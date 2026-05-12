@@ -32,17 +32,31 @@ When initialized to work on the EFS codebase (located in the sibling `contracts`
 
 ## 📋 The Kanban Protocol (`Board.md`)
 
-The human lead views `Board.md` using the Obsidian Kanban plugin. To prevent breaking the visual UI, **you must adhere strictly to standard Markdown list formatting** when updating this file.
+The human project lead views `Board.md` using the Obsidian Kanban plugin. To prevent breaking the visual UI, **you must adhere strictly to standard Markdown list formatting** when updating this file. 
 
-### Board Structure
-The board is structured using Markdown Header 2 (`##`) for columns, and unordered checklists (`- [ ]`) for tasks. 
+Board Structure
+The board is structured using Markdown Header 2 (`##`) for columns, and unordered checklists (`- [ ]`) for tasks. ```markdown ## Backlog - [ ] Implement symlink logic ## In Flight - [ ] Build attestation caching layer ## Done - [x] Create EFS planning repo
 
-```markdown
-## Backlog
-- [ ] Implement symlink logic
+---
 
-## In Flight
-- [ ] Build attestation caching layer
+## ✅ The Sub-Task Protocol
 
-## Done
-- [x] Create EFS planning repo
+For granular tasks that do not belong on the main Kanban board, you may drop standard Markdown checkboxes into _any_ file in this vault. The human lead uses a global Tasks rollup.
+
+**Format:** `- [ ] Sub-task description here`
+
+If you are working inside an architecture document (e.g., `Architecture/caching.md`) and discover a bug or missing feature, add a checklist item to the bottom of that specific document.
+
+---
+
+## 🏗️ Architecture Documentation Rules
+
+When creating new `.md` files in the `Architecture/` directory:
+
+1. Use clear, hierarchical headers (`#`, `##`, `###`).
+    
+2. When defining data structures (e.g., tens, tags, properties), use standard Markdown tables.
+    
+3. If a template exists in the vault for design docs, you must read and adhere to its structure.
+    
+4. Link related concepts by using Wiki-style links `[[Filename]]` to allow the human lead to navigate the vault easily.
