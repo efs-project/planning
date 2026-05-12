@@ -33,15 +33,17 @@ The human project lead views `Kanban.md` using the Obsidian Kanban plugin. To pr
 
 ### Board Structure
 The board is structured using Markdown Header 2 (`##`) for columns, and unordered checklists (`- [ ]`) for tasks. 
-## Backlog 
-- [ ] Implement symlink logic 
 
-## In Flight 
-- [ ] Build attestation caching layer 
+` ` `markdown
+## Backlog
+- [ ] Implement symlink logic
 
-## Done 
+## In Flight
+- [ ] Build attestation caching layer
+
+## Done
 - [x] Create EFS planning repo
-
+` ` `
 
 ---
 
