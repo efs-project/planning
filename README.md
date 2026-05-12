@@ -34,8 +34,17 @@ When initialized to work on the EFS codebase (located in the sibling `contracts`
 
 The human project lead views `Kanban.md` using the Obsidian Kanban plugin. To prevent breaking the visual UI, **you must adhere strictly to standard Markdown list formatting** when updating this file. 
 
-Board Structure
-The board is structured using Markdown Header 2 (`##`) for columns, and unordered checklists (`- [ ]`) for tasks. ```markdown ## Backlog - [ ] Implement symlink logic ## In Flight - [ ] Build attestation caching layer ## Done - [x] Create EFS planning repo
+### Board Structure
+The board is structured using Markdown Header 2 (`##`) for columns, and unordered checklists (`- [ ]`) for tasks. 
+## Backlog 
+- [ ] Implement symlink logic 
+
+## In Flight 
+- [ ] Build attestation caching layer 
+
+## Done 
+- [x] Create EFS planning repo
+
 
 ---
 
