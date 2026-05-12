@@ -1,0 +1,10 @@
+# Obsidian per-machine UI state
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+
+# Obsidian trash (deleted notes still recoverable locally)
+.trash/
+
+# macOS metadata
+.DS_Store
