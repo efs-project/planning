@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "d33c45106b670f6c",
+        "id": "eb53adf0a2739f7f",
         "type": "tabs",
         "children": [
           {
-            "id": "a363d78d8b47d2ea",
+            "id": "e5c2a589313a6163",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "2026-05-12.md",
+                "file": "README.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2026-05-12"
+              "title": "README"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "2026-05-12.md",
+                "file": "README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for 2026-05-12"
+              "title": "Backlinks for README"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "2026-05-12.md",
+                "file": "README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from 2026-05-12"
+              "title": "Outgoing links from README"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "2026-05-12.md",
+                "file": "README.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 2026-05-12"
+              "title": "Outline of README"
             }
           },
           {
@@ -195,12 +195,17 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "a363d78d8b47d2ea",
+  "active": "e5c2a589313a6163",
   "lastOpenFiles": [
-    "_Inbox Notes.canvas",
-    "_Inbox.base",
-    "Untitled 1.base",
-    "EFS Features Kanban.md",
-    "2026-05-12.md"
+    "_Notes.canvas",
+    "Untitled.base",
+    "_Index.base",
+    "Untitled Kanban.md",
+    "Kanban.md",
+    "README.md",
+    "Daily Notes/2026-05-12.md",
+    "Daily Notes",
+    "Untitled.md",
+    "Untitled 1.base"
   ]
 }
