@@ -1,6 +1,3 @@
-# planning
-Project management, kanban, ideas, etc
-
 # EFS Planning & Architecture Vault
 
 **Notice to Autonomous Agents (Codex, Claude, Antigravity):** This repository serves as the central brain, project tracker, and architectural source of truth for the Ethereum File System (EFS) project. You are to interact with this repository strictly via file system I/O (reading and writing `.md` files). 
