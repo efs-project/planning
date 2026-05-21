@@ -60,10 +60,6 @@ A trusted attester whose attestations contribute to a viewer's view of EFS. Mult
 
 EAS schema representing a retrieval URI for a DATA. Multiple mirrors allowed per DATA (ipfs://, ar://, web3://, https://, magnet:). The router picks the best transport. Revocable. See `contracts/specs/02`.
 
-## MOC (Map of Content)
-
-A hand-curated index file (`_MOC.md`) that organizes a folder's contents meaningfully — not just alphabetically. Each major folder in the vault has one. See [[design-system]] § MOC pages.
-
 ## PIN
 
 See [[Glossary#Edge (PIN, TAG)]]. Cardinality-1 edge. Used for file placement and PROPERTY value binding. Re-attesting at the same `(attester, definition, targetSchema)` slot supersedes in O(1).

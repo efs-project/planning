@@ -51,10 +51,10 @@ The exception: trivial typo fixes in comments, error strings, or markdown prose.
 | You need… | Look in… |
 |---|---|
 | Active and queued work | [[Kanban]] |
-| A specific design | `Designs/_MOC.md` or grep `Designs/` |
+| A specific design | `Designs/README.md` (curated map) or grep `Designs/` |
 | Terminology | [[Glossary]] |
-| How something works in EFS | `Architecture/_MOC.md` |
-| How to do something process-wise | the rest of `Onboarding/` (see [[_MOC]]) |
+| How something works in EFS | `Architecture/README.md` |
+| How to do something process-wise | the rest of `Onboarding/` (see [[Onboarding/README|its map]]) |
 | An ADR or spec from a dev repo | `../contracts/docs/adr/` or `../contracts/specs/` (and equivalents in `client/`, `sdk/`) |
 | Open coordination questions | grep `## Open questions` in `Designs/` |
 

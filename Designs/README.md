@@ -1,6 +1,6 @@
 # Designs
 
-Numbered design proposals with lifecycle. The canonical protocol lives in [[design-system]] (this folder's own meta-design). The vault's main [README](../README.md) is the entry point. This file is the folder-local quick-start.
+Design proposals with lifecycle. The canonical protocol lives in [[design-system]] (this folder's own meta-design). The vault's main [README](../README.md) is the entry point. This file is the folder-local quick-start AND the curated content map.
 
 ## Quick start (writing a new design)
 
@@ -13,7 +13,7 @@ Numbered design proposals with lifecycle. The canonical protocol lives in [[desi
 7. When ready for review: change prose `**Status:** review`, tag `#status/review`, push.
 8. When ready for promotion: fill the `## Pre-promotion checklist`, change status to `ready-for-promotion`, ask James.
 
-See [[write-a-design]] in Onboarding for the full walkthrough.
+See [`Onboarding/write-a-design.md`](../Onboarding/write-a-design.md) for the full walkthrough.
 
 ## File-naming
 
@@ -43,11 +43,53 @@ Cross-repo references (ADRs, specs in dev repos) use markdown form:
 see [ADR-0041](../../contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md)
 ```
 
-## Index
+---
 
-For a curated map of designs by status and target-repo, see `_MOC.md`. The list below is the directory listing.
+## Content map
 
-| File | Status | Target repos |
+Hand-curated index of designs in this folder, organized by **status** then by **target repo**. Updated in the same commit as design status changes (part of the tri-sync invariant).
+
+For automated rollups by status, see `../_Index.base` (Obsidian Bases view; configured by James).
+
+### In flight
+
+#### Draft
+
+| Design | Target repos | Notes |
 |---|---|---|
-| [[design-system]] | draft | `planning` |
-| [[cross-repo-reference-mirror]] | draft (`#blocked-on/concrete-CI-need`) | `planning`, `contracts` |
+| [[design-system]] | `planning` | Meta-design for this vault. Currently in draft; will become `0001-design-system.md` at promotion. |
+
+#### Review
+
+*(none)*
+
+#### Ready for promotion
+
+*(none)*
+
+### Deferred / blocked
+
+| Design | Target repos | Blocked on |
+|---|---|---|
+| [[cross-repo-reference-mirror]] | `planning`, `contracts` | `#blocked-on/concrete-CI-need` — `/efs/` colocation removed the primary use case; will resurface if CI needs cross-repo ADR access. |
+
+### Accepted (numbered, in implementation)
+
+*(none yet — promotion ceremony has not run)*
+
+### Landed
+
+*(none)*
+
+### Abandoned / rejected
+
+*(none)*
+
+### By target repo
+
+| Repo | Designs |
+|---|---|
+| `planning` | [[design-system]], [[cross-repo-reference-mirror]] |
+| `contracts` | [[cross-repo-reference-mirror]] |
+| `client` | *(none)* |
+| `sdk` | *(none)* |

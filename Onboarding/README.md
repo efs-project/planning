@@ -1,4 +1,4 @@
-# Onboarding — Map of Content
+# Onboarding
 
 If you're a new agent or new contributor, read these in order.
 
@@ -12,4 +12,4 @@ If you're a new agent or new contributor, read these in order.
 
 After these, read [[design-system]] (this vault's meta-design) and skim [[Glossary]] for terminology.
 
-For project state: open [[Kanban]] and `Designs/_MOC.md`.
+For project state: open [[Kanban]] and the curated design map in [[Designs/README|Designs/README.md]].

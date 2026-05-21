@@ -14,7 +14,7 @@ Read these in order:
 4. [`Onboarding/conventions.md`](./Onboarding/conventions.md) — tags, paths, tri-sync, commit messages.
 5. [`Onboarding/escalation.md`](./Onboarding/escalation.md) — when to stop and ask vs. note and continue.
 
-Then skim [`Glossary.md`](./Glossary.md) for terminology and [`Designs/_MOC.md`](./Designs/_MOC.md) for the design landscape.
+Then skim [`Glossary.md`](./Glossary.md) for terminology and [`Designs/README.md`](./Designs/README.md) for the design landscape.
 
 The **canonical protocol** for this vault is [`Designs/design-system.md`](./Designs/design-system.md). This README is the entry point; the design-system file is the authority.
 
@@ -27,10 +27,10 @@ The **canonical protocol** for this vault is [`Designs/design-system.md`](./Desi
 | `_Index.base` | Obsidian Bases queries (configured by James). |
 | `_Notes.canvas` | Obsidian Canvas — freeform whiteboard. |
 | `Daily Notes/` | Human's per-day notes; also catch-all for uncategorized content. |
-| `Designs/` | Design proposals. Name-first drafts; numbered at promotion. See [`Designs/_MOC.md`](./Designs/_MOC.md). |
-| `Architecture/` | Descriptive: "how the system works today." See [`Architecture/_MOC.md`](./Architecture/_MOC.md). |
+| `Designs/` | Design proposals. Name-first drafts; numbered at promotion. See [`Designs/README.md`](./Designs/README.md). |
+| `Architecture/` | Descriptive: "how the system works today." See [`Architecture/README.md`](./Architecture/README.md). |
 | `Glossary.md` | Single alphabetical file of EFS terms. |
-| `Onboarding/` | Procedural: "how YOU do X." See [`Onboarding/_MOC.md`](./Onboarding/_MOC.md). |
+| `Onboarding/` | Procedural: "how YOU do X." See [`Onboarding/README.md`](./Onboarding/README.md). |
 
 **No `Misc/` folder.** Uncategorized notes go in `Daily Notes/`.
 

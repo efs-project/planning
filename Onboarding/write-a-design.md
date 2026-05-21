@@ -13,7 +13,7 @@ Full lifecycle of an EFS design proposal — from "I have an idea" to landed cod
 ### 1. Check no one else is drafting the same thing
 
 Before opening a new draft, look at:
-- `Designs/_MOC.md` — what's in flight by topic
+- `Designs/README.md` — curated map of what's in flight by topic and status
 - `Kanban.md` — Backlog entries tagged `#kind/design`
 - Recent commits to `Designs/`
 

@@ -35,16 +35,16 @@ This file codifies the planning vault as the **brain for the swarm**: the place 
     _Notes.canvas            ← Obsidian Canvas
     Daily Notes/             ← human's per-day notes; also catch-all for uncategorized content
     Designs/                 ← name-first drafts; numbered promoted designs
-      _MOC.md                ← Map of Content (hand-curated index)
+      README.md              ← folder intro + curated content map (by status)
       _template.md           ← copy to start a new draft
       <slug>.md              ← drafts
       NNNN-<slug>.md         ← promoted designs
     Architecture/            ← descriptive: "how the system works today"
-      _MOC.md
+      README.md              ← folder intro + curated content map
       *.md                   ← layered model, invariants, key concepts
     Glossary.md              ← single alphabetical file with ## term anchors
     Onboarding/              ← procedural: "how YOU do X"
-      _MOC.md
+      README.md              ← reading order + curated content map
       start-here.md
       write-a-design.md
       conventions.md
@@ -240,15 +240,17 @@ Resolve in place when answered — replace the unchecked item with `- [x]` plus 
 
 For Tier 1/2 questions about **cross-cutting planning concerns** (not tied to one design — e.g., "where do specs live"), open a new design tagged `#kind/question` if the question deserves the lifecycle. Otherwise capture in `Daily Notes/`.
 
-### MOC pages (Maps of Content)
+### Folder READMEs (content maps)
 
-Each major folder gets a `_MOC.md` — a hand-curated index that organizes content meaningfully (not just by filename). Examples:
+Each major folder gets a `README.md` that serves as both folder intro and hand-curated content map — organized meaningfully (by status, by subsystem, by reading order), not just alphabetically. Examples:
 
-- `Designs/_MOC.md` — designs grouped by status and by target-repo
-- `Architecture/_MOC.md` — grouped by subsystem (data model, indexing, router, etc.)
-- `Onboarding/_MOC.md` — recommended reading order for new agents
+- `Designs/README.md` — designs grouped by status and by target-repo
+- `Architecture/README.md` — grouped by subsystem (data model, indexing, router, etc.)
+- `Onboarding/README.md` — recommended reading order for new agents
 
-The MOC is the human's mental model expressed in markdown. `_Index.base` (Obsidian Bases) supplements with automatic rollups configured by James in Obsidian; the curated MOC is what an agent reads first.
+The folder README is the human's mental model expressed in markdown. `_Index.base` (Obsidian Bases) supplements with automatic rollups configured by James in Obsidian; the curated README is what an agent reads first.
+
+Naming note: this convention uses plain `README.md` rather than the Obsidian-community `_MOC.md` ("Map of Content"). README is universally understood, renders on GitHub automatically, and avoids PKM-specific jargon.
 
 ### Onboarding/ — ships with five files
 
@@ -266,9 +268,9 @@ When this design is promoted (becomes `0001-design-system.md`):
 
 1. Rename `Designs/0001-cross-repo-reference-mirror.md` → `Designs/cross-repo-reference-mirror.md`. Set status to `draft`, add `#blocked-on/concrete-CI-need` tag, drop "DESIGN-0001" prefix from the title.
 2. This file: written as `Designs/design-system.md` (name-only). Promoted to `Designs/0001-design-system.md` at the ceremony.
-3. Update `Designs/README.md` to remove old DESIGN-0001 references, point at this design and the deferred mirror draft, switch the manual index to a pointer at `_MOC.md`.
+3. Update `Designs/README.md` to remove old DESIGN-0001 references, point at this design and the deferred mirror draft, and fold the curated content map into the same file (no separate MOC file).
 4. Update `Designs/_template.md` to match the new name-first + new-taxonomy + tri-sync-checklist format.
-5. Create `Designs/_MOC.md`, `Architecture/_MOC.md`, `Onboarding/_MOC.md` (latter ships with seed content from this design).
+5. Add `Architecture/README.md` and `Onboarding/README.md` as folder intros + curated content maps. (`Designs/README.md` already exists; gets the same treatment.)
 6. Create `Glossary.md` seeded with load-bearing EFS terms: anchor, attestation, data, design, edge, EFS, ephemeral/durable/etched, lens, mirror, PIN, planning vault, property, sort overlay, TAG, tombstone, tri-sync.
 7. Create the five Onboarding files (seed versions).
 8. Update main `README.md`: refresh directory listing, point at this design as the canonical protocol, trim duplicated lifecycle/tag/protocol prose that this design now owns.

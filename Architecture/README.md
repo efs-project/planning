@@ -1,6 +1,6 @@
-# Architecture — Map of Content
+# Architecture
 
-Hand-curated index of cross-cutting EFS system documentation. Descriptive ("how X works today"), not deliberative (proposed changes go in [[design-system|Designs/]]).
+Cross-cutting EFS system documentation. Descriptive ("how X works today"), not deliberative (proposed changes go in [[design-system|Designs/]]). This file is the folder intro + curated content map.
 
 **Source-of-truth note.** Where detailed system behavior is documented in `contracts/specs/`, this folder summarizes and links rather than re-stating. Specs in each owning repo are authoritative for their layer; `Architecture/` is the cross-cutting view.
 
@@ -25,6 +25,6 @@ Each candidate becomes its own `Architecture/<topic>.md` file when written.
 
 - "How X works today" → here (`Architecture/`).
 - "What's a TAG attestation?" (term-level) → [[Glossary]].
-- "How do I write a design?" (procedural) → [[_MOC|Onboarding/]].
+- "How do I write a design?" (procedural) → `Onboarding/` (see [[Onboarding/README|its content map]]).
 - "We should change how X works" → `Designs/`.
 - Solidity-level detail with ABI / function signatures → `contracts/specs/`. Link here, don't duplicate.
