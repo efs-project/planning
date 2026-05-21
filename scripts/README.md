@@ -13,6 +13,7 @@ Run from anywhere — scripts use absolute paths via `$VAULT_ROOT` derived from 
 | `agent-activity.sh` | Show recent commits per agent based on `Agent:` trailer. | Weekly; before triaging the promotion queue. |
 | `designs-awaiting-promotion.sh` | List designs in `#status/ready-for-promotion` and flag WIP-limit pressure. | Daily check; before deciding what to promote. |
 | `promotion-check.sh` | Audit recent `promote:` commits for the trust token, atomic rename, and subject format. | Periodically as a vault health check; after every promotion. |
+| `pre-commit-hook.sh` | Optional git hook running tri-sync-check on every commit that touches `Designs/`. Promotes tri-sync from "documented" to "enforced." Not installed by default; symlink into `.git/hooks/pre-commit` to activate. | Once, if you want commit-time blocking instead of periodic checks. |
 
 ## Running
 

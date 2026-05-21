@@ -44,6 +44,8 @@ Add a Kanban entry under **Backlog** so other agents know:
 **Target repos:** (any subset of: planning, contracts, client, sdk)
 **Depends on:** — (optional)
 **Supersedes:** — (optional)
+**Reviewers:** — (filled in by reviewing agents as `@<agent> (YYYY-MM-DD)` when they finish a review pass)
+**Last touched:** YYYY-MM-DD — (optional; Obsidian Bases derives this from file mtime)
 
 #status/draft #kind/design #repo/<each-target>
 ```
@@ -94,14 +96,22 @@ James (or an agent acting on his explicit trust token):
 
 1. Reads the design and the pre-promotion checklist.
 2. Writes a trust token in the design body: `Promoted by @james on YYYY-MM-DD`.
-3. Runs:
+3. Runs, in a **single** commit:
    ```bash
    git mv Designs/<slug>.md Designs/NNNN-<slug>.md
-   # edit Status, tag, Kanban entry — all in same commit
+   # in the same commit, also edit:
+   #   - prose **Status:** field → "accepted"
+   #   - #status/ tag → #status/accepted
+   #   - Designs/README.md content map: move from "Ready for promotion" to
+   #     "Accepted (in implementation)"
+   #   - Kanban: remove the "Draft: <slug>" Backlog entry, add per-repo
+   #     implementation cards for each target repo
    git commit -m "promote: DESIGN-NNNN — <title>"
    git push
    ```
 4. The Obsidian wiki-link auto-rename feature handles `[[<slug>]]` references in-vault. Cross-repo references need a separate cleanup pass (rare at this stage).
+
+5. Audit: `./scripts/promotion-check.sh` verifies the trust token, atomic rename, and subject format on the new commit. Run it as a quick sanity check.
 
 James may delegate the `git mv` step to an agent — the trust token in the commit body is what makes the ceremony un-forgeable.
 
@@ -162,13 +172,14 @@ Landed YYYY-MM-DD. Original design: see git history.
 
 Update tag: `#status/landed`. Commit message: `land: DESIGN-NNNN — <title>`.
 
-**d) Cross-repo back-link cleanup.** If your design's slug changed at any point (or if back-references in other designs use the old name), grep `../*/` for the old slug:
+**d) Cross-repo back-link cleanup.** If your design's slug changed at any point (or if back-references in other designs use the old name), grep across siblings for the old slug. From a worktree inside `planning/`:
 
 ```bash
-grep -rn "DESIGN-NNNN-old-slug\|old-slug.md" /efs/
+# from inside planning/
+grep -rn "DESIGN-NNNN-old-slug\|old-slug.md" . ../contracts ../client ../sdk 2>/dev/null
 ```
 
-Update any hits to point at the new tombstone path. Until `scripts/rename-design.sh` exists (deferred per [[design-system]]), this is a manual pass.
+Update any hits to point at the new tombstone path. Until a `scripts/rename-design.sh` exists (planned), this is a manual pass.
 
 **e) Kanban sweep.** Move all per-repo cards for this design to **Done**. If you had a meta-card tracking the design itself (rare; most designs are tracked via the per-repo cards), move that to Done too.
 

@@ -1,10 +1,12 @@
 # Start here
 
-You're a new agent or new contributor in `/efs/`. This is the planning vault — the brain for the EFS agent swarm. This file gets you from "I just arrived" to "I'm working on X."
+You're a new agent or new contributor in the EFS planning vault — the brain for the EFS agent swarm. This file gets you from "I just arrived" to "I'm working on X."
+
+> **You may not actually be in `/efs/`.** The vault's docs describe a target sibling-repo layout under `/efs/`, but on a given machine the planning vault may be at a different path. Wherever your working copy lives, the conventions are the same; just substitute your real path for `/efs/planning/` in the commands below.
 
 ## First five minutes
 
-1. `cd /efs/planning && git pull --rebase`. Always sync before reading or writing.
+1. `cd <your planning checkout> && git pull --rebase`. Always sync before reading or writing.
 2. Open [[Kanban]]. Look at columns in order: **In Flight**, **Blocked**, **Backlog**.
 3. If you have a specific task from James (in chat or a previous turn), go do that. Stop reading this file.
 

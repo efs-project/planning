@@ -4,6 +4,10 @@
 
 Humans (specifically James, the project lead) interact via Obsidian. Preserve standard Markdown so Obsidian renders correctly.
 
+> **Current state: bootstrap.** The vault's meta-design ([[design-system]]) is still in `#status/draft` — it codifies rules that are not yet promoted. No designs have been promoted yet (the Kanban has no In Flight cards as of writing). Most folders are scaffolding waiting for real content. Expect to be the first or second real user of any given procedure. If a documented path doesn't yet exist or a referenced script behaves unexpectedly, surface in chat — it's likely an unfilled-in path, not a bug.
+>
+> **Path reality check.** Docs in this vault describe a target `/efs/<repo>/` directory layout where all EFS repos are siblings. **This layout is aspirational.** The current physical paths may differ on James's machine (e.g. `/Users/james/Code/EFS/planning/`). Migrating clones to `/efs/` is on the Kanban Backlog as `#blocked-on/human-decision`. **When working today: use relative paths from your own worktree** rather than absolute `/efs/...` paths. The conventions in [[conventions#Linking out of the vault]] cover this.
+
 ## Quick start for a new agent
 
 Read these in order:
@@ -28,7 +32,8 @@ The **canonical protocol** for this vault is [`Designs/design-system.md`](./Desi
 | `For-James.md` | Dashboard of items needing the human's attention right now. |
 | `Decisions.md` | Append-only one-line decisions log. |
 | `Tasks.md` | Global rollups via the Obsidian Tasks plugin (open questions, blocked items, pre-promotion checklists). |
-| `_Index.base` | Obsidian Bases queries (configured by James). |
+| `Milestones.md` | Cross-repo milestone tracking (devnet launch, mainnet, etc.). Currently scaffold; populate as scope solidifies. |
+| `_Index.base` | Obsidian Bases queries (starter views shipped; tune in Obsidian). |
 | `_Notes.canvas` | Obsidian Canvas — freeform whiteboard. |
 | `Daily Notes/` | Human's per-day notes; also catch-all for uncategorized content. |
 | `Designs/` | Design proposals. Name-first drafts; numbered at promotion. See [`Designs/README.md`](./Designs/README.md). |

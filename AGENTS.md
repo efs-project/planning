@@ -4,6 +4,8 @@ EFS planning vault. Cross-repo coordination point for the AI agent swarm buildin
 
 This file exists so tools that auto-detect `AGENTS.md` (Codex CLI, Cursor, Devin, Copilot, Claude Code, et al — [universal agent brief convention](https://www.linuxfoundation.org/press/linux-foundation-announces-the-formation-of-the-agentic-ai-foundation)) get a stable entry point. **The canonical agent docs are [README.md](./README.md) and [Onboarding/](./Onboarding/).**
 
+> **Bootstrap state.** No designs have been promoted yet; the meta-design ([Designs/design-system.md](./Designs/design-system.md)) is itself a draft. Expect to be the first real user of most procedures. `/efs/<repo>/` paths in the docs are the target layout, not necessarily current reality — use relative paths from your worktree. See [README current-state preamble](./README.md) for details.
+
 ## Read on init
 
 If your tooling does not auto-load `@`-imported files, read these in order before your first commit:

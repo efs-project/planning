@@ -68,6 +68,7 @@ Plain `#kebab-case-text`. Obsidian indexes automatically; agents grep. Canonical
 | `#status/draft`, `#status/review`, `#status/ready-for-promotion`, `#status/accepted`, `#status/landed`, `#status/abandoned`, `#status/rejected` | Lifecycle of a design. |
 | `#blocked-on/<thing>` | Blocker (e.g. `#blocked-on/DESIGN-0007`, `#blocked-on/human-decision`, `#blocked-on/concrete-CI-need`). |
 | `#depends-on/<thing>` | Soft dependency between designs or tasks. |
+| `#needs/james` | Tag on a specific `- [ ]` Open Questions item or AGENT-Q comment that requires James's input. Surfaced via [[For-James]]. |
 
 No spaces, kebab-case, lowercase. Obsidian treats whitespace as a tag terminator.
 
