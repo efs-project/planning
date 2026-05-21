@@ -6,12 +6,14 @@ kanban-plugin: board
 
 ## Backlog
 
-- [ ] Decide and freeze smart-contract .sol file list (OnionDAO 2026-06-01) #repo/contracts
-- [ ] Schema spec freeze (OnionDAO 2026-06-01) #repo/contracts
-- [ ] Design: on-chain + off-chain SDK architecture (dedicated AI design session planned) #repo/sdk #kind/design
-- [ ] Build On-Chain SDK (folder management, permissions) — OnionDAO MVP #repo/sdk
-- [ ] Build Off-Chain DB SDK (core ops, tombstoning, caching) — OnionDAO MVP #repo/sdk
-- [ ] Deploy core contracts to Sepolia (OnionDAO 2026-06-01) #repo/contracts
+- [ ] **Merge EFS Lists** (branch `custom-lists` on efs-project/contracts) — keystone for OnionDAO. Changes schema count 6→7, reworks PROPERTY, adds `EdgeResolver.sol`, removes `TagResolver.sol`. Effectively IS the schema freeze and the .sol file list freeze. #repo/contracts #blocked-on/lists-merge
+- [ ] Schema spec freeze — collapses into Lists merge (see above). Confirm freeze the moment Lists merges. #repo/contracts #depends-on/lists-merge
+- [ ] Freeze smart-contract .sol file list — collapses into Lists merge (see above). Lock the set immediately after Lists merges. #repo/contracts #depends-on/lists-merge
+- [ ] Design: on-chain + off-chain SDK architecture (dedicated AI design session — @james initiates) #repo/sdk #kind/design
+- [ ] Build On-Chain SDK (folder management, permissions) — OnionDAO MVP #repo/sdk #depends-on/sdk-architecture-design
+- [ ] Build Off-Chain DB SDK (core ops, tombstoning, caching) — OnionDAO MVP #repo/sdk #depends-on/sdk-architecture-design
+- [ ] Deploy core contracts to Sepolia (OnionDAO 2026-06-01) #repo/contracts #depends-on/lists-merge
+- [ ] Plan OnionDAO hackathon logistics — venue/dates/prize amounts/judging/onboarding docs/comms plan #repo/planning
 - [ ] Build Client App SDK (iframe integrations) — deferred, not OnionDAO-required #repo/sdk
 - [ ] Build Client Skeleton (UI, media caching, thumbnails) #repo/client
 - [ ] Build EFS Development Tool App (standalone issue tracker for dogfooding)

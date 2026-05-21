@@ -1,7 +1,7 @@
 # For James
 
-- **Awaiting review: [[Agents/pm|pm.md]] SOUL file** — first PM session drafted it; status `#status/review`. Read, edit if needed, then promote per [[design-system#Promotion ceremony]] (or tell PM to revise). Added 2026-05-21.
-- **Critical-path nudge: SDK architecture design has not started** — OnionDAO is T-11 days; SDK MVP requires this design to land before two implementation threads can begin. Backlog card: `Design: on-chain + off-chain SDK architecture`. Per [[Decisions]] 2026-05-21, this is a dedicated AI thread you initiate. Added 2026-05-21 by @pm.
+- **CRITICAL FINDING: EFS Lists is the schema freeze and the .sol freeze** — branch `custom-lists` on contracts changes schema count 6→7, reworks PROPERTY semantics, adds `EdgeResolver.sol`, removes `TagResolver.sol`. The three Backlog items (Lists merge, schema freeze, .sol freeze) collapse into one keystone. Sepolia deploy is blocked on this. T-11 days. Added 2026-05-21 by @pm.
+- **Need from you (4 threads or decisions):** (1) Lists merge ETA — drives the whole calendar. (2) Spin up SDK architecture design thread. (3) Hackathon logistics — see [[Kanban]] new "Plan OnionDAO hackathon logistics" card; many sub-decisions only you can make (prize amount, venue confirmation, judging, onboarding docs, comms). (4) Review/promote [[Agents/pm|pm.md]] SOUL.
 
 ---
 
