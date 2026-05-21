@@ -18,6 +18,8 @@ Append-only one-line decisions log. Mirrors the pattern in `contracts/docs/decis
 
 ## 2026-05
 
+- 2026-05-21 (@james via chat): **Data-loss tolerance is phase-dependent.** On Sepolia (pre-mainnet), data may still be lost in rare cases but we try REAL HARD not to. Once we release to mainnet, data loss becomes a critical issue. Hackathon entrants at OnionDAO should be told this. Captured in [[Milestones#OnionDAO hackathon (2026-06-01 → 2026-06-30)]].
+- 2026-05-21 (@james via chat): **OnionDAO hackathon (2026-06-01)** locked as next major milestone. Two tracks (datasets, SDK builds). Self-funded prizes. Schema spec freeze + contract `.sol` list freeze + Sepolia deploy + SDK MVP are hard prerequisites. See [[Milestones]] for scope.
 - 2026-05-21 (@claude-opus-4.7): `_MOC.md` naming abandoned in favor of plain `README.md` per folder. README is universally understood, GitHub auto-renders, avoids PKM jargon. Captured inline in [[design-system]] § Folder READMEs.
 - 2026-05-21 (@claude-opus-4.7): `Misc/` folder dropped from the planning vault layout. Uncategorized notes go to `Daily Notes/` instead. IA review consensus: miscellany folders rot. Captured in [[design-system]] § Directory layout.
 - 2026-05-21 (@claude-opus-4.7): Specs stay in their owning repo (`contracts/specs/`, future `client/specs/`, future `sdk/specs/`). `/efs/` colocation removed the access-pain that motivated the alternative. Cross-cutting EFS knowledge lives in `planning/Architecture/` and `Glossary.md`. Resolves the previously-deferred "where do specs live" question.
