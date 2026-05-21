@@ -8,12 +8,14 @@ Humans interact with these files via Obsidian. Note that for any syntax or file 
 
 ## 📂 Directory Structure
 
-* `Kanban.md`: The central Kanban board tracking all project tasks. This is powered by the Kanban Obsidian plugin.
-* `_Index.md`: A table of files in this project.
-* `_Notes.md`: Random uncategorized notes.
-* `Designs/`: Numbered proposals with lifecycle (draft → landed). See "Designs Protocol" below.
-* `Architecture/`: Stable reference about how the system works today — overviews, layered models, diagrams. No lifecycle.
-* `README.md`: This file (Standard Operating Procedures).
+* `Kanban.md` — central Kanban board (Obsidian Kanban plugin).
+* `_Index.base` — Obsidian Bases view; query/table over vault notes.
+* `_Notes.canvas` — Obsidian Canvas; freeform whiteboard for visual thinking.
+* `Daily Notes/` — human's per-day notes (Daily Notes core plugin).
+* `Designs/` — numbered design proposals with lifecycle. See "Designs Protocol" below. Includes `_template.md` (copy to start a new design) and a folder-local `README.md` (index).
+* `Architecture/` — stable reference about how the system works today, no lifecycle. *(Created on first use; currently empty.)*
+* `Reference/` — *(planned, see `Designs/0001-cross-repo-reference-mirror.md`)* read-only mirrors of ADRs from dev repos.
+* `README.md` — this file (Standard Operating Procedures).
 
 ---
 
@@ -132,6 +134,8 @@ Designs are dynamic proposals for features or significant changes. They live in 
 
 ### File structure
 
+Copy [`Designs/_template.md`](./Designs/_template.md) to start a new design. The template renders as:
+
 ```markdown
 # DESIGN-NNNN: Title
 
@@ -139,6 +143,8 @@ Designs are dynamic proposals for features or significant changes. They live in 
 **Target repos:** contracts, client, sdk (any subset)
 **Depends on:** DESIGN-NNNN (optional)
 **Supersedes:** DESIGN-NNNN (optional)
+
+#status/<state> #kind/design #repo/<each-target-repo>
 
 ## Problem
 What we're solving, and why now.
@@ -152,6 +158,8 @@ Trackable items as `- [ ]` checkboxes.
 ## Implementation notes (optional)
 Repo-specific guidance.
 ```
+
+**Status is declared twice on purpose:** prose (`**Status:** draft`) is what humans skim; the tag (`#status/draft`) is what Obsidian's tag pane and `grep` query. Keep them in sync — when status changes, update both in the same edit.
 
 ### Lifecycle
 
