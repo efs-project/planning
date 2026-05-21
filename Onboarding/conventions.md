@@ -45,6 +45,18 @@ Co-authored-by: Claude Opus 4.7 <noreply@anthropic.com>
 
 Vendor noreply emails: `noreply@anthropic.com`, `noreply@openai.com`, `noreply@google.com`. For others, use `noreply@<vendor-domain>`.
 
+### Agent identity trailer
+
+In addition to `Co-authored-by:`, **include an `Agent: <slug>` trailer** in every agent-authored commit. The slug is a stable identifier for the agent + role (not the model version), so it's grep-friendly across `git log` and survives model upgrades:
+
+```
+Agent: claude-opus-4.7
+Agent: codex-gpt-5
+Agent: claude-haiku-3.5 (review)
+```
+
+This unlocks per-agent activity views via `git log --grep='^Agent: claude'` without parsing vendor noreply emails. The trailer is required for agent-authored commits; James's manual commits via the Obsidian UI don't need it.
+
 ## Tag vocabulary
 
 Plain `#kebab-case-text`. Obsidian indexes automatically; agents grep. Canonical set:
@@ -107,17 +119,66 @@ These do NOT auto-update on file renames in the target repo. Rename-cleanup is a
 In Flight card format:
 
 ```markdown
-- [ ] Implement [[0007-offline-sync]] #repo/client #repo/sdk
+- [ ] Implement [[0007-offline-sync]] #repo/client
   — @claude-opus-4.7, branch claude/offline-sync, claimed 2026-05-21, expires 2026-05-24
 ```
 
-3-day default expiry. After expiry, any agent (or James) can reclaim. Update the expiry whenever you touch the card.
+3-day default expiry on In Flight cards. After expiry, any agent (or James) can reclaim. Update the expiry whenever you touch the card.
 
 Drafts-in-flight format (in Backlog):
 
 ```markdown
-- [ ] Draft: offline-sync #kind/design #repo/client — @claude, started 2026-05-21
+- [ ] Draft: offline-sync #kind/design #repo/client — @claude-opus-4.7, started 2026-05-21
 ```
+
+### One card per PR per repo
+
+A design that targets multiple repos gets **one card per repo**, not one card for the whole design. The cards cross-link to `[[NNNN-design-slug]]`; the design file itself is the cross-cutting tracker (see `Design file owns multi-repo truth` below).
+
+Example: `[[0007-offline-sync]]` targets `client` and `sdk`. Two cards in flight:
+
+```markdown
+- [ ] Implement [[0007-offline-sync]] in client #repo/client
+  — @claude-opus-4.7, branch claude/offline-sync-client, claimed 2026-05-21, expires 2026-05-24
+- [ ] Implement [[0007-offline-sync]] in sdk #repo/sdk
+  — @codex-gpt-5, branch codex/offline-sync-sdk, claimed 2026-05-21, expires 2026-05-24
+```
+
+### Under Review and Blocked cards do NOT auto-expire
+
+Only **In Flight** cards have the 3-day TTL. Cards in **Under Review** (PR open) and **Blocked** (waiting on something) have no expiry and **cannot be reclaimed without asking in chat first**. PRs can legitimately sit in review for weeks; blockers can persist for days. The expiry semantics exist specifically to surface silently-abandoned active work.
+
+If an Under Review card looks stale (e.g., PR untouched for 7+ days), surface in chat rather than reclaiming.
+
+### Design file owns multi-repo truth
+
+For multi-repo designs, the design file's `## Implementation notes` carries the PR checklist:
+
+```markdown
+- [x] contracts#412 — merged 2026-05-19
+- [ ] client#88 — in review
+- [ ] sdk#15 — not started
+```
+
+**The commit that merges a PR for DESIGN-NNNN must also update DESIGN-NNNN's checklist in the same session.** Kanban tracks attention (what work-stream is active); the design file tracks truth (where the whole design stands). If the checklist drifts from PR reality, the design's `landed` status will be wrong.
+
+Until a PR-sync bot exists, this convention is the only thing keeping design state honest.
+
+### Post-acceptance Open Questions
+
+Once a design is `accepted`, the body is nominally frozen. But implementation reveals new questions that need recording. **Append a dated subhead to the existing `## Open questions` section:**
+
+```markdown
+## Open questions
+
+(pre-acceptance questions, all resolved)
+- [x] Should we support both X and Y? — only X, resolved 2026-05-15.
+
+### Post-acceptance (2026-06-03 / @claude-opus-4.7)
+- [ ] Discovered during implementation: the foo-bar interaction needs a tiebreaker. Proposed: lexicographic by attester address. Awaiting confirmation. #needs/james
+```
+
+Questions surfaced post-acceptance feed the same Tasks plugin rollup and reach James the same way. If a post-acceptance question changes the design's substance, the implementing agent must either update the design body (drift discipline, see [[design-system]]) or open a new design that supersedes.
 
 ## Daily check-ins
 

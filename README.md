@@ -24,6 +24,9 @@ The **canonical protocol** for this vault is [`Designs/design-system.md`](./Desi
 |---|---|
 | `README.md` | This file — entry point. |
 | `Kanban.md` | Cross-repo task board (Obsidian Kanban plugin). |
+| `For-James.md` | Dashboard of items needing the human's attention right now. |
+| `Decisions.md` | Append-only one-line decisions log. |
+| `Tasks.md` | Global rollups via the Obsidian Tasks plugin (open questions, blocked items, pre-promotion checklists). |
 | `_Index.base` | Obsidian Bases queries (configured by James). |
 | `_Notes.canvas` | Obsidian Canvas — freeform whiteboard. |
 | `Daily Notes/` | Human's per-day notes; also catch-all for uncategorized content. |

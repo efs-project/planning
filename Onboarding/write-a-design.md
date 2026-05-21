@@ -122,22 +122,59 @@ When you start, move to **In Flight** with the claim annotation. When the PR ope
 - [ ] client#88 — in review
 ```
 
-### 9. Land
+### 9. Land — the full ceremony
 
-When ALL PRs check, the design is `landed`. Replace the design body with a tombstone:
+When ALL PRs in the `## Implementation notes` checklist are merged, the design is ready to land. The landing ceremony has six steps that happen in roughly this order:
+
+**a) Confirm the design is truly done.** Every PR in the checklist is `merged`; no orphan TODOs in target-repo code; no `<!-- AGENT-Q: -->` markers anywhere; no `## Open questions` items still open (or all explicitly deferred to follow-up designs).
+
+**b) Write the ADR(s) in each target repo.** Each repo that received code from this design typically gets one ADR codifying the now-implemented decision. The ADR sits in `<repo>/docs/adr/NNNN-<slug>.md`, gets the next free number in that repo's ADR sequence (not the design's number — repos number independently), and links back to the planning design:
+
+```markdown
+# ADR-NNNN: <Title scoped to this repo's slice>
+
+**Status:** Accepted
+**Date:** YYYY-MM-DD
+**Related:** [[DESIGN-NNNN]] (`../../planning/Designs/NNNN-<slug>.md`), PR #<num>
+
+## Context
+…
+
+## Decision
+…
+```
+
+The implementing agent who landed this repo's PR is usually the one to write that repo's ADR — they have the freshest context. If the design landed across 3 repos, you may end up writing 3 ADRs (potentially across different sessions if the merges were staggered).
+
+**c) Tombstone the planning design.** Once all per-repo ADRs are written, replace the design body in `planning/Designs/NNNN-<slug>.md` with the tombstone form:
 
 ```markdown
 # DESIGN-NNNN: <Title>
 
 **Status:** landed
 **Canonical references:**
-- contracts/docs/adr/NNNN-<adr-slug>.md
-- client/docs/adr/MM-<adr-slug>.md
+- `contracts/docs/adr/0044-<adr-slug>.md`
+- `client/docs/adr/0007-<adr-slug>.md`
+- `sdk/docs/adr/0002-<adr-slug>.md`
 
-Original design: see git history.
+Landed YYYY-MM-DD. Original design: see git history.
 ```
 
-Update tag: `#status/landed`. Commit + push. Move the Kanban card to Done.
+Update tag: `#status/landed`. Commit message: `land: DESIGN-NNNN — <title>`.
+
+**d) Cross-repo back-link cleanup.** If your design's slug changed at any point (or if back-references in other designs use the old name), grep `../*/` for the old slug:
+
+```bash
+grep -rn "DESIGN-NNNN-old-slug\|old-slug.md" /efs/
+```
+
+Update any hits to point at the new tombstone path. Until `scripts/rename-design.sh` exists (deferred per [[design-system]]), this is a manual pass.
+
+**e) Kanban sweep.** Move all per-repo cards for this design to **Done**. If you had a meta-card tracking the design itself (rare; most designs are tracked via the per-repo cards), move that to Done too.
+
+**f) Update For-James.md and Decisions.md if relevant.** If the design's resolution should be discoverable as a one-line decision (e.g., "we now use lexicographic-by-attester-address as the tiebreaker"), add a line to `Decisions.md`. If the landing freed up a `#needs/james` item in `For-James.md`, check it off.
+
+**Single commit for the planning side** (steps c-f). The per-repo ADR writes (step b) live in those repos' own commits. The order matters: ADRs go in first (they're what the tombstone points at), then the tombstone references them. If you tombstone before writing the ADRs, the tombstone has broken links.
 
 ### 10. (If abandoned or rejected)
 

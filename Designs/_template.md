@@ -4,6 +4,8 @@
 **Target repos:** (any subset of: planning, contracts, client, sdk)
 **Depends on:** — (optional, list `[[other-design-slug]]`)
 **Supersedes:** — (optional, list `[[other-design-slug]]`)
+**Reviewers:** — (appended by reviewing agents: `@<agent> (YYYY-MM-DD)`)
+**Last touched:** YYYY-MM-DD — (optional; Obsidian Bases also derives this from file mtime)
 
 #status/draft #kind/design
 
