@@ -6,12 +6,16 @@ kanban-plugin: board
 
 ## Backlog
 
-- [ ] Migrate clones to /efs/ home directory layout #repo/planning #blocked-on/human-decision
-- [ ] Build On-Chain SDK (folder management, permissions)
-- [ ] Build Off-Chain DB SDK (core ops, tombstoning, caching)
-- [ ] Build Client App SDK (iframe integrations)
+- [ ] Decide and freeze smart-contract .sol file list (OnionDAO 2026-06-01) #repo/contracts
+- [ ] Schema spec freeze (OnionDAO 2026-06-01) #repo/contracts
+- [ ] Design: on-chain + off-chain SDK architecture (dedicated AI design session planned) #repo/sdk #kind/design
+- [ ] Build On-Chain SDK (folder management, permissions) — OnionDAO MVP #repo/sdk
+- [ ] Build Off-Chain DB SDK (core ops, tombstoning, caching) — OnionDAO MVP #repo/sdk
+- [ ] Deploy core contracts to Sepolia (OnionDAO 2026-06-01) #repo/contracts
+- [ ] Build Client App SDK (iframe integrations) — deferred, not OnionDAO-required #repo/sdk
+- [ ] Build Client Skeleton (UI, media caching, thumbnails) #repo/client
 - [ ] Build EFS Development Tool App (standalone issue tracker for dogfooding)
-- [ ] Build Client Skeleton (UI, media caching, thumbnails)
+- [ ] Migrate clones to /efs/ home directory layout #repo/planning #blocked-on/human-decision
 
 
 ## In Flight

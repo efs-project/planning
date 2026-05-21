@@ -25,9 +25,19 @@ EFS hosts its first hackathon at OnionDAO across the month of June 2026. **Goals
 ### Hard requirements (must ship before 2026-06-01)
 
 - [ ] **Schema spec freeze.** Once frozen, schema UIDs are stable. Any subsequent schema change creates a new UID and orphans prior attestations (per `contracts/AGENTS.md` Etched-tier rules). See `contracts/specs/02-Data-Models-and-Schemas.md` for the current schema set.
-- [ ] **Smart contract .sol list freeze.** Contracts will be **upgradeable to fix bugs**, but **adding or removing `.sol` files is much harder.** Decide which contracts exist by June 1; don't add new ones during hackathon.
+- [ ] **Smart contract `.sol` file list freeze.** Contracts will be **upgradeable to fix bugs**, but **adding or removing `.sol` files is much harder.** Decide which contracts exist by June 1; don't add new ones during hackathon. (Bug-fix upgrades to existing contracts remain possible.)
 - [ ] **Core deployed to Sepolia.** EFS contracts live and reachable on Sepolia. Data added during OnionDAO should persist long-term (best-effort; see data-loss tolerance below).
-- [ ] **SDK MVP.** Enough surface area for hackathon devs to use without hand-rolling EAS interactions. Scope determined by the three SDK Backlog items below.
+- [ ] **SDK MVP for OnionDAO.** Two SDK packages needed for hackathon dev experience:
+    - [ ] On-chain SDK — folder management, permissions, EAS attestation wrappers
+    - [ ] Off-chain DB SDK — core ops, tombstoning, caching
+  Client SDK (iframe integrations, OS-type stuff) is **NOT required for OnionDAO** — it's a later concern.
+
+### SDK scope — what counts as SDK
+
+- The **kernel, graph, and other contracts are NOT part of the SDK.** They're EFS proper: simple, immutable contracts that do their job.
+- The **SDK is a separate set of upgradeable APIs** wrapping the contracts for dev ease-of-use. Lots of options, regularly improved by the EFS team.
+- This split matters because contracts can't be updated freely once on mainnet; the SDK can. Devs build against the SDK; the SDK adapts.
+- A dedicated AI design session is planned for SDK architecture — see [[Decisions]] 2026-05-21 entry. Don't start SDK code without that design landing.
 
 ### Data-loss tolerance during this phase
 
@@ -41,10 +51,14 @@ This distinction matters for: backup strategy, replay safety, snapshot tools, an
 
 From [[Kanban]] Backlog. As work begins, each should move into In Flight with the standard claim annotation:
 
-- [ ] Build On-Chain SDK (folder management, permissions) — required for SDK MVP
-- [ ] Build Off-Chain DB SDK (core ops, tombstoning, caching) — required for SDK MVP
-- [ ] Build Client App SDK (iframe integrations) — useful for SDK MVP
-- [ ] Build Client Skeleton (UI, media caching, thumbnails) — likely target for dataset-track entrants
+- [ ] Build On-Chain SDK (folder management, permissions) — **required** for SDK MVP
+- [ ] Build Off-Chain DB SDK (core ops, tombstoning, caching) — **required** for SDK MVP
+- [ ] Build Client App SDK (iframe integrations) — **deferred** (not OnionDAO-required; "later concern" per @james 2026-05-21)
+- [ ] Build Client Skeleton (UI, media caching, thumbnails) — useful target for dataset-track entrants but not strictly required
+
+Also needed (not yet a Backlog item — flagging here):
+
+- [ ] **Decide and freeze the smart-contract `.sol` file list** before 2026-06-01. Likely a Tier-1 design conversation in `#repo/contracts`. Bug-fix upgrades stay possible after freeze; adding/removing files does not.
 
 (The "EFS Development Tool App" Backlog item is internal dogfooding, not OnionDAO-blocking.)
 
