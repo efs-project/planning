@@ -298,6 +298,10 @@ When this design is promoted (becomes `0001-design-system.md`):
 - [ ] **`#priority/{p0,p1,p2}` tag on Backlog items?** PM-review agent suggested for triage. Defer until volume justifies; revisit when the In Flight column regularly exceeds three.
 - [ ] **CODEOWNERS-style protection on `Designs/_template.md`** so an accidental edit there doesn't ripple to every future draft? Probably YAGNI; flag if a template-edit accident happens.
 
+### Post-acceptance (2026-05-21 / @claude-opus-4.7)
+
+- [x] **`Agents/` directory added** as a sibling to `Designs/`, `Architecture/`, `Onboarding/`. Holds launch prompts (`<role>-launch.md`) and SOUL files (`<role>.md`) for each agent role. Distinct from `Designs/` because SOUL files are long-lived operating documents, not feature designs. First inhabitant: `pm-launch.md` (PM launch prompt). PM SOUL (`pm.md`) to be drafted by the PM in its first session. This extends the directory layout in the original §"Directory layout" without contradicting it; no supersession required. See [[Agents/README|Agents/README.md]] for the folder's conventions and its own open question (whether SOUL files follow the same lifecycle as Designs or have their own).
+
 ## Pre-promotion checklist
 
 - [ ] All `## Open questions` resolved or explicitly deferred
