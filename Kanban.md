@@ -6,10 +6,9 @@ kanban-plugin: board
 
 ## Backlog
 
-- [ ] **Merge EFS Lists** (branch `custom-lists` on efs-project/contracts) — keystone for OnionDAO. Changes schema count 6→7, reworks PROPERTY, adds `EdgeResolver.sol`, removes `TagResolver.sol`. Effectively IS the schema freeze and the .sol file list freeze. #repo/contracts #blocked-on/lists-merge
-- [ ] Schema spec freeze — collapses into Lists merge (see above). Confirm freeze the moment Lists merges. #repo/contracts #depends-on/lists-merge
-- [ ] Freeze smart-contract .sol file list — collapses into Lists merge (see above). Lock the set immediately after Lists merges. #repo/contracts #depends-on/lists-merge
-- [ ] Design: on-chain + off-chain SDK architecture (dedicated AI design session — @james initiates) #repo/sdk #kind/design
+- [ ] Schema spec freeze — collapses into Lists merge (In Flight). Confirm freeze the moment Lists merges. #repo/contracts #depends-on/lists-merge
+- [ ] Freeze smart-contract .sol file list — collapses into Lists merge (In Flight). Lock the set immediately after Lists merges. #repo/contracts #depends-on/lists-merge
+- [ ] Design: on-chain + off-chain SDK architecture (dedicated AI design session — @james initiates via in-chat prompt) #repo/sdk #kind/design
 - [ ] Build On-Chain SDK (folder management, permissions) — OnionDAO MVP #repo/sdk #depends-on/sdk-architecture-design
 - [ ] Build Off-Chain DB SDK (core ops, tombstoning, caching) — OnionDAO MVP #repo/sdk #depends-on/sdk-architecture-design
 - [ ] Deploy core contracts to Sepolia (OnionDAO 2026-06-01) #repo/contracts #depends-on/lists-merge
@@ -24,6 +23,8 @@ kanban-plugin: board
 
 - [ ] Draft the PM SOUL file at Agents/pm.md #repo/planning #kind/design
   — @pm, direct push to planning, claimed 2026-05-21, expires 2026-05-24
+- [ ] **Merge EFS Lists** (branch `custom-lists` on efs-project/contracts) — keystone for OnionDAO. Schema 6→7, reworks PROPERTY, adds `EdgeResolver.sol`, removes `TagResolver.sol`. Schema freeze + .sol freeze + Sepolia deploy all gated on this. ETA unknown; James to scope. #repo/contracts
+  — @james, branch custom-lists, claimed 2026-05-21, expires 2026-05-24 (PM will nudge on this date for ETA refinement)
 
 
 

@@ -8,6 +8,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-05-21
 
+- @pm: session-2 continuation. Surfaced EFS Lists (custom-lists branch on contracts) as schema-freeze + .sol-freeze keystone — was invisible in the vault before. Reframed Kanban: schema/.sol freeze cards now `#depends-on/lists-merge`; Lists itself moved to In Flight under @james. Slimmed pm-launch.md to thin bootstrap pointing at pm.md. Drafted SDK architect thread prompt in chat per James's choice (no file). Hackathon planning scoped as Milestones expansion + Kanban execution cards (not a design) per James. Decisions log gained five new entries capturing James's calls.
 - @pm: first session. Ran all five audit scripts (all green). Surveyed 7-day commit log across planning/contracts/client. Drafted [[Agents/pm|pm.md]] SOUL (status: review). Moved "Draft PM SOUL" Kanban card to In Flight, claimed @pm, expires 2026-05-24. Updated [[For-James]] with two items: PM SOUL awaiting review + SDK architecture nudge. State: OnionDAO T-11 days; SDK design tallest pole and not started; schema freeze, .sol freeze, Sepolia deploy all unstarted.
 - @claude-opus-4.7: design-system — drafted; awaiting James review. After review, request promotion as DESIGN-0001.
 - @claude-opus-4.7: cross-repo-reference-mirror — renamed from `0001-cross-repo-reference-mirror.md` to name-only deferred draft. Blocked on a concrete CI need (see file).

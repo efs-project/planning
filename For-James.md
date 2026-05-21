@@ -1,7 +1,9 @@
 # For James
 
-- **CRITICAL FINDING: EFS Lists is the schema freeze and the .sol freeze** — branch `custom-lists` on contracts changes schema count 6→7, reworks PROPERTY semantics, adds `EdgeResolver.sol`, removes `TagResolver.sol`. The three Backlog items (Lists merge, schema freeze, .sol freeze) collapse into one keystone. Sepolia deploy is blocked on this. T-11 days. Added 2026-05-21 by @pm.
-- **Need from you (4 threads or decisions):** (1) Lists merge ETA — drives the whole calendar. (2) Spin up SDK architecture design thread. (3) Hackathon logistics — see [[Kanban]] new "Plan OnionDAO hackathon logistics" card; many sub-decisions only you can make (prize amount, venue confirmation, judging, onboarding docs, comms). (4) Review/promote [[Agents/pm|pm.md]] SOUL.
+- **Lists merge ETA still unknown** — In Flight card claimed by @james (custom-lists branch). PM needs at minimum a days/weeks bracket to plan around. T-11 days to OnionDAO; everything downstream (schema freeze, .sol freeze, Sepolia deploy, SDK implementation) stalls without this number. Added 2026-05-21 by @pm.
+- **Spin up the SDK architecture design thread** — full prompt drafted in chat 2026-05-21 (per [[Decisions]]). Paste into a new agent session whenever ready.
+- **OK to expand Milestones.md OnionDAO section with sub-decisions checklist?** (venue, prizes, judging, onboarding docs, comms plan) — PM-proposed in chat 2026-05-21; awaiting your nod before editing milestone scope per [[Agents/pm|SOUL § Autonomy boundaries]].
+- **Review/promote [[Agents/pm|pm.md]] SOUL** when you have a few minutes.
 
 ---
 
