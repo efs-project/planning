@@ -10,6 +10,8 @@ The categories below stay even when empty (helps you scan for "anything in this 
 
 Designs in `#status/ready-for-promotion`. Read the design, fill the trust token, run the atomic `git mv` ceremony. See [[Onboarding/write-a-design#7. Promotion (James does this)]] for the procedure.
 
+**WIP limit: 3.** When this list hits 3, agents stop adding new ready-for-promotion designs until you've cleared at least one. Per [[Onboarding/conventions#WIP limits]].
+
 *(none currently)*
 
 ## Blocked on a decision

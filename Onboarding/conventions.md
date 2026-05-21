@@ -114,6 +114,41 @@ see [ADR-0041](../contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.m
 
 These do NOT auto-update on file renames in the target repo. Rename-cleanup is a manual or scripted pass.
 
+## Task list vs Kanban vs design — three altitudes
+
+These three artifacts coexist on purpose. They're not redundant; they're at different altitudes. The single biggest failure mode is letting the same fact live in two places and drift.
+
+| Altitude | Artifact | What it tracks |
+|---|---|---|
+| Durable | `Designs/*.md` | Proposals → accepted → landed history. The "why" of architectural decisions. |
+| Flow | `Kanban.md` columns | Work-stream state right now: Backlog → In Flight → Blocked → Under Review → Done. WIP-disciplined. |
+| Detail | `- [ ]` task checkboxes | Execution-level items inside a design (`## Open questions`), inside a Daily Note, or inside any file. Rolled up globally by the Obsidian Tasks plugin (see [[Tasks]]). |
+
+Rules of thumb:
+
+- **A Kanban card is a discipline-bearing object** — has an owner, a claim with TTL, a WIP-limited column. Use it for things that need flow tracking and one identifiable owner.
+- **A design `## Open questions` checkbox** is for trackable items bound to a specific decision. They get answered before the design promotes (or carried forward as `### Post-acceptance`).
+- **A `- [ ]` in `Daily Notes/` or another file** is a personal/ephemeral todo. Useful but uncoordinated; not visible as project state.
+
+If you find yourself recording the same fact in two of these places, pick one and reference it from the other. **State duplication is the bug; multiple artifacts is the feature.**
+
+## WIP limits
+
+Kanban only works with WIP limits. The single human reviewer is the bottleneck; left unlimited, agents will accumulate work-in-progress faster than James can review it. Three soft limits, agent-honored not mechanically enforced:
+
+| Limit | Where | Why |
+|---|---|---|
+| **3** designs in `#status/ready-for-promotion` | Across all of `Designs/` | James's promotion-ceremony queue. Hitting 3 means agents must wait or help James promote before adding more. |
+| **5** cards in **Under Review** | `Kanban.md` Under Review column | James reviews PRs too. 5 PRs in review across all repos is already a lot. |
+| **2** In Flight cards per agent | `Kanban.md` In Flight, by claim annotation | Keeps each agent focused on something they can finish. |
+
+When a limit is hit, an agent that wants to add to that column must either:
+
+- finish or unblock an existing card in that column first, OR
+- surface in chat ("ready-for-promotion is at 3; can we promote one before I add another?")
+
+Limits exist to make the bottleneck visible, not to block work — but breaking them without acknowledging the bottleneck just hides it.
+
 ## Kanban entries
 
 In Flight card format:
@@ -179,6 +214,29 @@ Once a design is `accepted`, the body is nominally frozen. But implementation re
 ```
 
 Questions surfaced post-acceptance feed the same Tasks plugin rollup and reach James the same way. If a post-acceptance question changes the design's substance, the implementing agent must either update the design body (drift discipline, see [[design-system]]) or open a new design that supersedes.
+
+### Preserving the Obsidian Kanban plugin format
+
+`Kanban.md` is parsed by the Obsidian Kanban plugin, which needs three things to render correctly:
+
+1. **YAML frontmatter** at the top:
+   ```yaml
+   ---
+   kanban-plugin: board
+   ---
+   ```
+2. **`## Column-name` H2 headers** for each column. Order in the file = order on the board.
+3. **Settings footer** at the bottom:
+   ```markdown
+   %% kanban:settings
+   ```
+   {"kanban-plugin":"board","list-collapse":[false,false,false,false,false]}
+   ```
+   %%
+   ```
+   The `list-collapse` array length **MUST equal the number of columns**. Adding a column means adding a `false` entry; removing means removing one.
+
+When editing `Kanban.md`, never strip the frontmatter, never delete the footer, and always update `list-collapse` if you change the column count. Plain-markdown viewers (GitHub web) render this fine; it only matters to Obsidian's board view, which is what James uses.
 
 ## Daily check-ins
 

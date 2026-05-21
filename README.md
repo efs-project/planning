@@ -23,6 +23,7 @@ The **canonical protocol** for this vault is [`Designs/design-system.md`](./Desi
 | Path | Purpose |
 |---|---|
 | `README.md` | This file — entry point. |
+| `AGENTS.md` | Universal agent brief (for tools that auto-detect this filename); redirects here. |
 | `Kanban.md` | Cross-repo task board (Obsidian Kanban plugin). |
 | `For-James.md` | Dashboard of items needing the human's attention right now. |
 | `Decisions.md` | Append-only one-line decisions log. |
