@@ -1,6 +1,7 @@
 # For James
 
-*(Empty above this line = nothing needs you.)*
+- **Awaiting review: [[Agents/pm|pm.md]] SOUL file** — first PM session drafted it; status `#status/review`. Read, edit if needed, then promote per [[design-system#Promotion ceremony]] (or tell PM to revise). Added 2026-05-21.
+- **Critical-path nudge: SDK architecture design has not started** — OnionDAO is T-11 days; SDK MVP requires this design to land before two implementation threads can begin. Backlog card: `Design: on-chain + off-chain SDK architecture`. Per [[Decisions]] 2026-05-21, this is a dedicated AI thread you initiate. Added 2026-05-21 by @pm.
 
 ---
 

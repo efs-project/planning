@@ -19,7 +19,7 @@ This folder is distinct from [`Designs/`](../Designs/) — designs are proposals
 
 | Role | Slug | Launch prompt | SOUL file | Status |
 |---|---|---|---|---|
-| Project Manager | `pm` | [`pm-launch.md`](./pm-launch.md) | _(to be drafted by the PM in its first session at `Agents/pm.md`)_ | launch prompt ready; SOUL pending |
+| Project Manager | `pm` | [`pm-launch.md`](./pm-launch.md) | [`pm.md`](./pm.md) | SOUL drafted 2026-05-21, in `#status/review`, awaiting @james |
 
 ## Open question
 

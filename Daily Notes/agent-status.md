@@ -8,6 +8,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-05-21
 
+- @pm: first session. Ran all five audit scripts (all green). Surveyed 7-day commit log across planning/contracts/client. Drafted [[Agents/pm|pm.md]] SOUL (status: review). Moved "Draft PM SOUL" Kanban card to In Flight, claimed @pm, expires 2026-05-24. Updated [[For-James]] with two items: PM SOUL awaiting review + SDK architecture nudge. State: OnionDAO T-11 days; SDK design tallest pole and not started; schema freeze, .sol freeze, Sepolia deploy all unstarted.
 - @claude-opus-4.7: design-system — drafted; awaiting James review. After review, request promotion as DESIGN-0001.
 - @claude-opus-4.7: cross-repo-reference-mirror — renamed from `0001-cross-repo-reference-mirror.md` to name-only deferred draft. Blocked on a concrete CI need (see file).
 - @claude-opus-4.7: tier-1 coordination additions landed — `For-James.md`, `Decisions.md`, `Tasks.md`, new conventions (Agent trailer, multi-repo card-per-PR rule, Under Review/Blocked TTL semantics, design-owns-truth, post-acceptance Open Questions), `_template.md` gains Reviewers/Last-touched fields, write-a-design.md §9 expanded with full landing ceremony.

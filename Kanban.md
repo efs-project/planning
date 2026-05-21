@@ -15,11 +15,13 @@ kanban-plugin: board
 - [ ] Build Client App SDK (iframe integrations) — deferred, not OnionDAO-required #repo/sdk
 - [ ] Build Client Skeleton (UI, media caching, thumbnails) #repo/client
 - [ ] Build EFS Development Tool App (standalone issue tracker for dogfooding)
-- [ ] Draft the PM SOUL file at Agents/pm.md (PM agent drafts this in its first session) #repo/planning #kind/design
 - [ ] Migrate clones to /efs/ home directory layout #repo/planning #blocked-on/human-decision
 
 
 ## In Flight
+
+- [ ] Draft the PM SOUL file at Agents/pm.md #repo/planning #kind/design
+  — @pm, direct push to planning, claimed 2026-05-21, expires 2026-05-24
 
 
 
