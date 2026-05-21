@@ -1,21 +1,24 @@
-# DESIGN-0001: Cross-repo reference mirror
+# Cross-repo reference mirror
 
 **Status:** draft
 **Target repos:** `planning`, `contracts` (later: `client`, `sdk`)
 **Depends on:** —
 **Supersedes:** —
 
-#status/draft #kind/design #repo/planning #repo/contracts
+#status/draft #kind/design #repo/planning #repo/contracts #blocked-on/concrete-CI-need
+
+> **Status note (2026-05-21):** This design was originally drafted as `DESIGN-0001` when the planning vault had no `/efs/` colocation. The subsequent decision to colocate all EFS repos under `/efs/` (see [[design-system]]) made the local-machine sibling-read case trivial without a mirror, eliminating the design's primary use case. The design is kept on file because two narrower use cases still exist (see below) — but it does not warrant implementation until one of them surfaces a concrete need.
 
 ## Problem
 
-Agents working in `/planning/` need to read canonical reference material (ADRs, specs) from sibling dev repos to write informed designs. Today that material lives in `contracts/docs/adr/` and `contracts/specs/`, with `client/` and `sdk/` to follow. Three failure modes:
+Agents working in `/planning/` need to read canonical reference material (ADRs, specs) from sibling dev repos to write informed designs. With `/efs/` colocation, the local-machine case is solved: agents read `../contracts/docs/adr/0041-...` directly from the sibling clone.
 
-- **CI / restricted environments** — an agent in a GitHub Actions runner usually has only one repo checked out and can't read another repo's files at all.
-- **Stale or branch-divergent clones** — an agent on a local machine may have a sibling repo at an old SHA, or in a feature-branch worktree where the relevant ADR doesn't yet exist.
-- **Human-in-the-loop tax** — when the agent can't find the reference itself, it burns turns asking the human "what does ADR-0041 say?" Or worse: re-derives a decision that already exists, and a reviewer has to catch it later.
+Two narrower failure modes survive:
 
-The pain compounds as `client/` and `sdk/` come online. A cross-cutting design — say, a shared content-addressing scheme that touches all three repos — needs references in three places simultaneously, none colocated with the design file.
+- **CI / restricted environments** — an agent in a GitHub Actions runner usually has only one repo checked out and can't read another repo's files. A `planning`-repo workflow that lints designs or resolves wiki-links to ADRs has no `contracts/` available.
+- **Web/Obsidian-Publish rendering** — humans browsing `github.com/efs-project/planning` see broken `../contracts/...` relative paths. If Obsidian Publish or a static site is ever used, same problem.
+
+(The original third use case — local-machine stale clones, branch-divergent reads — is real but rare and easily fixed by `git pull` in the sibling repo. Not load-bearing.)
 
 ## Proposal
 
