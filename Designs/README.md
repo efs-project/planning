@@ -55,9 +55,7 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 #### Draft
 
-| Design | Target repos | Notes |
-|---|---|---|
-| [[design-system]] | `planning` | Meta-design for this vault. Currently in draft; will become `0001-design-system.md` at promotion. |
+*(none)*
 
 #### Review
 
@@ -73,9 +71,11 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 |---|---|---|
 | [[cross-repo-reference-mirror]] | `planning`, `contracts` | `#blocked-on/concrete-CI-need` — `/efs/` colocation removed the primary use case; will resurface if CI needs cross-repo ADR access. |
 
-### Accepted (numbered, in implementation)
+### Accepted (numbered, in effect)
 
-*(none yet — promotion ceremony has not run)*
+| Design | Target repos | Notes |
+|---|---|---|
+| [[0001-design-system]] | `planning` | Meta-design for this vault. Canonical protocol — perpetual reference, does not progress to `landed`. Promoted 2026-05-21. |
 
 ### Landed
 
@@ -89,7 +89,7 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 | Repo | Designs |
 |---|---|
-| `planning` | [[design-system]], [[cross-repo-reference-mirror]] |
+| `planning` | [[0001-design-system]], [[cross-repo-reference-mirror]] |
 | `contracts` | [[cross-repo-reference-mirror]] |
 | `client` | *(none)* |
 | `sdk` | *(none)* |

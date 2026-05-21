@@ -1,21 +1,27 @@
 # For James
 
-Single dashboard of items currently needing your attention. Agents append items when they need you; remove (or check off) once you've acted.
-
-Empty file = nothing needs you. If this file grows beyond ~10 items, that's a signal agents are over-pinging or actions are accumulating — surface in chat.
+*(Empty above this line = nothing needs you.)*
 
 ---
 
-## How to use this file (for agents)
+*(Agent docs below. Skip past unless you're an agent updating this file.)*
 
-At the end of any work session in which you produced something James needs to look at, append a bullet under one of these headings (create the heading if it doesn't exist):
+## How agents use this file
 
-- **Awaiting promotion** — a design moved to `#status/ready-for-promotion`. WIP limit 3 per [[conventions#WIP limits]]. Quick view: `./scripts/designs-awaiting-promotion.sh`.
-- **Blocked on a decision** — an item tagged `#blocked-on/human-decision`.
-- **Open questions flagged `#needs/james`** — design-bound questions explicitly waiting on James (vs. agent-resolvable).
+When you produce something James needs to look at, append a bullet at the **top of this file** (above the `---` separator). One line, clearly actionable:
 
-Format: `- [[<source-file>]] — short description (added YYYY-MM-DD)`.
+```markdown
+- **Awaiting promotion: [[design-slug]]** — read & promote per [[design-system#Promotion ceremony]]. Added 2026-05-21.
+- **Blocked on decision: [[some-design]]** — needs your call on X (see `## Open questions` in the design). Added 2026-05-21.
+- **#needs/james flag in [[some-design]]** — quick question about Y. Added 2026-05-21.
+```
 
-Commit + push as part of your session's final commit.
+Conventions:
 
-**Do not** put low-priority observations here. Use `Decisions.md` for one-line decisions you made yourself, `Daily Notes/` for ephemeral notes, and design-file `## Open questions` for trackable items inside a specific design.
+- **Top of file = most recently added.** James scans top-down.
+- **One line each.** Description + link + date. No nested bullets.
+- **Remove your item** when James has acted on it (don't archive; the commit history is the archive).
+- **Empty file is the goal state** — anything above the `---` separator means James has work waiting.
+- **WIP limit:** 3 ready-for-promotion items at any time (per [[conventions#WIP limits]]). If this file has 3 awaiting-promotion items, stop queuing new ones until James clears one.
+
+Don't put low-priority observations here. Use [[Decisions]] for one-line decisions you made yourself, `Daily Notes/` for ephemeral notes, design-file `## Open questions` for trackable items inside a design.

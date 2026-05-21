@@ -1,11 +1,16 @@
 # Design System
 
-**Status:** draft
+**Status:** accepted
 **Target repos:** `planning`
 **Depends on:** —
 **Supersedes:** —
+**Reviewers:** @claude-opus-4.7 (2026-05-21, via subagent rounds covering content / consistency / lifecycle-simulation / first-time-reader perspectives)
 
-#status/draft #kind/design #repo/planning
+#status/accepted #kind/design #repo/planning
+
+> **Promoted by @james on 2026-05-21** — delegated execution of the promotion ceremony to @claude-opus-4.7 via chat authorization ("Please promote the design as me and update it as needed").
+>
+> **Special case — perpetual canonical document.** This design is meta: it codifies the rules by which all other designs are promoted. Implementation already happened across the commits that built the vault (no separate target-repo work). Unlike a normal design, this one does **not** progress to `landed` and **does not get tombstoned** — its body remains the canonical reference. Updates to the design system itself happen via supersession (a new design that supersedes this one).
 
 ## Problem
 
