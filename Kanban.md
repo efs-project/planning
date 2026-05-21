@@ -15,6 +15,7 @@ kanban-plugin: board
 - [ ] Build Client App SDK (iframe integrations) — deferred, not OnionDAO-required #repo/sdk
 - [ ] Build Client Skeleton (UI, media caching, thumbnails) #repo/client
 - [ ] Build EFS Development Tool App (standalone issue tracker for dogfooding)
+- [ ] Design the PM SOUL file (instruction set for the cron-driven AI project manager) #repo/planning #kind/design
 - [ ] Migrate clones to /efs/ home directory layout #repo/planning #blocked-on/human-decision
 
 
