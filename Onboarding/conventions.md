@@ -75,13 +75,9 @@ New tags are fine when nothing existing fits — add to this table in the same c
 
 ## Tri-sync invariant
 
-Three places must agree for design status:
+Three places must agree for design status: prose `**Status:**`, tag `#status/`, and (post-promotion) filename. All three change in the same commit. Filename only changes at promotion.
 
-- [ ] Prose `**Status:** X`
-- [ ] Tag `#status/X`
-- [ ] Filename (`<slug>.md` pre-promotion, `NNNN-<slug>.md` post-promotion)
-
-All three change in the same commit. Filename only changes at promotion.
+**Canonical definition: [[design-system#Tri-sync invariant]].** Mechanical check: `scripts/tri-sync-check.sh` (also catches self-numbered drafts).
 
 ## Path conventions
 
@@ -106,13 +102,23 @@ Obsidian auto-updates these when a file is renamed. This is why we use them insi
 
 ## Linking out of the vault
 
-Use markdown form with a vault-rooted relative path:
+Use markdown form with a path **relative to the file you're writing in.** Markdown links are file-relative, not vault-rooted.
+
+From a vault-root file (`planning/Tasks.md` etc.):
 
 ```markdown
 see [ADR-0041](../contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md)
 ```
 
-These do NOT auto-update on file renames in the target repo. Rename-cleanup is a manual or scripted pass.
+From a file one level deep (`planning/Designs/foo.md`, `planning/Onboarding/foo.md`):
+
+```markdown
+see [ADR-0041](../../contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md)
+```
+
+The `../` count varies by file depth. If a link doesn't resolve when you click it in Obsidian or follow it on GitHub web, you've miscounted.
+
+Out-of-vault links do NOT auto-update on file renames in the target repo. Rename-cleanup is a manual or scripted pass.
 
 ## Task list vs Kanban vs design — three altitudes
 
@@ -252,17 +258,7 @@ Lets James scan project state quickly.
 
 ## Pre-promotion checklist
 
-Every design carries this section near the bottom (template includes it). Fill before requesting promotion:
-
-```markdown
-## Pre-promotion checklist
-
-- [ ] All `## Open questions` resolved or explicitly deferred (cite where)
-- [ ] `**Target repos:**` confirmed
-- [ ] `**Depends on:**` chain — all dependencies `accepted` or `landed`
-- [ ] No `<!-- AGENT-Q: -->` comments left in the design body
-- [ ] At least one round of `#status/review` with another agent or human comment
-```
+Every design carries this section near the bottom. **Canonical form: [[_template#Pre-promotion checklist]].** Fill it before requesting promotion; James scans rather than re-reads the whole design.
 
 ## Promotion commit shape
 
@@ -273,7 +269,7 @@ Single commit:
 - Commit message: `promote: DESIGN-NNNN — <title>`
 - Commit body includes the literal trust token: `Promoted by @james on YYYY-MM-DD`
 
-Any deviation = manual review.
+Any deviation = manual review. Mechanical check: `scripts/promotion-check.sh` audits recent `promote:` commits for the trust token, atomic rename, and subject format.
 
 ## Open questions inline
 

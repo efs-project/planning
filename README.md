@@ -62,6 +62,8 @@ git commit -m "<area>: <imperative summary>"
 git push
 ```
 
+Every agent-authored commit MUST include both an `Agent: <slug>` trailer and a `Co-authored-by:` trailer. Together they enable per-agent grep on `git log` (see `scripts/agent-activity.sh`). Full convention: [`Onboarding/conventions.md`](./Onboarding/conventions.md#agent-identity-trailer).
+
 On push rejection: `git pull --rebase`, resolve any conflicts (Kanban.md is the likely victim), `git push`. If a rebase gets gnarly (>5 minutes of resolving), back off — surface in chat rather than force-pushing.
 
 **Note on `vault backup: <date>` commits.** The Obsidian Git plugin uses that message template for manual commits via its UI. Those are James's edits, not auto-commits. Agents use semantic CLI commits and won't produce that prefix.

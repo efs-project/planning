@@ -88,9 +88,9 @@ When all `## Open questions` are resolved or explicitly deferred:
 
 Then **wait**. Promotion is human-only.
 
-### 7. Promotion (James does this)
+### 7. Promotion ceremony
 
-James:
+James (or an agent acting on his explicit trust token):
 
 1. Reads the design and the pre-promotion checklist.
 2. Writes a trust token in the design body: `Promoted by @james on YYYY-MM-DD`.

@@ -110,7 +110,7 @@ The mirror is authoritative-for-reading only. The source repo's file is the trut
 
 **Rollout order:**
 
-1. Land this design (status → `accepted`); add a Backlog Kanban item: `- [ ] Implement [[0001-cross-repo-reference-mirror]] #repo/contracts #repo/planning`.
+1. Land this design (status → `accepted` via promotion ceremony, gaining its `NNNN-` prefix); add a Backlog Kanban item: `- [ ] Implement [[NNNN-cross-repo-reference-mirror]] #repo/contracts #repo/planning`.
 2. Set up bot identity and PAT.
 3. Implement `contracts/` → `planning/` sync. Smoke test: edit an ADR, verify the mirror updates within minutes.
 4. Backfill: one-time copy of all existing `contracts/docs/adr/*` into the mirror.

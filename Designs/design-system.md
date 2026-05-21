@@ -66,7 +66,7 @@ All EFS repos live as siblings under `/efs/`. An agent's working directory is `/
 |---|---|---|
 | In-vault references | `[[wiki-link]]` (no extension) | `[[design-system]]`, `[[Glossary#TAG]]` |
 | Out-of-vault references in prose | repo-relative, no `/efs/` prefix | `contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md` |
-| Out-of-vault references in markdown link form | vault-rooted relative path | `[ADR-0041](../contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md)` |
+| Out-of-vault references in markdown link form | path relative to the file you're writing in (markdown links are file-relative, not vault-rooted) | From a root-level file: `[ADR-0041](../contracts/docs/adr/0041-...)`. From `Designs/foo.md` or `Onboarding/foo.md`: `[ADR-0041](../../contracts/docs/adr/0041-...)` |
 | Shell command | whatever `pwd` requires | `cd ../contracts && git status` |
 
 **Never use absolute `/efs/...` paths in committed files** — bakes in a mount point and breaks for any agent on a different layout (CI runners, alternate dev environments).
@@ -191,7 +191,7 @@ A term graduates to its own `Architecture/<term>.md` page when its definition ex
 |---|---|
 | Another file in the vault | `[[filename]]` (no extension) |
 | A glossary term | `[[Glossary#term]]` |
-| An ADR in a sibling repo | `[ADR-NNNN-title](../contracts/docs/adr/NNNN-title.md)` |
+| An ADR in a sibling repo | `[ADR-NNNN-title](../../contracts/docs/adr/NNNN-title.md)` *(adjust `../` count for the file's depth — see [[conventions#Linking out of the vault]])* |
 | A spec in a sibling repo | `[Spec NN](../contracts/specs/NN-...)` |
 | A PR or external URL | full URL, or `[text](url)` |
 

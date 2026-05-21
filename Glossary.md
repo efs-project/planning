@@ -22,7 +22,7 @@ EAS schema representing standalone file content identity: `contentHash` + `size`
 
 ## Design
 
-A proposal for a feature or change to EFS that may span multiple repos. Lives in `Designs/` in this vault. Has a lifecycle: `draft → review → ready-for-promotion → accepted → landed | abandoned`. See [[design-system]].
+A proposal for a feature or change to EFS that may span multiple repos. Lives in `Designs/` in this vault. Has a lifecycle: `draft → review → ready-for-promotion → accepted → landed | abandoned | rejected`. See [[design-system]] for the full state machine including the `rejected` (hard-veto, do not revive) vs `abandoned` (paused, may revive) distinction.
 
 ## Durable (permanence tier)
 
@@ -90,7 +90,7 @@ A short stub replacing a landed design's body. Points at the canonical ADRs/spec
 
 ## Tri-sync invariant
 
-The rule that a design's status must agree across three locations: prose `**Status:** X`, tag `#status/X`, and (post-promotion) filename `NNNN-<slug>.md`. All three change in the same commit. See [[design-system]] § Tri-sync invariant.
+The rule that a design's status must agree across three locations: prose `**Status:** X`, tag `#status/X`, and (post-promotion) filename `NNNN-<slug>.md`. All three change in the same commit. **Canonical definition: [[design-system]] § Tri-sync invariant.** Mechanical check: `scripts/tri-sync-check.sh`.
 
 ## Worktree
 
