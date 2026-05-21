@@ -1,14 +1,4 @@
-# Obsidian Bases starter for the EFS planning vault.
-#
-# These are illustrative queries; tune them in Obsidian (the Bases UI
-# is much more forgiving than hand-editing this YAML). The Bases plugin
-# parses this file and renders the views in the Obsidian sidebar.
-#
-# If a view fails to parse, Obsidian will show an error; comment the
-# view out and ask James to fix in the Bases editor.
-
 views:
-  # All designs grouped by status. Skips the template and folder README.
   - type: table
     name: Designs by status
     filters:
@@ -21,9 +11,6 @@ views:
       - file.name
       - tag:repo
       - file.mtime
-    sort: file.mtime desc
-
-  # Awaiting promotion — the high-leverage view for James.
   - type: table
     name: Awaiting promotion
     filters:
@@ -34,12 +21,9 @@ views:
       - file.name
       - tag:repo
       - file.mtime
-
-  # Anything blocked on a human decision.
   - type: table
     name: Blocked on James
-    filters:
-      tags matches "blocked-on/human-decision"
+    filters: tags matches "blocked-on/human-decision"
     group_by: file.folder
     columns:
       - file.name
