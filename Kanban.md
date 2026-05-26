@@ -21,10 +21,10 @@ kanban-plugin: board
 
 ## In Flight
 
+- [ ] **Merge EFS Lists** (branch `custom-lists` on efs-project/contracts) — keystone for OnionDAO. Schema 6→7, reworks PROPERTY, adds `EdgeResolver.sol`, removes `TagResolver.sol`. Schema freeze + Sepolia deploy gated on this. James confirms 2026-05-26: "wrapping up the List design." T-6 days. #repo/contracts
+  — @james, branch custom-lists, claimed 2026-05-21, expires 2026-05-29 (PM nudge if no merge by then)
 - [ ] Draft the PM SOUL file at Agents/pm.md #repo/planning #kind/design
-  — @pm, direct push to planning, claimed 2026-05-21, expires 2026-05-24
-- [ ] **Merge EFS Lists** (branch `custom-lists` on efs-project/contracts) — keystone for OnionDAO. Schema 6→7, reworks PROPERTY, adds `EdgeResolver.sol`, removes `TagResolver.sol`. Schema freeze + .sol freeze + Sepolia deploy all gated on this. ETA unknown; James to scope. #repo/contracts
-  — @james, branch custom-lists, claimed 2026-05-21, expires 2026-05-24 (PM will nudge on this date for ETA refinement)
+  — @pm, direct push to planning, claimed 2026-05-21, expires 2026-05-29 (low priority — not blocking OnionDAO)
 
 
 

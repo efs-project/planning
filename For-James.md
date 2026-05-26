@@ -1,9 +1,11 @@
 # For James
 
-- **Lists merge ETA still unknown** — In Flight card claimed by @james (custom-lists branch). PM needs at minimum a days/weeks bracket to plan around. T-11 days to OnionDAO; everything downstream (schema freeze, .sol freeze, Sepolia deploy, SDK implementation) stalls without this number. Added 2026-05-21 by @pm.
-- **Spin up the SDK architecture design thread** — full prompt drafted in chat 2026-05-21 (per [[Decisions]]). Paste into a new agent session whenever ready.
-- **OK to expand Milestones.md OnionDAO section with sub-decisions checklist?** (venue, prizes, judging, onboarding docs, comms plan) — PM-proposed in chat 2026-05-21; awaiting your nod before editing milestone scope per [[Agents/pm|SOUL § Autonomy boundaries]].
-- **Review/promote [[Agents/pm|pm.md]] SOUL** when you have a few minutes.
+- **T-6 days to OnionDAO. Triage list (this week only):**
+- **DECIDE — SDK track posture.** Drop / soft-launch (PM recommends) / push. Unblocks comms + entrant onboarding tone. Added 2026-05-26 by @pm.
+- **DO — finish Lists merge.** You said you're wrapping it up. This is the keystone; once merged, Sepolia deploy + schema freeze fall out for free. Added 2026-05-26 by @pm.
+- **DO — post one announce paragraph somewhere this week.** Even minimal. Silence = no attendees. Added 2026-05-26 by @pm.
+- **CONFIRM — OnionDAO logistics.** Venue / dates within June / host expecting you. PM has no visibility into this. Added 2026-05-26 by @pm.
+- **DEFERRED (do not think about this week):** my SOUL review, Milestones.md expansion, SDK design thread, Devcon, Client SDK, dev tool app.
 
 ---
 

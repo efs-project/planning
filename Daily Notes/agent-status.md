@@ -6,6 +6,10 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ---
 
+## 2026-05-26
+
+- @pm: T-6 days to OnionDAO. James in chat: panicking, wrapping up Lists, asked for "whatever thoughts." PM delivered triage: minimum-viable OnionDAO is Lists merge + Sepolia deploy; SDK track soft-launch recommended; schema freeze = deploy event (no separate ceremony); 4 things only @james can do (Lists, SDK posture, announce post, logistics confirm); everything else deferred. Refreshed stale In Flight cards (both expired 2026-05-24) with 2026-05-29 expiries reflecting realistic next-nudge. No new commits on custom-lists since 2026-05-21 — work happening locally per James. For-James restructured into triage-list form. PM standing by for SDK-posture decision.
+
 ## 2026-05-21
 
 - @pm: session-2 continuation. Surfaced EFS Lists (custom-lists branch on contracts) as schema-freeze + .sol-freeze keystone — was invisible in the vault before. Reframed Kanban: schema/.sol freeze cards now `#depends-on/lists-merge`; Lists itself moved to In Flight under @james. Slimmed pm-launch.md to thin bootstrap pointing at pm.md. Drafted SDK architect thread prompt in chat per James's choice (no file). Hackathon planning scoped as Milestones expansion + Kanban execution cards (not a design) per James. Decisions log gained five new entries capturing James's calls.
