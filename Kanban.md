@@ -13,7 +13,7 @@ kanban-plugin: board
 - [ ] Build Off-Chain DB SDK (core ops, tombstoning, caching) — OnionDAO MVP #repo/sdk #depends-on/sdk-architecture-design
 - [ ] Deploy core contracts to Sepolia (OnionDAO 2026-06-01) #repo/contracts #depends-on/lists-merge
 - [ ] Plan OnionDAO hackathon logistics — venue/dates/prize amounts/judging/onboarding docs/comms plan #repo/planning
-- [ ] Build Client App SDK (iframe integrations) — deferred, not OnionDAO-required #repo/sdk
+- [ ] Build **EFS OS SDK** (capability surface for sandboxed Ring 3 Apps per [[Brainstorms/2026-05-26-pm-client-os-architecture]]) — deferred, not OnionDAO-required #repo/sdk
 - [ ] Build Client Skeleton (UI, media caching, thumbnails) #repo/client
 - [ ] Build EFS Development Tool App (standalone issue tracker for dogfooding)
 - [ ] Migrate clones to /efs/ home directory layout #repo/planning #blocked-on/human-decision

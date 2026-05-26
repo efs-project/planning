@@ -84,6 +84,10 @@ EAS schema representing a free-floating string value, placed on a container via 
 
 See [[Glossary#Edge (PIN, TAG)]]. Cardinality-N edge with `int256 weight`. Used for folder visibility, descriptive labels (`#nsfw`, etc.), and schema-alias discovery.
 
+## Topic
+
+Human-facing synonym for [[Glossary#Anchor]]. James prefers "Topic" in user-facing language ("we're all talking about the topic Music"); "Anchor" is the technical name that appears in URLs (the web `#anchor` concept — something solid to link to). Same on-chain primitive. If you're writing for a developer, use Anchor; for an end-user, use Topic. Captured 2026-05-26 per @james chat clarification.
+
 ## Tombstone
 
 A short stub replacing a landed design's body. Points at the canonical ADRs/specs that resulted from the design. Keeps `DESIGN-NNNN` references resolvable forever. See [[design-system]] § Designs lifecycle.

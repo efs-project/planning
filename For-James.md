@@ -5,7 +5,8 @@
 - **DO — finish Lists merge.** You said you're wrapping it up. This is the keystone; once merged, Sepolia deploy + schema freeze fall out for free. Added 2026-05-26 by @pm.
 - **DO — post one announce paragraph somewhere this week.** Even minimal. Silence = no attendees. Added 2026-05-26 by @pm.
 - **CONFIRM — OnionDAO logistics.** Venue / dates within June / host expecting you. PM has no visibility into this. Added 2026-05-26 by @pm.
-- **DEFERRED (do not think about this week):** my SOUL review, Milestones.md expansion, SDK design thread, Devcon, Client SDK, dev tool app.
+- **REVIEW — [[brainstorm-system]]** (drafted 2026-05-26 per your green light). Light read; promotes when you say go. Not blocking OnionDAO. Added 2026-05-26 by @pm.
+- **DEFERRED (do not think about this week):** my SOUL review, Milestones.md expansion, SDK design thread, Devcon, EFS OS SDK, dev tool app.
 
 ---
 
