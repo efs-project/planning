@@ -67,7 +67,7 @@ Everything below the frontmatter is **freeform**. No template. No required secti
 1. **One file per brainstorm.** Don't append to existing brainstorms — write a new one if you have new thoughts. Preserves traceability.
 2. **Frontmatter must be present and parseable.** Three required fields above. Otherwise the brainstorm is invisible to PM indexing.
 3. **Filename: `YYYY-MM-DD-<agent-slug>-<topic-slug>.md`.** Date-first, kebab-case.
-4. **Do not edit other agents' brainstorms.** Build on them by writing a new brainstorm that references theirs (`anchors: [brainstorm: 2026-05-26-pm-foo]`).
+4. **Do not edit other agents' brainstorms.** Build on them by writing a new brainstorm that references theirs (`anchors: [brainstorm: 2026-05-26-pm-foo]`). **Reading another brainstorm is allowed only when it's declared as an anchor** — the dependency must be visible in frontmatter. Avoids the cascading-hallucination failure mode while permitting deliberate composition (e.g., a schema-coverage audit reading the use-case brainstorm it's auditing against).
 5. **The PM is the only thing that reads cross-cuttingly.** Other agents may read brainstorms in their own scope (e.g., an SDK agent reading SDK-anchored brainstorms while drafting) but should not become brainstorm-curators. Avoids cascading hallucination where agents feed each other's noise.
 6. **Subagents return a 3-5 sentence exit summary** describing what they produced, perceived value, and anything that was unclear in the spec. Gives the PM curation hooks without re-reading the entire file. *(Added 2026-05-26 after batch-1 demonstrated this saves PM time substantially.)*
 

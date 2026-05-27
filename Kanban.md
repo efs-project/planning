@@ -13,6 +13,8 @@ kanban-plugin: board
 - [ ] Build Off-Chain DB SDK (core ops, tombstoning, caching) — OnionDAO MVP #repo/sdk #depends-on/sdk-architecture-design
 - [ ] Deploy core contracts to Sepolia (OnionDAO 2026-06-01) #repo/contracts #depends-on/lists-merge
 - [ ] Plan OnionDAO hackathon logistics — venue/dates/prize amounts/judging/onboarding docs/comms plan #repo/planning
+- [ ] **Fix contracts spec drift** — `contracts/specs/` still uses "edition" (now "lens" per ADR-0043) and "TagResolver" (now "EdgeResolver" per ADR-0041). `specs/overview.md` says 6 core contracts; actual on `custom-lists` is different — needs reconciliation. Surfaced by `bs-contract-decomposition-v1` 2026-05-26. Small contracts-repo doc task; can be agent-driven. #repo/contracts
+- [ ] **Plan an off-chain "EFS-in-Postgres" indexer pattern** — dev UX brainstorm (`bs-third-party-dev-ux-v1` 2026-05-26) found every nontrivial dev abandons high-level read APIs within a day and reinvents an off-chain mirror. A packaged off-chain indexer reference matters more pre-launch than SDK polish. #repo/sdk #kind/design
 - [ ] Build **EFS OS SDK** (capability surface for sandboxed Ring 3 Apps per [[Brainstorms/2026-05-26-pm-client-os-architecture]]) — deferred, not OnionDAO-required #repo/sdk
 - [ ] Build Client Skeleton (UI, media caching, thumbnails) #repo/client
 - [ ] Build EFS Development Tool App (standalone issue tracker for dogfooding)
