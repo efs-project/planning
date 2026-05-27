@@ -101,6 +101,28 @@ These are real costs — PM sessions get longer. Worth it because each surfaced 
 
 **Key principle: brainstorms are never promoted in place into designs.** If a brainstorm has a good idea, the idea seeds a new design that someone writes properly. The brainstorm gets `status: integrated` with an `integrated_into:` pointer.
 
+### Exit triage structure (for decision-prep brainstorms)
+
+When a brainstorm is **decision-prep flavored** (synthesizing options, auditing gaps, evaluating directions), it should end with these three sections instead of or in addition to `## Curator notes`. This systematizes PM curation and makes recursion explicit.
+
+1. **`## Controversial human design choices`** — decisions only James can make. Each item:
+   - **Choice:** what the decision is, in one sentence.
+   - **Options:** the realistic alternatives (usually 2–4).
+   - **Tentative read:** what the brainstorm agent would pick if forced, with one-sentence reasoning.
+   - **Why controversial:** why reasonable people would disagree.
+
+2. **`## Unknown questions for future brainstorms`** — questions that another brainstorm could answer. Drives **recursion**. Each item:
+   - **Question:** what's unknown, in one sentence.
+   - **Brainstorm shape that would answer it:** e.g., "a `bs-edge-cases-typed-events-v1` brainstorm targeting the EVENT/TRANSITION schema candidates."
+   - **What it would unlock:** the next decision or artifact it enables.
+
+3. **`## Blockers / concerns`** — things blocking forward progress. Each item:
+   - **What's blocked:** the work that can't proceed.
+   - **The blocker:** what's in the way.
+   - **Who/what could unblock:** James, another brainstorm, an external answer, etc.
+
+Generative brainstorms (use case generation, capability enumeration) can keep their original `## Observations` + `## Curator notes` shape — the triage structure is for analytical/decision-prep work. Use judgment.
+
 ### Subagent prompt patterns (learned 2026-05-26)
 
 The first brainstorm batch (3 parallel subagents) validated a prompt shape that consistently produces high-signal output. Capture for reuse:
@@ -116,7 +138,9 @@ A good subagent brainstorm prompt has all six of:
 
 Empirical batch-1 stats: ~40-60k tokens per subagent, ~2-4 min runtime, output 150-400 lines, zero need for clarification turns. Three in parallel = ~155k tokens total, ~3.5 min wallclock.
 
-**Estimated token budget per subagent: 50k.** A batch of 3-5 in parallel costs 150-250k tokens — usually well-justified if even one finding is leveraged. Anything beyond ~250k for a single batch should be deliberate.
+**Estimated token budget per subagent: 50k-130k** (updated 2026-05-26 after batch-3 — varies by tool-use intensity). A batch of 3-5 in parallel costs 150-250k tokens; a batch of 7 costs 600-700k. **Anything beyond ~250k for a single batch should be deliberate** — large batches need explicit James green-light.
+
+**Pattern observation (batch-3):** brainstorms that DO things (compile artifacts, run greps, read actual code) produce more grounded output than purely-generative ones. Worth seeding more "go look at the actual data" prompts. `bs-bytecode-budget-v1` (compiled artifacts → real numbers) was the most concrete output for its token cost; `bs-vocab-coherence-audit-v1` (77 greps) found drift instances no generative brainstorm would have invented.
 
 ### Cron agents (future)
 
