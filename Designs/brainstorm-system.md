@@ -69,6 +69,7 @@ Everything below the frontmatter is **freeform**. No template. No required secti
 3. **Filename: `YYYY-MM-DD-<agent-slug>-<topic-slug>.md`.** Date-first, kebab-case.
 4. **Do not edit other agents' brainstorms.** Build on them by writing a new brainstorm that references theirs (`anchors: [brainstorm: 2026-05-26-pm-foo]`).
 5. **The PM is the only thing that reads cross-cuttingly.** Other agents may read brainstorms in their own scope (e.g., an SDK agent reading SDK-anchored brainstorms while drafting) but should not become brainstorm-curators. Avoids cascading hallucination where agents feed each other's noise.
+6. **Subagents return a 3-5 sentence exit summary** describing what they produced, perceived value, and anything that was unclear in the spec. Gives the PM curation hooks without re-reading the entire file. *(Added 2026-05-26 after batch-1 demonstrated this saves PM time substantially.)*
 
 That's it. No additional process gates.
 
@@ -99,6 +100,23 @@ These are real costs — PM sessions get longer. Worth it because each surfaced 
 | Lifecycle pressure | grows toward acceptance | indefinite; pruning requires written reason |
 
 **Key principle: brainstorms are never promoted in place into designs.** If a brainstorm has a good idea, the idea seeds a new design that someone writes properly. The brainstorm gets `status: integrated` with an `integrated_into:` pointer.
+
+### Subagent prompt patterns (learned 2026-05-26)
+
+The first brainstorm batch (3 parallel subagents) validated a prompt shape that consistently produces high-signal output. Capture for reuse:
+
+A good subagent brainstorm prompt has all six of:
+
+1. **Clear deliverable.** What you're producing, in one sentence. ("15 EFS use cases across diverse industries.")
+2. **Exact frontmatter spec** — copy-paste-verbatim YAML block. Removes ambiguity about the agent slug, anchors, status, date.
+3. **Scoped "what to read" list** with stop-when-enough guidance. Prevents the agent from reading the whole vault before starting.
+4. **Length target** (e.g., "200-400 lines"). Sets expectations on density vs. exhaustiveness.
+5. **What-NOT-to-do list.** "Don't commit. Don't read other brainstorms. Don't recommend a winner. Don't pad." Each one prevents a specific failure mode.
+6. **Exit-summary expectation.** "Return 3-5 sentences: what you produced, perceived value, anything that was unclear." This gives the PM curation hooks.
+
+Empirical batch-1 stats: ~40-60k tokens per subagent, ~2-4 min runtime, output 150-400 lines, zero need for clarification turns. Three in parallel = ~155k tokens total, ~3.5 min wallclock.
+
+**Estimated token budget per subagent: 50k.** A batch of 3-5 in parallel costs 150-250k tokens — usually well-justified if even one finding is leveraged. Anything beyond ~250k for a single batch should be deliberate.
 
 ### Cron agents (future)
 

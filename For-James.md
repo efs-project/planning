@@ -6,6 +6,7 @@
 - **DO — post one announce paragraph somewhere this week.** Even minimal. Silence = no attendees. Added 2026-05-26 by @pm.
 - **CONFIRM — OnionDAO logistics.** Venue / dates within June / host expecting you. PM has no visibility into this. Added 2026-05-26 by @pm.
 - **REVIEW — [[brainstorm-system]]** (drafted 2026-05-26 per your green light). Light read; promotes when you say go. Not blocking OnionDAO. Added 2026-05-26 by @pm.
+- **EVALUATE before Lists merges — typed-edge schema gap** (surfaced from [[Brainstorms/2026-05-26-bs-divergent-usecases-v1-efs-use-cases-across-industries#Observations|bs-divergent-usecases-v1]]). Agent brainstorm flagged that TAG is being asked to do 8+ roles across diverse use cases (placement, label, weighted vote, provenance, supply-chain handoff, synonymy, fanfic descriptor, ownership transfer). It suggests considering a typed-edge schema **before Lists locks the schema set**. **PM is NOT asking you to act** — this might already be considered, the gap might be acceptable, or it might be solvable in the SDK layer. But: a brief sanity check ("does Lists already address this?" or "yes I considered, it's fine") would let PM mark the finding as integrated rather than carrying it open. Time-sensitive only if you haven't thought about it. Added 2026-05-26 by @pm.
 - **DEFERRED (do not think about this week):** my SOUL review, Milestones.md expansion, SDK design thread, Devcon, EFS OS SDK, dev tool app.
 
 ---
