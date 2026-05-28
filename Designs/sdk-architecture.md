@@ -46,6 +46,9 @@ Distilled from: `bs-third-party-dev-ux-v1` (dev friction walkthroughs), `bs-dive
 | M9 | Set/get a PROPERTY value by key (key-anchor + PROPERTY + binding PIN; a 3-attestation singleton rebind) | client: PROPERTY schema; ADR-0041 §1; dev-friction |
 | M10 | Create and populate a LIST; iterate its entries | ADR-0044 (Lists) |
 | M11 | Expose schema UIDs and contract addresses as typed constants (never hardcode) | dev-friction: "what schema UID is PROPERTY this week?" |
+| M11a | Manage MIRRORs on existing DATA (list/add/remove); multiple transports per DATA | core primitive (multi-MIRROR per DATA); archival redundancy use cases |
+| M11b | Sort surface for folders AND lists: discover/declare sorts, read sorted (lens-filtered), and maintain the overlay (`process`/`reposition`) after modification | spec 06/07; lists must be re-sorted after entry changes |
+| M11c | Per-call lens override on every read (not just client-level lens stack) | compare-views use cases; avoids client-state mutation |
 | M12 | Expose the raw EAS SDK cleanly (EFS.EAS) without requiring devs to know the SDK internals | PM brief; dev-friction: drop-to-raw-EAS pattern |
 | M13 | Expose the raw contract instances as an escape hatch (EFS.raw) | PM brief |
 | M14 | Lens model: explicit, visible default; not silent | dev-friction: "SDK silently used the deployer lens" |
@@ -100,6 +103,8 @@ This pass determines what to WRAP vs. what to EXPOSE-AS-IS.
 | Place a file at a path (singleton) | `PIN(refUID=DATA, definition=fileAnchor)` — 1 attest, but dev must know placement is a PIN not a TAG, and encode it | Schema UID + encoding + supersession semantics; the single most-confused primitive | **Wrap; expose in batch** |
 | Descriptive label / folder visibility (cardinality-N) | `TAG(refUID=target, definition, weight)` — 1 attest/revoke | Schema UID + encoding; weight semantics; lens-scoped read | **Thin wrap; expose in batch** |
 | Create LIST + add entries | 1 LIST attest + N LIST_ENTRY attests | High-level API hides the schema encoding complexity; enforces mode-specific target encoding | **Wrap** |
+| Add/remove a MIRROR on existing DATA | 1 attest/revoke, but dev must know scheme allowlist (ADR-0023) + transport priority | Scheme validation, transport tagging, lens-scoped ordered read | **Wrap** |
+| Sort a folder/list after modification | `processItems` with hand-computed left/right hints; multicall sort keys; handle `StaleStartIndex` + already-processed no-ops; honor tie-break + key-padding rules | Computes hints client-side, batches, retries on concurrency, exposes staleness — none of which is feasible to hand-roll correctly | **Wrap — high value** |
 | Schema UIDs, contract addresses | Hardcoded hex strings | Typed constants module, version-checked | **New primitive — SDK only** |
 | Lens management | URL query param only (ADR-0031) | Client-side state, visible default, ENS resolution, multi-lens composition | **New primitive — SDK only** |
 | Raw contract calls (EFSIndexer, EFSFileView, etc.) | `new Contract(ADDR, ABI, signer)` — verbose | `efs.raw.indexer` — pre-wired instance | **Thin wrap** |
@@ -123,13 +128,14 @@ Two packages (OS SDK deferred), living in a single `sdk/` repo (Direction 2 from
     onchain/    → npm: @efs/sdk-onchain
       src/
         batch.ts         compiled batch builder → EAS.multiAttest
-        fs.ts            file read/write/stat/list
+        fs.ts            file read/write/stat/list + mirror management
         graph.ts         Anchor tree, TAG/PIN traversal
         props.ts         PROPERTY typed access
         lists.ts         LIST + LIST_ENTRY
+        sorts.ts         sort overlay: discover/declare/read + processItems hinting
         lenses.ts        lens management
         raw.ts           contract escape hatches
-        constants.ts     schema UIDs, contract addresses
+        constants.ts     schema UIDs, contract addresses, sort-func addresses
         index.ts         EFSClient class + re-exports
     offchain/   → npm: @efs/sdk   (the primary package devs install)
       src/
@@ -182,14 +188,21 @@ await efs.connect(walletClient)
 #### `efs.fs` — Filesystem (primary surface)
 
 ```ts
+// Every read accepts an optional per-call lens override. When omitted, the client's
+// lens stack (set at construction / via efs.lenses) is used. This lets a caller read
+// one path through a different lens without mutating client state (e.g. compare views).
+type ReadOpts = { lenses?: Address[] }
+type ListOpts = ReadOpts & { limit?: number; cursor?: Hex; sort?: Hex | string; schema?: Hex }
+
 // Read
 efs.fs.read(path: string, opts?: ReadOpts): Promise<Uint8Array>
 efs.fs.read.text(path: string, opts?: ReadOpts): Promise<string>
 efs.fs.read.json<T>(path: string, opts?: ReadOpts & { schema?: ZodSchema<T> }): Promise<T>
 
-// List directory — always AsyncIterable (never an eager array)
+// List directory — always AsyncIterable (never an eager array).
+// `sort` accepts a SORT_INFO UID or a sort name (resolved via efs.sorts discovery);
+// omitting it returns kernel insertion order. See efs.sorts for sorted reads + maintenance.
 efs.fs.list(path: string, opts?: ListOpts): AsyncIterable<DirEntry>
-// opts: { limit?, cursor?, sortInfoUID?, schema? }
 
 // Stat (metadata without reading the payload)
 efs.fs.stat(path: string, opts?: ReadOpts): Promise<FileStat>
@@ -197,6 +210,14 @@ efs.fs.stat(path: string, opts?: ReadOpts): Promise<FileStat>
 
 // Resolve path → anchor UID (lower-level; useful when you need the UID)
 efs.fs.resolve(path: string): Promise<Hex>
+
+// Mirrors — retrieval URIs for a DATA. Multiple transports per DATA (ADR-0011/0012);
+// reads are lens-scoped (ADR-0013). First-class because adding redundancy mirrors
+// (ipfs/arweave) to existing content is a core archival operation, not just a write-time concern.
+efs.fs.mirrors.list(dataUID: Hex, opts?: ReadOpts): Promise<MirrorEntry[]>
+// MirrorEntry: { uid, uri, transport, attester } — ordered by transport priority (ADR-0012)
+efs.fs.mirrors.add(dataUID: Hex, uri: string): Promise<Hex>   // attest MIRROR; validates scheme (ADR-0023)
+efs.fs.mirrors.remove(mirrorUID: Hex): Promise<void>          // revoke
 
 // Write (sugar over efs.batch().fs.write().execute())
 efs.fs.write(
@@ -302,17 +323,22 @@ efs.lists.create(opts: {
   maxEntries?: number
 }): Promise<Hex>
 
-// Add entry to a list (returns LIST_ENTRY UID)
+// Add entry to a list (returns LIST_ENTRY UID).
+// `reSort` (default: the list's default sort if one is set) folds the new entry into the
+// sort overlay after the insert confirms — see the design note on sort-after-modification.
 efs.lists.add(listUID: Hex, target: Hex | Address, opts?: {
   weight?: bigint
   properties?: Record<string, string>
+  reSort?: Hex | string | false   // sort to maintain after insert; false = skip
 }): Promise<Hex>
 
-// Remove entry (revokes LIST_ENTRY, rejected if appendOnly)
+// Remove entry (revokes LIST_ENTRY, rejected if appendOnly).
+// Removal is a no-op for the overlay (revoked nodes are skipped at read time), so no re-sort needed.
 efs.lists.remove(entryUID: Hex): Promise<void>
 
-// Iterate active entries of a list (lens-scoped)
-efs.lists.entries(listUID: Hex, opts?: PaginateOpts): AsyncIterable<ListEntry>
+// Iterate entries of a list (lens-scoped). With `sort`, returns sorted order via the overlay
+// (efs.sorts.read under the hood); without it, kernel insertion order.
+efs.lists.entries(listUID: Hex, opts?: ListOpts): AsyncIterable<ListEntry>
 // ListEntry: { uid, target, weight, attester, properties, attestedAt }
 
 // Get the LIST declaration
@@ -321,6 +347,63 @@ efs.lists.get(listUID: Hex): Promise<ListSpec>
 // Place a list at a path anchor (creates PIN from anchor → list)
 efs.lists.placeAt(path: string, listUID: Hex): Promise<Hex>
 ```
+
+**Design note on sort-after-modification:** A list is a directory; entries live in the kernel in insertion order, and ordering is the shared **sort overlay** (`efs.sorts`), not a property of the LIST. Because `processItems` validates each item against its post-insert kernel position, the overlay can only be advanced *after* the LIST_ENTRY attestation confirms — re-sorting is therefore inherently a second phase, not part of the insert's `multiAttest`. `efs.lists.add(..., { reSort })` orchestrates this: it appends the entry, waits for confirmation, then calls `efs.sorts.process(listAnchor, reSort)` to fold the entry into place. Sorting is a shared public good (any caller can advance any sort), so a reader can also bring a stale list current itself via `efs.sorts.process` — the SDK never assumes the writer is the only one maintaining order.
+
+---
+
+#### `efs.sorts` — Sort overlay (folders **and** lists)
+
+Ordering in EFS is a lazy, caller-paid **overlay** keyed by `(sortInfoUID, parentAnchor)`, shared across all viewers (spec 06/07). The kernel stores children/entries in insertion order; a sort is a linked list folded forward by `processItems`, which takes client-computed insertion hints. Reads are lens-filtered. The same surface serves directory sorting and list sorting because a list *is* a directory.
+
+```ts
+// Discover sort concepts available on a container (folder or list anchor).
+// Resolves naming anchors (local children with anchorSchema=SORT_INFO + global /sorts/),
+// then the best SORT_INFO implementation per the lens hierarchy.
+efs.sorts.list(parent: Hex | string, opts?: ReadOpts): Promise<SortConcept[]>
+// SortConcept: { namingAnchor, name, sortInfoUID, sortFunc, targetSchema?, scope: 'local'|'global' }
+
+// The per-lens default sort (a `defaultSort` PROPERTY on the parent), if any.
+efs.sorts.default(parent: Hex | string, opts?: ReadOpts): Promise<SortConcept | null>
+efs.sorts.setDefault(parent: Hex | string, sort: Hex | string): Promise<Hex>
+
+// Declare a sort on a container: creates the naming anchor (anchorSchema=SORT_INFO) if absent,
+// then attests this attester's SORT_INFO implementation of that concept. `sortFunc` is an
+// ISortFunc address — built-ins exported as SORT_FUNCS.BY_NAME / BY_TIMESTAMP / BY_WEIGHT.
+efs.sorts.declare(parent: Hex | string, opts: {
+  name: string                 // shared human label, e.g. "ByDate"
+  sortFunc: Address
+  targetSchema?: Hex           // restrict to one child schema; default = all children
+}): Promise<{ namingAnchor: Hex; sortInfoUID: Hex }>
+
+// Read a container's children/entries in sorted order, lens-filtered
+// (getSortedChunkByAddressList). `maxTraversal` bounds node walks per call (ADR sparse-filter cap).
+efs.sorts.read(parent: Hex | string, sort: Hex | string, opts?: ListOpts & {
+  showRevoked?: boolean
+  maxTraversal?: number
+}): AsyncIterable<Hex>
+
+// How far the overlay lags the kernel (kernelCount - lastProcessedIndex). 0 = fully sorted.
+efs.sorts.staleness(parent: Hex | string, sort: Hex | string): Promise<number>
+
+// Fold all unprocessed kernel items into the sorted overlay — THE "sort after modification" call.
+// Computes hints client-side (multicall ISortFunc.getSortKey → local sort → binary-search
+// positions), submits processItems in batches, and transparently handles concurrency:
+// StaleStartIndex → refresh getLastProcessedIndex and resubmit; already-processed → silent no-op.
+// Resolves when staleness reaches 0. For small lists it can use the on-chain computeHints path.
+efs.sorts.process(parent: Hex | string, sort: Hex | string, opts?: {
+  maxBatch?: number            // items per processItems tx (gas tuning)
+  onProgress?(done: number, total: number): void
+}): Promise<SortProcessReceipt>
+// SortProcessReceipt: { itemsProcessed, txHashes, finalStaleness }
+
+// Move one item whose sort key changed (mutable content). Idempotent: no-op if already ordered.
+efs.sorts.reposition(parent: Hex | string, sort: Hex | string, itemUID: Hex): Promise<void>
+```
+
+**Design note on hint computation (the core value-add):** `processItems` deliberately pushes comparison work off-chain — the contract only does O(1) `isLessThan` validation per item, never an N² sort. The SDK owns the matching client side: fetch `getSortKey` for new items via multicall, sort locally, binary-search each into the current ordered list to derive `(leftHint, rightHint)`, then submit. ISortFunc keys append the item UID for deterministic tie-breaking, and numeric keys are fixed-width left-padded so JS lexicographic comparison matches on-chain byte comparison — the SDK's hint utility must honor both rules or it will compute wrong positions. This is precisely the kind of error-prone multi-step that belongs in the SDK, not in every dev's app.
+
+> **Flagged for the schema freeze:** `specs/06` defines SORT_INFO as `"address sortFunc, bytes32 targetSchema"` while `specs/07` defines it as `"address sortFunc, bytes32 targetSchema, uint8 sourceType"`. These are different schema UIDs. The SDK abstracts SORT_INFO fields behind `efs.sorts.declare`, but the on-chain schema must be reconciled before the 9-schema freeze (a SORT_INFO field change = a new UID). Surfaced to contracts.
 
 ---
 
@@ -454,6 +537,12 @@ PROP_KEYS.CONTENT_TYPE
 PROP_KEYS.NAME
 PROP_KEYS.DESCRIPTION
 PROP_KEYS.PREVIOUS_VERSION
+PROP_KEYS.DEFAULT_SORT         // per-lens default sort for a container (spec 06)
+
+// Built-in ISortFunc implementations (addresses, version-checked like SCHEMAS)
+SORT_FUNCS.BY_NAME            // AlphabeticalSort — anchor name
+SORT_FUNCS.BY_TIMESTAMP      // TimestampSort — attestation.time
+SORT_FUNCS.BY_WEIGHT         // ranks by edge/entry weight (lists, votes)
 
 // Transport identifiers (ADR-0011)
 TRANSPORT.WEB3
@@ -484,6 +573,10 @@ enum EFSErrorCode {
   PartialBatchFailure,     // some ops in a batch failed; BatchReceipt.partialFailure populated
   ListAppendOnlyViolation, // tried to remove entry from appendOnly list
   ListCapExceeded,         // maxEntries reached
+  MirrorSchemeRejected,    // URI scheme not in allowlist (ADR-0023)
+  SortKeyConventionError,  // ISortFunc key violates tie-break/padding rules → hints would be wrong
+  // Note: processItems StaleStartIndex and already-processed no-ops are handled internally by
+  // efs.sorts.process (refresh+retry / silent success), never surfaced as errors.
 }
 ```
 
@@ -526,6 +619,8 @@ export type {
   PropEntry, PropView,
   ListSpec, ListEntry,
   LensInfo,
+  SortConcept, SortProcessReceipt,
+  MirrorEntry,
   WriteReceipt, BatchReceipt,
   OperationResult,
   TimelineEvent,
@@ -540,7 +635,7 @@ export { AnchorEntrySchema, FileStatSchema, ... } from '@efs/sdk/schemas'
 **Inspiration citations:**
 - **viem** — type-safety for contract interactions; we adopt their `Hex` / `Address` branded types
 - **Prisma** — fluent typed reads with optional includes; the `efs.fs.read.json<T>()` pattern
-- **Stripe** — resource-namespaced API (`stripe.customers`, `stripe.charges`) → our `efs.fs`, `efs.graph`, `efs.lists`
+- **Stripe** — resource-namespaced API (`stripe.customers`, `stripe.charges`) → our `efs.fs`, `efs.graph`, `efs.lists`, `efs.sorts`
 - **EAS SDK** — the embedded instance (`efs.EAS`) follows the same pattern as the SDK's own `new EAS(address)` instantiation
 
 **What we don't borrow:**
@@ -573,7 +668,7 @@ All debug-client capabilities are either directly covered or covered via `efs.EA
 
 - [x] **Q1 (repo packaging) — RESOLVED (James, 2026-05-28):** Everything lives in the new `sdk/` repo; the on-chain SDK does NOT co-locate in `contracts/`. ABI types are generated from `contracts/` at build time (`wagmi generate`/`typechain`) so they stay in sync without sharing a repo.
 
-- [x] **Q2 (namespace naming) — RESOLVED toward (a), pending James's confirm:** domain-model namespaces (`efs.fs`, `efs.graph`, `efs.props`, `efs.lists`, `efs.lenses`, `efs.EAS`, `efs.raw`) vs verb-first (`efs.read/write/query/attest`). An expert SDK-design review (2026-05-28) found **(a) is the de-facto industry standard** — *resource-oriented design*, codified in Google's API Design Guide and embodied by Stripe (`stripe.customers.create`), Prisma (`prisma.user.findMany`), Twilio, Supabase, GitHub Octokit. **No widely-respected SDK uses a top-level verb-namespace tree.** The field splits between resource.action namespacing (multi-resource domains — EFS's case) and flat verb methods (single-resource domains like EAS/ethers). Verb-first also fails EFS specifically because `graph` and `lenses` are resource models, not actions, and don't reduce to a single verb. **Refinement adopted from the review:** keep (a)'s noun tree but enforce a *consistent verb vocabulary* on the leaves (`read/write/list/stat` on `fs`; `get/set/list` on `props`; `pin/unpin/add/remove` on `graph`) — this pairs resource-oriented design with Google's "standard methods" discipline, giving both a domain map and predictable operation names. **Recommendation: confirm (a) + consistent-verb refinement.**
+- [x] **Q2 (namespace naming) — RESOLVED toward (a), pending James's confirm:** domain-model namespaces (`efs.fs`, `efs.graph`, `efs.props`, `efs.lists`, `efs.sorts`, `efs.lenses`, `efs.EAS`, `efs.raw`) vs verb-first (`efs.read/write/query/attest`). An expert SDK-design review (2026-05-28) found **(a) is the de-facto industry standard** — *resource-oriented design*, codified in Google's API Design Guide and embodied by Stripe (`stripe.customers.create`), Prisma (`prisma.user.findMany`), Twilio, Supabase, GitHub Octokit. **No widely-respected SDK uses a top-level verb-namespace tree.** The field splits between resource.action namespacing (multi-resource domains — EFS's case) and flat verb methods (single-resource domains like EAS/ethers). Verb-first also fails EFS specifically because `graph` and `lenses` are resource models, not actions, and don't reduce to a single verb. **Refinement adopted from the review:** keep (a)'s noun tree but enforce a *consistent verb vocabulary* on the leaves (`read/write/list/stat` on `fs`; `get/set/list` on `props`; `pin/unpin/add/remove` on `graph`) — this pairs resource-oriented design with Google's "standard methods" discipline, giving both a domain map and predictable operation names. **Recommendation: confirm (a) + consistent-verb refinement.**
 
 - [ ] **Q3 (off-chain index in v1):** Methods that require an off-chain index (`graph.timeline`, `graph.versions.descendants`, `lenses.discover`) are on the `@efs/sdk` surface but throw `OffchainIndexRequired` by default. Should we (a) include them and throw — signals intent, lets devs wire their own index; (b) exclude them entirely from v1 — cleaner surface, but devs have no model; or (c) include them with a bundled minimal SQLite-backed local indexer — best DX, much more implementation scope? **Recommendation: (a), with a reference index implementation as a companion example project.**
 
