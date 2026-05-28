@@ -29,23 +29,37 @@ The Lists process was high-quality but expensive in the wrong currency:
 
 ## Core principle
 
-> **Human attention is spent at two points only: setting the frame (early) and gating the result (late). AI does everything in between.**
+> **Human attention is spent at the convergence points — locking requirements and the frame (early), gating the result (late). AI does everything in between.**
 
-Rounds are cheap. Frame-corrections are cheap when early and brutally expensive when late (an 18th-round frame change costs 18 rounds). So move the human frame-check to the front.
+Rounds are cheap. Frame-corrections are cheap when early and brutally expensive when late (an 18th-round frame change costs 18 rounds). So move the human convergence-checks to the front.
+
+## Requirements first — the missing early anchor (added 2026-05-28 per James)
+
+James's refinement after reading the first draft of this proposal (itself a live demo of Stage 3 working): **we should lock requirements before exploring frames.** The early Lists swirl (rounds 11–17 churning through "lists are folders" → "free-floating" → "TAG-with-weight" → "constraint callbacks") happened because **there was no locked requirements list to falsify frames against.**
+
+Key reframings:
+
+- **Requirements are the falsification target.** A frame can't be ruled out until you know what it must satisfy. Without locked requirements, every frame looks plausible and exploration swirls. ADR-0044 converged the moment requirements were locked: the inverted-framing pass returned a definitive RED ("existing mechanisms can't satisfy these 4 MUSTs → new schema needed"). Those requirements crystallized ~round 18; had they been locked ~round 2, rounds 11–17 of frame churn would have collapsed.
+- **You derive requirements from use cases, not cold.** James: "gathering use cases helped with that." Use-case gathering was NOT the swirl — it was the productive path to requirements. The swirl was exploring *solutions* before locking the *target*.
+- **So the convergent step (requirements) follows the divergent step (use cases) and precedes frame exploration.** Use cases (diverge) → requirements MUST/NICE/DEFERRED (converge, human-locked) → frames (evaluated against locked requirements).
+- **The inverted-framing pass IS the requirements check.** "Do existing mechanisms satisfy the locked MUSTs?" only has meaning once the MUSTs exist. This is why inverted-framing must come AFTER requirements-lock, not before.
 
 ## Proposed lifecycle
 
 | Stage | Who | What | Cost |
 |---|---|---|---|
 | **0. Trigger** | brainstorm / James / agent | A need surfaces (gap, use case, requirement). Often from `Brainstorms/`. | — |
-| **1. Inverted-framing pass** | AI (1 subagent) | FIRST question is always *"is this needed? for each claimed use case, which existing mechanism already handles it?"* Returns "not needed (why)" or "needed — here are the specific gaps." | ~1 subagent |
-| **2. Rough first flesh-out** | AI (1-2 rounds MAX) | Draft the *simplest* version addressing the gaps. **State the frame explicitly**: "the mental model is X." Don't grind — get to human-readable fast. | 1-2 rounds |
-| **3. HUMAN FRAME REVIEW** ⭐ | **James** | Read the rough draft + stated frame. Answer "what's the simplest mental model?" Correct the frame, name simplifications, flag missing use cases / implicit invariants. **This is the leverage point.** | ~1 read |
-| **4. Flesh-out + adversarial** | AI (parallel subagents) | Within the human-blessed frame: design the mechanism, **pair every "verify X works" with a "find where X breaks"** agent, surface implicit invariants, preserve rejected alternatives in a notes file. | several subagents |
-| **5. External review** | external AI (Gemini/Codex/fresh Claude) | **Etched-tier only.** Open-ended "what are we missing." Skip or lighten for Durable/Ephemeral work. | hours of paste-overhead |
-| **6. HUMAN GATE REVIEW** ⭐ | **James** | Read the fleshed, reviewed design. Promote (trust-token ceremony) or send back. | ~1 read |
+| **1. Use cases (diverge)** | AI (subagents) | Gather broadly — the `bs-divergent-usecases` pattern. Establishes the space the thing must serve. (May already exist from prior brainstorming.) | brainstorm batch |
+| **2. Requirements distillation (converge)** | AI (1 subagent) | Distill **MUST / NICE / DEFERRED** from the use cases. This is the convergent counterpart to Stage 1's divergence. | ~1 subagent |
+| **3. HUMAN: lock requirements + name the frame** ⭐ | **James** | Read use cases + draft requirements. **Lock the MUST/NICE/DEFERRED list** (the falsification target) and answer "what's the simplest mental model?" The single highest-leverage touch — everything downstream optimizes against this. | ~1 read |
+| **4. Inverted-framing pass** | AI (1 subagent) | *"Do existing mechanisms satisfy each locked MUST?"* RED/GREEN per requirement. Returns "all GREEN → no new mechanism needed" or "these MUSTs are RED → here are the real gaps." The ADR-0043-saver. | ~1 subagent |
+| **5. Rough flesh-out** | AI (1-2 rounds MAX) | Draft the *simplest* design covering only the RED gaps, within the named frame. Get to human-readable fast; don't grind. | 1-2 rounds |
+| **6. HUMAN: simplification check** (optional; collapses into Stage 3 for small designs) | **James** | Skim the rough draft for simplifications before deep flesh-out. Large/Etched designs warrant it; small ones skip it. | ~1 quick read |
+| **7. Flesh-out + adversarial** | AI (parallel subagents) | Within the frame: design fully, **pair every "verify X works" with "find where X breaks,"** surface implicit invariants, preserve rejected alternatives in a notes file. | several subagents |
+| **8. External review** | external AI (Gemini/Codex/fresh Claude) | **Etched-tier only.** Open-ended "what are we missing." Skip or lighten for Durable/Ephemeral. | hours of paste-overhead |
+| **9. HUMAN: gate** ⭐ | **James** | Read the fleshed, reviewed design. Promote (trust-token ceremony) or send back. | ~1 read |
 
-Human touches: **Stage 3 + Stage 6.** Two reads. Not 18 rounds of churn.
+Human touches at the **convergence points**: requirements+frame lock (Stage 3), an optional simplification check (Stage 6, collapsible into 3 for small designs), and the final gate (Stage 9). **Two to three reads — not 18 rounds of churn.** The non-negotiable one is Stage 3: lock the target before anyone explores solutions.
 
 ## The reusable AI techniques (mapped to stages)
 
@@ -86,18 +100,21 @@ From the lessons file's cost-asymmetry point:
    - Options: (a) new Onboarding doc, (b) design-system section, (c) stays a brainstorm reference for now.
    - PM read: (a) Onboarding — it's procedural how-to, and editing the perpetual design-system is a Tier-1 action best avoided unless necessary.
    - Why controversial: some would argue the design lifecycle belongs IN the design-system for single-source-of-truth.
-2. **Is Stage 3 (human frame review) mandatory or optional?**
+2. **Is Stage 3 (lock requirements + frame) mandatory or optional?**
    - Options: mandatory for all designs / mandatory for Etched-tier only / advisory.
-   - PM read: mandatory for Etched-tier, strongly-encouraged otherwise. The whole proposal hinges on it.
-   - Why controversial: it adds a required human touchpoint, which is exactly the bottleneck we're trying to protect — but it SAVES net human time by preventing late frame-corrections.
-3. **How hard is the 1-2 round cap before frame review?**
+   - PM read: mandatory for Etched-tier, strongly-encouraged otherwise. The whole proposal hinges on it — it's the non-negotiable touch.
+   - Why controversial: it adds a required human touchpoint, which is exactly the bottleneck we're trying to protect — but it SAVES net human time by preventing late frame-corrections + requirement swirl.
+3. **How hard is the 1-2 round cap on Stage 5 (rough flesh-out)?**
    - A hard cap risks under-fleshed drafts that waste the human read; too soft and we're back to 18 rounds.
+4. **Who locks requirements when James isn't available — can the PM hold a provisional lock?**
+   - The requirements lock is a human touch. If James is heads-down, does design work block, or can the PM hold a provisional MUST/NICE/DEFERRED list that James ratifies later? Risk: provisional locks become de-facto locks without review.
 
 ## Unknown questions for future brainstorms
 
-1. **What does a good Stage-2 rough draft look like?** A template / example would help agents hit "human-readable fast" without over- or under-fleshing. Brainstorm shape: `bs-design-draft-template-v1` producing an annotated example.
-2. **Can the inverted-framing pass (Stage 1) be a standard reusable subagent prompt?** Like the brainstorm prompt patterns — a canonical "is-this-needed" prompt. Would standardize the ADR-0043-saver.
-3. **How do we measure whether this process is working?** Metric ideas: rounds-before-human-review, frame-changes-after-human-review (should trend to ~0 if frame review works), human-read-count per design.
+1. **What does a good Stage-5 rough draft look like?** A template / example would help agents hit "human-readable fast" without over- or under-fleshing. Brainstorm shape: `bs-design-draft-template-v1` producing an annotated example.
+2. **Can the inverted-framing pass (Stage 4) be a standard reusable subagent prompt?** Like the brainstorm prompt patterns — a canonical "do existing mechanisms satisfy the locked MUSTs?" prompt. Would standardize the ADR-0043-saver.
+3. **What does a good requirements-distillation (Stage 2) prompt look like?** Turning a pile of use cases into a crisp MUST/NICE/DEFERRED list is its own skill. A canonical prompt would make the convergent step repeatable.
+4. **How do we measure whether this process is working?** Metric ideas: rounds-before-requirements-lock, frame-changes-after-Stage-3 (should trend to ~0), human-read-count per design.
 
 ## Blockers / concerns
 
