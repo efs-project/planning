@@ -842,9 +842,9 @@ All debug-client capabilities are directly covered; the few that touch raw attes
 
 Everything above is the TypeScript SDK. This section specifies the **separate Solidity deliverable** for smart-contract developers whose own contracts write to EFS (e.g. a DAO archiving proposals, an NFT contract pinning metadata, a registry recording provenance).
 
-### Form: library + inheritable base (never a deployed singleton)
+### Form: inheritable base (primary) + library (escape hatch); never a deployed singleton
 
-Two ways to consume it, both executing in the **caller's** context so the caller's contract is the EAS attester (the load-bearing constraint from "Two deliverables" above):
+Two ways to consume it, both executing in the **caller's** context so the caller's contract is the EAS attester (the load-bearing constraint from "Two deliverables" above). **The documented happy path is the inheritable `EFSWriter` base** — a contract author is already writing a new contract and usually inheriting (`ERC721`, `Governor`, `Ownable`), so a base that takes `IEAS` once in the constructor removes the boilerplate of threading `eas` through every call (this is the OpenZeppelin mental model — you inherit `ERC20`, you don't `using` it). The **`using EFS for IEAS` library form is the escape hatch** for contracts that can't add a base (proxy/diamond patterns, inheritance conflicts) or want to pass a per-call EAS instance (multi-instance/testing).
 
 ```solidity
 // (1) Inheritable base — holds the EAS address + schema constants, exposes _efs* helpers.
@@ -873,7 +873,7 @@ contract MyApp {
 }
 ```
 
-A Solidity `library` with `internal` functions is **inlined** into the consuming contract (no separate deployment, no delegatecall hop); the inheritable base compiles in the same way. Either path keeps `msg.sender == address(consumingContract)` when EAS is called. A *separately deployed* helper called via a normal `CALL` would make the **helper** the attester and is therefore never offered.
+**Why this preserves the attester (the precise condition).** A Solidity `library` with `internal` functions is **inlined** into the consuming contract's bytecode; the inheritable base compiles in the same way. The EAS calls therefore originate from the consuming contract, so `msg.sender == address(consumingContract)` at EAS. The one pattern that breaks this is a **separately deployed helper invoked via a normal `CALL`** — then the helper is `msg.sender`/attester (the off-chain gateway defect, on-chain). Note that even a *deployed* library reached via `DELEGATECALL` (what the compiler emits if any library function is `public`/`external`) would still preserve `msg.sender`, since delegatecall runs in the caller's context — so the rule is "no plain `CALL` to a separate contract in the write path," not "no delegatecall." We keep all write helpers `internal` regardless, so they inline and need no linking/deployment.
 
 ### Write surface (the value-add: one call ⟶ the correct attestation sequence)
 
@@ -885,8 +885,15 @@ library EFS {
     function pinFile(IEAS eas, string memory path, bytes memory content, string memory contentType)
         internal returns (bytes32 dataUID, bytes32 pinUID);
 
+    // Batch convenience: pin many files in one tx (e.g. an NFT contract minting a metadata set).
+    // Still one transaction; loops internally. Lengths must match.
+    function pinFiles(IEAS eas, string[] memory paths, bytes[] memory contents, string memory contentType)
+        internal returns (bytes32[] memory dataUIDs, bytes32[] memory pinUIDs);
+
     // Lower-level placement: PIN(refUID = dataUID, definition = fileAnchor). Singleton; supersedes.
     function place(IEAS eas, bytes32 fileAnchor, bytes32 dataUID) internal returns (bytes32 pinUID);
+    // Clear a placement (revoke the active PIN at a file-anchor). Mirrors TS efs.graph.unplace.
+    function unplace(IEAS eas, bytes32 fileAnchor) internal;
 
     // Cardinality-N labelled/weighted edge (ADR-0041). weight is signed int256 (negatives valid).
     function tag(IEAS eas, bytes32 target, bytes32 definition, int256 weight) internal returns (bytes32 tagUID);
@@ -902,7 +909,18 @@ library EFS {
     function createList(IEAS eas, ListConfig memory cfg) internal returns (bytes32 listUID);
     function addEntry(IEAS eas, bytes32 listUID, bytes32 target, int256 weight) internal returns (bytes32 entryUID);
 }
+
+// LIST configuration (ADR-0044). Mirrors the TS ListSpec; the resolver rejects invalid combos
+// (e.g. appendOnly && allowsDuplicates && maxEntries == 0) — see the TS lists section.
+struct ListConfig {
+    bool appendOnly;
+    bool allowsDuplicates;
+    uint256 maxEntries;     // 0 = unbounded
+    uint8 targetMode;       // UID | ADDR (ADDR encodes the target into EAS recipient)
+}
 ```
+
+**Intra-transaction ordering (an implementer must honor this).** EAS validates that a referenced UID already exists when an attestation is created, so the composition functions must emit attestations in **dependency order within the one tx**: DATA before the placement PIN that sets `refUID = dataUID`; the key ANCHOR before the PROPERTY before the binding PIN; ancestor ANCHORs before the leaf. `pinFile`/`setProperty` encode this ordering internally — it is not the caller's concern, but it is a correctness constraint on the library, not a free choice.
 
 ### Read surface — O(1) only
 
@@ -912,9 +930,32 @@ library EFS {
 
     // The active PIN for a definition, by attester. O(1).
     function activePin(IEAS eas, bytes32 definition, address attester) internal view returns (bytes32);
+
+    // Read-back sugar: resolve a path to its file-anchor and return the DATA UID one attester
+    // placed there. Lets a contract verify/read what it just wrote in a later call. O(1).
+    function fileAt(IEAS eas, string memory path, address attester) internal view returns (bytes32 dataUID);
 ```
 
 **Enumeration (children, tags-on-a-target, sorted reads) is deliberately absent on-chain** — it is unbounded-gas and impractical inside a transaction. A contract that needs to *react to* graph contents reads a specific O(1) value (a PROPERTY or a PIN) it was given the key for; broad traversal belongs to the off-chain SDK. Lenses are likewise an off-chain read-time concept: on-chain reads name an explicit `attester` rather than walking a precedence stack.
+
+### Events & custom errors
+
+EAS emits its own `Attested` events, but those are keyed on attestation UIDs, not the consumer's domain. A DAO's subgraph or a registry's indexer wants to react to *domain* events (a proposal archived at a path), so the `EFSWriter` base **emits EFS-level events keyed on the human path**, and uses Solidity **custom errors** (cheaper than `require` strings; the modern idiom):
+
+```solidity
+abstract contract EFSWriter {
+    event EFSFilePinned(string indexed path, bytes32 indexed dataUID, bytes32 pinUID);
+    event EFSPropertySet(bytes32 indexed keyAnchor, bytes32 propUID);
+    event EFSTagged(bytes32 indexed target, bytes32 indexed definition, int256 weight);
+
+    error EFSPathInvalid(string path);             // fails ADR-0025 name / ADR-0021 depth
+    error EFSMirrorSchemeRejected(string scheme);  // not in the ADR-0023 allowlist
+    error EFSListConstraintViolation();            // invalid ListConfig combo
+    // ... mirrors the relevant subset of the TS EFSErrorCode enum
+}
+```
+
+The `using EFS for IEAS` library form cannot emit events on the consumer's behalf (events must be declared in the emitting contract), so event emission is a property of the **base**; library users who want domain events declare and emit their own. This is one more reason the base is the documented happy path.
 
 ### Constants & escape hatch
 
@@ -972,7 +1013,7 @@ The implementation thread (Kanban Backlog: "Implement OnionDAO subset of sdk-arc
 1. James frame-review of this doc (this card's purpose)
 2. Lists → Sepolia deploy (schema freeze: 9 schemas)
 
-Q1 (repo layout) resolved 2026-05-28: single `sdk/` repo.
+Q1 (repo layout): the TS SDK lives in a new `sdk/` repo (settled); the **Solidity library's home is reopened** by the 2026-05-28 reframe (`contracts/` vs `sdk/contracts/` — see Open Questions Q1). The implementation thread should not assume a single repo until Q1 is decided.
 
 ---
 
@@ -1000,7 +1041,7 @@ Second: the process says "stop at review" but doesn't say what "review-ready" lo
 
 ### Revision log
 
-**2026-05-28 — expert subagent review pass (James-requested, pre-frame-review).** Two parallel expert reviewers (SDK API/DX, and contract-fidelity against the `custom-lists` specs/ADRs) audited the draft. Both validated the *frame* (namespaces, layering, batch-as-value-add, lens model, PIN/TAG/PROPERTY semantics, sort-overlay mechanics — the last verified faithful in detail). Findings folded in:
+**2026-05-28 (entry 1 of 5) — expert subagent review pass (James-requested, pre-frame-review).** Two parallel expert reviewers (SDK API/DX, and contract-fidelity against the `custom-lists` specs/ADRs) audited the draft. Both validated the *frame* (namespaces, layering, batch-as-value-add, lens model, PIN/TAG/PROPERTY semantics, sort-overlay mechanics — the last verified faithful in detail). Findings folded in:
 - **Verb contract codified.** The draft *claimed* a consistent verb vocabulary but didn't deliver (`get` meant three things; enumeration used five verbs). Added the eight-verb "Naming conventions" contract and made every leaf conform.
 - **SORT_INFO flag corrected + `sourceType` exposed.** Fidelity check found specs 02 + 07 both carry the 3-field version (only spec 06 is stale), and that `targetSchema` is inert without `sourceType=1`. `sorts.declare` now exposes `sourceType`; the freeze flag points contracts at the 3-field string.
 - **Resumable cursors.** Added `Page<T>` + `.page()` companion on every `AsyncIterable` read, and stated the eager-array-vs-iterable rule explicitly.
@@ -1011,14 +1052,14 @@ Second: the process says "stop at review" but doesn't say what "review-ready" lo
 
 These are all within-frame refinements — none changed the architecture. The doc remains at `#status/review` for James's promote/revise call.
 
-**2026-05-28 — Q1–Q5 resolved (James), folded in one pass.** Q1 (single `sdk/` repo) and Q2 (resource-oriented namespaces) confirmed as already designed. Three design changes:
-- **Q3:** off-chain-index methods stay and throw `OffchainIndexRequired`; added a runnable reference index example (`examples/reference-index/`) so the throw points at real code.
+**2026-05-28 (entry 2 of 5) — Q1–Q5 resolved (James), folded in one pass.** Q1 (single `sdk/` repo) and Q2 (resource-oriented namespaces) confirmed as already designed. Three design changes (*Q1, Q3 and the Q5 mechanism order below were later superseded — see entries 3 and 4*):
+- **Q3:** off-chain-index methods stay and throw `OffchainIndexRequired`; added a runnable reference index example (`examples/reference-index/`) so the throw points at real code. *(Superseded by entry 4: renamed `NotImplemented`; example removed; SDK does not bundle indexing.)*
 - **Q4:** dropped "explicit lens always required." The lens now **defaults to the connected wallet's own address** (your own content is a safe default; the deployer default was the original bug). Explicit lens required only when no wallet is connected (`LensRequired`). New four-step resolution order documented in Instantiation.
-- **Q5:** removed the placeholder `gateway` flag. `efs.batch()` now owns single-signature delivery by capability detection — EIP-5792 → ERC-4337 → SDK-owned upgradeable `EFSUploadGateway` (explicitly not EFS-core) → sequential fallback — reporting `signatureCount`/`mechanism`.
+- **Q5:** removed the placeholder `gateway` flag. `efs.batch()` now owns single-signature delivery by capability detection — EIP-5792 → ERC-4337 → SDK-owned upgradeable `EFSUploadGateway` (explicitly not EFS-core) → sequential fallback — reporting `signatureCount`/`mechanism`. *(Superseded by entry 3: the gateway is not single-signature and was demoted to opt-in; sequential is the automatic fallback.)*
 
 All five open questions are now RESOLVED; the doc is held at `#status/review` per design mode.
 
-**2026-05-28 — second expert review (3 agents: wallet/EIP-5792, EAS-attribution fidelity, security/authz) caught a Q5 correctness defect; corrected.** The first-pass Q5 design listed an `EFSUploadGateway` aggregator as automatic mechanism #3. The fidelity reviewer flagged this as **flat wrong**: when a contract calls EAS, EAS records the *contract* as `msg.sender`/attester — so a plain aggregator attributes all content to the gateway address, collapsing every user into one cardinality-1 PIN slot and breaking lens resolution. EAS's `multiAttestByDelegation` restores the user as attester but costs **one signature per attestation** — so it is not a single-signature mechanism at all. Corrections folded in:
+**2026-05-28 (entry 3 of 5) — second expert review (3 agents: wallet/EIP-5792, EAS-attribution fidelity, security/authz) caught a Q5 correctness defect; corrected.** The first-pass Q5 design listed an `EFSUploadGateway` aggregator as automatic mechanism #3. The fidelity reviewer flagged this as **flat wrong**: when a contract calls EAS, EAS records the *contract* as `msg.sender`/attester — so a plain aggregator attributes all content to the gateway address, collapsing every user into one cardinality-1 PIN slot and breaking lens resolution. EAS's `multiAttestByDelegation` restores the user as attester but costs **one signature per attestation** — so it is not a single-signature mechanism at all. Corrections folded in:
 - **Only EIP-5792 and ERC-4337 deliver one approval AND correct attribution.** Stated the "attester is load-bearing" hard constraint explicitly in the Q5 note.
 - **Demoted the gateway to opt-in (`via: 'gateway'`), never automatic;** it relays by delegation (user stays attester) and is explicitly not single-signature. **Promoted transparent sequential signing to the automatic EOA fallback** (security: don't put an upgradeable SDK-owned contract in the signing path silently).
 - **Capability detection named:** `wallet_getCapabilities` for 5792; smart-account detection for 4337.
@@ -1028,7 +1069,7 @@ All five open questions are now RESOLVED; the doc is held at `#status/review` pe
 
 This is the only architecture-touching change since the frame review and it is a *correctness* fix, not a scope change. Remaining lower-severity review notes (read-path content-hash verification on mirrors, mutable ENS lens-membership, the connect-time lens self-default surfacing in `efs.batch.preview` rather than silently) are tracked as implementation-notes refinements and don't block the frame decision. Doc remains at `#status/review` for James's promote/revise call.
 
-**2026-05-28 — on-chain/off-chain reframe (James clarification).** James clarified two framing errors carried since the PM brief: (1) the **on-chain SDK is a Solidity deliverable** — a *library* (+ inheritable base) that smart-contract devs use *from their own contracts*, not a TypeScript package; and (2) **"off-chain SDK" just means "the TypeScript SDK"** — it has nothing to do with The Graph / a packaged indexer. Changes folded in:
+**2026-05-28 (entry 4 of 5) — on-chain/off-chain reframe (James clarification).** James clarified two framing errors carried since the PM brief: (1) the **on-chain SDK is a Solidity deliverable** — a *library* (+ inheritable base) that smart-contract devs use *from their own contracts*, not a TypeScript package; and (2) **"off-chain SDK" just means "the TypeScript SDK"** — it has nothing to do with The Graph / a packaged indexer. Changes folded in:
 - **New "Two deliverables" framing** at the top of the Proposal, plus an **On-chain SDK (Solidity)** section specifying the library/base API (`pinFile`, `tag`, `setProperty`, `place`, `createList`/`addEntry`, O(1) reads, constants, escape hatch).
 - **Why a library, not a deployed helper:** the same attester-fidelity rule from the Q5 review applies on-chain — a separately deployed helper would be `msg.sender` and capture every consumer's attestations. A library/base executes in the consuming contract's context, so the consuming contract stays the attester. James confirmed the library form.
 - **No batching on-chain:** a library call runs inside one transaction already; the Q5 single-signature machinery is off-chain-only. Stated explicitly.
@@ -1037,3 +1078,9 @@ This is the only architecture-touching change since the frame review and it is a
 - **Q1 reopened:** the single-repo decision assumed both SDKs were TS. The Solidity library's home (`contracts/` vs `sdk/contracts/`) is now a live fork — PM rec `contracts/`.
 
 This reopened one question (Q1) and did not change Q2–Q5. Doc held at `#status/review`.
+
+**2026-05-28 (entry 5 of 5) — expert review + brainstorm on the reframe (2 agents: Solidity/EAS fidelity, SDK coherence + on-chain ergonomics).** The fidelity agent confirmed the attester thesis is **correct** (an `internal` library inlines into the consuming contract; even a delegatecall-linked library preserves `msg.sender` — only a plain `CALL` to a separate deployed helper breaks it) and the Solidity signatures are sound. Required fixes (folded in):
+- **Intra-tx refUID ordering** made explicit (DATA before placement PIN; key-ANCHOR before PROPERTY before binding PIN; ancestors before leaf) — a correctness constraint on the library.
+- **`ListConfig` struct defined** (was referenced but undefined).
+- **Attester claim sharpened** to "no plain `CALL` to a separate contract," not "no delegatecall."
+The coherence agent caught a real straggler — the Implementation-notes section still asserted "Q1 resolved: single `sdk/` repo," contradicting the reopened Q1 (**fixed**) — and flagged the same-date revision-log entries as ambiguous in ordering (**fixed**: entries now numbered + superseded bullets tagged). Ergonomics adds from the brainstorm: **base-first** documented as the happy path (library = escape hatch); **EFS-level events + custom errors** on the `EFSWriter` base (the biggest gap for the DAO/registry audience — EAS events are UID-keyed, not domain-keyed); `unplace`, `fileAt` read-back, and a `pinFiles` batch convenience added. No architecture change; all within-frame. Doc held at `#status/review`.
