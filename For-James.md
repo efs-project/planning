@@ -4,11 +4,14 @@
 
 ## ⚡ DECIDE NOW (each is a fork — just pick a letter)
 
-*(empty — nothing to decide right now. SDK design Q1–Q5 all resolved; ball is with the SDK agent for a revise pass, then it comes back here for final promote.)*
+**SDK architecture — PROMOTE/REVISE** → [[Designs/sdk-architecture]] is promote-ready at `#status/review`. Q1–Q5 all resolved and folded in (Q3 include-but-throw + reference index example; Q4 lens defaults to connected wallet; Q5 batch() owns single-signature delivery via EIP-5792→4337→SDK-owned gateway→sequential). Also passed an expert subagent review (SDK-DX + contract-fidelity) — frame validated, within-frame refinements folded (verb contract codified, cursors, decode bridge, lists fidelity). See the Revision log at the doc's end. Fork:
+- **(a) Promote to accepted** — assign a number; OnionDAO-subset implementation thread can start (gated on Lists→Sepolia for the schema freeze).
+- **(b) Revise** — name what's wrong; I'll fix and re-surface.
+
+PM rec: **promote**.
 
 ## 🕐 WHEN YOU HAVE TIME (not blocking OnionDAO)
 
-- **Hand the SDK answers to the SDK agent.** All of Q1–Q5 are resolved (see [[Decisions]] 2026-05-28). In the SDK agent's own thread, tell it: "fold the resolved Q3/Q4/Q5 from the vault — Q3 include-but-throw, Q4 lens-defaults-to-connected-wallet, Q5 batch() targets single-signature writes (designer picks the mechanism; gateway-if-needed is SDK-owned) — then re-surface for promote." (Per the new coordination model: design specifics go James↔design-agent directly; PM keeps state.)
 - **Start the OnionDAO onboarding + flyers discussion** — you said you'll fork a chain for this; PM will keep reminding you each session until you do (you asked not to let it slip).
 - Frame-review the proposed design process → [[Brainstorms/2026-05-28-pm-design-process-synthesis]] (then I formalize it)
 - Promote [[brainstorm-system]] when you're happy with it
