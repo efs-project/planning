@@ -8,9 +8,14 @@
 - **(a) Promote to accepted** — implementation thread can start (OnionDAO subset first)
 - **(b) Revise** — name what's wrong; I'll fix and re-surface
 
-Q1 (repo layout) and Q2 (namespace names) are now **resolved** — you set Q1 = single `sdk/` repo; Q2 settled toward (a) domain-model namespaces after an expert SDK-design review found that's the de-facto industry standard (resource-oriented design — Stripe/Prisma/Twilio; no respected SDK uses verb-namespace trees). Both folded into the doc. So this is now a clean **promote / revise** call.
+Q1 (repo layout) and Q2 (namespace names) are now **resolved** — you set Q1 = single `sdk/` repo; Q2 settled toward (a) domain-model namespaces after an expert SDK-design review found that's the de-facto industry standard (resource-oriented design — Stripe/Prisma/Twilio; no respected SDK uses verb-namespace trees). Both folded into the doc.
 
-PM rec: **promote**.
+**Three open product decisions baked into the design — promoting accepts the designer's recommended default on each (you can override any):**
+- **Q3 — off-chain-index methods (timeline, version-descendants, lens-discover):** *rec (a)* include them but throw `OffchainIndexRequired` until an index exists (+ a reference index example). Alt: exclude from v1, or bundle a local SQLite indexer (more scope).
+- **Q4 — lenses must be declared explicitly** (no silent deployer default; more friction, prevents the silent-default prod bugs the brainstorm found). *Designer leans keep-it-strict*; alt: allow empty + loud warn on first read.
+- **Q5 — reserve `batch({ gateway: true })`** for the not-yet-built EFSUploadGateway now, or add later? *rec: reserve it now.*
+
+PM rec: **promote** with the three defaults above (Q3a / Q4 strict / Q5 reserve), unless any rubs you wrong.
 
 ## 🕐 WHEN YOU HAVE TIME (not blocking OnionDAO)
 

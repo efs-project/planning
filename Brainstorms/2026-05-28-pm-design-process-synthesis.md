@@ -94,6 +94,24 @@ From the lessons file's cost-asymmetry point:
 - **`Designs/` lifecycle (design-system) is unchanged** — this proposal is about *how a design gets fleshed out before promotion*, not the promotion ceremony itself. Stage 6 = the existing human-gated promotion.
 - **This proposal itself wants to land as either** a new `Onboarding/design-process.md` (procedural: "how YOU run a design") **or** a section in the design-system meta-design. PM leans Onboarding/ — design-system is the perpetual canonical doc and shouldn't bloat; the process is procedural how-to. James decides.
 
+## Field-test feedback (first live use: SDK design, 2026-05-28)
+
+The `sdk-architecture` design was the first thread run under this process. It reached `#status/review` in **one round** — no swirl. The designer's reported feedback:
+
+**Validated:**
+- Frame-first order (corpus → requirements → inverted-framing → THEN design) prevented jumping to API signatures before understanding needs.
+- The anchor requirement (debug-client parity) gave a concrete floor instead of speculation.
+- The inverted-framing pass produced the design's key insight: make `efs.EAS` a first-class top-level surface (devs drop to raw EAS on day one — embrace it, don't fight it).
+- Requirements-first prevented a false-promise method (`graph.versions.descendants` needs an off-chain index that doesn't exist → became a surface-that-throws with a clear upgrade path, not a buried lie).
+- Token spend felt proportional; the corpus read was the expensive part but load-bearing.
+
+**Two improvements to adopt (from the designer):**
+
+1. **Tag corpus files by priority in design prompts.** Mark each `[CRITICAL]` / `[CONTEXT]` / `[BACKGROUND]` so the agent prioritizes (and can skip background under time pressure). In this run, `bs-third-party-dev-ux-v1` was 10× more valuable than the OS-SDK brainstorm — but the prompt didn't say so.
+2. **Define "review-ready" in one line.** Adopt: *requirements locked + inverted-framing pass done + API/approach sketched + open questions named + the doc is readable by a non-agent human in under 20 minutes.* Gives future threads a clear stop signal (when to surface vs. keep refining).
+
+Both fold into the formalized `Onboarding/design-process.md` when James blesses it.
+
 ## Controversial human design choices
 
 1. **Where does this live — `Onboarding/design-process.md` or a section in `0001-design-system.md`?**
