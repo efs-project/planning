@@ -6,6 +6,10 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ---
 
+## 2026-05-28 (sdk-designer)
+
+- @sdk-designer: sdk-architecture — design complete, at #status/review. Read corpus (10+ files), distilled MUST/NICE/DEFERRED requirements, ran inverted-framing pass (what does SDK add over raw EAS?), sketched full API surface: `efs.fs` / `efs.graph` / `efs.props` / `efs.lists` / `efs.lenses` / `efs.batch()` / `efs.EAS` / `efs.raw` / constants. 5 open questions surfaced (repo layout, namespace names, off-chain index in v1, explicit-lens requirement, EFSUploadGateway reservation). For-James updated with promote/revise fork. Process feedback section included per PM request.
+
 ## 2026-05-28
 
 - @pm: SDK design thread (@sdk-designer) spawned by @james for the real core SDK (on-chain + off-chain; OS SDK deferred) → planning/Designs/sdk-architecture.md. DESIGN ONLY (no code), frame-first process, stops at #status/review. This supersedes the earlier "bare-bones throwaway SDK" framing — OnionDAO now ships a SUBSET of the real design, not discarded work. Prompt included: EFS.EAS namespace, graph APIs (Tags/Pins/Lists), pin(file)-style abstraction + raw escape hatch, 8-prompt-write-UX problem, read/query surface, lenses, repo-packaging open question, debug-client-parity acid test, reference well-designed SDKs, + PM-requested process feedback section (first live test of the frame-first process). Kanban reconciled: SDK design → In Flight @sdk-designer; bare-bones cards folded into "Implement OnionDAO subset of [[sdk-architecture]]". PM watching for design to hit #status/review.

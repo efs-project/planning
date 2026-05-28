@@ -31,8 +31,6 @@ kanban-plugin: board
 
 - [ ] **EFS Lists — design complete, dev starting** (branch `custom-lists`) — keystone for OnionDAO. ADR-0044 (Proposed) + design closed after 18 rounds + 3-reviewer sweep (all GO). Adds LIST + LIST_ENTRY schemas (7→9 total per ADR-0044) + `ListResolver`/`ListEntryResolver`/`ListReader`. PM reviewed 2026-05-26: **GO** (coherence + brainstorm cross-ref; design independently arrived at the TAG-overload fix the brainstorms found). Dev path: contracts → specs → SDK → frontend. CREATE2 deterministic deploy + schema-UID CI pin check = launch prereq (ADR §8). Schema freeze + Sepolia deploy gated on this. **T-4 days to OnionDAO — implementation just starting; timeline tight.** #repo/contracts
   — @james + dev, branch custom-lists, claimed 2026-05-21, expires 2026-05-29 (PM nudge if no merge by then)
-- [ ] **Design core EFS SDK (on-chain + off-chain)** → [[sdk-architecture]] — the real design (2 of 3 SDKs; OS SDK deferred). DESIGN ONLY, no code; frame-first process; stops at #status/review for @james's frame review. OnionDAO ships a subset (impl card in Backlog). #repo/sdk #kind/design
-  — @sdk-designer, design in planning/Designs/, claimed 2026-05-28, expires 2026-05-31
 - [ ] Draft the PM SOUL file at Agents/pm.md #repo/planning #kind/design
   — @pm, direct push to planning, claimed 2026-05-21, expires 2026-05-29 (low priority — not blocking OnionDAO)
 
@@ -44,6 +42,8 @@ kanban-plugin: board
 
 ## Under Review
 
+- [ ] **[[sdk-architecture]] — SDK design at #status/review** — frame review by @james (promote/revise fork in For-James ⚡). API surface: `efs.fs/graph/props/lists/lenses/batch/EAS/raw` + constants. 5 open questions. #repo/sdk #kind/design
+  — @sdk-designer → awaiting @james review, no expiry (Under Review cards don't expire per [[conventions]])
 
 
 ## Done

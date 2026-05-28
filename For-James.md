@@ -4,7 +4,15 @@
 
 ## ⚡ DECIDE NOW (each is a fork — just pick a letter)
 
-*(empty — nothing is blocking you right now. 🎉)*
+**SDK architecture frame review** → [[Designs/sdk-architecture]] is at `#status/review`. Read requirements + inverted-framing + API sketch (under 20 min). Fork:
+- **(a) Promote to accepted** — implementation thread can start (OnionDAO subset first)
+- **(b) Revise** — name what's wrong; I'll fix and re-surface
+
+Two embedded forks that need your read:
+- **Q1 (repo layout):** (a) `sdk/` monorepo (recommended) vs (b) on-chain SDK lives in `contracts/`
+- **Q2 (namespace names):** (a) domain-model (`efs.fs`, `efs.graph`, `efs.props`) vs (b) verb-first (`efs.read`, `efs.write`, `efs.query`)
+
+PM rec: promote with Q1=(a), Q2=(a).
 
 ## 🕐 WHEN YOU HAVE TIME (not blocking OnionDAO)
 
