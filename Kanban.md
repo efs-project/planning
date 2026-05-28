@@ -31,6 +31,8 @@ kanban-plugin: board
 
 - [ ] **EFS Lists — design complete, dev starting** (branch `custom-lists`) — keystone for OnionDAO. ADR-0044 (Proposed) + design closed after 18 rounds + 3-reviewer sweep (all GO). Adds LIST + LIST_ENTRY schemas (7→9 total per ADR-0044) + `ListResolver`/`ListEntryResolver`/`ListReader`. PM reviewed 2026-05-26: **GO** (coherence + brainstorm cross-ref; design independently arrived at the TAG-overload fix the brainstorms found). Dev path: contracts → specs → SDK → frontend. CREATE2 deterministic deploy + schema-UID CI pin check = launch prereq (ADR §8). Schema freeze + Sepolia deploy gated on this. **T-4 days to OnionDAO — implementation just starting; timeline tight.** #repo/contracts
   — @james + dev, branch custom-lists, claimed 2026-05-21, expires 2026-05-29 (PM nudge if no merge by then)
+- [ ] **Core EFS SDK design** → [[sdk-architecture]] at #status/review. Q1/Q2/Q3/Q4 resolved by @james; **pending ONE revise pass to fold Q3/Q4/Q5** (Q4 = lens defaults to connected wallet; Q5 still with James) → then final promote. DESIGN ONLY. #repo/sdk #kind/design
+  — @sdk-designer, design in planning/Designs/, claimed 2026-05-28, expires 2026-05-31
 - [ ] Draft the PM SOUL file at Agents/pm.md #repo/planning #kind/design
   — @pm, direct push to planning, claimed 2026-05-21, expires 2026-05-29 (low priority — not blocking OnionDAO)
 

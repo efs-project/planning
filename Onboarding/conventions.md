@@ -31,7 +31,12 @@ If a rebase gets gnarly (>5 minutes of resolving), back off — surface in chat.
 
 ## Commit-message style
 
-`<area>: <imperative summary>`. Areas seen in the wild: `design`, `kanban`, `docs`, `chore`, `promote`, `sync` (for the bot-driven Reference/ mirror, if/when it ships).
+`<area>: <imperative summary>`. Areas seen in the wild: `design`, `kanban`, `docs`, `chore`, `promote`, `land`, `sync` (for the bot-driven Reference/ mirror, if/when it ships), and `pm` (PM-role coordination commits only).
+
+**The subject prefix must reflect the authoring agent's role/area — it is NOT a free-form label.** In particular:
+
+- **`pm:` is RESERVED for the PM role (slug `pm`).** A non-PM agent editing a PM-owned coordination file (`For-James.md`, `Kanban.md`, `Daily Notes/agent-status.md`) uses its own area (`docs:` / `kanban:` / `design:`), never `pm:`. Otherwise `git log --grep='^pm:'` falsely attributes work and you get phantom "second PMs." (This happened 2026-05-28: `sdk-designer` used `pm:` subjects on For-James edits — honest `Agent:` trailer, misleading subject.)
+- **Editing `For-James.md` structure is PM work.** Other agents may *append a one-line surface entry* (e.g. "design X ready for review"); they should not restructure the decide-now framing or curate the queue. Surface, then let the PM curate. If you're not the PM, keep your For-James touch to a single appended line and tag the commit with your own area.
 
 Include a `Co-authored-by:` trailer naming the agent that wrote it:
 

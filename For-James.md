@@ -4,18 +4,13 @@
 
 ## ⚡ DECIDE NOW (each is a fork — just pick a letter)
 
-**SDK architecture frame review** → [[Designs/sdk-architecture]] is at `#status/review`. Read requirements + inverted-framing + API sketch (under 20 min). *(Self-corrected since first ping: the draft had modeled file placement as a TAG following the stale `overview.md`; ADR-0041 says placement is a singleton PIN. Fixed in `efs.graph`/`efs.props` + framing — review the corrected version.)* Fork:
-- **(a) Promote to accepted** — implementation thread can start (OnionDAO subset first)
-- **(b) Revise** — name what's wrong; I'll fix and re-surface
+**SDK design ([[Designs/sdk-architecture]]) — ONE decision left (Q5), then a quick revise → promote.** You've answered: Q1 = single `sdk/` repo ✅; Q2 = domain namespaces ✅; **Q3 = include-but-throw ✅**; **Q4 = lens defaults to the connected wallet; require explicit lens only if no wallet is connected ✅** (better than the designer's "always require" — it keeps hello-world easy AND avoids the deployer-default bug, since it defaults to the *user's own* wallet, not the deployer). Q3+Q4 go to the SDK designer for a small revise pass.
 
-Q1 (repo layout) and Q2 (namespace names) are now **resolved** — you set Q1 = single `sdk/` repo; Q2 settled toward (a) domain-model namespaces after an expert SDK-design review found that's the de-facto industry standard (resource-oriented design — Stripe/Prisma/Twilio; no respected SDK uses verb-namespace trees). Both folded into the doc.
+**Q5 — the last one (and it's minor):** Writing one logical thing today (e.g. place a file) pops ~8 wallet signatures. A future `EFSUploadGateway` contract could bundle them into ONE transaction = ONE signature — but it's not built yet. Should the SDK's `batch()` already include a labeled switch like `batch({ gateway: true })` for that future feature (does nothing until the contract ships)?
+- (a) Reserve it now — no API change when the gateway later ships — *PM rec (cheap insurance)*
+- (b) Skip it — cleaner API now, add the option when the gateway exists
 
-**Three open product decisions baked into the design — promoting accepts the designer's recommended default on each (you can override any):**
-- **Q3 — off-chain-index methods (timeline, version-descendants, lens-discover):** *rec (a)* include them but throw `OffchainIndexRequired` until an index exists (+ a reference index example). Alt: exclude from v1, or bundle a local SQLite indexer (more scope).
-- **Q4 — lenses must be declared explicitly** (no silent deployer default; more friction, prevents the silent-default prod bugs the brainstorm found). *Designer leans keep-it-strict*; alt: allow empty + loud warn on first read.
-- **Q5 — reserve `batch({ gateway: true })`** for the not-yet-built EFSUploadGateway now, or add later? *rec: reserve it now.*
-
-PM rec: **promote** with the three defaults above (Q3a / Q4 strict / Q5 reserve), unless any rubs you wrong.
+Answer Q5 → SDK designer folds Q3/Q4/Q5 in one revise pass → comes back to you as a final promote.
 
 ## 🕐 WHEN YOU HAVE TIME (not blocking OnionDAO)
 
