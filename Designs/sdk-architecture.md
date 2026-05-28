@@ -113,7 +113,7 @@ This pass determines what to WRAP vs. what to EXPOSE-AS-IS.
 
 ### Package Structure
 
-Two packages (OS SDK deferred), living in a single `sdk/` repo (Direction 2 from `bs-sdk-package-layout-v1`):
+Two packages (OS SDK deferred), living in a single `sdk/` repo (Direction 2 from `bs-sdk-package-layout-v1`). **Q1 decided by James 2026-05-28: everything lives in the new `sdk/` repo** — the on-chain SDK does NOT co-locate in `contracts/`. ABI types are generated from `contracts/` at build time (e.g. `wagmi generate`/`typechain`) so they stay in sync without sharing a repo.
 
 ```
 /Users/james/Code/EFS/sdk/     (new repo)
@@ -142,7 +142,7 @@ Two packages (OS SDK deferred), living in a single `sdk/` repo (Direction 2 from
         index.ts         re-exports @efs/sdk-onchain + adds offchain surface
 ```
 
-> **Open question Q1:** Should the on-chain SDK live *with* the contracts (contracts/) since it tracks ABIs, or in sdk/ (Direction 2 default)? See § Open questions.
+> **Q1 — RESOLVED (James, 2026-05-28):** Everything lives in the new `sdk/` repo. ABI types generated from `contracts/` at build time.
 
 **Consumer install:**
 ```bash
@@ -478,7 +478,7 @@ enum EFSErrorCode {
   WalletRequired,          // write attempted without signer
   AnchorNameInvalid,       // name fails ADR-0025 validation
   AnchorDepthExceeded,     // path depth > MAX_ANCHOR_DEPTH (ADR-0021)
-  MaxEditionsExceeded,     // lenses.active().length > MAX_EDITIONS (ADR-0026)
+  MaxLensesExceeded,       // lenses.active().length > MAX_LENSES (ADR-0026)
   BatchSizeExceeded,       // internal — SDK auto-chunks; surfaced only if unchunkable
   OffchainIndexRequired,   // called a method that needs the off-chain indexer
   PartialBatchFailure,     // some ops in a batch failed; BatchReceipt.partialFailure populated
@@ -571,9 +571,9 @@ All debug-client capabilities are either directly covered or covered via `efs.EA
 
 ## Open Questions
 
-- [ ] **Q1 (repo packaging):** Should `@efs/sdk-onchain` live in a new `sdk/` repo (Direction 2, recommended), or co-locate in `contracts/` since it tracks ABIs? **Trade-off:** `sdk/` keeps SDK development separate from contract development (good for independent velocity); `contracts/` means the ABI types are always in sync without a publish step (good for a tiny team with frequent ABI changes). Recommendation: `sdk/` monorepo for clean separation, with ABI types generated from contracts at build time via `wagmi generate` or `typechain`. **Needs James's call.** #needs/james
+- [x] **Q1 (repo packaging) — RESOLVED (James, 2026-05-28):** Everything lives in the new `sdk/` repo; the on-chain SDK does NOT co-locate in `contracts/`. ABI types are generated from `contracts/` at build time (`wagmi generate`/`typechain`) so they stay in sync without sharing a repo.
 
-- [ ] **Q2 (namespace naming):** Is the proposed namespace structure (`efs.fs`, `efs.graph`, `efs.props`, `efs.lists`, `efs.lenses`, `efs.EAS`, `efs.raw`) legible to a third-party dev, or would a different organization (`efs.read/write/query/attest`) feel more natural? The current names mirror the EFS domain model; an alternative mirrors the verb-oriented Web2 SDK style. **Fork:** (a) domain-model namespaces (current proposal), (b) verb-first namespaces. **Needs James's read.** #needs/james
+- [x] **Q2 (namespace naming) — RESOLVED toward (a), pending James's confirm:** domain-model namespaces (`efs.fs`, `efs.graph`, `efs.props`, `efs.lists`, `efs.lenses`, `efs.EAS`, `efs.raw`) vs verb-first (`efs.read/write/query/attest`). An expert SDK-design review (2026-05-28) found **(a) is the de-facto industry standard** — *resource-oriented design*, codified in Google's API Design Guide and embodied by Stripe (`stripe.customers.create`), Prisma (`prisma.user.findMany`), Twilio, Supabase, GitHub Octokit. **No widely-respected SDK uses a top-level verb-namespace tree.** The field splits between resource.action namespacing (multi-resource domains — EFS's case) and flat verb methods (single-resource domains like EAS/ethers). Verb-first also fails EFS specifically because `graph` and `lenses` are resource models, not actions, and don't reduce to a single verb. **Refinement adopted from the review:** keep (a)'s noun tree but enforce a *consistent verb vocabulary* on the leaves (`read/write/list/stat` on `fs`; `get/set/list` on `props`; `pin/unpin/add/remove` on `graph`) — this pairs resource-oriented design with Google's "standard methods" discipline, giving both a domain map and predictable operation names. **Recommendation: confirm (a) + consistent-verb refinement.**
 
 - [ ] **Q3 (off-chain index in v1):** Methods that require an off-chain index (`graph.timeline`, `graph.versions.descendants`, `lenses.discover`) are on the `@efs/sdk` surface but throw `OffchainIndexRequired` by default. Should we (a) include them and throw — signals intent, lets devs wire their own index; (b) exclude them entirely from v1 — cleaner surface, but devs have no model; or (c) include them with a bundled minimal SQLite-backed local indexer — best DX, much more implementation scope? **Recommendation: (a), with a reference index implementation as a companion example project.**
 
@@ -600,7 +600,8 @@ This is a DESIGN-ONLY document. No SDK code or repo scaffolding exists yet.
 The implementation thread (Kanban Backlog: "Implement OnionDAO subset of sdk-architecture") is gated on:
 1. James frame-review of this doc (this card's purpose)
 2. Lists → Sepolia deploy (schema freeze: 9 schemas)
-3. James's call on Q1 (repo layout)
+
+Q1 (repo layout) resolved 2026-05-28: single `sdk/` repo.
 
 ---
 
