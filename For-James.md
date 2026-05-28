@@ -4,16 +4,11 @@
 
 ## ⚡ DECIDE NOW (each is a fork — just pick a letter)
 
-**SDK design ([[Designs/sdk-architecture]]) — ONE decision left (Q5), then a quick revise → promote.** You've answered: Q1 = single `sdk/` repo ✅; Q2 = domain namespaces ✅; **Q3 = include-but-throw ✅**; **Q4 = lens defaults to the connected wallet; require explicit lens only if no wallet is connected ✅** (better than the designer's "always require" — it keeps hello-world easy AND avoids the deployer-default bug, since it defaults to the *user's own* wallet, not the deployer). Q3+Q4 go to the SDK designer for a small revise pass.
-
-**Q5 — the last one (and it's minor):** Writing one logical thing today (e.g. place a file) pops ~8 wallet signatures. A future `EFSUploadGateway` contract could bundle them into ONE transaction = ONE signature — but it's not built yet. Should the SDK's `batch()` already include a labeled switch like `batch({ gateway: true })` for that future feature (does nothing until the contract ships)?
-- (a) Reserve it now — no API change when the gateway later ships — *PM rec (cheap insurance)*
-- (b) Skip it — cleaner API now, add the option when the gateway exists
-
-Answer Q5 → SDK designer folds Q3/Q4/Q5 in one revise pass → comes back to you as a final promote.
+*(empty — nothing to decide right now. SDK design Q1–Q5 all resolved; ball is with the SDK agent for a revise pass, then it comes back here for final promote.)*
 
 ## 🕐 WHEN YOU HAVE TIME (not blocking OnionDAO)
 
+- **Hand the SDK answers to the SDK agent.** All of Q1–Q5 are resolved (see [[Decisions]] 2026-05-28). In the SDK agent's own thread, tell it: "fold the resolved Q3/Q4/Q5 from the vault — Q3 include-but-throw, Q4 lens-defaults-to-connected-wallet, Q5 batch() targets single-signature writes (designer picks the mechanism; gateway-if-needed is SDK-owned) — then re-surface for promote." (Per the new coordination model: design specifics go James↔design-agent directly; PM keeps state.)
 - **Start the OnionDAO onboarding + flyers discussion** — you said you'll fork a chain for this; PM will keep reminding you each session until you do (you asked not to let it slip).
 - Frame-review the proposed design process → [[Brainstorms/2026-05-28-pm-design-process-synthesis]] (then I formalize it)
 - Promote [[brainstorm-system]] when you're happy with it
