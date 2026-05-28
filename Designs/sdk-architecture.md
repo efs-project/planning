@@ -41,9 +41,9 @@ Distilled from: `bs-third-party-dev-ux-v1` (dev friction walkthroughs), `bs-dive
 | M4 | Walk ancestors of an Anchor (path → root) | client: `TopicStore.getPath` |
 | M5 | Read a file (path → Uint8Array) through the lens stack | client: `EASx.getAttestation` + resolution |
 | M6 | Write a file (path + bytes → on-chain) in one user action, not 8 wallet prompts | dev-friction: 8-tx submarine |
-| M7 | Place/remove a TAG (many-edge, weighted) | ADR-0041 |
-| M8 | Set/get a PIN (singleton-edge) | ADR-0041 |
-| M9 | Set/get a PROPERTY on any attestation, by key | client: PROPERTY schema; dev-friction |
+| M7 | Place/unplace a file at a path via PIN (singleton-edge); set/get any PIN | ADR-0041: file placement is a PIN |
+| M8 | Add/remove a descriptive label or folder-visibility TAG (many-edge, weighted) | ADR-0041: TAG is cardinality-N |
+| M9 | Set/get a PROPERTY value by key (key-anchor + PROPERTY + binding PIN; a 3-attestation singleton rebind) | client: PROPERTY schema; ADR-0041 §1; dev-friction |
 | M10 | Create and populate a LIST; iterate its entries | ADR-0044 (Lists) |
 | M11 | Expose schema UIDs and contract addresses as typed constants (never hardcode) | dev-friction: "what schema UID is PROPERTY this week?" |
 | M12 | Expose the raw EAS SDK cleanly (EFS.EAS) without requiring devs to know the SDK internals | PM brief; dev-friction: drop-to-raw-EAS pattern |
@@ -94,11 +94,11 @@ This pass determines what to WRAP vs. what to EXPOSE-AS-IS.
 | Create Anchor at path | 1 attest call — but dev must know schema UID, encode data, pick refUID from prior resolution | Path resolution (string → UID chain), name validation per ADR-0025, caching | **Wrap** |
 | List Anchor's children | `eas.getReferencingAttestationUIDs(uid, ANCHOR_SCHEMA)` + decode each | Pagination abstraction, AsyncIterable, caching, typed return | **Wrap** |
 | Read file at path | Router resolution (3 contract calls) + MIRROR selection + fetch | Single `read(path)` call; handles lenses, fallbacks, transport | **Wrap — high value** |
-| Write file (path + bytes) | 8 sequential attestations: ANCHOR (if new) + DATA (if new) + MIRROR + PROPERTY(contentType) + TAG + optional mirrors | One `write(path, bytes)` that compiles all to `multiAttest`; single wallet prompt | **Wrap — highest value** |
-| Get PROPERTY by key | `eas.getReferencingAttestationUIDs(uid, PROPERTY_SCHEMA)` → decode each → filter by key → newest | 3 lines vs. 15; typed return; lens-scoped filtering | **Wrap** |
-| Set PROPERTY | 1 attest call | Only the schema UID and encoding add value — thin wrapper | **Thin wrap; expose in batch** |
-| TAG place/remove | 2 attest/revoke calls | Only schema UID and encoding; resolver handles singleton | **Thin wrap; expose in batch** |
-| PIN set/get | Same as TAG | Same | **Thin wrap; expose in batch** |
+| Write file (path + bytes) | 8+ sequential attestations: ANCHOR (if new) + DATA (if new) + MIRROR + contentType triple (key ANCHOR + PROPERTY + binding PIN) + **placement PIN** (`PIN(refUID=DATA, definition=fileAnchor)`, ADR-0041) + folder-visibility TAGs for uncovered ancestors | One `write(path, bytes)` that compiles all to `multiAttest`; single wallet prompt | **Wrap — highest value** |
+| Get PROPERTY value by key | `getActivePin(keyAnchor, attester)` → resolve target PROPERTY → decode (O(1), ADR-0041) — but dev must resolve the key anchor and know the PIN-binding convention | 3 lines vs. 15; typed return; lens-scoped; hides the key-anchor + PIN-binding indirection | **Wrap** |
+| Set PROPERTY value | **3 attestations** (key ANCHOR if new + PROPERTY value + binding PIN) — a singleton rebind, NOT one call (ADR-0041 §1) | Hides the 3-attestation singleton-rebind entirely; this is real multi-step value, not a thin wrapper | **Wrap; expose in batch** |
+| Place a file at a path (singleton) | `PIN(refUID=DATA, definition=fileAnchor)` — 1 attest, but dev must know placement is a PIN not a TAG, and encode it | Schema UID + encoding + supersession semantics; the single most-confused primitive | **Wrap; expose in batch** |
+| Descriptive label / folder visibility (cardinality-N) | `TAG(refUID=target, definition, weight)` — 1 attest/revoke | Schema UID + encoding; weight semantics; lens-scoped read | **Thin wrap; expose in batch** |
 | Create LIST + add entries | 1 LIST attest + N LIST_ENTRY attests | High-level API hides the schema encoding complexity; enforces mode-specific target encoding | **Wrap** |
 | Schema UIDs, contract addresses | Hardcoded hex strings | Typed constants module, version-checked | **New primitive — SDK only** |
 | Lens management | URL query param only (ADR-0031) | Client-side state, visible default, ENS resolution, multi-lens composition | **New primitive — SDK only** |
@@ -210,7 +210,7 @@ efs.fs.write(
     onProgress?(phase: WritePhase): void
   }
 ): Promise<WriteReceipt>
-// WriteReceipt: { anchorUID, dataUID, tagUID, txHashes, attestationCount, totalGas }
+// WriteReceipt: { anchorUID, dataUID, placementPinUID, txHashes, attestationCount, totalGas }
 ```
 
 **Design note on `fs.list` vs array:** The brainstorm found a sports-stats dev tried `list("/mlb/2025", { recursive: true })` and got a 60-second stall or a `QueryTooLargeError`. `list` is always `AsyncIterable` with explicit pagination; consuming all results requires `collect(efs.fs.list(path))`. A `collect()` helper is exported for small folders.
@@ -225,15 +225,22 @@ efs.graph.children(anchor: Hex, opts?: PaginateOpts): AsyncIterable<AnchorEntry>
 efs.graph.path(anchor: Hex): Promise<string>       // UID → "/foo/bar/baz"
 efs.graph.subtree(anchor: Hex, opts?: { depth?: number }): AsyncIterable<AnchorEntry>
 
-// TAG operations (many/weighted edges per ADR-0041)
-efs.graph.tags.at(anchor: Hex, opts?: { attester?: Address }): Promise<TagEntry | null>
-efs.graph.tags.list(anchor: Hex, opts?: { allAttesters?: boolean }): AsyncIterable<TagEntry>
-efs.graph.tags.place(anchor: Hex, dataUID: Hex, weight?: bigint): Promise<Hex>   // returns tagUID
-efs.graph.tags.remove(tagUID: Hex): Promise<void>
+// PIN operations — singleton edges per ADR-0041 ("this slot holds exactly one thing").
+// File placement is a PIN: each (attester, file anchor) slot holds exactly one DATA.
+efs.graph.pins.get(definition: Hex, opts?: { attester?: Address }): Promise<PinEntry | null>
+// PinEntry: { pinUID, target, attester } — O(1) read via getActivePin, no newest-by-time scan
+efs.graph.pins.set(definition: Hex, target: Hex): Promise<Hex>                   // returns pinUID; supersedes prior
+efs.graph.pins.clear(definition: Hex): Promise<void>                             // revoke the active PIN
 
-// PIN operations (singleton edges per ADR-0041)
-efs.graph.pins.get(definition: Hex, target: Hex, opts?: { attester?: Address }): Promise<PinEntry | null>
-efs.graph.pins.set(definition: Hex, target: Hex): Promise<Hex>                   // returns pinUID
+// Sugar for the placement PIN (the most common PIN): place DATA at its file anchor
+efs.graph.place(fileAnchor: Hex, dataUID: Hex): Promise<Hex>     // PIN(refUID=dataUID, definition=fileAnchor)
+efs.graph.unplace(fileAnchor: Hex): Promise<void>
+
+// TAG operations — many/weighted edges per ADR-0041 ("this category contains N things").
+// Descriptive labels (#nsfw, #favorites) and folder visibility. NOT file placement.
+efs.graph.tags.list(target: Hex, opts?: { allAttesters?: boolean }): AsyncIterable<TagEntry>
+efs.graph.tags.add(target: Hex, definition: Hex, weight?: bigint): Promise<Hex>  // returns tagUID
+efs.graph.tags.remove(tagUID: Hex): Promise<void>
 
 // Time-ordered stream of everything touching an anchor (off-chain)
 efs.graph.timeline(anchor: Hex): AsyncIterable<TimelineEvent>
@@ -251,14 +258,16 @@ efs.graph.versions.descendants(dataUID: Hex): AsyncIterable<Hex>  // requires of
 #### `efs.props` — Properties
 
 ```ts
-// Get the active PROPERTY value for a key on a UID, lens-scoped
+// Get the active PROPERTY value for a key on a UID, lens-scoped.
+// Resolves the key anchor under `uid`, reads its binding PIN (O(1), ADR-0041), decodes the PROPERTY value.
 efs.props.get(uid: Hex, key: string): Promise<string | undefined>
 
 // Get PROPERTY value from all attesters (museum researcher, firmware verifier)
 efs.props.allViews(uid: Hex, key: string): Promise<Record<Address, PropView>>
 // PropView: { value: string, attestedAt: number, revoked: boolean }
 
-// Set a PROPERTY (compiles into batch; executes immediately unless inside a batch)
+// Set a PROPERTY value (a 3-attestation singleton rebind: key ANCHOR if new + PROPERTY + binding PIN).
+// Compiles into batch; executes immediately unless inside a batch.
 efs.props.set(uid: Hex, key: string, value: string): Promise<Hex>
 
 // List all active PROPERTYs on a UID, lens-scoped
@@ -276,6 +285,8 @@ PROP_KEYS.DESCRIPTION         // "description"
 PROP_KEYS.PREVIOUS_VERSION    // "previousVersion"
 // ... extensible; community-contributed keys can be added via SDK version bumps
 ```
+
+**Design note on the PROPERTY model (ADR-0041):** A PROPERTY value is not a single attestation. Per ADR-0041 §1 and `specs/02` §PIN, a key/value pair is three attestations: (1) an ANCHOR naming the key under the target (e.g. a `contentType` anchor under a DATA), (2) a PROPERTY carrying the value, (3) a **PIN** binding the value to the key anchor (`PIN(refUID=propertyUID, definition=keyAnchor)`). The PIN is what makes the value a singleton — a rebind is a new PROPERTY + new PIN that supersedes the old PIN, read in O(1) via `getActivePin`. This is exactly the kind of multi-step indirection `efs.props` exists to hide; devs never touch the key anchor or the binding PIN directly. This also corrects a pre-ADR-0041 model (`overview.md`, still stale on `main`) where PROPERTY rebinds were assumed to be newest-by-time scans — that model was found to be incorrect (ADR-0041 Context).
 
 ---
 
@@ -338,7 +349,7 @@ efs.lenses.discover(opts?: {
 
 #### `efs.batch()` — Write batching (primary write UX)
 
-The single most important value-add. A single `efs.fs.write()` compiles into 5–8 attestations. The batch builder makes this visible, composable, and limited to one wallet prompt.
+The single most important value-add. A single `efs.fs.write()` compiles into ~6–10 attestations (DATA + MIRROR + the 3-attestation contentType property + placement PIN + folder-visibility TAGs + any new path anchors). The batch builder makes this visible, composable, and limited to one wallet prompt.
 
 ```ts
 // Fluent builder pattern
