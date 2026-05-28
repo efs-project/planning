@@ -4,7 +4,7 @@
 
 ## ⚡ DECIDE NOW (each is a fork — just pick a letter)
 
-**SDK architecture — TWO PICKS** → [[Designs/sdk-architecture]] at `#status/review`. Your clarification reframed it: **on-chain SDK = a Solidity library** (used from a dev's own contract; library form keeps the dev's contract as attester, which lenses require) and **off-chain SDK = just the TypeScript SDK** (no indexer/The-Graph baggage — reverse-lookup reads are `NotImplemented` shims; the SDK doesn't bundle indexing). Both folded in: new "Two deliverables" framing + a full On-chain SDK (Solidity) section + on-chain requirements; stripped the EFS-in-Postgres/reference-index apparatus. Q2–Q5 unchanged. Earlier expert review had also fixed a Q5 attribution defect (only EIP-5792/4337 give one-approval-with-correct-attribution; sequential is the auto EOA fallback; gateway demoted to opt-in). See the Revision log. Two forks:
+**SDK architecture — TWO PICKS** → [[Designs/sdk-architecture]] at `#status/review`. Your clarification reframed it: **on-chain SDK = a Solidity library** (used from a dev's own contract; library form keeps the dev's contract as attester, which lenses require) and **off-chain SDK = just the TypeScript SDK** (no indexer/The-Graph baggage — reverse-lookup reads are `NotImplemented` shims; the SDK doesn't bundle indexing). Both folded in: new "Two deliverables" framing + a full On-chain SDK (Solidity) section + on-chain requirements; stripped the EFS-in-Postgres/reference-index apparatus. Q2–Q5 unchanged. Earlier expert review had also fixed a Q5 attribution defect (only EIP-5792/4337 give one-approval-with-correct-attribution; sequential is the auto EOA fallback; gateway demoted to opt-in). **Latest (your correction):** the on-chain SDK is a *first-class client*, not write-only — contracts read files through lenses, read lists, enumerate the first-N children of a folder (bounded gas window), and create files/folders; only reverse-lookup is out of scope on-chain. Added a shared functional-primitive **parity contract** to stop the on-chain/TS surfaces drifting. See the Revision log (entry 6). Two forks:
 
 - **1. Q1 — where does the Solidity library live?** (reopened by the reframe; the old "one sdk/ repo" answer assumed both SDKs were TS)
   - **(a) `contracts/`** — co-located with the immutable contracts it imports + version-locks to; same build; deploy/verify together. *(PM rec)*
@@ -13,7 +13,7 @@
   - **(a) Promote** — assign a number; OnionDAO-subset implementation can start (gated on Lists→Sepolia).
   - **(b) Revise** — name what's wrong; I'll fix and re-surface.
 
-PM rec: **1a + 2 promote.** (A fresh expert-review + brainstorm round on the reframe is running; I'll surface anything material before you decide.)
+PM rec: **1a + 2 promote.** (Expert-review + brainstorm round on the reframe is done — findings folded in, revision log entries 5–6. Nothing else blocking your call.)
 
 ## 🕐 WHEN YOU HAVE TIME (not blocking OnionDAO)
 
