@@ -75,7 +75,7 @@ Distilled from: `bs-third-party-dev-ux-v1` (dev friction walkthroughs), `bs-dive
 | # | Requirement | Why deferred |
 |---|---|---|
 | D1 | Off-chain indexer / "EFS-in-Postgres" packaged pattern | Major scope; own design thread (Kanban Backlog) |
-| D2 | EFSUploadGateway single-tx write (AA-wallet bundling) | Requires new contracts work (Kanban Backlog) |
+| D2 | EFSUploadGateway *contract* (one of the single-signature mechanisms) | Contract is backlog work, but the SDK's single-signature batch design is in-scope and ships via EIP-5792 first (Q5 resolved — see batch section). The gateway is an SDK-owned upgradeable convenience contract, added when built without an API change. |
 | D3 | PROPERTY-by-value aggregation queries | Requires D1 |
 | D4 | EFS OS SDK (Ring 3 sandboxed app surface) | Explicitly out of scope (PM brief) |
 | D5 | Lens partition-by-domain (trust attester only for firmware) | Post-v1 lens design |
@@ -146,6 +146,10 @@ Two packages (OS SDK deferred), living in a single `sdk/` repo (Direction 2 from
           subtree.ts     recursive anchor traversal
         watch.ts         change subscription with polling fallback
         index.ts         re-exports @efs/sdk-onchain + adds offchain surface
+  examples/
+    reference-index/    minimal runnable "EFS-in-Postgres" (Q3) — what OffchainIndexRequired points at
+    node-server/        server-side hot-wallet write example
+    browser-react/      MetaMask read/write example
 ```
 
 > **Q1 — RESOLVED (James, 2026-05-28):** Everything lives in the new `sdk/` repo. ABI types generated from `contracts/` at build time.
@@ -169,19 +173,29 @@ const efs = new EFSClient({
   rpc: "https://eth-sepolia.g.alchemy.com/v2/...",
   chainId: 11155111,
 
-  // Lenses: EXPLICIT required. No silent deployer default.
-  // Pass [] to opt into "deployer only" with acknowledgement.
-  lenses: ["alice.eth", "0xBob..."],
+  // Lenses: OPTIONAL. If omitted, the lens stack defaults to the connected
+  // wallet's own address — you see your own content first. Pass an explicit
+  // stack to view through others' lenses (precedence order matters).
+  lenses?: ["alice.eth", "0xBob..."],
 
-  // Signer: optional at construction. Required for writes.
+  // Signer: optional at construction. Required for writes — and, when no
+  // explicit `lenses` are given, the source of the default lens (see below).
   signer?: ethers.Signer | viem.WalletClient,
 })
 
-// Late-bind a signer (MetaMask flow):
+// Late-bind a signer (MetaMask flow). On connect, if no explicit lenses were
+// set, the default lens becomes the connected wallet's address.
 await efs.connect(walletClient)
 ```
 
-**Design note on lenses:** The current client silently uses the deployer lens. The brainstorm found this breaks apps in production ("why am I seeing the deployer's carbonara, not the popular one?"). The SDK requires an explicit lens declaration. Passing `lenses: []` gives the deployer as the only lens but names the choice explicitly.
+**Design note on lens defaulting (Q4 resolved):** The *original* bug was that the current client silently uses the **deployer's** lens — so users saw the deployer's content, not their own or a chosen author's ("why am I seeing the deployer's carbonara?"). The fix is not "force everyone to declare a lens" (that taxes every hello-world); it's **default to the connected wallet's own address**. Your own wallet is always a safe default — you see what *you* published, never a stranger's. Resolution order for the effective lens stack on any read:
+
+1. The per-call `opts.lenses` override, if given.
+2. The client's explicit `lenses`, if set at construction / via `efs.lenses`.
+3. Otherwise, **the connected wallet's address** (single-element stack).
+4. If none of the above — read-only client with no wallet and no explicit lenses — a read throws `LensRequired` with a message telling the dev to either connect a wallet or pass `lenses`. (A read with no lens is meaningless: there's no attester to resolve content from.)
+
+This keeps "install, connect wallet, read your own files" zero-config while making cross-author viewing an explicit, visible choice.
 
 ---
 
@@ -323,7 +337,7 @@ efs.graph.versions.descendants(dataUID: Hex): AsyncIterable<Hex>  // requires of
 
 **Design note on lens scoping in `efs.graph`:** `efs.fs` is the lens-*resolving* path — `fs.read`/`fs.stat` apply the first-attester-wins fallback across the lens stack (ADR-0031/0041) to pick the winning content. `efs.graph` is deliberately lower-level: `pins.get(definition, { attester })` reads exactly one attester's PIN in O(1) (no fallback), and `tags.list(target, { allAttesters })` enumerates raw edges. This is intentional — graph methods expose the unresolved edge data; if you want lens-resolved placement, use `fs`. A dev calling `graph.pins.get` without specifying `attester` gets the client's primary (first) lens, not a fallback walk. Documented so nobody assumes `graph` silently applies lens precedence.
 
-**Design note on `graph.timeline` and `graph.versions.descendants`:** These require an off-chain index (the EFS-in-Postgres pattern). They are intentionally on the `@efs/sdk` (off-chain) package, not `@efs/sdk-onchain`. When no off-chain index is configured, they throw `OffchainIndexRequired` with a message explaining how to configure one. They are **not removed from the surface** — a weak "here's a read-through cache, here's how to add a real indexer" story is better than forcing devs to hand-roll the same thing.
+**Design note on `graph.timeline` and `graph.versions.descendants`:** These require an off-chain index (the EFS-in-Postgres pattern). They are intentionally on the `@efs/sdk` (off-chain) package, not `@efs/sdk-onchain`. When no off-chain index is configured, they throw `OffchainIndexRequired` with a message pointing at the **reference index example project** (`examples/reference-index/`, per Q3) — a minimal runnable "EFS-in-Postgres" devs can run as-is or fork. They are **not removed from the surface** — a weak "here's a read-through cache, here's how to add a real indexer" story is better than forcing devs to hand-roll the same thing, and shipping a reference implementation means the throw always points at working code.
 
 ---
 
@@ -492,7 +506,7 @@ efs.lenses.discover(opts?: {
 // LensInfo: { address, ens?, label?, attestationCount, topicPaths[] }
 ```
 
-**Design note on lens semantics:** Lenses (formerly "editions") are client-side state per ADR-0031. The SDK propagates them through every read. `efs.lenses.add("alice.eth")` resolves ENS and prepends to the active list. This is NOT an on-chain action — the doc must say this clearly and early, because three of the five walkthrough devs burned time searching for the "follow" transaction.
+**Design note on lens semantics:** Lenses (formerly "editions") are client-side state per ADR-0031. The SDK propagates them through every read. `efs.lenses.add("alice.eth")` resolves ENS and prepends to the active list. This is NOT an on-chain action — the doc must say this clearly and early, because three of the five walkthrough devs burned time searching for the "follow" transaction. When no explicit lenses are set, `efs.lenses.active()` returns the connected wallet's address (the Q4 default); `add`/`set` switch the client to an explicit stack from then on.
 
 ---
 
@@ -520,7 +534,8 @@ const receipt = await efs.batch(b => {
 const estimate = await efs.batch(b => {
   for (const obs of observations) b.fs.write(pathFor(obs), toBytes(obs))
 }).estimate()
-// estimate: { attestationCount, chunkDeployCount, txCount, estimatedGasUnits, estimatedUSD? }
+// estimate: { attestationCount, chunkDeployCount, txCount, signatureCount, mechanism, estimatedGasUnits, estimatedUSD? }
+// mechanism: 'eip5792' | 'erc4337' | 'gateway' | 'sequential' — which path the SDK will use (see below)
 
 // BatchReceipt
 type BatchReceipt = {
@@ -548,12 +563,18 @@ type OperationResult = {
 **Batching strategy:**
 - Compile all operations to attestation payloads
 - Check existing DATA by `contentHash` (skip re-attest if dedup applies)
-- Chunk into groups where each chunk fits within EAS `multiAttest` practical limits
-- Each chunk = one wallet prompt (one tx)
-- Report `txCount` up-front so dev can warn users ("this will require 3 wallet signatures")
+- Pick a **submission mechanism** by capability detection (next note) to minimize signatures
+- Report `signatureCount` AND `txCount` up-front so the dev can warn users accurately
 - On partial failure, report which operations succeeded and which failed with errors
 
-**Design note on EFSUploadGateway (D2 from Deferred):** If the EFSUploadGateway wrapper contract ships, the batch builder can route through it for single-tx + single-signature writes. The SDK API is designed so this is a config option (`efs.batch({ gateway: true })`), not a breaking change.
+**Design note on single-signature writes (Q5 resolved — a core value, not a placeholder):** A logical write spans multiple EAS schemas (DATA, MIRROR, PROPERTY, PIN, TAG, ANCHOR), and `EAS.multiAttest` batches only *within* a schema — so the naive path is several `multiAttest` calls = several wallet signatures. Collapsing that to **one signature** is core SDK value, so `efs.batch()` owns mechanism selection rather than exposing a flag. At execute time it detects the connected wallet's capabilities and picks, in preference order:
+
+1. **EIP-5792 `wallet_sendCalls`** — when the wallet supports atomic batched calls (an increasing share do). All the attest calls go up as one batch the user approves once. No EFS contract needed; this is the preferred path.
+2. **ERC-4337** — if the signer is a smart account, bundle the calls into a single UserOperation (one signature).
+3. **SDK-owned `EFSUploadGateway` contract** — a thin aggregator that performs all the attestations in one `tx`. Crucially this is an **SDK-owned, upgradeable convenience contract — NOT part of EFS-core immutable contracts** (it holds no authoritative state; it just relays attestations on the caller's behalf, attributing them to the caller). It can be redeployed/improved freely because nothing's schema UID depends on it.
+4. **Fallback: N sequential `multiAttest` signatures** — for plain EOAs on wallets without 5792. The SDK reports `signatureCount` so the UI can say "this will need 3 signatures," and uses partial-failure semantics if the user abandons midway.
+
+The dev sees one API (`efs.batch(...)`); the SDK delivers the fewest signatures the wallet allows. `opts` can pin a mechanism for testing (`efs.batch({ via: 'gateway' | 'eip5792' | 'sequential' })`), but the default is automatic.
 
 ---
 
@@ -669,6 +690,7 @@ class EFSError extends Error { code: EFSErrorCode; context: unknown }
 enum EFSErrorCode {
   SchemaMismatch,          // SCHEMAS constants don't match on-chain
   WalletRequired,          // write attempted without signer
+  LensRequired,            // read attempted with no explicit lenses AND no connected wallet (Q4)
   AnchorNameInvalid,       // name fails ADR-0025 validation
   AnchorDepthExceeded,     // path depth > MAX_ANCHOR_DEPTH (ADR-0021)
   MaxLensesExceeded,       // lenses.active().length > MAX_LENSES (ADR-0026)
@@ -691,21 +713,26 @@ enum EFSErrorCode {
 ### Auth / Signer Handling
 
 ```ts
-// Server-side (Node, hot wallet):
+// Server-side (Node, hot wallet): no explicit lenses → defaults to the hot wallet's
+// own address. You read and write your own content with zero lens config.
 const efs = new EFSClient({
   rpc, chainId,
-  lenses: [],
   signer: new ethers.Wallet(process.env.HOT_KEY),
 })
 
-// Browser (MetaMask, late-bind):
+// Browser (MetaMask, late-bind): viewing a specific author → explicit lens.
 const efs = new EFSClient({ rpc, chainId, lenses: ["alice.eth"] })
 // ...later, after MetaMask connect:
 await efs.connect(walletClient)   // viem WalletClient OR ethers Signer
 
-// Read-only (no signer, no writes):
-const efs = new EFSClient({ rpc, chainId, lenses: [] })
-// efs.fs.read() works; efs.fs.write() throws WalletRequired
+// Browser, view-your-own: omit lenses; on connect the lens becomes the user's address.
+const efs = new EFSClient({ rpc, chainId })
+await efs.connect(walletClient)   // efs.fs.read() now reads the connected user's content
+
+// Pure read-only of a known author (no wallet): lenses REQUIRED.
+const efs = new EFSClient({ rpc, chainId, lenses: ["alice.eth"] })
+// efs.fs.read() works; efs.fs.write() throws WalletRequired.
+// Omitting both signer and lenses → efs.fs.read() throws LensRequired (no attester to resolve).
 ```
 
 **Design note:** The brainstorm found the server-side (Node hot-wallet) path is "underdocumented." The SDK should have a first-class Node/server example in the README alongside the browser example, not hidden in a footnote.
@@ -776,23 +803,25 @@ All debug-client capabilities are directly covered; the few that touch raw attes
 
 - [x] **Q1 (repo packaging) — RESOLVED (James, 2026-05-28):** Everything lives in the new `sdk/` repo; the on-chain SDK does NOT co-locate in `contracts/`. ABI types are generated from `contracts/` at build time (`wagmi generate`/`typechain`) so they stay in sync without sharing a repo.
 
-- [x] **Q2 (namespace naming) — RESOLVED toward (a), pending James's confirm:** domain-model namespaces (`efs.fs`, `efs.graph`, `efs.props`, `efs.lists`, `efs.sorts`, `efs.lenses`, `efs.EAS`, `efs.raw`) vs verb-first (`efs.read/write/query/attest`). An expert SDK-design review (2026-05-28) found **(a) is the de-facto industry standard** — *resource-oriented design*, codified in Google's API Design Guide and embodied by Stripe (`stripe.customers.create`), Prisma (`prisma.user.findMany`), Twilio, Supabase, GitHub Octokit. **No widely-respected SDK uses a top-level verb-namespace tree.** The field splits between resource.action namespacing (multi-resource domains — EFS's case) and flat verb methods (single-resource domains like EAS/ethers). Verb-first also fails EFS specifically because `graph` and `lenses` are resource models, not actions, and don't reduce to a single verb. **Refinement adopted from the review:** keep (a)'s noun tree but enforce a *consistent verb vocabulary* on the leaves — this pairs resource-oriented design with Google's "standard methods" discipline, giving both a domain map and predictable operation names. An expert SDK-design review (2026-05-28) noted the first draft *claimed* this consistency but did not deliver it (`get` was used for three different things; enumeration used five different verbs). That is now fixed: the eight-verb contract is codified in **"Naming conventions (the verb contract)"** above and every leaf method conforms. **Recommendation: confirm (a) + the codified verb contract.**
+- [x] **Q2 (namespace naming) — RESOLVED (James, 2026-05-28): confirmed (a) + the codified verb contract.** domain-model namespaces (`efs.fs`, `efs.graph`, `efs.props`, `efs.lists`, `efs.sorts`, `efs.lenses`, `efs.EAS`, `efs.raw`) vs verb-first (`efs.read/write/query/attest`). An expert SDK-design review (2026-05-28) found **(a) is the de-facto industry standard** — *resource-oriented design*, codified in Google's API Design Guide and embodied by Stripe (`stripe.customers.create`), Prisma (`prisma.user.findMany`), Twilio, Supabase, GitHub Octokit. **No widely-respected SDK uses a top-level verb-namespace tree.** The field splits between resource.action namespacing (multi-resource domains — EFS's case) and flat verb methods (single-resource domains like EAS/ethers). Verb-first also fails EFS specifically because `graph` and `lenses` are resource models, not actions, and don't reduce to a single verb. **Refinement adopted from the review:** keep (a)'s noun tree but enforce a *consistent verb vocabulary* on the leaves — this pairs resource-oriented design with Google's "standard methods" discipline, giving both a domain map and predictable operation names. An expert SDK-design review (2026-05-28) noted the first draft *claimed* this consistency but did not deliver it (`get` was used for three different things; enumeration used five different verbs). That is now fixed: the eight-verb contract is codified in **"Naming conventions (the verb contract)"** above and every leaf method conforms. **Recommendation: confirm (a) + the codified verb contract.**
 
-- [ ] **Q3 (off-chain index in v1):** Methods that require an off-chain index (`graph.timeline`, `graph.versions.descendants`, `lenses.discover`) are on the `@efs/sdk` surface but throw `OffchainIndexRequired` by default. Should we (a) include them and throw — signals intent, lets devs wire their own index; (b) exclude them entirely from v1 — cleaner surface, but devs have no model; or (c) include them with a bundled minimal SQLite-backed local indexer — best DX, much more implementation scope? **Recommendation: (a), with a reference index implementation as a companion example project.**
+- [x] **Q3 (off-chain index in v1) — RESOLVED (James, 2026-05-28): option (a).** Methods requiring an off-chain index (`graph.timeline`, `graph.versions.descendants`, `lenses.discover`) stay on the `@efs/sdk` surface and throw `OffchainIndexRequired` until an index is configured — they signal intent and give devs the model without forcing the SDK to bundle an indexer. **A reference off-chain index is shipped as a companion example project** (`examples/reference-index/` — a minimal "EFS-in-Postgres" the dev can run or fork), so the throw always points at runnable code, not a blank page.
 
-- [ ] **Q4 (lenses require explicit declaration):** The design requires `lenses: [...]` at construction — no silent deployer default. This is deliberately more friction than the current client. Is this the right call? Rationale: the brainstorm found silent defaults caused production bugs. Counter-argument: it raises the barrier for "hello world" demos. **Alternative: keep `lenses: []` as a valid constructor, but issue a loud console.warn on first read if lenses is empty.**
+- [x] **Q4 (lens default) — RESOLVED (James, 2026-05-28): default the lens to the connected wallet's address.** Don't always require an explicit lens — that taxes hello-world. Instead default the lens stack to the **connected wallet's own address**, and require an explicit lens *only* when no wallet is connected (a read with no attester is meaningless → `LensRequired`). The deployer default was the original bug; the user's own wallet is a safe default. See "Design note on lens defaulting" in Instantiation for the four-step resolution order.
 
-- [ ] **Q5 (EFSUploadGateway timing):** The batch API is designed to optionally route through an EFSUploadGateway contract (single tx, single signature). Should the SDK design explicitly reserve the `batch({ gateway: true })` option even though the gateway contract isn't built yet, or leave it for a later version bump?
+- [x] **Q5 (single-signature writes) — RESOLVED (James, 2026-05-28): core SDK value; SDK owns mechanism selection.** No placeholder flag. `efs.batch()` delivers one signature where the wallet allows, choosing the mechanism by capability detection: EIP-5792 `wallet_sendCalls` first, then ERC-4337 for smart accounts, then an **SDK-owned upgradeable `EFSUploadGateway`** convenience contract (explicitly NOT EFS-core immutable), falling back to N sequential signatures with accurate `signatureCount` reporting. See "Design note on single-signature writes" in the batch section.
+
+**All open questions resolved — this doc is promote-ready.** Held at `#status/review` per design mode for James's promote/revise call; not self-promoting.
 
 ---
 
 ## Pre-promotion checklist
 
-- [ ] All `## Open questions` resolved or explicitly deferred (cite where)
-- [ ] `**Target repos:**` confirmed (sdk — new; planning — design doc only)
-- [ ] `**Depends on:**` chain — design-system accepted ✅; brainstorm-system in review; ADR-0031 accepted ✅; ADR-0041 accepted ✅; ADR-0044 pending Lists merge (implementation gated, not design gated)
-- [ ] No `<!-- AGENT-Q: -->` comments left in the design body
-- [ ] At least one round of `#status/review` with another agent or human comment
+- [x] All `## Open questions` resolved or explicitly deferred — Q1–Q5 all RESOLVED (James, 2026-05-28), cited inline
+- [x] `**Target repos:**` confirmed (sdk — new; planning — design doc only)
+- [x] `**Depends on:**` chain — design-system accepted ✅; brainstorm-system in review; ADR-0031 accepted ✅; ADR-0041 accepted ✅; ADR-0044 pending Lists merge (implementation gated, not design gated)
+- [x] No `<!-- AGENT-Q: -->` comments left in the design body
+- [x] At least one round of `#status/review` — expert subagent review pass (2026-05-28) + James Q1–Q5 resolutions
 
 ---
 
@@ -842,3 +871,10 @@ Second: the process says "stop at review" but doesn't say what "review-ready" lo
 - **Smaller:** `lenses.remove` made async; `OperationResult` carries a stable op id (+ `.as()`); callback batch marked preferred with an unexecuted-builder guard; lens-precedence behavior of `efs.graph` documented.
 
 These are all within-frame refinements — none changed the architecture. The doc remains at `#status/review` for James's promote/revise call.
+
+**2026-05-28 — Q1–Q5 resolved (James), folded in one pass.** Q1 (single `sdk/` repo) and Q2 (resource-oriented namespaces) confirmed as already designed. Three design changes:
+- **Q3:** off-chain-index methods stay and throw `OffchainIndexRequired`; added a runnable reference index example (`examples/reference-index/`) so the throw points at real code.
+- **Q4:** dropped "explicit lens always required." The lens now **defaults to the connected wallet's own address** (your own content is a safe default; the deployer default was the original bug). Explicit lens required only when no wallet is connected (`LensRequired`). New four-step resolution order documented in Instantiation.
+- **Q5:** removed the placeholder `gateway` flag. `efs.batch()` now owns single-signature delivery by capability detection — EIP-5792 → ERC-4337 → SDK-owned upgradeable `EFSUploadGateway` (explicitly not EFS-core) → sequential fallback — reporting `signatureCount`/`mechanism`.
+
+All five open questions are now RESOLVED; the doc is promote-ready and held at `#status/review` per design mode.
