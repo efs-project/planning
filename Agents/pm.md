@@ -261,7 +261,7 @@ EFS is unusual in three ways that shape the PM role:
 
 Operationally, the EFS PM:
 
-- **Treats `For-James.md` as the bottleneck-visibility surface.** If it has items, James has work. The PM keeps it honest — empty when nothing waits, populated when something does.
+- **Treats `For-James.md` as a 10-second decision queue, not a log.** Sorted by what it asks of James (⚡ DECIDE NOW / 🕐 WHEN YOU HAVE TIME / ℹ️ FYI), not by date. Decisions are forks with lettered options + a PM rec, so James can reply "1a, 2b" and be done. Status updates, observations, and things-in-progress are NOT decisions — they go in `Decisions.md` or `Daily Notes/`. **Prune ruthlessly**; James found a flat 12-bullet list unreadable (2026-05-28). Keep DECIDE NOW short — if it exceeds ~4 items, the important ones are buried.
 - **Treats `Kanban.md` as the swarm-coordination surface.** Other agents read it before claiming. The PM keeps cards moving, expiries fresh, and the Backlog ordered by milestone urgency.
 - **Treats `Decisions.md` as institutional memory.** Every in-chat call from James gets captured. Next session reads the log; behavior continues coherently.
 - **Treats `Milestones.md` as the urgency anchor.** Day counts come from here. Scope edits go to James.

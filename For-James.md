@@ -1,17 +1,31 @@
 # For James
 
-- **T-6 days to OnionDAO. Triage list (this week only):**
-- **DECIDE — SDK track posture.** Drop / soft-launch (PM recommends) / push. Unblocks comms + entrant onboarding tone. Added 2026-05-26 by @pm.
-- **DO — finish Lists merge.** You said you're wrapping it up. This is the keystone; once merged, Sepolia deploy + schema freeze fall out for free. Added 2026-05-26 by @pm.
-- **DO — post one announce paragraph somewhere this week.** Even minimal. Silence = no attendees. Added 2026-05-26 by @pm.
-- **CONFIRM — OnionDAO logistics.** Venue / dates within June / host expecting you. PM has no visibility into this. Added 2026-05-26 by @pm.
-- **REVIEW — [[brainstorm-system]]** (drafted 2026-05-26 per your green light). Light read; promotes when you say go. Not blocking OnionDAO. Added 2026-05-26 by @pm.
-- **GO recommendation delivered — EFS Lists ready for dev.** PM reviewed `custom-lists` design + ADR-0044 (coherence + brainstorm cross-reference, NOT Solidity security — that was the 3-reviewer sweep). Verdict: GO. Design independently arrived at the exact TAG-overload fix the brainstorms found. Your call to greenlight. Added 2026-05-26 by @pm.
-- **DECISION NEEDED — ADR-0043 numbering collision (real, confirmed on branches).** `custom-lists` uses 0043 = "EFS Edge Constraint Callbacks" (Deferred); `editions-to-lenses` uses 0043 = "Rename editions to lenses" (Accepted). Whichever merges second must renumber; Glossary already links "per ADR-0043" expecting the rename. Pick the renumber loser before both land. (The earlier "phantom ADR" alarm is RESOLVED — ADR-0041/0042/0043/0044 all exist with coherent content on `custom-lists`; it was a main-vs-branch sync artifact.) Added 2026-05-26 by @pm.
-- **MINOR — `git pull` the contracts repo when convenient.** Local `contracts/` checkout is ~30 commits behind `origin/main` (local ADRs stop at 0032; origin has through 0043). This caused the brief "phantom ADR" false alarm. Some batch-3 brainstorm findings (rot-audit "main missing ADRs", the "~11 contracts" count) were read from the stale local tree and are confounded — re-verify against `origin/` before acting on them. PM didn't pull in case the tree is intentionally pinned. Added 2026-05-28 by @pm.
-- **REVIEW (you commissioned this) — proposed EFS design process.** [[Brainstorms/2026-05-28-pm-design-process-synthesis]] distills the Lists `design-lessons.md` + your "human attention is precious" framing into a streamlined lifecycle: **human judgment at the frame (early) + gate (late), AI grinds in between** — instead of 18 AI rounds before you read it. Meta-irony: this proposal should go through its own frame review (you read it, name the simplest framing) before I formalize it as `Onboarding/design-process.md`. No rush; not OnionDAO-blocking. Added 2026-05-28 by @pm.
-- **DOWNGRADED — typed-edge schema gap is NOT a Lists-blocker.** Earlier surface said this might need addressing before Lists merge. Batch-2 audit ([[Brainstorms/2026-05-26-bs-schema-coverage-audit-v1-schema-gap-map|bs-schema-coverage-audit-v1]]) re-evaluated honestly: of the 8 TAG-overload roles flagged, 5 work fine, 2 strain but workable with SDK conventions, and only 1 (state-transition / event edges with payload — provenance handoff, ownership transfer, synonymy-with-citation) actually breaks. That one is a real gap deserving an EVENT/TRANSITION schema design **before mainnet shape freeze**, but is NOT blocking Sepolia/OnionDAO. Removing the time-pressure framing. Updated 2026-05-26 by @pm.
-- **DEFERRED (do not think about this week):** my SOUL review, Milestones.md expansion, SDK design thread, Devcon, EFS OS SDK, dev tool app.
+> Scan **DECIDE NOW**. Reply with your picks. Everything below it can wait or needs nothing.
+
+## ⚡ DECIDE NOW (each is a fork — just pick a letter)
+
+**1. SDK for OnionDAO?**
+- (a) Bare-bones read/write SDK by end of next week (dev builds it right after Lists) — *PM rec if Lists dev is quick*
+- (b) Soft-launch: entrants call contracts directly via ABI; SDK later
+- (c) Drop the SDK track
+
+**2. ADR-0043 renumber — which one moves?** (before Lists merges to main)
+- (a) Renumber `custom-lists` "edge-constraint-callbacks" → 0045 — *PM rec (it's Deferred)*
+- (b) Renumber main's "rename-editions-to-lenses"
+
+**3. Flyers + entrant "start here" — want me to draft it?**
+- (a) Yes — agent drafts entrant onboarding doc + flyer copy — *PM rec*
+- (b) Just the onboarding doc
+- (c) You'll handle it
+
+## 🕐 WHEN YOU HAVE TIME (not blocking OnionDAO)
+
+- Frame-review the proposed design process → [[Brainstorms/2026-05-28-pm-design-process-synthesis]] (then I formalize it)
+- Promote [[brainstorm-system]] when you're happy with it
+
+## ℹ️ FYI (no action — details in [[Decisions]])
+
+- Lists got a GO; dev started. Typed-edge gap is NOT a blocker. Local `contracts/` checkout is ~30 commits stale — `git pull` it when convenient.
 
 ---
 
@@ -19,20 +33,17 @@
 
 ## How agents use this file
 
-When you produce something James needs to look at, append a bullet at the **top of this file** (above the `---` separator). One line, clearly actionable:
+This file exists to make James's decision queue **scannable in 10 seconds**. James found a flat list of 12 mixed bullets unreadable (2026-05-28) — so the file is now sorted by what it asks of him, not by date.
 
-```markdown
-- **Awaiting promotion: [[design-slug]]** — read & promote per [[design-system#Promotion ceremony]]. Added 2026-05-21.
-- **Blocked on decision: [[some-design]]** — needs your call on X (see `## Open questions` in the design). Added 2026-05-21.
-- **#needs/james flag in [[some-design]]** — quick question about Y. Added 2026-05-21.
-```
+Place each item in the right section:
 
-Conventions:
+- **⚡ DECIDE NOW** — genuine forks only. Phrase as a numbered question with lettered options and a PM recommendation. James should be able to reply "1a, 2b" and be done. Keep this section SHORT; if it has more than ~4 items, the most important ones are getting buried.
+- **🕐 WHEN YOU HAVE TIME** — reviews / promotions that aren't time-critical. One line each.
+- **ℹ️ FYI** — things James should know but that need no action. Collapse aggressively; one or two lines total, pointing at [[Decisions]] for detail. Do NOT let FYIs accumulate as separate bullets.
 
-- **Top of file = most recently added.** James scans top-down.
-- **One line each.** Description + link + date. No nested bullets.
-- **Remove your item** when James has acted on it (don't archive; the commit history is the archive).
-- **Empty file is the goal state** — anything above the `---` separator means James has work waiting.
-- **WIP limit:** 3 ready-for-promotion items at any time (per [[conventions#WIP limits]]). If this file has 3 awaiting-promotion items, stop queuing new ones until James clears one.
+Rules:
 
-Don't put low-priority observations here. Use [[Decisions]] for one-line decisions you made yourself, `Daily Notes/` for ephemeral notes, design-file `## Open questions` for trackable items inside a design.
+- **Prune ruthlessly.** When James acts on an item, delete it (git history is the archive). Stale items are the enemy — they're what made this file unreadable.
+- **A decision is a fork James picks.** Status updates, things-in-progress, and PM observations are NOT decisions — they go in [[Decisions]] or `Daily Notes/`, not here.
+- **Empty DECIDE NOW = James has nothing blocking him.** That's the goal state.
+- **WIP limit:** if DECIDE NOW has 3 awaiting-promotion items, don't queue more promotions (per [[conventions#WIP limits]]).
