@@ -27,6 +27,7 @@ Conventions: [[brainstorm-system]].
 - 2026-05-26 [`2026-05-26-bs-divergent-usecases-v1-efs-use-cases-across-industries`](./2026-05-26-bs-divergent-usecases-v1-efs-use-cases-across-industries.md) — `raw` — 15 use cases. Upstream for many subsequent brainstorms.
 - 2026-05-26 [`2026-05-26-bs-vocab-coherence-audit-v1-cross-repo-vocab-drift-audit`](./2026-05-26-bs-vocab-coherence-audit-v1-cross-repo-vocab-drift-audit.md) — `raw` — 7 High + 4 Medium + 2 Low drift instances + 14 Glossary gaps. **Sharpest finding: two branches each minted a different ADR-0043 (renumbering conflict).**
 - 2026-05-26 [`2026-05-26-bs-rot-audit-v1-first-formal-rot-audit`](./2026-05-26-bs-rot-audit-v1-first-formal-rot-audit.md) — `raw` — 16 rot items (4H/7M/5L). **Surprising:** `contracts/main` hasn't moved in 40 days; specs about to detonate at Lists merge. Recommends `#status/shelved` vocab addition.
+- 2026-05-28 [`2026-05-28-pm-design-process-synthesis`](./2026-05-28-pm-design-process-synthesis.md) — `raw` (James-commissioned) — Streamlined EFS design lifecycle synthesized from the Lists `design-lessons.md` retrospective. **Core principle: human attention at frame (early) + gate (late), AI in between.** 6-stage lifecycle, 8 reusable AI techniques, internal-vs-external review guidance. Proposes formalizing as `Onboarding/design-process.md`. Surfaced to For-James.
 
 ## By status
 

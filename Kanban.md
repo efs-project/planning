@@ -22,6 +22,7 @@ kanban-plugin: board
 - [ ] Build **EFS OS SDK** (capability surface for sandboxed Ring 3 Apps per [[Brainstorms/2026-05-26-pm-client-os-architecture]]) — deferred, not OnionDAO-required #repo/sdk
 - [ ] Build Client Skeleton (UI, media caching, thumbnails) #repo/client
 - [ ] Build EFS Development Tool App (standalone issue tracker for dogfooding)
+- [ ] Formalize EFS design process (frame-first lifecycle) — from [[Brainstorms/2026-05-28-pm-design-process-synthesis]]; likely `Onboarding/design-process.md`. Blocked on James's frame review of the proposal. #repo/planning #kind/design #blocked-on/human-decision
 - [ ] Migrate clones to /efs/ home directory layout #repo/planning #blocked-on/human-decision
 
 
