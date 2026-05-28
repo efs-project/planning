@@ -9,7 +9,9 @@ kanban-plugin: board
 - [ ] Schema spec freeze — collapses into Lists merge (In Flight). Confirm freeze the moment Lists merges. #repo/contracts #depends-on/lists-merge
 - [ ] Freeze smart-contract .sol file list — collapses into Lists merge (In Flight). Lock the set immediately after Lists merges. #repo/contracts #depends-on/lists-merge
 - [ ] Design: on-chain + off-chain SDK architecture (dedicated AI design session — @james initiates via in-chat prompt) #repo/sdk #kind/design
-- [ ] Build On-Chain SDK (folder management, permissions) — OnionDAO MVP #repo/sdk #depends-on/sdk-architecture-design
+- [ ] **Build bare-bones OnionDAO SDK (read/write)** — target END OF NEXT WEEK per @james 2026-05-28. Minimal read + write wrappers so entrants can add data. Gated on Lists→Sepolia (stable surface to wrap), NOT the full mainnet contract-shape freeze. Accepted cost: may need rework after the eventual contract-shape freeze (hackathon throwaway is fine). Subset of the fuller on-chain/off-chain SDK cards below. #repo/sdk #depends-on/lists-sepolia-deploy
+- [ ] **Discuss + draft OnionDAO entrant onboarding + flyers** — @james will initiate a separate discussion fork before drafting; PM resurfaces each session until started. Needs: "add your first data to EFS in 5 min" doc + flyer copy (tracks, prizes, dates, start-here URL). #repo/planning #blocked-on/human-decision
+- [ ] Build On-Chain SDK (folder management, permissions) — OnionDAO MVP (fuller version; the bare-bones card above is the near-term OnionDAO subset) #repo/sdk #depends-on/sdk-architecture-design
 - [ ] Build Off-Chain DB SDK (core ops, tombstoning, caching) — OnionDAO MVP #repo/sdk #depends-on/sdk-architecture-design
 - [ ] Deploy core contracts to Sepolia (OnionDAO 2026-06-01) #repo/contracts #depends-on/lists-merge
 - [ ] Plan OnionDAO hackathon logistics — venue/dates/prize amounts/judging/onboarding docs/comms plan #repo/planning

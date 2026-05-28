@@ -4,28 +4,17 @@
 
 ## ⚡ DECIDE NOW (each is a fork — just pick a letter)
 
-**1. SDK for OnionDAO?**
-- (a) Bare-bones read/write SDK by end of next week (dev builds it right after Lists) — *PM rec if Lists dev is quick*
-- (b) Soft-launch: entrants call contracts directly via ABI; SDK later
-- (c) Drop the SDK track
-
-**2. ADR-0043 renumber — which one moves?** (before Lists merges to main)
-- (a) Renumber `custom-lists` "edge-constraint-callbacks" → 0045 — *PM rec (it's Deferred)*
-- (b) Renumber main's "rename-editions-to-lenses"
-
-**3. Flyers + entrant "start here" — want me to draft it?**
-- (a) Yes — agent drafts entrant onboarding doc + flyer copy — *PM rec*
-- (b) Just the onboarding doc
-- (c) You'll handle it
+*(empty — nothing is blocking you right now. 🎉)*
 
 ## 🕐 WHEN YOU HAVE TIME (not blocking OnionDAO)
 
+- **Start the OnionDAO onboarding + flyers discussion** — you said you'll fork a chain for this; PM will keep reminding you each session until you do (you asked not to let it slip).
 - Frame-review the proposed design process → [[Brainstorms/2026-05-28-pm-design-process-synthesis]] (then I formalize it)
 - Promote [[brainstorm-system]] when you're happy with it
 
 ## ℹ️ FYI (no action — details in [[Decisions]])
 
-- Lists got a GO; dev started. Typed-edge gap is NOT a blocker. Local `contracts/` checkout is ~30 commits stale — `git pull` it when convenient.
+- SDK posture decided: **(a) bare-bones read/write SDK by end of next week** (gated on Lists→Sepolia). ADR-0043 collision **resolved by the dev** (renumbered to 0045). Lists has a GO; dev started. Typed-edge gap is NOT a blocker. Local `contracts/` checkout is ~30 commits stale — `git pull` when convenient.
 
 ---
 
