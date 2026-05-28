@@ -4,11 +4,16 @@
 
 ## ⚡ DECIDE NOW (each is a fork — just pick a letter)
 
-**SDK architecture — PROMOTE/REVISE** → [[Designs/sdk-architecture]] is at `#status/review`. Q1–Q5 all resolved and folded in (Q3 include-but-throw + reference index example; Q4 lens defaults to connected wallet; Q5 single-signature batching). **A 2nd expert review (wallet/EIP-5792 + EAS-attribution + security) caught a real Q5 correctness defect — now fixed:** the gateway-aggregator I'd put in the *automatic* batch path would make the gateway the attester, breaking lenses and colliding all users into one PIN slot. Corrected: only EIP-5792 + ERC-4337 give one-approval-AND-correct-attribution; transparent sequential signing is the automatic EOA fallback; the gateway is demoted to opt-in (delegation-based, not single-signature). Also added batch.preview() consent manifest + CREATE2/SSTORE2 note. First review (SDK-DX + contract-fidelity) had validated the frame; this 2nd round was a correctness catch within it. See the Revision log at the doc's end. Fork:
-- **(a) Promote to accepted** — assign a number; OnionDAO-subset implementation thread can start (gated on Lists→Sepolia for the schema freeze).
-- **(b) Revise** — name what's wrong; I'll fix and re-surface.
+**SDK architecture — TWO PICKS** → [[Designs/sdk-architecture]] at `#status/review`. Your clarification reframed it: **on-chain SDK = a Solidity library** (used from a dev's own contract; library form keeps the dev's contract as attester, which lenses require) and **off-chain SDK = just the TypeScript SDK** (no indexer/The-Graph baggage — reverse-lookup reads are `NotImplemented` shims; the SDK doesn't bundle indexing). Both folded in: new "Two deliverables" framing + a full On-chain SDK (Solidity) section + on-chain requirements; stripped the EFS-in-Postgres/reference-index apparatus. Q2–Q5 unchanged. Earlier expert review had also fixed a Q5 attribution defect (only EIP-5792/4337 give one-approval-with-correct-attribution; sequential is the auto EOA fallback; gateway demoted to opt-in). See the Revision log. Two forks:
 
-PM rec: **promote**.
+- **1. Q1 — where does the Solidity library live?** (reopened by the reframe; the old "one sdk/ repo" answer assumed both SDKs were TS)
+  - **(a) `contracts/`** — co-located with the immutable contracts it imports + version-locks to; same build; deploy/verify together. *(PM rec)*
+  - **(b) `sdk/contracts/`** — kept with the TS SDK so "the SDK" is one repo.
+- **2. PROMOTE / REVISE** the reframed doc:
+  - **(a) Promote** — assign a number; OnionDAO-subset implementation can start (gated on Lists→Sepolia).
+  - **(b) Revise** — name what's wrong; I'll fix and re-surface.
+
+PM rec: **1a + 2 promote.** (A fresh expert-review + brainstorm round on the reframe is running; I'll surface anything material before you decide.)
 
 ## 🕐 WHEN YOU HAVE TIME (not blocking OnionDAO)
 

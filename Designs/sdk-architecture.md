@@ -1,11 +1,11 @@
 # EFS SDK Architecture
 
 **Status:** review
-**Target repos:** sdk (new), planning
+**Target repos:** sdk (new — TypeScript SDK), contracts OR sdk (Solidity library — Q1), planning
 **Depends on:** [[0001-design-system]], [[brainstorm-system]], ADR-0031 (lenses), ADR-0041 (PIN/TAG), ADR-0044 (Lists — pending merge)
 **Supersedes:** —
-**Reviewers:** expert subagent pass 2026-05-28 (SDK API/DX + contract-fidelity); awaiting James frame-review
-**Last touched:** 2026-05-28
+**Reviewers:** expert subagent passes 2026-05-28 (SDK API/DX + contract-fidelity; wallet/EIP-5792 + attribution + security); awaiting James frame-review
+**Last touched:** 2026-05-28 (on-chain/off-chain reframe — see Revision log)
 
 #status/review #kind/design #repo/sdk #repo/planning
 
@@ -26,6 +26,22 @@ The anchor requirement: **a dev given this SDK can do everything the current deb
 ---
 
 ## Proposal
+
+### Two deliverables, two languages, two audiences
+
+EFS ships two SDKs (the third — the OS SDK — is deferred). They are **not** two packages of one TypeScript library; they are different artifacts for different developers:
+
+| | **On-chain SDK** | **Off-chain SDK** |
+|---|---|---|
+| Language | **Solidity** | **TypeScript** |
+| Form | A **library** (+ optional inheritable base contract) | An npm package (`@efs/sdk`) |
+| Runs | *Inside* a transaction, as part of the consuming contract | In a browser / Node / a script |
+| Audience | Smart-contract developers whose own contracts write to EFS | App, backend, and tooling developers |
+| Value-add | Collapses the multi-attestation dance into one Solidity call **while keeping the caller's contract as the EAS attester** | Collapses the same dance into one method, one wallet prompt, plus reads/queries/lenses |
+
+**Why the on-chain SDK must be a library, not a deployed helper (load-bearing).** EAS records `msg.sender` as the attester, and the attester address is the spine of the read model — lenses key on it (ADR-0031) and PROPERTY-value PINs are cardinality-1 *per attester* (ADR-0041). If a smart-contract dev called a *separately deployed* EFS helper contract, that helper would be `msg.sender` when it called EAS, so every consuming app's content would be attributed to the **helper**, not to the app — collapsing all of them into one identity and breaking lens resolution. (This is the exact defect the off-chain `EFSUploadGateway` analysis surfaced.) A Solidity **library** (`internal` functions inlined into the caller, or `using EFS for …`) and an **inheritable base contract** both execute in the *consuming contract's* context, so `msg.sender` stays the consuming contract — the correct attester. Decision (James, 2026-05-28): **the on-chain SDK is a Solidity library + inheritable base, never a deployed singleton.**
+
+The two SDKs share *concepts* (paths, DATA/MIRROR, PIN/TAG/PROPERTY, Lists, lenses) and the schema-UID constants, but not code. The rest of this doc designs the TypeScript off-chain SDK in depth (it is the larger surface and the debug-client parity target), then specifies the Solidity on-chain library.
 
 ### Requirements
 
@@ -65,7 +81,7 @@ Distilled from: `bs-third-party-dev-ux-v1` (dev friction walkthroughs), `bs-dive
 | N4 | Property helpers for well-known keys (`contentType`, `previousVersion`, `name`) | dev-friction: "where do PROPERTY keys come from?" |
 | N5 | `graph.timeline(anchor)` — time-ordered everything on an anchor | dev-friction: museum provenance |
 | N6 | `graph.versions(dataUID)` — `previousVersion` ancestor/descendant chain | dev-friction: recipe forker |
-| N7 | `lenses.discover()` — off-chain indexed lens discovery | dev-friction: cookbook curator |
+| N7 | `lenses.discover()` — lens discovery (reverse lookup; needs external indexing — `NotImplemented` shim in v1) | dev-friction: cookbook curator |
 | N8 | `watch(path)` — change subscription (fall back to polling when subscribe denied) | dev-friction: sports stats live feed |
 | N9 | Multi-chain config support | dev-friction: birding L2 wall |
 | N10 | `snapshot.cite()` — permanent URL + content hash + block for citation | dev-friction: museum scholar paper |
@@ -74,13 +90,28 @@ Distilled from: `bs-third-party-dev-ux-v1` (dev friction walkthroughs), `bs-dive
 
 | # | Requirement | Why deferred |
 |---|---|---|
-| D1 | Off-chain indexer / "EFS-in-Postgres" packaged pattern | Major scope; own design thread (Kanban Backlog) |
+| D1 | External index for reverse-lookups (timeline, descendants, lens discovery, search) | Major scope, own design thread (Kanban Backlog). The SDK does NOT bundle indexing infrastructure (per James, 2026-05-28); affected methods ship as `NotImplemented` shims so their shape is visible. |
 | D2 | EFSUploadGateway *contract* (opt-in `via: 'gateway'` path) | Contract is backlog work. Single-signature batching ships via EIP-5792/ERC-4337 (Q5 — see batch section); the gateway is **not** a single-signature mechanism (delegated attestation costs one signature per attestation) and is opt-in only, added when built without an API change. |
 | D3 | PROPERTY-by-value aggregation queries | Requires D1 |
 | D4 | EFS OS SDK (Ring 3 sandboxed app surface) | Explicitly out of scope (PM brief) |
 | D5 | Lens partition-by-domain (trust attester only for firmware) | Post-v1 lens design |
 | D6 | Historical/point-in-time reads (query at block N) | Requires EFSRouter changes |
 | D7 | `efs.search()` full-text | Requires D1; also a community expectation mismatch — needs prominent "EFS is not a search engine" in README |
+
+#### On-chain SDK (Solidity) requirements
+
+The MUST/NICE/DEFERRED tables above are the **off-chain** (TypeScript) surface — the debug-client parity target. The on-chain library is a separate, narrower deliverable. Its anchor requirement: **a smart-contract dev can perform any EFS write from inside their own contract in one call, with their contract recorded as the attester, without hand-assembling EAS payloads.**
+
+| # | Requirement |
+|---|---|
+| O1 | `pinFile`/`tag`/`setProperty`/`place`/`createList`+`addEntry` as one Solidity call each, composing the correct EAS attestation sequence (ADR-0041/0044) |
+| O2 | The consuming contract is always the EAS attester (library/base executes in caller context — no separately deployed helper in the write path) |
+| O3 | Path-anchor resolution/creation (`anchorAt(path)`) usable on-chain |
+| O4 | O(1) reads only: `propertyValue(keyAnchor, attester)`, `activePin(definition, attester)`. Enumeration (children/tags) is explicitly **out of scope on-chain** — impractical/unbounded gas; that's the off-chain SDK's job |
+| O5 | Schema UIDs + core contract addresses exposed as Solidity constants/immutables (the on-chain analogue of M11) |
+| O6 | Raw escape hatch: the EFS core contract interfaces + schema constants remain directly callable; the library is sugar, never a wall |
+
+Note there is **no batching/single-signature concern on-chain**: the whole library call runs inside one transaction (the consuming contract's function call), so N attestations happen in that one tx with no per-attestation wallet prompt. Batching (Q5) is a purely off-chain problem.
 
 ---
 
@@ -118,46 +149,40 @@ This pass determines what to WRAP vs. what to EXPOSE-AS-IS.
 
 ### Package Structure
 
-Two packages (OS SDK deferred), living in a single `sdk/` repo (Direction 2 from `bs-sdk-package-layout-v1`). **Q1 decided by James 2026-05-28: everything lives in the new `sdk/` repo** — the on-chain SDK does NOT co-locate in `contracts/`. ABI types are generated from `contracts/` at build time (e.g. `wagmi generate`/`typechain`) so they stay in sync without sharing a repo.
+Two artifacts in two languages: **one TypeScript package** (`@efs/sdk`) and **one Solidity library**. The earlier "two TS packages (`onchain`/`offchain`)" layout was a misread of deliverable #1 — corrected here.
+
+**The TypeScript off-chain SDK** — a single npm package. ABI types are generated from `contracts/` at build time (`wagmi generate`/`typechain`) so the schema/address constants stay in sync.
 
 ```
-/Users/james/Code/EFS/sdk/     (new repo)
-  package.json                  (workspace root, private)
-  pnpm-workspace.yaml
-  packages/
-    onchain/    → npm: @efs/sdk-onchain
-      src/
-        batch.ts         compiled batch builder → EAS.multiAttest
-        fs.ts            file read/write/stat/list + mirror management
-        graph.ts         Anchor tree, TAG/PIN traversal
-        props.ts         PROPERTY typed access
-        lists.ts         LIST + LIST_ENTRY
-        sorts.ts         sort overlay: discover/declare/read + processItems hinting
-        lenses.ts        lens management
-        raw.ts           contract escape hatches
-        constants.ts     schema UIDs, contract addresses, sort-func addresses
-        index.ts         EFSClient class + re-exports
-    offchain/   → npm: @efs/sdk   (the primary package devs install)
-      src/
-        cache.ts         read-through cache (IPFS/Arweave/HTTPS)
-        graph/
-          timeline.ts    time-ordered event stream
-          versions.ts    previousVersion DAG walk
-          subtree.ts     recursive anchor traversal
-        watch.ts         change subscription with polling fallback
-        index.ts         re-exports @efs/sdk-onchain + adds offchain surface
+@efs/sdk/                      (the one package devs `npm install`)
+  src/
+    client.ts        EFSClient class + instantiation/lens resolution
+    fs.ts            file read/write/stat/list + mirror management
+    graph.ts         Anchor tree, TAG/PIN traversal, referencing/decode bridge
+    props.ts         PROPERTY typed access
+    lists.ts         LIST + LIST_ENTRY
+    sorts.ts         sort overlay: discover/declare/read + processItems hinting
+    lenses.ts        lens management (client-side)
+    batch.ts         batch builder → EIP-5792 / 4337 / sequential
+    eas.ts           efs.EAS — raw EAS SDK exposure
+    raw.ts           efs.raw — contract escape hatches
+    decode.ts        efs.decode — raw attestation → typed entry
+    cache.ts         read-through content cache (IPFS/Arweave/HTTPS)
+    constants.ts     schema UIDs, contract addresses, sort-func addresses (generated)
+    index.ts         re-exports
   examples/
-    reference-index/    minimal runnable "EFS-in-Postgres" (Q3) — what OffchainIndexRequired points at
-    node-server/        server-side hot-wallet write example
-    browser-react/      MetaMask read/write example
+    node-server/     server-side hot-wallet write example
+    browser-react/   MetaMask read/write example
 ```
 
-> **Q1 — RESOLVED (James, 2026-05-28):** Everything lives in the new `sdk/` repo. ABI types generated from `contracts/` at build time.
+**The Solidity on-chain SDK** — a library + inheritable base contract (`EFS.sol` library, `EFSWriter` base, `EFSConstants`/interfaces). Specified in the "On-chain SDK (Solidity)" section below.
+
+> **Q1 — REOPENED by the 2026-05-28 reframe.** The original Q1 ("single `sdk/` repo") was resolved when *both* SDKs were assumed to be TypeScript. Now that the on-chain SDK is **Solidity tightly coupled to the immutable contracts**, its natural home is arguably `contracts/` (same Foundry/Hardhat toolchain, imports the core interfaces, deploys/verifies alongside, version-locked to the schemas it encodes) rather than a separate `sdk/` repo. The TypeScript SDK clearly lives in its own `sdk/` repo regardless. **The live fork is only: where does the Solidity library live — `contracts/` (co-located, recommended) or `sdk/contracts/` (with the TS SDK)?** See Open Questions Q1.
 
 **Consumer install:**
 ```bash
-npm install @efs/sdk               # off-chain (the normal install)
-npm install @efs/sdk-onchain       # on-chain only (unusual; for smart-contract devs)
+npm install @efs/sdk                       # off-chain (TypeScript) — the normal install
+forge install efs/contracts                # on-chain (Solidity) — for smart-contract devs
 ```
 
 ---
@@ -326,18 +351,21 @@ efs.graph.tags.list(target: Hex, opts?: { allAttesters?: boolean }): AsyncIterab
 efs.graph.tags.add(target: Hex, definition: Hex, weight?: bigint): Promise<Hex>  // returns tagUID
 efs.graph.tags.remove(tagUID: Hex): Promise<void>
 
-// Time-ordered stream of everything touching an anchor (off-chain)
+// Time-ordered stream of everything touching an anchor.
+// Needs external indexing infrastructure (see note) → throws NotImplemented in v1.
 efs.graph.timeline(anchor: Hex): AsyncIterable<TimelineEvent>
 // TimelineEvent: { type: 'tag'|'pin'|'property'|'data'|'mirror', uid, attester, time, ... }
 
-// previousVersion version DAG helpers (off-chain)
+// previousVersion version DAG helpers.
+// ancestors walks the on-chain previousVersion pointer (works in v1).
 efs.graph.versions.ancestors(dataUID: Hex): AsyncIterable<Hex>
-efs.graph.versions.descendants(dataUID: Hex): AsyncIterable<Hex>  // requires off-chain index
+// descendants is reverse-lookup → needs external indexing → throws NotImplemented in v1.
+efs.graph.versions.descendants(dataUID: Hex): AsyncIterable<Hex>
 ```
 
 **Design note on lens scoping in `efs.graph`:** `efs.fs` is the lens-*resolving* path — `fs.read`/`fs.stat` apply the first-attester-wins fallback across the lens stack (ADR-0031/0041) to pick the winning content. `efs.graph` is deliberately lower-level: `pins.get(definition, { attester })` reads exactly one attester's PIN in O(1) (no fallback), and `tags.list(target, { allAttesters })` enumerates raw edges. This is intentional — graph methods expose the unresolved edge data; if you want lens-resolved placement, use `fs`. A dev calling `graph.pins.get` without specifying `attester` gets the client's primary (first) lens, not a fallback walk. Documented so nobody assumes `graph` silently applies lens precedence.
 
-**Design note on `graph.timeline` and `graph.versions.descendants`:** These require an off-chain index (the EFS-in-Postgres pattern). They are intentionally on the `@efs/sdk` (off-chain) package, not `@efs/sdk-onchain`. When no off-chain index is configured, they throw `OffchainIndexRequired` with a message pointing at the **reference index example project** (`examples/reference-index/`, per Q3) — a minimal runnable "EFS-in-Postgres" devs can run as-is or fork. They are **not removed from the surface** — a weak "here's a read-through cache, here's how to add a real indexer" story is better than forcing devs to hand-roll the same thing, and shipping a reference implementation means the throw always points at working code.
+**Design note on reverse-lookup reads (`graph.timeline`, `graph.versions.descendants`, `lenses.discover`):** these are *reverse* lookups ("who points AT this?", "what happened across time?") that EFS's on-chain data can't answer efficiently without an external index — and per James's 2026-05-28 steer, **the SDK does not bundle or build indexing infrastructure** (no The-Graph integration, no packaged Postgres mirror). We keep these few methods in the typed surface as **`NotImplemented` shims** so the intended shape is visible and stable, rather than pretending or hand-waving — calling one throws `NotImplemented` with a message naming the capability it needs. Everything that *can* be answered from the chain directly (forward reads, `versions.ancestors`, `graph.referencing` via `getReferencingAttestationUIDs`) works in v1 without any external tool. A packaged external index is explicitly DEFERRED (D1) to its own design thread.
 
 ---
 
@@ -498,7 +526,7 @@ efs.lenses.add(addr: Address | string): Promise<void>    // resolves ENS
 efs.lenses.remove(addr: Address | string): Promise<void>
 efs.lenses.set(addrs: (Address | string)[]): Promise<void>
 
-// Discover lenses via off-chain index
+// Discover lenses — reverse lookup; needs external indexing → throws NotImplemented in v1.
 efs.lenses.discover(opts?: {
   topic?: string          // filter by topic anchor path
   minAttestations?: number
@@ -706,7 +734,7 @@ enum EFSErrorCode {
   AnchorDepthExceeded,     // path depth > MAX_ANCHOR_DEPTH (ADR-0021)
   MaxLensesExceeded,       // lenses.active().length > MAX_LENSES (ADR-0026)
   BatchSizeExceeded,       // internal — SDK auto-chunks; surfaced only if unchunkable
-  OffchainIndexRequired,   // called a method that needs the off-chain indexer
+  NotImplemented,          // called a reverse-lookup method that needs external indexing (v1 shim)
   PartialBatchFailure,     // some ops in a batch failed; BatchReceipt.partialFailure populated
   ListAppendOnlyViolation, // tried to remove entry from appendOnly list
   ListCapExceeded,         // maxEntries reached
@@ -810,26 +838,126 @@ All debug-client capabilities are directly covered; the few that touch raw attes
 
 ---
 
+## On-chain SDK (Solidity)
+
+Everything above is the TypeScript SDK. This section specifies the **separate Solidity deliverable** for smart-contract developers whose own contracts write to EFS (e.g. a DAO archiving proposals, an NFT contract pinning metadata, a registry recording provenance).
+
+### Form: library + inheritable base (never a deployed singleton)
+
+Two ways to consume it, both executing in the **caller's** context so the caller's contract is the EAS attester (the load-bearing constraint from "Two deliverables" above):
+
+```solidity
+// (1) Inheritable base — holds the EAS address + schema constants, exposes _efs* helpers.
+import {EFSWriter} from "efs-contracts/sdk/EFSWriter.sol";
+
+contract MyDAO is EFSWriter {
+    constructor(IEAS eas) EFSWriter(eas) {}
+
+    function archiveProposal(uint256 id, bytes calldata doc) external {
+        // one call composes DATA + MIRROR + contentType-PROPERTY triple + placement PIN
+        // + folder-visibility TAGs; MyDAO is msg.sender → MyDAO is the attester.
+        _efsPinFile(string.concat("/dao/proposals/", _toString(id)), doc, "application/pdf");
+    }
+}
+
+// (2) Library with `using` — for contracts that can't or don't want to inherit.
+import {EFS} from "efs-contracts/sdk/EFS.sol";
+
+contract MyApp {
+    using EFS for IEAS;
+    IEAS constant eas = IEAS(0x4200...);   // canonical EAS
+
+    function save(bytes calldata content) external {
+        eas.pinFile("/app/blobs/latest", content, "application/octet-stream");
+    }
+}
+```
+
+A Solidity `library` with `internal` functions is **inlined** into the consuming contract (no separate deployment, no delegatecall hop); the inheritable base compiles in the same way. Either path keeps `msg.sender == address(consumingContract)` when EAS is called. A *separately deployed* helper called via a normal `CALL` would make the **helper** the attester and is therefore never offered.
+
+### Write surface (the value-add: one call ⟶ the correct attestation sequence)
+
+```solidity
+library EFS {
+    // Compose a file write: DATA (+ MIRROR for the content), contentType PROPERTY triple,
+    // placement PIN at the path's file-anchor, and folder-visibility TAGs for new ancestors.
+    // Returns the DATA UID and the placement PIN UID.
+    function pinFile(IEAS eas, string memory path, bytes memory content, string memory contentType)
+        internal returns (bytes32 dataUID, bytes32 pinUID);
+
+    // Lower-level placement: PIN(refUID = dataUID, definition = fileAnchor). Singleton; supersedes.
+    function place(IEAS eas, bytes32 fileAnchor, bytes32 dataUID) internal returns (bytes32 pinUID);
+
+    // Cardinality-N labelled/weighted edge (ADR-0041). weight is signed int256 (negatives valid).
+    function tag(IEAS eas, bytes32 target, bytes32 definition, int256 weight) internal returns (bytes32 tagUID);
+
+    // PROPERTY value as the 3-attestation singleton rebind (key ANCHOR if new + PROPERTY + binding PIN).
+    function setProperty(IEAS eas, bytes32 keyAnchor, bytes memory value)
+        internal returns (bytes32 propUID, bytes32 bindingPinUID);
+
+    // Resolve (creating if absent) the anchor chain for a path; returns the leaf anchor UID.
+    function anchorAt(IEAS eas, string memory path) internal returns (bytes32 anchorUID);
+
+    // Lists (ADR-0044): create a LIST, then append entries.
+    function createList(IEAS eas, ListConfig memory cfg) internal returns (bytes32 listUID);
+    function addEntry(IEAS eas, bytes32 listUID, bytes32 target, int256 weight) internal returns (bytes32 entryUID);
+}
+```
+
+### Read surface — O(1) only
+
+```solidity
+    // The active PROPERTY value for a key, as seen by one attester. O(1) via getActivePin (ADR-0041).
+    function propertyValue(IEAS eas, bytes32 keyAnchor, address attester) internal view returns (bytes memory);
+
+    // The active PIN for a definition, by attester. O(1).
+    function activePin(IEAS eas, bytes32 definition, address attester) internal view returns (bytes32);
+```
+
+**Enumeration (children, tags-on-a-target, sorted reads) is deliberately absent on-chain** — it is unbounded-gas and impractical inside a transaction. A contract that needs to *react to* graph contents reads a specific O(1) value (a PROPERTY or a PIN) it was given the key for; broad traversal belongs to the off-chain SDK. Lenses are likewise an off-chain read-time concept: on-chain reads name an explicit `attester` rather than walking a precedence stack.
+
+### Constants & escape hatch
+
+```solidity
+import {EFSConstants} from "efs-contracts/sdk/EFSConstants.sol";
+// EFSConstants.ANCHOR_SCHEMA, .DATA_SCHEMA, .PIN_SCHEMA, … as `bytes32 constant`,
+// generated from the deployed registry and version-locked to the contracts release.
+
+// Escape hatch: the helpers are sugar over EAS + these constants. Any contract can bypass the
+// library and call eas.attest(...) / eas.multiAttest(...) directly with the raw schema encodings —
+// the library never hides state and never gates access.
+```
+
+### No batching / signature problem on-chain
+
+Unlike the off-chain SDK (where multiple attestations across schemas mean multiple wallet prompts — the whole Q5 problem), an on-chain library call runs **inside one transaction** already: the consuming contract makes N attestation calls during its own execution, triggered by a single user transaction to *that contract*. There is no per-attestation prompt and nothing to batch. The single-signature machinery (EIP-5792 / 4337 / sequential) is purely an off-chain concern.
+
+### Open question on packaging
+
+Where the Solidity source lives (`contracts/` vs `sdk/contracts/`) is the reopened **Q1** — see Open Questions. The recommendation is `contracts/`: a library that imports the core contract interfaces and encodes their schema UIDs is naturally version-locked to, built with, and deployed/verified alongside the contracts.
+
+---
+
 ## Open Questions
 
-- [x] **Q1 (repo packaging) — RESOLVED (James, 2026-05-28):** Everything lives in the new `sdk/` repo; the on-chain SDK does NOT co-locate in `contracts/`. ABI types are generated from `contracts/` at build time (`wagmi generate`/`typechain`) so they stay in sync without sharing a repo.
+- [ ] **Q1 (repo packaging) — REOPENED by the 2026-05-28 on-chain/off-chain reframe.** The prior resolution ("everything in one `sdk/` repo") assumed *both* SDKs were TypeScript. They aren't: the TS SDK (`@efs/sdk`) lives in its own `sdk/` repo (settled), but the **Solidity** on-chain library now has a real choice of home. **(a) `contracts/`** — co-located with the immutable contracts it imports and version-locks to; same Foundry/Hardhat build; deployed/verified together. **(b) `sdk/contracts/`** — kept with the TS SDK so "the SDK" is one repo. PM rec: **(a) `contracts/`** — a Solidity library that imports the core interfaces and hardcodes their schema UIDs is a contracts-repo artifact; splitting it from the contracts invites version skew. TS-side ABI/const generation already crosses the repo boundary cleanly either way.
 
 - [x] **Q2 (namespace naming) — RESOLVED (James, 2026-05-28): confirmed (a) + the codified verb contract.** domain-model namespaces (`efs.fs`, `efs.graph`, `efs.props`, `efs.lists`, `efs.sorts`, `efs.lenses`, `efs.EAS`, `efs.raw`) vs verb-first (`efs.read/write/query/attest`). An expert SDK-design review (2026-05-28) found **(a) is the de-facto industry standard** — *resource-oriented design*, codified in Google's API Design Guide and embodied by Stripe (`stripe.customers.create`), Prisma (`prisma.user.findMany`), Twilio, Supabase, GitHub Octokit. **No widely-respected SDK uses a top-level verb-namespace tree.** The field splits between resource.action namespacing (multi-resource domains — EFS's case) and flat verb methods (single-resource domains like EAS/ethers). Verb-first also fails EFS specifically because `graph` and `lenses` are resource models, not actions, and don't reduce to a single verb. **Refinement adopted from the review:** keep (a)'s noun tree but enforce a *consistent verb vocabulary* on the leaves — this pairs resource-oriented design with Google's "standard methods" discipline, giving both a domain map and predictable operation names. An expert SDK-design review (2026-05-28) noted the first draft *claimed* this consistency but did not deliver it (`get` was used for three different things; enumeration used five different verbs). That is now fixed: the eight-verb contract is codified in **"Naming conventions (the verb contract)"** above and every leaf method conforms. **Recommendation: confirm (a) + the codified verb contract.**
 
-- [x] **Q3 (off-chain index in v1) — RESOLVED (James, 2026-05-28): option (a).** Methods requiring an off-chain index (`graph.timeline`, `graph.versions.descendants`, `lenses.discover`) stay on the `@efs/sdk` surface and throw `OffchainIndexRequired` until an index is configured — they signal intent and give devs the model without forcing the SDK to bundle an indexer. **A reference off-chain index is shipped as a companion example project** (`examples/reference-index/` — a minimal "EFS-in-Postgres" the dev can run or fork), so the throw always points at runnable code, not a blank page.
+- [x] **Q3 (reverse-lookup reads in v1) — RESOLVED + REFRAMED (James, 2026-05-28).** Original framing ("ship an off-chain index / reference EFS-in-Postgres example") was dropped: per James, the SDK does **not** bundle or build indexing infrastructure (nothing to do with The Graph). The handful of reverse-lookup methods (`graph.timeline`, `graph.versions.descendants`, `lenses.discover`) stay in the typed surface as **`NotImplemented` shims** so their shape is visible and stable; everything answerable directly from the chain works in v1. A packaged external index is DEFERRED (D1) to its own thread. (Renamed `OffchainIndexRequired` → `NotImplemented`; removed the `examples/reference-index/` project.)
 
 - [x] **Q4 (lens default) — RESOLVED (James, 2026-05-28): default the lens to the connected wallet's address.** Don't always require an explicit lens — that taxes hello-world. Instead default the lens stack to the **connected wallet's own address**, and require an explicit lens *only* when no wallet is connected (a read with no attester is meaningless → `LensRequired`). The deployer default was the original bug; the user's own wallet is a safe default. See "Design note on lens defaulting" in Instantiation for the four-step resolution order.
 
 - [x] **Q5 (single-signature writes) — RESOLVED (James, 2026-05-28; corrected after 2nd expert review).** No placeholder flag. `efs.batch()` delivers one signature where the wallet allows, constrained by the hard rule that **the connected wallet must stay the attester** (lenses + cardinality-1 PINs key on it). Only EIP-5792 `wallet_sendCalls` and ERC-4337 deliver one approval AND correct attribution; the **automatic fallback for plain EOAs is transparent sequential signing** (not a contract). The SDK-owned upgradeable `EFSUploadGateway` is **opt-in only** (`via: 'gateway'`), uses `multiAttestByDelegation` to keep the user as attester, and is explicitly **not** a single-signature mechanism. See "Design note on single-signature writes" in the batch section.
 
-**All open questions resolved — this doc is promote-ready.** Held at `#status/review` per design mode for James's promote/revise call; not self-promoting.
+**Status: one open fork (Q1 repo home for the Solidity library) — otherwise resolved.** The 2026-05-28 on-chain/off-chain reframe reopened Q1; Q2–Q5 remain resolved. Held at `#status/review` per design mode; not self-promoting. James's two calls: (1) the Q1 fork, and (2) promote vs. revise on the reframed doc.
 
 ---
 
 ## Pre-promotion checklist
 
-- [x] All `## Open questions` resolved or explicitly deferred — Q1–Q5 all RESOLVED (James, 2026-05-28), cited inline
-- [x] `**Target repos:**` confirmed (sdk — new; planning — design doc only)
+- [ ] All `## Open questions` resolved or explicitly deferred — Q2–Q5 RESOLVED; **Q1 reopened** by the on-chain/off-chain reframe (Solidity library repo home)
+- [ ] `**Target repos:**` — TS SDK in new `sdk/` repo (settled); Solidity library repo home is Q1 (open); planning — design doc only
 - [x] `**Depends on:**` chain — design-system accepted ✅; brainstorm-system in review; ADR-0031 accepted ✅; ADR-0041 accepted ✅; ADR-0044 pending Lists merge (implementation gated, not design gated)
 - [x] No `<!-- AGENT-Q: -->` comments left in the design body
 - [x] At least one round of `#status/review` — expert subagent review pass (2026-05-28) + James Q1–Q5 resolutions
@@ -899,3 +1027,13 @@ All five open questions are now RESOLVED; the doc is held at `#status/review` pe
 - **`partialFailure` scoped** to the non-atomic sequential path only (5792/4337 are all-or-nothing).
 
 This is the only architecture-touching change since the frame review and it is a *correctness* fix, not a scope change. Remaining lower-severity review notes (read-path content-hash verification on mirrors, mutable ENS lens-membership, the connect-time lens self-default surfacing in `efs.batch.preview` rather than silently) are tracked as implementation-notes refinements and don't block the frame decision. Doc remains at `#status/review` for James's promote/revise call.
+
+**2026-05-28 — on-chain/off-chain reframe (James clarification).** James clarified two framing errors carried since the PM brief: (1) the **on-chain SDK is a Solidity deliverable** — a *library* (+ inheritable base) that smart-contract devs use *from their own contracts*, not a TypeScript package; and (2) **"off-chain SDK" just means "the TypeScript SDK"** — it has nothing to do with The Graph / a packaged indexer. Changes folded in:
+- **New "Two deliverables" framing** at the top of the Proposal, plus an **On-chain SDK (Solidity)** section specifying the library/base API (`pinFile`, `tag`, `setProperty`, `place`, `createList`/`addEntry`, O(1) reads, constants, escape hatch).
+- **Why a library, not a deployed helper:** the same attester-fidelity rule from the Q5 review applies on-chain — a separately deployed helper would be `msg.sender` and capture every consumer's attestations. A library/base executes in the consuming contract's context, so the consuming contract stays the attester. James confirmed the library form.
+- **No batching on-chain:** a library call runs inside one transaction already; the Q5 single-signature machinery is off-chain-only. Stated explicitly.
+- **Package structure corrected:** one TS package (`@efs/sdk`) + one Solidity library — not two TS packages. Added on-chain (O1–O6) requirements.
+- **Stripped the indexer framing:** the SDK does not bundle/build indexing. Reverse-lookup methods (`graph.timeline`, `versions.descendants`, `lenses.discover`) become `NotImplemented` shims (renamed from `OffchainIndexRequired`); removed the `examples/reference-index/` "EFS-in-Postgres" project; D1 reworded; Q3 reframed.
+- **Q1 reopened:** the single-repo decision assumed both SDKs were TS. The Solidity library's home (`contracts/` vs `sdk/contracts/`) is now a live fork — PM rec `contracts/`.
+
+This reopened one question (Q1) and did not change Q2–Q5. Doc held at `#status/review`.
