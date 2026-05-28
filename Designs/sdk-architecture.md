@@ -75,7 +75,7 @@ Distilled from: `bs-third-party-dev-ux-v1` (dev friction walkthroughs), `bs-dive
 | # | Requirement | Why deferred |
 |---|---|---|
 | D1 | Off-chain indexer / "EFS-in-Postgres" packaged pattern | Major scope; own design thread (Kanban Backlog) |
-| D2 | EFSUploadGateway *contract* (one of the single-signature mechanisms) | Contract is backlog work, but the SDK's single-signature batch design is in-scope and ships via EIP-5792 first (Q5 resolved — see batch section). The gateway is an SDK-owned upgradeable convenience contract, added when built without an API change. |
+| D2 | EFSUploadGateway *contract* (opt-in `via: 'gateway'` path) | Contract is backlog work. Single-signature batching ships via EIP-5792/ERC-4337 (Q5 — see batch section); the gateway is **not** a single-signature mechanism (delegated attestation costs one signature per attestation) and is opt-in only, added when built without an API change. |
 | D3 | PROPERTY-by-value aggregation queries | Requires D1 |
 | D4 | EFS OS SDK (Ring 3 sandboxed app surface) | Explicitly out of scope (PM brief) |
 | D5 | Lens partition-by-domain (trust attester only for firmware) | Post-v1 lens design |
@@ -535,13 +535,16 @@ const estimate = await efs.batch(b => {
   for (const obs of observations) b.fs.write(pathFor(obs), toBytes(obs))
 }).estimate()
 // estimate: { attestationCount, chunkDeployCount, txCount, signatureCount, mechanism, estimatedGasUnits, estimatedUSD? }
-// mechanism: 'eip5792' | 'erc4337' | 'gateway' | 'sequential' — which path the SDK will use (see below)
+// mechanism: 'eip5792' | 'erc4337' | 'sequential' (automatic) | 'gateway' (opt-in only) — see Q5 note below.
+// signatureCount reflects the chosen mechanism: 1 for eip5792/erc4337, N for sequential, N for gateway-by-delegation.
 
 // BatchReceipt
 type BatchReceipt = {
   txHashes: Hex[]
   results: OperationResult[]    // one per op
-  partialFailure?: OperationResult[]   // the subset where ok === false (same objects, filtered)
+  partialFailure?: OperationResult[]   // only populated for the non-atomic 'sequential' mechanism, where
+                                       // the user can abandon midway; eip5792/erc4337 are atomic (all-or-nothing)
+                                       // so partialFailure is always undefined for them
 }
 
 // Each queued op carries a STABLE id so partial-failure results correlate back to the op that
@@ -567,14 +570,22 @@ type OperationResult = {
 - Report `signatureCount` AND `txCount` up-front so the dev can warn users accurately
 - On partial failure, report which operations succeeded and which failed with errors
 
-**Design note on single-signature writes (Q5 resolved — a core value, not a placeholder):** A logical write spans multiple EAS schemas (DATA, MIRROR, PROPERTY, PIN, TAG, ANCHOR), and `EAS.multiAttest` batches only *within* a schema — so the naive path is several `multiAttest` calls = several wallet signatures. Collapsing that to **one signature** is core SDK value, so `efs.batch()` owns mechanism selection rather than exposing a flag. At execute time it detects the connected wallet's capabilities and picks, in preference order:
+**Design note on single-signature writes (Q5 resolved — a core value, with one hard constraint):** A logical write spans multiple EAS schemas (DATA, MIRROR, PROPERTY, PIN, TAG, ANCHOR), and `EAS.multiAttest` batches only *within* a schema — so the naive path is several `multiAttest` calls = several wallet signatures. Collapsing that to **one signature** is core SDK value, so `efs.batch()` owns mechanism selection rather than exposing a flag.
 
-1. **EIP-5792 `wallet_sendCalls`** — when the wallet supports atomic batched calls (an increasing share do). All the attest calls go up as one batch the user approves once. No EFS contract needed; this is the preferred path.
-2. **ERC-4337** — if the signer is a smart account, bundle the calls into a single UserOperation (one signature).
-3. **SDK-owned `EFSUploadGateway` contract** — a thin aggregator that performs all the attestations in one `tx`. Crucially this is an **SDK-owned, upgradeable convenience contract — NOT part of EFS-core immutable contracts** (it holds no authoritative state; it just relays attestations on the caller's behalf, attributing them to the caller). It can be redeployed/improved freely because nothing's schema UID depends on it.
-4. **Fallback: N sequential `multiAttest` signatures** — for plain EOAs on wallets without 5792. The SDK reports `signatureCount` so the UI can say "this will need 3 signatures," and uses partial-failure semantics if the user abandons midway.
+⚠️ **The hard constraint: attestation attribution.** EAS records `msg.sender` as the attester on every `attest`/`multiAttest`. The attester address is **load-bearing for the entire read model** — lenses key on it (ADR-0031), and PROPERTY-value PINs are cardinality-1 *per attester*. So any mechanism that changes who `msg.sender` is **silently corrupts reads**: content gets attributed to the wrong address, and every user of a shared relayer collides in the same PIN slot, each write superseding the last. A batching mechanism is only acceptable if it preserves the **connected wallet** as the attester. This rules out the naive "thin aggregator contract" idea — when a contract calls EAS, the *contract* is the attester, not the user. EAS's fix (`multiAttestByDelegation`) restores correct attribution but requires **one EIP-712 signature per attestation** (per-attester nonce in `EIP1271Verifier`), which defeats single-signature. The mechanisms that deliver **both** one approval **and** correct attribution are EIP-5792 and ERC-4337 only.
 
-The dev sees one API (`efs.batch(...)`); the SDK delivers the fewest signatures the wallet allows. `opts` can pin a mechanism for testing (`efs.batch({ via: 'gateway' | 'eip5792' | 'sequential' })`), but the default is automatic.
+At execute time the SDK detects capabilities (`wallet_getCapabilities` for 5792; smart-account detection for 4337) and picks, in preference order:
+
+1. **EIP-5792 `wallet_sendCalls`** — when the wallet advertises atomic batched calls via `wallet_getCapabilities` (a growing share do). All attest calls go up as one batch the user approves once; `msg.sender` stays the user's wallet, so attribution is correct. No EFS contract needed. **Preferred path.**
+2. **ERC-4337** — if the signer is a smart account, bundle the calls into one UserOperation (one signature). The account is the attester, which is the correct address for a smart-account user.
+3. **Automatic fallback: N sequential `multiAttest` signatures** — for plain EOAs on wallets without 5792. Attribution is trivially correct (the EOA signs each batch). The SDK reports `signatureCount` so the UI can say "this needs 3 signatures," and uses partial-failure semantics if the user abandons midway. This is the **default fallback** — a transparent, no-extra-trust path.
+4. **Opt-in only: SDK-owned `EFSUploadGateway` via `multiAttestByDelegation`** — *not* a single-signature mechanism (it costs one EIP-712 signature per attestation) and *not* in the automatic path. A gateway can still add value (sponsored gas, a single on-chain `tx` even if multiple off-chain signatures) but it puts an **SDK-owned upgradeable contract in the signing path**, so it must be **explicitly opted into** (`efs.batch({ via: 'gateway' })`), never selected silently. It is an SDK-owned convenience contract, **NOT EFS-core immutable** — it relays via delegation so the *user* remains the attester (a plain non-delegated aggregator would break attribution and is never used).
+
+The dev sees one API (`efs.batch(...)`); by default the SDK delivers the fewest signatures the wallet allows **without ever changing the attester or introducing trusted contracts silently**. `opts.via` can pin a mechanism for testing or to opt into the gateway (`'eip5792' | 'erc4337' | 'sequential' | 'gateway'`).
+
+**Batch consent & op-integrity:** because one approval can cover many operations, the SDK exposes `batch.preview()` returning a human-readable manifest (every op, target path, and attester) plus an integrity hash; the calls submitted to the wallet are the exact preview set (preview↔execute hash match enforced), so a UI can show the user what they're signing and nothing can be smuggled in between preview and execute.
+
+**SSTORE2 note:** bundling SSTORE2 chunk deploys into one EIP-5792/4337 batch requires the chunk addresses to be pre-derivable — i.e. deployed through a **CREATE2 factory** so the MIRROR/DATA attestations can reference them within the same batch. With plain `CREATE`, chunk addresses aren't known until mined, forcing a second signature; the SDK uses the CREATE2 factory path so large writes stay single-approval where the wallet supports batching.
 
 ---
 
@@ -809,7 +820,7 @@ All debug-client capabilities are directly covered; the few that touch raw attes
 
 - [x] **Q4 (lens default) — RESOLVED (James, 2026-05-28): default the lens to the connected wallet's address.** Don't always require an explicit lens — that taxes hello-world. Instead default the lens stack to the **connected wallet's own address**, and require an explicit lens *only* when no wallet is connected (a read with no attester is meaningless → `LensRequired`). The deployer default was the original bug; the user's own wallet is a safe default. See "Design note on lens defaulting" in Instantiation for the four-step resolution order.
 
-- [x] **Q5 (single-signature writes) — RESOLVED (James, 2026-05-28): core SDK value; SDK owns mechanism selection.** No placeholder flag. `efs.batch()` delivers one signature where the wallet allows, choosing the mechanism by capability detection: EIP-5792 `wallet_sendCalls` first, then ERC-4337 for smart accounts, then an **SDK-owned upgradeable `EFSUploadGateway`** convenience contract (explicitly NOT EFS-core immutable), falling back to N sequential signatures with accurate `signatureCount` reporting. See "Design note on single-signature writes" in the batch section.
+- [x] **Q5 (single-signature writes) — RESOLVED (James, 2026-05-28; corrected after 2nd expert review).** No placeholder flag. `efs.batch()` delivers one signature where the wallet allows, constrained by the hard rule that **the connected wallet must stay the attester** (lenses + cardinality-1 PINs key on it). Only EIP-5792 `wallet_sendCalls` and ERC-4337 deliver one approval AND correct attribution; the **automatic fallback for plain EOAs is transparent sequential signing** (not a contract). The SDK-owned upgradeable `EFSUploadGateway` is **opt-in only** (`via: 'gateway'`), uses `multiAttestByDelegation` to keep the user as attester, and is explicitly **not** a single-signature mechanism. See "Design note on single-signature writes" in the batch section.
 
 **All open questions resolved — this doc is promote-ready.** Held at `#status/review` per design mode for James's promote/revise call; not self-promoting.
 
@@ -877,4 +888,14 @@ These are all within-frame refinements — none changed the architecture. The do
 - **Q4:** dropped "explicit lens always required." The lens now **defaults to the connected wallet's own address** (your own content is a safe default; the deployer default was the original bug). Explicit lens required only when no wallet is connected (`LensRequired`). New four-step resolution order documented in Instantiation.
 - **Q5:** removed the placeholder `gateway` flag. `efs.batch()` now owns single-signature delivery by capability detection — EIP-5792 → ERC-4337 → SDK-owned upgradeable `EFSUploadGateway` (explicitly not EFS-core) → sequential fallback — reporting `signatureCount`/`mechanism`.
 
-All five open questions are now RESOLVED; the doc is promote-ready and held at `#status/review` per design mode.
+All five open questions are now RESOLVED; the doc is held at `#status/review` per design mode.
+
+**2026-05-28 — second expert review (3 agents: wallet/EIP-5792, EAS-attribution fidelity, security/authz) caught a Q5 correctness defect; corrected.** The first-pass Q5 design listed an `EFSUploadGateway` aggregator as automatic mechanism #3. The fidelity reviewer flagged this as **flat wrong**: when a contract calls EAS, EAS records the *contract* as `msg.sender`/attester — so a plain aggregator attributes all content to the gateway address, collapsing every user into one cardinality-1 PIN slot and breaking lens resolution. EAS's `multiAttestByDelegation` restores the user as attester but costs **one signature per attestation** — so it is not a single-signature mechanism at all. Corrections folded in:
+- **Only EIP-5792 and ERC-4337 deliver one approval AND correct attribution.** Stated the "attester is load-bearing" hard constraint explicitly in the Q5 note.
+- **Demoted the gateway to opt-in (`via: 'gateway'`), never automatic;** it relays by delegation (user stays attester) and is explicitly not single-signature. **Promoted transparent sequential signing to the automatic EOA fallback** (security: don't put an upgradeable SDK-owned contract in the signing path silently).
+- **Capability detection named:** `wallet_getCapabilities` for 5792; smart-account detection for 4337.
+- **Batch consent/op-integrity:** added `batch.preview()` returning a manifest + integrity hash with preview↔execute hash enforcement (closes the op-smuggling gap a single approval otherwise opens).
+- **SSTORE2 + CREATE2:** documented that bundling chunk deploys into one batch needs a CREATE2 factory (addresses must be pre-derivable) to stay single-approval.
+- **`partialFailure` scoped** to the non-atomic sequential path only (5792/4337 are all-or-nothing).
+
+This is the only architecture-touching change since the frame review and it is a *correctness* fix, not a scope change. Remaining lower-severity review notes (read-path content-hash verification on mirrors, mutable ENS lens-membership, the connect-time lens self-default surfacing in `efs.batch.preview` rather than silently) are tracked as implementation-notes refinements and don't block the frame decision. Doc remains at `#status/review` for James's promote/revise call.
