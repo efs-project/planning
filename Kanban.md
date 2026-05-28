@@ -8,12 +8,10 @@ kanban-plugin: board
 
 - [ ] Schema spec freeze — collapses into Lists merge (In Flight). Confirm freeze the moment Lists merges. #repo/contracts #depends-on/lists-merge
 - [ ] Freeze smart-contract .sol file list — collapses into Lists merge (In Flight). Lock the set immediately after Lists merges. #repo/contracts #depends-on/lists-merge
-- [ ] Design: on-chain + off-chain SDK architecture (dedicated AI design session — @james initiates via in-chat prompt) #repo/sdk #kind/design
-- [ ] **Design bare-bones OnionDAO SDK** (light / Ephemeral-tier) — short requirements + API-surface sketch in `planning/Designs/`. **No code.** Spawn NOW — design has NO dependency on Lists/deploy. Covers core read/write ("add your first data"); Lists methods out-of-scope for v1. Frame-review by @james, then a separate code thread. #repo/sdk #kind/design
-- [ ] **Build bare-bones OnionDAO SDK (read/write)** — separate code thread AFTER the design is frame-reviewed. Final wiring gated on Lists→Sepolia. Target end of next week. Throwaway-acceptable (expect rework post contract-shape-freeze). #repo/sdk #depends-on/bare-bones-sdk-design #depends-on/lists-sepolia-deploy
+- [ ] **Implement OnionDAO subset of [[sdk-architecture]]** — read/write so entrants can add data; the near-term subset of the full SDK design (now In Flight). Separate CODE thread, after the design is frame-reviewed; final wiring gated on Lists→Sepolia. Target end of next week. #repo/sdk #depends-on/sdk-architecture-design #depends-on/lists-sepolia-deploy
 - [ ] **Discuss + draft OnionDAO entrant onboarding + flyers** — @james will initiate a separate discussion fork before drafting; PM resurfaces each session until started. Needs: "add your first data to EFS in 5 min" doc + flyer copy (tracks, prizes, dates, start-here URL). #repo/planning #blocked-on/human-decision
-- [ ] Build On-Chain SDK (folder management, permissions) — OnionDAO MVP (fuller version; the bare-bones card above is the near-term OnionDAO subset) #repo/sdk #depends-on/sdk-architecture-design
-- [ ] Build Off-Chain DB SDK (core ops, tombstoning, caching) — OnionDAO MVP #repo/sdk #depends-on/sdk-architecture-design
+- [ ] Build On-Chain SDK (folder management, permissions) — full impl of [[sdk-architecture]] on-chain surface; the "OnionDAO subset" card above is the near-term cut #repo/sdk #depends-on/sdk-architecture-design
+- [ ] Build Off-Chain DB SDK (core ops, tombstoning, caching) — full impl of [[sdk-architecture]] off-chain surface #repo/sdk #depends-on/sdk-architecture-design
 - [ ] Deploy core contracts to Sepolia (OnionDAO 2026-06-01) #repo/contracts #depends-on/lists-merge
 - [ ] Plan OnionDAO hackathon logistics — venue/dates/prize amounts/judging/onboarding docs/comms plan #repo/planning
 - [ ] **Fix contracts spec drift** — `contracts/specs/` still uses "edition" (now "lens" per ADR-0043) and "TagResolver" (now "EdgeResolver" per ADR-0041). `specs/overview.md` says 6 core contracts; actual on `custom-lists` is different — needs reconciliation. Vocab audit (`bs-vocab-coherence-audit-v1` 2026-05-26) found 7 high-severity drift instances + 14 Glossary gaps. Small contracts-repo doc task; can be agent-driven. #repo/contracts
@@ -33,6 +31,8 @@ kanban-plugin: board
 
 - [ ] **EFS Lists — design complete, dev starting** (branch `custom-lists`) — keystone for OnionDAO. ADR-0044 (Proposed) + design closed after 18 rounds + 3-reviewer sweep (all GO). Adds LIST + LIST_ENTRY schemas (7→9 total per ADR-0044) + `ListResolver`/`ListEntryResolver`/`ListReader`. PM reviewed 2026-05-26: **GO** (coherence + brainstorm cross-ref; design independently arrived at the TAG-overload fix the brainstorms found). Dev path: contracts → specs → SDK → frontend. CREATE2 deterministic deploy + schema-UID CI pin check = launch prereq (ADR §8). Schema freeze + Sepolia deploy gated on this. **T-4 days to OnionDAO — implementation just starting; timeline tight.** #repo/contracts
   — @james + dev, branch custom-lists, claimed 2026-05-21, expires 2026-05-29 (PM nudge if no merge by then)
+- [ ] **Design core EFS SDK (on-chain + off-chain)** → [[sdk-architecture]] — the real design (2 of 3 SDKs; OS SDK deferred). DESIGN ONLY, no code; frame-first process; stops at #status/review for @james's frame review. OnionDAO ships a subset (impl card in Backlog). #repo/sdk #kind/design
+  — @sdk-designer, design in planning/Designs/, claimed 2026-05-28, expires 2026-05-31
 - [ ] Draft the PM SOUL file at Agents/pm.md #repo/planning #kind/design
   — @pm, direct push to planning, claimed 2026-05-21, expires 2026-05-29 (low priority — not blocking OnionDAO)
 
