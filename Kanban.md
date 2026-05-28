@@ -27,8 +27,8 @@ kanban-plugin: board
 
 ## In Flight
 
-- [ ] **Merge EFS Lists** (branch `custom-lists` on efs-project/contracts) — keystone for OnionDAO. Schema 6→7, reworks PROPERTY, adds `EdgeResolver.sol`, removes `TagResolver.sol`. Schema freeze + Sepolia deploy gated on this. James confirms 2026-05-26: "wrapping up the List design." T-6 days. #repo/contracts
-  — @james, branch custom-lists, claimed 2026-05-21, expires 2026-05-29 (PM nudge if no merge by then)
+- [ ] **EFS Lists — design complete, dev starting** (branch `custom-lists`) — keystone for OnionDAO. ADR-0044 (Proposed) + design closed after 18 rounds + 3-reviewer sweep (all GO). Adds LIST + LIST_ENTRY schemas (7→9 total per ADR-0044) + `ListResolver`/`ListEntryResolver`/`ListReader`. PM reviewed 2026-05-26: **GO** (coherence + brainstorm cross-ref; design independently arrived at the TAG-overload fix the brainstorms found). Dev path: contracts → specs → SDK → frontend. CREATE2 deterministic deploy + schema-UID CI pin check = launch prereq (ADR §8). Schema freeze + Sepolia deploy gated on this. T-6 days. #repo/contracts
+  — @james + dev, branch custom-lists, claimed 2026-05-21, expires 2026-05-29 (PM nudge if no merge by then)
 - [ ] Draft the PM SOUL file at Agents/pm.md #repo/planning #kind/design
   — @pm, direct push to planning, claimed 2026-05-21, expires 2026-05-29 (low priority — not blocking OnionDAO)
 
