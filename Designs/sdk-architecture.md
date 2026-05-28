@@ -36,8 +36,10 @@ EFS ships two SDKs (the third — the OS SDK — is deferred). They are **not** 
 | Language | **Solidity** | **TypeScript** |
 | Form | A **library** (+ optional inheritable base contract) | An npm package (`@efs/sdk`) |
 | Runs | *Inside* a transaction, as part of the consuming contract | In a browser / Node / a script |
-| Audience | Smart-contract developers whose own contracts write to EFS | App, backend, and tooling developers |
-| Value-add | Collapses the multi-attestation dance into one Solidity call **while keeping the caller's contract as the EAS attester** | Collapses the same dance into one method, one wallet prompt, plus reads/queries/lenses |
+| Audience | Smart-contract developers whose own contracts read AND write EFS | App, backend, and tooling developers |
+| Value-add | Collapses the multi-attestation dance into one Solidity call **while keeping the caller's contract as the EAS attester**; plus lens-scoped reads, bounded enumeration, and list reads | Collapses the same dance into one method, one wallet prompt, plus reads/queries/lenses |
+
+**A smart contract is a first-class client.** It is not a write-only stub: a contract reads files (lens-scoped, so it resolves the *right* attestation), reads lists, reads the first N children of a folder, and creates files and folders — essentially the full client surface. **Lenses are load-bearing for on-chain reads, not just writes**: without the caller-supplied lens stack a contract would resolve the wrong content. The single difference from the TS client is gas: on-chain enumeration is a **bounded window** (`start`, `count` — "first 10") rather than an open `AsyncIterable`, and the caller owns the gas of the window. Forward enumeration reads through the core on-chain view contracts (`EFSIndexer`/`EFSFileView`); only reverse-lookups (cross-history references, timelines, lens *discovery*) need an external index and are out of scope for both SDKs in v1.
 
 **Why the on-chain SDK must be a library, not a deployed helper (load-bearing).** EAS records `msg.sender` as the attester, and the attester address is the spine of the read model — lenses key on it (ADR-0031) and PROPERTY-value PINs are cardinality-1 *per attester* (ADR-0041). If a smart-contract dev called a *separately deployed* EFS helper contract, that helper would be `msg.sender` when it called EAS, so every consuming app's content would be attributed to the **helper**, not to the app — collapsing all of them into one identity and breaking lens resolution. (This is the exact defect the off-chain `EFSUploadGateway` analysis surfaced.) A Solidity **library** (`internal` functions inlined into the caller, or `using EFS for …`) and an **inheritable base contract** both execute in the *consuming contract's* context, so `msg.sender` stays the consuming contract — the correct attester. Decision (James, 2026-05-28): **the on-chain SDK is a Solidity library + inheritable base, never a deployed singleton.**
 
@@ -100,14 +102,15 @@ Distilled from: `bs-third-party-dev-ux-v1` (dev friction walkthroughs), `bs-dive
 
 #### On-chain SDK (Solidity) requirements
 
-The MUST/NICE/DEFERRED tables above are the **off-chain** (TypeScript) surface — the debug-client parity target. The on-chain library is a separate, narrower deliverable. Its anchor requirement: **a smart-contract dev can perform any EFS write from inside their own contract in one call, with their contract recorded as the attester, without hand-assembling EAS payloads.**
+The MUST/NICE/DEFERRED tables above are the **off-chain** (TypeScript) surface — the debug-client parity target. The on-chain library is a separate deliverable in a different language, but it is **not** a narrow write-only subset: a smart contract is a first-class EFS client. Its anchor requirement: **a smart-contract dev can perform any EFS read or write from inside their own contract in one call — lens-scoped reads, list reads, bounded folder enumeration, file/folder creation, pin/tag/set-property — with their contract recorded as the attester, without hand-assembling EAS payloads.** It differs from the TS SDK only in form (synchronous `view` calls; bounded enumeration windows the caller sizes; no async/iterator), never in *capability* — see the parity contract below.
 
 | # | Requirement |
 |---|---|
 | O1 | `pinFile`/`tag`/`setProperty`/`place`/`createList`+`addEntry` as one Solidity call each, composing the correct EAS attestation sequence (ADR-0041/0044) |
 | O2 | The consuming contract is always the EAS attester (library/base executes in caller context — no separately deployed helper in the write path) |
 | O3 | Path-anchor resolution/creation (`anchorAt(path)`) usable on-chain |
-| O4 | O(1) reads only: `propertyValue(keyAnchor, attester)`, `activePin(definition, attester)`. Enumeration (children/tags) is explicitly **out of scope on-chain** — impractical/unbounded gas; that's the off-chain SDK's job |
+| O4 | **A contract is a first-class reader, not write-only.** O(1) point reads (`propertyValue`, `activePin`, `read`) **plus bounded-window enumeration** — `read(path, lenses)`, `readList(...)`, `listChildren(path, start, count, lenses)` ("first 10 files of a folder"). Lenses are passed in by the contract exactly as a TS client passes them, because they decide *which* attestation is the right one. The only on-chain difference from the TS client is the gas boundary: enumeration is a caller-bounded window (`start`/`count`), not an open iterator |
+| O4b | **Folder/file creation on-chain:** a contract can create anchors/folders (`mkdir(path)`) and place files, not just mutate existing ones — the full create surface, mirroring the TS `fs` namespace |
 | O5 | Schema UIDs + core contract addresses exposed as Solidity constants/immutables (the on-chain analogue of M11) |
 | O6 | Raw escape hatch: the EFS core contract interfaces + schema constants remain directly callable; the library is sugar, never a wall |
 
@@ -904,6 +907,9 @@ library EFS {
 
     // Resolve (creating if absent) the anchor chain for a path; returns the leaf anchor UID.
     function anchorAt(IEAS eas, string memory path) internal returns (bytes32 anchorUID);
+    // Folder creation, mirroring TS efs.fs.mkdir: create the ancestor anchor chain + folder-visibility
+    // TAGs for a directory path. Sugar over anchorAt for the "create a folder" intent. Idempotent.
+    function mkdir(IEAS eas, string memory path) internal returns (bytes32 folderAnchor);
 
     // Lists (ADR-0044): create a LIST, then append entries.
     function createList(IEAS eas, ListConfig memory cfg) internal returns (bytes32 listUID);
@@ -922,21 +928,39 @@ struct ListConfig {
 
 **Intra-transaction ordering (an implementer must honor this).** EAS validates that a referenced UID already exists when an attestation is created, so the composition functions must emit attestations in **dependency order within the one tx**: DATA before the placement PIN that sets `refUID = dataUID`; the key ANCHOR before the PROPERTY before the binding PIN; ancestor ANCHORs before the leaf. `pinFile`/`setProperty` encode this ordering internally — it is not the caller's concern, but it is a correctness constraint on the library, not a free choice.
 
-### Read surface — O(1) only
+### Read surface — a contract is a first-class reader
+
+A smart contract is a client, not a write-only stub. It reads files, lists, and folder children — and it does so **through lenses**, because lenses decide *which* attestation is the canonical one for a given viewer (ADR-0031). The contract passes a `lenses` array exactly as a TS client would; reads resolve through that precedence stack rather than naming a bare `attester`. The single on-chain-specific constraint is gas: traversal is a **bounded window** the caller sizes (`start`/`count`), not an open iterator — the caller owns the gas of the window it asks for.
 
 ```solidity
-    // The active PROPERTY value for a key, as seen by one attester. O(1) via getActivePin (ADR-0041).
-    function propertyValue(IEAS eas, bytes32 keyAnchor, address attester) internal view returns (bytes memory);
+    // A lens stack is just an ordered list of attester addresses (first-attester-wins, ADR-0031),
+    // capped at MAX_LENSES (ADR-0026). Passing a single-element array == "read this one attester".
+    //   address[] memory lenses;
 
-    // The active PIN for a definition, by attester. O(1).
-    function activePin(IEAS eas, bytes32 definition, address attester) internal view returns (bytes32);
+    // --- O(1) point reads ---
 
-    // Read-back sugar: resolve a path to its file-anchor and return the DATA UID one attester
-    // placed there. Lets a contract verify/read what it just wrote in a later call. O(1).
-    function fileAt(IEAS eas, string memory path, address attester) internal view returns (bytes32 dataUID);
+    // The active PROPERTY value for a key, resolved through the lens stack. O(1) per lens via getActivePin.
+    function propertyValue(IEAS eas, bytes32 keyAnchor, address[] memory lenses) internal view returns (bytes memory);
+
+    // The active PIN for a definition, resolved through the lens stack. O(lenses).
+    function activePin(IEAS eas, bytes32 definition, address[] memory lenses) internal view returns (bytes32);
+
+    // Resolve a path to the DATA UID that wins under these lenses. The on-chain analogue of efs.fs.read.
+    function read(IEAS eas, string memory path, address[] memory lenses) internal view returns (bytes32 dataUID);
+
+    // --- Bounded enumeration (the caller owns the gas of the window) ---
+
+    // "The first `count` children of a folder, starting at `start`, as resolved under these lenses."
+    // Reads through the core on-chain view contracts (EFSIndexer/EFSFileView) for forward enumeration.
+    function listChildren(IEAS eas, string memory path, uint256 start, uint256 count, address[] memory lenses)
+        internal view returns (bytes32[] memory childAnchors);
+
+    // A windowed read of a LIST's entries under these lenses (ADR-0044). Same bounded-window contract.
+    function readList(IEAS eas, bytes32 listAnchor, uint256 start, uint256 count, address[] memory lenses)
+        internal view returns (bytes32[] memory entries);
 ```
 
-**Enumeration (children, tags-on-a-target, sorted reads) is deliberately absent on-chain** — it is unbounded-gas and impractical inside a transaction. A contract that needs to *react to* graph contents reads a specific O(1) value (a PROPERTY or a PIN) it was given the key for; broad traversal belongs to the off-chain SDK. Lenses are likewise an off-chain read-time concept: on-chain reads name an explicit `attester` rather than walking a precedence stack.
+**What is genuinely out of scope on-chain is reverse-lookup, not enumeration.** Forward, parent→child traversal reads through the core view contracts and is supported as a bounded window. Reverse-lookups (who references this UID, cross-history timelines, lens *discovery*) require an external index and are `NotImplemented` shims in **both** SDKs in v1 — see D1. The off-chain SDK adds ergonomics (open `AsyncIterable`, no caller-sized window, eventually an index), but the *functional* read surface — lens-scoped reads, list reads, folder enumeration — is available to a contract too.
 
 ### Events & custom errors
 
@@ -972,6 +996,19 @@ import {EFSConstants} from "efs-contracts/sdk/EFSConstants.sol";
 ### No batching / signature problem on-chain
 
 Unlike the off-chain SDK (where multiple attestations across schemas mean multiple wallet prompts — the whole Q5 problem), an on-chain library call runs **inside one transaction** already: the consuming contract makes N attestation calls during its own execution, triggered by a single user transaction to *that contract*. There is no per-attestation prompt and nothing to batch. The single-signature machinery (EIP-5792 / 4337 / sequential) is purely an off-chain concern.
+
+### Two SDKs, one functional spec (the parity contract)
+
+A smart contract is a first-class EFS client, so the on-chain and off-chain SDKs expose the **same functional primitives** — read a file under lenses, read a list, enumerate a folder, create files/folders, pin/tag/set-property. They differ only in *form*, not in *capability*:
+
+| Concern | Off-chain (TS) | On-chain (Solidity) |
+|---|---|---|
+| Enumeration shape | open `AsyncIterable` / cursor | bounded window (`start`, `count`) — caller owns the gas |
+| Async | `Promise` | synchronous `view`/state calls |
+| Attester | connected wallet (Q4 default) | always the consuming contract (`msg.sender`) |
+| Reverse-lookups | `NotImplemented` shim (D1) | `NotImplemented` (out of scope) |
+
+**Drift risk is real and must be managed, not assumed away.** Because the two SDKs ship in different languages (and possibly different repos — Q1), a primitive added to one can be forgotten in the other. The mitigation is a **shared functional-primitive checklist** — a single source-of-truth list of EFS operations (the rows of the parity table, expanded) that both SDKs are measured against. Adding an operation means adding a row; a row unimplemented on one side is a tracked gap (acceptable: e.g. reverse-lookups are `NotImplemented` on both), never a silent omission. This checklist lives with the contracts/EFS spec, not inside either SDK, precisely so neither SDK "owns" the definition of parity. *(This is a process artifact for implementation, flagged here so the eventual plan carries it; see Process feedback.)*
 
 ### Open question on packaging
 
@@ -1041,7 +1078,7 @@ Second: the process says "stop at review" but doesn't say what "review-ready" lo
 
 ### Revision log
 
-**2026-05-28 (entry 1 of 5) — expert subagent review pass (James-requested, pre-frame-review).** Two parallel expert reviewers (SDK API/DX, and contract-fidelity against the `custom-lists` specs/ADRs) audited the draft. Both validated the *frame* (namespaces, layering, batch-as-value-add, lens model, PIN/TAG/PROPERTY semantics, sort-overlay mechanics — the last verified faithful in detail). Findings folded in:
+**2026-05-28 (entry 1 of 6) — expert subagent review pass (James-requested, pre-frame-review).** Two parallel expert reviewers (SDK API/DX, and contract-fidelity against the `custom-lists` specs/ADRs) audited the draft. Both validated the *frame* (namespaces, layering, batch-as-value-add, lens model, PIN/TAG/PROPERTY semantics, sort-overlay mechanics — the last verified faithful in detail). Findings folded in:
 - **Verb contract codified.** The draft *claimed* a consistent verb vocabulary but didn't deliver (`get` meant three things; enumeration used five verbs). Added the eight-verb "Naming conventions" contract and made every leaf conform.
 - **SORT_INFO flag corrected + `sourceType` exposed.** Fidelity check found specs 02 + 07 both carry the 3-field version (only spec 06 is stale), and that `targetSchema` is inert without `sourceType=1`. `sorts.declare` now exposes `sourceType`; the freeze flag points contracts at the 3-field string.
 - **Resumable cursors.** Added `Page<T>` + `.page()` companion on every `AsyncIterable` read, and stated the eager-array-vs-iterable rule explicitly.
@@ -1052,14 +1089,14 @@ Second: the process says "stop at review" but doesn't say what "review-ready" lo
 
 These are all within-frame refinements — none changed the architecture. The doc remains at `#status/review` for James's promote/revise call.
 
-**2026-05-28 (entry 2 of 5) — Q1–Q5 resolved (James), folded in one pass.** Q1 (single `sdk/` repo) and Q2 (resource-oriented namespaces) confirmed as already designed. Three design changes (*Q1, Q3 and the Q5 mechanism order below were later superseded — see entries 3 and 4*):
+**2026-05-28 (entry 2 of 6) — Q1–Q5 resolved (James), folded in one pass.** Q1 (single `sdk/` repo) and Q2 (resource-oriented namespaces) confirmed as already designed. Three design changes (*Q1, Q3 and the Q5 mechanism order below were later superseded — see entries 3 and 4*):
 - **Q3:** off-chain-index methods stay and throw `OffchainIndexRequired`; added a runnable reference index example (`examples/reference-index/`) so the throw points at real code. *(Superseded by entry 4: renamed `NotImplemented`; example removed; SDK does not bundle indexing.)*
 - **Q4:** dropped "explicit lens always required." The lens now **defaults to the connected wallet's own address** (your own content is a safe default; the deployer default was the original bug). Explicit lens required only when no wallet is connected (`LensRequired`). New four-step resolution order documented in Instantiation.
 - **Q5:** removed the placeholder `gateway` flag. `efs.batch()` now owns single-signature delivery by capability detection — EIP-5792 → ERC-4337 → SDK-owned upgradeable `EFSUploadGateway` (explicitly not EFS-core) → sequential fallback — reporting `signatureCount`/`mechanism`. *(Superseded by entry 3: the gateway is not single-signature and was demoted to opt-in; sequential is the automatic fallback.)*
 
 All five open questions are now RESOLVED; the doc is held at `#status/review` per design mode.
 
-**2026-05-28 (entry 3 of 5) — second expert review (3 agents: wallet/EIP-5792, EAS-attribution fidelity, security/authz) caught a Q5 correctness defect; corrected.** The first-pass Q5 design listed an `EFSUploadGateway` aggregator as automatic mechanism #3. The fidelity reviewer flagged this as **flat wrong**: when a contract calls EAS, EAS records the *contract* as `msg.sender`/attester — so a plain aggregator attributes all content to the gateway address, collapsing every user into one cardinality-1 PIN slot and breaking lens resolution. EAS's `multiAttestByDelegation` restores the user as attester but costs **one signature per attestation** — so it is not a single-signature mechanism at all. Corrections folded in:
+**2026-05-28 (entry 3 of 6) — second expert review (3 agents: wallet/EIP-5792, EAS-attribution fidelity, security/authz) caught a Q5 correctness defect; corrected.** The first-pass Q5 design listed an `EFSUploadGateway` aggregator as automatic mechanism #3. The fidelity reviewer flagged this as **flat wrong**: when a contract calls EAS, EAS records the *contract* as `msg.sender`/attester — so a plain aggregator attributes all content to the gateway address, collapsing every user into one cardinality-1 PIN slot and breaking lens resolution. EAS's `multiAttestByDelegation` restores the user as attester but costs **one signature per attestation** — so it is not a single-signature mechanism at all. Corrections folded in:
 - **Only EIP-5792 and ERC-4337 deliver one approval AND correct attribution.** Stated the "attester is load-bearing" hard constraint explicitly in the Q5 note.
 - **Demoted the gateway to opt-in (`via: 'gateway'`), never automatic;** it relays by delegation (user stays attester) and is explicitly not single-signature. **Promoted transparent sequential signing to the automatic EOA fallback** (security: don't put an upgradeable SDK-owned contract in the signing path silently).
 - **Capability detection named:** `wallet_getCapabilities` for 5792; smart-account detection for 4337.
@@ -1069,7 +1106,7 @@ All five open questions are now RESOLVED; the doc is held at `#status/review` pe
 
 This is the only architecture-touching change since the frame review and it is a *correctness* fix, not a scope change. Remaining lower-severity review notes (read-path content-hash verification on mirrors, mutable ENS lens-membership, the connect-time lens self-default surfacing in `efs.batch.preview` rather than silently) are tracked as implementation-notes refinements and don't block the frame decision. Doc remains at `#status/review` for James's promote/revise call.
 
-**2026-05-28 (entry 4 of 5) — on-chain/off-chain reframe (James clarification).** James clarified two framing errors carried since the PM brief: (1) the **on-chain SDK is a Solidity deliverable** — a *library* (+ inheritable base) that smart-contract devs use *from their own contracts*, not a TypeScript package; and (2) **"off-chain SDK" just means "the TypeScript SDK"** — it has nothing to do with The Graph / a packaged indexer. Changes folded in:
+**2026-05-28 (entry 4 of 6) — on-chain/off-chain reframe (James clarification).** James clarified two framing errors carried since the PM brief: (1) the **on-chain SDK is a Solidity deliverable** — a *library* (+ inheritable base) that smart-contract devs use *from their own contracts*, not a TypeScript package; and (2) **"off-chain SDK" just means "the TypeScript SDK"** — it has nothing to do with The Graph / a packaged indexer. Changes folded in:
 - **New "Two deliverables" framing** at the top of the Proposal, plus an **On-chain SDK (Solidity)** section specifying the library/base API (`pinFile`, `tag`, `setProperty`, `place`, `createList`/`addEntry`, O(1) reads, constants, escape hatch).
 - **Why a library, not a deployed helper:** the same attester-fidelity rule from the Q5 review applies on-chain — a separately deployed helper would be `msg.sender` and capture every consumer's attestations. A library/base executes in the consuming contract's context, so the consuming contract stays the attester. James confirmed the library form.
 - **No batching on-chain:** a library call runs inside one transaction already; the Q5 single-signature machinery is off-chain-only. Stated explicitly.
@@ -1079,8 +1116,13 @@ This is the only architecture-touching change since the frame review and it is a
 
 This reopened one question (Q1) and did not change Q2–Q5. Doc held at `#status/review`.
 
-**2026-05-28 (entry 5 of 5) — expert review + brainstorm on the reframe (2 agents: Solidity/EAS fidelity, SDK coherence + on-chain ergonomics).** The fidelity agent confirmed the attester thesis is **correct** (an `internal` library inlines into the consuming contract; even a delegatecall-linked library preserves `msg.sender` — only a plain `CALL` to a separate deployed helper breaks it) and the Solidity signatures are sound. Required fixes (folded in):
+**2026-05-28 (entry 5 of 6) — expert review + brainstorm on the reframe (2 agents: Solidity/EAS fidelity, SDK coherence + on-chain ergonomics).** The fidelity agent confirmed the attester thesis is **correct** (an `internal` library inlines into the consuming contract; even a delegatecall-linked library preserves `msg.sender` — only a plain `CALL` to a separate deployed helper breaks it) and the Solidity signatures are sound. Required fixes (folded in):
 - **Intra-tx refUID ordering** made explicit (DATA before placement PIN; key-ANCHOR before PROPERTY before binding PIN; ancestors before leaf) — a correctness constraint on the library.
 - **`ListConfig` struct defined** (was referenced but undefined).
 - **Attester claim sharpened** to "no plain `CALL` to a separate contract," not "no delegatecall."
 The coherence agent caught a real straggler — the Implementation-notes section still asserted "Q1 resolved: single `sdk/` repo," contradicting the reopened Q1 (**fixed**) — and flagged the same-date revision-log entries as ambiguous in ordering (**fixed**: entries now numbered + superseded bullets tagged). Ergonomics adds from the brainstorm: **base-first** documented as the happy path (library = escape hatch); **EFS-level events + custom errors** on the `EFSWriter` base (the biggest gap for the DAO/registry audience — EAS events are UID-keyed, not domain-keyed); `unplace`, `fileAt` read-back, and a `pinFiles` batch convenience added. No architecture change; all within-frame. Doc held at `#status/review`.
+
+**2026-05-28 (entry 6 of 6) — on-chain SDK is a first-class *client*, not write-only (James correction).** James corrected a scope error in entry 4/5: I had framed the on-chain library as write-centric with O(1) point reads only, treating lenses + enumeration as off-chain concepts. Wrong. A smart contract is a full client — it reads files **through lenses** (lenses decide *which* attestation is canonical; ADR-0031), reads lists, enumerates the first N children of a folder, and creates files/folders. The only on-chain-specific difference is gas: enumeration is a **bounded window** (`start`/`count`) the caller sizes, not an open iterator. Changes folded in:
+- **O4 rewritten** + new **O4b** (folder/file creation on-chain); read-surface signatures now take `address[] lenses` and add `read(path, lenses)`, `listChildren(path, start, count, lenses)`, `readList(...)`; `mkdir(path)` added to the write surface.
+- **"Read surface — O(1) only" → "a contract is a first-class reader"**: the old "enumeration/lenses are off-chain-only" paragraph was flat wrong and is replaced; what is genuinely out of scope on-chain is **reverse-lookup**, not forward enumeration (forward reads through the core view contracts).
+- **New "Two SDKs, one functional spec (the parity contract)" subsection** addressing James's drift concern (entry-5 era): a shared functional-primitive checklist, owned by the EFS spec not either SDK, so a primitive added to one side isn't silently dropped on the other. No architecture change; scope-of-on-chain corrected. Doc held at `#status/review`.
