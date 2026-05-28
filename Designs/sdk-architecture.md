@@ -4,7 +4,7 @@
 **Target repos:** sdk (new), planning
 **Depends on:** [[0001-design-system]], [[brainstorm-system]], ADR-0031 (lenses), ADR-0041 (PIN/TAG), ADR-0044 (Lists — pending merge)
 **Supersedes:** —
-**Reviewers:** —
+**Reviewers:** expert subagent pass 2026-05-28 (SDK API/DX + contract-fidelity); awaiting James frame-review
 **Last touched:** 2026-05-28
 
 #status/review #kind/design #repo/sdk #repo/planning
@@ -185,6 +185,29 @@ await efs.connect(walletClient)
 
 ---
 
+#### Naming conventions (the verb contract)
+
+Q2 resolved toward resource-oriented namespaces *with a consistent verb vocabulary*. That promise is only worth making if it's mechanical, so here is the exact contract every leaf method obeys. A dev (or agent) who learns these eight verbs can predict the method name for any namespace:
+
+| Verb | Meaning | Returns | Examples |
+|---|---|---|---|
+| `get(key)` | Retrieve the namespace's **primary resource** by key | that resource's natural shape, or `null`/`undefined` if absent | `props.get`→value · `pins.get`→`PinEntry` · `lists.get`→`ListSpec` · `EAS.getAttestation`→attestation |
+| `list(container)` | Enumerate the namespace's **primary collection** | `AsyncIterable` (or `Promise<Array>` only when inherently bounded — see below) | `fs.list` · `tags.list` · `props.list` · `mirrors.list` · `sorts.list` |
+| `set(key, value)` | Bind a **singleton** (cardinality-1); supersedes the prior binding | the new attestation UID | `props.set` · `pins.set` · `sorts.setDefault` · `lenses.set` |
+| `add(target, …)` | Append a **cardinality-N** edge/member | the new attestation UID | `tags.add` · `lists.add` · `mirrors.add` · `lenses.add` |
+| `remove(uid)` | Revoke a cardinality-N edge/member | `Promise<void>` | `tags.remove` · `lists.remove` · `mirrors.remove` · `lenses.remove` |
+| `clear(key)` | Revoke a **singleton** binding | `Promise<void>` | `pins.clear` (and `unplace`, its file-placement alias) |
+| `create(spec)` | Mint a brand-new resource | the new resource UID | `lists.create` |
+| `declare(parent, concept)` | Register a **shared concept** others can implement | naming-anchor + impl UID | `sorts.declare` |
+
+Note `get` is deliberately polymorphic in *return type* but monomorphic in *meaning*: it always retrieves "the one thing this namespace is named for" — for `efs.props` that thing is a value, for `efs.graph.pins` it's a PIN. The return type differs because the resources differ; the verb does not.
+
+**Relationship traversals keep relationship names** rather than collapsing to `list`: `graph.children`, `graph.subtree`, `graph.versions.ancestors`, `graph.versions.descendants`, and `lists.entries`. These name a *specific* graph relation, not generic enumeration, so a descriptive name is clearer than `list` (the same reason Prisma keeps `findMany` distinct from relation accessors). `lenses.active()` is state inspection, not enumeration, so it is not `list` either.
+
+**Eager array vs `AsyncIterable` — the rule:** a read returns `Promise<Array>` **only** when the result is inherently bounded and small (the PROPERTYs on one UID, the MIRRORs on one DATA, the sort concepts on one container). Anything that can grow without bound (directory children, tags on a popular target, sorted reads) returns `AsyncIterable` and is paginated. Each method states which it is; the rule lets you predict it.
+
+---
+
 #### `efs.fs` — Filesystem (primary surface)
 
 ```ts
@@ -231,10 +254,28 @@ efs.fs.write(
     onProgress?(phase: WritePhase): void
   }
 ): Promise<WriteReceipt>
-// WriteReceipt: { anchorUID, dataUID, placementPinUID, txHashes, attestationCount, totalGas }
+// WriteReceipt: {
+//   anchorUID, dataUID, placementPinUID, txHashes, totalGas,
+//   attestationCount,   // EAS attestations (DATA + MIRROR + contentType triple + PIN + visibility TAGs + new anchors)
+//   chunkDeployCount,   // SSTORE2 ~24KB chunk CONTRACTS deployed for on-chain (web3://) content — NOT attestations
+// }
+// On-chain storage is two cost classes: attestations AND chunk-contract deploys. They're reported
+// separately because a 2MB file is ~10 attestations but ~80 chunk deploys — the gas lives in the chunks.
 ```
 
 **Design note on `fs.list` vs array:** The brainstorm found a sports-stats dev tried `list("/mlb/2025", { recursive: true })` and got a 60-second stall or a `QueryTooLargeError`. `list` is always `AsyncIterable` with explicit pagination; consuming all results requires `collect(efs.fs.list(path))`. A `collect()` helper is exported for small folders.
+
+**Design note on resumable pagination (cursors):** `for await` auto-paginates, but a server rendering page 2 of a feed needs to *resume* from where page 1 stopped — across requests, with no live iterator in memory. So every `AsyncIterable`-returning read has a `.page()` companion that surfaces the cursor:
+
+```ts
+type Page<T> = { items: T[]; nextCursor: Hex | null }   // nextCursor === null ⇒ exhausted
+
+const p1 = await efs.fs.list("/feed").page({ limit: 50 })
+// ...later request, different process:
+const p2 = await efs.fs.list("/feed").page({ limit: 50, cursor: p1.nextCursor })
+```
+
+The bare iterable threads the cursor internally; `.page()` exposes it. This is the Stripe/Prisma pattern (`page.nextCursor`) and is what keeps devs from dropping to raw EAS for "give me the next 50." The cursor is opaque (an encoded kernel index + filter state), stable across redeploys of stateless contracts, and validated on use — a stale cursor throws `CursorInvalid` rather than silently skipping items.
 
 ---
 
@@ -245,6 +286,14 @@ efs.fs.write(
 efs.graph.children(anchor: Hex, opts?: PaginateOpts): AsyncIterable<AnchorEntry>
 efs.graph.path(anchor: Hex): Promise<string>       // UID → "/foo/bar/baz"
 efs.graph.subtree(anchor: Hex, opts?: { depth?: number }): AsyncIterable<AnchorEntry>
+
+// Attestations that reference a given UID, optionally filtered by schema. First-class wrapper
+// over EFSIndexer.getReferencingAttestationUIDs (debug-client parity, M-level). Yields decoded
+// edges; pass `raw: true` to get bare UIDs for hand-off to efs.EAS. Reverse of `pins`/`tags`.
+efs.graph.referencing(uid: Hex, opts?: PaginateOpts & {
+  schema?: Hex            // e.g. SCHEMAS.PIN, SCHEMAS.TAG; omit for all
+  raw?: boolean           // true → AsyncIterable<Hex>; default → decoded edges
+}): AsyncIterable<EdgeEntry | Hex>
 
 // PIN operations — singleton edges per ADR-0041 ("this slot holds exactly one thing").
 // File placement is a PIN: each (attester, file anchor) slot holds exactly one DATA.
@@ -271,6 +320,8 @@ efs.graph.timeline(anchor: Hex): AsyncIterable<TimelineEvent>
 efs.graph.versions.ancestors(dataUID: Hex): AsyncIterable<Hex>
 efs.graph.versions.descendants(dataUID: Hex): AsyncIterable<Hex>  // requires off-chain index
 ```
+
+**Design note on lens scoping in `efs.graph`:** `efs.fs` is the lens-*resolving* path — `fs.read`/`fs.stat` apply the first-attester-wins fallback across the lens stack (ADR-0031/0041) to pick the winning content. `efs.graph` is deliberately lower-level: `pins.get(definition, { attester })` reads exactly one attester's PIN in O(1) (no fallback), and `tags.list(target, { allAttesters })` enumerates raw edges. This is intentional — graph methods expose the unresolved edge data; if you want lens-resolved placement, use `fs`. A dev calling `graph.pins.get` without specifying `attester` gets the client's primary (first) lens, not a fallback walk. Documented so nobody assumes `graph` silently applies lens precedence.
 
 **Design note on `graph.timeline` and `graph.versions.descendants`:** These require an off-chain index (the EFS-in-Postgres pattern). They are intentionally on the `@efs/sdk` (off-chain) package, not `@efs/sdk-onchain`. When no off-chain index is configured, they throw `OffchainIndexRequired` with a message explaining how to configure one. They are **not removed from the surface** — a weak "here's a read-through cache, here's how to add a real indexer" story is better than forcing devs to hand-roll the same thing.
 
@@ -314,26 +365,35 @@ PROP_KEYS.PREVIOUS_VERSION    // "previousVersion"
 #### `efs.lists` — Lists (post-ADR-0044)
 
 ```ts
-// Create a List (returns listUID)
+// Create a List (returns listUID).
+// PRE-FLIGHT: the SDK rejects opt combinations ListResolver would revert on (ADR-0044 §3) before
+// signing — notably appendOnly && allowsDuplicates && maxEntries === 0 → ListConstraintViolation.
 efs.lists.create(opts: {
   allowsDuplicates: boolean
   appendOnly: boolean
   targetType: 'ANY' | 'ADDR' | 'SCHEMA'
   targetSchema?: Hex    // required if targetType === 'SCHEMA'
-  maxEntries?: number
+  maxEntries?: number   // 0 = unbounded
 }): Promise<Hex>
 
 // Add entry to a list (returns LIST_ENTRY UID).
+// `target` is dispatched by the list's targetType (ADR-0044 §2 — no in-band polymorphism):
+//   ADDR   → an Address; encoded into EAS `recipient` with on-chain target = bytes32(0)
+//   ANY/SCHEMA → a UID (Hex); encoded into the `target` field
+// The SDK reads the list's targetType and routes encoding accordingly; passing the wrong kind throws.
+// `weight` is the LIST_ENTRY's int256 weight — SIGNED (negatives are valid, e.g. downvotes/ranking).
 // `reSort` (default: the list's default sort if one is set) folds the new entry into the
 // sort overlay after the insert confirms — see the design note on sort-after-modification.
 efs.lists.add(listUID: Hex, target: Hex | Address, opts?: {
-  weight?: bigint
-  properties?: Record<string, string>
+  weight?: bigint                 // int256, signed
+  properties?: Record<string, string>   // PROPERTYs scoped to the LIST_ENTRY UID (ADR-0044 §7)
   reSort?: Hex | string | false   // sort to maintain after insert; false = skip
 }): Promise<Hex>
 
 // Remove entry (revokes LIST_ENTRY, rejected if appendOnly).
 // Removal is a no-op for the overlay (revoked nodes are skipped at read time), so no re-sort needed.
+// NOTE: this does NOT reclaim space — the entry's UID stays in the append-only kernel array
+// (ADR-0009) and in the sorted linked list forever; staleness and traversal cost don't shrink.
 efs.lists.remove(entryUID: Hex): Promise<void>
 
 // Iterate entries of a list (lens-scoped). With `sort`, returns sorted order via the overlay
@@ -373,7 +433,12 @@ efs.sorts.setDefault(parent: Hex | string, sort: Hex | string): Promise<Hex>
 efs.sorts.declare(parent: Hex | string, opts: {
   name: string                 // shared human label, e.g. "ByDate"
   sortFunc: Address
-  targetSchema?: Hex           // restrict to one child schema; default = all children
+  // sourceType controls which kernel items the sort folds in (SORT_INFO field, spec 07):
+  //   'all'    (0) — every child of the parent (default)
+  //   'schema' (1) — only children of `targetSchema`; `targetSchema` REQUIRED in this mode
+  // Higher values revert on-chain (reserved). Defaults to 'all'.
+  sourceType?: 'all' | 'schema'
+  targetSchema?: Hex           // required when sourceType === 'schema'; ignored otherwise
 }): Promise<{ namingAnchor: Hex; sortInfoUID: Hex }>
 
 // Read a container's children/entries in sorted order, lens-filtered
@@ -403,7 +468,7 @@ efs.sorts.reposition(parent: Hex | string, sort: Hex | string, itemUID: Hex): Pr
 
 **Design note on hint computation (the core value-add):** `processItems` deliberately pushes comparison work off-chain — the contract only does O(1) `isLessThan` validation per item, never an N² sort. The SDK owns the matching client side: fetch `getSortKey` for new items via multicall, sort locally, binary-search each into the current ordered list to derive `(leftHint, rightHint)`, then submit. ISortFunc keys append the item UID for deterministic tie-breaking, and numeric keys are fixed-width left-padded so JS lexicographic comparison matches on-chain byte comparison — the SDK's hint utility must honor both rules or it will compute wrong positions. This is precisely the kind of error-prone multi-step that belongs in the SDK, not in every dev's app.
 
-> **Flagged for the schema freeze:** `specs/06` defines SORT_INFO as `"address sortFunc, bytes32 targetSchema"` while `specs/07` defines it as `"address sortFunc, bytes32 targetSchema, uint8 sourceType"`. These are different schema UIDs. The SDK abstracts SORT_INFO fields behind `efs.sorts.declare`, but the on-chain schema must be reconciled before the 9-schema freeze (a SORT_INFO field change = a new UID). Surfaced to contracts.
+> **Flagged for the schema freeze:** the SORT_INFO field string is inconsistent across specs. `specs/02` §5 and `specs/07` both define it with three fields — `"address sortFunc, bytes32 targetSchema, uint8 sourceType"` — and `specs/07` is the only spec that defines `sourceType` semantics (0 = all children, 1 = schema-filtered by `targetSchema`, 2+ reverts). `specs/06` §2 still shows the stale two-field version `"address sortFunc, bytes32 targetSchema"`. These hash to different schema UIDs. The current evidence (2-of-3 specs, plus the only one defining the field's meaning) favors the **three-field version**; `specs/06` looks like the lagging copy. The SDK is designed against three fields — `efs.sorts.declare` exposes `sourceType` so schema-filtered sorts are expressible, since `targetSchema` only takes effect when `sourceType = 1` (spec 07). Contracts must reconcile `specs/06` to the three-field string and freeze it before the 9-schema freeze (a SORT_INFO field change = a new UID). Surfaced to contracts.
 
 ---
 
@@ -413,9 +478,10 @@ efs.sorts.reposition(parent: Hex | string, sort: Hex | string, itemUID: Hex): Pr
 // Read current lens state
 efs.lenses.active(): Address[]     // currently active lenses (client-side)
 
-// Mutate (all client-side; no on-chain tx)
+// Mutate (all client-side; no on-chain tx). All async for a uniform await-able surface —
+// add/set must resolve ENS, and remove is async too so callers never mix sync/async on this object.
 efs.lenses.add(addr: Address | string): Promise<void>    // resolves ENS
-efs.lenses.remove(addr: Address): void
+efs.lenses.remove(addr: Address | string): Promise<void>
 efs.lenses.set(addrs: (Address | string)[]): Promise<void>
 
 // Discover lenses via off-chain index
@@ -432,7 +498,7 @@ efs.lenses.discover(opts?: {
 
 #### `efs.batch()` — Write batching (primary write UX)
 
-The single most important value-add. A single `efs.fs.write()` compiles into ~6–10 attestations (DATA + MIRROR + the 3-attestation contentType property + placement PIN + folder-visibility TAGs + any new path anchors). The batch builder makes this visible, composable, and limited to one wallet prompt.
+The single most important value-add. A single `efs.fs.write()` compiles into ~6–10 attestations (DATA + MIRROR + the 3-attestation contentType property + placement PIN + folder-visibility TAGs + any new path anchors) — *plus* the SSTORE2 chunk-contract deploys for on-chain content (one per ~24KB; a large file dominates here). The batch builder makes this visible, composable, and limited to one wallet prompt.
 
 ```ts
 // Fluent builder pattern
@@ -443,10 +509,10 @@ const receipt = await efs
   .lists.add(myListUID, dataUID)
   .execute()
 
-// Or via callback (auto-executes)
+// Or via callback (auto-executes — preferred; can't forget .execute())
 const receipt = await efs.batch(b => {
-  b.fs.write("/birding/obs/2026-05-28/robin-001", jsonBytes)
-  b.fs.write("/birding/obs/2026-05-28/robin-002", jsonBytes2)
+  b.fs.write("/birding/obs/2026-05-28/robin-001", jsonBytes).as("robin1")
+  b.fs.write("/birding/obs/2026-05-28/robin-002", jsonBytes2).as("robin2")
   b.props.set(anchor1, PROP_KEYS.NAME, "Robin #1")
 })
 
@@ -454,15 +520,30 @@ const receipt = await efs.batch(b => {
 const estimate = await efs.batch(b => {
   for (const obs of observations) b.fs.write(pathFor(obs), toBytes(obs))
 }).estimate()
-// estimate: { attestationCount, txCount, estimatedGasUnits, estimatedUSD? }
+// estimate: { attestationCount, chunkDeployCount, txCount, estimatedGasUnits, estimatedUSD? }
 
 // BatchReceipt
 type BatchReceipt = {
   txHashes: Hex[]
-  results: OperationResult[]    // one per op in builder order
-  partialFailure?: { opIndex: number; error: string }[]
+  results: OperationResult[]    // one per op
+  partialFailure?: OperationResult[]   // the subset where ok === false (same objects, filtered)
+}
+
+// Each queued op carries a STABLE id so partial-failure results correlate back to the op that
+// produced them — order-based indexing breaks when the SDK reorders/dedups/chunks ops internally.
+// The id is auto-assigned (op0, op1, …) or caller-supplied via .as("uploadRobin1"); every builder
+// method returns the builder for chaining and records the id.
+type OperationResult = {
+  id: string                  // matches the queued op
+  kind: 'write'|'pin'|'tag'|'property'|'list'|'mirror'|'sort'
+  ok: boolean
+  uid?: Hex                   // the produced attestation UID, when ok
+  txHash?: Hex
+  error?: { code: EFSErrorCode; message: string }   // when !ok
 }
 ```
+
+**Design note on the two forms:** the callback form (`efs.batch(b => {...})`) auto-executes and is the **recommended** default — there's nothing to forget. The fluent form (`efs.batch().…`) is lazy and only fires on `.execute()`/`.estimate()`; the builder is typed so a batch that's constructed but never executed is a `#[must_use]`-style dangling value (lint + a dev-mode runtime warning on GC of an unexecuted builder), closing the "silently did nothing" footgun the review flagged.
 
 **Batching strategy:**
 - Compile all operations to attestation payloads
@@ -507,6 +588,29 @@ efs.raw.sortOverlay  // EFSSortOverlay
 // Usage
 const count = await efs.raw.indexer.read.getReferencingAttestationUIDCount([uid, schemaUID])
 ```
+
+---
+
+#### `efs.decode` — the bridge back up
+
+`efs.EAS` and `efs.raw` are downward escape hatches, but the review found the cliff is *one-directional*: a dev who drops to `efs.EAS.getAttestation(uid)` to run one query gets a raw EAS attestation and then has to hand-decode it back into the SDK's typed world. `efs.decode` is the return path — it turns a raw attestation (or UID) into the same typed `*Entry` objects the high-level reads return, so dropping down for one call doesn't strand you in raw-land.
+
+```ts
+// Decode a raw EAS attestation (from efs.EAS / efs.raw) into a typed SDK entry.
+// Dispatches on the attestation's schema UID; throws SchemaMismatch if it isn't an EFS schema.
+efs.decode(att: Attestation): AnchorEntry | DataEntry | MirrorEntry | TagEntry | PinEntry | PropEntry | ListEntry
+
+// Or fetch-and-decode in one step (uid → typed entry), when you only have a UID.
+efs.decode.byUID(uid: Hex): Promise<DecodedEntry>
+
+// Schema-specific decoders when you already know the type (no dispatch, narrower return):
+efs.decode.pin(att: Attestation): PinEntry
+efs.decode.tag(att: Attestation): TagEntry
+efs.decode.property(att: Attestation): PropEntry
+// ... one per EFS schema
+```
+
+**Design note on the round-trip:** this closes the "conveniences, not a walled garden" promise in both directions — `efs.EAS`/`efs.raw` let you step *out* of the typed surface; `efs.decode` lets you step back *in*. The `raw: true` flag on reads like `efs.graph.referencing` and the decoders share the same `*Entry` types, so a dev can mix levels in one flow (raw query for reach, decode for ergonomics) without a type impedance mismatch.
 
 ---
 
@@ -574,6 +678,8 @@ enum EFSErrorCode {
   ListAppendOnlyViolation, // tried to remove entry from appendOnly list
   ListCapExceeded,         // maxEntries reached
   MirrorSchemeRejected,    // URI scheme not in allowlist (ADR-0023)
+  CursorInvalid,           // a .page() cursor is stale/unparseable; caller should restart pagination
+  ListConstraintViolation, // LIST opts rejected by ListResolver (e.g. appendOnly+allowsDuplicates+maxEntries==0)
   SortKeyConventionError,  // ISortFunc key violates tie-break/padding rules → hints would be wrong
   // Note: processItems StaleStartIndex and already-processed no-ops are handled internally by
   // efs.sorts.process (refresh+retry / silent success), never surfaced as errors.
@@ -614,9 +720,10 @@ All returns are fully typed — no `any`. The SDK exports:
 // Core types (tree-shakeable)
 export type {
   Hex, Address,
-  AnchorEntry, DirEntry, FileStat,
-  TagEntry, PinEntry,
+  AnchorEntry, DataEntry, DirEntry, FileStat,
+  TagEntry, PinEntry, EdgeEntry,
   PropEntry, PropView,
+  DecodedEntry,
   ListSpec, ListEntry,
   LensInfo,
   SortConcept, SortProcessReceipt,
@@ -625,6 +732,7 @@ export type {
   OperationResult,
   TimelineEvent,
   ReadOpts, ListOpts, PaginateOpts,
+  Page,
   MirrorSpec, WritePhase,
 }
 
@@ -655,12 +763,12 @@ The debug client's capabilities mapped to SDK calls:
 | `TopicStore.getChildren(topic)` | `efs.graph.children(anchor)` |
 | `TopicStore.getPath(topic)` | `efs.graph.path(anchor)` |
 | `EASx.getAttestation(uid)` | `efs.EAS.getAttestation(uid)` |
-| `EASx.getReferencingAttestationUIDs(uid, schema, ...)` | `efs.EAS.getAttestation` + `efs.raw.indexer` |
+| `EASx.getReferencingAttestationUIDs(uid, schema, ...)` | `efs.graph.referencing(uid, { schema })` (first-class wrapper) |
 | `EASx.indexAttestation(uid)` | `efs.raw.indexer.write.indexAttestation([uid])` |
 | `EFS.connect(signer)` | `await efs.connect(signer)` |
 | Hardcoded `contractConstants.ts` | `import { SCHEMAS, CONTRACTS } from '@efs/sdk/constants'` |
 
-All debug-client capabilities are either directly covered or covered via `efs.EAS` / `efs.raw`.
+All debug-client capabilities are directly covered; the few that touch raw attestations have a first-class wrapper (`efs.graph.referencing`) and a decode path (`efs.decode`) so parity never requires hand-rolling against `efs.EAS` / `efs.raw`.
 
 ---
 
@@ -668,7 +776,7 @@ All debug-client capabilities are either directly covered or covered via `efs.EA
 
 - [x] **Q1 (repo packaging) — RESOLVED (James, 2026-05-28):** Everything lives in the new `sdk/` repo; the on-chain SDK does NOT co-locate in `contracts/`. ABI types are generated from `contracts/` at build time (`wagmi generate`/`typechain`) so they stay in sync without sharing a repo.
 
-- [x] **Q2 (namespace naming) — RESOLVED toward (a), pending James's confirm:** domain-model namespaces (`efs.fs`, `efs.graph`, `efs.props`, `efs.lists`, `efs.sorts`, `efs.lenses`, `efs.EAS`, `efs.raw`) vs verb-first (`efs.read/write/query/attest`). An expert SDK-design review (2026-05-28) found **(a) is the de-facto industry standard** — *resource-oriented design*, codified in Google's API Design Guide and embodied by Stripe (`stripe.customers.create`), Prisma (`prisma.user.findMany`), Twilio, Supabase, GitHub Octokit. **No widely-respected SDK uses a top-level verb-namespace tree.** The field splits between resource.action namespacing (multi-resource domains — EFS's case) and flat verb methods (single-resource domains like EAS/ethers). Verb-first also fails EFS specifically because `graph` and `lenses` are resource models, not actions, and don't reduce to a single verb. **Refinement adopted from the review:** keep (a)'s noun tree but enforce a *consistent verb vocabulary* on the leaves (`read/write/list/stat` on `fs`; `get/set/list` on `props`; `pin/unpin/add/remove` on `graph`) — this pairs resource-oriented design with Google's "standard methods" discipline, giving both a domain map and predictable operation names. **Recommendation: confirm (a) + consistent-verb refinement.**
+- [x] **Q2 (namespace naming) — RESOLVED toward (a), pending James's confirm:** domain-model namespaces (`efs.fs`, `efs.graph`, `efs.props`, `efs.lists`, `efs.sorts`, `efs.lenses`, `efs.EAS`, `efs.raw`) vs verb-first (`efs.read/write/query/attest`). An expert SDK-design review (2026-05-28) found **(a) is the de-facto industry standard** — *resource-oriented design*, codified in Google's API Design Guide and embodied by Stripe (`stripe.customers.create`), Prisma (`prisma.user.findMany`), Twilio, Supabase, GitHub Octokit. **No widely-respected SDK uses a top-level verb-namespace tree.** The field splits between resource.action namespacing (multi-resource domains — EFS's case) and flat verb methods (single-resource domains like EAS/ethers). Verb-first also fails EFS specifically because `graph` and `lenses` are resource models, not actions, and don't reduce to a single verb. **Refinement adopted from the review:** keep (a)'s noun tree but enforce a *consistent verb vocabulary* on the leaves — this pairs resource-oriented design with Google's "standard methods" discipline, giving both a domain map and predictable operation names. An expert SDK-design review (2026-05-28) noted the first draft *claimed* this consistency but did not deliver it (`get` was used for three different things; enumeration used five different verbs). That is now fixed: the eight-verb contract is codified in **"Naming conventions (the verb contract)"** above and every leaf method conforms. **Recommendation: confirm (a) + the codified verb contract.**
 
 - [ ] **Q3 (off-chain index in v1):** Methods that require an off-chain index (`graph.timeline`, `graph.versions.descendants`, `lenses.discover`) are on the `@efs/sdk` surface but throw `OffchainIndexRequired` by default. Should we (a) include them and throw — signals intent, lets devs wire their own index; (b) exclude them entirely from v1 — cleaner surface, but devs have no model; or (c) include them with a bundled minimal SQLite-backed local indexer — best DX, much more implementation scope? **Recommendation: (a), with a reference index implementation as a companion example project.**
 
@@ -719,3 +827,18 @@ One round — this document. The corpus reading (10+ files in parallel) was the 
 One friction point: the process says "read the corpus" but doesn't specify which files are load-bearing vs. background. In this case, the dev-friction brainstorm (`bs-third-party-dev-ux-v1`) was 10× more valuable than the OS-SDK brainstorm for this design. Future design prompts should mark files as `[CRITICAL]`, `[CONTEXT]`, `[BACKGROUND]` so the agent can prioritize and skip background-only reads when time is short.
 
 Second: the process says "stop at review" but doesn't say what "review-ready" looks like. I interpret it as: requirements locked, inverted-framing pass done, API surface sketched, open questions named, doc is readable by a non-agent human in under 20 minutes. A one-line definition of "review-ready" in the process doc would help future threads calibrate when to stop vs. when to keep refining.
+
+---
+
+### Revision log
+
+**2026-05-28 — expert subagent review pass (James-requested, pre-frame-review).** Two parallel expert reviewers (SDK API/DX, and contract-fidelity against the `custom-lists` specs/ADRs) audited the draft. Both validated the *frame* (namespaces, layering, batch-as-value-add, lens model, PIN/TAG/PROPERTY semantics, sort-overlay mechanics — the last verified faithful in detail). Findings folded in:
+- **Verb contract codified.** The draft *claimed* a consistent verb vocabulary but didn't deliver (`get` meant three things; enumeration used five verbs). Added the eight-verb "Naming conventions" contract and made every leaf conform.
+- **SORT_INFO flag corrected + `sourceType` exposed.** Fidelity check found specs 02 + 07 both carry the 3-field version (only spec 06 is stale), and that `targetSchema` is inert without `sourceType=1`. `sorts.declare` now exposes `sourceType`; the freeze flag points contracts at the 3-field string.
+- **Resumable cursors.** Added `Page<T>` + `.page()` companion on every `AsyncIterable` read, and stated the eager-array-vs-iterable rule explicitly.
+- **Bidirectional escape hatch.** Added `efs.decode` (raw attestation → typed entry) and a first-class `efs.graph.referencing` wrapper (debug-client parity), closing the one-way cliff into raw-land.
+- **Lists fidelity (ADR-0044).** Pre-flight rejection of `appendOnly+allowsDuplicates+maxEntries==0`, ADDR-mode `recipient` encoding, signed `int256` weight, removal-doesn't-reclaim-space note.
+- **Write cost honesty.** `WriteReceipt`/`estimate` now separate `attestationCount` from `chunkDeployCount` (SSTORE2 chunk deploys aren't attestations and dominate large-file gas).
+- **Smaller:** `lenses.remove` made async; `OperationResult` carries a stable op id (+ `.as()`); callback batch marked preferred with an unexecuted-builder guard; lens-precedence behavior of `efs.graph` documented.
+
+These are all within-frame refinements — none changed the architecture. The doc remains at `#status/review` for James's promote/revise call.
