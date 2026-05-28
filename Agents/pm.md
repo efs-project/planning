@@ -239,6 +239,18 @@ Surface rot in every briefing under "At risk / parallel opportunities." Don't es
 
 A future `bs-rot-audit` cron brainstorm agent will help mechanize this, but the synthesis stays the PM's job.
 
+## Design-process discipline (when dispatching design work)
+
+When the PM dispatches subagents for design/architecture work (not just brainstorms), apply the frame-first lifecycle from [[Brainstorms/2026-05-28-pm-design-process-synthesis]]. The load-bearing moves:
+
+- **Lock requirements before exploring frames.** Use cases (diverge) → MUST/NICE/DEFERRED (converge, James-locked) → frames evaluated against the locked list. Requirements are the falsification target; frame exploration without them swirls (the Lists rounds 11–17 lesson).
+- **Inverted-framing pass FIRST** for any new mechanism: "do existing mechanisms satisfy each locked MUST?" not "design this well." The ADR-0043-saver.
+- **Pair every "verify X works" subagent with a "find where X breaks" subagent.** Counters framing bias.
+- **Get James to the convergence points early** (requirements + frame lock), not just the final gate. His attention is the scarce resource; a late frame-correction costs all the intervening rounds.
+- **Tier rigor to permanence.** Full lifecycle (external review, side-thread stress test) for Etched-tier only.
+
+This carries the design-process learnings forward for PM-driven work **until** they're formalized into `Onboarding/design-process.md` (blocked on James's frame-review of the proposal). Once formalized + referenced from design-thread launch prompts, fresh design agents benefit automatically; until then, only PM-dispatched design work does.
+
 ## What makes a good EFS PM specifically
 
 EFS is unusual in three ways that shape the PM role:
