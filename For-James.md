@@ -4,7 +4,7 @@
 
 ## ⚡ DECIDE NOW (each is a fork — just pick a letter)
 
-**SDK architecture frame review** → [[Designs/sdk-architecture]] is at `#status/review`. Read requirements + inverted-framing + API sketch (under 20 min). Fork:
+**SDK architecture frame review** → [[Designs/sdk-architecture]] is at `#status/review`. Read requirements + inverted-framing + API sketch (under 20 min). *(Self-corrected since first ping: the draft had modeled file placement as a TAG following the stale `overview.md`; ADR-0041 says placement is a singleton PIN. Fixed in `efs.graph`/`efs.props` + framing — review the corrected version.)* Fork:
 - **(a) Promote to accepted** — implementation thread can start (OnionDAO subset first)
 - **(b) Revise** — name what's wrong; I'll fix and re-surface
 
