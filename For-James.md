@@ -8,11 +8,9 @@
 - **(a) Promote to accepted** — implementation thread can start (OnionDAO subset first)
 - **(b) Revise** — name what's wrong; I'll fix and re-surface
 
-Two embedded forks that need your read:
-- **Q1 (repo layout):** (a) `sdk/` monorepo (recommended) vs (b) on-chain SDK lives in `contracts/`
-- **Q2 (namespace names):** (a) domain-model (`efs.fs`, `efs.graph`, `efs.props`) vs (b) verb-first (`efs.read`, `efs.write`, `efs.query`)
+Q1 (repo layout) and Q2 (namespace names) are now **resolved** — you set Q1 = single `sdk/` repo; Q2 settled toward (a) domain-model namespaces after an expert SDK-design review found that's the de-facto industry standard (resource-oriented design — Stripe/Prisma/Twilio; no respected SDK uses verb-namespace trees). Both folded into the doc. So this is now a clean **promote / revise** call.
 
-PM rec: promote with Q1=(a), Q2=(a).
+PM rec: **promote**.
 
 ## 🕐 WHEN YOU HAVE TIME (not blocking OnionDAO)
 
