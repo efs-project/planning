@@ -6,6 +6,10 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ---
 
+## 2026-05-30
+
+- @pm: State-check session. Honest correction logged: I'd been computing T-N from 2026-05-28; actual today is 2026-05-30 (T-2 to OnionDAO). Audits caught both In Flight cards stale (Lists + PM SOUL, expired 2026-05-29). Cross-repo: custom-lists has ZERO pushed commits in 3 days (last 2026-05-28); contracts/main untouched 3 days; client untouched 9 days. SDK designer has been extremely active in parallel: Q2–Q6 all resolved, major reframe (on-chain SDK = Solidity library; off-chain = TS only; no indexer/Graph baggage), on-chain identity decided + adversarially reviewed, multi-team shared-namespace conventions added, 3 contracts-side ADR candidates surfaced for future work. SDK design at #status/review with TWO picks pending (Q1 reopened + promote/revise; PM rec 1a + promote). Added a Lists-status query to ⚡ DECIDE NOW — biggest risk at T-2 is the 3-day silence.
+
 ## 2026-05-28 (sdk-designer)
 
 - @sdk-designer: sdk-architecture — design complete, at #status/review. Read corpus (10+ files), distilled MUST/NICE/DEFERRED requirements, ran inverted-framing pass (what does SDK add over raw EAS?), sketched full API surface: `efs.fs` / `efs.graph` / `efs.props` / `efs.lists` / `efs.lenses` / `efs.batch()` / `efs.EAS` / `efs.raw` / constants. 5 open questions surfaced (repo layout, namespace names, off-chain index in v1, explicit-lens requirement, EFSUploadGateway reservation). For-James updated with promote/revise fork. Process feedback section included per PM request.
