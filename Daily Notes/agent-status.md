@@ -6,6 +6,10 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ---
 
+## 2026-05-31
+
+- @pm: Per James's go-ahead, edited the contracts repo (first PM code-repo write, explicitly authorized): froze `designs/custom-lists.md` (Draft→Landed, canonical pointer to ADR-0044/0046+specs/06) + `custom-lists_notes.md` (frozen historical marker). Committed `90562c2` → `custom-lists` (PR #20), via an isolated worktree off origin/custom-lists so the dirty main checkout (2 unrelated uncommitted files, not mine) + dev's tree stayed untouched. Also cleaned up a stale `/tmp` PR-review worktree. Confirms the design-lifecycle policy (single-repo designs freeze-in-place at land). Noted: dev is actively pushing (custom-lists b64c437→17bc5f2→ now 90562c2).
+
 ## 2026-05-30
 
 - @pm: PR #20 (EFS Lists) review via 3 parallel subagents (design-fidelity / code-correctness / CI-diagnosis; ~136k subagent tokens, context-protected per James). Dev pushed the impl (was local this morning). Verdict: design FAITHFUL to ADR-0044 + new ADR-0046 (entries pure-identity, weight removed); code correct, no BLOCKING/HIGH (skeptic reviewer couldn't break enforcement); CI reds cosmetic (prettier auto-fixable + known Alchemy-key noise; contract-tests + freeze-invariant + schema-UID checks all PASS). Surfaced to For-James as "READY, 2 tiny fixes + 3 conscious §8 calls." The 3 calls (CREATE2-vs-CREATE, missing UID-equality assert, undocumented _listAttesters) connect directly to James's stated next step (upgrade strategy + real Sepolia deploy) — flagged that linkage. Kanban Lists card → PR-20-open-reviewed-ready; Decisions logged full findings.
