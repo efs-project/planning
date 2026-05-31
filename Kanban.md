@@ -6,8 +6,8 @@ kanban-plugin: board
 
 ## Backlog
 
-- [ ] Schema spec freeze — collapses into Lists merge (In Flight). Confirm freeze the moment Lists merges. #repo/contracts #depends-on/lists-merge
-- [ ] Freeze smart-contract .sol file list — collapses into Lists merge (In Flight). Lock the set immediately after Lists merges. #repo/contracts #depends-on/lists-merge
+- [ ] Schema spec freeze — confirm the moment PR #20 merges (7→9 schemas locked). #repo/contracts #depends-on/lists-merge
+- [ ] Freeze smart-contract .sol file list — lock the set the moment PR #20 merges. #repo/contracts #depends-on/lists-merge
 - [ ] **Implement OnionDAO subset of [[sdk-architecture]]** — read/write so entrants can add data; the near-term subset of the full SDK design (now In Flight). Separate CODE thread, after the design is frame-reviewed; final wiring gated on Lists→Sepolia. Target end of next week. #repo/sdk #depends-on/sdk-architecture-design #depends-on/lists-sepolia-deploy
 - [ ] **Discuss + draft OnionDAO entrant onboarding + flyers** — @james will initiate a separate discussion fork before drafting; PM resurfaces each session until started. Needs: "add your first data to EFS in 5 min" doc + flyer copy (tracks, prizes, dates, start-here URL). #repo/planning #blocked-on/human-decision
 - [ ] Build On-Chain SDK (folder management, permissions) — full impl of [[sdk-architecture]] on-chain surface; the "OnionDAO subset" card above is the near-term cut #repo/sdk #depends-on/sdk-architecture-design
@@ -29,12 +29,8 @@ kanban-plugin: board
 
 ## In Flight
 
-- [ ] **EFS Lists — PR #20 OPEN, PM-reviewed READY** (`custom-lists`→`main`, +13072/-68, 41 files). Adds LIST + LIST_ENTRY (7→9 schemas) + ListResolver/ListEntryResolver/ListReader, per ADR-0044 + new ADR-0046 (entries are pure identity; weight removed). PM 3-subagent review 2026-05-30: design FAITHFUL, code correct (no BLOCKING/HIGH), CI reds cosmetic. Before merge: prettier `lint:fix` + Alchemy-key rotation ([[known-issues]]). 3 §8 calls (CREATE2-vs-CREATE, missing UID-equality assert, undocumented `_listAttesters`) feed the deploy/upgrade-strategy thread. Keystone for OnionDAO; schema freeze + Sepolia deploy gated on merge. #repo/contracts
-  — @james + dev, PR #20, claimed 2026-05-21, expires 2026-06-01 (PM watching for merge)
-- [ ] **Core EFS SDK design** → [[sdk-architecture]] at #status/review. Q1/Q2/Q3/Q4 resolved by @james; **pending ONE revise pass to fold Q3/Q4/Q5** (Q4 = lens defaults to connected wallet; Q5 still with James) → then final promote. DESIGN ONLY. #repo/sdk #kind/design
-  — @sdk-designer, design in planning/Designs/, claimed 2026-05-28, expires 2026-05-31
-- [ ] Draft the PM SOUL file at Agents/pm.md #repo/planning #kind/design
-  — @pm, direct push to planning, claimed 2026-05-21, expires 2026-05-29 (low priority — not blocking OnionDAO)
+- [ ] **EFS Lists — almost done** (PR #20, `custom-lists`→`main`). LIST + LIST_ENTRY (7→9 schemas) + resolvers + ListReader, per ADR-0044/0046. PM-reviewed 2026-05-30 → ready to merge after 2 trivial CI fixes (dev's); review findings live on the PR, not here. Keystone for OnionDAO; schema freeze + Sepolia deploy gated on merge. #repo/contracts
+  — @james + dev, PR #20, expires 2026-06-01 (PM watching for merge)
 
 
 
@@ -44,8 +40,10 @@ kanban-plugin: board
 
 ## Under Review
 
-- [ ] **[[sdk-architecture]] — SDK design at #status/review** — frame review by @james (promote/revise fork in For-James ⚡). API surface: `efs.fs/graph/props/lists/lenses/batch/EAS/raw` + constants. 5 open questions. #repo/sdk #kind/design
-  — @sdk-designer → awaiting @james review, no expiry (Under Review cards don't expire per [[conventions]])
+- [ ] **[[sdk-architecture]] — SDK design at #status/review** — awaiting @james's promote/revise + Q1 fork (in For-James ⚡). Q2–Q6 resolved; reframed to on-chain Solidity lib + off-chain TS. #repo/sdk #kind/design
+  — @sdk-designer → awaiting @james, no expiry (Under Review cards don't expire per [[conventions]])
+- [ ] **PM SOUL [[Agents/pm]]** drafted, at #status/review — awaiting @james promote (low priority, not OnionDAO-blocking). #repo/planning #kind/design
+  — @pm → awaiting @james, no expiry
 
 
 ## Done
