@@ -8,6 +8,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-06-01
 
+- @pm: Refactored the freeze/deploy launch prompt to be open/frame-first (per James: inform + give ideas, don't shoehorn) and ran 3 expert-review subagents (autonomy / safety / domain). Domain pass caught two real things: "widening integers is free" is false at freeze (changes schema string → UID → orphans data; sizing is now-or-never), and the resolvers aren't upgradeable-shaped (immutables + no initializers → proxy refactor is real scope). Folded fixes into the prompt (accurate "physics" section, upgradeable-shape context, blocking UID/storage guards, register-the-proxy-not-impl). Feasibility flag to James: fastest path to data-add = deploy Sepolia now in current shape, proxy refactor before mainnet. Prompt ready in chat; thread spawns on James's word.
 - @pm: **EFS Lists MERGED** (PR #20 → main, commit b1ac4e0). Verified on origin/main (ADRs 0044-0047, Lists resolvers, frozen design doc all landed). Ran landing cascade: Kanban Lists card → Done; un-gated schema-freeze + Sepolia-deploy cards; folded LIST/LIST_ENTRY Glossary stubs into the vocab-drift card; logged in Decisions. Drafted the freeze/deploy thread launch prompt in chat (the now-critical path: freeze schemas ASAP, proxies for stateful resolvers, superseding ADR for ADR-0030, CREATE2-at-mainnet, sizing audit). For-James item 0 → Lists merged + spawn-the-thread; Milestones .sol-freeze-wording Tier-1 flag still pending James.
 
 ## 2026-05-31
