@@ -6,6 +6,10 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ---
 
+## 2026-06-01
+
+- @pm: **EFS Lists MERGED** (PR #20 → main, commit b1ac4e0). Verified on origin/main (ADRs 0044-0047, Lists resolvers, frozen design doc all landed). Ran landing cascade: Kanban Lists card → Done; un-gated schema-freeze + Sepolia-deploy cards; folded LIST/LIST_ENTRY Glossary stubs into the vocab-drift card; logged in Decisions. Drafted the freeze/deploy thread launch prompt in chat (the now-critical path: freeze schemas ASAP, proxies for stateful resolvers, superseding ADR for ADR-0030, CREATE2-at-mainnet, sizing audit). For-James item 0 → Lists merged + spawn-the-thread; Milestones .sol-freeze-wording Tier-1 flag still pending James.
+
 ## 2026-05-31
 
 - @pm: CORRECTION — James clarified the freeze model: NOT a frozen contract set. Correct model = frozen schemas + **stable resolver addresses (proxies) + upgradable logic**; contract set stays flexible (add freely, remove cautiously) pre-mainnet. PM had overstated "freeze the .sol set / no add-remove" — fixed in Decisions/Kanban/For-James. Flagged that the Milestones OnionDAO "(.sol file list freeze)" wording is now stale → asked James (Tier-1) before editing milestone scope. Sepolia deploy soon with "try real hard to keep data, but it's testnet" framing (consistent with the earlier best-effort decision).

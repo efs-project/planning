@@ -6,14 +6,14 @@ kanban-plugin: board
 
 ## Backlog
 
-- [ ] **Schema freeze + upgrade-strategy thread (post-Lists-merge)** — model DECIDED by James 2026-05-31: frozen schemas + **stable resolver addresses (proxies) + upgradable logic**; contract SET stays flexible (add freely, remove cautiously) pre-mainnet. Thread tasks: (1) freeze schemas (ASAP at merge); (2) put stateful resolvers (EFSIndexer, EdgeResolver, MirrorResolver, EFSSortOverlay, ListEntryResolver) behind stable proxies + storage-layout discipline; (3) **write a superseding ADR for the upgradeable-proxy model** (supersedes ADR-0030) — incl. the open **proxy-admin trust model** decision (multisig/timelock/announced/burn); (4) count-vs-discriminator sizing audit (ADR-0047 did maxEntries); confirm revocable flags; CREATE2-at-mainnet; adversarial-review hardening carry-overs. Canonical home = contracts repo (ADR + `docs/` checklist). PM drafts the launch prompt on James's word / at merge. #repo/contracts #depends-on/lists-merge
+- [ ] **Schema freeze + upgrade-strategy thread (post-Lists-merge)** — model DECIDED by James 2026-05-31: frozen schemas + **stable resolver addresses (proxies) + upgradable logic**; contract SET stays flexible (add freely, remove cautiously) pre-mainnet. Thread tasks: (1) freeze schemas (ASAP at merge); (2) put stateful resolvers (EFSIndexer, EdgeResolver, MirrorResolver, EFSSortOverlay, ListEntryResolver) behind stable proxies + storage-layout discipline; (3) **write a superseding ADR for the upgradeable-proxy model** (supersedes ADR-0030) — incl. the open **proxy-admin trust model** decision (multisig/timelock/announced/burn); (4) count-vs-discriminator sizing audit (ADR-0047 did maxEntries); confirm revocable flags; CREATE2-at-mainnet; adversarial-review hardening carry-overs. Canonical home = contracts repo (ADR + `docs/` checklist). **UNBLOCKED — Lists merged 2026-06-01; this is now the critical path.** PM launch prompt drafted in chat 2026-06-01. #repo/contracts
 - [ ] **Implement OnionDAO subset of [[sdk-architecture]]** — read/write so entrants can add data; the near-term subset of the full SDK design (now In Flight). Separate CODE thread, after the design is frame-reviewed; final wiring gated on Lists→Sepolia. Target end of next week. #repo/sdk #depends-on/sdk-architecture-design #depends-on/lists-sepolia-deploy
 - [ ] **Discuss + draft OnionDAO entrant onboarding + flyers** — @james will initiate a separate discussion fork before drafting; PM resurfaces each session until started. Needs: "add your first data to EFS in 5 min" doc + flyer copy (tracks, prizes, dates, start-here URL). #repo/planning #blocked-on/human-decision
 - [ ] Build On-Chain SDK (folder management, permissions) — full impl of [[sdk-architecture]] on-chain surface; the "OnionDAO subset" card above is the near-term cut #repo/sdk #depends-on/sdk-architecture-design
 - [ ] Build Off-Chain DB SDK (core ops, tombstoning, caching) — full impl of [[sdk-architecture]] off-chain surface #repo/sdk #depends-on/sdk-architecture-design
-- [ ] Deploy core contracts to Sepolia (OnionDAO 2026-06-01) #repo/contracts #depends-on/lists-merge
+- [ ] Deploy core contracts to Sepolia (OnionDAO) — UNBLOCKED (Lists merged); rolls into the freeze/deploy thread. "Try hard to keep data, but it's testnet" framing. #repo/contracts
 - [ ] Plan OnionDAO hackathon logistics — venue/dates/prize amounts/judging/onboarding docs/comms plan #repo/planning
-- [ ] **Fix contracts spec drift** — `contracts/specs/` still uses "edition" (now "lens" per ADR-0043) and "TagResolver" (now "EdgeResolver" per ADR-0041). `specs/overview.md` says 6 core contracts; actual on `custom-lists` is different — needs reconciliation. Vocab audit (`bs-vocab-coherence-audit-v1` 2026-05-26) found 7 high-severity drift instances + 14 Glossary gaps. Small contracts-repo doc task; can be agent-driven. #repo/contracts
+- [ ] **Fix contracts spec drift** — `contracts/specs/` still uses "edition" (now "lens" per ADR-0043) and "TagResolver" (now "EdgeResolver" per ADR-0041). `specs/overview.md` says 6 core contracts; actual on `custom-lists` is different — needs reconciliation. Vocab audit (`bs-vocab-coherence-audit-v1` 2026-05-26) found 7 high-severity drift instances + 14 Glossary gaps. Now also: add LIST/LIST_ENTRY (2-line stubs → ADR-0044/0046, specs/06) to `planning/Glossary.md`; reconcile schema count to 9. Small doc task; agent-driven. #repo/contracts #repo/planning
 - [ ] **Plan an off-chain "EFS-in-Postgres" indexer pattern** — dev UX brainstorm + L2/indexer perspectives ([`bs-third-party-dev-ux-v1`](Brainstorms/2026-05-26-bs-third-party-dev-ux-v1-dev-friction-walkthroughs.md), [`bs-system-design-perspectives-v1`](Brainstorms/2026-05-26-bs-system-design-perspectives-v1-contract-surface-from-n-angles.md) 2026-05-26) both flag this. Every nontrivial dev abandons high-level read APIs within a day. Packaged off-chain indexer reference may matter more pre-launch than SDK polish. #repo/sdk #kind/design
 - [ ] **Explore `EFSUploadGateway` wrapper contract** — single architectural change that addresses 8-prompt MetaMask detonation + L2 sequencer gas budget + AA-wallet bundling. Surfaced by `bs-system-design-perspectives-v1` 2026-05-26 as highest-leverage architectural ask; doesn't break any contract-decomposition direction. #repo/contracts #kind/design
 - [ ] **Sync `contracts/` specs on `main` when Lists merges** — `main` is 40 days stale; lists-aware spec drift will detonate at merge. Per `bs-rot-audit-v1`. Plan for the spec-sync PR before Lists merges so it's ready to land same-day. #repo/contracts
@@ -27,9 +27,6 @@ kanban-plugin: board
 
 
 ## In Flight
-
-- [ ] **EFS Lists — almost done** (PR #20, `custom-lists`→`main`). LIST + LIST_ENTRY (7→9 schemas) + resolvers + ListReader, per ADR-0044/0046. PM-reviewed 2026-05-30 → ready to merge after 2 trivial CI fixes (dev's); review findings live on the PR, not here. Keystone for OnionDAO; schema freeze + Sepolia deploy gated on merge. #repo/contracts
-  — @james + dev, PR #20, expires 2026-06-01 (PM watching for merge)
 
 
 
@@ -47,6 +44,7 @@ kanban-plugin: board
 
 ## Done
 
+- [x] **EFS Lists merged** — PR #20 → `main` 2026-06-01 (commit b1ac4e0). LIST + LIST_ENTRY schemas (7→9) + ListResolver/ListEntryResolver/ListReader + ADR-0044/0046/0047. Design doc landed frozen. Unblocks schema freeze + Sepolia deploy.
 - [x] Promote [[0001-design-system]] — meta-design promoted 2026-05-21 by @james (delegated)
 
 
