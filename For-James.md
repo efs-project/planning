@@ -4,7 +4,7 @@
 
 ## ⚡ DECIDE NOW (each is a fork — just pick a letter)
 
-**arch-review: overnight review ready** → read [[For-James-tomorrow]]. Schema-freeze + proxy design resolved with evidence (91+38 expert agents). Headline: both your instincts validated — keccak256 stays, and "hash is data not identity" needs **zero** change to the frozen DATA schema. All 8 schemas freeze solid-as-is. Need your OK on: (1) freeze DATA as-is with hash-as-property (ADR-0049), (2) the proxy→burn-to-immutable model (ADR-0048 r2). Then I build.
+**arch-review: schema set converged → 9 schemas, ready to build.** Resolved with you over chat (3 workflows, 159 agents total). Decisions locked: DATA → empty/pure-identity (hash+size become trust-scoped PROPERTYs); REDIRECT added as 9th schema (`bytes32 target, uint8 kind`) for canonical/sameAs/symlink; proxy→burn-to-immutable; on-chain property index for find-by-hash (tracked, non-blocking). ADRs 0048 r2 / 0049 r2 / 0050 + freeze table on branch `arch-review` (commit 2fa0f13). **Frozen-UID table still needs your signature before any Sepolia registration.** Next: build the resolver refactor test-first. (Earlier [[For-James-tomorrow]] is now partly superseded by the empty-DATA + REDIRECT decisions.)
 
 
 **0. ✅ EFS Lists MERGED** (2026-06-01, commit b1ac4e0). Schema freeze + Sepolia deploy now UNBLOCKED — the critical path. **Next action: spawn the freeze/deploy thread** — PM drafted its launch prompt in chat 2026-06-01; paste when ready. Decided model (frozen schemas + stable resolver addresses via proxies + upgradable logic; set stays flexible) is its agenda; open sub-q for it = proxy-admin trust model (multisig/timelock/burn).
