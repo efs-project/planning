@@ -28,7 +28,7 @@ kanban-plugin: board
 
 ## In Flight
 
-- [ ] **Hackathon go-live bundle** (@james, this week 2026-06-10): build ≥1 reference sample dataset (PM rec: blockchain-whitepaper library in topic folders + markdown READMEs + metadata — demos folders + markdown-per-folder + files + properties in one) using NORMAL files / no client changes; flyer with a tiered "interesting datasets" list (easy→stretch; newgrounds-games = stretch/needs-custom-viewer, someone else); list examples. **Open Q: is "markdown pages per folder" a CLIENT rendering feature (client idle since 2026-05-21 → unstaffed) or just markdown files placed in folders?** Gated for go-live on Sepolia deploy. #repo/planning #repo/client
+- [ ] **Hackathon go-live bundle** (@james, this week 2026-06-10): ✅ reference dataset DONE — `datasets/crypto-whitepapers/` (20 coins, 7 category folders + READMEs + metadata, 18 license-checked PDFs; uploads when Sepolia's live). Remaining: design the flyer (James, this week) with a tiered "interesting datasets" list (easy→stretch; newgrounds-games = stretch/needs-custom-viewer, someone else). **Open Q: is "markdown pages per folder" a CLIENT rendering feature (client idle since 2026-05-21 → unstaffed) or just markdown files placed in folders?** #repo/planning #repo/client
   — @james, claimed 2026-06-10, expires 2026-06-13
 - [ ] **arch-review: resolver refactor → freeze → Sepolia** (@arch-review). Schema set converged (9; ADR-0048/49/50 on branch). Coding the proxy-refactor test-first. BLOCKED on James's signature of the frozen-UID table before registration. #repo/contracts
   — @arch-review, branch arch-review, claimed 2026-06-10, expires 2026-06-13
