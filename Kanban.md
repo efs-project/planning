@@ -30,6 +30,8 @@ kanban-plugin: board
 
 - [ ] **Hackathon go-live bundle** (@james, this week 2026-06-10): ✅ reference dataset DONE — `datasets/crypto-whitepapers/` (20 coins, 7 category folders + READMEs + metadata, 18 license-checked PDFs; uploads when Sepolia's live). Remaining: design the flyer (James, this week) with a tiered "interesting datasets" list (easy→stretch; newgrounds-games = stretch/needs-custom-viewer, someone else). Markdown-per-folder = confirmed a CLIENT feature James is building (system-tagged README file, no new schema — see [[Decisions]]). **KEY OPEN QUESTION for the dataset track: how do participants actually ADD data? — client UI / bare-bones SDK / direct contract calls. The flyer + onboarding doc need a concrete path. Ties SDK + client + onboarding together; decide before the flyer ships.** #repo/planning #repo/client
   — @james, claimed 2026-06-10, expires 2026-06-13
+- [ ] **Seed whitepaper dataset** — addresses researched (`datasets/crypto-whitepapers/ADDRESSES.md`; only Bitcoin has a public CID, rest self-pin). Next: pin all PDFs to IPFS (Filebase/Pinata, one IPIP-499 profile) + Arweave (~<$0.10, permanence) → record contentHash+size+cid → after Sepolia, seeding script attests DATA+MIRROR(s) (separate from deploy script). **Gate: needs credentials (pinning-service key + funded Arweave wallet) — James-provisioned.** Part of go-live. #repo/planning
+  — needs @james credentials, then agent-runnable
 - [ ] **arch-review: resolver refactor → freeze → Sepolia** (@arch-review). Schema set converged (9; ADR-0048/49/50 on branch). Coding the proxy-refactor test-first. BLOCKED on James's signature of the frozen-UID table before registration. #repo/contracts
   — @arch-review, branch arch-review, claimed 2026-06-10, expires 2026-06-13
 
