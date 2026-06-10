@@ -1088,9 +1088,49 @@ Where the Solidity source lives (`contracts/` vs `sdk/contracts/`) is the reopen
 
 ---
 
+## Identity, lenses & the signer model (decided 2026-06-10)
+
+These decisions came out of a long working session on identity, multi-device wallets, and click-reduction. They are the load-bearing shape of the SDK; capturing them here so they survive.
+
+### 1. A lens is a *configurable hierarchy*, not an address
+
+This reconciles a misread: ADR-0031:35 ("the URL is the list") describes the **override transport**, not what a lens *is*. The **default** lens is a composed chain — **ADR-0039's priority hierarchy**, already Accepted:
+
+```
+connectedAddress → viewedAddress → webOfTrust[] → systemLenses[] (tail: bootstrap curator + deployer)
+```
+
+- **Building this chain is an SDK job** (the multi-step assembly the SDK exists for). TS: a `resolveLens(config)` utility. Solidity: helpers so a contract can assemble the `address[]` cheaply (`lensSelf()`, `lensFollowing(parent)`, `lensWithDefaults(...)`), bounded by `MAX_LENSES = 20`.
+- **`?lenses=` (or an explicit array) is a wholesale override** — pins exactly that list, shareable, no prepend/append (ADR-0039:31).
+- **ENS resolution and "(you)" expansion are SDK utilities**, kept simple and inspectable — not buried API magic.
+
+### 2. The "account group" (multi-device identity) = `webOfTrust[]` content
+
+A user's device/burner keys are modeled as a **LIST the parent (ENS) wallet attests** — no new schema (LIST_ENTRY ADDR mode already stores a bare address: `ListEntryResolver.sol:155`; verified in the freeze set). Reading "jamescarnley.eth" = ENS→parent→read key-set→feed into the `webOfTrust[]` tier. ADR-0039:18,37 **explicitly reserved this slot** ("adding it later is a config change, not a plumbing change"). Properties verified against contracts:
+- **Trust direction sound** — only the parent can edit its own key-set; a device can't add itself (membership keyed `[listUID][identityKey][attester]`).
+- **Retroactive** — a burner's past writes resolve under the identity the moment its address is added; no migration (resolution is attester-keyed at read time).
+- **First-attester-wins ⇒ list order is the conflict winner** → **main wallet must be index 0**.
+
+**v2 security gates (deferred, but the stance is flagged now because retrofitting after content exists is painful):** per-key capability scoping (a stolen burner currently = full identity authority); time-aware revocation (bind membership to block ranges; ignore a key's writes after its revocation); proof-of-control before adopting an address (not unilateral parent assertion); ENS-transfer / EIP-7702-controller re-verification at resolution time; a privacy opt-out (the key-set publicly links all burners to one identity).
+
+### 3. v1 ships the *seam*, not the feature — and it must stay non-breaking
+
+v1 APIs take an **opaque identity/lens abstraction** (an address is just the simplest identity); the trivial resolver (`addr → [addr]`) ships now, key-set expansion drops in later **additively**. Three invariants make that true (from adversarial review):
+1. **One async discipline for all constructors** — don't ship a sync `lens()` then an async `identity()`; resolve at **read time** (also fixes cache staleness; support `{ blockTag }`).
+2. **Resolved-set order is a documented contract** (first-wins makes order an API surface).
+3. **Identity stays opaque** — N-vs-1 never leaks into a return type. Also: **reject bare ENS strings** (`{ as: "james.eth" }` must not silently mean literal — force `EFS.identity(...)`); throw on `MAX_LENSES` overflow rather than silently truncating.
+
+### 4. The SDK is signer-agnostic → the burner-vs-real-wallet call is deferred
+
+Two separate abstractions: the **signer** (*who writes* — MetaMask EOA, burner, or smart account; the SDK just takes one) and the **lens hierarchy** (*who you read as*). Because the SDK abstracts the signer, **it serves all wallet strategies without changing** — so James can ship v1, watch how bad popups actually are with batching, and decide burners later from real data. Rule: never bake "burner"/"MetaMask" assumptions into the API. Smart wallets confirmed first-class (EAS uses OZ `SignatureChecker`, `EIP1271Verifier.sol:123` — ERC-1271 works in both direct and delegated attestation). Posture: defer AA/recovery to wallet devs; lean on ENS for naming; burners are an optional optimization, not a requirement.
+
+### 5. Click-reduction is an SDK-owned priority (see [[sdk-minimal-clicks]])
+
+Default to **efficient multi-attestation signing**. Verified crux: EAS UIDs include `block.timestamp` (`EAS.sol:704`), so a UID can't be predicted before mining — meaning any intra-write attestation that references another by **UID-refUID** forces sequential signing (the "8 popups"). The lever: compose a single `EAS.multiAttest` tx (one signature, works on plain MetaMask) **iff** the write's internal links use *predictable* ids (path/content-derived anchors) instead of UID-refUIDs. Whether that holds is a resolver/schema question being decided in the freeze **now** → live investigation + the concrete ask for the schema-freeze dev tracked in [[sdk-minimal-clicks]].
+
 ## Open Questions
 
-- [ ] **Q1 (repo packaging) — REOPENED by the 2026-05-28 on-chain/off-chain reframe.** The prior resolution ("everything in one `sdk/` repo") assumed *both* SDKs were TypeScript. They aren't: the TS SDK (`@efs/sdk`) lives in its own `sdk/` repo (settled), but the **Solidity** on-chain library now has a real choice of home. **(a) `contracts/`** — co-located with the immutable contracts it imports and version-locks to; same Foundry/Hardhat build; deployed/verified together. **(b) `sdk/contracts/`** — kept with the TS SDK so "the SDK" is one repo. PM rec: **(a) `contracts/`** — a Solidity library that imports the core interfaces and hardcodes their schema UIDs is a contracts-repo artifact; splitting it from the contracts invites version skew. TS-side ABI/const generation already crosses the repo boundary cleanly either way.
+- [x] **Q1 (repo packaging) — RESOLVED (James, 2026-06-10): both SDKs live in the `sdk/` repo.** The Solidity SDK is a **compile-in library consumed via npm**, not a contract EFS deploys — so it ships alongside the TS SDK as one package/repo. (This overrides the earlier PM rec of `contracts/`: James's framing is that distribution, not deployment-coupling, is the deciding factor — devs `npm install` both halves.) Version-lock to the frozen schema UIDs is handled by pinning, not co-location.
 
 - [x] **Q2 (namespace naming) — RESOLVED (James, 2026-05-28): confirmed (a) + the codified verb contract.** domain-model namespaces (`efs.fs`, `efs.graph`, `efs.props`, `efs.lists`, `efs.sorts`, `efs.lenses`, `efs.EAS`, `efs.raw`) vs verb-first (`efs.read/write/query/attest`). An expert SDK-design review (2026-05-28) found **(a) is the de-facto industry standard** — *resource-oriented design*, codified in Google's API Design Guide and embodied by Stripe (`stripe.customers.create`), Prisma (`prisma.user.findMany`), Twilio, Supabase, GitHub Octokit. **No widely-respected SDK uses a top-level verb-namespace tree.** The field splits between resource.action namespacing (multi-resource domains — EFS's case) and flat verb methods (single-resource domains like EAS/ethers). Verb-first also fails EFS specifically because `graph` and `lenses` are resource models, not actions, and don't reduce to a single verb. **Refinement adopted from the review:** keep (a)'s noun tree but enforce a *consistent verb vocabulary* on the leaves — this pairs resource-oriented design with Google's "standard methods" discipline, giving both a domain map and predictable operation names. An expert SDK-design review (2026-05-28) noted the first draft *claimed* this consistency but did not deliver it (`get` was used for three different things; enumeration used five different verbs). That is now fixed: the eight-verb contract is codified in **"Naming conventions (the verb contract)"** above and every leaf method conforms. **Recommendation: confirm (a) + the codified verb contract.**
 
@@ -1102,7 +1142,7 @@ Where the Solidity source lives (`contracts/` vs `sdk/contracts/`) is the reopen
 
 - [x] **Q6 (canonical shared config / shared-lens registry) — RESOLVED (James, 2026-05-28): no registry today; the dev picks the lens; the SDK is not where a registry would be built.** For unrelated teams sharing a config path (e.g. `/swaps/maxSlippage`), there is no canonical lens and **no shared-lens registry in EFS today** (ADR-0031 deferred on-chain lens lists). James's resolution: that's acceptable — a contract reading shared config chooses *whose* value to trust as **application logic** (the end-user caller `[msg.sender]`, the DAO/feature owner `[daoAddr]`, or itself `[address(this)]`); the SDK's job is only to make passing the chosen lens trivial. **A shared-lens registry, if EFS ever builds one, is a contracts/protocol artifact — never an SDK one; the SDK would consume it, not provide it.** So nothing here gates the SDK. (Kept on the radar as a *future protocol* possibility, not an SDK open question — see the Shared-namespace conventions §3–4.)
 
-**Status: one open fork — Q1 (Solidity library repo home) — otherwise resolved.** Q2–Q6 resolved (Q6 closed by James 2026-05-28: dev picks the lens; a shared-lens registry, if ever built, is a contracts artifact, not the SDK's). Held at `#status/review` per design mode; not self-promoting. James's two calls: (1) the Q1 fork, and (2) promote vs. revise.
+**Status: Q1–Q6 all RESOLVED.** Q1 closed 2026-06-10 (both SDKs in `sdk/` repo). One call left for James: **promote vs. revise**. Held at `#status/review` per design mode; not self-promoting. See the **Identity, lenses & the signer model** section for the 2026-06-10 decisions, and **[[sdk-minimal-clicks]]** for the live batched-write investigation.
 
 > **Reviewer baseline (read before raising "these schemas don't exist").** This doc targets the in-flight EFS model on the `custom-lists` / `pin-tag-split` / `editions-to-lenses` branches — **ADR-0033 through ADR-0045**: PIN/TAG cardinality split (0041), editions→**lenses** rename (0043), LIST/LIST_ENTRY (0044), default-lenses chain (0039), edge-constraint callbacks (0045). On `main` (currently `94217b5`) the highest ADR is 0032 and placement is still TAG-based (ADR-0003) with no PIN/LIST/`getActivePin` — so a reviewer on a stale `main` checkout will (correctly) find none of this and (incorrectly) conclude the doc is fictional. It is not: it builds on the branch the contracts dev is actively merging. `MAX_LENSES` is the renamed `MAX_EDITIONS = 20` (ADR-0026 + 0043).
 
@@ -1153,6 +1193,9 @@ Second: the process says "stop at review" but doesn't say what "review-ready" lo
 ---
 
 ### Revision log
+
+**2026-06-10 (session) — identity/lens/signer model captured + Q1 closed + minimal-clicks investigation.** Long working session, decisions written down so they survive: (1) **Q1 RESOLVED** — both SDKs in the `sdk/` repo (Solidity is compile-in via npm, not deployed by us). (2) New **"Identity, lenses & the signer model"** section: a lens is the **ADR-0039 configurable hierarchy** (not an address), built by the SDK, with `?lenses=` as wholesale override; the account-group/key-set = `webOfTrust[]` content (the reserved slot, no new schema — verified `ListEntryResolver.sol:155`); v1 ships the opaque-identity **seam** not the feature, under 3 non-breaking invariants; the SDK is **signer-agnostic** so the burner-vs-real-wallet call is deferred; smart wallets confirmed first-class (`EIP1271Verifier.sol:123`). (3) **Minimal-clicks** spun out to **[[sdk-minimal-clicks]]** — 3-agent deep pass found the write is a 2–3-deep UID-refUID DAG; EAS UIDs embed `block.timestamp` (`EAS.sol:704`) so one client-side `multiAttest` can't self-reference. **Viable path, no hard blocker:** 8→2–3 clicks ships now with zero contract change (one `multiAttest` per DAG layer); 8→1 needs a resolver-only affordance (deterministic-id edge resolution) raised with the schema-freeze dev. The `EFSUploadGateway` wrapper is ruled out (collapses attester). Doc held at `#status/review`.
+
 
 **2026-05-28 (entry 1 of 10) — expert subagent review pass (James-requested, pre-frame-review).** Two parallel expert reviewers (SDK API/DX, and contract-fidelity against the `custom-lists` specs/ADRs) audited the draft. Both validated the *frame* (namespaces, layering, batch-as-value-add, lens model, PIN/TAG/PROPERTY semantics, sort-overlay mechanics — the last verified faithful in detail). Findings folded in:
 - **Verb contract codified.** The draft *claimed* a consistent verb vocabulary but didn't deliver (`get` meant three things; enumeration used five verbs). Added the eight-verb "Naming conventions" contract and made every leaf conform.
