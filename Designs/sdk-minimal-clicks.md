@@ -26,7 +26,7 @@ Consequence: if attestation **B** in a single logical write must carry attestati
 
 ## Investigation (2026-06-10, 3-agent deep pass against real source)
 
-**Verdict: VIABLE, no hard blocker — in two tiers. 8 clicks → ~2–3 with zero contract change (ship now); → 1 needs one resolver affordance (raise with the schema-freeze dev now).**
+**Verdict (validated 2026-06-10): 8 clicks → ~2–3, SDK-only, zero contract change. This is the floor.** One-click was investigated (self-placing DATA) and **rejected** — MIRROR→DATA must stay UID-static, and the change would reopen an Etched ADR (0049). **No schema-freeze dependency for click-reduction.**
 
 ### The real write graph (steady-state, source: `CreateItemModal.tsx::handleSubmit` File branch + `EFSIndexer.sol` + `EdgeResolver.sol`)
 
@@ -59,17 +59,24 @@ The in-code `EFSUploadGateway` "batch-wrapper" idea (a contract that mints DATA,
 
 **Tier 2 — 1 click. Correctness guardrail (James, 2026-06-10): do NOT get here by coordinate-resolving static links.** The DATA-binding edges (MIRROR→DATA, placement PIN→DATA) are *semantically static* — they mean "these exact bytes," and pointing them at a path would be silent corruption the moment the data changes (see the static-vs-dynamic rule in [[sdk-architecture]] §5). So the earlier "resolve edges by path-coordinate" framing is **rejected for these edges** — it would invite that bug. **2 clicks is the principled floor for the current write shape**, because anything binding to DATA's specific bytes must reference DATA's UID, which exists only after minting.
 
-The only *correct* route to 1 click is changing the write's **shape**, not weakening a link: **self-placing DATA** — fold "these bytes" and "they live here" into a single attestation, so the write has *no forward UID reference at all* (placement is intrinsic to the same attestation; nothing needs to point at DATA's not-yet-known UID). This sidesteps the timestamp problem instead of corrupting semantics. It's a resolver/placement redesign (freeze-dev's domain), resolver-only if it fits the frozen schemas. **Note:** ADR-0049 (empty DATA) does **not** already solve this — it removed *content* from DATA's identity but the identity is still the time-mixed UID (ADR-0049:12,22).
+### One-click was investigated and rejected — 2 clicks is the floor (validated 2026-06-10)
 
-**Future direction — write-through identity contract = the account-group, write-side.** A "contract that lets keys on a list write through it" (James) is the same primitive as the multi-device key-set (read-side, [[sdk-architecture]] §2). Caveat: writing *through* a contract makes the contract the EAS attester → identity collapse. It works as an identity layer only if EFS *resolves the contract's writes back to the user* via key-set/`webOfTrust[]` membership (the contract is an authorized member, not a hijacker). Real new primitive — v2+, not hackathon. Captured so it's not lost.
+The candidate 1-click route was **self-placing DATA** (fold "these bytes" + "they live here" into one attestation, removing the forward UID reference). A validation pass against the frozen contracts found it **NOT-VIABLE**, for two independent reasons:
 
-## The ask for the schema-freeze dev (time-sensitive — before burn)
+1. **MIRROR re-introduces the blocker regardless.** `MirrorResolver.onAttest` requires its `refUID` to resolve to a DATA attestation of `DATA_SCHEMA_UID` (`MirrorResolver.sol:110,115`) — mirror→DATA is UID-static by the correctness rule (it means "these *exact* bytes"). So even with self-placing DATA, any write that includes a mirror still needs DATA's mined UID → still ≥2 signatures.
+2. **It would reopen an Etched invariant.** Welding placement into DATA overturns ADR-0049's "DATA is pure identity" and destroys DATA's path-agnostic hardlink property ("multiple paths can reference the same DATA"). That's a Tier-1 ADR reversal to save *one* signature versus a plain two-`multiAttest` batch that needs zero frozen-surface changes.
 
-1. **[resolver-only, the one that buys 1-click]** Can `EdgeResolver` resolve a PIN→DATA (and PIN→PROPERTY) edge by an **attester-supplied deterministic id** rather than the mined `refUID`, so the client can compute all edge targets at sign time and submit the whole write as one `multiAttest`? This is resolver logic, inside the proxy window (ADR-0048), touches no frozen UID. Trade-off to weigh: the orphan-index risk if relaxing/replacing the eager `InvalidTarget` guard (`EdgeResolver.sol:211`).
-2. **[do NOT pursue]** Content-hash binding for DATA — ADR-0049:14 already rejected hash-as-identity; don't reopen it.
-3. **[clarify]** Confirm whether "one tx, target known at *mine* time" (cheaper) suffices for any path, or whether one-signature truly requires "target known at *sign* time" (the deterministic-id design). One-signature requires sign-time.
+**Conclusion: there is no cheap one-click win, and therefore no time-sensitive ask for the schema-freeze dev.** The pragmatic floor is **Tier 1, ~2–3 clicks, SDK-only, no contract change.** True intrinsic-placement is filed as **post-burn FUTURE_WORK** if UX data ever justifies reopening it.
+
+### Write-through identity contract — rejected (folds into smart accounts)
+
+The "contract that lets keys on a list write through it" was validated adversarially and **does not hold up as an identity primitive**: resolving "contract → user" via membership is only injective when the contract is *per-user* — and a per-user contract that attests under its own address **is just a smart account**, which EAS already records as the attester natively (via ERC-1271). A *shared* (team/DAO) contract is non-injective (many users list it → its writes are unattributable) and collides on cardinality-1 PINs. ERC-4337 + ERC-7579 SmartSessions already deliver "many keys, one identity, scoped batched writes" better. **The genuine team/shared case is a different thing — a *shared content space*: an org list/lens whose members each attest under their *own* address, aggregated at read time** (which is exactly EFS's existing lens/`webOfTrust[]` model — no new primitive).
+
+## The ask for the schema-freeze dev
+
+**None.** The validation closed the one-click routes (static-link correctness + ADR-0049 being Etched), so there is **no contracts coordination required** for click-reduction. Tier 1 is entirely SDK-side. (Earlier drafts proposed a resolver affordance; it's withdrawn.)
 
 ## Decisions / status
 
-- **Status:** viability confirmed. **Tier 1 (2–3 clicks, no contract change) is the beta default.** Tier 2 (1 click) gated on the resolver affordance above — pursue with the schema-freeze dev opportunistically, do **not** block beta on it.
-- Cross-write batching (many files at once) via EIP-5792/4337 is an orthogonal, additive win — layer the same DAG approach across files.
+- **Status: settled. Tier 1 (~2–3 clicks, SDK-only, no contract change) is the answer for v1 and beyond.** No schema-freeze dependency. One-click (self-placing DATA) deferred to post-burn FUTURE_WORK; write-through-identity-contract dropped (use smart accounts).
+- Cross-write batching (many files at once) via EIP-5792/4337 is an orthogonal, additive win — layer the same per-DAG-layer `multiAttest` approach across files.
