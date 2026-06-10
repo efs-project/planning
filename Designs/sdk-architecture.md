@@ -1124,7 +1124,18 @@ v1 APIs take an **opaque identity/lens abstraction** (an address is just the sim
 
 Two separate abstractions: the **signer** (*who writes* — MetaMask EOA, burner, or smart account; the SDK just takes one) and the **lens hierarchy** (*who you read as*). Because the SDK abstracts the signer, **it serves all wallet strategies without changing** — so James can ship v1, watch how bad popups actually are with batching, and decide burners later from real data. Rule: never bake "burner"/"MetaMask" assumptions into the API. Smart wallets confirmed first-class (EAS uses OZ `SignatureChecker`, `EIP1271Verifier.sol:123` — ERC-1271 works in both direct and delegated attestation). Posture: defer AA/recovery to wallet devs; lean on ENS for naming; burners are an optional optimization, not a requirement.
 
-### 5. Click-reduction is an SDK-owned priority (see [[sdk-minimal-clicks]])
+### 5. Static vs dynamic references — match the pointer to the link's intent
+
+EFS has two pointer kinds, and using the wrong one is silent data corruption, not a style choice:
+
+- **Static reference (UID)** = "*these exact bytes / this exact version*." Mandatory whenever the link is semantically specific. **MIRROR→DATA is the canonical case:** a mirror serves the bytes of *one* DATA attestation; if it referenced a path instead, re-pinning new content there would make the mirror silently lie about what it serves. PIN→DATA is likewise static.
+- **Dynamic reference (path / Anchor)** = "*whatever's active here now*" (`/efs/logo` → newest). Safe **only when you're fine with the target moving under you** (navigation, "latest").
+
+**The clean model insight:** EFS gets its URL-like dynamic behaviour by **indexing which static link is currently active — never by making an individual link fuzzy.** A path resolves "dynamically" because the *active-pin pointer* moves; each pin is still a precise static statement. Updating = mint a new static pin. So **dynamism lives in "which static link is active," never in a fuzzy link.** Choosing a path for a semantically-static link is a latent bug that fires when the data later changes.
+
+**SDK consequence (this hazard bites third-party devs too):** expose the two as **distinct, explicit types** — a *file / latest* handle (path-backed, dynamic) vs a *pinned version / snapshot* handle (UID-backed, static) — so the type system stops a dev from holding a dynamic ref where a static one was meant. Same "make the dangerous distinction visible" discipline as the identity seam (§3).
+
+### 6. Click-reduction is an SDK-owned priority (see [[sdk-minimal-clicks]])
 
 Default to **efficient multi-attestation signing**. Verified crux: EAS UIDs include `block.timestamp` (`EAS.sol:704`), so a UID can't be predicted before mining — meaning any intra-write attestation that references another by **UID-refUID** forces sequential signing (the "8 popups"). The lever: compose a single `EAS.multiAttest` tx (one signature, works on plain MetaMask) **iff** the write's internal links use *predictable* ids (path/content-derived anchors) instead of UID-refUIDs. Whether that holds is a resolver/schema question being decided in the freeze **now** → live investigation + the concrete ask for the schema-freeze dev tracked in [[sdk-minimal-clicks]].
 
