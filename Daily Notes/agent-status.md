@@ -6,6 +6,10 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ---
 
+## 2026-06-10
+
+- @hackathon: onboarding+flyer thread started (James's fork, finally). Read the full state (Milestones, Decisions, holistic review UX findings, SDK scaffold, dead client, explorer pages, whitepapers dataset). Honest read: participant-add-data path does NOT exist today — Sepolia gated on James (freeze-table sign + EOA/Safe), SDK = stubs, explorer = debug-grade (UX-1/2/13 gaps). Drafted the full participant one-pager + flyer copy + tiered dataset/app idea lists at `/Users/james/Code/EFS/hackathon/onepager-draft.md` (staging, like datasets/). Surfaced 2 forks to For-James ⚡: entry path (rec: concierge-first via Discord + seeding script) + prize structure (rec: one pool both tracks). Announce gate proposed: Sepolia live + whitepapers seeded + Discord template pinned. Next: James's picks → final flyer visual + comms plan.
+
 ## 2026-06-01
 
 - @pm: Refactored the freeze/deploy launch prompt to be open/frame-first (per James: inform + give ideas, don't shoehorn) and ran 3 expert-review subagents (autonomy / safety / domain). Domain pass caught two real things: "widening integers is free" is false at freeze (changes schema string → UID → orphans data; sizing is now-or-never), and the resolvers aren't upgradeable-shaped (immutables + no initializers → proxy refactor is real scope). Folded fixes into the prompt (accurate "physics" section, upgradeable-shape context, blocking UID/storage guards, register-the-proxy-not-impl). Feasibility flag to James: fastest path to data-add = deploy Sepolia now in current shape, proxy refactor before mainnet. Prompt ready in chat; thread spawns on James's word.
