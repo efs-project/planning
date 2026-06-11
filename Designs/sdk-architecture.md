@@ -1,7 +1,7 @@
 # EFS SDK Architecture
 
 **Status:** review
-**Target repos:** sdk (new — TypeScript SDK), contracts OR sdk (Solidity library — Q1), planning
+**Target repos:** sdk (new — both the TypeScript SDK and the Solidity library; Q1 RESOLVED 2026-06-10, ADR-0001), planning
 **Depends on:** [[0001-design-system]], [[brainstorm-system]], ADR-0031 (lenses), ADR-0041 (PIN/TAG), ADR-0044 (Lists — pending merge)
 **Supersedes:** —
 **Reviewers:** expert subagent passes 2026-05-28 (SDK API/DX + contract-fidelity; wallet/EIP-5792 + attribution + security); awaiting James frame-review
@@ -41,7 +41,7 @@ EFS ships two SDKs (the third — the OS SDK — is deferred). They are **not** 
 
 **A smart contract is a first-class client.** It is not a write-only stub: a contract reads files (lens-scoped, so it resolves the *right* attestation), reads lists, reads the first N children of a folder, and creates files and folders — essentially the full client surface. **Lenses are load-bearing for on-chain reads, not just writes**: without the caller-supplied lens stack a contract would resolve the wrong content. The single difference from the TS client is gas: on-chain enumeration is a **bounded window** (`start`, `count` — "first 10") rather than an open `AsyncIterable`, and the caller owns the gas of the window. Forward enumeration reads through the core on-chain view contracts (`EFSIndexer`/`EFSFileView`); only reverse-lookups (cross-history references, timelines, lens *discovery*) need an external index and are out of scope for both SDKs in v1.
 
-**Why the on-chain SDK must be a library, not a deployed helper (load-bearing).** EAS records `msg.sender` as the attester, and the attester address is the spine of the read model — lenses key on it (ADR-0031) and PROPERTY-value PINs are cardinality-1 *per attester* (ADR-0041). If a smart-contract dev called a *separately deployed* EFS helper contract, that helper would be `msg.sender` when it called EAS, so every consuming app's content would be attributed to the **helper**, not to the app — collapsing all of them into one identity and breaking lens resolution. (This is the exact defect the off-chain `EFSUploadGateway` analysis surfaced.) A Solidity **library** (`internal` functions inlined into the caller, or `using EFS for …`) and an **inheritable base contract** both execute in the *consuming contract's* context, so `msg.sender` stays the consuming contract — the correct attester. Decision (James, 2026-05-28): **the on-chain SDK is a Solidity library + inheritable base, never a deployed singleton.**
+**Why the on-chain SDK must be a library, not a deployed helper (load-bearing).** EAS records `msg.sender` as the attester, and the attester address is the spine of the read model — lenses key on it (ADR-0031) and PROPERTY-value PINs are cardinality-1 *per attester* (ADR-0041). If a smart-contract dev called a *separately deployed* EFS helper contract, that helper would be `msg.sender` when it called EAS, so every consuming app's content would be attributed to the **helper**, not to the app — collapsing all of them into one identity and breaking lens resolution. (This is the exact defect the off-chain `EFSUploadGateway` analysis surfaced.) A Solidity **library** (`internal` functions inlined into the caller, or `using EFSLib for …`) and an **inheritable base contract** both execute in the *consuming contract's* context, so `msg.sender` stays the consuming contract — the correct attester. Decision (James, 2026-05-28): **the on-chain SDK is a Solidity library + inheritable base, never a deployed singleton.**
 
 The two SDKs share *concepts* (paths, DATA/MIRROR, PIN/TAG/PROPERTY, Lists, lenses) and the schema-UID constants, but not code. The rest of this doc designs the TypeScript off-chain SDK in depth (it is the larger surface and the debug-client parity target), then specifies the Solidity on-chain library.
 
@@ -67,7 +67,7 @@ Distilled from: `bs-third-party-dev-ux-v1` (dev friction walkthroughs), `bs-dive
 | M11a | Manage MIRRORs on existing DATA (list/add/remove); multiple transports per DATA | core primitive (multi-MIRROR per DATA); archival redundancy use cases |
 | M11b | Sort surface for folders AND lists: discover/declare sorts, read sorted (lens-filtered), and maintain the overlay (`process`/`reposition`) after modification | spec 06/07; lists must be re-sorted after entry changes |
 | M11c | Per-call lens override on every read (not just client-level lens stack) | compare-views use cases; avoids client-state mutation |
-| M12 | Expose the raw EAS SDK cleanly (EFS.EAS) without requiring devs to know the SDK internals | PM brief; dev-friction: drop-to-raw-EAS pattern |
+| M12 | Expose a clean raw-EAS surface (EFS.EAS — viem-native helpers + vendored ABIs, no eas-sdk/ethers dep per SDK ADR-0002) without requiring devs to know the internals | PM brief; dev-friction: drop-to-raw-EAS pattern |
 | M13 | Expose the raw contract instances as an escape hatch (EFS.raw) | PM brief |
 | M14 | Lens model: explicit, visible default; not silent | dev-friction: "SDK silently used the deployer lens" |
 | M15 | Signer/wallet handling: constructor injection + `.connect()` for MetaMask late-bind | client: `EFS.connect(signer)` |
@@ -167,7 +167,7 @@ Two artifacts in two languages: **one TypeScript package** (`@efs/sdk`) and **on
     sorts.ts         sort overlay: discover/declare/read + processItems hinting
     lenses.ts        lens management (client-side)
     batch.ts         batch builder → EIP-5792 / 4337 / sequential
-    eas.ts           efs.EAS — raw EAS SDK exposure
+    eas.ts           efs.EAS — viem-native raw-EAS helpers + vendored ABIs (no eas-sdk/ethers; ADR-0002)
     raw.ts           efs.raw — contract escape hatches
     decode.ts        efs.decode — raw attestation → typed entry
     cache.ts         read-through content cache (IPFS/Arweave/HTTPS)
@@ -178,14 +178,16 @@ Two artifacts in two languages: **one TypeScript package** (`@efs/sdk`) and **on
     browser-react/   MetaMask read/write example
 ```
 
-**The Solidity on-chain SDK** — a library + inheritable base contract (`EFS.sol` library, `EFSWriter` base, `EFSConstants`/interfaces). Specified in the "On-chain SDK (Solidity)" section below.
+**The Solidity on-chain SDK** — a library + inheritable base contract (`EFSLib.sol` library, `EFSWriter` base, `EFSConstants`/interfaces; package `@efs/solidity`, ADR-0003). Specified in the "On-chain SDK (Solidity)" section below.
 
-> **Q1 — REOPENED by the 2026-05-28 reframe.** The original Q1 ("single `sdk/` repo") was resolved when *both* SDKs were assumed to be TypeScript. Now that the on-chain SDK is **Solidity tightly coupled to the immutable contracts**, its natural home is arguably `contracts/` (same Foundry/Hardhat toolchain, imports the core interfaces, deploys/verifies alongside, version-locked to the schemas it encodes) rather than a separate `sdk/` repo. The TypeScript SDK clearly lives in its own `sdk/` repo regardless. **The live fork is only: where does the Solidity library live — `contracts/` (co-located, recommended) or `sdk/contracts/` (with the TS SDK)?** See Open Questions Q1.
+> **Q1 — RESOLVED (James, 2026-06-10; ADR-0001): both SDKs live in the `sdk/` repo.** The 2026-05-28 reframe briefly reopened this (the Solidity SDK's coupling to the contracts made `contracts/` look like a natural home). It is now settled the other way: the Solidity SDK is a **compile-in library consumed via npm** (`@efs/solidity`), not a contract EFS deploys — so distribution, not deployment-coupling, decides, and it ships alongside the TypeScript SDK in the one `sdk/` repo. Version-lock to the frozen schema UIDs is handled by pinning, not co-location. See Open Questions Q1.
 
 **Consumer install:**
 ```bash
 npm install @efs/sdk                       # off-chain (TypeScript) — the normal install
-forge install efs/contracts                # on-chain (Solidity) — for smart-contract devs
+npm i @efs/solidity                        # on-chain (Solidity) — for smart-contract devs (ADR-0003)
+# then add a Foundry remapping so imports resolve, e.g.:
+#   @efs/solidity/=node_modules/@efs/solidity/src/
 ```
 
 ---
@@ -396,12 +398,16 @@ efs.props.list(uid: Hex): Promise<PropEntry[]>
 
 ```ts
 import { PROP_KEYS } from '@efs/sdk/constants'
+PROP_KEYS.CONTENT_HASH        // "contentHash" — bare SHA-256 (lowercase hex; SDK ADR-0006). Reserved key.
+PROP_KEYS.SIZE                // "size"        — byte length of the content. Reserved key.
 PROP_KEYS.CONTENT_TYPE        // "contentType"
 PROP_KEYS.NAME                // "name"
 PROP_KEYS.DESCRIPTION         // "description"
 PROP_KEYS.PREVIOUS_VERSION    // "previousVersion"
 // ... extensible; community-contributed keys can be added via SDK version bumps
 ```
+
+`contentHash`, `size`, and `contentType` are **reserved-key PROPERTYs bound to the DATA UID** — they are *not* fields inside the DATA attestation. Per ADR-0049 the **DATA schema's field string is empty** (DATA carries no inline metadata); all of a file's metadata is attested as separate, lens-scoped PROPERTYs on the DATA UID. See the content-hashing design note in the batch section for the verification semantics.
 
 **Design note on the PROPERTY model (ADR-0041):** A PROPERTY value is not a single attestation. Per ADR-0041 §1 and `specs/02` §PIN, a key/value pair is three attestations: (1) an ANCHOR naming the key under the target (e.g. a `contentType` anchor under a DATA), (2) a PROPERTY carrying the value, (3) a **PIN** binding the value to the key anchor (`PIN(refUID=propertyUID, definition=keyAnchor)`). The PIN is what makes the value a singleton — a rebind is a new PROPERTY + new PIN that supersedes the old PIN, read in O(1) via `getActivePin`. This is exactly the kind of multi-step indirection `efs.props` exists to hide; devs never touch the key anchor or the binding PIN directly. This also corrects a pre-ADR-0041 model (`overview.md`, still stale on `main`) where PROPERTY rebinds were assumed to be newest-by-time scans — that model was found to be incorrect (ADR-0041 Context).
 
@@ -625,18 +631,19 @@ The dev sees one API (`efs.batch(...)`); by default the SDK delivers the fewest 
 #### `efs.EAS` — EAS SDK exposure
 
 ```ts
-// Direct access to the underlying EAS SDK instance
-efs.EAS          // type: EAS (from @ethereum-attestation-service/eas-sdk)
+// Direct access to EFS's viem-native EAS helpers (no eas-sdk/ethers dependency — SDK ADR-0002).
+// efs.EAS is a thin helper namespace over viem + vendored EAS ABIs, connected to efs's signer.
+efs.EAS
 
-// Fully typed, fully connected (same signer as the EFSClient)
+// Same verbs as raw EAS attestation, but viem-native (encoding via the vendored EAS ABIs)
 efs.EAS.attest({ schema, data: { ... } })
 efs.EAS.multiAttest([...])
 efs.EAS.getAttestation(uid)
 efs.EAS.revoke({ schema, data: { uid } })
-// ... all EAS SDK methods available
+// ... the full EAS attestation surface, expressed in viem
 ```
 
-**Design rationale:** Every non-trivial dev drops to raw EAS queries within day one (the museum researcher, the sports-stats dev, the recipe forker). Instead of fighting this, we make it first-class. `EFS.EAS` is *not* buried in `.raw` — it's a top-level, visible surface. The promise to the dev: "You can always speak EAS fluently. Our wrappers are conveniences, not a walled garden."
+**Design rationale:** Every non-trivial dev drops to raw EAS queries within day one (the museum researcher, the sports-stats dev, the recipe forker). Instead of fighting this, we make it first-class. `EFS.EAS` is *not* buried in `.raw` — it's a top-level, visible surface. Per SDK ADR-0002 the SDK does **not** depend on `@ethereum-attestation-service/eas-sdk` or ethers; `efs.EAS` is **viem-native helpers over vendored EAS ABIs**, so the promise — "you can always speak EAS fluently" — is kept without pulling in the eas-sdk/ethers stack. Our wrappers are conveniences, not a walled garden.
 
 ---
 
@@ -686,7 +693,7 @@ import { SCHEMAS, CONTRACTS, PROP_KEYS, TRANSPORT } from '@efs/sdk/constants'
 
 // Schema UIDs (typed, version-checked against the connected chainId)
 SCHEMAS.ANCHOR         // `0x...` as const
-SCHEMAS.DATA
+SCHEMAS.DATA           // field string is EMPTY (ADR-0049) — metadata lives in PROPERTYs on the DATA UID
 SCHEMAS.TAG
 SCHEMAS.PIN
 SCHEMAS.PROPERTY
@@ -701,8 +708,10 @@ CONTRACTS.ROUTER
 CONTRACTS.FILE_VIEW
 CONTRACTS.SORT_OVERLAY
 
-// Well-known property keys
-PROP_KEYS.CONTENT_TYPE
+// Well-known property keys (reserved keys are PROPERTYs bound to a DATA UID, not DATA fields)
+PROP_KEYS.CONTENT_HASH         // bare SHA-256, lowercase hex (SDK ADR-0006) — reserved key on DATA
+PROP_KEYS.SIZE                 // content byte length — reserved key on DATA
+PROP_KEYS.CONTENT_TYPE         // reserved key on DATA
 PROP_KEYS.NAME
 PROP_KEYS.DESCRIPTION
 PROP_KEYS.PREVIOUS_VERSION
@@ -815,7 +824,7 @@ export { AnchorEntrySchema, FileStatSchema, ... } from '@efs/sdk/schemas'
 - **viem** — type-safety for contract interactions; we adopt their `Hex` / `Address` branded types
 - **Prisma** — fluent typed reads with optional includes; the `efs.fs.read.json<T>()` pattern
 - **Stripe** — resource-namespaced API (`stripe.customers`, `stripe.charges`) → our `efs.fs`, `efs.graph`, `efs.lists`, `efs.sorts`
-- **EAS SDK** — the embedded instance (`efs.EAS`) follows the same pattern as the SDK's own `new EAS(address)` instantiation
+- **EAS** — the `efs.EAS` helper namespace mirrors EAS's attestation verbs, but is implemented **viem-native over vendored EAS ABIs** (no `@ethereum-attestation-service/eas-sdk` / ethers dependency, per SDK ADR-0002)
 
 **What we don't borrow:**
 - **wagmi** (React hooks) — too framework-coupled for a framework-agnostic SDK. React bindings belong in a separate `@efs/react` package, post-v1.
@@ -849,11 +858,11 @@ Everything above is the TypeScript SDK. This section specifies the **separate So
 
 ### Form: inheritable base (primary) + library (escape hatch); never a deployed singleton
 
-Two ways to consume it, both executing in the **caller's** context so the caller's contract is the EAS attester (the load-bearing constraint from "Two deliverables" above). **The documented happy path is the inheritable `EFSWriter` base** — a contract author is already writing a new contract and usually inheriting (`ERC721`, `Governor`, `Ownable`), so a base that takes `IEAS` once in the constructor removes the boilerplate of threading `eas` through every call (this is the OpenZeppelin mental model — you inherit `ERC20`, you don't `using` it). The **`using EFS for IEAS` library form is the escape hatch** for contracts that can't add a base (proxy/diamond patterns, inheritance conflicts) or want to pass a per-call EAS instance (multi-instance/testing).
+Two ways to consume it, both executing in the **caller's** context so the caller's contract is the EAS attester (the load-bearing constraint from "Two deliverables" above). **The documented happy path is the inheritable `EFSWriter` base** — a contract author is already writing a new contract and usually inheriting (`ERC721`, `Governor`, `Ownable`), so a base that takes `IEAS` once in the constructor removes the boilerplate of threading `eas` through every call (this is the OpenZeppelin mental model — you inherit `ERC20`, you don't `using` it). The **`using EFSLib for IEAS` library form is the escape hatch** for contracts that can't add a base (proxy/diamond patterns, inheritance conflicts) or want to pass a per-call EAS instance (multi-instance/testing).
 
 ```solidity
 // (1) Inheritable base — holds the EAS address + schema constants, exposes _efs* helpers.
-import {EFSWriter} from "efs-contracts/sdk/EFSWriter.sol";
+import {EFSWriter} from "@efs/solidity/EFSWriter.sol";
 
 contract MyDAO is EFSWriter {
     constructor(IEAS eas) EFSWriter(eas) {}
@@ -866,10 +875,10 @@ contract MyDAO is EFSWriter {
 }
 
 // (2) Library with `using` — for contracts that can't or don't want to inherit.
-import {EFS} from "efs-contracts/sdk/EFS.sol";
+import {EFSLib} from "@efs/solidity/EFSLib.sol";
 
 contract MyApp {
-    using EFS for IEAS;
+    using EFSLib for IEAS;
     IEAS constant eas = IEAS(0x4200...);   // canonical EAS
 
     function save(bytes calldata content) external {
@@ -883,7 +892,7 @@ contract MyApp {
 ### Write surface (the value-add: one call ⟶ the correct attestation sequence)
 
 ```solidity
-library EFS {
+library EFSLib {
     // Compose a file write: DATA (+ MIRROR for the content), contentType PROPERTY triple,
     // placement PIN at the path's file-anchor, and folder-visibility TAGs for new ancestors.
     // Returns the DATA UID and the placement PIN UID.
@@ -987,6 +996,8 @@ A lens is keyed on an **address**, so "whose data do I read?" is really "which a
 
 3. **Reading anyone else is always explicit: `readAs(path, who)`.** The `who` is an address the dev names on purpose — `msg.sender` (their direct caller), a DAO/registry, or an authenticated end user.
 
+**Two different "defaults" — don't conflate them.** The off-chain Q4 default lens (the connected **wallet's** address — "see your own files") and the on-chain `read(path)` default (`address(this)` — the consuming contract's own files) are the same *principle* ("default to your own namespace"), each resolved to the right self for its context. Neither is the **deployer**: the deployer appears only as the *tail* of ADR-0039's `systemLenses[]` default chain (the bootstrap shared default), never as the head/primary default — that deployer-as-primary behavior was the original "carbonara" bug both defaults exist to avoid.
+
 **Why this is address-keyed and AA-compatible (not "AA-native magic").** Under both ERC-4337 (`bundler → EntryPoint → smart account → your contract`) and EIP-7702, **the `msg.sender` your contract sees is the user's smart-*account address*** — not the bundler, not the paymaster. Account abstraction breaks the assumption "`msg.sender` is a human EOA"; EFS never needs that assumption, because lenses key on *an address* regardless of whether it is an EOA, a Safe, or a 4337/7702 account. **The honest caveat:** the account address is not the same thing as "the human owner's key." Session keys, ERC-7579/6900 executor modules, and re-delegated accounts mean the address that authored an attestation may today be controlled by a different key or different code than when it wrote. EFS resolves *which address* canonically — it does not and cannot certify *who currently controls that address*. Lens trust is trust in an address's **current controller**, which can change; for durability, prefer lens entries that point at immutable contracts over EOAs, and treat attestation provenance (timestamp, `refUID`, revocation state) as the freshness signal.
 
 **The one hard limit, stated honestly.** A contract *cannot* reach **through** a middleman to the true end user: if Alice calls a Router that calls your contract, your `msg.sender` is the Router, not Alice, and nothing on-chain recovers Alice safely (`tx.origin` is dead). This is an EVM reality, not an EFS gap. The industry answer — which the SDK documents rather than papers over — is to **pass the user explicitly and prove it**: an Aave-style `onBehalfOf` parameter gated by on-chain authorization, or an **EIP-712** signature the dev verifies (using **ERC-1271** for smart-contract-wallet signers, since `ecrecover` only works for EOAs). When the SDK documents that signature path it must carry the now-standard hardening, not a naïve `ecrecover`: **ERC-7739** nested-712 rehashing to stop a single owner's signature replaying across the multiple smart accounts it controls; `verifyingContract` + `chainId` + a contract-tracked `nonce` in the EIP-712 domain; and — because an EOA can *become* a contract mid-life under 7702 — re-checking code-presence per call rather than caching "EOA vs contract." The SDK deliberately ships **no `readAsEndUser`** helper — inferring the end user through middlemen can't be done safely, so we make the explicit, authenticated path easy instead of faking the magic one (a `readAsEndUser` would just be `tx.origin` in a nicer coat).
@@ -1028,12 +1039,12 @@ abstract contract EFSWriter {
 }
 ```
 
-The `using EFS for IEAS` library form cannot emit events on the consumer's behalf (events must be declared in the emitting contract), so event emission is a property of the **base**; library users who want domain events declare and emit their own. This is one more reason the base is the documented happy path.
+The `using EFSLib for IEAS` library form cannot emit events on the consumer's behalf (events must be declared in the emitting contract), so event emission is a property of the **base**; library users who want domain events declare and emit their own. This is one more reason the base is the documented happy path.
 
 ### Constants & escape hatch
 
 ```solidity
-import {EFSConstants} from "efs-contracts/sdk/EFSConstants.sol";
+import {EFSConstants} from "@efs/solidity/EFSConstants.sol";
 // EFSConstants.ANCHOR_SCHEMA, .DATA_SCHEMA, .PIN_SCHEMA, … as `bytes32 constant`,
 // generated from the deployed registry and version-locked to the contracts release.
 
@@ -1057,7 +1068,7 @@ A smart contract is a first-class EFS client, so the on-chain and off-chain SDKs
 | Attester | connected wallet (Q4 default) | always the consuming contract (`msg.sender`) |
 | Reverse-lookups | `NotImplemented` shim (D1) | `NotImplemented` (out of scope) |
 
-**Drift risk is real and must be managed, not assumed away.** Because the two SDKs ship in different languages (and possibly different repos — Q1), a primitive added to one can be forgotten in the other. The mitigation is a **shared functional-primitive checklist** — a single source-of-truth list of EFS operations (the rows of the parity table, expanded) that both SDKs are measured against. Adding an operation means adding a row; a row unimplemented on one side is a tracked gap (acceptable: e.g. reverse-lookups are `NotImplemented` on both), never a silent omission. This checklist lives with the contracts/EFS spec, not inside either SDK, precisely so neither SDK "owns" the definition of parity. *(This is a process artifact for implementation, flagged here so the eventual plan carries it; see Process feedback.)*
+**Drift risk is real and must be managed, not assumed away.** Because the two SDKs ship in different languages (though in the same `sdk/` repo — Q1 RESOLVED), a primitive added to one can be forgotten in the other. The mitigation is a **shared functional-primitive checklist** — a single source-of-truth list of EFS operations (the rows of the parity table, expanded) that both SDKs are measured against. Adding an operation means adding a row; a row unimplemented on one side is a tracked gap (acceptable: e.g. reverse-lookups are `NotImplemented` on both), never a silent omission. This checklist lives with the contracts/EFS spec, not inside either SDK, precisely so neither SDK "owns" the definition of parity. *(This is a process artifact for implementation, flagged here so the eventual plan carries it; see Process feedback.)*
 
 ### Shared-namespace conventions (multiple teams, one filesystem)
 
@@ -1084,9 +1095,9 @@ Choosing among these is **the dev's call**, application logic — the SDK's job 
 
 **6. The permission model is capability-style and ungriefable — with known limits.** "You write only your own overlay; readers ignore you unless they lens you in" is a complete, clean coexistence model: no one can overwrite your slot or inject a mirror/content-type onto your DATA. What it lacks, for later: **write delegation** ("App A authorizes App B to write A's overlay") and an explicit **"this is the official version" signal**. Both are post-v1; both largely reduce to the same blessing primitive as #4.
 
-### Open question on packaging
+### Packaging (Q1 RESOLVED — `sdk/` repo)
 
-Where the Solidity source lives (`contracts/` vs `sdk/contracts/`) is the reopened **Q1** — see Open Questions. The recommendation is `contracts/`: a library that imports the core contract interfaces and encodes their schema UIDs is naturally version-locked to, built with, and deployed/verified alongside the contracts.
+Where the Solidity source lives was the reopened **Q1**; it is now **RESOLVED (2026-06-10, ADR-0001): the Solidity SDK lives in the `sdk/` repo alongside the TS SDK**, shipped as a compile-in `@efs/solidity` package consumed via npm (not a contract EFS deploys). Distribution — devs `npm install` both halves — decided it over deployment-coupling; version-lock to the frozen schema UIDs is by pinning, not co-location. See Open Questions Q1.
 
 ---
 
@@ -1143,7 +1154,7 @@ Same "make the dangerous distinction visible" discipline as the identity seam (�
 
 ### 6. Click-reduction is an SDK-owned priority (see [[sdk-minimal-clicks]])
 
-Default to **efficient multi-attestation signing**. Verified crux: EAS UIDs include `block.timestamp` (`EAS.sol:704`), so a UID can't be predicted before mining — meaning any intra-write attestation that references another by **UID-refUID** forces sequential signing (the "8 popups"). **Validated outcome (2026-06-10): ~2–3 clicks per file, SDK-only, no contract change** — the SDK sends one `EAS.multiAttest` per dependency layer (mint DATA → then the mirror/placement/property attestations that reference its now-mined UID). One-click was investigated and **rejected** (self-placing DATA can't include the mirror and would reopen the Etched ADR-0049), so **there is no schema-freeze dependency** for click-reduction. Full investigation in [[sdk-minimal-clicks]].
+Default to **efficient multi-attestation signing**. Verified crux: EAS UIDs include `block.timestamp` (`EAS.sol:704`), so a UID can't be predicted before mining — meaning any intra-write attestation that references another by **UID-refUID** forces sequential signing (the "8 popups"). **Validated outcome (2026-06-10): click count is a function of the write's dependency depth, which is driven by how many PROPERTYs the write carries — not a fixed headline number.** The SDK sends one `EAS.multiAttest` per dependency layer (mint DATA → then the mirror/placement/property attestations that reference its now-mined UID). A **bare file** (DATA + MIRROR + placement PIN, no metadata PROPERTYs) is **2 layers ⟶ 2 clicks**; adding metadata PROPERTYs (`contentHash`/`size`/`contentType`, each a key-ANCHOR→PROPERTY→binding-PIN triple) adds the property layer for **~3 clicks**. This is SDK-only, no contract change. One-click was investigated and **rejected** (self-placing DATA can't include the mirror and would reopen the Etched ADR-0049), so **there is no schema-freeze dependency** for click-reduction. Full investigation in [[sdk-minimal-clicks]].
 
 ## Open Questions
 
@@ -1167,8 +1178,8 @@ Default to **efficient multi-attestation signing**. Verified crux: EAS UIDs incl
 
 ## Pre-promotion checklist
 
-- [ ] All `## Open questions` resolved or explicitly deferred — Q2–Q5 RESOLVED; **Q1 reopened** by the on-chain/off-chain reframe (Solidity library repo home)
-- [ ] `**Target repos:**` — TS SDK in new `sdk/` repo (settled); Solidity library repo home is Q1 (open); planning — design doc only
+- [x] All `## Open questions` resolved or explicitly deferred — Q1–Q6 all RESOLVED (Q1 closed 2026-06-10: both SDKs in the `sdk/` repo, ADR-0001)
+- [x] `**Target repos:**` — both SDKs in the `sdk/` repo (Q1 RESOLVED, ADR-0001); planning — design doc only
 - [x] `**Depends on:**` chain — design-system accepted ✅; brainstorm-system in review; ADR-0031 accepted ✅; ADR-0041 accepted ✅; ADR-0044 pending Lists merge (implementation gated, not design gated)
 - [x] No `<!-- AGENT-Q: -->` comments left in the design body
 - [x] At least one round of `#status/review` — expert subagent review pass (2026-05-28) + James Q1–Q5 resolutions
@@ -1183,7 +1194,7 @@ The implementation thread (Kanban Backlog: "Implement OnionDAO subset of sdk-arc
 1. James frame-review of this doc (this card's purpose)
 2. Lists → Sepolia deploy (schema freeze: 9 schemas)
 
-Q1 (repo layout): the TS SDK lives in a new `sdk/` repo (settled); the **Solidity library's home is reopened** by the 2026-05-28 reframe (`contracts/` vs `sdk/contracts/` — see Open Questions Q1). The implementation thread should not assume a single repo until Q1 is decided.
+Q1 (repo layout) — RESOLVED (2026-06-10, ADR-0001): **both SDKs live in the `sdk/` repo.** The TS SDK and the Solidity library (a compile-in `@efs/solidity` package, not a contract EFS deploys) ship together; the implementation thread can assume the single `sdk/` repo.
 
 ---
 
