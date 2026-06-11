@@ -1,5 +1,7 @@
 # For James — arch-review, ready to read
 
+> **⚠ SUPERSEDED in part (2026-06-10):** the content-hash sections below (the `hash:sha2-256`/`hash:keccak256`/`cid` multihash/CID "hash as properties" model) are **outdated**. The content-hash convention was decided as **bare SHA-256** — see SDK ADR-0006 + `sdk/docs/specs/content-hash.md`. The rest of this note (file-identity = DATA UID, empty/pure-identity DATA, proxy/burn plan) stands.
+
 *Prepared overnight 2026-05-31 by the arch-review thread. Read this top-to-bottom; it's all recommendations, not raw analysis. Two big multi-agent reviews (91 + 38 expert agents) back everything below. Nothing irreversible has happened — no schemas registered, no contracts changed, repo synced, your stash safe.*
 
 ## The one-paragraph version

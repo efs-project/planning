@@ -86,7 +86,7 @@ Distilled from: `bs-third-party-dev-ux-v1` (dev friction walkthroughs), `bs-dive
 | N7 | `lenses.discover()` — lens discovery (reverse lookup; needs external indexing — `NotImplemented` shim in v1) | dev-friction: cookbook curator |
 | N8 | `watch(path)` — change subscription (fall back to polling when subscribe denied) | dev-friction: sports stats live feed |
 | N9 | Multi-chain config support | dev-friction: birding L2 wall |
-| N10 | `snapshot.cite()` — permanent URL + content hash + block for citation | dev-friction: museum scholar paper |
+| N10 | `snapshot.cite()` — permanent URL + the author's attested SHA-256 contentHash (trust-relative, ADR-0006) + block for citation | dev-friction: museum scholar paper |
 
 #### DEFERRED (explicit non-scope for v1)
 
@@ -593,6 +593,8 @@ type OperationResult = {
 ```
 
 **Design note on the two forms:** the callback form (`efs.batch(b => {...})`) auto-executes and is the **recommended** default — there's nothing to forget. The fluent form (`efs.batch().…`) is lazy and only fires on `.execute()`/`.estimate()`; the builder is typed so a batch that's constructed but never executed is a `#[must_use]`-style dangling value (lint + a dev-mode runtime warning on GC of an unexecuted builder), closing the "silently did nothing" footgun the review flagged.
+
+**Design note on content hashing (decided 2026-06-10 — SDK ADR-0006):** a file's `contentHash` is a **bare SHA-256** digest (lowercase hex, matches `sha256sum`) recorded as a reserved-key PROPERTY (`contentHash`); `size` and `contentType` are sibling PROPERTYs. The PROPERTY *key* is the algorithm tag — no multihash/CID/keccak in the value. Two expert passes rejected multihash (its future-proofing is illusory; the IPFS-CID rationale is false). Because `contentHash` is a *lens-scoped* PROPERTY anyone can attest, **verification is trust-relative, not absolute**: the SDK checks fetched bytes against the hash attested by the lens that won placement (`resolvedBy`) and reports `matches-author` / `mismatch` / `no-claim` — never a bare "verified." Full spec: the SDK repo's `docs/specs/content-hash.md`. (Surfaced upstream as an ADR-0049 follow-up.)
 
 **Batching strategy:**
 - Compile all operations to attestation payloads
