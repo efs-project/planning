@@ -13,7 +13,7 @@
 
 **hackathon — entry path (gates the flyer):** how do participants actually add data? (a) **concierge-first** — submit folder+tags in Discord, our seeding script attests it; explorer = self-serve extra (rec — works day-1, routes everyone through Discord which IS the goal) / (b) explorer self-serve only / (c) wait for SDK. Draft at `/Users/james/Code/EFS/hackathon/onepager-draft.md`.
 
-**hackathon — prizes:** (a) **one pool, both tracks** — $100/$50/$25/500🧅/250🧅 (rec — simplest flyer, hedges thin SDK-track turnout) / (b) per-track pools (~2× cost) / (c) cash ladder for datasets + one flat builder bounty for SDK.
+**hackathon — prizes (UPDATED per James 2026-06-11 "spend more, seed the flywheel"):** (a) two mirrored pools $150/$75/$25+🧅 each ($500+1500🧅) / (b) one deep ladder $250/$150/$100/$50/$50 + 5×250🧅 ($600) / (c) **rec: two pools + 100🧅 ship-bounty for EVERY accepted entry** (cap 30) + optional first-10 early-bird 250🧅 — guaranteed micro-reward makes everyone ship; shipped datasets ARE the flywheel. Details in `/Users/james/Code/EFS/hackathon/onepager-draft.md`.
 
 **Milestones wording (Tier-1, your OK):** the OnionDAO list still says *"Smart contract .sol file list freeze"* — stale per your "set stays flexible." Want me to update it? (Milestone scope = your call.)
 
