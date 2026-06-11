@@ -67,7 +67,7 @@ Distilled from: `bs-third-party-dev-ux-v1` (dev friction walkthroughs), `bs-dive
 | M11a | Manage MIRRORs on existing DATA (list/add/remove); multiple transports per DATA | core primitive (multi-MIRROR per DATA); archival redundancy use cases |
 | M11b | Sort surface for folders AND lists: discover/declare sorts, read sorted (lens-filtered), and maintain the overlay (`process`/`reposition`) after modification | spec 06/07; lists must be re-sorted after entry changes |
 | M11c | Per-call lens override on every read (not just client-level lens stack) | compare-views use cases; avoids client-state mutation |
-| M12 | Expose a clean raw-EAS surface (EFS.EAS — viem-native helpers + vendored ABIs, no eas-sdk/ethers dep per SDK ADR-0002) without requiring devs to know the internals | PM brief; dev-friction: drop-to-raw-EAS pattern |
+| M12 | Expose a clean raw-EAS surface (efs.eas — viem-native helpers + vendored ABIs, no eas-sdk/ethers dep per SDK ADR-0002) without requiring devs to know the internals | PM brief; dev-friction: drop-to-raw-EAS pattern |
 | M13 | Expose the raw contract instances as an escape hatch (EFS.raw) | PM brief |
 | M14 | Lens model: explicit, visible default; not silent | dev-friction: "SDK silently used the deployer lens" |
 | M15 | Signer/wallet handling: constructor injection + `.connect()` for MetaMask late-bind | client: `EFS.connect(signer)` |
@@ -126,7 +126,7 @@ This pass determines what to WRAP vs. what to EXPOSE-AS-IS.
 
 | Operation | Raw EAS alone | EFS SDK adds | Verdict |
 |---|---|---|---|
-| Get one attestation by UID | `eas.getAttestation(uid)` ✅ trivial | Nothing | **Expose via EFS.EAS** |
+| Get one attestation by UID | `eas.getAttestation(uid)` ✅ trivial | Nothing | **Expose via efs.eas** |
 | Multi-attest (batch) | `eas.multiAttest([...])` — low-level, requires hand-assembled payloads | Compiles human operations into attestation payloads; validates; retries; splits if >MAX_BUNDLE_SIZE | **Wrap — high value** |
 | Create Anchor at path | 1 attest call — but dev must know schema UID, encode data, pick refUID from prior resolution | Path resolution (string → UID chain), name validation per ADR-0025, caching | **Wrap** |
 | List Anchor's children | `eas.getReferencingAttestationUIDs(uid, ANCHOR_SCHEMA)` + decode each | Pagination abstraction, AsyncIterable, caching, typed return | **Wrap** |
@@ -167,7 +167,7 @@ Two artifacts in two languages: **one TypeScript package** (`@efs/sdk`) and **on
     sorts.ts         sort overlay: discover/declare/read + processItems hinting
     lenses.ts        lens management (client-side)
     batch.ts         batch builder → EIP-5792 / 4337 / sequential
-    eas.ts           efs.EAS — viem-native raw-EAS helpers + vendored ABIs (no eas-sdk/ethers; ADR-0002)
+    eas.ts           efs.eas — viem-native raw-EAS helpers + vendored ABIs (no eas-sdk/ethers; ADR-0002)
     raw.ts           efs.raw — contract escape hatches
     decode.ts        efs.decode — raw attestation → typed entry
     cache.ts         read-through content cache (IPFS/Arweave/HTTPS)
@@ -220,7 +220,7 @@ await efs.connect(walletClient)
 
 **Design note on lens defaulting (Q4 resolved):** The *original* bug was that the current client silently uses the **deployer's** lens — so users saw the deployer's content, not their own or a chosen author's ("why am I seeing the deployer's carbonara?"). The fix is not "force everyone to declare a lens" (that taxes every hello-world); it's **default to the connected wallet's own address**. Your own wallet is always a safe default — you see what *you* published, never a stranger's. Resolution order for the effective lens stack on any read:
 
-1. The per-call `opts.lenses` override, if given.
+1. The per-call `opts.lens` override, if given (a single `Lens` encodes the ordered first-wins stack).
 2. The client's explicit `lenses`, if set at construction / via `efs.lenses`.
 3. Otherwise, **the connected wallet's address** (single-element stack).
 4. If none of the above — read-only client with no wallet and no explicit lenses — a read throws `LensRequired` with a message telling the dev to either connect a wallet or pass `lenses`. (A read with no lens is meaningless: there's no attester to resolve content from.)
@@ -258,7 +258,10 @@ Note `get` is deliberately polymorphic in *return type* but monomorphic in *mean
 // Every read accepts an optional per-call lens override. When omitted, the client's
 // lens stack (set at construction / via efs.lenses) is used. This lets a caller read
 // one path through a different lens without mutating client state (e.g. compare views).
-type ReadOpts = { lenses?: Address[] }
+// The option is SINGULAR `lens`: a single `Lens` value already encodes the ordered,
+// first-wins stack (built via lens([...])), so one field carries the whole precedence
+// chain — there is no `lenses` array on the per-call option (matches types.ts ReadOptions).
+type ReadOpts = { lens?: Lens | Address }
 type ListOpts = ReadOpts & { limit?: number; cursor?: Hex; sort?: Hex | string; schema?: Hex }
 
 // Read
@@ -298,13 +301,18 @@ efs.fs.write(
     onProgress?(phase: WritePhase): void
   }
 ): Promise<WriteReceipt>
-// WriteReceipt: {
-//   anchorUID, dataUID, placementPinUID, txHashes, totalGas,
-//   attestationCount,   // EAS attestations (DATA + MIRROR + contentType triple + PIN + visibility TAGs + new anchors)
-//   chunkDeployCount,   // SSTORE2 ~24KB chunk CONTRACTS deployed for on-chain (web3://) content — NOT attestations
+// WriteReceipt (field names match types.ts) — a durable, resumable write session: {
+//   contentHash: ContentHash,      // branded SHA-256 of the written bytes (ADR-0006)
+//   data?: DataRef,                // the resolved DATA ref once minted
+//   steps: { id, uid?, done }[],   // idempotent per id; a resume skips only mined work
+//   signatureCount,
+//   mechanism: WriteMechanism,     // 'sequential'|'eip5792'|'erc4337'|'gateway'
+//   status?: CallStatus,           // 'partial'/'reverted' flag a half-written file
 // }
-// On-chain storage is two cost classes: attestations AND chunk-contract deploys. They're reported
-// separately because a 2MB file is ~10 attestations but ~80 chunk deploys — the gas lives in the chunks.
+// Cost shape (the attestations-vs-chunk-deploys split) is reported by efs.batch().estimate()
+// (WriteEstimate.attestations / chunkDeploys): on-chain storage is two cost classes — EAS attestations
+// AND SSTORE2 ~24KB chunk-contract deploys for web3:// content. They're separated because a 2MB file is
+// ~10 attestations but ~80 chunk deploys — the gas lives in the chunks (NOT attestations).
 ```
 
 **Design note on `fs.list` vs array:** The brainstorm found a sports-stats dev tried `list("/mlb/2025", { recursive: true })` and got a 60-second stall or a `QueryTooLargeError`. `list` is always `AsyncIterable` with explicit pagination; consuming all results requires `collect(efs.fs.list(path))`. A `collect()` helper is exported for small folders.
@@ -333,7 +341,7 @@ efs.graph.subtree(anchor: Hex, opts?: { depth?: number }): AsyncIterable<AnchorE
 
 // Attestations that reference a given UID, optionally filtered by schema. First-class wrapper
 // over EFSIndexer.getReferencingAttestationUIDs (debug-client parity, M-level). Yields decoded
-// edges; pass `raw: true` to get bare UIDs for hand-off to efs.EAS. Reverse of `pins`/`tags`.
+// edges; pass `raw: true` to get bare UIDs for hand-off to efs.eas. Reverse of `pins`/`tags`.
 efs.graph.referencing(uid: Hex, opts?: PaginateOpts & {
   schema?: Hex            // e.g. SCHEMAS.PIN, SCHEMAS.TAG; omit for all
   raw?: boolean           // true → AsyncIterable<Hex>; default → decoded edges
@@ -571,17 +579,23 @@ const receipt = await efs.batch(b => {
 const estimate = await efs.batch(b => {
   for (const obs of observations) b.fs.write(pathFor(obs), toBytes(obs))
 }).estimate()
-// estimate: { attestationCount, chunkDeployCount, txCount, signatureCount, mechanism, estimatedGasUnits, estimatedUSD? }
-// mechanism: 'eip5792' | 'erc4337' | 'sequential' (automatic) | 'gateway' (opt-in only) — see Q5 note below.
+// WriteEstimate (field names match types.ts): {
+//   attestations, transactions, signatureCount, chunkDeploys, gas: bigint,
+//   usd?: { min; max; priceSource?; asOf? },   // range, not a bare scalar (A4 / future-proofing.md §5)
+//   warnings: string[]
+// }
+// mechanism (WriteMechanism literal): 'sequential' | 'eip5792' | 'erc4337' | 'gateway' — see Q5 note below.
 // signatureCount reflects the chosen mechanism: 1 for eip5792/erc4337, N for sequential, N for gateway-by-delegation.
 
-// BatchReceipt
+// BatchReceipt (field names match types.ts)
 type BatchReceipt = {
-  txHashes: Hex[]
   results: OperationResult[]    // one per op
-  partialFailure?: OperationResult[]   // only populated for the non-atomic 'sequential' mechanism, where
-                                       // the user can abandon midway; eip5792/erc4337 are atomic (all-or-nothing)
-                                       // so partialFailure is always undefined for them
+  signatureCount: number
+  mechanism: WriteMechanism
+  status?: CallStatus           // 'partial' when some ops landed and some did not
+  partialFailure?: boolean      // true only for the non-atomic 'sequential' mechanism, where the user
+                                // can abandon midway; eip5792/erc4337 are atomic so it stays false/undefined
+  txHashes?: Hex[]              // the tx hashes produced, in delivery order
 }
 
 // Each queued op carries a STABLE id so partial-failure results correlate back to the op that
@@ -590,11 +604,11 @@ type BatchReceipt = {
 // method returns the builder for chaining and records the id.
 type OperationResult = {
   id: string                  // matches the queued op
-  kind: 'write'|'pin'|'tag'|'property'|'list'|'mirror'|'sort'
+  kind: OperationKind         // 'write'|'pin'|'tag'|'property'|'list'|'mirror'|'sort'
   ok: boolean
   uid?: Hex                   // the produced attestation UID, when ok
   txHash?: Hex
-  error?: { code: EFSErrorCode; message: string }   // when !ok
+  error?: EfsError            // a typed EFS error (carries .code), not a bare Error — when !ok
 }
 ```
 
@@ -628,22 +642,22 @@ The dev sees one API (`efs.batch(...)`); by default the SDK delivers the fewest 
 
 ---
 
-#### `efs.EAS` — EAS SDK exposure
+#### `efs.eas` — EAS SDK exposure
 
 ```ts
 // Direct access to EFS's viem-native EAS helpers (no eas-sdk/ethers dependency — SDK ADR-0002).
-// efs.EAS is a thin helper namespace over viem + vendored EAS ABIs, connected to efs's signer.
-efs.EAS
+// efs.eas is a thin helper namespace over viem + vendored EAS ABIs, connected to efs's signer.
+efs.eas
 
 // Same verbs as raw EAS attestation, but viem-native (encoding via the vendored EAS ABIs)
-efs.EAS.attest({ schema, data: { ... } })
-efs.EAS.multiAttest([...])
-efs.EAS.getAttestation(uid)
-efs.EAS.revoke({ schema, data: { uid } })
+efs.eas.attest({ schema, data: { ... } })
+efs.eas.multiAttest([...])
+efs.eas.getAttestation(uid)
+efs.eas.revoke({ schema, data: { uid } })
 // ... the full EAS attestation surface, expressed in viem
 ```
 
-**Design rationale:** Every non-trivial dev drops to raw EAS queries within day one (the museum researcher, the sports-stats dev, the recipe forker). Instead of fighting this, we make it first-class. `EFS.EAS` is *not* buried in `.raw` — it's a top-level, visible surface. Per SDK ADR-0002 the SDK does **not** depend on `@ethereum-attestation-service/eas-sdk` or ethers; `efs.EAS` is **viem-native helpers over vendored EAS ABIs**, so the promise — "you can always speak EAS fluently" — is kept without pulling in the eas-sdk/ethers stack. Our wrappers are conveniences, not a walled garden.
+**Design rationale:** Every non-trivial dev drops to raw EAS queries within day one (the museum researcher, the sports-stats dev, the recipe forker). Instead of fighting this, we make it first-class. `efs.eas` is *not* buried in `.raw` — it's a top-level, visible surface. Per SDK ADR-0002 the SDK does **not** depend on `@ethereum-attestation-service/eas-sdk` or ethers; `efs.eas` is **viem-native helpers over vendored EAS ABIs**, so the promise — "you can always speak EAS fluently" — is kept without pulling in the eas-sdk/ethers stack. Our wrappers are conveniences, not a walled garden.
 
 ---
 
@@ -665,10 +679,10 @@ const count = await efs.raw.indexer.read.getReferencingAttestationUIDCount([uid,
 
 #### `efs.decode` — the bridge back up
 
-`efs.EAS` and `efs.raw` are downward escape hatches, but the review found the cliff is *one-directional*: a dev who drops to `efs.EAS.getAttestation(uid)` to run one query gets a raw EAS attestation and then has to hand-decode it back into the SDK's typed world. `efs.decode` is the return path — it turns a raw attestation (or UID) into the same typed `*Entry` objects the high-level reads return, so dropping down for one call doesn't strand you in raw-land.
+`efs.eas` and `efs.raw` are downward escape hatches, but the review found the cliff is *one-directional*: a dev who drops to `efs.eas.getAttestation(uid)` to run one query gets a raw EAS attestation and then has to hand-decode it back into the SDK's typed world. `efs.decode` is the return path — it turns a raw attestation (or UID) into the same typed `*Entry` objects the high-level reads return, so dropping down for one call doesn't strand you in raw-land.
 
 ```ts
-// Decode a raw EAS attestation (from efs.EAS / efs.raw) into a typed SDK entry.
+// Decode a raw EAS attestation (from efs.eas / efs.raw) into a typed SDK entry.
 // Dispatches on the attestation's schema UID; throws SchemaMismatch if it isn't an EFS schema.
 efs.decode(att: Attestation): AnchorEntry | DataEntry | MirrorEntry | TagEntry | PinEntry | PropEntry | ListEntry
 
@@ -682,7 +696,7 @@ efs.decode.property(att: Attestation): PropEntry
 // ... one per EFS schema
 ```
 
-**Design note on the round-trip:** this closes the "conveniences, not a walled garden" promise in both directions — `efs.EAS`/`efs.raw` let you step *out* of the typed surface; `efs.decode` lets you step back *in*. The `raw: true` flag on reads like `efs.graph.referencing` and the decoders share the same `*Entry` types, so a dev can mix levels in one flow (raw query for reach, decode for ergonomics) without a type impedance mismatch.
+**Design note on the round-trip:** this closes the "conveniences, not a walled garden" promise in both directions — `efs.eas`/`efs.raw` let you step *out* of the typed surface; `efs.decode` lets you step back *in*. The `raw: true` flag on reads like `efs.graph.referencing` and the decoders share the same `*Entry` types, so a dev can mix levels in one flow (raw query for reach, decode for ergonomics) without a type impedance mismatch.
 
 ---
 
@@ -691,7 +705,7 @@ efs.decode.property(att: Attestation): PropEntry
 ```ts
 import { SCHEMAS, CONTRACTS, PROP_KEYS, TRANSPORT } from '@efs/sdk/constants'
 
-// Schema UIDs (typed, version-checked against the connected chainId)
+// The frozen 9 schema UIDs (typed, version-checked against the connected chainId)
 SCHEMAS.ANCHOR         // `0x...` as const
 SCHEMAS.DATA           // field string is EMPTY (ADR-0049) — metadata lives in PROPERTYs on the DATA UID
 SCHEMAS.TAG
@@ -700,6 +714,11 @@ SCHEMAS.PROPERTY
 SCHEMAS.LIST           // post-ADR-0044
 SCHEMAS.LIST_ENTRY     // post-ADR-0044
 SCHEMAS.MIRROR
+SCHEMAS.REDIRECT       // alias/redirect anchor target
+
+// SORT_INFO is a separate, NOT-yet-frozen sort schema — its field string is still
+// being reconciled across specs (see the schema-freeze flag in efs.sorts above), so
+// it is deliberately outside the frozen-9 set until contracts freeze the field string.
 SCHEMAS.SORT_INFO
 
 // Contract addresses
@@ -824,7 +843,7 @@ export { AnchorEntrySchema, FileStatSchema, ... } from '@efs/sdk/schemas'
 - **viem** — type-safety for contract interactions; we adopt their `Hex` / `Address` branded types
 - **Prisma** — fluent typed reads with optional includes; the `efs.fs.read.json<T>()` pattern
 - **Stripe** — resource-namespaced API (`stripe.customers`, `stripe.charges`) → our `efs.fs`, `efs.graph`, `efs.lists`, `efs.sorts`
-- **EAS** — the `efs.EAS` helper namespace mirrors EAS's attestation verbs, but is implemented **viem-native over vendored EAS ABIs** (no `@ethereum-attestation-service/eas-sdk` / ethers dependency, per SDK ADR-0002)
+- **EAS** — the `efs.eas` helper namespace mirrors EAS's attestation verbs, but is implemented **viem-native over vendored EAS ABIs** (no `@ethereum-attestation-service/eas-sdk` / ethers dependency, per SDK ADR-0002)
 
 **What we don't borrow:**
 - **wagmi** (React hooks) — too framework-coupled for a framework-agnostic SDK. React bindings belong in a separate `@efs/react` package, post-v1.
@@ -842,13 +861,13 @@ The debug client's capabilities mapped to SDK calls:
 | `TopicStore.getById(uid)` | `efs.fs.stat(path)` or `efs.raw.indexer.read...` |
 | `TopicStore.getChildren(topic)` | `efs.graph.children(anchor)` |
 | `TopicStore.getPath(topic)` | `efs.graph.path(anchor)` |
-| `EASx.getAttestation(uid)` | `efs.EAS.getAttestation(uid)` |
+| `EASx.getAttestation(uid)` | `efs.eas.getAttestation(uid)` |
 | `EASx.getReferencingAttestationUIDs(uid, schema, ...)` | `efs.graph.referencing(uid, { schema })` (first-class wrapper) |
 | `EASx.indexAttestation(uid)` | `efs.raw.indexer.write.indexAttestation([uid])` |
 | `EFS.connect(signer)` | `await efs.connect(signer)` |
 | Hardcoded `contractConstants.ts` | `import { SCHEMAS, CONTRACTS } from '@efs/sdk/constants'` |
 
-All debug-client capabilities are directly covered; the few that touch raw attestations have a first-class wrapper (`efs.graph.referencing`) and a decode path (`efs.decode`) so parity never requires hand-rolling against `efs.EAS` / `efs.raw`.
+All debug-client capabilities are directly covered; the few that touch raw attestations have a first-class wrapper (`efs.graph.referencing`) and a decode path (`efs.decode`) so parity never requires hand-rolling against `efs.eas` / `efs.raw`.
 
 ---
 
@@ -938,6 +957,10 @@ struct ListConfig {
 ```
 
 **Intra-transaction ordering (an implementer must honor this).** EAS validates that a referenced UID already exists when an attestation is created, so the composition functions must emit attestations in **dependency order within the one tx**: DATA before the placement PIN that sets `refUID = dataUID`; the key ANCHOR before the PROPERTY before the binding PIN; ancestor ANCHORs before the leaf. `pinFile`/`setProperty` encode this ordering internally — it is not the caller's concern, but it is a correctness constraint on the library, not a free choice.
+
+**Gas boundary on large writes (SSTORE2 + EIP-7825).** For on-chain (`web3://`) content the DATA bytes are stored as SSTORE2 chunk-contracts (~24KB each, the code-size cap), and the whole library call runs inside the consuming contract's single transaction — which is itself capped at **~16.7M gas per tx (EIP-7825, live since Fusaka)**. Chunking content under that per-tx cap is a **protocol-contracts invariant the library inherits**, not a knob it sets: the lib emits the chunk deploys + DATA/MIRROR attestations the contracts define, and a write whose chunk set would exceed the cap must be split across transactions at the contracts layer. The lib does not paper over the cap.
+
+**Payable resolvers (EAS `value` is forwarded).** EAS attestations can carry a `value` to fund a payable schema resolver; the composition functions **forward that value through to `eas.attest`/`eas.multiAttest`** rather than swallowing it (the planned `buildMultiAttest` payload builder threads it through), so a schema with a payable resolver works from the library write path unchanged. *(Write surface currently ships as `NotImplemented` parity stubs, B3 — this is the contract those bodies must honor.)*
 
 ### Read surface — a contract is a first-class reader
 
@@ -1160,7 +1183,7 @@ Default to **efficient multi-attestation signing**. Verified crux: EAS UIDs incl
 
 - [x] **Q1 (repo packaging) — RESOLVED (James, 2026-06-10): both SDKs live in the `sdk/` repo.** The Solidity SDK is a **compile-in library consumed via npm**, not a contract EFS deploys — so it ships alongside the TS SDK as one package/repo. (This overrides the earlier PM rec of `contracts/`: James's framing is that distribution, not deployment-coupling, is the deciding factor — devs `npm install` both halves.) Version-lock to the frozen schema UIDs is handled by pinning, not co-location.
 
-- [x] **Q2 (namespace naming) — RESOLVED (James, 2026-05-28): confirmed (a) + the codified verb contract.** domain-model namespaces (`efs.fs`, `efs.graph`, `efs.props`, `efs.lists`, `efs.sorts`, `efs.lenses`, `efs.EAS`, `efs.raw`) vs verb-first (`efs.read/write/query/attest`). An expert SDK-design review (2026-05-28) found **(a) is the de-facto industry standard** — *resource-oriented design*, codified in Google's API Design Guide and embodied by Stripe (`stripe.customers.create`), Prisma (`prisma.user.findMany`), Twilio, Supabase, GitHub Octokit. **No widely-respected SDK uses a top-level verb-namespace tree.** The field splits between resource.action namespacing (multi-resource domains — EFS's case) and flat verb methods (single-resource domains like EAS/ethers). Verb-first also fails EFS specifically because `graph` and `lenses` are resource models, not actions, and don't reduce to a single verb. **Refinement adopted from the review:** keep (a)'s noun tree but enforce a *consistent verb vocabulary* on the leaves — this pairs resource-oriented design with Google's "standard methods" discipline, giving both a domain map and predictable operation names. An expert SDK-design review (2026-05-28) noted the first draft *claimed* this consistency but did not deliver it (`get` was used for three different things; enumeration used five different verbs). That is now fixed: the eight-verb contract is codified in **"Naming conventions (the verb contract)"** above and every leaf method conforms. **Recommendation: confirm (a) + the codified verb contract.**
+- [x] **Q2 (namespace naming) — RESOLVED (James, 2026-05-28): confirmed (a) + the codified verb contract.** domain-model namespaces (`efs.fs`, `efs.graph`, `efs.props`, `efs.lists`, `efs.sorts`, `efs.lenses`, `efs.eas`, `efs.raw`) vs verb-first (`efs.read/write/query/attest`). An expert SDK-design review (2026-05-28) found **(a) is the de-facto industry standard** — *resource-oriented design*, codified in Google's API Design Guide and embodied by Stripe (`stripe.customers.create`), Prisma (`prisma.user.findMany`), Twilio, Supabase, GitHub Octokit. **No widely-respected SDK uses a top-level verb-namespace tree.** The field splits between resource.action namespacing (multi-resource domains — EFS's case) and flat verb methods (single-resource domains like EAS/ethers). Verb-first also fails EFS specifically because `graph` and `lenses` are resource models, not actions, and don't reduce to a single verb. **Refinement adopted from the review:** keep (a)'s noun tree but enforce a *consistent verb vocabulary* on the leaves — this pairs resource-oriented design with Google's "standard methods" discipline, giving both a domain map and predictable operation names. An expert SDK-design review (2026-05-28) noted the first draft *claimed* this consistency but did not deliver it (`get` was used for three different things; enumeration used five different verbs). That is now fixed: the eight-verb contract is codified in **"Naming conventions (the verb contract)"** above and every leaf method conforms. **Recommendation: confirm (a) + the codified verb contract.**
 
 - [x] **Q3 (reverse-lookup reads in v1) — RESOLVED + REFRAMED (James, 2026-05-28).** Original framing ("ship an off-chain index / reference EFS-in-Postgres example") was dropped: per James, the SDK does **not** bundle or build indexing infrastructure (nothing to do with The Graph). The handful of reverse-lookup methods (`graph.timeline`, `graph.versions.descendants`, `lenses.discover`) stay in the typed surface as **`NotImplemented` shims** so their shape is visible and stable; everything answerable directly from the chain works in v1. A packaged external index is DEFERRED (D1) to its own thread. (Renamed `OffchainIndexRequired` → `NotImplemented`; removed the `examples/reference-index/` project.)
 
@@ -1202,7 +1225,7 @@ Q1 (repo layout) — RESOLVED (2026-06-10, ADR-0001): **both SDKs live in the `s
 
 **Was the process guidance clear and useful, or in the way?**
 
-Clear and useful. The frame-first directive ("read corpus → distill requirements → inverted-framing pass → THEN design") was the right order and prevented me from jumping to API signatures before I understood what the SDK actually needs to do. The "anchor requirement" (debug client parity) gave me a concrete floor to design from rather than speculating. The inverted-framing pass was particularly valuable — it's how I concluded that `efs.EAS` should be a first-class top-level surface rather than buried in `.raw`, because the corpus showed devs drop to raw EAS immediately and that's load-bearing behavior we should embrace rather than fight.
+Clear and useful. The frame-first directive ("read corpus → distill requirements → inverted-framing pass → THEN design") was the right order and prevented me from jumping to API signatures before I understood what the SDK actually needs to do. The "anchor requirement" (debug client parity) gave me a concrete floor to design from rather than speculating. The inverted-framing pass was particularly valuable — it's how I concluded that `efs.eas` should be a first-class top-level surface rather than buried in `.raw`, because the corpus showed devs drop to raw EAS immediately and that's load-bearing behavior we should embrace rather than fight.
 
 **Did the requirements-first / inverted-framing steps add value, or feel like overhead?**
 
@@ -1210,7 +1233,7 @@ Real value. The requirements step forced me to distinguish between "what the deb
 
 **Roughly how many tokens / rounds did you spend before reaching review-ready? Was it proportional?**
 
-One round — this document. The corpus reading (10+ files in parallel) was the most token-intensive part, but it was load-bearing: the dev-friction brainstorm alone contained the key design insight (devs drop to raw EAS on day one, so make EFS.EAS a feature not a failure mode). A shorter corpus would have produced a worse design. Token spend felt proportional to the scope.
+One round — this document. The corpus reading (10+ files in parallel) was the most token-intensive part, but it was load-bearing: the dev-friction brainstorm alone contained the key design insight (devs drop to raw EAS on day one, so make efs.eas a feature not a failure mode). A shorter corpus would have produced a worse design. Token spend felt proportional to the scope.
 
 **What would you change about the process for the next design thread?**
 
