@@ -262,7 +262,16 @@ Note `get` is deliberately polymorphic in *return type* but monomorphic in *mean
 // first-wins stack (built via lens([...])), so one field carries the whole precedence
 // chain — there is no `lenses` array on the per-call option (matches types.ts ReadOptions).
 type ReadOpts = { lens?: Lens | Address }
-type ListOpts = ReadOpts & { limit?: number; cursor?: Hex; sort?: Hex | string; schema?: Hex }
+type ListOpts = ReadOpts & {
+  limit?: number; cursor?: Hex; sort?: Hex | string; schema?: Hex
+  // On-chain directory filtering (ADR-0011). `excludes` is a set of folder-visibility
+  // TAG concepts (def-UIDs, or human labels resolved to /tags/<name>); a sibling is
+  // hidden if it carries any of them at >= the paired `minWeights` threshold. A
+  // non-empty `excludes` routes the listing to EFSFileView.getDirectoryPageFiltered;
+  // an empty/absent one keeps the unfiltered sibling. Cursors stay opaque + method-bound.
+  excludes?: readonly (Hex | string)[]
+  minWeights?: readonly bigint[]   // 1:1 with `excludes`; omitted ⇒ all-zero (any weight)
+}
 
 // Read
 efs.fs.read(path: string, opts?: ReadOpts): Promise<Uint8Array>
@@ -313,6 +322,19 @@ efs.fs.write(
 // (WriteEstimate.attestations / chunkDeploys): on-chain storage is two cost classes — EAS attestations
 // AND SSTORE2 ~24KB chunk-contract deploys for web3:// content. They're separated because a 2MB file is
 // ~10 attestations but ~80 chunk deploys — the gas lives in the chunks (NOT attestations).
+
+// Folder Overview — a folder's README.md, read by EXACT path (never a directory scan).
+// `none` if absent; `binary`/`too-large` guard the markdown-only display contract.
+efs.fs.overview(path: string, opts?: ReadOpts): Promise<OverviewResult>
+// OverviewResult (discriminated): { kind: 'none' }
+//   | { kind: 'markdown'; text: string; anchorUID: Hex; attester: Address }
+//   | { kind: 'binary'; contentType?: string; dataUID: Hex }
+//   | { kind: 'too-large'; size: number }
+
+// Set a folder's Overview: uploads `markdown` via the normal write pipeline, applies the
+// `system` TAG BEFORE placement (so it never flashes as a visible untagged sibling), then
+// places it at [...container, 'README.md']. Folder-scoped; authored on the top lens.
+efs.fs.setOverview(container: string, markdown: string, opts?: { onProgress?(phase: WritePhase): void }): Promise<WriteReceipt>
 ```
 
 **Design note on `fs.list` vs array:** The brainstorm found a sports-stats dev tried `list("/mlb/2025", { recursive: true })` and got a 60-second stall or a `QueryTooLargeError`. `list` is always `AsyncIterable` with explicit pagination; consuming all results requires `collect(efs.fs.list(path))`. A `collect()` helper is exported for small folders.
@@ -328,6 +350,10 @@ const p2 = await efs.fs.list("/feed").page({ limit: 50, cursor: p1.nextCursor })
 ```
 
 The bare iterable threads the cursor internally; `.page()` exposes it. This is the Stripe/Prisma pattern (`page.nextCursor`) and is what keeps devs from dropping to raw EAS for "give me the next 50." The cursor is opaque (an encoded kernel index + filter state), stable across redeploys of stateless contracts, and validated on use — a stale cursor throws `CursorInvalid` rather than silently skipping items.
+
+**Design note on on-chain directory filtering (`excludes`, ADR-0011):** `fs.list` exposes the contracts' view-layer filter (`EFSFileView.getDirectoryPageFiltered`) through `ListOpts` rather than a new verb. `excludes` names folder-visibility TAG concepts (the same TAGs that already gate sibling visibility) and `minWeights` pairs a threshold to each; the contract evaluates the exclusion as a **union over the viewed lenses and over the exclude pairs** (a sibling is hidden if any viewed lens tagged it with any excluded concept at or above its weight). A non-empty `excludes` routes the listing to the filtered call; an empty or absent one keeps the unfiltered sibling — so filtering is fully opt-in and there is **no default hiding**. The cursors the filtered call returns are opaque and method-bound (they encode filter state), so a cursor from a filtered list is only valid back into the same filtered call. Callers wanting the common "hide system/nsfw" policy can pass the exported `SAFETY_EXCLUDES = ['system', 'nsfw']` — itself opt-in, never applied automatically.
+
+**Design note on folder Overviews (ADR-0011):** a folder Overview is a `README.md` anchor placed in the folder (or an address-container root) and tagged `system`. There is **no new schema, contract, or reserved key** — `README.md` as the well-known name plus the existing `/tags/system` folder-visibility TAG are the *entire* convention, so an Overview is just an ordinary file that tooling agrees to treat specially. `fs.overview(path)` resolves it by **exact path** (`[...container, 'README.md']`), never a directory scan, and returns a discriminated result — `none` when absent (the common case, carried cleanly by a dedicated verb), `markdown` for the displayable case, and `binary`/`too-large` to keep the markdown-only display contract honest. `fs.setOverview(container, markdown)` composes the normal upload pipeline and applies the `system` TAG **before** placement, so the README never briefly appears as a visible untagged sibling; it is folder-scoped and authored on the top lens. File-anchor Overviews were considered and dropped — Overviews are folder-scoped only. (The `system` TAG is one of the `SAFETY_EXCLUDES` above, so a list filtered with that policy already hides the Overview from its own folder listing.)
 
 ---
 
@@ -705,21 +731,28 @@ efs.decode.property(att: Attestation): PropEntry
 ```ts
 import { SCHEMAS, CONTRACTS, PROP_KEYS, TRANSPORT } from '@efs/sdk/constants'
 
-// The frozen 9 schema UIDs (typed, version-checked against the connected chainId)
+// The schema UIDs the SDK keys against (typed, version-checked against the chainId).
+// This set is verified against the contracts deploy registration (deployedContracts.ts
+// `*_SCHEMA_UID` getters + deploy/01_indexer.ts), NOT the prose specs — see the drift
+// flag below. There is NO `REDIRECT` schema (no on-chain counterpart; alias resolution
+// lives in EFSRouter.resolvePath, ADR-0033 — it was a phantom and has been removed).
 SCHEMAS.ANCHOR         // `0x...` as const
 SCHEMAS.DATA           // field string is EMPTY (ADR-0049) — metadata lives in PROPERTYs on the DATA UID
-SCHEMAS.TAG
-SCHEMAS.PIN
 SCHEMAS.PROPERTY
+SCHEMAS.BLOB           // 'string mimeType, uint8 storageType, bytes location' (registered; omitted from specs/02)
+SCHEMAS.PIN
+SCHEMAS.TAG
+SCHEMAS.NAMING         // owned by SchemaNameIndex (registered; omitted from specs/02)
+SCHEMAS.MIRROR
+SCHEMAS.SORT_INFO      // field string still reconciling across specs (see the freeze flag in efs.sorts above)
 SCHEMAS.LIST           // post-ADR-0044
 SCHEMAS.LIST_ENTRY     // post-ADR-0044
-SCHEMAS.MIRROR
-SCHEMAS.REDIRECT       // alias/redirect anchor target
 
-// SORT_INFO is a separate, NOT-yet-frozen sort schema — its field string is still
-// being reconciled across specs (see the schema-freeze flag in efs.sorts above), so
-// it is deliberately outside the frozen-9 set until contracts freeze the field string.
-SCHEMAS.SORT_INFO
+// > **Flagged to contracts (doc/code drift):** the deploy actually registers **11**
+// > schemas (the set above), but `specs/02-Data-Models-and-Schemas.md` documents only
+// > nine — it omits BLOB and NAMING, both of which have real on-chain `*_SCHEMA_UID`
+// > getters and are passed into the EFSIndexer constructor. The SDK follows the
+// > registered code, not the prose. Contracts should reconcile specs/02 to 11.
 
 // Contract addresses
 CONTRACTS.INDEXER
