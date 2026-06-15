@@ -36,8 +36,6 @@ kanban-plugin: board
   — @arch-review/schema-freeze, branch schema-freeze, claimed 2026-06-10, expires 2026-06-13
 - [ ] **SDK build** (@sdk) — building against [[sdk-architecture]] in the `sdk/` repo; owns holistic-review SDK-shape fixes (DX-2/3/8/11/13, group 4). #repo/sdk
   — @sdk, repo efs-project/sdk, claimed 2026-06-10, expires 2026-06-13
-- [ ] **Markdown-per-item pane** (@markdown-per-item) — client feature, `markdown-per-item` branch; system-tagged README pane (see [[Decisions]]). #repo/client
-  — @markdown-per-item, branch markdown-per-item, claimed 2026-06-10, expires 2026-06-13
 - [ ] **Act on holistic review** → [[Reviews/2026-06-10-holistic-review]] (canonical 79-finding detail; track WORK here by its fix-groups, not by finding). Findings resolve via PRs citing IDs (git = completion log).
   - [ ] **G1 Reconciliation** (ENG-1 uint16 sign-off → @james; ENG-2 merge schema-freeze→main; ENG-3/6/7/8/9/10/17 hygiene) — @james + @pm
   - [ ] **G2 Pre-freeze kernel PR** (GAS-1/2/3/14, SEC-1, SEC-3 guard, DX-9, custom-errors) — @arch-review/schema-freeze
@@ -61,6 +59,7 @@ kanban-plugin: board
 
 ## Done
 
+- [x] **Markdown README pane + on-chain exclude filtering merged** — contracts `main` 2026-06-10 (commit 60284dd, branch `markdown-for-items`). System-tagged README-per-item pane in the nextjs explorer + new redeployable `EFSFileViewFiltered` contract (excludes system items at the read layer, tested) + sandboxed PDF preview; external/Codex-reviewed. Realizes the readme-per-item model; no freeze impact (FileView is redeployable). Explorer now renders the whitepaper `.md` cards + hides system files — feeds the hackathon participant view.
 - [x] **EFS Lists merged** — PR #20 → `main` 2026-06-01 (commit b1ac4e0). LIST + LIST_ENTRY schemas (7→9) + ListResolver/ListEntryResolver/ListReader + ADR-0044/0046/0047. Design doc landed frozen. Unblocks schema freeze + Sepolia deploy.
 - [x] Promote [[0001-design-system]] — meta-design promoted 2026-05-21 by @james (delegated)
 
