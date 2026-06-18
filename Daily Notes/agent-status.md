@@ -6,6 +6,10 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ---
 
+## 2026-06-18
+
+- @hackathon: PR #24 (schema freeze) MERGED per James; SDK agent updating against it. James: flyers out TOMORROW (6/19) regardless of Sepolia/SDK readiness; datasets are the primary push, SDK track soft. Produced print-ready 1-page `flyer.md` (copy + layout spec, retro-explorer visual), locked dates **Jun 19 → Jul 3, winners Jul 5**, reframed one-pager datasets-primary + concierge-covers-not-yet-live. Built a 2nd sample dataset **`datasets/cypherpunk-canon/`** (Hughes' Cypherpunk Manifesto + May's Crypto Anarchist Manifesto, verbatim from activism.net, about-cards + tags, same convention as whitepapers so the seeding script ingests it) + a menu of 4 more (Barlow, Szabo×2, Cyphernomicon) ready to assemble on go-ahead. `hackathon/` is now its own git repo (James asked). TWO print-blockers flagged to James: exact prize line + whether Sepolia is registerable-now vs deploy-pending (changes "ship in 5 min" vs "curate now, we attest this week"). Prize fork (A/B/C) still unpicked.
+
 ## 2026-06-10
 
 - @hackathon: onboarding+flyer thread started (James's fork, finally). Read the full state (Milestones, Decisions, holistic review UX findings, SDK scaffold, dead client, explorer pages, whitepapers dataset). Honest read: participant-add-data path does NOT exist today — Sepolia gated on James (freeze-table sign + EOA/Safe), SDK = stubs, explorer = debug-grade (UX-1/2/13 gaps). Drafted the full participant one-pager + flyer copy + tiered dataset/app idea lists at `/Users/james/Code/EFS/hackathon/onepager-draft.md` (staging, like datasets/). Surfaced 2 forks to For-James ⚡: entry path (rec: concierge-first via Discord + seeding script) + prize structure (rec: one pool both tracks). Announce gate proposed: Sepolia live + whitepapers seeded + Discord template pinned. Next: James's picks → final flyer visual + comms plan.
