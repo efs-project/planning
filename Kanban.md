@@ -32,12 +32,12 @@ kanban-plugin: board
   — @hackathon, claimed 2026-06-10, expires 2026-06-13
 - [ ] **Seed whitepaper dataset** — addresses researched (`datasets/crypto-whitepapers/ADDRESSES.md`; only Bitcoin has a public CID, rest self-pin). Next: pin all PDFs to IPFS (Filebase/Pinata, one IPIP-499 profile) + Arweave (~<$0.10, permanence) → record contentHash+size+cid → after Sepolia, seeding script attests DATA+MIRROR(s) (separate from deploy script). **Gate: needs credentials (pinning-service key + funded Arweave wallet) — James-provisioned.** Part of go-live. #repo/planning
   — needs @james credentials, then agent-runnable
-- [ ] **arch-review: resolver refactor → freeze → Sepolia** (@arch-review). Schema set converged (9; ADR-0048/49/50 on branch). Coding the proxy-refactor test-first. BLOCKED on James's signature of the frozen-UID table before registration. Also owns the holistic-review kernel fixes (group 2 below). #repo/contracts
-  — @arch-review/schema-freeze, branch schema-freeze, claimed 2026-06-10, expires 2026-06-13
+- [ ] **schema-freeze → Sepolia deploy** (@schema-freeze). ✅ Schemas FROZEN + merged to `main` 2026-06-11 (commit 21b737c): 9 schemas (DATA empty, REDIRECT `uint16 kind`), upgradeable proxies, ADRs 0048–0055. **Next: the actual Sepolia CREATE3 deploy + schema registration** (fills the real UID table `0x…TBD` → James's final sign-off at that point) + `deploy-pin-check` RPC key. Also owns holistic-review kernel fixes (G2). #repo/contracts
+  — @schema-freeze, claimed 2026-06-10, expires 2026-06-13
 - [ ] **SDK build** (@sdk) — building against [[sdk-architecture]] in the `sdk/` repo; owns holistic-review SDK-shape fixes (DX-2/3/8/11/13, group 4). #repo/sdk
   — @sdk, repo efs-project/sdk, claimed 2026-06-10, expires 2026-06-13
 - [ ] **Act on holistic review** → [[Reviews/2026-06-10-holistic-review]] (canonical 79-finding detail; track WORK here by its fix-groups, not by finding). Findings resolve via PRs citing IDs (git = completion log).
-  - [ ] **G1 Reconciliation** (ENG-1 uint16 sign-off → @james; ENG-2 merge schema-freeze→main; ENG-3/6/7/8/9/10/17 hygiene) — @james + @pm
+  - [x] **G1 Reconciliation** — ✅ ENG-1 settled (froze uint16); ENG-2 split-brain resolved (schema-freeze merged to main 2026-06-11). Remaining doc-hygiene (ENG-3/6/7/8/9/10) folds into normal sweeps.
   - [ ] **G2 Pre-freeze kernel PR** (GAS-1/2/3/14, SEC-1, SEC-3 guard, DX-9, custom-errors) — @arch-review/schema-freeze
   - [ ] **G3 Pre-freeze decision ADRs** (ARCH-1/2/3/8/12, DX-4 events) — @james decides, @arch-review writes
   - [ ] **G4 SDK shape** (DX-2/3/8/11/13) — @sdk
