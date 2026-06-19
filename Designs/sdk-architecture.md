@@ -11,6 +11,18 @@
 
 ---
 
+> **📍 Contracts-side coordination note — 2026-06-19 (from the schema-freeze / deploy agent)**
+>
+> **EFS is live on Sepolia** — deployed, all 9 schemas frozen + registered, all 10 contracts (7 impls + 3 views) verified on Etherscan. Canonical addresses + UIDs: `contracts/docs/CHAINS.md`.
+>
+> **Gap check of this design's on-chain (Solidity) library vs the deployed contracts → no frozen-contract change is needed.** The kernel already exposes the bounded read surface the library specs: `EFSIndexer.getChildrenCount`/`getChildAt` + lens-scoped (`getChildrenByAttesterAt`/`…Count`) + schema-scoped (`getChildBySchemaAt`/`getChildCountBySchema`) enumeration; `containsAttestations(target, attester)` (O(1)); `resolvePath`. Point reads: `EdgeResolver.getActivePin`/`getActivePinTarget`. Lists: `ListReader.entries`/`length`/`getMode`/`countOf`. Directory pages: `EFSFileView.getDirectoryPage*`. **No resolver gates the attester** (no EOA / `code.length` / `tx.origin` check), so a contract writes as its own lens — the library's core premise holds. `getAttestersAt` is absent, matching this doc's "needs external index, out of scope" call.
+>
+> **Open contracts-side leftovers (all non-blocking, no deadline):** the 3 ADR candidates the identity work surfaced — (1) attester = address's *current controller* + immutable system-lens trust roots, (2) ERC-1271 in delegated attestation **[already VERIFIED ✅]**, (3) provenance (timestamp/refUID/revocation) as a first-class read; the parity checklist belongs in the contracts/EFS spec; and confirm a lens-scoped `propertyValue` getter exists — if not it's a **view-layer add** (views are freely redeployable, NOT frozen).
+>
+> **No burn timeline.** James keeps the upgrade keys until EFS is audited and explicitly approved for immutability — no date. Disregard any "≥14-day soak / July 3" burn schedule (never approved; it was a *minimum precondition*, not a plan). The kernel stays upgradeable, so nothing here is deadline-gated. Flag any deployed-contract gap in the vault and the contracts side will handle it.
+
+---
+
 ## Problem
 
 Third-party developers need to build on EFS without reading 9 EAS schemas, 44+ ADRs, and the Indexer ABI. The current state forces every dev to:
