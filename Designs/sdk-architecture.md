@@ -217,11 +217,13 @@ npm i @efs/solidity                        # on-chain (Solidity) — for smart-c
 > in this section keeps the original shape for reasoning continuity; the two linked docs are the
 > current truth. See also the **Implemented vs Designed** manifest below for what actually runs today.
 
-#### Implemented vs Designed (manifest — as of the 2026-06-19 comprehensive review)
+#### Implemented vs Designed (manifest — updated 2026-06-20 to the `chore/scaffold` built surface)
 
-This doc is ~95% **design**; the **built** surface is one vertical slice (single-file write +
-lens-scoped read). The table below grounds every major surface against `packages/sdk/src/index.ts`
-and the review's completeness matrix, so a reader knows what runs today vs. what is still a sketch.
+This doc is mostly **design**, but the **built** surface has grown well past the original single
+vertical slice: as of branch `chore/scaffold` it covers reads, the Tier-1 write, edge/value/list
+writes, REDIRECT, the escape hatches, and a Solidity compile-in lib. The table below grounds every
+major surface against `packages/sdk/src/index.ts` + `packages/solidity/src/`, so a reader knows what
+runs today vs. what is still a sketch. (Earlier manifest snapshot: 2026-06-19 comprehensive review.)
 Legend: ✅ built · ◑ stubbed (present in the typed surface, throws `NotImplemented`) · **D** designed-only (no code yet).
 
 | Surface | State | Notes |
@@ -233,23 +235,44 @@ Legend: ✅ built · ◑ stubbed (present in the typed surface, throws `NotImple
 | Write — `fs.write` (Tier-1, multi-signature; on-chain SSTORE2 store + `web3://` mirror) | ✅ | The one fully-built write flow. *Bug (P1-2): ancestor-walk visibility TAGs deferred, so the author's own write doesn't show in their own lens listing.* |
 | Write — `createParents` default `true` | ✅ | Kept `true` by decision (object-storage mental model; review "Reconsider — RESOLVED"). |
 | Write — `fs.preview` (cost estimate) | ◑ | `NotImplemented`; call `write()` directly for now. |
-| `efs.batch()` — one-signature batching (EIP-5792 / 4337 / sequential) | ◑ → **D** | `batch()` throws `NotImplemented`. The headline one-signature UX is **type-present, behavior-absent**; resume likewise. |
-| Edge/value writes — `graph.tags.*`, `props.*`, `graph.pins.*`/`place`/`unplace` | **D** | Entire `graph`/`props` namespaces are not on the client yet (additive; `writes/graph.ts` proves the pattern). |
-| Lists & sorts — `lists.*`, `sorts.*` | **D** | Contracts: LIST/LIST_ENTRY frozen; **SORT_INFO deferred**, so `efs.sorts` is doubly designed-only. |
+| AA-ready Submitter seam (`detect → select → submit`; `efs.account.capabilities()`) | ✅ | `Tier1Submitter` is the built path; the seam detects account capabilities + selects a submission strategy, so EIP-5792/4337 routing can drop in without reshaping the write surface. |
+| `efs.batch()` — one-signature batching (EIP-5792 / 4337 / sequential) | ◑ → **D** | `batch()` throws `NotImplemented`. The headline one-signature UX is still **type-present, behavior-absent**; resume likewise. (The Submitter seam above is the groundwork.) |
+| Edge/value writes — `graph.tags.{add,remove,active,list}`, `props.{set,get,list}`, `graph.pins.{place,unplace,active}` | ✅ | Built on the client (author as the connected wallet). *Correctness fix this round: PROPERTY key-anchors now use `PROPERTY_SCHEMA_UID` as `forSchema` (was generic `0`) — see note below.* |
+| Lists — read `lists.{get,entries,length,has}` + write `lists.{create,add,remove}` | ✅ | LIST/LIST_ENTRY frozen + wrapped both directions. |
+| Sorts — `sorts.*` | ◑ (`@experimental`) | Stubbed `@experimental`; **SORT_INFO is deferred from the frozen 9** (unfrozen field string), so the surface stays designed-only until the schema ships. |
 | Mirrors — `fs.mirrors.list/add/remove` | **D** | Read backed by `getDataMirrors` (lens-scoped) when built. |
-| Escape hatches — `efs.eas.*` | ◑ (partial) | Built: `encoder`/`computeUID`/`verifyUID`/`abi`/`attestationsFor`. **Not** built: `attest`/`multiAttest`/`revoke`/`getAttestation`. |
-| Escape hatches — `efs.raw.*` | ◑ (partial) | Built: `deployment()`/`verifyDeployment()`. **Not** built: pre-wired `indexer`/`router`/`fileView` instances. |
-| `efs.decode` (raw attestation → typed entry) | **D** | The "bridge back up"; not built. |
+| Escape hatches — `efs.eas.*` | ✅ | Built: `encoder`/`computeUID`/`verifyUID`/`abi`/`attestationsFor` **plus** `attest`/`multiAttest`/`revoke`/`getAttestation`. |
+| Escape hatches — `efs.raw.*` | ✅ | Built: `deployment()`/`verifyDeployment()` (schema-UID integrity gate, see Constants) **plus** pre-wired `indexer`/`router`/`fileView` contract handles. |
+| `efs.decode` (raw attestation → typed entry) | ✅ | The "bridge back up": raw `Attestation` (or a UID, via `getAttestation`) → typed entry. |
 | Lens model — default-to-connected-wallet; `SYSTEM_LENS` | ✅ (partial) | `SYSTEM_LENS` exported; *no-wallet/no-lens read still throws `LensRequired` instead of falling back (P1-5).* |
-| Constants — schemas/contracts/transports (the **frozen 9**) | ✅ | `deployments.ts` carries the frozen-9 `EfsSchemaUIDs`. *Trust gate: `assertDeploymentIntegrity` checks bytecode presence only, not schema-UID match (P1-9, TODO).* |
-| Solidity SDK — write helpers + reads | ◑ (2 of 9) | Ships as `NotImplemented` parity stubs; covers 2 of 9 schemas; read wrappers + tag/property/list writers are **D**. |
+| Constants — schemas/contracts/transports (the **frozen 9**) | ✅ | `deployments.ts` carries the frozen-9 `EfsSchemaUIDs`. *Trust gate (P1-9) NOW BUILT: `efs.raw.verifyDeployment()` checks schema-UID match, not just bytecode presence.* |
+| Solidity SDK — `@efs/solidity` compile-in lib | ✅ | `EFSReader` (`resolveAnchor`/`resolvePath`/`activePin`/`propertyValue`/`listChildren`/`listEntries` + `redirectTarget`/`resolveWithRedirects`) + `EFSLib`/`EFSWriter` write wrappers (`writeFile`/`anchorAt`/`tag`/`setProperty`/`place`/`createList`/`addEntry`/`addAddressEntry`/`setRedirect`). A first-class on-chain client now, not write-only parity stubs. *Deferred: path-level symlink following (matches the TS opt-out default).* |
+| REDIRECT (ADR-0050) — write `redirects.{set,get,remove}` + read-time following | ✅ | Following is opt-out by default via `{ followRedirects }` on `locate`/`read`/`info`; cycle-detected, bounded hops, `result.via` provenance. *Resolution spec is unpinned — see note: the SDK fail-closes on a cycle vs the ADR's lowest-UID-in-SCC; path-level symlink following deferred.* |
 | Reverse-lookups — `graph.timeline`, `versions.descendants`, `lenses.discover` | ◑ (by design) | `NotImplemented` shims; need the external index (D1), deferred on both SDKs. |
-| REDIRECT (write + multi-hop read), WHITEOUT (ADR-0055), multi-chunk on-chain | **D** | Deferred-OK; REDIRECT schema is frozen, SDK support unbuilt. |
+| WHITEOUT (ADR-0055), multi-chunk on-chain | **D** | Deferred-OK; schemas frozen / designed, SDK support unbuilt. |
 
-**Bottom line:** the read-a-file / write-a-file core is real and above ecosystem baseline; "a dev can do
-*everything* easily" is **not yet true** — most protocol primitives (tag/property/pin/list/sort/mirror/redirect)
-and the one-signature batch UX are still designed-only. The design is additive, so these land as new namespaces
-without reshaping the surface.
+**Bottom line:** the gap to "a dev can do *everything* easily" has closed substantially. Reads, the
+Tier-1 write, the full edge/value surface (tag/property/pin), lists (read + write), REDIRECT (write +
+read-time following), the escape hatches (`raw`/`eas`/`decode`), and a Solidity compile-in lib all run
+today. Still designed-only: **sorts** (gated on SORT_INFO leaving the deferred set), **mirrors** writes,
+WHITEOUT, multi-chunk on-chain, and the headline **one-signature batch UX** (`batch()`/resume are
+type-present, behavior-absent — though the AA-ready Submitter seam is the groundwork). The design is
+additive, so these land as new namespaces without reshaping the surface.
+
+**Two items worth flagging from this round (both load-bearing for trust/correctness):**
+
+- **PROPERTY `forSchema` correctness fix.** The Solidity lib was anchoring PROPERTY key-anchors with a
+  generic `forSchema = 0` instead of `PROPERTY_SCHEMA_UID`. The effect: property values were **invisible
+  to spec-conformant readers** (they looked under the typed bucket, found nothing). Two independent expert
+  investigations surfaced it; the SDK now uses `PROPERTY_SCHEMA_UID` as the `forSchema` bucket. This is a
+  silent-data-loss-class bug, not cosmetic — worth a contracts-side glance to confirm no on-chain lib
+  shares the same defect.
+- **ADR-0050 redirect resolution spec is unpinned.** Read-time following is built and bounded, but the
+  resolver-spec for resolving a cycle isn't frozen: the SDK **fail-closes on a detected cycle**, whereas
+  the ADR gestures at *lowest-UID-in-SCC* as the canonical resolution. These diverge; the SDK chose the
+  conservative behavior so it's safe today, but the ADR needs pinning before the two can be guaranteed to
+  agree. **Path-level symlink following is deferred** on both SDKs (opt-out by default). Surfaced upstream
+  to contracts/ADR, not an SDK-only call.
 
 #### Instantiation
 
@@ -1343,6 +1366,8 @@ Second: the process says "stop at review" but doesn't say what "review-ready" lo
 ---
 
 ### Revision log
+
+**2026-06-20 (later) — manifest re-grounded to the `chore/scaffold` build round.** The SDK agent shipped a large batch since the morning reconciliation; the **Implemented vs Designed** manifest was updated to match the committed surface (verified against `packages/sdk/src/index.ts` + `packages/solidity/src/`). Newly ✅: schema-UID integrity gate (`efs.raw.verifyDeployment`, closes review P1-9); escape hatches (`efs.raw.*` contract handles, `efs.eas.*` attest/multiAttest/revoke/getAttestation, `efs.decode`); AA-ready Submitter seam (`Tier1Submitter` + `efs.account.capabilities()`); edge/value writes (`graph.tags.*`, `props.*`, `graph.pins.*`); lists read + write; **REDIRECT** (ADR-0050) write + opt-out read-time following (cycle-detected, bounded hops, `result.via` provenance); and the `@efs/solidity` compile-in lib (`EFSReader`/`EFSLib`/`EFSWriter`, a first-class on-chain client, no longer write-only stubs). Still flagged: **sorts** stubbed `@experimental` (SORT_INFO unfrozen); `batch()`/resume type-present-behavior-absent; mirrors writes / WHITEOUT / multi-chunk designed-only. Two load-bearing items added to the manifest bottom-line: (1) the **PROPERTY `forSchema` correctness fix** — key-anchors now use `PROPERTY_SCHEMA_UID` not generic `0` (they were invisible to spec-conformant readers; found by two expert investigations; worth a contracts-side check); (2) **ADR-0050 redirect resolution spec is unpinned** — SDK fail-closes on a cycle vs the ADR's lowest-UID-in-SCC, and path-level symlink following is deferred (surfaced upstream). Test counts ~416 TS + ~48 forge; ~27 kB gzip (budget 36). No frame change. (Other agents — wallet one-sig routine, gasless faucet drip — are separate, audit-/agent-gated, untouched here.)
 
 **2026-06-20 — reconciled the doc to the BUILT surface (post-2026-06-19 comprehensive review).** The 5-pass review flagged this doc as the least-trustworthy design doc: it overstated current capability and carried stale facts. Surgical corrections (no frame change):
 - **Schema count → the frozen 9.** The Typed-constants block listed **11** with BLOB/NAMING and (wrongly) claimed "there is NO REDIRECT schema." Corrected to the canonical 9 (ANCHOR, PROPERTY, DATA, PIN, TAG, MIRROR, LIST, LIST_ENTRY, **REDIRECT**); BLOB/NAMING **dropped** in the freeze reconciliation (ADR-0012); **SORT_INFO deferred** (not in the frozen set), so the `efs.sorts` surface is designed-only until it ships. Source: SDK `chain/deployments.ts` `EfsSchemaUIDs` + `docs/SEPOLIA_FREEZE_TABLE.md`.

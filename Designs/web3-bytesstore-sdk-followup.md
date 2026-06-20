@@ -26,7 +26,7 @@ constructor(address[] chunks, string contentType_)
 ```
 The old contract took only `address[]`. The new one takes a second `string` argument (the MIME the store reports on its ERC-5219 path; empty ⇒ served as `application/octet-stream`). The ABI input name is `contentType_` (trailing underscore avoids shadowing the `contentType()` getter); it's positional, so the deploy call just passes a second arg. **The writer's deploy call must encode the new 2-arg constructor.**
 
-**Creation bytecode** — `artifact.bytecode`, **3248 bytes**, **sha256 `acef9afbd9d1a1bb7459e858243ca44fefd6fb5fa9a82ced52715065179419d6`**.
+**Creation bytecode** — `artifact.bytecode`, **4159 bytes**, **sha256 `a7093cc6afaa4f36c07bd54f65eb2cecaecfe82277bf783e922a02bc741c4b6d`**.
 
 > **Re-vendor instruction (do NOT trust a pasted blob — lift from the artifact):**
 > ```bash
@@ -37,7 +37,7 @@ The old contract took only `address[]`. The new one takes a second `string` argu
 >   console.log('sha256', c.createHash('sha256').update(a.bytecode).digest('hex')); \
 >   console.log(a.bytecode);"
 > ```
-> Confirm the printed sha256 equals `acef9afb…419d6`, then copy `a.bytecode` into `EFS_BYTES_STORE_BYTECODE`. The bytecode embeds a solc metadata hash, so it changes whenever the source or compiler settings change — always re-derive from the artifact of the exact merged commit. (This spec deliberately does **not** embed the hex: an earlier draft's pasted blob drifted twice during review. The sha256 above is the authoritative pin.)
+> Confirm the printed sha256 equals `a7093cc6…4b6d`, then copy `a.bytecode` into `EFS_BYTES_STORE_BYTECODE`. The bytecode embeds a solc metadata hash, so it changes whenever the source or compiler settings change — always re-derive from the artifact of the exact merged commit. (This spec deliberately does **not** embed the hex: an earlier draft's pasted blob drifted twice during review. The sha256 above is the authoritative pin.)
 
 ### Function selectors (verified)
 
@@ -63,20 +63,24 @@ function request(string[] resource, KeyValue[] params)
     returns (uint16 statusCode, bytes body, KeyValue[] headers);
 ```
 
-How a standard client reads the bytes:
+**`request()` is EIP-7617 paginated — one chunk per call.** This is the important change for an SDK reader: a single `request([], [])` does **not** return the whole file; it returns chunk 0 plus a `web3-next-chunk` header chaining to the next chunk. (This is so large files resolve under gateway `eth_call` caps. See ADR-0057 §"Why per-chunk".)
+
+How a standard client reads the bytes (this is what `web3protocol-js` does internally):
 1. Call `resolveMode()` → `bytes32("5219")` (`0x3532313900…00`) ⇒ use the 5219/manual flow.
-2. Call `request([], [])` (path segments + query params; **the store ignores both** — a byte store is one file, any path resolves to the whole file).
-3. Decode the return as `(uint16 statusCode, bytes body, (string,string)[] headers)`.
-   - `statusCode == 200`.
-   - `body` is the **raw file bytes** — `bytes`, binary-safe, no base64 / UTF-8 transform. (Verified against the `web3protocol-js` reference decoder `src/mode/5219.js`, which decodes the return as `[{uint16},{bytes},{tuple[]}]` and enqueues the body via `hexToBytes(...)` as raw bytes — see ADR-0057 §"binary over ERC-5219".)
-   - `headers` contains exactly one entry: `Content-Type` = the store's constructor MIME (or `application/octet-stream` if empty).
-   - **Error path:** if any chunk address has no deployed code (`extcodesize == 0` — a corrupt/incomplete store), `request()` returns `(500, "Chunk contract has no code", [])` rather than a silently truncated 200 — matching the router's "Storage contract has no code" 500. A 1-byte STOP-only chunk is a *valid* empty payload (contributes nothing, still 200). Standard clients should treat `statusCode != 200` as a failed fetch.
+2. Call `request([], [])`. Decode `(uint16 statusCode, bytes body, (string,string)[] headers)`:
+   - `statusCode == 200`, `body` = **chunk 0's raw bytes** (binary-safe `bytes`, no base64/UTF-8 transform).
+   - headers: `Content-Type` (from this first response), and **`web3-next-chunk: /?chunk=1`** iff more chunks remain.
+3. While a `web3-next-chunk` header is present, re-call with the chunk param it encodes — the value is `/?chunk=<n>` (**leading slash**), which the client rewrites to `web3://<store>:<chainId>/?chunk=<n>` and parses into `request([], [("chunk","<n>")])`. Append each `body`. Stop when a response has no `web3-next-chunk`. Concatenated bodies = the whole file; the Content-Type is from step 2.
+   - **Single-chunk store:** step 2 returns the whole (only) chunk with no next header — one call.
+   - **Errors (no `web3-next-chunk`, so the client stops):** no-code chunk → `(500, "Chunk contract has no code")`; explicit out-of-bounds index → `(404, "Chunk out of bounds")`; empty store → `(200, "", [Content-Type])`.
 
-> **Selector note:** the EIP-5219 *text* declares the body as `string`; we return `bytes`. This does **not** change the selector (`request(string[],(string,string)[])` = `0x1374c460` either way — selectors ignore return types), so we are call-compatible with standard clients, and every real client already decodes `bytes` (that's the whole point — `string` mangles binary). statusCode is `uint16` to match the reference decoder exactly.
+> **Verified empirically:** the real `web3protocol@0.6.3` client paginated a multi-chunk store to the exact bytes (3 `request` calls, embedded `0x00` preserved), and `/?chunk=` (leading slash) is **required** — a bare `?chunk=` throws in the client's URL parser.
 
-> **chainId caveat:** a bare `web3://<store>` defaults to **chainId 1** (mainnet) per EIP-4804. For the store on Sepolia/devnet, the shared URL must carry the chain: `web3://<store>:<chainId>` (e.g. `:11155111`). ADR-0057 uses the `:<chainId>` form.
+> **Selector note:** the EIP-5219 *text* declares the body as `string`; we return `bytes`. This does **not** change the selector (`request(string[],(string,string)[])` = `0x1374c460` either way — selectors ignore return types). statusCode is `uint16` to match the reference decoder.
 
-The contracts repo proves both paths round-trip (single + multi-chunk + interleaved-empty-chunk + non-UTF-8 binary with embedded `0x00` + the no-code 500 guard): `contracts/packages/hardhat/test/EFSBytesStore.test.ts` (13 tests). The router still serves `web3://<router>/<path>` for an on-chain-stored file: `EFSRouter.test.ts`.
+> **chainId caveat:** a bare `web3://<store>` defaults to **chainId 1** (mainnet) per EIP-4804. For Sepolia/devnet the shared URL must carry the chain: `web3://<store>:<chainId>`.
+
+The contracts repo proves both paths round-trip (single + multi-chunk pagination chain + interleaved-empty-chunk + non-UTF-8 binary with `0x00` + 404/500 edges): `contracts/packages/hardhat/test/EFSBytesStore.test.ts` (18 tests). The router still serves `web3://<router>/<path>` for an on-chain-stored file: `EFSRouter.test.ts` (61).
 
 ---
 
@@ -87,7 +91,7 @@ The contracts repo proves both paths round-trip (single + multi-chunk + interlea
 ### 3a. Re-vendor `EFS_BYTES_STORE_BYTECODE` + thread `contentType` through the deploy — **required**
 
 **File `packages/sdk/src/writes/onchain-bytecode.ts`:**
-- Replace `EFS_BYTES_STORE_BYTECODE` with the new artifact bytes (§1; lift from the artifact, verify sha256 `acef9afb…419d6`). The current constant is still the **old `MockChunkedFile` compile** (1-arg constructor, solc 0.8.28, no `resolveMode`/`request`/`contentType`).
+- Replace `EFS_BYTES_STORE_BYTECODE` with the new artifact bytes (§1; lift from the artifact, verify sha256 `a7093cc6…4b6d`). The current constant is still the **old `MockChunkedFile` compile** (1-arg constructor, solc 0.8.28, no `resolveMode`/`request`/`contentType`).
 - Drop the now-stale `AGENT-NOTE` ("kept verbatim, functionally identical") — it is no longer identical: the constructor ABI changed and `resolveMode`/`request`/`contentType` were added.
 
 **File `packages/sdk/src/writes/onchain.ts` (the writer) — three coupled edits, all required or it won't typecheck:**
@@ -112,14 +116,14 @@ This unblocks the SDK writing **standards-compliant** stores: every file the SDK
 Recommendation: **keep `chunkCount`/`chunkAddress` + `getCode`** as-is. Reasoning (brainstormed + reviewed, verified against the actual `web3.ts`):
 
 - **Router parity is the binding invariant.** `web3.ts` exists to mirror `EFSRouter.sol`'s read branch *exactly*, and the router **kept** its extcodecopy path in ADR-0057 — it does **not** call `request()`. Switching the SDK to `request()` would make SDK and router read the same bytes via *different* code paths (raw chunk concat vs. the store's server-side reassembly + header logic) — a new divergence surface, the opposite of the stated invariant.
-- **Priority order is correctness → DX → performance.** `request()`'s only win is fewer RPCs (1 call vs. 1+2N). The current reader is already correct and **already handles N chunks** (`MAX_CHUNKS=4096`) — the brief's "SDK caps at one chunk" assumption is outdated. Trading a proven, router-identical path for an RPC-count optimization inverts the priorities.
-- **`request()` weakens the hostile-input bound.** Today `MAX_CHUNKS` caps work *before* materializing bytes, and each `getCode` is naturally ~24 KB. A hostile `request()` returns an arbitrarily large `body` in one `eth_call` that crosses the wire and ABI-decodes in memory *before* the engine's post-fetch size cap can fire.
-- **`request()` adds an untrusted content-type to discard.** The SDK's content-type is the lens-scoped PROPERTY; the `Web3Reader` seam deliberately returns only `Uint8Array`. `request()`'s `Content-Type` is mirror-supplied — exactly the value the SDK must ignore. Importing it is a confusing second source of truth for zero benefit.
-- **Large-file robustness.** A streams chunk-by-chunk under predictable `eth_getCode` sizes; `request()` materializes the whole file in one `eth_call`, subject to node response-size/gas caps that can hard-fail large reassembly on public RPCs.
+- **`request()` is now per-chunk paginated — it buys nothing over the direct reader.** Since `request()` returns one chunk per call (EIP-7617), reading a file through it means an even *more* involved walk than the direct path: call `request`, parse the `web3-next-chunk` header, decode `/?chunk=<n>`, re-call, concat — i.e. ~1 call per chunk **plus** header-parsing, vs. the direct reader's `chunkCount` + `chunkAddress(i)` + `getCode(i)`. The old "one `request()` call = whole file" performance argument is gone; switching would be *more* code for no win.
+- **Router parity (restated).** The router reads via `chunkCount`/`chunkAddress` + `extcodecopy`, and `web3.ts` mirrors that exactly. Both the router and the direct SDK reader use the chunk interface; `request()`'s pagination is a *third* code path that only external generic clients need. Keeping the SDK on the chunk interface preserves the SDK↔router byte-for-byte parity invariant.
+- **`request()` adds an untrusted content-type to discard.** The SDK's content-type is the lens-scoped PROPERTY; the `Web3Reader` seam deliberately returns only `Uint8Array`. `request()`'s `Content-Type` is the store's own constructor MIME — exactly the value the SDK must ignore. Importing it is a confusing second source of truth for zero benefit.
+- **The direct reader already handles N chunks** (`MAX_CHUNKS=4096`) and is correct/tested — the brief's "SDK caps at one chunk" assumption is outdated. No reason to rewrite a proven path.
 
 **No change to `web3.ts` is required now.** `parseWeb3Uri` already tolerates a trailing `/path` suffix, so it's forward-compatible.
 
-**Future (only when it's real):** if/when the SDK needs to read *external* ERC-5219 resources or the router's `web3://<router>/<path>` form (neither exists in any current write path), add a **separate** `request()`-based reader behind the existing `transport.ts` `web3://` seam, **keyed on URI shape** (bare `web3://<addr>` → chunk reader; `web3://<addr>/<path…>` or flagged external → `request()` reader). Never make `request()` a silent fallback for the bare-store path. When you do, use `readContract` against an ERC-5219 ABI (let viem encode `0x1374c460`), reject `statusCode !== 200` as `Web3ReadError`, `hexToBytes(body)`, and **ignore** the `Content-Type` header. Worth a short SDK ADR recording "router parity > ERC-5219 dogfooding, until external/router-path resources exist."
+**Future (only when it's real):** if/when the SDK needs to read *external* ERC-5219 resources or the router's `web3://<router>/<path>` form (neither exists in any current write path), add a **separate** `request()`-based reader behind the existing `transport.ts` `web3://` seam, **keyed on URI shape** (bare `web3://<addr>` → chunk reader; `web3://<addr>/<path…>` or flagged external → `request()` reader). Never make `request()` a silent fallback for the bare-store path. When you do, use `readContract` against an ERC-5219 ABI (let viem encode `0x1374c460`), **follow the `web3-next-chunk` pagination chain** (start `params=[]`, then `[("chunk", n)]` parsed from each `/?chunk=<n>` header, concat bodies until no next header), reject `statusCode !== 200` as `Web3ReadError`, `hexToBytes(body)` per page, and **ignore** the `Content-Type` header. Worth a short SDK ADR recording "router parity > ERC-5219 dogfooding, until external/router-path resources exist."
 
 ### 3c. (Optional, separate) nextjs debug-UI upload path
 
@@ -129,7 +133,7 @@ Out of scope for `@efs/sdk`, noted for completeness: `contracts/packages/nextjs/
 
 ## 4. Checklist for the SDK PR
 
-- [ ] `EFS_BYTES_STORE_BYTECODE` re-vendored from the new artifact (sha256 `acef9afb…419d6` verified)
+- [ ] `EFS_BYTES_STORE_BYTECODE` re-vendored from the new artifact (sha256 `a7093cc6…4b6d` verified)
 - [ ] `EFS_BYTES_STORE_ABI` (inline in `onchain.ts`) constructor gains the `contentType_` string input
 - [ ] `OnchainWalletClient.deployContract` arg type widened to `[readonly Address[], string]`
 - [ ] `storeOnchain` takes a `contentType` param; deploy call passes `args: [[chunkAddress], contentType]`

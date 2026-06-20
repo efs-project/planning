@@ -2,7 +2,7 @@
 
 **Status:** review
 **Source:** [[sdk-architecture]] · the 5-pass comprehensive review at `sdk/docs/reviews/2026-06-19-comprehensive-review.md`
-**Last touched:** 2026-06-20 (extracted from the 2026-06-19 review so the open P-items aren't lost)
+**Last touched:** 2026-06-20 (extracted from the 2026-06-19 review; then marked the `chore/scaffold` build round — P1-9 + most of P2 now done)
 
 #status/review #kind/design #repo/sdk #repo/planning
 
@@ -28,20 +28,21 @@ already reflected as warnings in the manifest.
 | 6 | `list({ excludes })` throws `InvalidDirectoryQuery` though it's a typed, documented option with `SAFETY_EXCLUDES` exported — wire it or remove from the public type | `reads/directory.ts`, `reads/list.ts` | present-but-throwing trap |
 | 7 | `CallStatus` / `OperationKind` are CLOSED unions pinned to EIP-5792's evolving wire format — add the `| (string & {})` open tail | `types.ts` | 50-yr type durability |
 | 8 | `EfsContracts` / `EfsSchemaUIDs` require all keys → every future primitive is a breaking change on the `deployments` override path — make additive keys optional | `chain/deployments.ts` | 50-yr type durability |
-| 9 | `assertDeploymentIntegrity` checks bytecode presence only, not schema-UID match (TODO) — the read model's trust root is unverified; 1.0 blocker | `deployments.ts:110-117` | security/trust gate |
+| 9 | ~~`assertDeploymentIntegrity` checks bytecode presence only, not schema-UID match (TODO)~~ **DONE 2026-06-20** — `efs.raw.verifyDeployment()` now checks schema-UID match; the read model's trust root is verified | `deployments.ts` | security/trust gate |
 | 10 | Dead default IPFS gateway `cloudflare-ipfs.com` (decommissioned 2024-08) — drop it; keep `ipfs.io`/`dweb.link`; consider `trustless-gateway.link` | mirror gateway defaults | standards |
 
 ## P2 — completeness build-out (the roadmap to "do everything")
 
-All additive; the builders are mechanical (`graph.ts`/`writes/graph.ts` prove the pattern). Rough priority:
+All additive; the builders are mechanical (`graph.ts`/`writes/graph.ts` prove the pattern). Most of this
+list landed on `chore/scaffold` 2026-06-20 — done items struck through, with the carry-overs flagged:
 
-1. **Edge/value writes:** `graph.tags.{add,remove}`, `props.{set,get,list}`, `graph.pins.{place,unplace}`.
-2. **Finish the escape hatches first** (cheap, de-risks the rest): pre-wired `efs.raw.{indexer,router,fileView,…}`; `efs.eas.{attest,multiAttest,revoke,getAttestation}`; `efs.decode` round-trip bridge.
-3. **Lists + sorts** (LIST/LIST_ENTRY contracts ready to wrap): `lists.{entries,get,create,add}`, `sorts.{read,process}`. *(Note: SORT_INFO is deferred from the frozen 9, so `sorts.*` is gated on that schema shipping.)*
-4. **Mirrors add/remove, overview/setOverview, container browsing (ADR-0033), `versions.ancestors`.**
-5. **Solidity SDK** read wrappers + tag/property/list writers (today: write-only, 2 of 9 schemas).
-6. **Batch / preview / resume** — the headline one-signature UX; resume is type-present but behavior-absent today.
-7. Deferred-OK but flag: REDIRECT (write + multi-hop read resolution), WHITEOUT (ADR-0055), multi-chunk on-chain.
+1. ~~**Edge/value writes:** `graph.tags.{add,remove}`, `props.{set,get,list}`, `graph.pins.{place,unplace}`.~~ **DONE** — `graph.tags.{add,remove,active,list}`, `props.{set,get,list}`, `graph.pins.{place,unplace,active}`. *Correctness fix in the same round: PROPERTY key-anchors now use `PROPERTY_SCHEMA_UID` as `forSchema` (was generic `0` in the Solidity lib) — they had been invisible to spec-conformant readers; found by two expert investigations. Worth a contracts-side check for the same defect.*
+2. ~~**Finish the escape hatches first:** pre-wired `efs.raw.{indexer,router,fileView,…}`; `efs.eas.{attest,multiAttest,revoke,getAttestation}`; `efs.decode` round-trip bridge.~~ **DONE** — all three. Plus the schema-UID integrity gate (`efs.raw.verifyDeployment`, P1-9).
+3. **Lists DONE; sorts deferred.** ~~`lists.{entries,get,create,add}`~~ **DONE** — read `lists.{get,entries,length,has}` + write `lists.{create,add,remove}`. `sorts.*` is **stubbed `@experimental`** — gated on SORT_INFO leaving the deferred set (the schema's field string isn't frozen).
+4. **Mirrors add/remove, overview/setOverview, container browsing (ADR-0033), `versions.ancestors`.** — still designed-only.
+5. ~~**Solidity SDK** read wrappers + tag/property/list writers (was: write-only, 2 of 9 schemas).~~ **DONE** — `@efs/solidity` compile-in lib: `EFSReader` (`resolveAnchor`/`resolvePath`/`activePin`/`propertyValue`/`listChildren`/`listEntries` + `redirectTarget`/`resolveWithRedirects`) + `EFSLib`/`EFSWriter` write wrappers (`writeFile`/`anchorAt`/`tag`/`setProperty`/`place`/`createList`/`addEntry`/`addAddressEntry`/`setRedirect`). A first-class on-chain client now. *Deferred: path-level symlink following (matches the TS opt-out default).*
+6. **Batch / preview / resume** — the headline one-signature UX; `batch()`/resume still type-present, behavior-absent. The **AA-ready Submitter seam** (`detect → select → submit`; `Tier1Submitter`; `efs.account.capabilities()`) is now built as the groundwork for EIP-5792/4337 routing.
+7. Deferred-OK: ~~REDIRECT (write + multi-hop read resolution)~~ **DONE** — `redirects.{set,get,remove}` + opt-out read-time following on `locate`/`read`/`info` (cycle-detected, bounded hops, `result.via` provenance). *But ADR-0050's resolution spec is unpinned: the SDK fail-closes on a cycle vs the ADR's lowest-UID-in-SCC — surfaced upstream to contracts/ADR.* Still deferred: WHITEOUT (ADR-0055), multi-chunk on-chain.
 
 ## P3 — polish
 
