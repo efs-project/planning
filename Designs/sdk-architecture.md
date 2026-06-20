@@ -89,7 +89,7 @@ Distilled from: `bs-third-party-dev-ux-v1` (dev friction walkthroughs), `bs-dive
 
 | # | Requirement | Source |
 |---|---|---|
-| N1 | `read.json<T>()` and `read.text()` helpers | dev-friction: sports stats, recipe |
+| N1 | `readJson<T>()` and `readText()` helpers | dev-friction: sports stats, recipe |
 | N2 | Gas/cost estimation before write | dev-friction: birding ($20k/day surprise) |
 | N3 | `batch.estimate()` — attestation count + tx count | dev-friction: batch sizing opacity |
 | N4 | Property helpers for well-known keys (`contentType`, `previousVersion`, `name`) | dev-friction: "where do PROPERTY keys come from?" |
@@ -285,22 +285,26 @@ type ListOpts = ReadOpts & {
   minWeights?: readonly bigint[]   // 1:1 with `excludes`; omitted ⇒ all-zero (any weight)
 }
 
-// Read
-efs.fs.read(path: string, opts?: ReadOpts): Promise<Uint8Array>
-efs.fs.read.text(path: string, opts?: ReadOpts): Promise<string>
-efs.fs.read.json<T>(path: string, opts?: ReadOpts & { schema?: ZodSchema<T> }): Promise<T>
+// Read — [[sdk-read-surface]] is the AUTHORITATIVE detail (value-first plain DTOs,
+// always-on provenance, fields/expand knobs, fail-closed verify, batching). Summary:
+efs.fs.read(pathOrRef: string | DataRef, opts?: ReadOpts): Promise<EfsFile>  // bytes + pure .text()/.json() + verification
+efs.fs.readText(path: string, opts?: ReadOpts): Promise<string>              // sugar; throws ContentHashMismatch on mismatch ({verify:false} to opt out)
+efs.fs.readBytes(path: string, opts?: ReadOpts): Promise<Uint8Array>
+efs.fs.readJson<T>(path: string, opts?: ReadOpts & { schema?: ZodSchema<T> }): Promise<T>
 
-// List directory — always AsyncIterable (never an eager array).
+// List directory — async-iterable (yields items) + .byPage()/.toArray({limit}).
 // `sort` accepts a SORT_INFO UID or a sort name (resolved via efs.sorts discovery);
 // omitting it returns kernel insertion order. See efs.sorts for sorted reads + maintenance.
-efs.fs.list(path: string, opts?: ListOpts): AsyncIterable<DirEntry>
+efs.fs.list(path: string, opts?: ListOpts): EfsList<DirEntry>
 
-// Stat (metadata without reading the payload)
-efs.fs.stat(path: string, opts?: ReadOpts): Promise<FileStat>
-// returns: { anchorUID, dataUID, attester, contentType, size, mirrors[], time }
+// Info (metadata without reading the payload) — renamed from `stat`; accepts fields/expand.
+efs.fs.info(path: string, opts?: ReadOpts): Promise<FileInfo>
+// FileInfo: { exists, contentType, size, name, ref, resolvedBy, verified, sourceUIDs, properties?, attestations? }
+efs.fs.exists(path: string, opts?: ReadOpts): Promise<boolean>
 
-// Resolve path → anchor UID (lower-level; useful when you need the UID)
-efs.fs.resolve(path: string): Promise<Hex>
+// Locate path → the winning pointer (DATA/version + attester, no bytes). Renamed from
+// `resolve` (collided with Promise.resolve + the low-level resolvePath). For the raw UID, use resolvePath.
+efs.fs.locate(path: string, opts?: ReadOpts): Promise<ReadResult | null>
 
 // Mirrors — retrieval URIs for a DATA. Multiple transports per DATA (ADR-0011/0012);
 // reads are lens-scoped (ADR-0013). First-class because adding redundancy mirrors
@@ -351,17 +355,17 @@ efs.fs.setOverview(container: string, markdown: string, opts?: { onProgress?(pha
 
 **Design note on `fs.list` vs array:** The brainstorm found a sports-stats dev tried `list("/mlb/2025", { recursive: true })` and got a 60-second stall or a `QueryTooLargeError`. `list` is always `AsyncIterable` with explicit pagination; consuming all results requires `collect(efs.fs.list(path))`. A `collect()` helper is exported for small folders.
 
-**Design note on resumable pagination (cursors):** `for await` auto-paginates, but a server rendering page 2 of a feed needs to *resume* from where page 1 stopped — across requests, with no live iterator in memory. So every `AsyncIterable`-returning read has a `.page()` companion that surfaces the cursor:
+**Design note on resumable pagination (cursors):** `for await` auto-paginates, but a server rendering page 2 of a feed needs to *resume* from where page 1 stopped — across requests, with no live iterator in memory. So every iterable-returning read is an `EfsList<T>` with a `.byPage()` companion that surfaces the cursor, plus a bounded `.toArray({ limit })` collect-all (the mandatory cap guards against unbounded on-chain enumeration). See [[sdk-read-surface]]:
 
 ```ts
 type Page<T> = { items: T[]; nextCursor: Hex | null }   // nextCursor === null ⇒ exhausted
 
-const p1 = await efs.fs.list("/feed").page({ limit: 50 })
+const p1 = await efs.fs.list("/feed").byPage({ limit: 50 })
 // ...later request, different process:
-const p2 = await efs.fs.list("/feed").page({ limit: 50, cursor: p1.nextCursor })
+const p2 = await efs.fs.list("/feed").byPage({ limit: 50, cursor: p1.nextCursor })
 ```
 
-The bare iterable threads the cursor internally; `.page()` exposes it. This is the Stripe/Prisma pattern (`page.nextCursor`) and is what keeps devs from dropping to raw EAS for "give me the next 50." The cursor is opaque (an encoded kernel index + filter state), stable across redeploys of stateless contracts, and validated on use — a stale cursor throws `CursorInvalid` rather than silently skipping items.
+The bare iterable threads the cursor internally; `.byPage()` exposes it. This is the Stripe/Prisma pattern (`page.nextCursor`) and is what keeps devs from dropping to raw EAS for "give me the next 50." The cursor is opaque (an encoded kernel index + filter state), stable across redeploys of stateless contracts, and validated on use — a stale cursor throws `CursorInvalid` rather than silently skipping items.
 
 **Design note on on-chain directory filtering (`excludes`, ADR-0011):** `fs.list` exposes the contracts' view-layer filter (`EFSFileView.getDirectoryPageFiltered`) through `ListOpts` rather than a new verb. `excludes` names folder-visibility TAG concepts (the same TAGs that already gate sibling visibility) and `minWeights` pairs a threshold to each; the contract evaluates the exclusion as a **union over the viewed lenses and over the exclude pairs** (a sibling is hidden if any viewed lens tagged it with any excluded concept at or above its weight). A non-empty `excludes` routes the listing to the filtered call; an empty or absent one keeps the unfiltered sibling — so filtering is fully opt-in and there is **no default hiding**. The cursors the filtered call returns are opaque and method-bound (they encode filter state), so a cursor from a filtered list is only valid back into the same filtered call. Callers wanting the common "hide system/nsfw" policy can pass the exported `SAFETY_EXCLUDES = ['system', 'nsfw']` — itself opt-in, never applied automatically.
 
@@ -414,7 +418,7 @@ efs.graph.versions.ancestors(dataUID: Hex): AsyncIterable<Hex>
 efs.graph.versions.descendants(dataUID: Hex): AsyncIterable<Hex>
 ```
 
-**Design note on lens scoping in `efs.graph`:** `efs.fs` is the lens-*resolving* path — `fs.read`/`fs.stat` apply the first-attester-wins fallback across the lens stack (ADR-0031/0041) to pick the winning content. `efs.graph` is deliberately lower-level: `pins.get(definition, { attester })` reads exactly one attester's PIN in O(1) (no fallback), and `tags.list(target, { allAttesters })` enumerates raw edges. This is intentional — graph methods expose the unresolved edge data; if you want lens-resolved placement, use `fs`. A dev calling `graph.pins.get` without specifying `attester` gets the client's primary (first) lens, not a fallback walk. Documented so nobody assumes `graph` silently applies lens precedence.
+**Design note on lens scoping in `efs.graph`:** `efs.fs` is the lens-*resolving* path — `fs.read`/`fs.info` apply the first-attester-wins fallback across the lens stack (ADR-0031/0041) to pick the winning content. `efs.graph` is deliberately lower-level: `pins.get(definition, { attester })` reads exactly one attester's PIN in O(1) (no fallback), and `tags.list(target, { allAttesters })` enumerates raw edges. This is intentional — graph methods expose the unresolved edge data; if you want lens-resolved placement, use `fs`. A dev calling `graph.pins.get` without specifying `attester` gets the client's primary (first) lens, not a fallback walk. Documented so nobody assumes `graph` silently applies lens precedence.
 
 **Design note on reverse-lookup reads (`graph.timeline`, `graph.versions.descendants`, `lenses.discover`):** these are *reverse* lookups ("who points AT this?", "what happened across time?") that EFS's on-chain data can't answer efficiently without an external index — and per James's 2026-05-28 steer, **the SDK does not bundle or build indexing infrastructure** (no The-Graph integration, no packaged Postgres mirror). We keep these few methods in the typed surface as **`NotImplemented` shims** so the intended shape is visible and stable, rather than pretending or hand-waving — calling one throws `NotImplemented` with a message naming the capability it needs. Everything that *can* be answered from the chain directly (forward reads, `versions.ancestors`, `graph.referencing` via `getReferencingAttestationUIDs`) works in v1 without any external tool. A packaged external index is explicitly DEFERRED (D1) to its own design thread.
 
@@ -817,7 +821,7 @@ enum EFSErrorCode {
   ListAppendOnlyViolation, // tried to remove entry from appendOnly list
   ListCapExceeded,         // maxEntries reached
   MirrorSchemeRejected,    // URI scheme not in allowlist (ADR-0023)
-  CursorInvalid,           // a .page() cursor is stale/unparseable; caller should restart pagination
+  CursorInvalid,           // a .byPage() cursor is stale/unparseable; caller should restart pagination
   ListConstraintViolation, // LIST opts rejected by ListResolver (e.g. appendOnly+allowsDuplicates+maxEntries==0)
   SortKeyConventionError,  // ISortFunc key violates tie-break/padding rules → hints would be wrong
   // Note: processItems StaleStartIndex and already-processed no-ops are handled internally by
@@ -864,7 +868,7 @@ All returns are fully typed — no `any`. The SDK exports:
 // Core types (tree-shakeable)
 export type {
   Hex, Address,
-  AnchorEntry, DataEntry, DirEntry, FileStat,
+  AnchorEntry, DataEntry, DirEntry, FileInfo,
   TagEntry, PinEntry, EdgeEntry,
   PropEntry, PropView,
   DecodedEntry,
@@ -881,12 +885,12 @@ export type {
 }
 
 // Zod schemas for runtime validation (optional peer dep)
-export { AnchorEntrySchema, FileStatSchema, ... } from '@efs/sdk/schemas'
+export { AnchorEntrySchema, FileInfoSchema, ... } from '@efs/sdk/schemas'
 ```
 
 **Inspiration citations:**
 - **viem** — type-safety for contract interactions; we adopt their `Hex` / `Address` branded types
-- **Prisma** — fluent typed reads with optional includes; the `efs.fs.read.json<T>()` pattern
+- **Prisma** — fluent typed reads with optional includes; the `efs.fs.readJson<T>()` pattern
 - **Stripe** — resource-namespaced API (`stripe.customers`, `stripe.charges`) → our `efs.fs`, `efs.graph`, `efs.lists`, `efs.sorts`
 - **EAS** — the `efs.eas` helper namespace mirrors EAS's attestation verbs, but is implemented **viem-native over vendored EAS ABIs** (no `@ethereum-attestation-service/eas-sdk` / ethers dependency, per SDK ADR-0002)
 
@@ -903,7 +907,7 @@ The debug client's capabilities mapped to SDK calls:
 | Debug client | SDK equivalent |
 |---|---|
 | `TopicStore.createTopic(name, parentUid)` | `efs.batch().fs.mkdir(parent, name).execute()` |
-| `TopicStore.getById(uid)` | `efs.fs.stat(path)` or `efs.raw.indexer.read...` |
+| `TopicStore.getById(uid)` | `efs.fs.info(path)` or `efs.raw.indexer.read...` |
 | `TopicStore.getChildren(topic)` | `efs.graph.children(anchor)` |
 | `TopicStore.getPath(topic)` | `efs.graph.path(anchor)` |
 | `EASx.getAttestation(uid)` | `efs.eas.getAttestation(uid)` |
