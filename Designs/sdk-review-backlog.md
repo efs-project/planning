@@ -46,9 +46,13 @@ list landed on `chore/scaffold` 2026-06-20 — done items struck through, with t
 
 ## P3 — polish
 
-`info` over-fetches `getActivePinSlot` on the pure-bytes path · `DirEntry` uses `DataUID` for an anchor
-(add an `AnchorUID` brand) · `NotImplemented` messages are dead ends (add `alternative`/`tracking`) ·
-ship a `bigint` JSON serializer for TanStack/Next · `MAX_LENSES` duplicated · `package.json` drop redundant
+`info` over-fetches `getActivePinSlot` on the pure-bytes path · ~~`DirEntry` uses `DataUID` for an anchor
+(add an `AnchorUID` brand)~~ **DONE 2026-06-20** (chore/scaffold — `AnchorUID` brand added; `DirEntry`'s
+dir variant carries it, file variant keeps `DataUID`; one-cast change in `reads/list.ts`, no test churn) ·
+`NotImplemented` messages are dead ends (add `alternative`/`tracking`) ·
+~~ship a `bigint` JSON serializer for TanStack/Next~~ **DONE 2026-06-20** (chore/scaffold — `efs.toJSON` +
+exported `jsonReplacer`; bigints → decimal strings, documented lossy round-trip) ·
+`MAX_LENSES` duplicated · `package.json` drop redundant
 `"module"` · SSRF DNS-rebinding gap (opt-in resolve-and-pin for Node) · EFSLib `contentHash` comment
 contradicts ADR-0006 (bare digest) · top-level export list dumps ~40 internal symbols into the package root.
 
