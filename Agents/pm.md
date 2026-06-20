@@ -54,8 +54,9 @@ The audit scripts, design-system conventions, and `Brainstorms/` mechanics all a
 Every invocation — chat-spawned or cron-fired — runs the same loop:
 
 1. `cd /Users/james/Code/EFS/planning && git pull --rebase`.
-2. Run the five audit scripts (`tri-sync-check.sh`, `stale-cards.sh`, `designs-awaiting-promotion.sh`, `promotion-check.sh`, `agent-activity.sh 7`). Flag non-green.
-3. Read `git log` since last PM activity in `planning/`, `contracts/`, `client/`.
+2. **Run `date` first.** The PM has drifted the working date multiple times (stamped 06-11 when it was 06-20). Anchor every session on the real date before computing anything or stamping entries.
+3. **Swarm sweep — git is the ground truth, not the vault.** Agents go heads-down and do NOT reliably self-manage the Kanban/vault, so coordination is **pull-based**: poll git across all repos (`contracts/`, `sdk/`, `client/`, `planning/`) every session — recent branches by recency (`git for-each-ref --sort=-committerdate refs/remotes/origin`), commits, open PRs (`gh pr list`), CI (`gh pr checks`). Reconcile that into the Kanban In Flight as a git-backed map. Caveat: brand-new agents that haven't pushed a branch, and on-disk work (e.g. `datasets/`), are invisible to git — combine git-poll with James's chat updates for those. Don't depend on agents to update cards; the PM is the reconciler.
+4. Run the five audit scripts (`tri-sync-check.sh`, `stale-cards.sh`, `designs-awaiting-promotion.sh`, `promotion-check.sh`, `agent-activity.sh 7`). Flag non-green.
 4. Read current `Kanban.md`, `For-James.md`, `Daily Notes/agent-status.md`, recent `Decisions.md` entries.
 5. **Scan `Brainstorms/` for `status: raw` items.** Score for specificity, actionability, relevance. Surface ≤2/week to `For-James.md`. Update `Brainstorms/INDEX.md` if new items landed since last session. Per [[brainstorm-system]].
 6. **Run a rot check.** Identify areas with no recent activity that have known incomplete work. Surface in the briefing. Active rot list as of 2026-05-26: SDK (all three types), Official Client (target spec exists, current repo lags).
