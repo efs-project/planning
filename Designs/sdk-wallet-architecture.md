@@ -80,6 +80,23 @@ All submitters **return** a `WriteReceipt` whose `status` faithfully reflects `c
 - **Primary integration is auto-detect from a passed client** (the dev already built their smart-account client): `createEfsClient({ account: kernelClient, chain })` lights up the AA path; `createEfsClient({ provider, chain, account })` is the EOA/MetaMask path. The `account` input accepts `Address | Account | SmartAccountClient`. **`adapters: [...]` is the escape hatch for novel stacks, not the headline.** Adapters take the dev's already-built client (thin wrapper), never construct one.
 - Core: a generic viem adapter (5792 detection + programmatic-7702 when the SDK controls the key). Optional tree-shakeable subpackages `@efs/sdk/adapters/{zerodev,biconomy,privy,...}`. A MetaMask hobbyist imports none.
 
+## Gas sponsorship (orthogonal axis: *who pays* ≠ *how many signatures*)
+
+Sponsorship is **independent** of the execution strategy. Every Submitter can run sponsored or unsponsored; selection produces *two* outputs — the execution strategy (signatures) and the sponsorship mode (gas). The **funded key + the relayer/paymaster server are client-owned infra** (see [[sdk-vs-client-responsibilities]]); the SDK only produces payloads + routes to a configured endpoint and **never holds the key**. The user is the attester in **every** sponsor mode (the sponsor pays, never attests).
+
+| Sponsor mode | For | How (SDK ⇄ client infra) | Attester | Contract? |
+|---|---|---|---|---|
+| **Delegated relayer** | any wallet (Tier-1 / plain EOA — the universal, MetaMask-friendly path) | SDK builds `multiAttestByDelegation` EIP-712 payloads → user signs (gasless) → SDK POSTs to the client's **relayer** → relayer submits + pays | the **signer** (user) — EAS records the delegated-attest signer | **none** (EAS-native) |
+| **ERC-7677 paymaster** | 5792 / smart-account / 7702 (fewer prompts) | the wallet/bundler calls the client's **paymaster service** during `sendCalls`/UserOp (the `paymasterService` capability) | the **account** (user) | a paymaster *service* (off-chain signer) or existing infra (Pimlico/CDP); a custom paymaster contract is optional, not required |
+
+So sponsorship layers onto whichever strategy was selected: MetaMask single file → Tier-1 (optionally via the delegated relayer = gasless, a few prompts); 5792 multi-op → `Eip5792` + paymaster (gasless, one popup); embedded-7702 one-sig → `InAccount` + paymaster (gasless, one sig). The combined selector: `selectExecution(profile, plan, sponsorship) → { submitter, sponsored }` (still pure).
+
+**Sepolia hackathon = the delegated-relayer mode, zero contracts.** EAS already supports `multiAttestByDelegation`, so the gasless hackathon path needs **no new contract** — just the SDK seam + a small client-run relayer holding the funded SepoliaETH key. (The contracts work in this design is the *one-signature* in-account routine — a separate axis from gas.) The SDK should ship a **reference relayer** (client-repo, out of `@efs/sdk`) so operators don't build it cold.
+
+**Security (from the review):** a relayer/paymaster gates **gas only** — it cannot alter the `FileWrite` or become the attester. It **does see the write content and can censor** (decline to sponsor); that's an infra trust the client accepts, documented for app devs. The post-submit attester assertion (§Security) still runs, so a misbehaving relayer can't slip the attester.
+
+**SDK seam:** `createEfsClient({ …, sponsorship: { mode: 'delegated-relayer' | 'paymaster', endpoint } })`. Open questions: the endpoint contract (what the SDK POSTs / what status it polls back); the reference relayer.
+
 ## Public surface
 
 ```ts
