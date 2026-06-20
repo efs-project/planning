@@ -5,7 +5,7 @@
 **Depends on:** [[0001-design-system]], [[brainstorm-system]], ADR-0031 (lenses), ADR-0041 (PIN/TAG), ADR-0044 (Lists — pending merge)
 **Supersedes:** —
 **Reviewers:** expert subagent passes 2026-05-28 (SDK API/DX + contract-fidelity; wallet/EIP-5792 + attribution + security); awaiting James frame-review
-**Last touched:** 2026-05-28 (on-chain/off-chain reframe — see Revision log)
+**Last touched:** 2026-06-20 (reconciled to the built surface + manifest + review backlog — see Revision log)
 
 #status/review #kind/design #repo/sdk #repo/planning
 
@@ -206,6 +206,51 @@ npm i @efs/solidity                        # on-chain (Solidity) — for smart-c
 
 ### API Surface
 
+> **Authoritative-detail pointers (this doc predates two refactors).** The read verbs
+> below (`read`/`info`/`list`/`locate` + value-first DTOs, always-on provenance,
+> `fields`/`expand`, fail-closed verify) are specified in detail in **[[sdk-read-surface]]** —
+> treat it as canonical where it and this section differ. Instantiation + the signer/lens
+> model are specified in **[[sdk-wallet-architecture]]**: the built client is
+> `createEfsClient({ provider, chain, account? })` (an **EIP-1193 provider + EIP-155 chain**,
+> not the `new EFSClient({ rpc, chainId, signer })` sketch shown below), with write capability
+> **type-gated** (no `account`/`walletClient` ⇒ no `write`/`preview`/`batch`). The pseudo-code
+> in this section keeps the original shape for reasoning continuity; the two linked docs are the
+> current truth. See also the **Implemented vs Designed** manifest below for what actually runs today.
+
+#### Implemented vs Designed (manifest — as of the 2026-06-19 comprehensive review)
+
+This doc is ~95% **design**; the **built** surface is one vertical slice (single-file write +
+lens-scoped read). The table below grounds every major surface against `packages/sdk/src/index.ts`
+and the review's completeness matrix, so a reader knows what runs today vs. what is still a sketch.
+Legend: ✅ built · ◑ stubbed (present in the typed surface, throws `NotImplemented`) · **D** designed-only (no code yet).
+
+| Surface | State | Notes |
+|---|---|---|
+| Read — `fs.read`/`readText`/`readBytes`/`readJson` (path → bytes, lens-scoped) | ✅ | The strong core. Value-first DTOs, always-on provenance, fail-closed verify (see [[sdk-read-surface]]). |
+| Read — `fs.info`/`exists`/`locate` | ✅ | *Bug (P1-1): `info().verified` returns `matches-author` without hashing bytes — must be `unchecked`.* |
+| Read — `fs.list` (directory pages) | ✅ | But `list({ excludes })` **throws `InvalidDirectoryQuery`** though typed + `SAFETY_EXCLUDES` exported (P1-6) — wire or hide. |
+| Read — `fs.overview`/`setOverview` | ◑ | `NotImplemented` (tracking ADR-0011); read the `README.md` directly for now. |
+| Write — `fs.write` (Tier-1, multi-signature; on-chain SSTORE2 store + `web3://` mirror) | ✅ | The one fully-built write flow. *Bug (P1-2): ancestor-walk visibility TAGs deferred, so the author's own write doesn't show in their own lens listing.* |
+| Write — `createParents` default `true` | ✅ | Kept `true` by decision (object-storage mental model; review "Reconsider — RESOLVED"). |
+| Write — `fs.preview` (cost estimate) | ◑ | `NotImplemented`; call `write()` directly for now. |
+| `efs.batch()` — one-signature batching (EIP-5792 / 4337 / sequential) | ◑ → **D** | `batch()` throws `NotImplemented`. The headline one-signature UX is **type-present, behavior-absent**; resume likewise. |
+| Edge/value writes — `graph.tags.*`, `props.*`, `graph.pins.*`/`place`/`unplace` | **D** | Entire `graph`/`props` namespaces are not on the client yet (additive; `writes/graph.ts` proves the pattern). |
+| Lists & sorts — `lists.*`, `sorts.*` | **D** | Contracts: LIST/LIST_ENTRY frozen; **SORT_INFO deferred**, so `efs.sorts` is doubly designed-only. |
+| Mirrors — `fs.mirrors.list/add/remove` | **D** | Read backed by `getDataMirrors` (lens-scoped) when built. |
+| Escape hatches — `efs.eas.*` | ◑ (partial) | Built: `encoder`/`computeUID`/`verifyUID`/`abi`/`attestationsFor`. **Not** built: `attest`/`multiAttest`/`revoke`/`getAttestation`. |
+| Escape hatches — `efs.raw.*` | ◑ (partial) | Built: `deployment()`/`verifyDeployment()`. **Not** built: pre-wired `indexer`/`router`/`fileView` instances. |
+| `efs.decode` (raw attestation → typed entry) | **D** | The "bridge back up"; not built. |
+| Lens model — default-to-connected-wallet; `SYSTEM_LENS` | ✅ (partial) | `SYSTEM_LENS` exported; *no-wallet/no-lens read still throws `LensRequired` instead of falling back (P1-5).* |
+| Constants — schemas/contracts/transports (the **frozen 9**) | ✅ | `deployments.ts` carries the frozen-9 `EfsSchemaUIDs`. *Trust gate: `assertDeploymentIntegrity` checks bytecode presence only, not schema-UID match (P1-9, TODO).* |
+| Solidity SDK — write helpers + reads | ◑ (2 of 9) | Ships as `NotImplemented` parity stubs; covers 2 of 9 schemas; read wrappers + tag/property/list writers are **D**. |
+| Reverse-lookups — `graph.timeline`, `versions.descendants`, `lenses.discover` | ◑ (by design) | `NotImplemented` shims; need the external index (D1), deferred on both SDKs. |
+| REDIRECT (write + multi-hop read), WHITEOUT (ADR-0055), multi-chunk on-chain | **D** | Deferred-OK; REDIRECT schema is frozen, SDK support unbuilt. |
+
+**Bottom line:** the read-a-file / write-a-file core is real and above ecosystem baseline; "a dev can do
+*everything* easily" is **not yet true** — most protocol primitives (tag/property/pin/list/sort/mirror/redirect)
+and the one-signature batch UX are still designed-only. The design is additive, so these land as new namespaces
+without reshaping the surface.
+
 #### Instantiation
 
 ```ts
@@ -310,6 +355,9 @@ efs.fs.locate(path: string, opts?: ReadOpts): Promise<ReadResult | null>
 // reads are lens-scoped (ADR-0013). First-class because adding redundancy mirrors
 // (ipfs/arweave) to existing content is a core archival operation, not just a write-time concern.
 efs.fs.mirrors.list(dataUID: Hex, opts?: ReadOpts): Promise<MirrorEntry[]>
+// Backed by EFSFileView.getDataMirrors(dataUID, attester, start, length) — LENS-SCOPED
+// (the winning lens' active mirrors). Cross-attester discovery is the separate
+// getDataMirrorsAllAttesters; there is no `getDataMirrorsByAttester`.
 // MirrorEntry: { uid, uri, transport, attester } — ordered by transport priority (ADR-0012)
 efs.fs.mirrors.add(dataUID: Hex, uri: string): Promise<Hex>   // attest MIRROR; validates scheme (ADR-0023)
 efs.fs.mirrors.remove(mirrorUID: Hex): Promise<void>          // revoke
@@ -748,27 +796,23 @@ efs.decode.property(att: Attestation): PropEntry
 import { SCHEMAS, CONTRACTS, PROP_KEYS, TRANSPORT } from '@efs/sdk/constants'
 
 // The schema UIDs the SDK keys against (typed, version-checked against the chainId).
-// This set is verified against the contracts deploy registration (deployedContracts.ts
-// `*_SCHEMA_UID` getters + deploy/01_indexer.ts), NOT the prose specs — see the drift
-// flag below. There is NO `REDIRECT` schema (no on-chain counterpart; alias resolution
-// lives in EFSRouter.resolvePath, ADR-0033 — it was a phantom and has been removed).
+// FROZEN SET = the canonical **9** (Sepolia freeze, contracts `docs/SEPOLIA_FREEZE_TABLE.md`,
+// mirrored in the SDK's `chain/deployments.ts` `EfsSchemaUIDs`). REDIRECT is a frozen
+// first-class schema (ADR-0050, resolver = AliasResolver, self-derives its UID via
+// `redirectSchemaUID()`); resolution is NOT in EFSRouter. BLOB and NAMING were dropped in
+// the freeze reconciliation (ADR-0012). SORT_INFO is DEFERRED — addable later without
+// orphaning, so it is NOT in the frozen 9 (the `efs.sorts` surface above is designed-only
+// until SORT_INFO ships). See [[sdk-read-surface]] for the authoritative read detail.
 SCHEMAS.ANCHOR         // `0x...` as const
 SCHEMAS.DATA           // field string is EMPTY (ADR-0049) — metadata lives in PROPERTYs on the DATA UID
 SCHEMAS.PROPERTY
-SCHEMAS.BLOB           // 'string mimeType, uint8 storageType, bytes location' (registered; omitted from specs/02)
 SCHEMAS.PIN
 SCHEMAS.TAG
-SCHEMAS.NAMING         // owned by SchemaNameIndex (registered; omitted from specs/02)
 SCHEMAS.MIRROR
-SCHEMAS.SORT_INFO      // field string still reconciling across specs (see the freeze flag in efs.sorts above)
 SCHEMAS.LIST           // post-ADR-0044
 SCHEMAS.LIST_ENTRY     // post-ADR-0044
-
-// > **Flagged to contracts (doc/code drift):** the deploy actually registers **11**
-// > schemas (the set above), but `specs/02-Data-Models-and-Schemas.md` documents only
-// > nine — it omits BLOB and NAMING, both of which have real on-chain `*_SCHEMA_UID`
-// > getters and are passed into the EFSIndexer constructor. The SDK follows the
-// > registered code, not the prose. Contracts should reconcile specs/02 to 11.
+SCHEMAS.REDIRECT       // frozen first-class schema (ADR-0050; resolver = AliasResolver)
+// (9 total. SORT_INFO is deferred — not registered in the freeze; BLOB/NAMING were dropped.)
 
 // Contract addresses
 CONTRACTS.INDEXER
@@ -1219,7 +1263,7 @@ EFS has two pointer kinds, and using the wrong one is silent data corruption, no
 **The clean model insight:** EFS gets its URL-like dynamic behaviour by **indexing which static link is currently active — never by making an individual link fuzzy.** A path resolves "dynamically" because the *active-pin pointer* moves; each pin is still a precise static statement. Updating = mint a new static pin. So **dynamism lives in "which static link is active," never in a fuzzy link.** Choosing a path for a semantically-static link is a latent bug that fires when the data later changes.
 
 **SDK consequence (this hazard bites third-party devs too).** Expose the two as **distinct, explicit types that never silently interconvert** — `DataRef` (UID-backed, static, "this exact version") vs `PathRef`/`AnchorRef` (path-backed, dynamic, re-resolved to "latest"). A contract-fidelity validation (2026-06-10) confirmed the principle holds across the codebase (no live violations) and named the two edges most at risk of being mis-referenced, which the SDK's types must guard:
-- **REDIRECT (ADR-0050, unimplemented):** one `kind` field separates `sameAs`/`supersededBy` (static UID target) from `symlink` (deliberately dynamic path target). The SDK must surface these as different return types, not one "redirect" blob — following a `symlink` expecting a fixed identity is the trap.
+- **REDIRECT (ADR-0050; schema frozen, SDK support designed-only):** one `kind` field separates `sameAs`/`supersededBy` (static UID target) from `symlink` (deliberately dynamic path target). The SDK must surface these as different return types, not one "redirect" blob — following a `symlink` expecting a fixed identity is the trap.
 - **Name-resolved alias anchors as fake permalinks:** a `web3://<router>/<schemaUID>` URL resolves through a *dynamic* name lookup whose anchor contents are lens-scoped and mutable. A dev who stores it as a "permalink" is holding a `PathRef`, not a `DataRef`. Conversely, storing a `DataRef` and expecting `?lenses=` to yield "latest" gets frozen identity — the opposite mistake.
 
 Same "make the dangerous distinction visible" discipline as the identity seam (§3). (Read-time REDIRECT multi-hop/cycle handling is an unfrozen resolver-spec gap — noted upstream, not an SDK concern.)
@@ -1260,7 +1304,13 @@ Default to **efficient multi-attestation signing**. Verified crux: EAS UIDs incl
 
 ## Implementation notes
 
-This is a DESIGN-ONLY document. No SDK code or repo scaffolding exists yet.
+> **Review backlog.** The 2026-06-19 comprehensive review (`sdk/docs/reviews/2026-06-19-comprehensive-review.md`)
+> found the built surface is ~35% of this design and surfaced concrete P1/P2/P3 items. Those open items are
+> tracked as work in **[[sdk-review-backlog]]** (correctness/docs/trust P1s, the completeness-roadmap P2s, polish P3s)
+> so they aren't lost in a review file. The **Implemented vs Designed** manifest under API Surface is the
+> at-a-glance built/stubbed/designed view.
+
+This document is mostly DESIGN; the SDK is scaffolded and partially built (see the manifest above) — the read-a-file / write-a-file core runs today, most protocol primitives do not yet.
 
 The implementation thread (Kanban Backlog: "Implement OnionDAO subset of sdk-architecture") is gated on:
 1. James frame-review of this doc (this card's purpose)
@@ -1293,6 +1343,13 @@ Second: the process says "stop at review" but doesn't say what "review-ready" lo
 ---
 
 ### Revision log
+
+**2026-06-20 — reconciled the doc to the BUILT surface (post-2026-06-19 comprehensive review).** The 5-pass review flagged this doc as the least-trustworthy design doc: it overstated current capability and carried stale facts. Surgical corrections (no frame change):
+- **Schema count → the frozen 9.** The Typed-constants block listed **11** with BLOB/NAMING and (wrongly) claimed "there is NO REDIRECT schema." Corrected to the canonical 9 (ANCHOR, PROPERTY, DATA, PIN, TAG, MIRROR, LIST, LIST_ENTRY, **REDIRECT**); BLOB/NAMING **dropped** in the freeze reconciliation (ADR-0012); **SORT_INFO deferred** (not in the frozen set), so the `efs.sorts` surface is designed-only until it ships. Source: SDK `chain/deployments.ts` `EfsSchemaUIDs` + `docs/SEPOLIA_FREEZE_TABLE.md`.
+- **`getDataMirrors` naming.** Pointed `efs.fs.mirrors.list` at the real lens-scoped `EFSFileView.getDataMirrors(dataUID, attester, start, length)` (cross-attester discovery = the separate `getDataMirrorsAllAttesters`); there is no `getDataMirrorsByAttester`.
+- **Stale read/instantiation flows.** Added an authoritative-detail banner under API Surface pointing reads to **[[sdk-read-surface]]** and instantiation/signer to **[[sdk-wallet-architecture]]** — the built client is `createEfsClient({ provider, chain, account? })` (EIP-1193 + EIP-155, type-gated writes), not the `new EFSClient({ rpc, chainId, signer })` sketch. REDIRECT relabeled "schema frozen, SDK support designed-only" (was "unimplemented").
+- **New "Implemented vs Designed" manifest** (under API Surface) — ✅/◑/**D** per major surface, grounded in `packages/sdk/src/index.ts` + the review's completeness matrix, so a reader sees the ~35%-built reality.
+- **New [[sdk-review-backlog]]** + a pointer in Implementation notes — the open P1/P2/P3 review items tracked as work. No architecture change; facts reconciled to reality. Doc held at `#status/review`.
 
 **2026-06-10 (session) — identity/lens/signer model captured + Q1 closed + minimal-clicks investigation.** Long working session, decisions written down so they survive: (1) **Q1 RESOLVED** — both SDKs in the `sdk/` repo (Solidity is compile-in via npm, not deployed by us). (2) New **"Identity, lenses & the signer model"** section: a lens is the **ADR-0039 configurable hierarchy** (not an address), built by the SDK, with `?lenses=` as wholesale override; the account-group/key-set = `webOfTrust[]` content (the reserved slot, no new schema — verified `ListEntryResolver.sol:155`); v1 ships the opaque-identity **seam** not the feature, under 3 non-breaking invariants; the SDK is **signer-agnostic** so the burner-vs-real-wallet call is deferred; smart wallets confirmed first-class (`EIP1271Verifier.sol:123`). (3) **Minimal-clicks** spun out to **[[sdk-minimal-clicks]]** — 3-agent deep pass found the write is a 2–3-deep UID-refUID DAG; EAS UIDs embed `block.timestamp` (`EAS.sol:704`) so one client-side `multiAttest` can't self-reference. **Validated outcome:** 8→2–3 clicks, SDK-only, **zero contract change and no schema-freeze dependency** (one `multiAttest` per DAG layer). One-click (self-placing DATA) investigated and **rejected** — MIRROR→DATA must stay UID-static + it reopens Etched ADR-0049; deferred to post-burn FUTURE_WORK. Write-through identity contract **dropped** (folds into per-user smart accounts, already first-class via ERC-1271). The `EFSUploadGateway` wrapper ruled out (collapses attester). Added the static-vs-dynamic reference rule (§5) + identity/lens/signer model. Doc held at `#status/review`.
 
