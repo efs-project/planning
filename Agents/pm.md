@@ -213,6 +213,10 @@ Not OnionDAO-blocking (do NOT prioritize):
 - EFS Development Tool App — internal dogfooding.
 - Devcon presentation (2026-11) — too far out.
 
+## Ideas parking lot (Ideas.md)
+
+`Ideas.md` is the lightweight parking lot for James's "we should do X someday" drops and things-to-account-for that aren't decisions/work/full-explorations. The PM maintains it: capture the idea + the threads it connects to (link existing brainstorms/ADRs/findings so a future design has the trail), and **surface an idea when it becomes relevant** (e.g., a deferred idea touches the thing an agent is now building). When an idea is worth real exploration → spawn a Brainstorm; when designed → a Design; mark it `→ [[link]]` on graduation. Distinct from `Brainstorms/` (full agent-generated explorations) — Ideas is for quick human drops.
+
 ## Curation duty (Brainstorms/)
 
 Per [[brainstorm-system]], the PM is the only thing that reads `Brainstorms/` cross-cuttingly. Each session:
