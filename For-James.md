@@ -4,8 +4,7 @@
 
 ## ⚡ DECIDE NOW (each is a fork — just pick a letter)
 
-**✅ Schema freeze MERGED to `main`** (commit 21b737c, 2026-06-11). Resolves both prior blockers: REDIRECT froze as **`uint16 kind`** (ENG-1 settled — uint16 is canonical), and the split-brain is gone (ENG-2 — main is now single source of truth). 9 schemas (DATA empty/pure-identity, REDIRECT added), upgradeable proxies, ADRs 0048–0055 on main. **Next gate (still yours, at deploy time): the actual Sepolia CREATE3 deploy + schema registration — that's where the real UID table fills in `0x…TBD` and gets your final sign-off.** Plus the dev's two non-blocking reminders: `deploy-pin-check` RPC key (infra) + ADR-0055 already ratified.
-
+**⭐ HIGHEST LEVERAGE — drop pinning/Arweave credentials.** Sepolia is live; the only thing between you and a *live reference dataset on EFS* (which makes the hackathon real + gives the flyer a concrete anchor) is a pinning-service key + a small-funded Arweave wallet. Hand them over → the seeding agent runs the whole pin→Arweave→attest pipeline. ~5 min.
 
 **hackathon — entry path (gates the flyer):** how do participants actually add data? (a) **concierge-first** — submit folder+tags in Discord, our seeding script attests it; explorer = self-serve extra (rec — works day-1, routes everyone through Discord which IS the goal) / (b) explorer self-serve only / (c) wait for SDK. Draft at `/Users/james/Code/EFS/hackathon/onepager-draft.md`.
 
@@ -13,16 +12,7 @@
 
 **Milestones wording (Tier-1, your OK):** the OnionDAO list still says *"Smart contract .sol file list freeze"* — stale per your "set stays flexible." Want me to update it? (Milestone scope = your call.)
 
-**SDK architecture — TWO PICKS** → [[Designs/sdk-architecture]] at `#status/review`. Your clarification reframed it: **on-chain SDK = a Solidity library** (used from a dev's own contract; library form keeps the dev's contract as attester, which lenses require) and **off-chain SDK = just the TypeScript SDK** (no indexer/The-Graph baggage — reverse-lookup reads are `NotImplemented` shims; the SDK doesn't bundle indexing). Both folded in: new "Two deliverables" framing + a full On-chain SDK (Solidity) section + on-chain requirements; stripped the EFS-in-Postgres/reference-index apparatus. Q2–Q5 unchanged. Earlier expert review had also fixed a Q5 attribution defect (only EIP-5792/4337 give one-approval-with-correct-attribution; sequential is the auto EOA fallback; gateway demoted to opt-in). **Latest:** (1) on-chain SDK is a *first-class client*, not write-only — contracts read files through lenses, read lists, enumerate first-N children (bounded gas window), create files/folders; added a parity contract to stop on-chain/TS drift. (2) Multi-team review round (3 agents) added a **Shared-namespace conventions** section (attester-keyed overlays vs Unix single-owner paths — the big footgun; `/apps/<reverse-dns>/` namespacing; reading another team's config; untrusted-read safety) and sharpened the discovery boundary. (3) you corrected the shared-config framing — apps share a path like `/swaps/maxSlippage` and disambiguate by **lens** (caller / DAO / self), *not* by namespace; namespacing is just navigation, not collision-avoidance. Q6 closed: no lens registry today, SDK won't build one. (4) **on-chain identity decided + adversarially reviewed** (your anxiety item, now written down): `read(path)` = `address(this)` ("my own files", AA-safe), `readAs(path, who)` for any explicit address, **never `tx.origin`**, **no `readAsEndUser`** (reaching through a middleman to the true end user can't be done safely — use Aave-style `onBehalfOf` / EIP-712+ERC-1271). A 4th review agent web-verified it: core decision sound, claims sharpened (EIP-7702 mutable-controller caveat, "address-keyed not AA-native", ERC-1271/7739 hardening, `read` now returns `(bool exists,…)`). See revision entries 9–10. Heads-up: all 3 agents cried "these schemas don't exist!" — **false alarm from your stale `contracts/` checkout**; the PIN/Lists/lenses model is on the `custom-lists` branch, not `main`. `git pull` when convenient. See Revision log (entries 6–8). Forks:
-
-- **1. Q1 — where does the Solidity library live? RESOLVED (2026-06-10): both SDKs in the `sdk/` repo.** Your reasoning: even the Solidity SDK is consumed via npm (compile-in, not deployed by us), so the on-chain and TS SDKs ship together as one package/repo.
-- **2. PROMOTE / REVISE** the reframed doc:
-  - **(a) Promote** — assign a number; OnionDAO-subset implementation can start (gated on Lists→Sepolia).
-  - **(b) Revise** — name what's wrong; I'll fix and re-surface.
-
-(Q6 — canonical shared config — **closed by you**: dev picks the lens, no registry today, and a registry if ever built is a contracts artifact, not the SDK's. Folded into the doc's Shared-namespace conventions.)
-
-PM rec: **1a + 2 promote.** (Expert-review + brainstorm round on the reframe is done — findings folded in, revision log entries 5–6. Nothing else blocking your call.)
+**SDK architecture — promote or revise** → [[Designs/sdk-architecture]] at `#status/review` (~11 days). All open questions resolved; the SDK agent is already *building against it* (PR #1, CI green). So promoting it just ratifies what's being built. **(a) Promote** (PM rec — assign a number, bless the foundation) / **(b) Revise** (name what's wrong). The full reasoning trail is in the design doc; nothing's blocking your call.
 
 ## 🕐 WHEN YOU HAVE TIME (not blocking OnionDAO)
 
