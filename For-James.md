@@ -17,6 +17,7 @@
 ## 🕐 WHEN YOU HAVE TIME (not blocking OnionDAO)
 
 - **Start the OnionDAO onboarding + flyers discussion** — you said you'll fork a chain for this; PM will keep reminding you each session until you do (you asked not to let it slip).
+- **Minimal-click write UX follow-ups:** decide whether true one-click should pursue a user-context `EFSWriter` / shared 7702 writer (vs compile-in only), and whether the debug client should default auto-sort processing off to avoid surprise MetaMask prompts. Current `codex-min-transactions` work ships Tier-1 layered `multiAttest` without blocking either call.
 - Frame-review the proposed design process → [[Brainstorms/2026-05-28-pm-design-process-synthesis]] (then I formalize it)
 - Promote [[brainstorm-system]] when you're happy with it
 
