@@ -4,7 +4,9 @@
 
 ## ⚡ DECIDE NOW (each is a fork — just pick a letter)
 
-**⭐ HIGHEST LEVERAGE — drop pinning/Arweave credentials.** Sepolia is live; the only thing between you and a *live reference dataset on EFS* (which makes the hackathon real + gives the flyer a concrete anchor) is a pinning-service key + a small-funded Arweave wallet. Hand them over → the seeding agent runs the whole pin→Arweave→attest pipeline. ~5 min.
+**🚀 AT-HANDOUT GATE (do before the flyer's QR is useful):** (1) **publish `buildathon.efs.eth.limo`** (build the explorer → IPFS → set ENS contenthash) so the URL resolves; (2) **set up Discord** (#buildathon channel + pin the start-here/template/rubric); (3) **fill the 2 placeholder links** in the pinned post — the web-client URL + a Sepolia faucet. THEN hand out flyers. Everything technical is live (Sepolia explorer #30, faucet #31, minimal-clicks writes #36 all merged); these 3 are manual chores only you can do. See `hackathon/READY.md`.
+
+**Week-1 nice-to-have (NOT handout-blocking): drop pinning/Arweave creds** → seed the sample datasets onto Sepolia for a live "look, it's already here" demo. Can land any time in week 1; concierge + self-serve both work without it.
 
 **hackathon — HANDOUT READY (all decisions locked).** Single dataset track; prizes all-cash $100/$50/$25/$10/$10 ($195); runs Jun 23 → Jul 8, winners Jul 10; bar = 5–10 small files or a few big ones; submit-to-James judging; US-Letter color flyer; URL `buildathon.efs.eth.limo`. All copy/visual/announcement/rubric/templates done in `hackathon/` (see `hackathon/READY.md`). **Nothing blocking from me.** Your at-handout chores: publish `buildathon.efs.eth.limo`, pin Discord assets + a Sepolia faucet link, decide how the flyer reaches OnionDAO. **Open (your call, not blocking): OnionDAO-only vs open to the internet** — current setup (all-cash, generic URL, runs a full week past OnionDAO) supports going wider; decide mid-week on traction.
 
