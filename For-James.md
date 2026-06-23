@@ -6,7 +6,7 @@
 
 **⭐ HIGHEST LEVERAGE — drop pinning/Arweave credentials.** Sepolia is live; the only thing between you and a *live reference dataset on EFS* (which makes the hackathon real + gives the flyer a concrete anchor) is a pinning-service key + a small-funded Arweave wallet. Hand them over → the seeding agent runs the whole pin→Arweave→attest pipeline. ~5 min.
 
-**hackathon — HANDOUT READY for 2026-06-23.** Entry path resolved (Sepolia live → self-serve primary + concierge fallback, both in the copy). Handout/announcement/rubric/templates done in `hackathon/` (see `hackathon/READY.md`). **Only confirm-or-change item: prize numbers** — baked in as 🥇$150/🥈$75/🥉$25 per track + 100🧅/accepted entry + first-10 250🧅 (≈$500+onions). Reply "prizes good" or give new figures. Then the at-handout chores are yours: publish `oniondao.efs.eth.limo`, pin Discord assets + faucet links, decide how the flyer reaches OnionDAO.
+**hackathon — HANDOUT READY for 2026-06-23 (all decisions locked).** Single dataset track; prizes $100/$50/$25/1000🧅/500🧅; bar = 5–10 small files or a few big ones; submit-to-James judging; US-Letter color flyer. All copy/visual/announcement/rubric/templates done in `hackathon/` (see `hackathon/READY.md`). **Nothing blocking from me.** Your at-handout chores: publish `oniondao.efs.eth.limo`, pin Discord assets + a Sepolia faucet link, decide how the flyer reaches OnionDAO.
 
 **Milestones wording (Tier-1, your OK):** the OnionDAO list still says *"Smart contract .sol file list freeze"* — stale per your "set stays flexible." Want me to update it? (Milestone scope = your call.)
 
