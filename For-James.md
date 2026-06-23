@@ -6,9 +6,7 @@
 
 **⭐ HIGHEST LEVERAGE — drop pinning/Arweave credentials.** Sepolia is live; the only thing between you and a *live reference dataset on EFS* (which makes the hackathon real + gives the flyer a concrete anchor) is a pinning-service key + a small-funded Arweave wallet. Hand them over → the seeding agent runs the whole pin→Arweave→attest pipeline. ~5 min.
 
-**hackathon — entry path (gates the flyer):** how do participants actually add data? (a) **concierge-first** — submit folder+tags in Discord, our seeding script attests it; explorer = self-serve extra (rec — works day-1, routes everyone through Discord which IS the goal) / (b) explorer self-serve only / (c) wait for SDK. Draft at `/Users/james/Code/EFS/hackathon/onepager-draft.md`.
-
-**hackathon — prizes (UPDATED per James 2026-06-11 "spend more, seed the flywheel"):** (a) two mirrored pools $150/$75/$25+🧅 each ($500+1500🧅) / (b) one deep ladder $250/$150/$100/$50/$50 + 5×250🧅 ($600) / (c) **rec: two pools + 100🧅 ship-bounty for EVERY accepted entry** (cap 30) + optional first-10 early-bird 250🧅 — guaranteed micro-reward makes everyone ship; shipped datasets ARE the flywheel. Details in `/Users/james/Code/EFS/hackathon/onepager-draft.md`.
+**hackathon — HANDOUT READY for 2026-06-23.** Entry path resolved (Sepolia live → self-serve primary + concierge fallback, both in the copy). Handout/announcement/rubric/templates done in `hackathon/` (see `hackathon/READY.md`). **Only confirm-or-change item: prize numbers** — baked in as 🥇$150/🥈$75/🥉$25 per track + 100🧅/accepted entry + first-10 250🧅 (≈$500+onions). Reply "prizes good" or give new figures. Then the at-handout chores are yours: publish `oniondao.efs.eth.limo`, pin Discord assets + faucet links, decide how the flyer reaches OnionDAO.
 
 **Milestones wording (Tier-1, your OK):** the OnionDAO list still says *"Smart contract .sol file list freeze"* — stale per your "set stays flexible." Want me to update it? (Milestone scope = your call.)
 
