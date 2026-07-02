@@ -55,7 +55,11 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 #### Draft
 
-*(none)*
+| Design | Target repos | Notes |
+|---|---|---|
+| [[deterministic-ids]] | `contracts`, `sdk`, `planning` | v2 core: the identity Codex — deterministic EFS IDs, derivation rules, registry, duplicate/existence/refUID semantics. |
+| [[efs-v2-holistic-redesign]] | `planning`, `contracts`, `sdk` | Umbrella: the one-final-freeze bundle, conventions-before-data, gap workstreams, explicit non-changes. |
+| [[efs-v2-transition-plan]] | `planning`, `contracts`, `sdk` | Guardrails, phase sequence, verification gates, abort triggers for the v2 window. |
 
 #### Review
 
