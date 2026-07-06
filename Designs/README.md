@@ -57,7 +57,8 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 | Design | Target repos | Notes |
 |---|---|---|
-| [[deterministic-ids]] | `contracts`, `sdk`, `planning` | v2 core: the identity Codex — deterministic EFS IDs, derivation rules, registry, duplicate/existence/refUID semantics. |
+| [[efs-substrate-decision]] | `planning`, `contracts`, `sdk` | The foundation ruling: EAS-carried v2+ with mechanically-reserved portability (envelope/KEL/identity-word); portable currency explicitly not sold; experiments + commissioned workstreams. Amends the three v2 docs. |
+| [[deterministic-ids]] | `contracts`, `sdk`, `planning` | v2 core: the identity Codex — deterministic EFS IDs, derivation rules, registry, duplicate/existence/refUID semantics. Amended by [[efs-substrate-decision]]. |
 | [[efs-v2-holistic-redesign]] | `planning`, `contracts`, `sdk` | Umbrella: the one-final-freeze bundle, conventions-before-data, gap workstreams, explicit non-changes. |
 | [[efs-v2-transition-plan]] | `planning`, `contracts`, `sdk` | Guardrails, phase sequence, verification gates, abort triggers for the v2 window. |
 

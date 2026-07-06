@@ -66,8 +66,11 @@ No token, no protocol fees, no tunable anti-spam parameters in immutable contrac
 
 *Publisher* (cold-key EOA on an air-gapped signer must publish first-class), *archivist* (replicate everything verifiably to a chain that survives), *curator* (lens = shareable, subscribable object), *dapp dev* (precompute any address offline; subscribe via log filter; boring writes), *indexer operator* (log-only sync; state-walk reconstruction), *future reader in 2126* (one self-hosted spec + chain data suffice; every link in an archived page still dereferences to something explainable). Invariants: attester=user; paths permanent; statements/things split; verify-don't-trust reads; minimum irreversible assumptions; viewer sovereignty.
 
+> **Substrate ruling (2026-07-02):** [[efs-substrate-decision]] adds its §3 reservations (identity word, envelope/KEL reserved formats, reserved schema IDs, chain-order leak fixes, TID device bits, read-grade vocabulary) to the §1 freeze bundle, and requires the §5 mission ruling (default permanence vs free tier) before Phase 0 closes.
+
 ## Open questions
 
+- [ ] **Mission ruling** ([[efs-substrate-decision]] §5): permanent-archive-with-social-features (no default-ephemeral tier) — confirm or amend. Sequences before everything else.
 - [ ] Sign off the bundle boundary: anything in §1 missing? anything that should be evicted to §2?
 - [ ] Sign off (or explicitly delegate to per-doc convention review) the §2 convention set — flagging in particular §2.1's consumption of the single per-attester `(folderAnchorId, KIND_DATA)` PIN slot at folder anchors (a permanent slot-namespace allocation) and §2.6's reversal of ADR-0039/ADR-0033's default lens order.
 - [ ] Visibility-TAG mechanism (also flagged in [[deterministic-ids]]).
