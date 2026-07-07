@@ -57,3 +57,6 @@ The KarmaHQ page is the first public grant-accountability anchor. Keep it update
 - [ ] Add exact demo video URL from the KarmaHQ quick link if we want it mirrored here.
 - [ ] Decide whether EFS needs an Open Collective / Open Source Collective fiscal home before broad donation rounds.
 - [ ] Decide whether to claim/configure Drips for EFS repos before Gitcoin or Octant rounds.
+- [ ] Decide whether to enable GitHub Sponsors and add `.github/FUNDING.yml` for EFS repos.
+- [ ] Decide whether to register EFS repos/projects with OSO for public impact analytics.
+- [ ] Decide whether a markdown table is enough for proposal operations or if we need Airtable/Grist/Instrumentl later.
