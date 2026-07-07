@@ -15,6 +15,46 @@ Rows touched:
 Next check:
 ```
 
+## 2026-07-07 - Proposal tracker source-backed column refresh
+
+Trigger: Fill `Amount`, `Deadline`, `Last checked`, and `Gate / evidence needed` after adding operational columns to [[proposals]].
+
+Official sources checked:
+
+- [ESP Applicants](https://esp.ethereum.foundation/applicants), [ESP Open Rounds](https://esp.ethereum.foundation/applicants/open-rounds), [ESP Office Hours](https://esp.ethereum.foundation/applicants/office-hours)
+- [ESP Wishlist](https://esp.ethereum.foundation/applicants/wishlist), [ESP RFPs](https://esp.ethereum.foundation/applicants/rfp)
+- [Filecoin Grants](https://fil.org/grants), [Filecoin devgrants](https://github.com/filecoin-project/devgrants), [FIL-ProPGF Batch 3](https://www.filecoin.io/blog/ProPGF-Batch-3-Call-for-Builders), [FIL PGF](https://www.filecoin.io/blog/the-future-of-public-goods-funding-in-filecoin-scaling-the-pl-pgf-vision)
+- [FUTO Grants](https://futo.org/grants/), [FUTO Grants newer page](https://futo.tech/grants)
+- [The Graph Grants](https://thegraph.com/grants/), [The Graph applications paused](https://forum.thegraph.com/t/the-graph-foundation-is-pausing-applications-to-the-grants-program/7008)
+- [OTF Internet Freedom Fund](https://www.opentech.fund/funds/internet-freedom-fund/)
+- [OTF FOSS Sustainability Fund](https://www.opentech.fund/funds/free-and-open-source-software-sustainability-fund/)
+- [Ocean Shipyard](https://oceanprotocol.com/build/shipyard)
+- [IPFS Data Utilities Grants](https://ipfsfoundation.org/ipfs-data-utilities-grants-year-1-primitives-in-motion/)
+- [NLnet Apply](https://nlnet.nl/propose/), [NGI Open Calls](https://ngi.eu/opencalls/)
+- [Giveth QF](https://qf.giveth.io/qf), [Giveth project verification](https://docs.giveth.io/projectverification), [Giveth GIVbacks](https://docs.giveth.io/givbacks), [Giveth Ethereum Security QF results](https://forum.giveth.io/t/ethereum-security-qf-round-results-april-23-may-14-2026/2201)
+- [Gitcoin Grants](https://gitcoin.co/program), [Gitcoin Campaigns](https://gitcoin.co/campaigns), [Gitcoin Grants 24](https://gitcoin.co/campaigns/gitcoin-grants-24-gg24), [Gitcoin d/acc proposal](https://gov.gitcoin.co/t/proposal-gitcoin-d-acc-2026-funding-initiative-restructuring-the-grants-program/25157)
+- [Octant v2 applications](https://docs.v2.octant.build/docs/projects/apply-for-funding/), [Octant v1 sunset](https://docs.octant.app/en-EN/epoch11-and-migration-to-v2.html)
+- [Base Get Funded](https://docs.base.org/get-started/get-funded), [Optimism Grants Season 9](https://www.opgrants.io/seasons/current/season-9/)
+
+Current read:
+
+- ESP: Office Hours is the right near-term route; no active Open Rounds or Wishlist found; visible RFPs are Devcon/community-growth oriented rather than EFS infrastructure.
+- Filecoin: Open Grants / GitHub intake remains the most actionable source-backed proposal route; public GitHub issues are the key precedent mine. FIL-ProPGF Batch 3 is urgent but only plausible if EFS has a real Filecoin-backed customer/product angle.
+- FUTO: lightweight rolling intake is open; legendary grants have no standard per-award range, while microgrants are listed at USD 1k-5k.
+- The Graph/Ocean: only real if EFS commits to ecosystem-specific integrations; The Graph paused grant applications on 2026-07-06 despite the grants page still being visible.
+- OTF: rolling, high potential only with a concrete internet-freedom threat model and measurable real-world applicability.
+- OTF FOSS Sustainability Fund: strong thematic fit for later internet-freedom dependency work, but the current page is a closed/dated route rather than an active EFS row.
+- IPFS/NLnet: high fit but current calls are closed or mismatched; IPFS says the next RFP round should open in late 2026, while NLnet's current August 1 deadline is restricted to Taler/Fediversity.
+- Gitcoin/Giveth/Octant/Base: public profile, community support, and shipped impact evidence matter more than proposal copy.
+- Giveth: no active QF round was visible in the QF hub; the immediate route is project profile plus verification/GIVbacks eligibility.
+- Octant: v1 is sunset and v2 Atlas is invite-gated during beta; future applications need profile, team, impact-so-far, USD funding goal, and proof links.
+
+Implication: [[proposals]] rows now distinguish active research from passive watching and include the next evidence gate before drafting.
+
+Rows touched: [[proposals]]
+
+Next check: Weekly for high-priority rows; monthly for watch rows.
+
 ## 2026-07-07 - KarmaHQ anchor and tracker seed
 
 - EFS has a public KarmaHQ project page: [Ethereum File System on Karma](https://www.karmahq.xyz/project/ethereum-file-system/about).

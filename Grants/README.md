@@ -46,6 +46,19 @@ The KarmaHQ page is the first public grant-accountability anchor. Keep it update
 4. Keep proposal outcomes, feedback, and rejection notes in [[proposals]] and [[research-log]].
 5. Keep rejected and withdrawn rows. Use `archived` only when a row should stop showing prominently.
 
+## Reviewer proof rule
+
+Every `drafting`, `needs-signoff`, or `submitted` row should have a five-minute reviewer proof bundle before submission:
+
+- demo URL;
+- repository link;
+- KarmaHQ or GAP link;
+- pitch deck or demo video link, when relevant;
+- one transaction, live record, dataset, or other artifact the reviewer can inspect;
+- one sentence explaining what the reviewer should verify.
+
+If a funder-specific draft cannot answer "what would make this funder proud to have funded EFS?", keep it in `researching`.
+
 ## Status vocabulary
 
 - `watching` - plausible future route, but no active application path yet.

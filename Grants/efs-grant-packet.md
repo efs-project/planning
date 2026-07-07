@@ -4,7 +4,7 @@ Reusable material for grant applications. Adapt this to each funder's language a
 
 ## One-line description
 
-Ethereum File System (EFS) is open-source Ethereum public infrastructure for durable paths, verifiable data references, mirrors, and lens-scoped public knowledge.
+Ethereum File System (EFS) is Ethereum-native public infrastructure for durable paths, provenance, mirrors, and verifiable data references across Ethereum and EVM L2s.
 
 ## Short description
 
@@ -55,10 +55,24 @@ Use this as the canonical public-good framing, but sharpen per funder.
 Before submitting, answer these in the proposal draft:
 
 - What exact funder language does this proposal mirror?
+- What would make this funder proud to have funded EFS?
 - What evidence would let a reviewer verify the claim in under five minutes?
 - Which EFS claim should be removed because it is not relevant to this funder?
 - What is the smallest milestone that would make the funder proud to have funded it?
+- How is the requested amount justified by concrete outputs?
+- What reporting or public accountability surface will the funder get?
 - What happens after the grant ends: maintenance, public updates, or next funding rail?
+
+## Five-minute reviewer proof
+
+Each serious draft should link a compact proof bundle:
+
+- demo URL;
+- public repository;
+- KarmaHQ or GAP page;
+- pitch deck or demo video, if relevant;
+- one transaction, live EFS record, public dataset, or inspectable artifact;
+- one sentence saying what the reviewer should verify.
 
 ## Funder-specific angles
 
@@ -143,8 +157,11 @@ Use milestone budgets rather than broad operating asks where possible.
 - [ ] Public repository links.
 - [ ] Demo URL.
 - [ ] KarmaHQ page updated.
+- [ ] Karma GAP or equivalent milestone/update link, if relevant.
 - [ ] Pitch deck URL.
 - [ ] Demo video URL.
+- [ ] One inspectable transaction, record, dataset, or live artifact.
+- [ ] One-sentence reviewer verification instruction.
 - [ ] Current milestones.
 - [ ] Clear budget table.
 - [ ] License statement.
