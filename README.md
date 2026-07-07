@@ -42,6 +42,7 @@ The **canonical protocol** for this vault is [`Designs/design-system.md`](./Desi
 | `Glossary.md` | Single alphabetical file of EFS terms. |
 | `Onboarding/` | Procedural: "how YOU do X." See [`Onboarding/README.md`](./Onboarding/README.md). |
 | `Agents/` | Agent-specific institutional knowledge: launch prompts and SOUL files for each agent role (PM, future design-reviewer, etc.). See [`Agents/README.md`](./Agents/README.md). |
+| `Grants/` | Operational grant tracking — funder landscape, proposal status table, reusable EFS pitch packet, research log. Owned by @grants; PM keeps it integrated with the board. Not a design. See [`Grants/README.md`](./Grants/README.md). |
 
 **No `Misc/` folder.** Uncategorized notes go in `Daily Notes/`.
 
