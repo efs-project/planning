@@ -1,0 +1,163 @@
+# Client OS pressure report — what official client v2 asks of EFS v2
+
+**Status:** draft
+**Target repos:** planning, contracts, sdk, client
+**Depends on:** [[web-os-thesis]] (and the full `Designs/clientv2/` set), [[codex-envelope]], [[codex-kinds]], [[codex-kernel]], [[read-lens-spec]], [[identity]], [[ops-doctrine]], [[large-file-uploads]], [[freeze-gates]]
+**Supersedes:** —
+**Reviewers:** —
+**Last touched:** 2026-07-07 — fable-5
+
+#status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client
+
+## What this is
+
+The client v2 design round ([[web-os-thesis]] + thirteen model docs + the 14-lane research corpus in `Reviews/2026-07-07-clientv2-corpus/`) was run as a pressure test against the EFS v2 design set, per the handoff's feedback protocol. This note consolidates every place the client OS found the protocol design missing, awkward, or undecided. Each item: problem → mismatch → paths → defer-risk, compressed. Nothing here blocks reading the client set; several items **do** touch the one-final-freeze window and are flagged.
+
+**Priority legend:**
+- **[ETCHED-WINDOW]** — touches surface bound by the freeze pledge ([[freeze-gates]] §C); decide or reserve before the ceremony or it needs a second freeze.
+- **[DURABLE]** — belongs in [[read-lens-spec]] or SDK specs; iterable, but should land before third-party clients fork.
+- **[DOCTRINE]** — [[ops-doctrine]] / [[apps-cookbook]] additions.
+- **[WORKSTREAM]** — new design work with no current home.
+
+---
+
+## P1. Read-ABI: verifiability, admission evidence, admission time — [ETCHED-WINDOW]
+
+**Problem.** Three client needs press on the frozen read surface:
+1. **Every read grade — including PROVEN-ABSENT — must be computable from state-backed reads provable via `eth_getProof`.** Helios-class light clients cannot verify log scans (2026); any grade that only derives from event enumeration is unverifiable *and* maximally observable. The client's "verified reads over untrusted endpoints" flagship depends on this.
+2. **Batched per-claimId admission checks.** Sync-center honesty ("which of this envelope's N records are admitted at venue V") needs a cheap batched read, or clients either lie or hammer RPCs per record.
+3. **Admission-event time is not readable.** Update cooldowns must anchor to admission time (TIDs are past-datable without bound — [[codex-envelope]]), but `getSlot` exposes `seq`/`expiresAt`, not when the venue admitted the claim.
+
+**Mismatch.** [[codex-kernel]] freezes the read ABI (G5) without these; the enumeration spine is state-resident (good) but per-claim admission-batching and admission-time are unspecified; discovery's indexer-lane fallback is explicitly not trustless.
+
+**Paths.** (a) Extend the frozen ABI now (`isAdmitted(claimId[]) → bool[]`, admission block/time word per claim — real Etched cost, measure it); (b) keep the kernel minimal and bless a *view-contract* recipe — but views cannot mint state the kernel didn't store, so admission time specifically is store-it-or-lose-it; (c) event-derived indexer lane for admission time, honestly labeled non-trustless (breaks the cooldown-anchor trust story).
+
+**Defer-risk.** Post-freeze this is unfixable at the trust level the client claims; auto-update cooldowns silently degrade to gameable or indexer-trusting.
+
+- [ ] Decide (a)/(b)/(c) per item; fold chosen reads into the [[freeze-gates]] A2 gas bundle.
+
+## P2. Reserved-key rows to mint before the table freezes — [ETCHED-WINDOW]
+
+**Problem.** The reserved-key table ([[codex-kinds]] P9, 13 rows) is Etched; the client needs record shapes that want uniform, vectored, lens-legible semantics. Candidates surfaced independently by multiple docs:
+
+| Candidate row | Client need | Cited by |
+|---|---|---|
+| `lang` (BCP-47) + `dir` (ltr/rtl/auto) | screen-reader lang tagging, font-pack selection, segmentation, reproducible rendering of signed content | locale doc G1 (top item) |
+| persona-link relation | persona ↔ primary stitching, both-LIVE pair rule, compromise-revocation semantics that cannot fork per client | wallet doc, threat doc |
+| handler binding ("type author endorses handler app") | open-with routing without squattable first-attester claims (assetlinks analog; Android's 2014–2025 retreat from declaration-wins) | kernel doc, fuchsia lane |
+| freshness beacon (expiring head PIN convention) | TUF-timestamp analog for update channels; channel-staleness rendering that doesn't fork per channel | packages doc, system-surfaces doc |
+| receipt/grant record schema | portable capability/settings receipts and audit exports lenses can reason about | kernel doc, capability-os lane |
+
+**Mismatch.** The additive-later list in [[freeze-gates]] §C reserves KEL/WHITEOUT/salted-TAGDEF etc., not these. Permissionless user-key TAGDEFs *can* express some (handler binding, beacons) as conventions — at the cost of per-client dialects and no frozen vectors.
+
+**Paths.** Mint reserved rows now (cheap: rows + vectors) for `lang`/`dir` and persona-link at minimum; rule the rest as cookbook conventions explicitly if not minted, so the "convention, not row" choice is a decision rather than silence.
+
+**Defer-risk.** Reserved-key additions after the freeze are a pledge amendment; conventions minted under user keys fragment exactly where signed-data semantics should be uniform.
+
+- [ ] James/design-round pass over the five candidates: row vs blessed convention vs reject, each.
+
+## P3. Read-grade vocabulary extensions — [DURABLE → read-lens-spec]
+
+**Problem.** The client hits states the CLOSED grade set (§2) cannot express; every Shell/client will invent presentation dialects exactly where honesty matters. Needed, consolidated:
+
+1. **Cause taxonomy for UNKNOWN**: `NO-TRANSPORT` (no endpoint capability granted), `POLICY-DENIED` (budget/trifecta refusal), venue-miss — "not permitted to look" must never render as "not found". (Flagged by six of thirteen docs; the single most-repeated gap in the round.)
+2. **PENDING-LOCAL overlay composition**: normative composition of the pending-state ladder with venue grades (what the local optimistic overlay renders as, and what agents see).
+3. **Composite closure grades**: multi-record resolutions (generations, app closures) need a worst-of-inputs, venue-qualified composition rule + a closure-completeness predicate over `BYTES-*` ("bootable/installable offline" is currently undefined protocol-side).
+4. **Grade→executability table**: LIVE/pinned = runnable; STALE = runnable-with-label; EQUIVOCAL = never auto-run — so all conforming clients gate *code loading* identically.
+5. **Machine-readable provenance tuples** in resolver output (author, venue, grade, currency, byte-verification, discovery-vs-trusted) — agent taint-tracking needs data, not rendered enums.
+6. **Post-local-state-loss degraded state**: after origin eviction, everything falls to venue-qualified UNKNOWN until re-verified — normative, so clients don't default optimistic.
+7. **Rendering-locale-is-a-lens** note + locale/font/CLDR **pack-version staleness** disclosure hook for safety-critical identifier display.
+8. **§6.5 grammar additions**: citation **lens-excerpt** form (disclose the resolving lens position without publishing the viewer's whole trust order); a sender-lens-hint / attestation-pin query key so path links can be made portable deliberately.
+
+**Mismatch.** §2 is deliberately closed; extension is by spec revision — which is exactly what this requests. None of this is Etched.
+
+**Defer-risk.** Third-party clients fork honesty vocabulary; the conformance suite (§8.3) tests a vocabulary that can't describe common OS states.
+
+- [ ] Read-lens-spec revision pass adopting/rejecting each of the eight, with vectors for 1–4.
+
+## P4. Actor and delegation dimension — [WORKSTREAM, with one ETCHED-WINDOW touchpoint]
+
+**Problem.** The protocol has no authority level below the author key:
+- Human, persona, and agent-mediated writes are **indistinguishable on-chain**; receipts lose third-party verifiability; post-compromise demotion of agent-written records has nothing to key on.
+- **Delegated revocation doesn't exist** (`revoker == claim.author`): the primary cannot revoke a stolen persona's claims; pre-signed revoke ladders minted at persona creation are the only kill switch — fragile and easy to lose.
+- **Bounded pre-authorization** ("admit up to N records of kinds K under path P before expiry" — the AP2 open-mandate analog) has no protocol form; the client substitutes personas + client policy.
+- **P-256 (0x02) / WebAuthn (0x03) un-reservation has no schedule.** EIP-7951 put P-256 verification on L1 (Fusaka 2025-12); the remaining gate for 0x03 is byte-exact vectors from ≥2 authenticator families ([[codex-envelope]] amendment 7). The client's whole key-custody ladder (hardware-backed, passkey-native authorship; browser custody of secp256k1 is structurally impossible — WebCrypto has no secp256k1) upgrades the day 0x02 lands. **This deserves an owner and a date, decoupled from full-KEL delivery if at all possible.**
+
+**Mismatch.** [[identity]] reserves KEL/succession only; agent-native and ocap practice (OAuth OBO `sub+act`, certificate capabilities) both want a delegation credential lenses can resolve.
+
+**Paths.** (a) Reserve a sibling slot next to the KEL reservation for delegated/attenuated signing + an `act` (on-behalf-of) convention word — reservation only, no v2 machinery; (b) explicitly rule agent/persona attribution client-receipt-only forever (also acceptable — but rule it, don't drift into it); (c) put the 0x02/0x03 un-reservation on the freeze-gates schedule with a named owner.
+
+**Defer-risk.** (a)/(b) undedided means clients invent unverifiable attribution; (c) deferred means the client ships its weakest custody story for years while the enabling precompile sits live on every chain.
+
+- [ ] James: pick (a) or (b); schedule (c).
+
+## P5. Signing legibility and bundle custody — [DURABLE + DOCTRINE]
+
+1. **Canonical envelope summary**: a deterministic summary (kinds, counts, targets, ordering) hashed into or alongside `recordsRoot`, so the human-readable preview is verifiable and "what you signed" is not client-relative. (Pairs with an **ERC-7730 descriptor** for the envelope schema submitted to the EF-stewarded clear-signing registry, and an ERC-8213-style digest cross-check in wallets.)
+2. **Per-record risk-class taxonomy** (conventional, SDK-level, keyed to record kinds/reserved keys) so batch preflights can't hide one dangerous record among harmless ones — and so wallets/Shells don't fork dialects of "dangerous".
+3. **`.efs-bundle` as a protocol artifact**: normative venue-neutral portable encoding (header + signed records + signature + submission progress), with the spec stating plainly that **any holder may submit it** and that admission is clock-free (expiry decays currency, never blocks admission).
+4. **Pre-admission supersession semantics**: whether a later-signed same-slot higher-seq bundle safely defangs a leaked earlier unsubmitted bundle; plus the blessed **pre-signed revoke-all abort artifact** doctrine for interactive bundles.
+5. **ERC-7920/7964 liaison**: EFS's envelope now has a standards-track twin; document the deliberate Merkle-profile divergence (positional tree, promotion, N=1 wrapped leaf) as a named profile and watch the drafts.
+
+- [ ] Envelope-spec appendix for 1/3/4; cookbook for 2; a liaison line in [[freeze-gates]] watch items for 5.
+
+## P6. Update-channel trust operations — [DOCTRINE → ops-doctrine]
+
+An "update channels" section covering: per-channel monotonic high-watermarks; the fast-forward rule (auto-follow never moves backward; user rollback always legal); backward-head handling (EQUIVOCAL-style stop + explicit user action); the **curator-compromise recovery recipe** (REVOKE-sweep + lens repair), written *before* channels ship; a **deny-set freshness floor for auto-update** ("deny view no older than T, venue-qualified" — distinct from general read freshness, else offline-honest clients auto-install later-revoked malware); **k-of-n curator quorum** as a blessed client-layer convention (first-attester-wins is 1-of-n; grades cannot say "LIVE but below threshold"); the **channel-monitor role** commissioned as a real, funded workstream (CT's lesson: unmonitored transparency protects no one); and the pre-KEL **key-compromise incident-response playbook** (lens distrust + advisory subtraction is currently client folklore).
+
+- [ ] Ops-doctrine revision adopting this section; monitor role gets an owner.
+
+## P7. App-platform primitives — [DOCTRINE, borderline P2]
+
+A blessed **app-package convention** in [[apps-cookbook]]: app identity = (author word, app-root record); manifest (CML-tri-partition shape) hashed into app identity; release/channel/provenance record shapes; and the **atomic resolve-closure-at-pinned-root** operation (manifest + content root as one consistent pair — per-record lens resolution can mix versions across an app's records; a partially-upgraded app is a security hazard). Language packs and font packs as signed-record patterns with lens-endorsed translations ride the same convention.
+
+- [ ] Cookbook blessed-pattern additions; decide whether any part hardens into P2 rows.
+
+## P8. Read-path privacy as a normative obligation — [DURABLE + DOCTRINE]
+
+Deterministic, permanent, global record IDs make interest metadata compound forever; naive clients will default to Infura-style leak-everything. The protocol docs should carry a normative client/SDK privacy section: **bulk snapshot distribution** for lens lists, deny sets, discovery indexes, and checkpoints (the OCSP→CRLite move — live per-record lens-resolution traffic reconstructs the viewer's trust graph from query order alone); **one-head-per-venue revalidation semantics** blessed (what a single head/checkpoint fetch proves about the freshness of N cached records — the client's anti-timing-correlation invariant depends on it); **chunk-size normalization and prefetch/padding guidance** in the bytes spec (chunk fetch sequences fingerprint files through any relay); and OHTTP-cleanliness guidance (stateless, identifier-free read protocols) so relaying stays retrofittable.
+
+- [ ] Read-lens-spec + codex-bytes privacy sections; SDK conformance items.
+
+## P9. Private/encrypted record tier and the local-state ruling — [WORKSTREAM]
+
+Four client needs converge on the same missing story: **journal escrow/backup**, **cross-device roaming** of profiles/lens-config/settings, **agent receipts** (sensitive, want portability + verifiability), and **published OS profiles** (fingerprinting gifts if public). Today the only options are public-permanent records or evictable local storage. Needed: (a) an explicit blessing of the **encrypted-local/roaming tier** as NOT-records (config, default handlers, permission ledgers — the anti-shape of permanent public data); (b) an **encrypted-record convention** (extends [[efs-v2-holistic-redesign]] §2.3 + the substrate privacy workstream) for the roaming/escrow cases, HNDL-aware; (c) **lens/trust config restorable** (exportable or as records under the user's address) — a silent wipe changing what a user *sees* is a truth bug, the round's sharpest storage finding.
+
+- [ ] Commission the private-records design note; rule (a) explicitly in ops-doctrine.
+
+## P10. Multi-device authorship — [DURABLE/SDK]
+
+Two offline devices of one identity can mint the same `seq` → admit-both makes the user **self-EQUIVOCAL**. The TID layout already carries 10 clockId/device bits (the SSB-death fix, [[efs-substrate-decision]] §3.5) — but no normative allocation convention exists. Needed: a blessed device-bit allocation + journal-handoff rule (or seq-range leases), owned by the SDK spec, with vectors.
+
+- [ ] SDK-spec section; add a self-equivocation vector to the conformance suite.
+
+## P11. Bytes and web-interop details — [ETCHED-WINDOW (EFSBytes) + standards work]
+
+1. **SHA-256 digests alongside keccak in chunk manifests** ([[large-file-uploads]] / codex-bytes): native import-map/SRI integrity speaks SHA-256/384; without a per-chunk SHA-256 word the client re-hashes every module in the SW — slower, non-native, and it forfeits browser-enforced module pinning. Cheap field now; painful retrofit after EFSBytes freezes.
+2. **Chunk-size normalization guidance** (privacy, P8).
+3. **`web3://` has no browser on-ramp**: not on the `registerProtocolHandler` safelist (`ipfs`/`ipns`/`dweb` are). The client ships https-canonical links + a `web+efs://` alias lane; the ecosystem fix is standards work (safelist addition, coordinated with the ERC-6860 community) — worth a named liaison task.
+
+- [ ] Codex-bytes: SHA-256 word decision before the EFSBytes vectors freeze; standards-liaison task filed.
+
+## P12. Housekeeping: v1-stranded planning docs
+
+[[efs-account-system]] (B′ smart-account identity, session keys, promptless-via-AA) and [[sdk-wallet-architecture]] + parts of [[sdk-vs-client-responsibilities]] are EAS-era and now contradict the identity/carrier rulings (no ERC-1271 ever; author = recovered signer; smart accounts cannot author). The client set replaces their UX layer with personas + submission-rails-only AA ([[wallet-and-actions]]). These docs need superseded-by banners or a v2 re-cut so future agents stop citing B′ as live doctrine. Also: a boot-artifact revocation-check policy ruling (may a user boot a REVOKED closure? client says yes-behind-loud-interstitial — confirm) and the [[web-os-thesis]] naming question ride the normal client thread, not this report.
+
+- [ ] Banner/re-cut pass on the three docs; confirm the REVOKED-closure-boot posture.
+
+---
+
+## Open questions
+
+- [ ] P1 decision (read-ABI extensions vs view recipes vs indexer lane) — sequencing: must precede the freeze-gates gas snapshot.
+- [ ] P2 five-candidate pass (row vs convention vs reject).
+- [ ] P4: actor/delegation reservation vs client-only ruling; 0x02/0x03 un-reservation owner + date.
+- [ ] P9 commissioning (private-records note).
+- [ ] Which of P3/P5/P6/P8 land in the current doc-revision round vs the next.
+
+## Pre-promotion checklist
+
+- [ ] All `## Open questions` resolved or explicitly deferred (cite where)
+- [ ] `**Target repos:**` confirmed
+- [ ] Cross-links added: [[read-lens-spec]], [[codex-kinds]], [[codex-kernel]], [[ops-doctrine]], [[identity]], [[large-file-uploads]], [[freeze-gates]], [[apps-cookbook]] each point here from their Open questions
+- [ ] At least one round of `#status/review` with another agent or human comment
