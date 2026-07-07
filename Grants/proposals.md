@@ -1,3 +1,8 @@
+---
+cssclasses:
+  - grants-wide-tables
+---
+
 # Grant Proposals
 
 Single source of truth for EFS grant proposal status.
