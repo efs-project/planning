@@ -1,0 +1,15 @@
+/* Wider grant-tracking tables without changing the whole vault. */
+body:not(.is-mobile) .markdown-preview-view.grants-wide-tables,
+body:not(.is-mobile) .markdown-source-view.mod-cm6.grants-wide-tables {
+  --file-line-width: min(96vw, 1800px);
+}
+
+body:not(.is-mobile) .markdown-rendered.grants-wide-tables .table-wrapper {
+  max-width: min(96vw, 1800px);
+  overflow-x: auto;
+}
+
+body:not(.is-mobile) .markdown-rendered.grants-wide-tables table {
+  min-width: 100%;
+  width: max-content;
+}
