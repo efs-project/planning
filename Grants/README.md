@@ -11,6 +11,15 @@ This folder is not a design, ADR, or parallel status board. It is the operationa
 - [[For-James]] gets only real James decisions or deadlines, such as a program pick, submission sign-off, or external profile change he must personally make.
 - [[Decisions]] gets only project-positioning calls that outlive a grant, not per-proposal tactics.
 
+## Operating contract
+
+- [[programs]] is the funder landscape: program state, fit gates, caveats, and discovery notes. It is not EFS proposal status.
+- [[proposals]] is the single status table for real EFS proposal opportunities.
+- [[research-log]] is the dated evidence trail: source checks, rejected leads, funder intel, and lessons learned.
+- [[efs-grant-packet]] is reusable copy and application material, not a live status board.
+
+Row graduation rule: a lead becomes a [[proposals]] row only when it has a plausible EFS application path, deadline, office-hours route, submitted proposal, or named RFP worth watching. Everything else stays in [[programs]] or [[research-log]].
+
 ## Files
 
 | File | Purpose |
@@ -31,22 +40,46 @@ The KarmaHQ page is the first public grant-accountability anchor. Keep it update
 
 ## Proposal workflow
 
-1. Add candidate programs to [[programs]] with status, fit, caveats, and next action.
-2. Add real proposal opportunities to [[proposals]] when they have a plausible application path or deadline.
+1. Add candidate programs to [[programs]] with program state, fit, caveats, and next action / graduation gate.
+2. Add real proposal opportunities to [[proposals]] only when they pass the row graduation rule.
 3. Draft from [[efs-grant-packet]], then adapt to the funder's own language.
 4. Keep proposal outcomes, feedback, and rejection notes in [[proposals]] and [[research-log]].
 5. Keep rejected and withdrawn rows. Use `archived` only when a row should stop showing prominently.
 
 ## Status vocabulary
 
-- `researching` - plausible lead, not yet a proposal.
+- `watching` - plausible future route, but no active application path yet.
+- `researching` - active fit/evidence check underway.
 - `drafting` - proposal or profile is being prepared.
+- `needs-signoff` - James must approve, send, or choose; mirror to [[For-James]] only for real forks/deadlines.
 - `submitted` - submitted and waiting.
 - `follow-up` - submitted and requires a reply, update, office-hours call, milestone, or clarification.
 - `accepted` - awarded or otherwise approved.
+- `reporting` - awarded and now in milestone/update/report obligations.
 - `rejected` - declined; keep feedback.
 - `withdrawn` - intentionally stopped by EFS.
 - `archived` - no longer active or prominent, retained for history.
+
+## Review cadence
+
+Weekly grant-ops pass:
+
+- Refresh [[proposals]] rows with active deadlines, `follow-up`, or `needs-signoff`.
+- Update `Last checked` and tighten `Gate / evidence needed`.
+- Move stale `researching` rows to `watching` or `archived`.
+- Surface only real James choices/deadlines to [[For-James]].
+
+Monthly landscape pass:
+
+- Refresh [[programs]] from official sources before aggregators.
+- Add dated source notes to [[research-log]].
+- Promote only qualifying leads into [[proposals]].
+
+Post-decision pass, within 48 hours:
+
+- Update proposal status and decision details.
+- Capture rejection/acceptance feedback in [[research-log]].
+- Move awarded proposals to `reporting` until milestones and public updates are complete.
 
 ## Open grant-ops tasks
 

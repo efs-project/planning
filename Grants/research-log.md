@@ -2,6 +2,19 @@
 
 Dated notes for grant-specific research, funder intel, rejected leads, and community signals. Keep broad project decisions in [[Decisions]] only when they outlive a specific grant.
 
+## Entry template
+
+```md
+## YYYY-MM-DD - Program / topic
+
+Trigger:
+Official sources checked:
+Current read:
+Implication:
+Rows touched:
+Next check:
+```
+
 ## 2026-07-07 - KarmaHQ anchor and tracker seed
 
 - EFS has a public KarmaHQ project page: [Ethereum File System on Karma](https://www.karmahq.xyz/project/ethereum-file-system/about).

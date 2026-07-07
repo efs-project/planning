@@ -28,6 +28,15 @@ EFS uses Ethereum attestations and simple resolver patterns to connect stable pa
 - **Storage-agnostic:** EFS does not need to be the storage network; it can point to and verify many storage backends.
 - **Builder-focused:** EFS is primarily infrastructure for developers, agents, curators, and public-good maintainers.
 
+## Do not say
+
+- Do not pitch EFS as "another storage network" or a replacement for IPFS, Filecoin, Arweave, or HTTP.
+- Do not use consumer-cloud analogies such as "Dropbox on Ethereum" or "Google Drive onchain."
+- Do not claim permanent storage unless the proposal names the backend and persistence guarantee.
+- Do not say "canonical truth layer." Use "lens-scoped, attestable views" or "verifiable claims with explicit attesters."
+- Do not lead with token, VC, or speculative-market language unless a funder explicitly asks about sustainability mechanics.
+- Do not call EFS critical infrastructure for security funders until there is adoption/dependency evidence.
+
 ## External links
 
 - [EFS KarmaHQ page](https://www.karmahq.xyz/project/ethereum-file-system/about)
@@ -40,6 +49,16 @@ EFS uses Ethereum attestations and simple resolver patterns to connect stable pa
 > EFS is a credibly neutral, open source, public good that organizes data on Ethereum and its EVM L2 chains.
 
 Use this as the canonical public-good framing, but sharpen per funder.
+
+## Funder adaptation checklist
+
+Before submitting, answer these in the proposal draft:
+
+- What exact funder language does this proposal mirror?
+- What evidence would let a reviewer verify the claim in under five minutes?
+- Which EFS claim should be removed because it is not relevant to this funder?
+- What is the smallest milestone that would make the funder proud to have funded it?
+- What happens after the grant ends: maintenance, public updates, or next funding rail?
 
 ## Funder-specific angles
 
@@ -95,6 +114,17 @@ These are examples, not commitments.
 | SDK read path | Developer API for resolving paths, mirrors, and provenance | Package, docs, tests |
 | Public-good dataset pilot | Curated dataset published through EFS with mirrors and provenance | Dataset page, EFS records, update log |
 | Grant accountability updates | Karma GAP milestones and progress posts | Karma links |
+
+## Budget bands
+
+Use concrete milestone bundles instead of broad operating asks.
+
+| Ask size | Good fit | Example bundle |
+|---|---|---|
+| USD 5k-10k | Lightweight ecosystem grants, microgrants, profile cleanup | Public profile cleanup, demo polish, one small integration note, Karma/GAP milestone setup |
+| USD 25k | Narrow tooling/RFP work | Resolver demo, docs, example records, small public-good dataset pilot |
+| USD 50k | Filecoin/IPFS-style integration or SDK slice | Mirror/provenance integration, SDK read path, tests, docs, example dataset |
+| USD 100k+ | Larger infrastructure/security/public-interest work | Multi-milestone build, security review prep, public dataset partner, reporting cadence, maintenance runway |
 
 ## Budget snippets
 
