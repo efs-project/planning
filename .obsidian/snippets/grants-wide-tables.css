@@ -1,13 +1,21 @@
-/* Wider grant-tracking tables without widening ordinary prose.
+/* Wider grant-tracking tables without changing the whole vault.
    Add `cssclasses: grants-wide-tables` to any note that should opt in. */
+body:not(.is-mobile) .grants-wide-tables {
+  --file-line-width: min(96vw, 1800px) !important;
+  --line-width: min(96vw, 1800px) !important;
+}
+
+body:not(.is-mobile) .markdown-preview-view.grants-wide-tables .markdown-preview-sizer,
+body:not(.is-mobile) .markdown-source-view.mod-cm6.grants-wide-tables .cm-sizer,
+body:not(.is-mobile) .markdown-source-view.mod-cm6.grants-wide-tables .cm-contentContainer {
+  max-width: min(96vw, 1800px) !important;
+  width: min(96vw, 1800px) !important;
+}
 
 body:not(.is-mobile) .markdown-rendered.grants-wide-tables .table-wrapper,
 body:not(.is-mobile) .markdown-preview-view.grants-wide-tables .table-wrapper {
-  width: min(96vw, 1800px);
-  max-width: min(96vw, 1800px);
-  margin-left: 50%;
+  max-width: 100%;
   overflow-x: auto;
-  transform: translateX(-50%);
 }
 
 body:not(.is-mobile) .markdown-rendered.grants-wide-tables table,
