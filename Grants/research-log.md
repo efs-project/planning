@@ -135,3 +135,65 @@ Sources:
 - [GitHub Sponsors](https://github.com/open-source/sponsors)
 - [Drips](https://www.drips.network/)
 - [OSO](https://opensource.observer/)
+
+## 2026-07-07 - Award ranges and precedent mining pass
+
+Question: do the target grants have funding history, known monetary ranges, and previous submissions we can learn from before applying?
+
+Working answer: yes, but the level of visibility differs sharply by program.
+
+Best sources for full or near-full proposal text:
+
+- Filecoin Foundation Grants: many prior proposals are public GitHub issues, including reviewer comments, milestone discussions, and status outcomes.
+- NLnet: NLnet does not appear to host a full application archive, but some grantees publish their full applications. These are useful for budget, scope, and "compare with historical efforts" framing.
+- Octant, Gitcoin, Giveth, Optimism, ENS, and Questbook-style ecosystems: public profiles, forum posts, round pages, results, and payout data are often visible, but private review notes are not consistently available.
+
+Best range evidence found in this pass:
+
+- EF ESP: no standard public range; Wishlist/RFP grants are determined by proposal scope and complexity, with RFP-specific guidance where applicable.
+- Filecoin: Open Grants up to $50k; Builder Next Step Grants $5k-$10k.
+- IPFS Implementations / Utility Grants: $5k-$25k for 1-3 months, with a possible 10% maintenance grant.
+- Base Builder Grants: 1-5 ETH retroactive grants; weekly rewards route lists 2 ETH.
+- Gitcoin: round-dependent; GG21 distributed $933k total across 517 projects.
+- Giveth / TheDAO Security QF: 2026 Ethereum Security QF matching pool exceeded 637 ETH, with 134 accepted projects from 250+ applications.
+- Octant: Epoch 1 allocated 330.25 ETH and funded 19 projects; later epochs vary.
+- NLnet: current open calls are restricted, but public examples and historical NGI-style calls show common 5k-50k EUR ask shapes.
+- FUTO: microgrants are $1k-$5k; larger "legendary" grants are relationship-driven and do not have a standard published range.
+- OTF Internet Freedom Fund: $10k-$900k; ideal range $50k-$200k for 6-12 months.
+- Common Good Cyber Fund: 2026 open call expects two-year grants typically $100k-$300k, max $300k.
+- Sovereign Tech Fund: current minimum work cost exceeds 50k EUR, with funded technology pages showing larger contracted work.
+- GitHub Secure Open Source Fund: $10k per project plus security program support.
+- Alpha-Omega / OpenSSF: no fixed standard range; published critical-OSS grants are often hundreds of thousands.
+- Ocean Shipyard: $30k average grant size and 12.4% acceptance rate.
+
+Drafting implications:
+
+- Before applying to Filecoin, mine 5-10 accepted and rejected GitHub issue proposals and copy the milestone discipline, not the project framing.
+- Before applying to NLnet, read public grantee-published proposals and keep EFS scoped as a concrete open-standards deliverable.
+- Before applying to EF ESP, build an Office Hours packet around Ethereum-native path/provenance infrastructure and ask whether a Wishlist/RFP route exists.
+- Before applying to Gitcoin, Octant, Giveth, or Optimism, improve the public-facing EFS profile, Karma evidence, usage metrics, and community activation plan.
+- Treat Sovereign Tech, Alpha-Omega, and GitHub Secure Open Source Fund as later-stage security/criticality routes unless a specific EFS security-hardening scope appears.
+
+Sources:
+
+- [ESP Applicants](https://esp.ethereum.foundation/applicants)
+- [ESP Funded Projects](https://esp.ethereum.foundation/funded-projects)
+- [Filecoin Grants](https://fil.org/grants)
+- [Filecoin Open Grants README](https://github.com/filecoin-project/devgrants/blob/master/Program%20Resources/Open%20Grants%20README.md)
+- [IPFS Implementations Grants](https://ipfsgrants.io/utility-grants/)
+- [IPFS Data Utilities Grants, Year 1](https://ipfsfoundation.org/ipfs-data-utilities-grants-year-1-primitives-in-motion/)
+- [Base Get Funded](https://docs.base.org/get-started/get-funded)
+- [Gitcoin Grants 21](https://gitcoin.co/campaigns/gitcoin-grants-21-gg21)
+- [Giveth Ethereum Security QF results](https://forum.giveth.io/t/ethereum-security-qf-round-results-april-23-may-14-2026/2201)
+- [Octant Epoch One results](https://golem.foundation/2023/11/10/first-allocation-window-results.html)
+- [Optimism Retro Funding repository](https://github.com/ethereum-optimism/Retro-Funding)
+- [NLnet Apply](https://nlnet.nl/propose/)
+- [Libre-Chip NLnet proposal](https://libre-chip.org/grants/nlnet-first.html)
+- [Small Technology Foundation NLnet application](https://ar.al/2024/06/01/small-technology-foundation-funding-application-for-nlnet-foundation-ngi-zero-core-seventh-call/)
+- [FUTO Grants](https://futo.tech/grants)
+- [OTF Internet Freedom Fund](https://www.opentech.fund/funds/internet-freedom-fund/)
+- [Common Good Cyber Fund](https://www.isocfoundation.org/grant-programme/common-good-cyber-fund/)
+- [Sovereign Tech Fund](https://www.sovereign.tech/programs/fund)
+- [GitHub Secure Open Source Fund announcement](https://github.blog/news-insights/company-news/announcing-github-secure-open-source-fund/)
+- [Alpha-Omega How to Apply](https://alpha-omega.dev/grants/how-to-apply/)
+- [Ocean Shipyard](https://oceanprotocol.com/build/shipyard)
