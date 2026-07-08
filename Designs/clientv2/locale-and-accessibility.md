@@ -23,6 +23,8 @@ Three disclosure tiers, enforced by the Kernel's capability table:
 - **Tier 1 — string-returning methods (`locale.basic`, promptless, budgeted):** for computation (sorting, search folding, canvas-mode text) apps may call formatting/collation methods. **Honesty note: returned strings and comparison results leak the profile through outputs** — an app that formats `2026-07-07` and reads back `7/7/26` has learned region conventions. Tier 1 therefore *spends the locale entropy budget* (§2); "methods, not data" limits disclosure, it does not eliminate it. [reasoned — refines the thesis wording; see Open questions]
 - **Tier 2 — full profile (`locale.profile`, prompted, high-sensitivity):** the raw profile object, for apps that genuinely need it (a calendar app, a locale-testing tool). Separate capability, System Chrome prompt with fingerprint warning, revocable, receipted.
 
+**Why this does not hurt third-party developers (a design goal, not an afterthought).** The overwhelmingly common case — "show dates, numbers, and text correctly for this user" — is **Tier 0: zero disclosure *and* zero effort.** The app emits a typed `SemanticValue`; the Shell formats it with the user's *full* profile, which never crosses the membrane. The app gets perfect localized output, ships no CLDR data, and does no timezone math — while learning nothing. Canvas-mode apps that render their own text use Tier 1, which still formats *with* the real profile, so `formatDate` returns correctly region-formatted output without handing over the region. An app needs Tier 2 only if it does its own locale math (rare, correctly prompted). **Net: EFS gives apps the OAuth `locale` baseline for free — primary language + region — plus a formatting service that means they usually don't need even that. Better DX than the status quo web, not worse.** What we withhold by default is *only* the high-entropy tail (full ordered language list, exact timezone, installed-font enumeration) — which the plain web leaks to every site silently, which OAuth doesn't expose at all, and which is precisely what would re-correlate a user's personas (§2).
+
 ```ts
 // @efs/os-sdk — surface-mode typed values (Tier 0; preferred)
 type SemanticValue =
@@ -35,8 +37,10 @@ type SemanticValue =
 
 // capability: locale.basic (Tier 1 — budgeted)
 interface LocaleHandle {
-  readonly primaryLanguage: string;            // coarsened: language (+ script only when it changes rendering,
-                                               // e.g. "zh-Hant"); never region, never the full list
+  readonly primaryLanguage: string;            // language (+ script only when it changes rendering, e.g. "zh-Hant")
+  readonly region?: string;                    // e.g. "MX" — free, OAuth-parity (low-entropy AND constant across
+                                               // personas, so not a delinking risk). NOT the full language list,
+                                               // NOT exact timezone, NOT installed fonts — those stay gated (§2).
   formatDate(iso: string, opts?: DateStyle): Promise<string>;
   formatNumber(dec: string, opts?: NumberStyle): Promise<string>;
   formatDuration(iso: string, opts?: DurationStyle): Promise<string>;
@@ -66,6 +70,7 @@ Mirror of the network privacy model (F5): default-deny disclosure, metered spend
 | Disclosure / inference class | Est. bits | Default policy |
 |---|---|---|
 | `primaryLanguage` (coarsened) | ~6 | Free; disclosed in install review ("This app will see your primary language: English") |
+| `region` (e.g. MX) | ~4 | **Free (OAuth-parity)** — low-entropy and identical across your personas, so it fingerprints you against *other users* but never *de-links your personas*; disclosed in install review |
 | Date/number format-output inference | ~4–8 | Tier-1 pool |
 | Collation order (comparator probing) | ~5 | Tier-1 pool |
 | Segmentation dictionary behavior | ~2 | Tier-1 pool |
