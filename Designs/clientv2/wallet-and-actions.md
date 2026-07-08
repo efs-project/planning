@@ -55,14 +55,27 @@ type PersonaPolicy = {
 
 Policy is capability-table state: diffable, snapshotted per generation, shown in install review. Exceeding a budget doesn't error mid-app — the write lands in the journal as `draft` flagged `over-budget`, and flushing it requires the checkpoint ceremony. **Deny by downgrade, not by data loss.**
 
-### Linking convention: persona ↔ primary, revocable, bidirectional
+### Linking convention: persona ↔ primary, revocable, bidirectional, labeled
 
-Client-layer key-TAGDEFs (permissionless extension per [[codex-kinds]]), deliberately **not** the reserved `successor` row (that is key succession; this is authorship presentation):
+The **primary key is the group owner**: it adds, removes, relabels, and vouches for personas. This is the [[identity]] "org-as-lens-list" doctrine pointed at one user's own fleet — expressible **today in the five kinds**, no new protocol authority. Client-layer key-TAGDEFs (permissionless extension per [[codex-kinds]]), deliberately **not** the reserved `successor` row (that is key succession; this is authorship presentation). Validated 2026-07-07 (identity red-team): the group is a **cardinality-N TAG accumulation, NOT an appendOnly LIST** — an appendOnly roster would make removal impossible (revoke-second is an inert `RefusedAppendOnly` no-op, [[codex-kinds]] am.2).
 
-- Primary publishes `efs.os/persona` — a **TAG** (cardinality-N) under the primary's container, target = persona address word. Revocable: revoking it is *un-endorsement*.
-- Persona publishes `efs.os/primary` — a **PIN** (cardinality-1) under the persona's container, target = primary. Revocable by the persona.
-- **Both directions LIVE or no link.** A one-sided claim is rendered as an unverified assertion (anyone can TAG "this persona is mine" — the pair requirement de-forges it, same shape as the successor-pair doctrine in [[identity]]).
-- Links are ordinary claims: they are **graded through the viewer's lens** before stitching. A link from an author outside the lens stitches nothing.
+- **Membership + label = one owner-authored claim.** Primary publishes `efs.os/persona` — a **VAL-layout TAG** (cardinality-N) under the primary's container, target = persona address word, **VAL tail = the label** (`human` / `agent` / `device:laptop` / `app:<id>`). The kernel auto-interns the value; slot key `(primary, efs.os/persona, persona)` ⇒ one LWW label slot per member. **Add** = sign it; **relabel** = re-assert at higher seq; **remove** = REVOKE its claimId (effective because `revoker == author == primary`; slot reads EMPTY).
+- **Reciprocal de-forge.** Persona publishes `efs.os/primary` — a **PIN** (cardinality-1) under the persona's container, target = primary. The label lives **only on the primary-authored side** — a persona cannot label itself.
+- **Both directions LIVE or no link.** A one-sided claim renders as an unverified assertion (the pair requirement de-forges it, same shape as the successor-pair doctrine in [[identity]]).
+- Links are ordinary claims, **graded through the viewer's lens** before stitching. A link from an author outside the lens stitches nothing.
+
+**The label is owner-*asserted*, not kernel-*enforced* — say so.** "An agent can't forge its own label" holds only as a **client-conformance + lens-trust** property: conforming clients render the *owner-authored* label and grade a member's self-label as untrusted/DISCOVERY. It is not cryptography. Three honest limits, all in the Permission Center:
+- the label means "the owner **asserts** human/agent," never "**is** human/agent" — no protocol settles the human-vs-AI Sybil question; the label triggers nice behavior among honest actors, nothing more;
+- it is **lens-relative** — legible only to readers whose lens ranks the owner first; outside that lens an agent write is just an unknown key;
+- **removal is prospective un-endorsement, not retroactive disavowal** — REVOKE drops the persona from the owner's lens going forward, but its prior records stay LIVE and independently authored forever. The "was-me-until-block-N, thief-after-N" partition is **inexpressible without the reserved KEL validity-window** ([[identity]] THEFT row; pressure item P4).
+
+### Persona privacy: the link is the leak
+
+Separate personas exist to **un**-correlate what you do — but **publishing the link publicly re-correlates them permanently**, and the default convention above is a plaintext, public, bidirectional pair that hands the whole N-address map to any observer (validated 2026-07-07, privacy red-team). The sharp tension: **public link = legible label, fully correlated; private link = uncorrelated, selectively disclosed.** The user chooses per persona.
+
+- **Public link** (default for a persona whose point is a *labeled public role*, e.g. a published agent): the pair above, plaintext. Correct when correlation is not what you're protecting.
+- **Private link** (default when unlinkability is the goal): place each side of the pair at a **salted-capability anchor** (handle rides the web3:// **fragment** — never sent to a server or chain, [[read-lens-spec]] §6 / [[deterministic-ids]] salted-TAGDEF) and **encrypt the link body** to the chosen reader (`contentEncryption` + `keyWrap` to a **per-link key, never the identity key** — the [[identity]] G9 rule). A chosen reader finds → decrypts → verifies both signatures; the world sees a ciphertext blob at an unguessable anchor. **No new Etched surface — a cookbook convention over reserved parts.**
+- **The irreducible residual, plainly.** Even a private link leaves a **public author word + public timestamp** on each claim, and on-chain funding/submitter trails correlate personas independently (§Gas). Hiding the *authorship edge itself* needs zk-authorship or a mixnet submit path — out of scope, because publicly-recovered-signer authorship **is** EFS's verification model. So private **link-content** ships today; true authorship+timing unlinkability is research, in genuine tension with verify-don't-trust. **EFS is privacy-possible, not private-by-default, never anonymous** — honest by construction (pressure item P9).
 
 ### How lenses stitch personas
 
@@ -86,7 +99,7 @@ A persona is a software key; assume it can be stolen. Consequences and mitigatio
 
 1. **Revoking the link is un-endorsement, not key death.** The thief keeps a valid author key; readers following the pair convention stop stitching; deny facts (primary-authored) advise against the persona.
 2. **Delegated revocation does not exist** (`revoker == claim.author`). Therefore: at persona creation the Kernel **pre-signs a revoke-all ladder** — REVOKE envelopes over precomputed claimIds ([[ops-doctrine]] renewal-ladder machinery, pre-revocation legal) — stored encrypted beside the persona. Kill switch = flush the ladder multi-venue.
-3. The primary's own compromise is out of scope here — [[identity]]'s THEFT row governs; the client's job is detection surfaces (unexpected-claims monitor in the Sync Center).
+3. **Owner-key (primary) theft is fleet-wide** (validated 2026-07-07). Because the primary owns the roster, a stolen primary can revoke every membership, relabel an attacker key "human, on behalf of you," and — bare-EOA, no rotation until the KEL — cannot be locked out (the [[identity]] same-key war). It adds no authority the primary didn't already hold and the personas' own keys stay uncompromised, but it is why the primary earns the hardest custody tier (below) and the loudest recovery story; the KEL is what will ever make "before-N-was-me" provable. The client's job pre-KEL is detection surfaces (unexpected-claims monitor in the Sync Center) + the pre-signed revoke-all ladder.
 
 ## The key custody ladder
 
@@ -185,7 +198,7 @@ Records are venue-targeted per placement; one envelope may flush to several venu
 ## Gas and funding UX
 
 - **Author ≠ payer, shown as such.** Most personas never hold funds: their envelopes flush via the submitter account, the connected wallet, or a sponsor. A persona gas float exists only for the fully-sovereign self-submit route.
-- **Linkability warning [research-grounded — network-privacy lane logic]:** funding a persona from the primary wallet, or submitting many personas' envelopes from one submitter account, **links them on-chain**. The funding ceremony says so: *"Topping up this persona from your main wallet publicly connects them. Use a relayed route to keep them separate."* Persona-pseudonymity is honest only with relayed/sponsored flush classes.
+- **Linkability warning [research-grounded — network-privacy lane logic]:** three things correlate personas on-chain — a **public link claim** (§Persona privacy — use the private-link variant to avoid it), **funding** a persona from the primary wallet, and **submitting** many personas' envelopes from one submitter account. The funding ceremony says so: *"Topping up this persona from your main wallet publicly connects them. Use a relayed route to keep them separate."* Persona-pseudonymity is honest only with a **private link AND** relayed/sponsored flush — either alone leaks.
 - **Top-ups are spend checkpoints** (#3) with a budgeted auto-renew option: user sets a monthly ceiling once at a checkpoint; refills under the ceiling are quiet-chip events, not modals.
 - **Faucet-drip:** on devnet, the gasless faucet-drip route is the zero-cost onboarding rail (hackathon must-have; devnet drain is accepted posture — no auth hardening proposals). On public nets the same UX slot is filled by the sponsored class, honestly labeled.
 - **Estimates in preflight:** the ceremony shows per-venue fee estimates (envelope tx + N chunk txs), a variance label ("estimate, not a quote"), and the sponsor alternative side-by-side, before `ready_to_sign` is reachable.
