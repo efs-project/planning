@@ -150,6 +150,25 @@ Two offline devices of one identity can mint the same `seq` → admit-both makes
 
 - [ ] Banner/re-cut pass on the three docs; confirm the REVOKED-closure-boot posture.
 
+## P13. Timestamp-free ID: the application-layer footguns nobody wrote down — [DURABLE + DOCTRINE, with P1 as the enabler]
+
+**Problem.** Dropping EAS's timestamp-in-UID (the source of the many-clicks disease) was correct, but it means **the record carries no trustworthy "when."** The `seq`/TID is *author-asserted* and **back-datable without bound** (only future-dating is fenced, +600s). The one trustworthy clock is the **admission block** — which is per-chain, gone once the origin chain dies, and **not currently exposed to readers** (that is P1). The substrate investigation ruled this deliberately (per-author order travels; global/cross-author order and cross-chain currency do not, and were audited as not-needed for core reads) — but the *application-layer consequences* were never consolidated anywhere findable, and a naive app walks into every one of them. Surfaced by the client round's social-app pressure-testing (2026-07-07):
+
+| Footgun | Naive failure | Blessed defense |
+|---|---|---|
+| **Chaotic ordering** (feed/comments) | sort by author-claimed TID ⇒ a commenter back-dates to the top | order by **venue admission order** (discovery index, already venue-labeled) or curator list — never the claimed TID |
+| **Fake predictions** ("I called 9/11") | trust the displayed TID as real time ⇒ unfalsifiable back-dated claim | the **admission block is an upper bound on age**; a real prediction needs an old admission, a forgery is detectable — *but only if P1 exposes admission time*. This is the sharpest argument for P1 |
+| **Edit-after-reply gaslighting** | reply threads by mutable path ⇒ author edits the post, replier looks dumb | replies **cite the exact version** (citation-form pins the claimId; supersession never silently followed) + client **renders the supersession/edit history** — EFS is *better* than centralized here (edits can't be hidden), if the app shows them |
+| **Cross-chain partial views** | render a fresh replica as complete/authoritative | a cherry-picked/partial replica grades **UNKNOWN-CURRENCY, never LIVE** (§5.1); checkpoints prove completeness-through-N; home chain holds the truth. "Snapshot of unknown completeness until a checkpoint says otherwise" |
+
+**Mismatch.** The read-lens spec has the *machinery* (admission-order discovery index, citation-pins-not-follows, venue ceilings, SUPERSEDED grade) but states **no normative client/SDK rule** "never gate on the author-asserted TID as real time," and the **apps-cookbook has no social-app pattern** codifying the four defenses. The temporal-provenance-under-replication limit ([[efs-v2-holistic-redesign]] §3.3) is real but buried, which is why "I never heard the downsides" is a fair complaint.
+
+**Paths.** (a) A normative **"author-time is untrusted; use admission-time / expiry / checkpoints" rule** in [[read-lens-spec]] (pairs with P1 exposing admission time and P3's grade work); (b) a **blessed social-app pattern** in [[apps-cookbook]] (feed/comment ordering by admission, reply-cites-exact-version, render-edit-history, replica-completeness honesty); (c) **surface the timestamp-free-ID tradeoffs prominently** — a short "known tradeoffs of the timestamp-free ID" section (or promote §3.3) so the downside is stated once, findably, not only in the false-confidence register.
+
+**Defer-risk.** Every third-party EFS social/forum/wiki/config app re-derives these badly and independently; the predate and edit-gaslight failures become "EFS is chaotic" folklore even though the primitives defend against them. Cheap to write now; expensive as ecosystem reputation later.
+
+- [ ] read-lens-spec: the untrusted-author-time rule (+ its dependency on P1). apps-cookbook: the social-app blessed pattern. Substrate/holistic: promote the timestamp-free-ID tradeoffs to a findable section.
+
 ---
 
 ## Open questions
@@ -158,7 +177,8 @@ Two offline devices of one identity can mint the same `seq` → admit-both makes
 - [ ] P2 five-candidate pass (row vs convention vs reject).
 - [ ] P4: actor/delegation reservation vs client-only ruling; 0x02/0x03 un-reservation owner + date.
 - [ ] P9 commissioning (private-records note).
-- [ ] Which of P3/P5/P6/P8 land in the current doc-revision round vs the next.
+- [ ] P13: the untrusted-author-time rule + social-app blessed pattern + surfacing the timestamp-free-ID tradeoffs (leans on P1).
+- [ ] Which of P3/P5/P6/P8/P13 land in the current doc-revision round vs the next.
 
 ## Pre-promotion checklist
 
