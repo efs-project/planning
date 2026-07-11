@@ -32,6 +32,10 @@ The consolidation the kickoff asked for: what only James can decide, what the de
 - [ ] Shell-contract@1 conformance receipts: record shape + who signs them ([[shell-and-sessions]], pressure P2-adjacent).
 - [ ] Agent evaluation suite: adopt the benchmark task list as CI-runnable fixtures ([[agent-native]]).
 - [ ] Locale entropy budget: initial budget numbers + what spends them ([[locale-and-accessibility]]).
+- [ ] **Kernel-egress fallback is undefined if the CSP asymmetry fails** (surfaced writing [[spike-1-cage-matrix]]): Amendment 1 names the cradle-iframe as the fallback, but the cradle is *Ring-3 app* isolation (opaque origin, page-CSP-governed) and gives the *Kernel* no network path — so "use the cradle" is a category error for the Kernel. If spike-1 cells B/C fail on an engine, the only real options are a **served CSP header for the Kernel worker** (breaks the pure-static/IPFS story) or a **Kernel-placement rethink**. Amendment 1 conflates two different problems; reconcile before the OS-SDK/cage freeze ([[web-os-thesis]] Am.1, [[kernel-capability-model]]).
+- [ ] **Header-less Permissions-Policy covers only the worker lane** (spike-1): document-mode runs in a DOM iframe that *can* reach devices, and on the static/header-less lane there's no PP header — only `allow=""`. Whether `allow=""` alone fully strips device access cross-engine is untested and load-bearing (spike-1 cell P).
+- [ ] **One SW as both COOP/COEP injector and content-addressed integrity gate** — unconfirmed these compose (spike-1 contingency).
+- [ ] **Reconciler-ownership wording:** thesis F1 still says "the Shell reconciles/composites" but Amendment 2 moved compositing + DOM ownership to System Chrome; the OS-SDK render contract must name the right owner (the compositor = System Chrome). Amendment 2 governs; reconcile F1's prose so the SDK doesn't inherit stale wording.
 
 ## Recommended next investigations (cheap, ordered — the client analog of the efsv2 B-gates)
 
