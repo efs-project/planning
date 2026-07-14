@@ -1,0 +1,91 @@
+# EFS v2 — Filesystem-features pass: synthesis & ruling record
+
+**Status:** draft
+**Target repos:** planning, contracts, sdk
+**Depends on:** [[codex-envelope]], [[codex-kinds]], [[codex-kernel]], [[read-lens-spec]], [[fable-fs-kickoff]]
+**Base corpus:** [2026-07-10-fs-pass-corpus/](../../Reviews/2026-07-10-fs-pass-corpus/) (8 lane reports + 5 red teams + critic) — the lane files are the untouched adversarial record; this doc is the corrected canon.
+**Last touched:** 2026-07-10
+
+#status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #pass/1-filesystem
+
+## What this is
+
+The ruling record of the FS-completeness + privacy pass. Eight lane designers explored the feature space, five red teams attacked, a completeness critic consolidated. **The pass held: no mission end was breached, no lane's central ruling was destroyed, all four fatal-class findings are real and repairable pre-freeze.** The three companion docs carry the load-bearing outputs: [[fs-pass-freeze-reservations]] (the "reserve before the ceremony" set), [[fs-pass-james-decisions]] (nine decisions), [[os-pass-handoff]] (what changed under the OS pass). This doc holds the corrected canon, the classic-FS dispositions master table, and the corrections annex.
+
+## The one idea that organizes everything
+
+**Tag-core has no shared mutable cell**, so every classic FS feature built to coordinate many writers around one mutable object *inverts*: "who may write?" → "whose writes does a reader's lens honor?"; "delete" → "revoke-hides, never destroys"; "lock" → no referent. The pass's central labor was sorting **essential semantics to re-home** from **artifacts of the one-mutable-cell world to declare gone**. That sorting is in the master table below. EFS is *Datomic-facts-under-RDF-provenance-with-git-refs*, not POSIX. On CRDTs the honest scope (C7): per-reader op-set selection is real for op-independent CRDTs (OR-sets, counters — the B4 family) and for content-visibility/curation reads; for op-dependent (sequence) CRDTs the lens masks content, never membership — the fold input is the causal closure of the trusted set, so there is no free per-reader op-set selection and no structural lead over the CRDT literature.
+
+## Corrected canon (the C1–C14 reconciliations the synthesis adopts)
+
+These override the lane files where they conflict; the lane files remain as the adversarial record.
+
+1. **Freshness anchor split (C1, F2).** `admittedAt` is **existence-since evidence only** (cooldowns from *this venue's own* admission; upper-bounds predate; write-once per venue); it is **never** a data-freshness anchor — the **recency beacon** (a checkpoint-body word, D5) is. The OS pressure report's "freshness via admittedAt" (fix 6) is dead, fail-open at home too. Supersedes os-contract fence 4 / G8 ("freshness" out) / FM-O1 and consistency §6.2 (corpus lane files, kept as the record); the correction ships in the commissioned [[read-lens-spec]] revision batch, [[ops-doctrine]], and [[freeze-gates]] §A.8 verification note (iv).
+2. **Path-segment grammar (C2, ceremony-blocking).** Two lanes disagreed on the same Etched surface and a red team mis-reported agreement. Pin one grammar: the reject-set **superset** (empty / `.` / `..` / `U+002F` / C0+DEL / **leading `0x7E`** / bidi + Cf controls per a pinned IDNA2008/UTS-46 profile / unassigned codepoints), byte-exact case after NFC, Unicode-version pinned, kernel-vs-SDK NFC-enforcement sentence reconciled; **`MAX_NAME_BYTES = 255`** (POSIX Schelling point; the 512 rationale was thin). Vectors include the boundary case.
+3. **`claimedAt` shape & semantics (C3).** Always-present `uint64` (0 = no testimony), second-to-last body word before `expiresAt`, **ASSERT PIN/TAG bodies only** (REVOKE stays exactly `bytes32 claimId`); **performed-at only** (≤ signing time); "scheduled-for" is payload content, not this field; the backdate check runs **forward-only** (`claimedAt > earliestAdmittedAt + slack` = proven false; backward is a labeled "unproven-early" heuristic, never "detected backdate"). Private tier writes 0.
+4. **Merge/latest is never admission-time (C4).** Admission time is *evidence and basis-selection input*, never a fold input or supersession key — venue-relative document state would break replication convergence. The comparator fence (verify-time-model fix 4) is **restored** to the FS-3 `admittedAt` reservation ([[fs-pass-freeze-reservations]] B1) and [[os-pass-handoff]].
+5. **WHITEOUT re-encoded (C5).** Not a new sentinel `targetKind` (self-contradictory — that IS kernel surface). Instead: a **genesis `/.well-known/whiteout` TAGDEF object + ordinary REF-PIN** targeting it; read behavior fully Durable; only the genesis-manifest row is now-or-never. Union-mask semantics attached (honored whiteouts mask graft-lower names). Cross-author tombstone stays a **deny-advisory convention** — no second removal spelling.
+6. **keyWrap is TAG-only by default (C6, F3/F4).** The deletion lane's dual-role PIN overturned a stated exclusion ([[deterministic-ids]] §5/§13) uncited, and its `H(recipientEncKeyId)` occurrence key is a **public O(1) recipient-set confirmation oracle**. Ruling: TAG-only (as deterministic-ids routed it); owner escrow = a wrap TAG with a reserved self-occurrence-key; **occurrence keys random by default in the private tier**; `H(recipientEncKeyId)` demoted to a public-sharing convenience with the oracle named in the row text. Dual-role PIN is an explicit James override of a stated exclusion or it does not happen.
+7. **B3 public collaborative documents struck (C7, F1).** Public + permissionless + convergent + bounded-reader-cost is a genuine four-property impossibility (a vandal inflates every reader's mandatory causal fold without bound; appendOnly makes the spray unrevokable). Public/open-world/churning-membership docs route to **B2 (revision-DAG + human merge/curation)** or **B4 (OR-set/counter containers)**; the op-fold family (B3) survives **only** on blinded, capability-gated, stable-membership containers. Three riders adopted with it: the surviving-B3 reader-cost model is corrected to **O(causal closure of the trusted set)** — the lens masks content, never membership, so per-reader op-set selection is not free; snapshot recipes are lens-bound and long-lived docs require **≥2 independent snapshotters** (ejecting a sole snapshotter is a fold-from-genesis cost cliff); and the B2 edit-war resolver is corrected **from merge to curation** — a covering merge ends a *quiescent* fork; an *active* war is ended only by curation (lens ejection or a curator head-pick), never by merging, which an appending opponent out-races. **Structural corollary: the privacy tier is availability infrastructure, not just confidentiality** — blinding is what makes fine-grained collaboration buildable at all. This strengthens James's pull-privacy-into-this-pass call.
+8. **View-parameter pinning (C8).** Every materialized-view artifact (fold snapshot, basis, manifest) must declare its **view parameters**: lens identity, deny reference, evidence anchor, retrospective-vs-as-experienced, and the anchor clock. GATE consumption re-folds under a gate-declared closed author set; audit/historical gates consume only BASIS-EXACT or venue-conjoined anchors — never bare ORDER anchors (attack-time-versioning A5: `order` is past-unbounded, so BASIS-OPEN is author-forgeable backward; its caveat is renamed "author-mutable past"; at the basis's recorded venue replay conjoins `admittedAt ≤ blockNumber`, off-venue OPEN positions carry the forgeability label). Depends on the canonical **lens-object encoding** (the pass's most-depended-on unwritten spec — commissioned first, below).
+9–14. **Smaller corrections** adopted verbatim: P10 device-bit convention unified (roster-assigned, random-fallback, `clientId = f(author, deviceBits)` — now FOLD-correctness-blocking); `authorHead` demoted to a hint (completeness = venue spine cursor); admission order is **tamper-evident but not neutral** at creation (sequencer reorders within the batching window — precedence apps go multi-venue, anchor on earliest `admittedAt`); batch atomicity scoped to single-transaction full-envelope submit ("torn at any venue mid-resume"); offer/accept holes get a cookbook entry with three rules; the "P12" label collision renamed to "freeze-gates A2 kernel-state-cost sign-off".
+
+## Classic-FS dispositions — the master table (native / re-homed / gone)
+
+| Feature | Disposition | How / why |
+|---|---|---|
+| **Write permission (chmod/ACL/root/sudo/setuid/sticky/unlink-rights/write-locks/quotas)** | **GONE** | No referent — Bob can already write; nobody can stop him. "Write permission" decomposes into five separate wants (below). Declared gone loudly so devs stop reaching for `chmod`. |
+| Visibility (r-bit, groups, owner) | **RE-HOMED** → curated-view membership (curator LIST + TAG rosters; two modes — author-mode ejection removes history, record-mode approval survives ejection) |
+| Delegated authorship ("write as the team") | **SUPERSEDED BY [[kel]]:** bounded KEL grant + actor signature + home admission provide authority; `act` is optional provenance only. The old read-side-only construction cannot stop removed-key backdating or answer Tier-1 authorization. |
+| Read-exclusion | **RE-HOMED** → salted TAGDEF + keyWrap caps (Tahoe-style); honest costs: caps can't be un-shared, removal = re-salt/re-key, roster + co-occurrence still leak |
+| Retraction | prospective = lens ejection (native); retroactive-of-authority needs `admittedAt` windows (⚖ P1, decision 1) or KEL (later) |
+| **Delete / trash** | **RE-HOMED** (soft-delete is the only delete) | REVOKE placement → slot reads EMPTY, bytes persist, re-ASSERT = undelete → trash + infinite undo free. **Hard delete does not exist and cannot** (permanence). Crypto-shred is the only "truly gone", a privacy-tier dependency. "Delete for everyone" inexpressible (would be a write-gate). |
+| Locking / leases | **GONE** | Separate author slots = optimistic by construction; no write-write conflicts. Exclusion-hunt returned empty three ways. Advisory expiring-PIN convention exists if an app wants a hint. |
+| Atomicity (single author) | **NATIVE, stronger than POSIX** | One signature over a Merkle root commits an arbitrarily large batch. |
+| Atomicity (cross-author, Alice-AND-Bob-or-neither) | **RE-HOMED (chain-layer)** | Not expressible in one envelope; punt to an escrow/commit contract conditioning on admission facts. Not a protocol gap. |
+| Versioning / history / undo | **NATIVE** | Nothing is destroyed; per-slot chains via `supersededBy`; undo = re-assert prior; per-author checkpoint as-of (Datomic `asOf/since/history` vocabulary). |
+| Directory-level snapshot ("restore /projects to Tuesday") | **RE-HOMED (per-lens, not global)** | A **basis** record = the vector of per-author checkpoints under a *named lens*; no global `t`. View-parameters pinned (C8). |
+| Move / rename | **NATIVE** | `movedTo` PIN redirect at the folder node (children can't re-derive `tagId`); multi-hop composition + breadcrumb; follow budget per-segment (E3). |
+| Hardlink | **NATIVE (better)** | Many PINs → one DATA; arbitrarily many first-class names. **No refcount-GC — nothing is ever freed** (stated). |
+| Symlink / mount | **RE-HOMED** | `symlink` PIN (auto-follow); **cross-container mount = a union convention** (`efs.fs/union`), not a new row — "mount is a lens" is substantially true (first-attester-wins = Plan-9 union mounts). |
+| Multi-writer collab (accumulation, curation) | **NATIVE** | Additive authors (threads/tags) and candidate-versions-one-wins are both native. |
+| Multi-writer collab (convergent shared doc) | **RE-HOMED (read-time fold)** | CRDT-merge = a read-time fold over the causal closure of the trusted set's signed op-claims, with a per-reader content-visibility mask (lens masks content, never membership — C7); the view has no author, needs none; **public case declared GONE** (C7). Kernel changes: zero. |
+| Quotas / accounting | **GONE (metered by gas)** | Everyone pays own writes; `maxEntries` = read-time filter; subtree accounting = indexer job. |
+| Multi-tag AND / query | **BOUNDED native + off-chain** | Bounded 2–3-tag AND over small containers = view-contract convenience; unbounded/ranked/NOT/OR = The Graph. No query language ships. |
+| Backlinks / inverse edges ("which records point here") | **NATIVE — REQUIRED** (the target-keyed index, [[onchain-graph-queries]]; v1 had it on-chain via `getAllReferencing`, v2 must too — mission constraint, not optional) | Discovery index keyed on edge *targets* → "cited by / who mirrored this" native on-chain; VAL-target backlinks the one optional trim; LIST-reverse + REDIRECT-cited-by are now-or-never sub-decisions. |
+| Watch / inotify | **RE-HOMED (poll)** | No push; blessed poll = venue spine cursor; `authorHead` is a hint; multi-venue composition is a cookbook item. |
+| xattrs | **NATIVE** → VAL reserved-key edges |
+| Content dedup | **NATIVE (bytes-by-CID)**; identity deliberately *not* content-derived (CAS people surprised — stated) |
+| Journaling / fsck | chain IS the journal (no corruption); **availability-fsck** ("are my mirrors alive?") = a real different check → blessed mirror-health attestation pattern |
+| atime | **GONE (privacy feature)** | Reads leave no trace. Stated, not silent. |
+| Special files (dev/fifo/socket), file modes/x-bit | **GONE** (no referent) / x-bit RE-HOMED as a handler-binding convention |
+| Schema / CREATE CONSTRAINT | **GONE from kernel** | Schema is a read-side lens concern, never kernel-enforced (string-only, permissionless edges). Said plainly for DB people. |
+
+## The five-want access decomposition (retire "write permission")
+
+W1 **visibility** = curated-view membership (native). W2 **authority** = delegated authorship via `act` (read-side; kernel verifies nothing). W3 **read-exclusion** = salted-TAGDEF + keyWrap caps (honest leak costs). W4 **write-exclusion** = GONE (no referent). W5 **retraction** = prospective now, windowed with `admittedAt`. Macaroons rejected (HMAC = no public verifiability, fails verify-don't-trust); UCAN *attenuation grammar* adopted but its offline-bearer carrier rejected (EFS is the better revocation/transparency store); Zanzibar's read-side relations validate the whole frame.
+
+## The consistency-model statement (the sentence the OS pass quotes)
+
+**EFS is per-venue consistent, eventually-replicated, never globally-linearizable.** Slot state is a pure function of the admitted set — identical on any venue holding the same records in any order. Admission order is **tamper-evident but not neutral** at creation. Apps may assume: deterministic per-lens resolution, confluent replication, existence-since evidence from `admittedAt` (⚖ pending the P1 kernel-state bundle, decision 1). Apps may **not** assume: a global clock, cross-author linearizability, cross-chain currency, or sequencer-neutral ordering.
+
+## Corrections annex
+
+Every red-team finding the synthesis adopted, keyed to what it supersedes: C1 supersedes os-contract fence 4 + consistency §6.2 (freshness); C2 supersedes both consistency and namespaces path-grammar recommendations; C3 supersedes the time lane FS-2 / os "optional word" split; C4 supersedes the kickoff "merge = admission-time" lean + restores the dropped comparator fence; C5 supersedes the deletion lane's sentinel-`targetKind` WHITEOUT; C6 supersedes the deletion lane keyWrap F2; C7 **strikes "public" from the collab lane's B3 blessed pattern**; C8 supersedes both the collab snapshot and time-lane basis view-parameter omissions. Full reasoning: [critic.md](../../Reviews/2026-07-10-fs-pass-corpus/critic.md).
+
+## Commissioned follow-ups (Durable, not freeze-blocking, but ship-order-critical)
+
+1. **The lens-object canonical encoding** — the most-depended-on unwritten spec in the pass (team membership, `act` expansion, snapshot lens-binding, P9 roaming all need a citable lens identity). Co-owned by [[read-lens-spec]] + SDK, with vectors. **Write first.**
+2. **The conventions registry** (`efs-conventions`) — ~20 explicit convention-not-row rulings with no home; a wrong-dialect risk the row discipline was supposed to buy off. One registry doc + a named conformance-vector owner.
+3. **read-lens-spec revision batch** — the C1/C4/C8 corrections, the P3 qualifiers (adopt/reject each of the eight; vectors for 1–4), the P8 read-path-privacy section (bulk snapshot distribution for lens/deny/index/checkpoint lists; one-head-per-venue revalidation; chunk-size normalization + padding guidance; OHTTP-cleanliness — landing in read-lens-spec §5 + codex-bytes), ANCHORED + ENCRYPTED-NO-KEY flags, `asOf/since/history` vocabulary, mount rules R-A1/2/3 + the M1 `movedTo` evaluator + M2 spine-set walk + M3 listing rules, the anti-fallthrough hop sentence, delegate-set completeness + authority-STALE, and the FOLD rules as corrected (C7).
+
+## Open questions
+
+- [ ] The nine James decisions — see [[fs-pass-james-decisions]]. Everything else the synthesis decides.
+- [ ] Gas snapshot must land **before** the James decision memos cite numbers (two red teams already flagged estimates as unratifiable).
+
+## Pre-promotion checklist
+
+- [ ] All `## Open questions` resolved or explicitly deferred (cite where)
+- [ ] Lens-object encoding commissioned (blocks third-party team/snapshot clients)
+- [ ] At least one round of `#status/review` with another agent or human comment

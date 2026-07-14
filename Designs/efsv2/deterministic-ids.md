@@ -9,6 +9,8 @@
 
 #status/draft #kind/design #repo/contracts #repo/sdk #repo/planning
 
+> **Coordinated re-cut required.** The chain-free/domain-separated ID goal survives, but this text still assumes EAS statements, address-shaped authors, and an older literal vocabulary. KEL requires full-width principals at every semantic boundary, and the native kernel now owns admission and revocation. Do not implement or freeze the formulas below until `codex-envelope`, `codex-kinds`, `codex-kernel`, and KEL are re-cut together with new cross-language vectors. See [[assumptions-and-requirements]].
+
 ## Problem
 
 EFS uses EAS attestation UIDs as object identity and `refUID` as its graph edge. EAS UIDs hash `block.timestamp` (plus a collision bump), so they are unknowable before mining. Three permanent consequences follow, in order of importance:

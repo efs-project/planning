@@ -57,10 +57,8 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 | Design | Target repos | Notes |
 |---|---|---|
-| [[efs-substrate-decision]] | `planning`, `contracts`, `sdk` | The foundation ruling: EAS-carried v2+ with mechanically-reserved portability (envelope/KEL/identity-word); portable currency explicitly not sold; experiments + commissioned workstreams. Amends the three v2 docs. |
-| [[deterministic-ids]] | `contracts`, `sdk`, `planning` | v2 core: the identity Codex — deterministic EFS IDs, derivation rules, registry, duplicate/existence/refUID semantics. Amended by [[efs-substrate-decision]]. |
-| [[efs-v2-holistic-redesign]] | `planning`, `contracts`, `sdk` | Umbrella: the one-final-freeze bundle, conventions-before-data, gap workstreams, explicit non-changes. |
-| [[efs-v2-transition-plan]] | `planning`, `contracts`, `sdk` | Guardrails, phase sequence, verification gates, abort triggers for the v2 window. |
+| **[`efsv2/`](./efsv2/) — the v2 design set** | `planning`, `contracts`, `sdk`, `client` | Native kernel + tag-core (carrier ruled 2026-07-07), now with the 2026-07-11 [[kel]] identity/account foundation pass. The KEL pass makes the older envelope/kernel/identity labels freeze-blocked pending authority-seam and home-admission reconciliation. Entry point and current round map: [efsv2/README](./efsv2/README.md). |
+| **[`clientv2/`](./clientv2/) — the official client / web OS design set** | `planning`, `client`, `sdk` | Client v2 as a web OS (round run 2026-07-07). Entry point: [[web-os-thesis]] (ruling layer + amendments) over 13 model docs; research corpus in `Reviews/2026-07-07-clientv2-corpus/`; protocol pressure fed back via [[client-os-pressure-report]] — see [clientv2/README](./clientv2/README.md). |
 
 #### Review
 
@@ -94,7 +92,7 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 | Repo | Designs |
 |---|---|
-| `planning` | [[0001-design-system]], [[cross-repo-reference-mirror]] |
-| `contracts` | [[cross-repo-reference-mirror]] |
-| `client` | *(none)* |
-| `sdk` | *(none)* |
+| `planning` | [[0001-design-system]], [[cross-repo-reference-mirror]], [`efsv2/`](./efsv2/) |
+| `contracts` | [[cross-repo-reference-mirror]], [`efsv2/`](./efsv2/) |
+| `client` | [`clientv2/`](./clientv2/), [`efsv2/`](./efsv2/) |
+| `sdk` | [`clientv2/`](./clientv2/), [`efsv2/`](./efsv2/) |

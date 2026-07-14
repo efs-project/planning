@@ -9,6 +9,8 @@
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk
 
+> **Historical umbrella — not current design authority.** This document predates the native-carrier ruling and the KEL, privacy, filesystem, on-chain-completeness, and typed-lens passes. Its mission guardrails and rationale remain useful; its EAS mechanics, exact scope closure, and technical dependencies do not. Start with [[owner-rulings]], [[assumptions-and-requirements]], and [[human-overview]].
+
 ## Problem
 
 The prototype works and taught us the model. Before mainnet there is exactly one cheap window to fix data-model decisions; after it, every wart is Etched. This design defines the **complete, bounded scope** of that window: what rides the final re-freeze, what becomes a pre-mainnet convention, what is explicitly out, and the honest justification for reopening a freeze at all. It is the umbrella over [[deterministic-ids]] (the core) and [[efs-v2-transition-plan]] (the sequencing).

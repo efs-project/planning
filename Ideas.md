@@ -8,6 +8,13 @@ A lightweight parking lot for future ideas, "we should do X someday" drops, and 
 
 ## Open
 
+### HTMX for third-party OS app UI
+*(James, 2026-07-14)*
+
+Consider whether **HTMX can be used from the Web Worker-based third-party app UI model**. Evaluate the fit with the Ring-3 worker / Shell-owned surface boundary, including what an HTMX-style interaction model would need from the renderer and whether it preserves the no-ambient-network and capability constraints.
+
+Not a commitment to adopt HTMX; revisit when specifying or prototyping third-party app UI.
+
 ### Burner wallets for transactionless interactions + multi-wallet identity in lenses
 *(James, 2026-06-21)*
 

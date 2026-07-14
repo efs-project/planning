@@ -7,6 +7,8 @@
 
 #status/draft #kind/design #repo/planning #repo/client
 
+> **2026-07-11 KEL correction.** This is the pre-KEL fallback model, not the target account architecture. Under [[kel]], device/app/security keys are scoped actors beneath one stable principal and do not become public authors with independent namespaces. Only identities that need genuine unlinkability remain separate principals/KELs, with linkage local or explicitly disclosed. The outbox, signing-ceremony, capability-broker, and recovery-UX work remains useful, but persona authority and revocation must be re-cut against grants, `authEpoch`, and home admission.
+
 > Elaborates thesis rulings **F6** (keys, personas, ceremony) and **F7** (draft-first write lifecycle). Evidence: Reviews/2026-07-07-clientv2-corpus/research/wallet-standards.md and Reviews/2026-07-07-clientv2-corpus/research/secure-ui.md. Where this doc and [[web-os-thesis]] disagree, the thesis wins until amended.
 
 ## Problem
