@@ -129,11 +129,12 @@ Rung-1 mechanics [research-grounded]: never a raw key in `localStorage`/IndexedD
 
 ## Submission rails: AA is economics, never authorship
 
-7702, 4337, paymasters, bundlers, relayers are **how a signed envelope reaches a venue and who pays** — nothing more. The author is fixed by the envelope signature before any rail is chosen; the mortality invariant guarantees no rail leaves a trace in the signed bytes.
+7702, 4337, EIP-8130 native AA, payers/paymasters, bundlers, and relayers are **how a signed envelope reaches a venue and who pays** — nothing more. The author is fixed by the envelope signature before any rail is chosen; the mortality invariant guarantees no rail leaves a trace in the signed bytes.
 
 - **Self-pay:** a Kernel-held **submitter account** (gas identity ≠ author identity) or the connected wallet sends the tx. Sovereign; links whatever it submits on-chain via `msg.sender`.
 - **Sponsored:** ERC-7677 paymaster flow or an EFS relayer (`/.well-known/relayer` policy). Endpoint class `relayed` or `trusted-paid`.
 - **7702/4337:** useful to batch envelope-publish + chunk txs into one atomic submission. Never used to *sign* records; a 7715 session key signing an envelope would recover to the session key's address and author as a stranger — structurally rejected.
+- **EIP-8130 (Base Cobalt target; Draft, reviewed 2026-07-19):** native batching, transaction actors, payer signatures, and parallel nonce lanes can remove EntryPoint/bundler machinery on supporting venues. Its actor/session authority remains wallet/execution authority unless an independently signed EFS envelope and KEL grant also authorize the records. Treat the Account Configuration and Transaction Context surfaces as versioned adapters; see [[Reviews/2026-07-19-base-native-aa-impact]].
 
 Honest labels, rendered on every sponsored flush and in the switchboard: **"This relayer sees these records before anyone else, can decline or delay them, and is not the author. Verification is unaffected."** Sponsorship changes privacy class and liveness, never authenticity — two independent indicators, never conflated (F5).
 

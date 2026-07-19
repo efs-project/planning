@@ -10,6 +10,8 @@
 
 > **2026-07-11 freeze blocker — the signed authority seam must be re-cut before this can be Etched.** The KEL pass found that `recovered == author` cannot preserve one stable principal while a scoped device, app, P-256, WebAuthn, or PQ actor signs. [[kel]] §8 proposes the breaking `author + authorityId + authEpoch` amendment while retaining the bare-EOA zero path and one signature per record batch. The final field names, types, type hash, claim-ID interaction, and vectors remain ceremony work; the struct below is the reviewed historical baseline, not a freeze candidate.
 
+> **2026-07-19 external evidence — EIP-8130.** Base's native-AA implementation makes actor IDs, P-256/passkey authenticators, scoped session actors, payer separation, and transaction actor context concrete enough to test now. It should inform the `authorityId`/suite adapter and vector work, but it does not close this blocker: an EIP-8130 sender signature is chain- and transaction-bound, whereas this envelope's exact actor witness must remain chain-free and carrier-independent. See [[Reviews/2026-07-19-base-native-aa-impact]].
+
 ## What this document is
 
 The ruling layer over the base text: the base design is adopted as THE envelope/replay-domain spec — the single irreversible Etched crypto surface — **with the amendments below**, which resolve the round's cross-document contradictions (adjudicated in [critic.md](../../Reviews/2026-07-07-efsv2-corpus/critic.md)) and the red team's three serious findings. Where this document and the base text disagree, this document wins. The next iteration inlines base + amendments into one frozen chapter.

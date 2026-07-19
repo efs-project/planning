@@ -150,6 +150,8 @@ The requirement IDs are stable handles for design reviews.
 | **R-D8** | Principal/authorship authority never derives from `msg.sender`, a relayer, paymaster, wallet vendor, or submission rail; one exact actor witness authorizes an envelope | Required invariant | Relayer/paymaster/account-adapter substitution vectors |
 | **R-D9** | `order` is author-controlled ordering, not uniqueness, nonce, or trusted chronology; `claimedAt` is testimony; `admittedAt` is venue-relative existence evidence, not data freshness | Proposed freeze-sensitive semantics | Cross-language time/order vectors and misleading-clock tests |
 
+**EIP-8130 cross-check (2026-07-19):** native transaction actor and payer context is useful venue evidence and an adapter input, but cannot satisfy R-D8 by itself because it authenticates a chain-bound transaction rather than the portable envelope witness. Its 2D/nonce-free transaction nonces likewise do not replace R-D9's record-order semantics. Test the substitution boundaries in [[Reviews/2026-07-19-base-native-aa-impact]].
+
 ### KEL and authority
 
 | ID | Requirement | Status | Acceptance evidence |
