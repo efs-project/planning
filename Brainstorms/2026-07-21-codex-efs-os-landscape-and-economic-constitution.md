@@ -305,6 +305,8 @@ Current project material:
 
 Local EFS evidence:
 
+- [[2026-07-21-codex-logos-deep-dive]]
+- [[2026-07-21-codex-sovereign-os-deep-dive-program]]
 - [[clientv2/web-os-thesis]]
 - [[clientv2/kernel-capability-model]]
 - [[clientv2/packages-and-updates]]
