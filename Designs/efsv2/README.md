@@ -6,11 +6,12 @@ The v2 architecture: **native envelope kernel + tag-core data model** (EAS dropp
 
 **Reading order for a fresh reviewer:**
 
-1. [[owner-rulings]] — decisions James has actually adopted.
-2. [[assumptions-and-requirements]] — canonical validation ledger; separates requirements, assumptions, hypotheses, and human choices.
-3. [[human-overview]] — the integrated system in plain English.
-4. Current domain inputs: [[kel]], [[fs-pass-synthesis]], [[onchain-completeness]], and [[privacy-pass-synthesis]], plus the [lens architecture review](../../Reviews/2026-07-11-efsv2-lens-architecture-and-scale-review.md) as the current **non-normative** lens-design input pending a replacement spec.
-5. Exact technical specs only after understanding their current reconciliation warnings.
+1. [[owner-decision-inbox]] — the single phone-friendly list of choices that still need James; source decision sheets remain the reason trail.
+2. [[owner-rulings]] — decisions James has actually adopted.
+3. [[assumptions-and-requirements]] — canonical validation ledger; separates requirements, assumptions, hypotheses, and human choices.
+4. [[human-overview]] — the integrated system in plain English.
+5. Current domain inputs: [[kel]], [[fs-pass-synthesis]], [[onchain-completeness]], and [[privacy-pass-synthesis]], plus the [lens architecture review](../../Reviews/2026-07-11-efsv2-lens-architecture-and-scale-review.md) as the current **non-normative** lens-design input pending a replacement spec.
+6. Exact technical specs only after understanding their current reconciliation warnings.
 
 **Source precedence during reconciliation:** adopted owner rulings → ratified requirements/invariants → later system constitution → reconciled self-contained technical specs → decision/freeze process sheets → historical reviews, handoffs, and snapshots. [[assumptions-and-requirements]] controls classification and blocker status; its proposed requirements and recommendations are not adopted merely because they are listed.
 
@@ -20,6 +21,7 @@ The v2 architecture: **native envelope kernel + tag-core data model** (EAS dropp
 
 | Doc | Tier | What it rules |
 |---|---|---|
+| [[owner-decision-inbox]] | **Owner decision entry point** | One consolidated, phone-friendly queue: decide now, decide after evidence, decide at launch, settled items, and the recording rule back into [[owner-rulings]]. |
 | [[codex-envelope]] | **Reopened candidate — coordinated re-cut required** | The irreversible signing surface. KEL requires `authorityId` + `authEpoch`, a suite-neutral semantic identity, and new vectors; the prior `recovered == author` struct is historical baseline. |
 | [[codex-kinds]] | **Reopened candidate** | The five-kind reduction remains strong, but full-width principals, native-kernel IDs, string/literal grammar, privacy rows, and joined vectors must reconcile before freeze. |
 | [[codex-kernel]] | **Reopened candidate — coordinated re-cut required** | The kernel artifact. Strong historical authority requires an admission-ordered authority lane, stored `AuthReceipt`, evidence/import lane, and bounded identity ABI before freeze. The exact authority topology is not yet adopted. |
