@@ -2,6 +2,8 @@
 
 The official EFS client v2 ("web OS") design set, produced 2026-07-07 by the Fable client-v2 round: 14-lane researched foundation → thesis with fork rulings → thirteen model docs written against it in parallel with structured conflict-surfacing → thesis amendments → the [[client-os-pressure-report]] back into `Designs/efsv2/`. Evidence corpus: [Reviews/2026-07-07-clientv2-corpus/](../../Reviews/2026-07-07-clientv2-corpus/README.md) (research digests with dated primary sources, decision framework, worklog).
 
+**Reading order for James:** [owner decision inbox](./owner-decision-inbox.md) → linked detail only when useful.
+
 **Reading order for a fresh reviewer:** [[fable-client-v2-handoff]] (the mandate) → [[web-os-thesis]] (the ruling layer — F1–F13 **plus its Amendments section, which wins**) → the model docs you care about → [[open-questions]] → [[client-os-pressure-report]] (what this round asks of the protocol set).
 
 ## The ruling layer
@@ -32,6 +34,7 @@ The official EFS client v2 ("web OS") design set, produced 2026-07-07 by the Fab
 
 | Doc | What it holds |
 |---|---|
+| [owner decision inbox](./owner-decision-inbox.md) | The sole live James-facing queue: examples, options, recommendations, timing, and links to detail |
 | [[open-questions]] | James-level decisions, per-doc open questions index, recommended next investigations (spikes/prototypes) |
 | [[client-os-pressure-report]] (in `efsv2/`) | The twelve pressure clusters on the protocol set; P1/P2/P4c/P11 are freeze-window-relevant |
 

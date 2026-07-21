@@ -8,6 +8,8 @@
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk
 
+> **Decision-routing note (2026-07-21):** this remains the detailed engineering/open-question index. The sole live James-facing queue for this folder is the [Client v2 owner inbox](./owner-decision-inbox.md). Cross-cutting protocol choices are owned by the [EFS v2 inbox](../efsv2/owner-decision-inbox.md); unchecked boxes below are not automatically owner decisions.
+
 ## What this is
 
 The consolidation the kickoff asked for: what only James can decide, what the design set left open (with owner docs), and the concrete next investigations that would settle the biggest bets cheaply. Per-doc open questions live in their docs; this indexes the ones that matter across the set.

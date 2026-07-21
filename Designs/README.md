@@ -2,6 +2,8 @@
 
 Design proposals with lifecycle. The canonical protocol lives in [[design-system]] (this folder's own meta-design). The vault's main [README](../README.md) is the entry point. This file is the folder-local quick-start AND the curated content map.
 
+**James:** start with the [folder-level owner decision inbox](./owner-decision-inbox.md). It routes to the EFS v2 and Client v2 inboxes and separates real owner choices from stale checkboxes and implementation work.
+
 ## Quick start (writing a new design)
 
 1. Copy `_template.md` to `Designs/<descriptive-slug>.md`. **Do not include a number** — numbers come at promotion only.

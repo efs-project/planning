@@ -1,129 +1,220 @@
 # EFS v2 + OS — owner decision inbox
 
-**Status:** draft decision packet; no choice here is adopted until James answers and it is copied into [[owner-rulings]]
+**Status:** draft decision packet; no choice is adopted until James answers and it is copied into [[owner-rulings]]
 **Audience:** James first; designers second
 **Last reconciled:** 2026-07-21
-**Inputs:** [[owner-rulings]], [[assumptions-and-requirements]], [[fs-pass-james-decisions]], [[privacy-james-decisions]], [[onchain-completeness]], [[client-os-pressure-report]], and [Client v2 open questions](../clientv2/open-questions.md)
+**Inputs:** [[owner-rulings]], [[assumptions-and-requirements]], [[fs-pass-james-decisions]], [[privacy-james-decisions]], [[read-lens-spec]], [[onchain-completeness]], and [[client-os-pressure-report]]
 
 #status/draft #kind/decision #repo/planning #topic/efsv2 #topic/clientv2 #blocked-on/human-decision
 
-> **This is the one phone-friendly inbox for owner choices.** The source documents remain the detailed reason trail. Future agents must not ask James to re-answer a source question that this packet classifies as settled, deferred pending evidence, or superseded.
+> **This is the sole live owner queue for EFS v2 and cross-cutting OS architecture.** Detailed documents remain the reason trail. Future agents must not revive a source checkbox classified here as settled, evidence-gated, delegated, or superseded.
 
 ## How to answer
 
-Reply with codes, for example: `A1, B1, C1, D1`. Add exceptions in plain English. An answer such as `B1 except lens ceiling` adopts the cluster except for the named part.
+Reply with codes, for example `N1A, N2A, N3A, N4A, N5A, N6A, Q1A–Q5A`. Add exceptions in plain English. `N2A except N2h` adopts the boundary set except its host-lane item.
 
-There are **four useful choices now**. Everything after them either needs measurements first or is a launch/operations choice that should not interrupt constitutional design.
+The recommended packet is always option **A** below. That is a recommendation, not an adopted answer.
 
-## Decide now
+## Decide now — six architecture choices
 
-### A — Strong authority without a cross-chain empire
+### N1 — Strong authority without a cross-chain empire
 
-This resolves [[assumptions-and-requirements]] D-1 through D-7 as one coherent architecture instead of seven accidentally incompatible answers.
+**Example:** Alice's phone key is stolen, revoked, and then used to backdate a malicious record. What shared evidence lets a reader reject it without making one EFS operator the universal hub?
 
-- **A1 — Adopt the recommended minimum strong-authority profile.** Require protection from post-revocation backdating; use one measured fixed EFS authority domain for the v2 protocol profile; let zero-setup EOAs publish portable evidence immediately but grant strongest authority only after admission; clients may verify the authority domain remotely, while foreign contracts need an explicit adapter or disclosed local commitment; do not build a universal cross-chain hub; do not support same-principal home migration in v2; define a narrow same-domain successor mechanism for future signature suites. **Recommended.**
-- **A2 — Portable evidence only.** No canonical admission witness. Simpler and more sovereign per object, but current authorization and post-revocation backdating remain policy-dependent and ambiguous.
-- **A3 — Per-principal authority homes.** Preserve individual venue choice now, accepting locators, multi-home reads, adapters, migration, and much larger proof/recovery scope.
+- **N1A — One fixed EFS authority profile. Recommended.** Strongest history comes from admission on one measured authority domain; zero-setup EOAs can publish portable evidence immediately but remain evidence-only until admitted. Clients can verify remotely; foreign contracts need an adapter or disclosed local commitment. No universal cross-chain hub and no same-principal home migration in v2.
+- **N1B — Permissionless independent EFS realms.** Each realm can offer strong local history. This preserves venue sovereignty but requires profile discovery, realm-aware grades, and explicit non-interoperability between realms.
+- **N1C — Portable evidence only.** No canonical admission witness. Simplest and most object-sovereign, but post-revocation backdating and current authorization remain policy-dependent.
+- **N1D — Per-principal authority homes.** Every principal chooses a home. This adds locators, multi-home reads, adapters, migration, and a much larger recovery/proof surface.
 
-**What A1 does not decide:** the actual authority venue, exact receipt bytes, finality profile, or successor ABI. Those require the authority prototype and measurements.
+**N1A also means:** ship the KEL-aware seam before v2 freezes; make legacy-EOA upgrade commitment default-on with an explicit degraded opt-out; let smart-account-only users make one direct inception call; do not treat ERC-1271/6492 as eternal record authority; make personal principals non-transferable while organizations use control succession; and reserve a narrow same-domain successor mechanism for future signature suites.
 
-### B — Ratify the system boundaries
+**Not chosen here:** actual venue, receipt bytes, finality, or successor ABI. Those wait for E1. Details: [[assumptions-and-requirements#Strong-authority hypothesis to prototype next]], [[kel#23. Decisions for James]], and [[fs-pass-james-decisions]].
 
-- **B1 — Adopt the following constitutional boundary set. Recommended.**
-  - “100 years” means active preservation: live authoritative reads, exports, independent reconstruction, repair, format migration, and cryptographic renewal—not passive storage.
-  - “Works on-chain” means complete durable state plus bounded keyed queries on the authority venue; clients compose global/cross-chain views.
-  - Lenses are typed, purpose-scoped policies compiled reproducibly into bounded execution policies; the risk bearer chooses the policy.
-  - Content is public by default; sensitive or opted-in content is encrypted; EFS promises confidentiality where specified, never anonymity.
-  - EFS OS is least-authority: apps have no ambient network, wallet, identity, decryption, filesystem, DOM, or trusted-pixel power.
-  - Packages are reproducible hash-addressed closures; activation creates health-gated, rollback-capable generations; updates fail closed under purpose-specific policy.
-  - Recoverable and shreddable private data use independent random roots; shared data is not honestly shreddable; encryption roots never come from wallet signatures.
-  - Browser-first remains the distribution goal, but confinement claims ship only on measured host lanes. A served-header or native lane is allowed where the static-browser cage is insufficient.
-  - Design for a 50-principal normal lens case and a 256-principal portable ceiling, but make the final ceiling conditional on independent compiler and mobile benchmarks.
-- **B2 — Amend specific bullets.** Name only the exceptions; the rest can be ratified together.
-- **B3 — Do not constitutionalize this cluster yet.** This keeps the joined protocol/OS recut blocked and invites later documents to choose incompatible boundaries.
+### N2 — Constitutional system boundaries
 
-This cluster corresponds to D-8 through D-16, but deliberately leaves exact algorithms, UI schemas, quotas, and host implementation to evidence and replaceable specifications.
+**Example:** without one shared boundary, a contract designer may promise global queries, an OS designer may promise anonymity, and a preservation UI may label one uploaded copy “permanent.” Those products cannot all be honest.
 
-### C — Close the two privacy ceremony forks
+- **N2A — Adopt the complete boundary set below. Recommended.**
+- **N2B — Adopt with named exceptions.** Reply with the bullet codes to change.
+- **N2C — Defer the bundle.** The joined protocol/OS recut remains blocked because later specs can choose incompatible meanings.
 
-- **C1 — Reserve the minimal announced-invite feed with an epoch; do not publish a stealth meta-address by default at onboarding. Recommended.** This keeps canonical stranger-to-stranger private invitations possible without committing EFS to a dedicated stealth record kind or forcing every user to scan by default. This is [[privacy-james-decisions]] JD-8(a), separated from the deferred default-onboarding choice.
-- **C2 — Skip the canonical announced-invite feed.** Self-derived pseudonyms and direct sharing still work; stranger invitations use a later, less-canonical convention.
-
-And independently:
-
-- **C3 — Drop the broken subtree-bulk-unlock formula and freeze the honest negative sentence. Recommended.** Private dirnodes and explicit child capabilities remain; a future opt-in tree scheme can be added for new trees. This is JD-36 Option B.
-- **C4 — Freeze the repaired bulk-unlock construction now.** This accepts whole-subtree rekeying when a folder is renamed.
-
-### D — Use the playable archive as the anchor pressure application
-
-- **D1 — Yes: make the playable software archive the first joined-system reference application, not the permanent definition of EFS OS. Recommended.** It sequences prototypes and acceptance tests for verified packages, byte retrieval, safe execution, capabilities, saves, curation, publishing, rollback, and provider exit. Only requirements proven irreducible should pressure frozen protocol bytes.
-- **D2 — Use it only as one test fixture.** Choose another daily retention application before sequencing EFS OS delivery.
-- **D3 — Choose a different anchor now.** Name it; the platform should not proceed anchor-first without one.
-
-## Decide after evidence, not from prose
-
-These are real owner decisions, consolidated here so they are not lost, but answering them now would replace measurement with taste.
-
-| ID | Decision after evidence | Evidence required | Current leaning |
-|---|---|---|---|
-| **E1** | Name the fixed authority venue/finality profile | Admission/rotation/recovery gas; finality and force-inclusion model; proof size/latency; independent RPC reconstruction | Exactly one measured profile at v2 |
-| **E2** | Full author index vs roots-forward plus orphan-tail index | Complete automatic-indexing gas/state snapshot and recovery benchmark | Roots-forward + smallest complete orphan-tail mechanism unless the full index is cheap |
-| **E3** | Paginated definition/schema enumeration | Same gas snapshot plus two real contract consumers | Include if genuinely cheap; mandatory definition-keyed item enumeration is already ruled in |
-| **E4** | Final 50/100/256 lens limits | Two compilers; mobile cold/warm benchmarks; adversarial policy fixtures | 50 normal, 256 portable ceiling |
-| **E5** | Static-only, served-header, or native confinement support matrix | Chrome/Firefox/Safari/iOS cage matrix, including Kernel egress and Permissions Policy | Browser-first; publish per-lane claims, not one universal claim |
-| **E6** | Surface-mode render vocabulary | A real Files/archive app over the Worker boundary; accessibility and frame-budget results | Small declarative vocabulary owned by System Chrome |
-| **E7** | Merge-rule declaration location | Collaborative-container replay prototype and canonical encoding comparison | Keep protocol surface minimal; freeze only what deterministic replay cannot recover without |
-
-The already adopted on-chain direction does **not** need another vote: mandatory automatic indexing for anything admitted on-chain; predicate-aware backlinks; address targets; reverse membership; REDIRECT cited-by; best-mirror view; revocation-aware live counts; content-hash lookup; full-body spine; and no body elision. The remaining sign-off is the aggregate measured cost and E2/E3.
-
-## Decide later as launch or resourcing choices
-
-These belong here for completeness but should not block the constitution or coordinated recut.
-
-| ID | Later owner choice | Recommended trigger |
+| Code | Boundary | Simple example |
 |---|---|---|
-| **L1** | Default update curators and k-of-n quorum | Before third-party auto-update ships |
-| **L2** | Default RPC/storage/relay endpoint set | Before public onboarding; publish the control and logging graph |
-| **L3** | Whether a withdrawn/denied package remains manually bootable behind System Chrome warning | Before package beta; test rescue/forensics and ordinary-user harm |
-| **L4** | Fund and staff a channel/transparency observatory | Before claiming monitored update or split-view protection |
-| **L5** | Name the `web3://`/browser-standards liaison | Before EFSBytes/web serving is positioned as mainstream browser access |
-| **L6** | Operate gateways/relays or remain code-only | Only after legal, logging, abuse-response, and succession operations are funded |
-| **L7** | Product name | Launch, not design freeze |
-| **L8** | Public preservation vocabulary | Before launch copy: recommend “preserved/reconstructable with current evidence”; treat “permanent” as mission/aspiration, not an unconditional object guarantee |
-| **L9** | Preservation classes, horizons, and minimum independent fault domains | After the preservation-controller prototype prices critical roots, public packages, private data, caches, and ordinary user content separately |
-| **L10** | Repair and renewal after EFS disappears | Before any long-horizon claim: choose an endowed keeper/bounty, institutional consortium, permissionless renewer, or explicit hybrid |
-| **L11** | Publication-complete rule and poisoned-replica repair policy | Before storage UX ships: recommend no “preserved” status until independent full retrieval; conservative/quorum repair when corruption or malice is plausible |
-| **L12** | Steward-exit/succession package | Before mainnet: publish graph+blob exports, Ethereum reconstruction material, formats/vectors, buildable clients, provider/renewal state, release/control succession, and independently hosted copies |
+| **N2a** | “100 years” means active preservation: authoritative reads, exports, reconstruction, repair, migration, and cryptographic renewal | One Arweave upload is not yet a 100-year service |
+| **N2b** | “Works on-chain” means complete durable state plus bounded keyed queries on the authority venue; clients compose global/cross-chain views | A contract can resolve a known key, not search every chain |
+| **N2c** | Lenses are typed, purpose-scoped policies compiled reproducibly into bounded execution; the risk bearer chooses | An installer uses a stricter lens than a photo viewer |
+| **N2d** | Public by default; opted-in/sensitive content can be confidential, but EFS never promises anonymity | Encryption can hide a filename, not necessarily that an author wrote |
+| **N2e** | EFS OS is least-authority: apps have no ambient network, wallet, identity, decryption, filesystem, DOM, or trusted-pixel power | A game receives a save handle, not the user's whole drive |
+| **N2f** | Packages are reproducible hash-addressed closures; activation makes health-gated rollback generations; policy-sensitive updates fail closed | A compromised channel cannot silently swap the running bytes |
+| **N2g** | Recoverable and shreddable private data use independent random roots; shared data is not honestly shreddable; roots never derive from wallet signatures | Recovering family photos must not resurrect a destroyed diary |
+| **N2h** | Browser-first is the distribution goal, but confinement claims are per measured host lane; served-header/native lanes are allowed | Safari may need a weaker or differently hosted lane than desktop Chrome |
+| **N2i** | Design for 50 principals normally and a provisional 256-principal portable ceiling; benchmark before freezing | A community lens with 200 curators must still work on a mid-range phone |
+
+Details: [[assumptions-and-requirements#Owner decision register]] D-8–D-16, [[ops-doctrine]], and [[web-os-thesis]].
+
+### N3 — Canonical private invitation discovery
+
+**Example:** Bob wants strangers who know his public identity to send an encrypted invitation without first exchanging a secret off-platform.
+
+- **N3A — Reserve a minimal announced-invite feed with an epoch. Recommended.** Preserve the future path without adding a stealth record kind or forcing every user to scan.
+- **N3B — Do not reserve it.** Direct sharing and self-derived pseudonyms still work; stranger invitations become a later convention.
+
+This does **not** turn on a stealth meta-address during onboarding; that later default is L13. Details: [[privacy-james-decisions]] JD-8.
+
+### N4 — Honest private-subtree behavior
+
+**Example:** renaming an encrypted folder should not unexpectedly require re-encrypting every descendant—or claim bulk unlock when the formula is broken.
+
+- **N4A — Drop the broken bulk-unlock formula. Recommended.** Keep private dirnodes and explicit child capabilities; add a future opt-in tree scheme only for new trees.
+- **N4B — Freeze the repaired construction now.** Accept whole-subtree rekeying when a folder is renamed.
+
+Details: [[privacy-james-decisions]] JD-36.
+
+### N5 — Joined-system anchor application
+
+**Example:** a preserved game must remain retrievable, verifiable, safely runnable, writable, curatable, rollbackable, and exportable. That exposes integration gaps a generic “platform” demo hides.
+
+- **N5A — Make the playable software archive the first joined-system reference app. Recommended.** It sequences work and acceptance tests but does not permanently define EFS OS.
+- **N5B — Keep it as only one test fixture.** Choose another daily retention app before sequencing delivery.
+- **N5C — Use another anchor.** Name the replacement before proceeding platform-first.
+
+Details: [[playable-archive-requirements]] and [[apps-cookbook]].
+
+### N6 — Ratify the reviewed privacy policy batch
+
+**Example:** designers should not repeatedly ask whether wallet signatures derive archive keys, whether private records leak filenames, or whether shared data is truly shreddable.
+
+- **N6A — Ratify the reviewed product/policy batch, subject to technical gates. Recommended.** This adopts the privacy posture, ceremony choices, honesty language, and future-feature gates summarized below. Exact cryptographic algorithms, encodings, vectors, and maxima still require independent review.
+- **N6B — Ratify with named exceptions.** Cite JD numbers or describe the exception.
+- **N6C — Keep the batch advisory.** Every item remains potentially reopenable during recut.
+
+The batch includes committing AEAD; random independent roots; encrypted dirnodes at launch; explicit recovery artifacts; no on-chain recipient graph; honest eager/lazy removal semantics; client-side viewing keys; walk-away tests; and gates before shreddable/team/live-session claims. N3, N4, L13, L14, and L15 remain separately timed choices. Details: [[privacy-pass-synthesis]], [[privacy-james-decisions]], and [[privacy-freeze-reservations]].
+
+## Decide now — five quick wire and safety calls
+
+Each is independent. These are small, but freezing the opposite accidentally would be expensive.
+
+### Q1 — Rename `seq` to `order`
+
+**Example:** app developers keep treating `seq` as trusted time or a nonce; it is only author-controlled ordering.
+
+- **Q1A — Rename it to `order`. Recommended.** Regenerate the wire type hash, vectors, and wallet label during the freeze.
+- **Q1B — Keep `seq`.** Preserve the misleading name forever in the frozen wire format.
+
+Details: [[fs-pass-james-decisions#3. `seq` → `order` rename (freeze-gates A.8a)]].
+
+### Q2 — Always include `claimedAt`
+
+**Example:** a photo can testify “taken Tuesday,” while the venue only proves “this claim existed by Friday.” Neither is authoritative freshness.
+
+- **Q2A — Include an always-present `uint64 claimedAt`; `0` means absent. Recommended.** It is testimony only, never a comparator or authorization input.
+- **Q2B — Omit it from v2 forever.** Applications encode any performed-at claim in payloads instead.
+
+Details: [[fs-pass-james-decisions#2. `claimedAt` row (freeze-gates A.8b)]].
+
+### Q3 — Public collaboration model
+
+**Example:** two strangers concurrently edit a public document. A deterministic private-team op fold cannot honestly solve open-world spam, forks, and curation.
+
+- **Q3A — Public/open-world collaboration uses revision DAGs plus curation; deterministic op folds are for private/closed containers. Recommended.** Remove “public” from the op-fold promise.
+- **Q3B — Keep one op-fold model for both.** Accept the unresolved open-world governance burden.
+
+Details: [[fs-pass-james-decisions#7. B3 demotion ratification (reverses a blessed pattern)]].
+
+### Q4 — Checkpoints stay ordinary claims
+
+**Example:** a copier proves Alice's state only through order 500. Readers can say “as of 500,” but the kernel does not choose a canonical head among competing checkpoints.
+
+- **Q4A — A checkpoint is an ordinary reserved-key claim. Recommended.** It bounds reads; add no kernel HEAD/current/fork-choice machinery.
+- **Q4B — Add special checkpoint machinery.** Specify the consensus/fork-choice semantics before freeze.
+
+Details: [[read-lens-spec#5.2 Checkpoints are ordinary claims (pins P7; critic C4)]].
+
+### Q5 — Reference SDK safety default
+
+**Example:** an installer cannot reach an author's authority home while deciding whether to run an update.
+
+- **Q5A — Fail closed by default; warnings require an explicit override. Recommended.** Safe ecosystem default, with a disclosed escape hatch.
+- **Q5B — Warn and continue by default.** More available, but unsafe defaults will become sticky across apps.
+
+Details: [[read-lens-spec#Open questions]].
+
+## Decide after evidence — do not answer yet
+
+These are real owner acceptance gates. Engineers choose exact mechanisms; James chooses whether measured cost, usability, or product degradation is acceptable.
+
+| ID | Example and eventual options | Evidence required | Recommendation after evidence | Details |
+|---|---|---|---|---|
+| **E1 Authority venue** | Base/L2, L3, or another fixed profile | admission/rotation/recovery gas; finality/force inclusion; proof latency; independent RPC reconstruction | exactly one measured v2 profile | [[assumptions-and-requirements#Strong-authority hypothesis to prototype next]] |
+| **E2 Aggregate kernel cost** | accept full body + indexes + revocation state, trim optional surfaces, or reject the on-chain promise | one combined gas/state snapshot including every mandatory direction | accept only against the complete bill, not isolated cheap calls | [[onchain-completeness]], [[freeze-gates]] |
+| **E3 `admittedAt`** | store + batch-read it, or explicitly degrade trustless time | measured incremental state/read cost and two consumers | store if the complete snapshot is tolerable | [[fs-pass-james-decisions#1. The `admittedAt` + index bundle (P1) — the pass's biggest lever]] |
+| **E4 Author enumeration** | full author index or roots-forward + orphan-tail | gas/state plus recovery benchmark | smallest mechanism that still guarantees complete discovery | [[onchain-completeness]] |
+| **E5 Definition enumeration** | paginated schema/definition index or omit | same snapshot plus two real contract consumers | include only if genuinely cheap | [[onchain-completeness]] |
+| **E6 Lens ceiling** | 50, 100, or 256 portable principals | two compilers; cold/warm mobile benchmarks; adversarial fixtures | 50 normal, 256 portable if measured | [[read-lens-spec]] |
+| **E7 Host lanes** | static-only, served-header, and/or native support claims | Chrome/Firefox/Safari/iOS cage matrix | browser-first with honest per-lane claims | [[client-os-pressure-report]], [Client evidence queue](../clientv2/owner-decision-inbox.md#decide-after-evidence--do-not-answer-yet) |
+| **E8 Render vocabulary** | small declarative schema, constrained HTML, or another IDL | a real Files/archive app; accessibility and frame budget | smallest System-Chrome-owned vocabulary that passes | [[kernel-capability-model]] |
+| **E9 Merge-rule location** | protocol word, typed payload, or package convention | collaborative replay prototype + canonical encoding comparison | freeze only irreducible replay semantics | [[fs-pass-james-decisions]], [[apps-cookbook]] |
+| **E10 Recovery acceptance** | ship mainstream flow, restrict it, or redesign | formal model plus nontechnical recovery trials | no mainstream claim until ordinary people recover safely | [[kel]], [[privacy-james-decisions]] |
+| **E11 Public metadata budget** | accept, coarsen, or redesign KEL/receipt/index/funding metadata | minimization review and adversarial correlation analysis | publish the measured leakage plainly before acceptance | [[privacy-james-decisions]], [[kel]] |
+
+## Decide at launch or when resourcing exists
+
+| ID | Choice with a simple example | Options | Recommendation / trigger | Details |
+|---|---|---|---|---|
+| **L1 Curators** | who may auto-update the default OS channel? | named first parties; independent set; user-only/manual | independent k-of-n before auto-update | [[packages-and-updates]] |
+| **L2 Endpoints + RPC privacy** | first run needs RPC/storage without silently selecting an observer | first-party; community set; user-required; fund OHTTP relay | publish operators/logging/control graph; no silent RPC | [Client network privacy](../clientv2/network-privacy.md), [[privacy-james-decisions]] JD-13 |
+| **L3 Denied package boot** | an investigator needs an old revoked game | forbid; manual behind warning; unrestricted | manual only behind System Chrome warning, after harm testing | [[boot-and-profiles]] |
+| **L4 Observatory** | detect channel split views and compromised curators | fund/staff; community-only; make no monitored claim | fund before claiming monitoring | [[packages-and-updates]] |
+| **L5 Browser liaison** | standards work affects `web3://` and EFSBytes access | name owner; consortium; defer mainstream claim | name before browser-mainstream positioning | [[ops-doctrine]] |
+| **L6 Operate infrastructure** | EFS project runs gateways/relays that see abuse and metadata | operate; partner; code-only | only with legal/logging/abuse/succession capacity | [[ops-doctrine]] |
+| **L7 Product name** | EFS OS vs Cyphos/Cypher OS | adopt; test shortlist; keep EFS OS | user test and trademark/domain review near launch | [[web-os-thesis#Naming — **[open]**]] |
+| **L8 Preservation words** | may UI say “permanent”? | permanent; preserved; reconstructable-with-evidence | use “preserved/reconstructable with current evidence” | [[ops-doctrine]] |
+| **L9 Preservation classes** | critical roots need more fault domains than cache data | one class; tiered horizons; user-configured | price separate classes after controller prototype | [[ops-doctrine]] |
+| **L10 Renewal after EFS** | signatures/formats age after the project disappears | endowed keeper; consortium; permissionless bounty; hybrid | explicit funded hybrid before long-horizon claims | [[ops-doctrine]] |
+| **L11 Publication complete + repair** | one replica says upload succeeded; another is corrupt | first copy; independent full retrieval; quorum | no “preserved” until independent full retrieval; conservative repair | [[ops-doctrine]] |
+| **L12 Steward exit** | maintainers vanish | informal fork; signed succession; complete exit package | ship graph/blob exports, vectors, builds, provider state, and succession plan before mainnet | [[ops-doctrine]] |
+| **L13 Stealth onboarding** | publish a meta-address for every new user? | default-on; explicit opt-in; omit | explicit opt-in after scanning/privacy costs are known | [[privacy-james-decisions]] JD-9 |
+| **L14 Public disclosures** | users may confuse confidentiality with anonymity or quantum safety | concise labels; full ceremony; defer feature | exact privacy/quantum/GDPR/hardware-wallet disclosures before feature claims | [[privacy-james-decisions]] |
+| **L15 Timestamp privacy** | fine-grained times correlate a private user's activity | exact; coarsened private tier; user choice | coarsen privacy-tier defaults if it preserves needed semantics | [[privacy-james-decisions]] JD-22 |
+| **L16 P-256/WebAuthn** | passkey can sign directly once the profile is safe | activate; keep wrapped software keys; staged opt-in | assign owner/date only after vectors, review, and transition staffing | [[kel]], [[client-os-pressure-report]] |
+| **L17 Guardians** | social recovery can help or enable collusion | launch; later opt-in; do not support | mainstream base stays passkey sync + independent cold factor; guardians later | [[kel]] |
 
 ## Already settled — do not ask again
 
-- Chains are assumed to persist and remain queryable; retain pruning/state-retrieval defenses, not chain-death machinery.
-- KEL is required; a bare EOA remains the zero-state identity.
-- Passkey sync plus an independent cold factor is the mainstream recovery default; guardians can follow.
-- Durable unlinkable personas are separate KELs grouped locally by the OS. They do not share a public recovery root. Disposable stealth addresses remain one-shot privacy tools.
-- Public by default plus a client sensitivity-policy layer.
-- Storage direction is on-chain plus Arweave now, with optional replaceable mirrors; future cheap chain storage is upside, not a dependency.
-- Graph labels such as `act` are provenance/UI claims, never authorization; KEL grants and admission control authority.
-- Contracts operate on public data. Private content is decrypted on user devices, not inside public contracts.
-- Ranked search, full text, unbounded set operations, and global aggregates remain off-chain. Bounded keyed queries required by core behavior stay on-chain.
-- On-chain contracts do not receive a collision bit for universal equivocation detection; safety-critical untrusted-author use requires a challenge-window or tighter policy.
-- Wallet-signature-derived archive encryption is forbidden.
-- Private file metadata must not leak plaintext names, sizes, or content types through supposedly private records.
-- No on-chain read receipts or seen markers.
-- The old shared-root derived-persona hypothesis is superseded by the later KEL reconciliation noted above.
+- Native envelope kernel; EAS carrier dropped; five-kind tag-core.
+- Durable archive: no free ephemeral record tier; writes are paid on-chain, with optional community relayers.
+- Chains are assumed to persist and remain queryable. Keep pruning/reconstruction defenses, not chain-death machinery.
+- KEL is required; bare EOA is the zero-state path. Passkey sync plus an independent cold factor is the mainstream recovery baseline.
+- Durable unlinkable personas are separate KELs grouped locally; disposable stealth addresses are one-shot.
+- Public by default plus a client sensitivity layer; contracts consume public data only.
+- On-chain plus Arweave, with replaceable optional mirrors.
+- Mandatory automatic indexing for admitted on-chain data, including required backlinks, address/list/redirect directions, best-mirror and content-hash lookup, full-body spine, and revocation-aware live counts. Only measured shape/cost remains.
+- No universal on-chain collision bit. Untrusted safety-critical authors need challenge-window or tighter policy.
+- `act` is provenance only; KEL grants authorize.
+- No wallet-signature-derived encryption roots, on-chain read receipts, or plaintext private metadata.
+- `contractReadable` is the floor; EFSBytes is immutable at freeze; bytes are L2/L3-first and blob use remains reserved.
+- Ranked/full-text/global/unbounded analytics stay off-chain.
 
-## Bulk ratifications that should ride B1 unless amended
+## Delegated technical gates — not owner votes
 
-The privacy pass contains many individually numbered recommendations. They should not become dozens of phone decisions. B1 is intended to ratify their shared product boundary. During the coordinated recut, the reviewed technical batch can be adopted together unless an implementation review finds a concrete defect: committing AEAD; PQ-hybrid wrapping profile subject to exact review/vectors; random archive roots; encrypted dirnodes at launch; explicit recovery artifacts; no recipient graph on-chain; eager/lazy member-removal honesty; client-side viewing keys; walk-away tests; and gates before shreddable/team/live-session claims.
+Protocol and security owners must resolve exact index layouts, live-count mechanism, receipt bytes, crypto suite/vectors, WebAuthn/PQ vectors, control maxima, event shapes, and EIP-170 splitting through prototypes, independent review, and conformance tests. Escalate only if the result changes a boundary, safety promise, product degradation, or irreversible wire choice listed above.
 
-Exact algorithms and vectors still require independent cryptographic review. Bulk ratification is not permission to freeze unreviewed bytes.
+## Superseded questions — never revive silently
+
+- Per-principal L1 homes and migration text in [[kel]] is superseded by its correction banner and N1's current authority hypothesis.
+- Reserve-KEL-until-2030 and smart-wallet exclusion text in [identity](./identity.md) is superseded by the KEL pass.
+- Pre-KEL actor alternatives in [[client-os-pressure-report]] are historical.
+- The proposed exact-slot collision summary conflicts with the adopted no-collision-bit ruling.
+- Full-body/no-elision and mandatory indexing are adopted; old “pending ratification” labels are stale.
+- The dual “public archive/private-by-default OS” posture is superseded by public-by-default plus sensitivity policy.
+- EAS substrate and chain-death questions are historical inputs, not live v2 forks.
 
 ## Recording rule
 
 When James answers:
 
-1. append the answer, date, and any caveat to [[owner-rulings]];
-2. mark the corresponding item here `ADOPTED`, `REJECTED`, or `DEFERRED`; and
-3. update source decision sheets by linking here rather than copying a second live answer.
+1. append the dated answer and caveat to [[owner-rulings]];
+2. mark the item here `ADOPTED`, `REJECTED`, or `DEFERRED`; and
+3. replace conflicting source checkboxes with a link here instead of copying a second live answer.
 
-`owner-rulings.md` remains the authoritative history. This inbox remains the authoritative list of what still needs an owner answer.
+`owner-rulings.md` is the authoritative history. This inbox is the authoritative list of what still needs an owner answer.
