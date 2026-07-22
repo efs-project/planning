@@ -3,7 +3,7 @@
 **Target repos:** planning, client, sdk
 **Depends on:** [[web-os-thesis]], [[read-lens-spec]], [[codex-kinds]], [[codex-envelope]], [[identity]], [[apps-cookbook]]
 **Reviewers:** —
-**Last touched:** 2026-07-07 — fable-5
+**Last touched:** 2026-07-22 — codex-gpt-5 (WASM/WASI runner ruling; original fable-5)
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk
 
@@ -155,9 +155,11 @@ Fuchsia-shaped, exactly: `Resolver.resolve(url) → (manifestDecl, closureRootHa
 |---|---|---|
 | `ses-worker@1` | default Ring-3 cage | receives Start(resolvedURL, program block, granted ports, controller) |
 | `render-service@1` | document-mode bytes | never receives capability ports |
-| `wasm-component` | later | jco-transpiled; deny-by-default imports = second capability dimension |
+| `wasm-component@1` | first-class foundation; launch support evidence-gated | versioned WIT app world; jco-transpiled in browsers until native Component Model support; deny-by-default imports mirror capability ceilings |
 
 Which resolvers/runners a collection sees is **environment policy** (auto-propagating, Fuchsia's two-channel insight: infrastructure flows implicitly, authority explicitly). Production collections get content-addressed resolvers only; `dev://` exists solely in the developer environment.
+
+**WASM-first runner rule (owner-ratified 2026-07-22).** All foundational app semantics must be expressible as versioned WIT interfaces and resource handles even when the first implementation is the SES/TypeScript runner. Standard WASI filesystem, HTTP, sockets, environment, and CLI worlds are not ambient floors; the host denies them or implements a compatibility interface over narrower Kernel grants. Surface IR remains the sole ordinary UI target. Browser jco wrappers, language runtimes, and WASI adapters are pinned closure members, never runtime CDN dependencies. Full design: [[wasm-wasi-app-platform]].
 
 ### Collections — instance classes and capability floors
 

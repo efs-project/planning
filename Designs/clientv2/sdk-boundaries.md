@@ -3,7 +3,7 @@
 **Target repos:** planning, sdk, client
 **Depends on:** [[web-os-thesis]], [[sdk-vs-client-responsibilities]], [[read-lens-spec]], [[codex-envelope]], [[codex-kinds]], [[deterministic-ids]], [[apps-cookbook]]
 **Reviewers:** —
-**Last touched:** 2026-07-07 — fable-5
+**Last touched:** 2026-07-22 — codex-gpt-5 (WIT app ABI ruling; original fable-5)
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/client
 
@@ -135,6 +135,10 @@ Levels nest (C2 requires C1; C3 requires C2 for anything that renders). Certific
 - **`@efs/dev`**, **`@efs/conformance`** — tooling, never in app bundles.
 - Docs teach the split in one sentence: *"Building for the web? `@efs/sdk`. Building an app for EFS OS? Add `@efs/os-sdk`."* If the product gets a real name (thesis Naming is [open]), `os-sdk` keeps its package name — package identity should not chase brand identity.
 
+### WIT is the language-neutral app ABI
+
+Per [[wasm-wasi-app-platform]], `@efs/os-sdk` is one generated adapter for a versioned WIT app world, not the definition of that world. The WIT packages own language-neutral interface names, resources, ownership, async operations, streams, and errors. TypeScript types/validators, C#/Rust bindings, MessagePort codecs, agent tool schemas, and conformance fixtures must be generated from or checked against that semantic source. Manifest/config schemas and canonical CBOR constraints may still need a companion schema language; that narrower choice remains open below.
+
 ### What belongs in NEITHER SDK
 
 Per [[sdk-vs-client-responsibilities]], unchanged in spirit: anything with a key, a server, or an operating cost. The **relayer/sponsor reference implementation**, the **trustless gateway**, the **gas station/paymaster**, the **home-endpoint container** (F5), pinning services, and indexer services are client-owned infrastructure. We should still *ship* reference implementations (operators must not build them cold) — but in a separate `efs-infra` repo with its own release cadence, consuming the SDK's seams like any third party. Putting them under SDK semver would couple protocol-library releases to ops software and quietly re-privilege our infrastructure — the exact failure [[sdk-vs-client-responsibilities]] guards against.
@@ -153,7 +157,7 @@ Agents change three things here. (1) **The IDL's fourth artifact is load-bearing
 
 ## Open questions
 
-- [ ] IDL format: bespoke TS-first schema (zod-style source with codegen) vs an established IDL (JSON-Schema-based, smithy-like). Agent tool-schema emission and validator performance at the membrane are the forcing functions. Needs a prototype ADR (sdk repo). [open]
+- [ ] Companion schema format beyond WIT: WIT now owns the app/runtime semantic ABI, but manifest/config constraints, canonical CBOR messages, runtime validation, and agent JSON tool schemas still need either generated WIT annotations plus a companion schema or an established schema language. Prototype in the sdk repo. [open]
 - [ ] Where the surface-mode render schema is specified — inside the os-sdk IDL or a separate spec shared with the Shell. Blocked on the thesis's surface-mode open question. [open]
 - [ ] `@efs/sdk/ids` vs standalone `@efs/ids`: freeze-gate vector generation wants a minimal, auditable, contract-adjacent artifact; subpath export may be too entangled for external review. [open]
 - [ ] Conformance governance: who may attest certification, suite-version pinning, deny-fact policy on regressions (k-of-n as in app curation, or steward-only at launch). [open]

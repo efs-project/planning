@@ -28,6 +28,7 @@ The official EFS client v2 ("web OS") design set, produced 2026-07-07 by the Fab
 | [[system-surfaces]] | The full surface map with trust classes, v2-launch vs later, per-surface honesty obligations, retention-app question | cross-cutting |
 | [[threat-model]] | Assets, adversaries, attack trees, mitigations, residual-risk honesty table, truth-trap conformance items, incident response | cross-cutting |
 | [[sdk-boundaries]] | `@efs/sdk` vs `@efs/os-sdk` for the native-envelope era, dual-target app pattern, one-IDL contracts, versioning, conformance suites | F8, dev platform |
+| [[wasm-wasi-app-platform]] | WASM-first, not WASM-only app substrate; WIT worlds, deny-by-default WASI imports, browser/native adapters, framework lanes, packaging, quotas, and evidence gates | F1, F8, app platform |
 | [[research-digest]] | Consolidated research findings with dated primary sources; exists/emerging/invention split; standards watch list | evidence |
 
 ## Consolidation
@@ -44,4 +45,4 @@ The official EFS client v2 ("web OS") design set, produced 2026-07-07 by the Fab
 
 ## Status
 
-Everything `#status/draft`, written 2026-07-07 by fable-5. The set is internally reconciled (parallel-authored conflicts adjudicated in the thesis Amendments; a cross-doc consistency review ran post-fan-out — residue in [[open-questions]]). Next: James pass on the thesis + open questions; the pressure report's freeze-window items (P1/P2/P4c/P11) should ride the current efsv2 iteration.
+Everything remains `#status/draft`. The original set was written 2026-07-07 by fable-5 and internally reconciled (parallel-authored conflicts adjudicated in thesis Amendments 1–13; cross-doc residue in [[open-questions]]). [[wasm-wasi-app-platform]] and thesis Amendment 14 were added 2026-07-22 from James's WASM/WASI platform ruling. Next: evidence spikes, coordinated EFS v2 reconciliation, and eventual promotion review.

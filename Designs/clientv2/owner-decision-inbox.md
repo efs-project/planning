@@ -2,7 +2,7 @@
 
 **Status:** draft decision packet; no choice is adopted until James answers and it is recorded in the owning history
 **Audience:** James first; client/OS designers second
-**Last reconciled:** 2026-07-21
+**Last reconciled:** 2026-07-22
 **Inputs:** [[web-os-thesis]], [[open-questions]], [[wallet-and-actions]], [agent-native](./agent-native.md), and the [EFS v2 owner queue](../efsv2/owner-decision-inbox.md)
 
 #status/draft #kind/decision #repo/planning #repo/client #repo/sdk #topic/clientv2 #blocked-on/human-decision
@@ -108,6 +108,7 @@ Details: [[locale-and-accessibility#Language packs and font packs]], [[locale-an
 
 ## Already settled — do not ask again
 
+- EFS OS is **WASM-first, not WASM-only**: WebAssembly Components + versioned WIT worlds are the long-term app ABI; JS/TS, Blazor, Rust, and future adapters target the same capabilities and Surface IR. WASI imports are deny-by-default and never ambient authority. See [[wasm-wasi-app-platform]].
 - System Chrome owns trusted DOM/compositing; Session Shell owns placement and workspace policy.
 - System Chrome owns sync authority/loss ceremonies; Session Shell owns the dashboard.
 - Break-glass is one of the eight ceremony classes.
