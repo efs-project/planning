@@ -5,7 +5,7 @@
 **Depends on:** [[fable-client-v2-handoff]], [[os-research-compass-for-fable]], [[agent-native-os-compass-for-fable]], [[read-lens-spec]], [[codex-envelope]], [[codex-kinds]], [[codex-kernel]], [[identity]], [[ops-doctrine]], [[apps-cookbook]], [[mirror-scheme-policy]], [[sdk-vs-client-responsibilities]]
 **Supersedes:** the 2026-05-26 ring-architecture sketch ([[2026-05-26-pm-client-os-architecture]]) as design truth — its instincts survive, its mechanisms are re-cut below
 **Reviewers:** —
-**Last touched:** 2026-07-22 — codex-gpt-5 (owner WASM/WASI amendment; original fable-5)
+**Last touched:** 2026-07-22 — codex-gpt-5 (app-model research correction; original fable-5)
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk
 
@@ -57,7 +57,6 @@ Two findings from the research make this more than a slogan:
 - **The pending-state ladder** — `draft → planned → ready_to_sign → signed → queued → flushing → submitted → partially_admitted → complete_on_chain → chain_finalized → replicated` as *normative OS SDK vocabulary*, composed with read grades, so apps cannot invent dialects of "saved". (Adopted from the handoff; the local-first lane confirmed every serious system converges here.)
 - **Read grades as UI physics** — RR1–RR12 of [[read-lens-spec]] bind every surface. One shared string catalog so STALE-vs-REVOKED wording cannot fork per client. Negative indicators over positive: warn on REVOKED/EQUIVOCAL/UNKNOWN; never build a "green check = safe" habit (SiteKey evidence). **[research-grounded]**
 - **Petnames over the lens graph** — trusted-author lists are petname directories; raw addresses and global nicknames are never trust signals; `<efs-identifier>` renders addresses LTR-isolated, chunked, confusable-checked. **[research-grounded]**
-- **WebAssembly Components + WIT as the long-term app ABI** — EFS OS is WASM-first, not WASM-only. Components receive deny-by-default, resource-shaped EFS capabilities; JS/TS and framework adapters target the same semantic app world. WASI is an interface vocabulary, never permission to expose ambient filesystem, sockets, HTTP, environment, DOM, wallet, or identity. Browser shims such as jco are replaceable closure members; the WIT contract survives them. See [[wasm-wasi-app-platform]]. **[owner-ratified 2026-07-22; current standards research-grounded]**
 
 ## The architecture ruling
 
@@ -178,9 +177,9 @@ The truth-traps list in [[fable-client-v2-handoff]] is adopted wholesale as acce
 3. **Positive trust chrome habituates; negative indicators inform.** Warn loudly on the bad states; never train a green checkmark.
 4. **Privacy-possible, not private-by-default, never anonymous** (validated 2026-07-07). The OS is genuinely cypherpunk — and arguably ahead of the ecosystem — on the **read/custody** side: verified reads over untrusted endpoints, OHTTP identity-unlinking, no ambient network, interest-privacy honestly labeled *unsolved* rather than faked. On the **write/graph** side it can do nothing, because permanence, verify-don't-trust, censorship-resistance, and lens resolution *all require public claims with publicly-recovered-signer authors* — so who-authored-what, author↔author edges, and timing are public by construction. Payload encryption is opt-in and real; graph anonymity is not offered. The persona system makes this concrete: separate personas *un*-correlate you, but publishing the link *re*-correlates them, so the OS ships a **private-link variant** (encrypted body at a salted fragment-capability anchor) and states the irreducible residual (public author word + timestamp) plainly. The client must never let a privacy affordance imply anonymity it can't deliver — see [[wallet-and-actions]] §Persona privacy and pressure item P9.
 
-## Amendments (normative; they win over the F-sections above)
+## Amendments (2026-07-07, post model-doc fan-out — normative; they win over the F-sections above)
 
-Items 1–13 came from the 2026-07-07 parallel model-doc review. Item 14 records James's 2026-07-22 app-platform ruling. These are the accepted corrections:
+The thirteen model docs were written against this thesis in parallel and surfaced conflicts through a structured channel rather than diverging silently. These are the accepted corrections:
 
 1. **F1 — the CSP asymmetry (from [[kernel-capability-model]]):** "the worker inherits the page's CSP" glossed how the Kernel itself escapes the cage. Ruling: the *page* runs `connect-src 'none'`-class CSP; the **Kernel is a real-URL same-origin worker carrying its own CSP** (real-URL workers get their own policy; `blob:` workers inherit); Ring-3 apps are `blob:` workers that inherit the page's denial. Cradle-iframe fallback lane pending a cross-browser test matrix.
 2. **F1/F3 — who composites (from [[shell-and-sessions]]):** the compositing *mechanism* moves into System Chrome (Ring 1½); the Session Shell holds only placement/focus *policy* over a typed API and never owns raw DOM. This is the enforcement precondition for any future third-party Shell.
@@ -195,12 +194,17 @@ Items 1–13 came from the 2026-07-07 parallel model-doc review. Item 14 records
 11. **F3 — sync surface split (from [[system-surfaces]]):** System Chrome owns sync *authority and loss events* (what happened to your data); the Session Shell owns the sync *dashboard* (browsing detail) — protecting Chrome's dependency diet.
 12. **F12 — closed (boot-deeplinks retry landed):** the amendments in [[boot-and-profiles]] govern (Static Routing over navigation preload; AS-OF/UNKNOWN-CURRENCY presentation for cache-first renders; fragment grammar and size tiers; the `web3://` safelist gap).
 13. **F4 — transparency needs a funded monitor (from [[packages-and-updates]] via the package-trust lane):** chain admission is a free transparency log, but CT/Firefox-BT history says unmonitored transparency protects no one. The **channel-monitor role** (equivocation, mass-publish, revocation-flood watching) is hereby named as an uncommissioned workstream — see open questions.
-14. **F1/F8 — WASM-first app platform (James, 2026-07-22):** WebAssembly Components and versioned WIT worlds become a first-class foundation rather than a deferred runner experiment. Every language/framework adapter targets the same EFS capability and Surface IR semantics. Standard WASI imports are denied or attenuated by the host; no component receives ambient filesystem, HTTP, sockets, environment, DOM, wallet, or identity. Exact browser engine, jco adapter, launch WASI profile, and per-language runtime remain evidence-gated. See [[wasm-wasi-app-platform]].
+
+## Third-party app model research directive (2026-07-22 — not a ruling)
+
+James explicitly withheld a platform choice and requested a deep Fable research round. WebAssembly, WASI, WIT, the Component Model, Blazor/.NET, HTMX-inspired UI, JavaScript/SES, iframe compatibility, and other approaches are possibilities to investigate and validate. The current Worker/capability/Surface-IR architecture must be challenged in the same comparison; it is not protected from revision merely because it appears in F1/F8.
+
+The research must separate authoring model, execution runtime, semantic app API, IDL/wire format, rendering ownership, security boundary, and packaging/versioning. It should compare coherent end-to-end architectures with the same prototype workload and explicit threat, accessibility, performance, portability, and developer-experience evidence. See [[fable-third-party-app-model-handoff]].
 
 ## What v2 deliberately does not do
 
 - No third-party Session Shells at launch (contract designed for them; shipping deferred).
-- No privileged third-party Kernel modules/plugins; extension = system services with narrow capabilities or unprivileged WebAssembly Components behind the same app capability boundary.
+- No true Kernel modules/plugins; extension = system services with narrow capabilities, or additional app runners only after the app-model research establishes their boundary.
 - No generic `wallet.sendTransaction` in Ring 3; EFS-shaped writes only, wallet interactions Kernel-mediated.
 - No CRDT merge machinery in the Kernel (slots are per-author LWW by protocol; CRDT libs are app-layer SDK helpers).
 - No ambient HTTP anywhere, including fonts, avatars, telemetry, crash reports, update checks. There is no telemetry.

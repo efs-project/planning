@@ -28,7 +28,6 @@ The official EFS client v2 ("web OS") design set, produced 2026-07-07 by the Fab
 | [[system-surfaces]] | The full surface map with trust classes, v2-launch vs later, per-surface honesty obligations, retention-app question | cross-cutting |
 | [[threat-model]] | Assets, adversaries, attack trees, mitigations, residual-risk honesty table, truth-trap conformance items, incident response | cross-cutting |
 | [[sdk-boundaries]] | `@efs/sdk` vs `@efs/os-sdk` for the native-envelope era, dual-target app pattern, one-IDL contracts, versioning, conformance suites | F8, dev platform |
-| [[wasm-wasi-app-platform]] | WASM-first, not WASM-only app substrate; WIT worlds, deny-by-default WASI imports, browser/native adapters, framework lanes, packaging, quotas, and evidence gates | F1, F8, app platform |
 | [[research-digest]] | Consolidated research findings with dated primary sources; exists/emerging/invention split; standards watch list | evidence |
 
 ## Consolidation
@@ -43,6 +42,12 @@ The official EFS client v2 ("web OS") design set, produced 2026-07-07 by the Fab
 
 [[fable-client-v2-handoff]], [[os-research-compass-for-fable]], [[agent-native-os-compass-for-fable]], [[fable-client-v2-kickoff-prompt]].
 
+## Next research round
+
+| Handoff | Purpose |
+|---|---|
+| [[fable-third-party-app-model-handoff]] | Deep comparison of WASM/WASI/Components, Blazor/.NET, HTMX-inspired and typed UI, JS/SES, iframe compatibility, and other third-party app models. No runner, ABI, or UI model is selected. |
+
 ## Status
 
-Everything remains `#status/draft`. The original set was written 2026-07-07 by fable-5 and internally reconciled (parallel-authored conflicts adjudicated in thesis Amendments 1–13; cross-doc residue in [[open-questions]]). [[wasm-wasi-app-platform]] and thesis Amendment 14 were added 2026-07-22 from James's WASM/WASI platform ruling. Next: evidence spikes, coordinated EFS v2 reconciliation, and eventual promotion review.
+Everything remains `#status/draft`. The original set was written 2026-07-07 by fable-5 and internally reconciled (parallel-authored conflicts adjudicated in thesis Amendments 1–13; cross-doc residue in [[open-questions]]). The 2026-07-22 app-model handoff reopens the current Worker/Surface hypothesis alongside WASM/WASI/Components, Blazor/.NET, HTMX-inspired UI, iframe compatibility, and other candidates. No runner, ABI, or UI model has been adopted. Next: the Fable deep-research round, evidence spikes, coordinated EFS v2 reconciliation, and eventual promotion review.

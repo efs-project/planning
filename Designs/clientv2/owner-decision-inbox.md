@@ -108,7 +108,6 @@ Details: [[locale-and-accessibility#Language packs and font packs]], [[locale-an
 
 ## Already settled — do not ask again
 
-- EFS OS is **WASM-first, not WASM-only**: WebAssembly Components + versioned WIT worlds are the long-term app ABI; JS/TS, Blazor, Rust, and future adapters target the same capabilities and Surface IR. WASI imports are deny-by-default and never ambient authority. See [[wasm-wasi-app-platform]].
 - System Chrome owns trusted DOM/compositing; Session Shell owns placement and workspace policy.
 - System Chrome owns sync authority/loss ceremonies; Session Shell owns the dashboard.
 - Break-glass is one of the eight ceremony classes.
@@ -121,6 +120,8 @@ Details: [[locale-and-accessibility#Language packs and font packs]], [[locale-an
 ## Delegated to product and implementation teams
 
 Do not ask James to choose constants or mechanics that prototypes and normal design review can settle: ceremony serialization/risk thresholds, expiry constants, cache watermarks, quota margins, UI placement, IDL syntax, package layout, high-bandwidth port mechanics, locale entropy constants, app migration ownership, and second-instance takeover behavior.
+
+**Research directive, not a decision:** the third-party app model is deliberately unchosen. Fable should deeply compare WASM/WASI/Components, Blazor/.NET, HTMX-inspired and typed UI, JS/SES, iframe compatibility, and alternatives using [[fable-third-party-app-model-handoff]]. No James answer is needed until evidence produces a real product or permanence tradeoff.
 
 ## Protocol-owned — route to EFS v2
 
