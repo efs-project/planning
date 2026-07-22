@@ -14,3 +14,5 @@ If you're a new agent or new contributor, read these in order.
 After these, read [[design-system]] (this vault's meta-design) and skim [[Glossary]] for terminology.
 
 For project state: open [[Kanban]] and the curated design map in [[Designs/README|Designs/README.md]].
+
+For decisions James actually needs to make: start at the [Designs owner decision inbox](../Designs/owner-decision-inbox.md). It routes to one canonical queue per design folder; source open-question checkboxes are not owner decisions unless that queue promotes them.

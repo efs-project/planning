@@ -13,14 +13,17 @@ Humans (specifically James, the project lead) interact via Obsidian. Preserve st
 Read these in order:
 
 1. [`Onboarding/start-here.md`](./Onboarding/start-here.md) — decision tree from "I just arrived" to "I'm working on X."
-2. [`Onboarding/repo-map.md`](./Onboarding/repo-map.md) — the `/efs/` layout.
-3. [`Onboarding/write-a-design.md`](./Onboarding/write-a-design.md) — if your task involves writing a design.
-4. [`Onboarding/conventions.md`](./Onboarding/conventions.md) — tags, paths, tri-sync, commit messages.
-5. [`Onboarding/escalation.md`](./Onboarding/escalation.md) — when to stop and ask vs. note and continue.
+2. [`Designs/owner-decision-inbox.md`](./Designs/owner-decision-inbox.md) — routing page for every live design choice James needs to make.
+3. [`Onboarding/repo-map.md`](./Onboarding/repo-map.md) — the `/efs/` layout.
+4. [`Onboarding/write-a-design.md`](./Onboarding/write-a-design.md) — if your task involves writing a design.
+5. [`Onboarding/conventions.md`](./Onboarding/conventions.md) — tags, paths, tri-sync, commit messages.
+6. [`Onboarding/escalation.md`](./Onboarding/escalation.md) — when to stop and ask vs. note and continue.
 
 Then skim [`Glossary.md`](./Glossary.md) for terminology and [`Designs/README.md`](./Designs/README.md) for the design landscape.
 
 The **canonical protocol** for this vault is [`Designs/design-system.md`](./Designs/design-system.md). This README is the entry point; the design-system file is the authority.
+
+> **Need James to make a design decision?** Start at the [Designs owner decision inbox](./Designs/owner-decision-inbox.md), then follow its folder link. Use only that folder's canonical inbox to determine what is live. Source-design checkboxes are research residue unless the inbox promotes them. Adopted EFS v2 answers are recorded in [owner rulings](./Designs/efsv2/owner-rulings.md); `For-James.md` covers non-design attention too.
 
 ## Directory structure
 
@@ -29,7 +32,7 @@ The **canonical protocol** for this vault is [`Designs/design-system.md`](./Desi
 | `README.md` | This file — entry point. |
 | `AGENTS.md` | Universal agent brief (for tools that auto-detect this filename); redirects here. |
 | `Kanban.md` | Cross-repo task board (Obsidian Kanban plugin). |
-| `For-James.md` | Dashboard of items needing the human's attention right now. |
+| `For-James.md` | Broader cross-project attention dashboard, including deadlines and operational items; live design choices route through the Designs owner inbox. |
 | `Decisions.md` | Append-only one-line decisions log. |
 | `Ideas.md` | Parking lot for future "someday" ideas + things-to-account-for (PM-curated; graduate to Brainstorm/Design). |
 | `Tasks.md` | Global rollups via the Obsidian Tasks plugin (open questions, blocked items, pre-promotion checklists). |
@@ -37,7 +40,7 @@ The **canonical protocol** for this vault is [`Designs/design-system.md`](./Desi
 | `_Index.base` | Obsidian Bases queries (starter views shipped; tune in Obsidian). |
 | `_Notes.canvas` | Obsidian Canvas — freeform whiteboard. |
 | `Daily Notes/` | Human's per-day notes; also catch-all for uncategorized content. |
-| `Designs/` | Design proposals. Name-first drafts; numbered at promotion. See [`Designs/README.md`](./Designs/README.md). |
+| `Designs/` | Design proposals plus the canonical [owner decision routing inbox](./Designs/owner-decision-inbox.md). Name-first drafts; numbered at promotion. See [`Designs/README.md`](./Designs/README.md). |
 | `Architecture/` | Descriptive: "how the system works today." See [`Architecture/README.md`](./Architecture/README.md). |
 | `Glossary.md` | Single alphabetical file of EFS terms. |
 | `Onboarding/` | Procedural: "how YOU do X." See [`Onboarding/README.md`](./Onboarding/README.md). |

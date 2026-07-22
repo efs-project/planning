@@ -11,10 +11,17 @@ This file exists so tools that auto-detect `AGENTS.md` (Codex CLI, Cursor, Devin
 If your tooling does not auto-load `@`-imported files, read these in order before your first commit:
 
 1. [`Onboarding/start-here.md`](./Onboarding/start-here.md) — decision tree from "I just arrived" to "I'm working on X."
-2. [`Onboarding/repo-map.md`](./Onboarding/repo-map.md) — `/efs/` layout and sibling repos.
-3. [`Onboarding/conventions.md`](./Onboarding/conventions.md) — tri-sync invariant, tag vocabulary, commit-message format, link forms, Kanban rules.
-4. [`Onboarding/escalation.md`](./Onboarding/escalation.md) — when to stop and ask vs. note-and-continue.
-5. [`Designs/design-system.md`](./Designs/design-system.md) — canonical protocol for this vault.
+2. [`Designs/owner-decision-inbox.md`](./Designs/owner-decision-inbox.md) — routing page for every live design choice James needs to make.
+3. [`Onboarding/repo-map.md`](./Onboarding/repo-map.md) — `/efs/` layout and sibling repos.
+4. [`Onboarding/conventions.md`](./Onboarding/conventions.md) — tri-sync invariant, tag vocabulary, commit-message format, link forms, Kanban rules.
+5. [`Onboarding/escalation.md`](./Onboarding/escalation.md) — when to stop and ask vs. note-and-continue.
+6. [`Designs/design-system.md`](./Designs/design-system.md) — canonical protocol for this vault.
+
+### Finding James's needed design decisions
+
+Start at [`Designs/owner-decision-inbox.md`](./Designs/owner-decision-inbox.md). It routes to the one canonical owner inbox in each design folder. Those inboxes separate **decide now**, **decide after evidence**, **launch choices**, **settled**, and **delegated** work, with examples and links to detail.
+
+Do not infer a James decision from an unchecked box in a source design. A choice is live only when its folder's owner inbox says it is. Adopted EFS v2 rulings live in [`Designs/efsv2/owner-rulings.md`](./Designs/efsv2/owner-rulings.md); [`For-James.md`](./For-James.md) remains the broader cross-project attention dashboard.
 
 ## Hard rules (load-bearing, don't violate without checking)
 
@@ -34,7 +41,8 @@ If your tooling does not auto-load `@`-imported files, read these in order befor
 | You need… | Look in… |
 |---|---|
 | Active work | [`Kanban.md`](./Kanban.md) |
-| Items needing James's attention | [`For-James.md`](./For-James.md) |
+| Live design choices James needs to make | [`Designs/owner-decision-inbox.md`](./Designs/owner-decision-inbox.md) |
+| Other items needing James's attention | [`For-James.md`](./For-James.md) |
 | Designs (proposals + landed history) | [`Designs/`](./Designs/) (see `README.md` for content map) |
 | Cross-cutting terminology | [`Glossary.md`](./Glossary.md) |
 | System overviews | [`Architecture/`](./Architecture/) |

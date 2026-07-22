@@ -8,7 +8,10 @@ You're a new agent or new contributor in the EFS planning vault — the brain fo
 
 1. `cd <your planning checkout> && git pull --rebase`. Always sync before reading or writing.
 2. Open [[Kanban]]. Look at columns in order: **In Flight**, **Blocked**, **Backlog**.
-3. If you have a specific task from James (in chat or a previous turn), go do that. Stop reading this file.
+3. Open the [Designs owner decision inbox](../Designs/owner-decision-inbox.md) if your work touches design, prioritization, or a question for James. Follow it to the owning folder's single live queue.
+4. If you have a specific task from James (in chat or a previous turn), go do that. Stop reading this file.
+
+> **Decision rule:** unchecked boxes and “open questions” in source designs are not automatically James decisions. The owning folder's owner inbox says whether a choice is live now, evidence-gated, launch-only, settled, delegated, or superseded. Record adopted EFS v2 answers in [owner rulings](../Designs/efsv2/owner-rulings.md); use [[For-James]] for broader non-design attention.
 
 ## Decision tree (if no task assigned)
 
@@ -53,12 +56,14 @@ The exception: trivial typo fixes in comments, error strings, or markdown prose.
 | You need… | Look in… |
 |---|---|
 | Active and queued work | [[Kanban]] |
+| A design choice James needs to make | [Designs owner decision inbox](../Designs/owner-decision-inbox.md) |
+| An adopted EFS v2 owner ruling | [EFS v2 owner rulings](../Designs/efsv2/owner-rulings.md) |
 | A specific design | `Designs/README.md` (curated map) or grep `Designs/` |
 | Terminology | [[Glossary]] |
 | How something works in EFS | `Architecture/README.md` |
 | How to do something process-wise | the rest of `Onboarding/` (see [[Onboarding/README|its map]]) |
 | An ADR or spec from a dev repo | `../contracts/docs/adr/` or `../contracts/specs/` (and equivalents in `client/`, `sdk/`) |
-| Open coordination questions | grep `## Open questions` in `Designs/` |
+| Engineering/research open questions | grep `## Open questions` in `Designs/`; do not treat them as owner choices unless an owner inbox does |
 
 ## Next reads
 
