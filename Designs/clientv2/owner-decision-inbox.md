@@ -121,7 +121,7 @@ Details: [[locale-and-accessibility#Language packs and font packs]], [[locale-an
 
 Do not ask James to choose constants or mechanics that prototypes and normal design review can settle: ceremony serialization/risk thresholds, expiry constants, cache watermarks, quota margins, UI placement, IDL syntax, package layout, high-bandwidth port mechanics, locale entropy constants, app migration ownership, and second-instance takeover behavior.
 
-**Research directive, not a decision:** the third-party app model is deliberately unchosen. Fable should deeply compare WASM/WASI/Components, Blazor/.NET, HTMX-inspired and typed UI, JS/SES, iframe compatibility, and alternatives using [[fable-third-party-app-model-handoff]]. No James answer is needed until evidence produces a real product or permanence tradeoff.
+**Research directive, not a final lane/ABI decision:** open web standards and WebAssembly/WASI are the strong foundational prior. Fable should validate a likely multi-lane model—confined compiled apps driving OS-owned UI, full-web sandboxed iframes speaking typed messages/opcodes, and only evidence-earned specialist lanes—against Blazor/.NET, HTMX-inspired UI, JS/SES, Components/WIT, and alternatives using [[fable-third-party-app-model-handoff]]. Every lane shares one Kernel-resolved permission system; app-declared security tags/imports/options request but never grant authority. No James answer is needed until evidence produces a real product or permanence tradeoff.
 
 ## Protocol-owned — route to EFS v2
 

@@ -156,10 +156,13 @@ Fuchsia-shaped, exactly: `Resolver.resolve(url) → (manifestDecl, closureRootHa
 | `ses-worker@1` | default Ring-3 cage | receives Start(resolvedURL, program block, granted ports, controller) |
 | `render-service@1` | document-mode bytes | never receives capability ports |
 | `wasm-component` | candidate under research | test WIT/components and selective WASI against core Wasm, JS/SES, .NET, and compatibility lanes; no version or browser adapter selected |
+| `sandboxed-iframe` | candidate full-web lane | app owns its frame DOM; opaque-origin sandbox and brokered typed message/opcode capabilities; exact profile and launch role evidence-gated |
 
 Which resolvers/runners a collection sees is **environment policy** (auto-propagating, Fuchsia's two-channel insight: infrastructure flows implicitly, authority explicitly). Production collections get content-addressed resolvers only; `dev://` exists solely in the developer environment.
 
-**Research status (2026-07-22; not a ruling).** This runner table is a candidate model. [[fable-third-party-app-model-handoff]] asks Fable to compare the present SES Worker and Surface IR assumptions with core Wasm, WebAssembly Components/WIT, .NET/Blazor variants, constrained hypermedia, iframe compatibility, and other models. No runner, IDL, WASI profile, framework, or rendering protocol is selected.
+**Research status (2026-07-22; not a frozen runner set).** Web standards and WebAssembly/WASI are the strong foundation prior. [[fable-third-party-app-model-handoff]] asks Fable to validate a probable multi-lane model: a confined Wasm/WASI-style app driving OS-owned UI, a sandboxed full-web iframe controlling its interior DOM and speaking typed opcodes across a message boundary, and at most one or two evidence-earned specialist lanes. Exact runners, IDL, WASI profile, UI protocol, and lane count remain open.
+
+**One permission law across runners.** A manifest may declare a runner, requested security tags/profile, imports, capabilities, budgets, and options. It cannot grant or truthfully rate itself. The Kernel computes effective authority as the intersection of the package ceiling, runner/profile ceiling, user/admin grants, and platform policy. For a component this controls the host/WASI interfaces actually instantiated; for an iframe it controls sandbox/origin/CSP/Permissions-Policy features and the capability ports/opcodes exposed. Install and update review shows the resolved capability/profile diff, not merely the package's requested labels.
 
 ### Collections — instance classes and capability floors
 

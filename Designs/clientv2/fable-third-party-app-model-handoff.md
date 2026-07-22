@@ -11,9 +11,40 @@
 
 ## What this is
 
-This is a deep-research handoff for Fable, not an architecture ruling. James explicitly does **not** want EFS to choose a runner, ABI, UI system, framework, or WASI version yet. The job is to find the safest, most durable, most useful third-party application model for EFS OS and to show the evidence behind that recommendation.
+This is a deep-research handoff for Fable, not a frozen app-platform specification. James does **not** want EFS to choose an exact runner set, ABI, UI protocol, framework, or WASI version yet. The job is to find the safest, most durable, most useful third-party application model for EFS OS and to show the evidence behind that recommendation.
 
 The current Worker/capability/Surface-IR model is a hypothesis too. Fable may preserve it, recut it, combine it with another model, or reject it if the evidence supports that result.
+
+## Owner steering — strong prior, shape still open
+
+EFS itself is evolving, so depending on young technology is acceptable when it is built through open web standards with a credible long-term ecosystem. WebAssembly and WASI are expected to keep improving and are a **strong foundational prior** for EFS OS even if today's Component Model tooling, browser adapters, WIT worlds, and WASI version are not the final forms.
+
+The likely product is not one universal app container. Research a small number of deliberately different app lanes that share one EFS permission and capability system. The leading shape to validate is:
+
+1. **Confined compiled/component app:** Wasm/WASI-style code receives only selected host imports and capability handles. It does not own the DOM; it sends versioned typed UI operations, patches, components, or another researched protocol to an OS-owned renderer.
+2. **Full-web iframe app:** a sandboxed, preferably opaque-origin iframe controls the web platform and DOM inside its own frame. It crosses into EFS only through a versioned `MessagePort`/`postMessage` capability protocol—potentially compact typed opcodes—and never receives direct Kernel objects.
+3. **One or two additional lanes if evidence earns them:** possibilities include a lightweight JS/SES app, code-free declarative app, headless compute/service component, document/media renderer, or graphics-focused surface. Do not add lanes merely to accommodate every framework.
+
+Fable must determine whether this is two, three, or four lanes; which are ordinary third-party apps versus compatibility/special-purpose lanes; and whether the maintenance and conformance cost is justified.
+
+### One permission system across every lane
+
+Every package declares its requested runner class, security tags/profile, capabilities, required and optional imports, UI bridge version, resource budgets, and runner-specific options. Those declarations are requests and compatibility metadata—not self-granted authority or trustworthy claims about the package.
+
+The effective authority is the intersection of:
+
+```text
+package-declared ceiling
+∩ runner/security-profile ceiling
+∩ user and administrator grants
+∩ current platform support and policy
+= effective app capabilities
+```
+
+- For Wasm/component apps, this determines which EFS host interfaces and selected WASI modules/interfaces are actually linked or instantiated, plus options such as memory, threads, clocks, randomness, storage, network, GPU, and execution budgets.
+- For iframe apps, it determines sandbox flags, origin treatment, CSP, Permissions Policy, network/storage brokers, cross-origin-isolation features, device access, and the capability ports/opcodes made available across the message boundary.
+- Capability names and user-facing meanings should stay consistent across lanes even when enforcement mechanisms differ. A network grant should not silently mean broader authority in an iframe than in a component.
+- The Kernel resolves the effective profile and records capability diffs on install/update. An app may request a security tag or option; it may not choose its own effective confinement or label itself trusted.
 
 ## The product problem
 
@@ -55,7 +86,7 @@ Fable should research broadly, then narrow to three to five coherent architectur
 | Core Wasm + small EFS-owned ABI | Mature browser execution and tight host control | EFS must invent async, resources, bindings, evolution, and good multi-language ergonomics |
 | WebAssembly Components + WIT, with selective or no generic WASI | Typed language-neutral boundaries and resource handles may fit object capabilities | Component Model/browser tooling maturity, adapter churn, size, copies, interruption, and language support are unproven |
 | Dual JS and Component runners over one semantic contract | Practical JS path now with a credible component future | Two implementations can drift and double conformance/security work |
-| Sandboxed opaque-origin iframe compatibility lane | Existing web frameworks, DOM, accessibility ecosystem, and complex UI | Much broader attack/privacy surface and weaker OS control over trusted rendering |
+| Sandboxed opaque-origin iframe full-web lane | Existing web frameworks, DOM, accessibility ecosystem, and complex UI; typed message opcodes can expose the same EFS capabilities | Much broader attack/privacy surface; sandbox/profile options and capability semantics must not become self-awarded privilege |
 | Blazor/Razor custom adapter | Productive C# component model and mature .NET tooling | Ordinary Blazor owns the DOM/UI thread; a custom renderer relies on unstable internals and adds runtime cost |
 | Plain .NET Worker + EFS-native C# UI DSL | Reuses C# logic/tooling without pretending ordinary Blazor fits | Still ships a .NET runtime; EFS owns another framework and bindings surface |
 | C# NativeAOT component | C# without a full interactive Blazor runtime | Young component toolchain and reduced framework/library compatibility |
@@ -79,6 +110,7 @@ Also investigate relevant models we missed: browser extension sandboxes, Isolate
 - OS-owned rendering may improve security, accessibility, and consistency, but a home-grown Surface IR or component catalog can become an inflexible lowest common denominator.
 - A compatibility iframe may be strategically valuable even if it is never the high-trust lane.
 - Multiple runners may preserve optionality, or may create permanent complexity and semantic drift. Compare that cost with choosing one narrow substrate.
+- A two-to-four-lane architecture may be the honest way to combine safe compiled apps with full web compatibility, provided all lanes share capability meanings, audit behavior, package identity, and conformance tests.
 
 ## Required research method
 
@@ -140,15 +172,16 @@ Fable should return:
 
 ## Explicit non-decisions
 
-This handoff does **not** select:
+This handoff does **not** yet select:
 
-- WASM-first or WASM-only;
+- the exact foundational role, binary/profile floor, or launch maturity bar for WebAssembly/WASI;
 - WIT or any other canonical IDL;
 - WASI 0.2, WASI 0.3, or generic WASI imports;
 - `jco`, a browser component engine, or a native runtime;
 - Blazor, Razor, .NET Worker, NativeAOT, HTMX, or another framework;
 - Surface IR, hypermedia fragments, a component catalog, app-owned DOM, or iframe rendering;
 - one runner or multiple runners;
+- the final number or names of app lanes;
 - a promise that the same binary will run unchanged in future native hosts.
 
 These are research questions for Fable and evidence spikes, not choices James needs to answer now.
