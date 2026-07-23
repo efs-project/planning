@@ -88,6 +88,7 @@ while IFS= read -r f; do
   #   pre-promotion       draft | review | ready-for-promotion   → un-numbered
   #   promoted            accepted | landed                      → numbered
   #   terminal, either    abandoned | rejected | superseded
+  #   not a design      reference → un-numbered; a ledger/context artifact in Designs/
   #   terminal, in-vault  handoff  → un-numbered; implementation lands in
   #                       another repo, so it never earns a number
   if [[ $is_numbered -eq 1 ]]; then
@@ -109,7 +110,7 @@ while IFS= read -r f; do
     esac
   else
     case "$prose_status" in
-      draft|review|ready-for-promotion|abandoned|rejected|superseded|handoff) ;;  # OK
+      draft|review|ready-for-promotion|abandoned|rejected|superseded|handoff|reference) ;;  # OK
       accepted|landed)
         echo "MISSING NUMBER: $f has status=$prose_status but no NNNN- prefix (promotion should have renamed)"
         ISSUES=$((ISSUES + 1))

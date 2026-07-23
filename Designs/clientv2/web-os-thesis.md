@@ -80,7 +80,7 @@ The load-bearing change from the 2026-05-26 sketch: **apps do not live on the ma
 
 ## Fork rulings
 
-### F1. The Ring-3 cage: SES-in-Worker, render as capability — **[research-grounded]**
+### F1. The Ring-3 cage: SES-in-Worker, render as capability — research-grounded
 
 Three independent layers, always, per app:
 
@@ -96,11 +96,11 @@ A worker with `connect-src 'none'` whose only channel is postMessage to the Kern
 - **Canvas mode:** a transferred `OffscreenCanvas` the app paints, composited inside a Shell-drawn frame — for editors, games, visualizers. Requires a semantic sidecar (accessible tree) for anything interactive.
 - **Document mode:** the render service (sandboxed iframe, separate lane) for rendering untrusted document content.
 
-### F2. Protection domains, honestly — **[research-grounded]**
+### F2. Protection domains, honestly — research-grounded
 
 Bootstrapper, Kernel, System Chrome, and Session Shell share one origin (static, IPFS-distributable). The browser's real protection domain is the origin, so the design *says out loud*: the Kernel-in-a-Worker is modularity and crash isolation, **not** a cryptographic enclave. WebCrypto has no secp256k1, so EFS author keys are software keys in worker memory; at rest they are wrapped by non-extractable WebCrypto AES keys derived via **passkey PRF** (broadly supported 2025–26) and/or a wallet-derived secret, so encrypted state survives total origin eviction and is re-openable. Shell-origin compromise = local-state compromise; the defense budget therefore goes to the Shell's dependency diet, LavaMoat policy over our own supply chain, Trusted Types, and reproducible builds — not to pretending the worker boundary is more than it is. Where real key protection is wanted, route to an external signer (wallet, hardware, passkey ceremony) — see F6/T10.
 
-### F3. Shell: split, then plural — **[research-grounded]** on the split; **[reasoned]** on plurality timing
+### F3. Shell: split, then plural — research-grounded on the split; — reasoned on plurality timing
 
 What the handoff calls "Shell" is two trust classes fused. We split them:
 
@@ -110,7 +110,7 @@ What the handoff calls "Shell" is two trust classes fused. We split them:
 
 Secure-prompt reality check (the in-page "line of death" does not exist): because apps own no pixels (F1), an app cannot paint over System Chrome — the classic in-page spoof is structurally gone. What remains is *mimicry inside the app's own surface* and browser-level spoofs (BitB). Mitigations adopted from the research: interaction gating (activation delays, no default-focus accept, ignore too-fast clicks), user-configured **negative** indicator (absence is a tell; never a positive trust signal — SiteKey's 58/60 lesson), Kernel-derived identity in all prompts, full-address rendering (address-poisoning is a pure truncation failure; $83M+), and **T10**: above a defined risk threshold (large value, admin grants, key export), Shell-only confirmation is *disallowed* — authorization must run on a surface EFS doesn't draw (hardware wallet clear-signing via ERC-7730, or the origin-bound passkey ceremony).
 
-### F4. Packages and updates: EFS is the registry; lenses are the channels — **[research-grounded]**
+### F4. Packages and updates: EFS is the registry; lenses are the channels — research-grounded
 
 - **App identity** = (author identity word, app-root record), *never* the signing-key hash (IWA's key-as-identity has no rotation story) and never a vanity path.
 - **Version identity** = package content hash; releases are immutable placements; names are petnames.
@@ -120,7 +120,7 @@ Secure-prompt reality check (the in-page "line of death" does not exist): becaus
 - **Rollback:** user rollback among locally verified generations is always allowed; auto-follow of a backward-moving channel pointer is never allowed (Guix fast-forward rule — downgrade-as-attack and rollback-as-right are different operations). Rolling back into a release carrying a deny fact warns explicitly.
 - **The client's own distribution eats this dog food:** reproducible builds, provenance records on EFS, the Bootstrapper verifying Shell/Kernel CIDs against the pinned profile before boot (the Bybit lesson), TOFU + self-pinning service worker as default, IWA-convertible packaging as the hardened lane, WAICT/WEBCAT tracked as the standards path.
 
-### F5. Network: the broker owns every packet — **[research-grounded]**
+### F5. Network: the broker owns every packet — research-grounded
 
 The cage (F1) makes "no ambient network" *enforceable*: apps have no network path at all; the Kernel's broker is the only egress. Policy on top:
 
@@ -129,7 +129,7 @@ The cage (F1) makes "no ambient network" *enforceable*: apps have no network pat
 - **Traffic discipline as an OS invariant:** derive venue freshness for *all* cached records from a single jittered head/checkpoint fetch per venue per interval (passive timing correlation deanonymizes >95% of per-record pollers); distribute hot indexes (lens lists, deny sets, discovery, checkpoints) as content-addressed signed snapshots queried locally — the OCSP→CRLite pattern; normalize request shapes so app identity and user configuration aren't recoverable from traffic shape (Tor's uniformity-beats-configurability lesson, which directly tensions with user-sovereign profiles — resolved by keeping profile diversity out of network-observable behavior).
 - **Self-hosting first-class:** localhost endpoints must handle Chrome 142's Local Network Access prompt; consider shipping a one-container "EFS home endpoint" (getProof-capable RPC + trustless gateway + optional OHTTP gateway) as the sovereign tier. **[reasoned]** on the container; the LNA handling is grounded.
 
-### F6. Keys, personas, and the signing ceremony — **[research-grounded]** mechanics; **[reasoned]** persona doctrine
+### F6. Keys, personas, and the signing ceremony — research-grounded mechanics; — reasoned persona doctrine
 
 Protocol facts bind us: author = recovered secp256k1 signer; no session keys; no ERC-1271, ever. So:
 
@@ -138,19 +138,19 @@ Protocol facts bind us: author = recovered secp256k1 signer; no session keys; no
 - **Batch legibility over batch hiding:** aggregate ("312 files into /photos/2026, 4 folders, 1 lens update"), expandable, with **per-record risk classes** so one dangerous record can't hide among harmless ones (the 7702 drainer wave — >97% of early delegations were sweepers — is the memento mori).
 - **Key custody ladder:** connected wallet (EOA signs envelopes; 7702/AA useful only as *submission* rails) → Kernel software keys wrapped via passkey PRF → future: P-256 passkey signers when 0x02 un-reserves (EIP-7951 precompile is live on L1 as of Fusaka 2025-12; the pressure report asks the protocol to re-examine the "KEL-era" gating).
 
-### F7. Write lifecycle: draft-first, ratified — **[research-grounded]**
+### F7. Write lifecycle: draft-first, ratified — research-grounded
 
 PSBT practice and Safe's front-runnable public queue settle the handoff's open question: a signed artifact is a live grenade, not a draft. Ordinary "save" = encrypted journal. Signing = explicit checkpoint. Signed bundles: encrypted at rest, default `expiresAt` on interactive-session bundles, custody tracked, export = a Shell security event ("anyone holding this can publish it, now or years from now — expiry only ages what readers make of it"; see Amendment 6 — the pre-signed abort artifact, not expiry, is the kill switch). "Sign now, submit later" and offline `.efs-bundle` export are first-class *user actions*. The flush engine is a dumb resumable outbox: at-least-once, idempotent on deterministic claimIds, per-record admission tracking, offset-probe-then-append for chunk uploads; Background Sync is Chromium-only so flush-on-foreground with a visible Sync Center is the portable pattern; `navigator.onLine` is never trusted.
 
-### F8. The OS SDK transport: ports, membranes, pickers — **[research-grounded]**
+### F8. The OS SDK transport: ports, membranes, pickers — research-grounded
 
 Capabilities are **MessagePorts minted by the Kernel** — unforgeable, transferable (delegation), severable (revocation), web-native (Fuchsia's channel model in browser primitives). Every grant is a Kernel-side caretaker proxy carrying a printable scope descriptor, expiry/decay, pause/revoke, and an invocation audit trail; persisted grants are Sandstorm-style tokens whose *restore re-evaluates current policy* — never rehydrated raw. Deep attenuation at the postMessage membrane: any object returned through a granted capability is wrapped in the same membrane. The `efs.*` object apps see is a typed veneer over ports, with TypeScript types and runtime validators generated from one IDL. **Pickers are the permission system**: apps request by *type* (Sandstorm descriptor model); Shell-owned file/folder/lens/endpoint/persona pickers return scoped handles; designation = authorization; yes/no resource dialogs are reserved for the signing checkpoint. App manifests adopt the CML tri-partition — `program` (runner + opaque block), `use` (capability ceilings), `config` (typed schema validated pre-launch), `facets` — compiled to a canonical hashed form so the manifest hash is part of app identity; resolvers (installed / IPFS / EFS-record / dev) and runners (SES-worker / iframe-renderer / WASM-later) are Kernel capabilities in the Fuchsia shape.
 
-### F9. Agents: the fourth principal — **[research-grounded]**
+### F9. Agents: the fourth principal — research-grounded
 
 User, app, system service, **agent session**. The typed plan → dry-run → approve → execute → receipt pipeline is the load-bearing security boundary, CaMeL-shaped: the plan is compiled from trusted intent *before* untrusted content is read; untrusted data fills declared data slots but can never add or reorder actions; the Kernel — not the model — validates each step. The **lethal trifecta** (private-data reads + untrusted-content ingestion + external network) is a *static Kernel invariant* no agent session may hold in full without break-glass chrome. Budgets are day-one meters (AP2 open/closed-mandate vocabulary; every deployed system retrofitted them after blowouts). Agents never hold signing keys; they enqueue into the same outbox humans use, and the T3/T5 checkpoints (sign/publish/spend/install/grant/export/delete) are **never satisfiable by an agent alone**. App-manifest action catalogs are root authority; MCP servers / A2A cards / WebMCP / llms.txt are generated exhaust. Receipts are local-first, signed, structured; publishing one to EFS is an explicit previewed write. Deterministic client-computable IDs make dry-runs unusually honest — exploit that as a differentiator.
 
-### F10. Locale and accessibility: mediated, canonical, budgeted — **[research-grounded]**
+### F10. Locale and accessibility: mediated, canonical, budgeted — research-grounded
 
 - **`LocaleHandle` exposes methods, not data** — format/collate/segment/pluralize/translate without disclosing the profile; full-profile access is a separate, prompted, high-sensitivity capability; default app-visible locale = coarsened primary language tag only. A per-app **locale entropy budget** mirrors the network privacy model.
 - **Two-track rendering:** display track = engine `Intl` (fast, offline); canonical track = pinned **ICU4X-WASM + hash-pinned CLDR pack** for anything reproducible — receipts, citations, audit entries — always storing the raw machine value under the localized surface, tagged `(cldrVersion, tzVersion, formatterCID)`. Rendering locale is a lens too, and is labeled.
@@ -158,15 +158,15 @@ User, app, system service, **agent session**. The typed plan → dry-run → app
 - **A11y floor:** WCAG 2.2 AA; `ElementInternals` semantics in every component; ARIA relationships kept within one shadow root (cross-root ARIA is not Baseline); mandatory manual screen-reader testing; all `prefers-*` queries wired into tokens day one. Surface mode (F1) is the a11y strategy: the Shell owns real DOM, so app UI is accessible by construction rather than by app diligence.
 - **`<efs-identifier>`** renders addresses/hashes/paths LTR-isolated, chunked, UTS-39 confusable-checked, bidi-control-stripped — one primitive kills the mixed-direction spoofing class.
 
-### F11. Client self-trust — **[research-grounded]**, residual risk stated
+### F11. Client self-trust — research-grounded, residual risk stated
 
 Ladder: plain web origin (trust the gateway every load) → **default: PWA + self-pinning SW + reproducible builds + provenance on EFS + generation verification at boot** → IWA signed bundle (Chromium/enterprise; kept format-convertible) → native wrapper (last resort). The residual truth is stated loudly: the *first* load of the Bootstrapper is a TOFU event on whatever origin/gateway served it — exactly TUF's untrusted-root-bootstrap step. After first pin, every subsequent boot verifies the closure. G2 from the secure-ui lane is accepted as residual: the web has no secure attention key; we document it and design the negative-indicator + passkey stack around it.
 
-### F12. Deep links — **[reasoned]**, awaiting the boot-deeplinks lane retry
+### F12. Deep links — reasoned, awaiting the boot-deeplinks lane retry
 
 web3:// grammar stays owned by [[read-lens-spec]] §6.5. The OS adds link classes as query/fragment extensions, never new derivation surface: app links, generation/closure links (open exact system vs follow channel), permission-prompt links, sync-state links. Capabilities ride the fragment (never sent to servers); unfurl bots fetch pasted links, so nothing sensitive may ride the query string. Boot path: cache-first app-shell served by a thin-router SW (Static Routing API + auto-preload where available; navigation preload is a data-wasting footgun for cache-first shells — amended per [[boot-and-profiles]]), minimal viewer closure for citation links — the deep-link cold start is a first-class performance budget, not a page load. Cache-rendered content before venue contact presents as AS-OF/UNKNOWN-CURRENCY with a presentation state, never as a new grade word.
 
-### F13. Venues: invisible until they change an answer — **[reasoned]**
+### F13. Venues: invisible until they change an answer — reasoned
 
 Grades and "as of" labels surface only when not HOME-LIVE; a Venue/Sync center owns the detail; one-head-per-venue freshness polling (F5) makes the honest default cheap and private. GATE consumers inside the OS (installers, agents, auto-update) obey [[read-lens-spec]] §3.3 consumption rules mechanically.
 
@@ -212,7 +212,7 @@ Every lane uses one permission system. Packages may declare requested security t
 - No ambient HTTP anywhere, including fonts, avatars, telemetry, crash reports, update checks. There is no telemetry.
 - No positive-trust badges; no silent fallthrough; no un-graded render of anything fetched.
 
-## Naming — **[open]**
+## Naming — open
 
 Working frame: the protocol is **EFS**; the product is the **EFS OS** (or a to-be-chosen name); the replaceable presentation layer is the **Shell**; developer surfaces are **`@efs/sdk`** (protocol) and **`@efs/os-sdk`** (app runtime). "EOS" is rejected (collision-rich, overclaiming). Candidate product names to explore with taste later: *Etherea*, *Archive OS*, *Meridian*, *Everfile*, *the Commons*. Naming is not a blocker for any design in this set; it is a launch decision.
 

@@ -2,7 +2,7 @@
 
 **Status:** review
 **Target repos:** sdk, contracts (the authenticated in-account routine)
-**Depends on:** [[sdk-write-ux]], [[sdk-architecture]] (EIP-1193/viem boundary, ADR-0008/0009), [[efs-write-ux-attester]]
+**Depends on:** [[sdk-write-ux]], [[sdk-architecture]] (EIP-1193/viem boundary, ADR-0008/0009)
 **Reviewers:** 2026-06-20 — 5 expert passes (coherence, future-proofing, standards/viem, security, DX). Findings folded into this v2. Verdict: sound & buildable; corrections below.
 **Last touched:** 2026-06-20 — sdk-designer (v2)
 

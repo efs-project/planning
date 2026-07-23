@@ -80,11 +80,11 @@ The first five rows elaborate canonical EFS launch choices. Answer the **EFS cod
 
 | Canonical code | Client example and options | Recommendation | Details |
 |---|---|---|---|
-| **EFS L3 — dangerous package boot** | A researcher needs a revoked emulator: forbid boot; isolated guest/forensics boot; or normal-profile warning | isolated guest only, with no standing grants, identity, signing, or ambient network | [[boot-and-profiles#4.4 Boot-time revocation posture — [open — protocol gap]]], [[packages-and-updates#6. Rollback [research-grounded]]] |
-| **EFS L1 — update trust** | one steward; independent thresholds; or manual-only | separate disclosed forkable threshold sets for OS and apps; broadening updates always require review | [[packages-and-updates#7. The client's own distribution [research-grounded]]], [[packages-and-updates#8. Curator-compromise recovery — the runbook ships BEFORE channels [research-grounded]]] |
+| **EFS L3 — dangerous package boot** | A researcher needs a revoked emulator: forbid boot; isolated guest/forensics boot; or normal-profile warning | isolated guest only, with no standing grants, identity, signing, or ambient network | [[boot-and-profiles#4.4 Boot-time revocation posture — open — protocol gap]], [[packages-and-updates#6. Rollback — research-grounded]] |
+| **EFS L1 — update trust** | one steward; independent thresholds; or manual-only | separate disclosed forkable threshold sets for OS and apps; broadening updates always require review | [[packages-and-updates#7. The client's own distribution — research-grounded]], [[packages-and-updates#8. Curator-compromise recovery — the runbook ships BEFORE channels — research-grounded]] |
 | **EFS L2 — endpoint/privacy defaults** | manual/self-hosted; operator-diverse defaults; or one first-party endpoint | closure-pinned named operator set, explicit first-run acknowledgment, easy replacement, and distinct relay/destination operators | [endpoint onboarding](./network-privacy.md#endpoint-onboarding-ux), [OHTTP posture](./network-privacy.md#ohttp-posture-research-grounded) |
-| **EFS L4 — monitoring promise** | funded global observatory; local subscriber checks; or none | local checks with explicit limits until an independent observatory is funded | [[packages-and-updates#8. Curator-compromise recovery — the runbook ships BEFORE channels [research-grounded]]], [[research-digest#Open questions]] |
-| **EFS L7 — product name** | EFS OS; Cyphos; another screened name | use Cyphos as a working name only; decide after trademark/package/repo/domain/app-store screening | [[web-os-thesis#Naming — **[open]**]] |
+| **EFS L4 — monitoring promise** | funded global observatory; local subscriber checks; or none | local checks with explicit limits until an independent observatory is funded | [[packages-and-updates#8. Curator-compromise recovery — the runbook ships BEFORE channels — research-grounded]], [[research-digest#Open questions]] |
+| **EFS L7 — product name** | EFS OS; Cyphos; another screened name | use Cyphos as a working name only; decide after trademark/package/repo/domain/app-store screening | [[web-os-thesis#Naming — open]] |
 
 ### CL1 — Sovereign endpoint tooling schedule
 
@@ -104,7 +104,7 @@ Details: [endpoint onboarding](./network-privacy.md#endpoint-onboarding-ux) and 
 - **CL2B — Commit to a broad multilingual first-party launch.** Higher reach and ongoing translation burden.
 - **CL2C — Build English-only and retrofit.** Not recommended because some correctness failures are architectural.
 
-Details: [[locale-and-accessibility#Language packs and font packs]], [[locale-and-accessibility#Accessibility foundation]], and [[locale-and-accessibility#Open questions]].
+Details: [[locale-and-accessibility#4. Language packs and font packs]], [[locale-and-accessibility#7. Accessibility foundation]], and [[locale-and-accessibility#Open questions]].
 
 ## Already settled — do not ask again
 

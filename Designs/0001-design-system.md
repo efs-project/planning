@@ -103,10 +103,15 @@ Designs/offline-sync.md
 | `landed` | Implementation merged in all target repos. Body replaced with tombstone. |
 | `abandoned` | Explicitly chosen against. File kept for reasoning. |
 | `rejected` | Hard-vetoed by human; do not revive without re-litigation. |
+| `superseded` | A later design replaced it. Distinct from `abandoned` (nothing replaced that) and `rejected` (vetoed). Pairs with the `**Supersedes:**` header field, which previously had no matching status. |
+| `handoff` | Planning is finished; the doc is a self-contained packet for another repo's agent. Terminal **in this vault** — never numbered, because implementation lands elsewhere. |
+| `reference` | A permanent **non-design** artifact living inside `Designs/` — a ruling ledger, a kickoff-context doc, a round map. No lifecycle; never promoted or numbered. |
 
 `rejected` and `abandoned` differ: `abandoned` may be revisited freely (the team got bored, the moment passed); `rejected` requires a new argument that addresses the original veto.
 
-**Tri-sync invariant.** Status appears in three places (prose, tag, filename — at promotion). All three must agree:
+### Tri-sync invariant
+
+Status appears in three places (prose, tag, filename — at promotion). All three must agree:
 
 - [ ] **Prose** `**Status:** X` in the design front-matter
 - [ ] **Tag** `#status/X` on the tag line
@@ -200,7 +205,7 @@ A term graduates to its own `Architecture/<term>.md` page when its definition ex
 |---|---|
 | Another file in the vault | `[[filename]]` (no extension) |
 | A glossary term | `[[Glossary#term]]` |
-| An ADR in a sibling repo | `[ADR-NNNN-title](../../contracts/docs/adr/NNNN-title.md)` *(adjust `../` count for the file's depth — see [[conventions#Linking out of the vault]])* |
+| An ADR in a sibling repo | `[ADR-NNNN-title](../../contracts/docs/adr/NNNN-title.md)` *(adjust `../` count for the file's depth — see [[conventions#Paths and links]])* |
 | A spec in a sibling repo | `[Spec NN](../contracts/specs/NN-...)` |
 | A PR or external URL | full URL, or `[text](url)` |
 

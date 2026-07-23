@@ -1,9 +1,9 @@
 # EFS v2 — Owner rulings & notes (James)
 
-**Status:** running notes — decisions/directions, NOT designs. Append-only, dated. The design docs get updated to match separately.
+**Status:** reference — append-only, dated ruling ledger. NOT a design: decisions/directions only. The design docs get updated to match separately.
 **Last touched:** 2026-07-23
 
-#status/notes #kind/notes
+#status/reference #kind/note
 
 ## 2026-07-10
 

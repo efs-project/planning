@@ -45,6 +45,7 @@ Adopted EFS v2 rulings live in [`Designs/efsv2/owner-rulings.md`](./Designs/efsv
 
 - Subject line: `<area>: <imperative summary>`. Areas: `design`, `kanban`, `docs`, `chore`, `promote`, `land`, `sync`, `status`, `pm`. **`pm:` is RESERVED for the PM role** — a non-PM agent editing a PM-owned file uses its own area, or `git log --grep='^pm:'` falsely attributes the work (this produced a "phantom second PM" on 2026-05-28). Full list: [`Onboarding/conventions.md`](./Onboarding/conventions.md).
 - Include `Agent: <slug>` and `Co-authored-by: <Model Name> <noreply@<vendor>>` trailers. The `Agent:` slug is a stable identifier for agent + role (e.g. `claude-opus-4.7`, `codex-gpt-5`), enabling per-agent grep on `git log`.
+- **Before pushing, run `./scripts/open-decisions.sh --check`** — it fails if the generated decision roll-up no longer matches its sources.
 - **Run `./scripts/install-hooks.sh` once per clone.** Hooks are per-clone and not carried by git, so a fresh checkout has no commit validation.
 - **Write the commit message to a file and use `git commit -F <file>` — never embed `\n` inside `git commit -m`.** Some harnesses don't interpret the escape, so trailers land as a literal `\n` on one physical line; six vault commits already did, and `scripts/agent-activity.sh` buckets them as "unknown." Verify with `git log -1 --format='%B'` after your first commit.
 - **Write a subject a future agent can orient from** — the *outcome*, not the activity ("drop EAS as the record carrier", not "update design docs").

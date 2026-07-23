@@ -2,7 +2,7 @@
 
 **Status:** review
 **Target repos:** sdk, contracts (in-account routine: a 7702 impl + a 7579 executor module — NOT frozen schema contracts)
-**Depends on:** [[sdk-minimal-clicks]], [[efs-write-ux-attester]]
+**Depends on:** [[sdk-minimal-clicks]]
 **Supersedes:** [[sdk-one-signature-writes]]
 **Reviewers:** 2026-06-20 — 2 deep research dives (EAS delegated/gasless feasibility; 2026 AA/paymaster wallet landscape), both source-verified.
 **Last touched:** 2026-06-20 — sdk-designer

@@ -271,7 +271,24 @@ file exists, \`Decisions.md\` otherwise — and never in both._
 EOF
 }
 
-if [[ "${1:-}" == "--stdout" ]]; then
+if [[ "${1:-}" == "--check" ]]; then
+  # Staleness gate. The committed page is what AGENTS.md calls "the fastest
+  # answer"; if someone marks a decision adopted and forgets to regenerate, it
+  # silently keeps advertising the old count. Date lines are excluded so the
+  # check doesn't go red purely because a day passed.
+  # Normalize the DATE only — never drop whole lines. The counts live on the
+  # same line as the date ("**Generated:** <date> · **Ask now: 3** · …"), so
+  # filtering that line out would blind the check to exactly the drift it exists
+  # to catch. (It did, on first write.)
+  norm() { sed -E 's/[0-9]{4}-[0-9]{2}-[0-9]{2}/<DATE>/g'; }
+  if diff <(emit | norm) <(norm < "$OUT" 2>/dev/null) >/dev/null 2>&1; then
+    echo "Open-Decisions.md is current."
+    exit 0
+  fi
+  echo "STALE: Open-Decisions.md does not match its sources." >&2
+  echo "  Regenerate with ./scripts/open-decisions.sh and commit the result." >&2
+  exit 1
+elif [[ "${1:-}" == "--stdout" ]]; then
   emit
 else
   emit > "$OUT"

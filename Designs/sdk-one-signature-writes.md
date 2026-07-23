@@ -4,7 +4,7 @@
 
 **Status:** superseded
 **Target repos:** sdk (no new contracts)
-**Depends on:** [[sdk-minimal-clicks]], [[efs-write-ux-attester]]
+**Depends on:** [[sdk-minimal-clicks]]
 **Reviewers:** 2026-06-20 — 3 expert passes (security/7702-trust, standards/EIP+viem, architecture/alternatives). All three independently rejected the first draft's mechanism; this is the corrected design.
 **Last touched:** 2026-06-20 — sdk-designer
 

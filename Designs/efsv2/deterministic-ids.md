@@ -3,7 +3,7 @@
 **Status:** draft
 **Target repos:** contracts, sdk, planning
 **Depends on:** —
-**Supersedes:** — (on acceptance: supersedes the identity model of [ADR-0049](../../contracts/docs/adr/0049-file-content-identity-hash-as-data.md) in part — "identity ≠ content" is retained, "identity = EAS UID" is replaced; also supersedes the 2026-06-01 never-change-frozen-schemas commitment ([[Decisions]]) and the v1 UID set in `contracts/docs/SEPOLIA_FREEZE_TABLE.md`)
+**Supersedes:** — (on acceptance: supersedes the identity model of [ADR-0049](../../../contracts/docs/adr/0049-file-content-identity-hash-as-data.md) in part — "identity ≠ content" is retained, "identity = EAS UID" is replaced; also supersedes the 2026-06-01 never-change-frozen-schemas commitment ([[Decisions]]) and the v1 UID set in `contracts/docs/SEPOLIA_FREEZE_TABLE.md`)
 **Reviewers:** —
 **Last touched:** 2026-07-01
 

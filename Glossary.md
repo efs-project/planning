@@ -30,7 +30,7 @@ A proposal for a feature or change to EFS that may span multiple repos. Lives in
 
 ## Durable (permanence tier)
 
-Expensive but recoverable surfaces. Includes devnet contracts, cross-package TypeScript APIs, the committed `deployedContracts.ts` shape. Karpathy-style simplicity applies; permanence wins ties. Contrast: [[Glossary#Etched]], [[Glossary#Ephemeral]]. See `contracts/docs/agent-workflow.md` → Permanence tiers.
+Expensive but recoverable surfaces. Includes devnet contracts, cross-package TypeScript APIs, the committed `deployedContracts.ts` shape. Karpathy-style simplicity applies; permanence wins ties. Contrast: [[Glossary#Etched (permanence tier)|Etched]], [[Glossary#Ephemeral (permanence tier)|Ephemeral]]. See `contracts/docs/agent-workflow.md` → Permanence tiers.
 
 ## EAS
 

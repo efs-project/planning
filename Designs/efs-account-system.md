@@ -2,7 +2,7 @@
 title: EFS account system — one smart-account identity per user
 status: review
 tags: [status/review, sdk, identity, ux, contracts-coordination]
-related: [[write-ux-options-ranked]], [[sdk-one-signature-writes]], [[sdk-write-ux]], [[efs-write-ux-attester]]
+related: [[write-ux-options-ranked]], [[sdk-one-signature-writes]], [[sdk-write-ux]]
 target-repos: [sdk, contracts]
 last-touched: 2026-06-23
 ---
@@ -224,7 +224,8 @@ address is the identity).
 A group lens is the **same contract-as-attester** with a different authorization policy: `canWrite(addr)` is
 member-gated (current mod set, token-gate, DAO vote) instead of owner-gated. The contract is the attester, so reads
 are single-address and on-chain cardinality is clean — exactly like a personal account. Groups are the legitimate
-"app's own contract" publisher case ([[efs-write-ux-attester]]); end-user value: `lens=cars.eth` → a curated list
+"app's own contract" publisher case under the write-UX attester rule (the attester stays the user's wallet or the
+app's own contract — no shared relayer); end-user value: `lens=cars.eth` → a curated list
 maintained by the expert set, membership enforced on-chain. **One interface, two policies** — so personal and
 group identity are not double work. (Design the interface now; build groups as a v2 follow-on.)
 

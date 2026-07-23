@@ -13,7 +13,7 @@ Elaborates thesis ruling **F4** (EFS is the registry; lenses are the channels) a
 
 ---
 
-## 1. The registry is EFS itself — record shapes [research-grounded]
+## 1. The registry is EFS itself — record shapes — research-grounded
 
 No registry server, no store, no publish tokens. Every concept below is ordinary Etched records read through [[read-lens-spec]] machinery.
 
@@ -42,7 +42,7 @@ No registry server, no store, no publish tokens. Every concept below is ordinary
 
 One deliberate divergence from thesis F4's shorthand: "channel = LIST head + freshness beacons" conflates two records that the Codex forbids fusing — appendOnly ledger entries must carry `expiresAt == 0`, so the expiring beacon cannot *be* a ledger entry. The split above (permanent ledger + expiring head) is the compliant elaboration.
 
-## 2. App identity and signer change [research-grounded]
+## 2. App identity and signer change — research-grounded
 
 **App identity = `(authorIdentityWord, appRootDataId)`.** Never the signing-key hash (IWA's key-as-identity has no rotation story), never a vanity path (paths are petnames; squatting is inert per [[apps-cookbook]]). Version identity = package manifest hash. The canonical manifest hash participates in identity per F8, so "same app, tampered manifest" is a different app.
 
@@ -52,7 +52,7 @@ One deliberate divergence from thesis F4's shorthand: "channel = LIST head + fre
 - **Any change of publishing author on a channel is the loudest diff class** — blocking, never auto-approved, rendered by System Chrome with the event-stream lesson made visible. UI copy: *"The publisher of Notes changed from alice.eth to 0x9f2… This is how account takeovers look. Notes stays on its current version and will not update until you approve."*
 - **Key theft is the same-key war** (ops amendment 2): the thief renews, re-asserts, counter-supersedes. Expiry and revocation do not defend; the working defenses are deny facts (presence-shaped, work when the author is hostile — read-lens-spec §3.4 rule 6) and lens-level distrust. Detection-before-KEL-inception is the security-critical window and install UX says so in the trust dossier.
 
-## 3. The closure manifest [research-grounded]
+## 3. The closure manifest — research-grounded
 
 One content-addressed DATA record naming the whole bootable system. The manifest's id **is** the generation name and a shareable hyperlink (generation/closure link class, F12). Schema frozen small, versioned, with defined unknown-field behavior — the flakes lesson: this format is what alternative Shells and forks depend on immediately.
 
@@ -95,7 +95,7 @@ interface ClosureManifest {
 
 Rules: **unknown `role` ⇒ the manifest is unbootable by this client version** (fail closed — a role you can't verify is a hole you can't see); unknown *optional* fields are ignored and preserved. Integrity enforcement is layered: import-map `integrity` for every ES module where native; everything else (WASM, packs, app bundles, policy docs) is hash-verified by the Kernel before instantiation — SES worker blobs are built only from verified bytes. Nothing outside the closure loads, ever. A `follows`-style dedup override (two apps sharing a library) is supported in the resolver, recorded in provenance, never implicit.
 
-## 4. Generations [research-grounded]
+## 4. Generations — research-grounded
 
 A generation is a **local, journal-recorded activation** of a closure manifest: `{n, manifestId, provenanceRef, activatedAt, health: staged|booting|successful|failed, pinned: bool}`. Append-only; activation is atomic (SW-mediated pointer swap — the browser's "one SW version controls one client set" is the native atomicity unit; never serve mixed-version chunks, the Vercel skew lesson).
 
@@ -105,7 +105,7 @@ A generation is a **local, journal-recorded activation** of a closure manifest: 
 - **persist() honesty:** call `navigator.storage.persist()` at install and **display the answer**. If denied: *"Your browser may evict the OS and its history. Rollback targets are best-effort until you install to Home Screen / grant persistence."* Boot-time wipe detection (generation sentinels + `estimate()` deltas) emits the Shell-visible eviction event per the thesis honesty doctrine. Never evict the running or last-successful closure while any other cached data remains.
 - **Export/fork:** a generation exports offline as manifest + all bytes + envelopes + proofs + covering checkpoints (CAR-style). Signatures travel *with* the export (the `nix-store --export` signature-loss trap, avoided by construction — envelopes are self-verifying). Importing a shared profile always runs the full install review + capability diff: **a shared closure is a Trojan vector until diffed** (FM-U13).
 
-## 5. The update flow [research-grounded mechanics; [reasoned] constants]
+## 5. The update flow — research-grounded mechanics; reasoned constants
 
 Pipeline: `discovered → cooldown → quorum-check → deny-check → diff-review → staged → activated → successful | rolled-back`. Staging resolves `original` specs through the lens, produces a **new manifest**, fetches and verifies the full closure (all-or-nothing — no half-verified apps, FM-U10), and waits for the activation moment (explicit reload/boot; no forced anything).
 
@@ -116,11 +116,11 @@ Pipeline: `discovered → cooldown → quorum-check → deny-check → diff-revi
 - **Disable-until-approved diffs (Chrome's shipped semantic):** an update that broadens capability ceilings, adds/changes endpoints, changes signer, or changes manifest schema either keeps running the **old version under old grants** or, where the manifest allows, runs the new version attenuated to old grants — and never auto-applies. Diffs render in human meaning (Chrome's warning-diff insight), with network-origin diffs first-class. Same-authority updates auto-apply per channel policy after cooldown + quorum + deny gates.
 - **Publishing is a high-risk action class:** release publication is a Kernel-mediated signature with preflight (files changed; capability/endpoint/signer diffs vs previous), no long-lived publish authority exists anywhere in the OS, and intake tooling normalizes/flags invisible Unicode and homoglyphs (GlassWorm) in names, manifests, and code.
 
-### 5.1 Update discovery under no-ambient-HTTP [research-grounded]
+### 5.1 Update discovery under no-ambient-HTTP — research-grounded
 
 There is no update poller. Channel freshness derives from the **single jittered per-venue head/checkpoint fetch** (F5 traffic discipline) through granted endpoint capabilities — per-app polling would deanonymize the app list from traffic shape. Hot channel state (ledgers, heads, attestation sets, deny sets) distributes as **content-addressed signed snapshots queried locally** (the OCSP→CRLite pattern): a curator-signed digest record the client fetches once and resolves against offline. With **no endpoint grant at all**, update status is `UNKNOWN — no network capability`, never "up to date" (honesty doctrine addition 1). Sneakernet lane: channel snapshots and full closures import from files; imported channel state carries the offline bundle's grade ceiling (read-lens-spec §5.1 last column) and can never satisfy the deny-freshness gate for auto-apply.
 
-## 6. Rollback [research-grounded]
+## 6. Rollback — research-grounded
 
 Two different operations on two different surfaces — the corpus's sharpest synthesis:
 
@@ -129,7 +129,7 @@ Two different operations on two different surfaces — the corpus's sharpest syn
 - **Deny facts on rollback targets warn, never block (for humans).** *"You're rolling back to a version that 2 of your security sources advise against (RCE — GHSA-xxxx). It will run with its previous grants. Continue?"* — typed confirmation for deny-marked targets. Agents get the GATE behavior: flat refusal, no break-glass without a human at System Chrome.
 - **Migration ledger — rollback stops at mutable state, honestly.** Every app/Shell declares `dataSchemaVersion` (the `system.stateVersion` analog). The Kernel keeps a ledger: `{storeId, fromSchema, toSchema, byGeneration, at, downMigrationRef?}`. Rolling back across a migration boundary triggers a real warning — *"Notes migrated its data forward at generation 41. Generation 39 may misread it. Export first?"* — offering proceed / export / cancel, and runs the declared down-migration where one exists. **Never ChromeOS's silent powerwash, never silent corruption.** OS rollback never touches the journal, keys, drafts, outbox, or app data (the Android userdata wall); settings/policy merge across generations 3-way (old defaults × user's current × new defaults, the OSTree /etc pattern).
 
-## 7. The client's own distribution [research-grounded]
+## 7. The client's own distribution — research-grounded
 
 The OS eats this dog food; its own closure roles ride the same channels with `k = 3`.
 
@@ -140,7 +140,7 @@ The OS eats this dog food; its own closure roles ride the same channels with `k 
 5. **IWA-convertible packaging:** bundle layout kept convertible to a Signed Web Bundle for the hardened enterprise lane; identity remains the EFS tuple — the IWA signing key is a packaging detail, divergence documented (key-as-identity is the trap we refuse).
 6. **WAICT/WEBCAT tracked** as the standards path to browser-*enforced* closure verification; align the manifest so adoption is a format change, not a redesign. Chain admission is already our transparency log; **monitoring is the half we must fund** (§8, §9 FM-U12) — transparency without monitors protected no one.
 
-## 8. Curator-compromise recovery — the runbook ships BEFORE channels [research-grounded]
+## 8. Curator-compromise recovery — the runbook ships BEFORE channels — research-grounded
 
 Written now because every precedent wrote it after the incident. This is a System Chrome guided flow plus a published recipe, not a wiki page.
 

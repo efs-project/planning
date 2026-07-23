@@ -97,7 +97,7 @@ The contracts repo proves both paths round-trip (single + multi-chunk pagination
 **File `packages/sdk/src/writes/onchain.ts` (the writer) — three coupled edits, all required or it won't typecheck:**
 1. **The inline ABI.** The deploy ABI is `EFS_BYTES_STORE_ABI`, defined **inline in `onchain.ts`** (~L157), and its constructor is `inputs: [{ name: 'chunks', type: 'address[]' }]`. Add the second input: `{ name: 'contentType_', type: 'string' }`. (There is no separate `efsBytesStoreAbi` symbol — edit the inline constant.)
 2. **The typed client interface.** `OnchainWalletClient.deployContract` (~L119–125) hard-types `args: readonly [readonly Address[]]` — a 1-tuple. Widen to `readonly [readonly Address[], string]`, or the deploy call won't typecheck.
-3. **The deploy call + plumbing.** `storeOnchain(...)` (~L202) currently takes no `contentType` param and the deploy call (~L217–222) is `args: [[chunkAddress]]`. Add a `contentType` parameter to `storeOnchain` (thread it from the caller, which already computes the MIME for the lens-scoped `contentType` PROPERTY — single source of the value), and change the call to `args: [[chunkAddress], contentType]`. Empty string is acceptable (⇒ `application/octet-stream`).
+3. **The deploy call + plumbing.** `storeOnchain(...)` (~L202) currently takes no `contentType` param and the deploy call (~L217–222) is `args: `chunkAddress``. Add a `contentType` parameter to `storeOnchain` (thread it from the caller, which already computes the MIME for the lens-scoped `contentType` PROPERTY — single source of the value), and change the call to `args: [[chunkAddress], contentType]`. Empty string is acceptable (⇒ `application/octet-stream`).
 
 viem deploy shape after the edits:
 ```ts

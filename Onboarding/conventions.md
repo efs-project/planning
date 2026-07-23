@@ -81,7 +81,7 @@ Plain `#kebab-case-text` — no spaces, lowercase (Obsidian treats whitespace as
 
 Canonical meanings live in [[design-system#Designs lifecycle]]; this is the tag surface.
 
-> ⚠️ **Pending sync (2026-07-23).** `superseded`, `handoff`, and `done` were documented here from measured production use; [[design-system]]'s status taxonomy still lists only the original seven. `design-system.md` is numbered/`accepted`, so widening it is a promotion-gated edit — until that happens, **this table and `scripts/tri-sync-check.sh` are the operative list** and no agent should stall on the three additions.
+> The canonical taxonomy lives in [[design-system]]; this table and `scripts/tri-sync-check.sh` mirror it. All three change in the same commit.
 
 | Tag | Meaning |
 |---|---|
@@ -94,6 +94,7 @@ Canonical meanings live in [[design-system#Designs lifecycle]]; this is the tag 
 | `#status/rejected` | Hard-vetoed by the owner. Needs a new argument to revive. |
 | `#status/superseded` | A newer design replaced it; the successor names it in its `**Supersedes:**` field. Read the successor — don't revive this one. Distinct from `abandoned` (nobody replaced it, we just chose against it) and `rejected` (vetoed). Fills the gap where `**Supersedes:**` already existed as a header field with no matching status. |
 | `#status/handoff` | Planning work is finished and the doc is a self-contained packet for another repo's agent. Terminal **in this vault**: it never gets numbered, because implementation lands elsewhere. **One word.** |
+| `#status/reference` | A permanent **non-design** artifact that lives inside `Designs/` — a ruling ledger, a kickoff-context doc, a round map. Has no design lifecycle and is never promoted or numbered. Use this instead of inventing a prose status like `running` or `informational`. |
 | `#status/done` | Terminal state of a **non-design** artifact — a finished `Reviews/` pass, an ops card. **Never valid inside `Designs/`**, where a design ends `landed` / `abandoned` / `rejected` / `superseded`. |
 
 **Not vocabulary — do not copy these if you see them:**
@@ -149,12 +150,14 @@ If such a file *also* carries a `#status/` tag, **the tag is the machine-readabl
 |---|---|---|
 | In-vault references | `[[wiki-link]]` (no extension) | `[[design-system]]`, `[[Glossary#TAG]]`, `[[design-system\|the meta-design]]` (alias) |
 | Out-of-vault references in prose | repo-relative, no `/efs/` prefix | `contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md` |
-| Out-of-vault links | markdown link, path relative to the file you're writing in | `[ADR-0041](../contracts/docs/adr/0041-...)` |
+| Out-of-vault links — from a vault-root file (`Kanban.md`, `Glossary.md`) | markdown link, path relative to the file you're writing in | `[ADR-0041](../contracts/docs/adr/0041-...)` |
+| Out-of-vault links — from depth 1 (`Designs/`, `Onboarding/`, `Reviews/`) | one more `../` | `[ADR-0041](../../contracts/docs/adr/0041-...)` |
+| Out-of-vault links — from depth 2 (`Designs/efsv2/`, `Designs/clientv2/`, corpus subfolders) | one more `../` again | `[ADR-0041](../../../contracts/docs/adr/0041-...)` |
 | Shell commands | whatever `pwd` requires | `cd ../contracts && git status` |
 
 **Never use absolute `/efs/...` paths in committed files** — bakes in a mount point.
 
-Wiki-links auto-update on rename; that's why they're the in-vault form. Markdown links are file-relative: `../contracts/...` from a vault-root file, `../../contracts/...` from one level deep (`Designs/`, `Onboarding/`). If one doesn't resolve in Obsidian or on GitHub web, you miscounted. They do NOT auto-update on target-repo renames — cleanup is a manual pass.
+Wiki-links auto-update on rename; that's why they're the in-vault form. Markdown links are file-relative — **count the `../` from the file, not from the vault root**: `../contracts/...` from a vault-root file, `../../contracts/...` from one level deep (`Designs/`, `Onboarding/`), `../../../contracts/...` from two levels deep (`Designs/efsv2/`, `Designs/clientv2/`), where most design files now live. This off-by-one is the single most common broken link in the vault. Note that `../../Reviews/...` from a depth-2 design file is *in-vault* and correct — only sibling-repo paths (`contracts/`, `sdk/`, `client/`) need the extra hop out of `planning/`. If one doesn't resolve in Obsidian or on GitHub web, you miscounted. They do NOT auto-update on target-repo renames — cleanup is a manual pass.
 
 ## Task list vs Kanban vs design — three altitudes
 

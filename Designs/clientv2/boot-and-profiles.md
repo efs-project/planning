@@ -17,7 +17,7 @@ THE boot/profile/deep-link model for client v2: it elaborates thesis rulings **F
 
 ## 1. The link layer
 
-### 1.1 Canonical form and the two carriage rules — [research-grounded]
+### 1.1 Canonical form and the two carriage rules — research-grounded
 
 The canonical deep link is an **https URL on the client's origin with an empty path, an empty query, and everything EFS in the fragment**:
 
@@ -29,7 +29,7 @@ https://<client-origin>/#efs1.<class>.<segments…>[.k.<cap>]
 - **Carriage rule 2 — the fragment never traverses the network, but any JS on the page can read it.** The Sentry lesson: default crash SDKs capture `location.href` including the fragment. The fragment protects against the network, not against code on the page — hence the ingest-strip discipline of §2. (boot-deeplinks §1.1)
 - **`web3://` is NOT browser-registrable** — the `registerProtocolHandler` safelist admits `ipfs`/`ipns`/`dweb` but not `web3`, and `web+` prefixes are the only escape. **`web+efs://` is an alias lane only** (manifest `protocol_handlers` + runtime registration, Chromium-side, never Baseline): the OS registers it where available and redirects into canonical https form. Alias ingress arrives via `%s` **query** substitution, so alias links MUST NOT carry capability sub-segments — the share UI only ever emits `web+efs://` for preview-safe links, and the shell rewrites query→fragment via `replaceState()` as its first act. Scheme links are never load-bearing: Safari/Firefox users lose nothing. **[research-grounded]**; the safelist gap is a protocol pressure item (§Open).
 
-### 1.2 Link taxonomy — [research-grounded] classes, [reasoned] assignments
+### 1.2 Link taxonomy — research-grounded classes, reasoned assignments
 
 The web3:// grammar ([[read-lens-spec]] §6.3–6.5) is canonical for *what a link names*; OS classes say *what the OS does when one arrives*. Classes carried as the first fragment tag:
 
@@ -46,7 +46,7 @@ The web3:// grammar ([[read-lens-spec]] §6.3–6.5) is canonical for *what a li
 
 Every class may carry an optional `g.<manifestCID>` **generation hint** — honored only for viewer selection inside the booted generation's compat range. A hint never switches generations; only `gx`/`gf` classes do, and only with consent (§4.2).
 
-### 1.3 The fragment grammar `#efs1.` — [reasoned], grammar frozen small (the flakes lesson)
+### 1.3 The fragment grammar `#efs1.` — reasoned, grammar frozen small (the flakes lesson)
 
 ```
 fragment  = "efs1" 1*( "." segment )
@@ -61,7 +61,7 @@ enc-flag  = "u" (raw UTF-8, b64url'd) / "z" (deflate-raw then b64url)
 - **Versioned:** `efs1` is load-bearing. Unknown versions render the resolver surface's "newer link than this OS" state with the raw string preserved; unknown *tags* within `efs1` are ignored-but-displayed. The grammar freezes tiny and versioned precisely because half-frozen pinning formats fork ecosystems (closures-generations §4.1).
 - The `k` sub-segment is **always terminal**, so a preview-safe copy is the same string truncated before `.k.` — derivable by any holder, no re-encoding.
 
-### 1.4 Size tiers — enforced in the share UI, not documented in a footnote — [research-grounded]
+### 1.4 Size tiers — enforced in the share UI, not documented in a footnote — research-grounded
 
 | Tier | Budget | Content discipline |
 |---|---|---|
@@ -71,7 +71,7 @@ enc-flag  = "u" (raw UTF-8, b64url'd) / "z" (deflate-raw then b64url)
 
 The share UI computes the tier live and refuses to emit a link that overflows its declared medium. A link grammar not designed to a byte budget fails at the exact moment of sharing.
 
-### 1.5 Preview-safe vs access copies; unfurl posture — [research-grounded]
+### 1.5 Preview-safe vs access copies; unfurl posture — research-grounded
 
 Share UI always offers two copies: **"Copy link"** (preview-safe — no `k` segment) and **"Copy access link"** (capability-bearing), the latter with the honest disclosure: *"Anyone holding this link can open the content until it expires. Pasting it into a non-E2E channel (Slack, Discord) discloses it to that platform permanently."* The channel stores the message even though the fetch can't see the fragment. Minting an access link is a Kernel event (F7's export-is-a-security-event applies: expiry on by default, custody tracked, revocable at the token layer per §2.3). No per-link OG rendering exists or is wanted — static host, generic card, `focus-existing` routing (§5.1) makes shared links land in the running OS.
 
@@ -79,7 +79,7 @@ Share UI always offers two copies: **"Copy link"** (preview-safe — no `k` segm
 
 ## 2. Fragment capabilities
 
-### 2.1 Ingest, strip, hand off — before anything else runs — [research-grounded]
+### 2.1 Ingest, strip, hand off — before anything else runs — research-grounded
 
 Order is normative:
 
@@ -92,18 +92,18 @@ Residual leaks stated honestly: the pre-strip URL touches browser history and hi
 
 **No third-party telemetry in Ring 0/1, ever.** The thesis already bans telemetry outright; this doc adds the mechanical rule: after step 2, no Ring-0/1 code path may read `location`. If any error capture is ever added (it should not be), fragment-scrubbing is a merge-blocking requirement, not a config option.
 
-### 2.2 The service-worker fragment traps — [research-grounded]
+### 2.2 The service-worker fragment traps — research-grounded
 
 Since the 2017 fetch-spec change, `FetchEvent.request.url` **preserves fragments**, including on navigations. Two mandatory disciplines: (a) the SW is inside the secrecy boundary — it must never log request URLs anywhere; (b) **normalize before caching**: strip fragments before every `cache.match()`/`cache.put()`, or fragment-bearing links fragment the cache key-space — a correctness bug (cache misses on identical pages) and a poisoning surface (attacker-chosen fragments minting duplicate entries and forcing network fetches). Both are conformance tests in the SW suite.
 
-### 2.3 Token construction — [reasoned]
+### 2.3 Token construction — reasoned
 
 Two grades of link-borne capability:
 
 - **Pure decryption caps** (the `#k=` salted-path key of [[read-lens-spec]] §6.5): random ≥128-bit keys, Excalidraw-grade. Fine as raw material; the bytes they unlock are already content-addressed and authenticated.
 - **Authority-bearing caps**: adopt a **biscuit-style construction** — public-key signed blocks with offline attenuation, third-party verifiable with no shared secret and no server. A holder mints a *weaker* link (read-only, expiring, venue-pinned, single-target) with zero infrastructure — exactly EFS's chain-free envelope philosophy, and the W3C TAG capability-URL lifecycle (expiry, revocation, canonical-URL pairing) implemented in the token rather than in a server. This is unoccupied design space (boot-deeplinks §1.4); it is [reasoned], not shipped precedent — prototype before freeze, and mind the token's byte cost against §1.4 tiers.
 
-### 2.4 What a link-borne capability may and may not do — [reasoned]
+### 2.4 What a link-borne capability may and may not do — reasoned
 
 - A fragment capability is an **offer**, never a grant. Content-scoped read caps (decryption keys for bytes the link designates) open without a prompt — designation is authorization, the link *is* the picker — but the resolver surface labels their provenance.
 - Anything conferring standing authority — endpoint capabilities, persona access, write scopes, agent budgets — routes through **System Chrome review** before entering the capability table. **Deep links never smuggle endpoints:** an endpoint named in a link is a rendered *proposal* carrying its privacy class (F5), requiring the same explicit grant as any picker flow. A link can propose; only the user (or a standing policy the user authored) disposes.
@@ -113,7 +113,7 @@ Two grades of link-borne capability:
 
 ## 3. The boot pipeline
 
-### 3.1 Stages — [research-grounded]
+### 3.1 Stages — research-grounded
 
 ```
 click → static shell → (SW thin router) → Bootstrapper verify → Kernel slice → route by class
@@ -129,11 +129,11 @@ click → static shell → (SW thin router) → Bootstrapper verify → Kernel s
 
 **Health gate + Rescue trigger:** a generation is marked `successful` only when Bootstrapper→Kernel→Shell reach a healthy checkpoint (the Android `markBootSuccessful` pattern). Keep current + previous always; on boot failure, auto-fall-back to last-successful — that fallback *is* the Rescue Shell trigger. Failing twice lands in Rescue Shell proper: recovery, rollback among locally verified generations, permission reset, export. (closures-generations §5.4)
 
-### 3.2 The unikernel principle — [reasoned]
+### 3.2 The unikernel principle — reasoned
 
 **A citation link boots Bootstrapper + a Kernel slice + exactly one viewer — not the whole OS.** The closure manifest partitions its import map into named slices (`boot`, `kernel-core`, `viewer-<type>`, `shell`, per-app); the link class selects the minimal slice set. A `c` link on a fresh device downloads the boot slice, one viewer, and the cited bytes — nothing else. The full Shell is a *promotion* the user can invoke from the viewer chrome ("Open in EFS OS"), warming the remaining slices in the background after first paint, never before it. `p` links to containers boot the file-manager viewer; `a` links boot Shell+app; only home/`gx`/`gf` links boot everything.
 
-### 3.3 Cold-start budgets are product requirements — [research-grounded]
+### 3.3 Cold-start budgets are product requirements — research-grounded
 
 P75 device = Samsung Galaxy A24-class, 9 Mbps down / 100 ms RTT (Russell 2026). Budgets, enforced in CI against a throttled profile:
 
@@ -147,7 +147,7 @@ P75 device = Samsung Galaxy A24-class, 9 Mbps down / 100 ms RTT (Russell 2026). 
 
 **The first-visit cliff, stated honestly:** the first click on a fresh device has no SW, no cache, no pinned generation. That load is a **TOFU event** on whatever origin/gateway served the shell (F11's untrusted-root-bootstrap step): integrity checks on that boot verify internal consistency against the manifest *the gateway chose to serve*. The UI says so — "first load: trusting <origin> to introduce this OS" — and every subsequent boot verifies against the user's pin. The IPFS SW-gateway (inbrowser.link) documents the same structural asymmetry; we do not pretend otherwise, we engineer the cold path as its own product (§3.1 shell budget exists for exactly this path).
 
-### 3.4 The import map is the generation's dependency manifest — [research-grounded]
+### 3.4 The import map is the generation's dependency manifest — research-grounded
 
 One content-addressed import map per generation: every specifier maps to a CID URL with per-module `integrity` (native Chrome 127+/Safari 18+ — the enforcement layer, not a lint). The closure manifest embeds it; the manifest CID **is** the generation name and a shareable `gx` link; `@gen=` pinning is the `g` hint of §1.2. Upgrading = swapping one small JSON through the F4 channel machinery; rollback = swapping back; unreferenced modules cost nothing at boot. Multiple-import-map support (Chrome 133/Safari 18.4) permits app-scoped maps layered over the OS map — used for Ring-3 slices, feature-detected.
 
@@ -155,20 +155,20 @@ One content-addressed import map per generation: every specifier maps to a CID U
 
 ## 4. Profiles and generations at boot
 
-### 4.1 What a generation link opens — [reasoned]
+### 4.1 What a generation link opens — reasoned
 
 - **`gx` (open-exact, flake `locked`):** verify the manifest CID, fetch the closure, boot it **as a guest session** — sandboxed profile, empty capability table, the guest's journal is throwaway. A guest generation never touches the user's pin, journal, keys, or capability table. Banner: "Running a shared system — your data is not attached."
 - **`gf` (follow-channel, flake `original`):** resolve the channel pointer under the **recipient's** lens with full read grades. Booting is a machine-acting consumption, so **§3.3 GATE rules apply mechanically**: only `LIVE @ HOME-LIVE` or `LIVE @ AS-OF(N), age ≤ H` with a clean deny pass may auto-proceed; STALE/UNKNOWN/EQUIVOCAL channels stop and present the grade. An expired **freshness beacon** on the channel ⇒ STALE ⇒ refuse auto-follow, offer the last verified manifest with an honest label (F4). The Guix fast-forward rule holds at boot: a backward-moving channel pointer renders the channel **suspect-backward** (client state, deliberately not a protocol grade word — [[packages-and-updates]] §6), never auto-followed.
 
-### 4.2 Switching generations = explicit, consented, whole-document reload — [reasoned]
+### 4.2 Switching generations = explicit, consented, whole-document reload — reasoned
 
 No hot-swapping the OS under a running session. Adopting a generation (from `gx` guest promotion, `gf` follow, or the update center) is: consent screen → journal checkpoint → full navigation reload → Bootstrapper verifies the new closure → health gate → `successful` or auto-fallback. The journal and user data are never touched by generation switches (the Android userdata wall); the data-schema-migration ledger of [[packages-and-updates]] governs the one-way doors.
 
-### 4.3 Sharing a profile is sharing a Trojan vector — [research-grounded]
+### 4.3 Sharing a profile is sharing a Trojan vector — research-grounded
 
 A profile/generation link is a link to *someone else's wiring*. Importing one (promoting a guest to your pin, or accepting a friend's "here's my setup") runs the **full install review**: the capability-table diff *is* the review surface (capability-table-as-data, F4/F8) — every app, every grant ceiling, every endpoint capability and its privacy class, every persona binding, rendered as a diff against your current generation. Same-author convenience shortcuts do not exist here; a shared Shell is the highest-value spoof target in the system.
 
-### 4.4 Boot-time revocation posture — [open — protocol gap]
+### 4.4 Boot-time revocation posture — open — protocol gap
 
 The closure manifest is a DATA **object**, and objects are unrevocable ([[codex-envelope]] domain disjointness) — what changes after the fact are the *claims around it*: the placement/head claims that made it "the channel's current release" can be REVOKED (the slot reads EMPTY), and deny facts can be published against its dataId/claimIds. A user pinned to a generation whose placement claims are later revoked, or which accumulates deny facts (vulnerable Kernel, malicious Shell), may boot offline forever without learning any of it. Policy sketch pending protocol support: (a) when any transport exists, the Bootstrapper's post-paint head check re-resolves the *generation's placement/head claims and deny status*, venue-qualified with "last checked" age; (b) a closure whose placement was revoked or which carries deny facts remains **user-bootable** (permanence; rollback is a right) but boots into a loud System Chrome interstitial ("withdrawn by its curator" / "N security sources advise against this generation") and disables auto-follow; (c) offline, the pin's last-checked age is displayed at boot past the trust/authorization horizon (7d default). What the protocol lacks: a composite grade for a multi-record closure resolution and a normative boot-artifact revocation-check rule — both filed in Open questions and the pressure report.
 
@@ -176,15 +176,15 @@ The closure manifest is a DATA **object**, and objects are unrevocable ([[codex-
 
 ## 5. Launch handling
 
-### 5.1 Focus-existing — [research-grounded]
+### 5.1 Focus-existing — research-grounded
 
 Manifest `launch_handler: { client_mode: "focus-existing" }` + a `launchQueue` consumer in Ring 0: a deep link clicked while the OS runs routes the parsed link into the **live Kernel's classifier** — no second boot, no reload, the running Session Shell opens the target. Chromium-only, progressive; on Safari/Firefox a second instance boots and the journal's single-writer lock (Web Locks) makes the newer instance read-only with a "take over" affordance. bfcache covers back/forward warm paths for free.
 
-### 5.2 File and share-target handlers are picker-shaped grants — [reasoned]
+### 5.2 File and share-target handlers are picker-shaped grants — reasoned
 
 `file_handlers` ("Open with EFS OS") and `share_target` (OS share sheet) registrations ride the generation manifest like every other capability declaration. An arriving file handle or shared payload is a **designated capability**: the OS receives exactly those bytes/handles, System Chrome shows the app-chooser (a picker — designation is authorization), and the chosen Ring-3 app receives a scoped handle through the membrane. Nothing ambient is created; both APIs are Chromium-only and strictly additive.
 
-### 5.3 The resolver surface: context before content — [reasoned]
+### 5.3 The resolver surface: context before content — reasoned
 
 Between click and content the user watches a System Chrome surface (not app-drawable, by F1 construction) that fills in, in order: **link class → target venue → lens context → grade → content**. Concretely: "Citation link · venue: <chain> · pinned to the sender's lens chain — reproducible" vs "Path link · resolving under **your** lens — the sender may see something different." Capability offers (§2.4) and generation consent (§4) render here. The surface is honest about *which* step is pending (fetching manifest / verifying closure / contacting venue / no transport), so a hang is diagnosable and a spoof has to fake process, not just a spinner.
 

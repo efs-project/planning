@@ -78,7 +78,7 @@ git log --invert-grep --grep '^sync('
 
 ### What agents do with it
 
-- **Writing a design here in `planning/Designs/`** — reference ADRs by path: `Reference/contracts/adr/0041-pin-tag-schema-split-for-cardinality.md`. Wiki-links work too: `[[0041-pin-tag-schema-split-for-cardinality]]` (Obsidian resolves to the mirror file).
+- **Writing a design here in `planning/Designs/`** — reference ADRs by path: `Reference/contracts/adr/0041-pin-tag-schema-split-for-cardinality.md`. Wiki-links work too: `[ADR-0041](../../contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md)` (Obsidian resolves to the mirror file).
 - **Implementing in the target repo** — read the source-of-truth file (`docs/adr/0041-...`) directly. Don't read the planning mirror from inside `contracts/`; it may be a few minutes stale, and the local copy is right there.
 
 ### Trust model

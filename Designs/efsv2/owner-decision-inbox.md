@@ -41,7 +41,7 @@ Where an item labels option **A** recommended, that is provisional research advi
 
 **The previous N1A bundle also included:** ship the KEL-aware seam before v2 freezes; make legacy-EOA upgrade commitment default-on with an explicit degraded opt-out; let smart-account-only users make one direct inception call; do not treat ERC-1271/6492 as eternal record authority; make personal principals non-transferable while organizations use control succession; and reserve a narrow same-domain successor mechanism for future signature suites. These dimensions must not be silently adopted together merely because one topology is chosen.
 
-**Not chosen here:** actual venue, receipt bytes, finality, or successor ABI. Those wait for E1. [[solana]] supplies the first non-EVM capability map and prototype gates; it does not add another option or decide N1. Details: [[assumptions-and-requirements#Strong-authority hypothesis to prototype next]], [[kel#23. Decisions for James]], and [[fs-pass-james-decisions]].
+**Not chosen here:** actual venue, receipt bytes, finality, or successor ABI. Those wait for E1. [[solana]] supplies the first non-EVM capability map and prototype gates; it does not add another option or decide N1. Details: [[assumptions-and-requirements#17. Current first-prototype hypothesis]], [[kel#23. Decisions for James]], and [[fs-pass-james-decisions]].
 
 ### N2 — Constitutional system boundaries
 
@@ -63,7 +63,7 @@ Where an item labels option **A** recommended, that is provisional research advi
 | **N2h** | Browser-first is the distribution goal, but confinement claims are per measured host lane; served-header/native lanes are allowed | Safari may need a weaker or differently hosted lane than desktop Chrome |
 | **N2i** | Design for 50 principals normally and a provisional 256-principal portable ceiling; benchmark before freezing | A community lens with 200 curators must still work on a mid-range phone |
 
-Details: [[assumptions-and-requirements#Owner decision register]] D-8–D-16, [[ops-doctrine]], and [[web-os-thesis]].
+Details: [[assumptions-and-requirements#11. Human decisions requiring eventual disposition]] D-8–D-16, [[ops-doctrine]], and [[web-os-thesis]].
 
 ### N3 — Canonical private invitation discovery
 
@@ -160,7 +160,7 @@ These are real owner acceptance gates. Engineers choose exact mechanisms; James 
 
 | ID | Example and eventual options | Evidence required | Recommendation after evidence | Details |
 |---|---|---|---|---|
-| **E1 Authority venue** | Base/L2, Solana, L3, or another fixed profile | admission/rotation/recovery cost; finality/force inclusion; proof latency; independent RPC/state reconstruction; mandatory bounded queries | exactly one measured v2 profile | [[assumptions-and-requirements#Strong-authority hypothesis to prototype next]], [[solana]] |
+| **E1 Authority venue** | Base/L2, Solana, L3, or another fixed profile | admission/rotation/recovery cost; finality/force inclusion; proof latency; independent RPC/state reconstruction; mandatory bounded queries | exactly one measured v2 profile | [[assumptions-and-requirements#17. Current first-prototype hypothesis]], [[solana]] |
 | **E2 Aggregate kernel cost** | accept full body + indexes + revocation state, trim optional surfaces, or reject the on-chain promise | one combined gas/state snapshot including every mandatory direction | accept only against the complete bill, not isolated cheap calls | [[onchain-completeness]], [[freeze-gates]] |
 | **E3 `admittedAt`** | store + batch-read it, or explicitly degrade trustless time | measured incremental state/read cost and two consumers | store if the complete snapshot is tolerable | [[fs-pass-james-decisions#1. The `admittedAt` + index bundle (P1) — the pass's biggest lever]] |
 | **E4 Author enumeration** | full author index or roots-forward + orphan-tail | gas/state plus recovery benchmark | smallest mechanism that still guarantees complete discovery | [[onchain-completeness]] |
@@ -182,7 +182,7 @@ These are real owner acceptance gates. Engineers choose exact mechanisms; James 
 | **L4 Observatory** | detect channel split views and compromised curators | fund/staff; community-only; make no monitored claim | fund before claiming monitoring | [[packages-and-updates]] |
 | **L5 Browser liaison** | standards work affects `web3://` and EFSBytes access | name owner; consortium; defer mainstream claim | name before browser-mainstream positioning | [[ops-doctrine]] |
 | **L6 Operate infrastructure** | EFS project runs gateways/relays that see abuse and metadata | operate; partner; code-only | only with legal/logging/abuse/succession capacity | [[ops-doctrine]] |
-| **L7 Product name** | EFS OS vs Cyphos/Cypher OS | adopt; test shortlist; keep EFS OS | user test and trademark/domain review near launch | [[web-os-thesis#Naming — **[open]**]] |
+| **L7 Product name** | EFS OS vs Cyphos/Cypher OS | adopt; test shortlist; keep EFS OS | user test and trademark/domain review near launch | [[web-os-thesis#Naming — open]] |
 | **L8 Preservation words** | may UI say “permanent”? | permanent; preserved; reconstructable-with-evidence | use “preserved/reconstructable with current evidence” | [[ops-doctrine]] |
 | **L9 Preservation classes** | critical roots need more fault domains than cache data | one class; tiered horizons; user-configured | price separate classes after controller prototype | [[ops-doctrine]] |
 | **L10 Renewal after EFS** | signatures/formats age after the project disappears | endowed keeper; consortium; permissionless bounty; hybrid | explicit funded hybrid before long-horizon claims | [[ops-doctrine]] |

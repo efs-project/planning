@@ -1,11 +1,11 @@
 # Fable 5 — Filesystem Features design pass (Pass 1): kickoff
 
-**Status:** informational kickoff — context and open surfaces, not a spec to execute
+**Status:** reference — kickoff context and open surfaces, not a spec to execute
 **Target repos:** planning, contracts, sdk (design context; nothing here is a work order)
 **Depends on / reads with:** [[fable-next-pass-scope]], [[codex-envelope]], [[codex-kinds]], [[codex-kernel]], [[read-lens-spec]], [[confidence-and-open-decisions]], [[freeze-gates]], [[client-os-pressure-report]], [[fable-handoff-v2-tag-core]]
 **Last touched:** 2026-07-10
 
-#status/draft #kind/design #repo/planning #pass/1-filesystem
+#status/reference #kind/note #repo/planning #pass/1-filesystem
 
 ---
 
