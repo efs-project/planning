@@ -11,6 +11,8 @@
 
 > **Evidence base:** 14-lane research corpus at `Reviews/2026-07-07-clientv2-corpus/` (dated primary sources in every lane digest), plus the full EFS v2 design set. Confidence markers as in [[fable-handoff-v2-tag-core]]: **[research-grounded]** — supported by shipped-system evidence or the v2 rulings; **[reasoned]** — argued but untested; **[open]** — genuinely undecided.
 
+> **Cross-cutting research frame:** [[ethereum-first-efs-and-os]] asks how this OS can remain a cypherpunk, local-first human environment while EFS remains proudly Ethereum-first and EVM-useful. Its architecture shapes and non-chain modes are research possibilities; they do not amend the rulings below.
+
 ## What this document is
 
 The ruling layer for official client v2. It states the thesis, rejects the old-OS assumptions that don't survive contact with EFS's primitives, adopts the new ones, and closes the thirteen architectural forks enumerated in `Reviews/2026-07-07-clientv2-corpus/decision-framework.md`. The per-model design docs in this folder elaborate each ruling; where they and this document disagree, this document wins until amended.

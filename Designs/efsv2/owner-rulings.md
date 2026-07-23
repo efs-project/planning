@@ -1,7 +1,7 @@
 # EFS v2 — Owner rulings & notes (James)
 
 **Status:** running notes — decisions/directions, NOT designs. Append-only, dated. The design docs get updated to match separately.
-**Last touched:** 2026-07-10
+**Last touched:** 2026-07-23
 
 #status/notes #kind/notes
 
@@ -100,3 +100,52 @@
 - **James: the designs are hard to wade through, isolated, not cross-linked** — which is exactly why kel.md / assumptions-and-requirements / the D-decisions were missed earlier. Concrete evidence: **README.md is stale** — still lists [[identity]] as primary and does NOT index [[kel]] or [[assumptions-and-requirements]] (the two most important current docs).
 - **Project direction (James):** (1) a PM consolidation + linking pass; (2) ALL owner decisions in ONE canonical place going forward (owner-rulings + the D-ledger are currently separate — merge/cross-link); (3) enforce linking/referencing so isolation misses don't recur.
 - **The consolidation plan already exists:** assumptions-and-requirements.md §14 lays out the reconciliation order (adopt D-1..D-16 into owner-rulings → write `system-constitution.md` → re-cut the core docs together → …). It's blocked on the top decisions. So: **decisions first, then consolidation.**
+
+## 2026-07-22
+
+### Cross-platform read-only mounted EFS — REQUIRED
+
+- **ADOPTED (James): EFS v2 must expose a useful read-only mounted filesystem on Linux, macOS, and Windows.** It must work through ordinary command-line tools and each platform's normal graphical file manager. A Linux-only prototype does not finish the requirement.
+- **Linux FUSE is an adapter and likely first implementation path, not the canonical protocol API.** The design target is one platform-neutral resolved-filesystem contract with Linux, macOS, and Windows adapters. Current leading candidates are libfuse3, macFUSE/FSKit, and WinFsp; exact adapters, versions, packaging, licensing, and support floors remain evidence-driven Durable choices.
+- **The required common profile is deliberately read-only:** deterministic directories, regular files, stable file identity, pinned handles/directory snapshots, verified range reads, honest absence versus `UNKNOWN`, bounded metadata, and read-only failure for every mutation. Writable mounts remain later research.
+- **Cross-platform validation is a data-model gate.** Portable filename presentation/collisions, exact child and point-property enumeration, basis pinning, missing/corrupt bytes, adapter error categories, and metadata bounds must pass one golden fixture on all three hosts before EFS claims filesystem-semantic validation.
+- **EFS properties project to xattrs/EAs, but xattrs are not the canonical property model.** Short bounded public scalar/diagnostic metadata may appear as read-only `user.efs.*`; the complete property graph, provenance, grades, and pagination require a lossless control/API surface.
+- **Plan 9 is adopted as design precedent, not a fourth launch requirement.** A process-local namespace is a strong analogue for an EFS resolved view, and ordered union lookup models the simple priority-lens subset. EFS lenses remain richer authenticated policies with WHITEOUTs, basis/completeness, and fail-closed `UNKNOWN`; exact resolution stays inside the EFS resolver.
+- **This mount track remains separate from Solana/substrate portability.** The first required mounted view is Ethereum/EVM EFS; making that view work on three desktop OSes neither chooses nor rejects Solana support.
+
+### Research sequencing before an MVP pass — DIRECTION
+
+- **Do another joined deep pass before contracting to an MVP.** KEL/authority and lenses/resolution are the first two foundations to revisit. Then re-check their coupling to required on-chain enumeration, Solana/independent realms, local or networked storage, privacy, and the Linux/macOS/Windows read-only mount.
+- **This supersedes the 2026-07-16 “decisions first, then consolidation” sentence as sequencing guidance only.** Adopted rulings remain adopted. Unanswered N/Q/D choices remain useful issue inventory, but their wording, grouping, options, and recommendations must be revalidated before James is asked to answer them as a packet.
+- **Use the new cases as pressure tests, not automatic requirements.** Keep Ethereum/EVM as the reference and intended strongest/composable profile; use Solana, signed local/network realms, and native mounts to detect accidental coupling and missing semantics.
+- **The contraction gate comes later.** After the joined pass and comparable prototypes, reconcile the owner inbox, write the short constitution and explicit support matrix, and only then choose the MVP. The matrix should distinguish required, extension-ready, experimental, and explicitly unsupported behavior.
+- **Research may expand possibilities without flattening guarantees.** Portable artifacts, authority, query completeness, byte availability, native program/contract readability, and host projection remain separately named capabilities throughout the pass.
+
+## 2026-07-23
+
+### Chain-dependence guardrails — RATIFIED
+- **No cross-chain bridges, hubs, or locators in the v2 baseline** unless a required application proves it indispensable. (Ratifies the existing [[ethereum-first-efs-and-os]] §12 stop rule into owner history.)
+- **Honor the 2026-07-22 sequencing hold** on [[owner-decision-inbox]] — no owner answers on N1/N2/Q1–Q5 until the joined KEL/authority + lens/resolver pass re-runs against native mounts, Solana/independent realms, required on-chain enumeration, and signed local/network modes.
+- **N1 must be split into separate dimensions before it is presented to James again.** It currently bundles authority semantics, deployment topology, legacy-EOA commitment, smart-account inception, personal transferability, and suite succession.
+- **Decision routing adopted as process:** [[owner-decision-inbox]] and its child queues are the sole live decision queues; [[owner-rulings]] is the authoritative EFS v2 history. All future decisions route through both.
+
+### Deferred — James needs to think (NOT rulings yet)
+- **"KEL introduces no cross-chain machinery; per-principal L1 homes/migration rejected"** — deferred; KEL-coupled, belongs to the re-run pass.
+- **"Do not bake a specific venue into the protocol; venue stays evidence-gated (E1)"** — deferred, same reason.
+- Explicitly NOT ruled (these are the held N1 question in disguise): one-chain-as-user-anchor; OS-useful-before-any-chain; portability-worth-weaker-authority.
+- **Honest status: none of the chain/authority space is measurement-backed yet.** E1 (venue admission/rotation/recovery cost, finality, force inclusion), E2, E6, E10 are all open. The N1A recommendation is architectural reasoning + prior art, not benchmarks. James's "L1 expensive / L2s transient" objection is exactly what E1 would settle with numbers.
+
+### NEW DIRECTION (James) — the OS and the filesystem may need DIFFERENT chain models
+- **Observation (James):** everyone on one chain is good for **social/OS** use cases (network effects, one social graph, discovery). But the **filesystem** must work on **all chains — including a freshly spun-up L3** — so apps and utilities are immediately useful without depending on another chain. They share a UI today but may be architecturally different. Choosing the right chain is crucial and gas UX must be thought through.
+- **Assessment: sound and important, with one hard consequence.** "FS works on any chain with zero dependency on another chain" and "one global identity/social graph" cannot both hold: an L3-local EFS either has **realm-local identities** (fragmented; authority becomes realm-qualified) or its users **depend on the anchor chain** for identity — the cross-chain dependency being avoided. This is an inherent tension, not a design gap; [[assumptions-and-requirements]] R-K11 already states two domains cannot both claim unqualified `CURRENT` for one principal.
+- **Where it points:** **realm-local/self-sufficient filesystem deployments (≈N1B independent realms) + an optional shared anchor for the OS/social layer** (≈ [[ethereum-first-efs-and-os]] Shapes C/E). NOT adopted — flagged as the shape to evaluate.
+- **ACTION for the re-run pass:** *"Does the filesystem require the same authority venue as the social/OS layer?"* becomes an explicit **N1 split axis**, applying the just-ratified N1-must-be-split ruling.
+
+### Decision-routing structure — assessment of the hierarchical pass
+- **Verified structure:** `Designs/owner-decision-inbox.md` (top; owns loose `Designs/` items) → child queues `Designs/efsv2/owner-decision-inbox.md` and `Designs/clientv2/owner-decision-inbox.md`. Rule: a question lives in only one live queue. Tiers per queue: Decide now / Decide after evidence / Already settled / Delegated / Dormant — each item with a plain-language example, options, a recommendation, and links to the reason trail. **Good design; keep it.**
+- **Three gaps to fix (PM task):**
+  1. **Two histories, not one.** Top-level records to `Decisions.md`; efsv2 records to `owner-rulings.md`. "All decisions in one place" is not yet true — pick one canonical history or add an aggregating index.
+  2. **No single "list all my open decisions" view.** Answering "what do I need to decide?" requires visiting 3+ files and knowing they exist. Add a generated roll-up across all queues.
+  3. **Status does not propagate upward.** The efsv2 sequencing hold is invisible from the top-level inbox.
+- **Index routing check passed:** `Designs/efsv2/README.md` links [[kel]], [[assumptions-and-requirements]], and [[owner-decision-inbox]].
+- **Minor:** owner-rulings sections are slightly out of chronological order (2026-07-15/16 sit above 2026-07-22); harmless, tidy during consolidation.

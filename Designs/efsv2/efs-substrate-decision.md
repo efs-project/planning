@@ -9,6 +9,8 @@
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk
 
+> **Historical carrier decision.** EAS was subsequently dropped for the native-kernel direction. Use [[assumptions-and-requirements]] for current classification and [[solana]] for the current substrate-portability pressure test; only claims reaffirmed there or in [[owner-rulings]] remain live.
+
 ## Problem
 
 EFS's EAS usage has been shrinking with every design round: v2 moved references off EAS UIDs; replication planning moved identity off `msg.sender`; portability planning moved authenticity off EAS signatures (even EAS's *offchain* attestations bind a chainId + verifying contract in their EIP-712 domain — portable name, non-portable proof). The pattern raised the foundation question: **what is the right substrate for a portable, verifiable, permanent graph database — and is EAS it?**

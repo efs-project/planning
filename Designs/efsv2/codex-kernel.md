@@ -10,6 +10,8 @@
 
 > **2026-07-11 freeze blocker — generic confluence is not sufficient for authoritative KEL authorship.** [[kel]] §§8–9 requires a KEL-aware, home-ordered admission lane that validates live actor/grant authority and persists an immutable `AuthReceipt`, plus a distinct evidence/import lane for merely portable signatures. The later peer-kernel/backward-union plan below cannot give contracts a bounded Tier-1 authorization answer or prevent removed-key backdating. Reconcile the entrypoints, state, ABI, receipt/evidence semantics, and confluence boundary before freezing this artifact.
 
+> **Venue scope:** this document specifies an EVM authority-profile implementation, not the portable kernel abstraction. [[solana]] maps the same required capabilities to program-owned accounts, staged commits, explicit page accounts, and a separate proof/code basis.
+
 ## What this document is
 
 The ruling layer over the kernel design. The base text was overtaken in-session by the kinds ruling and envelope spec (deliberate — parallel design, reconciled here); the amendments re-cut it to the adjudicated interfaces. Where documents disagree, the precedence is: [[codex-envelope]] > [[codex-kinds]] > this document > base text.

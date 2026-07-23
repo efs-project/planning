@@ -2,12 +2,14 @@
 
 **Status:** draft synthesis and decision guide; not a byte-level specification
 **Audience:** James and human reviewers
-**Last touched:** 2026-07-12
-**Technical sources:** [[assumptions-and-requirements]], [[README]], [[kel]], [[privacy-pass-synthesis]], [[privacy-james-decisions]], [[read-lens-spec]], [lens architecture review](../../Reviews/2026-07-11-efsv2-lens-architecture-and-scale-review.md), [[onchain-completeness]], [[fs-pass-synthesis]], [[freeze-gates]], and the [client v2 design set](../clientv2/README.md)
+**Last touched:** 2026-07-22
+**Technical sources:** [[assumptions-and-requirements]], [[README]], [[ethereum-first-efs-and-os]], [[mountable-filesystem-semantics]], [[kel]], [[privacy-pass-synthesis]], [[privacy-james-decisions]], [[read-lens-spec]], [lens architecture review](../../Reviews/2026-07-11-efsv2-lens-architecture-and-scale-review.md), [[onchain-completeness]], [[fs-pass-synthesis]], [[freeze-gates]], and the [client v2 design set](../clientv2/README.md)
 
 #status/draft #kind/design #repo/planning #topic/efsv2 #topic/human-overview
 
 > **Bottom line.** EFS v2 is directionally right, but the written design set is not yet coherent enough to freeze. The good core is now visible: permanent evidence, stable identities with replaceable keys, admission-ordered authorization when the strongest historical grade is required, explicit reader policies, honest encryption, and a capability-based local OS. The present per-principal-home/L1-locator/migration topology is one ambitious candidate, not a settled consequence of KEL. Several older documents also implement previous models. Those contradictions must be resolved in one coordinated rewrite before permanent bytes, IDs, or storage layouts are approved.
+
+> **Research posture:** [[ethereum-first-efs-and-os]] records the current attempt to reconcile an Ethereum-native EFS protocol with a potentially broader cypherpunk OS. It keeps several product/profile shapes open and treats “Ethereum-first, not Ethereum-only” as an exploration prior—not an adopted topology.
 
 This document is the simple human map. It deliberately avoids ABI and cryptographic detail. It says what the system is trying to be, which parts are sound, where the designs do not yet join, what James actually needs to decide, and what work should happen next.
 
@@ -23,6 +25,7 @@ EFS v2 is designed to be a permanent, public-by-default graph of files, claims, 
 - If EFS requires definitive protection from post-revocation backdating, one explicit authority domain checks whether the actual device or app key was authorized at admission order and stores that basis. The recommended first prototype uses one fixed authority profile, not a different movable home for every principal; adoption depends on James accepting its sovereignty and censorship tradeoff.
 - Other chains and storage networks can carry verified copies, but they do not invent a second authoritative history. Clients can query another chain; foreign smart contracts need a bridge, verifier, oracle, or fully specified local commitment.
 - A lens is an explicit, reproducible policy that says which valid statements a reader accepts for a particular purpose and how conflicts combine.
+- The same resolved EFS view must mount read-only on Linux, macOS, and Windows. Host filesystem adapters expose files, folders, verified reads, and bounded metadata without turning FUSE, FSKit, WinFsp, POSIX, or NTFS rules into canonical EFS identity.
 - Sensitive bytes are encrypted before publication. Encryption can hide content; it does not make the public graph anonymous.
 - EFS OS is designed to give apps local capabilities, verified packages, reproducible generations, and no ambient network or wallet power.
 
@@ -36,7 +39,7 @@ It never meant chains could call one another. It meant one chain would be the so
 
 The current maximal design then added a separate home for every principal, an L1 registry to locate those homes, and a migration protocol to move them. Those are optional sovereignty mechanisms, not requirements of stable identity. The smaller comparison prototype is one named authority profile whose domain contains the complete authoritative record/KEL/slot/index graph, with other chains carrying evidence or explicitly verified snapshots. This centralizes fees, censorship, throughput, and state growth, so it is not adopted architecture. [[assumptions-and-requirements]] contains the sovereignty choice and the alternatives.
 
-## 2. Six rules that make the system coherent
+## 2. Seven rules that make the system coherent
 
 ### 2.1 Evidence is not authority
 
@@ -99,6 +102,14 @@ Assuming chains persist simplifies authority. It does not solve log pruning, sta
 - signatures and evidence are renewed before algorithms age out;
 - canonical formats have independent implementations and golden vectors; and
 - a clean implementation can rebuild without EFS-operated infrastructure.
+
+### 2.7 A mounted filesystem is a resolved view, not a chain-shaped disk
+
+The “chains are hard drives we mount” metaphor is useful product language, but the mounted tree is actually `resolve(evidence, lens, basis, limits)`. Ethereum/EVM is the first required evidence/authority/query profile; Linux, macOS, and Windows are three projections of the same logical result. Solana/substrate portability is separate research.
+
+Plan 9 is the closest conceptual precedent: each process can construct its own namespace, and ordered unions resemble the simple first-present lens subset. EFS adds signed provenance, typed policies, WHITEOUTs, completeness, a pinned basis, and `UNKNOWN`; those semantics are resolved before the host adapter sees a tree.
+
+EFS properties are metadata, so bounded public scalar properties should be readable as host xattrs/EAs. They are not the whole property system: multi-valued claims, provenance, losing candidates, grades, and unbounded enumeration require a lossless paged EFS control/API surface. The cross-platform mount requirement and exact acceptance gates live in [[mountable-filesystem-semantics]].
 
 ## 3. The system, from write to read
 
@@ -519,6 +530,8 @@ These matter, but they should not hold the wire-format ceremony hostage.
 ## 11. What should happen next
 
 Order matters more than schedule pressure.
+
+> **2026-07-22 sequencing correction:** the steps below remain useful dependency guidance, but the current action is another joined KEL/authority and lens/resolver pass before James answers the open decision packet or the team writes an MVP constitution. The newer Solana/independent-realm, signed local/network, on-chain enumeration, and native-mount cases may change the unanswered options. See [[owner-rulings]] and [[ethereum-first-efs-and-os#11. Research-to-MVP sequence]].
 
 ### Step 1 — Validate the assumptions and authority profile
 

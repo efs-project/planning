@@ -40,6 +40,10 @@ EAS attestation that links one EFS entity to another. **PIN** has cardinality 1 
 
 Ethereum File System. On-chain filesystem built on EAS attestations. Pre-launch devnet target April 19, 2026.
 
+## ENOENT
+
+Unix/macOS error name for “No such file or directory.” In an EFS mount it is valid only when the requested name is **proven absent** from the complete mounted lens/view at its basis. An incomplete RPC, page, author, or snapshot is [[Glossary#UNKNOWN]], not ENOENT. Windows adapters translate the same proven-absence result to the appropriate native file/path-not-found error. See [[mountable-filesystem-semantics]].
+
 ## Ephemeral (permanence tier)
 
 Surfaces that change next commit. Includes the Scaffold-ETH-based debug UI in `contracts/packages/nextjs/`, deploy scripts, dev tooling, tests, docs prose. Karpathy's principles apply cleanly here.
@@ -54,7 +58,7 @@ The append-only, lens-agnostic index in `EFSIndexer.sol`. Stores raw attestation
 
 ## Lens
 
-A trusted attester whose attestations contribute to a viewer's view of EFS. Multiple lenses compose via URL query param: `?lenses=alice.eth,bob.eth`. Without lenses, the router falls back to `?caller=` then to the EFS deployer. See `contracts/docs/adr/0031-lenses-url-param-model.md`. Renamed from "edition" in `contracts/docs/adr/0043-rename-editions-to-lenses.md`.
+A reader-selected policy describing whose authenticated claims contribute to a view and how conflicts combine. The deployed/v1 form is an ordered trusted-attester list composed through `?lenses=`; EFS v2 is replacing that with typed, scoped, reproducibly compiled policies. Plan 9 process namespaces and ordered union lookup are useful precedent only for the simple priority-first-present subset; they do not supply EFS basis, completeness, provenance, WHITEOUT, or `UNKNOWN` semantics. See `contracts/docs/adr/0031-lenses-url-param-model.md`, `contracts/docs/adr/0043-rename-editions-to-lenses.md`, and [[mountable-filesystem-semantics]].
 
 ## MIRROR
 
@@ -71,6 +75,10 @@ This repository. Cross-repo coordination point for EFS: holds designs, kanban, g
 ## Promotion (of a design)
 
 Human-gated, atomic ceremony that moves a design from `ready-for-promotion` to `accepted` and assigns it a permanent number. See [[design-system]] § Promotion ceremony.
+
+## Resolved view
+
+The deterministic tree/value projection produced by applying a lens, basis, evidence set, and explicit limits. A read-only EFS mount exposes a resolved view; it does not mount a blockchain as if the chain were literally a block device. See [[mountable-filesystem-semantics]].
 
 ## PROPERTY
 
@@ -96,6 +104,14 @@ A short stub replacing a landed design's body. Points at the canonical ADRs/spec
 
 The rule that a design's status must agree across three locations: prose `**Status:** X`, tag `#status/X`, and (post-promotion) filename `NNNN-<slug>.md`. All three change in the same commit. **Canonical definition: [[design-system]] § Tri-sync invariant.** Mechanical check: `scripts/tri-sync-check.sh`.
 
+## UNKNOWN
+
+An EFS resolver result meaning the available evidence is insufficient to prove presence or absence at the requested lens and basis. It is not a POSIX errno. A strict mount maps it to an explicit retry/I/O failure and never to [[Glossary#ENOENT]], a missing xattr, or silent lower-priority lens fallthrough. See [[mountable-filesystem-semantics]].
+
 ## Worktree
 
 A git worktree under a repo, used to isolate per-task work without affecting `main`. Convention: `/efs/<repo>/.worktrees/<slug>`. See [[design-system]] § /efs/ agent home and [[repo-map]].
+
+## xattr / extended attribute
+
+Host filesystem name/value metadata attached to a file or directory. Resolved public scalar EFS properties and fixed diagnostics can project read-only to Linux/macOS xattrs and Windows EAs under bounded `user.efs.*` names. Xattrs are not the canonical or lossless EFS property system: they cannot portably carry arbitrary keys, multi-valued claims, provenance, grades, losing candidates, or unbounded enumeration. See [[mountable-filesystem-semantics]].

@@ -4,7 +4,7 @@
 **Target repos:** planning, contracts, sdk
 **Depends on:** [[codex-envelope]], [[codex-kinds]], [[codex-kernel]], [[read-lens-spec]], [[fable-fs-kickoff]]
 **Base corpus:** [2026-07-10-fs-pass-corpus/](../../Reviews/2026-07-10-fs-pass-corpus/) (8 lane reports + 5 red teams + critic) — the lane files are the untouched adversarial record; this doc is the corrected canon.
-**Last touched:** 2026-07-10
+**Last touched:** 2026-07-22
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #pass/1-filesystem
 
@@ -14,7 +14,7 @@ The ruling record of the FS-completeness + privacy pass. Eight lane designers ex
 
 ## The one idea that organizes everything
 
-**Tag-core has no shared mutable cell**, so every classic FS feature built to coordinate many writers around one mutable object *inverts*: "who may write?" → "whose writes does a reader's lens honor?"; "delete" → "revoke-hides, never destroys"; "lock" → no referent. The pass's central labor was sorting **essential semantics to re-home** from **artifacts of the one-mutable-cell world to declare gone**. That sorting is in the master table below. EFS is *Datomic-facts-under-RDF-provenance-with-git-refs*, not POSIX. On CRDTs the honest scope (C7): per-reader op-set selection is real for op-independent CRDTs (OR-sets, counters — the B4 family) and for content-visibility/curation reads; for op-dependent (sequence) CRDTs the lens masks content, never membership — the fold input is the causal closure of the trusted set, so there is no free per-reader op-set selection and no structural lead over the CRDT literature.
+**Tag-core has no shared mutable cell**, so every classic FS feature built to coordinate many writers around one mutable object *inverts*: "who may write?" → "whose writes does a reader's lens honor?"; "delete" → "revoke-hides, never destroys"; "lock" → no referent. The pass's central labor was sorting **essential semantics to re-home** from **artifacts of the one-mutable-cell world to declare gone**. That sorting is in the master table below. EFS is *Datomic-facts-under-RDF-provenance-with-git-refs*, not POSIX. [[mountable-filesystem-semantics]] applies the result to Linux, macOS, and Windows host filesystem operations and identifies where adapters need stricter behavior than this conceptual table. On CRDTs the honest scope (C7): per-reader op-set selection is real for op-independent CRDTs (OR-sets, counters — the B4 family) and for content-visibility/curation reads; for op-dependent (sequence) CRDTs the lens masks content, never membership — the fold input is the causal closure of the trusted set, so there is no free per-reader op-set selection and no structural lead over the CRDT literature.
 
 ## Corrected canon (the C1–C14 reconciliations the synthesis adopts)
 
@@ -46,15 +46,15 @@ These override the lane files where they conflict; the lane files remain as the 
 | Versioning / history / undo | **NATIVE** | Nothing is destroyed; per-slot chains via `supersededBy`; undo = re-assert prior; per-author checkpoint as-of (Datomic `asOf/since/history` vocabulary). |
 | Directory-level snapshot ("restore /projects to Tuesday") | **RE-HOMED (per-lens, not global)** | A **basis** record = the vector of per-author checkpoints under a *named lens*; no global `t`. View-parameters pinned (C8). |
 | Move / rename | **NATIVE** | `movedTo` PIN redirect at the folder node (children can't re-derive `tagId`); multi-hop composition + breadcrumb; follow budget per-segment (E3). |
-| Hardlink | **NATIVE (better)** | Many PINs → one DATA; arbitrarily many first-class names. **No refcount-GC — nothing is ever freed** (stated). |
-| Symlink / mount | **RE-HOMED** | `symlink` PIN (auto-follow); **cross-container mount = a union convention** (`efs.fs/union`), not a new row — "mount is a lens" is substantially true (first-attester-wins = Plan-9 union mounts). |
+| Hardlink/shared object identity | **NATIVE in EFS; host hard-link projection optional** | Many PINs → one DATA; arbitrarily many first-class names. **No refcount-GC — nothing is ever freed.** The three-OS read-only profile exposes shared DATA identity as metadata because WinFsp does not support native hard links. |
+| Symlink / mount | **RE-HOMED** | `symlink` PIN (auto-follow); **cross-container mount = a union convention** (`efs.fs/union`), not a new row. Narrowly: Plan 9 ordered union lookup models the `PRIORITY_FIRST_PRESENT` lens subset. General EFS lenses are richer typed policies with WHITEOUT, basis/completeness, provenance, and fail-closed `UNKNOWN`; resolve them before host mounting. |
 | Multi-writer collab (accumulation, curation) | **NATIVE** | Additive authors (threads/tags) and candidate-versions-one-wins are both native. |
 | Multi-writer collab (convergent shared doc) | **RE-HOMED (read-time fold)** | CRDT-merge = a read-time fold over the causal closure of the trusted set's signed op-claims, with a per-reader content-visibility mask (lens masks content, never membership — C7); the view has no author, needs none; **public case declared GONE** (C7). Kernel changes: zero. |
 | Quotas / accounting | **GONE (metered by gas)** | Everyone pays own writes; `maxEntries` = read-time filter; subtree accounting = indexer job. |
 | Multi-tag AND / query | **BOUNDED native + off-chain** | Bounded 2–3-tag AND over small containers = view-contract convenience; unbounded/ranked/NOT/OR = The Graph. No query language ships. |
 | Backlinks / inverse edges ("which records point here") | **NATIVE — REQUIRED** (the target-keyed index, [[onchain-graph-queries]]; v1 had it on-chain via `getAllReferencing`, v2 must too — mission constraint, not optional) | Discovery index keyed on edge *targets* → "cited by / who mirrored this" native on-chain; VAL-target backlinks the one optional trim; LIST-reverse + REDIRECT-cited-by are now-or-never sub-decisions. |
 | Watch / inotify | **RE-HOMED (poll)** | No push; blessed poll = venue spine cursor; `authorHead` is a hint; multi-venue composition is a cookbook item. |
-| xattrs | **NATIVE** → VAL reserved-key edges |
+| xattrs / EAs | **NATIVE as a bounded projection** → resolved public scalar VAL edges and fixed diagnostics; full keys/candidates/provenance/grades require the lossless paged property/control API in [[mountable-filesystem-semantics]] |
 | Content dedup | **NATIVE (bytes-by-CID)**; identity deliberately *not* content-derived (CAS people surprised — stated) |
 | Journaling / fsck | chain IS the journal (no corruption); **availability-fsck** ("are my mirrors alive?") = a real different check → blessed mirror-health attestation pattern |
 | atime | **GONE (privacy feature)** | Reads leave no trace. Stated, not silent. |
@@ -78,6 +78,8 @@ Every red-team finding the synthesis adopted, keyed to what it supersedes: C1 su
 1. **The lens-object canonical encoding** — the most-depended-on unwritten spec in the pass (team membership, `act` expansion, snapshot lens-binding, P9 roaming all need a citable lens identity). Co-owned by [[read-lens-spec]] + SDK, with vectors. **Write first.**
 2. **The conventions registry** (`efs-conventions`) — ~20 explicit convention-not-row rulings with no home; a wrong-dialect risk the row discipline was supposed to buy off. One registry doc + a named conformance-vector owner.
 3. **read-lens-spec revision batch** — the C1/C4/C8 corrections, the P3 qualifiers (adopt/reject each of the eight; vectors for 1–4), the P8 read-path-privacy section (bulk snapshot distribution for lens/deny/index/checkpoint lists; one-head-per-venue revalidation; chunk-size normalization + padding guidance; OHTTP-cleanliness — landing in read-lens-spec §5 + codex-bytes), ANCHORED + ENCRYPTED-NO-KEY flags, `asOf/since/history` vocabulary, mount rules R-A1/2/3 + the M1 `movedTo` evaluator + M2 spine-set walk + M3 listing rules, the anti-fallthrough hop sentence, delegate-set completeness + authority-STALE, and the FOLD rules as corrected (C7).
+
+**Later owner requirement, with implementation/profile design still open:** [[mountable-filesystem-semantics]] requires one read-only mounted Ethereum/EVM EFS projection on Linux, macOS, and Windows. The same golden view must validate lookup, portable names, exact directory/property enumeration, pinned file identity, verified range reads, and `UNKNOWN` through each host adapter. Writable `fsync`/rename/unlink behavior is a later extension. Non-EVM substrate portability is a separate research track; FUSE/FSKit/WinFsp are not frozen protocol dependencies.
 
 ## Open questions
 

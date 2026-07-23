@@ -2,7 +2,7 @@
 
 **Status:** draft reconciliation control; owner validation required
 **Audience:** James, protocol designers, reviewers, and implementers
-**Last touched:** 2026-07-12
+**Last touched:** 2026-07-22
 **Authority:** requirements and assumptions inventory, not a byte-level specification and not an adoption of any undecided mechanism
 
 #status/draft #kind/design #repo/planning #topic/efsv2 #topic/requirements #topic/assumptions
@@ -47,6 +47,10 @@ The coherent promise is:
 > **EFS base records, logical IDs, actor signatures, and evidence are copyable across chains without trusting the copier. Current KEL authority is rooted in an explicit authority domain; its receipts/proofs are portable but domain- and basis-bound. A foreign client may query and verify that domain; a foreign contract needs an installed verification adapter or a fully specified local commitment.**
 
 This is still meaningful portability. It avoids pretending that chain-free record IDs imply chain-free current authority.
+
+[[solana]] is the concrete substrate pressure test for this promise. It maps Ethereum, Solana, local, object-store, and content-addressed backends by capability and defines falsification gates; it does not select the authority topology.
+
+[[ethereum-first-efs-and-os]] holds the broader exploratory frame: EFS may remain an Ethereum-strength protocol while the OS uses a smaller portable constitution and honestly graded local/network modes. It is not an adopted exception to the requirements in this ledger.
 
 ## 2. Vocabulary: do not mix these categories
 
@@ -94,6 +98,7 @@ These concepts are the strongest common baseline produced by the research passes
 ### Files, graph, and lenses
 
 - EFS is an append-only evidence graph with filesystem conventions. It is not POSIX and does not promise protocol delete, shared mutable cells, locks, or universal write ACLs.
+- EFS nevertheless provides one deterministic read-only mounted projection on Linux, macOS, and Windows. Host adapters preserve canonical EFS identity and logical results rather than redefining the protocol around one host's filesystem rules.
 - A lens is a typed, scoped, reproducibly compiled policy over evidence. It is not merely a global ordered author list.
 - Evidence, reader policy, application capability, confidentiality, and transport are separate powers.
 - Cross-venue reads carry an explicit basis vector. A client-composed view is not one atomic global snapshot.
@@ -221,6 +226,7 @@ The requirement IDs are stable handles for design reviews.
 | **R-O7** | System Chrome owns consequential consent and trusted display; an app cannot draw or approve its own wallet, identity, recovery, or authority prompt | Proposed safety boundary | UI-redressing and confused-deputy tests |
 | **R-O8** | Pending local/outbox state never masquerades as confirmed authority-domain state | Required truth boundary | Offline, rejected, reorged, and delayed-admission UX fixtures |
 | **R-O9** | App network denial and endpoint/query privacy are separate controls; a verified response is not necessarily privately retrieved | Required honesty boundary | Capability and traffic-observer tests |
+| **R-O10** | The same EFS view is mountable read-only on Linux, macOS, and Windows through ordinary shell and graphical file-manager workflows; Linux FUSE alone does not satisfy the requirement | **Adopted owner requirement** | One cross-adapter golden fixture; exact directory/property enumeration; portable-name collision vectors; pinned handles; verified range reads; honest `UNKNOWN`; all mutations fail read-only |
 
 ## 5. Adopted owner assumptions and their limits
 
@@ -378,7 +384,9 @@ Never compress these to a Boolean `valid`. Applications must state the minimum g
 
 A foreign “local commitment” is not automatically trustless. Its profile must expose who updates it, how remote state is authenticated, how rollback/monotonicity works, its finality lag and expiry, challenge/failure behavior, and whether the risk bearer pinned it, a bridge derived it, or an oracle/witness asserted it.
 
-## 11. Human decisions needed now
+## 11. Human decisions requiring eventual disposition
+
+> **2026-07-22 sequencing hold:** treat this section as the canonical issue inventory, not a packet to answer immediately. Revalidate KEL/authority and lens/resolver semantics against native mounts, Solana/independent realms, required enumeration, and signed local/network modes first; then revise and route the surviving choices through [[owner-decision-inbox]]. Adopted rulings remain in [[owner-rulings]].
 
 These are intentionally written as product choices, not cryptographic jargon. Recommended choices are provisional until James adopts them.
 
@@ -540,6 +548,8 @@ Do not settle these through editorial merging:
 
 ## 14. Reconciliation order after the top decisions
 
+> **Sequencing clarification (2026-07-22):** this remains the dependency order once the top choices are ready. It is not the immediate work order. The joined research sequence in [[ethereum-first-efs-and-os#11. Research-to-MVP sequence]] now precedes the decision packet so the cases and recommendations below do not fossilize assumptions invalidated by the new pressure tests.
+
 1. Adopt or edit D-1 through D-16 and record them in `owner-rulings.md`.
 2. Write a short `system-constitution.md` containing only settled boundaries and vocabulary.
 3. Re-cut `kel.md`, `codex-envelope.md`, `deterministic-ids.md`, `codex-kinds.md`, and `codex-kernel.md` together. Their identities and admission semantics cannot be changed independently.
@@ -583,6 +593,7 @@ Historical handoffs, snapshots, and research corpora should remain available as 
 - Funding, timing, batching, actor, grant, and traffic-correlation red team.
 - Chrome, Firefox, Safari, and iOS capability-cage tests.
 - Verified-read, malicious-RPC, reproducible-build, compromised-update, rollback, eviction, and device-loss drills.
+- Cross-platform mounted-filesystem conformance on Linux, macOS, and Windows using one canonical fixture: shell/file-manager reads and copies, portable-name escaping, exact child/property enumeration, strict absence/`UNKNOWN`, pinned handles, verified range reads, metadata privacy/bounds, daemon failure, and read-only enforcement.
 
 ### Before claiming 100-year access
 

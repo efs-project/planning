@@ -1,21 +1,25 @@
 # EFS v2 + OS — owner decision inbox
 
-**Status:** draft decision packet; no choice is adopted until James answers and it is copied into [[owner-rulings]]
+**Status:** draft decision inventory under sequencing hold; no choice is adopted until James answers and it is copied into [[owner-rulings]]
 **Audience:** James first; designers second
-**Last reconciled:** 2026-07-21
-**Inputs:** [[owner-rulings]], [[assumptions-and-requirements]], [[fs-pass-james-decisions]], [[privacy-james-decisions]], [[read-lens-spec]], [[onchain-completeness]], and [[client-os-pressure-report]]
+**Last reconciled:** 2026-07-22
+**Inputs:** [[owner-rulings]], [[assumptions-and-requirements]], [[ethereum-first-efs-and-os]], [[mountable-filesystem-semantics]], [[fs-pass-james-decisions]], [[privacy-james-decisions]], [[read-lens-spec]], [[onchain-completeness]], [[solana]], and [[client-os-pressure-report]]
 
 #status/draft #kind/decision #repo/planning #topic/efsv2 #topic/clientv2 #blocked-on/human-decision
 
 > **This is the sole live owner queue for EFS v2 and cross-cutting OS architecture.** Detailed documents remain the reason trail. Future agents must not revive a source checkbox classified here as settled, evidence-gated, delegated, or superseded.
+>
+> **2026-07-22 sequencing hold:** this page is presently the canonical **inventory**, not a packet James should batch-answer yet. Re-run the joined KEL/authority and lens/resolver passes against native mounts, Solana/independent realms, required on-chain enumeration, and signed local/network modes first. Preserve adopted rulings, but revalidate every unanswered option and recommendation before lifting this hold. See [[owner-rulings]] and [[ethereum-first-efs-and-os#11. Research-to-MVP sequence]].
 
 ## How to answer
 
-Reply with codes, for example `N1A, N2A, N3A, N4A, N5A, N6A, Q1A–Q5A`. Add exceptions in plain English. `N2A except N2h` adopts the boundary set except its host-lane item.
+After the sequencing hold is lifted, reply with codes, for example `N1A, N2A, N3A, N4A, N5A, N6A, Q1A–Q5A`. Add exceptions in plain English. `N2A except N2h` adopts the boundary set except its host-lane item.
 
 The recommended packet is always option **A** below. That is a recommendation, not an adopted answer.
 
-## Decide now — six architecture choices
+**Research posture, not another decision code:** [[ethereum-first-efs-and-os]] records James's current desire to make EFS deeply useful to Ethereum while exploring a broader cypherpunk OS and avoiding premature universal abstractions. Its Shapes A–E remain hypotheses until evidence changes a choice in this inbox and James records a ruling.
+
+## Provisional architecture-choice inventory — revalidate before asking
 
 ### N1 — Strong authority without a cross-chain empire
 
@@ -28,7 +32,7 @@ The recommended packet is always option **A** below. That is a recommendation, n
 
 **N1A also means:** ship the KEL-aware seam before v2 freezes; make legacy-EOA upgrade commitment default-on with an explicit degraded opt-out; let smart-account-only users make one direct inception call; do not treat ERC-1271/6492 as eternal record authority; make personal principals non-transferable while organizations use control succession; and reserve a narrow same-domain successor mechanism for future signature suites.
 
-**Not chosen here:** actual venue, receipt bytes, finality, or successor ABI. Those wait for E1. Details: [[assumptions-and-requirements#Strong-authority hypothesis to prototype next]], [[kel#23. Decisions for James]], and [[fs-pass-james-decisions]].
+**Not chosen here:** actual venue, receipt bytes, finality, or successor ABI. Those wait for E1. [[solana]] supplies the first non-EVM capability map and prototype gates; it does not add another option or decide N1. Details: [[assumptions-and-requirements#Strong-authority hypothesis to prototype next]], [[kel#23. Decisions for James]], and [[fs-pass-james-decisions]].
 
 ### N2 — Constitutional system boundaries
 
@@ -90,7 +94,7 @@ Details: [[playable-archive-requirements]] and [[apps-cookbook]].
 
 The batch includes committing AEAD; random independent roots; encrypted dirnodes at launch; explicit recovery artifacts; no on-chain recipient graph; honest eager/lazy removal semantics; client-side viewing keys; walk-away tests; and gates before shreddable/team/live-session claims. N3, N4, L13, L14, and L15 remain separately timed choices. Details: [[privacy-pass-synthesis]], [[privacy-james-decisions]], and [[privacy-freeze-reservations]].
 
-## Decide now — five quick wire and safety calls
+## Provisional wire and safety inventory — revalidate before asking
 
 Each is independent. These are small, but freezing the opposite accidentally would be expensive.
 
@@ -145,7 +149,7 @@ These are real owner acceptance gates. Engineers choose exact mechanisms; James 
 
 | ID | Example and eventual options | Evidence required | Recommendation after evidence | Details |
 |---|---|---|---|---|
-| **E1 Authority venue** | Base/L2, L3, or another fixed profile | admission/rotation/recovery gas; finality/force inclusion; proof latency; independent RPC reconstruction | exactly one measured v2 profile | [[assumptions-and-requirements#Strong-authority hypothesis to prototype next]] |
+| **E1 Authority venue** | Base/L2, Solana, L3, or another fixed profile | admission/rotation/recovery cost; finality/force inclusion; proof latency; independent RPC/state reconstruction; mandatory bounded queries | exactly one measured v2 profile | [[assumptions-and-requirements#Strong-authority hypothesis to prototype next]], [[solana]] |
 | **E2 Aggregate kernel cost** | accept full body + indexes + revocation state, trim optional surfaces, or reject the on-chain promise | one combined gas/state snapshot including every mandatory direction | accept only against the complete bill, not isolated cheap calls | [[onchain-completeness]], [[freeze-gates]] |
 | **E3 `admittedAt`** | store + batch-read it, or explicitly degrade trustless time | measured incremental state/read cost and two consumers | store if the complete snapshot is tolerable | [[fs-pass-james-decisions#1. The `admittedAt` + index bundle (P1) — the pass's biggest lever]] |
 | **E4 Author enumeration** | full author index or roots-forward + orphan-tail | gas/state plus recovery benchmark | smallest mechanism that still guarantees complete discovery | [[onchain-completeness]] |
@@ -187,6 +191,7 @@ These are real owner acceptance gates. Engineers choose exact mechanisms; James 
 - KEL is required; bare EOA is the zero-state path. Passkey sync plus an independent cold factor is the mainstream recovery baseline.
 - Durable unlinkable personas are separate KELs grouped locally; disposable stealth addresses are one-shot.
 - Public by default plus a client sensitivity layer; contracts consume public data only.
+- A read-only mounted EFS projection is required on Linux, macOS, and Windows; Linux FUSE alone is not completion. Exact adapters and support floors are delegated evidence gates. See [[mountable-filesystem-semantics]].
 - On-chain plus Arweave, with replaceable optional mirrors.
 - Mandatory automatic indexing for admitted on-chain data, including required backlinks, address/list/redirect directions, best-mirror and content-hash lookup, full-body spine, and revocation-aware live counts. Only measured shape/cost remains.
 - No universal on-chain collision bit. Untrusted safety-critical authors need challenge-window or tighter policy.
@@ -197,7 +202,7 @@ These are real owner acceptance gates. Engineers choose exact mechanisms; James 
 
 ## Delegated technical gates — not owner votes
 
-Protocol and security owners must resolve exact index layouts, live-count mechanism, receipt bytes, crypto suite/vectors, WebAuthn/PQ vectors, control maxima, event shapes, and EIP-170 splitting through prototypes, independent review, and conformance tests. Escalate only if the result changes a boundary, safety promise, product degradation, or irreversible wire choice listed above.
+Protocol and security owners must resolve exact index layouts, live-count mechanism, receipt bytes, crypto suite/vectors, WebAuthn/PQ vectors, control maxima, event shapes, EIP-170 splitting, and the cross-platform mount adapters/name/error/metadata profile through prototypes, independent review, and conformance tests. Escalate only if the result changes a boundary, safety promise, product degradation, or irreversible wire choice listed above.
 
 ## Superseded questions — never revive silently
 

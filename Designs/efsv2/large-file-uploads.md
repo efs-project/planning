@@ -12,6 +12,8 @@
 
 How a file **too large for one block** becomes **one signature**, with chunked/parallel/resumable submission behind that signature, permanent bytes on-chain, and forward-compatibility with future scaling. This is the "make the data bytes signatures too" idea taken to its full form: the user's single `eth_signTypedData_v4` transitively commits **every byte** of the file, and the chunks themselves carry **no signature** — each is admitted only if its bytes prove against the author-committed root.
 
+> **Venue scope:** `EFSBytes`, SSTORE2, CREATE2, calldata, and `extcodecopy` below are the EVM byte-store profile, not the portable byte layer. [[solana]] preserves the commitment/verification semantics while mapping storage, staging, cost, availability, and deletion to explicit `ByteStore` capabilities.
+
 The round designed three architectures and red-teamed each. **The three collapse to one genuine fork** (a fat/thin byte-layer dial): Architecture A and C are the same core differing only on Etched-sibling-contract (A) vs Durable-redeployable-store (C); B is A's core plus a blob transport rail plus a promotion lens (B ⊇ A). **No fatal flaw exists in the shared mechanism** — the envelope's already-fuzzed leaf verifier carries it.
 
 ## Recommendation: A-mechanism + B-lens + C-discipline

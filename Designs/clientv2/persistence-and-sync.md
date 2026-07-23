@@ -2,8 +2,9 @@
 **Status:** draft
 **Target repos:** planning, client, sdk
 **Depends on:** [[web-os-thesis]], [[read-lens-spec]], [[codex-envelope]], [[deterministic-ids]], [[large-file-uploads]], [[fable-client-v2-handoff]]
+**Related research:** [[mountable-filesystem-semantics]]
 **Reviewers:** —
-**Last touched:** 2026-07-07 — fable-5
+**Last touched:** 2026-07-22
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk
 
@@ -49,6 +50,8 @@ One elected **Kernel storage worker** owns every OPFS sync handle and every SQLi
 ### D4. The journal — event-sourced op log
 
 The Kernel's canonical local truth is an ordered, append-only log. Everything else — slot tables, path trees, lens resolutions, the pending overlay — is a **materialized view, rebuildable by replay** (eg-walker/LiveStore rule: the op log is canonical, derived state is a disposable cache). [research-grounded]
+
+The mount pressure test in [[mountable-filesystem-semantics]] makes this journal the writable upper layer for ordinary file operations: random writes and renames stage locally, `fsync` can mean local crash durability, and signing/publication remain explicit ladder transitions rather than side effects of `write(2)` or `close()`.
 
 ```ts
 interface JournalEntry {

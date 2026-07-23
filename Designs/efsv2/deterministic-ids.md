@@ -9,7 +9,7 @@
 
 #status/draft #kind/design #repo/contracts #repo/sdk #repo/planning
 
-> **Coordinated re-cut required.** The chain-free/domain-separated ID goal survives, but this text still assumes EAS statements, address-shaped authors, and an older literal vocabulary. KEL requires full-width principals at every semantic boundary, and the native kernel now owns admission and revocation. Do not implement or freeze the formulas below until `codex-envelope`, `codex-kinds`, `codex-kernel`, and KEL are re-cut together with new cross-language vectors. See [[assumptions-and-requirements]].
+> **Coordinated re-cut required.** The chain-free/domain-separated ID goal survives, but this text still assumes EAS statements, address-shaped authors, and an older literal vocabulary. KEL requires full-width principals at every semantic boundary, and the native kernel now owns admission and revocation. Do not implement or freeze the formulas below until `codex-envelope`, `codex-kinds`, `codex-kernel`, and KEL are re-cut together with new cross-language vectors. See [[assumptions-and-requirements]]. [[solana]] adds the concrete rule that a PDA/program ID is a venue locator, never a logical EFS ID, and supplies the redeployment vector.
 
 ## Problem
 

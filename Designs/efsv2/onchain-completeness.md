@@ -16,6 +16,8 @@
 
 The audit's central result is that "works on-chain" was one word hiding **three independent questions**, and conflating them is what let the keep/demote line demote core features by accident:
 
+[[solana]] treats these three axes as substrate-neutral capability requirements. EVM mappings/arrays and Solana account pages are venue layouts; both must still provide state-resident bodies, bounded keyed queries, and honestly graded native-program composability.
+
 - **Durability** — do the bytes survive log pruning? (In on-chain *state*, not just events.) The full-body **spine** makes this YES for the whole admitted set.
 - **Queryability** — can a *bounded reader* get the answer from a **keyed index**, without a trusted party and without replaying 100 years of global history? Durable-but-unindexed = "run your own full scan," which differs from "trust The Graph" only in *who* you trust, not in *cost*. **Durable is necessary but not sufficient.**
 - **Composability** — can a *smart contract* compute it in bounded gas?

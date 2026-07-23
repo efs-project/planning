@@ -27,6 +27,8 @@ The test from [[sdk-vs-client-responsibilities]] survives verbatim: *if it requi
 - **The pending-state ladder as types** — the enum `draft → … → replicated`, legal transitions, and runtime validators live here so third-party outboxes and plain-web apps share one vocabulary. The outbox *machinery* does not (see Private, below).
 - **Submission strategies via seams** — strategy code (direct RPC write, sponsored-bundle POST, offline `.efs-bundle` export/import) against injected interfaces. The SDK opens no sockets of its own in OS context; a plain-web adapter (`@efs/sdk/web`) provides fetch-based `Transport`/`Provider` defaults.
 
+**Portability correction:** one broad `Transport`/`Provider` seam is not enough to describe Ethereum, Solana, local bundles, and cloud/content-addressed stores honestly. [[solana]] defines the conceptual split into artifact codec, signer suite, evidence replica, authority venue, query/proof, byte store, and workspace capabilities; exact SDK names remain part of the coordinated recut.
+
 Never, structurally: keys, servers, DOM, UI, telemetry, ambient network, product policy. `npm install @efs/sdk` still runs nothing.
 
 ### The ownership matrix, re-cut for v2

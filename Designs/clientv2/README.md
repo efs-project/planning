@@ -11,6 +11,7 @@ The official EFS client v2 ("web OS") design set, produced 2026-07-07 by the Fab
 | Doc | What it rules |
 |---|---|
 | [[web-os-thesis]] | The thesis, rejected/adopted OS assumptions, the ring architecture (Bootstrapper → Kernel → System Chrome → Session Shell → apps-in-Workers), fork rulings F1–F13, post-fan-out amendments, honesty doctrine, non-goals, naming frame. |
+| [Ethereum-first EFS and OS](../efsv2/ethereum-first-efs-and-os.md) | **Research frame, not a ruling:** explores how an Ethereum-native EFS profile and a broader local-first OS can coexist, then contract through comparable vertical slices. |
 
 ## Model docs (each elaborates named forks; thesis wins on conflict)
 
