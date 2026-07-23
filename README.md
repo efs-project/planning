@@ -13,15 +13,16 @@ Humans (specifically James, the project lead) interact via Obsidian. Preserve st
 Read these in order:
 
 1. [`Onboarding/start-here.md`](./Onboarding/start-here.md) — decision tree from "I just arrived" to "I'm working on X."
-2. [`Designs/owner-decision-inbox.md`](./Designs/owner-decision-inbox.md) — routing page for every live design choice James needs to make.
-3. [`Onboarding/repo-map.md`](./Onboarding/repo-map.md) — the `/efs/` layout.
-4. [`Onboarding/write-a-design.md`](./Onboarding/write-a-design.md) — if your task involves writing a design.
-5. [`Onboarding/conventions.md`](./Onboarding/conventions.md) — tags, paths, tri-sync, commit messages.
-6. [`Onboarding/escalation.md`](./Onboarding/escalation.md) — when to stop and ask vs. note and continue.
+2. [`Open-Decisions.md`](./Open-Decisions.md) — generated roll-up: every open owner decision across all queues, active holds first. Start here to answer "what needs deciding?"
+3. [`Designs/owner-decision-inbox.md`](./Designs/owner-decision-inbox.md) — routing page for live design choices; each design folder owns its queue.
+4. [`Onboarding/repo-map.md`](./Onboarding/repo-map.md) — the `/efs/` layout.
+5. [`Onboarding/write-a-design.md`](./Onboarding/write-a-design.md) — if your task involves writing a design.
+6. [`Onboarding/conventions.md`](./Onboarding/conventions.md) — tags, paths, tri-sync, commit messages.
+7. [`Onboarding/escalation.md`](./Onboarding/escalation.md) — when to stop and ask vs. note and continue.
 
 Then skim [`Glossary.md`](./Glossary.md) for terminology and [`Designs/README.md`](./Designs/README.md) for the design landscape.
 
-The **canonical protocol** for this vault is [`Designs/design-system.md`](./Designs/design-system.md). This README is the entry point; the design-system file is the authority.
+The **canonical protocol** for this vault is [`Designs/0001-design-system.md`](./Designs/0001-design-system.md). This README is the entry point; the design-system file is the authority.
 
 > **Need James to make a design decision?** Start at the [Designs owner decision inbox](./Designs/owner-decision-inbox.md), then follow its folder link. Use only that folder's canonical inbox to determine what is live. Source-design checkboxes are research residue unless the inbox promotes them. Adopted EFS v2 answers are recorded in [owner rulings](./Designs/efsv2/owner-rulings.md); `For-James.md` covers non-design attention too.
 
@@ -33,6 +34,7 @@ The **canonical protocol** for this vault is [`Designs/design-system.md`](./Desi
 | `AGENTS.md` | Universal agent brief (for tools that auto-detect this filename); redirects here. |
 | `Kanban.md` | Cross-repo task board (Obsidian Kanban plugin). |
 | `For-James.md` | Broader cross-project attention dashboard, including deadlines and operational items; live design choices route through the Designs owner inbox. |
+| `Open-Decisions.md` | **Generated** roll-up of every open owner decision across all queues, holds first. Regenerate with `./scripts/open-decisions.sh`; never hand-edit. |
 | `Decisions.md` | Append-only one-line decisions log. |
 | `Ideas.md` | Parking lot for future "someday" ideas + things-to-account-for (PM-curated; graduate to Brainstorm/Design). |
 | `Tasks.md` | Global rollups via the Obsidian Tasks plugin (open questions, blocked items, pre-promotion checklists). |
@@ -43,6 +45,7 @@ The **canonical protocol** for this vault is [`Designs/design-system.md`](./Desi
 | `Designs/` | Design proposals plus the canonical [owner decision routing inbox](./Designs/owner-decision-inbox.md). Name-first drafts; numbered at promotion. See [`Designs/README.md`](./Designs/README.md). |
 | `Architecture/` | Descriptive: "how the system works today." See [`Architecture/README.md`](./Architecture/README.md). |
 | `Glossary.md` | Single alphabetical file of EFS terms. |
+| `Onboarding/authority.md` | Who may decide what — the authority roster. A roster plus attribution, deliberately not an ACL. |
 | `Onboarding/` | Procedural: "how YOU do X." See [`Onboarding/README.md`](./Onboarding/README.md). |
 | `Agents/` | Agent-specific institutional knowledge: launch prompts and SOUL files for each agent role (PM, future design-reviewer, etc.). See [`Agents/README.md`](./Agents/README.md). |
 | `Grants/` | Operational grant tracking — funder landscape, proposal status table, reusable EFS pitch packet, research log. Owned by @grants; PM keeps it integrated with the board. Not a design. See [`Grants/README.md`](./Grants/README.md). |
@@ -101,7 +104,7 @@ Full Kanban rules in [`Onboarding/conventions.md`](./Onboarding/conventions.md) 
 
 This README is intentionally short. The detailed rules — design lifecycle, status taxonomy, promotion ceremony, tri-sync invariant, link conventions, escalation tiers — all live in:
 
-- **[`Designs/design-system.md`](./Designs/design-system.md)** — the canonical meta-design.
+- **[`Designs/0001-design-system.md`](./Designs/0001-design-system.md)** — the canonical meta-design.
 - **[`Onboarding/`](./Onboarding/)** — procedural how-tos.
 
 If this README and `design-system.md` disagree, `design-system.md` wins. Surface the discrepancy as a Tier 2 escalation per [`Onboarding/escalation.md`](./Onboarding/escalation.md).

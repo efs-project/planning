@@ -74,7 +74,7 @@ We are at the leading edge of this pattern, not blazing it alone. The combinatio
 
 - How does a swarm of agents reach consensus on a controversial design without a human gatekeeper? Our answer: the gatekeeper is the human. Pure-agent consensus has no good solution today.
 - How do you prevent prompt-injection via documents read from a shared vault? The vault is trusted in our case (all writers are agents we run); a multi-tenant version would need this.
-- How do agents represent "I don't know" in a coordination file? Our convention: `#needs/james` for "ask the human"; `<!-- AGENT-Q: -->` for "I'd like another agent's read." Lightweight but might need formalizing if it gets ambiguous.
+- How do agents represent "I don't know" in a coordination file? Our convention: `#needs/owner` for "ask the human"; `<!-- AGENT-Q: -->` for "I'd like another agent's read." Lightweight but might need formalizing if it gets ambiguous.
 
 ## References
 

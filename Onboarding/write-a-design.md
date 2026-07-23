@@ -183,7 +183,7 @@ Update any hits to point at the new tombstone path. Until a `scripts/rename-desi
 
 **e) Kanban sweep.** Move all per-repo cards for this design to **Done**. If you had a meta-card tracking the design itself (rare; most designs are tracked via the per-repo cards), move that to Done too.
 
-**f) Update For-James.md and Decisions.md if relevant.** If the design's resolution should be discoverable as a one-line decision (e.g., "we now use lexicographic-by-attester-address as the tiebreaker"), add a line to `Decisions.md`. If the landing freed up a `#needs/james` item in `For-James.md`, check it off.
+**f) Update For-James.md and Decisions.md if relevant.** If the design's resolution should be discoverable as a one-line decision (e.g., "we now use lexicographic-by-attester-address as the tiebreaker"), add a line to `Decisions.md`. If the landing freed up a `#needs/owner` item in `For-James.md`, check it off.
 
 **Single commit for the planning side** (steps c-f). The per-repo ADR writes (step b) live in those repos' own commits. The order matters: ADRs go in first (they're what the tombstone points at), then the tombstone references them. If you tombstone before writing the ADRs, the tombstone has broken links.
 

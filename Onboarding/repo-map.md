@@ -72,7 +72,7 @@ Never use absolute `/efs/...` paths in committed files — bakes in a mount poin
 If you're in `/efs/contracts/.worktrees/feature-x/` and need to read planning:
 
 ```bash
-cat ../../../planning/Designs/design-system.md
+cat ../../../planning/Designs/0001-design-system.md
 ```
 
 The path is `../../../planning/` from any worktree four levels deep.

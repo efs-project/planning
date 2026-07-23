@@ -26,7 +26,9 @@ COUNT=0
 echo "=== Designs awaiting promotion ==="
 echo ""
 
-for f in "$DESIGNS"/*.md; do
+# Recursive as of 2026-07-23 — was `"$DESIGNS"/*.md`, which hid every design in
+# Designs/efsv2/ and Designs/clientv2/ and reported "queue empty" as a false green.
+while IFS= read -r f; do
   base="$(basename "$f")"
   case "$base" in
     _template.md|README.md) continue ;;
@@ -41,13 +43,13 @@ for f in "$DESIGNS"/*.md; do
     last_touched="$(git -C "$VAULT_ROOT" log -1 --format='%ai' -- "$f" 2>/dev/null | cut -d' ' -f1 || echo "unknown")"
 
     echo "- $title"
-    echo "    file:          Designs/$base"
+    echo "    file:          ${f#"$VAULT_ROOT"/}"
     echo "    target repos:  $target_repos"
     echo "    last touched:  $last_touched"
     echo ""
     COUNT=$((COUNT + 1))
   fi
-done
+done < <(find "$DESIGNS" -name '*.md' | sort)
 
 echo "=== Summary ==="
 echo "Total: $COUNT designs awaiting promotion (WIP limit: $WIP_LIMIT)"

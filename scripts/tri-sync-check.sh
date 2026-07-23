@@ -28,7 +28,10 @@ fi
 
 ISSUES=0
 
-for f in "$DESIGNS"/*.md; do
+# Recursive: design work lives in subfolders (Designs/efsv2/, Designs/clientv2/).
+# This loop was `"$DESIGNS"/*.md` until 2026-07-23, which made ~77% of the design
+# corpus invisible to every check below — a false green, not a clean bill.
+while IFS= read -r f; do
   base="$(basename "$f")"
 
   # Skip the template and the folder README
@@ -93,7 +96,8 @@ for f in "$DESIGNS"/*.md; do
         ;;
     esac
   fi
-done
+# Process substitution (not a pipe) so ISSUES survives in the current shell.
+done < <(find "$DESIGNS" -name '*.md' | sort)
 
 echo ""
 if [[ $ISSUES -eq 0 ]]; then

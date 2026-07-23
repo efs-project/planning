@@ -73,11 +73,25 @@ Plain `#kebab-case-text`. Obsidian indexes automatically; agents grep. Canonical
 | `#status/draft`, `#status/review`, `#status/ready-for-promotion`, `#status/accepted`, `#status/landed`, `#status/abandoned`, `#status/rejected` | Lifecycle of a design. |
 | `#blocked-on/<thing>` | Blocker (e.g. `#blocked-on/DESIGN-0007`, `#blocked-on/human-decision`, `#blocked-on/concrete-CI-need`). |
 | `#depends-on/<thing>` | Soft dependency between designs or tasks. |
-| `#needs/james` | Tag on a specific `- [ ]` Open Questions item or AGENT-Q comment that requires James's input. Surfaced via [[For-James]]. |
+| `#needs/owner` | Tag on a specific `- [ ]` Open Questions item or AGENT-Q comment that needs an owner ruling. Surfaced via [[Open-Decisions]]. |
+| `#needs/james` | **Deprecated alias of `#needs/owner`** (renamed 2026-07-23). Still surfaced; don't write new ones. Existing occurrences in dated history stay as written. |
 
 No spaces, kebab-case, lowercase. Obsidian treats whitespace as a tag terminator.
 
 New tags are fine when nothing existing fits — add to this table in the same commit so other agents find them.
+
+## Naming the decision-maker: role vs. person
+
+> **In durable design and process docs, write "the owner." In dated rulings, decision history, and status notes, name the person — attribution is the point.**
+
+Both forms are correct; they do different jobs. `Designs/**/owner-decision-inbox.md` and `owner-rulings.md` describe a **role** that could one day belong to more than one person, so they use the role. `Decisions.md`, `Daily Notes/`, `Reviews/`, and `Brainstorms/` are **append-only history**, where "James corrected my EAS claim" is a dated attribution — rewriting it to "the owner corrected…" destroys provenance and is a falsification, not a rename. The roster of who currently holds authority lives in [[authority]].
+
+Two consequences worth stating plainly:
+
+- **Never bulk-rename "James" across the vault.** ~1113 occurrences exist; most are history. Rename only where the sentence tells a future agent what to *do*, and only if substituting "whoever currently holds decision authority" keeps it true.
+- **Never rewrite a signature.** `Promoted by @james on YYYY-MM-DD` trust tokens and `RULED (James)` markers name a specific person taking responsibility for an irreversible act. That specificity is the whole value. The role generalizes; the signature never does.
+
+**Disambiguation:** EFS the product also uses "owner" (container owner, gate owner, owner-derived `DATA` IDs). Project-role usage is a bare noun-adjunct (`owner-decision-inbox`, "the owner ruled"); EFS-resource usage is always possessive-qualified ("the container's owner"). In documents discussing both, write **"project owner"** on first mention. See [[Glossary#Owner (project role)]].
 
 ## Tri-sync invariant
 
@@ -222,7 +236,7 @@ Once a design is `accepted`, the body is nominally frozen. But implementation re
 - [x] Should we support both X and Y? — only X, resolved 2026-05-15.
 
 ### Post-acceptance (2026-06-03 / @claude-opus-4.7)
-- [ ] Discovered during implementation: the foo-bar interaction needs a tiebreaker. Proposed: lexicographic by attester address. Awaiting confirmation. #needs/james
+- [ ] Discovered during implementation: the foo-bar interaction needs a tiebreaker. Proposed: lexicographic by attester address. Awaiting confirmation. #needs/owner
 ```
 
 Questions surfaced post-acceptance feed the same Tasks plugin rollup and reach James the same way. If a post-acceptance question changes the design's substance, the implementing agent must either update the design body (drift discipline, see [[design-system]]) or open a new design that supersedes.

@@ -202,7 +202,7 @@ Push back ≠ stonewall. Format: state the conflict, link the convention, offer 
 - Designs sitting in `#status/ready-for-promotion` (WIP limit is 3 — at 3, James must clear before more).
 - Any audit script failing.
 - Designs that have been in `#status/draft` for >10 days without activity.
-- Decisions sitting unresolved in design `## Open questions` tagged `#needs/james`.
+- Decisions sitting unresolved in design `## Open questions` tagged `#needs/owner`.
 
 ## Where decisions live (routing — read before surfacing anything)
 

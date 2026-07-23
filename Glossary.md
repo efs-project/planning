@@ -64,6 +64,14 @@ A reader-selected policy describing whose authenticated claims contribute to a v
 
 EAS schema representing a retrieval URI for a DATA. Multiple mirrors allowed per DATA (ipfs://, ar://, web3://, https://, magnet:). The router picks the best transport. Revocable. See `contracts/specs/02`.
 
+## Owner (project role)
+
+The person holding decision authority over some part of this vault — currently James (sole holder). Encodes a **role**, not an identity; the roster lives in [[authority]]. Used bare as a noun-adjunct: `owner-decision-inbox`, "the owner ruled." In documents that also discuss EFS resource ownership, write "project owner" on first mention. Not to be confused with [[Glossary#Owner (EFS resource)]].
+
+## Owner (EFS resource)
+
+The on-chain principal controlling a container, gate, namespace, or device. EFS `DATA` IDs are owner/salt-derived. Always possessive-qualified in prose ("the container's owner", "gate owner"). Not to be confused with [[Glossary#Owner (project role)]].
+
 ## PIN
 
 See [[Glossary#Edge (PIN, TAG)]]. Cardinality-1 edge. Used for file placement and PROPERTY value binding. Re-attesting at the same `(attester, definition, targetSchema)` slot supersedes in O(1).

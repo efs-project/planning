@@ -4,7 +4,7 @@ EFS planning vault. Cross-repo coordination point for the AI agent swarm buildin
 
 This file exists so tools that auto-detect `AGENTS.md` (Codex CLI, Cursor, Devin, Copilot, Claude Code, et al — [universal agent brief convention](https://www.linuxfoundation.org/press/linux-foundation-announces-the-formation-of-the-agentic-ai-foundation)) get a stable entry point. **The canonical agent docs are [README.md](./README.md) and [Onboarding/](./Onboarding/).**
 
-> **Bootstrap state.** No designs have been promoted yet; the meta-design ([Designs/design-system.md](./Designs/design-system.md)) is itself a draft. Expect to be the first real user of most procedures. `/efs/<repo>/` paths in the docs are the target layout, not necessarily current reality — use relative paths from your worktree. See [README current-state preamble](./README.md) for details.
+> **Bootstrap state.** No designs have been promoted yet; the meta-design ([Designs/0001-design-system.md](./Designs/0001-design-system.md)) is itself a draft. Expect to be the first real user of most procedures. `/efs/<repo>/` paths in the docs are the target layout, not necessarily current reality — use relative paths from your worktree. See [README current-state preamble](./README.md) for details.
 
 ## Read on init
 
@@ -15,13 +15,21 @@ If your tooling does not auto-load `@`-imported files, read these in order befor
 3. [`Onboarding/repo-map.md`](./Onboarding/repo-map.md) — `/efs/` layout and sibling repos.
 4. [`Onboarding/conventions.md`](./Onboarding/conventions.md) — tri-sync invariant, tag vocabulary, commit-message format, link forms, Kanban rules.
 5. [`Onboarding/escalation.md`](./Onboarding/escalation.md) — when to stop and ask vs. note-and-continue.
-6. [`Designs/design-system.md`](./Designs/design-system.md) — canonical protocol for this vault.
+6. [`Designs/0001-design-system.md`](./Designs/0001-design-system.md) — canonical protocol for this vault.
 
-### Finding James's needed design decisions
+### Finding the owner's needed design decisions
 
-Start at [`Designs/owner-decision-inbox.md`](./Designs/owner-decision-inbox.md). It routes to the one canonical owner inbox in each design folder. Those inboxes separate **decide now**, **decide after evidence**, **launch choices**, **settled**, and **delegated** work, with examples and links to detail.
+**Fastest answer: [`Open-Decisions.md`](./Open-Decisions.md)** — one generated page listing every open item across all queues, with active holds first. Regenerate with `./scripts/open-decisions.sh`. Never hand-edit it.
 
-Do not infer a James decision from an unchecked box in a source design. A choice is live only when its folder's owner inbox says it is. Adopted EFS v2 rulings live in [`Designs/efsv2/owner-rulings.md`](./Designs/efsv2/owner-rulings.md); [`For-James.md`](./For-James.md) remains the broader cross-project attention dashboard.
+Then [`Designs/owner-decision-inbox.md`](./Designs/owner-decision-inbox.md), which routes to the one canonical owner inbox in each design folder. Those inboxes separate **decide now**, **decide after evidence**, **launch choices**, **settled**, and **delegated** work.
+
+Three rules that have each already been violated once:
+
+- **Do not infer an owner decision from an unchecked box in a source design.** A choice is live only when its folder's owner inbox says it is.
+- **Per-folder READMEs may lag.** The owner inbox plus the folder's current-spine block are authoritative for what's live — not the README's doc table.
+- **Check for a sequencing hold before preparing any decision packet.** A held queue is an *inventory*, not a list to work through; asking anyway pushes the owner through a gate the designers deliberately closed.
+
+Adopted EFS v2 rulings live in [`Designs/efsv2/owner-rulings.md`](./Designs/efsv2/owner-rulings.md); [`For-James.md`](./For-James.md) carries **non-design** attention only. A ruling is recorded in the history owned by the queue that owns the item — `Designs/<folder>/owner-rulings.md` where that file exists, [`Decisions.md`](./Decisions.md) otherwise — and never in both. Who may rule on what: [`Onboarding/authority.md`](./Onboarding/authority.md).
 
 ## Hard rules (load-bearing, don't violate without checking)
 
@@ -35,6 +43,8 @@ Do not infer a James decision from an unchecked box in a source design. A choice
 
 - Subject line: `<area>: <imperative summary>`. Areas: `design`, `kanban`, `docs`, `chore`, `promote`, `land`, `sync`.
 - Include `Agent: <slug>` and `Co-authored-by: <Model Name> <noreply@<vendor>>` trailers. The `Agent:` slug is a stable identifier for agent + role (e.g., `claude-opus-4.7`, `codex-gpt-5`). Enables per-agent grep on `git log`.
+- **Write the commit message to a file and use `git commit -F <file>` — never embed `\n` inside `git commit -m`.** Some harnesses pass the string through a shell that doesn't interpret the escape, so the trailers land as a literal `\n` on one physical line. That has already happened to six vault commits, all of which `scripts/agent-activity.sh` now buckets as "unknown." Verify yours with `git log -1 --format='%B'` after your first commit.
+- **Write a subject a future agent can orient from.** The `git log` is the cheapest possible index of what happened — say the *outcome*, not the activity ("drop EAS as the record carrier", not "update design docs"). An agent should be able to read 20 subjects and know the state of the project without opening a file.
 
 ## Where to find things
 
