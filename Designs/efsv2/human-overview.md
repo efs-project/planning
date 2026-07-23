@@ -20,10 +20,10 @@ Adopted owner rulings govern direction. [[assumptions-and-requirements]] governs
 EFS v2 is designed to be a permanent, public-by-default graph of files, claims, and provenance.
 
 - Authors sign portable records.
-- An immutable protocol-contract set preserves records, receipts, revocations, and the indexes needed for bounded on-chain queries. Exact artifact boundaries remain measured freeze questions.
+- The intended Ethereum/EVM profile uses protocol contracts to preserve records, receipts, revocations, and the indexes needed for bounded on-chain queries. Exact artifact boundaries and whether other authority realms are supported remain open.
 - A KEL-mode identity is designed to survive device loss, actor-key replacement, wallet changes, tested recovery, and reviewed future cryptographic transitions. A bare EOA has none of those guarantees.
-- If EFS requires definitive protection from post-revocation backdating, one explicit authority domain checks whether the actual device or app key was authorized at admission order and stores that basis. The recommended first prototype uses one fixed authority profile, not a different movable home for every principal; adoption depends on James accepting its sovereignty and censorship tradeoff.
-- Other chains and storage networks can carry verified copies, but they do not invent a second authoritative history. Clients can query another chain; foreign smart contracts need a bridge, verifier, oracle, or fully specified local commitment.
+- If EFS requires definitive protection from post-revocation backdating, an authority domain must check whether the actual device or app key was authorized at admission order and store that basis. Whether EFS has one fixed profile, independent realm-qualified profiles, or per-principal homes remains undecided.
+- Under the fixed-profile candidate, other chains and storage networks carry verified copies rather than a second unqualified authoritative history. Under the independent-realm candidate, each realm may offer its own explicitly qualified current authority. Foreign contracts still need a bridge, verifier, oracle, or fully specified local commitment to consume another realm.
 - A lens is an explicit, reproducible policy that says which valid statements a reader accepts for a particular purpose and how conflicts combine.
 - The same resolved EFS view must mount read-only on Linux, macOS, and Windows. Host filesystem adapters expose files, folders, verified reads, and bounded metadata without turning FUSE, FSKit, WinFsp, POSIX, or NTFS rules into canonical EFS identity.
 - Sensitive bytes are encrypted before publication. Encryption can hide content; it does not make the public graph anonymous.
@@ -33,9 +33,9 @@ The constitutional sentence is:
 
 > **EFS preserves objective evidence; KEL defines who may act for a principal; authoritative admission can record when that authority was valid; lenses decide which evidence a reader uses; encryption decides who can read bytes; and the OS decides what running software may do. None of those powers implies another.**
 
-### What “home chain” actually meant
+### What the “home chain” candidate meant
 
-It never meant chains could call one another. It meant one chain would be the source of truth for a principal's KEL order. A client can read Alice's authority state on one chain and her copied file on another. A smart contract cannot perform that two-chain read by itself: someone must deliver a bridge message, verified proof, or a local commitment whose updater, trust, rollback, finality, freshness, and failure rules are explicit.
+It never meant chains could call one another. In that candidate, one chain would be the source of truth for a principal's KEL order. A client can read Alice's authority state on one chain and her copied file on another. A smart contract cannot perform that two-chain read by itself: someone must deliver a bridge message, verified proof, or a local commitment whose updater, trust, rollback, finality, freshness, and failure rules are explicit.
 
 The current maximal design then added a separate home for every principal, an L1 registry to locate those homes, and a migration protocol to move them. Those are optional sovereignty mechanisms, not requirements of stable identity. The smaller comparison prototype is one named authority profile whose domain contains the complete authoritative record/KEL/slot/index graph, with other chains carrying evidence or explicitly verified snapshots. This centralizes fees, censorship, throughput, and state growth, so it is not adopted architecture. [[assumptions-and-requirements]] contains the sovereignty choice and the alternatives.
 
@@ -486,12 +486,9 @@ Provisionally endorse the ceremony direction: the blinded-name derivation and fo
 - Add the always-present `uint64 claimedAt` body word where specified, with zero meaning absent and no authority, freshness, or comparator role. This preserves per-action human timeline testimony inside batches and costs one canonical 32-byte body word per affected claim, plus associated storage and gas. **Recommended.**
 - Omit it and accept that the action time becomes an application convention that cannot be promoted into the frozen body later.
 
-### Decision 7 — Decide exact-slot collision support after the prototype
+### Settled — no universal exact-slot collision bit
 
-Contracts that must fail closed on competing exact-slot signatures may need bounded collision evidence. The old global `(author, order)` equivocation rule is wrong.
-
-- Keep the deterministic `(order, recordDigest)` winner and add an orthogonal `SAME_SLOT_COLLISION` summary if the measured cost is reasonable. **Current lean.**
-- Otherwise state that ordinary on-chain gates with closed authors cannot detect every competing same-slot signature and must use a stronger proof/profile when that matters. Do not label all ordinary same-order records equivocation.
+The deterministic `(order, recordDigest)` winner remains, but the kernel does not add a universal `SAME_SLOT_COLLISION` summary. Ordinary on-chain gates use closed trusted author sets or an application-level challenge window when they need stronger protection. This was ruled in [[owner-rulings]] on 2026-07-15 and must not be reopened as a live Decision 7.
 
 ### Decision 8 — Fund monitoring before relying on transparency
 
@@ -531,7 +528,7 @@ These matter, but they should not hold the wire-format ceremony hostage.
 
 Order matters more than schedule pressure.
 
-> **2026-07-22 sequencing correction:** the steps below remain useful dependency guidance, but the current action is another joined KEL/authority and lens/resolver pass before James answers the open decision packet or the team writes an MVP constitution. The newer Solana/independent-realm, signed local/network, on-chain enumeration, and native-mount cases may change the unanswered options. See [[owner-rulings]] and [[ethereum-first-efs-and-os#11. Research-to-MVP sequence]].
+> **2026-07-23 sequencing clarification:** the steps below remain useful dependency guidance, but the current action is another joined KEL/authority and lens/resolver pass before agents present the open decisions as a consolidated packet or the team writes an MVP constitution. James may still answer an isolated choice. The newer Solana/independent-realm, signed local/network, on-chain enumeration, and native-mount cases may change adjacent unanswered options. See [[owner-rulings]] and [[ethereum-first-efs-and-os#11. Research-to-MVP sequence]].
 
 ### Step 1 — Validate the assumptions and authority profile
 
@@ -555,9 +552,9 @@ Record adopted answers in [[owner-rulings]]. Then write a short system constitut
 
 The output should have one precedence rule, one vocabulary, one state diagram, and no “historical baseline” text mixed into normative sections. Research corpora and handoffs remain history, not normative reading-order dependencies.
 
-### Step 2 — Build the smallest exact identity/admission comparison prototype
+### Step 2 — Build comparable exact identity/admission slices
 
-Prototype one fixed authority-domain profile first because it is the smallest strong-authority state machine—not because its sovereignty tradeoff is already accepted. Its domain must contain the complete canonical record bodies, KEL/grants, admissions, revocations, slots, and required indexes; a receipt-only chain would recreate the split-authority problem. Do not begin with an L1 per-principal `HomeRegistry` or cross-chain migration. The model must cover:
+Compare one fixed authority-domain slice, one independent realm-qualified slice, and one signed-head non-chain control before selecting the implementation order. A strong authority slice must contain the complete canonical record bodies, KEL/grants, admissions, revocations, slots, and required indexes; a receipt-only chain would recreate the split-authority problem. Per-principal `HomeRegistry` and cross-chain migration remain separate hypotheses rather than assumed baseline machinery. The comparison must cover:
 
 - the signature-only versus authority-admitted behavior of bare principals;
 - born-KEL and legacy inception;

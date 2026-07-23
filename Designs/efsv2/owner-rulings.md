@@ -123,11 +123,19 @@
 
 ## 2026-07-23
 
-### Chain-dependence guardrails — RATIFIED
-- **No cross-chain bridges, hubs, or locators in the v2 baseline** unless a required application proves it indispensable. (Ratifies the existing [[ethereum-first-efs-and-os]] §12 stop rule into owner history.)
-- **Honor the 2026-07-22 sequencing hold** on [[owner-decision-inbox]] — no owner answers on N1/N2/Q1–Q5 until the joined KEL/authority + lens/resolver pass re-runs against native mounts, Solana/independent realms, required on-chain enumeration, and signed local/network modes.
-- **N1 must be split into separate dimensions before it is presented to James again.** It currently bundles authority semantics, deployment topology, legacy-EOA commitment, smart-account inception, personal transferability, and suite succession.
-- **Decision routing adopted as process:** [[owner-decision-inbox]] and its child queues are the sole live decision queues; [[owner-rulings]] is the authoritative EFS v2 history. All future decisions route through both.
+### CORRECTION — agent synthesis was not an owner ruling
+
+Commit `471a2ca` incorrectly promoted several integration-agent conclusions to **RATIFIED** owner rulings and overstated one exploratory question as a James requirement. They are corrected as follows:
+
+- **Cross-chain bridges, hubs, and locators in the v2 baseline are UNDECIDED.** “Do not add them without a demonstrated application” remains a useful research stop rule, not an adopted architectural prohibition.
+- **Splitting N1 is an agent recommendation for producing an answerable packet, not an adopted architecture choice.** The bundled N1 remains held and must expose its independent axes before any answer is interpreted broadly.
+- **The sequencing hold blocks agents from presenting N1–N6/Q1–Q5 as a batch with stale recommendations.** It does not prevent James from voluntarily answering an isolated choice; any such answer is recorded and its affected axes are reconciled.
+- **Decision routing is vault process, not an EFS architecture ruling.** The current inboxes and generated [[Open-Decisions]] view may be improved during consolidation without changing protocol semantics.
+- **EFS support for every chain or every new L3 is NOT a requirement.** The requirement is to avoid accidental design coupling while the pass evaluates Ethereum-first, independent-realm, Solana, and non-chain possibilities.
+
+The 2026-07-22 cross-platform read-only mount requirement and research-before-MVP direction remain adopted. The corrected open axes are tracked under held N1 and N5 in [[owner-decision-inbox]].
+
+— ruled by @james, 2026-07-23
 
 ### Deferred — James needs to think (NOT rulings yet)
 - **"KEL introduces no cross-chain machinery; per-principal L1 homes/migration rejected"** — deferred; KEL-coupled, belongs to the re-run pass.
@@ -135,17 +143,12 @@
 - Explicitly NOT ruled (these are the held N1 question in disguise): one-chain-as-user-anchor; OS-useful-before-any-chain; portability-worth-weaker-authority.
 - **Honest status: none of the chain/authority space is measurement-backed yet.** E1 (venue admission/rotation/recovery cost, finality, force inclusion), E2, E6, E10 are all open. The N1A recommendation is architectural reasoning + prior art, not benchmarks. James's "L1 expensive / L2s transient" objection is exactly what E1 would settle with numbers.
 
-### NEW DIRECTION (James) — the OS and the filesystem may need DIFFERENT chain models
-- **Observation (James):** everyone on one chain is good for **social/OS** use cases (network effects, one social graph, discovery). But the **filesystem** must work on **all chains — including a freshly spun-up L3** — so apps and utilities are immediately useful without depending on another chain. They share a UI today but may be architecturally different. Choosing the right chain is crucial and gas UX must be thought through.
+### UNDECIDED hypothesis — the OS and filesystem may need different authority models
+- **Question raised by James:** a shared venue is attractive for social/OS network effects, while a user may care only about one L2/L3 and should not necessarily need Ethereum L1 gas or a universal home. Could the filesystem be self-sufficient in a realm while the social/OS layer uses another shared anchor? This is a pressure test, not a requirement that EFS work on every chain.
 - **Assessment: sound and important, with one hard consequence.** "FS works on any chain with zero dependency on another chain" and "one global identity/social graph" cannot both hold: an L3-local EFS either has **realm-local identities** (fragmented; authority becomes realm-qualified) or its users **depend on the anchor chain** for identity — the cross-chain dependency being avoided. This is an inherent tension, not a design gap; [[assumptions-and-requirements]] R-K11 already states two domains cannot both claim unqualified `CURRENT` for one principal.
 - **Where it points:** **realm-local/self-sufficient filesystem deployments (≈N1B independent realms) + an optional shared anchor for the OS/social layer** (≈ [[ethereum-first-efs-and-os]] Shapes C/E). NOT adopted — flagged as the shape to evaluate.
-- **ACTION for the re-run pass:** *"Does the filesystem require the same authority venue as the social/OS layer?"* becomes an explicit **N1 split axis**, applying the just-ratified N1-must-be-split ruling.
+- **Question for the re-run pass:** *"Does the filesystem require the same authority venue as the social/OS layer?"* is one explicit N1 axis.
 
-### Decision-routing structure — assessment of the hierarchical pass
-- **Verified structure:** `Designs/owner-decision-inbox.md` (top; owns loose `Designs/` items) → child queues `Designs/efsv2/owner-decision-inbox.md` and `Designs/clientv2/owner-decision-inbox.md`. Rule: a question lives in only one live queue. Tiers per queue: Decide now / Decide after evidence / Already settled / Delegated / Dormant — each item with a plain-language example, options, a recommendation, and links to the reason trail. **Good design; keep it.**
-- **Three gaps to fix (PM task):**
-  1. **Two histories, not one.** Top-level records to `Decisions.md`; efsv2 records to `owner-rulings.md`. "All decisions in one place" is not yet true — pick one canonical history or add an aggregating index.
-  2. **No single "list all my open decisions" view.** Answering "what do I need to decide?" requires visiting 3+ files and knowing they exist. Add a generated roll-up across all queues.
-  3. **Status does not propagate upward.** The efsv2 sequencing hold is invisible from the top-level inbox.
-- **Index routing check passed:** `Designs/efsv2/README.md` links [[kel]], [[assumptions-and-requirements]], and [[owner-decision-inbox]].
-- **Minor:** owner-rulings sections are slightly out of chronological order (2026-07-15/16 sit above 2026-07-22); harmless, tidy during consolidation.
+### Decision-routing structure — agent audit note, not an owner ruling
+- The hierarchical inboxes remain the current process implementation, not permanent protocol or product architecture.
+- The subsequent PM hardening pass added the generated [[Open-Decisions]] roll-up and propagated active holds. Consolidating historical rulings remains editorial work for the holistic documentation pass.

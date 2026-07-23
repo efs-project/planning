@@ -2,20 +2,20 @@
 
 **Status:** draft decision inventory under sequencing hold; no choice is adopted until James answers and it is copied into [[owner-rulings]]
 **Audience:** James first; designers second
-**Last reconciled:** 2026-07-22
+**Last reconciled:** 2026-07-23
 **Inputs:** [[owner-rulings]], [[assumptions-and-requirements]], [[ethereum-first-efs-and-os]], [[mountable-filesystem-semantics]], [[fs-pass-james-decisions]], [[privacy-james-decisions]], [[read-lens-spec]], [[onchain-completeness]], [[solana]], and [[client-os-pressure-report]]
 
 #status/draft #kind/decision #repo/planning #topic/efsv2 #topic/clientv2 #blocked-on/human-decision
 
 > **This is the sole live owner queue for EFS v2 and cross-cutting OS architecture.** Detailed documents remain the reason trail. Future agents must not revive a source checkbox classified here as settled, evidence-gated, delegated, or superseded.
 >
-> **2026-07-22 sequencing hold:** this page is presently the canonical **inventory**, not a packet James should batch-answer yet. Re-run the joined KEL/authority and lens/resolver passes against native mounts, Solana/independent realms, required on-chain enumeration, and signed local/network modes first. Preserve adopted rulings, but revalidate every unanswered option and recommendation before lifting this hold. See [[owner-rulings]] and [[ethereum-first-efs-and-os#11. Research-to-MVP sequence]].
+> **2026-07-23 clarified sequencing hold:** this page is presently the canonical **inventory**, not a packet agents should ask James to batch-answer. Re-run the joined KEL/authority and lens/resolver passes against native mounts, Solana/independent realms, required on-chain enumeration, and signed local/network modes before presenting a consolidated packet. Preserve adopted rulings, but revalidate every unanswered option and recommendation first. James may still volunteer an isolated answer; record it without treating adjacent bundled assumptions as adopted. See [[owner-rulings]] and [[ethereum-first-efs-and-os#11. Research-to-MVP sequence]].
 
 ## How to answer
 
-After the sequencing hold is lifted, reply with codes, for example `N1A, N2A, N3A, N4A, N5A, N6A, Q1A–Q5A`. Add exceptions in plain English. `N2A except N2h` adopts the boundary set except its host-lane item.
+After the sequencing hold is lifted, reply with codes, for example `N1A, N2A, N3A, N4A, N5A, N6A, Q1A–Q5A`. James may answer an isolated item during the hold, but bundled codes adopt only the explicitly described dimensions. Add exceptions in plain English. `N2A except N2h` adopts the boundary set except its host-lane item.
 
-The recommended packet is always option **A** below. That is a recommendation, not an adopted answer.
+Where an item labels option **A** recommended, that is provisional research advice, not an adopted answer. N1A is explicitly a prior recommendation pending decomposition and revalidation.
 
 **Research posture, not another decision code:** [[ethereum-first-efs-and-os]] records James's current desire to make EFS deeply useful to Ethereum while exploring a broader cypherpunk OS and avoiding premature universal abstractions. Its Shapes A–E remain hypotheses until evidence changes a choice in this inbox and James records a ruling.
 
@@ -25,12 +25,21 @@ The recommended packet is always option **A** below. That is a recommendation, n
 
 **Example:** Alice's phone key is stolen, revoked, and then used to backdate a malicious record. What shared evidence lets a reader reject it without making one EFS operator the universal hub?
 
-- **N1A — One fixed EFS authority profile. Recommended.** Strongest history comes from admission on one measured authority domain; zero-setup EOAs can publish portable evidence immediately but remain evidence-only until admitted. Clients can verify remotely; foreign contracts need an adapter or disclosed local commitment. No universal cross-chain hub and no same-principal home migration in v2.
+> **UNDECIDED and not presently answerable as one bundled code.** The options below are retained as research inventory, not current recommendations. Before N1 is presented again, the joined pass must separate at least:
+>
+> 1. whether the strongest grade requires admission-time authority at all;
+> 2. one fixed EFS profile, permissionless independent realms, or per-principal homes;
+> 3. whether v2 includes no cross-chain machinery, only explicit adapters/commitments, or any locator/migration mechanism;
+> 4. whether the filesystem and social/OS layer share an authority venue;
+> 5. whether portability means one required Ethereum profile with extension-ready seams, several supported realms, or eventual support for any conforming deployment; and
+> 6. legacy-EOA commitment, smart-account inception, personal transferability, and signature-suite succession.
+
+- **N1A — One fixed EFS authority profile. Prior research recommendation, not adopted.** Strongest history comes from admission on one measured authority domain; zero-setup EOAs can publish portable evidence immediately but remain evidence-only until admitted. Clients can verify remotely; foreign contracts need an adapter or disclosed local commitment. No universal cross-chain hub and no same-principal home migration in v2.
 - **N1B — Permissionless independent EFS realms.** Each realm can offer strong local history. This preserves venue sovereignty but requires profile discovery, realm-aware grades, and explicit non-interoperability between realms.
 - **N1C — Portable evidence only.** No canonical admission witness. Simplest and most object-sovereign, but post-revocation backdating and current authorization remain policy-dependent.
 - **N1D — Per-principal authority homes.** Every principal chooses a home. This adds locators, multi-home reads, adapters, migration, and a much larger recovery/proof surface.
 
-**N1A also means:** ship the KEL-aware seam before v2 freezes; make legacy-EOA upgrade commitment default-on with an explicit degraded opt-out; let smart-account-only users make one direct inception call; do not treat ERC-1271/6492 as eternal record authority; make personal principals non-transferable while organizations use control succession; and reserve a narrow same-domain successor mechanism for future signature suites.
+**The previous N1A bundle also included:** ship the KEL-aware seam before v2 freezes; make legacy-EOA upgrade commitment default-on with an explicit degraded opt-out; let smart-account-only users make one direct inception call; do not treat ERC-1271/6492 as eternal record authority; make personal principals non-transferable while organizations use control succession; and reserve a narrow same-domain successor mechanism for future signature suites. These dimensions must not be silently adopted together merely because one topology is chosen.
 
 **Not chosen here:** actual venue, receipt bytes, finality, or successor ABI. Those wait for E1. [[solana]] supplies the first non-EVM capability map and prototype gates; it does not add another option or decide N1. Details: [[assumptions-and-requirements#Strong-authority hypothesis to prototype next]], [[kel#23. Decisions for James]], and [[fs-pass-james-decisions]].
 
@@ -77,6 +86,8 @@ Details: [[privacy-james-decisions]] JD-36.
 ### N5 — Joined-system anchor application
 
 **Example:** a preserved game must remain retrievable, verifiable, safely runnable, writable, curatable, rollbackable, and exportable. That exposes integration gaps a generic “platform” demo hides.
+
+> **UNDECIDED.** [[playable-archive-requirements]] is a conditional pressure test. Its existence does not select N5A or make the archive a v2 launch requirement.
 
 - **N5A — Make the playable software archive the first joined-system reference app. Recommended.** It sequences work and acceptance tests but does not permanently define EFS OS.
 - **N5B — Keep it as only one test fixture.** Choose another daily retention app before sequencing delivery.
@@ -203,6 +214,8 @@ These are real owner acceptance gates. Engineers choose exact mechanisms; James 
 ## Delegated technical gates — not owner votes
 
 Protocol and security owners must resolve exact index layouts, live-count mechanism, receipt bytes, crypto suite/vectors, WebAuthn/PQ vectors, control maxima, event shapes, EIP-170 splitting, and the cross-platform mount adapters/name/error/metadata profile through prototypes, independent review, and conformance tests. Escalate only if the result changes a boundary, safety promise, product degradation, or irreversible wire choice listed above.
+
+Vault routing mechanics—the inbox hierarchy, generated roll-ups, and historical indexes—are delegated documentation process. They are not EFS architecture rulings and may be improved during consolidation.
 
 ## Superseded questions — never revive silently
 

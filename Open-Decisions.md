@@ -17,7 +17,7 @@ the owner through a gate the designers deliberately closed.
 
 | Queue | Hold |
 |---|---|
-| `efsv2` | **2026-07-22 sequencing hold:** this page is presently the canonical **inventory**, not a packet James should batch-answer yet. Re-run the joined KEL/authority and lens/resolver passes against native mounts, Solana/independent realms, required on-chain enumeration, and signed local/network modes first. Preserve adopted rulings, but revalidate every unanswered option and recommendation before lifting this hold. See [[owner-rulings]] and [[ethereum-first-efs-and-os#11. Research-to-MVP sequence]]. |
+| `efsv2` | **2026-07-23 clarified sequencing hold:** this page is presently the canonical **inventory**, not a packet agents should ask James to batch-answer. Re-run the joined KEL/authority and lens/resolver passes against native mounts, Solana/independent realms, required on-chain enumeration, and signed local/network modes before presenting a consolidated packet. Preserve adopted rulings, but revalidate every unanswered option and recommendation first. James may still volunteer an isolated answer; record it without treating adjacent bundled assumptions as adopted. See [[owner-rulings]] and [[ethereum-first-efs-and-os#11. Research-to-MVP sequence]]. |
 
 
 ## Ask now (3)
@@ -72,7 +72,7 @@ Under a hold or pending revalidation. Listed so nothing is invisible — **not**
 | Queue | Live items | Last reconciled | State |
 |---|---|---|---|
 | [`clientv2`](Designs/clientv2/owner-decision-inbox.md) | 6 | 2026-07-22 | ok |
-| [`efsv2`](Designs/efsv2/owner-decision-inbox.md) | 11 | 2026-07-22 | **HELD** |
+| [`efsv2`](Designs/efsv2/owner-decision-inbox.md) | 11 | 2026-07-23 | **HELD** |
 | [`Designs (root)`](Designs/owner-decision-inbox.md) | 3 | 2026-07-21 | ok |
 
 _Decision **history** is not shown here. A ruling is recorded in the history owned

@@ -1,21 +1,21 @@
 # Playable archive requirements for EFS v2
 
 **Status:** draft
-**Target repos:** planning, contracts, sdk, client, content
+**Target repos:** planning, contracts, sdk, client
 **Depends on:** [[assumptions-and-requirements]], [[apps-cookbook]], [[large-file-uploads]], [[onchain-completeness]], [[read-lens-spec]], [[../clientv2/packages-and-updates]], [[../clientv2/kernel-capability-model]], [[../clientv2/shell-and-sessions]], [[../clientv2/persistence-and-sync]]
 **Supersedes:** -
 **Reviewers:** -
-**Last touched:** 2026-07-20 - codex-gpt-5
+**Last touched:** 2026-07-23 - codex-gpt-5
 
-#status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #repo/content #topic/efsv2 #topic/requirements #topic/games #topic/content
+#status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/requirements #topic/games #topic/content
 
 ## Mission
 
-EFS should support an open, crowdsourced archive of software that is pleasant to explore and easy to run. An ordinary user should be able to find an interesting app or game, understand what it is, click Play, and have it work without knowing about gateways, contracts, package layouts, or wallets.
+EFS should be pressure-tested against an open, crowdsourced archive of software that is pleasant to explore and easy to run. An ordinary user should be able to find an interesting app or game, understand what it is, click Play, and have it work without knowing about gateways, contracts, package layouts, or wallets.
 
 This document is a product pressure test for EFS v2, not a proposal for a playable-archive subsystem. It deliberately avoids turning client behavior, archive taxonomy, or content policy into permanent protocol surface.
 
-The first useful release should support a curated set of legally redistributable:
+> **Owner status:** [[owner-decision-inbox]] N5 remains undecided. This document does not select the playable archive as the first joined-system reference app or make it a v2 launch requirement. If N5A is later adopted, the archive's first useful release should support a curated set of legally redistributable:
 
 - Single-file and multi-file web apps and games.
 - Runtime-backed packages, with one emulator path proven end to end.
@@ -50,7 +50,7 @@ The archive succeeds when this path feels ordinary. Verification and provenance 
 | PAF-7 | Curation, rights, and playability evidence | Content/tooling/lenses |
 | PAF-8 | Portable, repeatable publishing | SDK/content |
 
-Only PAF-2 applies direct pressure to the frozen data model, and it should be satisfied with generic EFS identities, records, placement, and byte commitments. The other requirements should use versioned manifests, client behavior, tooling, and content policy unless an existing generic v2 primitive is demonstrably insufficient.
+PAF-2 is the clearest known direct pressure on the frozen data model and should be satisfied with generic EFS identities, records, placement, and byte commitments. The other requirements should use versioned manifests, client behavior, tooling, and content policy unless the readiness checks demonstrate that an existing generic v2 primitive is insufficient.
 
 ## PAF-1: Visual Archive and Useful Item Metadata
 
@@ -259,15 +259,15 @@ These are important follow-on goals, not EFS v2 launch blockers:
 
 EFS does not need to host every old game or application. Old, unavailable, or commonly called abandonware does not automatically mean redistributable. The archive can preserve metadata and lawful links without mirroring restricted bytes.
 
-## V2 Readiness Checks
+## Open questions
 
-Before freeze, answer these as tests of the generic design rather than invitations to add archive-specific features:
+Before using this archive to justify an EFS v2 freeze or adopting N5A, answer these as tests of the generic design rather than invitations to add archive-specific features:
 
-- Can the five-kind model give exact canonical manifest bytes one portable generation name, reconciling pure DATA identity with the body-bearing package draft?
-- Can the client perform bounded reads for collection membership, ordinary file facts, mirror facts, and the exact manifest selected by the active lens?
-- Can the generic large-file model verify and reconstruct every required package file, while distinguishing unavailable bytes from mismatched bytes?
-- Can the general lens design select a recommended collection and generation while composing curation, warning, and block facts?
-- Will v2 explicitly permit an isolated legacy compatibility runner, or defer direct iframe-hosted games to preserve the current rule that Ring-3 app logic never runs in an iframe?
+- [ ] Can the five-kind model give exact canonical manifest bytes one portable generation name, reconciling pure DATA identity with the body-bearing package draft?
+- [ ] Can the client perform bounded reads for collection membership, ordinary file facts, mirror facts, and the exact manifest selected by the active lens?
+- [ ] Can the generic large-file model verify and reconstruct every required package file, while distinguishing unavailable bytes from mismatched bytes?
+- [ ] Can the general lens design select a recommended collection and generation while composing curation, warning, and block facts?
+- [ ] Will v2 explicitly permit an isolated legacy compatibility runner, or defer direct iframe-hosted games to preserve the current rule that Ring-3 app logic never runs in an iframe?
 
 If the answer is yes, the playable archive requires no additional protocol surface.
 
@@ -292,3 +292,11 @@ If the answer is yes, the playable archive requires no additional protocol surfa
 - **SDK:** parse and validate manifests, verify closures and bytes, plan idempotent publication, and produce receipts.
 - **Client:** own browse/detail/player UX, package serving, preflight, runtime isolation, capabilities, input/fullscreen behavior, saves, and actionable failure states.
 - **Content:** own curated manifests, thumbnails, tags, descriptions, source and rights notes, compatibility, controls, playability tests, IPFS pins, and deployment receipts.
+
+## Pre-promotion checklist
+
+- [ ] All `## Open questions` resolved or explicitly deferred (cite where)
+- [ ] `**Target repos:**` confirmed (no surprise repos at implementation time)
+- [ ] `**Depends on:**` chain — all dependencies `accepted` or `landed`
+- [ ] No `<!-- AGENT-Q: -->` comments left in the design body
+- [ ] At least one round of `#status/review` with another agent or human comment

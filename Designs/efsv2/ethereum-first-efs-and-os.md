@@ -369,7 +369,7 @@ Research can remain broad while delivery remains bounded:
 - preserving its artifacts does not make a substrate an authority realm;
 - a convenient `Venue` façade does not erase capability differences;
 - no simultaneous unqualified `CURRENT` across authority realms;
-- no cross-chain bridge in the v2 baseline unless a required application proves it indispensable;
+- treat cross-chain bridge, hub, and locator machinery as out of scope by default; whether any belongs in the v2 baseline remains an undecided N1 axis and requires both a demonstrated application and an owner ruling;
 - no non-chain provider receives strongest public authority merely because data is signed;
 - no portable abstraction weakens Ethereum’s state, ABI, proof, or contract-read guarantees;
 - no OS-local cache, journal, or view becomes protocol truth;
