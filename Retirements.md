@@ -18,11 +18,12 @@ What rulings have **retired**, and what replaced it. Input to `./scripts/needs-i
 
 | Retired phrase | Replacement | Ruling | Since |
 |---|---|---|---|
-| `EAS carrier` | native envelope kernel | 2026-07-07 carrier ruling | 2026-07-07 |
-| `identity = EAS UID` | portable principal ID | 2026-07-07 carrier ruling | 2026-07-07 |
+| — | — | — | — |
 
 ## Cleared
 
 | Retired phrase | Ruling | Cleared |
 |---|---|---|
 | `EAS-core` | 2026-07-07 carrier ruling | 2026-07-23 |
+| `EAS carrier` | 2026-07-07 carrier ruling | 2026-07-23 |
+| `identity = EAS UID` | 2026-07-07 carrier ruling | 2026-07-23 |

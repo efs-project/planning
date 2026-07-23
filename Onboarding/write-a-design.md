@@ -16,7 +16,7 @@ Check `Designs/README.md` (curated map by topic and status), `Kanban.md` Backlog
 
 ### 2. Open a draft
 
-After `git pull --rebase`: `cp Designs/_template.md Designs/<descriptive-slug>.md`. The slug is **descriptive** (`offline-sync`, `sdk-cache-eviction`), not generic (`design-v2`); it can change later, since Obsidian auto-updates `[[wiki-links]]` on rename.
+After `git fetch origin && git rebase --autostash origin/main`: `cp Designs/_template.md Designs/<descriptive-slug>.md`. The slug is **descriptive** (`offline-sync`, `sdk-cache-eviction`), not generic (`design-v2`); it can change later, since Obsidian auto-updates `[[wiki-links]]` on rename.
 
 Add a Kanban entry under **Backlog**:
 

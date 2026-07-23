@@ -62,6 +62,11 @@ while IFS= read -r row; do
     is_history "$file" && continue
     # An explicit marker means the line legitimately keeps the old phrase.
     printf '%s' "$hit" | grep -q '@historical' && continue
+    # A line that ANNOUNCES the retirement is correct text, not a contradiction.
+    # Without this the queue's first run was 4-for-4 false positives, each with a
+    # work order telling an agent to "fix" a sentence that was already right —
+    # actively worse than no tool. Supersession language is the tell.
+    printf '%s' "$hit" | grep -qiE 'supersed|replac|dropped|no longer|formerly|retired|deprecat' && continue
     hits="${hits}    ${hit#"$VAULT_ROOT"/}
 "
     n=$((n + 1))

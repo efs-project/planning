@@ -4,7 +4,7 @@ EFS planning vault. Cross-repo coordination point for the AI agent swarm buildin
 
 Stable entry point for tools that auto-detect `AGENTS.md` ([universal agent brief convention](https://www.linuxfoundation.org/press/linux-foundation-announces-the-formation-of-the-agentic-ai-foundation)). **The canonical agent docs are [README.md](./README.md) and [Onboarding/](./Onboarding/).**
 
-> **Bootstrap state.** No designs promoted yet; the meta-design ([Designs/0001-design-system.md](./Designs/0001-design-system.md)) is itself a draft — expect to be the first real user of most procedures. `/efs/<repo>/` paths are the target layout, not necessarily current reality; use relative paths from your worktree. See [README current-state preamble](./README.md).
+> **State.** DESIGN-0001 (the meta-design) was promoted 2026-05-21 and is `accepted`; it is the canonical protocol. The vault is in active use, not bootstrap. `/efs/<repo>/` paths in docs describe a target layout, not necessarily your reality — discover your own paths and use relative ones.
 
 ## Read on init
 
@@ -43,7 +43,7 @@ Adopted EFS v2 rulings live in [`Designs/efsv2/owner-rulings.md`](./Designs/efsv
 
 ## Every commit
 
-- Subject line: `<area>: <imperative summary>`. Areas: `design`, `kanban`, `docs`, `chore`, `promote`, `land`, `sync`.
+- Subject line: `<area>: <imperative summary>`. Areas: `design`, `kanban`, `docs`, `chore`, `promote`, `land`, `sync`, `status`, `pm`. **`pm:` is RESERVED for the PM role** — a non-PM agent editing a PM-owned file uses its own area, or `git log --grep='^pm:'` falsely attributes the work (this produced a "phantom second PM" on 2026-05-28). Full list: [`Onboarding/conventions.md`](./Onboarding/conventions.md).
 - Include `Agent: <slug>` and `Co-authored-by: <Model Name> <noreply@<vendor>>` trailers. The `Agent:` slug is a stable identifier for agent + role (e.g. `claude-opus-4.7`, `codex-gpt-5`), enabling per-agent grep on `git log`.
 - **Run `./scripts/install-hooks.sh` once per clone.** Hooks are per-clone and not carried by git, so a fresh checkout has no commit validation.
 - **Write the commit message to a file and use `git commit -F <file>` — never embed `\n` inside `git commit -m`.** Some harnesses don't interpret the escape, so trailers land as a literal `\n` on one physical line; six vault commits already did, and `scripts/agent-activity.sh` buckets them as "unknown." Verify with `git log -1 --format='%B'` after your first commit.

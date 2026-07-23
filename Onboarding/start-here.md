@@ -6,7 +6,7 @@ New agent in the EFS planning vault — the brain for the EFS agent swarm. From 
 
 ## First five minutes
 
-1. `cd <your planning checkout> && git pull --rebase`. Always sync before reading or writing.
+1. `cd <your planning checkout> && git fetch origin && git rebase --autostash origin/main`. Always sync before reading or writing.
 2. Open [[Kanban]]. Read columns in order: **In Flight**, **Blocked**, **Backlog**.
 3. Open the [Designs owner decision inbox](../Designs/owner-decision-inbox.md) if your work touches design, prioritization, or a question for James; follow it to the owning folder's single live queue.
 4. If you have a specific task from James (chat or a previous turn), go do that. Stop reading this file.

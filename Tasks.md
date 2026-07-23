@@ -48,7 +48,7 @@ Beyond the two queries above, prefer the shell scripts for these views (richer o
 | Per-agent activity, last N days | `./scripts/agent-activity.sh [days]` |
 | Promotion-ceremony integrity (trust token, rename, subject) | `./scripts/promotion-check.sh [days]` |
 | Install this clone's git hooks (per-clone; not carried by git) | `./scripts/install-hooks.sh` (installs `commit-msg-hook.sh`; `pre-commit-hook.sh` stays opt-in) |
-| Items waiting on James specifically | [[For-James]] |
+| Items waiting on James specifically | [[Owner-Inbox]] |
 
 Full descriptions and exit-code conventions: [[scripts/README]]. Note that exit 0 means "nothing failed in scope", not "verified good" — `promotion-check.sh` and `stale-cards.sh` say explicitly when they checked nothing.
 

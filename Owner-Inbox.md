@@ -26,7 +26,7 @@ aliases: [For-James]
 
 ## ℹ️ FYI (no action)
 
-- **Audit scripts were blind to 77% of the design corpus** — `tri-sync-check.sh` and `designs-awaiting-promotion.sh` scanned `Designs/*.md` non-recursively, so all ~63 files in `efsv2/`/`clientv2/` were invisible and "promotion queue empty" was a false green. Fixed 2026-07-23; the honest count is now 7 tri-sync issues across 82 files (5 pre-existing + 2 newly visible).
+- **Audit scripts were blind to 77% of the design corpus** — `tri-sync-check.sh` and `designs-awaiting-promotion.sh` scanned `Designs/*.md` non-recursively, so all ~63 files in `efsv2/`/`clientv2/` were invisible and "promotion queue empty" was a false green. Fixed 2026-07-23; the honest count is now 2 tri-sync issues across 82 files, both in `Designs/efsv2/`.
 - **Entry-point docs pointed at a file that doesn't exist** — `Designs/design-system.md` (it's `0001-design-system.md`), referenced from `README.md`, `AGENTS.md`, and `repo-map.md`. Fixed.
 - **Two items removed from this page as already-resolved:** the buildathon cancel-vs-lapse fork (the event's end date passed 07-08; [[Decisions]] records it wound down 07-01) and the SDK-corpus tombstone question (it *is* `R1` — answer it there, not here).
 

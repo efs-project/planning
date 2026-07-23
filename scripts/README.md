@@ -31,7 +31,7 @@ Hooks are per-clone and not carried by git — a fresh agent checkout has none.
 ## Running
 
 ```bash
-cd /efs/planning
+cd <your planning checkout>
 ./scripts/stale-cards.sh
 ./scripts/tri-sync-check.sh
 ./scripts/designs-awaiting-promotion.sh

@@ -60,6 +60,7 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 | Design | Target repos | Notes |
 |---|---|---|
 | **[`efsv2/`](./efsv2/) — the v2 design set** | `planning`, `contracts`, `sdk`, `client` | Native kernel + tag-core (carrier ruled 2026-07-07), now with the 2026-07-11 [[kel]] identity/account foundation pass. The KEL pass makes the older envelope/kernel/identity labels freeze-blocked pending authority-seam and home-admission reconciliation. Entry point and current round map: [efsv2/README](./efsv2/README.md). |
+| [[brainstorm-system]] | `planning` | The `Brainstorms/` system: statuses, surfacing cap, deliberate-only pruning. Awaiting promotion. |
 | **[`clientv2/`](./clientv2/) — the official client / web OS design set** | `planning`, `client`, `sdk` | Client v2 as a web OS (round run 2026-07-07). Entry point: [[web-os-thesis]] (ruling layer + amendments) over 13 model docs; research corpus in `Reviews/2026-07-07-clientv2-corpus/`; protocol pressure fed back via [[client-os-pressure-report]] — see [clientv2/README](./clientv2/README.md). |
 
 #### Review
@@ -74,8 +75,8 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 | [[sdk-wallet-architecture]] | `sdk` | Wallet/account integration; open questions feed ER1/ER2. |
 | [[sdk-review-backlog]] | `sdk` | Reconciled build backlog for the SDK. |
 | [[sdk-vs-client-responsibilities]] | `sdk`, `client` | Boundary between SDK and client. |
-| [[sdk-minimal-clicks]] | `sdk` | Batched single-signature writes (Tier-0 baseline, shipped). *Missing prose `**Status:**` — tri-sync finding.* |
-| [[efs-account-system]] | `sdk`, `contracts` | One smart-account identity per user. **Historical input** — v2's logical actor + KEL supersede the premise. *Missing prose `**Status:**`.* |
+| [[sdk-minimal-clicks]] | `sdk` | Batched single-signature writes (Tier-0 baseline, shipped). |
+| [[efs-account-system]] | `sdk`, `contracts` | One smart-account identity per user. **Historical input** — v2's logical actor + KEL supersede the premise. |
 | [[mirror-scheme-policy]] | `contracts` | Mirror URI scheme policy; allowlist removal. |
 | [[web3-standards-compliance]] | `contracts` | web3:// serving conformance. |
 
@@ -83,9 +84,9 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 | Design | Target repos | Notes |
 |---|---|---|
-| [[sdk-one-signature-writes]] | `sdk` | Superseded by the native-envelope recut. *Prose says `superseded`, tag says `review` — tri-sync finding.* |
-| [[web3-bytesstore-sdk-followup]] | `sdk` | Handed off. *Prose `hand-off` vs tag `handoff` — tri-sync finding.* |
-| [[write-ux-options-ranked]] | `sdk` | Ranked write-UX options. Tier-5 gating rule superseded by the v2 justification. *Missing prose `**Status:**`.* |
+| [[sdk-one-signature-writes]] | `sdk` | Superseded by the native-envelope recut. |
+| [[web3-bytesstore-sdk-followup]] | `sdk` | Handed off. |
+| [[write-ux-options-ranked]] | `sdk` | Ranked write-UX options. Tier-5 gating rule superseded by the v2 justification. |
 
 #### Ready for promotion
 
