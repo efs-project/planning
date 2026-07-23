@@ -1,5 +1,8 @@
 # Milestones
 
+> ⚠️ **Stale — do not report from this file without checking.** The OnionDAO milestone below wound down 2026-07-01, and its four "hard requirements" (schema freeze, `.sol` list freeze, Sepolia deploy, SDK MVP) all shipped by 2026-06-11 despite reading as unchecked. Reconciliation is pending owner decision **FJ-2** in [[Owner-Inbox]]. Devcon 2026-11 is the one live milestone.
+
+
 Cross-repo milestone tracking for EFS. Each section names a target with a date and the designs / Kanban items that must land for it to be hit.
 
 **How to use this file** (for agents and James):

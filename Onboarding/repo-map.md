@@ -1,8 +1,6 @@
 # Repo map
 
-`/efs/` is your home. All EFS repos live as siblings underneath it.
-
-## Layout
+`/efs/` is your home; all EFS repos are siblings underneath it.
 
 ```
 /efs/
@@ -29,65 +27,22 @@
 | Process / how-to-contribute | `planning/Onboarding/` |
 | Human's daily notes / catch-all | `planning/Daily Notes/` |
 
-**Rule of thumb.** Decisions tied to one repo's code live in that repo's ADRs. Decisions that span repos start as designs in `planning/Designs/` and land as ADRs in each affected repo.
+**Rule of thumb.** Decisions tied to one repo's code live in that repo's ADRs. Decisions spanning repos start as designs in `planning/Designs/` and land as ADRs in each affected repo.
+
+Per-repo specs stay in their repo (`contracts/specs/`, eventually `client/specs/`, `sdk/specs/`) — a deliberate decision (see [[design-system]] § Migration plan) so spec changes ride alongside code in the same PR.
 
 ## Worktree convention
 
-Per-task worktrees live under each repo:
+Per-task worktrees live under each repo: `/efs/contracts/.worktrees/<slug>/`, `/efs/client/.worktrees/<slug>/`. From a worktree four levels deep, siblings resolve via `../../../planning/` (`cat ../../../planning/Designs/0001-design-system.md`).
 
-```
-/efs/contracts/.worktrees/<slug>/    ← a worktree for a feature branch
-/efs/client/.worktrees/<slug>/       ← same shape for client
-```
+`/efs/planning/` itself is typically the main checkout (no worktrees) — concurrent edits go through rebase rather than branch isolation.
 
-The four-level path resolves siblings via `../../../planning/` from inside a worktree.
+## Cross-repo reads and writes
 
-`/efs/planning/` itself is typically the main checkout (no worktrees) since it's documentation and concurrent edits go through rebase rather than branch isolation.
+From inside the vault, sibling files read directly: `cat ../contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md`. Reference them in designs as repo-relative paths in prose (…per `contracts/docs/adr/0041-...`…) or as markdown links: `[ADR-0041](../contracts/docs/adr/0041-...)`. Never use absolute `/efs/...` paths in committed files — bakes in a mount point.
 
-## Cross-repo reads (from inside the vault)
-
-You can read sibling-repo files directly:
-
-```bash
-cat ../contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md
-ls ../contracts/specs/
-```
-
-Reference them in designs as repo-relative paths in prose:
-
-```markdown
-…per `contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md`…
-```
-
-Or as markdown links:
-
-```markdown
-…[ADR-0041](../contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md)…
-```
-
-Never use absolute `/efs/...` paths in committed files — bakes in a mount point.
-
-## Cross-repo reads (from inside a worktree of another repo)
-
-If you're in `/efs/contracts/.worktrees/feature-x/` and need to read planning:
-
-```bash
-cat ../../../planning/Designs/0001-design-system.md
-```
-
-The path is `../../../planning/` from any worktree four levels deep.
-
-## Cross-repo writes
-
-Commit boundaries:
-
-- Each commit lives in the repo whose content it changes.
-- If a contracts PR tombstones a landed design, that's a separate commit in `planning/`, not a co-mingled commit. Same agent, two commits, two pushes.
-
-## What's NOT in the planning vault
-
-Per-repo specs live in their repo: `contracts/specs/`, eventually `client/specs/` and `sdk/specs/`. The decision "specs stay in the owning repo" was made deliberately (see [[design-system]] § Migration plan) because the `/efs/` colocation makes cross-repo reads cheap, and co-locating specs with code preserves the "spec changes alongside code in the same PR" enforcement.
+Each commit lives in the repo whose content it changes. If a contracts PR tombstones a landed design, that's a separate commit in `planning/` — same agent, two commits, two pushes. Never co-mingle.
 
 ## CI / GitHub Actions
 
-A CI runner typically checks out one repo at a time. Cross-repo reads aren't directly available. If a workflow needs an ADR from a sibling repo, it must either `gh api`/clone on demand, or accept that some references can't resolve. See [[cross-repo-reference-mirror]] — a deferred design that would mirror canonical references into `planning/Reference/` for exactly this case.
+A CI runner typically checks out one repo at a time, so cross-repo reads aren't available. A workflow needing a sibling repo's ADR must `gh api`/clone on demand, or accept unresolvable references. See [[cross-repo-reference-mirror]] — a deferred design that would mirror canonical references into `planning/Reference/`.

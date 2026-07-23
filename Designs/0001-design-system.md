@@ -1,3 +1,7 @@
+---
+aliases: [design-system]
+---
+
 # Design System
 
 **Status:** accepted

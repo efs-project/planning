@@ -91,7 +91,7 @@ if [[ $TOTAL -eq 0 ]]; then
 fi
 
 printf '%s\n' "$OUT"
-echo "Total: $TOTAL live contradiction(s) across $(printf '%s' "$OUT" | grep -c ':' || true) reference(s)."
+echo "Total: $TOTAL live contradiction(s)."
 echo ""
 echo "Work order for the integrating agent: fix each line above so it reflects the"
 echo "current ruling, then re-run. When a phrase reaches zero, move its row in"

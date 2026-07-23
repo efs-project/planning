@@ -1,5 +1,7 @@
 # Brainstorms index
 
+> ⚠️ **Index covers through 2026-05-28 only.** ~15 later brainstorms (the 2026-07 codex research dossiers) are unindexed — list them with `ls Brainstorms/2026-07*`. Do not treat this index as the complete set.
+
 PM-maintained map of brainstorms by area and status. Excludes `obsolete` by default — see git history if you need pruned items.
 
 Conventions: [[brainstorm-system]].

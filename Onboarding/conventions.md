@@ -1,44 +1,23 @@
 # Conventions
 
-Deep reference for the vault's conventions. The canonical rules live in [[design-system]]; this file is the per-convention quick-lookup.
+Per-convention quick-lookup. Canonical rules: [[design-system]].
 
 ## Git sync
 
-Before reading or writing in this vault:
+Pull before reading or writing: `cd <your planning checkout> && git fetch origin && git rebase --autostash origin/main` (plain `pull --rebase` fails whenever another agent has uncommitted work — the normal state). Commit and push when a unit of work is done (Kanban move, finished draft, status change, answered question).
 
-```bash
-cd /efs/planning
-git pull --rebase
-```
-
-When a unit of work is done (a Kanban move, a finished draft, a status change, an answered question):
-
-```bash
-git add <files>
-git commit -m "<area>: <imperative summary>"
-git push
-```
-
-On push rejection (someone else pushed first):
-
-```bash
-git pull --rebase
-# resolve conflicts (Kanban.md is the likely victim)
-git push
-```
-
-If a rebase gets gnarly (>5 minutes of resolving), back off — surface in chat. Don't force-push.
+On push rejection: `git pull --rebase`, resolve conflicts (`Kanban.md` is the likely victim), push again. If a rebase gets gnarly (>5 minutes of resolving), back off and surface in chat. Never force-push.
 
 ## Commit-message style
 
-`<area>: <imperative summary>`. Areas seen in the wild: `design`, `kanban`, `docs`, `chore`, `promote`, `land`, `sync` (for the bot-driven Reference/ mirror, if/when it ships), and `pm` (PM-role coordination commits only).
+`<area>: <imperative summary>`. Areas: `design`, `kanban`, `docs`, `chore`, `promote`, `land`, `sync` (bot-driven Reference/ mirror, if/when it ships), `pm` (PM-role coordination commits only).
 
-**The subject prefix must reflect the authoring agent's role/area — it is NOT a free-form label.** In particular:
+**The subject prefix must reflect the authoring agent's role/area — it is NOT a free-form label.**
 
-- **`pm:` is RESERVED for the PM role (slug `pm`).** A non-PM agent editing a PM-owned coordination file (`Owner-Inbox.md`, `Kanban.md`, `Daily Notes/agent-status.md`) uses its own area (`docs:` / `kanban:` / `design:`), never `pm:`. Otherwise `git log --grep='^pm:'` falsely attributes work and you get phantom "second PMs." (This happened 2026-05-28: `sdk-designer` used `pm:` subjects on For-James edits — honest `Agent:` trailer, misleading subject.)
-- **Editing `Owner-Inbox.md` structure is PM work.** Other agents may *append a one-line surface entry* (e.g. "design X ready for review"); they should not restructure the decide-now framing or curate the queue. Surface, then let the PM curate. If you're not the PM, keep your Owner-Inbox touch to a single appended line and tag the commit with your own area.
+- **`pm:` is RESERVED for the PM role (slug `pm`).** A non-PM agent editing a PM-owned coordination file (`Owner-Inbox.md`, `Kanban.md`, `Daily Notes/agent-status.md`) uses its own area (`docs:` / `kanban:` / `design:`), never `pm:` — otherwise `git log --grep='^pm:'` falsely attributes work and phantom "second PMs" appear. (Happened 2026-05-28: `sdk-designer` used `pm:` subjects on For-James edits.)
+- **Editing `Owner-Inbox.md` structure is PM work.** Other agents may *append a one-line surface entry* ("design X ready for review"), not restructure the decide-now framing or curate the queue; tag that commit with your own area.
 
-Include a `Co-authored-by:` trailer naming the agent that wrote it:
+Two trailers on every agent-authored commit: `Co-authored-by:` naming the model, and `Agent: <slug>` — a stable agent+role identifier (not the model version), grep-friendly and durable across model upgrades. Write the message to a file and `git commit -F` it.
 
 ```
 design: draft offline-sync — describe the offline sync proposal
@@ -46,223 +25,128 @@ design: draft offline-sync — describe the offline sync proposal
 Body paragraph or two.
 
 Co-authored-by: Claude Opus 4.7 <noreply@anthropic.com>
-```
-
-Vendor noreply emails: `noreply@anthropic.com`, `noreply@openai.com`, `noreply@google.com`. For others, use `noreply@<vendor-domain>`.
-
-### Agent identity trailer
-
-In addition to `Co-authored-by:`, **include an `Agent: <slug>` trailer** in every agent-authored commit. The slug is a stable identifier for the agent + role (not the model version), so it's grep-friendly across `git log` and survives model upgrades:
-
-```
 Agent: claude-opus-4.7
-Agent: codex-gpt-5
-Agent: claude-haiku-3.5 (review)
 ```
 
-This unlocks per-agent activity views via `git log --grep='^Agent: claude'` without parsing vendor noreply emails. The trailer is required for agent-authored commits; James's manual commits via the Obsidian UI don't need it.
+Other slug forms: `Agent: codex-gpt-5`, `Agent: claude-haiku-3.5 (review)`. Unlocks `git log --grep='^Agent: claude'`. Required for agent commits; James's manual Obsidian-UI commits are exempt.
+
+Vendor noreply emails: `noreply@anthropic.com`, `noreply@openai.com`, `noreply@google.com`; otherwise `noreply@<vendor-domain>`.
 
 ## Tag vocabulary
 
-Plain `#kebab-case-text`. Obsidian indexes automatically; agents grep. Canonical set:
+Plain `#kebab-case-text` — no spaces, lowercase (Obsidian treats whitespace as a tag terminator). Canonical set:
 
 | Tag | Use |
 |---|---|
 | `#repo/contracts`, `#repo/client`, `#repo/sdk`, `#repo/planning` | Target codebase. Multi-repo work gets multiple tags. |
 | `#kind/design`, `#kind/task`, `#kind/question`, `#kind/decision`, `#kind/note` | Artifact type. |
 | `#status/draft`, `#status/review`, `#status/ready-for-promotion`, `#status/accepted`, `#status/landed`, `#status/abandoned`, `#status/rejected` | Lifecycle of a design. |
-| `#blocked-on/<thing>` | Blocker (e.g. `#blocked-on/DESIGN-0007`, `#blocked-on/human-decision`, `#blocked-on/concrete-CI-need`). |
+| `#blocked-on/<thing>` | Blocker (e.g. `#blocked-on/DESIGN-0007`, `#blocked-on/human-decision`). |
 | `#depends-on/<thing>` | Soft dependency between designs or tasks. |
-| `#needs/owner` | Tag on a specific `- [ ]` Open Questions item or AGENT-Q comment that needs an owner ruling. Surfaced via [[Open-Decisions]]. |
+| `#needs/owner` | On a specific `- [ ]` Open Questions item or AGENT-Q comment needing an owner ruling. Surfaced via [[Open-Decisions]]. |
 | `#needs/james` | **Deprecated alias of `#needs/owner`** (renamed 2026-07-23). Still surfaced; don't write new ones. Existing occurrences in dated history stay as written. |
 
-No spaces, kebab-case, lowercase. Obsidian treats whitespace as a tag terminator.
-
-New tags are fine when nothing existing fits — add to this table in the same commit so other agents find them.
+New tags are fine when nothing existing fits — add to this table in the same commit.
 
 ## Naming the decision-maker: role vs. person
 
 > **In durable design and process docs, write "the owner." In dated rulings, decision history, and status notes, name the person — attribution is the point.**
 
-Both forms are correct; they do different jobs. `Designs/**/owner-decision-inbox.md` and `owner-rulings.md` describe a **role** that could one day belong to more than one person, so they use the role. `Decisions.md`, `Daily Notes/`, `Reviews/`, and `Brainstorms/` are **append-only history**, where "James corrected my EAS claim" is a dated attribution — rewriting it to "the owner corrected…" destroys provenance and is a falsification, not a rename. The roster of who currently holds authority lives in [[authority]].
+`Designs/**/owner-decision-inbox.md` and `owner-rulings.md` describe a **role** that could one day belong to more than one person. `Decisions.md`, `Daily Notes/`, `Reviews/`, and `Brainstorms/` are **append-only history**: rewriting "James corrected my EAS claim" to "the owner corrected…" destroys provenance — falsification, not renaming. Who currently holds authority: [[authority]].
 
-Two consequences worth stating plainly:
-
-- **Never bulk-rename "James" across the vault.** ~1113 occurrences exist; most are history. Rename only where the sentence tells a future agent what to *do*, and only if substituting "whoever currently holds decision authority" keeps it true.
-- **Never rewrite a signature.** `Promoted by @james on YYYY-MM-DD` trust tokens and `RULED (James)` markers name a specific person taking responsibility for an irreversible act. That specificity is the whole value. The role generalizes; the signature never does.
+- **Never bulk-rename "James" across the vault.** ~1113 occurrences, most of them history. Rename only where the sentence tells a future agent what to *do*, and only if substituting "whoever currently holds decision authority" keeps it true.
+- **Never rewrite a signature.** `Promoted by @james on YYYY-MM-DD` trust tokens and `RULED (James)` markers name a specific person taking responsibility for an irreversible act. The role generalizes; the signature never does.
 
 **Disambiguation:** EFS the product also uses "owner" (container owner, gate owner, owner-derived `DATA` IDs). Project-role usage is a bare noun-adjunct (`owner-decision-inbox`, "the owner ruled"); EFS-resource usage is always possessive-qualified ("the container's owner"). In documents discussing both, write **"project owner"** on first mention. See [[Glossary#Owner (project role)]].
 
 ## Tri-sync invariant
 
-Three places must agree for design status: prose `**Status:**`, tag `#status/`, and (post-promotion) filename. All three change in the same commit. Filename only changes at promotion.
+Design status lives in three places — prose `**Status:**`, tag `#status/`, and (post-promotion) filename — which must agree and change in the same commit. Filename only changes at promotion.
 
-**Canonical definition: [[design-system#Tri-sync invariant]].** Mechanical check: `scripts/tri-sync-check.sh` (also catches self-numbered drafts).
+**Canonical definition: [[design-system#Tri-sync invariant]].** Check: `scripts/tri-sync-check.sh` (also catches self-numbered drafts).
 
-## Path conventions
+## Paths and links
 
 | Use case | Form | Example |
 |---|---|---|
-| In-vault references | `[[wiki-link]]` (no extension) | `[[design-system]]`, `[[Glossary#TAG]]` |
+| In-vault references | `[[wiki-link]]` (no extension) | `[[design-system]]`, `[[Glossary#TAG]]`, `[[design-system\|the meta-design]]` (alias) |
 | Out-of-vault references in prose | repo-relative, no `/efs/` prefix | `contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md` |
-| Out-of-vault links | vault-rooted relative path | `[ADR-0041](../contracts/docs/adr/0041-...)` |
+| Out-of-vault links | markdown link, path relative to the file you're writing in | `[ADR-0041](../contracts/docs/adr/0041-...)` |
 | Shell commands | whatever `pwd` requires | `cd ../contracts && git status` |
 
-**Never use absolute `/efs/...` paths in committed files.** Bakes in a mount point; breaks for any agent on a different layout.
+**Never use absolute `/efs/...` paths in committed files** — bakes in a mount point.
 
-## Wiki-link form
-
-Inside the vault: `[[filename]]` (no extension).
-
-- `[[design-system]]` — link to the design-system design.
-- `[[Glossary#TAG]]` — link to a specific glossary anchor.
-- `[[design-system|the meta-design]]` — alias form when prose reads better.
-
-Obsidian auto-updates these when a file is renamed. This is why we use them inside the vault.
-
-## Linking out of the vault
-
-Use markdown form with a path **relative to the file you're writing in.** Markdown links are file-relative, not vault-rooted.
-
-From a vault-root file (`planning/Tasks.md` etc.):
-
-```markdown
-see [ADR-0041](../contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md)
-```
-
-From a file one level deep (`planning/Designs/foo.md`, `planning/Onboarding/foo.md`):
-
-```markdown
-see [ADR-0041](../../contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md)
-```
-
-The `../` count varies by file depth. If a link doesn't resolve when you click it in Obsidian or follow it on GitHub web, you've miscounted.
-
-Out-of-vault links do NOT auto-update on file renames in the target repo. Rename-cleanup is a manual or scripted pass.
+Wiki-links auto-update on rename; that's why they're the in-vault form. Markdown links are file-relative: `../contracts/...` from a vault-root file, `../../contracts/...` from one level deep (`Designs/`, `Onboarding/`). If one doesn't resolve in Obsidian or on GitHub web, you miscounted. They do NOT auto-update on target-repo renames — cleanup is a manual pass.
 
 ## Task list vs Kanban vs design — three altitudes
 
-These three artifacts coexist on purpose. They're not redundant; they're at different altitudes. The single biggest failure mode is letting the same fact live in two places and drift.
+| Altitude | Artifact | Tracks | Use for |
+|---|---|---|---|
+| Durable | `Designs/*.md` | Proposals → accepted → landed; the "why" of architectural decisions | Architectural history |
+| Flow | `Kanban.md` columns | Backlog → In Flight → Blocked → Under Review → Done | Work needing flow tracking and one identifiable owner; a card is discipline-bearing (owner, claim TTL, WIP limit) |
+| Detail | `- [ ]` checkboxes | Execution-level items, rolled up globally by the Obsidian Tasks plugin (see [[Tasks]]) | In a design's `## Open questions`: items bound to a decision, answered before promotion (or carried as `### Post-acceptance`). Elsewhere (`Daily Notes/`): personal/ephemeral, not project state |
 
-| Altitude | Artifact | What it tracks |
-|---|---|---|
-| Durable | `Designs/*.md` | Proposals → accepted → landed history. The "why" of architectural decisions. |
-| Flow | `Kanban.md` columns | Work-stream state right now: Backlog → In Flight → Blocked → Under Review → Done. WIP-disciplined. |
-| Detail | `- [ ]` task checkboxes | Execution-level items inside a design (`## Open questions`), inside a Daily Note, or inside any file. Rolled up globally by the Obsidian Tasks plugin (see [[Tasks]]). |
-
-Rules of thumb:
-
-- **A Kanban card is a discipline-bearing object** — has an owner, a claim with TTL, a WIP-limited column. Use it for things that need flow tracking and one identifiable owner.
-- **A design `## Open questions` checkbox** is for trackable items bound to a specific decision. They get answered before the design promotes (or carried forward as `### Post-acceptance`).
-- **A `- [ ]` in `Daily Notes/` or another file** is a personal/ephemeral todo. Useful but uncoordinated; not visible as project state.
-
-If you find yourself recording the same fact in two of these places, pick one and reference it from the other. **State duplication is the bug; multiple artifacts is the feature.**
+If the same fact lands in two of these, pick one and reference it from the other. **State duplication is the bug; multiple artifacts is the feature.**
 
 ## WIP limits
 
-Kanban only works with WIP limits. The single human reviewer is the bottleneck; left unlimited, agents will accumulate work-in-progress faster than James can review it. Three soft limits, agent-honored not mechanically enforced:
+Soft limits, agent-honored not mechanically enforced; the single human reviewer is the bottleneck.
 
-| Limit | Where | Why |
-|---|---|---|
-| **3** designs in `#status/ready-for-promotion` | Across all of `Designs/` | James's promotion-ceremony queue. Hitting 3 means agents must wait or help James promote before adding more. |
-| **5** cards in **Under Review** | `Kanban.md` Under Review column | James reviews PRs too. 5 PRs in review across all repos is already a lot. |
-| **2** In Flight cards per agent | `Kanban.md` In Flight, by claim annotation | Keeps each agent focused on something they can finish. |
+| Limit | Where |
+|---|---|
+| **3** designs in `#status/ready-for-promotion` | Across all of `Designs/` — James's promotion-ceremony queue |
+| **5** cards in **Under Review** | `Kanban.md` Under Review column, across all repos |
+| **2** In Flight cards per agent | `Kanban.md` In Flight, by claim annotation |
 
-When a limit is hit, an agent that wants to add to that column must either:
-
-- finish or unblock an existing card in that column first, OR
-- surface in chat ("ready-for-promotion is at 3; can we promote one before I add another?")
-
-Limits exist to make the bottleneck visible, not to block work — but breaking them without acknowledging the bottleneck just hides it.
+At a limit: finish or unblock an existing card in that column first, or surface in chat ("ready-for-promotion is at 3; can we promote one before I add another?"). Don't break a limit silently.
 
 ## Kanban entries
 
-In Flight card format:
+In Flight card, and drafts-in-flight (in Backlog):
 
 ```markdown
 - [ ] Implement [[0007-offline-sync]] #repo/client
   — @claude-opus-4.7, branch claude/offline-sync, claimed 2026-05-21, expires 2026-05-24
-```
-
-3-day default expiry on In Flight cards. After expiry, any agent (or James) can reclaim. Update the expiry whenever you touch the card.
-
-Drafts-in-flight format (in Backlog):
-
-```markdown
 - [ ] Draft: offline-sync #kind/design #repo/client — @claude-opus-4.7, started 2026-05-21
 ```
 
-### One card per PR per repo
+3-day default expiry on In Flight cards; after expiry any agent (or James) can reclaim. Update the expiry whenever you touch the card.
 
-A design that targets multiple repos gets **one card per repo**, not one card for the whole design. The cards cross-link to `[[NNNN-design-slug]]`; the design file itself is the cross-cutting tracker (see `Design file owns multi-repo truth` below).
+**One card per PR per repo.** A design targeting multiple repos gets one card per repo — each with its own agent, branch, and `#repo/` tag — not one card for the whole design. Cards cross-link to `[[NNNN-design-slug]]`; the design file is the cross-cutting tracker.
 
-Example: `[[0007-offline-sync]]` targets `client` and `sdk`. Two cards in flight:
-
-```markdown
-- [ ] Implement [[0007-offline-sync]] in client #repo/client
-  — @claude-opus-4.7, branch claude/offline-sync-client, claimed 2026-05-21, expires 2026-05-24
-- [ ] Implement [[0007-offline-sync]] in sdk #repo/sdk
-  — @codex-gpt-5, branch codex/offline-sync-sdk, claimed 2026-05-21, expires 2026-05-24
-```
-
-### Under Review and Blocked cards do NOT auto-expire
-
-Only **In Flight** cards have the 3-day TTL. Cards in **Under Review** (PR open) and **Blocked** (waiting on something) have no expiry and **cannot be reclaimed without asking in chat first**. PRs can legitimately sit in review for weeks; blockers can persist for days. The expiry semantics exist specifically to surface silently-abandoned active work.
-
-If an Under Review card looks stale (e.g., PR untouched for 7+ days), surface in chat rather than reclaiming.
+**Under Review and Blocked cards do NOT auto-expire.** Only In Flight has the 3-day TTL; Under Review (PR open) and Blocked cards **cannot be reclaimed without asking in chat first**. If one looks stale (untouched 7+ days), surface in chat rather than reclaiming.
 
 ### Design file owns multi-repo truth
 
-For multi-repo designs, the design file's `## Implementation notes` carries the PR checklist:
+The design's `## Implementation notes` carries the PR checklist:
 
 ```markdown
 - [x] contracts#412 — merged 2026-05-19
 - [ ] client#88 — in review
-- [ ] sdk#15 — not started
 ```
 
-**The commit that merges a PR for DESIGN-NNNN must also update DESIGN-NNNN's checklist in the same session.** Kanban tracks attention (what work-stream is active); the design file tracks truth (where the whole design stands). If the checklist drifts from PR reality, the design's `landed` status will be wrong.
-
-Until a PR-sync bot exists, this convention is the only thing keeping design state honest.
+**The commit that merges a PR for DESIGN-NNNN must also update DESIGN-NNNN's checklist in the same session.** Kanban tracks attention; the design file tracks truth, and drift makes the design's `landed` status wrong.
 
 ### Post-acceptance Open Questions
 
-Once a design is `accepted`, the body is nominally frozen. But implementation reveals new questions that need recording. **Append a dated subhead to the existing `## Open questions` section:**
+An `accepted` design's body is nominally frozen. For questions implementation raises, **append a dated subhead to the existing `## Open questions` section:**
 
 ```markdown
-## Open questions
-
-(pre-acceptance questions, all resolved)
-- [x] Should we support both X and Y? — only X, resolved 2026-05-15.
-
 ### Post-acceptance (2026-06-03 / @claude-opus-4.7)
-- [ ] Discovered during implementation: the foo-bar interaction needs a tiebreaker. Proposed: lexicographic by attester address. Awaiting confirmation. #needs/owner
+- [ ] Tiebreaker needed for the foo-bar interaction. Proposed: lexicographic by attester address. #needs/owner
 ```
 
-Questions surfaced post-acceptance feed the same Tasks plugin rollup and reach James the same way. If a post-acceptance question changes the design's substance, the implementing agent must either update the design body (drift discipline, see [[design-system]]) or open a new design that supersedes.
+If such a question changes the design's substance, either update the design body (drift discipline, see [[design-system]]) or open a superseding design.
 
 ### Preserving the Obsidian Kanban plugin format
 
-`Kanban.md` is parsed by the Obsidian Kanban plugin, which needs three things to render correctly:
+`Kanban.md` is parsed by the Obsidian Kanban plugin, which needs:
 
-1. **YAML frontmatter** at the top:
-   ```yaml
-   ---
-   kanban-plugin: board
-   ---
-   ```
-2. **`## Column-name` H2 headers** for each column. Order in the file = order on the board.
-3. **Settings footer** at the bottom:
-   ```markdown
-   %% kanban:settings
-   ```
-   {"kanban-plugin":"board","list-collapse":[false,false,false,false,false]}
-   ```
-   %%
-   ```
-   The `list-collapse` array length **MUST equal the number of columns**. Adding a column means adding a `false` entry; removing means removing one.
+1. **YAML frontmatter** at the top: `kanban-plugin: board`.
+2. **`## Column-name` H2 headers** per column. File order = board order.
+3. **Settings footer** at the bottom, wrapped in `%% kanban:settings` … `%%`, containing a fenced `{"kanban-plugin":"board","list-collapse":[false,false,false,false,false]}`. The `list-collapse` array length **MUST equal the number of columns**.
 
-When editing `Kanban.md`, never strip the frontmatter, never delete the footer, and always update `list-collapse` if you change the column count. Plain-markdown viewers (GitHub web) render this fine; it only matters to Obsidian's board view, which is what James uses.
+Never strip the frontmatter, never delete the footer, always update `list-collapse` when the column count changes.
 
 ## Daily check-ins
 
@@ -271,29 +155,19 @@ Active agents append once per work-session to `Daily Notes/agent-status.md`:
 ```markdown
 ## 2026-05-21
 - @claude-opus-4.7: offline-sync — finished proposal section, opening for review
-- @codex-gpt-5: sdk-core — blocked on offline-sync acceptance
 ```
-
-Lets James scan project state quickly.
 
 ## Pre-promotion checklist
 
-Every design carries this section near the bottom. **Canonical form: [[_template#Pre-promotion checklist]].** Fill it before requesting promotion; James scans rather than re-reads the whole design.
+Every design carries this section near the bottom. **Canonical form: [[_template#Pre-promotion checklist]].** Fill it before requesting promotion.
 
 ## Promotion commit shape
 
-Single commit:
-
-- `git mv Designs/<slug>.md Designs/NNNN-<slug>.md`
-- Tri-sync edit (prose Status, tag, Kanban entry)
-- Commit message: `promote: DESIGN-NNNN — <title>`
-- Commit body includes the literal trust token: `Promoted by @james on YYYY-MM-DD`
-
-Any deviation = manual review. Mechanical check: `scripts/promotion-check.sh` audits recent `promote:` commits for the trust token, atomic rename, and subject format.
+One commit: `git mv Designs/<slug>.md Designs/NNNN-<slug>.md` + tri-sync edit (prose Status, tag, Kanban entry), subject `promote: DESIGN-NNNN — <title>`, body containing the literal trust token `Promoted by @james on YYYY-MM-DD`. Any deviation = manual review. Full ceremony: [[write-a-design]] § 7. Check: `scripts/promotion-check.sh`.
 
 ## Open questions inline
 
-Inside a design file:
+Inside a design file; the Obsidian Tasks plugin rolls these into a global view for James:
 
 ```markdown
 ## Open questions
@@ -302,10 +176,8 @@ Inside a design file:
 - [x] Is the foo limit per-user or global? — global, per ADR-0026 (resolved 2026-05-21).
 ```
 
-The Obsidian Tasks plugin rolls these into a global view for James.
-
-For Tier 1/2 questions about cross-cutting planning concerns (not tied to one design), open a new design with `#kind/question` if it deserves lifecycle. Otherwise `Daily Notes/`.
+Tier 1/2 questions about cross-cutting planning concerns (not tied to one design) get a new design with `#kind/question` if they deserve lifecycle; otherwise `Daily Notes/`.
 
 ## When in doubt
 
-Surface in chat with James before doing. Cost of asking is ~1 chat turn; cost of stomping a convention is hours of cleanup.
+Surface in chat with James before doing.

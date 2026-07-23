@@ -18,7 +18,6 @@ What rulings have **retired**, and what replaced it. Input to `./scripts/needs-i
 
 | Retired phrase | Replacement | Ruling | Since |
 |---|---|---|---|
-| `EAS-core` | native envelope kernel | 2026-07-07 carrier ruling (`Designs/efsv2/owner-rulings.md`) | 2026-07-07 |
 | `EAS carrier` | native envelope kernel | 2026-07-07 carrier ruling | 2026-07-07 |
 | `identity = EAS UID` | portable principal ID | 2026-07-07 carrier ruling | 2026-07-07 |
 
@@ -26,4 +25,4 @@ What rulings have **retired**, and what replaced it. Input to `./scripts/needs-i
 
 | Retired phrase | Ruling | Cleared |
 |---|---|---|
-| — | — | — |
+| `EAS-core` | 2026-07-07 carrier ruling | 2026-07-23 |

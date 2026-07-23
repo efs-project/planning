@@ -64,7 +64,28 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 #### Review
 
-*(none)*
+> **The pre-v2 SDK corpus.** Its disposition is the open owner decision **R1** ([owner-decision-inbox](./owner-decision-inbox.md)) — these carry `#status/review` but are **provisional/legacy** pending that ruling. `deterministic-ids` supersedes their identity model ("identity = EAS UID" is replaced). **Do not re-draft these, and do not treat them as canonical.**
+
+| Design | Target repos | Notes |
+|---|---|---|
+| [[sdk-architecture]] | `sdk` | The SDK API surface. Built against on `chore/scaffold`. Identity substrate superseded by v2 — see R1. |
+| [[sdk-read-surface]] | `sdk` | Read API shape. |
+| [[sdk-write-ux]] | `sdk` | Write-UX design; open questions feed ER2. |
+| [[sdk-wallet-architecture]] | `sdk` | Wallet/account integration; open questions feed ER1/ER2. |
+| [[sdk-review-backlog]] | `sdk` | Reconciled build backlog for the SDK. |
+| [[sdk-vs-client-responsibilities]] | `sdk`, `client` | Boundary between SDK and client. |
+| [[sdk-minimal-clicks]] | `sdk` | Batched single-signature writes (Tier-0 baseline, shipped). *Missing prose `**Status:**` — tri-sync finding.* |
+| [[efs-account-system]] | `sdk`, `contracts` | One smart-account identity per user. **Historical input** — v2's logical actor + KEL supersede the premise. *Missing prose `**Status:**`.* |
+| [[mirror-scheme-policy]] | `contracts` | Mirror URI scheme policy; allowlist removal. |
+| [[web3-standards-compliance]] | `contracts` | web3:// serving conformance. |
+
+#### Superseded / handed off
+
+| Design | Target repos | Notes |
+|---|---|---|
+| [[sdk-one-signature-writes]] | `sdk` | Superseded by the native-envelope recut. *Prose says `superseded`, tag says `review` — tri-sync finding.* |
+| [[web3-bytesstore-sdk-followup]] | `sdk` | Handed off. *Prose `hand-off` vs tag `handoff` — tri-sync finding.* |
+| [[write-ux-options-ranked]] | `sdk` | Ranked write-UX options. Tier-5 gating rule superseded by the v2 justification. *Missing prose `**Status:**`.* |
 
 #### Ready for promotion
 

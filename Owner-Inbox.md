@@ -21,7 +21,7 @@ aliases: [For-James]
 ## 🕐 WHEN YOU HAVE TIME
 
 - **Design decisions awaiting you: 3** — `R1` (root), `OS1`/`OS2` (clientv2). See [Open-Decisions.md](./Open-Decisions.md). The **efsv2 queue (N1–N6, Q1–Q5) is under a clarified sequencing hold** — agents should not present it as a batch until the joined pass revalidates it, but you may still volunteer an isolated answer.
-- **Vault process changes are in flight from me** — see [[Decisions]] 2026-07-23. Two need your nod: whether to rename `For-James.md` → `Owner-Inbox.md` (PM rec: **don't** — see the reasoning), and whether to keep the structural SOUL edits I made.
+- **Vault process changes landed 2026-07-23** — see [[Decisions]]. One thing needs your nod: whether to keep the structural SOUL edits (escalation dial re-keyed off the dead milestone, "ignore design bodies" inverted for a design phase). Say the word and I revert them.
 - Frame-review the proposed design process → [[Brainstorms/2026-05-28-pm-design-process-synthesis]] (then I formalize it)
 
 ## ℹ️ FYI (no action)

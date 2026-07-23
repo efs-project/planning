@@ -22,14 +22,14 @@ kanban-plugin: board
 
 ## In Flight
 
-- [ ] **Grants — research + tracker + submissions** (@grants) — funder-landscape research + a lightweight operational tracker in `Grants/` (README/programs/proposals/packet/research-log), + preparing James's actual submissions. First external anchor = the [EFS KarmaHQ page](https://www.karmahq.xyz/project/ethereum-file-system/about); first proposal row = Octant (rejected, competitive — keep the row + feedback). Tracking detail lives in `Grants/proposals.md` (not mirrored here); this card is just the swarm-visible pointer to the active work. James-actionable items (Karma cleanup: no team listed, funds raised = 0, bare "Path to Success"; program picks; submission sign-offs) route to [[For-James]] only when they're real forks/deadlines. #repo/planning #kind/ops
-  — @grants, structure blessed by @pm 2026-07-05, expires 2026-07-12
+- [ ] **Grants — research + tracker + submissions** (@grants) — funder-landscape research + a lightweight operational tracker in `Grants/` (README/programs/proposals/packet/research-log), + preparing James's actual submissions. First external anchor = the [EFS KarmaHQ page](https://www.karmahq.xyz/project/ethereum-file-system/about); first proposal row = Octant (rejected, competitive — keep the row + feedback). Tracking detail lives in `Grants/proposals.md` (not mirrored here); this card is just the swarm-visible pointer to the active work. James-actionable items (Karma cleanup: no team listed, funds raised = 0, bare "Path to Success"; program picks; submission sign-offs) route to [[Owner-Inbox]] only when they're real forks/deadlines. #repo/planning #kind/ops
+  — @grants, structure blessed by @pm 2026-07-05, expires 2026-07-30
 
 - [ ] **EFS v2 — "the one final freeze before mainnet"** (@fable / @codex-gpt-5) — a bounded, batched re-freeze of the data model, justified on **permanent properties** (portable/deterministic IDs → cross-chain replicability, offline/light-client verifiability, atomic+idempotent one-popup writes) that no additive overlay can retrofit. **Current shape (2026-07-07 carrier ruling): a native envelope kernel + tag-core, 9 record kinds collapsed to 5.** The earlier EAS-carried proposal is superseded; `deterministic-ids` is a reopened baseline and the umbrella/transition docs are historical inputs, not current authority. **Read `Designs/efsv2/README.md` for the current spine — this card is a pointer, not a summary.** Corpus in `Designs/efsv2/`, `Designs/clientv2/`, `Reviews/`. **Status: reconciliation-ready, not promotion-ready.** The efsv2 owner queue is under a **2026-07-22 sequencing hold** — an inventory, not a packet to batch-answer. Still proposes superseding the 2026-06-01 never-change-frozen-schemas commitment and the v1 Sepolia UID set. #repo/planning #repo/contracts #repo/sdk #kind/design
-  — @fable / @codex-gpt-5, active through 2026-07-23; owner queue held
+  — @fable / @codex-gpt-5, claimed 2026-07-23, expires 2026-07-30; owner queue held
 
 - [ ] **SDK build** (@sdk) — building [[sdk-architecture]] in `sdk/`, branch `chore/scaffold` (141 commits ahead of `main`). Read core + Tier-1 write + edge/value writes + lists (R/W) + REDIRECT + escape hatches + schema-UID integrity gate + AA-ready Submitter seam + `@efs/solidity` compile-in lib all built (~416 TS + ~48 forge tests, ~27 kB gzip). **PR #1 is open + CI-green but 22 commits behind `chore/scaffold`** — James to merge soon (repoint the PR at the live branch or catch it up first). Deferred/open: sorts (SORT_INFO unfrozen), one-signature `batch()`, mirrors writes. #repo/sdk
-  — @sdk, repo efs-project/sdk (PR #1 open, CI green)
+  — @sdk, repo efs-project/sdk (PR #1 open, CI green), claimed 2026-07-23, expires 2026-07-30
 - [ ] **Act on holistic review** → [[Reviews/2026-06-10-holistic-review]] (canonical 79-finding detail; track WORK here by fix-group, not by finding). Findings resolve via PRs citing IDs (git = completion log).
   - [x] **G1 Reconciliation** — ✅ ENG-1 settled (froze uint16); ENG-2 split-brain resolved (schema-freeze merged to main).
   - [x] **G2 kernel/router fixes** — ✅ SEC-1 (header sanitize) + ARCH-4 (chainId) closed by @web3-uri PR #32; remaining GAS/guard items folded into the shipped freeze/deploy work.
@@ -37,7 +37,7 @@ kanban-plugin: board
   - [x] **G4 SDK shape** (DX-2/3/8/11/13) — @sdk (built on `chore/scaffold`).
   - [ ] **G5 Hackathon UX** (UX-1/2/4/5/13/7/9/10) — landed via the live-Sepolia explorer + minimal-clicks + burner-session work.
   - [ ] **G6 Pre-mainnet backlog** (remaining ARCH/SEC/GAS/DX/ENG) — revisit before mainnet.
-  — @pm tracks; #repo/contracts #repo/sdk #repo/client #repo/planning
+  — @pm tracks, claimed 2026-07-23, expires 2026-07-30; #repo/contracts #repo/sdk #repo/client #repo/planning
 
 ## Blocked
 

@@ -17,7 +17,7 @@ heading includes Open questions
 sort by path
 ````
 
-**CLI fallback:** `grep -rn "^- \[ \]" /efs/planning/Designs/ | grep -v _template`
+**CLI fallback:** `grep -rn "^- \[ \]" ./Designs/ | grep -v _template`
 
 ---
 
@@ -30,7 +30,7 @@ not done
 description includes #blocked-on/human-decision
 ````
 
-**CLI fallback:** `grep -rn "#blocked-on/human-decision" /efs/planning/ --include="*.md"`
+**CLI fallback:** `grep -rn "#blocked-on/human-decision" ./ --include="*.md"`
 
 ---
 

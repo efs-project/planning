@@ -43,7 +43,11 @@ trap 'rm -f "$TMP"' EXIT
 
 # For each commit, pull subject + agent trailer + date in a robust way.
 for sha in "${SHAS[@]}"; do
-  agent="$(git log -1 --format='%B' "$sha" | grep -m1 -E '^Agent: ' | sed -E 's/^Agent: +//' | tr -d '\r' || true)"
+  # Normalize literal \n before matching: some harnesses passed the message through
+  # a shell that didn't interpret the escape, gluing trailers onto one physical line.
+  # Six real commits were bucketed "unknown" for this reason before 2026-07-23.
+  agent="$(git log -1 --format='%B' "$sha" | sed 's/\\n/\
+/g' | grep -m1 -E '^Agent: ' | sed -E 's/^Agent: +//' | tr -d '\r' || true)"
   agent="${agent:-unknown}"
   date="$(git log -1 --format='%ai' "$sha" | cut -d' ' -f1)"
   short="$(git log -1 --format='%h' "$sha")"
