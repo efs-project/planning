@@ -3,13 +3,17 @@
 #
 # Verify the tri-sync invariant across every file in Designs/:
 #   - Prose `**Status:** X` matches the `#status/X` tag
-#   - Filename `NNNN-<slug>.md` implies Status must be `accepted` or `landed`
-#   - Filename `<slug>.md` (no NNNN prefix) implies Status must be one of:
-#     `draft`, `review`, `ready-for-promotion`, `abandoned`, `rejected`
+#   - The status value is in the documented vocabulary
+#   - Numbered/un-numbered filename agrees with the status
 #
 # Also catches self-numbered drafts: a file with `NNNN-` prefix that has
 # prose Status `draft` or `review` (per "DO NOT NUMBER YOUR OWN DRAFT"
 # rule in design-system.md).
+#
+# THE STATUS VOCABULARY BELOW IS A MIRROR, NOT A SOURCE. Canonical list:
+# Onboarding/conventions.md § "Tag vocabulary" → "#status/ — lifecycle".
+# Widen it only alongside that table (and design-system.md), never to make a
+# red run go green — an undocumented status is exactly the drift this catches.
 #
 # Exit codes:
 #   0 — all designs pass
@@ -54,12 +58,12 @@ while IFS= read -r f; do
 
   # Check 1: prose status and tag status agree
   if [[ -z "$prose_status" ]]; then
-    echo "MISSING prose **Status:** field — $f"
+    echo "MISSING prose **Status:** field — $f (YAML frontmatter 'status:'/'tags:' does not count; write the inline header line)"
     ISSUES=$((ISSUES + 1))
     continue
   fi
   if [[ -z "$tag_status" ]]; then
-    echo "MISSING #status/ tag — $f (prose says: $prose_status)"
+    echo "MISSING #status/ tag — $f (prose says: $prose_status; YAML 'tags:' is not read — write the inline tag line)"
     ISSUES=$((ISSUES + 1))
     continue
   fi
@@ -69,29 +73,49 @@ while IFS= read -r f; do
     continue
   fi
 
-  # Check 2: filename and status agree
+  # Check 2: the status is a documented DESIGN status, not a non-design one.
+  # `done` and `notes` are real tags elsewhere in the vault (a finished Reviews/
+  # pass; a running-notes ledger) but a design never ends in them.
+  case "$prose_status" in
+    done|notes|note)
+      echo "NON-DESIGN STATUS '$prose_status' — $f (valid on Reviews/ and ops artifacts, never on a design; a design ends landed/abandoned/rejected/superseded)"
+      ISSUES=$((ISSUES + 1))
+      continue
+      ;;
+  esac
+
+  # Check 3: filename and status agree
+  #   pre-promotion       draft | review | ready-for-promotion   → un-numbered
+  #   promoted            accepted | landed                      → numbered
+  #   terminal, either    abandoned | rejected | superseded
+  #   terminal, in-vault  handoff  → un-numbered; implementation lands in
+  #                       another repo, so it never earns a number
   if [[ $is_numbered -eq 1 ]]; then
     case "$prose_status" in
       accepted|landed) ;;  # OK
+      abandoned|rejected|superseded) ;;  # OK — promoted, then closed out
       draft|review|ready-for-promotion)
         echo "SELF-NUMBERED DRAFT: $f has NNNN- prefix but status=$prose_status (numbers are for promoted designs only)"
         ISSUES=$((ISSUES + 1))
         ;;
-      abandoned|rejected) ;;  # OK — was promoted then abandoned/rejected
+      handoff)
+        echo "NUMBERED HANDOFF: $f has NNNN- prefix but status=handoff (a hand-off packet is never promoted — it implements in another repo)"
+        ISSUES=$((ISSUES + 1))
+        ;;
       *)
-        echo "UNKNOWN STATUS '$prose_status' on numbered design — $f"
+        echo "UNKNOWN STATUS '$prose_status' on numbered design — $f (see Onboarding/conventions.md § Tag vocabulary)"
         ISSUES=$((ISSUES + 1))
         ;;
     esac
   else
     case "$prose_status" in
-      draft|review|ready-for-promotion|abandoned|rejected) ;;  # OK
+      draft|review|ready-for-promotion|abandoned|rejected|superseded|handoff) ;;  # OK
       accepted|landed)
         echo "MISSING NUMBER: $f has status=$prose_status but no NNNN- prefix (promotion should have renamed)"
         ISSUES=$((ISSUES + 1))
         ;;
       *)
-        echo "UNKNOWN STATUS '$prose_status' on un-numbered draft — $f"
+        echo "UNKNOWN STATUS '$prose_status' on un-numbered draft — $f (see Onboarding/conventions.md § Tag vocabulary)"
         ISSUES=$((ISSUES + 1))
         ;;
     esac

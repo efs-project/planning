@@ -10,7 +10,7 @@ This folder is currently a placeholder. Content will be added as agents and the 
 
 - **System overview** — three-layer model (Paths → Data → Mirrors), how attestations compose, what the kernel does vs. the overlay.
 - **Lenses & resolution** — what a lens is (see [[Glossary#Lens]]), how multi-lens resolution composes, default lens chain.
-- **Schemas at a glance** — the seven EAS schemas (ANCHOR, DATA, MIRROR, PIN, TAG, PROPERTY, SORT_INFO) and how they relate.
+- **Schemas at a glance** — the frozen EAS schema set and how it relates. **As of 2026-06-11: 9 schemas frozen and registered on Sepolia** (ANCHOR, DATA, MIRROR, PIN, TAG, PROPERTY, LIST, LIST_ENTRY, REDIRECT) plus **WHITEOUT** added as an additive 10th. SORT_INFO was deferred and never frozen. Canonical source: `contracts/docs/SEPOLIA_FREEZE_TABLE.md` — do not restate the set here.
 - **Upload flow** — what a user's "save" actually does, step by step.
 - **Read flow** — what `web3://<router>/path/file.png` does, step by step.
 - **Permanence tiers** — Etched / Durable / Ephemeral as a working model.

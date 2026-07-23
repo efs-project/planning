@@ -63,7 +63,7 @@ James (or an agent acting on his explicit trust token):
 
 1. Reads the design and the pre-promotion checklist.
 2. Writes the trust token in the design body: `Promoted by @james on YYYY-MM-DD`.
-3. In a **single** commit: `git mv Designs/<slug>.md Designs/NNNN-<slug>.md`; prose `**Status:**` → `accepted`; tag → `#status/accepted`; `Designs/README.md` content map moves the entry from "Ready for promotion" to "Accepted (in implementation)"; Kanban drops the `Draft: <slug>` Backlog entry and gains per-repo implementation cards. Subject: `promote: DESIGN-NNNN — <title>`. Push.
+3. In a **single** commit: `git mv Designs/<slug>.md Designs/NNNN-<slug>.md`; prose `**Status:**` → `accepted`; tag → `#status/accepted`; `Designs/README.md` content map moves the entry from "Ready for promotion" to "Accepted (numbered, in effect)"; Kanban drops the `Draft: <slug>` Backlog entry and gains per-repo implementation cards. Subject: `promote: DESIGN-NNNN — <title>`. Push.
 4. Obsidian auto-renames in-vault `[[<slug>]]` references; cross-repo references need a separate cleanup pass.
 5. Audit with `./scripts/promotion-check.sh` (trust token, atomic rename, subject format).
 
@@ -90,7 +90,7 @@ When ALL PRs in `## Implementation notes` are merged:
 ```markdown
 # ADR-NNNN: <Title scoped to this repo's slice>
 
-**Status:** Accepted
+**Status:** accepted
 **Date:** YYYY-MM-DD
 **Related:** [[DESIGN-NNNN]] (`../../planning/Designs/NNNN-<slug>.md`), PR #<num>
 

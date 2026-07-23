@@ -5,7 +5,7 @@
 #
 # SCOPE IS DELIBERATELY NARROW. It checks only things that are (a) mechanically
 # decidable, (b) already green, and (c) cheap to fix in under 10 seconds. It does
-# NOT run tri-sync — that check currently has 7 known findings, and a gate that
+# NOT run tri-sync — that check has known findings, and a gate that
 # arrives red is a gate everyone learns to bypass. Never widen this to a check
 # that isn't already passing.
 #

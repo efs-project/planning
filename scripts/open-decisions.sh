@@ -18,10 +18,21 @@
 #     no edits to files the PM does not own.
 #   - HOLDS ARE SURFACED FIRST AND LOUDEST. A held queue must never read as
 #     answerable — that is the specific failure this tool exists to prevent.
+#   - IT NEVER DROPS CONTENT SILENTLY. Both ways this script can quietly lie —
+#     an item under a section classify() does not recognize, and a hold written
+#     in a form the hold detector does not match — warn loudly on stderr. The
+#     generated page's format is unchanged: it is committed and diffed, so a
+#     formatting change would be pure noise.
 #
 # USAGE:
 #   ./scripts/open-decisions.sh              # write Open-Decisions.md
 #   ./scripts/open-decisions.sh --stdout     # print instead (no file written)
+#
+# EXIT CODES:
+#   0 — generated, nothing suspicious
+#   1 — generated (the file IS written), but see the stderr warnings: something
+#       was dropped, or a hold may have gone undetected
+#   2 — script error, nothing generated
 #
 # Regenerate in the same commit as any decision-state change. On a merge
 # conflict in Open-Decisions.md, NEVER hand-merge a generated file:
@@ -39,6 +50,12 @@ TODAY="$(date +%Y-%m-%d)"
 # Classify a "## " section heading into a bucket.
 # efsv2 phrases its live inventory as "... revalidate before asking", which is
 # NOT askable — hence the explicit guard before the generic "decide now" match.
+#
+# OTHER means "unrecognized", and OTHER has no emit branch — items under such a
+# section appear NOWHERE on the generated page. That is silent data loss on the
+# page AGENTS.md calls the fastest answer to what needs deciding, so OTHER now
+# warns on stderr. (SETTLED/DELEGATED/SUPERSEDED/MIRROR also have no emit
+# branch, but those omissions are deliberate classifications, not misses.)
 classify() {
   local h; h="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
   case "$h" in
@@ -66,6 +83,12 @@ QUEUES=$(find "$DESIGNS" -name 'owner-decision-inbox.md' | sort)
 ASK_ROWS=""; REVAL_ROWS=""; EVID_ROWS=""; SCHED_ROWS=""
 HOLD_ROWS=""; QUEUE_ROWS=""
 n_ask=0; n_reval=0; n_evid=0; n_sched=0; n_hold=0
+WARNINGS=0
+
+# Loose second net for the hold detector below. Deliberately phrase-based, not
+# just the word "hold": the corpus is full of "threshold", "browser-held key"
+# and an option literally labelled "Hold and reconcile", none of which are holds.
+HOLD_HINT_RE='(on hold|under ([a-z]+ )?hold|sequencing hold|(is|are|remains?) held|hold (is|remains) (in effect|active))'
 
 for q in $QUEUES; do
   rel="${q#"$VAULT_ROOT"/}"
@@ -86,6 +109,27 @@ for q in $QUEUES; do
     HOLD_ROWS="${HOLD_ROWS}| \`${qname}\` | ${txt} |
 "
   done < <(grep -E '^> \*\*.*[Hh]old' "$q" 2>/dev/null || true)
+
+  # The detector above only sees a hold written as a bolded blockquote. A hold
+  # written as an ordinary paragraph would flip this queue from HELD to "ok" —
+  # the most dangerous failure this tool can have, since "ok" means askable.
+  # So when the strict detector found NOTHING, re-scan with the loose phrase
+  # net and warn. Suppressed once a hold is already detected, otherwise every
+  # held queue warns about its own hold on every run.
+  if [[ $held -eq 0 ]]; then
+    hint="$(grep -n -iE "$HOLD_HINT_RE" "$q" 2>/dev/null || true)"
+    if [[ -n "$hint" ]]; then
+      WARNINGS=$((WARNINGS + 1))
+      {
+        echo "WARNING: possible UNDETECTED HOLD — ${rel}"
+        echo "  This queue is being reported \"ok\", i.e. safe to ask the owner about."
+        echo "  The hold detector only matches a blockquote line: > **... hold ...**"
+        echo "  These lines mention a hold but are not in that form:"
+        printf '%s\n' "$hint" | sed 's/^/    /'
+        echo "  Confirm by hand before asking anything from this queue."
+      } >&2
+    fi
+  fi
 
   section=""; bucket="OTHER"; qcount=0
   while IFS= read -r line; do
@@ -117,6 +161,18 @@ for q in $QUEUES; do
           SCHEDULED)
             SCHED_ROWS="${SCHED_ROWS}${row}"; n_sched=$((n_sched + 1))
             qcount=$((qcount + 1)) ;;
+          OTHER)
+            WARNINGS=$((WARNINGS + 1))
+            sec="$section"
+            [[ -n "$sec" ]] || sec="(no '## ' heading yet — item precedes the first section)"
+            {
+              echo "WARNING: ITEM DROPPED — ${rel}"
+              echo "  ### ${heading}"
+              echo "  sits under '## ${sec}', which classify() does not recognize, so it"
+              echo "  appears NOWHERE in Open-Decisions.md — not even as 'not askable'."
+              echo "  Fix: rename the section to a recognized phrase, or add a case to"
+              echo "  classify() in scripts/open-decisions.sh."
+            } >&2 ;;
         esac ;;
     esac
   done < "$q"
@@ -220,4 +276,11 @@ if [[ "${1:-}" == "--stdout" ]]; then
 else
   emit > "$OUT"
   echo "Wrote ${OUT#"$VAULT_ROOT"/} — ask now: ${n_ask}, held/revalidate: ${n_reval}, evidence: ${n_evid}, scheduled: ${n_sched}"
+fi
+
+if [[ $WARNINGS -gt 0 ]]; then
+  echo "" >&2
+  echo "$WARNINGS warning(s) above. The output WAS generated — it is just not trustworthy" >&2
+  echo "until each warning is resolved. Do not present this page as complete." >&2
+  exit 1
 fi

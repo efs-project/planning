@@ -12,6 +12,10 @@ Single-file alphabetical glossary of EFS terms. Each term is an `## H2` anchor s
 
 A path node in EFS. Stored as an `ANCHOR` EAS attestation; hierarchical via `refUID = parentAnchor`. Permanent and non-revocable — once a folder or path exists, it exists forever. See `contracts/specs/02-Data-Models-and-Schemas.md`.
 
+## ANCHOR
+
+Frozen schema. A stable, content-derived name in the path namespace — the "folder" or file-name primitive. Anchors are permanent deterministic IDs; membership and metadata attach via edges rather than living on the anchor. Registered on Sepolia 2026-06-11.
+
 ## Attestation
 
 The fundamental unit of state in EFS. EFS uses Ethereum Attestation Service (EAS) to represent files, folders, edges, and metadata as on-chain attestations rather than custom storage. See [[Glossary#EAS]] and `contracts/specs/01-System-Architecture.md`.
@@ -60,6 +64,14 @@ The append-only, lens-agnostic index in `EFSIndexer.sol`. Stores raw attestation
 
 A reader-selected policy describing whose authenticated claims contribute to a view and how conflicts combine. The deployed/v1 form is an ordered trusted-attester list composed through `?lenses=`; EFS v2 is replacing that with typed, scoped, reproducibly compiled policies. Plan 9 process namespaces and ordered union lookup are useful precedent only for the simple priority-first-present subset; they do not supply EFS basis, completeness, provenance, WHITEOUT, or `UNKNOWN` semantics. See `contracts/docs/adr/0031-lenses-url-param-model.md`, `contracts/docs/adr/0043-rename-editions-to-lenses.md`, and [[mountable-filesystem-semantics]].
 
+## LIST
+
+Frozen schema (added by EFS Lists, PR #20, 2026-06-01). A named ordered collection. Paired with [[Glossary#LIST_ENTRY]]. See ADR-0044/0046/0047.
+
+## LIST_ENTRY
+
+Frozen schema. A single membership record in a [[Glossary#LIST]] — pure identity; per-entry metadata was deliberately removed (ADR-0046).
+
 ## MIRROR
 
 EAS schema representing a retrieval URI for a DATA. Multiple mirrors allowed per DATA (ipfs://, ar://, web3://, https://, magnet:). The router picks the best transport. Revocable. See `contracts/specs/02`.
@@ -84,6 +96,10 @@ This repository. Cross-repo coordination point for EFS: holds designs, kanban, g
 
 Human-gated, atomic ceremony that moves a design from `ready-for-promotion` to `accepted` and assigns it a permanent number. See [[design-system]] § Promotion ceremony.
 
+## REDIRECT
+
+Frozen 9th schema (ADR-0050): `bytes32 target, uint16 kind`. Expresses canonical / sameAs / supersededBy / symlink relations; `kind=4` is `movedTo`. Only the `uint16 kind` is frozen — the taxonomy of values is upgradeable resolver logic. Read-time resolution (lens precedence, depth cap, cycle rule) is specified in ADR-0050.
+
 ## Resolved view
 
 The deterministic tree/value projection produced by applying a lens, basis, evidence set, and explicit limits. A read-only EFS mount exposes a resolved view; it does not mount a blockchain as if the chain were literally a block device. See [[mountable-filesystem-semantics]].
@@ -95,6 +111,10 @@ EAS schema representing a free-floating string value, placed on a container via 
 ## Sort overlay
 
 `EFSSortOverlay`: per-parent sorted linked lists, lazy overlay on `EFSIndexer`. Stateful but composes on top of the kernel rather than being part of it. See `contracts/specs/07-Sort-Overlay-Architecture.md`.
+
+## SORT_INFO
+
+**Deferred, never frozen.** Proposed during the schema freeze and explicitly left out (all deferrals are additive, so nothing is orphaned by adding it later). Docs that list it among the frozen schemas are stale — the frozen set is the 9 registered 2026-06-11 plus WHITEOUT.
 
 ## TAG
 
@@ -115,6 +135,10 @@ The rule that a design's status must agree across three locations: prose `**Stat
 ## UNKNOWN
 
 An EFS resolver result meaning the available evidence is insufficient to prove presence or absence at the requested lens and basis. It is not a POSIX errno. A strict mount maps it to an explicit retry/I/O failure and never to [[Glossary#ENOENT]], a missing xattr, or silent lower-priority lens fallthrough. See [[mountable-filesystem-semantics]].
+
+## WHITEOUT
+
+Additive 10th schema (ADR-0055, landed 2026-06-23). A cross-lens negative mask — per-name deletion that hides an entry without mutating what it shadows. Schemas can be *added* freely; only changing a frozen one orphans data.
 
 ## Worktree
 

@@ -1,6 +1,6 @@
 ---
 title: SDK minimal-clicks (batched single-signature writes)
-status: active
+status: review
 tags: [status/review, sdk, ux, contracts-coordination]
 related: [[sdk-architecture]]
 target-repos: [sdk, contracts]
@@ -8,6 +8,10 @@ last-touched: 2026-06-18
 ---
 
 # SDK minimal-clicks: one-signature EFS writes
+
+**Status:** review
+
+#status/review #kind/design
 
 > Sub-investigation of [[sdk-architecture]]. **Goal:** a single logical EFS write (create/pin a file) should cost the end user **one wallet click**, ideally on a plain MetaMask EOA — not ~8. This page establishes whether a viable path exists with no obvious blocker, and produces a concrete ask for the schema-freeze dev (time-sensitive against the Sepolia freeze).
 

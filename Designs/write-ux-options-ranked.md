@@ -9,6 +9,10 @@ last-touched: 2026-06-22
 
 # EFS write-UX — every option to cut popups + latency, ranked
 
+**Status:** review
+
+#status/review #kind/design
+
 Six parallel expert passes (account-abstraction, on-chain routines, alternative IDs, EAS-protocol/backends,
 storage latency, cross-protocol prior art). This is the consolidated, ranked map — including ADR-breaking
 and high-effort options, per James's ask for a full rundown.

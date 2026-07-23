@@ -1,6 +1,6 @@
 ---
 title: EFS account system — one smart-account identity per user
-status: active
+status: review
 tags: [status/review, sdk, identity, ux, contracts-coordination]
 related: [[write-ux-options-ranked]], [[sdk-one-signature-writes]], [[sdk-write-ux]], [[efs-write-ux-attester]]
 target-repos: [sdk, contracts]
@@ -8,6 +8,8 @@ last-touched: 2026-06-23
 ---
 
 # EFS account system: one identity, many signers
+
+**Status:** review
 
 > The popup/latency problem is solved by **removing the human from the signing loop** (a key the app signs with
 > locally, no prompts). That only works if EFS has an **identity layer** tying every such signer back to one user.

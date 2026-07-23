@@ -10,14 +10,20 @@ On push rejection: `git pull --rebase`, resolve conflicts (`Kanban.md` is the li
 
 ## Commit-message style
 
-`<area>: <imperative summary>`. Areas: `design`, `kanban`, `docs`, `chore`, `promote`, `land`, `sync` (bot-driven Reference/ mirror, if/when it ships), `pm` (PM-role coordination commits only).
+`<area>: <imperative summary>`. Areas: `design`, `kanban`, `docs`, `chore`, `promote`, `land`, `status` (agent-status / activity-log commits), `sync` (bot-driven Reference/ mirror, if/when it ships), `pm` (PM-role coordination commits only).
 
 **The subject prefix must reflect the authoring agent's role/area — it is NOT a free-form label.**
 
 - **`pm:` is RESERVED for the PM role (slug `pm`).** A non-PM agent editing a PM-owned coordination file (`Owner-Inbox.md`, `Kanban.md`, `Daily Notes/agent-status.md`) uses its own area (`docs:` / `kanban:` / `design:`), never `pm:` — otherwise `git log --grep='^pm:'` falsely attributes work and phantom "second PMs" appear. (Happened 2026-05-28: `sdk-designer` used `pm:` subjects on For-James edits.)
 - **Editing `Owner-Inbox.md` structure is PM work.** Other agents may *append a one-line surface entry* ("design X ready for review"), not restructure the decide-now framing or curate the queue; tag that commit with your own area.
 
-Two trailers on every agent-authored commit: `Co-authored-by:` naming the model, and `Agent: <slug>` — a stable agent+role identifier (not the model version), grep-friendly and durable across model upgrades. Write the message to a file and `git commit -F` it.
+Trailers on agent-authored commits — each on its own real line, never glued on with a literal `\n`. Write the message to a file and `git commit -F` it.
+
+| Trailer | Value | Required? |
+|---|---|---|
+| `Co-authored-by:` | The actual model, `<Model> <noreply@vendor>` | Yes — enforced by `scripts/commit-msg-hook.sh` |
+| `Agent:` | Stable agent+role **slug**, *not* the model version — grep-friendly and durable across model upgrades | Yes — enforced by the hook |
+| `Harness:` | The tool the agent runs inside: `claude-code`, `codex`, … | Yes for any role that can run two concurrent sessions (PM does — see `Agents/pm.md`); recommended for every agent commit. Not yet hook-enforced |
 
 ```
 design: draft offline-sync — describe the offline sync proposal
@@ -26,27 +32,80 @@ Body paragraph or two.
 
 Co-authored-by: Claude Opus 4.7 <noreply@anthropic.com>
 Agent: claude-opus-4.7
+Harness: claude-code
 ```
 
-Other slug forms: `Agent: codex-gpt-5`, `Agent: claude-haiku-3.5 (review)`. Unlocks `git log --grep='^Agent: claude'`. Required for agent commits; James's manual Obsidian-UI commits are exempt.
+Slug forms in use: `Agent: pm`, `Agent: sdk-designer`, `Agent: codex-gpt-5`, `Agent: claude-opus-4.7`, `Agent: codex-gpt-5 (integration)`. Unlocks `git log --grep='^Agent: claude'`. Required for agent commits; James's manual Obsidian-UI commits (`vault backup: …`) are exempt and the hook skips them.
+
+**Why `Harness:` is separate from `Agent:`.** The slug is stable per role, so two simultaneous sessions of the same role are indistinguishable by `Agent:` alone. `Harness:` is how a session finds *its own* watermark: `git log --grep='^Harness: <yours>'`. It is also matched by the commit-msg hook's literal-`\n` check, so a glued-on `Harness:` trailer fails the commit.
 
 Vendor noreply emails: `noreply@anthropic.com`, `noreply@openai.com`, `noreply@google.com`; otherwise `noreply@<vendor-domain>`.
 
 ## Tag vocabulary
 
-Plain `#kebab-case-text` — no spaces, lowercase (Obsidian treats whitespace as a tag terminator). Canonical set:
+Plain `#kebab-case-text` — no spaces, lowercase (Obsidian treats whitespace as a tag terminator). Write tags **inline**, on a tag line directly under the header block. Obsidian also honours YAML `tags: [status/review, …]` frontmatter, but the `scripts/` checks only read inline tags, so a frontmatter-only file is invisible to them — if you use frontmatter, still write the inline line.
+
+**Closed vs. open families.** This distinction is what [[escalation]] Tier 2 actually means by "introducing a new tag":
+
+- **Closed families — `#kind/`, `#status/`, `#repo/`.** The values below are the whole set. Inventing a new one *is* a Tier-2 stop-and-ask, and updates this table in the same commit.
+- **Open families — `#topic/`, `#pass/`, `#blocked-on/`, `#depends-on/`, `#needs/`.** The *family* is canonical; individual values are coined as needed. **Coining a value in an open family is NOT an escalation** — keep it lowercase kebab-case, and reuse an existing value when one fits rather than minting a synonym.
 
 | Tag | Use |
 |---|---|
 | `#repo/contracts`, `#repo/client`, `#repo/sdk`, `#repo/planning` | Target codebase. Multi-repo work gets multiple tags. |
-| `#kind/design`, `#kind/task`, `#kind/question`, `#kind/decision`, `#kind/note` | Artifact type. |
-| `#status/draft`, `#status/review`, `#status/ready-for-promotion`, `#status/accepted`, `#status/landed`, `#status/abandoned`, `#status/rejected` | Lifecycle of a design. |
-| `#blocked-on/<thing>` | Blocker (e.g. `#blocked-on/DESIGN-0007`, `#blocked-on/human-decision`). |
+| `#kind/…` | Artifact type — closed set, table below. |
+| `#status/…` | Lifecycle — closed set, table below. |
+| `#topic/<subject>` | Subject-matter facet, orthogonal to repo/kind/status. **Open vocabulary.** In use: `privacy`, `efsv2`, `clientv2`, `requirements`, `lenses`, `read-path`, `onchain`, `onchain-completeness`, `graph-queries`, `trust`, `coherence`, `assumptions`, `app-model`, `content`, `cypherpunk-os`, `games`, `human-overview`, `wasm`, `wasi`. Use it to gather one subject across `Designs/`, `Reviews/`, and subfolders — that is the whole point, so prefer an existing value over a near-synonym. |
+| `#pass/<round-slug>` | Membership in one named, dated **work round** (a batch of parallel-agent lanes). In use: `#pass/deep-privacy`, `#pass/1-filesystem`. `#topic/` says what a doc is *about*; `#pass/` says which run *produced* it. **Open vocabulary.** |
+| `#blocked-on/<thing>` | Blocker (e.g. `#blocked-on/DESIGN-0007`, `#blocked-on/human-decision`, `#blocked-on/concrete-CI-need`). Also how you park a design that is alive but dormant — see "shelved" under *Not vocabulary* below. |
 | `#depends-on/<thing>` | Soft dependency between designs or tasks. |
 | `#needs/owner` | On a specific `- [ ]` Open Questions item or AGENT-Q comment needing an owner ruling. Surfaced via [[Open-Decisions]]. |
 | `#needs/james` | **Deprecated alias of `#needs/owner`** (renamed 2026-07-23). Still surfaced; don't write new ones. Existing occurrences in dated history stay as written. |
 
-New tags are fine when nothing existing fits — add to this table in the same commit.
+### `#kind/` — artifact type (closed)
+
+| Tag | Artifact |
+|---|---|
+| `#kind/design` | A proposal that argues for a change and rides the design lifecycle. The default. |
+| `#kind/spec` | A normative statement of shape rather than an argument for one (e.g. a spike spec). |
+| `#kind/research` | A landscape scan, digest, or compass. Evidence and options; binds no one. |
+| `#kind/review` | A review, audit, or adversarial record *of* another artifact. Most of `Reviews/`. |
+| `#kind/decision` | A decision packet or owner inbox. |
+| `#kind/question` | A cross-cutting open question given its own lifecycle (see *Open questions inline* below). |
+| `#kind/task` | A bounded unit of execution work with a finish line. |
+| `#kind/ops` | Continuous operational work that has no "done" (trackers, submission pipelines). Use `#kind/task` if it can actually complete. |
+| `#kind/prompt` | An agent launch / kickoff prompt. |
+| `#kind/note` | Durable material that is none of the above. **Singular.** |
+
+### `#status/` — lifecycle (closed)
+
+Canonical meanings live in [[design-system#Designs lifecycle]]; this is the tag surface.
+
+> ⚠️ **Pending sync (2026-07-23).** `superseded`, `handoff`, and `done` were documented here from measured production use; [[design-system]]'s status taxonomy still lists only the original seven. `design-system.md` is numbered/`accepted`, so widening it is a promotion-gated edit — until that happens, **this table and `scripts/tri-sync-check.sh` are the operative list** and no agent should stall on the three additions.
+
+| Tag | Meaning |
+|---|---|
+| `#status/draft` | Author is writing; may be incomplete. |
+| `#status/review` | Author thinks it's ready; soliciting comment. |
+| `#status/ready-for-promotion` | Reviewed and converged; awaiting the human promotion ceremony. |
+| `#status/accepted` | Promoted by the owner. Numbered. |
+| `#status/landed` | Implementation merged in all target repos. |
+| `#status/abandoned` | Explicitly chosen against. May be revisited freely. |
+| `#status/rejected` | Hard-vetoed by the owner. Needs a new argument to revive. |
+| `#status/superseded` | A newer design replaced it; the successor names it in its `**Supersedes:**` field. Read the successor — don't revive this one. Distinct from `abandoned` (nobody replaced it, we just chose against it) and `rejected` (vetoed). Fills the gap where `**Supersedes:**` already existed as a header field with no matching status. |
+| `#status/handoff` | Planning work is finished and the doc is a self-contained packet for another repo's agent. Terminal **in this vault**: it never gets numbered, because implementation lands elsewhere. **One word.** |
+| `#status/done` | Terminal state of a **non-design** artifact — a finished `Reviews/` pass, an ops card. **Never valid inside `Designs/`**, where a design ends `landed` / `abandoned` / `rejected` / `superseded`. |
+
+**Not vocabulary — do not copy these if you see them:**
+
+| Seen | Verdict |
+|---|---|
+| `#kind/notes` | Typo for `#kind/note`. Normalize on sight. |
+| `#status/notes` | Category error — "notes" is an artifact *type*, not a lifecycle state. A running-notes ledger is `#kind/note` plus a real status. |
+| prose `hand-off` | Spelling drift for `handoff`. One word, in both prose and tag. |
+| `#status/shelved`, `#status/hibernating` | **Proposed 2026-05-26 by the rot audit; never adopted, zero real uses** — every occurrence in the vault is the proposal quoting itself. The need was met instead by `#blocked-on/<unblock-trigger>` on a `draft` (see [[cross-repo-reference-mirror]]), which records *why* it is asleep and *what* wakes it. Don't add these. |
+
+Adding to a closed family is fine when nothing existing fits — update this table, [[design-system]], and `scripts/tri-sync-check.sh`'s accepted lists in the same commit, and flag it in chat.
 
 ## Naming the decision-maker: role vs. person
 
@@ -64,6 +123,25 @@ New tags are fine when nothing existing fits — add to this table in the same c
 Design status lives in three places — prose `**Status:**`, tag `#status/`, and (post-promotion) filename — which must agree and change in the same commit. Filename only changes at promotion.
 
 **Canonical definition: [[design-system#Tri-sync invariant]].** Check: `scripts/tri-sync-check.sh` (also catches self-numbered drafts).
+
+### What the prose `**Status:**` line may say
+
+**Inside `Designs/` (recursively)** the line must **begin with exactly one `#status/` token**, equal to the tag. A trailing qualifier after the token is welcome — the checker reads only the first word:
+
+```markdown
+**Status:** draft decision packet; no choice is adopted until James answers
+**Status:** handoff (ready for `@efs/sdk`)
+```
+
+What is *not* allowed inside `Designs/` is a sentence whose first word isn't a lifecycle token (`**Status:** informational kickoff …`, `**Status:** running notes …`). Lowercase, always.
+
+**Outside `Designs/`** — `Reviews/`, `Brainstorms/`, `Agents/` — the `Status:` line is a free-form sentence describing the artifact's **evidential standing**, not a lifecycle token, and is not tri-synced. This is a good habit and these are all valid:
+
+> "point-in-time architecture review; input to the next revision, not canon" · "design-pass output — normative where marked" · "lane report for Pass 1 synthesis" · "candidate-normative draft for external review" · "integrated review record" · "complete architecture for adversarial review" · "proposal for the freeze bundle" · "design input for the v2 large-upload spec"
+
+If such a file *also* carries a `#status/` tag, **the tag is the machine-readable status** and the sentence is commentary. They do not have to match.
+
+**Don't reuse the bold `Status:` label for domain fields.** `Brainstorms/2026-05-26-bs-schema-freeze-recommendation-*` uses it inside body sections for values like `freeze-for-sepolia`, `hold-for-shape-freeze`, and `new-schema-needed` — those describe *a schema's* freeze disposition, not the document's lifecycle. Existing history stays as written; in new docs pick a distinct label (`Freeze:`, `Disposition:`) so the two never collide.
 
 ## Paths and links
 

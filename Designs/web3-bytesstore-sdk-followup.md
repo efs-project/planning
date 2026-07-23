@@ -1,6 +1,6 @@
 # EFSBytesStore — SDK follow-up hand-off (re-vendor + reader decision)
 
-**Status:** hand-off (ready for `@efs/sdk`)
+**Status:** handoff (ready for `@efs/sdk`)
 **Target repo:** sdk (`efs-project/sdk`)
 **Produced by:** contracts agent on branch `claude/web3-erc5219-bytes-store`
 **Depends on:** contracts ADR-0057 (Production ERC-5219 on-chain byte store), `[[web3-standards-compliance]]`, `[[sdk-read-surface]]`

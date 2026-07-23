@@ -47,6 +47,9 @@ The full protocol, conventions, and hard rules live in [`AGENTS.md`](./AGENTS.md
 | `Glossary.md` | Single alphabetical file of EFS terms. |
 | `Onboarding/authority.md` | Who may decide what — the authority roster. A roster plus attribution, deliberately not an ACL. |
 | `Onboarding/` | Procedural: "how YOU do X." See [`Onboarding/README.md`](./Onboarding/README.md). |
+| `Brainstorms/` | Agent-generated explorations and research dossiers. Deliberate-only pruning. See [`Brainstorms/README.md`](./Brainstorms/README.md). |
+| `Reviews/` | Dated review passes and research corpora — the reason trail behind decisions. |
+| `scripts/` | Vault audit + generation tools. See [`scripts/README.md`](./scripts/README.md). |
 | `Agents/` | Agent-specific institutional knowledge: launch prompts and SOUL files for each agent role (PM, future design-reviewer, etc.). See [`Agents/README.md`](./Agents/README.md). |
 | `Grants/` | Operational grant tracking — funder landscape, proposal status table, reusable EFS pitch packet, research log. Owned by @grants; PM keeps it integrated with the board. Not a design. See [`Grants/README.md`](./Grants/README.md). |
 
