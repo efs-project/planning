@@ -29,7 +29,9 @@ Three rules that have each already been violated once:
 - **Per-folder READMEs may lag.** The owner inbox plus the folder's current-spine block are authoritative for what's live — not the README's doc table.
 - **Check for a sequencing hold before preparing any decision packet.** A held queue is an *inventory*, not a list to work through; asking anyway pushes the owner through a gate the designers deliberately closed.
 
-Adopted EFS v2 rulings live in [`Designs/efsv2/owner-rulings.md`](./Designs/efsv2/owner-rulings.md); [`For-James.md`](./For-James.md) carries **non-design** attention only. A ruling is recorded in the history owned by the queue that owns the item — `Designs/<folder>/owner-rulings.md` where that file exists, [`Decisions.md`](./Decisions.md) otherwise — and never in both. Who may rule on what: [`Onboarding/authority.md`](./Onboarding/authority.md).
+**After recording a ruling, add a row to [`Retirements.md`](./Retirements.md) naming the phrasing it kills, then run `./scripts/needs-integration.sh`** — that is the work order for propagating the decision into the docs that still contradict it. A decision is not done until that queue is clear.
+
+Adopted EFS v2 rulings live in [`Designs/efsv2/owner-rulings.md`](./Designs/efsv2/owner-rulings.md); [`Owner-Inbox.md`](./Owner-Inbox.md) carries **non-design** attention only. A ruling is recorded in the history owned by the queue that owns the item — `Designs/<folder>/owner-rulings.md` where that file exists, [`Decisions.md`](./Decisions.md) otherwise — and never in both. Who may rule on what: [`Onboarding/authority.md`](./Onboarding/authority.md).
 
 ## Hard rules (load-bearing, don't violate without checking)
 
@@ -52,7 +54,7 @@ Adopted EFS v2 rulings live in [`Designs/efsv2/owner-rulings.md`](./Designs/efsv
 |---|---|
 | Active work | [`Kanban.md`](./Kanban.md) |
 | Live design choices James needs to make | [`Designs/owner-decision-inbox.md`](./Designs/owner-decision-inbox.md) |
-| Other items needing James's attention | [`For-James.md`](./For-James.md) |
+| Other items needing James's attention | [`Owner-Inbox.md`](./Owner-Inbox.md) |
 | Designs (proposals + landed history) | [`Designs/`](./Designs/) (see `README.md` for content map) |
 | Cross-cutting terminology | [`Glossary.md`](./Glossary.md) |
 | System overviews | [`Architecture/`](./Architecture/) |

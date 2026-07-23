@@ -18,7 +18,7 @@ We need a place where agents can throw ideas at the wall — divergent, weird, h
 
 ## Proposal
 
-A `Brainstorms/` folder with **minimal structure** and **deliberate-only pruning**. Agents (cron-driven or ad-hoc) write into it; the PM is the only thing that reads it cross-cuttingly and surfaces 1–2 items per week into For-James or as input to other agents.
+A `Brainstorms/` folder with **minimal structure** and **deliberate-only pruning**. Agents (cron-driven or ad-hoc) write into it; the PM is the only thing that reads it cross-cuttingly and surfaces 1–2 items per week into Owner-Inbox or as input to other agents.
 
 ### Folder layout
 
@@ -83,7 +83,7 @@ Anchor schema is open — add new anchor types as they emerge (`anchor: app: not
 
 Each PM session loop adds two steps:
 
-1. **Scan `Brainstorms/` for `status: raw` items.** Score by specificity, actionability, and relevance to active work. Surface ≤2/week to `For-James.md` or into the input of another agent thread.
+1. **Scan `Brainstorms/` for `status: raw` items.** Score by specificity, actionability, and relevance to active work. Surface ≤2/week to `Owner-Inbox.md` or into the input of another agent thread.
 2. **Maintain `Brainstorms/INDEX.md`.** A grouped view (by area, by status) so the folder doesn't go opaque. Includes recent `integrated_into:` traces.
 
 These are real costs — PM sessions get longer. Worth it because each surfaced brainstorm represents a high-leverage piece of work James didn't have to think of himself.
@@ -148,7 +148,7 @@ Once this system is accepted, cron-driven brainstorm agents become viable. Each 
 
 - A stable slug (e.g., `bs-divergent-usecases`, `bs-rot-audit`, `bs-edge-cases`)
 - A scoped prompt (not "brainstorm anything") — one mode per agent
-- Write-only access to `Brainstorms/` — cannot touch Kanban, Designs, For-James, code repos
+- Write-only access to `Brainstorms/` — cannot touch Kanban, Designs, Owner-Inbox, code repos
 - A staggered schedule to avoid commit races
 
 Initial seed agents (post-OnionDAO, when bandwidth allows):

@@ -1,30 +1,29 @@
 # EFS Planning Vault
 
-**Notice to autonomous agents (Claude, Codex, Cursor, Gemini, Antigravity, etc.).** This repository is the brain for the EFS agent swarm. It coordinates designs that span multiple repos, tracks cross-repo work, and holds system-level knowledge. **You interact strictly via file system I/O** — reading and writing `.md` files. No GitHub API calls.
+**This README is for humans. Agents start at [`AGENTS.md`](./AGENTS.md).**
 
-Humans (specifically James, the project lead) interact via Obsidian. Preserve standard Markdown so Obsidian renders correctly.
+This is the planning vault for [Ethereum File System](https://github.com/efs-project) — the shared brain for a swarm of AI agents building it. It coordinates designs spanning multiple repos, tracks cross-repo work, and holds system-level knowledge. It's a plain folder of Markdown: read in Obsidian, versioned in git. No database, no SaaS, no tickets.
 
-> **Current state: bootstrap.** The vault's meta-design ([[design-system]]) is still in `#status/draft` — it codifies rules that are not yet promoted. No designs have been promoted yet (the Kanban has no In Flight cards as of writing). Most folders are scaffolding waiting for real content. Expect to be the first or second real user of any given procedure. If a documented path doesn't yet exist or a referenced script behaves unexpectedly, surface in chat — it's likely an unfilled-in path, not a bug.
->
-> **Path reality check.** Docs in this vault describe a target `/efs/<repo>/` directory layout where all EFS repos are siblings. **This layout is aspirational.** The current physical paths may differ on James's machine (e.g. `/Users/james/Code/EFS/planning/`). Migrating clones to `/efs/` is on the Kanban Backlog as `#blocked-on/human-decision`. **When working today: use relative paths from your own worktree** rather than absolute `/efs/...` paths. The conventions in [[conventions#Linking out of the vault]] cover this.
+## Where do I look?
 
-## Quick start for a new agent
+| I want to… | Go to |
+|---|---|
+| **See what needs my decision** | [`Open-Decisions.md`](./Open-Decisions.md) — generated; every open decision across all queues, active holds first |
+| Answer a **design** decision | [`Designs/owner-decision-inbox.md`](./Designs/owner-decision-inbox.md) → the folder queue it routes to |
+| See **everything else** needing me | [`Owner-Inbox.md`](./Owner-Inbox.md) — operational forks, deadlines, FYI |
+| See what's **being worked on** | [`Kanban.md`](./Kanban.md) |
+| Check **which rulings haven't landed in the docs yet** | `./scripts/needs-integration.sh` |
+| Remember **what we decided and why** | [`Decisions.md`](./Decisions.md), plus `Designs/<folder>/owner-rulings.md` for design-set history |
+| Look up a **term** | [`Glossary.md`](./Glossary.md) |
+| Know **who may decide what** | [`Onboarding/authority.md`](./Onboarding/authority.md) |
 
-Read these in order:
+Answer a decision by replying with its code (`R1A`, `FJ-1a`) — in chat to an agent, or by editing the queue directly. An agent then records the ruling in the owning history and propagates it into the affected designs.
 
-1. [`Onboarding/start-here.md`](./Onboarding/start-here.md) — decision tree from "I just arrived" to "I'm working on X."
-2. [`Open-Decisions.md`](./Open-Decisions.md) — generated roll-up: every open owner decision across all queues, active holds first. Start here to answer "what needs deciding?"
-3. [`Designs/owner-decision-inbox.md`](./Designs/owner-decision-inbox.md) — routing page for live design choices; each design folder owns its queue.
-4. [`Onboarding/repo-map.md`](./Onboarding/repo-map.md) — the `/efs/` layout.
-5. [`Onboarding/write-a-design.md`](./Onboarding/write-a-design.md) — if your task involves writing a design.
-6. [`Onboarding/conventions.md`](./Onboarding/conventions.md) — tags, paths, tri-sync, commit messages.
-7. [`Onboarding/escalation.md`](./Onboarding/escalation.md) — when to stop and ask vs. note and continue.
+## How the agent side works (the short version)
 
-Then skim [`Glossary.md`](./Glossary.md) for terminology and [`Designs/README.md`](./Designs/README.md) for the design landscape.
+Agents read `AGENTS.md`, work in `Designs/`, and route anything needing your judgment into a decision queue. They never promote a design, edit milestone scope, or rule on your behalf — those are yours. The vault is the only coordination surface: if it isn't written down here, it didn't happen.
 
-The **canonical protocol** for this vault is [`Designs/0001-design-system.md`](./Designs/0001-design-system.md). This README is the entry point; the design-system file is the authority.
-
-> **Need James to make a design decision?** Start at the [Designs owner decision inbox](./Designs/owner-decision-inbox.md), then follow its folder link. Use only that folder's canonical inbox to determine what is live. Source-design checkboxes are research residue unless the inbox promotes them. Adopted EFS v2 answers are recorded in [owner rulings](./Designs/efsv2/owner-rulings.md); `For-James.md` covers non-design attention too.
+The full protocol, conventions, and hard rules live in [`AGENTS.md`](./AGENTS.md) and [`Onboarding/`](./Onboarding/). You don't need to read them to use this vault.
 
 ## Directory structure
 
@@ -33,7 +32,8 @@ The **canonical protocol** for this vault is [`Designs/0001-design-system.md`](.
 | `README.md` | This file — entry point. |
 | `AGENTS.md` | Universal agent brief (for tools that auto-detect this filename); redirects here. |
 | `Kanban.md` | Cross-repo task board (Obsidian Kanban plugin). |
-| `For-James.md` | Broader cross-project attention dashboard, including deadlines and operational items; live design choices route through the Designs owner inbox. |
+| `Owner-Inbox.md` | Broader cross-project attention dashboard, including deadlines and operational items; live design choices route through the Designs owner inbox. |
+| `Retirements.md` | What rulings retired, and what replaced it. Input to `./scripts/needs-integration.sh` — the "decided but not yet integrated" work order. |
 | `Open-Decisions.md` | **Generated** roll-up of every open owner decision across all queues, holds first. Regenerate with `./scripts/open-decisions.sh`; never hand-edit. |
 | `Decisions.md` | Append-only one-line decisions log. |
 | `Ideas.md` | Parking lot for future "someday" ideas + things-to-account-for (PM-curated; graduate to Brainstorm/Design). |
@@ -54,65 +54,6 @@ The **canonical protocol** for this vault is [`Designs/0001-design-system.md`](.
 
 A `Reference/` folder is **planned but not built** — read-only mirrors of ADRs from dev repos. Deferred pending a concrete CI need; see [`Designs/cross-repo-reference-mirror.md`](./Designs/cross-repo-reference-mirror.md).
 
-## Agent SOP (TL;DR)
+---
 
-1. **Sync.** `cd /efs/planning && git pull --rebase`.
-2. **Orient.** Read `Kanban.md`. Pick up an In Flight card you own, claim a Backlog item, or review a `#status/review` design. **Do not invent work** — if nothing matches, ask in chat.
-3. **Work.** Stay surgical. Match existing patterns. Don't refactor things unrelated to your task.
-4. **Document.** If you're making a non-trivial change, draft a design in `Designs/` *before* writing target-repo code. See [`Onboarding/write-a-design.md`](./Onboarding/write-a-design.md).
-5. **Commit & push.** Small commits. Use [`Onboarding/conventions.md`](./Onboarding/conventions.md) commit-message style with `Co-authored-by:` agent attribution.
-
-## Git Sync Protocol
-
-This repo is shared across agents and machines.
-
-```bash
-# before any read or write
-git pull --rebase
-
-# when a unit of work is done
-git add <files>
-git commit -m "<area>: <imperative summary>"
-git push
-```
-
-Every agent-authored commit MUST include both an `Agent: <slug>` trailer and a `Co-authored-by:` trailer. Together they enable per-agent grep on `git log` (see `scripts/agent-activity.sh`). Full convention: [`Onboarding/conventions.md`](./Onboarding/conventions.md#agent-identity-trailer).
-
-On push rejection: `git pull --rebase`, resolve any conflicts (Kanban.md is the likely victim), `git push`. If a rebase gets gnarly (>5 minutes of resolving), back off — surface in chat rather than force-pushing.
-
-**Note on `vault backup: <date>` commits.** The Obsidian Git plugin uses that message template for manual commits via its UI. Those are James's edits, not auto-commits. Agents use semantic CLI commits and won't produce that prefix.
-
-## Kanban basics
-
-`Kanban.md` is the cross-repo task board with five columns:
-
-| Column | Meaning |
-|---|---|
-| **Backlog** | Agreed-upon work, not yet started. |
-| **In Flight** | Active. Card includes claim annotation: `— @<agent>, branch <name>, claimed YYYY-MM-DD, expires YYYY-MM-DD`. |
-| **Blocked** | Waiting on a decision, dependency, or human. Tag `#blocked-on/<thing>`. |
-| **Under Review** | In PR review. |
-| **Done** | Landed. |
-
-In Flight cards have a 3-day default expiry; any agent or James can reclaim an expired card. Update the expiry whenever you touch a card.
-
-Active agents append once per work-session to `Daily Notes/agent-status.md` so James can scan project state without `git log`.
-
-Full Kanban rules in [`Onboarding/conventions.md`](./Onboarding/conventions.md) § Kanban entries.
-
-## Where the detailed rules live
-
-This README is intentionally short. The detailed rules — design lifecycle, status taxonomy, promotion ceremony, tri-sync invariant, link conventions, escalation tiers — all live in:
-
-- **[`Designs/0001-design-system.md`](./Designs/0001-design-system.md)** — the canonical meta-design.
-- **[`Onboarding/`](./Onboarding/)** — procedural how-tos.
-
-If this README and `design-system.md` disagree, `design-system.md` wins. Surface the discrepancy as a Tier 2 escalation per [`Onboarding/escalation.md`](./Onboarding/escalation.md).
-
-## Sub-task protocol
-
-Granular tasks that don't belong on the Kanban can be dropped as standard Markdown checkboxes into _any_ file in the vault. The Obsidian Tasks plugin rolls them up globally for James.
-
-**Format:** `- [ ] Sub-task description here`
-
-For trackable open questions inside a design, use the design's `## Open questions` section. For ephemeral notes, use `Daily Notes/`.
+*Agent protocol, conventions, and hard rules: [`AGENTS.md`](./AGENTS.md) and [`Onboarding/`](./Onboarding/).*

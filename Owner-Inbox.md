@@ -1,4 +1,8 @@
-# For James
+---
+aliases: [For-James]
+---
+
+# Owner Inbox
 
 > **Non-design** attention: operational forks, deadlines, FYI.
 > **Design decisions live in the [owner decision inbox](./Designs/owner-decision-inbox.md)** and are never restated here — only pointed at. Duplicating one breaks answers: you'd reply "3a" against this page's numbering while design agents read `R1` in theirs.
@@ -6,7 +10,9 @@
 >
 > Items carry stable IDs (`FJ-n`). IDs are never reused. Reply with the ID.
 
-## ⚡ DECIDE NOW
+*Renamed from `For-James.md` 2026-07-23. The `For-James` alias above keeps every existing `[[For-James]]` link resolving in Obsidian, including the ones in frozen history — so nothing had to be rewritten and no stub file is needed.*
+
+## ⚡ DECIDE NOW — James
 
 **FJ-1 · Merge SDK PR #1.** Open since ~06-21 and aging. Heads-up: the PR head is **22 commits behind** the live `chore/scaffold` branch (141 ahead of `main`), so merging as-is lands a stale snapshot. **(a)** Repoint the PR at `chore/scaffold`, then merge — *PM rec*. **(b)** Merge as-is, follow-up PR for the rest. **(c)** Merge `chore/scaffold` → `main` directly and close PR #1.
 
@@ -14,7 +20,7 @@
 
 ## 🕐 WHEN YOU HAVE TIME
 
-- **Design decisions awaiting you: 3** — `R1` (root), `OS1`/`OS2` (clientv2). See [Open-Decisions.md](./Open-Decisions.md). The **efsv2 queue (N1–N6, Q1–Q5) is under a 2026-07-22 sequencing hold** — inventoried, not askable; nothing for you to answer there yet.
+- **Design decisions awaiting you: 3** — `R1` (root), `OS1`/`OS2` (clientv2). See [Open-Decisions.md](./Open-Decisions.md). The **efsv2 queue (N1–N6, Q1–Q5) is under a clarified sequencing hold** — agents should not present it as a batch until the joined pass revalidates it, but you may still volunteer an isolated answer.
 - **Vault process changes are in flight from me** — see [[Decisions]] 2026-07-23. Two need your nod: whether to rename `For-James.md` → `Owner-Inbox.md` (PM rec: **don't** — see the reasoning), and whether to keep the structural SOUL edits I made.
 - Frame-review the proposed design process → [[Brainstorms/2026-05-28-pm-design-process-synthesis]] (then I formalize it)
 
@@ -33,6 +39,8 @@
 This file makes James's **non-design** queue scannable in 10 seconds. It is sorted by what it asks of him, not by date.
 
 **Boundary (settled 2026-07-21, do not re-litigate):** design forks live in `Designs/**/owner-decision-inbox.md`; this file carries non-design operational forks + FYI, plus **one pointer line** per design queue. A question appears in exactly one live queue. If you catch an item here duplicating an inbox code, delete it here — the inbox wins.
+
+**Multiple owners.** The file is role-named so it scales, but each owner gets their **own `## ⚡ DECIDE NOW — <name>` section** rather than a separate file. One file keeps the "exactly one live queue" invariant intact and keeps `Open-Decisions.md` able to see everything; per-owner sections keep each person's list short and personal. Route an item to the owner whose scope covers it per [[authority]]. Don't create `For-<person>.md` files — that's how you get four queues and answers landing on the wrong fork.
 
 Place each item in the right section:
 

@@ -11,7 +11,7 @@ You're a new agent or new contributor in the EFS planning vault — the brain fo
 3. Open the [Designs owner decision inbox](../Designs/owner-decision-inbox.md) if your work touches design, prioritization, or a question for James. Follow it to the owning folder's single live queue.
 4. If you have a specific task from James (in chat or a previous turn), go do that. Stop reading this file.
 
-> **Decision rule:** unchecked boxes and “open questions” in source designs are not automatically James decisions. The owning folder's owner inbox says whether a choice is live now, evidence-gated, launch-only, settled, delegated, or superseded. Record adopted EFS v2 answers in [owner rulings](../Designs/efsv2/owner-rulings.md); use [[For-James]] for broader non-design attention.
+> **Decision rule:** unchecked boxes and “open questions” in source designs are not automatically James decisions. The owning folder's owner inbox says whether a choice is live now, evidence-gated, launch-only, settled, delegated, or superseded. Record adopted EFS v2 answers in [owner rulings](../Designs/efsv2/owner-rulings.md); use [[Owner-Inbox]] for broader non-design attention.
 
 ## Decision tree (if no task assigned)
 
