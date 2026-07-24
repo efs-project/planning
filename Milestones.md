@@ -1,105 +1,65 @@
 # Milestones
 
-> ⚠️ **Stale — do not report from this file without checking.** The OnionDAO milestone below wound down 2026-07-01, and its four "hard requirements" (schema freeze, `.sol` list freeze, Sepolia deploy, SDK MVP) all shipped by 2026-06-11 despite reading as unchecked. Reconciliation is pending owner decision **FJ-2** in [[Owner-Inbox]]. Devcon 2026-11 is the one live milestone.
+Cross-repo milestone tracking for EFS.
 
+> **Current phase (2026-07-23): design and rebuild.** The pre-v2 contracts,
+> SDK, and clients are evidence and reference implementations, not the baseline
+> for a mainnet release. EFS v2 is in constitutional reconciliation; no
+> mainnet date or v2 implementation deadline has been set.
 
-Cross-repo milestone tracking for EFS. Each section names a target with a date and the designs / Kanban items that must land for it to be hit.
-
-**How to use this file** (for agents and James):
-
-- Add a section per milestone. `## Milestone name (YYYY-MM-DD)`.
-- Under each, list the designs (`[[NNNN-slug]]`) and the Backlog Kanban items required for that milestone.
-- When a design or item lands, check it off rather than removing it (keeps history visible).
-- A milestone is "hit" when all checkboxes check. Move closed milestones to the bottom under `## History`.
-
-**Owners**: James adds/edits scope. Agents may check off completed items as part of their landing-ceremony commit but should not edit a milestone's scope without James's say-so (it's a Tier 1 action — see [[escalation]]).
-
----
-
-## OnionDAO hackathon (2026-06-01 → 2026-06-30)
-
-EFS hosts its first hackathon at OnionDAO across the month of June 2026. **Goals:** critical feedback on the system, and start a data network effect. **Prizes:** self-funded.
-
-### Two tracks
-
-1. **Interesting datasets** — entrants build curated content on EFS. Drives real content into the system.
-2. **SDK builds** — devs use the EFS SDK to build apps and tools on top. Validates the dev experience.
-
-### Hard requirements (must ship before 2026-06-01)
-
-- [ ] **Schema spec freeze.** Once frozen, schema UIDs are stable. Any subsequent schema change creates a new UID and orphans prior attestations (per `contracts/AGENTS.md` Etched-tier rules). See `contracts/specs/02-Data-Models-and-Schemas.md` for the current schema set.
-- [ ] **Smart contract `.sol` file list freeze.** Contracts will be **upgradeable to fix bugs**, but **adding or removing `.sol` files is much harder.** Decide which contracts exist by June 1; don't add new ones during hackathon. (Bug-fix upgrades to existing contracts remain possible.)
-- [ ] **Core deployed to Sepolia.** EFS contracts live and reachable on Sepolia. Data added during OnionDAO should persist long-term (best-effort; see data-loss tolerance below).
-- [ ] **SDK MVP for OnionDAO.** Two SDK packages needed for hackathon dev experience:
-    - [ ] On-chain SDK — folder management, permissions, EAS attestation wrappers
-    - [ ] Off-chain DB SDK — core ops, tombstoning, caching
-  Client SDK (iframe integrations, OS-type stuff) is **NOT required for OnionDAO** — it's a later concern.
-
-### SDK scope — what counts as SDK
-
-- The **kernel, graph, and other contracts are NOT part of the SDK.** They're EFS proper: simple, immutable contracts that do their job.
-- The **SDK is a separate set of upgradeable APIs** wrapping the contracts for dev ease-of-use. Lots of options, regularly improved by the EFS team.
-- This split matters because contracts can't be updated freely once on mainnet; the SDK can. Devs build against the SDK; the SDK adapts.
-- A dedicated AI design session is planned for SDK architecture — see [[Decisions]] 2026-05-21 entry. Don't start SDK code without that design landing.
-
-### Data-loss tolerance during this phase
-
-This is the **Sepolia phase** — devnet-grade, pre-mainnet. Data **may still be lost** in rare cases (state corruption, fork restart, etc.), but **we try REAL HARD not to**. Hackathon entrants should be told: their data should persist, but treat anything truly precious with care until mainnet.
-
-Once we release to mainnet, data loss becomes a critical concern — that's a separate milestone with its own (much stricter) guarantees.
-
-This distinction matters for: backup strategy, replay safety, snapshot tools, and what we communicate to entrants.
-
-### Backlog items tied to this milestone
-
-From [[Kanban]] Backlog. As work begins, each should move into In Flight with the standard claim annotation:
-
-- [ ] Build On-Chain SDK (folder management, permissions) — **required** for SDK MVP
-- [ ] Build Off-Chain DB SDK (core ops, tombstoning, caching) — **required** for SDK MVP
-- [ ] Build Client App SDK (iframe integrations) — **deferred** (not OnionDAO-required; "later concern" per @james 2026-05-21)
-- [ ] Build Client Skeleton (UI, media caching, thumbnails) — useful target for dataset-track entrants but not strictly required
-
-Also needed (not yet a Backlog item — flagging here):
-
-- [ ] **Decide and freeze the smart-contract `.sol` file list** before 2026-06-01. Likely a Tier-1 design conversation in `#repo/contracts`. Bug-fix upgrades stay possible after freeze; adding/removing files does not.
-
-(The "EFS Development Tool App" Backlog item is internal dogfooding, not OnionDAO-blocking.)
-
-### Stretch (nice-to-have)
-
-*(open — fill in as priorities emerge)*
-
-### Out of scope (deferred to later milestones)
-
-- Production-grade data-loss guarantees (Sepolia is best-effort).
-- Mainnet contract deployment.
-- Production EFS client (the separate `efs-project/client` repo isn't built yet).
+James owns milestone scope. Agents may record completed outcomes and keep status
+honest, but must not invent dates, requirements, or launch commitments.
 
 ---
 
 ## Devcon presentation (2026-11)
 
-Public talk at Devcon. Far enough out that scope is open; populate as the date approaches.
+**Status:** the only current dated milestone; scope is not yet locked.
 
-### Likely shape
+The presentation should describe and demonstrate whatever is genuinely coherent
+by Devcon. It must not turn an unfinished v2 design into a launch promise.
 
-- EFS overview + system architecture.
-- Demo of working system (depends on OnionDAO outcome).
-- Lessons learned from OnionDAO hackathon — content vs. dev tracks, data network-effect signal, what broke.
+### Current inputs
+
+- The v1 Sepolia deployment and explorer are useful evidence about what worked,
+  what accumulated complexity, and why EFS is being redesigned.
+- The current v2 spine is
+  [[Designs/efsv2/README|Designs/efsv2/README.md]]. It is
+  reconciliation-ready, not promotion- or implementation-ready.
+- The Client v2 design set is
+  [[Designs/clientv2/README|Designs/clientv2/README.md]]. Its exact app lane,
+  rendering ABI, and implementation target remain evidence-gated.
+
+### Possible presentation shape — not commitments
+
+- What EFS is trying to make possible.
+- What the v1 Sepolia system taught us.
+- The coherent v2 architecture that exists by then.
+- A working demonstration only if it represents the architecture honestly.
 
 ### Hard requirements
 
-*(none locked in yet)*
+None locked. James will add them when the v2 research and implementation shape
+are concrete enough to make commitments meaningful.
 
 ---
 
 ## History
 
-*(closed milestones land here as one-line summaries with their hit date)*
+### The Forever Files / OnionDAO buildathon (June–July 2026)
+
+**Wound down 2026-07-01.** EFS deployed its v1 system to Sepolia, shipped a
+usable explorer path, and produced reusable event and dataset materials. Turnout
+was low, so the event did not become an ongoing delivery milestone. The v1 SDK
+branch remained unmerged and is now legacy input to the from-scratch v2
+redesign. See [[Decisions]] and [[Kanban]] for the detailed record.
 
 ---
 
-## Notes
+## Maintenance rule
 
-- The contracts repo has `LAUNCH_CHECKLIST.md` covering contract-specific launch blockers. That file is authoritative for contracts-side blockers; this file is the cross-repo rollup that adds dataset, SDK, hackathon-coordination, and presentation scope on top.
-- Milestone-scope discussion happens with James in chat, not via PR edits to this file.
+- Keep only live dated milestones above **History**.
+- Move closed or cancelled milestones to **History** with a concise outcome.
+- Link execution work to [[Kanban]] rather than copying its cards here.
+- Do not convert research directions, design holds, or hoped-for demos into
+  milestone requirements without James's explicit decision.

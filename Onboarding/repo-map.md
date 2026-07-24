@@ -1,48 +1,71 @@
 # Repo map
 
-`/efs/` is your home; all EFS repos are siblings underneath it.
+The canonical EFS repos are siblings. `/efs/` is the portable name used in
+documentation; discover the actual local parent directory before running
+commands.
 
-```
+```text
 /efs/
-  contracts/                 ← Solidity contracts, ADRs, specs
-  client/                    ← (future) production web client
-  sdk/                       ← (future) JS/TS SDK
-  planning/                  ← THIS VAULT — designs, kanban, glossary, onboarding
+  planning/                  ← coordination vault and active v2 design work
+  contracts/                 ← deployed v1/Sepolia implementation and specs
+  sdk/                       ← unmerged pre-v2 SDK implementation; legacy input
+  client/                    ← outdated v1 Vite/Lit client
+  content/                   ← static content and playable examples
+  devnet/                    ← v1 development-network operations
+  datasets/                  ← dataset staging and deployment tooling
+  hackathon/                 ← historical event materials
 ```
+
+Additional worktrees may sit beside these repos. They are task-local working
+state, not additional canonical repos.
+
+## Current phase
+
+EFS is being redesigned from scratch as EFS v2. The current design spine lives
+in `planning/Designs/efsv2/`; Client v2 lives in
+`planning/Designs/clientv2/`. The existing contracts, SDK, and client are useful
+evidence, but they do not define the v2 architecture unless a current design
+explicitly carries something forward.
 
 ## What's authoritative where
 
-| Concern | Lives in |
+| Concern | Authority |
 |---|---|
-| Solidity code | `contracts/` |
-| Contract behavior specs | `contracts/specs/` |
-| Contract-level decisions (ADRs) | `contracts/docs/adr/` |
-| Client UI code | `client/` (when it exists) |
-| Client architecture decisions | `client/docs/adr/` (when it exists) |
-| SDK API code | `sdk/` (when it exists) |
-| Cross-repo design proposals | `planning/Designs/` |
-| Cross-repo task board | `planning/Kanban.md` |
+| Current v2 architecture and open choices | `planning/Designs/efsv2/` and its owner inbox |
+| Current Client v2 architecture and open choices | `planning/Designs/clientv2/` and its owner inbox |
+| Deployed v1 Solidity behavior | `contracts/specs/`, then `contracts/docs/adr/` |
+| Deployed v1 Solidity code | `contracts/` |
+| Pre-v2 SDK behavior | `sdk/docs/specs/` and `sdk/` — reference only during v2 redesign |
+| Legacy Vite/Lit client behavior | `client/` — not the Client v2 implementation target |
+| Cross-repo work and milestones | `planning/Kanban.md` and `planning/Milestones.md` |
 | Cross-cutting terminology | `planning/Glossary.md` |
-| System overviews ("how EFS works today") | `planning/Architecture/` |
-| Process / how-to-contribute | `planning/Onboarding/` |
-| Human's daily notes / catch-all | `planning/Daily Notes/` |
+| Process and agent guidance | each repo's `AGENTS.md`, plus `planning/Onboarding/` |
 
-**Rule of thumb.** Decisions tied to one repo's code live in that repo's ADRs. Decisions spanning repos start as designs in `planning/Designs/` and land as ADRs in each affected repo.
-
-Per-repo specs stay in their repo (`contracts/specs/`, eventually `client/specs/`, `sdk/specs/`) — a deliberate decision (see [[design-system]] § Migration plan) so spec changes ride alongside code in the same PR.
+**Rule of thumb:** use repo-local specs to understand what v1 does today. Use
+the planning design spine to understand what v2 may become. Never silently
+promote a v1 mechanism into the v2 baseline.
 
 ## Worktree convention
 
-Per-task worktrees live under each repo: `/efs/contracts/.worktrees/<slug>/`, `/efs/client/.worktrees/<slug>/`. From a worktree four levels deep, siblings resolve via `../../../planning/` (`cat ../../../planning/Designs/0001-design-system.md`).
+Task worktrees may live under a repo or beside the sibling repos. Resolve paths
+from the worktree you actually occupy. Never assume a fixed number of `../`
+segments without checking.
 
-`/efs/planning/` itself is typically the main checkout (no worktrees) — concurrent edits go through rebase rather than branch isolation.
+`planning/` is normally a shared main checkout rather than a worktree. Pull
+before reading or writing and follow the PM concurrency rules in
+`Agents/pm.md`.
 
 ## Cross-repo reads and writes
 
-From inside the vault, sibling files read directly: `cat ../contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md`. Reference them in designs as repo-relative paths in prose (…per `contracts/docs/adr/0041-...`…) or as markdown links: `[ADR-0041](../contracts/docs/adr/0041-...)`. Never use absolute `/efs/...` paths in committed files — bakes in a mount point.
+From the vault, sibling files are readable through relative paths such as
+`../contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md`.
 
-Each commit lives in the repo whose content it changes. If a contracts PR tombstones a landed design, that's a separate commit in `planning/` — same agent, two commits, two pushes. Never co-mingle.
+Each commit belongs to the repo whose file it changes. A change spanning
+planning, contracts, and client produces separate commits. Never bake an
+absolute local path into a committed file.
 
-## CI / GitHub Actions
+## CI and GitHub Actions
 
-A CI runner typically checks out one repo at a time, so cross-repo reads aren't available. A workflow needing a sibling repo's ADR must `gh api`/clone on demand, or accept unresolvable references. See [[cross-repo-reference-mirror]] — a deferred design that would mirror canonical references into `planning/Reference/`.
+A CI runner usually checks out one repository. Workflows cannot assume sibling
+repos exist. If a check needs another repo's artifact, fetch or pin it
+explicitly; do not rely on a developer's local sibling layout.

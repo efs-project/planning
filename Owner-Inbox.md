@@ -16,8 +16,6 @@ aliases: [For-James]
 
 **FJ-1 · Merge SDK PR #1.** Open since ~06-21 and aging. Heads-up: the PR head is **22 commits behind** the live `chore/scaffold` branch (141 ahead of `main`), so merging as-is lands a stale snapshot. **(a)** Repoint the PR at `chore/scaffold`, then merge — *PM rec*. **(b)** Merge as-is, follow-up PR for the rest. **(c)** Merge `chore/scaffold` → `main` directly and close PR #1.
 
-**FJ-2 · Milestones is stale — may I edit it?** [[Milestones]] still frames the old two-track OnionDAO hackathon (Jun 1–30) with shipped items unchecked, and ".sol file list freeze" contradicts "the contract set stays flexible." Also **Devcon 2026-11 is now ~4 months out** and the SOUL's old "too far out" dismissal no longer holds. Milestone scope is your call, so I won't touch it unasked. **(a)** Yes, reconcile it to reality — *PM rec*. **(b)** Leave it; it's not load-bearing right now.
-
 ## 🕐 WHEN YOU HAVE TIME
 
 - **Design decisions awaiting you: 3** — `R1` (root), `OS1`/`OS2` (clientv2). See [Open-Decisions.md](./Open-Decisions.md). The **efsv2 queue (N1–N6, Q1–Q5) is under a clarified sequencing hold** — agents should not present it as a batch until the joined pass revalidates it, but you may still volunteer an isolated answer.
