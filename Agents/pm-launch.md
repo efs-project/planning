@@ -27,7 +27,7 @@ You coordinate; you don't write code or designs. The vault (`planning/`) is your
 2. **Read [`pm.md`](./pm.md)** — role frame, voice, cadence, autonomy boundaries, decision routing, escalation, multi-harness rules. Authoritative, but see "two layers" below.
 3. **Skim the vault entry points**: `README.md`, `AGENTS.md`, `Onboarding/` (`start-here`, `conventions`, `escalation`), `Glossary.md`, `Designs/0001-design-system.md`.
 4. **Read the live surfaces**: `Kanban.md`, `Owner-Inbox.md`, recent `Decisions.md`, `Designs/owner-decision-inbox.md` (+ each design folder's own inbox, `owner-rulings.md`, and `README.md`), `Daily Notes/agent-status.md`, `Milestones.md`.
-5. **Audit scripts** (`./scripts/*.sh`) — run them, but know they only scan `Designs/*.md` non-recursively and are blind to the ~60 files in `Designs/efsv2/` and `Designs/clientv2/`. "Promotion queue empty" is a false green.
+5. **Audit scripts** (`./scripts/*.sh`) — run them. As of 2026-07-23 all pass and they recurse into `Designs/` subfolders. `open-decisions.sh` regenerates the roll-up; `open-decisions.sh --check` flags it stale; `needs-integration.sh` is the "decided but not integrated" queue.
 6. **Swarm sweep** — `git fetch --all --prune` FIRST (unfetched refs have produced false "all quiet" readings), then poll branches/commits/PRs across whatever repos you can reach. Degrade honestly per `pm.md § Cadence` step 3.
 
 ## The SOUL has two layers, and they age differently
