@@ -6,6 +6,8 @@
 
 **Disposition:** research only; no EFS v2 design is promoted and no public-election deployment is recommended
 
+**Shareable brief:** [Chicago + Vocdoni: a practical EVM/ZK voting brief](./ChicagoVocdoni.md)
+
 **Companion record:** [evidence, transcript, source pins, and working notes](./evidence-notes.md)
 
 #kind/research #status/done #repo/planning #topic/privacy #topic/efsv2 #topic/onchain
