@@ -21,7 +21,7 @@ The v2 architecture: **native envelope kernel + tag-core data model** (EAS dropp
 
 | Doc | Tier | What it rules |
 |---|---|---|
-| [[owner-decision-inbox]] | **Owner decision entry point** | One consolidated, phone-friendly queue: decide now, decide after evidence, decide at launch, settled items, and the recording rule back into [[owner-rulings]]. |
+| [[owner-decision-inbox]] | **Owner decision entry point** | One consolidated, phone-friendly queue — **rewritten 2026-07-25 with the revalidated joined-pass packet P-1…P-23** (hold liftable for the authority surface): decide now, decide after evidence, decide at launch, settled items, and the recording rule back into [[owner-rulings]]. |
 | [[codex-envelope]] | **Reopened candidate — coordinated re-cut required** | The irreversible signing surface. KEL requires `authorityId` + `authEpoch`, a suite-neutral semantic identity, and new vectors; the prior `recovered == author` struct is historical baseline. |
 | [[codex-kinds]] | **Reopened candidate** | The five-kind reduction remains strong, but full-width principals, native-kernel IDs, string/literal grammar, privacy rows, and joined vectors must reconcile before freeze. |
 | [[codex-kernel]] | **Reopened candidate — coordinated re-cut required** | The kernel artifact. Strong historical authority requires an admission-ordered authority lane, stored `AuthReceipt`, evidence/import lane, and bounded identity ABI before freeze. The exact authority topology is not yet adopted. |
@@ -78,6 +78,18 @@ Current-standards research across KERI, did:webvh, did:plc, Farcaster, transpare
 
 Until [[kel]]'s owner choices and external gates close, treat every older “Etched” identity/envelope/kernel label as **candidate surface, not permission to run the ceremony**.
 
+## The joined KEL × authority × lens filesystem pass (2026-07-25)
+
+Requirements-first, inversion-before-design: 2 foundations (use-case register + smart-account inversion) → 4 design lanes (authority model, filesystem core, local mode, large files) → 2 red teams → binding critic. **Zero FATAL findings; fifteen SERIOUS, all repaired.** Headlines: the two-grade authority hypothesis validated as an authorization-axis theorem (with the F-15 never-two-labels rule); the L1 pointer designed, judged, and shelved conditionally; the residual identity layer = R1–R6 with the home field parametric; one system-wide absence rule (four sources); FS-LENS/1 as the read-lens replacement seed; the snapshot/bundle ordinary-app mount profile; T1–T4 all reconciled explicitly. **The 2026-07-23 sequencing hold is liftable for the authority surface (P-1…P-10).**
+
+| Doc | Tier | What it rules |
+|---|---|---|
+| [[joined-pass-synthesis]] | ruling record | The pass canon JR-1–JR-10, the binding D-ledger repairs, the 20-item kill list, seam dispositions, gaps + owed work. |
+| [[owner-decision-inbox]] | **owner packet** | Rewritten: the revalidated P-1…P-23 packet in six tiers + E-track riders + held remainder. |
+| [[multichain-dependency-map]] | requirements roll-up | What forces the L1 pointer (nothing at MUST grade), what depends on cross-chain, the ten local-only losses. |
+
+Corpus: [2026-07-25-joined-fs-pass-corpus/](../../Reviews/2026-07-25-joined-fs-pass-corpus/) (critic.md is the binding consolidation); record: [2026-07-25-joined-fs-pass](../../Reviews/2026-07-25-joined-fs-pass.md).
+
 ## Carried forward from earlier rounds (historical inputs)
 
 | Doc | Status |
@@ -89,4 +101,4 @@ Until [[kel]]'s owner choices and external gates close, treat every older “Etc
 
 ## Status
 
-Everything is `#status/draft`. The set is **reconciliation-ready, not promotion-ready**. The current sequence is another joined KEL/authority and lens/resolver pass, pressure-tested against on-chain enumeration, Solana/independent realms, signed local/network modes, and the required native mount; then reconcile the owner inbox, write a short constitution/support matrix, perform coordinated technical re-cuts and measurements, and select the MVP. The existing [[freeze-gates]] list is blocked and must be regenerated against the eventual final bytes. See [[owner-rulings]] and [[ethereum-first-efs-and-os#11. Research-to-MVP sequence]].
+Everything is `#status/draft`. The set is **reconciliation-ready, not promotion-ready**. The joined KEL/authority × filesystem pass ran 2026-07-25 ([[joined-pass-synthesis]]); the owner inbox is reconciled and its authority surface is answerable. Remaining sequence: the dedicated **lens/resolver pass** (gap G-A — GATE/package/discovery/moderation profiles consuming FS-LENS/1 as chapter one), the **coordinated envelope/kernel recut** (seams 1/2/4/5 + the D-ledger repairs), the **measurement passes** (E1 with three new riders; E2 with four new inputs), then the constitution/support matrix and MVP contraction. The existing [[freeze-gates]] list is blocked and must be regenerated against the eventual final bytes. See [[owner-rulings]] and [[ethereum-first-efs-and-os#11. Research-to-MVP sequence]].
