@@ -1,6 +1,6 @@
 # Reviews
 
-Analysis, critique, and build-record artifacts produced by review/architecture agents. Date-prefixed (`YYYY-MM-DD-<slug>.md`). These are point-in-time outputs — reference them as history; the canonical decisions they fed into live in the relevant repo's ADRs and in [[Decisions]].
+Analysis, critique, and build-record artifacts produced by review/architecture agents. Top-level artifacts are date-prefixed files or folders (`YYYY-MM-DD-<slug>`); nested companion filenames may be descriptive. These are point-in-time outputs — reference them as history; the canonical decisions they fed into live in the relevant repo's ADRs and in [[Decisions]].
 
 ## Contents
 
@@ -30,3 +30,4 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 ### Vocdoni, Ethereum, EFS, and Chicago voting (2026-07-24)
 
 - [`2026-07-24-chicago-voting-vocdoni/`](./2026-07-24-chicago-voting-vocdoni/) — deep review of legacy Vochain and DAVINCI, ZK/encryption and EVM/L2 behavior, Illinois/Chicago feasibility, alternatives, a bounded EFS sidecar architecture, pilot gates, and the supporting audio/evidence record.
+- [`folder-poll-question-resolution.md`](./2026-07-24-chicago-voting-vocdoni/folder-poll-question-resolution.md) — follow-up answers for decentralized folder polling: social-poll versus governance-vote defaults, role and privacy boundaries, EFS v2 authority/snapshot/enumeration gates, current DAVINCI maturity, economics, vendor questions, and acceptance tests.
