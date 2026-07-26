@@ -106,6 +106,15 @@ for q in $QUEUES; do
     [[ -n "$hline" ]] || continue
     held=1; n_hold=$((n_hold + 1))
     txt="$(printf '%s' "$hline" | sed -E 's/^> *//')"
+    # Re-base relative links. The hold text is copied verbatim from a queue at
+    # Designs/<folder>/ (depth 2) into this file at the vault root, so a link
+    # that was correct at the source ("../../Reviews/x.md") is broken here.
+    # This produced a live broken link on 2026-07-25.
+    if [[ "$qname" == "Designs (root)" ]]; then
+      txt="$(printf '%s' "$txt" | sed -E 's#\]\(\.\./#](#g')"
+    else
+      txt="$(printf '%s' "$txt" | sed -E 's#\]\(\.\./\.\./#](#g; s#\]\(\.\./#](Designs/#g')"
+    fi
     HOLD_ROWS="${HOLD_ROWS}| \`${qname}\` | ${txt} |
 "
   done < <(grep -E '^> \*\*.*[Hh]old' "$q" 2>/dev/null || true)

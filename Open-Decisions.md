@@ -17,7 +17,7 @@ the owner through a gate the designers deliberately closed.
 
 | Queue | Hold |
 |---|---|
-| `efsv2` | **Sequencing-hold status (2026-07-25):** the 2026-07-23 hold demanded a joined KEL/authority + lens/resolver revalidation before any packet. That pass ran ([2026-07-25-joined-fs-pass](../../Reviews/2026-07-25-joined-fs-pass.md)). Per its critic, **the hold is LIFTABLE for the authority/identity surface — Tiers 1–2 below (P-1…P-10)** — every item is answerable alone, none re-asks a settled item, and adopting one adopts nothing else. Tiers 3–6 are equally revalidated product/projection calls. **Lens-coupled items stay held** pending the dedicated lens pass (gap G-A in [[joined-pass-synthesis]]): the [[assumptions-and-requirements]] D-13 typed-lens scope and seams 7/8/12/19. Lifting the hold is James's call; he may also answer any single item without lifting anything. |
+| `efsv2` | **Sequencing-hold status (2026-07-25):** the 2026-07-23 hold demanded a joined KEL/authority + lens/resolver revalidation before any packet. That pass ran ([2026-07-25-joined-fs-pass](Reviews/2026-07-25-joined-fs-pass.md)). Per its critic, **the hold is LIFTABLE for the authority/identity surface — Tiers 1–2 below (P-1…P-10)** — every item is answerable alone, none re-asks a settled item, and adopting one adopts nothing else. Tiers 3–6 are equally revalidated product/projection calls. **Lens-coupled items stay held** pending the dedicated lens pass (gap G-A in [[joined-pass-synthesis]]): the [[assumptions-and-requirements]] D-13 typed-lens scope and seams 7/8/12/19. Lifting the hold is James's call; he may also answer any single item without lifting anything. |
 
 
 ## Ask now (3)

@@ -14,16 +14,18 @@ Then read **current state** for whatever you're touching: [`Open-Decisions.md`](
 
 Load the rest **when it's relevant**:
 
+Rows are keyed to **what you are doing**, not to whether you feel unsure — if the action matches, open the file even if you think you already know the rule.
+
 | When you're… | Read |
 |---|---|
-| unsure what to work on | [`Onboarding/start-here.md`](./Onboarding/start-here.md) |
+| picking what to work on, or claiming a Kanban card | [`Onboarding/start-here.md`](./Onboarding/start-here.md) |
 | writing, reviewing, or promoting a design | [`Onboarding/write-a-design.md`](./Onboarding/write-a-design.md) |
-| unsure whether to stop and ask or proceed | [`Onboarding/escalation.md`](./Onboarding/escalation.md) |
-| needing tag / path / link / Kanban detail beyond the rules below | [`Onboarding/conventions.md`](./Onboarding/conventions.md) |
+| **committing, pushing, claiming, tagging, or linking across files/repos** | [`Onboarding/conventions.md`](./Onboarding/conventions.md) |
+| **about to delete or rewrite a large section, edit a landed tombstone, add a value to a closed tag family (`#status/`, `#kind/`, `#repo/`), change `_template.md`, or deviate from any documented convention** | [`Onboarding/escalation.md`](./Onboarding/escalation.md) |
 | working across sibling repos | [`Onboarding/repo-map.md`](./Onboarding/repo-map.md) |
 | changing the vault's own protocol | [`Designs/0001-design-system.md`](./Designs/0001-design-system.md) |
 | recording a ruling, or checking who may decide | [`Onboarding/authority.md`](./Onboarding/authority.md) |
-| hitting a known recurring breakage | [`Onboarding/known-issues.md`](./Onboarding/known-issues.md) |
+| debugging a CI/tooling breakage in a *code* repo | [`Onboarding/known-issues.md`](./Onboarding/known-issues.md) |
 
 ### Finding the owner's needed design decisions
 
@@ -47,12 +49,15 @@ Adopted EFS v2 rulings live in [`Designs/efsv2/owner-rulings.md`](./Designs/efsv
 - **DO NOT number your own design drafts.** Save as `<slug>.md`, not `0007-<slug>.md`. Numbers are allocated only at the human-gated promotion ceremony; self-numbering bypasses review.
 - **Tri-sync invariant.** Design status appears in three places: prose `**Status:** X`, tag `#status/X`, and (post-promotion) filename `NNNN-<slug>.md`. All three change in the same commit.
 - **Promotion is human-only.** James writes the literal trust token `Promoted by @james on YYYY-MM-DD` in the design body. Agents may execute the `git mv` ceremony on his behalf only after he has written that token.
+- **Never force-push.** On push rejection: `git pull --rebase`, resolve conflicts (`Kanban.md` is the usual victim), push again. Force-pushing past a rebase conflict is a **Tier-1 stop-and-ask** — this vault is shared across agents and machines, and a force-push destroys work you can't see.
 - **Do not invent work.** If nothing in [`Onboarding/start-here.md`](./Onboarding/start-here.md)'s decision tree applies, stop and ask James in chat.
+- **Respect card TTLs.** In Flight cards expire (3-day default) and can be reclaimed; **Under Review and Blocked cards have no TTL and cannot be reclaimed without asking in chat.** WIP limits: 3 ready-for-promotion / 5 Under Review / 2 In Flight per agent.
+- **Append one dated line to `Daily Notes/agent-status.md` per work session** — it's how the swarm sees state without reading `git log`, and how two concurrent sessions detect each other.
 
 ## Every commit
 
 - Subject line: `<area>: <imperative summary>`. Areas: `design`, `kanban`, `docs`, `chore`, `promote`, `land`, `sync`, `status`, `pm`. **`pm:` is RESERVED for the PM role** — a non-PM agent editing a PM-owned file uses its own area, or `git log --grep='^pm:'` falsely attributes the work (this produced a "phantom second PM" on 2026-05-28). Full list: [`Onboarding/conventions.md`](./Onboarding/conventions.md).
-- Include `Agent: <slug>` and `Co-authored-by: <Model Name> <noreply@<vendor>>` trailers. The `Agent:` slug is a stable identifier for agent + role (e.g. `claude-opus-4.7`, `codex-gpt-5`), enabling per-agent grep on `git log`.
+- Include `Agent: <slug>`, `Co-authored-by: <Model Name> <noreply@<vendor>>`, and `Harness: <claude-code|codex|…>` trailers. The `Agent:` slug is a stable identifier for agent + role (e.g. `claude-opus-4.7`, `codex-gpt-5`), enabling per-agent grep on `git log`.
 - **Before pushing, run `./scripts/open-decisions.sh --check`** — it fails if the generated decision roll-up no longer matches its sources.
 - **Run `./scripts/install-hooks.sh` once per clone.** Hooks are per-clone and not carried by git, so a fresh checkout has no commit validation.
 - **Write the commit message to a file and use `git commit -F <file>` — never embed `\n` inside `git commit -m`.** Some harnesses don't interpret the escape, so trailers land as a literal `\n` on one physical line; six vault commits already did, and `scripts/agent-activity.sh` buckets them as "unknown." Verify with `git log -1 --format='%B'` after your first commit.
@@ -69,12 +74,15 @@ Adopted EFS v2 rulings live in [`Designs/efsv2/owner-rulings.md`](./Designs/efsv
 | Cross-cutting terminology | [`Glossary.md`](./Glossary.md) |
 | System overviews | [`Architecture/`](./Architecture/) |
 | How-to-do-something | [`Onboarding/`](./Onboarding/) |
+| Agent roles, SOUL files, launch prompts | [`Agents/`](./Agents/) |
+| Milestones, ideas, research corpora | [`Milestones.md`](./Milestones.md), [`Ideas.md`](./Ideas.md), [`Reviews/`](./Reviews/), [`Brainstorms/`](./Brainstorms/) |
+| The audit + generation tools | [`scripts/README.md`](./scripts/README.md) |
 | Past one-line decisions | [`Decisions.md`](./Decisions.md) |
 | Open questions across all designs | [`Tasks.md`](./Tasks.md) (Obsidian Tasks rollup) |
 | ADR or spec in a dev repo | `../contracts/docs/adr/`, `../contracts/specs/` (etc. for client/sdk) |
 
 ## Sibling repos under /efs/
 
-`contracts/` (Solidity, ADRs, specs — [efs-project/contracts](https://github.com/efs-project/contracts)), `client/` (web client, future), `sdk/` (JS/TS, future), `planning/` (this vault). Details: [`Onboarding/repo-map.md`](./Onboarding/repo-map.md).
+`contracts/` (Solidity, ADRs, specs — also hosts the live nextjs explorer), `sdk/` (JS/TS — **exists and is in flight**, branch `chore/scaffold`), `client/` (v1 Vite/Lit client, **hibernating**), `planning/` (this vault). Details: [`Onboarding/repo-map.md`](./Onboarding/repo-map.md).
 
-Cross-repo reads via sibling paths (`../contracts/docs/adr/0041-...`). Never use absolute `/efs/...` paths in committed files — bakes in a mount point.
+Cross-repo reads via sibling paths — **count `../` from the file you are writing in**: `../contracts/…` from vault root, `../../` from `Designs/`, `../../../` from `Designs/efsv2/`. Getting this wrong is the most common broken link in the vault. Never use absolute `/efs/...` paths in committed files — bakes in a mount point.

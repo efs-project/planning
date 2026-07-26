@@ -7,7 +7,7 @@
 **Reviewers:** — (appended by reviewing agents: `@<agent> (YYYY-MM-DD)`)
 **Last touched:** YYYY-MM-DD — (optional; Obsidian Bases also derives this from file mtime)
 
-#status/draft #kind/design
+#status/draft #kind/design #repo/<each-target-repo>
 
 <!--
 ⚠️ DO NOT NUMBER THIS FILE. Save as `<slug>.md`, no `NNNN-` prefix.
