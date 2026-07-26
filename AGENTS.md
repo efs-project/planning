@@ -6,16 +6,24 @@ Stable entry point for tools that auto-detect `AGENTS.md` ([universal agent brie
 
 > **State.** DESIGN-0001 (the meta-design) was promoted 2026-05-21 and is `accepted`; it is the canonical protocol. The vault is in active use, not bootstrap. `/efs/<repo>/` paths in docs describe a target layout, not necessarily your reality — discover your own paths and use relative ones.
 
-## Read on init
+## Start here
 
-If your tooling does not auto-load `@`-imported files, read these in order before your first commit:
+**This file is enough to start working safely.** It carries the gotchas and hard rules; everything below is one hop away when you need it. Don't read the whole `Onboarding/` set up front — it's ~7,400 words of procedure, most of which won't apply to your task.
 
-1. [`Onboarding/start-here.md`](./Onboarding/start-here.md) — "I just arrived" → "I'm working on X" decision tree.
-2. [`Designs/owner-decision-inbox.md`](./Designs/owner-decision-inbox.md) — every live design choice James needs to make.
-3. [`Onboarding/repo-map.md`](./Onboarding/repo-map.md) — `/efs/` layout and sibling repos.
-4. [`Onboarding/conventions.md`](./Onboarding/conventions.md) — tri-sync, tags, commit format, link forms, Kanban rules.
-5. [`Onboarding/escalation.md`](./Onboarding/escalation.md) — stop-and-ask vs. note-and-continue.
-6. [`Designs/0001-design-system.md`](./Designs/0001-design-system.md) — canonical protocol for this vault.
+Then read **current state** for whatever you're touching: [`Open-Decisions.md`](./Open-Decisions.md) (what needs the owner), [`Kanban.md`](./Kanban.md) (what's in flight), and your task's design-folder `README.md` (the map of current vs. historical vs. blocked — it changes fast).
+
+Load the rest **when it's relevant**:
+
+| When you're… | Read |
+|---|---|
+| unsure what to work on | [`Onboarding/start-here.md`](./Onboarding/start-here.md) |
+| writing, reviewing, or promoting a design | [`Onboarding/write-a-design.md`](./Onboarding/write-a-design.md) |
+| unsure whether to stop and ask or proceed | [`Onboarding/escalation.md`](./Onboarding/escalation.md) |
+| needing tag / path / link / Kanban detail beyond the rules below | [`Onboarding/conventions.md`](./Onboarding/conventions.md) |
+| working across sibling repos | [`Onboarding/repo-map.md`](./Onboarding/repo-map.md) |
+| changing the vault's own protocol | [`Designs/0001-design-system.md`](./Designs/0001-design-system.md) |
+| recording a ruling, or checking who may decide | [`Onboarding/authority.md`](./Onboarding/authority.md) |
+| hitting a known recurring breakage | [`Onboarding/known-issues.md`](./Onboarding/known-issues.md) |
 
 ### Finding the owner's needed design decisions
 
