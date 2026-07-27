@@ -8,6 +8,17 @@ A lightweight parking lot for future ideas, "we should do X someday" drops, and 
 
 ## Open
 
+### HyperCard/Decker-style end-user authoring
+*(James, 2026-07-26)*
+
+Explore a first-party EFS OS authoring app whose artifacts are both **editable documents and sandboxed apps**. Start with cards/pages, native fields/buttons/grids/canvases, links, and a direct **Edit ↔ Interact** switch; let users add small event scripts only when direct manipulation stops being enough. Visible objects should own their behavior, persistent state should live in the artifact, and reusable components should be copyable between projects.
+
+The EFS-shaped version could make **use → inspect → edit → remix → script → publish** one continuous ladder: local drafts while making, a capability-confined app while running, a forkable package when shared, and an explicit content-addressed generation when published. This may be a stronger candidate for the Client v2 retention app than a platform-first demo, and a useful real workload for the surface-mode prototype.
+
+Guardrails: System Chrome and security ceremonies remain uneditable; no ambient network/device authority; real DOM semantics instead of a canvas-only UI; responsive constraints instead of fixed-card-only layouts; local save is not permanent publication; the tool must remain useful before scripting. Preserve Decker's portable, diff-friendly artifact and reusable “contraption” ideas without copying its accessibility and fixed-layout costs.
+
+References: [Decker overview](https://beyondloom.com/decker/), [manual](https://www.beyondloom.com/decker/decker.html), [file-format rationale](https://www.beyondloom.com/decker/format.html), [HyperCard User's Guide](https://vintageapple.org/macmanuals/pdf/HyperCard_Users_Guide_1987.pdf), and Hacker News discussions on [Decker](https://news.ycombinator.com/item?id=33377964), [normal people making specific tools](https://news.ycombinator.com/item?id=4227698), and [tinkerable software](https://news.ycombinator.com/item?id=38961262). Related: [[Designs/clientv2/web-os-thesis]], [[Designs/clientv2/kernel-capability-model]], [[Designs/clientv2/system-surfaces]], and [[Designs/clientv2/open-questions]].
+
 ### Retro OS and playful shell themes
 *(James, 2026-07-23)*
 
