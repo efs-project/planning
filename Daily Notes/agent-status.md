@@ -8,7 +8,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-07-27
 
-- @pm: HTMX/Wasm third-party app hypothesis — integrated James's reuse-first steering and primary-source links into the Fable app-model handoff: HTMX 4 `MessagePort` transport extension first, minimal hardening fork second, new UI protocol only if adaptation fails.
+- @pm: HTMX/Wasm third-party app hypothesis — integrated James's reuse-first steering, sources, and the complete confined-app developer/runtime loop into the Fable handoff: Wasm + capability-scoped OS SDK + local HTMX request/HTML response; optional templates, Shell-owned trusted UI.
 
 ## 2026-07-26
 

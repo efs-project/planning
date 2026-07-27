@@ -47,6 +47,69 @@ a final framework selection.
 · [HTMX security guidance](https://htmx.org/docs/#security)
 · [Zero-Clause BSD license](https://github.com/bigskysoftware/htmx/blob/four/LICENSE)
 
+### Concrete confined-app loop to prototype
+
+The product hypothesis is a safe way for untrusted developers to run real
+application logic and dynamically update an app-like UI without receiving DOM
+or ambient OS authority.
+
+An installable compiled app package would contain:
+
+- a manifest naming its Wasm profile, OS SDK and UI-bridge versions, entry
+  module, requested capabilities, resource budgets, and packaged assets;
+- one or more Wasm modules;
+- optional static assets, localization, styles, and templates.
+
+The OS verifies and caches the content-addressed package, creates a dedicated
+Worker, instantiates the Wasm module with only its effective host imports and
+capability handles, and gives it a private app surface plus `MessagePort`. The
+app receives no direct DOM, Kernel object, wallet, storage, EFS data, or network
+access.
+
+The smallest UI contract to test is local HTTP-shaped request/response, not a
+web server:
+
+```text
+initial mount or user gesture
+  → trusted surface-scoped HTMX
+  → structured request over the app MessagePort
+  → Wasm request handler
+  → optional EFS OS SDK capability calls
+  → HTML fragment response
+  → sanitize, scope, budget, and sequence checks
+  → HTMX swap inside that app surface only
+```
+
+An initial local `GET /` can render the first surface. Ordinary app markup can
+then use familiar attributes such as `data-hx-post="/actions/search"` and
+`data-hx-target="#results"`. Those paths are app-local handler names, never
+network URLs or authority. An illustrative wire request carries method, local
+action, form values, surface and revision IDs, cancellation ID, and a
+host-attested user-activation fact. A response carries status, allowlisted
+HTMX response controls, HTML, and the next revision. The exact ABI/IDL remains
+an experiment.
+
+Inside the OS, apps should normally call generated **EFS OS SDK** bindings:
+capability-scoped file/query/storage/network/wallet services plus lifecycle and
+surface APIs. The Kernel may use the general **EFS SDK** underneath for EFS
+resolution, verification, encoding, and writes. An app may link a
+language-native EFS SDK where useful, but that does not grant transport,
+signing, or data access. See
+[[fable-client-v2-handoff#EFS SDK vs EFS OS SDK]].
+
+Do **not** require standard view templates for safety. A developer may use any
+template engine or HTML generator that compiles for the supported Wasm profile,
+or package static templates. EFS should provide optional language starter kits,
+escaping helpers, semantic component examples, theme tokens/classes, and
+generated OS SDK bindings. Standardize the manifest, host interfaces,
+request/response bridge, allowed HTML/HTMX profile, and conformance tests—not
+the developer's templating framework.
+
+Secure prompts, permission grants, file/app pickers, wallet confirmation, and
+other authority-bearing UI remain Shell-owned. Apps request them through
+capabilities and receive handles/results; app-produced HTML can never become
+trusted System Chrome.
+
 The likely product is not one universal app container. Research a small number of deliberately different app lanes that share one EFS permission and capability system. The leading shape to validate is:
 
 1. **Confined compiled/component app:** Wasm/WASI-style code receives only selected host imports and capability handles. It does not own the DOM; it sends versioned typed UI operations, patches, components, or another researched protocol to an OS-owned renderer.
