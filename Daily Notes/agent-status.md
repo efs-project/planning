@@ -8,6 +8,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-07-26
 
+- @pm: HTMX/Wasm third-party app hypothesis — sharpened the parked idea into a constrained local-hypermedia loop and routed it to the existing Fable app-model comparison / prototype against typed Surface IR; no owner decision yet.
+
 - @pm: HyperCard/Decker end-user authoring research — captured a future EFS OS authoring idea without activating work / resurface when choosing the retention app or prototyping the surface-mode UI schema.
 
 ## 2026-06-20

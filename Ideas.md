@@ -73,12 +73,31 @@ Not active work. Revisit when the Client v2 Shell/theme layer is being specified
 
 </details>
 
-### HTMX for third-party OS app UI
-*(James, 2026-07-14)*
+### HTMX-shaped local hypermedia for third-party OS apps
+*(James, 2026-07-14; sharpened 2026-07-26)*
 
-Consider whether **HTMX can be used from the Web Worker-based third-party app UI model**. Evaluate the fit with the Ring-3 worker / Shell-owned surface boundary, including what an HTMX-style interaction model would need from the renderer and whether it preserves the no-ambient-network and capability constraints.
+**Leading hypothesis:** a confined Wasm/WASI app owns its state and returns a
+closed, HTML-shaped fragment or patch. System Chrome parses that output into an
+allowlisted surface tree and builds the real DOM. App markup may bind user
+gestures only to opaque, app-local action handles:
 
-Not a commitment to adopt HTMX; revisit when specifying or prototyping third-party app UI.
+`click/input/submit → structured event over MessagePort → Wasm handler → revisioned fragment/patch → validated surface-local swap`
+
+This borrows HTMX's authoring loop, not its authority model. No live-DOM
+`innerHTML`, scripts or event attributes, arbitrary CSS/SVG/URLs, selectors
+outside the app surface, network requests, history, out-of-band swaps, or
+extensions. IDs and targets are namespaced. EFS, network, storage, signing, and
+other authority remain separate capability handles that markup cannot mint.
+The renderer also needs bounded fragment size/depth/rate, cancellation and
+sequencing, crash/restart/full-resync behavior, and explicit
+focus/accessibility/IME/RTL handling.
+
+Test this as the OS-rendered hypermedia finalist in the existing playable
+archive comparison against typed Surface IR. Measure author ergonomics as well
+as security, accessibility, and performance; do not freeze the ABI before the
+prototype.
+
+→ [[Designs/clientv2/fable-third-party-app-model-handoff]]
 
 ### Burner wallets for transactionless interactions + multi-wallet identity in lenses
 *(James, 2026-06-21)*
