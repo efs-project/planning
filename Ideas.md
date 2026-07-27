@@ -73,29 +73,47 @@ Not active work. Revisit when the Client v2 Shell/theme layer is being specified
 
 </details>
 
-### HTMX-shaped local hypermedia for third-party OS apps
-*(James, 2026-07-14; sharpened 2026-07-26)*
+### Hardened HTMX for third-party OS apps
+*(James, 2026-07-14; revised 2026-07-27)*
 
-**Leading hypothesis:** a confined Wasm/WASI app owns its state and returns a
-closed, HTML-shaped fragment or patch. System Chrome parses that output into an
-allowlisted surface tree and builds the real DOM. App markup may bind user
-gestures only to opaque, app-local action handles:
+**Owner steering:** prefer adapting the existing HTMX library over inventing an
+EFS UI framework. Preserve normal `data-hx-*` authoring wherever the security
+boundary permits it.
 
-`click/input/submit → structured event over MessagePort → Wasm handler → revisioned fragment/patch → validated surface-local swap`
+**Revised leading hypothesis:** run a trusted, OS-supplied HTMX 4 instance in
+the compositor; the confined Wasm/WASI app owns state and returns ordinary HTML
+fragments. An EFS HTMX extension replaces `fetch()` with a `MessagePort` call to
+that app's worker and returns a synthetic `Response`, allowing HTMX to retain
+its triggers, form collection, request coordination, targeting, swapping, and
+settling:
 
-This borrows HTMX's authoring loop, not its authority model. No live-DOM
-`innerHTML`, scripts or event attributes, arbitrary CSS/SVG/URLs, selectors
-outside the app surface, network requests, history, out-of-band swaps, or
-extensions. IDs and targets are namespaced. EFS, network, storage, signing, and
-other authority remain separate capability handles that markup cannot mint.
-The renderer also needs bounded fragment size/depth/rate, cancellation and
-sequencing, crash/restart/full-resync behavior, and explicit
-focus/accessibility/IME/RTL handling.
+`click/input/submit → HTMX → MessagePort → Wasm handler → HTML Response → hardened surface-local HTMX swap`
 
-Test this as the OS-rendered hypermedia finalist in the existing playable
-archive comparison against typed Surface IR. Measure author ergonomics as well
-as security, accessibility, and performance; do not freeze the ABI before the
-prototype.
+HTMX 4 already exposes the transport replacement required for this through its
+extension request context. Start with an extension, then make the smallest
+auditable fork only where extension hooks cannot fail closed. The library's
+Zero-Clause BSD license explicitly permits modification.
+
+The remaining work is hardening, not inventing a framework:
+
+- remove native-network fallback so every action must cross the app's port;
+- scope every target, indicator, preserve, partial, and swap lookup to the
+  app's root—never `document`, `body`, System Chrome, or another app;
+- reject scripts, `hx-on`, `javascript:`, arbitrary extensions, active/custom
+  elements, unsafe resource URLs/styles, history/boost, and unapproved
+  response-control headers before insertion;
+- enforce fragment/DOM/rate budgets, cancellation, sequencing, restart/resync,
+  and focus/accessibility/IME/RTL behavior.
+
+Try in this order: unmodified HTMX 4 plus an EFS extension; a minimal
+security/scoping fork; only then a new typed Surface protocol if the adaptation
+cannot be made safe or portable. Use literal unmodified HTMX inside an
+opaque-origin iframe as the compatibility/control lane.
+
+Primary-source starting points:
+[HTMX 4 extension authoring](https://github.com/bigskysoftware/htmx/blob/four/src/skills/htmx-extension-authoring.md);
+[HTMX security guidance](https://htmx.org/docs/#security);
+[license](https://github.com/bigskysoftware/htmx/blob/four/LICENSE).
 
 → [[Designs/clientv2/fable-third-party-app-model-handoff]]
 

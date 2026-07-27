@@ -6,6 +6,10 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ---
 
+## 2026-07-27
+
+- @pm: HTMX/Wasm third-party app hypothesis — corrected the research bias after source inspection and James's steering: reuse HTMX 4 via a MessagePort transport extension first, then a minimal hardening fork; new UI protocol only if adaptation fails.
+
 ## 2026-07-26
 
 - @pm: HTMX/Wasm third-party app hypothesis — sharpened the parked idea into a constrained local-hypermedia loop and routed it to the existing Fable app-model comparison / prototype against typed Surface IR; no owner decision yet.
