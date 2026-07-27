@@ -5,7 +5,7 @@
 **Depends on:** [[web-os-thesis]], [[kernel-capability-model]], [[sdk-boundaries]], [[fable-client-v2-handoff]]
 **Supersedes:** —
 **Reviewers:** 3 expert critique lanes, 2026-07-22
-**Last touched:** 2026-07-22 — codex-gpt-5
+**Last touched:** 2026-07-27 — pm
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/clientv2 #topic/app-model #topic/wasm #topic/wasi
 
@@ -18,6 +18,34 @@ The current Worker/capability/Surface-IR model is a hypothesis too. Fable may pr
 ## Owner steering — strong prior, shape still open
 
 EFS itself is evolving, so depending on young technology is acceptable when it is built through open web standards with a credible long-term ecosystem. WebAssembly and WASI are expected to keep improving and are a **strong foundational prior** for EFS OS even if today's Component Model tooling, browser adapters, WIT worlds, and WASI version are not the final forms.
+
+### Reuse HTMX before inventing a renderer framework
+
+**James, 2026-07-27:** preserve ordinary HTMX authoring if it can be made safe;
+do not default to an EFS-specific hypermedia or Surface framework.
+
+Test HTMX 4 first as trusted OS code. Its extension API allows the request
+context's `fetch` function to be replaced with a function returning a
+`Response`, so an EFS extension can route `data-hx-*` actions over the app's
+`MessagePort` to its Wasm worker and feed the returned HTML fragment back
+through HTMX's normal trigger/form/target/swap machinery. Try, in order:
+
+1. unmodified HTMX 4 plus an EFS transport and sanitization extension;
+2. the smallest auditable fork needed for fail-closed networking and
+   app-root-only selector/swap resolution;
+3. a new typed Surface or hypermedia protocol only if adaptation fails.
+
+The security experiment must distinguish **trusted HTMX runtime** from
+**untrusted app-produced HTML**. Unmodified HTMX remains acceptable inside the
+opaque-origin iframe lane; in the privileged compositor it must not retain a
+native-network fallback, execute app scripts or `hx-on`, honor active resource
+URLs or arbitrary extensions, or resolve targets/partials/out-of-band swaps
+outside that app's surface. This is owner steering for the research order, not
+a final framework selection.
+
+[HTMX 4 extension authoring](https://github.com/bigskysoftware/htmx/blob/four/src/skills/htmx-extension-authoring.md)
+· [HTMX security guidance](https://htmx.org/docs/#security)
+· [Zero-Clause BSD license](https://github.com/bigskysoftware/htmx/blob/four/LICENSE)
 
 The likely product is not one universal app container. Research a small number of deliberately different app lanes that share one EFS permission and capability system. The leading shape to validate is:
 
@@ -90,8 +118,8 @@ Fable should research broadly, then narrow to three to five coherent architectur
 | Blazor/Razor custom adapter | Productive C# component model and mature .NET tooling | Ordinary Blazor owns the DOM/UI thread; a custom renderer relies on unstable internals and adds runtime cost |
 | Plain .NET Worker + EFS-native C# UI DSL | Reuses C# logic/tooling without pretending ordinary Blazor fits | Still ships a .NET runtime; EFS owns another framework and bindings surface |
 | C# NativeAOT component | C# without a full interactive Blazor runtime | Young component toolchain and reduced framework/library compatibility |
-| HTMX-inspired constrained hypermedia → OS renderer | Simple event/action/fragment mental model with OS-owned pixels | EFS must define a safe closed vocabulary, state/resync rules, and component catalog |
-| Literal HTMX/HTML swaps | Huge open-web familiarity and low authoring ceremony | DOM, CSS selectors, URLs, HTML parsing, scripts, and swaps conflict with a Worker and trusted compositor; use mainly as a control/adversarial baseline |
+| Hardened HTMX 4 + Worker transport | Reuses normal hypermedia authoring and HTMX's event/form/swap machinery; HTMX 4 can replace `fetch` with a `MessagePort` transport | Prove fail-closed networking, untrusted-fragment sanitization, app-root selector scoping, recovery, and whether a maintainable fork is required |
+| Literal unmodified HTMX/HTML swaps | Huge open-web familiarity and low authoring ceremony; natural fit inside the opaque-origin iframe lane | Unsafe as-is in the privileged compositor because DOM, selectors, active HTML, URLs, response control, and swaps assume a trusted producer |
 | Local LiveView-style Worker loop | Clear event → state → patch model without a server | Patch protocol, latency, recovery, focus, and client-local state ownership need proof |
 | RemoteViews/A2UI-style component catalog | Strong host control, a11y, and predictable rendering | Catalog ossification and limited app expressiveness |
 | Canvas/display-list lane | Appropriate for games, visualization, and custom graphics | Accessibility, text/input, battery, and spoofing make it unsuitable as the only UI lane |
@@ -106,7 +134,7 @@ Also investigate relevant models we missed: browser extension sandboxes, Isolate
 - WASI 0.3 native async/streams/futures may solve real composition problems, but its June 2026 release is too new to declare the EFS compatibility floor.
 - A Worker removes DOM access, but it still has ambient browser APIs such as network and storage unless the cage actually denies or replaces them. “Worker” is not synonymous with least authority.
 - Ordinary Blazor WebAssembly renders on the browser UI thread. Running .NET compute in a Worker is supported; running Razor against a custom non-DOM renderer is a separate experimental architecture that must earn its maintenance and payload cost.
-- Literal HTMX is DOM-, selector-, URL-, and HTML-swap-oriented. Its hypermedia ideas may still inspire a closed local protocol using action handles, typed nodes, opaque resources, and validated revisioned patches.
+- HTMX 4's replaceable `fetch` makes a local Worker/Wasm transport plausible without changing its authoring model. Test an extension first, then a minimal security/scoping fork; treat an EFS-owned protocol as fallback rather than the starting assumption.
 - OS-owned rendering may improve security, accessibility, and consistency, but a home-grown Surface IR or component catalog can become an inflexible lowest common denominator.
 - A compatibility iframe may be strategically valuable even if it is never the high-trust lane.
 - Multiple runners may preserve optionality, or may create permanent complexity and semantic drift. Compare that cost with choosing one narrow substrate.
@@ -189,7 +217,7 @@ These are research questions for Fable and evidence spikes, not choices James ne
 ## Seed evidence, not the research corpus
 
 - Official .NET documentation distinguishes ordinary Blazor WebAssembly rendering on the UI thread from .NET compute running in a Web Worker.
-- Official HTMX documentation defines its model around DOM elements, HTTP/AJAX, HTML responses, selectors, and swaps.
+- Official HTMX documentation defines its model around DOM elements, HTTP/AJAX, HTML responses, selectors, and swaps; HTMX 4's extension documentation also permits replacing `fetch` with an arbitrary function returning a `Response`.
 - WASI 0.3 shipped native async/streams/futures in June 2026, while the Component Model's path to 1.0 still requires native support from at least two browser engines.
 - `jco` can transpile components for JavaScript environments, but its documentation still labels the project experimental without stability, security, or support guarantees.
 
