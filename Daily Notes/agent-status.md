@@ -8,6 +8,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-07-27
 
+- @pm: portable schemas/validators + EAS interoperability — audited which EAS properties survived v2, identified the application-shape and permissionless-validator gaps, and prepared a dedicated Fable handoff with real-EAS import/export/projection candidates / next: James chooses its sequencing relative to the read-lens resolver pass.
+
 - @pm: joined KEL/authority/filesystem pass — verified Fable's landed corpus, reconciled Kanban and Owner-Inbox, and removed the stale pre-v2 SDK merge nudge / next: James answers the compressed authority/identity packet; lens pass remains next foundation work.
 
 - @pm: HTMX/Wasm third-party app hypothesis — integrated James's reuse-first steering, sources, and the complete confined-app developer/runtime loop into the Fable handoff: Wasm + capability-scoped OS SDK + local HTMX request/HTML response; optional templates, Shell-owned trusted UI.
