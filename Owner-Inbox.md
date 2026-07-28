@@ -14,7 +14,7 @@ aliases: [For-James]
 
 ## ⚡ DECIDE NOW — James
 
-- **FJ-3 — FUTO submission quality gate.** Funding/non-duplication is confirmed and the replacement email is in [[Grants/futo-microgrant-email]]. `a` submit the improved proposal now; `b` first build a tiny signed-file demonstrator and have another person reproduce it, then submit; `c` stop. **@grants recommendation: b for the strongest application; a remains a credible early-stage microgrant submission.**
+- **FJ-3 — FUTO submission quality gate.** Funding/non-duplication is confirmed and the replacement email is in [[Grants/futo-microgrant-email]]. `a` submit the improved proposal now; `b` follow the one-day [[Grants/futo-fj-3b-demonstrator]] checklist, have another person reproduce it, then submit; `c` stop. **@grants recommendation: b for the strongest application; a remains a credible early-stage microgrant submission.**
 
 ## 🕐 WHEN YOU HAVE TIME
 

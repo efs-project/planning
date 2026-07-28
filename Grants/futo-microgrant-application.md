@@ -131,7 +131,7 @@ Do not lead reviewers to the current website or GitHub organization description 
 
 - [ ] James approves the architecture-neutral scope and EFS release pilot.
 - [ ] Choose the exact tagged source release and generated ABI artifact.
-- [ ] Decide whether a tiny pre-grant demonstrator is worth building before submission.
+- [ ] Decide whether to run the one-day [[futo-fj-3b-demonstrator]] before submission.
 - [ ] Identify an independent final reproducer; do not imply one is already committed.
 - [ ] Reconcile legacy public claims before using the website as grant evidence.
 

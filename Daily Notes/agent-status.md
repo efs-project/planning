@@ -8,6 +8,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-07-28
 
+- @grants: futo-fj-3b-demonstrator — converted the recommended pre-submission proof into a one-day reading/build/reproduction checklist with an architecture-neutral Sepolia receipt, explicit non-goals, evidence matrix, and five owner inputs / next: James confirms the artifact, signer, Sepolia gas, Arweave route, and human reproducer.
 - @grants: futo-funding-facts — James confirmed EFS has been self-funded to date and the proposed FUTO scope is not funded elsewhere; updated the worksheet, proposal gate, owner fork, and unsent email draft.
 - @grants: futo-four-lens-review — ran independent FUTO-fit, technical, editorial, and hostile-committee reviews; all rejected the prior send-ready claim. Rewrote the application as architecture-neutral Walk-Away Proof v0 with a deterministic manifest, carrier-independent digest, minimal Sepolia receipt, no-chain baseline, executable outcomes, EFS release pilot, independent reproduction, and 12-month maintenance; routed the submit-now-vs-demonstrator fork as FJ-3.
 - @grants: futo-microgrant-application — incorporated James's applicant, control, carrier, license, and availability answers; found the frozen Safe-controlled Sepolia deployment as prior evidence; and prepared a send-ready FUTO email pending only funding-history confirmation and James's send approval.
