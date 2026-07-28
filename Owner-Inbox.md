@@ -14,7 +14,7 @@ aliases: [For-James]
 
 ## ⚡ DECIDE NOW — James
 
-Nothing.
+- **FJ-2 — Send the USD 5,000 FUTO microgrant application today?** A Gmail draft is ready and the proposal is tracked in [[Grants/futo-microgrant-application]]. `a` send as drafted after confirming the work is not funded elsewhere; `b` revise first; `c` do not submit. **@grants recommendation: a.**
 
 ## 🕐 WHEN YOU HAVE TIME
 
