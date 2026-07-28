@@ -15,6 +15,46 @@ Rows touched:
 Next check:
 ```
 
+## 2026-07-28 - Same-day application and live-program sweep
+
+Trigger: Choose one credible grant to apply to today and identify the information needed for a strong submission.
+
+Official sources checked:
+
+- [FUTO Grants](https://futo.tech/grants), [FUTO principles](https://www.futo.org/about/what-is-futo/), [Source First](https://futo.tech/source-first)
+- [Sentient Foundation grants](https://sentient.foundation/grants), [Requests for Products](https://sentient.foundation/product-requests), [application](https://form.typeform.com/to/IRj7WaKH?typeform-source=sentient.foundation)
+- [Filecoin Open Grants](https://fil.org/grants), [Open Grants rules](https://github.com/filecoin-project/devgrants/blob/master/Program%20Resources/Open%20Grants%20README.md), [Filecoin Pin](https://docs.filecoin.io/builder-cookbook/filecoin-pin)
+- [Ethereum Foundation ESP Open Rounds](https://esp.ethereum.foundation/applicants/open-rounds), [Wishlist](https://esp.ethereum.foundation/applicants/wishlist), [RFPs](https://esp.ethereum.foundation/applicants/rfp), [Office Hours](https://esp.ethereum.foundation/applicants/office-hours)
+- [ENS Public Goods Builder Grants](https://builder.ensgrants.xyz/)
+- [NLnet current call](https://nlnet.nl/news/2026/20260601-call.html)
+- [Common Good Cyber Fund](https://www.isocfoundation.org/grant-programme/common-good-cyber-fund/)
+- [Base funding](https://docs.base.org/get-started/get-funded)
+- [Sia Grants](https://sia.tech/grants)
+- [Open Technology Fund Internet Freedom Fund](https://www.opentech.fund/funds/internet-freedom-fund/)
+
+Current read:
+
+- **Apply today:** FUTO microgrant, USD 5,000, for one "walk-away file proof." Applications are open, the email intake is lightweight, and FUTO explicitly values source availability, user control, self-manageable infrastructure, sovereign identity, and open databases. The bounded proof fits EFS's current maturity better than a broad v2 build request.
+- **Strong next lead:** Sentient Foundation launched a rolling open-source AGI program with USD 42M committed. Its public product requests include agent identity, signed actions, provenance, public logs, and user-owned memory. EFS should apply only after building an inspectable AI-specific vertical slice; a generic EFS proposal with AI wording would be weak. The grant form requires a demo URL and supporting file upload.
+- **Conditional follow-up:** Filecoin Open Grants remain live up to USD 50,000. A credible EFS request would be an approximately USD 15,000 Filecoin Pin integration, but it first needs dual MIT/Apache-2.0 licensing, a pilot corpus, a tester, and real Filecoin usage. Public precedents show that "provenance plus IPFS" and a small ask are not sufficient without proof.
+- **Not open today:** EF has no active general round or Wishlist; Office Hours is non-financial. ENS Builder Grants now explicitly says applications are closed because its working group is sunsetting.
+- **Deadlines that should not create false urgency:** NLnet's 2026-08-01 call is restricted to Taler and Fediversity. Common Good Cyber's 2026-08-04 call requires established nonprofit/cybersecurity evidence EFS does not have.
+- **Other conditional routes:** OTF needs an at-risk user group and internet-freedom deployment partner; Base is retroactive after a shipped Base deployment; Sia requires a real Sia SDK or `indexd` build.
+
+Precedent lessons:
+
+- Show one artifact a reviewer can inspect in under five minutes.
+- Separate existing v1 evidence from draft v2 work.
+- Fund one bounded result with executable acceptance tests, not the whole vision.
+- Name a beneficiary, a maintainer, a license, a budget, and what happens after the grant.
+- Remove unsupported neutrality, permanence, security, cross-chain, and adoption claims.
+
+Implication: [[futo-microgrant-application]] is the active same-day worksheet. Sentient and Filecoin remain high-value follow-ups after their evidence gates are met.
+
+Rows touched: [[proposals]], [[programs]]
+
+Next check: After the FUTO application is sent; weekly for Sentient, Filecoin, and EF.
+
 ## 2026-07-07 - Proposal tracker source-backed column refresh
 
 Trigger: Fill `Amount`, `Deadline`, `Last checked`, and `Gate / evidence needed` after adding operational columns to [[proposals]].

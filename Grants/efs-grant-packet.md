@@ -4,13 +4,13 @@ Reusable material for grant applications. Adapt this to each funder's language a
 
 ## One-line description
 
-Ethereum File System (EFS) is Ethereum-native public infrastructure for durable paths, provenance, mirrors, and verifiable data references across Ethereum and EVM L2s.
+Ethereum File System (EFS) is building open Ethereum-native infrastructure for portable paths, provenance, mirrors, and verifiable data references.
 
 ## Short description
 
-Ethereum File System (EFS) is a credibly neutral, open-source public good that organizes data on Ethereum and EVM L2s. It provides a shared onchain namespace and index that developers, agents, and communities can extend without relying on a single app, server, or admin.
+Ethereum File System (EFS) is an open-source public-good project exploring a shared Ethereum-native namespace and index that developers, agents, and communities can extend without relying on a single app or server.
 
-EFS uses Ethereum attestations and simple resolver patterns to connect stable paths to data, mirrors, tags, lists, redirects, and lens-scoped views. Storage backends such as IPFS, Filecoin, Arweave, HTTP, and future transports can be represented as mirrors; EFS focuses on the neutral coordination layer above them.
+EFS v1 produced public code, a Sepolia implementation, and a working demo. EFS v2 is a clean redesign, not a production implementation. Its current architecture explores paths, data, mirrors, tags, lists, redirects, and lens-scoped views above storage systems such as IPFS, Filecoin, Arweave, HTTP, and onchain bytes.
 
 ## Why Ethereum needs this
 
@@ -22,10 +22,10 @@ EFS uses Ethereum attestations and simple resolver patterns to connect stable pa
 
 ## Core claims
 
-- **Credibly neutral:** no admin keys, no global delete button, no app-owned namespace as the only path to discovery.
+- **Neutrality goal:** minimize privileged control and avoid making one app-owned namespace the only path to discovery; describe current authority honestly in each application.
 - **Open source:** grant-funded outputs should remain public and reusable.
 - **Composable:** paths, data, mirrors, tags, lists, redirects, and lenses can be reused by multiple apps.
-- **Storage-agnostic:** EFS does not need to be the storage network; it can point to and verify many storage backends.
+- **Storage-composing:** EFS is not the storage network; each named backend has its own verification and persistence guarantees.
 - **Builder-focused:** EFS is primarily infrastructure for developers, agents, curators, and public-good maintainers.
 
 ## Do not say
@@ -36,6 +36,8 @@ EFS uses Ethereum attestations and simple resolver patterns to connect stable pa
 - Do not say "canonical truth layer." Use "lens-scoped, attestable views" or "verifiable claims with explicit attesters."
 - Do not lead with token, VC, or speculative-market language unless a funder explicitly asks about sustainability mechanics.
 - Do not call EFS critical infrastructure for security funders until there is adoption/dependency evidence.
+- Do not blur the existing v1 evidence with the draft v2 architecture.
+- Do not claim no admin keys, cross-L2 deployment, production readiness, audits, or adoption without current evidence.
 
 ## External links
 
@@ -122,8 +124,8 @@ These are examples, not commitments.
 
 | Milestone | Output | Evidence |
 |---|---|---|
-| Grant packet and public profile cleanup | Updated Karma/Giveth/Gitcoin-ready project profile and public pitch | Profile links, public updates |
 | Resolver demo | Live demo resolving EFS paths to mirrored content | Demo URL, repo, transaction links |
+| Walk-away file proof | Portable proof verified without an EFS account or hosted EFS API | CLI, test vectors, two carriers, short demo |
 | Filecoin/IPFS mirror integration | EFS record flow for IPFS/Filecoin-backed content | Docs, code, example dataset |
 | SDK read path | Developer API for resolving paths, mirrors, and provenance | Package, docs, tests |
 | Public-good dataset pilot | Curated dataset published through EFS with mirrors and provenance | Dataset page, EFS records, update log |
@@ -135,7 +137,7 @@ Use concrete milestone bundles instead of broad operating asks.
 
 | Ask size | Good fit | Example bundle |
 |---|---|---|
-| USD 5k-10k | Lightweight ecosystem grants, microgrants, profile cleanup | Public profile cleanup, demo polish, one small integration note, Karma/GAP milestone setup |
+| USD 5k-10k | Lightweight ecosystem grants and microgrants | One independently testable prototype, docs, test vectors, and a short demo |
 | USD 25k | Narrow tooling/RFP work | Resolver demo, docs, example records, small public-good dataset pilot |
 | USD 50k | Filecoin/IPFS-style integration or SDK slice | Mirror/provenance integration, SDK read path, tests, docs, example dataset |
 | USD 100k+ | Larger infrastructure/security/public-interest work | Multi-milestone build, security review prep, public dataset partner, reporting cadence, maintenance runway |

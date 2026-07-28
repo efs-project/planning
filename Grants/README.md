@@ -28,6 +28,7 @@ Row graduation rule: a lead becomes a [[proposals]] row only when it has a plaus
 | [[proposals]] | Submitted, drafting, and watchlist proposals. Single source of truth for status. |
 | [[efs-grant-packet]] | Reusable EFS pitch, links, milestones, and budget snippets. |
 | [[research-log]] | Dated grant-specific research notes, rejected leads, and community/funder intel. |
+| [[futo-microgrant-application]] | Active worksheet for the proposed USD 5,000 walk-away file-proof microgrant. |
 
 ## External anchors
 
