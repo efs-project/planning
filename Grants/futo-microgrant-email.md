@@ -33,6 +33,8 @@ The budget is 100 hours at USD 50 per hour: USD 750 for specification and tests,
 
 I have developed EFS publicly since early 2025 and previously delivered public contracts plus an experimental Sepolia deployment. The broader EFS v2 architecture is still being designed; this grant funds only the self-contained experiment described here.
 
+EFS has been self-funded to date, and this proposed work is not funded elsewhere.
+
 All funded work will be MIT-licensed and independently usable. It will include no advertising, telemetry, token issuance, financial product, storage marketplace, or required proprietary service.
 
 Current work and prior implementation:

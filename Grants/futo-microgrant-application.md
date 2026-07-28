@@ -116,7 +116,7 @@ The proof will include no advertising, telemetry, token issuance, financial prod
 - [x] Ask and availability: USD 5,000, 100 hours, six weeks.
 - [x] License: MIT for all grant-funded outputs.
 - [x] Human contributors: James is the only confirmed human contributor. AI agents are development tools, not team members.
-- [ ] Confirm prior EFS funding and that this scope is not funded elsewhere.
+- [x] Funding history: EFS has been self-funded to date, and this proposed scope is not funded elsewhere.
 
 ## Evidence to include
 
@@ -129,7 +129,6 @@ Do not lead reviewers to the current website or GitHub organization description 
 
 ## Remaining quality gates
 
-- [ ] James confirms prior funding and non-duplication.
 - [ ] James approves the architecture-neutral scope and EFS release pilot.
 - [ ] Choose the exact tagged source release and generated ABI artifact.
 - [ ] Decide whether a tiny pre-grant demonstrator is worth building before submission.

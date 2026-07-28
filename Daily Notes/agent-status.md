@@ -8,6 +8,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-07-28
 
+- @grants: futo-funding-facts — James confirmed EFS has been self-funded to date and the proposed FUTO scope is not funded elsewhere; updated the worksheet, proposal gate, owner fork, and unsent email draft.
 - @grants: futo-four-lens-review — ran independent FUTO-fit, technical, editorial, and hostile-committee reviews; all rejected the prior send-ready claim. Rewrote the application as architecture-neutral Walk-Away Proof v0 with a deterministic manifest, carrier-independent digest, minimal Sepolia receipt, no-chain baseline, executable outcomes, EFS release pilot, independent reproduction, and 12-month maintenance; routed the submit-now-vs-demonstrator fork as FJ-3.
 - @grants: futo-microgrant-application — incorporated James's applicant, control, carrier, license, and availability answers; found the frozen Safe-controlled Sepolia deployment as prior evidence; and prepared a send-ready FUTO email pending only funding-history confirmation and James's send approval.
 - @grants: same-day funding pass — verified live programs with four expert lanes, selected a bounded USD 5k FUTO microgrant as the strongest honest application today, added the application worksheet, recorded Sentient as the next AI-specific lead, tightened Filecoin gates, retired expired ProPGF urgency, and corrected v1/v2 claim blur in the reusable grant packet.
