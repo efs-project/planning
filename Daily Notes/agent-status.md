@@ -6,6 +6,10 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ---
 
+## 2026-07-28
+
+- @pm: guest deep-link path + open achievements — captured James's two future product ideas with design connections and unresolved boundaries: immediate no-account viewer/app boot with dual guest/authenticated app modes and true module slicing; plus an open cross-app achievement catalog/eligibility/evidence standard without prematurely choosing NFT, soulbound, EFS-claim, or EAS carrier.
+
 ## 2026-07-27
 
 - @pm: portable schemas/validators + EAS interoperability — audited which EAS properties survived v2, identified the application-shape and permissionless-validator gaps, and prepared a dedicated Fable handoff with real-EAS import/export/projection candidates / next: James chooses its sequencing relative to the read-lens resolver pass.

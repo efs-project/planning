@@ -8,6 +8,122 @@ A lightweight parking lot for future ideas, "we should do X someday" drops, and 
 
 ## Open
 
+### Instant guest deep links + two-mode applications
+*(James, 2026-07-28)*
+
+Make the first experience of EFS OS a **fast, unauthenticated guest path** for
+people arriving through ordinary hyperlinks from Reddit, chats, search, and
+other sites. A public file, folder, or app link should open directly into the
+smallest useful viewer—typically the file browser or linked app—without account
+creation, wallet connection, authentication, profile hydration, or a tour.
+Most visitors will not have EFS accounts and should still get immediate value.
+
+Keep only the minimum trustworthy link-classification, data-resolution, and
+verification slice on the critical path. Defer the full Kernel, wallet and
+identity systems, private stores, sync, package management, general Session
+Shell, and unrelated OS services until after the linked content is interactive;
+then warm them in the background or load them when the user asks for a
+privileged/full-OS action. Preserve hyperlinks as a first-class product surface,
+not an onboarding detour.
+
+Require third-party applications to design two operational modes:
+
+- **guest mode:** fast, useful, read-oriented, no identity assumption, and no
+  ambient access to private data or authority; and
+- **authenticated mode:** explicitly promoted after user intent, with the
+  application's full authorized features, private data, writes, and security
+  ceremonies.
+
+Explore the universal edge case honestly: applications that cannot offer a
+meaningful guest function should have to declare that limitation and must not
+become the automatic handler for public hyperlinks. Promotion from guest to
+authenticated mode must preserve the user's route/state without silently
+granting capabilities.
+
+Treat modularity as a performance and ownership requirement: Bootstrapper,
+minimal verifier/resolver, viewers, Kernel services, authentication, Shell, and
+individual apps should have explicit dependency boundaries, separately
+loadable closures, budgets, lifecycle/restart behavior, and independently
+manageable updates where security permits. "Modular" is not satisfied merely
+by separate source files if opening one folder still downloads and initializes
+the whole OS.
+
+**Terminology:** James called this the anonymous path; use **guest /
+unauthenticated path** in specifications. It means no account or login
+prerequisite, not network or graph anonymity. Endpoint choice, public reads,
+and public writes may still leak interest, authorship, timing, and graph
+relationships.
+
+**Existing foundation:** [[Designs/clientv2/boot-and-profiles]] already specifies
+minimal viewer closures, guest generations, lazy full-Shell promotion, and cold
+start budgets; this idea strengthens the product requirement and adds the
+third-party dual-mode contract plus stricter auth/kernel deferral. Revisit in
+the boot performance and app-model rounds. Related:
+[[Designs/clientv2/web-os-thesis]],
+[[Designs/clientv2/fable-third-party-app-model-handoff]],
+[[Designs/clientv2/kernel-capability-model]], and
+[[Designs/clientv2/packages-and-updates]].
+
+### Open cross-app achievement standard
+*(James, 2026-07-28)*
+
+Explore an open achievement system for EFS OS that combines the motivation and
+progress view of Steam/Xbox/PlayStation achievements with POAP-like durable
+records of meaningful things a person has done. The OS should be able to show
+one cross-app collection while each app owns a namespaced catalog of earnable
+achievements. The likely user surface is a first-party Achievements app that
+aggregates an open catalog-of-apps → per-app achievement catalogs → the user's
+earned records and remaining goals; it is a viewer/index, not the universal
+issuer.
+
+A candidate app achievement manifest would publish stable achievement IDs,
+human metadata and artwork, visibility/hidden status, version/supersession
+relationships, and a configurable read-only eligibility function or validator:
+given a principal and an achievement, can this principal earn or claim it now?
+Keep **eligibility**, **claiming/issuance**, and **earned evidence** separate.
+Some achievements may be derived live with no mint; some may be self-claimable
+from a verifiable proof; others may require an app, event organizer, or trusted
+issuer to attest. Hidden unearned achievements are desirable where technically
+honest, but are not a hard requirement.
+
+Do not pre-decide the earned-record carrier. Compare:
+
+- a portable EFS achievement claim;
+- a non-transferable or soulbound token;
+- an ordinary transferable NFT where that meaning is intentional;
+- an EAS/credential/POAP-compatible projection; and
+- a derived, non-minted result computed from public state.
+
+The open standard matters more than choosing one collection contract. A single
+official contract or NFT collection should not become the authority over every
+app's achievements. App identity, catalog authority, verifier identity/version,
+evidence, recipient principal, issuance basis, revocation, transferability, and
+privacy must remain explicit and independently inspectable.
+
+Questions for the later exploration:
+
+- Can the eligibility function be safely standardized as a bounded
+  `view`/read-only interface across chains and off-chain evidence?
+- How do portable achievements survive account/key rotation and multiple
+  personas without making private personas linkable?
+- Who may add, change, hide, revoke, or supersede an app's achievements?
+- How are anti-cheat, snapshot/finality, replay, cross-chain state, and
+  unverifiable local/off-chain actions represented honestly?
+- Can hidden achievements conceal their criteria or existence on a public
+  system, or are they only hidden in presentation?
+- How does the OS distinguish an entertaining accomplishment, an
+  organizer-issued attendance record, and a security-sensitive credential
+  without turning any of them into a generic green trust badge?
+- What is the simplest SDK flow for defining a catalog, checking eligibility,
+  claiming, and displaying portable progress?
+
+This is a strong future workload for
+[[Designs/efsv2/fable-handoff-portable-schemas-and-validators]]: shared schemas,
+portable identity, stateful admission/validation, receipts, discovery, and real
+EAS projection all meet here. It also connects to [[Designs/efsv2/kel]],
+[[Designs/efsv2/privacy-pass-synthesis]],
+[[Designs/efsv2/apps-cookbook]], and the eventual EFS OS identity/app model.
+
 ### HyperCard/Decker-style end-user authoring
 *(James, 2026-07-26)*
 
