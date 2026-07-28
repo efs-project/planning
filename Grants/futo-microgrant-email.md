@@ -1,55 +1,48 @@
 # FUTO Microgrant Email
 
-Send-ready draft for [[futo-microgrant-application]]. Proposal status remains in [[proposals]].
+Expert-reviewed draft for [[futo-microgrant-application]]. Proposal status remains in [[proposals]].
 
 **To:** `grantapps@futo.org`
 
-**Subject:** Microgrant application: EFS Walk-Away File Proof
+**Subject:** Microgrant application: portable file verification without platform lock-in
 
-**Draft state:** Created in James's Gmail on 2026-07-28; not sent.
+**Draft state:** Updated in James's Gmail on 2026-07-28; not sent. Hold until the remaining quality gates in [[futo-microgrant-application]] are resolved.
 
 ---
 
 Hello FUTO team,
 
-I'm James Carnley, an open-source builder in Chicago who leads and maintains Ethereum File System (EFS). I'm applying personally for a USD 5,000 microgrant to build the **EFS Walk-Away File Proof**, a six-week open-source prototype focused on user control and exit.
+I'm James Carnley, an open-source developer in Chicago. I'm seeking a one-time USD 5,000 microgrant to build **EFS Walk-Away Proof v0**, a six-week experiment that lets an open-source maintainer publish a signed file reference and lets anyone later verify the exact bytes through either IPFS or Arweave after the original website, platform account, and EFS services disappear.
 
-Public files are often reachable only through a platform-owned URL or API. IPFS and Arweave can make the bytes independently addressable, but applications still need a portable way to record who published a reference, which mirrors are available, and how another person can verify the result without depending on the original application.
+Open-source release files and their metadata commonly depend on accounts and URLs controlled by hosting platforms. If an account is suspended, abandoned, or compromised, users may retain copies but lose a reliable way to determine which Ethereum address signed the reference, which bytes it identified, where valid copies were published, or whether the reference was revoked.
 
-EFS is exploring an Ethereum-native coordination layer for paths, provenance, and mirrors above storage systems. EFS v1 produced public code and a Safe-controlled Sepolia deployment. EFS v2 is a clean redesign, not a production implementation. This grant would fund one bounded proof rather than claiming the full system is complete.
+The prototype will define a deterministic signed manifest containing a common SHA-256 digest and byte length plus separate IPFS and Arweave locations. A minimal experimental Sepolia receipt will commit to the manifest digest and its revocation status. An MIT-licensed command-line verifier will check the signature, public-chain receipt, revocation state, and retrieved bytes without requiring an EFS account or EFS-operated server.
 
-The acceptance test is simple:
+Ethereum has one narrow, testable role: providing a shared receipt and revocation log that no application vendor controls. It will not store files or promise permanence. The final report will compare this design with a simpler signed-manifest-only baseline and document whether Ethereum provides enough value to justify its cost and dependencies.
 
-> A clean machine can reconstruct and verify a portable file reference from public Ethereum data, IPFS, and Arweave without an EFS account, an EFS-operated server, or a privileged EFS key.
+The first pilot will publish a tagged EFS source release and generated ABI bundle. Success means:
 
-The proposed work is:
+- verification succeeds through IPFS when Arweave is unavailable, and through Arweave when IPFS is unavailable;
+- modified bytes, signatures, manifests, locators, revoked references, and wrong chain receipts are rejected;
+- unavailable carriers are reported as unavailable rather than mislabeled as tampering;
+- a second person reproduces the result from a clean machine using replaceable RPC and gateway endpoints.
 
-- define the threat model, portable proof format, and executable acceptance tests;
-- implement a minimal publisher and command-line verifier;
-- verify the same file through IPFS and Arweave and document disappearance, stale-mirror, substitution, and tampering behavior;
-- publish test vectors, reproducible instructions, a short demonstration video, a final report, and a maintenance note.
+Over six weeks I will specify the manifest and threat model, build the publisher, Sepolia receipt, and verifier, run the failure tests, and publish the source, test vectors, reproducible instructions, short video, independent reproduction result, and final comparison report.
 
-The budget is 100 hours at USD 50 per hour:
+The budget is 100 hours at USD 50 per hour: USD 750 for specification and tests, USD 2,500 for implementation, USD 1,000 for failure and independence testing, and USD 750 for documentation and publication. I will maintain critical defects in the funded code for at least twelve months.
 
-- scope and acceptance tests: USD 750;
-- prototype implementation: USD 2,500;
-- independence and failure testing: USD 1,000;
-- documentation, demo, and publication: USD 750.
+I have developed EFS publicly since early 2025 and previously delivered public contracts plus an experimental Sepolia deployment. The broader EFS v2 architecture is still being designed; this grant funds only the self-contained experiment described here.
 
-All grant-funded output will be released as open-source software under the MIT license. The verification path will not require a proprietary client, hosted EFS service, advertising, token, or irreplaceable operator. I currently control the EFS GitHub organization and `efs.eth` through a Safe-based deployment authority; the Safe is intended to become shared multisig control as additional human team members join.
+All funded work will be MIT-licensed and independently usable. It will include no advertising, telemetry, token issuance, financial product, storage marketplace, or required proprietary service.
 
-Current public evidence:
+Current work and prior implementation:
 
-- Website: https://efs.eth.limo
-- GitHub: https://github.com/efs-project
-- Karma project profile: https://www.karmahq.xyz/project/ethereum-file-system/about
-- Sepolia deployment registry: https://github.com/efs-project/contracts/blob/main/docs/CHAINS.md
-- EFSIndexer on Sepolia: https://sepolia.etherscan.io/address/0xc4DeaBB482C2FA74690629eEa662efb166BD658a
-- GitHub profile: https://github.com/JamesCarnley
+- https://github.com/efs-project/contracts
+- https://github.com/efs-project/contracts/blob/main/docs/CHAINS.md
+- https://github.com/JamesCarnley
+- https://github.com/efs-project
 
-The requested prototype does not exist yet; producing and documenting that independently reproducible proof is the purpose of the grant. I would be glad to provide any additional format, technical detail, or progress reporting FUTO prefers.
-
-Thank you for considering it,
+Thank you for considering the application. I would be glad to provide a one-page technical specification or walk through the existing deployment.
 
 James Carnley
 Chicago, Illinois

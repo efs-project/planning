@@ -15,6 +15,33 @@ Rows touched:
 Next check:
 ```
 
+## 2026-07-28 - FUTO four-lens expert review
+
+Trigger: Review the proposed FUTO microgrant worksheet and Gmail draft for mission fit, technical correctness, writing quality, and rejection risk.
+
+Review lanes:
+
+- FUTO/open-source grant reviewer;
+- Ethereum, IPFS, and Arweave technical fact-checker;
+- grant-writing and communications editor;
+- hostile grant-committee red team.
+
+Consensus:
+
+- Do not send the original draft. It was polished but too abstract, had no concrete user, left Ethereum's necessity unexplained, and linked public material whose legacy permanence claims contradicted the careful grant language.
+- Keep the USD 5,000 / 100-hour / six-week shape. It is credible only for a narrow experiment, not a v2 implementation.
+- The beneficiary is an open-source maintainer whose release site or platform account may disappear. The first honest pilot is a tagged EFS source release plus generated ABI bundle.
+- Use a carrier-independent SHA-256 and byte length. IPFS CIDs and Arweave transaction IDs are separate locators, not interchangeable file hashes.
+- Ethereum's only proposed role is an experimental public receipt and revocation log. Compare it with a signed-manifest-only baseline and report when Ethereum does not justify its cost or dependencies.
+- Define executable outcomes: `VERIFIED`, `UNAVAILABLE`, and `INVALID`; never treat unavailability as tampering.
+- Require configurable RPC/gateway endpoints, a pinned environment, explicit trust boundaries, and a second person's published clean-machine reproduction.
+- Remove the website, Karma, and Safe-governance details from the email. Use specific code/deployment links and mention v1/v2 maturity once.
+- Commit to twelve months of critical maintenance and public issue tracking.
+
+Result: [[futo-microgrant-application]] and [[futo-microgrant-email]] were rewritten around EFS Walk-Away Proof v0. The proposal returned from `needs-signoff` to `drafting`; FJ-3 now asks whether to submit the improved early-stage proposal or first build a tiny demonstrator and name a reproducer.
+
+Next check: After James confirms prior funding/non-duplication and resolves FJ-3.
+
 ## 2026-07-28 - Same-day application and live-program sweep
 
 Trigger: Choose one credible grant to apply to today and identify the information needed for a strong submission.

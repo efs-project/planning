@@ -14,7 +14,7 @@ aliases: [For-James]
 
 ## ⚡ DECIDE NOW — James
 
-- **FJ-2 — Send the USD 5,000 FUTO microgrant application today?** A Gmail draft is ready and the proposal is tracked in [[Grants/futo-microgrant-application]]. `a` send as drafted after confirming the work is not funded elsewhere; `b` revise first; `c` do not submit. **@grants recommendation: a.**
+- **FJ-3 — FUTO submission quality gate.** Four expert reviews agreed the old email should not be sent; the replacement is in [[Grants/futo-microgrant-email]]. After confirming prior funding/non-duplication: `a` submit the improved architecture-neutral proposal now; `b` first build a tiny signed-manifest demonstrator and name an independent reproducer, then submit; `c` stop. **@grants recommendation: b for the strongest application; a remains a credible early-stage microgrant submission.**
 
 ## 🕐 WHEN YOU HAVE TIME
 
