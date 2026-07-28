@@ -31,3 +31,9 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 
 - [`2026-07-24-chicago-voting-vocdoni/`](./2026-07-24-chicago-voting-vocdoni/) — deep review of legacy Vochain and DAVINCI, ZK/encryption and EVM/L2 behavior, Illinois/Chicago feasibility, alternatives, a bounded EFS sidecar architecture, pilot gates, and the supporting audio/evidence record.
 - [`folder-poll-question-resolution.md`](./2026-07-24-chicago-voting-vocdoni/folder-poll-question-resolution.md) — follow-up answers for decentralized folder polling: social-poll versus governance-vote defaults, role and privacy boundaries, EFS v2 authority/snapshot/enumeration gates, current DAVINCI maturity, economics, vendor questions, and acceptance tests.
+
+### Ethereum-aligned voting alternatives and EFS (2026-07-28)
+
+- [`2026-07-28-voting/`](./2026-07-28-voting/) — current primary-source comparison of MACI v3, Semaphore, Snapshot, OpenZeppelin Governor, Shutter, Interfold/CRISP, DAVINCI, Belenios, ElectionGuard and Decidim; includes per-project reports, an EFS backend profile, a use-case decision matrix and a synthetic validation program.
+- [`comparison.md`](./2026-07-28-voting/comparison.md) — direct MACI maturity/ideology/EFS verdict, best system by use case, coordinator-free research directions and pilot sequence.
+- [`efs-integration.md`](./2026-07-28-voting/efs-integration.md) — backend-neutral EFS voting profile and the generic EFS v2 requirements exercised by voting.

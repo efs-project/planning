@@ -8,6 +8,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-07-28
 
+- @codex: voting-alternatives — completed primary-source profiles for MACI v3, Semaphore, Snapshot, OpenZeppelin Governor/Cactus, Shutter, Interfold/CRISP, Belenios, ElectionGuard and Decidim; updated the DAVINCI comparison; and added the decision matrix, EFS backend profile and synthetic validation program. MACI v3 is the leading bounded private-EVM pilot; CRISP is the leading no-single-plaintext-holder EVM prototype but remains Sepolia/testnet-only. No backend warrants a frozen EFS kernel primitive or standalone Chicago public-election use; automatic folder mutation does require a generic external-result authority decision.
+
 - @pm: guest deep-link path + open achievements — captured James's two future product ideas with design connections and unresolved boundaries: immediate no-account viewer/app boot with dual guest/authenticated app modes and true module slicing; plus an open cross-app achievement catalog/eligibility/evidence standard without prematurely choosing NFT, soulbound, EFS-claim, or EAS carrier.
 
 ## 2026-07-27
