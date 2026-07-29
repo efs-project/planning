@@ -1,11 +1,11 @@
 # EFS v2 + OS — owner decision inbox
 
-**Status:** revalidated decision packet (2026-07-25 joined pass + 2026-07-28 lens pass) + held remainder; no choice is adopted until James answers and it is copied into [[owner-rulings]]
+**Status:** reference — revalidated decision packet (2026-07-25 joined pass + 2026-07-28 lens pass) + held remainder; no choice is adopted until James answers and it is copied into [[owner-rulings]]
 **Audience:** James first; designers second
 **Last reconciled:** 2026-07-28
 **Inputs:** [[joined-pass-synthesis]] + [joined critic](../../Reviews/2026-07-25-joined-fs-pass-corpus/critic.md), [[lens-pass-synthesis]] + [lens critic](../../Reviews/2026-07-25-lens-pass-corpus/critic.md) (the packets' reason trails), [[owner-rulings]], [[assumptions-and-requirements]], [[multichain-dependency-map]], [[mountable-filesystem-semantics]], [[privacy-james-decisions]], [[solana]], [[ethereum-first-efs-and-os]]
 
-#status/draft #kind/decision #repo/planning #topic/efsv2 #topic/clientv2 #blocked-on/human-decision
+#status/reference #kind/decision #repo/planning #topic/efsv2 #topic/clientv2 #blocked-on/human-decision
 
 > **This is the sole live owner queue for EFS v2 and cross-cutting OS architecture.** Detailed documents remain the reason trail. Future agents must not revive a source checkbox classified here as settled, evidence-gated, delegated, or superseded.
 >

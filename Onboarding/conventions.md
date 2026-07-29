@@ -94,7 +94,7 @@ Canonical meanings live in [[design-system#Designs lifecycle]]; this is the tag 
 | `#status/rejected` | Hard-vetoed by the owner. Needs a new argument to revive. |
 | `#status/superseded` | A newer design replaced it; the successor names it in its `**Supersedes:**` field. Read the successor — don't revive this one. Distinct from `abandoned` (nobody replaced it, we just chose against it) and `rejected` (vetoed). Fills the gap where `**Supersedes:**` already existed as a header field with no matching status. |
 | `#status/handoff` | Planning work is finished and the doc is a self-contained packet for another repo's agent. Terminal **in this vault**: it never gets numbered, because implementation lands elsewhere. **One word.** |
-| `#status/reference` | A permanent **non-design** artifact that lives inside `Designs/` — a ruling ledger, a kickoff-context doc, a round map. Has no design lifecycle and is never promoted or numbered. Use this instead of inventing a prose status like `running` or `informational`. |
+| `#status/reference` | A permanent **non-design** artifact that lives inside `Designs/` — **every `owner-decision-inbox.md` and `owner-rulings.md`**, plus kickoff-context docs and round maps. Has no design lifecycle and is never promoted or numbered. Use this instead of inventing a prose status like `running`, `informational`, or `revalidated`. |
 | `#status/done` | Terminal state of a **non-design** artifact — a finished `Reviews/` pass, an ops card. **Never valid inside `Designs/`**, where a design ends `landed` / `abandoned` / `rejected` / `superseded`. |
 
 **Not vocabulary — do not copy these if you see them:**
@@ -104,6 +104,7 @@ Canonical meanings live in [[design-system#Designs lifecycle]]; this is the tag 
 | `#kind/notes` | Typo for `#kind/note`. Normalize on sight. |
 | `#status/notes` | Category error — "notes" is an artifact *type*, not a lifecycle state. A running-notes ledger is `#kind/note` plus a real status. |
 | prose `hand-off` | Spelling drift for `handoff`. One word, in both prose and tag. |
+| `revalidated` | **Not a lifecycle state — it's freshness.** An agent reached for `**Status:**` to say "this packet was re-derived" and broke tri-sync for four days (2026-07-25→29). A decision inbox is `reference` *permanently*; how current it is belongs in its `**Last reconciled:**` field, which those files already carry. Descriptive detail goes in the prose tail after the lifecycle token — `**Status:** reference — revalidated packet + held remainder` — which tri-sync reads past. |
 | `#status/shelved`, `#status/hibernating` | **Proposed 2026-05-26 by the rot audit; never adopted, zero real uses** — every occurrence in the vault is the proposal quoting itself. The need was met instead by `#blocked-on/<unblock-trigger>` on a `draft` (see [[cross-repo-reference-mirror]]), which records *why* it is asleep and *what* wakes it. Don't add these. |
 
 Adding to a closed family is fine when nothing existing fits — update this table, [[design-system]], and `scripts/tri-sync-check.sh`'s accepted lists in the same commit, and flag it in chat.

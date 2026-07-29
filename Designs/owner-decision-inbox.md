@@ -1,10 +1,10 @@
 # Designs — owner decision inbox
 
-**Status:** draft decision packet; no choice is adopted until James answers and it is recorded in the owning history
+**Status:** reference — decision packet; no choice is adopted until James answers and it is recorded in the owning history
 **Audience:** James first; designers second
 **Last reconciled:** 2026-07-21
 
-#status/draft #kind/decision #repo/planning #blocked-on/human-decision
+#status/reference #kind/decision #repo/planning #blocked-on/human-decision
 
 > **Start here for design decisions.** This page owns choices about loose designs in `Designs/`. Each design subfolder owns its own queue:
 >

@@ -1,11 +1,11 @@
 # Client v2 — owner decision inbox
 
-**Status:** draft decision packet; no choice is adopted until James answers and it is recorded in the owning history
+**Status:** reference — decision packet; no choice is adopted until James answers and it is recorded in the owning history
 **Audience:** James first; client/OS designers second
 **Last reconciled:** 2026-07-22
 **Inputs:** [[web-os-thesis]], [[open-questions]], [[wallet-and-actions]], [agent-native](./agent-native.md), and the [EFS v2 owner queue](../efsv2/owner-decision-inbox.md)
 
-#status/draft #kind/decision #repo/planning #repo/client #repo/sdk #topic/clientv2 #blocked-on/human-decision
+#status/reference #kind/decision #repo/planning #repo/client #repo/sdk #topic/clientv2 #blocked-on/human-decision
 
 > **This is the sole live owner queue for Client v2-specific product architecture.** Cross-cutting EFS/OS decisions stay canonical in the [EFS v2 inbox](../efsv2/owner-decision-inbox.md). This page gives the client example and link but never creates a second answer state.
 
