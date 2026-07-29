@@ -26,6 +26,7 @@ Conventions: [[brainstorm-system]].
 - 2026-05-26 [`2026-05-26-bs-system-design-perspectives-v1-contract-surface-from-n-angles`](./2026-05-26-bs-system-design-perspectives-v1-contract-surface-from-n-angles.md) — `raw` — 8 perspectives (L2 sequencer, indexer node, hardware wallet, search engine, privacy preserver, cross-chain bridge, archival node, lens curator). **Sharpest architectural ask: `EFSUploadGateway` wrapper** — single change addressing 8-prompt detonation + L2 amortization + AA bundling.
 
 ### Meta / cross-cutting
+- 2026-07-29 [`2026-07-29-pm-credibly-neutral-git-forge-and-agent-artifacts`](./2026-07-29-pm-credibly-neutral-git-forge-and-agent-artifacts.md) — `reference` — Product-priority and research brief: neutral Git-host v1 floor, portable later-forge layer, explicit Git-backed EFS workspaces, and safe separation of public Agent Skills/knowledge from private memory/context.
 - 2026-05-26 [`2026-05-26-bs-divergent-usecases-v1-efs-use-cases-across-industries`](./2026-05-26-bs-divergent-usecases-v1-efs-use-cases-across-industries.md) — `raw` — 15 use cases. Upstream for many subsequent brainstorms.
 - 2026-05-26 [`2026-05-26-bs-vocab-coherence-audit-v1-cross-repo-vocab-drift-audit`](./2026-05-26-bs-vocab-coherence-audit-v1-cross-repo-vocab-drift-audit.md) — `raw` — 7 High + 4 Medium + 2 Low drift instances + 14 Glossary gaps. **Sharpest finding: two branches each minted a different ADR-0043 (renumbering conflict).**
 - 2026-05-26 [`2026-05-26-bs-rot-audit-v1-first-formal-rot-audit`](./2026-05-26-bs-rot-audit-v1-first-formal-rot-audit.md) — `raw` — 16 rot items (4H/7M/5L). **Surprising:** `contracts/main` hasn't moved in 40 days; specs about to detonate at Lists merge. Recommends `#status/shelved` vocab addition.
@@ -51,6 +52,7 @@ All 11 brainstorms except `pm-client-os-architecture` (reference) and partial su
 
 ### Reference (durable context)
 - 2026-05-26-pm-client-os-architecture
+- 2026-07-29-pm-credibly-neutral-git-forge-and-agent-artifacts
 
 ## Integrated history
 *(brainstorms that became designs/decisions/cards land here with `→` pointer)*
