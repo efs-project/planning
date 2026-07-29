@@ -14,7 +14,7 @@ aliases: [For-James]
 
 ## ⚡ DECIDE NOW — James
 
-- **FJ-3 — FUTO submission quality gate.** Funding/non-duplication is confirmed and the replacement email is in [[Grants/futo-microgrant-email]]. `a` submit the improved proposal now; `b` follow the one-day [[Grants/futo-fj-3b-demonstrator]] checklist, have another person reproduce it, then submit; `c` stop. **@grants recommendation: b for the strongest application; a remains a credible early-stage microgrant submission.**
+- **FJ-3 — FUTO submission quality gate.** Funding/non-duplication is confirmed, `JamesCarnley.eth` is the chosen signer, clean-runner automation replaces a second human reproducer, and the replacement email is in [[Grants/futo-microgrant-email]]. `a` submit the improved proposal now; `b` follow the one-day [[Grants/futo-fj-3b-demonstrator]] checklist using deployed EFS, publish the CI evidence, then submit; `c` stop. **@grants recommendation: b for the strongest application; a remains a credible early-stage microgrant submission.**
 
 ## 🕐 WHEN YOU HAVE TIME
 

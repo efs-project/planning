@@ -15,7 +15,7 @@ We then make a signed instruction card saying:
 
 > This exact file has this fingerprint and size. Here is where to find each copy. James signed this card, and its fingerprint was posted publicly on Ethereum's Sepolia test network.
 
-A small verifier follows the card, downloads either copy, and checks the file. Another person repeats the test on their own computer. That is the evidence added to the grant application.
+A small verifier follows the card, downloads either copy, and checks the file. A fresh public CI runner repeats the test using only the repository instructions and public endpoints. That is the evidence added to the grant application.
 
 ## Read this first
 
@@ -35,9 +35,9 @@ The tiny demonstrator proves:
 
 - identical bytes can be retrieved through either IPFS or Arweave;
 - one signed manifest describes those bytes and both carrier locations;
-- the manifest fingerprint has a public Sepolia timestamp/receipt;
+- the manifest and carrier records are published through the deployed EFS contracts on Sepolia;
 - corruption is distinguishable from carrier unavailability;
-- another human can reproduce the result from a clean machine.
+- a clean public CI runner can reproduce the result without private EFS infrastructure.
 
 It deliberately omits:
 
@@ -125,21 +125,24 @@ Create `manifest.json` with at least:
 
 ### 5. Sign the manifest
 
-- Use James's personal Ethereum signing address for this prototype.
+- Use `JamesCarnley.eth`, which resolved to `0xaCf4C2950107eF9b1C37faA1F9a866C8F0da88b9` on 2026-07-28. Confirm MetaMask displays the same address immediately before signing.
 - Sign the manifest digest as EIP-712 typed data.
 - Record the signer address, EIP-712 domain, typed-data definition, message, and signature in `proof.json`.
 - Verify the signature locally before continuing.
 
 The EFS treasury Safe is not required for this proof. Supporting Safe/ERC-1271 signatures can remain part of the funded implementation.
 
-### 6. Put the receipt on Sepolia
+### 6. Publish the proof through deployed EFS
 
-- Send a zero-value Sepolia transaction from the same signing address to itself.
-- Put the manifest digest in the transaction data.
-- Record the transaction hash in `proof.json`.
-- Wait for a successful receipt.
+Use the frozen, live EFS schemas on Sepolia rather than a dummy self-transaction. A publisher script prepares the calls and pauses only for MetaMask approval.
 
-The verifier checks the chain ID, successful receipt, sender, recipient, zero value, and transaction data. This gives the grant reviewer a public timestamped receipt without prematurely designing a permanent EFS contract.
+1. Create an empty EFS `DATA` attestation and the standalone PROPERTY values.
+2. Create `contentHash`, `size`, and `cid` key anchors under the DATA; add `ipfs://` and `ar://` MIRROR attestations.
+3. PIN the PROPERTY values to their key anchors and optionally PIN the DATA at a human-readable EFS path.
+
+Record the EFS DATA UID, attestation UIDs, transaction hashes, schema UIDs, chain ID, and contract addresses in `proof.json`.
+
+The three stages are separate because later attestations refer to UIDs created by earlier transactions. The deployed EFS contracts supply meaningful public receipts, publisher identity, mirror discovery, and revocable claims without introducing a new permanent contract for this demo.
 
 ### 7. Build the smallest verifier
 
@@ -147,15 +150,16 @@ The CLI accepts `manifest.json`, `proof.json`, and configurable IPFS, Arweave, a
 
 1. RFC 8785 canonicalization and manifest digest;
 2. EIP-712 signature and signer;
-3. Sepolia transaction receipt and embedded manifest digest;
-4. retrieval through the selected carrier;
-5. downloaded byte length and SHA-256.
+3. deployed EFS DATA, PROPERTY, PIN, and MIRROR attestations on Sepolia;
+4. the EFS publisher address and transaction receipts;
+5. retrieval through the selected carrier;
+6. downloaded byte length and SHA-256.
 
 It prints exactly one final state:
 
 | State | Meaning |
 |---|---|
-| `VERIFIED` | The signature, receipt, retrieved bytes, size, and fingerprint match. |
+| `VERIFIED` | The signature, EFS records, retrieved bytes, size, and fingerprint match. |
 | `UNAVAILABLE` | No selected carrier returned bytes. This is not called tampering. |
 | `INVALID` | A returned or declared value conflicts with the signed proof. |
 
@@ -167,22 +171,24 @@ It prints exactly one final state:
 - [ ] A changed manifest field returns `INVALID`.
 - [ ] A changed signature returns `INVALID`.
 - [ ] A substituted CID or Arweave ID returns `INVALID`.
-- [ ] A wrong Sepolia transaction returns `INVALID`.
+- [ ] A wrong EFS DATA UID, schema, publisher, or Sepolia transaction returns `INVALID`.
 - [ ] Both carriers disabled returns `UNAVAILABLE`.
 
 Save the commands and compact output as `EVIDENCE.md`.
 
-### 9. Get independent reproduction
+### 9. Run clean-room automation
 
-Ask one human who did not build the demo to:
+Add a public GitHub Actions workflow that:
 
-1. start from a clean checkout on their own computer;
-2. follow only the public README;
-3. run the IPFS-only and Arweave-only success cases;
-4. run at least one `INVALID` case;
-5. report their OS, commit, commands, result, and any confusing instruction.
+1. starts from a fresh hosted runner;
+2. checks out only the public repository;
+3. installs pinned dependencies;
+4. verifies the EFS records through a public Sepolia RPC;
+5. runs the IPFS-only and Arweave-only success cases;
+6. runs at least one `INVALID` case;
+7. publishes the commit, environment, commands, and result in the workflow log.
 
-CI is useful but does not replace this human check. Fix unclear instructions and have the person rerun them.
+No private EFS server, local artifact, publishing key, or unpublished configuration may be available to the workflow.
 
 ### 10. Strengthen and send the application
 
@@ -191,8 +197,8 @@ Add these to [[futo-microgrant-email]]:
 - public demo repository and commit;
 - IPFS CID;
 - Arweave ID;
-- Sepolia transaction;
-- one-line independent reproduction result;
+- EFS DATA UID and Sepolia transactions;
+- one-line clean-runner reproduction result;
 - one command a reviewer can run;
 - a clear sentence that this is a deliberately small proof and the grant funds the robust publish/revoke tool, tests, documentation, and maintenance.
 
@@ -203,22 +209,17 @@ Then complete the remaining gates in [[futo-microgrant-application]] and submit.
 **James**
 
 - approves the artifact;
-- signs the manifest and sends the Sepolia receipt;
+- signs the manifest and approves the deployed-EFS Sepolia attestations;
 - pays any Arweave upload cost;
-- recruits the independent human reproducer;
 - reviews and sends the final grant email.
 
 **Codex and implementation agents**
 
 - scaffold the tiny demo repository;
 - build the deterministic packager, manifest generator, verifier, and tests;
+- build the deployed-EFS publisher and public clean-runner workflow;
 - document the reproducible commands;
 - prepare the evidence links and update the application.
-
-**Independent human**
-
-- follows the public instructions without private help;
-- records what worked and what was confusing.
 
 ## Time Box
 
@@ -227,9 +228,9 @@ Estimated effort:
 | Work | Target |
 |---|---:|
 | James's reading and scope approval | 30-45 minutes |
-| Artifact, manifest, signature, and receipt | 1-2 hours |
+| Artifact, manifest, signature, and EFS publication | 1-2 hours |
 | Verifier and evidence matrix | 2-4 hours |
-| Independent reproduction and fixes | 30-90 minutes |
+| Clean-runner reproduction and fixes | 30-60 minutes |
 | Grant update and final review | 30 minutes |
 
 Stop and reassess if the pre-grant demo grows beyond one focused day. Its job is to make the application tangible, not to consume the proposed grant.
@@ -237,7 +238,6 @@ Stop and reassess if the pre-grant demo grows beyond one focused day. Its job is
 ## Decisions Needed to Start
 
 - [ ] Confirm the pilot artifact: contracts source plus generated ABIs, or source only.
-- [ ] Choose the personal Ethereum address used to sign and send the Sepolia receipt.
-- [ ] Confirm that address has a small amount of Sepolia ETH.
+- [x] Use `JamesCarnley.eth` (`0xaCf4C2950107eF9b1C37faA1F9a866C8F0da88b9`) as the signer and EFS publisher.
+- [ ] Confirm MetaMask shows that address and it has a small amount of Sepolia ETH.
 - [ ] Choose the Arweave upload route and payment wallet.
-- [ ] Name the independent human reproducer.

@@ -85,7 +85,7 @@ A pinned, reproducible environment and CI must demonstrate:
 8. Both carriers being unavailable produces `UNAVAILABLE`, not `INVALID`.
 9. A wrong chain, receipt contract, transaction, or log reference produces `INVALID`.
 10. Verification requires no EFS account, EFS server, publishing key, proprietary software, or privileged EFS key.
-11. A second person reproduces the verification from a clean machine and the result is published.
+11. A fresh public CI runner reproduces verification using only the public repository, pinned dependencies, and replaceable public endpoints.
 12. The final report compares the Ethereum receipt with a signed-manifest-only baseline.
 
 ## Milestones and budget
@@ -94,7 +94,7 @@ A pinned, reproducible environment and CI must demonstrate:
 |---|---|---:|---:|
 | Specification | Threat model, manifest, no-chain baseline, receipt design, and executable acceptance tests | 15 hours | USD 750 |
 | Prototype | Minimal publisher, experimental Sepolia receipt, and CLI verifier | 50 hours | USD 2,500 |
-| Failure and independence testing | IPFS/Arweave isolation, invalid/unavailable cases, configurable endpoints, and clean-machine reproduction | 20 hours | USD 1,000 |
+| Failure and portability testing | IPFS/Arweave isolation, invalid/unavailable cases, configurable endpoints, and clean-runner reproduction | 20 hours | USD 1,000 |
 | Publication | Source, test vectors, instructions, short video, final comparison report, and maintenance note | 15 hours | USD 750 |
 | **Total** | Six weeks at USD 50/hour | **100 hours** | **USD 5,000** |
 
@@ -102,7 +102,7 @@ James confirmed the ask, budget, and six-week availability on 2026-07-28.
 
 ## Maintenance commitment
 
-Grant-funded code will be MIT-licensed. James will maintain critical defects in the funded proof for at least twelve months, use public issue tracking, and publish the independent reproduction result and final report.
+Grant-funded code will be MIT-licensed. James will maintain critical defects in the funded proof for at least twelve months, use public issue tracking, and publish the clean-runner reproduction record and final report.
 
 The proof will include no advertising, telemetry, token issuance, financial product, storage marketplace, or required proprietary service.
 
@@ -132,7 +132,8 @@ Do not lead reviewers to the current website or GitHub organization description 
 - [ ] James approves the architecture-neutral scope and EFS release pilot.
 - [ ] Choose the exact tagged source release and generated ABI artifact.
 - [ ] Decide whether to run the one-day [[futo-fj-3b-demonstrator]] before submission.
-- [ ] Identify an independent final reproducer; do not imply one is already committed.
+- [x] Use `JamesCarnley.eth` as the prototype signer and deployed-EFS publisher; verify the resolved address in MetaMask before signing.
+- [x] Use public clean-runner automation rather than claiming a second human contributor or reproducer.
 - [ ] Reconcile legacy public claims before using the website as grant evidence.
 
 ## Submission route

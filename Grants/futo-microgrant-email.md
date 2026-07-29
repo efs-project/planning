@@ -25,11 +25,11 @@ The first pilot will publish a tagged EFS source release and generated ABI bundl
 - verification succeeds through IPFS when Arweave is unavailable, and through Arweave when IPFS is unavailable;
 - modified bytes, signatures, manifests, locators, revoked references, and wrong chain receipts are rejected;
 - unavailable carriers are reported as unavailable rather than mislabeled as tampering;
-- a second person reproduces the result from a clean machine using replaceable RPC and gateway endpoints.
+- a fresh public CI runner reproduces the result using only pinned open-source dependencies and replaceable public RPC and gateway endpoints.
 
-Over six weeks I will specify the manifest and threat model, build the publisher, Sepolia receipt, and verifier, run the failure tests, and publish the source, test vectors, reproducible instructions, short video, independent reproduction result, and final comparison report.
+Over six weeks I will specify the manifest and threat model, build the publisher, Sepolia receipt, and verifier, run the failure tests, and publish the source, test vectors, reproducible instructions, short video, clean-runner reproduction record, and final comparison report.
 
-The budget is 100 hours at USD 50 per hour: USD 750 for specification and tests, USD 2,500 for implementation, USD 1,000 for failure and independence testing, and USD 750 for documentation and publication. I will maintain critical defects in the funded code for at least twelve months.
+The budget is 100 hours at USD 50 per hour: USD 750 for specification and tests, USD 2,500 for implementation, USD 1,000 for failure and portability testing, and USD 750 for documentation and publication. I will maintain critical defects in the funded code for at least twelve months.
 
 I have developed EFS publicly since early 2025 and previously delivered public contracts plus an experimental Sepolia deployment. The broader EFS v2 architecture is still being designed; this grant funds only the self-contained experiment described here.
 
