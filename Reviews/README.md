@@ -48,6 +48,12 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 - [`comparison.md`](./2026-07-28-voting/comparison.md) — direct MACI maturity/ideology/EFS verdict, best system by use case, coordinator-free research directions and pilot sequence.
 - [`efs-integration.md`](./2026-07-28-voting/efs-integration.md) — backend-neutral EFS voting profile and the generic EFS v2 requirements exercised by voting.
 
+### EFS target communities (2026-07-29)
+
+- [`2026-07-29-target-communities/`](./2026-07-29-target-communities/) — source-indexed research across visual galleries and boorus, adult creators, public/research data, wikis and fandom, open hardware, games/mods/speedruns, music/zines and dead platforms; includes the steward-calibrated five-community validation shortlist, broad opportunity map, adversarial review, gallery/data/package fixtures, product requirements and candidate first apps.
+- [`opportunity-map.md`](./2026-07-29-target-communities/opportunity-map.md) — canonical comparison: wiki migrations, public-data rescue, open hardware, mod maintainers and a creator-controlled illustration collective, all explicitly unvalidated until a real steward commits.
+- [`requirements-and-first-apps.md`](./2026-07-29-target-communities/requirements-and-first-apps.md) — gallery and cross-community acceptance tests, current-design pressure, serving boundaries and demo proposals.
+
 ### Virtual OS Museum deep dive — playable-archive pressure test (2026-07-29)
 
 - [`2026-07-29-virtual-os-museum-deep-dive.md`](./2026-07-29-virtual-os-museum-deep-dive.md) — architecture-pressure pass on the Virtual OS Museum (Andrew Warkentin's 1,700-install VM museum) and the entire browser-OS-emulation field, against EFS v2 generic primitives and the client v2 kernel: what the museum is, why one-click matters, which OS classes actually run in browsers (measured: System 7 in <2 s on 1.4 MB), licensing/neutrality reality, parity + better-than-parity verdicts, PAF tightening proposals, no-protocol-gap finding, and a legally-clean staged demo plan. Extends `Designs/efsv2/playable-archive-requirements.md`; N5 and runner-lane decisions preserved as undecided.
