@@ -8,7 +8,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-07-29
 
-- @grants: futo-walk-away-proof — published the signed deployed-EFS demonstrator through IPFS and Arweave, independently verified both carriers and adversarial cases, pushed the public source/evidence branch, and converted the application from funding a prototype to funding coherent revocation, portability, UX, testing, documentation, and maintenance / next: confirm clean-runner result, sync Gmail, and James sends.
+- @grants: futo-walk-away-proof — published the signed deployed-EFS demonstrator through IPFS and Arweave, independently verified both carriers and adversarial cases, passed the five-job public clean runner, pushed the source/evidence branch, and synced the proof-backed Gmail draft with a grant ask for coherent revocation, portability, UX, testing, documentation, and maintenance / next: James reviews and sends.
 
 ## 2026-07-28
 

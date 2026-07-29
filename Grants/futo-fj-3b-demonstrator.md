@@ -7,6 +7,25 @@ cssclasses:
 
 This is the pre-submission proof for [[futo-microgrant-application]]. It should take hours, not weeks. It does not define EFS v2 and it does not build the full grant deliverable.
 
+## Result
+
+Completed 2026-07-29 using the deployed EFS Sepolia contracts and
+`JamesCarnley.eth`.
+
+- Public source: [walk-away-proof at evidence commit](https://github.com/efs-project/contracts/tree/e86e6e77fcb5cda31374e07c5f582b502455ba80/packages/walk-away-proof)
+- Artifact: `efs-sepolia-deployment-reference-v0.tar.gz`
+- Bytes: `63,245`
+- SHA-256: `9c5bbda410deea8714a37b5ab82d3e22982cee79d1d1320cd43a91d562f34d39`
+- IPFS CID: `bafkreie4lo62ieg65kdrji33lk4c2prctawo46or2ezazvb2shkwf42nhe`
+- Arweave ID: `-34W1UeEynCbiM_wSU-v2vCw_M7SUeBnUF2xPco0M1k`
+- EFS DATA UID: `0xcb848af3a9508e4cf9bac6948d2221a0a8ef2c74887a637260ee10ffe83f8e49`
+- Sepolia transactions: [values](https://sepolia.etherscan.io/tx/0xb718f21d58fee081c73128b6af721cfa97fb87b93105d8731381c9b75300a933), [paths and mirrors](https://sepolia.etherscan.io/tx/0x72619bc19e4b822815ae9741a00781a0a1f4d73796d810d5b7778e545f3f1a16), [pins](https://sepolia.etherscan.io/tx/0x5f6fce39b8efc2463f007a61012fe41a089ee320b721053700aaa0ca7cc3a701)
+- Compact evidence bundle: [IPFS](https://w3s.link/ipfs/bafkreiblww44k5hmyimnlktnyf27rmdazxs7hajk65gcqydqhxsguelwwe), [Arweave](https://ardrive.net/LwXdLNPkpHMAlDdhfbHnSndkz_5igAW7L8kTkhqoX0U)
+
+Independent verification returned `VERIFIED` through both carriers. Negative
+checks returned `INVALID` for changed bytes, manifest, signature, locator, and
+EFS UID, while an unreachable selected carrier returned `UNAVAILABLE`.
+
 ## ELI10
 
 We make one exact EFS package and put identical copies in two different storage systems: IPFS and Arweave.
@@ -48,7 +67,10 @@ It deliberately omits:
 - long-term availability claims;
 - support for every wallet or storage backend.
 
-The funded project would turn this proof into a maintained, documented tool with publish/revoke behavior, broader failure testing, and a proper comparison report.
+The funded project would turn this proof into a maintained, documented tool
+with coherent publish/supersede/revoke behavior, broader failure testing, and a
+proper comparison report. Contract-wallet coverage and a lightweight
+reviewer-facing page are stretch goals after the core acceptance criteria.
 
 ## Recommended Pilot Artifact
 
@@ -165,20 +187,21 @@ It prints exactly one final state:
 
 ### 8. Run the evidence matrix
 
-- [ ] IPFS succeeds while Arweave access is disabled.
-- [ ] Arweave succeeds while IPFS access is disabled.
-- [ ] One changed artifact byte returns `INVALID`.
-- [ ] A changed manifest field returns `INVALID`.
-- [ ] A changed signature returns `INVALID`.
-- [ ] A substituted CID or Arweave ID returns `INVALID`.
-- [ ] A wrong EFS DATA UID, schema, publisher, or Sepolia transaction returns `INVALID`.
-- [ ] Both carriers disabled returns `UNAVAILABLE`.
+- [x] IPFS verification succeeds without accessing Arweave.
+- [x] Arweave verification succeeds without accessing IPFS.
+- [x] One changed artifact byte returns `INVALID`.
+- [x] A changed manifest field returns `INVALID`.
+- [x] A changed signature returns `INVALID`.
+- [x] A substituted CID or Arweave ID returns `INVALID`.
+- [x] A wrong EFS DATA UID returns `INVALID`; the verifier also checks schema, publisher, and transaction receipts.
+- [x] An unreachable selected carrier returns `UNAVAILABLE`.
 
-Save the commands and compact output as `EVIDENCE.md`.
+Commands and compact results are published in
+[EVIDENCE.md](https://github.com/efs-project/contracts/blob/e86e6e77fcb5cda31374e07c5f582b502455ba80/packages/walk-away-proof/EVIDENCE.md).
 
 ### 9. Run clean-room automation
 
-Add a public GitHub Actions workflow that:
+The public GitHub Actions workflow now:
 
 1. starts from a fresh hosted runner;
 2. checks out only the public repository;
@@ -189,6 +212,9 @@ Add a public GitHub Actions workflow that:
 7. publishes the commit, environment, commands, and result in the workflow log.
 
 No private EFS server, local artifact, publishing key, or unpublished configuration may be available to the workflow.
+
+- [x] Workflow committed and triggered from the public proof branch.
+- [x] Final five-job run passed on Ubuntu/macOS and Node.js 22/26, including live verification through both carriers: [run 30423222694](https://github.com/efs-project/contracts/actions/runs/30423222694).
 
 ### 10. Strengthen and send the application
 
@@ -237,7 +263,7 @@ Stop and reassess if the pre-grant demo grows beyond one focused day. Its job is
 
 ## Decisions Needed to Start
 
-- [ ] Confirm the pilot artifact: contracts source plus generated ABIs, or source only.
+- [x] Pilot artifact: deterministic contracts source, deployment registry, and generated ABI reference bundle.
 - [x] Use `JamesCarnley.eth` (`0xaCf4C2950107eF9b1C37faA1F9a866C8F0da88b9`) as the signer and EFS publisher.
-- [ ] Confirm MetaMask shows that address and it has a small amount of Sepolia ETH.
-- [ ] Choose the Arweave upload route and payment wallet.
+- [x] Confirmed MetaMask showed the expected address and approved all three Sepolia transactions.
+- [x] Uploaded through Turbo's free small-file path with an ephemeral upload key; no payment wallet or fee was required.
