@@ -17,6 +17,8 @@ Reply with item codes and arms, e.g. `P-1 yes, P-2a, P-5a + r1: qualified, P-16a
 
 **Research posture, not another decision code:** [[ethereum-first-efs-and-os]] records James's desire to make EFS deeply useful to Ethereum while exploring a broader cypherpunk OS and avoiding premature universal abstractions. Its Shapes A–E remain hypotheses until evidence changes a choice here and James records a ruling.
 
+**Reading aid for the lens items (LP-1…LP-10 and E2/E6):** [[lens-read-gotchas]] maps each of those decisions to the concrete limitation it is really about (e.g. LP-5 = "a guest is never told a file *doesn't* exist"). Every lens recommendation is "state the honest limit plainly"; the arms are mostly about how much honesty vs. convenience.
+
 ## Decide now — Tier 1: the authority spine (P-1 is the root; in dependency order)
 
 ### P-1 — Adopt the strong authority grade (two-lane kernel + admission receipts)?

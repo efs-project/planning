@@ -8,6 +8,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-07-29
 
+- @fable: lens-read-gotchas — wrote the consumer-facing honest-limitations digest of the lens pass (file reads / directory listings / app-store GATEs / config values), mapped each open lens decision (LP-1…LP-10, E2/E6) to the limitation it settles, and flagged the kill-list traps + blocking gaps (AMBIENT/1, kernel lane labels) for future agents; wired it into lens-spec, owner-inbox, and the README map / next: none — companion to [[lens-spec]].
 - @grants: futo-walk-away-proof — published the signed deployed-EFS demonstrator through IPFS and Arweave, independently verified both carriers and adversarial cases, passed the five-job public clean runner, pushed the source/evidence branch, and submitted the proof-backed USD 5k FUTO application on 2026-07-29 / next: monitor for acknowledgment, questions, or decision.
 
 ## 2026-07-28

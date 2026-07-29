@@ -8,6 +8,8 @@
 #status/draft #kind/design #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/lenses
 
 > **How to read this seed.** Each chapter states the normative spine — the rules a conforming implementation is bound by — and points at its detail record in the [pass corpus](../../Reviews/2026-07-25-lens-pass-corpus/). Where a corpus lane and the [critic's ledger](../../Reviews/2026-07-25-lens-pass-corpus/critic.md) disagree, **the critic wins** (the lanes carry pre-repair text). Owner-gated choices are marked `[LP-n]` and live in [[owner-decision-inbox]]; nothing here freezes a schema. Verification debts are the critic's V-1…V-27; a rule marked *(PLAUSIBLE)* carries its V-obligation.
+>
+> **Building a consumer (SDK/client/contract)? Read [[lens-read-gotchas]] first** — the honest-limitations digest of what every read actually promises (and does not) across file reads, directory listings, app-store GATEs, and config values.
 
 ## 0. Constitution and taxonomy
 
