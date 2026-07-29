@@ -38,7 +38,7 @@ The full protocol, conventions, and hard rules live in [`AGENTS.md`](./AGENTS.md
 | `Decisions.md` | Append-only one-line decisions log. |
 | `Ideas.md` | Parking lot for future "someday" ideas + things-to-account-for (PM-curated; graduate to Brainstorm/Design). |
 | `Tasks.md` | Global rollups via the Obsidian Tasks plugin (open questions, blocked items, pre-promotion checklists). |
-| `Milestones.md` | Cross-repo milestone tracking (devnet launch, mainnet, etc.). Currently scaffold; populate as scope solidifies. |
+| `Milestones.md` | Cross-repo milestone tracking. Devcon 2026-11 is the only current dated milestone; v2 and mainnet scope remain open. |
 | `_Index.base` | Obsidian Bases queries (starter views shipped; tune in Obsidian). |
 | `_Notes.canvas` | Obsidian Canvas — freeform whiteboard. |
 | `Daily Notes/` | Human's per-day notes; also catch-all for uncategorized content. |
