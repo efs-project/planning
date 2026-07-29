@@ -8,6 +8,17 @@ A lightweight parking lot for future ideas, "we should do X someday" drops, and 
 
 ## Open
 
+### A per-read diagnostic channel — "why this file?" (from vfile's `messages`)
+*(James asked about [vfile](https://github.com/vfile/vfile), 2026-07-29)*
+
+vfile (the unified/remark file object) separates a file into `value` (bytes) · `path` (location) · `data` (metadata) · **`messages` (positioned diagnostics)**. The first three map cleanly onto EFS DATA / anchors / PROPERTY. **EFS has no equivalent of the fourth**, and it needs one: [[file-browser-requirements]] **J9** asks *"two people see different winners at the same path — why this file?"*, and the read model carries `UNKNOWN` vs proven-absent, basis pinning, and fail-closed reads that all have to be explained rather than silently applied.
+
+vfile's message shape is a usable model: `reason` + `source` (which subsystem spoke) + `ruleId` (which rule fired) + `fatal` (did the read fail closed) + `place` (where). Mapped to EFS: **source = which lens/resolver, ruleId = whiteout / revoked / unknown-basis / cycle-cap, fatal = fail-closed, place = which record or redirect hop.** A read result would carry its own explanation, so a client can answer "why this file?" and surface read grades honestly instead of quietly.
+
+Threads: [[file-browser-requirements]] J9 · the read-grade / `UNKNOWN` vocabulary in the lens work · SDK receipt/error/progress design (flagged as worth harvesting). **Not protocol** — a read-result/SDK/client shape needing no frozen surface; but reserving the *vocabulary* early keeps clients consistent.
+
+**Also validated, no action needed:** vfile's `history` is append-only with `path` a getter over its last entry — independently the same shape as EFS's move doctrine (permanent paths + `REDIRECT(kind=4 movedTo)` at every vacated path). Convergent design; treat as confirmation. And `rehype-sanitize` is this ecosystem's answer to the markdown-XSS requirement the README-pane work flagged — use it rather than hand-rolling.
+
 ### Instant guest deep links + two-mode applications
 *(James, 2026-07-28)*
 
