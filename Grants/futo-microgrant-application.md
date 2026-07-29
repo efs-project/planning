@@ -193,8 +193,14 @@ Do not lead reviewers to the current website or GitHub organization description 
 - [x] Use public clean-runner automation rather than claiming a second human contributor or reproducer.
 - [x] Separate the self-funded feasibility spike from the remaining grant-funded work.
 - [x] Final five-job clean-runner workflow passed on Ubuntu/macOS and Node.js 22/26, including live IPFS and Arweave verification.
-- [ ] James reviews and sends the final email.
+- [x] James reviewed and sent the final email on 2026-07-29.
 - [ ] Reconcile legacy public claims before using the website as grant evidence.
+
+## Submission record
+
+- Submitted by James via email to `grantapps@futo.org` on 2026-07-29.
+- Status: awaiting acknowledgment, questions, or decision.
+- Canonical submitted text: [[futo-microgrant-email]].
 
 ## Submission route
 

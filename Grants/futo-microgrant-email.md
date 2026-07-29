@@ -6,8 +6,8 @@ Expert-reviewed draft for [[futo-microgrant-application]]. Proposal status remai
 
 **Subject:** Microgrant application: portable file verification without platform lock-in
 
-**Draft state:** Proof-backed revision synced to Gmail on 2026-07-29; not sent.
-Ready for James's final review.
+**Submission state:** Sent by James to `grantapps@futo.org` on 2026-07-29.
+Preserved here as the submitted text; do not silently revise it.
 
 ---
 
