@@ -182,7 +182,9 @@ The proof will include no advertising, telemetry, token issuance, financial prod
 - [James Carnley on GitHub](https://github.com/JamesCarnley)
 - [EFS GitHub organization](https://github.com/efs-project)
 
-Do not lead reviewers to the current website or GitHub organization description until their legacy permanence/uncensorability language is reconciled with current maturity.
+Legacy permanence/uncensorability claims on the website and GitHub organization
+still need reconciliation with current maturity. The submitted email linked
+both surfaces; [[futo-microgrant-email]] preserves exactly what FUTO received.
 
 ## Remaining quality gates
 
@@ -194,7 +196,7 @@ Do not lead reviewers to the current website or GitHub organization description 
 - [x] Separate the self-funded feasibility spike from the remaining grant-funded work.
 - [x] Final five-job clean-runner workflow passed on Ubuntu/macOS and Node.js 22/26, including live IPFS and Arweave verification.
 - [x] James reviewed and sent the final email on 2026-07-29.
-- [ ] Reconcile legacy public claims before using the website as grant evidence.
+- [ ] Reconcile legacy public claims; the submitted email used the website and organization links before this cleanup was complete.
 
 ## Submission record
 
