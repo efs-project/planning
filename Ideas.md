@@ -15,7 +15,18 @@ vfile (the unified/remark file object) separates a file into `value` (bytes) · 
 
 vfile's message shape is a usable model: `reason` + `source` (which subsystem spoke) + `ruleId` (which rule fired) + `fatal` (did the read fail closed) + `place` (where). Mapped to EFS: **source = which lens/resolver, ruleId = whiteout / revoked / unknown-basis / cycle-cap, fatal = fail-closed, place = which record or redirect hop.** A read result would carry its own explanation, so a client can answer "why this file?" and surface read grades honestly instead of quietly.
 
-Threads: [[file-browser-requirements]] J9 · the read-grade / `UNKNOWN` vocabulary in the lens work · SDK receipt/error/progress design (flagged as worth harvesting). **Not protocol** — a read-result/SDK/client shape needing no frozen surface; but reserving the *vocabulary* early keeps clients consistent.
+**⚠️ The distinction that matters — do not collapse these two, and do NOT add a record kind.**
+
+- **Derived diagnostics (what this idea is about).** "This file won because lens A outranked lens B." "This read is `UNKNOWN` because basis X was unavailable." **Computed by the reader** from (records + lens + basis). Two readers legitimately compute *different* diagnostics from the same records — that is viewer sovereignty working, not a bug. So these are **not portable, not signed, and must not become a record kind.** They belong in the read result / SDK surface.
+- **Authored claims (already solved — don't route here).** "This is spam." "This supersedes that." "This translation is wrong." Those are *someone's signed opinion* and EFS already expresses them: **TAG, PROPERTY, REDIRECT, WHITEOUT**, resolved through lenses.
+
+**Therefore portable signed data does NOT need a `messages` kind**, and adding one would be a mistake on three counts: it duplicates the existing signed-claim primitives; it fights v2's deliberate collapse of 9 record kinds → 5 by adding a sixth against the grain; and signing a *derived* value is a category error — it freezes one reader's computation whose inputs vary per reader. *(Recommendation, not a ruling — the design thread owns it.)*
+
+**What the portable/frozen layer plausibly does need is smaller than a kind:**
+1. **A stable diagnostic vocabulary.** Instances aren't portable, but the *names* should be. If one implementation emits `UNKNOWN: basis-unavailable` and another emits `unknown_basis`, no cross-implementation tooling can agree on why a read failed. That's a read-surface spec concern.
+2. **Honest basis/unknown metadata in exports.** An export or checkpoint (`.efs-bundle`, per [[2026-07-21-codex-arfs-ardrive-competitive-architecture]] §4) legitimately needs to say "as of basis B, these entries were `UNKNOWN`" so a recipient understands the snapshot's limits rather than reading absence as proof. That's export metadata — the one place a diagnostic crosses a trust boundary, so the vocabulary matters there most.
+
+Threads: [[file-browser-requirements]] J9 · the read-grade / `UNKNOWN` vocabulary in the lens work · the pending lens/read **replacement spec** · SDK receipt/error/progress design (flagged as worth harvesting).
 
 **Also validated, no action needed:** vfile's `history` is append-only with `path` a getter over its last entry — independently the same shape as EFS's move doctrine (permanent paths + `REDIRECT(kind=4 movedTo)` at every vacated path). Convergent design; treat as confirmation. And `rehype-sanitize` is this ecosystem's answer to the markdown-XSS requirement the README-pane work flagged — use it rather than hand-rolling.
 
