@@ -43,6 +43,12 @@ The official EFS client v2 ("web OS") design set, produced 2026-07-07 by the Fab
 
 [[fable-client-v2-handoff]], [[os-research-compass-for-fable]], [[agent-native-os-compass-for-fable]], [[fable-client-v2-kickoff-prompt]].
 
+## Competitive input (2026-07-29)
+
+| Doc | What it holds |
+|---|---|
+| [[file-browser-requirements]] | Feature bar for the Files app (§20 of [[system-surfaces]]) derived from the ArDrive teardown + mainstream-drive baseline: MATCH/DIFFER/SKIP buckets, the first drawing of lenses-in-a-file-UI, mount-compatibility constraints, and acceptance tests. Evidence: [Reviews/2026-07-29-ardrive-product-teardown.md](../../Reviews/2026-07-29-ardrive-product-teardown.md) + corpus. |
+
 ## Next research round
 
 | Handoff | Purpose |

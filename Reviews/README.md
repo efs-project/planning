@@ -32,6 +32,11 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 - [`2026-07-24-chicago-voting-vocdoni/`](./2026-07-24-chicago-voting-vocdoni/) — deep review of legacy Vochain and DAVINCI, ZK/encryption and EVM/L2 behavior, Illinois/Chicago feasibility, alternatives, a bounded EFS sidecar architecture, pilot gates, and the supporting audio/evidence record.
 - [`folder-poll-question-resolution.md`](./2026-07-24-chicago-voting-vocdoni/folder-poll-question-resolution.md) — follow-up answers for decentralized folder polling: social-poll versus governance-vote defaults, role and privacy boundaries, EFS v2 authority/snapshot/enumeration gates, current DAVINCI maturity, economics, vendor questions, and acceptance tests.
 
+### ArDrive product teardown (2026-07-29)
+
+- [`2026-07-29-ardrive-product-teardown.md`](./2026-07-29-ardrive-product-teardown.md) — product/UX teardown of ArDrive (the shipped drive app on Arweave): onboarding, pricing disclosure, file management, sharing/permissions, private-drive ceremonies, publishing/ArNS, takedown reality and centralization map, company momentum, the mainstream-drive baseline, the dweb-drive graveyard, and the Arweave OS vacuum. Feeds `Designs/clientv2/file-browser-requirements.md`. Architecture layer deliberately excluded (covered by `Brainstorms/2026-07-21-codex-arfs-ardrive-competitive-architecture.md`).
+- [`2026-07-29-ardrive-teardown-corpus/`](./2026-07-29-ardrive-teardown-corpus/README.md) — 12 dated research-lane reports plus the live app probe and the shipped app's extracted UI string evidence.
+
 ### Ethereum-aligned voting alternatives and EFS (2026-07-28)
 
 - [`2026-07-28-voting/`](./2026-07-28-voting/) — current primary-source comparison of MACI v3, Semaphore, Snapshot, OpenZeppelin Governor, Shutter, Interfold/CRISP, DAVINCI, Belenios, ElectionGuard and Decidim; includes per-project reports, an EFS backend profile, a use-case decision matrix and a synthetic validation program.

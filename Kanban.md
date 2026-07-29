@@ -23,9 +23,6 @@ kanban-plugin: board
 
 ## In Flight
 
-- [ ] **ArDrive product teardown → EFS File Browser feature requirements** (@ardrive-teardown) — product/UX only; architecture is already covered by [[2026-07-21-codex-arfs-ardrive-competitive-architecture]] and deliberately out of scope. Rationale: ArDrive is the closest **shipped** competitor to the File Browser, and `Designs/clientv2/` had zero references to it. Produces a dated teardown in `Reviews/` + a feature-requirements doc in `Designs/clientv2/` (must-match / do-differently / can-skip) + a reusable positioning line ("Arweave is a carrier we use; ArDrive is a product we differ from"). **Parallel-safe** — requirements, not protocol decisions. #repo/planning #repo/client #kind/task
-  — @ardrive-teardown, claimed 2026-07-29, expires 2026-08-05; corpus currently untracked on disk
-
 - [ ] **Target-community research — who are EFS's first real users?** (@communities, Codex) — the vault has abstract use cases and technical-competitor dossiers but **zero research on real communities with real populations**. Hypothesis: image/media galleries (pixiv, boorus, imageboards); scoped to research widely (fan archives, scanlation, emulation/preservation, open data, photography, zines, dead-platform diasporas). Wedge to find: **who has already lost an archive** — purges, payment-processor deplatforming, shutdowns. Includes an honest content-class risk column, since EFS content is permanent, public, and not centrally removable. Deliverables: dated corpus in `Reviews/`, ranked shortlist of 3–5, the requirements each implies (validates or breaks current designs), candidate first apps. **Parallel-safe**; barred from `Designs/efsv2/` and the inboxes. Frame in [[Decisions]] 2026-07-29. #repo/planning #kind/task
   — @communities, claimed 2026-07-29, expires 2026-08-05
 
@@ -42,6 +39,8 @@ kanban-plugin: board
 
 ## Under Review
 
+- [ ] **ArDrive product teardown → EFS File Browser feature requirements** (@ardrive-teardown) — all three deliverables landed 2026-07-29: teardown record [[2026-07-29-ardrive-product-teardown]] + 14-file corpus in `Reviews/`, [[file-browser-requirements]] draft in `Designs/clientv2/` (must-match / do-differently / can-skip + lenses-in-a-file-UI + mount constraints + 19 acceptance tests), positioning line included in both. Adversarially verified (7-reviewer pass: fact-check, rulings-consistency, conventions, 4 personas) and revised before landing. Awaiting review of the `#status/draft` requirements doc. #repo/planning #repo/client #kind/task
+  — @ardrive-teardown (claude-fable-5) → awaiting review, no expiry
 - [ ] **[[sdk-architecture]] — SDK design at #status/review** — awaiting @james's promote/revise. Open questions resolved; the SDK agent is already building against it (PR #1). Promoting just ratifies what's being built. #repo/sdk #kind/design
   — @sdk-designer → awaiting @james, no expiry
 - [ ] **PM SOUL [[Agents/pm]]** drafted, at #status/review — awaiting @james promote (low priority). #repo/planning #kind/design
