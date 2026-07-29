@@ -6,8 +6,13 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ---
 
+## 2026-07-29
+
+- @grants: futo-walk-away-proof — published the signed deployed-EFS demonstrator through IPFS and Arweave, independently verified both carriers and adversarial cases, pushed the public source/evidence branch, and converted the application from funding a prototype to funding coherent revocation, portability, UX, testing, documentation, and maintenance / next: confirm clean-runner result, sync Gmail, and James sends.
+
 ## 2026-07-28
 
+- @fable: lens/resolver pass (G-A) — launched the dedicated multi-agent lens round (research + 5 design lanes + 2 red teams + critic) consuming FS-LENS/1, the 2026-07-11 lens review, and KEL §7/§9; deliverables: tiered on-chain-core→client→enhanced architecture, taxonomy, canonical lens-object encoding, URL views + anonymous viewer, replacement seed for read-lens-spec, owner packet / next: synthesis + verification + commit.
 - @grants: futo-deployed-efs-proof — recorded `JamesCarnley.eth` as the signer, replaced the unsupported second-human claim with public clean-runner evidence, and switched the pre-grant receipt to real deployed-EFS attestations; synced the unsent Gmail draft / next: choose the artifact and Arweave route, then confirm MetaMask address + Sepolia balance.
 - @grants: futo-fj-3b-demonstrator — converted the recommended pre-submission proof into a one-day reading/build/reproduction checklist with an architecture-neutral Sepolia receipt, explicit non-goals, evidence matrix, and five owner inputs / next: James confirms the artifact, signer, Sepolia gas, Arweave route, and human reproducer.
 - @grants: futo-funding-facts — James confirmed EFS has been self-funded to date and the proposed FUTO scope is not funded elsewhere; updated the worksheet, proposal gate, owner fork, and unsent email draft.

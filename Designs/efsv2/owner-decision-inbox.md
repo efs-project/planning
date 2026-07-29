@@ -1,15 +1,15 @@
 # EFS v2 + OS — owner decision inbox
 
-**Status:** revalidated decision packet (2026-07-25 joined pass) + held remainder; no choice is adopted until James answers and it is copied into [[owner-rulings]]
+**Status:** revalidated decision packet (2026-07-25 joined pass + 2026-07-28 lens pass) + held remainder; no choice is adopted until James answers and it is copied into [[owner-rulings]]
 **Audience:** James first; designers second
-**Last reconciled:** 2026-07-25
-**Inputs:** [[joined-pass-synthesis]] + [critic.md](../../Reviews/2026-07-25-joined-fs-pass-corpus/critic.md) (the packet's reason trail), [[owner-rulings]], [[assumptions-and-requirements]], [[multichain-dependency-map]], [[mountable-filesystem-semantics]], [[privacy-james-decisions]], [[solana]], [[ethereum-first-efs-and-os]]
+**Last reconciled:** 2026-07-28
+**Inputs:** [[joined-pass-synthesis]] + [joined critic](../../Reviews/2026-07-25-joined-fs-pass-corpus/critic.md), [[lens-pass-synthesis]] + [lens critic](../../Reviews/2026-07-25-lens-pass-corpus/critic.md) (the packets' reason trails), [[owner-rulings]], [[assumptions-and-requirements]], [[multichain-dependency-map]], [[mountable-filesystem-semantics]], [[privacy-james-decisions]], [[solana]], [[ethereum-first-efs-and-os]]
 
 #status/draft #kind/decision #repo/planning #topic/efsv2 #topic/clientv2 #blocked-on/human-decision
 
 > **This is the sole live owner queue for EFS v2 and cross-cutting OS architecture.** Detailed documents remain the reason trail. Future agents must not revive a source checkbox classified here as settled, evidence-gated, delegated, or superseded.
 >
-> **Sequencing-hold status (2026-07-25):** the 2026-07-23 hold demanded a joined KEL/authority + lens/resolver revalidation before any packet. That pass ran ([2026-07-25-joined-fs-pass](../../Reviews/2026-07-25-joined-fs-pass.md)). Per its critic, **the hold is LIFTABLE for the authority/identity surface — Tiers 1–2 below (P-1…P-10)** — every item is answerable alone, none re-asks a settled item, and adopting one adopts nothing else. Tiers 3–6 are equally revalidated product/projection calls. **Lens-coupled items stay held** pending the dedicated lens pass (gap G-A in [[joined-pass-synthesis]]): the [[assumptions-and-requirements]] D-13 typed-lens scope and seams 7/8/12/19. Lifting the hold is James's call; he may also answer any single item without lifting anything.
+> **Sequencing-hold status (2026-07-28):** the 2026-07-23 hold demanded a joined KEL/authority + lens/resolver revalidation before any packet. **Both passes have now run** ([2026-07-25-joined-fs-pass](../../Reviews/2026-07-25-joined-fs-pass.md); [2026-07-25-lens-pass](../../Reviews/2026-07-25-lens-pass.md)). Per their critics, **the hold is LIFTABLE across its full surface**: Tiers 1–2 (P-1…P-10, the authority/identity spine), Tiers 3–6 (revalidated product/projection calls), and **Tier 7 (LP-1…LP-10, the lens family — new this pass)**. Every item is answerable alone, none re-asks a settled item, and adopting one adopts nothing else. The lens pass also dispositioned the previously lens-held items: **N2c, D-9, and Q5 are folded into LP-1, LP-2, and LP-6's rider; E6's structure is LP-4** (its numbers stay evidence-gated); **Q3 and Q4 stay held** (no new evidence). Lifting the hold is James's call; he may also answer any single item without lifting anything.
 
 ## How to answer
 
@@ -155,11 +155,86 @@ Nothing may call DA-tier or mirror bytes "on-chain"; state-tier EFSBytes is the 
 
 PII/consent warnings, tooling refusal for obvious hazard classes, encrypted-commitment-only guidance — zero protocol surface, folds into L14. **Rec: adopt now.** Trail: [use-cases J5](../../Reviews/2026-07-25-joined-fs-pass-corpus/use-cases.md)
 
-## Held from earlier passes — revalidate before asking (unchanged by the joined pass)
+## Decide now — Tier 7: the lens family (2026-07-28 lens pass; LP-1 is the root)
+
+Full example/arm text for every item: [lens critic §4](../../Reviews/2026-07-25-lens-pass-corpus/critic.md). Independence-checked: answering one adopts nothing else.
+
+### LP-1 — Ratify the typed-lens constitution (held D-13/N2c, revalidated)
+
+**Example:** "lens" currently means your file view, your friend list, a labeler set, and the rule that gates an OS update. Ratifying says a lens is a **typed, purpose-scoped, compiled policy over evidence** — following a friend can never let them publish an OS update.
+**Options:** (a) adopt the typed compiled-policy model ("lens" stays the human word; the flat ordered list survives as an editor projection and one execution slice) / (b) keep the flat ordered author list as the universal primitive.
+**Rec: (a), high confidence** — two passes compiled every real consumer inside the grammar without extending it. Deliberately bundled (same constitutional act): no universal protocol content/advisory tail; personal policy local/encrypted by default; every exclusive **authority** rule declares fallthrough-or-stop, with packages/updates/security-config/gates stopping by default.
+Trail: [lens critic LP-1](../../Reviews/2026-07-25-lens-pass-corpus/critic.md) · [[lens-pass-synthesis]] LN-1 · [[assumptions-and-requirements]] D-13
+
+### LP-2 — The on-chain lens promise (held D-9, restated with physics)
+
+**Example:** "who is authoritative for this one name?" works on-chain in bounded gas at every size we care about. "Give me this whole 128-entry folder, sorted" **cannot be served**: the live EIP-7825 transaction cap (16,777,216 gas, Fusaka 2025-12) makes a 128×55 naive page (~29.5M) permanently impossible.
+**Options:** (a) bounded candidate pages + exact venue-local point resolution + deterministic fixed-basis client materialization is the core promise; wide sorted directories are a client product, and contract consumers of whole directories use sparse-roster plans, a materialized/proven snapshot, or move to the client tier / (b) declare contract-native sorted pages mandatory and fund a separate ordered-index/proof program.
+**Rec: (a), high confidence** — the 2026-07-11 "should not be promised" is now "cannot be delivered."
+Trail: [lens critic LP-2](../../Reviews/2026-07-25-lens-pass-corpus/critic.md) · [research §3](../../Reviews/2026-07-25-lens-pass-corpus/research.md) (cap VERIFIED live)
+
+### LP-3 — Naming ratification
+
+**Example:** every corpus accident of the form "contracts walk lenses" came from one word doing two jobs.
+**Options:** (a) adopt the family — **Lens** (your read-view) · **View** (saved linkable lens+place+presentation; never contains trust) · **Starter Pack** · **Follow** · **Channel** · **Labeler**+**Action Map** · **Roster** (the trust-list primitive) · **Plan** (the executable contract slice) · **GATE** (install/contract trust) / (b) adopt with named changes / (c) defer to implementation.
+**Rec: (a), high confidence** — GATE and the Roster/Plan split matter most (the pass's own lanes used "Roster" for two different objects).
+Trail: [lens critic LP-3 + LR-1 §4](../../Reviews/2026-07-25-lens-pass-corpus/critic.md) · [object-taxonomy §1](../../Reviews/2026-07-25-lens-pass-corpus/object-taxonomy.md)
+
+### LP-4 — Lens-scale structure (held E6's structure; numbers stay evidence-gated)
+
+**Example:** your real policy is ~10–50 people + 3–5 system principals — not "50 keys" (devices collapse behind KEL principals). Three numbers were conflated: what a normal policy holds (15–55), what a contract-readable plan may hold (CORE cap, candidate 64), and what the compiler accepts (client ceiling, candidate 256).
+**Options:** (a) ratify the structure — two constants doing two jobs; per-read budgets independent of policy size; every limit fails typed, nothing truncates; hundreds-of-curators = a bespoke curation contract, not base-lens growth; web-of-trust stays out / (b) keep one number as "the lens limit" set by measurement (the `MAX_LENSES=20` shape).
+**Rec: (a), high confidence.** Rider (yes/no): the client counts and shows **effective authority principals across all saved Views** against the 15–55 center — otherwise one-tap curator Views reach 245 principals while the people list reads 45.
+Trail: [lens critic LP-4](../../Reviews/2026-07-25-lens-pass-corpus/critic.md) · [use-pressure §2](../../Reviews/2026-07-25-lens-pass-corpus/use-pressure.md)
+
+### LP-5 — The anonymous/guest viewer's default trust grade
+
+**Example:** someone clicks an EFS link with no account. Their client can always verify who signed what and that bytes match; over a hosted endpoint it can never prove a file *isn't* there.
+**Options:** (a) **G1 default** — client-verified authorship/bytes over a hosted endpoint; absence never claimed ("nothing found via this endpoint — unverified"); grades ratchet up as proofs arrive; gateway-rendered G0 pages only as the operator's labelled word / (b) require a proof-capable path for the ordinary guest (more honest, slower, needs infra that doesn't exist) / (c) accept G0 gateway rendering as ordinary.
+**Rec: (a), medium-high confidence** — the only arm where the hyperlink product works day one and nothing unverified is claimed. Product copy must say: a guest is never told "that file does not exist."
+Trail: [lens critic LP-5](../../Reviews/2026-07-25-lens-pass-corpus/critic.md) · [[Ideas]] guest deep-links · [views-links §3](../../Reviews/2026-07-25-lens-pass-corpus/views-links.md)
+
+### LP-6 — Ratify the GATE profile's hard rules
+
+**Example:** installing an update is not browsing; install/update/security policies are a different kind of object whose rules no link, curator, or preference can relax.
+**Options:** (a) ratify all: owner-pinned, never caller-supplied · fail-closed non-configurable · STOP on revocation (a lapsed publisher never hands the name to a squatter) · no discovery influence · closed enumerated authorities · unknown advisory label values map to NONE · freshness floors on evidence **and** on the policy generation itself (`policyMaxAge` — a withheld update channel fails loud, not silently frozen) · advisories over the whole pinned dependency closure · the install ceremony re-derives the candidate list under the GATE's own rules (a hostile browse page cannot steer you onto an old vulnerable release) / (b) ratify minus named items / (c) defer to a package/update pass.
+**Rec: (a), high confidence** — three clauses exist because the red team found the corresponding attack alive.
+**Rider (held Q5, now askable):** the reference SDK ships **fail-closed** as its single default; `--allow-stale` is an explicit disclosed policy, never a default.
+Trail: [lens critic LP-6 + AV-15/16/17/19](../../Reviews/2026-07-25-lens-pass-corpus/critic.md) · [profiles-composition §1.2](../../Reviews/2026-07-25-lens-pass-corpus/profiles-composition.md)
+
+### LP-7 — Personal-policy privacy default
+
+**Example:** your file contents can be public while **who you trust** stays yours — the policy names your friends, communities, moderators, and politics.
+**Options:** (a) ratify: personal policy local/encrypted by default; publishing is a deliberate ceremony with a disclosure preview; the routine freshness check runs against **your own node/replica** by default (the remote batched check ships your whole roster to the endpoint on every app focus — a better identifier than a cookie); links never carry principal arrays; trust-adjacent link params ride the fragment / (b) same policy but keep the remote batched check as default / (c) defer to the privacy pass.
+**Rec: (a), high confidence** — with the honest limit said in the same breath: a content-addressed public system cannot stop someone who correctly *guesses* your policy from confirming the guess; membership privacy comes from not publishing, not from cryptography.
+Trail: [lens critic LP-7 + AV-27/AV-36/AO-14](../../Reviews/2026-07-25-lens-pass-corpus/critic.md) · [[human-overview]] §7.12
+
+### LP-8 — The link-safety floor (the non-suppressible set)
+
+**Example:** a link may rearrange what you see; it must never hide *that* it rearranged it, hide a malware label, hide a look-alike name, hide that you changed chains, or start an identity ceremony.
+**Options:** (a) ratify NS-1…NS-11 as **binding client conformance** (grades/basis · staleness · foreign-view banner + one-tap escape · advisory counts · conflict/attribution markers · authorship boundaries · citation-under-foreign-policy label · look-alike warnings carrying their own completeness · guest/write-lock state · degradation notices · policy-suppression disclosure), plus: realm changes are chrome-owned transitions, guest→account promotion never starts from page content, and the grant ceremony renders each scope root's resolved extent under your own plan, the count of positions inside it, and an explicit ancestor warning / (b) ratify a subset / (c) treat as guidance, not conformance.
+**Rec: (a), high confidence** — a floor that is not conformance is decoration; three items exist because the red team found the attack.
+Trail: [lens critic LP-8](../../Reviews/2026-07-25-lens-pass-corpus/critic.md) · [views-links §4](../../Reviews/2026-07-25-lens-pass-corpus/views-links.md)
+
+### LP-9 — Citation disclosure defaults
+
+**Example:** you cite a file in a paper — should the link also carry *which of your trusted sources* selected it?
+**Options:** (a) split the forms: object/claim citations carry **no policy reference by default**; view citations carry the policy and its disclosure preview (a deliberate act) / (b) one form that always carries the policy / (c) one form that never does.
+**Rec: (a), high confidence** — the pass had the warning on the rare act (publishing) and off the frequent one (citing), which is backwards.
+Trail: [lens critic LP-9 + AV-28/AV-7](../../Reviews/2026-07-25-lens-pass-corpus/critic.md)
+
+### LP-10 — Computed membership: may a machine-derived trust list be followed?
+
+**Example:** your achievement idea — an app publishes "everyone who earned X" as a channel advancing hourly; one subscribe, and an unbounded machine-derived set of strangers refreshes inside a user's compiled policy forever.
+**Options:** (a) distinguish curated from computed: published policies declare `derivationKind: CURATED | COMPUTED(algorithmRef)`; computed sets are **pin-only** (never channel-followed), need a per-adoption ceremony for authority tiers, and count at full cardinality against the effective-principal budget / (b) allow computed sets to be followed with disclosure / (c) no distinction.
+**Rec: (a), medium-high confidence** — Nostr's web-of-trust experiment is field evidence (no reproducible score, unsolved Sybil, centralization into scoring services); and this is the guardrail your own Ideas entry asks for ("without turning any of them into a generic green trust badge").
+Trail: [lens critic LP-10 + AV-25](../../Reviews/2026-07-25-lens-pass-corpus/critic.md) · [research §5](../../Reviews/2026-07-25-lens-pass-corpus/research.md) · [[Ideas]]
+
+## Held from earlier passes — revalidate before asking
 
 ### N2 — Constitutional system boundaries
 
- Still held as one bundle with named-exception answering (`N2A` adopt all / `N2B` + bullet codes to change / `N2C` defer). The codes: **N2a** "100 years" = active preservation · **N2b** "works on-chain" = complete durable state + bounded keyed queries · **N2c** lenses are typed, purpose-scoped compiled policies · **N2d** public by default; never anonymity · **N2e** least-authority OS · **N2f** reproducible hash-addressed package closures · **N2g** recoverable/shreddable independent random roots · **N2h** browser-first with per-measured-host-lane confinement claims · **N2i** 50 principals normal / provisional 256 portable ceiling. The joined pass *consumed* several boundaries as invariants (N2b via P-22; N2d; N2g) but did not revalidate the bundle's wording. Details: [[assumptions-and-requirements#11. Human decisions requiring eventual disposition]] D-8–D-16, [[ops-doctrine]], [[web-os-thesis]].
+ Still held as one bundle with named-exception answering (`N2A` adopt all / `N2B` + bullet codes to change / `N2C` defer). The codes: **N2a** "100 years" = active preservation · **N2b** "works on-chain" = complete durable state + bounded keyed queries · **N2c** lenses are typed, purpose-scoped compiled policies — **revalidated by the lens pass; askable stand-alone as LP-1** (answering LP-1 answers N2c; the bundle's other codes are untouched) · **N2d** public by default; never anonymity · **N2e** least-authority OS · **N2f** reproducible hash-addressed package closures · **N2g** recoverable/shreddable independent random roots · **N2h** browser-first with per-measured-host-lane confinement claims · **N2i** 50 principals normal / provisional 256 portable ceiling — structure now LP-4. The joined pass *consumed* several boundaries as invariants (N2b via P-22; N2d; N2g) but did not revalidate the bundle's wording. Details: [[assumptions-and-requirements#11. Human decisions requiring eventual disposition]] D-8–D-16, [[ops-doctrine]], [[web-os-thesis]].
 ### N3 — Canonical private invitation discovery
 
  `N3A` reserve a minimal announced-invite feed with an epoch (**rec**) / `N3B` don't (stranger invitations become a later convention). Not the L13 onboarding default. Details: [[privacy-james-decisions]] JD-8.
@@ -178,9 +253,9 @@ PII/consent warnings, tooling refusal for obvious hazard classes, encrypted-comm
 ### Q2 — Always-present `claimedAt`
 
  `Q2A` include, `0` = absent, testimony only (**rec**) / `Q2B` omit forever. Details: [[fs-pass-james-decisions#2. `claimedAt` row (freeze-gates A.8b)]].
-### Q3 / Q4 / Q5 / D-9 — still held, evidence added
+### Q3 / Q4 — still held (the lens pass added hooks, not evidence)
 
-**Q3** (public collab = revision DAGs + curation, `Q3A` rec) / **Q4** (checkpoints stay ordinary claims, `Q4A` rec) / **Q5** (SDK fail-closed default, `Q5A` rec) + **D-9** (on-chain lens promise): the joined pass's FS profile and local mode were written against the A-arms and disclose the coupling ([critic §8.3](../../Reviews/2026-07-25-joined-fs-pass-corpus/critic.md)); answering differently reworks [filesystem-core §1.3](../../Reviews/2026-07-25-joined-fs-pass-corpus/filesystem-core.md) and [local-mode §2](../../Reviews/2026-07-25-joined-fs-pass-corpus/local-mode.md). Details: [[fs-pass-james-decisions]], [[read-lens-spec#Open questions]].
+**Q3** (public collab = revision DAGs + curation, `Q3A` rec): the lens pass named five collaboration read-hooks (H-Q3-1…5 in [profiles-composition §1.5](../../Reviews/2026-07-25-lens-pass-corpus/profiles-composition.md)) without answering it. **Q4** (checkpoints stay ordinary claims, `Q4A` rec): untouched and consistent; the checkpoint's absence-prover role was already dead, its freshness-hint role survives. Both stay held — no new evidence would change an arm. The joined pass's FS profile and local mode were written against the A-arms and disclose the coupling ([joined critic §8.3](../../Reviews/2026-07-25-joined-fs-pass-corpus/critic.md)). **Q5 and D-9 left this queue:** revalidated by the lens pass and now askable as the LP-6 rider and LP-2 respectively. Details: [[fs-pass-james-decisions]], [[read-lens-spec#Open questions]].
 
 ## Decide after evidence — do not answer yet
 
@@ -188,12 +263,12 @@ These are real owner acceptance gates. Engineers choose exact mechanisms; James 
 
 | ID | Choice | Evidence required (incl. new this pass) | Recommendation after evidence | Details |
 |---|---|---|---|---|
-| **E1 Authority venue** | Base/L2, Solana, L3, or another fixed profile | admission/rotation/recovery cost; finality/force inclusion; proof latency; independent RPC/state reconstruction; mandatory bounded queries; **+3 riders: venue-class (P-5r1), revocation force-inclusion latency (P-5r2), shared-settlement embedding granularity** | exactly one measured v2 profile | [[assumptions-and-requirements#17. Current first-prototype hypothesis]], [[solana]] |
-| **E2 Aggregate kernel cost** | accept full promise, trim optional surfaces, or reject | one combined gas/state snapshot including every mandatory direction; **+4 inputs: mount-budget ⇄ current-live index coupling; `SAME_SLOT_COLLISION` surface; dual-digest leaf pricing; generation-churn fixture** | accept only against the complete bill, not isolated cheap calls | [[onchain-completeness]], [[freeze-gates]] |
+| **E1 Authority venue** | Base/L2, Solana, L3, or another fixed profile | admission/rotation/recovery cost; finality/force inclusion; proof latency; independent RPC/state reconstruction; mandatory bounded queries; **+3 riders: venue-class (P-5r1), revocation force-inclusion latency (P-5r2), shared-settlement embedding granularity**; evidence note (lens pass): FOCIL slipped to Hegotá ≥2027 — the P-5r2 rider prices rollup escape hatches meanwhile | exactly one measured v2 profile | [[assumptions-and-requirements#17. Current first-prototype hypothesis]], [[solana]], [research §3](../../Reviews/2026-07-25-lens-pass-corpus/research.md) |
+| **E2 Aggregate kernel cost** | accept full promise, trim optional surfaces, or reject | one combined gas/state snapshot including every mandatory direction; **+4 joined-pass inputs: mount-budget ⇄ current-live index coupling; dual-digest leaf pricing; generation-churn fixture** (the `SAME_SLOT_COLLISION` line is deleted — settled item F controls, [lens critic §2.2 P-6](../../Reviews/2026-07-25-lens-pass-corpus/critic.md)); **+4 lens-pass inputs: ONE joint kernel-counter row (`viewMutationVersion` MUST-candidate / `positionSeq` option / claimant roster lean-adopt with the corrected ~4–7× decaying cost curve); LR-1 §3 plan-store economics; the corrected gas matrix on the real kernel; closure-wide advisory cost** | accept only against the complete bill, not isolated cheap calls | [[onchain-completeness]], [[freeze-gates]], [lens critic §2.3](../../Reviews/2026-07-25-lens-pass-corpus/critic.md) |
 | **E3 `admittedAt`** | store + batch-read, or explicitly degrade trustless time | measured incremental cost + two consumers — **now priceable: both consumers exist** (legal chain-of-custody; poll close rule) | store if the complete snapshot is tolerable | [[fs-pass-james-decisions#1. The `admittedAt` + index bundle (P1) — the pass's biggest lever]], [use-cases](../../Reviews/2026-07-25-joined-fs-pass-corpus/use-cases.md) |
 | **E4 Author enumeration** | full author index or roots-forward + orphan-tail | gas/state + recovery benchmark; restated with the admission-time root-reachability constraint | smallest mechanism that still guarantees complete discovery | [[onchain-completeness]], [filesystem-core §4.2](../../Reviews/2026-07-25-joined-fs-pass-corpus/filesystem-core.md) |
 | **E5 Definition enumeration** | paginated schema/definition index or omit | same snapshot + two real contract consumers (released from FS pressure) | include only if genuinely cheap | [[onchain-completeness]] |
-| **E6 Lens ceiling** | 50, 100, or 256 portable principals | two compilers; cold/warm mobile benchmarks; adversarial fixtures; + month-scale local merge/conflict benchmarks | 50 normal, 256 portable if measured | [[read-lens-spec]] |
+| **E6 Lens ceiling — numbers only; the structure is LP-4** | CORE per-plan cap (candidate 64) and client compile ceiling (candidate 256) as separate measured constants | two compilers; cold/warm mobile benchmarks; adversarial fixtures; month-scale local merge/conflict benchmarks; the real-kernel gas matrix | 15–55 design center; 64 CORE / 256 client if measured | [[lens-spec]] §9, [[read-lens-spec]] |
 | **E7 Host lanes** | static-only, served-header, and/or native support claims | Chrome/Firefox/Safari/iOS cage matrix | browser-first with honest per-lane claims | [[client-os-pressure-report]], [Client evidence queue](../clientv2/owner-decision-inbox.md#decide-after-evidence--do-not-answer-yet) |
 | **E8 Render vocabulary** | small declarative schema, constrained HTML, or another IDL | a real Files/archive app; accessibility and frame budget | smallest System-Chrome-owned vocabulary that passes | [[kernel-capability-model]] |
 | **E9 Merge-rule location** | protocol word, typed payload, or package convention | collaborative replay prototype + canonical encoding comparison | freeze only irreducible replay semantics | [[fs-pass-james-decisions]], [[apps-cookbook]] |
