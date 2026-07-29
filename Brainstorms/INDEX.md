@@ -1,6 +1,6 @@
 # Brainstorms index
 
-> ⚠️ **Index covers through 2026-05-28 only.** ~15 later brainstorms (the 2026-07 codex research dossiers) are unindexed — list them with `ls Brainstorms/2026-07*`. Do not treat this index as the complete set.
+> ⚠️ **Index is selective after 2026-05-28.** The two 2026-07-29 PM reference briefs are indexed, but ~15 other July research dossiers are not — list them with `ls Brainstorms/2026-07*`. Do not treat this index as the complete set.
 
 PM-maintained map of brainstorms by area and status. Excludes `obsolete` by default — see git history if you need pruned items.
 
@@ -26,6 +26,7 @@ Conventions: [[brainstorm-system]].
 - 2026-05-26 [`2026-05-26-bs-system-design-perspectives-v1-contract-surface-from-n-angles`](./2026-05-26-bs-system-design-perspectives-v1-contract-surface-from-n-angles.md) — `raw` — 8 perspectives (L2 sequencer, indexer node, hardware wallet, search engine, privacy preserver, cross-chain bridge, archival node, lens curator). **Sharpest architectural ask: `EFSUploadGateway` wrapper** — single change addressing 8-prompt detonation + L2 amortization + AA bundling.
 
 ### Meta / cross-cutting
+- 2026-07-29 [`2026-07-29-pm-nanda-neutral-agent-infrastructure-pressure`](./2026-07-29-pm-nanda-neutral-agent-infrastructure-pressure.md) — `reference` — Downstream NANDA-compatible platform pressure: neutral agent/skill releases, exact resolution, portable evidence, plural indexes, DataFacts, and a capability-safe consumer resolver without putting search, secrets, or execution on-chain.
 - 2026-07-29 [`2026-07-29-pm-credibly-neutral-git-forge-and-agent-artifacts`](./2026-07-29-pm-credibly-neutral-git-forge-and-agent-artifacts.md) — `reference` — Product-priority and research brief: neutral Git-host v1 floor, portable later-forge layer, explicit Git-backed EFS workspaces, and safe separation of public Agent Skills/knowledge from private memory/context.
 - 2026-05-26 [`2026-05-26-bs-divergent-usecases-v1-efs-use-cases-across-industries`](./2026-05-26-bs-divergent-usecases-v1-efs-use-cases-across-industries.md) — `raw` — 15 use cases. Upstream for many subsequent brainstorms.
 - 2026-05-26 [`2026-05-26-bs-vocab-coherence-audit-v1-cross-repo-vocab-drift-audit`](./2026-05-26-bs-vocab-coherence-audit-v1-cross-repo-vocab-drift-audit.md) — `raw` — 7 High + 4 Medium + 2 Low drift instances + 14 Glossary gaps. **Sharpest finding: two branches each minted a different ADR-0043 (renumbering conflict).**
@@ -35,7 +36,8 @@ Conventions: [[brainstorm-system]].
 ## By status
 
 ### Raw (awaiting curation)
-All 11 brainstorms except `pm-client-os-architecture` (reference) and partial surfaces (see below).
+The May 26 raw brainstorm batch listed above remains awaiting curation. July
+entries are selective reference additions; see the warning at the top.
 
 ### Surfaced (PM has flagged)
 - typed-edge finding (from `bs-divergent-usecases-v1`, refined by `bs-schema-coverage-audit-v1`) → For-James (downgraded)
@@ -53,6 +55,7 @@ All 11 brainstorms except `pm-client-os-architecture` (reference) and partial su
 ### Reference (durable context)
 - 2026-05-26-pm-client-os-architecture
 - 2026-07-29-pm-credibly-neutral-git-forge-and-agent-artifacts
+- 2026-07-29-pm-nanda-neutral-agent-infrastructure-pressure
 
 ## Integrated history
 *(brainstorms that became designs/decisions/cards land here with `→` pointer)*
