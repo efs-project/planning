@@ -26,7 +26,7 @@ Console-reported boot milestones from the emulator's own instrumentation:
 
 ### Critical-path bytes (VERIFIED, measured via the Performance API)
 
-Total network transfer for the running machine: **~1.4 MB compressed**.
+Main-thread network transfer on a warm load: **~1.4 MB compressed / 5.6 MB decoded**. **Correction (measured later the same session):** this figure excludes the disk chunks entirely — they are fetched *inside the emulator worker*, which does not appear in the document's resource timing, and the first measurement was also served partly from cache. After clearing Cache Storage, the service worker, and OPFS and re-booting, the `disk-cache` held **exactly 36 chunk entries totalling 9.00 MB** — the true on-demand disk cost of booting System 7.0 to a settled desktop. Corrected accounting below.
 
 | Asset | Transfer | Decoded | Role |
 | --- | --- | --- | --- |
@@ -38,7 +38,16 @@ Total network transfer for the running machine: **~1.4 MB compressed**.
 | `Saved HD.dsk-*.js` | 1 KB | 5 KB | persistent-disk chunk manifest |
 | `worker-*.js` | 11 KB | 29 KB | emulator worker glue |
 
-The load-bearing trick: disk "images" ship as **tiny chunk manifests**; chunk bytes stream on demand as the emulated OS touches disk blocks. A bootable classic Mac needs ~2.5 MB decoded critical path (emulator + ROM + glue) plus the first few disk chunks — the multi-GB library disk costs nothing until opened. Asset filenames embed content hashes (`BasiliskII-Dm9iTInD.wasm`), pinning an exact build generation per page load (VERIFIED); the site's overall release/version identifier was not captured in this probe (UNKNOWN).
+The load-bearing trick: disk "images" ship as **tiny chunk manifests**; chunk bytes stream on demand as the emulated OS touches disk blocks. Corrected total for a cold boot to a settled System 7 desktop (VERIFIED by cache-clear + re-measure):
+
+| Component | Decoded | Notes |
+| --- | --- | --- |
+| BasiliskII wasm + ROM + worker glue | ~2.2 MB | execute-critical; 0.8 MB over the wire compressed |
+| Disk chunks actually read | **9.00 MB** (36 × 256 KB) | worker-fetched, Brotli on the wire, Cache-Storage-backed |
+| Software-library index (`MacLibraryContents`) | 1.6 MB | not boot-critical |
+| **Total to a booted desktop** | **~11–12 MB decoded** | the project's own published cold figure is ~3 s to fully booted |
+
+The multi-GB library disk and the 1.1 GB sparse `Saved HD` cost essentially nothing until touched. Asset filenames embed content hashes (`BasiliskII-Dm9iTInD.wasm`), pinning an exact build generation per page load (VERIFIED); the site's overall release/version identifier was not captured in this probe (UNKNOWN).
 
 ### Disk chunk-manifest format (VERIFIED, fetched and inspected)
 
@@ -88,7 +97,7 @@ During the session a shared-pane probe (runtimes lane) had `https://copy.sh/v86`
 
 ## What the probe establishes for EFS
 
-1. **The target experience exists and is cheap.** A real classic-Mac boot needs ~2.5 MB decoded + streamed chunks and reaches quiescence in under 2 s (VERIFIED above). "Click a link, a little computer pops up" is not speculative; parity is an integration problem, not a research problem, *for system classes whose media is lawful to serve*.
+1. **The target experience exists and is cheap.** A real classic-Mac boot needs ~2.2 MB of execute-critical bytes plus exactly 9.00 MB of on-demand disk chunks — ~11–12 MB decoded total against a 40 MB image — and the emulator reaches quiescence 1.9 s after start (VERIFIED above; the project's own cold-cache figure is ~3 s to fully booted). "Click a link, a little computer pops up" is not speculative; parity is an integration problem, not a research problem, *for system classes whose media is lawful to serve*.
 2. **The manifest closure is small and legible.** Exact generation = emulator WASM (content-hashed) + ROM + config blob + N disk-chunk manifests. All are ordinary files; nothing museum-specific. EFS's PAF-2 versioned-manifest model expresses this closure directly (PROPOSED mapping, to be argued in the main review).
 3. **Range/chunk reads are the load-bearing primitive.** The entire UX rests on lazy verified chunk fetch against an immutable image — precisely the `BYTES-PARTIAL` chunk machinery in large-file-uploads.md plus the range-read spec text it still lacks, and precisely what packages-and-updates.md's all-or-nothing closure staging currently refuses (a named gap for the review).
 4. **Persistence = overlay, not image mutation.** Dirty-chunk overlays over an immutable base keep saves tiny, portable, and generation-scoped; browser storage is evictable and the honest-failure dialog is mandatory product surface, not polish.

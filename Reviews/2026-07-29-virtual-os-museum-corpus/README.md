@@ -17,7 +17,7 @@ Research corpus for the architecture-pressure pass on the [Virtual OS Museum](ht
 | [`runtimes-x86.md`](./runtimes-x86.md) | v86, JSLinux, WebVM/CheerpX, halfix, Boxedwine, qemu-wasm, container2wasm — with live boot tests and measured payloads |
 | [`runtimes-retro.md`](./runtimes-retro.md) | Internet Archive/Emularity at 326k-item scale, MAME-wasm, PCjs, js-dos/em-dosbox, 8/16-bit best-of-breed, consoles, mainframes/minis; ROM-legality islands (Amstrad grant, Caldera Ancient-UNIX license) |
 | [`runtimes-mac-unix-mobile.md`](./runtimes-mac-unix-mobile.md) | Infinite Mac teardown (the "click Mac OS 7" existence proof), Unix workstations, PalmOS/Newton/WinCE/Symbian/Android/iPhone OS, modern-OS honesty, WASI/Component-Model + OCI reality check, server-stream fallbacks |
-| [`hands-on-test-log.md`](./hands-on-test-log.md) | First-hand probe: Infinite Mac System 7.0 measured (1.4 MB transfer, <2 s boot, chunk-manifest format, OPFS overlay saves, COOP/COEP+SAB, cross-tab lock failure state); witnessed v86 Linux boot |
+| [`hands-on-test-log.md`](./hands-on-test-log.md) | First-hand probe: Infinite Mac System 7.0 measured (corrected byte accounting: 2.2 MB engine/ROM + exactly 9.00 MB streamed disk chunks, 1.9 s to settled desktop, chunk-manifest format, OPFS overlay saves, COOP/COEP+SAB, cross-tab lock failure state); witnessed v86 Linux boot |
 
 ## Synthesis documents (main-session author)
 

@@ -23,7 +23,7 @@ Merged from [`runtimes-x86.md`](./runtimes-x86.md), [`runtimes-retro.md`](./runt
 | 6 | Windows 3.x | v86 (apps-only: Boxedwine) | **browser-native-practical** | ~1.8 MB + 10–20 MB | 32–64 MB | snappy | TOLERATED/BYO |
 | 7 | Windows 95/98 | v86 (FIX95CPU, state-image resume) | **browser-native-practical** (setup quirks) | +50–300 MB | 128 MB | boot minutes cold, seconds from state | TOLERATED/BYO |
 | 8 | Windows 2000/XP | v86 (2000 solid; XP fragile) | **browser-capable-with-limits** | 28 MB–2 GB | 128–512 MB | sluggish | TOLERATED/BYO |
-| 9 | 68k Mac (System 1–7.5) | Mini vMac / Basilisk II / Snow via Infinite Mac | **browser-native-practical** | 0.8–1.6 MB core + streamed chunks (measured: **1.4 MB to booted System 7**) | ≤128 MB | ≥ original; <2 s boot measured | TOLERATED (ROMs never licensed; openly served since 2022 without takedown) |
+| 9 | 68k Mac (System 1–7.5) | Mini vMac / Basilisk II / Snow via Infinite Mac | **browser-native-practical** | 0.8–1.6 MB core + streamed chunks (measured for System 7: 2.2 MB engine/ROM + **9.00 MB of chunks**) | ≤128 MB | ≥ original; <2 s boot measured | TOLERATED (ROMs never licensed; openly served since 2022 without takedown) |
 | 10 | PPC Mac OS 8/9 | SheepShaver via Infinite Mac | **browser-native-practical** | 0.7 MB core + streamed 100s MB | 64–256 MB | usable | TOLERATED |
 | 11 | Mac OS X 10.0–10.4 (PPC) | DingusPPC / PearPC wasm | **browser-capable-with-limits** | 1–2 MB + GB-class streamed | 128–512 MB | ~2 min boot; qemu-wasm ~2× tracked | TOLERATED |
 | 12 | NeXTSTEP / OPENSTEP | Previous via Infinite Mac | **browser-native-practical** | 2.8 MB + images | 8–128 MB | paced to original | TOLERATED |
