@@ -15,6 +15,35 @@ Rows touched:
 Next check:
 ```
 
+## 2026-07-31 - Nouns DAO funding fit
+
+Trigger: James asked whether Nouns DAO could fund EFS and whether buying a Noun for roughly 2 ETH would improve the chance of funding.
+
+Official sources checked:
+
+- [Nouns proposal documentation](https://docs.nouns.wtf/governance/proposals), [DUNA documentation](https://docs.nouns.wtf/legal/duna), [official deployments](https://docs.nouns.wtf/protocol/deployments), and read-only Ethereum calls to the listed governor, data, and treasury contracts;
+- [ethOS proposal 279](https://nouns.wtf/vote/279), [House of Nouns proposal 242](https://nouns.wtf/vote/242), [defeated NFT exchange proposal 204](https://nouns.wtf/vote/204), [CC0 space-image-bank proposal 94](https://www.nouns.com/vote/94), [HackQuest proposal 856](https://www.nouns.camp/proposals/856), and current Nouns Camp candidates;
+- [Prop House FAQ](https://offchain.prop.house/faq) and the user-supplied [2023 Nouns/Prop House overview](https://youtu.be/oa79nN4gMPs?is=tWYXfhSCnLEU6nml), used as historical context because captions were unavailable and no current Nouns round was verified.
+
+Current read:
+
+- Nouns is a credible medium-high lead only through a bounded, Nouns-specific pilot. It is a weak target for an abstract request to fund the whole EFS redesign.
+- One Noun gives one vote but does not meet the current 3-vote proposal threshold or the much larger dynamic passing quorum. A permissionless Proposal Candidate and sponsor route exists; the live candidate cost was 0.01 ETH when checked.
+- Live quorum checks indicated roughly 136-204 FOR votes depending on eligible supply and opposition; the official documentation's 108-162 example was stale. Current contract state controls.
+- Prior funding for ethOS and House of Nouns is strong precedent for open-source OS and self-hostable public infrastructure. The close ethOS vote, major House of Nouns budget reduction, and defeated technical proposals show that proof, direct Nouns value, community support, and a bounded ask matter.
+- The strongest hypothesis is **Nouns Walk-Away Archive**: a portable, verifiable Nouns archive with a fast anonymous browser, explicit mirrors and unavailable states, downloadable export, and independent verifier. A Nounish EFS OS surface could make it delightful, but the archive and exit proof are the funding substance. “Forever” is campaign language, not an unsupported storage guarantee.
+- Do not buy a Noun to obtain access to funding. Purchase only if James independently wants long-term membership and accepts the financial risk.
+- A current candidate's claim that Nouns has shifted from raw grants toward mutual-benefit or investment structures is a useful culture signal, not official policy.
+- The sponsored onchain proposal path is the only current, official, adequately funded route verified. No active Nouns Prop House round was found; Flows and legacy Small Grants should not be presented as current routes, and the unaudited experimental `noun.wtf` grants contract is too small for EFS.
+
+Implication: Preserve the lead as `watching`. The next evidence step is a dedicated deep dive into recent votes, active funding routes, sponsor fit, delivery history, and a small pilot budget. Do not buy, contact anyone, draft a proposal, or make the pilot an EFS milestone yet.
+
+Boundary: [[nouns-dao-funding]] records research and a proposal hypothesis, not an EFS architecture decision, implementation commitment, partnership claim, or owner ruling.
+
+Rows touched: [[programs]], [[proposals]]
+
+Next check: Only after James chooses whether to authorize the dedicated deep dive.
+
 ## 2026-07-28 - FUTO four-lens expert review
 
 Trigger: Review the proposed FUTO microgrant worksheet and Gmail draft for mission fit, technical correctness, writing quality, and rejection risk.

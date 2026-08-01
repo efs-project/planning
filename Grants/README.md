@@ -28,6 +28,7 @@ Row graduation rule: a lead becomes a [[proposals]] row only when it has a plaus
 | [[proposals]] | Submitted, drafting, and watchlist proposals. Single source of truth for status. |
 | [[efs-grant-packet]] | Reusable EFS pitch, links, milestones, and budget snippets. |
 | [[research-log]] | Dated grant-specific research notes, rejected leads, and community/funder intel. |
+| [[nouns-dao-funding]] | Point-in-time Nouns DAO funding research, purchase analysis, pilot hypothesis, and deep-dive prompt; not an application decision. |
 | [[futo-microgrant-application]] | Active worksheet for the proposed USD 5,000 walk-away file-proof microgrant. |
 | [[futo-microgrant-email]] | Send-ready email draft for the FUTO microgrant application. |
 | [[futo-fj-3b-demonstrator]] | Reading list and one-day build/reproduction checklist for the FUTO pre-submission proof. |
