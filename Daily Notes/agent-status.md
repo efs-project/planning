@@ -149,3 +149,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 ## 2026-07-31
 
 - @pm (harness codex): Nouns DAO funding lead captured under `Grants/` and independently checked in three read-only lanes. Corrected stale documented quorum against live contracts; verified candidate/sponsorship as the only current adequately funded official route; narrowed the hypothesis to a Nouns Walk-Away Archive with optional anonymous OS/browser demonstration. Tracker status is `watching`; no application, purchase, outreach, architecture commitment, or milestone is authorized.
+
+## 2026-08-04
+
+- @pm (harness codex): Parked the OpenStreetMap canoeability thread in `Ideas.md` as a persistent-shared-subject + plural-geospatial-claims pressure test. Preserved exact-source citation vs. evolving subject identity, signed conditional observations, split/merge continuity, lenses, and OSMPID-first interoperability; no design, milestone, or flagship use-case commitment. Remote refresh was unavailable because GitHub DNS resolution failed; local `main` was otherwise clean before this scoped edit.

@@ -8,6 +8,47 @@ A lightweight parking lot for future ideas, "we should do X someday" drops, and 
 
 ## Open
 
+### Persistent shared subjects + plural geospatial claims
+*(James, 2026-08-04; prompted by the [OpenStreetMap canoeability thread](https://news.ycombinator.com/item?id=49155521))*
+
+Use EFS as a portable claim and continuity layer for real-world things whose
+source-dataset identifiers and geometry evolve. The concrete example is a
+canoe map: OpenStreetMap can record legal access, but practical navigability is
+subjective, seasonal, conditional, and often inappropriate as one canonical
+map fact. A third-party overlay can express it, but references to OSM nodes,
+ways, and relations break when features are split, merged, replaced, or
+repurposed.
+
+Keep five concepts separate in any later pressure test:
+
+1. an immutable citation to the exact source object and version, including a
+   geometry/content digest and observation time;
+2. a durable shared subject for the evolving real-world place or stream reach;
+3. signed, scoped observations such as legal access, practical navigability,
+   difficulty, season, water level, obstruction, footprint, and evidence;
+4. authored continuity claims across source replacements, splits, and merges;
+   and
+5. lenses that select or aggregate which authors' claims a reader sees.
+
+Prefer the domain-native [OSMPID proposal](https://2026.stateofthemap.org/sessions/CYVSG9/)
+when available. EFS should bridge exact legacy OSM references, OSMPIDs, and
+other identifiers while preserving provenance and history—not create a rival
+canonical map ID merely to own the namespace. EFS can validate claim shape and
+authorship; it cannot automatically decide whether two changed features remain
+the same real-world thing or whether a canoeability assessment is true.
+
+Later design pressure should cover duplicate subject creation, reversible
+same-as decisions, one-to-many and many-to-one continuity, claims over only
+part of a geometry, time/condition scope, geospatial indexing and discovery,
+completeness/absence honesty, and OpenStreetMap licensing. Candidate EFS
+connections are shared TAGDEF subjects, `sameAs` / `relatedVersion` /
+`supersededBy` relations, portable schemas and validators, provenance, and
+lenses; all remain candidates during v2 reconciliation, not an adopted design,
+milestone, or flagship use case.
+
+Revisit during the coordinated identity/kinds/lens recut or when EFS evaluates
+real-world public datasets and third-party overlays.
+
 ### A per-read diagnostic channel — "why this file?" (from vfile's `messages`)
 *(James asked about [vfile](https://github.com/vfile/vfile), 2026-07-29)*
 
