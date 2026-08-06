@@ -52,3 +52,13 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 
 - [`2026-07-29-virtual-os-museum-deep-dive.md`](./2026-07-29-virtual-os-museum-deep-dive.md) — architecture-pressure pass on the Virtual OS Museum (Andrew Warkentin's 1,700-install VM museum) and the entire browser-OS-emulation field, against EFS v2 generic primitives and the client v2 kernel: what the museum is, why one-click matters, which OS classes actually run in browsers (measured: System 7 in <2 s on 1.4 MB), licensing/neutrality reality, parity + better-than-parity verdicts, PAF tightening proposals, no-protocol-gap finding, and a legally-clean staged demo plan. Extends `Designs/efsv2/playable-archive-requirements.md`; N5 and runner-lane decisions preserved as undecided.
 - [`2026-07-29-virtual-os-museum-corpus/`](./2026-07-29-virtual-os-museum-corpus/README.md) — 7 evidence lanes (history, architecture teardown incl. live apt-repo inspection, licensing, 3 runtime surveys, first-hand hands-on probe) + 6 synthesis docs (feasibility matrix, feature matrix, EFS coverage/gap ledger, threats, vertical slice, open questions), all source-graded and dated.
+
+### EthStorage and EFS boundary (2026-08-05)
+
+- [`2026-08-05-ethstorage-deep-dive.md`](./2026-08-05-ethstorage-deep-dive.md) — current EthStorage architecture, economics, proof and governance boundaries; `web3://`, FlatDirectory, W3Drive/dBlog, and verified-frontend evidence; the candidate EFS-above-EthStorage differentiation thesis; OS/product-boundary constraints; claim safety; and a falsifiable integration/walk-away program. It selects no carrier or v2 design.
+- [`2026-08-05-ethstorage-corpus/`](./2026-08-05-ethstorage-corpus/README.md) — pinned-source protocol/product reports, EFS comparison and gap ledger, and the validation program future storage designers should rerun before adopting, partnering with, or positioning against EthStorage.
+
+### GoE / Git on Ethereum (2026-08-05)
+
+- [`2026-08-05-goe-deep-dive.md`](./2026-08-05-goe-deep-dive.md) — separate teardown of GoE's released CLI, remote helper, contracts, and live Sepolia use: what Git transport it already solves, why it is not yet a credibly neutral forge, its production-readiness gates, and the reuse/build decision rule.
+- [`2026-08-05-goe-corpus/`](./2026-08-05-goe-corpus/README.md) — Git-helper and contract behavior, deployment evidence, security/trust gates, and a candidate portable Git profile/library plus Markdown-workspace acceptance suite.

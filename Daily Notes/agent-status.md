@@ -149,3 +149,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 ## 2026-07-31
 
 - @pm (harness codex): Nouns DAO funding lead captured under `Grants/` and independently checked in three read-only lanes. Corrected stale documented quorum against live contracts; verified candidate/sponsorship as the only current adequately funded official route; narrowed the hypothesis to a Nouns Walk-Away Archive with optional anonymous OS/browser demonstration. Tracker status is `watching`; no application, purchase, outreach, architecture commitment, or milestone is authorized.
+
+## 2026-08-05
+
+- @pm (harness codex): EthStorage + GoE deep review completed in isolated worktree `pm/2026-08-05-ethstorage`: current protocol/product evidence, EFS integration/differentiation boundary, separate Git-on-Ethereum teardown, portable-Git/Markdown-workspace handoff, and falsifiable follow-up program. No storage provider, Git library, OS boundary, or v2 design choice was adopted.
