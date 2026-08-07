@@ -62,3 +62,8 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 
 - [`2026-08-05-goe-deep-dive.md`](./2026-08-05-goe-deep-dive.md) — separate teardown of GoE's released CLI, remote helper, contracts, and live Sepolia use: what Git transport it already solves, why it is not yet a credibly neutral forge, its production-readiness gates, and the reuse/build decision rule.
 - [`2026-08-05-goe-corpus/`](./2026-08-05-goe-corpus/README.md) — Git-helper and contract behavior, deployment evidence, security/trust gates, and a candidate portable Git profile/library plus Markdown-workspace acceptance suite.
+
+### EFS Git deep dive — neutral hosting, Git-backed wikis, and the ref-transaction fold (2026-08-07)
+
+- [`2026-08-07-efs-git-deep-dive.md`](./2026-08-07-efs-git-deep-dive.md) — dedicated from-scratch pass on EFS Git: verdict that the EFS Wiki workspace (not a GitHub clone) is the first product; the `GIT-REF/1` admission-ordered ref-transaction fold as the zero-kernel-surface answer to replay-safe atomic multi-ref CAS; the exact Git/EFS canonical-state boundary; reuse-vs-build ledger; a five-item owner packet (GD-1…GD-5); unknowns and kill conditions. Riders on P-1/E2/Q3 only; no kernel asks, no carrier adopted.
+- [`2026-08-07-efs-git-corpus/`](./2026-08-07-efs-git-corpus/README.md) — requirements ledger, state model, primitive fit/gap, storage/closure/recovery, wiki + collaboration objects, four candidate architectures, threat/economics, fifteen grounding traces, freeze-impact table, prototype plan + acceptance suite, twelve primary-source prior-art lanes, and eleven first-hand Git fixture experiments.

@@ -153,3 +153,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 ## 2026-08-05
 
 - @pm (harness codex): EthStorage + GoE deep review completed in isolated worktree `pm/2026-08-05-ethstorage`: current protocol/product evidence, EFS integration/differentiation boundary, separate Git-on-Ethereum teardown, portable-Git/Markdown-workspace handoff, and falsifiable follow-up program. No storage provider, Git library, OS boundary, or v2 design choice was adopted.
+
+## 2026-08-07
+
+- @claude-fable-5 (harness claude-code): EFS Git deep dive completed in isolated worktree `fable/2026-08-07-efs-git` (base `pm/2026-08-05-ethstorage` @ 4fe845f): 13 prior-art research lanes + 12 local Git fixture experiments + 10 analysis docs + main review with owner packet GD-1…GD-5. Central finding: replay-safe atomic multi-ref CAS = typed read-time fold over admission-ordered ordinary claims (predecessor witnesses + txn commitments in claim bodies; CAS-canonical heads, ancestry via object-bearing verifiers) — zero Git-specific kernel surface; wiki-first earned as proving workload with demand-side and proposer-funding questions honestly open. Five adversarial reviews (git-semantics, EFS-consistency, security, wiki-UX, hostile-arch) ran pre-publication; 3 FATAL-class fold overclaims repaired into the text. No owner question answered, no carrier adopted, Q3/P-1 untouched. / next: James answers GD packet and/or prototype M1–M2.
