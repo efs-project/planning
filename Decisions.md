@@ -16,6 +16,10 @@ Append-only one-line decisions log. Mirrors the pattern in `contracts/docs/decis
 
 ---
 
+## 2026-08
+
+- 2026-08-07 (@james via chat → @pm capture): **EFS v1 plus the existing SDK is the supported bridge for current Nanda and Arcade work; harden and merge the SDK for those real product paths.** This reverses the 2026-07-27 operational instruction not to merge it, but preserves that ruling's architecture boundary: using and supporting v1 now does **not** make v1 contracts, EAS UIDs, SDK shapes, write DAGs, lens defaults, or storage assumptions the automatic EFS v2 baseline. Isolate v1-specific mechanics where practical so these apps pressure-test v2 without silently defining it.
+
 ## 2026-07
 
 - 2026-07-29 (@james via chat → @pm): **Owner decision inboxes and ruling ledgers are `#status/reference` permanently.** James: "Set whatever tag an owner decision inbox should have. It's not a design so reference seems fine. Not sure what revalidated even means." Applied to all three inboxes (root, `efsv2/`, `clientv2/`) plus `efsv2/owner-rulings.md`; `#kind/decision` retained (they *are* decision artifacts). **Root cause captured so it can't recur:** `revalidated` was agent-invented, not James's word. An agent wanted to express "this packet was re-derived" and reached for `**Status:**` — the one field it saw — when these files already carry `**Last reconciled:**` for exactly that. **`**Status:**` is lifecycle, not freshness:** an inbox is `reference` forever, freshness goes in `Last reconciled:`, and descriptive detail goes in the prose tail after the lifecycle token (tri-sync reads word 1 only). Documented in [[conventions]] both as the `#status/reference` definition and as a "not vocabulary" row. Broke tri-sync 2026-07-25→29; now green.

@@ -23,8 +23,8 @@ kanban-plugin: board
 
 ## In Flight
 
-- [ ] **Target-community research — who are EFS's first real users?** (@communities, Codex) — the vault has abstract use cases and technical-competitor dossiers but **zero research on real communities with real populations**. Hypothesis: image/media galleries (pixiv, boorus, imageboards); scoped to research widely (fan archives, scanlation, emulation/preservation, open data, photography, zines, dead-platform diasporas). Wedge to find: **who has already lost an archive** — purges, payment-processor deplatforming, shutdowns. Includes an honest content-class risk column, since EFS content is permanent, public, and not centrally removable. Deliverables: dated corpus in `Reviews/`, ranked shortlist of 3–5, the requirements each implies (validates or breaks current designs), candidate first apps. **Parallel-safe**; barred from `Designs/efsv2/` and the inboxes. Frame in [[Decisions]] 2026-07-29. #repo/planning #kind/task
-  — @communities, claimed 2026-07-29, expires 2026-08-05
+- [ ] **Harden and merge the v1 SDK for Nanda + Arcade** (@sdk agent) — owner direction 2026-08-07: v1 is the supported product bridge for these two current workloads. The SDK agent is fixing bugs and preparing the existing branch for merge. Treat its v1 APIs and deployed-contract assumptions as operationally supported here, but not as the automatic v2 architecture; keep the substrate boundary visible so product evidence can inform the redesign without deciding it. Merge/readiness details stay in the SDK repo rather than being copied into this board. #repo/sdk #repo/planning #kind/task
+  — @sdk agent, active 2026-08-07; next: return a concise merge-readiness report to James
 
 - [ ] **Grants — research + tracker + submissions** (@grants) — funder-landscape research + a lightweight operational tracker in `Grants/` (README/programs/proposals/packet/research-log), + preparing James's actual submissions. First external anchor = the [EFS KarmaHQ page](https://www.karmahq.xyz/project/ethereum-file-system/about); first proposal row = Octant (rejected, competitive — keep the row + feedback). Tracking detail lives in `Grants/proposals.md` (not mirrored here); this card is just the swarm-visible pointer to the active work. James-actionable items (Karma cleanup: no team listed, funds raised = 0, bare "Path to Success"; program picks; submission sign-offs) route to [[Owner-Inbox]] only when they're real forks/deadlines. #repo/planning #kind/ops
   — @grants, structure blessed by @pm 2026-07-05, expires 2026-07-30
@@ -42,14 +42,13 @@ kanban-plugin: board
 
 - [ ] **ArDrive product teardown → EFS File Browser feature requirements** (@ardrive-teardown) — all three deliverables landed 2026-07-29: teardown record [[2026-07-29-ardrive-product-teardown]] + 14-file corpus in `Reviews/`, [[file-browser-requirements]] draft in `Designs/clientv2/` (must-match / do-differently / can-skip + lenses-in-a-file-UI + mount constraints + 19 acceptance tests), positioning line included in both. Adversarially verified (7-reviewer pass: fact-check, rulings-consistency, conventions, 4 personas) and revised before landing. Awaiting review of the `#status/draft` requirements doc. #repo/planning #repo/client #kind/task
   — @ardrive-teardown (claude-fable-5) → awaiting review, no expiry
-- [ ] **[[sdk-architecture]] — SDK design at #status/review** — awaiting @james's promote/revise. Open questions resolved; the SDK agent is already building against it (PR #1). Promoting just ratifies what's being built. #repo/sdk #kind/design
-  — @sdk-designer → awaiting @james, no expiry
 - [ ] **PM SOUL [[Agents/pm]]** drafted, at #status/review — awaiting @james promote (low priority). #repo/planning #kind/design
   — @pm → awaiting @james, no expiry
 
 
 ## Done
 
+- [x] **Target-community research — first-user shortlist and Arcade wedge** — landed 2026-08-07 (`877bb1c`): evidence-backed community inventory, steward-calibrated scorecard, ranked prospects, community interaction/persona maps, risk gates, requirements, and validation plan. Arcade is the current first-product hypothesis, not a permanent exclusion of stronger candidates. #repo/planning #kind/task
 - [x] **FS deletion + pre-launch hardening (WHITEOUT = additive 10th schema)** — landed on contracts `main` (2026-06-23): per-name WHITEOUT deletion + cross-lens negative mask, anchor depth raised to 1024, redirect/contentHash specs, view-layer whiteout suppression, freeze/burn runbooks updated. Additive schema (schemas can be added freely) — no orphaning of the frozen 9.
 - [x] **Instant Sepolia burner session** (PR #39) — merged to `main` 2026-06-23. Chain-aware burner wallet + network persistence + Sepolia-first public builds. Realizes the burner-wallet half of the [[Ideas]] entry; multi-wallet-as-one-identity-in-lenses still open.
 - [x] **Easy-edits reliability (#41) + post-seal retry/smoke (#40)** — hardened burner connect, overview tag writes on wallet client, IPFS/Arweave gateway env normalization, sealed-retry smoke correctness. Merged to `main` 2026-06-23/24.

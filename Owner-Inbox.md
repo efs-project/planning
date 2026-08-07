@@ -19,7 +19,7 @@ Nothing.
 ## 🕐 WHEN YOU HAVE TIME
 
 - **EFS v2 packet is fully revalidated** — the joined authority/filesystem pass and dedicated lens pass both landed. The hold is liftable across P-1…P-23 and LP-1…LP-10; Q3/Q4 remain held. P-1 is the dependency root, so start there rather than treating the packet as 33 simultaneous asks. See [Open-Decisions.md](./Open-Decisions.md).
-- **Other live design choices:** `OS1`/`OS2` (clientv2). Root `R1` conflicts with the captured v2-from-scratch / SDK-as-legacy ruling and awaits retirement by its owning design thread. See [Open-Decisions.md](./Open-Decisions.md).
+- **Other live design choices:** `OS1`/`OS2` (clientv2). Root `R1` was answered by the 2026-08-07 v1-bridge ruling and awaits retirement by its owning design thread; it is no longer a James decision. See [Open-Decisions.md](./Open-Decisions.md).
 - **Vault process changes landed 2026-07-23** — see [[Decisions]]. One thing needs your nod: whether to keep the structural SOUL edits (escalation dial re-keyed off the dead milestone, "ignore design bodies" inverted for a design phase). Say the word and I revert them.
 - Frame-review the proposed design process → [[Brainstorms/2026-05-28-pm-design-process-synthesis]] (then I formalize it)
 

@@ -18,7 +18,7 @@ What rulings have **retired**, and what replaced it. Input to `./scripts/needs-i
 
 | Retired phrase | Replacement | Ruling | Since |
 |---|---|---|---|
-| `pre-v2 SDK design corpus` | Legacy evidence; reuse API ideas only after the v2 constitution and record model land | 2026-07-27 SDK-as-legacy ruling | 2026-07-29 |
+| `pre-v2 SDK design corpus` | Supported v1 bridge for Nanda/Arcade; legacy evidence only for v2, with no automatic architectural inheritance | 2026-08-07 v1-bridge ruling | 2026-07-29 |
 
 ## Cleared
 
