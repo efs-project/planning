@@ -6,6 +6,11 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ---
 
+## 2026-08-05
+
+- @pm (harness codex): ETHDenver 2027 speaker watch — confirmed that no official 2027 event or CFP dates are published yet; recorded the prior official October–December three-wave speaker cycle, separate attendance application, January decision target, and a September monitoring trigger without turning historical dates into a 2027 commitment / next: finish Devcon, then refresh when ETHDenver announces 2027.
+- @pm (harness codex): Devcon 8 speaker application — verified the live CFP, hidden form fields, earlier operative deadline, tracks, review process, organizer/contact boundaries, accepted-talk precedents, and current EFS proof; created a source-indexed application workspace with a ranked problem-first talk slate and copy-ready walk-away-test proposal / next: James supplies five profile answers, reviews voice, and submits before the live form's 2026-08-06 01:30 CDT cutoff.
+
 ## 2026-07-29
 
 - @pm: planning-vault health pass — verified a synced HEAD and initially clean worktree, full history, hooks, promotion integrity, live milestone, decision rollup, card TTLs, links, and current sibling evidence; a concurrent ArDrive review corpus appeared during the pass and was left untouched; pruned the submitted FUTO fork, updated post-lens sequencing, moved the dormant v1 holistic review out of In Flight, routed contracts guidance to PR #42, and restored the missed SDK retirement work order / next: owning design thread records the 2026-07-27 SDK ruling against R1; James's highest-leverage design action is lifting the revalidated EFS v2 hold or answering root P-1.
@@ -153,3 +158,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 ## 2026-08-04
 
 - @pm (harness codex): Parked the OpenStreetMap canoeability thread in `Ideas.md` as a persistent-shared-subject + plural-geospatial-claims pressure test. Preserved exact-source citation vs. evolving subject identity, signed conditional observations, split/merge continuity, lenses, and OSMPID-first interoperability; no design, milestone, or flagship use-case commitment. Remote refresh was unavailable because GitHub DNS resolution failed; local `main` was otherwise clean before this scoped edit.
+
+## 2026-08-06
+
+- @codex (harness codex): Devcon 8 proposal submitted before the live-form cutoff as “Who Can Turn Off Your Ethereum App? A Full-Stack Walk-Away Test,” targeting Permissionless Networks with EFS as the working example. Recorded the on-screen confirmation and share-review URL in `Devcon/`; acceptance remains pending and creates no Devcon implementation deadline.

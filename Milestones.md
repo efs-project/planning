@@ -14,13 +14,17 @@ honest, but must not invent dates, requirements, or launch commitments.
 
 ## Devcon presentation (2026-11)
 
-**Status:** the only current dated milestone; scope is not yet locked.
+**Status:** speaker application submitted; selection pending; talk delivery
+scope remains unlocked until acceptance.
 
 The presentation should describe and demonstrate whatever is genuinely coherent
 by Devcon. It must not turn an unfinished v2 design into a launch promise.
 
 ### Current inputs
 
+- The speaker-application workspace is [[Devcon/README|Devcon/README.md]]. It
+  holds the submitted application, research, and follow-up record, not a
+  commitment to deliver every idea it explores.
 - The v1 Sepolia deployment and explorer are useful evidence about what worked,
   what accumulated complexity, and why EFS is being redesigned.
 - The current v2 spine is
@@ -30,12 +34,14 @@ by Devcon. It must not turn an unfinished v2 design into a launch promise.
   [[Designs/clientv2/README|Designs/clientv2/README.md]]. Its exact app lane,
   rendering ABI, and implementation target remain evidence-gated.
 
-### Possible presentation shape — not commitments
+### Submitted presentation shape — delivery details remain open
 
-- What EFS is trying to make possible.
-- What the v1 Sepolia system taught us.
-- The coherent v2 architecture that exists by then.
-- A working demonstration only if it represents the architecture honestly.
+- Identify centralized off switches across the full Ethereum app stack.
+- Use the public EFS Sepolia system as the working example.
+- Demonstrate independent retrieval and verification, including corruption and
+  unavailability.
+- Give developers practical questions for testing their own applications.
+- Show only implementation details that remain accurate at presentation time.
 
 ### Hard requirements
 
