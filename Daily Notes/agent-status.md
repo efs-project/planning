@@ -159,6 +159,14 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 - @pm (harness codex): Parked the OpenStreetMap canoeability thread in `Ideas.md` as a persistent-shared-subject + plural-geospatial-claims pressure test. Preserved exact-source citation vs. evolving subject identity, signed conditional observations, split/merge continuity, lenses, and OSMPID-first interoperability; no design, milestone, or flagship use-case commitment. Remote refresh was unavailable because GitHub DNS resolution failed; local `main` was otherwise clean before this scoped edit.
 
+## 2026-08-05
+
+- @pm (harness codex): EthStorage + GoE deep review completed in isolated worktree `pm/2026-08-05-ethstorage`: current protocol/product evidence, EFS integration/differentiation boundary, separate Git-on-Ethereum teardown, portable-Git/Markdown-workspace handoff, and falsifiable follow-up program. No storage provider, Git library, OS boundary, or v2 design choice was adopted.
+
 ## 2026-08-06
 
 - @codex (harness codex): Devcon 8 proposal submitted before the live-form cutoff as “Who Can Turn Off Your Ethereum App? A Full-Stack Walk-Away Test,” targeting Permissionless Networks with EFS as the working example. Recorded the on-screen confirmation and share-review URL in `Devcon/`; acceptance remains pending and creates no Devcon implementation deadline.
+
+## 2026-08-07
+
+- @claude-fable-5 (harness claude-code): EFS Git deep dive completed in isolated worktree `fable/2026-08-07-efs-git` (base `pm/2026-08-05-ethstorage` @ 4fe845f): 13 prior-art research lanes + 12 local Git fixture experiments + 10 analysis docs + main review with owner packet GD-1…GD-5. Central finding: replay-safe atomic multi-ref CAS = typed read-time fold over admission-ordered ordinary claims (predecessor witnesses + txn commitments in claim bodies; CAS-canonical heads, ancestry via object-bearing verifiers) — zero Git-specific kernel surface; wiki-first earned as proving workload with demand-side and proposer-funding questions honestly open. Five adversarial reviews (git-semantics, EFS-consistency, security, wiki-UX, hostile-arch) ran pre-publication; 3 FATAL-class fold overclaims repaired into the text. No owner question answered, no carrier adopted, Q3/P-1 untouched. / next: James answers GD packet and/or prototype M1–M2.
