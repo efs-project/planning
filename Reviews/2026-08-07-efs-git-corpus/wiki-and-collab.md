@@ -61,6 +61,14 @@ The wiki lane's MediaWiki analysis forces two items the earlier draft under-weig
 
 A skills repo is `workspaceClass = skills` with the same machinery plus one object: **SkillReleaseV1** — publisher principal, repoId, release tag, exact commit/tree OID (+dual digest), capability-manifest hash, supersession pointer. Install/update flows through GATE/1 unchanged (owner-pinned plan, closed authorities, STOP-on-revocation, policyMaxAge); the install ledger diffs capability manifests between pinned releases — the "meaningful diff before install" (trace T15) is the existing clientv2 install-ledger surface fed by release claims. Repository popularity never grants execution (A-3's enumeration ≠ endorsement, applied to skills).
 
+## 7b. Named product-reconciliation debts (PM review, 2026-08-07 — tracked, not yet designed)
+
+1. **Guest-state vocabulary**: map every wiki guest state onto the lens-spec G-ladder + NO-TRANSPORT qualifier exactly (no dialect); one table, conformance-checkable.
+2. **Stable-link grammar**: align repo/commit/path link forms with read-lens-spec §6's Path/Citation grammar and the `web3://` URL shapes — one grammar, not a wiki-local invention.
+3. **Proposal revisions**: a v2 of a proposal (new tip after review feedback) needs a supersession pointer + re-review flow — currently only OPEN→ACCEPTED/DECLINED exists; Gerrit's patchset chain is the precedent.
+4. **Mobile failure matrix**: OPFS eviction mid-edit, background-tab kill during publish, wallet-app roundtrip state loss — each needs a named recovery behavior on the persistence tiers.
+5. **Anonymous first-paint budget**: the guest page must meet the deep-link resolver's cold-start perf budget (clientv2 #1); no number is set for wiki pages yet — M5 measures against a stated target.
+
 ## 8. What breaks on phones / at scale (named, not hidden)
 
 - Whole-repo clone in a phone browser is the wrong default; the guest path (§4) reads pages without cloning, and editors materialize **sparse working sets** (current page + deps) from gateway-prepared containers. Full clone remains the power path.

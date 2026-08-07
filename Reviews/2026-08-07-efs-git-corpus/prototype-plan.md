@@ -25,7 +25,7 @@ Adopted from the GoE pressure test (its core-Git / portability / workspace / GoE
 ### Core Git
 1. SHA-1 and SHA-256 repos round-trip byte-exact (OIDs unchanged) through import→publish→export.
 2. Anonymous stock clone/fetch, no wallet, no helper.
-3. Authorized stock push; atomic two-ref push rejected wholly on one stale ref (E4 parity); a relayer-carried subset of a multi-ref envelope derives `TRUNCATED-TXN`, never a partial application.
+3. Stock push lands as proposal intake with correct report-status; authorized *EFS-client* publish incl. an atomic two-ref transaction rejected wholly on one stale witness (E4 parity); a relayer-carried subset of a multi-ref envelope derives `TRUNCATED-TXN`, never a partial application. (Direct authoritative stock push to canonical refs is explicitly not claimed.)
 4. Tags (annotated + lightweight), branch delete, default-branch selection.
 5. Thin/malformed/oversized/bomb packs rejected at intake with named errors (E8 + limits, WARN/INFO fsck checks raised); materialization surfaces (diff/render/working-set) run under fan-out/depth budgets against a git-bomb fixture (detonation happens at materialization, not admission — security lane).
 6. Repack to a different layout → clean clone equivalence (E3 parity).

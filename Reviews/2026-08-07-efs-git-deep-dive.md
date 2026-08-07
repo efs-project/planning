@@ -33,7 +33,8 @@ The boundary in one table ([state-model](./2026-08-07-efs-git-corpus/state-model
 - **Git canonical for:** file contents and per-file version history. EFS mints no per-commit version records (hypothesis H-3 survives, sharpened).
 - **EFS canonical for:** ref transitions and their history (Git provably cannot keep this — experiment E6: force-push + GC permanently destroys displaced history; forges keep it by private convention), publish/accept provenance, page identity across renames, placement/availability evidence, policy and its epochs.
 - **Derived, always rebuildable:** gateway bare repos, web views, indexes, LFS maps, pack layouts (E3).
-- **Kernel: zero new surface.** All substrate needs are riders on items already in front of James (P-1, E2, Q3, AMBIENT/1, `.efs-bundle`, conventions registry) — [freeze-impact](./2026-08-07-efs-git-corpus/freeze-impact.md).
+- **Kernel: no new surface identified** — provisional until M2's two implementations and the cost fixtures run; every substrate need found so far is a rider on items already in front of James (P-1, E2, Q3, AMBIENT/1, `.efs-bundle`, conventions registry) — [freeze-impact](./2026-08-07-efs-git-corpus/freeze-impact.md).
+- **Interop boundary, stated plainly:** anonymous stock clone/fetch is full-fidelity; stock `git push` lands as **proposal intake** (refs/for-style, honest within receive-pack's synchronous report-status); *direct authoritative publish requires an EFS-aware countersign path*. "Full authenticated stock-Git push to canonical refs" is not claimed in v1 — the trilemma has no honest third option.
 
 ## 4. The wiki, concretely
 
@@ -82,6 +83,10 @@ Deliberately **not** in the packet: P-1/E2/Q3 (already James's queue — this pa
 4. Browser-side sparse checkout+commit infeasible on current phones **and** users rejecting gateway-assisted editing (the browser lane's evidence currently says wiki-scale is comfortable, so this would require the evidence to be wrong).
 
 Each is a falsifier to test, none is currently in evidence.
+
+## 8b. Owner steering received (2026-08-07, chat)
+
+After reading this review, James stated the long-horizon frame directly: *GitHub-class collaboration — topics, comments, social endorsement, team management — is one of the major long-term forms of EFS, and EFS must be designed with that in mind even where the MVP is simpler.* Recorded here as steering (goal G-FORGE in the [requirements ledger](./2026-08-07-efs-git-corpus/requirements-ledger.md) §B); proposed one-line ruling text for [[owner-rulings]] is included there for PM/James to append on main — a research branch must not edit the ruling ledger. Design consequence already honored by this pass: the settled forge-object taxonomy (issue/PR/review/comment/label/release/team — F3/ForgeFed/Gerrit convergence) is a named future workload class, the freeze-impact table shows nothing forecloses it, and the E2/portable-schemas fixtures should carry forge objects as candidate workloads.
 
 ## 9. Disposition
 

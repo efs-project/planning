@@ -30,7 +30,10 @@ From the kickoff prompt, restated testably:
 5. **G-AGENT** — public Agent Skills, `AGENTS.md`, shared knowledge as versioned artifacts; meaningful capability diff before install.
 6. **G-GUEST** — anonymous, fast, wallet-free browsing of public files, commits, diffs, history.
 7. **G-EXIT** — complete walk-away recovery without EFS-operated domains, databases, gateways, or signing services.
-8. **G-INTEROP** — technical users can clone and manipulate the same repository with standard Git; use existing systems where they work.
+8. **G-INTEROP** — technical users can clone and manipulate the same repository with standard Git; use existing systems where they work. *Honest v1 boundary:* stock clone/fetch is full-fidelity; stock push is proposal intake; direct authoritative publish is EFS-client-only (receive-pack's synchronous report-status leaves no honest way to say "pending" on `refs/heads/*`).
+9. **G-FORGE** *(owner steering, 2026-08-07 chat)* — GitHub-class collaboration (topics, comments, social endorsement, teams, reviews) is a major **long-term form** of EFS; v2 must be designed so the full forge stays expressible — the settled forge-object taxonomy is a named future workload class — even while the MVP is simpler. The differentiator, per the shutdown evidence: the first forge whose social record is as clonable as its code.
+
+**Proposed [[owner-rulings]] text** (for PM/James to append on `main` — this research branch does not edit the ruling ledger): *"2026-08-07 — Git/forge direction (James, chat): GitHub-class collaboration is a major long-term form of EFS. Design v2 so the full forge (topics/comments/social/teams/reviews as portable records) remains expressible even though the MVP is simpler; nothing in the freeze may foreclose it. The wiki-first sequencing from [[2026-08-07-efs-git-deep-dive]] is the path, not the destination."*
 
 ## C. Binding constraints this design holds itself to
 

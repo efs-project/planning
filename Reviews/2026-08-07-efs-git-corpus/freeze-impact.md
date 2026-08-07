@@ -1,6 +1,6 @@
 # EFS Git — freeze-impact table
 
-**Status:** deep-dive analysis, 2026-08-07. What this workload asks of each layer, split between generic substrate requirements (freeze-relevant) and Durable SDK/library/client/gateway behavior (iterable forever). Headline: **the recommended architecture adds nothing to the Etched surface.** Its substrate needs are riders on items already in front of James or already delegated.
+**Status:** deep-dive analysis, 2026-08-07. What this workload asks of each layer, split between generic substrate requirements (freeze-relevant) and Durable SDK/library/client/gateway behavior (iterable forever). Headline: **no new Etched surface is identified — a provisional claim, not a proven one.** "Zero kernel changes" looks solid; "zero design impact" would be false: `GIT-REF/1` is a substantial new deterministic state machine (GATE/1-scale) whose two-implementation vector suite (M2) and cost fixtures (E2 + placement) are exactly the tests that would surface a hidden substrate need. Until they run, the correct statement is: every substrate need *found so far* is a rider on an item already in front of James or already delegated.
 
 #kind/review #status/done #repo/planning #topic/efsv2 #topic/git
 

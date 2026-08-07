@@ -18,12 +18,13 @@
 - [`traces.md`](./traces.md) — the fifteen required grounding traces (T1–T15).
 - [`freeze-impact.md`](./freeze-impact.md) — generic-substrate riders (all on existing items) vs Durable work; explicit kernel non-asks.
 - [`prototype-plan.md`](./prototype-plan.md) — six milestones + the executable acceptance suite.
+- [`adversarial-reviews.md`](./adversarial-reviews.md) — the five verbatim pre-publication review reports + disposition of every finding (audit trail for the repairs incorporated above).
 
 ## Prior-art lanes (`prior-art/`)
 
 Thirteen web-research lanes (primary/current sources, researched 2026-08-07, implemented-vs-intent labeled) plus one first-hand experiment set:
 
-- [`local-git-experiments.md`](./prior-art/local-git-experiments.md) — E1–E11 scripted fixture experiments on git 2.54 (bundles, atomic push, CAS transactions, force-push GC loss, SHA-256 interop refusal, prose merges, closure enumeration, rename heuristics).
+- [`local-git-experiments.md`](./prior-art/local-git-experiments.md) — E1–E11 + E9b scripted fixture experiments on git 2.54 (scripts committed under `prior-art/scripts/`) (bundles, atomic push, CAS transactions, force-push GC loss, SHA-256 interop refusal, prose merges, closure enumeration, rename heuristics).
 - [`git-core-mechanics.md`](./prior-art/git-core-mechanics.md) — object/ref/transaction model, proc-receive, push certs, protocol v2, bundle-URI adoption, partial clone/backfill/LOP, SHA-256 transition, LFS internals, multi-repo hosting, GC/force-push forensics.
 - [`radicle.md`](./prior-art/radicle.md) — Heartwood 1.10, sigrefs replay incident (full timeline + fix), canonical-ref quorum stalls, identity-COB evaluation bugs, adoption/funding arc, the unsolved list.
 - [`forges-and-formats.md`](./prior-art/forges-and-formats.md) — Forgejo/Gitea storage split, F3, ForgeFed's stall, GitHub/GitLab export losses, Gerrit NoteDb, git-appraise/git-bug/Fossil/Jujutsu change-id.
