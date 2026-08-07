@@ -62,6 +62,7 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 | **[`efsv2/`](./efsv2/) — the v2 design set** | `planning`, `contracts`, `sdk`, `client` | Native kernel + tag-core (carrier ruled 2026-07-07), now with the 2026-07-11 [[kel]] identity/account foundation pass. The KEL pass makes the older envelope/kernel/identity labels freeze-blocked pending authority-seam and home-admission reconciliation. Entry point and current round map: [efsv2/README](./efsv2/README.md). |
 | [[brainstorm-system]] | `planning` | The `Brainstorms/` system: statuses, surfacing cap, deliberate-only pruning. Awaiting promotion. |
 | **[`clientv2/`](./clientv2/) — the official client / web OS design set** | `planning`, `client`, `sdk` | Client v2 as a web OS (round run 2026-07-07). Entry point: [[web-os-thesis]] (ruling layer + amendments) over 13 model docs; research corpus in `Reviews/2026-07-07-clientv2-corpus/`; protocol pressure fed back via [[client-os-pressure-report]] — see [clientv2/README](./clientv2/README.md). |
+| **[`arcade/`](./arcade/) — the EFS Arcade design set** | `planning`, `contracts`, `content` | Product validation + September-11 MVP design for the Arcade hypothesis (pass run 2026-08-07; verdict: conditional go as a labeled demo/guest-UX probe). Entry point: [arcade/README](./arcade/README.md); owner packet: [arcade/owner-decision-inbox](./arcade/owner-decision-inbox.md); evidence: `Reviews/2026-08-07-arcade-corpus/`. v2 pressure routed via [[v2-pressure-and-migration]]. |
 
 #### Review
 

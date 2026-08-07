@@ -10,6 +10,7 @@
 >
 > - [EFS v2 + OS decisions](./efsv2/owner-decision-inbox.md)
 > - [Client v2 decisions](./clientv2/owner-decision-inbox.md)
+> - [EFS Arcade decisions](./arcade/owner-decision-inbox.md) *(added 2026-08-07 — D1–D7 are time-sensitive: they gate the September-11 build window)*
 >
 > A question appears in only one live queue. Linked design documents provide detail; unchecked boxes in them are not automatically James decisions.
 

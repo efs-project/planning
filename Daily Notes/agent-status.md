@@ -149,3 +149,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 ## 2026-07-31
 
 - @pm (harness codex): Nouns DAO funding lead captured under `Grants/` and independently checked in three read-only lanes. Corrected stale documented quorum against live contracts; verified candidate/sponsorship as the only current adequately funded official route; narrowed the hypothesis to a Nouns Walk-Away Archive with optional anonymous OS/browser demonstration. Tracker status is `watching`; no application, purchase, outreach, architecture commitment, or milestone is authorized.
+
+## 2026-08-07
+
+- @fable (harness claude-code): EFS Arcade validation pass completed on isolated branch `fable/2026-08-07-arcade` (worktree `planning-arcade/`). 12 research/verification lanes + hands-on browser probe + 6-perspective adversarial review. Verdict: conditional go as a labeled demo/guest-UX probe (GO-AS-DEMO-ONLY default), Sept-11 target, owner packet D1–D7 in `Designs/arcade/owner-decision-inbox.md`. Verified live: `/games` seeded on real Sepolia with 67 non-canonical keccak contentHash PROPERTYs (seeder fix gates further durable seeding; remediation trustless via CIDv1 mirrors); receipts never committed; devnet 26001993 currently has no contracts; Sepolia faucet not deployed. Nothing merged or adopted — James reviews the branch.
