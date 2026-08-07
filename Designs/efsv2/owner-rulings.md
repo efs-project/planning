@@ -152,3 +152,16 @@ The 2026-07-22 cross-platform read-only mount requirement and research-before-MV
 ### Decision-routing structure — agent audit note, not an owner ruling
 - The hierarchical inboxes remain the current process implementation, not permanent protocol or product architecture.
 - The subsequent PM hardening pass added the generated [[Open-Decisions]] roll-up and propagated active holds. Consolidating historical rulings remains editorial work for the holistic documentation pass.
+
+## 2026-08-07
+
+### Git and GitHub-class collaboration — a major long-term form of EFS (DIRECTION)
+
+- **Stated by James in chat, verbatim:** *"GitHub does seem like one of the major long term forms of EFS. If EFS can be an open source GitHub that would be huge. GitHub even has topics, comments, social stuff, abilities for teams to manage things. It's collaboration. That's what EFS should be good at right?"* and *"We need to design EFS with all this in mind even if the MVP is simpler."*
+- **Recorded as adopted direction:** design v2 so that GitHub-class collaboration — topics, comments, social endorsement, teams/organizations, reviews, releases — **stays expressible**, even though the MVP is smaller. Nothing in the eventual freeze may foreclose it.
+- **The differentiator this direction rests on** (evidence: [[2026-08-07-efs-git-deep-dive]]): every platform shutdown in the record preserved the code and lost the conversation — Google Code, Bitbucket-hg, and GitHub's own Arctic Vault and migration tooling all drop issues/PRs/reviews/stars/edit-history; Software Heritage archives 2 PB of git and deliberately no collaboration data. Git history survives host death because clones carry it. **The goal is therefore the first forge whose social record is as clonable as its code.**
+- **Concretely already expressible in the tag core** (fit analysis, not new surface): topics = TAGs; comments = claims targeting an object; stars/reactions = endorsement TAGs with the adopted revocation-aware live count; watching = channels; teams/orgs = org principals with KEL control succession and scoped actor grants; PRs/reviews = portable proposal/review claims. The settled cross-industry forge taxonomy (F3 / ForgeFed / Gerrit convergence) is adopted as the vocabulary to reuse rather than reinvent.
+- **Scope limits — what this direction does NOT do.** It does not adopt an architecture, answer GD-1…GD-5, answer held Q3, pre-empt P-1, authorize a forge build, or change the sequencing recommendation (wiki-first as the proving workload, skills registry next, full forge later). CI/actions, code search at scale, and merge queues remain separate later problems with their own security programs.
+- **Obligation this creates for the freeze work:** the freeze-impact analysis must keep showing that forge objects stay expressible, and the E2 / portable-schemas fixtures should carry forge objects (issue/PR/review/release) as candidate workloads.
+
+— direction stated by @james in chat, recorded 2026-08-07 by @claude-fable-5. **Wording is the recorder's; James should correct or trim it if it overstates the intent.**
