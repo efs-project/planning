@@ -59,6 +59,7 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 | Design | Target repos | Notes |
 |---|---|---|
+| **[`efs15/`](./efs15/) — the EAS-backed product bridge** | `planning`, `contracts`, `sdk`, `client` | Draft bridge for current Nanda and Arcade work: universal EFS IDs, requirements and work to derive an Arcade-grounded bounded graph vocabulary, and deliberately simple address/principal lenses while native v2 remains open. Entry point: [efs15/README](./efs15/README.md). |
 | **[`efsv2/`](./efsv2/) — the v2 design set** | `planning`, `contracts`, `sdk`, `client` | Native kernel + tag-core (carrier ruled 2026-07-07), now with the 2026-07-11 [[kel]] identity/account foundation pass. The KEL pass makes the older envelope/kernel/identity labels freeze-blocked pending authority-seam and home-admission reconciliation. Entry point and current round map: [efsv2/README](./efsv2/README.md). |
 | [[brainstorm-system]] | `planning` | The `Brainstorms/` system: statuses, surfacing cap, deliberate-only pruning. Awaiting promotion. |
 | **[`clientv2/`](./clientv2/) — the official client / web OS design set** | `planning`, `client`, `sdk` | Client v2 as a web OS (round run 2026-07-07). Entry point: [[web-os-thesis]] (ruling layer + amendments) over 13 model docs; research corpus in `Reviews/2026-07-07-clientv2-corpus/`; protocol pressure fed back via [[client-os-pressure-report]] — see [clientv2/README](./clientv2/README.md). |
@@ -116,7 +117,7 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 | Repo | Designs |
 |---|---|
-| `planning` | [[0001-design-system]], [[cross-repo-reference-mirror]], [`efsv2/`](./efsv2/) |
-| `contracts` | [[cross-repo-reference-mirror]], [`efsv2/`](./efsv2/) |
-| `client` | [`clientv2/`](./clientv2/), [`efsv2/`](./efsv2/) |
-| `sdk` | [`clientv2/`](./clientv2/), [`efsv2/`](./efsv2/) |
+| `planning` | [[0001-design-system]], [[cross-repo-reference-mirror]], [`efs15/`](./efs15/), [`efsv2/`](./efsv2/) |
+| `contracts` | [[cross-repo-reference-mirror]], [`efs15/`](./efs15/), [`efsv2/`](./efsv2/) |
+| `client` | [`clientv2/`](./clientv2/), [`efs15/`](./efs15/), [`efsv2/`](./efsv2/) |
+| `sdk` | [`clientv2/`](./clientv2/), [`efs15/`](./efs15/), [`efsv2/`](./efsv2/) |

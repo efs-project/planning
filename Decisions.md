@@ -18,6 +18,7 @@ Append-only one-line decisions log. Mirrors the pattern in `contracts/docs/decis
 
 ## 2026-08
 
+- 2026-08-07 (@james via chat → @pm capture): **Open an EAS-backed EFS 1.5 bridge that backports universal EFS IDs and a limited/tag-oriented graph model into v1 rather than waiting for the full native v2 redesign.** Stable semantic links and references use EFS IDs; mined EAS UIDs become realm-qualified carrier receipts. The current MVP identity frame is one visible authoring address/principal per visible identity and one explicit identity per lens entry. Key correlation and account mechanisms remain open design work; [[requirements-and-boundaries]] evaluates account-internal device/app keys and display-only linked addresses, neither as adopted authority. Exact formulas, graph kinds, deployment changes, and key/account support remain design work. — ruled by @james, 2026-08-07
 - 2026-08-07 (@james via chat → @pm capture): **EFS v1 plus the existing SDK is the supported bridge for current Nanda and Arcade work; harden and merge the SDK for those real product paths.** This reverses the 2026-07-27 operational instruction not to merge it, but preserves that ruling's architecture boundary: using and supporting v1 now does **not** make v1 contracts, EAS UIDs, SDK shapes, write DAGs, lens defaults, or storage assumptions the automatic EFS v2 baseline. Isolate v1-specific mechanics where practical so these apps pressure-test v2 without silently defining it.
 
 ## 2026-07
