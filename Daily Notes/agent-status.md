@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ---
 
+- @sdk-designer: sdk-big-pass — 8 commits on sdk `chore/scaffold` clear ALL PR #1 blockers (4 P1 spec-conformance: contentHash multibase, segment codec, ratified redirect algorithm, indexer lifecycle; P2 hardened view addresses + drift CI; the 6 standing June blockers incl. ADR-0015 trust landed; v1-profile boundary ADR-0019 per the v1-bridge ruling) + 4 adversarial-review findings fixed with regressions. [[sdk-v1-bridge-v2-compat-asks]] at #status/review (the 10 cheap v2 commitments); R1 packet re-cut + R2/R3/R4 riders added to [[owner-decision-inbox]] (Open-Decisions regenerated: ask-now 3→6). / next: final review-workflow verdict → push → reply/resolve the 5 PR threads.
+
 ## 2026-08-05
 
 - @pm (harness codex): ETHDenver 2027 speaker watch — confirmed that no official 2027 event or CFP dates are published yet; recorded the prior official October–December three-wave speaker cycle, separate attendance application, January decision target, and a September monitoring trigger without turning historical dates into a 2027 commitment / next: finish Devcon, then refresh when ETHDenver announces 2027.
