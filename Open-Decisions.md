@@ -5,7 +5,7 @@
      Regenerate in the same commit as any decision-state change.
      On conflict: git checkout --ours Open-Decisions.md && ./scripts/open-decisions.sh -->
 
-**Generated:** 2026-08-08 · **Ask now: 6** · Held/revalidate: 41 · Awaiting evidence: 4 · Scheduled: 2
+**Generated:** 2026-08-08 · **Ask now: 6** · Held/revalidate: 48 · Awaiting evidence: 4 · Scheduled: 2
 
 This page answers one question: *what does the owner actually need to decide right now?*
 It is a **view with zero authority** — every item's truth lives in its owning queue.
@@ -17,6 +17,7 @@ the owner through a gate the designers deliberately closed.
 
 | Queue | Hold |
 |---|---|
+| `arcade` | **Reconciliation hold (2026-08-08 / @pm):** do not ask D1–D7 as a batch. Later validation and James's direction changed their shared premises: Arcade is a possible founding-product pilot; Andromeda replaces Norman for the first slice; the launch proof is one game with no durable EFS write; and client placement plus runner/network permissions are unresolved. Preserve these questions as the initial-pass inventory, then recut only the decisions that still block the one-game slice. |
 | `efsv2` | **Sequencing-hold status (2026-07-28):** the 2026-07-23 hold demanded a joined KEL/authority + lens/resolver revalidation before any packet. **Both passes have now run** ([2026-07-25-joined-fs-pass](Reviews/2026-07-25-joined-fs-pass.md); [2026-07-25-lens-pass](Reviews/2026-07-25-lens-pass.md)). Per their critics, **the hold is LIFTABLE across its full surface**: Tiers 1–2 (P-1…P-10, the authority/identity spine), Tiers 3–6 (revalidated product/projection calls), and **Tier 7 (LP-1…LP-10, the lens family — new this pass)**. Every item is answerable alone, none re-asks a settled item, and adopting one adopts nothing else. The lens pass also dispositioned the previously lens-held items: **N2c, D-9, and Q5 are folded into LP-1, LP-2, and LP-6's rider; E6's structure is LP-4** (its numbers stay evidence-gated); **Q3 and Q4 stay held** (no new evidence). Lifting the hold is James's call; he may also answer any single item without lifting anything. |
 
 
@@ -33,12 +34,19 @@ the owner through a gate the designers deliberately closed.
 
 Reply with the code and any exception in plain English, e.g. `R1A` or `R1B, but keep locate/read naming provisional`.
 
-## Inventoried but not askable (41)
+## Inventoried but not askable (48)
 
 Under a hold or pending revalidation. Listed so nothing is invisible — **not** a queue to work through.
 
 | ID | Question | Queue |
 |---|---|---|
+| [D1](Designs/arcade/owner-decision-inbox.md#d1--ratify-the-scope-demo-not-product-blocks-all-labeling-marketing-and-gate-math) | Ratify the scope: demo, not product (blocks all labeling, marketing, and gate math) | `arcade` |
+| [D2](Designs/arcade/owner-decision-inbox.md#d2--comments-approach-blocks-away-window-build) | Comments approach (blocks away-window build) | `arcade` |
+| [D3](Designs/arcade/owner-decision-inbox.md#d3--catalog-rights-actions-blocks-catalog-production) | Catalog rights actions (blocks catalog production) | `arcade` |
+| [D4](Designs/arcade/owner-decision-inbox.md#d4--contenthash-reconciliation-execution-blocks-the-seed-run) | contentHash reconciliation execution (blocks the seed run) | `arcade` |
+| [D5](Designs/arcade/owner-decision-inbox.md#d5--name-and-domain-blocks-brand-domain-purchase-giscus-repo) | Name and domain (blocks brand, domain purchase, giscus repo) | `arcade` |
+| [D6](Designs/arcade/owner-decision-inbox.md#d6--stand-up-the-sepolia-faucet-blocks-the-on-chain-star) | Stand up the Sepolia faucet (blocks the on-chain star) | `arcade` |
+| [D7](Designs/arcade/owner-decision-inbox.md#d7--the-public-sepolia-permanence-answer) | The public Sepolia-permanence answer | `arcade` |
 | [P-1](Designs/efsv2/owner-decision-inbox.md#p-1--adopt-the-strong-authority-grade-two-lane-kernel--admission-receipts) | Adopt the strong authority grade (two-lane kernel + admission receipts)? | `efsv2` |
 | [P-2](Designs/efsv2/owner-decision-inbox.md#p-2--realm-qualified-authority--how-many-realms-ship) | Realm-qualified authority + how many realms ship | `efsv2` |
 | [P-3](Designs/efsv2/owner-decision-inbox.md#p-3--the-cross-realm-consumption-promise) | The cross-realm consumption promise | `efsv2` |
@@ -104,6 +112,7 @@ Under a hold or pending revalidation. Listed so nothing is invisible — **not**
 
 | Queue | Live items | Last reconciled | State |
 |---|---|---|---|
+| [`arcade`](Designs/arcade/owner-decision-inbox.md) | 7 | 2026-08-08 — merged to main; original questions held | **HELD** |
 | [`clientv2`](Designs/clientv2/owner-decision-inbox.md) | 6 | 2026-07-22 | ok |
 | [`efsv2`](Designs/efsv2/owner-decision-inbox.md) | 41 | 2026-07-28 | **HELD** |
 | [`Designs (root)`](Designs/owner-decision-inbox.md) | 6 | 2026-07-21 | ok |

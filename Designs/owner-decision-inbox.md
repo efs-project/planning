@@ -10,6 +10,7 @@
 >
 > - [EFS v2 + OS decisions](./efsv2/owner-decision-inbox.md)
 > - [Client v2 decisions](./clientv2/owner-decision-inbox.md)
+> - [EFS Arcade decisions](./arcade/owner-decision-inbox.md) *(initial D1–D7 packet awaits post-pass reconciliation; do not batch-answer it)*
 >
 > A question appears in only one live queue. Linked design documents provide detail; unchecked boxes in them are not automatically James decisions.
 
