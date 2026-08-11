@@ -4,7 +4,9 @@ Personal attendance and EFS participation follow-ups for Devcon 8, November
 3–6, 2026 at Jio World Centre in BKC, Mumbai.
 
 **Status (2026-08-11):** James confirmed he has a ticket. Speaker selection is
-pending. Visa, flight, and accommodation completion are not yet recorded.
+pending. The Impact Booth application is submitted; selection and staffing
+terms are pending. Visa, flight, and accommodation completion are not yet
+recorded.
 
 Do not put passport numbers, scans, visa application IDs, ticket/order numbers,
 booking references, or a private itinerary in this repository.
@@ -87,13 +89,14 @@ Official references: [U.S. State Department India entry requirements](https://tr
 - [ ] Watch for the speaker decision from late August through September. If
   accepted, confirm whether the purchased ticket should be refunded under
   Devcon's speaker policy.
-- [ ] Decide whether to apply to the
-  [Devcon Impact Program](https://devcon.org/en/supporters/) as a
-  FOSS/public-infrastructure project. **PM recommendation, not an adopted
-  decision:** prefer the digital **Impact Tier**; consider a free Impact Booth
-  only after confirming staffing expectations and having a truthful November
-  demo. The [application](https://devcon.org/en/form/supporter-application/) is
-  rolling.
+- [x] Apply to the [Devcon Impact Program](https://devcon.org/en/supporters/)
+  for a free Impact Booth as a FOSS/public-infrastructure project — submitted
+  2026-08-11.
+- [ ] If selected, confirm mandatory staffing hours, allowed breaks or
+  unattended periods, helper credentials/tickets, and whether solo operation
+  is supported. Default to accepting if the booth is manageable solo; recruit
+  occasional helpers where possible. If near-continuous staffing is required
+  and no helpers materialize, ask to move to the digital **Impact Tier**.
 - [ ] Book refundable accommodation near BKC using the
   [official travel guide](https://devcon.org/en/travel-guide/) and attendee
   inventory before availability tightens.
