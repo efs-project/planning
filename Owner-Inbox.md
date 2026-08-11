@@ -14,7 +14,15 @@ aliases: [For-James]
 
 ## ⚡ DECIDE NOW — James
 
-Nothing.
+- **FJ-4 — Enter ETHOnline 2026 before the conservative September 3 cutoff?**
+  - **a. Recommended:** apply under an existing-open-source continuity path to
+    preserve the option; choose the exact bounded build after the live rules and
+    sponsor prizes settle. Default candidate is the one-game Arcade
+    verified-artifact/fallback trace in [[ETHOnline-2026]].
+  - **b. Skip:** protect the Genesis and Arcade work from event pressure.
+  - Applying is not a promise to submit, use a sponsor, revive v1, or freeze the
+    successor design. The current official metadata says September 6, but an
+    earlier event page said September 3, so the earlier date is the safe one.
 
 ## 🕐 WHEN YOU HAVE TIME
 

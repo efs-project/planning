@@ -4,7 +4,8 @@ Submission record and follow-up control center for James's Devcon 8 application.
 This folder is an application and research surface, not an EFS design ruling or
 a promise to ship v2 by Devcon.
 
-**Status (2026-08-06 before 00:46 CDT):** submitted; final public proposal page captured.
+**Status (2026-08-11):** proposal submitted; final public page captured; James
+has a Devcon ticket; speaker selection and attendance follow-ups remain open.
 
 **Proposal:** [Who Can Turn Off Your Ethereum App? A Full-Stack Walk-Away Test](https://cfp.devcon.org/devcon8/talk/review/WZPKY3CBX3B78PZDQBPDQNAC9QRAB8TJ)
 
@@ -39,6 +40,9 @@ The submitted answers are in [[application-draft]]. Research and provenance are
 in [[speaker-application-research]]. Alternatives and the reasoning behind this
 choice are in [[talk-concepts]]. The next-conference date watch is in
 [[ethdenver-2027-watch]] and remains separate from this proposal.
+Ticket, visa, travel, and EFS participation follow-ups are in
+[[attendance-checklist]]. Keep sensitive travel and identity details out of this
+repository.
 
 ## Submission completed
 
@@ -72,9 +76,11 @@ were not publicly listed during the research pass.
 
 - Watch for decisions beginning at the end of August; all decisions are expected
   by the end of September.
-- If accepted, contact [visa@devcon.org](mailto:visa@devcon.org) immediately.
-  Official guidance recommends visa-letter requests about 90 days before the
-  event, while speaker decisions arrive later than that threshold.
+- James already has a ticket, so visa support does not wait for speaker
+  acceptance. Follow [[attendance-checklist]] now: request the ticket letter,
+  ask [visa@devcon.org](mailto:visa@devcon.org) which conference documents and
+  category/code its packet supports, confirm the correct route with an official
+  Indian visa authority, then apply through the applicable official channel.
 - Build the talk around preverified records and an offline recording. Never make
   conference Wi-Fi, a faucet, a fresh transaction, or one RPC the demo's single
   point of failure.

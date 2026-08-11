@@ -1,0 +1,101 @@
+# Devcon 8 attendance checklist
+
+Personal attendance and EFS participation follow-ups for Devcon 8, November
+3–6, 2026 at Jio World Centre in BKC, Mumbai.
+
+**Status (2026-08-11):** James confirmed he has a ticket. Speaker selection is
+pending. Visa, flight, and accommodation completion are not yet recorded.
+
+Do not put passport numbers, scans, visa application IDs, ticket/order numbers,
+booking references, or a private itinerary in this repository.
+
+## Visa — act now
+
+Unless James has an Overseas Citizen of India card, **a U.S. passport holder
+needs a valid Indian visa to enter and leave India**. The U.S. State Department
+also warns that India may deny entry for the wrong visa type.
+
+- [x] Devcon ticket secured — James confirmed 2026-08-11; type and order details
+  intentionally not stored here.
+- [ ] Check that the passport has at least **six months of validity at the time
+  of the visa application** and **two blank pages**.
+- [ ] Submit Devcon's official
+  [Ticket Confirmation Letter request](https://devcon.org/en/form/visa-collection-attendees/)
+  now. Its preferred 90-day lead time passed around August 5.
+- [ ] Ask [visa@devcon.org](mailto:visa@devcon.org) which conference-document
+  packet and category/code Devcon supports. Devcon cannot choose the visa.
+- [ ] Confirm the correct route and category with the Government of India's
+  eVisa helpdesk (`indian-evisa@gov.in`) or the appropriate Indian mission. If
+  eVisa is confirmed, apply only through the
+  [Government of India eVisa portal](https://indianvisaonline.gov.in/evisa/);
+  otherwise follow the official regular-visa route.
+- [ ] If using eVisa, confirm the Electronic Travel Authorization says
+  **GRANTED**, print it, and carry it with the passport. Recheck the rule and
+  complete the official e-Arrival card within 72 hours before arrival.
+
+Why the category needs official Indian confirmation: the Indian portal lists
+the USA as eVisa eligible and includes private conferences as an allowed
+purpose, but currently uses both “e-Conference” and “e-Business Visa (for
+e-Conference purpose)” labels. Its document table calls for an organizer
+invitation, Ministry of External Affairs political clearance, and Ministry of
+Home Affairs event clearance; its FAQ describes the last item as optional. Let
+the officials resolve that inconsistency. Do not casually select e-Tourist or
+another category just because it has fewer documents.
+
+The portal also calls for a recent front-facing white-background photo, passport
+bio-page scan, return/onward travel, and sufficient funds. Mumbai's international
+airport (BOM) is an authorized eVisa arrival point. Recheck the official rules
+at application time because Indian visa instructions change.
+
+### Copyable category/document email
+
+**Subject:** Devcon 8 conference documents for U.S. attendee
+
+> Hello Devcon visa team,
+>
+> I am a U.S. passport holder with a confirmed Devcon 8 ticket and plan to
+> attend in Mumbai, November 3–6, 2026. I submitted the Ticket Confirmation
+> Letter request through the official form. Please tell me which Indian visa
+> category/code Devcon's conference packet supports and provide the organizer
+> invitation, MEA political clearance, and MHA event clearance—or confirm which
+> of those documents Devcon does not provide. I will confirm the correct visa
+> route with the Government of India before applying.
+>
+> Name as shown on passport: [full name exactly as shown on passport]
+> Ticket/order email: [email]
+>
+> Thank you.
+
+Use Devcon's secure form for any identity document it specifically requests; do
+not put a passport number in an ordinary email.
+
+Official references: [U.S. State Department India entry requirements](https://travel.state.gov/en/international-travel/travel-advisories/india.html),
+[Devcon ticket and visa FAQ](https://devcon.org/en/tickets/faq/), and the
+[Government of India eVisa portal](https://indianvisaonline.gov.in/evisa/).
+
+## Attendance and EFS participation
+
+- [x] Ticket secured.
+- [ ] Watch for the speaker decision from late August through September. If
+  accepted, confirm whether the purchased ticket should be refunded under
+  Devcon's speaker policy.
+- [ ] Decide whether to apply to the
+  [Devcon Impact Program](https://devcon.org/en/supporters/) as a
+  FOSS/public-infrastructure project. **PM recommendation, not an adopted
+  decision:** prefer the digital **Impact Tier**; consider a free Impact Booth
+  only after confirming staffing expectations and having a truthful November
+  demo. The [application](https://devcon.org/en/form/supporter-application/) is
+  rolling.
+- [ ] Book refundable accommodation near BKC using the
+  [official travel guide](https://devcon.org/en/travel-guide/) and attendee
+  inventory before availability tightens.
+- [ ] After the visa route is clear, book changeable/refundable travel through
+  BOM. Arriving November 1 or 2 is the current practical recommendation, not an
+  organizer requirement.
+- [ ] Review travel health, medical/evacuation insurance, local transport,
+  connectivity, payment, and emergency-copy needs before departure.
+
+**PM recommendation, not an owner ruling:** do not buy a paid Supporter package
+or operate an EFS-branded Community Hub. A Community Hub must be neutral,
+coalition-led, and staffed throughout the conference; joining an aligned
+open-source or privacy hub later is the better path.
