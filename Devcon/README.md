@@ -77,10 +77,11 @@ were not publicly listed during the research pass.
 - Watch for decisions beginning at the end of August; all decisions are expected
   by the end of September.
 - James already has a ticket, so visa support does not wait for speaker
-  acceptance. Follow [[attendance-checklist]] now: request the ticket letter,
-  ask [visa@devcon.org](mailto:visa@devcon.org) which conference documents and
-  category/code its packet supports, confirm the correct route with an official
-  Indian visa authority, then apply through the applicable official channel.
+  acceptance. Follow [[attendance-checklist]] now: ask
+  [visa@devcon.org](mailto:visa@devcon.org) what conference-document packet it
+  provides and whether its optional Ticket Confirmation Letter is the organizer
+  invitation, confirm the correct route with an official Indian visa authority,
+  then request only the documents that route requires and apply.
 - Build the talk around preverified records and an offline recording. Never make
   conference Wi-Fi, a faucet, a fresh transaction, or one RPC the demo's single
   point of failure.

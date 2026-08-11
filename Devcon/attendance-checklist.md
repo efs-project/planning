@@ -17,21 +17,28 @@ also warns that India may deny entry for the wrong visa type.
 
 - [x] Devcon ticket secured — James confirmed 2026-08-11; type and order details
   intentionally not stored here.
+- [ ] Check whether James already holds a valid Indian visa or OCI card. If so,
+  verify that it covers this trip before starting a new application.
 - [ ] Check that the passport has at least **six months of validity at the time
   of the visa application** and **two blank pages**.
-- [ ] Submit Devcon's official
-  [Ticket Confirmation Letter request](https://devcon.org/en/form/visa-collection-attendees/)
-  now. Its preferred 90-day lead time passed around August 5.
 - [ ] Ask [visa@devcon.org](mailto:visa@devcon.org) which conference-document
-  packet and category/code Devcon supports. Devcon cannot choose the visa.
+  packet Devcon provides, which application category/code that packet is meant
+  to support, and whether its Ticket Confirmation Letter serves as any required
+  organizer invitation. Devcon cannot make the legal category choice.
 - [ ] Confirm the correct route and category with the Government of India's
   eVisa helpdesk (`indian-evisa@gov.in`) or the appropriate Indian mission. If
   eVisa is confirmed, apply only through the
   [Government of India eVisa portal](https://indianvisaonline.gov.in/evisa/);
   otherwise follow the official regular-visa route.
+- [ ] Request Devcon's
+  [Ticket Confirmation Letter](https://devcon.org/en/form/visa-collection-attendees/)
+  only if the confirmed application route needs it. The letter is optional
+  supporting evidence, not entry permission or a substitute for the visa; if
+  needed, request it promptly because Devcon's preferred lead time has passed.
 - [ ] If using eVisa, confirm the Electronic Travel Authorization says
-  **GRANTED**, print it, and carry it with the passport. Recheck the rule and
-  complete the official e-Arrival card within 72 hours before arrival.
+  **GRANTED**, print it, and carry it with the passport.
+- [ ] Recheck the rule and complete the official e-Arrival card within 72 hours
+  before arrival.
 
 Why the category needs official Indian confirmation: the Indian portal lists
 the USA as eVisa eligible and includes private conferences as an allowed
@@ -47,19 +54,20 @@ bio-page scan, return/onward travel, and sufficient funds. Mumbai's internationa
 airport (BOM) is an authorized eVisa arrival point. Recheck the official rules
 at application time because Indian visa instructions change.
 
-### Copyable category/document email
+### Copyable first email
 
-**Subject:** Devcon 8 conference documents for U.S. attendee
+**Subject:** Devcon 8 visa route and conference documents for U.S. attendee
 
 > Hello Devcon visa team,
 >
 > I am a U.S. passport holder with a confirmed Devcon 8 ticket and plan to
-> attend in Mumbai, November 3–6, 2026. I submitted the Ticket Confirmation
-> Letter request through the official form. Please tell me which Indian visa
-> category/code Devcon's conference packet supports and provide the organizer
-> invitation, MEA political clearance, and MHA event clearance—or confirm which
-> of those documents Devcon does not provide. I will confirm the correct visa
-> route with the Government of India before applying.
+> attend in Mumbai, November 3–6, 2026. Which Indian visa application
+> category/code is Devcon's conference-document packet intended to support? Is
+> the Ticket Confirmation Letter intended to serve as any required organizer
+> invitation? Please also tell me whether Devcon supplies the MEA political
+> clearance and MHA event clearance if the confirmed route requires them. I
+> will confirm the correct visa category with the Government of India before
+> applying.
 >
 > Name as shown on passport: [full name exactly as shown on passport]
 > Ticket/order email: [email]
@@ -94,6 +102,9 @@ Official references: [U.S. State Department India entry requirements](https://tr
   organizer requirement.
 - [ ] Review travel health, medical/evacuation insurance, local transport,
   connectivity, payment, and emergency-copy needs before departure.
+- [ ] Enroll in the U.S. State Department's
+  [Smart Traveler Enrollment Program](https://mytravel.state.gov/s/step) before
+  departure.
 
 **PM recommendation, not an owner ruling:** do not buy a paid Supporter package
 or operate an EFS-branded Community Hub. A Community Hub must be neutral,
