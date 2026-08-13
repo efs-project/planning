@@ -230,8 +230,9 @@ target Envelope header is not already in state requires bounded
 Principal descriptor, and witness; no bodies). Admission recomputes
 `EnvelopeId`, checks the target range and descriptor equality, verifies the
 target witness and author match, constructs typed
-`ValidatedWithdrawalTarget`, and passes only that context to Binding; proof
-bytes and witness/author validation never cross that seam. It then sets
+`ValidatedOccurrenceLifecycleEffect`, and passes that same context to the
+status owner (`LibIndex`) and head owner (`LibBinding`); proof bytes and
+witness/authority/author validation never cross either seam. It then sets
 `PRE_WITHDRAWN`. The
 accepting Withdrawal's ordinal durably keys the canonical ABI re-encoding of
 the exact evidence used; the target overlay's `revokedAtOrdinal` points back
@@ -257,6 +258,17 @@ IDs and the intrinsic bootstrap Type ID live in the encoding chapter's
 constants table. Binding-class body conventions must be legal under that
 chapter's REF/sentinel rules (first-write predecessor uses the explicit NONE
 encoding, never raw 0).
+
+The three schemas are exact MC/1 Types: `BindingSet/1` is the three position
+words plus `targetRecord OPTION(REF RECORD)`, `targetOccurrence
+OPTION(OCCREF OCCURRENCE)`, and `predecessor OPTION(OCCREF OCCURRENCE)`;
+exactly one target option is present or Admission emits structural error 17.
+`BindingTombstone/1` has the three position words plus predecessor and no
+target. `Withdrawal/1` is one direct OCCREF with a 34-byte canonical body.
+Dense roles/backlinks cover each reference exactly once. ReferenceRole target
+classes are only RECORD/TYPESCHEMA/PRINCIPAL/OCCURRENCE/OBJECT; digest lookup
+uses the separate `KIND_DIGEST=0x09` value family, never an ADDRESS or digest
+reference class. Concrete kernel TypeSchemaIds remain Stage B outputs.
 
 **SR-12 — entrypoint and admission consent (RP-12, S1).** One permissionless
 entrypoint `publish(envelopeBytes, principal, intentBytes, intentWitness)`:
@@ -323,9 +335,17 @@ state-readable `codexConstants()` that the realm chapter's `profileId` and
 
 Realm bootstrap is byte-exact: B0 is protocol 0.0 and `InitConfig/1` is
 `abi.encode(uint16(1),uint8 finalityRuleKind,uint32 finalityParam,uint8
-upgradeAuthorityKind,uint64 declaredTxGasLimit,bytes32
+upgradeAuthorityKind,bytes32 upgradeAuthorityRef,uint64 declaredTxGasLimit,bytes32
 initialPolicyCommitment)`, with `initConfigHash=keccak256(initConfigBytes)`.
-Revision 1 uses that initial policy exactly. `genesisFacts()` returns the full
+The ref is zero iff kind NONE; otherwise it is the canonical nonzero
+zero-extended controller address. Revision 1 uses that initial policy and
+genesis authority exactly. Each controller change atomically appends one
+RealmRevision plus one chained `AuthorityTransition`; current authority
+reconstructs from genesis and the enumerable transition chain, never hidden
+admin state. Direct/NONE deployments have zero EIP-1967 implementation/admin
+slots; B0 UUPS-style kinds use the Codex-owned implementation slot, zero admin
+slot, and state-readable implementation/current-authority getters.
+`genesisFacts()` returns the full
 `GenesisFactsView` needed to re-encode InitConfig and independently recompute
 profileId, genesisCommitment, and RealmId; no hidden config enters identity.
 
@@ -370,6 +390,11 @@ structural validation rule in the encoding chapter. DIRECT and
 ARRAY_STRUCT_MEMBER ReferenceRole selectors (including
 `ArtifactClosure.members[*].content`) count extracted instances, so index
 fan-out is bounded and backlink completeness holds.
+
+A Lens result carries `ResolvedTarget(targetKind,targetA,targetLeaf)` as one
+indivisible value. NONE/RECORD require leaf zero; OCCURRENCE preserves the
+leaf. Combiners, strict returns, and challenge rechecks compare all three, so
+two leaves of one Envelope never alias.
 
 ## 3. The Stage A doc set → PM deliverables
 

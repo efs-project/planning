@@ -252,6 +252,12 @@ member level (Stage B may add members, never remove).
   `ArtifactClosure/1.members[*].content`, a 17-reference budget rejection, and
   `ERR_ROLE_SELECTOR` for unknown selectors; exact two-byte IndexSpec
   eligibility/target violations for SCALAR_EQ, REF_BACKLINK, and DIGEST_EQ;
+  closed ReferenceRole classes RECORD/TYPESCHEMA/PRINCIPAL/OCCURRENCE/OBJECT
+  with REALM/ADDRESS/BYTEDIGEST rejected; `KIND_DIGEST=0x09` exercised as the
+  non-role digest value family; exact kernel-Type blobs: BindingSet one-of-two
+  target options with structural code 17 for neither/both, Tombstone no target,
+  and Withdrawal one direct OCCREF/34-byte body, including their dense role and
+  backlink rows (concrete TypeSchemaIds remain Stage B outputs);
   the four §6 evolution Records
   (`TypeSuccessor/1`, `TypeEquivalence/1` incl. the `a < b` canonical-order
   conformance member, `TypeFamilyGenesis/1`, `TypeFamilyMembership/1`)
@@ -591,7 +597,8 @@ member level (Stage B may add members, never remove).
 - **Shape:** input = `ResolutionPlan/1` canonical bodies
   `u16(frameLen)||frame` (lens §3.2; parser starts at offset 2) + head-state
   fixtures at a pinned basis; output = `ResolveResult` (presence, reasonCode,
-  value, winner, counts, BasisReport) or validation `rejectCode`.
+  `ResolvedTarget{targetKind,targetA,targetLeaf}`, winner, counts, BasisReport)
+  or validation `rejectCode`.
 - **Impl:** SOL (`resolve`/`validatePlan`), TS, RS (pure fold over the same
   head fixture).
 - **Pass:** byte-identical canonical bodies and PlanIds (including N=64's
@@ -613,6 +620,9 @@ member level (Stage B may add members, never remove).
     in the client-compiler open item so R-L1 is visibly parked, not dropped].
   - Combiner transitions T1–T10, each its own member; two-value THRESHOLD
     conflict at k ≤ N/2; tombstone-contributes-absent;
+    RECORD-vs-OCCURRENCE with equal targetA conflicts; two OCCURRENCE values
+    with one EnvelopeId but different targetLeaf conflict; NONE/RECORD with
+    nonzero leaf rejects; strict return preserves all target fields;
     `ALL_TIERS_SINGLETON` early-exit legality (set vs unset);
     equal-tier full-scan conflict detection.
   - Anti-fallthrough: an ungradeable-PRESENT head (SDK tier; B0 on-chain is
@@ -626,7 +636,7 @@ member level (Stage B may add members, never remove).
     `resolve(P2, pos)` succeeds as a view with zero G state change.
   - Challenge-window commit/abort/finalize triple (lens §11): in-window head
     flip forces abort, never wrong acceptance; decision-scoped recheck
-    (value + winner identity) survives unrelated churn at busy positions
+    (all three target fields + winner identity) survives unrelated churn at busy positions
     (LR-3(ii) repair).
   - `purposeAndScope` mismatch member: display plan pinned into a gate is
     refused by the conforming consumer check.
@@ -747,8 +757,10 @@ member level (Stage B may add members, never remove).
   at two chunk sizes ⇒ distinct RecordIds (documented non-convergence);
   closure: the ReferenceRole extractor walks
   `members[*].content` through ARRAY_STRUCT_MEMBER within the 16-ref bound;
-  a 256-byte name exceeds the declared field bound and Core-rejects, while
-  unsorted/duplicate/`/`/`.`/`..`, kind-target mismatch, or member-size
+  `name` is STRING(255): a 256-byte name Core-rejects, an empty name is
+  structurally admitted but profile-malformed, and maximal packing is exactly
+  298 bytes/member, 4,770 bytes/16 members, body-only ceiling 27 while the
+  reference ceiling 16 governs; unsorted/duplicate/`/`/`.`/`..`, kind-target mismatch, or member-size
   mismatch remains admitted evidence but yields `PROFILE_MALFORMED` at bounded
   conformance/walk (write-side convenience gets a read-side check — §0.2),
   nested dedup, walk-depth PARTIAL; name-not-in-closure = the ONLY provable
@@ -768,7 +780,7 @@ member level (Stage B may add members, never remove).
   deployment/profile-confusion attack is detected by the C-checks; a second
   implementation rebuilds everything from state alone. [Anchors V2-E5 (PM
   in-scope); candidate falsifiers 2 and 10; SPINE lane finding 2.]
-- **Shape:** input = `RealmDescriptor/1`, the exact six-field fixed-width
+- **Shape:** input = `RealmDescriptor/1`, the exact seven-field fixed-width
   `InitConfig/1`, and live/forged Realm state; output = C-1..C-7 verdicts,
   full `GenesisFactsView`, recomputed ids, and W-0..W-10.
 - **Impl:** TS + RS authoritative (two independent client reconstructions —
@@ -779,10 +791,12 @@ member level (Stage B may add members, never remove).
   the walk needs **zero** event logs (harness runs with logs disabled).
 - **Members:** B0 protocol 0.0; `InitConfig/1 = abi.encode(uint16(1),
   uint8 finalityRuleKind,uint32 finalityParam,uint8 upgradeAuthorityKind,
-  uint64 declaredTxGasLimit,bytes32 initialPolicyCommitment)` and
+  bytes32 upgradeAuthorityRef,uint64 declaredTxGasLimit,
+  bytes32 initialPolicyCommitment)` and
   `initConfigHash=keccak256(initConfigBytes)`; unknown/noncanonical kind,
-  finalityParam, gas-floor, and zero-policy rejection; revision 1 uses the
-  initial policy exactly. Full `genesisFacts()` re-encodes every preimage and
+  finalityParam, gas-floor, zero-policy, ref/kind mismatch, noncanonical/high-
+  bit/nonzero-address failures; revision 1 uses the initial policy and genesis
+  authority exactly. Full `genesisFacts()` re-encodes every preimage and
   recomputes profileId/genesisCommitment/RealmId. RealmRevisionId vectors;
   A-1 wrong-chain (C-1); A-2 lookalike Core with
   divergent canonicalization — caught by C-6's recompute-one-envelope
@@ -790,7 +804,13 @@ member level (Stage B may add members, never remove).
   NOT best-effort-decode (C-4); A-4 descriptor substitution (C-2/C-3); A-5
   lying endpoint → C-7 disclosure conformance ("single-endpoint, unproven"
   labeling — the stale/omitting-RPC attack's honest floor); A-6 upgrade
-  smuggling → C-5 revision-history check; W-0..W-10 full walk incl. W-8/W-9
+  smuggling → C-5 checks direct/NONE zero implementation/admin slots or UUPS
+  canonical implementation + zero admin, matches state-readable implementation
+  and current-authority getters, and rejects hidden authority; controller
+  transition members assert exactly one paired RealmRevision plus one chained
+  `AuthorityTransition(oldRef,newRef,block,firstAdmission,revisionOrdinal)`,
+  no transition on unchanged controller, NONE refusal, and current-ref
+  reconstruction from genesis; W-0..W-10 full walk incl. W-8/W-9
   index+binding fold replay (pure function of the total event order), including
   canonical **unsigned** envelope bytes plus ordered RecordIds; receipts and
   admission batches ground historical acceptance, and the walk never claims to
@@ -835,8 +855,13 @@ member level (Stage B may add members, never remove).
   (cost-shape member). All transitions use the single SR-12 `publish` surface,
   SR-3's exact per-selected-Binding `expectedRevisions[]`, and the shared
   SR-10 lifecycle overlay. Admission alone decodes/authenticates pre-withdrawal
-  evidence and passes `ValidatedWithdrawalTarget` to Binding; no proof bytes,
-  witness decoder, or repeat author check crosses that seam. `reconciles:
+  evidence and passes one byte-identical `ValidatedOccurrenceLifecycleEffect`
+  to Index and Binding; its target/occKey/principal/prior status+ordinals/
+  evidence ordinal/effect kind/binding key/current-head fields match the owner
+  struct, and no proof bytes, witness decoder, or repeat authority/author check
+  crosses either seam. BindingSet vectors require exactly one target option
+  (neither/both → structural code 17); Tombstone has none; Withdrawal's direct
+  OCCREF body is 34 bytes. `reconciles:
   RP-3,6,8,9,10,11,12,13,15`;
   `requiresPins: SR-3, SR-6, SR-8, SR-9, SR-10, SR-11, SR-12, SR-13,
   SR-15`.

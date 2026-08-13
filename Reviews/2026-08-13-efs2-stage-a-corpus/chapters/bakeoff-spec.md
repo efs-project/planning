@@ -160,7 +160,12 @@ and ID family (b0-encoding-and-ids.md §1–§2), AccountPrincipal/AuthorityVeri
 (b0-principal-authority.md §2–§3), RealmDescriptor/receipts/reconstruction
 (b0-realm-admission.md), the Binding state machine (b0-binding.md), the Lens resolver
 (b0-lens.md), the content Type family (b0-content-locators.md), and the frozen fixture
-corpus + workload scripts (§6).
+corpus + workload scripts (§6). Thus every cell inherits the exact seven-field
+`InitConfig`, controller-reference/revision/transition and EIP-1967 read facts;
+the exact BindingSet/Tombstone/Withdrawal Types and Admission-only
+`ValidatedOccurrenceLifecycleEffect`; the three-field `ResolvedTarget`; and
+ArtifactClosure's STRING(255) member-name shape. Cell deltas may not redefine
+those interfaces.
 
 ### 3.1 B0 — SPINE
 
@@ -396,8 +401,10 @@ spine), `Admission` (verifier + receipts + ordinals; the single write entrypoint
 **Exact rebuild list:**
 - The internal-library seams that B0 pins as in-process calls become external
   interfaces: `LibBinding.applyBind` → `IBinding.applyBind` (b0-binding.md §8);
-  withdrawal passes only Admission's typed `ValidatedWithdrawalTarget`, never
-  evidence bytes or a witness/author verifier; `LibIndex.appendPosting` plus
+  withdrawal passes the same exact ten-field
+  `ValidatedOccurrenceLifecycleEffect` from Admission to Index and Binding,
+  never evidence bytes or a witness/authority/author verifier;
+  `LibIndex.appendPosting` plus
   status-aware activation/withdrawal calls consume the shared SR-10 overlay →
   `IIndex.*` (b0-indexes.md "Internal seam"). `KIND_BINDING_HIST` remains
   RAW_AUDIT and uses that overlay only for hydrated status/revocation, never
@@ -712,11 +719,11 @@ adapter where needed (F1/X17 only):
 
 | Subsystem | Source of truth | Per-cell variation |
 |---|---|---|
-| Binding/Withdrawal state machine (T1–T9, CAS, no-resurrection, absence predicate) | b0-binding.md §3–§6 | none except the OccurrenceRef adapter (F1/X17) and `expectedRevision` carriage (F3, §3.4) |
-| LensResolver (`ResolutionPlan/1`, combiners, resolve algorithm, risk-bearer ABI) | b0-lens.md §3–§8 | none — plans are Records in every cell; head reads cross a boundary only in F6 |
+| Binding/Withdrawal state machine (T1–T9, exact kernel Type schemas, CAS, no-resurrection, absence predicate, Admission-only lifecycle context) | b0-binding.md §3–§6; b0-authorship-envelope.md §3.2–§3.3 | none except the OccurrenceRef adapter (F1/X17) and `expectedRevision` carriage (F3, §3.4); error 17 and the closed role-class/KIND_DIGEST split are shared |
+| LensResolver (`ResolutionPlan/1`, three-field `ResolvedTarget`, combiners, resolve algorithm, risk-bearer ABI) | b0-lens.md §3–§8 | none — plans are Records in every cell; head reads cross a boundary only in F6 |
 | AuthorityVerifier/1 + AccountPrincipal/1 | b0-principal-authority.md §2–§3 | none except F2's AuthorRef entry |
-| Realm descriptor / receipts / reconstruction walk | b0-realm-admission.md §2, §5, §8 | card-spine re-expression of W-3..W-5 in F1/X17; module-set genesis hash in F6 |
-| Content Type family + 50 GB client machine | b0-content-locators.md | none (client-side; not a gas cell) |
+| Realm descriptor / receipts / reconstruction walk (seven-field InitConfig, authority ref/transitions, EIP-1967 facts) | b0-realm-admission.md §2, §5, §7–§8 | card-spine re-expression of W-3..W-5 in F1/X17; module-set genesis hash in F6; no cell may hide or reinterpret controller state |
+| Content Type family + 50 GB client machine (ArtifactClosure STRING(255), structural/profile split) | b0-content-locators.md | none (client-side; not a gas cell) |
 | **Lens benchmarks** | b0-lens.md §9 + hf §2.5 | **run ONCE on B0**: Core `N={1,8,32,64}`; separately TS/RS client `N={50,100,256}` on pinned mobile+desktop profiles, never as 100/256-entry on-chain Plans. A single N=64 spot-check inside F6's `OVH_6` captures the head-read boundary crossing. |
 
 ### 6.2 The frozen-corpus rule [PROPOSAL — binding harness discipline]

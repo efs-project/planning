@@ -176,15 +176,20 @@ Additional red-team repair gates cover seams the old table missed:
   `ArtifactClosure/1.members[*].content` through the latter.
 - ResolutionPlan bodies include the `u16(frameLen)` prefix and parsers begin at
   offset 2; N=64 therefore exercises the 4,194-byte body, not a raw frame.
-- Realm setup consumes the exact fixed-width `InitConfig/1`, B0 protocol 0.0,
-  and checks `GenesisFactsView` plus revision-1 initial policy source.
+- Realm setup consumes the exact seven-field fixed-width `InitConfig/1`, B0
+  protocol 0.0, and checks `GenesisFactsView`, genesis controller,
+  revision-1 policy/authority, EIP-1967 facts, and transition history.
 - Binding history is RAW_AUDIT: never liveness-filtered/decremented/compacted;
   reads hydrate occurrence status and `revokedAtOrdinal`.
-- Admission alone validates Withdrawal target evidence and passes typed
-  `ValidatedWithdrawalTarget`; no opaque evidence bytes cross into Binding.
+- Admission alone validates Withdrawal target evidence and passes the exact
+  ten-field `ValidatedOccurrenceLifecycleEffect` to both LibIndex and
+  LibBinding; no opaque evidence bytes or repeated verifier crosses either seam.
 - Content tests separate structural admission from profile eligibility: URI,
   cross-field/chunk math, sorted/unique members, and kind-target checks may make
   a structurally admitted Record ineligible, but Core does not reject them.
+  ArtifactClosure names are STRING(255): Core accepts empty but the profile
+  rejects it; maximal member/body arithmetic is 298/4,770/27, with the
+  16-reference budget governing.
 - IndexSpec vectors use exactly `u8 indexKind|u8 target`; selector vectors use
   explicit `winnerPresent`, with no winner `(0,0)` and a real zero-score winner
   carrying a nonzero ordinal.
@@ -309,6 +314,19 @@ content family; `ResolutionPlan/1` (Lane 7 §3). Fixture-pack additions
 [PROPOSAL — field kinds per Lane 1 §2.2; roles get REF_BACKLINK indexes unless
 "no idx"]:
 
+The kernel fixtures consume these exact owner schemas, never a corpus-local
+projection: BindingSet's fields are `(purpose,subject,fieldRole,
+targetRecord OPTION(REF RECORD),targetOccurrence OPTION(OCCREF OCCURRENCE),
+predecessor OPTION(OCCREF OCCURRENCE))`; exactly one target option is present
+or the write returns `E_STRUCTURAL(...,17)`. Tombstone is the three position
+words plus predecessor and no target. Withdrawal is one direct OCCREF whose
+body is exactly 34 bytes. Dense ReferenceRoles and REF_BACKLINK specs cover
+each reference exactly once. Legal target classes are exactly RECORD,
+TYPESCHEMA, PRINCIPAL, OCCURRENCE, OBJECT; ADDRESS/REALM/BYTEDIGEST reject.
+Digest equality uses `KIND_DIGEST=0x09` with `DOM_VK_DIGEST`. The three
+concrete TypeSchemaIds and every dependent expected byte remain Stage B
+outputs over these frozen blobs.
+
 | Type | Fields | Roles (class) |
 |---|---|---|
 | `Comment/1` | body STRING(2048) | target REF(ANY); replyTo OPTION(OCCREF)(OCCURRENCE) |
@@ -374,7 +392,11 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   including no-resurrection, wrong-author whole-envelope revert, and
   idempotent double withdrawal. Binding history remains RAW_AUDIT: physical
   revisions/counts never decrement or filter, while hydrated status and
-  `revokedAtOrdinal` change through the occurrence overlay.
+  `revokedAtOrdinal` change through the occurrence overlay. Admission builds
+  the exact lifecycle context `(target,targetOccKey,targetPrincipalId,
+  priorStatus,priorOrdinal,priorRevokedAtOrdinal,evidenceOrdinal,
+  targetEffectKind,targetBindingKey,targetIsCurrentBindingHead)`; Index and
+  Binding consume byte-identical copies and never parse evidence.
 - **CV-SPARSE-ADMIT** — GV-8/GV-9, SR-10/SR-15: admit leaves `{0,3,7}`, then
   the remainder; verify per-new-occurrence submission-order ordinals,
   reversible hydration, no holes/derived base law, and duplicate no-op.
@@ -382,7 +404,8 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   header+signature with no bodies creates `PRE_WITHDRAWN` at target ordinal 0;
   later admission fails; wrong/forged author reverts with zero delta; repeat
   succeeds as a no-op using retained evidence. Admission alone validates and
-  constructs `ValidatedWithdrawalTarget`; Binding receives no evidence bytes.
+  constructs `ValidatedOccurrenceLifecycleEffect`; neither downstream owner
+  receives evidence bytes.
 - **CV-DIGEST-LOOKUP** — GV-14/GV-16, SR-18a/b: publish and query one
   digest-bearing Record with the same u16 `algCode`; legacy u8/u32 encodings
   are typed-unsupported/rejected and can never produce `COMPLETE`-empty.
@@ -396,7 +419,9 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   a staged group commitment.
 - **CV-RECON** — `RECONSTRUCT()` (Lane 4 §8 walk) executed by the second
   implementation after every fixture's final phase; it re-encodes the exact
-  InitConfig/genesis facts, reads canonical unsigned envelopes, and treats
+  seven-field InitConfig/genesis facts, checks direct/UUPS EIP-1967 slot
+  invariants and implementation/current-authority getters, folds the chained
+  AuthorityTransitions into the latest revision, reads canonical unsigned envelopes, and treats
   receipts/batches as historical validation evidence without claiming to
   recover discarded main witnesses. Any §3.2a state mismatch fails the cell.
 
@@ -657,7 +682,13 @@ absent, threshold-met, threshold-split}: `RESOLVE` measured COLD then WARM
 arithmetic [HYPOTHESIS there — closed here]. Plan-load vs probe cost split
 reported per row (drives Lane 7 open item 4, PLAN-STORE-B decision rule).
 Combiner transition coverage: every T1–T10 asserted once (golden), then
-measured. The Core grid remains exactly `N={1,8,32,64}`. [PROPOSAL]
+measured. Every result and gate snapshot carries the full
+`ResolvedTarget(targetKind,targetA,targetLeaf)`. Add two non-alias vectors:
+RECORD vs OCCURRENCE with equal `targetA`, and two OCCURRENCE targets sharing
+one EnvelopeId but different leaves; exact/threshold combiners must report
+conflict rather than collapse them. Challenge finalize compares all three
+fields plus winner identity. The Core grid remains exactly
+`N={1,8,32,64}`. [PROPOSAL]
 
 **Distinct client-tier grid (never submitted as an on-chain Plan):** TS and RS
 resolve `N={50,100,256}` from paged B0 reads on two corpus-pinned reference
@@ -952,7 +983,11 @@ pagePostingsHydrated, counts, lookupByDigest, getBindingHead, getBindingAtBasis,
 selectBestLocator` (Lane 5); `readHead, readHeadBatch, readHistory,
 readOccurrenceStatus` (Lane 6); `resolve, resolveStrict, validatePlan`
 (Lane 7); `envelopeHeaderOf, envelopeRecordIdsOf, occurrenceStateOf` (Lane 2);
-the Lane 4 §8.2 reconstruction surface (measured by CV-RECON). [PROPOSAL]
+`genesisFacts, implementationAddress, currentUpgradeAuthorityRef,
+revisionCount/revisionAt/currentRevision, authorityTransitionCount/
+authorityTransitionAt` and the remainder of Lane 4 §8.2 (CV-RECON). Every
+result-registry entry uses the final seven-field/three-target-field ABI; prior
+omitted-authority-ref and single-word-target schemas are absent. [PROPOSAL]
 
 ### 3.2 The reporting schema — one row shape for every cell × fixture × workload
 
@@ -1070,6 +1105,16 @@ debug read, with every reachable/bubbled error. Missing or duplicate entries,
 unknown errors, noncanonical ABI spellings, and unlisted actual reverts fail
 freeze.
 
+This inventory is regenerated after owner commit `a18e571`: codec/kernel-Type
+members include structural code 17; lifecycle folds consume the ten-field
+typed context; Lens successes encode the three-field `ResolvedTarget` in both
+`resolve` and `resolveStrict`; Realm entries use seven-field InitConfig,
+authority-bearing revisions, both authority-transition enumeration reads, and
+implementation/authority getters. ArtifactClosure Type/Record expectations use
+STRING(255). These changes intentionally move `resultRegistryHash`,
+`corpusVersion`, affected Type/Record IDs, and every dependent expected result;
+their concrete bytes are Stage B outputs, not values guessed in Stage A.
+
 ```text
 successPayload = abi.encode(success outputs...)
 canonicalResultBytes(success) = u8(0)||u32(len(successPayload))||successPayload
@@ -1125,8 +1170,10 @@ only success artifacts are legal. `STATE_PROJECTION_SCHEMA_ID` is the registry
 id for `harness:state-projection/1`, input `(uint8,bytes32,uint64)`, output
 `(bytes)`, kind HARNESS, no errors.
 
-The closed component schedule is: 0x01 exact `genesisFacts`, Codex bytes, then
-`revisionAt(1..revisionCount)`; 0x02 admission/envelope/card/batch/Type/Principal
+The closed component schedule is: 0x01 exact `genesisFacts`, Codex bytes,
+EIP-1967 implementation/admin words, `implementationAddress`,
+`currentUpgradeAuthorityRef`, `revisionAt(1..revisionCount)`, then every
+`authorityTransitionAt(1..authorityTransitionCount)` in ordinal order; 0x02 admission/envelope/card/batch/Type/Principal
 counters, every used `(principalId,nonceKey)`, and cell control counters; 0x03
 Principals by full bytes32 id with descriptors/ordinals; 0x04
 Types/shapes/profiles by bytes32 id with exact definitions and schema-cache
@@ -1169,7 +1216,7 @@ discarded signature witness, ground historical validation.
 RealmProfile {
   realmProfileId    string
   txGasCap          uint64      -- per-tx ceiling the harness enforces
-  initConfigBytes   bytes       -- exact six-field InitConfig/1 ABI tuple
+  initConfigBytes   bytes       -- exact seven-field InitConfig/1 ABI tuple
   calldataFloor7623 bool
   eip170CodeLimit   uint32 = 24,576
   p256Precompile    bool        -- EIP-7951 availability (Lane 3 kind 3 gate)
@@ -1187,10 +1234,13 @@ Rules [PROPOSAL]:
 
 0. Every profile uses B0 protocol 0.0 and encodes
    `abi.encode(uint16(1),uint8 finalityRuleKind,uint32 finalityParam,uint8
-   upgradeAuthorityKind,uint64 declaredTxGasLimit,bytes32
+   upgradeAuthorityKind,bytes32 upgradeAuthorityRef,uint64 declaredTxGasLimit,bytes32
    initialPolicyCommitment)`. `declaredTxGasLimit=txGasCap`; the policy
-   commitment is corpus-pinned/nonzero; initialization and `genesisFacts()`
-   must round-trip the bytes/hash and revision-1 policy exactly.
+   commitment is corpus-pinned/nonzero. The ref is zero iff kind NONE;
+   otherwise it is a canonical nonzero address word. Initialization and
+   `genesisFacts()` round-trip all bytes/hash, revision-1 policy, and genesis
+   controller exactly. Profiles also pin valid implementation/admin slot words
+   and controller-transition scripts; changing any is a corpus-version bump.
 1. `MUST_FIT_ATOMIC`: one semantic unit executes in one EVM call under the
    selected Realm cap. `overCap=true` is a failing hard-gate observation,
    `splitFactor=1`, and the harness never retries pieces.
