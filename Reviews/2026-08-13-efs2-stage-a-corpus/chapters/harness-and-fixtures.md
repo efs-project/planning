@@ -170,6 +170,26 @@ Additional red-team repair gates cover seams the old table missed:
 - SR-18(a-e): shared u16 digest vocabulary, fail-closed Completeness values,
   total-posting locator visit bounds, last-live unique counts, and the
   `REF_INSTANCES_MAX = 16` bound.
+- Reference extraction consumes the exact three-byte
+  `(fieldIdx,selectorKind,memberIdx)` tail; only DIRECT and
+  ARRAY_STRUCT_MEMBER exist, and the Arcade closure vector extracts
+  `ArtifactClosure/1.members[*].content` through the latter.
+- ResolutionPlan bodies include the `u16(frameLen)` prefix and parsers begin at
+  offset 2; N=64 therefore exercises the 4,194-byte body, not a raw frame.
+- Realm setup consumes the exact fixed-width `InitConfig/1`, B0 protocol 0.0,
+  and checks `GenesisFactsView` plus revision-1 initial policy source.
+- Binding history is RAW_AUDIT: never liveness-filtered/decremented/compacted;
+  reads hydrate occurrence status and `revokedAtOrdinal`.
+- Admission alone validates Withdrawal target evidence and passes typed
+  `ValidatedWithdrawalTarget`; no opaque evidence bytes cross into Binding.
+- Content tests separate structural admission from profile eligibility: URI,
+  cross-field/chunk math, sorted/unique members, and kind-target checks may make
+  a structurally admitted Record ineligible, but Core does not reject them.
+- IndexSpec vectors use exactly `u8 indexKind|u8 target`; selector vectors use
+  explicit `winnerPresent`, with no winner `(0,0)` and a real zero-score winner
+  carrying a nonzero ordinal.
+- Reconstruction persists/returns canonical **unsigned** envelope bytes;
+  AdmissionReceipts and batches retain historical validation basis.
 
 Harness/vector execution is blocked until every consumed pin is VERIFIED in
 all owning chapters and the Task 6 retired-form residue search passes. The
@@ -177,6 +197,93 @@ adapter `PUBLISH_SCHEMA_GROUP` may call SDK helper
 `registerTypeSchemaGroup(...)`, but it must prove the helper constructs the
 intrinsic Record and calls the sole Core `publish`; no second entrypoint or
 two-step materialization is permitted. [PROPOSAL]
+
+### 1.4 Canonical corpus and vector source bytes
+
+All corpus-owned JSON uses RFC 8785 JCS, UTF-8, no BOM, and no trailing
+newline, with this restricted profile: JSON numeric tokens are forbidden;
+integers are minimal unsigned decimal strings; binary values are lowercase
+even-length `0x` hex (full width where fixed); protocol names/enums are
+printable ASCII; human text is NFC and control-free; unknown/duplicate keys,
+duplicate IDs/paths, invalid UTF-8, symlinks, and platform separators reject.
+Arrays retain semantic order unless a field below specifies sorting. Solidity
+never parses JSON. [PROPOSAL — exact harness interface]
+
+The freeze tree has exactly these top-level directories:
+`domains/`, `fixtures/`, `interfaces/`, `profiles/`, `scripts/`, `toolchain/`,
+and `vectors/`. Every regular descendant is included. Generated manifests,
+cell implementations, builds, reports, measurements, caches, and VCS metadata
+are excluded. Relative POSIX paths match `[a-z0-9][a-z0-9._/-]*`, with no
+empty, dot, dot-dot, leading, or trailing segment.
+
+`corpus-manifest.json` has exactly:
+
+```json
+{"domainManifest":"0x<exact corpusDomainManifestBytes>","entries":[{"bytes":"<u64 decimal>","keccak256":"0x<bytes32>","path":"<path>"}],"format":"efs2-stage-b-corpus/1"}
+```
+
+Entries sort by unsigned-ASCII path bytes; `bytes` is exact file length and
+the digest is `keccak256(fileBytes)`. The manifest itself is not an input file
+and does not contain its own version.
+
+```text
+canonicalCorpusBytes = RFC8785(corpus-manifest object)
+corpusVersion = keccak256(abi.encode(
+  DOM_FIXTURE_CORPUS, keccak256(canonicalCorpusBytes)))
+```
+
+Every `vectors/*.json` root has exactly `format`, `resultRegistryHash`,
+`setups`, and `vectors`; format is `efs2-stage-b-vectors/1`. Setups sort by
+`(cellId,id)` and vectors by `(category,id,cellId)` in unsigned ASCII.
+
+```text
+Setup { cellId; id; Step[] steps }
+Vector {
+  atomicityClass; category; cellId; description; id; impls;
+  reconciles; requiresPins; setupId; stateDigest; Step[] steps; tier
+}
+Step { actor; args; expect; opName }
+Success { bytes; kind="success"; resultSchemaId }
+Failure {
+  arguments; code; kind="error"; namespace; resultSchemaId
+}
+```
+
+Cell IDs are exactly B0, F1..F7, X17. `impls` is an ordered subset of SOL, TS,
+RS; tier is CORE, SDK, or FIXTURE; atomicity is MUST_FIT_ATOMIC,
+SPLITTABLE_THROUGHPUT, or N/A. Categories are GV-1..GV-18 or named CV/H cases.
+Setup IDs are globally unique with cellId; vector IDs are stable printable
+ASCII and never reused; `setupId` references the same cell or is `-`.
+Descriptions are NFC. Arguments/success bytes are canonical ABI tuples in lowercase hex. Error
+arguments exclude the selector; code is minimal-decimal nonzero u32 other than
+`2^32-1`. `reconciles` and `requiresPins` sort numerically. Every write is
+followed by explicit public reads. State-machine vectors carry a non-null
+digest; stateless vectors carry null. At freeze no expected output or required
+digest may remain null. `resultRegistryHash=keccak256(resultSchemaRegistryBytes)`;
+a mismatch rejects before execution.
+
+Mandatory freeze checks are executable corpus members:
+
+- **H-JCS/H-MANIFEST:** reject JSON numbers, BOM/newline, non-NFC, duplicate or
+  unknown keys, invalid/symlink/dot paths, wrong ordering/length/digest, and
+  excluded artifacts entering the manifest; TS/RS reproduce identical bytes
+  and corpusVersion.
+- **H-RESULTREG:** every ABI/FixOp/read/cell operation appears exactly once;
+  any name/schema/error change moves registry hash and corpusVersion; actual
+  revert selector+arguments match its namespace/code entry.
+- **H-OUTCOME:** success, typed error including zero arguments, and N/A rows
+  produce exact bytes/digests/sentinels; an assertion cannot substitute for an
+  operation result.
+- **H-STATE:** insertion-order and physical-layout permutations normalize to
+  one within-cell digest; changing a nonce, dead posting, retained evidence,
+  history status, receipt basis, or F4 coverage changes it; reverted calls do
+  not, while log/cache-only changes are excluded.
+- **H-DOMTABLE:** all six F1/F3/F4 domains occur once in the corpus manifest
+  and never in `codexConstantsHash`; retired spellings reject.
+- **H-CELLS:** F1's SR-3 intent bytes remain B0-exact with CardId/mask=1; F3
+  has the one bound type/digest and no intent object; F4 enforces one pending,
+  CAS, scan-16, single revision increment, cursor invalidation, two-profile
+  fan-out, and COMPLETE/retirement semantics.
 
 ---
 
@@ -225,10 +332,12 @@ content family; `ResolutionPlan/1` (Lane 7 §3). Fixture-pack additions
 | `DatasetMeta/1` | license STRING(64); note STRING(1024) | dataset REF(OBJECT) |
 | `ServiceMeta/1` | name STRING(128); endpointHint OPTION(STRING(2048)) | service REF(OBJECT); provider REF(OBJECT) |
 
-Role-target sets like `{ChunkTree/1, ArtifactClosure/1}` follow Lane 8's usage;
-whether Variant A's role grammar can express small closed sets is Lane 8 open
-item O2 (dependsOn — Lane 1's `expectedType` today holds ONE id or ANY; fixtures
-use ANY + read-side checks until pinned).
+Repeated nested references use the closed ReferenceRole path grammar. In
+particular `ArtifactClosure/1.members[*].content` uses
+`ARRAY_STRUCT_MEMBER(memberIdx=content)`; ordinary top-level roles use DIRECT.
+`expectedType` remains one Type id or a named sentinel. Small multi-Type sets
+and semantic kind-target claims are profile checks, never implicit Core
+callbacks or an unbounded fixture exception.
 
 **2.0.3 Cross-cutting conformance suite CV-\*** — run once per bakeoff cell,
 before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
@@ -263,14 +372,17 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   kind-1-vs-kind-2 distinct-Principal check.
 - **CV-WITHDRAW** — Lane 2 §3.2 T1–T6 + Lane 6 T1–T9 state machines,
   including no-resurrection, wrong-author whole-envelope revert, and
-  idempotent double withdrawal.
+  idempotent double withdrawal. Binding history remains RAW_AUDIT: physical
+  revisions/counts never decrement or filter, while hydrated status and
+  `revokedAtOrdinal` change through the occurrence overlay.
 - **CV-SPARSE-ADMIT** — GV-8/GV-9, SR-10/SR-15: admit leaves `{0,3,7}`, then
   the remainder; verify per-new-occurrence submission-order ordinals,
   reversible hydration, no holes/derived base law, and duplicate no-op.
 - **CV-PREWITHDRAW** — GV-9, SR-9/SR-10/SR-15: authenticated target
   header+signature with no bodies creates `PRE_WITHDRAWN` at target ordinal 0;
   later admission fails; wrong/forged author reverts with zero delta; repeat
-  succeeds as a no-op using retained evidence.
+  succeeds as a no-op using retained evidence. Admission alone validates and
+  constructs `ValidatedWithdrawalTarget`; Binding receives no evidence bytes.
 - **CV-DIGEST-LOOKUP** — GV-14/GV-16, SR-18a/b: publish and query one
   digest-bearing Record with the same u16 `algCode`; legacy u8/u32 encodings
   are typed-unsupported/rejected and can never produce `COMPLETE`-empty.
@@ -283,7 +395,10 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   over-cap result is a hard on-ramp observation with `splitFactor = 1`, never
   a staged group commitment.
 - **CV-RECON** — `RECONSTRUCT()` (Lane 4 §8 walk) executed by the second
-  implementation after every fixture's final phase; any mismatch fails the cell.
+  implementation after every fixture's final phase; it re-encodes the exact
+  InitConfig/genesis facts, reads canonical unsigned envelopes, and treats
+  receipts/batches as historical validation evidence without claiming to
+  recover discarded main witnesses. Any §3.2a state mismatch fails the cell.
 
 [PROPOSAL — suite composition; each member cites its owning chapter's vector
 category and exists so the fixture scripts stay workload-shaped instead of
@@ -831,7 +946,7 @@ measurement, or result-dependent corpus mutation is permitted.
 is measured cold AND warm at least once per cell — including the baseline reads
 the intake SPINE lane found uncosted (admission-order pages under churn,
 unique-Records-by-Type, Occurrences by Type/Record/Principal — VERIFIED
-finding): `getTypeSchema, getRecord, getEnvelope, getOccurrence,
+finding): `getTypeSchema, getRecord, getEnvelope, getEnvelopeBytes, getOccurrence,
 getOccurrenceByOrdinal, getReceipt, admissionLogPage, pagePostings,
 pagePostingsHydrated, counts, lookupByDigest, getBindingHead, getBindingAtBasis,
 selectBestLocator` (Lane 5); `readHead, readHeadBatch, readHistory,
@@ -910,16 +1025,65 @@ Both domains are live `evidence`-class rows in the closed registry
 not Core semantic IDs: neither enters `codexConstantsHash`; both enter
 `corpusDomainManifestBytes` and H-DOMTABLE.
 
-The frozen, corpus-manifested result-schema registry defines field order/width
-for every `opName` as a tagged union: tag 0 plus the success-output tuple, or
-tag 1 plus `(errorNamespace, typedErrorCode, canonicalErrorArguments)`. Those
-are `canonicalResultSchemaBytes`; the matching encoded union value is
-`canonicalResultBytes`. TS/RS serialize the same bytes before differential
-comparison. `resultPresent=true` for either encoded arm and is false only for
-a row whose operation has no result artifact. `crossImplEqual=TRUE` means every
-required implementation produced the same `resultSchemaId`, `resultDigest`,
-`errorNamespace`, `typedErrorCode`, `errorDataDigest`, and context fields, not
-merely the same Boolean assertion.
+The restricted-JCS registry source is `interfaces/result-registry.json`.
+Namespaces are exactly `authority`, `authorship`, `binding`, `codec`,
+`content`, `harness`, `index`, `lens`, `realm`, serialized in that ASCII order.
+Empty per-cell namespaces remain present. Their ids and typed codes are:
+
+```text
+errorNamespace(name) = keccak256(abi.encode(
+  DOM_RESULT_SCHEMA, uint256(1), keccak256(ascii(name))))
+```
+
+Within a namespace, canonical Solidity error signatures sort by unsigned ASCII
+and receive consecutive u32 codes 1..N. Code 0 is ERROR_NONE and `2^32-1` is
+measurement-only ERROR_NA. Actual revert bytes must be selector
+`bytes4(keccak256(ascii(signature)))` plus `abi.encode(error arguments...)`.
+
+```text
+resultSchemaRegistryBytes :=
+  u16(1) || u16(namespaceCount) ||
+  for each namespace:
+    u16(nameLen)||ascii(name)||bytes32(errorNamespace)||u16(errorCount)||
+    for each error: u32(code)||u16(signatureLen)||ascii(signature) ||
+  u16(operationCount) ||
+  for each operation sorted by ASCII opName:
+    u32(schemaLen)||canonicalResultSchemaBytes
+
+canonicalResultSchemaBytes :=
+  u16(1) || u16(opNameLen)||ascii(opName) ||
+  u8(executionKind) ||
+  u16(inputTypeLen)||ascii(canonical ABI input tuple) ||
+  u16(successTypeLen)||ascii(canonical ABI success tuple) ||
+  u16(allowedErrorCount) ||
+  sorted (bytes32 errorNamespace || u32 typedErrorCode)*
+```
+
+Execution kinds are 1 PURE, 2 VIEW, 3 TX, 4 FOLD, 5 HARNESS. `()` is the
+two-byte empty tuple spelling, never zero length. Operation names have one
+grammar: external ABI `sol:<canonical function signature>`, FixOp
+`fix:<UPPER_SNAKE_ENUM>/1`, pure fold `pure:<lower-kebab-name>/1`, harness
+`harness:<lower-kebab-name>/1`, debug `debug:<lower-kebab-name>/1`. Aliases
+reject. The inventory is every FixOp, mandatory read, CellAdapter write,
+selector/reconstruction/Lens operation, F4 control/read, state projection, and
+debug read, with every reachable/bubbled error. Missing or duplicate entries,
+unknown errors, noncanonical ABI spellings, and unlisted actual reverts fail
+freeze.
+
+```text
+successPayload = abi.encode(success outputs...)
+canonicalResultBytes(success) = u8(0)||u32(len(successPayload))||successPayload
+canonicalResultBytes(error) =
+  u8(1)||bytes32(errorNamespace)||u32(typedErrorCode)||
+  u32(len(canonicalErrorArguments))||canonicalErrorArguments
+```
+
+`resultPresent=true` for either encoded arm. For success, namespace/code/error
+digest are zero. For error, `errorDataDigest=keccak256(canonicalErrorArguments)`;
+a zero-argument error hashes empty bytes, not zero. For no artifact, both ids
+and digests are zero and the N/A sentinels apply. `crossImplEqual=TRUE` means
+all required implementations produced the same schema/result/error/context
+fields, not merely a Boolean assertion.
 
 N/A sentinels are closed: `ORDINAL_NA = 2^64−1` (legal protocol ordinals are
 u48), `COVERAGE_NA = 2^32−1`, `ITEMS_NA = 2^16−1`,
@@ -937,12 +1101,75 @@ charts computed FROM rows (k\* curves, ratios). Nothing is reported outside the
 row shape — that is what makes cell × fixture × workload grids diffable.
 [PROPOSAL — the single-shape rule is the deliverable's core]
 
+### 3.2a Canonical logical-state projection
+
+State digests compare logical behavior across SOL/TS/RS **within one cell**, not
+physical layouts across cells:
+
+```text
+canonicalStateBytes :=
+  u16(1)||u8(cellCode)||bytes32(realmId)||u64(basisOrdinal)||
+  u32(entryCount)||StateEntry*
+StateEntry :=
+  u8(componentTag)||bytes32(resultSchemaId)||
+  u32(argsLen)||canonical ABI input bytes||
+  u32(resultLen)||canonicalResultBytes(success)
+stateDigest = keccak256(abi.encode(
+  DOM_MEASUREMENT_RESULT, STATE_PROJECTION_SCHEMA_ID,
+  keccak256(canonicalStateBytes)))
+```
+
+Cell codes are B0=0, F1=1, F2=2, F3=3, F4=4, F5=5, F6=6, F7=7, X17=8.
+Entries sort by `(componentTag,resultSchemaId,args bytes)`; duplicates reject;
+only success artifacts are legal. `STATE_PROJECTION_SCHEMA_ID` is the registry
+id for `harness:state-projection/1`, input `(uint8,bytes32,uint64)`, output
+`(bytes)`, kind HARNESS, no errors.
+
+The closed component schedule is: 0x01 exact `genesisFacts`, Codex bytes, then
+`revisionAt(1..revisionCount)`; 0x02 admission/envelope/card/batch/Type/Principal
+counters, every used `(principalId,nonceKey)`, and cell control counters; 0x03
+Principals by full bytes32 id with descriptors/ordinals; 0x04
+Types/shapes/profiles by bytes32 id with exact definitions and schema-cache
+digest; 0x05 Records by id with type/shape, canonical body, and first-admission
+metadata; 0x06 **unsigned** persisted envelopes/cards by id plus ordered
+RecordIds; 0x07 admission log/receipts `1..H`, Occurrences by reversible ref,
+and batches in batch order; 0x08 retained pre-withdrawal evidence keyed by
+effective withdrawal ordinal; 0x09 postings keys sorted bytes32 with every
+logical ordinal including dead entries, head/counts/liveness/digest state;
+0x0a Binding keys sorted bytes32 with decoded heads plus complete RAW_AUDIT
+revision order and hydrated occurrence status/revoked ordinal; 0x0b F4
+profile/coverage and historical/live partitions (empty elsewhere).
+
+The disposable SOL build exposes only these harness reads:
+
+```text
+debug:intent-nonce/1        (bytes32,uint192) -> (uint64)
+debug:schema-cache-digest/1 (bytes32) -> (bytes32)
+debug:logical-postings/1    (bytes32) -> (uint64[],uint64,uint64,uint64)
+```
+
+The final debug tuple is `(appendOrderOrdinals,totalCount,liveCount,lastOrdinal)`
+and normalizes packed/wide physical storage; none of these debug reads is a
+production ABI.
+
+Reconstruction, not a private DB, closes the key universe: ids from the
+state-readable spine; posting keys from admitted schemas/bodies; Binding keys
+and nonce lanes from accepted Records/intents. Include immutable state, caches
+that affect future calls, nonces, retained evidence, lifecycle, dead postings,
+counts, RAW_AUDIT history, F4 coverage, receipt/admission/code bases. Exclude
+physical slots/packing, gas warmness/payment, balances/account nonces, tx hashes,
+logs, bookmarks/caches, compiler metadata, memory, and code bytes except recorded
+codehashes. A revert is byte-identical pre/post. `getEnvelopeBytes` contributes
+the canonical unsigned header+RecordId vector; receipts/batches, not replay of a
+discarded signature witness, ground historical validation.
+
 ### 3.3 Realm gas profiles
 
 ```text
 RealmProfile {
   realmProfileId    string
   txGasCap          uint64      -- per-tx ceiling the harness enforces
+  initConfigBytes   bytes       -- exact six-field InitConfig/1 ABI tuple
   calldataFloor7623 bool
   eip170CodeLimit   uint32 = 24,576
   p256Precompile    bool        -- EIP-7951 availability (Lane 3 kind 3 gate)
@@ -958,6 +1185,12 @@ RealmProfile {
 
 Rules [PROPOSAL]:
 
+0. Every profile uses B0 protocol 0.0 and encodes
+   `abi.encode(uint16(1),uint8 finalityRuleKind,uint32 finalityParam,uint8
+   upgradeAuthorityKind,uint64 declaredTxGasLimit,bytes32
+   initialPolicyCommitment)`. `declaredTxGasLimit=txGasCap`; the policy
+   commitment is corpus-pinned/nonzero; initialization and `genesisFacts()`
+   must round-trip the bytes/hash and revision-1 policy exactly.
 1. `MUST_FIT_ATOMIC`: one semantic unit executes in one EVM call under the
    selected Realm cap. `overCap=true` is a failing hard-gate observation,
    `splitFactor=1`, and the harness never retries pieces.
@@ -1114,14 +1347,12 @@ physical posting budget directly and wires GV-14/SR-18c to M-CONF + M-SEL.
 
 ## 5. The fixture-freeze rule
 
-**FR-1 (corpus identity).** The corpus = `corpusDomainManifestBytes` from
-`b0-encoding-and-ids.md` §1.6 + fixture definitions + fixture-pack
-TypeSchema blobs + scripts + CV suite + WL scripts + knob value sets + Realm
-profiles + `CORPUS_SEED` + vector files, canonically serialized;
-`DOM_FIXTURE_CORPUS = keccak256("efs2/fixture-corpus/1")` and
-`corpusVersion = keccak256(abi.encode(DOM_FIXTURE_CORPUS,
-keccak256(canonicalCorpusBytes)))` [PROPOSAL — exact SR-1 discipline for a
-non-protocol artifact].
+**FR-1 (corpus identity).** The corpus is exactly §1.4's seven-directory tree,
+restricted-JCS manifest, domain-manifest bytes, result registry, profiles,
+scripts/toolchain, fixtures, and vectors. `canonicalCorpusBytes` and
+`corpusVersion` use §1.4's byte-exact formula. Unknown paths, symlinks,
+noncanonical JSON, or registry-hash mismatch reject. [PROPOSAL — exact SR-1
+discipline for a non-protocol artifact].
 
 **FR-2 (freeze point).** The corpus is frozen — corpusVersion computed and
 recorded — BEFORE the first Stage B measurement of ANY bakeoff cell. All 9
@@ -1174,7 +1405,8 @@ The compact contract other chapters and Stage B rely on:
   CV-WITHDRAW / CV-SPARSE-ADMIT / CV-PREWITHDRAW / CV-DIGEST-LOOKUP /
   CV-LAST-LIVE-COUNT / CV-SCHEMA-CAP / CV-RECON runs once per cell.
 - **MeasurementRow** (§3.2): the one table shape for every cell × fixture ×
-  workload, including canonical result schema/digest, typed error,
+  workload, including the binary result-registry/outcome encoding and logical
+  state projection/digest, typed error,
   cross-implementation equality, Realm/basis/high-water/coverage, exact N/A
   sentinels, Core-call count, and F1 aggregator overhead; metric definitions
   §3.1; the mandatory read matrix (every named chapter read, cold+warm).
@@ -1192,8 +1424,8 @@ The compact contract other chapters and Stage B rely on:
   ≠ protocol-freeze.
 - **Obligations on other lanes:** all consumed SR-1..SR-18 owning-chapter
   repairs and retired-form residue checks verify before golden-vector
-  emission; Lane 8 O2 (role target-set grammar) answered before fixture-pack schemas
-  finalize; measured rows replace the chapters' schedule-arithmetic
+  emission; the closed ReferenceRole/content-profile boundary is reflected in
+  fixture schemas before vector minting; measured rows replace the chapters' schedule-arithmetic
   [HYPOTHESIS] tables (Lane 2 §2.5, Lane 4 §5.6, Lane 5 §5.3/§9, Lane 6 §3.6,
   Lane 7 §9, Lane 8 §8.4).
 
@@ -1201,9 +1433,10 @@ The compact contract other chapters and Stage B rely on:
 
 1. **FX-EAP durable brief** — PM-directed provisional status; Codex's brief
    closes it (FR-6 bump). Excluded from adopt/kill citations meanwhile.
-2. **Fixture-pack role grammar** — small closed target sets (`{ChunkTree/1,
-   ArtifactClosure/1}`) vs ANY+read-side checks awaits Lane 1/Lane 8 O2; corpus
-   currently uses ANY (weaker admission checks, stated).
+2. ~~**Fixture-pack role grammar.**~~ **CLOSED:** ReferenceRole selectors are
+   DIRECT or ARRAY_STRUCT_MEMBER with one bounded member index; the
+   `ArtifactClosure/1.members[*].content` role uses the latter. Shape/content
+   conformance remains profile policy, not a new Core target-set callback.
 3. **RP-L2/RP-L3 default caps** — [HYPOTHESIS] placeholders until a venue
    profile is adopted (V2-E5 descriptor carries the real cap; Lane 4 §2.1 B).
 4. **WL-CHURN scaling rule** — the 100k-op cap + flatness-gated extrapolation is

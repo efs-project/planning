@@ -46,9 +46,9 @@ produce.
 - **State-machine categories** (GV-9/10/12/17/18): SOL runs the real state
   machine; TS/RS implement the deterministic fold over the Realm's **total
   event order** (admissions ⊎ intent applications, `b0-realm-admission` §5.4 /
-  W-6) as pure functions and must reproduce SOL's end state. Equality is
-  checked via a canonical **state digest** (definition = the state-digest open item)
-  plus spot read-back through the §0.2 rule.
+  W-6) as pure functions and must reproduce SOL's end state. Equality uses the
+  exact logical projection and digest in `harness-and-fixtures` §3.2a plus
+  public spot read-back through §0.2.
 
 ### 0.2 Cross-cutting rule: every write pairs with a read-back
 
@@ -73,28 +73,30 @@ includes at least one member where collapsing the axes would flip the
 assertion (e.g. FOUND-at-stale-basis vs FOUND-current; UNKNOWN-basis vs
 ABSENT).
 
-### 0.4 Vector-record container (shape only; harness lane finalizes)
+### 0.4 Frozen vector-record container
 
-[PROPOSAL — dependsOn the fixture/measurement-harness chapter, which owns the
-frozen file format] One vector = one record:
+[PROPOSAL — exact Stage B input interface; bytes mint only in Stage B] Every
+`vectors/*.json` uses the restricted-JCS root and sorting rules in
+`harness-and-fixtures` §1.4. One semantic category instantiated in multiple
+cells is multiple records, never one cell-dependent expectation:
 
 ```text
 Vector {
-  id            : "GV-<cat>/<seq>"        -- stable, never reused
-  category      : GV identifier (§2)
-  description   : one sentence
-  inputs        : named hex/JSON fields in the owning chapter's encoding
-  expect        : { ok: true, outputs: named hex fields }
-                | { ok: false, error: named error code }
-  readback      : post-state assertions per §0.2 (admission-class only)
-  reconciles    : list of RP-* ids (§1) this vector's bytes depend on
-  requiresPins  : list of SR-* ids (§1) whose owning-chapter repair must be
-                  VERIFIED before this vector may mint
-  atomicityClass: MUST_FIT_ATOMIC | SPLITTABLE_THROUGHPUT | N/A
-  impls         : subset of {SOL, TS, RS} when a tier is out of scope
-                  (e.g. SDK-only STRUCT-FULL members exclude SOL)
+  atomicityClass; category; cellId; description; id; impls;
+  reconciles; requiresPins; setupId; stateDigest; Step[] steps; tier
 }
+Step { actor; args; expect; opName }
+Success { bytes; kind="success"; resultSchemaId }
+Failure { arguments; code; kind="error"; namespace; resultSchemaId }
 ```
+
+The file root is exactly `{format,resultRegistryHash,setups,vectors}` with
+format `efs2-stage-b-vectors/1`; Setup/Vector sorting, enums, hex/decimal rules,
+write→read sequencing, and null-state rules are §1.4. `opName` resolves exactly
+once through the binary result registry in harness §3.2. Errors compare the
+namespace/code/arguments tuple and the actual selector+arguments revert bytes.
+State-machine expectations use harness §3.2a; no storage-dump or event-log hash
+is permitted.
 
 ### 0.5 Tier notation
 
@@ -243,13 +245,14 @@ member level (Stage B may add members, never remove).
   mutual pair via `GROUP_REF`; R3 malformations (`GROUP_REF(own index)`,
   `GROUP_REF(k ≥ memberCount)`, group-of-1 using `GROUP_REF`) →
   `ERR_SCHEMA_MALFORMED`; unknown `metaCodecVersion` → deterministic reject;
-  role/field binding violations (unbound REF field, doubly-bound role, direct
-  or optional OCCREF with non-OCCURRENCE class, and any unsupported role-bound
-  `OPTION(inner)`); valid direct `OCCREF` and `OPTION(OCCREF)` only under
-  OCCURRENCE, with schema-time REF-budget contribution one apiece; IndexSpec
-  eligibility violations
-  (redundant BACKLINK → `ERR_SPEC_REDUNDANT`, disabled COMPOUND →
-  `ERR_COMPOUND_DISABLED`, indexes §4.1); the four §6 evolution Records
+  role/field binding violations (unbound REF field, doubly-bound role, invalid
+  selector/member combinations, direct or optional OCCREF with non-OCCURRENCE
+  class, and unsupported role-bound `OPTION(inner)`); valid DIRECT OCCREF and
+  `OPTION(OCCREF)`, valid `ARRAY_STRUCT_MEMBER` extraction for
+  `ArtifactClosure/1.members[*].content`, a 17-reference budget rejection, and
+  `ERR_ROLE_SELECTOR` for unknown selectors; exact two-byte IndexSpec
+  eligibility/target violations for SCALAR_EQ, REF_BACKLINK, and DIGEST_EQ;
+  the four §6 evolution Records
   (`TypeSuccessor/1`, `TypeEquivalence/1` incl. the `a < b` canonical-order
   conformance member, `TypeFamilyGenesis/1`, `TypeFamilyMembership/1`)
   round-tripped; assertion that admitting evolution evidence changes **no**
@@ -585,12 +588,14 @@ member level (Stage B may add members, never remove).
   authority-callback abuse and beneficiary self-authorization are structurally
   impossible. [Anchors SURVIVORS finding 5 (R-L1/R-L3 vector demand, closed
   here); candidate falsifier 8.]
-- **Shape:** input = `ResolutionPlan/1` packed frames (lens §3.2) + head-state
+- **Shape:** input = `ResolutionPlan/1` canonical bodies
+  `u16(frameLen)||frame` (lens §3.2; parser starts at offset 2) + head-state
   fixtures at a pinned basis; output = `ResolveResult` (presence, reasonCode,
   value, winner, counts, BasisReport) or validation `rejectCode`.
 - **Impl:** SOL (`resolve`/`validatePlan`), TS, RS (pure fold over the same
   head fixture).
-- **Pass:** byte-identical plan frames and PlanIds; identical ResolveResults
+- **Pass:** byte-identical canonical bodies and PlanIds (including N=64's
+  4,194-byte body); identical ResolveResults
   on every member; identical rejectCodes; resolution gas independent of any
   principal's account code (no external calls on the read path — measured
   invariance member).
@@ -659,6 +664,13 @@ member level (Stage B may add members, never remove).
   consume `selectBestLocator` from cursor 0 to exhaustion — every physical
   posting and boundary probe appears in `postingsVisited`, each nonterminal
   page is `PARTIAL + nextCursor`, and per-call work remains bounded;
+  **selector sentinel:** no live winner returns `(0,0)` while a real candidate
+  with score zero wins with its nonzero ordinal; combining windows uses the
+  explicit winner-present bit, never score zero as absence;
+  **F4 coverage:** declaration, one-pending rejection, CAS mismatch,
+  16-ordinal scan bound, revision-invalidated cursor, historical/live merge,
+  COMPLETE transition and retirement all match `b0-indexes` §10's exact
+  `F4CoverageState`/`F4PageResult`; PARTIAL never proves absence;
   **digest false-empty:** publish a digest-bearing Record with the shared u16
   `algCode`, retrieve it with the same u16 key, and require legacy u8/u32
   encodings to reject/return UNSUPPORTED rather than `COMPLETE`-empty;
@@ -718,19 +730,27 @@ member level (Stage B may add members, never remove).
   ```
 - **Impl:** SOL (`ChunkTreeVerify` and `B0_SELECT` only), TS, RS; the deferred
   rich profile has no SOL implementation.
-- **Pass:** identical proof booleans and B0 window winners; every MUST-FAIL
-  proof rejected; `SELECT_PROFILE_V2`, if included, is compared only between
+- **Pass:** identical proof booleans and B0 window winners; every Core
+  structural error rejects at admission, while every content-only failure is
+  admitted as immutable evidence but returns the exact bounded
+  `PROFILE_MALFORMED(reason)`/ineligible result; `SELECT_PROFILE_V2`, if included, is compared only between
   TS/RS under one explicit profile, Plan, and basis.
-- **Members:** digest table round-trips + multihash/ni: projections +
-  wrong-length + reserved-tag `0x04` rejection; ChunkTree n ∈ {1, 2, 3, 5,
+- **Members:** digest table round-trips + multihash/ni: projections; globally
+  unknown digest code or wrong digest length is Core structural rejection,
+  while a globally known algorithm outside the content profile is admitted
+  then `PROFILE_MALFORMED(ALGORITHM_NOT_IN_CONTENT_V1)`; ChunkTree n ∈ {1, 2, 3, 5,
   256} (promotion cases), last-chunk-short, `chunkCount ≠
-  ceil(totalSize/chunkSize)` rejected, tampered chunk, wrong-index proof,
+  ceil(totalSize/chunkSize)` is admitted then
+  `PROFILE_MALFORMED(CHUNK_ARITHMETIC)`, tampered chunk, wrong-index proof,
   padded proof (trailing-hash rejection), truncated proof, chunk-as-node /
   node-as-chunk cross-role preimages fail (LEAF/NODE domain tags); same bytes
   at two chunk sizes ⇒ distinct RecordIds (documented non-convergence);
-  closure: unsorted / duplicate-name / `/` / `.` / `..` / 256-byte name
-  rejected, kind-target mismatch, `member.size` mismatch → `CLOSURE_MALFORMED`
-  at walk (write-side convenience gets a read-side check — §0.2 rule),
+  closure: the ReferenceRole extractor walks
+  `members[*].content` through ARRAY_STRUCT_MEMBER within the 16-ref bound;
+  a 256-byte name exceeds the declared field bound and Core-rejects, while
+  unsorted/duplicate/`/`/`.`/`..`, kind-target mismatch, or member-size
+  mismatch remains admitted evidence but yields `PROFILE_MALFORMED` at bounded
+  conformance/walk (write-side convenience gets a read-side check — §0.2),
   nested dedup, walk-depth PARTIAL; name-not-in-closure = the ONLY provable
   absence this layer grounds; **B0_SELECT:** declared-score/latest members,
   total-posting visit accounting, dead-spray `PARTIAL + cursor`, claimed-time
@@ -748,23 +768,33 @@ member level (Stage B may add members, never remove).
   deployment/profile-confusion attack is detected by the C-checks; a second
   implementation rebuilds everything from state alone. [Anchors V2-E5 (PM
   in-scope); candidate falsifiers 2 and 10; SPINE lane finding 2.]
-- **Shape:** input = `RealmDescriptor/1` + live/forged Realm state; output =
-  C-1..C-7 verdicts, recomputed ids, and the W-0..W-10 walk result.
+- **Shape:** input = `RealmDescriptor/1`, the exact six-field fixed-width
+  `InitConfig/1`, and live/forged Realm state; output = C-1..C-7 verdicts,
+  full `GenesisFactsView`, recomputed ids, and W-0..W-10.
 - **Impl:** TS + RS authoritative (two independent client reconstructions —
   this category IS the independent-rebuild acceptance trace); SOL supplies the
   Realm under test.
 - **Pass:** both clients reach identical verdicts and identical reconstructed
   state digests; every A-* attack member is detected by its named C-check;
   the walk needs **zero** event logs (harness runs with logs disabled).
-- **Members:** RealmId / profileId / genesisCommitment / RealmRevisionId
-  recomputation vectors; A-1 wrong-chain (C-1); A-2 lookalike Core with
+- **Members:** B0 protocol 0.0; `InitConfig/1 = abi.encode(uint16(1),
+  uint8 finalityRuleKind,uint32 finalityParam,uint8 upgradeAuthorityKind,
+  uint64 declaredTxGasLimit,bytes32 initialPolicyCommitment)` and
+  `initConfigHash=keccak256(initConfigBytes)`; unknown/noncanonical kind,
+  finalityParam, gas-floor, and zero-policy rejection; revision 1 uses the
+  initial policy exactly. Full `genesisFacts()` re-encodes every preimage and
+  recomputes profileId/genesisCommitment/RealmId. RealmRevisionId vectors;
+  A-1 wrong-chain (C-1); A-2 lookalike Core with
   divergent canonicalization — caught by C-6's recompute-one-envelope
   semantic spot-check; A-3 profile spoof → `UNSUPPORTED_PROFILE`, client MUST
   NOT best-effort-decode (C-4); A-4 descriptor substitution (C-2/C-3); A-5
   lying endpoint → C-7 disclosure conformance ("single-endpoint, unproven"
   labeling — the stale/omitting-RPC attack's honest floor); A-6 upgrade
   smuggling → C-5 revision-history check; W-0..W-10 full walk incl. W-8/W-9
-  index+binding fold replay (pure function of the total event order);
+  index+binding fold replay (pure function of the total event order), including
+  canonical **unsigned** envelope bytes plus ordered RecordIds; receipts and
+  admission batches ground historical acceptance, and the walk never claims to
+  recover or replay a discarded main witness;
   `UNAVAILABLE_SOURCE_BASIS` wording assertions H-1..H-5 (never absence,
   never silent fallthrough, never promoted local copy); section-C hints
   never enter any preimage (tamper member: altered rpcUrls change nothing).
@@ -782,9 +812,11 @@ member level (Stage B may add members, never remove).
   history entries, typed errors, absence verdicts.
 - **Impl:** SOL authoritative; TS/RS fold-replay over the total event order.
 - **Pass:** transition table exact; revisions and ordinals strictly increase;
-  an occurrence produces at most one head state ever; `readHistory` pages
-  reconstruct the full chain; the four-source absence rules hold at the SDK
-  tier.
+  an occurrence produces at most one head state ever; `readHistory` is a
+  RAW_AUDIT family whose physical revisions and `count==liveCount` survive
+  withdrawal/compaction forever, while each hydrated entry exposes current
+  `occurrenceStatus` and `revokedAtOrdinal`; the four-source absence rules hold
+  at the SDK tier.
 - **Members:** T1–T9 each; CAS race — two writers, same predecessor: one
   admits, the other's whole envelope reverts `ErrCasPredecessor` with the
   actual head occurrence + revision in revert data (re-read without extra
@@ -802,7 +834,10 @@ member level (Stage B may add members, never remove).
   cross-list); challenge-window re-check = one SLOAD on `revision`
   (cost-shape member). All transitions use the single SR-12 `publish` surface,
   SR-3's exact per-selected-Binding `expectedRevisions[]`, and the shared
-  SR-10 lifecycle overlay. `reconciles: RP-3,6,8,9,10,11,12,13,15`;
+  SR-10 lifecycle overlay. Admission alone decodes/authenticates pre-withdrawal
+  evidence and passes `ValidatedWithdrawalTarget` to Binding; no proof bytes,
+  witness decoder, or repeat author check crosses that seam. `reconciles:
+  RP-3,6,8,9,10,11,12,13,15`;
   `requiresPins: SR-3, SR-6, SR-8, SR-9, SR-10, SR-11, SR-12, SR-13,
   SR-15`.
 
@@ -967,6 +1002,10 @@ The compact contract other chapters (and the Stage B harness) rely on:
 - **Cross-cutting rules** every vector obeys: three-implementation agreement
   with typed-error equality (§0.1); write-pairs-with-read-back (§0.2);
   two-axis never-collapse (§0.3); tier notation CORE/SDK/FIXTURE (§0.5).
+- **Frozen artifact interface:** §0.4 + harness §§1.4/3.2/3.2a define the
+  restricted-JCS vector container, binary result registry/outcomes, and
+  logical-state digest. Stage B fills concrete bytes; it does not choose a
+  serialization.
 - **Reconciliation preconditions** `RP-1..RP-18` and winning pins
   `SR-1..SR-18` (§1): `reconciles` preserves the historical conflict mapping;
   `requiresPins` gates minting on VERIFIED repairs in every owning chapter and
@@ -976,17 +1015,15 @@ The compact contract other chapters (and the Stage B harness) rely on:
 
 ## Open items
 
-1. **Vector container format** — §0.4 shape is a proposal; the
-   fixture/measurement-harness chapter (PM deliverable 5) freezes it.
-   Closed by: harness lane + synthesizer.
+1. ~~**Vector container format.**~~ **CLOSED as a Stage B interface:** §0.4
+   delegates to the exact restricted-JCS container, binary result registry,
+   canonical outcomes, and sorting rules in harness §§1.4/3.2.
 2. **PID-LOW160 injection harness** — the test-only storage path that injects
    synthetic colliding PrincipalIds must be designed so it cannot exist in
    production builds (compile-time gate). Closed by: harness lane.
-3. **State-digest definition** (§0.1 reference) — the canonical digest of
-   Realm state used for fold-equality and zero-delta revert assertions;
-   candidates: the realm chapter's optional `stateDigest` accumulator
-   [HYPOTHESIS there] or a harness-side storage-dump hash. Closed by: harness
-   lane; must not become a Core obligation silently.
+3. ~~**State-digest definition.**~~ **CLOSED as harness-only:** harness §3.2a
+   fixes the logical projection, component ordering, inclusions/exclusions,
+   schema id, and digest. It is not a Core accumulator or protocol obligation.
 4. **EAP fixture** — provisional per the PM directive; GV members referencing
    it are conditional until the durable brief lands. Closed by: Codex brief.
 5. **R-L1 client-compiler corpus attach point** — cycle/diamond/import

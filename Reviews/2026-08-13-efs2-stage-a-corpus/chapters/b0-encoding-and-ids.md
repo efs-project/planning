@@ -127,6 +127,12 @@ H-DOMTABLE.
 | `DOM_FIXTURE_SEED` | `efs2/fixture-corpus-seed/1` | fixture | harness corpus master seed |
 | `DOM_FIXTURE_CORPUS` | `efs2/fixture-corpus/1` | fixture | harness corpus version hash |
 | `DOM_BAKEOFF_AUTHOR_KEY` | `efs2/bakeoff/author-key/1` | bakeoff | disposable F2 author-key derivation only; never a Core key/id |
+| `DOM_BAKEOFF_F1_CARD` | `efs2/bakeoff/f1-card/1` | bakeoff | F1/X17 PublicationCard identity only |
+| `DOM_BAKEOFF_F3_ENVELOPE` | `efs2/bakeoff/f3-envelope/1` | bakeoff | F3 Realm-bound Envelope identity only |
+| `DOM_BAKEOFF_F4_TYPE` | `efs2/bakeoff/f4-type/1` | bakeoff | F4 TypeId only |
+| `DOM_BAKEOFF_F4_SHAPE` | `efs2/bakeoff/f4-shape/1` | bakeoff | F4 ShapeId only |
+| `DOM_BAKEOFF_F4_INDEX_PROFILE` | `efs2/bakeoff/f4-index-profile/1` | bakeoff | F4 IndexProfileId only |
+| `DOM_BAKEOFF_F4_RECORD` | `efs2/bakeoff/f4-record/1` | bakeoff | F4 RecordId only |
 | `DOM_RESULT_SCHEMA` | `efs2/harness-result-schema/1` | evidence | Stage B harness result-schema artifact id only |
 | `DOM_MEASUREMENT_RESULT` | `efs2/harness-result/1` | evidence | Stage B harness measurement-result digest only |
 
@@ -139,8 +145,11 @@ spellings (never mint; listed so the registry stays auditable): `efs2/bindingkey
 occKey; no separate key domain exists), and `efs2/plan/1` (REJECTED — a
 ResolutionPlan is an ordinary Record and its PlanId alias is that RecordId;
 no parallel plan domain exists). Reserved example, unminted: `efs2/record/2` (§7
-migration illustration only). Bakeoff-arm domains (`*_B`, §3.6) join the `bakeoff`
-class only if the arm is built. Conformance harness case **H-DOMTABLE** [PROPOSAL]:
+migration illustration only). Retired bakeoff spellings (never mint):
+`efs2f1/card/1`, `efs2f3/envelope/1`, and the unregistered symbolic names
+`DOM_TYPE_B`, `DOM_SHAPE_B`, `DOM_IDXPROF_B`, `DOM_RECORD_B`. The exact F1/F3/F4
+rows above are mandatory corpus-interface domains whenever the nine-cell campaign
+is built; all remain non-Core. Conformance harness case **H-DOMTABLE** [PROPOSAL]:
 the harness sweeps every chapter and implementation for `efs2/` strings and diffs
 against this table, checks each use against its declared class/scope, checks that
 only `id`/`key`/`slot`/`tag` rows enter `codexConstantsHash`, and checks that every
@@ -811,20 +820,33 @@ codepoints, NAME_PROFILE — SDK-enforced, vector-pinned). Realm validator modul
 versioned policy ON TOP; their verdict lands in the receipt, never in the RecordId
 [DERIVED INVARIANT — constitution Type-and-admission acceptance trace, VERIFIED].
 
-### 3.6 Variant B (bakeoff cell F4 — sketched interface only)
+### 3.6 Variant B (bakeoff cell F4 — exact disposable interface)
 
 ```
-TypeId         = keccak256(abi.encode(DOM_TYPE_B,    keccak256(semanticBlockBytes)))
-ShapeId        = keccak256(abi.encode(DOM_SHAPE_B,   keccak256(shapeBytes)))          // fields only
-IndexProfileId = keccak256(abi.encode(DOM_IDXPROF_B, typeId, shapeId, keccak256(indexSpecBytes)))
-RecordId_B     = keccak256(abi.encode(DOM_RECORD_B,  typeId, shapeId, keccak256(canonicalBody)))
+TypeId = keccak256(abi.encode(
+  DOM_BAKEOFF_F4_TYPE, keccak256(semanticBlockBytes)))
+ShapeId = keccak256(abi.encode(
+  DOM_BAKEOFF_F4_SHAPE, keccak256(shapeBytes)))
+IndexProfileId = keccak256(abi.encode(
+  DOM_BAKEOFF_F4_INDEX_PROFILE, TypeId, ShapeId,
+  keccak256(indexSpecBytes)))
+RecordId_F4 = keccak256(abi.encode(
+  DOM_BAKEOFF_F4_RECORD, TypeId, ShapeId,
+  keccak256(canonicalBody)))
 ```
 
-Index evolution mints a new IndexProfileId while RecordIds persist; every profile carries an
-explicit start basis, and backfill coverage stays `PARTIAL` until proved complete (candidate
-text, VERIFIED). Bakeoff measures: RecordId stability under index evolution vs coverage
-honesty complexity vs the Variant A portability guarantee. Domains `*_B` join the closed table
-only if the arm is built. [PROPOSAL — arm specification, not adopted.]
+`semanticBlockBytes`, `shapeBytes`, and `indexSpecBytes` are exact MC/1-derived
+byte strings. A cell-local variant of the intrinsic TypeSchemaGroup Record carries
+all three through the ordinary `publish` on-ramp; its intrinsic branch derives the
+four ids and atomically materializes the caches. There is no registration
+entrypoint and no admit-then-cache gap. F4 leaf carriage is
+`(TypeId,ShapeId,canonicalBody)` and the Envelope commits `RecordId_F4`.
+
+Changing only `indexSpecBytes` changes `IndexProfileId`, not TypeId, ShapeId, or
+existing RecordIds. Changing shape changes ShapeId and new RecordIds; changing
+semantics changes TypeId and new RecordIds. Exact active/pending profile,
+backfill, coverage, and page-result mechanics are owned by `b0-indexes` §10 and
+`bakeoff-spec` §3.5. [PROPOSAL — exact mandatory cell interface, not adopted.]
 
 ---
 
@@ -1400,8 +1422,8 @@ seam §9 (`IEasProjectionSeam`); axis-8 vectors `T-CONV`/`T-QUAL` pin whichever 
 7. Whether `BYTES_FIXED(n<32) → bytes{n}` is expressible in EAS schema strings (PLAUSIBLE
    only) — V2-E8 adapter work verifies against EAS source.
 8. Axis-8 arm adoption (S-with-qualifier vs pure P) and axis-4 (Variant A vs B) — bakeoff
-   evidence then James; this chapter supplies both arms' exact/sketched interfaces and the
-   pinning vectors.
+   evidence then James; this chapter supplies the exact cell interfaces and the
+   pinning vectors. Exactness makes the comparison executable; it does not adopt an arm.
 9. Whether the closure-manifest profile adopts SSZ merkleization for partial proofs —
    content/fixtures lane closes; only DIGEST + bounded ARRAY seams are consumed from here.
 10. ~~IndexSpec grammar reconciliation~~ — **CLOSED**: the exact grammar is

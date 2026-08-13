@@ -196,12 +196,10 @@ one (TypeSchemaId, canonicalBody). No shared Envelope, no leaves.
   fields 1–6 unchanged (profile, principalId, authorityRef=0, authEpoch=0, pubNonce,
   notAfter — the reserved authority-basis seam §6 is preserved verbatim), field 7
   `recordIds[]` replaced by `typeSchemaId bytes32` + the RecordId of the single body.
-  Wire carries the one body + witness. EIP-712 primary type string changes
-  (`PublicationCard(...)`), domain name `"EFS2-Card"`, structural wrap domain
-  `DOM_F1_CARD = keccak256("efs2f1/card/1")` — F1 domain constants live in an
-  `efs2f1/` namespace so no F1 id can collide with a spine id [PROPOSAL — same discipline as
-  b0-encoding-and-ids.md §7 rule 1].
-- `CardId = keccak256(abi.encode(DOM_F1_CARD, eip712CardDigest))` — the §2.3
+  Wire carries the one body + witness. The exact EIP-712 type/domain/digest is
+  `b0-authorship-envelope.md` §2.4; the wrap word is the registered
+  `DOM_BAKEOFF_F1_CARD = keccak256("efs2/bakeoff/f1-card/1")`.
+- `CardId = keccak256(abi.encode(DOM_BAKEOFF_F1_CARD, eip712CardDigest))` — the §2.3
   single-source-identity rule carried unchanged. `RecordId` formula untouched
   (axis 4 arm A shared).
 - **Occurrence identity adapter (the load-bearing line).** `OccurrenceRef ≡ (CardId,
@@ -213,8 +211,9 @@ one (TypeSchemaId, canonicalBody). No shared Envelope, no leaves.
 - **Axis 3 held at arm P (the P′ re-expression).** The card stays portable — signed
   under the chain-free constant domain with the same §2.4 argument — and admission
   still requires a separate Realm-bound `AdmissionIntent/1` (b0-authorship-envelope.md
-  §5.1) with `envelopeId → cardId` and `leafMask` fixed to 1 (or the field dropped and
-  the type string adjusted; either way one intent admits one card). Intent nonces,
+  §5.1) with `envelopeId=CardId`, `leafMask=1`, and `action=0`. **No field is
+  dropped and no type string is adjusted**: the entire SR-3 intent remains
+  byte-identical. Intent nonces,
   PrincipalId descriptor carriage and verification carry unchanged;
   `admitAsSender` remains legal only for non-Binding cards, while Binding cards
   require the exact SR-3 `expectedRevisions[]`. [PROPOSAL —
@@ -292,13 +291,16 @@ recovered arithmetically from D5 + F1's repetition count (§1.3).
 
 ### 3.4 F3 — REALMBOUND (axis-3 flip)
 
-Per the seam already specified in b0-authorship-envelope.md §2.4 ("Bakeoff seam: cell
-F3"): the same Envelope struct with `realmId bytes32` inserted after `principalId`,
-signed under a **full** EIP-712 domain (name `"EFS2-Envelope-Bound"`, chainId,
-verifyingContract — the §5.1 domain shape), and **no separate AdmissionIntent**.
+Per the exact seam in `b0-authorship-envelope.md` §2.4, F3 signs
+`PublicationEnvelopeBound(...)ExpectedRevision(...)` under the full
+`EFS2-Envelope-Bound` EIP-712 domain and wraps the digest with the registered
+`DOM_BAKEOFF_F3_ENVELOPE = keccak256("efs2/bakeoff/f3-envelope/1")`. The
+exact field order, nested-array hashing, and formulas there are normative for
+the cell. There is **no separate AdmissionIntent**.
 
 **Exact rebuild list:**
-- Signing profile (§2.4) → realm-bound; EnvelopeId wrap domain `"efs2f3/envelope/1"`.
+- Signing profile (§2.4) → realm-bound; exact id is
+  `keccak256(abi.encode(DOM_BAKEOFF_F3_ENVELOPE,eip712F3Digest))`.
 - Admission (§5.3): steps 3–8 replaced — the envelope itself is the Realm consent;
   since the envelope now HAS local effects, it must carry the replay defense the
   intent carried: the 2-D nonce pair (`nonceKey`, `nonceSeq` — §5.2) moves INTO the
@@ -326,12 +328,11 @@ must re-sign per Realm. Both numbers come from the same fixture traces.
 
 ### 3.5 F4 — SPLIT-ID (axis-4 flip; distinct engine)
 
-Per the Variant B sketch in b0-encoding-and-ids.md §3.6, every alternate id
-uses its own hashed cell-local `DOM_*_B` word and fixed-word `abi.encode` under
-SR-1. In particular,
-`RecordId_B = keccak256(abi.encode(DOM_RECORD_B, typeId, shapeId,
-keccak256(canonicalBody)))`; structured inputs enter through exactly one nested
-hash.
+Per the exact Variant B cell interface in `b0-encoding-and-ids.md` §3.6, the
+registered bakeoff domains are `DOM_BAKEOFF_F4_TYPE`,
+`DOM_BAKEOFF_F4_SHAPE`, `DOM_BAKEOFF_F4_INDEX_PROFILE`, and
+`DOM_BAKEOFF_F4_RECORD`. The exact formulas there are normative for the cell;
+structured inputs enter through exactly one nested hash.
 
 **Exact rebuild list (why this is Engine γ, not a branch):**
 - The schema object may separate semantic, shape, and index-profile
@@ -340,20 +341,16 @@ hash.
   registration function or a two-step materialization path.
 - Index population keys postings by `(IndexProfileId, …)` instead of the
   Variant-A `(TypeSchemaId, specOrdinal, …)` of b0-indexes.md §2.1/§4.3.
-- **Coverage state machine (new state, the heart of the arm):** per
-  (IndexProfileId): `DECLARED(startBasis) → BACKFILLING(cursor) → COMPLETE`, all
-  transitions recorded with ordinals. Every page read under a profile not COMPLETE
-  for the queried range returns `PARTIAL` with the profile's `startBasis` and
-  backfill cursor; external Completeness remains exactly
-  `UNKNOWN=0, COMPLETE=1, PARTIAL=2, UNSUPPORTED=3`; b0-indexes.md §5.2 rule 2 (UNSUPPORTED, structural under
-  Variant A) gains start-basis/coverage fields exactly as that chapter's open item 8
-  anticipates.
-- **Backfill entrypoint:** permissionless, bounded batch. EIP-7825 arithmetic
-  [imported from b0-indexes.md §9's per-posting figures, PLAUSIBLE schedule]:
-  typical leaf fan-out 9 postings ≈ 121k gas/record ⇒ ≤ ~138 records per backfill
-  tx; worst-declared fan-out (F_MAX = 44) ≈ 590k/record ⇒ ≤ ~28 per tx. The cap
-  binds; backfill of a large history is a many-transaction campaign, and coverage
-  honesty is what makes that campaign safe to run slowly.
+- **Coverage state machine (new state, the heart of the arm):** the exact
+  active+pending bound, `F4CoverageState`, CAS backfill ABI, fixed
+  `F4_BACKFILL_SCAN_MAX=16`, transition rules, historical/live partitions,
+  coverage-revision cursor binding, and `F4PageResult` are
+  `b0-indexes.md` §10. A second pending profile rejects; one admission writes
+  to at most two profile sets. `PARTIAL` never proves absence.
+- **Backfill unit:** every call is one `SPLITTABLE_THROUGHPUT` campaign unit
+  bounded by 16 admission ordinals; no call mints an admission ordinal. The
+  campaign may span transactions only between successful CAS steps. The fixed
+  cap, not schedule-derived record estimates, is what Stage B executes.
 
 **Shared:** Envelope/admission machinery, Binding, Lens, principal, content types
 (their Type declarations published under the split formulas by the harness).
@@ -398,11 +395,14 @@ spine), `Admission` (verifier + receipts + ordinals; the single write entrypoint
 
 **Exact rebuild list:**
 - The internal-library seams that B0 pins as in-process calls become external
-  interfaces: `LibBinding.applyBind` → `IBinding.applyBind` (b0-binding.md §8),
-  `LibIndex.appendPosting` plus status-aware activation/withdrawal calls that
-  consume the shared SR-10 overlay → `IIndex.*` (b0-indexes.md
-  "Internal seam"), Lens's `recordBody`/`bindingHead` reads (b0-lens.md §5.2) →
-  cross-contract STATICCALLs.
+  interfaces: `LibBinding.applyBind` → `IBinding.applyBind` (b0-binding.md §8);
+  withdrawal passes only Admission's typed `ValidatedWithdrawalTarget`, never
+  evidence bytes or a witness/author verifier; `LibIndex.appendPosting` plus
+  status-aware activation/withdrawal calls consume the shared SR-10 overlay →
+  `IIndex.*` (b0-indexes.md "Internal seam"). `KIND_BINDING_HIST` remains
+  RAW_AUDIT and uses that overlay only for hydrated status/revocation, never
+  filtering or decrement. Lens's `recordBody`/`bindingHead` reads
+  (b0-lens.md §5.2) become cross-contract STATICCALLs.
 - Wiring: immutable addresses fixed at deployment, codehash pinned in the Realm
   descriptor's genesisCommitment (extended to commit all six codehashes —
   b0-realm-admission.md §2.4 gains a module-set hash [PROPOSAL — cell-local]).
@@ -489,7 +489,9 @@ Statistics:
 - `PREMIUM_1` — the k=1 premium ratio `G_B0(1) / G_F1(1)`.
 - `RECON_1` — pass/fail: **both** arms complete the state-only reconstruction walk
   (b0-realm-admission.md §8.1 W-0..W-10; for F1 with the card-spine re-expression of
-  W-3..W-5) with zero recourse to logs. [DERIVED INVARIANT as a hard gate —
+  W-3..W-5) with zero recourse to logs. It reconstructs canonical unsigned
+  carriers and uses receipts/batches for historical admission basis; it never
+  claims to recover or replay a discarded main witness. [DERIVED INVARIANT as a hard gate —
   candidate falsifier 10, VERIFIED: "state-only reconstruction needs old logs" is
   rejection.]
 - `DIST_1` — the corpus's observed batch-size distribution (median and mass below
@@ -757,8 +759,9 @@ Concretely:
   worst-case B0 publish ≈12.9M (b0-realm-admission.md §5.6) / ≈13.1M
   (b0-authorship-envelope.md §2.5) — the two models are reconciled by the
   synthesizer, and the harness replaces both; index-only leaf ceilings ≈25 worst /
-  ≈86 typical per tx (b0-indexes.md §9); F4 backfill ≤ ~138 typical records/tx
-  (§3.5); page maxima §5.3 of b0-indexes.md. Axis 1 executes every frozen
+  ≈86 typical per tx (b0-indexes.md §9); F4 backfill scans the exact maximum
+  16 admission ordinals per CAS step (§3.5); page maxima §5.3 of
+  b0-indexes.md. Axis 1 executes every frozen
   integer `k=1..64`; each exact k reports measured fit or `OVER_CAP` under its
   unchanged `MUST_FIT_ATOMIC` class. Per-Realm caps may differ; every report states the assumed profile
   [DERIVED INVARIANT — venue-conditional physics, CARRY-IN lane, VERIFIED].
@@ -806,10 +809,12 @@ beyond local/test chains, seeds durable data, or becomes a product dependency
 
 ## 8. Reporting format and adoption protocol
 
-Each cell produces one report: {cell id, axis vector, corpus manifest hash,
+Each cell produces one report: {cell id, axis vector, corpusVersion from the
+restricted-JCS manifest and exact domain bytes,
 engine + branch commit, aggregate snapshot per fixture trace, state-growth
 table (slots per trace), `atomicityClass/overCap/splitFactor`, canonical
-`resultSchemaId/resultDigest`, `typedErrorCode`, `crossImplEqual`, exact
+binary-registry `resultSchemaId/resultDigest`, typed outcome namespace/code/
+argument digest, logical `stateDigest`, `crossImplEqual`, exact
 Realm/basis/high-water/coverage metadata, the axis's named statistics (§4),
 declared confounds restated, vector-suite pass/fail lists}. Axis-1 reports the
 complete 64-row B0/F1 table, `coreCallCount`, and `aggregatorGas`; omitting any

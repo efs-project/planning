@@ -14,8 +14,8 @@ PRE_WITHDRAWN), SR-12 (implicit-sender Binding-class restriction), SR-13
 Lane 2 of the Stage A design pass. This chapter makes the B0 "SPINE" arm exact for
 axis 3 (portable authored Envelope + separate Realm-bound AdmissionIntent) and axis 5
 (inline canonical Record leaves), and specifies the authority-witness seam the axis-2
-uniform-PrincipalId arm crosses. Alternatives (Realm-bound envelope F3, RecordId
-leaves F5, tagged author F2) get sketched interfaces only, marked as bakeoff arms.
+uniform-PrincipalId arm crosses. Mandatory F1/F3 bakeoff carriers are exact
+disposable cell interfaces; other alternatives remain labeled bakeoff sketches.
 
 Evidence base read for this chapter (all VERIFIED reads unless marked PLAUSIBLE):
 `Designs/efsv2/core-architecture-candidate.md` (envelope/intent/occurrence sketch,
@@ -324,11 +324,67 @@ design" — audit-lanes.json STANDARDS/EIP-712):
 | resurrection of withdrawn content | per-occurrence `WITHDRAWN` terminal state, incl. pre-withdrawal (§3.3) |
 | equivocation (two conflicting envelopes) | deliberately NOT defended on-chain [OWNER RULING — owner-rulings.md 2026-07-15 item F, lines 51–54: no kernel collision bit, TOCTOU-defeated; contracts use closed author sets or challenge windows]. Challenge-window compatibility preserved; exact collision-state mechanics stay unfrozen per the PM directive. |
 
-Bakeoff seam: cell F3 (Realm-bound envelope) = same struct with `realmId bytes32`
-inserted after `principalId`, signed under the full domain of §5.1, and no separate
-intent. Its comparison vectors are the §12 matrix; its rejection condition is the
-BAKEOFF lane's: if F3 cannot keep copied signed evidence verifiable at a
-destination, it is rejected regardless of gas (candidate lines 155–158).
+**Mandatory bakeoff signing seams (exact, disposable, not B0).** These spellings
+are frozen so Stage B compares semantics rather than inventing them while
+measuring.
+
+F1/X17 uses one chain-free signed card per Record:
+
+```text
+DS_CARD = keccak256(abi.encode(
+  keccak256("EIP712Domain(string name,string version)"),
+  keccak256("EFS2-Card"), keccak256("1")))
+CARD_TYPE =
+  "PublicationCard(uint16 profile,bytes32 principalId,bytes32 authorityRef,uint64 authEpoch,bytes32 pubNonce,uint64 notAfter,bytes32 typeSchemaId,bytes32 recordId)"
+CARD_TYPEHASH = keccak256(ascii(CARD_TYPE))
+cardStructHash = keccak256(abi.encode(
+  CARD_TYPEHASH, profile, principalId, authorityRef, authEpoch, pubNonce,
+  notAfter, typeSchemaId, recordId))
+eip712CardDigest = keccak256(0x1901 || DS_CARD || cardStructHash)
+CardId = keccak256(abi.encode(DOM_BAKEOFF_F1_CARD, eip712CardDigest))
+OccurrenceRef_F1 = (CardId, uint16(0))
+```
+
+The unsigned wire carries exactly one canonical body plus one witness and checks
+`recordIdOf(typeSchemaId,body)==recordId`. F1 retains the **byte-exact SR-3
+AdmissionIntent**: `intent.envelopeId=CardId`, `leafMask=1`, `action=0`, and
+`expectedRevisions=[]` except for the one `(leafIndex=0,revision)` entry on a
+Binding card. No intent field or type string changes.
+
+F3 removes AdmissionIntent and signs this exact Realm-bound carrier:
+
+```text
+ExpectedRevision(uint16 leafIndex,uint32 revision)
+PublicationEnvelopeBound(uint16 profile,bytes32 principalId,bytes32 realmId,bytes32 authorityRef,uint64 authEpoch,bytes32 pubNonce,uint64 notAfter,bytes32[] recordIds,uint64 leafMask,uint8 action,ExpectedRevision[] expectedRevisions,uint192 nonceKey,uint64 nonceSeq,uint64 admissionNotAfter)ExpectedRevision(uint16 leafIndex,uint32 revision)
+
+DS_F3 = keccak256(abi.encode(
+  keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+  keccak256("EFS2-Envelope-Bound"), keccak256("1"), chainId,
+  verifyingContract))
+EXPECTED_REVISION_TYPEHASH = keccak256(
+  "ExpectedRevision(uint16 leafIndex,uint32 revision)")
+expectedRevisionsHash = keccak256(concat(
+  keccak256(abi.encode(EXPECTED_REVISION_TYPEHASH,item.leafIndex,item.revision))
+  for item in array order))
+recordIdsHash = keccak256(abi.encodePacked(recordIds))
+F3_TYPEHASH = keccak256(
+  "PublicationEnvelopeBound(uint16 profile,bytes32 principalId,bytes32 realmId,bytes32 authorityRef,uint64 authEpoch,bytes32 pubNonce,uint64 notAfter,bytes32[] recordIds,uint64 leafMask,uint8 action,ExpectedRevision[] expectedRevisions,uint192 nonceKey,uint64 nonceSeq,uint64 admissionNotAfter)ExpectedRevision(uint16 leafIndex,uint32 revision)")
+f3StructHash = keccak256(abi.encode(
+  F3_TYPEHASH, profile, principalId, realmId, authorityRef, authEpoch,
+  pubNonce, notAfter, recordIdsHash, leafMask, action,
+  expectedRevisionsHash, nonceKey, nonceSeq, admissionNotAfter))
+eip712F3Digest = keccak256(0x1901 || DS_F3 || f3StructHash)
+F3EnvelopeId = keccak256(abi.encode(
+  DOM_BAKEOFF_F3_ENVELOPE, eip712F3Digest))
+```
+
+`realmId` equals the admitting Realm; `leafMask` is nonzero/in-range;
+`action=0`; expected revisions are ordered and cover exactly the selected
+Binding leaves; the nonce lane and both expiries retain their SR-3/B0 meanings.
+F3 has no AdmissionIntent, IntentId, intent witness, or consumed-intent object.
+Changing mask, nonce, revision, Realm, or admission expiry changes the F3 id.
+Its rejection condition remains: if copied signed evidence cannot stay
+verifiable at a destination, reject F3 regardless of gas.
 
 ### 2.5 Size bounds — named constants with EIP-7825 arithmetic
 

@@ -229,7 +229,10 @@ target Envelope header is not already in state requires bounded
 `TargetEnvelopeEvidence` (signed header fields, full RecordId vector, typed
 Principal descriptor, and witness; no bodies). Admission recomputes
 `EnvelopeId`, checks the target range and descriptor equality, verifies the
-target witness, verifies the author match, and sets `PRE_WITHDRAWN`. The
+target witness and author match, constructs typed
+`ValidatedWithdrawalTarget`, and passes only that context to Binding; proof
+bytes and witness/author validation never cross that seam. It then sets
+`PRE_WITHDRAWN`. The
 accepting Withdrawal's ordinal durably keys the canonical ABI re-encoding of
 the exact evidence used; the target overlay's `revokedAtOrdinal` points back
 to it. This bounded state read is the W-7/W-9 reconstruction source when no
@@ -237,7 +240,10 @@ target `EnvelopeMeta` exists. A later withdrawal of the same terminal target
 is a no-op and loads that retained evidence when an author check is needed;
 callers neither resupply nor replace it. `WITHDRAWN` and `PRE_WITHDRAWN`
 permanently block (re-)admission of that occKey (no-resurrection, SR-15). The
-one-way ACTIVE status flip drives the exactly-once index decrement.
+one-way ACTIVE status flip drives the exactly-once index decrement, except
+`KIND_BINDING_HIST`: that family is RAW_AUDIT, never decremented,
+liveness-filtered, or compacted; reads hydrate occurrence status and
+`revokedAtOrdinal` separately.
 
 **SR-11 — kernel Type recognition (RP-11).** The closed B0 list of
 **application Types with kernel admission effects** is exactly
@@ -315,6 +321,14 @@ the encoding chapter also gains the `codexConstantsHash` definition and a
 state-readable `codexConstants()` that the realm chapter's `profileId` and
 `genesisCommitment` consume.
 
+Realm bootstrap is byte-exact: B0 is protocol 0.0 and `InitConfig/1` is
+`abi.encode(uint16(1),uint8 finalityRuleKind,uint32 finalityParam,uint8
+upgradeAuthorityKind,uint64 declaredTxGasLimit,bytes32
+initialPolicyCommitment)`, with `initConfigHash=keccak256(initConfigBytes)`.
+Revision 1 uses that initial policy exactly. `genesisFacts()` returns the full
+`GenesisFactsView` needed to re-encode InitConfig and independently recompute
+profileId, genesisCommitment, and RealmId; no hidden config enters identity.
+
 **SR-17 — schema on-ramp.** TypeSchemas enter state **as Records of the
 bootstrap meta-Type through ordinary admission** (the realm chapter's
 reconstruction-walk model wins — one uniform state-readable spine). When
@@ -344,24 +358,28 @@ regenerates). (c) Best-locator selection: the index chapter owns the B0
 on-chain bounded algorithm (single declared score field) **with the
 examination budget bounding TOTAL postings visited, live or dead** (a
 spray of self-revoked postings degrades to honest `PARTIAL` + cursor, never
-an unbounded scan — THE LINE); the content chapter's richer
+an unbounded scan — THE LINE). Selection tracks winner presence separately:
+no winner returns `(ordinal=0,score=0)`, while a real score-zero winner has a
+nonzero ordinal; the content chapter's richer
 CandidateSet/SelectionKey profile is the client-tier `SELECT_PROFILE_V2`,
 explicitly deferred. (d) Unique-Records-by-Type live count decrements only
 when a Record's **last live occurrence** withdraws (per-Record live-occurrence
 fold), so the count means "unique Records with at least one live occurrence."
 (e) Per-leaf total REF-instance bound `REF_INSTANCES_MAX = 16` is a
-structural validation rule in the encoding chapter (ARRAY(REF) role counts
-included), so index fan-out is bounded and backlink completeness holds.
+structural validation rule in the encoding chapter. DIRECT and
+ARRAY_STRUCT_MEMBER ReferenceRole selectors (including
+`ArtifactClosure.members[*].content`) count extracted instances, so index
+fan-out is bounded and backlink completeness holds.
 
 ## 3. The Stage A doc set → PM deliverables
 
 | PM deliverable | Where |
 |---|---|
 | 1 Exact implementable B0 | [[b0-encoding-and-ids]], [[b0-authorship-envelope]], [[b0-principal-authority]], [[b0-realm-admission]], [[b0-indexes]], [[b0-binding]], [[b0-lens]], [[b0-content-locators]] + this overview's SR pins |
-| 2 Smallest semantic model + alternatives | §1 above; per-chapter alternative sketches; [[bakeoff-spec]] cells |
+| 2 Smallest semantic model + alternatives | §1 above; per-chapter alternatives; exact mandatory cell interfaces in [[bakeoff-spec]] |
 | 3 Traceability with labels | [[traceability]] (149 rows) |
 | 4 Controlled bakeoff spec | [[bakeoff-spec]] (9-cell fractional design, declared confounds) |
-| 5 Frozen fixture/harness interfaces | [[harness-and-fixtures]] (10 fixtures, measurement schema; "frozen" = fixed before Stage B measurement, not protocol-frozen) |
+| 5 Frozen fixture/harness interfaces | [[harness-and-fixtures]] (10 fixtures; restricted-JCS manifest/vector container; binary result registry/outcomes; logical state projection; measurement schema; "frozen" = fixed before Stage B measurement, not protocol-frozen) |
 | 6 Golden-vector categories + falsifiers | [[vectors-and-falsifiers]] (GV-1..GV-18 + consolidated falsifier matrix) |
 | 7 Proposed spine edits (no shared-file edits made) | corpus `proposed-spine-edits.md` (16 items, A1–D1) |
 | 8 Durable evidence for journal-only claims | corpus `standards-audit.md`, `carry-in-register.md`, `intake-findings.md`, `redteam-findings.md` |
@@ -386,8 +404,8 @@ pass generates evidence for V2-E1..E5 and the V2-E8 seam, feeding V2-F1.
 2. The revocation-aware-counter tradeoff returns to James only after the one
    aggregate Stage B gas snapshot ([OWNER RULING] — pay for it — stands).
 3. EAP fixture provisional until the Codex durable brief lands.
-4. Axis-4 (Variant A/B) and axis-8 (namespace qualifier) arms: both fully
-   sketched; adoption is bakeoff-evidence-then-James.
+4. Axis-4 (Variant A/B) and axis-8 (namespace qualifier) arms have exact
+   executable cell interfaces; adoption remains bakeoff-evidence-then-James.
 5. Challenge-window mechanics remain deliberately unfrozen ([OWNER RULING]
    item F preserved **in substance** — the realm chapter's "verbatim" claim is
    corrected to "substance-faithful paraphrase"; the ratified sentence itself

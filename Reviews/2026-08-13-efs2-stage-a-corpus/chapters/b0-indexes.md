@@ -5,7 +5,8 @@ Lane 5 of the Stage A pass. This chapter makes the B0 "SPINE" arm's index and
 query surface exact: storage layouts, ordinal width, the IndexSpec grammar, the
 one page-result ABI, revocation-aware counts, digest lookup, author
 enumeration, best-locator selection, spam bounds, and the acceptance rule.
-Alternatives get sketched interfaces only, marked as bakeoff arms. Names follow
+F4's mandatory coverage cell has an exact disposable interface; other
+alternatives remain sketches marked as bakeoff arms. Names follow
 the shared Stage-A skeleton (`TypeSchemaId`, `OccurrenceRef = (EnvelopeId,
 leafIndex uint16)`, `AdmissionOrdinal`, …).
 
@@ -1504,6 +1505,74 @@ range map: write −22.1k/leaf, hydration +~40 probes × 2,100 ≈ +84k/item wor
 Rejected for B0 on read-cost grounds [PROPOSAL — reads dominate over a
 century; the arm is recorded for the harness to confirm the asymmetry].
 
+**Bakeoff arm F4 — exact profile coverage interface (not B0).** F4 permits at
+most one active and one pending IndexProfile per `(TypeId,ShapeId)`. Admission
+writes to the active profile and, while present, the pending profile, bounding
+profile fan-out at two. A second pending declaration rejects.
+
+```solidity
+enum F4ProfileState { UNDECLARED, DECLARED, BACKFILLING, COMPLETE }
+struct F4CoverageState {
+  bytes32 indexProfileId; bytes32 typeId; bytes32 shapeId; uint8 state;
+  uint32 coverageRevision; uint64 declaredAtOrdinal;
+  uint64 historicalEndOrdinal; uint64 backfillNextOrdinal;
+  uint64 backfillThroughOrdinal; uint64 liveFromOrdinal;
+  uint64 backfillStartedAtBasis; uint64 completedAtBasis;
+  uint64 retiredAtBasis;
+}
+function backfillIndexProfile(
+  bytes32 indexProfileId, uint64 expectedNextOrdinal, uint16 maxAdmissions
+) external returns (
+  uint64 nextOrdinal, uint64 throughOrdinal,
+  uint32 coverageRevision, uint8 state
+);
+```
+
+At declaration ordinal `d`: state=`DECLARED`, revision=1,
+`historicalEndOrdinal=d`, `backfillNextOrdinal=1`,
+`backfillThroughOrdinal=0`, `liveFromOrdinal=d+1`, and all transition bases are
+zero. The declaration occurrence belongs to historical scan `[1,d]`; later
+admissions at `>=liveFromOrdinal` enter the pending live partition.
+
+The disposable cap is exactly `F4_BACKFILL_SCAN_MAX=16`. A call requires
+`1<=maxAdmissions<=16` and CAS equality with `backfillNextOrdinal`; otherwise a
+typed error reverts without changing state. The first success changes
+DECLARED→BACKFILLING and records the current admission high-water, then scans
+exactly `[next,min(historicalEnd,next+maxAdmissions-1)]`. Matching occurrences
+append deterministic historical postings. Every successful state-changing call
+increments `coverageRevision` exactly once. Completion occurs when
+`next=historicalEnd+1`: set COMPLETE and `completedAtBasis`, activate the new
+profile, set the prior active profile's `retiredAtBasis`, and clear pending. A
+backfill call mints no admission ordinal. Further calls on COMPLETE reject.
+
+Historical/live partitions remain append-only and ordinal-sorted. A cursor
+commits query key, profile, basis, and `coverageRevision`; revision drift makes
+resume revert and restart at zero. F4 page operations return the ordinary six
+PageResult fields first plus:
+
+```solidity
+struct F4CoverageReport {
+  bytes32 indexProfileId; uint8 state; uint32 coverageRevision;
+  uint64 declaredAtOrdinal; uint64 historicalEndOrdinal;
+  uint64 backfillThroughOrdinal; uint64 liveFromOrdinal;
+  uint64 backfillStartedAtBasis; uint64 completedAtBasis;
+  uint64 retiredAtBasis;
+}
+struct F4PageResult {
+  bytes32 realmBasis; uint64 highWaterOrdinal; uint256 cursor;
+  bytes32[] items; uint32 coverage; Completeness completeness;
+  F4CoverageReport profile;
+}
+```
+
+For requested basis H: UNSUPPORTED before declaration; COMPLETE iff the profile
+is COMPLETE, backfill covers `min(H,historicalEndOrdinal)`, and H is not past
+retirement; otherwise a known profile is PARTIAL. Unknown/malformed profile or
+undeclared shape is UNSUPPORTED. UNKNOWN is only unavailable/unproven external
+basis. Future basis and stale/mismatched cursor revert. PARTIAL never proves
+absence; the report makes `[1,backfillThroughOrdinal]` and the bounded live
+interval explicit. [PROPOSAL — exact cell interface; adoption remains open.]
+
 ---
 
 ## Interfaces exposed
@@ -1594,10 +1663,10 @@ state.
    pinned; whether Lane 8 needs a composite `SELECT_PROFILE_V2` (multi-field,
    third-party availability attestations) is theirs. Closed by: Lane 8
    chapter + synthesizer.
-6. **UNSUPPORTED vs Variant-B coverage.** §5.2 rule 2 is structural under
-   Variant A. If the axis-4 bakeoff selects Variant B (separate IndexProfile),
-   the UNSUPPORTED rule must gain start-basis/coverage fields
-   (`PARTIAL`-until-proven-backfill). Closed by: axis-4 bakeoff outcome.
+6. ~~**UNSUPPORTED vs Variant-B coverage.**~~ **CLOSED as an executable cell
+   interface, not adopted:** §10 freezes F4's active/pending bound, CAS backfill,
+   coverage state, cursor revision, and F4PageResult. Variant A remains B0;
+   axis-4 adoption still requires the measured bakeoff outcome and James.
 7. **Local-ordinal reverse maps.** `typeOrd`/`principalOrd` (§2.2) trade two
    one-time slots per new Type/Principal for a packed hot word; the F7 arm
    deletes them. Closed by: axis-7 bakeoff measurement.
