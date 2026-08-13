@@ -150,8 +150,8 @@ shape:
 
 | Alias | Status | Winning pin | Harness consequence |
 |---|---|---|---|
-| S1 | RESOLVED | SR-12, with SR-13 descriptor carriage | one permissionless `publish(envelopeBytes, AccountPrincipal, intentBytes, intentWitness)`; author consent; implicit sender forbidden for Binding-class leaves |
-| S2 | RESOLVED | SR-3 | exact EIP-712 AdmissionIntent with leafMask, `expectedRevisions[]`, u192/u64 nonce lane, action MBZ=ADMIT |
+| S1 | RESOLVED | SR-12, with SR-13 descriptor carriage | one permissionless `publish(envelopeBytes, AccountPrincipal, intentBytes, intentWitness)`; author consent; implicit sender forbidden when any of the three kernel-effect Types is selected |
+| S2 | RESOLVED | SR-3 | exact EIP-712 AdmissionIntent with leafMask; one ordered `expectedRevisions[]` item per selected BindingSet/Tombstone including ACTIVE duplicates, none for Withdrawal; u192/u64 nonce lane; action MBZ=ADMIT |
 | S3 | RESOLVED | SR-6 under SR-1 | hashed domain words + fixed-word `abi.encode` PositionKey/BindingKey formulas |
 | S4 | RESOLVED | SR-4 | u64 external/reporting ordinals, u48 physical guard |
 | S5 | RESOLVED | SR-5 | 64 leaves; 8,192-byte envelope/body caps; fit remains measured |
@@ -184,6 +184,25 @@ Additional red-team repair gates cover seams the old table missed:
 - Admission alone validates Withdrawal target evidence and passes the exact
   ten-field `ValidatedOccurrenceLifecycleEffect` to both LibIndex and
   LibBinding; no opaque evidence bytes or repeated verifier crosses either seam.
+- `TargetEnvelopeEvidence` carries a fixed
+  `TargetRecordCommitment(typeSchemaId,bodyHash)`, never the target body, and
+  authenticates it by recomputing the signed RecordId with `DOM_RECORD`.
+  Maximal evidence is 7,808 bytes (`32+384+2,080+1,184+4,128`); the aggregate
+  cap is 8,192 and whole-wire cap 16,384. A same-Envelope target derives the
+  pair from its RecordId-matched carried body. Retained reads expose the signed
+  recordId/type/principal but no body, postings, live fold, or Binding head for
+  a never-admitted target.
+
+The corpus ABI shape is exact: `TargetRecordCommitment = (bytes32
+typeSchemaId,bytes32 bodyHash)` and `TargetEnvelopeEvidence = (uint16
+withdrawalLeafIndex,EnvelopeHeader header,bytes32[] recordIds,
+TargetRecordCommitment targetCommitment,AccountPrincipal targetPrincipal,bytes
+witness)`. Any prior LeafBody-bearing evidence encoding is invalid.
+- Non-idempotent admission uses one ascending, bounded point-in-order shadow.
+  A static pass associates revision items, prospective ordinals and all
+  lifecycle/Binding/index effects are journaled sequentially, and every
+  user-controlled error occurs before state. Commit only asserts and replays
+  the frozen before/after journal.
 - Content tests separate structural admission from profile eligibility: URI,
   cross-field/chunk math, sorted/unique members, and kind-target checks may make
   a structurally admitted Record ineligible, but Core does not reject them.
@@ -396,16 +415,38 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   the exact lifecycle context `(target,targetOccKey,targetPrincipalId,
   priorStatus,priorOrdinal,priorRevokedAtOrdinal,evidenceOrdinal,
   targetEffectKind,targetBindingKey,targetIsCurrentBindingHead)`; Index and
-  Binding consume byte-identical copies and never parse evidence.
+  Binding consume byte-identical copies and never parse evidence. A static
+  pass consumes one ordered revision item per selected BindingSet/Tombstone,
+  including ACTIVE duplicates; only fresh sources compare the item against the
+  current point-in-order shadow head, and Withdrawal has no item.
 - **CV-SPARSE-ADMIT** — GV-8/GV-9, SR-10/SR-15: admit leaves `{0,3,7}`, then
   the remainder; verify per-new-occurrence submission-order ordinals,
   reversible hydration, no holes/derived base law, and duplicate no-op.
 - **CV-PREWITHDRAW** — GV-9, SR-9/SR-10/SR-15: authenticated target
-  header+signature with no bodies creates `PRE_WITHDRAWN` at target ordinal 0;
-  later admission fails; wrong/forged author reverts with zero delta; repeat
-  succeeds as a no-op using retained evidence. Admission alone validates and
-  constructs `ValidatedOccurrenceLifecycleEffect`; neither downstream owner
-  receives evidence bytes.
+  header/vector + `TargetRecordCommitment(typeSchemaId,bodyHash)` + signature,
+  with no target body, creates `PRE_WITHDRAWN` at target ordinal 0; the
+  `DOM_RECORD` recomputation and both commitment-word flips are checked. Later
+  admission fails; wrong/forged author reverts with zero delta; repeat succeeds
+  using retained evidence. `T4-MAX-BODY` proves an 8,192-byte target body is
+  absent from wire/state: its EOA/65-byte-witness evidence is exactly 800 bytes,
+  and the maximal legal evidence shape is 7,808 bytes under the aggregate cap.
+  Retained reads return recordId/typeSchemaId/principalId but no target body or
+  never-created index/head state. Admission alone constructs the lifecycle
+  context; neither downstream owner receives evidence bytes. A same-Envelope
+  target instead derives the pair from its authenticated header/vector and
+  RecordId-matched carried body and rejects duplicate caller evidence.
+- **CV-SHADOW** — GV-9/GV-10/GV-18, SR-3/SR-10/SR-15: run the four owner-pinned
+  same-call traces. (1) bind→withdraw nets its normal posting/live delta to zero,
+  tombstones the head, and appends both RAW_AUDIT revisions; (2) sequential
+  same-key binds use `(NONE,xr=0)` then `((E,0),xr=1)` and finish revision 2,
+  while stale/reversed CAS has zero state delta; (3) withdraw-before-later-target
+  stages PRE_WITHDRAWN then fails the later source's no-resurrection with nonce,
+  counters, Envelope/evidence/receipt/index/head unchanged; (4) duplicate
+  external prewithdraw consumes one evidence item, reuses its planned retained
+  bytes for the terminal sibling, admits both sources consecutively, and stores
+  exactly one evidence value; a second caller item fails prewrite. Compare the
+  exact final occurrence, Binding, posting-head, Record-live, unique-zero-crossing,
+  and RAW_AUDIT journal outcomes in SOL/TS/RS.
 - **CV-DIGEST-LOOKUP** — GV-14/GV-16, SR-18a/b: publish and query one
   digest-bearing Record with the same u16 `algCode`; legacy u8/u32 encodings
   are typed-unsupported/rejected and can never produce `COMPLETE`-empty.
@@ -423,7 +464,10 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   invariants and implementation/current-authority getters, folds the chained
   AuthorityTransitions into the latest revision, reads canonical unsigned envelopes, and treats
   receipts/batches as historical validation evidence without claiming to
-  recover discarded main witnesses. Any §3.2a state mismatch fails the cell.
+  recover discarded main witnesses. It decodes retained prewithdraw evidence,
+  recomputes the signed target RecordId from TypeSchemaId/bodyHash, and confirms
+  that a never-admitted target has no body/posting/live/head state. Any §3.2a
+  state mismatch fails the cell.
 
 [PROPOSAL — suite composition; each member cites its owning chapter's vector
 category and exists so the fixture scripts stay workload-shaped instead of
@@ -983,6 +1027,7 @@ pagePostingsHydrated, counts, lookupByDigest, getBindingHead, getBindingAtBasis,
 selectBestLocator` (Lane 5); `readHead, readHeadBatch, readHistory,
 readOccurrenceStatus` (Lane 6); `resolve, resolveStrict, validatePlan`
 (Lane 7); `envelopeHeaderOf, envelopeRecordIdsOf, occurrenceStateOf` (Lane 2);
+`preWithdrawalEvidenceAt` with exact TargetRecordCommitment decoding (Lane 2);
 `genesisFacts, implementationAddress, currentUpgradeAuthorityRef,
 revisionCount/revisionAt/currentRevision, authorityTransitionCount/
 authorityTransitionAt` and the remainder of Lane 4 §8.2 (CV-RECON). Every
@@ -1115,6 +1160,17 @@ STRING(255). These changes intentionally move `resultRegistryHash`,
 `corpusVersion`, affected Type/Record IDs, and every dependent expected result;
 their concrete bytes are Stage B outputs, not values guessed in Stage A.
 
+Owner commits `c48f252`/`4983843` further change frozen corpus inputs and
+expected outcomes: publish-wire fixtures encode the fixed
+`TargetRecordCommitment(typeSchemaId,bodyHash)` evidence shape; publish errors
+cover commitment mismatch, exact evidence/revision cardinality, sequential CAS,
+and later-sibling no-resurrection before state; occurrence reads for a retained
+never-admitted target expose recordId/typeSchemaId/principalId but no body; and
+CV-SHADOW final states encode the exact sequential lifecycle/Binding/index
+journal result. These move `resultRegistryHash`, `corpusVersion`, affected
+expected result/state digests, and dependent IDs; concrete bytes remain Stage B
+outputs.
+
 ```text
 successPayload = abi.encode(success outputs...)
 canonicalResultBytes(success) = u8(0)||u32(len(successPayload))||successPayload
@@ -1181,11 +1237,17 @@ digest; 0x05 Records by id with type/shape, canonical body, and first-admission
 metadata; 0x06 **unsigned** persisted envelopes/cards by id plus ordered
 RecordIds; 0x07 admission log/receipts `1..H`, Occurrences by reversible ref,
 and batches in batch order; 0x08 retained pre-withdrawal evidence keyed by
-effective withdrawal ordinal; 0x09 postings keys sorted bytes32 with every
+effective withdrawal ordinal, decoded to the exact signed header/vector,
+TypeSchemaId/bodyHash commitment, descriptor, and witness (never a target
+body); 0x09 postings keys sorted bytes32 with every
 logical ordinal including dead entries, head/counts/liveness/digest state;
 0x0a Binding keys sorted bytes32 with decoded heads plus complete RAW_AUDIT
 revision order and hydrated occurrence status/revoked ordinal; 0x0b F4
 profile/coverage and historical/live partitions (empty elsewhere).
+Transient preflight shadow/journal memory is excluded; its conformance is the
+all-prewrite error result plus the exact final 0x02–0x0a state after mechanical
+commit. A never-admitted prewithdraw target therefore appears in 0x07/0x08 but
+not as a 0x05 body, 0x09 posting/live contribution, or 0x0a head source.
 
 The disposable SOL build exposes only these harness reads:
 

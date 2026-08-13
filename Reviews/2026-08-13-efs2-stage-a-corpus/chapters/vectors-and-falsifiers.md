@@ -400,10 +400,11 @@ member level (Stage B may add members, never remove).
   authorship); first-acceptance-wins + later no-op (T2) leaves identical end
   state whichever rail lands first. A rail that can mint or alter any
   authorship-bearing field fails the category.
-- **Members:** the three-rail triple; for an envelope with no Binding-class
+- **Members:** the three-rail triple; for an envelope with no kernel-effect
   leaf, `admitAsSender` vs explicit-intent equivalence (identical persisted
-  state); negative Binding-class member: empty implicit intent MUST fail
-  because SR-3 `expectedRevisions` are mandatory; msg.sender-as-diagnostic-only
+  state); negative BindingSet/Tombstone and Withdrawal members: empty implicit
+  intent MUST fail; the former also require SR-3 revision carriage while the
+  latter has none; msg.sender-as-diagnostic-only
   assertion (enters no id, no receipt identity, no read path). `reconciles:
   RP-3,12,13,15`; `requiresPins: SR-3, SR-12, SR-13, SR-15`.
 
@@ -453,8 +454,9 @@ member level (Stage B may add members, never remove).
   `E_LEAF_RANGE`; admit-selected-then-admit-remainder later (unselected
   leaves stay UNSEEN, admissible under a fresh intent); **sparse/staged member:**
   from one envelope admit selected leaves `{0,3,7}`, then the remainder; only
-  newly accepted leaves receive ordinals, in accepted-occurrence submission
-  order rather than leaf-index order; `getOccurrence(E,k)` and
+  newly accepted leaves receive prospective ordinals in ascending selected-leaf
+  order, visible to later siblings in the same-call shadow and committed only
+  after full preflight; `getOccurrence(E,k)` and
   `getOccurrenceByOrdinal(o)` are exact inverses; there are no reserved holes
   and no derived base law; retrying either subset is an occurrence-granular
   no-op; envelope-is-not-an-
@@ -480,11 +482,14 @@ member level (Stage B may add members, never remove).
   `ALREADY_ADMITTED` outcome at the realm ABI); duplicate leaves in one
   envelope (same RecordId at two indexes ⇒ two occurrences, distinct
   leafCommits); **authenticated pre-withdrawal:** target header fields + full
-  RecordId vector + typed descriptor + target signature, with no bodies,
-  recompute EnvelopeId, verify the target author equals the withdrawer, write
+  RecordId vector + fixed `TargetRecordCommitment(typeSchemaId,bodyHash)` +
+  typed descriptor + target signature, with no target body; recompute
+  EnvelopeId and `H(DOM_RECORD,typeSchemaId,bodyHash)`, verify the target author
+  equals the withdrawer, write
   target `PRE_WITHDRAWN` with ordinal 0 and retained evidence keyed by the
   accepting Withdrawal's ordinal, then reject later admission with
-  `E_NO_RESURRECTION`; the target gets no admission posting or decrement;
+  `E_NO_RESURRECTION`; the target gets no admission posting or decrement and
+  its point read recovers recordId/typeSchemaId/principalId but no body;
   repeat withdrawal is unconditional no-op success; wrong-author Withdrawal
   reverts the whole envelope with `ErrWithdrawNotAuthor` and zero state delta.
   Exact all-ACTIVE retry returns before expiry/nonce/effect checks; a mixed/new
@@ -493,6 +498,14 @@ member level (Stage B may add members, never remove).
   unique-by-Type `liveCount = 1`; withdraw the last and reach 0; repeat both
   withdrawals with no further count change. `reconciles: RP-3,9,10,13,15,18`;
   `requiresPins: SR-3, SR-9, SR-10, SR-13, SR-15, SR-18d`.
+
+  **T4-MAX-BODY:** a signed but never-admitted target has an 8,192-byte body;
+  prewithdraw it with only `(typeSchemaId,keccak256(body))`. One RecordId + EOA
+  descriptor + 65-byte witness encodes to exactly 800 evidence bytes; neither
+  wire nor retained state carries the body. Flipping either commitment word
+  fails. A maximal evidence item is 7,808 bytes under fixed
+  `32+384+2,080+1,184+4,128` ABI accounting and fits the 8,192-byte aggregate
+  cap independently of target body size.
 
 ### GV-10 Partial-failure atomicity
 
@@ -508,7 +521,9 @@ member level (Stage B may add members, never remove).
 - **Pass:** zero state delta on every MUST-FAIL; nonce lanes unconsumed on
   revert; mandatory-index postings and admission writes are inseparable (an
   accepted occurrence is present in every applicable family in the same call —
-  indexes guarantee list).
+  indexes guarantee list). Every user-controlled failure is discovered in the
+  bounded shadow preflight before real allocation; commit is an assert-only
+  replay of the frozen before/after journal.
 - **Members:** one member per typed revert in the realm §5.5 list
   (`E_STRUCTURAL`, `E_UNKNOWN_TYPE`, `E_AUTHORITY`, `E_REF_UNSATISFIED`
   forward-reference member, `E_CAS_CONFLICT`, `E_BOUNDS`, `E_POLICY`);
@@ -527,6 +542,18 @@ member level (Stage B may add members, never remove).
   (BAKEOFF axis-6 decision rule). Every member is `MUST_FIT_ATOMIC`; no poison
   trace may be split into passing pieces. `reconciles: RP-3,9,10,12,13,15,17`;
   `requiresPins: SR-3, SR-9, SR-10, SR-12, SR-13, SR-15, SR-17`.
+
+  Four mandatory same-call members exercise the point-in-order contract:
+  **SHADOW-1** bind leaf 0 then withdraw it at leaf 1 (one decrement, head
+  tombstoned, RAW_AUDIT keeps both revisions); **SHADOW-2** two same-key binds
+  from UNSET use `(NONE,xr=0)` then `((E,0),xr=1)` and finish at revision 2,
+  while stale/reversed CAS fails prewrite; **SHADOW-3** a Withdrawal before its
+  later target stages PRE_WITHDRAWN, the target hits no-resurrection, and every
+  counter/nonce/header/evidence/receipt/index/head stays unchanged; **SHADOW-4**
+  duplicate external prewithdraw consumes one target-specific evidence item,
+  reuses its planned retained bytes for the terminal sibling, admits both
+  sources with consecutive ordinals, and stores one evidence value (a second
+  caller item is extra and fails prewrite).
 
 ### GV-11 Time/order honesty (R-D9)
 
@@ -814,7 +841,10 @@ member level (Stage B may add members, never remove).
   index+binding fold replay (pure function of the total event order), including
   canonical **unsigned** envelope bytes plus ordered RecordIds; receipts and
   admission batches ground historical acceptance, and the walk never claims to
-  recover or replay a discarded main witness;
+  recover or replay a discarded main witness. Retained prewithdrawal evidence
+  reconstructs its signed target RecordId/type/principal from the fixed
+  TypeSchemaId/bodyHash commitment, while the never-admitted body, postings,
+  Record-live fold, and Binding head remain absent;
   `UNAVAILABLE_SOURCE_BASIS` wording assertions H-1..H-5 (never absence,
   never silent fallthrough, never promoted local copy); section-C hints
   never enter any preimage (tamper member: altered rpcUrls change nothing).
@@ -828,7 +858,8 @@ member level (Stage B may add members, never remove).
   enforced at the resolver boundary. [Anchors constitution honest-mutation
   block; owner ruling item F posture; JR-5 four sources via CARRY-IN.]
 - **Shape:** input = admitted BindingSet/BindingTombstone/Withdrawal leaf
-  sequences + `expectedRevision` intent params; output = head states,
+  sequences + strictly ordered `expectedRevision` items for every selected
+  BindingSet/Tombstone (including ACTIVE duplicates); output = head states,
   history entries, typed errors, absence verdicts.
 - **Impl:** SOL authoritative; TS/RS fold-replay over the total event order.
 - **Pass:** transition table exact; revisions and ordinals strictly increase;
@@ -853,15 +884,19 @@ member level (Stage B may add members, never remove).
   anti-fallthrough — UNKNOWN at a higher tier stops resolution (GV-13
   cross-list); challenge-window re-check = one SLOAD on `revision`
   (cost-shape member). All transitions use the single SR-12 `publish` surface,
-  SR-3's exact per-selected-Binding `expectedRevisions[]`, and the shared
-  SR-10 lifecycle overlay. Admission alone decodes/authenticates pre-withdrawal
+  SR-3's exact per-selected-CAS-bearing-Binding `expectedRevisions[]`,
+  statically associated before the walk and compared by fresh sources against
+  point-in-order shadow heads; Withdrawal has no revision item. Admission alone
+  decodes/authenticates pre-withdrawal
   evidence and passes one byte-identical `ValidatedOccurrenceLifecycleEffect`
   to Index and Binding; its target/occKey/principal/prior status+ordinals/
   evidence ordinal/effect kind/binding key/current-head fields match the owner
   struct, and no proof bytes, witness decoder, or repeat authority/author check
   crosses either seam. BindingSet vectors require exactly one target option
   (neither/both → structural code 17); Tombstone has none; Withdrawal's direct
-  OCCREF body is 34 bytes. `reconciles:
+  OCCREF body is 34 bytes. The four SHADOW fixtures assert sequential Binding,
+  lifecycle, RAW_AUDIT, index/live-count, planned-evidence, and all-prewrite
+  behavior. `reconciles:
   RP-3,6,8,9,10,11,12,13,15`;
   `requiresPins: SR-3, SR-6, SR-8, SR-9, SR-10, SR-11, SR-12, SR-13,
   SR-15`.
@@ -955,7 +990,7 @@ chapters cited.]
 
 ### 3.5 Coverage note
 
-Every kickoff attack, all 14 candidate falsifiers, and all six audit additions
+Every kickoff attack, all 14 candidate falsifiers, and all seven audit additions
 map to at least one detection row above; conversely every GV category serves
 at least one matrix row (GV-4 serves the axis-8 pin; GV-6 serves R-D8, which
 the kickoff omitted and the audit added; GV-11 serves R-D9, ditto). The

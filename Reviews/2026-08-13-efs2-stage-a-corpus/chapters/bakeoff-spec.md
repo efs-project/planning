@@ -165,7 +165,11 @@ corpus + workload scripts (§6). Thus every cell inherits the exact seven-field
 the exact BindingSet/Tombstone/Withdrawal Types and Admission-only
 `ValidatedOccurrenceLifecycleEffect`; the three-field `ResolvedTarget`; and
 ArtifactClosure's STRING(255) member-name shape. Cell deltas may not redefine
-those interfaces.
+those interfaces. Multi-leaf admission also inherits the static
+expected-revision association, ascending point-in-order shadow, fixed
+`TargetRecordCommitment(typeSchemaId,bodyHash)` evidence, and assert-only
+before/after commit journal; a never-admitted target creates no body/index/head
+state.
 
 ### 3.1 B0 — SPINE
 
@@ -220,8 +224,10 @@ one (TypeSchemaId, canonicalBody). No shared Envelope, no leaves.
   dropped and no type string is adjusted**: the entire SR-3 intent remains
   byte-identical. Intent nonces,
   PrincipalId descriptor carriage and verification carry unchanged;
-  `admitAsSender` remains legal only for non-Binding cards, while Binding cards
-  require the exact SR-3 `expectedRevisions[]`. [PROPOSAL —
+  `admitAsSender` remains legal only for cards with no kernel effect;
+  BindingSet/Tombstone cards require the exact one-item SR-3
+  `expectedRevisions[]`, while Withdrawal cards require explicit intent with an
+  empty revision list. [PROPOSAL —
   adopts BAKEOFF finding 2's recommendation: F1 isolates axis 1.]
 - Admission algorithm (§5.3): steps unchanged except the leaf loop degenerates to one
   iteration; the envelope spine mappings (§10) become a card spine
@@ -229,6 +235,12 @@ one (TypeSchemaId, canonicalBody). No shared Envelope, no leaves.
   card; its one newly accepted occurrence receives the next SR-10 ordinal and
   is read through the shared occKey lifecycle overlay. No base/leaf arithmetic
   survives merely because `leafIndex = 0`.
+- The B0 shadow walk degenerates to one leaf per Core call. In an F1 atomic
+  aggregator, later cards see state committed by earlier subcalls and any later
+  failure reverts the outer transaction; F1 must not claim B0's stronger
+  *single-Core-call* all-prewrite property across cards. The SHADOW fixtures run
+  through the aggregator and report this axis-1 boundary explicitly while
+  preserving identical final success/revert state.
 - **Exact axis-1 comparison transaction.** For every frozen integer `k=1..64`,
   `G_B0(k)` is one EVM transaction making one ordinary Core `publish` call with
   one independently signed envelope containing exactly k Record leaves.
@@ -318,7 +330,8 @@ the cell. There is **no separate AdmissionIntent**.
   out of portable bytes (b0-binding.md §3.2 [PROPOSAL there]). F3 has no intent, so
   the entire SR-3 `expectedRevisions[]` commitment — the exact
   `ExpectedRevision(uint16 leafIndex,uint32 revision)` array hash, ordering,
-  cardinality, and selected-Binding coverage rules — moves into the signed
+  cardinality, and selected BindingSet/Tombstone coverage rules—including
+  structural association for ACTIVE duplicates and no item for Withdrawal—moves into the signed
   Realm-bound envelope (legitimate there — the envelope is already Realm-bound).
   This is a real design difference that rides
   the flip; the F3 report must note that CAS ergonomics differ across arms for
@@ -403,10 +416,13 @@ spine), `Admission` (verifier + receipts + ordinals; the single write entrypoint
   interfaces: `LibBinding.applyBind` → `IBinding.applyBind` (b0-binding.md §8);
   withdrawal passes the same exact ten-field
   `ValidatedOccurrenceLifecycleEffect` from Admission to Index and Binding,
-  never evidence bytes or a witness/authority/author verifier;
-  `LibIndex.appendPosting` plus
-  status-aware activation/withdrawal calls consume the shared SR-10 overlay →
-  `IIndex.*` (b0-indexes.md "Internal seam"). `KIND_BINDING_HIST` remains
+  never evidence bytes or a witness/authority/author verifier. Admission first
+  computes the complete point-in-order shadow and exact typed Binding/index
+  before/after journals; module commit calls accept only those frozen operations,
+  assert each prestate, and store the after-state without re-derivation;
+  `LibIndex.appendPosting` plus status-aware activation/withdrawal folds consume
+  the shared SR-10 overlay → `IIndex.*` (b0-indexes.md "Internal seam").
+  `KIND_BINDING_HIST` remains
   RAW_AUDIT and uses that overlay only for hydrated status/revocation, never
   filtering or decrement. Lens's `recordBody`/`bindingHead` reads
   (b0-lens.md §5.2) become cross-contract STATICCALLs.
@@ -719,7 +735,7 @@ adapter where needed (F1/X17 only):
 
 | Subsystem | Source of truth | Per-cell variation |
 |---|---|---|
-| Binding/Withdrawal state machine (T1–T9, exact kernel Type schemas, CAS, no-resurrection, absence predicate, Admission-only lifecycle context) | b0-binding.md §3–§6; b0-authorship-envelope.md §3.2–§3.3 | none except the OccurrenceRef adapter (F1/X17) and `expectedRevision` carriage (F3, §3.4); error 17 and the closed role-class/KIND_DIGEST split are shared |
+| Binding/Withdrawal state machine (T1–T9, exact kernel Type schemas, CAS, no-resurrection, absence predicate, Admission-only lifecycle context, point-in-order shadow + assert-only journal) | b0-binding.md §3–§6; b0-authorship-envelope.md §3.2–§5.3; b0-indexes.md lifecycle seam | none except the OccurrenceRef adapter (F1/X17), F1's one-leaf degeneration/aggregator rollback boundary, and `expectedRevision` carriage (F3, §3.4); error 17, fixed TargetRecordCommitment evidence, and closed role-class/KIND_DIGEST split are shared |
 | LensResolver (`ResolutionPlan/1`, three-field `ResolvedTarget`, combiners, resolve algorithm, risk-bearer ABI) | b0-lens.md §3–§8 | none — plans are Records in every cell; head reads cross a boundary only in F6 |
 | AuthorityVerifier/1 + AccountPrincipal/1 | b0-principal-authority.md §2–§3 | none except F2's AuthorRef entry |
 | Realm descriptor / receipts / reconstruction walk (seven-field InitConfig, authority ref/transitions, EIP-1967 facts) | b0-realm-admission.md §2, §5, §7–§8 | card-spine re-expression of W-3..W-5 in F1/X17; module-set genesis hash in F6; no cell may hide or reinterpret controller state |
@@ -827,7 +843,7 @@ declared confounds restated, vector-suite pass/fail lists}. Axis-1 reports the
 complete 64-row B0/F1 table, `coreCallCount`, and `aggregatorGas`; omitting any
 integer k or selecting points after observing results invalidates the report.
 Every affected report carries the atomic schema-group cap result plus the
-`CV-SPARSE-ADMIT`, `CV-PREWITHDRAW`, `CV-DIGEST-LOOKUP`,
+`CV-SPARSE-ADMIT`, `CV-PREWITHDRAW`/`T4-MAX-BODY`, `CV-SHADOW`, `CV-DIGEST-LOOKUP`,
 `WL-DEAD-LOCATOR`, and `CV-LAST-LIVE-COUNT` outcomes; a cell that cannot
 implement the repaired semantic test is blocked rather than silently omitted.
 The per-axis verdict section applies §4's decision rules and ends

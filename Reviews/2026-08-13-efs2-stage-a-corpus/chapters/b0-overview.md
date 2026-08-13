@@ -106,9 +106,14 @@ new publication event by design.
 expectedRevisions[] of (leafIndex uint16, revision uint32), nonceKey uint192,
 nonceSeq uint64, notAfter uint64 }`, signed under a full Realm-bound EIP-712
 domain (chainId + verifyingContract, realmId in the struct).
-`expectedRevisions` is **required for every Binding-class leaf selected by
-`leafMask`** — the Binding machine bans wildcard/blind realm-local writes; it
-is empty only when no Binding-class leaf is selected.
+`expectedRevisions` is strictly leaf-index ordered and is **required for every
+selected CAS-bearing `BindingSet/1` or `BindingTombstone/1` leaf**, including
+an already-ACTIVE duplicate; `Withdrawal/1` has no entry. A static shape pass
+associates and consumes every item before the ascending effect walk. Only a
+fresh source compares its associated revision and body predecessor against the
+point-in-order shadow head. This bans wildcard/blind realm-local writes without
+letting mixed retries drift the carriage cursor; the array is empty only when
+no CAS-bearing Binding mutation is selected.
 The exact EIP-712 types and array commitment are:
 
 ```text
@@ -225,22 +230,37 @@ assigned **per accepted occurrence in submission order** — the
 `base + k` consecutive-ordinal law is retired because leafMask subset and
 staged admission (SR-3/SR-12) make it unsound. **Pre-withdrawal (T4) is
 preserved and now implementable:** withdrawing a never-admitted occKey whose
-target Envelope header is not already in state requires bounded
-`TargetEnvelopeEvidence` (signed header fields, full RecordId vector, typed
-Principal descriptor, and witness; no bodies). Admission recomputes
-`EnvelopeId`, checks the target range and descriptor equality, verifies the
-target witness and author match, constructs typed
+complete authenticated target bundle is unavailable requires bounded
+`TargetEnvelopeEvidence` (selected Withdrawal leaf, signed header, full
+RecordId vector, fixed `TargetRecordCommitment(typeSchemaId,bodyHash)`, typed
+Principal descriptor, and witness; never the target body). Admission
+recomputes `EnvelopeId`, checks the target range and
+`keccak256(abi.encode(DOM_RECORD,typeSchemaId,bodyHash))` against the signed
+target RecordId, checks descriptor equality, and verifies target witness and
+author before classifying the target effect. It constructs typed
 `ValidatedOccurrenceLifecycleEffect`, and passes that same context to the
 status owner (`LibIndex`) and head owner (`LibBinding`); proof bytes and
 witness/authority/author validation never cross either seam. It then sets
 `PRE_WITHDRAWN`. The
 accepting Withdrawal's ordinal durably keys the canonical ABI re-encoding of
-the exact evidence used; the target overlay's `revokedAtOrdinal` points back
-to it. This bounded state read is the W-7/W-9 reconstruction source when no
-target `EnvelopeMeta` exists. A later withdrawal of the same terminal target
-is a no-op and loads that retained evidence when an author check is needed;
-callers neither resupply nor replace it. `WITHDRAWN` and `PRE_WITHDRAWN`
+the exact bounded evidence; the target overlay's `revokedAtOrdinal` points back
+to it. Retained evidence supplies `recordId`, `typeSchemaId`, and `principalId`
+for W-7/W-9 and occurrence reads but never makes the target body readable. A
+same-Envelope target instead derives the commitment from the authenticated
+header/vector plus its RecordId-matched carried body, with no duplicate caller
+evidence. A later withdrawal of the same terminal target reuses persisted or
+same-call planned evidence; callers neither resupply nor replace it, and
+target-specific evidence never becomes generic staged availability.
+`WITHDRAWN` and `PRE_WITHDRAWN`
 permanently block (re-)admission of that occKey (no-resurrection, SR-15). The
+commitment pair is fixed 64 bytes; maximal legal evidence is exactly 7,808 ABI
+bytes (`32+384+2,080+1,184+4,128`) under the 8,192-byte aggregate and
+16,384-byte whole-wire caps, independent of a legal 8,192-byte target body.
+For NEVER_ADMITTED, authenticated `typeSchemaId` only classifies the closed
+effect kind and rejects a Withdrawal target: Core derives no body semantics,
+Binding key/head transition, posting, Record-live, or unique-by-Type delta.
+The mandatory T4-MAX-BODY vector freezes this boundary.
+The
 one-way ACTIVE status flip drives the exactly-once index decrement, except
 `KIND_BINDING_HIST`: that family is RAW_AUDIT, never decremented,
 liveness-filtered, or compacted; reads hydrate occurrence status and
@@ -276,14 +296,31 @@ anyone may carry a signed envelope, but admission-with-effects requires an
 AdmissionIntent witnessed by the envelope's own Principal — author-only
 consent over a permissionless rail (R-D8-clean). `admitAsSender` implicit
 intent (msg.sender is the Principal's own account) is legal **only when the
-envelope contains no Binding-class leaves**; Binding-class leaves always
-require an explicit intent carrying `expectedRevisions` (SR-3). Uninvited
+selected set contains none of the three kernel-effect Types**. BindingSet and
+BindingTombstone require explicit intent plus `expectedRevisions`; Withdrawal
+requires explicit intent but no revision entry (SR-3). Uninvited
 third-party carriage without an author intent is not local admission; copied
 foreign evidence enters only through the import/Recognition lane as
 source-qualified evidence (`AUTH_FOREIGN_ORIGIN` range), never destination
 truth. `publish` is the sole Core write entrypoint: any schema-registration
 helper is SDK/convenience code that constructs and calls this same entrypoint,
 not a second Core primitive (SR-17).
+
+Every non-idempotent `publish` uses one bounded point-in-order preflight, not
+independent checks against a stale storage snapshot. After authenticating and
+staging the current Envelope header/vector, Admission statically associates
+semantic carriage and walks selected leaves in ascending index order through a
+memory shadow of prospective counters/ordinals, occurrence status, target
+commitments/planned evidence, Type cache, Binding heads/exact sources, posting
+heads/live counts, Record/unique liveness, and an exact leaf journal. A fresh
+source is shadow-activated before its closed `NONE | BIND_SET |
+BIND_TOMBSTONE | WITHDRAWAL` effect; later siblings see the result. Both
+semantic-carriage cursors must exhaust. Only after every fallible
+author/policy/reference/bounds/CAS/lifecycle check succeeds does commit replay
+the frozen before/after journal in the same order, asserting each prestate and
+making no new decision. Therefore every user-controlled failure occurs before
+any real nonce, ordinal, evidence, Envelope, Record, receipt, index, cache, or
+Binding write.
 
 **SR-13 — the authorship identity chain (red-team BLOCKING).** The write path
 carries the `AccountPrincipal` descriptor explicitly:
@@ -320,9 +357,10 @@ For a multi-leaf `publish`, after bounded structural/wire checks and envelope
 identity/authentication, an all-selected-ACTIVE set returns before semantic
 `targetEvidence` cardinality/effect checks, expiries, or intent replay state.
 This makes exact original evidence-bearing retry a true no-op. A mixed/new set
-does not take the shortcut: ACTIVE members no-op, while the call supplies a
-fresh intent and passes the complete semantic evidence/effect preflight for
-every newly accepted member.
+does not take the shortcut: its static pass still consumes revision carriage
+for selected ACTIVE BindingSet/Tombstone members, those members remain
+effect-free, and fresh members use a new intent plus exactly the caller target
+evidence required at their point in the ordered shadow walk.
 
 **SR-16 — RealmRevisionId (the predicted 13th seam).**
 `RealmRevisionId = keccak256(abi.encode(DOM_REALM_REVISION, realmId,
