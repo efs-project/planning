@@ -14,6 +14,9 @@ Realm-bound AdmissionIntent; one atomic physical Core with internal libraries).
 Post-red-team, this chapter is repaired to the overview's SR pins — chiefly
 SR-3 (intent-carried `expectedRevisions`), SR-6 (key domains), SR-8 (2-slot
 head), SR-10 (occurrence-status overlay), and SR-15 (idempotent duplicates).
+The final identity-preserving repair forbids every current-envelope OCCREF;
+same-envelope RecordId references remain legal, and cross-envelope effect chains
+compose through the optional non-Core atomic router.
 
 Evidence base: [[owner-rulings]] 2026-07-15 item F (lines 51–53, read
 verbatim — VERIFIED); [[system-constitution]] "One transaction and honest
@@ -369,11 +372,20 @@ state and would poison portability if signed into the Envelope.
 
 `expectedRevision` is REQUIRED per selected BindingSet/Tombstone leaf (no
 wildcard sentinel). A writer who does not know the starting revision reads it
-first and predicts any earlier same-call mutations in leaf order;
+first. Within one Envelope it also predicts legal earlier effects in leaf order;
+successful same-key chains themselves use separate Envelopes through the router;
 blind writes are exactly the race this machine refuses to paper over.
 [PROPOSAL — races explicit, per system-constitution line 155: "Mutable state
 uses explicit predecessor/CAS rules where races matter." Width is u32 per
 SR-3/SR-8, guarded (§3.3).]
+
+All three kernel bodies are additionally subject to Admission's common
+`E_SELF_ENVELOPE_OCCREF` guard. `targetOccurrence`, `predecessor`, and
+Withdrawal `target` may never name the Envelope that contains their own Record.
+That is an identity constraint, not a Binding-policy choice: EnvelopeId commits
+the RecordId, so embedding that same EnvelopeId in the Record body would require
+a hash fixed point. A same-envelope BindingSet may still target an earlier
+RecordId through `targetRecord OPTION(REF)`.
 
 ### 3.3 Transitions — complete table
 
@@ -413,7 +425,7 @@ occurrence in submission order, SR-10), and fires the Lane 5 hook
 | T8 | WITHDRAW_NONHEAD | any | Withdrawal targeting an occurrence that is not any current head's source | author rule; target ACTIVE | no head transition (overlay only) |
 | T9 | WITHDRAW_TOMBSTONE_HEAD | TOMBSTONED(r) | Withdrawal targeting `src(head)` | author rule; target ACTIVE | TOMBSTONED(r+1, WITHDRAWAL) |
 
-**Same-call shadow fold [PROPOSAL — exact].** For preflight, `head` is not
+**Point-in-order shadow fold [PROPOSAL — exact].** For preflight, `head` is not
 reloaded from storage for every selected leaf. On first touch Admission hydrates
 the persisted head and its reversible source into a bounded memory entry; every
 later selected leaf reads the updated entry. A fresh BindingSet/Tombstone source
@@ -425,19 +437,29 @@ no transition and does not value-check or replay its already-landed CAS.
 
 The transition immediately updates shadow state: revision, head target/state,
 `admissionOrdinal`, exact source `(currentEnvelopeId,leafIndex)`, and one planned
-RAW_AUDIT append. Thus two same-key mutations are sequential, not parallel
-reads of the pre-call head. Example from UNSET:
+RAW_AUDIT append. Later leaves read this updated value rather than a stale
+pre-call head. Because a successful second same-key mutation would need its body
+to name the first source `(currentEnvelopeId,leafIndex)`, §3.2 forbids that chain
+inside one Envelope. The legal sequential form uses independently precomputed
+Envelopes A and B:
 
 ```text
-leaf 0 BindingSet:       P=NONE,  xr=0  -> BOUND rev1, source=(E,0)
-leaf 1 BindingSet same K:P=(E,0), xr=1  -> BOUND rev2, source=(E,1)
+router publish(A): BindingSet P=NONE,  xr=0 -> BOUND rev1, source=(A,0)
+router publish(B): BindingSet P=(A,0), xr=1 -> BOUND rev2, source=(B,0)
 ```
+
+Both calls use explicit AdmissionIntents. In one outer EVM transaction B sees
+A's state, and any later failure rolls both calls back. Two same-key mutations
+placed in one Envelope against the same prior head do not both succeed: the
+second observes the first shadow update and fails CAS before any write.
 
 A Withdrawal receives its `ValidatedOccurrenceLifecycleEffect` from the same
 point-in-order shadow. `targetIsCurrentBindingHead` is exact equality with that
-shadow source. An effective withdrawal of the leaf-0 head above therefore plans
-T7/T9; a second sibling Withdrawal sees the first's tombstoned head/terminal
-target and plans no second target effect. Preflight writes nothing.
+shadow source. A cross-envelope Withdrawal published after A through the atomic
+router therefore plans T7/T9. Two Withdrawal leaves in one Envelope may legally
+name that same prior external source: the first tombstones it and the second sees
+the terminal shadow target and plans no second target effect. Preflight writes
+nothing.
 
 Commit replays the planned transitions in the same ascending leaf order. Each
 plan records its complete before head/source and after head/source. Commit
@@ -640,9 +662,11 @@ another issuer's occurrence and never deletes the Record. [DERIVED INVARIANT
 PRE_WITHDRAWN) [PROPOSAL — SR-10's evidence mechanism; the leaked-envelope
 defense].** A Withdrawal may target an occKey whose overlay status is
 NEVER_ADMITTED — the case of a signed-but-leaked envelope its author wants
-dead before anyone admits it. Because the target envelope has never been
-seen, the author guard cannot be read from state. The **authorship/admission
-owner alone** accepts and validates the exact `TargetEnvelopeEvidence` shape:
+dead before anyone admits it. The target occurrence has no admitted body/receipt;
+an unsigned Envelope spine that happens to exist because another leaf was
+admitted is not enough to authenticate the target commitment or witness. The
+**authorship/admission owner alone** therefore always accepts, retains, and
+validates the exact `TargetEnvelopeEvidence` shape for fresh T4:
 target header, full RecordId vector, the target `(typeSchemaId, bodyHash)`
 commitment pair, typed `AccountPrincipal`, and witness. It recomputes EnvelopeId,
 checks the target leaf range and
@@ -931,7 +955,9 @@ explicit AdmissionIntent; selected BindingSet/Tombstone leaves additionally
 carry `expectedRevisions` (SR-3). `admitAsSender` is legal only when none of
 the three is selected (SR-12). This
 preserves axis 6 (one atomic physical Core; modules as internal libraries)
-and one-call atomicity. The internal transition API and the external read
+and per-call Core atomicity. Cross-envelope sequences use explicit intents and
+the optional non-Core router; sequential calls share one all-or-nothing outer
+EVM transaction. The internal transition API and the external read
 ABI are both normative:
 
 ```solidity
@@ -943,8 +969,9 @@ library LibBinding {
     // targetBindingKey is nonzero only for an ACTIVE kind-1 target whose body
     // produced a Realm head; it is zero for NEVER_ADMITTED prewithdrawal because
     // no body semantics/head delta exists. Head status was computed against
-    // preflight state. evidenceOrdinal is 0 unless Admission retained
-    // or reused authenticated prewithdraw evidence. The status-owner LibIndex
+    // preflight state. evidenceOrdinal equals the effective Withdrawal ordinal
+    // for fresh T4, reuses that retained ordinal for PRE_WITHDRAWN, and is zero
+    // for ACTIVE/WITHDRAWN paths. The status-owner LibIndex
     // consumes the byte-identical struct before Binding applies any head fold.
     struct OccurrenceRef { bytes32 envelopeId; uint16 leafIndex; }
 
@@ -1131,8 +1158,9 @@ The compact contract other chapters rely on:
    (predecessor `OPTION(OCCREF)` in the portable body — explicit NONE for
    first writes, never raw 0) + (required per selected BindingSet/Tombstone
    `expectedRevision uint32` in the Realm-bound AdmissionIntent, SR-3);
-   same-call mutations consume/compare these against point-in-order shadow
-   heads; CAS/authority failures are
+   point-in-order mutations consume/compare these against shadow heads;
+   current-envelope OCCREF is forbidden, so successful sequential same-key
+   mutations use independent Envelopes through the atomic router; CAS/authority failures are
    typed whole-envelope reverts; **duplicates are idempotent no-ops at
    occurrence granularity (SR-15)** — re-admission of ACTIVE returns
    ALREADY_ADMITTED, re-withdrawal of a terminal occKey is a no-op success;
@@ -1147,8 +1175,9 @@ The compact contract other chapters rely on:
    BindingSet/Tombstone leaf; no entry for Withdrawal; implicit sender excluded
    for all three kernel-effect Types per SR-12); the SR-10 overlay guard
    consulted point-in-order before Binding logic;
-   AdmissionOrdinal per accepted occurrence; pre-withdrawal header-evidence
-   verification (§4); `MAX_BIND_LEAVES_PER_ENVELOPE = 64` (SR-5) enforced at
+   AdmissionOrdinal per accepted occurrence; full external pre-withdrawal
+   evidence verification and retention (§4); current-envelope OCCREF rejection;
+   `MAX_BIND_LEAVES_PER_ENVELOPE = 64` (SR-5) enforced at
    admission.
 4. **For Lane 5 (indexes/counts):** same-transaction hooks
    `onBindingHeadChanged(bindingKey, newRevision, newState, cause,

@@ -321,12 +321,10 @@ withdrawOccurrence(validated, withdrawalOrdinal):
 preWithdrawOccurrence(validated, withdrawalOrdinal):
   require validated.priorStatus == NEVER_ADMITTED
   require validated.targetOccKey == occKeyOf(validated.target)
-  require validated.evidenceOrdinal == 0 ||
-          validated.evidenceOrdinal == withdrawalOrdinal
+  require validated.evidenceOrdinal == withdrawalOrdinal
   NEVER_ADMITTED -> PRE_WITHDRAWN
   ordinal = 0; revokedAtOrdinal = withdrawalOrdinal
-  // nonzero means Admission already retained canonical evidence there;
-  // zero means Admission had authenticated header/vector + target commitment
+  // Admission already retained the full bounded external target evidence there
   decrement nothing
 
 withdrawOccurrence(validated terminal target):
@@ -335,14 +333,14 @@ withdrawOccurrence(validated terminal target):
 ```
 
 The shadow entry for an occurrence is loaded from persisted state once; later
-sibling leaves see the prior planned transition. A fresh source is planned
-ACTIVE at its prospective ordinal before its own Withdrawal effect runs. Thus
-bind→withdraw in one Envelope stages ordinary postings/liveCount `+1` then the
-exact withdrawal dedup set `−1` (net zero for that source), while its
-`KIND_BINDING_HIST` audit revisions only append. Withdraw-before-a-later
-selected source stages PRE_WITHDRAWN first; the later activation rejects
-no-resurrection before any SSTORE. Of two sibling Withdrawals, only the first
-effective target fold decrements; the terminal second is a target no-op.
+sibling leaves see the prior planned transition. Current-envelope OCCREF is
+rejected by Admission before this fold, so no selected Withdrawal can target a
+new sibling source. Bind→withdraw-new-head and sequential same-key Binding use
+independent Envelopes through the atomic router; the second Core call sees the
+first call's committed index state, and an outer revert rolls both back. Within
+one Envelope, two Withdrawal leaves may target the same prior external
+occurrence: only the first effective target fold decrements; the terminal second
+is a target no-op.
 
 Every touched `PostingsHead` shadow carries exact
 `count/liveCount/lastOrdinal/flags` and planned packed-lane value, not an
@@ -508,6 +506,8 @@ AdmissionBatchMeta (one packed word), consumed from the admission owner:
 
 batchAuthorityBasis[batchId] = AuthorityBasisWord
 batchCodehash[batchId] = codehashOrZero // stored only for CONTRACT_ERC1271
+batchIntentLane[batchId] = 0 iff implicit, otherwise
+  (uint256(nonceKey) << 64) | uint256(nonceSeq), nonceSeq >= 1
 
 AuthorityBasisWord =
   kind u8 | verifierVersion u16 | witnessProfile u8 |
@@ -608,6 +608,9 @@ sparse envelope leaf through base arithmetic. For `PRE_WITHDRAWN`, only
 retained target evidence supplies `recordId`, `typeSchemaId`, and `principalId`
 from its signed RecordId-matched `(typeSchemaId, bodyHash)` commitment and
 authenticated descriptor. It does not make the never-admitted body readable.
+Every PRE_WITHDRAWN target has this nonempty bounded evidence: Admission forbids
+current-envelope OCCREF and retains the full evidence for every effective
+external T4, so this read has no staged-body or private-index fallback.
 
 ### 3.2 Globally ordered accepted-admission pages
 
@@ -1116,7 +1119,7 @@ Every postings head carries `liveCount` (§2.3):
   `Σ decrements(key) ≤ Σ increments(key)`; a repeated withdrawal of a
   `WITHDRAWN` or `PRE_WITHDRAWN` target is a no-op success before any
   decrement (no double-decrement). Pre-withdrawal of a never-admitted target
-  writes `PRE_WITHDRAWN` plus any required bounded retained target evidence
+  writes `PRE_WITHDRAWN` plus its required bounded retained target evidence
   and decrements nothing.
 
 The clauses above govern occurrence-liveness families. `KIND_BINDING_HIST` is
@@ -1488,6 +1491,9 @@ stable-dedup computation:
 per accepting call with at least one new occurrence:
   AdmissionBatchMeta + AuthorityBasisWord                ≈ 44,200 new-slot floor
   + conditional contract codehash                        ≈ 0 or 22,100
+  + explicit intentNonces lane write                     ≈ 5,000 or 22,100
+  + explicit nonzero batchIntentLane slot                ≈ 22,100
+    (implicit batch word is zero and requires no physical slot)
   + first-touch Envelope/Record/Type/Principal metadata,
     canonical bodies, schema-cache and kernel effects    measured separately
 
@@ -1503,7 +1509,8 @@ contract codehashes. It is not amortized into or projected from EnvelopeMeta.
 `MAX_ENVELOPE_LEAVES = 64` remains the SR-5 structural `leafMask uint64`
 bound, **not a promise that 64 maximal leaves fit one transaction**. No row in
 this chapter claims a 64-leaf fit. The harness must measure the aggregate path
-(bodies, cache/effects, overlay, postings, and full batch receipt metadata)
+(bodies, cache/effects, overlay, postings, nonce-map update, packed batch lane,
+and full batch receipt metadata)
 against the qualifying Realm gas cap and return any lower safe cap to James.
 
 **The ONE aggregate bundle.** These per-write figures exist to be summed, not
