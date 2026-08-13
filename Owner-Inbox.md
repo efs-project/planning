@@ -19,15 +19,15 @@ aliases: [For-James]
     preserve the option; choose the exact bounded build after the live rules and
     sponsor prizes settle. Default candidate is the one-game Arcade
     verified-artifact/fallback trace in [[ETHOnline-2026]].
-  - **b. Skip:** protect the Genesis and Arcade work from event pressure.
+  - **b. Skip:** protect the EFS 2.0 Core and Arcade work from event pressure.
   - Applying is not a promise to submit, use a sponsor, revive v1, or freeze the
     successor design. The current official metadata says September 6, but an
     earlier event page said September 3, so the earlier date is the safe one.
 
 ## 🕐 WHEN YOU HAVE TIME
 
-- **EFS v2 packet is fully revalidated** — the joined authority/filesystem pass and dedicated lens pass both landed. The hold is liftable across P-1…P-23 and LP-1…LP-10; Q3/Q4 remain held. P-1 is the dependency root, so start there rather than treating the packet as 33 simultaneous asks. See [Open-Decisions.md](./Open-Decisions.md).
-- **Other live design choices:** `OS1`/`OS2` (clientv2). Root `R1` was answered by the 2026-08-07 v1-bridge ruling and awaits retirement by its owning design thread; it is no longer a James decision. See [Open-Decisions.md](./Open-Decisions.md).
+- **EFS 2.0 consolidation is in engineering review** — the phone-readable README points to the detailed draft constitution and Core candidate; the old P/LP packet is superseded as a live queue. Nothing needs your answer until the evidence gates return a real fork. Start at [the EFS 2.0 README](./Designs/efsv2/README.md) only when you want the current model.
+- **Other design queues are held for evidence.** The old Client `OS1`/`OS2` and root `R1` packets are not live James decisions. See [Open-Decisions.md](./Open-Decisions.md) for the generated held/evidence inventory.
 - **Vault process changes landed 2026-07-23** — see [[Decisions]]. One thing needs your nod: whether to keep the structural SOUL edits (escalation dial re-keyed off the dead milestone, "ignore design bodies" inverted for a design phase). Say the word and I revert them.
 - Frame-review the proposed design process → [[Brainstorms/2026-05-28-pm-design-process-synthesis]] (then I formalize it)
 

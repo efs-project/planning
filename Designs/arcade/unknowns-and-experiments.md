@@ -3,11 +3,14 @@
 **Status:** draft
 **Target repos:** planning
 **Depends on:** [[product-and-communities]], [[september-plan]]
-**Last touched:** 2026-08-07 — claude-fable-5 (arcade pass)
+**Last touched:** 2026-08-12 — correction banner over 2026-08-07 pass
 
 #status/draft #kind/design #repo/planning #topic/games #topic/arcade
 
-> **Initial-pass ledger:** recut this list against the one-game Andromeda slice and the EFS 1.5 application-profile boundary in [[Designs/arcade/README]] before treating an item as current work.
+> **Initial-pass ledger:** references below to EFS 1.5 describe the initial
+> pass. Recut this list against the one-game Andromeda slice, the provisional
+> adapter, and [[../efsv2/system-constitution|EFS 2.0 Core]] before treating an
+> item as current work. No durable seed implements the superseded EAS bridge.
 
 One ledger for every load-bearing unknown. Rules: an unknown with a cheap test gets the test, not an owner question; owner-gated items live in [[Designs/arcade/owner-decision-inbox|owner-decision-inbox]], not here. The T1–T7 recruitment experiments (thresholds + kill signal) are specified in the [communities lane](../../Reviews/2026-08-07-arcade-corpus/research-communities-and-outreach.md) §5 and referenced below.
 

@@ -59,26 +59,28 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 | Design | Target repos | Notes |
 |---|---|---|
-| **[`efs15/`](./efs15/) — the EAS-backed product bridge** | `planning`, `contracts`, `sdk`, `client` | Draft bridge for current Nanda and Arcade work: universal DataId/RecordVersion/slot IDs, four-role semantic graph, sibling EAS schemas over a shared registry-index, portable type/shape identity and bounded typed references, honest reads, and deliberately simple address principals while native v2 remains open. Arcade's game/package/runner/curator policy stays an application profile. The v2→1.5 deep dive and concrete `EFS-ID/1` candidate are complete; coordinated namespace/schema/receipt review plus the fork proof are the next freeze gates. Entry point: [efs15/README](./efs15/README.md). |
-| **[`efsv2/`](./efsv2/) — the v2 design set** | `planning`, `contracts`, `sdk`, `client` | Native kernel + tag-core (carrier ruled 2026-07-07), now with the 2026-07-11 [[kel]] identity/account foundation pass. The KEL pass makes the older envelope/kernel/identity labels freeze-blocked pending authority-seam and home-admission reconciliation. Entry point and current round map: [efsv2/README](./efsv2/README.md). |
+| **[`efsv2/`](./efsv2/) — EFS 2.0 greenfield design** | `planning`, `contracts`, `sdk`, `client` | One active successor design: standalone Core, optional Commons, direct Web Client, and optional OS. Start with the phone-readable [README](./efsv2/README.md); the Type/Record/Occurrence/Principal/Lens mechanics remain candidate work. |
 | [[brainstorm-system]] | `planning` | The `Brainstorms/` system: statuses, surfacing cap, deliberate-only pruning. Awaiting promotion. |
-| **[`clientv2/`](./clientv2/) — the official client / web OS design set** | `planning`, `client`, `sdk` | Client v2 as a web OS (round run 2026-07-07). Entry point: [[web-os-thesis]] (ruling layer + amendments) over 13 model docs; research corpus in `Reviews/2026-07-07-clientv2-corpus/`; protocol pressure fed back via [[client-os-pressure-report]] — see [clientv2/README](./clientv2/README.md). |
-| **[`arcade/`](./arcade/) — the EFS Arcade design set** | `planning`, `contracts`, `client`, `content` | Initial product/MVP pass plus post-pass correction map. The 2026-08-07 research corpus is durable evidence; its demo-only framing and broad September scope are under hold while the one-game Andromeda slice, runner policy, EFS 1.5 application profile, and client placement are reconciled on `main`. Entry: [arcade/README](./arcade/README.md); held queue: [arcade/owner-decision-inbox](./arcade/owner-decision-inbox.md). |
+| **[`clientv2/`](./clientv2/) — Web Client / OS evidence set** | `planning`, `client`, `sdk` | The July Web-OS round is historical design evidence. The active boundary separates a direct guest Web Client and shared Files modules from optional EFS OS; the detailed OS architecture must re-earn adoption after the direct slice. See [clientv2/README](./clientv2/README.md). |
+| **[`arcade/`](./arcade/) — the EFS Arcade design set** | `planning`, `contracts`, `client`, `content` | Initial product/MVP pass plus post-pass correction map. The 2026-08-07 research corpus is durable evidence; its demo-only framing and broad September scope are under hold while the one-game Andromeda slice proceeds behind a provisional adapter and pressure-tests EFS 2.0 Core. Entry: [arcade/README](./arcade/README.md); held queue: [arcade/owner-decision-inbox](./arcade/owner-decision-inbox.md). |
 
 #### Review
 
-> **The pre-v2 SDK corpus.** Its disposition is the open owner decision **R1** ([owner-decision-inbox](./owner-decision-inbox.md)) — these carry `#status/review` but are **provisional/legacy** pending that ruling. `deterministic-ids` supersedes their identity model ("identity = EAS UID" is replaced). **Do not re-draft these, and do not treat them as canonical.**
+> **The pre-v2 SDK corpus.** These files preserve useful API and operational
+> evidence, but their EAS UID identity, wallet/Lens defaults, and write graph are
+> not EFS 2.0 inputs by default. There is no live R1 owner choice. Reuse only
+> evidence that passes the greenfield Core boundary.
 
 | Design | Target repos | Notes |
 |---|---|---|
-| [[sdk-architecture]] | `sdk` | The SDK API surface. Built against on `chore/scaffold`. Identity substrate superseded by v2 — see R1. |
+| [[sdk-architecture]] | `sdk` | Historical SDK API surface. Identity substrate superseded by EFS 2.0. |
 | [[sdk-read-surface]] | `sdk` | Read API shape. |
-| [[sdk-write-ux]] | `sdk` | Write-UX design; open questions feed ER2. |
-| [[sdk-wallet-architecture]] | `sdk` | Wallet/account integration; open questions feed ER1/ER2. |
+| [[sdk-write-ux]] | `sdk` | Historical v1 write-UX evidence; its old ER2 is superseded. |
+| [[sdk-wallet-architecture]] | `sdk` | Historical v1 wallet/account evidence; its old ER1/ER2 packet is superseded. |
 | [[sdk-review-backlog]] | `sdk` | Reconciled build backlog for the SDK. |
 | [[sdk-vs-client-responsibilities]] | `sdk`, `client` | Boundary between SDK and client. |
-| [[sdk-minimal-clicks]] | `sdk` | Batched single-signature writes (Tier-0 baseline, shipped). |
-| [[efs-account-system]] | `sdk`, `contracts` | One smart-account identity per user. **Historical input** — v2's logical actor + KEL supersede the premise. |
+| [[sdk-minimal-clicks]] | `sdk` | V1 batched single-signature writes (shipped evidence); no successor mechanism inherited. |
+| [[efs-account-system]] | `sdk`, `contracts` | Historical one-smart-account identity proposal; EFS 2.0 Principal/account design is reopened. |
 | [[mirror-scheme-policy]] | `contracts` | Mirror URI scheme policy; allowlist removal. |
 | [[web3-standards-compliance]] | `contracts` | web3:// serving conformance. |
 
@@ -86,9 +88,10 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 | Design | Target repos | Notes |
 |---|---|---|
-| [[sdk-one-signature-writes]] | `sdk` | Superseded by the native-envelope recut. |
+| **[`efs15/`](./efs15/) — historical EAS-bridge evidence** | `planning`, `contracts`, `sdk`, `client` | Superseded implementation target preserved for universal-ID, typed-schema, admission, graph/read, exact-vector, and EAS-interoperability evidence. Do not implement its carrier prefix, sibling schemas, v1 coexistence, or ID domains. |
+| [[sdk-one-signature-writes]] | `sdk` | Historical write-batching evidence; the July native-envelope replacement is also reopened. |
 | [[web3-bytesstore-sdk-followup]] | `sdk` | Handed off. |
-| [[write-ux-options-ranked]] | `sdk` | Ranked write-UX options. Tier-5 gating rule superseded by the v2 justification. |
+| [[write-ux-options-ranked]] | `sdk` | Historical ranked v1 write-UX options; successor write mechanics are reopened. |
 
 #### Ready for promotion
 

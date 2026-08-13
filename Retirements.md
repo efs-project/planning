@@ -18,11 +18,6 @@ What rulings have **retired**, and what replaced it. Input to `./scripts/needs-i
 
 | Retired phrase | Replacement | Ruling | Since |
 |---|---|---|---|
-| `pre-v2 SDK design corpus` | Historical implementation evidence only; not a supported bridge or greenfield baseline | 2026-08-08 greenfield-successor ruling | 2026-07-29 |
-| `EAS-backed product bridge` | Greenfield successor; EAS must re-earn any optional interoperability role | 2026-08-08 greenfield-successor ruling | 2026-08-08 |
-| `EFS 1.5 bridge` | Greenfield successor derived from requirements and product traces, not v1 compatibility | 2026-08-08 greenfield-successor ruling | 2026-08-08 |
-| `v1 coexistence` | No v1 compatibility, migration, coexistence, or legacy-read requirement | 2026-08-08 greenfield-successor ruling | 2026-08-08 |
-| `additive sibling 1.5 EAS schemas` | Fresh data model and contracts; no inherited carrier or sibling-schema architecture | 2026-08-08 greenfield-successor ruling | 2026-08-08 |
 
 ## Cleared
 
@@ -32,3 +27,8 @@ What rulings have **retired**, and what replaced it. Input to `./scripts/needs-i
 | `EAS carrier` | 2026-07-07 carrier ruling | 2026-07-23 |
 | `identity = EAS UID` | 2026-07-07 carrier ruling | 2026-07-23 |
 | `v1 is the supported product bridge` | 2026-08-08 greenfield-successor ruling | 2026-08-08 |
+| `pre-v2 SDK design corpus` | 2026-08-08 greenfield-successor ruling | 2026-08-12 |
+| `EAS-backed product bridge` | 2026-08-08 greenfield-successor ruling | 2026-08-12 |
+| `EFS 1.5 bridge` | 2026-08-08 greenfield-successor ruling | 2026-08-12 |
+| `v1 coexistence` | 2026-08-08 greenfield-successor ruling | 2026-08-12 |
+| `additive sibling 1.5 EAS schemas` | 2026-08-08 greenfield-successor ruling | 2026-08-12 |

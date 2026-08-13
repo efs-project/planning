@@ -2,10 +2,16 @@
 
 **Status:** draft synthesis and decision guide; not a byte-level specification
 **Audience:** James and human reviewers
-**Last touched:** 2026-07-22
+**Last touched:** 2026-08-12
 **Technical sources:** [[assumptions-and-requirements]], [[README]], [[ethereum-first-efs-and-os]], [[mountable-filesystem-semantics]], [[kel]], [[privacy-pass-synthesis]], [[privacy-james-decisions]], [[read-lens-spec]], [lens architecture review](../../Reviews/2026-07-11-efsv2-lens-architecture-and-scale-review.md), [[onchain-completeness]], [[fs-pass-synthesis]], [[freeze-gates]], and the [client v2 design set](../clientv2/README.md)
 
 #status/draft #kind/design #repo/planning #topic/efsv2 #topic/human-overview
+
+> **Historical synthesis warning (2026-08-12):** this explains the joined July
+> design and its contradictions. It is no longer the current system summary.
+> Start with [[README]], [[system-constitution]], and
+> [[core-architecture-candidate]]. KEL homes, the old envelope/kind model, and
+> the Web-OS-only path below are evidence to re-evaluate, not active architecture.
 
 > **Bottom line.** EFS v2 is directionally right, but the written design set is not yet coherent enough to freeze. The good core is now visible: permanent evidence, stable identities with replaceable keys, admission-ordered authorization when the strongest historical grade is required, explicit reader policies, honest encryption, and a capability-based local OS. The present per-principal-home/L1-locator/migration topology is one ambitious candidate, not a settled consequence of KEL. Several older documents also implement previous models. Those contradictions must be resolved in one coordinated rewrite before permanent bytes, IDs, or storage layouts are approved.
 

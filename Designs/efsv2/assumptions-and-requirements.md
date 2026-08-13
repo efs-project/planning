@@ -2,10 +2,17 @@
 
 **Status:** draft reconciliation control; owner validation required
 **Audience:** James, protocol designers, reviewers, and implementers
-**Last touched:** 2026-07-22
+**Last touched:** 2026-08-12
 **Authority:** requirements and assumptions inventory, not a byte-level specification and not an adoption of any undecided mechanism
 
 #status/draft #kind/design #repo/planning #topic/efsv2 #topic/requirements #topic/assumptions
+
+> **Greenfield correction (2026-08-12):** this is a pre-August-8 requirements
+> inventory and reason trail, not the current normative entry point. Read
+> [[system-constitution]] first. Its outcome-level requirements and failure
+> tests remain inputs; its KEL homes, native envelope, kind set, Type/claim
+> shapes, Lens grammar, owner packet, and reconciliation sequence are reopened
+> mechanisms unless the new constitution explicitly carries them forward.
 
 > **Why this exists.** EFS v2 has accumulated several good designs, but some documents turn a desired property into one particular mechanism and then treat that mechanism as settled. This ledger separates what EFS must accomplish from what we merely assume, what James has already chosen, and what still has to be proved.
 
@@ -551,7 +558,8 @@ Do not settle these through editorial merging:
 > **Sequencing clarification (2026-07-22):** this remains the dependency order once the top choices are ready. It is not the immediate work order. The joined research sequence in [[ethereum-first-efs-and-os#11. Research-to-MVP sequence]] now precedes the decision packet so the cases and recommendations below do not fossilize assumptions invalidated by the new pressure tests.
 
 1. Adopt or edit D-1 through D-16 and record them in `owner-rulings.md`.
-2. Write a short `system-constitution.md` containing only settled boundaries and vocabulary.
+2. Reconcile the now-written [[system-constitution]] as prototypes settle its
+   remaining candidate boundaries and vocabulary.
 3. Re-cut `kel.md`, `codex-envelope.md`, `deterministic-ids.md`, `codex-kinds.md`, and `codex-kernel.md` together. Their identities and admission semantics cannot be changed independently.
 4. Replace the current lens specification with the typed compiled-policy model; preserve the old review corpus as history.
 5. Finalize on-chain query capabilities and storage only after the complete gas/state benchmark.

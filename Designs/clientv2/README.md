@@ -1,16 +1,32 @@
-# Client v2 design set — map
+# EFS clients and OS — historical v2 round map
 
-The official EFS client v2 ("web OS") design set, produced 2026-07-07 by the Fable client-v2 round: 14-lane researched foundation → thesis with fork rulings → thirteen model docs written against it in parallel with structured conflict-surfacing → thesis amendments → the [[client-os-pressure-report]] back into `Designs/efsv2/`. Evidence corpus: [Reviews/2026-07-07-clientv2-corpus/](../../Reviews/2026-07-07-clientv2-corpus/README.md) (research digests with dated primary sources, decision framework, worklog).
+This directory preserves the official-client/Web-OS round produced on
+2026-07-07: 14-lane researched foundation → thesis with fork rulings → thirteen
+model docs → amendments → [[client-os-pressure-report]]. Evidence corpus:
+[Reviews/2026-07-07-clientv2-corpus/](../../Reviews/2026-07-07-clientv2-corpus/README.md).
 
-**Reading order for James:** [owner decision inbox](./owner-decision-inbox.md) → linked detail only when useful.
+> **Greenfield product-layer correction (2026-08-12):** this set is evidence,
+> not one automatically adopted client architecture. The active boundary is:
+> EFS Core; reusable reader/File Browser/presentation/runner modules; a
+> self-hostable direct EFS Web Client with a guest path; optional EFS OS; and
+> optional Commons. A fresh qualifying L3 read must not boot the OS or require
+> Commons.
+> Reconcile the thesis after the direct Files/Arcade slice; see
+> [[../efsv2/system-constitution]].
 
-**Reading order for a fresh reviewer:** [[fable-client-v2-handoff]] (the mandate) → [[web-os-thesis]] (the ruling layer — F1–F13 **plus its Amendments section, which wins**) → the model docs you care about → [[open-questions]] → [[client-os-pressure-report]] (what this round asks of the protocol set).
+**Reading order for James:** [EFS 2.0](../efsv2/README.md) first. Return here
+only for OS/client evidence or the held [owner decision inbox](./owner-decision-inbox.md).
 
-## The ruling layer
+**Historical-round reading order:** [[fable-client-v2-handoff]] (the mandate) →
+[[web-os-thesis]] (the July thesis and its internal amendments) → the relevant
+model docs → [[open-questions]] → [[client-os-pressure-report]]. None of that
+sequence outranks the current greenfield rulings.
 
-| Doc | What it rules |
+## Historical thesis layer
+
+| Doc | What it proposed in the July round |
 |---|---|
-| [[web-os-thesis]] | The thesis, rejected/adopted OS assumptions, the ring architecture (Bootstrapper → Kernel → System Chrome → Session Shell → apps-in-Workers), fork rulings F1–F13, post-fan-out amendments, honesty doctrine, non-goals, naming frame. |
+| [[web-os-thesis]] | The thesis, rejected/adopted-within-that-round OS assumptions, ring architecture, fork recommendations F1–F13, amendments, honesty doctrine, non-goals, and naming frame. These are evidence until revalidated. |
 | [Ethereum-first EFS and OS](../efsv2/ethereum-first-efs-and-os.md) | **Research frame, not a ruling:** explores how an Ethereum-native EFS profile and a broader local-first OS can coexist, then contract through comparable vertical slices. |
 
 ## Model docs (each elaborates named forks; thesis wins on conflict)
@@ -35,7 +51,7 @@ The official EFS client v2 ("web OS") design set, produced 2026-07-07 by the Fab
 
 | Doc | What it holds |
 |---|---|
-| [owner decision inbox](./owner-decision-inbox.md) | The sole live James-facing queue: examples, options, recommendations, timing, and links to detail |
+| [owner decision inbox](./owner-decision-inbox.md) | Held evidence inventory. It has no live James-facing choice until the direct client/Files slice produces a real fork. |
 | [[open-questions]] | James-level decisions, per-doc open questions index, recommended next investigations (spikes/prototypes) |
 | [[client-os-pressure-report]] (in `efsv2/`) | The twelve pressure clusters on the protocol set; P1/P2/P4c/P11 are freeze-window-relevant |
 
@@ -57,4 +73,9 @@ The official EFS client v2 ("web OS") design set, produced 2026-07-07 by the Fab
 
 ## Status
 
-Everything remains `#status/draft`. The original set was written 2026-07-07 by fable-5 and internally reconciled (parallel-authored conflicts adjudicated in thesis Amendments 1–13; cross-doc residue in [[open-questions]]). The 2026-07-22 app-model handoff records open web standards and WebAssembly/WASI as the strong foundational prior, while leaving the exact ABI, versions, UI bridge, and runner set open. Fable will validate a probable multi-lane model—confined compiled apps, full-web sandboxed iframe apps, and only evidence-earned specialist lanes—under one Kernel-resolved permission system. Next: the Fable deep-research round, evidence spikes, coordinated EFS v2 reconciliation, and eventual promotion review.
+Everything remains `#status/draft`. The original set was written 2026-07-07 by
+fable-5 and internally reconciled within its own assumptions. It is now a
+client/OS research corpus, not the active product architecture. The next pass
+starts from the direct guest Web Client + shared Files + optional OS boundary,
+then selectively revalidates capability, sandbox, offline, account, and app
+ideas against measured slices.

@@ -1,13 +1,18 @@
-# EFS 1.5 bridge — requirements and boundaries
+# Historical EFS 1.5 requirements and boundaries
 
-**Status:** draft
+**Status:** superseded — historical EAS-bridge design evidence; use [[../efsv2/system-constitution]]
 **Target repos:** planning, contracts, sdk, client
 **Depends on:** —
 **Supersedes:** —
 **Reviewers:** @codex-gpt-5 (2026-08-07, identity, adversarial-risk, and source-precedence lanes)
-**Last touched:** 2026-08-07
+**Last touched:** 2026-08-12
 
-#status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efs15 #topic/requirements #topic/lenses
+#status/superseded #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efs15 #topic/requirements #topic/lenses
+
+> **Superseded 2026-08-08:** James removed every v1 compatibility, migration,
+> coexistence, legacy-read, EAS-carrier, and sibling-schema requirement. This
+> file is preserved for requirements, feasibility, and failure-analysis
+> evidence. It is not an implementation or freeze target.
 
 ## Problem
 

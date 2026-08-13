@@ -1,13 +1,17 @@
 # EFS-ID/1 — candidate universal identity profile
 
-**Status:** draft
+**Status:** superseded — historical candidate; do not freeze or implement these domains
 **Target repos:** planning, contracts, sdk
 **Depends on:** [[requirements-and-boundaries]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-08-07
+**Last touched:** 2026-08-12
 
-#status/draft #kind/spec #repo/planning #repo/contracts #repo/sdk #topic/efs15 #topic/efsv2
+#status/superseded #kind/spec #repo/planning #repo/contracts #repo/sdk #topic/efs15 #topic/efsv2
+
+> **Superseded 2026-08-08:** this exact EAS-backed profile remains test and
+> failure-analysis evidence only. EFS 2.0 must define fresh semantics and domains
+> after the greenfield bakeoff; no sibling schemas or v1 coexistence survive.
 
 ## Standing
 

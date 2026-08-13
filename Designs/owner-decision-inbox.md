@@ -2,9 +2,9 @@
 
 **Status:** reference — decision packet; no choice is adopted until James answers and it is recorded in the owning history
 **Audience:** James first; designers second
-**Last reconciled:** 2026-07-21
+**Last reconciled:** 2026-08-12
 
-#status/reference #kind/decision #repo/planning #blocked-on/human-decision
+#status/reference #kind/decision #repo/planning
 
 > **Start here for design decisions.** This page owns choices about loose designs in `Designs/`. Each design subfolder owns its own queue:
 >
@@ -14,11 +14,13 @@
 >
 > A question appears in only one live queue. Linked design documents provide detail; unchecked boxes in them are not automatically James decisions.
 
-## How to answer
+> **Greenfield correction (2026-08-12):** R1–R4 and ER1–ER2 below are v1
+> packet history, not live choices. The active EFS 2.0 evidence gates are in
+> [the EFS 2.0 inbox](./efsv2/owner-decision-inbox.md). Do not revive v1 SDK,
+> devnet, redirect-default, EOL, onboarding, or write-rail work as a successor
+> dependency.
 
-Reply with a code and optional exception, for example `R1A`, or `R1B, but keep locate/read naming provisional`.
-
-## Decide now
+## Superseded questions — do not ask
 
 ### R1 — What should agents do with the pre-v2 SDK design corpus?
 
@@ -51,7 +53,7 @@ specs/09 makes symlink-following normative for a conformant reader (the router w
 - **R4A** — `createEfsV1Client` goes archive-read-only (maintenance-frozen; Sepolia v1 stays readable forever). **Default if unanswered — matches the "bridge" framing.**
 - **R4B** — delete v1-profile code at v2 launch (bridge apps must migrate immediately).
 
-## Decide after evidence — do not answer yet
+## Superseded questions — do not ask
 
 ### ER1 — Account/onboarding default
 
@@ -61,7 +63,10 @@ specs/09 makes symlink-following normative for a conformant reader (the router w
 - **B:** provision an EFS/Cyphos account;
 - **C:** offer both with one recommended default.
 
-**Recommendation after evidence:** choose only after the KEL admission/recovery slice, wallet capability matrix, and recovery usability test. The canonical authority choice lives in [EFS v2 N1](./efsv2/owner-decision-inbox.md#n1--strong-authority-without-a-cross-chain-empire). Historical input: [[efs-account-system#Decisions for James]].
+**Historical recommendation:** choose only after authority and recovery evidence.
+The current greenfield work is [V2-E1](./efsv2/owner-decision-inbox.md#v2-e1--principal-surface) and
+[V2-E5](./efsv2/owner-decision-inbox.md#v2-e5--realm-bootstrap-and-authority-history).
+Historical input: [[efs-account-system#Decisions for James]].
 
 ### ER2 — First one-click write integration
 
@@ -76,8 +81,11 @@ specs/09 makes symlink-following normative for a conformant reader (the router w
 ## Already settled — do not ask again
 
 - The brainstorm system was approved; promotion mechanics are agent/process work. See [[brainstorm-system]] and [[Decisions]].
-- SDK architecture Q1–Q6 and the core read-surface shape were settled. Only R1 remains an owner choice.
-- Permissive mirror schemes plus mandatory render isolation are the direction; implementation follows the EFS OS security boundary.
+- SDK architecture Q1–Q6 and the old core read-surface shape were settled within
+  v1. R1 is superseded; none of that settles the EFS 2.0 SDK or identity model.
+- Permissive locator schemes plus verify-before-render and confinement remain
+  evidence-backed outcomes; exact implementation follows the reusable
+  verifier/runner evidence gate, not an assumed EFS OS boundary.
 - Specifications live in their owning repository. A cross-repo mirror remains dormant until a concrete CI need appears.
 
 ## Delegated to agents
@@ -86,11 +94,17 @@ Agents should choose reversible implementation details, record their rationale, 
 
 ## Dormant or historical — not live queues
 
-- [[efs-account-system]]'s smart-account-as-identity premise is historical input; v2's logical actor + KEL work supersedes it.
-- [[sdk-one-signature-writes]] is superseded by the native-envelope recut.
+- [[efs-account-system]]'s smart-account-as-identity premise and the later
+  logical-actor/KEL work are both historical evidence. EFS 2.0 has reopened the
+  exact Principal, actor, rotation, and recovery mechanism.
+- [[sdk-one-signature-writes]] and the later native-envelope recut are both
+  historical evidence. EFS 2.0 is re-testing portable Publication Envelopes,
+  immutable context sharing, and one-call admission independently.
 - [[cross-repo-reference-mirror]] stays blocked until a concrete CI need exists.
 - Old web3, BytesStore, mirror, and SDK checkboxes are implementation verification or lifecycle cleanup unless promoted back into this inbox.
 
 ## Recording rule
 
-When James answers R1, record the dated ruling in `Decisions.md`, mark it here `ADOPTED`, `REJECTED`, or `DEFERRED`, and replace conflicting source checkboxes with a link to this page. The child inboxes use [[owner-rulings]] for EFS v2 constitutional history.
+This page has no live answer code. New EFS 2.0 rulings belong in
+[[efsv2/owner-rulings]] through the EFS 2.0 queue; historical questions stay
+unchanged except for explicit supersession notes.

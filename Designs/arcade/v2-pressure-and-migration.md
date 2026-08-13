@@ -3,15 +3,22 @@
 **Status:** draft
 **Target repos:** planning
 **Depends on:** [[playable-archive-requirements]], [[apps-cookbook]], [[boot-and-profiles]], [[packages-and-updates]], [[kernel-capability-model]], [[deterministic-ids]], [[Designs/arcade/owner-decision-inbox|owner-decision-inbox]]
-**Last touched:** 2026-08-07 — claude-fable-5 (arcade pass)
+**Last touched:** 2026-08-12 — correction banner over 2026-08-07 pass
 
 #status/draft #kind/design #repo/planning #topic/games #topic/arcade
 
-> **Initial-pass draft:** current bridge findings supersede the v1-identity assumptions below: GameProject, immutable GameRelease, ArtifactManifest, curator selection, locator, and runner policy are an application profile; v1/EAS UIDs are receipts; no valuable durable write precedes the EFS 1.5 gates. See [[Designs/arcade/README]].
+> **Initial-pass draft:** the EFS 1.5 migration frame below is historical.
+> GameProject, immutable GameRelease, ArtifactManifest, curator selection,
+> locator, and runner policy remain application-profile pressure, but Arcade now
+> targets [[../efsv2/system-constitution|EFS 2.0 Core]] behind a provisional
+> adapter. There is no v1 migration or durable EAS-bridge seed requirement.
 
-## Purpose and posture
+## Historical purpose and posture
 
-The Arcade (this pass's proposal: CONDITIONAL GO as a labeled public demo on the v1 Sepolia stack, ship 2026-09-11) is the first real product surface built on v1 while v2 is actively being designed. That makes it a **pressure instrument**: every v1 workaround it ships is either evidence for an existing v2 design, a named spec gap, or deliberate debt. This document does three things and nothing else:
+The initial pass proposed a labeled public demo on the v1 Sepolia stack. That
+proposal is superseded as current implementation scope, but this remains a
+**pressure instrument**: each workaround is evidence, a named gap, or debt.
+This historical document does three things and nothing else:
 
 1. Classifies every load-bearing Arcade element against v2 (§1).
 2. Routes each pressure finding TO the design doc that owns it (§2). This doc **decides nothing** — findings are evidence for the owning docs' authors, several of which touch owner-level rulings.

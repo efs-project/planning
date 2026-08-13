@@ -1,7 +1,7 @@
 # EFS v2 — Owner rulings & notes (James)
 
 **Status:** reference — append-only, dated ruling ledger. NOT a design: decisions/directions only. The design docs get updated to match separately.
-**Last touched:** 2026-07-23
+**Last touched:** 2026-08-12
 
 #status/reference #kind/note
 
@@ -165,3 +165,57 @@ The 2026-07-22 cross-platform read-only mount requirement and research-before-MV
 - **Obligation this creates for the freeze work:** the freeze-impact analysis must keep showing that forge objects stay expressible, and the E2 / portable-schemas fixtures should carry forge objects (issue/PR/review/release) as candidate workloads.
 
 — direction stated by @james in chat, recorded 2026-08-07 by @claude-fable-5. **Wording is the recorder's; James should correct or trim it if it overstates the intent.**
+
+## 2026-08-12
+
+### EFS 2.0 greenfield system boundary
+
+- **EFS 2.0 is the one active greenfield successor design.** “EFS 1.5,”
+  “Genesis,” and “vNext” are not parallel products. V1, the EAS-backed EFS 1.5
+  work, and the July native-envelope/tag-core v2 work remain evidence; no
+  mechanism survives automatically. This carries forward the August 8 ruling
+  previously recorded in [[Decisions]].
+- **This reset supersedes earlier mechanism-level rulings, not the problems they
+  were solving.** EAS carrier details, the July kind table/envelope/KEL
+  topology, a fixed authority-home model, and exact index/storage machinery
+  must re-earn inclusion. Shared Types and validation, automatic useful
+  on-chain queryability, typed backlinks/reverse membership, revocation-aware
+  current counts, content-digest lookup, authored-data enumeration, full
+  state-readable Record bodies, and bounded contract reads remain acceptance
+  obligations unless James explicitly reverses one after the aggregate cost
+  pass. “Fresh L3” means a qualifying EVM Realm can stand alone; it does not
+  promise prebuilt support for every chain or revive a global home chain.
+- **ADOPTED boundary: Core / optional Commons / clients.** EFS Core is the
+  standalone EVM protocol and graph/filesystem substrate. A Realm or fresh L3
+  must be useful to contracts and direct clients without Commons, a canonical
+  EFS chain, or EFS OS. EFS Commons is an optional shared Realm/service layer.
+  The Web Client and EFS OS consume Core; they do not define Core truth.
+- **No Commons home chain is selected.** Any candidate must earn selection
+  through an explicit cypherpunk/CROPS review: censorship and capture
+  resistance, public source and state, rule-change/governance risk, independent
+  operation, force inclusion, verifiable finality, reconstructability, and
+  exit. Core design and direct guest reads do not wait for this choice.
+- **Smart-contract-usable Lenses remain a Core requirement.** Rich Commons/OS
+  policies may be more expressive, but Core must support a deterministic,
+  bounded policy profile for contracts reading trust-qualified files, config,
+  and graph state. Exact grammar, encoding, limits, and contract placement are
+  engineering questions.
+- **Type creators choose the bounded fields and supported index modes for their
+  Types.** Once a Realm admits a Type/index profile, every admitted item is
+  indexed automatically according to that declaration; an individual writer
+  cannot opt out and create invisible half-presence. Baseline Type, Record,
+  authored Occurrence, Principal, admission-order, and exact-ID reads remain
+  automatic. Whether canonical index declarations are inside semantic Type
+  identity or in a separately identified profile is a 50-year bakeoff question,
+  not ruled by this API direction.
+- **A direct guest File Browser path is required.** A self-hostable Web Client
+  must be able to open an explicit Realm/L3 and useful EFS data before wallet,
+  authentication, Commons, or OS boot. “Guest” means unauthenticated, not
+  network-anonymous. The same Files/reader semantics should be reusable inside
+  EFS OS.
+- **Open, not ruled:** whether every author-facing API uses `PrincipalId` with
+  raw accounts represented as zero-setup single-account Principals; whether the
+  direct Web Client and EFS OS are one package or distinct products; exact
+  Commons features/operator/brand; and all candidate Core primitives and bytes.
+
+— ruled by @james, 2026-08-12

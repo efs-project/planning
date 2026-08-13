@@ -6,23 +6,66 @@ Single-file alphabetical glossary of EFS terms. Each term is an `## H2` anchor s
 
 **Source-of-truth note.** Where a term has a precise definition in the contracts repo's `specs/` or `docs/adr/`, the Glossary entry summarizes and links rather than re-stating. The contracts repo wins on contract-level precision; the Glossary's job is cross-cutting recognizability.
 
+**Version rule (2026-08-12).** Deployed-v1 terms below are labeled explicitly.
+The current EFS 2.0 vocabulary is governed by
+[[Designs/efsv2/owner-rulings]] and synthesized in
+[[Designs/efsv2/system-constitution]]. Candidate terms say candidate; a glossary
+entry does not freeze protocol bytes.
+
 ---
 
 ## Anchor
 
-A path node in EFS. Stored as an `ANCHOR` EAS attestation; hierarchical via `refUID = parentAnchor`. Permanent and non-revocable — once a folder or path exists, it exists forever. See `contracts/specs/02-Data-Models-and-Schemas.md`.
+**V1 term.** A path node stored as an `ANCHOR` EAS attestation, hierarchical via
+`refUID = parentAnchor`. EFS 2.0 keeps stable linkable Topics/paths as a
+requirement but has not frozen this carrier or formula.
 
 ## ANCHOR
 
-Frozen schema. A stable, content-derived name in the path namespace — the "folder" or file-name primitive. Anchors are permanent deterministic IDs; membership and metadata attach via edges rather than living on the anchor. Registered on Sepolia 2026-06-11.
+**V1 frozen schema.** Stable path/name primitive registered on Sepolia. It is
+evidence for EFS 2.0 Topics, not the active successor kind or ID formula.
 
 ## Attestation
 
-The fundamental unit of state in EFS. EFS uses Ethereum Attestation Service (EAS) to represent files, folders, edges, and metadata as on-chain attestations rather than custom storage. See [[Glossary#EAS]] and `contracts/specs/01-System-Architecture.md`.
+**V1 term.** The deployed system uses EAS attestations for files, folders,
+edges, and metadata. EFS 2.0 uses candidate Records, authored Occurrences, and
+Realm admission; EAS may return only as an optional interoperability adapter.
+
+## EFS Commons
+
+Optional shared EFS Realm and/or replaceable services for public discovery,
+catalogs, comments, profiles, relaying, endpoints, and other network effects.
+It is not required by [[Glossary#EFS Core]], cannot mint semantic identity or
+become the only index, and has no selected chain or operator.
+
+## EFS Core
+
+The standalone EVM protocol/contracts at the center of EFS 2.0: deterministic
+semantic identities, reusable typed data, authored occurrences, Realm
+admission, bounded on-chain graph indexes and Lenses, exact-byte commitments,
+honest completeness, and independent reconstruction. Core never requires
+Commons or EFS OS.
+
+## EFS OS
+
+Optional sovereign client environment above EFS Core: local/encrypted state,
+accounts and recovery, rich personal Lenses, offline work, capability grants,
+app installation/sandboxing, agents, and secure signing. The direct Web Client
+and shared File Browser do not require the OS to boot.
+
+## EFS Web Client
+
+Candidate self-hostable first-party direct client for EFS Core. Its baseline is
+a guest File Browser/verified-content path that can open an explicit Realm or
+exact EFS link without Commons, an account, a wallet prompt, or EFS OS. “Guest”
+does not mean network-anonymous.
 
 ## DATA
 
-EAS schema representing standalone file content identity: `contentHash` + `size`. Does not belong to a specific path; pure content identity. Multiple paths can reference the same DATA. Non-revocable. See `contracts/specs/02`.
+**V1 frozen schema.** EAS attestation representing standalone file content
+identity as `contentHash + size`; it is non-revocable and path-independent. EFS
+2.0 does not inherit this schema or assume size is known when a Locator is first
+published. See `contracts/specs/02` for v1.
 
 ## Design
 
@@ -34,15 +77,30 @@ Expensive but recoverable surfaces. Includes devnet contracts, cross-package Typ
 
 ## EAS
 
-Ethereum Attestation Service. The on-chain attestation primitive EFS is built on. EFS Schemas are registered with EAS at deploy time; every file, folder, edge, and property in EFS is an EAS attestation.
+Ethereum Attestation Service. It is the carrier for deployed EFS v1. EFS 2.0
+does not assume EAS Core; a loss-aware import/export/projection adapter may be
+added if a concrete interoperability benefit earns it.
 
 ## Edge (PIN, TAG)
 
-EAS attestation that links one EFS entity to another. **PIN** has cardinality 1 (file placement, property value binding). **TAG** has cardinality N with `int256 weight` (folder visibility, descriptive labels). Cardinality is declared at the schema level, not per-attestation. See `contracts/docs/adr/0041-pin-tag-schema-split-for-cardinality.md`.
+**V1 term.** EAS attestation linking entities. PIN has cardinality one; TAG has
+cardinality many. EFS 2.0 preserves the semantic distinction through generic
+Binding/current slots versus many authored membership Occurrences; exact names
+and physical representation remain candidate.
 
 ## EFS
 
-Ethereum File System. On-chain filesystem built on EAS attestations. Pre-launch devnet target April 19, 2026.
+Ethereum File System. EFS v1 is the deployed EAS-based evidence system. EFS 2.0
+is the active greenfield EVM-native typed graph/filesystem design; see
+[[Designs/efsv2/README]].
+
+## Envelope
+
+**EFS 2.0 candidate.** An immutable signed context that amortizes Principal,
+actor/account authority witness, replay domain, and an ordered set of Record
+leaves. It creates authored [[Glossary#Occurrence|Occurrences]] but does not
+change a Record's semantic ID or automatically promise an application-level
+transaction.
 
 ## ENOENT
 
@@ -58,23 +116,49 @@ Mathematically irreversible state. Includes mainnet contracts, schema field defi
 
 ## Kernel
 
-The append-only, lens-agnostic index in `EFSIndexer.sol`. Stores raw attestation relationships without filtering by attester. Contrast: the **overlay** (filesystem-specific views like sort overlays, folder visibility) that compose on top. See `contracts/specs/01-System-Architecture.md`.
+In v1, the append-only lens-agnostic `EFSIndexer.sol`. In EFS 2.0, “Core” is
+preferred for the whole protocol; exact contract decomposition is not frozen.
 
 ## Lens
 
-A reader-selected policy describing whose authenticated claims contribute to a view and how conflicts combine. The deployed/v1 form is an ordered trusted-attester list composed through `?lenses=`; EFS v2 is replacing that with typed, scoped, reproducibly compiled policies. Plan 9 process namespaces and ordered union lookup are useful precedent only for the simple priority-first-present subset; they do not supply EFS basis, completeness, provenance, WHITEOUT, or `UNKNOWN` semantics. See `contracts/docs/adr/0031-lenses-url-param-model.md`, `contracts/docs/adr/0043-rename-editions-to-lenses.md`, and [[mountable-filesystem-semantics]].
+A reader-selected trust policy describing whose authenticated claims contribute
+to one purpose and how conflicts combine. EFS 2.0 requires a bounded public
+contract profile (candidate name: Resolution Plan) and allows richer
+Commons/OS policy above it. Lenses always expose basis/completeness and never
+grant execution capability. The deployed v1 ordered-address list is evidence,
+not the successor grammar.
 
 ## LIST
 
-Frozen schema (added by EFS Lists, PR #20, 2026-06-01). A named ordered collection. Paired with [[Glossary#LIST_ENTRY]]. See ADR-0044/0046/0047.
+**V1 frozen schema.** A named ordered collection added by EFS Lists, paired with
+[[Glossary#LIST_ENTRY]]. EFS 2.0 collection/query semantics must re-earn their
+generic representation. See ADR-0044/0046/0047 for v1.
 
 ## LIST_ENTRY
 
-Frozen schema. A single membership record in a [[Glossary#LIST]] — pure identity; per-entry metadata was deliberately removed (ADR-0046).
+**V1 frozen schema.** A single membership record in a [[Glossary#LIST]]—pure
+identity; per-entry metadata was deliberately removed (ADR-0046).
 
 ## MIRROR
 
-EAS schema representing a retrieval URI for a DATA. Multiple mirrors allowed per DATA (ipfs://, ar://, web3://, https://, magnet:). The router picks the best transport. Revocable. See `contracts/specs/02`.
+**V1 schema.** A retrieval URI for DATA. EFS 2.0 uses generic Locator claims:
+locations, exact content, provenance, availability, and independent custody are
+separate facts, and bytes verify against already-selected exact identity.
+
+## Occurrence
+
+**EFS 2.0 candidate.** One authored publication of one semantic Record, named
+by its signed Envelope plus the Record leaf's zero-based index. Several authors
+may publish the same RecordId while preserving distinct Occurrences,
+withdrawals, replies, admission receipts, and provenance.
+
+## Principal
+
+A stable semantic author/trust-list identifier, distinct from submitter,
+relayer, and payer. EFS 2.0 is testing a uniform `PrincipalId` API where a local
+EOA or ERC-1271 account is an intrinsic zero-setup Realm-qualified account
+Principal and later managed Principals add rotation/recovery/delegation. That
+specific representation is candidate, not frozen.
 
 ## Owner (project role)
 
@@ -82,11 +166,15 @@ The person holding decision authority over some part of this vault — currently
 
 ## Owner (EFS resource)
 
-The on-chain principal controlling a container, gate, namespace, or device. EFS `DATA` IDs are owner/salt-derived. Always possessive-qualified in prose ("the container's owner", "gate owner"). Not to be confused with [[Glossary#Owner (project role)]].
+The Principal or authority controlling a container, gate, namespace, or device.
+EFS 2.0 has not frozen which stable objects are Principal-qualified or their ID
+formula. Always possessive-qualified in prose ("the container's owner", "gate
+owner"). Not to be confused with [[Glossary#Owner (project role)]].
 
 ## PIN
 
-See [[Glossary#Edge (PIN, TAG)]]. Cardinality-1 edge. Used for file placement and PROPERTY value binding. Re-attesting at the same `(attester, definition, targetSchema)` slot supersedes in O(1).
+**V1 term.** See [[Glossary#Edge (PIN, TAG)]]. EFS 2.0's candidate generic
+Binding/current slot carries the surviving cardinality-one semantics.
 
 ## Planning vault
 
@@ -98,7 +186,10 @@ Human-gated, atomic ceremony that moves a design from `ready-for-promotion` to `
 
 ## REDIRECT
 
-Frozen 9th schema (ADR-0050): `bytes32 target, uint16 kind`. Expresses canonical / sameAs / supersededBy / symlink relations; `kind=4` is `movedTo`. Only the `uint16 kind` is frozen — the taxonomy of values is upgradeable resolver logic. Read-time resolution (lens precedence, depth cap, cycle rule) is specified in ADR-0050.
+**V1 frozen schema.** The 9th schema (ADR-0050), `bytes32 target, uint16
+kind`, expresses canonical/sameAs/supersededBy/symlink relations. EFS 2.0 keeps
+explicit successor/redirect evidence as a requirement but has not inherited
+this schema or resolver taxonomy.
 
 ## Resolved view
 
@@ -106,11 +197,30 @@ The deterministic tree/value projection produced by applying a lens, basis, evid
 
 ## PROPERTY
 
-EAS schema representing a free-floating string value, placed on a container via PIN under a PROPERTY-typed "key" anchor. Reserved key anchor names: `contentType`, `name`. Non-revocable. See `contracts/specs/02`.
+**V1 schema.** A free-floating string value placed by PIN. EFS 2.0 is testing
+generic typed Records and optional ownerless typed literal/value identity
+instead of inheriting PROPERTY.
+
+## Realm
+
+One independently ordered EFS Core deployment and policy domain. Its descriptor
+binds enough chain, deployment/genesis/config, profile, and basis information
+to prevent confusion. Semantic Records may be copied between Realms;
+admission, order, revocation, current bindings, authority, finality, and
+completeness remain Realm-qualified.
+
+## Record
+
+**EFS 2.0 candidate.** Immutable author-neutral typed semantic content—roughly
+`TypeSchemaId + canonical body`—whose RecordId does not depend on Envelope,
+Realm admission, carrier, author, or transaction. Authorship lives in an
+[[Glossary#Occurrence]].
 
 ## Sort overlay
 
-`EFSSortOverlay`: per-parent sorted linked lists, lazy overlay on `EFSIndexer`. Stateful but composes on top of the kernel rather than being part of it. See `contracts/specs/07-Sort-Overlay-Architecture.md`.
+**V1 mechanism.** `EFSSortOverlay` uses per-parent sorted linked lists as a lazy
+overlay on `EFSIndexer`. It is evidence, not the EFS 2.0 index design. See
+`contracts/specs/07-Sort-Overlay-Architecture.md`.
 
 ## SORT_INFO
 
@@ -118,11 +228,25 @@ EAS schema representing a free-floating string value, placed on a container via 
 
 ## TAG
 
-See [[Glossary#Edge (PIN, TAG)]]. Cardinality-N edge with `int256 weight`. Used for folder visibility, descriptive labels (`#nsfw`, etc.), and schema-alias discovery.
+**V1 term.** See [[Glossary#Edge (PIN, TAG)]]. EFS 2.0 preserves
+cardinality-many membership/tag semantics as generic typed authored
+Occurrences plus bounded enumeration rather than inheriting this schema.
+
+## Type Schema
+
+**EFS 2.0 candidate developer term.** Immutable portable definition of one
+Record's semantic meaning, canonical body shape, constraints, typed reference
+roles, structural validation commitment, and bounded canonical index
+declarations. Changing a meaning-affecting field creates a new TypeSchemaId;
+successor/equivalence is explicit evidence, never mutation. Older drafts call a
+similar object `TypeRevision`.
 
 ## Topic
 
-Human-facing synonym for [[Glossary#Anchor]]. James prefers "Topic" in user-facing language ("we're all talking about the topic Music"); "Anchor" is the technical name that appears in URLs (the web `#anchor` concept — something solid to link to). Same on-chain primitive. If you're writing for a developer, use Anchor; for an end-user, use Topic. Captured 2026-05-26 per @james chat clarification.
+Human-facing concept for a stable, linkable subject such as `/Arcade/` or
+`Music`. In v1, James chose “Topic” as the user term for [[Glossary#Anchor]];
+that same-primitive implementation is historical. EFS 2.0 must preserve
+universal linkable Topics but has not frozen their Type, path grammar, or ID.
 
 ## Tombstone
 
@@ -138,7 +262,9 @@ An EFS resolver result meaning the available evidence is insufficient to prove p
 
 ## WHITEOUT
 
-Additive 10th schema (ADR-0055, landed 2026-06-23). A cross-lens negative mask — per-name deletion that hides an entry without mutating what it shadows. Schemas can be *added* freely; only changing a frozen one orphans data.
+**V1 frozen schema.** Additive 10th schema (ADR-0055), a cross-lens per-name
+negative mask that hides without mutating what it shadows. Negative masks remain
+Lens/filesystem evidence; EFS 2.0 has not frozen this schema or fold.
 
 ## Worktree
 
