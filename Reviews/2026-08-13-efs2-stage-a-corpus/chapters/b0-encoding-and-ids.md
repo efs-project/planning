@@ -778,9 +778,10 @@ function, kept below as a rejected sketch.]
   Core primitive. It accepts the same typed `AccountPrincipal calldata principal` channel,
   constructs or forwards the `TypeSchemaGroup/1` Record/envelope/intent, and calls the one
   repaired `publish(envelopeBytes, principal, intentBytes, intentWitness)` path. It neither
-  defines a side truth nor performs a later cache write. The cache is deterministic derived
-  state from the admitted full-body Record [OWNER RULING], and its materialization is
-  idempotent. The intrinsic branch is not a fourth application effect: SR-11's closed
+  defines a side truth nor performs a later cache write. The admitted full-body Record remains
+  the owner-ratified truth; the parsed cache and its atomic materialization are
+  [PROPOSAL — SR-17/B0 deterministic derived state], and materialization is idempotent. The
+  intrinsic branch is not a fourth application effect: SR-11's closed
   application-effect list remains Binding set, Binding tombstone, and Withdrawal.
 - **Usability gate.** Admission of an instance Record whose `typeSchemaId` has no materialized
   cache on that Realm fails with a typed error. A successfully admitted TypeSchemaGroup cannot

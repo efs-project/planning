@@ -371,7 +371,9 @@ outputs over these frozen blobs.
 | `CatalogMembership/1` | note OPTION(STRING(256)) | catalog REF(OBJECT); member REF(OBJECT) |
 | `Compatibility/1` | runnerProfile BYTES_FIXED(32); verdict UINT(1) [1..3] | release REF(RECORD, expected ArtifactRelease/1) |
 | `RightsEvidence/1` | rightsKind UINT(1); uri OPTION(STRING(2048)) | subject REF(ANY) |
-| `GitPushTransaction/1` | updates ARRAY(STRUCT{refName STRING(255), oldOid OPTION(DIGEST), newOid DIGEST}, max 64) | repo REF(OBJECT) |
+| `GitObject/1` | objectKind UINT(1) [1..4 = BLOB/TREE/COMMIT/TAG]; nativeOid DIGEST; payloadSize UINT(8) | payload REF(RECORD, expected ChunkTree/1) |
+| `GitObjectClosure/1` | members ARRAY(STRUCT{memberKind UINT(1), target REF}, max 16) | member REF(RECORD) |
+| `GitPushTransaction/1` | updates ARRAY(STRUCT{refName STRING(255), oldOid OPTION(DIGEST), newOid DIGEST}, max 64) | repo REF(OBJECT); objectClosure REF(RECORD, expected GitObjectClosure/1) |
 | `WikiPageRev/1` | note OPTION(STRING(256)) | page REF(OBJECT); content REF(RECORD); prev OPTION(OCCREF)(OCCURRENCE) |
 | `Issue/1` | title STRING(256); body STRING(4096) | repo REF(OBJECT) |
 | `PullRequest/1` | title STRING(256); baseRef STRING(255) | repo REF(OBJECT); patch REF(RECORD) |
@@ -394,6 +396,31 @@ particular `ArtifactClosure/1.members[*].content` uses
 `expectedType` remains one Type id or a named sentinel. Small multi-Type sets
 and semantic kind-target claims are profile checks, never implicit Core
 callbacks or an unbounded fixture exception.
+
+`GitObject/1` and `GitObjectClosure/1` are portable Git application-profile
+Types made only from ordinary Records and the generic byte layer; neither is a
+Core kind or effect. `GitObject.payload` commits the exact native payload bytes;
+`objectKind`, `payloadSize`, and that commitment deterministically reconstruct
+the canonical object preimage `ascii(kind) || 0x20 ||
+ascii(decimal(payloadSize)) || 0x00 || payload`. Profile conformance checks that
+`payloadSize` equals the `ChunkTree/1` total size and that the appropriate native
+hash over this exact preimage yields `nativeOid.digest`: `0xef01`
+`git-sha1-object` for SHA-1 or `0x0012` `sha2-256` for a SHA-256 repository.
+A BLOB, TREE, COMMIT, or TAG therefore remains exactly reconstructable without
+treating its native OID as EFS identity. Two different valid preimages with one
+colliding foreign OID remain two different EFS Records and an OID lookup returns
+both rather than choosing.
+
+`GitObjectClosure/1` is a FINAL, sorted, duplicate-free set. `memberKind=1`
+targets `GitObject/1`; `memberKind=2` targets another `GitObjectClosure/1`, so
+nesting scales beyond the per-Record 16-reference bound. The application profile
+checks target Types and bytewise `(memberKind,target RecordId)` ordering; Core
+only validates and indexes the declared bounded references. Each
+`GitPushTransaction/1.objectClosure` commits the complete object closure
+reachable from all advertised `newOid` tips, reusing earlier subclosures. The
+fixture admits and verifies that closure before admitting the push Record and
+its ref-head Bindings. Reachability validation is Git-profile/client work, not
+an application-specific Core callback or write effect. [PROPOSAL]
 
 **2.0.3 Cross-cutting conformance suite CV-\*** — run once per bakeoff cell,
 before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
@@ -454,7 +481,7 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   context; neither downstream owner receives evidence bytes. A same-Envelope
   target instead derives the pair from its authenticated header/vector and
   RecordId-matched carried body and rejects duplicate caller evidence.
-- **CV-SHADOW** — GV-9/GV-10/GV-18, SR-3/SR-10/SR-15: run the four owner-pinned
+- **CV-SHADOW** — GV-9/GV-10/GV-18, SR-3/SR-10/SR-15: run the four SR-pinned
   same-call traces. (1) bind→withdraw nets its normal posting/live delta to zero,
   tombstones the head, and appends both RAW_AUDIT revisions; (2) sequential
   same-key binds use `(NONE,xr=0)` then `((E,0),xr=1)` and finish revision 2,
@@ -487,6 +514,26 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   recomputes the signed target RecordId from TypeSchemaId/bodyHash, and confirms
   that a never-admitted target has no body/posting/live/head state. Any §3.2a
   state mismatch fails the cell.
+- **CV-GIT-STOCK** — FX-GIT/GV-16: from a clean directory with the original Git
+  repository, every EFS cache/database, and every gateway cache absent, a second
+  implementation walks the admitted ref Binding to its
+  `GitPushTransaction/1.objectClosure`, recursively loads every
+  `GitObjectClosure/1`, verifies each exact `GitObject/1` preimage against its
+  native kind and algorithm-tagged OID, and materializes a new bare object
+  database. It runs `git fsck --full`, serves that bare repository to an
+  unmodified stock `git clone`, and compares every advertised ref, native OID,
+  `git ls-tree -r` result, and checked-out file byte-for-byte with the source.
+  The fixture then admits a later push only after its new exact closure is
+  present and verified; an unmodified stock `git fetch` reaches the new tips and
+  repeats the OID/tree comparison. A missing, malformed, or mismatching native
+  object fails closed before a ref is advertised or exported. For SHA-1 BLOB,
+  TREE, COMMIT, and TAG objects the reader emits and round-trips only the valid
+  SWHID v1 projections `cnt`, `dir`, `rev`, and `rel`; a SHA-256 Git OID has no
+  SWHID v1 projection and returns typed `UNSUPPORTED_SWHID_VERSION`, never a
+  truncated or counterfeit 40-hex identifier. The synthetic SHA-1 collision
+  canary is checked as ambiguous foreign evidence and is not silently selected
+  into the canonical closure. [DERIVED INVARIANT — native Git and walk-away
+  interoperability requirement; SWHID v1 is SHA-1-only.]
 
 [PROPOSAL — suite composition; each member cites its owning chapter's vector
 category and exists so the fixture scripts stay workload-shaped instead of
@@ -537,6 +584,19 @@ publish `TypeSuccessor/1{Comment/1→Comment/2, COMPATIBLE_SUPERSET}`, write 5
 comments under /2, re-read old and new (BAKEOFF lane: "script one
 index-evolution event mid-way through the Git and Arcade fixture timelines",
 VERIFIED; under cell F4 this exercises IndexProfile coverage instead). F: 23.
+G: **unauthenticated guest/player interface** — `Guest` has no Principal,
+wallet, OS profile, or Commons dependency and imports the Realm C-1..C-7 checks;
+at a pinned basis it resolves C1's curated release rather than an unqualified
+"official" release, strictly fetches the exact closure with tampered-primary
+fallback, and verifies every executable member before launch. `RuntimeRequest/1`
+is displayed as a request, never authority; trusted local client policy chooses
+the runner and any minimal grants. `LAUNCH_DISPOSABLE` starts a disposable
+runner with no ambient signer, wallet, EFS-write, secret, decryption, storage, or
+network authority, and the capability-injection canary confirms every undeclared
+request is denied. This phase specifies the client boundary only: its runner and
+Web Client implementation are DEFERRED(V2-E6 / Stage B client lane), and Stage A
+does not claim it executed. [DERIVED INVARIANT — constitution Arcade guest-play
+trace plus the execution-authority boundary.]
 
 **Adversarial:** (i) tampered primary — primary locator serves one corrupted
 chunk: `VERIFY_RANGE` hits MISMATCH, rotates to fallback, completes A3; asserts
@@ -554,7 +614,8 @@ substitutes for the B0 Core result.
 M-PAGE (Project→Releases, target→Comments, Artifact→Locators backlinks),
 M-SEL (`B0_SELECT` SOL/TS/RS plus separately labeled client-profile rows), M-COUNT
 (endorsement liveCount before/after one E-principal withdraws), M-CLIENT
-(tampered-fallback wall time), M-STATE. Axis relevance: 1, 5, 7; Lane 7 §8
+(tampered-fallback and guest-open-to-verified-launch wall time), M-CONF
+(guest authority-denial result), M-STATE. Axis relevance: 1, 5, 7; Lane 7 §8
 LENS-NEG-1 runs in FX-LENS, not here.
 
 ---
@@ -570,26 +631,34 @@ KEY_P256, 1 ERC-1271), `Team` (ObjectGenesis + TeamMembership records),
 | Cluster | Records |
 |---|---|
 | Repo identity | `ObjectGenesis/1` RepoId — stable across all history [satisfies "stable repo identity"] |
-| Native objects | `ByteDigest/1{ALG_GIT_SHA1_OBJECT}` per commit/tree/blob OID touched (foreign digests only — Lane 8 §1.1; never EFS identity, Lane 1 §2.4) |
-| Content | Markdown/wiki page bytes as `ChunkTree/1` (+ `RepresentationBinding/1` git-blob ↔ chunk tree, Lane 8 §6 Git interop) |
-| Push | `GitPushTransaction/1` — ONE typed Record carrying all ref updates of a push = the atomic multi-ref transaction Record [DERIVED INVARIANT — constitution: "Git multi-ref and similar all-or-nothing meaning lives in one typed transaction Record", VERIFIED] |
+| Native objects | one ordinary `GitObject/1` per BLOB/TREE/COMMIT/TAG, committing kind + payload size + algorithm-tagged native OID + exact payload `ChunkTree/1`; those fields reconstruct the exact canonical object preimage and the foreign OID is never EFS identity |
+| Object closure | nested `GitObjectClosure/1` Records form the FINAL complete object set reachable from every advertised new tip; prior closures are reusable subclosures |
+| Content | Markdown/wiki page bytes are the payloads of exact BLOB `GitObject/1` Records; `RepresentationBinding/1` may additionally expose blob-content equivalence for generic file readers |
+| Push | `GitPushTransaction/1` — ONE typed Record carrying all ref updates plus the already-admitted complete `objectClosure` = the atomic multi-ref transaction Record [DERIVED INVARIANT — constitution: "Git multi-ref and similar all-or-nothing meaning lives in one typed transaction Record", VERIFIED] |
 | Ref heads | per ref: Binding at `(purpose = TypeSchemaId(GitPushTransaction/1), subject = RepoId, fieldRole = keccak256(abi.encode(DOM_FIELDROLE, keccak256(utf8(refName)))))`, `DOM_FIELDROLE = keccak256("efs2/fieldrole/1")` (Lane 6 §1.1–1.2), targeting the push Record; SR-3 `expectedRevisions[]` = replay-safe authenticated push |
 | Wiki history | `WikiPageRev/1` chain (prev = predecessor occurrence) + per-page current-rev Binding |
 | Collaboration | `Issue/1`, `Comment/1` (reused), `PullRequest/1`, `Review/1`, `ArtifactRelease/1` (repo releases), `Reaction/1`, `TeamMembership/1`, `Edit/1` (edit history on comments/issues) — all clonable: plain Records + occurrences, no Core primitive |
 | Issue status | maintainer Binding at `(purpose = TypeSchemaId(Issue/1), subject = issueRecordId-as-subject, fieldRole = 1)` → open/closed head |
 
-**Script:** A: cast/types/repo genesis/team. B: base history — 30 commits as six
-five-commit pushes. P1–P5 each update only `refs/heads/main`; P6 is the one
-designated `PUSH-WORST-20` below. Wiki: 8 page revisions across 2 pages. C:
+**Script:** A: cast/types/repo genesis/team and import the fixture from an
+ordinary stock Git repository by enumerating and reading its native object
+database. B: base history — 30 commits as six five-commit pushes. Before each
+push, admit every newly required exact
+`GitObject/1`, construct a complete nested `GitObjectClosure/1` reusing the prior
+closure, and verify it; only then admit the push Record and ref Bindings. P1–P5
+each update only `refs/heads/main`; P6 is the one designated `PUSH-WORST-20`
+below. Wiki: 8 page revisions across 2 pages. C:
 collaboration — 6 issues (2 closed via Binding), 3 PRs (patch closures,
 2 reviews each, 1 merged → push), 1 release, 12 reactions, 3 edits (edit-history
 reads must show both versions with provenance). D: index-evolution event
 (`Issue/2` + successor evidence, as FX-ARC.E). E: **walk-away reconstruction** —
 delete every client cache/db; second implementation runs `RECONSTRUCT()`; then
-re-derives a stock-git-clonable tree (commits/blobs from content bytes +
-RepresentationBindings) and byte-compares against the original working tree;
+executes `CV-GIT-STOCK` from the exact native-object closures and byte-compares
+the stock clone against the original working tree;
 issues/PRs/reviews/comments/reactions/teams/edit history all rebuilt from state
-alone [DERIVED INVARIANT — constitution Git/Markdown acceptance trace, VERIFIED].
+alone. F: admit a seventh push, again closure first, then run the stock-fetch
+half of `CV-GIT-STOCK`. [DERIVED INVARIANT — constitution Git/Markdown
+acceptance trace, VERIFIED].
 
 **Adversarial:** (i) replayed push intent (same signed intent twice) MUST-FAIL
 nonce/consumption; (ii) racing pushes — D1 and D2 race one ref with the same
@@ -599,7 +668,9 @@ typed revert carrying the current head (Lane 6 §3.5); (iii) forged-author push
 Records carrying the same (synthetically colliding) foreign OID digest coexist;
 EFS identity unaffected; the read layer shows the digest as foreign-only
 [DERIVED INVARIANT — Lane 1 §1.1 foreign-digest rule]; (v) CV-CLOCK applied to
-commit-claimed timestamps.
+commit-claimed timestamps; (vi) missing/corrupt COMMIT, TREE, BLOB, or TAG
+preimage makes the profile refuse ref advertisement/export; (vii) SHA-1 SWHID
+v1 projections round-trip while SHA-256 explicitly does not project to v1.
 
 `PUSH-WORST-20` is frozen as exactly 20 ref updates in one
 `GitPushTransaction/1`: `refs/heads/main` moves from P5's tip to P6's tip, and
@@ -609,7 +680,8 @@ ref-name order (`bench/01`…`bench/19`, then `main`). No other push is called
 worst-case, and no workload may resize or repack this designated trace.
 
 The Git push semantic unit — its `GitPushTransaction/1` Record plus the
-declared ref-head Binding updates — is `MUST_FIT_ATOMIC`. It is never retried as
+declared ref-head Binding updates — is `MUST_FIT_ATOMIC`; its immutable object
+closure is already admitted and verified before this unit begins. It is never retried as
 separate ref updates. **EIP-7825 arithmetic (in-chapter, per the exactness bar):** worst corpus push =
 20 ref updates ⇒ 1 GitPushTransaction leaf + 20 Binding leaves. Using Lane 6
 §3.6's ≤90k/Binding-leaf estimate + Lane 2 §2.5's model: 21 leaves ≈ 20×90,000 +
@@ -624,10 +696,19 @@ M-K (the separate fixed ordinary-Record comparison slice; `PUSH-WORST-20` is
 never repacked), M-PAGE (issues by repo,
 comments by issue, occurrences by author D1 = author enumeration under churn),
 M-COUNT (open-issue live counts), M-REC (reconstruction pass/fail + wall time),
-M-STATE (state growth per year of simulated history via WL-CHURN §4), plus the
+M-CONF (`CV-GIT-STOCK`: exact-object verification, `git fsck --full`, stock
+clone/fetch, OID/tree equality, SWHID-version honesty), M-STATE (state growth
+per year of simulated history via WL-CHURN §4), plus the
 Lane 5 COMPOUND gate probe: assert every ref-head and issue-list read needs ≤ 2
 page reads with single-key indexes; if any needs more, that is the evidence
 Lane 5 open item 3 awaits.
+
+This fixture specifies byte-exact Git data interoperability—including an
+ordinary stock-repository import and reconstructed bare-repository export—not a
+production forge transport. SSH/HTTP gateway service, guest Git UI, opted-in EFS
+workspace UX, and general import/export product workflows remain DEFERRED to the
+Git client/profile and V2-E6 lanes. Their implementations are not Stage A or Core
+claims.
 
 ---
 
@@ -899,10 +980,11 @@ M-CLIENT (range-verify throughput MB/s per language; resume latency), M-CONF
 
 ---
 
-### 2.9 FX-MOUNT — pinned three-host golden view (interface ONLY)
+### 2.9 FX-MOUNT — pinned three-host golden view (canonical input seam ONLY)
 
 **No mount is built in this pass** (kickoff prohibition, VERIFIED; task
-directive). The fixture freezes the INTERFACE that any later mount consumes:
+directive). The fixture freezes only the canonical raw-manifest input seam that
+a later mount consumes:
 
 ```text
 GoldenView/1 = (realmId, basisOrdinal, planId, rootClosureRecordId)
@@ -923,12 +1005,13 @@ ResolvedManifest/1 (canonical bytes; MC/1-style packed, u16-prefixed):
   u16 unknownCount ‖ UnknownEntry × unknownCount   -- UNKNOWNs are LISTED, never elided
 ```
 
-[PROPOSAL — field set chosen so the manifest carries exactly what the
-constitution's three-host trace requires visible: honest absence/UNKNOWN, exact
-enumeration, verified sizes/digests, provenance, grades. Name-collision policy,
-xattr projection, and host semantics are the mount lane's later work and are
-explicitly NOT in this interface — the manifest commits raw member names (Lane 8
-§7 rule 2).]
+[PROPOSAL — the manifest carries canonical raw inputs for honest
+absence/UNKNOWN, exact enumeration, verified sizes/digests, provenance, and
+grades. It is not the complete three-host mount interface. Portable name and
+collision mapping, stable host handles, xattr/EA projection, control-surface
+transport, verified mounted I/O, mutation failure, and Linux/macOS/Windows host
+semantics and execution are later mount-lane work. The manifest commits raw
+member names (Lane 8 §7 rule 2).]
 
 **Script:** build GoldenView over FX-ARC's release closure at a pinned basis;
 two implementations independently materialize `ResolvedManifest/1` —
@@ -941,7 +1024,7 @@ exactly (basis-pinned determinism).
 **Measurements fed:** M-CLIENT (materialization read count + wall time), M-CONF
 (byte-identity ×2 implementations ×3 languages; UNKNOWN listing).
 
-The `u16 algCode` and reversible provenance fields are corpus-interface bytes;
+The `u16 algCode` and reversible provenance fields are corpus input-seam bytes;
 implementing this repaired layout requires the FR-3 corpus-version bump before
 any measurement is compared.
 
@@ -1113,7 +1196,7 @@ MeasurementRow {
 ```
 
 `fixtureId` names the exact corpus source, not merely its family. The closed
-values are the ten `FX-*` ids in §2, the fifteen `CV-*` ids in §2.0.3,
+values are the ten `FX-*` ids in §2, the sixteen `CV-*` ids in §2.0.3,
 `GV-1..GV-18`, `H-JCS`, `H-MANIFEST`, `H-RESULTREG`, `H-OUTCOME`, `H-STATE`,
 `H-DOMTABLE`, `H-CELLS`, the four `WL-*` ids in §4, and `CORPUS` for a
 corpus-wide bundle/compile statistic. A row with `fixtureId="CV"` is malformed.
@@ -1618,11 +1701,11 @@ The compact contract other chapters and Stage B rely on:
   the sole Core `publish` entrypoint.
 - **Fixture IDs and interfaces** (§2): FX-ARC, FX-GIT, FX-EAP [PROVISIONAL],
   FX-NANDA, FX-LENS, FX-TOPIC, FX-PRIV, FX-50GB, FX-MOUNT (GoldenView/1 +
-  ResolvedManifest/1 byte layout — interface only), FX-BROWSE (retained thin;
+  ResolvedManifest/1 byte layout — canonical raw-manifest input seam only), FX-BROWSE (retained thin;
   guest checks imported from FX-NANDA.E). Cross-cutting suite CV-RAIL /
   CV-PID160 / CV-AUTHCHAIN / CV-XREALM / CV-SUBSET / CV-CLOCK / CV-7702 /
   CV-WITHDRAW / CV-SPARSE-ADMIT / CV-PREWITHDRAW / CV-SHADOW / CV-DIGEST-LOOKUP /
-  CV-LAST-LIVE-COUNT / CV-SCHEMA-CAP / CV-RECON runs once per cell.
+  CV-LAST-LIVE-COUNT / CV-SCHEMA-CAP / CV-RECON / CV-GIT-STOCK runs once per cell.
 - **MeasurementRow** (§3.2): the one table shape for every cell × fixture ×
   workload, with exact `fixtureId/caseId/vectorId/stepIndex`, canonical
   `inputDigest`, binary result-registry/outcome encoding, logical

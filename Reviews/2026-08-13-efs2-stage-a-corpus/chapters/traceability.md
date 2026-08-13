@@ -44,7 +44,7 @@ GAP with a disposition proposal.
   (bk §4: `KSTAR_1 … FRESH_5/REENDORSE_5 … I_17`) when the test is a
   measurement, not a byte vector.
 - **Fixture** — `FX-ARC, FX-GIT, FX-EAP [PROVISIONAL], FX-NANDA, FX-LENS,
-  FX-TOPIC, FX-PRIV, FX-50GB, FX-MOUNT (interface only), FX-BROWSE` and
+  FX-TOPIC, FX-PRIV, FX-50GB, FX-MOUNT (canonical raw-manifest input seam only), FX-BROWSE` and
   workloads `WL-SPRAY / WL-CHURN / WL-HOT / WL-DEAD-LOCATOR` (hf §2/§4).
   "all" = every fixture's
   write path exercises it.
@@ -209,10 +209,10 @@ in document order (VERIFIED).
 
 | ID | Requirement | Label | B0 realization | Vector | Fixture | Falsifier | Status |
 |---|---|---|---|---|---|---|---|
-| C-FS-1 | Same pinned resolved view projectable read-only on Linux/macOS/Windows: honest absence, stable handles, verified reads, portable names, bounded metadata | [OWNER RULING — 2026-07-22 mount requirement (adopted); R-O10 register:236] | FX-MOUNT interface only: GoldenView/1 + ResolvedManifest/1 canonical bytes (hf §2.9); host adapters deliberately NOT built (kickoff prohibition) | M-CONF (byte-identity ×2 impls ×3 langs) | FX-MOUNT | — | DEFERRED(mount lane; V2-F2 trace) — manifest seam COVERED now so the lane cannot drift |
-| C-FS-2 | Bounded public scalars → read-only xattrs/EAs; lossless paged control/API surface for the full graph/provenance/grades | [OWNER RULING — 2026-07-22 ("xattrs are not the canonical property model")] | hf §2.9 explicitly excludes xattr projection; the lossless surface = the chapters' read ABI + ResolvedManifest | GV-14 (control-surface half) | FX-MOUNT | — | DEFERRED(mount lane, named in hf §2.9) — the lossless control surface half COVERED now |
+| C-FS-1 | Same pinned resolved view projectable read-only on Linux/macOS/Windows: honest absence, stable handles, verified reads, portable names, bounded metadata | [OWNER RULING — 2026-07-22 mount requirement (adopted); R-O10 register:236] | hf §2.9 specifies only GoldenView/1 + canonical raw-name ResolvedManifest/1 input bytes; it explicitly excludes portable collision mapping, stable host handles, mounted-I/O semantics, and host adapters | M-CONF (raw-manifest byte identity ×2 impls ×3 langs) | FX-MOUNT | — | DEFERRED(mount lane; V2-F2 trace) — only the canonical raw-manifest input seam is specified here |
+| C-FS-2 | Bounded public scalars → read-only xattrs/EAs; lossless paged control/API surface for the full graph/provenance/grades | [OWNER RULING — 2026-07-22 ("xattrs are not the canonical property model")] | the generic Core read ABI and raw ResolvedManifest are candidate inputs; hf §2.9 explicitly excludes xattr/EA projection and host control-surface transport | GV-14 (Core read input only) | FX-MOUNT | — | DEFERRED(mount lane) — xattr/EA mapping and the lossless host control/API surface are not specified as complete here |
 | C-FS-3 | Generic Types/indexes express Arcade, Git/Markdown history, EAP, Nanda, comments/collaboration, anonymous browse, contract config, Topics, large-file Locators — zero app-specific Core contracts or private indexes | [DERIVED INVARIANT — const.; kickoff fixture rule] | hf §0 rule (fixture unable to express generically = reportable falsifier finding, never a corpus patch); all ten fixtures built from generic surface | all GV via fixtures | FX-ARC, FX-GIT, FX-EAP [PROVISIONAL], FX-NANDA, FX-TOPIC, FX-BROWSE, FX-LENS, FX-50GB | CF-9 (architecture-level) | COVERED |
-| C-FS-4 | Git keeps native OIDs and SWHIDs; EFS adds repo identity, collaboration, placement, authority, availability, bounded queries — no renaming Git objects | [OWNER RULING — 2026-08-07 GitHub-class direction + const. bullet] | FX-GIT (ALG_GIT_SHA1_OBJECT foreign digests; ObjectGenesis repo id; push/issue/PR/review/reaction/team/edit clusters) | GV-16 (digest projections); CV-CLOCK on commit timestamps | FX-GIT | CF-9; FX-GIT adversarial iv (SHA-1 honesty) | COVERED |
+| C-FS-4 | Git keeps native OIDs and SWHIDs where the standard applies; EFS adds repo identity, collaboration, placement, authority, availability, bounded queries — no renaming Git objects | [DERIVED INVARIANT — constitution Git bullet + native Git interoperability; the 2026-08-07 owner ruling protects forge expressibility, not this carrier mechanism] | FX-GIT application-profile `GitObject/1` exact BLOB/TREE/COMMIT/TAG preimages + nested complete `GitObjectClosure/1`; foreign algorithm-tagged OIDs never become EFS identity; SWHID v1 projection is SHA-1-only | GV-16; CV-GIT-STOCK; CV-CLOCK | FX-GIT | CF-9; FX-GIT adversarial iv/vi/vii | COVERED at specification/interface level; product Git surfaces are AT-9b |
 
 ---
 
@@ -231,14 +231,16 @@ specified and wired, DEFERRED when its executing lane is out of this pass.
 | AT-5 | Type/scalar/backlink/set/Lens reads paginate at a pinned basis; truncation/missing coverage → PARTIAL/UNKNOWN, never empty | idx §5/§7; lens §7.2 | GV-14, GV-13 | read matrix; WL-SPRAY; WL-DEAD-LOCATOR (total visits + cursor) | CF-6 | COVERED |
 | AT-6 | EOA + ERC-1271 writes preserve author/actor/payer separation; forged descriptor/header chains fail before witness verification; later account/Core upgrades never alter recorded basis | prin §3–§5; auth §4; realm §7; SR-13/SR-14 | GV-5, GV-6, GV-12 | CV-AUTHCHAIN, CV-RAIL, CV-7702 | CF-7; KA-5/6/7 | COVERED |
 | AT-7 | Contract resolves one slot through 1/8/32/64-Principal plans in bounded gas; beneficiary-supplied plan cannot authorize the beneficiary | lens §7–§9 | GV-13 | FX-LENS grid + LENS-NEG-1 | CF-8; AA-3 | COVERED (gas rows are Stage B measurement by design) |
-| AT-8 | Arcade full trace without an Arcade Core primitive | candidate worked example realized in hf §2.1 | GV-16 members | FX-ARC (incl. tampered-primary, fake-release, gate refusal) | CF-9; KA-11 | COVERED |
-| AT-9 | Git/Markdown: stable repo id, native OIDs, replay-safe push, atomic multi-ref, wiki history, clonable collaboration, walk-away reconstruction — no Git Core primitive | hf §2.2 (`MUST_FIT_ATOMIC` push unit; over-cap never split) | GV-16; CV-CLOCK; CV-RECON | FX-GIT | CF-9, CF-13 | COVERED |
+| AT-8a | Arcade generic Core/profile seam: Project, Release, exact closure, two locators, curator selection, evidence, tampered-primary rejection/fallback, and a specified unauthenticated no-ambient-authority launch boundary need no Arcade Core primitive | hf §2.1 phases A–G; `RuntimeRequest/1` is request not authority | GV-16 | FX-ARC (tampered primary, fake release, gate refusal, guest boundary) | CF-9; KA-11 | COVERED at specification/interface level |
+| AT-8b | The self-hostable guest Arcade player, disposable runner, and capability cage execute the phase-G interface | not a Stage A artifact | — | FX-ARC.G supplies the future conformance script | — | DEFERRED(V2-E6 / Stage B client lane) |
+| AT-9a | Git/Markdown data/profile seam: stable repo id, exact native BLOB/TREE/COMMIT/TAG bytes and OIDs, SHA-1-only SWHID v1, closure-before-advertise, stock clone/fetch conformance, replay-safe authored ref transaction, atomic multi-ref, wiki/collaboration history, and walk-away reconstruction — no Git Core primitive | hf §2.2 (`GitObject/1`, nested complete `GitObjectClosure/1`, `MUST_FIT_ATOMIC` ref unit); product surface excluded | GV-16; CV-GIT-STOCK; CV-CLOCK; CV-RECON | FX-GIT | CF-9, CF-13 | COVERED at specification/interface level; execution is Stage B |
+| AT-9b | Production stock-push/intake gateway, guest file/commit/diff UI, opted-in EFS workspace UX, and general import/export workflows | not a Stage A or Core artifact; data interop seam is AT-9a | — | FX-GIT explicitly names the boundary | — | DEFERRED(V2-E6 / Git client-profile lane) |
 | AT-10 | EAP: definitions/awards/lifecycle/local gate generic; hostile subject spam cannot unbound the authoritative point check | hf §2.3 (issuer-Binding O(1) gate design) | GV-18 | FX-EAP + WL-SPRAY (2,000-spam assertion, gate gas ±1 SLOAD) | CF-9 | COVERED **[PROVISIONAL — PM directive: excluded from adopt/kill until the durable Codex brief lands; hf FR-6]** |
 | AT-11 | Nanda: provider/service/skill, plural catalogs, yanking, guest inspection; discovery never grants execution | hf §2.4 | GV-16 gate member | FX-NANDA | CF-9 | COVERED |
 | AT-12 | 50 GB Locator before hashing; additive closure; partial/resume, funding/durability grades, gateway fallback, range proof; unverified executables never run | cont §8; hf §2.8 | GV-16 | FX-50GB | KA-11 | COVERED |
 | AT-13 | Same portable Record (+source Occurrence) copied into two Realms; admissions/bindings differ; clients show source vs destination authority, never invented global state | realm §4.2; auth §8 | GV-7, GV-17 | CV-XREALM | KA-8; V3_COPY (hard gate) | COVERED |
-| AT-14 | One golden pinned view through shell + GUI on three hosts, portable names, stable handles, verified ranges, visible UNKNOWN, bounded xattrs, lossless control surface, mutations fail | ResolvedManifest/1 seam only (hf §2.9) | M-CONF byte-identity | FX-MOUNT | — | DEFERRED(mount lane — three-host execution explicitly out of this pass per kickoff prohibition; interface pinned so the lane cannot drift) |
-| AT-15 | Web Files and OS Files produce the same canonical resolved manifest for same Realm/policy/basis | ResolvedManifest/1 byte-identity IS the parity seam (hf §2.9) | M-CONF ×2 implementations ×3 languages | FX-MOUNT | — | COVERED at seam level; product parity run DEFERRED(V2-E6) |
+| AT-14 | One golden pinned view through shell + GUI on three hosts, portable names, stable handles, verified ranges, visible UNKNOWN, bounded xattrs, lossless control surface, mutations fail | hf §2.9 supplies only the canonical raw-manifest input seam; portable names/collisions, handles, mounted-I/O verification, xattrs/control surface, read-only enforcement, host adapters, and execution are excluded | M-CONF raw-manifest byte identity only | FX-MOUNT | — | DEFERRED(mount lane — the complete three-host interface and execution remain open) |
+| AT-15 | Web Files and OS Files produce the same canonical resolved manifest for same Realm/policy/basis | hf §2.9 specifies the canonical raw-manifest equality input, not either product package | M-CONF ×2 manifest implementations ×3 languages | FX-MOUNT | — | COVERED at raw-manifest specification level; Web/OS product implementations DEFERRED(V2-E6) |
 | AT-16 | Privacy fixture: encrypt-before-sign, indexes reveal only accepted metadata, no cross-profile oracle for equal low-entropy plaintext; key-role misuse, AEAD transplant, batch linkage, observer disclosure all tested | hf §2.7; enc §1.5 | GV-15 | FX-PRIV | KA-10 | COVERED at seam level; constructions DEFERRED per C-PS-4b (key-role misuse vectors bind when the profile pins) |
 
 ## 4. Constitution — not-frozen list, freeze discipline, open questions
@@ -283,7 +285,7 @@ evidence unless re-earned; requirement-level content survives. Labels below are
 
 | ID | Ruling (date, item) | B0 realization | Vector | Fixture | Falsifier | Status |
 |---|---|---|---|---|---|---|
-| OR-1 | Chains don't die — drop dead-chain machinery; keep cross-Realm reach + pruning insurance (2026-07-10) | realm §4 (QR-1 extends it per-Realm — the RULINGS-lane "unowned Realm-mortality scope" drop is closed by design, no new owner decision needed); §4.2 H-5 (no dead-chain machinery reintroduced); QR-6 (pruning insurance kept for the OTHER reason, as ruled) | GV-17 | — | AA-4 | COVERED |
+| OR-1 | Historical chains-don't-die ruling: drop broad dead-chain machinery; keep cross-Realm reach + pruning insurance (2026-07-10) | realm §4 carries qualifying-Realm assumptions, honest `UNAVAILABLE_SOURCE_BASIS`, no broad survival machinery, and the separately motivated pruning/reach seams. Applying the historical assumption independently to every qualifying Realm is A2's unadopted proposal, not part of this owner ruling; B0 behaves honestly under either later scope answer | GV-17 | — | AA-4 | COVERED for the historical DROP/KEEP ruling; A2 remains unadopted and does not block Stage B |
 | OR-2 | KEL: design it; bare-EOA day-one; adversarial track before freeze (2026-07-10; mechanism reopened 2026-08-12) | prin §6 seam + §2.2 append-only kinds; day-one = AccountPrincipal/1 | GV-12 GRAD-SEAM slot | — | AA-6/AA-7 | DEFERRED(future succession/KEL round with its own owner review — vf open item 8); the graduation seam itself COVERED now (C-AA-4) |
 | OR-3 | Lens scale concern: ~50+ attesters normal; MAX_LENSES=20 conflict; lens-object canonical encoding needed (2026-07-10) | Plan encoding = lens §3.2; Core cap/grid = 64 and 1/8/32/64; separate TS/RS client grid = 50/100/256 on mobile+desktop (hf §2.5) | GV-13 | FX-LENS two grids | — | COVERED at Stage-A interface level; execution is Stage B |
 | OR-4 | Public by default + named sensitivity-policy layer; client/OS convention, not freeze-bound (2026-07-10) | invariant half in FX-PRIV.1; layer itself out of Core by the ruling's own terms | GV-15 | FX-PRIV | KA-10 | Invariant COVERED; layer DEFERRED(client/OS lane — see C-PS-2b) |
@@ -305,7 +307,7 @@ evidence unless re-earned; requirement-level content survives. Labels below are
 | OR-18 | No body-elision — ETCH IT (record bodies, not file bytes) (2026-07-15) | enc §2.6 [OWNER RULING constant]; lens §4.1 (plans full-body) | GV-17 (walk needs zero logs) | CV-RECON | CF-10 | COVERED |
 | OR-P | Persona model: one-root mainstream recovery default; unlinkable personas opt-in; true isolation = separate roots (2026-07-15/16; mechanism reopened) | prin §6.3 (unlinkable-persona probe against the graduation seam; reconciles with OR-12a metadata boundary) | — | — | AA-6 | DEFERRED(KEL round, same home as OR-2); the §6.3 probe COVERED now |
 | OR-R | Passkey-sync mainstream recovery + independent cold factor; lone synced passkey REJECTED as sole root (2026-07-16) | KEL-round composition question; no B0 surface | — | — | — | DEFERRED(KEL round — recovery composition is convention, not Etched, per the ruling itself) |
-| OR-M | Three-host read-only mount REQUIRED; FUSE = adapter not canonical API; xattrs bounded; Plan 9 precedent only (2026-07-22) | see C-FS-1/C-FS-2 | M-CONF | FX-MOUNT | — | DEFERRED(mount lane) — interface pinned now (= C-FS-1/2) |
+| OR-M | Three-host read-only mount REQUIRED; FUSE = adapter not canonical API; xattrs bounded; Plan 9 precedent only (2026-07-22) | see C-FS-1/C-FS-2; only the canonical raw-manifest input seam is specified now | M-CONF raw-manifest equality | FX-MOUNT | — | DEFERRED(mount lane) — host projection/interface semantics and execution are not closed by Stage A |
 | OR-X | 2026-07-23 corrections: cross-chain bridges/hubs/locators UNDECIDED (research stop rule, not prohibition); not-every-chain is NOT a requirement | B0 builds no bridge/hub; cross-Realm = copy + destination grading (realm §4.2) — the undecided space is left genuinely open | GV-7 | CV-XREALM | — | COVERED (boundary honored, nothing foreclosed) |
 | OR-G2 | GitHub-class collaboration stays expressible; freeze work must keep showing forge objects expressible; fixtures carry forge objects (2026-08-07) | FX-GIT collaboration cluster (Issue/PR/Review/Reaction/Team/Edit history, all clonable) | CV-RECON (collab data rebuilt with the code) | FX-GIT.C/.E | CF-9 | COVERED |
 | OR-B1 | 2026-08-12 greenfield boundary: one successor; evidence-not-baseline; label discipline | every chapter's header + label key; this table | — | — | — | COVERED (process, observable in the artifacts) |
@@ -405,14 +407,15 @@ cross-checks, not rows):
 |---|---|---|---|---|
 | §1 Layer obligations (C-LY, incl. a/b split) | 5 | 4 | 1 (C-LY-2b → V2-E6) | 0 |
 | §2 Constitution bullets (C-UI 5, C-TD 5, C-AA 6, C-TX 4, C-IX 7, C-LN 8, C-HR 4, C-FB 5, C-PS 10, C-FS 4) | 58 | 51 | 7 (C-LN-2b/3b/5b, C-PS-2b/4b, C-FS-1/2) | 0 |
-| §3 Acceptance traces (AT-1..16) | 16 | 15 (AT-10 PROVISIONAL) | 1 (AT-14 → mount lane) | 0 |
+| §3 Acceptance traces (AT-1..16, with AT-8a/b and AT-9a/b split) | 18 | 15 (AT-10 PROVISIONAL) | 3 (AT-8b/AT-9b → V2-E6 client/profile lanes; AT-14 → mount lane) | 0 |
 | §5 Owner rulings (OR) | 33 | 28 | 5 (OR-2, OR-G, OR-P, OR-R, OR-M) | 0 (OR-12b's open owner call tracked as G-6) |
 | §6.1 SURVIVORS certified rows | 24 | 22 | 2 (S-RP7, S-RO10) | 0 |
 | §6.2 SURVIVORS flagged rows | 13 | 7 | 2 (S-SUCC, S-E2) | 4 (S-RK6, S-RP3, S-RX5, S-RO8 → G-2..G-5) |
-| **Total** | **149** | **127** | **18** | **4** |
+| **Total** | **151** | **127** | **20** | **4** |
 
 Notes on the count: (i) split rows mean one *requirement* can appear as one
-COVERED and one DEFERRED row — that is the point of §0.3, so "127 COVERED"
+COVERED and one DEFERRED row — including the Arcade and Git product halves
+split in AT-8a/b and AT-9a/b — so "127 COVERED"
 must never be quoted as "127 requirements fully done"; (ii) the four active
 GAP rows map to G-2..G-5; G-1 is retained as a resolved historical key, while
 G-6 (an unanswered owner call) and G-7 (a deferral annotation on AT-16) are register-only entries without their own
@@ -424,11 +427,12 @@ reads DEFERRED but its forbidden-rule (no signature-derived archive roots) is
 restated nowhere yet — G-3's disposition explicitly carries it, which is the
 strictest honest reading.
 
-The two SERIOUS RULINGS-lane drops (item-F equivocation; chains-don't-die
-Realm scope) and three SERIOUS SURVIVORS absences (succession, lens scale,
-R-D9) all trace to explicit closures above (OR-F, OR-1, S-SUCC, S-RL4a/b,
-S-RD9F). The remaining active GAP risk is exactly G-2..G-5; G-1 is resolved,
-and G-6/G-7 remain register-only routing/deferral annotations.
+The item-F RULINGS-lane drop and three SERIOUS SURVIVORS absences (succession,
+lens scale, R-D9) trace to explicit closures above (OR-F, S-SUCC, S-RL4a/b,
+S-RD9F). OR-1 carries the historical chains-don't-die DROP/KEEP ruling while
+leaving its per-Realm extension explicitly unadopted as A2; it is no longer
+presented as silently closed. The remaining active GAP risk is exactly G-2..G-5;
+G-1 is resolved, and G-6/G-7 remain register-only routing/deferral annotations.
 
 ## 9. Gate-coverage map
 
@@ -444,7 +448,7 @@ scope, VERIFIED):
 | V2-E4 Type/index budget | Closed 2-byte IndexSpec and ReferenceRole selector grammar; fan-out/16-ref bound; page ABI; selector sentinel; exact F4 identity/coverage/backfill/page cell; ONE bundle and adversarial workloads; budget number remains Stage B | enc §3; idx §§4–10; GV-2/GV-14; hf §3–§4 |
 | V2-E5 Realm bootstrap & authority history | RealmDescriptor/1 plus exact protocol 0.0 seven-field InitConfig/hash/GenesisFactsView/revision-1 policy+authority; canonical authority ref; direct/UUPS EIP-1967 facts and getters; enumerable paired revision/AuthorityTransition history; C-1..C-7, QR-1..8, admission/finality split, U-1..6, and unsigned-carrier/receipt-grounded reconstruction | realm (all); GV-17; CV-RECON; hf §3.2a |
 | V2-E8 (partial) | Adapter seam specified from three sides (schema-string mapping + UID non-identity, enc §9; receipt projection, realm §8.3; principal mapping, prin §9); recursive-Type safety (GV-2); no-callback rule (enc §2.8); loss-map itself deferred to V2-E8 proper per PM directive | enc §9/§2.8; realm §8.3; prin §9 |
-| V2-E6 / V2-E7 | Out of scope by directive; DEFERRED rows above name them as homes. C-PS-8's client-policy seam is COVERED, while its UI implementation remains V2-E6 | — |
+| V2-E6 / V2-E7 | Out of scope by directive; DEFERRED rows above name them as homes. C-PS-8's client-policy seam is COVERED, while its UI implementation, FX-ARC guest player/runner (AT-8b), and Git gateway/guest/workspace/import-export product surfaces (AT-9b) remain V2-E6/client-profile work | — |
 | **V2-F1 feed** | The freeze gate consumes: this table + the eleven chapters + Stage B's minted vectors/measurements + the §7 gap closures + the succession vector classes (vf open item 8, freeze-blocking) + independent review. Stage A's claim is exactness, not freeze-readiness | — |
 
 ---
@@ -454,7 +458,8 @@ scope, VERIFIED):
 The compact contract other chapters (synthesizer, red team, Stage B) rely on:
 
 - **Row identifiers** `C-LY-*, C-UI-*, C-TD-*, C-AA-*, C-TX-*, C-IX-*, C-LN-*,
-  C-HR-*, C-FB-*, C-PS-*, C-FS-*` (constitution), `AT-1..16` (acceptance
+  C-HR-*, C-FB-*, C-PS-*, C-FS-*` (constitution), `AT-1..16` including
+  `AT-8a/b` and `AT-9a/b` (acceptance
   traces), `OR-*` (owner rulings), `S-*` (SURVIVORS rows), `G-1..G-7` (gaps) —
   stable citation keys for review findings and Stage B reports.
 - **Status vocabulary** {COVERED, DEFERRED(home), GAP(disposition)} with the
@@ -495,3 +500,35 @@ The compact contract other chapters (synthesizer, red team, Stage B) rely on:
 5. **Count drift** — §8's counts are mechanically tallied over this document; if the
    red team adds/splits rows, the summary table must be re-tallied in the same
    edit (a stale count is itself a table defect). Closed by: whoever edits.
+
+## Final requirements/honesty assembly report — 2026-08-13
+
+This repair is confined to Stage A candidate and assembly artifacts. It adopts
+no mechanism, changes no shared `Designs/efsv2/` spine file, adds no Git or
+Arcade Core primitive, and makes no product-completion claim.
+
+- FX-GIT now carries exact native BLOB/TREE/COMMIT/TAG preimages through
+  ordinary `GitObject/1` Records, generic `ChunkTree/1` byte commitments, and
+  nested FINAL `GitObjectClosure/1` Records. `CV-GIT-STOCK` specifies clean
+  second-implementation reconstruction, `git fsck --full`, stock clone, later
+  push/fetch, OID/tree equality, closure-before-advertise, and SHA-1-only SWHID
+  v1 projections. Production Git UI, gateway/intake, workspace, and
+  import/export workflows remain AT-9b/V2-E6 client-profile work. [PROPOSAL —
+  application-profile carrier and fixture mechanism.]
+- FX-ARC phase G now specifies the unauthenticated guest/player boundary with
+  no wallet, OS, Commons, or ambient authority; its Web Client, disposable
+  runner, and capability-cage implementation remain AT-8b/V2-E6 work.
+  [DERIVED INVARIANT — acceptance-trace honesty repair.]
+- FX-MOUNT is narrowed to a canonical raw-manifest input seam. Portable host
+  names/collisions, stable handles, xattrs/control API, mounted-I/O semantics,
+  read-only enforcement, and three-host execution remain explicitly deferred.
+  [DERIVED INVARIANT — split-row honesty repair.]
+- OR-1 now separates James's historical chains-don't-die DROP/KEEP ruling from
+  A2's unadopted per-Realm scope proposal; the parsed schema cache and exact Git
+  carrier mechanisms retain proposal rather than owner authority. [DERIVED
+  INVARIANT — authority-scope audit against the cited ruling and A2.]
+
+The AT-8 and AT-9 product halves were split rather than hidden inside COVERED
+rows. The mechanical trace tally is therefore **151 rows / 127 COVERED / 20
+DEFERRED / 4 GAP**. The four active GAPs remain exactly G-2..G-5; none of this
+assembly report closes or adopts them.

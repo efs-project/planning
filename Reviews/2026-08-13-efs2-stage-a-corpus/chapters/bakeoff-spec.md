@@ -845,7 +845,7 @@ complete 64-row B0/F1 table, `coreCallCount`, and `aggregatorGas`; omitting any
 integer k or selecting points after observing results invalidates the report.
 Every affected report carries the atomic schema-group cap result plus the
 `CV-SPARSE-ADMIT`, `CV-PREWITHDRAW`/`T4-MAX-BODY`, `CV-SHADOW`, `CV-DIGEST-LOOKUP`,
-`WL-DEAD-LOCATOR`, and `CV-LAST-LIVE-COUNT` outcomes; a cell that cannot
+`CV-GIT-STOCK`, `WL-DEAD-LOCATOR`, and `CV-LAST-LIVE-COUNT` outcomes; a cell that cannot
 implement the repaired semantic test is blocked rather than silently omitted.
 The machine evidence is the harness §3.2 restricted-JCS measurement file in
 strict `MeasurementRowKey` order; bare `fixtureId="CV"`, duplicate keys, or a

@@ -766,7 +766,8 @@ member level (Stage B may add members, never remove).
   substitution" attack; constitution Large-content trace; owner ruling item C.]
 - **Shape:** per content §13 — `ByteDigestValue` codecs; `verifyChunk(root,
   n, chunkSize, totalSize, index, chunk, proof) → bool`; closure bodies; and
-  two non-interchangeable selection suites:
+  FX-GIT's application-profile `GitObject/1` exact native-object preimages and
+  nested `GitObjectClosure/1` bodies; and two non-interchangeable selection suites:
 
   ```text
   B0_SELECT:          SOL/TS/RS; one declared u64 score field (or SCORE_LATEST);
@@ -782,7 +783,10 @@ member level (Stage B may add members, never remove).
   structural error rejects at admission, while every content-only failure is
   admitted as immutable evidence but returns the exact bounded
   `PROFILE_MALFORMED(reason)`/ineligible result; `SELECT_PROFILE_V2`, if included, is compared only between
-  TS/RS under one explicit profile, Plan, and basis.
+  TS/RS under one explicit profile, Plan, and basis. Exact BLOB/TREE/COMMIT/TAG
+  preimages reproduce their algorithm-tagged native Git OIDs; a clean second
+  implementation's object database passes `git fsck --full`, stock clone, and
+  later stock fetch with identical refs/OIDs/trees.
 - **Members:** digest table round-trips + multihash/ni: projections; globally
   unknown digest code or wrong digest length is Core structural rejection,
   while a globally known algorithm outside the content profile is admitted
@@ -809,7 +813,15 @@ member level (Stage B may add members, never remove).
   PARTIAL-labeled result, all-MISMATCH ⇒ `CONTENT_MISMATCH`, and claimed-time
   manipulation does not move ranking (GV-11 cross-list);
   [FIXTURE] Arcade tampered-primary trace (A2 MISMATCH rotation → fallback →
-  A3), resume-from-different-client, executable gate refuses at k = n−1.
+  A3), resume-from-different-client, executable gate refuses at k = n−1;
+  [FIXTURE] Git exact-object members for BLOB/TREE/COMMIT/TAG include minimal
+  canonical native headers, payload-length mismatch, kind mismatch, one-bit
+  preimage corruption, absent closure member, closure ordering/duplicate/nesting,
+  and closure-before-ref-advertise. SHA-1 objects project and round-trip only the
+  SWHID v1 `cnt/dir/rev/rel` forms; SHA-256 Git OIDs return
+  `UNSUPPORTED_SWHID_VERSION` for v1 and are never truncated to 40 hex. A
+  synthetic same-SHA-1/different-preimage pair remains two EFS Records and an
+  ambiguous foreign-OID lookup, not a silently selected object.
   `reconciles: RP-1,5,18`; `requiresPins: SR-1, SR-5, SR-18a, SR-18c`.
 
 ### GV-17 Realm descriptor, bootstrap, confusion attacks, reconstruction
