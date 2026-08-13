@@ -78,3 +78,7 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 
 - [`2026-08-07-efs-v2-to-15-deep-dive.md`](./2026-08-07-efs-v2-to-15-deep-dive.md) — contraction pass after dropping portable data from the near-term bridge: recommends an additive sibling EAS profile with stable DataId lineages, body-bound RecordVersionIds, four semantic roles, explicit receipt folding, honest reads/trust source, and one immutable shared router over a bounded on-chain Type/Shape/binding descriptor; keeps Arcade identities above the core; proves 1.5 is viable but not an SDK alias and defines the finite freeze/fork package.
 - [`2026-08-07-efs-v2-to-15-corpus/`](./2026-08-07-efs-v2-to-15-corpus/README.md) — v2 disposition ledger, actual-v1/live-Sepolia feasibility and migration boundary, Arcade/Nanda/Git/wiki/file/schema traces, and the integrated adversarial review record.
+
+### EFS 2.0 Core engineering pass — Stage A corpus (2026-08-13)
+
+- [`2026-08-13-efs2-stage-a-corpus/`](./2026-08-13-efs2-stage-a-corpus/) — Fable 5's Stage A of the commissioned EFS 2.0 core engineering pass ([[fable-efs2-core-engineering-kickoff]]): intake audit, the B0 baseline chapter set with seam pins SR-1..SR-18, bakeoff/harness/vector/traceability specs, and the evidence corpus (standards audit, carry-in register, intake + red-team findings, proposed spine edits). **Read [`STATUS.md`](./2026-08-13-efs2-stage-a-corpus/STATUS.md) first — the repair round was cut off mid-flight, so no chapter is review-ready.** Nothing landed into the EFS 2.0 spine; no shared design file was edited.
