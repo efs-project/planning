@@ -166,11 +166,16 @@ struct LeafBody {
     bytes   canonicalBody; // opaque to this chapter; bounded (§2.5)
 }
 
+struct TargetRecordCommitment {
+    bytes32 typeSchemaId;
+    bytes32 bodyHash;              // keccak256(canonicalBody); body is not carried
+}
+
 struct TargetEnvelopeEvidence {          // unsigned carriage for §3.3 T4 only
     uint16         withdrawalLeafIndex;  // selected Withdrawal leaf this proves
     EnvelopeHeader header;
     bytes32[]      recordIds;            // FULL committed vector
-    LeafBody       targetBody;           // exactly target leaf; RecordId-matched
+    TargetRecordCommitment targetCommitment;
     AccountPrincipal targetPrincipal;
     bytes          witness;
 }
@@ -199,8 +204,14 @@ for every carried leaf, `recordIdOf(bodies[j].typeSchemaId, bodies[j].canonicalB
 `1 ≤ recordIds.length ≤ MAX_ENVELOPE_LEAVES`, every evidence witness is
 `≤ MAX_WITNESS_BYTES`, and
 `Σ abi.encode(targetEvidence[j]).length ≤ MAX_ENVELOPE_BODY_BYTES`, else
-`E_TARGET_EVIDENCE`. These reuse the existing 64-leaf and 8,192-byte Stage B
-hypotheses; target evidence creates no unbounded secondary carriage surface.
+`E_TARGET_EVIDENCE`. The commitment pair is fixed at 64 bytes and never carries
+the target canonical body. Maximal legal `abi.encode(evidence)` is exactly
+`32 + 384 + 2,080 + 1,184 + 4,128 = 7,808` bytes: outer dynamic-struct offset,
+fixed struct head, 64-entry vector, maximal valid RSA `AccountPrincipal` (empty
+origin plus 1,024-byte key), and maximal witness. The ERC-1271 alternative has
+a nonempty origin but only a 20-byte account and is smaller. The maximal item therefore
+fits the 8,192-byte aggregate evidence cap independently of a target body's
+legal size. The 16,384-byte whole-wire cap still applies to the enclosing call.
 These are decoding and bounded-carriage checks and therefore run on every call,
 including an all-selected-ACTIVE retry. They do **not** perform the semantic
 one-to-one match below.
@@ -212,7 +223,7 @@ Envelope-header availability,
 increasing `withdrawalLeafIndex` order and bind one-to-one to exactly the newly
 accepted Withdrawal leaves whose target transition is
 `NEVER_ADMITTED -> PRE_WITHDRAWN` **and** whose authenticated target bundle
-(header, full vector, exact RecordId-matched target body) is not otherwise
+(header, full vector, authenticated TypeSchemaId/bodyHash commitment) is not otherwise
 available from persisted or staged state. An ACTIVE duplicate
 source occurrence, a target whose complete authenticated bundle is already
 persisted/staged (including a sibling whose exact body is carried in the
@@ -229,7 +240,8 @@ or non-Withdrawal evidence on the non-idempotent path reverts
 `E_TARGET_EVIDENCE`. Each required item is then
 structurally validated, recomputes its SR-2 EnvelopeId, binds its typed
 `targetPrincipal` to its declared header id before witness verification under
-§4.4, carries the full committed vector plus exactly the target LeafBody, and is consumed only by
+§4.4, carries the full committed vector plus exactly the target commitment pair,
+and is consumed only by
 its named selected Withdrawal.
 
 ### 2.3 EnvelopeId
@@ -534,7 +546,7 @@ struct ValidatedOccurrenceLifecycleEffect {
     uint64 priorRevokedAtOrdinal;
     uint64 evidenceOrdinal;          // 0, or immutable retained evidence key
     uint8 targetEffectKind;          // 0 ordinary, 1 Binding mutation, 2 Withdrawal
-    bytes32 targetBindingKey;        // nonzero only for effect kind 1
+    bytes32 targetBindingKey;        // nonzero only for ACTIVE kind-1 body/head fold
     bool targetIsCurrentBindingHead;
 }
 ```
@@ -611,8 +623,8 @@ if this target leaf is still `NEVER_ADMITTED`. When the target transition is
 `NEVER_ADMITTED -> PRE_WITHDRAWN` and that complete authenticated target bundle
 is unavailable, the caller MUST carry
 `TargetEnvelopeEvidence`: the target's signed header fields, full ordered
-`recordIds[]` vector, exactly the target `LeafBody`, typed `targetPrincipal`,
-and witness. The
+`recordIds[]` vector, the target's `(typeSchemaId, bodyHash)` commitment, typed
+`targetPrincipal`, and witness. The canonical body is deliberately absent. The
 evidence item is already one-to-one bound to this newly accepted Withdrawal leaf
 by §2.2. Admission recomputes `evidenceEnvelopeId` from the evidence header and
 full vector and MUST require, in this order:
@@ -620,8 +632,9 @@ full vector and MUST require, in this order:
 ```text
 evidenceEnvelopeId == withdrawal.target.envelopeId
 withdrawal.target.leafIndex < targetEvidence.recordIds.length
-recordIdOf(targetEvidence.targetBody.typeSchemaId,
-           targetEvidence.targetBody.canonicalBody) ==
+keccak256(abi.encode(DOM_RECORD,
+                     targetEvidence.targetCommitment.typeSchemaId,
+                     targetEvidence.targetCommitment.bodyHash)) ==
     targetEvidence.recordIds[withdrawal.target.leafIndex]
 computePrincipalId(targetEvidence.targetPrincipal) ==
     targetEvidence.header.principalId
@@ -630,13 +643,14 @@ verify(targetEvidence.targetPrincipal, targetEnvelopeDigest,
 targetEvidence.header.principalId == withdrawalEnvelope.header.principalId
 ```
 
-The EnvelopeId equality, target-index range, and target-body commitment guards
-therefore run before Admission classifies `targetEffectKind`, author comparison,
+The EnvelopeId equality, target-index range, and target-commitment guards
+therefore run before Admission classifies `targetEffectKind` from the
+authenticated `typeSchemaId`, performs author comparison,
 or any `PRE_WITHDRAWN` write. An ID mismatch, out-of-range target,
 missing/extra/duplicate evidence, or invalid target witness reverts
 `E_TARGET_EVIDENCE`; author mismatch reverts `ErrWithdrawNotAuthor`; only complete
 equality permits `PRE_WITHDRAWN`. A bare `targetEnvelopeId` can never cause
-pre-withdrawal when the authenticated header/vector and exact target body are
+pre-withdrawal when the authenticated header/vector and target commitment are
 not already available.
 
 Admission is the only evidence decoder. After these checks (or equivalent
@@ -651,8 +665,9 @@ has received ordinal `wOrd`, Core stores exactly
 `abi.encode(decodedTargetEnvelopeEvidence)` at
 `preWithdrawalEvidence[wOrd]`. This is the canonical ABI re-encoding in the field
 order of §2.2, not the caller's potentially non-canonical outer calldata bytes;
-it contains the exact validated header, full RecordId vector, target LeafBody,
-typed descriptor, and witness used by the transition. Its encoded length was already included in
+it contains the exact validated header, full RecordId vector, target commitment,
+typed descriptor, and witness used by the transition. Its encoded length is
+included in
 both the 8,192-byte aggregate target-evidence bound and the 16,384-byte whole-wire
 bound, so the state carrier cannot become an unbounded side channel. The target
 overlay stores `revokedAtOrdinal = wOrd`, giving reconstruction a direct pointer.
@@ -883,6 +898,7 @@ ShadowState {
   nextEnvelopeOrdinal, nextTypeOrdinal, nextPrincipalOrdinal
   occurrence[occKey]              // status, ordinal, revokedAtOrdinal
   envelopeAvailable[EnvelopeId]   // persisted, or authenticated current header/vector
+  targetCommitment[OccurrenceKey] // authenticated TypeSchemaId/bodyHash only
   plannedPrewithdrawEvidence[wOrd]
   binding[bindingKey]             // head + exact producing OccurrenceRef
   postingHead[pk]                 // count/liveCount/lastOrdinal/RAW_AUDIT
@@ -896,11 +912,13 @@ After the main Envelope witness succeeds, its verified header and full
 `recordIds[]` vector enter `envelopeAvailable` before the leaf loop. They are
 staged availability, not a state write. Every sibling target's body must also be
 carried in this main wire (selected bodies already are) and RecordId-matched, or
-already state-readable; that exact body supplies its Type/effect class. Thus a
+already state-readable; Admission derives its `(typeSchemaId,
+keccak256(canonicalBody))` commitment and Type/effect class without duplicate
+evidence. Thus a
 Withdrawal targeting a sibling in this authenticated Envelope never supplies
 duplicate `TargetEnvelopeEvidence`. Other entries are loaded from storage on
 first touch and thereafter only from the shadow; an external never-admitted
-target's evidence carries its one committed target body as §3.3 requires.
+target's evidence carries only its signed target commitment as §3.3 requires.
 
 ```text
 evidenceCursor = 0
@@ -941,9 +959,12 @@ for i in ascending set-bit order of leafMask:
         when target is NEVER_ADMITTED and no complete authenticated target
         bundle is available—
         the next caller TargetEnvelopeEvidence item
-      establish exact target Type/body from a state-readable Record, the
-        RecordId-matched carried sibling body, or that evidence's committed
-        targetBody; otherwise reject E_TARGET_EVIDENCE
+      establish authenticated target TypeSchemaId/bodyHash from a state-readable
+        Record, the RecordId-matched carried sibling body, or that evidence's
+        commitment pair; otherwise reject E_TARGET_EVIDENCE
+      classify targetEffectKind from TypeSchemaId. For NEVER_ADMITTED, derive no
+        body semantics, Binding key, index delta, or head delta; only reject a
+        Withdrawal target or plan PRE_WITHDRAWN/no-resurrection
       enforce caller-evidence cardinality at this exact point: missing, extra,
         duplicate, or wrong withdrawalLeafIndex rejects; terminal retries consume none
       derive every ValidatedOccurrenceLifecycleEffect field from this shadow,
@@ -1025,8 +1046,8 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
     from the current shadow, validate/consume exactly one caller evidence item
     only when required, construct `ValidatedOccurrenceLifecycleEffect` entirely
     from the shadow, and apply its target consequences there. A sibling target
-    uses the authenticated staged main header/vector plus its exact
-    RecordId-matched carried body; terminal retries reuse
+    derives the commitment pair from the authenticated staged main header/vector
+    plus its exact RecordId-matched carried body; terminal retries reuse
     retained persisted/planned evidence and consume no caller item
 11. require both semantic-carriage cursors exhausted and the complete shadow
     plan valid. Until this point no nonce, ordinal, Envelope, Record, status,
@@ -1514,6 +1535,14 @@ There is no generic `E_AUTHORITY`, `E_BAD_WITNESS`, `E_NOT_AUTHOR`, or
    and old ACTIVE-leaf evidence fail; a fresh intent plus exactly the evidence
    required by newly accepted T4 leaves receives full preflight. T5b uses retained
    original evidence without caller resupply and MUST NOT replace or copy it.
+   A mandatory **T4-MAX-BODY** vector creates a target Record with exactly
+   `MAX_BODY_BYTES = 8,192` canonical bytes, signs its Envelope without admitting
+   it, and successfully prewithdraws it using only
+   `(typeSchemaId, keccak256(canonicalBody))`. With one target RecordId, an EOA
+   descriptor, and a 65-byte witness, canonical `abi.encode(TargetEnvelopeEvidence)`
+   is 800 bytes; the 8,192-byte target body is absent from evidence, retained
+   state, and the Withdrawal wire. The vector MUST also fail after flipping
+   either commitment word.
    Four same-call shadow fixtures are mandatory:
    - **SHADOW-1 bind→withdraw:** leaf 0 first-binds key K at prospective ordinal
      `o`; leaf 1 withdraws `(E,0)` at `o+1`. Preflight sees leaf 0 ACTIVE/current,
@@ -1531,7 +1560,7 @@ There is no generic `E_AUTHORITY`, `E_BAD_WITNESS`, `E_NOT_AUTHOR`, or
      evidence, receipts, indexes, and Binding state all unchanged.
    - **SHADOW-4 duplicate withdrawal:** two fresh Withdrawal leaves target one
      initially NEVER_ADMITTED, header-absent external occurrence. The first
-     consumes one evidence item (including the committed target body), plans
+     consumes one evidence item (including the authenticated commitment pair), plans
      PRE_WITHDRAWN, and stages that evidence at its prospective ordinal. The
      second sees terminal shadow state, reuses the planned retained evidence,
      consumes none, and is an accepted target no-op. Extra second evidence
@@ -1565,8 +1594,10 @@ Compact contract other chapters may rely on:
   multi-leaf admission; stored ordinals are u48 and every public value is u64;
   withdrawal is author-only, Realm-local, non-deleting, non-resurrecting,
   authenticated pre-withdrawal legal only with bounded one-to-one target evidence
-  whose recomputed EnvelopeId and target-index range match the Withdrawal before
-  author comparison; an effective evidence-backed T4 durably retains one bounded
+  whose recomputed EnvelopeId, target-index range, and
+  `H(DOM_RECORD,typeSchemaId,bodyHash)` match the signed target RecordId before
+  author comparison; evidence and retained state contain the commitment pair,
+  never the target body; an effective evidence-backed T4 durably retains one bounded
   canonical evidence value at its Withdrawal ordinal, and terminal repeats load
   it rather than requiring evidence again; after bounded structure and envelope
   authentication, an all-selected-ACTIVE retry returns before semantic evidence,

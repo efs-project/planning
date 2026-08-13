@@ -326,7 +326,7 @@ preWithdrawOccurrence(validated, withdrawalOrdinal):
   NEVER_ADMITTED -> PRE_WITHDRAWN
   ordinal = 0; revokedAtOrdinal = withdrawalOrdinal
   // nonzero means Admission already retained canonical evidence there;
-  // zero means Admission had authenticated header/vector + exact target body
+  // zero means Admission had authenticated header/vector + target commitment
   decrement nothing
 
 withdrawOccurrence(validated terminal target):
@@ -606,7 +606,8 @@ current high-water, and values above the physical u48 range; it never maps a
 sparse envelope leaf through base arithmetic. For `PRE_WITHDRAWN`, only
 `status`, `ordinal == 0`, and `revokedAtOrdinal` come from the overlay. The
 retained target evidence supplies `recordId`, `typeSchemaId`, and `principalId`
-from its exact RecordId-matched target body and authenticated descriptor.
+from its signed RecordId-matched `(typeSchemaId, bodyHash)` commitment and
+authenticated descriptor. It does not make the never-admitted body readable.
 
 ### 3.2 Globally ordered accepted-admission pages
 

@@ -616,8 +616,9 @@ submitting `msg.sender` is not authority state.
 For an evidence-backed pre-withdrawal, the target overlay's
 `revokedAtOrdinal` is the accepting Withdrawal occurrence's ordinal and that
 ordinal keys the exact canonical evidence bytes above. The bytes contain the
-validated target header, full RecordId vector, one RecordId-matched target
-`LeafBody`, typed `AccountPrincipal`, and witness in the authorship chapter's
+validated target header, full RecordId vector, authenticated target
+`(typeSchemaId, bodyHash)` commitment, typed `AccountPrincipal`, and witness in
+the authorship chapter's
 `TargetEnvelopeEvidence` field order. The
 outer wire and aggregate-evidence bounds are checked before storage, so this is
 a bounded reconstruction carrier rather than an unbounded side channel. Empty
@@ -776,8 +777,9 @@ applies that leaf's effect to the current shadow. Therefore:
 
 Caller target-evidence cardinality is derived during this walk, not from one
 stale pre-call status snapshot. A target in the authenticated current Envelope
-uses the staged header/vector with no duplicate `TargetEnvelopeEvidence`,
-regardless of whether its leaf is earlier or later. An evidence-backed
+uses the staged header/vector plus its RecordId-matched carried body to derive
+the commitment pair, with no duplicate `TargetEnvelopeEvidence`, regardless of
+whether its leaf is earlier or later. An evidence-backed
 prewithdrawal stages canonical evidence at its Withdrawal's prospective
 ordinal; a later terminal retry reuses that planned evidence. Every
 `ValidatedOccurrenceLifecycleEffect` prior field,
@@ -995,10 +997,12 @@ WITHDRAWN/PRE_WITHDRAWN -> reject any admission; no resurrection
   caller `TargetEnvelopeEvidence` only when its complete authenticated target
   bundle is unavailable from persisted or staged state: target signed header
   fields, the full committed
-  `recordIds[]`, exactly the target `LeafBody`, target `AccountPrincipal`, and
+  `recordIds[]`, the target `(typeSchemaId, bodyHash)` commitment, target
+  `AccountPrincipal`, and
   target witness.
   Preflight recomputes the target EnvelopeId, requires the exact target ID and
-  target-leaf range, requires the carried target body's Type/body hash to equal
+  target-leaf range, requires
+  `keccak256(abi.encode(DOM_RECORD,typeSchemaId,bodyHash))` to equal the signed
   `recordIds[targetLeaf]` (so effect classification is total), requires
   `computePrincipalId(targetPrincipal) == targetHeader.principalId`, verifies
   the target witness, and only then compares target and withdrawing
@@ -1083,7 +1087,15 @@ MAX_ENVELOPE_LEAVES          = 64
 MAX_ENVELOPE_BODY_BYTES      = 8,192
 MAX_BODY_BYTES               = 8,192
 MAX_BIND_LEAVES_PER_ENVELOPE = 64
+MAX_TARGET_EVIDENCE_BYTES    = 8,192  // aggregate; one maximal legal item = 7,808
+MAX_ENVELOPE_WIRE_BYTES      = 16,384
 ```
+
+`TargetEnvelopeEvidence` contains a fixed 64-byte TypeSchemaId/bodyHash
+commitment rather than a target body, so a target at `MAX_BODY_BYTES` remains
+prewithdrawable. The maximal evidence item arithmetic is
+`32 + 384 + 2,080 + 1,184 + 4,128 = 7,808` ABI bytes and fits the aggregate cap;
+the enclosing wire cap remains independent and mandatory.
 
 The shared feasibility equation is
 `G_FIXED + c_bodies + Σ(selected new occurrences) c_occ ≤ G_TX_CAP`, with
@@ -1385,12 +1397,14 @@ W-7  EFFECTS     replay exactly the Binding-set, Binding-tombstone, and
                  NEVER_ADMITTED->PRE_WITHDRAWN overlay results. For each
                  evidence-backed T4, read preWithdrawalEvidenceAt(ord), decode
                  the exact TargetEnvelopeEvidence, recompute target EnvelopeId
-                 and leaf range, recompute targetBody RecordId/type, assert
+                 and leaf range, recompute target RecordId from the retained
+                 TypeSchemaId/bodyHash commitment, assert
                  descriptor equality, replay the retained
                  target witness/author check at its recorded basis, and
                  require target.revokedAtOrdinal == ord. Empty evidence is
-                 valid only when the authenticated header/vector and exact
-                 target body were otherwise available, or the target effect
+                 valid only when the authenticated header/vector and target
+                 commitment were otherwise derivable from a state-readable or
+                 carried Record body, or the target effect
                  was terminal no-op; there is no peer
                  intent event stream.
 W-8  INDEXES     replay deterministic postings, per-Record liveness, and count

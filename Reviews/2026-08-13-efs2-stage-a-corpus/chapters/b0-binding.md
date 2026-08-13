@@ -643,9 +643,11 @@ NEVER_ADMITTED — the case of a signed-but-leaked envelope its author wants
 dead before anyone admits it. Because the target envelope has never been
 seen, the author guard cannot be read from state. The **authorship/admission
 owner alone** accepts and validates the exact `TargetEnvelopeEvidence` shape:
-target header, full RecordId vector, the one target `LeafBody`, typed
-`AccountPrincipal`, and witness. It recomputes EnvelopeId, checks the target
-leaf range and body-to-RecordId commitment, binds
+target header, full RecordId vector, the target `(typeSchemaId, bodyHash)`
+commitment pair, typed `AccountPrincipal`, and witness. It recomputes EnvelopeId,
+checks the target leaf range and
+`keccak256(abi.encode(DOM_RECORD,typeSchemaId,bodyHash))` against the signed
+target RecordId, binds
 the descriptor to the header Principal before verifying the witness, and
 performs the author comparison. This Binding module receives only the
 resulting typed `ValidatedOccurrenceLifecycleEffect` context shared with the
@@ -653,8 +655,10 @@ status owner; it never accepts,
 decodes, or verifies opaque evidence bytes and defines no second evidence
 format. For a valid NEVER_ADMITTED target it sets `PRE_WITHDRAWN` with
 `revokedAtOrdinal` = the Withdrawal ordinal. No head is touched (a
-never-admitted occurrence produced no head), and no count decrements (nothing
-was incremented). Missing or invalid evidence already failed in Admission
+never-admitted occurrence produced no head), no Binding key/body semantics are
+derived, and no count decrements (nothing was incremented). Admission uses the
+authenticated TypeSchemaId only to classify the closed kernel effect and reject
+a Withdrawal target. Missing or invalid evidence already failed in Admission
 with `E_TARGET_EVIDENCE`; an author mismatch already failed with
 `ErrWithdrawNotAuthor`.
 `PRE_WITHDRAWN` permanently blocks later admission of that occKey (§3.4) —
@@ -936,8 +940,10 @@ library LibBinding {
     // Admission-authenticated effect context. No witness/evidence bytes cross
     // this seam. targetEffectKind: 0 ordinary/no Binding effect,
     // 1 Binding mutation, 2 Withdrawal (not a legal withdrawal target).
-    // targetBindingKey is nonzero only for kind 1; head status was computed
-    // against preflight state. evidenceOrdinal is 0 unless Admission retained
+    // targetBindingKey is nonzero only for an ACTIVE kind-1 target whose body
+    // produced a Realm head; it is zero for NEVER_ADMITTED prewithdrawal because
+    // no body semantics/head delta exists. Head status was computed against
+    // preflight state. evidenceOrdinal is 0 unless Admission retained
     // or reused authenticated prewithdraw evidence. The status-owner LibIndex
     // consumes the byte-identical struct before Binding applies any head fold.
     struct OccurrenceRef { bytes32 envelopeId; uint16 leafIndex; }
