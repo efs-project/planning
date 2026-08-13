@@ -168,8 +168,15 @@ ArtifactClosure's STRING(255) member-name shape. Cell deltas may not redefine
 those interfaces. Multi-leaf admission also inherits the static
 expected-revision association, ascending point-in-order shadow, fixed
 `TargetRecordCommitment(typeSchemaId,bodyHash)` evidence, and assert-only
-before/after commit journal; a never-admitted target creates no body/index/head
-state.
+before/after commit journal. Every cell resolves a selected Type from persisted
+or earlier-staged cache (with intrinsic TypeSchemaGroup bootstrap) before its
+body/OCCREF guard, rejects a current-carrier OCCREF before activation/state, and
+preserves same-carrier RecordId REF DAGs; the all-ACTIVE shortcut repeats the
+guard from persisted Types. Every effective T4 target
+is external and retains its full evidence; a never-admitted target creates no
+body/index/head state. Accepted explicit-intent batches persist an enumerable
+nonzero packed lane, implicit batches persist zero, and W-4a reconstructs the
+live nonce lanes from batches without a private key universe.
 
 ### 3.1 B0 — SPINE
 
@@ -238,9 +245,12 @@ one (TypeSchemaId, canonicalBody). No shared Envelope, no leaves.
 - The B0 shadow walk degenerates to one leaf per Core call. In an F1 atomic
   aggregator, later cards see state committed by earlier subcalls and any later
   failure reverts the outer transaction; F1 must not claim B0's stronger
-  *single-Core-call* all-prewrite property across cards. The SHADOW fixtures run
-  through the aggregator and report this axis-1 boundary explicitly while
-  preserving identical final success/revert state.
+  *single-Core-call* all-prewrite property across cards. CV-SHADOW runs the two
+  cross-card bind/withdraw and bind/rebind traces through the aggregator, runs
+  STAGED-TYPE-OCCREF with the current-CardId equality guard directly in staged
+  and persisted-retry modes, and keeps the duplicate
+  external Withdrawal trace inside one carrier. It reports this axis-1 boundary
+  explicitly while preserving identical final success/revert state.
 - **Exact axis-1 comparison transaction.** For every frozen integer `k=1..64`,
   `G_B0(k)` is one EVM transaction making one ordinary Core `publish` call with
   one independently signed envelope containing exactly k Record leaves.
@@ -511,9 +521,10 @@ Statistics:
   `aggregatorGas=0` and `coreCallCount=1`.
 - `PREMIUM_1` — the k=1 premium ratio `G_B0(1) / G_F1(1)`.
 - `RECON_1` — pass/fail: **both** arms complete the state-only reconstruction walk
-  (b0-realm-admission.md §8.1 W-0..W-10; for F1 with the card-spine re-expression of
+  (b0-realm-admission.md §8.1 W-0..W-10 including W-4a; for F1 with the card-spine re-expression of
   W-3..W-5) with zero recourse to logs. It reconstructs canonical unsigned
-  carriers and uses receipts/batches for historical admission basis; it never
+  carriers, uses receipts/batches for historical admission basis, enumerates
+  every packed batch-intent lane, and reproduces all live nonce points; it never
   claims to recover or replay a discarded main witness. [DERIVED INVARIANT as a hard gate —
   candidate falsifier 10, VERIFIED: "state-only reconstruction needs old logs" is
   rejection.]
@@ -735,7 +746,7 @@ adapter where needed (F1/X17 only):
 
 | Subsystem | Source of truth | Per-cell variation |
 |---|---|---|
-| Binding/Withdrawal state machine (T1–T9, exact kernel Type schemas, CAS, no-resurrection, absence predicate, Admission-only lifecycle context, point-in-order shadow + assert-only journal) | b0-binding.md §3–§6; b0-authorship-envelope.md §3.2–§5.3; b0-indexes.md lifecycle seam | none except the OccurrenceRef adapter (F1/X17), F1's one-leaf degeneration/aggregator rollback boundary, and `expectedRevision` carriage (F3, §3.4); error 17, fixed TargetRecordCommitment evidence, and closed role-class/KIND_DIGEST split are shared |
+| Binding/Withdrawal state machine (T1–T9, exact kernel Type schemas, staged-Type-ordered OCCREF guard, CAS, no-resurrection, absence predicate, Admission-only lifecycle context, point-in-order shadow + assert-only journal, current-carrier OCCREF rejection, external-T4 retained evidence) | b0-binding.md §3–§6; b0-authorship-envelope.md §3.1–§5.3; b0-indexes.md lifecycle seam | none except the OccurrenceRef adapter (F1/X17), F1's one-leaf degeneration/aggregator rollback boundary, and `expectedRevision` carriage (F3, §3.4); intrinsic TypeSchemaGroup bootstrap, persisted/earlier-staged descriptor resolution, same-carrier RecordId DAGs, `E_SELF_ENVELOPE_OCCREF`, error 17, fixed TargetRecordCommitment evidence, and closed role-class/KIND_DIGEST split are shared |
 | LensResolver (`ResolutionPlan/1`, three-field `ResolvedTarget`, combiners, resolve algorithm, risk-bearer ABI) | b0-lens.md §3–§8 | none — plans are Records in every cell; head reads cross a boundary only in F6 |
 | AuthorityVerifier/1 + AccountPrincipal/1 | b0-principal-authority.md §2–§3 | none except F2's AuthorRef entry |
 | Realm descriptor / receipts / reconstruction walk (seven-field InitConfig, authority ref/transitions, EIP-1967 facts) | b0-realm-admission.md §2, §5, §7–§8 | card-spine re-expression of W-3..W-5 in F1/X17; module-set genesis hash in F6; no cell may hide or reinterpret controller state |
@@ -851,6 +862,9 @@ The machine evidence is the harness §3.2 restricted-JCS measurement file in
 strict `MeasurementRowKey` order; bare `fixtureId="CV"`, duplicate keys, or a
 row that cannot join to exactly one frozen case/vector step invalidates the
 cell report. Charts and prose are derived views, not alternate result stores.
+Every cell also emits M-INTENT-LANE write/read/reconstruction rows so the
+explicit nonzero batch word, implicit zero marker, and W-4a cost remain visible
+rather than disappearing into aggregate gas.
 The per-axis verdict section applies §4's decision rules and ends
 in exactly one of:
 

@@ -412,8 +412,11 @@ member level (Stage B may add members, never remove).
   state whichever rail lands first. A rail that can mint or alter any
   authorship-bearing field fails the category.
 - **Members:** the three-rail triple; for an envelope with no kernel-effect
-  leaf, `admitAsSender` vs explicit-intent equivalence (identical persisted
-  state); negative BindingSet/Tombstone and Withdrawal members: empty implicit
+  leaf, `admitAsSender` vs explicit-intent equivalence for portable authorship,
+  occurrence, receipt, and application state. AdmissionBatch replay metadata
+  intentionally differs: implicit persists lane word zero; explicit persists
+  `(nonceKey<<64)|nonceSeq` with `nonceSeq>=1`, and W-4a reconstructs the latter
+  lane. Negative BindingSet/Tombstone and Withdrawal members: empty implicit
   intent MUST fail; the former also require SR-3 revision carriage while the
   latter has none; msg.sender-as-diagnostic-only
   assertion (enters no id, no receipt identity, no read path). `reconciles:
@@ -504,7 +507,12 @@ member level (Stage B may add members, never remove).
   repeat withdrawal is unconditional no-op success; wrong-author Withdrawal
   reverts the whole envelope with `ErrWithdrawNotAuthor` and zero state delta.
   Exact all-ACTIVE retry returns before expiry/nonce/effect checks; a mixed/new
-  subset uses a fresh SR-3 intent while ACTIVE members no-op. **Last-live
+  subset uses a fresh SR-3 intent while ACTIVE members no-op. Every effective
+  T4 target is external, consumes one complete TargetEnvelopeEvidence item, and
+  retains it; current-envelope staged data is never target evidence and is
+  never discarded instead of retention. Accepted explicit batches expose the
+  nonzero packed intent lane, implicit batches expose zero, and the all-ACTIVE
+  retry creates no batch/lane/nonce state. **Last-live
   count:** admit two occurrences of one Record; withdraw the first and retain
   unique-by-Type `liveCount = 1`; withdraw the last and reach 0; repeat both
   withdrawals with no further count change. `reconciles: RP-3,9,10,13,15,18`;
@@ -544,27 +552,49 @@ member level (Stage B may add members, never remove).
   `publish(envelopeBytes, AccountPrincipal, intentBytes, intentWitness)`
   interface with the exact SR-3 `expectedRevisions[]`; wrong-author Withdrawal
   is a batch-poison member — it reverts only its author-local single-envelope
-  call, while an explicitly all-or-nothing `publishBatch` may abort sibling
-  elements and therefore requires aggregator pre-validation; 1271 witness
+  call, while the optional non-Core atomic router may abort earlier independent
+  Envelope calls and therefore requires aggregator pre-validation; 1271 witness
   attempting reentry into `admit` during verification → blocked (STATICCALL);
-  returndata-bomb during verification → bounded copy; `publishBatch`
+  returndata-bomb during verification → bounded copy; atomic-router
   all-or-nothing; **F6 MODULAR cell**: the same suite re-run across physical
   module boundaries — any partially-committed Core write rejects the arm
   (BAKEOFF axis-6 decision rule). Every member is `MUST_FIT_ATOMIC`; no poison
   trace may be split into passing pieces. `reconciles: RP-3,9,10,12,13,15,17`;
   `requiresPins: SR-3, SR-9, SR-10, SR-12, SR-13, SR-15, SR-17`.
 
-  Four mandatory same-call members exercise the point-in-order contract:
-  **SHADOW-1** bind leaf 0 then withdraw it at leaf 1 (one decrement, head
-  tombstoned, RAW_AUDIT keeps both revisions); **SHADOW-2** two same-key binds
-  from UNSET use `(NONE,xr=0)` then `((E,0),xr=1)` and finish at revision 2,
-  while stale/reversed CAS fails prewrite; **SHADOW-3** a Withdrawal before its
-  later target stages PRE_WITHDRAWN, the target hits no-resurrection, and every
-  counter/nonce/header/evidence/receipt/index/head stays unchanged; **SHADOW-4**
-  duplicate external prewithdraw consumes one target-specific evidence item,
-  reuses its planned retained bytes for the terminal sibling, admits both
-  sources with consecutive ordinals, and stores one evidence value (a second
-  caller item is extra and fails prewrite).
+  Four mandatory identity-valid members exercise composition and shadow state:
+  **ROUTER-BIND-WITHDRAW** independently precomputes Envelope A containing the
+  Binding and Envelope B withdrawing `(A,0)`, then atomically routes
+  `publish(A)` followed by `publish(B)` with explicit intents (consecutive
+  same-lane nonces); B sees A, decrements once, tombstones the head, and any B
+  failure rolls every A/nonce/batch-lane write back. **ROUTER-BIND-REBIND**
+  independently precomputes A with `(NONE,xr=0)` and B with `((A,0),xr=1)`;
+  the route finishes revision 2, while reverse order or stale CAS rolls both
+  calls back. **STAGED-TYPE-OCCREF** makes leaf 0 resolve through the
+  kernel-known intrinsic TypeSchemaGroup/1 branch and define an OCCREF-bearing
+  Type plus a REF-only Type. The success Envelope's leaf 1 resolves the staged
+  OCCREF Type and names an independently precomputed external Envelope; leaf 2
+  resolves the staged REF-only Type and names an earlier selected RecordId; all
+  three admit. The frozen invalid `Vector.id` is exactly `E_SELF_OCCREF` in
+  category `GV-10`: `harness:self-occurrence-ref-guard/1` resolves the same
+  earlier-staged Type with `cacheSource=1` plus nonempty canonical group body and
+  supplies synthetic current-Envelope equality, expecting
+  exactly `E_SELF_ENVELOPE_OCCREF(sourceLeafIndex,targetLeafIndex)` followed by
+  public no-change reads. After success, an all-ACTIVE retry resolves the now-
+  persisted Types and returns ALREADY_ADMITTED for the external OCCREF; the same
+  harness operation with `cacheSource=2`, empty group bytes, and equality fails
+  before that shortcut,
+  again with the full state digest unchanged. An end-to-end self-hashing
+  Envelope is intentionally impossible; this disposable internal path plus
+  ordinary Envelope/body vectors covers the guard without weakening identity,
+  while the same-envelope RecordId DAG remains legal. Wrong cache-source/group-
+  presence combinations return `ErrHarnessCacheMode(uint8,bool)` and never
+  reach the guard. **DUP-WITHDRAW-EXTERNAL** places two Withdrawal
+  leaves in one Envelope targeting one prior external occurrence; the first is
+  effective, the second sees terminal shadow state, and both sources admit.
+  Its never-admitted variant consumes and retains exactly one full T4 evidence
+  value for the first source, reuses it for the second, and rejects an extra
+  second item before state.
 
 ### GV-11 Time/order honesty (R-D9)
 
@@ -860,11 +890,15 @@ member level (Stage B may add members, never remove).
   transition members assert exactly one paired RealmRevision plus one chained
   `AuthorityTransition(oldRef,newRef,block,firstAdmission,revisionOrdinal)`,
   no transition on unchanged controller, NONE refusal, and current-ref
-  reconstruction from genesis; W-0..W-10 full walk incl. W-8/W-9
+  reconstruction from genesis; W-0..W-10 full walk incl. W-4a/W-8/W-9
   index+binding fold replay (pure function of the total event order), including
   canonical **unsigned** envelope bytes plus ordered RecordIds; receipts and
   admission batches ground historical acceptance, and the walk never claims to
-  recover or replay a discarded main witness. Retained prewithdrawal evidence
+  recover or replay a discarded main witness. W-4a enumerates every batch's
+  `admissionBatchIntentLane`, derives its Principal through the first admitted
+  occurrence, ignores zero implicit markers, requires every nonzero decoded
+  `nonceSeq>=1` and exact per-lane succession, and reproduces every
+  `intentNonceOf` point without a private key-universe database. Retained prewithdrawal evidence
   reconstructs its signed target RecordId/type/principal from the fixed
   TypeSchemaId/bodyHash commitment, while the never-admitted body, postings,
   Record-live fold, and Binding head remain absent;
@@ -917,9 +951,11 @@ member level (Stage B may add members, never remove).
   struct, and no proof bytes, witness decoder, or repeat authority/author check
   crosses either seam. BindingSet vectors require exactly one target option
   (neither/both → structural code 17); Tombstone has none; Withdrawal's direct
-  OCCREF body is 34 bytes. The four SHADOW fixtures assert sequential Binding,
-  lifecycle, RAW_AUDIT, index/live-count, planned-evidence, and all-prewrite
-  behavior. `reconciles:
+  OCCREF body is 34 bytes. CV-SHADOW asserts the two legal atomic-router
+  sequences, intrinsic TypeSchemaGroup → staged OCCREF/REF descriptor ordering,
+  current-envelope OCCREF rejection/no-state in staged and persisted-retry
+  modes, same-envelope RecordId DAG acceptance, and duplicate external
+  Withdrawal lifecycle/RAW_AUDIT/index/retained-evidence behavior. `reconciles:
   RP-3,6,8,9,10,11,12,13,15`;
   `requiresPins: SR-3, SR-6, SR-8, SR-9, SR-10, SR-11, SR-12, SR-13,
   SR-15`.

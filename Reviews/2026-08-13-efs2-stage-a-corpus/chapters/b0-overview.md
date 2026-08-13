@@ -143,7 +143,13 @@ Here `concat` is the EIP-712 concatenation of the 32-byte element struct
 hashes; the empty array hashes the empty byte string. Under SR-1,
 `DOM_INTENT = keccak256("efs2/admission-intent/1")`. Replay control is the
 2-D nonce discipline: per-`nonceKey` **sequential lanes** (`lastSeq + 1`),
-which realizes the realm chapter's consumed-intent registry. The realm
+which realizes the realm chapter's consumed-intent registry. Every accepting
+AdmissionBatch stores an enumerable `batchIntentLane` word: explicit intent =
+`(uint256(nonceKey)<<64)|nonceSeq` with `nonceSeq>=1`; implicit sender = zero.
+The state-readable `admissionBatchIntentLane(batchId)` walk reconstructs every
+explicit `(principalId,nonceKey)->lastSeq` and compares it with
+`intentNonceOf`; an all-selected-ACTIVE retry appends neither a batch nor a
+lane word. The realm
 chapter's separate action/actionData table is retired for B0: admission
 effects are **leaf-Type-driven** (SR-11). The portable `predecessorOccurrence`
 CAS in the Binding body is unchanged (dual CAS stands).
@@ -205,11 +211,12 @@ same seam class as U48_GUARD).
 **SR-9 — wrong-author Withdrawal (RP-9).** **Revert the envelope**
 (`ErrWithdrawNotAuthor`); the admit-as-inert-evidence arm is [REJECTED] for
 B0. Scope honestly stated: within one envelope this punishes only the
-mistaken author, since all leaves share one authenticated principal. Under
-`publishBatch` (all-or-nothing composition of independent envelopes) any
-element failure — this one included — aborts the batch; batch aggregation is
-opt-in composition and aggregators pre-validate elements, as they already
-must for expired intents and CAS conflicts. Rationale for revert: deterministic
+mistaken author, since all leaves share one authenticated principal. Under the
+optional non-Core atomic router, sequential `publish` calls over independently
+precomputed Envelopes share one outer EVM transaction; any later element
+failure — this one included — reverts every earlier call. Every router element
+uses explicit intent, and same-lane elements use consecutive `nonceSeq` values
+in call order. Rationale for revert: deterministic
 all-or-nothing admission, and no inert kernel-class state (the
 confirms-but-unreadable defect class).
 
@@ -228,9 +235,17 @@ The log stores no `occKey`: hydration returns the reversible OccurrenceRef
 uint256(leafIndex)))` under SR-1. Ordinals are
 assigned **per accepted occurrence in submission order** — the
 `base + k` consecutive-ordinal law is retired because leafMask subset and
-staged admission (SR-3/SR-12) make it unsound. **Pre-withdrawal (T4) is
-preserved and now implementable:** withdrawing a never-admitted occKey whose
-complete authenticated target bundle is unavailable requires bounded
+staged admission (SR-3/SR-12) make it unsound. **Current-envelope OCCREF is
+forbidden:** for each selected leaf in the ascending write-free shadow,
+Admission resolves its Type descriptor from persisted or earlier staged Type
+cache (or the kernel-known intrinsic TypeSchemaGroup/1 branch), structurally
+validates the body, extracts every bounded OCCREF, and
+rejects `E_SELF_ENVELOPE_OCCREF(sourceLeafIndex,targetLeafIndex)` before source
+activation or any effect when the referenced EnvelopeId equals the current one.
+An earlier selected TypeSchemaGroup may therefore define the descriptor safely
+used by a later selected leaf. Unselected carriage is not semantically
+inspected; same-envelope RecordId REF DAGs remain legal. **Pre-withdrawal (T4) is preserved:** withdrawing a
+never-admitted external occKey always requires bounded
 `TargetEnvelopeEvidence` (selected Withdrawal leaf, signed header, full
 RecordId vector, fixed `TargetRecordCommitment(typeSchemaId,bodyHash)`, typed
 Principal descriptor, and witness; never the target body). Admission
@@ -245,12 +260,13 @@ witness/authority/author validation never cross either seam. It then sets
 accepting Withdrawal's ordinal durably keys the canonical ABI re-encoding of
 the exact bounded evidence; the target overlay's `revokedAtOrdinal` points back
 to it. Retained evidence supplies `recordId`, `typeSchemaId`, and `principalId`
-for W-7/W-9 and occurrence reads but never makes the target body readable. A
-same-Envelope target instead derives the commitment from the authenticated
-header/vector plus its RecordId-matched carried body, with no duplicate caller
-evidence. A later withdrawal of the same terminal target reuses persisted or
-same-call planned evidence; callers neither resupply nor replace it, and
-target-specific evidence never becomes generic staged availability.
+for W-7/W-9 and occurrence reads but never makes the target body readable. The
+current Envelope is staged only for persistence, never occurrence-target
+resolution; no staged commitment can replace or be discarded instead of the
+mandatory retained evidence. A later Withdrawal leaf targeting the same
+external now-terminal occurrence reuses the same-call planned evidence;
+callers neither resupply nor replace it, and target-specific evidence never
+becomes generic staged availability.
 `WITHDRAWN` and `PRE_WITHDRAWN`
 permanently block (re-)admission of that occKey (no-resurrection, SR-15). The
 commitment pair is fixed 64 bytes; maximal legal evidence is exactly 7,808 ABI
@@ -307,20 +323,34 @@ helper is SDK/convenience code that constructs and calls this same entrypoint,
 not a second Core primitive (SR-17).
 
 Every non-idempotent `publish` uses one bounded point-in-order preflight, not
-independent checks against a stale storage snapshot. After authenticating and
-staging the current Envelope header/vector, Admission statically associates
-semantic carriage and walks selected leaves in ascending index order through a
+independent checks against a stale storage snapshot. After authenticating the
+current Envelope and selected body commitments, Admission stages the
+header/vector for persistence only and walks selected leaves in ascending index
+order through a
 memory shadow of prospective counters/ordinals, occurrence status, target
 commitments/planned evidence, Type cache, Binding heads/exact sources, posting
-heads/live counts, Record/unique liveness, and an exact leaf journal. A fresh
-source is shadow-activated before its closed `NONE | BIND_SET |
-BIND_TOMBSTONE | WITHDRAWAL` effect; later siblings see the result. Both
+heads/live counts, Record/unique liveness, and an exact leaf journal. At each
+leaf it first resolves the descriptor from persisted/earlier-staged cache,
+or the intrinsic TypeSchemaGroup/1 branch, validates and extracts OCCREF,
+applies the current-envelope guard, classifies
+the closed effect, and associates semantic carriage. A fresh TypeSchemaGroup
+stages its member caches for later leaves; only then is a fresh source
+shadow-activated before its closed `NONE | BIND_SET |
+BIND_TOMBSTONE | WITHDRAWAL` effect; later legal siblings see the result. One
+Envelope may therefore contain two Withdrawals targeting one prior external
+occurrence: the first is effective and the second sees terminal shadow state.
+Successful bind→withdraw or sequential same-key Binding chains instead use
+independently precomputed Envelopes through the optional atomic router. Both
 semantic-carriage cursors must exhaust. Only after every fallible
 author/policy/reference/bounds/CAS/lifecycle check succeeds does commit replay
 the frozen before/after journal in the same order, asserting each prestate and
 making no new decision. Therefore every user-controlled failure occurs before
 any real nonce, ordinal, evidence, Envelope, Record, receipt, index, cache, or
-Binding write.
+Binding write. The all-selected-ACTIVE shortcut first runs a smaller write-free
+guard over persisted selected Type descriptors/bodies/OCCREFs (with the
+intrinsic branch for a selected TypeSchemaGroup/1), then returns
+before effects, policy, CAS, target evidence, expiry, intent, or nonce checks;
+it stages no missing cache and appends no batch/lane word.
 
 **SR-13 — the authorship identity chain (red-team BLOCKING).** The write path
 carries the `AccountPrincipal` descriptor explicitly:

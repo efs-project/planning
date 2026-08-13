@@ -79,6 +79,13 @@ BIND(castId, purpose, subject, fieldRole,        -- Lane 6 BindingSet/1 leaf +
      targetSpec, expectedRevision)               --   intent CAS carriage
 TOMBSTONE(castId, purpose, subject, fieldRole, expectedRevision)
 WITHDRAW(castId, targetOccRef)                   -- Lane 6/2 Withdrawal/1
+ATOMIC_ROUTE(publishInputs[])                    -- harness-only non-Core router;
+                                                 -- independent precomputed Envelopes,
+                                                 -- explicit intent per element
+OCCREF_GUARD(currentEnvelopeId, sourceLeafIndex, -- disposable internal-path adapter;
+             typeSchemaGroupBody, typeSchemaId,
+             canonicalBody,
+             cacheSource)                        -- EARLIER_STAGED | PERSISTED_RETRY
 -- read plane (each maps to a named chapter ABI; §3.1 read matrix) --
 READ_POINT(what, key...)                         -- getRecord/getEnvelope/getOccurrence/
                                                  --   readHead/getBindingHead/counts...
@@ -104,9 +111,31 @@ splitBoundary  = NONE | BETWEEN_INDEPENDENT_ENVELOPES
 ```
 
 Each concrete `PUBLISH`, `PUBLISH_SCHEMA_GROUP`, `BIND`, `TOMBSTONE`, and
-`WITHDRAW` call is `MUST_FIT_ATOMIC`. Workload campaigns may be
+`WITHDRAW` call is `MUST_FIT_ATOMIC`. `ATOMIC_ROUTE` is one outer
+`MUST_FIT_ATOMIC` EVM transaction whose elements call ordinary Core `publish`
+sequentially; earlier committed state is visible to later calls and any later
+revert rolls the whole route back. Every element uses explicit AdmissionIntent
+because the router is `msg.sender`; same-Principal/same-lane elements use
+consecutive nonceSeq values in call order. It adds no Core ABI. Workload
+campaigns may be
 `SPLITTABLE_THROUGHPUT` only at explicitly declared independent-envelope
 boundaries (§3.3); the class never changes when an op exceeds a Realm cap.
+
+`OCCREF_GUARD` maps exactly to registry operation
+`harness:self-occurrence-ref-guard/1`, kind HARNESS, canonical input
+`(bytes32,uint16,bytes,bytes32,bytes,uint8)`, success
+`(uint16 occurrenceRefCount)`. `cacheSource=1 EARLIER_STAGED` requires nonempty
+canonical `typeSchemaGroupBody`; the adapter resolves leaf 0 through the
+intrinsic TypeSchemaGroup/1 branch, validates/stages its member caches in the
+disposable shadow, then resolves `typeSchemaId`. `cacheSource=2
+PERSISTED_RETRY` requires empty group bytes and resolves `typeSchemaId` from the
+Core state created by Setup. Any other source/presence combination returns exact
+harness-namespace `ErrHarnessCacheMode(uint8,bool)`. The operation then calls
+the same internal structural-body validation → bounded-OCCREF extraction →
+current-envelope comparison path as publish and writes nothing. Its allowed
+protocol errors include the exact codec/unknown-Type errors and
+`E_SELF_ENVELOPE_OCCREF(uint16,uint16)`. It is not a production ABI and cannot
+manufacture a Record, Envelope, or admission.
 
 `PUBLISH.packHint` interacts with the `K_BATCH` knob (§3.4): the deterministic
 packer `PACK(k)` groups the script's pending logical leaves into envelopes of at
@@ -188,8 +217,9 @@ Additional red-team repair gates cover seams the old table missed:
   `TargetRecordCommitment(typeSchemaId,bodyHash)`, never the target body, and
   authenticates it by recomputing the signed RecordId with `DOM_RECORD`.
   Maximal evidence is 7,808 bytes (`32+384+2,080+1,184+4,128`); the aggregate
-  cap is 8,192 and whole-wire cap 16,384. A same-Envelope target derives the
-  pair from its RecordId-matched carried body. Retained reads expose the signed
+  cap is 8,192 and whole-wire cap 16,384. Every effective T4 target is external
+  and carries/retains the complete evidence; the current Envelope is never a
+  target-evidence source. Retained reads expose the signed
   recordId/type/principal but no body, postings, live fold, or Binding head for
   a never-admitted target.
 
@@ -199,10 +229,38 @@ withdrawalLeafIndex,EnvelopeHeader header,bytes32[] recordIds,
 TargetRecordCommitment targetCommitment,AccountPrincipal targetPrincipal,bytes
 witness)`. Any prior LeafBody-bearing evidence encoding is invalid.
 - Non-idempotent admission uses one ascending, bounded point-in-order shadow.
-  A static pass associates revision items, prospective ordinals and all
-  lifecycle/Binding/index effects are journaled sequentially, and every
-  user-controlled error occurs before state. Commit only asserts and replays
-  the frozen before/after journal.
+  After each selected descriptor/body/OCCREF guard, effect classification
+  associates that leaf's exact revision item where applicable; prospective
+  ordinals and all lifecycle/Binding/index effects are journaled sequentially,
+  and every user-controlled error occurs before state. Commit only asserts and
+  replays the frozen before/after journal.
+- For each selected leaf, its Type resolves from persisted or earlier-staged
+  cache, or the kernel-known intrinsic TypeSchemaGroup/1 branch, before
+  structural validation/OCCREF extraction; current-envelope OCCREF
+  then rejects before source activation/state with `E_SELF_ENVELOPE_OCCREF`.
+  An earlier selected TypeSchemaGroup may define the later leaf's descriptor;
+  unselected carriage is not semantically inspected, and same-envelope RecordId
+  REF DAGs remain legal. The all-ACTIVE shortcut first repeats the guard using
+  persisted selected Types/the intrinsic TypeSchemaGroup branch and stages no
+  cache/state.
+  Successful bind→withdraw and sequential same-key bind chains use independent
+  Envelopes through `ATOMIC_ROUTE`; one Envelope may still carry duplicate
+  Withdrawals targeting one prior external occurrence (effective then terminal).
+- Every accepted batch exposes `admissionBatchIntentLane(batchId)`: zero for
+  implicit sender, otherwise `(nonceKey<<64)|nonceSeq` with `nonceSeq>=1`.
+  `intentNonceOf(principalId,nonceKey)` closes reconstruction; an all-ACTIVE
+  retry creates neither a batch nor a lane word.
+
+  ```solidity
+  function admissionBatchIntentLane(uint64 batchId)
+      external view returns (uint256 packedLane);
+  function intentNonceOf(bytes32 principalId, uint192 nonceKey)
+      external view returns (uint64 lastSeq);
+  ```
+
+  `batchId==0` or `batchId>admissionBatchCount` is the owning Realm's typed
+  bounds error. A nonzero word decodes as `nonceKey=uint192(word>>64)` and
+  `nonceSeq=uint64(word)`; zero never denotes an explicit lane.
 - Content tests separate structural admission from profile eligibility: URI,
   cross-field/chunk math, sorted/unique members, and kind-target checks may make
   a structurally admitted Record ineligible, but Core does not reject them.
@@ -478,21 +536,40 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   and the maximal legal evidence shape is 7,808 bytes under the aggregate cap.
   Retained reads return recordId/typeSchemaId/principalId but no target body or
   never-created index/head state. Admission alone constructs the lifecycle
-  context; neither downstream owner receives evidence bytes. A same-Envelope
-  target instead derives the pair from its authenticated header/vector and
-  RecordId-matched carried body and rejects duplicate caller evidence.
-- **CV-SHADOW** — GV-9/GV-10/GV-18, SR-3/SR-10/SR-15: run the four SR-pinned
-  same-call traces. (1) bind→withdraw nets its normal posting/live delta to zero,
-  tombstones the head, and appends both RAW_AUDIT revisions; (2) sequential
-  same-key binds use `(NONE,xr=0)` then `((E,0),xr=1)` and finish revision 2,
-  while stale/reversed CAS has zero state delta; (3) withdraw-before-later-target
-  stages PRE_WITHDRAWN then fails the later source's no-resurrection with nonce,
-  counters, Envelope/evidence/receipt/index/head unchanged; (4) duplicate
-  external prewithdraw consumes one evidence item, reuses its planned retained
-  bytes for the terminal sibling, admits both sources consecutively, and stores
-  exactly one evidence value; a second caller item fails prewrite. Compare the
-  exact final occurrence, Binding, posting-head, Record-live, unique-zero-crossing,
-  and RAW_AUDIT journal outcomes in SOL/TS/RS.
+  context; neither downstream owner receives evidence bytes. There is no
+  current-envelope shortcut or discardable staged commitment: every effective
+  external T4 retains the full evidence and a second caller item is extra.
+- **CV-SHADOW** — GV-9/GV-10/GV-18, SR-3/SR-10/SR-15/SR-17: run four legal traces.
+  (1) `ROUTER-BIND-WITHDRAW`: precompute Envelope A with one BindingSet and
+  Envelope B with its Withdrawal; `ATOMIC_ROUTE([A,B])` binds then withdraws,
+  nets the ordinary posting/live delta to zero, tombstones the head, appends
+  RAW_AUDIT, uses explicit intents with consecutive same-lane nonces, and fully
+  rolls back A if B fails. (2) `ROUTER-BIND-REBIND`: precompute A from
+  `(NONE,xr=0)` and B from `((A,0),xr=1)`; the route finishes revision 2, while
+  stale/reversed CAS rolls back both calls. (3) `STAGED-TYPE-OCCREF`: leaf 0
+  resolves through the kernel-known intrinsic TypeSchemaGroup/1 branch and is
+  a fresh group defining one direct/optional-OCCREF Type and one
+  REF-only Type. In the real success arm, leaf 1 uses the newly staged OCCREF
+  Type to name an independently precomputed external Envelope, while leaf 2
+  uses the staged REF-only Type to name an earlier selected RecordId; all three
+  admit. The frozen invalid subvector `E_SELF_OCCREF` runs the exact disposable
+  descriptor-resolution/validation/extraction path with the same earlier-staged
+  Type and synthetic `currentEnvelopeId` equality; it returns
+  `E_SELF_ENVELOPE_OCCREF(sourceLeaf,targetLeaf)` before activation, with nonce,
+  batch/lane, counters, Envelope/evidence/receipt/index/cache/head unchanged.
+  Retrying the successful Envelope proves the all-ACTIVE path resolves persisted
+  Types; its external OCCREF returns ALREADY_ADMITTED, while the persisted-cache
+  synthetic equality fails before the shortcut with the same no-state result.
+  The harness seam is required because constructing a full self-hashing Envelope
+  is infeasible. (4)
+  `DUP-WITHDRAW-EXTERNAL`: one Envelope carries two Withdrawals targeting one
+  prior external ACTIVE occurrence; the first is effective, the second sees
+  terminal shadow state, both sources receive consecutive ordinals, and no
+  target evidence is required. A separate external PRE_WITHDRAW variant
+  consumes/stores exactly one caller evidence value for the first effective T4
+  and reuses it for the terminal sibling. Compare exact occurrence, Binding,
+  posting/live, unique-count, RAW_AUDIT, batch-lane, and atomic rollback state
+  in SOL/TS/RS.
 - **CV-DIGEST-LOOKUP** — GV-14/GV-16, SR-18a/b: publish and query one
   digest-bearing Record with the same u16 `algCode`; legacy u8/u32 encodings
   are typed-unsupported/rejected and can never produce `COMPLETE`-empty.
@@ -512,8 +589,12 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   receipts/batches as historical validation evidence without claiming to
   recover discarded main witnesses. It decodes retained prewithdraw evidence,
   recomputes the signed target RecordId from TypeSchemaId/bodyHash, and confirms
-  that a never-admitted target has no body/posting/live/head state. Any §3.2a
-  state mismatch fails the cell.
+  that a never-admitted target has no body/posting/live/head state. Its W-4a
+  batch walk reads every `admissionBatchIntentLane` in order, derives the
+  Principal from the first accepted occurrence, validates every nonzero
+  `(nonceKey,nonceSeq)` succession, and exactly matches all `intentNonceOf`
+  points; zero words are implicit batches and no private key-universe input is
+  allowed. Any §3.2a state mismatch fails the cell.
 - **CV-GIT-STOCK** — FX-GIT/GV-16: from a clean directory with the original Git
   repository, every EFS cache/database, and every gateway cache absent, a second
   implementation walks the admitted ref Binding to its
@@ -1089,7 +1170,16 @@ comparison and derived k\*; **M-PAGE** paged
 reads cold/warm at declared page sizes; **M-COUNT** `counts()` + fold costs;
 **M-LENS** the FX-LENS grid; **M-SEL** selection determinism + gas; **M-REC**
 reconstruction pass/fail + walk cost; **M-CONF** conformance pass/fail;
-**M-STATE** state growth; **M-CLIENT** client-plane timings.
+**M-STATE** state growth; **M-CLIENT** client-plane timings;
+**M-INTENT-LANE** the replay-metadata delta and reconstruction cost. Its write
+rows compare otherwise identical accepting non-kernel calls in implicit mode
+(zero batch word, no nonzero lane slot) and explicit mode (nonzero packed batch
+word plus the live nonce-lane update), then measure cold/warm
+`admissionBatchIntentLane`, cold/warm `intentNonceOf`, and the complete W-4a
+batch walk. Atomic-router cases are explicit-only and report each element's
+word plus outer rollback. The harness records actual gas/SSTORE/state-growth
+results; the owning chapter's approximate `+22,100` nonzero-slot estimate is
+an input hypothesis, not a prefilled measurement.
 
 **Exact M-K comparison unit.** Each contributing fixture declares one ordered
 `MK64` list of exactly 64 independent non-Binding Record leaves in the frozen
@@ -1130,6 +1220,8 @@ selectBestLocator` (Lane 5); `readHead, readHeadBatch, readHistory,
 readOccurrenceStatus` (Lane 6); `resolve, resolveStrict, validatePlan`
 (Lane 7); `envelopeHeaderOf, envelopeRecordIdsOf, occurrenceStateOf` (Lane 2);
 `preWithdrawalEvidenceAt` with exact TargetRecordCommitment decoding (Lane 2);
+`admissionBatchIntentLane` and `intentNonceOf` (Lanes 2/4; W-4a replay-control
+reconstruction);
 `genesisFacts, implementationAddress, currentUpgradeAuthorityRef,
 revisionCount/revisionAt/currentRevision, authorityTransitionCount/
 authorityTransitionAt` and the remainder of Lane 4 §8.2 (CV-RECON). Every
@@ -1201,7 +1293,7 @@ values are the ten `FX-*` ids in §2, the sixteen `CV-*` ids in §2.0.3,
 `H-DOMTABLE`, `H-CELLS`, the four `WL-*` ids in §4, and `CORPUS` for a
 corpus-wide bundle/compile statistic. A row with `fixtureId="CV"` is malformed.
 `caseId` uses `[A-Za-z0-9][A-Za-z0-9._/-]{0,127}` and identifies the exact
-member or script step (`CV-SHADOW/SHADOW-1`, `GV-1/MAX-BODY-PLUS-1`,
+member or script step (`CV-SHADOW/ROUTER-BIND-WITHDRAW`, `GV-1/MAX-BODY-PLUS-1`,
 `FX-ARC.C3`, `H-JCS/JSON-NUMBER`, `SIZE_6`). `vectorId` is the byte-identical
 `Vector.id` from §1.4 when a vector owns the row and `-` otherwise. In a
 vector-owned row there is no independent naming choice:
@@ -1344,16 +1436,21 @@ STRING(255). These changes intentionally move `resultRegistryHash`,
 `corpusVersion`, affected Type/Record IDs, and every dependent expected result;
 their concrete bytes are Stage B outputs, not values guessed in Stage A.
 
-Owner commits `c48f252`/`4983843` further change frozen corpus inputs and
+Owner commits `c48f252`/`4983843`/`2f25b7e`/`1ad0483`/`180c784` further change frozen corpus inputs and
 expected outcomes: publish-wire fixtures encode the fixed
 `TargetRecordCommitment(typeSchemaId,bodyHash)` evidence shape; publish errors
 cover commitment mismatch, exact evidence/revision cardinality, sequential CAS,
-and later-sibling no-resurrection before state; occurrence reads for a retained
-never-admitted target expose recordId/typeSchemaId/principalId but no body; and
-CV-SHADOW final states encode the exact sequential lifecycle/Binding/index
-journal result. These move `resultRegistryHash`, `corpusVersion`, affected
-expected result/state digests, and dependent IDs; concrete bytes remain Stage B
-outputs.
+and current-envelope OCCREF rejection after intrinsic/persisted/earlier-staged
+Type resolution but before activation/state; occurrence reads for a
+retained never-admitted target expose recordId/typeSchemaId/principalId but no
+body. The registry includes `E_SELF_ENVELOPE_OCCREF`, both intent-lane reads,
+the exact `harness:self-occurrence-ref-guard/1` plus
+`ErrHarnessCacheMode(uint8,bool)`, and `fix:ATOMIC_ROUTE/1`;
+CV-SHADOW results encode two atomic-router traces, intrinsic→staged Type success,
+staged/persisted-retry guard rejection with no state, and the legal duplicate-
+Withdrawal journal. These move `resultRegistryHash`,
+`corpusVersion`, affected expected result/state digests, and dependent IDs;
+concrete bytes remain Stage B outputs.
 
 ```text
 successPayload = abi.encode(success outputs...)
@@ -1420,13 +1517,15 @@ The closed component schedule is: 0x01 exact `genesisFacts`, Codex bytes,
 EIP-1967 implementation/admin words, `implementationAddress`,
 `currentUpgradeAuthorityRef`, `revisionAt(1..revisionCount)`, then every
 `authorityTransitionAt(1..authorityTransitionCount)` in ordinal order; 0x02 admission/envelope/card/batch/Type/Principal
-counters, every used `(principalId,nonceKey)`, and cell control counters; 0x03
+counters, every used `(principalId,nonceKey)` with its exact `intentNonceOf`
+value, and cell control counters; 0x03
 Principals by full bytes32 id with descriptors/ordinals; 0x04
 Types/shapes/profiles by bytes32 id with exact definitions and schema-cache
 digest; 0x05 Records by id with type/shape, canonical body, and first-admission
 metadata; 0x06 **unsigned** persisted envelopes/cards by id plus ordered
 RecordIds; 0x07 admission log/receipts `1..H`, Occurrences by reversible ref,
-and batches in batch order; 0x08 retained pre-withdrawal evidence keyed by
+and batches in batch order, including each batch's exact
+`admissionBatchIntentLane(batchId)` word; 0x08 retained pre-withdrawal evidence keyed by
 effective withdrawal ordinal, decoded to the exact signed header/vector,
 TypeSchemaId/bodyHash commitment, descriptor, and witness (never a target
 body); 0x09 postings keys sorted bytes32 with every
@@ -1438,6 +1537,10 @@ Transient preflight shadow/journal memory is excluded; its conformance is the
 all-prewrite error result plus the exact final 0x02–0x0a state after mechanical
 commit. A never-admitted prewithdraw target therefore appears in 0x07/0x08 but
 not as a 0x05 body, 0x09 posting/live contribution, or 0x0a head source.
+STAGED-TYPE-OCCREF success therefore adds the admitted group/member caches to
+0x04 and its three admitted sources to the ordinary components; either staged-
+or persisted-cache `E_SELF_OCCREF` error reproduces the byte-identical pre-call
+projection, including no new cache, batch-intent lane, or nonce state.
 
 The disposable SOL build exposes only these harness reads:
 
@@ -1453,7 +1556,11 @@ production ABI.
 
 Reconstruction, not a private DB, closes the key universe: ids from the
 state-readable spine; posting keys from admitted schemas/bodies; Binding keys
-and nonce lanes from accepted Records/intents. Include immutable state, caches
+from accepted Records; and nonce lanes from the W-4a ascending AdmissionBatch
+walk. Each nonzero packed word derives its Principal from the batch's first
+accepted occurrence, requires `nonceSeq>=1` and exact per-lane succession, and
+must reproduce `intentNonceOf`; zero is the implicit marker and an all-ACTIVE
+retry contributes no batch or word. Include immutable state, caches
 that affect future calls, nonces, retained evidence, lifecycle, dead postings,
 counts, RAW_AUDIT history, F4 coverage, receipt/admission/code bases. Exclude
 physical slots/packing, gas warmness/payment, balances/account nonces, tx hashes,
@@ -1505,7 +1612,7 @@ Rules [PROPOSAL]:
    replacing it with smaller envelopes is not a measurement of k.
 4. Minimum `MUST_FIT_ATOMIC` set: `ONECALL_5`; one FX-GIT push unit; one
    `TypeSchemaGroup/1` admission plus deterministic cache materialization;
-   every concrete `publish` and tested all-or-nothing `publishBatch`; every
+   every concrete `publish` and tested all-or-nothing `ATOMIC_ROUTE`; every
    poisoned-leaf/full-revert conformance vector.
 5. Minimum `SPLITTABLE_THROUGHPUT` set: F4 backfill campaigns, staged
    large-content acquisition, churn/spray population, and workload-level PACK
@@ -1698,7 +1805,10 @@ The compact contract other chapters and Stage B rely on:
   `M_K_POINT(k=1..64)` + DRBG seeding (§1.2):
   the ONLY vocabulary fixtures/workloads are written in; bakeoff cells supply
   `CellAdapter: FixOp → concrete ABI`; `PUBLISH_SCHEMA_GROUP` must reduce to
-  the sole Core `publish` entrypoint.
+  the sole Core `publish` entrypoint. `ATOMIC_ROUTE` and `OCCREF_GUARD` are
+  disposable harness operations only; the latter resolves through the exact
+  intrinsic/persisted/earlier-staged descriptor path and maps to
+  `harness:self-occurrence-ref-guard/1`.
 - **Fixture IDs and interfaces** (§2): FX-ARC, FX-GIT, FX-EAP [PROVISIONAL],
   FX-NANDA, FX-LENS, FX-TOPIC, FX-PRIV, FX-50GB, FX-MOUNT (GoldenView/1 +
   ResolvedManifest/1 byte layout — canonical raw-manifest input seam only), FX-BROWSE (retained thin;
