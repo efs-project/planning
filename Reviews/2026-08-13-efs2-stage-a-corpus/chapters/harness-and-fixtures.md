@@ -89,6 +89,7 @@ VERIFY_RANGE(chunkTreeRef, range, locatorSet)    -- Lane 8 §8.2 client machine
 RECONSTRUCT()                                    -- Lane 4 §8 walk W-0..W-10, 2nd impl
 -- control plane --
 EXPECT(assertion)                                -- typed assertion incl. MUST-FAIL(err)
+M_K_POINT(k, orderedLeaves[64])                  -- frozen axis-1 comparison; §3.1
 ADVANCE(blocks | seconds)
 SNAPSHOT(label) / REVERT_TO(label)               -- EVM test-node state bookmarks
 AS_REALM(realmInstance)                          -- multi-Realm scripts (CV-XREALM)
@@ -110,12 +111,13 @@ boundaries (§3.3); the class never changes when an op exceeds a Realm cap.
 `PUBLISH.packHint` interacts with the `K_BATCH` knob (§3.4): the deterministic
 packer `PACK(k)` groups the script's pending logical leaves into envelopes of at
 most `k` leaves in script order, never reordering across a `BARRIER` pseudo-op.
-The packer, not the script, decides envelope boundaries — so one script yields
-the k ∈ {1, 3, 10, 64} amortization curve the axis-1/5 decision statistics need
-(audit BAKEOFF lane axis-1 falsifier, VERIFIED). `PACK(k)` may form envelopes
-only inside a `SPLITTABLE_THROUGHPUT` campaign; every resulting envelope remains
-one `MUST_FIT_ATOMIC` call. An over-cap `PACK(k)` point is reported `OVER_CAP`
-for that exact k, never silently replaced with smaller envelopes. [PROPOSAL]
+The packer, not the script, decides ordinary workload envelope boundaries.
+`PACK(k)` may form envelopes only inside a `SPLITTABLE_THROUGHPUT` campaign;
+every resulting envelope remains one `MUST_FIT_ATOMIC` call. An over-cap
+`PACK(k)` point is reported `OVER_CAP` for that exact k, never silently replaced
+with smaller envelopes. Axis-1 `M-K` does not reuse this throughput behavior:
+`M_K_POINT` has the fixed all-or-nothing B0/F1 transaction shapes in §3.1.
+[PROPOSAL]
 
 ### 1.2 Determinism and seeding
 
@@ -345,7 +347,7 @@ TS/RS-only `SELECT_PROFILE_V2` run may compare health-first and grade-first
 client profiles across the tampered trace, but is labeled deferred and never
 substitutes for the B0 Core result.
 
-**Measurements fed:** M-K (measured-sign crossover search, phase C), M-AGG (full-trace bundle),
+**Measurements fed:** M-K (frozen 64-point comparison, phase C), M-AGG (full-trace bundle),
 M-PAGE (Project→Releases, target→Comments, Artifact→Locators backlinks),
 M-SEL (`B0_SELECT` SOL/TS/RS plus separately labeled client-profile rows), M-COUNT
 (endorsement liveCount before/after one E-principal withdraws), M-CLIENT
@@ -373,9 +375,10 @@ KEY_P256, 1 ERC-1271), `Team` (ObjectGenesis + TeamMembership records),
 | Collaboration | `Issue/1`, `Comment/1` (reused), `PullRequest/1`, `Review/1`, `ArtifactRelease/1` (repo releases), `Reaction/1`, `TeamMembership/1`, `Edit/1` (edit history on comments/issues) — all clonable: plain Records + occurrences, no Core primitive |
 | Issue status | maintainer Binding at `(purpose = TypeSchemaId(Issue/1), subject = issueRecordId-as-subject, fieldRole = 1)` → open/closed head |
 
-**Script:** A: cast/types/repo genesis/team. B: base history — 30 commits as 6
-pushes (5-ref worst push exercises multi-ref); wiki: 8 page revisions across 2
-pages. C: collaboration — 6 issues (2 closed via Binding), 3 PRs (patch closures,
+**Script:** A: cast/types/repo genesis/team. B: base history — 30 commits as six
+five-commit pushes. P1–P5 each update only `refs/heads/main`; P6 is the one
+designated `PUSH-WORST-20` below. Wiki: 8 page revisions across 2 pages. C:
+collaboration — 6 issues (2 closed via Binding), 3 PRs (patch closures,
 2 reviews each, 1 merged → push), 1 release, 12 reactions, 3 edits (edit-history
 reads must show both versions with provenance). D: index-evolution event
 (`Issue/2` + successor evidence, as FX-ARC.E). E: **walk-away reconstruction** —
@@ -395,6 +398,13 @@ EFS identity unaffected; the read layer shows the digest as foreign-only
 [DERIVED INVARIANT — Lane 1 §1.1 foreign-digest rule]; (v) CV-CLOCK applied to
 commit-claimed timestamps.
 
+`PUSH-WORST-20` is frozen as exactly 20 ref updates in one
+`GitPushTransaction/1`: `refs/heads/main` moves from P5's tip to P6's tip, and
+the 19 refs `refs/heads/bench/01` through `refs/heads/bench/19` are created
+from absent `oldOid` to that same P6 tip. Its update array is bytewise
+ref-name order (`bench/01`…`bench/19`, then `main`). No other push is called
+worst-case, and no workload may resize or repack this designated trace.
+
 The Git push semantic unit — its `GitPushTransaction/1` Record plus the
 declared ref-head Binding updates — is `MUST_FIT_ATOMIC`. It is never retried as
 separate ref updates. **EIP-7825 arithmetic (in-chapter, per the exactness bar):** worst corpus push =
@@ -406,7 +416,9 @@ of the 16,777,216 cap** — single-tx atomic. Ceiling: gas, not the leaf cap —
 structural cap is the predicted limiter. [HYPOTHESIS — the measured
 `MUST_FIT_ATOMIC` row governs; an over-cap trace fails rather than splitting.]
 
-**Measurements fed:** M-AGG, M-K (push batch curve), M-PAGE (issues by repo,
+**Measurements fed:** M-AGG (including the exact 20-ref/21-leaf atomic push),
+M-K (the separate fixed ordinary-Record comparison slice; `PUSH-WORST-20` is
+never repacked), M-PAGE (issues by repo,
 comments by issue, occurrences by author D1 = author enumeration under churn),
 M-COUNT (open-issue live counts), M-REC (reconstruction pass/fail + wall time),
 M-STATE (state growth per year of simulated history via WL-CHURN §4), plus the
@@ -431,8 +443,9 @@ interface is designed to survive brief-driven renaming.]**
 subject PRINCIPAL field); lifecycle: revoke = `Withdrawal/1` of the award
 occurrence; **gate-grade point read** = Issuer Binding at
 `(purpose = TypeSchemaId(AchievementAward/1), subject = defObjectId,
-fieldRole = keccak("efs2/fieldrole/1" ‖ subjectPrincipalId))` → head targets the
-current award Record (or TOMBSTONED). [PROPOSAL — award-as-occurrence carries
+fieldRole = keccak256(abi.encode(DOM_FIELDROLE, subjectPrincipalId)))`, where
+`DOM_FIELDROLE = keccak256("efs2/fieldrole/1")` → head targets the current
+award Record (or TOMBSTONED). [PROPOSAL — award-as-occurrence carries
 the evidence and enumeration; issuer-Binding carries the O(1) authoritative
 check. Rationale: BindingKey embeds the ISSUER principal (Lane 6 §1.3), so no
 volume of hostile third-party awards can touch the gate's read path.]
@@ -548,8 +561,8 @@ plans — one MUST-FAIL vector per rejection code 1–13 (Lane 7 §3.5).
 
 **Measurements fed:** M-LENS (Core grid — THE V2-E2 deliverable), M-CLIENT
 (50/100/256 mobile+desktop grid), M-CONF
-(LENS-NEG-1, window pattern, rejection codes), M-K (a gated batch: 5 resolves in
-one tx, warm amortization). Feeds Lane 7 §3.4 cap confirmation and the
+(LENS-NEG-1, window pattern, rejection codes); M-LENS also records a gated
+batch of 5 resolves in one tx for warm amortization. Feeds Lane 7 §3.4 cap confirmation and the
 `readHeadBatch` cost row (Lane 6 open item 6).
 
 ---
@@ -773,24 +786,46 @@ each is mechanically extractable from a standard EVM test node trace]:
 | `sloadsCold` / `sloadsWarm` | EIP-2929 classification from the trace |
 | `stateGrowthBytes` | 32 × (net new nonzero slots) + deployed code bytes; refund-cleared slots subtract |
 | `returndataBytes`, `itemsReturned`, `completeness` | read-plane honesty fields |
+| `realmId`, `realmBasis`, `basisOrdinal`, `highWaterOrdinal`, `coverage` | exact Realm/query context returned or fixed for the operation; `coverage` is examined-entry count |
+| `resultSchemaId`, `resultDigest`, `typedErrorCode`, `crossImplEqual` | canonical output/error artifact and differential-equality fields (§3.2) |
 | `postingsVisited`, `nextCursor` | physical selector work and resumability; dead/boundary reads included exactly as the endpoint reports |
 | `wallMs`, `peakMemoryBytes`, `rpcCount`, `pageCount` | client-plane quantities (M-CLIENT rows; language + profile tagged) |
 
 Metric bundles (referenced by fixtures): **M-AGG** per-fixture-trace totals and
-the §3.5 aggregate bundle; **M-K** per-leaf cost vs batch size k with crossover
-k\* (axis 1/5 decision statistic — audit BAKEOFF, VERIFIED); **M-PAGE** paged
+the §3.5 aggregate bundle; **M-K** the fixed 64-point axis-1 transaction
+comparison and derived k\*; **M-PAGE** paged
 reads cold/warm at declared page sizes; **M-COUNT** `counts()` + fold costs;
 **M-LENS** the FX-LENS grid; **M-SEL** selection determinism + gas; **M-REC**
 reconstruction pass/fail + walk cost; **M-CONF** conformance pass/fail;
 **M-STATE** state growth; **M-CLIENT** client-plane timings.
 
-`M-K` begins at seed points `{1,3,10,64}` and reports measured signs only. If
-adjacent seeds bracket a sign change, it measures the missing integer k values
-(or deterministic integer bisection followed by the neighboring integer) until
-the smallest measured crossing is known. Every compared k has identical
-`atomicityClass`, fixture slice, Realm/client profile, and `corpusVersion`. If
-no crossing is measured, it reports `NO_OBSERVED_CROSSING_WITHIN_1_64`; it
-never interpolates or extrapolates a first discrete crossing.
+**Exact M-K comparison unit.** Each contributing fixture declares one ordered
+`MK64` list of exactly 64 independent non-Binding Record leaves in the frozen
+corpus manifest. Point `k` consumes the first `k` leaves; all 64 integer points
+`k = 1..64` execute regardless of earlier results. `{1,3,10,64}` may be chart
+labels only. It never controls execution, adds a point, or changes corpus
+bytes.
+
+- `G_B0(k)`: one EVM transaction, one ordinary Core `publish`, one independently
+  signed envelope containing exactly `k` leaves.
+- `G_F1(k)`: one EVM transaction to the pinned, disposable, test-only
+  `F1AtomicAggregator`, carrying exactly `k` independently signed one-Record
+  cards. Its stateless loop makes exactly `k` ordinary Core `publish` calls and
+  bubbles any revert so the outer transaction is all-or-nothing. It adds no
+  Core entrypoint or production mechanism.
+- Both rows are `MUST_FIT_ATOMIC`, always have `splitFactor=1`, and record
+  `OVER_CAP` at the exact k rather than splitting or substituting another
+  transaction. B0 reports `coreCallCount=1, aggregatorGas=0`; F1 reports
+  `coreCallCount=k` and `aggregatorGas` as outer-frame gas exclusive of the k
+  Core subcall frames. The aggregator codehash is pinned in the toolchain
+  manifest; deployment gas is excluded from G(k) and reported once as harness
+  setup metadata.
+
+Every pair has identical fixture prefix, Realm profile, `corpusVersion`, and
+atomicity class. `KSTAR_1` is computed only after the full 64-point table: the
+smallest measured k satisfying `G_B0(k) < G_F1(k)`, or
+`NO_OBSERVED_CROSSING_WITHIN_1_64`. No interpolation, bisection, adaptive
+measurement, or result-dependent corpus mutation is permitted.
 
 **The mandatory read matrix.** Every named external read in the eight chapters
 is measured cold AND warm at least once per cell — including the baseline reads
@@ -821,6 +856,8 @@ MeasurementRow {
   atomicityClass  enum        -- MUST_FIT_ATOMIC | SPLITTABLE_THROUGHPUT | N/A
   overCap         bool        -- true iff the exact measured unit exceeds txGasCap
   splitFactor     uint16      -- MUST_FIT_ATOMIC always 1; campaign split count otherwise
+  coreCallCount   uint16      -- B0 M-K=1; F1 M-K=k; 0 when no Core call
+  aggregatorGas   uint64      -- F1 outer-frame gas excluding Core subcall frames; 0 otherwise
   k               uint16      -- batch size (writes) / page size (reads) / plan N
   n               uint32      -- repetition count aggregated into this row
   temperature     enum        -- COLD | WARM | MIXED
@@ -828,11 +865,24 @@ MeasurementRow {
   calldataBytes, returndataBytes          uint32
   sstoreNew, sstoreMod, sloadsCold, sloadsWarm  uint32
   stateGrowthBytes  int64
-  itemsReturned   uint16
-  completeness    enum        -- UNKNOWN=0|COMPLETE=1|PARTIAL=2|UNSUPPORTED=3|N/A
-  postingsVisited uint16      -- selector-reported total physical reads
-  nextCursor      uint256     -- 0 when N/A, a resumable cursor, or CURSOR_END
-  ok              bool        -- assertion outcome (CONFORMANCE rows)
+  resultPresent   bool        -- true for an encoded success or typed-error artifact
+  resultSchemaId  bytes32     -- frozen ResultSchema/1 id; zero iff !resultPresent
+  resultDigest    bytes32     -- tagged canonical outcome digest; zero iff !resultPresent
+  errorNamespace  bytes32     -- frozen error-vocabulary id; zero for success/N/A
+  typedErrorCode  uint32      -- ERROR_NONE=0; ERROR_NA=2^32-1; otherwise exact table code
+  errorDataDigest bytes32     -- hash of canonical typed-error arguments; zero for none/N/A
+  crossImplEqual  enum        -- NOT_APPLICABLE=0 | FALSE=1 | TRUE=2
+  realmId         bytes32     -- zero only when the op has no Realm context
+  realmBasis      bytes32     -- RealmRevisionId; zero when N/A
+  basisOrdinal    uint64      -- exact requested/resolved basis; ORDINAL_NA when N/A
+  highWaterOrdinal uint64     -- exact returned high-water; ORDINAL_NA when N/A
+  coverage        uint32      -- examined-entry count; COVERAGE_NA when N/A
+  itemsReturned   uint16      -- exact count; ITEMS_NA when N/A
+  completeness    enum        -- UNKNOWN=0|COMPLETE=1|PARTIAL=2|UNSUPPORTED=3|N/A=255
+  postingsVisited uint16      -- selector total reads; POSTINGS_NA when N/A
+  cursorApplicable bool       -- false only when cursor semantics do not apply
+  nextCursor      uint256     -- exact cursor/CURSOR_END when applicable; 0 iff !cursorApplicable
+  assertionStatus enum        -- NOT_APPLICABLE=0 | FAIL=1 | PASS=2
   wallMs          uint32      -- 0 unless M-CLIENT
   peakMemoryBytes uint64      -- 0 unless M-CLIENT
   rpcCount        uint32      -- 0 unless M-CLIENT
@@ -841,6 +891,41 @@ MeasurementRow {
   note            string      -- ≤ 128 chars; SCALED / PROVISIONAL flags here
 }
 ```
+
+Result artifacts use exact, corpus-versioned schemas:
+
+```text
+DOM_RESULT_SCHEMA = keccak256("efs2/harness-result-schema/1")
+resultSchemaId = keccak256(abi.encode(
+  DOM_RESULT_SCHEMA, keccak256(canonicalResultSchemaBytes)))
+
+DOM_MEASUREMENT_RESULT = keccak256("efs2/harness-result/1")
+resultDigest = keccak256(abi.encode(
+  DOM_MEASUREMENT_RESULT, resultSchemaId,
+  keccak256(canonicalResultBytes)))
+```
+
+The frozen, corpus-manifested result-schema registry defines field order/width
+for every `opName` as a tagged union: tag 0 plus the success-output tuple, or
+tag 1 plus `(errorNamespace, typedErrorCode, canonicalErrorArguments)`. Those
+are `canonicalResultSchemaBytes`; the matching encoded union value is
+`canonicalResultBytes`. TS/RS serialize the same bytes before differential
+comparison. `resultPresent=true` for either encoded arm and is false only for
+a row whose operation has no result artifact. `crossImplEqual=TRUE` means every
+required implementation produced the same `resultSchemaId`, `resultDigest`,
+`errorNamespace`, `typedErrorCode`, `errorDataDigest`, and context fields, not
+merely the same Boolean assertion.
+
+N/A sentinels are closed: `ORDINAL_NA = 2^64−1` (legal protocol ordinals are
+u48), `COVERAGE_NA = 2^32−1`, `ITEMS_NA = 2^16−1`,
+`POSTINGS_NA = 2^16−1`, `ERROR_NA = 2^32−1`, `Completeness.N/A = 255`, zero `realmId/realmBasis` only where their context is
+absent, and `cursorApplicable=false` with `nextCursor=0` only where cursor
+semantics do not apply. An applicable protocol cursor is recorded exactly,
+including zero if zero is a legal returned value. Successful
+operations use `ERROR_NONE=0`; a typed failure uses its nonzero frozen error
+code and nonzero `errorNamespace`; a row with `resultPresent=false` uses
+`ERROR_NA`. These sentinels are measurement vocabulary, not protocol ABI
+values.
 
 One flat table; every report in Stage B is a set of these rows plus derived
 charts computed FROM rows (k\* curves, ratios). Nothing is reported outside the
@@ -894,7 +979,7 @@ Rules [PROPOSAL]:
 
 | Knob | Values (frozen) | Used by |
 |---|---|---|
-| `K_BATCH` | {1, 3, 10, 64} | PACK(k); M-K seed signs and bounded crossover search |
+| `K_BATCH` | every integer `1..64` | PACK(k); all 64 frozen M-K points. `{1,3,10,64}` are chart labels only |
 | `K_CHURN_YEARS` | {1, 10, 50} | WL-CHURN (50 = the 50-year panel's number) |
 | `K_WRITE_RATE` | {100, 1,000} writes/day | WL-CHURN volume |
 | `K_SPAM_RATIO` | {1, 10, 100} spam:legit | WL-SPRAY |
@@ -1070,7 +1155,8 @@ the Codex brief lands, its replacement is an ordinary FR-3 version bump.
 
 The compact contract other chapters and Stage B rely on:
 
-- **FixOp language** (§1.1, closed set) + `PACK(k)` + DRBG seeding (§1.2):
+- **FixOp language** (§1.1, closed set) + `PACK(k)` + fixed
+  `M_K_POINT(k=1..64)` + DRBG seeding (§1.2):
   the ONLY vocabulary fixtures/workloads are written in; bakeoff cells supply
   `CellAdapter: FixOp → concrete ABI`; `PUBLISH_SCHEMA_GROUP` must reduce to
   the sole Core `publish` entrypoint.
@@ -1082,13 +1168,16 @@ The compact contract other chapters and Stage B rely on:
   CV-WITHDRAW / CV-SPARSE-ADMIT / CV-PREWITHDRAW / CV-DIGEST-LOOKUP /
   CV-LAST-LIVE-COUNT / CV-SCHEMA-CAP / CV-RECON runs once per cell.
 - **MeasurementRow** (§3.2): the one table shape for every cell × fixture ×
-  workload; metric definitions §3.1; the mandatory read matrix (every named
-  chapter read, cold+warm).
+  workload, including canonical result schema/digest, typed error,
+  cross-implementation equality, Realm/basis/high-water/coverage, exact N/A
+  sentinels, Core-call count, and F1 aggregator overhead; metric definitions
+  §3.1; the mandatory read matrix (every named chapter read, cold+warm).
 - **RealmProfile** (§3.3): RP-L1 pinned at txGasCap = 16,777,216 (EIP-7825);
   RP-L2/RP-L3 parameterized; decisions cite RP-L1 rows;
   `MUST_FIT_ATOMIC` over-cap traces fail with `splitFactor=1`, while declared
   throughput campaigns split only between independent envelopes.
-- **Knob set** (§3.4), distinct Lens grids (Core 1/8/32/64; TS/RS client
+- **Knob set** (§3.4), all 64 frozen M-K integer points, the exact
+  FX-GIT `PUSH-WORST-20`, distinct Lens grids (Core 1/8/32/64; TS/RS client
   50/100/256 on pinned mobile/desktop profiles), and **named adversarial
   workloads** WL-SPRAY / WL-CHURN / WL-HOT / WL-DEAD-LOCATOR (§4).
 - **Aggregate-bundle rule** (§3.5): adopt/kill and return-to-James cite bundle

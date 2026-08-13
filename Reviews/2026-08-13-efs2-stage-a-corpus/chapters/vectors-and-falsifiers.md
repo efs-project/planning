@@ -202,9 +202,11 @@ member level (Stage B may add members, never remove).
   structurally", VERIFIED.]
 - **Shape:** input = `(TypeSchemaBlob bytes, body bytes)`; output =
   `errCode uint16` (0 = OK; closed table `b0-encoding-and-ids` §2.7) plus, for
-  valid members, `extractWord(fieldIdx)` / `extractRefs(roleId)` results
-  (E1 static extraction).
-- **Impl:** SOL (`EfsCodec.validateBody/extractWord/extractRefs`), TS, RS.
+  valid members, `extractWord(fieldIdx)` / `extractRefs(roleId)` /
+  `extractOccurrenceRefs(roleId)` results (E1 static extraction).
+- **Impl:** SOL
+  (`EfsCodec.validateBody/extractWord/extractRefs/extractOccurrenceRefs`), TS,
+  RS.
 - **Pass:** identical errCode; identical extraction bytes; for every valid
   member, re-encode(decode(body)) == body (canonical-form uniqueness, rule E2).
 - **Members:** every field kind at boundary widths; `BOOL`/`OPTION` flag bytes
@@ -214,6 +216,10 @@ member level (Stage B may add members, never remove).
   documented length-first consequence member (`"z" < "aa"`); invalid UTF-8 →
   `ERR_UTF8`; DIGEST unknown algo / wrong length → `ERR_DIGEST`; REF sentinel
   or zero in body → `ERR_SENTINEL_IN_BODY`; nesting depth 5 → `ERR_DEPTH`;
+  `OPTION(OCCREF)` under an OCCURRENCE role: absent projects to TS `null` /
+  Rust `None`, extracts `[]`, and consumes zero runtime REF budget; present
+  projects to the full `(EnvelopeId, leafIndex)`, extracts one reversible
+  OccurrenceRef, and consumes one; no OccurrenceKey hash may replace it;
   count over bound → `ERR_COUNT`; body at exactly `MAX_BODY_BYTES` (valid) and
   +1 (fail); [SDK tier] NFC composed/decomposed pairs (SDK converges,
   chain accepts both as distinct bytes — both facts asserted), unassigned
@@ -237,8 +243,11 @@ member level (Stage B may add members, never remove).
   mutual pair via `GROUP_REF`; R3 malformations (`GROUP_REF(own index)`,
   `GROUP_REF(k ≥ memberCount)`, group-of-1 using `GROUP_REF`) →
   `ERR_SCHEMA_MALFORMED`; unknown `metaCodecVersion` → deterministic reject;
-  role/field binding violations (unbound REF field, doubly-bound role,
-  OCCREF with non-OCCURRENCE class); IndexSpec eligibility violations
+  role/field binding violations (unbound REF field, doubly-bound role, direct
+  or optional OCCREF with non-OCCURRENCE class, and any unsupported role-bound
+  `OPTION(inner)`); valid direct `OCCREF` and `OPTION(OCCREF)` only under
+  OCCURRENCE, with schema-time REF-budget contribution one apiece; IndexSpec
+  eligibility violations
   (redundant BACKLINK → `ERR_SPEC_REDUNDANT`, disabled COMPOUND →
   `ERR_COMPOUND_DISABLED`, indexes §4.1); the four §6 evolution Records
   (`TypeSuccessor/1`, `TypeEquivalence/1` incl. the `a < b` canonical-order
@@ -263,7 +272,10 @@ member level (Stage B may add members, never remove).
   `PrincipalId`, `RealmId`, `RealmRevisionId`, `profileId`,
   `genesisCommitment`, `PositionKey`, `BindingKey`, `PlanId`, the complete
   SR-3 EIP-712 `IntentId`, `pk()` postings keys and `targetKey`/`valueKey` rules
-  (indexes §2.1/§3.5/§4.1), `purposeAndScope` (lens §3.3), `ChainRef/1`.
+  (indexes §2.1/§3.5/§4.1), `purposeAndScope` (lens §3.3), `ChainRef/1`, and
+  the bakeoff-F2-only
+  `keccak256(abi.encode(DOM_BAKEOFF_AUTHOR_KEY, uint256(kind), value))`
+  authorKey.
 - **Impl:** SOL (`EfsIds` + chapter libraries), TS, RS.
 - **Pass:** byte equality; one-word sensitivity (flip any single preimage
   word ⇒ different id) per formula; sentinel-space outputs never occur/accepted.
@@ -278,6 +290,9 @@ member level (Stage B may add members, never remove).
   identity from a 160-bit address fails the category by construction;
   migration-seam pair (identical fields under the hashed domain words for
   `efs2/record/1` vs hypothetical `efs2/record/2` ⇒ different ids);
+  F2 authorKey member with
+  `DOM_BAKEOFF_AUTHOR_KEY=keccak256("efs2/bakeoff/author-key/1")`, plus rejection
+  of a two-level mapping, packed tuple, or raw-prefix alternative;
   sentinel-space output rejection; SR-14 worked PrincipalId examples A/B
   (fixed formula; output bytes
   mint in Stage B) and C (after its canonical chainRef fixture is supplied);

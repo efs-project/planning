@@ -225,8 +225,19 @@ one (TypeSchemaId, canonicalBody). No shared Envelope, no leaves.
   card; its one newly accepted occurrence receives the next SR-10 ordinal and
   is read through the shared occKey lifecycle overlay. No base/leaf arithmetic
   survives merely because `leafIndex = 0`.
-- Batch publication of n Records = n cards = n signatures + n header storage writes —
-  this repetition **is the measured quantity** for axis 1.
+- **Exact axis-1 comparison transaction.** For every frozen integer `k=1..64`,
+  `G_B0(k)` is one EVM transaction making one ordinary Core `publish` call with
+  one independently signed envelope containing exactly k Record leaves.
+  `G_F1(k)` is one EVM transaction through a pinned, disposable, stateless, test-only
+  `F1AtomicAggregator` carrying k independently signed one-Record cards. The
+  aggregator loops over the cards, makes exactly k ordinary Core `publish`
+  calls, and bubbles any failure so the outer transaction reverts all earlier
+  subcalls. It creates no Core batch entrypoint and is never a production
+  mechanism. Both comparison units are `MUST_FIT_ATOMIC`, keep
+  `splitFactor=1`, and report `OVER_CAP` at that exact k rather than splitting.
+  `G_F1(k)` includes the aggregator's execution overhead; every row separately
+  reports `coreCallCount` and `aggregatorGas` (outer-frame gas exclusive of
+  Core subcall frames). Deployment gas is one-time harness setup, not G(k).
 
 **Rebuilt:** Lane 2 signing/wire/admission surface; card spine storage.
 **Shared:** everything else, including indexes (postings unchanged; `EnvelopeMeta` →
@@ -240,14 +251,26 @@ one (TypeSchemaId, canonicalBody). No shared Envelope, no leaves.
    separate line so the header-vs-witness contributions are distinguishable.
 3. Subset carriage is trivially moot (a card IS the minimal subset); F1 runs no
    subset-carriage suite.
+4. Test-only aggregator overhead is not attributed to Core: it is included in
+   total transaction gas for an honest one-tx comparison and exposed separately
+   as `aggregatorGas` on every F1 M-K row.
 
 ### 3.3 F2 — TAGGED (axis-2 thin ABI variant; NOT a full build)
 
 Per b0-principal-authority.md §7 (the sketch is already exact enough): `AuthorRef
 {uint8 kind; bytes32 value}` replaces `principalId` in the Envelope header, in every
-author-bearing ABI, and in every author-keyed storage/index key (two-level mapping or
-`keccak256(kind ‖ value)` key). ACCOUNT arm authors by address (ecrecover/1271);
-PRINCIPAL arm is a registered author object.
+author-bearing ABI, and in every author-keyed storage/index key. The only F2
+author key is:
+
+```text
+DOM_BAKEOFF_AUTHOR_KEY = keccak256("efs2/bakeoff/author-key/1")
+authorKey = keccak256(abi.encode(
+  DOM_BAKEOFF_AUTHOR_KEY, uint256(kind), value))
+```
+
+There is no two-level-mapping or packed/raw-concatenation alternative. ACCOUNT
+arm authors by address (ecrecover/1271); PRINCIPAL arm is a registered author
+object.
 
 **Build form:** a compile-time branch of Engine α touching only (a) the Envelope
 header field + type string, (b) author-key derivation in `LibIndex`/`LibBinding`,
@@ -419,9 +442,9 @@ relative weight of posting appends in the aggregate rises; simultaneously the
 ordinal→id dereference that packed postings pay at read time changes cost because
 hydration has no envelope vector to walk.
 
-**Measured:** the axis-7 three numbers re-run under the S shape; the axis-1 aggregate
-re-run on the k ∈ {1,3,10,64} seed workloads (plus any integer refinement
-required by §4.1); and the standard 2×2 interaction contrast
+**Measured:** the axis-7 three numbers re-run under the S shape; the axis-1
+aggregate re-run at every frozen integer `k=1..64` under §3.2's exact B0/F1
+transaction units; and the standard 2×2 interaction contrast
 
 ```text
 I_17 = (G_X17 − G_F1) − (G_F7 − G_B0)
@@ -447,16 +470,17 @@ exact tradeoff to James; do not silently remove it"].
 ### 4.1 Axis 1 — Record shape (B0 vs F1, confirmed in X17)
 
 Statistics:
-- `KSTAR_1` — smallest **measured** integer k in `[1,64]` at which total gas
-  (calldata + execution + SSTORE) for publishing k Records satisfies
-  `G_B0(k) < G_F1(k)`. Seed points are `{1,3,10,64}` on identical fixture
-  slices. If adjacent seeds bracket a sign change, measure missing integer k
-  values (or deterministic integer bisection followed by the neighboring
-  integer) until the first measured crossing is established. If no crossing is
-  observed, report `NO_OBSERVED_CROSSING_WITHIN_1_64`; never interpolate or
-  extrapolate. Every compared k has the same `atomicityClass`, Realm profile,
-  fixture slice, and corpusVersion; an `OVER_CAP` k is not replaced by smaller
-  envelopes.
+- `KSTAR_1` — smallest measured integer k in `[1,64]` at which total
+  transaction gas satisfies `G_B0(k) < G_F1(k)`, using §3.2's exact
+  transaction units. The frozen corpus executes every integer k, regardless
+  of earlier results; `{1,3,10,64}` may be display labels only. If no measured
+  point crosses, report `NO_OBSERVED_CROSSING_WITHIN_1_64`. Never interpolate,
+  bisect, extrapolate, add a result-dependent point, or mutate corpus inputs.
+  Every pair has the same `MUST_FIT_ATOMIC` class, Realm profile, ordered
+  fixture prefix, and corpusVersion; each `OVER_CAP` result remains the exact
+  k observation. F1 total includes the test aggregator, with
+  `aggregatorGas` and `coreCallCount=k` reported separately; B0 reports
+  `aggregatorGas=0` and `coreCallCount=1`.
 - `PREMIUM_1` — the k=1 premium ratio `G_B0(1) / G_F1(1)`.
 - `RECON_1` — pass/fail: **both** arms complete the state-only reconstruction walk
   (b0-realm-admission.md §8.1 W-0..W-10; for F1 with the card-spine re-expression of
@@ -729,9 +753,9 @@ Concretely:
   (b0-authorship-envelope.md §2.5) — the two models are reconciled by the
   synthesizer, and the harness replaces both; index-only leaf ceilings ≈25 worst /
   ≈86 typical per tx (b0-indexes.md §9); F4 backfill ≤ ~138 typical records/tx
-  (§3.5); page maxima §5.3 of b0-indexes.md. Axis-1 seeds are
-  `{1,3,10,64}`; each exact k reports measured fit or `OVER_CAP` under its
-  unchanged atomicity class. Per-Realm caps may differ; every report states the assumed profile
+  (§3.5); page maxima §5.3 of b0-indexes.md. Axis 1 executes every frozen
+  integer `k=1..64`; each exact k reports measured fit or `OVER_CAP` under its
+  unchanged `MUST_FIT_ATOMIC` class. Per-Realm caps may differ; every report states the assumed profile
   [DERIVED INVARIANT — venue-conditional physics, CARRY-IN lane, VERIFIED].
 - **Pinned toolchain.** One solc version + optimizer setting + EVM version
   (Fusaka-level so 7825/7623 semantics hold) across ALL cells, recorded in the
@@ -779,8 +803,12 @@ beyond local/test chains, seeds durable data, or becomes a product dependency
 
 Each cell produces one report: {cell id, axis vector, corpus manifest hash,
 engine + branch commit, aggregate snapshot per fixture trace, state-growth
-table (slots per trace), `atomicityClass/overCap/splitFactor`, the axis's named
-statistics (§4), declared confounds restated, vector-suite pass/fail lists}.
+table (slots per trace), `atomicityClass/overCap/splitFactor`, canonical
+`resultSchemaId/resultDigest`, `typedErrorCode`, `crossImplEqual`, exact
+Realm/basis/high-water/coverage metadata, the axis's named statistics (§4),
+declared confounds restated, vector-suite pass/fail lists}. Axis-1 reports the
+complete 64-row B0/F1 table, `coreCallCount`, and `aggregatorGas`; omitting any
+integer k or selecting points after observing results invalidates the report.
 Every affected report carries the atomic schema-group cap result plus the
 `CV-SPARSE-ADMIT`, `CV-PREWITHDRAW`, `CV-DIGEST-LOOKUP`,
 `WL-DEAD-LOCATOR`, and `CV-LAST-LIVE-COUNT` outcomes; a cell that cannot
@@ -818,11 +846,16 @@ The compact contract other chapters and the harness lane rely on:
   FRAC_4, BACKGAS_4, GATE_4; ONECALL_5, FRESH_5, REENDORSE_5,
   DERIVED_FSTAR_5, SUBSET_5; SIZE_6, OVH_6, PFAIL_6;
   APPEND_7, PAGE100_7, EXH_7; I_17`.
+- **Axis-1 measurement surface:** every integer `k=1..64` is frozen and run;
+  B0 is one tx/one Core publish/one k-leaf envelope, while F1 is one atomic tx
+  through the stateless harness aggregator making k ordinary Core publishes.
+  Both are `MUST_FIT_ATOMIC`; F1 aggregator overhead is a separate row field.
 - **Hard gates that reject regardless of gas**: `RECON_1` (state-only
   reconstruction, both arms), `V3_COPY` (copied-evidence verifiability), `GATE_4`
   (PARTIAL never reads as absence), `ONECALL_5` (one-call dependent writes),
   `PFAIL_6` (no partially-committed Core write), plus `SIZE_6` as a
-  forced-decision compile gate. `ONECALL_5`, FX-GIT push units,
+  forced-decision compile gate. `ONECALL_5`, the exact FX-GIT 20-ref/21-leaf
+  push unit,
   TypeSchemaGroup validation/cache materialization, every concrete publish,
   and poison/full-revert vectors are `MUST_FIT_ATOMIC`; over-cap never converts
   to a throughput split.

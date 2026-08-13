@@ -377,7 +377,7 @@ every one-call write.
 | `MAX_GROUP_SIZE` | 16 | schemas per group (§5) |
 | `MAX_FIELDS` | 64 | per schema |
 | `MAX_REFERENCE_ROLES` | 16 | per schema |
-| `REF_INSTANCES_MAX` | 16 | [HYPOTHESIS] per-leaf total REF instances, ARRAY(REF) counts included (§2.7/§3.1, SR-18e) |
+| `REF_INSTANCES_MAX` | 16 | [HYPOTHESIS] per-leaf total REF/OCCREF instances; present supported OPTION values and ARRAY(REF) elements count (§2.7/§3.1, SR-18e) |
 | `MAX_INDEX_SPECS` | 8 | per schema |
 | `MAX_CONSTRAINTS` | 32 | per schema |
 | `MAX_NEST_DEPTH` | 4 | root fields are depth 1 |
@@ -503,8 +503,10 @@ decodeField(S, desc, body, cur, depth, refCount):
 checks (§3.5) run after the structural walk. The runtime `refCount` guard is
 defense-in-depth under the schema-time bound in §3.1 and makes
 `REF_INSTANCES_MAX = 16` an explicit per-leaf structural validation rule,
-including every `ARRAY(REF)` element. ARRAY, MAP-key, MAP-value, STRUCT, and
-OPTION recursive calls capture and immediately propagate every nonzero error,
+including every `ARRAY(REF)` element. A role-bound `OPTION(REF)` or the narrow
+owner-grammar correction `OPTION(OCCREF)` contributes zero runtime instances
+when absent and exactly one when present. ARRAY, MAP-key, MAP-value, STRUCT,
+and OPTION recursive calls capture and immediately propagate every nonzero error,
 including `ERR_REF_BUDGET`; no recursive failure can be overwritten by a later
 successful child. Gas is linear in body length with
 schema-bounded loop counts — a Type
@@ -587,18 +589,24 @@ ReferenceRole :=
 ```
 
 Binding rules (checked by `validateTypeSchemaGroup`, else `ERR_SCHEMA_MALFORMED`): the bound
-field's kind must be `REF`, `OCCREF`, `ARRAY(REF)`, or `OPTION(REF)` (`OCCREF` only with
-`targetClass = OCCURRENCE`); every `REF`/`OCCREF`-kind field is bound by exactly one role;
-every role binds exactly one field; `expectedType` is meaningful only for
+field's kind must be `REF`, `OCCREF`, `ARRAY(REF)`, `OPTION(REF)`, or
+`OPTION(OCCREF)`. Direct `OCCREF` and `OPTION(OCCREF)` are legal only with
+`targetClass = OCCURRENCE`; this correction does not make any other
+`OPTION(inner)` shape role-eligible. Every field with one of those supported
+role-bearing shapes is bound by exactly one role; every role binds exactly one
+field; `expectedType` is meaningful only for
 `targetClass ∈ {RECORD, OBJECT}`; bound fields satisfy extraction rule E1. `OBJECT` means "a
 RecordId of an `ObjectGenesis/1`-charter Record" — same width, distinct declared intent.
 
 **REF budget (SR-18e), structural validation bound.** [PROPOSAL — pinned by SR-18e]
-Σ over role-bound fields of (1 for `REF`/`OCCREF`/`OPTION(REF)`; the declared `maxCount` for
+Σ over role-bound fields of (1 for
+`REF`/`OCCREF`/`OPTION(REF)`/`OPTION(OCCREF)`; the declared `maxCount` for
 `ARRAY(REF)`) ≤ `REF_INSTANCES_MAX = 16` per schema — checked by `validateTypeSchemaGroup`
 with typed error `ERR_REF_BUDGET` (code 15). Because widths and counts are schema-declared,
 this bounds the TOTAL reference instances any legal leaf can carry, ARRAY(REF) elements
-included, at registration time. Rationale: every reference instance costs mandatory index
+included, at registration time. The schema-time maximum for either supported
+OPTION reference shape is one; at body-validation/extraction time absent contributes zero
+and present contributes one. Rationale: every reference instance costs mandatory index
 postings (backlink fan-out); the bound makes per-leaf index fan-out a schema-time constant,
 so admission gas stays bounded by construction and backlink completeness holds — without it,
 one legal `ARRAY(REF, maxCount = 1,024)` field implies ≈ 2,000+ posting appends ≈ 27.5M gas,
@@ -1138,7 +1146,12 @@ memory-level evidence, PLAUSIBLE):
    GROUP_REF; R3 malformation cases; same-Occurrence re-registration returns
    `ALREADY_ADMITTED`, while the same group RecordId in a new envelope admits a new
    Occurrence and content-idempotently reuses the derived cache through the SR-17 on-ramp
-   (`TypeSchemaGroup/1` Record round-trip); REF-budget rejection (`ERR_REF_BUDGET`, SR-18e);
+   (`TypeSchemaGroup/1` Record round-trip); direct `OCCREF` and
+   `OPTION(OCCREF)` accepted only for an OCCURRENCE role; optional
+   absent/present extraction yields zero/one OccurrenceRefs and consumes
+   zero/one runtime REF budget; `OPTION(OCCREF)` under any other targetClass
+   and any newly role-bound `OPTION(inner)` shape reject
+   `ERR_SCHEMA_MALFORMED`; REF-budget rejection (`ERR_REF_BUDGET`, SR-18e);
    the H-GROUPCAP pair (largest-fitting group; nominal-max group deterministic rejection).
 5. Axis-8 pair: `T-CONV`, `T-QUAL` (§8).
 6. RecordId: same body two Types ⇒ different ids; same Type byte-different bodies ⇒ different
@@ -1178,12 +1191,20 @@ schema-derived bounded program (E1), zero self-description (schema-directed).
 
 ```solidity
 library EfsCodec {
+    struct OccurrenceRefValue {
+        bytes32 envelopeId;
+        uint16 leafIndex;
+    }
+
     function validateBody(bytes calldata schemaBlob, bytes calldata body)
         internal pure returns (uint16 errCode);                    // 0 = OK; closed code table §2.7
     function extractWord(bytes calldata schemaBlob, bytes calldata body, uint8 fieldIdx)
         internal pure returns (bytes32 value, bool ok);            // SCALAR_EQ/DIGEST_EQ extraction
     function extractRefs(bytes calldata schemaBlob, bytes calldata body, uint8 roleId)
         internal pure returns (bytes32[] memory targets);          // REF / ARRAY(REF) / OPTION(REF)
+    function extractOccurrenceRefs(
+        bytes calldata schemaBlob, bytes calldata body, uint8 roleId
+    ) internal pure returns (OccurrenceRefValue[] memory targets); // OCCREF / OPTION(OCCREF)
     function validateTypeSchemaGroup(bytes calldata groupBytes)
         internal pure returns (uint16 errCode);                    // incl. E1/R1–R3 + SR-18e REF budget
 }
@@ -1234,6 +1255,14 @@ interface ICodexConstants {
     function codexConstantsHash() external view returns (bytes32);
 }
 ```
+
+The TypeScript/Rust projection is part of this interface, not an SDK choice:
+direct `OCCREF` maps to `OccurrenceRef`; `OPTION(OCCREF)` maps to
+`OccurrenceRef | null` in TypeScript and `Option<OccurrenceRef>` in Rust. The
+role extractor returns `[]` for absent and the singleton
+`[{envelopeId, leafIndex}]` for present in both languages, preserving the full
+34-byte reversible value rather than projecting it to an `OccurrenceKey` hash.
+Those results consume zero/one runtime REF budget respectively.
 
 Contract points other lanes consume: domain table §1.3 (closed, SET-WIDE per SR-1, with
 scope classes and retired spellings); sentinel space §1.4; salt rule §1.5;
