@@ -905,6 +905,11 @@ resultDigest = keccak256(abi.encode(
   keccak256(canonicalResultBytes)))
 ```
 
+Both domains are live `evidence`-class rows in the closed registry
+(`b0-encoding-and-ids.md` §1.3). They are harness-only Stage B artifact domains,
+not Core semantic IDs: neither enters `codexConstantsHash`; both enter
+`corpusDomainManifestBytes` and H-DOMTABLE.
+
 The frozen, corpus-manifested result-schema registry defines field order/width
 for every `opName` as a tagged union: tag 0 plus the success-output tuple, or
 tag 1 plus `(errorNamespace, typedErrorCode, canonicalErrorArguments)`. Those
@@ -1109,7 +1114,8 @@ physical posting budget directly and wires GV-14/SR-18c to M-CONF + M-SEL.
 
 ## 5. The fixture-freeze rule
 
-**FR-1 (corpus identity).** The corpus = fixture definitions + fixture-pack
+**FR-1 (corpus identity).** The corpus = `corpusDomainManifestBytes` from
+`b0-encoding-and-ids.md` §1.6 + fixture definitions + fixture-pack
 TypeSchema blobs + scripts + CV suite + WL scripts + knob value sets + Realm
 profiles + `CORPUS_SEED` + vector files, canonically serialized;
 `DOM_FIXTURE_CORPUS = keccak256("efs2/fixture-corpus/1")` and

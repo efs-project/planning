@@ -268,6 +268,11 @@ authorKey = keccak256(abi.encode(
   DOM_BAKEOFF_AUTHOR_KEY, uint256(kind), value))
 ```
 
+This live domain is the `bakeoff`-class row in the closed registry
+(`b0-encoding-and-ids.md` §1.3): it exists only in the disposable F2 arm, is
+not a Core semantic key/id, is excluded from `codexConstantsHash`, and is
+included in `corpusDomainManifestBytes` and H-DOMTABLE.
+
 There is no two-level-mapping or packed/raw-concatenation alternative. ACCOUNT
 arm authors by address (ecrecover/1271); PRINCIPAL arm is a registered author
 object.

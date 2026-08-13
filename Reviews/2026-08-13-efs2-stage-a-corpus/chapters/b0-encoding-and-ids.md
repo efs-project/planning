@@ -80,7 +80,11 @@ Per SR-1 this table is the single set-wide registry: it now absorbs EVERY domain
 minted anywhere in the doc set (red-team sweep 2026-08-13). `Class` column: `id` = portable
 or Realm-naming id preimages; `key` = index/value-key preimages (index chapter §2.1); `slot` =
 storage-slot region bases (never legal in any id or key preimage); `tag` = name/purpose tag
-hashing; `fixture` = harness-scope only, never on-chain.
+hashing; `fixture` = frozen corpus identity only; `bakeoff` = disposable bakeoff-arm
+derivation only; `evidence` = Stage B harness result artifacts only. The last three are
+non-Core classes: they never define a Core semantic id/key/slot/tag and are excluded from
+`codexConstantsHash`, but remain mandatory rows in the corpus domain manifest and
+H-DOMTABLE.
 
 | Constant | Printable preimage | Class | Scope |
 |---|---|---|---|
@@ -122,8 +126,12 @@ hashing; `fixture` = harness-scope only, never on-chain.
 | `DOM_SLOT_CTR` | `efs2/slot/counters/1` | slot | global counters slot |
 | `DOM_FIXTURE_SEED` | `efs2/fixture-corpus-seed/1` | fixture | harness corpus master seed |
 | `DOM_FIXTURE_CORPUS` | `efs2/fixture-corpus/1` | fixture | harness corpus version hash |
+| `DOM_BAKEOFF_AUTHOR_KEY` | `efs2/bakeoff/author-key/1` | bakeoff | disposable F2 author-key derivation only; never a Core key/id |
+| `DOM_RESULT_SCHEMA` | `efs2/harness-result-schema/1` | evidence | Stage B harness result-schema artifact id only |
+| `DOM_MEASUREMENT_RESULT` | `efs2/harness-result/1` | evidence | Stage B harness measurement-result digest only |
 
-[PROPOSAL] The table is closed for B0; new domains are additive, never reused. Retired
+[PROPOSAL] The table is closed for the Stage A corpus; its Core subset is exactly the
+`id`/`key`/`slot`/`tag` rows. New domains are additive, never reused. Retired
 spellings (never mint; listed so the registry stays auditable): `efs2/bindingkey/1` and
 `efs2/binding-key/1` (SR-6 → `efs2/binding/1`), `efs2/realmrev/1` (SR-16 →
 `efs2/realm-revision/1`), `efs2/intent/1` (SR-3 → `efs2/admission-intent/1`),
@@ -131,9 +139,12 @@ spellings (never mint; listed so the registry stays auditable): `efs2/bindingkey
 occKey; no separate key domain exists), and `efs2/plan/1` (REJECTED — a
 ResolutionPlan is an ordinary Record and its PlanId alias is that RecordId;
 no parallel plan domain exists). Reserved example, unminted: `efs2/record/2` (§7
-migration illustration only). Bakeoff-arm domains (`*_B`, §3.6) join only if the arm is
-built. Conformance harness case **H-DOMTABLE** [PROPOSAL]: the harness sweeps every chapter
-and implementation for `efs2/` strings and diffs against this table; any string absent here
+migration illustration only). Bakeoff-arm domains (`*_B`, §3.6) join the `bakeoff`
+class only if the arm is built. Conformance harness case **H-DOMTABLE** [PROPOSAL]:
+the harness sweeps every chapter and implementation for `efs2/` strings and diffs
+against this table, checks each use against its declared class/scope, checks that
+only `id`/`key`/`slot`/`tag` rows enter `codexConstantsHash`, and checks that every
+active row enters the corpus domain manifest. An absent or misclassified string
 fails the build — the registry can never silently drift again.
 
 ### 1.4 Sentinel subspace
@@ -161,15 +172,15 @@ fails the build — the registry can never silently drift again.
 
 [PROPOSAL — added post-red-team; the realm chapter's `profileId` (§2.3 there) and
 `genesisCommitment` (§2.4 there) consume this hash, and it must be state-readable. This
-chapter owns it: one canonical, ordered, versioned serialization of every constant this
-chapter pins.]
+chapter owns it: one canonical, ordered, versioned serialization of every Core constant
+this chapter pins. Harness/bakeoff-only constants are kept out of the Core profile hash.]
 
 ```
 codexConstantsBytes :=
-  u16 codexRevision              // = 1 for B0; ANY change to any table below bumps it
+  u16 codexRevision              // = 1 for B0; any change to a serialized Core table below bumps it
   u16 mcVersion                  // = MC_VERSION = 1
-  ---- closed domain table (§1.3): active rows only, table order ----
-  u16 domainCount ‖ domainCount × ( u16 len ‖ asciiBytes )
+  ---- closed domain table (§1.3): active id/key/slot/tag rows only, table order ----
+  u16 coreDomainCount ‖ coreDomainCount × ( u16 len ‖ asciiBytes )
   ---- named numeric constants (§2.6 incl. REF_INSTANCES_MAX, plus SENTINEL_BOUND = 2^16), table order ----
   u16 constCount  ‖ constCount  × ( u16 nameLen ‖ asciiName ‖ u64 value )
   ---- digest algorithm table (§2.4), ascending algCode ----
@@ -181,10 +192,22 @@ codexConstantsBytes :=
   ---- derived intrinsic ids: kernel-known Types (SR-11) + intrinsic schemas (§3.4 meta-Type, §6), name order ----
   u16 idCount     ‖ idCount     × ( u16 nameLen ‖ asciiName ‖ bytes32 id )
 codexConstantsHash := keccak256(codexConstantsBytes)
+
+corpusDomainManifestBytes :=
+  u16 domainManifestRevision     // = 1; any active-row/class change triggers FR-3
+  u16 domainCount                // every active §1.3 row, table order
+  domainCount × (
+    u8 classCode                 // 1=id 2=key 3=slot 4=tag 5=fixture 6=bakeoff 7=evidence
+    ‖ u16 constantNameLen ‖ asciiConstantName
+    ‖ u16 domainLen ‖ asciiDomain
+  )
 ```
 
-Rules: every constant appears exactly once; ordering is the printed table order (auditable
-against this chapter's text); the derived-id section's values (TYPE_BINDING_SET_V1,
+Rules: every Core constant appears exactly once in `codexConstantsBytes`; every active
+domain row appears exactly once in `corpusDomainManifestBytes`. Ordering is the printed
+table order (auditable against this chapter's text). The `fixture`, `bakeoff`, and
+`evidence` classes are therefore covered by H-DOMTABLE/corpusVersion without changing
+the Realm-visible Core `codexConstantsHash`. The derived-id section's values (TYPE_BINDING_SET_V1,
 TYPE_BINDING_TOMBSTONE_V1, TYPE_WITHDRAWAL_V1 per SR-11's closed list, plus the intrinsic
 TypeSchemaIds of §3.4/§6) are computed from intrinsic blobs at the Stage B Codex build — the
 serialization is pinned here, the byte values mint in Stage B (Stage A ships no byte
@@ -1173,7 +1196,9 @@ memory-level evidence, PLAUSIBLE):
     `efs2/record/2` ⇒ different ids; unknown `metaCodecVersion` deterministic rejection.
 12. Evolution shapes: one instance of each §6 Record, round-tripped.
 13. Codex constants: `codexConstantsBytes` serialization + `codexConstantsHash`
-    recomputation across the three languages (§1.6); H-DOMTABLE domain-registry sweep
+    recomputation across the three languages (§1.6); `corpusDomainManifestBytes`
+    serialization; H-DOMTABLE domain-registry/class/scope sweep, including proof that
+    non-Core classes are absent from the Core hash and present in the corpus manifest
     (§1.3).
 
 ---
@@ -1265,7 +1290,8 @@ role extractor returns `[]` for absent and the singleton
 Those results consume zero/one runtime REF budget respectively.
 
 Contract points other lanes consume: domain table §1.3 (closed, SET-WIDE per SR-1, with
-scope classes and retired spellings); sentinel space §1.4; salt rule §1.5;
+scope classes, the Core-hash/non-Core-manifest partition, and retired spellings);
+sentinel space §1.4; salt rule §1.5;
 `codexConstantsBytes`/`codexConstantsHash` §1.6 (consumed by the realm chapter's `profileId`
 and `genesisCommitment`, SR-16); the ONE u16 `algCode` table §2.4 (SR-18a — content chapter's
 u8 tags and index chapter's u32 algId retired); size constants §2.6 (SR-5 values;

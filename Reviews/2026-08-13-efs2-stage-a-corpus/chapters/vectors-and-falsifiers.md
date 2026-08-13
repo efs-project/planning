@@ -293,6 +293,10 @@ member level (Stage B may add members, never remove).
   F2 authorKey member with
   `DOM_BAKEOFF_AUTHOR_KEY=keccak256("efs2/bakeoff/author-key/1")`, plus rejection
   of a two-level mapping, packed tuple, or raw-prefix alternative;
+  H-DOMTABLE member requiring that `DOM_BAKEOFF_AUTHOR_KEY`,
+  `DOM_RESULT_SCHEMA`, and `DOM_MEASUREMENT_RESULT` are present with exact
+  `bakeoff/evidence/evidence` classes, excluded from the Core
+  `codexConstantsHash`, and included in `corpusDomainManifestBytes`;
   sentinel-space output rejection; SR-14 worked PrincipalId examples A/B
   (fixed formula; output bytes
   mint in Stage B) and C (after its canonical chainRef fixture is supplied);
