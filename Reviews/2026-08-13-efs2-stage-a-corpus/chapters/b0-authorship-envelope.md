@@ -535,6 +535,15 @@ missing/extra/duplicate evidence, or invalid target witness reverts
 equality permits `PRE_WITHDRAWN`. A bare `targetEnvelopeId` can never cause
 pre-withdrawal when the target header is not already state-readable.
 
+Admission is the only evidence decoder. After these checks (or equivalent
+state lookup for an already known target), it constructs the Binding owner's
+typed `ValidatedWithdrawalTarget`: exact target `(envelopeId,leafIndex)`,
+authenticated target `principalId`, prior lifecycle status/ordinals,
+classified effect kind, BindingKey if the target produced a Binding mutation,
+and whether it is the current head. `LibBinding` receives that context only.
+It receives no opaque evidence bytes, defines no alternate proof grammar, and
+never repeats descriptor, witness, or author validation.
+
 On that effective evidence-backed transition, after the Withdrawal occurrence
 has received ordinal `wOrd`, Core stores exactly
 `abi.encode(decodedTargetEnvelopeEvidence)` at
@@ -608,6 +617,18 @@ checks. For profile 1
 load-bearing the moment managed Principals activate (§6) — which is exactly why
 the discipline is fixed now rather than retrofitted (kel §3 line 94: the
 "KEL-added-later-as-peer" failure).
+
+The immutable `AdmissionBatch` plus logical `AdmissionReceipt/1` is the
+historical validation evidence: it records that this Realm's named verifier,
+at the recorded basis and codehash, accepted the envelope author for the newly
+admitted occurrence. Core intentionally does **not** persist the main envelope
+witness. `getEnvelopeBytes` therefore cannot replay a historic signature and a
+reader MUST NOT call the present ERC-1271 account (or any present authority)
+and treat that answer as the historic verdict. Historical authorship grade
+comes from the receipt's immutable admission basis. A caller that separately
+possesses the original witness may replay a pure signature against the
+persisted unsigned envelope, but that is additive evidence, not a state-only
+Core guarantee.
 
 ### 4.4 Consumed verifier interface (Lane 3 seam)
 
@@ -789,7 +810,9 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
     evidence EnvelopeId equals Withdrawal.targetEnvelopeId and targetLeafIndex is
     in range; then run the target descriptor/witness checks of §3.3. A terminal
     PRE_WITHDRAWN target instead resolves its original evidence through
-    revokedAtOrdinal; caller evidence is forbidden.
+    revokedAtOrdinal; caller evidence is forbidden. For every target, construct
+    the typed ValidatedWithdrawalTarget context; no evidence bytes cross into
+    LibBinding.
  9. structurally validate every selected body's TypeSchema and preflight all
     leaf-driven effects, policy checks, reference checks, and Binding CAS checks.
 10. allocate ordinals only to newly accepted selected occurrences.
@@ -803,7 +826,8 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
       index, descriptor, witness, and author checks; for an evidence-backed
       NEVER_ADMITTED -> PRE_WITHDRAWN transition, store its canonical ABI
       re-encoding at this Withdrawal occurrence's new ordinal before setting the
-      target's revokedAtOrdinal to that same ordinal
+      target's revokedAtOrdinal to that same ordinal; dispatch the already
+      validated target context to LibBinding, never a second proof format
 13. atomically materialize the parsed schema cache when the accepted Record is an
     intrinsic TypeSchemaGroup/1 Record; this is structural bootstrap work, not an
     application effect or second write primitive
@@ -1062,6 +1086,12 @@ mapping(bytes32 envelopeId => uint256) envelopeMeta;
 //   bit   160    headerStored flag
 //   bits 161–255 zero (reserved)
 mapping(bytes32 envelopeId => bytes32[]) envelopeRecordIds; // length = count
+// getEnvelopeBytes returns the exact canonical unsigned envelope:
+//   abi.encode(EnvelopeHeader(profile, principalId, authorityRef, authEpoch,
+//                             pubNonce, notAfter), recordIds)
+// The header mappings + full vector above are its stored lossless
+// representation. Bodies, main witness, target evidence, consent/intent,
+// submitter, payer, and receipt basis are expressly excluded.
 
 // ---- occurrence overlay (this contract IS the realm) ----
 struct OccStatus {
@@ -1092,11 +1122,18 @@ the none-sentinel.
 
 State-readability [DERIVED INVARIANT — constitution reconstruction clause;
 R-D3]: header + full RecordId vector persist on first admission so a second
-implementation can re-verify authorship of every admitted occurrence from state
-alone. For a PRE_WITHDRAWN target whose header never otherwise entered state, the
+implementation can recompute every unsigned-envelope digest, EnvelopeId,
+OccurrenceRef, and downstream admitted effect from state alone. The immutable
+receipt/batch basis is the evidence that admission-time authorship validation
+succeeded; absent an externally supplied original witness, historic signature
+verification is not replayable from state and is not claimed. For a
+PRE_WITHDRAWN target whose header never otherwise entered state, the
 effective Withdrawal's ordinal retains the exact bounded canonical evidence bytes
 needed to recompute the target EnvelopeId, leaf range, descriptor equality,
-witness, and author — no logs or EFS-operated service (EIP-4444-proof by
+witness, and author. This is a narrow lifecycle exception, retained because the
+never-admitted target has no receipt or unsigned-envelope spine; it does not
+silently make main-envelope witnesses persistent. No logs or EFS-operated
+service are required for either reconstruction path (EIP-4444-proof by
 construction).
 
 External ABI (Solidity signatures other chapters and the SDK compile against):
@@ -1165,6 +1202,13 @@ function envelopeHeaderOf(bytes32 envelopeId) external view
 
 function envelopeRecordIdsOf(bytes32 envelopeId, uint16 start, uint16 limit)
     external view returns (bytes32[] memory page, uint16 total);
+
+/// Exact `abi.encode(EnvelopeHeader, fullRecordIds)` reconstructed from the
+/// persisted header/vector. This is canonical UNSIGNED semantic-envelope
+/// bytes. It excludes all witnesses, bodies, target evidence, consent/intent,
+/// carrier, payer, and receipt material.
+function getEnvelopeBytes(bytes32 envelopeId)
+    external view returns (bytes memory canonicalUnsignedEnvelope);
 
 function receiptOf(bytes32 envelopeId, uint16 leafIndex) external view
     returns (AdmissionReceiptView memory);

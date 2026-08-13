@@ -71,7 +71,8 @@ conformance rules ride the consumer-profile chapter), and the EAS adapter seam.
 | `MAX_PLAN_ENTRIES_CLIENT` | `256` | [HYPOTHESIS — client compile ceiling, not enforced by Core; falsified/retuned by the V2-E2-successor client bench; evidence: lens-spec §2.4 "[LP-4] candidate 64 vs 256"] |
 | `PLAN_HEADER_BYTES` | `96` | [PROPOSAL] |
 | `PLAN_ENTRY_BYTES` | `64` | [PROPOSAL] |
-| `MAX_PLAN_BYTES` | `96 + 64·64 = 4,192` | arithmetic |
+| `MAX_PLAN_FRAME_BYTES` | `96 + 64·64 = 4,192` | arithmetic; value of the one MC/1 BYTES field |
+| `MAX_PLAN_CANONICAL_BODY_BYTES` | `2 + 4,192 = 4,194` | MC/1 u16 length prefix plus frame |
 | `SEMANTICS_PROFILE_B0` | `keccak256("efs2/lens-semantics/b0/1")` | [PROPOSAL — multi-segment name, legal under amended SR-1; the string enters the encoding chapter's closed §1.3 table] |
 | `DOM_BINDING` | `keccak256("efs2/binding/1")` | SR-6 pin [PROPOSAL]. The draft spellings `efs2/binding-key/1` (this chapter) and `efs2/bindingkey/1` (Lane 6 draft) are retired [REJECTED — SR-6] |
 | `DOM_PLAN_PURPOSE` | `keccak256("efs2/plan-purpose/1")` | [PROPOSAL — regenerated under SR-1; enters the closed table] |
@@ -88,7 +89,7 @@ the client constant.
 
 ---
 
-## 3. `ResolutionPlan/1` — exact packed layout
+## 3. `ResolutionPlan/1` — exact packed frame and MC/1 body
 
 ### 3.1 Derived invariants this layout obeys
 
@@ -107,13 +108,17 @@ the client constant.
 
 ### 3.2 Byte layout
 
-All integers big-endian, fixed width. The plan is exactly
-`PLAN_HEADER_BYTES + PLAN_ENTRY_BYTES · N` bytes; any other length rejects.
+All frame integers are big-endian and fixed width. The Type has exactly one
+field, `frame BYTES(maxLen=4,192)`, so the Record's MC/1 canonical body is
+exactly `u16(frameLen) ‖ frame`. The frame is exactly
+`PLAN_HEADER_BYTES + PLAN_ENTRY_BYTES · N` bytes; the complete canonical body
+is therefore `98 + 64·N` bytes. Any other prefix or length rejects.
 [PROPOSAL — layout is fresh B0 design; field inventory carries the lens-pass
 evidence (object-taxonomy §2.2's 96 + 64·N RosterV1 frame) as its precedent.]
 
 ```text
-ResolutionPlan/1  (canonical body of a Record of Type TYPE_RESOLUTION_PLAN_1)
+ResolutionPlan/1 frame  (value of the Record's one `frame` field;
+                         canonical body begins with its u16 length)
 
 HEADER — 96 bytes = 3 × 32-byte words
 word 0 (bytes 0..31):
@@ -208,7 +213,7 @@ inventory; the fail-closed posture is DERIVED (lens-spec §2.2).]
 | Code | Name | Fires when |
 |---|---|---|
 | 1 | `BAD_TYPE` | Record exists but its TypeSchemaId ≠ `TYPE_RESOLUTION_PLAN_1` |
-| 2 | `BAD_LENGTH` | body length ≠ `96 + 64·entryCount`, or body < 96 bytes |
+| 2 | `BAD_LENGTH` | body < 2 bytes; `u16(body[0:2]) != body.length-2`; frame length ≠ `96 + 64·entryCount`; or frame < 96 bytes |
 | 3 | `BAD_VERSION` | `planVersion` ≠ 0x01 |
 | 4 | `BAD_COMBINER` | `combiner` ∉ {0,1,2} |
 | 5 | `BAD_FLAGS` | reserved bit set in `planFlags`, or any `entryFlags` ≠ 0 |
@@ -249,12 +254,14 @@ planRecordId = RecordId(plan Record)
 `DOM_PLAN`, parallel plan hash, profile-specific identity, or alternate
 retrieval key.
 
-The plan's `canonicalBody` **is byte-identical to the §3.2 packed frame** —
-no wrapping, no re-encoding. The one property required of the encoding chapter:
-the canonical body codec must admit an opaque bounded raw-bytes body profile
-(or, failing that, wrap plan bytes at a fixed, offset-free position so the
-resolver can slice without parsing the general codec). This preserves the
-no-CBOR-on-chain invariant while making plans first-class graph citizens.
+The encoding seam is closed: `ResolutionPlan/1` has one
+`frame BYTES(maxLen=4,192)` field. Its canonical body is
+`u16(frameLen) ‖ frame`; the two-byte big-endian prefix is part of RecordId.
+The resolver checks that prefix, then parses the fixed-offset frame beginning at
+canonical-body offset 2. The frame itself remains the exact §3.2 layout, so no
+contract parses a general-purpose codec, CBOR, or an author-supplied offset. The
+maximum canonical body is 4,194 bytes. This makes plans ordinary first-class
+Records without an opaque-body exception or a parallel plan encoding.
 
 The resolver reads plan bytes with the spine's body read (Lane 5/6 ABI,
 assumed):
@@ -293,9 +300,10 @@ it verbatim]. The B0 spine satisfies it without new machinery:
    discipline, and an EVM-evolution exposure (EOF, initcode/`EXTCODECOPY`
    repricing — the CARRY-IN names this invalidation surface). Plans-as-Records
    ride the one admission path that is already the system's security boundary.
-4. **The gas argument favors CREATE2 only as a perf lever.** Loading 4,192 plan
-   bytes from storage words costs ≈ 131 cold SLOADs ≈ 275k gas; `EXTCODECOPY`
-   of the same bytes ≈ 2,600 + 3·131 + memory ≈ 3.0k. That ~90× delta on the
+4. **The gas argument favors CREATE2 only as a perf lever.** Loading the maximal
+   4,194-byte canonical body from storage words costs ≈132 cold SLOADs
+   ≈277k gas; `EXTCODECOPY` of the same bytes is ≈2,600 + 3·132 + memory
+   ≈3.0k. That ~90× delta on the
    plan-load component (≈ 50% of worst-case resolve, §9) is real — but it is a
    physical-storage question, and physical storage layout is replaceable until
    frozen [DERIVED INVARIANT — system-constitution "On-chain graph and
@@ -563,7 +571,7 @@ lens-read-gotchas "One-basis rule".]
 ```text
 resolve(planRecordId, positionKey, basis) → ResolveResult
   # (1) LOAD
-  body ← recordBody@basis(planRecordId)  # ordinary RecordId point read
+  body ← recordBody@basis(planRecordId)  # MC/1: u16 frameLen ‖ frame
   if body unavailable:
       on-chain  → revert PlanUnavailable(planRecordId)    # authoritative: config error
       off-chain → return UNKNOWN(REASON_PLAN_UNAVAILABLE) # never ABSENT
@@ -572,12 +580,13 @@ resolve(planRecordId, positionKey, basis) → ResolveResult
   if code ≠ 0:
       on-chain  → revert PlanMalformed(planRecordId, code) # fail-closed
       off-chain → return UNKNOWN(REASON_PLAN_MALFORMED, code)
-  if body.semanticsProfileId ≠ SEMANTICS_PROFILE_B0:
+  frame ← body[2 : 2 + u16be(body[0:2])]  # fixed only after BAD_LENGTH passes
+  if frame.semanticsProfileId ≠ SEMANTICS_PROFILE_B0:
       return UNSUPPORTED(REASON_UNRECOGNIZED_SEMANTICS_PROFILE)
   # (3) PROBE ORDER — fixed by combiner (§6): EXACT/THRESHOLD = all entries in
   #     stored order; PRIORITY = ascending tier groups in stored order
   heads ← []
-  for entry in consultedEntries(body, combiner):
+  for entry in consultedEntries(frame, combiner):
       bk ← keccak256(abi.encode(
         DOM_BINDING, entry.principalId, positionKey
       ))
@@ -812,34 +821,34 @@ a qualifying Realm and re-verify the cap against the adopted Realm gas profile
 venue's cap).
 
 Model (consumed SR-8 layout, §5.2): plan load from spine storage words =
-`(3 + 2N)` cold SLOADs; every present-head probe = 2 cold SLOADs; `N`
+`ceil((2 + 96 + 64N)/32) = (4 + 2N)` cold SLOADs; every present-head probe = 2 cold SLOADs; `N`
 BindingKey keccaks cost 48 gas each; fixed overhead (dispatch, memory,
 loop, basis report) budgeted 2,000. Worst case is a full walk with every head
 present (EXACT and THRESHOLD always probe all N; PRIORITY's worst case is a
 last-tier winner or all-absent).
 
 ```text
-gasWorst(N) ≈ (3 + 2N)·2100  +  N·2·2100  +  N·48  +  2000
+gasWorst(N) ≈ (4 + 2N)·2100  +  N·2·2100  +  N·48  +  2000
 ```
 
 | N | Plan load (cold) | Probes (cold, all present) | keccak | Total cold ≈ | % of 2²⁴ cap | Total warm ≈ |
 |---|---|---|---|---|---|---|
-| 1  | 5 w = 10,500   | 2 SLOAD = 4,200     | 48    | **16.7 k**  | 0.10 % | 2.7 k |
-| 8  | 19 w = 39,900  | 16 SLOAD = 33,600   | 384   | **75.9 k**  | 0.45 % | 5.9 k |
-| 32 | 67 w = 140,700 | 64 SLOAD = 134,400  | 1,536 | **278.6 k** | 1.66 % | 16.6 k |
-| 64 | 131 w = 275,100| 128 SLOAD = 268,800 | 3,072 | **549.0 k** | 3.27 % | 31.0 k |
+| 1  | 6 w = 12,600   | 2 SLOAD = 4,200     | 48    | **18.8 k**  | 0.11 % | 2.8 k |
+| 8  | 20 w = 42,000  | 16 SLOAD = 33,600   | 384   | **78.0 k**  | 0.46 % | 6.0 k |
+| 32 | 68 w = 142,800 | 64 SLOAD = 134,400  | 1,536 | **280.7 k** | 1.67 % | 16.7 k |
+| 64 | 132 w = 277,200| 128 SLOAD = 268,800 | 3,072 | **551.1 k** | 3.28 % | 31.1 k |
 
 (warm = same-transaction repeat: (planWords + probeSLOADs)·100 + keccaks +
 overhead; EIP-2929 makes a batched action gating several operations through one
 plan pay the cold cost once.)
 
 All-absent worst case (every probe 1 SLOAD): N=64 →
-275,100 + 64·2,100 + 3,072 + 2,000 ≈ **414.6 k** (2.47 % of cap).
+277,200 + 64·2,100 + 3,072 + 2,000 ≈ **416.7 k** (2.48 % of cap).
 
 Headroom statement: at the CORE cap, one worst-case cold resolve consumes
-≈ 3.27 % of the EIP-7825 transaction budget, leaving ≈ 96.73 %
+≈ 3.28 % of the EIP-7825 transaction budget, leaving ≈ 96.72 %
 (≈ 16.23 M gas) for the consumer's own logic; five worst-case resolves in
-one gated batch cost ≈ 2.745 M, or ≈ 16.36 % of the cap. A naive wide sorted directory page
+one gated batch cost ≈ 2.755 M, or ≈ 16.42 % of the cap. A naive wide sorted directory page
 (128 items × 55 principals ≈ 29.5 M) exceeds the cap and is not promised at any
 size the naive path implies — point resolution and bounded candidate pages are
 the whole on-chain enumeration promise. [DERIVED INVARIANT — venue-conditional
@@ -985,7 +994,9 @@ Properties, each a fixture:
 | `positionSeq`-shaped O(1) revalidation | HYPOTHESIS | core-onchain §5.4 (PLAUSIBLE), V2-E2 falsifier named |
 
 Golden-vector categories this chapter owes the fixture chapter: plan
-encode/validate vectors (valid N ∈ {1,8,32,64}; one per rejection code 1–13);
+encode/validate vectors (valid N ∈ {1,8,32,64}; one per rejection code 1–13;
+MC/1 u16 frame-length prefix round-trip plus short/long/noncanonical-prefix
+rejections);
 combiner outcome vectors (each of T1–T10, incl. two-value THRESHOLD conflict at
 k ≤ N/2 and the tombstone-contributes-absent case); BindingKey derivation
 vectors (incl. two Principals sharing low-160-bits); LENS-NEG-1; challenge-window
@@ -1009,8 +1020,9 @@ The compact contract other chapters rely on:
 uint16  MAX_PLAN_ENTRIES_CORE = 64;          // Core-enforced
 uint16  MAX_PLAN_ENTRIES_CLIENT = 256;       // client-side ceiling, not Core-enforced
 bytes32 SEMANTICS_PROFILE_B0 = keccak256("efs2/lens-semantics/b0/1");
-// PlanId is only an alias for the RecordId whose TypeSchemaId = TYPE_RESOLUTION_PLAN_1
-// whose canonicalBody is the §3.2 packed ResolutionPlan/1 frame (96 + 64·N bytes).
+// PlanId is only an alias for the RecordId whose TypeSchemaId = TYPE_RESOLUTION_PLAN_1.
+// That Type has one frame BYTES(maxLen=4192) field; canonicalBody is
+// u16(frameLen) ‖ the §3.2 frame, totaling 98 + 64·N bytes.
 
 // ---- types ----
 enum Presence { UNKNOWN, FOUND, ABSENT, CONFLICT, UNSUPPORTED }
@@ -1068,10 +1080,11 @@ checkmark.
 
 ## Open items
 
-1. **Encoding-chapter reconciliation** — raw-bytes canonical-body profile (or a
-   fixed-offset wrap) so the §3.2 frame is byte-identical to `canonicalBody`;
-   the `TYPE_RESOLUTION_PLAN_1` TypeSchemaId value; RecordId preimage. Closed
-   by: encoding/identity chapters.
+1. ~~Encoding-chapter reconciliation~~ — **CLOSED**: one
+   `frame BYTES(maxLen=4,192)` field; canonical body
+   `u16(frameLen) ‖ frame`; parser offset 2; ordinary RecordId over the whole
+   body. Only the concrete `TYPE_RESOLUTION_PLAN_1` golden-vector value waits
+   for Stage B minting; no encoding decision remains open.
 2. **`MAX_PLAN_ENTRIES_CORE = 64`** — confirm/retune on V2-E2 real-kernel
    measurements at 1/8/32/64; budget failure returns to James per the kickoff
    gate. Closed by: V2-E2 matrix.

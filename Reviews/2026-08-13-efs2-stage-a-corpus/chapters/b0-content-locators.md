@@ -94,7 +94,7 @@ subset of that table legal under its v1 types, plus the per-code semantics.]
   SWHID is an ISO standard published 2025-04-23 and is SHA-1-based — VERIFIED
   via the intake audit STANDARDS lane; EFS POLICY: cite/emit, never inherit].
 - **Successor-hash seam.** Any `algCode` outside the closed subset **fails
-  structural validation** under every v1 type in this chapter; the subset
+  this content profile's bounded conformance** under every v1 type in this chapter; the subset
   extends only by a Codex revision assigning a new `u16` code in the encoding
   chapter's table (multihash registry value where one exists) — the migration
   seam per the hash-migration playbook obligation (deterministic-ids.md
@@ -119,9 +119,11 @@ ByteDigestValue {
 }
 ```
 
-Structural validation (deterministic, no I/O):
-`algCode ∈ {0xEF01, 0x0012, 0x001B}` and `len(digest) == lengthFor(algCode)`;
-otherwise the containing Record is malformed.
+Core structural validation of a `DIGEST` value requires a globally known
+`algCode` and its Codex-pinned length. Content-profile conformance additionally
+requires `algCode ∈ {0xEF01, 0x0012, 0x001B}`; otherwise the admitted Record
+is `PROFILE_MALFORMED(ALGORITHM_NOT_IN_CONTENT_V1)`. Length mismatch remains a
+Core structural failure.
 
 **Multihash projection** (export/import only, never storage-canonical):
 `varint(code) ‖ varint(length) ‖ digest`. The registry-backed algorithms
@@ -190,6 +192,37 @@ already declares. Where Lane 5 additionally exposes a global digest key
 family, it keys on the same `u16 algCode` (zero-extended, SR-18a), so the two
 entry points can never fragment by algorithm vocabulary [PROPOSAL].
 
+### 2.1 Core admission versus content-profile conformance
+
+The closed Type language is intentionally small. Core validates only rules it
+can derive from the canonical descriptor with bounded generic machinery; this
+chapter's richer semantic profiles are deterministic reader/SDK checks, not
+hidden kernel validators [PROPOSAL — no callbacks, exact disposition]:
+
+| Rule class | Enforced by Core admission | Enforced by bounded content-profile/read conformance |
+|---|---|---|
+| Canonical body | MC/1 parse, field order/count, no trailing bytes, UTF-8 validity, declared scalar/bytes/array/struct bounds, body/depth limits | none; these are already structural |
+| Declarative constraints | Top-level `INT_RANGE`, `NONEMPTY`, and `NAME_PROFILE` exactly as declared by the Type | sparse allowsets, arithmetic/alignment relationships, all-or-none option groups, and every other cross-field invariant |
+| Digests | `DIGEST` uses a Codex-known `algCode` and its globally pinned length | this profile's closed algorithm subset, Git-framing meaning, and whether a field permits a particular algorithm |
+| References | bounded extraction; every reference leaf covered exactly once; `DIRECT` or one `ARRAY_STRUCT_MEMBER`; `REF_INSTANCES_MAX=16`; target class; exact singleton `expectedType` when declared | allowed sets of multiple target Types, member `kind` to target-Type agreement, target-body size/count agreement, and semantic graph relationships |
+| Locator/text meaning | declared bytes length and `NONEMPTY` where expressible | RFC-3986 URI grammar, ASCII/scheme semantics, secret-fragment warnings, path-segment rules, and host-collision policy |
+| Collections | declared maximum count and total reference budget | sorted/unique members or capabilities, closure name uniqueness, and nesting/walk policy |
+| Content mathematics | integer widths/ranges declared independently | chunk alignment, count/size arithmetic, nonzero-root policy, Merkle/representation equivalence, and verified range coverage |
+
+Every conformance check above is bounded by `MAX_BODY_BYTES`, declared array
+maxima, `REF_INSTANCES_MAX`, and explicit point reads of referenced Records.
+There are no Type-created callbacks and no unbounded traversal during
+admission. A Record that passes Core structure but fails this profile remains
+immutable admitted evidence with the same RecordId; a conforming reader grades
+it `PROFILE_MALFORMED(reason)` and excludes it from verified execution,
+exact-closure claims, or best-locator eligibility as applicable. It is never
+silently reclassified as structurally invalid or deleted.
+
+For all multi-Type target sets below, the Type role uses
+`expectedType = ANY`; the listed set is content-profile conformance. A
+singleton target may use its exact `TypeSchemaId`. This closes the prior
+allowed-set/kind-target ambiguity without set-valued Core constraints.
+
 ## 3. Locator/1
 
 Purpose: an authored claim "bytes for subject S may be found at URI U",
@@ -216,20 +249,20 @@ Reference roles and indexes (inside TypeSchemaId, axis 4 Variant A):
 |---|---|---|---|
 | `subject` | `ObjectGenesis/1`, `ByteDigest/1`, `ChunkTree/1`, `ArtifactClosure/1` | exactly 1 | target-first backlink ("locators for T") |
 
-Structural validation:
+Validation split (per §2.1):
 
-1. `1 ≤ len(uri) ≤ MAX_LOCATOR_URI_BYTES` (`MAX_LOCATOR_URI_BYTES = 2048`
+1. **Core:** `1 ≤ len(uri) ≤ MAX_LOCATOR_URI_BYTES` (`MAX_LOCATOR_URI_BYTES = 2048`
    [PROPOSAL — covers real-world signed gateway URLs; anything longer is
    hostile or machinery, and bounded bodies are a Core requirement]).
-2. `uri` MUST be a syntactically valid RFC 3986 absolute URI: `scheme ":"
+2. **Profile/read:** `uri` MUST be a syntactically valid RFC 3986 absolute URI: `scheme ":"
    hier-part [ "?" query ] [ "#" fragment ]`; scheme = `ALPHA *( ALPHA / DIGIT
    / "+" / "-" / "." )`; every byte printable ASCII `0x21..0x7E` (non-ASCII
    MUST be percent-encoded). **No scheme list is consulted** [PROPOSAL — the
    v1 ADR-0056 direction cited as evidence, §0; client-policy-not-Core-
    allowlist is the design]. The TYPE pins syntax bounds; dereference/render
    policy is client policy.
-3. Observation group: either all three observation fields present or none.
-4. `observedDigest.algCode ≠ ALG_GIT_SHA1_OBJECT` (an HTTP fetch yields raw
+3. **Profile/read:** observation group: either all three observation fields present or none.
+4. **Profile/read:** `observedDigest.algCode ≠ ALG_GIT_SHA1_OBJECT` (an HTTP fetch yields raw
    bytes; the Git framing never appears on a wire) [PROPOSAL — keeps foreign
    framing out of transport observations].
 
@@ -282,7 +315,8 @@ ByteDigest/1 {
 - No size, no media type, no name [DERIVED INVARIANT — distinct-facts rule,
   §0]. Size/type/naming claims attach as separate evidence or live in
   closures.
-- Structural validation: §1.2 rules; nothing else.
+- Core structural validation is the global `DIGEST` grammar. Content-profile
+  conformance applies §1.2's closed algorithm subset; nothing else.
 - Declared indexes: none beyond baseline (unique-Records-by-Type and exact
   point reads suffice — the RecordId is computable from the digest alone).
 - Any Principal may assert it; asserting it means "I claim bytes with this
@@ -308,15 +342,16 @@ ChunkTree/1 {
 }
 ```
 
-Structural validation:
+Validation split (per §2.1):
 
-1. `chunkSize % CHUNK_SIZE_ALIGN == 0`, `CHUNK_SIZE_MIN ≤ chunkSize ≤
-   CHUNK_SIZE_MAX`.
-2. `1 ≤ chunkCount ≤ CHUNK_COUNT_MAX`.
-3. `chunkCount == ceil(totalSize / chunkSize)` and `totalSize ≥ 1`
+1. **Core:** independent `INT_RANGE` constraints enforce
+   `CHUNK_SIZE_MIN ≤ chunkSize ≤ CHUNK_SIZE_MAX`,
+   `1 ≤ chunkCount ≤ CHUNK_COUNT_MAX`, and `totalSize ≥ 1`.
+2. **Profile/read:** `chunkSize % CHUNK_SIZE_ALIGN == 0`.
+3. **Profile/read:** `chunkCount == ceil(totalSize / chunkSize)`
    (equivalently `(chunkCount−1)·chunkSize < totalSize ≤ chunkCount·chunkSize`,
    checked in uint256 arithmetic — no overflow at these widths).
-4. `merkleRoot ≠ 0x0`.
+4. **Profile/read:** `merkleRoot ≠ 0x0`.
 
 Named constants [PROPOSAL — each with rationale]:
 
@@ -466,8 +501,11 @@ RepresentationBinding/1 {
 |---|---|---|---|
 | `subject` | `ChunkTree/1`, `ArtifactClosure/1` | exactly 1 | target-first backlink ("bindings for commitment C") |
 
-Structural validation: exactly one of `externalDigest`/`externalUri` present,
-matching `externalKind`; digest per §1.2; URI per §3 rules.
+Validation split: Core enforces field encodings, option shapes, independent
+bounds, and global `DIGEST` length. The content profile requires exactly one of
+`externalDigest`/`externalUri`, agreement with `externalKind`, the §1.2
+algorithm subset, and the §3 URI grammar. Failure is
+`PROFILE_MALFORMED`, not retroactive Core invalidity.
 
 Semantics:
 
@@ -523,33 +561,42 @@ Member {
 |---|---|---|---|
 | `member` | `ChunkTree/1` (kind FILE/EXEC_FILE), `ArtifactClosure/1` (kind SUBCLOSURE) | 1..MAX_CLOSURE_MEMBERS | target-first backlink (**reverse membership**: "closures containing C") |
 
+The exact Type descriptor uses one role with
+`selectorKind = ARRAY_STRUCT_MEMBER`, `fieldIdx = members`, and
+`memberIdx = content`. The selected member descriptor is exactly `REF`; the
+role's `targetClass = RECORD` and `expectedType = ANY`. The generic extractor
+therefore emits one reference per array element in wire order, statically
+bounded by `MAX_CLOSURE_MEMBERS = REF_INSTANCES_MAX = 16`. Names, kinds, and
+sizes are not reference-path components, and no deeper path is legal. The
+kind-specific allowed Type set is the content-profile check below.
+
 The reverse-membership backlink is this chapter's contribution to the costed
 reverse-membership/cited-by obligation [OWNER RULING — owner-rulings.md
 2026-07-15 item B, "reverse membership + REDIRECT cited-by: ON-CHAIN",
 VERIFIED; carried as an acceptance obligation in the 2026-08-12 ruling,
 VERIFIED].
 
-Structural validation:
+Validation split (per §2.1):
 
-1. `1 ≤ len(members) ≤ MAX_CLOSURE_MEMBERS` (`MAX_CLOSURE_MEMBERS = 16`
+1. **Core:** `1 ≤ len(members) ≤ MAX_CLOSURE_MEMBERS` (`MAX_CLOSURE_MEMBERS = 16`
    [PROPOSAL — governed by SR-18e's per-leaf reference-instance bound
    `REF_INSTANCES_MAX = 16` (every member is a role-bound reference with the
    owner-obligated reverse-membership backlink, and ARRAY(REF) role counts are
    included in that bound), which is tighter than the SR-5 body-bytes
    derivation: see §8.4; nesting provides scale]).
-2. Each `name`: 1..255 bytes (`MAX_MEMBER_NAME_BYTES = 255` [PROPOSAL — host
-   filesystem name ceiling for the three-host mount]), valid UTF-8, no `0x00`,
-   no `/` (0x2F), not `.` or `..`. **Portable presentation/collision policy
+2. **Core:** each `name` is valid UTF-8 with declared 1..255-byte bounds
+   (`MAX_MEMBER_NAME_BYTES = 255`). **Profile/read:** no `0x00`, no `/`
+   (0x2F), and not `.` or `..`. **Portable presentation/collision policy
    (case folding, Unicode normalization, Windows reserved names) is the mount
    lane's read-side problem; the closure commits raw bytes** and two names
    differing only by normalization are distinct members [PROPOSAL — identity
    must not depend on host-collation opinions].
-3. Members strictly sorted by `name` bytewise ascending; duplicates therefore
+3. **Profile/read:** members strictly sorted by `name` bytewise ascending; duplicates therefore
    impossible.
-4. `kind` consistent with the reference's target Type (checkable at admission
-   when the target's Type is resolvable in-Realm; otherwise checked at read —
-   open item O3).
-5. No symlinks, no hardlinks, no empty directories in v1: a SUBCLOSURE target
+4. **Profile/read:** `kind` is in `{FILE, EXEC_FILE, SUBCLOSURE}` and is
+   consistent with the referenced Record's Type. Core extracts and indexes the
+   target but does not implement this cross-field/target-Type rule.
+5. **Profile/read:** no symlinks, hardlinks, or empty directories in v1: a SUBCLOSURE target
    with zero members is impossible by bound 1's minimum. [PROPOSAL — symlink
    escape/aliasing is the classic archive-extraction attack surface; the
    mount profile is read-only and needs none of it. A later
@@ -693,7 +740,7 @@ each Realm descriptor states its own cap (Lane 3 seam).]
   members, or ~64 members at a ≈ 4-word (≤ ~128 B) average — names averaging
   ≤ ~64 B. The **governing bound is structural, not bytes**: SR-18e caps
   per-leaf role-bound reference instances at `REF_INSTANCES_MAX = 16`
-  (ARRAY(REF) role counts included), and every closure member is one
+  (including the `ARRAY_STRUCT_MEMBER(members,content)` selector), and every closure member is one
   role-bound reference, so `MAX_CLOSURE_MEMBERS = 16` — at which even
   all-worst-case names fit the body (16 × 384 = 6,144 B ≤ 8,192 B). All
   bounds are enforced; the tighter one wins. [PROPOSAL — re-derived under
@@ -758,6 +805,13 @@ RuntimeRequest/1 {
 | Release.artifact | `ArtifactClosure/1`, `ChunkTree/1` | 1 | target-first backlink ("releases shipping A") |
 | Release.runtime | `RuntimeRequest/1` | 0..1 | none |
 | Release.notes | any | 0..1 | none |
+
+Core enforces only field/option/array bounds, reference extraction, and any
+exact singleton expected Type. The multi-Type artifact set, custody ordinal
+range, `versionLabel` meaning, and RuntimeRequest capability ordering are
+bounded content-profile checks. In particular `capabilities` being sorted and
+unique is not a Core admission claim; a violation grades the runtime request
+`PROFILE_MALFORMED` and grants nothing.
 
 Semantics:
 
@@ -835,6 +889,12 @@ AvailabilityObservation/1 {
 | `locator` | `Locator/1` | 1 | target-first backlink ("probes of L") |
 | `commitment` | `ChunkTree/1`, `ArtifactClosure/1` | 1 | none (reached via locator) |
 
+Core enforces the field encodings, independent ranges, references, and exact
+singleton Locator target. The commitment target set and the cross-field
+relationships (`COMPLETE ⇒ verifiedChunks == n`, `UNREACHABLE ⇒ 0`, and
+otherwise `< n`) are bounded profile/read checks. A nonconforming observation
+is preserved testimony but ineligible for health selection.
+
 `MISMATCH` means proof-failing bytes were served — the strongest negative
 signal a prober can publish, and it indicts the locator, never the content.
 `UNREACHABLE` never grounds absence of the bytes (§3 absence discipline).
@@ -895,6 +955,11 @@ cursor chain. An undeclared/invalid Type-role-score profile is `UNSUPPORTED`,
 not `COMPLETE + empty`; an unavailable basis is UNKNOWN at the client boundary
 (and an invalid on-chain basis/cursor reverts), never a lower-priority
 fallthrough. The sole B0 total order is `(score desc, AdmissionOrdinal asc)`.
+For either `COMPLETE` or `PARTIAL`, no eligible winner is encoded exactly as
+`bestOrdinal = 0, bestScore = 0`. Implementations track `winnerPresent`
+separately from the score: an eligible real occurrence may have score zero and
+then returns its nonzero ordinal (with `bestScore = 0`). Sentinel comparison
+must never cause that candidate to disappear.
 
 **`SELECT_PROFILE_V2` — the client-tier graded fold (explicitly deferred;
 NOT B0)** [PROPOSAL — re-scoped by SR-18c from this chapter's draft, where
@@ -1045,7 +1110,8 @@ Vector categories this chapter owes the measurement lane (cross-language:
 Solidity/TypeScript/Rust):
 
 1. **ByteDigestValue**: each algorithm round-trip; multihash projections;
-   wrong-length digest rejected; out-of-subset `algCode` rejected — including
+   wrong-length digest Core-rejected; known-but-out-of-subset `algCode` grades
+   `PROFILE_MALFORMED(ALGORITHM_NOT_IN_CONTENT_V1)` — including
    `0x0001`/`0x0002`/`0x0003` (the retired u8-tag values, catching
    implementations shipping the superseded table), `0x0011` (raw sha1), and
    `0x0013` (sha2-512): all are legal or reserved elsewhere in the encoding
@@ -1054,14 +1120,19 @@ Solidity/TypeScript/Rust):
    sha1 multihash.
 2. **ChunkTree**: n=1 (root == leaf, empty proof); n=2; n=3 (promotion); n=5
    (double promotion); n=256; last-chunk-short; `chunkCount ≠
-   ceil(totalSize/chunkSize)` rejected; tampered chunk fails; wrong-index
+   ceil(totalSize/chunkSize)` is Core-admitted but
+   `PROFILE_MALFORMED(CHUNK_ARITHMETIC)` and never verified; tampered chunk fails; wrong-index
    proof fails; padded proof fails (trailing-hash rejection); truncated proof
    fails; chunk-bytes-as-node and node-as-chunk cross-role preimages fail;
    the same bytes at `CHUNK_SIZE_DEFAULT` vs `CHUNK_SIZE_STATE` yield
    distinct RecordIds (documented non-convergence).
-3. **Closure**: unsorted members rejected; duplicate name rejected; `/` in
-   name rejected; `.`/`..` rejected; 256-byte name rejected; kind/target
-   mismatch rejected; member.size mismatch detected at walk
+3. **Closure**: valid `ARRAY_STRUCT_MEMBER(members,content)` extracts all
+   references in wire order and emits all backlinks; DIRECT applied to the
+   struct array, a non-reference selected member, a second-depth selector, or
+   17 reference instances is Core-rejected. Unsorted members, duplicate names,
+   `/`, `.`/`..`, and kind/target mismatch are Core-admitted but deterministically
+   `PROFILE_MALFORMED`; a 256-byte name is Core-rejected by its bound;
+   member.size mismatch detected at walk
    (`CLOSURE_MALFORMED`); nested dedup (identical subtree → one RecordId);
    walk-depth bound reports PARTIAL.
 4. **Flow**: P1→P3 additive (earlier Locator RecordId unchanged after closure
@@ -1095,14 +1166,16 @@ chapter's `u16` algCode table (SR-18a — one table everywhere: `DIGEST`
 values, ByteDigest bodies, index keys zero-extended). Closed subset legal
 under this chapter's v1 types: `{0xEF01 git-sha1-object/20 (foreign-only,
 framed preimage), 0x0012 sha2-256/32, 0x001B keccak-256/32}`; out-of-subset
-codes rejected; multihash projections `0x12 20‖d`, `0x1b 20‖d`, while
+codes fail content-profile conformance (globally unknown codes or wrong lengths
+fail Core structure); multihash projections `0x12 20‖d`, `0x1b 20‖d`, while
 projecting `0xEF01` as raw sha1 `0x11 14‖d` is explicitly lossy of framing.
 
 **Type Schemas** (axis 4 Variant A; names bind, TypeSchemaIds derive via Lane
 4): `Locator/1`, `ByteDigest/1`, `ChunkTree/1`, `ArtifactClosure/1`,
 `RepresentationBinding/1`, `ArtifactRelease/1`, `RuntimeRequest/1`,
 `DurabilityGrade/1`, `AvailabilityObservation/1` — bodies, roles, per-role
-backlink declarations, and structural validation exactly as §§3–10.
+  backlink declarations, Core structural validation, and bounded profile/read
+  conformance exactly as §2.1 and §§3–10.
 
 **Deterministic entry points other lanes may rely on**:
 - `RecordId(ByteDigest/1{algCode,d})` computable offline ⇒ content-digest
@@ -1146,15 +1219,14 @@ MAX_CHUNKS_PER_SUBMIT_TX 2 (venue sketch); LEAF_TAG 0x00; NODE_TAG 0x01.`
   the Stage B harness re-derives the SR-5 size constants against per-Realm
   gas caps — if either pinned constant moves, §8.4 re-runs. Closed by: the
   measurement harness.
-- **O2 (Lane 4):** whether a reference role's allowed-target set (used here as
-  small closed TypeSchemaId sets, e.g. `{ChunkTree/1, ArtifactClosure/1}`) is
-  expressible in the Variant A role grammar, and how `any` (Release.notes) is
-  spelled. Closed by: Lane 4's Type chapter.
-- **O3 (Lane 3):** whether admission-time structural validation may check a
-  reference target's Type when the target is co-carried or already admitted
-  in-Realm (closure member-kind consistency, §7 rule 4), or whether that check
-  is read-side only. Closed by: Lane 3's admission chapter; either answer is
-  compatible — the read-side check is mandatory regardless.
+- **O2 (Lane 4) — CLOSED:** `expectedType` expresses `ANY` or one exact
+  `TypeSchemaId`; no set-valued role constraint is added. Every listed
+  multi-Type target set is bounded content-profile/read conformance (§2.1).
+  `Release.notes` spells `ANY`.
+- **O3 (Lane 3) — CLOSED:** Core checks an exact singleton `expectedType` when
+  declared. Artifact member kind/target agreement and every multi-Type target
+  set are bounded profile/read checks; admission does not call a content
+  validator or perform semantic set membership.
 - **O4 (chains-don't-die scope — aligned to the set-wide disposition):**
   per-Realm scope of chains-don't-die for fresh L3 custody claims (§12) —
   **one disposition, set-wide** (overview §5.1): this chapter's

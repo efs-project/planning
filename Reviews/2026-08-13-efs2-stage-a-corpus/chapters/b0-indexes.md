@@ -229,7 +229,8 @@ KIND_BY_PRINCIPAL  = 0x04   // typeSchemaId = 0, ordinal 0, valueKey = Principal
 KIND_TARGET        = 0x05   // typeSchemaId = 0, ordinal 0, valueKey = targetKey (general backlink + digest lookup)
 KIND_ROLE          = 0x06   // typeSchemaId = T, ordinal = roleOrdinal, valueKey = targetKey (predicate backlink)
 KIND_SPEC          = 0x07   // typeSchemaId = T, ordinal = specOrdinal, valueKey per IndexSpec (§4)
-KIND_BINDING_HIST  = 0x08   // typeSchemaId = 0, ordinal 0, valueKey = BindingKey
+KIND_BINDING_HIST  = 0x08   // raw audit history: typeSchemaId = 0, ordinal 0,
+                            // valueKey = BindingKey; never liveness-filtered
 ```
 
 `PrincipalId` participates at full 32-byte width in `pk` and everywhere else;
@@ -335,7 +336,7 @@ pheadSlot(pk): PostingsHead, bit layout:
   count       bits [0..63]    uint64  // total ordinals ever appended
   liveCount   bits [64..127]  uint64  // revocation-aware current count (§6)
   lastOrdinal bits [128..175] uint48  // last appended ordinal (append monotonicity check)
-  flags       bits [176..191] uint16  // MBZ
+  flags       bits [176..191] uint16  // bit0 RAW_AUDIT; all others MBZ
   reserved    bits [192..255] MBZ
 
 pdataSlot(pk, i): 5 packed uint48 ordinals, lanes per §1.2; entries are
@@ -347,6 +348,7 @@ Append pseudocode (deterministic; used by every family):
 ```
 appendPosting(pk, ord):
   head = SLOAD(pheadSlot(pk))
+  assert head.flags == 0                    // liveness family only
   assert ord > head.lastOrdinal            // strict ascending
   i = head.count / 5 ; lane = head.count % 5
   word = (lane == 0) ? 0 : SLOAD(pdataSlot(pk, i))
@@ -355,7 +357,22 @@ appendPosting(pk, ord):
   SSTORE(pheadSlot(pk), head)
 ```
 
-`appendPosting` is called at most once per `(occurrence ordinal, pk)`. Before
+`KIND_BINDING_HIST` is the one explicit exception to occurrence-liveness
+postings. It uses `appendAuditPosting`, which requires/sets
+`flags = RAW_AUDIT (0x0001)`, appends the physical producing ordinal, and
+increments both `count` and `liveCount`; for this family `liveCount == count`
+means "audit entries retained", not "currently active occurrences". The
+withdrawal fold MUST NOT decrement a RAW_AUDIT head, and a generic decrement
+attempt against one reverts an internal invariant error. Pages over this family
+enumerate every physical ordinal at the pinned basis and hydrate each
+occurrence's status separately. Thus withdrawal can change an entry's grade but
+can never hide the mutation that produced a historical Binding revision.
+No caller selects the flag: `indexKind == KIND_BINDING_HIST` is the only route
+to `appendAuditPosting`, and every other kind requires `flags == 0`.
+
+`appendPosting` is called at most once per `(occurrence ordinal, pk)`. The
+Binding-owned raw audit append is outside the occurrence-level liveness key set
+and is not included in its admit/withdraw dedup symmetry. Before
 any posting write, admission derives the complete bounded candidate-key list
 for the occurrence in this order: `KIND_BY_RECORD`, `KIND_BY_TYPE`, and
 `KIND_BY_PRINCIPAL`; reference instances in schema role/field order and array
@@ -414,7 +431,8 @@ EnvelopeMeta @ emetaSlot(envelopeId), consumed from the admission owner:
   principalId       bytes32
   envelopeOrdinal   uint40
   leafCount         uint16
-  persisted signed-envelope/body-carriage metadata and the full RecordId vector
+  persisted canonical unsigned-header carriage and full RecordId vector;
+  main witness, bodies, target evidence, consent, and receipt basis excluded
 
   // No leaf-ordinal base exists. No receipt revision, block, or authority
   // basis lives here: staged admission may give one Envelope multiple batches.
@@ -498,8 +516,11 @@ function getRecord(bytes32 recordId) external view
            uint64 firstAdmitOrdinal);
 
 function getEnvelope(bytes32 envelopeId) external view
-  returns (bytes memory canonicalEnvelope, uint40 envelopeOrdinal,
+  returns (bytes memory canonicalUnsignedEnvelope, uint40 envelopeOrdinal,
            uint16 leafCount, bytes32 principalId, uint64 authEpoch);
+// canonicalUnsignedEnvelope = abi.encode(EnvelopeHeader, fullRecordIds).
+// It is sufficient to recompute the digest/EnvelopeId, not to replay the
+// intentionally unstored main witness; receipt/batch is historical validation evidence.
 
 function getOccurrence(bytes32 envelopeId, uint16 leafIndex) external view
   returns (uint8 status, uint64 ordinal, bytes32 recordId,
@@ -695,7 +716,11 @@ profile reintroduces an unindexed containment shortcut].
 
 Per admitted Binding mutation (the bindings chapter owns CAS/tombstone
 semantics), admission updates `BindingHead` and appends the mutation's ordinal
-to `pk(0, KIND_BINDING_HIST, 0, bindingKey)`.
+to `pk(0, KIND_BINDING_HIST, 0, bindingKey)` through the RAW_AUDIT path.
+Revision `r` is physical posting position `r-1` plus one; no liveness filter,
+count decrement, or compaction may alter that mapping. `readHistory` hydrates
+the producing OccurrenceRef and its status at the call basis, so a withdrawn
+mutation remains a visible revision marked WITHDRAWN.
 
 ```solidity
 enum BindingState { UNSET, BOUND, TOMBSTONED }
@@ -746,6 +771,7 @@ promises an `occKey → EnvelopeId` reverse lookup.
 Withdrawal of the current Binding occurrence and tombstones fold through the
 same head + history (bindings chapter owns which transitions are legal;
 no-resurrection is enforced there; this chapter only stores and pages).
+Withdrawal never removes, filters, or decrements a `KIND_BINDING_HIST` entry.
 
 ---
 
@@ -900,6 +926,8 @@ struct HydratedItem {
   uint16  leafIndex;
   bytes32 recordId;
   bytes32 principalId;   // full width
+  uint8   occurrenceStatus; // ACTIVE | WITHDRAWN at highWaterOrdinal
+  uint64  revokedAtOrdinal; // zero when not withdrawn at that basis
 }
 
 function counts(bytes32 typeSchemaId, uint8 indexKind, uint8 indexOrdinal,
@@ -910,7 +938,17 @@ function counts(bytes32 typeSchemaId, uint8 indexKind, uint8 indexOrdinal,
 
 Item encodings per endpoint: postings/admission-log/binding-history pages
 return AdmissionOrdinals as `bytes32(uint256(ordinal))`. Consumers hydrate via
-`getOccurrenceByOrdinal` or the hydrated variant.
+`getOccurrenceByOrdinal` or the hydrated variant. The two lifecycle fields
+are redundant for ordinary live-filtered postings (returned items are ACTIVE)
+but load-bearing for RAW_AUDIT Binding history.
+
+For `KIND_BINDING_HIST`, `coverage` counts physical audit postings examined
+and `items` includes them regardless of current occurrence liveness. The
+hydrated form carries the occurrence status/revoked ordinal returned by
+`getOccurrenceByOrdinal`. All other occurrence-posting families apply
+`liveAt(ord,H)` filtering. A caller cannot request RAW_AUDIT behavior for any
+other kind: it is fixed by the closed `indexKind` code and checked against the
+head flag.
 
 ### 5.2 Completeness semantics (exact rules)
 
@@ -958,6 +996,8 @@ return AdmissionOrdinals as `bytes32(uint256(ordinal))`. Consumers hydrate via
    best-effort.
 5. `coverage` is examined-entry count; `items.length < coverage` reveals
    dead-entry filtering honestly (§8's spray-degradation bound rides on it).
+   The raw Binding-history family instead has `items.length == coverage` until
+   the requested item/page bound; lifecycle status is hydrated, not filtered.
 
 ### 5.3 EIP-7825-aware page maxima (arithmetic in-chapter)
 
@@ -1030,6 +1070,12 @@ Every postings head carries `liveCount` (§2.3):
   decrement (no double-decrement). Pre-withdrawal of a never-admitted target
   writes `PRE_WITHDRAWN` plus any required bounded retained target evidence
   and decrements nothing.
+
+The clauses above govern occurrence-liveness families. `KIND_BINDING_HIST` is
+the explicit RAW_AUDIT exception: append increments `count` and the ABI's
+compatibility `liveCount` together, withdrawal never decrements either, and
+readers inspect each retained entry's separately hydrated occurrence status.
+Treating its `liveCount` as a live-claim count is non-conformant.
 
 For each ACTIVE occurrence and final key, the exact symmetry invariant is
 `one append at activation ↔ one decrement at withdrawal`, regardless of how
@@ -1199,7 +1245,9 @@ selectBestLocator(targetKey, spec, basisOrdinal, cursor):
       revert ErrSelectCursor(cursor)
 
   windowVisited = 0
-  best = (score = -∞, ordinal = 0)
+  winnerPresent = false
+  bestOrdinal = 0
+  bestScore = 0
 
   while i < canonicalEnd && windowVisited < LOCATOR_POSTINGS_VISIT_MAX:
     ord = postingAt(key, i)
@@ -1210,17 +1258,20 @@ selectBestLocator(targetKey, spec, basisOrdinal, cursor):
     score = (spec.scoreMode == SCORE_LATEST)
       ? ord
       : extractUint64(body(ord), spec.scoreFieldOrdinal)
-    if score > best.score ||
-       (score == best.score &&
-        (best.ordinal == 0 || ord < best.ordinal)):
-      best = (score, ord)
+    if !winnerPresent || score > bestScore ||
+       (score == bestScore && ord < bestOrdinal):
+      winnerPresent = true
+      bestScore = score
+      bestOrdinal = ord
 
   postingsVisited = boundaryProbes + windowVisited
   assert postingsVisited <= LOCATOR_TOTAL_POSTING_READ_MAX
   if i == canonicalEnd:
-    return (best.ordinal, best.score, postingsVisited, CURSOR_END, COMPLETE)
+    if !winnerPresent: return (0, 0, postingsVisited, CURSOR_END, COMPLETE)
+    return (bestOrdinal, bestScore, postingsVisited, CURSOR_END, COMPLETE)
   next = encodeSelectCursor(i, canonicalEnd, H, contextTag)
-  return (best.ordinal, best.score, postingsVisited, next, PARTIAL)
+  if !winnerPresent: return (0, 0, postingsVisited, next, PARTIAL)
+  return (bestOrdinal, bestScore, postingsVisited, next, PARTIAL)
 ```
 
 Cursor grammar [PROPOSAL — state-free and fail-closed]:
@@ -1277,6 +1328,10 @@ Exactness notes:
   later spam [PROPOSAL — earliest-wins prevents rank-jacking by re-publishing
   the same score; SCORE_LATEST mode exists for freshest-wins consumers and is
   equally deterministic].
+- Winner presence is an explicit boolean during comparison. A real candidate
+  with score `0` is valid and beats no winner; ordinal `0` remains only the
+  no-winner sentinel. Every window with no live candidate returns the exact
+  pair `(bestOrdinal=0, bestScore=0)` for either PARTIAL or COMPLETE.
 - `PARTIAL` means "best of this visited window" and always carries a resumable
   cursor. `bestOrdinal == 0 && PARTIAL` is **not absence**. Only
   an initial empty `COMPLETE`, or an empty aggregate after consuming the whole
@@ -1482,6 +1537,10 @@ with encoding-owned hashed domain words and `abi.encode` fixed words.
 - Mandatory indexing: an accepted Occurrence is present in every applicable
   family in the same atomic call; there is no admitted-but-unindexed state.
 - `counts()` liveCount is revocation-aware at current basis, O(1).
+- `KIND_BINDING_HIST` is a closed RAW_AUDIT family: physical revision postings
+  are never liveness-filtered, decremented, or compacted; history reads hydrate
+  lifecycle status separately. Its compatibility `liveCount` equals `count`
+  and is not a live-claim count.
 - `KIND_UNIQUE_BY_TYPE.liveCount` means live unique Records and changes only
   on the corresponding `KIND_BY_RECORD.liveCount` transitions `0 → 1` and
   `1 → 0` (last live occurrence).

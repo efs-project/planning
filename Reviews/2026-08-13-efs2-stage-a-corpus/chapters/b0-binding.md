@@ -163,7 +163,11 @@ family plus the SR-10 admission log**: each head mutation appends the
 producing occurrence's `AdmissionOrdinal` to the bindingKey's posting list;
 per-revision detail (target, cause, body tuple) hydrates from the admission
 log entry and the occurrence's state-readable body (full-body spine, owner
-ruling items 17/18). This chapter keeps **heads only**.
+ruling items 17/18). `KIND_BINDING_HIST` is a RAW_AUDIT family: its physical
+postings are never liveness-filtered or decremented, and each history result
+hydrates the producing occurrence's current/basis-pinned status separately.
+Withdrawal therefore grades a historical mutation but never hides its
+revision. This chapter keeps **heads only**.
 
 ```solidity
 // ---- named storage (illustrative Solidity; layout is the normative part) --
@@ -349,7 +353,7 @@ occKeyOf(x) = keccak256(abi.encode(
 This is two cold log SLOADs per CAS check. No `occKey -> EnvelopeId` reverse
 lookup exists or is needed. Every admission
 below also appends the producing `AdmissionOrdinal` to the bindingKey's
-`KIND_BINDING_HIST` posting list (Lane 5 — THE history, §2), rewrites
+`KIND_BINDING_HIST` RAW_AUDIT posting list (Lane 5 — THE history, §2), rewrites
 `heads[k]`, consumes one fresh `AdmissionOrdinal` (assigned per accepted
 occurrence in submission order, SR-10), and fires the Lane 5 hook
 `onBindingHeadChanged` — atomically with the whole envelope admission call.
@@ -475,10 +479,13 @@ error ErrWithdrawNotAuthor(bytes32 targetEnvelopeId, uint16 targetLeafIndex,
                            bytes32 envelopePrincipal, bytes32 targetPrincipal);
 error ErrWithdrawTargetKind(bytes32 targetEnvelopeId, uint16 targetLeafIndex);
                           // target is itself a Withdrawal/1 occurrence
-error ErrWithdrawTargetProof(bytes32 targetEnvelopeId);
-                          // pre-withdrawal header evidence missing/invalid (§4)
 error ErrReservedBitsNonzero(bytes32 bindingKey);
 ```
+
+`ErrWithdrawNotAuthor` is raised by Admission while creating the validated
+withdrawal context and bubbles through the shared Core ABI; `E_TARGET_EVIDENCE`
+owns missing/invalid target evidence. LibBinding defines no
+`ErrWithdrawTargetProof` and no evidence decoder.
 
 [REJECTED — removed per SR-15]: `ErrDuplicateOccurrence`,
 `ErrAlreadyWithdrawn`. Duplicates are idempotent no-ops at occurrence
@@ -557,16 +564,20 @@ PRE_WITHDRAWN) [PROPOSAL — SR-10's evidence mechanism; the leaked-envelope
 defense].** A Withdrawal may target an occKey whose overlay status is
 NEVER_ADMITTED — the case of a signed-but-leaked envelope its author wants
 dead before anyone admits it. Because the target envelope has never been
-seen, the author guard cannot be read from state; instead **the withdrawal
-admission call carries the target envelope's authenticated header (all
-signed header fields + signature, no bodies)**. Admission recomputes
-`EnvelopeId` from the presented header, verifies it equals the withdrawal
-body's `target.envelopeId`, verifies the header's `principalId` equals the
-withdrawer's authenticated principal (else `ErrWithdrawNotAuthor`), and sets
-the overlay to `PRE_WITHDRAWN` with `revokedAtOrdinal` = the withdrawal's
-ordinal. Missing or non-verifying header evidence reverts
-`ErrWithdrawTargetProof`. No head is touched (a never-admitted occurrence
-produced no head), and no count decrements (nothing was incremented).
+seen, the author guard cannot be read from state. The **authorship/admission
+owner alone** accepts and validates the exact `TargetEnvelopeEvidence` shape:
+target header, full RecordId vector, typed `AccountPrincipal`, and witness,
+with no bodies. It recomputes EnvelopeId, checks the target leaf range, binds
+the descriptor to the header Principal before verifying the witness, and
+performs the author comparison. This Binding module receives only the
+resulting typed `ValidatedWithdrawalTarget` context; it never accepts,
+decodes, or verifies opaque evidence bytes and defines no second evidence
+format. For a valid NEVER_ADMITTED target it sets `PRE_WITHDRAWN` with
+`revokedAtOrdinal` = the Withdrawal ordinal. No head is touched (a
+never-admitted occurrence produced no head), and no count decrements (nothing
+was incremented). Missing or invalid evidence already failed in Admission
+with `E_TARGET_EVIDENCE`; an author mismatch already failed with
+`ErrWithdrawNotAuthor`.
 `PRE_WITHDRAWN` permanently blocks later admission of that occKey (§3.4) —
 the evaluable author guard keeps this from being a griefing lever: only the
 target's own author can ever produce the proof.
@@ -842,6 +853,23 @@ ABI are both normative:
 ```solidity
 // ---------- internal library surface (called only by Admission) ----------
 library LibBinding {
+    // Admission-authenticated effect context. No witness/evidence bytes cross
+    // this seam. effectKind: 0 ordinary/no Binding effect, 1 Binding mutation,
+    // 2 Withdrawal (which is not a legal withdrawal target). bindingKey is
+    // nonzero only for effectKind 1; isCurrentHead was computed against the
+    // preflight snapshot. priorStatus/ordinals are the SR-10 overlay values.
+    struct ValidatedWithdrawalTarget {
+        bytes32 envelopeId;
+        uint16  leafIndex;
+        bytes32 principalId;
+        uint8   priorStatus;
+        uint64  priorOrdinal;
+        uint64  priorRevokedAtOrdinal;
+        uint8   effectKind;
+        bytes32 bindingKey;
+        bool    isCurrentHead;
+    }
+
     // Executes T1/T2/T5. Reverts ErrCas*, ErrRevisionGuard,
     // ErrReservedBitsNonzero. `pred*` fields carry the decoded
     // OPTION(OCCREF): predIsNone == true ⇔ explicit NONE (first write).
@@ -865,16 +893,13 @@ library LibBinding {
         uint64  admissionOrdinal
     ) internal returns (bytes32 bindingKey, uint32 newRevision);
 
-    // Executes T7/T8/T9 and pre-withdrawal (overlay PRE_WITHDRAWN).
-    // Reverts ErrWithdrawNotAuthor / ErrWithdrawTargetKind /
-    // ErrWithdrawTargetProof. Re-withdrawal of a terminal occKey is a no-op
-    // success (SR-15). `targetHeaderEvidence` is nonempty only on the
-    // pre-withdrawal path (§4): the target envelope's authenticated header,
-    // no bodies. Returns whether a head changed (for Lane 5).
+    // Executes T7/T8/T9 and pre-withdrawal (overlay PRE_WITHDRAWN) from the
+    // exact context already validated by Admission. Reverts only on a typed
+    // effect invariant such as targeting an admitted Withdrawal. Evidence,
+    // descriptor/witness validation, and author equality do not repeat here.
+    // Re-withdrawal of a terminal occKey is a no-op success (SR-15).
     function applyWithdrawal(
-        bytes32 withdrawingPrincipal,
-        bytes32 targetEnvelopeId, uint16 targetLeafIndex,
-        bytes   memory targetHeaderEvidence,
+        ValidatedWithdrawalTarget memory target,
         bytes32 wSrcEnvelopeId, uint16 wSrcLeafIndex,
         uint64  admissionOrdinal
     ) internal returns (bool headChanged, bytes32 bindingKey);
@@ -900,6 +925,8 @@ struct BindingHistoryEntry {   // hydrated from KIND_BINDING_HIST + the log
     uint64  admissionOrdinal;  // the posting's ordinal
     bytes32 envelopeId;        // producing OccurrenceRef.EnvelopeId (log slot A)
     uint16  leafIndex;         // producing OccurrenceRef.leafIndex (log slot B)
+    uint8   occurrenceStatus;  // ACTIVE | WITHDRAWN at the requested basis
+    uint64  revokedAtOrdinal;  // zero unless/while the occurrence is withdrawn
 }
 
 /// 1 cold SLOAD if UNSET or if only meta is needed; 2 SLOADs with targetRef.
@@ -922,12 +949,15 @@ function readHeadBatch(bytes32[] calldata bindingKeys)
 
 /// Paged history ascending from `fromRevision` (1-based), max `limit`
 /// entries, `limit` <= MAX_HISTORY_PAGE = 64 (named constant [PROPOSAL]).
-/// A paged fold over the bindingKey's KIND_BINDING_HIST postings with
-/// per-entry hydration from the admission log (THE history, §2); deep
+/// A direct page over the bindingKey's physical KIND_BINDING_HIST postings.
+/// Physical posting position `r - 1` is revision `r`; no liveness filter,
+/// decrement, or compaction may remove it. Each entry hydrates lifecycle
+/// status at the requested/current basis plus its reversible OccurrenceRef
+/// from the admission log (THE history, §2); deep
 /// hydration (targets, position tuple) is via the occurrence's
 /// state-readable body. completeness uses the shared SR-18b enum
 /// { UNKNOWN=0, COMPLETE=1, PARTIAL=2, UNSUPPORTED=3 }: COMPLETE when the
-/// page reached the current head, PARTIAL with resume-at nextRevision
+/// physical posting sequence is exhausted, PARTIAL with resume-at nextRevision
 /// otherwise; never UNKNOWN here — this is authoritative local state.
 function readHistory(bytes32 bindingKey, uint32 fromRevision, uint16 limit)
     external view returns (

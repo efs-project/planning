@@ -110,9 +110,11 @@ RealmDescriptor/1
      hint that MUST be re-verified)
      currentRevisionOrdinal  uint32
      finalityRuleKind        uint8     (§6.1 table)
+     finalityParam           uint32    (confirmation depth only; otherwise 0)
      upgradeAuthorityKind    uint8     (0=NONE/immutable, 1=PROXY_ADMIN_EOA,
                                         2=PROXY_ADMIN_CONTRACT, 3=GOVERNANCE,
                                         4-255 reserved)
+     declaredTxGasLimit      uint64    (genesis declaration; >= QR-5 floor)
 
   C. ADVISORY TRANSPORT HINTS (untrusted; MUST NOT enter any preimage;
      MUST NOT be treated as evidence)
@@ -123,7 +125,7 @@ RealmDescriptor/1
 Canonical descriptor bytes [PROPOSAL]: section A+B as
 `abi.encode(uint16 version=1, chainNamespace, chainReference, coreAddress,
 profileId, genesisCommitment, currentRevisionOrdinal, finalityRuleKind,
-upgradeAuthorityKind)`; section C appended as an ABI-encoded
+finalityParam, upgradeAuthorityKind, declaredTxGasLimit)`; section C appended as an ABI-encoded
 `(string[] rpcUrls, string displayName)` tail. The descriptor itself has no
 EFS identity; **RealmId is the identity** and is recomputable from section A
 alone. Signing or notarizing descriptors is application-level evidence, not a
@@ -159,8 +161,8 @@ DOM_PROFILE = keccak256("efs2/profile/1")
 
 profileId = keccak256(abi.encode(
     DOM_PROFILE,
-    uint16 protocolMajor,                  // B0 = 0 (pre-freeze)
-    uint16 protocolMinor,
+    uint16 protocolMajor,                  // B0 = 0
+    uint16 protocolMinor,                  // B0 = 0; pinned, not open
     bytes32 codexConstantsHash))           // owned by the encoding chapter
 ```
 [PROPOSAL — regenerated field-for-field under SR-1. Per SR-16 the encoding
@@ -170,7 +172,42 @@ the state-readable `codexConstants()`; this chapter consumes both here, in
 §2.4, and in §8.2, and requires that the hash cover every constant named in
 this chapter. DEPENDS-ON: encoding chapter (SR-16).]
 
+For B0, `protocolMajor = 0` and `protocolMinor = 0` are Codex constants.
+Changing either, or any constant covered by `codexConstantsHash`, produces a
+different `profileId`; a deployment cannot describe the same bytes as a
+different minor profile.
+
 ### 2.4 genesisCommitment — exact formula
+
+`InitConfig/1` is the complete deployment-selected input to the genesis hash.
+It is one ordered, fixed-width ABI tuple; there is no map, optional tail, or
+implementation-private hashing convention:
+
+```text
+initConfigBytes = abi.encode(
+    uint16 initConfigVersion,       // MUST equal 1
+    uint8  finalityRuleKind,        // §6.1; 0..3
+    uint32 finalityParam,           // >0 only for CONFIRMATION_DEPTH;
+                                    // MUST be 0 for every other kind
+    uint8  upgradeAuthorityKind,    // §2.1; 0..3
+    uint64 declaredTxGasLimit,      // MUST be >= REALM_MIN_TX_GAS
+    bytes32 initialPolicyCommitment)// MUST be nonzero; revision 1 policy
+
+initConfigHash = keccak256(initConfigBytes)
+```
+
+The split is normative. Protocol/version values, domain strings, codec and
+index grammars, `REALM_MIN_TX_GAS`, `POLICY_GAS_MAX`, and every other
+implementation-independent bound live in `codexConstantsBytes` and therefore
+`codexConstantsHash`. Only the six deployment-selected values above live in
+`InitConfig/1`. An implementation MAY take additional constructor plumbing
+(for example the address used by its already-declared proxy authority
+pattern), but such plumbing is not EFS semantic configuration, may not change
+the tuple, and receives no new Core administration power here.
+
+Initialization rejects an unknown kind, a non-canonical `finalityParam`, a gas
+declaration below the B0 floor, a zero policy commitment, or any differently
+encoded tuple. Revision 1 uses `initialPolicyCommitment` exactly.
 
 ```text
 DOM_REALM_GENESIS = keccak256("efs2/realmgenesis/1")
@@ -182,7 +219,7 @@ genesisCommitment = keccak256(abi.encode(
                               // initialize() block
     uint48  deployBlock,      // block.number of initialize()
     bytes32 codexConstantsHash,
-    bytes32 initConfigHash))  // hash of initialize() parameters
+    bytes32 initConfigHash))  // keccak256(exact InitConfig/1 tuple above)
 ```
 [PROPOSAL — regenerated field-for-field under SR-1.]
 Core computes `genesisCommitment` and `RealmId` once inside
@@ -216,7 +253,8 @@ encoding chapter's `(DOM_REALMREV, realmId, uint256 generation,
 keccak256(revisionDescriptorBytes))` row — its `generation` word is
 subsumed by `revisionOrdinal` inside the descriptor.]
 Revision 1 is written by `initialize()` with
-`implementationCodehash = deployCodehash`.
+`implementationCodehash = deployCodehash` and
+`policyCommitment = InitConfig.initialPolicyCommitment`.
 
 ---
 
@@ -258,9 +296,11 @@ C-5 REVISION  revisionCount >= 1; activatedAtBlock strictly increasing;
               EXTCODEHASH(implementation account per declared
               upgradeAuthorityKind pattern).                  (A-2/A-6 partial)
 C-6 SEMANTIC  if admissionCount > 0: fetch one admitted envelope's canonical
-              bytes, recompute EnvelopeId and each leaf RecordId, and compare
+              unsigned header+RecordId bytes plus each selected Record body;
+              recompute EnvelopeId and each leaf RecordId, and compare
               with the state mappings (§8). A canonicalization lookalike
-              fails here even with a copied genesis struct.   (A-2/A-3)
+              fails here even with a copied genesis struct. This checks
+              semantic identity, not the unstored main witness. (A-2/A-3)
 C-7 HONESTY   all of C-1..C-6 are only as strong as the endpoint's answers.
               A client either (a) cross-checks >= 2 independent endpoints,
               (b) verifies eth_getProof against a block hash it trusts, or
@@ -324,7 +364,8 @@ individual items cite their sources]:
   precompile (EIP-7951) is an optional capability flagged in the profile, not
   the floor. [PROPOSAL; EIP-7951 live on L1 since Fusaka is a standards FACT
   — VERIFIED via STANDARDS lane finding 8]
-- **QR-5 GAS-PROFILE.** The Realm's per-transaction gas ceiling is at least
+- **QR-5 GAS-PROFILE.** `InitConfig.declaredTxGasLimit` and the Realm's
+  enforced per-transaction gas ceiling are each at least
   `REALM_MIN_TX_GAS = 16,777,216` (2^24). This is exactly the EIP-7825 cap,
   live on L1 since Fusaka 2025-12-03 [standards FACT — VERIFIED via task text
   and STANDARDS lane finding 0]. **The cap binds**: every contract-callable
@@ -477,8 +518,8 @@ EnvelopeMeta:
   principalId       bytes32
   envelopeOrdinal   u40
   leafCount         u16
-  body-carriage metadata sufficient to return the persisted signed envelope
-  bytes and full ordered RecordId vector
+  carriage metadata sufficient to return the canonical unsigned envelope
+  `abi.encode(EnvelopeHeader, fullRecordIds)`
 
 AdmissionBatchMeta (one packed word):
   firstOrdinal    bits [0..47]     u48
@@ -513,11 +554,21 @@ second lifecycle store. The log is reversible: hydration reads the full
 `EnvelopeId` and `leafIndex`, then recomputes `occKey`; neither lifecycle data
 nor a hash-only occurrence reference appears in the log.
 
-The immutable signed envelope bytes and full RecordId vector are persisted
-once. `envelopeOrdinal` is assigned only when the first occurrence of that
+The immutable canonical unsigned envelope bytes — exact header plus full
+RecordId vector, excluding witnesses, bodies, target evidence, and consent —
+are persisted once in the authorship owner's lossless header/vector layout.
+`envelopeOrdinal` is assigned only when the first occurrence of that
 envelope is accepted and remains stable across staged admissions. Envelope
 metadata deliberately owns no singular receipt status, revision, block, or
 authority basis.
+
+The accepting `AdmissionBatch` and logical receipt are immutable historical
+validation evidence. Main-envelope witnesses are not stored, so Realm state
+does not promise replay of historic signature or ERC-1271 validation. A reader
+uses the receipt's recorded verifier/code basis for historical authorship
+grade; calling present authority cannot reinterpret that verdict. The bounded
+pre-withdrawal carrier below is the deliberate exception for a never-admitted
+target, whose proof must remain reconstructable despite having no receipt.
 
 Each single-envelope `publish` call that accepts at least one new occurrence
 appends one batch record. Its new ordinals are contiguous, and append-only
@@ -846,7 +897,10 @@ WITHDRAWN/PRE_WITHDRAWN -> reject any admission; no resurrection
   evidence reverts; a bare target ID never sets PRE_WITHDRAWN when no target
   header is in state. On success, the accepted Withdrawal's ordinal retains
   the bounded canonical ABI re-encoding of the validated evidence and the
-  target's `revokedAtOrdinal` points to it.
+  target's `revokedAtOrdinal` points to it. Admission then passes only the
+  Binding owner's typed `ValidatedWithdrawalTarget` (target Principal,
+  lifecycle/effect/head context) into `LibBinding`; no opaque evidence bytes,
+  peer proof grammar, or second author check crosses that seam.
 - **Terminal withdrawal retry.** A different author-valid Withdrawal targeting
   WITHDRAWN/PRE_WITHDRAWN is accepted but its target effect is a no-op. For a
   PRE_WITHDRAWN target with no persisted Envelope header, preflight loads the
@@ -943,12 +997,13 @@ candidate core-architecture-candidate.md:203-205]. The receipt records
 finalityRuleKind (uint8):
   0 = NONE_DECLARED          // qualifying only for evidence-grade use
   1 = L1_FINALIZED_BATCH     // final when included in an L1-finalized batch
-  2 = CONFIRMATION_DEPTH(k)  // final at depth k; k in policyCommitment params
+  2 = CONFIRMATION_DEPTH(k)  // final at depth k; k = InitConfig.finalityParam
   3 = SEQUENCER_SOFT         // soft finality only; MUST be surfaced as such
   4-255 reserved
 ```
 [PROPOSAL — table; the rule is Realm-declared fact, the *choice to rely on
-it* is always the consumer's]
+it* is always the consumer's]. `finalityParam` MUST be nonzero for kind 2 and
+MUST be zero for kinds 0, 1, and 3, so the same rule has one genesis spelling.
 
 ### 6.2 FinalityObservation — exact ABI
 
@@ -1112,20 +1167,23 @@ owner-rulings.md:15,67-68].
 
 ```text
 W-0  BOOTSTRAP   verify descriptor per C-1..C-7 (§3). Abort on any failure.
-W-1  GENESIS     read genesisFacts(): chainRef, profileId, codexConstantsHash,
-                 deployBlock, deployCodehash, initConfigHash, realmId.
-                 Recompute genesisCommitment and RealmId; compare.
+W-1  GENESIS     read genesisFacts(): chainRef, protocolMajor/minor,
+                 codexConstantsHash, every ordered InitConfig/1 field,
+                 deployBlock, deployCodehash, profileId, initConfigHash,
+                 genesisCommitment, and realmId. Re-encode InitConfig/1,
+                 recompute all four hashes/IDs, and compare.
 W-2  REVISIONS   n := revisionCount(); for i in 1..n read revisionAt(i);
                  require revisionOrdinal and activatedAtBlock strictly
                  increase, firstAdmissionOrdinal is nondecreasing, and each
                  boundary lies in 1..admissionCount+1. Recompute the exact
                  descriptor and every RealmRevisionId; the write rule was
                  admissionCount-at-activation + 1.
-W-3  ENVELOPES   enumerate envelopeOrdinal 1..envelopeCount; fetch persisted
-                 signed envelope bytes and the full ordered RecordId vector.
-                 Recompute the EIP-712 digest and EnvelopeId. Fetch the
-                 PrincipalRecord, recompute PrincipalId, and require linkage
-                 to the signed header and EnvelopeMeta.
+W-3  ENVELOPES   enumerate envelopeOrdinal 1..envelopeCount; fetch the exact
+                 persisted canonical unsigned bytes
+                 `abi.encode(EnvelopeHeader, fullRecordIds)`. Recompute the
+                 EIP-712 digest and EnvelopeId. Fetch the PrincipalRecord,
+                 recompute PrincipalId, and require linkage to the header and
+                 EnvelopeMeta. Do not claim to replay the unstored main witness.
 W-4  ADMISSIONS  for ord in 1..admissionCount: read logSlotA/logSlotB; hydrate
                  the exact OccurrenceRef; recompute occKey; require
                  occStatus.ordinal == ord and status in {ACTIVE, WITHDRAWN}.
@@ -1133,7 +1191,9 @@ W-4  ADMISSIONS  for ord in 1..admissionCount: read logSlotA/logSlotB; hydrate
                  maps and compare them with the hydrated Record and envelope.
                  Find the admitting batch from its explicit firstOrdinal
                  boundary and reconstruct the logical receipt using that
-                 batch's block, revision, AuthorityBasisWord, and codehash.
+                 batch's block, revision, AuthorityBasisWord, and codehash;
+                 that immutable receipt is the historical validation evidence,
+                 not a promise to re-run the unstored witness.
 W-5  RECORDS     hydrate the selected leaf body; recompute RecordId and compare
                  with envelope.recordIds[leafIndex]. Process accepted ordinals
                  in order, not envelope-leaf order.
@@ -1147,8 +1207,8 @@ W-7  EFFECTS     replay exactly the Binding-set, Binding-tombstone, and
                  NEVER_ADMITTED->PRE_WITHDRAWN overlay results. For each
                  evidence-backed T4, read preWithdrawalEvidenceAt(ord), decode
                  the exact TargetEnvelopeEvidence, recompute target EnvelopeId
-                 and leaf range, assert descriptor equality, replay the target
-                 witness/author check at the retained admission basis, and
+                 and leaf range, assert descriptor equality, replay the retained
+                 target witness/author check at its recorded basis, and
                  require target.revokedAtOrdinal == ord. Empty evidence is
                  valid only when the target header was already state-readable
                  or the target effect was terminal no-op; there is no peer
@@ -1199,6 +1259,8 @@ struct HydratedItem {
   uint16 leafIndex;
   bytes32 recordId;
   bytes32 principalId;
+  uint8 occurrenceStatus;
+  uint64 revokedAtOrdinal;
 }
 
 struct IndexedReceiptView {           // extended index view, not a second receipt
@@ -1233,6 +1295,8 @@ struct BindingHistoryEntry {
   uint64 admissionOrdinal;
   bytes32 envelopeId;
   uint16 leafIndex;
+  uint8 occurrenceStatus;
+  uint64 revokedAtOrdinal;
 }
 
 struct SelectSpec {
@@ -1242,12 +1306,37 @@ struct SelectSpec {
   uint8 scoreFieldOrdinal;
 }
 
+struct GenesisFactsView {
+  // Chain/profile preimage facts, in canonical order.
+  bytes8 chainNamespace;
+  bytes32 chainReference;
+  address core;
+  uint16 protocolMajor;               // B0 = 0
+  uint16 protocolMinor;               // B0 = 0
+  bytes32 codexConstantsHash;
+
+  // Exact InitConfig/1 tuple, in canonical order.
+  uint16 initConfigVersion;            // = 1
+  uint8 finalityRuleKind;
+  uint32 finalityParam;
+  uint8 upgradeAuthorityKind;
+  uint64 declaredTxGasLimit;
+  bytes32 initialPolicyCommitment;
+
+  // Remaining genesis preimages and recomputed outputs.
+  uint48 deployBlock;
+  bytes32 deployCodehash;
+  bytes32 initConfigHash;
+  bytes32 profileId;
+  bytes32 genesisCommitment;
+  bytes32 realmId_;
+}
+
 function realmId() external view returns (bytes32);
-function genesisFacts() external view returns (
-  bytes8 chainNamespace, bytes32 chainReference, address core,
-  bytes32 profileId, bytes32 codexConstantsHash,
-  uint48 deployBlock, bytes32 deployCodehash, bytes32 initConfigHash,
-  bytes32 genesisCommitment, bytes32 realmId_);
+/// Returns every field needed to re-encode InitConfig/1 and recompute
+/// initConfigHash, profileId, genesisCommitment, and RealmId; no hidden
+/// implementation config is permitted to enter those formulas.
+function genesisFacts() external view returns (GenesisFactsView memory);
 function codexConstants() external view returns (bytes memory); // encoding ch.
 function revisionCount() external view returns (uint32);
 function revisionAt(uint32 ordinal) external view returns (
@@ -1259,7 +1348,11 @@ function currentRevision() external view returns (
 function admissionCount() external view returns (uint64);
 function envelopeCount() external view returns (uint40);
 function envelopeIdByOrdinal(uint40 ordinal) external view returns (bytes32);
-function getEnvelopeBytes(bytes32 envelopeId) external view returns (bytes memory);
+/// Exact canonical unsigned bytes `abi.encode(EnvelopeHeader, fullRecordIds)`.
+/// Excludes the unstored main witness, bodies, target evidence, intent,
+/// submitter/payer, and receipt material.
+function getEnvelopeBytes(bytes32 envelopeId)
+  external view returns (bytes memory canonicalUnsignedEnvelope);
 function envelopeInfo(bytes32 envelopeId) external view returns (
   uint40 envelopeOrdinal, bytes32 principalId, uint16 leafCount);
 function getPrincipalRecord(bytes32 principalId) external view
@@ -1298,7 +1391,7 @@ function getTypeSchema(bytes32 typeSchemaId) external view returns (
 function getRecord(bytes32 recordId) external view returns (
   bytes32 typeSchemaId, bytes memory canonicalBody, uint64 firstAdmitOrdinal);
 function getEnvelope(bytes32 envelopeId) external view returns (
-  bytes memory canonicalEnvelope, uint40 envelopeOrdinal,
+  bytes memory canonicalUnsignedEnvelope, uint40 envelopeOrdinal,
   uint16 leafCount, bytes32 principalId, uint64 authEpoch);
 function getOccurrence(bytes32 envelopeId, uint16 leafIndex) external view returns (
   uint8 status, uint64 ordinal, bytes32 recordId, bytes32 typeSchemaId,
@@ -1338,6 +1431,9 @@ function selectBestLocator(bytes32 targetKey, SelectSpec calldata spec,
   external view returns (
     uint64 bestOrdinal, uint64 bestScore, uint16 postingsVisited,
     uint256 nextCursor, Completeness completeness);
+// COMPLETE/PARTIAL with no eligible winner returns bestOrdinal=0,bestScore=0.
+// Winner presence is tracked independently; a real candidate score of zero is
+// valid and returns its nonzero ordinal.
 
 // IBindingRead/1 — byte-identical current Binding-owner signatures.
 function readHead(bytes32 bindingKey) external view
@@ -1351,6 +1447,8 @@ function readHistory(bytes32 bindingKey, uint32 fromRevision, uint16 limit)
   external view returns (
     BindingHistoryEntry[] memory entries, uint32 nextRevision,
     uint8 completeness);
+// Direct physical KIND_BINDING_HIST audit sequence: posting position r-1 is
+// revision r. Withdrawal never filters/decrements it; status is hydrated.
 function readOccurrenceStatus(bytes32 envelopeId, uint16 leafIndex)
   external view returns (
     uint8 status, uint64 ordinal, uint64 revokedAtOrdinal);

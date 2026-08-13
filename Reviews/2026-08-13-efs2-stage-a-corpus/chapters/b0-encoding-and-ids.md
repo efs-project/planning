@@ -181,12 +181,16 @@ codexConstantsBytes :=
   u16 mcVersion                  // = MC_VERSION = 1
   ---- closed domain table (§1.3): active id/key/slot/tag rows only, table order ----
   u16 coreDomainCount ‖ coreDomainCount × ( u16 len ‖ asciiBytes )
-  ---- named numeric constants (§2.6 incl. REF_INSTANCES_MAX, plus SENTINEL_BOUND = 2^16), table order ----
+  ---- named numeric constants (§2.6 incl. REF_INSTANCES_MAX, plus
+       PROTOCOL_MAJOR=0, PROTOCOL_MINOR=0, SENTINEL_BOUND=2^16,
+       REALM_MIN_TX_GAS=16777216, POLICY_GAS_MAX=200000), table order ----
   u16 constCount  ‖ constCount  × ( u16 nameLen ‖ asciiName ‖ u64 value )
   ---- digest algorithm table (§2.4), ascending algCode ----
   u16 algCount    ‖ algCount    × ( u16 algCode ‖ u16 digestLen ‖ u16 nameLen ‖ asciiName )
-  ---- closed code tables: field kinds (§2.2), error codes (§2.7), constraint kinds (§3.1) ----
+  ---- closed code tables: field kinds (§2.2), reference selectors (§3.1),
+       error codes (§2.7), constraint kinds (§3.1) ----
   u16 kindCount   ‖ kindCount   × ( u8 code ‖ u16 nameLen ‖ asciiName )
+  u16 selCount    ‖ selCount    × ( u8 code ‖ u16 nameLen ‖ asciiName )
   u16 errCount    ‖ errCount    × ( u16 code ‖ u16 nameLen ‖ asciiName )
   u16 cstrCount   ‖ cstrCount   × ( u8 code ‖ u16 nameLen ‖ asciiName )
   ---- derived intrinsic ids: kernel-known Types (SR-11) + intrinsic schemas (§3.4 meta-Type, §6), name order ----
@@ -214,6 +218,12 @@ serialization is pinned here, the byte values mint in Stage B (Stage A ships no 
 vectors). State-readability: Core exposes `codexConstants()` returning the exact bytes and
 `codexConstantsHash()` returning the hash (interface in "Interfaces exposed"); a reader can
 therefore re-derive the hash the realm chapter's `profileId` commits to from state alone.
+`PROTOCOL_MAJOR` and `PROTOCOL_MINOR` are profile constants, not InitConfig
+fields; B0 pins both to zero. Likewise the Realm gas floor and policy-call cap
+are protocol constants. A deployment-selected transaction ceiling, finality
+rule/parameter, upgrade-authority kind, and initial policy commitment belong
+only to the Realm owner's fixed-width `InitConfig/1` and never duplicate into
+this artifact.
 
 ---
 
@@ -522,7 +532,8 @@ decodeField(S, desc, body, cur, depth, refCount):
 `need(n)` returns `ERR_TRUNCATED` if fewer than `n` bytes remain. Closed error codes:
 `0 OK, 1 ERR_TRAILING, 2 ERR_TRUNCATED, 3 ERR_BOUND, 4 ERR_UTF8, 5 ERR_MAP_ORDER,
 6 ERR_OPTION_FLAG, 7 ERR_BOOL, 8 ERR_SENTINEL_IN_BODY, 9 ERR_DIGEST, 11 ERR_DEPTH,
-12 ERR_COUNT, 13 ERR_SCHEMA_MALFORMED, 14 ERR_CONSTRAINT, 15 ERR_REF_BUDGET`. Constraint
+12 ERR_COUNT, 13 ERR_SCHEMA_MALFORMED, 14 ERR_CONSTRAINT, 15 ERR_REF_BUDGET,
+16 ERR_ROLE_SELECTOR`. Constraint
 checks (§3.5) run after the structural walk. The runtime `refCount` guard is
 defense-in-depth under the schema-time bound in §3.1 and makes
 `REF_INSTANCES_MAX = 16` an explicit per-leaf structural validation rule,
@@ -609,32 +620,69 @@ ReferenceRole :=
   u8      targetClass                // 1=RECORD 2=TYPESCHEMA 3=PRINCIPAL 4=OCCURRENCE 5=OBJECT
   bytes32 expectedType               // 0 = ANY; SELF / GROUP_REF(k) sentinels (§5); or exact TypeSchemaId
   u8      fieldIdx                   // top-level field carrying the role
+  u8      selectorKind               // 0=DIRECT, 1=ARRAY_STRUCT_MEMBER
+  u8      memberIdx                  // MBZ for DIRECT; STRUCT member for kind 1
 ```
 
-Binding rules (checked by `validateTypeSchemaGroup`, else `ERR_SCHEMA_MALFORMED`): the bound
-field's kind must be `REF`, `OCCREF`, `ARRAY(REF)`, `OPTION(REF)`, or
-`OPTION(OCCREF)`. Direct `OCCREF` and `OPTION(OCCREF)` are legal only with
-`targetClass = OCCURRENCE`; this correction does not make any other
-`OPTION(inner)` shape role-eligible. Every field with one of those supported
-role-bearing shapes is bound by exactly one role; every role binds exactly one
-field; `expectedType` is meaningful only for
-`targetClass ∈ {RECORD, OBJECT}`; bound fields satisfy extraction rule E1. `OBJECT` means "a
-RecordId of an `ObjectGenesis/1`-charter Record" — same width, distinct declared intent.
+The final three bytes (`fieldIdx ‖ selectorKind ‖ memberIdx`) are the complete,
+byte-exact **ReferencePath/1** grammar. It deliberately
+expresses only zero or one container step; there is no arbitrary field-path bytecode
+and no recursive selector. Binding rules are checked by
+`validateTypeSchemaGroup`; a selector/shape mismatch returns the typed
+`ERR_ROLE_SELECTOR` rather than being accepted as an unreadable role:
+
+- `DIRECT (0)`: `memberIdx == 0`. The top-level field is exactly `REF`,
+  `OCCREF`, `ARRAY(REF)`, `OPTION(REF)`, or `OPTION(OCCREF)`.
+- `ARRAY_STRUCT_MEMBER (1)`: the top-level field is exactly
+  `ARRAY(maxCount, STRUCT(members))`; `memberIdx < memberCount`; and the selected
+  member is exactly `REF`, `OCCREF`, `OPTION(REF)`, or `OPTION(OCCREF)`.
+  The extractor walks the bounded outer array, decodes each whole STRUCT in
+  declaration order, and emits only the selected member. A selected member may
+  not itself be an ARRAY, STRUCT, MAP, or another selector container.
+- Any other `selectorKind`, a nonzero DIRECT `memberIdx`, or any deeper/nonnamed
+  reference position is invalid. Every runtime `REF`/`OCCREF` leaf in a valid
+  schema is covered by exactly one ReferenceRole under one of these two shapes;
+  schemas containing an unbound or multiply-bound reference leaf reject.
+
+Direct or selected `OCCREF` / `OPTION(OCCREF)` shapes are legal only with
+`targetClass = OCCURRENCE`. `expectedType` is meaningful only for
+`targetClass ∈ {RECORD, OBJECT}`. The containing field satisfies extraction
+rule E1. `OBJECT` means "a RecordId of an `ObjectGenesis/1`-charter Record" —
+same width, distinct declared intent. The narrow nested selector exists for
+generic repeated structs such as `ArtifactClosure/1.members[*].content`; normal
+roles remain DIRECT.
 
 **REF budget (SR-18e), structural validation bound.** [PROPOSAL — pinned by SR-18e]
-Σ over role-bound fields of (1 for
-`REF`/`OCCREF`/`OPTION(REF)`/`OPTION(OCCREF)`; the declared `maxCount` for
-`ARRAY(REF)`) ≤ `REF_INSTANCES_MAX = 16` per schema — checked by `validateTypeSchemaGroup`
-with typed error `ERR_REF_BUDGET` (code 15). Because widths and counts are schema-declared,
-this bounds the TOTAL reference instances any legal leaf can carry, ARRAY(REF) elements
-included, at registration time. The schema-time maximum for either supported
-OPTION reference shape is one; at body-validation/extraction time absent contributes zero
-and present contributes one. Rationale: every reference instance costs mandatory index
-postings (backlink fan-out); the bound makes per-leaf index fan-out a schema-time constant,
-so admission gas stays bounded by construction and backlink completeness holds — without it,
-one legal `ARRAY(REF, maxCount = 1,024)` field implies ≈ 2,000+ posting appends ≈ 27.5M gas,
-over the EIP-7825 cap, and the index chapter's F_MAX arithmetic collapses (red-team
-derivation, VERIFIED).
+`validateTypeSchemaGroup` computes `maxRefInstances(desc)` over the complete
+descriptor tree: `REF`/`OCCREF = 1`; `OPTION(x) = maxRefInstances(x)`;
+`ARRAY(n,x) = n·maxRefInstances(x)`; `STRUCT = Σ members`; and
+`MAP(n,k,v) = n·(maxRefInstances(k)+maxRefInstances(v))`. The sum over all
+top-level fields MUST be ≤ `REF_INSTANCES_MAX = 16`, else
+`ERR_REF_BUDGET` (code 15). Role coverage above then ensures every counted
+runtime reference also has exactly one index meaning. For
+`ARRAY_STRUCT_MEMBER`, the selected member contributes the outer
+`array.maxCount` (or zero-to-that maximum for an OPTION member); it does not
+receive a second independent budget. Because widths and counts are
+schema-declared, this bounds the TOTAL reference instances any legal leaf can
+carry at registration time. At body validation/extraction, absent OPTIONs
+contribute zero and present OPTIONs one per containing element. Rationale: every
+reference instance costs mandatory index postings; the bound makes per-leaf
+fan-out a schema-time constant and keeps backlink completeness reconstructable.
+Without it, one legal `ARRAY(REF, maxCount = 1,024)` implies ≈2,000+ posting
+appends and exceeds the EIP-7825 cap.
+
+**Reference extraction (exact).** `extractRole(schema, body, roleId)` first
+performs the ordinary structural walk, then executes the registered selector:
+DIRECT decodes the one named top-level field and emits its zero, one, or
+bounded-array values. ARRAY_STRUCT_MEMBER reads the top-level `u16` count,
+requires it within the declared maximum, walks every member of every STRUCT
+element using the schema-derived decoder, and emits only the selected member's
+zero-or-one value for each element. Output order is array order. The walk stops
+on the first codec error and can emit at most `REF_INSTANCES_MAX` values. No
+submitted offset, path length, nested selector, or runtime-selected member is
+accepted; all offsets and skips derive from the immutable schema. A selector
+whose registered shape no longer matches its descriptor is a Realm conformance
+failure, not an empty result.
 
 ```
 IndexSpec :=
@@ -745,6 +793,16 @@ with no author, no Occurrence, and its own write path. [REJECTED — it forked t
 spine: a registered-but-never-instantiated schema would be invisible to the reconstruction
 walk, schema enumeration would need a side ABI, and SR-12's one-entrypoint pin would need an
 exception. One uniform state-readable spine wins.]
+
+**ResolutionPlan/1 body seam (closed).** The contract Lens Type has exactly one
+field, `frame BYTES(maxLen = 4,192)`, and no ReferenceRoles or IndexSpecs. MC/1
+therefore defines its canonical body byte-for-byte as
+`u16(frameLen) ‖ frame`, where the two-byte length is big-endian and
+`frameLen = 96 + 64·N` for the Lens chapter's valid frame. The maximum
+canonical body is 4,194 bytes, within `MAX_BODY_BYTES`. `PlanId` remains the
+ordinary RecordId over this complete canonical body; the Lens parser begins at
+body offset 2 after checking the MC/1 length. There is no opaque-body exception,
+parallel plan encoding, or open reconciliation seam. [PROPOSAL]
 
 ### 3.5 Validation tiers recap
 
@@ -1174,7 +1232,14 @@ memory-level evidence, PLAUSIBLE):
    absent/present extraction yields zero/one OccurrenceRefs and consumes
    zero/one runtime REF budget; `OPTION(OCCREF)` under any other targetClass
    and any newly role-bound `OPTION(inner)` shape reject
-   `ERR_SCHEMA_MALFORMED`; REF-budget rejection (`ERR_REF_BUDGET`, SR-18e);
+   `ERR_SCHEMA_MALFORMED`; DIRECT accepts exactly its listed zero-step shapes
+   and rejects nonzero memberIdx; ARRAY_STRUCT_MEMBER accepts one bounded
+   ARRAY(STRUCT) selector and extracts its selected REF/OCCREF/OPTION member in
+   element order; out-of-range/non-reference member, nested selected
+   container, second-depth request, unknown selector code, unbound reference,
+   and multiply-bound reference reject `ERR_ROLE_SELECTOR`; a 16-member
+   ArtifactClosure-shaped selector succeeds and a 17-instance schema rejects
+   `ERR_REF_BUDGET` (SR-18e);
    the H-GROUPCAP pair (largest-fitting group; nominal-max group deterministic rejection).
 5. Axis-8 pair: `T-CONV`, `T-QUAL` (§8).
 6. RecordId: same body two Types ⇒ different ids; same Type byte-different bodies ⇒ different
@@ -1200,6 +1265,10 @@ memory-level evidence, PLAUSIBLE):
     serialization; H-DOMTABLE domain-registry/class/scope sweep, including proof that
     non-Core classes are absent from the Core hash and present in the corpus manifest
     (§1.3).
+14. ResolutionPlan/1 seam: canonical bodies at N=0, 1, and 64 equal
+    `u16(frameLen) ‖ frame`; Plan parsing starts at offset 2; wrong/mismatched
+    length prefix, trailing byte, `frameLen > 4,192`, a second field, or a
+    reference/index declaration rejects; `MAX` body length is exactly 4,194.
 
 ---
 
@@ -1226,10 +1295,11 @@ library EfsCodec {
     function extractWord(bytes calldata schemaBlob, bytes calldata body, uint8 fieldIdx)
         internal pure returns (bytes32 value, bool ok);            // SCALAR_EQ/DIGEST_EQ extraction
     function extractRefs(bytes calldata schemaBlob, bytes calldata body, uint8 roleId)
-        internal pure returns (bytes32[] memory targets);          // REF / ARRAY(REF) / OPTION(REF)
+        internal pure returns (bytes32[] memory targets);          // DIRECT or ARRAY_STRUCT_MEMBER;
+                                                                   // at most REF_INSTANCES_MAX
     function extractOccurrenceRefs(
         bytes calldata schemaBlob, bytes calldata body, uint8 roleId
-    ) internal pure returns (OccurrenceRefValue[] memory targets); // OCCREF / OPTION(OCCREF)
+    ) internal pure returns (OccurrenceRefValue[] memory targets); // either selector; full 34-byte refs
     function validateTypeSchemaGroup(bytes calldata groupBytes)
         internal pure returns (uint16 errCode);                    // incl. E1/R1–R3 + SR-18e REF budget
 }
@@ -1334,14 +1404,13 @@ seam §9 (`IEasProjectionSeam`); axis-8 vectors `T-CONV`/`T-QUAL` pin whichever 
    pinning vectors.
 9. Whether the closure-manifest profile adopts SSZ merkleization for partial proofs —
    content/fixtures lane closes; only DIGEST + bounded ARRAY seams are consumed from here.
-10. IndexSpec grammar reconciliation (red-team lane, unpinned by SR-1..SR-18): this
-    chapter's 2-byte IndexSpec (§3.1, with DIGEST_EQ) vs the index chapter's 8-byte form
-    (SCALAR_EQ/REF_EQ/BACKLINK/COMPOUND, no DIGEST_EQ), and per-Type DIGEST_EQ vs the global
-    `DOM_VK_DIGEST` lookup family (whether ReferenceRole `targetClass` gains
-    BYTEDIGEST/ADDRESS classes). Because IndexSpec bytes sit inside the TypeSchemaBlob and
-    hence inside TypeSchemaId, Type golden vectors BLOCK on this seam — flagged to the
-    synthesizer for the next pin round; the SR-18a algCode width is already resolved and is
-    not blocked.
+10. ~~IndexSpec grammar reconciliation~~ — **CLOSED**: the exact grammar is
+    the 2-byte `u8 indexKind ‖ u8 target` form in §3.1 and the index chapter
+    §4.1: `SCALAR_EQ`, `REF_BACKLINK`, `DIGEST_EQ`. The retired 8-byte
+    `REF_EQ/BACKLINK/COMPOUND` form must not mint. `DIGEST_EQ` uses the global
+    `DOM_VK_DIGEST` family and the one u16 algCode table; no BYTEDIGEST or
+    ADDRESS ReferenceRole target class is added. Type golden vectors are no
+    longer blocked on this seam.
 11. EFS-assigned algCode range (`0xef00–0xefff`, §2.4) — verify unassigned against the
     multihash registry snapshot pinned at the freeze ceremony; move the code before genesis
     if collided.
