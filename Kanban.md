@@ -24,6 +24,9 @@ kanban-plugin: board
 
 ## In Flight
 
+- [ ] **Act on the 2026-08-13 Claude evidence round** — 5 read-only research lanes, record at [[Reviews/2026-08-13-claude-evidence-round/README]]. Nothing here is a ruling; it is evidence plus **seven surfaced owner questions**. Load-bearing for three live threads: **efsv2/venue** (never put durable data in blobs; no venue clears a 30-day exit window; EIP-8037 reprices storage ~4.9×; the L1-pointer question reopens on discovery-and-tombstone grounds), **Arcade** (falsification returned 0 EFS-specific benefits twice by independent methods, plus a possible §6 STOP-trigger — scoped to the proposed catalog, so it may be a catalog problem), and **client/runner** (Safari has no process isolation for opaque sandboxed iframes and throttles them to ~22fps; the `allowfullscreen` vs `allow="fullscreen"` trap; sandbox does not stop network egress). Route each finding to its owning thread rather than acting here. #repo/planning #repo/contracts #repo/client #kind/task
+  — @pm surfaced 2026-08-13; awaiting @james on the seven questions
+
 - [ ] **Grants — research + tracker + submissions** (@grants) — funder-landscape research + a lightweight operational tracker in `Grants/` (README/programs/proposals/packet/research-log), + preparing James's actual submissions. First external anchor = the [EFS KarmaHQ page](https://www.karmahq.xyz/project/ethereum-file-system/about); first proposal row = Octant (rejected, competitive — keep the row + feedback). Tracking detail lives in `Grants/proposals.md` (not mirrored here); this card is just the swarm-visible pointer to the active work. James-actionable items (Karma cleanup: no team listed, funds raised = 0, bare "Path to Success"; program picks; submission sign-offs) route to [[Owner-Inbox]] only when they're real forks/deadlines. #repo/planning #kind/ops
   — @grants, structure blessed by @pm 2026-07-05, expires 2026-07-30
 
