@@ -362,12 +362,18 @@ aesthetic preference.
 
 ## Worked example: Arcade without Arcade Core code
 
+This is the **post-verification release lane**. Before exact closure is known,
+Arcade may publish a Locator plus a submission/release-intent or immutable
+location-observation Record; that evidence is not yet an exact GameRelease or
+Artifact. Verification later adds the closure and exact Release without
+rewriting the earlier Locator or observation.
+
 ```text
 GameProject        ObjectGenesis/1 Record -> stable publisher-qualified ID
 GameMetadata       Record -> references GameProject
 ArtifactClosure    ownerless exact Record -> exact package bytes
 GameRelease        Record -> references GameProject + ArtifactClosure
-Locator            Record Occurrence -> references exact ArtifactClosure
+VerifiedLocator    Record Occurrence -> references exact ArtifactClosure
 CatalogMembership  curator Occurrence -> references GameProject
 SelectedRelease    curator Binding -> GameProject slot points to GameRelease
 Comment            Record Occurrence -> references Project/Release and reply
