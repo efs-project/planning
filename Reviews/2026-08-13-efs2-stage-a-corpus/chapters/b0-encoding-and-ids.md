@@ -440,6 +440,8 @@ validateBody(schema S, bytes body) -> uint16 errCode   // 0 = OK
   return 0
 
 decodeField(S, desc, body, cur, depth, refCount):
+  // Every direct `return ERR_X` below is shorthand for
+  // `return (cur, refCount, ERR_X)`.
   if depth > MAX_NEST_DEPTH: return ERR_DEPTH
   switch desc.kind:
     BOOL:        need(1); b := body[cur]; if b > 1: return ERR_BOOL; cur += 1
@@ -462,23 +464,32 @@ decodeField(S, desc, body, cur, depth, refCount):
                  if !algCodeTable[algCode] or L != algCodeTable[algCode].len: return ERR_DIGEST
                  need(L); cur += 4 + L
     ARRAY:       need(2); c := u16; if c > desc.maxCount: return ERR_COUNT
-                 repeat c: (cur, refCount) := decodeField(
-                   S, desc.elem, body, cur, depth+1, refCount)
+                 repeat c:
+                   (cur, refCount, err) := decodeField(
+                     S, desc.elem, body, cur, depth+1, refCount)
+                   if err != 0: return (cur, refCount, err)
     MAP:         need(2); c := u16; if c > desc.maxEntries: return ERR_COUNT
                  prevKeyEnc := ⊥
                  repeat c:
-                   kStart := cur; (cur, refCount) := decodeField(
+                   kStart := cur; (cur, refCount, err) := decodeField(
                      S, desc.key, body, cur, depth+1, refCount)
+                   if err != 0: return (cur, refCount, err)
                    kEnc := body[kStart..cur]
                    if prevKeyEnc != ⊥ and !(prevKeyEnc < kEnc bytewise): return ERR_MAP_ORDER
                    prevKeyEnc := kEnc
-                   (cur, refCount) := decodeField(
+                   (cur, refCount, err) := decodeField(
                      S, desc.val, body, cur, depth+1, refCount)
-    STRUCT:      for m in desc.members: (cur, refCount) := decodeField(
-                   S, m, body, cur, depth+1, refCount)
+                   if err != 0: return (cur, refCount, err)
+    STRUCT:      for m in desc.members:
+                   (cur, refCount, err) := decodeField(
+                     S, m, body, cur, depth+1, refCount)
+                   if err != 0: return (cur, refCount, err)
     OPTION:      need(1); p := body[cur]; if p > 1: return ERR_OPTION_FLAG
-                 cur += 1; if p == 1: (cur, refCount) := decodeField(
-                   S, desc.inner, body, cur, depth, refCount)
+                 cur += 1
+                 if p == 1:
+                   (cur, refCount, err) := decodeField(
+                     S, desc.inner, body, cur, depth, refCount)
+                   if err != 0: return (cur, refCount, err)
   return (cur, refCount, 0)
 ```
 
@@ -489,7 +500,10 @@ decodeField(S, desc, body, cur, depth, refCount):
 checks (§3.5) run after the structural walk. The runtime `refCount` guard is
 defense-in-depth under the schema-time bound in §3.1 and makes
 `REF_INSTANCES_MAX = 16` an explicit per-leaf structural validation rule,
-including every `ARRAY(REF)` element. Gas is linear in body length with
+including every `ARRAY(REF)` element. ARRAY, MAP-key, MAP-value, STRUCT, and
+OPTION recursive calls capture and immediately propagate every nonzero error,
+including `ERR_REF_BUDGET`; no recursive failure can be overwritten by a later
+successful child. Gas is linear in body length with
 schema-bounded loop counts — a Type
 creator cannot make validation unbounded [DERIVED INVARIANT — kickoff gate "a Type creator can
 make admission or reads unbounded" is candidate falsifier 5, VERIFIED].
@@ -667,9 +681,13 @@ function, kept below as a rejected sketch.]
   cache on that Realm fails with a typed error. A successfully admitted TypeSchemaGroup cannot
   exhibit that intermediate state because Record admission and cache materialization are one
   atomic call frame. [PROPOSAL]
-- **Idempotence.** Same `groupBytes` ⇒ same RecordId ⇒ re-admission is the SR-15
-  occurrence-granular no-op (`ALREADY_ADMITTED`); cache materialization is likewise
-  deterministic and idempotent within ordinary publication.
+- **Idempotence has two distinct keys.** The same `groupBytes` yields the same
+  TypeSchemaGroup RecordId and therefore the same derived schema-cache contents,
+  so cache materialization is content-idempotent by RecordId/TypeSchemaId. But
+  admission idempotence is keyed only by `OccurrenceKey`: re-admitting the same
+  `(EnvelopeId, leafIndex)` returns `ALREADY_ADMITTED`; publishing that identical
+  RecordId in a new envelope is a new Occurrence, receives its own admission
+  receipt/ordinal, and merely reuses the already-correct cache contents.
 - **Recursion.** Group registration rides the same path unchanged: one Record carries the
   whole `groupBytes`, so R2's simultaneous group commitment is untouched.
 
@@ -1108,7 +1126,9 @@ memory-level evidence, PLAUSIBLE):
 3. MAP ordering: correct ascending, equal-key rejection, length-first consequence documented
    (`"z" < "aa"` by encoding order).
 4. TypeSchema: standalone group-of-1; SELF recursion (Comment/1-shape); mutual pair via
-   GROUP_REF; R3 malformation cases; idempotent re-registration through the SR-17 on-ramp
+   GROUP_REF; R3 malformation cases; same-Occurrence re-registration returns
+   `ALREADY_ADMITTED`, while the same group RecordId in a new envelope admits a new
+   Occurrence and content-idempotently reuses the derived cache through the SR-17 on-ramp
    (`TypeSchemaGroup/1` Record round-trip); REF-budget rejection (`ERR_REF_BUDGET`, SR-18e);
    the H-GROUPCAP pair (largest-fitting group; nominal-max group deterministic rejection).
 5. Axis-8 pair: `T-CONV`, `T-QUAL` (§8).

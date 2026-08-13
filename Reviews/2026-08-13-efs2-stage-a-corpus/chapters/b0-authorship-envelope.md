@@ -167,6 +167,7 @@ struct LeafBody {
 }
 
 struct TargetEnvelopeEvidence {          // unsigned carriage for §3.3 T4 only
+    uint16         withdrawalLeafIndex;  // selected Withdrawal leaf this proves
     EnvelopeHeader header;
     bytes32[]      recordIds;            // FULL committed vector; no bodies
     AccountPrincipal targetPrincipal;
@@ -184,16 +185,32 @@ struct EnvelopeWire {
 ```
 
 Validation (fail closed, R-D6, all errors named in §11):
+`envelopeBytes.length ≤ MAX_ENVELOPE_WIRE_BYTES` else `E_WIRE_LIMIT` — this
+counts the entire ABI carriage, including every target-evidence header, vector,
+typed descriptor, and witness;
 `profile == 1`; `authorityRef == 0 && authEpoch == 0` else `E_RESERVED_AUTHORITY`;
 `1 ≤ recordIds.length ≤ MAX_ENVELOPE_LEAVES` else `E_LEAF_LIMIT`;
 `carriedLeafIndexes` strictly increasing and in range else `E_LEAF_RANGE`;
 for every carried leaf, `recordIdOf(bodies[j].typeSchemaId, bodies[j].canonicalBody)
 == recordIds[carriedLeafIndexes[j]]` else `E_BODY_MISMATCH`;
-`Σ bodies[j].canonicalBody.length ≤ MAX_ENVELOPE_BODY_BYTES` else `E_BODY_LIMIT`.
-Every `targetEvidence` item is structurally validated, recomputes its SR-2
-EnvelopeId, binds its typed `targetPrincipal` to the declared header id before
-witness verification under §4.4, carries the full
-committed vector and no bodies, and is consumed only by a selected Withdrawal.
+`Σ bodies[j].canonicalBody.length ≤ MAX_ENVELOPE_BODY_BYTES` else `E_BODY_LIMIT`;
+`targetEvidence.length ≤ MAX_ENVELOPE_LEAVES`; every evidence vector has
+`1 ≤ recordIds.length ≤ MAX_ENVELOPE_LEAVES`, every evidence witness is
+`≤ MAX_WITNESS_BYTES`, and
+`Σ abi.encode(targetEvidence[j]).length ≤ MAX_ENVELOPE_BODY_BYTES`, else
+`E_TARGET_EVIDENCE`. These reuse the existing 64-leaf and 8,192-byte Stage B
+hypotheses; target evidence creates no unbounded secondary carriage surface.
+
+After `leafMask` and current occurrence states are known, `targetEvidence` MUST be
+in strictly increasing `withdrawalLeafIndex` order and bind one-to-one to exactly
+the selected pre-withdrawal-class Withdrawal leaves whose targets lack a persisted
+envelope header (`NEVER_ADMITTED`, or `PRE_WITHDRAWN` for an idempotent repeat).
+Missing, extra, duplicate, unselected-leaf, non-Withdrawal, or evidence for a
+target with an already-persisted header reverts `E_TARGET_EVIDENCE`. Each item is
+then structurally validated, recomputes
+its SR-2 EnvelopeId, binds its typed `targetPrincipal` to its declared header id
+before witness verification under §4.4, carries the full committed vector and no
+bodies, and is consumed only by its named selected Withdrawal.
 
 ### 2.3 EnvelopeId
 
@@ -337,7 +354,7 @@ re-derives them against each qualifying Realm's gas cap and mandatory index fan-
 | `MAX_BIND_LEAVES_PER_ENVELOPE` | 64 | Binding-class leaf structural cap |
 | `MAX_WITNESS_BYTES` | 4,096 | bounds ERC-1271 witness blobs |
 | `MAX_ERC1271_VERIFY_GAS` | 200,000 | cap on the external `isValidSignature` call |
-| `MAX_ENVELOPE_WIRE_BYTES` | 16,384 | header + 64×32 vector + bodies + witness, rounded |
+| `MAX_ENVELOPE_WIRE_BYTES` | 16,384 | entire EnvelopeWire, including bounded target evidence |
 | `G_ADMIT_BUDGET` | 15,000,000 | ≤ G_TX_CAP with ~10% margin |
 
 Schedule-derived illustration for the candidate values (not a claim that a maximal
@@ -481,12 +498,26 @@ full bytes32 comparison (R-D2). When the target is already known, its persisted
 header supplies the target Principal. When the target is `NEVER_ADMITTED`, the
 caller MUST carry `TargetEnvelopeEvidence`: the target's signed header fields, the
 full ordered `recordIds[]` vector, typed `targetPrincipal`, and its witness, but no
-bodies. Admission recomputes the target EnvelopeId, asserts
-`computePrincipalId(targetPrincipal)` equals the target's declared PrincipalId
-before verifying the target witness against that descriptor, and only then
-compares the authenticated target author to the Withdrawal author. Mismatch reverts
-`ErrWithdrawNotAuthor`; equality permits `PRE_WITHDRAWN`. A bare `targetEnvelopeId` can never cause
-pre-withdrawal. Missing or invalid target evidence reverts.
+bodies. The evidence item is already one-to-one bound to this selected Withdrawal
+leaf by §2.2. Admission recomputes `evidenceEnvelopeId` from the evidence header
+and full vector and MUST require, in this order:
+
+```text
+evidenceEnvelopeId == withdrawal.targetEnvelopeId
+withdrawal.targetLeafIndex < targetEvidence.recordIds.length
+computePrincipalId(targetEvidence.targetPrincipal) ==
+    targetEvidence.header.principalId
+verify(targetEvidence.targetPrincipal, targetEnvelopeDigest,
+       targetEvidence.witness, verifyContext)
+targetEvidence.header.principalId == withdrawalEnvelope.header.principalId
+```
+
+The EnvelopeId equality and target-index range guard therefore run before author
+comparison or any `PRE_WITHDRAWN` write. An ID mismatch, out-of-range target,
+missing/extra/duplicate evidence, or invalid target witness reverts
+`E_TARGET_EVIDENCE`; author mismatch reverts `ErrWithdrawNotAuthor`; only complete
+equality permits `PRE_WITHDRAWN`. A bare `targetEnvelopeId` can never cause
+pre-withdrawal.
 
 A wrong-author Withdrawal reverts the whole envelope with
 `ErrWithdrawNotAuthor`; it is not admitted as inert evidence [PROPOSAL — SR-9].
@@ -672,7 +703,8 @@ increment); across lanes: author's explicit choice.
 ```text
 publish(bytes envelopeBytes, AccountPrincipal calldata principal,
         bytes intentBytes, bytes intentWitness):
- 1. env ← decode EnvelopeWire(envelopeBytes); validate structurally (§2.2)
+ 1. require envelopeBytes.length ≤ MAX_ENVELOPE_WIRE_BYTES; decode EnvelopeWire;
+    validate the main envelope and bounded target-evidence carriage (§2.2)
  2. computed ← computePrincipalId(principal)
     require computed == env.header.principalId
       — AUTH_PRINCIPAL_MISMATCH(declared, computed), before ANY witness verify
@@ -681,8 +713,15 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
        principal, envDigest, env.witness, verifyContext)
     // reverts typed on failure; persist this exact pair for accepted occurrences
  5. select explicit-intent or implicit-sender mode (§5.4); require leafMask ≠ 0,
-    bits ≥ count clear, every selected body carried, and every body RecordId-matched
- 6. classify every selected occKey under §3.2. If every selected outcome is an
+    bits ≥ count clear, every selected body carried, and every body RecordId-matched.
+    Derive the ascending selected pre-withdrawal-class leaf list (target header
+    absent) from selected Withdrawal bodies and target states; require
+    targetEvidence.withdrawalLeafIndex
+    matches that list exactly (one-to-one; no missing/extra/duplicate entries).
+    For each pair, before author comparison or state write, require the recomputed
+    evidence EnvelopeId equals Withdrawal.targetEnvelopeId and targetLeafIndex is
+    in range; then run the target descriptor/witness checks of §3.3.
+ 6. classify every selected occurrence under §3.2. If every selected outcome is an
     idempotent no-op, return its existing receipts/outcomes without consuming a
     nonce or writing. If any selected occurrence is WITHDRAWN/PRE_WITHDRAWN and
     the operation is admission, revert E_NO_RESURRECTION.
@@ -702,8 +741,9 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
 10. for each selected bit i, ascending:
       dispatch §3.2; ACTIVE duplicates write nothing and return ALREADY_ADMITTED;
       newly accepted occurrences receive consecutive next ordinals in this
-      submission order only; store any new Record body; apply Withdrawal §3.3,
-      including authenticated target evidence for PRE_WITHDRAWN
+      submission order only; store any new Record body; apply Withdrawal §3.3
+      only after its exactly matched target evidence has passed the ID, target
+      index, descriptor, witness, and author checks; then write PRE_WITHDRAWN
 11. atomically materialize the parsed schema cache when the accepted Record is an
     intrinsic TypeSchemaGroup/1 Record; this is structural bootstrap work, not an
     application effect or second write primitive
@@ -1012,7 +1052,7 @@ unknown-at-this-Realm, never a claim about other Realms [DERIVED INVARIANT —
 constitution honest-reads clause].
 
 Named error selectors: `E_PROFILE, E_RESERVED_AUTHORITY, E_EMPTY_ENVELOPE,
-E_LEAF_LIMIT, E_LEAF_RANGE, E_BODY_LIMIT, E_BODY_MISMATCH, E_BAD_WITNESS,
+E_LEAF_LIMIT, E_LEAF_RANGE, E_BODY_LIMIT, E_WIRE_LIMIT, E_BODY_MISMATCH, E_BAD_WITNESS,
 E_NOT_AUTHOR, E_REALM_MISMATCH, E_NONCE, E_EXPIRED_ENVELOPE, E_EXPIRED_INTENT,
 E_EXPECTED_REVISION, E_TARGET_EVIDENCE, E_NO_RESURRECTION,
 AUTH_PRINCIPAL_MISMATCH, ErrWithdrawNotAuthor, U48_GUARD`.
@@ -1025,8 +1065,8 @@ AUTH_PRINCIPAL_MISMATCH, ErrWithdrawNotAuthor, U48_GUARD`.
 | `MAX_ENVELOPE_BODY_BYTES` | 8,192 | [HYPOTHESIS] Stage B re-derives |
 | `MAX_BODY_BYTES` | 8,192 | [HYPOTHESIS] one leaf may fill the envelope; Stage B re-derives |
 | `MAX_BIND_LEAVES_PER_ENVELOPE` | 64 | [HYPOTHESIS] Stage B re-derives |
-| `MAX_WITNESS_BYTES` | 4,096 | §2.5 |
-| `MAX_ENVELOPE_WIRE_BYTES` | 16,384 | §2.5 |
+| `MAX_WITNESS_BYTES` | 4,096 | §2.5; applies to each main/target witness; aggregate target evidence also shares the 8,192-byte and 16,384-byte caps |
+| `MAX_ENVELOPE_WIRE_BYTES` | 16,384 | [HYPOTHESIS] entire EnvelopeWire including all target evidence; Stage B re-derives |
 | `MAX_ERC1271_VERIFY_GAS` | 200,000 | §4.1 |
 | `G_ADMIT_BUDGET` | 15,000,000 | §2.5; ≤ Realm tx cap (L1: 16,777,216, EIP-7825) |
 | `c_occ` budget | ≤ 90,000 gas | HYPOTHESIS; measurement closes it |
@@ -1052,7 +1092,10 @@ AUTH_PRINCIPAL_MISMATCH, ErrWithdrawNotAuthor, U48_GUARD`.
    vs expired intent.
 8. Occurrence state machine: T1–T6 including authenticated `PRE_WITHDRAWN`,
    terminal no-resurrection, wrong-author whole-envelope
-   `ErrWithdrawNotAuthor`, `ALREADY_ADMITTED`, and duplicate withdrawal no-ops.
+   `ErrWithdrawNotAuthor`, `ALREADY_ADMITTED`, and duplicate withdrawal no-ops;
+   target-evidence wrong EnvelopeId and out-of-range targetLeafIndex MUST-FAIL
+   before author comparison; missing/extra/duplicate/wrong-leaf evidence and
+   aggregate evidence/wire overflow MUST-FAIL.
 9. Two Principals with identical low-160-bit accounts distinct end-to-end (R-D2).
 10. Bounds: 65 leaves, count = 0, oversize body, oversize witness, leafMask bit ≥
     count — each MUST-FAIL with its named error.
@@ -1078,7 +1121,9 @@ Compact contract other chapters may rely on:
   exactly NEVER_ADMITTED/ACTIVE/WITHDRAWN/PRE_WITHDRAWN with T1–T6 and atomic
   multi-leaf admission; stored ordinals are u48 and every public value is u64;
   withdrawal is author-only, Realm-local, non-deleting, non-resurrecting,
-  authenticated pre-withdrawal legal; admission is author-consented (no
+  authenticated pre-withdrawal legal only with bounded one-to-one target evidence
+  whose recomputed EnvelopeId and target-index range match the Withdrawal before
+  author comparison; admission is author-consented (no
   third-party admission); descriptor equality precedes witness verification;
   authority is verified at admission and persisted, never re-derived at read;
   `publish` is the only Core write primitive.
