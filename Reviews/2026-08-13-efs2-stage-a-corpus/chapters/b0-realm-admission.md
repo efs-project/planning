@@ -768,13 +768,16 @@ topologically sort, which is always possible because RecordIds cannot form
 reference cycles (a cycle would require hashing a hash of itself; the
 encoding chapter's recursive-Type rules handle the SELF case).
 
-This one-call graph rule is exclusively for `REF`/RecordId edges. After the
-current EnvelopeId and carried Record bodies are authenticated, Admission
-extracts every bounded direct or optional `OCCREF`; equality between any
-`ref.envelopeId` and the current EnvelopeId reverts
+This one-call graph rule is exclusively for `REF`/RecordId edges. For each
+selected body in the ascending write-free shadow, Admission first resolves its
+Type descriptor from persisted or earlier staged Type cache, then structurally
+validates and extracts every bounded direct or optional `OCCREF`; equality
+between any `ref.envelopeId` and the current EnvelopeId reverts
 `E_SELF_ENVELOPE_OCCREF(sourceLeafIndex,ref.leafIndex)` before writes. Binding
 predecessors, Withdrawal targets, and every other occurrence edge must therefore
-name an independently precomputable external Envelope.
+name an independently precomputable external Envelope. Unselected carriage is
+not semantically inspected. This placement lets leaf 0 bootstrap a Type cache
+that leaf 1 safely uses without weakening the identity guard.
 
 **Point-in-order shadow state [PROPOSAL — exact].** All non-idempotent
 admissibility/effect decisions use one bounded in-memory shadow initialized
@@ -790,9 +793,14 @@ ordinal counters so log words and metadata are exact before replay. The only app
 `BIND_SET | BIND_TOMBSTONE | WITHDRAWAL`; ordinary leaves have `NONE`, and
 intrinsic Type-cache materialization is structural bootstrap work.
 
-At each fresh source leaf, Admission first shadow-activates the source at its
-prospective ordinal and stages its ordinary Record/index consequences. It then
-applies that leaf's effect to the current shadow. Therefore:
+At each selected leaf, Admission resolves the descriptor from persisted or
+earlier staged Type cache, structurally validates the body, extracts and checks
+OCCREF, classifies the closed effect kind, and associates the exact ordered
+`expectedRevisions` item when applicable. All of this precedes source activation
+or effects. A fresh TypeSchemaGroup stages its validated deterministic member
+caches before the next selected leaf. Only then does Admission shadow-activate a
+fresh source at its prospective ordinal, stage ordinary Record/index
+consequences, and apply that leaf's effect. Therefore:
 
 - every later selected leaf observes all legal earlier effects;
 - two Withdrawal leaves may target one prior external occurrence: the first can
@@ -814,13 +822,19 @@ ordinal; a later terminal retry reuses that planned evidence. Every
 `targetIsCurrentBindingHead`, Binding CAS input, and index/count delta is taken
 from this point-in-order shadow.
 
-Before the fold, a static shape pass classifies selected effect Types and
-associates exactly one ordered `expectedRevisions` entry with every selected
-BindingSet/Tombstone leaf, including an ACTIVE duplicate. The cursor therefore
-always advances structurally. Only a fresh source compares that associated
-value and predecessor against its current shadow head; an ACTIVE source remains
-an effect-free idempotent result. Caller target evidence stays specific to its
-named Withdrawal and is never cached as generic Envelope availability.
+The expected-revision cursor advances structurally for every selected
+BindingSet/Tombstone leaf, including an ACTIVE duplicate. Only a fresh source
+compares the associated value and predecessor against its current shadow head;
+an ACTIVE source remains effect-free after descriptor/body/self-OCCREF checks.
+Caller target evidence stays specific to its named Withdrawal and is never
+cached as generic Envelope availability.
+
+The all-selected-ACTIVE shortcut runs a smaller ascending retry guard before it
+returns: every selected descriptor must resolve from persisted Type cache, its
+body is structurally validated, and its bounded OCCREFs pass the same comparison.
+No cache is staged and no unselected body is inspected. This pass precedes the
+shortcut but does not replay application effects, policy, CAS, target-evidence
+semantics, expiry, expected revisions, or intent/nonces.
 
 After the whole plan and both ordered semantic-carriage cursors succeed,
 commit persists the staged Envelope prelude and replays the identical ascending
@@ -946,24 +960,32 @@ as local destination truth.
 4 verify the envelope witness; retain its exact basis pair
 5 decode consent carriage only far enough to derive the prospective explicit or
   implicit leafMask; enforce nonempty/in-range selection, selected body carriage,
-  and body-to-RecordId commitments; extract every bounded OCCREF and reject
-  E_SELF_ENVELOPE_OCCREF when its envelopeId equals the recomputed current
-  EnvelopeId; read each selected source OccStatus
-6 EARLY-ACTIVE: if every selected source occurrence is ACTIVE, return existing
-  PublishResult/receipts as ALREADY_ADMITTED. Do not semantically match or verify
-  targetEvidence; do not check Type/effect/policy/CAS state, either expiry,
-  expected revisions, intent witness, or intent nonce; discard the newly observed
-  envelope basis; append no AdmissionBatch and write nothing
+  and selected body-to-RecordId commitments; do not semantically inspect
+  unselected carriage; read each selected source OccStatus
+6 EARLY-ACTIVE: if every selected source occurrence is ACTIVE, walk selected
+  leaves ascending, resolve each descriptor from persisted Type cache,
+  structurally validate the body, extract bounded OCCREFs, and enforce
+  E_SELF_ENVELOPE_OCCREF. Then return existing PublishResult/receipts as
+  ALREADY_ADMITTED. Do not semantically match or verify targetEvidence; do not
+  replay effects/policy/CAS, either expiry, expected revisions, intent witness,
+  or intent nonce; discard the newly observed envelope basis; append no
+  AdmissionBatch and write nothing
 7 NON-IDEMPOTENT CONSENT: reject selected terminal source occurrences, then fully
   verify explicit or implicit consent. Explicit consent must carry a fresh next
-  nonce and the exact ordered expected-revision carriage; both expiries apply.
+  nonce and canonically ordered expected-revision carriage; exact selected
+  Binding coverage/value checks occur in the shadow; both expiries apply.
   Stage, but do not write, the nonce update plus this batch's packed nonzero lane
   word; implicit consent stages zero
 8 initialize the shadow from persisted point reads. Stage the authenticated
-  current Envelope only for persistence, never target resolution. Walk selected leaves ascending: structurally validate,
-  check point-in-order references/policy/CAS, assign prospective ordinals without
-  writes, and update occurrence/cache/Binding/index/count shadow state exactly as
-  commit. Derive/consume target evidence at each Withdrawal from that shadow
+  current Envelope only for persistence, never target resolution. Walk selected
+  leaves ascending: resolve each descriptor from persisted or earlier staged Type
+  cache; structurally validate the body; enforce E_SELF_ENVELOPE_OCCREF before
+  source activation/effects; classify the effect and consume exact expected-
+  revision coverage; validate/stage a fresh TypeSchemaGroup's member caches for
+  later leaves; then check point-in-order references/policy/CAS, assign
+  prospective ordinals without writes, and update occurrence/Binding/index/count
+  shadow state exactly as commit. Derive/consume target evidence at each
+  Withdrawal from that shadow
 9 require expected-revision and target-evidence cursors exhausted, every bound
   and counter guard satisfied, and the complete leaf plan valid. No state has
   changed
@@ -997,10 +1019,12 @@ transition.
   bounded wire/structural decoding, EnvelopeId recomputation, descriptor equality,
   envelope-witness authentication, selection decoding, and selected
   body-to-RecordId checks. If every selected source occurrence is then already
-  ACTIVE, return each existing ordinal/receipt as `ALREADY_ADMITTED` without
-  semantically matching `targetEvidence`, rechecking either expiry,
-  expected revisions or the explicit intent witness/nonce, appending a batch, or
-  writing anything. Thus byte-for-byte retry of successful evidence-bearing T4
+  ACTIVE, run the persisted-Type retry guard over selected leaves and reject any
+  structurally invalid body or current-envelope OCCREF before returning each
+  existing ordinal/receipt as `ALREADY_ADMITTED`. Do not inspect unselected
+  carriage, semantically match `targetEvidence`, replay effects/policy/CAS,
+  recheck either expiry, expected revisions or the explicit intent witness/nonce,
+  append a batch, or write anything. Thus byte-for-byte retry of successful evidence-bearing T4
   calldata succeeds even though its original target evidence would be extra under
   non-idempotent cardinality. A mixed mask cannot take this shortcut: it requires
   a fresh valid next nonce and every evidence/effect/expiry/policy/CAS check;

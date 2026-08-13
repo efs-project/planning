@@ -231,8 +231,8 @@ ACTIVE duplicate source occurrence or a target already in WITHDRAWN/
 PRE_WITHDRAWN at that point requires no
 caller evidence on a mixed/new call; supplying it for that leaf is extra and
 reverts. The all-selected-ACTIVE path is deliberately earlier: after the checks
-above and envelope identity/authentication, it returns without applying this
-semantic cardinality rule, so byte-for-byte retry of the successful
+above, envelope identity/authentication, and §3.1's persisted-Type retry guard,
+it returns without applying this target-evidence cardinality rule, so byte-for-byte retry of the successful
 evidence-bearing calldata remains valid. For PRE_WITHDRAWN on a mixed/new call,
 Core loads the original evidence through `occStatus[target].revokedAtOrdinal`
 rather than asking the caller again. Missing, extra, duplicate, unselected-leaf,
@@ -511,10 +511,12 @@ the envelope header is unavailable [DERIVED INVARIANT — fail closed, R-D6; hon
 UNKNOWN, constitution honest-reads clause].
 
 **No current-envelope occurrence references [PROPOSAL — identity-preserving
-repair].** After Core recomputes the current `EnvelopeId` and validates each
-carried body against its committed RecordId, it extracts every bounded `OCCREF`
-instance from that body using the Type descriptor. If any extracted reference
-has `ref.envelopeId == currentEnvelopeId`, Core reverts
+repair].** After Core recomputes the current `EnvelopeId` and validates selected
+bodies against their committed RecordIds, each selected leaf enters the bounded
+ascending shadow walk. Once that leaf's Type descriptor resolves from persisted
+or an earlier leaf's staged Type cache, Core structurally validates the body and
+extracts every bounded `OCCREF` instance declared by that descriptor. If any
+extracted reference has `ref.envelopeId == currentEnvelopeId`, Core reverts
 `E_SELF_ENVELOPE_OCCREF(sourceLeafIndex, ref.leafIndex)` before nonce, ordinal,
 Envelope, Record, receipt, evidence, index, or Binding state changes. This rule
 applies to direct and optional `OCCREF` fields, including Binding predecessor and
@@ -523,6 +525,8 @@ earlier RecordId: those remain the legal one-call dependent-Record graph. The
 restriction preserves the pinned identity formulas: otherwise a Record body
 would contain an EnvelopeId that itself commits that RecordId, requiring an
 infeasible hash fixed point rather than an offline-computable identifier.
+Unselected carried bodies are commitment-checked if carried but are not
+semantically inspected in that call.
 
 Semantics [DERIVED INVARIANT — candidate lines 176–187]: an Occurrence is the
 authored publication event "Principal P asserted Record R at position i of signed
@@ -939,40 +943,59 @@ ShadowState {
 }
 ```
 
-After the main Envelope witness succeeds and body commitments match, Admission
-performs §3.1's bounded current-envelope `OCCREF` rejection before the leaf-effect
-walk. The main header/vector are still staged for eventual persistence, but they
-are never target availability: every legal occurrence target is in an independent,
+After the main Envelope witness succeeds and selected body commitments match,
+Admission performs §3.1's bounded current-envelope `OCCREF` guard per selected
+leaf inside the ascending shadow, immediately after that leaf's descriptor and
+body structure resolve and before source activation or any application effect.
+This placement is load-bearing: an earlier selected `TypeSchemaGroup/1` may
+define and stage the descriptor needed by a later selected leaf in the same
+call. The main header/vector are staged for eventual persistence but are never
+target availability: every legal occurrence target is in an independent,
 offline-precomputable Envelope. External ACTIVE target state is loaded from
 storage on first touch. Every fresh external `NEVER_ADMITTED -> PRE_WITHDRAWN`
 uses the one full `TargetEnvelopeEvidence` item required by §2.2 and stages that
 exact bounded value for durable retention.
+
+The all-selected-ACTIVE path has a smaller write-free **retry guard pass** before
+returning: in ascending selected-leaf order it resolves each descriptor from the
+persisted Type cache, structurally validates that selected body, extracts its
+bounded OCCREF instances, and enforces the same self-envelope comparison. It does
+not stage Type caches or inspect unselected bodies; every ACTIVE application leaf
+must already have a persisted descriptor from its original admission. Only after
+this pass succeeds does the shortcut return before effect, target-evidence,
+policy, expiry, expected-revision, intent-witness, and nonce checks.
 
 ```text
 evidenceCursor = 0
 expectedRevisionCursor = 0
 shadow.nextOrdinal = admissionCount
 
-static shape pass over selected leaves ascending:
-  classify each selected kernel-effect Type from its carried RecordId-matched body
-  associate exactly one ordered expectedRevisions item with every selected
-    BIND_SET/BIND_TOMBSTONE leaf, including an ACTIVE duplicate; compare no value yet
-
 for i in ascending set-bit order of leafMask:
-  expectedItem = the statically associated item, if any  // cursor always consumed
+  resolve this leaf's Type descriptor from persisted typeCache or an earlier
+    selected TypeSchemaGroup's staged cache; otherwise reject E_UNKNOWN_TYPE
+  structurally validate this selected body under that descriptor
+  extract its bounded direct/optional OCCREF instances
+  if any ref.envelopeId == current EnvelopeId:
+      reject E_SELF_ENVELOPE_OCCREF(i, ref.leafIndex)     // no writes exist
+  classify application effect by the closed list only:
+    NONE | BIND_SET | BIND_TOMBSTONE | WITHDRAWAL
+  if BIND_SET or BIND_TOMBSTONE:
+      consume the next exactly leaf-index-matched expectedRevisions item
+      // cursor advances even for an ACTIVE duplicate; value comparison is fresh-only
+
   src = occurrence[occKey(envelopeId,i)]
   if src.status == ACTIVE:
       plan ALREADY_ADMITTED; continue                 // no effect replay
   if src.status in {WITHDRAWN,PRE_WITHDRAWN}:
       reject E_NO_RESURRECTION                         // no writes exist
 
+  if this is TypeSchemaGroup/1:
+      validate groupBytes and stage all deterministic member descriptors/caches;
+      later selected leaves observe them
+
   prospective = shadow.nextOrdinal + 1; guard u48; shadow.nextOrdinal = prospective
   shadow-activate source occurrence at prospective
-  stage its Record/body, mandatory posting appends, record-live folds, and any
-  intrinsic Type-cache materialization; all later leaves observe these results
-
-  classify application effect by the closed list only:
-    NONE | BIND_SET | BIND_TOMBSTONE | WITHDRAWAL
+  stage its Record/body, mandatory posting appends, and record-live folds
 
   if BIND_SET or BIND_TOMBSTONE:
       load current shadow head and its exact shadow source
@@ -1041,20 +1064,23 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
     // reverts typed on failure; persist this pair only if this call accepts new state
  5. decode the consent carriage only far enough to identify explicit-intent or
     implicit-sender form and derive the prospective leafMask; require leafMask ≠ 0,
-    bits ≥ count clear, every selected body carried, and every body RecordId-matched.
-    Extract every bounded OCCREF from each carried body and reject
-    E_SELF_ENVELOPE_OCCREF before any state write if its envelopeId equals this
-    recomputed envelopeId. Read the occurrence overlay for every selected source.
- 6. EARLY-ACTIVE: if every selected source occurrence is already ACTIVE, return
-    the stable envelopeOrdinal and each existing ordinal/receipt as
-    ALREADY_ADMITTED. Do not semantically match or verify targetEvidence; do not
-    check Type/effect/policy/CAS state, either expiry, explicit intent witness,
+    bits ≥ count clear, every selected body carried, and selected bodies
+    RecordId-matched. Do not semantically inspect unselected carriage. Read the
+    occurrence overlay for every selected source.
+ 6. EARLY-ACTIVE: if every selected source occurrence is already ACTIVE, run the
+    retry guard pass in ascending leaf order: resolve every selected leaf's
+    descriptor from persisted Type cache, structurally validate its body, extract
+    bounded OCCREF instances, and reject E_SELF_ENVELOPE_OCCREF on equality with
+    this EnvelopeId. Then return the stable envelopeOrdinal and existing receipts
+    as ALREADY_ADMITTED. Do not semantically match or verify targetEvidence; do
+    not replay effects/policy/CAS, either expiry, explicit intent witness,
     expectedRevisions, or intent nonce; discard (basisE, codehashE); write nothing.
  7. NON-IDEMPOTENT CONSENT: reject selected WITHDRAWN/PRE_WITHDRAWN source
     occurrences (E_NO_RESURRECTION). For explicit mode, decode the exact §5.1
     AdmissionIntent and require action == 0; envelopeId/realmId/leafMask match;
-    both expiries pass; expectedRevisions exactly cover selected CAS-bearing
-    Binding mutations (value checks occur point-in-order below); (basisI, codehashI) ←
+    both expiries pass; expectedRevisions has canonical shape/order and its exact
+    selected Binding coverage/value checks occur point-in-order below;
+    (basisI, codehashI) ←
     AuthorityVerifierV1.verify(principal, eip712IntentDigest, intentWitness,
     verifyContext), used only for consent and never as the receipt basis; require
     a fresh nonceSeq == lastSeq + 1 and stage that nonce write plus
@@ -1069,10 +1095,15 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
     persistence, never as occurrence-target evidence; set both semantic-carriage
     cursors to zero
  9. walk selected leaves in ascending mask order exactly as specified above.
-    Structurally validate each Type/body; check references, policy, counter
-    bounds, point-in-order expected revision and predecessor; assign each fresh
-    source a prospective ordinal without writing; and update shadow occurrence,
-    staged cache, Binding, RAW_AUDIT, posting/live-count, and unique-record folds
+    Resolve each descriptor from persisted or earlier staged Type cache;
+    structurally validate that selected body; extract its bounded OCCREFs and
+    enforce E_SELF_ENVELOPE_OCCREF before source activation or effects. Classify
+    its effect and consume exact expected-revision coverage. A fresh
+    TypeSchemaGroup validates/stages its member caches before the next selected
+    leaf. Then check RecordId references, policy, counters, point-in-order revision
+    and predecessor; assign each fresh source a prospective ordinal without
+    writing; and update shadow occurrence, Binding, RAW_AUDIT, posting/live-count,
+    and unique-record folds
 10. at each Withdrawal in that same walk, decide target status and evidence need
     from the current shadow, validate/consume exactly one full caller evidence
     item for each fresh external T4, construct
@@ -1101,12 +1132,15 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
 Idempotency is occurrence-granular and unambiguous. After bounded wire/structural
 checks, EnvelopeId recomputation, descriptor equality, envelope-witness
 authentication, selection decoding, and selected body-to-RecordId checks, an
-all-selected-ACTIVE retry returns the existing `PublishResult` receipts as
-`ALREADY_ADMITTED` and writes nothing. In particular, byte-for-byte retry of a
+all-selected-ACTIVE retry resolves every selected leaf's persisted Type
+descriptor and enforces §3.1's structural body/self-OCCREF guard before returning
+the existing `PublishResult` receipts as `ALREADY_ADMITTED` with no writes. It
+does not inspect unselected carriage or stage missing Type caches. In particular,
+byte-for-byte retry of a
 successful evidence-backed T4 call still carries its original bounded
 `targetEvidence`; the early return deliberately occurs before that list could be
 reclassified as extra. It also precedes expiry, expected-revision, intent-witness,
-and nonce checks and appends no AdmissionBatch or evidence copy. In a mixed mask,
+effect, policy, CAS, and nonce checks and appends no AdmissionBatch or evidence copy. In a mixed mask,
 the shortcut is unavailable: ACTIVE members no-op while newly accepted members
 require one fresh valid intent, full semantic target-evidence cardinality/effect
 preflight, and new ordinals. Evidence for an ACTIVE source leaf in that mixed call
@@ -1623,13 +1657,21 @@ There is no generic `E_AUTHORITY`, `E_BAD_WITNESS`, `E_NOT_AUTHOR`, or
      when applicable), finish at BOUND revision 2. Calling B first or using a
      stale CAS reverts the outer transaction with neither Envelope, nonce update,
      nor batch-lane row retained.
-   - **SELF-OCCREF rejection:** the bounded decoded-reference guard is unit-tested
-     with `ref.envelopeId == currentEnvelopeId` for direct and optional OCCREF and
-     MUST return `E_SELF_ENVELOPE_OCCREF(sourceLeaf,targetLeaf)` with identical
-     state before/after. An end-to-end real-hash Envelope fixture is deliberately
-     not required because constructing one would itself solve the forbidden hash
-     fixed point; Stage B tests the guard directly and separately tests EnvelopeId
-     recomputation/body matching.
+   - **STAGED-TYPE-OCCREF:** leaf 0 is a fresh TypeSchemaGroup defining one
+     direct/optional-OCCREF-bearing Type and one REF-only Type. In the success arm,
+     leaf 1 uses the newly staged OCCREF descriptor and names an independently
+     precomputed external Envelope; leaf 2 uses the newly staged REF-only
+     descriptor and names an earlier selected RecordId. All three admit, proving
+     staged-Type resolution and that same-envelope RecordId edges remain legal.
+     In the synthetic failure arm, the harness resolves the same staged OCCREF
+     descriptor but supplies `ref.envelopeId == currentEnvelopeId`; it MUST return
+     `E_SELF_ENVELOPE_OCCREF(sourceLeaf,targetLeaf)` before source activation or
+     any state change. After the success arm is admitted, an all-ACTIVE retry MUST
+     resolve the now-persisted descriptors and enforce the same guard before its
+     shortcut; a synthetic equality fails rather than returning ALREADY_ADMITTED.
+     An end-to-end real-hash self-reference fixture is deliberately not required
+     because constructing one would itself solve the forbidden hash fixed point;
+     Stage B separately tests EnvelopeId recomputation/body matching.
    - **SHADOW-LEGAL-1 duplicate withdrawal:** two fresh Withdrawal leaves in one
      Envelope target one prior external occurrence. For an initially NEVER target,
      the first consumes and stages exactly one full evidence item, plans
@@ -1662,8 +1704,10 @@ Compact contract other chapters may rely on:
   fail-closed) so managed Principals activate without layout or formula change;
   subset carriage always ships the full RecordId vector; occurrence states are
   exactly NEVER_ADMITTED/ACTIVE/WITHDRAWN/PRE_WITHDRAWN with T1–T6 and atomic
-  multi-leaf admission; every carried current-envelope OCCREF is a typed
-  fail-before-write error while same-envelope RecordId DAGs remain legal; stored
+  multi-leaf admission; every selected current-envelope OCCREF is a typed
+  fail-before-write error after its persisted/earlier-staged Type descriptor
+  resolves, while unselected carriage is not semantic input and same-envelope
+  RecordId DAGs remain legal; stored
   ordinals are u48 and every public value is u64;
   withdrawal is author-only, Realm-local, non-deleting, non-resurrecting,
   authenticated pre-withdrawal legal only with bounded one-to-one full target evidence
@@ -1673,8 +1717,9 @@ Compact contract other chapters may rely on:
   never the target body; every effective T4 durably retains one bounded
   canonical evidence value at its Withdrawal ordinal, and terminal repeats load
   it rather than requiring evidence again; after bounded structure and envelope
-  authentication, an all-selected-ACTIVE retry returns before semantic evidence,
-  effect, expiry, or intent replay checks, while every mixed/new call performs
+  authentication, an all-selected-ACTIVE retry resolves persisted selected Type
+  descriptors and enforces the self-OCCREF guard, then returns before target
+  evidence, effect, policy, CAS, expiry, or intent replay checks, while every mixed/new call performs
   them with a fresh intent; admission is author-consented (no
   third-party admission); descriptor equality precedes witness verification;
   authority is verified at admission and persisted, never re-derived at read;
@@ -1720,7 +1765,8 @@ Compact contract other chapters may rely on:
 - **O9 — durable rejected-attempt receipts.** B0 leaves rejected admissions
   stateless; admission chapter (V2-E5) decides if a rejection spine is needed.
 - **O10 — self-OCCREF guard harness.** Stage B must expose the bounded internal
-  comparison to the disposable harness so the typed fail-before-write result is
-  exercised without weakening production hashing or pretending an end-to-end
-  self-referential Envelope can be constructed. The production ABI gains no test
-  hook.
+  descriptor-resolution/extraction/comparison path to the disposable harness so
+  the typed fail-before-write result is exercised with both an earlier-staged Type
+  and an all-ACTIVE persisted Type cache, without weakening production hashing or
+  pretending an end-to-end self-referential Envelope can be constructed. The
+  production ABI gains no test hook.
