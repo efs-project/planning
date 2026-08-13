@@ -201,16 +201,21 @@ for every carried leaf, `recordIdOf(bodies[j].typeSchemaId, bodies[j].canonicalB
 `E_TARGET_EVIDENCE`. These reuse the existing 64-leaf and 8,192-byte Stage B
 hypotheses; target evidence creates no unbounded secondary carriage surface.
 
-After `leafMask` and current occurrence states are known, `targetEvidence` MUST be
-in strictly increasing `withdrawalLeafIndex` order and bind one-to-one to exactly
-the selected pre-withdrawal-class Withdrawal leaves whose targets lack a persisted
-envelope header (`NEVER_ADMITTED`, or `PRE_WITHDRAWN` for an idempotent repeat).
-Missing, extra, duplicate, unselected-leaf, non-Withdrawal, or evidence for a
-target with an already-persisted header reverts `E_TARGET_EVIDENCE`. Each item is
-then structurally validated, recomputes
-its SR-2 EnvelopeId, binds its typed `targetPrincipal` to its declared header id
-before witness verification under §4.4, carries the full committed vector and no
-bodies, and is consumed only by its named selected Withdrawal.
+After `leafMask`, source-occurrence outcomes, target occurrence states, and target
+Envelope-header availability are known, `targetEvidence` MUST be in strictly
+increasing `withdrawalLeafIndex` order and bind one-to-one to exactly the newly
+accepted Withdrawal leaves whose target transition is
+`NEVER_ADMITTED -> PRE_WITHDRAWN` **and** whose target Envelope header is absent
+from state. An ACTIVE duplicate source occurrence, a target whose header is
+already persisted, or a target already in WITHDRAWN/PRE_WITHDRAWN requires no
+caller evidence; supplying it is extra and reverts. For PRE_WITHDRAWN, Core loads
+the original evidence through `occStatus[target].revokedAtOrdinal` rather than
+asking the caller again. Missing, extra, duplicate, unselected-leaf, or
+non-Withdrawal evidence reverts `E_TARGET_EVIDENCE`. Each required item is then
+structurally validated, recomputes its SR-2 EnvelopeId, binds its typed
+`targetPrincipal` to its declared header id before witness verification under
+§4.4, carries the full committed vector and no bodies, and is consumed only by
+its named selected Withdrawal.
 
 ### 2.3 EnvelopeId
 
@@ -448,9 +453,9 @@ State per `occKey` in one Realm is the SR-10 four-state overlay:
 | T1 | `ADMIT` | NEVER_ADMITTED → ACTIVE | envelope + witness + consent valid (§5.3) | assign the next ordinal; store status + receipt; run mandatory postings |
 | T2 | `DUP_ADMIT` | ACTIVE → ACTIVE | same occKey re-admitted | `ALREADY_ADMITTED`; return existing receipt; no write |
 | T3 | `WITHDRAW` | ACTIVE → WITHDRAWN | admitted `Withdrawal/1`, author match (§3.3) | one-way status flip; set `revokedAtOrdinal`; decrement indexes exactly once |
-| T4 | `PRE_WITHDRAW` | NEVER_ADMITTED → PRE_WITHDRAWN | authenticated target-envelope evidence + author match (§3.3) | block target before its first admission |
+| T4 | `PRE_WITHDRAW` | NEVER_ADMITTED → PRE_WITHDRAWN | persisted target header, or authenticated target-envelope evidence + author match (§3.3) | block target before its first admission; when evidence was required, store its canonical bytes at the Withdrawal ordinal |
 | T5 | `DUP_WITHDRAW` | WITHDRAWN → WITHDRAWN | second withdrawal | no-op success |
-| T5b | `DUP_PRE_WITHDRAW` | PRE_WITHDRAWN → PRE_WITHDRAWN | second withdrawal | no-op success |
+| T5b | `DUP_PRE_WITHDRAW` | PRE_WITHDRAWN → PRE_WITHDRAWN | author match using retained original evidence when no target header exists; no caller evidence | no-op success |
 | T6 | `ADMIT_AFTER_WITHDRAW` | WITHDRAWN/PRE_WITHDRAWN → ✗ | admit attempt on terminal occKey | revert `E_NO_RESURRECTION` |
 
 There are no other transitions; `WITHDRAWN` and `PRE_WITHDRAWN` are terminal
@@ -494,13 +499,15 @@ open item O5), and has NO effect in any Realm where it is not admitted.
 
 Authority guard [PROPOSAL]: effective iff
 `withdrawalEnvelope.header.principalId == targetEnvelope.header.principalId` —
-full bytes32 comparison (R-D2). When the target is already known, its persisted
-header supplies the target Principal. When the target is `NEVER_ADMITTED`, the
-caller MUST carry `TargetEnvelopeEvidence`: the target's signed header fields, the
-full ordered `recordIds[]` vector, typed `targetPrincipal`, and its witness, but no
-bodies. The evidence item is already one-to-one bound to this selected Withdrawal
-leaf by §2.2. Admission recomputes `evidenceEnvelopeId` from the evidence header
-and full vector and MUST require, in this order:
+full bytes32 comparison (R-D2). When the target Envelope header is already known,
+its persisted header supplies the target Principal even if this target leaf is
+still `NEVER_ADMITTED`. When the target transition is
+`NEVER_ADMITTED -> PRE_WITHDRAWN` and that header is absent, the caller MUST carry
+`TargetEnvelopeEvidence`: the target's signed header fields, full ordered
+`recordIds[]` vector, typed `targetPrincipal`, and witness, but no bodies. The
+evidence item is already one-to-one bound to this newly accepted Withdrawal leaf
+by §2.2. Admission recomputes `evidenceEnvelopeId` from the evidence header and
+full vector and MUST require, in this order:
 
 ```text
 evidenceEnvelopeId == withdrawal.targetEnvelopeId
@@ -517,7 +524,30 @@ comparison or any `PRE_WITHDRAWN` write. An ID mismatch, out-of-range target,
 missing/extra/duplicate evidence, or invalid target witness reverts
 `E_TARGET_EVIDENCE`; author mismatch reverts `ErrWithdrawNotAuthor`; only complete
 equality permits `PRE_WITHDRAWN`. A bare `targetEnvelopeId` can never cause
-pre-withdrawal.
+pre-withdrawal when the target header is not already state-readable.
+
+On that effective evidence-backed transition, after the Withdrawal occurrence
+has received ordinal `wOrd`, Core stores exactly
+`abi.encode(decodedTargetEnvelopeEvidence)` at
+`preWithdrawalEvidence[wOrd]`. This is the canonical ABI re-encoding in the field
+order of §2.2, not the caller's potentially non-canonical outer calldata bytes;
+it contains the exact validated header, full RecordId vector, typed descriptor,
+and witness used by the transition. Its encoded length was already included in
+both the 8,192-byte aggregate target-evidence bound and the 16,384-byte whole-wire
+bound, so the state carrier cannot become an unbounded side channel. The target
+overlay stores `revokedAtOrdinal = wOrd`, giving reconstruction a direct pointer.
+No evidence bytes are stored for ACTIVE->WITHDRAWN or a terminal-target no-op.
+
+For a new Withdrawal occurrence targeting `PRE_WITHDRAWN`, Core follows the
+target's nonzero `revokedAtOrdinal`, loads and decodes the retained evidence,
+checks the stored evidence's ID/range/descriptor linkage, and uses its already
+authenticated header Principal for the author comparison; it does not call live
+target authority again. The original accepted Withdrawal plus immutable retained
+bytes are the admission-time authentication fact that W-7 replays. The caller MUST
+NOT resupply evidence. The target effect is a no-op and the retained bytes are
+neither replaced nor copied. Re-admission of the same already-ACTIVE Withdrawal
+occurrence is ordinary T2 idempotence and returns before target-effect preflight,
+also without evidence.
 
 A wrong-author Withdrawal reverts the whole envelope with
 `ErrWithdrawNotAuthor`; it is not admitted as inert evidence [PROPOSAL — SR-9].
@@ -557,10 +587,12 @@ never raw bodies, never a Realm value. One witness authorizes the whole envelope
 
 [DERIVED INVARIANT — kel §3 line 93 and §8.2 lines 437–449: read-time-only
 authorization lets a removed key backdate; a signature has no trusted creation
-time] The witness is verified exactly once per Realm, at admission, by the
-Realm's versioned verifier; the resulting `AuthorityBasisWord` and conditional
-contract-account codehash are persisted with the receipt; reads consume receipts
-and never re-run authority checks. For profile 1
+time] The witness is verified exactly once in each non-idempotent accepting
+`publish` call by the Realm's versioned verifier; the resulting
+`AuthorityBasisWord` and conditional contract-account codehash are persisted in
+that call's `AdmissionBatch` and resolved by its newly accepted occurrences'
+receipts. A later staged call reverifies. Reads consume receipts and never re-run
+authority checks. For profile 1
 (intrinsic account Principals, no rotation) this is cheap insurance; it becomes
 load-bearing the moment managed Principals activate (§6) — which is exactly why
 the discipline is fixed now rather than retrofitted (kel §3 line 94: the
@@ -599,10 +631,13 @@ AuthorityBasisWord = kind u8 ‖ verifierVersion u16 ‖ witnessProfile u8 ‖
                      basisBlock u64 ‖ delegateOrZero u160
 ```
 
-The word is the receipt authority-basis slot and the envelope-meta index value;
-`codehashOrZero` occupies a conditional second slot only for contract-account
-kinds. `authEpoch` remains in the signed envelope header and never enters the
-basis word.
+The word and `codehashOrZero` are retained once by the non-idempotent accepting
+call's `AdmissionBatch`; every occurrence newly accepted in that call resolves
+that exact pair in its logical receipt. A later staged admission of the same
+Envelope is reverified and may retain a different pair. Envelope metadata owns
+no singular authority basis. The codehash occupies a conditional second slot
+only for contract-account kinds. `authEpoch` remains in the signed envelope
+header and never enters the basis word.
 
 ---
 
@@ -714,13 +749,16 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
     // reverts typed on failure; persist this exact pair for accepted occurrences
  5. select explicit-intent or implicit-sender mode (§5.4); require leafMask ≠ 0,
     bits ≥ count clear, every selected body carried, and every body RecordId-matched.
-    Derive the ascending selected pre-withdrawal-class leaf list (target header
-    absent) from selected Withdrawal bodies and target states; require
+    Derive the ascending evidence-required leaf list from newly accepted
+    Withdrawal bodies whose target is NEVER_ADMITTED and whose target Envelope
+    header is absent; require
     targetEvidence.withdrawalLeafIndex
     matches that list exactly (one-to-one; no missing/extra/duplicate entries).
     For each pair, before author comparison or state write, require the recomputed
     evidence EnvelopeId equals Withdrawal.targetEnvelopeId and targetLeafIndex is
-    in range; then run the target descriptor/witness checks of §3.3.
+    in range; then run the target descriptor/witness checks of §3.3. A terminal
+    PRE_WITHDRAWN target instead resolves its original evidence through
+    revokedAtOrdinal; caller evidence is forbidden.
  6. classify every selected occurrence under §3.2. If every selected outcome is an
     idempotent no-op, return its existing receipts/outcomes without consuming a
     nonce or writing. If any selected occurrence is WITHDRAWN/PRE_WITHDRAWN and
@@ -743,7 +781,10 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
       newly accepted occurrences receive consecutive next ordinals in this
       submission order only; store any new Record body; apply Withdrawal §3.3
       only after its exactly matched target evidence has passed the ID, target
-      index, descriptor, witness, and author checks; then write PRE_WITHDRAWN
+      index, descriptor, witness, and author checks; for an evidence-backed
+      NEVER_ADMITTED -> PRE_WITHDRAWN transition, store its canonical ABI
+      re-encoding at this Withdrawal occurrence's new ordinal before setting the
+      target's revokedAtOrdinal to that same ordinal
 11. atomically materialize the parsed schema cache when the accepted Record is an
     intrinsic TypeSchemaGroup/1 Record; this is structural bootstrap work, not an
     application effect or second write primitive
@@ -760,8 +801,11 @@ Idempotency is occurrence-granular and unambiguous. An all-duplicate retry retur
 the existing receipts as `ALREADY_ADMITTED` and writes nothing. In a mixed mask,
 duplicates no-op while newly accepted occurrences require one fresh valid intent,
 consume its nonce, and receive new ordinals. Re-withdrawal of a `WITHDRAWN` or
-`PRE_WITHDRAWN` target is likewise a no-op success. Terminal status prevents
-resurrection; duplicate handling never does so by whole-call revert.
+`PRE_WITHDRAWN` target is likewise a no-op success after the author guard, using
+retained original evidence when the target header is absent; no caller evidence is
+required or accepted again. Re-admission of the same Withdrawal occurrence exits
+through T2 before that guard. Terminal status prevents resurrection; duplicate
+handling never does so by whole-call revert.
 
 ### 5.4 Who may admit — author-only, and the implicit same-tx intent
 
@@ -794,8 +838,10 @@ account named by the verified `AccountPrincipal`, `intentBytes` may carry only a
 selected envelope contains no Binding-class leaves; Binding-class leaves always
 require the explicit SR-3 intent with `expectedRevisions`. Realm is this contract
 by construction, the envelope expiry still applies, and the account transaction
-nonce supplies replay control. The receipt records `intentKind = IMPLICIT_SENDER`.
-R-D8 is not violated [DERIVED INVARIANT]: authorship still derives exclusively
+nonce supplies replay control. Consent mode is transient validation input only:
+explicit and implicit consent produce the same `PublishResult`,
+`AdmissionBatch`, and `AdmissionReceipt/1` shapes and persist no mode tag. R-D8
+is not violated [DERIVED INVARIANT]: authorship still derives exclusively
 from the envelope witness; `msg.sender` supplies only Realm-local consent for the
 same account. Any rail can reach the same state through explicit intent.
 
@@ -848,9 +894,10 @@ the identity layer, that is a named falsifier of this proposal and routes to a
 kel-style claimId variant in the bakeoff notes — not a silent patch.
 
 The exact `AuthorityBasisWord` and conditional codehash returned by §4.4 are
-persisted per accepted admission without re-encoding; nothing in this chapter
-caches authority at read time [DERIVED INVARIANT — CARRY-IN (a): admission-time
-validation + persisted authorization basis].
+persisted without re-encoding in the accepting call's `AdmissionBatch`; each
+newly accepted occurrence in that call resolves them through its receipt.
+Nothing in this chapter caches authority at read time [DERIVED INVARIANT —
+CARRY-IN (a): admission-time validation + persisted authorization basis].
 
 ---
 
@@ -952,20 +999,25 @@ Why the LAYOUT guarantees it — an exhaustive input audit:
 Substitution vector (binding for the harness): the same `(EnvelopeWire, intent,
 intentWitness)` bytes submitted by (a) the author's own EOA, (b) an unrelated EOA
 relayer, (c) a 4337 bundler with a paymaster, MUST yield byte-identical
-EnvelopeId, occKeys, principalId, and AuthorityBasisWord (plus conditional
-codehash). `AdmissionOrdinal` and block
-basis MAY differ — they record WHEN a Realm accepted, which is venue-relative
-existence evidence, never authorship (R-D9) — and since the first acceptance wins
-and later ones no-op (T2), the persisted end state is identical whichever rail
-lands first. A rail that can alter any authorship-bearing field is a broken
+EnvelopeId, occKeys, and principalId. Against identical account state, the
+AuthorityBasis pair is identical except for `basisBlock`; across an account-state
+change, delegate/codehash may also differ. Those differences belong to the actual
+accepting call's `AdmissionBatch`, never to the rail or Envelope metadata.
+`AdmissionOrdinal` and block basis MAY differ — they record WHEN a Realm accepted,
+which is venue-relative existence evidence, never authorship (R-D9) — and since
+the first acceptance wins and later ones no-op (T2), the identity/authorship state
+is identical whichever rail lands first while the receipt honestly names that
+acceptance's basis. A rail that can alter any authorship-bearing field is a broken
 implementation, detectable by this vector.
 
 ---
 
 ## 10. Storage layout and external ABI (Realm-local)
 
-Storage owned by this chapter (admission-receipt spine and Record-body spine are
-sibling chapters; slot packing shown explicitly):
+Storage contract exported by this chapter (the Realm/admission chapter is the
+sole physical owner of the receipt/batch, overlay, and retained-evidence spine;
+the declarations below pin the byte-for-byte seam, while the Record-body spine
+is a sibling chapter):
 
 ```solidity
 // ---- envelope spine (written once, first admission touching the envelope) ----
@@ -992,6 +1044,13 @@ mapping(bytes32 occKey => OccStatus) occStatus;
 // The ordinal-keyed admission log owns receipt paging/hydration. No receipt
 // reference is duplicated in this overlay.
 
+// ---- authenticated pre-withdrawal evidence (Realm-owned; effective T4 only) ----
+mapping(uint48 withdrawalOrdinal => bytes) preWithdrawalEvidence;
+// Value = abi.encode(decoded TargetEnvelopeEvidence) in the exact §2.2 field order.
+// Length is nonzero and <= MAX_ENVELOPE_BODY_BYTES. The PRE_WITHDRAWN target's
+// revokedAtOrdinal is this key. Empty means this accepted Withdrawal did not use
+// caller target evidence; entries are immutable and never copied on T5b.
+
 // ---- intent nonces ----
 mapping(bytes32 principalId => mapping(uint192 nonceKey => uint64)) intentNonces;
 ```
@@ -1004,7 +1063,11 @@ the none-sentinel.
 State-readability [DERIVED INVARIANT — constitution reconstruction clause;
 R-D3]: header + full RecordId vector persist on first admission so a second
 implementation can re-verify authorship of every admitted occurrence from state
-alone — no logs, no EFS-operated service (EIP-4444-proof by construction).
+alone. For a PRE_WITHDRAWN target whose header never otherwise entered state, the
+effective Withdrawal's ordinal retains the exact bounded canonical evidence bytes
+needed to recompute the target EnvelopeId, leaf range, descriptor equality,
+witness, and author — no logs or EFS-operated service (EIP-4444-proof by
+construction).
 
 External ABI (Solidity signatures other chapters and the SDK compile against):
 
@@ -1025,13 +1088,40 @@ struct AdmissionIntentArg {           // mirrors §5.1 fields 1–8
     uint64 notAfter;
 }
 
+struct OccurrenceRef {
+    bytes32 envelopeId;
+    uint16 leafIndex;
+}
+
+struct PublishLeafResult {
+    uint16 leafIndex;
+    uint8 outcome;                    // 1 ADMITTED, 2 ALREADY_ADMITTED
+    uint64 admissionOrdinal;          // fresh or existing
+}
+
+struct PublishResult {
+    bytes32 envelopeId;
+    uint40 envelopeOrdinal;           // stable existing or newly assigned
+    PublishLeafResult[] leaves;        // selected leaves, ascending mask order
+}
+
+struct AdmissionReceiptView {         // exact logical AdmissionReceipt/1
+    OccurrenceRef occurrenceRef;
+    bytes32 realmId;
+    bytes32 realmRevisionId;
+    AuthorityBasisWord authorityBasis;
+    bytes32 authorityCodehash;         // zero unless CONTRACT_ERC1271
+    uint64 admissionOrdinal;
+    uint48 admittedAtBlock;
+    uint8 acceptedStatus;              // 1 ACCEPTED
+}
+
 function publish(
     bytes calldata envelopeBytes,
     AccountPrincipal calldata principal,
     bytes calldata intentBytes,
     bytes calldata intentWitness
-) external returns (bytes32 envelopeId, uint8[] memory outcomes,
-                    uint64[] memory admissionOrdinals);
+) external returns (PublishResult memory);
 
 function occKeyOf(bytes32 envelopeId, uint16 leafIndex)
     external pure returns (bytes32);
@@ -1045,17 +1135,54 @@ function envelopeHeaderOf(bytes32 envelopeId) external view
 
 function envelopeRecordIdsOf(bytes32 envelopeId, uint16 start, uint16 limit)
     external view returns (bytes32[] memory page, uint16 total);
+
+function receiptOf(bytes32 envelopeId, uint16 leafIndex) external view
+    returns (AdmissionReceiptView memory);
+
+function preWithdrawalEvidenceAt(uint64 withdrawalOrdinal) external view
+    returns (bytes memory canonicalTargetEvidence);
+// Empty iff that accepted Withdrawal did not cause an evidence-backed T4.
+// Nonempty bytes are <= MAX_ENVELOPE_BODY_BYTES and decode exactly as §2.2.
 ```
 
 All reads are point reads or hard-bounded pages; `known = false` is honest
 unknown-at-this-Realm, never a claim about other Realms [DERIVED INVARIANT —
 constitution honest-reads clause].
 
-Named error selectors: `E_PROFILE, E_RESERVED_AUTHORITY, E_EMPTY_ENVELOPE,
-E_LEAF_LIMIT, E_LEAF_RANGE, E_BODY_LIMIT, E_WIRE_LIMIT, E_BODY_MISMATCH, E_BAD_WITNESS,
-E_NOT_AUTHOR, E_REALM_MISMATCH, E_NONCE, E_EXPIRED_ENVELOPE, E_EXPIRED_INTENT,
-E_EXPECTED_REVISION, E_TARGET_EVIDENCE, E_NO_RESURRECTION,
-AUTH_PRINCIPAL_MISMATCH, ErrWithdrawNotAuthor, U48_GUARD`.
+Authorship/Realm-owned error selectors are exact and byte-identical here and in
+the Realm chapter:
+
+```solidity
+error E_PROFILE(uint16 got);
+error E_RESERVED_AUTHORITY(bytes32 authorityRef, uint64 authEpoch);
+error E_EMPTY_ENVELOPE();
+error E_LEAF_LIMIT(uint256 got);
+error E_LEAF_RANGE(uint16 leafIndex);
+error E_BODY_LIMIT(uint256 got);
+error E_WIRE_LIMIT(uint256 got);
+error E_BODY_MISMATCH(uint16 leafIndex);
+error E_REALM_MISMATCH(bytes32 expected, bytes32 got);
+error E_NONCE(uint192 nonceKey, uint64 expected, uint64 got);
+error E_EXPIRED_ENVELOPE(uint64 notAfter);
+error E_EXPIRED_INTENT(uint64 notAfter);
+error E_EXPECTED_REVISION(uint16 leafIndex, uint32 expected, uint32 actual);
+error E_TARGET_EVIDENCE(uint16 withdrawalLeafIndex);
+error E_NO_RESURRECTION(bytes32 envelopeId, uint16 leafIndex);
+error E_STRUCTURAL(uint16 leafIndex, uint16 code);
+error E_UNKNOWN_TYPE(uint16 leafIndex);
+error E_REF_UNSATISFIED(uint16 leafIndex, uint8 roleOrdinal);
+error E_BOUNDS(uint16 code);
+error E_POLICY(uint16 code);
+error AUTH_PRINCIPAL_MISMATCH(bytes32 declared, bytes32 computed);
+error ErrWithdrawNotAuthor(bytes32 targetEnvelopeId, uint16 targetLeafIndex,
+                           bytes32 envelopePrincipal, bytes32 targetPrincipal);
+error U48_GUARD();
+```
+
+Authority-verifier errors bubble unchanged from the principal chapter's §3.6;
+Binding transition errors bubble unchanged from the Binding chapter's §3.5.
+There is no generic `E_AUTHORITY`, `E_BAD_WITNESS`, `E_NOT_AUTHOR`, or
+`E_CAS_CONFLICT` alias.
 
 ## 11. Constants table (consolidated)
 
@@ -1095,7 +1222,10 @@ AUTH_PRINCIPAL_MISMATCH, ErrWithdrawNotAuthor, U48_GUARD`.
    `ErrWithdrawNotAuthor`, `ALREADY_ADMITTED`, and duplicate withdrawal no-ops;
    target-evidence wrong EnvelopeId and out-of-range targetLeafIndex MUST-FAIL
    before author comparison; missing/extra/duplicate/wrong-leaf evidence and
-   aggregate evidence/wire overflow MUST-FAIL.
+   aggregate evidence/wire overflow MUST-FAIL; effective evidence-backed T4
+   MUST return byte-identical canonical evidence through
+   `preWithdrawalEvidenceAt(withdrawalOrdinal)`, while T5b and exact retry MUST
+   succeed without resupplied evidence and MUST NOT replace or copy the entry.
 9. Two Principals with identical low-160-bit accounts distinct end-to-end (R-D2).
 10. Bounds: 65 leaves, count = 0, oversize body, oversize witness, leafMask bit ≥
     count — each MUST-FAIL with its named error.
@@ -1113,6 +1243,7 @@ Compact contract other chapters may rely on:
   uint256(leafIndex)))`; `EnvelopeId = keccak256(abi.encode(DOM_ENVELOPE,
   eip712EnvelopeDigest))`; the principal chapter's `WitnessProfile/1`,
   `AccountPrincipal`, and exact `AuthorityBasisWord` plus conditional codehash;
+  exact `PublishResult`, `PublishLeafResult`, and `AdmissionReceiptView` (§10);
   constants table §11.
 - **Guarantees**: EnvelopeId/RecordId/OccurrenceRef exclude witness, submitter,
   rail, payer, and Realm; authorityRef/authEpoch are physically reserved (zero,
@@ -1123,11 +1254,14 @@ Compact contract other chapters may rely on:
   withdrawal is author-only, Realm-local, non-deleting, non-resurrecting,
   authenticated pre-withdrawal legal only with bounded one-to-one target evidence
   whose recomputed EnvelopeId and target-index range match the Withdrawal before
-  author comparison; admission is author-consented (no
+  author comparison; an effective evidence-backed T4 durably retains one bounded
+  canonical evidence value at its Withdrawal ordinal, and terminal repeats load
+  it rather than requiring evidence again; admission is author-consented (no
   third-party admission); descriptor equality precedes witness verification;
   authority is verified at admission and persisted, never re-derived at read;
   `publish` is the only Core write primitive.
-- **ABI**: §10 function signatures.
+- **ABI**: §10 function signatures and the byte-identical authorship/Realm-owned
+  error-selector block; delegated authority/Binding selectors bubble unchanged.
 - **Consumed (dependsOn)**: `recordIdOf` (Type/Record chapter);
   `AccountPrincipal`, `computePrincipalId`, `AuthorityVerifierV1`,
   `AuthorityBasisWord` (principal chapter); receipt spine,

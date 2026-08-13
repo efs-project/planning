@@ -431,6 +431,27 @@ AdmissionReceipt/1 {
 }
 ```
 
+The external Solidity shape is byte-for-byte the authorship chapter's one
+`AdmissionReceipt/1` view; no consent-mode or envelope-level basis field exists:
+
+```solidity
+struct OccurrenceRef {
+  bytes32 envelopeId;
+  uint16 leafIndex;
+}
+
+struct AdmissionReceiptView {
+  OccurrenceRef occurrenceRef;
+  bytes32 realmId;
+  bytes32 realmRevisionId;
+  AuthorityBasisWord authorityBasis;
+  bytes32 authorityCodehash;         // zero unless CONTRACT_ERC1271
+  uint64 admissionOrdinal;
+  uint48 admittedAtBlock;
+  uint8 acceptedStatus;              // 1 ACCEPTED
+}
+```
+
 Physical storage [PROPOSAL — SR-7/SR-10 exact contract]. Bit 0 is the
 least-significant bit of a word; every reserved bit MUST be zero:
 
@@ -469,6 +490,12 @@ AdmissionBatchMeta (one packed word):
 batchAuthorityBasis[batchId] = AuthorityBasisWord
 batchCodehash[batchId] = codehashOrZero // slot exists only for contract kind
 
+preWithdrawalEvidence[withdrawalOrdinal u48] =
+  abi.encode(decoded TargetEnvelopeEvidence)
+  // written only when this accepted Withdrawal causes an evidence-backed
+  // NEVER_ADMITTED -> PRE_WITHDRAWN transition; nonzero length,
+  // <= MAX_ENVELOPE_BODY_BYTES, immutable
+
 AuthorityBasisWord =
   authorityKind u8 || verifierVersion u16 || witnessProfile u8 ||
   basisBlock u64 || delegateOrZero u160
@@ -500,6 +527,15 @@ and gets block, explicit revision, exact verifier basis, and conditional
 codehash from that ordinal's batch. A later staged admission therefore cannot
 inherit first-touch metadata. `realmId` remains one genesis value; the
 submitting `msg.sender` is not authority state.
+
+For an evidence-backed pre-withdrawal, the target overlay's
+`revokedAtOrdinal` is the accepting Withdrawal occurrence's ordinal and that
+ordinal keys the exact canonical evidence bytes above. The bytes contain the
+validated target header, full RecordId vector, typed `AccountPrincipal`, and
+witness in the authorship chapter's `TargetEnvelopeEvidence` field order. The
+outer wire and aggregate-evidence bounds are checked before storage, so this is
+a bounded reconstruction carrier rather than an unbounded side channel. Empty
+at an accepted Withdrawal ordinal means no caller target evidence was used.
 
 ### 5.2 acceptedStatus
 
@@ -553,8 +589,6 @@ transaction block, system-constitution.md:149-153; candidate module 3,
 core-architecture-candidate.md:351-353].
 
 ```solidity
-struct OccurrenceRef { bytes32 envelopeId; uint16 leafIndex; }
-
 struct PublishLeafResult {
   uint16 leafIndex;
   uint8 outcome;              // 1 ADMITTED, 2 ALREADY_ADMITTED
@@ -712,9 +746,14 @@ as local destination truth.
 4 verify the envelope witness; retain its exact basis pair
 5 decode and verify explicit or implicit consent (all-duplicate shortcut first)
 6 structurally validate selected bodies and their TypeSchemas
-7 preflight every selected occurrence and leaf-driven effect
+7 preflight every selected occurrence and leaf-driven effect; caller target
+  evidence is required exactly for a newly accepted Withdrawal whose target is
+  NEVER_ADMITTED and whose target Envelope header is absent. A PRE_WITHDRAWN
+  target instead resolves retained evidence through revokedAtOrdinal
 8 allocate ordinals only to newly accepted occurrences
-9 commit envelope/Record/log/overlay/batch/cache/index/Binding writes atomically
+9 commit envelope/Record/log/overlay/batch/cache/index/Binding writes atomically;
+  for each evidence-backed T4, canonically re-encode the validated evidence at
+  the Withdrawal ordinal before pointing target.revokedAtOrdinal to it
 ```
 
 The intrinsic `TypeSchemaGroup/1` branch participates in steps 6–9. When a
@@ -764,36 +803,63 @@ WITHDRAWN/PRE_WITHDRAWN -> reject any admission; no resurrection
   already terminal occurrence is an accepted occurrence whose target effect
   is a no-op.
 - **Authenticated pre-withdrawal.** A never-admitted target requires
-  state-free `TargetEnvelopeEvidence`: target signed header fields, the full
-  committed `recordIds[]`, target `AccountPrincipal`, and target witness, but
-  no bodies. Preflight recomputes the target EnvelopeId, requires the exact
-  target ID and target-leaf range, requires
+  caller `TargetEnvelopeEvidence` only when its target Envelope header is not
+  already state-readable: target signed header fields, the full committed
+  `recordIds[]`, target `AccountPrincipal`, and target witness, but no bodies.
+  Preflight recomputes the target EnvelopeId, requires the exact target ID and
+  target-leaf range, requires
   `computePrincipalId(targetPrincipal) == targetHeader.principalId`, verifies
   the target witness, and only then compares target and withdrawing
   PrincipalIds. Missing, extra, duplicate, mismatched, or unauthenticated
-  evidence reverts; a bare target ID never sets PRE_WITHDRAWN.
+  evidence reverts; a bare target ID never sets PRE_WITHDRAWN when no target
+  header is in state. On success, the accepted Withdrawal's ordinal retains
+  the bounded canonical ABI re-encoding of the validated evidence and the
+  target's `revokedAtOrdinal` points to it.
+- **Terminal withdrawal retry.** A different author-valid Withdrawal targeting
+  WITHDRAWN/PRE_WITHDRAWN is accepted but its target effect is a no-op. For a
+  PRE_WITHDRAWN target with no persisted Envelope header, preflight loads the
+  immutable original evidence through `revokedAtOrdinal`, checks its stored
+  ID/range/descriptor linkage, and uses the already authenticated target
+  Principal for the author comparison; it never asks the caller to resupply or
+  replace evidence and never calls live target authority at read time. Exact
+  retry of the same already-ACTIVE Withdrawal occurrence returns through
+  occurrence idempotence before target-effect preflight.
 - **Wrong author.** A Principal mismatch reverts the whole envelope with
   `ErrWithdrawNotAuthor`; it never admits inert kernel-class evidence.
-- **Typed reverts** (closed list; codes are ABI errors, not stored state):
+- **Typed reverts.** The authorship/Realm-owned selector block is byte-identical
+  to the authorship chapter; codes are ABI errors, not stored state:
 
-```text
-E_STRUCTURAL(uint16 leafIndex, uint16 code)   // malformed canonical body
-E_UNKNOWN_TYPE(uint16 leafIndex)              // TypeSchemaId not admitted
-E_AUTHORITY(uint16 code)                      // envelope authority fails (Lane 3 codes)
-E_INTENT_EXPIRED()
-E_INTENT_REALM_MISMATCH()
-E_NONCE(uint192 nonceKey, uint64 expected, uint64 got)
-E_EXPECTED_REVISION(uint16 leafIndex, uint32 expected, uint32 actual)
-E_TARGET_EVIDENCE(uint16 withdrawalLeafIndex)
-E_NO_RESURRECTION(bytes32 envelopeId, uint16 leafIndex)
-ErrWithdrawNotAuthor()
-E_REF_UNSATISFIED(uint16 leafIndex, uint8 roleOrdinal)
-E_CAS_CONFLICT(bytes32 positionKey)           // Lane 5 seam
-E_BOUNDS(uint16 code)                         // named-constant violation
-E_POLICY(uint16 code)                         // Realm policy module rejection
-AUTH_PRINCIPAL_MISMATCH(bytes32 declared, bytes32 computed)
-U48_GUARD()
+```solidity
+error E_PROFILE(uint16 got);
+error E_RESERVED_AUTHORITY(bytes32 authorityRef, uint64 authEpoch);
+error E_EMPTY_ENVELOPE();
+error E_LEAF_LIMIT(uint256 got);
+error E_LEAF_RANGE(uint16 leafIndex);
+error E_BODY_LIMIT(uint256 got);
+error E_WIRE_LIMIT(uint256 got);
+error E_BODY_MISMATCH(uint16 leafIndex);
+error E_REALM_MISMATCH(bytes32 expected, bytes32 got);
+error E_NONCE(uint192 nonceKey, uint64 expected, uint64 got);
+error E_EXPIRED_ENVELOPE(uint64 notAfter);
+error E_EXPIRED_INTENT(uint64 notAfter);
+error E_EXPECTED_REVISION(uint16 leafIndex, uint32 expected, uint32 actual);
+error E_TARGET_EVIDENCE(uint16 withdrawalLeafIndex);
+error E_NO_RESURRECTION(bytes32 envelopeId, uint16 leafIndex);
+error E_STRUCTURAL(uint16 leafIndex, uint16 code);
+error E_UNKNOWN_TYPE(uint16 leafIndex);
+error E_REF_UNSATISFIED(uint16 leafIndex, uint8 roleOrdinal);
+error E_BOUNDS(uint16 code);
+error E_POLICY(uint16 code);
+error AUTH_PRINCIPAL_MISMATCH(bytes32 declared, bytes32 computed);
+error ErrWithdrawNotAuthor(bytes32 targetEnvelopeId, uint16 targetLeafIndex,
+                           bytes32 envelopePrincipal, bytes32 targetPrincipal);
+error U48_GUARD();
 ```
+
+Authority-verifier errors bubble unchanged from the principal chapter's §3.6;
+Binding transition errors bubble unchanged from the Binding chapter's §3.5.
+There is no generic `E_AUTHORITY`, `E_BAD_WITNESS`, `E_NOT_AUTHOR`, or
+`E_CAS_CONFLICT` alias.
 
 - **Policy hook.** Realm admission policy is a bounded, revisioned check
   inside the atomic call (`POLICY_GAS_MAX = 200,000` gas [PROPOSAL — value
@@ -1046,21 +1112,31 @@ W-6  TYPES       when a Record is TypeSchemaGroup/1, validate groupBytes,
 W-7  EFFECTS     replay exactly the Binding-set, Binding-tombstone, and
                  Withdrawal leaf-Type effects in admission-ordinal order.
                  Withdrawal Records derive ACTIVE->WITHDRAWN or
-                 NEVER_ADMITTED->PRE_WITHDRAWN overlay results; there is no
-                 peer intent event stream.
+                 NEVER_ADMITTED->PRE_WITHDRAWN overlay results. For each
+                 evidence-backed T4, read preWithdrawalEvidenceAt(ord), decode
+                 the exact TargetEnvelopeEvidence, recompute target EnvelopeId
+                 and leaf range, assert descriptor equality, replay the target
+                 witness/author check at the retained admission basis, and
+                 require target.revokedAtOrdinal == ord. Empty evidence is
+                 valid only when the target header was already state-readable
+                 or the target effect was terminal no-op; there is no peer
+                 intent event stream.
 W-8  INDEXES     replay deterministic postings, per-Record liveness, and count
                  folds from the same accepted-occurrence order; compare every
                  bounded index read, including its cursor/high-water/basis.
 W-9  BINDINGS    replay Binding CAS/head folds from the same order and compare
                  point reads. Finally compare every reconstructed OccStatus,
-                 including PRE_WITHDRAWN targets absent from the admission log.
+                 including PRE_WITHDRAWN targets absent from the admission log;
+                 every such target whose Envelope header is absent must point
+                 to one nonempty bounded evidence value at its effective
+                 Withdrawal ordinal.
 W-10 VERDICT     any mismatch at W-1..W-9 is a conformance failure of the
                  Realm or of one implementation — a Stage B golden-vector
                  category, and at runtime an UNQUALIFIED_REALM grading, never
                  a silent repair.
 ```
 
-### 8.2 Reconstruction read ABI (complete list)
+### 8.2 Exact reconstruction read ABI
 
 ```solidity
 enum Completeness {
@@ -1068,6 +1144,70 @@ enum Completeness {
   COMPLETE,      // 1
   PARTIAL,       // 2
   UNSUPPORTED    // 3
+}
+
+struct PageRequest {                  // index-owner shape
+  uint256 cursor;
+  uint16 maxItems;
+  uint64 basisOrdinal;                // 0 = current
+}
+
+struct PageResult {                   // index-owner six-part page tuple
+  bytes32 realmBasis;
+  uint64 highWaterOrdinal;
+  uint256 cursor;
+  bytes32[] items;
+  uint32 coverage;
+  Completeness completeness;
+}
+
+struct HydratedItem {
+  uint64 ordinal;
+  bytes32 envelopeId;
+  uint16 leafIndex;
+  bytes32 recordId;
+  bytes32 principalId;
+}
+
+struct IndexedReceiptView {           // extended index view, not a second receipt
+  bytes32 envelopeId;
+  uint16 leafIndex;
+  bytes32 realmId;
+  bytes32 realmRevisionId;
+  AuthorityBasisWord authorityBasis;
+  bytes32 authorityCodehash;
+  uint64 authEpoch;
+  uint64 admissionOrdinal;
+  uint48 admittedAtBlock;
+  uint8 acceptedStatus;
+  uint8 occurrenceStatus;
+  uint64 revokedAtOrdinal;
+}
+
+enum BindingState { UNSET, BOUND, TOMBSTONED }
+
+struct BindingHead {
+  uint8 state;
+  uint8 targetKind;
+  uint8 tombstoneCause;
+  uint32 revision;
+  uint64 admissionOrdinal;
+  bytes32 targetA;
+  uint16 targetLeaf;
+}
+
+struct BindingHistoryEntry {
+  uint32 revision;
+  uint64 admissionOrdinal;
+  bytes32 occKeyRef;
+  uint16 leafIndex;
+}
+
+struct SelectSpec {
+  bytes32 typeSchemaId;
+  uint8 roleOrdinal;
+  uint8 scoreMode;
+  uint8 scoreFieldOrdinal;
 }
 
 function realmId() external view returns (bytes32);
@@ -1098,6 +1238,11 @@ function principalIdByOrdinal(uint64 principalOrdinal) external view
   returns (bytes32 principalId);
 function occurrenceStatus(bytes32 envelopeId, uint16 leafIndex) external view
   returns (uint8 status, uint64 admissionOrdinal, uint64 revokedAtOrdinal);
+function preWithdrawalEvidenceAt(uint64 withdrawalOrdinal) external view
+  returns (bytes memory canonicalTargetEvidence);
+  // rejects 0, values above admissionCount, and values above the physical u48
+  // range. Empty iff that accepted Withdrawal did not use caller target evidence;
+  // nonempty is <= MAX_ENVELOPE_BODY_BYTES and decodes as TargetEnvelopeEvidence.
 function receiptOf(bytes32 envelopeId, uint16 leafIndex) external view
   returns (AdmissionReceiptView memory);      // logical AdmissionReceipt/1
 function admissionAt(uint64 ordinal) external view
@@ -1113,19 +1258,80 @@ function admissionBatchAt(uint64 batchId) external view returns (
 function admissionAge(OccurrenceRef calldata ref) external view
   returns (uint48 admittedAtBlock, uint48 currentBlock, uint64 confirmations);
 
-// Byte-identical index-owned point reads used by W-5/W-6 comparison.
-function getRecord(bytes32 recordId) external view returns (
-  bytes32 typeSchemaId, bytes memory canonicalBody,
-  uint64 firstAdmittedAtOrdinal);
+// IRealmIndexRead/1 — byte-identical current index-owner signatures.
+// Point reads:
 function getTypeSchema(bytes32 typeSchemaId) external view returns (
-  bytes memory canonicalSchemaBody, uint64 typeOrdinal,
-  uint64 admittedAtOrdinal, uint8 refRoleCount, uint8 indexSpecCount);
+  bytes memory canonicalBody, uint48 typeOrd, uint64 admitOrdinal,
+  uint8 refRoleCount, uint8 indexSpecCount);
+function getRecord(bytes32 recordId) external view returns (
+  bytes32 typeSchemaId, bytes memory canonicalBody, uint64 firstAdmitOrdinal);
+function getEnvelope(bytes32 envelopeId) external view returns (
+  bytes memory canonicalEnvelope, uint40 envelopeOrdinal,
+  uint16 leafCount, bytes32 principalId, uint64 authEpoch);
+function getOccurrence(bytes32 envelopeId, uint16 leafIndex) external view returns (
+  uint8 status, uint64 ordinal, bytes32 recordId, bytes32 typeSchemaId,
+  bytes32 principalId, uint64 revokedAtOrdinal);
+function getOccurrenceByOrdinal(uint64 ordinal) external view returns (
+  bytes32 envelopeId, uint16 leafIndex, bytes32 recordId,
+  bytes32 typeSchemaId, bytes32 principalId, uint8 status,
+  uint64 revokedAtOrdinal);
+function getReceipt(uint64 ordinal) external view
+  returns (IndexedReceiptView memory);
+
+// Exact index-owner pages/counts/helpers:
+function admissionLogPage(PageRequest calldata req) external view
+  returns (PageResult memory);
+function pagePostings(bytes32 typeSchemaId, uint8 indexKind,
+                      uint8 indexOrdinal, bytes32 valueKey,
+                      PageRequest calldata req) external view
+  returns (PageResult memory);
+function pagePostingsHydrated(bytes32 typeSchemaId, uint8 indexKind,
+                              uint8 indexOrdinal, bytes32 valueKey,
+                              PageRequest calldata req) external view
+  returns (PageResult memory ordinals, HydratedItem[] memory hydrated);
+function counts(bytes32 typeSchemaId, uint8 indexKind, uint8 indexOrdinal,
+                bytes32 valueKey) external view returns (
+  uint64 totalCount, uint64 liveCount, uint64 lastOrdinal,
+  bytes32 realmBasis, uint64 highWaterOrdinal);
+function lookupByDigest(uint16 algCode, bytes calldata digest,
+                        PageRequest calldata req) external view
+  returns (PageResult memory);
+function getBindingHead(bytes32 bindingKey) external view returns (
+  BindingHead memory head, bytes32 realmBasis, uint64 highWaterOrdinal);
+function getBindingAtBasis(bytes32 bindingKey, uint64 basisOrdinal)
+  external view returns (
+    BindingHead memory head, bytes32 realmBasis, uint64 highWaterOrdinal);
+function selectBestLocator(bytes32 targetKey, SelectSpec calldata spec,
+                           uint64 basisOrdinal, uint256 cursor)
+  external view returns (
+    uint64 bestOrdinal, uint64 bestScore, uint16 postingsVisited,
+    uint256 nextCursor, Completeness completeness);
+
+// IBindingRead/1 — byte-identical current Binding-owner signatures.
+function readHead(bytes32 bindingKey) external view
+  returns (BindingHead memory);
+function readHeadByPosition(bytes32 principalId, bytes32 purpose,
+                            bytes32 subject, bytes32 fieldRole)
+  external view returns (BindingHead memory, bytes32 bindingKey);
+function readHeadBatch(bytes32[] calldata bindingKeys) external view
+  returns (BindingHead[] memory);
+function readHistory(bytes32 bindingKey, uint32 fromRevision, uint16 limit)
+  external view returns (
+    BindingHistoryEntry[] memory entries, uint32 nextRevision,
+    uint8 completeness);
+function readOccurrenceStatus(bytes32 envelopeId, uint16 leafIndex)
+  external view returns (
+    uint8 status, uint64 ordinal, uint64 revokedAtOrdinal);
 ```
-[PROPOSAL — every page-shaped read uses the same fail-closed enum and returns
-cursor, high-water, and query basis. Truncation is `PARTIAL`; an unsupported
-profile is `UNSUPPORTED`; an unavailable or unproven basis is `UNKNOWN`.
-Zero/default can never mean COMPLETE-empty. This external completeness word is
-distinct from §4.2's semantic presence `UNKNOWN` and from `BasisGrade`.]
+[PROPOSAL — every `PageResult`-shaped index read uses the same fail-closed enum
+and returns cursor, high-water, and query basis. Truncation is `PARTIAL`; an
+unsupported profile is `UNSUPPORTED`; an unavailable or unproven basis is
+`UNKNOWN`. Binding-owned `readHistory` retains its exact owner shape
+`(entries,nextRevision,uint8 completeness)` and is evaluated at the basis of
+the enclosing `eth_call`; callers use the returned resume revision plus the
+Binding head. Zero/default can never mean COMPLETE-empty. This external
+completeness word is distinct from §4.2's semantic presence `UNKNOWN` and from
+`BasisGrade`.]
 
 Honest scope note: this walk reconstructs state **at the basis the RPC
 serves** (latest, or any basis within QR-2's window). Reconstructing a *past*
@@ -1174,7 +1380,9 @@ The compact contract other chapters rely on:
   `(principalId, nonceKey) -> lastSeq` lanes, exact-retry shortcut, and
   `IntentId = keccak256(abi.encode(DOM_INTENT, eip712IntentDigest))` (§5.4).
 - **Occurrence contract**: four-state OccStatus overlay; authenticated target
-  evidence and wrong-author revert; no resurrection; sparse u64/public,
+  evidence and wrong-author revert; evidence-backed T4 stores one bounded
+  canonical value at the Withdrawal ordinal and terminal repeats load rather
+  than resupply it; no resurrection; sparse u64/public,
   u48/stored ordinals; reversible `logSlotA/logSlotB`; per-occurrence receipt
   reconstructed from explicit AdmissionBatch block/revision/exact
   AuthorityBasisWord/conditional codehash (§5.1–5.5).
@@ -1187,11 +1395,15 @@ The compact contract other chapters rely on:
 - **Upgrade rules U-1..U-6**: activation boundaries are stored u48/public u64
   and nondecreasing; explicit batch revision owns receipt reconstruction;
   breaking change = new RealmId + successor evidence (§7).
-- **Reconstruction ABI** (§8.2): the complete state-only read surface,
-  including envelope, occurrence/log, batch, Record, Type-cache, effects,
-  index, and Binding comparison points; no intent event log or private DB.
+- **Reconstruction ABI** (§8.2): the exact state-only Core reads plus the
+  byte-identical named `IRealmIndexRead/1` and `IBindingRead/1` owner surfaces,
+  covering envelope, occurrence/log, batch, retained pre-withdrawal evidence,
+  Record, Type-cache, effects, index, and Binding comparison points; no intent
+  event log or private DB.
 - **Completeness**: one external byte vocabulary `UNKNOWN=0, COMPLETE=1,
-  PARTIAL=2, UNSUPPORTED=3`, always with cursor/high-water/basis on pages.
+  PARTIAL=2, UNSUPPORTED=3`; index `PageResult` pages carry
+  cursor/high-water/basis, while Binding `readHistory` keeps its exact owner
+  resume-revision shape at the enclosing call basis.
 - **Named constants** (§5.6): shared SR-5 values remain Stage B hypotheses;
   selected-leaf publication is the structural fallback.
 - **Depended-on seams**: Lane 2 (envelope codec, EnvelopeId preimage,

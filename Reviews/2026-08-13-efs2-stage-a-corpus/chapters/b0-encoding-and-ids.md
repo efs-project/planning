@@ -89,7 +89,7 @@ hashing; `fixture` = harness-scope only, never on-chain.
 | `DOM_LEAF` | `efs2/envelope-leaf/1` | id | per-leaf commitment (§4.2b sub-variant only) |
 | `DOM_OCCURRENCE` | `efs2/occurrence/1` | id | single-word OccurrenceKey (also keys the SR-10 status overlay) |
 | `DOM_PRINCIPAL` | `efs2/principal/1` | id | PrincipalId (SR-14; descriptor from Lane 3) |
-| `DOM_REALM` | `efs2/realm/1` | id | RealmId (descriptor from Lane 4) |
+| `DOM_REALM` | `efs2/realm/1` | id | RealmId (exact five immutable fields from Lane 4) |
 | `DOM_REALM_REVISION` | `efs2/realm-revision/1` | id | RealmRevisionId (SR-16) |
 | `DOM_POSITION` | `efs2/position/1` | id | PositionKey (SR-6) |
 | `DOM_BINDING` | `efs2/binding/1` | id | BindingKey (SR-6) |
@@ -749,7 +749,7 @@ sizes are `32 × wordCount` bytes.
 | `leafCommit_i` | `(DOM_LEAF, uint256 i, recordId_i)` — §4.2b sub-variant only, not B0 |
 | `OccurrenceKey` | `(DOM_OCCURRENCE, envelopeId, uint256 leafIndex)` — single-word form of OccurrenceRef |
 | `PrincipalId` | `(DOM_PRINCIPAL, uint256(kind), keccak256(descriptorBytes))` — SR-14; per-kind fixed descriptor layout owned by Lane 3 |
-| `RealmId` | `(DOM_REALM, keccak256(realmDescriptorBytes))` — descriptor owned by Lane 4 |
+| `RealmId` | `(DOM_REALM, chainNamespace, chainReference, coreAddress, profileId, genesisCommitment)` — exact fieldwise SR-1 formula owned by Lane 4 |
 | `RealmRevisionId` | `(DOM_REALM_REVISION, realmId, keccak256(revisionDescriptorBytes))` — SR-16; descriptor field set owned by the realm chapter |
 | `PositionKey` | `(DOM_POSITION, bytes32 purpose, bytes32 subject, bytes32 fieldRole)` |
 | `BindingKey` | `(DOM_BINDING, principalId, positionKey)` |
@@ -1190,7 +1190,15 @@ library EfsIds {
     function occurrenceKey(bytes32 envelopeId_, uint16 leafIndex) internal pure returns (bytes32);
     function principalId(uint8 kind, bytes calldata descriptor) internal pure returns (bytes32);
         // SR-14: kind = the principal chapter's authorityKind, zero-extended to uint256 in the preimage
-    function realmId(bytes calldata realmDescriptor) internal pure returns (bytes32);
+    function realmId(
+        bytes8 chainNamespace,
+        bytes32 chainReference,
+        address coreAddress,
+        bytes32 profileId,
+        bytes32 genesisCommitment
+    ) internal pure returns (bytes32);
+        // SR-1 / Realm §2.2: keccak256(abi.encode(DOM_REALM,
+        // chainNamespace, chainReference, coreAddress, profileId, genesisCommitment)).
     function realmRevisionId(bytes32 realmId_, bytes calldata revisionDescriptor)
         internal pure returns (bytes32);                           // SR-16: descriptor owned by realm chapter
     function positionKey(bytes32 purpose, bytes32 subject, bytes32 fieldRole) internal pure returns (bytes32);

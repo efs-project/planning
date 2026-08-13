@@ -172,8 +172,12 @@ free `bytes32` per the binding chapter's ruling.
 it: one packed `AuthorityBasisWord` (bytes32) =
 `kind u8 ‖ verifierVersion u16 ‖ witnessProfile u8 ‖ basisBlock u64 ‖
 delegateOrZero u160`, plus one conditional codehash slot for contract-account
-kinds. This word IS the receipt's authority-basis slot and IS what the
-envelope-meta index row stores (the compressed `authorityBasisCode u16`
+kinds. The exact pair belongs to each non-idempotent accepting `publish` call:
+one `AdmissionBatch` stores it, and every newly accepted occurrence in that
+call resolves its immutable `AdmissionReceipt/1` through that batch. A later
+staged admission of the same Envelope is reverified and may therefore record a
+different basis block, delegate, or codehash. `EnvelopeMeta` owns no
+authoritative singular basis (and the compressed `authorityBasisCode u16`
 projection is retired). The authorship chapter's four-field struct is
 superseded and regenerates against the word. `authEpoch` lives in the envelope
 header (SR-2), not in the basis word.
@@ -220,14 +224,20 @@ uint256(leafIndex)))` under SR-1. Ordinals are
 assigned **per accepted occurrence in submission order** — the
 `base + k` consecutive-ordinal law is retired because leafMask subset and
 staged admission (SR-3/SR-12) make it unsound. **Pre-withdrawal (T4) is
-preserved and now implementable:** withdrawing a never-admitted occKey
-requires presenting the target envelope's authenticated header (fields +
-signature, no bodies) so admission recomputes `EnvelopeId`, verifies the
-target's author equals the withdrawer, and sets `PRE_WITHDRAWN` — the
-leaked-envelope defense with an evaluable author guard. `WITHDRAWN` and
-`PRE_WITHDRAWN` permanently block (re-)admission of that occKey
-(no-resurrection, SR-15). The one-way status flip drives the exactly-once
-index decrement.
+preserved and now implementable:** withdrawing a never-admitted occKey whose
+target Envelope header is not already in state requires bounded
+`TargetEnvelopeEvidence` (signed header fields, full RecordId vector, typed
+Principal descriptor, and witness; no bodies). Admission recomputes
+`EnvelopeId`, checks the target range and descriptor equality, verifies the
+target witness, verifies the author match, and sets `PRE_WITHDRAWN`. The
+accepting Withdrawal's ordinal durably keys the canonical ABI re-encoding of
+the exact evidence used; the target overlay's `revokedAtOrdinal` points back
+to it. This bounded state read is the W-7/W-9 reconstruction source when no
+target `EnvelopeMeta` exists. A later withdrawal of the same terminal target
+is a no-op and loads that retained evidence when an author check is needed;
+callers neither resupply nor replace it. `WITHDRAWN` and `PRE_WITHDRAWN`
+permanently block (re-)admission of that occKey (no-resurrection, SR-15). The
+one-way ACTIVE status flip drives the exactly-once index decrement.
 
 **SR-11 — kernel Type recognition (RP-11).** The closed B0 list of
 **application Types with kernel admission effects** is exactly

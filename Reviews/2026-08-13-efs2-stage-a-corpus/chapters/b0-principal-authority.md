@@ -37,8 +37,11 @@ Each is restated once here and then used without re-argument.
   authorization → removed key signs later and backdates order/epoch") and §8.2
   ("Authoritative authorship is validated at the principal's authority-home
   admission… A signature has no trusted creation time")]. Authority is checked
-  exactly once, at admission, in the Realm's own transaction order, and the
-  basis used is persisted into the admission receipt. No read path ever
+  once per non-idempotent accepting call, at admission in the Realm's own
+  transaction order, and the basis used is persisted into each newly accepted
+  occurrence's admission receipt through its admitting-call `AdmissionBatch`.
+  An Envelope admitted in
+  stages is reverified on every non-idempotent accepting call; no read path ever
   re-evaluates live authority for historical data.
 - **AUTH-INV-2 (no `hasCode ? ERC1271 : ecrecover` dispatch).**
   [DERIVED INVARIANT — core-architecture-candidate.md §Principal lines 247–250;
@@ -55,8 +58,10 @@ Each is restated once here and then used without re-argument.
   derives from msg.sender, a relayer, paymaster, wallet vendor, or submission
   rail"]. `AuthorityVerifier` reads no `msg.sender`, `tx.origin`, or payer
   context. Conformance vector: one envelope submitted by two different
-  rails/sponsors yields byte-identical `PrincipalId` and `AuthorityBasis`
-  except `basisBlock`.
+  rails/sponsors against the same account state yields byte-identical
+  `PrincipalId` and basis fields except `basisBlock`; if account state changes,
+  the exact delegate/codehash difference is retained by each accepting batch,
+  never attributed to the rail.
 - **AUTH-INV-5 (full-width PrincipalId).** [DERIVED INVARIANT —
   system-constitution.md "Every Principal-bearing ID, ABI, storage key, index
   key, Binding, and Lens preserves the full bytes32 PrincipalId"]. Nothing in
@@ -400,8 +405,10 @@ chapter** (its EIP-712 preparation, replay domain, and nonce design live
 there; the audit STANDARDS lane's EIP-712 finding binds that chapter, not
 this one). This verifier's contract is: witness proves authority over the
 supplied digest, whatever it commits to. One verification covers one
-Envelope; every Occurrence `(EnvelopeId, leafIndex)` in it inherits that
-Envelope's basis.
+non-idempotent accepting `publish` call. Every occurrence newly accepted by
+that call resolves the returned pair through the call's `AdmissionBatch`.
+Later staged admission of another occurrence from the same Envelope performs a
+new verification and may retain a different block/delegate/codehash basis.
 
 ### 3.3 Witness encodings — `WitnessProfile/1`
 
@@ -535,18 +542,21 @@ records how authority was verified, the header records which authority epoch
 was claimed. Return vs persistence: `verify` returns the uniform pair
 `(AuthorityBasisWord, bytes32 codehashOrZero)` (SR-13); the PERSISTED form
 stays one word plus one conditional slot — `codehashOrZero` is nonzero iff
-`authorityKind == CONTRACT_ERC1271`, and a zero second word is never
-stored. Per SR-7 this word IS the receipt's authority-basis slot and IS
-what the envelope-meta index row stores; the compressed
-`authorityBasisCode u16` projection is retired, and the authorship
-chapter's four-field basis struct is superseded (it regenerates as a
-partial projection of this word, not a peer encoding).
+`authorityKind == CONTRACT_ERC1271`, and a zero second word is never stored.
+Per SR-7 this word is the receipt's exact authority-basis value. The admitting
+call stores the pair once in its `AdmissionBatch`; each occurrence newly
+accepted by that call resolves its immutable receipt through that batch.
+`EnvelopeMeta` stores no singular authority basis. The compressed
+`authorityBasisCode u16` projection is retired, and the authorship chapter's
+four-field basis struct is superseded (it regenerates as a partial projection
+of this word, not a peer encoding).
 
-Persisted **per accepted Envelope admission** in the admission receipt (Lane
-4/admission chapter owns the receipt spine; this chapter owns these bytes).
-Every Occurrence in the Envelope shares the Envelope's basis. The receipt
-additionally carries `RealmRevisionId` and `AdmissionOrdinal` (admission
-chapter), so the complete historical interpretation context is:
+Persisted **per non-idempotent accepting call**, with one batch shared only by
+the occurrences newly accepted in that call (Lane 4/admission owns the batch
+and receipt spine; this chapter owns these bytes). A staged call for the same
+Envelope may record a different pair. The logical receipt additionally carries
+`RealmRevisionId` and `AdmissionOrdinal` (admission chapter), so the complete
+historical interpretation context is:
 `(PrincipalId, AuthorityBasisWord [, contractCodehash], RealmRevisionId,
 AdmissionOrdinal)`.
 
@@ -690,9 +700,9 @@ evidence of hazard: identity.md line 18's July ruling "No ERC-1271 anywhere,
 ever (chain-bound, state-dependent)" is EVIDENCE not baseline; the audit
 STANDARDS lane names basis-pinning as the price of re-admission]:
 
-1. **Admission-time only.** ERC-1271 is called exactly once per Envelope, at
-   admission, under `ERC1271_VERIFY_GAS`, and the answering code's
-   `EXTCODEHASH` + block are pinned into `AuthorityBasis`. The
+1. **Admission-time only.** ERC-1271 is called exactly once per
+   non-idempotent accepting `publish` call, under `ERC1271_VERIFY_GAS`, and the
+   answering code's `EXTCODEHASH` + block are pinned into `AuthorityBasis`. The
    state-dependence hazard is neutralized because the receipt records *which
    state answered*.
 2. **Never on read/Lens paths.** [DERIVED INVARIANT — candidate falsifier 8;
@@ -951,8 +961,9 @@ the address, which is exactly the information `AccountPrincipal/1` adds.
 6. `AUTH-P256`: RFC 6979 A.2.5 key with a valid raw signature; high-s
    rejected; off-curve key rejected at V4.
 7. `AUTH-RSA`: 2048-bit accept; e≠65537 rejected; wrong-length sig rejected.
-8. `AUTH-RAIL`: one envelope, two submission rails → identical PrincipalId +
-   basis modulo `basisBlock` (AUTH-INV-4).
+8. `AUTH-RAIL`: one envelope, two submission rails against the same account
+   state → identical PrincipalId + basis modulo `basisBlock` (AUTH-INV-4);
+   staged calls across an account-state change retain their own exact pairs.
 9. `AUTH-FOREIGN`: contract-account Principal with foreign originRef →
    `AUTH_FOREIGN_ORIGIN`, and its import-lane, no-live-authority carriage.
 10. `GRAD-SEAM` (deferred until the managed design exists): G1–G8 as scripted
@@ -998,8 +1009,9 @@ function previewAuthority(AccountPrincipal calldata, bytes32, bytes calldata)
 // ---- persisted state this chapter defines ----
 // mapping(bytes32 => bytes) principalRecord;      // descriptorBytes verbatim, first-use,
 //                                                 // append-only, from the SR-13 channel
-// AuthorityBasisWord (+ conditional codehash slot; zero never stored) persisted per
-//   accepted Envelope admission in the receipt; all Occurrences of the Envelope share it.
+// AuthorityBasisWord (+ conditional codehash slot; zero never stored) persisted once per
+//   non-idempotent accepting call in AdmissionBatch; only occurrences newly accepted by
+//   that call resolve that pair. EnvelopeMeta owns no singular authority basis.
 function principalGovernance(bytes32 principalId) external view
     returns (bool seen, uint8 class, uint64 sinceOrdinal, bytes32 managedAuthorityRef);
 ```
