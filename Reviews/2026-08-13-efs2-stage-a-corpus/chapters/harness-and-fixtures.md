@@ -360,8 +360,9 @@ Mandatory freeze checks are executable corpus members:
   and corpusVersion. The same check rejects a measurement report with bare
   `fixtureId="CV"`, an invalid/missing `caseId`, mismatched `vectorId` or
   `stepIndex`, invalid signed-state-growth spelling, duplicate
-  `MeasurementRowKey`, unsorted rows, unknown/missing row keys, or a root/row
-  corpusVersion/resultRegistryHash mismatch or mixed/wrong-filename cell ids.
+  `MeasurementRowKey`, unsorted rows, unknown/missing row keys, a root/row
+  `corpusVersion` mismatch, a root `resultRegistryHash` that does not equal the
+  frozen registry, or mixed/wrong-filename cell ids.
 - **H-RESULTREG:** every ABI/FixOp/read/cell operation appears exactly once;
   any name/schema/error change moves registry hash and corpusVersion; actual
   revert selector+arguments match its namespace/code entry. Every row
@@ -1324,9 +1325,10 @@ MUST NOT be substituted for either `inputDigest` or `stateDigest`.
 **Canonical measurement report bytes [PROPOSAL — exact].** Each Stage B cell
 emits one `measurements/<cellId>.json` restricted-JCS file whose root has exactly
 `{corpusVersion,format,resultRegistryHash,rows}` and whose format is
-`efs2-stage-b-measurements/1`. Root `corpusVersion` and
-`resultRegistryHash` equal every row/the frozen corpus, and every row's
-`cellId` equals the filename cell; a mismatch rejects.
+`efs2-stage-b-measurements/1`. Every row's `corpusVersion` equals the root,
+the root `resultRegistryHash` equals the frozen registry, and every row's
+`cellId` equals the filename cell; a mismatch rejects. Rows intentionally do
+not repeat the report-wide `resultRegistryHash`.
 Every row object has exactly the fields in `MeasurementRow` above; missing,
 unknown, or duplicate keys reject. JSON booleans are booleans; strings are
 NFC/control-free; bytes32 values are full-width lowercase `0x` hex; unsigned
