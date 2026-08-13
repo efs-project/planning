@@ -770,7 +770,8 @@ encoding chapter's recursive-Type rules handle the SELF case).
 
 This one-call graph rule is exclusively for `REF`/RecordId edges. For each
 selected body in the ascending write-free shadow, Admission first resolves its
-Type descriptor from persisted or earlier staged Type cache, then structurally
+Type descriptor from the kernel-known intrinsic `TypeSchemaGroup/1` descriptor,
+persisted Type cache, or earlier staged Type cache, then structurally
 validates and extracts every bounded direct or optional `OCCREF`; equality
 between any `ref.envelopeId` and the current EnvelopeId reverts
 `E_SELF_ENVELOPE_OCCREF(sourceLeafIndex,ref.leafIndex)` before writes. Binding
@@ -793,8 +794,9 @@ ordinal counters so log words and metadata are exact before replay. The only app
 `BIND_SET | BIND_TOMBSTONE | WITHDRAWAL`; ordinary leaves have `NONE`, and
 intrinsic Type-cache materialization is structural bootstrap work.
 
-At each selected leaf, Admission resolves the descriptor from persisted or
-earlier staged Type cache, structurally validates the body, extracts and checks
+At each selected leaf, Admission resolves the descriptor from the kernel-known
+intrinsic `TypeSchemaGroup/1` descriptor, persisted Type cache, or earlier staged
+Type cache, structurally validates the body, extracts and checks
 OCCREF, classifies the closed effect kind, and associates the exact ordered
 `expectedRevisions` item when applicable. All of this precedes source activation
 or effects. A fresh TypeSchemaGroup stages its validated deterministic member
@@ -830,8 +832,9 @@ Caller target evidence stays specific to its named Withdrawal and is never
 cached as generic Envelope availability.
 
 The all-selected-ACTIVE shortcut runs a smaller ascending retry guard before it
-returns: every selected descriptor must resolve from persisted Type cache, its
-body is structurally validated, and its bounded OCCREFs pass the same comparison.
+returns: every selected descriptor must resolve from the kernel-known intrinsic
+`TypeSchemaGroup/1` descriptor or persisted Type cache, its body is structurally
+validated, and its bounded OCCREFs pass the same comparison.
 No cache is staged and no unselected body is inspected. This pass precedes the
 shortcut but does not replay application effects, policy, CAS, target-evidence
 semantics, expiry, expected revisions, or intent/nonces.
@@ -963,7 +966,8 @@ as local destination truth.
   and selected body-to-RecordId commitments; do not semantically inspect
   unselected carriage; read each selected source OccStatus
 6 EARLY-ACTIVE: if every selected source occurrence is ACTIVE, walk selected
-  leaves ascending, resolve each descriptor from persisted Type cache,
+  leaves ascending, resolve each descriptor from the kernel-known intrinsic
+  TypeSchemaGroup/1 descriptor or persisted Type cache,
   structurally validate the body, extract bounded OCCREFs, and enforce
   E_SELF_ENVELOPE_OCCREF. Then return existing PublishResult/receipts as
   ALREADY_ADMITTED. Do not semantically match or verify targetEvidence; do not
@@ -978,7 +982,8 @@ as local destination truth.
   word; implicit consent stages zero
 8 initialize the shadow from persisted point reads. Stage the authenticated
   current Envelope only for persistence, never target resolution. Walk selected
-  leaves ascending: resolve each descriptor from persisted or earlier staged Type
+  leaves ascending: resolve each descriptor from the kernel-known intrinsic
+  TypeSchemaGroup/1 descriptor, persisted Type cache, or earlier staged Type
   cache; structurally validate the body; enforce E_SELF_ENVELOPE_OCCREF before
   source activation/effects; classify the effect and consume exact expected-
   revision coverage; validate/stage a fresh TypeSchemaGroup's member caches for
@@ -997,7 +1002,7 @@ as local destination truth.
   input/evidence/authority/policy/CAS decision
 ```
 
-The intrinsic `TypeSchemaGroup/1` branch participates in steps 8–10. When a
+The intrinsic `TypeSchemaGroup/1` branch participates in steps 6 and 8–10. When a
 new bootstrap Record is encountered, Core validates `groupBytes` (R1–R3, E1
 offset classes, `REF_INSTANCES_MAX=16`), derives every member TypeSchemaId,
 stages the parsed cache, rejects any conflicting existing entry, and makes the
