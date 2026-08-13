@@ -37,11 +37,13 @@ Each is restated once here and then used without re-argument.
   authorization → removed key signs later and backdates order/epoch") and §8.2
   ("Authoritative authorship is validated at the principal's authority-home
   admission… A signature has no trusted creation time")]. Authority is checked
-  once per non-idempotent accepting call, at admission in the Realm's own
-  transaction order, and the basis used is persisted into each newly accepted
+  once per `publish` that passes bounded structure and descriptor equality,
+  before the all-selected-ACTIVE classification. That no-op path discards the
+  observation; only a
+  non-idempotent accepting call persists the basis into each newly accepted
   occurrence's admission receipt through its admitting-call `AdmissionBatch`.
-  An Envelope admitted in
-  stages is reverified on every non-idempotent accepting call; no read path ever
+  An Envelope admitted in stages is reverified on every non-idempotent accepting
+  call; no read path ever
   re-evaluates live authority for historical data.
 - **AUTH-INV-2 (no `hasCode ? ERC1271 : ecrecover` dispatch).**
   [DERIVED INVARIANT — core-architecture-candidate.md §Principal lines 247–250;
@@ -404,11 +406,13 @@ as its weakest asserted link.] First-use `PrincipalRecord` persistence
 chapter** (its EIP-712 preparation, replay domain, and nonce design live
 there; the audit STANDARDS lane's EIP-712 finding binds that chapter, not
 this one). This verifier's contract is: witness proves authority over the
-supplied digest, whatever it commits to. One verification covers one
-non-idempotent accepting `publish` call. Every occurrence newly accepted by
-that call resolves the returned pair through the call's `AdmissionBatch`.
-Later staged admission of another occurrence from the same Envelope performs a
-new verification and may retain a different block/delegate/codehash basis.
+supplied digest, whatever it commits to. One verification covers one `publish`
+call that reaches occurrence classification. An all-selected-ACTIVE call
+discards the returned pair and writes nothing; every occurrence newly accepted
+by a non-idempotent call resolves its pair through that call's
+`AdmissionBatch`. Later staged admission of another occurrence from the same
+Envelope performs a new verification and may retain a different
+block/delegate/codehash basis.
 
 ### 3.3 Witness encodings — `WitnessProfile/1`
 
@@ -700,11 +704,13 @@ evidence of hazard: identity.md line 18's July ruling "No ERC-1271 anywhere,
 ever (chain-bound, state-dependent)" is EVIDENCE not baseline; the audit
 STANDARDS lane names basis-pinning as the price of re-admission]:
 
-1. **Admission-time only.** ERC-1271 is called exactly once per
-   non-idempotent accepting `publish` call, under `ERC1271_VERIFY_GAS`, and the
-   answering code's `EXTCODEHASH` + block are pinned into `AuthorityBasis`. The
-   state-dependence hazard is neutralized because the receipt records *which
-   state answered*.
+1. **Admission-time only.** ERC-1271 is called exactly once per `publish` that
+   passes bounded structure and descriptor equality and reaches occurrence
+   classification, under
+   `ERC1271_VERIFY_GAS`. An all-selected-ACTIVE retry discards that result and
+   writes nothing. For a non-idempotent accepting call, the answering code's
+   `EXTCODEHASH` + block are pinned into `AuthorityBasis`; the state-dependence
+   hazard is neutralized because the receipt records *which state answered*.
 2. **Never on read/Lens paths.** [DERIVED INVARIANT — candidate falsifier 8;
    constitution: "Reads consume historical admission receipts; they do not
    call arbitrary ERC-1271 accounts for every Lens entry."] Lens/Binding

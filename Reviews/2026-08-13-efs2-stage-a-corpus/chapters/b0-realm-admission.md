@@ -712,12 +712,14 @@ mapping(bytes32 principalId => mapping(uint192 nonceKey => uint64 lastSeq))
     intentNonces;
 ```
 
-Explicit intent requires `nonceSeq == lastSeq + 1`; the first accepted
-sequence is 1. The intent must name this Realm and recomputed EnvelopeId,
-select a nonempty in-range mask, set `action == 0`, and satisfy `notAfter`
-(`0` means no deadline; otherwise `block.timestamp <= notAfter`); the signed
-envelope's own expiry must also pass. There is no separate intent-event order:
-kernel effects come only from accepted leaf Types in admission-ordinal order.
+On the non-idempotent path, explicit intent requires
+`nonceSeq == lastSeq + 1`; the first accepted sequence is 1. The intent must
+name this Realm and recomputed EnvelopeId, select a nonempty in-range mask, set
+`action == 0`, and satisfy `notAfter` (`0` means no deadline; otherwise
+`block.timestamp <= notAfter`); the signed envelope's own expiry must also
+pass. The all-selected-ACTIVE shortcut in §5.5 occurs before these replay and
+admissibility gates. There is no separate intent-event order: kernel effects
+come only from accepted leaf Types in admission-ordinal order.
 
 **Consent branches inside the one ABI.** Every selected Binding-class leaf
 requires explicit intent. Relayers and non-account Principals also require an
@@ -740,23 +742,38 @@ as local destination truth.
 **Required call order** [PROPOSAL — exact]:
 
 ```text
-1 decode and enforce bounds
+1 decode and enforce main-envelope structure, body/carriage bounds, and every
+  target-evidence item's bounded syntactic shape; do not semantically match
+  targetEvidence to effects yet
 2 recompute the envelope digest and EnvelopeId
 3 computePrincipalId(principal); assert equality with header.principalId
 4 verify the envelope witness; retain its exact basis pair
-5 decode and verify explicit or implicit consent (all-duplicate shortcut first)
-6 structurally validate selected bodies and their TypeSchemas
-7 preflight every selected occurrence and leaf-driven effect; caller target
-  evidence is required exactly for a newly accepted Withdrawal whose target is
-  NEVER_ADMITTED and whose target Envelope header is absent. A PRE_WITHDRAWN
-  target instead resolves retained evidence through revokedAtOrdinal
-8 allocate ordinals only to newly accepted occurrences
-9 commit envelope/Record/log/overlay/batch/cache/index/Binding writes atomically;
+5 decode consent carriage only far enough to derive the prospective explicit or
+  implicit leafMask; enforce nonempty/in-range selection, selected body carriage,
+  and body-to-RecordId commitments; read each selected source OccStatus
+6 EARLY-ACTIVE: if every selected source occurrence is ACTIVE, return existing
+  PublishResult/receipts as ALREADY_ADMITTED. Do not semantically match or verify
+  targetEvidence; do not check Type/effect/policy/CAS state, either expiry,
+  expected revisions, intent witness, or intent nonce; discard the newly observed
+  envelope basis; append no AdmissionBatch and write nothing
+7 NON-IDEMPOTENT CONSENT: reject selected terminal source occurrences, then fully
+  verify explicit or implicit consent. Explicit consent must carry a fresh next
+  nonce and current expected revisions; both expiries apply. Stage the nonce write
+8 structurally validate selected TypeSchemas and preflight every leaf-driven
+  effect, reference, policy, and Binding CAS. Semantic target-evidence cardinality
+  and verification run here: caller evidence is required exactly for a newly
+  accepted Withdrawal whose target is NEVER_ADMITTED and whose target Envelope
+  header is absent. A PRE_WITHDRAWN target instead resolves retained evidence
+  through revokedAtOrdinal; old evidence for an ACTIVE source in a mixed call is
+  extra and reverts
+9 allocate ordinals only to newly accepted occurrences
+10 commit the staged nonce and envelope/Record/log/overlay/batch/cache/index/
+  Binding writes atomically;
   for each evidence-backed T4, canonically re-encode the validated evidence at
   the Withdrawal ordinal before pointing target.revokedAtOrdinal to it
 ```
 
-The intrinsic `TypeSchemaGroup/1` branch participates in steps 6–9. When a
+The intrinsic `TypeSchemaGroup/1` branch participates in steps 8–10. When a
 new bootstrap Record is encountered, Core validates `groupBytes` (R1–R3, E1
 offset classes, `REF_INSTANCES_MAX=16`), derives every member TypeSchemaId,
 stages the parsed cache, rejects any conflicting existing entry, and makes the
@@ -774,15 +791,30 @@ transition.
 
 [PROPOSAL — exact semantics]
 
-- **Exact retry before nonce consumption.** If every selected occurrence is
-  already ACTIVE, return each existing ordinal/receipt as `ALREADY_ADMITTED`
-  without consuming or re-requiring its old nonce and without any write. A
-  mixed mask requires a fresh valid next nonce and every non-idempotent check;
+- **Exact retry before evidence/effect/nonce preflight.** Every call first passes
+  bounded wire/structural decoding, EnvelopeId recomputation, descriptor equality,
+  envelope-witness authentication, selection decoding, and selected
+  body-to-RecordId checks. If every selected source occurrence is then already
+  ACTIVE, return each existing ordinal/receipt as `ALREADY_ADMITTED` without
+  semantically matching `targetEvidence`, rechecking either expiry,
+  expected revisions or the explicit intent witness/nonce, appending a batch, or
+  writing anything. Thus byte-for-byte retry of successful evidence-bearing T4
+  calldata succeeds even though its original target evidence would be extra under
+  non-idempotent cardinality. A mixed mask cannot take this shortcut: it requires
+  a fresh valid next nonce and every evidence/effect/expiry/policy/CAS check;
   ACTIVE members still no-op while newly accepted members receive ordinals.
 - **All-or-nothing preflight.** Any non-idempotent structural, Type, target-
   evidence, expiry, nonce, policy, or CAS failure reverts the whole call before
   ordinal allocation. Subset publication is explicit through `leafMask`, not a
   post-failure admit-the-valid-subset mode.
+- **Retry-order conformance vectors.** After one evidence-backed T4 succeeds,
+  advance past both signed expiries and replay its exact original calldata: the
+  result MUST be the existing `ALREADY_ADMITTED` ordinal and every state word,
+  nonce, batch count, and retained evidence byte MUST be unchanged. Oversize or
+  malformed wire and a failing envelope witness still fail before the shortcut.
+  Add a NEVER_ADMITTED leaf to form a mixed mask: the consumed intent and the old
+  ACTIVE-source evidence MUST fail; only a fresh intent and the exact semantic
+  evidence set for newly accepted T4 leaves may reach allocation.
 - **Lifecycle transitions.** The complete overlay machine is:
 
 ```text
@@ -1377,12 +1409,15 @@ The compact contract other chapters rely on:
   optional non-Core SDK/router composition (§5.4).
 - **Exact AdmissionIntent/1**: Realm-bound EIP-712 commitment, selected
   `leafMask`, MBZ action, exact Binding expected-revision array, sequential
-  `(principalId, nonceKey) -> lastSeq` lanes, exact-retry shortcut, and
+  `(principalId, nonceKey) -> lastSeq` lanes, and
   `IntentId = keccak256(abi.encode(DOM_INTENT, eip712IntentDigest))` (§5.4).
 - **Occurrence contract**: four-state OccStatus overlay; authenticated target
   evidence and wrong-author revert; evidence-backed T4 stores one bounded
   canonical value at the Withdrawal ordinal and terminal repeats load rather
-  than resupply it; no resurrection; sparse u64/public,
+  than resupply it; the all-selected-ACTIVE shortcut follows bounded structure
+  plus envelope authentication but precedes semantic evidence/effect/expiry/
+  intent replay checks, while mixed/new calls require full preflight and a fresh
+  intent; no resurrection; sparse u64/public,
   u48/stored ordinals; reversible `logSlotA/logSlotB`; per-occurrence receipt
   reconstructed from explicit AdmissionBatch block/revision/exact
   AuthorityBasisWord/conditional codehash (§5.1–5.5).

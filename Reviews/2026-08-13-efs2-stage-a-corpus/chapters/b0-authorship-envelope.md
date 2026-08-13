@@ -200,18 +200,27 @@ for every carried leaf, `recordIdOf(bodies[j].typeSchemaId, bodies[j].canonicalB
 `Σ abi.encode(targetEvidence[j]).length ≤ MAX_ENVELOPE_BODY_BYTES`, else
 `E_TARGET_EVIDENCE`. These reuse the existing 64-leaf and 8,192-byte Stage B
 hypotheses; target evidence creates no unbounded secondary carriage surface.
+These are decoding and bounded-carriage checks and therefore run on every call,
+including an all-selected-ACTIVE retry. They do **not** perform the semantic
+one-to-one match below.
 
-After `leafMask`, source-occurrence outcomes, target occurrence states, and target
-Envelope-header availability are known, `targetEvidence` MUST be in strictly
+On the non-idempotent path, after `leafMask`, source-occurrence outcomes, target
+occurrence states, and target Envelope-header availability are known,
+`targetEvidence` MUST be in strictly
 increasing `withdrawalLeafIndex` order and bind one-to-one to exactly the newly
 accepted Withdrawal leaves whose target transition is
 `NEVER_ADMITTED -> PRE_WITHDRAWN` **and** whose target Envelope header is absent
 from state. An ACTIVE duplicate source occurrence, a target whose header is
 already persisted, or a target already in WITHDRAWN/PRE_WITHDRAWN requires no
-caller evidence; supplying it is extra and reverts. For PRE_WITHDRAWN, Core loads
-the original evidence through `occStatus[target].revokedAtOrdinal` rather than
-asking the caller again. Missing, extra, duplicate, unselected-leaf, or
-non-Withdrawal evidence reverts `E_TARGET_EVIDENCE`. Each required item is then
+caller evidence on a mixed/new call; supplying it for that leaf is extra and
+reverts. The all-selected-ACTIVE path is deliberately earlier: after the checks
+above and envelope identity/authentication, it returns without applying this
+semantic cardinality rule, so byte-for-byte retry of the successful
+evidence-bearing calldata remains valid. For PRE_WITHDRAWN on a mixed/new call,
+Core loads the original evidence through `occStatus[target].revokedAtOrdinal`
+rather than asking the caller again. Missing, extra, duplicate, unselected-leaf,
+or non-Withdrawal evidence on the non-idempotent path reverts
+`E_TARGET_EVIDENCE`. Each required item is then
 structurally validated, recomputes its SR-2 EnvelopeId, binds its typed
 `targetPrincipal` to its declared header id before witness verification under
 §4.4, carries the full committed vector and no bodies, and is consumed only by
@@ -587,12 +596,14 @@ never raw bodies, never a Realm value. One witness authorizes the whole envelope
 
 [DERIVED INVARIANT — kel §3 line 93 and §8.2 lines 437–449: read-time-only
 authorization lets a removed key backdate; a signature has no trusted creation
-time] The witness is verified exactly once in each non-idempotent accepting
-`publish` call by the Realm's versioned verifier; the resulting
-`AuthorityBasisWord` and conditional contract-account codehash are persisted in
-that call's `AdmissionBatch` and resolved by its newly accepted occurrences'
-receipts. A later staged call reverifies. Reads consume receipts and never re-run
-authority checks. For profile 1
+time] The witness is verified exactly once in each `publish` call that passes
+bounded structure and descriptor equality, before the all-selected-ACTIVE
+classification. The Realm's versioned
+verifier result is discarded on that no-op path; only a non-idempotent accepting
+call persists its `AuthorityBasisWord` and conditional contract-account codehash
+in an `AdmissionBatch` resolved by its newly accepted occurrences' receipts. A
+later staged call reverifies. Reads consume receipts and never re-run authority
+checks. For profile 1
 (intrinsic account Principals, no rotation) this is cheap insurance; it becomes
 load-bearing the moment managed Principals activate (§6) — which is exactly why
 the discipline is fixed now rather than retrofitted (kel §3 line 94: the
@@ -739,17 +750,37 @@ increment); across lanes: author's explicit choice.
 publish(bytes envelopeBytes, AccountPrincipal calldata principal,
         bytes intentBytes, bytes intentWitness):
  1. require envelopeBytes.length ≤ MAX_ENVELOPE_WIRE_BYTES; decode EnvelopeWire;
-    validate the main envelope and bounded target-evidence carriage (§2.2)
+    validate the main-envelope structure, body/carriage bounds, and the bounded
+    syntactic shape of every target-evidence item (§2.2), but DO NOT yet match
+    targetEvidence to Withdrawal effects
  2. computed ← computePrincipalId(principal)
     require computed == env.header.principalId
       — AUTH_PRINCIPAL_MISMATCH(declared, computed), before ANY witness verify
  3. envDigest ← §2.4; envelopeId ← §2.3
  4. (basisE, codehashE) ← AuthorityVerifierV1.verify(
        principal, envDigest, env.witness, verifyContext)
-    // reverts typed on failure; persist this exact pair for accepted occurrences
- 5. select explicit-intent or implicit-sender mode (§5.4); require leafMask ≠ 0,
+    // reverts typed on failure; persist this pair only if this call accepts new state
+ 5. decode the consent carriage only far enough to identify explicit-intent or
+    implicit-sender form and derive the prospective leafMask; require leafMask ≠ 0,
     bits ≥ count clear, every selected body carried, and every body RecordId-matched.
-    Derive the ascending evidence-required leaf list from newly accepted
+    Read the occurrence overlay for every selected source occurrence.
+ 6. EARLY-ACTIVE: if every selected source occurrence is already ACTIVE, return
+    the stable envelopeOrdinal and each existing ordinal/receipt as
+    ALREADY_ADMITTED. Do not semantically match or verify targetEvidence; do not
+    check Type/effect/policy/CAS state, either expiry, explicit intent witness,
+    expectedRevisions, or intent nonce; discard (basisE, codehashE); write nothing.
+ 7. NON-IDEMPOTENT CONSENT: reject selected WITHDRAWN/PRE_WITHDRAWN source
+    occurrences (E_NO_RESURRECTION). For explicit mode, decode the exact §5.1
+    AdmissionIntent and require action == 0; envelopeId/realmId/leafMask match;
+    both expiries pass; expectedRevisions exactly cover selected Binding-class
+    leaves and match current state; (basisI, codehashI) ←
+    AuthorityVerifierV1.verify(principal, eip712IntentDigest, intentWitness,
+    verifyContext), used only for consent and never as the receipt basis; require
+    a fresh nonceSeq == lastSeq + 1 and stage that nonce write. For implicit mode, require
+    intentBytes encodes only leafMask, intentWitness is empty, msg.sender is the
+    account in principal, no selected leaf is Binding-class, and envelope expiry
+    passes.
+ 8. Derive the ascending evidence-required leaf list from newly accepted
     Withdrawal bodies whose target is NEVER_ADMITTED and whose target Envelope
     header is absent; require
     targetEvidence.withdrawalLeafIndex
@@ -759,24 +790,12 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
     in range; then run the target descriptor/witness checks of §3.3. A terminal
     PRE_WITHDRAWN target instead resolves its original evidence through
     revokedAtOrdinal; caller evidence is forbidden.
- 6. classify every selected occurrence under §3.2. If every selected outcome is an
-    idempotent no-op, return its existing receipts/outcomes without consuming a
-    nonce or writing. If any selected occurrence is WITHDRAWN/PRE_WITHDRAWN and
-    the operation is admission, revert E_NO_RESURRECTION.
- 7. for explicit mode, decode the exact §5.1 AdmissionIntent and require:
-      action == 0; envelopeId/realmId/leafMask match; both expiries pass;
-      expectedRevisions exactly covers selected Binding-class leaves and every
-      expected revision matches current Realm state.
-    (basisI, codehashI) ← AuthorityVerifierV1.verify(
-       principal, eip712IntentDigest, intentWitness, verifyContext)
-    // the same typed descriptor is used for both checks; verification failure reverts
-    consume mapping[principalId][uint192 nonceKey] at nonceSeq == lastSeq + 1
- 8. for implicit-sender mode, require intentBytes encodes only leafMask,
-    intentWitness is empty, msg.sender is the account in `principal`, and no
-    selected leaf is Binding-class; the transaction nonce supplies replay control.
- 9. if first admission touching envelopeId: persist header + FULL recordIds vector
+ 9. structurally validate every selected body's TypeSchema and preflight all
+    leaf-driven effects, policy checks, reference checks, and Binding CAS checks.
+10. allocate ordinals only to newly accepted selected occurrences.
+11. if first admission touching envelopeId: persist header + FULL recordIds vector
     and first-use PrincipalRecord bytes copied from `principal` (state-readable, §10)
-10. for each selected bit i, ascending:
+12. for each selected bit i, ascending:
       dispatch §3.2; ACTIVE duplicates write nothing and return ALREADY_ADMITTED;
       newly accepted occurrences receive consecutive next ordinals in this
       submission order only; store any new Record body; apply Withdrawal §3.3
@@ -785,22 +804,33 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
       NEVER_ADMITTED -> PRE_WITHDRAWN transition, store its canonical ABI
       re-encoding at this Withdrawal occurrence's new ordinal before setting the
       target's revokedAtOrdinal to that same ordinal
-11. atomically materialize the parsed schema cache when the accepted Record is an
+13. atomically materialize the parsed schema cache when the accepted Record is an
     intrinsic TypeSchemaGroup/1 Record; this is structural bootstrap work, not an
     application effect or second write primitive
-12. run mandatory index postings for every newly accepted occurrence and the
+14. commit the staged fresh nonce (explicit mode), one AdmissionBatch with
+    (basisE, codehashE), mandatory index postings for every newly accepted
+    occurrence, and the
     exactly-once decrement for every effective withdrawal
     [OWNER RULING — mandatory automatic indexing, no writer opt-out,
      owner-rulings.md 2026-07-15 lines 59–62 and 2026-08-12 lines 203–210]
-13. emit receipt outcomes; ANY non-idempotent failure above reverts EVERYTHING
-    (steps 1–12
+15. emit receipt outcomes; ANY non-idempotent failure above reverts EVERYTHING
+    (steps 1–14
     are one EVM call frame — the one-transaction gate)
 ```
 
-Idempotency is occurrence-granular and unambiguous. An all-duplicate retry returns
-the existing receipts as `ALREADY_ADMITTED` and writes nothing. In a mixed mask,
-duplicates no-op while newly accepted occurrences require one fresh valid intent,
-consume its nonce, and receive new ordinals. Re-withdrawal of a `WITHDRAWN` or
+Idempotency is occurrence-granular and unambiguous. After bounded wire/structural
+checks, EnvelopeId recomputation, descriptor equality, envelope-witness
+authentication, selection decoding, and selected body-to-RecordId checks, an
+all-selected-ACTIVE retry returns the existing `PublishResult` receipts as
+`ALREADY_ADMITTED` and writes nothing. In particular, byte-for-byte retry of a
+successful evidence-backed T4 call still carries its original bounded
+`targetEvidence`; the early return deliberately occurs before that list could be
+reclassified as extra. It also precedes expiry, expected-revision, intent-witness,
+and nonce checks and appends no AdmissionBatch or evidence copy. In a mixed mask,
+the shortcut is unavailable: ACTIVE members no-op while newly accepted members
+require one fresh valid intent, full semantic target-evidence cardinality/effect
+preflight, and new ordinals. Evidence for an ACTIVE source leaf in that mixed call
+is extra and reverts. Re-withdrawal of a `WITHDRAWN` or
 `PRE_WITHDRAWN` target is likewise a no-op success after the author guard, using
 retained original evidence when the target header is absent; no caller evidence is
 required or accepted again. Re-admission of the same Withdrawal occurrence exits
@@ -836,9 +866,9 @@ workload (route to the F3 bakeoff notes).]
 account named by the verified `AccountPrincipal`, `intentBytes` may carry only a
 `uint64 leafMask` and `intentWitness` is empty. The mode is legal only when the
 selected envelope contains no Binding-class leaves; Binding-class leaves always
-require the explicit SR-3 intent with `expectedRevisions`. Realm is this contract
-by construction, the envelope expiry still applies, and the account transaction
-nonce supplies replay control. Consent mode is transient validation input only:
+require the explicit SR-3 intent with `expectedRevisions`. On the non-idempotent
+path, Realm is this contract by construction, the envelope expiry applies, and the
+account transaction nonce supplies replay control. Consent mode is transient validation input only:
 explicit and implicit consent produce the same `PublishResult`,
 `AdmissionBatch`, and `AdmissionReceipt/1` shapes and persist no mode tag. R-D8
 is not violated [DERIVED INVARIANT]: authorship still derives exclusively
@@ -1224,8 +1254,16 @@ There is no generic `E_AUTHORITY`, `E_BAD_WITNESS`, `E_NOT_AUTHOR`, or
    before author comparison; missing/extra/duplicate/wrong-leaf evidence and
    aggregate evidence/wire overflow MUST-FAIL; effective evidence-backed T4
    MUST return byte-identical canonical evidence through
-   `preWithdrawalEvidenceAt(withdrawalOrdinal)`, while T5b and exact retry MUST
-   succeed without resupplied evidence and MUST NOT replace or copy the entry.
+   `preWithdrawalEvidenceAt(withdrawalOrdinal)`. Replay that successful call's
+   exact original calldata after both expiries: it MUST return
+   `ALREADY_ADMITTED` with the existing ordinal, despite carrying the now-extra
+   original target evidence, and MUST leave nonce, AdmissionBatch count,
+   evidence bytes, and all state unchanged. Malformed/oversize wire or a failing
+   envelope witness MUST still fail before the shortcut. A mixed mask formed by
+   adding one NEVER_ADMITTED leaf MUST NOT take the shortcut: the consumed intent
+   and old ACTIVE-leaf evidence fail; a fresh intent plus exactly the evidence
+   required by newly accepted T4 leaves receives full preflight. T5b uses retained
+   original evidence without caller resupply and MUST NOT replace or copy it.
 9. Two Principals with identical low-160-bit accounts distinct end-to-end (R-D2).
 10. Bounds: 65 leaves, count = 0, oversize body, oversize witness, leafMask bit ≥
     count — each MUST-FAIL with its named error.
@@ -1256,7 +1294,10 @@ Compact contract other chapters may rely on:
   whose recomputed EnvelopeId and target-index range match the Withdrawal before
   author comparison; an effective evidence-backed T4 durably retains one bounded
   canonical evidence value at its Withdrawal ordinal, and terminal repeats load
-  it rather than requiring evidence again; admission is author-consented (no
+  it rather than requiring evidence again; after bounded structure and envelope
+  authentication, an all-selected-ACTIVE retry returns before semantic evidence,
+  effect, expiry, or intent replay checks, while every mixed/new call performs
+  them with a fresh intent; admission is author-consented (no
   third-party admission); descriptor equality precedes witness verification;
   authority is verified at admission and persisted, never re-derived at read;
   `publish` is the only Core write primitive.

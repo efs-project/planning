@@ -298,6 +298,13 @@ re-withdrawal of a WITHDRAWN occKey is a no-op success. The binding chapter's
 [REJECTED] — they break legitimate subset-admission retries. No-resurrection
 is enforced by the SR-10 status guard (WITHDRAWN / PRE_WITHDRAWN block
 admission), not by duplicate reverts.
+For a multi-leaf `publish`, after bounded structural/wire checks and envelope
+identity/authentication, an all-selected-ACTIVE set returns before semantic
+`targetEvidence` cardinality/effect checks, expiries, or intent replay state.
+This makes exact original evidence-bearing retry a true no-op. A mixed/new set
+does not take the shortcut: ACTIVE members no-op, while the call supplies a
+fresh intent and passes the complete semantic evidence/effect preflight for
+every newly accepted member.
 
 **SR-16 — RealmRevisionId (the predicted 13th seam).**
 `RealmRevisionId = keccak256(abi.encode(DOM_REALM_REVISION, realmId,
