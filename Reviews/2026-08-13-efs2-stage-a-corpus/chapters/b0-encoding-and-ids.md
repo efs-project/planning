@@ -14,7 +14,9 @@ Label key (PM-mandated): [OWNER RULING] / [DERIVED INVARIANT] / [PROPOSAL] / [HY
 Revision note (2026-08-13): repaired to the revised SR-1..SR-18 pins of [[b0-overview]].
 Landed here: SR-1 (set-wide domain table + relaxed grammar, §1.3), SR-2 (EnvelopeId — the
 pinned EIP-712 form; this chapter's earlier formula kept as a sub-variant sketch, §4.2),
-SR-5 (size-constant alignment, §2.6), SR-11 cross-ref (Binding-class sentinel rule, §2.2),
+SR-3 (exact EIP-712-wrapped IntentId, §4), SR-4 (public-u64/stored-u48 ordinal contract,
+§4.3), SR-5 (Stage B size hypotheses, §2.6), SR-7 (AuthorityBasisWord is packed evidence,
+not an ID), SR-11 cross-ref (Binding-class sentinel rule, §2.2),
 SR-14 (PrincipalId naming/structure, §4), SR-16 (RealmRevisionId regenerated; new
 `codexConstants` artifact, §1.6/§4), SR-17 (schema on-ramp via ordinary admission, §3.4 +
 harness case H-GROUPCAP), SR-18a (one u16 algCode table set-wide, §2.4), SR-18e
@@ -50,8 +52,12 @@ playbook item (red-team lane findings).
   addresses, chain ids, or registry state inside portable ID preimages). Evidence:
   deterministic-ids.md §1/§2 (VERIFIED); constitution "Universal identity without false
   equivalence" (chain/deployment/carrier must not change portable identity).
-- Exception, stated: `RealmId`/`RealmRevisionId` and `AuthorityBasis` deliberately DO commit to
-  deployment facts — they name deployments. The rule above governs *portable* ids
+- Exception, stated: `RealmId`/`RealmRevisionId` deliberately DO commit to deployment facts —
+  they name deployments. `AuthorityBasisWord` is not an ID at all: it is the principal
+  chapter's packed admission evidence
+  (`kind u8 ‖ verifierVersion u16 ‖ witnessProfile u8 ‖ basisBlock u64 ‖
+  delegateOrZero u160`) plus a conditional contract-account codehash slot. The rule above
+  governs *portable* ids
   (TypeSchemaId, RecordId, EnvelopeId, PrincipalId, PositionKey, BindingKey, PlanId).
   [PROPOSAL]
 
@@ -89,7 +95,6 @@ hashing; `fixture` = harness-scope only, never on-chain.
 | `DOM_BINDING` | `efs2/binding/1` | id | BindingKey (SR-6) |
 | `DOM_PLAN` | `efs2/plan/1` | id | PlanId (plan bytes from Lens lane) |
 | `DOM_INTENT` | `efs2/admission-intent/1` | id | AdmissionIntent id (SR-3, admission lane) |
-| `DOM_AUTHBASIS` | `efs2/authority-basis/1` | id | AuthorityBasis word (Lane 3/4) |
 | `DOM_PROFILE` | `efs2/profile/1` | id | Realm profileId (realm §2.3; consumes §1.6 hash) |
 | `DOM_REALM_GENESIS` | `efs2/realmgenesis/1` | id | Realm genesisCommitment (realm §2.4) |
 | `DOM_FIELDROLE` | `efs2/fieldrole/1` | tag | named-role hash for typed positions (binding §1.1) |
@@ -256,7 +261,7 @@ the seam it needs from this chapter is only `DIGEST` values and bounded `ARRAY` 
 | `0x07` | `REF` | bound by a ReferenceRole (§3) | 32 bytes (an EFS id) |
 | `0x08` | `OCCREF` | bound by a ReferenceRole | 34 bytes: EnvelopeId ‖ `u16` leafIndex |
 | `0x09` | `PRINCIPAL` | — | 32 bytes, full width, never truncated |
-| `0x0A` | `DIGEST` | — | `u16` algoCode ‖ `u16` len ‖ digest bytes (§2.4) |
+| `0x0A` | `DIGEST` | — | `u16` algCode ‖ `u16` len ‖ digest bytes (§2.4) |
 | `0x0B` | `ARRAY` | element descriptor, `maxCount` | `u16` count ‖ count × enc(elem) |
 | `0x0C` | `MAP` | key desc, value desc, `maxEntries` | `u16` count ‖ count × (enc(K) ‖ enc(V)), keys strictly ascending bytewise over enc(K) |
 | `0x0D` | `STRUCT` | member list | concatenation of members in declared order |
@@ -321,7 +326,7 @@ STANDARDS audit lane. EFS POLICY per that lane's recommendation: adopt registry 
 verbatim where they exist, pin the closed subset with printable names in the Codex, cite the
 registry as provenance, never as a living dependency):
 
-| algoCode | Name | Digest length | Status in EFS |
+| algCode | Name | Digest length | Status in EFS |
 |---|---|---|---|
 | `0x11` | `sha1` | 20 | foreign-only raw sha1; collision-broken; never EFS identity |
 | `0x12` | `sha2-256` | 32 | content digests, closures |
@@ -332,7 +337,7 @@ registry as provenance, never as a living dependency):
 EFS-assigned codes live in `0xef00–0xefff` [PROPOSAL — chosen as unassigned in the registry
 snapshot to be pinned at the freeze ceremony; if a collision with a registry assignment is
 found at snapshot time, the EFS code moves BEFORE genesis and never after]. Canonical rule:
-`len` must equal the table length for `algoCode`; unknown codes are structural errors (the
+`len` must equal the table length for `algCode`; unknown codes are structural errors (the
 table extends only by Codex revision, §7). Full CID (IPLD codec + multibase) is
 [REJECTED] as a Core value form unless IPFS interop becomes a stated requirement — a bare
 tagged digest is the smaller freezable unit (kill source: STANDARDS audit lane multihash
@@ -355,20 +360,21 @@ order, with two structural rules:
 
 ### 2.6 Named size constants
 
-All [PROPOSAL] unless noted; the deciding measurement is the Stage-A harness (fixtures lane)
-against the EIP-7825 cap. EIP-7825 = 16,777,216 gas per-transaction cap, live on L1 since
+Names and structural relationships are [PROPOSAL]. Numeric size values, including the four
+SR-5 envelope constants, are [HYPOTHESIS] to be re-derived by the Stage B harness against
+each qualifying Realm's gas cap. EIP-7825 = 16,777,216 gas per-transaction cap, live on L1 since
 Fusaka 2025-12-03 (VERIFIED via STANDARDS audit lane) — treated as hard protocol physics for
 every one-call write.
 
 | Constant | Value | Note |
 |---|---|---|
 | `MC_VERSION` | 1 | |
-| `MAX_BODY_BYTES` | 8,192 | arithmetic below |
+| `MAX_BODY_BYTES` | 8,192 | [HYPOTHESIS] one leaf may fill the envelope body budget |
 | `MAX_TYPESCHEMA_BYTES` | 8,192 | one schema blob |
 | `MAX_GROUP_SIZE` | 16 | schemas per group (§5) |
 | `MAX_FIELDS` | 64 | per schema |
 | `MAX_REFERENCE_ROLES` | 16 | per schema |
-| `REF_INSTANCES_MAX` | 16 | per-leaf total REF instances, ARRAY(REF) counts included (§3.1, SR-18e) |
+| `REF_INSTANCES_MAX` | 16 | [HYPOTHESIS] per-leaf total REF instances, ARRAY(REF) counts included (§2.7/§3.1, SR-18e) |
 | `MAX_INDEX_SPECS` | 8 | per schema |
 | `MAX_CONSTRAINTS` | 32 | per schema |
 | `MAX_NEST_DEPTH` | 4 | root fields are depth 1 |
@@ -380,8 +386,9 @@ every one-call write.
 | `MAX_TYPE_NAME_BYTES` | 128 | NAME_PROFILE |
 | `MAX_MEANING_BYTES` | 2,048 | §3.1 |
 | `MAX_EXTRACT_WALK` | 16 | rule E1 |
-| `MAX_ENVELOPE_LEAVES` | 64 | STRUCTURAL cap — matches `leafMask uint64` (SR-5); `leafIndex` stays uint16 ABI width |
-| `MAX_ENVELOPE_BODY_BYTES` | 8,192 | sum of leaf bodies per envelope (SR-5; one leaf may fill it) |
+| `MAX_ENVELOPE_LEAVES` | 64 | [HYPOTHESIS] STRUCTURAL cap — matches `leafMask uint64` (SR-5); `leafIndex` stays uint16 ABI width |
+| `MAX_ENVELOPE_BODY_BYTES` | 8,192 | [HYPOTHESIS] sum of leaf bodies per envelope (SR-5; one leaf may fill it) |
+| `MAX_BIND_LEAVES_PER_ENVELOPE` | 64 | [HYPOTHESIS] Binding-class leaf structural cap (SR-5) |
 | `MAX_GROUP_BYTES` | 8,190 | max `groupBytes` carried by the §3.4 on-ramp (= MAX_BODY_BYTES − 2) |
 | `MAX_DOMAIN_STRING_BYTES` | 64 | §1.3 |
 
@@ -425,13 +432,14 @@ EIP-7825 arithmetic (cap = 16,777,216):
 ```
 validateBody(schema S, bytes body) -> uint16 errCode   // 0 = OK
   cur := 0
+  refCount := 0
   for f in S.fields (declared order):
-    (cur, err) := decodeField(S, f.desc, body, cur, depth=1)
+    (cur, refCount, err) := decodeField(S, f.desc, body, cur, depth=1, refCount)
     if err != 0: return err
   if cur != len(body): return ERR_TRAILING
   return 0
 
-decodeField(S, desc, body, cur, depth):
+decodeField(S, desc, body, cur, depth, refCount):
   if depth > MAX_NEST_DEPTH: return ERR_DEPTH
   switch desc.kind:
     BOOL:        need(1); b := body[cur]; if b > 1: return ERR_BOOL; cur += 1
@@ -444,34 +452,45 @@ decodeField(S, desc, body, cur, depth):
                  cur += 2 + L
     REF:         need(32); v := word(body,cur)
                  if uint256(v) < 2^16 or v == 0: return ERR_SENTINEL_IN_BODY
+                 refCount += 1; if refCount > REF_INSTANCES_MAX: return ERR_REF_BUDGET
                  cur += 32
-    OCCREF:      need(34); cur += 34
+    OCCREF:      need(34)
+                 refCount += 1; if refCount > REF_INSTANCES_MAX: return ERR_REF_BUDGET
+                 cur += 34
     PRINCIPAL:   need(32); cur += 32
-    DIGEST:      need(4); algo := u16; L := u16
-                 if !algoTable[algo] or L != algoTable[algo].len: return ERR_DIGEST
+    DIGEST:      need(4); algCode := u16; L := u16
+                 if !algCodeTable[algCode] or L != algCodeTable[algCode].len: return ERR_DIGEST
                  need(L); cur += 4 + L
     ARRAY:       need(2); c := u16; if c > desc.maxCount: return ERR_COUNT
-                 repeat c: decodeField(S, desc.elem, body, cur, depth+1)
+                 repeat c: (cur, refCount) := decodeField(
+                   S, desc.elem, body, cur, depth+1, refCount)
     MAP:         need(2); c := u16; if c > desc.maxEntries: return ERR_COUNT
                  prevKeyEnc := ⊥
                  repeat c:
-                   kStart := cur; decodeField(S, desc.key, body, cur, depth+1)
+                   kStart := cur; (cur, refCount) := decodeField(
+                     S, desc.key, body, cur, depth+1, refCount)
                    kEnc := body[kStart..cur]
                    if prevKeyEnc != ⊥ and !(prevKeyEnc < kEnc bytewise): return ERR_MAP_ORDER
                    prevKeyEnc := kEnc
-                   decodeField(S, desc.val, body, cur, depth+1)
-    STRUCT:      for m in desc.members: decodeField(S, m, body, cur, depth+1)
+                   (cur, refCount) := decodeField(
+                     S, desc.val, body, cur, depth+1, refCount)
+    STRUCT:      for m in desc.members: (cur, refCount) := decodeField(
+                   S, m, body, cur, depth+1, refCount)
     OPTION:      need(1); p := body[cur]; if p > 1: return ERR_OPTION_FLAG
-                 cur += 1; if p == 1: decodeField(S, desc.inner, body, cur, depth)
-  return (cur, 0)
+                 cur += 1; if p == 1: (cur, refCount) := decodeField(
+                   S, desc.inner, body, cur, depth, refCount)
+  return (cur, refCount, 0)
 ```
 
 `need(n)` returns `ERR_TRUNCATED` if fewer than `n` bytes remain. Closed error codes:
 `0 OK, 1 ERR_TRAILING, 2 ERR_TRUNCATED, 3 ERR_BOUND, 4 ERR_UTF8, 5 ERR_MAP_ORDER,
 6 ERR_OPTION_FLAG, 7 ERR_BOOL, 8 ERR_SENTINEL_IN_BODY, 9 ERR_DIGEST, 11 ERR_DEPTH,
 12 ERR_COUNT, 13 ERR_SCHEMA_MALFORMED, 14 ERR_CONSTRAINT, 15 ERR_REF_BUDGET`. Constraint
-checks (§3.5) run after
-the structural walk. Gas is linear in body length with schema-bounded loop counts — a Type
+checks (§3.5) run after the structural walk. The runtime `refCount` guard is
+defense-in-depth under the schema-time bound in §3.1 and makes
+`REF_INSTANCES_MAX = 16` an explicit per-leaf structural validation rule,
+including every `ARRAY(REF)` element. Gas is linear in body length with
+schema-bounded loop counts — a Type
 creator cannot make validation unbounded [DERIVED INVARIANT — kickoff gate "a Type creator can
 make admission or reads unbounded" is candidate falsifier 5, VERIFIED].
 
@@ -626,25 +645,31 @@ function, kept below as a rejected sketch.]
   is intrinsic code, so no self-typing fixed point arises). Fields:
   `groupBytes BYTES(maxLen = MAX_GROUP_BYTES = 8,190)`. IndexSpecs: none in B0 (point read
   by RecordId; enumeration rides the index chapter's TypeSchemaMeta/typeOrd spine).
-- **On-ramp = ordinary admission.** A TypeSchemaGroup enters state as an ordinary Record of
-  this meta-Type, published in an ordinary envelope through the one entrypoint (SR-12). It
-  therefore has an author, an Occurrence, an AdmissionOrdinal, and full-body state-readable
-  bytes like everything else — which is exactly what the realm chapter's reconstruction walk
-  (W-5) needs: schemas appear IN the walk, no side registry exists.
-- **The thin wrapper.** `registerTypeSchemaGroup(...)` is a wrapper that (i) admits the
-  envelope whose leaf is the `TypeSchemaGroup/1` Record carrying `groupBytes`, and (ii) calls
-  `materializeSchemaCache(groupRecordId)` — a permissionless, idempotent step that runs
-  `validateTypeSchemaGroup` (R1–R3, E1 offset-class precompute, the SR-18e REF budget) and
-  stores the parsed-schema cache keyed by each derived `TypeSchemaId_k`. The cache is
-  derivable state: anyone can re-materialize it from the admitted Record (full-body spine
-  [OWNER RULING], §2.6); it writes no new truth, so SR-11's closed kernel-effect list is
-  untouched — the kernel does NOT dispatch on the meta-Type.
-- **Usability gate.** Admission of an instance Record whose `typeSchemaId` has no
-  materialized cache on that Realm fails with a typed error; the wrapper performs both steps,
-  so the common path never sees it. [PROPOSAL]
+- **On-ramp = ordinary admission with atomic derived state.** A TypeSchemaGroup enters state
+  as an ordinary Record of this meta-Type, published in an ordinary envelope through the sole
+  Core write entrypoint `publish` (SR-12). It therefore has an author, an Occurrence, an
+  AdmissionOrdinal, and full-body state-readable bytes like everything else — exactly what
+  the realm chapter's reconstruction walk (W-5) needs: schemas appear IN the walk, no side
+  registry exists. Core recognizes this intrinsic bootstrap Type for structural work only:
+  in the same admission it runs `validateTypeSchemaGroup` (R1–R3, E1 offset-class
+  precomputation, and SR-18e's REF-instance bound), derives every member
+  `TypeSchemaId_k`, and atomically materializes the parsed cache keyed by each id. Validation
+  or materialization failure reverts the whole publication.
+- **The thin wrapper.** `registerTypeSchemaGroup(...)` is SDK/convenience code, not a second
+  Core primitive. It accepts the same typed `AccountPrincipal calldata principal` channel,
+  constructs or forwards the `TypeSchemaGroup/1` Record/envelope/intent, and calls the one
+  repaired `publish(envelopeBytes, principal, intentBytes, intentWitness)` path. It neither
+  defines a side truth nor performs a later cache write. The cache is deterministic derived
+  state from the admitted full-body Record [OWNER RULING], and its materialization is
+  idempotent. The intrinsic branch is not a fourth application effect: SR-11's closed
+  application-effect list remains Binding set, Binding tombstone, and Withdrawal.
+- **Usability gate.** Admission of an instance Record whose `typeSchemaId` has no materialized
+  cache on that Realm fails with a typed error. A successfully admitted TypeSchemaGroup cannot
+  exhibit that intermediate state because Record admission and cache materialization are one
+  atomic call frame. [PROPOSAL]
 - **Idempotence.** Same `groupBytes` ⇒ same RecordId ⇒ re-admission is the SR-15
-  occurrence-granular no-op (ALREADY_ADMITTED), and re-materialization is a no-op —
-  content-addressed registration is preserved through the ordinary-admission path.
+  occurrence-granular no-op (`ALREADY_ADMITTED`); cache materialization is likewise
+  deterministic and idempotent within ordinary publication.
 - **Recursion.** Group registration rides the same path unchanged: one Record carries the
   whole `groupBytes`, so R2's simultaneous group commitment is untouched.
 
@@ -711,8 +736,7 @@ sizes are `32 × wordCount` bytes.
 | `PositionKey` | `(DOM_POSITION, bytes32 purpose, bytes32 subject, bytes32 fieldRole)` |
 | `BindingKey` | `(DOM_BINDING, principalId, positionKey)` |
 | `PlanId` | `(DOM_PLAN, uint256 planProfile, keccak256(planBytes))` — plan bytes owned by Lens lane; fixed-width packed per LR-1 |
-| `IntentId` | `(DOM_INTENT, realmId, envelopeId, keccak256(intentBodyBytes))` — body = the SR-3 merged intent shape, owned by the admission lane |
-| `AuthorityBasis` | `(DOM_AUTHBASIS, uint256 basisKind, keccak256(basisDescriptorBytes))` — descriptor owned by Lanes 3/4 |
+| `IntentId` | `(DOM_INTENT, eip712IntentDigest)` — exact SR-3 digest owned by the authorship chapter |
 
 Superseded rows, kept as labeled residue: `PrincipalId` under the name `principalScheme`
 regenerates verbatim to SR-14's `kind` (same two-level structure — one naming, one width:
@@ -723,6 +747,39 @@ regenerates verbatim to SR-14's `kind` (same two-level structure — one naming,
 SR-16]: the revision ordinal lives INSIDE `revisionDescriptorBytes` with the
 codehash/policy-commitment fields, so one owner (the realm chapter) holds the whole field
 set and this chapter carries only the two-level wrap.
+
+`AuthorityBasisWord` is deliberately absent from this ID-family table. Per SR-7 it is the
+principal chapter's exact packed evidence word plus a conditional contract codehash slot,
+not a hashed structural identity and not a second derivation surface.
+
+The intent row expands mechanically to the authorship chapter's complete SR-3 commitment:
+
+```text
+EXPECTED_REVISION_TYPEHASH = keccak256(
+  "ExpectedRevision(uint16 leafIndex,uint32 revision)")
+expectedRevisionsHash = keccak256(concat(
+  keccak256(abi.encode(EXPECTED_REVISION_TYPEHASH,
+                       item.leafIndex,
+                       item.revision))
+  for item in expectedRevisions, in array order
+))
+INTENT_TYPEHASH = keccak256(
+  "AdmissionIntent(bytes32 realmId,bytes32 envelopeId,uint64 leafMask,uint8 action,ExpectedRevision[] expectedRevisions,uint192 nonceKey,uint64 nonceSeq,uint64 notAfter)ExpectedRevision(uint16 leafIndex,uint32 revision)")
+intentStructHash = keccak256(abi.encode(
+  INTENT_TYPEHASH, realmId, envelopeId, leafMask, action,
+  expectedRevisionsHash, nonceKey, nonceSeq, notAfter
+))
+DS_INT = keccak256(abi.encode(
+  keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+  keccak256("EFS2-AdmissionIntent"), keccak256("1"),
+  chainId, verifyingContract
+))
+eip712IntentDigest = keccak256(0x1901 ‖ DS_INT ‖ intentStructHash)
+IntentId = keccak256(abi.encode(DOM_INTENT, eip712IntentDigest))
+```
+
+There is no unconstrained `intentBodyBytes` identity convention and no alternate
+field-order encoding.
 
 ### 4.1 RecordId
 
@@ -762,7 +819,8 @@ EnvelopeId = keccak256(abi.encode(DOM_ENVELOPE, eip712EnvelopeDigest))
   any AdmissionIntent. [DERIVED INVARIANT — identity excludes actor/grant carriage so
   reauthorization or re-signing never changes identity; evidence: kel.md §8.1 via CARRY-IN
   finding 2(b), VERIFIED. Authentication is verified at admission and pinned in the receipt
-  via `AuthorityBasis`.] Consequence: a re-signed identical struct is the SAME publication
+  via the exact `AuthorityBasisWord` plus conditional contract codehash.] Consequence: a
+  re-signed identical struct is the SAME publication
   event (same EnvelopeId; idempotent re-admission, not a duplicate); a new `pubNonce` is a
   new publication event by design.
 - `OccurrenceRef = (EnvelopeId, uint16 leafIndex)` — canonical 34-byte packed form
@@ -802,8 +860,13 @@ genesis. `DOM_LEAF` remains in the closed table scoped to this sketch.
   "Every Principal-bearing ID … preserves the full bytes32", VERIFIED]. Golden vector: two
   principal descriptors ground distinct PrincipalIds agreeing in their low 160 bits
   (constructed fixture), exercised end-to-end.
-- `AdmissionOrdinal` is `uint64`, Realm-local, assigned by admission (Lane 4). Century
-  arithmetic: 10,000 admissions/s × 100 years ≈ 3.2 × 10^13 ≪ 2^64. [PROPOSAL]
+- `AdmissionOrdinal` is Realm-local and `uint64` at every ABI, receipt, and vector.
+  Its physical packed representation is `uint48` inside postings, admission-log words,
+  and the authorship chapter's occurrence overlay; five u48 ordinals fit one storage slot.
+  `0` is the none-sentinel and admitted ordinals start at `1`. Before assigning a successor,
+  Core applies the explicit `U48_GUARD` and reverts at `2^48 - 1`; a named successor-Realm
+  seam carries migration rather than overflowing or widening in place. At 10,000
+  admissions/s, 2^48 lasts approximately 892 years. [PROPOSAL — SR-4]
 - `leafIndex` is `uint16` (skeleton pin); `MAX_ENVELOPE_LEAVES = 64 ≪ 2^16` (SR-5) keeps
   ample headroom — raising the structural cap is a per-Realm/Stage-B question that the u16
   arithmetic already accommodates.
@@ -1060,7 +1123,7 @@ memory-level evidence, PLAUSIBLE):
    end-to-end through storage/index keys.
 9. DIGEST: each table row; git SHA-1 OID carried as `0xef01 git-sha1-object` (framed
    preimage) with raw `0x11 sha1` distinct over the same 20 bytes; wrong-length and
-   unknown-algo rejection; one digest value round-tripped through a `ByteDigest/1` body and
+   unknown-`algCode` rejection; one digest value round-tripped through a `ByteDigest/1` body and
    a `DOM_VK_DIGEST` key with the same u16 algCode (SR-18a set-wide vocabulary).
 10. Sentinels: `SELF`/`GROUP_REF` values appearing in a body REF ⇒ `ERR_SENTINEL_IN_BODY`;
     sentinel-space registration rejection.
@@ -1113,22 +1176,20 @@ library EfsIds {
     function positionKey(bytes32 purpose, bytes32 subject, bytes32 fieldRole) internal pure returns (bytes32);
     function bindingKey(bytes32 principalId_, bytes32 positionKey_) internal pure returns (bytes32);
     function planId(uint16 planProfile, bytes calldata planBytes) internal pure returns (bytes32);
-    function intentId(bytes32 realmId_, bytes32 envelopeId_, bytes calldata intentBody)
-        internal pure returns (bytes32);
-    function authorityBasis(uint16 basisKind, bytes calldata basisDescriptor) internal pure returns (bytes32);
+    function intentId(bytes32 eip712IntentDigest) internal pure returns (bytes32);
+        // SR-3: keccak256(abi.encode(DOM_INTENT, eip712IntentDigest)); exact intent
+        // struct, expectedRevisions array hash, type hash, and Realm-bound domain are §4.
 }
 
-// SR-17 on-ramp: thin wrapper over ordinary admission + permissionless cache step (Core surface).
+// SR-17 on-ramp: SDK/convenience wrapper over the sole Core write primitive.
 interface ISchemaOnRamp {
     /// Admits the TypeSchemaGroup/1 Record through the one SR-12/SR-13 entrypoint shape,
-    /// then materializes the cache. Returns the group Record's id.
+    /// whose intrinsic branch atomically validates and materializes the cache.
+    /// Returns the group Record's id; defines no second write path.
     function registerTypeSchemaGroup(
-        bytes calldata envelopeBytes, bytes calldata principal,
+        bytes calldata envelopeBytes, AccountPrincipal calldata principal,
         bytes calldata intentBytes, bytes calldata intentWitness
     ) external returns (bytes32 groupRecordId);
-    /// Permissionless, idempotent: re-runs validateTypeSchemaGroup from the admitted Record
-    /// and stores the parsed-schema cache keyed by each derived TypeSchemaId.
-    function materializeSchemaCache(bytes32 groupRecordId) external;
 }
 
 // SR-16 obligation: state-readable Codex constants (§1.6).
@@ -1144,9 +1205,11 @@ scope classes and retired spellings); sentinel space §1.4; salt rule §1.5;
 and `genesisCommitment`, SR-16); the ONE u16 `algCode` table §2.4 (SR-18a — content chapter's
 u8 tags and index chapter's u32 algId retired); size constants §2.6 (SR-5 values;
 `REF_INSTANCES_MAX` per SR-18e); `OccurrenceRef` = `(bytes32, uint16)`, packed 34 bytes;
-`AdmissionOrdinal` = `uint64` ABI (u48 physical per SR-4); ids never truncated; foreign
+`AdmissionOrdinal` = `uint64` at every ABI/receipt/vector, u48 physical with
+`U48_GUARD`, zero-none, start-at-one, and a successor-Realm seam (SR-4); ids never truncated; foreign
 digests only as `DIGEST` values; no Type-created callbacks §2.8; the SR-17 schema on-ramp
-§3.4 (`ISchemaOnRamp`; kernel never dispatches on the meta-Type); TypeSchema evolution via §6
+§3.4 (`ISchemaOnRamp`; `publish` intrinsically validates/materializes the meta-Type but
+does not dispatch an application effect); TypeSchema evolution via §6
 evidence Records; migration seam §7 (incl. the legacy-suite write-path playbook item); EAS
 seam §9 (`IEasProjectionSeam`); axis-8 vectors `T-CONV`/`T-QUAL` pin whichever arm wins.
 
