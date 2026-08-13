@@ -549,7 +549,7 @@ ArtifactClosure/1 {
   members : array of Member          -- 1..MAX_CLOSURE_MEMBERS, sorted, unique
 }
 Member {
-  name    : bytes                    -- 1..MAX_MEMBER_NAME_BYTES, one path segment
+  name    : STRING(maxBytes=255)     -- UTF-8; profile requires nonempty path segment
   kind    : uint8                    -- 0x01 FILE | 0x02 EXEC_FILE | 0x03 SUBCLOSURE
   size    : uint64                   -- claimed exact byte size (FILE/EXEC_FILE);
                                      -- claimed member count (SUBCLOSURE)
@@ -584,9 +584,10 @@ Validation split (per §2.1):
    owner-obligated reverse-membership backlink, and ARRAY(REF) role counts are
    included in that bound), which is tighter than the SR-5 body-bytes
    derivation: see §8.4; nesting provides scale]).
-2. **Core:** each `name` is valid UTF-8 with declared 1..255-byte bounds
-   (`MAX_MEMBER_NAME_BYTES = 255`). **Profile/read:** no `0x00`, no `/`
-   (0x2F), and not `.` or `..`. **Portable presentation/collision policy
+2. **Core:** each `name` is a `STRING(maxBytes=255)`, so MC/1 enforces
+   well-formed UTF-8 and the 255-byte maximum but permits the empty string.
+   **Profile/read:** `1 ≤ len(name) ≤ 255`, no `0x00`, no `/` (0x2F),
+   and not `.` or `..`. **Portable presentation/collision policy
    (case folding, Unicode normalization, Windows reserved names) is the mount
    lane's read-side problem; the closure commits raw bytes** and two names
    differing only by normalization are distinct members [PROPOSAL — identity
@@ -734,20 +735,20 @@ each Realm descriptor states its own cap (Lane 3 seam).]
   state. Cold SSTORE ≈ 22.1k gas per 32-byte word ⇒ the pinned 8,192-byte
   body ≈ 256 words ≈ 5.66M gas storage alone. SR-5 pins `MAX_BODY_BYTES =
   8,192` ([HYPOTHESIS] there; Stage B re-derives), and this chapter
-  **re-derives the member ceiling against it**: worst-case member ≈ 12 words
-  (384 B) under a word-aligned codec (name ≤ 255 B ⇒ 8 name words + ref +
-  size + kind + len) ⇒ the body admits at most ⌊8,192 / 384⌋ = 21 worst-case
-  members, or ~64 members at a ≈ 4-word (≤ ~128 B) average — names averaging
-  ≤ ~64 B. The **governing bound is structural, not bytes**: SR-18e caps
+  **re-derives the member ceiling against it** using exact MC/1 packed bytes:
+  `STRING(255)` costs `u16 length + 255 = 257`, then `kind u8 = 1`,
+  `size u64 = 8`, and `content REF = 32`, for exactly 298 bytes per maximal
+  member. The ARRAY count adds 2 bytes, so 16 maximal members occupy
+  `2 + 16·298 = 4,770` bytes. The body bound alone would admit
+  `floor((8,192−2)/298) = 27` maximal members. The **governing bound is
+  structural, not bytes**: SR-18e caps
   per-leaf role-bound reference instances at `REF_INSTANCES_MAX = 16`
   (including the `ARRAY_STRUCT_MEMBER(members,content)` selector), and every closure member is one
   role-bound reference, so `MAX_CLOSURE_MEMBERS = 16` — at which even
-  all-worst-case names fit the body (16 × 384 = 6,144 B ≤ 8,192 B). All
+  all-maximal names fit the body (4,770 B ≤ 8,192 B). All
   bounds are enforced; the tighter one wins. [PROPOSAL — re-derived under
-  SR-5 + SR-18e. Supersedes the draft's `128` (derived from an assumed
-  16 KiB body with no REF-instance bound), kept as the visible delta:
-  16 KiB ⇒ 128 at a ≤ ~64 B average-name budget; the pinned 8,192 ⇒ 64;
-  the SR-18e REF bound ⇒ 16.]
+  SR-5 + SR-18e. Supersedes the draft's word-aligned estimate and its `128`
+  member arm; MC/1 is packed and the SR-18e REF bound yields 16.]
 - **Chunk-hash manifests can never be Records**: 6.55 MB ≫ any admittable
   body (§5.4).
 - **State-tier custody (optional venue module, §11):** EIP-170 allows
@@ -1130,8 +1131,9 @@ Solidity/TypeScript/Rust):
    references in wire order and emits all backlinks; DIRECT applied to the
    struct array, a non-reference selected member, a second-depth selector, or
    17 reference instances is Core-rejected. Unsorted members, duplicate names,
-   `/`, `.`/`..`, and kind/target mismatch are Core-admitted but deterministically
-   `PROFILE_MALFORMED`; a 256-byte name is Core-rejected by its bound;
+   empty name, `/`, `.`/`..`, and kind/target mismatch are Core-admitted but
+   deterministically `PROFILE_MALFORMED`; invalid UTF-8 and a 256-byte name are
+   Core-rejected by the STRING codec/bound;
    member.size mismatch detected at walk
    (`CLOSURE_MALFORMED`); nested dedup (identical subtree → one RecordId);
    walk-depth bound reports PARTIAL.

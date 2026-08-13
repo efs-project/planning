@@ -388,6 +388,20 @@ SR-8 removed the basis word from the head; the §9 gas rows regenerate.
 
 Semantics consumed:
 
+```solidity
+struct ResolvedTarget {
+    uint8   targetKind; // 0 NONE, 1 RECORD, 2 OCCURRENCE
+    bytes32 targetA;    // RecordId or EnvelopeId
+    uint16  targetLeaf; // MUST be 0 for RECORD/NONE; leaf index for OCCURRENCE
+}
+```
+
+`ResolvedTarget` is the only value compared or returned by the resolver. A
+BOUND head normalizes byte-for-byte to this struct. `RECORD` requires
+`targetLeaf == 0`; `OCCURRENCE` preserves the full `(EnvelopeId,leafIndex)`.
+Two Occurrence targets with the same EnvelopeId and different leaf indexes are
+different values. No bytes32-only projection may alias them.
+
 - `BOUND` ("present") head ⇒ the value was admitted under CAS from an authored
   Occurrence whose Principal matches `bindingKey`'s derivation, with authority
   validated at admission by the SR-13 verifier chain and recorded on that
@@ -416,8 +430,12 @@ Semantics consumed:
 The B0 combiner set is **closed**: `EXACT`, `PRIORITY_FIRST_PRESENT`,
 `THRESHOLD(k)`. Unknown tags reject at validation (`BAD_COMBINER`), never at
 execution. [DERIVED INVARIANT — closed contract-tier vocabulary; lens-pass
-corpus core-onchain P-CORE-7.] Value equality is `bytes32` word equality on
-`targetRef`. Every combiner is deterministic over (plan bytes, head states at
+corpus core-onchain P-CORE-7.] **[REJECTED — repaired]:** bytes32-only
+`targetRef` equality aliases two
+Occurrence targets in the same Envelope. Value equality is exact structural
+equality of all three `ResolvedTarget` fields
+`(targetKind,targetA,targetLeaf)`; RECORD values additionally require
+`targetLeaf=0`. Every combiner is deterministic over (plan bytes, head states at
 the basis) — never over gas price, warmth, or call path. [DERIVED INVARIANT —
 identical-semantics rule, core-onchain §4.2 carried.]
 
@@ -603,10 +621,11 @@ resolve(planRecordId, positionKey, basis) → ResolveResult
               return UNKNOWN(REASON_AUTHORITY_UNGRADEABLE) # blocks; no fallthrough
       heads.append((entry, h))
       # PRIORITY only: tier-boundary decision per §6.2 T4–T6; STOP on decide
-  # (6) COMBINE — §6.1/§6.2/§6.3 transitions T1–T10
-  (presence, value, winner) ← combine(combiner, thresholdK, heads)
+  # (6) COMBINE — compare every ResolvedTarget field; two leaves in one
+  #     Envelope are distinct. Apply §6.1/§6.2/§6.3 transitions T1–T10.
+  (presence, target, winner) ← combine(combiner, thresholdK, heads)
   # (7) REPORT — two axes, never collapsed (§7.2)
-  return ResolveResult{presence, value, winner,
+  return ResolveResult{presence, target, winner,
                        winnerAdmissionOrdinal,
                        presentCount, agreeCount,
                        basisReport(basis)}
@@ -642,12 +661,12 @@ struct BasisReport {
 struct ResolveResult {
     Presence presence;               // UNKNOWN|FOUND|ABSENT|CONFLICT|UNSUPPORTED
     uint8    reasonCode;             // ≠ 0 only for UNKNOWN/UNSUPPORTED
-    bytes32  value;                  // targetRef when FOUND; else 0 (not meaningful)
+    ResolvedTarget target;           // exact target when FOUND; all zero otherwise
     uint16   winnerIndex;            // plan entry index; WINNER_NONE when no winner
     uint16   winnerTier;             // 0 for EXACT/THRESHOLD
     uint64   winnerAdmissionOrdinal; // 0 when no winner
     uint16   presentCount;           // consulted entries with BOUND heads
-    uint16   agreeCount;             // heads agreeing with `value` (0 when no winner)
+    uint16   agreeCount;             // heads agreeing with `target` (0 when no winner)
     BasisReport basis;
 }
 ```
@@ -738,7 +757,7 @@ function resolve(bytes32 planRecordId, bytes32 positionKey)
 /// acceptMask = (1 << uint8(Presence.FOUND)) only; including UNKNOWN or
 /// CONFLICT bits in a gate's mask is non-conformant.
 function resolveStrict(bytes32 planRecordId, bytes32 positionKey, uint8 acceptMask)
-    external view returns (bytes32 value, ResolveResult memory r);
+    external view returns (ResolvedTarget memory target, ResolveResult memory r);
 
 /// Structural validation only (no probes). ok=false ⇒ rejectCode per §3.5.
 function validatePlan(bytes32 planRecordId)
@@ -788,10 +807,12 @@ contract ExampleGate {
     function act(bytes32 positionKey /* no planRecordId parameter */)
         external
     {
-        (bytes32 v, ) = core.resolveStrict(
+        (ResolvedTarget memory target, ) = core.resolveStrict(
             approvedPlanRecordId, positionKey,
             uint8(1) << uint8(Presence.FOUND));
-        // ... state change gated on v ...
+        // Example policy: require the exact target class expected by this gate.
+        require(target.targetKind == 1 && target.targetLeaf == 0, "not record");
+        // ... state change gated on target.targetA ...
     }
 }
 ```
@@ -922,7 +943,7 @@ pattern as consumer-side code against the §7.4 ABI, freezing no Core state:
 // Consumer-side pattern — no Core support required beyond resolve().
 struct PendingDecision {
     bytes32 positionKey;
-    bytes32 value;                    // resolved value at commit
+    ResolvedTarget target;            // exact resolved target at commit
     uint16  winnerIndex;              // decision-scoped identity of the winner
     uint32  winnerRevision;           // Lane 6 head revision at commit (via winner head)
     uint64  admissionHigh;            // basis high-water at commit
@@ -931,11 +952,13 @@ struct PendingDecision {
 
 // commit step:
 //   r = core.resolve(approvedPlanRecordId, pos); require(r.presence == FOUND);
-//   store PendingDecision{pos, r.value, r.winnerIndex, headRevision, r.basis.admissionHigh, now + WINDOW}
+//   store PendingDecision{pos, r.target, r.winnerIndex, headRevision, r.basis.admissionHigh, now + WINDOW}
 // finalize step (only after readyAt):
 //   r2 = core.resolve(approvedPlanRecordId, pos);
 //   ok = r2.presence == FOUND
-//     && r2.value == pd.value
+//     && r2.target.targetKind == pd.target.targetKind
+//     && r2.target.targetA == pd.target.targetA
+//     && r2.target.targetLeaf == pd.target.targetLeaf
 //     && r2.winnerIndex == pd.winnerIndex;        // decision-scoped recheck
 //   if (!ok) abort;  else act;
 ```
@@ -943,7 +966,7 @@ struct PendingDecision {
 Properties, each a fixture:
 
 - **Decision-scoped recheck** — the finalize re-check compares exactly the
-  decision inputs (value + winner identity), not global position quiescence, so
+  decision inputs (all target fields + winner identity), not global position quiescence, so
   unrelated churn at busy positions cannot permanently wedge honest decisions.
   [DERIVED INVARIANT — LR-3(ii)'s repair of the originally adopted item-F
   instantiation, lens-spec §3.2 via CARRY-IN.]
@@ -998,9 +1021,12 @@ encode/validate vectors (valid N ∈ {1,8,32,64}; one per rejection code 1–13;
 MC/1 u16 frame-length prefix round-trip plus short/long/noncanonical-prefix
 rejections);
 combiner outcome vectors (each of T1–T10, incl. two-value THRESHOLD conflict at
-k ≤ N/2 and the tombstone-contributes-absent case); BindingKey derivation
+k ≤ N/2, RECORD-vs-OCCURRENCE same targetA conflict, same EnvelopeId with
+different targetLeaf conflict, and the tombstone-contributes-absent case);
+BindingKey derivation
 vectors (incl. two Principals sharing low-160-bits); LENS-NEG-1; challenge-window
-commit/abort/finalize; cross-language (Solidity/TS/Rust) byte-identical plan
+commit/abort/finalize comparing all target fields; cross-language
+(Solidity/TS/Rust) byte-identical plan
 frames and plan RecordIds.
 
 Separate SDK/client fixtures run `N = {50,100,256}` on pinned mobile and
@@ -1027,8 +1053,9 @@ bytes32 SEMANTICS_PROFILE_B0 = keccak256("efs2/lens-semantics/b0/1");
 // ---- types ----
 enum Presence { UNKNOWN, FOUND, ABSENT, CONFLICT, UNSUPPORTED }
 struct BasisReport { bytes32 realmRevisionId; uint64 blockNumber; uint64 admissionHigh; uint8 basisKind; }
+struct ResolvedTarget { uint8 targetKind; bytes32 targetA; uint16 targetLeaf; }
 struct ResolveResult {
-    Presence presence; uint8 reasonCode; bytes32 value;
+    Presence presence; uint8 reasonCode; ResolvedTarget target;
     uint16 winnerIndex; uint16 winnerTier;
     uint64 winnerAdmissionOrdinal;
     uint16 presentCount; uint16 agreeCount; BasisReport basis;
@@ -1037,7 +1064,7 @@ struct ResolveResult {
 // ---- external views on Core ----
 function resolve(bytes32 planRecordId, bytes32 positionKey) external view returns (ResolveResult memory);
 function resolveStrict(bytes32 planRecordId, bytes32 positionKey, uint8 acceptMask)
-    external view returns (bytes32 value, ResolveResult memory);
+    external view returns (ResolvedTarget memory target, ResolveResult memory);
 function validatePlan(bytes32 planRecordId) external view returns (bool ok, uint8 rejectCode);
 function deriveBindingKey(bytes32 principalId, bytes32 positionKey) external pure returns (bytes32);
 // DOM_BINDING = keccak256("efs2/binding/1")

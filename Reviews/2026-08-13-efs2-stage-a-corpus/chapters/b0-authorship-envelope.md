@@ -513,6 +513,37 @@ consequence for profile 2 is stated there honestly.
 State per `occKey` in one Realm is the SR-10 four-state overlay:
 `NEVER_ADMITTED (0) | ACTIVE (1) | WITHDRAWN (2) | PRE_WITHDRAWN (3)`.
 
+Admission is the sole `TargetEnvelopeEvidence` verifier. Before either the
+status owner (`LibIndex`) or Binding receives a withdrawal effect, Admission
+constructs this typed context from state or from one fully validated retained/
+caller evidence value:
+
+```solidity
+struct ValidatedOccurrenceLifecycleEffect {
+    OccurrenceRef target;
+    bytes32 targetOccKey;
+    bytes32 targetPrincipalId;       // authenticated; author equality already checked
+    uint8 priorStatus;               // NEVER_ADMITTED|ACTIVE|WITHDRAWN|PRE_WITHDRAWN
+    uint64 priorOrdinal;
+    uint64 priorRevokedAtOrdinal;
+    uint64 evidenceOrdinal;          // 0, or immutable retained evidence key
+    uint8 targetEffectKind;          // 0 ordinary, 1 Binding mutation, 2 Withdrawal
+    bytes32 targetBindingKey;        // nonzero only for effect kind 1
+    bool targetIsCurrentBindingHead;
+}
+```
+
+For a new evidence-backed prewithdrawal, `evidenceOrdinal` is the newly
+allocated Withdrawal ordinal at which Admission stores the already-validated
+canonical evidence; for a terminal retry it is the existing nonzero
+`priorRevokedAtOrdinal`; otherwise it is zero. Admission asserts
+`targetOccKey == occKeyOf(target)`, classifies the target Record/effect, and
+authenticates the target Principal before constructing the context.
+`LibIndex` owns and writes lifecycle/status, while `LibBinding` owns the
+possible head consequence; both consume this same typed value only. Neither
+library accepts witness/evidence bytes, decodes a descriptor, calls an
+authority verifier, or repeats author equality.
+
 | # | Transition | From → To | Guard | Effect |
 |---|---|---|---|---|
 | T1 | `ADMIT` | NEVER_ADMITTED → ACTIVE | envelope + witness + consent valid (§5.3) | assign the next ordinal; store status + receipt; run mandatory postings |
@@ -541,19 +572,23 @@ if V2-E5 needs it].
 
 ### 3.3 Withdrawal/1
 
-`Withdrawal/1` is an ordinary Record Type with a reserved, pinned TypeSchemaId —
+`Withdrawal/1` is an ordinary Record Type with a reserved kernel TypeSchemaId —
 not a special transaction kind [PROPOSAL — one write path; withdrawal evidence is
-itself portable, authored, and admissible per-Realm]. Pinned schema (exact
-TypeSchemaId value computed by the Type chapter's formula over this schema text —
-open item O2):
+itself portable, authored, and admissible per-Realm]. Its concrete
+TypeSchemaId value remains a Stage B Codex output. The exact schema is:
 
 ```text
 Withdrawal/1 body fields (canonical order):
-  targetEnvelopeId  bytes32
-  targetLeafIndex   uint16
-Reference roles: target : OccurrenceRef (statically extractable)
-Body codec: encoding-chapter canonical codec over the two fields; fixed length.
+  target  OCCREF
+Reference role `target`: targetClass=OCCURRENCE, expectedType unused,
+                         selector=DIRECT(fieldIdx=target, memberIdx=0)
+canonicalBody = target.envelopeId ‖ u16be(target.leafIndex)  // exactly 34 bytes
 ```
+
+There is no split `bytes32 targetEnvelopeId` + `uint16 targetLeafIndex`
+schema and no ad hoc effect decoder. Prose below uses
+`withdrawal.target.envelopeId` / `withdrawal.target.leafIndex`; these are the
+two components of the one MC/1 `OCCREF` value.
 
 Semantics [DERIVED INVARIANT — candidate lines 227–231, restated exactly]:
 a Withdrawal admitted in Realm V marks `(V, target)` WITHDRAWN, meaning "the
@@ -575,8 +610,8 @@ by §2.2. Admission recomputes `evidenceEnvelopeId` from the evidence header and
 full vector and MUST require, in this order:
 
 ```text
-evidenceEnvelopeId == withdrawal.targetEnvelopeId
-withdrawal.targetLeafIndex < targetEvidence.recordIds.length
+evidenceEnvelopeId == withdrawal.target.envelopeId
+withdrawal.target.leafIndex < targetEvidence.recordIds.length
 computePrincipalId(targetEvidence.targetPrincipal) ==
     targetEvidence.header.principalId
 verify(targetEvidence.targetPrincipal, targetEnvelopeDigest,
@@ -592,13 +627,11 @@ equality permits `PRE_WITHDRAWN`. A bare `targetEnvelopeId` can never cause
 pre-withdrawal when the target header is not already state-readable.
 
 Admission is the only evidence decoder. After these checks (or equivalent
-state lookup for an already known target), it constructs the Binding owner's
-typed `ValidatedWithdrawalTarget`: exact target `(envelopeId,leafIndex)`,
-authenticated target `principalId`, prior lifecycle status/ordinals,
-classified effect kind, BindingKey if the target produced a Binding mutation,
-and whether it is the current head. `LibBinding` receives that context only.
-It receives no opaque evidence bytes, defines no alternate proof grammar, and
-never repeats descriptor, witness, or author validation.
+state lookup for an already known target), it constructs the exact shared
+`ValidatedOccurrenceLifecycleEffect` defined in §3.2. `LibIndex` and
+`LibBinding` receive that typed context only. They receive no opaque evidence
+bytes, define no alternate proof grammar, and never repeat descriptor,
+witness, or author validation.
 
 On that effective evidence-backed transition, after the Withdrawal occurrence
 has received ordinal `wOrd`, Core stores exactly
@@ -863,12 +896,13 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
     targetEvidence.withdrawalLeafIndex
     matches that list exactly (one-to-one; no missing/extra/duplicate entries).
     For each pair, before author comparison or state write, require the recomputed
-    evidence EnvelopeId equals Withdrawal.targetEnvelopeId and targetLeafIndex is
+    evidence EnvelopeId equals `Withdrawal.target.envelopeId` and
+    `Withdrawal.target.leafIndex` is
     in range; then run the target descriptor/witness checks of §3.3. A terminal
     PRE_WITHDRAWN target instead resolves its original evidence through
     revokedAtOrdinal; caller evidence is forbidden. For every target, construct
-    the typed ValidatedWithdrawalTarget context; no evidence bytes cross into
-    LibBinding.
+    the typed ValidatedOccurrenceLifecycleEffect context; no evidence bytes
+    cross into LibIndex or LibBinding.
  9. structurally validate every selected body's TypeSchema and preflight all
     leaf-driven effects, policy checks, reference checks, and Binding CAS checks.
 10. allocate ordinals only to newly accepted selected occurrences.
@@ -882,8 +916,9 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
       index, descriptor, witness, and author checks; for an evidence-backed
       NEVER_ADMITTED -> PRE_WITHDRAWN transition, store its canonical ABI
       re-encoding at this Withdrawal occurrence's new ordinal before setting the
-      target's revokedAtOrdinal to that same ordinal; dispatch the already
-      validated target context to LibBinding, never a second proof format
+      target's revokedAtOrdinal to that same ordinal; dispatch the same already
+      validated lifecycle context to LibIndex and LibBinding, never a second
+      proof format
 13. atomically materialize the parsed schema cache when the accepted Record is an
     intrinsic TypeSchemaGroup/1 Record; this is structural bootstrap work, not an
     application effect or second write primitive

@@ -114,6 +114,8 @@ RealmDescriptor/1
      upgradeAuthorityKind    uint8     (0=NONE/immutable, 1=PROXY_ADMIN_EOA,
                                         2=PROXY_ADMIN_CONTRACT, 3=GOVERNANCE,
                                         4-255 reserved)
+     upgradeAuthorityRef     bytes32   current controller/admin reference at
+                                        currentRevisionOrdinal (§2.4/§7)
      declaredTxGasLimit      uint64    (genesis declaration; >= QR-5 floor)
 
   C. ADVISORY TRANSPORT HINTS (untrusted; MUST NOT enter any preimage;
@@ -125,7 +127,8 @@ RealmDescriptor/1
 Canonical descriptor bytes [PROPOSAL]: section A+B as
 `abi.encode(uint16 version=1, chainNamespace, chainReference, coreAddress,
 profileId, genesisCommitment, currentRevisionOrdinal, finalityRuleKind,
-finalityParam, upgradeAuthorityKind, declaredTxGasLimit)`; section C appended as an ABI-encoded
+finalityParam, upgradeAuthorityKind, upgradeAuthorityRef,
+declaredTxGasLimit)`; section C appended as an ABI-encoded
 `(string[] rpcUrls, string displayName)` tail. The descriptor itself has no
 EFS identity; **RealmId is the identity** and is recomputable from section A
 alone. Signing or notarizing descriptors is application-level evidence, not a
@@ -190,6 +193,8 @@ initConfigBytes = abi.encode(
     uint32 finalityParam,           // >0 only for CONFIRMATION_DEPTH;
                                     // MUST be 0 for every other kind
     uint8  upgradeAuthorityKind,    // §2.1; 0..3
+    bytes32 upgradeAuthorityRef,    // immutable genesis controller ref;
+                                    // zero iff kind NONE
     uint64 declaredTxGasLimit,      // MUST be >= REALM_MIN_TX_GAS
     bytes32 initialPolicyCommitment)// MUST be nonzero; revision 1 policy
 
@@ -199,15 +204,17 @@ initConfigHash = keccak256(initConfigBytes)
 The split is normative. Protocol/version values, domain strings, codec and
 index grammars, `REALM_MIN_TX_GAS`, `POLICY_GAS_MAX`, and every other
 implementation-independent bound live in `codexConstantsBytes` and therefore
-`codexConstantsHash`. Only the six deployment-selected values above live in
-`InitConfig/1`. An implementation MAY take additional constructor plumbing
-(for example the address used by its already-declared proxy authority
-pattern), but such plumbing is not EFS semantic configuration, may not change
-the tuple, and receives no new Core administration power here.
+`codexConstantsHash`. Only the seven deployment-selected values above live in
+`InitConfig/1`. There is no hidden controller constructor input.
 
 Initialization rejects an unknown kind, a non-canonical `finalityParam`, a gas
 declaration below the B0 floor, a zero policy commitment, or any differently
-encoded tuple. Revision 1 uses `initialPolicyCommitment` exactly.
+encoded tuple. It requires `upgradeAuthorityRef == 0` iff
+`upgradeAuthorityKind == NONE`. Otherwise the reference MUST be the canonical
+zero-extended address word `bytes32(uint256(uint160(controller)))`, with a
+nonzero controller and zero high 96 bits. Revision 1 uses
+`initialPolicyCommitment` and this immutable genesis authority reference
+exactly; later current refs exist only through §7's append-only transitions.
 
 ```text
 DOM_REALM_GENESIS = keccak256("efs2/realmgenesis/1")
@@ -237,6 +244,8 @@ revisionDescriptorBytes =                      // owned by THIS chapter (SR-16)
              bytes32 implementationCodehash,   // EXTCODEHASH after activation
              bytes32 policyCommitment,         // hash of the active admission
                                                // policy parameter set (§7.2)
+             bytes32 upgradeAuthorityRef,      // current controller at activation;
+                                               // zero only for immutable kind NONE
              uint48  activatedAtBlock)
 
 RealmRevisionId = keccak256(abi.encode(
@@ -254,7 +263,8 @@ keccak256(revisionDescriptorBytes))` row — its `generation` word is
 subsumed by `revisionOrdinal` inside the descriptor.]
 Revision 1 is written by `initialize()` with
 `implementationCodehash = deployCodehash` and
-`policyCommitment = InitConfig.initialPolicyCommitment`.
+`policyCommitment = InitConfig.initialPolicyCommitment`, and
+`upgradeAuthorityRef = InitConfig.upgradeAuthorityRef`.
 
 ---
 
@@ -293,8 +303,10 @@ C-4 PROFILE   client supports profileId; on mismatch the client MUST return
               UNSUPPORTED_PROFILE and MUST NOT best-effort-decode. (A-3)
 C-5 REVISION  revisionCount >= 1; activatedAtBlock strictly increasing;
               currentRevision().implementationCodehash ==
-              EXTCODEHASH(implementation account per declared
-              upgradeAuthorityKind pattern).                  (A-2/A-6 partial)
+              EXTCODEHASH(implementation account per §7.1); the exact proxy/
+              direct slots and current authority ref match §7.1; and the
+              append-only authority-transition chain reconstructs that ref.
+                                                               (A-2/A-6 partial)
 C-6 SEMANTIC  if admissionCount > 0: fetch one admitted envelope's canonical
               unsigned header+RecordId bytes plus each selected Record body;
               recompute EnvelopeId and each leaf RecordId, and compare
@@ -491,7 +503,29 @@ struct AdmissionReceiptView {
   uint48 admittedAtBlock;
   uint8 acceptedStatus;              // 1 ACCEPTED
 }
+
+// Internal-only, byte-identical Admission -> LibIndex/LibBinding seam.
+// Admission alone has authenticated any TargetEnvelopeEvidence and author.
+struct ValidatedOccurrenceLifecycleEffect {
+  OccurrenceRef target;
+  bytes32 targetOccKey;
+  bytes32 targetPrincipalId;
+  uint8 priorStatus;
+  uint64 priorOrdinal;
+  uint64 priorRevokedAtOrdinal;
+  uint64 evidenceOrdinal;
+  uint8 targetEffectKind;
+  bytes32 targetBindingKey;
+  bool targetIsCurrentBindingHead;
+}
 ```
+
+`ValidatedOccurrenceLifecycleEffect` is not caller ABI. Admission constructs
+it only after descriptor, target range, witness/authority, Principal equality,
+current lifecycle, and any retained-evidence checks have succeeded. `LibIndex`
+and `LibBinding` receive this typed context only: neither accepts evidence or
+witness bytes, parses a target descriptor, invokes an authority verifier, or
+repeats the author comparison.
 
 Physical storage [PROPOSAL — SR-7/SR-10 exact contract]. Bit 0 is the
 least-significant bit of a word; every reserved bit MUST be zero:
@@ -898,9 +932,11 @@ WITHDRAWN/PRE_WITHDRAWN -> reject any admission; no resurrection
   header is in state. On success, the accepted Withdrawal's ordinal retains
   the bounded canonical ABI re-encoding of the validated evidence and the
   target's `revokedAtOrdinal` points to it. Admission then passes only the
-  Binding owner's typed `ValidatedWithdrawalTarget` (target Principal,
-  lifecycle/effect/head context) into `LibBinding`; no opaque evidence bytes,
-  peer proof grammar, or second author check crosses that seam.
+  shared typed `ValidatedOccurrenceLifecycleEffect` (target OccurrenceRef,
+  occKey, authenticated Principal, evidence ordinal, lifecycle/effect/head
+  context) into `LibIndex` and `LibBinding`; no opaque evidence bytes, peer
+  proof grammar, or second author check crosses either seam. `LibIndex` remains
+  the lifecycle/status owner, not an evidence verifier.
 - **Terminal withdrawal retry.** A different author-valid Withdrawal targeting
   WITHDRAWN/PRE_WITHDRAWN is accepted but its target effect is a no-op. For a
   PRE_WITHDRAWN target with no persisted Envelope header, preflight loads the
@@ -1079,19 +1115,62 @@ first overcome the recorded TOCTOU refutation].
 
 ```text
 uint32 revisionCount;
-mapping(uint32 => RealmRevision) revisions;   // 1-based, append-only
-struct RealmRevision {                        // 3 slots
+mapping(uint32 => RealmRevision) revisions;       // 1-based, append-only
+struct RealmRevision {                            // 4 slots
   bytes32 implementationCodehash;             // slot 0
   bytes32 policyCommitment;                   // slot 1
-  // slot 2: activatedAtBlock u48;
+  bytes32 upgradeAuthorityRef;                // slot 2; current at activation
+  // slot 3: activatedAtBlock u48;
   //         firstAdmissionOrdinal u48 — admissionCount + 1 at activation;
   //         reserved u160 MBZ
 }
+
+uint32 authorityTransitionCount;
+mapping(uint32 => AuthorityTransition) authorityTransitions; // 1-based
+struct AuthorityTransition {                    // 3 slots, append-only
+  bytes32 oldRef;                               // slot 0
+  bytes32 newRef;                               // slot 1
+  // slot 2: activatedAtBlock u48;
+  //         firstAdmissionOrdinal u48;
+  //         revisionOrdinal u32;
+  //         reserved u128 MBZ
+}
 ```
-[PROPOSAL] For `upgradeAuthorityKind = NONE` the Core account's own codehash
-is the implementation codehash; for proxy patterns it is the implementation
-account's EXTCODEHASH. The pattern is declared in the descriptor (§2.1 B) and
-checked by C-5.
+[PROPOSAL] `InitConfig.upgradeAuthorityRef` is immutable genesis evidence;
+`RealmRevision.upgradeAuthorityRef` is the authority current at that revision.
+For non-NONE kinds, the reference has one canonical form:
+`bytes32(uint256(uint160(controller)))`; the high 96 bits MUST be zero and the
+low 160 bits are the immediate controller account. Kind 1 requires that account
+to have no code at activation; kinds 2 and 3 require code at activation. This
+classification is an activation-basis fact, not a promise that account code can
+never change.
+
+The implementation/admin read pattern is closed for B0:
+
+```text
+EIP1967_IMPLEMENTATION_SLOT = bytes32(uint256(keccak256(
+  "eip1967.proxy.implementation")) - 1)
+EIP1967_ADMIN_SLOT = bytes32(uint256(keccak256(
+  "eip1967.proxy.admin")) - 1)
+
+kind NONE:
+  coreAddress is direct; both EIP-1967 slots are zero;
+  implementationAddress = coreAddress; upgradeAuthorityRef = 0.
+
+kinds 1..3:
+  coreAddress is a UUPS-style proxy; IMPLEMENTATION_SLOT is a canonical
+  zero-extended implementation address; ADMIN_SLOT MUST be zero;
+  implementationAddress is that slot's address; the immediate controller is
+  the canonical address word in currentUpgradeAuthorityRef.
+```
+
+The two slot words are Codex constants. A transparent-proxy admin, beacon,
+second controller slot, constructor-only owner, or any other upgrade path is a
+hidden authority and disqualifies the Realm. The Core's state-readable getters
+in §8.2 expose the same implementation address and authority reference; clients
+cross-check them against storage and `EXTCODEHASH` under C-5. This exact pattern
+lets a controller rotation append its evidence in the same Core call instead of
+changing an external admin slot invisibly.
 
 ### 7.2 Rules
 
@@ -1110,12 +1189,27 @@ core-architecture-candidate.md:58-61.]
   capabilities, and gas work qualify.
 - **U-2 (recorded activation).** Activation MUST atomically append a
   `RealmRevision` with the new `implementationCodehash`, active
-  `policyCommitment`, `activatedAtBlock = block.number`, and
+  `policyCommitment`, current `upgradeAuthorityRef`,
+  `activatedAtBlock = block.number`, and
   `firstAdmissionOrdinal = admissionCount + 1`. Revisions are append-only;
   `revisionOrdinal` and `activatedAtBlock` strictly increase. The stored
   boundary is u48 and every public read widens it to u64. Boundaries are
   **nondecreasing**, because multiple empty revisions can share the same next
   admission ordinal.
+- **U-2a (recorded controller transition).** A controller change MUST occur in
+  the same call as one new `RealmRevision` and one new
+  `AuthorityTransition(oldRef,newRef,activatedAtBlock,
+  firstAdmissionOrdinal,revisionOrdinal)`. `oldRef` MUST equal the preceding
+  revision's ref; `newRef` MUST be canonical and nonzero; its block and first
+  admission boundary MUST equal the paired revision; and its
+  `revisionOrdinal` MUST name that revision. Transition ordinals and revision
+  ordinals strictly increase; an implementation/policy revision with an
+  unchanged controller appends no transition. No controller changes outside
+  this path. Starting from immutable `InitConfig.upgradeAuthorityRef`, applying
+  the enumerable transitions reconstructs the current ref exactly. Kind NONE
+  permits no transition. For kinds 1..3, the account encoded by the old current
+  ref is the only caller authorized to append a revision or transition; the
+  new controller becomes effective only after the paired entries are stored.
 - **U-3 (breaking = new Realm).** Any change outside U-1(a-e) is
   semantics-breaking and MUST NOT reuse the RealmId: it requires a new
   deployment (new genesisCommitment → new RealmId) plus, optionally,
@@ -1144,10 +1238,12 @@ core-architecture-candidate.md:58-61.]
   indefinitely (QR-1). No un-freeze exists [PROPOSAL].
 
 Prototype note: disposable prototypes may use ERC-7201-namespaced upgradeable
-storage; the frozen production Core is intended to end `upgradeAuthorityKind
-= NONE` [PROPOSAL — consistent with STANDARDS lane finding 18's scoped-role
-recommendation; ERC-7201 Final is a standards FACT, VERIFIED via that
-finding].
+storage. A production Realm that needs immutable kind NONE is deployed that way
+at genesis; a kind-1..3 Realm cannot silently relabel itself NONE. Terminal
+sunset under U-6 disables writes but leaves its last nonzero authority ref and
+complete transition history visible [PROPOSAL — consistent with STANDARDS lane
+finding 18's scoped-role recommendation; ERC-7201 Final is a standards FACT,
+VERIFIED via that finding].
 
 ---
 
@@ -1177,7 +1273,12 @@ W-2  REVISIONS   n := revisionCount(); for i in 1..n read revisionAt(i);
                  increase, firstAdmissionOrdinal is nondecreasing, and each
                  boundary lies in 1..admissionCount+1. Recompute the exact
                  descriptor and every RealmRevisionId; the write rule was
-                 admissionCount-at-activation + 1.
+                 admissionCount-at-activation + 1. Starting with the immutable
+                 genesis upgradeAuthorityRef, enumerate authorityTransitionAt
+                 (1..authorityTransitionCount), require one canonical chained
+                 oldRef/newRef sequence and exact paired revision/block/first-
+                 admission boundaries, and compare the result with the latest
+                 revision plus currentUpgradeAuthorityRef().
 W-3  ENVELOPES   enumerate envelopeOrdinal 1..envelopeCount; fetch the exact
                  persisted canonical unsigned bytes
                  `abi.encode(EnvelopeHeader, fullRecordIds)`. Recompute the
@@ -1320,6 +1421,7 @@ struct GenesisFactsView {
   uint8 finalityRuleKind;
   uint32 finalityParam;
   uint8 upgradeAuthorityKind;
+  bytes32 upgradeAuthorityRef;        // immutable genesis controller ref
   uint64 declaredTxGasLimit;
   bytes32 initialPolicyCommitment;
 
@@ -1338,13 +1440,21 @@ function realmId() external view returns (bytes32);
 /// implementation config is permitted to enter those formulas.
 function genesisFacts() external view returns (GenesisFactsView memory);
 function codexConstants() external view returns (bytes memory); // encoding ch.
+function implementationAddress() external view returns (address);
+function currentUpgradeAuthorityRef() external view returns (bytes32);
 function revisionCount() external view returns (uint32);
 function revisionAt(uint32 ordinal) external view returns (
   bytes32 implementationCodehash, bytes32 policyCommitment,
-  uint48 activatedAtBlock, uint64 firstAdmissionOrdinal, bytes32 revisionId);
+  bytes32 upgradeAuthorityRef, uint48 activatedAtBlock,
+  uint64 firstAdmissionOrdinal, bytes32 revisionId);
 function currentRevision() external view returns (
   uint32 ordinal, bytes32 revisionId, bytes32 implementationCodehash,
-  bytes32 policyCommitment, uint48 activatedAtBlock);
+  bytes32 policyCommitment, bytes32 upgradeAuthorityRef,
+  uint48 activatedAtBlock);
+function authorityTransitionCount() external view returns (uint32);
+function authorityTransitionAt(uint32 transitionOrdinal) external view returns (
+  bytes32 oldRef, bytes32 newRef, uint48 activatedAtBlock,
+  uint64 firstAdmissionOrdinal, uint32 revisionOrdinal);
 function admissionCount() external view returns (uint64);
 function envelopeCount() external view returns (uint40);
 function envelopeIdByOrdinal(uint40 ordinal) external view returns (bytes32);
@@ -1519,6 +1629,10 @@ The compact contract other chapters rely on:
   u48/stored ordinals; reversible `logSlotA/logSlotB`; per-occurrence receipt
   reconstructed from explicit AdmissionBatch block/revision/exact
   AuthorityBasisWord/conditional codehash (§5.1–5.5).
+- **Internal lifecycle seam**: Admission is the only
+  `TargetEnvelopeEvidence` verifier and passes byte-identical
+  `ValidatedOccurrenceLifecycleEffect` context to the status and Binding
+  owners; neither downstream library accepts opaque proof bytes (§5.1/§5.5).
 - **Intrinsic bootstrap**: ordinary accepted TypeSchemaGroup/1 Record plus
   atomic validation and deterministic Type cache materialization. The only
   application-effect Types are Binding set, Binding tombstone, and Withdrawal.
@@ -1526,8 +1640,10 @@ The compact contract other chapters rely on:
   `FinalityObservation/1`; admission, verifier, finality-read, and page-query
   bases remain distinct (§6).
 - **Upgrade rules U-1..U-6**: activation boundaries are stored u48/public u64
-  and nondecreasing; explicit batch revision owns receipt reconstruction;
-  breaking change = new RealmId + successor evidence (§7).
+  and nondecreasing; the immutable genesis authority ref plus enumerable
+  controller transitions reconstruct current authority without hidden admin
+  state; explicit batch revision owns receipt reconstruction; breaking change
+  = new RealmId + successor evidence (§7).
 - **Reconstruction ABI** (§8.2): the exact state-only Core reads plus the
   byte-identical named `IRealmIndexRead/1` and `IBindingRead/1` owner surfaces,
   covering envelope, occurrence/log, batch, retained pre-withdrawal evidence,

@@ -111,7 +111,6 @@ H-DOMTABLE.
 | `DOM_VK_CMPD` | `efs2/vk/compound/1` | key | compound value key |
 | `DOM_VK_DIGEST` | `efs2/vk/digest/1` | key | ByteDigest value key (u16 algCode zero-extended, §2.4/SR-18a) |
 | `DOM_VK_OCC` | `efs2/vk/occ/1` | key | occurrence-target value key |
-| `DOM_VK_ADDR` | `efs2/vk/addr/1` | key | address-target value key |
 | `DOM_SLOT_LOG` | `efs2/slot/log/1` | slot | admission log region |
 | `DOM_SLOT_PH` | `efs2/slot/phead/1` | slot | postings head |
 | `DOM_SLOT_PD` | `efs2/slot/pdata/1` | slot | postings data region |
@@ -194,6 +193,11 @@ codexConstantsBytes :=
        PROTOCOL_MAJOR=0, PROTOCOL_MINOR=0, SENTINEL_BOUND=2^16,
        REALM_MIN_TX_GAS=16777216, POLICY_GAS_MAX=200000), table order ----
   u16 constCount  ‖ constCount  × ( u16 nameLen ‖ asciiName ‖ u64 value )
+  ---- named fixed words, name order: exact Realm implementation/admin slots ----
+  u16 wordCount   ‖ wordCount × ( u16 nameLen ‖ asciiName ‖ bytes32 value )
+    EIP1967_ADMIN_SLOT = bytes32(uint256(keccak256("eip1967.proxy.admin")) - 1)
+    EIP1967_IMPLEMENTATION_SLOT =
+      bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1)
   ---- digest algorithm table (§2.4), ascending algCode ----
   u16 algCount    ‖ algCount    × ( u16 algCode ‖ u16 digestLen ‖ u16 nameLen ‖ asciiName )
   ---- closed code tables: field kinds (§2.2), reference selectors (§3.1),
@@ -229,10 +233,11 @@ vectors). State-readability: Core exposes `codexConstants()` returning the exact
 therefore re-derive the hash the realm chapter's `profileId` commits to from state alone.
 `PROTOCOL_MAJOR` and `PROTOCOL_MINOR` are profile constants, not InitConfig
 fields; B0 pins both to zero. Likewise the Realm gas floor and policy-call cap
-are protocol constants. A deployment-selected transaction ceiling, finality
-rule/parameter, upgrade-authority kind, and initial policy commitment belong
-only to the Realm owner's fixed-width `InitConfig/1` and never duplicate into
-this artifact.
+and the exact EIP-1967 implementation/admin slot words are protocol constants.
+A deployment-selected transaction ceiling, finality rule/parameter,
+upgrade-authority kind, immutable genesis upgrade-authority reference, and
+initial policy commitment belong only to the Realm owner's fixed-width
+`InitConfig/1` and never duplicate into this artifact.
 
 ---
 
@@ -328,12 +333,18 @@ the seam it needs from this chapter is only `DIGEST` values and bounded `ARRAY` 
 - `REF` values must not be in the sentinel space and must be nonzero; "no reference" is
   `OPTION(REF)` absent, never `bytes32(0)`. [PROPOSAL — deletes the zero-vs-root conflation
   class ADR-0033 documented in v1 evidence.]
-- Kernel Binding-class bodies obey the same rule (cross-ref SR-11): when the
-  `TYPE_BINDING_SET_V1` / `TYPE_BINDING_TOMBSTONE_V1` / `TYPE_WITHDRAWAL_V1` schemas mint in
-  Stage B, a first write's "no predecessor" is the explicit NONE encoding — `OPTION(OCCREF)`
-  absent — never raw `bytes32(0)`; the binding chapter's earlier `predecessorEnvelopeId = 0`
-  first-write convention regenerates to this. [PROPOSAL — pinned direction by SR-11:
-  Binding-class body conventions must be legal under this section's REF/sentinel rules.]
+- Kernel Binding-class bodies use only this grammar (cross-ref SR-11). The
+  exact BindingSet fields are three `BYTES_FIXED(32)` position words, then
+  `targetRecord OPTION(REF)`, `targetOccurrence OPTION(OCCREF)`, and
+  `predecessor OPTION(OCCREF)`. The two target roles are respectively
+  `targetClass=RECORD` and `targetClass=OCCURRENCE`; predecessor is
+  OCCURRENCE. Kernel effect validation requires exactly one target option
+  present. BindingTombstone has the same three position words plus only the
+  OCCURRENCE predecessor option. Withdrawal has exactly one direct OCCREF
+  target, so its canonical body is 34 bytes. No target uses an ad hoc
+  `targetKind/targetA/targetLeaf` body or split bytes32+uint16 schema. A first
+  write's "no predecessor" is explicit OPTION-none, never raw zero.
+  Concrete kernel TypeSchemaIds mint only in Stage B from these exact blobs.
 - `BOOL`/`OPTION` flag bytes other than `0x00`/`0x01` are structural errors (not masked).
 
 ### 2.3 Strings and Unicode policy
@@ -542,7 +553,10 @@ decodeField(S, desc, body, cur, depth, refCount):
 `0 OK, 1 ERR_TRAILING, 2 ERR_TRUNCATED, 3 ERR_BOUND, 4 ERR_UTF8, 5 ERR_MAP_ORDER,
 6 ERR_OPTION_FLAG, 7 ERR_BOOL, 8 ERR_SENTINEL_IN_BODY, 9 ERR_DIGEST, 11 ERR_DEPTH,
 12 ERR_COUNT, 13 ERR_SCHEMA_MALFORMED, 14 ERR_CONSTRAINT, 15 ERR_REF_BUDGET,
-16 ERR_ROLE_SELECTOR`. Constraint
+16 ERR_ROLE_SELECTOR, 17 ERR_EFFECT_BINDING_TARGET_CARDINALITY`. Codes 0–16
+are emitted by the generic schema/body validators as applicable; code 17 is
+emitted by Admission's kernel effect parser after an otherwise-valid
+BindingSet body has both target options absent or both present. Constraint
 checks (§3.5) run after the structural walk. The runtime `refCount` guard is
 defense-in-depth under the schema-time bound in §3.1 and makes
 `REF_INSTANCES_MAX = 16` an explicit per-leaf structural validation rule,
@@ -1262,6 +1276,10 @@ memory-level evidence, PLAUSIBLE):
    and multiply-bound reference reject `ERR_ROLE_SELECTOR`; a 16-member
    ArtifactClosure-shaped selector succeeds and a 17-instance schema rejects
    `ERR_REF_BUDGET` (SR-18e);
+   exact BindingSet targetRecord-only and targetOccurrence-only bodies parse
+   to the corresponding head tuples; neither/both target options reject code
+   17; BindingTombstone contains no target role; Withdrawal round-trips one
+   direct 34-byte OCCREF and no split-field encoding shares its TypeSchemaId;
    the H-GROUPCAP pair (largest-fitting group; nominal-max group deterministic rejection).
 5. Axis-8 pair: `T-CONV`, `T-QUAL` (§8).
 6. RecordId: same body two Types ⇒ different ids; same Type byte-different bodies ⇒ different
@@ -1413,9 +1431,12 @@ seam §9 (`IEasProjectionSeam`); axis-8 vectors `T-CONV`/`T-QUAL` pin whichever 
 4. Per-kind `descriptorBytes` layouts and the `kind` registry (incl. ERC-7913
    verifier-vs-key split and P-256/WebAuthn form) — Lane 3 closes; the SR-14 outer formula is
    fixed here.
-5. `revisionDescriptorBytes` field set and the chain-reference encoding (ERC-7930 binary vs
-   CAIP-2 projection; 7930 is Review-status — standards FACT) — Lane 4 closes under the
-   SR-16 wrap fixed here.
+5. ~~`revisionDescriptorBytes` field set and chain-reference encoding~~ —
+   **CLOSED**: Lane 4 pins the descriptor as
+   `(revisionOrdinal,implementationCodehash,policyCommitment,
+   upgradeAuthorityRef,activatedAtBlock)` inside the SR-16 wrap. B0 pins
+   `ChainRef/1` to fixed `bytes8 namespace + bytes32 reference`; CAIP-2 is its
+   human projection and ERC-7930 remains a future projection while in Review.
 6. Cross-field constraint for `TypeEquivalence/1`'s `a < b` canonical order — promote to a
    B0 constraint kind (MC change) or keep as STRUCT-FULL conformance; red team + James's
    convergence preference decide.
@@ -1430,8 +1451,9 @@ seam §9 (`IEasProjectionSeam`); axis-8 vectors `T-CONV`/`T-QUAL` pin whichever 
     the 2-byte `u8 indexKind ‖ u8 target` form in §3.1 and the index chapter
     §4.1: `SCALAR_EQ`, `REF_BACKLINK`, `DIGEST_EQ`. The retired 8-byte
     `REF_EQ/BACKLINK/COMPOUND` form must not mint. `DIGEST_EQ` uses the global
-    `DOM_VK_DIGEST` family and the one u16 algCode table; no BYTEDIGEST or
-    ADDRESS ReferenceRole target class is added. Type golden vectors are no
+    `DOM_VK_DIGEST` / index-owner `KIND_DIGEST` value family and the one u16
+    algCode table; no BYTEDIGEST or ADDRESS ReferenceRole target class is
+    added. Type golden vectors are no
     longer blocked on this seam.
 11. EFS-assigned algCode range (`0xef00–0xefff`, §2.4) — verify unassigned against the
     multihash registry snapshot pinned at the freeze ceremony; move the code before genesis

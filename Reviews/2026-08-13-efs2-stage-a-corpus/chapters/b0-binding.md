@@ -272,16 +272,16 @@ BindingSet/1 {
   purpose       BYTES_FIXED(32)   // never REF-kind (§1.1 sentinel rule)
   subject       BYTES_FIXED(32)   // never REF-kind
   fieldRole     BYTES_FIXED(32)   // never REF-kind
-  targetKind    uint8             // 1=RECORD, 2=OCCURRENCE
-  targetA       bytes32           // RecordId | EnvelopeId — always a real,
-                                  // nonzero reference; kind pinned when the
-                                  // SR-11 constants mint (REF-kind is legal
-                                  // here: targets are never NONE)
-  targetLeaf    uint16            // 0 unless targetKind==2
+  targetRecord  OPTION(REF)       // role targetRecord: targetClass=RECORD,
+                                  // expectedType=ANY, DIRECT selector
+  targetOccurrence OPTION(OCCREF) // role targetOccurrence:
+                                  // targetClass=OCCURRENCE, DIRECT selector
   predecessor   OPTION(OCCREF)    // (envelopeId, leafIndex); NONE ⇔ first
                                   // write at this key. Uses the encoding
                                   // chapter's EXPLICIT NONE encoding — never
                                   // raw bytes32(0) (SR-11 sentinel rule).
+                                  // role predecessor: targetClass=OCCURRENCE,
+                                  // DIRECT selector
 }
 
 BindingTombstone/1 {
@@ -289,13 +289,53 @@ BindingTombstone/1 {
   subject       BYTES_FIXED(32)
   fieldRole     BYTES_FIXED(32)
   predecessor   OPTION(OCCREF)    // NONE ⇔ first write (T4)
+                                  // role predecessor: targetClass=OCCURRENCE,
+                                  // DIRECT selector; no target fields exist
 }
 
 Withdrawal/1 {
   target        OCCREF            // (targetEnvelopeId, targetLeafIndex);
-                                  // always a real reference, never NONE
+                                  // always a real reference, never NONE;
+                                  // role target: targetClass=OCCURRENCE,
+                                  // DIRECT selector
 }
 ```
+
+These are ordinary MC/1 schemas, not ad hoc kernel byte layouts. In
+particular, `Withdrawal/1.canonicalBody` is exactly the 34-byte MC/1 `OCCREF`
+encoding `target.envelopeId ‖ u16be(target.leafIndex)`. `BindingSet/1` passes
+kernel effect validation iff **exactly one** of `targetRecord` and
+`targetOccurrence` is present. Both absent or both present are
+`E_STRUCTURAL(leafIndex, ERR_EFFECT_BINDING_TARGET_CARDINALITY=17)` before
+any state write.
+The exact role/index rows are:
+
+| Type | roleId | name / fieldIdx | targetClass | expectedType | selector | IndexSpec |
+|---|---:|---|---|---|---|---|
+| BindingSet | 0 | targetRecord / 3 | RECORD | 0 (ANY) | DIRECT, member 0 | REF_BACKLINK(0) |
+| BindingSet | 1 | targetOccurrence / 4 | OCCURRENCE | 0 (unused) | DIRECT, member 0 | REF_BACKLINK(1) |
+| BindingSet | 2 | predecessor / 5 | OCCURRENCE | 0 (unused) | DIRECT, member 0 | REF_BACKLINK(2) |
+| BindingTombstone | 0 | predecessor / 3 | OCCURRENCE | 0 (unused) | DIRECT, member 0 | REF_BACKLINK(0) |
+| Withdrawal | 0 | target / 0 | OCCURRENCE | 0 (unused) | DIRECT, member 0 | REF_BACKLINK(0) |
+
+There are no other ReferenceRoles or IndexSpecs in these three Types. Field
+indexes are zero-based; role IDs are dense; every reference leaf is covered
+once. The meaning/spec/qualifier bytes and resulting concrete TypeSchemaIds are
+Codex golden-vector material that Stage B must pin over this exact shape before
+genesis.
+The effect parser derives the head tuple without another body convention:
+
+```text
+targetRecord present     => targetKind=RECORD,     targetA=RecordId,   targetLeaf=0
+targetOccurrence present => targetKind=OCCURRENCE, targetA=EnvelopeId, targetLeaf=leafIndex
+```
+
+`BindingTombstone/1` has neither target field. Its only occurrence reference
+is `predecessor`; `Withdrawal/1` has exactly its one `target`. Thus every
+kernel reference is representable by, and uniquely covered by, the closed
+ReferenceRole grammar. Concrete `TYPE_BINDING_SET_V1`,
+`TYPE_BINDING_TOMBSTONE_V1`, and `TYPE_WITHDRAWAL_V1` values remain Stage B
+Codex outputs over these exact schemas; no value is minted in Stage A.
 
 [REJECTED — superseded sub-variant]: the draft encoded first-write
 predecessors as `predecessorEnvelopeId = bytes32(0), predecessorLeafIndex =
@@ -570,7 +610,8 @@ target header, full RecordId vector, typed `AccountPrincipal`, and witness,
 with no bodies. It recomputes EnvelopeId, checks the target leaf range, binds
 the descriptor to the header Principal before verifying the witness, and
 performs the author comparison. This Binding module receives only the
-resulting typed `ValidatedWithdrawalTarget` context; it never accepts,
+resulting typed `ValidatedOccurrenceLifecycleEffect` context shared with the
+status owner; it never accepts,
 decodes, or verifies opaque evidence bytes and defines no second evidence
 format. For a valid NEVER_ADMITTED target it sets `PRE_WITHDRAWN` with
 `revokedAtOrdinal` = the Withdrawal ordinal. No head is touched (a
@@ -854,20 +895,25 @@ ABI are both normative:
 // ---------- internal library surface (called only by Admission) ----------
 library LibBinding {
     // Admission-authenticated effect context. No witness/evidence bytes cross
-    // this seam. effectKind: 0 ordinary/no Binding effect, 1 Binding mutation,
-    // 2 Withdrawal (which is not a legal withdrawal target). bindingKey is
-    // nonzero only for effectKind 1; isCurrentHead was computed against the
-    // preflight snapshot. priorStatus/ordinals are the SR-10 overlay values.
-    struct ValidatedWithdrawalTarget {
-        bytes32 envelopeId;
-        uint16  leafIndex;
-        bytes32 principalId;
+    // this seam. targetEffectKind: 0 ordinary/no Binding effect,
+    // 1 Binding mutation, 2 Withdrawal (not a legal withdrawal target).
+    // targetBindingKey is nonzero only for kind 1; head status was computed
+    // against preflight state. evidenceOrdinal is 0 unless Admission retained
+    // or reused authenticated prewithdraw evidence. The status-owner LibIndex
+    // consumes the byte-identical struct before Binding applies any head fold.
+    struct OccurrenceRef { bytes32 envelopeId; uint16 leafIndex; }
+
+    struct ValidatedOccurrenceLifecycleEffect {
+        OccurrenceRef target;
+        bytes32 targetOccKey;
+        bytes32 targetPrincipalId;
         uint8   priorStatus;
         uint64  priorOrdinal;
         uint64  priorRevokedAtOrdinal;
-        uint8   effectKind;
-        bytes32 bindingKey;
-        bool    isCurrentHead;
+        uint64  evidenceOrdinal;
+        uint8   targetEffectKind;
+        bytes32 targetBindingKey;
+        bool    targetIsCurrentBindingHead;
     }
 
     // Executes T1/T2/T5. Reverts ErrCas*, ErrRevisionGuard,
@@ -899,7 +945,7 @@ library LibBinding {
     // descriptor/witness validation, and author equality do not repeat here.
     // Re-withdrawal of a terminal occKey is a no-op success (SR-15).
     function applyWithdrawal(
-        ValidatedWithdrawalTarget memory target,
+        ValidatedOccurrenceLifecycleEffect memory target,
         bytes32 wSrcEnvelopeId, uint16 wSrcLeafIndex,
         uint64  admissionOrdinal
     ) internal returns (bool headChanged, bytes32 bindingKey);

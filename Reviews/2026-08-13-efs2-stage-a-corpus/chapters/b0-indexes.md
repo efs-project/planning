@@ -213,9 +213,6 @@ scalarValueKey(fieldBytes) = keccak256(abi.encode(
 occurrenceTargetKey(envelopeId, leafIndex) = keccak256(abi.encode(
   DOM_VK_OCC, envelopeId, uint256(leafIndex)))
 
-addressTargetKey(account) = keccak256(abi.encode(
-  DOM_VK_ADDR, bytes32(uint256(uint160(account)))))
-
 digestTargetKey(algCode, digestBytes) = keccak256(abi.encode(
   DOM_VK_DIGEST, uint256(algCode), keccak256(digestBytes)))
 ```
@@ -227,11 +224,13 @@ KIND_BY_TYPE       = 0x01   // typeSchemaId = T, ordinal 0, valueKey 0
 KIND_UNIQUE_BY_TYPE= 0x02   // typeSchemaId = T, ordinal 0, valueKey 0
 KIND_BY_RECORD     = 0x03   // typeSchemaId = 0, ordinal 0, valueKey = RecordId
 KIND_BY_PRINCIPAL  = 0x04   // typeSchemaId = 0, ordinal 0, valueKey = PrincipalId (full 32 bytes)
-KIND_TARGET        = 0x05   // typeSchemaId = 0, ordinal 0, valueKey = targetKey (general backlink + digest lookup)
+KIND_TARGET        = 0x05   // typeSchemaId = 0, ordinal 0, valueKey = targetKey (general reference backlink)
 KIND_ROLE          = 0x06   // typeSchemaId = T, ordinal = roleOrdinal, valueKey = targetKey (predicate backlink)
 KIND_SPEC          = 0x07   // typeSchemaId = T, ordinal = specOrdinal, valueKey per IndexSpec (§4)
 KIND_BINDING_HIST  = 0x08   // raw audit history: typeSchemaId = 0, ordinal 0,
                             // valueKey = BindingKey; never liveness-filtered
+KIND_DIGEST        = 0x09   // typeSchemaId = 0, ordinal 0, valueKey = digestTargetKey;
+                            // DIGEST_EQ value postings, never a reference role
 ```
 
 `PrincipalId` participates at full 32-byte width in `pk` and everywhere else;
@@ -281,7 +280,28 @@ OccStatus @ occStatus[occKey]:
   reserved         bits [104..255]        // MBZ
 ```
 
-Every transition is decided before leaf effects:
+Every transition is decided before leaf effects. Admission has already
+authenticated target authorship/evidence and passes the shared typed context:
+
+```solidity
+struct OccurrenceRef { bytes32 envelopeId; uint16 leafIndex; }
+struct ValidatedOccurrenceLifecycleEffect {
+  OccurrenceRef target;
+  bytes32 targetOccKey;
+  bytes32 targetPrincipalId;
+  uint8 priorStatus;
+  uint64 priorOrdinal;
+  uint64 priorRevokedAtOrdinal;
+  uint64 evidenceOrdinal;
+  uint8 targetEffectKind;
+  bytes32 targetBindingKey;
+  bool targetIsCurrentBindingHead;
+}
+```
+
+`LibIndex` asserts the context matches current status and owns the status
+write. It never accepts or decodes `TargetEnvelopeEvidence`, verifies a
+witness/descriptor, or compares authors. Transition pseudocode:
 
 ```
 activateOccurrence(E, k):
@@ -291,24 +311,25 @@ activateOccurrence(E, k):
   WITHDRAWN       -> revert ErrOccWithdrawn
   PRE_WITHDRAWN   -> revert ErrOccWithdrawn
 
-withdrawOccurrence(ACTIVE target, withdrawalOrdinal):
+withdrawOccurrence(validated, withdrawalOrdinal):
+  require validated.priorStatus == ACTIVE and current overlay matches
   ACTIVE -> WITHDRAWN { revokedAtOrdinal = withdrawalOrdinal }
   decrement occurrence-level index heads exactly once (§6)
 
-preWithdrawOccurrence(never-admitted target, targetEvidence,
-                      withdrawalOrdinal):
-  require targetEvidence is the bounded signed header + full RecordId vector
-          + typed Principal descriptor + witness (no bodies)
-  recompute EnvelopeId; check leaf range, descriptor equality, witness,
-          and author match
+preWithdrawOccurrence(validated, withdrawalOrdinal):
+  require validated.priorStatus == NEVER_ADMITTED
+  require validated.targetOccKey == occKeyOf(validated.target)
+  require validated.evidenceOrdinal == 0 ||
+          validated.evidenceOrdinal == withdrawalOrdinal
   NEVER_ADMITTED -> PRE_WITHDRAWN
   ordinal = 0; revokedAtOrdinal = withdrawalOrdinal
-  retain canonical ABI re-encoding of targetEvidence keyed by withdrawalOrdinal
+  // nonzero means Admission already retained canonical evidence there;
+  // zero means Admission authenticated the state-readable target header
   decrement nothing
 
-withdrawOccurrence(WITHDRAWN or PRE_WITHDRAWN target):
-  success, no writes, no decrement; load retained evidence if an author check
-  is needed, never accept replacement evidence
+withdrawOccurrence(validated terminal target):
+  require current overlay matches validated terminal status/evidenceOrdinal
+  success, no writes, no decrement; never load/replace/revalidate evidence
 ```
 
 The immutable `ordinal` survives `ACTIVE → WITHDRAWN`; terminal states never
@@ -666,23 +687,26 @@ the same ordinal twice to one final key: the general key is written once;
 each distinct predicate key is written once. Consequently `liveCount` counts
 live Occurrences under a key, not repeated equal fields inside one Occurrence.
 
-`targetKey(X)` by declared target kind (the role declaration carries the kind;
-types chapter owns the role table):
+`targetKey(X)` by the encoding chapter's closed `ReferenceRole.targetClass`
+(the role declaration carries the class):
 
 ```
-RECORD / PRINCIPAL / REALM / TYPESCHEMA targets (canonical 32 bytes):
+RECORD / TYPESCHEMA / PRINCIPAL / OBJECT targets (canonical 32 bytes):
     targetKey = the id itself
 OCCURRENCE targets:
     targetKey = occurrenceTargetKey(envelopeId, leafIndex)          // §2.1
-BYTEDIGEST targets (algorithm-tagged foreign digests; never EFS identity):
-    targetKey = digestTargetKey(algCode, digestBytes)               // §2.1
-ADDRESS targets (raw EVM address, the v1 R3 lesson):
-    targetKey = addressTargetKey(account)                           // §2.1
 ```
 
-**contentHash → Record/file lookup (deliverable 6).** A digest reference is a
-reference; the `KIND_TARGET` family keyed by the digest's `targetKey` **is**
-the bounded keyed lookup "given a sha-256/keccak/git-OID, find what declares
+There is no `REALM`, `ADDRESS`, or `BYTEDIGEST` ReferenceRole target class.
+Realm/account concepts that need graph backlinks are represented by ordinary
+application Records and referenced as RECORD/OBJECT. A raw scalar may be
+declared for value equality where its field kind is eligible, but that does
+not make it a graph reference. `DIGEST` is a value kind indexed only through
+`DIGEST_EQ` below.
+
+**contentHash → Record/file lookup (deliverable 6).** A DIGEST_EQ field is a
+declared value; the `KIND_DIGEST` family keyed by `digestTargetKey` **is** the
+bounded keyed lookup "given a sha-256/keccak/git-OID, find what declares
 it" [OWNER RULING — owner-rulings.md 2026-07-15 item 13: "add a `contentHash →
 DATA/file` index to the A–E bundle … Only the unbounded global dedup sweep …
 stays off-chain"; VERIFIED]. Exact shape:
@@ -691,7 +715,7 @@ stays off-chain"; VERIFIED]. Exact shape:
 function lookupByDigest(uint16 algCode, bytes calldata digest,
                         PageRequest calldata req) external view
   returns (PageResult memory);
-// = pagePostings(0, KIND_TARGET, 0,
+// = pagePostings(0, KIND_DIGEST, 0,
 //                digestTargetKey(algCode, digest), req)
 ```
 
@@ -806,9 +830,10 @@ Mappings:
 - **REF_BACKLINK** names a declared role and produces the general
   `KIND_TARGET` plus predicate `KIND_ROLE` writes of §3.5 for every instance.
   These are the mandatory reference writes, not a third duplicate posting.
-- **DIGEST_EQ** names a DIGEST field and appends under the global
-  `KIND_TARGET` family with the same `digestTargetKey` used by
-  `lookupByDigest` (§3.5).
+- **DIGEST_EQ** names a DIGEST value field and appends under the global
+  `KIND_DIGEST` family with the same `digestTargetKey` used by
+  `lookupByDigest` (§3.5). It creates no `KIND_ROLE` or `KIND_TARGET`
+  posting and is not a ReferenceRole target class.
 
 TypeSchema admission rejects an unknown kind, an ineligible or
 non-extractable target, and duplicate `(indexKind, target)` pairs. It also
@@ -1632,9 +1657,11 @@ with encoding-owned hashed domain words and `abi.encode` fixed words.
 `selectBestLocator`.
 
 **Internal seam:** `LibIndex.activateOccurrence(E, k, ...)`,
-`LibIndex.withdrawOccurrence(E, k, W, ...)`, and
-`LibIndex.preWithdrawOccurrence(E, k, W, targetEvidence)` own the status
-checks before effects. `appendPosting(pk, ord)` is reached only from a fresh
+`LibIndex.withdrawOccurrence(ValidatedOccurrenceLifecycleEffect, W, ...)`, and
+`LibIndex.preWithdrawOccurrence(ValidatedOccurrenceLifecycleEffect, W)` own
+the status checks/writes before effects. Admission is the sole verifier and
+evidence-retention owner; no evidence/witness bytes cross this seam.
+`appendPosting(pk, ord)` is reached only from a fresh
 activation after `postingKeysForOccurrence` stable-deduplicates the bounded
 candidate list; `foldRevocation(ord, W, keys…)` may run only after the one-way
 `ACTIVE → WITHDRAWN` transition and replays the identical derivation/dedup
