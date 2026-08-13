@@ -8,7 +8,7 @@ state machine, Withdrawal/1, the equivocation posture, the absence predicate,
 and the ABI. It assumes the shared name/type skeleton (`TypeSchemaId`,
 `RecordId`, `EnvelopeId`, `OccurrenceRef = (EnvelopeId, leafIndex uint16)`,
 `PrincipalId` bytes32 full-width, `RealmId`, `AdmissionOrdinal`, `PositionKey`,
-`BindingKey`, `PlanId`, `AuthorityBasis`) and the B0 axis pins (immutable
+`BindingKey`, ResolutionPlan `RecordId` (`PlanId` alias), `AuthorityBasis`) and the B0 axis pins (immutable
 shared PublicationEnvelope; uniform PrincipalId; portable Envelope + separate
 Realm-bound AdmissionIntent; one atomic physical Core with internal libraries).
 Post-red-team, this chapter is repaired to the overview's SR pins — chiefly
@@ -211,10 +211,15 @@ Probe costs [PROPOSAL — SR-8 gas shape]: proved-absent = **1 cold SLOAD**
 reversible two-word log entry, adding **2 log SLOADs** (§3.3). There is no
 `sourceEnv` slot on the head and no
 `authorityBasis` on the head: the producing occurrence and its authority
-evidence are reached by following `currentOrdinal` into the admission log
-(SR-8/SR-10; the receipt's SR-7 `AuthorityBasisWord` lives on the
-envelope-meta row). B0 account-Principal grading is constant `AUTH_OK` and
-reads nothing.
+evidence are reached by following `currentOrdinal` through the reversible
+admission log into `getReceipt(currentOrdinal)`. Receipt hydration finds the
+occurrence's accepting `AdmissionBatch` from its append-only `firstOrdinal`
+boundaries and returns that batch's exact SR-7 `AuthorityBasisWord` plus the
+conditional `authorityCodehash` (zero unless `CONTRACT_ERC1271`). EnvelopeMeta
+owns neither field: staged admissions of one Envelope are separately verified
+and may belong to different accepting batches with different basis blocks,
+delegates, revisions, or codehashes. B0 account-Principal grading is constant
+`AUTH_OK` and reads none of them.
 
 ### 2.2 Occurrence status overlay (consumed, not owned) — SR-10 field names
 
@@ -1018,8 +1023,11 @@ The compact contract other chapters rely on:
    `readHeadBatch` (1 cold SLOAD absent / 2 present — SR-8); the
    position-state outcome set is FOUND / NONE_EXPLICIT / NONE_WITHDRAWN /
    ABSENT / UNKNOWN(cause), all head-slot-0-readable; no `authorityBasis`
-   on the head — authority evidence is reached via `admissionOrdinal` → log
-   → envelope-meta `AuthorityBasisWord` (SR-7/SR-8); on-chain in-Realm reads
+   on the head — authority evidence is reached via `admissionOrdinal` →
+   reversible log → accepting AdmissionBatch → receipt's exact
+   `AuthorityBasisWord` plus conditional `authorityCodehash` (SR-7/SR-8);
+   this per-accepting-batch path is required because staged admissions of one
+   Envelope may record different verifier bases/codehashes; on-chain in-Realm reads
    may treat a zero head word as proved ABSENT; off-chain readers must
    satisfy §6.2's four sources + FINAL-scope precondition; UNKNOWN never
    falls through a tier. Challenge-window re-check = one SLOAD on

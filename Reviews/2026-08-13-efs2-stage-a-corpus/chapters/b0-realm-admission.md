@@ -1231,7 +1231,7 @@ struct BindingHead {
 struct BindingHistoryEntry {
   uint32 revision;
   uint64 admissionOrdinal;
-  bytes32 occKeyRef;
+  bytes32 envelopeId;
   uint16 leafIndex;
 }
 

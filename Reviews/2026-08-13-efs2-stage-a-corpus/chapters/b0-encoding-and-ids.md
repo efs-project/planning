@@ -58,8 +58,10 @@ playbook item (red-team lane findings).
   (`kind u8 ‖ verifierVersion u16 ‖ witnessProfile u8 ‖ basisBlock u64 ‖
   delegateOrZero u160`) plus a conditional contract-account codehash slot. The rule above
   governs *portable* ids
-  (TypeSchemaId, RecordId, EnvelopeId, PrincipalId, PositionKey, BindingKey, PlanId).
-  [PROPOSAL]
+  (TypeSchemaId, RecordId, EnvelopeId, PrincipalId, PositionKey, BindingKey).
+  A Lens `PlanId` is only an alias for the exact `RecordId` of a
+  `TYPE_RESOLUTION_PLAN_1` Record; it introduces no additional identity
+  family or preimage. [PROPOSAL]
 
 ### 1.3 Domain constants (closed table, printable preimages)
 
@@ -93,7 +95,6 @@ hashing; `fixture` = harness-scope only, never on-chain.
 | `DOM_REALM_REVISION` | `efs2/realm-revision/1` | id | RealmRevisionId (SR-16) |
 | `DOM_POSITION` | `efs2/position/1` | id | PositionKey (SR-6) |
 | `DOM_BINDING` | `efs2/binding/1` | id | BindingKey (SR-6) |
-| `DOM_PLAN` | `efs2/plan/1` | id | PlanId (plan bytes from Lens lane) |
 | `DOM_INTENT` | `efs2/admission-intent/1` | id | AdmissionIntent id (SR-3, admission lane) |
 | `DOM_PROFILE` | `efs2/profile/1` | id | Realm profileId (realm §2.3; consumes §1.6 hash) |
 | `DOM_REALM_GENESIS` | `efs2/realmgenesis/1` | id | Realm genesisCommitment (realm §2.4) |
@@ -127,7 +128,9 @@ spellings (never mint; listed so the registry stays auditable): `efs2/bindingkey
 `efs2/binding-key/1` (SR-6 → `efs2/binding/1`), `efs2/realmrev/1` (SR-16 →
 `efs2/realm-revision/1`), `efs2/intent/1` (SR-3 → `efs2/admission-intent/1`),
 `efs2/occlife/1` (SR-10 — the lifecycle overlay is keyed by the `DOM_OCCURRENCE`-derived
-occKey; no separate key domain exists). Reserved example, unminted: `efs2/record/2` (§7
+occKey; no separate key domain exists), and `efs2/plan/1` (REJECTED — a
+ResolutionPlan is an ordinary Record and its PlanId alias is that RecordId;
+no parallel plan domain exists). Reserved example, unminted: `efs2/record/2` (§7
 migration illustration only). Bakeoff-arm domains (`*_B`, §3.6) join only if the arm is
 built. Conformance harness case **H-DOMTABLE** [PROPOSAL]: the harness sweeps every chapter
 and implementation for `efs2/` strings and diffs against this table; any string absent here
@@ -753,7 +756,6 @@ sizes are `32 × wordCount` bytes.
 | `RealmRevisionId` | `(DOM_REALM_REVISION, realmId, keccak256(revisionDescriptorBytes))` — SR-16; descriptor field set owned by the realm chapter |
 | `PositionKey` | `(DOM_POSITION, bytes32 purpose, bytes32 subject, bytes32 fieldRole)` |
 | `BindingKey` | `(DOM_BINDING, principalId, positionKey)` |
-| `PlanId` | `(DOM_PLAN, uint256 planProfile, keccak256(planBytes))` — plan bytes owned by Lens lane; fixed-width packed per LR-1 |
 | `IntentId` | `(DOM_INTENT, eip712IntentDigest)` — exact SR-3 digest owned by the authorship chapter |
 
 Superseded rows, kept as labeled residue: `PrincipalId` under the name `principalScheme`
@@ -769,6 +771,13 @@ set and this chapter carries only the two-level wrap.
 `AuthorityBasisWord` is deliberately absent from this ID-family table. Per SR-7 it is the
 principal chapter's exact packed evidence word plus a conditional contract codehash slot,
 not a hashed structural identity and not a second derivation surface.
+
+`PlanId` is also deliberately absent as a separate formula: the Lens chapter owns the exact
+`ResolutionPlan/1` canonical body, and `PlanId` is merely its ergonomic alias for
+`recordId(TYPE_RESOLUTION_PLAN_1, canonicalBody)`. The earlier
+`keccak256(abi.encode(DOM_PLAN, planProfile, keccak256(planBytes)))` form is
+[REJECTED]; it would assign one plan two portable identities and bypass ordinary Record
+retrieval.
 
 The intent row expands mechanically to the authorship chapter's complete SR-3 commitment:
 
@@ -1203,7 +1212,6 @@ library EfsIds {
         internal pure returns (bytes32);                           // SR-16: descriptor owned by realm chapter
     function positionKey(bytes32 purpose, bytes32 subject, bytes32 fieldRole) internal pure returns (bytes32);
     function bindingKey(bytes32 principalId_, bytes32 positionKey_) internal pure returns (bytes32);
-    function planId(uint16 planProfile, bytes calldata planBytes) internal pure returns (bytes32);
     function intentId(bytes32 eip712IntentDigest) internal pure returns (bytes32);
         // SR-3: keccak256(abi.encode(DOM_INTENT, eip712IntentDigest)); exact intent
         // struct, expectedRevisions array hash, type hash, and Realm-bound domain are §4.

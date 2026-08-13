@@ -43,7 +43,11 @@ bakeoff arms only):
   before `verify(AccountPrincipal calldata p, bytes32 digest, bytes calldata
   witness, VerifyContext memory ctx) → (AuthorityBasisWord, bytes32
   codehashOrZero)`) and recorded as the SR-7 packed `AuthorityBasisWord` on
-  the admission receipt / envelope-meta row — **NOT on the Binding head**
+  each accepting `AdmissionBatch`, with its conditional `authorityCodehash`
+  (zero unless `CONTRACT_ERC1271`), then hydrated through the occurrence
+  receipt — **NOT on the Binding head or EnvelopeMeta**. One Envelope may be
+  admitted in stages under separately verified batches, so no singular
+  envelope-level basis/codehash exists
   (SR-8) ([DERIVED INVARIANT — kel.md §3/§8.2 admission-time-validation
   lesson, via CARRY-IN KEL finding (a); representation per SR-7/SR-8/SR-13]).
 - Binding heads: Lane 6 owns `PositionKey` derivation, the head state machine
@@ -233,15 +237,19 @@ lever per the SDK priority order correct → easy → performant.]
 the state-readable Record spine:
 
 ```text
-PlanId = RecordId(plan Record)
-       = keccak256(abi.encode(DOM_RECORD, TYPE_RESOLUTION_PLAN_1,
-                              keccak256(canonicalBody)))
+planRecordId = RecordId(plan Record)
+             = keccak256(abi.encode(DOM_RECORD, TYPE_RESOLUTION_PLAN_1,
+                                    keccak256(canonicalBody)))
          (DOM_RECORD = keccak256("efs2/record/1"); form shown under the SR-1
           discipline — variable-length body enters pre-hashed; exact RecordId
           preimage owned by the identity/encoding chapters)
 ```
 
-and the plan's `canonicalBody` **is byte-identical to the §3.2 packed frame** —
+`PlanId` is only an ergonomic alias for this exact `planRecordId`; B0 mints no
+`DOM_PLAN`, parallel plan hash, profile-specific identity, or alternate
+retrieval key.
+
+The plan's `canonicalBody` **is byte-identical to the §3.2 packed frame** —
 no wrapping, no re-encoding. The one property required of the encoding chapter:
 the canonical body codec must admit an opaque bounded raw-bytes body profile
 (or, failing that, wrap plan bytes at a fixed, offset-free position so the
@@ -259,7 +267,7 @@ function recordBody(bytes32 recordId) external view returns (bytes memory);
 ### 4.2 Why this beats the CREATE2/EXTCODECOPY store for B0
 
 The lens pass's plan store was: deploy plan bytes as immutable code at a
-CREATE2 address derived from `planId`; consumers derive the address and
+CREATE2 address derived from `planRecordId`; consumers derive the address and
 `EXTCODECOPY`; "address derivation is the verification."
 [HYPOTHESIS — lens-spec §2.3, explicitly marked "(PLAUSIBLE — V-2 fixture is
 the gate)"; the source itself never fixture-verified it.]
@@ -268,19 +276,19 @@ The requirement behind it is only: **the plan store must not be a trusted
 party** [DERIVED INVARIANT — lens-spec §2.3's stated purpose; CARRY-IN restates
 it verbatim]. The B0 spine satisfies it without new machinery:
 
-1. **Content addressing does the same verification.** `PlanId = RecordId` is a
-   content hash; any reader (contract via `recordBody` + rehash if it distrusts
-   the Core, or any second implementation reconstructing from state) can verify
-   bytes against the id. Inside the atomic Core (axis 6), the resolver and the
+1. **Content addressing does the same verification.** `PlanId` is the plan
+   `RecordId`, a content hash; any reader (contract via `recordBody` + rehash if
+   it distrusts the Core, or any second implementation reconstructing from
+   state) can verify bytes against the id. Inside the atomic Core (axis 6), the resolver and the
    spine are one contract and one trust domain — there is no separate "store
    party" to distrust, which was the CREATE2 trick's entire job in a
    multi-contract world.
 2. **Reconstruction and honesty come free.** A plan Record is admitted evidence:
    it is enumerable by Type, carried by ordinary Envelopes, replicated by the
    same reconstruction pass as everything else, and portable — the same
-   content-derived PlanId denotes the same plan in every Realm. A CREATE2 store
-   is a second, per-Realm storage system outside the admitted graph that the
-   reconstruction trace would have to special-case.
+   content-derived plan RecordId denotes the same plan in every Realm. A
+   CREATE2 store is a second, per-Realm storage system outside the admitted
+   graph that the reconstruction trace would have to special-case.
 3. **No second write path.** CREATE2 needs a deployment entrypoint, initcode
    discipline, and an EVM-evolution exposure (EOF, initcode/`EXTCODECOPY`
    repricing — the CARRY-IN names this invalidation surface). Plans-as-Records
@@ -302,8 +310,10 @@ Sketched interface only:
 // PLAN-STORE-B (bakeoff arm; fixture gate = the V-2 successor fixture:
 // deploy → derive address → EXTCODECOPY → byte-equality → resolve-equivalence
 // against PLAN-STORE-A on identical fixtures, plus a poisoned-store negative)
-function deployPlan(bytes calldata planBytes) external returns (address at, bytes32 planId);
-function planAddress(bytes32 planId) external view returns (address); // pure CREATE2 derivation
+function deployPlan(bytes calldata planBytes)
+    external returns (address at, bytes32 planRecordId);
+function planAddress(bytes32 planRecordId)
+    external view returns (address); // pure CREATE2 derivation from RecordId
 ```
 
 Adopt B over A only if (i) the V2-E2 gas matrix shows the plan-load component
@@ -357,8 +367,12 @@ probe costs 1 cold SLOAD; a bound/tombstoned probe costs 2 (meta +
 `targetA`). `realmBasis` and `highWaterOrdinal` are query metadata returned
 separately; neither is a head field or substitutes for one. There is **no
 SR-7 authority word in either head slot** — the exact
-`AuthorityBasisWord` lives on the admission receipt / envelope-meta row,
-reachable by following `admissionOrdinal` into the admission log (SR-8).
+`AuthorityBasisWord` plus conditional `authorityCodehash` live on the
+occurrence's accepting AdmissionBatch and are hydrated through its receipt,
+reachable by following `admissionOrdinal` through the reversible admission
+log and bounded batch-boundary lookup (SR-8). This cannot be inferred from
+EnvelopeMeta: staged admissions of the same Envelope are reverified and may
+record different basis blocks, delegates, revisions, or codehashes.
 
 [REJECTED — superseded sub-variant, kept for the record]: the draft assumed a
 3-word head carrying `authorityBasis` (1 cold SLOAD absent / 3 present).
@@ -368,8 +382,10 @@ Semantics consumed:
 
 - `BOUND` ("present") head ⇒ the value was admitted under CAS from an authored
   Occurrence whose Principal matches `bindingKey`'s derivation, with authority
-  validated at admission by the SR-13 verifier chain and recorded as the SR-7
-  `AuthorityBasisWord` on the receipt [DERIVED INVARIANT — admission-time
+  validated at admission by the SR-13 verifier chain and recorded on that
+  occurrence's accepting AdmissionBatch; its receipt hydrates the exact SR-7
+  `AuthorityBasisWord` and conditional `authorityCodehash` (zero unless
+  `CONTRACT_ERC1271`) [DERIVED INVARIANT — admission-time
   validation, kel.md §8.2 via CARRY-IN; core-architecture-candidate "Binding and
   withdrawal": "Admission derives principalId from the authored Occurrence, so a
   writer cannot bind another Principal's key"].
@@ -510,10 +526,14 @@ The seam for managed Principals is already in the layout and the walk:
   B0 value; enforcement code `AUTH_FLOOR_UNSUPPORTED` keeps the seam honest).
 - walk: step (5) of §7.1 — `gradeAuthority(entry, head)` runs for `BOUND`
   heads only. Under managed Principals it **follows `head.admissionOrdinal`
-  into the admission log** to the receipt's SR-7 `AuthorityBasisWord`
-  (envelope-meta row) and compares it against `entry.minAuthFloor` under the
-  then-current authority module — the SR-8 attachment path; the extra log +
-  meta SLOADs are paid only by managed-tier plans, never by B0. A `BOUND`
+  through the reversible admission log and accepting-batch lookup** to the
+  receipt's exact SR-7 `AuthorityBasisWord` plus conditional
+  `authorityCodehash`, and compares them against `entry.minAuthFloor` under
+  the then-current authority module — the SR-8 attachment path; the extra log
+  + batch/receipt SLOADs are paid only by managed-tier plans, never by B0.
+  Per-batch hydration is mandatory: staged admissions of one Envelope may
+  have distinct verifier bases/codehashes, so EnvelopeMeta is never a
+  substitute. A `BOUND`
   head that cannot be graded at the required floor yields
   `UNKNOWN(REASON_AUTHORITY_UNGRADEABLE)` and blocks (never falls through).
   Prospective revocation means floors, not emptied slots: removal affects
@@ -541,16 +561,16 @@ one-basis phantom/ghost lesson). [DERIVED INVARIANT — FSP-BASIS-1,
 lens-read-gotchas "One-basis rule".]
 
 ```text
-resolve(planId, positionKey, basis) → ResolveResult
+resolve(planRecordId, positionKey, basis) → ResolveResult
   # (1) LOAD
-  body ← recordBody@basis(planId)
+  body ← recordBody@basis(planRecordId)  # ordinary RecordId point read
   if body unavailable:
-      on-chain  → revert PlanUnavailable(planId)          # authoritative: config error
+      on-chain  → revert PlanUnavailable(planRecordId)    # authoritative: config error
       off-chain → return UNKNOWN(REASON_PLAN_UNAVAILABLE) # never ABSENT
   # (2) VALIDATE  (pure memory; §3.5 order; first failure wins)
   code ← validateStructure(body)
   if code ≠ 0:
-      on-chain  → revert PlanMalformed(planId, code)      # fail-closed
+      on-chain  → revert PlanMalformed(planRecordId, code) # fail-closed
       off-chain → return UNKNOWN(REASON_PLAN_MALFORMED, code)
   if body.semanticsProfileId ≠ SEMANTICS_PROFILE_B0:
       return UNSUPPORTED(REASON_UNRECOGNIZED_SEMANTICS_PROFILE)
@@ -625,8 +645,11 @@ struct ResolveResult {
 
 B0 returns no per-winner authority word: account-Principal grading is the
 constant `AUTH_OK` and performs no receipt read. A caller needing the exact
-SR-7 `AuthorityBasisWord` and conditional codehash hydrates
-`getReceipt(winnerAdmissionOrdinal)` separately. A future managed-Principal
+SR-7 `AuthorityBasisWord` and conditional `authorityCodehash` (zero unless
+`CONTRACT_ERC1271`) hydrates
+`getReceipt(winnerAdmissionOrdinal)` separately; that lookup returns the
+winning occurrence's accepting AdmissionBatch fields, not envelope first-touch
+metadata, and therefore remains correct across staged admissions. A future managed-Principal
 profile may mint a versioned `ResolveResult` extension that follows that
 ordinal during resolution; it does not enlarge this B0 result or head.
 
@@ -692,24 +715,24 @@ the PM default; the absence discipline makes the shape forced.]
 // LensResolve — internal library on the atomic Core (axis 6);
 // external view wrappers on the Core contract:
 
-error PlanUnavailable(bytes32 planId);
-error PlanMalformed(bytes32 planId, uint8 rejectCode);
+error PlanUnavailable(bytes32 planRecordId);
+error PlanMalformed(bytes32 planRecordId, uint8 rejectCode);
 error ResolveNotAccepted(uint8 presence, uint8 reasonCode);
 
 /// Neutral, stateless point resolution. Anyone may call with any plan —
 /// personalization of DISPLAY is free and harmless (view-only).
-function resolve(bytes32 planId, bytes32 positionKey)
+function resolve(bytes32 planRecordId, bytes32 positionKey)
     external view returns (ResolveResult memory r);
 
 /// Fail-closed wrapper for state-changing consumers: reverts unless
 /// bit(uint8(r.presence)) is set in acceptMask. Gates SHOULD pass
 /// acceptMask = (1 << uint8(Presence.FOUND)) only; including UNKNOWN or
 /// CONFLICT bits in a gate's mask is non-conformant.
-function resolveStrict(bytes32 planId, bytes32 positionKey, uint8 acceptMask)
+function resolveStrict(bytes32 planRecordId, bytes32 positionKey, uint8 acceptMask)
     external view returns (bytes32 value, ResolveResult memory r);
 
 /// Structural validation only (no probes). ok=false ⇒ rejectCode per §3.5.
-function validatePlan(bytes32 planId)
+function validatePlan(bytes32 planRecordId)
     external view returns (bool ok, uint8 rejectCode);
 
 /// Pure helper; must byte-match the Lane 6 formula.
@@ -736,28 +759,29 @@ the trust list that authorizes that caller."); lens-spec §0.4.]
 The ABI split realizes it:
 
 - `resolve` / `resolveStrict` are **views** — neutral machinery, safe for any
-  caller-supplied `planId` because a view authorizes nothing.
+  caller-supplied `planRecordId` because a view authorizes nothing.
 - Authorization happens only inside a consumer contract, and a conforming
-  consumer's state-changing paths read the plan id **exclusively from its own
+  consumer's state-changing paths read the plan RecordId **exclusively from its own
   storage**, written by its own admin authority:
 
 ```solidity
 contract ExampleGate {
-    bytes32 public approvedPlanId;         // the pinned trust policy
+    bytes32 public approvedPlanRecordId;   // pinned ResolutionPlan RecordId
     bytes32 public constant EXPECTED_PURPOSE_AND_SCOPE = /* §3.3 value */ 0x0;
 
-    function setApprovedPlan(bytes32 planId) external onlyGateAdmin {
-        (bool ok, uint8 code) = core.validatePlan(planId);
+    function setApprovedPlan(bytes32 planRecordId) external onlyGateAdmin {
+        (bool ok, uint8 code) = core.validatePlan(planRecordId);
         require(ok, "malformed");
         // conformance: check the plan's purposeAndScope against expectation
-        approvedPlanId = planId;
+        approvedPlanRecordId = planRecordId;
     }
 
-    function act(bytes32 positionKey /*, no planId parameter — by construction */)
+    function act(bytes32 positionKey /* no planRecordId parameter */)
         external
     {
         (bytes32 v, ) = core.resolveStrict(
-            approvedPlanId, positionKey, uint8(1) << uint8(Presence.FOUND));
+            approvedPlanRecordId, positionKey,
+            uint8(1) << uint8(Presence.FOUND));
         // ... state change gated on v ...
     }
 }
@@ -853,7 +877,7 @@ people", line ~193–196 — cited as the deferral authority].
 // under the same plan; any non-FOUND intermediate outcome propagates unchanged
 // (anti-fallthrough applies per step). MAX_PATH_DEPTH_CORE bounds depth.
 function resolvePath(
-    bytes32 planId,
+    bytes32 planRecordId,
     bytes32 rootPositionKey,
     bytes32[] calldata stepRoles,   // length ≤ MAX_PATH_DEPTH_CORE (TBD; candidate ≤ 4)
     uint8   acceptMaskPerStep
@@ -897,10 +921,10 @@ struct PendingDecision {
 }
 
 // commit step:
-//   r = core.resolve(approvedPlanId, pos); require(r.presence == FOUND);
+//   r = core.resolve(approvedPlanRecordId, pos); require(r.presence == FOUND);
 //   store PendingDecision{pos, r.value, r.winnerIndex, headRevision, r.basis.admissionHigh, now + WINDOW}
 // finalize step (only after readyAt):
-//   r2 = core.resolve(approvedPlanId, pos);
+//   r2 = core.resolve(approvedPlanRecordId, pos);
 //   ok = r2.presence == FOUND
 //     && r2.value == pd.value
 //     && r2.winnerIndex == pd.winnerIndex;        // decision-scoped recheck
@@ -941,7 +965,7 @@ Properties, each a fixture:
 | Plan-committed caps; exact-length; reserved-zero; fail-closed unknowns | DERIVED INVARIANT | lens-spec §2.2 / object-taxonomy §2.2 (VERIFIED) |
 | CORE cap ≠ client ceiling (two constants) | DERIVED INVARIANT | lens-pass-synthesis LN-3 (VERIFIED) |
 | `MAX_PLAN_ENTRIES_CORE = 64` | PROPOSAL | §3.4 arithmetic + 15–55 center (HYPOTHESIS) |
-| Plans as admitted spine Records; PlanId = RecordId | PROPOSAL | §4.2 argument; enabled by OWNER RULING items 17/18 |
+| Plans as admitted spine Records; PlanId is the exact ResolutionPlan RecordId | PROPOSAL | §4.2 argument; enabled by OWNER RULING items 17/18 |
 | CREATE2/EXTCODECOPY plan store | HYPOTHESIS (bakeoff arm B) | lens-spec §2.3, self-marked PLAUSIBLE, V-2 gate |
 | Claim-conditional authority | DERIVED INVARIANT | lens-spec §3.1 LR-2 (VERIFIED); dissolved-into-admission path noted per CARRY-IN |
 | Verify-above-the-winner; hints never correctness | DERIVED INVARIANT | lens-spec §3.2 LR-3 (VERIFIED) |
@@ -966,7 +990,7 @@ combiner outcome vectors (each of T1–T10, incl. two-value THRESHOLD conflict a
 k ≤ N/2 and the tombstone-contributes-absent case); BindingKey derivation
 vectors (incl. two Principals sharing low-160-bits); LENS-NEG-1; challenge-window
 commit/abort/finalize; cross-language (Solidity/TS/Rust) byte-identical plan
-frames and PlanIds.
+frames and plan RecordIds.
 
 Separate SDK/client fixtures run `N = {50,100,256}` on pinned mobile and
 desktop profiles (never as Core plans) and assert equal results plus honest
@@ -985,7 +1009,7 @@ The compact contract other chapters rely on:
 uint16  MAX_PLAN_ENTRIES_CORE = 64;          // Core-enforced
 uint16  MAX_PLAN_ENTRIES_CLIENT = 256;       // client-side ceiling, not Core-enforced
 bytes32 SEMANTICS_PROFILE_B0 = keccak256("efs2/lens-semantics/b0/1");
-// PlanId := RecordId of a Record with TypeSchemaId = TYPE_RESOLUTION_PLAN_1
+// PlanId is only an alias for the RecordId whose TypeSchemaId = TYPE_RESOLUTION_PLAN_1
 // whose canonicalBody is the §3.2 packed ResolutionPlan/1 frame (96 + 64·N bytes).
 
 // ---- types ----
@@ -999,17 +1023,17 @@ struct ResolveResult {
 }
 
 // ---- external views on Core ----
-function resolve(bytes32 planId, bytes32 positionKey) external view returns (ResolveResult memory);
-function resolveStrict(bytes32 planId, bytes32 positionKey, uint8 acceptMask)
+function resolve(bytes32 planRecordId, bytes32 positionKey) external view returns (ResolveResult memory);
+function resolveStrict(bytes32 planRecordId, bytes32 positionKey, uint8 acceptMask)
     external view returns (bytes32 value, ResolveResult memory);
-function validatePlan(bytes32 planId) external view returns (bool ok, uint8 rejectCode);
+function validatePlan(bytes32 planRecordId) external view returns (bool ok, uint8 rejectCode);
 function deriveBindingKey(bytes32 principalId, bytes32 positionKey) external pure returns (bytes32);
 // DOM_BINDING = keccak256("efs2/binding/1")
 // deriveBindingKey = keccak256(abi.encode(DOM_BINDING, principalId, positionKey))
 
 // ---- errors ----
-error PlanUnavailable(bytes32 planId);
-error PlanMalformed(bytes32 planId, uint8 rejectCode);
+error PlanUnavailable(bytes32 planRecordId);
+error PlanMalformed(bytes32 planRecordId, uint8 rejectCode);
 error ResolveNotAccepted(uint8 presence, uint8 reasonCode);
 
 // ---- consumed exactly from Lane 5/6 ----
@@ -1034,7 +1058,8 @@ function getBindingAtBasis(bytes32 bindingKey, uint64 basisOrdinal)
 ```
 
 Conformance rules other chapters must carry: state-changing consumers read
-`planId` only from their own admin-written storage and check `purposeAndScope`;
+the plan RecordId only from their own admin-written storage and check
+`purposeAndScope`;
 gates accept only the FOUND bit; UNKNOWN/CONFLICT never collapse or fall
 through; SDK resolves pin one basis for all probes of one resolution and return
 UNKNOWN (never ABSENT) on unavailable basis/coverage; CONFLICT rows render no
