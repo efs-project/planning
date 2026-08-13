@@ -357,16 +357,19 @@ Realm-local CAS precision rides in the **AdmissionIntent**, not the portable
 Envelope, preserving axis 3 (portable authored evidence; Realm-bound
 admission). This is now pinned by SR-3 [PROPOSAL — overview pin]: the intent
 carries `expectedRevisions[]` of `(leafIndex uint16, revision uint32)`,
-**required for every Binding-class leaf selected by `leafMask`** — the
-Binding machine bans wildcard/blind realm-local writes; the array is empty
-only when no Binding-class leaf is selected. Correspondingly, SR-12's
+**required for every selected CAS-bearing `BindingSet/1` or
+`BindingTombstone/1` leaf** — the Binding machine bans wildcard/blind
+realm-local writes; `Withdrawal/1` has no revision CAS item because it targets
+an exact occurrence. The array is empty only when no CAS-bearing Binding
+mutation is selected. Correspondingly, SR-12's
 `admitAsSender` implicit-intent path is legal **only when the envelope
-contains no Binding-class leaves**. The predecessor *occurrence* is portable
+contains none of the three kernel-effect Types**. The predecessor *occurrence* is portable
 authored testimony and lives in the Record body; the *revision* is Realm-local
 state and would poison portability if signed into the Envelope.
 
-`expectedRevision` is REQUIRED per selected Binding-class leaf (no wildcard
-sentinel). A writer who does not know the current revision reads it first;
+`expectedRevision` is REQUIRED per selected BindingSet/Tombstone leaf (no
+wildcard sentinel). A writer who does not know the starting revision reads it
+first and predicts any earlier same-call mutations in leaf order;
 blind writes are exactly the race this machine refuses to paper over.
 [PROPOSAL — races explicit, per system-constitution line 155: "Mutable state
 uses explicit predecessor/CAS rules where races matter." Width is u32 per
@@ -409,6 +412,40 @@ occurrence in submission order, SR-10), and fires the Lane 5 hook
 | T7 | WITHDRAW_HEAD | BOUND(r) | Withdrawal targeting `src(head)` | withdrawal author == binding principal (structural, §1.3); target status ACTIVE | TOMBSTONED(r+1, WITHDRAWAL) |
 | T8 | WITHDRAW_NONHEAD | any | Withdrawal targeting an occurrence that is not any current head's source | author rule; target ACTIVE | no head transition (overlay only) |
 | T9 | WITHDRAW_TOMBSTONE_HEAD | TOMBSTONED(r) | Withdrawal targeting `src(head)` | author rule; target ACTIVE | TOMBSTONED(r+1, WITHDRAWAL) |
+
+**Same-call shadow fold [PROPOSAL — exact].** For preflight, `head` is not
+reloaded from storage for every selected leaf. On first touch Admission hydrates
+the persisted head and its reversible source into a bounded memory entry; every
+later selected leaf reads the updated entry. A fresh BindingSet/Tombstone source
+is shadow-activated at its prospective ordinal before this table runs. Its
+intent's expected-revision entry was structurally associated with that selected
+leaf; for a fresh source the value is compared to the current shadow revision,
+and `P` is compared to the current shadow source. An ACTIVE duplicate consumes
+no transition and does not value-check or replay its already-landed CAS.
+
+The transition immediately updates shadow state: revision, head target/state,
+`admissionOrdinal`, exact source `(currentEnvelopeId,leafIndex)`, and one planned
+RAW_AUDIT append. Thus two same-key mutations are sequential, not parallel
+reads of the pre-call head. Example from UNSET:
+
+```text
+leaf 0 BindingSet:       P=NONE,  xr=0  -> BOUND rev1, source=(E,0)
+leaf 1 BindingSet same K:P=(E,0), xr=1  -> BOUND rev2, source=(E,1)
+```
+
+A Withdrawal receives its `ValidatedOccurrenceLifecycleEffect` from the same
+point-in-order shadow. `targetIsCurrentBindingHead` is exact equality with that
+shadow source. An effective withdrawal of the leaf-0 head above therefore plans
+T7/T9; a second sibling Withdrawal sees the first's tombstoned head/terminal
+target and plans no second target effect. Preflight writes nothing.
+
+Commit replays the planned transitions in the same ascending leaf order. Each
+plan records its complete before head/source and after head/source. Commit
+asserts the actual before value—including an earlier sibling change already
+committed in this replay—then writes only the recorded after value/history
+append. A mismatch is an internal invariant panic reverting the whole call;
+`ErrCas*`, `ErrRevisionGuard`, target-kind, and author failures are preflight
+input errors and never first discovered after ordinal allocation.
 
 Revision guard [PROPOSAL — SR-8]: a transition that would produce
 `newRevision == 2^32 − 1` reverts `ErrRevisionGuard(bindingKey)`. The named
@@ -606,8 +643,9 @@ NEVER_ADMITTED — the case of a signed-but-leaked envelope its author wants
 dead before anyone admits it. Because the target envelope has never been
 seen, the author guard cannot be read from state. The **authorship/admission
 owner alone** accepts and validates the exact `TargetEnvelopeEvidence` shape:
-target header, full RecordId vector, typed `AccountPrincipal`, and witness,
-with no bodies. It recomputes EnvelopeId, checks the target leaf range, binds
+target header, full RecordId vector, the one target `LeafBody`, typed
+`AccountPrincipal`, and witness. It recomputes EnvelopeId, checks the target
+leaf range and body-to-RecordId commitment, binds
 the descriptor to the header Principal before verifying the witness, and
 performs the author comparison. This Binding module receives only the
 resulting typed `ValidatedOccurrenceLifecycleEffect` context shared with the
@@ -884,9 +922,10 @@ Write path: there are no standalone external bind/tombstone/withdraw
 functions in B0 — all writes enter through the admission lane's single
 permissionless entrypoint (`publish(envelopeBytes, principal, intentBytes,
 intentWitness)`, SR-12/SR-13, that chapter's surface) and reach this
-subsystem as internal library calls. Binding-class leaves always require an
-explicit AdmissionIntent carrying `expectedRevisions` (SR-3); `admitAsSender`
-is legal only for envelopes with no Binding-class leaves (SR-12). This
+subsystem as internal library calls. All three kernel-effect Types require an
+explicit AdmissionIntent; selected BindingSet/Tombstone leaves additionally
+carry `expectedRevisions` (SR-3). `admitAsSender` is legal only when none of
+the three is selected (SR-12). This
 preserves axis 6 (one atomic physical Core; modules as internal libraries)
 and one-call atomicity. The internal transition API and the external read
 ABI are both normative:
@@ -916,10 +955,26 @@ library LibBinding {
         bool    targetIsCurrentBindingHead;
     }
 
-    // Executes T1/T2/T5. Reverts ErrCas*, ErrRevisionGuard,
-    // ErrReservedBitsNonzero. `pred*` fields carry the decoded
-    // OPTION(OCCREF): predIsNone == true ⇔ explicit NONE (first write).
-    function applyBind(
+    struct ShadowBindingHead {
+        uint8 state; uint8 targetKind; uint8 tombstoneCause;
+        uint32 revision; uint64 admissionOrdinal;
+        bytes32 targetA; uint16 targetLeaf;
+        OccurrenceRef source; // explicit even when ordinal is only prospective
+    }
+
+    struct BindingTransitionPlan {
+        bytes32 bindingKey;
+        bool hasHeadTransition;
+        bool appendRawAudit;
+        ShadowBindingHead beforeHead;
+        ShadowBindingHead afterHead;
+    }
+
+    // Pure/memory preflight folds. They receive the point-in-order shadow head,
+    // emit exact before/after plans, and perform all typed CAS/guard reverts.
+    // `pred*` is decoded OPTION(OCCREF); predIsNone means explicit first write.
+    function planBind(
+        ShadowBindingHead memory shadowHead,
         bytes32 principalId,           // kernel-derived from the envelope
         bytes32 purpose, bytes32 subject, bytes32 fieldRole,
         uint8   targetKind, bytes32 targetA, uint16 targetLeaf,
@@ -927,28 +982,30 @@ library LibBinding {
         uint32  expectedRevision,      // from AdmissionIntent (SR-3)
         bytes32 srcEnvelopeId, uint16 srcLeafIndex,
         uint64  admissionOrdinal
-    ) internal returns (bytes32 bindingKey, uint32 newRevision);
+    ) internal pure returns (BindingTransitionPlan memory plan);
 
-    // Executes T3/T4/T6.
-    function applyTombstone(
+    function planTombstone(
+        ShadowBindingHead memory shadowHead,
         bytes32 principalId,
         bytes32 purpose, bytes32 subject, bytes32 fieldRole,
         bool    predIsNone, bytes32 predEnvelopeId, uint16 predLeafIndex,
         uint32  expectedRevision,
         bytes32 srcEnvelopeId, uint16 srcLeafIndex,
         uint64  admissionOrdinal
-    ) internal returns (bytes32 bindingKey, uint32 newRevision);
+    ) internal pure returns (BindingTransitionPlan memory plan);
 
-    // Executes T7/T8/T9 and pre-withdrawal (overlay PRE_WITHDRAWN) from the
-    // exact context already validated by Admission. Reverts only on a typed
-    // effect invariant such as targeting an admitted Withdrawal. Evidence,
-    // descriptor/witness validation, and author equality do not repeat here.
-    // Re-withdrawal of a terminal occKey is a no-op success (SR-15).
-    function applyWithdrawal(
+    // Plans T7/T8/T9/no-op from Admission's exact shadow lifecycle context.
+    function planWithdrawal(
+        ShadowBindingHead memory shadowHead,
         ValidatedOccurrenceLifecycleEffect memory target,
         bytes32 wSrcEnvelopeId, uint16 wSrcLeafIndex,
         uint64  admissionOrdinal
-    ) internal returns (bool headChanged, bytes32 bindingKey);
+    ) internal pure returns (BindingTransitionPlan memory plan);
+
+    // Commit never re-runs a transition. It asserts the stored/current shadow
+    // word equals plan.beforeHead and stores plan.afterHead + planned audit.
+    // Mismatch is an internal invariant panic reverting the full publish call.
+    function commitBindingPlan(BindingTransitionPlan memory plan) internal;
 }
 
 // ---------- external read surface (on the Core contract) ----------
@@ -1066,8 +1123,10 @@ The compact contract other chapters rely on:
    TOMBSTONED(EXPLICIT|WITHDRAWAL), `revision` u32 with `ErrRevisionGuard` +
    successor-position seam; transitions T1–T9 exactly as tabled; CAS =
    (predecessor `OPTION(OCCREF)` in the portable body — explicit NONE for
-   first writes, never raw 0) + (required per-leaf `expectedRevision uint32`
-   in the Realm-bound AdmissionIntent, SR-3); CAS/authority failures are
+   first writes, never raw 0) + (required per selected BindingSet/Tombstone
+   `expectedRevision uint32` in the Realm-bound AdmissionIntent, SR-3);
+   same-call mutations consume/compare these against point-in-order shadow
+   heads; CAS/authority failures are
    typed whole-envelope reverts; **duplicates are idempotent no-ops at
    occurrence granularity (SR-15)** — re-admission of ACTIVE returns
    ALREADY_ADMITTED, re-withdrawal of a terminal occKey is a no-op success;
@@ -1079,8 +1138,9 @@ The compact contract other chapters rely on:
 3. **For the envelope/admission chapter:** kernel recognition of the three
    SR-11 Binding-class TypeSchemaIds; the SR-3 `expectedRevisions[]`
    `(leafIndex uint16, revision uint32)` carriage (required per selected
-   Binding-class leaf; admitAsSender excluded for Binding-class leaves per
-   SR-12); the SR-10 overlay guard consulted before Binding logic;
+   BindingSet/Tombstone leaf; no entry for Withdrawal; implicit sender excluded
+   for all three kernel-effect Types per SR-12); the SR-10 overlay guard
+   consulted point-in-order before Binding logic;
    AdmissionOrdinal per accepted occurrence; pre-withdrawal header-evidence
    verification (§4); `MAX_BIND_LEAVES_PER_ENVELOPE = 64` (SR-5) enforced at
    admission.
@@ -1126,7 +1186,8 @@ The compact contract other chapters rely on:
    through STRUCT-EVM are owed to the vectors chapter.
 2. ~~AdmissionIntent per-leaf carriage~~ — **CLOSED by SR-3**: the merged
    AdmissionIntent/1 carries `expectedRevisions[]` of `(leafIndex uint16,
-   revision uint32)`, required per Binding-class leaf; the fallback
+   revision uint32)`, required per selected CAS-bearing `BindingSet/1` or
+   `BindingTombstone/1` leaf and absent for `Withdrawal/1`; the fallback
    (revision in the portable body) is moot.
 3. ~~`occLife` overlay vs. the admission lane's occurrence status word~~ —
    **CLOSED by SR-10**: one owner, the occKey-addressable status overlay

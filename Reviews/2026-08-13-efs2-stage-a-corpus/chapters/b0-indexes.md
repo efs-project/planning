@@ -299,9 +299,11 @@ struct ValidatedOccurrenceLifecycleEffect {
 }
 ```
 
-`LibIndex` asserts the context matches current status and owns the status
-write. It never accepts or decodes `TargetEnvelopeEvidence`, verifies a
-witness/descriptor, or compares authors. Transition pseudocode:
+`LibIndex` owns lifecycle/status semantics but Admission's bounded shadow runs
+the fold before storage commit. It never accepts or decodes
+`TargetEnvelopeEvidence`, verifies a witness/descriptor, or compares authors.
+The following is first applied to the point-in-order shadow and journaled, then
+replayed against asserted prestates during commit:
 
 ```
 activateOccurrence(E, k):
@@ -324,13 +326,33 @@ preWithdrawOccurrence(validated, withdrawalOrdinal):
   NEVER_ADMITTED -> PRE_WITHDRAWN
   ordinal = 0; revokedAtOrdinal = withdrawalOrdinal
   // nonzero means Admission already retained canonical evidence there;
-  // zero means Admission authenticated the state-readable target header
+  // zero means Admission had authenticated header/vector + exact target body
   decrement nothing
 
 withdrawOccurrence(validated terminal target):
   require current overlay matches validated terminal status/evidenceOrdinal
   success, no writes, no decrement; never load/replace/revalidate evidence
 ```
+
+The shadow entry for an occurrence is loaded from persisted state once; later
+sibling leaves see the prior planned transition. A fresh source is planned
+ACTIVE at its prospective ordinal before its own Withdrawal effect runs. Thus
+bind→withdraw in one Envelope stages ordinary postings/liveCount `+1` then the
+exact withdrawal dedup set `−1` (net zero for that source), while its
+`KIND_BINDING_HIST` audit revisions only append. Withdraw-before-a-later
+selected source stages PRE_WITHDRAWN first; the later activation rejects
+no-resurrection before any SSTORE. Of two sibling Withdrawals, only the first
+effective target fold decrements; the terminal second is a target no-op.
+
+Every touched `PostingsHead` shadow carries exact
+`count/liveCount/lastOrdinal/flags` and planned packed-lane value, not an
+unqualified aggregate delta. Record live-occurrence and unique-by-Type
+zero-crossings are updated after each sibling in the same order. The plan also
+freezes the stable-deduplicated posting-key list, RAW_AUDIT appends, and all
+before/after words. Commit derives no keys and makes no lifecycle/count choice:
+it asserts each before word—including an earlier sibling's just-written after
+word—and stores the recorded after word. A mismatch is an internal invariant
+panic reverting the call, never a late user-facing withdrawal/index error.
 
 The immutable `ordinal` survives `ACTIVE → WITHDRAWN`; terminal states never
 resurrect. The liveness rule derives the reversible reference first and then
@@ -583,9 +605,8 @@ without writing these words (mandatory indexing; complete-by-construction)
 current high-water, and values above the physical u48 range; it never maps a
 sparse envelope leaf through base arithmetic. For `PRE_WITHDRAWN`, only
 `status`, `ordinal == 0`, and `revokedAtOrdinal` come from the overlay. The
-retained target evidence supplies `recordId` and `principalId`; `typeSchemaId`
-remains zero unless the target body is independently state-readable, because
-pre-withdrawal evidence intentionally carries no body.
+retained target evidence supplies `recordId`, `typeSchemaId`, and `principalId`
+from its exact RecordId-matched target body and authenticated descriptor.
 
 ### 3.2 Globally ordered accepted-admission pages
 
@@ -1656,17 +1677,15 @@ with encoding-owned hashed domain words and `abi.encode` fixed words.
 `counts`, `lookupByDigest`, `getBindingHead`, `getBindingAtBasis`,
 `selectBestLocator`.
 
-**Internal seam:** `LibIndex.activateOccurrence(E, k, ...)`,
-`LibIndex.withdrawOccurrence(ValidatedOccurrenceLifecycleEffect, W, ...)`, and
-`LibIndex.preWithdrawOccurrence(ValidatedOccurrenceLifecycleEffect, W)` own
-the status checks/writes before effects. Admission is the sole verifier and
-evidence-retention owner; no evidence/witness bytes cross this seam.
-`appendPosting(pk, ord)` is reached only from a fresh
-activation after `postingKeysForOccurrence` stable-deduplicates the bounded
-candidate list; `foldRevocation(ord, W, keys…)` may run only after the one-way
-`ACTIVE → WITHDRAWN` transition and replays the identical derivation/dedup
-before one decrement per distinct key. No external writer can touch index
-state.
+**Internal seam:** the logical folds
+`activateOccurrence`, `withdrawOccurrence`, `preWithdrawOccurrence`,
+`appendPosting`, and `foldRevocation` first operate on Admission's bounded
+point-in-order shadow and emit exact typed before/after operations. Admission
+is the sole verifier/evidence-retention owner; no evidence/witness bytes cross
+this seam. Posting-key derivation and stable dedup happen only in preflight.
+Commit accepts the frozen journal, asserts each current word equals its planned
+before value, and stores its after value in the identical leaf order; it does
+not re-derive or re-decide. No external writer can touch index state.
 
 ## Open items
 

@@ -169,7 +169,8 @@ struct LeafBody {
 struct TargetEnvelopeEvidence {          // unsigned carriage for §3.3 T4 only
     uint16         withdrawalLeafIndex;  // selected Withdrawal leaf this proves
     EnvelopeHeader header;
-    bytes32[]      recordIds;            // FULL committed vector; no bodies
+    bytes32[]      recordIds;            // FULL committed vector
+    LeafBody       targetBody;           // exactly target leaf; RecordId-matched
     AccountPrincipal targetPrincipal;
     bytes          witness;
 }
@@ -204,14 +205,19 @@ These are decoding and bounded-carriage checks and therefore run on every call,
 including an all-selected-ACTIVE retry. They do **not** perform the semantic
 one-to-one match below.
 
-On the non-idempotent path, after `leafMask`, source-occurrence outcomes, target
-occurrence states, and target Envelope-header availability are known,
+On the non-idempotent path, as the ascending shadow walk determines each
+source outcome, point-in-order target state, and authenticated target
+Envelope-header availability,
 `targetEvidence` MUST be in strictly
 increasing `withdrawalLeafIndex` order and bind one-to-one to exactly the newly
 accepted Withdrawal leaves whose target transition is
-`NEVER_ADMITTED -> PRE_WITHDRAWN` **and** whose target Envelope header is absent
-from state. An ACTIVE duplicate source occurrence, a target whose header is
-already persisted, or a target already in WITHDRAWN/PRE_WITHDRAWN requires no
+`NEVER_ADMITTED -> PRE_WITHDRAWN` **and** whose authenticated target bundle
+(header, full vector, exact RecordId-matched target body) is not otherwise
+available from persisted or staged state. An ACTIVE duplicate
+source occurrence, a target whose complete authenticated bundle is already
+persisted/staged (including a sibling whose exact body is carried in the
+authenticated current Envelope), or a target already in
+WITHDRAWN/PRE_WITHDRAWN at that point requires no
 caller evidence on a mixed/new call; supplying it for that leaf is extra and
 reverts. The all-selected-ACTIVE path is deliberately earlier: after the checks
 above and envelope identity/authentication, it returns without applying this
@@ -223,7 +229,7 @@ or non-Withdrawal evidence on the non-idempotent path reverts
 `E_TARGET_EVIDENCE`. Each required item is then
 structurally validated, recomputes its SR-2 EnvelopeId, binds its typed
 `targetPrincipal` to its declared header id before witness verification under
-§4.4, carries the full committed vector and no bodies, and is consumed only by
+§4.4, carries the full committed vector plus exactly the target LeafBody, and is consumed only by
 its named selected Withdrawal.
 
 ### 2.3 EnvelopeId
@@ -600,11 +606,13 @@ open item O5), and has NO effect in any Realm where it is not admitted.
 Authority guard [PROPOSAL]: effective iff
 `withdrawalEnvelope.header.principalId == targetEnvelope.header.principalId` —
 full bytes32 comparison (R-D2). When the target Envelope header is already known,
-its persisted header supplies the target Principal even if this target leaf is
-still `NEVER_ADMITTED`. When the target transition is
-`NEVER_ADMITTED -> PRE_WITHDRAWN` and that header is absent, the caller MUST carry
+its persisted or authenticated staged header supplies the target Principal even
+if this target leaf is still `NEVER_ADMITTED`. When the target transition is
+`NEVER_ADMITTED -> PRE_WITHDRAWN` and that complete authenticated target bundle
+is unavailable, the caller MUST carry
 `TargetEnvelopeEvidence`: the target's signed header fields, full ordered
-`recordIds[]` vector, typed `targetPrincipal`, and witness, but no bodies. The
+`recordIds[]` vector, exactly the target `LeafBody`, typed `targetPrincipal`,
+and witness. The
 evidence item is already one-to-one bound to this newly accepted Withdrawal leaf
 by §2.2. Admission recomputes `evidenceEnvelopeId` from the evidence header and
 full vector and MUST require, in this order:
@@ -612,6 +620,9 @@ full vector and MUST require, in this order:
 ```text
 evidenceEnvelopeId == withdrawal.target.envelopeId
 withdrawal.target.leafIndex < targetEvidence.recordIds.length
+recordIdOf(targetEvidence.targetBody.typeSchemaId,
+           targetEvidence.targetBody.canonicalBody) ==
+    targetEvidence.recordIds[withdrawal.target.leafIndex]
 computePrincipalId(targetEvidence.targetPrincipal) ==
     targetEvidence.header.principalId
 verify(targetEvidence.targetPrincipal, targetEnvelopeDigest,
@@ -619,12 +630,14 @@ verify(targetEvidence.targetPrincipal, targetEnvelopeDigest,
 targetEvidence.header.principalId == withdrawalEnvelope.header.principalId
 ```
 
-The EnvelopeId equality and target-index range guard therefore run before author
-comparison or any `PRE_WITHDRAWN` write. An ID mismatch, out-of-range target,
+The EnvelopeId equality, target-index range, and target-body commitment guards
+therefore run before Admission classifies `targetEffectKind`, author comparison,
+or any `PRE_WITHDRAWN` write. An ID mismatch, out-of-range target,
 missing/extra/duplicate evidence, or invalid target witness reverts
 `E_TARGET_EVIDENCE`; author mismatch reverts `ErrWithdrawNotAuthor`; only complete
 equality permits `PRE_WITHDRAWN`. A bare `targetEnvelopeId` can never cause
-pre-withdrawal when the target header is not already state-readable.
+pre-withdrawal when the authenticated header/vector and exact target body are
+not already available.
 
 Admission is the only evidence decoder. After these checks (or equivalent
 state lookup for an already known target), it constructs the exact shared
@@ -638,8 +651,8 @@ has received ordinal `wOrd`, Core stores exactly
 `abi.encode(decodedTargetEnvelopeEvidence)` at
 `preWithdrawalEvidence[wOrd]`. This is the canonical ABI re-encoding in the field
 order of §2.2, not the caller's potentially non-canonical outer calldata bytes;
-it contains the exact validated header, full RecordId vector, typed descriptor,
-and witness used by the transition. Its encoded length was already included in
+it contains the exact validated header, full RecordId vector, target LeafBody,
+typed descriptor, and witness used by the transition. Its encoded length was already included in
 both the 8,192-byte aggregate target-evidence bound and the 16,384-byte whole-wire
 bound, so the state carrier cannot become an unbounded side channel. The target
 overlay stores `revokedAtOrdinal = wOrd`, giving reconstruction a direct pointer.
@@ -827,8 +840,11 @@ chains — CREATE2 — still separates, and honest clients can DISPLAY the targe
 Realm from the signed bytes alone.]
 
 `expectedRevisions` carries the Realm-local half of Binding dual CAS. It contains
-exactly one entry for every selected Binding-class leaf, in selected-leaf order,
-and is empty only when no Binding-class leaf is selected. Missing, extra,
+exactly one entry for every selected **CAS-bearing Binding mutation**
+(`BindingSet/1` or `BindingTombstone/1`), in selected-leaf order, and is empty
+only when no such leaf is selected. `Withdrawal/1` is a kernel effect but has no
+Binding CAS entry: it targets an exact occurrence and its head consequence is
+derived at its point in the ordered shadow walk. Missing, extra,
 duplicate, out-of-order, or mismatched entries reject; no wildcard or blind
 Binding write exists. Each Binding body still carries its portable
 `predecessorOccurrence` CAS.
@@ -856,6 +872,112 @@ increment); across lanes: author's explicit choice.
 
 ### 5.3 Admission algorithm (one call, atomic)
 
+**Deterministic shadow preflight [PROPOSAL — exact].** The non-idempotent path
+does not validate every leaf against one unchanged storage snapshot. It builds
+one bounded in-memory `ShadowState`, initialized lazily from persisted state,
+and advances it in ascending selected `leafIndex` order:
+
+```text
+ShadowState {
+  nextOrdinal                     // starts admissionCount
+  nextEnvelopeOrdinal, nextTypeOrdinal, nextPrincipalOrdinal
+  occurrence[occKey]              // status, ordinal, revokedAtOrdinal
+  envelopeAvailable[EnvelopeId]   // persisted, or authenticated current header/vector
+  plannedPrewithdrawEvidence[wOrd]
+  binding[bindingKey]             // head + exact producing OccurrenceRef
+  postingHead[pk]                 // count/liveCount/lastOrdinal/RAW_AUDIT
+  recordLive[RecordId]            // occurrence and unique-by-Type fold inputs
+  typeCache[TypeSchemaId]         // persisted or earlier planned bootstrap
+  leafPlan[]                      // exact before/after values and prospective ordinal
+}
+```
+
+After the main Envelope witness succeeds, its verified header and full
+`recordIds[]` vector enter `envelopeAvailable` before the leaf loop. They are
+staged availability, not a state write. Every sibling target's body must also be
+carried in this main wire (selected bodies already are) and RecordId-matched, or
+already state-readable; that exact body supplies its Type/effect class. Thus a
+Withdrawal targeting a sibling in this authenticated Envelope never supplies
+duplicate `TargetEnvelopeEvidence`. Other entries are loaded from storage on
+first touch and thereafter only from the shadow; an external never-admitted
+target's evidence carries its one committed target body as §3.3 requires.
+
+```text
+evidenceCursor = 0
+expectedRevisionCursor = 0
+shadow.nextOrdinal = admissionCount
+
+static shape pass over selected leaves ascending:
+  classify each selected kernel-effect Type from its carried RecordId-matched body
+  associate exactly one ordered expectedRevisions item with every selected
+    BIND_SET/BIND_TOMBSTONE leaf, including an ACTIVE duplicate; compare no value yet
+
+for i in ascending set-bit order of leafMask:
+  expectedItem = the statically associated item, if any  // cursor always consumed
+  src = occurrence[occKey(envelopeId,i)]
+  if src.status == ACTIVE:
+      plan ALREADY_ADMITTED; continue                 // no effect replay
+  if src.status in {WITHDRAWN,PRE_WITHDRAWN}:
+      reject E_NO_RESURRECTION                         // no writes exist
+
+  prospective = shadow.nextOrdinal + 1; guard u48; shadow.nextOrdinal = prospective
+  shadow-activate source occurrence at prospective
+  stage its Record/body, mandatory posting appends, record-live folds, and any
+  intrinsic Type-cache materialization; all later leaves observe these results
+
+  classify application effect by the closed list only:
+    NONE | BIND_SET | BIND_TOMBSTONE | WITHDRAWAL
+
+  if BIND_SET or BIND_TOMBSTONE:
+      load current shadow head and its exact shadow source
+      require expectedItem.revision == shadowHead.revision
+      require body predecessor == shadow source (or explicit NONE iff UNSET)
+      derive and apply the next head/revision/source and RAW_AUDIT append in shadow
+
+  if WITHDRAWAL:
+      load target occurrence from point-in-order shadow
+      establish target Principal/header from authenticated staged current
+        Envelope, persisted state, retained planned/persisted evidence, or—only
+        when target is NEVER_ADMITTED and no complete authenticated target
+        bundle is available—
+        the next caller TargetEnvelopeEvidence item
+      establish exact target Type/body from a state-readable Record, the
+        RecordId-matched carried sibling body, or that evidence's committed
+        targetBody; otherwise reject E_TARGET_EVIDENCE
+      enforce caller-evidence cardinality at this exact point: missing, extra,
+        duplicate, or wrong withdrawalLeafIndex rejects; terminal retries consume none
+      derive every ValidatedOccurrenceLifecycleEffect field from this shadow,
+        including prior status/ordinals, evidenceOrdinal, effect class,
+        targetBindingKey, and targetIsCurrentBindingHead
+      verify author/target-kind, then apply the target lifecycle, Binding-head,
+        posting live-count, record-live, and unique-by-Type consequences in shadow
+
+after loop:
+  require both evidence and expected-revision cursors exhausted exactly
+```
+
+A caller evidence item remains target-specific to its named Withdrawal; it is
+never promoted into generic staged Envelope availability for another target.
+A first evidence-backed prewithdrawal stages its canonical evidence at that
+Withdrawal source's prospective ordinal. A later sibling Withdrawal targeting
+the same now-PRE_WITHDRAWN occurrence reuses that planned retained evidence and
+is a terminal no-op; it neither consumes caller evidence nor decrements counts.
+The shadow applies the same stable posting-key deduplication and RAW_AUDIT
+exception as commit. It is bounded by 64 selected leaves, the per-leaf reference
+and posting-key caps, and the bounded target-evidence wire cap; no unbounded map
+or scan is introduced.
+
+Only after this whole walk, all consent/policy/reference checks, and all counter
+guards succeed may commit begin. Commit persists the staged main header/vector
+prelude, then replays `leafPlan[]` in the identical ascending order using the
+recorded prospective ordinals and before/after values. Every actual prestate
+must equal the plan's expected prestate, including changes written by an earlier
+sibling during that same replay. A mismatch is an internal implementation
+invariant fault (`assert`/panic) that reverts the entire call; it is never a
+normal input/CAS/evidence rejection after ordinal allocation. No verifier,
+policy callback, evidence parse, CAS decision, or other fallible external-input
+check occurs during commit.
+
 ```text
 publish(bytes envelopeBytes, AccountPrincipal calldata principal,
         bytes intentBytes, bytes intentWitness):
@@ -882,55 +1004,46 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
  7. NON-IDEMPOTENT CONSENT: reject selected WITHDRAWN/PRE_WITHDRAWN source
     occurrences (E_NO_RESURRECTION). For explicit mode, decode the exact §5.1
     AdmissionIntent and require action == 0; envelopeId/realmId/leafMask match;
-    both expiries pass; expectedRevisions exactly cover selected Binding-class
-    leaves and match current state; (basisI, codehashI) ←
+    both expiries pass; expectedRevisions exactly cover selected CAS-bearing
+    Binding mutations (value checks occur point-in-order below); (basisI, codehashI) ←
     AuthorityVerifierV1.verify(principal, eip712IntentDigest, intentWitness,
     verifyContext), used only for consent and never as the receipt basis; require
     a fresh nonceSeq == lastSeq + 1 and stage that nonce write. For implicit mode, require
     intentBytes encodes only leafMask, intentWitness is empty, msg.sender is the
-    account in principal, no selected leaf is Binding-class, and envelope expiry
+    account in principal, no selected leaf is one of the three kernel-effect
+    Types, and envelope expiry
     passes.
- 8. Derive the ascending evidence-required leaf list from newly accepted
-    Withdrawal bodies whose target is NEVER_ADMITTED and whose target Envelope
-    header is absent; require
-    targetEvidence.withdrawalLeafIndex
-    matches that list exactly (one-to-one; no missing/extra/duplicate entries).
-    For each pair, before author comparison or state write, require the recomputed
-    evidence EnvelopeId equals `Withdrawal.target.envelopeId` and
-    `Withdrawal.target.leafIndex` is
-    in range; then run the target descriptor/witness checks of §3.3. A terminal
-    PRE_WITHDRAWN target instead resolves its original evidence through
-    revokedAtOrdinal; caller evidence is forbidden. For every target, construct
-    the typed ValidatedOccurrenceLifecycleEffect context; no evidence bytes
-    cross into LibIndex or LibBinding.
- 9. structurally validate every selected body's TypeSchema and preflight all
-    leaf-driven effects, policy checks, reference checks, and Binding CAS checks.
-10. allocate ordinals only to newly accepted selected occurrences.
-11. if first admission touching envelopeId: persist header + FULL recordIds vector
-    and first-use PrincipalRecord bytes copied from `principal` (state-readable, §10)
-12. for each selected bit i, ascending:
-      dispatch §3.2; ACTIVE duplicates write nothing and return ALREADY_ADMITTED;
-      newly accepted occurrences receive consecutive next ordinals in this
-      submission order only; store any new Record body; apply Withdrawal §3.3
-      only after its exactly matched target evidence has passed the ID, target
-      index, descriptor, witness, and author checks; for an evidence-backed
-      NEVER_ADMITTED -> PRE_WITHDRAWN transition, store its canonical ABI
-      re-encoding at this Withdrawal occurrence's new ordinal before setting the
-      target's revokedAtOrdinal to that same ordinal; dispatch the same already
-      validated lifecycle context to LibIndex and LibBinding, never a second
-      proof format
-13. atomically materialize the parsed schema cache when the accepted Record is an
-    intrinsic TypeSchemaGroup/1 Record; this is structural bootstrap work, not an
-    application effect or second write primitive
-14. commit the staged fresh nonce (explicit mode), one AdmissionBatch with
-    (basisE, codehashE), mandatory index postings for every newly accepted
-    occurrence, and the
-    exactly-once decrement for every effective withdrawal
-    [OWNER RULING — mandatory automatic indexing, no writer opt-out,
-     owner-rulings.md 2026-07-15 lines 59–62 and 2026-08-12 lines 203–210]
-15. emit receipt outcomes; ANY non-idempotent failure above reverts EVERYTHING
-    (steps 1–14
-    are one EVM call frame — the one-transaction gate)
+ 8. initialize the bounded shadow from persisted counters/point reads and mark
+    this authenticated Envelope header + full vector staged-available; set both
+    semantic-carriage cursors to zero
+ 9. walk selected leaves in ascending mask order exactly as specified above.
+    Structurally validate each Type/body; check references, policy, counter
+    bounds, point-in-order expected revision and predecessor; assign each fresh
+    source a prospective ordinal without writing; and update shadow occurrence,
+    staged cache, Binding, RAW_AUDIT, posting/live-count, and unique-record folds
+10. at each Withdrawal in that same walk, decide target status and evidence need
+    from the current shadow, validate/consume exactly one caller evidence item
+    only when required, construct `ValidatedOccurrenceLifecycleEffect` entirely
+    from the shadow, and apply its target consequences there. A sibling target
+    uses the authenticated staged main header/vector plus its exact
+    RecordId-matched carried body; terminal retries reuse
+    retained persisted/planned evidence and consume no caller item
+11. require both semantic-carriage cursors exhausted and the complete shadow
+    plan valid. Until this point no nonce, ordinal, Envelope, Record, status,
+    cache, index, evidence, batch, or Binding state has been written
+12. commit the staged nonce and, on first touch, header/full vector plus
+    first-use PrincipalRecord; create one AdmissionBatch with (basisE,codehashE)
+13. replay the exact leaf plan in the same ascending order and with its exact
+    prospective ordinals: write each fresh source/log/Record; materialize staged
+    Type cache; append mandatory and RAW_AUDIT postings; apply the planned
+    Binding head; store planned prewithdraw evidence before its target pointer;
+    and perform each planned exactly-once live/unique-count decrement. ACTIVE
+    duplicates remain write-free
+14. every commit prestate is asserted against the plan. Any mismatch is an
+    internal invariant panic and reverts the entire call; commit performs no
+    fallible input, evidence, policy, authority, or CAS decision
+15. emit receipt outcomes; ANY failure or internal invariant fault above reverts
+    EVERYTHING (steps 1–14 are one EVM call frame — the one-transaction gate)
 ```
 
 Idempotency is occurrence-granular and unambiguous. After bounded wire/structural
@@ -947,8 +1060,9 @@ require one fresh valid intent, full semantic target-evidence cardinality/effect
 preflight, and new ordinals. Evidence for an ACTIVE source leaf in that mixed call
 is extra and reverts. Re-withdrawal of a `WITHDRAWN` or
 `PRE_WITHDRAWN` target is likewise a no-op success after the author guard, using
-retained original evidence when the target header is absent; no caller evidence is
-required or accepted again. Re-admission of the same Withdrawal occurrence exits
+retained original evidence when the complete authenticated target bundle is not
+otherwise available; no caller evidence is required or accepted again.
+Re-admission of the same Withdrawal occurrence exits
 through T2 before that guard. Terminal status prevents resurrection; duplicate
 handling never does so by whole-call revert.
 
@@ -980,8 +1094,9 @@ workload (route to the F3 bakeoff notes).]
 **Implicit same-tx intent within `publish`.** When the transaction sender is the
 account named by the verified `AccountPrincipal`, `intentBytes` may carry only a
 `uint64 leafMask` and `intentWitness` is empty. The mode is legal only when the
-selected envelope contains no Binding-class leaves; Binding-class leaves always
-require the explicit SR-3 intent with `expectedRevisions`. On the non-idempotent
+selected envelope contains none of the three kernel-effect Types; they always
+require explicit SR-3 intent, while only `BindingSet/1` and
+`BindingTombstone/1` carry `expectedRevisions`. On the non-idempotent
 path, Realm is this contract by construction, the envelope expiry applies, and the
 account transaction nonce supplies replay control. Consent mode is transient validation input only:
 explicit and implicit consent produce the same `PublishResult`,
@@ -1399,6 +1514,30 @@ There is no generic `E_AUTHORITY`, `E_BAD_WITNESS`, `E_NOT_AUTHOR`, or
    and old ACTIVE-leaf evidence fail; a fresh intent plus exactly the evidence
    required by newly accepted T4 leaves receives full preflight. T5b uses retained
    original evidence without caller resupply and MUST NOT replace or copy it.
+   Four same-call shadow fixtures are mandatory:
+   - **SHADOW-1 bind→withdraw:** leaf 0 first-binds key K at prospective ordinal
+     `o`; leaf 1 withdraws `(E,0)` at `o+1`. Preflight sees leaf 0 ACTIVE/current,
+     then plans it WITHDRAWN, one liveness decrement, and K TOMBSTONED by leaf 1;
+     history contains both physical revisions after commit.
+   - **SHADOW-2 sequential same-key bind:** from UNSET, leaf 0 carries
+     `(predecessor=NONE,xr=0)` and leaf 1 carries
+     `(predecessor=(E,0),xr=1)`. Both admit; the final head is leaf 1 at revision
+     2. Reversing/staling either CAS rejects the whole call before writes.
+   - **SHADOW-3 withdraw-before-later target:** leaf 0 withdraws `(E,1)` and
+     leaf 1 would otherwise be fresh. Its carried body is RecordId-matched; the
+     authenticated main header/vector means no caller target evidence is
+     needed. Leaf 0 plans PRE_WITHDRAWN, then leaf
+     1 hits no-resurrection. The call reverts with counters, nonce, header,
+     evidence, receipts, indexes, and Binding state all unchanged.
+   - **SHADOW-4 duplicate withdrawal:** two fresh Withdrawal leaves target one
+     initially NEVER_ADMITTED, header-absent external occurrence. The first
+     consumes one evidence item (including the committed target body), plans
+     PRE_WITHDRAWN, and stages that evidence at its prospective ordinal. The
+     second sees terminal shadow state, reuses the planned retained evidence,
+     consumes none, and is an accepted target no-op. Extra second evidence
+     rejects; both Withdrawal sources receive consecutive ordinals and exactly
+     one evidence value exists. The ACTIVE-target variant likewise permits only
+     the first lifecycle/head/decrement consequence.
 9. Two Principals with identical low-160-bit accounts distinct end-to-end (R-D2).
 10. Bounds: 65 leaves, count = 0, oversize body, oversize witness, leafMask bit ≥
     count — each MUST-FAIL with its named error.
