@@ -148,46 +148,46 @@ is owned by the encoding/envelope chapters — this chapter treats
 
 ### 2.1 Slot and key derivation
 
-ID family rule [PROPOSAL — per shared skeleton]: all derived keys use
-`keccak256(DOMAIN_TAG ‖ version-pinned preimage)` with printable pinned ASCII
-domain constants. Domain constants used by this chapter:
+SR-1 applies without exception here. This chapter **consumes**, and does not
+redefine, the `DOM_* bytes32` words in [[b0-encoding-and-ids]] §1.3. Each is
+already `keccak256("efs2/<name>/<version>")`; no raw domain string is an
+active key or slot preimage below. Every structured preimage uses
+`abi.encode` with fixed-width words, and every dynamic component is hashed
+once before entering the outer preimage.
+
+Slot formulas [PROPOSAL — exact SR-1 form]:
 
 ```
-DOM_PK        = "efs2/pk/1"            // postings key
-DOM_VK_SCALAR = "efs2/vk/scalar/1"     // scalar value key (over-32-byte case)
-DOM_VK_CMPD   = "efs2/vk/compound/1"   // compound value key
-DOM_VK_DIGEST = "efs2/vk/digest/1"     // ByteDigest value key
-DOM_SLOT_LOG  = "efs2/slot/log/1"      // admission log region
-DOM_SLOT_PH   = "efs2/slot/phead/1"    // postings head
-DOM_SLOT_PD   = "efs2/slot/pdata/1"    // postings data region
-DOM_SLOT_TM   = "efs2/slot/tmeta/1"    // TypeSchemaMeta
-DOM_SLOT_RM   = "efs2/slot/rmeta/1"    // RecordMeta
-DOM_SLOT_EM   = "efs2/slot/emeta/1"    // EnvelopeMeta
-DOM_SLOT_PM   = "efs2/slot/pmeta/1"    // PrincipalMeta
-DOM_SLOT_PBO  = "efs2/slot/pbyord/1"   // principalOrd -> PrincipalId
-DOM_SLOT_TBO  = "efs2/slot/tbyord/1"   // typeOrd -> TypeSchemaId
-DOM_SLOT_BH   = "efs2/slot/bhead/1"    // BindingHead
-DOM_SLOT_REV  = "efs2/slot/revepoch/1" // RealmRevision epoch table
-DOM_SLOT_CTR  = "efs2/slot/counters/1" // global counters slot
+logBase            = uint256(keccak256(abi.encode(DOM_SLOT_LOG)))
+logSlotA(ord)      = logBase + 2*uint256(ord)       // EnvelopeId word
+logSlotB(ord)      = logBase + 2*uint256(ord) + 1   // metadata word
+
+pheadSlot(pk)      = keccak256(abi.encode(DOM_SLOT_PH, pk))
+pdataBase(pk)      = uint256(keccak256(abi.encode(DOM_SLOT_PD, pk)))
+pdataSlot(pk, i)   = pdataBase(pk) + uint256(i)     // i = floor(n/5)
+tmetaSlot(tid)     = keccak256(abi.encode(DOM_SLOT_TM, tid))
+rmetaSlot(rid)     = keccak256(abi.encode(DOM_SLOT_RM, rid))
+emetaSlot(eid)     = keccak256(abi.encode(DOM_SLOT_EM, eid))
+pmetaSlot(prid)    = keccak256(abi.encode(DOM_SLOT_PM, prid))
+principalByOrdBase = uint256(keccak256(abi.encode(DOM_SLOT_PBO)))
+principalByOrd(po) = principalByOrdBase + uint256(po)
+typeByOrdBase      = uint256(keccak256(abi.encode(DOM_SLOT_TBO)))
+typeByOrd(to)      = typeByOrdBase + uint256(to)
+bheadSlot0(bk)     = uint256(keccak256(abi.encode(DOM_SLOT_BH, bk)))
+bheadSlot1(bk)     = bheadSlot0(bk) + 1
+revisionBase       = uint256(keccak256(abi.encode(DOM_SLOT_REV)))
+revisionSlot(i)    = revisionBase + 2*uint256(i)
+countersSlot       = keccak256(abi.encode(DOM_SLOT_CTR))
 ```
 
-Slot formulas (all concatenations are raw bytes, fixed width, in the order
-written; integers big-endian at their declared width):
+The SR-10 store is the owner chapter's `occStatus[occKey]` mapping. Its key
+uses the encoding registry's explicitly dual-purpose `DOM_OCCURRENCE`; no
+second lifecycle key domain is minted:
 
 ```
-logSlotA(ord)      = keccak256(DOM_SLOT_LOG) + 2*ord        // envelopeId word
-logSlotB(ord)      = keccak256(DOM_SLOT_LOG) + 2*ord + 1    // packed meta word
-pheadSlot(pk)      = keccak256(DOM_SLOT_PH ‖ pk)
-pdataSlot(pk, i)   = keccak256(DOM_SLOT_PD ‖ pk) + i        // i = slot index = floor(n/5)
-tmetaSlot(tid)     = keccak256(DOM_SLOT_TM ‖ tid)
-rmetaSlot(rid)     = keccak256(DOM_SLOT_RM ‖ rid)
-emetaSlot(eid)     = keccak256(DOM_SLOT_EM ‖ eid)
-pmetaSlot(prid)    = keccak256(DOM_SLOT_PM ‖ prid)
-principalByOrd(po) = keccak256(DOM_SLOT_PBO) + po
-typeByOrd(to)      = keccak256(DOM_SLOT_TBO) + to
-bheadSlot(bk)      = keccak256(DOM_SLOT_BH ‖ bk)
-revEpochSlot(i)    = keccak256(DOM_SLOT_REV) + 2*i          // pair of slots per epoch
-countersSlot       = keccak256(DOM_SLOT_CTR)                // ordinal counter etc.
+occKey(E, k)       = keccak256(abi.encode(
+                       DOM_OCCURRENCE, E, uint256(k)))
+occStatusSlot(key) = keccak256(abi.encode(DOM_OCCURRENCE, key))
 ```
 
 Additive-offset regions and hash-derived point slots collide only with
@@ -203,8 +203,20 @@ postings word; the key must carry the predicate so filtered reverse reads are
 O(matches)]:
 
 ```
-pk(typeSchemaId, indexKind uint8, indexOrdinal uint8, valueKey bytes32)
-  = keccak256(DOM_PK ‖ typeSchemaId ‖ indexKind ‖ indexOrdinal ‖ valueKey)
+pk(T, kind, ordinal, valueKey) = keccak256(abi.encode(
+  DOM_PK, T, uint256(kind), uint256(ordinal), valueKey))
+
+scalarValueKey(fieldBytes) = keccak256(abi.encode(
+  DOM_VK_SCALAR, keccak256(fieldBytes)))
+
+occurrenceTargetKey(envelopeId, leafIndex) = keccak256(abi.encode(
+  DOM_VK_OCC, envelopeId, uint256(leafIndex)))
+
+addressTargetKey(account) = keccak256(abi.encode(
+  DOM_VK_ADDR, bytes32(uint256(uint160(account)))))
+
+digestTargetKey(algCode, digestBytes) = keccak256(abi.encode(
+  DOM_VK_DIGEST, uint256(algCode), keccak256(digestBytes)))
 ```
 
 `indexKind` values (closed set; unknown kind ⇒ UNSUPPORTED, never a scan):
@@ -225,49 +237,94 @@ no truncation to 160 bits anywhere in this chapter [DERIVED INVARIANT —
 system-constitution.md "Every Principal-bearing ID, ABI, storage key, index
 key, Binding, and Lens preserves the full bytes32 PrincipalId"; VERIFIED].
 
-### 2.2 The admission log (2 slots per accepted Occurrence)
+### 2.2 The reversible admission log (2 slots per accepted Occurrence)
 
-The log is simultaneously (a) the **globally ordered accepted-admission
-pages** index, (b) the O(1) hydration table `ordinal → OccurrenceRef`, and
-(c) the **revocation-fold store** used by every liveness check [PROPOSAL —
-merging the revocation fold into the per-ordinal word makes liveness + typing
-+ authorship one SLOAD per item].
+The log is only (a) the globally ordered accepted-occurrence spine and (b) the
+direct `ordinal → OccurrenceRef` hydration table. Lifecycle state does not
+live here [PROPOSAL — SR-10 exact contract].
 
 ```
 logSlotA(ord): EnvelopeId                       // full 32 bytes
 logSlotB(ord): packed word, bit layout:
-  leafIndex        bits [0..15]    uint16
-  typeOrd          bits [16..63]   uint48   // local ordinal of the Occurrence's TypeSchema
-  principalOrd     bits [64..111]  uint48   // local ordinal of the author Principal
-  revokedAtOrdinal bits [112..159] uint48   // 0 = live; else ordinal of the withdrawal/revocation fold
-  flags            bits [160..175] uint16   // MBZ in B0
-  reserved         bits [176..255] MBZ
+  leafIndex    bits [0..15]   uint16
+  typeOrd      bits [16..63]  uint48   // local TypeSchema ordinal
+  principalOrd bits [64..111] uint48   // local author Principal ordinal
+  reserved     bits [112..255]         // MBZ (u144)
 ```
 
-Rules:
-- Leaves of one envelope are admitted atomically with **consecutive
-  ordinals**: `ordinal(leaf k) = EnvelopeMeta.admitOrdinalBase + k`
-  [PROPOSAL — one base per envelope makes envelope↔ordinal mapping O(1) both
-  ways].
-- `revokedAtOrdinal` is write-once monotone: transitions only `0 → W` where
-  `W` = the AdmissionOrdinal of the accepted withdrawal/revocation Occurrence.
-  Never cleared: no resurrection [DERIVED INVARIANT — system-constitution.md
-  "History is append-only evidence. Withdrawal … do not erase prior bytes or
-  unexpectedly resurrect an older value"; VERIFIED].
-- **Liveness at a basis** (the rule every read uses):
-  `liveAt(ord, H) ⇔ ord ≤ H ∧ (revokedAt(ord) == 0 ∨ revokedAt(ord) > H)`.
-  Because the fold records *when* it happened (an ordinal, not a bit), reads
-  pinned at basis `H` are consistent: an item revoked after `H` is still live
-  at `H`. This is the postings families' **live-revocation story**
-  [DERIVED INVARIANT — onchain-completeness.md §1/§6 requires one; the ordinal-
-  valued fold (vs a bit) is [PROPOSAL — enables basis-pinned reads and repairs
-  the FSP-BASIS-1 ghost anomaly, lens-read-gotchas.md "One-basis rule"]].
+The full-width `EnvelopeId` plus `leafIndex` is the reversible
+`OccurrenceRef`; the log never stores only an irreversible `occKey`. Newly
+accepted leaves receive ordinals in ascending selected `leafIndex` within a
+call and submission order across calls. Subset and staged admission are
+therefore intentionally sparse relative to envelope leaf indexes. No
+per-envelope range, reserved hole, leaf-mask walk, or arithmetic derives an
+occurrence ordinal. `(EnvelopeId, leafIndex) → ordinal` reads
+`occStatus[occKey].ordinal`; the reverse direction reads these two log words.
 
 `typeOrd`/`principalOrd` are Realm-local uint48 ordinals assigned at the first
 admission touching that TypeSchema/Principal, with reverse maps
 `typeByOrd`/`principalByOrd` (one 32-byte slot each, written once) and forward
 maps in the meta words [PROPOSAL — lets the hot log word carry typing and
-authorship without 32-byte ids; the F7 bakeoff arm removes them, §10].
+authorship without 32-byte ids; the F7 bakeoff arm removes them, §10]. Both
+counters use `U48_GUARD` and never wrap.
+
+### 2.2a The occKey status overlay (sole lifecycle owner)
+
+```
+OccStatus @ occStatus[occKey]:
+  status           bits [0..7]     uint8  // 0 NEVER_ADMITTED, 1 ACTIVE,
+                                           // 2 WITHDRAWN, 3 PRE_WITHDRAWN
+  ordinal          bits [8..55]    uint48 // 0 iff never accepted
+  revokedAtOrdinal bits [56..103]  uint48 // withdrawal ordinal; else 0
+  reserved         bits [104..255]        // MBZ
+```
+
+Every transition is decided before leaf effects:
+
+```
+activateOccurrence(E, k):
+  NEVER_ADMITTED -> require nextOrdinal < 2^48 - 1 else U48_GUARD;
+                    ACTIVE { ordinal = nextOrdinal++; revokedAtOrdinal = 0 }
+  ACTIVE          -> ALREADY_ADMITTED(existing ordinal/receipt), no writes
+  WITHDRAWN       -> revert ErrOccWithdrawn
+  PRE_WITHDRAWN   -> revert ErrOccWithdrawn
+
+withdrawOccurrence(ACTIVE target, withdrawalOrdinal):
+  ACTIVE -> WITHDRAWN { revokedAtOrdinal = withdrawalOrdinal }
+  decrement occurrence-level index heads exactly once (§6)
+
+preWithdrawOccurrence(never-admitted target, targetEvidence,
+                      withdrawalOrdinal):
+  require targetEvidence is the bounded signed header + full RecordId vector
+          + typed Principal descriptor + witness (no bodies)
+  recompute EnvelopeId; check leaf range, descriptor equality, witness,
+          and author match
+  NEVER_ADMITTED -> PRE_WITHDRAWN
+  ordinal = 0; revokedAtOrdinal = withdrawalOrdinal
+  retain canonical ABI re-encoding of targetEvidence keyed by withdrawalOrdinal
+  decrement nothing
+
+withdrawOccurrence(WITHDRAWN or PRE_WITHDRAWN target):
+  success, no writes, no decrement; load retained evidence if an author check
+  is needed, never accept replacement evidence
+```
+
+The immutable `ordinal` survives `ACTIVE → WITHDRAWN`; terminal states never
+resurrect. The liveness rule derives the reversible reference first and then
+loads the overlay:
+
+```
+liveAt(ord, H):
+  if ord == 0 or ord > H: return false
+  ref = { envelopeId: logSlotA(ord), leafIndex: logSlotB(ord).leafIndex }
+  s = occStatus[occKey(ref.envelopeId, ref.leafIndex)]
+  assert s.ordinal == ord
+  return s.revokedAtOrdinal == 0 || s.revokedAtOrdinal > H
+```
+
+Because the fold records *when* it happened, an item withdrawn after `H`
+remains live at `H`; pages pinned to one `H` are phantom/ghost-free. No reader
+consults a log-owned revocation field.
 
 ### 2.3 The packed postings store (axis-7 arm)
 
@@ -299,13 +356,13 @@ appendPosting(pk, ord):
 ```
 
 Postings arrays are never compacted and never rewritten; dead entries remain
-and are filtered at read time via `logSlotB.revokedAtOrdinal` (§2.2). On-chain
+and are filtered at read time via `liveAt` and the status overlay (§2.2a). On-chain
 compaction is **[REJECTED for B0 — [PROPOSAL] it breaks cursor stability and
 ordinal-position determinism; a compacted *view* remains addable later as a
 redeployable read layer without kernel state, consistent with the
 reserve-selector-as-floor clause in onchain-completeness.md §4]**.
 
-### 2.4 Meta words (one packed slot each)
+### 2.4 Meta words, receipt batches, and Binding heads
 
 ```
 TypeSchemaMeta @ tmetaSlot(typeSchemaId):
@@ -314,7 +371,7 @@ TypeSchemaMeta @ tmetaSlot(typeSchemaId):
   refRoleCount   [96..103] uint8
   indexSpecCount [104..111] uint8
   bodyLen        [112..143] uint32
-  flags          [144..159] uint16  // bit0 = COMPOUND_PRESENT; others MBZ
+  flags          [144..159] uint16  // MBZ in B0
   reserved       [160..255] MBZ
 
 RecordMeta @ rmetaSlot(recordId):
@@ -326,15 +383,14 @@ RecordMeta @ rmetaSlot(recordId):
   // occurrence counts intentionally NOT duplicated here: they live in the
   // KIND_BY_RECORD postings head (count / liveCount).
 
-EnvelopeMeta @ emetaSlot(envelopeId):
-  admitOrdinalBase [0..47]   uint48
-  leafCount        [48..63]  uint16
-  principalOrd     [64..111] uint48
-  authorityBasisCode [112..127] uint16  // versioned verifier profile id (admission chapter owns codes)
-  authEpoch        [128..159] uint32   // KEL seam, MBZ in B0 [DERIVED INVARIANT — carry-in KEL (b): reserve the authority seam now]
-  bodyLen          [160..191] uint32
-  flags            [192..207] uint16   // MBZ
-  reserved         [208..255] MBZ
+EnvelopeMeta @ emetaSlot(envelopeId), consumed from the admission owner:
+  principalId       bytes32
+  envelopeOrdinal   uint40
+  leafCount         uint16
+  persisted signed-envelope/body-carriage metadata and the full RecordId vector
+
+  // No leaf-ordinal base exists. No receipt revision, block, or authority
+  // basis lives here: staged admission may give one Envelope multiple batches.
 
 PrincipalMeta @ pmetaSlot(principalId):
   principalOrd      [0..47]  uint48
@@ -342,22 +398,43 @@ PrincipalMeta @ pmetaSlot(principalId):
   reserved          [96..255] MBZ
   // authored-occurrence counts live in the KIND_BY_PRINCIPAL postings head.
 
-BindingHead @ bheadSlot(bindingKey):
-  state          [0..7]    uint8   // 0=UNSET, 1=SET, 2=TOMBSTONE
-  revision       [8..39]   uint32
-  currentOrdinal [40..87]  uint48  // ordinal of the Occurrence that produced current state
-  reserved       [88..255] MBZ
+BindingHead @ bheadSlot0/1(bindingKey), exactly two slots (SR-8):
+  slot 0:
+    state           [0..7]     uint8  // BindingState wire value below
+    revision        [8..39]    uint32
+    currentOrdinal  [40..87]   uint48 // widened to uint64 at every ABI
+    targetKind      [88..95]   uint8  // 0 NONE, 1 RECORD, 2 OCCURRENCE
+    tombstoneCause  [96..103]  uint8  // 0 NONE, 1 EXPLICIT, 2 WITHDRAWAL
+    targetLeaf      [104..119] uint16 // iff OCCURRENCE, else zero
+    reserved        [120..255]         // MBZ (u136)
+  slot 1:
+    targetRef       bytes32            // zero when TOMBSTONED
 
-RealmRevision epoch table (receipts):
-  revEpochSlot(i):   packed { fromOrdinal [0..47] uint48, reserved MBZ }
-  revEpochSlot(i)+1: RealmRevisionId (32 bytes)
-  epochCount stored in countersSlot (bits [48..79] uint32)
-  revisionAt(ord) = binary search over epochs, ≤ 32 probes [bounded; epoch
-  count is upgrade-rate bounded, not attacker-writable]
+AdmissionBatchMeta (one packed word), consumed from the admission owner:
+  firstOrdinal    [0..47]    uint48
+  acceptedCount   [48..63]   uint16
+  admittedAtBlock [64..111]  uint48
+  revisionOrdinal [112..143] uint32
+  reserved        [144..255]          // MBZ (u112)
+
+batchAuthorityBasis[batchId] = AuthorityBasisWord
+batchCodehash[batchId] = codehashOrZero // stored only for CONTRACT_ERC1271
+
+AuthorityBasisWord =
+  kind u8 | verifierVersion u16 | witnessProfile u8 |
+  basisBlock u64 | delegateOrZero u160
+
+RealmRevision rows map `revisionOrdinal` to the exact `RealmRevisionId`.
+`receiptOf` locates an ordinal's batch by bounded binary search over append-only
+`firstOrdinal` boundaries (`BATCH_PROBES_MAX = 64` covers a uint64 batch id),
+then returns that batch's explicit revision, full `AuthorityBasisWord`, and
+conditional codehash. It never infers authority from Envelope first-touch
+metadata or projects it into a lossy code. The signed header's `authEpoch` is
+`uint64` (zero in B0) and is hydrated from the persisted envelope.
 
 countersSlot:
-  nextOrdinal  [0..47]  uint48
-  epochCount   [48..79] uint32
+  nextOrdinal  [0..47]  uint48  // next allocatable ordinal; initialized to 1
+  revisionCount [48..79] uint32
   nextTypeOrd  [80..127] uint48
   nextPrincipalOrd [128..175] uint48
   reserved MBZ
@@ -369,58 +446,76 @@ countersSlot:
 
 Everything in this section is populated for every accepted Occurrence with no
 declaration and no writer choice [OWNER RULING — mandatory automatic indexing,
-§0]. Per accepted leaf, the baseline writes are: 2 log slots (§2.2), the
+§0]. Per newly accepted leaf, the baseline writes are: 2 log slots (§2.2), one
+fresh status-overlay slot (§2.2a), the
 `KIND_BY_TYPE` append, the `KIND_BY_RECORD` append, the `KIND_BY_PRINCIPAL`
 append, the conditional `KIND_UNIQUE_BY_TYPE` append, and per reference
 instance the `KIND_TARGET` + `KIND_ROLE` appends (§3.5).
 
 ### 3.1 Exact point reads (Type / Record / Envelope / Occurrence / receipt)
 
-All O(1) (a fixed number of SLOADs, plus body-length-proportional copy for
-body reads — proportional to the answer, satisfying THE LINE):
+Type/Record/Envelope/Occurrence reads are O(1), plus
+body-length-proportional copying. Receipt hydration is bounded by
+`BATCH_PROBES_MAX = 64` because current owner state records exact authority
+per accepting batch rather than pretending one envelope has one receipt.
+Every public AdmissionOrdinal is `uint64`; packed u48 fields widen on read and
+every write range-checks before packing.
 
 ```solidity
 function getTypeSchema(bytes32 typeSchemaId) external view
-  returns (bytes memory canonicalBody, uint48 typeOrd, uint48 admitOrdinal,
+  returns (bytes memory canonicalBody, uint48 typeOrd, uint64 admitOrdinal,
            uint8 refRoleCount, uint8 indexSpecCount);
 
 function getRecord(bytes32 recordId) external view
   returns (bytes32 typeSchemaId, bytes memory canonicalBody,
-           uint48 firstAdmitOrdinal);
+           uint64 firstAdmitOrdinal);
 
 function getEnvelope(bytes32 envelopeId) external view
-  returns (bytes memory canonicalEnvelope, uint48 admitOrdinalBase,
-           uint16 leafCount, bytes32 principalId);
+  returns (bytes memory canonicalEnvelope, uint40 envelopeOrdinal,
+           uint16 leafCount, bytes32 principalId, uint64 authEpoch);
 
 function getOccurrence(bytes32 envelopeId, uint16 leafIndex) external view
-  returns (uint48 ordinal, bytes32 recordId, bytes32 typeSchemaId,
-           bytes32 principalId, uint48 revokedAtOrdinal);
+  returns (uint8 status, uint64 ordinal, bytes32 recordId,
+           bytes32 typeSchemaId, bytes32 principalId,
+           uint64 revokedAtOrdinal);
 
-function getOccurrenceByOrdinal(uint48 ordinal) external view
+function getOccurrenceByOrdinal(uint64 ordinal) external view
   returns (bytes32 envelopeId, uint16 leafIndex, bytes32 recordId,
-           bytes32 typeSchemaId, bytes32 principalId, uint48 revokedAtOrdinal);
+           bytes32 typeSchemaId, bytes32 principalId,
+           uint8 status, uint64 revokedAtOrdinal);
 
-function getReceipt(uint48 ordinal) external view
-  returns (AdmissionReceipt memory);
+function getReceipt(uint64 ordinal) external view
+  returns (IndexedReceiptView memory);
 
-struct AdmissionReceipt {
+struct IndexedReceiptView {
   bytes32 envelopeId;
   uint16  leafIndex;
-  bytes32 principalId;        // full width
-  bytes32 realmRevisionId;    // via epoch table at `ordinal`
-  uint16  authorityBasisCode; // versioned verifier profile used at admission
-  uint32  authEpoch;          // 0 in B0; KEL seam
-  uint48  ordinal;
-  uint48  revokedAtOrdinal;   // 0 = live now
+  bytes32 realmId;
+  bytes32 realmRevisionId;
+  AuthorityBasisWord authorityBasis; // exact packed word, never a code
+  bytes32 authorityCodehash;   // zero unless CONTRACT_ERC1271
+  uint64  authEpoch;           // signed-header field; zero in B0
+  uint64  admissionOrdinal;
+  uint48  admittedAtBlock;
+  uint8   acceptedStatus;      // immutable receipt outcome: 1 ACCEPTED
+  uint8   occurrenceStatus;    // current overlay status
+  uint64  revokedAtOrdinal;    // current overlay fold; zero while live
 }
 ```
 
 Non-existent ids return zeroed results with a distinguishing `exists` proxy:
-`firstAdmitOrdinal == 0` / `admitOrdinalBase == 0` / `ordinal == 0` means "not
-admitted in this Realm" — which, on authoritative Core state, is **proven
-Realm-local absence** because admission cannot succeed without writing these
-words (mandatory indexing; complete-by-construction) [PROPOSAL — semantics;
-reconciled with the carry-in absence discipline in §5.2].
+`firstAdmitOrdinal == 0` / `envelopeOrdinal == 0` / occurrence status
+`NEVER_ADMITTED` means "not admitted in this Realm" — which, on authoritative
+Core state, is **proven Realm-local absence** because admission cannot succeed
+without writing these words (mandatory indexing; complete-by-construction)
+[PROPOSAL — semantics; reconciled with the carry-in absence discipline in
+§5.2]. `getOccurrenceByOrdinal` rejects `ordinal == 0`, values above the
+current high-water, and values above the physical u48 range; it never maps a
+sparse envelope leaf through base arithmetic. For `PRE_WITHDRAWN`, only
+`status`, `ordinal == 0`, and `revokedAtOrdinal` come from the overlay. The
+retained target evidence supplies `recordId` and `principalId`; `typeSchemaId`
+remains zero unless the target body is independently state-readable, because
+pre-withdrawal evidence intentionally carries no body.
 
 ### 3.2 Globally ordered accepted-admission pages
 
@@ -437,15 +532,50 @@ pinned); PARTIAL with cursor otherwise.
 
 ### 3.3 Unique Records by Type
 
-`KIND_UNIQUE_BY_TYPE` postings under `pk(T, 0x02, 0, 0)`: appended exactly when
-the `KIND_BY_RECORD` head for the leaf's RecordId transitions `count 0 → 1`
-(the head is already loaded during the by-record append; the check is free).
-The posting's ordinal is the record's **first** admission ordinal. Liveness of
-a *record* (vs an occurrence) at basis `H`: the record's `KIND_BY_RECORD`
-`liveCount > 0` at current basis, or — basis-pinned — at least one live
-occurrence per §2.2's rule; the paged reader filters by hydrating the first
-posting and, if dead, consulting `KIND_BY_RECORD` for that record (cost scales
-with the page, not history) [PROPOSAL].
+`KIND_UNIQUE_BY_TYPE` under `pk(T, KIND_UNIQUE_BY_TYPE, 0, 0)` enumerates
+**unique Records of Type T having at least one live occurrence at the reported
+basis**. Its posting for Record `R` is appended once, at `R`'s stable first
+admission ordinal; resurrection of the *record's live set* never appends a
+second unique posting.
+
+The unique reader does **not** apply `liveAt` to that stable outer ordinal:
+the first occurrence may be withdrawn while another occurrence of the same
+Record remains live. Outer ordinals identify Records; record liveness comes
+only from the per-Record fold below.
+
+The current-basis count is maintained from `KIND_BY_RECORD` transitions:
+
+```
+on occurrence admission for record R of type T:
+  br = head(pk(0, KIND_BY_RECORD, 0, R))
+  before = br.liveCount
+  append occurrence ordinal to br                 // count++, liveCount++
+  if before == 0:
+    if br.count was 0 before the append:
+      append R's stable first ordinal to uniqueByType(T)
+    else:
+      uniqueByType(T).liveCount += 1              // 0 -> 1, no new posting
+
+on ACTIVE -> WITHDRAWN for an occurrence of R:
+  decrement byRecord(R).liveCount first
+  if byRecord(R).liveCount == 0:
+    uniqueByType(T).liveCount -= 1                // last live occurrence only
+```
+
+Thus two live occurrences of one Record count once, and withdrawing either
+one alone does not decrement the unique head. Re-admitting an ACTIVE
+occurrence writes nothing; a terminal occurrence never resurrects.
+
+For the current basis, the page tests `byRecord(R).liveCount` in O(1) per
+outer item. A historical-basis page cannot use the current count. It walks the
+outer unique list and, for each candidate Record, its nested `KIND_BY_RECORD`
+postings until it finds one occurrence live at `H` or exhausts that record.
+**Every outer posting and every nested posting examined is charged to the one
+`PAGE_SCAN_MAX` budget.** The `uint256` cursor encodes
+`(outerUniqueCursor, innerRecordCursor)`; if the budget ends in either loop,
+the reader returns that exact resumable cursor with `PARTIAL`, including when
+the page has no items. It performs no hidden history scan and returns
+`COMPLETE` only after the outer list and any active nested walk are exhausted.
 
 ### 3.4 Occurrences by Type, by Record, by Principal
 
@@ -489,11 +619,11 @@ types chapter owns the role table):
 RECORD / PRINCIPAL / REALM / TYPESCHEMA targets (canonical 32 bytes):
     targetKey = the id itself
 OCCURRENCE targets:
-    targetKey = keccak256("efs2/vk/occ/1" ‖ envelopeId ‖ leafIndex(uint16 BE))
+    targetKey = occurrenceTargetKey(envelopeId, leafIndex)          // §2.1
 BYTEDIGEST targets (algorithm-tagged foreign digests; never EFS identity):
-    targetKey = keccak256(DOM_VK_DIGEST ‖ algId(uint32 BE) ‖ digestBytes)
+    targetKey = digestTargetKey(algCode, digestBytes)               // §2.1
 ADDRESS targets (raw EVM address, the v1 R3 lesson):
-    targetKey = keccak256("efs2/vk/addr/1" ‖ address(20 bytes))
+    targetKey = addressTargetKey(account)                           // §2.1
 ```
 
 **contentHash → Record/file lookup (deliverable 6).** A digest reference is a
@@ -504,11 +634,19 @@ DATA/file` index to the A–E bundle … Only the unbounded global dedup sweep �
 stays off-chain"; VERIFIED]. Exact shape:
 
 ```solidity
-function lookupByDigest(uint32 algId, bytes calldata digest,
+function lookupByDigest(uint16 algCode, bytes calldata digest,
                         PageRequest calldata req) external view
   returns (PageResult memory);
-// = pagePostings(0, KIND_TARGET, 0, keccak256(DOM_VK_DIGEST ‖ algId ‖ digest), req)
+// = pagePostings(0, KIND_TARGET, 0,
+//                digestTargetKey(algCode, digest), req)
 ```
+
+Writer and reader use the identical `digestTargetKey` formula. Before lookup,
+Core requires `algCode` to exist in the encoding chapter's one closed u16
+table and requires `digest.length` to match that row. Unknown codes and
+malformed lengths return a typed validation error (an implementation may
+instead return `UNSUPPORTED`); they never produce `COMPLETE + empty` and
+therefore never masquerade as proven absence.
 
 Cost scales with matches (THE LINE). The global dedup sweep ("every duplicate
 everywhere") remains off-chain **[REJECTED for Core — same ruling]**.
@@ -528,32 +666,50 @@ semantics), admission updates `BindingHead` and appends the mutation's ordinal
 to `pk(0, KIND_BINDING_HIST, 0, bindingKey)`.
 
 ```solidity
-enum BindingState { UNSET, SET, TOMBSTONE }
+enum BindingState { UNSET, BOUND, TOMBSTONED }
+
+struct BindingHead {                  // byte-identical decoded SR-8 head
+  uint8   state;                      // BindingState
+  uint8   targetKind;                 // 0 NONE / 1 RECORD / 2 OCCURRENCE
+  uint8   tombstoneCause;             // 0 NONE / 1 EXPLICIT / 2 WITHDRAWAL
+  uint32  revision;
+  uint64  admissionOrdinal;           // physical currentOrdinal u48, widened
+  bytes32 targetA;                    // targetRef; zero when TOMBSTONED
+  uint16  targetLeaf;
+}
 
 function getBindingHead(bytes32 bindingKey) external view
-  returns (BindingState state, uint32 revision, uint48 currentOrdinal,
-           bytes32 realmBasis, uint48 highWaterOrdinal);
+  returns (BindingHead memory head, bytes32 realmBasis,
+           uint64 highWaterOrdinal);
 
-function getBindingAtBasis(bytes32 bindingKey, uint48 basisOrdinal)
+function getBindingAtBasis(bytes32 bindingKey, uint64 basisOrdinal)
   external view
-  returns (BindingState state, uint48 asOfOrdinal,
-           bytes32 realmBasis, uint48 highWaterOrdinal);
+  returns (BindingHead memory head, bytes32 realmBasis,
+           uint64 highWaterOrdinal);
 ```
 
-- Latest point read: 1 SLOAD (the head). `state == UNSET` on authoritative
-  Core state is **proven complete Realm-local absence**: every admitted
-  Binding writes the head, mandatory indexing admits no bypass, so an unset
-  head at basis = no admitted Binding at that key, at that basis
-  [PROPOSAL — semantics; this is the "complete Realm-local absence at a basis"
-  obligation from the baseline list, grounded in complete-by-construction
-  indexing].
+Realm basis and high-water are query metadata, not fields smuggled into or
+substituted for the head. Latest point read costs one SLOAD for an absent or
+metadata-only result and two for a present head including `targetRef`.
+`state == UNSET` on authoritative Core state is **proven complete Realm-local
+absence**: every admitted Binding writes the head, mandatory indexing admits
+no bypass, so an unset head at basis = no admitted Binding at that key, at
+that basis [PROPOSAL — semantics; this is the "complete Realm-local absence at
+a basis" obligation from the baseline list, grounded in
+complete-by-construction indexing].
 - Basis-pinned read: if `currentOrdinal ≤ basisOrdinal`, the head answers
   directly. Else binary-search the history postings for the greatest ordinal
   `≤ basisOrdinal` (postings are strictly ascending): ≤ `BINDING_PROBES_MAX =
-  48` packed-slot probes (covers 2^48 entries; each probe 1 SLOAD), then
-  hydrate that one Occurrence for the bound value. `asOfOrdinal = 0` with
-  `state = UNSET` when no mutation existed at or before the basis. Bounded,
+  48` packed-slot probes (covers the physical 2^48 entries; each probe 1 SLOAD), then
+  hydrate that one Occurrence for the bound value.
+  `head.admissionOrdinal = 0` with `state = UNSET` when no mutation existed at
+  or before the basis. Bounded,
   deterministic, answer-proportional.
+
+The Binding CAS source check is separate from the head read: it loads the
+reversible log entry at `head.admissionOrdinal` and compares the claimed
+predecessor to `(source.envelopeId, source.leafIndex)`. No hash-only log word
+promises an `occKey → EnvelopeId` reverse lookup.
 
 Withdrawal of the current Binding occurrence and tombstones fold through the
 same head + history (bindings chapter owns which transitions are legal;
@@ -572,58 +728,37 @@ no contract ever parses CBOR or any variable-offset encoding [DERIVED
 INVARIANT — carry-in LR-1, lens-spec.md §2.2 "packed, big-endian, fixed-width,
 offset-free … No contract parses CBOR"].
 
-Exactly 8 bytes per IndexSpec, big-endian field order as written:
+The encoding chapter owns one byte-exact grammar; this chapter consumes it
+verbatim:
 
 ```
-IndexSpec (8 bytes):
-  byte 0: mode      uint8   // 1=SCALAR_EQ, 2=REF_EQ, 3=BACKLINK, 4=COMPOUND
-  byte 1: fieldA    uint8   // canonical-body field ordinal (0-based)
-  byte 2: fieldB    uint8   // COMPOUND second component; MBZ otherwise
-  byte 3: roleA     uint8   // reference-role ordinal for REF_EQ/BACKLINK; MBZ for SCALAR_EQ/COMPOUND
-  byte 4: keyKind   uint8   // 1=WORD32 (canonical field encoding is exactly 32 bytes), 2=HASHED
-  byte 5: flags     uint8   // MBZ in B0
-  bytes 6–7: reserved uint16 // MBZ
-INDEXSPECS_MAX = 8 per TypeSchema
-COMPOUND_COMPONENTS_MAX = 2
+IndexSpec (2 bytes):
+  u8 indexKind  // 1 SCALAR_EQ, 2 REF_BACKLINK, 3 DIGEST_EQ
+  u8 target     // fieldIdx for SCALAR_EQ/DIGEST_EQ; roleId for REF_BACKLINK
+MAX_INDEX_SPECS = 8
 ```
 
-Modes:
-- **SCALAR_EQ** — exact equality on ONE canonical bounded scalar field.
-  `valueKey`: if the field's canonical encoding is exactly 32 bytes
-  (`keyKind = WORD32`), `valueKey` = that word verbatim; else (bounded bytes,
-  `SCALAR_BYTES_MAX = 128`) `keyKind = HASHED` and
-  `valueKey = keccak256(DOM_VK_SCALAR ‖ fieldBytes)`. A declared
-  `keyKind` inconsistent with the field's shape fails Type admission.
-- **REF_EQ** — typed-reference equality on the field holding role `roleA`.
-  `valueKey = targetKey(X)` per §3.5. Note: REF_EQ postings coincide with the
-  KIND_ROLE family for the same (T, role); Type admission therefore rejects a
-  REF_EQ spec whose `roleA` is a declared reference role (it is already
-  automatically indexed — declaring it again would double-charge writers for
-  an identical posting set) [PROPOSAL]. REF_EQ exists for reference-*valued*
-  scalar fields that are deliberately not declared as graph roles (types
-  chapter owns that distinction).
-- **BACKLINK** — target-first backlink by declared field role: exactly the
-  KIND_ROLE family of §3.5. In B0, every declared reference role is
-  automatically backlink-indexed, so mode 3 in a spec is redundant and Type
-  admission rejects it (`ERR_SPEC_REDUNDANT`) [PROPOSAL — keeps "declared role
-  ⇒ reverse-queryable" unconditional, per the backlink ruling; the mode code
-  is retained in the grammar so Variant-B arms (index profiles separate from
-  Type identity) can express opt-in backlinks without renumbering].
-- **COMPOUND** — small exact compound key over two components:
-  `valueKey = keccak256(DOM_VK_CMPD ‖ keyOf(fieldA) ‖ keyOf(fieldB))` where
-  `keyOf` is the SCALAR_EQ/REF_EQ per-field rule. **Gated on workload proof
-  [HYPOTHESIS — falsifier: a Stage-B fixture workload (Git multi-ref or Nanda
-  catalog) that a single-key index cannot serve in ≤ 2 page reads; until such
-  a workload is measured, `COMPOUND_ENABLED = false` and Type admission
-  rejects mode 4 with `ERR_COMPOUND_DISABLED`]**. The encoding is pinned now
-  so enabling it later changes no preimage grammar.
+Mappings:
 
-Static validation at Type admission (deterministic, no callbacks — arbitrary
-Type-created admission callbacks are [REJECTED — kickoff "no arbitrary
-Type-created admission callbacks"; VERIFIED]): every `fieldA/fieldB` ordinal
-must exist in the canonical body shape and be statically extractable; every
-`roleA` must exist in the role table; modes/keyKinds must be in the closed
-sets; violations revert Type admission.
+- **SCALAR_EQ** appends under
+  `pk(T, KIND_SPEC, specOrdinal, scalarValueKey(fieldBytes))`. Eligible kinds
+  and bounded extraction are exactly the encoding chapter's rules; no local
+  key-kind byte changes those bytes.
+- **REF_BACKLINK** names a declared role and produces the general
+  `KIND_TARGET` plus predicate `KIND_ROLE` writes of §3.5 for every instance.
+  These are the mandatory reference writes, not a third duplicate posting.
+- **DIGEST_EQ** names a DIGEST field and appends under the global
+  `KIND_TARGET` family with the same `digestTargetKey` used by
+  `lookupByDigest` (§3.5).
+
+TypeSchema admission rejects an unknown kind, an ineligible or
+non-extractable target, and duplicate `(indexKind, target)` pairs. It also
+rejects declarations that would append the same posting twice. Validation is
+deterministic and callback-free; arbitrary Type-created admission callbacks
+remain [REJECTED — kickoff "no arbitrary Type-created admission callbacks";
+VERIFIED]. Compound and alternate grammars are **[REJECTED for B0]**; adding
+one requires a new versioned schema grammar and a new seam resolution before
+vectors, never reinterpretation of these two bytes.
 
 ### 4.2 Fan-out cost model — who pays
 
@@ -632,19 +767,31 @@ the exact price before writing [PROPOSAL — "Type authors declare, writers pay"
 per core-architecture-candidate.md Indexes section]:
 
 ```
-F(leaf) = 4                                  // baseline: byType + byRecord + byPrincipal + uniqueByType(≤1)
-        + 2 × refInstances(leaf)             // KIND_TARGET + KIND_ROLE per reference instance
-        + applicableSpecs(leaf)              // ≤ INDEXSPECS_MAX = 8
-REF_INSTANCES_MAX = 16 per leaf              // consumed from the types/encoding chapter [TBD there;
-                                             // this chapter's arithmetic assumes ≤ 16]
-F_MAX = 4 + 2×16 + 8 = 44 postings per leaf
+F(leaf) = 4                                  // byType + byRecord + byPrincipal + uniqueByType(≤1)
+        + 2 × refInstances(leaf)             // mandatory general + predicate backlink
+        + applicableValueSpecs(leaf)         // SCALAR_EQ/DIGEST_EQ; ≤ MAX_INDEX_SPECS
+
+sum(1 for REF/OCCREF/OPTION(REF),
+    declared maxCount for ARRAY(REF))
+  <= REF_INSTANCES_MAX = 16 per schema
+
+F_MAX = 4 + 2×16 + 8 = 44 postings per leaf  // conservative structural ceiling
 ```
 
+`REF_INSTANCES_MAX = 16` is a consumed SR-18e structural guarantee, not an
+assumption. `validateTypeSchemaGroup` enforces it with `ERR_REF_BUDGET`, and
+the runtime body walk carries the same defense-in-depth counter, so actual
+per-leaf extraction cannot exceed it. The two-byte IndexSpec grammar removes
+the old alternate-mode overhead and preserves this conservative `F_MAX`.
+
 - **Admit:** the admitting writer pays `F(leaf)` posting appends + 2 log slots
-  + meta updates, in the same atomic call (§9 arithmetic).
+  + one new `OccStatus` slot + meta/batch updates, in the same atomic call
+  (§9 arithmetic).
 - **Withdraw/revoke:** the withdrawing writer pays the same declared fan-out
-  again: the fold sets `revokedAtOrdinal` (1 SSTORE) and decrements
-  `liveCount` in **every** postings head the admit incremented. The key set is
+  again: the fold modifies `OccStatus` (1 SSTORE) and decrements
+  occurrence-level `liveCount` in every postings head the admit incremented.
+  `KIND_UNIQUE_BY_TYPE` decrements only when the affected Record's
+  `KIND_BY_RECORD.liveCount` reaches zero (§3.3). The key set is
   recomputed deterministically from the state-readable canonical body + the
   admitted TypeSchema (re-extraction), so no key list is stored [PROPOSAL —
   determinism from the full-body spine; zero extra state].
@@ -678,12 +825,12 @@ enum Completeness { UNKNOWN, COMPLETE, PARTIAL, UNSUPPORTED }
 struct PageRequest {
   uint256 cursor;       // 0 = start; else the cursor from the prior PageResult
   uint16  maxItems;     // clamped to the endpoint's MAX_PAGE_* constant
-  uint48  basisOrdinal; // 0 = current basis; else pin: fold only ordinals ≤ basisOrdinal
+  uint64  basisOrdinal; // 0 = current basis; range-check before physical use
 }
 
 struct PageResult {
   bytes32 realmBasis;        // RealmRevisionId under which the page was computed
-  uint48  highWaterOrdinal;  // greatest ordinal folded into the answering state
+  uint64  highWaterOrdinal;  // greatest ordinal folded into the answering state
                              // (= min(nextOrdinal-1, basisOrdinal if pinned))
   uint256 cursor;            // resume position; CURSOR_END = 2^256-1 when exhausted
   bytes32[] items;           // endpoint-declared item encoding (ordinals: bytes32(uint256(ord)))
@@ -703,7 +850,7 @@ function pagePostingsHydrated(bytes32 typeSchemaId, uint8 indexKind,
   returns (PageResult memory ordinals, HydratedItem[] memory hydrated);
 
 struct HydratedItem {
-  uint48  ordinal;
+  uint64  ordinal;
   bytes32 envelopeId;
   uint16  leafIndex;
   bytes32 recordId;
@@ -712,8 +859,8 @@ struct HydratedItem {
 
 function counts(bytes32 typeSchemaId, uint8 indexKind, uint8 indexOrdinal,
                 bytes32 valueKey) external view
-  returns (uint64 totalCount, uint64 liveCount, uint48 lastOrdinal,
-           bytes32 realmBasis, uint48 highWaterOrdinal);
+  returns (uint64 totalCount, uint64 liveCount, uint64 lastOrdinal,
+           bytes32 realmBasis, uint64 highWaterOrdinal);
 ```
 
 Item encodings per endpoint: postings/admission-log/binding-history pages
@@ -756,7 +903,7 @@ return AdmissionOrdinals as `bytes32(uint256(ordinal))`. Consumers hydrate via
    point reads at drifting bases yields phantoms and ghosts; VERIFIED]: page 1
    returns `highWaterOrdinal = H`; callers pass `basisOrdinal = H` on every
    subsequent page and point read of one logical operation. Liveness folds by
-   `revokedAtOrdinal` relative to `H` (§2.2), so a revocation landing between
+   `revokedAtOrdinal` relative to `H` (§2.2a), so a revocation landing between
    pages does not ghost earlier pages, and admissions after `H` do not phantom
    into later ones. Cross-page basis consistency is therefore exact, not
    best-effort.
@@ -779,26 +926,30 @@ snapshot if any bound exceeds 130% of the estimate]].
 Per-item worst-case read costs (cold, adversarially non-clustered ordinals):
 
 ```
-raw item      = postings data (2,100/5 amortized ≈ 420) + logSlotB liveness (2,100) ≈ 2,520
-hydrated item = raw + logSlotA envelopeId (2,100) + leaf→recordId (≤ 2,100)        ≈ 6,720
+raw item      = postings data (2,100/5 amortized ≈ 420)
+              + reversible log A+B (4,200) + OccStatus (2,100) ≈ 6,720
+hydrated item = raw + leaf→recordId (≤ 2,100)                     ≈ 8,820
 ```
+
+These are deliberately conservative [HYPOTHESIS]: `liveAt` must obtain both
+components of `OccurrenceRef` before reading the overlay. An implementation
+may cache those same log words for hydration, but may not price or implement a
+nonexistent log-owned revocation field.
 
 Named constants with arithmetic against the cap:
 
 ```
-MAX_PAGE_ITEMS           = 512   // raw pages:      512 × 2,520 ≈ 1.29M gas ≈ 7.7% of 16,777,216
-MAX_PAGE_ITEMS_HYDRATED  = 256   // hydrated pages: 256 × 6,720 ≈ 1.72M gas ≈ 10.3% of cap
+MAX_PAGE_ITEMS           = 512   // raw pages:      512 × 6,720 ≈ 3.44M gas ≈ 20.5% of cap
+MAX_PAGE_ITEMS_HYDRATED  = 256   // hydrated pages: 256 × 8,820 ≈ 2.26M gas ≈ 13.5% of cap
 PAGE_SCAN_MAX            = 1024  // dead-entry scan bound per call:
-                                 // worst 1,024 × 2,520 ≈ 2.58M ≈ 15.4% of cap
-PAGE_GAS_ENVELOPE        = 4.4M  // named worst-call bound (rounded up from the
-                                 // derived 2.58M scan + 1.72M hydration ≈ 4.30M,
-                                 // ≈ 26% of cap) — a composing contract keeps
-                                 // ≥ 12.3M for its own logic
+                                 // worst 1,024 × 6,720 ≈ 6.88M ≈ 41.0% of cap
+PAGE_GAS_ENVELOPE        = 7.7M  // [HYPOTHESIS] rounded above the 6.88M scan
+                                 // + 256 × 2,100 hydration increment ≈ 7.42M
 CURSOR_END               = 2^256 - 1
 ```
 
 Returndata: 512 × 32 B = 16 KiB (raw) / 256 × 160 B = 40 KiB (hydrated) —
-negligible against calldata/returndata practice [PLAUSIBLE]. A contract
+bounded independently of postings cardinality [PLAUSIBLE]. A contract
 needing tighter bounds lowers `maxItems`; the clamp is
 `min(req.maxItems, MAX_PAGE_*)`, never a revert.
 
@@ -817,14 +968,19 @@ Every postings head carries `liveCount` (§2.3):
 
 - **Increment**: `appendPosting` (+1) at admit — every family, every key.
 - **Decrement**: the withdrawal/revocation fold recomputes the admit-time key
-  set from the state-readable body (§4.2) and decrements each head's
-  `liveCount` by exactly the number of postings that admit appended under that
-  key. The fold and all decrements are one atomic call (axis 6); a partial
-  decrement cannot be observed.
+  set from the state-readable body (§4.2) after the one-way
+  `ACTIVE → WITHDRAWN` overlay transition and decrements each occurrence-level
+  head's `liveCount` by exactly the number of postings that admit appended
+  under that key. `KIND_BY_RECORD` decrements first;
+  `KIND_UNIQUE_BY_TYPE` decrements only if that value becomes zero — the
+  Record's last live occurrence (§3.3). The fold and all decrements are one
+  atomic call (axis 6); a partial decrement cannot be observed.
 - Invariants (assertable in the prototype): `liveCount ≤ count`;
-  `Σ decrements(key) ≤ Σ increments(key)`; a second withdrawal of the same
-  Occurrence is rejected by the monotone `revokedAtOrdinal` check before any
-  decrement (no double-decrement).
+  `Σ decrements(key) ≤ Σ increments(key)`; a repeated withdrawal of a
+  `WITHDRAWN` or `PRE_WITHDRAWN` target is a no-op success before any
+  decrement (no double-decrement). Pre-withdrawal of a never-admitted target
+  writes `PRE_WITHDRAWN` plus any required bounded retained target evidence
+  and decrements nothing.
 
 `counts()` (§5.1) returns `(totalCount, liveCount)` in one SLOAD plus basis
 words — O(1), THE LINE's cheapest read.
@@ -861,12 +1017,12 @@ postings — stated honestly in the ABI docs [PROPOSAL; see Open items].
 
 ```
 admit:    +1 SSTORE-modify per head touched (the head write is shared with the
-          append; liveCount adds zero extra slots) → 0 marginal slots, 0 marginal
-          cold accesses; ≈ 0 marginal gas beyond the append itself.
-withdraw: fold (1 SSTORE-modify to logSlotB ≈ 5,000 cold) +
-          F(leaf) head decrements ≈ F × (2,100 + 2,900) = F × 5,000
-          worst F = 44 → ≈ 225,000 gas; typical F (2 roles ⇒ 4 ref postings,
-          1 spec, 4 baseline) = 9 → ≈ 50,000
+          append; liveCount adds zero extra slots) → 0 marginal posting slots;
+          the fresh OccStatus slot is priced in §9.
+withdraw: OccStatus modify (≈ 5,000 cold) + occurrence-level head decrements;
+          uniqueByType decrements only on byRecord liveCount 1 -> 0.
+          Conservative ceiling: ≤ F(leaf) × (2,100 + 2,900) + overlay
+          = 44 × 5,000 + 5,000 ≈ 225,000 gas [HYPOTHESIS].
 ```
 
 This is the priced "PAY for it": revocation costs the same order as admission,
@@ -884,6 +1040,8 @@ Lane 8 owns Locator/availability evidence shapes; this chapter consumes them
 as opaque canonical bodies with statically extractable declared fields.
 
 ```solidity
+uint16 constant LOCATOR_POSTINGS_VISIT_MAX = 32;
+
 struct SelectSpec {                 // supplied or pinned by the consumer
   bytes32 typeSchemaId;             // the locator-evidence Type to consider
   uint8   roleOrdinal;              // role whose target identifies the content
@@ -891,45 +1049,69 @@ struct SelectSpec {                 // supplied or pinned by the consumer
   uint8   scoreFieldOrdinal;        // canonical uint64 field read as score (mode 1)
 }
 
-function selectBestLocator(bytes32 targetKey, SelectSpec calldata spec,
-                           uint48 basisOrdinal) external view
-  returns (uint48 bestOrdinal,      // 0 = none live in examined window
-           uint64 bestScore,
-           uint16 examined,
-           Completeness completeness);
+function selectBestLocator(
+    bytes32 targetKey,
+    SelectSpec calldata spec,
+    uint64 basisOrdinal,
+    uint256 cursor
+) external view returns (
+    uint64 bestOrdinal,
+    uint64 bestScore,
+    uint16 postingsVisited,
+    uint256 nextCursor,
+    Completeness completeness
+);
 ```
 
 Algorithm (deterministic pseudocode):
 
 ```
-selectBestLocator(targetKey, spec, H):
+selectBestLocator(targetKey, spec, H, cursor):
   key   = pk(spec.typeSchemaId, KIND_ROLE, spec.roleOrdinal, targetKey)
-  best  = (score = -∞, ordinal = 0); examined = 0
-  for ord in postings(key) ascending, while examined < LOCATOR_CANDIDATES_MAX:
-      if not liveAt(ord, H): continue            // §2.2 rule; dead entries skipped, still counted below
-      examined += 1
-      s = (spec.scoreMode == SCORE_LATEST) ? ord
-          : extractUint64(body(ord), spec.scoreFieldOrdinal)   // static extractor, encoding chapter
-      // deterministic total order: higher score wins; ties → LOWEST ordinal wins
-      if s > best.score or (s == best.score and (best.ordinal == 0 or ord < best.ordinal)):
-          best = (s, ord)
-  completeness = (more live candidates remain beyond the window) ? PARTIAL : COMPLETE
-  return (best.ordinal, best.score, examined, completeness)
+  i     = decodeCursor(cursor)
+  require i <= postings(key).count
+  visited = 0
+  best = (score = -∞, ordinal = 0)
+
+  while i < postings(key).count && visited < LOCATOR_POSTINGS_VISIT_MAX:
+    ord = postings(key)[i]
+    i += 1
+    visited += 1                       // count EVERY physical posting first
+    if !liveAt(ord, H): continue
+    score = (spec.scoreMode == SCORE_LATEST)
+      ? ord
+      : extractUint64(body(ord), spec.scoreFieldOrdinal)
+    if score > best.score ||
+       (score == best.score &&
+        (best.ordinal == 0 || ord < best.ordinal)):
+      best = (score, ord)
+
+  if i == postings(key).count:
+    return (best.ordinal, best.score, visited, CURSOR_END, COMPLETE)
+  return (best.ordinal, best.score, visited, encodeCursor(i), PARTIAL)
 ```
 
 Exactness notes:
-- `LOCATOR_CANDIDATES_MAX = 32` live candidates examined per call [PROPOSAL —
-  32 × (liveness 2,520 + body-field extract ≈ 2,600) ≈ 164k gas ≈ 1% of the
-  7825 cap; a hostile sprayer padding the candidate list costs themselves
-  admission gas per entry and can only force `PARTIAL`, never a wrong
-  COMPLETE].
+- `LOCATOR_POSTINGS_VISIT_MAX = 32` bounds **total physical postings
+  visited**, live or dead [PROPOSAL — repriced against the overlay at roughly
+  32 × 8,820 ≈ 282k gas before fixed overhead, [HYPOTHESIS]]. Dead-posting
+  spray therefore yields bounded `PARTIAL + nextCursor`, never an unbounded
+  look-ahead or false `COMPLETE`.
 - Tie-breaks are total and pinned: `(score desc, AdmissionOrdinal asc)` —
   the earliest equally-scored locator wins, so the selection is stable under
   later spam [PROPOSAL — earliest-wins prevents rank-jacking by re-publishing
   the same score; SCORE_LATEST mode exists for freshest-wins consumers and is
   equally deterministic].
-- `PARTIAL` means "best of the examined window"; a consumer needing the global
-  optimum pages the postings itself under §5. Honest, bounded, and stated.
+- `PARTIAL` means "best of this visited window" and always carries a resumable
+  cursor. `bestOrdinal == 0 && PARTIAL` is **not absence**. Only
+  `bestOrdinal == 0 && COMPLETE` proves no live candidate at the pinned basis.
+  A consumer combines window winners under the same total order until
+  `COMPLETE`; the function never scans beyond the declared window to decide
+  whether a live candidate remains.
+- Resumption obeys the one-basis rule: a caller first obtains the current
+  high-water (for example from `counts`) and passes that nonzero
+  `basisOrdinal` on every selector call. `cursor != 0 && basisOrdinal == 0`
+  reverts rather than silently resume against a drifting basis.
 - Bounded inputs: the score is one declared uint64 field; composite
   scoring (durability tier + verification status + operator diversity) is a
   Lane 8 profile question — if Lane 8 needs multi-field scores, it compiles
@@ -945,26 +1127,25 @@ reads unbounded [kickoff falsifier 5]:
 
 | Constant | Value | Bounds |
 |---|---|---|
-| `INDEXSPECS_MAX` | 8 | Type creator's declarable spec fan-out |
-| `REF_INSTANCES_MAX` | 16/leaf | reference fan-out per leaf (types/encoding chapter owns; assumed here) |
-| `COMPOUND_COMPONENTS_MAX` | 2 | compound key width |
-| `COMPOUND_ENABLED` | false (B0) | mode 4 admission gate (§4.1) |
-| `SCALAR_BYTES_MAX` | 128 | scalar key preimage size |
+| `MAX_INDEX_SPECS` | 8 | encoding-owned TypeSchema bound; 2-byte grammar |
+| `REF_INSTANCES_MAX` | 16/leaf | encoding-owned structural guarantee; `ERR_REF_BUDGET` |
 | `F_MAX` | 44 postings/leaf | total per-leaf declared fan-out (derived, §4.2) |
 | `MAX_PAGE_ITEMS` | 512 | raw page size (§5.3 arithmetic) |
 | `MAX_PAGE_ITEMS_HYDRATED` | 256 | hydrated page size |
 | `PAGE_SCAN_MAX` | 1024 | entries examined per page call |
-| `LOCATOR_CANDIDATES_MAX` | 32 | live candidates per selection call |
+| `LOCATOR_POSTINGS_VISIT_MAX` | 32 | total physical postings per selection call |
 | `BINDING_PROBES_MAX` | 48 | binary-search probes per basis-pinned binding read |
+| `BATCH_PROBES_MAX` | 64 | binary-search probes for exact receipt batch |
 | `ORDINAL_MAX` | 2^48−1 | admission ceiling; revert, never wrap |
 
 Bound arguments:
 
-- **Hostile Type creator.** Fan-out is capped (`INDEXSPECS_MAX`,
+- **Hostile Type creator.** Fan-out is capped (`MAX_INDEX_SPECS`,
   `REF_INSTANCES_MAX`), statically validated, callback-free (§4.1), and fixed
   at Type admission — a Type cannot make *admission* unbounded (the cost is
   `F(leaf) ≤ F_MAX`, known before writing) and cannot make *reads* unbounded
-  (every read is a bounded page or an O(1) point/count).
+  (every read is a bounded page, an O(1) point/count, or an explicitly capped
+  batch/history probe).
 - **Hot values.** A key with 10⁹ postings costs the same per page as a key
   with 10: page reads touch `≤ PAGE_SCAN_MAX` entries, `counts()` is 1 SLOAD,
   binding point reads are 1 SLOAD (+ ≤ 48 probes pinned). No read's cost is a
@@ -972,15 +1153,16 @@ Bound arguments:
 - **Spray-then-self-revoke degradation (stated honestly).** Self-revocation
   cannot inflate `liveCount` (§6.2) but the dead entries remain in the array,
   so a sprayer can dilute a key: readers page through dead entries at
-  `≈ 420–2,520 gas each`, bounded per call by `PAGE_SCAN_MAX` (worst ≈ 2.58M
-  gas per call, §5.3), resuming via cursor. Attacker cost: ≥ ~13.4k gas per
-  spam posting × F at admit **plus** the withdrawal pass (§6.3); defender cost
+  a derived `≈ 6,720 gas each` before fixed overhead, bounded per call by
+  `PAGE_SCAN_MAX` (worst ≈ 6.88M gas per call [HYPOTHESIS], §5.3), resuming
+  via cursor. Attacker cost: at least one posting append per entry at admit
+  **plus** the withdrawal pass (§6.3); defender cost
   per page is capped and the `coverage` field makes dilution visible.
   Compaction stays a redeployable future view (§2.3). [HYPOTHESIS — the
-  economic asymmetry (attacker pays ~10× per entry what any single reader pays
-  to skip it, once) suffices; falsifier: a Stage-B adversarial fixture where
-  sustained spray makes a legitimate consumer's steady-state read cost exceed
-  2× its clean-key cost at equal page yield.]
+  economic asymmetry suffices; the overlay pricing invalidates the old claimed
+  ratio. Falsifier: a Stage-B adversarial fixture where sustained spray makes
+  a legitimate consumer's steady-state read cost exceed 2× its clean-key cost
+  at equal page yield.]
 - **Griefing via shared keys.** Postings keys include the predicate and exact
   value; an attacker cannot append into a key they cannot legitimately write
   to — but any writer CAN reference any target (permissionless graph). So
@@ -993,33 +1175,47 @@ Bound arguments:
 
 ## 9. Write-path cost model + aggregate arithmetic under EIP-7825
 
-Per accepted leaf (cold, worst-case; harness re-measures [HYPOTHESIS as §5.3]):
+All figures here are schedule-derived **[HYPOTHESIS]** inputs for the Stage B
+harness, not envelope-fit claims. The overlay and per-batch full receipt basis
+change the earlier arithmetic:
 
 ```
-log slots:            2 × SSTORE-new           ≈ 44,200
-posting append:       amortized ≈ 13,420 each  // head 5,000 + data (22,100 + 4×5,000)/5
-meta updates:         RecordMeta (new 22,100 | seen 0) + Envelope/Principal/Type
-                      metas amortized over the envelope ≈ 30,000/leaf worst
-baseline postings:    4 × 13,420 ≈ 53,700
-typical leaf (2 roles ⇒ 4 ref postings, 1 spec):  (4+4+1) × 13,420 ≈ 120,800
-   → typical index total ≈ 44,200 + 120,800 + 30,000 ≈ 195,000 gas/leaf
-worst leaf (F_MAX = 44): 44 × 13,420 ≈ 590,500
-   → worst index total ≈ 44,200 + 590,500 + 30,000 ≈ 664,700 gas/leaf
+per newly accepted occurrence:
+  reversible log:     2 × SSTORE-new                     ≈ 44,200
+  fresh OccStatus:    1 × SSTORE-new                     ≈ 22,100
+  log + lifecycle subtotal                               ≈ 66,300
+  posting append:     amortized ≈ 13,420 each
+                      // head modify + packed-data new/modify cycle
+  baseline postings:  ≤ 4 × 13,420                       ≈ 53,700
+
+typical leaf (2 roles ⇒ 4 ref postings, 1 spec):
+  (4+4+1) × 13,420                                      ≈ 120,800
+  occurrence/log/posting subtotal                        ≈ 187,100
+
+worst leaf (F_MAX = 44):
+  44 × 13,420                                            ≈ 590,500
+  occurrence/log/posting subtotal                        ≈ 656,800
+
+per accepting call with at least one new occurrence:
+  AdmissionBatchMeta + AuthorityBasisWord                ≈ 44,200 new-slot floor
+  + conditional contract codehash                        ≈ 0 or 22,100
+  + first-touch Envelope/Record/Type/Principal metadata,
+    canonical bodies, schema-cache and kernel effects    measured separately
+
+pre-withdrawal of a never-admitted target:
+  fresh PRE_WITHDRAWN OccStatus + bounded retained target evidence;
+  no log entry for the target and no index-head decrement             measured
 ```
 
-EIP-7825 batch arithmetic (cap 16,777,216):
+The full receipt basis belongs to each admission batch because staged calls
+for one Envelope may use different Realm revisions, verifier basis blocks, or
+contract codehashes. It is not amortized into or projected from EnvelopeMeta.
 
-```
-index-only ceiling:  16,777,216 / 664,700  ≈ 25 worst-declared leaves per tx
-                     16,777,216 / 195,000  ≈ 86 typical leaves per tx
-with bodies:         a 1 KiB canonical body ≈ 32 words × 22,100 ≈ 707,000 gas
-                     → worst leaf + 1 KiB body ≈ 1.37M → ≤ 12 leaves/tx
-```
-
-Consequence for the envelope chapter [dependsOn]: any `ENVELOPE_MAX_LEAVES ≥
-16` must either bound per-leaf declarations/bodies or accept that worst-case
-envelopes revert on gas before reaching the leaf cap; this chapter's numbers
-are the constraint, the envelope chapter picks the constant.
+`MAX_ENVELOPE_LEAVES = 64` remains the SR-5 structural `leafMask uint64`
+bound, **not a promise that 64 maximal leaves fit one transaction**. No row in
+this chapter claims a 64-leaf fit. The harness must measure the aggregate path
+(bodies, cache/effects, overlay, postings, and full batch receipt metadata)
+against the qualifying Realm gas cap and return any lower safe cap to James.
 
 **The ONE aggregate bundle.** These per-write figures exist to be summed, not
 signed individually: the mandatory-index bundle (baseline families + reference
@@ -1075,18 +1271,21 @@ The compact contract other chapters rely on:
 
 **Types & constants** (consumed by lenses, bindings, client, harness):
 `Completeness {UNKNOWN=0, COMPLETE, PARTIAL, UNSUPPORTED}`, `PageRequest`,
-`PageResult`, `HydratedItem`, `AdmissionReceipt`, `BindingState`;
-`AdmissionOrdinal = uint48` (0 = NONE, first = 1, revert at 2^48−1);
+`PageResult`, `HydratedItem`, `OccStatus`, `IndexedReceiptView`, `BindingHead`,
+`BindingState`;
+`AdmissionOrdinal = uint64` externally (physical u48, 0 = NONE, first = 1,
+`U48_GUARD` before packing);
 `CURSOR_END = 2^256−1`; the §8 limits table; the §5.3 page maxima.
 
 **Key derivation** (stable grammar): `pk(typeSchemaId, indexKind,
 indexOrdinal, valueKey)` with the closed `KIND_*` set (§2.1) and the
 `targetKey`/`valueKey` rules (§3.5, §4.1) — all preimages domain-tagged
-`"efs2/…/1"`.
+with encoding-owned hashed domain words and `abi.encode` fixed words.
 
 **Guarantees other chapters may assume:**
 - `ordinal → (EnvelopeId, leafIndex, RecordId, TypeSchemaId, PrincipalId,
-  revokedAtOrdinal)` in ≤ 4 SLOADs (O(1) hydration).
+  status, revokedAtOrdinal)` by direct two-word log hydration plus one
+  occKey-overlay read; no scan or envelope-leaf arithmetic.
 - `liveAt(ord, H) ⇔ ord ≤ H ∧ (revokedAt == 0 ∨ revokedAt > H)` — the one
   liveness rule; basis-pinned pages are phantom/ghost-free (FSP-BASIS-1).
 - Every enumeration returns the six-part page tuple; truncation ⇒ PARTIAL,
@@ -1095,8 +1294,13 @@ indexOrdinal, valueKey)` with the closed `KIND_*` set (§2.1) and the
 - Mandatory indexing: an accepted Occurrence is present in every applicable
   family in the same atomic call; there is no admitted-but-unindexed state.
 - `counts()` liveCount is revocation-aware at current basis, O(1).
-- Fan-out formula `F(leaf) = 4 + 2·refInstances + specs ≤ 44` — the envelope
-  chapter's leaf-cap constraint; withdrawal costs the same fan-out again.
+- `KIND_UNIQUE_BY_TYPE.liveCount` means live unique Records and changes only
+  on the corresponding `KIND_BY_RECORD.liveCount` transitions `0 → 1` and
+  `1 → 0` (last live occurrence).
+- Fan-out formula `F(leaf) = 4 + 2·refInstances + valueSpecs ≤ 44` is a
+  structural ceiling; transaction fit remains a measured hypothesis.
+- `selectBestLocator` visits at most 32 physical postings, counts dead ones,
+  and returns `PARTIAL` only with a resumable cursor.
 - Full `bytes32 PrincipalId` width preserved in every key, item, and ABI.
 
 **External functions** (Solidity signatures as defined above): `getTypeSchema`,
@@ -1105,45 +1309,42 @@ indexOrdinal, valueKey)` with the closed `KIND_*` set (§2.1) and the
 `counts`, `lookupByDigest`, `getBindingHead`, `getBindingAtBasis`,
 `selectBestLocator`.
 
-**Internal seam:** `LibIndex.appendPosting(pk, ord)` /
-`LibIndex.foldRevocation(ord, W, keys…)` invoked only by the admission path of
-the one atomic Core (axis 6); no external writer can touch index state.
+**Internal seam:** `LibIndex.activateOccurrence(E, k, ...)`,
+`LibIndex.withdrawOccurrence(E, k, W, ...)`, and
+`LibIndex.preWithdrawOccurrence(E, k, W, targetEvidence)` own the status
+checks before effects. `appendPosting(pk, ord)` is reached only from a fresh
+activation; `foldRevocation(ord, W, keys…)` may run only after the one-way
+`ACTIVE → WITHDRAWN` transition. No external writer can touch index state.
 
 ## Open items
 
-1. **Gas re-measurement (A2 snapshot).** Every gas figure (§5.3, §6.3, §9) is
-   schedule-derived [PLAUSIBLE/HYPOTHESIS]; the Stage-A measurement harness
+1. **Gas re-measurement (Stage B snapshot).** Every gas figure (§5.3, §6.3, §9) is
+   schedule-derived [PLAUSIBLE/HYPOTHESIS]; the Stage B measurement harness
    must replace them and re-derive `MAX_PAGE_ITEMS`, `PAGE_SCAN_MAX`,
    `PAGE_GAS_ENVELOPE`, and the leaf ceilings. Closed by: harness lane +
    fixture corpus run.
-2. **`REF_INSTANCES_MAX` reconciliation.** Assumed 16/leaf here; the
-   types/encoding chapter owns the real bound. Closed by: synthesizer
-   reconciling the two chapters' constants.
-3. **Compound-key enable gate.** `COMPOUND_ENABLED = false` pending a fixture
-   workload a single-key index cannot serve in ≤ 2 page reads (§4.1). Closed
-   by: Stage-B Git/Nanda workload measurement.
-4. **Count-at-basis.** `liveCount` is current-basis only; historical counts
+2. **Count-at-basis.** `liveCount` is current-basis only; historical counts
    are a client fold. Whether any contract workload needs an on-chain
    count-at-basis (per-key history index — real state cost) is unproven.
    Closed by: fixture evidence; else signed as a client-tier fold.
-5. **Self-enumeration pricing.** The author index is in the bundle per §3.4;
+3. **Self-enumeration pricing.** The author index is in the bundle per §3.4;
    owner ruling D's roots-forward alternative stays the priced fallback.
    Closed by: James, on the aggregate snapshot numbers.
-6. **Realm profile without EIP-7825.** Page constants assume the 16,777,216
+4. **Realm profile without EIP-7825.** Page constants assume the 16,777,216
    cap; a Realm without it (or with a revised cap) re-derives §5.3. Closed by:
    V2-E5 Realm-descriptor chapter declaring the gas profile as a descriptor
    field (adapter seam already shaped for it).
-7. **Best-locator score semantics.** `SCORE_FIELD_MAX`/`SCORE_LATEST` are
+5. **Best-locator score semantics.** `SCORE_FIELD_MAX`/`SCORE_LATEST` are
    pinned; whether Lane 8 needs a composite `SELECT_PROFILE_V2` (multi-field,
    third-party availability attestations) is theirs. Closed by: Lane 8
    chapter + synthesizer.
-8. **UNSUPPORTED vs Variant-B coverage.** §5.2 rule 2 is structural under
+6. **UNSUPPORTED vs Variant-B coverage.** §5.2 rule 2 is structural under
    Variant A. If the axis-4 bakeoff selects Variant B (separate IndexProfile),
    the UNSUPPORTED rule must gain start-basis/coverage fields
    (`PARTIAL`-until-proven-backfill). Closed by: axis-4 bakeoff outcome.
-9. **Local-ordinal reverse maps.** `typeOrd`/`principalOrd` (§2.2) trade two
+7. **Local-ordinal reverse maps.** `typeOrd`/`principalOrd` (§2.2) trade two
    one-time slots per new Type/Principal for a packed hot word; the F7 arm
    deletes them. Closed by: axis-7 bakeoff measurement.
-10. **Spray-degradation economics.** The §8 [HYPOTHESIS] needs the named
-    adversarial fixture (sustained spray vs steady-state reader cost ratio).
-    Closed by: Stage-B adversarial fixture run.
+8. **Spray-degradation economics.** The §8 [HYPOTHESIS] needs the named
+   adversarial fixture (sustained spray vs steady-state reader cost ratio).
+   Closed by: Stage-B adversarial fixture run.
