@@ -286,22 +286,41 @@ digest; stateless vectors carry null. At freeze no expected output or required
 digest may remain null. `resultRegistryHash=keccak256(resultSchemaRegistryBytes)`;
 a mismatch rejects before execution.
 
+Every executed Vector step emits exactly one base CONFORMANCE
+`MeasurementRow` with `fixtureId` equal to the exact `GV-*`, `CV-*`, or `H-*`
+source, `caseId` equal to its stable member id, `vectorId=Vector.id`, and
+`stepIndex` equal to its zero-based position. Supplemental cold/warm or gas
+rows may share that vector only when their temperature/profile/key fields
+differ. A row whose vector id, case id, step index, opName, canonical input, or
+expected state cannot be joined back to exactly one frozen Vector rejects.
+
 Mandatory freeze checks are executable corpus members:
 
 - **H-JCS/H-MANIFEST:** reject JSON numbers, BOM/newline, non-NFC, duplicate or
   unknown keys, invalid/symlink/dot paths, wrong ordering/length/digest, and
   excluded artifacts entering the manifest; TS/RS reproduce identical bytes
-  and corpusVersion.
+  and corpusVersion. The same check rejects a measurement report with bare
+  `fixtureId="CV"`, an invalid/missing `caseId`, mismatched `vectorId` or
+  `stepIndex`, invalid signed-state-growth spelling, duplicate
+  `MeasurementRowKey`, unsorted rows, unknown/missing row keys, or a root/row
+  corpusVersion/resultRegistryHash mismatch or mixed/wrong-filename cell ids.
 - **H-RESULTREG:** every ABI/FixOp/read/cell operation appears exactly once;
   any name/schema/error change moves registry hash and corpusVersion; actual
-  revert selector+arguments match its namespace/code entry.
+  revert selector+arguments match its namespace/code entry. Every row
+  independently re-derives the exact nonzero `inputDigest` from the registered
+  input tuple; a one-bit argument, opName, or schema change must move it.
 - **H-OUTCOME:** success, typed error including zero arguments, and N/A rows
   produce exact bytes/digests/sentinels; an assertion cannot substitute for an
-  operation result.
+  operation result. `inputDigest`, `resultDigest`, and `stateDigest` are tested
+  as three distinct fields/preimages and cannot alias one another. Missing,
+  extra, or semantically unequal language rows under one ComparisonKey reject.
 - **H-STATE:** insertion-order and physical-layout permutations normalize to
   one within-cell digest; changing a nonce, dead posting, retained evidence,
   history status, receipt basis, or F4 coverage changes it; reverted calls do
-  not, while log/cache-only changes are excluded.
+  not, while log/cache-only changes are excluded. Each state-bearing vector's
+  terminal row equals its `Vector.stateDigest`; intermediate rows carry their
+  exact post-step digest. A stateless/null-state vector row has zero
+  `stateDigest`, and swapping either form fails before report acceptance.
 - **H-DOMTABLE:** all six F1/F3/F4 domains occur once in the corpus manifest
   and never in `codexConstantsHash`; retired spellings reject.
 - **H-CELLS:** F1's SR-3 intent bytes remain B0-exact with CardId/mask=1; F3
@@ -1040,7 +1059,11 @@ omitted-authority-ref and single-word-target schemas are absent. [PROPOSAL]
 MeasurementRow {
   corpusVersion   bytes32     -- §5; rows with different values never compared
   cellId          string      -- "B0" | "F1".."F7" | "X17"
-  fixtureId       string      -- "FX-ARC" … "FX-BROWSE" | "CV" | "WL-…"
+  fixtureId       string      -- exact source id: FX-* | CV-* | GV-* | H-* | WL-* | CORPUS;
+                              -- bare "CV" is forbidden
+  caseId          string      -- stable corpus case/member id; never "-"
+  vectorId        string      -- exact Vector.id, or "-" when no vector owns the row
+  stepIndex       uint32      -- zero-based step within that vector/script; STEP_NA otherwise
   workloadId      string      -- "-" or WL-SPRAY/WL-CHURN/WL-HOT/WL-DEAD-LOCATOR + knob hash
   realmProfileId  string      -- §3.3
   clientProfileId string      -- MOBILE_REF | DESKTOP_REF | "-"
@@ -1060,6 +1083,7 @@ MeasurementRow {
   calldataBytes, returndataBytes          uint32
   sstoreNew, sstoreMod, sloadsCold, sloadsWarm  uint32
   stateGrowthBytes  int64
+  inputDigest     bytes32     -- canonical invocation digest; always nonzero
   resultPresent   bool        -- true for an encoded success or typed-error artifact
   resultSchemaId  bytes32     -- frozen ResultSchema/1 id; zero iff !resultPresent
   resultDigest    bytes32     -- tagged canonical outcome digest; zero iff !resultPresent
@@ -1067,6 +1091,7 @@ MeasurementRow {
   typedErrorCode  uint32      -- ERROR_NONE=0; ERROR_NA=2^32-1; otherwise exact table code
   errorDataDigest bytes32     -- hash of canonical typed-error arguments; zero for none/N/A
   crossImplEqual  enum        -- NOT_APPLICABLE=0 | FALSE=1 | TRUE=2
+  stateDigest     bytes32     -- exact §3.2a post-step digest; zero only when state is N/A
   realmId         bytes32     -- zero only when the op has no Realm context
   realmBasis      bytes32     -- RealmRevisionId; zero when N/A
   basisOrdinal    uint64      -- exact requested/resolved basis; ORDINAL_NA when N/A
@@ -1086,6 +1111,82 @@ MeasurementRow {
   note            string      -- ≤ 128 chars; SCALED / PROVISIONAL flags here
 }
 ```
+
+`fixtureId` names the exact corpus source, not merely its family. The closed
+values are the ten `FX-*` ids in §2, the fifteen `CV-*` ids in §2.0.3,
+`GV-1..GV-18`, `H-JCS`, `H-MANIFEST`, `H-RESULTREG`, `H-OUTCOME`, `H-STATE`,
+`H-DOMTABLE`, `H-CELLS`, the four `WL-*` ids in §4, and `CORPUS` for a
+corpus-wide bundle/compile statistic. A row with `fixtureId="CV"` is malformed.
+`caseId` uses `[A-Za-z0-9][A-Za-z0-9._/-]{0,127}` and identifies the exact
+member or script step (`CV-SHADOW/SHADOW-1`, `GV-1/MAX-BODY-PLUS-1`,
+`FX-ARC.C3`, `H-JCS/JSON-NUMBER`, `SIZE_6`). `vectorId` is the byte-identical
+`Vector.id` from §1.4 when a vector owns the row and `-` otherwise. In a
+vector-owned row there is no independent naming choice:
+`fixtureId=Vector.category`, `caseId=Vector.category || "/" || Vector.id`, and
+`stepIndex` is the zero-based index into `Vector.steps`. In a
+fixture/workload script, `caseId` is its printed citable step id and
+`stepIndex` is the zero-based index in that exact script.
+`STEP_NA = 2^32-1` is legal only for aggregate/compile/report-only rows. These
+fields are corpus data: renaming or reassigning one triggers FR-3.
+
+For every row, `opName` resolves through the frozen result registry even when
+`resultPresent=false`. Let `operationSchemaId` be that operation's
+`resultSchemaId`, and let `canonicalInputBytes` be the canonical ABI tuple
+under its registered input type (aggregate operations register the ordered
+child-row-key tuple they consume):
+
+```text
+inputDigest = keccak256(abi.encode(
+  DOM_MEASUREMENT_RESULT, uint256(0), operationSchemaId,
+  keccak256(canonicalInputBytes)))
+```
+
+The discriminator word keeps invocation evidence disjoint from the existing
+result and state preimages without minting another domain. `inputDigest` is
+always nonzero. `resultDigest` remains the canonical outcome digest below and
+MUST NOT be substituted for either `inputDigest` or `stateDigest`.
+
+**Canonical measurement report bytes [PROPOSAL — exact].** Each Stage B cell
+emits one `measurements/<cellId>.json` restricted-JCS file whose root has exactly
+`{corpusVersion,format,resultRegistryHash,rows}` and whose format is
+`efs2-stage-b-measurements/1`. Root `corpusVersion` and
+`resultRegistryHash` equal every row/the frozen corpus, and every row's
+`cellId` equals the filename cell; a mismatch rejects.
+Every row object has exactly the fields in `MeasurementRow` above; missing,
+unknown, or duplicate keys reject. JSON booleans are booleans; strings are
+NFC/control-free; bytes32 values are full-width lowercase `0x` hex; unsigned
+integers are minimal unsigned decimal strings; `stateGrowthBytes` alone is a
+fixed-width lowercase two's-complement `0x` plus 16 hex digits; enum values are
+their exact printed ASCII names; no value is null. The report has UTF-8, no
+BOM, and no trailing newline.
+
+Rows sort by this typed key (strings/bytes by unsigned byte order, integers by
+numeric value, enums by their declared numeric code):
+
+```text
+MeasurementRowKey := (
+  corpusVersion, cellId, fixtureId, caseId, vectorId, stepIndex,
+  workloadId, realmProfileId, clientProfileId, phase,
+  opClass, opName, atomicityClass, k, temperature, lang, inputDigest)
+```
+
+Two rows with the same key reject; repetitions of the same invocation are
+folded into `n`, never emitted as duplicate rows. The root `rows` array is in
+strict ascending key order. `canonicalMeasurementReportBytes` is RFC 8785 JCS
+of that exact object. Derived charts and prose reports are computed from this
+file and are not alternate evidence stores. This closes the one-flat-table
+claim: an independent runner can join every row back to one frozen case,
+vector step, input, outcome, and (where applicable) logical post-state.
+
+`ComparisonKey` is `MeasurementRowKey` with only `lang` removed. For each
+vector step, the report contains exactly the implementations named by
+`Vector.impls`, one row per language with the same ComparisonKey; a missing or
+extra implementation row rejects. `crossImplEqual=TRUE` iff their registered
+schema, input digest, canonical outcome/error fields, Realm/basis/context
+fields, and applicable state digest are byte-identical. Gas, wall-time,
+memory, RPC, and language fields are deliberately excluded from semantic
+equality. Any FALSE member fails conformance rather than becoming a measured
+tradeoff.
 
 Result artifacts use exact, corpus-versioned schemas:
 
@@ -1184,7 +1285,12 @@ digest are zero. For error, `errorDataDigest=keccak256(canonicalErrorArguments)`
 a zero-argument error hashes empty bytes, not zero. For no artifact, both ids
 and digests are zero and the N/A sentinels apply. `crossImplEqual=TRUE` means
 all required implementations produced the same schema/result/error/context
-fields, not merely a Boolean assertion.
+fields, including `inputDigest` and a nonzero state-bearing `stateDigest`, not
+merely a Boolean assertion. A vector-owned state-machine row carries the exact
+post-step digest, and its terminal row MUST equal the non-null
+`Vector.stateDigest`; a stateless vector or an operation with no logical
+post-state records zero. A revert row records the byte-identical pre-call
+digest when the vector asserts atomic no-change, rather than zero.
 
 N/A sentinels are closed: `ORDINAL_NA = 2^64−1` (legal protocol ordinals are
 u48), `COVERAGE_NA = 2^32−1`, `ITEMS_NA = 2^16−1`,
@@ -1194,8 +1300,9 @@ semantics do not apply. An applicable protocol cursor is recorded exactly,
 including zero if zero is a legal returned value. Successful
 operations use `ERROR_NONE=0`; a typed failure uses its nonzero frozen error
 code and nonzero `errorNamespace`; a row with `resultPresent=false` uses
-`ERROR_NA`. These sentinels are measurement vocabulary, not protocol ABI
-values.
+`ERROR_NA`. `STEP_NA=2^32−1`; zero `stateDigest` means state N/A only, while
+`inputDigest` has no N/A form. These sentinels are measurement vocabulary, not
+protocol ABI values.
 
 One flat table; every report in Stage B is a set of these rows plus derived
 charts computed FROM rows (k\* curves, ratios). Nothing is reported outside the
@@ -1514,11 +1621,13 @@ The compact contract other chapters and Stage B rely on:
   ResolvedManifest/1 byte layout — interface only), FX-BROWSE (retained thin;
   guest checks imported from FX-NANDA.E). Cross-cutting suite CV-RAIL /
   CV-PID160 / CV-AUTHCHAIN / CV-XREALM / CV-SUBSET / CV-CLOCK / CV-7702 /
-  CV-WITHDRAW / CV-SPARSE-ADMIT / CV-PREWITHDRAW / CV-DIGEST-LOOKUP /
+  CV-WITHDRAW / CV-SPARSE-ADMIT / CV-PREWITHDRAW / CV-SHADOW / CV-DIGEST-LOOKUP /
   CV-LAST-LIVE-COUNT / CV-SCHEMA-CAP / CV-RECON runs once per cell.
 - **MeasurementRow** (§3.2): the one table shape for every cell × fixture ×
-  workload, including the binary result-registry/outcome encoding and logical
-  state projection/digest, typed error,
+  workload, with exact `fixtureId/caseId/vectorId/stepIndex`, canonical
+  `inputDigest`, binary result-registry/outcome encoding, logical
+  `stateDigest`, restricted-JCS report bytes, strict row ordering/uniqueness,
+  typed error,
   cross-implementation equality, Realm/basis/high-water/coverage, exact N/A
   sentinels, Core-call count, and F1 aggregator overhead; metric definitions
   §3.1; the mandatory read matrix (every named chapter read, cold+warm).

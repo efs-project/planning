@@ -98,6 +98,17 @@ namespace/code/arguments tuple and the actual selector+arguments revert bytes.
 State-machine expectations use harness §3.2a; no storage-dump or event-log hash
 is permitted.
 
+Execution joins losslessly to the canonical measurement report: each step's
+base row carries the exact source `fixtureId` (never bare `CV`), stable
+`caseId`, `vectorId=Vector.id`, zero-based `stepIndex`, registered-input
+`inputDigest`, canonical outcome `resultDigest`, and logical `stateDigest`.
+The last is the exact post-step digest for a state-bearing member and the
+terminal row equals `Vector.stateDigest`; it is zero only when this Vector's
+state digest is null. Duplicate or unsorted row keys, a mismatched
+step/op/input, or substituting any one of the three digests for another fails
+H-JCS/H-RESULTREG/H-OUTCOME/H-STATE before evidence is accepted (harness
+§§1.4, 3.2–3.2a).
+
 ### 0.5 Tier notation
 
 - **CORE** members run on-chain semantics (SOL authoritative, TS/RS replicate).
@@ -1064,8 +1075,9 @@ The compact contract other chapters (and the Stage B harness) rely on:
   two-axis never-collapse (§0.3); tier notation CORE/SDK/FIXTURE (§0.5).
 - **Frozen artifact interface:** §0.4 + harness §§1.4/3.2/3.2a define the
   restricted-JCS vector container, binary result registry/outcomes, and
-  logical-state digest. Stage B fills concrete bytes; it does not choose a
-  serialization.
+  logical-state digest plus canonical measurement report rows keyed by exact
+  source/case/vector/step/input. Stage B fills concrete bytes; it does not
+  choose a serialization or collapse all CV cases to one label.
 - **Reconciliation preconditions** `RP-1..RP-18` and winning pins
   `SR-1..SR-18` (§1): `reconciles` preserves the historical conflict mapping;
   `requiresPins` gates minting on VERIFIED repairs in every owning chapter and

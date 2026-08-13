@@ -440,7 +440,7 @@ scope, VERIFIED):
 |---|---|---|
 | V2-E1 Principal surface | Uniform-vs-tagged fully specified as axis 2: D1–D4 close by construction/vector/inspection; F2 authorKey has one exact hashed-domain/fixed-word formula; only D5_2 awaits measurement; rejection conditions pinned both ways | prin §2–§7; bk §3.3/§4.2; GV-3/5/6 |
 | V2-E2 Contract Lens floor | ResolutionPlan/1 exact `u16(frameLen)‖frame` body/parser offset/4,194-byte maximum, indivisible three-field ResolvedTarget, combiners and non-alias vectors, risk-bearer ABI, LENS-NEG-1, challenge-window pattern; separate Core/client grids with honest UNKNOWN/PARTIAL | enc §3.4; lens (all); GV-13; FX-LENS; hf §2.5; bk §6.1 |
-| V2-E3 Record/context bakeoff | Exact F1 card+unchanged SR-3 intent and F3 signed carrier; every k=1..64 under same-atomicity units; F1 aggregator overhead; restricted-JCS corpus/vector/result/state interfaces prevent adaptive drift; CV-SHADOW reports F1's one-leaf/outer-rollback boundary rather than claiming B0's single-Core-call preflight | auth §2.4/§5.3; bk §3–§4/§6; hf §§1.4,2.0.3,3.1–3.2a, FR-1..6 |
+| V2-E3 Record/context bakeoff | Exact F1 card+unchanged SR-3 intent and F3 signed carrier; every k=1..64 under same-atomicity units; F1 aggregator overhead; restricted-JCS corpus/vector/result/state interfaces plus uniquely keyed source/case/vector/step/input measurement rows prevent adaptive or attribution drift; CV-SHADOW reports F1's one-leaf/outer-rollback boundary rather than claiming B0's single-Core-call preflight | auth §2.4/§5.3; bk §3–§4/§6; hf §§1.4,2.0.3,3.1–3.2a, FR-1..6 |
 | V2-E4 Type/index budget | Closed 2-byte IndexSpec and ReferenceRole selector grammar; fan-out/16-ref bound; page ABI; selector sentinel; exact F4 identity/coverage/backfill/page cell; ONE bundle and adversarial workloads; budget number remains Stage B | enc §3; idx §§4–10; GV-2/GV-14; hf §3–§4 |
 | V2-E5 Realm bootstrap & authority history | RealmDescriptor/1 plus exact protocol 0.0 seven-field InitConfig/hash/GenesisFactsView/revision-1 policy+authority; canonical authority ref; direct/UUPS EIP-1967 facts and getters; enumerable paired revision/AuthorityTransition history; C-1..C-7, QR-1..8, admission/finality split, U-1..6, and unsigned-carrier/receipt-grounded reconstruction | realm (all); GV-17; CV-RECON; hf §3.2a |
 | V2-E8 (partial) | Adapter seam specified from three sides (schema-string mapping + UID non-identity, enc §9; receipt projection, realm §8.3; principal mapping, prin §9); recursive-Type safety (GV-2); no-callback rule (enc §2.8); loss-map itself deferred to V2-E8 proper per PM directive | enc §9/§2.8; realm §8.3; prin §9 |
@@ -462,8 +462,9 @@ The compact contract other chapters (synthesizer, red team, Stage B) rely on:
   repairs/residue-gates caveat (§0.2).
 - **Measurement-evidence contract** (hf §§1.4, 3.1–3.4): one restricted-JCS
   corpus/vector manifest, binary result-schema registry and canonical outcome,
-  logical state projection/digest; every claimed output has a typed error,
-  cross-implementation equality, and
+  logical state projection/digest, and one canonical measurement file whose
+  unique row key names exact source/case/vector/step/input; every claimed
+  output has a typed error, cross-implementation equality, and
   Realm/basis/high-water/coverage fields with exact N/A sentinels; axis 1 has
   all 64 fixed integer rows and explicit F1 aggregator overhead.
 - **The GAP/resolution register** (§7): four active gaps (G-2..G-5), resolved

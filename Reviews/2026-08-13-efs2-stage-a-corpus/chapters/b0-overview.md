@@ -442,7 +442,7 @@ two leaves of one Envelope never alias.
 | 2 Smallest semantic model + alternatives | §1 above; per-chapter alternatives; exact mandatory cell interfaces in [[bakeoff-spec]] |
 | 3 Traceability with labels | [[traceability]] (149 rows) |
 | 4 Controlled bakeoff spec | [[bakeoff-spec]] (9-cell fractional design, declared confounds) |
-| 5 Frozen fixture/harness interfaces | [[harness-and-fixtures]] (10 fixtures; restricted-JCS manifest/vector container; binary result registry/outcomes; logical state projection; measurement schema; "frozen" = fixed before Stage B measurement, not protocol-frozen) |
+| 5 Frozen fixture/harness interfaces | [[harness-and-fixtures]] (10 fixtures; restricted-JCS manifest/vector container; binary result registry/outcomes; logical state projection; canonical measurement rows keyed by exact source/case/vector/step/input; "frozen" = fixed before Stage B measurement, not protocol-frozen) |
 | 6 Golden-vector categories + falsifiers | [[vectors-and-falsifiers]] (GV-1..GV-18 + consolidated falsifier matrix) |
 | 7 Proposed spine edits (no shared-file edits made) | corpus `proposed-spine-edits.md` (16 items, A1–D1) |
 | 8 Durable evidence for journal-only claims | corpus `standards-audit.md`, `carry-in-register.md`, `intake-findings.md`, `redteam-findings.md` |

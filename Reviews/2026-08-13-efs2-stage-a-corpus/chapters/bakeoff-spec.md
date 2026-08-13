@@ -836,8 +836,9 @@ Each cell produces one report: {cell id, axis vector, corpusVersion from the
 restricted-JCS manifest and exact domain bytes,
 engine + branch commit, aggregate snapshot per fixture trace, state-growth
 table (slots per trace), `atomicityClass/overCap/splitFactor`, canonical
-binary-registry `resultSchemaId/resultDigest`, typed outcome namespace/code/
-argument digest, logical `stateDigest`, `crossImplEqual`, exact
+measurement rows with exact `fixtureId/caseId/vectorId/stepIndex` and
+`inputDigest`, binary-registry `resultSchemaId/resultDigest`, typed outcome
+namespace/code/argument digest, logical `stateDigest`, `crossImplEqual`, exact
 Realm/basis/high-water/coverage metadata, the axis's named statistics (§4),
 declared confounds restated, vector-suite pass/fail lists}. Axis-1 reports the
 complete 64-row B0/F1 table, `coreCallCount`, and `aggregatorGas`; omitting any
@@ -846,6 +847,10 @@ Every affected report carries the atomic schema-group cap result plus the
 `CV-SPARSE-ADMIT`, `CV-PREWITHDRAW`/`T4-MAX-BODY`, `CV-SHADOW`, `CV-DIGEST-LOOKUP`,
 `WL-DEAD-LOCATOR`, and `CV-LAST-LIVE-COUNT` outcomes; a cell that cannot
 implement the repaired semantic test is blocked rather than silently omitted.
+The machine evidence is the harness §3.2 restricted-JCS measurement file in
+strict `MeasurementRowKey` order; bare `fixtureId="CV"`, duplicate keys, or a
+row that cannot join to exactly one frozen case/vector step invalidates the
+cell report. Charts and prose are derived views, not alternate result stores.
 The per-axis verdict section applies §4's decision rules and ends
 in exactly one of:
 
@@ -898,7 +903,9 @@ The compact contract other chapters and the harness lane rely on:
   1/8/32/64 and client 50/100/256 on mobile/desktop reference profiles.
 - **Engine map** (§7): α{B0,F2,F3,F5,F7}, β{F1,X17}, γ{F4}, δ{F6}; compile-time
   branches; untouched-module byte-identity assertion.
-- **Report/verdict protocol** (§8): survives / rejected(kill source) / fork→James.
+- **Report/verdict protocol** (§8): one canonical, uniquely keyed measurement
+  file joins exact source/case/vector/step/input to outcome and logical state;
+  verdict is survives / rejected(kill source) / fork→James.
 
 ## Open items
 
