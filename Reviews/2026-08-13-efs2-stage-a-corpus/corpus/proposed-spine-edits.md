@@ -1,5 +1,5 @@
 # Proposed spine edits — Stage A deliverable 7
-**Stage A chapter — draft for red-team review; not landed, adopts nothing.**
+**Stage A chapter — post-red-team repaired draft; proposals only; not landed.**
 
 This document is PROPOSALS ONLY. No shared design file has been edited, and
 nothing here self-adopts: per the PM Stage-A execution defaults
@@ -39,10 +39,12 @@ Verification key: **VERIFIED** = I read the exact cited text in this pass.
 **VERIFIED (lane)** = the intake audit (audit-lanes.json) read and quoted the
 exact text; I read the audit, not the underlying file. **PLAUSIBLE** = stated
 inference. Standards statuses cite the STANDARDS audit lane, which
-web-verified them on 2026-08-12.
+web-verified the intake marks on 2026-08-12; its PM-named status corrections were
+reverified against primary sources on 2026-08-13.
 
 Items are ordered by target file: A = system-constitution.md, B = README.md,
 C = fable-efs2-core-engineering-kickoff.md, D = owner-rulings.md.
+**Inventory:** 16 items: A1-A4, B1-B2, C1-C9, D1.
 
 ---
 
@@ -50,11 +52,10 @@ C = fable-efs2-core-engineering-kickoff.md, D = owner-rulings.md.
 
 The constitution is `#status/draft` and states its own correction rule: "When
 this draft conflicts with a ruling or promoted EFS 2.0 spec, this draft is
-corrected" (system-constitution.md:31-32, VERIFIED). Items A1 and A3 are
-corrections toward attributed rulings and are therefore self-authorizing under
-that rule once the PM applies them; A2 and A4 contain new [PROPOSAL] material
-and need PM adoption, with A2's assumption-scope element flagged onward to
-James.
+corrected" (system-constitution.md:31-32, VERIFIED). A1 and A3 restore
+attributed rulings. A2 is one set-wide [PROPOSAL], informed by historical
+owner evidence and the PM's method directive; A4 remains a [PROPOSAL]. No item
+self-adopts a new mechanism or scope.
 
 ### A1. Equivocation non-guarantee + challenge-window (item F restoration)
 
@@ -155,19 +156,16 @@ James.
   third bullet defines that honest behavior and names the cause code other
   Stage A chapters already need (the resolver and cross-Realm chapters
   consume `UNAVAILABLE_SOURCE_BASIS`).
-- **Label:** first bullet [OWNER RULING restoration] — owner-rulings.md
-  2026-07-10 (lines 10-17); second and third bullets [PM DIRECTIVE adoption]
-  with [PROPOSAL] wording — the per-Realm scope statement is the recorder's
-  formulation of the directive, and because it extends the scope of a James
-  assumption, its final adoption is flagged to James at Stage A review (the
-  RULINGS lane recommended surfacing exactly this as an owner-visible
-  decision; the PM directive shaped the answer but James has not seen the
-  wording).
+- **Label:** historical chains-don't-die ruling [OWNER RULING evidence] —
+  owner-rulings.md 2026-07-10 (lines 10-17); PM method directive
+  [PM DIRECTIVE adoption] — `pm-stage-a-directive.md:22`; this complete
+  per-Realm scope item is one [PROPOSAL]. The historical ruling and the
+  directive inform the item, but neither silently adopts the proposed scope.
 - **Contradiction called out:** none in current text (the spine is silent);
   the item replaces silent scope loss with explicit scope.
-- **Authority routing:** PM applies bullets as draft text; James confirms the
-  per-Realm scope sentence at review. Authority routing per
-  Onboarding/authority.md: @james, scope `*`.
+- **Authority routing:** A2 remains the sole owner-routed scope proposal;
+  Stage A does not ask for adoption now. If later promoted, James is the
+  authority. The B0 behavior remains honest under either scope answer.
 
 ### A3. Personas/unlinkability in the authority extension list
 
@@ -423,14 +421,14 @@ baseline; the corpus holds the cross-cutting deliverables.
 
 | Stage A deliverable | Doc |
 |---|---|
-| Exact B0 baseline — per-subsystem chapters (envelope/publication, records + encoding, Type Schema, Principal/authority, Realm/admission, indexes, Binding, Lens/resolution, …) | `b0-*` chapter set (final chapter list per the Stage A synthesis) |
-| Smallest coherent semantic model + explicit alternatives | Stage A corpus (filename per synthesis) |
-| Requirement-to-test traceability with authority labels | Stage A corpus (filename per synthesis) |
-| Controlled bakeoff specification (axes, cells, declared confounds) | Stage A corpus (filename per synthesis) |
-| Frozen fixture + measurement-harness interfaces | Stage A corpus (filename per synthesis) |
-| Golden-vector categories and falsifiers | Stage A corpus (filename per synthesis) |
-| Proposed spine edits (proposals only; shared files unedited) | [[proposed-spine-edits]] |
-| Citations/durable evidence for journal-only claims | Stage A corpus (filename per synthesis) |
+| Exact B0 baseline — per-subsystem chapters | `chapters/b0-overview.md` + the eight `chapters/b0-*` subsystem chapters |
+| Smallest coherent semantic model + explicit alternatives | `chapters/b0-overview.md` §1 + `chapters/bakeoff-spec.md` |
+| Requirement-to-test traceability with authority labels | `chapters/traceability.md` |
+| Controlled bakeoff specification (axes, cells, declared confounds) | `chapters/bakeoff-spec.md` |
+| Frozen fixture + measurement-harness interfaces | `chapters/harness-and-fixtures.md` |
+| Golden-vector categories and falsifiers | `chapters/vectors-and-falsifiers.md` |
+| Proposed spine edits (proposals only; shared files unedited) | `corpus/proposed-spine-edits.md` |
+| Citations/durable evidence for journal-only claims | `corpus/standards-audit.md`, `carry-in-register.md`, `intake-findings.md`, `redteam-findings.md` |
 ```
 
 - **Rationale + citation:** The eight rows are the PM's Stage-A deliverables
@@ -439,17 +437,14 @@ baseline; the corpus holds the cross-cutting deliverables.
   owner-visible artifacts to be missed ("README.md is stale — still lists
   [[identity]] as primary and does NOT index [[kel]]…", owner-rulings.md:100,
   VERIFIED); indexing the Stage A set on landing prevents a recurrence.
-  Filename discipline: only `proposed-spine-edits.md` (this file) has a final
-  planned name; the working set currently at `stage-a/chapters/b0-*.md`
-  (`b0-binding`, `b0-lens`, `b0-principal-authority` exist as of this
-  writing, more lanes in flight — VERIFIED by directory listing) will be
-  finalized by the Stage A synthesizer. Rows marked "filename per synthesis"
-  are **TBD — decided by: the Stage A synthesizer at landing time**; the
-  table must not land with those placeholders unresolved.
+  The final Stage A artifact names are the current overview inventory
+  (`b0-overview.md` §3, VERIFIED): the B0 overview plus eight subsystem
+  chapters, bakeoff, traceability, harness, vectors/falsifiers, proposed-spine
+  edits, and the four durable-evidence ledgers. This proposed table names those
+  existing artifacts; it does not authorize a README edit.
 - **Label:** [PM DIRECTIVE adoption] (deliverable list) + [PROPOSAL] (table
   placement and row wording).
-- **Authority routing:** PM applies at Stage A landing, after filling final
-  filenames.
+- **Authority routing:** PM applies at Stage A landing.
 
 ---
 
@@ -747,31 +742,28 @@ different L2/L3 cap stated separately; and EIP-170 caps runtime bytecode at
 24,576 bytes (EIP-7907 did not ship in Fusaka), which bounds the one-physical-
 Core-versus-modules axis at compile time. Separate stable standards from
 drafts and avoid adopting a standard outside the problem it actually solves.
+For the PM-named status recheck: ERC-6492 is Final; ERC-7930 is Review;
+EIP-4444 and EIP-7927 are Stagnant documents even though pre-merge history
+deletion is partially deployed; CBOR CDE draft-13 is expired/archived and not
+an RFC; and RDFC-1.0 is a 2024 W3C Recommendation.
 ```
 
-- **Rationale + citation:** Statuses per the web-verified STANDARDS audit
-  lane (audit-lanes.json STANDARDS findings 1, 5, 16, 17, 18, 20, all
-  VERIFIED (lane) against primary sources on 2026-08-12): EIP-7825 live on
-  L1 since Fusaka 2025-12-03 and absent from the kickoff while the July batch
-  arithmetic it invalidates persists in the evidence; EIP-712 Final and the
-  July "chain-free EIP-712, constant domain separator" deviation must re-earn
-  inclusion; CAIP-2 finalized / ERC-7930 in Review — the RealmId "chain
-  reference" preimage needs a canonical chain-scoped encoding; W3C DID-core
-  1.0 REC / 1.1 CR — the obvious adopt-or-justify-rejection prior art for the
-  Principal seam; ERC-5564 Final — standards-grounded prior art for
-  unlinkable authorship (pairs with A3/C6); EIP-4444 partially real since
-  2025-05 with EIP-7927 as the meta-EIP — converts state-readable
-  reconstruction from prudence to necessity; EIP-170 still binding. The
-  facts-vs-policy sentence implements the PM execution default
-  (pm-stage-a-directive.md:23, VERIFIED). This standards set is exactly the
-  PM-adopted list (task directive: "EIP-7825/712/CAIP/DID/5564/4444-7927/170
-  standards additions", VERIFIED); further STANDARDS-lane items (EIP-7951,
-  ERC-7913-Final regrade, CBOR profile naming, ERC-6860) are Stage A chapter
-  material, not kickoff edits, and are not proposed here.
-- **Label:** [PM DIRECTIVE adoption] (list + facts/policy split). The
-  EIP-7825 and EIP-170 sentences are standards FACTS (VERIFIED (lane), web);
-  their binding force on the harness is [PROPOSAL] wording of the PM
-  amendment.
+- **Rationale + citation:** The PM directive requires standards-status
+  correction and a FACT/POLICY separation, especially for ERC-6492, ERC-7930,
+  EIP-4444/7927, CBOR CDE, and RDFC (`pm-stage-a-directive.md:23`, VERIFIED).
+  The repaired audit provides their direct primary-source citations and exact
+  statuses: `standards-audit.md` §2.7 (ERC-6492 Final), §3.6 (ERC-7930 Review),
+  §2.14 (EIP-4444/7927 Stagnant documents plus separate partial-deployment
+  fact), §3.3 (CDE-13 expired/archived I-D, not RFC), and §2.13 (RDFC-1.0 W3C
+  Recommendation, 2024-05-21). EIP-7825, EIP-170, EIP-712, CAIP, DID, and
+  ERC-5564 remain useful evidence-lane candidates, but neither their list
+  membership nor any EFS action is adopted by the directive or this proposal.
+- **Label:** [PM DIRECTIVE adoption] applies only to the Stage-A process rule:
+  FACT/POLICY separation and rechecking the five PM-named entries. The expanded
+  standards-list membership and every EFS action on those facts are [PROPOSAL].
+  EIP-7825 and EIP-170 are standards FACTS with venue/fork qualifications and
+  direct primary evidence; treating a harness policy as consequential is
+  [PROPOSAL], not a standards fact.
 - **Authority routing:** PM applies.
 
 ### C9. Four-tier support matrix: fold into output 7 or retire — flag for PM
@@ -853,7 +845,7 @@ drafts and avoid adopting a standard outside the problem it actually solves.
 | 3 | Kickoff seven bakeoff axes vs candidate eight alternative rows | C3 | Eighth axis added, disposed analysis-only |
 | 4 | Kickoff compatibility ban vs README/constitution live EAS adapter option | C4 | Ban scoped to v1 data; adapter seam specified now, loss-map deferred to V2-E8 |
 | 5 | Two-Principal Lens fixture vs constitution 1/8/32/64 acceptance trace + V2-E2 | C1 | Fixture scaled; negative test + callback attack added |
-| 6 | Spine silence vs owner item F (equivocation) and chains-don't-die rulings | A1, A2 | Restored at requirement level; mechanics stay unfrozen |
+| 6 | Spine silence vs owner item F (equivocation) and the historical chains-don't-die ruling | A1, A2 | A1 restores attributed ruling content; A2 is a set-wide scope proposal. Mechanics stay unfrozen and A2 is not adopted by listing it. |
 | 7 | Reviewer lists diverge (constitution omits privacy; README omits crypto/identity) | B1 (+ its consequential constitution edit) | Union list: database, EVM/security, standards, privacy, crypto/identity, long-horizon |
 
 ## Interfaces exposed
@@ -861,12 +853,12 @@ drafts and avoid adopting a standard outside the problem it actually solves.
 Other chapters and the synthesizer may rely on the following from this
 document; item IDs are stable for citation as `proposed-spine-edits <ID>`:
 
-- **Item registry:** A1 (item-F restoration), A2 (qualifying-Realm +
-  `UNAVAILABLE_SOURCE_BASIS`), A3 (personas in extension list), A4 (outcome
-  vocabulary), B1 (staged build order), B2 (Stage A doc table), C1-C9
-  (kickoff amendments incl. C9 support-matrix flag), D1 (owner-rulings
-  suggestion). Nothing is adopted until the named authority applies it;
-  chapters citing these items must cite them as proposals.
+- **16-item registry:** A1 (item-F restoration), A2 (qualifying-Realm +
+  `UNAVAILABLE_SOURCE_BASIS` scope proposal), A3 (personas in extension list),
+  A4 (outcome vocabulary), B1 (staged build order), B2 (Stage A doc table),
+  C1-C9 (kickoff amendments incl. C9 support-matrix flag), D1
+  (owner-rulings suggestion). Nothing is adopted until the named authority
+  applies it; chapters citing these items must cite them as proposals.
 - **Resolver point-outcome enumeration (A4):** `FOUND | ABSENT | CONFLICT |
   UNSUPPORTED | UNKNOWN`, exactly one per point resolution; `UNSUPPORTED` =
   deterministic capability gap at a Realm revision; `UNKNOWN` = supported but
@@ -880,10 +872,11 @@ document; item IDs are stable for citation as `proposed-spine-edits <ID>`:
 - **Enumeration-status vocabulary (A4):** `COMPLETE | PARTIAL | UNSUPPORTED |
   UNKNOWN` for paged reads — distinct from the point-outcome enumeration;
   chapters must not mix the two.
-- **Qualifying-Realm assumption (A2):** chapters may assume the deployed
-  Realm persists and stays queryable (no dead-chain machinery anywhere), and
-  must return `UNKNOWN(UNAVAILABLE_SOURCE_BASIS)` — never `ABSENT` — when a
-  required source basis is unreachable.
+- **Qualifying-Realm proposal (A2):** A2 is the sole proposed spine location
+  for the per-Realm scope. It is not adopted by this list. Until a later owner
+  adoption, chapters use the overview's set-wide disposition: qualifying-Realm
+  assumptions and `UNKNOWN(UNAVAILABLE_SOURCE_BASIS)` behavior remain honest
+  under either scope answer; required-source unavailability is never `ABSENT`.
 - **Equivocation boundary (A1):** no chapter may propose an on-chain
   collision/duplicity bit without overcoming the recorded TOCTOU refutation;
   contract-gate certainty against untrusted authors is closed author sets or
@@ -894,28 +887,23 @@ document; item IDs are stable for citation as `proposed-spine-edits <ID>`:
 
 ## Open items
 
-1. **Final Stage A filenames for B2** — the README table rows marked
-   "filename per synthesis" cannot land until the synthesizer fixes the
-   chapter/corpus set. Closed by: the Stage A synthesizer at landing;
-   `proposed-spine-edits.md` is the only name final now.
-2. **A2 per-Realm scope confirmation** — extending the chains-don't-die
-   assumption per-Realm to fresh L3s was shaped by the PM directive but is
-   ultimately a scope change to a James assumption. Closed by: James at
-   Stage A review (PM presents A2's second bullet).
-3. **C9 disposition** — fold the four-tier support matrix into output 7
+1. **A2 status** — A2 remains the sole owner-routed scope proposal; Stage A
+   does not ask for adoption now. If later promoted, James is the authority.
+   It is not a present Stage A blocker.
+2. **C9 disposition** — fold the four-tier support matrix into output 7
    (recommended, no new authority needed) or route retirement to James.
    Closed by: PM; James only if retirement is chosen.
-4. **D1 form** — inline citation note vs a new dated recorder entry in the
+3. **D1 form** — inline citation note vs a new dated recorder entry in the
    append-only ledger. Closed by: PM drafts, James accepts (his ledger).
-5. **Constitution freeze-discipline rewording** — B1's consequential edit to
+4. **Constitution freeze-discipline rewording** — B1's consequential edit to
    constitution steps 2-4 is described but not given final verbatim text
    (the section is otherwise untouched and the PM owns the integration
    wording). Closed by: PM when applying B1.
-6. **Cause-code registry ownership** — A4 names four minimal `UNKNOWN` cause
+5. **Cause-code registry ownership** — A4 names four minimal `UNKNOWN` cause
    codes; the authoritative registry, wire encoding, and extension rule
    belong to the Lens/resolver chapter (b0-lens). Closed by: b0-lens chapter
    + synthesizer reconciliation.
-7. **Survivor-row texts cited via the audit lane** — R-K10/R-K12/R-D8/R-D9/
+6. **Survivor-row texts cited via the audit lane** — R-K10/R-K12/R-D8/R-D9/
    R-L1/R-L3/§10/§12.7 and the reserved-seam IDs in C6/C7 are quoted from
    audit-lanes.json (which read assumptions-and-requirements.md in full),
    not from the register directly. Closed by: red team spot-checking the

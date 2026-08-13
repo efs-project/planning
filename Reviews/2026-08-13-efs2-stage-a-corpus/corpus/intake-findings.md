@@ -9,6 +9,10 @@ was performed; every VERIFIED/PLAUSIBLE mark and every severity is the intake au
 carried unchanged. Standards findings live in `standards-audit.md`; mechanism carry-ins
 live in `carry-in-register.md` (entries cited here as OR-n/DI-n/HY-n/RJ-n/PR-n).
 
+**Repair note (2026-08-13):** the post-red-team repair updated dispositions,
+realization citations, and open-item status only. It did not regrade the underlying
+intake evidence, its severity, or its VERIFIED/PLAUSIBLE marks.
+
 Disposition vocabulary: **addressed in Stage A chapter <file>** (chapters in
 `scratchpad/stage-a/chapters/`, written concurrently — cited by filename and topic, not
 read); **addressed in Stage A deliverable N** (PM directive deliverables 1-8, where no
@@ -55,10 +59,12 @@ Chapter files cited (landed at transcription time): `b0-authorship-envelope.md`,
 - **Evidence**: VERIFIED — kickoff line 132; constitution acceptance trace line 309;
   candidate open question line 450; owner-decision-inbox V2-E2 lines 28-31; kickoff
   line 93 vs candidate line 429.
-- **Disposition**: addressed in Stage A chapter `b0-lens.md` (Resolution Plan profile,
-  plan-size scaling, beneficiary-self-authorization negative test, callback-abuse
-  attack) and Stage A deliverable 5 (harness interfaces: 1/8/32/64-Principal
-  workloads); evidence gate remains V2-E2.
+- **Disposition**: `b0-lens.md` addresses the Resolution Plan profile, 1/8/32/64 Core
+  scaling, and `LENS-NEG-1` beneficiary self-authorization. The callback-abuse attack
+  is realized in `vectors-and-falsifiers.md` CF-8 + AA-2 (zero external authority
+  callbacks per Principal) and proposed kickoff edit C1, not in `b0-lens.md`.
+  Deliverable 5 owns the 1/8/32/64 Core workload interface; V2-E2 remains the
+  measurement gate.
 
 ### IF-03 — V2-E5 Realm descriptor / finality observation homeless in the kickoff (SERIOUS)
 
@@ -239,11 +245,13 @@ Chapter files cited (landed at transcription time): `b0-authorship-envelope.md`,
   only as 50 GB and 50-year.
 - **Evidence**: VERIFIED absence — kickoff 64, 104-107, 137, 177; register 203, 250,
   466-469, 595.
-- **Disposition**: addressed in Stage A deliverable 5 (harness: principal-count scaling
-  at 50/100/256 for posting/enumeration/lens-resolution costs, alongside IF-02's
-  1/8/32/64 plan profile) with register entry HY-3 as the design-center hypothesis; if
-  client-side lens scale is instead parked, deliverable 7 must name the follow-on
-  measurement so R-L4 is visibly parked, not dropped.
+- **Disposition**: addressed at Stage-A interface level in deliverable 5:
+  `harness-and-fixtures.md` keeps the contract/Core grid `N={1,8,32,64}` and separately
+  specifies the TS/RS client-tier grid `N={50,100,256}` on pinned mobile and desktop
+  profiles, reporting wall time, peak memory, RPC/page count, result equality, and honest
+  `UNKNOWN`/`PARTIAL` propagation. Register entry HY-3 remains the design-center
+  hypothesis. Measurements are Stage B evidence; Stage A claims only the frozen
+  interface.
 
 ### IF-16 — R-D9 time/order semantics unvectored; §12.7 equivocation correction uncarried (SERIOUS)
 
@@ -322,12 +330,11 @@ Chapter files cited (landed at transcription time): `b0-authorship-envelope.md`,
   (sovereignty) are formally adopted in owner-rulings.md is inference, not verified.
 - **Evidence**: VERIFIED texts, PLAUSIBLE disposition — register 353, 628-644, 10-15,
   409-418; kickoff 36-38, 51, 95, 101-103, 115, 5.
-- **Disposition**: addressed in Stage A deliverable 4 (bakeoff spec reads §17 as a
-  superseded comparison hypothesis — the rejected-alternative baseline the bakeoffs
-  demand); **open item for the synthesizer**: confirm against owner-rulings.md that the
-  Realm/no-venue frame formally disposes D-2 and D-5 — if not, R-K11's "two domains
-  cannot both claim unqualified CURRENT" (register line 181) becomes the load-bearing
-  check on the Realm design in `b0-realm-admission.md`.
+- **Disposition**: the fixed-domain §17 prototype target is superseded by the
+  2026-08-12 greenfield Realm direction; this is supersession, not an explicit D-2/D-5
+  ledger answer. No named venue is selected in Stage A. R-K11 remains the live
+  invariant: every authority/currentness result is Realm-qualified, and two Realms
+  cannot both claim unqualified `CURRENT`. No owner mechanism decision is requested now.
 
 ---
 
@@ -365,10 +372,9 @@ Chapter files cited (landed at transcription time): `b0-authorship-envelope.md`,
 - **Disposition**: carried as register entry **OR-2**; **resolved in method by PM
   directive** ("Do not reopen broad dead-chain survival machinery. Define
   qualifying-Realm assumptions and honest behavior when a source basis is
-  unavailable", directive line 22); addressed in Stage A chapter
-  `b0-realm-admission.md` (qualifying-Realm assumptions; unavailable-source grading);
-  the per-Realm scope question joins Stage A deliverable 6 (irreducible owner
-  decisions, after evidence).
+  unavailable", directive line 22). A2 is the sole proposed spine location; Stage A
+  asks no decision now, and the chapter behavior remains honest under either scope
+  answer.
 
 ### IF-24 — Kickoff's own text omits the no-writer-opt-out mandate (NOTE)
 
@@ -712,13 +718,13 @@ completeness. Severities as recorded there.
 | EIP-7825 live; July batch arithmetic stale; kickoff omits it | SERIOUS | register DI-3; arithmetic re-derived wherever batches/pages are bounded — `b0-indexes.md`, `b0-authorship-envelope.md` (batch sizing), harness (deliverable 5); Stage A task text already pins the cap |
 | ERC-7913 Final (not future seam) | SERIOUS | addressed in `b0-principal-authority.md` (candidate encoding; verifier-is-Realm-config portability split) |
 | EIP-7951 live; passkey Principals buildable | SERIOUS | addressed in `b0-principal-authority.md` (P-256/WebAuthn vector; algoTag path) |
-| "Deterministic CBOR" unresolved to a byte-exact profile | SERIOUS | addressed in `b0-encoding-and-ids.md` (meta-codec candidates named; golden vectors blocked until pinned) |
+| "Deterministic CBOR" needs a byte-exact profile; CBOR CDE-13 is expired/archived, not an RFC | SERIOUS | addressed in `b0-encoding-and-ids.md` (meta-codec candidates named; golden vectors blocked until pinned); no floating CDE dependency |
 | EIP-712 missing; constant-domain deviation must re-earn | SERIOUS | addressed in `b0-authorship-envelope.md` (domain design) + `b0-encoding-and-ids.md` (domain constants) |
 | ERC-1271 live vault contradiction (July "never" vs candidate "locally") | SERIOUS | addressed in `b0-principal-authority.md` (admission-time only, basis-pinned receipts; never read/Lens paths); register RJ-3 caveat |
 | CAIP-2/10 + ERC-7930 chain-reference encoding missing | SERIOUS | addressed in `b0-realm-admission.md` (RealmId preimage encoding; Codex-pinned if 7930 adopted while Review) |
 | ERC-6492 unsafe as admission-time basis | NOTE | addressed in `b0-principal-authority.md` (pre-flight only, or deployment-state basis in receipt) |
 | EIP-8130 Draft — falsifier probe only | NOTE | addressed in `b0-principal-authority.md` (verifier-abstraction probe; no dependency) |
-| EIP-170 binding on axis 6; EIP-4444/7927 justify state-walk | NOTE | IF-41 (compile gate); `b0-indexes.md`/`b0-realm-admission.md` (state-readable reconstruction justified from live protocol direction); **proposed spine edit** (standards list) |
+| EIP-170 binding on axis 6; EIP-4444/EIP-7927 are Stagnant documents while pre-merge-history expiry is partially deployed | NOTE | IF-41 (compile gate); `b0-indexes.md`/`b0-realm-admission.md` (state-readable reconstruction justified by separately cited deployment direction); **proposed spine edit** (standards list) |
 | multihash registry-only; 6860-vs-4804; Git transition; RFC 6920; RDFC; SWHID; DID; ERC-5564; EIP-1153/2935/7201 | NOTE | addressed in `b0-encoding-and-ids.md` (Codex-pinned code subsets, ByteDigest foreign digests) and `b0-content-locators.md` (web3:// pinning, locator conventions); remainder are standards-audit policy entries awaiting chapter adoption |
 
 ---
@@ -731,20 +737,19 @@ completeness. Severities as recorded there.
   is verifiable against the named chapter file; every "proposed spine edit" must appear
   in deliverable 7's edit list; every "deferred to V2-En" must appear in the
   gate-coverage map (IF-06).
-- Open owner decisions surfaced (deliverable 6, after evidence only): per-Realm
-  chains-don't-die scope (IF-23); D-2/D-5 disposition confirmation (IF-21); the
-  counter-vs-advisory bundle decision after the aggregate gas snapshot (IF-25 / OR-4).
+- Open owner decisions surfaced after evidence: the counter-vs-advisory bundle decision
+  after the aggregate gas snapshot (IF-25 / OR-4). A2 remains a sole proposed
+  per-Realm-scope location and is not a Stage A decision request; IF-21 is resolved by
+  supersession rather than an explicit D-2/D-5 ruling.
 
 ## Open items
 
-- Confirm each "addressed in Stage A chapter X" disposition against the landed chapter
-  text — chapters were written concurrently and were not read by this lane; a
-  disposition here is a routing claim, not evidence of coverage.
-- No dedicated chapter file for the bakeoff specification, harness/fixture interfaces,
-  traceability table, threat matrix, or cuts/seams was visible at transcription time
-  (deliverables 3-7); dispositions cite the deliverable number — the synthesizer must
-  bind them to files when those land.
-- IF-21's D-2/D-5 verification against owner-rulings.md remains open (survivors-lane
-  auditor could not verify in that pass).
+- The Stage A assembly files are now visible: `traceability.md`, `bakeoff-spec.md`,
+  `harness-and-fixtures.md`, `vectors-and-falsifiers.md`, and
+  `proposed-spine-edits.md`. Dispositions cite their exact available home rather than a
+  hypothetical later synthesis.
+- IF-15's client-tier 50/100/256 matrix is frozen in `harness-and-fixtures.md`; it is a
+  Stage A interface, not evidence that any measurement has yet run. The Core 1/8/32/64
+  grid remains distinct and does not imply a Core cap above 64.
 - The spine-internal reviewer-list inconsistency (constitution omits "privacy";
   README/kickoff include it — IF-12c) needs a one-line spine edit decision.

@@ -7,6 +7,10 @@ intake audit (`scratchpad/audit-lanes.json`, 2026-08-12), reorganized by propose
 and deduplicated. No re-research was performed; every VERIFIED/PLAUSIBLE mark and
 severity is the intake auditor's, carried unchanged.
 
+**Repair note (2026-08-13):** the post-red-team repair updated dispositions,
+realization citations, and open-item status only. It did not regrade the underlying
+intake evidence, its severity, or its VERIFIED/PLAUSIBLE marks.
+
 **Why this register exists** (intake CARRY-IN finding 1, severity **BLOCKING**,
 VERIFIED): the greenfield spine (README / system-constitution /
 core-architecture-candidate / kickoff) carries lens-pass, KEL, privacy, and
@@ -71,28 +75,28 @@ evidence.
   same-(principal, order) equivocation rule — do not inherit it by accident, and do not
   forget that it was removed.
 
-### OR-2 — Chains-don't-die assumption (scope now unowned)
+### OR-2 — Chains-don't-die assumption (historical ruling; new scope remains proposed)
 
-- **Proposed label**: [OWNER RULING] as adopted (2026-07-10 context); its **extension to
-  fresh-L3 Realms is an open owner decision**, not a ruling.
+- **Proposed label**: [OWNER RULING] in its original 2026-07-10 home-chain context.
+  Extending that assumption to every qualifying Realm is A2 [PROPOSAL], not a silently
+  inherited ruling or a current owner decision.
 - **Severity at intake**: SERIOUS (rulings lane).
 - **What it is**: "ADOPTED (James): assume a blockchain persists indefinitely and stays
   queryable" (VERIFIED, owner-rulings.md:11), with the :16 NET effect
   ("home-chain-authoritative + home chain always queryable ⇒ … definite on-demand
-  read"). The assumption was adopted in the one-persistent-home-chain context; the
-  2026-08-12 ruling (owner-rulings.md:185-188) makes "a qualifying EVM Realm can stand
-  alone" on a fresh L3 first-class — and fresh L3s dying is realistic in a way Ethereum
-  L1 dying is not. Grep across all four spine docs for die/dead-chain/death/persist/
-  mortality/queryable: zero hits. The pruning half IS carried mechanically (constitution
-  210-213: reconstruction never depends on event logs — the EIP-4444 rationale), but the
-  assumption boundary itself is not.
-- **Source**: VERIFIED — owner-rulings.md:11, :16, :185-188; constitution 210-213.
+  read"). That is verified historical authority in its original home-chain context.
+  The 2026-08-12 greenfield boundary instead says fixed authority-home machinery must
+  re-earn inclusion, a qualifying EVM Realm can stand alone, and no Commons home chain is
+  selected (owner-rulings.md:178-197). A2 is the sole proposal that would extend the
+  assumption's scope; it is not adopted here. The pruning half IS carried mechanically
+  (constitution 210-213: reconstruction never depends on event logs — the EIP-4444
+  rationale), but the assumption boundary itself is not.
+- **Source**: VERIFIED — owner-rulings.md:11, :16, :178-197; constitution 210-213.
 - **Invalidation surface / handling**: PM execution default (binding): do **not** reopen
   broad dead-chain survival machinery; instead define qualifying-Realm assumptions and
   honest behavior when a source basis is unavailable (e.g. imported-evidence grading
-  when a source Realm is unreachable). Whether chains-don't-die extends per-Realm is one
-  of the few irreducible owner decisions (kickoff output 6) — surface after evidence,
-  not before.
+  when a source Realm is unreachable). The Stage A behavior must remain honest under
+  either scope answer; A2 is not asked for adoption now.
 
 ### OR-3 — Mandatory automatic indexing; no writer opt-out; EAS opt-in rejected
 
@@ -445,6 +449,11 @@ evidence.
   conflict rendering; tuple-collapse non-conformance).
 - **Invalidation surface**: none as rules on the read/enumeration ABI and client
   conformance; re-key onto the new ABI names.
+- **Stage A realization**: `b0-lens.md` §7.1 carries FSP-BASIS-1; its DI-13 client
+  conformance block requires no claimant-derived rendering for `CONFLICT` and forbids
+  collapse of the six-axis result to a success checkmark. The Lens fixture/conformance
+  hooks repeat those requirements for the hostile-CONFLICT and mixed-result cases.
+  These remain [DERIVED INVARIANT] client-conformance requirements, not UI advice.
 
 ### DI-14 — The §10 grade axis: never compress to a Boolean valid
 
@@ -634,16 +643,16 @@ constraints.
 
 ## Open items
 
-- D-2/D-5 sovereignty disposition: the kickoff's Realm/no-venue frame appears to
-  dispose them, but the survivors-lane auditor could not verify owner-rulings.md
-  formally records it (PLAUSIBLE disposition) — the synthesizer must confirm against
-  owner-rulings.md; if unconfirmed, R-K11's "two domains cannot both claim unqualified
-  CURRENT" becomes a load-bearing check on the Realm design rather than a settled
-  premise.
-- Whether chains-don't-die extends per-Realm to fresh L3s (OR-2) — an irreducible owner
-  decision to surface only after evidence (kickoff output 6; PM directive line 25).
+- The fixed-domain §17 prototype target is superseded by the 2026-08-12 greenfield Realm
+  direction; this is supersession, not an explicit D-2/D-5 ledger answer. No named venue
+  is selected in Stage A. R-K11 remains the live invariant: every authority/currentness
+  result is Realm-qualified, and two Realms cannot both claim unqualified `CURRENT`. No
+  owner mechanism decision is requested now.
 - V-2 (CREATE2 plan store), V-3 (UNKNOWN exhaustiveness), and the V2-E2 benchmark set
-  are the named verification debts this register hands to the fixture/harness chapters.
+  are named verification debts. Stage A freezes interfaces before measurement; the
+  measurements themselves remain Stage B evidence. The separate 50/100/256 client-tier
+  interface is frozen in the harness; it must not be represented as measurement evidence
+  or as a Core cap above 64.
 - The four-tier support matrix (required / extension-ready / experimental /
   explicitly-unsupported; owner-rulings.md:121) was never produced or retired — Stage A
   output 7 is its natural home (see intake-findings).

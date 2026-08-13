@@ -4,9 +4,19 @@
 
 Provenance: faithful transcription of the STANDARDS lane of the six-lane intake audit
 (`scratchpad/audit-lanes.json`, 2026-08-12), reorganized stable-vs-draft and deduplicated.
-No re-research was performed. Every VERIFIED/PLAUSIBLE mark is the intake auditor's own,
-carried unchanged; severities are carried unchanged. Web statuses are current to
-2026-08-12 (the audit date), not to any later date.
+Every VERIFIED/PLAUSIBLE mark is the intake auditor's own, carried unchanged; severities
+are carried unchanged. The intake's remaining web statuses are transcribed as of
+2026-08-12 (the audit date).
+
+**Repair note (2026-08-13):** Task 7 reverified only the PM-named document statuses
+against their primary sources: [ERC-6492](https://eips.ethereum.org/EIPS/eip-6492),
+[ERC-7930](https://eips.ethereum.org/EIPS/eip-7930),
+[EIP-4444](https://eips.ethereum.org/EIPS/eip-4444),
+[EIP-7927](https://eips.ethereum.org/EIPS/eip-7927),
+[CBOR CDE draft-13](https://datatracker.ietf.org/doc/draft-ietf-cbor-cde/), and
+[RDFC-1.0](https://www.w3.org/TR/rdf-canon/). Every other intake mark remains as
+transcribed; no EFS policy recommendation became an adopted requirement through this
+status correction.
 
 Reading key (PM-mandated distinction, pm-stage-a-directive.md line 23):
 
@@ -31,10 +41,10 @@ absent standards status. Each row links to its full entry below.
 | C1 | **EIP-7825 is live** on L1 since Fusaka 2025-12-03 (16,777,216-gas per-tx cap) — new protocol physics; kickoff standards list omits it; July batch arithmetic is stale | deterministic-ids.md §5 (line 160) "~29M gas… ~36M-gas-limit L1 block"; kickoff lines 102-107, 149 | §2.1 |
 | C2 | **ERC-7913 is Final**, with shipped OpenZeppelin verifiers — not the "future seam" the candidate assumes | core-architecture-candidate.md lines 249-250; kickoff line 149 | §2.2 |
 | C3 | **EIP-7951 (P-256 precompile) is live** on L1 since Fusaka — absent from the kickoff standards list; unblocks passkey/WebAuthn zero-setup Principals | kickoff line 149 (absence); identity.md open question (b) already knew | §2.3 |
-| C4 | **CBOR CDE is not an RFC** (draft-ietf-cbor-cde-13, intended BCP); "deterministic CBOR" names a family, not a codec — golden vectors impossible until one byte-exact profile is named | kickoff line 150 | §3.3 |
+| C4 | **CBOR CDE draft-13 is an expired/archived Internet-Draft** (intended BCP), not an RFC; "deterministic CBOR" names a family, not a codec — golden vectors impossible until one byte-exact profile is named | kickoff line 150 | §3.3 |
 | C5 | **multihash/CID is registry-stewarded only** — the IETF draft expired 2024-02-21 and was never an RFC | deterministic-ids.md §13.8 convention | §3.5 |
 | C6 | **web3:// is two documents**: ERC-4804 Final but superseded-in-practice by ERC-6860, which carries the corrections and is still Draft — "web3://" alone is ambiguous about the normative text | deterministic-ids.md §8, §13.7; memory: web3:// as zero-infra write default | §3.2 |
-| C7 | **EIP-170's 24,576-byte code limit still binds** (EIP-7907 did not ship in Fusaka) — a compile-time forced gate on bakeoff axis 6; EIP-4444 history expiry is now partially real (pre-merge droppable since 2025-05) | kickoff lines 149-150 list neither | §2.14 |
+| C7 | **EIP-170's 24,576-byte code limit still binds** (EIP-7907 did not ship in Fusaka) — a compile-time forced gate on bakeoff axis 6; separately, pre-merge history expiry is partially deployed (pre-merge bodies/receipts droppable since 2025-05), not an EIP-4444/7927 document status | kickoff lines 149-150 list neither | §2.14 |
 | C8 | **EIP-8130 is a Draft Core EIP** (2025-10-24, spec explicitly unstable, no scheduled fork) — reserved seam only, never load-bearing; kickoff labels it "draft" correctly | kickoff line 149 | §3.1 |
 
 ---
@@ -146,8 +156,8 @@ absent standards status. Each row links to its full entry below.
 
 ### 2.7 ERC-6492 — signature validation for predeploy (counterfactual) contracts (severity at intake: NOTE; PM-named)
 
-- **Standards FACT** — VERIFIED (web): eips.ethereum.org fetched — ERC-6492 Final
-  ("Signature Validation for Predeploy Contracts").
+- **Standards FACT** — VERIFIED (web): [ERC-6492](https://eips.ethereum.org/EIPS/eip-6492)
+  is Final ("Signature Validation for Predeploy Contracts").
 - **Spine state at intake** — VERIFIED (vault): kickoff line 148 lists it. PLAUSIBLE
   (inference, intake auditor): a 6492 wrapper's validity flips once the account deploys,
   so an admission receipt recording "6492-verified" without deployment-state basis is a
@@ -226,8 +236,8 @@ absent standards status. Each row links to its full entry below.
 
 ### 2.13 RDFC-1.0 — RDF dataset canonicalization (severity at intake: NOTE; PM-named)
 
-- **Standards FACT** — VERIFIED (web): W3C news 2024 — "RDF Dataset Canonicalization is
-  a W3C Recommendation" (2024-05-21).
+- **Standards FACT** — VERIFIED (web): [RDFC-1.0](https://www.w3.org/TR/rdf-canon/) is
+  a W3C Recommendation (2024-05-21).
 - **Spine state at intake** — VERIFIED (vault): deterministic-ids.md "Statements vs.
   things" explicitly maps to Datomic's entity/fact split, the closer database prior art;
   kickoff lines 60-61 require honest FOUND/ABSENT/CONFLICT/UNKNOWN semantics, which are
@@ -242,25 +252,26 @@ absent standards status. Each row links to its full entry below.
   property-graph/Datomic index models (EAVT/AEVT/VAET-style) rather than triple-store
   SPARQL models.
 
-### 2.14 EIP-170 (binding) and EIP-4444/EIP-7927 (partially real) — protocol physics beyond 7825 (severity at intake: NOTE; 4444/7927 PM-named)
+### 2.14 EIP-170 (binding) and EIP-4444/EIP-7927 — protocol physics beyond 7825 (severity at intake: NOTE; 4444/7927 PM-named)
 
 - **Standards FACT** — PLAUSIBLE (knowledge): EIP-7907 (code-size increase) was
   considered for but not included in Fusaka's final EIP set, so **EIP-170's 24,576-byte
-  contract-code limit stands**. VERIFIED (web): EF blog 2025-07-08 "Partial history
-  expiry announcement" — all clients support dropping pre-merge bodies/receipts since
-  2025-05; the rolling-window phase has no set timeline; EIP-7927 is the History Expiry
-  Meta-EIP.
+  contract-code limit stands**. [EIP-4444](https://eips.ethereum.org/EIPS/eip-4444) and
+  [EIP-7927](https://eips.ethereum.org/EIPS/eip-7927) are both **Stagnant** documents.
+- **Deployment FACT** — VERIFIED (web, separately transcribed EF/client evidence): the
+  EF blog 2025-07-08 "Partial history expiry announcement" says all clients support
+  dropping pre-merge bodies/receipts since 2025-05; the rolling-window phase has no set
+  timeline. That partial deployment is not either EIP's standards-track status.
 - **Spine state at intake** — VERIFIED (vault): core-architecture-candidate.md falsifier
   10 (line 432) "state-only reconstruction needs old logs" and deterministic-ids.md §4
   "never dependent on event logs (EIP-4444 history expiry)" already encode the response;
   kickoff lines 149-150 list neither 4444 nor any code-size constraint.
-- **EFS policy recommendation** [PROPOSAL]: add EIP-4444/7927 to the standards list as
-  the justification for the state-readable-reconstruction gate (a reviewer should see it
-  argued from live protocol direction, not taste) — partial history expiry converts the
-  vault's state-walk doctrine from prudence into necessity. Put the 24KB code limit into
-  the monolith-vs-modules bakeoff (axis 6) as a measured compile-time constraint: one
-  atomic Core must fit, or use EIP-2535/delegate patterns — which reintroduce exactly
-  the codehash-dependency risks the kickoff attacks.
+- **EFS policy recommendation** [PROPOSAL]: cite the separate deployment fact when
+  justifying the state-readable-reconstruction gate; the documents' Stagnant status does
+  not itself adopt an EFS mechanism. Put the 24KB code limit into the
+  monolith-vs-modules bakeoff (axis 6) as a measured compile-time constraint: one atomic
+  Core must fit, or use EIP-2535/delegate patterns — which reintroduce exactly the
+  codehash-dependency risks the kickoff attacks.
 
 ### 2.15 ISO/IEC 18670:2025 — SWHID (severity at intake: NOTE)
 
@@ -345,9 +356,11 @@ absent standards status. Each row links to its full entry below.
 
 ### 3.3 Deterministic CBOR — a family, not a codec (severity at intake: SERIOUS; PM-named)
 
-- **Standards FACT** — VERIFIED (web): datatracker shows draft-ietf-cbor-cde-13
-  (2025-10-14), intended status Best Current Practice, expires 2026-04-17 — **not an RFC
-  as of 2026-08**. RFC 8949 §4.2 is an Internet Standard. PLAUSIBLE (knowledge):
+- **Standards FACT** — VERIFIED (web):
+  [draft-ietf-cbor-cde-13](https://datatracker.ietf.org/doc/draft-ietf-cbor-cde/) is an
+  **expired/archived Internet-Draft**, latest revision 2025-10-13, intended status BCP,
+  WG state Parked, IESG state Expired — **not an RFC**. RFC 8949 §4.2 is an Internet
+  Standard. PLAUSIBLE (knowledge):
   dag-cbor retains legacy length-first map-key ordering vs RFC 8949 §4.2
   bytewise-lexicographic — a real byte-level divergence; dag-cbor is a de facto IPLD
   spec with no SDO. SSZ is stable in the consensus layer (merkleization useful for
@@ -356,12 +369,12 @@ absent standards status. Each row links to its full entry below.
   "multihash/CID and deterministic CBOR"; the July evidence (deterministic-ids.md §1)
   instead used keccak over fixed-width abi.encode words for on-chain verifiability.
 - **EFS policy recommendation** [PROPOSAL]: golden vectors cannot be produced until one
-  byte-exact profile is named. Make the bootstrap/meta-codec bakeoff name explicit
-  candidates: (a) fixed-width abi.encode words (July-evidence lesson, cheapest
-  on-chain), (b) an RFC 8949 §4.2 profile pinned in the Codex (not a floating reference
-  to CDE), (c) SSZ where merkle partial proofs pay for closure/chunk verification.
-  Reject dag-cbor unless full CID interop is a requirement, and record that CDE is not
-  yet stable enough to pin.
+  byte-exact profile is named. No floating CDE dependency is acceptable: pin a
+  byte-exact codec/profile before vectors. Make the bootstrap/meta-codec bakeoff name
+  explicit candidates: (a) fixed-width abi.encode words (July-evidence lesson, cheapest
+  on-chain), (b) an RFC 8949 §4.2 profile pinned in the Codex, (c) SSZ where merkle
+  partial proofs pay for closure/chunk verification. Reject dag-cbor unless full CID
+  interop is a requirement.
 
 ### 3.4 Git SHA-1 → SHA-256 transition (severity at intake: NOTE)
 
@@ -398,8 +411,9 @@ absent standards status. Each row links to its full entry below.
 
 ### 3.6 ERC-7930 — interoperable addresses, binary form (severity at intake: SERIOUS, shared with CAIP; PM-named)
 
-- **Standards FACT** — VERIFIED (web): eips/ethereum-magicians — ERC-7930 in **Review**
-  as of Q2 2026; binary chainType+reference+address encoding.
+- **Standards FACT** — VERIFIED (web):
+  [ERC-7930](https://eips.ethereum.org/EIPS/eip-7930) is in **Review**;
+  binary chainType+reference+address encoding.
 - **Spine state at intake** — as §2.17: the candidate's RealmId "chain reference" and
   Realm-qualified contract-account authorities need a standard chain-scoped identifier
   encoding, and none is named anywhere in the kickoff.
@@ -474,7 +488,8 @@ absent standards status. Each row links to its full entry below.
 2. **ERC-7913 Final + EIP-7951 live** moves addressless/passkey Principals from deferred
    to concretely buildable (§2.2, §2.3).
 3. **"Deterministic CBOR" must be resolved to a named byte-exact profile** before golden
-   vectors exist (§3.3).
+   vectors exist; CBOR CDE-13 is expired/archived and not an RFC, so it cannot be a
+   floating dependency (§3.3).
 4. **EIP-712 domain design, chain-scoped identifiers (CAIP/ERC-7930), and DID-core
    adopt-or-reject are missing** from the kickoff standards list (§2.4, §2.17/§3.6,
    §2.16).
@@ -495,13 +510,18 @@ What other Stage A chapters may rely on from this document:
   gas (L1, live; venue-conditional per Realm profile); EIP-170 runtime-code limit =
   24,576 bytes (binding; EIP-7907 did not ship); EIP-7951 P-256 precompile at 0x100,
   6900 gas; EIP-2935 ring ≈ 8191 blocks.
-- **Status one-liners** (all as of 2026-08-12): Final/live — 1271, 4337, 6492, 7702
-  (Pectra), 7913, 712, 7825 (Fusaka), 7951 (Fusaka), 1153 (Cancun), 2935 (Pectra), 7201,
-  5564, 4804, RFC 8949, RFC 6920 (2013, stagnant), RDFC-1.0, ISO 18670 (SWHID), DID 1.0,
-  CAIP-2. Draft/unstable — 8130, 6860, CBOR CDE draft-13, dag-cbor (no SDO),
-  multihash/CID (expired drafts; registry), DID 1.1 (CR), ERC-7930 (Review), EIP-4444
-  (partial: pre-merge expiry only), CT RFCs (Experimental), KERI/OCapN (drafts), SSZ
-  (consensus-layer only), Git SHA-256 transition (incomplete).
+- **Reverified PM-named document statuses** (2026-08-13; document maturity, not
+  deployment): ERC-6492 **Final**; ERC-7930 **Review**; EIP-4444 **Stagnant**;
+  EIP-7927 **Stagnant**; CBOR CDE draft-13 **expired/archived Internet-Draft**, intended
+  BCP and not an RFC; RDFC-1.0 a **2024 W3C Recommendation**. Separately, EIP-7825 is
+  active L1 protocol physics and pre-merge history expiry is partially deployed; neither
+  deployment fact changes EIP-4444/7927's document status.
+- **Other intake statuses** remain transcribed as of 2026-08-12: Final/live — 1271,
+  4337, 7702 (Pectra), 7913, 712, 7825 (Fusaka), 7951 (Fusaka), 1153 (Cancun), 2935
+  (Pectra), 7201, 5564, 4804, RFC 8949, RFC 6920 (2013, stagnant), ISO 18670 (SWHID),
+  DID 1.0, CAIP-2. Draft/unstable — 8130, 6860, dag-cbor (no SDO), multihash/CID
+  (expired drafts; registry), DID 1.1 (CR), CT RFCs (Experimental), KERI/OCapN (drafts),
+  SSZ (consensus-layer only), Git SHA-256 transition (incomplete).
 
 ## Open items
 
@@ -509,8 +529,6 @@ What other Stage A chapters may rely on from this document:
   on it (7702 activation date, EIP-7907 non-inclusion, dag-cbor ordering divergence,
   CT/KERI/OCapN statuses, SWHID hashing scope, SSZ maturity) — the intake auditor did
   not fetch these.
-- CDE (draft-ietf-cbor-cde-13) expires 2026-04-17 per datatracker at audit time and may
-  have advanced; check before the meta-codec bakeoff report is finalized.
 - ERC-7930 is in Review; its byte layout may change — anyone pinning it in the Codex
   must snapshot the exact revision.
 - The Realm gas profile decides whether EIP-7825 physics binds a given Realm; the Realm
