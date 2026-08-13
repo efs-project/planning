@@ -355,6 +355,33 @@ appendPosting(pk, ord):
   SSTORE(pheadSlot(pk), head)
 ```
 
+`appendPosting` is called at most once per `(occurrence ordinal, pk)`. Before
+any posting write, admission derives the complete bounded candidate-key list
+for the occurrence in this order: `KIND_BY_RECORD`, `KIND_BY_TYPE`, and
+`KIND_BY_PRINCIPAL`; reference instances in schema role/field order and array
+element order
+(general then predicate key); then IndexSpecs in `specOrdinal` order. The
+record-level unique-by-Type transition is handled separately after
+`KIND_BY_RECORD` (§3.3). Admission performs a stable first-seen deduplication
+over the **full occurrence-level** list:
+
+```
+postingKeysForOccurrence(leaf):
+  candidates = deriveCandidateKeys(leaf)       // length <= POSTING_KEY_CANDIDATE_MAX
+  distinct = []
+  for key in candidates:
+    if key not in distinct: distinct.push(key) // bounded linear membership
+  return distinct                              // preserves first-seen order
+```
+
+This is key equality, not value equality: repeated equal runtime REF/DIGEST
+values, repeated array elements, and overlaps between mandatory and declared
+families append one posting iff they derive the same final `pk`. Distinct
+predicate keys remain distinct. With `POSTING_KEY_CANDIDATE_MAX = 43`, the
+simple bounded implementation performs at most `43 * 42 / 2 = 903` bytes32
+comparisons; no attacker-controlled loop can exceed that structural bound.
+The resulting key set is deterministic from immutable schema + body state.
+
 Postings arrays are never compacted and never rewritten; dead entries remain
 and are filtered at read time via `liveAt` and the status overlay (§2.2a). On-chain
 compaction is **[REJECTED for B0 — [PROPOSAL] it breaks cursor stability and
@@ -597,7 +624,7 @@ taken [OWNER RULING D + kickoff "return that exact tradeoff to James"].
 ### 3.5 Reference postings: general backlink + predicate backlink + digest lookup
 
 For every reference instance (role `r` of TypeSchema `T`, target `X`) in an
-accepted leaf with ordinal `o`, admission appends **two** postings:
+accepted leaf with ordinal `o`, admission derives **two candidate** postings:
 
 1. `pk(0, KIND_TARGET, 0, targetKey(X))` — the **general backlink** family:
    "every Occurrence referencing X, any type, any role."
@@ -611,6 +638,11 @@ from a predicate-blind family without scanning — exactly the v1 B4 defect
 [DERIVED INVARIANT — onchain-completeness.md §1]. Both are required by the
 backlink ruling [OWNER RULING — owner-rulings.md 2026-07-15 item A: "backlinks
 incl. predicate-typed (items 1–4): ON-CHAIN, indexed. Slam-dunk"; VERIFIED].
+The occurrence-wide stable deduplication in §2.3 runs after all candidates are
+derived. Repeating `X` within one role or across roles therefore never appends
+the same ordinal twice to one final key: the general key is written once;
+each distinct predicate key is written once. Consequently `liveCount` counts
+live Occurrences under a key, not repeated equal fields inside one Occurrence.
 
 `targetKey(X)` by declared target kind (the role declaration carries the kind;
 types chapter owns the role table):
@@ -762,20 +794,29 @@ vectors, never reinterpretation of these two bytes.
 
 ### 4.2 Fan-out cost model — who pays
 
-Fan-out is fully determined by the admitted TypeSchema, so every writer sees
-the exact price before writing [PROPOSAL — "Type authors declare, writers pay"
-per core-architecture-candidate.md Indexes section]:
+The admitted TypeSchema fixes the fan-out ceiling; the canonical leaf body
+fixes the exact deduplicated key count, which admission computes before the
+first write. A writer can therefore price the exact submitted body and can
+always rely on the schema-level maximum [PROPOSAL — "Type authors declare,
+writers pay" per core-architecture-candidate.md Indexes section]:
 
 ```
-F(leaf) = 4                                  // byType + byRecord + byPrincipal + uniqueByType(≤1)
-        + 2 × refInstances(leaf)             // mandatory general + predicate backlink
+candidateKeys(leaf) = ordered list from §2.3
+C(leaf) = len(candidateKeys(leaf))
+        = 3                                  // byType + byRecord + byPrincipal
+        + 2 × refInstances(leaf)             // candidate general + predicate backlinks
         + applicableValueSpecs(leaf)         // SCALAR_EQ/DIGEST_EQ; ≤ MAX_INDEX_SPECS
+
+D(leaf) = len(stableUnique(candidateKeys(leaf))) // exact distinct posting keys
 
 sum(1 for REF/OCCREF/OPTION(REF),
     declared maxCount for ARRAY(REF))
   <= REF_INSTANCES_MAX = 16 per schema
 
-F_MAX = 4 + 2×16 + 8 = 44 postings per leaf  // conservative structural ceiling
+POSTING_KEY_CANDIDATE_MAX = 3 + 2×16 + 8 = 43
+DISTINCT_OCCURRENCE_KEYS_MAX = 43
+INDEX_HEAD_TOUCH_MAX = 43 + 1 uniqueByType transition = 44
+F_MAX = INDEX_HEAD_TOUCH_MAX = 44             // compatibility name in tables
 ```
 
 `REF_INSTANCES_MAX = 16` is a consumed SR-18e structural guarantee, not an
@@ -783,18 +824,22 @@ assumption. `validateTypeSchemaGroup` enforces it with `ERR_REF_BUDGET`, and
 the runtime body walk carries the same defense-in-depth counter, so actual
 per-leaf extraction cannot exceed it. The two-byte IndexSpec grammar removes
 the old alternate-mode overhead and preserves this conservative `F_MAX`.
+Repeated equal runtime values can reduce `D(leaf)` but can never raise it; the
+bounded dedup work is at most 903 bytes32 comparisons (§2.3).
 
-- **Admit:** the admitting writer pays `F(leaf)` posting appends + 2 log slots
-  + one new `OccStatus` slot + meta/batch updates, in the same atomic call
-  (§9 arithmetic).
-- **Withdraw/revoke:** the withdrawing writer pays the same declared fan-out
-  again: the fold modifies `OccStatus` (1 SSTORE) and decrements
-  occurrence-level `liveCount` in every postings head the admit incremented.
+- **Admit:** the admitting writer appends once to each of the `D(leaf)`
+  distinct occurrence-level keys. The separate unique-by-Type transition may
+  append one stable Record posting or modify its live count (§3.3). The same
+  call writes 2 log slots, one new `OccStatus` slot, and meta/batch state (§9).
+- **Withdraw/revoke:** after the one-way overlay flip, the fold re-derives
+  candidate keys in the same order, runs the identical stable deduplication,
+  and decrements each of the exact `D(leaf)` occurrence-level heads once.
   `KIND_UNIQUE_BY_TYPE` decrements only when the affected Record's
   `KIND_BY_RECORD.liveCount` reaches zero (§3.3). The key set is
   recomputed deterministically from the state-readable canonical body + the
-  admitted TypeSchema (re-extraction), so no key list is stored [PROPOSAL —
-  determinism from the full-body spine; zero extra state].
+  admitted immutable TypeSchema (re-extraction), so admit and withdrawal are
+  symmetric without storing a key list [PROPOSAL — determinism from the
+  full-body spine; zero extra state].
 - Nobody else ever pays: readers pay only per-page costs; Type creators pay
   only their schema's admission.
 
@@ -969,9 +1014,9 @@ Every postings head carries `liveCount` (§2.3):
 - **Increment**: `appendPosting` (+1) at admit — every family, every key.
 - **Decrement**: the withdrawal/revocation fold recomputes the admit-time key
   set from the state-readable body (§4.2) after the one-way
-  `ACTIVE → WITHDRAWN` overlay transition and decrements each occurrence-level
-  head's `liveCount` by exactly the number of postings that admit appended
-  under that key. `KIND_BY_RECORD` decrements first;
+  `ACTIVE → WITHDRAWN` overlay transition, applies the identical stable
+  first-seen deduplication, and decrements each distinct occurrence-level
+  head's `liveCount` exactly once. `KIND_BY_RECORD` decrements first;
   `KIND_UNIQUE_BY_TYPE` decrements only if that value becomes zero — the
   Record's last live occurrence (§3.3). The fold and all decrements are one
   atomic call (axis 6); a partial decrement cannot be observed.
@@ -981,6 +1026,10 @@ Every postings head carries `liveCount` (§2.3):
   decrement (no double-decrement). Pre-withdrawal of a never-admitted target
   writes `PRE_WITHDRAWN` plus any required bounded retained target evidence
   and decrements nothing.
+
+For each ACTIVE occurrence and final key, the exact symmetry invariant is
+`one append at activation ↔ one decrement at withdrawal`, regardless of how
+many equal runtime values emitted that key before deduplication.
 
 `counts()` (§5.1) returns `(totalCount, liveCount)` in one SLOAD plus basis
 words — O(1), THE LINE's cheapest read.
@@ -1021,8 +1070,9 @@ admit:    +1 SSTORE-modify per head touched (the head write is shared with the
           the fresh OccStatus slot is priced in §9.
 withdraw: OccStatus modify (≈ 5,000 cold) + occurrence-level head decrements;
           uniqueByType decrements only on byRecord liveCount 1 -> 0.
-          Conservative ceiling: ≤ F(leaf) × (2,100 + 2,900) + overlay
-          = 44 × 5,000 + 5,000 ≈ 225,000 gas [HYPOTHESIS].
+          Conservative ceiling: ≤ D(leaf) distinct decrements + 1 unique
+          transition + overlay = 44 × 5,000 + 5,000 ≈ 225,000 gas
+          [HYPOTHESIS], plus bounded re-derivation/dedup computation.
 ```
 
 This is the priced "PAY for it": revocation costs the same order as admission,
@@ -1066,17 +1116,66 @@ function selectBestLocator(
 Algorithm (deterministic pseudocode):
 
 ```
-selectBestLocator(targetKey, spec, H, cursor):
-  key   = pk(spec.typeSchemaId, KIND_ROLE, spec.roleOrdinal, targetKey)
-  i     = decodeCursor(cursor)
-  require i <= postings(key).count
+unsupportedSelect():
+  return (0, 0, 0, CURSOR_END, UNSUPPORTED)
+
+validateSelectSpec(targetKey, spec, H):
+  if targetKey == 0: return false
+  meta = TypeSchemaMeta[spec.typeSchemaId]
+  if meta does not exist || uint64(meta.admitOrdinal) > H: return false
+  role = declaredRole(spec.typeSchemaId, spec.roleOrdinal)
+  if role does not exist: return false
+  if !declaresIndexSpec(spec.typeSchemaId, REF_BACKLINK,
+                        spec.roleOrdinal): return false
+
+  if spec.scoreMode == SCORE_LATEST:
+    return spec.scoreFieldOrdinal == 0       // MBZ in this mode
+  if spec.scoreMode != SCORE_FIELD_MAX: return false
+
+  field = declaredField(spec.typeSchemaId, spec.scoreFieldOrdinal)
+  if field does not exist || field.kind != UINT || field.width != 64:
+    return false
+  if !isStaticallyExtractable(field): return false
+  if !declaresIndexSpec(spec.typeSchemaId, SCALAR_EQ,
+                        spec.scoreFieldOrdinal): return false
+  return true
+
+selectBestLocator(targetKey, spec, basisOrdinal, cursor):
+  currentH = nextOrdinal - 1
+  if basisOrdinal == 0 || basisOrdinal > currentH:
+    revert ErrSelectBasis(basisOrdinal, currentH)
+  H = basisOrdinal
+
+  // Validate the Type at H, role, score shape, and index obligations BEFORE
+  // deriving/loading the postings key. Undeclared/invalid is not absence.
+  if !validateSelectSpec(targetKey, spec, H): return unsupportedSelect()
+
+  key = pk(spec.typeSchemaId, KIND_ROLE, spec.roleOrdinal, targetKey)
+  head = SLOAD(pheadSlot(key))
+  require head.count <= 2^48 - 1                 // structural invariant
+
+  contextTag = selectContextTag(targetKey, spec) // 111-bit commitment
+  if cursor == 0:
+    i = 0
+    snapshotEnd = head.count                     // pin physical end now
+  else:
+    if cursor == CURSOR_END: revert ErrSelectCursor(cursor)
+    (i, snapshotEnd, cursorH, cursorTag) = decodeSelectCursor(cursor)
+    if cursorH != basisOrdinal || cursorTag != contextTag:
+      revert ErrSelectCursor(cursor)
+    if i > snapshotEnd || snapshotEnd > head.count:
+      revert ErrSelectCursor(cursor)
+
   visited = 0
   best = (score = -∞, ordinal = 0)
 
-  while i < postings(key).count && visited < LOCATOR_POSTINGS_VISIT_MAX:
+  while i < snapshotEnd && visited < LOCATOR_POSTINGS_VISIT_MAX:
     ord = postings(key)[i]
     i += 1
     visited += 1                       // count EVERY physical posting first
+    if ord > H:
+      // Strict posting order proves every remaining snapshot entry is > H.
+      return (best.ordinal, best.score, visited, CURSOR_END, COMPLETE)
     if !liveAt(ord, H): continue
     score = (spec.scoreMode == SCORE_LATEST)
       ? ord
@@ -1086,10 +1185,34 @@ selectBestLocator(targetKey, spec, H, cursor):
         (best.ordinal == 0 || ord < best.ordinal)):
       best = (score, ord)
 
-  if i == postings(key).count:
+  if i == snapshotEnd:
     return (best.ordinal, best.score, visited, CURSOR_END, COMPLETE)
-  return (best.ordinal, best.score, visited, encodeCursor(i), PARTIAL)
+  next = encodeSelectCursor(i, snapshotEnd, H, contextTag)
+  return (best.ordinal, best.score, visited, next, PARTIAL)
 ```
+
+Cursor grammar [PROPOSAL — state-free and fail-closed]:
+
+```
+SelectCursor (uint256, nonzero and never CURSOR_END):
+  nextIndex       bits [0..47]    u48
+  snapshotEnd     bits [48..95]   u48
+  basisOrdinal    bits [96..143]  u48
+  contextTag      bits [144..254] u111
+  reserved        bit  [255]      0
+
+contextTag = low111(keccak256(abi.encode(
+  DOM_PK, targetKey, spec.typeSchemaId, uint256(spec.roleOrdinal),
+  uint256(spec.scoreMode), uint256(spec.scoreFieldOrdinal))))
+```
+
+`basisOrdinal` is required and nonzero for this selector; callers obtain it
+from the same Realm's high-water read before the first call. A nonzero cursor
+is valid only for the identical basis, target, and fully validated spec, with
+`nextIndex ≤ snapshotEnd ≤ current head.count`; every mismatch or malformed
+encoding reverts `ErrSelectCursor`. The u111 context commitment is cursor
+misuse detection, not an authorization primitive. Bit 255 is zero so an
+encoded resumable cursor cannot collide with `CURSOR_END`.
 
 Exactness notes:
 - `LOCATOR_POSTINGS_VISIT_MAX = 32` bounds **total physical postings
@@ -1097,6 +1220,11 @@ Exactness notes:
   32 × 8,820 ≈ 282k gas before fixed overhead, [HYPOTHESIS]]. Dead-posting
   spray therefore yields bounded `PARTIAL + nextCursor`, never an unbounded
   look-ahead or false `COMPLETE`.
+- `snapshotEnd` pins the physical list length on the first call. Later appends
+  are outside that snapshot and cannot move its completion boundary. For a
+  historical `H`, encountering the first `ord > H` also terminates COMPLETE
+  immediately because postings are strictly ascending. The boundary posting
+  is a physical visit and is included in `postingsVisited`.
 - Tie-breaks are total and pinned: `(score desc, AdmissionOrdinal asc)` —
   the earliest equally-scored locator wins, so the selection is stable under
   later spam [PROPOSAL — earliest-wins prevents rank-jacking by re-publishing
@@ -1108,10 +1236,11 @@ Exactness notes:
   A consumer combines window winners under the same total order until
   `COMPLETE`; the function never scans beyond the declared window to decide
   whether a live candidate remains.
-- Resumption obeys the one-basis rule: a caller first obtains the current
-  high-water (for example from `counts`) and passes that nonzero
-  `basisOrdinal` on every selector call. `cursor != 0 && basisOrdinal == 0`
-  reverts rather than silently resume against a drifting basis.
+- Full declaration validation precedes the postings-head lookup. An unknown
+  Type, undeclared role/`REF_BACKLINK` obligation, invalid score mode,
+  non-u64/non-extractable score field, or missing `SCALAR_EQ` score declaration
+  returns `UNSUPPORTED` with zero visits and `CURSOR_END`; none can become
+  `COMPLETE + empty`.
 - Bounded inputs: the score is one declared uint64 field; composite
   scoring (durability tier + verification status + operator diversity) is a
   Lane 8 profile question — if Lane 8 needs multi-field scores, it compiles
@@ -1129,7 +1258,9 @@ reads unbounded [kickoff falsifier 5]:
 |---|---|---|
 | `MAX_INDEX_SPECS` | 8 | encoding-owned TypeSchema bound; 2-byte grammar |
 | `REF_INSTANCES_MAX` | 16/leaf | encoding-owned structural guarantee; `ERR_REF_BUDGET` |
-| `F_MAX` | 44 postings/leaf | total per-leaf declared fan-out (derived, §4.2) |
+| `POSTING_KEY_CANDIDATE_MAX` | 43/leaf | raw occurrence-level derived keys before dedup |
+| `POSTING_KEY_DEDUP_COMPARE_MAX` | 903/leaf | bounded stable-dedup bytes32 comparisons |
+| `F_MAX` | 44 head touches/leaf | ≤43 distinct occurrence keys + unique transition (§4.2) |
 | `MAX_PAGE_ITEMS` | 512 | raw page size (§5.3 arithmetic) |
 | `MAX_PAGE_ITEMS_HYDRATED` | 256 | hydrated page size |
 | `PAGE_SCAN_MAX` | 1024 | entries examined per page call |
@@ -1143,7 +1274,8 @@ Bound arguments:
 - **Hostile Type creator.** Fan-out is capped (`MAX_INDEX_SPECS`,
   `REF_INSTANCES_MAX`), statically validated, callback-free (§4.1), and fixed
   at Type admission — a Type cannot make *admission* unbounded (the cost is
-  `F(leaf) ≤ F_MAX`, known before writing) and cannot make *reads* unbounded
+  `C(leaf) ≤ 43`, `D(leaf) ≤ 43`, and ≤44 head touches, known before writing)
+  and cannot make *reads* unbounded
   (every read is a bounded page, an O(1) point/count, or an explicitly capped
   batch/history probe).
 - **Hot values.** A key with 10⁹ postings costs the same per page as a key
@@ -1186,15 +1318,19 @@ per newly accepted occurrence:
   log + lifecycle subtotal                               ≈ 66,300
   posting append:     amortized ≈ 13,420 each
                       // head modify + packed-data new/modify cycle
-  baseline postings:  ≤ 4 × 13,420                       ≈ 53,700
+  baseline/index writes use D(leaf) distinct occurrence keys plus the
+  conditional unique-by-Type transition; raw duplicate candidates do not write
 
 typical leaf (2 roles ⇒ 4 ref postings, 1 spec):
-  (4+4+1) × 13,420                                      ≈ 120,800
+  (D <= 3+4+1, plus unique <= 1) × 13,420                ≈ 120,800 max
   occurrence/log/posting subtotal                        ≈ 187,100
 
-worst leaf (F_MAX = 44):
+worst leaf (D = 43 plus one unique append/head transition):
   44 × 13,420                                            ≈ 590,500
   occurrence/log/posting subtotal                        ≈ 656,800
+
+stable-dedup computation:
+  <= 903 bytes32 comparisons + bounded key derivation     remeasure in harness
 
 per accepting call with at least one new occurrence:
   AdmissionBatchMeta + AuthorityBasisWord                ≈ 44,200 new-slot floor
@@ -1297,10 +1433,14 @@ with encoding-owned hashed domain words and `abi.encode` fixed words.
 - `KIND_UNIQUE_BY_TYPE.liveCount` means live unique Records and changes only
   on the corresponding `KIND_BY_RECORD.liveCount` transitions `0 → 1` and
   `1 → 0` (last live occurrence).
-- Fan-out formula `F(leaf) = 4 + 2·refInstances + valueSpecs ≤ 44` is a
-  structural ceiling; transaction fit remains a measured hypothesis.
+- Candidate fan-out `C(leaf) = 3 + 2·refInstances + valueSpecs ≤ 43` is
+  stably deduplicated to `D(leaf) ≤ 43`; with the conditional unique-record
+  transition, `F_MAX = 44` head touches. Withdrawal replays the same dedup set.
+  Transaction fit remains a measured hypothesis.
 - `selectBestLocator` visits at most 32 physical postings, counts dead ones,
-  and returns `PARTIAL` only with a resumable cursor.
+  validates the declared Type/role/score indexes before lookup, pins a finite
+  snapshot end and basis in its cursor, and returns `PARTIAL` only with a
+  validated resumable cursor.
 - Full `bytes32 PrincipalId` width preserved in every key, item, and ABI.
 
 **External functions** (Solidity signatures as defined above): `getTypeSchema`,
@@ -1313,8 +1453,11 @@ with encoding-owned hashed domain words and `abi.encode` fixed words.
 `LibIndex.withdrawOccurrence(E, k, W, ...)`, and
 `LibIndex.preWithdrawOccurrence(E, k, W, targetEvidence)` own the status
 checks before effects. `appendPosting(pk, ord)` is reached only from a fresh
-activation; `foldRevocation(ord, W, keys…)` may run only after the one-way
-`ACTIVE → WITHDRAWN` transition. No external writer can touch index state.
+activation after `postingKeysForOccurrence` stable-deduplicates the bounded
+candidate list; `foldRevocation(ord, W, keys…)` may run only after the one-way
+`ACTIVE → WITHDRAWN` transition and replays the identical derivation/dedup
+before one decrement per distinct key. No external writer can touch index
+state.
 
 ## Open items
 
