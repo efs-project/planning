@@ -10,6 +10,21 @@ red-teamed by seven adversarial lanes; two pins (SR-9, SR-10) were repaired,
 four amended (SR-1/3/5/8/12), and six added (SR-13..SR-18). The findings are
 archived in the pass corpus.
 
+**Correction note (2026-08-13 — independent post-Fable repair evidence).** A
+fresh packed-word arithmetic sweep found that SR-8's named Slot 0 fields total
+120 bits (`8 + 32 + 48 + 8 + 8 + 16`), so its reserved tail is 136 bits, not
+112. This corrects packing only; no field, width, meaning, evidence label, or
+architecture choice changes. The same sweep rechecked SR-7's
+`AuthorityBasisWord` at 256 bits (`8 + 16 + 8 + 64 + 160`), SR-10's
+`OccStatus` fields at 104 bits (`8 + 48 + 48`) and its admission-log metadata
+beside the separate full `EnvelopeId` word at 112 bits (`16 + 48 + 48`),
+leaving 144 reserved bits, and SR-4's five packed `u48` ordinals at 240 bits.
+Follow-up consistency review clarified three existing pins without choosing a
+new arm: SR-10 now names the reversible two-word hydration layout; SR-3 spells
+the complete EIP-712 commitment for `expectedRevisions`; and SR-11/SR-12/SR-17
+separate the intrinsic bootstrap Type from the three application-effect Types
+while keeping schema admission and cache materialization on ordinary `publish`.
+
 #status/draft #kind/design #topic/efsv2
 
 ## 1. What B0 is
@@ -94,7 +109,33 @@ domain (chainId + verifyingContract, realmId in the struct).
 `expectedRevisions` is **required for every Binding-class leaf selected by
 `leafMask`** — the Binding machine bans wildcard/blind realm-local writes; it
 is empty only when no Binding-class leaf is selected.
-`IntentId = keccak256(abi.encode(DOM_INTENT, …))`,
+The exact EIP-712 types and array commitment are:
+
+```text
+ExpectedRevision(uint16 leafIndex,uint32 revision)
+AdmissionIntent(bytes32 realmId,bytes32 envelopeId,uint64 leafMask,uint8 action,ExpectedRevision[] expectedRevisions,uint192 nonceKey,uint64 nonceSeq,uint64 notAfter)ExpectedRevision(uint16 leafIndex,uint32 revision)
+
+EXPECTED_REVISION_TYPEHASH = keccak256("ExpectedRevision(uint16 leafIndex,uint32 revision)")
+expectedRevisionsHash = keccak256(concat(
+  keccak256(abi.encode(EXPECTED_REVISION_TYPEHASH, item.leafIndex, item.revision))
+  for item in expectedRevisions, in array order
+))
+INTENT_TYPEHASH = keccak256("AdmissionIntent(bytes32 realmId,bytes32 envelopeId,uint64 leafMask,uint8 action,ExpectedRevision[] expectedRevisions,uint192 nonceKey,uint64 nonceSeq,uint64 notAfter)ExpectedRevision(uint16 leafIndex,uint32 revision)")
+intentStructHash = keccak256(abi.encode(
+  INTENT_TYPEHASH, realmId, envelopeId, leafMask, action,
+  expectedRevisionsHash, nonceKey, nonceSeq, notAfter
+))
+DS_INT = keccak256(abi.encode(
+  keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+  keccak256("EFS2-AdmissionIntent"), keccak256("1"),
+  chainId, verifyingContract
+))
+eip712IntentDigest = keccak256(0x1901 ‖ DS_INT ‖ intentStructHash)
+IntentId = keccak256(abi.encode(DOM_INTENT, eip712IntentDigest))
+```
+
+Here `concat` is the EIP-712 concatenation of the 32-byte element struct
+hashes; the empty array hashes the empty byte string. Under SR-1,
 `DOM_INTENT = keccak256("efs2/admission-intent/1")`. Replay control is the
 2-D nonce discipline: per-`nonceKey` **sequential lanes** (`lastSeq + 1`),
 which realizes the realm chapter's consumed-intent registry. The realm
@@ -140,7 +181,7 @@ header (SR-2), not in the basis word.
 **SR-8 — BindingHead layout (RP-8, S7).** Two slots.
 Slot 0 (meta): `state u8 (0 = UNSET — the zero word IS absence, 1 = BOUND,
 2 = TOMBSTONED) ‖ revision u32 ‖ currentOrdinal u48 ‖ targetKind u8 ‖
-tombstoneCause u8 ‖ targetLeaf u16 ‖ reserved u112`. Slot 1:
+tombstoneCause u8 ‖ targetLeaf u16 ‖ reserved u136`. Slot 1:
 `targetRef bytes32` (zero when tombstoned). `tombstoneCause` distinguishes
 explicit tombstones from withdrawal-driven ones (the graded
 `NONE_EXPLICIT` / `NONE_WITHDRAWN` outcomes); `targetLeaf` carries the
@@ -169,8 +210,13 @@ owner is an **occKey-addressable status overlay**, not the ordinal-keyed log:
 `OccStatus = { status u8 (0 = NEVER_ADMITTED, 1 = ACTIVE, 2 = WITHDRAWN,
 3 = PRE_WITHDRAWN), ordinal u48 (0 = none; ordinals start at 1),
 revokedAtOrdinal u48 }`. The ordinal-keyed admission log keeps the
-pages/hydration role with **restored u48 widths**:
-`{ occKeyRef, leafIndex u16, typeOrd u48, principalOrd u48 }`. Ordinals are
+pages/hydration role with **restored u48 widths** as exactly two words per
+accepted occurrence: word A is the full `EnvelopeId bytes32`; word B is
+metadata `leafIndex u16 ‖ typeOrd u48 ‖ principalOrd u48 ‖ reserved u144`.
+The log stores no `occKey`: hydration returns the reversible OccurrenceRef
+`(EnvelopeId, leafIndex)`, and readers recompute
+`occKey = keccak256(abi.encode(DOM_OCCURRENCE, EnvelopeId,
+uint256(leafIndex)))` under SR-1. Ordinals are
 assigned **per accepted occurrence in submission order** — the
 `base + k` consecutive-ordinal law is retired because leafMask subset and
 staged admission (SR-3/SR-12) make it unsound. **Pre-withdrawal (T4) is
@@ -183,13 +229,18 @@ leaked-envelope defense with an evaluable author guard. `WITHDRAWN` and
 (no-resurrection, SR-15). The one-way status flip drives the exactly-once
 index decrement.
 
-**SR-11 — kernel-known Types (RP-11).** The closed B0 list is exactly
+**SR-11 — kernel Type recognition (RP-11).** The closed B0 list of
+**application Types with kernel admission effects** is exactly
 `{ TYPE_BINDING_SET_V1, TYPE_BINDING_TOMBSTONE_V1, TYPE_WITHDRAWAL_V1 }`.
-`ResolutionPlan/1` is deliberately NOT kernel-known. Concrete constants mint
-in Stage B; the list is closed here and owned by the encoding chapter's
-constants table. Binding-class body conventions must be legal under the
-encoding chapter's REF/sentinel rules (first-write predecessor uses the
-explicit NONE encoding, never raw 0).
+Separately, the intrinsic bootstrap meta-Type `TypeSchemaGroup/1` is known to
+Core for structural validation and deterministic schema-cache materialization
+only (SR-17); it is not a fourth application-effect Type and does not dispatch
+Binding or Withdrawal behavior. `ResolutionPlan/1` is deliberately not
+kernel-known. Concrete constants mint in Stage B; both the three effect-Type
+IDs and the intrinsic bootstrap Type ID live in the encoding chapter's
+constants table. Binding-class body conventions must be legal under that
+chapter's REF/sentinel rules (first-write predecessor uses the explicit NONE
+encoding, never raw 0).
 
 **SR-12 — entrypoint and admission consent (RP-12, S1).** One permissionless
 entrypoint `publish(envelopeBytes, principal, intentBytes, intentWitness)`:
@@ -202,7 +253,9 @@ require an explicit intent carrying `expectedRevisions` (SR-3). Uninvited
 third-party carriage without an author intent is not local admission; copied
 foreign evidence enters only through the import/Recognition lane as
 source-qualified evidence (`AUTH_FOREIGN_ORIGIN` range), never destination
-truth.
+truth. `publish` is the sole Core write entrypoint: any schema-registration
+helper is SDK/convenience code that constructs and calls this same entrypoint,
+not a second Core primitive (SR-17).
 
 **SR-13 — the authorship identity chain (red-team BLOCKING).** The write path
 carries the `AccountPrincipal` descriptor explicitly:
@@ -247,12 +300,21 @@ state-readable `codexConstants()` that the realm chapter's `profileId` and
 
 **SR-17 — schema on-ramp.** TypeSchemas enter state **as Records of the
 bootstrap meta-Type through ordinary admission** (the realm chapter's
-reconstruction-walk model wins — one uniform state-readable spine); the
-registration entrypoint is a thin wrapper that admits the schema Record and
-materializes the parsed-schema cache. The encoding chapter's standalone
-non-Record registration function is superseded. Group registration
-(recursion) rides the same path; the maximal-group-vs-tx-cap cross-check is a
-named harness case.
+reconstruction-walk model wins — one uniform state-readable spine). When
+ordinary `publish` admits a `TypeSchemaGroup/1` Record, Core recognizes the
+intrinsic bootstrap Type, validates `groupBytes` with
+`validateTypeSchemaGroup` (R1–R3, E1 offset-class precomputation, and SR-18e's
+REF-instance bound), derives every member `TypeSchemaId`, and **atomically
+materializes the parsed-schema cache keyed by each derived TypeSchemaId** in
+the same admission; validation or materialization failure reverts the
+admission. The cache is deterministic derived state from the admitted Record,
+not a second truth or application effect, and re-admission is idempotent.
+`registerTypeSchemaGroup(...)` names only an SDK/convenience wrapper that
+constructs this Record/envelope/intent and calls the one SR-12 `publish`
+entrypoint; it is not a Core entrypoint. The encoding chapter's standalone
+non-Record registration function and two-step admit-then-materialize path are
+superseded. Group registration (recursion) rides the same path; the
+maximal-group-vs-tx-cap cross-check is a named harness case.
 
 **SR-18 — shared vocabularies.** (a) Digest algorithms: one `u16`
 multihash-compatible `algCode` table (encoding chapter owns it) used
