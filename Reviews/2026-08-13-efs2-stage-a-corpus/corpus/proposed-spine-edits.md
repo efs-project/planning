@@ -409,26 +409,27 @@ NEW:
 
 - **Target file:** Designs/efsv2/README.md
 - **Location:** INSERT a new subsection immediately after the `## Evidence
-  map` table (which ends at ~line 90) and before `## Build order`.
+  map` table (currently lines 77-91) and before `## Build order` (currently
+  line 93).
 - **Verbatim proposed text (INSERT):**
 
 ```markdown
 ## Fable program output — Stage A doc set
 
-Stage A output is design-current and review-gated: drafts for red-team
-review, adopting nothing until integrated. Chapters pin the exact B0 "SPINE"
-baseline; the corpus holds the cross-cutting deliverables.
+Stage A output is post-red-team repaired evidence and remains review-gated: it
+is not landed and adopts nothing until integrated. Chapters pin the exact B0
+"SPINE" baseline; the corpus holds the cross-cutting deliverables.
 
 | Stage A deliverable | Doc |
 |---|---|
-| Exact B0 baseline — per-subsystem chapters | `chapters/b0-overview.md` + the eight `chapters/b0-*` subsystem chapters |
-| Smallest coherent semantic model + explicit alternatives | `chapters/b0-overview.md` §1 + `chapters/bakeoff-spec.md` |
-| Requirement-to-test traceability with authority labels | `chapters/traceability.md` |
-| Controlled bakeoff specification (axes, cells, declared confounds) | `chapters/bakeoff-spec.md` |
-| Frozen fixture + measurement-harness interfaces | `chapters/harness-and-fixtures.md` |
-| Golden-vector categories and falsifiers | `chapters/vectors-and-falsifiers.md` |
-| Proposed spine edits (proposals only; shared files unedited) | `corpus/proposed-spine-edits.md` |
-| Citations/durable evidence for journal-only claims | `corpus/standards-audit.md`, `carry-in-register.md`, `intake-findings.md`, `redteam-findings.md` |
+| Exact B0 baseline — overview + eight subsystem chapters | [overview](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-overview.md); [encoding/IDs](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-encoding-and-ids.md); [authorship/envelope](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-authorship-envelope.md); [Principal/authority](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-principal-authority.md); [Realm/admission](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-realm-admission.md); [indexes](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-indexes.md); [Binding](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-binding.md); [Lens](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-lens.md); [content locators](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-content-locators.md) |
+| Smallest coherent semantic model + explicit alternatives | [overview §1](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-overview.md#1-what-b0-is) + [bakeoff](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/bakeoff-spec.md) |
+| Requirement-to-test traceability with authority labels | [traceability](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/traceability.md) |
+| Controlled bakeoff specification (axes, cells, declared confounds) | [bakeoff](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/bakeoff-spec.md) |
+| Frozen fixture + measurement-harness interfaces | [harness and fixtures](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/harness-and-fixtures.md) |
+| Golden-vector categories and falsifiers | [vectors and falsifiers](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/vectors-and-falsifiers.md) |
+| Proposed spine edits (proposals only; shared files unedited) | [proposed spine edits](../../Reviews/2026-08-13-efs2-stage-a-corpus/corpus/proposed-spine-edits.md) |
+| Citations/durable evidence for journal-only claims | [standards audit](../../Reviews/2026-08-13-efs2-stage-a-corpus/corpus/standards-audit.md); [carry-in register](../../Reviews/2026-08-13-efs2-stage-a-corpus/corpus/carry-in-register.md); [intake findings](../../Reviews/2026-08-13-efs2-stage-a-corpus/corpus/intake-findings.md); [red-team findings](../../Reviews/2026-08-13-efs2-stage-a-corpus/corpus/redteam-findings.md) |
 ```
 
 - **Rationale + citation:** The eight rows are the PM's Stage-A deliverables
@@ -441,7 +442,8 @@ baseline; the corpus holds the cross-cutting deliverables.
   (`b0-overview.md` §3, VERIFIED): the B0 overview plus eight subsystem
   chapters, bakeoff, traceability, harness, vectors/falsifiers, proposed-spine
   edits, and the four durable-evidence ledgers. This proposed table names those
-  existing artifacts; it does not authorize a README edit.
+  existing artifacts with links resolved from `Designs/efsv2/README.md`; it
+  does not authorize a README edit.
 - **Label:** [PM DIRECTIVE adoption] (deliverable list) + [PROPOSAL] (table
   placement and row wording).
 - **Authority routing:** PM applies at Stage A landing.
@@ -738,10 +740,14 @@ recommendation carrying its own label. Two facts are protocol physics, not
 candidates: EIP-7825 caps every L1 transaction at 16,777,216 gas (2^24; live
 since Fusaka, 2025-12-03) — every one-call dependent write, mandatory-index
 fan-out, and atomic batch must show its arithmetic under that cap, with any
-different L2/L3 cap stated separately; and EIP-170 caps runtime bytecode at
-24,576 bytes (EIP-7907 did not ship in Fusaka), which bounds the one-physical-
-Core-versus-modules axis at compile time. Separate stable standards from
-drafts and avoid adopting a standard outside the problem it actually solves.
+different L2/L3 cap stated separately. Separately,
+[EIP-170](https://eips.ethereum.org/EIPS/eip-170) sets the mainnet runtime-code
+baseline at 24,576 bytes. The final
+[Fusaka EIP inventory](https://eips.ethereum.org/EIPS/eip-7607) does not include
+draft [EIP-7907](https://eips.ethereum.org/EIPS/eip-7907), so Fusaka did not
+raise that baseline. The 24,576-byte baseline bounds the one-physical-Core-
+versus-modules axis at compile time. Separate stable standards from drafts and
+avoid adopting a standard outside the problem it actually solves.
 For the PM-named status recheck: ERC-6492 is Final; ERC-7930 is Review;
 EIP-4444 and EIP-7927 are Stagnant documents even though pre-merge history
 deletion is partially deployed; CBOR CDE draft-13 is expired/archived and not
@@ -755,15 +761,20 @@ an RFC; and RDFC-1.0 is a 2024 W3C Recommendation.
   statuses: `standards-audit.md` §2.7 (ERC-6492 Final), §3.6 (ERC-7930 Review),
   §2.14 (EIP-4444/7927 Stagnant documents plus separate partial-deployment
   fact), §3.3 (CDE-13 expired/archived I-D, not RFC), and §2.13 (RDFC-1.0 W3C
-  Recommendation, 2024-05-21). EIP-7825, EIP-170, EIP-712, CAIP, DID, and
+  Recommendation, 2024-05-21). For the code-size claim, EIP-170 directly sets
+  `MAX_CODE_SIZE = 0x6000`; final EIP-7607 is the authoritative Fusaka
+  inventory and omits draft EIP-7907. The baseline fact and the fork-
+  non-inclusion fact are distinct. EIP-7825, EIP-170, EIP-712, CAIP, DID, and
   ERC-5564 remain useful evidence-lane candidates, but neither their list
   membership nor any EFS action is adopted by the directive or this proposal.
 - **Label:** [PM DIRECTIVE adoption] applies only to the Stage-A process rule:
   FACT/POLICY separation and rechecking the five PM-named entries. The expanded
   standards-list membership and every EFS action on those facts are [PROPOSAL].
-  EIP-7825 and EIP-170 are standards FACTS with venue/fork qualifications and
-  direct primary evidence; treating a harness policy as consequential is
-  [PROPOSAL], not a standards fact.
+  EIP-7825 and the EIP-170 code-size baseline are standards FACTS with
+  venue/fork qualifications and direct primary evidence; EIP-7907's absence
+  from the final Fusaka inventory is a separate fork-inventory FACT. Treating
+  any resulting harness policy as consequential is [PROPOSAL], not a standards
+  fact.
 - **Authority routing:** PM applies.
 
 ### C9. Four-tier support matrix: fold into output 7 or retire — flag for PM

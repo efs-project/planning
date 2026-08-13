@@ -18,6 +18,13 @@ against their primary sources: [ERC-6492](https://eips.ethereum.org/EIPS/eip-649
 transcribed; no EFS policy recommendation became an adopted requirement through this
 status correction.
 
+**Review repair note (2026-08-13):** the code-size and partial-history facts were also
+rechecked against primary sources: [EIP-170](https://eips.ethereum.org/EIPS/eip-170),
+the final [Fusaka EIP inventory](https://eips.ethereum.org/EIPS/eip-7607), draft
+[EIP-7907](https://eips.ethereum.org/EIPS/eip-7907),
+[EIP-7642](https://eips.ethereum.org/EIPS/eip-7642), and the official EF
+[partial-history announcement](https://blog.ethereum.org/2025/07/08/partial-history-exp).
+
 Reading key (PM-mandated distinction, pm-stage-a-directive.md line 23):
 
 - **Standards FACT** — the status, date, and source of the external document. Marked
@@ -44,7 +51,7 @@ absent standards status. Each row links to its full entry below.
 | C4 | **CBOR CDE draft-13 is an expired/archived Internet-Draft** (intended BCP), not an RFC; "deterministic CBOR" names a family, not a codec — golden vectors impossible until one byte-exact profile is named | kickoff line 150 | §3.3 |
 | C5 | **multihash/CID is registry-stewarded only** — the IETF draft expired 2024-02-21 and was never an RFC | deterministic-ids.md §13.8 convention | §3.5 |
 | C6 | **web3:// is two documents**: ERC-4804 Final but superseded-in-practice by ERC-6860, which carries the corrections and is still Draft — "web3://" alone is ambiguous about the normative text | deterministic-ids.md §8, §13.7; memory: web3:// as zero-infra write default | §3.2 |
-| C7 | **EIP-170's 24,576-byte code limit still binds** (EIP-7907 did not ship in Fusaka) — a compile-time forced gate on bakeoff axis 6; separately, pre-merge history expiry is partially deployed (pre-merge bodies/receipts droppable since 2025-05), not an EIP-4444/7927 document status | kickoff lines 149-150 list neither | §2.14 |
+| C7 | **EIP-170 sets the 24,576-byte runtime-code baseline**; separately, Fusaka's final EIP inventory omits draft EIP-7907, so Fusaka did not raise it — a compile-time forced gate on bakeoff axis 6. For partial history, clients were permitted to drop pre-merge data after 2025-05-01; the official all-execution-client support milestone is 2025-07-08, not May | kickoff lines 149-150 list neither | §2.14 |
 | C8 | **EIP-8130 is a Draft Core EIP** (2025-10-24, spec explicitly unstable, no scheduled fork) — reserved seam only, never load-bearing; kickoff labels it "draft" correctly | kickoff line 149 | §3.1 |
 
 ---
@@ -252,16 +259,27 @@ absent standards status. Each row links to its full entry below.
   property-graph/Datomic index models (EAVT/AEVT/VAET-style) rather than triple-store
   SPARQL models.
 
-### 2.14 EIP-170 (binding) and EIP-4444/EIP-7927 — protocol physics beyond 7825 (severity at intake: NOTE; 4444/7927 PM-named)
+### 2.14 EIP-170 and EIP-4444/EIP-7927 — protocol physics beyond 7825 (severity at intake: NOTE; 4444/7927 PM-named)
 
-- **Standards FACT** — PLAUSIBLE (knowledge): EIP-7907 (code-size increase) was
-  considered for but not included in Fusaka's final EIP set, so **EIP-170's 24,576-byte
-  contract-code limit stands**. [EIP-4444](https://eips.ethereum.org/EIPS/eip-4444) and
+- **Code-size baseline FACT** — VERIFIED (primary):
+  [EIP-170](https://eips.ethereum.org/EIPS/eip-170) is Final and sets mainnet
+  `MAX_CODE_SIZE = 0x6000` (24,576 bytes) from Spurious Dragon.
+- **Fusaka inventory FACT** — VERIFIED (primary): final
+  [EIP-7607](https://eips.ethereum.org/EIPS/eip-7607) enumerates Fusaka's included EIPs
+  and does not include draft [EIP-7907](https://eips.ethereum.org/EIPS/eip-7907).
+  Therefore EIP-7907 did not ship in Fusaka. This fork-inventory fact is separate from
+  EIP-170's code-size baseline.
+- **Standards-status FACT** — VERIFIED (primary):
+  [EIP-4444](https://eips.ethereum.org/EIPS/eip-4444) and
   [EIP-7927](https://eips.ethereum.org/EIPS/eip-7927) are both **Stagnant** documents.
-- **Deployment FACT** — VERIFIED (web, separately transcribed EF/client evidence): the
-  EF blog 2025-07-08 "Partial history expiry announcement" says all clients support
-  dropping pre-merge bodies/receipts since 2025-05; the rolling-window phase has no set
-  timeline. That partial deployment is not either EIP's standards-track status.
+- **Partial-history milestone FACTS** — VERIFIED (primary):
+  [EIP-7642](https://eips.ethereum.org/EIPS/eip-7642) records that clients could drop
+  pre-merge history after 2025-05-01. The official EF
+  [2025-07-08 announcement](https://blog.ethereum.org/2025/07/08/partial-history-exp)
+  says that **as of that date** all Ethereum execution clients supported partial history
+  expiry; full rolling history expiry remained ongoing. May 1 is the permitted-drop
+  milestone, not the all-client-support date. These implementation facts are not either
+  EIP-4444 or EIP-7927's standards-track status.
 - **Spine state at intake** — VERIFIED (vault): core-architecture-candidate.md falsifier
   10 (line 432) "state-only reconstruction needs old logs" and deterministic-ids.md §4
   "never dependent on event logs (EIP-4444 history expiry)" already encode the response;
@@ -507,9 +525,9 @@ What other Stage A chapters may rely on from this document:
   §2.1") rather than re-asserting the status, and must not promote a policy
   recommendation to adopted without its own labeled decision.
 - **Hard physics constants for Stage A arithmetic**: EIP-7825 per-tx cap = 16,777,216
-  gas (L1, live; venue-conditional per Realm profile); EIP-170 runtime-code limit =
-  24,576 bytes (binding; EIP-7907 did not ship); EIP-7951 P-256 precompile at 0x100,
-  6900 gas; EIP-2935 ring ≈ 8191 blocks.
+  gas (L1, live; venue-conditional per Realm profile); EIP-170 runtime-code baseline =
+  24,576 bytes, while the final Fusaka inventory omits draft EIP-7907; EIP-7951 P-256
+  precompile at 0x100, 6900 gas; EIP-2935 ring ≈ 8191 blocks.
 - **Reverified PM-named document statuses** (2026-08-13; document maturity, not
   deployment): ERC-6492 **Final**; ERC-7930 **Review**; EIP-4444 **Stagnant**;
   EIP-7927 **Stagnant**; CBOR CDE draft-13 **expired/archived Internet-Draft**, intended
@@ -525,8 +543,8 @@ What other Stage A chapters may rely on from this document:
 
 ## Open items
 
-- Re-verify every "PLAUSIBLE (knowledge)" status line before any freeze decision relies
-  on it (7702 activation date, EIP-7907 non-inclusion, dag-cbor ordering divergence,
+- Re-verify every remaining "PLAUSIBLE (knowledge)" status line before any freeze
+  decision relies on it (7702 activation date, dag-cbor ordering divergence,
   CT/KERI/OCapN statuses, SWHID hashing scope, SSZ maturity) — the intake auditor did
   not fetch these.
 - ERC-7930 is in Review; its byte layout may change — anyone pinning it in the Codex
