@@ -1,6 +1,15 @@
 # B0 Realm, Admission, Finality, and Reconstruction
 **Stage A chapter — post-red-team revision; not landed, adopts nothing.**
 
+**Repair note (2026-08-13 — Stage A reconciliation, still a proposal).** This
+chapter now consumes SR-1/3/4/7/9/10/11/12/13/15/16/17/18 exactly: the sole
+Core mutation is typed `publish`; intent replay uses sequential nonce lanes;
+accepted occurrences use sparse per-occurrence ordinals, a reversible two-word
+log, and the four-state lifecycle overlay; authority/revision/finality are
+occurrence-scoped through explicit admitting-call batches; and the state-only
+walk reconstructs leaf-driven effects and the atomic Type cache. This repair
+records the reviewed seam target; it does not adopt B0 or settle Stage A.
+
 Lane 4 of the Stage A B0 baseline. Covers V2-E5 in full: RealmDescriptor/1 and
 registry-free bootstrap, RealmId/RealmRevisionId formulas, the
 deployment/profile-confusion attack, qualifying-Realm assumptions (replacing
@@ -411,91 +420,86 @@ sketch core-architecture-candidate.md:194-202):
 
 ```text
 AdmissionReceipt/1 {
-  occurrenceRef    (bytes32 envelopeId, uint16 leafIndex)
-  realmId          bytes32          // constant for the answering contract
-  realmRevisionId  bytes32          // policy + implementation basis (§2.5)
-  authorityBasis   bytes32          // the SR-7 packed AuthorityBasisWord
-                                    // verbatim (kind ‖ verifierVersion ‖
-                                    // witnessProfile ‖ basisBlock ‖
-                                    // delegateOrZero); the conditional
-                                    // codehash slot is Lane 3's. DEPENDS-ON
-                                    // Lane 3 (SR-7).
-  admissionOrdinal uint64           // global accepted order, 1-based
-  admittedAtBlock  uint48           // inclusion block of the admitting tx
-  acceptedStatus   uint8            // §5.2
+  occurrenceRef     (bytes32 envelopeId, uint16 leafIndex)
+  realmId           bytes32
+  realmRevisionId   bytes32
+  authorityBasis    AuthorityBasisWord
+  authorityCodehash bytes32          // zero unless CONTRACT_ERC1271
+  admissionOrdinal  uint64           // global accepted order, 1-based
+  admittedAtBlock   uint48           // inclusion block of the admitting tx
+  acceptedStatus    uint8            // 1 ACCEPTED (§5.2)
 }
 ```
 
-Physical storage [PROPOSAL — regenerated to the SR-10 split: an
-occKey-addressable status overlay owns the occurrence lifecycle, an
-ordinal-keyed log is the receipt spine, and per-envelope/per-call records
-carry the rest]:
+Physical storage [PROPOSAL — SR-7/SR-10 exact contract]. Bit 0 is the
+least-significant bit of a word; every reserved bit MUST be zero:
 
 ```text
-// slot packing: byte 0 = most significant byte of the 32-byte slot word;
-// all integers big-endian within their byte range.
+DOM_OCCURRENCE = keccak256("efs2/occurrence/1")
+occKey(E,k) = keccak256(abi.encode(DOM_OCCURRENCE, E, uint256(k)))
 
-// 1. THE occurrence lifecycle owner — occKey status overlay (SR-10);
-//    occKey = H(envelopeId, leafIndex), formula owned by the authorship
-//    chapter:
-mapping(bytes32 occKey => OccStatus) occStatus;
-//   OccStatus, one slot:
-//     status           u8   0 = NEVER_ADMITTED, 1 = ACTIVE, 2 = WITHDRAWN,
-//                           3 = PRE_WITHDRAWN
-//     ordinal          u48  0 = none; ordinals are 1-based (SR-4)
-//     revokedAtOrdinal u48  0 = none
-//   WITHDRAWN and PRE_WITHDRAWN are terminal and permanently block
-//   (re-)admission of the occKey (no-resurrection, SR-10/SR-15); the
-//   one-way status flip drives the exactly-once index decrement.
+OccStatus @ occStatus[occKey]:
+  status           bits [0..7]     u8   // 0 NEVER_ADMITTED, 1 ACTIVE,
+                                         // 2 WITHDRAWN, 3 PRE_WITHDRAWN
+  ordinal          bits [8..55]    u48  // 0 iff never accepted
+  revokedAtOrdinal bits [56..103]  u48  // effective Withdrawal ordinal
+  reserved         bits [104..255]      // MBZ
 
-// 2. The receipt spine — ordinal-keyed admission log, one entry per
-//    ACCEPTED occurrence: { occKeyRef (envelopeId + leafIndex),
-//    leafIndex u16, typeOrd u48, principalOrd u48 }. Physical word layout
-//    is owned by the index chapter (SR-10 restored-u48 widths); this
-//    chapter consumes it for receipts, pages, and the reconstruction walk.
+logSlotA(ord): full EnvelopeId bytes32
+logSlotB(ord):
+  leafIndex    bits [0..15]    u16
+  typeOrd      bits [16..63]   u48
+  principalOrd bits [64..111]  u48
+  reserved     bits [112..255]      // MBZ (u144)
 
-// 3. Per-envelope meta, written at the first admission touching the
-//    envelope:
-struct EnvelopeMeta {                        // 3 slots
-  bytes32 principalId;                       // slot 0 — SR-13 identity chain
-  bytes32 authorityBasis;                    // slot 1 — SR-7 word verbatim
-  // slot 2: bytes 0-4 envelopeOrdinal uint40; bytes 5-10 firstTouchBlock
-  //         uint48; bytes 11-14 firstTouchRevision uint32; byte 15
-  //         acceptedStatus uint8; bytes 16-31 reserved, MUST be zero
-}
-mapping(bytes32 => EnvelopeMeta) envelopeMetaOf;
-mapping(uint40  => bytes32) envelopeIdByOrdinal;
+EnvelopeMeta:
+  principalId       bytes32
+  envelopeOrdinal   u40
+  leafCount         u16
+  body-carriage metadata sufficient to return the persisted signed envelope
+  bytes and full ordered RecordId vector
 
-// 4. Per-admitting-call batch record (this chapter's addition — gives every
-//    ordinal its admittedAtBlock/revisionOrdinal without widening the index
-//    chapter's log word): one slot per call that accepted >= 1 occurrence:
-//    { firstOrdinal u48, admittedAtBlock u48, revisionOrdinal u32 };
-//    ordinal → batch by binary search over append-only firstOrdinal.
+AdmissionBatchMeta (one packed word):
+  firstOrdinal    bits [0..47]     u48
+  acceptedCount   bits [48..63]    u16
+  admittedAtBlock bits [64..111]   u48
+  revisionOrdinal bits [112..143]  u32
+  reserved        bits [144..255]       // MBZ (u112)
+
+batchAuthorityBasis[batchId] = AuthorityBasisWord
+batchCodehash[batchId] = codehashOrZero // slot exists only for contract kind
+
+AuthorityBasisWord =
+  authorityKind u8 || verifierVersion u16 || witnessProfile u8 ||
+  basisBlock u64 || delegateOrZero u160
+contractCodehash = bytes32 conditional slot for CONTRACT_ERC1271 only
 
 uint48 admissionCount;    // physical width; uint64 at every ABI (SR-4);
                           // typed U48_GUARD revert at 2^48 − 1
 uint40 envelopeCount;     // high-water envelope ordinal
-// canonical envelope bytes: state-readable spine, layout owned by the
-// RecordStore/encoding chapter; MUST satisfy §8 W-4. DEPENDS-ON Lane 2.
+uint64 admissionBatchCount;
 ```
 
-[REJECTED — pre-SR-10 arm, kept as a sketch: one 2-slot `EnvelopeAdmission`
-per envelope holding `firstAdmissionOrdinal + leafCount + authorityBasis`,
-with `admissionOrdinal(leaf k) = firstAdmissionOrdinal + k` and authority
-"verified once per signed envelope". Retired because leafMask subset and
-staged admission (SR-3/SR-12) make any leaf-indexed `base + k` law unsound,
-and because a never-admitted occurrence (pre-withdrawal, SR-10) needs an
-occKey-keyed home that an ordinal-keyed store cannot provide.]
+The overlay is the sole lifecycle owner. Public views widen both packed
+ordinals to `uint64`; `acceptedStatus` is only the receipt outcome and never a
+second lifecycle store. The log is reversible: hydration reads the full
+`EnvelopeId` and `leafIndex`, then recomputes `occKey`; neither lifecycle data
+nor a hash-only occurrence reference appears in the log.
 
-Redundancy avoided: `realmId` is stored once in genesis state, never per
-receipt; `realmRevisionId` is dereferenced from the admission ordinal via
-the append-only revision history (each revision stores its
-`firstAdmissionOrdinal`, U-2); `admittedAtBlock` comes from the batch
-record. The submitting `msg.sender` is deliberately **not** recorded:
-authority never derives from the submission rail, and recording it would
-create a false authority surface [DERIVED INVARIANT — R-D8 via intake
-SURVIVORS lane finding 7 (relayer/paymaster substitution), and constitution
-role separation system-constitution.md:130-131].
+The immutable signed envelope bytes and full RecordId vector are persisted
+once. `envelopeOrdinal` is assigned only when the first occurrence of that
+envelope is accepted and remains stable across staged admissions. Envelope
+metadata deliberately owns no singular receipt status, revision, block, or
+authority basis.
+
+Each single-envelope `publish` call that accepts at least one new occurrence
+appends one batch record. Its new ordinals are contiguous, and append-only
+`firstOrdinal` boundaries permit bounded ordinal-to-batch search. `receiptOf`
+reads the occurrence ordinal from the overlay, checks the reversible log entry,
+and gets block, explicit revision, exact verifier basis, and conditional
+codehash from that ordinal's batch. A later staged admission therefore cannot
+inherit first-touch metadata. `realmId` remains one genesis value; the
+submitting `msg.sender` is not authority state.
 
 ### 5.2 acceptedStatus
 
@@ -520,25 +524,24 @@ struct.
 ```text
 ordinals are 1-based; 0 is the NONE sentinel everywhere.
 
-on admitting envelope E with n leaves (after all checks pass):
-  envelopeCount        += 1
-  envelopeOrdinal(E)    = envelopeCount
-  firstAdmissionOrdinal = admissionCount + 1
-  admissionCount       += n
-  leaf k of E (k in [0, n-1]) has admissionOrdinal = firstAdmissionOrdinal + k
+newLeaves = selected leaves whose status is NEVER_ADMITTED,
+            in ascending selected-leaf/submission order
+
+for leaf in newLeaves:
+  require admissionCount < 2^48 - 1 else U48_GUARD
+  admissionCount += 1
+  ord = admissionCount
+  occStatus[occKey(EnvelopeId, leaf)].ordinal = ord
+  append logSlotA(ord) and logSlotB(ord)
 ```
 
-Consequences: the global accepted-admission order is total and gap-free;
-`admissionOrdinal → OccurrenceRef` is computable by binary search over
-envelope ordinals (each `EnvelopeAdmission` stores `firstAdmissionOrdinal`),
-so no separate admission log is stored [PROPOSAL — correct/easy-before-fast;
-a packed admission-log arm is a bakeoff lever if the ~40-iteration search
-(≤ 40 × 2 cold SLOADs ≈ 168,000 gas worst case for a contract caller; free
-via RPC) proves too hot]. Century arithmetic: uint40 envelope ordinals allow
-1.10e12 envelopes — at a sustained 10 envelopes/second that is ~3,486 years;
-uint64 admission ordinals are inexhaustible at any credible rate (2^64 at
-1,000 admissions/s ≈ 5.8e8 years). State growth, not ordinal width, is the
-real bound.
+ACTIVE selected leaves allocate no ordinal and return their existing receipt.
+Selecting a WITHDRAWN or PRE_WITHDRAWN occurrence for admission reverts: no
+terminal occurrence resurrects. The global sequence is gap-free by accepted
+event but intentionally sparse with respect to envelope leaf indexes. No
+per-envelope range, hole reservation, or leaf-index arithmetic identifies an
+occurrence; `admissionAt` is a direct two-word log read. A new envelope receives
+its stable `envelopeOrdinal u40` when its first new occurrence is accepted.
 
 ### 5.4 Entrypoints and the atomic boundary
 
@@ -552,44 +555,57 @@ core-architecture-candidate.md:351-353].
 ```solidity
 struct OccurrenceRef { bytes32 envelopeId; uint16 leafIndex; }
 
-struct PublishResult {
-  bytes32 envelopeId;
-  uint40  envelopeOrdinal;        // 0 iff outcome = ALREADY_ADMITTED
-  uint64  firstAdmissionOrdinal;  // 0 iff outcome = ALREADY_ADMITTED
-  uint16  admittedLeafCount;      // 0 iff outcome = ALREADY_ADMITTED
-  uint8   outcome;                // 1 = ADMITTED, 2 = ALREADY_ADMITTED
+struct PublishLeafResult {
+  uint16 leafIndex;
+  uint8 outcome;              // 1 ADMITTED, 2 ALREADY_ADMITTED
+  uint64 admissionOrdinal;    // fresh or existing
 }
 
-/// Admit one signed portable envelope, optionally applying one Realm-bound
-/// AdmissionIntent in the same atomic call. intentBytes = "" for plain
-/// evidence admission (no principal-authorized local effects).
-function publish(bytes calldata envelopeBytes, bytes calldata intentBytes)
-  external returns (PublishResult memory);
+struct PublishResult {
+  bytes32 envelopeId;
+  uint40 envelopeOrdinal;      // stable existing or newly assigned
+  PublishLeafResult[] leaves;  // one result per selected leaf, in mask order
+}
 
-/// Apply one Realm-bound intent over already-admitted occurrences.
-function applyIntent(bytes calldata intentBytes)
-  external returns (bytes32 intentId, uint64 intentOrdinal);
-
-/// All-or-nothing batch. Reverts atomically if any element reverts.
-function publishBatch(bytes[] calldata envelopes, bytes[] calldata intents)
-  external returns (PublishResult[] memory);
+function publish(
+    bytes calldata envelopeBytes,
+    AccountPrincipal calldata principal,
+    bytes calldata intentBytes,
+    bytes calldata intentWitness
+) external returns (PublishResult memory);
 ```
-[PROPOSAL — signatures] `publish` is permissionless: anyone may submit any
-well-formed signed envelope; authorship comes from the envelope's signature
-via Lane 3's versioned verifier, never from `msg.sender` [DERIVED INVARIANT —
-R-D8, §5.1]. Submitting someone's portable envelope to a new Realm creates
-destination *evidence*, never destination *truth* (§4.2 H-2) — this is B0
-axis 3's portable arm working as intended.
+
+This is the **sole Core write primitive**. `envelopeBytes` carries the repaired
+PublicationEnvelope header, full ordered `recordIds[]`, selected inline bodies,
+the envelope witness, and any bounded target evidence. Core recomputes the
+EIP-712 envelope digest and `EnvelopeId`, then requires
+`computePrincipalId(principal) == header.principalId`; mismatch reverts
+`AUTH_PRINCIPAL_MISMATCH(declared, computed)` before either witness check.
+First-use `PrincipalRecord` bytes come only from that verified descriptor.
+
+Envelope authorship is verified through the one Lane-3 interface:
+
+```solidity
+AuthorityVerifierV1.verify(
+    principal, eip712EnvelopeDigest, envelopeWitness,
+    VerifyContext({selfChainRefHash: SELF_CHAIN_REF_HASH,
+                   blockNumber: uint64(block.number)})
+) -> (AuthorityBasisWord basis, bytes32 codehashOrZero);
+```
+
+The returned pair is the admitting batch's receipt basis. Explicit intent
+verification uses the same descriptor and verifier but never replaces the
+envelope-authorship pair.
 
 **Dependent-graph one-call flow with precomputed IDs** [PROPOSAL — exact
 rule]: all EFS IDs are deterministic and computable offline (skeleton rule),
 so a writer precomputes every RecordId/EnvelopeId before submission. During
-admission, leaves are processed in leaf order `0..n-1`; a typed reference
-from leaf `k` to RecordId `r` is satisfied iff
+preflight, selected leaves are processed in ascending mask order; a typed
+reference from leaf `k` to RecordId `r` is satisfied iff
 
 ```text
 REF-SAT: r is already admitted in Realm state
-         OR r is the RecordId of some leaf j < k in the same envelope.
+         OR r is the RecordId of an earlier selected leaf j < k in this call.
 ```
 
 Inline canonical Record leaves (B0 axis 5) make the second arm total: the
@@ -601,61 +617,163 @@ topologically sort, which is always possible because RecordIds cannot form
 reference cycles (a cycle would require hashing a hash of itself; the
 encoding chapter's recursive-Type rules handle the SELF case).
 
-**AdmissionIntent/1** [PROPOSAL — canonical word encoding; action semantics
-2..3 are Lane 5's (Binding) seam]:
+**AdmissionIntent/1** [PROPOSAL — exact SR-3 semantic shape]:
 
 ```text
-AdmissionIntent/1 signed body = abi.encode(
-  bytes32 realmId,          // realm-bound: MUST equal this Realm's id
-  bytes32 principalId,      // full-width, never truncated
-  uint8   action,           // 1=ADMIT_EVIDENCE, 2=BIND, 3=WITHDRAW, 4-255 rsvd
-  bytes32 actionData,       // action-specific commitment (Lane 5 owns 2/3)
-  uint64  intentNonce,      // uniquifier inside IntentId; no ordering meaning
-  uint48  expiryBlock,      // admission requires block.number <= expiryBlock
-  OccurrenceRef[] refs      // ABI dynamic tail; refs into this envelope or
-)                           // already-admitted state
-IntentId = keccak256("efs2/intent/1" ‖ signed body)   // witness EXCLUDED
-witness  = authorization per Lane 3 (actor signature for principalId);
-           carried alongside, never inside the IntentId preimage
-           (signature malleability must not fork intent identity).
+AdmissionIntent/1 = {
+  realmId bytes32,
+  envelopeId bytes32,
+  leafMask uint64,
+  action uint8,                    // MBZ = 0 = ADMIT in B0
+  expectedRevisions[] of {
+    leafIndex uint16,
+    revision uint32
+  },
+  nonceKey uint192,
+  nonceSeq uint64,
+  notAfter uint64                   // unix seconds; 0 = no deadline
+}
 ```
 
-Replay and domain rules [PROPOSAL]: the intent's signing domain includes
-`realmId` (Realm-bound); the envelope's signing domain MUST NOT include any
-realm binding (portable — B0 axis 3 pin). Cross-Realm intent replay fails
-`E_INTENT_REALM_MISMATCH`. Consumption registry:
-`mapping(bytes32 intentId => uint64 intentOrdinal) consumedIntents` — nonzero
-means consumed. `INTENT_MAX_TTL_BLOCKS = 1,048,576` (2^20; ≈ 24 days at 2 s
-blocks) bounds `expiryBlock - block.number` at submission, limiting how long
-a pre-signed intent can float (TOCTOU hygiene, §6.4).
+`expectedRevisions` is strictly leaf-index ordered and contains exactly one
+entry for every selected Binding-class leaf, and no entry for any other leaf.
+Missing, extra, duplicate, out-of-mask, or wrong-revision entries revert. The
+portable Binding body's `predecessorOccurrence` remains the other CAS half.
 
-Intent applications are logged for reconstruction (§8 W-6): `uint64
-intentCount; mapping(uint64 => bytes32) intentIdByOrdinal;
-mapping(bytes32 => bytes) intentBytesById;` plus each intent's
-`atAdmissionOrdinal` (the value of `admissionCount` when it applied), so the
-interleaving of admissions and intent effects is a deterministic total order:
-admissions by ordinal, with intents inserted at their recorded
-`atAdmissionOrdinal` points, ties broken by `intentOrdinal` [PROPOSAL — makes
-Binding folds a pure function of state; Lane 5 consumes this order].
+The exact commitment is:
+
+```text
+ExpectedRevision(uint16 leafIndex,uint32 revision)
+AdmissionIntent(bytes32 realmId,bytes32 envelopeId,uint64 leafMask,uint8 action,ExpectedRevision[] expectedRevisions,uint192 nonceKey,uint64 nonceSeq,uint64 notAfter)ExpectedRevision(uint16 leafIndex,uint32 revision)
+
+EXPECTED_REVISION_TYPEHASH = keccak256(
+  "ExpectedRevision(uint16 leafIndex,uint32 revision)")
+expectedRevisionsHash = keccak256(concat(
+  keccak256(abi.encode(EXPECTED_REVISION_TYPEHASH,
+                       item.leafIndex, item.revision))
+  for item in expectedRevisions, in array order
+))
+INTENT_TYPEHASH = keccak256(
+  "AdmissionIntent(bytes32 realmId,bytes32 envelopeId,uint64 leafMask,uint8 action,ExpectedRevision[] expectedRevisions,uint192 nonceKey,uint64 nonceSeq,uint64 notAfter)ExpectedRevision(uint16 leafIndex,uint32 revision)")
+intentStructHash = keccak256(abi.encode(
+  INTENT_TYPEHASH, realmId, envelopeId, leafMask, action,
+  expectedRevisionsHash, nonceKey, nonceSeq, notAfter
+))
+DS_INT = keccak256(abi.encode(
+  keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+  keccak256("EFS2-AdmissionIntent"), keccak256("1"),
+  chainId, verifyingContract
+))
+eip712IntentDigest = keccak256(0x1901 || DS_INT || intentStructHash)
+DOM_INTENT = keccak256("efs2/admission-intent/1")
+IntentId = keccak256(abi.encode(DOM_INTENT, eip712IntentDigest))
+```
+
+`concat` is the EIP-712 concatenation of 32-byte element struct hashes; an
+empty array hashes the empty byte string. Replay state is only sequential
+lane state:
+
+```solidity
+mapping(bytes32 principalId => mapping(uint192 nonceKey => uint64 lastSeq))
+    intentNonces;
+```
+
+Explicit intent requires `nonceSeq == lastSeq + 1`; the first accepted
+sequence is 1. The intent must name this Realm and recomputed EnvelopeId,
+select a nonempty in-range mask, set `action == 0`, and satisfy `notAfter`
+(`0` means no deadline; otherwise `block.timestamp <= notAfter`); the signed
+envelope's own expiry must also pass. There is no separate intent-event order:
+kernel effects come only from accepted leaf Types in admission-ordinal order.
+
+**Consent branches inside the one ABI.** Every selected Binding-class leaf
+requires explicit intent. Relayers and non-account Principals also require an
+explicit author intent. The implicit-sender branch is internal to `publish`
+and legal only when `msg.sender` is the account represented by the already
+verified account Principal, no selected leaf is Binding-class, the selected
+mask exactly equals the carried-body set, `intentBytes` encodes only that
+`uint64 leafMask`, and `intentWitness` is empty. It is not a peer entrypoint.
+Authorship still derives from the envelope witness; `msg.sender` supplies only
+local consent.
+
+`publishBatch` is an explicitly **non-Core** SDK/router composition over
+independent `(envelopeBytes, principal, intentBytes, intentWitness)` elements.
+Its optional all-or-nothing EVM transaction aborts if any element fails;
+aggregators pre-validate wrong-author withdrawal, expiry, nonce, and CAS
+failures. It never appears in the Core ABI or semantics. Foreign uninvited
+evidence enters only through source-qualified import/Recognition Records, not
+as local destination truth.
+
+**Required call order** [PROPOSAL — exact]:
+
+```text
+1 decode and enforce bounds
+2 recompute the envelope digest and EnvelopeId
+3 computePrincipalId(principal); assert equality with header.principalId
+4 verify the envelope witness; retain its exact basis pair
+5 decode and verify explicit or implicit consent (all-duplicate shortcut first)
+6 structurally validate selected bodies and their TypeSchemas
+7 preflight every selected occurrence and leaf-driven effect
+8 allocate ordinals only to newly accepted occurrences
+9 commit envelope/Record/log/overlay/batch/cache/index/Binding writes atomically
+```
+
+The intrinsic `TypeSchemaGroup/1` branch participates in steps 6–9. When a
+new bootstrap Record is encountered, Core validates `groupBytes` (R1–R3, E1
+offset classes, `REF_INSTANCES_MAX=16`), derives every member TypeSchemaId,
+stages the parsed cache, rejects any conflicting existing entry, and makes the
+staged cache available to a later selected leaf in the same call. The Record,
+occurrence, log, cache, and index writes commit together. The only application
+Types that dispatch kernel effects are exactly
+`{TYPE_BINDING_SET_V1, TYPE_BINDING_TOMBSTONE_V1, TYPE_WITHDRAWAL_V1}`;
+bootstrap validation/cache work is not a fourth application effect. An
+already-equal cache entry is a no-op, as is cache work on exact occurrence
+re-admission. `registerTypeSchemaGroup` names only SDK construction of this
+ordinary Record/envelope/consent and a call to `publish`; it is not a Core
+transition.
 
 ### 5.5 Idempotent retry and partial-failure rules
 
 [PROPOSAL — exact semantics]
 
-- **Idempotent success.** `publish` where `envelopeId` is already admitted
-  AND `intentBytes` is empty or its `IntentId` already consumed → returns
-  `outcome = ALREADY_ADMITTED`, writes nothing, does not revert. Retry loops
-  converge without error handling; "retrying identical content is
-  idempotent" [DERIVED INVARIANT — system-constitution.md:153-154].
-- **Conflicting reuse.** Same `IntentId` submitted with a different
-  envelope, or an intent whose CAS predecessor no longer matches (Lane 5
-  rule) → typed revert; nothing commits.
-- **All-or-nothing.** Any leaf failing any check reverts the entire call —
-  there is no admit-the-valid-subset mode; a writer wanting independent
-  failure domains splits envelopes (and loses cross-envelope atomicity,
-  honestly) [PROPOSAL — an envelope is one signed unit; admitting a subset
-  would create a signed-bytes-vs-admitted-set divergence, the
-  subset-carriage hazard the axis-3/5 vectors test].
+- **Exact retry before nonce consumption.** If every selected occurrence is
+  already ACTIVE, return each existing ordinal/receipt as `ALREADY_ADMITTED`
+  without consuming or re-requiring its old nonce and without any write. A
+  mixed mask requires a fresh valid next nonce and every non-idempotent check;
+  ACTIVE members still no-op while newly accepted members receive ordinals.
+- **All-or-nothing preflight.** Any non-idempotent structural, Type, target-
+  evidence, expiry, nonce, policy, or CAS failure reverts the whole call before
+  ordinal allocation. Subset publication is explicit through `leafMask`, not a
+  post-failure admit-the-valid-subset mode.
+- **Lifecycle transitions.** The complete overlay machine is:
+
+```text
+NEVER_ADMITTED -> ACTIVE          accept; allocate next ordinal
+ACTIVE -> ACTIVE                  ALREADY_ADMITTED; existing receipt; no write
+ACTIVE -> WITHDRAWN               effective author Withdrawal
+NEVER_ADMITTED -> PRE_WITHDRAWN   authenticated pre-withdrawal
+WITHDRAWN -> WITHDRAWN            duplicate withdrawal effect; no-op success
+PRE_WITHDRAWN -> PRE_WITHDRAWN    duplicate withdrawal effect; no-op success
+WITHDRAWN/PRE_WITHDRAWN -> reject any admission; no resurrection
+```
+
+  An effective Withdrawal occurrence receives its own accepted ordinal before
+  that ordinal is written into the target's `revokedAtOrdinal`. The one-way
+  ACTIVE flip drives exactly one index/live-count decrement; PRE_WITHDRAWN
+  decrements nothing. Re-admitting the same Withdrawal occurrence is ordinary
+  occurrence idempotence; a different author-valid Withdrawal targeting an
+  already terminal occurrence is an accepted occurrence whose target effect
+  is a no-op.
+- **Authenticated pre-withdrawal.** A never-admitted target requires
+  state-free `TargetEnvelopeEvidence`: target signed header fields, the full
+  committed `recordIds[]`, target `AccountPrincipal`, and target witness, but
+  no bodies. Preflight recomputes the target EnvelopeId, requires the exact
+  target ID and target-leaf range, requires
+  `computePrincipalId(targetPrincipal) == targetHeader.principalId`, verifies
+  the target witness, and only then compares target and withdrawing
+  PrincipalIds. Missing, extra, duplicate, mismatched, or unauthenticated
+  evidence reverts; a bare target ID never sets PRE_WITHDRAWN.
+- **Wrong author.** A Principal mismatch reverts the whole envelope with
+  `ErrWithdrawNotAuthor`; it never admits inert kernel-class evidence.
 - **Typed reverts** (closed list; codes are ABI errors, not stored state):
 
 ```text
@@ -664,11 +782,17 @@ E_UNKNOWN_TYPE(uint16 leafIndex)              // TypeSchemaId not admitted
 E_AUTHORITY(uint16 code)                      // envelope authority fails (Lane 3 codes)
 E_INTENT_EXPIRED()
 E_INTENT_REALM_MISMATCH()
-E_INTENT_REPLAY()
+E_NONCE(uint192 nonceKey, uint64 expected, uint64 got)
+E_EXPECTED_REVISION(uint16 leafIndex, uint32 expected, uint32 actual)
+E_TARGET_EVIDENCE(uint16 withdrawalLeafIndex)
+E_NO_RESURRECTION(bytes32 envelopeId, uint16 leafIndex)
+ErrWithdrawNotAuthor()
 E_REF_UNSATISFIED(uint16 leafIndex, uint8 roleOrdinal)
 E_CAS_CONFLICT(bytes32 positionKey)           // Lane 5 seam
 E_BOUNDS(uint16 code)                         // named-constant violation
 E_POLICY(uint16 code)                         // Realm policy module rejection
+AUTH_PRINCIPAL_MISMATCH(bytes32 declared, bytes32 computed)
+U48_GUARD()
 ```
 
 - **Policy hook.** Realm admission policy is a bounded, revisioned check
@@ -680,43 +804,31 @@ E_POLICY(uint16 code)                         // Realm policy module rejection
   never changes portable IDs [DERIVED INVARIANT — constitution acceptance
   trace "Type and admission validation", system-constitution.md:304].
 
-### 5.6 EIP-7825 arithmetic — the cap binds and B0 fits under it
+### 5.6 EIP-7825 arithmetic — cap and Stage B hypotheses
 
-Per QR-5 the design budget per transaction is 16,777,216 gas [standards
-FACT]. Cost model constants used (EVM, post-Berlin/Pectra; PLAUSIBLE from
-general knowledge, to be re-measured by the harness): cold SSTORE to a fresh
-slot ≈ 22,100 gas; cold SLOAD ≈ 2,100 gas; calldata ≈ up to 40 gas per
-nonzero byte under the EIP-7623 floor.
+Per QR-5 the venue ceiling is 16,777,216 gas [standards FACT]. It is a cap,
+not proof that any candidate maximum fits. The shared candidate constants are
+all [HYPOTHESIS] and Stage B re-derives them against Realm fixed cost,
+state-readable body storage, per-occurrence `c_occ`, mandatory index fan-out,
+Binding effects, and bootstrap cache materialization:
 
-Named bounds [each PROPOSAL; the deciding measurement is the Stage B harness
-aggregate-write benchmark]:
 
 ```text
-MAX_ENVELOPE_BYTES     = 8,192      // canonical envelope incl. inline leaves
-MAX_LEAVES_PER_ENVELOPE= 64
-MAX_INTENT_REFS        = 64
-MAX_BATCH_ENVELOPES    = 8
-ADMISSION_PAGE_MAX     = 1,024      // entries per paged read
-POLICY_GAS_MAX         = 200,000
-INTENT_MAX_TTL_BLOCKS  = 1,048,576
-REALM_MIN_TX_GAS       = 16,777,216
-RECENT_BASIS_WINDOW    = 8,191
+MAX_ENVELOPE_LEAVES          = 64
+MAX_ENVELOPE_BODY_BYTES      = 8,192
+MAX_BODY_BYTES               = 8,192
+MAX_BIND_LEAVES_PER_ENVELOPE = 64
 ```
 
-Worst-case publish arithmetic: envelope byte spine 8,192 B → 256 slots ×
-22,100 ≈ 5.66 M; envelope admission + id maps + intent structures ≈ 8 slots
-≈ 0.18 M; per-leaf index postings (Lane 5's mandatory bundle, assumed ≤ 4
-cold slots/leaf) 64 × 4 × 22,100 ≈ 5.66 M; calldata ≤ 8,192 × 40 ≈ 0.33 M;
-hashing/execution overhead ≈ 1 M. Total ≈ 12.9 M < 16,777,216 ✓ with ~23%
-headroom. If Lane 5's measured fan-out exceeds 4 slots/leaf, either
-`MAX_LEAVES_PER_ENVELOPE` or `MAX_ENVELOPE_BYTES` shrinks — that tradeoff
-returns to James rather than being silently absorbed [OWNER-PROCESS RULE —
-kickoff:106-107]. Paged reads: a 1,024-entry admission page walks ≤ 1,024
-envelope slots ≈ 1,024 × 2 × 2,100 ≈ 4.3 M ✓; binary-search point lookup
-≈ 0.17 M ✓. A hypothetical 65,536-byte envelope would cost ≈ 45 M in slot
-storage alone — impossible under the cap; that is why large content rides
-Locators/closures, never canonical bodies [DERIVED INVARIANT — constitution
-Files/bytes block, system-constitution.md:224-238].
+The shared feasibility equation is
+`G_FIXED + c_bodies + Σ(selected new occurrences) c_occ ≤ G_TX_CAP`, with
+the index chapter supplying mandatory posting/fold costs and the harness
+owning measured values. No fixed slot count per leaf is assumed, and a maximal
+legal envelope is not claimed to admit in one transaction. Selected-leaf
+publication is the structural fallback; if measurements require a lower
+constant, the change returns to James. `MAX_BATCH_ENVELOPES`, if measured at
+all, belongs only to the optional SDK/router harness and never implies another
+Core entrypoint.
 
 ---
 
@@ -745,9 +857,9 @@ it* is always the consumer's]
 On-chain helper (same-Realm consumers):
 
 ```solidity
-/// Age of an admitted envelope, for challenge-window and depth rules.
-/// Reverts E_BOUNDS if the envelope is not admitted.
-function admissionAge(bytes32 envelopeId) external view
+/// Age of one accepted occurrence, for challenge-window and depth rules.
+/// Reverts E_BOUNDS if this occurrence has no accepted ordinal.
+function admissionAge(OccurrenceRef calldata ref) external view
   returns (uint48 admittedAtBlock, uint48 currentBlock, uint64 confirmations);
 ```
 
@@ -757,7 +869,7 @@ Client-side named-basis read (normative result object)
 ```text
 FinalityObservation/1 {
   realmId            bytes32
-  occurrenceRef      OccurrenceRef      // or envelopeId-wide
+  occurrenceRef      OccurrenceRef      // exact receipt being observed
   admittedAtBlock    uint48
   observedAtBlock    uint48             // the named basis B
   observedBlockHash  bytes32            // hash of B as seen by the observer
@@ -773,6 +885,12 @@ evidence graded by reader trust, never Core truth [PROPOSAL — no Core
 finality state exists]. Cross-Realm consumption of such observations is an
 explicit adapter concern (inbox P-3/P-22 dispositions), out of B0.
 
+The three block notions do not alias: `admittedAtBlock` comes from the
+occurrence's AdmissionBatch; `AuthorityBasisWord.basisBlock` is the verifier's
+admission-time observation basis; and `observedAtBlock/observedBlockHash` name
+the later finality read. A page's query `basisBlock` is page-scoped and does
+not replace any receipt field.
+
 ### 6.3 On-chain recent-basis tool
 
 EIP-2935 exposes an in-state ring of the last ~8,191 block hashes (live
@@ -787,14 +905,14 @@ from history [PROPOSAL — design consequence].
 
 ### 6.4 Challenge-window safety (preserved lesson)
 
-Preserved verbatim as standing owner authority [OWNER RULING — 2026-07-15
-item F, owner-rulings.md:51-54, VERIFIED]: on-chain gates use closed, trusted
-author sets; EFS does not guarantee contracts can detect equivocation; a
-collision/duplicity bit is TOCTOU-defeated (the attacker controls timing);
-contracts needing certainty against untrusted authors use a challenge-window
-(delay + re-check) pattern. B0 consequence: admission maintains **no**
-collision-state, and the receipt's `admittedAtBlock` plus `admissionAge()`
-are the exact mechanism a consuming contract needs to enforce
+Preserved in substance from standing owner authority [OWNER RULING —
+2026-07-15 item F, owner-rulings.md:51-54, VERIFIED]. The ratified requirement
+is that contracts needing certainty against untrusted authors use a
+challenge-window pattern. The supporting TOCTOU analysis is separate: an
+attacker controls timing, so a collision/duplicity bit cannot by itself make
+an immediate gate safe. B0 consequence: admission maintains **no** collision
+state, and the receipt's `admittedAtBlock` plus occurrence-scoped
+`admissionAge()` let a consumer enforce
 `confirmations >= W` before acting, then re-check the slot [PROPOSAL —
 mechanism hook; exact collision-state mechanics remain unfrozen per the PM
 directive line 21, and any future proposal to add kernel duplicity state must
@@ -812,9 +930,9 @@ mapping(uint32 => RealmRevision) revisions;   // 1-based, append-only
 struct RealmRevision {                        // 3 slots
   bytes32 implementationCodehash;             // slot 0
   bytes32 policyCommitment;                   // slot 1
-  // slot 2: bytes 0-5 activatedAtBlock uint48 (BE);
-  //         bytes 6-13 firstAdmissionOrdinal uint64 (BE) — the first ordinal
-  //         admitted under this revision; bytes 14-31 reserved zero
+  // slot 2: activatedAtBlock u48;
+  //         firstAdmissionOrdinal u48 — admissionCount + 1 at activation;
+  //         reserved u160 MBZ
 }
 ```
 [PROPOSAL] For `upgradeAuthorityKind = NONE` the Core account's own codehash
@@ -841,7 +959,10 @@ core-architecture-candidate.md:58-61.]
   `RealmRevision` with the new `implementationCodehash`, active
   `policyCommitment`, `activatedAtBlock = block.number`, and
   `firstAdmissionOrdinal = admissionCount + 1`. Revisions are append-only;
-  `revisionOrdinal` strictly increases.
+  `revisionOrdinal` and `activatedAtBlock` strictly increase. The stored
+  boundary is u48 and every public read widens it to u64. Boundaries are
+  **nondecreasing**, because multiple empty revisions can share the same next
+  admission ordinal.
 - **U-3 (breaking = new Realm).** Any change outside U-1(a-e) is
   semantics-breaking and MUST NOT reuse the RealmId: it requires a new
   deployment (new genesisCommitment → new RealmId) plus, optionally,
@@ -852,9 +973,11 @@ core-architecture-candidate.md:58-61.]
   slot would be a mutable global administrator surface; cf. the succession
   cluster flagged by the intake SURVIVORS lane finding 1, reserved not
   frozen].
-- **U-4 (per-admission basis).** Every admission stores `revisionOrdinal`
-  (§5.1); verification and interpretation of an old Occurrence use the
-  recorded revision's basis, never the current one. A later upgrade,
+- **U-4 (per-admission basis).** Every accepting call stores the explicit
+  `revisionOrdinal` in its AdmissionBatch (§5.1); receipt reconstruction uses
+  that value, never boundary inference or the current revision. Verification
+  and interpretation of an old Occurrence use the recorded revision's basis.
+  A later upgrade,
   account-code change, or controller rotation does not silently reinterpret
   an old admission [DERIVED INVARIANT — constitution
   system-constitution.md:133-136; candidate falsifier 7].
@@ -895,37 +1018,42 @@ W-1  GENESIS     read genesisFacts(): chainRef, profileId, codexConstantsHash,
                  deployBlock, deployCodehash, initConfigHash, realmId.
                  Recompute genesisCommitment and RealmId; compare.
 W-2  REVISIONS   n := revisionCount(); for i in 1..n read revisionAt(i);
-                 verify activatedAtBlock and firstAdmissionOrdinal are
-                 strictly increasing; recompute each RealmRevisionId.
-W-3  ENVELOPES   E := envelopeCount(); for e in 1..E:
-                   id  := envelopeIdByOrdinal(e)
-                   adm := admissionByEnvelopeId(id)     // packed slot + basis
-                   verify adm.envelopeOrdinal == e
-W-4  BYTES       for each envelope id: bytes := getEnvelopeBytes(id)
-                 (total function over admitted envelopes; physical layout
-                 owned by the RecordStore chapter, DEPENDS-ON Lane 2).
-                 Recompute EnvelopeId from bytes; MUST equal id.
-W-5  LEAVES      decode leaves 0..n-1 per the canonical codec; for each leaf
-                 recompute RecordId and TypeSchemaId; Occurrence set :=
-                 { (id, k) } with admissionOrdinal firstAdmissionOrdinal + k.
-                 Types are themselves Records of the bootstrap meta-Type and
-                 appear in this same walk — no side registry exists.
-W-6  INTENTS     I := intentCount(); for i in 1..I:
-                   iid   := intentIdByOrdinal(i)
-                   bytes := intentBytesById(iid)        // state-stored, §5.4
-                   read atAdmissionOrdinal(iid)
-                 Build the total event order: admissions by ordinal, intents
-                 inserted at their atAdmissionOrdinal, ties by intentOrdinal.
-W-7  RECEIPTS    logical AdmissionReceipt/1 per occurrence is now fully
-                 derivable; cross-check a sample (or all) against
-                 receiptOf(envelopeId, leafIndex).
-W-8  INDEXES     replay the Lane 5 posting fold over the W-6 total order;
-                 the fold MUST be a pure deterministic function of that
-                 order (DEPENDS-ON Lane 5 determinism guarantee); compare
-                 recomputed postings against paged index reads.
-W-9  BINDINGS    replay the Binding CAS fold over the same order; compare
-                 current heads against Binding point reads (DEPENDS-ON
-                 Lane 5).
+                 require revisionOrdinal and activatedAtBlock strictly
+                 increase, firstAdmissionOrdinal is nondecreasing, and each
+                 boundary lies in 1..admissionCount+1. Recompute the exact
+                 descriptor and every RealmRevisionId; the write rule was
+                 admissionCount-at-activation + 1.
+W-3  ENVELOPES   enumerate envelopeOrdinal 1..envelopeCount; fetch persisted
+                 signed envelope bytes and the full ordered RecordId vector.
+                 Recompute the EIP-712 digest and EnvelopeId. Fetch the
+                 PrincipalRecord, recompute PrincipalId, and require linkage
+                 to the signed header and EnvelopeMeta.
+W-4  ADMISSIONS  for ord in 1..admissionCount: read logSlotA/logSlotB; hydrate
+                 the exact OccurrenceRef; recompute occKey; require
+                 occStatus.ordinal == ord and status in {ACTIVE, WITHDRAWN}.
+                 Resolve the logged typeOrd/principalOrd through their reverse
+                 maps and compare them with the hydrated Record and envelope.
+                 Find the admitting batch from its explicit firstOrdinal
+                 boundary and reconstruct the logical receipt using that
+                 batch's block, revision, AuthorityBasisWord, and codehash.
+W-5  RECORDS     hydrate the selected leaf body; recompute RecordId and compare
+                 with envelope.recordIds[leafIndex]. Process accepted ordinals
+                 in order, not envelope-leaf order.
+W-6  TYPES       when a Record is TypeSchemaGroup/1, validate groupBytes,
+                 derive every member TypeSchemaId and deterministic parsed
+                 cache entry, and compare cache point reads. Validate later
+                 application Records against the reconstructed cache.
+W-7  EFFECTS     replay exactly the Binding-set, Binding-tombstone, and
+                 Withdrawal leaf-Type effects in admission-ordinal order.
+                 Withdrawal Records derive ACTIVE->WITHDRAWN or
+                 NEVER_ADMITTED->PRE_WITHDRAWN overlay results; there is no
+                 peer intent event stream.
+W-8  INDEXES     replay deterministic postings, per-Record liveness, and count
+                 folds from the same accepted-occurrence order; compare every
+                 bounded index read, including its cursor/high-water/basis.
+W-9  BINDINGS    replay Binding CAS/head folds from the same order and compare
+                 point reads. Finally compare every reconstructed OccStatus,
+                 including PRE_WITHDRAWN targets absent from the admission log.
 W-10 VERDICT     any mismatch at W-1..W-9 is a conformance failure of the
                  Realm or of one implementation — a Stage B golden-vector
                  category, and at runtime an UNQUALIFIED_REALM grading, never
@@ -935,6 +1063,13 @@ W-10 VERDICT     any mismatch at W-1..W-9 is a conformance failure of the
 ### 8.2 Reconstruction read ABI (complete list)
 
 ```solidity
+enum Completeness {
+  UNKNOWN,       // 0; zero/default can never claim coverage
+  COMPLETE,      // 1
+  PARTIAL,       // 2
+  UNSUPPORTED    // 3
+}
+
 function realmId() external view returns (bytes32);
 function genesisFacts() external view returns (
   bytes8 chainNamespace, bytes32 chainReference, address core,
@@ -953,56 +1088,61 @@ function admissionCount() external view returns (uint64);
 function envelopeCount() external view returns (uint40);
 function envelopeIdByOrdinal(uint40 ordinal) external view returns (bytes32);
 function getEnvelopeBytes(bytes32 envelopeId) external view returns (bytes memory);
-function admissionOf(bytes32 envelopeId) external view returns (
-  uint40 envelopeOrdinal, uint64 firstAdmissionOrdinal, uint16 leafCount,
-  uint32 revisionOrdinal, uint48 admittedAtBlock, uint8 acceptedStatus,
-  bytes32 authorityBasis);
+function envelopeInfo(bytes32 envelopeId) external view returns (
+  uint40 envelopeOrdinal, bytes32 principalId, uint16 leafCount);
+function getPrincipalRecord(bytes32 principalId) external view
+  returns (bytes memory descriptorBytes);
+function typeSchemaIdByOrdinal(uint64 typeOrdinal) external view
+  returns (bytes32 typeSchemaId);
+function principalIdByOrdinal(uint64 principalOrdinal) external view
+  returns (bytes32 principalId);
+function occurrenceStatus(bytes32 envelopeId, uint16 leafIndex) external view
+  returns (uint8 status, uint64 admissionOrdinal, uint64 revokedAtOrdinal);
 function receiptOf(bytes32 envelopeId, uint16 leafIndex) external view
   returns (AdmissionReceiptView memory);      // logical AdmissionReceipt/1
 function admissionAt(uint64 ordinal) external view
-  returns (OccurrenceRef memory);             // binary search, §5.3
+  returns (OccurrenceRef memory);             // direct two-word log read
 function admissionPage(uint64 startOrdinal, uint16 maxCount) external view
-  returns (OccurrenceRef[] memory page, uint64 nextCursor, uint8 completeness,
-           uint64 highWater, uint48 basisBlock);
-function intentCount() external view returns (uint64);
-function intentIdByOrdinal(uint64 ordinal) external view returns (bytes32);
-function intentBytesById(bytes32 intentId) external view returns (bytes memory);
-function intentApplicationOf(bytes32 intentId) external view returns (
-  uint64 intentOrdinal, uint64 atAdmissionOrdinal, uint48 appliedAtBlock);
-function admissionAge(bytes32 envelopeId) external view
+  returns (OccurrenceRef[] memory page, uint64 nextCursor,
+           Completeness completeness, uint64 highWater, uint48 basisBlock);
+function admissionBatchCount() external view returns (uint64);
+function admissionBatchAt(uint64 batchId) external view returns (
+  uint64 firstOrdinal, uint16 acceptedCount, uint48 admittedAtBlock,
+  uint32 revisionOrdinal, AuthorityBasisWord authorityBasis,
+  bytes32 codehashOrZero);
+function admissionAge(OccurrenceRef calldata ref) external view
   returns (uint48 admittedAtBlock, uint48 currentBlock, uint64 confirmations);
+
+// Byte-identical index-owned point reads used by W-5/W-6 comparison.
+function getRecord(bytes32 recordId) external view returns (
+  bytes32 typeSchemaId, bytes memory canonicalBody,
+  uint64 firstAdmittedAtOrdinal);
+function getTypeSchema(bytes32 typeSchemaId) external view returns (
+  bytes memory canonicalSchemaBody, uint64 typeOrdinal,
+  uint64 admittedAtOrdinal, uint8 refRoleCount, uint8 indexSpecCount);
 ```
-[PROPOSAL — every page-shaped read returns `(cursor, completeness, highWater,
-basisBlock)`; completeness uses the constitution enum values COMPLETE=1,
-PARTIAL=2 (UNSUPPORTED=3, UNKNOWN=4 reserved for this contract's reads),
-"truncation or missing coverage returns PARTIAL/UNKNOWN, never empty"
-— DERIVED INVARIANT, system-constitution.md:307]
+[PROPOSAL — every page-shaped read uses the same fail-closed enum and returns
+cursor, high-water, and query basis. Truncation is `PARTIAL`; an unsupported
+profile is `UNSUPPORTED`; an unavailable or unproven basis is `UNKNOWN`.
+Zero/default can never mean COMPLETE-empty. This external completeness word is
+distinct from §4.2's semantic presence `UNKNOWN` and from `BasisGrade`.]
 
 Honest scope note: this walk reconstructs state **at the basis the RPC
 serves** (latest, or any basis within QR-2's window). Reconstructing a *past*
 snapshot needs archive state — a bonus under QR-2, never a requirement, and
 never claimed by the guarantee [PROPOSAL — honesty boundary].
 
-Optional accumulator [HYPOTHESIS — falsified/decided by the Stage B gas
-harness]: a rolling `stateDigest = keccak256(prevDigest ‖ envelopeId ‖
-packedAdmissionSlot)` updated per admission (~1 warm SSTORE ≈ 2,900 gas per
-envelope) would let a rebuilt implementation verify the whole walk against
-one word. Adopt only if the aggregate write budget holds; correctness does
-not depend on it.
-
 ### 8.3 EAS adapter seam (specified here, exercised at V2-E8)
 
 Per the PM directive (line 18): the loss-map is deferred to V2-E8; the seam
-is pinned now [PROPOSAL]: an EAS adapter is an **ordinary permissionless
-submitter** of envelopes/intents — no special entrypoint, no Core knowledge
-of EAS. Two reservations make the seam real: (a) Lane 3's AuthorityBasis
-vocabulary MUST reserve a code range for "authority verified against a
-foreign carrier at a recorded basis" so an adapter-published admission can
-record honest provenance without new receipt fields; (b) foreign carrier
-identifiers (EAS UIDs, schema UIDs) enter only as algorithm-tagged ByteDigest
-values inside application Types, never as EFS identity (skeleton rule). The
-V2-E8 loss-map then only fills in *what* survives round-trip, not *where* it
-plugs in.
+is pinned now [PROPOSAL]: an EAS adapter is an ordinary author and calls typed
+`publish`; Core has no EAS entrypoint or fabricated verifier result. Foreign
+attestation/carrier provenance enters in ordinary application Record bodies
+and Recognition grading. EAS UIDs and schema UIDs are algorithm-tagged
+ByteDigest values, never EFS identity. Imported evidence remains source-
+qualified and cannot become local destination truth merely because an adapter
+carried it. The V2-E8 loss-map fills in what survives round-trip, not a new
+authority kind or write path.
 
 ---
 
@@ -1013,8 +1153,9 @@ The compact contract other chapters rely on:
 - **ChainRef/1** `(bytes8 chainNamespace, bytes32 chainReference)`; eip155
   pinned; CAIP-2 human projection; ERC-7930 projection deferred until Final.
 - **ID formulas**: `RealmId` (§2.2), `profileId` (§2.3), `genesisCommitment`
-  (§2.4), `RealmRevisionId` (§2.5), `IntentId` (§5.4) — all
-  `keccak256(ASCII domain ‖ abi.encode(fixed-width words))`.
+  (§2.4), `RealmRevisionId` (§2.5), occurrence key (§5.1), and `IntentId`
+  (§5.4) — all use an SR-1 hashed domain word as the first fixed-width
+  `abi.encode` field; variable structures enter as one `keccak256` word.
 - **RealmDescriptor/1** three-section field set (§2.1); RealmId is the only
   identity; section C is untrusted.
 - **Client MUST-checks C-1..C-7** (§3) — conformance list for any direct
@@ -1023,58 +1164,60 @@ The compact contract other chapters rely on:
   instead of inventing per-chapter chain assumptions.
 - **BasisGrade** enum incl. `UNAVAILABLE_SOURCE_BASIS` with normative
   wording (§4.2); rules H-1..H-5. Presence and basis axes never collapse.
-- **AdmissionReceipt/1** logical shape (§5.1); physical per-envelope packed
-  layout; `acceptedStatus` table (§5.2); ordinal rule
-  `leaf k ↔ firstAdmissionOrdinal + k` (§5.3).
-- **Entrypoints** `publish(envelopeBytes, intentBytes)`,
-  `applyIntent(intentBytes)`, `publishBatch(...)` with `PublishResult`;
-  REF-SAT dependent-write rule; idempotent `ALREADY_ADMITTED`; typed revert
-  list (§5.4-5.5). One external call = one atomicity domain.
-- **AdmissionIntent/1** canonical words + realm-bound signing domain;
-  envelope signing domain MUST stay realm-free (§5.4).
-- **Total event order** (admissions ⊎ intent applications, §5.4/W-6) — the
-  input Lane 5's index/Binding folds MUST be pure functions of.
-- **Finality**: `admissionAge()`, `FinalityObservation/1`,
-  `finalityRuleKind` table; challenge-window pattern hook (§6).
-- **Upgrade rules U-1..U-6**; `revisionOrdinal` recorded per admission;
+- **One Core mutation**: typed
+  `publish(envelopeBytes, AccountPrincipal calldata principal, intentBytes,
+  intentWitness) -> PublishResult`; descriptor equality precedes both witness
+  checks. Implicit sender consent is a non-Binding internal branch. Batch is
+  optional non-Core SDK/router composition (§5.4).
+- **Exact AdmissionIntent/1**: Realm-bound EIP-712 commitment, selected
+  `leafMask`, MBZ action, exact Binding expected-revision array, sequential
+  `(principalId, nonceKey) -> lastSeq` lanes, exact-retry shortcut, and
+  `IntentId = keccak256(abi.encode(DOM_INTENT, eip712IntentDigest))` (§5.4).
+- **Occurrence contract**: four-state OccStatus overlay; authenticated target
+  evidence and wrong-author revert; no resurrection; sparse u64/public,
+  u48/stored ordinals; reversible `logSlotA/logSlotB`; per-occurrence receipt
+  reconstructed from explicit AdmissionBatch block/revision/exact
+  AuthorityBasisWord/conditional codehash (§5.1–5.5).
+- **Intrinsic bootstrap**: ordinary accepted TypeSchemaGroup/1 Record plus
+  atomic validation and deterministic Type cache materialization. The only
+  application-effect Types are Binding set, Binding tombstone, and Withdrawal.
+- **Finality**: occurrence-scoped `admissionAge(OccurrenceRef)` and
+  `FinalityObservation/1`; admission, verifier, finality-read, and page-query
+  bases remain distinct (§6).
+- **Upgrade rules U-1..U-6**: activation boundaries are stored u48/public u64
+  and nondecreasing; explicit batch revision owns receipt reconstruction;
   breaking change = new RealmId + successor evidence (§7).
-- **Reconstruction ABI** (§8.2) — the complete state-only read surface;
-  no-event-logs guarantee.
-- **Named constants** table (§5.6) with EIP-7825 arithmetic.
+- **Reconstruction ABI** (§8.2): the complete state-only read surface,
+  including envelope, occurrence/log, batch, Record, Type-cache, effects,
+  index, and Binding comparison points; no intent event log or private DB.
+- **Completeness**: one external byte vocabulary `UNKNOWN=0, COMPLETE=1,
+  PARTIAL=2, UNSUPPORTED=3`, always with cursor/high-water/basis on pages.
+- **Named constants** (§5.6): shared SR-5 values remain Stage B hypotheses;
+  selected-leaf publication is the structural fallback.
 - **Depended-on seams**: Lane 2 (envelope codec, EnvelopeId preimage,
-  `getEnvelopeBytes` physical layout, MAX body split); Lane 3
-  (AuthorityBasis preimage, verifier versioning, witness formats, adapter
-  code range); Lane 5 (Binding CAS + posting folds, per-leaf fan-out ≤ 4
-  slots assumption in §5.6); encoding chapter (canonical codec,
-  codexConstantsHash, recursive-Type/SELF rules).
+  full RecordId vector and state-readable body layout); Lane 3
+  (`AccountPrincipal`, PrincipalRecord, exact verifier/basis/codehash); Lane 5
+  (Binding CAS and the three leaf-driven effects); encoding chapter (canonical
+  codec, exact TypeSchemaGroup validation/cache, codexConstantsHash).
 
 ## Open items
 
-1. **AuthorityBasis preimage** — Lane 3 must pin the exact commitment
-   (verifier version, ERC-1271 codehash basis, EIP-7702 classification) that
-   fills the receipt's bytes32; this chapter reserves the slot only.
-2. **Envelope byte codec and MAX_BODY split** — Lane 2/encoding; §5.6's
-   8,192-byte envelope cap is arithmetic-backed but the per-leaf body bound
-   inside it is theirs. SSTORE2-style code-page storage (~3× cheaper per
-   byte, PLAUSIBLE) is a bakeoff arm that could raise the cap; measured at
-   Stage B.
-3. **Per-leaf index fan-out ≤ 4 cold slots** — assumption borrowed for §5.6;
-   Lane 5's V2-E4 costing confirms or shrinks the leaf/envelope bounds; any
-   loss of an adopted query obligation returns to James.
-4. **admissionAt binary search vs stored admission log** — pinned to binary
-   search [PROPOSAL]; flip if the Stage B harness shows contract callers need
-   the O(1) log (≈ 5.5 k gas/leaf amortized to add).
-5. **Non-eip155 ChainRef namespaces** — reserved, undefined in B0; ERC-7930
+1. **Measured size/cost constants.** Stage B measures the shared SR-5
+   candidates, full-body layout, per-occurrence mandatory fan-out, policy,
+   target evidence, and bootstrap cache materialization against the Realm cap.
+   A failing maximum shrinks the constants and returns to James; no query
+   obligation is silently lost.
+2. **Non-eip155 ChainRef namespaces.** Reserved, undefined in B0; ERC-7930
    adoption revisited when it leaves Review.
-6. **State-proof client mode** — C-7(b) names `eth_getProof`; the exact
+3. **State-proof client mode.** C-7(b) names `eth_getProof`; the exact
    proof-verification client profile is SDK-lane work.
-7. **stateDigest accumulator** — HYPOTHESIS pending gas measurement (§8.2).
-8. **Intent action table 2/3 semantics** (BIND/WITHDRAW actionData layouts)
-   — Lane 5 owns; this chapter fixes only the envelope-level mechanics,
-   consumption registry, and event-order logging.
-9. **EAP fixture** — provisional per PM directive; no admission-layer
+4. **EAP fixture.** Provisional per PM directive; no admission-layer
    dependency was taken on it.
-10. **Realm mortality owner decision** — deliberately NOT raised: §4 closes
-    the chains-don't-die scope gap by design (qualifying assumption +
-    UNAVAILABLE_SOURCE_BASIS honest path). Raise to James only if a reviewer
-    shows a workload where the works-either-way path is impossible.
+5. **Realm mortality scope.** The works-either-way mechanism is complete:
+   qualifying assumptions plus `UNAVAILABLE_SOURCE_BASIS` define behavior.
+   Whether the chains-don't-die ruling applies per Realm remains a candidate
+   owner decision presented to James only through proposed spine edit A2 at
+   Stage A review; B0 does not block on that answer.
+6. **EAS loss map.** V2-E8 records what survives round-trip through ordinary
+   publication and Recognition evidence. It may not create a reserved
+   AuthorityBasis code, special Core entrypoint, or foreign-carrier identity.
