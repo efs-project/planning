@@ -1,5 +1,5 @@
 # Controlled bakeoff specification — cells, confounds, and decision rules
-**Stage A chapter — draft for red-team review; not landed, adopts nothing.**
+**Stage A chapter — post-red-team repair; not landed, adopts nothing.**
 
 Assembly Lane A of the Stage A commissioned pass (2026-08-12). This chapter is PM
 deliverable 4: the controlled bakeoff specification that separates the seven kickoff
@@ -23,15 +23,16 @@ BAKEOFF audit lane; individual gates cite their own authority.
 
 ## 0. Position, inputs, and the amendment
 
-**Inputs.** The B0 "SPINE" arm is now exact across eight chapters:
+**Inputs.** B0 means the repaired SR-1..SR-18 configuration, not the
+pre-red-team parallel drafts. It is exact across eight chapters:
 `b0-encoding-and-ids.md` (Lane 1), `b0-authorship-envelope.md` (Lane 2),
 `b0-principal-authority.md` (Lane 3), `b0-realm-admission.md` (Lane 4),
 `b0-indexes.md` (Lane 5), `b0-binding.md` (Lane 6), `b0-lens.md` (Lane 7),
 `b0-content-locators.md` (Lane 8). Every flip cell below is defined as a **delta
-against named sections of those chapters** — never as a fresh design. Where chapters
-disagree on a shared constant (they do; §8 Open items lists the known cases), the
-synthesizer's reconciled B0 is the baseline; cell deltas are invariant under those
-reconciliations unless flagged.
+against named sections of those chapters** — never as a fresh design. Every
+cell inherits the repaired exact identities, ABI widths, lifecycle overlay,
+schema on-ramp, and SR-18 vocabularies. A stale owning-chapter repair blocks the
+cell; it is never a cell-local choice.
 
 **The amendment [PROPOSAL — amends kickoff line 71; evidence: BAKEOFF lane findings
 1–2, both SERIOUS, VERIFIED].** Three facts break literal one-axis-at-a-time:
@@ -113,8 +114,8 @@ interactions is PLAUSIBLE and is itself red-team surface.]
 | Pair | Mechanism of interaction | Treatment |
 |---|---|---|
 | **1×7** | Posting/log cost sits inside the same aggregate calldata/SSTORE totals that decide axis 1; envelope amortization changes per-posting volume (b0-indexes.md §2.2's 2-log-slots-per-occurrence and §9 totals). The **sign** of the axis-7 verdict could flip with Record shape. | Dedicated interaction cell **X17** (§3.9); interaction contrast `I_17` (§4.7). |
-| **1×2** | The author surface appears once per Envelope under arm E (b0-authorship-envelope.md §2.1 field 2) but once per Record under arm S — header repetition amplifies any tagged-union byte/gas delta. | **Arithmetic recovery**: `Δ_1×2 ≈ (records per publication − 1) × δ_tag`, where `δ_tag` is the per-author tagged-union delta measured on the F2 thin variant (§4.2 D5). No cell. |
-| **4×7** | Variant B's backfill writes postings for historical records (candidate lines 294–298), so backfill gas depends on the posting encoding (13.4k amortized packed vs ~2×22.1k wide; b0-indexes.md §9, §10). | Measure backfill in F4 **on baseline packed ordinals only**; compute the wide-posting delta arithmetically from F7's measured per-posting append delta. Declared on the F4 report. |
+| **1×2** | The author surface appears once per Envelope under arm E (b0-authorship-envelope.md §2.1 field 2) but once per Record under arm S — header repetition amplifies any tagged-union byte/gas delta. | **Conditional arithmetic recovery**: `Δ_1×2 = (records per publication − 1) × δ_tag` may be used only after trace decomposition demonstrates the F2 tag component is isolated and unchanged in F1; otherwise the interaction is UNMEASURED and cannot decide an arm. |
+| **4×7** | Variant B's backfill writes postings for historical records (candidate lines 294–298), so backfill gas depends on the posting encoding (13.4k amortized packed vs ~2×22.1k wide; b0-indexes.md §9, §10). | Measure backfill in F4 **on baseline packed ordinals only**; derive the wide-posting delta from F7 only after trace decomposition proves the reused append component is isolated. Otherwise label 4×7 UNMEASURED and do not decide from it. |
 | **3×5** | Subset-carriage vectors behave differently for inline-carried vs reference-only leaves (what the wire must reveal vs what admission requires present). | **Shared vector suite**: the subset-carriage suite (b0-authorship-envelope.md §7, §12 cat. 4) runs unchanged in B0, F3, AND F5; results reported per cell, never pooled. |
 | **6×7** | Ordinal assignment needs one strictly-increasing counter shared by Admission (assigns; b0-realm-admission.md §5.3), Index (appends postings keyed by it; b0-indexes.md §2.3), and Binding (stamps heads; b0-binding.md §3.4). Under arm D that counter crosses a physical contract boundary. | **Written analysis in the F6 report** (§3.7): note that arm W (RecordId postings) removes the shared-counter coupling ordinals impose on the modular arm — i.e., a D+W combination is architecturally easier than D+O — plus the measured per-boundary overhead. No cell. |
 
@@ -163,7 +164,7 @@ corpus + workload scripts (§6).
 
 ### 3.1 B0 — SPINE
 
-The eight chapters as reconciled by the synthesizer; no delta. Two obligations
+The eight chapters repaired to SR-1..SR-18; no delta. Two obligations
 specific to this spec:
 
 **Arm-choice provenance [PROPOSAL — required by BAKEOFF finding 5 so the memo states
@@ -192,15 +193,15 @@ one (TypeSchemaId, canonicalBody). No shared Envelope, no leaves.
 **Exact delta vs B0 (Engine β rebuild of Lane 2's surface):**
 
 - `PublicationEnvelope/1` (b0-authorship-envelope.md §2.1) → `PublicationCard/1`:
-  fields 1–6 unchanged (profile, principalId, authorityId=0, authEpoch=0, pubNonce,
+  fields 1–6 unchanged (profile, principalId, authorityRef=0, authEpoch=0, pubNonce,
   notAfter — the reserved authority-basis seam §6 is preserved verbatim), field 7
   `recordIds[]` replaced by `typeSchemaId bytes32` + the RecordId of the single body.
   Wire carries the one body + witness. EIP-712 primary type string changes
   (`PublicationCard(...)`), domain name `"EFS2-Card"`, structural wrap domain
-  `"efs2f1/card/1"` — F1 domain constants live in an `efs2f1/` namespace so no F1 id
-  can collide with a spine id [PROPOSAL — same discipline as
+  `DOM_F1_CARD = keccak256("efs2f1/card/1")` — F1 domain constants live in an
+  `efs2f1/` namespace so no F1 id can collide with a spine id [PROPOSAL — same discipline as
   b0-encoding-and-ids.md §7 rule 1].
-- `CardId = keccak256("efs2f1/card/1" ‖ abi.encode(eip712CardDigest))` — the §2.3
+- `CardId = keccak256(abi.encode(DOM_F1_CARD, eip712CardDigest))` — the §2.3
   single-source-identity rule carried unchanged. `RecordId` formula untouched
   (axis 4 arm A shared).
 - **Occurrence identity adapter (the load-bearing line).** `OccurrenceRef ≡ (CardId,
@@ -214,13 +215,16 @@ one (TypeSchemaId, canonicalBody). No shared Envelope, no leaves.
   still requires a separate Realm-bound `AdmissionIntent/1` (b0-authorship-envelope.md
   §5.1) with `envelopeId → cardId` and `leafMask` fixed to 1 (or the field dropped and
   the type string adjusted; either way one intent admits one card). Intent nonces,
-  `admitAsSender`, and author-only admission (§5.2–§5.4) carry unchanged. [PROPOSAL —
+  PrincipalId descriptor carriage and verification carry unchanged;
+  `admitAsSender` remains legal only for non-Binding cards, while Binding cards
+  require the exact SR-3 `expectedRevisions[]`. [PROPOSAL —
   adopts BAKEOFF finding 2's recommendation: F1 isolates axis 1.]
 - Admission algorithm (§5.3): steps unchanged except the leaf loop degenerates to one
   iteration; the envelope spine mappings (§10) become a card spine
   (`cardPrincipal`, `cardMeta`, one RecordId — no vector). Receipts: one receipt per
-  card; `firstAdmissionOrdinal + k` degenerates to `k = 0`
-  (b0-realm-admission.md §5.1/§5.3 carry with `leafCount = 1`).
+  card; its one newly accepted occurrence receives the next SR-10 ordinal and
+  is read through the shared occKey lifecycle overlay. No base/leaf arithmetic
+  survives merely because `leafIndex = 0`.
 - Batch publication of n Records = n cards = n signatures + n header storage writes —
   this repetition **is the measured quantity** for axis 1.
 
@@ -271,11 +275,17 @@ verifyingContract — the §5.1 domain shape), and **no separate AdmissionIntent
   since the envelope now HAS local effects, it must carry the replay defense the
   intent carried: the 2-D nonce pair (`nonceKey`, `nonceSeq` — §5.2) moves INTO the
   signed envelope. `admitAsSender` keeps its role (sender-consent path).
+- AccountPrincipal descriptor carriage and
+  `computePrincipalId(descriptor) == header.principalId` still precede witness
+  verification exactly as SR-13/SR-14 require.
 - **Binding CAS carriage (declared confound).** B0 carries per-leaf
   `expectedRevision` in the Realm-bound intent precisely to keep Realm-local state
   out of portable bytes (b0-binding.md §3.2 [PROPOSAL there]). F3 has no intent, so
-  `expectedRevision` moves into the signed Realm-bound envelope (legitimate there —
-  the envelope is already Realm-bound). This is a real design difference that rides
+  the entire SR-3 `expectedRevisions[]` commitment — the exact
+  `ExpectedRevision(uint16 leafIndex,uint32 revision)` array hash, ordering,
+  cardinality, and selected-Binding coverage rules — moves into the signed
+  Realm-bound envelope (legitimate there — the envelope is already Realm-bound).
+  This is a real design difference that rides
   the flip; the F3 report must note that CAS ergonomics differ across arms for
   reasons downstream of axis 3 itself.
 
@@ -288,21 +298,26 @@ must re-sign per Realm. Both numbers come from the same fixture traces.
 
 ### 3.5 F4 — SPLIT-ID (axis-4 flip; distinct engine)
 
-Per the Variant B sketch in b0-encoding-and-ids.md §3.6 (formulas verbatim):
-`TypeId`, `ShapeId`, `IndexProfileId`, and `RecordId_B = keccak256(DOM_RECORD_B ‖
-typeId ‖ shapeId ‖ keccak256(canonicalBody))` under new `*_B` domain constants.
+Per the Variant B sketch in b0-encoding-and-ids.md §3.6, every alternate id
+uses its own hashed cell-local `DOM_*_B` word and fixed-word `abi.encode` under
+SR-1. In particular,
+`RecordId_B = keccak256(abi.encode(DOM_RECORD_B, typeId, shapeId,
+keccak256(canonicalBody)))`; structured inputs enter through exactly one nested
+hash.
 
 **Exact rebuild list (why this is Engine γ, not a branch):**
-- Schema registration splits into semantic-block, shape, and index-profile
-  registration (three content-addressed registries replacing
-  b0-encoding-and-ids.md §3.3–§3.4).
+- The schema object may separate semantic, shape, and index-profile
+  commitments, but enters state as a `TypeSchemaGroup/1` Record through the
+  sole ordinary `publish` entrypoint. F4 may not introduce a second Core
+  registration function or a two-step materialization path.
 - Index population keys postings by `(IndexProfileId, …)` instead of the
   Variant-A `(TypeSchemaId, specOrdinal, …)` of b0-indexes.md §2.1/§4.3.
 - **Coverage state machine (new state, the heart of the arm):** per
   (IndexProfileId): `DECLARED(startBasis) → BACKFILLING(cursor) → COMPLETE`, all
   transitions recorded with ordinals. Every page read under a profile not COMPLETE
   for the queried range returns `PARTIAL` with the profile's `startBasis` and
-  backfill cursor; b0-indexes.md §5.2 rule 2 (UNSUPPORTED, structural under
+  backfill cursor; external Completeness remains exactly
+  `UNKNOWN=0, COMPLETE=1, PARTIAL=2, UNSUPPORTED=3`; b0-indexes.md §5.2 rule 2 (UNSUPPORTED, structural under
   Variant A) gains start-basis/coverage fields exactly as that chapter's open item 8
   anticipates.
 - **Backfill entrypoint:** permissionless, bounded batch. EIP-7825 arithmetic
@@ -313,7 +328,7 @@ typeId ‖ shapeId ‖ keccak256(canonicalBody))` under new `*_B` domain constan
   honesty is what makes that campaign safe to run slowly.
 
 **Shared:** Envelope/admission machinery, Binding, Lens, principal, content types
-(their Type declarations re-registered under the split formulas by the harness).
+(their Type declarations published under the split formulas by the harness).
 
 **Declared confound (4×7):** backfill gas measured on packed ordinals only; the wide
 delta computed from F7 (§1.3).
@@ -337,7 +352,8 @@ makes F5 a lean branch.
 - Wire: `carriedLeafIndexes`/`bodies` may be a strict subset of admitted leaves.
 - Everything else — EnvelopeId, intent, occurrence state machine, indexes — shared.
 
-**Optional sub-variant F5m [not measured unless §4.5's crossover is inconclusive]:**
+**Optional sub-variant F5m [not measured unless §4.5's direct endpoint-weighted
+result is inconclusive]:**
 `leavesHash` as a positional Merkle root enabling single-leaf proofs
 (b0-encoding-and-ids.md §4.2 bakeoff sketch). Kept out of the primary cell to avoid
 compounding carriage with commitment structure.
@@ -355,7 +371,8 @@ spine), `Admission` (verifier + receipts + ordinals; the single write entrypoint
 **Exact rebuild list:**
 - The internal-library seams that B0 pins as in-process calls become external
   interfaces: `LibBinding.applyBind` → `IBinding.applyBind` (b0-binding.md §8),
-  `LibIndex.appendPosting`/`foldRevocation` → `IIndex.*` (b0-indexes.md
+  `LibIndex.appendPosting` plus status-aware activation/withdrawal calls that
+  consume the shared SR-10 overlay → `IIndex.*` (b0-indexes.md
   "Internal seam"), Lens's `recordBody`/`bindingHead` reads (b0-lens.md §5.2) →
   cross-contract STATICCALLs.
 - Wiring: immutable addresses fixed at deployment, codehash pinned in the Realm
@@ -378,10 +395,12 @@ W would dissolve the coupling by keying postings on ids rather than ordinals.
 ### 3.8 F7 — WIDE-POST (axis-7 flip; branch of α)
 
 Per the arm sketch in b0-indexes.md §10 ("Bakeoff arm F7"): each posting is one
-32-byte `EnvelopeId` plus a paired word carrying `leafIndex` + the revocation fold —
-2 slots per posting, no packing, no ordinal indirection; the `typeOrd`/`principalOrd`
+32-byte `EnvelopeId` plus a paired word carrying `leafIndex` — 2 slots per
+posting, no packing, no ordinal indirection; liveness comes only from the
+shared occKey SR-10 overlay (there is no paired-word revocation fold); the `typeOrd`/`principalOrd`
 local-ordinal reverse maps (§2.2) are deleted. The external page ABI (§5) is
-layout-independent by design and does not change — the arm swaps `LibIndex` internals
+layout-independent by design, retains uint64 public ordinals, and does not
+change — the arm swaps `LibIndex` internals
 only. The admission log's role as the globally-ordered page source is retained
 (ordinals still exist for ordering and receipts; the flip is what postings *store*).
 
@@ -401,7 +420,8 @@ ordinal→id dereference that packed postings pay at read time changes cost beca
 hydration has no envelope vector to walk.
 
 **Measured:** the axis-7 three numbers re-run under the S shape; the axis-1 aggregate
-re-run on the k ∈ {1,3,10} workloads; and the standard 2×2 interaction contrast
+re-run on the k ∈ {1,3,10,64} seed workloads (plus any integer refinement
+required by §4.1); and the standard 2×2 interaction contrast
 
 ```text
 I_17 = (G_X17 − G_F1) − (G_F7 − G_B0)
@@ -427,9 +447,16 @@ exact tradeoff to James; do not silently remove it"].
 ### 4.1 Axis 1 — Record shape (B0 vs F1, confirmed in X17)
 
 Statistics:
-- `KSTAR_1` — crossover batch size: smallest k at which total gas (calldata +
-  execution + SSTORE) for publishing k Records satisfies `G_B0(k) < G_F1(k)`,
-  measured at k ∈ {1, 3, 10} on the Arcade and Git fixture traces and interpolated.
+- `KSTAR_1` — smallest **measured** integer k in `[1,64]` at which total gas
+  (calldata + execution + SSTORE) for publishing k Records satisfies
+  `G_B0(k) < G_F1(k)`. Seed points are `{1,3,10,64}` on identical fixture
+  slices. If adjacent seeds bracket a sign change, measure missing integer k
+  values (or deterministic integer bisection followed by the neighboring
+  integer) until the first measured crossing is established. If no crossing is
+  observed, report `NO_OBSERVED_CROSSING_WITHIN_1_64`; never interpolate or
+  extrapolate. Every compared k has the same `atomicityClass`, Realm profile,
+  fixture slice, and corpusVersion; an `OVER_CAP` k is not replaced by smaller
+  envelopes.
 - `PREMIUM_1` — the k=1 premium ratio `G_B0(1) / G_F1(1)`.
 - `RECON_1` — pass/fail: **both** arms complete the state-only reconstruction walk
   (b0-realm-admission.md §8.1 W-0..W-10; for F1 with the card-spine re-expression of
@@ -439,8 +466,11 @@ Statistics:
 - `DIST_1` — the corpus's observed batch-size distribution (median and mass below
   `KSTAR_1`), instrumented on B0 (§3.1).
 
-Decision rule [PROPOSAL — adopts BAKEOFF finding 7]: the Envelope arm survives only
-if `KSTAR_1 ≤ median(DIST_1)` AND `RECON_1` passes for it. If the Envelope arm loses
+Decision rule [PROPOSAL — adopts BAKEOFF finding 7]: when a measured crossing
+exists, the Envelope arm survives only if `KSTAR_1 ≤ median(DIST_1)` AND
+`RECON_1` passes for it. If no crossing is observed within 1..64, the report
+uses the direct corpus-weighted measured totals and keeps the no-crossing label;
+it does not invent a threshold. If the Envelope arm loses
 at k=1 by more than its batch savings recoup in expectation over `DIST_1` (i.e.
 `E_corpus[G_B0 − G_F1] > 0`), the self-contained arm wins the axis — and that verdict
 is returned as the tradeoff, not silently adopted, because axis-3/5 machinery
@@ -532,16 +562,25 @@ Statistics:
   in a FRESH Realm (bodies bundled or pre-admitted; b0-realm-admission.md §5.4
   REF-SAT). An arm that cannot do this fails the axis decisively [DERIVED
   INVARIANT — kickoff "one-call dependent writes" line 56 + constitution
-  one-transaction gate, VERIFIED].
-- `XOVER_5` — calldata + gas per admission for (a) fresh-unique publication (favors
-  inline carriage) vs (b) the ten-curator re-endorsement trace (candidate lines
-  176–181; ten Occurrences of one already-admitted Record — favors body-free
-  leaves), measured in both cells.
+  one-transaction gate, VERIFIED]. This trace is `MUST_FIT_ATOMIC`: over-cap
+  fails the gate with `splitFactor=1`; the harness may not convert it into
+  split throughput.
+- `FRESH_5` — measured calldata + gas delta for fresh-unique publication.
+- `REENDORSE_5` — measured calldata + gas delta for the ten-curator
+  re-endorsement trace (candidate lines 176–181; ten Occurrences of one
+  already-admitted Record).
+- `DERIVED_FSTAR_5` — optional break-even endorsement frequency derived from
+  `FRESH_5` and `REENDORSE_5` only under an explicit linear-mixture assumption.
+  It is a derived model, never an observed crossover. The direct adoption
+  statistic remains the corpus-weighted sum of measured endpoint rows.
 - `SUBSET_5` — the subset-carriage suite result in F5 (3×5 interaction; §1.3).
 
-Decision rule: if F5 fails `ONECALL_5`, B0's inline arm wins decisively. Otherwise
-decide `XOVER_5` by the endorsement frequency observed in the frozen corpus (what
-fraction of admitted occurrences reference already-admitted Records). Storage dedup
+Decision rule: if F5 fails `ONECALL_5`, B0's inline arm wins decisively.
+Otherwise decide from the direct corpus-weighted measured total using the
+observed fresh/re-endorsement mix. `DERIVED_FSTAR_5` may explain the result only
+with its linear-mixture assumption shown. If the observed mix is not
+representative, report both endpoints and return the surviving fork; do not
+interpolate a verdict. Storage dedup
 is explicitly OUT of scope — admitted Record bodies are state-readable in both arms
 [DERIVED INVARIANT — candidate lines 172–174, VERIFIED], so only carriage and
 admission-path costs differ.
@@ -647,7 +686,7 @@ adapter where needed (F1/X17 only):
 | AuthorityVerifier/1 + AccountPrincipal/1 | b0-principal-authority.md §2–§3 | none except F2's AuthorRef entry |
 | Realm descriptor / receipts / reconstruction walk | b0-realm-admission.md §2, §5, §8 | card-spine re-expression of W-3..W-5 in F1/X17; module-set genesis hash in F6 |
 | Content Type family + 50 GB client machine | b0-content-locators.md | none (client-side; not a gas cell) |
-| **The 1/8/32/64-Principal Plan benchmark (V2-E2)** | b0-lens.md §9 (schedule arithmetic to be replaced by measurement) | **run ONCE on B0 — never repeated per cell** [PROPOSAL — BAKEOFF finding 10], plus a single N=64 spot-check inside F6's `OVH_6` to capture the head-read boundary crossing (a component of the axis-6 overhead number, not a fresh matrix) |
+| **Lens benchmarks** | b0-lens.md §9 + hf §2.5 | **run ONCE on B0**: Core `N={1,8,32,64}`; separately TS/RS client `N={50,100,256}` on pinned mobile+desktop profiles, never as 100/256-entry on-chain Plans. A single N=64 spot-check inside F6's `OVH_6` captures the head-read boundary crossing. |
 
 ### 6.2 The frozen-corpus rule [PROPOSAL — binding harness discipline]
 
@@ -690,8 +729,9 @@ Concretely:
   (b0-authorship-envelope.md §2.5) — the two models are reconciled by the
   synthesizer, and the harness replaces both; index-only leaf ceilings ≈25 worst /
   ≈86 typical per tx (b0-indexes.md §9); F4 backfill ≤ ~138 typical records/tx
-  (§3.5); page maxima §5.3 of b0-indexes.md. The k ∈ {1,3,10} axis-1 runs fit
-  trivially. Per-Realm caps may differ; every report states the assumed profile
+  (§3.5); page maxima §5.3 of b0-indexes.md. Axis-1 seeds are
+  `{1,3,10,64}`; each exact k reports measured fit or `OVER_CAP` under its
+  unchanged atomicity class. Per-Realm caps may differ; every report states the assumed profile
   [DERIVED INVARIANT — venue-conditional physics, CARRY-IN lane, VERIFIED].
 - **Pinned toolchain.** One solc version + optimizer setting + EVM version
   (Fusaka-level so 7825/7623 semantics hold) across ALL cells, recorded in the
@@ -699,7 +739,10 @@ Concretely:
   foundry/solc at freeze time.
 - **Schedule-derived figures in the chapters are inputs, not results.** Every gas
   number quoted from a chapter above is [PLAUSIBLE/HYPOTHESIS] until the harness
-  replaces it; decision rules bind on measured values only.
+  replaces it; decision rules bind on measured values only. Every affected
+  write/read cost is repriced after SR-10's extra OccStatus write and the
+  repaired index/log layout; no pre-repair derived value may survive as a
+  Stage B observation.
 
 ---
 
@@ -712,7 +755,7 @@ Concretely:
 |---|---|---|
 | **α** | B0 + branches F2, F3, F5, F7 | the reconciled eight-chapter spine; branches touch, respectively: author-key derivation (F2), signing/consent path (F3), leaf-availability rule (F5), `LibIndex` internals (F7) |
 | **β** | F1 + branch X17 | the FLATCARD card surface (§3.2); X17 swaps `LibIndex` internals |
-| **γ** | F4 | split-ID registration + coverage machine + backfill |
+| **γ** | F4 | split-ID schema publication + coverage machine + backfill |
 | **δ** | F6 | the physical six-contract deployment |
 
 **Lean compile-time branches, NOT runtime parameterization** [PROPOSAL — BAKEOFF
@@ -734,10 +777,15 @@ beyond local/test chains, seeds durable data, or becomes a product dependency
 
 ## 8. Reporting format and adoption protocol
 
-Each cell produces one report: {cell id, axis vector, corpus manifest hash, engine +
-branch commit, aggregate snapshot per fixture trace, state-growth table (slots per
-trace), the axis's named statistics (§4), declared confounds restated, vector-suite
-pass/fail lists}. The per-axis verdict section applies §4's decision rules and ends
+Each cell produces one report: {cell id, axis vector, corpus manifest hash,
+engine + branch commit, aggregate snapshot per fixture trace, state-growth
+table (slots per trace), `atomicityClass/overCap/splitFactor`, the axis's named
+statistics (§4), declared confounds restated, vector-suite pass/fail lists}.
+Every affected report carries the atomic schema-group cap result plus the
+`CV-SPARSE-ADMIT`, `CV-PREWITHDRAW`, `CV-DIGEST-LOOKUP`,
+`WL-DEAD-LOCATOR`, and `CV-LAST-LIVE-COUNT` outcomes; a cell that cannot
+implement the repaired semantic test is blocked rather than silently omitted.
+The per-axis verdict section applies §4's decision rules and ends
 in exactly one of:
 
 1. **arm survives** (baseline retained — nothing is thereby adopted; the B0 pin
@@ -767,50 +815,46 @@ The compact contract other chapters and the harness lane rely on:
   `occKey` formula unchanged — the seam that lets Binding/Lens/indexes build once.
 - **Named decision statistics** (harness output schema): `KSTAR_1, PREMIUM_1,
   RECON_1, DIST_1; D1_2..D5_2; V3_REPLAY, V3_SUBSET, V3_DOMAIN, V3_COPY, OVH_3;
-  FRAC_4, BACKGAS_4, GATE_4; ONECALL_5, XOVER_5, SUBSET_5; SIZE_6, OVH_6, PFAIL_6;
+  FRAC_4, BACKGAS_4, GATE_4; ONECALL_5, FRESH_5, REENDORSE_5,
+  DERIVED_FSTAR_5, SUBSET_5; SIZE_6, OVH_6, PFAIL_6;
   APPEND_7, PAGE100_7, EXH_7; I_17`.
 - **Hard gates that reject regardless of gas**: `RECON_1` (state-only
   reconstruction, both arms), `V3_COPY` (copied-evidence verifiability), `GATE_4`
   (PARTIAL never reads as absence), `ONECALL_5` (one-call dependent writes),
   `PFAIL_6` (no partially-committed Core write), plus `SIZE_6` as a
-  forced-decision compile gate.
+  forced-decision compile gate. `ONECALL_5`, FX-GIT push units,
+  TypeSchemaGroup validation/cache materialization, every concrete publish,
+  and poison/full-revert vectors are `MUST_FIT_ATOMIC`; over-cap never converts
+  to a throughput split.
 - **Frozen-corpus rule** (§6.2): corpus manifest hash embedded in every report; any
   corpus change invalidates all measured cells.
-- **Build-once list** (§6.1) incl. the run-once 1/8/32/64 Plan benchmark.
+- **Build-once list** (§6.1) incl. separate run-once Lens grids: Core
+  1/8/32/64 and client 50/100/256 on mobile/desktop reference profiles.
 - **Engine map** (§7): α{B0,F2,F3,F5,F7}, β{F1,X17}, γ{F4}, δ{F6}; compile-time
   branches; untouched-module byte-identity assertion.
 - **Report/verdict protocol** (§8): survives / rejected(kill source) / fork→James.
 
 ## Open items
 
-1. **Synthesizer reconciliations that cell deltas inherit** (deltas are defined
-   against reconciled B0; none changes a cell's identity): AdmissionOrdinal width
-   (uint48 in b0-indexes.md §1 vs uint64 in b0-encoding-and-ids.md §4.3 /
-   b0-binding.md / b0-authorship-envelope.md §10); `MAX_ENVELOPE_LEAVES` 64
-   (b0-authorship-envelope.md §2.5) vs `MAX_BIND_LEAVES_PER_ENVELOPE` 128
-   (b0-binding.md §3.6); the two worst-case publish models (§6.3); `occLife` overlay
-   vs admission occurrence-state word (b0-binding.md open item 3); per-leaf
-   `expectedRevision` carriage ratification (b0-binding.md open item 2 — F3's §3.4
-   confound depends on the outcome). Closed by: the synthesizer, before engine α is
-   coded.
-2. **Corpus manifest format and the fixtures/measurement lane's ownership** of the
+1. **Corpus manifest implementation and the fixtures/measurement lane's ownership** of the
    freeze mechanics (§6.2) — this spec pins the rule, not the file format. Closed
    by: harness lane.
-3. **Toolchain pin values** (solc version, optimizer runs, EVM version string) —
+2. **Toolchain pin values** (solc version, optimizer runs, EVM version string) —
    §6.3. Closed by: harness lane at freeze time.
-4. **F5m Merkle sub-variant** — measured only if `XOVER_5` is inconclusive or the
+3. **F5m Merkle sub-variant** — measured only if the direct
+   `FRESH_5`/`REENDORSE_5` corpus-weighted result is inconclusive or the
    subset-proof cost becomes decision-relevant (§3.6). Closed by: axis-5 first-round
    numbers.
-5. **F6 spot-check scope** — whether one N=64 Plan-walk spot-check suffices to bound
+4. **F6 spot-check scope** — whether one N=64 Plan-walk spot-check suffices to bound
    the Lens boundary overhead or the full 1/8/32/64 matrix must re-run on δ (§6.1).
    Closed by: `OVH_6` decomposition quality on first measurement.
-6. **EAP fixture** — provisional and non-gating per the PM directive; if the durable
+5. **EAP fixture** — provisional and non-gating per the PM directive; if the durable
    brief lands before corpus freeze, it enters the manifest; afterwards, it waits
    for the next full re-run. Closed by: Codex brief + harness lane.
-7. **Additivity risk beyond the five named interactions** — the claim that 1×7,
+6. **Additivity risk beyond the five named interactions** — the claim that 1×7,
    1×2, 4×7, 3×5, 6×7 exhaust the strong interactions is PLAUSIBLE (BAKEOFF finding
    4); the red team is invited to name a sixth pair with a mechanism, which would
    cost either a cell or an arithmetic-recovery argument. Closed by: red-team round.
-8. **Axis-4 fork anticipation** — §4.4 predicts axis 4 ends as an irreducible fork;
+7. **Axis-4 fork anticipation** — §4.4 predicts axis 4 ends as an irreducible fork;
    if so, the James packet needs the index-evolution frequency assumption made
    explicit (50-year horizon judgment). Closed by: Stage B numbers + synthesis.

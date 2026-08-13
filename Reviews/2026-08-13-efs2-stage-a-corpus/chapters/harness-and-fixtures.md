@@ -1,5 +1,5 @@
 # B0 harness & fixtures — fixture and measurement-harness interfaces
-**Stage A chapter — draft for red-team review; not landed, adopts nothing.**
+**Stage A chapter — post-red-team repair; not landed, adopts nothing.**
 
 Assembly Lane B of the Stage A commissioned pass (2026-08-12). PM deliverable 5:
 "frozen fixture and measurement-harness interfaces." This chapter delivers (1) each
@@ -60,12 +60,10 @@ such claims are PLAUSIBLE-via-cited-chapter unless marked otherwise).
 
 ### 1.1 The abstract fixture-op language (FixOp)
 
-[PROPOSAL — rationale: the eight chapters expose two conflicting admission ABIs
-and several conflicting derivations (§1.3). Workload scripts written against a
-concrete ABI would be invalidated by synthesizer reconciliation; scripts written
-in abstract ops survive it. Each bakeoff cell supplies one `CellAdapter` mapping
-FixOps to its concrete ABI — exactly the per-cell adapter mechanism the BAKEOFF
-lane prescribes for F1/X17 occurrence-identity differences (VERIFIED).]
+[PROPOSAL — the repaired SR-1..SR-18 interface is the B0 contract. Scripts stay
+in abstract ops so bakeoff cells can flip one axis through a `CellAdapter`
+without changing corpus intent. The adapter must prove that every B0 op maps to
+the repaired interface rather than choosing among historical conflicts.]
 
 Closed op set (a script is an ordered list of these; every op names the acting
 principal from the fixture cast):
@@ -73,7 +71,8 @@ principal from the fixture cast):
 ```text
 -- write plane --
 GEN_PRINCIPAL(castId, authorityKind)            -- Lane 3 AccountPrincipal/1
-REG_TYPES(schemaGroupRef)                        -- Lane 1 §3.4 registration
+PUBLISH_SCHEMA_GROUP(castId, schemaGroupRef)     -- TypeSchemaGroup/1 Record;
+                                                 --   ordinary publish + atomic cache
 PUBLISH(castId, leaves[], packHint)              -- sign + admit one envelope;
                                                  --   leaves = (typeRef, bodySpec)[]
 BIND(castId, purpose, subject, fieldRole,        -- Lane 6 BindingSet/1 leaf +
@@ -85,7 +84,7 @@ READ_POINT(what, key...)                         -- getRecord/getEnvelope/getOcc
                                                  --   readHead/getBindingHead/counts...
 READ_PAGE(family, key..., PageRequest)           -- Lane 5 pagePostings/admissionLogPage/...
 RESOLVE(planRef, positionKey [, strictMask])     -- Lane 7 resolve/resolveStrict
-SELECT_LOCATOR(targetKey, spec, basis)           -- Lane 5 §7 / Lane 8 §10.3
+SELECT_LOCATOR(targetKey, spec, basis)           -- Lane 5 §7 B0_SELECT; TS/RS SELECT_PROFILE_V2 is separate
 VERIFY_RANGE(chunkTreeRef, range, locatorSet)    -- Lane 8 §8.2 client machine
 RECONSTRUCT()                                    -- Lane 4 §8 walk W-0..W-10, 2nd impl
 -- control plane --
@@ -96,12 +95,27 @@ AS_REALM(realmInstance)                          -- multi-Realm scripts (CV-XREA
 INJECT_PID(rawPrincipalId)                       -- test-only low-160 injection, Lane 3 §2.6
 ```
 
+Every write op and every enclosing trace carries:
+
+```text
+atomicityClass = MUST_FIT_ATOMIC | SPLITTABLE_THROUGHPUT
+splitBoundary  = NONE | BETWEEN_INDEPENDENT_ENVELOPES
+```
+
+Each concrete `PUBLISH`, `PUBLISH_SCHEMA_GROUP`, `BIND`, `TOMBSTONE`, and
+`WITHDRAW` call is `MUST_FIT_ATOMIC`. Workload campaigns may be
+`SPLITTABLE_THROUGHPUT` only at explicitly declared independent-envelope
+boundaries (§3.3); the class never changes when an op exceeds a Realm cap.
+
 `PUBLISH.packHint` interacts with the `K_BATCH` knob (§3.4): the deterministic
 packer `PACK(k)` groups the script's pending logical leaves into envelopes of at
 most `k` leaves in script order, never reordering across a `BARRIER` pseudo-op.
 The packer, not the script, decides envelope boundaries — so one script yields
 the k ∈ {1, 3, 10, 64} amortization curve the axis-1/5 decision statistics need
-(audit BAKEOFF lane axis-1 falsifier, VERIFIED). [PROPOSAL]
+(audit BAKEOFF lane axis-1 falsifier, VERIFIED). `PACK(k)` may form envelopes
+only inside a `SPLITTABLE_THROUGHPUT` campaign; every resulting envelope remains
+one `MUST_FIT_ATOMIC` call. An over-cap `PACK(k)` point is reported `OVER_CAP`
+for that exact k, never silently replaced with smaller envelopes. [PROPOSAL]
 
 ### 1.2 Determinism and seeding
 
@@ -110,8 +124,10 @@ languages, or golden vectors are meaningless]
 
 - One corpus master seed `CORPUS_SEED = keccak256("efs2/fixture-corpus-seed/1")`.
 - All fixture randomness (principal keys, salts, pubNonces, spam payloads, Zipf
-  draws) comes from a deterministic DRBG: `draw(i) = keccak256(CORPUS_SEED ‖
-  fixtureId ‖ uint256(i))`, consumed in declared order. Cross-language identical.
+  draws) comes from a deterministic DRBG:
+  `draw(i) = keccak256(abi.encode(CORPUS_SEED, keccak256(utf8(fixtureId)),
+  uint256(i)))`, consumed in declared order. All tuple fields are fixed-width or
+  hash-normalized; cross-language bytes are identical.
 - Honesty note for FX-PRIV: Lane 1 §1.5 requires ≥128-bit CSPRNG-grade salts.
   Corpus salts are DRBG-derived and therefore *publicly derivable by anyone
   holding the corpus* — acceptable for measurement and for MUST-FAIL vectors,
@@ -124,26 +140,41 @@ languages, or golden vectors are meaningless]
   the `PID-DERIVE` golden vectors, never in workload measurement (avoids warm/
   cold pollution from vector reuse). [PROPOSAL]
 
-### 1.3 Seam conflicts the synthesizer must pin BEFORE golden-vector generation
+### 1.3 Resolved seam aliases and executable repair gates
 
-The harness can run workloads against any reconciliation via CellAdapters, but
-**cross-language golden vectors bind exact bytes** and are blocked until these
-are pinned (each is a dependsOn, flagged for the synthesizer; the harness takes
-no side):
+S1–S8 remain stable historical aliases, but every row is **RESOLVED** by the
+post-red-team SR target. A `CellAdapter` has no discretion to revive a losing
+shape:
 
-| # | Conflict | Chapters | Harness impact |
+| Alias | Status | Winning pin | Harness consequence |
 |---|---|---|---|
-| S1 | Admission entrypoint + author consent: `admit(env, intent, witness)` with author-only admission (Lane 2 §5.3–5.4) vs permissionless `publish(envelopeBytes, intentBytes)` (Lane 4 §5.4) | Lane 2 / Lane 4 | CellAdapter shape; CV-RAIL and CV-XREALM assertions differ under the two rules |
-| S2 | AdmissionIntent layout: leafMask + 2-D nonce (Lane 2 §5.1–5.2) vs action/actionData/refs + consumedIntents (Lane 4 §5.4); Lane 6 additionally needs per-leaf `expectedRevision` carriage (Lane 6 §3.2, open item 2) | 2/4/6 | intent golden vectors blocked |
-| S3 | PositionKey/BindingKey formulas: word-encoded domain `keccak(abi.encode(DOM, …))` (Lane 1 §4) vs raw-ASCII-prefix `keccak("efs2/position/1" ‖ abi.encode(…))` (Lane 6 §1.1) vs `"efs2/binding-key/1"` prefix (Lane 7 §5.1) — three byte-different derivations | 1/6/7 | ALL Binding/Lens vectors blocked; FX-LENS/FX-ARC unaffected at script level |
-| S4 | AdmissionOrdinal width: uint64 (skeleton pin; Lanes 1/2/4/6/7) vs uint48 packed (Lane 5 §1) | 1–7 | reporting schema stores ordinals as uint64; packing is cell-internal (axis 7) — measurement unaffected, vectors blocked |
-| S5 | Envelope constants: `MAX_ENVELOPE_LEAVES` 1,024 (Lane 1 §2.6) vs 64 (Lane 2 §2.5) vs 64 (Lane 4 §5.6) vs `MAX_BIND_LEAVES_PER_ENVELOPE` 128 (Lane 6 §3.6 — exceeds Lane 2's 64); `MAX_ENVELOPE_BODY_BYTES` 16,384 (Lane 1) vs 8,192 (Lanes 2/4) | 1/2/4/6 | `K_BATCH` top value = min(pinned leaf cap, 64); harness runs at 64 until repinned |
-| S6 | Occurrence-lifecycle store triplicated: `occState` (Lane 2 §10) vs `occLife` (Lane 6 §2.2) vs `revokedAtOrdinal` in the log word (Lane 5 §2.2) | 2/5/6 | state-growth metric counts whatever merged layout ships; per-op slot attribution labels needed |
-| S7 | BindingHead shape: Lane 6 §2.1 (3-slot Entry, uint64 revision) vs Lane 5 §2.4 BindingHead (1 slot, uint32 revision) vs Lane 7 §5.2 assumed head (authorityBasis on head, uint32 revision) | 5/6/7 | FX-LENS gas rows depend on probe slot count (Lane 7 §9 model assumes 3) |
-| S8 | EnvelopeId formula: leaf-commit chain over inline leaves (Lane 1 §4.2) vs EIP-712-digest wrap with reserved authorityId/authEpoch (Lane 2 §2.3–2.4) | 1/2 | envelope vectors + CV-SUBSET blocked |
+| S1 | RESOLVED | SR-12, with SR-13 descriptor carriage | one permissionless `publish(envelopeBytes, AccountPrincipal, intentBytes, intentWitness)`; author consent; implicit sender forbidden for Binding-class leaves |
+| S2 | RESOLVED | SR-3 | exact EIP-712 AdmissionIntent with leafMask, `expectedRevisions[]`, u192/u64 nonce lane, action MBZ=ADMIT |
+| S3 | RESOLVED | SR-6 under SR-1 | hashed domain words + fixed-word `abi.encode` PositionKey/BindingKey formulas |
+| S4 | RESOLVED | SR-4 | u64 external/reporting ordinals, u48 physical guard |
+| S5 | RESOLVED | SR-5 | 64 leaves; 8,192-byte envelope/body caps; fit remains measured |
+| S6 | RESOLVED | SR-10 and SR-15 | one occKey lifecycle overlay; per-new-occurrence ordinals; idempotent duplicates |
+| S7 | RESOLVED | SR-8 | exact two-slot BindingHead; one-SLOAD absence/two-SLOAD present probe |
+| S8 | RESOLVED | SR-2 | EIP-712-digest-wrapped EnvelopeId with ordered RecordId vector and authority seam |
 
-Rule: **workload measurement may proceed on any single pinned reconciliation;
-golden-vector emission may not proceed until S1–S8 are pinned.** [PROPOSAL]
+Additional red-team repair gates cover seams the old table missed:
+
+- SR-9: wrong-author Withdrawal reverts the whole envelope.
+- SR-13/SR-14: explicit descriptor carriage, pre-verification PrincipalId
+  equality, and the one PrincipalId formula.
+- SR-16: one RealmRevisionId formula.
+- SR-17: schema groups are Records admitted by ordinary `publish`, with cache
+  materialization in the same atomic call.
+- SR-18(a-e): shared u16 digest vocabulary, fail-closed Completeness values,
+  total-posting locator visit bounds, last-live unique counts, and the
+  `REF_INSTANCES_MAX = 16` bound.
+
+Harness/vector execution is blocked until every consumed pin is VERIFIED in
+all owning chapters and the Task 6 retired-form residue search passes. The
+adapter `PUBLISH_SCHEMA_GROUP` may call SDK helper
+`registerTypeSchemaGroup(...)`, but it must prove the helper constructs the
+intrinsic Record and calls the sole Core `publish`; no second entrypoint or
+two-step materialization is permitted. [PROPOSAL]
 
 ---
 
@@ -160,7 +191,8 @@ corpus defect [DERIVED INVARIANT — constitution honest-reads block, VERIFIED].
 
 **2.0.2 Fixture-pack Type Schemas (corpus content, not protocol).** All are MC/1
 `TypeSchemaBlob`s (Lane 1 §3.1) with `namespaceQualifier = 0` (convergent) unless
-noted; registered by `REG_TYPES` in each fixture's phase A; their TypeSchemaIds
+noted; published as intrinsic `TypeSchemaGroup/1` Records by
+`PUBLISH_SCHEMA_GROUP` in each fixture's phase A; their TypeSchemaIds
 are corpus golden vectors. Reused protocol-adjacent schemas come from the
 chapters: `ObjectGenesis/1`, `TypeSuccessor/1` etc. (Lane 1 §§4.1, 6);
 `BindingSet/1`, `BindingTombstone/1`, `Withdrawal/1` (Lane 6 §3.2); the Lane 8
@@ -205,6 +237,10 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
 - **CV-PID160** — injected low-160-colliding PrincipalIds (Lane 3 §2.6
   `PID-LOW160`) exercised through storage, postings keys, Binding heads, plan
   entries, and page results end to end.
+- **CV-AUTHCHAIN** — GV-5 / SR-13/SR-14: a valid attacker witness plus
+  attacker descriptor presented with victim `header.principalId` fails
+  `AUTH_PRINCIPAL_MISMATCH` before envelope or intent witness verification;
+  first-use PrincipalRecord bytes may come only from the verified descriptor.
 - **CV-XREALM** — two Realm instances; copy one signed envelope from source to
   destination; destination shows evidence-not-truth (grades per Lane 4 §4.2);
   intent replay across Realms MUST-FAIL (`E_REALM_MISMATCH`-class); constitution
@@ -215,15 +251,35 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   from its RecordId — documents, not defends).
 - **CV-CLOCK** — R-D9 misleading-clock vectors (audit SURVIVORS lane, VERIFIED):
   absurd `observedAtClaim`/`probedAtClaim`/`horizonClaim` values (year 1970,
-  year 9999) never move any deterministic ordering (Lane 8 §10.3 folds by
-  admission ordinal); same-author same-content multiple occurrences at one
+  year 9999) never move B0's declared u64 score/latest-ordinal selection; if
+  `SELECT_PROFILE_V2` is separately run in TS/RS, they never move that
+  profile's admitted-evidence ordering either; same-author same-content
+  multiple occurrences at one
   position remain distinct occurrences (no equivocation rule resurrect —
   [REJECTED mechanism per Lane 6 §5, cited there]).
 - **CV-7702** — Lane 3 §4 three-point vector (before/under/after delegation) +
   kind-1-vs-kind-2 distinct-Principal check.
-- **CV-WITHDRAW** — Lane 2 §3.2 T1–T6 + Lane 6 T1–T9 state machines, including
-  pre-withdrawal, no-resurrection, cross-principal withdrawal inert/T8, double
-  withdrawal.
+- **CV-WITHDRAW** — Lane 2 §3.2 T1–T6 + Lane 6 T1–T9 state machines,
+  including no-resurrection, wrong-author whole-envelope revert, and
+  idempotent double withdrawal.
+- **CV-SPARSE-ADMIT** — GV-8/GV-9, SR-10/SR-15: admit leaves `{0,3,7}`, then
+  the remainder; verify per-new-occurrence submission-order ordinals,
+  reversible hydration, no holes/derived base law, and duplicate no-op.
+- **CV-PREWITHDRAW** — GV-9, SR-9/SR-10/SR-15: authenticated target
+  header+signature with no bodies creates `PRE_WITHDRAWN` at target ordinal 0;
+  later admission fails; wrong/forged author reverts with zero delta; repeat
+  succeeds as a no-op using retained evidence.
+- **CV-DIGEST-LOOKUP** — GV-14/GV-16, SR-18a/b: publish and query one
+  digest-bearing Record with the same u16 `algCode`; legacy u8/u32 encodings
+  are typed-unsupported/rejected and can never produce `COMPLETE`-empty.
+- **CV-LAST-LIVE-COUNT** — GV-9/GV-14, SR-18d: two live occurrences of one
+  Record; first withdrawal leaves unique-by-Type count 1, last withdrawal
+  makes it 0, and retries do not change it.
+- **CV-SCHEMA-CAP** — GV-2, SR-17: `PUBLISH_SCHEMA_GROUP` is
+  `MUST_FIT_ATOMIC`; validation and deterministic cache materialization occur
+  in the same call. Test the maximal legal group against each Realm cap. An
+  over-cap result is a hard on-ramp observation with `splitFactor = 1`, never
+  a staged group commitment.
 - **CV-RECON** — `RECONSTRUCT()` (Lane 4 §8 walk) executed by the second
   implementation after every fixture's final phase; any mismatch fails the cell.
 
@@ -283,13 +339,15 @@ Lane 8 §8.2 rotation and that MISMATCH indicts the locator, never the content;
 (ii) `P_evil` publishes a fake release + own locator for the project; guest read
 shows both releases author-qualified; C1's Binding and a 1-entry plan resolve
 only the curated one (no "official bit" — candidate, VERIFIED); (iii) executable
-gate refusal at coverage n−1 (Lane 8 §8.3); (iv) `SELECT_LOCATOR` run under BOTH
-SelectionKey orderings (health-first and grade-first) across the tampered trace
-— closes Lane 8 open item O5's comparison data.
+gate refusal at coverage n−1 (Lane 8 §8.3); (iv) `B0_SELECT` runs through the
+index §7 declared-score/latest ABI with physical-visit accounting; a separate
+TS/RS-only `SELECT_PROFILE_V2` run may compare health-first and grade-first
+client profiles across the tampered trace, but is labeled deferred and never
+substitutes for the B0 Core result.
 
-**Measurements fed:** M-K (k\* crossover, phase C), M-AGG (full-trace bundle),
+**Measurements fed:** M-K (measured-sign crossover search, phase C), M-AGG (full-trace bundle),
 M-PAGE (Project→Releases, target→Comments, Artifact→Locators backlinks),
-M-SEL (selection determinism ×2 orderings ×2 implementations), M-COUNT
+M-SEL (`B0_SELECT` SOL/TS/RS plus separately labeled client-profile rows), M-COUNT
 (endorsement liveCount before/after one E-principal withdraws), M-CLIENT
 (tampered-fallback wall time), M-STATE. Axis relevance: 1, 5, 7; Lane 7 §8
 LENS-NEG-1 runs in FX-LENS, not here.
@@ -310,7 +368,7 @@ KEY_P256, 1 ERC-1271), `Team` (ObjectGenesis + TeamMembership records),
 | Native objects | `ByteDigest/1{ALG_GIT_SHA1_OBJECT}` per commit/tree/blob OID touched (foreign digests only — Lane 8 §1.1; never EFS identity, Lane 1 §2.4) |
 | Content | Markdown/wiki page bytes as `ChunkTree/1` (+ `RepresentationBinding/1` git-blob ↔ chunk tree, Lane 8 §6 Git interop) |
 | Push | `GitPushTransaction/1` — ONE typed Record carrying all ref updates of a push = the atomic multi-ref transaction Record [DERIVED INVARIANT — constitution: "Git multi-ref and similar all-or-nothing meaning lives in one typed transaction Record", VERIFIED] |
-| Ref heads | per ref: Binding at `(purpose = TypeSchemaId(GitPushTransaction/1), subject = RepoId, fieldRole = keccak("efs2/fieldrole/1" ‖ refName))` (Lane 6 §1.1–1.2 typed-position convention) targeting the push Record; CAS `expectedRevision` = replay-safe authenticated push |
+| Ref heads | per ref: Binding at `(purpose = TypeSchemaId(GitPushTransaction/1), subject = RepoId, fieldRole = keccak256(abi.encode(DOM_FIELDROLE, keccak256(utf8(refName)))))`, `DOM_FIELDROLE = keccak256("efs2/fieldrole/1")` (Lane 6 §1.1–1.2), targeting the push Record; SR-3 `expectedRevisions[]` = replay-safe authenticated push |
 | Wiki history | `WikiPageRev/1` chain (prev = predecessor occurrence) + per-page current-rev Binding |
 | Collaboration | `Issue/1`, `Comment/1` (reused), `PullRequest/1`, `Review/1`, `ArtifactRelease/1` (repo releases), `Reaction/1`, `TeamMembership/1`, `Edit/1` (edit history on comments/issues) — all clonable: plain Records + occurrences, no Core primitive |
 | Issue status | maintainer Binding at `(purpose = TypeSchemaId(Issue/1), subject = issueRecordId-as-subject, fieldRole = 1)` → open/closed head |
@@ -337,14 +395,16 @@ EFS identity unaffected; the read layer shows the digest as foreign-only
 [DERIVED INVARIANT — Lane 1 §1.1 foreign-digest rule]; (v) CV-CLOCK applied to
 commit-claimed timestamps.
 
-**EIP-7825 arithmetic (in-chapter, per the exactness bar):** worst corpus push =
+The Git push semantic unit — its `GitPushTransaction/1` Record plus the
+declared ref-head Binding updates — is `MUST_FIT_ATOMIC`. It is never retried as
+separate ref updates. **EIP-7825 arithmetic (in-chapter, per the exactness bar):** worst corpus push =
 20 ref updates ⇒ 1 GitPushTransaction leaf + 20 Binding leaves. Using Lane 6
 §3.6's ≤90k/Binding-leaf estimate + Lane 2 §2.5's model: 21 leaves ≈ 20×90,000 +
 (1 push-record leaf ≈ 60k storage+postings) + G_FIXED 150k ≈ **2.07M gas ≈ 12.3%
 of the 16,777,216 cap** — single-tx atomic. Ceiling: gas, not the leaf cap —
-⌊(16.78M − 150k)·0.9 / 90k⌋ ≈ 166 ref updates/tx on RP-L1, so the S5 constant
-pin (64 vs 128) binds before the cap does. [HYPOTHESIS — numbers re-derived by
-this harness; falsified rows shrink the ceiling.]
+⌊(16.78M − 150k)·0.9 / 90k⌋ ≈ 166 ref updates/tx on RP-L1, so SR-5's 64-leaf
+structural cap is the predicted limiter. [HYPOTHESIS — the measured
+`MUST_FIT_ATOMIC` row governs; an over-cap trace fails rather than splitting.]
 
 **Measurements fed:** M-AGG, M-K (push batch curve), M-PAGE (issues by repo,
 comments by issue, occurrences by author D1 = author enumeration under churn),
@@ -448,8 +508,9 @@ basis-pinned pages before the fold unaffected — FSP-BASIS-1 discipline, Lane 5
 
 ### 2.5 FX-LENS — contract configuration (V2-E2 benchmark)
 
-**Cast:** plan principals `Q1..Q64` (56 EOA, 4 KEY_P256, 2 KEY_RSA, 2 ERC-1271 —
-exercises every Lane 3 authority kind on the resolve path's admission side);
+**Cast:** Core plan principals `Q1..Q64` (56 EOA, 4 KEY_P256, 2 KEY_RSA, 2
+ERC-1271 — exercises every Lane 3 authority kind on the resolve path's
+admission side), plus corpus-only client principal fixtures `Q65..Q256`;
 `GateAdmin`; `M` (beneficiary attacker); the two CV-PID160 injected principals
 appear as plan entries 63–64 of the N=64 plan.
 
@@ -460,7 +521,7 @@ Records at N ∈ {1, 8, 32, 64} for each combiner (EXACT, PRIORITY_FIRST_PRESENT
 with 2 tiers, THRESHOLD k = ⌈N/2⌉) — 12 plans; `ExampleGate`-pattern consumer
 (Lane 7 §8) pinning one plan.
 
-**Script + measurement grid:** for each plan × each outcome class
+**Core script + measurement grid:** for each plan × each outcome class
 {first-present, last-present, all-absent, conflict, tombstone-contributes-
 absent, threshold-met, threshold-split}: `RESOLVE` measured COLD then WARM
 (same-tx repeat) — this is the constitution's 1/8/32/64 acceptance benchmark
@@ -468,9 +529,16 @@ absent, threshold-met, threshold-split}: `RESOLVE` measured COLD then WARM
 arithmetic [HYPOTHESIS there — closed here]. Plan-load vs probe cost split
 reported per row (drives Lane 7 open item 4, PLAN-STORE-B decision rule).
 Combiner transition coverage: every T1–T10 asserted once (golden), then
-measured. **Optional rider:** N=50 PRIORITY plan — one row honoring the
-SURVIVORS-lane R-L4 50-principal design-center concern (VERIFIED there) without
-disturbing the pinned 1/8/32/64 grid. [PROPOSAL]
+measured. The Core grid remains exactly `N={1,8,32,64}`. [PROPOSAL]
+
+**Distinct client-tier grid (never submitted as an on-chain Plan):** TS and RS
+resolve `N={50,100,256}` from paged B0 reads on two corpus-pinned reference
+profiles, `MOBILE_REF` and `DESKTOP_REF`. Each profile records hardware model,
+OS/runtime version, logical cores, RAM, RPC transport, and local/remote endpoint
+mode in the frozen manifest. Every `(N, profile, lang)` row reports wall time,
+peak memory, RPC count, page count, result digest/equality, and propagation of
+`UNKNOWN`/`PARTIAL`. No test constructs a 100- or 256-entry on-chain
+`ResolutionPlan/1`, and the client grid does not imply a Core cap above 64.
 
 **Adversarial:** LENS-NEG-1 exactly as Lane 7 §8 (beneficiary self-authorization
 three-way negative); purpose-mismatch (display plan pinned into a gate rejects
@@ -478,7 +546,8 @@ on `purposeAndScope` check); challenge-window commit → equivocating rebind
 inside window → finalize ABORT (decision-scoped recheck, Lane 7 §11); malformed
 plans — one MUST-FAIL vector per rejection code 1–13 (Lane 7 §3.5).
 
-**Measurements fed:** M-LENS (the full grid — THE V2-E2 deliverable), M-CONF
+**Measurements fed:** M-LENS (Core grid — THE V2-E2 deliverable), M-CLIENT
+(50/100/256 mobile+desktop grid), M-CONF
 (LENS-NEG-1, window pattern, rejection codes), M-K (a gated batch: 5 resolves in
 one tx, warm amortization). Feeds Lane 7 §3.4 cap confirmation and the
 `readHeadBatch` cost row (Lane 6 open item 6).
@@ -601,7 +670,8 @@ reports PARTIAL(k, n) and never absence, never early COMPLETE (Lane 8 §8.2 A4);
 funding-oracle: absurd `horizonClaim` ignored by ranking (CV-CLOCK member).
 
 **Measurements fed:** M-AGG (ladder Record-plane gas — the pasted-URL P1 write
-is its own headline row), M-SEL (fold over graded evidence; both orderings),
+is its own headline row), M-SEL (`B0_SELECT`; optional TS/RS
+`SELECT_PROFILE_V2` rows are separate and profile-tagged),
 M-CLIENT (range-verify throughput MB/s per language; resume latency), M-CONF
 (coverage vocabulary + custodyFloor gating + never-claims-complete).
 
@@ -621,11 +691,13 @@ ResolvedManifest/1 (canonical bytes; MC/1-style packed, u16-prefixed):
   u32 entryCount ‖ Entry × entryCount, sorted by full path bytewise:
     Entry = u16 pathLen ‖ path (joined member names, '/' separator)
           ‖ u8 kind (FILE|EXEC_FILE|SUBCLOSURE)
-          ‖ u64 size ‖ u8 digestAlg ‖ digest
+          ‖ u64 size ‖ u16 algCode ‖ digest
           ‖ u8 bytesGrade (BYTES_* per Lane 8 §8.2)
           ‖ u8 durabilityClass (§10.1 ordinal; 0 if ungraded)
           ‖ u8 presence (Lane 7 Presence enum for the entry's provenance reads)
-          ‖ bytes32 provenanceOcc (winning occurrence's occKey; 0 if n/a)
+          ‖ u8 provenancePresent
+          ‖ bytes32 provenanceEnvelopeId ‖ u16 provenanceLeafIndex
+             -- reversible OccurrenceRef; both fields zero iff not present
   u16 unknownCount ‖ UnknownEntry × unknownCount   -- UNKNOWNs are LISTED, never elided
 ```
 
@@ -646,6 +718,10 @@ exactly (basis-pinned determinism).
 
 **Measurements fed:** M-CLIENT (materialization read count + wall time), M-CONF
 (byte-identity ×2 implementations ×3 languages; UNKNOWN listing).
+
+The `u16 algCode` and reversible provenance fields are corpus-interface bytes;
+implementing this repaired layout requires the FR-3 corpus-version bump before
+any measurement is compared.
 
 ---
 
@@ -697,7 +773,8 @@ each is mechanically extractable from a standard EVM test node trace]:
 | `sloadsCold` / `sloadsWarm` | EIP-2929 classification from the trace |
 | `stateGrowthBytes` | 32 × (net new nonzero slots) + deployed code bytes; refund-cleared slots subtract |
 | `returndataBytes`, `itemsReturned`, `completeness` | read-plane honesty fields |
-| `wallMs` | client-plane wall time (M-CLIENT rows only; language-tagged) |
+| `postingsVisited`, `nextCursor` | physical selector work and resumability; dead/boundary reads included exactly as the endpoint reports |
+| `wallMs`, `peakMemoryBytes`, `rpcCount`, `pageCount` | client-plane quantities (M-CLIENT rows; language + profile tagged) |
 
 Metric bundles (referenced by fixtures): **M-AGG** per-fixture-trace totals and
 the §3.5 aggregate bundle; **M-K** per-leaf cost vs batch size k with crossover
@@ -707,6 +784,14 @@ reads cold/warm at declared page sizes; **M-COUNT** `counts()` + fold costs;
 reconstruction pass/fail + walk cost; **M-CONF** conformance pass/fail;
 **M-STATE** state growth; **M-CLIENT** client-plane timings.
 
+`M-K` begins at seed points `{1,3,10,64}` and reports measured signs only. If
+adjacent seeds bracket a sign change, it measures the missing integer k values
+(or deterministic integer bisection followed by the neighboring integer) until
+the smallest measured crossing is known. Every compared k has identical
+`atomicityClass`, fixture slice, Realm/client profile, and `corpusVersion`. If
+no crossing is measured, it reports `NO_OBSERVED_CROSSING_WITHIN_1_64`; it
+never interpolates or extrapolates a first discrete crossing.
+
 **The mandatory read matrix.** Every named external read in the eight chapters
 is measured cold AND warm at least once per cell — including the baseline reads
 the intake SPINE lane found uncosted (admission-order pages under churn,
@@ -715,7 +800,7 @@ finding): `getTypeSchema, getRecord, getEnvelope, getOccurrence,
 getOccurrenceByOrdinal, getReceipt, admissionLogPage, pagePostings,
 pagePostingsHydrated, counts, lookupByDigest, getBindingHead, getBindingAtBasis,
 selectBestLocator` (Lane 5); `readHead, readHeadBatch, readHistory,
-readOccurrenceLifecycle` (Lane 6); `resolve, resolveStrict, validatePlan`
+readOccurrenceStatus` (Lane 6); `resolve, resolveStrict, validatePlan`
 (Lane 7); `envelopeHeaderOf, envelopeRecordIdsOf, occurrenceStateOf` (Lane 2);
 the Lane 4 §8.2 reconstruction surface (measured by CV-RECON). [PROPOSAL]
 
@@ -726,12 +811,16 @@ MeasurementRow {
   corpusVersion   bytes32     -- §5; rows with different values never compared
   cellId          string      -- "B0" | "F1".."F7" | "X17"
   fixtureId       string      -- "FX-ARC" … "FX-BROWSE" | "CV" | "WL-…"
-  workloadId      string      -- "-" or "WL-SPRAY"/"WL-CHURN"/"WL-HOT" + knob hash
+  workloadId      string      -- "-" or WL-SPRAY/WL-CHURN/WL-HOT/WL-DEAD-LOCATOR + knob hash
   realmProfileId  string      -- §3.3
+  clientProfileId string      -- MOBILE_REF | DESKTOP_REF | "-"
   phase           string      -- "C", "P3", …
   opClass         enum        -- WRITE | READ_POINT | READ_PAGE | RESOLVE | SELECT
                               --  | VERIFY | RECONSTRUCT | AGGREGATE | CONFORMANCE
   opName          string      -- FixOp or ABI function name
+  atomicityClass  enum        -- MUST_FIT_ATOMIC | SPLITTABLE_THROUGHPUT | N/A
+  overCap         bool        -- true iff the exact measured unit exceeds txGasCap
+  splitFactor     uint16      -- MUST_FIT_ATOMIC always 1; campaign split count otherwise
   k               uint16      -- batch size (writes) / page size (reads) / plan N
   n               uint32      -- repetition count aggregated into this row
   temperature     enum        -- COLD | WARM | MIXED
@@ -740,9 +829,14 @@ MeasurementRow {
   sstoreNew, sstoreMod, sloadsCold, sloadsWarm  uint32
   stateGrowthBytes  int64
   itemsReturned   uint16
-  completeness    enum        -- UNKNOWN|COMPLETE|PARTIAL|UNSUPPORTED|N/A
+  completeness    enum        -- UNKNOWN=0|COMPLETE=1|PARTIAL=2|UNSUPPORTED=3|N/A
+  postingsVisited uint16      -- selector-reported total physical reads
+  nextCursor      uint256     -- 0 when N/A, a resumable cursor, or CURSOR_END
   ok              bool        -- assertion outcome (CONFORMANCE rows)
   wallMs          uint32      -- 0 unless M-CLIENT
+  peakMemoryBytes uint64      -- 0 unless M-CLIENT
+  rpcCount        uint32      -- 0 unless M-CLIENT
+  pageCount       uint32      -- 0 unless M-CLIENT
   lang            string      -- "sol" | "ts" | "rs" | "-"
   note            string      -- ≤ 128 chars; SCALED / PROVISIONAL flags here
 }
@@ -772,26 +866,43 @@ RealmProfile {
 | `RP-L2` | parameter (default 30,000,000) | [HYPOTHESIS — representative rollup execution cap; default falsified/replaced by the adopted venue's real profile] |
 | `RP-L3` | parameter (default 100,000,000) | app-chain profile; DA/calldata pricing divergence noted per venue |
 
-Rules [PROPOSAL]: (i) any trace tx exceeding the active cap is SPLIT by the
-harness (subset admission / batch split per Lane 2 §7, Lane 4 §5.5) and the
-split factor reported in `note` — never silently raised; (ii) all cross-cell
-DECISIONS read RP-L1 rows; RP-L2/L3 rows are context, matching the PM/standards
-guidance that the cap is venue-conditional physics to re-verify per Realm
-(CARRY-IN EIP-7825 finding, VERIFIED); (iii) profile constants live in the
-corpus, so a venue-profile change is a corpus version bump.
+Rules [PROPOSAL]:
+
+1. `MUST_FIT_ATOMIC`: one semantic unit executes in one EVM call under the
+   selected Realm cap. `overCap=true` is a failing hard-gate observation,
+   `splitFactor=1`, and the harness never retries pieces.
+2. `SPLITTABLE_THROUGHPUT`: a logical campaign may contain several independent
+   atomic units. The adapter may split only at declared envelope boundaries
+   and reports the actual factor. It may never split inside a Record,
+   AdmissionIntent, one selected occurrence's admission effects, or one atomic
+   schema group.
+3. A `PACK(k)` point that exceeds the cap is `OVER_CAP` for that exact k;
+   replacing it with smaller envelopes is not a measurement of k.
+4. Minimum `MUST_FIT_ATOMIC` set: `ONECALL_5`; one FX-GIT push unit; one
+   `TypeSchemaGroup/1` admission plus deterministic cache materialization;
+   every concrete `publish` and tested all-or-nothing `publishBatch`; every
+   poisoned-leaf/full-revert conformance vector.
+5. Minimum `SPLITTABLE_THROUGHPUT` set: F4 backfill campaigns, staged
+   large-content acquisition, churn/spray population, and workload-level PACK
+   campaigns between independent envelopes. An over-cap maximal schema group
+   reports a schema-on-ramp failure; Task 6 never invents staged commitment.
+6. All cross-cell decisions read RP-L1 rows; RP-L2/L3 rows are context. Profile
+   constants live in the corpus, so a venue-profile change is a corpus-version
+   bump.
 
 ### 3.4 Workload knobs (closed set, frozen defaults)
 
 | Knob | Values (frozen) | Used by |
 |---|---|---|
-| `K_BATCH` | {1, 3, 10, 64} | PACK(k); M-K curves (64 pending S5 pin) |
+| `K_BATCH` | {1, 3, 10, 64} | PACK(k); M-K seed signs and bounded crossover search |
 | `K_CHURN_YEARS` | {1, 10, 50} | WL-CHURN (50 = the 50-year panel's number) |
 | `K_WRITE_RATE` | {100, 1,000} writes/day | WL-CHURN volume |
 | `K_SPAM_RATIO` | {1, 10, 100} spam:legit | WL-SPRAY |
 | `K_REVOKE_FRACT` | {0.0, 0.5, 1.0} | WL-SPRAY self-revoke pass |
 | `K_HOT_SKEW` | Zipf s ∈ {0, 1.0, 1.5} | WL-HOT target draw |
 | `K_PAGE` | {16, 256, 512} | READ_PAGE maxItems |
-| `K_PLAN_N` | {1, 8, 32, 64} (+50 rider) | FX-LENS |
+| `K_PLAN_CORE_N` | {1, 8, 32, 64} | FX-LENS Core grid |
+| `K_PLAN_CLIENT_N` | {50, 100, 256} | FX-LENS TS/RS client grid on MOBILE_REF + DESKTOP_REF |
 | `K_RW_RATIO` | {10:1, 100:1} | read/write weighting for axis-7 verdicts |
 
 [PROPOSAL — value sets; each ties to a named consumer. Extending a knob's value
@@ -818,8 +929,9 @@ TypeScript, and Rust (kickoff gate, VERIFIED) and reports them as CONFORMANCE
 rows: Lane 1 §10 categories 1–12; Lane 2 §12 categories 1–10; Lane 3 §10
 `PID-DERIVE … GRAD-SEAM`; Lane 4 §3/§8 checks C-1..C-7 + walk W-0..W-10; Lane 5
 page/liveness vectors; Lane 6 T1–T9 + key-derivation vectors; Lane 7 §12 plan/
-combiner/LENS-NEG-1 vectors; Lane 8 §13 categories 1–5. Emission is blocked on
-§1.3 S1–S8. Vector files are corpus content (§5); the corpus adds only the
+combiner/LENS-NEG-1 vectors; Lane 8 §13 categories 1–5. Emission is blocked
+on VERIFIED repair status for every consumed SR pin plus the retired-form
+residue check in §1.3. Vector files are corpus content (§5); the corpus adds only the
 cross-fixture vectors defined in this chapter (CV-\*, convergence twins,
 ResolvedManifest/1 byte-identity).
 
@@ -827,7 +939,7 @@ ResolvedManifest/1 byte-identity).
 
 ## 4. Adversarial workloads — named scripts
 
-All three run against NAMED key-spaces in the frozen corpus (not synthetic
+All four run against NAMED key-spaces in the frozen corpus (not synthetic
 stand-alone graphs), so their numbers compose with fixture rows. Each script's
 falsifier names the [HYPOTHESIS] it closes. [PROPOSAL — script set]
 
@@ -886,6 +998,28 @@ assert: per-page cost curves FLAT across target cardinality (THE LINE,
 Closes: Lane 5 §8 hot-value bound; feeds axis-7 (packed vs wide postings under
 skew) and the F7/X17 comparison.
 
+### WL-DEAD-LOCATOR — selector-specific dead-posting spray
+
+```text
+target: FX-ARC's release/closure locator key under B0_SELECT
+1. publish 65 Locator/1 occurrences targeting the same key (more than two
+   LOCATOR_POSTINGS_VISIT_MAX windows), using the B0-declared score mode
+   (`SCORE_LATEST` for repaired `Locator/1`)
+2. self-withdraw every occurrence; assert the one-way SR-10 status flips
+3. call selectBestLocator(target, spec, basis, cursor=0), then follow only the
+   returned cursor until CURSOR_END
+4. on every call assert:
+     postingsVisited counts all boundary probes + every live/dead sequential
+       posting visited and stays <= LOCATOR_TOTAL_POSTING_READ_MAX
+     an unexhausted suffix returns PARTIAL + nextCursor, even with no live item
+     only the terminal page returns COMPLETE; no call scans ahead for liveness
+5. report gas/wall per page and cursor-chain length; compare against the same
+   fixed call bounds before spray
+```
+
+This is not substitutable by comment/EAP spray: it attacks the B0 selector's
+physical posting budget directly and wires GV-14/SR-18c to M-CONF + M-SEL.
+
 ---
 
 ## 5. The fixture-freeze rule
@@ -893,8 +1027,10 @@ skew) and the F7/X17 comparison.
 **FR-1 (corpus identity).** The corpus = fixture definitions + fixture-pack
 TypeSchema blobs + scripts + CV suite + WL scripts + knob value sets + Realm
 profiles + `CORPUS_SEED` + vector files, canonically serialized;
-`corpusVersion = keccak256("efs2/fixture-corpus/1" ‖ canonicalCorpusBytes)`
-[PROPOSAL — reuses the Lane 1 ID family discipline for a non-protocol artifact].
+`DOM_FIXTURE_CORPUS = keccak256("efs2/fixture-corpus/1")` and
+`corpusVersion = keccak256(abi.encode(DOM_FIXTURE_CORPUS,
+keccak256(canonicalCorpusBytes)))` [PROPOSAL — exact SR-1 discipline for a
+non-protocol artifact].
 
 **FR-2 (freeze point).** The corpus is frozen — corpusVersion computed and
 recorded — BEFORE the first Stage B measurement of ANY bakeoff cell. All 9
@@ -936,60 +1072,59 @@ The compact contract other chapters and Stage B rely on:
 
 - **FixOp language** (§1.1, closed set) + `PACK(k)` + DRBG seeding (§1.2):
   the ONLY vocabulary fixtures/workloads are written in; bakeoff cells supply
-  `CellAdapter: FixOp → concrete ABI`.
+  `CellAdapter: FixOp → concrete ABI`; `PUBLISH_SCHEMA_GROUP` must reduce to
+  the sole Core `publish` entrypoint.
 - **Fixture IDs and interfaces** (§2): FX-ARC, FX-GIT, FX-EAP [PROVISIONAL],
   FX-NANDA, FX-LENS, FX-TOPIC, FX-PRIV, FX-50GB, FX-MOUNT (GoldenView/1 +
   ResolvedManifest/1 byte layout — interface only), FX-BROWSE (retained thin;
   guest checks imported from FX-NANDA.E). Cross-cutting suite CV-RAIL /
-  CV-PID160 / CV-XREALM / CV-SUBSET / CV-CLOCK / CV-7702 / CV-WITHDRAW /
-  CV-RECON runs once per cell.
+  CV-PID160 / CV-AUTHCHAIN / CV-XREALM / CV-SUBSET / CV-CLOCK / CV-7702 /
+  CV-WITHDRAW / CV-SPARSE-ADMIT / CV-PREWITHDRAW / CV-DIGEST-LOOKUP /
+  CV-LAST-LIVE-COUNT / CV-SCHEMA-CAP / CV-RECON runs once per cell.
 - **MeasurementRow** (§3.2): the one table shape for every cell × fixture ×
   workload; metric definitions §3.1; the mandatory read matrix (every named
   chapter read, cold+warm).
 - **RealmProfile** (§3.3): RP-L1 pinned at txGasCap = 16,777,216 (EIP-7825);
-  RP-L2/RP-L3 parameterized; decisions cite RP-L1 rows; over-cap traces split,
-  never silently raised.
-- **Knob set** (§3.4) and **named adversarial workloads** WL-SPRAY / WL-CHURN /
-  WL-HOT (§4) with the [HYPOTHESIS] each closes.
+  RP-L2/RP-L3 parameterized; decisions cite RP-L1 rows;
+  `MUST_FIT_ATOMIC` over-cap traces fail with `splitFactor=1`, while declared
+  throughput campaigns split only between independent envelopes.
+- **Knob set** (§3.4), distinct Lens grids (Core 1/8/32/64; TS/RS client
+  50/100/256 on pinned mobile/desktop profiles), and **named adversarial
+  workloads** WL-SPRAY / WL-CHURN / WL-HOT / WL-DEAD-LOCATOR (§4).
 - **Aggregate-bundle rule** (§3.5): adopt/kill and return-to-James cite bundle
   rows only; FX-EAP rows excluded while PROVISIONAL.
 - **Freeze rules FR-1..FR-6** (§5): corpusVersion discipline; measurement-freeze
   ≠ protocol-freeze.
-- **Obligations on other lanes:** synthesizer pins S1–S8 (§1.3) before
-  golden-vector emission; Lane 5/2 constants reconciled before K_BATCH=64 runs;
-  Lane 8 O2 (role target-set grammar) answered before fixture-pack schemas
+- **Obligations on other lanes:** all consumed SR-1..SR-18 owning-chapter
+  repairs and retired-form residue checks verify before golden-vector
+  emission; Lane 8 O2 (role target-set grammar) answered before fixture-pack schemas
   finalize; measured rows replace the chapters' schedule-arithmetic
   [HYPOTHESIS] tables (Lane 2 §2.5, Lane 4 §5.6, Lane 5 §5.3/§9, Lane 6 §3.6,
   Lane 7 §9, Lane 8 §8.4).
 
 ## Open items
 
-1. **S1–S8 seam pins** (§1.3) — synthesizer closes; golden-vector emission and
-   K_BATCH=64 measurement are blocked until then; workload structure is not.
-2. **FX-EAP durable brief** — PM-directed provisional status; Codex's brief
+1. **FX-EAP durable brief** — PM-directed provisional status; Codex's brief
    closes it (FR-6 bump). Excluded from adopt/kill citations meanwhile.
-3. **Fixture-pack role grammar** — small closed target sets (`{ChunkTree/1,
+2. **Fixture-pack role grammar** — small closed target sets (`{ChunkTree/1,
    ArtifactClosure/1}`) vs ANY+read-side checks awaits Lane 1/Lane 8 O2; corpus
    currently uses ANY (weaker admission checks, stated).
-4. **RP-L2/RP-L3 default caps** — [HYPOTHESIS] placeholders until a venue
+3. **RP-L2/RP-L3 default caps** — [HYPOTHESIS] placeholders until a venue
    profile is adopted (V2-E5 descriptor carries the real cap; Lane 4 §2.1 B).
-5. **N=50 lens rider** — pinned grid is 1/8/32/64 (constitution); the 50-row
-   rider honors the SURVIVORS-lane R-L4 concern; James/PM may promote it to the
-   pinned grid (corpus bump) or drop it.
-6. **WL-CHURN scaling rule** — the 100k-op cap + flatness-gated extrapolation is
+4. **WL-CHURN scaling rule** — the 100k-op cap + flatness-gated extrapolation is
    [PROPOSAL]; if any cell shows non-flat per-op cost, full-volume runs (or a
    bigger cap) replace extrapolation for that cell — red team may demand a
    higher floor now.
-7. **FX-PRIV encProfile stub** — AEAD/KEM constructions are Stage-B crypto work
+5. **FX-PRIV encProfile stub** — AEAD/KEM constructions are Stage-B crypto work
    (carried-in proposals); the fixture tests seams only; transplant/batch-linkage
    vectors bind to the profile once pinned.
-8. **Corpus size vs FR-3 full re-run budget** — the "single-digit hours"
+6. **Corpus size vs FR-3 full re-run budget** — the "single-digit hours"
    target is unmeasured until the first B0 dry run; if missed, the corpus
    shrinks (version bump), never the comparability rule.
-9. **Client-plane wallMs comparability** — M-CLIENT rows are machine-dependent;
-   the corpus pins a reference-hardware note, but cross-campaign wallMs
+7. **Client-plane wallMs comparability** — M-CLIENT rows are machine-dependent;
+   the corpus pins `MOBILE_REF`/`DESKTOP_REF` hardware/runtime manifests, but cross-campaign wallMs
    comparisons remain weaker than gas rows (stated honestly in the schema docs).
-10. **Cross-fixture graph coupling** — FX-TOPIC tags FX-ARC/FX-GIT objects;
+8. **Cross-fixture graph coupling** — FX-TOPIC tags FX-ARC/FX-GIT objects;
     convenient for realism, but it means fixture execution order is part of the
     corpus (pinned: ARC, GIT, EAP, NANDA, LENS, TOPIC, PRIV, 50GB, MOUNT,
     BROWSE, then CV/WL). Red team should confirm no fixture's assertions depend

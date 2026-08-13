@@ -41,10 +41,12 @@ GAP with a disposition proposal.
   (`bk` = bakeoff-spec, `hf` = harness-and-fixtures, `vf` = vectors-and-falsifiers).
 - **Vector** — `GV-1..GV-18` (vf §2), cross-cutting rules `vf §0.2/§0.3`,
   conformance suites `CV-*` (hf §2.0.3), or bakeoff decision statistics
-  (bk §4: `KSTAR_1 … I_17`) when the test is a measurement, not a byte vector.
+  (bk §4: `KSTAR_1 … FRESH_5/REENDORSE_5 … I_17`) when the test is a
+  measurement, not a byte vector.
 - **Fixture** — `FX-ARC, FX-GIT, FX-EAP [PROVISIONAL], FX-NANDA, FX-LENS,
   FX-TOPIC, FX-PRIV, FX-50GB, FX-MOUNT (interface only), FX-BROWSE` and
-  workloads `WL-SPRAY / WL-CHURN / WL-HOT` (hf §2/§4). "all" = every fixture's
+  workloads `WL-SPRAY / WL-CHURN / WL-HOT / WL-DEAD-LOCATOR` (hf §2/§4).
+  "all" = every fixture's
   write path exercises it.
 - **Falsifier** — `CF-1..14` (candidate's 14, vf §3.2), `KA-1..12` (kickoff
   attack list, vf §3.3), `AA-1..7` (audit additions, vf §3.4), or a bakeoff
@@ -73,10 +75,11 @@ COVERED therefore means "an engineer can implement it and the test that would
 catch its violation is named and specified." Rows whose evidence is inherently
 a measurement (gas/state budgets) say so via a bakeoff statistic and remain
 open at Stage B — most prominently CF-14, which cannot fire until the harness
-runs. Additionally, **no vector can be minted until the synthesizer resolves
-the twelve reconciliation preconditions RP-1..RP-12** (vf §1) / seam pins S1–S8
-(hf §1.3); every COVERED status below is conditional on that reconciliation
-landing, which is why it is this chapter's first open item.
+runs. Every COVERED status is conditional on VERIFIED SR-1..SR-18
+owning-chapter repairs, the vector `requiresPins` gate, and the Task 6
+retired-form residue checks (vf §1; hf §1.3). Historical
+RP-1..RP-18/S1–S8 identifiers preserve provenance but cannot authorize bytes
+by themselves.
 
 ### 0.3 Split-row discipline
 
@@ -117,7 +120,7 @@ in document order (VERIFIED).
 
 | ID | Requirement | Label | B0 realization | Vector | Fixture | Falsifier | Status |
 |---|---|---|---|---|---|---|---|
-| C-TD-1 | EAS's developer outcomes without EAS: shared Types, precise shapes, named validation/admission, browsable-by-Type, app Types need no Core upgrade | [OWNER RULING — 2026-08-12 acceptance-obligation clause ("Shared Types and validation")] | enc §3 (TypeSchema Variant A), §2.7 (STRUCT-EVM); idx §3.3 (unique-by-Type); fixture-pack schemas registered with zero Core change (hf §2.0.2) | GV-2 | all (phase-A REG_TYPES) | CF-9 | COVERED |
+| C-TD-1 | EAS's developer outcomes without EAS: shared Types, precise shapes, named validation/admission, browsable-by-Type, app Types need no Core upgrade | [OWNER RULING — 2026-08-12 acceptance-obligation clause ("Shared Types and validation")] | enc §3/§3.4 + realm §8.1: `TypeSchemaGroup/1` is an intrinsic Record admitted by ordinary `publish`; SR-17 validation + cache materialization are atomic; idx §3.3 unique-by-Type | GV-2; SR-17 | all (phase-A `PUBLISH_SCHEMA_GROUP`); CV-SCHEMA-CAP | CF-9; atomic schema-cap gate | COVERED |
 | C-TD-2 | Canonical Records store only defining bytes; derivable fields not repeated as payload | [DERIVED INVARIANT — const. Minimal typed data] | enc §2.5 (body layout); cont §3 (Locator author = Occurrence, not a body field) | GV-1 (canonical-form uniqueness) | all | KA-2 | COVERED |
 | C-TD-3 | Immutable descriptors/context may share repeated data; mutable ambient parents never retroactively reinterpret children | [DERIVED INVARIANT — const.] | auth §2 (immutable Envelope amortizes); enc §6 (evolution evidence is inert on old admissions) | GV-2 (evolution-inertness), GV-12 | FX-ARC.E, FX-GIT.D (index-evolution events) | CF-12 | COVERED |
 | C-TD-4 | Exact content separable from authored Occurrence and Realm receipt; identical content from several authors keeps distinct provenance | [DERIVED INVARIANT — const.; candidate ten-curator trace] | enc §4.1 + auth §3.1 + realm §5.1 (three distinct objects/keys) | GV-3 (same Record, two envelopes), GV-9 (duplicate leaves) | FX-ARC.22 (ten endorsements), FX-TOPIC (convergence twins) | CF-4 | COVERED |
@@ -128,9 +131,9 @@ in document order (VERIFIED).
 | ID | Requirement | Label | B0 realization | Vector | Fixture | Falsifier | Status |
 |---|---|---|---|---|---|---|---|
 | C-AA-1 | Semantic author, signing actor, submitter/relayer, payer are distinct roles | [DERIVED INVARIANT — const.; R-D8 register:162] | auth §2.1 (principal vs witness), §9 (rail invariant); prin §1 | GV-5, GV-6 | CV-RAIL | vf §3 R-D8 mapping; KA via GV-6 | COVERED |
-| C-AA-2 | EOA and ERC-1271 authorship work in a fresh Realm without another chain's identity service | [DERIVED INVARIANT — const.; V2-E5 gate text] | prin §3.4 (per-kind semantics), §5 (1271/6492 policy); realm §5 | GV-5 | FX-ARC (C2 = 1271 curator), FX-LENS cast | CF-1, CF-2 | COVERED |
+| C-AA-2 | EOA and ERC-1271 authorship work in a fresh Realm without another chain's identity service; descriptor identity cannot be forged | [DERIVED INVARIANT — const.; V2-E5 gate text; SR-13/SR-14] | prin §3.4 (per-kind semantics), §5 (1271/6492 policy); auth/realm write path checks computed PrincipalId before any witness | GV-5 | CV-AUTHCHAIN; FX-ARC (C2 = 1271 curator), FX-LENS cast | CF-1, CF-2; SR-13 mismatch attack | COVERED |
 | C-AA-3 | Historical admission records authority + implementation basis; later account/controller/Core changes never silently reinterpret | [DERIVED INVARIANT — const.; kel admission-time lesson via CARRY-IN] | prin §3.5 (AuthorityBasis persisted); auth §4.3 (admission-time, not read-time); realm §7 (U-1..U-6) | GV-12; GV-5 (pinned-codehash replay) | CV-7702 | CF-7; KA-5, KA-6 | COVERED |
-| C-AA-4 | Rotation, delegation, recovery, organizations, future suites are extension requirements; no full custom KEL frozen into the MVP | [OWNER RULING — 2026-07-10 "KEL — design it" as reopened by 2026-08-12 reset; const. wording] | prin §6 (graduation seam, G1–G8 invariants), §2.2 (append-only kinds); auth §6 (reserved authority seam) | GV-12 (GRAD-SEAM slot, members deferred) | — | AA-6, AA-7 (RESERVED-SEAM) | COVERED as reserved seam; the managed-Principal design itself DEFERRED(future KEL/succession round — vf open item 10) |
+| C-AA-4 | Rotation, delegation, recovery, organizations, future suites are extension requirements; no full custom KEL frozen into the MVP | [OWNER RULING — 2026-07-10 "KEL — design it" as reopened by 2026-08-12 reset; const. wording] | prin §6 (graduation seam, G1–G8 invariants), §2.2 (append-only kinds); auth §6 (reserved authority seam) | GV-12 (GRAD-SEAM slot, members deferred) | — | AA-6, AA-7 (RESERVED-SEAM) | COVERED as reserved seam; the managed-Principal design itself DEFERRED(future KEL/succession round — vf open item 8) |
 | C-AA-5 | One PrincipalId author surface + intrinsic zero-setup account Principal — explicitly prototype, not constitutional law | [PROPOSAL — B0 axis-2 pin; V2-E1 open] | prin §2 (AccountPrincipal/1); bk §3.4/§4.2 (F2 arm + D1_2..D5_2) | GV-3 (PID-DERIVE) | all | bk axis-2 rejection conditions (fractured authorship kills either arm) | COVERED as bakeoff arm |
 | C-AA-6 | Full bytes32 PrincipalId through every ID, ABI, storage key, index key, Binding, Lens; low-160-collision pair distinct end to end | [DERIVED INVARIANT — R-D2 register:156; const.] | skeleton rule; prin §2.4/§2.6; bind §1.1; lens §3.2 (32-byte entries); idx §2.1 | GV-3 (PID-LOW160) | CV-PID160; FX-LENS (entries 63–64) | category-fails-by-construction on any 160-bit re-derivation | COVERED |
 
@@ -138,21 +141,21 @@ in document order (VERIFIED).
 
 | ID | Requirement | Label | B0 realization | Vector | Fixture | Falsifier | Status |
 |---|---|---|---|---|---|---|---|
-| C-TX-1 | Precomputed dependent IDs; bounded dependency graph in one EVM call; all-commit-or-all-revert; no second block to learn an id | [DERIVED INVARIANT — const.; kickoff line 56] | realm §5.4 (atomic boundary, REF-SAT), §5.6 (EIP-7825 fit); auth §5.3 | GV-10 (REF-SAT member) | FX-ARC phase C | ONECALL_5 (hard gate); KA-1 | COVERED |
-| C-TX-2 | Identical-content retry idempotent; mutable state uses explicit predecessor/CAS | [DERIVED INVARIANT — const.] | auth §3.2 (T2 no-op); realm §5.5; bind §3.3/§3.5 (typed race errors) | GV-9, GV-18 | FX-GIT (racing pushes) | KA-4 | COVERED |
-| C-TX-3 | History append-only; withdrawal/revocation/tombstone/replacement never erase bytes or resurrect older values | [DERIVED INVARIANT — const.] | bind §3.4 (NO-RESURRECTION), §4; auth §3.3 (Withdrawal/1) | GV-9, GV-18 | FX-EAP.C (revoke/re-award), FX-NANDA.D (yank) | KA-12 | COVERED |
-| C-TX-4 | Signed Envelope ≠ application-semantic transaction; multi-ref atomicity lives in one typed transaction Record or bounded profile rule | [DERIVED INVARIANT — const.] | auth §7 (conclusion 7); GitPushTransaction/1 (hf §2.2) | GV-8 (conclusion-7 member), GV-10 | FX-GIT (push = one typed Record + ref Bindings) | CF-13 | COVERED |
+| C-TX-1 | Precomputed dependent IDs; bounded dependency graph in one EVM call; all-commit-or-all-revert; no second block to learn an id | [DERIVED INVARIANT — const.; kickoff line 56] | realm §5.4 (atomic boundary, REF-SAT), §5.6 (EIP-7825 fit); auth §5.3; hf §3.3 `MUST_FIT_ATOMIC` | GV-10 (REF-SAT member) | FX-ARC phase C | ONECALL_5 (hard gate; over-cap fails with splitFactor=1); KA-1 | COVERED |
+| C-TX-2 | Identical-content retry idempotent; mutable state uses explicit predecessor/CAS | [DERIVED INVARIANT — const.] | SR-15 occurrence-granular no-op; auth §3.2; realm §5.5; bind §3.3/§3.5 | GV-9, GV-18 | CV-SPARSE-ADMIT; FX-GIT races | KA-4 | COVERED |
+| C-TX-3 | History append-only; authenticated pre-withdrawal/withdrawal/revocation/tombstone/replacement never erase bytes or resurrect older values | [DERIVED INVARIANT — const.] | bind §3.4/§4; auth §3.3 SR-9/SR-10/SR-15 lifecycle + retained target evidence | GV-9, GV-18 | CV-PREWITHDRAW; FX-EAP.C, FX-NANDA.D | KA-12 | COVERED |
+| C-TX-4 | Signed Envelope ≠ application-semantic transaction; multi-ref atomicity lives in one typed transaction Record or bounded profile rule | [DERIVED INVARIANT — const.] | auth §7 (conclusion 7); GitPushTransaction/1 (hf §2.2); hf §3.3 `MUST_FIT_ATOMIC` | GV-8 (conclusion-7 member), GV-10 | FX-GIT push unit (never auto-split) | CF-13 | COVERED |
 
 ### 2.5 On-chain graph and indexes
 
 | ID | Requirement | Label | B0 realization | Vector | Fixture | Falsifier | Status |
 |---|---|---|---|---|---|---|---|
 | C-IX-1 | Core is a graph database; required contract reads in bounded gas from Realm state | [DERIVED INVARIANT — onchain-completeness §6 "THE LINE" via idx §0] | idx §0 (acceptance rule), §3, §5 | GV-14 | mandatory read matrix (hf §3.1); WL-HOT flatness | CF-5 | COVERED |
-| C-IX-2 | Baseline automatic reads: exact Types, Records, Occurrences, receipts, global admission order, unique-by-Type, Occurrences by Type/Record/Principal | [DERIVED INVARIANT — const.; 2026-08-12 "remain automatic"] | idx §3.1–§3.4 | GV-14; GV-3 (pk()) | hf §3.1 read matrix, cold+warm per cell | CF-14 (aggregate) | COVERED |
+| C-IX-2 | Baseline automatic reads: exact Types, Records, Occurrences, receipts, global admission order, unique-by-Type, Occurrences by Type/Record/Principal | [DERIVED INVARIANT — const.; 2026-08-12 "remain automatic"] | idx §3.1–§3.4; SR-18a u16 digest key and SR-18d last-live count | GV-14; GV-3 (pk()) | CV-DIGEST-LOOKUP; CV-LAST-LIVE-COUNT; hf §3.1 read matrix | CF-14 (aggregate) | COVERED |
 | C-IX-3 | Type creator declares bounded index set; once admitted, every matching item auto-indexed; no writer opt-out | [OWNER RULING — 2026-07-15 item 12 (opt-in REJECTED); re-carried 2026-08-12] | idx §0 (mandate), §4.1 (closed grammar); enc §3.1/§3.2 (indexSpecs inside TypeSchemaId — Variant A) | GV-2 (IndexSpec eligibility) | FX-ARC.E (evolution event) | CF-6; AA-5 (F4 arm) | COVERED |
-| C-IX-4 | Paginated typed backlinks by role/target; hot values, spam, history never turn point reads into unbounded scans | [DERIVED INVARIANT — const.; owner ruling item A] | idx §3.5, §8 (limits table) | GV-14 | WL-SPRAY, WL-HOT, WL-CHURN (each closes a named [HYPOTHESIS], hf §4) | CF-5; WL-SPRAY 2×-clean-key falsifier | COVERED |
+| C-IX-4 | Paginated typed backlinks by role/target; hot values, spam, dead history never turn point reads or locator selection into unbounded scans | [DERIVED INVARIANT — const.; owner ruling item A] | idx §3.5/§7/§8; every B0 selector posting visited consumes the cap and returns cursor honestly | GV-14 | WL-SPRAY, WL-HOT, WL-CHURN, WL-DEAD-LOCATOR | CF-5; dead-spray total-visit bound | COVERED |
 | C-IX-5 | Physical layout replaceable until frozen; the semantic query contract (typed keys, basis, cursor, coverage, completeness) is durable | [DERIVED INVARIANT — const., quoted verbatim in idx §0] | idx §0, §5 (page ABI as the durable surface); axis-7 arms swap physics under one ABI | GV-14 (ABI-level, arm-independent) | — | axis-7 verdict cannot change the ABI (bk §4.7) | COVERED |
-| C-IX-6 | Adopted generic query outcomes (reverse membership/cited-by, digest lookup, author enumeration, revocation-aware counts, best-locator) remain costed gates; budget failure returns to James | [OWNER RULING — 2026-07-15 items A/B/C/D/E/13; 2026-08-12 obligation clause] | idx §3.4 (author enum), §3.5 (backlinks + lookupByDigest), §6 (counts), §7 (best-locator); cont §10.3 | GV-14, GV-16 | M-AGG ONE-bundle snapshot (hf §3.5); M-PAGE author-enum under WL-CHURN | CF-14 → RETURN-TO-JAMES | COVERED at spec level; the price itself is Stage B (CF-14 open by design) |
+| C-IX-6 | Adopted generic query outcomes (reverse membership/cited-by, digest lookup, author enumeration, revocation-aware counts, best-locator) remain costed gates; budget failure returns to James | [OWNER RULING — 2026-07-15 items A/B/C/D/E/13; 2026-08-12 obligation clause] | idx §3.4/§3.5/§6; idx §7 `B0_SELECT` single-score total-visit selector; cont §10.3 `SELECT_PROFILE_V2` is client-tier/deferred | GV-14; GV-16 (`B0_SELECT`) | CV-DIGEST-LOOKUP; CV-LAST-LIVE-COUNT; WL-DEAD-LOCATOR; M-AGG | CF-14 → RETURN-TO-JAMES | COVERED at spec level; the price itself is Stage B (CF-14 open by design) |
 | C-IX-7 | Range, prefix, collation, full text, global ranking/analytics, arbitrary joins stay off-chain until a real workload proves one | [OWNER RULING — 2026-07-15 item 15] | idx §4.1 (grammar excludes them), §10 (rejected alternatives) | GV-14 (UNSUPPORTED member) | — | boundary; no mechanism to falsify | COVERED |
 
 ### 2.6 Lenses for contracts and people
@@ -163,7 +166,7 @@ in document order (VERIFIED).
 | C-LN-2a | Bounded deterministic contract point-resolution profile with FOUND/ABSENT/CONFLICT/UNSUPPORTED/UNKNOWN | [DERIVED INVARIANT — const.] | lens §6 (combiners T1–T10), §7 (algorithm + Presence enum) | GV-13 | FX-LENS grid (V2-E2) | CF-8; AA-2 | COVERED |
 | C-LN-2b | Separately benchmarked bounded-depth path profile may build on it | [PROPOSAL — deferral, lens §10] | lens §10 (resolvePath stub reserved) | — | — | — | DEFERRED(post-B0 lens round; stub pinned so it is not foreclosed) |
 | C-LN-3a | Rich OS/Commons Lens compiles to an immutable Core-compatible Plan; Core never runs arbitrary policy code or unbounded social graphs on read | [DERIVED INVARIANT — const.] | lens §4 (plans admitted on the spine), §7 (zero external calls on read path) | GV-13 (gas-invariance member) | FX-LENS | CF-8; AA-2 | COVERED |
-| C-LN-3b | The rich-lens → Plan compiler and its determinism corpus (R-L1) | [DERIVED INVARIANT — R-L1 register:200] | not built in B0 (flat plans; no import grammar) | GV-13 note; vf open item 6 | — | — | DEFERRED(client/lens-compiler lane — visibly parked, not dropped) |
+| C-LN-3b | The rich-lens → Plan compiler and its determinism corpus (R-L1) | [DERIVED INVARIANT — R-L1 register:200] | not built in B0 (flat plans; no import grammar) | GV-13 note; vf open item 5 | — | — | DEFERRED(client/lens-compiler lane — visibly parked, not dropped) |
 | C-LN-4 | Risk-bearer selects/approves the Lens; a caller cannot choose the trust list that authorizes itself | [DERIVED INVARIANT — const. Lenses] | lens §8 (view/state ABI split, admin-written plan pin) | GV-13 (LENS-NEG-1 three-way negative) | FX-LENS adversarial | AA-3 | COVERED |
 | C-LN-5a | Contract-visible Lenses are public | [DERIVED INVARIANT — const.] | lens §4 (plans = admitted spine Records, full-body state-readable) | GV-13 | FX-LENS | — | COVERED |
 | C-LN-5b | Private personal trust policy stays local/encrypted (ZK profiles later research) | [DERIVED INVARIANT — const.; §12 item 8 of the register] | no Core mechanism (correctly — nothing forces personal policy on-chain) | — | — | — | DEFERRED(OS/client lens lane; constitution itself assigns it there) |
@@ -173,7 +176,7 @@ in document order (VERIFIED).
 | ID | Requirement | Label | B0 realization | Vector | Fixture | Falsifier | Status |
 |---|---|---|---|---|---|---|---|
 | C-HR-1 | Every enumeration hard-bounded; exposes Realm, policy/code basis, high-water, cursor, coverage, COMPLETE/PARTIAL/UNSUPPORTED/UNKNOWN; UNKNOWN never absence | [DERIVED INVARIANT — const.; R-L6 register:205] | idx §5 (PageResult + completeness rules); realm §4.2 (H-1); bind §6 | GV-14 (never-empty, one-basis, UNSUPPORTED members); vf §0.3 | every read step names its honesty fields (hf §2.0.1 corpus rule) | CF-6 | COVERED |
-| C-HR-2 | Canonical Type/Record/Occurrence/admission/index/current-fold bytes stay state-readable; never hash-only elision, event logs, or private DBs | [OWNER RULING — 2026-07-15 items 17 (full-body spine, "PAY IT") + 18 (no elision, "ETCH IT")] | enc §2.6 (no-elision constant set); idx §2.2 (2-slot admission log incl. bodies); lens §4.1 | GV-17 (walk with logs disabled) | CV-RECON | CF-10 | COVERED |
+| C-HR-2 | Canonical Type/Record/Occurrence/admission/index/current-fold bytes stay state-readable; never hash-only elision, event logs, or private DBs | [OWNER RULING — 2026-07-15 items 17 (full-body spine, "PAY IT") + 18 (no elision, "ETCH IT")] | enc §2.6 full Record-body spine; idx §2 preamble + §2.4 log/meta words (the two-slot admission log stores EnvelopeId + metadata, not bodies); lens §4.1 | GV-17 (walk with logs disabled) | CV-RECON | CF-10 | COVERED |
 | C-HR-3 | Second implementation reconstructs Types, Records, Occurrences, admissions, indexes, current folds from Realm state + byte carriers, no EFS service | [DERIVED INVARIANT — R-M2 register:146; const.] | realm §8 (W-0..W-10 walk + §8.2 read ABI) | GV-17 (two independent client rebuilds = the acceptance trace) | CV-RECON after every fixture; FX-GIT.E walk-away | CF-10; RECON_1 (hard gate, both axis-1 arms) | COVERED |
 | C-HR-4 | Early upgrades fix code/add capability but the interpretation of already-admitted data stays identifiable; evolution via versioned Types + successor/redirect evidence | [DERIVED INVARIANT — const.; V2-E5] | realm §7 (revision history, U-1..U-6, freeze U-6); enc §6 (successor/equivalence Records) | GV-12, GV-2 | FX-ARC.E, FX-GIT.D | CF-7, CF-12 | COVERED |
 
@@ -185,7 +188,7 @@ in document order (VERIFIED).
 | C-FB-2 | Exact identity only after exact representation/closure known; 50 GB paste need not block on whole-file hashing | [DERIVED INVARIANT — const. 50 GB trace] | cont §8.1 (publication ladder P0–P4, monotone accretion) | GV-16 | FX-50GB (P1 = the phone-paste headline row) | KA-11 | COVERED |
 | C-FB-3 | Digests, sizes, media types, CIDs, manifests, provenance, rights, compatibility, availability are distinct facts; none forced into identity | [DERIVED INVARIANT — const.] | cont §2 (Type family split), §6 (RepresentationBinding), §10 (grades/observations) | GV-16 | FX-ARC 8/13–14/20–21 | GV-16 two-chunk-size non-convergence member | COVERED |
 | C-FB-4 | Executable bytes verify before execution; chunk/Merkle closure verifies arbitrary ranges; partial/resume exposes verified coverage, never claims complete early | [DERIVED INVARIANT — const.; R-M4 register:148] | cont §5 (ChunkTree + proofs), §8.2 (acquisition machine), §8.3 (executable gate) | GV-16 (proof MUST-FAIL set) | FX-50GB (resume, hostile mirror), FX-ARC adversarial i/iii | KA-11; CF-9 | COVERED |
-| C-FB-5 | Content identity independent of storage provider; Locators plural; shared-gateway ≠ independent custody | [DERIVED INVARIANT — const.; owner ruling item C for the selection view] | cont §3, §10.1 (custody classes), §10.3 (DECLARED-evidence selection); idx §7 | GV-16 (selection determinism) | FX-ARC (two locators), FX-50GB (two mirrors) | GV-16 claimed-time manipulation member | COVERED |
+| C-FB-5 | Content identity independent of storage provider; Locators plural; shared-gateway ≠ independent custody | [DERIVED INVARIANT — const.; owner ruling item C for the selection view] | idx §7 owns B0 `B0_SELECT` (one declared score/latest mode, total-visit bound); cont §3/§10.1 owns evidence and deferred TS/RS `SELECT_PROFILE_V2` | GV-16 split suites | FX-ARC, FX-50GB; WL-DEAD-LOCATOR | GV-16 claimed-time + dead-spray members | COVERED |
 
 ### 2.9 Privacy, safety, and execution
 
@@ -196,11 +199,11 @@ in document order (VERIFIED).
 | C-PS-2b | The sensitivity-policy layer itself (class defaults, inheritance, "make private") | [OWNER RULING — 2026-07-10 named deliverable; "client/OS convention, NOT freeze-bound"] | out of Core by the ruling's own terms | — | — | — | DEFERRED(client/OS lane; V2-E6 adjacency) |
 | C-PS-3 | Opaque/ciphertext bodies legal; private profiles use distinct domains and salted/ciphertext bodies — no plaintext-derived dictionary oracle | [DERIVED INVARIANT — enc §1.5 salt rule + CARRY-IN oracle checklist] | enc §1.5 (≥128-bit CSPRNG salts; public-input-derived salts REJECTED); EncryptedRecord/1 (hf §2.0.2) | GV-15 (incl. MUST-FAIL unsalted twin) | FX-PRIV.2 | KA-10 | COVERED |
 | C-PS-4a | Encrypted-body profile seams: versioned encProfile, AEAD-transplant rejection vector, batch-linkage rejection | [DERIVED INVARIANT — R-P6 register:220; const.] | FX-PRIV.3/.4 (seam tests against the profile stub) | GV-15; M-CONF | FX-PRIV | KA-10 | COVERED as seam |
-| C-PS-4b | The pinned AEAD/KEM construction, canonical associated-data transcript, key-role separation (sign/KEM/archive/scan/wrap/shred), KAT suite; signature-derived archive keys forbidden | [DERIVED INVARIANT — R-P6/R-P7 register:220–221; §12 item 9] | not pinned in B0 (deliberate — hf §2.7 scope note) | — | — | — | DEFERRED(Stage-B crypto round; hf open item 7 names it; R-P7's forbidden rule must be restated there) |
+| C-PS-4b | The pinned AEAD/KEM construction, canonical associated-data transcript, key-role separation (sign/KEM/archive/scan/wrap/shred), KAT suite; signature-derived archive keys forbidden | [DERIVED INVARIANT — R-P6/R-P7 register:220–221; §12 item 9] | not pinned in B0 (deliberate — hf §2.7 scope note) | — | — | — | DEFERRED(Stage-B crypto round; hf open item 5 names it; R-P7's forbidden rule must be restated there) |
 | C-PS-5 | Sensitivity defaults are explicit client policy; public and private material never share a signed batch/context that creates permanent linkage | [DERIVED INVARIANT — const.; R-P5/R-P8 half; CARRY-IN PC-11] | FX-PRIV.4 (SDK refuses mixed envelope; chain non-enforcement stated honestly) | GV-15; M-CONF | FX-PRIV | KA-10 | COVERED as client-conformance rule |
 | C-PS-6 | Retrieval integrity never implies interest privacy; clients disclose who can observe object/query | [DERIVED INVARIANT — R-P9 register:222; const.] | FX-PRIV.5 (observer named in client result); FX-BROWSE (guest disclosure) | M-CONF | FX-PRIV, FX-BROWSE | KA-9 (client conformance side) | COVERED |
 | C-PS-7 | Discovery/presentation metadata never authorize execution; untrusted app code gets no ambient signing/wallet/secrets/network/decrypt/write authority | [DERIVED INVARIANT — const.; R-O1/R-O2 lineage] | cont §8.3 (executable gate: request ≠ grant); FX-NANDA adversarial (capability-injection canary) | GV-16 (gate refusal at k=n−1) | FX-NANDA, FX-ARC iii | CF-9 | COVERED for the Core/read seam; the OS capability cage itself is V2-E6/OS scope (constitution assigns) |
-| C-PS-8 | Permanent-public-data tools warn / may refuse obvious hazard classes at the client edge; Core stays neutral | [DERIVED INVARIANT — const. Privacy block] | **nothing** — no chapter, fixture, or conformance rule mentions client-edge hazard warnings (grep-verified across all 11 chapters) | — | — | — | GAP → §7 G-1 |
+| C-PS-8 | Permanent-public-data tools warn / may refuse obvious hazard classes at the client edge; Core stays neutral | [DERIVED INVARIANT — const. Privacy block] | cont §3 client policy MUST warn before publishing URI fragments/capabilities into permanent public Records; Core remains neutral | client-policy conformance assertion | FX-PRIV/publication UI seam | — | COVERED at B0/client-policy interface; UI implementation DEFERRED(V2-E6) |
 
 ### 2.10 Filesystem and application expressibility
 
@@ -223,13 +226,13 @@ specified and wired, DEFERRED when its executing lane is out of this pass.
 |---|---|---|---|---|---|---|
 | AT-1 | Fresh qualifying L3: deploy Core + fixtures; clean self-hosted client opens Realm as guest, no Commons/account/wallet/OS/indexer | realm §2–§4; C-1..C-7 | GV-17 | FX-NANDA.E, FX-BROWSE | CF-2 | COVERED at Core/read level; the Web Client build is V2-E6 (see C-LY-2b) |
 | AT-2 | Malformed body fails structural validation; bounded version-identified Realm validator accepts/rejects without changing portable RecordId; receipt exposes validator/policy basis | enc §2.7 (STRUCT-EVM); realm §5.1–§5.2 (policy revision in receipt), §5.5 (E_POLICY) | GV-1, GV-10 (E_POLICY member), GV-12 (verifier versioning) | corpus MUST-FAIL members | KA-2 | COVERED |
-| AT-3 | Precompute IDs offline; atomically publish related Records+Occurrences; idempotent retries; explicit races | realm §5.4/§5.5; auth §5.3; bind §3.5 | GV-9, GV-10 | FX-ARC phase C; FX-GIT races | ONECALL_5; KA-1/KA-4 | COVERED |
+| AT-3 | Precompute IDs offline; atomically publish related Records+Occurrences; idempotent retries; explicit races | realm §5.4/§5.5; auth §5.3; bind §3.5; hf `MUST_FIT_ATOMIC` | GV-9, GV-10 | CV-SPARSE-ADMIT; FX-ARC phase C; FX-GIT races | ONECALL_5 over-cap fails, never splits; KA-1/KA-4 | COVERED |
 | AT-4 | Delete all caches; second implementation reconstructs from Realm state + declared carriers | realm §8 | GV-17 (logs disabled) | CV-RECON; FX-GIT.E | CF-10; RECON_1 | COVERED |
-| AT-5 | Type/scalar/backlink/set/Lens reads paginate at a pinned basis; truncation/missing coverage → PARTIAL/UNKNOWN, never empty | idx §5; lens §7.2 | GV-14, GV-13 | read matrix; WL-SPRAY | CF-6 | COVERED |
-| AT-6 | EOA + ERC-1271 writes preserve author/actor/payer separation; later account/Core upgrades never alter recorded basis | prin §3–§5; auth §4; realm §7 | GV-5, GV-6, GV-12 | CV-RAIL, CV-7702 | CF-7; KA-5/6/7 | COVERED |
+| AT-5 | Type/scalar/backlink/set/Lens reads paginate at a pinned basis; truncation/missing coverage → PARTIAL/UNKNOWN, never empty | idx §5/§7; lens §7.2 | GV-14, GV-13 | read matrix; WL-SPRAY; WL-DEAD-LOCATOR (total visits + cursor) | CF-6 | COVERED |
+| AT-6 | EOA + ERC-1271 writes preserve author/actor/payer separation; forged descriptor/header chains fail before witness verification; later account/Core upgrades never alter recorded basis | prin §3–§5; auth §4; realm §7; SR-13/SR-14 | GV-5, GV-6, GV-12 | CV-AUTHCHAIN, CV-RAIL, CV-7702 | CF-7; KA-5/6/7 | COVERED |
 | AT-7 | Contract resolves one slot through 1/8/32/64-Principal plans in bounded gas; beneficiary-supplied plan cannot authorize the beneficiary | lens §7–§9 | GV-13 | FX-LENS grid + LENS-NEG-1 | CF-8; AA-3 | COVERED (gas rows are Stage B measurement by design) |
 | AT-8 | Arcade full trace without an Arcade Core primitive | candidate worked example realized in hf §2.1 | GV-16 members | FX-ARC (incl. tampered-primary, fake-release, gate refusal) | CF-9; KA-11 | COVERED |
-| AT-9 | Git/Markdown: stable repo id, native OIDs, replay-safe push, atomic multi-ref, wiki history, clonable collaboration, walk-away reconstruction — no Git Core primitive | hf §2.2 (incl. EIP-7825 push arithmetic) | GV-16; CV-CLOCK; CV-RECON | FX-GIT | CF-9, CF-13 | COVERED |
+| AT-9 | Git/Markdown: stable repo id, native OIDs, replay-safe push, atomic multi-ref, wiki history, clonable collaboration, walk-away reconstruction — no Git Core primitive | hf §2.2 (`MUST_FIT_ATOMIC` push unit; over-cap never split) | GV-16; CV-CLOCK; CV-RECON | FX-GIT | CF-9, CF-13 | COVERED |
 | AT-10 | EAP: definitions/awards/lifecycle/local gate generic; hostile subject spam cannot unbound the authoritative point check | hf §2.3 (issuer-Binding O(1) gate design) | GV-18 | FX-EAP + WL-SPRAY (2,000-spam assertion, gate gas ±1 SLOAD) | CF-9 | COVERED **[PROVISIONAL — PM directive: excluded from adopt/kill until the durable Codex brief lands; hf FR-6]** |
 | AT-11 | Nanda: provider/service/skill, plural catalogs, yanking, guest inspection; discovery never grants execution | hf §2.4 | GV-16 gate member | FX-NANDA | CF-9 | COVERED |
 | AT-12 | 50 GB Locator before hashing; additive closure; partial/resume, funding/durability grades, gateway fallback, range proof; unverified executables never run | cont §8; hf §2.8 | GV-16 | FX-50GB | KA-11 | COVERED |
@@ -281,16 +284,16 @@ evidence unless re-earned; requirement-level content survives. Labels below are
 | ID | Ruling (date, item) | B0 realization | Vector | Fixture | Falsifier | Status |
 |---|---|---|---|---|---|---|
 | OR-1 | Chains don't die — drop dead-chain machinery; keep cross-Realm reach + pruning insurance (2026-07-10) | realm §4 (QR-1 extends it per-Realm — the RULINGS-lane "unowned Realm-mortality scope" drop is closed by design, no new owner decision needed); §4.2 H-5 (no dead-chain machinery reintroduced); QR-6 (pruning insurance kept for the OTHER reason, as ruled) | GV-17 | — | AA-4 | COVERED |
-| OR-2 | KEL: design it; bare-EOA day-one; adversarial track before freeze (2026-07-10; mechanism reopened 2026-08-12) | prin §6 seam + §2.2 append-only kinds; day-one = AccountPrincipal/1 | GV-12 GRAD-SEAM slot | — | AA-6/AA-7 | DEFERRED(future succession/KEL round with its own owner review — vf open item 10); the graduation seam itself COVERED now (C-AA-4) |
-| OR-3 | Lens scale concern: ~50+ attesters normal; MAX_LENSES=20 conflict; lens-object canonical encoding needed (2026-07-10) | Plan encoding = lens §3.2 (canonical bytes exist now); CORE cap 64 ≥ 50 (lens §3.4); N=50 rider row (hf §2.5) | GV-13 | FX-LENS (+50 rider) | — | Core-side COVERED; client-scale half → S-RL4b |
+| OR-2 | KEL: design it; bare-EOA day-one; adversarial track before freeze (2026-07-10; mechanism reopened 2026-08-12) | prin §6 seam + §2.2 append-only kinds; day-one = AccountPrincipal/1 | GV-12 GRAD-SEAM slot | — | AA-6/AA-7 | DEFERRED(future succession/KEL round with its own owner review — vf open item 8); the graduation seam itself COVERED now (C-AA-4) |
+| OR-3 | Lens scale concern: ~50+ attesters normal; MAX_LENSES=20 conflict; lens-object canonical encoding needed (2026-07-10) | Plan encoding = lens §3.2; Core cap/grid = 64 and 1/8/32/64; separate TS/RS client grid = 50/100/256 on mobile+desktop (hf §2.5) | GV-13 | FX-LENS two grids | — | COVERED at Stage-A interface level; execution is Stage B |
 | OR-4 | Public by default + named sensitivity-policy layer; client/OS convention, not freeze-bound (2026-07-10) | invariant half in FX-PRIV.1; layer itself out of Core by the ruling's own terms | GV-15 | FX-PRIV | KA-10 | Invariant COVERED; layer DEFERRED(client/OS lane — see C-PS-2b) |
 | OR-5 | Storage direction: on-chain + Arweave now; durability tiering on-chain > Arweave > grant-pinned > volunteer (2026-07-10) | cont §10.1 (DurabilityGrade custody classes mirror the tiering), §11 (venue byte-store seam); no venue frozen | GV-16 | FX-50GB (FUNDED_PINNED vs BEST_EFFORT) | — | COVERED as evidence vocabulary; venue/economics DEFERRED(A-5/E-6 validation, ops lane) |
 | OR-A | Backlinks incl. predicate-typed: ON-CHAIN, indexed (2026-07-15 A) | idx §3.5 (general + predicate backlink families; postings carry the predicate — the v1 no-definitionId defect named in idx §0 is the kill evidence) | GV-14 | FX-ARC/FX-TOPIC backlink reads | CF-14 aggregate | COVERED |
 | OR-B | Reverse membership + cited-by: ON-CHAIN (2026-07-15 B) | idx §3.5 | GV-14 | FX-NANDA catalogs; FX-TOPIC | CF-14 | COVERED |
-| OR-C | Best-mirror ranking ON-CHAIN, zero new state beyond declared evidence (2026-07-15 C) | idx §7 + cont §10.3 (bounded DECLARED-evidence fold) | GV-16 (selection) | FX-ARC iv (both orderings), FX-50GB | CF-14 | COVERED |
+| OR-C | Best-mirror ranking ON-CHAIN, zero new state beyond declared evidence (2026-07-15 C) | idx §7 `B0_SELECT` is the bounded on-chain single-score/latest selector; cont §10.3's richer evidence fold is `SELECT_PROFILE_V2`, client-tier/deferred | GV-16 split suites | FX-ARC/FX-50GB B0 rows; WL-DEAD-LOCATOR | CF-14 | COVERED |
 | OR-D | Self-enumeration: PENDING then adopted as acceptance obligation ("authored-data enumeration", 2026-08-12) | idx §3.4 (Occurrences-by-Principal family) | GV-14 | M-PAGE author enumeration under WL-CHURN (10-year author) | CF-14 | COVERED |
 | OR-E | Live counts revocation-aware — PAY for it; not advisory (2026-07-15 E) | idx §6 (counter design, spray analysis, per-write cost) | GV-14 (counts-vs-fold agreement) | FX-EAP, WL-SPRAY (K_REVOKE_FRACT) | CF-14 | COVERED |
-| OR-F | Equivocation: sign the limitation; NO kernel collision bit [REJECTED — TOCTOU-defeated]; closed author sets or challenge windows (2026-07-15 F) | bind §5 (ratified wording carried verbatim); lens §11 (challenge-window consumer pattern, window mechanics unfrozen per PM directive); auth §2.5/§8 rows — the RULINGS-lane SERIOUS "item-F silent drop" is closed | GV-13 (window triple), GV-18 (CAS visibility) | FX-LENS adversarial | AA-1 | COVERED |
+| OR-F | Equivocation: sign the limitation; NO kernel collision bit [REJECTED — TOCTOU-defeated]; closed author sets or challenge windows (2026-07-15 F) | bind §5; lens §11; auth §2.4 table + §8 replay/domain rows — the RULINGS-lane SERIOUS "item-F silent drop" is closed | GV-13 (window triple), GV-18 (CAS visibility) | FX-LENS adversarial | AA-1 | COVERED |
 | OR-G | `act` delegation: authorization reads bounded grant ABI, never inferred from permissionless labels (2026-07-15 G, KEL-downstream) | no `act` primitive exists in B0 (nothing to misuse); grant ABI = managed-Principal seam | — | — | AA-6 | DEFERRED(KEL round; prin §6.2 G-invariants must carry the labels-never-authorize rule) |
 | OR-12a | MANDATORY automatic indexing; EAS opt-in REJECTED bundle-wide; client-only = the sole opt-out (2026-07-15 item 12) | idx §0 (verbatim carriage incl. the [REJECTED] classification) | GV-2/GV-14 | all | CF-6; AA-5 | COVERED |
 | OR-12b | Schema/type-list enumeration: records-by-Type on-chain (ruled); a paginated ALL-TypeSchemas index = "James's call", still unanswered | records-by-Type = idx §3.3; getTypeSchema point read = idx §3.1; a paginated all-schemas enumeration is not in the B0 index list | GV-14 | — | — | Ruled half COVERED; the all-schemas index remains an open owner call → carried to the synthesizer packet (not a design gap: cheap additive family; disposition in §7 G-6) |
@@ -298,7 +301,7 @@ evidence unless re-earned; requirement-level content survives. Labels below are
 | OR-14 | Contracts operate on PUBLIC data; on-chain decryption impossible; keyWrap recipient sets off-chain (2026-07-15) | boundary honored: no key material in any B0 state; EncryptedRecord/1 opaque; lens reads public heads only | GV-15 | FX-PRIV | KA-10 | COVERED |
 | OR-15 | Ranked/full-text/aggregate search off-chain (2026-07-15) | idx §4.1/§10 | GV-14 UNSUPPORTED | — | — | COVERED |
 | OR-16 | "If a contract can't read it in bounded gas, it's off-chain"; file BYTES = DA-tier, honestly graded; contracts read metadata (2026-07-15) | idx §0 THE LINE (the definition, operationalized); cont §11 (byte custody graded, never contract-read) | GV-14, GV-16 | FX-50GB grades | CF-5 | COVERED |
-| OR-17 | Full-body spine — PAY IT (2026-07-15) | idx §2.2 (bodies in state, 2-slot log); enc §2.6 | GV-17 | CV-RECON | CF-10 | COVERED |
+| OR-17 | Full-body spine — PAY IT (2026-07-15) | enc §2.6 owns state-readable Record bodies; idx §2 preamble + §2.4 own the separate two-word admission log/meta layout | GV-17 | CV-RECON | CF-10 | COVERED |
 | OR-18 | No body-elision — ETCH IT (record bodies, not file bytes) (2026-07-15) | enc §2.6 [OWNER RULING constant]; lens §4.1 (plans full-body) | GV-17 (walk needs zero logs) | CV-RECON | CF-10 | COVERED |
 | OR-P | Persona model: one-root mainstream recovery default; unlinkable personas opt-in; true isolation = separate roots (2026-07-15/16; mechanism reopened) | prin §6.3 (unlinkable-persona probe against the graduation seam; reconciles with OR-12a metadata boundary) | — | — | AA-6 | DEFERRED(KEL round, same home as OR-2); the §6.3 probe COVERED now |
 | OR-R | Passkey-sync mainstream recovery + independent cold factor; lone synced passkey REJECTED as sole root (2026-07-16) | KEL-round composition question; no B0 surface | — | — | — | DEFERRED(KEL round — recovery composition is convention, not Etched, per the ruling itself) |
@@ -345,7 +348,7 @@ them".
 | S-RK11 | R-K11 two domains never both claim unqualified CURRENT for one principal (:181) | [DERIVED INVARIANT] | realm §4.2; FX-NANDA.D two-catalog display rule | GV-7, GV-17 | CV-XREALM | AA-7 (the R-K11 check is its sketch detection) | COVERED |
 | S-RL5 | R-L5 exact point queries + bounded candidate enumeration from state for the adopted list (:204) + D-9 "works on-chain" definition (:461–463) | [DERIVED INVARIANT + OWNER RULING item 16 lineage] | idx §3/§5; D-9's recommended reading is exactly idx §0 THE LINE | GV-14 | read matrix | CF-14 | COVERED |
 | S-RL6 | R-L6 absence/completeness name venue and basis; omission ≠ absence (:205) | [DERIVED INVARIANT] | idx §5.2; bind §6 (four sources); realm §4.2 | GV-14, GV-18 | — | CF-6 | COVERED |
-| S-RX2 | R-X2/R-X3 evidence-vs-snapshot-vs-current distinguishable; every result names domain/basis/proof/freshness (:189–190) | [DERIVED INVARIANT] | realm §4.2 (BasisGrade); lens §7.2 (BasisReport); vf §0.3 (two-axis rule on every vector) | GV-13/14/17 members with axis-flip assertions | CV-XREALM | KA-9 | COVERED — final grade-name mapping to the register's five §10 grades = vf open item 8 (see S-G10) |
+| S-RX2 | R-X2/R-X3 evidence-vs-snapshot-vs-current distinguishable; every result names domain/basis/proof/freshness (:189–190) | [DERIVED INVARIANT] | realm §4.2 (BasisGrade); lens §7.2 (BasisReport); vf §0.3 (two-axis rule on every vector) | GV-13/14/17 members with axis-flip assertions | CV-XREALM | KA-9 | COVERED — final grade-name mapping to the register's five §10 grades = vf open item 6 (see S-G10) |
 | S-RX4 | R-X4 foreign local storage never silently a second authority history (:191) | [DERIVED INVARIANT] | realm §4.2 (UNAVAILABLE wording: MUST NOT promote local copy) | GV-17 H-wording assertions | CV-XREALM | KA-8 | COVERED |
 | S-RP1 | R-P1 sensitive plaintext encrypted before signing/publication (:214) | [DERIVED INVARIANT — adopted direction] | FX-PRIV.1 | GV-15 | FX-PRIV | KA-10 | COVERED |
 | S-RP5 | R-P5 personas not co-batched/linked by operational defaults (:218) | [DERIVED INVARIANT] | FX-PRIV.4 (batch linkage); prin §6.3 (persona probe) | GV-15 | FX-PRIV | KA-10 | COVERED at seam |
@@ -358,35 +361,35 @@ them".
 
 | ID | Register row / finding | Label | B0 realization | Vector | Fixture | Falsifier | Status |
 |---|---|---|---|---|---|---|---|
-| S-SUCC | Finding 1 (SERIOUS): succession cluster R-K10 (:180), R-K12 (:182), R-M3 (:147), O-3 (:273), D-7 (:449–453) — suite renewal, single-active-kernel, cryptographic-renewal drills | [DERIVED INVARIANT — the cluster's rows] | Closed as **named reserved seams**: AA-6 ("old suite forgeable") + AA-7 ("two kernels admit") with full seam inventory (prin §2.2 append-only kinds, §3.1 verifier versioning, AuthorityBasis as frozen interpretation key, enc §7 hash-migration playbook, reserved witness kinds, realm U-3 breaking=new-RealmId + no-successor-pointer [the mutable-admin surface refused], R-K11 two-truth display) | GV-3 migration member (structural half); succession vector classes = vf open item 10, a named FREEZE gate | successor-evidence sketch fixture (AA-7) | AA-6, AA-7 (RESERVED-SEAM); prin §8 EIP-8130 probe = standing drill | DEFERRED(future succession design round with its own owner review; freeze-blocking, per vf §4 item 9 — the finding's demanded disposition, satisfied) |
-| S-RL4a | Finding 2 (SERIOUS): lens scale — Core resolution at scale (R-L4 :203, A-7 :250, D-10 :466) | [OWNER RULING — 50+ concern 2026-07-10; 256 = measured unknown] | lens §3.4 (CORE cap 64 ≥ 50 design center); FX-LENS N ∈ {1,8,32,64} + **N=50 rider row** | GV-13 | FX-LENS | — | COVERED for Core (rider promotable by James — hf open item 5) |
-| S-RL4b | Same finding: client-side 50/100/256 mobile/desktop benchmarks (§15:595 demand) | [DERIVED INVARIANT — register acceptance evidence] | not a Core matter; explicitly parked | vf open item 7 | — | — | DEFERRED(harness lane client-tier benchmark matrix — visibly parked per the finding's recommendation, not lost) |
+| S-SUCC | Finding 1 (SERIOUS): succession cluster R-K10 (:180), R-K12 (:182), R-M3 (:147), O-3 (:273), D-7 (:449–453) — suite renewal, single-active-kernel, cryptographic-renewal drills | [DERIVED INVARIANT — the cluster's rows] | Closed as **named reserved seams**: AA-6 ("old suite forgeable") + AA-7 ("two kernels admit") with full seam inventory (prin §2.2 append-only kinds, §3.1 verifier versioning, AuthorityBasis as frozen interpretation key, enc §7 hash-migration playbook, reserved witness kinds, realm U-3 breaking=new-RealmId + no-successor-pointer [the mutable-admin surface refused], R-K11 two-truth display) | GV-3 migration member (structural half); succession vector classes = vf open item 8, a named FREEZE gate | successor-evidence sketch fixture (AA-7) | AA-6, AA-7 (RESERVED-SEAM); prin §8 EIP-8130 probe = standing drill | DEFERRED(future succession design round with its own owner review; freeze-blocking, per vf §4 item 9 — the finding's demanded disposition, satisfied) |
+| S-RL4a | Finding 2 (SERIOUS): lens scale — Core resolution at scale (R-L4 :203, A-7 :250, D-10 :466) | [OWNER RULING — 50+ concern 2026-07-10; 256 = measured unknown] | lens §3.4 Core cap 64; FX-LENS exact `N={1,8,32,64}` Core grid | GV-13 | FX-LENS Core grid | — | COVERED for Core at Stage-A interface level |
+| S-RL4b | Same finding: client-side 50/100/256 mobile/desktop benchmarks (§15:595 demand) | [DERIVED INVARIANT — register acceptance evidence] | hf §2.5 specifies distinct TS/RS `N={50,100,256}` grid on pinned mobile/desktop profiles with wall, peak memory, RPC/page counts, equality, UNKNOWN/PARTIAL; no on-chain 100/256 Plan | M-CLIENT | FX-LENS client grid | — | COVERED at Stage-A interface level; execution remains Stage B |
 | S-RD9F | Finding 3 (SERIOUS): R-D9 time/order vectors + §12.7 equivocation-removal carriage | [DERIVED INVARIANT + REJECTED import] | = S-RD9: GV-11 + CV-CLOCK exist specifically to close this | GV-11 | CV-CLOCK | — | COVERED (finding satisfied) |
-| S-G10 | Finding 4: §10 authorization/freshness grade axis (:378–392) must not compress into presence vocabulary | [DERIVED INVARIANT — "never compress to a Boolean valid"] | vf §0.3 (two-axis rule, with axis-flip members); realm §4.2 BasisGrade; lens §7.2 BasisReport | every GV-13/14/17/18 member asserts both axes | — | — | COVERED structurally; the exact five-grade name mapping (PORTABLE-EVIDENCE/AUTHORITY-ADMITTED/SNAPSHOT@H/CURRENT@H/FOREIGN-LOCAL) onto the SDK result model = vf open item 8, owner: SDK/result-model chapter + synthesizer |
-| S-RL1 | Finding 5: R-L1 (:200) / R-L3 (:202) plan determinism + adversarial corpus | [DERIVED INVARIANT] | GV-13 (byte-determinism ×3 languages; rejection-code corpus 1–13; combiner corpus); B0 has no import grammar, so cycle/diamond members attach to the client compiler | GV-13 | FX-LENS malformed-plan set | CF-8 | COVERED for B0's flat plans; compiler corpus DEFERRED(client/lens-compiler lane — vf open item 6, = C-LN-3b) |
+| S-G10 | Finding 4: §10 authorization/freshness grade axis (:378–392) must not compress into presence vocabulary | [DERIVED INVARIANT — "never compress to a Boolean valid"] | vf §0.3 (two-axis rule, with axis-flip members); realm §4.2 BasisGrade; lens §7.2 BasisReport | every GV-13/14/17/18 member asserts both axes | — | — | COVERED structurally; the exact five-grade name mapping (PORTABLE-EVIDENCE/AUTHORITY-ADMITTED/SNAPSHOT@H/CURRENT@H/FOREIGN-LOCAL) onto the SDK result model = vf open item 6, owner: SDK/result-model chapter + synthesizer |
+| S-RL1 | Finding 5: R-L1 (:200) / R-L3 (:202) plan determinism + adversarial corpus | [DERIVED INVARIANT] | GV-13 (byte-determinism ×3 languages; rejection-code corpus 1–13; combiner corpus); B0 has no import grammar, so cycle/diamond members attach to the client compiler | GV-13 | FX-LENS malformed-plan set | CF-8 | COVERED for B0's flat plans; compiler corpus DEFERRED(client/lens-compiler lane — vf open item 5, = C-LN-3b) |
 | S-RD8F | Finding 6: R-D8 relayer/paymaster substitution vectors missing from kickoff | [DERIVED INVARIANT] | = S-RD8; GV-6 minted for exactly this | GV-6 | CV-RAIL | — | COVERED (finding satisfied) |
 | S-RK6 | Finding 7: R-K6 (:175) recovery cannot silently seize funds or decrypt merely by recovering identity | [DERIVED INVARIANT — required safety boundary] | **absent** — prin §6.2's G-invariant list does not carry the identity/funds/encryption separation; §12 item 9's same rule also unstated | — | — | — | GAP → §7 G-2 |
 | S-RP3 | Finding 7: R-P3 (:216) recoverable vs shreddable tiers; R-P8 (:222) KEM generations/rotation/rewrap lifecycle; D-16 (:503–509) | [DERIVED INVARIANT / proposed launch requirement] | **absent** — FX-PRIV's scope note covers constructions but names no tier split or KEM lifecycle seam | — | — | — | GAP → §7 G-3 |
 | S-RX5 | Finding 7: R-X5 (:192) foreign contract uses remote authority only via explicit adapter or local commitment; R-X7 (:194) local-commitment profile discloses updater/auth/monotonicity/lag/expiry/trust class | [DERIVED INVARIANT — physical boundary / required invariant] | **absent** — realm §8.3/enc §9 specify only the EAS adapter seam; no foreign-contract adapter or local-commitment profile seam is named | — | — | — | GAP → §7 G-4 |
-| S-RO8 | Finding 7: R-O8 (:234) pending/outbox state never masquerades as confirmed (SDK truth boundary) | [DERIVED INVARIANT — required truth boundary] | **absent** — no chapter states an outbox/pending display rule; nearest text is GV-9's retry-consumes-nonce SDK note | — | — | — | GAP → §7 G-5 |
+| S-RO8 | Finding 7: R-O8 (:234) pending/outbox state never masquerades as confirmed (SDK truth boundary) | [DERIVED INVARIANT — required truth boundary] | **absent** — no chapter states an outbox/pending display rule; SR-15's idempotent retry semantics do not define SDK outbox presentation | — | — | — | GAP → §7 G-5 |
 | S-E2 | Finding 7: E-2 (:261) inclusion despite censoring relayers/sponsors | [DERIVED INVARIANT — external assumption] | deferred with the venue by the register's own terms; GV-6 proves rail-substitutability (any rail CAN carry), which is the Core-side floor; inclusion guarantees are venue properties | GV-6 (floor only) | — | — | DEFERRED(V2-E7 venue matrix — force-inclusion column already named in that gate's text) |
 | S-D2D5 | Finding 8: §9/§17 fixed-authority-domain hypothesis vs the Realm frame; D-2/D-5 disposition unverified by the audit | [REJECTED as target architecture — superseded; kept as comparison evidence] | **Confirmed by this lane against owner-rulings.md 2026-08-12 (exact text read):** "'Fresh L3' means a qualifying EVM Realm can stand alone; it does not promise prebuilt support for every chain or revive a global home chain" + no-Commons-venue. §17's fixed domain is thereby a superseded comparison baseline, not the target. Honesty note: this is disposition **by supersession**; no explicit D-2/D-5 answer is recorded in the ledger, so R-K11 remains a live check on the Realm design (carried: AA-7, CV-XREALM) rather than a settled premise — exactly the audit's fallback demand | GV-7/17 | CV-XREALM | AA-7 | COVERED (verification the audit requested, performed here) |
 
 ---
 
-## 7. GAP register — every gap with a disposition proposal
+## 7. GAP and resolution register
 
 | # | Gap | Disposition proposal (one line each) |
 |---|---|---|
-| G-1 | C-PS-8 client-edge hazard warn/refuse tooling: no chapter, fixture, or conformance rule touches it | Add one client-conformance line item to the V2-E6 Web-Client slice backlog ("permanent-public-data warning + refusable hazard classes at the publish UI"); Core needs zero surface (neutrality is the default), so this is a client-lane obligation, not a B0 edit. [PROPOSAL] |
+| G-1 | **RESOLVED** — the former C-PS-8 false gap claimed no client-edge hazard rule | cont §3 already requires warning before URI fragments/capabilities enter permanent public Records. C-PS-8 now marks that interface COVERED; actual UI tooling remains V2-E6. Excluded from active GAP count. |
 | G-2 | R-K6 identity/funds/encryption recovery separation absent from the graduation seam | One-sentence synthesizer edit: append to prin §6.2's G-invariant list "G9: graduation/recovery of identity never implicitly transfers funds custody or decryption capability (R-K6); the three roots stay separable" — cost ≈ 1 line, keeps the seam honest before any managed-Principal round starts. [PROPOSAL] |
 | G-3 | R-P3/R-P8/D-16 recoverable-vs-shreddable tiers + KEM lifecycle unnamed in the privacy seams | Extend hf §2.7's scope note: the encProfile stub must reserve a tier byte (RECOVERABLE vs SHREDDABLE) and name KEM-generation/rewrap as Stage-B crypto deliverables; carried as a named reserved seam so the crypto round inherits it explicitly. [PROPOSAL] |
 | G-4 | R-X5/R-X7 foreign-contract adapter + local-commitment disclosure profile unnamed | Add to realm's seam list (beside §8.3's EAS seam): "foreign-consumer adapter seam — a non-Realm contract consumes EFS state only via an explicit adapter or a local commitment whose profile names updater, auth source, monotonicity, lag, expiry, trust class (R-X7 fields)"; interface stub only, no B0 build; home: realm chapter open items + V2-E8-adjacent adapter work. [PROPOSAL] |
-| G-5 | R-O8 outbox/pending truth boundary unowned | Assign to the SDK/result-model chapter that vf open item 8 already presupposes: one conformance rule ("pending/outbox rows render only with an explicit UNCONFIRMED grade; no read API returns them as admitted") + one GV-9-adjacent SDK vector; home: SDK lane. [PROPOSAL] |
-| G-6 | OR-12b all-TypeSchemas paginated enumeration — owner call never answered, not in the B0 index list | Carry as a one-line question in the synthesizer's James packet (it is additive, cheap, and non-blocking: the registration spine already stores schemas; an enumeration family can be added without RecordId impact under Variant A registration) — do NOT silently add or drop it. [PROPOSAL] |
+| G-5 | R-O8 outbox/pending truth boundary unowned | Assign to the SDK/result-model chapter that vf open item 6 already presupposes: one conformance rule ("pending/outbox rows render only with an explicit UNCONFIRMED grade; no read API returns them as admitted") + one GV-9-adjacent SDK vector; home: SDK lane. [PROPOSAL] |
+| G-6 | OR-12b all-TypeSchemas paginated enumeration — owner call never answered, not in the B0 index list | Carry as a one-line question in the synthesizer's James packet (it is additive, cheap, and non-blocking: the schema-Record spine already stores admitted groups; an enumeration family can be added without RecordId impact under Variant A admission) — do NOT silently add or drop it. [PROPOSAL] |
 | G-7 | (Near-gap, recorded for honesty) AT-16's "key-role misuse" sub-clause has no vector until the C-PS-4b crypto round lands | Already implied by C-PS-4b's deferral; listed so the acceptance-test row cannot be read as fully covered; home: Stage-B crypto round. [PROPOSAL] |
 
-No other GAP was found: every other constitutional bullet, acceptance trace,
+No other active GAP was found: every other constitutional bullet, acceptance trace,
 engineering-content ruling, and audit-flagged row lands as COVERED or DEFERRED
 with a named home in §§1–6.
 
@@ -401,22 +404,22 @@ cross-checks, not rows):
 | Row family | Rows | COVERED | DEFERRED (named home) | GAP |
 |---|---|---|---|---|
 | §1 Layer obligations (C-LY, incl. a/b split) | 5 | 4 | 1 (C-LY-2b → V2-E6) | 0 |
-| §2 Constitution bullets (C-UI 5, C-TD 5, C-AA 6, C-TX 4, C-IX 7, C-LN 8, C-HR 4, C-FB 5, C-PS 10, C-FS 4) | 58 | 50 | 7 (C-LN-2b/3b/5b, C-PS-2b/4b, C-FS-1/2) | 1 (C-PS-8 → G-1) |
+| §2 Constitution bullets (C-UI 5, C-TD 5, C-AA 6, C-TX 4, C-IX 7, C-LN 8, C-HR 4, C-FB 5, C-PS 10, C-FS 4) | 58 | 51 | 7 (C-LN-2b/3b/5b, C-PS-2b/4b, C-FS-1/2) | 0 |
 | §3 Acceptance traces (AT-1..16) | 16 | 15 (AT-10 PROVISIONAL) | 1 (AT-14 → mount lane) | 0 |
 | §5 Owner rulings (OR) | 33 | 28 | 5 (OR-2, OR-G, OR-P, OR-R, OR-M) | 0 (OR-12b's open owner call tracked as G-6) |
 | §6.1 SURVIVORS certified rows | 24 | 22 | 2 (S-RP7, S-RO10) | 0 |
-| §6.2 SURVIVORS flagged rows | 13 | 6 | 3 (S-SUCC, S-RL4b, S-E2) | 4 (S-RK6, S-RP3, S-RX5, S-RO8 → G-2..G-5) |
-| **Total** | **149** | **125** | **19** | **5** |
+| §6.2 SURVIVORS flagged rows | 13 | 7 | 2 (S-SUCC, S-E2) | 4 (S-RK6, S-RP3, S-RX5, S-RO8 → G-2..G-5) |
+| **Total** | **149** | **127** | **18** | **4** |
 
 Notes on the count: (i) split rows mean one *requirement* can appear as one
-COVERED and one DEFERRED row — that is the point of §0.3, so "125 COVERED"
-must never be quoted as "125 requirements fully done"; (ii) the five GAP rows
-map to register entries G-1..G-5; G-6 (an unanswered owner call) and G-7 (a
-deferral annotation on AT-16) are register-only entries without their own
+COVERED and one DEFERRED row — that is the point of §0.3, so "127 COVERED"
+must never be quoted as "127 requirements fully done"; (ii) the four active
+GAP rows map to G-2..G-5; G-1 is retained as a resolved historical key, while
+G-6 (an unanswered owner call) and G-7 (a deferral annotation on AT-16) are register-only entries without their own
 GAP-status rows; (iii) every DEFERRED home is one of: V2-E6 (client slice),
 V2-E7 (venue), V2-E8-adjacent (adapters), mount lane, KEL/succession round,
-Stage-B crypto round, harness client-tier benchmarks, SDK/result-model chapter,
-client/lens-compiler lane — nine named homes, no orphan deferrals; (iv) S-RP7
+Stage-B crypto round, SDK/result-model chapter,
+client/lens-compiler lane — eight named homes, no orphan deferrals; (iv) S-RP7
 reads DEFERRED but its forbidden-rule (no signature-derived archive roots) is
 restated nowhere yet — G-3's disposition explicitly carries it, which is the
 strictest honest reading.
@@ -424,8 +427,8 @@ strictest honest reading.
 The two SERIOUS RULINGS-lane drops (item-F equivocation; chains-don't-die
 Realm scope) and three SERIOUS SURVIVORS absences (succession, lens scale,
 R-D9) all trace to explicit closures above (OR-F, OR-1, S-SUCC, S-RL4a/b,
-S-RD9F). The remaining risk mass is concentrated in the six §7 gaps, of which
-four (G-2..G-5) are one-to-few-line seam edits proposed for the synthesizer.
+S-RD9F). The remaining active GAP risk is exactly G-2..G-5; G-1 is resolved,
+and G-6/G-7 remain register-only routing/deferral annotations.
 
 ## 9. Gate-coverage map
 
@@ -436,13 +439,13 @@ scope, VERIFIED):
 | Gate | Evidence produced by this pass | Where |
 |---|---|---|
 | V2-E1 Principal surface | Uniform-vs-tagged fully specified as axis 2: D1–D4 close by construction/vector/inspection; only D5_2 (gas delta) awaits the F2 thin branch; rejection conditions pinned both ways | prin §2–§7; bk §3.4/§4.2; GV-3/5/6 |
-| V2-E2 Contract Lens floor | ResolutionPlan/1 exact bytes, combiners, resolution algorithm, risk-bearer ABI, LENS-NEG-1, challenge-window pattern; the 1/8/32/64 grid + outcome classes specified as the run-once benchmark (+N=50 rider); gas rows are schedule arithmetic [HYPOTHESIS] until Stage B measures | lens (all); FX-LENS; GV-13; bk §6.1 |
-| V2-E3 Record/context bakeoff | Cells B0/F1/F5/X17 with declared confounds, KSTAR_1/PREMIUM_1/RECON_1/DIST_1 statistics, decision rules, frozen-corpus discipline | bk §3–§4, §6; hf FR-1..6 |
-| V2-E4 Type/index budget | Closed IndexSpec grammar, fan-out cost model, limits table, page ABI, EIP-7825 page maxima, ONE-bundle aggregate rule, WL-SPRAY/CHURN/HOT closures; the budget number itself is Stage B (CF-14) | enc §3; idx §4–§9; hf §3–§4 |
+| V2-E2 Contract Lens floor | ResolutionPlan/1 exact bytes, combiners, risk-bearer ABI, LENS-NEG-1, challenge-window pattern; separate run-once grids: Core 1/8/32/64 and TS/RS client 50/100/256 on mobile+desktop with honest UNKNOWN/PARTIAL | lens (all); FX-LENS; GV-13; hf §2.5; bk §6.1 |
+| V2-E3 Record/context bakeoff | Cells B0/F1/F5/X17 with declared confounds; measured-only KSTAR_1 seed/refinement rule plus FRESH_5/REENDORSE_5 and explicitly derived DERIVED_FSTAR_5; frozen-corpus discipline | bk §3–§4, §6; hf FR-1..6 |
+| V2-E4 Type/index budget | Closed IndexSpec grammar, fan-out cost model, limits table, page ABI, EIP-7825 page maxima, ONE-bundle aggregate rule, WL-SPRAY/CHURN/HOT plus selector-specific WL-DEAD-LOCATOR; digest/count attacks; budget number remains Stage B | enc §3; idx §4–§9; hf §3–§4 |
 | V2-E5 Realm bootstrap & authority history | RealmDescriptor/1 exact formulas, C-1..C-7 confusion defenses, QR-1..8, admission/finality split, upgrade history U-1..6, reconstruction walk + read ABI — the PM directive's five named E5 items each land | realm (all); GV-17; GV-12 |
 | V2-E8 (partial) | Adapter seam specified from three sides (schema-string mapping + UID non-identity, enc §9; receipt projection, realm §8.3; principal mapping, prin §9); recursive-Type safety (GV-2); no-callback rule (enc §2.8); loss-map itself deferred to V2-E8 proper per PM directive | enc §9/§2.8; realm §8.3; prin §9 |
-| V2-E6 / V2-E7 | Out of scope by directive; their DEFERRED rows above (C-LY-2b, OR-B4, S-E2, G-1) name them as homes so nothing lands there silently | — |
-| **V2-F1 feed** | The freeze gate consumes: this table + the eleven chapters + Stage B's minted vectors/measurements + the §7 gap closures + the succession vector classes (vf open item 10, freeze-blocking) + independent review. Stage A's claim is exactness, not freeze-readiness | — |
+| V2-E6 / V2-E7 | Out of scope by directive; DEFERRED rows above name them as homes. C-PS-8's client-policy seam is COVERED, while its UI implementation remains V2-E6 | — |
+| **V2-F1 feed** | The freeze gate consumes: this table + the eleven chapters + Stage B's minted vectors/measurements + the §7 gap closures + the succession vector classes (vf open item 8, freeze-blocking) + independent review. Stage A's claim is exactness, not freeze-readiness | — |
 
 ---
 
@@ -455,12 +458,11 @@ The compact contract other chapters (synthesizer, red team, Stage B) rely on:
   traces), `OR-*` (owner rulings), `S-*` (SURVIVORS rows), `G-1..G-7` (gaps) —
   stable citation keys for review findings and Stage B reports.
 - **Status vocabulary** {COVERED, DEFERRED(home), GAP(disposition)} with the
-  split-row discipline (§0.3) and the COVERED-is-conditional-on-RP/S-pins
-  caveat (§0.2).
-- **The GAP register** (§7): six gaps, each with a one-line disposition; four
-  are synthesizer-sized seam edits (G-2..G-5), one is a client-lane backlog
-  item (G-1), one is an owner call to carry, not answer (G-6).
-- **The named-homes list** (§8 note iii): the nine legal destinations for any
+  split-row discipline (§0.3) and the COVERED-is-conditional-on-verified-SR-
+  repairs/residue-gates caveat (§0.2).
+- **The GAP/resolution register** (§7): four active gaps (G-2..G-5), resolved
+  historical G-1, and register-only G-6/G-7.
+- **The named-homes list** (§8 note iii): the eight legal destinations for any
   DEFERRED status; a deferral naming no home from this list is a table defect.
 - **The gate map** (§9): which chapters evidence which V2-E gate, and that
   V2-F1 additionally blocks on Stage B execution + the succession vector
@@ -468,25 +470,21 @@ The compact contract other chapters (synthesizer, red team, Stage B) rely on:
 
 ## Open items
 
-1. **RP-1..RP-12 / S1–S8 reconciliation** — every COVERED row is conditional on
-   the synthesizer's pins (§0.2); after reconciliation this table needs a
-   half-day re-verify pass over the affected realization cells (mostly GV-3/5
-   and Binding/Lens rows). Closed by: synthesizer.
-2. **G-2..G-5 seam edits** — proposed one-to-few-line insertions (prin §6.2 G9;
+1. **G-2..G-5 seam edits** — proposed one-to-few-line insertions (prin §6.2 G9;
    hf §2.7 tier byte; realm adapter-seam stub; SDK outbox rule); adopting them
    is a synthesizer/red-team action, not this lane's authority. Closed by:
    synthesizer with red-team review.
-3. **G-6 owner call** (all-TypeSchemas enumeration) — carry into the James
+2. **G-6 owner call** (all-TypeSchemas enumeration) — carry into the James
    packet at the next genuine-fork presentation; do not batch prematurely (PM
    directive: silence never adopts, and James is asked only at evidenced
    forks). Closed by: synthesizer packet assembly.
-4. **S-G10 grade-name mapping** — the register's five §10 grades vs
+3. **S-G10 grade-name mapping** — the register's five §10 grades vs
    BasisGrade/BasisReport vs the Binding outcome vocabulary must merge in the
-   SDK/result-model chapter before SDK-tier vectors mint (vf open item 8).
+   SDK/result-model chapter before SDK-tier vectors mint (vf open item 6).
    Closed by: SDK/result-model lane + synthesizer.
-5. **AT-10 provisional status** — FX-EAP rows excluded from adopt/kill until
+4. **AT-10 provisional status** — FX-EAP rows excluded from adopt/kill until
    the Codex durable brief lands (PM directive; hf FR-6); flip the AT-10
    annotation when it does. Closed by: Codex brief.
-6. **Count drift** — §8's counts are hand-tallied over this document; if the
+5. **Count drift** — §8's counts are mechanically tallied over this document; if the
    red team adds/splits rows, the summary table must be re-tallied in the same
    edit (a stale count is itself a table defect). Closed by: whoever edits.

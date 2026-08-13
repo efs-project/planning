@@ -47,7 +47,7 @@ produce.
   machine; TS/RS implement the deterministic fold over the Realm's **total
   event order** (admissions ⊎ intent applications, `b0-realm-admission` §5.4 /
   W-6) as pure functions and must reproduce SOL's end state. Equality is
-  checked via a canonical **state digest** (definition = open item O7)
+  checked via a canonical **state digest** (definition = the state-digest open item)
   plus spot read-back through the §0.2 rule.
 
 ### 0.2 Cross-cutting rule: every write pairs with a read-back
@@ -88,6 +88,9 @@ Vector {
                 | { ok: false, error: named error code }
   readback      : post-state assertions per §0.2 (admission-class only)
   reconciles    : list of RP-* ids (§1) this vector's bytes depend on
+  requiresPins  : list of SR-* ids (§1) whose owning-chapter repair must be
+                  VERIFIED before this vector may mint
+  atomicityClass: MUST_FIT_ATOMIC | SPLITTABLE_THROUGHPUT | N/A
   impls         : subset of {SOL, TS, RS} when a tier is out of scope
                   (e.g. SDK-only STRUCT-FULL members exclude SOL)
 }
@@ -139,12 +142,48 @@ texts read in this lane.]
 | RP-17 → **SR-17** | **Schema on-ramp** (red-team SERIOUS): standalone non-Record registration function (encoding §3.4) vs Types-are-Records-of-the-bootstrap-meta-Type walk (realm §8.1 W-5) vs schemas-admitted-as-Occurrences (indexes §2.4) — three mechanisms, no pinned path, reconstruction-walk claim broken under two of them. | encoding vs realm vs indexes |
 | RP-18 → **SR-18(a)–(e)** | **Shared vocabularies** (red-team SERIOUS, several lanes): digest algorithm-code widths forked three ways (u16 multihash / u8 EFS algTag / u32 index algId); Completeness enum numeric encodings conflict (UNKNOWN=0 fail-closed vs UNKNOWN=4); TWO normative best-locator algorithms (idx §7 single-score vs cont §10.3 evidence fold); unique-Records-by-Type decrement semantics; missing per-leaf REF-instance bound (`REF_INSTANCES_MAX`) that all index arithmetic assumed. | encoding vs content vs indexes vs realm |
 
-**Rule [PROPOSAL, amended post-red-team]:** every minted vector lists its
-`reconciles` RP ids; the Stage B harness refuses to mint a vector until the
-CHAPTER REPAIRS to each listed RP's resolving pin have landed (the pins
-themselves are landed in [[b0-overview]] §2; residual chapter text
-contradicting a pin is a defect against the overview). This keeps the
-conflict table executable rather than advisory.
+**Executable mint gate [PROPOSAL, amended post-red-team]:** RP identifiers
+remain stable historical conflict keys; SR identifiers are the winning target.
+Each category declares both fields, and the §1 table is the machine-readable
+RP→SR map (`RP-18` maps to the consumed `SR-18a`…`SR-18e` sub-pins).
+
+```text
+mint(vector):
+  require every vector.reconciles RP maps to exactly one winning SR row in §1
+  require every vector.requiresPins SR has repairStatus = VERIFIED in every
+          owning chapter
+  require the generator uses no retired-form residue
+```
+
+The existence of an SR paragraph is not sufficient: a vector stays blocked
+until dependent chapter repairs and their residue checks pass.
+
+Minimum category dependencies (a category may add a consumed pin, never remove
+one listed here):
+
+| Category | `requiresPins` |
+|---|---|
+| GV-1 | SR-5, SR-18a, SR-18e |
+| GV-2 | SR-1, SR-17, SR-18e |
+| GV-3 | SR-1, SR-2, SR-3, SR-6, SR-14, SR-16, SR-17, SR-18a |
+| GV-4 | SR-1, SR-17 |
+| GV-5 | SR-2, SR-7, SR-13, SR-14 |
+| GV-6 | SR-3, SR-12, SR-13, SR-15 |
+| GV-7 | SR-1, SR-2, SR-3, SR-12, SR-13, SR-14 |
+| GV-8 | SR-2, SR-3, SR-5, SR-10, SR-12, SR-15 |
+| GV-9 | SR-3, SR-9, SR-10, SR-13, SR-15, SR-18d |
+| GV-10 | SR-3, SR-9, SR-10, SR-12, SR-13, SR-15, SR-17 |
+| GV-11 | SR-4, SR-10, SR-18c |
+| GV-12 | SR-7, SR-13, SR-16 |
+| GV-13 | SR-1, SR-6, SR-7, SR-8, SR-13 |
+| GV-14 | SR-4, SR-10, SR-15, SR-18b, SR-18c, SR-18d |
+| GV-15 | SR-1, SR-2, SR-14 |
+| GV-16 | SR-1, SR-5, SR-18a, SR-18c |
+| GV-17 | SR-1, SR-4, SR-10, SR-13, SR-14, SR-16, SR-17, SR-18b |
+| GV-18 | SR-3, SR-6, SR-8, SR-9, SR-10, SR-11, SR-12, SR-13, SR-15 |
+
+This dual gate keeps the historical conflict ledger executable without ever
+minting against an unresolved or losing formula.
 
 ---
 
@@ -178,19 +217,22 @@ member level (Stage B may add members, never remove).
   count over bound → `ERR_COUNT`; body at exactly `MAX_BODY_BYTES` (valid) and
   +1 (fail); [SDK tier] NFC composed/decomposed pairs (SDK converges,
   chain accepts both as distinct bytes — both facts asserted), unassigned
-  codepoints rejected, NAME_PROFILE rejections. `reconciles: RP-5`.
+  codepoints rejected, NAME_PROFILE rejections. `reconciles: RP-5,18`;
+  `requiresPins: SR-5, SR-18a, SR-18e`.
 
 ### GV-2 TypeSchema parsing, groups, recursion, evolution
 
 - **Purpose:** Type bootstrap has no hash fixed point; recursive/mutual schemas
-  and unknown versions behave deterministically; schema registration is
+  and unknown versions behave deterministically; schema publication/cache materialization is
   idempotent; evolution evidence round-trips. [Anchors candidate falsifier 11.]
 - **Shape:** input = `groupBytes`; output = `errCode` from
   `validateTypeSchemaGroup`, plus `groupHash` and `TypeSchemaId_k` per member;
   E1 offset classes per field.
 - **Impl:** SOL/TS/RS.
 - **Pass:** identical ids, identical offset-class tables, identical typed
-  rejections; re-registration returns the same ids with no state delta.
+  rejections; re-publication of the same `TypeSchemaGroup/1` Record through
+  ordinary `publish` returns the same ids with no state delta and proves the
+  parsed-schema cache was materialized atomically (SR-17).
 - **Members:** standalone group-of-1; `SELF` recursion (Comment/1-shape);
   mutual pair via `GROUP_REF`; R3 malformations (`GROUP_REF(own index)`,
   `GROUP_REF(k ≥ memberCount)`, group-of-1 using `GROUP_REF`) →
@@ -202,7 +244,11 @@ member level (Stage B may add members, never remove).
   (`TypeSuccessor/1`, `TypeEquivalence/1` incl. the `a < b` canonical-order
   conformance member, `TypeFamilyGenesis/1`, `TypeFamilyMembership/1`)
   round-tripped; assertion that admitting evolution evidence changes **no**
-  Realm admission/index behavior (encoding §6 reading rule).
+  Realm admission/index behavior (encoding §6 reading rule). The
+  `registerTypeSchemaGroup(...)` SDK helper is tested only as construction of
+  the intrinsic Record/envelope/intent plus the sole Core `publish` call; a
+  second Core registration entrypoint fails the category. `reconciles:
+  RP-1,17,18`; `requiresPins: SR-1, SR-17, SR-18e`.
 
 ### GV-3 The ID formula family
 
@@ -211,11 +257,12 @@ member level (Stage B may add members, never remove).
   migration seam proven structurally. [Anchors constitution "Universal
   identity"; SURVIVORS R-D2.]
 - **Shape:** input = named preimage fields per formula; output = 32-byte id.
-  Formulas covered (post-RP-1/2/3/6 reconciliation): `TypeSchemaId`,
+  Formulas covered under the SR-1 hashed-domain/fixed-word discipline:
+  `TypeSchemaId`,
   `RecordId`, `EnvelopeId`, `leafCommit`, `OccurrenceKey`/`occKey`,
   `PrincipalId`, `RealmId`, `RealmRevisionId`, `profileId`,
-  `genesisCommitment`, `PositionKey`, `BindingKey`, `PlanId`, `IntentId`,
-  `AuthorityBasis`, `pk()` postings keys and `targetKey`/`valueKey` rules
+  `genesisCommitment`, `PositionKey`, `BindingKey`, `PlanId`, the complete
+  SR-3 EIP-712 `IntentId`, `pk()` postings keys and `targetKey`/`valueKey` rules
   (indexes §2.1/§3.5/§4.1), `purposeAndScope` (lens §3.3), `ChainRef/1`.
 - **Impl:** SOL (`EfsIds` + chapter libraries), TS, RS.
 - **Pass:** byte equality; one-word sensitivity (flip any single preimage
@@ -229,11 +276,16 @@ member level (Stage B may add members, never remove).
   §2.6, VERIFIED honesty note), driven end-to-end through storage keys,
   `pk()`, BindingKey, plan entries, and receipts; any path that re-derives
   identity from a 160-bit address fails the category by construction;
-  migration-seam pair (identical preimage under `efs2/record/1` vs
-  hypothetical `efs2/record/2` ⇒ different ids); sentinel-space registration
-  rejection; worked PrincipalId examples A/B (principal §2.5 — candidate seed
-  values pending RP-1) and C (blocked on Lane 4 chainRef). `reconciles:
-  RP-1,2,3,6`.
+  migration-seam pair (identical fields under the hashed domain words for
+  `efs2/record/1` vs hypothetical `efs2/record/2` ⇒ different ids);
+  sentinel-space output rejection; SR-14 worked PrincipalId examples A/B
+  (fixed formula; output bytes
+  mint in Stage B) and C (after its canonical chainRef fixture is supplied);
+  SR-16 RealmRevisionId preimages; and the SR-10 reversible two-word
+  occurrence-log layout with `OccurrenceRef` hydration. `AuthorityBasisWord`
+  is tested as the SR-7 packed evidence word in GV-5/12, never as an
+  independently hashed identity. `reconciles: RP-1,2,3,6,14,16,17,18`;
+  `requiresPins: SR-1, SR-2, SR-3, SR-6, SR-14, SR-16, SR-17, SR-18a`.
 
 ### GV-4 Namespace-vs-spec-commitment pin pair (axis 8)
 
@@ -241,14 +293,15 @@ member level (Stage B may add members, never remove).
   choice is frozen as bytes, not prose. [Anchors the BAKEOFF lane's
   analysis-only disposition and encoding §8.]
 - **Shape:** input = two `TypeSchemaBlob`s + two publisher PrincipalIds;
-  output = TypeSchemaIds + registration state.
+  output = TypeSchemaIds + schema-Record admission/cache state.
 - **Impl:** SOL/TS/RS.
 - **Pass (S-with-qualifier arm, the B0 recommendation):** `T-CONV` — two
   distinct publishers, byte-identical blobs, `namespaceQualifier = 0` ⇒ SAME
-  TypeSchemaId, idempotent second registration; `T-QUAL` — same blobs except
+  TypeSchemaId, idempotent second publication; `T-QUAL` — same blobs except
   qualifier = P1 vs P2 ⇒ DIFFERENT ids, both valid, neither canonical. Under a
   pure-P arm the expected outputs invert for T-CONV; the pair is the pinning
   instrument either way [PROPOSAL].
+  `reconciles: RP-1,17`; `requiresPins: SR-1, SR-17`.
 
 ### GV-5 Envelope signing & authorship witnesses
 
@@ -289,7 +342,8 @@ member level (Stage B may add members, never remove).
   - **PrincipalId-mismatch forgery (SR-13's load-bearing assertion):** a VALID
     witness over the attacker's own `AccountPrincipal` descriptor, presented
     with `header.principalId` = a different (victim) id → MUST-FAIL
-    `E_PRINCIPAL_MISMATCH`, asserted BEFORE witness verification — a valid
+    `AUTH_PRINCIPAL_MISMATCH`, asserted BEFORE envelope or intent witness
+    verification — a valid
     witness for the attacker's key can never be attributed to another declared
     principalId; twin member: first-use PrincipalRecord persistence takes its
     preimage only from the verified calldata descriptor.
@@ -298,7 +352,7 @@ member level (Stage B may add members, never remove).
   - [SDK/Stage-B live] stock `eth_signTypedData_v4` reproduction of the
     chain-free envelope domain against current wallets (authorship O6 — July
     evidence is aging; category defined here, run at Stage B).
-  `reconciles: RP-2,7`.
+  `reconciles: RP-2,7,13,14`; `requiresPins: SR-2, SR-7, SR-13, SR-14`.
 
 ### GV-6 Rail substitution (R-D8)
 
@@ -318,10 +372,12 @@ member level (Stage B may add members, never remove).
   authorship); first-acceptance-wins + later no-op (T2) leaves identical end
   state whichever rail lands first. A rail that can mint or alter any
   authorship-bearing field fails the category.
-- **Members:** the three-rail triple; `admitAsSender` vs explicit-intent
-  equivalence (identical persisted state, only `intentKind` differs —
-  authorship §5.4); msg.sender-as-diagnostic-only assertion (enters no id, no
-  receipt identity, no read path). `reconciles: RP-3,12`.
+- **Members:** the three-rail triple; for an envelope with no Binding-class
+  leaf, `admitAsSender` vs explicit-intent equivalence (identical persisted
+  state); negative Binding-class member: empty implicit intent MUST fail
+  because SR-3 `expectedRevisions` are mandatory; msg.sender-as-diagnostic-only
+  assertion (enters no id, no receipt identity, no read path). `reconciles:
+  RP-3,12,13,15`; `requiresPins: SR-3, SR-12, SR-13, SR-15`.
 
 ### GV-7 Replay, cross-Realm, and domain confusion
 
@@ -341,13 +397,15 @@ member level (Stage B may add members, never remove).
   destination truth/effects without destination admission (constitution
   cross-Realm trace); intent replayed cross-Realm → `E_REALM_MISMATCH` /
   `E_INTENT_REALM_MISMATCH`; intent replayed in-Realm → nonce consumed
-  (`E_NONCE` / `E_INTENT_REPLAY`); ID-vs-digest byte-space disjointness
-  (ascii-prefixed structural ids never begin a `0x1901` transcript —
-  authorship §1); EFS-712 signature into a foreign protocol's flow and the
+  (`E_NONCE` / `E_INTENT_REPLAY`); exact domain-word and EIP-712 typehash
+  inequality for every structural-ID/signature role pair, with signatures
+  supplied in the wrong typed role rejected; EFS-712 signature into a foreign
+  protocol's flow and the
   converse → fail; expired envelope vs expired intent distinguished
   (`E_EXPIRED_ENVELOPE` vs `E_EXPIRED_INTENT`); CREATE2 same-address
   second-chain deployment still separates (domain chainId + realmId check).
-  `reconciles: RP-2,3,12`.
+  `reconciles: RP-1,2,3,12,13,14`; `requiresPins: SR-1, SR-2, SR-3,
+  SR-12, SR-13, SR-14`.
 
 ### GV-8 Subset carriage
 
@@ -365,11 +423,18 @@ member level (Stage B may add members, never remove).
   → fail; reordered vector → fail (leaf commitments are index-committed);
   wrong-position body → `E_BODY_MISMATCH`; `leafMask` bit ≥ count →
   `E_LEAF_RANGE`; admit-selected-then-admit-remainder later (unselected
-  leaves stay UNSEEN, admissible under a fresh intent); envelope-is-not-an-
+  leaves stay UNSEEN, admissible under a fresh intent); **sparse/staged member:**
+  from one envelope admit selected leaves `{0,3,7}`, then the remainder; only
+  newly accepted leaves receive ordinals, in accepted-occurrence submission
+  order rather than leaf-index order; `getOccurrence(E,k)` and
+  `getOccurrenceByOrdinal(o)` are exact inverses; there are no reserved holes
+  and no derived base law; retrying either subset is an occurrence-granular
+  no-op; envelope-is-not-an-
   application-transaction assertion (conclusion 7 — candidate falsifier 13's
   structural half); **privacy caveat member**: a low-entropy unrevealed leaf's
   RecordId is dictionary-guessable — asserted as a documented property, not a
-  defense (feeds GV-15). `reconciles: RP-2,3,5`.
+  defense (feeds GV-15). `reconciles: RP-2,3,5,10,12,15`;
+  `requiresPins: SR-2, SR-3, SR-5, SR-10, SR-12, SR-15`.
 
 ### GV-9 Duplicate postings, idempotent retry, occurrence lifecycle
 
@@ -386,13 +451,20 @@ member level (Stage B may add members, never remove).
 - **Members:** duplicate admit (T2 no-op, existing receipt returned;
   `ALREADY_ADMITTED` outcome at the realm ABI); duplicate leaves in one
   envelope (same RecordId at two indexes ⇒ two occurrences, distinct
-  leafCommits); pre-withdrawal (T4) then admit attempt → `E_WITHDRAWN`
-  (no-resurrection); double withdrawal (T5 no-op / `ErrAlreadyWithdrawn` per
-  RP-9 resolution); withdrawal by non-author (inert-vs-revert per RP-9 —
-  member minted after resolution); retry-consumes-nonce client rule
-  (authorship §5.3 note): re-submitting the same intent after success fails at
-  the nonce step and the SDK converts it to a read. `reconciles:
-  RP-3,9,10`.
+  leafCommits); **authenticated pre-withdrawal:** target header fields + full
+  RecordId vector + typed descriptor + target signature, with no bodies,
+  recompute EnvelopeId, verify the target author equals the withdrawer, write
+  target `PRE_WITHDRAWN` with ordinal 0 and retained evidence keyed by the
+  accepting Withdrawal's ordinal, then reject later admission with
+  `E_NO_RESURRECTION`; the target gets no admission posting or decrement;
+  repeat withdrawal is unconditional no-op success; wrong-author Withdrawal
+  reverts the whole envelope with `ErrWithdrawNotAuthor` and zero state delta.
+  Exact all-ACTIVE retry returns before expiry/nonce/effect checks; a mixed/new
+  subset uses a fresh SR-3 intent while ACTIVE members no-op. **Last-live
+  count:** admit two occurrences of one Record; withdraw the first and retain
+  unique-by-Type `liveCount = 1`; withdraw the last and reach 0; repeat both
+  withdrawals with no further count change. `reconciles: RP-3,9,10,13,15,18`;
+  `requiresPins: SR-3, SR-9, SR-10, SR-13, SR-15, SR-18d`.
 
 ### GV-10 Partial-failure atomicity
 
@@ -412,13 +484,21 @@ member level (Stage B may add members, never remove).
 - **Members:** one member per typed revert in the realm §5.5 list
   (`E_STRUCTURAL`, `E_UNKNOWN_TYPE`, `E_AUTHORITY`, `E_REF_UNSATISFIED`
   forward-reference member, `E_CAS_CONFLICT`, `E_BOUNDS`, `E_POLICY`);
-  REF-SAT dependent-graph one-call member (Project → Release → Locator in one
-  tx, precomputed ids — constitution one-transaction trace); 1271 witness
+  REF-SAT dependent-graph `MUST_FIT_ATOMIC` one-call member (Project → Release
+  → Locator in one tx, precomputed ids — constitution one-transaction trace);
+  all poison leaves and Binding transitions use the one
+  `publish(envelopeBytes, AccountPrincipal, intentBytes, intentWitness)`
+  interface with the exact SR-3 `expectedRevisions[]`; wrong-author Withdrawal
+  is a batch-poison member — it reverts only its author-local single-envelope
+  call, while an explicitly all-or-nothing `publishBatch` may abort sibling
+  elements and therefore requires aggregator pre-validation; 1271 witness
   attempting reentry into `admit` during verification → blocked (STATICCALL);
   returndata-bomb during verification → bounded copy; `publishBatch`
   all-or-nothing; **F6 MODULAR cell**: the same suite re-run across physical
   module boundaries — any partially-committed Core write rejects the arm
-  (BAKEOFF axis-6 decision rule). `reconciles: RP-3,10`.
+  (BAKEOFF axis-6 decision rule). Every member is `MUST_FIT_ATOMIC`; no poison
+  trace may be split into passing pieces. `reconciles: RP-3,9,10,12,13,15,17`;
+  `requiresPins: SR-3, SR-9, SR-10, SR-12, SR-13, SR-15, SR-17`.
 
 ### GV-11 Time/order honesty (R-D9)
 
@@ -436,9 +516,12 @@ member level (Stage B may add members, never remove).
   `horizonClaim`, envelope `notAfter`-as-testimony) influences any
   deterministic selection, index, or resolution outcome; admission-vs-claimed
   divergence surfaces as two labeled facts, never merged.
-- **Members:** absurd `probedAtClaim` (future date, epoch 0) does not move the
-  best-locator `SelectionKey` (which uses highest AdmissionOrdinal — content
-  §10.3); `observedAtClaim` manipulation never reorders locator evidence;
+- **Members:** absurd `probedAtClaim` (future date, epoch 0) does not move
+  `B0_SELECT`, whose only rank inputs are the one declared u64 score field
+  (or SR-18c's `SCORE_LATEST` ordinal mode) plus its exact ordinal tiebreak;
+  if the deferred TS/RS-only `SELECT_PROFILE_V2` suite is included,
+  `observedAtClaim`/`probedAtClaim` manipulation is tested separately and
+  never reorders its evidence fold;
   same-principal same-leaves two `pubNonce`s ⇒ two distinct authored events
   (multiplicity is legal — the §12.7 removal honored: no same-(principal,
   order) kernel rule exists to violate); same `pubNonce` re-sign ⇒ same event
@@ -446,7 +529,8 @@ member level (Stage B may add members, never remove).
   verifies as portable evidence; claimedAt-vs-admittedAt divergence member:
   a Record claiming 2019 admitted in 2026 displays both with their labels
   (SDK assertion); AdmissionOrdinal monotonicity + gap-free assignment
-  (realm §5.3) as the only order primitive. `reconciles: RP-4`.
+  (realm §5.3) as the only order primitive. `reconciles: RP-4,10,18`;
+  `requiresPins: SR-4, SR-10, SR-18c`.
 
 ### GV-12 Upgrade vectors
 
@@ -472,7 +556,8 @@ member level (Stage B may add members, never remove).
   authority-backdating probe: a key removed/rotated later cannot cause an
   earlier-signed, later-submitted envelope to classify under the old basis —
   admission-time validation stamps the basis at ITS admission, and read paths
-  never re-evaluate (kel lesson via CARRY-IN (a)). `reconciles: RP-7`.
+  never re-evaluate (kel lesson via CARRY-IN (a)). `reconciles: RP-7,13,16`;
+  `requiresPins: SR-7, SR-13, SR-16`.
 
 ### GV-13 ResolutionPlan bytes, adversarial corpus, combiners (R-L1/R-L3)
 
@@ -501,7 +586,7 @@ member level (Stage B may add members, never remove).
     arise in B0** — plans are flat with no import grammar; the R-L1
     differential-compiler corpus (rich lens → plan compilation, incl. cycles)
     attaches to the client compiler tier when it exists [PROPOSAL — recorded
-    as open item O6 so R-L1 is visibly parked, not dropped].
+    in the client-compiler open item so R-L1 is visibly parked, not dropped].
   - Combiner transitions T1–T10, each its own member; two-value THRESHOLD
     conflict at k ≤ N/2; tombstone-contributes-absent;
     `ALL_TIERS_SINGLETON` early-exit legality (set vs unset);
@@ -521,7 +606,8 @@ member level (Stage B may add members, never remove).
     (LR-3(ii) repair).
   - `purposeAndScope` mismatch member: display plan pinned into a gate is
     refused by the conforming consumer check.
-  `reconciles: RP-1,6,8`.
+  `reconciles: RP-1,6,7,8,13`; `requiresPins: SR-1, SR-6, SR-7, SR-8,
+  SR-13`.
 
 ### GV-14 Page-key / cursor determinism & completeness honesty
 
@@ -549,7 +635,18 @@ member level (Stage B may add members, never remove).
   honesty); clamped `maxItems` never reverts; hydrated-vs-raw page
   consistency (`pagePostingsHydrated` items match raw ordinals hydrated
   one-by-one); `counts()` liveCount vs a client fold over pages at the same
-  basis agree. `reconciles: RP-4,10`.
+  basis agree; **B0 locator dead-spray:** create more than one
+  `LOCATOR_POSTINGS_VISIT_MAX` of locator postings, self-withdraw all, then
+  consume `selectBestLocator` from cursor 0 to exhaustion — every physical
+  posting and boundary probe appears in `postingsVisited`, each nonterminal
+  page is `PARTIAL + nextCursor`, and per-call work remains bounded;
+  **digest false-empty:** publish a digest-bearing Record with the shared u16
+  `algCode`, retrieve it with the same u16 key, and require legacy u8/u32
+  encodings to reject/return UNSUPPORTED rather than `COMPLETE`-empty;
+  **last-live count:** the GV-9 two-occurrence sequence agrees with page folds
+  and changes unique-by-Type live count only on the last withdrawal.
+  `reconciles: RP-4,10,15,18`; `requiresPins: SR-4, SR-10, SR-15,
+  SR-18b, SR-18c, SR-18d`.
 
 ### GV-15 Dictionary / existence-oracle checks
 
@@ -579,7 +676,8 @@ member level (Stage B may add members, never remove).
   documentation; high-entropy `pubNonce` denies a fully-guessable envelope
   preimage (authorship §2.6 hook); [FIXTURE] the privacy fixture's
   equal-low-entropy-plaintext public/private pair does not share an
-  oracle-friendly id (constitution privacy trace).
+  oracle-friendly id (constitution privacy trace). `reconciles: RP-1,2,14`;
+  `requiresPins: SR-1, SR-2, SR-14`.
 
 ### GV-16 Content & byte layer: digests, chunk trees, closures, selection
 
@@ -588,11 +686,22 @@ member level (Stage B may add members, never remove).
   selection is implementation-independent. [Anchors kickoff "closure
   substitution" attack; constitution Large-content trace; owner ruling item C.]
 - **Shape:** per content §13 — `ByteDigestValue` codecs; `verifyChunk(root,
-  n, chunkSize, totalSize, index, chunk, proof) → bool`; closure bodies;
-  `LocatorEvidence` fold + `SelectionKey` total order.
-- **Impl:** SOL (`ChunkTreeVerify`, `selectBestLocator`), TS, RS.
-- **Pass:** identical booleans/selections; every MUST-FAIL proof rejected;
-  two implementations, one Plan, one basis ⇒ byte-identical selection.
+  n, chunkSize, totalSize, index, chunk, proof) → bool`; closure bodies; and
+  two non-interchangeable selection suites:
+
+  ```text
+  B0_SELECT:          SOL/TS/RS; one declared u64 score field (or SCORE_LATEST);
+                      total physical postings visited is bounded; returns
+                      cursor + basis + Completeness
+  SELECT_PROFILE_V2: TS/RS client tier only; Locator + DurabilityGrade +
+                      AvailabilityObservation fold; profile/version explicit;
+                      no claim of B0 Core implementation
+  ```
+- **Impl:** SOL (`ChunkTreeVerify` and `B0_SELECT` only), TS, RS; the deferred
+  rich profile has no SOL implementation.
+- **Pass:** identical proof booleans and B0 window winners; every MUST-FAIL
+  proof rejected; `SELECT_PROFILE_V2`, if included, is compared only between
+  TS/RS under one explicit profile, Plan, and basis.
 - **Members:** digest table round-trips + multihash/ni: projections +
   wrong-length + reserved-tag `0x04` rejection; ChunkTree n ∈ {1, 2, 3, 5,
   256} (promotion cases), last-chunk-short, `chunkCount ≠
@@ -604,12 +713,15 @@ member level (Stage B may add members, never remove).
   rejected, kind-target mismatch, `member.size` mismatch → `CLOSURE_MALFORMED`
   at walk (write-side convenience gets a read-side check — §0.2 rule),
   nested dedup, walk-depth PARTIAL; name-not-in-closure = the ONLY provable
-  absence this layer grounds; selection: candidate-page truncation ⇒
-  PARTIAL-labeled result, all-MISMATCH ⇒ `CONTENT_MISMATCH` not a selection,
-  claimed-time manipulation does not move ranking (GV-11 cross-list);
+  absence this layer grounds; **B0_SELECT:** declared-score/latest members,
+  total-posting visit accounting, dead-spray `PARTIAL + cursor`, claimed-time
+  manipulation cannot move the score; **SELECT_PROFILE_V2 (deferred):** only
+  if the explicit client profile is included, candidate-page truncation ⇒
+  PARTIAL-labeled result, all-MISMATCH ⇒ `CONTENT_MISMATCH`, and claimed-time
+  manipulation does not move ranking (GV-11 cross-list);
   [FIXTURE] Arcade tampered-primary trace (A2 MISMATCH rotation → fallback →
   A3), resume-from-different-client, executable gate refuses at k = n−1.
-  `reconciles: RP-5`.
+  `reconciles: RP-1,5,18`; `requiresPins: SR-1, SR-5, SR-18a, SR-18c`.
 
 ### GV-17 Realm descriptor, bootstrap, confusion attacks, reconstruction
 
@@ -637,7 +749,8 @@ member level (Stage B may add members, never remove).
   `UNAVAILABLE_SOURCE_BASIS` wording assertions H-1..H-5 (never absence,
   never silent fallthrough, never promoted local copy); section-C hints
   never enter any preimage (tamper member: altered rpcUrls change nothing).
-  `reconciles: RP-1,4`.
+  `reconciles: RP-1,4,10,13,14,16,17,18`; `requiresPins: SR-1, SR-4,
+  SR-10, SR-13, SR-14, SR-16, SR-17, SR-18b`.
 
 ### GV-18 Binding state machine, CAS, absence, anti-fallthrough
 
@@ -668,7 +781,11 @@ member level (Stage B may add members, never remove).
   exhaustion / bare `eth_getStorageAt` zero never grounds absence;
   anti-fallthrough — UNKNOWN at a higher tier stops resolution (GV-13
   cross-list); challenge-window re-check = one SLOAD on `revision`
-  (cost-shape member). `reconciles: RP-6,8,9,10,11`.
+  (cost-shape member). All transitions use the single SR-12 `publish` surface,
+  SR-3's exact per-selected-Binding `expectedRevisions[]`, and the shared
+  SR-10 lifecycle overlay. `reconciles: RP-3,6,8,9,10,11,12,13,15`;
+  `requiresPins: SR-3, SR-6, SR-8, SR-9, SR-10, SR-11, SR-12, SR-13,
+  SR-15`.
 
 ### Category-to-requirement traceability (compact)
 
@@ -677,7 +794,7 @@ member level (Stage B may add members, never remove).
 | R-D2 low-160 full-width | GV-3 (PID-LOW160), GV-13, GV-18 |
 | R-D8 rail substitution | GV-6 |
 | R-D9 time/order honesty + §12.7 removal | GV-11 |
-| R-L1/R-L3 plan determinism + adversarial corpus | GV-13 (+ O6 client-compiler attach) |
+| R-L1/R-L3 plan determinism + adversarial corpus | GV-13 (+ client-compiler attach) |
 | §10 grade axis never-collapse | §0.3 rule; GV-13/14/17/18 members |
 | Kickoff golden-vector gate (invalid, unknown-version, replay, cross-Realm, subset, duplicate, partial-failure, upgrade) | GV-1/2, GV-2, GV-7, GV-7, GV-8, GV-9, GV-10, GV-12 respectively |
 | V2-E5 descriptor/bootstrap/finality/reconstruction | GV-17 |
@@ -720,7 +837,7 @@ member level (Stage B may add members, never remove).
 | CF-11 | Type bootstrap or recursive references create hash fixed points | GV-2 SELF/GROUP_REF members | REDESIGN-B0 (encoding) |
 | CF-12 | a mutable parent changes already-admitted child meaning | GV-2 evolution-inertness member; GV-12 schema-immutability; GV-16 closure FINAL-commitment members | REDESIGN-B0 |
 | CF-13 | one batch accidentally promises application-level atomicity it cannot provide | GV-8 conclusion-7 member; GV-10 all-or-nothing vs FIXTURE Git multi-ref typed-transaction trace | REDESIGN-B0 (envelope semantics; the typed transaction Record is the sanctioned path) |
-| CF-14 | aggregate gas/state for the mandatory index bundle is not economically credible on the intended L2/L3 profile | Stage B measurement harness: the ONE aggregate bundle snapshot (indexes §9) over the frozen fixture corpus; not a byte-vector matter | RETURN-TO-JAMES (then possibly ABORT of specific obligations, each named) |
+| CF-14 | aggregate gas/state for the mandatory index bundle is not economically credible on the intended L2/L3 profile | Stage B measurement harness: the ONE aggregate bundle snapshot (indexes §9) over the frozen fixture corpus, including `B0_SELECT` total-visit/dead-spray rows; `SELECT_PROFILE_V2` is a separate deferred client profile and cannot stand in for the Core measurement | RETURN-TO-JAMES (then possibly ABORT of specific obligations, each named) |
 
 ### 3.3 Kickoff attack list (fable-efs2-core-engineering-kickoff.md lines 112–116, VERIFIED)
 
@@ -775,10 +892,9 @@ Explicit, so the deliverable cannot be over-read [PROPOSAL — boundary
 statement; PM directive: Stage A stops for review]:
 
 1. **No expectation bytes.** Not one hex output value in this chapter is
-   frozen. The two worked PrincipalId examples (principal §2.5 A/B) are
-   candidate seeds only — they were computed under the raw-ascii-domain
-   variant and are void if RP-1 resolves the other way. Stage B mints all
-   byte vectors from the reconciled formulas.
+   frozen. The worked PrincipalId examples (principal §2.5 A/B) now carry the
+   fixed SR-14 derivation but intentionally omit output bytes. Stage B mints
+   all bytes only after every consumed SR chapter repair verifies.
 2. **No implementations.** Neither the Solidity prototype Core nor the TS/RS
    libraries exist yet. Stage A defines what they must agree on.
 3. **No differential runs, no CI harness.** The vector-record container
@@ -793,17 +909,20 @@ statement; PM directive: Stage A stops for review]:
 6. **No wallet-signability run.** GV-5's `eth_signTypedData_v4` member is
    defined here; the live re-run against current wallets is Stage B
    (authorship O6 — the July confirmation is aging evidence).
-7. **No frozen TBD constants.** `WITHDRAWAL_TYPE_ID`, `TYPE_BINDING_SET_V1`,
-   `TYPE_BINDING_TOMBSTONE_V1`, `TYPE_RESOLUTION_PLAN_1`, final `chainRef`
-   bytes, `UNICODE_PIN`, `ERC1271_VERIFY_GAS` — all await their owning
-   chapters' closure; vectors touching them carry the dependency.
+7. **No frozen TBD constant bytes.** The constants set is exactly
+   `TYPE_BINDING_SET_V1`, `TYPE_BINDING_TOMBSTONE_V1`,
+   `TYPE_WITHDRAWAL_V1`, and the intrinsic `TypeSchemaGroup/1` bootstrap Type,
+   plus the owning chapters' `chainRef`, `UNICODE_PIN`, and
+   `ERC1271_VERIFY_GAS` values. `ResolutionPlan/1` is not kernel-known.
+   Stage B computes the constants from the verified intrinsic blobs.
 8. **No client-compiler corpus.** The R-L1 rich-lens differential-compilation
    corpus (incl. cycle/diamond imports) attaches when that compiler exists;
-   B0's flat plans cannot host it (GV-13 note; open item O6).
+   B0's flat plans cannot host it (GV-13 note; client-compiler open item).
 9. **No succession vectors.** AA-6/AA-7 are recorded as reserved-seam threats
    with their seam inventory; designing their vector classes is future work
    that gates freeze, not Stage B.
-10. **Minting order [PROPOSAL]:** after synthesis resolves RP-1..RP-12:
+10. **Minting order [PROPOSAL]:** after SR-1..SR-18 chapter repairs and residue
+    checks verify:
     ids (GV-3/4) → codec (GV-1/2) → envelope/witness (GV-5/6/7/8) → state
     machines (GV-9/10/12/18) → folds and pages (GV-13/14/16) → realm walk
     (GV-17) → oracle checks (GV-15) — each stage's vectors feed the next
@@ -829,47 +948,39 @@ The compact contract other chapters (and the Stage B harness) rely on:
 - **Cross-cutting rules** every vector obeys: three-implementation agreement
   with typed-error equality (§0.1); write-pairs-with-read-back (§0.2);
   two-axis never-collapse (§0.3); tier notation CORE/SDK/FIXTURE (§0.5).
-- **Reconciliation preconditions** `RP-1..RP-12` (§1) — the synthesizer's
-  checklist; the `reconciles` field makes them machine-enforceable at minting
-  time. No vector freezes while its RPs are open.
+- **Reconciliation preconditions** `RP-1..RP-18` and winning pins
+  `SR-1..SR-18` (§1): `reconciles` preserves the historical conflict mapping;
+  `requiresPins` gates minting on VERIFIED repairs in every owning chapter and
+  the no-retired-residue check.
 - **Stage boundary** (§4): Stage A = categories, members, pass criteria,
   detection mapping; Stage B = bytes, implementations, runs, measurements.
 
 ## Open items
 
-1. **RP-1..RP-12 resolution** — the synthesizer must rule each conflict
-   (or route irreducible ones per the PM's evidence-first rule) before any
-   vector is minted; this chapter's member lists are stable across
-   resolutions, only the bytes change.
-2. **Vector container format** — §0.4 shape is a proposal; the
+1. **Vector container format** — §0.4 shape is a proposal; the
    fixture/measurement-harness chapter (PM deliverable 5) freezes it.
    Closed by: harness lane + synthesizer.
-3. **PID-LOW160 injection harness** — the test-only storage path that injects
+2. **PID-LOW160 injection harness** — the test-only storage path that injects
    synthetic colliding PrincipalIds must be designed so it cannot exist in
    production builds (compile-time gate). Closed by: harness lane.
-4. **State-digest definition** (§0.1 O7 reference) — the canonical digest of
+3. **State-digest definition** (§0.1 reference) — the canonical digest of
    Realm state used for fold-equality and zero-delta revert assertions;
    candidates: the realm chapter's optional `stateDigest` accumulator
    [HYPOTHESIS there] or a harness-side storage-dump hash. Closed by: harness
    lane; must not become a Core obligation silently.
-5. **EAP fixture** — provisional per the PM directive; GV members referencing
+4. **EAP fixture** — provisional per the PM directive; GV members referencing
    it are conditional until the durable brief lands. Closed by: Codex brief.
-6. **R-L1 client-compiler corpus attach point** — cycle/diamond/import
+5. **R-L1 client-compiler corpus attach point** — cycle/diamond/import
    adversarial compilation vectors parked until the rich-lens compiler
    exists; visibly parked here so R-L1 is not silently dropped. Closed by:
    the client/lens-compiler lane.
-7. **R-L4 lens scale (50/100/256)** — a measurement matter, not a byte-vector
-   matter: GV-13's N ∈ {1,8,32,64} covers Core; the client-tier 50/100/256
-   principal-count benchmarks belong to the harness lane's matrix and are
-   flagged there per the SURVIVORS lane so the scale requirement is parked,
-   not lost. Closed by: harness lane.
-8. **Presence/Binding outcome vocabulary mapping** — GV-18's five-value
+6. **Presence/Binding outcome vocabulary mapping** — GV-18's five-value
    position-state set vs GV-13's `Presence` enum vs GV-14's `Completeness`
    must be mapped onto the SDK result model's two axes before SDK-tier
    members mint (binding open item 5). Closed by: read-model/SDK chapter +
    synthesizer.
-9. **Wallet re-verification run** (GV-5 member; authorship O6) — Stage B,
+7. **Wallet re-verification run** (GV-5 member; authorship O6) — Stage B,
    against then-current major wallets. Closed by: Stage B execution.
-10. **Succession vector classes** (AA-6/AA-7) — reserved; designing them is a
+8. **Succession vector classes** (AA-6/AA-7) — reserved; designing them is a
     named freeze gate, not Stage B scope. Closed by: a future succession
     design round with its own owner review.
