@@ -919,9 +919,13 @@ return AdmissionOrdinals as `bytes32(uint256(ordinal))`. Consumers hydrate via
    empty"; VERIFIED]: a call that truncates (page bound, scan bound, or gas
    bound reached) returns `PARTIAL` with a resumable `cursor` — including when
    `items` is empty because the scan window held only dead entries.
-   `COMPLETE` with empty `items` is returned **only** when the index
-   authoritatively holds zero live entries at the basis — which, on Core
-   state, is proven Realm-local absence (complete-by-construction, §0).
+   An initial (`cursor == 0`) `COMPLETE` with empty `items` proves the index
+   authoritatively holds zero live entries at the basis. On a resumed call,
+   `COMPLETE` means the validated suffix is exhausted; an empty terminal page
+   cannot erase items returned on earlier pages or independently ground
+   whole-key absence. Whole-query absence requires the complete cursor chain
+   to contain no items. This distinction is mandatory for every stateless
+   cursor, including §7's canonical-bound selector.
 2. **UNSUPPORTED, never silent-empty**: an `indexKind` outside the closed set,
    a `(typeSchemaId, KIND_SPEC, specOrdinal)` not declared by the admitted
    TypeSchema, an unknown `typeSchemaId` for a type-scoped kind, or a disabled
@@ -1091,6 +1095,8 @@ as opaque canonical bodies with statically extractable declared fields.
 
 ```solidity
 uint16 constant LOCATOR_POSTINGS_VISIT_MAX = 32;
+uint8  constant LOCATOR_BOUNDARY_PROBES_MAX = 48;
+uint16 constant LOCATOR_TOTAL_POSTING_READ_MAX = 80;
 
 struct SelectSpec {                 // supplied or pinned by the consumer
   bytes32 typeSchemaId;             // the locator-evidence Type to consider
@@ -1140,11 +1146,40 @@ validateSelectSpec(targetKey, spec, H):
                         spec.scoreFieldOrdinal): return false
   return true
 
+postingAt(key, index):
+  word = SLOAD(pdataSlot(key, index / POSTINGS_PER_SLOT))
+  return lane48(word, index % POSTINGS_PER_SLOT)
+
+canonicalEndAtBasis(key, H, head):
+  // Return the first physical index whose ordinal is > H, or head.count.
+  // Strictly ascending postings make this the unique canonical boundary.
+  if head.count == 0: return (0, 0)
+  if uint64(head.lastOrdinal) <= H: return (head.count, 0)
+
+  lo = 0; hi = head.count; probes = 0
+  while lo < hi:
+    mid = lo + (hi - lo) / 2
+    ord = postingAt(key, mid); probes += 1
+    if uint64(ord) <= H: lo = mid + 1
+    else: hi = mid
+  assert probes <= LOCATOR_BOUNDARY_PROBES_MAX
+  return (lo, probes)
+
 selectBestLocator(targetKey, spec, basisOrdinal, cursor):
   currentH = nextOrdinal - 1
-  if basisOrdinal == 0 || basisOrdinal > currentH:
-    revert ErrSelectBasis(basisOrdinal, currentH)
-  H = basisOrdinal
+  contextTag = selectContextTag(targetKey, spec) // 111-bit commitment
+
+  if cursor == 0:
+    H = (basisOrdinal == 0) ? currentH : basisOrdinal
+    i = 0
+  else:
+    if cursor == CURSOR_END: revert ErrSelectCursor(cursor)
+    (i, claimedEnd, cursorH, cursorTag) = decodeSelectCursor(cursor)
+    if basisOrdinal != cursorH || cursorTag != contextTag:
+      revert ErrSelectCursor(cursor)
+    H = cursorH
+
+  if H > currentH: revert ErrSelectBasis(H, currentH)
 
   // Validate the Type at H, role, score shape, and index obligations BEFORE
   // deriving/loading the postings key. Undeclared/invalid is not absence.
@@ -1154,28 +1189,23 @@ selectBestLocator(targetKey, spec, basisOrdinal, cursor):
   head = SLOAD(pheadSlot(key))
   require head.count <= 2^48 - 1                 // structural invariant
 
-  contextTag = selectContextTag(targetKey, spec) // 111-bit commitment
-  if cursor == 0:
-    i = 0
-    snapshotEnd = head.count                     // pin physical end now
-  else:
-    if cursor == CURSOR_END: revert ErrSelectCursor(cursor)
-    (i, snapshotEnd, cursorH, cursorTag) = decodeSelectCursor(cursor)
-    if cursorH != basisOrdinal || cursorTag != contextTag:
-      revert ErrSelectCursor(cursor)
-    if i > snapshotEnd || snapshotEnd > head.count:
+  (canonicalEnd, boundaryProbes) = canonicalEndAtBasis(key, H, head)
+  if cursor != 0:
+    // The boundary is recomputed from authenticated Realm state. The cursor
+    // does not get to choose, truncate, or enlarge it.
+    if claimedEnd != canonicalEnd ||
+       i == 0 || i % LOCATOR_POSTINGS_VISIT_MAX != 0 ||
+       i >= canonicalEnd:
       revert ErrSelectCursor(cursor)
 
-  visited = 0
+  windowVisited = 0
   best = (score = -∞, ordinal = 0)
 
-  while i < snapshotEnd && visited < LOCATOR_POSTINGS_VISIT_MAX:
-    ord = postings(key)[i]
+  while i < canonicalEnd && windowVisited < LOCATOR_POSTINGS_VISIT_MAX:
+    ord = postingAt(key, i)
     i += 1
-    visited += 1                       // count EVERY physical posting first
-    if ord > H:
-      // Strict posting order proves every remaining snapshot entry is > H.
-      return (best.ordinal, best.score, visited, CURSOR_END, COMPLETE)
+    windowVisited += 1                 // count EVERY scan posting first
+    assert ord <= H                    // guaranteed by canonical upper bound
     if !liveAt(ord, H): continue
     score = (spec.scoreMode == SCORE_LATEST)
       ? ord
@@ -1185,10 +1215,12 @@ selectBestLocator(targetKey, spec, basisOrdinal, cursor):
         (best.ordinal == 0 || ord < best.ordinal)):
       best = (score, ord)
 
-  if i == snapshotEnd:
-    return (best.ordinal, best.score, visited, CURSOR_END, COMPLETE)
-  next = encodeSelectCursor(i, snapshotEnd, H, contextTag)
-  return (best.ordinal, best.score, visited, next, PARTIAL)
+  postingsVisited = boundaryProbes + windowVisited
+  assert postingsVisited <= LOCATOR_TOTAL_POSTING_READ_MAX
+  if i == canonicalEnd:
+    return (best.ordinal, best.score, postingsVisited, CURSOR_END, COMPLETE)
+  next = encodeSelectCursor(i, canonicalEnd, H, contextTag)
+  return (best.ordinal, best.score, postingsVisited, next, PARTIAL)
 ```
 
 Cursor grammar [PROPOSAL — state-free and fail-closed]:
@@ -1196,7 +1228,7 @@ Cursor grammar [PROPOSAL — state-free and fail-closed]:
 ```
 SelectCursor (uint256, nonzero and never CURSOR_END):
   nextIndex       bits [0..47]    u48
-  snapshotEnd     bits [48..95]   u48
+  claimedEnd      bits [48..95]   u48  // checked against canonicalEndAtBasis
   basisOrdinal    bits [96..143]  u48
   contextTag      bits [144..254] u111
   reserved        bit  [255]      0
@@ -1206,25 +1238,40 @@ contextTag = low111(keccak256(abi.encode(
   uint256(spec.scoreMode), uint256(spec.scoreFieldOrdinal))))
 ```
 
-`basisOrdinal` is required and nonzero for this selector; callers obtain it
-from the same Realm's high-water read before the first call. A nonzero cursor
-is valid only for the identical basis, target, and fully validated spec, with
-`nextIndex ≤ snapshotEnd ≤ current head.count`; every mismatch or malformed
-encoding reverts `ErrSelectCursor`. The u111 context commitment is cursor
-misuse detection, not an authorization primitive. Bit 255 is zero so an
-encoded resumable cursor cannot collide with `CURSOR_END`.
+On an initial `cursor == 0` call, `basisOrdinal == 0` resolves once to the
+current high-water `H`; an explicit nonzero basis selects that historical
+basis. Every resumed call passes the exact encoded `H` as `basisOrdinal` —
+zero never re-resolves to a later current basis during resumption.
+
+`canonicalEndAtBasis` computes the unique first position with ordinal `> H`
+using the authoritative sorted postings. Its fast path returns `head.count`
+when `head.lastOrdinal ≤ H`; otherwise a lower-bound binary search performs at
+most 48 point reads for any physically legal list. Every resumed call
+recomputes this boundary and requires `claimedEnd == canonicalEnd`. A nonzero
+cursor also requires an emitted window boundary
+`nextIndex ∈ {32, 64, ...} < canonicalEnd`; zero, a truncated/enlarged end, an
+end-position cursor, a basis/context mismatch, a nonzero reserved bit, or any
+other malformed encoding reverts `ErrSelectCursor`.
+
+The u111 context commitment is cursor-misuse detection, not an authorization
+primitive. Bit 255 is zero so an encoded resumable cursor cannot collide with
+`CURSOR_END`. Stateless cursors cannot prove that a caller consumed earlier
+pages: a resumed page's `COMPLETE` applies to the suffix beginning at its
+validated `nextIndex`. Whole-query absence requires either an initial
+`cursor == 0` call that returns empty `COMPLETE`, or combination of every
+window result along one cursor chain.
 
 Exactness notes:
-- `LOCATOR_POSTINGS_VISIT_MAX = 32` bounds **total physical postings
-  visited**, live or dead [PROPOSAL — repriced against the overlay at roughly
-  32 × 8,820 ≈ 282k gas before fixed overhead, [HYPOTHESIS]]. Dead-posting
-  spray therefore yields bounded `PARTIAL + nextCursor`, never an unbounded
-  look-ahead or false `COMPLETE`.
-- `snapshotEnd` pins the physical list length on the first call. Later appends
-  are outside that snapshot and cannot move its completion boundary. For a
-  historical `H`, encountering the first `ord > H` also terminates COMPLETE
-  immediately because postings are strictly ascending. The boundary posting
-  is a physical visit and is included in `postingsVisited`.
+- `LOCATOR_POSTINGS_VISIT_MAX = 32` bounds sequential candidate visits, live
+  or dead. `LOCATOR_BOUNDARY_PROBES_MAX = 48` bounds the canonical-end search;
+  `postingsVisited` counts **both** boundary point reads and sequential visits,
+  so `LOCATOR_TOTAL_POSTING_READ_MAX = 80` is the honest per-call physical-read
+  ceiling. Repriced worst case: `48 × 2,100 + 32 × 8,820 ≈ 383k` gas before
+  fixed overhead [HYPOTHESIS]. Dead-posting spray therefore yields bounded
+  `PARTIAL + nextCursor`, never unbounded look-ahead or false `COMPLETE`.
+- The canonical boundary includes exactly the postings whose strictly
+  ascending ordinal is `≤ H`. Later appends necessarily have ordinal `> H`,
+  so continuous writes cannot change `canonicalEnd` or prevent completion.
 - Tie-breaks are total and pinned: `(score desc, AdmissionOrdinal asc)` —
   the earliest equally-scored locator wins, so the selection is stable under
   later spam [PROPOSAL — earliest-wins prevents rank-jacking by re-publishing
@@ -1232,10 +1279,11 @@ Exactness notes:
   equally deterministic].
 - `PARTIAL` means "best of this visited window" and always carries a resumable
   cursor. `bestOrdinal == 0 && PARTIAL` is **not absence**. Only
-  `bestOrdinal == 0 && COMPLETE` proves no live candidate at the pinned basis.
-  A consumer combines window winners under the same total order until
-  `COMPLETE`; the function never scans beyond the declared window to decide
-  whether a live candidate remains.
+  an initial empty `COMPLETE`, or an empty aggregate after consuming the whole
+  cursor chain, proves no live candidate at the pinned basis. A consumer
+  combines window winners under the same total order until `COMPLETE`; the
+  function never scans beyond the declared window to decide whether a live
+  candidate remains.
 - Full declaration validation precedes the postings-head lookup. An unknown
   Type, undeclared role/`REF_BACKLINK` obligation, invalid score mode,
   non-u64/non-extractable score field, or missing `SCALAR_EQ` score declaration
@@ -1264,7 +1312,9 @@ reads unbounded [kickoff falsifier 5]:
 | `MAX_PAGE_ITEMS` | 512 | raw page size (§5.3 arithmetic) |
 | `MAX_PAGE_ITEMS_HYDRATED` | 256 | hydrated page size |
 | `PAGE_SCAN_MAX` | 1024 | entries examined per page call |
-| `LOCATOR_POSTINGS_VISIT_MAX` | 32 | total physical postings per selection call |
+| `LOCATOR_POSTINGS_VISIT_MAX` | 32 | sequential locator postings per call, dead included |
+| `LOCATOR_BOUNDARY_PROBES_MAX` | 48 | canonical upper-bound point reads per call |
+| `LOCATOR_TOTAL_POSTING_READ_MAX` | 80 | honest total: boundary probes + sequential visits |
 | `BINDING_PROBES_MAX` | 48 | binary-search probes per basis-pinned binding read |
 | `BATCH_PROBES_MAX` | 64 | binary-search probes for exact receipt batch |
 | `ORDINAL_MAX` | 2^48−1 | admission ceiling; revert, never wrap |
@@ -1426,7 +1476,9 @@ with encoding-owned hashed domain words and `abi.encode` fixed words.
   liveness rule; basis-pinned pages are phantom/ghost-free (FSP-BASIS-1).
 - Every enumeration returns the six-part page tuple; truncation ⇒ PARTIAL,
   undeclared ⇒ UNSUPPORTED, UNKNOWN reserved for non-authoritative tiers;
-  empty+COMPLETE = proven Realm-local absence at the stated basis.
+  initial empty+COMPLETE, or an empty aggregate over a full validated cursor
+  chain, = proven Realm-local absence at the stated basis; an isolated resumed
+  suffix never grounds whole-query absence.
 - Mandatory indexing: an accepted Occurrence is present in every applicable
   family in the same atomic call; there is no admitted-but-unindexed state.
 - `counts()` liveCount is revocation-aware at current basis, O(1).
@@ -1437,10 +1489,12 @@ with encoding-owned hashed domain words and `abi.encode` fixed words.
   stably deduplicated to `D(leaf) ≤ 43`; with the conditional unique-record
   transition, `F_MAX = 44` head touches. Withdrawal replays the same dedup set.
   Transaction fit remains a measured hypothesis.
-- `selectBestLocator` visits at most 32 physical postings, counts dead ones,
-  validates the declared Type/role/score indexes before lookup, pins a finite
-  snapshot end and basis in its cursor, and returns `PARTIAL` only with a
-  validated resumable cursor.
+- `selectBestLocator` scans at most 32 sequential postings, counting dead ones,
+  plus at most 48 logarithmic point reads to recompute the canonical
+  ordinal-at-basis boundary; `postingsVisited` reports both (≤80). It validates
+  the declared Type/role/score indexes before lookup, rejects any cursor whose
+  claimed end differs from the canonical boundary, and returns `PARTIAL` only
+  with a validated resumable cursor.
 - Full `bytes32 PrincipalId` width preserved in every key, item, and ABI.
 
 **External functions** (Solidity signatures as defined above): `getTypeSchema`,
