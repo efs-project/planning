@@ -1,89 +1,237 @@
-# 2026-08-13 — Claude evidence round (5 lanes)
+# 2026-08-13 — Claude evidence round
 
-**Status:** reference — dated research record, not a design or a ruling
-**Commissioned by:** @james via @pm, 2026-08-12, from work maps drafted by the Codex EFS PM and the Arcade agent
-**Method:** 4 top-level Opus 5 agents + delegated sub-lanes, read-only, ~800k tokens
-**Boundaries honored:** no venue selected, no Realm identity defined, no EFS contracts designed, no Arcade design doc or owner inbox touched, nothing written outside this folder
+**Status:** corrected, fully recovered dated research record; not a design, ruling, or owner packet
+**Commissioned by:** @james via @pm, 2026-08-12, from work maps drafted by the Codex EFS PM and Arcade PM
+**Method:** four directly launched Opus 5 agents with delegated research; 30 distinct completed memos recovered
+**Authority:** observations and analyst interpretations only; existing design gates decide what survives
 
-#status/reference #kind/research #repo/planning #repo/contracts #repo/client
+#status/done #kind/research #repo/planning #repo/contracts #repo/client #pass/claude-evidence-round
 
-## The convergent finding
+## Phone summary
 
-Four lanes, different domains, one conclusion: **the dominant failure is not chain death or byte loss — it is "confirmed, then unreadable."** This is the bug class the vault already names, arrived at independently by each lane.
+All 30 distinct completed result bodies were recovered after Claude hit its
+spend cap. The full [30-memo corpus](corpus/README.md) is now in the vault with task IDs,
+timestamps, source-event locations, measurements, links, caveats, and negative
+results. [Corrections and scope](CORRECTIONS.md) records where the original PM
+compression overstated or conflated those results.
 
-- **Venue lane:** "The threat you are actually buying insurance against is not chain death. It is confirmed, then unreadable."
-- **L1-incidents lane:** blobs expire in ~18 days (measured); history expiry shipped 2025-07-08; testnet read paths evaporate while chains still run.
-- **Falsification lane:** "every case died at the index layer, not the storage layer."
-- **Case-study lane:** ldjam.com — bytes fine, SPA index dead, Internet Archive holds 3.8 KB shells.
+Three evidence families matter:
 
-## Lane 1 — Arcade differentiation falsification (ran twice, independent methods)
+1. **Arcade:** one adversarial workstream produced two overlapping memos.
+   Neither classified a tested benefit as uniquely EFS-specific, while some
+   benefits remained unresolved. That challenges the current
+   preservation/differentiation hypothesis; it does not decide that Arcade or
+   EFS should stop. Andromeda's exact artifact/runtime reproduction is
+   favorable, but rights, notice, name, real-mobile, and target-browser gates
+   remain open.
+2. **Browser runner:** measured desktop results show that a sandboxed iframe is
+   not a network cage and does not isolate a hung child from Safari's host
+   page. The measurements are useful runner evidence, not a chosen policy, and
+   Firefox plus real iOS/Android/touch/gamepad remain unmeasured.
+3. **Realm/venue:** venue, L1, dead-chain, governance, DA, cost, and node studies
+   reinforce a broad risk: a record can remain confirmed while its practical
+   read or reconstruction path disappears. No chain was selected. The evidence
+   now feeds the existing Realm and Commons gates.
 
-**Verdict both times: 0 EFS-SPECIFIC benefits.** (8 or 9 of 10 conventional-baseline-sufficient, 1–2 unresolved, depending on run.)
+## What actually ran
 
-- The Arcade's own `mvp-architecture.md` concedes it: manifest is chain-free ("No required chain values"), "manifest is the index; chain is provenance, not availability", J13 reconstruction is `git clone`, "deleting every receipt leaves a valid, re-seedable dataset."
-- The proposed catalog needs no rescuing: js13kGames is 2,503 public repos, the aggregate repo has 42 forks, and Software Heritage archives GitHub continuously with content-addressed SWHIDs, free and unasked.
-- **EFS is currently behind the baseline on its own signature property** — `verifyContentHash` has zero callers (verified: declared once at `contracts/packages/nextjs/utils/efs/transports.ts:111`), 67 durable Sepolia files carry non-canonical keccak hashes, pins sit on one VPS Kubo node.
-- The one non-baseline property (claim discoverability anchored to the object) **is not blockchain-specific** — Nostr NIP-54 + NIP-51 ship it today.
-- **Possible STOP-trigger:** `Designs/arcade/product-and-communities.md` §6 says stop if "the differentiator demo cannot be made user-visible." The memo argues 4 of 5 demo beats are baseline parity and the 5th is unexpressible in a single-operator site.
-- **Scope caveat (PM):** the verdict is explicitly "for the catalog it actually proposes." js13k-class games are the least endangered software on the internet. This may be a *catalog* problem rather than an EFS problem — which is what the target-community research is built to test.
+Four agents were launched directly:
 
-## Lane 2 — Andromeda Invaders evidence reproduction
+- Commons/Realm venue matrix;
+- Andromeda artifact reproduction;
+- Arcade differentiation falsification; and
+- browser-runner behavior measurement.
 
-**Artifact is clean; the vault's claim about it was not evidenced until now.** "Mobile-capable, rights-clean" entered by direction ~2026-08-08 without an evidence pass.
+They delegated supporting lanes. The corpus contains 55 completed-result
+notifications, deduplicated to 30 distinct bodies totaling 848,254 characters
+before HTML-entity decoding. Six reports are the curated entry points: two different Arcade
+falsification passes, Andromeda, browser measurements, the Commons/Realm matrix,
+and the L1/dead-data report. The L1 report is a venue sub-lane, and both Arcade
+passes came from one task at different stops; do not describe these as six
+independent experiments.
 
-VERIFIED: no build step (curl + clone + `cmp` identical); zero outbound requests and zero storage over 70s runtime; runs in `sandbox="allow-scripts"` opaque origin (answers ledger U5); MIT; all assets generated (canvas `fillRect`, oscillators, hardcoded FONTMAP) — no image, audio, or font files exist.
+The later spend-limit notification for the browser task carried no result and
+occurred after its complete report had landed. It did not erase or truncate the
+earlier result.
 
-Four unresolved, none agent-rulable:
-1. **Font glyph provenance** — only third-party asset; CC0 claim downstream of an ambiguous IBM/Verite ROM chain. OWNER-OR-COUNSEL. Cheap fix: redraw ~40 glyphs.
-2. **Custody is one operator four times over** — susam.net, github.io, codeberg.page, npm all his. Independent *archival* custody does exist (Software Heritage + Wayback hold the exact bytes).
-3. **"0.9.0" maps to two different byte sequences** (web vs npm/tag); in-game constant says 0.8.0. **Pin by digest, never version.**
-4. **MIT permission-notice completeness** if shipping `invaders.html` alone. Fix: include `LICENSE.md` in the closure.
+## Cross-domain signal: confirmed, then unreadable
 
-MISSING: the USPTO name pass `rights-safety-and-operations.md` §2.3 requires has not been run.
+Several related lanes independently collected examples in which bytes, chain
+state, or commitments survived while normal discovery, reconstruction, RPC,
+explorer, index, or runtime paths failed. That is useful cross-domain
+corroboration for a failure class EFS already tracks. It is **not** a statistical
+finding that every lane independently proved one dominant cause:
 
-## Lane 3 — Browser-runner behavior matrix (measured, macOS)
+- the [venue matrix](corpus/venue/commons-realm-venue-matrix.md) emphasizes
+  historical-read, DA, operator, upgrade, and reconstruction dependencies;
+- the [L1/dead-data report](corpus/venue/l1-incidents-and-dead-data.md) separates
+  durable commitments from expiring blob bytes and records disappearing testnet
+  read paths;
+- the [indie/jam catalog study](corpus/arcade/indie-jam-catalog-loss.md) finds
+  modern index/SPA failure cases; and
+- the [Flash-era study](corpus/arcade/flash-era-catalog-loss.md) finds a
+  different dominant problem—runtime obsolescence even when bytes survive.
 
-Chrome 151.0.7922.109 · Safari 26.5.2 · Brave 151. **Firefox, iOS Safari, and Chrome Android entirely unmeasured** (unavailable on the machine); touch and gamepad input never exercised.
+The design implication remains a test, not a ruling: EFS should prove that an
+independent implementation can reconstruct useful state and exact content from
+the dependencies each Realm explicitly promises.
 
-- **Safari has no process isolation for opaque sandboxed iframes.** A 3s busy loop in the child froze the host page for 3.0s. Chrome: 51ms (out-of-process, confirmed via CDP). Adding `allow-same-origin` removes Chrome's isolation too.
-- **Safari throttles sandboxed children to ~22 fps** while the host runs 60. Tracks cross-origin-ness, not the sandbox attribute — cannot be opted out of. Chrome: no throttling.
-- **Fullscreen trap:** in Safari, `allowfullscreen` alone works; `allow="fullscreen"` alone fails; **both together fails** — the modern attribute overrides and disables the legacy one. Reproduced 3×. Chrome accepts either.
-- **Self-navigation is uncontained** — `location.href` to an external https URL navigates in both engines, and the landing document **inherits the sandbox and opaque origin** (server-verified `Origin: null`). Directly relevant to Andromeda's info-screen behavior.
-- **The sandbox does not stop network egress** — `fetch(mode:'no-cors')` sends; WebSockets work ungated; blob/`data:` Workers alive. A no-egress guarantee is CSP, not `sandbox`.
-- **A child renderer crash gives the parent no event** — detection needs your own watchdog.
-- Storage uniformly dead in opaque origins; Safari silently accepts cookie writes that go nowhere where Chrome throws (the confirms-but-unreadable shape again).
-- Spec sub-lane: **user activation flows to all ancestors unconditionally, to descendants only when same-origin.** One rule governing audio, fullscreen, and pointer-lock; documented by no vendor. iOS: fullscreen is iPad-only (still, at Safari 27 beta); pointer lock never.
+## Arcade falsification
 
-## Lane 4 — Commons/Realm venue evidence
+One adversarial workstream produced [pass 1](corpus/arcade/arcade-falsification-pass-1.md)
+and the overlapping [pass 2](corpus/arcade/arcade-falsification-pass-2.md).
+Neither classified a tested benefit as uniquely EFS-specific; one or two
+items remained unresolved depending on the pass. The workstream found that
+Git, signed manifests, ordinary replicated storage,
+Software Heritage, and static clients already provide much of the proposed
+preservation path; Nostr was cited as a non-chain comparison for attributed
+multi-author discovery.
 
-- **Optimism deleted its own users' event logs** (Jan–Jul 2021, "cannot be fully recovered", "errantly deleted during an infra cleanup"). Documented by OP.
-- **"Onchain DA" ≠ permanently retrievable.** Arbitrum/Base/OP post blobs; retention is 4096 epochs ≈ 18.2 days. Beyond that, re-derivability rests on Blobscan and commercial providers, not Ethereum.
-- **No venue clears a 30-day exit window.** Every L2 is "None" — instant, no-notice authority over bridge and state-root logic. L1 is the only venue with no upgrade key at all.
-- **Cost:** 200k-gas write 2026-08-13 — L1 $0.020, Arbitrum $0.0076, Base $0.0023, OP $0.00038. The same write cost **$23.43 in Dec 2024** (~1,000× swing). **EIP-8037 (Scheduled for Glamsterdam) takes new SSTORE 20,000 → 97,920 gas**, repricing EFS's storage-heavy design ~4.9×.
-- **L3s fail adopted requirements by construction** — AnyTrust: "a node cannot reconstruct chain state from parent-chain data alone" (Arbitrum's own docs). ~96 archived vs 107 live chains; $85.2M stranded; 8/8 dead chains probed had deleted DNS.
-- **L1's own weaknesses:** Teku at 53.86% of consensus clients; 41% of blocks via OFAC-censoring relays; no force-inclusion mechanism (FOCIL declined for Glamsterdam).
-- **Redstone is the sharpest EFS-shaped case:** alt-DA; Lattice's notice says contract assets "will not be recoverable"; 22.107 ETH sits in an unpaused portal because the DA is gone and nobody can build the storage proof.
-- **Do not cite `l2fees.info`** — measured 190 days stale, L1 figures ~300–520× off.
+The important scope boundary is “for the catalog it tested.” Public GitHub and
+js13k-style games are unusually well replicated. The studies challenge:
 
-## Lane 5 — L1 track record and dead-data precedents (measured)
+- preservation as the current catalog's strongest public rationale;
+- whether the proposed video makes an EFS-only property visible; and
+- whether a single-operator Arcade surface demonstrates curator plurality.
 
-- **L1 liveness is not the risk.** 5,103 sampled windows: no contiguous halt >59 min as a rigorous upper bound; longest observed inter-block gap post-Merge is **96 seconds**. Two finality pauses ever (~25 and ~54 min, May 2023), both self-healing.
-- **Same bug class twice** — May 2023 and Dec 2025, same client (Prysm), 31 months apart; survived by client diversity, not protocol robustness.
-- **State-rewrite risk retired:** one rewrite (DAO 2016); **EIP-999 withdrawn** — Ethereum declined to rewrite state over ~500k frozen ETH.
-- **Never put durable data in blobs.** Measured: 45-day-old slots return blob bytes, 60+ days return HTTP 403. A 6-month-old type-3 tx still carries its `blobVersionedHashes` — the commitments are permanent, the bytes are gone.
-- **Testnet death pattern, measured:** Goerli — 8 public RPCs tried, zero working; explorer returns Cloudflare 522 (DNS resolves, origin decommissioned, so naive health checks report it healthy). Ropsten/Rinkeby/Kovan/Holesky explorers: no DNS A record. **No shutdown announcement ever addressed data preservation.** The official archive registry lists none of the dead testnets, and one of its *listed live mirrors* has no DNS record.
-- Live mainnets lose explorers too: Fantom Opera and Polygon zkEVM both running, both canonical explorer domains NXDOMAIN.
+They do not establish that conventional tools satisfy every EFS use case, that
+the guest-game product lacks value, or that the existing Arcade STOP condition
+has been owner-triggered. The Arcade queue remains held while its product agent
+recuts the one-game evidence and differentiation question.
 
-## Open questions for the owner (surfaced, not decided)
+Supporting reports: [polished portals](corpus/arcade/six-flow-polished-portals.md),
+[HN Arcade/js13k/itch](corpus/arcade/six-flow-hn-js13k-itch.md),
+[Flash-era cases](corpus/arcade/flash-era-catalog-loss.md), and
+[indie/jam cases](corpus/arcade/indie-jam-catalog-loss.md).
 
-1. **Does an Etched kernel tolerate a mutable machine underneath it?** Answering "no" collapses the venue set to L1 immediately. Answering "yes" means naming whose keys can change EFS's execution environment.
-2. **What does "reconstructible" mean** — from venue state, or from the venue's parent after the venue dies? Different bars, different venues. `R-M2` does not currently say which.
-3. **Is "chains don't die" retained, scoped, or retired?** Defensible for L1, arguable for top L2s, empirically false for L3s.
-4. **Durability or reach?** They point opposite ways (L1 vs Base). The Core/Commons split permits different answers — if stated explicitly.
-5. **Does the L1 pointer reopen on new grounds?** Retired correctly on censorship-escape; the **discovery-and-tombstone** argument is new and independent.
-6. **How much fee-regime variance can EFS carry?** ~1,000× swing in 20 months, plus EIP-8037.
-7. **Arcade framing** — does the falsification result change the Arcade's rationale, and is the STOP trigger met?
+## Andromeda Invaders
 
-## Honest limits of this round
+The [reproduction memo](corpus/arcade/andromeda-evidence-reproduction.md)
+verified a strong provisional artifact:
 
-Firefox / iOS Safari / Chrome Android unmeasured. No JavaScript executed in the falsification lane (no game actually played). GitHub Pages' own failure modes were flagged by both falsification runs as under-tested — partially closed by the case-study lane (Nintendo's 8,535-repo single-notice takedown; account suspension with no counter-notice; 1 GB Pages cap), which also confirmed content-addressing does **not** escape DMCA or sanctions (Tornado Cash). Sepolia's permissioned-validator status is asserted by one lane and listed as unverified by another — **unresolved**. Degen's reported 2026-08-31 sunset is secondary-source only.
+- the published 45,248-byte HTML file matched repository HEAD without a build;
+- its SHA-256, Git blob, raw CIDv1, revision, and SWHIDs are recorded;
+- static and measured runtime checks found no external request or persistent
+  storage use during the tested desktop run;
+- art and audio are generated in code; no image, audio, or font file ships; and
+- it ran in the tested Chromium opaque `sandbox="allow-scripts"` harness.
+
+That is **not publication clearance**. Still open:
+
+- provenance/licensing of the embedded bitmap glyph data;
+- including the full MIT permission notice in the shipped closure;
+- the required name/trademark pass;
+- independent serving custody rather than several locators controlled by the
+  same publisher;
+- exact-release identity because “0.9.0” labels different byte sequences; and
+- Firefox, real iOS/Android, touch, gamepad, and target-device testing.
+
+The durable-write hold therefore remains correct. This pass does not label the
+game “rights-clean,” “mobile-cleared,” or safe for irreversible publication.
+
+## Browser-runner evidence
+
+The [measured matrix](corpus/runner/browser-runner-measurements.md) exercised
+Chrome 151, Safari 26.5.2, and Brave 151 on one macOS machine. Among its direct
+observations:
+
+- a three-second busy loop in the opaque child froze Safari's host page for the
+  same period; Chrome's host remained responsive in the tested process layout;
+- the tested Safari cross-origin/opaque child ran about 22 animation frames per
+  second while its host ran 60;
+- the tested sandbox allowed outbound fetch/WebSocket behavior subject to the
+  normal web controls; `sandbox` alone is not a no-egress boundary;
+- self-navigation remained possible and inherited the sandbox;
+- a crashed Chrome child produced no parent event in the tested harness; and
+- Safari's fullscreen attributes behaved differently from Chromium's in the
+  tested combinations.
+
+These are small-sample measurements, not universal browser laws. Firefox,
+iOS Safari, Chrome Android, real touch, and real gamepad were not measured.
+The companion documentation reports are [standards/vendor synthesis](corpus/runner/sandbox-spec-and-vendor-docs.md),
+[WebKit/iOS](corpus/runner/webkit-ios-docs.md),
+[Firefox/Gecko](corpus/runner/firefox-gecko-docs.md), and
+[Chrome Android](corpus/runner/chrome-android-docs.md). They do not complete the
+client's separate Worker/CSP cage spike or select runner permissions.
+
+## Realm, venue, and L1 evidence
+
+The [Commons/Realm matrix](corpus/venue/commons-realm-venue-matrix.md) and its
+17 venue/L1 reports are inputs to V2-E5/V2-E7, not a chain choice.
+
+High-value findings and their precise limits:
+
+- **Blob retention:** EIP-4844 guarantees blob-sidecar service for 4,096
+  epochs (about 18.2 days) and permits longer retention. One tested beacon endpoint served selected
+  45-day-old blobs and returned HTTP 403 for selected 60+-day samples; the test
+  did not measure an exact global deletion boundary. A six-month-old
+  transaction still exposed its commitments. Safe requirement: do not depend
+  on protocol blob retrieval beyond the guaranteed window.
+- **Upgrade/exit:** no surveyed L2 met the analyst-applied 30-day notice/exit
+  bar under every upgrade path. Thirty days is L2BEAT's Stage 2 criterion, not
+  an adopted EFS requirement. Some—including Arbitrum—have nonzero regular
+  paths, but the reports found zero-delay emergency authority. “Every L2 has
+  no exit window” is too broad.
+- **Costs:** at one 2026-08-13 snapshot, 200,000 units of L1 execution gas cost
+  about $0.020 before payload-specific fees. Applying a separate December 2024
+  gas/ETH-price scenario produced $23.43. This is a two-snapshot sensitivity
+  illustration, not measured fee history or an actual EFS transaction; the
+  historical input still needs an exact date and source. EIP-8037's
+  20,000→97,920 comparison is about 4.9× for the net-new 64-byte storage
+  component only; whole-transaction impact must be measured, and L2 adoption
+  was not verified.
+- **Archived versus dead:** L2BEAT counts in the corpus are project slugs, and
+  “archived” does not mean technically dead. Separate probes found many frozen
+  or unavailable chains/endpoints and should be cited with their actual sample,
+  not converted into a universal L3 mortality rate.
+- **Polygon zkEVM:** its sequencer stopped producing blocks when it was sunset
+  on 2026-07-03. A read-only archive RPC still returned its frozen final block
+  while its former explorer domain was gone; that is a
+  read-path-after-shutdown case, not a live-mainnet case.
+- **L1 sampling:** one report evaluated 5,103 consecutive 2,000-block endpoint
+  windows. Its largest aggregate delay above an ideal 12-second schedule was
+  59 minutes; under the report's timestamp/slot assumptions, that bounds any
+  single missed-slot run within those windows. Dense scans of the two May 2023
+  incidents and selected anomalies found a maximum 96-second inter-block gap;
+  the pass did not scan every adjacent post-Merge block.
+
+The corpus also records OP's unrecoverable legacy event-log loss, disappearing
+testnet/explorer/RPC paths, independent-node costs, force-inclusion differences,
+governance and emergency powers, RaaS/offboarding gaps, dead-chain cases,
+external/committee DA, and live documentation-versus-contract discrepancies.
+Use the [corpus manifest](corpus/README.md) to reach the evidence behind a
+specific claim.
+
+## Held routing notes—nothing for James now
+
+The original PM summary turned seven analyst prompts into a shadow owner queue.
+That was wrong: the generated owner rollup currently says **Ask now: 0**.
+
+- Questions about mutable execution environments, reconstructibility, chain
+  mortality assumptions, durability versus reach, and fee variance feed the
+  existing EFS 2.0 Realm/Commons evidence gates V2-E5 and V2-E7.
+- The discovery-and-tombstone argument may be evaluated there, but superseded
+  L1-pointer item P-5 remains superseded unless the owning design process
+  explicitly reopens it.
+- Arcade differentiation and STOP criteria remain inside the held Arcade recut.
+- Browser observations remain client/runner evidence, not a client owner ask.
+
+No venue, contract mechanism, Arcade disposition, Andromeda publication,
+browser permission, or public claim was adopted by this round.
+
+## Honest limits
+
+- Raw memos are preserved research outputs, not independently re-audited truth.
+  Their recommendations and occasional overstatements remain visible for
+  provenance; this synthesis and [correction register](CORRECTIONS.md) govern
+  how the round should be cited.
+- Firefox and mobile browser behavior were researched from documentation but
+  not directly measured.
+- No game was played during the Arcade falsification studies.
+- The Andromeda test used one desktop Chromium-family runtime plus emulation;
+  it did not complete real-device clearance.
+- Sepolia's validator-permission characterization conflicts between raw lanes
+  and remains unresolved; do not cite it from this round as settled fact.
+- Several economic, client-share, relay, chain-status, and governance readings
+  are point-in-time observations dated 2026-08-12/13 and must be refreshed
+  before deployment or public claims.

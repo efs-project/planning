@@ -82,3 +82,7 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 ### EFS 2.0 Core engineering pass — Stage A corpus (2026-08-13)
 
 - [`2026-08-13-efs2-stage-a-corpus/`](./2026-08-13-efs2-stage-a-corpus/) — Fable 5's Stage A of the commissioned EFS 2.0 core engineering pass ([[fable-efs2-core-engineering-kickoff]]): intake audit, the B0 baseline chapter set with seam pins SR-1..SR-18, bakeoff/harness/vector/traceability specs, and the evidence corpus (standards audit, carry-in register, intake + red-team findings, proposed spine edits). **Read [`STATUS.md`](./2026-08-13-efs2-stage-a-corpus/STATUS.md) first — the repair round was cut off mid-flight, so no chapter is review-ready.** Nothing landed into the EFS 2.0 spine; no shared design file was edited.
+
+### Claude cross-workstream evidence round (2026-08-13)
+
+- [`2026-08-13-claude-evidence-round/`](./2026-08-13-claude-evidence-round/README.md) — corrected synthesis and routing for four directly launched research workstreams covering Arcade differentiation and Andromeda, browser-runner behavior, and Realm/Commons venue/L1 risk. All 30 distinct completed reports are preserved under [`corpus/`](./2026-08-13-claude-evidence-round/corpus/README.md); [`CORRECTIONS.md`](./2026-08-13-claude-evidence-round/CORRECTIONS.md) governs overclaims in the raw memos and original PM compression. Dated research only: no owner ask, design ruling, venue choice, Arcade disposition, publication clearance, or runner policy.

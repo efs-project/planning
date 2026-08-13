@@ -1,7 +1,7 @@
 # EFS Arcade — design set
 
 **Status:** draft set — historical broad pass plus current correction; owner queue held
-**Last touched:** 2026-08-12 — @james direction recorded by @pm
+**Last touched:** 2026-08-13 — recovered evidence routed by @pm; no owner ruling
 
 #status/draft #kind/design #repo/planning #topic/games #topic/arcade
 
@@ -12,10 +12,13 @@
 **One-game pressure slice, not the broad launch below.** Preserve the corpus,
 but do not implement its demo-only framing or 12–18-game September plan as
 written. James treats Arcade as a possible founding product/community pilot.
-The current slice is one mobile-capable, rights-clean game (Andromeda Invaders),
-no durable EFS write, strict verified fallback, and generic application Types
-behind a provisional adapter while EFS 2.0 Core freezes. Client/OS placement and
-runner/network permissions remain open. The owner queue is held.
+The current candidate is Andromeda Invaders. Its exact desktop artifact/runtime
+evidence is favorable, but “mobile-capable” and “rights-clean” remain targets,
+not findings: glyph provenance, license-notice closure, name review, serving
+custody, exact-release identity, and real mobile/browser/input testing are still
+open. Keep the slice reversible behind a provisional adapter with no durable
+EFS write. Client/OS placement and runner/network permissions remain open. The
+owner queue is held.
 
 ### Historical 2026-08-07 pass recommendation
 
@@ -40,7 +43,7 @@ An ordinary person follows a normal link → a fast, game-looking catalog/game p
 
 ## Highest-leverage next action
 
-**Finish the one-game Andromeda intake/play slice behind static/EFS adapters, then show the working artifact to Susam Pal and the HN Arcade operator.** Do not send outreach or seed durable records until James reviews the live slice and the held owner packet is recut.
+**The owning Arcade thread should recut the one-game hypothesis against the recovered differentiation, Andromeda, and browser evidence before implementation or outreach.** This evidence creates no James decision now; do not send outreach or seed durable records until the held owner packet is deliberately reopened.
 
 ## Document map
 
@@ -58,4 +61,7 @@ An ordinary person follows a normal link → a fast, game-looking catalog/game p
 | [[unknowns-and-experiments]] | U1–U18 ledger + T1–T7 experiments + the kill signal |
 | [[Designs/arcade/owner-decision-inbox|owner-decision-inbox]] | D1–D7 now · E1–E5 after evidence · L1–L3 launch · later · settled guidance |
 
-External evidence corpus: [`Reviews/2026-08-07-arcade-corpus/`](../../Reviews/2026-08-07-arcade-corpus/README.md) (13 graded lane reports incl. live on-chain verification and a hands-on browser log). Review record: [`Reviews/2026-08-07-arcade-deep-dive.md`](../../Reviews/2026-08-07-arcade-deep-dive.md).
+External evidence corpora:
+
+- [`Reviews/2026-08-07-arcade-corpus/`](../../Reviews/2026-08-07-arcade-corpus/README.md) — 13 graded lane reports including live on-chain verification and a hands-on browser log; review record: [`Reviews/2026-08-07-arcade-deep-dive.md`](../../Reviews/2026-08-07-arcade-deep-dive.md).
+- [`Reviews/2026-08-13-claude-evidence-round/`](../../Reviews/2026-08-13-claude-evidence-round/README.md) — recovered Andromeda reproduction, one Arcade falsification workstream with two overlapping passes, catalog-loss cases, and browser-runner measurements; dated research only, with a correction register.

@@ -64,6 +64,7 @@ sequence outranks the current greenfield rulings.
 | Doc | What it holds |
 |---|---|
 | [[file-browser-requirements]] | Feature bar for the Files app (§20 of [[system-surfaces]]) derived from the ArDrive teardown + mainstream-drive baseline: MATCH/DIFFER/SKIP buckets, the first drawing of lenses-in-a-file-UI, mount-compatibility constraints, and acceptance tests. Evidence: [Reviews/2026-07-29-ardrive-product-teardown.md](../../Reviews/2026-07-29-ardrive-product-teardown.md) + corpus. |
+| [2026-08-13 browser-runner evidence](../../Reviews/2026-08-13-claude-evidence-round/README.md#browser-runner-evidence) | Dated macOS measurements for sandboxed frames plus WebKit, Gecko, and Chrome-Android documentation reports. This is partial runner evidence only: it does not complete the separate Worker/CSP cage spike, establish mobile behavior, or select permissions or policy. |
 
 ## Next research round
 
