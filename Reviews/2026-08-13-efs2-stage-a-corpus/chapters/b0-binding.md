@@ -180,8 +180,9 @@ mapping(bytes32 bindingKey => BindingHeadSlots) heads;
 //   mapping(occKey => OccStatus)
 //   OccStatus = { status u8 (0 NEVER_ADMITTED, 1 ACTIVE, 2 WITHDRAWN,
 //                 3 PRE_WITHDRAWN), ordinal u48, revokedAtOrdinal u48 }
-// with occKey = keccak256(abi.encode(DOM_OCC, envelopeId, uint256(leafIndex))),
-// DOM_OCC = keccak256("efs2/occurrence/1") (authorship chapter, regenerated
+// with occKey = keccak256(abi.encode(DOM_OCCURRENCE, envelopeId,
+//                                          uint256(leafIndex))),
+// DOM_OCCURRENCE = keccak256("efs2/occurrence/1") (encoding/authorship owner,
 // under SR-1). This chapter CONSUMES that overlay; the draft's Binding-local
 // `occLife` word is [REJECTED — merged into the SR-10 overlay, which owns
 // pre-admission status (PRE_WITHDRAWN) this lane's word could not represent].
@@ -200,14 +201,15 @@ unsigned big-endian within their span (ordinary EVM integer packing).
 | 88–95 | 8 | `targetKind` | 0 = NONE, 1 = RECORD, 2 = OCCURRENCE |
 | 96–103 | 8 | `tombstoneCause` | 0 = NONE, 1 = EXPLICIT, 2 = WITHDRAWAL |
 | 104–119 | 16 | `targetLeaf` | leaf index iff `targetKind == OCCURRENCE`, else 0 |
-| 120–255 | 136 | reserved | MUST be zero in `/1`; nonzero rejects at write, ignored at read. (SR-8 writes "reserved u112"; the named-field widths are the pin and sum to 120 bits, so the true remainder is 136 — the 24-bit delta is filed as a defect against the overview per its own residue rule.) |
+| 120–255 | 136 | reserved | MUST be zero in `/1`; nonzero rejects at write, ignored at read. |
 
 Slot 1 is `targetRef` (`bytes32`), zero when TOMBSTONED.
 
 Probe costs [PROPOSAL — SR-8 gas shape]: proved-absent = **1 cold SLOAD**
 (~2,100); present state/revision/cause/targetLeaf = 1 SLOAD; present incl.
-`targetRef` = **2 SLOADs** (~4,200). The CAS source-occurrence check adds
-**1 log SLOAD** (§3.3). There is no `sourceEnv` slot on the head and no
+`targetRef` = **2 SLOADs** (~4,200). The CAS source-occurrence check reads the
+reversible two-word log entry, adding **2 log SLOADs** (§3.3). There is no
+`sourceEnv` slot on the head and no
 `authorityBasis` on the head: the producing occurrence and its authority
 evidence are reached by following `currentOrdinal` into the admission log
 (SR-8/SR-10; the receipt's SR-7 `AuthorityBasisWord` lives on the
@@ -325,11 +327,22 @@ SR-3/SR-8, guarded (§3.3).]
 
 `P` = predecessor `OPTION(OCCREF)` from the Record body, `xr` =
 `expectedRevision` from the intent (u32), `head` = `heads[k]` decoded.
-`src(head)` = the producing occurrence, reached through the admission log:
-`log[head.currentOrdinal].occKeyRef` names it, and the guard compares
-`occKeyOf(P) == log[head.currentOrdinal].occKeyRef` where
-`occKeyOf(P) = keccak256(abi.encode(DOM_OCC, P.envelopeId,
-uint256(P.leafIndex)))` — one extra cold SLOAD per CAS check. Every admission
+`src(head)` = the producing `OccurrenceRef`, reached through the reversible
+admission log:
+
+```text
+src = {
+  envelopeId: logSlotA(head.currentOrdinal),
+  leafIndex:  logSlotB(head.currentOrdinal).leafIndex
+}
+occKeyOf(P) == occKeyOf(src)
+occKeyOf(x) = keccak256(abi.encode(
+  DOM_OCCURRENCE, x.envelopeId, uint256(x.leafIndex)
+))
+```
+
+This is two cold log SLOADs per CAS check. No `occKey -> EnvelopeId` reverse
+lookup exists or is needed. Every admission
 below also appends the producing `AdmissionOrdinal` to the bindingKey's
 `KIND_BINDING_HIST` posting list (Lane 5 — THE history, §2), rewrites
 `heads[k]`, consumes one fresh `AdmissionOrdinal` (assigned per accepted
@@ -445,13 +458,13 @@ revert-data shape is PROPOSAL.]
 
 ```solidity
 error ErrCasPredecessor(bytes32 bindingKey,
-                        bytes32 haveOccKeyRef, uint16 haveLeafIndex,
+                        bytes32 haveEnvelopeId, uint16 haveLeafIndex,
                         uint64 haveOrdinal, uint32 haveRevision);
                         // predecessor mismatch; carries the current head's
-                        // producing occurrence as the log names it
+                        // reversible OccurrenceRef as the log names it
 error ErrCasRevision(bytes32 bindingKey, uint32 expected, uint32 have);
 error ErrRevisionGuard(bytes32 bindingKey);          // 2^32−1; successor seam §3.3
-error ErrOccWithdrawn(bytes32 occKeyRef);            // WITHDRAWN | PRE_WITHDRAWN
+error ErrOccWithdrawn(bytes32 occKey);               // WITHDRAWN | PRE_WITHDRAWN
                                                      // blocks admission (§3.4)
 error ErrWithdrawNotAuthor(bytes32 targetEnvelopeId, uint16 targetLeafIndex,
                            bytes32 envelopePrincipal, bytes32 targetPrincipal);
@@ -466,10 +479,11 @@ error ErrReservedBitsNonzero(bytes32 bindingKey);
 `ErrAlreadyWithdrawn`. Duplicates are idempotent no-ops at occurrence
 granularity (ALREADY_ADMITTED / no-op success), never reverts.
 
-Revert data carries the current head's producing occurrence (occKeyRef +
-leaf + ordinal) and revision so a well-behaved client can re-read, re-decide,
-and re-sign with at most one index lookup (occKeyRef → envelope via the
-client's own view; the log stores the hash, not the preimage). Idempotent
+Revert data carries the current head's producing
+`OccurrenceRef { envelopeId, leafIndex }`, ordinal, and revision so a
+well-behaved client can re-read, re-decide, and re-sign from the reversible
+two-word log entry. No hash-preimage or occKey-to-Envelope lookup is part of
+the contract. Idempotent
 retry of the *same* envelope returns `ALREADY_ADMITTED` per occurrence and
 writes nothing — the retry learns its write already landed (idempotency per
 system-constitution line 154, now aligned with realm §5.5 and authorship
@@ -611,11 +625,14 @@ all occurrence kinds.
 
 **Effect on counts (Lane 5 seam).** In the same atomic call, the kernel
 fires `onOccurrenceWithdrawn(envelopeId, leafIndex, typeSchemaId,
-principalId)`; Lane 5 decrements every live-count register this occurrence
-incremented at admission (revocation-aware counts are an owner-carried
-acceptance obligation — [OWNER RULING — owner-rulings 2026-07-15 item E,
-line 49: revocation-aware live counts, "PAY for it"; re-carried 2026-08-12
-lines 184–186]). Exactly-once discipline: the decrement fires iff the
+principalId)`. Lane 5 decrements the occurrence-level posting heads that this
+occurrence incremented at admission. It first decrements the Record's
+`KIND_BY_RECORD.liveCount`; `KIND_UNIQUE_BY_TYPE.liveCount` decrements **only
+if that per-Record count reaches zero in the same fold** — the withdrawn
+occurrence was the Record's last live occurrence. Revocation-aware counts are
+an owner-carried acceptance obligation [OWNER RULING — owner-rulings
+2026-07-15 item E, line 49: revocation-aware live counts, "PAY for it";
+re-carried 2026-08-12 lines 184–186]. Exactly-once discipline: the decrement fires iff the
 overlay flip happens, and the flip is one-way — no double decrement, no
 decrement without a flip. (Pre-withdrawal flips NEVER_ADMITTED →
 PRE_WITHDRAWN and fires no decrement: nothing was incremented.)
@@ -868,15 +885,16 @@ struct BindingHead {                  // decoded SR-8 2-slot head
     bytes32 targetA;          // targetRef; zero when TOMBSTONED
     uint16  targetLeaf;
     // NOTE: no sourceEnvelopeId/sourceLeafIndex on the head (SR-8): the
-    // producing occurrence is log[admissionOrdinal].occKeyRef — one further
-    // point read via readAdmissionLog (Lane 5 surface).
+    // producing OccurrenceRef is the pair
+    // { logSlotA(admissionOrdinal), logSlotB(admissionOrdinal).leafIndex }
+    // — one reversible two-word read through Lane 5.
 }
 
 struct BindingHistoryEntry {   // hydrated from KIND_BINDING_HIST + the log
     uint32  revision;          // 1-based position in the posting sequence
     uint64  admissionOrdinal;  // the posting's ordinal
-    bytes32 occKeyRef;         // producing occurrence, as the log names it
-    uint16  leafIndex;         // from the log entry
+    bytes32 envelopeId;        // producing OccurrenceRef.EnvelopeId (log slot A)
+    uint16  leafIndex;         // producing OccurrenceRef.leafIndex (log slot B)
 }
 
 /// 1 cold SLOAD if UNSET or if only meta is needed; 2 SLOADs with targetRef.
@@ -989,10 +1007,13 @@ The compact contract other chapters rely on:
    `onBindingHeadChanged(bindingKey, newRevision, newState, cause,
    principalId, positionKey)` and `onOccurrenceWithdrawn(envelopeId,
    leafIndex, typeSchemaId, principalId)`; **the `KIND_BINDING_HIST`
-   postings family + the admission log ARE the Binding history (one owner —
+   postings family + the reversible two-word admission log ARE the Binding
+   history (one owner —
    the revision-keyed Entry mapping is dead)**; the withdrawal decrement
    fires exactly once per occurrence (overlay flip is one-way;
-   pre-withdrawal fires no decrement).
+   pre-withdrawal fires no decrement); occurrence-level heads decrement on
+   that flip, while `KIND_UNIQUE_BY_TYPE` decrements only when the affected
+   Record's `KIND_BY_RECORD.liveCount` reaches zero.
 5. **For the Lens/Plan chapter:** point resolution consumes `readHead` /
    `readHeadBatch` (1 cold SLOAD absent / 2 present — SR-8); the
    position-state outcome set is FOUND / NONE_EXPLICIT / NONE_WITHDRAWN /
@@ -1050,7 +1071,3 @@ The compact contract other chapters rely on:
    head as imported testimony): envelope/cross-realm chapter; this chapter
    only guarantees copied bytes never touch destination heads without
    destination admission.
-9. **SR-8 reserved-width arithmetic**: the pin's `reserved u112` under-counts
-   the slot-0 remainder (named fields sum to 120 bits ⇒ 136 reserved). Filed
-   as a defect against the overview per its own residue rule; this chapter
-   uses 136.

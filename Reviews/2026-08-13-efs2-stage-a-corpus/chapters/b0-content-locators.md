@@ -70,7 +70,7 @@ subset of that table legal under its v1 types, plus the per-code semantics.]
 
 | algCode (u16) | Name | Digest bytes | Role | Multihash projection |
 |---|---|---|---|---|
-| `0x0011` | `ALG_GIT_SHA1_OBJECT` | 20 | **Foreign-only.** SHA-1 over the canonical Git object serialization (`"<type> <len>\0"` + content) | code `0x11`, len `0x14`, over the *framed* object bytes |
+| `0xEF01` | `ALG_GIT_SHA1_OBJECT` | 20 | **Foreign-only.** SHA-1 over the canonical Git object serialization (`"<type> <len>\0"` + content) | EFS-assigned; no lossless multihash code |
 | `0x0012` | `ALG_SHA2_256` | 32 | Interop digest (SRI, CIDs, TLS ecosystem) | code `0x12`, len `0x20` |
 | `0x001B` | `ALG_KECCAK_256` | 32 | EFS-native digest (EVM-cheap) | code `0x1b`, len `0x20` |
 
@@ -81,15 +81,15 @@ subset of that table legal under its v1 types, plus the per-code semantics.]
   the Git SHA-1→SHA-256 transition, 8+ years and unfinished because retrofitted
   (deterministic-ids.md §13.6, VERIFIED); a broken hash entering the identity
   layer is the falsifier (intake audit STANDARDS lane, VERIFIED)].
-- `ALG_GIT_SHA1_OBJECT` numerically reuses the multihash sha1 code, but the
-  **table row — not the number — carries the semantics** [PROPOSAL — preserves
-  the draft's framing pin under SR-18a's shared code space]: within EFS,
-  `0x0011` is legal *only* as SHA-1 over the **framed** Git object bytes,
-  foreign-only. Raw unframed SHA-1 has no EFS code at all — a broken hash is
-  admitted solely as a foreign identifier with pinned preimage framing, never
-  as a general digest algorithm. Bare multihash cannot express framing, so the
-  projection (`0x11` over the framed object bytes) is documented as lossy of
-  this rule. SWHIDs (ISO/IEC 18670:2025) project onto this code for
+- `ALG_GIT_SHA1_OBJECT` uses the encoding owner's EFS-assigned `0xEF01`, and
+  the **table row — not the number — carries the semantics** [PROPOSAL —
+  preserves the framing pin under SR-18a's shared code space]: it is legal
+  only as SHA-1 over the **framed** Git object bytes, foreign-only. Raw
+  unframed SHA-1 is the owner's distinct `0x0011` (`sha1`) and is outside this
+  chapter's v1 subset. Bare multihash cannot express Git framing, so projecting
+  the digest as multihash sha1 (`0x11` over the framed object bytes) is
+  explicitly lossy and never storage-canonical. SWHIDs (ISO/IEC 18670:2025)
+  project from this EFS code for
   `cnt`/`rev`/etc. objects as foreign identifiers only [standards FACT:
   SWHID is an ISO standard published 2025-04-23 and is SHA-1-based — VERIFIED
   via the intake audit STANDARDS lane; EFS POLICY: cite/emit, never inherit].
@@ -120,17 +120,17 @@ ByteDigestValue {
 ```
 
 Structural validation (deterministic, no I/O):
-`algCode ∈ {0x0011, 0x0012, 0x001B}` and `len(digest) == lengthFor(algCode)`;
+`algCode ∈ {0xEF01, 0x0012, 0x001B}` and `len(digest) == lengthFor(algCode)`;
 otherwise the containing Record is malformed.
 
 **Multihash projection** (export/import only, never storage-canonical):
-`varint(code) ‖ varint(length) ‖ digest`, where the projected code is the
-stored `algCode`'s numeric value. For every pinned algorithm both varints are
-single bytes, so the projections are exactly
-`0x11 0x14 ‖ d`, `0x12 0x20 ‖ d`, `0x1b 0x20 ‖ d` — projection simply drops
-the code's high zero byte; the storage-canonical form stays the fixed-width
-`u16`, and index keys zero-extend the same code (Lane 5, SR-18a) [PROPOSAL —
-fixed-width storage, varint export].
+`varint(code) ‖ varint(length) ‖ digest`. The registry-backed algorithms
+project exactly as `0x12 0x20 ‖ d` and `0x1b 0x20 ‖ d`. EFS-assigned
+`0xEF01` has no lossless multihash projection; an exporter may emit
+`0x11 0x14 ‖ d` only with an explicit loss-of-Git-framing warning. The
+storage-canonical form stays fixed-width `u16`, and index keys zero-extend the
+same stored code (Lane 5, SR-18a) [PROPOSAL — fixed-width storage, varint
+export].
 [standards FACT: multihash/CID's IETF track is dead — draft-multiformats-
 multihash-07 expired 2024-02-21, never an RFC; the format is de facto stable
 via the multiformats registry only. VERIFIED via intake audit STANDARDS lane.]
@@ -326,7 +326,9 @@ Named constants [PROPOSAL — each with rationale]:
 | `CHUNK_SIZE_MIN` | 4,096 | smaller chunks explode manifests for no verification gain |
 | `CHUNK_SIZE_MAX` | 8,388,608 (8 MiB) | keeps single-chunk memory bounded on mobile verifiers |
 | `CHUNK_SIZE_DEFAULT` | 262,144 (256 KiB) | matches the IPFS default chunker for CID-adjacent convergence [PLAUSIBLE — kubo default is 256 KiB]; keeps 50 GB at 204,800 chunks, depth-18 proofs |
-| `CHUNK_SIZE_STATE` | 24,576 | one chunk == one EIP-170 code page: single-tx proof-verified state-tier submission (arithmetic §8.4) [standards FACT: EIP-170's 24,576-byte runtime code limit still binds; EIP-7907 did not ship in Fusaka — VERIFIED via intake audit STANDARDS lane] |
+| `SSTORE2_RUNTIME_GUARD_BYTES` | 1 | leading `STOP` byte in the optional SSTORE2-shaped runtime; it counts against EIP-170 |
+| `SSTORE2_PAYLOAD_MAX` | 24,575 | EIP-170 runtime allowance 24,576 minus the one guard byte; payload alone may never consume the full code page |
+| `CHUNK_SIZE_STATE` | 20,480 | largest `CHUNK_SIZE_ALIGN` multiple ≤ `SSTORE2_PAYLOAD_MAX`; single-tx proof-verified state-tier submission for the optional venue arm (arithmetic §8.4) |
 | `CHUNK_COUNT_MAX` | 16,777,216 (2^24) | bounds proof depth ≤ 24 (≤ 768-byte proofs) and manifest ≤ 512 MiB; max artifact = 8 MiB × 2^24 = 128 TiB, 256 KiB × 2^24 = 4 TiB |
 
 `chunkSize` is a **declared field, not a hard-coded constant** [DERIVED
@@ -375,10 +377,19 @@ merkleRoot     = the single element of the final level                (n = 1 ⇒
 - Leaf/node domain separation: a chunk presented as an interior node (or vice
   versa) changes the first hashed byte, so cross-role second preimages fail.
 - The **apex binding of `n`, `chunkSize`, `totalSize` is the RecordId itself**:
-  `RecordId = keccak256(DOMAIN_RECORD ‖ version ‖ TypeSchemaId(ChunkTree/1) ‖
-  canonicalBody)` (Lane 1/skeleton), and the body contains all three. No
-  separate apex hash exists; the RecordId is the one commitment handle other
-  Records reference.
+
+  ```text
+  DOM_RECORD = keccak256("efs2/record/1")
+  RecordId = keccak256(abi.encode(
+    DOM_RECORD,
+    TypeSchemaId(ChunkTree/1),
+    keccak256(canonicalBody)
+  ))
+  ```
+
+  The canonical body contains all three fields. No separate apex hash exists;
+  the RecordId is the one commitment handle other Records reference
+  (SR-1; exact formula owned by the encoding chapter).
 
 ### 5.3 Chunk proof verification (exact, implementable as a pure Solidity library)
 
@@ -417,7 +428,7 @@ library ChunkTreeVerify {
 ```
 
 Gas envelope [arithmetic, PLAUSIBLE — standard keccak costing 30 + 6/word]:
-hashing one 24,576-byte chunk ≈ 30 + 768·6 ≈ 4.6k; one 262,144-byte chunk ≈
+hashing one 20,480-byte chunk ≈ 30 + 640·6 ≈ 3.9k; one 262,144-byte chunk ≈
 49.2k; plus ≤ 24 node hashes ≈ 24·(30+12) ≈ 1k; verification is never the
 dominant cost of any transaction that carries the chunk bytes.
 
@@ -692,18 +703,23 @@ each Realm descriptor states its own cap (Lane 3 seam).]
   the SR-18e REF bound ⇒ 16.]
 - **Chunk-hash manifests can never be Records**: 6.55 MB ≫ any admittable
   body (§5.4).
-- **State-tier custody (optional venue module, §11):** one
-  `CHUNK_SIZE_STATE = 24,576` chunk per tx: calldata 24,576·16 ≈ 393k +
-  keccak ≈ 4.6k + proof verify ≈ 1k + SSTORE2-style code deploy 200·24,576 ≈
-  4.92M + create/base overhead ≈ 55k ⇒ **≈ 5.4M gas ≪ 16,777,216** ✓; two
-  chunks per tx ≈ 10.8M ✓; three ≈ 16.2M — inside the cap with < 4% margin, so
-  the venue profile pins `MAX_CHUNKS_PER_SUBMIT_TX = 2` [PROPOSAL — margin
-  discipline].
+- **State-tier custody (optional venue module, §11):** EIP-170 allows
+  24,576 runtime bytes, but SSTORE2-shaped code spends one leading `STOP`
+  guard byte; therefore `SSTORE2_PAYLOAD_MAX = 24,575`, not 24,576. The
+  largest page-aligned payload is `CHUNK_SIZE_STATE = 20,480`. One such chunk
+  per tx costs calldata 20,480·16 ≈ 328k + keccak ≈ 3.9k + proof verify
+  ≈ 1k + code deploy 200·(20,480 + 1) ≈ 4.10M + create/base overhead
+  ≈ 55k ⇒ **≈ 4.5M gas ≪ 16,777,216** ✓. Two chunks cost ≈ 9.0M;
+  three fit the arithmetic floor at ≈ 13.5M but are not promised before a
+  venue measurement, so the optional profile conservatively retains
+  `MAX_CHUNKS_PER_SUBMIT_TX = 2` [PROPOSAL — margin discipline].
 - A `CHUNK_SIZE_DEFAULT` (256 KiB) chunk **cannot** reach state-tier custody
   in one L1 tx: code-deploy alone 200·262,144 ≈ 52.4M > cap, and EIP-170 caps
-  a single code page at 24,576 bytes anyway. This is exactly why
+  a single runtime to 24,576 bytes including its guard byte anyway. This is
+  exactly why
   `CHUNK_SIZE_STATE` exists and why chunk size is a declared field.
-- **50 GB at state tier** = 2,184,534 chunks (< `CHUNK_COUNT_MAX` ✓) ⇒ ~2.18M
+- **50 GiB at state tier** = 2,621,440 chunks (< `CHUNK_COUNT_MAX` ✓) ⇒
+  ~2.62M
   transactions ≈ 11.8T gas: economically absurd on L1 and cited as such — the
   honest 50 GB posture is durable off-chain custody with graded evidence
   (§10), not state custody [derived arithmetic; consistent with the L2/L3-
@@ -850,6 +866,36 @@ and indexes", line 180-184, VERIFIED]. Division of labor under SR-18c:
   compiles its score into one canonical body field at publication, per the
   index chapter's SelectSpec rules.
 
+The exact B0 selector surface consumed here is:
+
+```solidity
+function selectBestLocator(
+    bytes32 targetKey,
+    SelectSpec calldata spec,       // one uint64 score field or SCORE_LATEST
+    uint64 basisOrdinal,
+    uint256 cursor
+) external view returns (
+    uint64 bestOrdinal,
+    uint64 bestScore,
+    uint16 postingsVisited,
+    uint256 nextCursor,
+    Completeness completeness
+);
+```
+
+`LOCATOR_POSTINGS_VISIT_MAX = 32` bounds sequential postings visited, dead
+included; the owner additionally accounts for its bounded canonical-end
+probes in `postingsVisited`. On an initial `cursor == 0`, `basisOrdinal == 0`
+pins the current high-water once. A resumable cursor commits that exact basis,
+canonical end, target, and `SelectSpec`; every continuation uses the same
+basis and context. `PARTIAL` always carries a nonterminal `nextCursor`, and
+`bestOrdinal == 0 && PARTIAL` never proves absence. Whole-query absence needs
+an initial empty `COMPLETE` or aggregation of every window in one canonical
+cursor chain. An undeclared/invalid Type-role-score profile is `UNSUPPORTED`,
+not `COMPLETE + empty`; an unavailable basis is UNKNOWN at the client boundary
+(and an invalid on-chain basis/cursor reverts), never a lower-priority
+fallthrough. The sole B0 total order is `(score desc, AdmissionOrdinal asc)`.
+
 **`SELECT_PROFILE_V2` — the client-tier graded fold (explicitly deferred;
 NOT B0)** [PROPOSAL — re-scoped by SR-18c from this chapter's draft, where
 the fold below was the normative selection; kept fully specified as a
@@ -942,8 +988,11 @@ argument is arithmetic over the CREATE2 address formula]. If the store
 persists chunks SSTORE2-style, it deploys via CREATE2 **from the store
 contract itself**, with a content-derived salt (e.g.
 `keccak256(chunkTreeRecordId ‖ index)`) and an init code that is the standard
-data-constructor **embedding the chunk bytes**, with no environment-reading
-opcodes (runtime code is a pure function of init code). Then
+data-constructor **embedding runtime `0x00 ‖ chunkBytes`**, with no
+environment-reading opcodes. The leading `0x00` is the SSTORE2 `STOP` guard,
+so `1 + len(chunkBytes) ≤ 24,576` and the aligned venue profile uses
+`CHUNK_SIZE_STATE = 20,480` (§8.4); runtime code is a pure function of init
+code. Then
 `address = keccak256(0xff ‖ store ‖ salt ‖ keccak256(initCode))[12:]`
 commits to the chunk bytes through the init-code hash, so:
 
@@ -998,9 +1047,11 @@ Solidity/TypeScript/Rust):
 1. **ByteDigestValue**: each algorithm round-trip; multihash projections;
    wrong-length digest rejected; out-of-subset `algCode` rejected — including
    `0x0001`/`0x0002`/`0x0003` (the retired u8-tag values, catching
-   implementations shipping the superseded table) and `0x0013` (sha2-512:
-   legal in the encoding chapter's full table, outside this chapter's
-   subset); `ni:` projection round-trip.
+   implementations shipping the superseded table), `0x0011` (raw sha1), and
+   `0x0013` (sha2-512): all are legal or reserved elsewhere in the encoding
+   vocabulary but outside this chapter's v1 subset; `ni:` projection
+   round-trip; `0xEF01` Git-framed export marked lossy when projected to raw
+   sha1 multihash.
 2. **ChunkTree**: n=1 (root == leaf, empty proof); n=2; n=3 (promotion); n=5
    (double promotion); n=256; last-chunk-short; `chunkCount ≠
    ceil(totalSize/chunkSize)` rejected; tampered chunk fails; wrong-index
@@ -1042,10 +1093,10 @@ the return-to-James rule.
 `ByteDigestValue { algCode uint16, digest bytes }` over the encoding
 chapter's `u16` algCode table (SR-18a — one table everywhere: `DIGEST`
 values, ByteDigest bodies, index keys zero-extended). Closed subset legal
-under this chapter's v1 types: `{0x0011 git-sha1-object/20 (foreign-only,
+under this chapter's v1 types: `{0xEF01 git-sha1-object/20 (foreign-only,
 framed preimage), 0x0012 sha2-256/32, 0x001B keccak-256/32}`; out-of-subset
-codes rejected; multihash projections `0x11 14‖d` (framed bytes),
-`0x12 20‖d`, `0x1b 20‖d`.
+codes rejected; multihash projections `0x12 20‖d`, `0x1b 20‖d`, while
+projecting `0xEF01` as raw sha1 `0x11 14‖d` is explicitly lossy of framing.
 
 **Type Schemas** (axis 4 Variant A; names bind, TypeSchemaIds derive via Lane
 4): `Locator/1`, `ByteDigest/1`, `ChunkTree/1`, `ArtifactClosure/1`,
@@ -1069,7 +1120,9 @@ backlink declarations, and structural validation exactly as §§3–10.
 - Best-locator evidence shapes (§10): `Locator/1` + `DurabilityGrade/1` +
   `AvailabilityObservation/1` feed the B0 on-chain bounded selection owned by
   [[b0-indexes]] §7 (SR-18c; single declared score field, total-postings
-  examination budget). The `CandidateSet`/`LocatorEvidence`/`SelectionKey`
+  examination budget, canonical pinned-basis cursor, `PARTIAL + nextCursor`,
+  and no false-empty result for undeclared/unavailable input). The
+  `CandidateSet`/`LocatorEvidence`/`SelectionKey`
   fold is the client-tier `SELECT_PROFILE_V2`, **explicitly deferred** — Lane
   5 supplies (P, B) from the Plan only if the profile graduates.
 - Executable gate rule (§8.3): full `A3 COMPLETE` before execution; request ≠
@@ -1077,7 +1130,8 @@ backlink declarations, and structural validation exactly as §§3–10.
 
 **Named constants**: `MAX_LOCATOR_URI_BYTES 2048; CHUNK_SIZE_ALIGN 4096;
 CHUNK_SIZE_MIN 4096; CHUNK_SIZE_MAX 8388608; CHUNK_SIZE_DEFAULT 262144;
-CHUNK_SIZE_STATE 24576; CHUNK_COUNT_MAX 16777216; MAX_CLOSURE_MEMBERS 16
+SSTORE2_RUNTIME_GUARD_BYTES 1; SSTORE2_PAYLOAD_MAX 24575;
+CHUNK_SIZE_STATE 20480; CHUNK_COUNT_MAX 16777216; MAX_CLOSURE_MEMBERS 16
 (SR-18e-governed, §8.4); MAX_MEMBER_NAME_BYTES 255; MAX_CLOSURE_WALK_DEPTH
 16; MAX_VERSION_LABEL_BYTES 64; MAX_CAPABILITY_ENTRIES 64;
 MAX_LOCATOR_CANDIDATES 32 (SELECT_PROFILE_V2, deferred);

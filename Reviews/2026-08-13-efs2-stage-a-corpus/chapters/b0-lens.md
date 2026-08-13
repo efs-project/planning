@@ -47,8 +47,8 @@ bakeoff arms only):
   (SR-8) ([DERIVED INVARIANT — kel.md §3/§8.2 admission-time-validation
   lesson, via CARRY-IN KEL finding (a); representation per SR-7/SR-8/SR-13]).
 - Binding heads: Lane 6 owns `PositionKey` derivation, the head state machine
-  (CAS, tombstone, no-resurrection), and head storage. This chapter consumes an
-  assumed head-read ABI (§5.2) that Lane 6 must reconcile.
+  (CAS, tombstone, no-resurrection), and head storage. This chapter consumes
+  its exact SR-8 head and Lane 5's basis-qualified read wrappers (§5.2).
 - The canonical BODY codec is owned by the encoding chapter; §4.1 states the one
   property this chapter needs from it.
 
@@ -312,7 +312,7 @@ breaking a consumer budget the spine's own storage evolution cannot fix, and
 
 ---
 
-## 5. Keys and the assumed Lane 6 head ABI
+## 5. Keys and the consumed Binding read ABI
 
 ### 5.1 BindingKey derivation
 
@@ -333,8 +333,6 @@ fieldRole))` derivation is owned by Lane 6 (SR-6); this chapter treats
 
 ```solidity
 enum HeadState { UNSET, BOUND, TOMBSTONED }   // 0, 1, 2 — Lane 6 / SR-8 names.
-// This chapter's combiner prose (§6–§7) says PRESENT for state == BOUND and
-// treats UNSET/TOMBSTONED as "no present claim"; the wire values are SR-8's.
 
 struct BindingHead {                 // decoded SR-8 2-slot head
     uint8   state;                   // HeadState
@@ -342,17 +340,23 @@ struct BindingHead {                 // decoded SR-8 2-slot head
     uint8   tombstoneCause;          // 0 NONE / 1 EXPLICIT / 2 WITHDRAWAL
     uint32  revision;                // CAS revision counter (u32, guarded)
     uint64  admissionOrdinal;        // currentOrdinal, uint64 at ABI (SR-4)
-    bytes32 targetRef;               // selected value; meaningful only when BOUND
+    bytes32 targetA;                 // targetRef; meaningful only when BOUND
     uint16  targetLeaf;
 }
 
-function bindingHead(bytes32 bindingKey) external view returns (BindingHead memory);
+function getBindingHead(bytes32 bindingKey) external view returns (
+    BindingHead memory head, bytes32 realmBasis, uint64 highWaterOrdinal);
+function getBindingAtBasis(bytes32 bindingKey, uint64 basisOrdinal)
+    external view returns (
+        BindingHead memory head, bytes32 realmBasis, uint64 highWaterOrdinal);
 ```
 
 Storage cost model (drives §9) [PROPOSAL — pinned by SR-8, no longer an
 assumption]: **2 slots per head**, slot 0 zero for `UNSET` keys — an absent
 probe costs 1 cold SLOAD; a bound/tombstoned probe costs 2 (meta +
-`targetRef`). There is **no `authorityBasis` field on the head** — the SR-7
+`targetA`). `realmBasis` and `highWaterOrdinal` are query metadata returned
+separately; neither is a head field or substitutes for one. There is **no
+SR-7 authority word in either head slot** — the exact
 `AuthorityBasisWord` lives on the admission receipt / envelope-meta row,
 reachable by following `admissionOrdinal` into the admission log (SR-8).
 
@@ -414,7 +418,7 @@ paged lens surface (client-tier enumeration) uses the SR-18(b) enum, not
 
 All N entries are required sources; tiers are structurally 0.
 
-- Let `P` = entries whose head is `PRESENT`.
+- Let `P` = entries whose head is `BOUND`.
 - **T1** if ≥ 2 distinct values appear among `P` → `CONFLICT`.
 - **T2** else if `|P| < N` → `ABSENT` (proved: every missing head is proven
   absent at the basis).
@@ -430,8 +434,8 @@ Entries are grouped by ascending `tier` (lower number = higher priority; the
 worked constitution example "SecurityCouncil tier 1 outranks Alice tier 2"
 carries). Walk tiers in ascending order; for tier `t` with entry set `E_t`:
 
-- **T4** probe every entry in `E_t`. If no `PRESENT` head → next tier.
-- **T5** if ≥ 1 `PRESENT` and all present values equal → `FOUND(v)`,
+- **T4** probe every entry in `E_t`. If no `BOUND` head → next tier.
+- **T5** if ≥ 1 `BOUND` head and all present values equal → `FOUND(v)`,
   `winnerTier = t`, winner = lowest-index present entry. STOP (lower-priority
   tiers are never probed).
 - **T6** if present values disagree within `t` → `CONFLICT`. STOP.
@@ -452,7 +456,7 @@ probe). [DERIVED INVARIANT — lens-spec §3.2 "early exit is legal only when th
 plan's allTiersSingleton bit is set".]
 
 **Anti-fallthrough**: a tier is passed over only on *proved absence* of every
-entry in it. A head that is `PRESENT` but ungradeable (§6.5) stops resolution
+entry in it. A head that is `BOUND` but ungradeable (§6.5) stops resolution
 with `UNKNOWN`; it never yields to a lower tier — first-trusted-wins is
 anti-monotone under missing data. [DERIVED INVARIANT — lens-read-gotchas "Never
 fall through on UNKNOWN"; joined-pass JR-1.]
@@ -463,7 +467,7 @@ All N entries are approvers; tiers are structurally 0; `1 ≤ k ≤ N` committed
 the plan. Probe all N (no early exit in B0 — required to detect two-value
 conflicts and keep the walk deterministic):
 
-- Group `PRESENT` heads by value; let `m(v)` = count per value.
+- Group `BOUND` heads by value; let `m(v)` = count per value.
 - **T8** if exactly one value has `m(v) ≥ k` → `FOUND(v)`; winner = lowest-index
   entry carrying `v`.
 - **T9** if two or more distinct values reach `k` (possible only when
@@ -481,7 +485,7 @@ not a combiner"; owner-rulings 2026-07-15 item E (revocation-aware counts).]
 
 ### 6.4 Claim-conditional authority
 
-Authority status is evaluated **only** for principals holding a `PRESENT` claim
+Authority status is evaluated **only** for principals holding a `BOUND` claim
 at the position, and only for entries at tiers at-or-above the selected winner
 (for EXACT/THRESHOLD: all entries, since all are consulted). Absent principals
 are never graded, so an attacker parking an ungradeable principal in a plan
@@ -504,12 +508,12 @@ The seam for managed Principals is already in the layout and the walk:
 - layout: per-entry `minAuthFloor` (uint64) — the minimum authority
   epoch/grade the plan demands of that entry (`0` = intrinsic, the only legal
   B0 value; enforcement code `AUTH_FLOOR_UNSUPPORTED` keeps the seam honest).
-- walk: step (5) of §7.1 — `gradeAuthority(entry, head)` runs for `PRESENT`
+- walk: step (5) of §7.1 — `gradeAuthority(entry, head)` runs for `BOUND`
   heads only. Under managed Principals it **follows `head.admissionOrdinal`
   into the admission log** to the receipt's SR-7 `AuthorityBasisWord`
   (envelope-meta row) and compares it against `entry.minAuthFloor` under the
   then-current authority module — the SR-8 attachment path; the extra log +
-  meta SLOADs are paid only by managed-tier plans, never by B0. A `PRESENT`
+  meta SLOADs are paid only by managed-tier plans, never by B0. A `BOUND`
   head that cannot be graded at the required floor yields
   `UNKNOWN(REASON_AUTHORITY_UNGRADEABLE)` and blocks (never falls through).
   Prospective revocation means floors, not emptied slots: removal affects
@@ -519,7 +523,7 @@ The seam for managed Principals is already in the layout and the walk:
 
 The exhaustive enumeration of on-chain `UNKNOWN` causes under managed
 Principals is a carried verification debt, not settled. [HYPOTHESIS — lens-spec
-§3.1's V-3; falsifier: a fixture producing an ungradeable-PRESENT state outside
+§3.1's V-3; falsifier: a fixture producing an ungradeable-BOUND state outside
 the enumerated reason codes.]
 
 ---
@@ -554,12 +558,16 @@ resolve(planId, positionKey, basis) → ResolveResult
   #     stored order; PRIORITY = ascending tier groups in stored order
   heads ← []
   for entry in consultedEntries(body, combiner):
-      bk ← keccak256(DOMAIN_BINDING_KEY ‖ entry.principalId ‖ positionKey)
-      h  ← bindingHead@basis(bk)
+      bk ← keccak256(abi.encode(
+        DOM_BINDING, entry.principalId, positionKey
+      ))
+      # DOM_BINDING = keccak256("efs2/binding/1") (SR-6)
+      (h, headRealmBasis, headHighWater) ← getBindingHead@basis(bk)
       if h unavailable (off-chain partial replica):
           return UNKNOWN(REASON_COVERAGE_PARTIAL)          # never ABSENT
-      # (4) CLAIM-CONDITIONAL AUTHORITY — PRESENT heads only (§6.4)
-      if h.state == PRESENT:
+      requireSameBasis(headRealmBasis, headHighWater, basis)
+      # (4) CLAIM-CONDITIONAL AUTHORITY — BOUND heads only (§6.4)
+      if h.state == BOUND:
           # (5) AUTHORITY GRADE — B0: intrinsic AUTH_OK (§6.5)
           g ← gradeAuthority(entry, h)
           if g == AUTH_UNKNOWN:
@@ -570,7 +578,7 @@ resolve(planId, positionKey, basis) → ResolveResult
   (presence, value, winner) ← combine(combiner, thresholdK, heads)
   # (7) REPORT — two axes, never collapsed (§7.2)
   return ResolveResult{presence, value, winner,
-                       winnerAdmissionOrdinal, winnerAuthorityBasis,
+                       winnerAdmissionOrdinal,
                        presentCount, agreeCount,
                        basisReport(basis)}
 ```
@@ -609,12 +617,18 @@ struct ResolveResult {
     uint16   winnerIndex;            // plan entry index; WINNER_NONE when no winner
     uint16   winnerTier;             // 0 for EXACT/THRESHOLD
     uint64   winnerAdmissionOrdinal; // 0 when no winner
-    bytes32  winnerAuthorityBasis;   // 0 when no winner
-    uint16   presentCount;           // consulted entries with PRESENT heads
+    uint16   presentCount;           // consulted entries with BOUND heads
     uint16   agreeCount;             // heads agreeing with `value` (0 when no winner)
     BasisReport basis;
 }
 ```
+
+B0 returns no per-winner authority word: account-Principal grading is the
+constant `AUTH_OK` and performs no receipt read. A caller needing the exact
+SR-7 `AuthorityBasisWord` and conditional codehash hydrates
+`getReceipt(winnerAdmissionOrdinal)` separately. A future managed-Principal
+profile may mint a versioned `ResolveResult` extension that follows that
+ordinal during resolution; it does not enlarge this B0 result or head.
 
 **When each presence value fires** (exact, closed):
 
@@ -624,15 +638,16 @@ struct ResolveResult {
 | `ABSENT` | T2 / T7 / T10 — proved under absence source 1 (authoritative state at positive closure, §5.2); off-chain, only when the source holds one of the four absence proofs; otherwise UNKNOWN |
 | `CONFLICT` | T1 / T6 / T9 — disagreement the combiner cannot lawfully collapse |
 | `UNSUPPORTED` | recognized plan whose semantics this resolver cannot honestly execute (`semanticsProfileId` mismatch; SDK: future capability/PATH request) |
-| `UNKNOWN` | a consulted PRESENT head ungradeable at the required floor (reserved in B0); off-chain: basis/plan/coverage unavailable — enumerated by `reasonCode` |
+| `UNKNOWN` | a consulted BOUND head ungradeable at the required floor (reserved in B0); off-chain: basis/plan/coverage unavailable — enumerated by `reasonCode` |
 
 **The never-collapse rule** [DERIVED INVARIANT — the two-axis result honesty,
 assumptions-and-requirements §10 ("Never compress these to a Boolean valid";
 slot state, freshness, completeness orthogonal) + joined-pass JR-1 tuple]:
 
 - The **presence axis** (`Presence`) and the **authorization/freshness basis
-  axis** (`BasisReport` + `winnerAuthorityBasis`) are orthogonal and both always
-  returned. `FOUND` never implies "current everywhere" — it is FOUND *at this
+  axis** (`BasisReport` plus the receipt identified by
+  `winnerAdmissionOrdinal`) are orthogonal and both remain available.
+  `FOUND` never implies "current everywhere" — it is FOUND *at this
   Realm, at this basis, under this plan*; a consumer needing freshness compares
   `basis.blockNumber`/`admissionHigh` age against its own policy (the survivor
   §10 grades `AUTHORITY-ADMITTED` / `SNAPSHOT@H` / `CURRENT@H` are the SDK's
@@ -642,6 +657,23 @@ slot state, freshness, completeness orthogonal) + joined-pass JR-1 tuple]:
   falls through to a lower-priority source.
 - Consumers declare acceptable outcomes explicitly (§7.4) and otherwise fail
   closed.
+
+**DI-13 client conformance [DERIVED INVARIANT].** Client and SDK renderers
+apply two additional non-contract rules to this result:
+
+1. A `CONFLICT` row renders **no claimant-derived content**. It may identify
+   the conflicting principals/values as warning metadata, but it never chooses
+   one claimant's bytes, label, icon, or link for the result row; doing so
+   recreates the grindable phishing tie-break that AV-21/AO-8 rejected.
+2. The complete read answer is the six-axis tuple **authorization, existence,
+   freshness/basis, availability, slot state, completeness**. No SDK helper,
+   packet, product copy, or UI collapses that tuple to a success checkmark.
+   Negative and unresolved axes remain visible even when another axis is
+   positive.
+
+The SDK result-model fixture must include both a CONFLICT row with hostile
+claimant presentation fields and a mixed six-axis result; it fails if any
+claimant-derived content is selected or either result renders as a checkmark.
 
 ### 7.3 Honest behavior when the source basis is unavailable
 
@@ -755,23 +787,23 @@ a qualifying Realm and re-verify the cap against the adopted Realm gas profile
 (an L2/L3 may not enforce 7825; V2-E5's Realm descriptor should carry the
 venue's cap).
 
-Model (assumptions §5.2; Lane 6 reconciles): plan load from spine storage words
-= `(3 + 2N)` cold SLOADs; probe = 1 cold SLOAD when the head is empty, 3 when
-present; `N` BindingKey keccaks at 48 gas; fixed overhead (dispatch, memory,
+Model (consumed SR-8 layout, §5.2): plan load from spine storage words =
+`(3 + 2N)` cold SLOADs; every present-head probe = 2 cold SLOADs; `N`
+BindingKey keccaks cost 48 gas each; fixed overhead (dispatch, memory,
 loop, basis report) budgeted 2,000. Worst case is a full walk with every head
 present (EXACT and THRESHOLD always probe all N; PRIORITY's worst case is a
 last-tier winner or all-absent).
 
 ```text
-gasWorst(N) ≈ (3 + 2N)·2100  +  N·3·2100  +  N·48  +  2000
+gasWorst(N) ≈ (3 + 2N)·2100  +  N·2·2100  +  N·48  +  2000
 ```
 
 | N | Plan load (cold) | Probes (cold, all present) | keccak | Total cold ≈ | % of 2²⁴ cap | Total warm ≈ |
 |---|---|---|---|---|---|---|
-| 1  | 5 w = 10,500  | 3 SLOAD = 6,300    | 48    | **18.8 k**  | 0.11 % | 2.9 k |
-| 8  | 19 w = 39,900 | 24 SLOAD = 50,400  | 384   | **92.7 k**  | 0.55 % | 6.7 k |
-| 32 | 67 w = 140,700| 96 SLOAD = 201,600 | 1,536 | **345.8 k** | 2.06 % | 19.9 k |
-| 64 | 131 w = 275,100| 192 SLOAD = 403,200| 3,072 | **683.4 k** | 4.07 % | 35.4 k |
+| 1  | 5 w = 10,500   | 2 SLOAD = 4,200     | 48    | **16.7 k**  | 0.10 % | 2.7 k |
+| 8  | 19 w = 39,900  | 16 SLOAD = 33,600   | 384   | **75.9 k**  | 0.45 % | 5.9 k |
+| 32 | 67 w = 140,700 | 64 SLOAD = 134,400  | 1,536 | **278.6 k** | 1.66 % | 16.6 k |
+| 64 | 131 w = 275,100| 128 SLOAD = 268,800 | 3,072 | **549.0 k** | 3.27 % | 31.0 k |
 
 (warm = same-transaction repeat: (planWords + probeSLOADs)·100 + keccaks +
 overhead; EIP-2929 makes a batched action gating several operations through one
@@ -781,9 +813,9 @@ All-absent worst case (every probe 1 SLOAD): N=64 →
 275,100 + 64·2,100 + 3,072 + 2,000 ≈ **414.6 k** (2.47 % of cap).
 
 Headroom statement: at the CORE cap, one worst-case cold resolve consumes
-≈ 4.1 % of the EIP-7825 transaction budget, leaving ≥ 95.9 % (≈ 16.09 M gas)
-for the consumer's own logic; five worst-case resolves in one gated batch
-≈ 3.42 M ≈ 20.4 % of the cap. A naive wide sorted directory page
+≈ 3.27 % of the EIP-7825 transaction budget, leaving ≈ 96.73 %
+(≈ 16.23 M gas) for the consumer's own logic; five worst-case resolves in
+one gated batch cost ≈ 2.745 M, or ≈ 16.36 % of the cap. A naive wide sorted directory page
 (128 items × 55 principals ≈ 29.5 M) exceeds the cap and is not promised at any
 size the naive path implies — point resolution and bounded candidate pages are
 the whole on-chain enumeration promise. [DERIVED INVARIANT — venue-conditional
@@ -794,8 +826,16 @@ the real-kernel numbers are V2-E2's to produce at exactly these four sizes on
 the real Lane 6 head layout. [HYPOTHESIS — falsified/retuned by the V2-E2
 matrix; the lens pass's own critic found lane floors ~3× understated on the old
 kernel, so treat every row as a floor.] The SSTORE2-shaped body-storage lever
-(§4.2, item 4) would cut the N=64 worst case by ≈ 272 k (to ≈ 411 k); it is a
+(§4.2, item 4) would cut the N=64 worst case by ≈ 272 k (to ≈ 277 k); it is a
 Lane 5/6 physical-layout option, deferred.
+
+**Separate client-tier scale requirement.** The contract benchmark grid stays
+exactly `N = {1, 8, 32, 64}` and Core rejects plans above 64. Stage B also
+benchmarks the TypeScript and Rust SDK/client resolvers at
+`N = {50, 100, 256}` on pinned mobile and desktop profiles, reporting wall
+time, peak memory, RPC/page count, result equality, and honest
+UNKNOWN/PARTIAL propagation. The 100/256 cases are client-tier composition
+requirements, never on-chain plans or hidden Core scans.
 
 ---
 
@@ -928,6 +968,12 @@ vectors (incl. two Principals sharing low-160-bits); LENS-NEG-1; challenge-windo
 commit/abort/finalize; cross-language (Solidity/TS/Rust) byte-identical plan
 frames and PlanIds.
 
+Separate SDK/client fixtures run `N = {50,100,256}` on pinned mobile and
+desktop profiles (never as Core plans) and assert equal results plus honest
+UNKNOWN/PARTIAL propagation. The DI-13 fixture adds a hostile CONFLICT row
+whose claimant-controlled presentation fields must not render and a mixed
+six-axis answer that must not become a success checkmark.
+
 ---
 
 ## Interfaces exposed
@@ -948,7 +994,7 @@ struct BasisReport { bytes32 realmRevisionId; uint64 blockNumber; uint64 admissi
 struct ResolveResult {
     Presence presence; uint8 reasonCode; bytes32 value;
     uint16 winnerIndex; uint16 winnerTier;
-    uint64 winnerAdmissionOrdinal; bytes32 winnerAuthorityBasis;
+    uint64 winnerAdmissionOrdinal;
     uint16 presentCount; uint16 agreeCount; BasisReport basis;
 }
 
@@ -958,22 +1004,30 @@ function resolveStrict(bytes32 planId, bytes32 positionKey, uint8 acceptMask)
     external view returns (bytes32 value, ResolveResult memory);
 function validatePlan(bytes32 planId) external view returns (bool ok, uint8 rejectCode);
 function deriveBindingKey(bytes32 principalId, bytes32 positionKey) external pure returns (bytes32);
-// deriveBindingKey = keccak256("efs2/binding-key/1" ‖ principalId ‖ positionKey)
+// DOM_BINDING = keccak256("efs2/binding/1")
+// deriveBindingKey = keccak256(abi.encode(DOM_BINDING, principalId, positionKey))
 
 // ---- errors ----
 error PlanUnavailable(bytes32 planId);
 error PlanMalformed(bytes32 planId, uint8 rejectCode);
 error ResolveNotAccepted(uint8 presence, uint8 reasonCode);
 
-// ---- consumed from Lane 5/6 (assumptions to reconcile) ----
+// ---- consumed exactly from Lane 5/6 ----
 function recordBody(bytes32 recordId) external view returns (bytes memory); // full body, no elision
-function bindingHead(bytes32 bindingKey) external view returns (BindingHead memory);
-// BindingHead = { targetRef, admissionOrdinal, revision, state(NEVER_SET|PRESENT|TOMBSTONE), authorityBasis }
-// assumed 3 packed words, zero-first-word absence (1 cold SLOAD absent / 3 present)
+function getBindingHead(bytes32 bindingKey) external view returns (
+    BindingHead memory head, bytes32 realmBasis, uint64 highWaterOrdinal);
+function getBindingAtBasis(bytes32 bindingKey, uint64 basisOrdinal)
+    external view returns (
+        BindingHead memory head, bytes32 realmBasis, uint64 highWaterOrdinal);
+// BindingHead = { state(UNSET|BOUND|TOMBSTONED), targetKind,
+//                 tombstoneCause, revision, admissionOrdinal uint64,
+//                 targetA, targetLeaf } decoded from the exact SR-8 two slots.
+// realmBasis/highWaterOrdinal are separately qualified query metadata.
+// Probe cost: 1 cold SLOAD absent/metadata-only; 2 with targetA.
 
 // ---- reserved seams ----
 // per-entry minAuthFloor (uint64, 0 in B0) + walk step (5) gradeAuthority():
-//   managed-Principal attachment point; PRESENT-heads-only, blocks with
+//   managed-Principal attachment point; BOUND-heads-only, blocks with
 //   UNKNOWN(REASON_AUTHORITY_UNGRADEABLE), never falls through.
 // resolvePath(...): PATH/1 stub, separately benchmarked, not in B0.
 // Challenge window: consumer-side pattern only; no Core state frozen.
@@ -983,38 +1037,36 @@ Conformance rules other chapters must carry: state-changing consumers read
 `planId` only from their own admin-written storage and check `purposeAndScope`;
 gates accept only the FOUND bit; UNKNOWN/CONFLICT never collapse or fall
 through; SDK resolves pin one basis for all probes of one resolution and return
-UNKNOWN (never ABSENT) on unavailable basis/coverage.
+UNKNOWN (never ABSENT) on unavailable basis/coverage; CONFLICT rows render no
+claimant-derived content; the six-axis answer tuple never becomes a success
+checkmark.
 
 ## Open items
 
-1. **Lane 6 reconciliation** — `BindingKey` formula byte-equality, `BindingHead`
-   field set (esp. `authorityBasis` and `revision` present on the head, and the
-   zero-first-word absence layout), `PositionKey` derivation, head-state
-   machine. Closed by: Lane 6 chapter + synthesizer.
-2. **Encoding-chapter reconciliation** — raw-bytes canonical-body profile (or a
+1. **Encoding-chapter reconciliation** — raw-bytes canonical-body profile (or a
    fixed-offset wrap) so the §3.2 frame is byte-identical to `canonicalBody`;
    the `TYPE_RESOLUTION_PLAN_1` TypeSchemaId value; RecordId preimage. Closed
    by: encoding/identity chapters.
-3. **`MAX_PLAN_ENTRIES_CORE = 64`** — confirm/retune on V2-E2 real-kernel
+2. **`MAX_PLAN_ENTRIES_CORE = 64`** — confirm/retune on V2-E2 real-kernel
    measurements at 1/8/32/64; budget failure returns to James per the kickoff
    gate. Closed by: V2-E2 matrix.
-4. **PLAN-STORE-B (CREATE2/EXTCODECOPY)** — run the V-2-successor fixture and
+3. **PLAN-STORE-B (CREATE2/EXTCODECOPY)** — run the V-2-successor fixture and
    the plan-load gas comparison before freeze; adopt only under the §4.2
    decision rule. Closed by: bakeoff round + fixture.
-5. **PATH profile** — depth constant, position-derivation formula for steps,
+4. **PATH profile** — depth constant, position-derivation formula for steps,
    and the separate benchmark. Closed by: a dedicated PATH fixture round;
    constitution already authorizes the split.
-6. **UNKNOWN exhaustiveness under managed Principals** (V-3 successor) — the
+5. **UNKNOWN exhaustiveness under managed Principals** (V-3 successor) — the
    reason-code enumeration must be re-proved exhaustive when the authority
    module lands. Closed by: Principal/authority chapter + red team.
-7. **`positionSeq`-shaped O(1) revalidation** — bump-invariant proof across all
+6. **`positionSeq`-shaped O(1) revalidation** — bump-invariant proof across all
    Lane 6 transitions before any adoption. Closed by: V2-E2 successor.
-8. **Advisory/deny composition** — whether two-plan consumer composition
+7. **Advisory/deny composition** — whether two-plan consumer composition
    suffices for GATE deny sources or a versioned plan section returns. Closed
    by: consumer/GATE profile chapter + red team.
-9. **acceptMask vs full AcceptanceMatrix** — whether per-axis acceptance
+8. **acceptMask vs full AcceptanceMatrix** — whether per-axis acceptance
    (basis-age floors, basisKind restrictions) belongs in Core's
    `resolveStrict` or stays consumer code. Closed by: consumer-profile chapter.
-10. **Realm gas profile** — V2-E5's Realm descriptor should carry the venue tx
+9. **Realm gas profile** — V2-E5's Realm descriptor should carry the venue tx
     cap so the §9 headroom claims are checkable per Realm (EIP-7825 is L1
     physics, not guaranteed on an L2/L3). Closed by: V2-E5 lane.
