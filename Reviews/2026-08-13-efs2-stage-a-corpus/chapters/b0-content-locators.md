@@ -950,13 +950,17 @@ function selectBestLocator(
 );
 ```
 
-`SelectSpec.principalId` MUST be nonzero and is bound into every continuation
-context. `LOCATOR_POSTINGS_VISIT_MAX = 32` bounds sequential postings visited,
-dead and untrusted included; the owner additionally accounts for its bounded canonical-end
+`SelectSpec.principalId` MUST be nonzero. Every continuation context binds the
+exact `realmId`, `realmBasisAt(H)`, target, and trusted-Principal-scoped
+`SelectSpec`; the separate `basisOrdinal` field binds `H`.
+`LOCATOR_POSTINGS_VISIT_MAX = 32` bounds sequential postings visited, dead and
+untrusted included; the owner additionally accounts for its bounded canonical-end
 probes in `postingsVisited`. On an initial `cursor == 0`, `basisOrdinal == 0`
-pins the current high-water once. A resumable cursor commits that exact basis,
-canonical end, target, and `SelectSpec`; every continuation uses the same
-basis and context. `PARTIAL` always carries a nonterminal `nextCursor`, and
+pins the current high-water once. Initial and resumed calls recompute
+`realmBasisAt(H)` and the context tag from authoritative Realm state. A
+resumable cursor also commits the canonical end; every continuation uses the
+same Realm, revision, basis, target, and spec. `PARTIAL` always carries a
+nonterminal `nextCursor`, and
 `bestOrdinal == 0 && PARTIAL` never proves absence. Whole-query absence needs
 an initial empty `COMPLETE` or aggregation of every window in one canonical
 cursor chain. An undeclared/invalid Type-role-score profile is `UNSUPPORTED`,

@@ -1481,8 +1481,12 @@ six-field `PageResult`; no separate range-page result or u64 continuation
 schema is registered. The selector operation is exactly
 `sol:selectBestLocator(bytes32,(bytes32,bytes32,uint8,uint8,uint8),uint64,uint256)`,
 where the first `SelectSpec` word is the nonzero trusted `principalId` and the
-second is `typeSchemaId`. Its input digest and result schema therefore move
-with this repair; the index namespace also registers exactly
+second is `typeSchemaId`. Its SelectCursor context tag uses the exact
+`DOM_PK, realmId, realmBasisAt(H), targetKey, principalId, typeSchemaId,
+roleOrdinal, scoreMode, scoreFieldOrdinal` preimage; the endpoint recomputes
+the Realm basis and tag on initial and resumed calls while the separate
+`basisOrdinal` field binds `H`. Its input digest and result schema therefore
+move with this repair; the index namespace also registers exactly
 `ErrSelectCursor(uint256)` and `ErrSelectBasis(uint64,uint64)`. The
 `codexConstants()` success bytes include the sole
 length-delimited index module; `genesisFacts()` commits their outer hash.
@@ -1741,7 +1745,10 @@ cross-fixture vectors defined in this chapter (CV-\*, convergence twins,
 ResolvedManifest/1 byte-identity). GV-14 is mandatory in all three languages:
 first/middle/terminal ordinary pages; rejected wrong family/query/mode/basis;
 version/reserved/end/range corruption; and unique-by-Type outer plus inner
-continuation. These are CONFORMANCE rows over the existing vector and
+continuation. Its selector members additionally reject a SelectCursor from a
+different `realmId` even when `H`, target, spec, and canonical end match, and
+one with the same `H` but a different `realmBasisAt(H)`. These are CONFORMANCE
+rows over the existing vector and
 `MeasurementRow` identities, not new fixtures, domains, or measurement fields.
 The same run byte-compares the index module extracted from `codexConstants()`
 with `interfaces/index-codex.bin`, recomputes profileId/genesisCommitment, and
@@ -1828,6 +1835,8 @@ target: FX-ARC's release/closure locator key under B0_SELECT
      only the terminal page returns COMPLETE; no call scans ahead for liveness
      no P_evil occurrence wins; the aggregate winner is P_pub's 66th occurrence
      changing only spec.principalId rejects an old cursor as wrong context
+     replay in another Realm with matching H/target/spec/end rejects the cursor
+     keeping H equal but changing realmBasisAt(H) rejects the cursor
 5. report gas/wall per page and cursor-chain length; compare against the same
    fixed call bounds before spray
 ```

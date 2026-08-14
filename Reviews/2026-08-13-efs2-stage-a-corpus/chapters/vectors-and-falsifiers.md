@@ -767,8 +767,13 @@ member level (Stage B may add members, never remove).
   **trusted-Principal selector:** `SelectSpec.principalId` zero is
   UNSUPPORTED; a higher-scored/later occurrence by another Principal is
   visited and charged but never wins; changing only the trusted Principal
-  rejects a continuation from the prior context; untrusted-only windows may
-  be empty PARTIAL, never false COMPLETE or a winner;
+  rejects a continuation from the prior context; reusing a SelectCursor while
+  target, spec, `H`, and canonical end match but `realmId` differs, or at the
+  same `H` under a different `realmBasisAt(H)`, also rejects as wrong context;
+  the endpoint recomputes the
+  Realm basis and tag on initial and resumed calls while the separate
+  `basisOrdinal` binds `H`; untrusted-only windows may be empty PARTIAL, never
+  false COMPLETE or a winner;
   **selector sentinel:** no live winner returns `(0,0)` while a real candidate
   with score zero wins with its nonzero ordinal; combining windows uses the
   explicit winner-present bit, never score zero as absence;
@@ -877,7 +882,11 @@ member level (Stage B may add members, never remove).
   absence this layer grounds; **B0_SELECT:** declared-score/latest members,
   exact trusted-Principal filtering, total-posting visit accounting,
   dead/untrusted spray `PARTIAL + cursor`, claimed-time
-  manipulation cannot move the score; **SELECT_PROFILE_V2 (deferred):** only
+  manipulation cannot move the score; a cursor with matching target, spec,
+  `H`, and canonical end but a different `realmId`, or the same `H` with a
+  different `realmBasisAt(H)`, rejects after exact context recomputation, with
+  the separate `basisOrdinal` continuing to bind `H`;
+  **SELECT_PROFILE_V2 (deferred):** only
   if the explicit client profile is included, candidate-page truncation ⇒
   PARTIAL-labeled result, all-MISMATCH ⇒ `CONTENT_MISMATCH`, and claimed-time
   manipulation does not move ranking (GV-11 cross-list);

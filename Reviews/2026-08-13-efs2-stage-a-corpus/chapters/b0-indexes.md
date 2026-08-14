@@ -225,8 +225,8 @@ selectorCode 3, outputBitCount=103, UNIQUE_BY_TYPE:
   DOM_PK, REALM_ID, REALM_BASIS_AT_H, LITERAL_U256(1), LITERAL_U256(4),
   ENDPOINT_MODE, TYPE_SCHEMA_ID
 selectorCode 4, outputBitCount=111, SELECT_BEST_LOCATOR:
-  DOM_PK, TARGET_KEY, PRINCIPAL_ID, TYPE_SCHEMA_ID, ROLE_ORDINAL,
-  SCORE_MODE, SCORE_FIELD_ORDINAL
+  DOM_PK, REALM_ID, REALM_BASIS_AT_H, TARGET_KEY, PRINCIPAL_ID,
+  TYPE_SCHEMA_ID, ROLE_ORDINAL, SCORE_MODE, SCORE_FIELD_ORDINAL
 ```
 
 The four continuation rows are:
@@ -1581,7 +1581,6 @@ canonicalEndAtBasis(key, H, head):
 
 selectBestLocator(targetKey, spec, basisOrdinal, cursor):
   currentH = nextOrdinal - 1
-  contextTag = selectContextTag(targetKey, spec) // 111-bit commitment
 
   if cursor == 0:
     H = (basisOrdinal == 0) ? currentH : basisOrdinal
@@ -1589,11 +1588,15 @@ selectBestLocator(targetKey, spec, basisOrdinal, cursor):
   else:
     if cursor == CURSOR_END: revert ErrSelectCursor(cursor)
     (i, claimedEnd, cursorH, cursorTag) = decodeSelectCursor(cursor)
-    if basisOrdinal != cursorH || cursorTag != contextTag:
-      revert ErrSelectCursor(cursor)
+    if basisOrdinal != cursorH: revert ErrSelectCursor(cursor)
     H = cursorH
 
   if H > currentH: revert ErrSelectBasis(H, currentH)
+  realmBasis = realmBasisAt(H)
+  contextTag = selectContextTag(
+    realmId, realmBasis, targetKey, spec) // 111-bit commitment
+  if cursor != 0 && cursorTag != contextTag:
+    revert ErrSelectCursor(cursor)
 
   // Validate the Type at H, role, score shape, and index obligations BEFORE
   // deriving/loading the postings key. Undeclared/invalid is not absence.
@@ -1654,14 +1657,20 @@ SelectCursor (uint256, nonzero and never CURSOR_END):
   reserved        bit  [255]      0
 
 contextTag = low111(keccak256(abi.encode(
-  DOM_PK, targetKey, spec.principalId, spec.typeSchemaId, uint256(spec.roleOrdinal),
-  uint256(spec.scoreMode), uint256(spec.scoreFieldOrdinal))))
+  DOM_PK, realmId, realmBasisAt(H), targetKey, spec.principalId,
+  spec.typeSchemaId, uint256(spec.roleOrdinal), uint256(spec.scoreMode),
+  uint256(spec.scoreFieldOrdinal))))
 ```
 
 On an initial `cursor == 0` call, `basisOrdinal == 0` resolves once to the
 current high-water `H`; an explicit nonzero basis selects that historical
 basis. Every resumed call passes the exact encoded `H` as `basisOrdinal` —
-zero never re-resolves to a later current basis during resumption.
+zero never re-resolves to a later current basis during resumption. After that
+initial resolution or resumed decode, the endpoint recomputes
+`realmBasisAt(H)` from authoritative Realm state and recomputes the exact
+context tag above. The separate `basisOrdinal` field binds `H`; `realmId` and
+`realmBasisAt(H)` in the tag bind which Realm and Realm revision interpret
+that same ordinal.
 
 `canonicalEndAtBasis` computes the unique first position with ordinal `> H`
 using the authoritative sorted postings. Its fast path returns `head.count`
@@ -1673,11 +1682,12 @@ cursor also requires an emitted window boundary
 end-position cursor, a basis/context mismatch, a nonzero reserved bit, or any
 other malformed encoding reverts `ErrSelectCursor`.
 
-The u111 context commitment binds the exact trusted Principal filter but is
-still cursor-misuse detection, not an authorization primitive. Trust is the
-consumer's choice of the nonzero full-width `spec.principalId`; Core merely
-enforces exact equality against the admitted Occurrence author. Bit 255 is zero
-so an encoded resumable cursor cannot collide with
+The u111 context commitment binds the exact Realm, Realm revision at `H`,
+target, and trusted-Principal-scoped `SelectSpec`, but is still cursor-misuse
+detection, not an authorization primitive. Trust is the consumer's choice of
+the nonzero full-width `spec.principalId`; Core merely enforces exact equality
+against the admitted Occurrence author. Bit 255 is zero so an encoded
+resumable cursor cannot collide with
 `CURSOR_END`. Stateless cursors cannot prove that a caller consumed earlier
 pages: a resumed page's `COMPLETE` applies to the suffix beginning at its
 validated `nextIndex`. Whole-query absence requires either an initial

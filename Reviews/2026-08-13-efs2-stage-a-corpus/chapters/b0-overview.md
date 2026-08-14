@@ -460,9 +460,12 @@ on-chain bounded algorithm (single declared score field) **with the
 examination budget bounding TOTAL postings visited, live or dead** (a
 spray of self-revoked postings degrades to honest `PARTIAL` + cursor, never
 an unbounded scan — THE LINE). Its `SelectSpec` requires one nonzero trusted
-full-width `principalId`, binds it into the SelectCursor context, and skips
-every differently authored occurrence before scoring; untrusted spray can
-cost windows but can never win. B0 eligibility is only structural + exact
+full-width `principalId`; the exact SelectCursor context binds `realmId`,
+`realmBasisAt(H)`, target, and the full trusted-Principal-scoped spec, while
+the separate `basisOrdinal` field binds `H`. The endpoint recomputes that
+Realm basis and tag on initial and resumed calls, and skips every differently
+authored occurrence before scoring; untrusted spray can cost windows but can
+never win. B0 eligibility is only structural + exact
 Principal + live-at-basis + declared Type/role/score. URI syntax,
 reachability, content-profile conformance, and health remain client-tier
 checks. Selection tracks winner presence separately:
