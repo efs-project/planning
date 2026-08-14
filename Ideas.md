@@ -8,6 +8,61 @@ A lightweight parking lot for future ideas, "we should do X someday" drops, and 
 
 ## Open
 
+### Media lifecycle workload pressure-test portfolio
+*(James, 2026-08-14)*
+
+Park adjacent media workloads as **candidate fixtures for falsifying EFS media
+requirements**, not as applications EFS has decided to build. The active
+product tracks remain the shared media foundation, Booru/Sankaku-style public
+gallery and Plex/Jellyfin-style private library in
+[[Designs/media-library/README]]. Pull one of these workloads into an
+experiment only when it exposes a materially different failure mode:
+
+| Parked workload | Distinct pressure on the shared design | Smallest safe fixture |
+|---|---|---|
+| **Family legacy archive**, informed by [Immich's original/sidecar/backup boundary](https://docs.immich.app/administration/backup-and-restore/) | Private originals, XMP edits, RAW/JPEG or photo/video pairs, exact versus perceptual duplicates, revocable sharing and cold reconstruction. This is preservation and inheritance, not another Plex skin. | Twelve synthetic assets from two devices, including one sidecar correction, exact and near duplicates, a paired asset and one share/revoke cycle. |
+| **Creator release capsule**, informed by [Podcasting 2.0](https://podcasting2.org/docs/podcast-namespace/1.0), [Faircamp](https://simonrepp.com/faircamp/) and [Pepper&Carrot's source/translation workflow](https://www.peppercarrot.com/en/webcomic-sources/ep34_The-Knighting-of-Shichimi__files.html) | Mutable channel or catalog head pointing to immutable episode, album or chapter releases; masters versus encodes; chapters, transcripts, credits, language layers and mirrors. | One creator-owned episode, two-track EP or comic page with two representations, credits, one timed/text layer and two mirrors. |
+| **Scholarly or cultural viewer**, informed by [IIIF Presentation 3](https://iiif.io/api/presentation/3.0/) and [Chronicling America](https://www.loc.gov/apis/additional-apis/chronicling-america-api/) | Compound identity such as title → issue → page → region → OCR word; exact fragment citations; region annotations; later OCR or image corrections without citation drift. This is evidence navigation, not merely booru tagging. | One rights-reviewed four-page historical issue with page images, OCR/coordinates and three exact article-region citations. |
+| **Production asset and review graph**, informed by [OpenUSD composition](https://openusd.org/release/glossary.html) and [Frame.io annotations](https://help.frame.io/en/articles/9105251-commenting-on-your-media) | Authored layer/dependency closure, variants and missing dependencies; proxy-first review followed by an original; comments anchored to an exact revision, frame or region rather than silently migrating across edits. | One tiny layered 3D scene plus a 12-second v1/v2 clip, one missing dependency, one proxy/original pair and three version-bound annotations. |
+| **Offline field-media notebook**, informed by [ODK's offline Entity conflicts](https://docs.getodk.org/central-entities/) and [STAC](https://stacspec.org/) | Encrypted device-local capture, schema versions, parallel offline branches, interrupted attachment delivery, sensitive coordinates and deliberate local-to-public promotion. Connect this to [[#Persistent shared subjects + plural geospatial claims]], not a rival map authority. | A synthetic tree or river inspection with one photo, short audio clip and GPS point; two devices update the same subject offline and upload out of order. |
+| **Live-to-archive channel**, informed by [PeerTube federation](https://docs.joinpeertube.org/api/activitypub) and [Owncast's non-archival live-storage boundary](https://owncast.online/docs/storage/) | Scheduled → live → ended → archived state; incomplete segment sets, outages and clock skew; exact final edition versus the live session; chat/moderation state kept separate from archived media. | A five-minute synthetic stream with one gap, a saved master, two final mirrors and no raw chat publication by default. |
+
+Keep several deliberately awkward formats as **infrastructure-only torture
+tests**, not presumed products: one Landsat/STAC scene for authenticated range
+and spatial/time queries; one OME-NGFF microscopy image for N-dimensional chunk
+verification; one multi-LOD 3D object for dependency closure and coordinate
+annotations; one synthetic Frigate-shaped recording for retention and honest
+gaps; and, only if needed, synthetic DICOM for withdrawal/privacy behavior.
+Ordinary household surveillance and clinical media are not candidate public
+corpora.
+
+Rules for using this portfolio later:
+
+1. Map every fixture to an existing `ML-*` requirement in
+   [[Reviews/2026-08-14-media-library-intake/evidence-and-requirements]] and the
+   shared `MEDIA-*` requirements in [[Designs/media-library/media-infrastructure]].
+   If it creates no new trace, failure or measurement, do not build it.
+2. Start with creator-owned, public-domain or wholly synthetic bytes. A project
+   named above is a workload teacher, not an acquisition source, partner or
+   adoption claim. Reuse the consent and steward boundaries in
+   [[Reviews/2026-07-29-target-communities/opportunity-map]].
+3. Do not infer a new application track, media-specific Core primitive,
+   milestone, public Realm or canonical profile from a useful fixture. Route a
+   Core gap only through an exact failing trace and falsifier, as in
+   [[Reviews/2026-08-14-media-library-intake/fixture-pressure-map]].
+4. Try bounded equality, backlink, bucket/tile and paginated onchain reads
+   before using The Graph for a **public derived query**. The Graph is never the
+   byte server, range verifier, transform worker or private household index.
+5. Preserve `UNKNOWN`, partial availability, provenance, rights and derivation
+   boundaries. A successful demo is not permission to claim interoperability,
+   completeness, consent, deletion or independent reconstruction.
+
+Revisit this parking-lot entry only when Stage B needs a distinct application
+fixture, a current media requirement lacks a falsifier, or the owner explicitly
+chooses one workload for product exploration. The existing
+[[Designs/efsv2/playable-archive-requirements|playable archive]] remains a
+separate already-documented pressure test and should not be duplicated here.
+
 ### Persistent shared subjects + plural geospatial claims
 *(James, 2026-08-04; prompted by the [OpenStreetMap canoeability thread](https://news.ycombinator.com/item?id=49155521))*
 

@@ -143,6 +143,21 @@ now adds dated official-source baselines for
 [[plex-jellyfin-app#Primary-source Jellyfin follow-up, 2026-08-14|Jellyfin]].
 They justify requirements; they do not prove adapter compatibility or parity.
 
+## Parked workload pressure tests
+
+Adjacent media lifecycles are parked in
+[[Ideas#Media lifecycle workload pressure-test portfolio]]. They are candidate
+fixtures for falsifying the shared identity, byte, privacy, provenance,
+collection and query requirements only. This design set does **not** add a
+family archive, creator-release system, scholarly viewer, production review
+graph, field notebook, live channel, scientific viewer, NVR or medical-media
+system as an application track, roadmap commitment or authorized corpus.
+
+A parked workload should enter an experiment only with an exact minimal
+fixture, a requirement it can falsify, a safe rights/privacy boundary and a
+clear stop condition. A useful result may strengthen or correct the shared
+foundation without implying that EFS should ship the example application.
+
 ## Shared boundary
 
 | Concern | Shared infrastructure | Booru | Plex / Jellyfin |
