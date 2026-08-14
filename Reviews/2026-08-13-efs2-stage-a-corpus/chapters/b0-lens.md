@@ -945,34 +945,40 @@ struct PendingDecision {
     bytes32 positionKey;
     ResolvedTarget target;            // exact resolved target at commit
     uint16  winnerIndex;              // decision-scoped identity of the winner
-    uint32  winnerRevision;           // Lane 6 head revision at commit (via winner head)
+    uint64  winnerAdmissionOrdinal;   // exact winning occurrence at commit
     uint64  admissionHigh;            // basis high-water at commit
     uint64  readyAt;                  // block.timestamp + WINDOW (consumer constant)
 }
 
 // commit step:
 //   r = core.resolve(approvedPlanRecordId, pos); require(r.presence == FOUND);
-//   store PendingDecision{pos, r.target, r.winnerIndex, headRevision, r.basis.admissionHigh, now + WINDOW}
+//   store PendingDecision{pos, r.target, r.winnerIndex, r.winnerAdmissionOrdinal,
+//                         r.basis.admissionHigh, now + WINDOW}
 // finalize step (only after readyAt):
 //   r2 = core.resolve(approvedPlanRecordId, pos);
 //   ok = r2.presence == FOUND
 //     && r2.target.targetKind == pd.target.targetKind
 //     && r2.target.targetA == pd.target.targetA
 //     && r2.target.targetLeaf == pd.target.targetLeaf
-//     && r2.winnerIndex == pd.winnerIndex;        // decision-scoped recheck
+//     && r2.winnerIndex == pd.winnerIndex
+//     && r2.winnerAdmissionOrdinal == pd.winnerAdmissionOrdinal;
+//                                                // decision-scoped recheck
 //   if (!ok) abort;  else act;
 ```
 
 Properties, each a fixture:
 
 - **Decision-scoped recheck** — the finalize re-check compares exactly the
-  decision inputs (all target fields + winner identity), not global position quiescence, so
+  decision inputs (all target fields + plan entry + exact winning admission
+  ordinal), not global position quiescence, so
   unrelated churn at busy positions cannot permanently wedge honest decisions.
   [DERIVED INVARIANT — LR-3(ii)'s repair of the originally adopted item-F
   instantiation, lens-spec §3.2 via CARRY-IN.]
 - **Attack bound** — an equivocating author who flips the head inside the
-  window forces an *abort* (a DoS of the decision, priced at the attacker's own
-  gas via CAS writes), never a wrong acceptance. [DERIVED INVARIANT —
+  window forces an *abort*, including flip-away-then-rebind-to-the-same-target
+  sequences because the winning admission ordinal changes (a DoS of the
+  decision, priced at the attacker's own gas via CAS writes), never a wrong
+  acceptance. [DERIVED INVARIANT —
   core-onchain attack table, "revocation race inside a challenge window" row.]
 - **Unfrozen mechanics** — `WINDOW` is a consumer constant (no Core default);
   whether Core later adds an O(1) revalidation counter (`positionSeq`-shaped:
@@ -982,9 +988,10 @@ Properties, each a fixture:
   view-affecting transition bumps") holds across every Lane 6 transition, else
   the counter is unsound and stays out]. B0 ships without it; correctness never
   depends on it.
-- B0 note: Binding CAS at cardinality-one heads makes same-principal
-  equivocation a visible sequence of head revisions (`winnerRevision` motion),
-  which the recheck catches; cross-Principal "equivocation" is just plan-visible
+- B0 note: Binding CAS at cardinality-one heads makes every fresh same-principal
+  rebind a distinct admitted occurrence (`winnerAdmissionOrdinal` motion),
+  which the recheck catches without a separate head read; cross-Principal
+  "equivocation" is just plan-visible
   CONFLICT and is handled by the combiner, not the window.
 
 ---
@@ -1025,7 +1032,8 @@ k ≤ N/2, RECORD-vs-OCCURRENCE same targetA conflict, same EnvelopeId with
 different targetLeaf conflict, and the tombstone-contributes-absent case);
 BindingKey derivation
 vectors (incl. two Principals sharing low-160-bits); LENS-NEG-1; challenge-window
-commit/abort/finalize comparing all target fields; cross-language
+commit/abort/finalize comparing all target fields, winner index, and exact
+winning admission ordinal; cross-language
 (Solidity/TS/Rust) byte-identical plan
 frames and plan RecordIds.
 

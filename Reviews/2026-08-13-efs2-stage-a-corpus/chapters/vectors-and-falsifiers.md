@@ -753,7 +753,8 @@ member level (Stage B may add members, never remove).
     `resolve(P2, pos)` succeeds as a view with zero G state change.
   - Challenge-window commit/abort/finalize triple (lens §11): in-window head
     flip forces abort, never wrong acceptance; decision-scoped recheck
-    (all three target fields + winner identity) survives unrelated churn at busy positions
+    (all three target fields + winner index + exact winning admission ordinal)
+    catches flip-away-then-rebind-to-the-same-target while surviving unrelated churn at busy positions
     (LR-3(ii) repair).
   - `purposeAndScope` mismatch member: display plan pinned into a gate is
     refused by the conforming consumer check.
@@ -821,8 +822,9 @@ member level (Stage B may add members, never remove).
   16-ordinal scan bound, revision-invalidated cursor, historical/live merge,
   COMPLETE transition and retirement all match `b0-indexes` §10's exact
   `F4CoverageState`/`F4PageResult`; PARTIAL never proves absence;
-  **digest false-empty:** publish a digest-bearing Record with the shared u16
-  `algCode`, retrieve it with the same u16 key, and require legacy u8/u32
+  **digest false-empty:** publish a `GitObject/1` Record through its declared
+  `DIGEST_EQ(fieldIdx=1)` spec with the shared u16 `algCode`, retrieve it with
+  the same u16 key, and require legacy u8/u32
   encodings to reject/return UNSUPPORTED rather than `COMPLETE`-empty;
   **last-live count:** the GV-9 two-occurrence sequence agrees with page folds
   and changes unique-by-Type live count only on the last withdrawal.
@@ -1013,8 +1015,10 @@ member level (Stage B may add members, never remove).
   enforced at the resolver boundary. [Anchors constitution honest-mutation
   block; owner ruling item F posture; JR-5 four sources via CARRY-IN.]
 - **Shape:** input = admitted BindingSet/BindingTombstone/Withdrawal leaf
-  sequences + strictly ordered `expectedRevision` items for every selected
-  BindingSet/Tombstone (including ACTIVE duplicates); output = head states,
+  sequences +, on every non-idempotent call, strictly ordered
+  `expectedRevision` items for every selected BindingSet/Tombstone (including
+  ACTIVE duplicates); the all-ACTIVE write-free receipt lookup is the explicit
+  consent-carriage exception; output = head states,
   history entries, typed errors, absence verdicts.
 - **Impl:** SOL authoritative; TS/RS fold-replay over the total event order.
 - **Pass:** transition table exact; revisions and ordinals strictly increase;
@@ -1037,8 +1041,9 @@ member level (Stage B may add members, never remove).
   [SDK] `PARTIAL(cursor)` manifest scope never yields absence; budget
   exhaustion / bare `eth_getStorageAt` zero never grounds absence;
   anti-fallthrough — UNKNOWN at a higher tier stops resolution (GV-13
-  cross-list); challenge-window re-check = one SLOAD on `revision`
-  (cost-shape member). All transitions use the single SR-12 `publish` surface,
+  cross-list); challenge-window finalize performs one fresh bounded `resolve`
+  and compares target, winner index, and winning admission ordinal (cost-shape
+  member; no separate head-revision read). All transitions use the single SR-12 `publish` surface,
   SR-3's exact per-selected-CAS-bearing-Binding `expectedRevisions[]`,
   statically associated before the walk and compared by fresh sources against
   point-in-order shadow heads; Withdrawal has no revision item. Admission alone

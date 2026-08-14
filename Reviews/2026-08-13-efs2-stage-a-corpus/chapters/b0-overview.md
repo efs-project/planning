@@ -106,14 +106,17 @@ new publication event by design.
 expectedRevisions[] of (leafIndex uint16, revision uint32), nonceKey uint192,
 nonceSeq uint64, notAfter uint64 }`, signed under a full Realm-bound EIP-712
 domain (chainId + verifyingContract, realmId in the struct).
-`expectedRevisions` is strictly leaf-index ordered and is **required for every
-selected CAS-bearing `BindingSet/1` or `BindingTombstone/1` leaf**, including
-an already-ACTIVE duplicate; `Withdrawal/1` has no entry. A static shape pass
+On every non-idempotent call, `expectedRevisions` is strictly leaf-index
+ordered and is **required for every selected CAS-bearing `BindingSet/1` or
+`BindingTombstone/1` leaf**, including an already-ACTIVE duplicate in a mixed
+selection; `Withdrawal/1` has no entry. A static shape pass
 associates and consumes every item before the ascending effect walk. Only a
 fresh source compares its associated revision and body predecessor against the
 point-in-order shadow head. This bans wildcard/blind realm-local writes without
 letting mixed retries drift the carriage cursor; the array is empty only when
-no CAS-bearing Binding mutation is selected.
+no CAS-bearing Binding mutation is selected. The all-selected-ACTIVE shortcut
+is a write-free receipt lookup, not a consent/effect path: after its exact retry
+guard it intentionally returns before decoding or requiring this array.
 The exact EIP-712 types and array commitment are:
 
 ```text

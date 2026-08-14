@@ -995,7 +995,8 @@ for i in ascending set-bit order of leafMask:
     NONE | BIND_SET | BIND_TOMBSTONE | WITHDRAWAL
   if BIND_SET or BIND_TOMBSTONE:
       consume the next exactly leaf-index-matched expectedRevisions item
-      // cursor advances even for an ACTIVE duplicate; value comparison is fresh-only
+      // non-idempotent walk: cursor advances even for an ACTIVE duplicate;
+      // value comparison is fresh-only
 
   src = occurrence[occKey(envelopeId,i)]
   if src.status == ACTIVE:

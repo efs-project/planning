@@ -340,8 +340,8 @@ the cell. There is **no separate AdmissionIntent**.
   out of portable bytes (b0-binding.md §3.2 [PROPOSAL there]). F3 has no intent, so
   the entire SR-3 `expectedRevisions[]` commitment — the exact
   `ExpectedRevision(uint16 leafIndex,uint32 revision)` array hash, ordering,
-  cardinality, and selected BindingSet/Tombstone coverage rules—including
-  structural association for ACTIVE duplicates and no item for Withdrawal—moves into the signed
+  cardinality, and non-idempotent selected BindingSet/Tombstone coverage
+  rules—including structural association for ACTIVE duplicates and no item for Withdrawal—moves into the signed
   Realm-bound envelope (legitimate there — the envelope is already Realm-bound).
   This is a real design difference that rides
   the flip; the F3 report must note that CAS ergonomics differ across arms for

@@ -1258,7 +1258,8 @@ MAX_CHUNKS_PER_SUBMIT_TX 2 (venue sketch); LEAF_TAG 0x00; NODE_TAG 0x01.`
   **one disposition, set-wide** (overview §5.1): this chapter's
   honest-UNKNOWN posture is designed to work under either answer, and the
   question is surfaced to James **only** via proposed spine-edit A2, not
-  asked now. Closed by: James at Stage A review via A2.
+  asked now. Routed by: A2 at the next genuine-fork owner presentation; it is
+  not a Stage A blocker or immediate owner ask.
 - **O5 (fixture — re-scoped to the deferred profile):** the
   `SELECT_PROFILE_V2` SelectionKey ordering (health before grade) is
   falsifiable by the Arcade tampered-primary + probe-lag trace; the harness

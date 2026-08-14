@@ -368,7 +368,8 @@ that assumption has defined honest behavior (§4.2), so the architecture
 proceeds identically whether or not any particular L3 in fact persists. The
 per-Realm scope of chains-don't-die is nevertheless a **candidate owner
 decision**, surfaced to James **only** through proposed spine-edit A2 at
-Stage A review — not asked mid-pass, and B0 does not block on the answer
+the next genuine-fork owner presentation — not asked during Stage A, and B0
+does not block on the answer
 [PROPOSAL — the single set-wide disposition; the overview §5 item 1 and the
 corpus spine-edits doc carry the same routing].
 
@@ -863,8 +864,9 @@ ordinal; a later terminal retry reuses that planned evidence. Every
 `targetIsCurrentBindingHead`, Binding CAS input, and index/count delta is taken
 from this point-in-order shadow.
 
-The expected-revision cursor advances structurally for every selected
-BindingSet/Tombstone leaf, including an ACTIVE duplicate. Only a fresh source
+On the non-idempotent walk, the expected-revision cursor advances structurally
+for every selected BindingSet/Tombstone leaf, including an ACTIVE duplicate.
+Only a fresh source
 compares the associated value and predecessor against its current shadow head;
 an ACTIVE source remains effect-free after descriptor/body/self-OCCREF checks.
 Caller target evidence stays specific to its named Withdrawal and is never
@@ -876,7 +878,9 @@ returns: every selected descriptor must resolve from the kernel-known intrinsic
 validated, and its bounded OCCREFs pass the same comparison.
 No cache is staged and no unselected body is inspected. This pass precedes the
 shortcut but does not replay application effects, policy, CAS, target-evidence
-semantics, expiry, expected revisions, or intent/nonces.
+semantics, expiry, expected revisions, or intent/nonces. The shortcut is a
+write-free receipt lookup and is the sole exception to SR-3's non-idempotent
+expected-revision carriage rule.
 
 After the whole plan and both ordered semantic-carriage cursors succeed,
 commit persists the staged Envelope prelude and replays the identical ascending
@@ -1930,7 +1934,8 @@ The compact contract other chapters rely on:
    qualifying assumptions plus `UNAVAILABLE_SOURCE_BASIS` define behavior.
    Whether the chains-don't-die ruling applies per Realm remains a candidate
    owner decision presented to James only through proposed spine edit A2 at
-   Stage A review; B0 does not block on that answer.
+   the next genuine-fork owner presentation; it is not a Stage A blocker or
+   immediate owner ask.
 6. **EAS loss map.** V2-E8 records what survives round-trip through ordinary
    publication and Recognition evidence. It may not create a reserved
    AuthorityBasis code, special Core entrypoint, or foreign-carrier identity.

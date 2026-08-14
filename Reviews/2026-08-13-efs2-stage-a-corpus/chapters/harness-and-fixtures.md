@@ -180,7 +180,7 @@ shape:
 | Alias | Status | Winning pin | Harness consequence |
 |---|---|---|---|
 | S1 | RESOLVED | SR-12, with SR-13 descriptor carriage | one permissionless `publish(envelopeBytes, AccountPrincipal, intentBytes, intentWitness)`; author consent; implicit sender forbidden when any of the three kernel-effect Types is selected |
-| S2 | RESOLVED | SR-3 | exact EIP-712 AdmissionIntent with leafMask; one ordered `expectedRevisions[]` item per selected BindingSet/Tombstone including ACTIVE duplicates, none for Withdrawal; u192/u64 nonce lane; action MBZ=ADMIT |
+| S2 | RESOLVED | SR-3 | exact EIP-712 AdmissionIntent with leafMask; on non-idempotent calls, one ordered `expectedRevisions[]` item per selected BindingSet/Tombstone including ACTIVE duplicates, none for Withdrawal; all-ACTIVE write-free receipt lookup is consent-carriage-exempt; u192/u64 nonce lane; action MBZ=ADMIT |
 | S3 | RESOLVED | SR-6 under SR-1 | hashed domain words + fixed-word `abi.encode` PositionKey/BindingKey formulas |
 | S4 | RESOLVED | SR-4 | u64 external/reporting ordinals, u48 physical guard |
 | S5 | RESOLVED | SR-5 | 64 leaves; 8,192-byte envelope/body caps; fit remains measured |
@@ -490,7 +490,7 @@ outputs over these frozen blobs.
 | `CatalogMembership/1` | note OPTION(STRING(256)) | catalog REF(OBJECT); member REF(OBJECT) |
 | `Compatibility/1` | runnerProfile BYTES_FIXED(32); verdict UINT(1) [1..3] | release REF(RECORD, expected ArtifactRelease/1) |
 | `RightsEvidence/1` | rightsKind UINT(1); uri OPTION(STRING(2048)) | subject REF(ANY) |
-| `GitObject/1` | objectKind UINT(1) [1..4 = BLOB/TREE/COMMIT/TAG]; nativeOid DIGEST; payloadSize UINT(8) | payload REF(RECORD, expected ChunkTree/1) |
+| `GitObject/1` | objectKind UINT(1) [1..4 = BLOB/TREE/COMMIT/TAG]; nativeOid DIGEST with `DIGEST_EQ(fieldIdx=1)`; payloadSize UINT(8) | payload REF(RECORD, expected ChunkTree/1) |
 | `GitObjectClosure/1` | members ARRAY(STRUCT{memberKind UINT(1), target REF}, max 16) | member REF(RECORD) |
 | `GitPushTransaction/1` | updates ARRAY(STRUCT{refName STRING(255), oldOid OPTION(DIGEST), newOid DIGEST}, max 64) | repo REF(OBJECT); objectClosure REF(RECORD, expected GitObjectClosure/1) |
 | `WikiPageRev/1` | note OPTION(STRING(256)) | page REF(OBJECT); content REF(RECORD); prev OPTION(OCCREF)(OCCURRENCE) |
@@ -585,8 +585,8 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   priorStatus,priorOrdinal,priorRevokedAtOrdinal,evidenceOrdinal,
   targetEffectKind,targetBindingKey,targetIsCurrentBindingHead)`; Index and
   Binding consume byte-identical copies and never parse evidence. A static
-  pass consumes one ordered revision item per selected BindingSet/Tombstone,
-  including ACTIVE duplicates; only fresh sources compare the item against the
+  pass consumes one ordered revision item per selected BindingSet/Tombstone on
+  every non-idempotent call, including ACTIVE duplicates; only fresh sources compare the item against the
   current point-in-order shadow head, and Withdrawal has no item.
 - **CV-SPARSE-ADMIT** — GV-8/GV-9, SR-10/SR-15: admit leaves `{0,3,7}`, then
   the remainder; verify per-new-occurrence submission-order ordinals,
@@ -641,7 +641,8 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   posting/live, unique-count, RAW_AUDIT, batch-lane, and atomic rollback state
   in SOL/TS/RS.
 - **CV-DIGEST-LOOKUP** — GV-14/GV-16, SR-18a/b: publish and query one
-  digest-bearing Record with the same u16 `algCode`; legacy u8/u32 encodings
+  `GitObject/1` Record through its declared `DIGEST_EQ(fieldIdx=1)` spec with
+  the same u16 `algCode`; legacy u8/u32 encodings
   are typed-unsupported/rejected and can never produce `COMPLETE`-empty.
 - **CV-LAST-LIVE-COUNT** — GV-9/GV-14, SR-18d: two live occurrences of one
   Record; first withdrawal leaves unique-by-Type count 1, last withdrawal
@@ -990,7 +991,7 @@ measured. Every result and gate snapshot carries the full
 RECORD vs OCCURRENCE with equal `targetA`, and two OCCURRENCE targets sharing
 one EnvelopeId but different leaves; exact/threshold combiners must report
 conflict rather than collapse them. Challenge finalize compares all three
-fields plus winner identity. The Core grid remains exactly
+fields plus winner index and exact winning admission ordinal. The Core grid remains exactly
 `N={1,8,32,64}`. [PROPOSAL]
 
 **Distinct client-tier grid (never submitted as an on-chain Plan):** TS and RS
@@ -1005,7 +1006,9 @@ peak memory, RPC count, page count, result digest/equality, and propagation of
 **Adversarial:** LENS-NEG-1 exactly as Lane 7 §8 (beneficiary self-authorization
 three-way negative); purpose-mismatch (display plan pinned into a gate rejects
 on `purposeAndScope` check); challenge-window commit → equivocating rebind
-inside window → finalize ABORT (decision-scoped recheck, Lane 7 §11); malformed
+inside window → finalize ABORT by comparing target, winner index, and exact
+winning admission ordinal; include flip-away-then-rebind-to-the-same-target
+(decision-scoped recheck, Lane 7 §11); malformed
 plans — one MUST-FAIL vector per rejection code 1–13 (Lane 7 §3.5).
 
 **Measurements fed:** M-LENS (Core grid — THE V2-E2 deliverable), M-CLIENT
