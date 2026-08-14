@@ -70,6 +70,15 @@ Names and exact bytes are open. `TypeSchema` is the current plain-language
 name; older files call similar concepts `TypeRevision`. EAS is not Core. An EAS
 import/export adapter remains possible if it provides real interoperability.
 
+Focused Files proposal: [[hierarchical-files-and-folders]] defines the current
+greenfield candidate for stable File/Directory Objects, per-name Bindings,
+mount-local namespace/content Plans, complete directory enumeration, canonical
+URLs, exact views, immutable file revisions, verified bytes, and the shared
+Web/OS/mount resolver. Complete listing and certified filesystem writes depend
+on the draft's generic `BindingScope` and executor/operation-bound consent
+experiments; neither is current B0. It is a draft experiment target, not a
+frozen profile or owner decision packet.
+
 ## Evidence map
 
 These are inputs, not competing active architectures:
@@ -82,6 +91,7 @@ These are inputs, not competing active architectures:
 | [[lens-spec]], [[lens-pass-synthesis]], and [[lens-read-gotchas]] | Lens use cases, risk-bearer rule, typed policy, basis/completeness, and scale evidence. Old grammar is not frozen. |
 | [[kel]] and KEL/account review corpus | Rotation, recovery, delegation, temporal-authority, and smart-account failure analysis. Full KEL/topology must re-earn inclusion. |
 | [[mountable-filesystem-semantics]] | Adopted three-host read-only outcome and projection acceptance gates. |
+| [[hierarchical-files-and-folders]] | Current greenfield hierarchical Files/1 proposal; replaces July namespace mechanisms while preserving the adopted mount outcome. |
 | [[privacy-pass-synthesis]] and privacy corpus | Payload/read/metadata distinctions, privacy seams, and honest limitations. Old crypto/profile bytes are candidates. |
 | [[deterministic-ids]], [[codex-envelope]], [[codex-kinds]], [[codex-kernel]] | July native v2 formulas and implementation hypotheses. Useful but superseded as an automatic baseline. |
 | [`../efs15/`](../efs15/) | Fully reviewed EAS-backed contraction and exact vectors. Historical evidence showing what semantic IDs, schemas, admission, and reads require. |
