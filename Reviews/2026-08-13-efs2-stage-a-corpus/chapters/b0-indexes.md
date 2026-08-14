@@ -621,9 +621,11 @@ function admissionLogPage(PageRequest calldata req) external view
   returns (PageResult memory); // items[i] = bytes32(uint256(ordinal)), ascending
 ```
 
-Cursor = next ordinal to read. COMPLETE when the page reaches
-`highWaterOrdinal` (= `nextOrdinal − 1` clamped to `req.basisOrdinal` if
-pinned); PARTIAL with cursor otherwise.
+Cursor = the canonical `PageCursorV1` admission-family token in §5.1a; its
+`nextPosition` is the next ordinal to read and its `claimedEnd` is the pinned
+high-water ordinal. COMPLETE when the page reaches `highWaterOrdinal`
+(= `nextOrdinal − 1` clamped to `req.basisOrdinal` if pinned); PARTIAL with the
+exact resumable token otherwise.
 
 ### 3.3 Unique Records by Type
 
@@ -666,11 +668,13 @@ outer item. A historical-basis page cannot use the current count. It walks the
 outer unique list and, for each candidate Record, its nested `KIND_BY_RECORD`
 postings until it finds one occurrence live at `H` or exhausts that record.
 **Every outer posting and every nested posting examined is charged to the one
-`PAGE_SCAN_MAX` budget.** The `uint256` cursor encodes
-`(outerUniqueCursor, innerRecordCursor)`; if the budget ends in either loop,
-the reader returns that exact resumable cursor with `PARTIAL`, including when
-the page has no items. It performs no hidden history scan and returns
-`COMPLETE` only after the outer list and any active nested walk are exhausted.
+`PAGE_SCAN_MAX` budget.** The `uint256` cursor is the canonical
+`UniqueTypeCursorV1` token in §5.1a. It carries the exact outer position and,
+when a nested Record walk is active, `innerNextIndex + 1`; if the budget ends in
+either loop, the reader returns that exact resumable cursor with `PARTIAL`,
+including when the page has no items. It performs no hidden history scan and
+returns `COMPLETE` only after the outer list and any active nested walk are
+exhausted.
 
 ### 3.4 Occurrences by Type, by Record, by Principal
 
@@ -936,9 +940,12 @@ takes the sub-index realization: key-carried predicate + packed ordinals].
 
 ### 5.1 Types and signatures
 
-One request/result shape for **every** enumeration in Core — postings pages,
-admission-log pages, binding history, digest lookup [PROPOSAL — one ABI keeps
-client and contract consumers layout-independent]:
+One request/result shape for every **`PageRequest` enumeration** in Core —
+postings pages, admission-log pages, and digest lookup. Binding's direct
+revision-number history API and §7's bounded selector retain their separately
+pinned continuation shapes [PROPOSAL — one generic page ABI keeps client and
+contract consumers layout-independent without pretending distinct operations
+have the same cursor]:
 
 ```solidity
 enum Completeness { UNKNOWN, COMPLETE, PARTIAL, UNSUPPORTED }
@@ -946,7 +953,7 @@ enum Completeness { UNKNOWN, COMPLETE, PARTIAL, UNSUPPORTED }
 
 struct PageRequest {
   uint256 cursor;       // 0 = start; else the cursor from the prior PageResult
-  uint16  maxItems;     // clamped to the endpoint's MAX_PAGE_* constant
+  uint16  maxItems;     // clamped to [1, endpoint MAX_PAGE_*]
   uint64  basisOrdinal; // 0 = current basis; range-check before physical use
 }
 
@@ -986,6 +993,109 @@ function counts(bytes32 typeSchemaId, uint8 indexKind, uint8 indexOrdinal,
   returns (uint64 totalCount, uint64 liveCount, uint64 lastOrdinal,
            bytes32 realmBasis, uint64 highWaterOrdinal);
 ```
+
+### 5.1a Canonical generic cursor grammar
+
+[PROPOSAL — exact continuation-token ABI. Cursor bytes are transport state,
+not semantic EFS identities. No new hash domain is minted: context tags use the
+existing `DOM_PK` word plus fixed numeric family/version discriminators.]
+
+All `PageRequest` endpoints use one of the two closed `uint256` encodings below.
+`cursor == 0` means start. `CURSOR_END = 2^256 - 1` appears only in a COMPLETE
+result and is never accepted as input. `PAGE_CURSOR_VERSION = 1`. A nonzero
+cursor with another version, a nonzero reserved bit, a zero/out-of-range resume
+position, a query/context mismatch, a basis mismatch, or a noncanonical nested
+position reverts `ErrPageCursor(cursor)` before returning postings.
+
+```text
+PageCursorV1 (ordinary postings, hydrated postings, digest alias, admission log):
+  nextPosition   bits [0..47]    u48
+  claimedEnd     bits [48..95]   u48
+  basisOrdinal   bits [96..143]  u48
+  version        bits [144..151] u8   // exactly 1
+  contextTag     bits [152..254] u103
+  reserved       bit  [255]      0
+
+UniqueTypeCursorV1 (KIND_UNIQUE_BY_TYPE only):
+  outerNextIndex bits [0..47]    u48
+  innerPlusOne   bits [48..95]   u48  // 0 = between Records;
+                                         // n > 0 => next inner index = n - 1
+  basisOrdinal   bits [96..143]  u48
+  version        bits [144..151] u8   // exactly 1
+  contextTag     bits [152..254] u103
+  reserved       bit  [255]      0
+```
+
+For ordinary postings, `nextPosition` is the next zero-based physical posting
+index and `claimedEnd` is the canonical first physical position whose admission
+ordinal is greater than `H`. For the admission log, `nextPosition` is the next
+one-based AdmissionOrdinal and `claimedEnd == H`. A resumable ordinary token
+requires `0 < nextPosition < claimedEnd`; a resumable admission token requires
+`1 <= nextPosition <= claimedEnd`. The endpoint recomputes the canonical end
+from authoritative state at `H` and rejects any unequal `claimedEnd`.
+
+For unique-by-Type, the endpoint recomputes the outer canonical end at `H`.
+`outerNextIndex` names the next outer posting. `innerPlusOne == 0` means no
+nested walk is active. When it is nonzero, the current outer Record is retained
+and `innerPlusOne - 1` is the next physical `KIND_BY_RECORD` position; that
+position must be strictly below the recomputed inner canonical end at `H`.
+When an inner walk exhausts or finds one live occurrence, the deterministic
+state advances to `(outerNextIndex + 1, 0)`. If the budget stops after reading
+the outer Record but before its first inner item, the emitted state is
+`(outerNextIndex, 1)`. These rules make every stop position byte-identical.
+
+Context tags are the low 103 bits of the following hashes;
+`realmBasisAt(H)` is the exact RealmRevisionId returned in
+`PageResult.realmBasis`, and
+`low103(x) = uint256(x) & ((uint256(1) << 103) - 1)`:
+
+```text
+ordinaryContext = low103(keccak256(abi.encode(
+  DOM_PK, realmId, realmBasisAt(H), uint256(1),
+  uint256(endpointMode), typeSchemaId, uint256(indexKind),
+  uint256(indexOrdinal), valueKey)))
+
+admissionContext = low103(keccak256(abi.encode(
+  DOM_PK, realmId, realmBasisAt(H), uint256(1), uint256(3))))
+
+uniqueTypeContext = low103(keccak256(abi.encode(
+  DOM_PK, realmId, realmBasisAt(H), uint256(1), uint256(4),
+  uint256(endpointMode), typeSchemaId)))
+```
+
+`endpointMode` is exactly `1 = PAGE_RAW` or `2 = PAGE_HYDRATED`;
+`lookupByDigest` is the raw `pagePostings` alias and therefore uses mode 1.
+The first numeric word is the version; 3 and 4 are the admission and unique
+cursor-family discriminators, while 1 and 2 are endpoint modes. None is an
+`indexKind` value. `KIND_UNIQUE_BY_TYPE` always selects
+`UniqueTypeCursorV1`; every other valid postings kind selects `PageCursorV1`.
+On an initial request, `basisOrdinal == 0` resolves once to current `H`;
+an explicit nonzero basis selects historical `H`. Every resumed request MUST
+pass the encoded nonzero `H` exactly—zero never re-resolves—and the endpoint
+recomputes both `realmBasisAt(H)` and the context tag.
+
+The truncated tag detects accidental or adversarial cross-query cursor reuse;
+it is not an authorization proof. Correctness also comes from recomputing the
+authoritative canonical boundary and range-checking every physical position.
+
+`itemLimit = min(max(req.maxItems, 1), endpointMax)` so every PARTIAL call makes
+physical progress. Within a family, scanning and stop order are fixed: test the
+item limit after appending an item, test `PAGE_SCAN_MAX` after charging each
+examined outer or inner posting, and encode the exact next state without
+prefetch. A caller may begin at zero or resume a validated suffix, but a
+stateless token cannot prove earlier pages were consumed; whole-query absence
+still requires the complete cursor chain from zero (§5.2).
+
+```solidity
+error ErrPageCursor(uint256 cursor);
+```
+
+Mandatory Stage B cursor vectors cover first/middle/terminal raw and hydrated
+pages; admission ordinals; unique-by-Type stopping before inner index zero,
+inside an inner walk, after a live match, and between Records; dead-only empty
+PARTIAL pages; and rejection for version/reserved/context/query/mode/basis/end/
+range corruption plus `CURSOR_END` input. SOL/TS/RS MUST emit identical cursor
+words for every successful step.
 
 Item encodings per endpoint: postings/admission-log/binding-history pages
 return AdmissionOrdinals as `bytes32(uint256(ordinal))`. Consumers hydrate via
@@ -1091,7 +1201,8 @@ CURSOR_END               = 2^256 - 1
 Returndata: 512 × 32 B = 16 KiB (raw) / 256 × 160 B = 40 KiB (hydrated) —
 bounded independently of postings cardinality [PLAUSIBLE]. A contract
 needing tighter bounds lowers `maxItems`; the clamp is
-`min(req.maxItems, MAX_PAGE_*)`, never a revert.
+`min(max(req.maxItems, 1), MAX_PAGE_*)`, never a revert, so every PARTIAL call
+makes progress.
 
 ---
 
@@ -1418,6 +1529,8 @@ reads unbounded [kickoff falsifier 5]:
 | `MAX_PAGE_ITEMS` | 512 | raw page size (§5.3 arithmetic) |
 | `MAX_PAGE_ITEMS_HYDRATED` | 256 | hydrated page size |
 | `PAGE_SCAN_MAX` | 1024 | entries examined per page call |
+| `PAGE_CURSOR_VERSION` | 1 | canonical generic cursor grammar (§5.1a) |
+| `CURSOR_END` | 2^256−1 | terminal result sentinel; never accepted as input |
 | `LOCATOR_POSTINGS_VISIT_MAX` | 32 | sequential locator postings per call, dead included |
 | `LOCATOR_BOUNDARY_PROBES_MAX` | 48 | canonical upper-bound point reads per call |
 | `LOCATOR_TOTAL_POSTING_READ_MAX` | 80 | honest total: boundary probes + sequential visits |
@@ -1639,7 +1752,9 @@ The compact contract other chapters rely on:
 `BindingState`;
 `AdmissionOrdinal = uint64` externally (physical u48, 0 = NONE, first = 1,
 `U48_GUARD` before packing);
-`CURSOR_END = 2^256−1`; the §8 limits table; the §5.3 page maxima.
+`CURSOR_END = 2^256−1`; `PAGE_CURSOR_VERSION = 1`; the exact
+`PageCursorV1`/`UniqueTypeCursorV1` encodings and `ErrPageCursor` in §5.1a;
+the §8 limits table; the §5.3 page maxima.
 
 **Key derivation** (stable grammar): `pk(typeSchemaId, indexKind,
 indexOrdinal, valueKey)` with the closed `KIND_*` set (§2.1) and the
@@ -1657,6 +1772,9 @@ with encoding-owned hashed domain words and `abi.encode` fixed words.
   initial empty+COMPLETE, or an empty aggregate over a full validated cursor
   chain, = proven Realm-local absence at the stated basis; an isolated resumed
   suffix never grounds whole-query absence.
+- Every generic continuation is a canonical, query- and basis-bound `uint256`
+  token from §5.1a. Ordinary, hydrated, admission, and unique-by-Type families
+  cannot exchange cursors; malformed or stale tokens revert `ErrPageCursor`.
 - Mandatory indexing: an accepted Occurrence is present in every applicable
   family in the same atomic call; there is no admitted-but-unindexed state.
 - `counts()` liveCount is revocation-aware at current basis, O(1).
