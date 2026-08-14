@@ -382,14 +382,18 @@ check for kinds 2/3/4 — non-EOA authors were unimplementable under it; it is
 kept only as this labeled rejected sketch. The preimage's calldata channel
 is the entrypoint itself:
 `publish(envelopeBytes, AccountPrincipal calldata principal, intentBytes,
-intentWitness)` (SR-12 as amended by SR-13). Before any witness
-verification, admission MUST assert
+intentWitness)` (SR-12 as amended by SR-13). Admission executes §3.8 common
+prelude V1..V5 first so canonical descriptor construction is total, then,
+before reading any witness byte, MUST assert
 
 ```text
 computePrincipalId(principal) == envelope.header.principalId
 ```
 
-and revert `AUTH_PRINCIPAL_MISMATCH(declared, computed)` on failure.
+and revert `AUTH_PRINCIPAL_MISMATCH(declared, computed)` on failure. OP6 is
+admission-owned because the declared value lives in the Envelope header; it is
+nevertheless a mandatory byte-committed step of the one verifier program, not
+an optional wrapper convention.
 Forgery rationale: `verify` checks the witness against the SUPPLIED struct's
 account — that is its whole contract. Without the assertion, an attacker
 submits an envelope whose header declares a victim's `principalId` while
@@ -444,13 +448,17 @@ versioning adds witness profiles without touching identity or history.]
 
 ```text
 verify(p, digest, witness, ctx):
-  // PRE: admission has already asserted computePrincipalId(p) ==
-  //      envelope.header.principalId (SR-13, §3.2); the verifier itself
-  //      does not re-check — it is pure over its supplied inputs.
-  structurally validate p            (V1..V5; §2.4)  else revert typed
+  // Logical admission-verifier program; the admission wrapper owns OP6's
+  // declared header input even if OP1..OP11 are inlined across wrapper/library.
+  structurally validate p in order   (V1,V2,V3,V4,V5; §2.4) else revert typed
+  computed = computePrincipalId(p)
+  require computed == envelope.header.principalId    else AUTH_PRINCIPAL_MISMATCH
+  require len(witness) >= 1                          else AUTH_WITNESS_EMPTY
   require len(witness) <= MAX_WITNESS_BYTES          else AUTH_WITNESS_OVERSIZE
   profile = witness[0]; payload = witness[1:]
-  require profileCompatible(profile, p.authorityKind) else AUTH_WITNESS_PROFILE_UNSUPPORTED
+  require profile row exists, is ACTIVE at verifier v1, and matches kind
+                                                     else AUTH_WITNESS_PROFILE_UNSUPPORTED
+  dispatch exactly profile 1..4
 
   case p.authorityKind of
 
@@ -472,29 +480,38 @@ verify(p, digest, witness, ctx):
     require keccak256(p.originRef) == ctx.selfChainRefHash
                                                      else AUTH_FOREIGN_ORIGIN
     a = address(p.accountOrKey)
-    require EXTCODESIZE(a) > 0                       else AUTH_1271_NO_CODE    // ERC-6492 is pre-flight only; §5
+    cs = EXTCODESIZE(a)
+    ch = EXTCODEHASH(a)
+    require cs > 0 && ch != 0 && ch != EMPTY_ACCOUNT_CODEHASH
+                                                     else AUTH_1271_NO_CODE    // ERC-6492 is pre-flight only; §5
     (ok, ret) = STATICCALL{gas: ERC1271_VERIFY_GAS}(
                   a, abi.encodeCall(isValidSignature, (digest, payload)))
-    // copy AT MOST 32 returndata bytes (unbounded-returndata defense)
+    // retain RETURNDATASIZE; copy min(RETURNDATASIZE, 32) bytes only
     require ok                                       else AUTH_1271_CALL_FAILED
-    require len(ret) == 32 && bytes4(ret) == 0x1626ba7e
+    require RETURNDATASIZE == 32 && first4(ret) == 0x1626ba7e
                                                      else AUTH_1271_REJECTED
-    codehashOrZero = EXTCODEHASH(a)                  // second return word; §3.5
+    codehashOrZero = ch                              // second return word; §3.5
     return (pack(kind=2, ver=1, profile=2, block=ctx.blockNumber, delegate=0), codehashOrZero)
 
   KEY_P256:                                          // profile WP_P256_RAW64
     require len(payload) == 64                       else AUTH_SIG_INVALID
     (r, s) = split(payload)
     require uint(s) <= P256_HALF_N                   else AUTH_SIG_MALLEABLE   // deterministic low-s; SDK normalizes
-    out = CALL precompile P256VERIFY (0x…0100) with digest‖r‖s‖x‖y  (160 B in) // EIP-7951, 6900 gas
-    require out == uint256(1)                        else AUTH_SIG_INVALID
+    out = invoke P256VERIFY (0x…0100) with digest‖r‖s‖x‖y (160 B in) // EIP-7951, 6900 gas
+    // EIP-7951 returns exactly word(1) on success and empty bytes for invalid input.
+    require len(out) == 32 && out == uint256(1)      else AUTH_SIG_INVALID
     return (pack(kind=3, ver=1, profile=3, block=ctx.blockNumber, delegate=0), 0)
 
   KEY_RSA:                                           // profile WP_RSA_PKCS1_SHA256
     require len(payload) == modulusLen(p)            else AUTH_SIG_INVALID
-    em = MODEXP(payload, 65537, n)                   // precompile 0x05; ~5.5k gas at 2048-bit (EIP-2565)
-    require em == EMSA-PKCS1-v1_5(DigestInfo(sha256, digest), modulusLen)
-                                                     else AUTH_SIG_INVALID
+    require 0 < OS2IP(payload) < n                   else AUTH_SIG_INVALID
+    modexpIn = U256BE(modulusLen) || U256BE(3) || U256BE(modulusLen)
+               || payload || 0x010001 || I2OSP(n, modulusLen)
+    em = invoke MODEXP at 0x…0005 with modexpIn      // EIP-198 input; EIP-2565 price
+    require len(em) == modulusLen                    else AUTH_SIG_INVALID
+    T = 0x3031300d060960864801650304020105000420 || digest
+    PS = 0xff repeated (modulusLen - len(T) - 3)     // RFC 8017 §9.2; len(PS) >= 8
+    require em == 0x00 ‖ 0x01 ‖ PS ‖ 0x00 ‖ T      else AUTH_SIG_INVALID
     // `digest` is used AS the precomputed SHA-256 hash value inside DigestInfo;
     // signers sign the raw 32-byte digest via any standard "sign prehashed" API.
     return (pack(kind=4, ver=1, profile=4, block=ctx.blockNumber, delegate=0), 0)
@@ -517,7 +534,12 @@ Notes:
   foreign contract authority. [PROPOSAL]
 - The ERC-1271 call is the only external call in the verifier; it is
   STATICCALL (no reentrancy into state) with a hard gas cap and 32-byte
-  returndata copy. [PROPOSAL — cap value TBD by V2-E1 benchmark; see §3.7.]
+  returndata copy. Pure EVM precompile invocation may use `CALL` or
+  `STATICCALL` with zero value: that opcode choice is `PHYSICAL_LAYOUT`, not a
+  profile semantic, because the ECRECOVER, P256VERIFY, and MODEXP targets are
+  stateless. Their exact targets, input bytes, accepted outputs, and failure
+  mappings are `PROFILE` and are serialized in §3.8. [PROPOSAL — the 1271 cap
+  value is chosen by V2-E1 before a profile can mint; see §3.7.]
 
 ### 3.5 AuthorityBasis — exact persisted form
 
@@ -567,7 +589,10 @@ AdmissionOrdinal)`.
 Why each field exists:
 
 - `authorityKind` + `verifierVersion`: the frozen interpretation key — a
-  future reader replays *these* rules, never current ones (AUTH-INV-1/3).
+  future reader interprets the immutable acceptance receipt under *these*
+  rules, never current ones. The receipt is the historical verdict; this does
+  not promise that a discarded witness or historical contract-account state
+  can be replayed (AUTH-INV-1/3).
 - `witnessProfile`: distinguishes e.g. raw vs WebAuthn P-256 admissions once
   verifier v2 exists, without a new kind.
 - `basisBlock`: the Realm-local observation point; finality over it is
@@ -592,6 +617,13 @@ Example, delegate 0x3333…33:
   = 0x7ca83f12251099bf9a00938050c48404aa08f921268d32b90fdb5088ec630b2e
 ```
 
+`EMPTY_ACCOUNT_CODEHASH` is not illustrative-only. Verifier v1 classifies
+`EXTCODESIZE == 0`, `EXTCODEHASH == 0`, or
+`EXTCODEHASH == EMPTY_ACCOUNT_CODEHASH` as `AUTH_1271_NO_CODE`; only a
+nonempty-code account can reach the STATICCALL. This exact disposition is
+serialized as C15 and enforced by OP27 in the ERC-1271 ordered verifier
+program in §3.8.
+
 ### 3.6 Typed errors (closed list, v1)
 
 ```solidity
@@ -607,6 +639,7 @@ error AUTH_EOA_UNEXPECTED_CODE(address account);
 error AUTH_1271_NO_CODE(address account);
 error AUTH_1271_CALL_FAILED();
 error AUTH_1271_REJECTED(bytes4 got);
+error AUTH_WITNESS_EMPTY();
 error AUTH_WITNESS_OVERSIZE(uint256 len);
 error AUTH_WITNESS_PROFILE_UNSUPPORTED(uint8 profile);
 ```
@@ -614,8 +647,8 @@ error AUTH_WITNESS_PROFILE_UNSUPPORTED(uint8 profile);
 A failed verification reverts the admission call (all-or-nothing per the
 one-transaction gate); no rejected-attempt receipt persists (candidate
 §Admission receipt). `AUTH_PRINCIPAL_MISMATCH` is raised by the admission
-path's SR-13 assertion, before `verify` is ever entered; it lives in this
-closed list because this chapter owns the identity chain.
+path's byte-committed OP6 after V1..V5 and before any witness step; it lives in
+this closed list because this chapter owns the identity chain.
 
 ### 3.7 Named constants and EIP-7825 arithmetic
 
@@ -626,7 +659,7 @@ closed list because this chapter owns the identity chain.
 | `MAX_ORIGIN_REF_BYTES` | 64 | consumption cap; Lane 4 pins the real length |
 | `MAX_ACCOUNT_OR_KEY_BYTES` | 1024 | RSA-4096 DER upper bound [PROPOSAL] |
 | `MAX_WITNESS_BYTES` | 4096 | headroom incl. future WebAuthn (~1 KB) and PQ (~2.4 KB, owner-cited) [PROPOSAL] |
-| `ERC1271_VERIFY_GAS` | 200,000 **TBD** | V2-E1 benchmark vs Safe m-of-n, Kernel, Ambire; must cover a 7-of-9 Safe (~7 ecrecovers + overhead) |
+| `ERC1271_VERIFY_GAS` | 200,000 **measurement candidate; not frozen** | V2-E1 benchmark vs Safe m-of-n, Kernel, Ambire; Stage B freezes one concrete corpusVersion-wide value before minting the one shared `authorityCodexBytes`; no pending/sentinel row may mint |
 | `ERC1271_MAGIC` | `0x1626ba7e` | ERC-1271 (FACT) |
 | `SECP256K1_HALF_N` | `0x7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0` | secp256k1 (FACT) |
 | `P256_HALF_N` | `0x7fffffff800000007fffffffffffffffde737d56d38bcf4279dce5617e3192a8` | P-256 (FACT, computed) |
@@ -643,11 +676,436 @@ STANDARDS lane, VERIFIED) bounds verification counts per transaction
 | KEY_RSA 2048 (MODEXP, EIP-2565) | ~5,500 | ~3,050 |
 | CONTRACT_ERC1271 (capped) | ≤ 200,000 | 83 |
 
+The approximate precompile gas/capacity rows are `EVIDENCE_ONLY` venue
+physics and are not serialized as verifier semantics. In contrast,
+`ERC1271_VERIFY_GAS` changes whether an account call can succeed and is
+therefore `PROFILE`, with its one corpusVersion-wide concrete value serialized
+in constant row C16 below. The two example 7702 codehashes in §3.5 are vector material, while the
+classification prefix/length/offset that produces their delegate result is
+`PROFILE` in profile 1.
+
 Verification is therefore never the batch bottleneck except for
 contract-account authors: **at most 83 contract-author Envelope admissions
 can even be *verified* in one L1 transaction** before any storage write;
 admission storage costs (other chapters) will bound real batches far lower.
 The measurement harness must report the verification share per fixture batch.
+
+### 3.8 Authority Codex module — canonical bytes consumed by the Realm profile
+
+[PROPOSAL — final protocol-gate repair.] This chapter owns exactly one
+versioned owner module, `authorityCodexBytes`. It byte-commits every
+profile-visible `AccountPrincipal/1`, `AuthorityVerifier/1`, and
+`WitnessProfile/1` constant/code/table named by this chapter. The encoding
+chapter embeds the module exactly once behind its canonical owner-module row
+inside `codexConstantsBytes`; there is no authority-local hash and no new
+domain. The one outer `codexConstantsHash` therefore moves whenever any byte
+below moves.
+
+All integers are unsigned big-endian fixed width; names/signatures are the
+printed ASCII bytes; rows occur exactly in the order printed. `byteOffset`
+counts from the most-significant byte of `AuthorityBasisWord`.
+
+```text
+authorityCodexBytes :=
+  u16 authorityCodexRevision                    // = 1
+  u16 accountPrincipalVersion                   // = 1
+  u16 authorityVerifierVersion                  // = 1
+  u16 authorityKindCount                        // = 5, including invalid 0
+  authorityKindCount x AuthorityKindRow
+  u16 witnessProfileCount                       // = 6, including invalid/reserved
+  witnessProfileCount x WitnessProfileRow
+  u16 descriptorFieldCount                      // = 4
+  descriptorFieldCount x DescriptorFieldRow
+  u16 basisFieldCount                           // = 5
+  basisFieldCount x BasisFieldRow
+  u16 constantTypeCount                         // = 3
+  constantTypeCount x (u8 code || u16 nameLen || asciiName)
+  u16 valueStateCount                           // = 2
+  valueStateCount x (u8 code || u16 nameLen || asciiName)
+  u16 verifierConstantCount                     // = 30
+  verifierConstantCount x VerifierConstantRow
+  u16 verifierVmRevision                        // = 1
+  u16 operandTypeCount                          // = 8
+  operandTypeCount x (u8 code || u8 width || u16 nameLen || asciiName)
+  u16 opcodeCount                               // = 24
+  opcodeCount x OpcodeRow
+  u32 commonPreludeLen || VerifierProgram        // = 11 ordered steps
+  u16 profileProgramCount                       // = 4, active profiles 1..4
+  profileProgramCount x ProfileProgramRow
+  u16 codeTableCount                            // = 4
+  codeTableCount x CodeTable
+  u16 errorCount                                // = 15
+  errorCount x (u32 code || u16 signatureLen || asciiSignature)
+
+AuthorityKindRow :=
+  u8 kindCode || u8 originRuleCode || u8 keyRuleCode ||
+  u16 accountMinBytes || u16 accountMaxBytes ||
+  u16 nameLen || asciiName
+
+WitnessProfileRow :=
+  u8 profileCode || u16 verifierVersion || u8 compatibleKind ||
+  u8 statusCode || u16 payloadMinBytes || u16 payloadMaxBytes ||
+  u16 nameLen || asciiName
+
+DescriptorFieldRow :=
+  u8 fieldOrdinal || u8 grammarCode || u16 nameLen || asciiName
+
+BasisFieldRow :=
+  u8 fieldOrdinal || u8 byteOffset || u8 byteWidth ||
+  u16 nameLen || asciiName
+
+VerifierConstantRow :=
+  u16 constantCode || u8 constantTypeCode || u8 valueStateCode ||
+  u16 nameLen || asciiName || u16 valueLen || rawValue
+
+OpcodeRow :=
+  u16 opcode || u16 semanticsCode || u16 semanticsVersion ||
+  u8 terminalMode || u8 operandCount || operandCount x u8 operandTypeCode ||
+  u16 nameLen || asciiName
+
+ProfileProgramRow :=
+  u8 witnessProfileCode || u16 programVersion ||
+  u32 programLen || VerifierProgram
+
+VerifierProgram :=
+  u16 stepCount || stepCount x StepRow
+
+StepRow :=
+  u16 stepOrdinal || u16 opcode || u16 operandLen || operandBytes
+
+CodeTable :=
+  u16 tableNameLen || asciiTableName || u16 rowCount ||
+  rowCount x (u32 code || u16 nameLen || asciiName)
+```
+
+`VerifierVM/1` is a closed ordered machine, not a text-expression language.
+`constantTypeCode` rows are `1 UINT_BE`, `2 BYTES_FIXED`, `3 ADDRESS20`;
+`valueStateCode` rows are `0 MEASUREMENT_PENDING`, `1 CONCRETE`.
+`operandTypeCode` rows are `1 U8`, `2 U16`, `3 U32`, `4 CONST_REF_U16`,
+`5 ERROR_REF_U32`, `6 KIND_U8`, `7 PROFILE_U8`, `8 RESULT_RULE_U8`, with
+widths `1,2,4,2,4,1,1,1` respectively. An opcode's operand bytes MUST decode
+to exactly its serialized operand schema; surplus, short, wrong-type,
+unknown, duplicate, or reordered rows reject the module.
+
+Execution starts with the common prelude and visits contiguous
+`stepOrdinal=1..stepCount` in order. A kind-conditional opcode explicitly
+skips on another kind. The first failing opcode returns its serialized typed
+error and arguments and terminates; no later step executes. `terminalMode` is
+`0 CONTINUE`, `1 DISPATCH`, or `2 RETURN`; DISPATCH selects exactly one
+profile program and RETURN must be its last step. All indexing/slicing occurs
+only inside an opcode whose prior program steps established the required
+length, so decoded invalid inputs cannot trigger an ABI panic. Malformed ABI
+that cannot decode never enters `VerifierVM/1` and may fail at the external
+ABI boundary.
+
+Each `semanticsCode/semanticsVersion` pair below has one immutable meaning in
+`VerifierVM/1`; its serialized name, terminal mode, and operand schema are
+part of that definition. No prose override or implementation-local branch is
+permitted. Changing evaluation, widths, target, algorithm, failure precedence,
+error arguments, or result requires a new semantics version/code and changed
+module/program bytes. Two profiles exposing the same `authorityCodexBytes`
+therefore cannot legally implement different verifier behavior.
+
+The five `AuthorityKindRow` values are:
+
+```text
+0 RESERVED_INVALID:  origin=0 INVALID,       key=0 INVALID,                  account=0..0
+1 EOA_SECP256K1:     origin=1 EMPTY,         key=1 ADDRESS20,                account=20..20
+2 CONTRACT_ERC1271:  origin=2 SELF_CHAINREF, key=1 ADDRESS20,                account=20..20
+3 KEY_P256:          origin=1 EMPTY,         key=2 P256_XY64_ON_CURVE,       account=64..64
+4 KEY_RSA:           origin=1 EMPTY,         key=3 RSA_DER_2048_4096_E65537, account=270..1024
+```
+
+The six `WitnessProfileRow` values are:
+
+```text
+0 WP_INVALID:          verifier=0, kind=0, status=0 INVALID,  payload=0..0
+1 WP_SECP256K1_RAW65:  verifier=1, kind=1, status=1 ACTIVE,   payload=65..65
+2 WP_ERC1271_CALL:     verifier=1, kind=2, status=1 ACTIVE,   payload=0..4095
+3 WP_P256_RAW64:       verifier=1, kind=3, status=1 ACTIVE,   payload=64..64
+4 WP_RSA_PKCS1_SHA256: verifier=1, kind=4, status=1 ACTIVE,   payload=256..512
+5 WP_P256_WEBAUTHN:    verifier=2, kind=3, status=2 RESERVED, payload=0..0
+```
+
+`payloadMaxBytes=4095` for profile 2 follows from the one-byte profile tag
+inside `MAX_WITNESS_BYTES=4096`; a reserved profile has no accepted payload.
+The descriptor field rows commit the exact §2.4 grammar:
+
+```text
+0 authorityKind: grammar=1 U8
+1 originLen:     grammar=1 U8
+2 originRef:     grammar=2 BYTES_LENGTH_FROM_ORIGIN_LEN
+3 accountOrKey:  grammar=3 BYTES_KIND_GOVERNED_REMAINDER
+```
+
+The descriptor is parsed and validated before hashing; PrincipalId uses the
+§2.4 `abi.encode(DOM_PRINCIPAL,uint256(authorityKind),
+keccak256(descriptorBytes))` rule. `DOM_PRINCIPAL` remains in the encoding
+root's Core-domain table and is not duplicated here.
+
+The five basis rows commit the exact one-word layout:
+
+```text
+0 authorityKind:   byteOffset=0,  byteWidth=1
+1 verifierVersion: byteOffset=1,  byteWidth=2
+2 witnessProfile:  byteOffset=3,  byteWidth=1
+3 basisBlock:      byteOffset=4,  byteWidth=8
+4 delegateOrZero:  byteOffset=12, byteWidth=20
+```
+
+The conditional `contractCodehash` rule is code 1
+`SECOND_WORD_IFF_CONTRACT_ERC1271_NONZERO`; all other kinds require zero and
+store no second word. That rule is in `AuthorityBasisCode/1` below.
+
+The 30 ordered verifier constants are:
+
+```text
+code  type          state                  name                         rawValue
+ 1    UINT_BE       CONCRETE               MAX_ORIGIN_REF_BYTES         0x0040
+ 2    UINT_BE       CONCRETE               MAX_ACCOUNT_OR_KEY_BYTES     0x0400
+ 3    UINT_BE       CONCRETE               MAX_WITNESS_BYTES            0x1000
+ 4    ADDRESS20     CONCRETE               ECRECOVER_PRECOMPILE         0x0000000000000000000000000000000000000001
+ 5    UINT_BE       CONCRETE               SECP256K1_P                  0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f
+ 6    UINT_BE       CONCRETE               SECP256K1_A                  0x0000000000000000000000000000000000000000000000000000000000000000
+ 7    UINT_BE       CONCRETE               SECP256K1_B                  0x0000000000000000000000000000000000000000000000000000000000000007
+ 8    UINT_BE       CONCRETE               SECP256K1_GX                 0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798
+ 9    UINT_BE       CONCRETE               SECP256K1_GY                 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8
+10    UINT_BE       CONCRETE               SECP256K1_N                  0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
+11    UINT_BE       CONCRETE               SECP256K1_H                  0x01
+12    UINT_BE       CONCRETE               SECP256K1_HALF_N             0x7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0
+13    BYTES_FIXED   CONCRETE               EIP7702_DESIGNATOR_PREFIX    0xef0100
+14    BYTES_FIXED   CONCRETE               ERC1271_MAGIC                0x1626ba7e
+15    BYTES_FIXED   CONCRETE               EMPTY_ACCOUNT_CODEHASH       0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+16    UINT_BE       MEASUREMENT_PENDING    ERC1271_VERIFY_GAS           valueLen=0
+17    ADDRESS20     CONCRETE               P256_VERIFY_PRECOMPILE       0x0000000000000000000000000000000000000100
+18    UINT_BE       CONCRETE               P256_P                       0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff
+19    UINT_BE       CONCRETE               P256_A                       0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc
+20    UINT_BE       CONCRETE               P256_B                       0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b
+21    UINT_BE       CONCRETE               P256_GX                      0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296
+22    UINT_BE       CONCRETE               P256_GY                      0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5
+23    UINT_BE       CONCRETE               P256_N                       0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551
+24    UINT_BE       CONCRETE               P256_H                       0x01
+25    UINT_BE       CONCRETE               P256_HALF_N                  0x7fffffff800000007fffffffffffffffde737d56d38bcf4279dce5617e3192a8
+26    ADDRESS20     CONCRETE               MODEXP_PRECOMPILE            0x0000000000000000000000000000000000000005
+27    BYTES_FIXED   CONCRETE               RSA_EXPONENT_BE              0x010001
+28    BYTES_FIXED   CONCRETE               SHA256_DIGESTINFO_PREFIX     0x3031300d060960864801650304020105000420
+29    UINT_BE       CONCRETE               RSA_MODULUS_MIN_BITS         0x0800
+30    UINT_BE       CONCRETE               RSA_MODULUS_MAX_BITS         0x1000
+```
+
+`MEASUREMENT_PENDING` is a Stage A template state, not a value or sentinel;
+any module containing it is unmintable. Stage B first chooses one concrete
+u256 `ERC1271_VERIFY_GAS` for the **corpusVersion**, changes row 16 to
+`CONCRETE` with `valueLen=32`, mints one `authorityCodexBytes`, and embeds that
+byte-identical artifact in every B0/bakeoff cell. A different cap requires a
+different `corpusVersion` and comparison run; it is never a cell-local
+profile/confound inside one nine-cell campaign.
+
+The 24 ordered `OpcodeRow` definitions are below. `semanticsCode=opcode` and
+`semanticsVersion=1` for every row; operand abbreviations are the exact
+operand-type rows above.
+
+```text
+opcode terminal operands                                      asciiName
+ 1     CONTINUE ERROR_REF                                     V1_KIND
+ 2     CONTINUE CONST_REF,ERROR_REF                           V2_ACCOUNT
+ 3     CONTINUE CONST_REF,ERROR_REF,ERROR_REF,ERROR_REF        V3_ORIGIN
+ 4     CONTINUE CONST_REF,CONST_REF,CONST_REF,ERROR_REF        V4_P256_KEY
+ 5     CONTINUE CONST_REF,CONST_REF,CONST_REF,ERROR_REF        V5_RSA_PARAMS
+ 6     CONTINUE ERROR_REF                                     ASSERT_PRINCIPAL_ID
+ 7     CONTINUE ERROR_REF                                     WITNESS_NONEMPTY
+ 8     CONTINUE CONST_REF,ERROR_REF                           WITNESS_MAX
+ 9     CONTINUE -                                             DECODE_WITNESS
+10     CONTINUE ERROR_REF                                     CHECK_PROFILE
+11     DISPATCH -                                             DISPATCH_PROFILE
+20     CONTINUE U16,ERROR_REF                                 PAYLOAD_EXACT
+21     CONTINUE U16,U16,ERROR_REF                             PAYLOAD_RANGE
+22     CONTINUE ERROR_REF                                     V_27_28
+23     CONTINUE CONST_REF,ERROR_REF                           LOW_S
+24     CONTINUE CONST_REF,CONST_REF,CONST_REF,CONST_REF,CONST_REF,CONST_REF,CONST_REF,CONST_REF,ERROR_REF ECRECOVER_VERIFY
+25     CONTINUE CONST_REF,ERROR_REF                           EIP7702_CLASSIFY
+26     CONTINUE ERROR_REF                                     ERC1271_ORIGIN
+27     CONTINUE CONST_REF,ERROR_REF                           ERC1271_CODE
+28     CONTINUE CONST_REF,CONST_REF,ERROR_REF,ERROR_REF        ERC1271_STATICCALL
+29     CONTINUE CONST_REF,CONST_REF,CONST_REF,CONST_REF,CONST_REF,CONST_REF,CONST_REF,CONST_REF,ERROR_REF P256VERIFY
+30     CONTINUE ERROR_REF                                     RSA_SIG_RANGE
+31     CONTINUE CONST_REF,CONST_REF,CONST_REF,ERROR_REF        RSA_MODEXP_EMSA_SHA256
+32     RETURN   KIND_U8,PROFILE_U8,RESULT_RULE_U8              RETURN_BASIS
+```
+
+The common prelude has 11 exact steps. Operands below are encoded in the
+serialized schemas (`C#` constant reference, `E#` error-table reference):
+
+```text
+ 1 OP1  V1_KIND              (E6)
+ 2 OP2  V2_ACCOUNT           (C2,E12)
+ 3 OP3  V3_ORIGIN            (C1,E8,E7,E12)
+ 4 OP4  V4_P256_KEY          (C18,C19,C20,E12)
+ 5 OP5  V5_RSA_PARAMS        (C29,C30,C27,E12)
+ 6 OP6  ASSERT_PRINCIPAL_ID  (E9)
+ 7 OP7  WITNESS_NONEMPTY     (E13)
+ 8 OP8  WITNESS_MAX          (C3,E14)
+ 9 OP9  DECODE_WITNESS       ()
+10 OP10 CHECK_PROFILE        (E15)
+11 OP11 DISPATCH_PROFILE     ()
+```
+
+Prelude semantics and precedence are exact:
+
+1. V1 accepts only kinds 1..4; otherwise `AUTH_KIND_INVALID(kind)`.
+2. V2 uses the kind row's exact 20/20/64/270..1024 carrier bounds. Kind 4 is
+   one strict DER `RSAPublicKey` SEQUENCE of two positive, minimally encoded
+   INTEGERs with definite shortest lengths, one sign-pad `00` iff required,
+   and no trailing byte; failure is `AUTH_STRUCT_INVALID()`.
+3. V3 first applies required/forbidden origin presence, yielding
+   `AUTH_ORIGIN_REQUIRED()` or `AUTH_ORIGIN_FORBIDDEN()`, then applies C1's
+   maximum and yields `AUTH_STRUCT_INVALID()` on oversize.
+4. V4 runs only for kind 3: `qx,qy < P`, affine non-infinity, and
+   `qy^2 mod P = (qx^3 + A*qx + B) mod P`; failure is
+   `AUTH_STRUCT_INVALID()`.
+5. V5 runs only for kind 4: C29 <= bitlen(n) <= C30, odd n, and parsed exponent
+   bytes exactly C27; failure is `AUTH_STRUCT_INVALID()`.
+6. Only after V1..V5 make canonical descriptor construction total, OP6 builds
+   §2.4 `descriptorBytes`, computes PrincipalId, and compares it to the
+   declared header value. Mismatch yields
+   `AUTH_PRINCIPAL_MISMATCH(declared,computed)`. This is the exact
+   admission-owned SR-13 boundary and still precedes every witness operation.
+7. Empty witness yields `AUTH_WITNESS_EMPTY()`; OP9 never reads byte zero
+   before this step succeeds.
+8. `len(witness) > C3` yields `AUTH_WITNESS_OVERSIZE(len(witness))` before tag
+   decoding or profile checks.
+9. OP9 sets `tag=witness[0]` and `payload=witness[1:]` without another decode.
+10. OP10 looks up the serialized witness table, then checks in order: row
+    exists; status ACTIVE; row verifierVersion=1; compatibleKind equals V1's
+    kind. The first failure yields `AUTH_WITNESS_PROFILE_UNSUPPORTED(tag)`.
+11. OP11 dispatches tags 1..4 to the same-numbered program; no fallback exists.
+
+The four `ProfileProgramRow`s have `programVersion=1` and exact step streams:
+
+```text
+profile 1, stepCount=6
+ 1 OP20 PAYLOAD_EXACT       (65,E10)
+ 2 OP22 V_27_28             (E11)
+ 3 OP23 LOW_S               (C12,E11)
+ 4 OP24 ECRECOVER_VERIFY    (C4,C5,C6,C7,C8,C9,C10,C11,E10)
+ 5 OP25 EIP7702_CLASSIFY    (C13,E4)
+ 6 OP32 RETURN_BASIS        (kind=1,profile=1,resultRule=1)
+
+profile 2, stepCount=5
+ 1 OP21 PAYLOAD_RANGE       (0,4095,E10)
+ 2 OP26 ERC1271_ORIGIN      (E5)
+ 3 OP27 ERC1271_CODE        (C15,E2)
+ 4 OP28 ERC1271_STATICCALL  (C14,C16,E1,E3)
+ 5 OP32 RETURN_BASIS        (kind=2,profile=2,resultRule=2)
+
+profile 3, stepCount=4
+ 1 OP20 PAYLOAD_EXACT       (64,E10)
+ 2 OP23 LOW_S               (C25,E11)
+ 3 OP29 P256VERIFY          (C17,C18,C19,C20,C21,C22,C23,C24,E10)
+ 4 OP32 RETURN_BASIS        (kind=3,profile=3,resultRule=3)
+
+profile 4, stepCount=4
+ 1 OP21 PAYLOAD_RANGE       (256,512,E10)
+ 2 OP30 RSA_SIG_RANGE       (E10)
+ 3 OP31 RSA_MODEXP_EMSA_SHA256 (C26,C27,C28,E10)
+ 4 OP32 RETURN_BASIS        (kind=4,profile=4,resultRule=3)
+```
+
+Profile opcode semantics are exact:
+
+- OP20/21 validate before any payload slice. OP22 parses profile-1
+  `r32||s32||v8` and accepts only v 27/28. OP23 interprets `s` big-endian and
+  rejects `s > halfN`; because it precedes the algorithm opcode, high-s wins
+  over any later scalar/signature failure.
+- OP24 consumes the supplied digest verbatim: no prefix and no rehash. Its
+  precompile input is exactly `digest32||u256be(v)||r32||s32` (128 bytes),
+  target C4, zero value. The curve is C5..C11. With recovery id `v-27`, valid
+  scalars `1 <= r,s < n`, and `z=OS2IP(digest32) mod n`, recovery computes
+  `R` from x=r and the selected y parity, then `Q=r^-1(sR-zG)`; invalid R/Q
+  fails. The recovered address is `keccak256(qx32||qy32)[12:32]`. Call failure,
+  non-word output, zero address, or mismatch with the descriptor address yields
+  E10. OP25 reads at most 23 code bytes: size zero gives delegate zero; exactly
+  `C13||address20` gives that delegate; every other nonzero code shape yields
+  E4(account).
+- OP26 compares `keccak256(originRef)` to `ctx.selfChainRefHash`; mismatch is
+  E5(got,self). OP27 records EXTCODESIZE/EXTCODEHASH and yields E2(account) for
+  size zero, hash zero, or C15. OP28 forms exactly selector C14 followed by
+  ABI encoding of `(digest32,payload)`, then STATICCALLs the descriptor account
+  with exactly C16 gas. It retains RETURNDATASIZE and copies only min(size,32).
+  Call-status zero yields E1 before output inspection. Otherwise size != 32,
+  then first four bytes != C14, yield E3(`got4`), where `got4` is the first up
+  to four copied bytes right-padded with zero. Exact size 32 + magic succeeds;
+  bytes 4..31 are unconstrained. Result rule 2 returns the pre-call nonzero,
+  nonempty codehash.
+- OP29 consumes verbatim `digest32||r32||s32||qx32||qy32` (160 bytes) at C17,
+  zero value. C18..C24 are the final EIP-7951 curve. V4 already checked Q;
+  OP29 additionally requires `1 <= r,s < n`, computes
+  `z=OS2IP(digest32)`, `w=s^-1 mod n`, `u1=z*w mod n`, `u2=r*w mod n`, and
+  `R=u1*G+u2*Q`; infinity fails. It computes `rPrime=x(R) mod n` and succeeds
+  iff `rPrime=r`. The precompile returns exactly `word32(1)` on success and
+  empty bytes on every invalid input. Call failure or anything other than the
+  exact success word yields E10.
+- OP30 sets `K=ceil(bitlen(n)/8)`, requires `len(payload)=K`, and requires
+  `0 < OS2IP(payload) < n`; failure is E10. OP31 invokes C26 with EIP-198 input
+  `u256be(K)||u256be(3)||u256be(K)||payload||C27||I2OSP(n,K)` and requires an
+  exact K-byte output. EFS verifier policy treats the supplied digest as the
+  already-computed SHA-256 value: `T=C28||digest32`,
+  `PS=FF^(K-len(T)-3)` with at least eight FF bytes, and
+  `EM=00||01||PS||00||T`; no rehash occurs. Call failure, wrong output width,
+  or output != EM yields E10. This uses RFC 8017's EMSA octet construction but
+  the prehashed-input choice is **EFS policy**, not a claim that RFC 8017
+  itself defines this API.
+- OP32 result rule 1 packs the OP25 delegate and zero codehash; result rule 2
+  packs zero delegate and OP27 codehash; result rule 3 packs both zero. Every
+  rule fixes kind, verifier version 1, profile, and `ctx.blockNumber` in the
+  §3.5 basis layout.
+
+The four closed code tables are:
+
+```text
+OriginRule/1:
+  0 INVALID; 1 EMPTY; 2 SELF_CHAINREF
+PrincipalKeyRule/1:
+  0 INVALID; 1 ADDRESS20; 2 P256_XY64_ON_CURVE;
+  3 RSA_DER_2048_4096_E65537
+WitnessStatus/1:
+  0 INVALID; 1 ACTIVE; 2 RESERVED
+AuthorityBasisCode/1:
+  1 SECOND_WORD_IFF_CONTRACT_ERC1271_NONZERO;
+  2 EIP7702_NO_CODE; 3 EIP7702_DESIGNATOR; 4 EIP7702_UNEXPECTED_CODE
+```
+
+Codes 2–4 plus profile 1's exact prefix/length/offset clauses commit the
+three-way EIP-7702 classification in §3.4/§4: zero code, exactly
+`0xef0100 || address` at 23 bytes, or unexpected non-designator code.
+
+The closed authority error table is byte-identical to the `authority`
+namespace in the frozen Stage B result registry. Codes are assigned by
+unsigned-ASCII signature order, as that registry requires:
+
+```text
+ 1 AUTH_1271_CALL_FAILED()
+ 2 AUTH_1271_NO_CODE(address)
+ 3 AUTH_1271_REJECTED(bytes4)
+ 4 AUTH_EOA_UNEXPECTED_CODE(address)
+ 5 AUTH_FOREIGN_ORIGIN(bytes32,bytes32)
+ 6 AUTH_KIND_INVALID(uint8)
+ 7 AUTH_ORIGIN_FORBIDDEN()
+ 8 AUTH_ORIGIN_REQUIRED()
+ 9 AUTH_PRINCIPAL_MISMATCH(bytes32,bytes32)
+10 AUTH_SIG_INVALID()
+11 AUTH_SIG_MALLEABLE()
+12 AUTH_STRUCT_INVALID()
+13 AUTH_WITNESS_EMPTY()
+14 AUTH_WITNESS_OVERSIZE(uint256)
+15 AUTH_WITNESS_PROFILE_UNSUPPORTED(uint8)
+```
+
+The harness rejects any missing/extra/reordered row, count/length drift,
+module duplication, mismatch with the result registry, or verifier behavior
+that consumes a profile-visible authority constant absent from these bytes.
+Stage B emits one module vector and byte-identically extracts it from
+`codexConstants()` in Solidity, TypeScript, and Rust.
 
 ---
 
@@ -783,8 +1241,10 @@ says so.
   candidate §Principal: managed Principals arrive "behind the same semantic
   PrincipalId API"; this is also axis-2's decision result D2, §7.]
 - **G2 (history immutability).** No pre-graduation `AuthorityBasis` is
-  rewritten; historical verification replays old rules by `(kind,
-  verifierVersion)` forever (AUTH-INV-1/3).
+  rewritten; historical interpretation consumes the accepted receipt under
+  its recorded `(kind, verifierVersion)` forever. It does not re-run current
+  account code or claim discarded witnesses are state-replayable
+  (AUTH-INV-1/3).
 - **G3 (self-authorized).** Graduation is authorized by the account authority
   itself through the normal verifier — no administrator, no registry.
   [PROPOSAL]
@@ -913,7 +1373,8 @@ abstraction, not 8130]:
 > must classify `A`'s **new** admissions (via an appended `authorityKind`
 > and/or witness profile under version N) while every **old**
 > `AuthorityBasis` record — e.g. `(kind=EOA_SECP256K1, verifierVersion=1)` —
-> remains byte-untouched and replays under version-1 rules.
+> remains byte-untouched and is interpreted under version-1 rules; its
+> accepted receipt remains the verdict rather than invoking present authority.
 
 Failure conditions (any one falsifies the axis-2/verifier design):
 
@@ -956,17 +1417,26 @@ the address, which is exactly the information `AccountPrincipal/1` adds.
    PrincipalId (V6 construction rule).
 2. `PID-LOW160`: synthetic injected colliding PrincipalIds (§2.6).
 3. `AUTH-EOA`: valid; high-s rejected; v=29 rejected; wrong-recovered
-   rejected; zero-address ecrecover rejected.
+   rejected; zero-address ecrecover rejected; exact raw-digest/128-byte
+   ECRECOVER input and 32-byte address word; zero/out-of-range scalar mapping.
 4. `AUTH-7702`: the three-point vector (§4) + `AUTH_EOA_UNEXPECTED_CODE`
    defensive case + kind-1-vs-kind-2 distinct-Principal vector for one
    delegated account.
 5. `AUTH-1271`: accept; reject (wrong magic); revert-in-account; gas-cap
-   exhaustion; >32-byte returndata; no-code (counterfactual) rejection; and
-   the pinned-codehash replay: account self-destruct/upgrade after admission
-   must not alter the recorded basis.
-6. `AUTH-P256`: RFC 6979 A.2.5 key with a valid raw signature; high-s
-   rejected; off-curve key rejected at V4.
-7. `AUTH-RSA`: 2048-bit accept; e≠65537 rejected; wrong-length sig rejected.
+   exhaustion; short and >32-byte returndata with exact `GOT4`; exact 32-byte
+   magic with an unconstrained 28-byte tail; zero/empty account-codehash and
+   no-code (counterfactual) rejection; exact ABI calldata transcript; and
+   pinned-codehash receipt immutability: account self-destruct/upgrade after
+   admission must not alter the recorded basis, and reconstruction must not
+   invoke current or archive account code to reproduce that old verdict.
+6. `AUTH-P256`: RFC 6979 A.2.5 key with a valid raw signature; all curve
+   constants and exact `digest||r||s||qx||qy` precompile input; high-s
+   rejected; off-curve key rejected at V4; invalid input returns empty and
+   only exact word-one succeeds.
+7. `AUTH-RSA`: strict-minimal-DER 2048-bit accept; e≠65537, trailing DER,
+   nonminimal INTEGER, signature representative ≥ modulus, and wrong-length
+   signature reject; exact EIP-198 input/modulus-width output; and EFS-policy
+   prehashed SHA-256 DigestInfo/EMSA padding corruption rejects byte-for-byte.
 8. `AUTH-RAIL`: one envelope, two submission rails against the same account
    state → identical PrincipalId + basis modulo `basisBlock` (AUTH-INV-4);
    staged calls across an account-state change retain their own exact pairs.
@@ -997,16 +1467,17 @@ function computePrincipalId(AccountPrincipal calldata p) external pure returns (
 
 // ---- carriage + identity assertion (SR-13) ----
 // publish(envelopeBytes, AccountPrincipal calldata principal, intentBytes, intentWitness)
-//   `principal` is THE calldata channel for the preimage; admission asserts
+//   `principal` is THE calldata channel for the preimage; after V1..V5 admission asserts
 //   computePrincipalId(principal) == envelope.header.principalId
-//   (revert AUTH_PRINCIPAL_MISMATCH) BEFORE witness verification.
+//   (revert AUTH_PRINCIPAL_MISMATCH) BEFORE reading any witness byte.
 
 // ---- verification (internal library; logical version 1) ----
 type AuthorityBasisWord is bytes32;   // kind u8 ‖ verifierVersion u16 ‖ witnessProfile u8 ‖
                                       // basisBlock u64 ‖ delegateOrZero u160
                                       // (8+16+8+64+160 = 256, exact — SR-7)
 struct VerifyContext { bytes32 selfChainRefHash; uint64 blockNumber; }
-// AuthorityVerifierV1.verify(principal, digest, witness, ctx)
+// AuthorityVerifierV1.verify(principal, digest, witness, ctx), executed only
+// after the admission-owned OP1..OP6 prefix succeeds
 //   → (AuthorityBasisWord basis, bytes32 codehashOrZero)   // reverts typed;
 //   codehashOrZero nonzero iff kind 2 (CONTRACT_ERC1271)
 function previewAuthority(AccountPrincipal calldata, bytes32, bytes calldata)
@@ -1035,7 +1506,9 @@ other chapters: the realm chapter's `publish()` carries the
 reserves `(authorityRef, authEpoch)` (G7; `authEpoch` rides the header, not
 the basis word — SR-2/SR-7); Lane 4 supplies `chainRef` bytes and
 `selfChainRefHash`; the admission chapter persists the basis word(s) it
-receives, unmodified; the encoding chapter registers `efs2/principal/1` in
+receives, unmodified; the encoding chapter embeds this chapter's one
+length-delimited `authorityCodexBytes` module exactly once and registers
+`efs2/principal/1` in
 its closed domain table §1.3 and regenerates its `EfsIds` PrincipalId row to
 the SR-14 formula (retiring `principalScheme` in favor of `authorityKind`).
 
@@ -1043,7 +1516,10 @@ the SR-14 formula (retiring `principalScheme` in favor of `authorityKind`).
 
 1. `ERC1271_VERIFY_GAS` exact value — decided by the V2-E1 measurement pass
    (benchmark Safe 1-of-1 … 7-of-9, Kernel, Ambire; the constant must cover
-   the chosen support floor with margin).
+   the chosen support floor with margin). This is not a silent Codex TBD:
+   §3.8 requires one concrete value for the corpusVersion before any cell
+   artifact mints, and every cell reuses that one module. Trying a different
+   value requires a distinct corpusVersion and comparison run.
 2. `WP_P256_WEBAUTHN` profile — gated on byte-exact vectors from ≥2 real
    authenticator families (identity.md amendment 7); ships as verifier v2.
 3. Lane 4's canonical `chainRef` encoding (ERC-7930 Review-status vs pinned

@@ -317,10 +317,16 @@ member level (Stage B may add members, never remove).
   `DOM_RESULT_SCHEMA`, and `DOM_MEASUREMENT_RESULT` are present with exact
   `bakeoff/evidence/evidence` classes, excluded from the Core
   `codexConstantsHash`, and included in `corpusDomainManifestBytes`;
-  exact `indexCodexBytes` version-1 serialization (18 limits, 14 code tables,
+  exact `authorityCodexBytes` version-1 serialization (kind/witness
+  compatibility+version, descriptor/basis layouts, 30 ordered verifier
+  constants, `VerifierVM/1`'s 24 opcode/semantics rows, the 11-step common
+  prelude, profile step counts `6/5/4/4`, four code tables, and 15 sorted
+  authority errors) and exact
+  `indexCodexBytes` version-1 serialization (18 limits, 14 code tables,
   three cursor layouts, four context selectors including the trusted-Principal
-  selector token, and four continuation rows), embedded once behind its u32
-  length in `codexConstantsBytes`; module count/length/order/token drift moves
+  selector token, and four continuation rows), embedded once as manifest codes
+  1 then 2 behind their u32 lengths in `codexConstantsBytes`;
+  H-MODULE-COMPLETE and module count/code/length/order/token drift move
   the sole outer hash, then `profileId` and `genesisCommitment`, while any
   separately supplied index hash is rejected;
   sentinel-space output rejection; SR-14 worked PrincipalId examples A/B
@@ -369,21 +375,44 @@ member level (Stage B may add members, never remove).
   lesson, VERIFIED via authorship §2.3/principal AUTH-INV-7).
 - **Members:**
   - EOA: valid low-S; high-S → `AUTH_SIG_MALLEABLE`; v = 29; wrong recovered
-    address; ecrecover zero-address.
+    address; ecrecover zero-address; raw-digest/no-prefix input, exact
+    128-byte precompile input and word-address output; scalar-range failure.
   - ERC-1271: magic accept; wrong magic → `AUTH_1271_REJECTED`; account
     reverts; gas-bomb capped at `ERC1271_VERIFY_GAS`; >32-byte
     returndata-bomb bounded; no-code counterfactual → `AUTH_1271_NO_CODE`;
+    zero/empty account codehash → the same error; exact 32-byte return accepts
+    with unconstrained tail while short/long return rejects with the pinned
+    `GOT4` rule;
     ERC-6492 wrapper rejected as admission witness [STANDARDS lane, VERIFIED];
-    **pinned-codehash replay** — account upgrades/self-destructs after
-    admission; recorded basis (codehash + block) byte-unchanged.
+    **pinned-codehash receipt immutability** — account upgrades/self-destructs
+    after admission; recorded basis (codehash + block) stays byte-unchanged and
+    no reconstruction step invokes current/archive account code.
   - EIP-7702 **three-point vector** (principal §4): E1 pre-delegation
     (`delegateOrZero = 0`), E2 delegated to D1, E3 re-delegated to D2 — one
     PrincipalId, three persisted bases, no retro-grading; defensive
     `AUTH_EOA_UNEXPECTED_CODE`; kind-1-vs-kind-2 distinct-Principal member for
     one delegated account.
-  - P-256 (RFC 6979 A.2.5 key; high-s reject; off-curve key rejected at V4)
-    and RSA (2048-bit accept; e ≠ 65537 reject; wrong-length sig).
-  - Struct validation V1–V6 (incl. V6 non-minimal ABI re-encode rejection).
+  - P-256 (RFC 6979 A.2.5 key; all curve constants and the exact
+    `h||r||s||qx||qy` input; high-s reject; off-curve key rejected at V4;
+    infinity and `rPrime=x(R) mod n` failure; empty invalid output and exact
+    word-one success) and RSA (strict minimal
+    DER; 2048-bit accept; e ≠ 65537 reject; signature representative ≥ n and
+    wrong-length sig reject; exact EIP-198 MODEXP carrier/output; malformed
+    SHA-256 DigestInfo, PS shorter than eight `ff`, or any EFS-policy prehashed
+    EMSA byte mismatch rejects).
+  - Struct validation V1–V6: two decodable ABI encodings with the same decoded
+    fields, including a non-minimal dynamic-offset layout, MUST produce the
+    same canonical `descriptorBytes` and PrincipalId under V6; malformed ABI
+    that cannot decode MAY reject at the ABI boundary.
+  - **Prelude precedence / no-panic matrix:** invalid kind + mismatched
+    PrincipalId + empty witness → `AUTH_KIND_INVALID(kind)`; invalid V2 carrier
+    + mismatch + empty witness → `AUTH_STRUCT_INVALID()`; structurally valid
+    descriptor + mismatch + empty witness → `AUTH_PRINCIPAL_MISMATCH`; correct
+    descriptor + empty witness → `AUTH_WITNESS_EMPTY()`; oversized witness
+    with unknown tag → `AUTH_WITNESS_OVERSIZE(len)`; reserved/unknown/wrong-kind
+    tag → `AUTH_WITNESS_PROFILE_UNSUPPORTED(tag)`; EOA high-s + invalid r →
+    `AUTH_SIG_MALLEABLE()`. Every decodable case returns that typed error with
+    exact arguments and no ABI panic; only malformed ABI stays outside the VM.
   - **PrincipalId-mismatch forgery (SR-13's load-bearing assertion):** a VALID
     witness over the attacker's own `AccountPrincipal` descriptor, presented
     with `header.principalId` = a different (victim) id → MUST-FAIL
@@ -486,6 +515,12 @@ member level (Stage B may add members, never remove).
   defense (feeds GV-15). `reconciles: RP-2,3,5,10,12,15`;
   `requiresPins: SR-2, SR-3, SR-5, SR-10, SR-12, SR-15`.
 
+  **Envelope-u48 boundary member:** seed `envelopeCount=2^48-2`; one fresh
+  Envelope succeeds at ordinal `2^48-1`; the next fresh Envelope reverts exact
+  authorship `E_ENVELOPE_ORDINAL_EXHAUSTED()` with no state/counter change.
+  Idempotent retry and staged admission of an existing Envelope still succeed
+  at the ceiling and retain the same u48 ordinal.
+
 ### GV-9 Duplicate postings, idempotent retry, occurrence lifecycle
 
 - **Purpose:** retries converge without error handling; duplicates never
@@ -513,6 +548,11 @@ member level (Stage B may add members, never remove).
   target EnvelopeId and leaf index and matching its one frozen registry
   selector; the target gets no admission posting or decrement and
   its point read recovers recordId/typeSchemaId/principalId but no body;
+  the accepting Withdrawal receipt/batch—not a later witness call—is the
+  authoritative historical fact for main authority, target witness/evidence,
+  Principal equality, policy, and code basis. Reconstruction recomputes target
+  identities from retained bytes, never calls current/archive ERC-1271 state,
+  and makes EOA/P-256/RSA math-only re-verification optional/non-gating;
   repeat withdrawal is unconditional no-op success; wrong-author Withdrawal
   reverts the whole envelope with `ErrWithdrawNotAuthor` and zero state delta.
   Exact all-ACTIVE retry returns before expiry/nonce/effect checks; a mixed/new
@@ -925,8 +965,9 @@ member level (Stage B may add members, never remove).
   finalityParam, gas-floor, zero-policy, ref/kind mismatch, noncanonical/high-
   bit/nonzero-address failures; revision 1 uses the initial policy and genesis
   authority exactly. Full `genesisFacts()` re-encodes every preimage and
-  hashes the exact `codexConstants()` bytes, decodes the sole length-delimited
-  index module, and recomputes profileId/genesisCommitment/RealmId. Missing,
+  hashes the exact `codexConstants()` bytes, decodes the ordered AUTHORITY and
+  INDEX length-delimited modules, cross-checks the authority error namespace,
+  and recomputes profileId/genesisCommitment/RealmId. Missing,
   duplicate, truncated, trailing, reordered, or selector-mutated module bytes
   fail C-4 as `UNSUPPORTED_PROFILE`. C-6 reads a one-item canonical
   `admissionLogPage`, compares it to `admissionAt`, and validates the exact
@@ -946,15 +987,18 @@ member level (Stage B may add members, never remove).
   no transition on unchanged controller, NONE refusal, and current-ref
   reconstruction from genesis; W-0..W-10 full walk incl. W-4a/W-8/W-9
   index+binding fold replay (pure function of the total event order), including
-  canonical **unsigned** envelope bytes plus ordered RecordIds; receipts and
+  canonical **unsigned** envelope bytes plus ordered RecordIds; guarded u48
+  envelope inventory walks through the max value without loop wrap; receipts and
   admission batches ground historical acceptance, and the walk never claims to
   recover or replay a discarded main witness. W-4a enumerates every batch's
   `admissionBatchIntentLane`, derives its Principal through the first admitted
   occurrence, ignores zero implicit markers, requires every nonzero decoded
   `nonceSeq>=1` and exact per-lane succession, and reproduces every
-  `intentNonceOf` point without a private key-universe database. Retained prewithdrawal evidence
+  `intentNonceOf` point without a private key-universe database. Each accepted
+  Withdrawal receipt/batch is the historical verification fact; retained prewithdrawal evidence
   reconstructs its signed target RecordId/type/principal from the fixed
-  TypeSchemaId/bodyHash commitment, while the never-admitted body, postings,
+  TypeSchemaId/bodyHash commitment without current/archive ERC-1271 execution
+  or required witness replay, while the never-admitted body, postings,
   Record-live fold, and Binding head remain absent;
   `UNAVAILABLE_SOURCE_BASIS` wording assertions H-1..H-5 (never absence,
   never silent fallthrough, never promoted local copy); section-C hints
@@ -1057,7 +1101,7 @@ member level (Stage B may add members, never remove).
 | CF-4 | identical Records from two issuers lose distinct Occurrences/provenance | GV-9 duplicate-leaf + ten-curators FIXTURE (Arcade) | REDESIGN-B0 |
 | CF-5 | a Type creator can make admission or reads unbounded | GV-1/GV-2 grammar bounds; GV-14 hot-key members; indexes §8 limits table asserted as vectors | REDESIGN-B0 (encoding/indexes grammar) |
 | CF-6 | index incompleteness can appear as absence | GV-14 never-empty + UNSUPPORTED members; AA-5 (F4 cell) | REDESIGN-B0; for the F4 arm, ABORT-ARM |
-| CF-7 | smart-account/Core upgrades reinterpret historical admission | GV-12 (all members); GV-5 pinned-codehash replay | REDESIGN-B0 |
+| CF-7 | smart-account/Core upgrades reinterpret historical admission | GV-12 (all members); GV-5 pinned-codehash receipt immutability | REDESIGN-B0 |
 | CF-8 | contract Lens reads call arbitrary authority callbacks per Principal | GV-13 gas-invariance member + static no-external-call inspection (= AA-2) | REDESIGN-B0 (lens layer) |
 | CF-9 | an application needs a custom Core contract or private index for ordinary typed references/membership/comments/releases/evidence | FIXTURE tier: Arcade, Git/Markdown, Nanda, EAP (provisional), contract-config traces built from generic Types only; content chapter falsifier (a) | REDESIGN-B0 (architecture-level; kickoff names it a candidate falsifier of the whole design) |
 | CF-10 | state-only reconstruction needs old logs or an EFS-operated database | GV-17 W-walk with logs disabled | REDESIGN-B0 |
@@ -1075,7 +1119,7 @@ member level (Stage B may add members, never remove).
 | KA-3 | unbounded returndata | GV-5 1271 returndata-bomb; GV-10 bounded-copy member | REDESIGN-B0 |
 | KA-4 | duplicate postings | GV-9 (strict-ascending append, T2 no-op, no-double-decrement) | REDESIGN-B0 |
 | KA-5 | authority backdating | GV-12 backdating probe (admission-time validation + persisted basis); GV-18 ordinal monotonicity | REDESIGN-B0 |
-| KA-6 | smart-account code changes | GV-5 pinned-codehash replay; GV-12 | REDESIGN-B0 |
+| KA-6 | smart-account code changes | GV-5 pinned-codehash receipt immutability; GV-12 | REDESIGN-B0 |
 | KA-7 | EIP-7702 classification | GV-5 three-point vector + anti-vector (hasCode dispatch fails E2) | REDESIGN-B0 (verifier) |
 | KA-8 | cross-Realm replay / domain confusion | GV-7 full matrix | REDESIGN-B0 |
 | KA-9 | stale / omitting RPCs | GV-17 C-7 conformance (cross-check / proof / labeled-unproven); GV-14 basis honesty at SDK tier | REDESIGN of client conformance rules (Core is not the detection point — an RPC lie is outside Core's trust boundary; the falsifier is a *client* that presents unproven endpoint answers as proof) |
@@ -1141,7 +1185,10 @@ statement; PM directive: Stage A stops for review]:
    `TYPE_WITHDRAWAL_V1`, and the intrinsic `TypeSchemaGroup/1` bootstrap Type,
    plus the owning chapters' `chainRef`, `UNICODE_PIN`, and
    `ERC1271_VERIFY_GAS` values. `ResolutionPlan/1` is not kernel-known.
-   Stage B computes the constants from the verified intrinsic blobs.
+   Stage B computes the constants from the verified intrinsic blobs, chooses
+   one corpusVersion-wide concrete gas cap, and mints one shared
+   `authorityCodexBytes` for all nine cells. A cap variant requires a distinct
+   corpusVersion/comparison run; a pending/sentinel module fails to mint.
 8. **No client-compiler corpus.** The R-L1 rich-lens differential-compilation
    corpus (incl. cycle/diamond imports) attaches when that compiler exists;
    B0's flat plans cannot host it (GV-13 note; client-compiler open item).

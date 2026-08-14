@@ -181,9 +181,9 @@ fails the build — the registry can never silently drift again.
 [PROPOSAL — added post-red-team; the realm chapter's `profileId` (§2.3 there) and
 `genesisCommitment` (§2.4 there) consume this hash, and it must be state-readable. This
 chapter owns the outer artifact: one canonical, ordered, versioned serialization
-of every Core constant it pins plus the byte-exact length-delimited module owned
-by the index chapter. Harness/bakeoff-only constants are kept out of the Core
-profile hash.]
+of the profile-visible constants it owns plus the byte-exact, length-delimited
+owner modules required by the principal/authority and index chapters.
+Harness/bakeoff-only constants are kept out of the Core profile hash.]
 
 ```
 codexConstantsBytes :=
@@ -211,8 +211,11 @@ codexConstantsBytes :=
   u16 selCount    ‖ selCount    × ( u8 code ‖ u16 nameLen ‖ asciiName )
   u16 errCount    ‖ errCount    × ( u16 code ‖ u16 nameLen ‖ asciiName )
   u16 cstrCount   ‖ cstrCount   × ( u8 code ‖ u16 nameLen ‖ asciiName )
-  ---- canonical modular index Codex artifact (b0-indexes §0.1) ----
-  u32 indexCodexLen ‖ indexCodexBytes
+  ---- canonical owner-module manifest; exact order and no duplicate codes ----
+  u16 ownerModuleCount                         // = 2
+  u16 moduleCode ‖ u32 moduleLen ‖ moduleBytes // repeated ownerModuleCount times
+    1 AUTHORITY: authorityCodexBytes            // b0-principal-authority §3.8
+    2 INDEX:     indexCodexBytes                // b0-indexes §0.1
   ---- derived intrinsic ids: kernel-known Types (SR-11) + intrinsic schemas (§3.4 meta-Type, §6), name order ----
   u16 idCount     ‖ idCount     × ( u16 nameLen ‖ asciiName ‖ bytes32 id )
 codexConstantsHash := keccak256(codexConstantsBytes)
@@ -227,9 +230,9 @@ corpusDomainManifestBytes :=
   )
 ```
 
-Rules: every Core constant appears exactly once in `codexConstantsBytes`,
-either directly in an encoding-owned table or inside the one
-`indexCodexBytes` module; every active
+Rules: every **profile-visible semantic** constant/code/table appears exactly
+once in `codexConstantsBytes`, either directly in an encoding-root table or
+inside its one manifest-listed owner module; every active
 domain row appears exactly once in `corpusDomainManifestBytes`. Ordering is the printed
 table order (auditable against this chapter's text). The `fixture`, `bakeoff`, and
 `evidence` classes are therefore covered by H-DOMTABLE/corpusVersion without changing
@@ -237,12 +240,43 @@ the Realm-visible Core `codexConstantsHash`. The derived-id section's values (TY
 TYPE_BINDING_TOMBSTONE_V1, TYPE_WITHDRAWAL_V1 per SR-11's closed list, plus the intrinsic
 TypeSchemaIds of §3.4/§6) are computed from intrinsic blobs at the Stage B Codex build — the
 serialization is pinned here, the byte values mint in Stage B (Stage A ships no byte
-vectors). `indexCodexLen` is the exact byte length of the index chapter's
-version-1 serialization; zero, truncation, trailing module bytes, a second
-index module, or a module whose internal counts/lengths do not consume exactly
-`indexCodexLen` rejects the Codex build. There is deliberately no
-`indexCodexHash`: the module must be reconstructed from the returned bytes and
-is committed once by the outer hash. State-readability: Core exposes
+vectors). Module codes are closed for B0: 1 AUTHORITY then 2 INDEX. Each
+`moduleLen` is the exact byte length of that owner's version-1 serialization;
+zero, unknown/reordered/duplicate code, truncation, trailing module bytes, a
+second copy, or internal counts/lengths that do not consume exactly
+`moduleLen` rejects the Codex build. There is deliberately no
+`authorityCodexHash` or `indexCodexHash`: both modules must be reconstructed
+from returned bytes and are committed once by the outer hash.
+
+**Mandatory owner-module completeness rule.** `PROFILE` means a constant,
+code, or closed table whose value a conforming Core/reader must know to
+interpret profile-committed state independently of one deployment's mutable
+configuration. The encoding root owns domains, MC/1 grammar, shared structural
+limits/codes, fixed Realm slots, digest algorithms, and intrinsic IDs; the
+AUTHORITY module owns all profile-visible Principal/verifier/witness semantics;
+the INDEX module owns all profile-visible query/cursor/continuation semantics.
+An owner chapter MUST NOT introduce or consume a `PROFILE` item absent from
+its manifest-listed module (or, for encoding-owned items, the root tables).
+H-MODULE-COMPLETE inventories every normative named constant, numeric bound,
+enum/code table, layout table, versioned verifier constant/opcode/program rule,
+and error table in every owner chapter and fails
+on an unclassified or duplicate item before Codex mint.
+
+The only permitted non-`PROFILE` classifications are explicit:
+`REALM_CONFIG` for deployment/revision-selected values serialized in
+`InitConfig/1` or `RealmRevision`; `ABI_RESULT` for function/result/error
+schema committed by deployed code plus the byte-exact frozen result registry;
+`PHYSICAL_LAYOUT` for replaceable implementation packing identified by the
+Realm revision/codehash; `APP_PROFILE` for Type/ResolutionPlan/client-profile
+semantics; `EVIDENCE_ONLY` for harness/bakeoff metadata; and
+`MEASUREMENT_PENDING` for a value that cannot mint a profile until replaced
+by a concrete owner-module/root value. Classification is not an escape hatch:
+items that affect cross-implementation interpretation are `PROFILE`. No empty
+owner-module placeholder is legal. B0 presently requires exactly AUTHORITY
+and INDEX; a new load-bearing owner first adds concrete bytes and a manifest
+row, which moves the one outer hash.
+
+State-readability: Core exposes
 `codexConstants()` returning the exact bytes and
 `codexConstantsHash()` returning the hash (interface in "Interfaces exposed"); a reader can
 therefore re-derive the hash the realm chapter's `profileId` commits to from state alone.
@@ -1318,12 +1352,15 @@ memory-level evidence, PLAUSIBLE):
 12. Evolution shapes: one instance of each §6 Record, round-tripped.
 13. Codex constants: `codexConstantsBytes` serialization + `codexConstantsHash`
     recomputation across the three languages (§1.6); byte-exact extraction and
-    independent decoding of the one length-delimited `indexCodexBytes` module,
-    including every limit/code/layout/context/continuation row from the index
-    chapter §0.1 and rejection of length/count/order/tag-selector drift; `corpusDomainManifestBytes`
+    independent decoding of the ordered AUTHORITY and INDEX owner modules,
+    including every principal/verifier/witness/authority-error row from the
+    principal chapter §3.8 and every limit/code/layout/context/continuation row
+    from the index chapter §0.1; reject owner-module code/count/length/order,
+    gas-cap, error-table, or tag-selector drift; run H-MODULE-COMPLETE;
+    `corpusDomainManifestBytes`
     serialization; H-DOMTABLE domain-registry/class/scope sweep, including proof that
     non-Core classes are absent from the Core hash and present in the corpus manifest
-    (§1.3). A one-word index limit/code/layout/context mutation changes
+    (§1.3). A one-word authority or index limit/code/layout/context mutation changes
     `codexConstantsHash`, `profileId`, and `genesisCommitment`; no independent
     index hash can be supplied to mask the mutation.
 14. ResolutionPlan/1 seam: canonical bodies at N=0, 1, and 64 equal
@@ -1424,7 +1461,7 @@ Contract points other lanes consume: domain table §1.3 (closed, SET-WIDE per SR
 scope classes, the Core-hash/non-Core-manifest partition, and retired spellings);
 sentinel space §1.4; salt rule §1.5;
 `codexConstantsBytes`/`codexConstantsHash` §1.6, including the canonical
-length-delimited index-owner module (consumed by the realm chapter's `profileId`
+ordered authority- and index-owner modules (consumed by the realm chapter's `profileId`
 and `genesisCommitment`, SR-16); the ONE u16 `algCode` table §2.4 (SR-18a — content chapter's
 u8 tags and index chapter's u32 algId retired); size constants §2.6 (SR-5 values;
 `REF_INSTANCES_MAX` per SR-18e); `OccurrenceRef` = `(bytes32, uint16)`, packed 34 bytes;

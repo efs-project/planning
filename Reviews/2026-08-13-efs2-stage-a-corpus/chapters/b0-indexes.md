@@ -665,14 +665,23 @@ RecordMeta @ rmetaSlot(recordId):
   // KIND_BY_RECORD postings head (count / liveCount).
 
 EnvelopeMeta @ emetaSlot(envelopeId), consumed from the admission owner:
-  principalId       bytes32
-  envelopeOrdinal   uint40
-  leafCount         uint16
+  envelopePrincipal[envelopeId] = principalId bytes32
+  envelopeMeta packed word:
+    profile          [0..15]    uint16
+    leafCount        [16..31]   uint16
+    authEpoch        [32..95]   uint64
+    notAfter         [96..159]  uint64
+    headerStored     [160]      bool
+    envelopeOrdinal  [161..208] uint48
+    reserved         [209..255] MBZ (47 bits)
   persisted canonical unsigned-header carriage and full RecordId vector;
   main witness, bodies, target evidence, consent, and receipt basis excluded
 
   // No leaf-ordinal base exists. No receipt revision, block, or authority
   // basis lives here: staged admission may give one Envelope multiple batches.
+  // Admission allocates envelopeOrdinal only while envelopeCount < 2^48-1;
+  // otherwise E_ENVELOPE_ORDINAL_EXHAUSTED() reverts before state. Index code
+  // consumes this u48 value and never allocates, widens, or wraps it.
 
 PrincipalMeta @ pmetaSlot(principalId):
   principalOrd      [0..47]  uint48
@@ -755,7 +764,7 @@ function getRecord(bytes32 recordId) external view
            uint64 firstAdmitOrdinal);
 
 function getEnvelope(bytes32 envelopeId) external view
-  returns (bytes memory canonicalUnsignedEnvelope, uint40 envelopeOrdinal,
+  returns (bytes memory canonicalUnsignedEnvelope, uint48 envelopeOrdinal,
            uint16 leafCount, bytes32 principalId, uint64 authEpoch);
 // canonicalUnsignedEnvelope = abi.encode(EnvelopeHeader, fullRecordIds).
 // It is sufficient to recompute the digest/EnvelopeId, not to replay the

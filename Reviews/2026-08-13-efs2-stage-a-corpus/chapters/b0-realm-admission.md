@@ -173,12 +173,15 @@ profileId = keccak256(abi.encode(
 ```
 [PROPOSAL — regenerated field-for-field under SR-1. Per SR-16 the encoding
 chapter owns the outer `codexConstantsHash` definition — the hash over the full
-ordered table of domain constants, codec versions, bound constants, and the
-one length-delimited `indexCodexBytes` module owned by the index chapter — and
-the state-readable `codexConstants()`; there is no separate index hash. This
+ordered table of encoding-root constants plus the manifest-listed,
+length-delimited `authorityCodexBytes` and `indexCodexBytes` owner modules —
+and the state-readable `codexConstants()`; there is no separate authority or
+index hash. This
 chapter consumes the exact bytes and outer hash here, in
-§2.4, and in §8.2, and requires that the hash cover every constant named in
-this chapter. DEPENDS-ON: encoding chapter (SR-16).]
+§2.4, and in §8.2. The hash covers every item this chapter classifies as
+`PROFILE`; Realm configuration and revision values remain committed by
+`InitConfig` and the applicable Realm-revision mechanism rather than being
+silently promoted into the Codex. DEPENDS-ON: encoding chapter (SR-16).]
 
 For B0, `protocolMajor = 0` and `protocolMinor = 0` are Codex constants.
 Changing either, or any constant covered by `codexConstantsHash`, produces a
@@ -306,9 +309,10 @@ C-3 REALM-ID  recompute RealmId (§2.2) from section A; compare with
               the EFS link, receipt, or citation that led here). (A-2/A-4)
 C-4 PROFILE   fetch the exact codexConstants() bytes; require their keccak256
               equals genesisFacts.codexConstantsHash; parse every section,
-              including the one length-delimited indexCodexBytes module, with
-              exact revision/count/length exhaustion; then recompute profileId.
-              The client MUST support that exact profile/module. Any mismatch,
+              including the ordered AUTHORITY and INDEX module-manifest rows,
+              with exact revision/code/count/length exhaustion; then recompute
+              profileId. The client MUST support that exact profile/modules.
+              Any mismatch,
               unknown code/layout/context selector, omitted module, duplicate
               module, or trailing byte returns UNSUPPORTED_PROFILE and MUST
               NOT best-effort-decode. (A-3)
@@ -567,9 +571,15 @@ logSlotB(ord):
   reserved     bits [112..255]      // MBZ (u144)
 
 EnvelopeMeta:
-  principalId       bytes32
-  envelopeOrdinal   u40
-  leafCount         u16
+  envelopePrincipal[envelopeId] = principalId bytes32
+  envelopeMeta word (authorship owner; bit 0 is LSB):
+    profile          bits [0..15]    u16
+    leafCount        bits [16..31]   u16
+    authEpoch        bits [32..95]   u64
+    notAfter         bits [96..159]  u64
+    headerStored     bit  [160]      bool
+    envelopeOrdinal  bits [161..208] u48
+    reserved         bits [209..255]      // MBZ (u47)
   carriage metadata sufficient to return the canonical unsigned envelope
   `abi.encode(EnvelopeHeader, fullRecordIds)`
 
@@ -599,7 +609,8 @@ contractCodehash = bytes32 conditional slot for CONTRACT_ERC1271 only
 
 uint48 admissionCount;    // physical width; uint64 at every ABI (SR-4);
                           // typed U48_GUARD revert at 2^48 − 1
-uint40 envelopeCount;     // high-water envelope ordinal
+uint48 envelopeCount;     // high-water envelope ordinal; u48 at ABI;
+                          // E_ENVELOPE_ORDINAL_EXHAUSTED before allocation
 uint64 admissionBatchCount;
 ```
 
@@ -617,13 +628,27 @@ envelope is accepted and remains stable across staged admissions. Envelope
 metadata deliberately owns no singular receipt status, revision, block, or
 authority basis.
 
+Envelope inventory is guarded independently from AdmissionOrdinal allocation.
+The write-free shadow begins `nextEnvelopeOrdinal = envelopeCount`. On the
+first fresh occurrence of an unseen Envelope it requires
+`nextEnvelopeOrdinal < 2^48 - 1`, increments once, and stages the resulting
+u48 in the packed metadata and reverse map. Failure reverts the exact
+authorship error `E_ENVELOPE_ORDINAL_EXHAUSTED()` before any state; there is no
+wrap or narrowing. Existing-Envelope retries/staged admissions do not touch
+the counter. Because each Envelope ordinal accompanies at least one accepted
+occurrence, 2^48 envelopes lasts at least approximately 892 years even at a
+sustained 10,000 fresh Envelopes per second; this is century-scale headroom,
+not a claim of infinite capacity.
+
 The accepting `AdmissionBatch` and logical receipt are immutable historical
 validation evidence. Main-envelope witnesses are not stored, so Realm state
 does not promise replay of historic signature or ERC-1271 validation. A reader
 uses the receipt's recorded verifier/code basis for historical authorship
 grade; calling present authority cannot reinterpret that verdict. The bounded
 pre-withdrawal carrier below is the deliberate exception for a never-admitted
-target, whose proof must remain reconstructable despite having no receipt.
+target, whose unsigned identity preimages must remain reconstructable despite
+having no target receipt. It is not a historical-state proof carrier: the
+accepted Withdrawal's own receipt/batch is the authoritative admission fact.
 
 Each single-envelope `publish` call that accepts at least one new occurrence
 appends one batch record. Its new ordinals are contiguous, and append-only
@@ -701,7 +726,7 @@ terminal occurrence resurrects. The global sequence is gap-free by accepted
 event but intentionally sparse with respect to envelope leaf indexes. No
 per-envelope range, hole reservation, or leaf-index arithmetic identifies an
 occurrence; `admissionAt` is a direct two-word log read. A new envelope receives
-its stable `envelopeOrdinal u40` when its first new occurrence is accepted.
+its stable `envelopeOrdinal u48` when its first new occurrence is accepted.
 Prospective assignment is not a state allocation: any later preflight failure,
 including a point-in-order lifecycle or CAS failure, leaves the counter and every
 log slot untouched.
@@ -727,7 +752,7 @@ struct PublishLeafResult {
 
 struct PublishResult {
   bytes32 envelopeId;
-  uint40 envelopeOrdinal;      // stable existing or newly assigned
+  uint48 envelopeOrdinal;      // stable existing or newly assigned
   PublishLeafResult[] leaves;  // one result per selected leaf, in mask order
 }
 
@@ -742,9 +767,10 @@ function publish(
 This is the **sole Core write primitive**. `envelopeBytes` carries the repaired
 PublicationEnvelope header, full ordered `recordIds[]`, selected inline bodies,
 the envelope witness, and any bounded target evidence. Core recomputes the
-EIP-712 envelope digest and `EnvelopeId`, then requires
+EIP-712 envelope digest and `EnvelopeId`, then executes authority prelude
+OP1–OP5 in order and OP6
 `computePrincipalId(principal) == header.principalId`; mismatch reverts
-`AUTH_PRINCIPAL_MISMATCH(declared, computed)` before either witness check.
+`AUTH_PRINCIPAL_MISMATCH(declared, computed)` before reading either witness.
 First-use `PrincipalRecord` bytes come only from that verified descriptor.
 
 Envelope authorship is verified through the one Lane-3 interface:
@@ -972,8 +998,9 @@ as local destination truth.
   target-evidence item's bounded syntactic shape; do not semantically match
   targetEvidence to effects yet
 2 recompute the envelope digest and EnvelopeId
-3 computePrincipalId(principal); assert equality with header.principalId
-4 verify the envelope witness; retain its exact basis pair
+3 execute authority prelude OP1..OP5 in order; computePrincipalId(principal);
+  execute OP6 and assert equality with header.principalId
+4 continue at OP7, verify the envelope witness, and retain its exact basis pair
 5 decode consent carriage only far enough to derive the prospective explicit or
   implicit leafMask; enforce nonempty/in-range selection, selected body carriage,
   and selected body-to-RecordId commitments; do not semantically inspect
@@ -1141,6 +1168,7 @@ error AUTH_PRINCIPAL_MISMATCH(bytes32 declared, bytes32 computed);
 error ErrWithdrawNotAuthor(bytes32 targetEnvelopeId, uint16 targetLeafIndex,
                            bytes32 envelopePrincipal, bytes32 targetPrincipal);
 error U48_GUARD();
+error E_ENVELOPE_ORDINAL_EXHAUSTED(); // bubbled authorship namespace
 ```
 
 Authority-verifier errors bubble unchanged from the principal chapter's §3.6;
@@ -1441,8 +1469,13 @@ W-1  GENESIS     read genesisFacts(): chainRef, protocolMajor/minor,
                  deployBlock, deployCodehash, profileId, initConfigHash,
                  genesisCommitment, and realmId. Read codexConstants(), require
                  its hash to equal codexConstantsHash, decode the exact
-                 length-delimited indexCodexBytes module with no duplicate or
-                 trailing bytes, then re-encode InitConfig/1, recompute all
+                 ordered authorityCodexBytes/indexCodexBytes manifest modules
+                 with no unknown, reordered, duplicate, or trailing bytes,
+                 including AUTHORITY's `VerifierVM/1` revision, 30 constants,
+                 24 fixed-schema opcode rows, ordered 11-step common prelude,
+                 four ordered profile programs (6/5/4/4 steps), and 15-row
+                 error table,
+                 then re-encode InitConfig/1, recompute all
                  four hashes/IDs, and compare.
 W-2  REVISIONS   n := revisionCount(); for i in 1..n read revisionAt(i);
                  require revisionOrdinal and activatedAtBlock strictly
@@ -1455,8 +1488,10 @@ W-2  REVISIONS   n := revisionCount(); for i in 1..n read revisionAt(i);
                  oldRef/newRef sequence and exact paired revision/block/first-
                  admission boundaries, and compare the result with the latest
                  revision plus currentUpgradeAuthorityRef().
-W-3  ENVELOPES   enumerate envelopeOrdinal 1..envelopeCount; fetch the exact
-                 persisted canonical unsigned bytes
+W-3  ENVELOPES   require envelopeCount <= 2^48-1; enumerate the complete u48
+                 range envelopeOrdinal 1..envelopeCount with a guarded loop
+                 that terminates after the max value rather than incrementing
+                 it; fetch the exact persisted canonical unsigned bytes
                  `abi.encode(EnvelopeHeader, fullRecordIds)`. Recompute the
                  EIP-712 digest and EnvelopeId. Fetch the PrincipalRecord,
                  recompute PrincipalId, and require linkage to the header and
@@ -1494,10 +1529,18 @@ W-7  EFFECTS     replay exactly the Binding-set, Binding-tombstone, and
                  effective T4, require nonempty preWithdrawalEvidenceAt(ord), decode
                  the exact TargetEnvelopeEvidence, recompute target EnvelopeId
                  and leaf range, recompute target RecordId from the retained
-                 TypeSchemaId/bodyHash commitment, assert
-                 descriptor equality, replay the retained
-                 target witness/author check at its recorded basis, and
-                 require target.revokedAtOrdinal == ord. Empty evidence is valid
+                 TypeSchemaId/bodyHash commitment, recompute target PrincipalId
+                 from the descriptor, and require Principal equality plus
+                 target.revokedAtOrdinal == ord. Treat the accepted Withdrawal
+                 Occurrence's AdmissionReceipt/AdmissionBatch as the
+                 authoritative historical fact that Core verified its main
+                 authority, target evidence/witness, exact Principal equality,
+                 policy, Realm revision, and code/authority basis at admission.
+                 Do NOT invoke current authority code, require a historical
+                 archive call, or claim to reproduce an ERC-1271 verdict from
+                 retained bytes. Optional target-signature re-verification is
+                 diagnostic only for timeless EOA/P-256/RSA math profiles and
+                 never gates reconstruction. Empty evidence is valid
                  only when the target effect was not T4, including a terminal
                  no-op; no effective PRE_WITHDRAWN target lacks retained evidence.
 W-8  INDEXES     replay deterministic postings, per-Record liveness, and count
@@ -1642,15 +1685,15 @@ function authorityTransitionAt(uint32 transitionOrdinal) external view returns (
   bytes32 oldRef, bytes32 newRef, uint48 activatedAtBlock,
   uint64 firstAdmissionOrdinal, uint32 revisionOrdinal);
 function admissionCount() external view returns (uint64);
-function envelopeCount() external view returns (uint40);
-function envelopeIdByOrdinal(uint40 ordinal) external view returns (bytes32);
+function envelopeCount() external view returns (uint48);
+function envelopeIdByOrdinal(uint48 ordinal) external view returns (bytes32);
 /// Exact canonical unsigned bytes `abi.encode(EnvelopeHeader, fullRecordIds)`.
 /// Excludes the unstored main witness, bodies, target evidence, intent,
 /// submitter/payer, and receipt material.
 function getEnvelopeBytes(bytes32 envelopeId)
   external view returns (bytes memory canonicalUnsignedEnvelope);
 function envelopeInfo(bytes32 envelopeId) external view returns (
-  uint40 envelopeOrdinal, bytes32 principalId, uint16 leafCount);
+  uint48 envelopeOrdinal, bytes32 principalId, uint16 leafCount);
 function getPrincipalRecord(bytes32 principalId) external view
   returns (bytes memory descriptorBytes);
 function typeSchemaIdByOrdinal(uint64 typeOrdinal) external view
@@ -1664,6 +1707,8 @@ function preWithdrawalEvidenceAt(uint64 withdrawalOrdinal) external view
   // rejects 0, values above admissionCount, and values above the physical u48
   // range. Empty iff that accepted Withdrawal caused no effective T4;
   // nonempty is <= MAX_ENVELOPE_BODY_BYTES and decodes as TargetEnvelopeEvidence.
+  // It is immutable identity/preimage material, not a historical ERC-1271
+  // proof carrier; the accepted Withdrawal receipt/batch is the verdict.
 function receiptOf(bytes32 envelopeId, uint16 leafIndex) external view
   returns (AdmissionReceiptView memory);      // logical AdmissionReceipt/1
 function admissionAt(uint64 ordinal) external view
@@ -1691,7 +1736,7 @@ function getTypeSchema(bytes32 typeSchemaId) external view returns (
 function getRecord(bytes32 recordId) external view returns (
   bytes32 typeSchemaId, bytes memory canonicalBody, uint64 firstAdmitOrdinal);
 function getEnvelope(bytes32 envelopeId) external view returns (
-  bytes memory canonicalUnsignedEnvelope, uint40 envelopeOrdinal,
+  bytes memory canonicalUnsignedEnvelope, uint48 envelopeOrdinal,
   uint16 leafCount, bytes32 principalId, uint64 authEpoch);
 function getOccurrence(bytes32 envelopeId, uint16 leafIndex) external view returns (
   uint8 status, uint64 ordinal, bytes32 recordId, bytes32 typeSchemaId,
@@ -1833,6 +1878,11 @@ The compact contract other chapters rely on:
   `TargetEnvelopeEvidence` verifier and passes byte-identical
   `ValidatedOccurrenceLifecycleEffect` context to the status and Binding
   owners; neither downstream library accepts opaque proof bytes (§5.1/§5.5).
+- **Historical T4 boundary**: the accepted Withdrawal's receipt/batch proves
+  that the admitting Core revision applied main-authority, target-witness,
+  Principal-equality, and policy checks. Retained target evidence recomputes
+  target identity fields but reconstruction never invokes current/archive
+  ERC-1271 code; timeless math-only rechecks are optional and non-gating (§8).
 - **Intrinsic bootstrap**: ordinary accepted TypeSchemaGroup/1 Record plus
   atomic validation and deterministic Type cache materialization. The only
   application-effect Types are Binding set, Binding tombstone, and Withdrawal.

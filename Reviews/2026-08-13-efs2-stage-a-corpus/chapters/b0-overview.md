@@ -159,6 +159,15 @@ and vector; `uint48` as the physical packed representation inside postings and
 log words (5 per slot), with an explicit `U48_GUARD` revert at `2^48 − 1` and
 a successor-realm seam. At a sustained 10,000 admissions/sec, 2^48 lasts
 ≈ 892 years. Ordinals start at 1; 0 is the none-sentinel (SR-10).
+Reconstruction-critical Envelope inventory counters are independently
+`uint48`: `envelopeOrdinal`, `envelopeCount`, and `nextEnvelopeOrdinal` never
+use the retired 40-bit form. A new Envelope allocates only while
+`envelopeCount < 2^48 - 1`; exhaustion reverts the exact authorship error
+`E_ENVELOPE_ORDINAL_EXHAUSTED()` before state and never wraps. Because an
+Envelope ordinal is allocated only with its first accepted occurrence,
+Envelope creation cannot outrun admissions; the same 10,000/s stress rate
+therefore gives at least the same ≈892-year horizon. Existing-Envelope
+idempotent/staged calls do not allocate and remain valid at the ceiling.
 
 **SR-5 — size constants (RP-5, S5).** B0 pins, all [HYPOTHESIS] to be
 re-derived by the Stage B harness against per-Realm gas caps (EIP-7825's
@@ -252,7 +261,16 @@ Principal descriptor, and witness; never the target body). Admission
 recomputes `EnvelopeId`, checks the target range and
 `keccak256(abi.encode(DOM_RECORD,typeSchemaId,bodyHash))` against the signed
 target RecordId, checks descriptor equality, and verifies target witness and
-author before classifying the target effect. It constructs typed
+author before classifying the target effect. The accepted Withdrawal
+Occurrence's immutable AdmissionReceipt/AdmissionBatch is then the
+authoritative historical fact that Core performed the main-authority,
+target-evidence/witness, Principal-equality, policy, and code-revision checks
+at admission. Retained evidence remains immutable forensic/preimage material:
+it recomputes the target EnvelopeId, RecordId, leaf, and Principal, but W-7
+never calls current authority code or claims to reproduce a historical
+ERC-1271 verdict. Re-verifying the retained target signature is optional
+diagnostics only for timeless EOA/P-256/RSA math profiles and is never needed
+for Realm-state reconstruction. It constructs typed
 `ValidatedOccurrenceLifecycleEffect`, and passes that same context to the
 status owner (`LibIndex`) and head owner (`LibBinding`); proof bytes and
 witness/authority/author validation never cross either seam. It then sets
@@ -361,9 +379,10 @@ it stages no missing cache and appends no batch/lane word.
 **SR-13 — the authorship identity chain (red-team BLOCKING).** The write path
 carries the `AccountPrincipal` descriptor explicitly:
 `publish(envelopeBytes, AccountPrincipal calldata principal, intentBytes,
-intentWitness)`. Admission asserts
-`computePrincipalId(principal) == envelope.header.principalId` **before**
-witness verification — a valid witness for the attacker's own key can never
+intentWitness)`. Admission executes the committed V1–V5 structural prefix,
+then asserts `computePrincipalId(principal) ==
+envelope.header.principalId` at OP6 **before reading any witness byte** — a
+valid witness for the attacker's own key can never
 be attributed to a different declared principalId. One verifier signature
 program-wide:
 `verify(AccountPrincipal calldata p, bytes32 digest, bytes calldata witness,
@@ -407,12 +426,25 @@ keccak256(revisionDescriptorBytes)))`,
 owns `revisionDescriptorBytes`. The encoding chapter's variant is superseded;
 the encoding chapter also gains the `codexConstantsHash` definition and a
 state-readable `codexConstants()` that the realm chapter's `profileId` and
-`genesisCommitment` consume. The index chapter owns one exact version-1
+`genesisCommitment` consume. The principal chapter owns one exact version-1
+`authorityCodexBytes` module (verifier/kind/witness compatibility,
+AccountPrincipal grammar, AuthorityBasis layout, 30 verification constants,
+the closed `VerifierVM/1` instruction set of 24 fixed-schema opcodes, its
+ordered 11-step common prelude, four ordered profile programs of 6/5/4/4
+steps for exact ecrecover/EIP-7702, ERC-1271, EIP-7951 P-256, and EFS-policy
+prehashed RSA-SHA256 over strict DER/EIP-198/EMSA rules, and the closed
+15-row authority error table). The
+index chapter owns one exact version-1
 `indexCodexBytes` module (closed query/status codes, semantic limits, cursor
-layouts, context selectors, and continuation rules); encoding embeds it once
-as `u32 length || bytes` inside `codexConstantsBytes`. There is no second
-index hash: state readers reconstruct the module from the existing Codex bytes
-and verify the one outer hash.
+layouts, context selectors, and continuation rules); encoding embeds both
+exactly once in the ordered owner-module manifest inside
+`codexConstantsBytes`. There is no authority/index-local hash: state readers
+reconstruct both modules from the existing Codex bytes and verify the one
+outer hash. The manifest-completeness gate forbids an owner chapter from
+introducing a profile-visible constant/code/table/semantic rule absent from its concrete
+module; Realm configuration, deployed ABI/result schema, physical layout,
+application profile, evidence-only, and measurement-pending values must be
+explicitly classified rather than hidden behind an overbroad coverage claim.
 
 Realm bootstrap is byte-exact: B0 is protocol 0.0 and `InitConfig/1` is
 `abi.encode(uint16(1),uint8 finalityRuleKind,uint32 finalityParam,uint8

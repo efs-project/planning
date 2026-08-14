@@ -442,7 +442,7 @@ re-derives them against each qualifying Realm's gas cap and mandatory index fan-
 | `MAX_BODY_BYTES` | 8,192 | one leaf may use the whole envelope body budget |
 | `MAX_BIND_LEAVES_PER_ENVELOPE` | 64 | Binding-class leaf structural cap |
 | `MAX_WITNESS_BYTES` | 4,096 | bounds ERC-1271 witness blobs |
-| `MAX_ERC1271_VERIFY_GAS` | 200,000 | cap on the external `isValidSignature` call |
+| `ERC1271_VERIFY_GAS` | 200,000 measurement candidate | Stage B freezes one concrete value for the corpusVersion before any cell mints; every cell embeds the same principal-owned `authorityCodexBytes`, and a cap variant requires a distinct corpusVersion/comparison run |
 | `MAX_ENVELOPE_WIRE_BYTES` | 16,384 | entire EnvelopeWire, including bounded target evidence |
 | `G_ADMIT_BUDGET` | 15,000,000 | ≤ G_TX_CAP with ~10% margin |
 
@@ -695,8 +695,14 @@ target's nonzero `revokedAtOrdinal`, loads and decodes the retained evidence,
 checks the stored evidence's ID/range/descriptor linkage, and uses its already
 authenticated header Principal for the author comparison; it does not call live
 target authority again. The original accepted Withdrawal plus immutable retained
-bytes are the admission-time authentication fact that W-7 replays. The caller MUST
-NOT resupply evidence. The target effect is a no-op and the retained bytes are
+bytes are consumed differently at reconstruction: the accepted Withdrawal
+Occurrence's AdmissionReceipt/AdmissionBatch is the authoritative historical
+fact that Core verified the main authority, target evidence/witness, exact
+Principal equality, policy, and code revision at admission. Retained bytes are
+immutable forensic/preimage material for recomputing the target EnvelopeId,
+leaf RecordId/type, and Principal; W-7 MUST NOT invoke current target authority
+or claim to reproduce a historical ERC-1271 verdict. The caller MUST NOT
+resupply evidence. The target effect is a no-op and the retained bytes are
 neither replaced nor copied. Re-admission of the same already-ACTIVE Withdrawal
 occurrence is ordinary T2 idempotence and returns before target-effect preflight,
 also without evidence.
@@ -787,11 +793,14 @@ AuthorityVerifierV1.verify(
 ) -> (AuthorityBasisWord basis, bytes32 codehashOrZero)
 ```
 
-`verify` reverts on failure and reads no `msg.sender`/`tx.origin`. Admission MUST
-first execute
+`verify` reverts on failure and reads no `msg.sender`/`tx.origin`. As the
+admission-owned prefix of this one logical verifier program, Admission MUST
+execute §3.8 OP1–OP5 in order and only then OP6
 `computePrincipalId(principal) == envelope.header.principalId`, reverting
-`AUTH_PRINCIPAL_MISMATCH(declared, computed)` before either envelope- or
-intent-witness verification. First-use `PrincipalRecord` persistence copies
+`AUTH_PRINCIPAL_MISMATCH(declared, computed)` before reading either envelope-
+or intent-witness bytes. The internal library continues at OP7; an
+implementation may inline the wrapper/library boundary but may not reorder or
+repeat the committed steps. First-use `PrincipalRecord` persistence copies
 exactly this verified calldata descriptor. The returned basis is persisted without
 projection:
 
@@ -932,7 +941,8 @@ and advances it in ascending selected `leafIndex` order:
 ```text
 ShadowState {
   nextOrdinal                     // starts admissionCount
-  nextEnvelopeOrdinal, nextTypeOrdinal, nextPrincipalOrdinal
+  nextEnvelopeOrdinal u48         // starts envelopeCount; separate guarded inventory
+  nextTypeOrdinal, nextPrincipalOrdinal
   occurrence[occKey]              // status, ordinal, revokedAtOrdinal
   envelopeAvailable[EnvelopeId]   // persisted external target bundles only
   targetCommitment[OccurrenceKey] // authenticated TypeSchemaId/bodyHash only
@@ -992,6 +1002,12 @@ for i in ascending set-bit order of leafMask:
       plan ALREADY_ADMITTED; continue                 // no effect replay
   if src.status in {WITHDRAWN,PRE_WITHDRAWN}:
       reject E_NO_RESURRECTION                         // no writes exist
+
+  if envelopeOrdinal[current EnvelopeId] == 0 and no shadow ordinal assigned yet:
+      require shadow.nextEnvelopeOrdinal < 2^48 - 1
+        else E_ENVELOPE_ORDINAL_EXHAUSTED()
+      shadow.nextEnvelopeOrdinal += 1
+      stage this uint48 as the Envelope's stable ordinal
 
   if this is TypeSchemaGroup/1:
       validate groupBytes and stage all deterministic member descriptors/caches;
@@ -1059,11 +1075,13 @@ publish(bytes envelopeBytes, AccountPrincipal calldata principal,
     validate the main-envelope structure, body/carriage bounds, and the bounded
     syntactic shape of every target-evidence item (§2.2), but DO NOT yet match
     targetEvidence to Withdrawal effects
- 2. computed ← computePrincipalId(principal)
-    require computed == env.header.principalId
-      — AUTH_PRINCIPAL_MISMATCH(declared, computed), before ANY witness verify
+ 2. execute authority prelude OP1..OP5 in order; computed ←
+    computePrincipalId(principal); execute OP6 and require
+    computed == env.header.principalId
+      — AUTH_PRINCIPAL_MISMATCH(declared, computed), before reading ANY witness byte
  3. envDigest ← §2.4; envelopeId ← §2.3
- 4. (basisE, codehashE) ← AuthorityVerifierV1.verify(
+ 4. continue the one authority program at OP7:
+    (basisE, codehashE) ← AuthorityVerifierV1.verify(
        principal, envDigest, env.witness, verifyContext)
     // reverts typed on failure; persist this pair only if this call accepts new state
  5. decode the consent carriage only far enough to identify explicit-intent or
@@ -1391,8 +1409,11 @@ mapping(bytes32 envelopeId => uint256) envelopeMeta;
 //   bits  32–95  authEpoch
 //   bits  96–159 notAfter
 //   bit   160    headerStored flag
-//   bits 161–255 zero (reserved)
+//   bits 161–208 envelopeOrdinal uint48; 0 iff never accepted
+//   bits 209–255 zero (reserved, 47 bits)
 mapping(bytes32 envelopeId => bytes32[]) envelopeRecordIds; // length = count
+mapping(uint48 envelopeOrdinal => bytes32 envelopeId) envelopeIdByOrdinal;
+uint48 envelopeCount; // highest allocated Envelope ordinal; never wraps
 // getEnvelopeBytes returns the exact canonical unsigned envelope:
 //   abi.encode(EnvelopeHeader(profile, principalId, authorityRef, authEpoch,
 //                             pubNonce, notAfter), recordIds)
@@ -1431,6 +1452,18 @@ and vector. Before assigning the next ordinal, Core applies `U48_GUARD` and reve
 at `2^48 - 1`; a successor Realm/revision is the named migration seam. Zero remains
 the none-sentinel.
 
+Envelope inventory uses a separate guarded u48 discipline at storage **and**
+ABI: `envelopeOrdinal`, `envelopeCount`, and the shadow's
+`nextEnvelopeOrdinal` are `uint48`. Only the first newly accepted occurrence
+of a previously unseen Envelope allocates. Preflight requires
+`nextEnvelopeOrdinal < 2^48 - 1`, increments once, and otherwise reverts
+`E_ENVELOPE_ORDINAL_EXHAUSTED()` before any write; it never wraps or silently
+narrows. Existing-Envelope staged admissions and idempotent retries allocate
+nothing and remain valid when the counter is exhausted. Since every allocated
+Envelope consumes at least one AdmissionOrdinal, Envelope inventory cannot
+grow faster than admissions: even the intentionally extreme 10,000-new-
+Envelopes/s rate lasts approximately 892 years at u48.
+
 State-readability [DERIVED INVARIANT — constitution reconstruction clause;
 R-D3]: header + full RecordId vector persist on first admission so a second
 implementation can recompute every unsigned-envelope digest, EnvelopeId,
@@ -1440,8 +1473,13 @@ succeeded; absent an externally supplied original witness, historic signature
 verification is not replayable from state and is not claimed. For every
 PRE_WITHDRAWN target, the effective Withdrawal's ordinal retains the exact
 bounded canonical evidence bytes
-needed to recompute the target EnvelopeId, leaf range, descriptor equality,
-witness, and author. This is a narrow lifecycle exception, retained because the
+needed to recompute the target EnvelopeId, leaf range, RecordId, descriptor
+equality, and Principal. The witness remains immutable forensic material, not
+a required replay input. Optional signature re-verification is permitted only
+for timeless EOA/P-256/RSA mathematical profiles; it is diagnostic, never a
+Realm-state reconstruction requirement. ERC-1271 target re-verification is
+never part of reconstruction because the historical account state is absent.
+This is a narrow lifecycle exception, retained because the
 never-admitted target occurrence has no receipt or admitted body spine—even when
 another leaf previously made its unsigned Envelope spine readable. It does not
 silently make main-envelope witnesses persistent. No logs or EFS-operated
@@ -1487,7 +1525,7 @@ struct PublishLeafResult {
 
 struct PublishResult {
     bytes32 envelopeId;
-    uint40 envelopeOrdinal;           // stable existing or newly assigned
+    uint48 envelopeOrdinal;           // stable existing or newly assigned
     PublishLeafResult[] leaves;        // selected leaves, ascending mask order
 }
 
@@ -1581,6 +1619,7 @@ error AUTH_PRINCIPAL_MISMATCH(bytes32 declared, bytes32 computed);
 error ErrWithdrawNotAuthor(bytes32 targetEnvelopeId, uint16 targetLeafIndex,
                            bytes32 envelopePrincipal, bytes32 targetPrincipal);
 error U48_GUARD();
+error E_ENVELOPE_ORDINAL_EXHAUSTED();
 ```
 
 Authority-verifier errors bubble unchanged from the principal chapter's §3.6;
@@ -1598,7 +1637,7 @@ There is no generic `E_AUTHORITY`, `E_BAD_WITNESS`, `E_NOT_AUTHOR`, or
 | `MAX_BIND_LEAVES_PER_ENVELOPE` | 64 | [HYPOTHESIS] Stage B re-derives |
 | `MAX_WITNESS_BYTES` | 4,096 | §2.5; applies to each main/target witness; aggregate target evidence also shares the 8,192-byte and 16,384-byte caps |
 | `MAX_ENVELOPE_WIRE_BYTES` | 16,384 | [HYPOTHESIS] entire EnvelopeWire including all target evidence; Stage B re-derives |
-| `MAX_ERC1271_VERIFY_GAS` | 200,000 | §4.1 |
+| `ERC1271_VERIFY_GAS` | 200,000 measurement candidate; one exact corpusVersion-wide module value required before any cell mints | principal §3.7–§3.8 |
 | `G_ADMIT_BUDGET` | 15,000,000 | §2.5; ≤ Realm tx cap (L1: 16,777,216, EIP-7825) |
 | `c_occ` budget | ≤ 90,000 gas | HYPOTHESIS; measurement closes it |
 | `WITHDRAWAL_TYPE_ID` | TBD — Type-chapter formula over the §3.3 pinned schema | open item O2 |
@@ -1615,7 +1654,7 @@ There is no generic `E_AUTHORITY`, `E_BAD_WITNESS`, `E_NOT_AUTHOR`, or
 5. Rail substitution (§9): three rails, byte-identical persisted authorship.
 6. Identity-chain and witness vectors: a valid witness for an attacker descriptor
    with a different declared `header.principalId` MUST fail with
-   `AUTH_PRINCIPAL_MISMATCH` before `verify`; honest descriptor equality passes;
+   `AUTH_PRINCIPAL_MISMATCH` at committed prelude OP6 before any witness step; honest descriptor equality passes;
    low-S malleability rejection; 1271 gas-bomb and
    returndata-bomb bounded; 7702 account before/under/after delegation classified
    per-admission; ERC-6492 wrapper rejected.
@@ -1692,6 +1731,11 @@ There is no generic `E_AUTHORITY`, `E_BAD_WITNESS`, `E_NOT_AUTHOR`, or
 9. Two Principals with identical low-160-bit accounts distinct end-to-end (R-D2).
 10. Bounds: 65 leaves, count = 0, oversize body, oversize witness, leafMask bit ≥
     count — each MUST-FAIL with its named error.
+11. Envelope inventory boundary: with `envelopeCount = 2^48-2`, a fresh
+    Envelope allocates ordinal `2^48-1`; the next fresh Envelope reverts
+    `E_ENVELOPE_ORDINAL_EXHAUSTED()` before state. An idempotent retry and a
+    staged fresh occurrence of an existing Envelope at that ceiling allocate
+    nothing and preserve its existing u48 ordinal.
 
 ---
 
@@ -1718,7 +1762,9 @@ Compact contract other chapters may rely on:
   earlier-staged Type descriptor resolves, while unselected carriage is not
   semantic input and same-envelope
   RecordId DAGs remain legal; stored
-  ordinals are u48 and every public value is u64;
+  Admission ordinals are u48 stored/u64 public, while reconstruction-critical
+  `envelopeOrdinal`/`envelopeCount` are guarded u48 at storage and ABI with the
+  exact exhaustion error and no wrap;
   withdrawal is author-only, Realm-local, non-deleting, non-resurrecting,
   authenticated pre-withdrawal legal only with bounded one-to-one full target evidence
   whose recomputed EnvelopeId, target-index range, and
@@ -1726,7 +1772,10 @@ Compact contract other chapters may rely on:
   author comparison; evidence and retained state contain the commitment pair,
   never the target body; every effective T4 durably retains one bounded
   canonical evidence value at its Withdrawal ordinal, and terminal repeats load
-  it rather than requiring evidence again; after bounded structure and envelope
+  it rather than requiring evidence again; the accepted Withdrawal receipt/batch
+  is the historical validation fact, while retained bytes recompute identities
+  without required witness replay or any ERC-1271 historical-state call; after
+  bounded structure and envelope
   authentication, an all-selected-ACTIVE retry resolves kernel-known intrinsic
   or persisted selected Type descriptors and enforces the self-OCCREF guard,
   then returns before target

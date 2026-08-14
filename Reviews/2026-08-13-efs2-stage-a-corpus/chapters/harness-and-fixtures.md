@@ -200,11 +200,17 @@ Additional red-team repair gates cover seams the old table missed:
   total-posting locator visit bounds, exact trusted-Principal selector
   eligibility, last-live unique counts, and the `REF_INSTANCES_MAX = 16`
   bound.
-- The index owner emits exactly one version-1 `indexCodexBytes` artifact. The
-  encoding owner embeds it once as `u32 length || bytes` in
-  `codexConstantsBytes`; no second index hash or alternate prose-only constants
-  table exists. Profile/genesis reconstruction parses and replays those exact
-  bytes. Admission enumeration is solely `admissionLogPage(PageRequest)` with
+- The principal and index owners emit exactly one version-1
+  `authorityCodexBytes` and `indexCodexBytes` artifact respectively. The
+  encoding owner embeds them once in owner-module order AUTHORITY then INDEX in
+  `codexConstantsBytes`; no owner-local hash or alternate prose-only constants
+  table exists. H-MODULE-COMPLETE rejects every profile-visible owner constant,
+  code, verifier opcode/program step, or table absent from its concrete
+  module/root classification. The authority artifact decodes
+  30 ordered constants, `VerifierVM/1`'s 24 opcode/semantics rows, its 11-step
+  common prelude, and exactly four active programs with step counts `6/5/4/4`.
+  Profile/genesis reconstruction parses and replays those exact bytes.
+  Admission enumeration is solely `admissionLogPage(PageRequest)` with
   `PageCursorV1`/`PageResult`; `admissionAt` remains point-only.
 - Reference extraction consumes the exact three-byte
   `(fieldIdx,selectorKind,memberIdx)` tail; only DIRECT and
@@ -229,6 +235,12 @@ Additional red-team repair gates cover seams the old table missed:
   target-evidence source. Retained reads expose the signed
   recordId/type/principal but no body, postings, live fold, or Binding head for
   a never-admitted target.
+- For W-7, the accepted Withdrawal's AdmissionReceipt/AdmissionBatch is the
+  authoritative historical fact that Core verified main authority, target
+  evidence/witness, exact Principal equality, policy, and code basis. Retained
+  target evidence recomputes EnvelopeId/RecordId/Principal but never requires
+  current/archive ERC-1271 execution; EOA/P-256/RSA math-only re-verification is
+  optional diagnostics and never gates the reconstruction fold.
 
 The corpus ABI shape is exact: `TargetRecordCommitment = (bytes32
 typeSchemaId,bytes32 bodyHash)` and `TargetEnvelopeEvidence = (uint16
@@ -317,12 +329,14 @@ Entries sort by unsigned-ASCII path bytes; `bytes` is exact file length and
 the digest is `keccak256(fileBytes)`. The manifest itself is not an input file
 and does not contain its own version.
 
-Two entries are mandatory: `interfaces/index-codex.bin` is exactly the index
-chapter's `indexCodexBytes`; `profiles/codex-constants.bin` is the complete
+Three entries are mandatory: `interfaces/authority-codex.bin` is exactly the
+principal chapter's `authorityCodexBytes`;
+`interfaces/index-codex.bin` is exactly the index chapter's
+`indexCodexBytes`; `profiles/codex-constants.bin` is the complete
 encoding-owned `codexConstantsBytes` returned by Core. The latter must contain
-the former exactly once behind its canonical `u32 indexCodexLen`, and its
-keccak256 must equal every Realm profile's `codexConstantsHash`. Neither file
-mints a domain or a second module hash.
+the former two exactly once as manifest module codes 1 then 2 behind their
+canonical u32 lengths, and its keccak256 must equal every Realm profile's
+`codexConstantsHash`. None mints a domain or an owner-local module hash.
 
 ```text
 canonicalCorpusBytes = RFC8785(corpus-manifest object)
@@ -398,15 +412,40 @@ Mandatory freeze checks are executable corpus members:
   `stateDigest`, and swapping either form fails before report acceptance.
 - **H-DOMTABLE:** all six F1/F3/F4 domains occur once in the corpus manifest
   and never in `codexConstantsHash`; retired spellings reject. The same case
-  byte-compares `interfaces/index-codex.bin` to the sole length-delimited
-  module in `profiles/codex-constants.bin`, decodes all 18 limit rows, 14 code
+  byte-compares both `interfaces/authority-codex.bin` and
+  `interfaces/index-codex.bin` to manifest module codes 1 and 2 in
+  `profiles/codex-constants.bin`; it decodes every authority kind/witness/
+  descriptor/basis/constant/opcode/program/code/error row, including the
+  common prelude and all four authority programs, and all 18 index limit rows, 14 code
   tables, three cursor layouts, four context selectors, and four continuation
-  rows, and rejects any count/order/length/token drift, duplicate module,
-  trailing byte, or separately supplied index hash.
+  rows, and rejects any module-code/count/order/length/token drift, duplicate
+  module, trailing byte, or separately supplied owner hash.
+- **H-MODULE-COMPLETE:** inventory every normative named constant, bound,
+  enum/code/layout/error table, and versioned verifier opcode/program rule in
+  every owner chapter. Each item occurs once as
+  encoding-root PROFILE, owner-module PROFILE, REALM_CONFIG, ABI_RESULT,
+  PHYSICAL_LAYOUT, APP_PROFILE, EVIDENCE_ONLY, or MEASUREMENT_PENDING. An
+  unclassified/duplicate item, an empty module, or a minted profile retaining
+  MEASUREMENT_PENDING rejects. The authority namespace's 15 sorted code/
+  signature rows must be byte-identical to `authorityCodexBytes`. The harness
+  also rejects a module that omits, reorders, or alters common-prelude
+  precedence, raw-digest ecrecover semantics,
+  exact ERC-1271 ABI/STATICCALL/return-size/codehash rules, EIP-7951 curve and
+  infinity/rPrime/word-one/empty-result rules, or strict DER/EIP-198 and EFS
+  prehashed RSA-SHA256 EMSA rules while retaining the same VM/program version.
+- **H-AUTH-PRELUDE:** execute GV-5's overlapping-invalid matrix in SOL/TS/RS,
+  assert first-error code and exact arguments, and instrument that no later
+  opcode ran. Include empty witness, oversized+unknown tag, reserved and
+  wrong-kind tags, decodable non-minimal ABI twins with identical PrincipalId,
+  and malformed ABI outside-VM rejection; no decodable case may panic.
 - **H-CELLS:** F1's SR-3 intent bytes remain B0-exact with CardId/mask=1; F3
   has the one bound type/digest and no intent object; F4 enforces one pending,
   CAS, scan-16, single revision increment, cursor invalidation, two-profile
   fan-out, and COMPLETE/retirement semantics.
+  Before any cell artifact mints, the harness replaces authority constant C16
+  once for the corpusVersion, asserts `CONCRETE/valueLen=32`, byte-compares the
+  same `authority-codex.bin` in all nine cells, and rejects a cell-local cap.
+  A cap variant must change corpusVersion and run as a separate comparison.
 
 ---
 
@@ -513,7 +552,8 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   entries, and page results end to end.
 - **CV-AUTHCHAIN** — GV-5 / SR-13/SR-14: a valid attacker witness plus
   attacker descriptor presented with victim `header.principalId` fails
-  `AUTH_PRINCIPAL_MISMATCH` before envelope or intent witness verification;
+  `AUTH_PRINCIPAL_MISMATCH` after OP1–OP5 and at OP6, before either envelope-
+  or intent-witness bytes are read;
   first-use PrincipalRecord bytes may come only from the verified descriptor.
 - **CV-XREALM** — two Realm instances; copy one signed envelope from source to
   destination; destination shows evidence-not-truth (grades per Lane 4 §4.2);
@@ -550,7 +590,10 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   current point-in-order shadow head, and Withdrawal has no item.
 - **CV-SPARSE-ADMIT** — GV-8/GV-9, SR-10/SR-15: admit leaves `{0,3,7}`, then
   the remainder; verify per-new-occurrence submission-order ordinals,
-  reversible hydration, no holes/derived base law, and duplicate no-op.
+  reversible hydration, no holes/derived base law, and duplicate no-op. Its
+  inventory-boundary member seeds `envelopeCount=2^48-2`, allocates max once,
+  then requires exact `E_ENVELOPE_ORDINAL_EXHAUSTED()` and zero state for the
+  next new Envelope while existing-Envelope retry/staging remains valid.
 - **CV-PREWITHDRAW** — GV-9, SR-9/SR-10/SR-15: authenticated target
   header/vector + `TargetRecordCommitment(typeSchemaId,bodyHash)` + signature,
   with no target body, creates `PRE_WITHDRAWN` at target ordinal 0; the
@@ -611,13 +654,14 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
 - **CV-RECON** — `RECONSTRUCT()` (Lane 4 §8 walk) executed by the second
   implementation after every fixture's final phase; it re-encodes the exact
   seven-field InitConfig/genesis facts, hashes and parses the exact returned
-  Codex bytes (including the sole length-delimited index module), recomputes
+  Codex bytes (including ordered AUTHORITY and INDEX modules), recomputes
   profileId/genesisCommitment/RealmId, checks direct/UUPS EIP-1967 slot
   invariants and implementation/current-authority getters, folds the chained
   AuthorityTransitions into the latest revision, reads canonical unsigned envelopes, and treats
   receipts/batches as historical validation evidence without claiming to
   recover discarded main witnesses. It decodes retained prewithdraw evidence,
-  recomputes the signed target RecordId from TypeSchemaId/bodyHash, and confirms
+  recomputes target EnvelopeId/RecordId/Principal, never calls current/archive
+  ERC-1271 authority or requires witness replay, and confirms
   that a never-admitted target has no body/posting/live/head state. Its W-4a
   batch walk reads every `admissionBatchIntentLane` in order, derives the
   Principal from the first accepted occurrence, validates every nonzero
@@ -1488,8 +1532,11 @@ the Realm basis and tag on initial and resumed calls while the separate
 `basisOrdinal` field binds `H`. Its input digest and result schema therefore
 move with this repair; the index namespace also registers exactly
 `ErrSelectCursor(uint256)` and `ErrSelectBasis(uint64,uint64)`. The
-`codexConstants()` success bytes include the sole
-length-delimited index module; `genesisFacts()` commits their outer hash.
+`codexConstants()` success bytes include the ordered, length-delimited
+authority and index modules; `genesisFacts()` commits their outer hash. The
+frozen `authority` namespace's 15 codes and canonical signatures are
+byte-identical to the authority module; no registry-only alias or reordered
+code is accepted.
 
 For terminal source admission, the frozen registry has exactly one external
 error signature: authorship namespace
@@ -1501,6 +1548,17 @@ and compares its selector plus those two encoded arguments. The `binding` and
 status fold result and assert-only commit invariant are internal and therefore
 cannot appear as operation outcomes. Any alternate selector or namespace fails
 H-RESULTREG.
+
+Envelope inventory operations use the exact u48 ABI spellings
+`sol:envelopeCount()`, `sol:envelopeIdByOrdinal(uint48)`,
+`sol:envelopeInfo(bytes32)`, `sol:getEnvelope(bytes32)`, and every
+`PublishResult.envelopeOrdinal uint48`; no narrower or widened variant is
+registered. The authorship namespace contains exactly
+`E_ENVELOPE_ORDINAL_EXHAUSTED()` for a fresh-Envelope allocation attempted at
+`envelopeCount == 2^48-1`. Boundary vectors assert max-1 -> max success, then
+this exact selector with zero arguments and zero state delta; existing-
+Envelope retry/staged paths at the ceiling remain successful and allocate
+nothing.
 
 This inventory is regenerated after owner commit `a18e571`: codec/kernel-Type
 members include structural code 17; lifecycle folds consume the ten-field
@@ -1590,11 +1648,12 @@ id for `harness:state-projection/1`, input `(uint8,bytes32,uint64)`, output
 `(bytes)`, kind HARNESS, no errors.
 
 The closed component schedule is: 0x01 exact `genesisFacts`, Codex bytes
-(including the one canonical length-delimited `indexCodexBytes` module),
+(including the canonical length-delimited AUTHORITY and INDEX modules),
 EIP-1967 implementation/admin words, `implementationAddress`,
 `currentUpgradeAuthorityRef`, `revisionAt(1..revisionCount)`, then every
 `authorityTransitionAt(1..authorityTransitionCount)` in ordinal order; 0x02 admission/envelope/card/batch/Type/Principal
-counters, every used `(principalId,nonceKey)` with its exact `intentNonceOf`
+counters (including u48 `envelopeCount` and every u48 reverse inventory row),
+every used `(principalId,nonceKey)` with its exact `intentNonceOf`
 value, and cell control counters; 0x03
 Principals by full bytes32 id with descriptors/ordinals; 0x04
 Types/shapes/profiles by bytes32 id with exact definitions and schema-cache
@@ -1930,7 +1989,7 @@ The compact contract other chapters and Stage B rely on:
   ≠ protocol-freeze.
 - **Obligations on other lanes:** all consumed SR-1..SR-18 owning-chapter
   repairs and retired-form residue checks verify before golden-vector
-  emission; the byte-exact index Codex module/full Codex pair is manifest
+  emission; the byte-exact authority/index owner modules plus full Codex are manifest
   content and the result registry exposes only the canonical admission page;
   the closed trusted-Principal B0/content-profile boundary is reflected in
   fixture schemas before vector minting; measured rows replace the chapters' schedule-arithmetic
