@@ -86,3 +86,9 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 ### Claude cross-workstream evidence round (2026-08-13)
 
 - [`2026-08-13-claude-evidence-round/`](./2026-08-13-claude-evidence-round/README.md) — corrected synthesis and routing for four directly launched research workstreams covering Arcade differentiation and Andromeda, browser-runner behavior, and Realm/Commons venue/L1 risk. All 30 distinct completed reports are preserved under [`corpus/`](./2026-08-13-claude-evidence-round/corpus/README.md); [`CORRECTIONS.md`](./2026-08-13-claude-evidence-round/CORRECTIONS.md) governs overclaims in the raw memos and original PM compression. Dated research only: no owner ask, design ruling, venue choice, Arcade disposition, publication clearance, or runner policy.
+
+### EFS Media Library / Booru intake (2026-08-14)
+
+- [`2026-08-14-media-library-intake/`](./2026-08-14-media-library-intake/README.md) — authority-aware product intake for a personal/public tagged-media library: a proposed common charter and roadmap, retained requirements, current standards and adapter boundaries, a smallest-fixture obligation set, generic-Core mapping, and three exact conditional falsifier traces. It adopts no first-product ordering, media schema, Core mechanism, public corpus, Realm, or implementation.
+- [`product-charter-and-roadmap.md`](./2026-08-14-media-library-intake/product-charter-and-roadmap.md) — durable common promises, users/jobs, recommended personal/local-first MVP, staged exit gates, mature findings, open choices and exact Core-escalation rule.
+- [`fixture-pressure-map.md`](./2026-08-14-media-library-intake/fixture-pressure-map.md) — original/derivative/video, conflicting-curator, private-relationship, duplicate/provenance and verified-retrieval obligations mapped onto current generic EFS concepts.
