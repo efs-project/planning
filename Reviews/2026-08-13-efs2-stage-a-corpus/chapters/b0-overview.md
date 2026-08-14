@@ -269,6 +269,12 @@ callers neither resupply nor replace it, and target-specific evidence never
 becomes generic staged availability.
 `WITHDRAWN` and `PRE_WITHDRAWN`
 permanently block (re-)admission of that occKey (no-resurrection, SR-15). The
+only external rejection is Admission/Authorship's
+`E_NO_RESURRECTION(bytes32 envelopeId,uint16 leafIndex)`, emitted during
+write-free preflight before effects or commit. `LibIndex` reports typed terminal
+source status to Admission and `LibBinding` consumes only prevalidated state;
+their commit paths treat a terminal source as an assert-only internal invariant
+and expose no alternate selector. The
 commitment pair is fixed 64 bytes; maximal legal evidence is exactly 7,808 ABI
 bytes (`32+384+2,080+1,184+4,128`) under the 8,192-byte aggregate and
 16,384-byte whole-wire caps, independent of a legal 8,192-byte target body.
@@ -382,7 +388,9 @@ re-withdrawal of a WITHDRAWN occKey is a no-op success. The binding chapter's
 `ErrDuplicateOccurrence` / `ErrAlreadyWithdrawn` whole-call reverts are
 [REJECTED] — they break legitimate subset-admission retries. No-resurrection
 is enforced by the SR-10 status guard (WITHDRAWN / PRE_WITHDRAWN block
-admission), not by duplicate reverts.
+admission through the sole external
+`E_NO_RESURRECTION(bytes32 envelopeId,uint16 leafIndex)`), not by duplicate
+reverts or downstream fold-library errors.
 For a multi-leaf `publish`, after bounded structural/wire checks and envelope
 identity/authentication, an all-selected-ACTIVE set returns before semantic
 `targetEvidence` cardinality/effect checks, expiries, or intent replay state.

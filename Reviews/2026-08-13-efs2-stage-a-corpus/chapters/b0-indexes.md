@@ -310,8 +310,8 @@ activateOccurrence(E, k):
   NEVER_ADMITTED -> require nextOrdinal < 2^48 - 1 else U48_GUARD;
                     ACTIVE { ordinal = nextOrdinal++; revokedAtOrdinal = 0 }
   ACTIVE          -> ALREADY_ADMITTED(existing ordinal/receipt), no writes
-  WITHDRAWN       -> revert ErrOccWithdrawn
-  PRE_WITHDRAWN   -> revert ErrOccWithdrawn
+  WITHDRAWN       -> report TERMINAL_SOURCE(WITHDRAWN) to Admission; no writes
+  PRE_WITHDRAWN   -> report TERMINAL_SOURCE(PRE_WITHDRAWN) to Admission; no writes
 
 withdrawOccurrence(validated, withdrawalOrdinal):
   require validated.priorStatus == ACTIVE and current overlay matches
@@ -331,6 +331,14 @@ withdrawOccurrence(validated terminal target):
   require current overlay matches validated terminal status/evidenceOrdinal
   success, no writes, no decrement; never load/replace/revalidate evidence
 ```
+
+`TERMINAL_SOURCE` is an internal typed fold result, not an ABI error. Admission
+consumes it during write-free preflight and alone reverts
+`E_NO_RESURRECTION(bytes32 envelopeId,uint16 leafIndex)` before any effect or
+commit. Commit replay may only assert that no terminal source result reached
+LibIndex; LibIndex exposes no independent no-resurrection selector. This does
+not change terminal-target withdrawal retry, which remains the no-op success
+shown above.
 
 The shadow entry for an occurrence is loaded from persisted state once; later
 sibling leaves see the prior planned transition. Current-envelope OCCREF is
@@ -824,7 +832,8 @@ promises an `occKey → EnvelopeId` reverse lookup.
 
 Withdrawal of the current Binding occurrence and tombstones fold through the
 same head + history (bindings chapter owns which transitions are legal;
-no-resurrection is enforced there; this chapter only stores and pages).
+no-resurrection source admission is rejected by Admission before this fold;
+this chapter only stores and pages).
 Withdrawal never removes, filters, or decrements a `KIND_BINDING_HIST` entry.
 
 ---

@@ -502,7 +502,10 @@ member level (Stage B may add members, never remove).
   equals the withdrawer, write
   target `PRE_WITHDRAWN` with ordinal 0 and retained evidence keyed by the
   accepting Withdrawal's ordinal, then reject later admission with
-  `E_NO_RESURRECTION`; the target gets no admission posting or decrement and
+  authorship-namespace
+  `E_NO_RESURRECTION(bytes32 envelopeId,uint16 leafIndex)`, carrying that
+  target EnvelopeId and leaf index and matching its one frozen registry
+  selector; the target gets no admission posting or decrement and
   its point read recovers recordId/typeSchemaId/principalId but no body;
   repeat withdrawal is unconditional no-op success; wrong-author Withdrawal
   reverts the whole envelope with `ErrWithdrawNotAuthor` and zero state delta.

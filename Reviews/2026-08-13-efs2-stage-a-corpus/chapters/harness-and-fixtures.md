@@ -531,9 +531,11 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   header/vector + `TargetRecordCommitment(typeSchemaId,bodyHash)` + signature,
   with no target body, creates `PRE_WITHDRAWN` at target ordinal 0; the
   `DOM_RECORD` recomputation and both commitment-word flips are checked. Later
-  admission fails; wrong/forged author reverts with zero delta; repeat succeeds
-  using retained evidence. `T4-MAX-BODY` proves an 8,192-byte target body is
-  absent from wire/state: its EOA/65-byte-witness evidence is exactly 800 bytes,
+  admission fails before effects/commit with the authorship-namespace error
+  `E_NO_RESURRECTION(bytes32 envelopeId,uint16 leafIndex)`, carrying the exact
+  target EnvelopeId and leaf index; wrong/forged author reverts with zero delta;
+  repeat succeeds using retained evidence. `T4-MAX-BODY` proves an 8,192-byte
+  target body is absent from wire/state: its EOA/65-byte-witness evidence is exactly 800 bytes,
   and the maximal legal evidence shape is 7,808 bytes under the aggregate cap.
   Retained reads return recordId/typeSchemaId/principalId but no target body or
   never-created index/head state. Admission alone constructs the lifecycle
@@ -1440,6 +1442,17 @@ successful PARTIAL row records
 the exact next ordinary position or unique outer/inner continuation in the
 unchanged `MeasurementRow.nextCursor`; SOL, TS, and RS words and progress must
 be byte-identical.
+
+For terminal source admission, the frozen registry has exactly one external
+error signature: authorship namespace
+`E_NO_RESURRECTION(bytes32,uint16)` (the ABI declaration names the arguments
+`envelopeId` and `leafIndex`). Every admission operation that can encounter a
+WITHDRAWN/PRE_WITHDRAWN selected source allows that same namespace/code entry
+and compares its selector plus those two encoded arguments. The `binding` and
+`index` namespaces contain no no-resurrection error entry; their typed terminal-
+status fold result and assert-only commit invariant are internal and therefore
+cannot appear as operation outcomes. Any alternate selector or namespace fails
+H-RESULTREG.
 
 This inventory is regenerated after owner commit `a18e571`: codec/kernel-Type
 members include structural code 17; lifecycle folds consume the ten-field

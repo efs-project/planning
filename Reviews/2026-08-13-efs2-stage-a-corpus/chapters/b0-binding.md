@@ -533,11 +533,15 @@ Enforcement mechanics — re-derived from the SR-10 overlay guard per SR-15
    admitted; this leaf is an **idempotent no-op** returning its existing
    receipt (`ALREADY_ADMITTED`), writing nothing — no Binding logic runs, so
    no second head event can exist. `WITHDRAWN` / `PRE_WITHDRAWN` → admission
-   of this occKey is **permanently blocked**: revert `ErrOccWithdrawn`
-   (the authorship lifecycle's `E_WITHDRAWN` class) — resurrection is a
-   genuine error, not a benign retry, and only the occurrence's own author
-   could have caused the state [PROPOSAL — whole-call revert per the
-   all-or-nothing admission posture, SR-9 rationale].
+   of this occKey is **permanently blocked**. The typed status fold reports the
+   terminal source to Admission, and Admission alone reverts
+   `E_NO_RESURRECTION(bytes32 envelopeId,uint16 leafIndex)` before any effect
+   or commit. LibBinding consumes only the prevalidated lifecycle result; if a
+   terminal source reaches its effect fold, that is an assert-only internal
+   planner invariant, never a second external error. Resurrection is a genuine
+   error, not a benign retry, and only the occurrence's own author could have
+   caused the state [PROPOSAL — whole-call revert per the all-or-nothing
+   admission posture, SR-9 rationale].
 2. The CAS guard compares against `src(head)` — the *newest* producer. A
    stale writer holding an old predecessor gets `ErrCasPredecessor`, never a
    silent overwrite and never a rollback.
@@ -572,8 +576,6 @@ error ErrCasPredecessor(bytes32 bindingKey,
                         // reversible OccurrenceRef as the log names it
 error ErrCasRevision(bytes32 bindingKey, uint32 expected, uint32 have);
 error ErrRevisionGuard(bytes32 bindingKey);          // 2^32−1; successor seam §3.3
-error ErrOccWithdrawn(bytes32 occKey);               // WITHDRAWN | PRE_WITHDRAWN
-                                                     // blocks admission (§3.4)
 error ErrWithdrawNotAuthor(bytes32 targetEnvelopeId, uint16 targetLeafIndex,
                            bytes32 envelopePrincipal, bytes32 targetPrincipal);
 error ErrWithdrawTargetKind(bytes32 targetEnvelopeId, uint16 targetLeafIndex);
@@ -584,7 +586,9 @@ error ErrReservedBitsNonzero(bytes32 bindingKey);
 `ErrWithdrawNotAuthor` is raised by Admission while creating the validated
 withdrawal context and bubbles through the shared Core ABI; `E_TARGET_EVIDENCE`
 owns missing/invalid target evidence. LibBinding defines no
-`ErrWithdrawTargetProof` and no evidence decoder.
+`ErrWithdrawTargetProof`, no no-resurrection rejection, and no evidence
+decoder. The sole external terminal-source rejection is Admission/Authorship's
+`E_NO_RESURRECTION(bytes32 envelopeId,uint16 leafIndex)`.
 
 [REJECTED — removed per SR-15]: `ErrDuplicateOccurrence`,
 `ErrAlreadyWithdrawn`. Duplicates are idempotent no-ops at occurrence
@@ -1164,9 +1168,11 @@ The compact contract other chapters rely on:
    typed whole-envelope reverts; **duplicates are idempotent no-ops at
    occurrence granularity (SR-15)** — re-admission of ACTIVE returns
    ALREADY_ADMITTED, re-withdrawal of a terminal occKey is a no-op success;
-   WITHDRAWN/PRE_WITHDRAWN permanently block admission (`ErrOccWithdrawn`);
-   revisions and AdmissionOrdinals strictly increase; an occurrence produces
-   at most one head state ever (no-resurrection via the SR-10 overlay
+   WITHDRAWN/PRE_WITHDRAWN permanently block source admission: the internal
+   fold reports terminal status and Admission reverts the sole external
+   `E_NO_RESURRECTION(bytes32 envelopeId,uint16 leafIndex)` before effects or
+   commit; revisions and AdmissionOrdinals strictly increase; an occurrence
+   produces at most one head state ever (no-resurrection via the SR-10 overlay
    guard); withdrawal of a head tombstones, never reverts; `src(head)` is
    always ACTIVE.
 3. **For the envelope/admission chapter:** kernel recognition of the three
