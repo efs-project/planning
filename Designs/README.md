@@ -60,6 +60,7 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 | Design | Target repos | Notes |
 |---|---|---|
 | **[`efsv2/`](./efsv2/) — EFS 2.0 greenfield design** | `planning`, `contracts`, `sdk`, `client` | One active successor design: standalone Core, optional Commons, direct Web Client, and optional OS. Start with the phone-readable [README](./efsv2/README.md); the Type/Record/Occurrence/Principal/Lens mechanics remain candidate work. |
+| **[`media-library/`](./media-library/) — shared media infrastructure plus Booru and Plex/Jellyfin applications** | `planning`, `contracts`, `sdk`, `client` | Owner-directed product set over generic EFS: exact media identity/verification and exit shared by a public tagged gallery and private playback library. Public queries are onchain-first; The Graph is the last-resort reference fallback after an exact measured falsifier. |
 | [[brainstorm-system]] | `planning` | The `Brainstorms/` system: statuses, surfacing cap, deliberate-only pruning. Awaiting promotion. |
 | **[`clientv2/`](./clientv2/) — Web Client / OS evidence set** | `planning`, `client`, `sdk` | The July Web-OS round is historical design evidence. The active boundary separates a direct guest Web Client and shared Files modules from optional EFS OS; the detailed OS architecture must re-earn adoption after the direct slice. See [clientv2/README](./clientv2/README.md). |
 | **[`arcade/`](./arcade/) — the EFS Arcade design set** | `planning`, `contracts`, `client`, `content` | Initial product/MVP pass plus post-pass correction map. The 2026-08-07 research corpus is durable evidence; its demo-only framing and broad September scope are under hold while the one-game Andromeda slice proceeds behind a provisional adapter and pressure-tests EFS 2.0 Core. Entry: [arcade/README](./arcade/README.md); held queue: [arcade/owner-decision-inbox](./arcade/owner-decision-inbox.md). |
@@ -121,7 +122,7 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 | Repo | Designs |
 |---|---|
-| `planning` | [[0001-design-system]], [[cross-repo-reference-mirror]], [`efs15/`](./efs15/), [`efsv2/`](./efsv2/) |
-| `contracts` | [[cross-repo-reference-mirror]], [`efs15/`](./efs15/), [`efsv2/`](./efsv2/) |
-| `client` | [`clientv2/`](./clientv2/), [`efs15/`](./efs15/), [`efsv2/`](./efsv2/) |
-| `sdk` | [`clientv2/`](./clientv2/), [`efs15/`](./efs15/), [`efsv2/`](./efsv2/) |
+| `planning` | [[0001-design-system]], [[cross-repo-reference-mirror]], [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`media-library/`](./media-library/) |
+| `contracts` | [[cross-repo-reference-mirror]], [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`media-library/`](./media-library/) |
+| `client` | [`clientv2/`](./clientv2/), [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`media-library/`](./media-library/) |
+| `sdk` | [`clientv2/`](./clientv2/), [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`media-library/`](./media-library/) |
