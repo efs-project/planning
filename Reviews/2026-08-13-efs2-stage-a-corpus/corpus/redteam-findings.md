@@ -7,6 +7,12 @@ reproduced as returned by each lane; the **Adjudication** line is the
 synthesizer's disposition. Where a finding was resolved by a seam pin, the pin
 is named — the pin set SR-1..SR-18 lives in `b0-overview.md` §2.
 
+> **Current-status provenance:** Findings and adjudication lines below preserve
+> the original 2026-08-13 red-team record. Their “repair round (incomplete)”
+> wording describes the interrupted original repair, not current corpus status.
+> Later repairs and final reviews are recorded in [STATUS](../STATUS.md) and the
+> [Stage A report](../stage-a-report.md).
+
 Totals: 8 BLOCKING, 27 SERIOUS, 21 NOTE across seven lanes.
 
 #status/reference #kind/note #topic/efsv2

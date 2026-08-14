@@ -416,9 +416,10 @@ NEW:
 ```markdown
 ## Fable program output — Stage A doc set
 
-Stage A output is post-red-team repaired evidence and remains review-gated: it
-is not landed and adopts nothing until integrated. Chapters pin the exact B0
-"SPINE" baseline; the corpus holds the cross-cutting deliverables.
+Stage A is complete at the specification/evidence level and remains
+proposal-only: it is not adopted or protocol-frozen, and Stage B execution is
+unrun. Chapters pin the exact B0 comparison baseline; the corpus holds the
+cross-cutting deliverables.
 
 | Stage A deliverable | Doc |
 |---|---|

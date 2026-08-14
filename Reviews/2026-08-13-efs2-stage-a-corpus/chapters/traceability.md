@@ -1,5 +1,5 @@
 # Requirement-to-test traceability
-**Stage A chapter — post-red-team repaired draft; not landed, adopts nothing.**
+**Stage A specification/evidence deliverable — complete; not adopted or protocol-frozen; Stage B execution unrun.**
 
 Traceability lane of the Stage A commissioned pass (2026-08-12) — PM deliverable 3
 ("requirement-to-test traceability with owner-ruling, derived-invariant, proposal,

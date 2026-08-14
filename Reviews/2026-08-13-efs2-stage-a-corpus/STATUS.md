@@ -1,89 +1,89 @@
 # EFS 2.0 Stage A corpus — STATUS (read this first)
 
-**Status:** reference — work-in-progress corpus, **NOT a completed Stage A deliverable**
-**Audience:** the Codex PM first; Fable's successor session second
+**Status:** done at the specification/evidence level; proposal-only; Stage B unrun
+
+**Audience:** James, the EFS 2.0 PM, and the Stage B implementation team
+
 **Last touched:** 2026-08-13
 
-#status/reference #kind/note #repo/planning #topic/efsv2
+**Reviewed protocol tip:** `6ea657e`
 
-> **This corpus is preserved mid-flight.** The Stage A design and red-team
-> rounds completed; the **repair round was cut off partway** when the session
-> hit a spend limit. Six of eight repair agents died after applying an unknown
-> fraction of their edits, and the residue-verification sweep never ran.
-> **No file here is review-ready.** Nothing in this corpus was landed into the
-> EFS 2.0 spine, and no shared design file was edited.
+#status/done #kind/report #repo/planning #topic/efsv2
 
-## What ran, in order
+> **Stage A is complete as a specification and evidence package.** It does not
+> adopt or freeze EFS 2.0. Canonical byte fixtures, prototype implementations,
+> executions, measurements, independent reconstruction, and deployment are
+> Stage B work and have not run.
 
-| Round | Result |
-|---|---|
-| Intake audit (6 lanes, read-only) | Complete — delivered to James/PM as the kickoff reply memo; evidence preserved in `corpus/` |
-| Stage A design (14 lanes) | Complete — 8 B0 chapters + 3 assembly chapters + 4 corpus files |
-| Synthesis: seam pins SR-1..SR-12 | Complete — `chapters/b0-overview.md` |
-| Red team (7 adversarial lanes) | Complete — 8 BLOCKING, 27 SERIOUS, 21 NOTE; `corpus/redteam-findings.md` |
-| Adjudication: pins revised to SR-1..SR-18 | Complete — `chapters/b0-overview.md` §2 (two pins repaired, five amended, six added) |
-| **Repair round (8 agents + verifier)** | **INCOMPLETE — 2 of 8 agents finished; 6 died partway; verifier never ran** |
+## Verdict
 
-## Exact per-file state
+The interrupted Fable repair was completed forward, independently red-teamed,
+repaired, and re-reviewed. At protocol tip `6ea657e`, the final bounded gates
+found no open Critical or Important defect in the Stage A candidate interfaces.
+The last gate repairs pinned exact challenge-window winner identity, made the
+positive digest-index fixture mintable, reconciled idempotent retry carriage,
+and removed a false immediate owner ask.
 
-**Do not read any chapter below as internally consistent until the repair round
-is completed and the residue sweep passes.**
+This verdict means the corpus is coherent enough to build and compare in a
+disposable Stage B. It does **not** mean the candidate won the bakeoff or earned
+permanent deployment.
 
-| File | Repair state |
-|---|---|
-| `chapters/b0-overview.md` | **Current.** Authority for the set: SR-1..SR-18 pins, post-adjudication. Chapters are repaired *to it*, not the reverse. |
-| `chapters/b0-principal-authority.md` | **Repaired, agent completed** (SR-13/SR-14/SR-7). |
-| `chapters/b0-content-locators.md` | **Repaired, agent completed** (scheme-gate relabel, SR-18a/18c, SR-5 re-derivation, CREATE2 note). |
-| `chapters/b0-encoding-and-ids.md` | **Partially repaired** — agent killed mid-run; depth unknown. |
-| `chapters/b0-authorship-envelope.md` | **Partially repaired** — agent killed mid-run; carries the SR-13/SR-10 BLOCKING repairs only in part. |
-| `chapters/b0-realm-admission.md` | **Partially repaired** — agent killed mid-run. |
-| `chapters/b0-indexes.md` | **Partially repaired** — agent killed mid-run; the THE-LINE `selectBestLocator` fix is not confirmed. |
-| `chapters/b0-binding.md`, `chapters/b0-lens.md` | **Partially repaired** — shared agent killed mid-run. |
-| `chapters/vectors-and-falsifiers.md` | **Partially repaired** — agent killed mid-run. |
-| `chapters/bakeoff-spec.md`, `chapters/harness-and-fixtures.md`, `chapters/traceability.md` | **Unrepaired** — pre-red-team drafts. |
-| `corpus/standards-audit.md`, `carry-in-register.md`, `intake-findings.md`, `proposed-spine-edits.md` | **Unrepaired** — pre-red-team drafts. Known corrections listed below. |
-| `corpus/redteam-findings.md` | **Current** — transcribed mechanically from the red-team run. |
+## The eight commissioned deliverables
 
-## Known-outstanding corrections (from the red team, not yet applied)
+| # | Deliverable | Current artifact |
+|---:|---|---|
+| 1 | Exact candidate B0 | [`b0-overview.md`](./chapters/b0-overview.md) plus eight subsystem chapters |
+| 2 | Smallest coherent model and explicit alternatives | overview + [`bakeoff-spec.md`](./chapters/bakeoff-spec.md) |
+| 3 | Requirement-to-test traceability with authority labels | [`traceability.md`](./chapters/traceability.md): **151 rows = 127 COVERED / 20 DEFERRED / 4 GAP** |
+| 4 | Controlled bakeoff | [`bakeoff-spec.md`](./chapters/bakeoff-spec.md): **9 cells** with declared axes/confounds |
+| 5 | Fixed fixtures and harness interfaces | [`harness-and-fixtures.md`](./chapters/harness-and-fixtures.md): **10 fixtures / 16 CV suites** |
+| 6 | Vectors and falsifiers | [`vectors-and-falsifiers.md`](./chapters/vectors-and-falsifiers.md): **GV-1..18 / 14 CF / 12 KA / 7 AA** |
+| 7 | Proposed spine integration without silently applying it | [`proposed-spine-edits.md`](./corpus/proposed-spine-edits.md): **16 proposal-only edits** |
+| 8 | Durable evidence and provenance | standards audit, carry-in register, intake findings, and preserved red-team findings |
 
-Carried here so they survive even if a chapter's half-applied edits are
-discarded and the repair is re-run from the drafts:
+## What remains deliberately unclaimed
 
-1. **`traceability.md`** — row C-PS-8 is a false GAP (the client-edge hazard
-   rule does exist in `b0-content-locators`); OR-F and C-HR-2/OR-17 citations
-   point at the wrong sections; §8 counts need re-tallying after any edit.
-2. **`intake-findings.md`** — IF-15's disposition is wrong (the 50/100/256
-   lens-scale benchmark is *not* in the harness chapter; it must be added
-   there first); IF-02 misroutes the callback-abuse attack to `b0-lens`
-   (it lives in `vectors-and-falsifiers` CF-8 + AA-2); IF-21 (D-2/D-5
-   disposition) still needs its answer recorded against the 2026-08-12 ruling.
-3. **`harness-and-fixtures.md`** — S1–S8 need marking RESOLVED with their SR
-   numbers; needs the 50/100/256 client-tier scale benchmark, a
-   pre-withdrawal-evidence workload, and a spray-of-dead-postings adversarial
-   workload.
-4. **`bakeoff-spec.md`** — its cross-chapter conflict inventory is superseded
-   by SR-1..SR-18; cell deltas referencing the `base + k` ordinal law need
-   regenerating.
-5. **`carry-in-register.md`** — DI-13's two client-conformance rules land in
-   `b0-lens` once that repair completes.
-6. **`proposed-spine-edits.md`** — count is 16 items (the overview said 14;
-   the overview is now correct); A2's framing should match the single
-   set-wide chains-don't-die disposition (overview §5.1).
+- No Stage A proposal is adopted into `Designs/efsv2/`.
+- No semantic or contract freeze has occurred.
+- No canonical Stage B corpus bytes, Type IDs, signatures, cursors, or state
+  digests have been minted.
+- No Solidity, TypeScript, or Rust prototype has executed the corpus.
+- No gas/state-growth measurement, independent reconstruction, deployment, or
+  production-readiness claim exists.
+- `ERC1271_VERIFY_GAS` remains measurement-pending. Stage B must choose one
+  concrete value per `corpusVersion` before any comparison cell can mint.
+- James has no immediate mechanism decision from Stage A.
 
-## What Stage A does *not* contain, by design
+## Honest gaps and deferrals
 
-No byte vectors, no measurements, no prototype code, no deployed contracts.
-Every gas figure in every chapter is schedule-derived arithmetic labeled
-`[HYPOTHESIS]`; the Stage B harness replaces them. V2-E6 and V2-E7 are out of
-scope. Nothing here asks James for a protocol mechanism decision.
+The 20 DEFERRED rows have named successor homes. Four active non-B0 gaps remain
+explicit rather than being presented as silently solved:
 
-## To resume
+| Gap | Missing boundary | Home |
+|---|---|---|
+| G-2 | Managed-Principal recovery must not imply funds custody or decryption recovery | future managed-Principal/KEL round |
+| G-3 | Recoverable vs shreddable privacy tiers and KEM rotation/rewrap lifecycle | privacy/crypto profile |
+| G-4 | Foreign-contract adapter or local-commitment disclosure profile | V2-E8-adjacent adapter work |
+| G-5 | Pending/outbox data must never render as admitted/confirmed | SDK result-model lane |
 
-1. Re-run the repair round from `chapters/b0-overview.md` SR-1..SR-18 against
-   the eight chapter files + three assembly files + four corpus files, using
-   `corpus/redteam-findings.md` as the finding list. Half-applied files are
-   safe to repair forward (the pins are idempotent targets), but each must be
-   swept for contradictions with its own earlier text.
-2. Run the residue verification sweep (retired spellings; SR-13/SR-10/SR-8/
-   SR-15/SR-18 uniformity; constant consistency; three spot-reads).
-3. Then, and only then, produce the Stage A report for the PM.
+These gaps block claims about those future capabilities. They do not block the
+local B0 Core comparison specified here.
+
+## Review and repair trail
+
+- Initial design, seam adjudication, and red-team evidence remain preserved in
+  this folder. Historical “repair incomplete” wording in the raw red-team
+  record describes the interrupted Fable run, not current status.
+- The repair series spans `48bf72d..6ea657e`; the final long-horizon and
+  release-gate repairs are `f430e90` and `6ea657e`.
+- Independent scoped reviews approved the authority profile, long-horizon
+  reconstruction, final Lens/digest interfaces, SR-3 retry semantics, and A2
+  owner-routing wording. Repository release checks are recorded in the
+  publication commit and the accompanying [Stage A report](./stage-a-report.md).
+
+## Next
+
+Run the disposable Stage B program: mint one exact corpus, implement it in
+Solidity/TypeScript/Rust, execute the 9 cells and 10 fixtures, measure the full
+write/read/state budget, and perform clean-room reconstruction. Return only
+falsified arms, measured budget failures, or genuinely irreducible owner forks.

@@ -81,7 +81,7 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 
 ### EFS 2.0 Core engineering pass — Stage A corpus (2026-08-13)
 
-- [`2026-08-13-efs2-stage-a-corpus/`](./2026-08-13-efs2-stage-a-corpus/) — Fable 5's Stage A of the commissioned EFS 2.0 core engineering pass ([[fable-efs2-core-engineering-kickoff]]): intake audit, the B0 baseline chapter set with seam pins SR-1..SR-18, bakeoff/harness/vector/traceability specs, and the evidence corpus (standards audit, carry-in register, intake + red-team findings, proposed spine edits). **Read [`STATUS.md`](./2026-08-13-efs2-stage-a-corpus/STATUS.md) first — the repair round was cut off mid-flight, so no chapter is review-ready.** Nothing landed into the EFS 2.0 spine; no shared design file was edited.
+- [`2026-08-13-efs2-stage-a-corpus/`](./2026-08-13-efs2-stage-a-corpus/) — completed specification/evidence Stage A of the commissioned EFS 2.0 Core engineering pass: exact candidate B0, 9-cell bakeoff, 10 fixtures, vectors/falsifiers, 151-row traceability, and preserved evidence. Start with [`stage-a-report.md`](./2026-08-13-efs2-stage-a-corpus/stage-a-report.md), then [`STATUS.md`](./2026-08-13-efs2-stage-a-corpus/STATUS.md). No proposal was applied to `Designs/efsv2/`; protocol adoption/freeze and all Stage B bytes, prototypes, executions, measurements, reconstruction, and deployment remain unclaimed.
 
 ### Claude cross-workstream evidence round (2026-08-13)
 
