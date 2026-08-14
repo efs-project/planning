@@ -60,6 +60,7 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 | Design | Target repos | Notes |
 |---|---|---|
 | **[`efsv2/`](./efsv2/) — EFS 2.0 greenfield design** | `planning`, `contracts`, `sdk`, `client` | One active successor design: standalone Core, optional Commons, direct Web Client, and optional OS. Start with the phone-readable [README](./efsv2/README.md); the Type/Record/Occurrence/Principal/Lens mechanics remain candidate work. |
+| **[`web-client-os/`](./web-client-os/) — fast Web Client and modular user-owned Web OS** | `planning`, `client`, `sdk` | Active product-layer spine: route-shaped guest boot; official basic File Browser writes; `BIOS -> Kernel -> Shell -> Apps`; user-replaceable service slots; privacy reserves; and human/agent parity. Core/Files names, module ABI, tooling, repository, and implementation remain proposal-only. The July `clientv2/` set is historical evidence. |
 | **[`open-web-app-store/`](./open-web-app-store/) — permissionless software evidence graph and eventual EFS store** | `planning`, `contracts`, `sdk`, `client` | Proposed working comparison baseline for generic Project/Release identity, exact resolved package sets, immutable catalog editions, plural trust/provenance/advisory evidence, optional updates, export/reconstruction, runtime-neutral OS handoff, and the later polished store. No package bytes, Core change, registry, runtime ABI, or implementation is adopted. |
 | **[`media-library/`](./media-library/) — shared media infrastructure plus Booru and Plex/Jellyfin applications** | `planning`, `contracts`, `sdk`, `client` | Owner-directed product set over generic EFS: exact media identity/verification and exit shared by a public tagged gallery and private playback library. Public queries are onchain-first; The Graph is the last-resort reference fallback after an exact measured falsifier. |
 | [[brainstorm-system]] | `planning` | The `Brainstorms/` system: statuses, surfacing cap, deliberate-only pruning. Awaiting promotion. |
@@ -123,7 +124,7 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 | Repo | Designs |
 |---|---|
-| `planning` | [[0001-design-system]], [[cross-repo-reference-mirror]], [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`open-web-app-store/`](./open-web-app-store/), [`media-library/`](./media-library/) |
+| `planning` | [[0001-design-system]], [[cross-repo-reference-mirror]], [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`web-client-os/`](./web-client-os/), [`open-web-app-store/`](./open-web-app-store/), [`media-library/`](./media-library/) |
 | `contracts` | [[cross-repo-reference-mirror]], [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`open-web-app-store/`](./open-web-app-store/), [`media-library/`](./media-library/) |
-| `client` | [`clientv2/`](./clientv2/), [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`open-web-app-store/`](./open-web-app-store/), [`media-library/`](./media-library/) |
-| `sdk` | [`clientv2/`](./clientv2/), [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`open-web-app-store/`](./open-web-app-store/), [`media-library/`](./media-library/) |
+| `client` | [`web-client-os/`](./web-client-os/), [`clientv2/`](./clientv2/), [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`open-web-app-store/`](./open-web-app-store/), [`media-library/`](./media-library/) |
+| `sdk` | [`web-client-os/`](./web-client-os/), [`clientv2/`](./clientv2/), [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`open-web-app-store/`](./open-web-app-store/), [`media-library/`](./media-library/) |

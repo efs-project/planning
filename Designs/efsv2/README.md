@@ -6,7 +6,7 @@ system is v1 evidence; the EFS 1.5 bridge and July native-envelope/five-kind v2
 round are historical design evidence. Nothing inherits a place in EFS 2.0
 without passing the greenfield requirements and product traces.
 
-> **Current status:** James has ratified the greenfield direction and the Core / optional Commons / Web Client and OS layer boundary. The constitution and architecture below are drafts for engineering review, not ceremony-final bytes or permission to deploy permanent contracts.
+> **Current status:** James has ratified the greenfield direction and the Core / optional Commons / Web Client and OS layer boundary. Sepolia is the first development Commons, not a permanent or canonical venue selection. The constitution and architecture below are drafts for engineering review, not ceremony-final bytes or permission to deploy permanent contracts.
 
 ## Read this on a phone
 
@@ -27,7 +27,7 @@ flowchart TB
     CORE["EFS Core<br/>standalone typed graph/filesystem contracts in a qualifying EVM Realm"]
     WEB["EFS Web Client<br/>direct guest Files + verified content"]
     OS["EFS OS<br/>optional capabilities, apps, identity, local/private state"]
-    COMMONS["EFS Commons<br/>optional shared Realm and community services<br/>no venue selected"]
+    COMMONS["EFS Commons<br/>optional shared Realm and community services<br/>Sepolia first for development; no canonical venue"]
     APPS["Contracts and third-party clients"]
     CORE --> WEB
     CORE --> OS
@@ -42,11 +42,13 @@ flowchart TB
   current bindings, contract Lenses, exact bytes, honest completeness, and
   independent reconstruction.
 - **Commons** may add public network effects, but Core and durable links cannot
-  depend on it. No canonical chain is chosen; a candidate must earn trust under
-  cypherpunk/CROPS criteria.
+  depend on it. Sepolia is the first development Commons because it is the
+  active, near-free shared venue. No permanent/canonical chain is chosen; a
+  candidate must earn trust under cypherpunk/CROPS criteria.
 - **Web Client** is a self-hostable direct guest reader and File Browser. A
   person can open a fresh qualifying L3 without booting an OS or creating an
-  account.
+  account. Its active product-layer architecture and MVP packet are in
+  [[../web-client-os/README]].
 - **EFS OS** is the optional higher environment for rich personal policy,
   local/encrypted state, accounts/recovery, sandboxed apps, agents, and signing.
 

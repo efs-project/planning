@@ -12,10 +12,13 @@ model docs → amendments → [[client-os-pressure-report]]. Evidence corpus:
 > optional Commons. A fresh qualifying L3 read must not boot the OS or require
 > Commons.
 > Reconcile the thesis after the direct Files/Arcade slice; see
-> [[../efsv2/system-constitution]].
+> [[../efsv2/system-constitution]]. The active product architecture and
+> requirements now live in [[../web-client-os/README]].
 
-**Reading order for James:** [EFS 2.0](../efsv2/README.md) first. Return here
-only for OS/client evidence or the held [owner decision inbox](./owner-decision-inbox.md).
+**Reading order for James:** [EFS 2.0](../efsv2/README.md) first, then the
+[active Web Client/OS spine](../web-client-os/README.md). Return here only for
+historical OS/client evidence or the held
+[owner decision inbox](./owner-decision-inbox.md).
 
 **Historical-round reading order:** [[fable-client-v2-handoff]] (the mandate) →
 [[web-os-thesis]] (the July thesis and its internal amendments) → the relevant
@@ -77,6 +80,8 @@ sequence outranks the current greenfield rulings.
 Everything remains `#status/draft`. The original set was written 2026-07-07 by
 fable-5 and internally reconciled within its own assumptions. It is now a
 client/OS research corpus, not the active product architecture. The next pass
-starts from the direct guest Web Client + shared Files + optional OS boundary,
-then selectively revalidates capability, sandbox, offline, account, and app
-ideas against measured slices.
+is now [[../web-client-os/README]]: it starts from the direct guest Web Client,
+official basic File Browser writes, shared Files, route-shaped OS layering,
+privacy reserves, and human/agent parity, then selectively revalidates this
+corpus's capability, sandbox, offline, account, and app ideas against measured
+slices.
