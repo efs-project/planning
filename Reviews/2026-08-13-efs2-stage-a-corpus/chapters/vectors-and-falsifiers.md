@@ -723,9 +723,21 @@ member level (Stage B may add members, never remove).
 - **Impl:** SOL authoritative; TS/RS recompute pages from reconstructed state.
 - **Pass:** identical item sequences and cursors; paging in one call vs
   resumed across k calls yields the identical concatenated sequence; the
-  §0.3 two-axis assertions on every member.
+  §0.3 two-axis assertions on every member. SOL, TS, and RS emit the identical
+  `uint256` cursor word and result on every successful step.
 - **Members:** `pk()` derivation vectors per KIND_* (GV-3 overlap); cursor
-  resume equality; `CURSOR_END` exhaustion; **one-basis discipline** — a
+  resume equality; the canonical §5.1a `PageCursorV1` and
+  `UniqueTypeCursorV1` layouts — exact first, middle, and terminal ordinary
+  pages (raw, hydrated, and admission as applicable), then exact unique-by-Type
+  outer continuation and inner continuation before inner index zero, inside an
+  inner walk, after a live match, and between Records; `CURSOR_END` exhaustion
+  and rejected input; rejection for wrong cursor family, family-applicable
+  query/raw-hydrated mode, Realm/basis, version, reserved bit, claimed end,
+  ordinary range, and nested outer/inner range. Each positive cursor carries
+  its exact family-specific §5.1a context tag and separate `basisOrdinal` for
+  the exact resolved nonzero `H`; zero only starts and resolves a basis once.
+  `maxItems` clamps to a positive item limit, and every PARTIAL result encodes
+  the deterministic next physical or outer/inner position. **One-basis discipline** — a
   revocation landing between page 1 and page 2 does not ghost page 1 at the
   pinned basis, and admissions after `H` do not phantom in (`liveAt(ord, H)`
   fold, indexes §2.2/§5.2 rule 4); **never-empty rule** — a scan window of

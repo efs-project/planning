@@ -459,6 +459,27 @@ ARRAY_STRUCT_MEMBER ReferenceRole selectors (including
 `ArtifactClosure.members[*].content`) count extracted instances, so index
 fan-out is bounded and backlink completeness holds.
 
+**SR-18f — generic page continuations.** `PageRequest.cursor` stays the
+existing `uint256` page ABI, not an SDK-only opaque value. `b0-indexes.md`
+§5.1a owns the two closed v1 encodings: ordinary `PageCursorV1` carries
+`nextPosition`, `claimedEnd`, `basisOrdinal`, version 1, a 103-bit context tag,
+and a zero reserved bit; `UniqueTypeCursorV1` substitutes exact
+`outerNextIndex` plus `innerPlusOne` (`0` between Records; otherwise next inner
+index + 1). Each tag binds exactly its family-specific §5.1a preimage:
+ordinary includes query and endpoint mode, admission includes neither, and
+unique-by-Type includes mode and Type. The separate `basisOrdinal` field binds
+`H`; all tag preimages include Realm and exact `realmBasisAt(H)`.
+`KIND_UNIQUE_BY_TYPE` alone selects the nested family. The endpoint recomputes
+the tag and canonical end, range-checks every resume position, and rejects
+wrong version, reserved bit, family-specific context, basis, end, range, nested
+position, or input `CURSOR_END` with `ErrPageCursor(uint256)`. Initial zero
+basis resolves once;
+every resume supplies that encoded nonzero basis exactly. `maxItems` clamps to
+at least one, scan/item stop order is fixed, and each PARTIAL result encodes the
+exact next physical or outer/inner state, including empty dead-only pages;
+COMPLETE alone returns `CURSOR_END`. This preserves MeasurementRow's existing
+`uint256 nextCursor` identity and requires byte-identical SOL/TS/RS progress.
+
 A Lens result carries `ResolvedTarget(targetKind,targetA,targetLeaf)` as one
 indivisible value. NONE/RECORD require leaf zero; OCCURRENCE preserves the
 leaf. Combiners, strict returns, and challenge rechecks compare all three, so
@@ -470,7 +491,7 @@ two leaves of one Envelope never alias.
 |---|---|
 | 1 Exact implementable B0 | [[b0-encoding-and-ids]], [[b0-authorship-envelope]], [[b0-principal-authority]], [[b0-realm-admission]], [[b0-indexes]], [[b0-binding]], [[b0-lens]], [[b0-content-locators]] + this overview's SR pins |
 | 2 Smallest semantic model + alternatives | §1 above; per-chapter alternatives; exact mandatory cell interfaces in [[bakeoff-spec]] |
-| 3 Traceability with labels | [[traceability]] (149 rows) |
+| 3 Traceability with labels | [[traceability]] (151 rows; 127 COVERED / 20 DEFERRED / 4 GAP) |
 | 4 Controlled bakeoff spec | [[bakeoff-spec]] (9-cell fractional design, declared confounds) |
 | 5 Frozen fixture/harness interfaces | [[harness-and-fixtures]] (10 fixtures; restricted-JCS manifest/vector container; binary result registry/outcomes; logical state projection; canonical measurement rows keyed by exact source/case/vector/step/input; "frozen" = fixed before Stage B measurement, not protocol-frozen) |
 | 6 Golden-vector categories + falsifiers | [[vectors-and-falsifiers]] (GV-1..GV-18 + consolidated falsifier matrix) |

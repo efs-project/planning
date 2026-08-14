@@ -1428,6 +1428,19 @@ debug read, with every reachable/bubbled error. Missing or duplicate entries,
 unknown errors, noncanonical ABI spellings, and unlisted actual reverts fail
 freeze.
 
+The frozen `index` namespace includes the exact signature
+`ErrPageCursor(uint256)`. The registered page operations retain the existing
+`uint256` request/result cursor fields and test the canonical `PageCursorV1`
+and `UniqueTypeCursorV1` words, not a cell-specific or SDK-only encoding: each
+tag follows its exact family-specific §5.1a preimage (ordinary query+mode,
+admission neither, unique Type+mode, all with Realm/realmBasis), while separate
+`basisOrdinal` binds `H`; version, reserved bit, terminal sentinel, canonical
+end, and ordinary or nested physical range are validated before results. A
+successful PARTIAL row records
+the exact next ordinary position or unique outer/inner continuation in the
+unchanged `MeasurementRow.nextCursor`; SOL, TS, and RS words and progress must
+be byte-identical.
+
 This inventory is regenerated after owner commit `a18e571`: codec/kernel-Type
 members include structural code 17; lifecycle folds consume the ten-field
 typed context; Lens successes encode the three-field `ResolvedTarget` in both
@@ -1667,7 +1680,11 @@ combiner/LENS-NEG-1 vectors; Lane 8 §13 categories 1–5. Emission is blocked
 on VERIFIED repair status for every consumed SR pin plus the retired-form
 residue check in §1.3. Vector files are corpus content (§5); the corpus adds only the
 cross-fixture vectors defined in this chapter (CV-\*, convergence twins,
-ResolvedManifest/1 byte-identity).
+ResolvedManifest/1 byte-identity). GV-14 is mandatory in all three languages:
+first/middle/terminal ordinary pages; rejected wrong family/query/mode/basis;
+version/reserved/end/range corruption; and unique-by-Type outer plus inner
+continuation. These are CONFORMANCE rows over the existing vector and
+`MeasurementRow` identities, not new fixtures, domains, or measurement fields.
 
 ---
 
