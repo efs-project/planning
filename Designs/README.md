@@ -2,7 +2,7 @@
 
 Design proposals with lifecycle. The canonical protocol lives in [[design-system]] (this folder's own meta-design). The vault's main [README](../README.md) is the entry point. This file is the folder-local quick-start AND the curated content map.
 
-**James:** start with the [folder-level owner decision inbox](./owner-decision-inbox.md). It routes to the EFS v2 and Client v2 inboxes and separates real owner choices from stale checkboxes and implementation work.
+**James:** start with the [folder-level owner decision inbox](./owner-decision-inbox.md). It routes to the current design-set inboxes and separates real owner choices from stale checkboxes and implementation work.
 
 ## Quick start (writing a new design)
 
@@ -60,6 +60,7 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 | Design | Target repos | Notes |
 |---|---|---|
 | **[`efsv2/`](./efsv2/) — EFS 2.0 greenfield design** | `planning`, `contracts`, `sdk`, `client` | One active successor design: standalone Core, optional Commons, direct Web Client, and optional OS. Start with the phone-readable [README](./efsv2/README.md); the Type/Record/Occurrence/Principal/Lens mechanics remain candidate work. |
+| **[`open-web-app-store/`](./open-web-app-store/) — permissionless software evidence graph and eventual EFS store** | `planning`, `contracts`, `sdk`, `client` | Proposed working comparison baseline for generic Project/Release identity, exact resolved package sets, immutable catalog editions, plural trust/provenance/advisory evidence, optional updates, export/reconstruction, runtime-neutral OS handoff, and the later polished store. No package bytes, Core change, registry, runtime ABI, or implementation is adopted. |
 | **[`media-library/`](./media-library/) — shared media infrastructure plus Booru and Plex/Jellyfin applications** | `planning`, `contracts`, `sdk`, `client` | Owner-directed product set over generic EFS: exact media identity/verification and exit shared by a public tagged gallery and private playback library. Public queries are onchain-first; The Graph is the last-resort reference fallback after an exact measured falsifier. |
 | [[brainstorm-system]] | `planning` | The `Brainstorms/` system: statuses, surfacing cap, deliberate-only pruning. Awaiting promotion. |
 | **[`clientv2/`](./clientv2/) — Web Client / OS evidence set** | `planning`, `client`, `sdk` | The July Web-OS round is historical design evidence. The active boundary separates a direct guest Web Client and shared Files modules from optional EFS OS; the detailed OS architecture must re-earn adoption after the direct slice. See [clientv2/README](./clientv2/README.md). |
@@ -122,7 +123,7 @@ For automated rollups by status, see `../_Index.base` (Obsidian Bases view; conf
 
 | Repo | Designs |
 |---|---|
-| `planning` | [[0001-design-system]], [[cross-repo-reference-mirror]], [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`media-library/`](./media-library/) |
-| `contracts` | [[cross-repo-reference-mirror]], [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`media-library/`](./media-library/) |
-| `client` | [`clientv2/`](./clientv2/), [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`media-library/`](./media-library/) |
-| `sdk` | [`clientv2/`](./clientv2/), [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`media-library/`](./media-library/) |
+| `planning` | [[0001-design-system]], [[cross-repo-reference-mirror]], [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`open-web-app-store/`](./open-web-app-store/), [`media-library/`](./media-library/) |
+| `contracts` | [[cross-repo-reference-mirror]], [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`open-web-app-store/`](./open-web-app-store/), [`media-library/`](./media-library/) |
+| `client` | [`clientv2/`](./clientv2/), [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`open-web-app-store/`](./open-web-app-store/), [`media-library/`](./media-library/) |
+| `sdk` | [`clientv2/`](./clientv2/), [`efs15/`](./efs15/), [`efsv2/`](./efsv2/), [`open-web-app-store/`](./open-web-app-store/), [`media-library/`](./media-library/) |

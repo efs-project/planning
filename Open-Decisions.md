@@ -74,7 +74,8 @@ Under a hold or pending revalidation. Listed so nothing is invisible — **not**
 | [`clientv2`](Designs/clientv2/owner-decision-inbox.md) | 0 | 2026-08-12 | **HELD** |
 | [`efsv2`](Designs/efsv2/owner-decision-inbox.md) | 10 | 2026-08-12 | ok |
 | [`media-library`](Designs/media-library/owner-decision-inbox.md) | 4 | 2026-08-14 — initial design packet | ok |
-| [`Designs (root)`](Designs/owner-decision-inbox.md) | 0 | 2026-08-12 | ok |
+| [`open-web-app-store`](Designs/open-web-app-store/owner-decision-inbox.md) | 0 | 2026-08-14 | ok |
+| [`Designs (root)`](Designs/owner-decision-inbox.md) | 0 | 2026-08-14 | ok |
 
 _Decision **history** is not shown here. A ruling is recorded in the history owned
 by the queue that owns the item — `Designs/<folder>/owner-rulings.md` where that

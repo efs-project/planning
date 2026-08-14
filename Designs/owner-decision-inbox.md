@@ -2,7 +2,7 @@
 
 **Status:** reference — decision packet; no choice is adopted until James answers and it is recorded in the owning history
 **Audience:** James first; designers second
-**Last reconciled:** 2026-08-12
+**Last reconciled:** 2026-08-14
 
 #status/reference #kind/decision #repo/planning
 
@@ -11,6 +11,7 @@
 > - [EFS v2 + OS decisions](./efsv2/owner-decision-inbox.md)
 > - [Client v2 decisions](./clientv2/owner-decision-inbox.md)
 > - [EFS Arcade decisions](./arcade/owner-decision-inbox.md) *(initial D1–D7 packet awaits post-pass reconciliation; do not batch-answer it)*
+> - [Open Web App Store decisions](./open-web-app-store/owner-decision-inbox.md) *(nothing to decide yet; evidence gates stay in the architecture)*
 >
 > A question appears in only one live queue. Linked design documents provide detail; unchecked boxes in them are not automatically James decisions.
 
