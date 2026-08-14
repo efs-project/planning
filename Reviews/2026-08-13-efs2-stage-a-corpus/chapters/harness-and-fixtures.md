@@ -91,7 +91,7 @@ READ_POINT(what, key...)                         -- getRecord/getEnvelope/getOcc
                                                  --   readHead/getBindingHead/counts...
 READ_PAGE(family, key..., PageRequest)           -- Lane 5 pagePostings/admissionLogPage/...
 RESOLVE(planRef, positionKey [, strictMask])     -- Lane 7 resolve/resolveStrict
-SELECT_LOCATOR(targetKey, spec, basis)           -- Lane 5 §7 B0_SELECT; TS/RS SELECT_PROFILE_V2 is separate
+SELECT_LOCATOR(targetKey, spec, basis)           -- Lane 5 §7 B0_SELECT; spec has trusted principalId; TS/RS SELECT_PROFILE_V2 separate
 VERIFY_RANGE(chunkTreeRef, range, locatorSet)    -- Lane 8 §8.2 client machine
 RECONSTRUCT()                                    -- Lane 4 §8 walk W-0..W-10, 2nd impl
 -- control plane --
@@ -197,8 +197,15 @@ Additional red-team repair gates cover seams the old table missed:
 - SR-17: schema groups are Records admitted by ordinary `publish`, with cache
   materialization in the same atomic call.
 - SR-18(a-e): shared u16 digest vocabulary, fail-closed Completeness values,
-  total-posting locator visit bounds, last-live unique counts, and the
-  `REF_INSTANCES_MAX = 16` bound.
+  total-posting locator visit bounds, exact trusted-Principal selector
+  eligibility, last-live unique counts, and the `REF_INSTANCES_MAX = 16`
+  bound.
+- The index owner emits exactly one version-1 `indexCodexBytes` artifact. The
+  encoding owner embeds it once as `u32 length || bytes` in
+  `codexConstantsBytes`; no second index hash or alternate prose-only constants
+  table exists. Profile/genesis reconstruction parses and replays those exact
+  bytes. Admission enumeration is solely `admissionLogPage(PageRequest)` with
+  `PageCursorV1`/`PageResult`; `admissionAt` remains point-only.
 - Reference extraction consumes the exact three-byte
   `(fieldIdx,selectorKind,memberIdx)` tail; only DIRECT and
   ARRAY_STRUCT_MEMBER exist, and the Arcade closure vector extracts
@@ -261,15 +268,17 @@ witness)`. Any prior LeafBody-bearing evidence encoding is invalid.
   `batchId==0` or `batchId>admissionBatchCount` is the owning Realm's typed
   bounds error. A nonzero word decodes as `nonceKey=uint192(word>>64)` and
   `nonceSeq=uint64(word)`; zero never denotes an explicit lane.
-- Content tests separate structural admission from profile eligibility: URI,
+- Content tests separate structural admission from client-profile eligibility: URI,
   cross-field/chunk math, sorted/unique members, and kind-target checks may make
-  a structurally admitted Record ineligible, but Core does not reject them.
+  a structurally admitted Record profile-ineligible, but Core does not reject
+  them or remove them from trusted-Principal-scoped B0 structural selection.
   ArtifactClosure names are STRING(255): Core accepts empty but the profile
   rejects it; maximal member/body arithmetic is 298/4,770/27, with the
   16-reference budget governing.
 - IndexSpec vectors use exactly `u8 indexKind|u8 target`; selector vectors use
-  explicit `winnerPresent`, with no winner `(0,0)` and a real zero-score winner
-  carrying a nonzero ordinal.
+  a nonzero full-width trusted `principalId` bound into the cursor, skip every
+  other Principal before scoring, and use explicit `winnerPresent`, with no
+  winner `(0,0)` and a real zero-score winner carrying a nonzero ordinal.
 - Reconstruction persists/returns canonical **unsigned** envelope bytes;
   AdmissionReceipts and batches retain historical validation basis.
 
@@ -307,6 +316,13 @@ empty, dot, dot-dot, leading, or trailing segment.
 Entries sort by unsigned-ASCII path bytes; `bytes` is exact file length and
 the digest is `keccak256(fileBytes)`. The manifest itself is not an input file
 and does not contain its own version.
+
+Two entries are mandatory: `interfaces/index-codex.bin` is exactly the index
+chapter's `indexCodexBytes`; `profiles/codex-constants.bin` is the complete
+encoding-owned `codexConstantsBytes` returned by Core. The latter must contain
+the former exactly once behind its canonical `u32 indexCodexLen`, and its
+keccak256 must equal every Realm profile's `codexConstantsHash`. Neither file
+mints a domain or a second module hash.
 
 ```text
 canonicalCorpusBytes = RFC8785(corpus-manifest object)
@@ -381,7 +397,12 @@ Mandatory freeze checks are executable corpus members:
   exact post-step digest. A stateless/null-state vector row has zero
   `stateDigest`, and swapping either form fails before report acceptance.
 - **H-DOMTABLE:** all six F1/F3/F4 domains occur once in the corpus manifest
-  and never in `codexConstantsHash`; retired spellings reject.
+  and never in `codexConstantsHash`; retired spellings reject. The same case
+  byte-compares `interfaces/index-codex.bin` to the sole length-delimited
+  module in `profiles/codex-constants.bin`, decodes all 18 limit rows, 14 code
+  tables, three cursor layouts, four context selectors, and four continuation
+  rows, and rejects any count/order/length/token drift, duplicate module,
+  trailing byte, or separately supplied index hash.
 - **H-CELLS:** F1's SR-3 intent bytes remain B0-exact with CardId/mask=1; F3
   has the one bound type/digest and no intent object; F4 enforces one pending,
   CAS, scan-16, single revision increment, cursor invalidation, two-profile
@@ -504,7 +525,10 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   from its RecordId — documents, not defends).
 - **CV-CLOCK** — R-D9 misleading-clock vectors (audit SURVIVORS lane, VERIFIED):
   absurd `observedAtClaim`/`probedAtClaim`/`horizonClaim` values (year 1970,
-  year 9999) never move B0's declared u64 score/latest-ordinal selection; if
+  year 9999) never move B0's declared u64 score/latest-ordinal selection. Every
+  B0 case supplies one nonzero trusted Principal; a later, higher-scored
+  Locator from another Principal consumes scan coverage but cannot win, and
+  changing only that Principal in `SelectSpec` invalidates the cursor. If
   `SELECT_PROFILE_V2` is separately run in TS/RS, they never move that
   profile's admitted-evidence ordering either; same-author same-content
   multiple occurrences at one
@@ -586,7 +610,9 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   a staged group commitment.
 - **CV-RECON** — `RECONSTRUCT()` (Lane 4 §8 walk) executed by the second
   implementation after every fixture's final phase; it re-encodes the exact
-  seven-field InitConfig/genesis facts, checks direct/UUPS EIP-1967 slot
+  seven-field InitConfig/genesis facts, hashes and parses the exact returned
+  Codex bytes (including the sole length-delimited index module), recomputes
+  profileId/genesisCommitment/RealmId, checks direct/UUPS EIP-1967 slot
   invariants and implementation/current-authority getters, folds the chained
   AuthorityTransitions into the latest revision, reads canonical unsigned envelopes, and treats
   receipts/batches as historical validation evidence without claiming to
@@ -597,7 +623,10 @@ before that cell's workload measurement; all are pass/fail gates feeding M-CONF:
   Principal from the first accepted occurrence, validates every nonzero
   `(nonceKey,nonceSeq)` succession, and exactly matches all `intentNonceOf`
   points; zero words are implicit batches and no private key-universe input is
-  allowed. Any §3.2a state mismatch fails the cell.
+  allowed. It also executes C-6's `admissionLogPage(maxItems=1)` semantic probe,
+  checks its item against `admissionAt`, and recomputes context, canonical end,
+  Realm/basis/high-water, coverage, Completeness, and cursor from the decoded
+  index module. Any §3.2a state mismatch fails the cell.
 - **CV-GIT-STOCK** — FX-GIT/GV-16: from a clean directory with the original Git
   repository, every EFS cache/database, and every gateway cache absent, a second
   implementation walks the admitted ref Binding to its
@@ -689,7 +718,9 @@ Lane 8 §8.2 rotation and that MISMATCH indicts the locator, never the content;
 shows both releases author-qualified; C1's Binding and a 1-entry plan resolve
 only the curated one (no "official bit" — candidate, VERIFIED); (iii) executable
 gate refusal at coverage n−1 (Lane 8 §8.3); (iv) `B0_SELECT` runs through the
-index §7 declared-score/latest ABI with physical-visit accounting; a separate
+index §7 declared-score/latest ABI with `principalId=P_pub` and physical-visit
+accounting; `P_evil`'s later/higher-scored Locator is visited but cannot win,
+and switching the filter to `P_evil` changes the context/cursor and winner; a separate
 TS/RS-only `SELECT_PROFILE_V2` run may compare health-first and grade-first
 client profiles across the tampered trace, but is labeled deferred and never
 substitutes for the B0 Core result.
@@ -1217,7 +1248,7 @@ is measured cold AND warm at least once per cell — including the baseline read
 the intake SPINE lane found uncosted (admission-order pages under churn,
 unique-Records-by-Type, Occurrences by Type/Record/Principal — VERIFIED
 finding): `getTypeSchema, getRecord, getEnvelope, getEnvelopeBytes, getOccurrence,
-getOccurrenceByOrdinal, getReceipt, admissionLogPage, pagePostings,
+getOccurrenceByOrdinal, getReceipt, admissionAt, admissionLogPage, pagePostings,
 pagePostingsHydrated, counts, lookupByDigest, getBindingHead, getBindingAtBasis,
 selectBestLocator` (Lane 5); `readHead, readHeadBatch, readHistory,
 readOccurrenceStatus` (Lane 6); `resolve, resolveStrict, validatePlan`
@@ -1225,7 +1256,7 @@ readOccurrenceStatus` (Lane 6); `resolve, resolveStrict, validatePlan`
 `preWithdrawalEvidenceAt` with exact TargetRecordCommitment decoding (Lane 2);
 `admissionBatchIntentLane` and `intentNonceOf` (Lanes 2/4; W-4a replay-control
 reconstruction);
-`genesisFacts, implementationAddress, currentUpgradeAuthorityRef,
+`genesisFacts, codexConstants, implementationAddress, currentUpgradeAuthorityRef,
 revisionCount/revisionAt/currentRevision, authorityTransitionCount/
 authorityTransitionAt` and the remainder of Lane 4 §8.2 (CV-RECON). Every
 result-registry entry uses the final seven-field/three-target-field ABI; prior
@@ -1443,6 +1474,19 @@ the exact next ordinary position or unique outer/inner continuation in the
 unchanged `MeasurementRow.nextCursor`; SOL, TS, and RS words and progress must
 be byte-identical.
 
+The operation registry contains exactly one admission point read and one
+admission enumerator: `sol:admissionAt(uint64)` and
+`sol:admissionLogPage((uint256,uint16,uint64))`. The latter's success is the
+six-field `PageResult`; no separate range-page result or u64 continuation
+schema is registered. The selector operation is exactly
+`sol:selectBestLocator(bytes32,(bytes32,bytes32,uint8,uint8,uint8),uint64,uint256)`,
+where the first `SelectSpec` word is the nonzero trusted `principalId` and the
+second is `typeSchemaId`. Its input digest and result schema therefore move
+with this repair; the index namespace also registers exactly
+`ErrSelectCursor(uint256)` and `ErrSelectBasis(uint64,uint64)`. The
+`codexConstants()` success bytes include the sole
+length-delimited index module; `genesisFacts()` commits their outer hash.
+
 For terminal source admission, the frozen registry has exactly one external
 error signature: authorship namespace
 `E_NO_RESURRECTION(bytes32,uint16)` (the ABI declaration names the arguments
@@ -1541,7 +1585,8 @@ only success artifacts are legal. `STATE_PROJECTION_SCHEMA_ID` is the registry
 id for `harness:state-projection/1`, input `(uint8,bytes32,uint64)`, output
 `(bytes)`, kind HARNESS, no errors.
 
-The closed component schedule is: 0x01 exact `genesisFacts`, Codex bytes,
+The closed component schedule is: 0x01 exact `genesisFacts`, Codex bytes
+(including the one canonical length-delimited `indexCodexBytes` module),
 EIP-1967 implementation/admin words, `implementationAddress`,
 `currentUpgradeAuthorityRef`, `revisionAt(1..revisionCount)`, then every
 `authorityTransitionAt(1..authorityTransitionCount)` in ordinal order; 0x02 admission/envelope/card/batch/Type/Principal
@@ -1686,9 +1731,9 @@ brief lands (PM directive, VERIFIED)].
 
 The harness executes every chapter-owned vector category in Solidity,
 TypeScript, and Rust (kickoff gate, VERIFIED) and reports them as CONFORMANCE
-rows: Lane 1 §10 categories 1–12; Lane 2 §12 categories 1–10; Lane 3 §10
+rows: Lane 1 §10 categories 1–14; Lane 2 §12 categories 1–10; Lane 3 §10
 `PID-DERIVE … GRAD-SEAM`; Lane 4 §3/§8 checks C-1..C-7 + walk W-0..W-10; Lane 5
-page/liveness vectors; Lane 6 T1–T9 + key-derivation vectors; Lane 7 §12 plan/
+page/liveness/index-Codex vectors; Lane 6 T1–T9 + key-derivation vectors; Lane 7 §12 plan/
 combiner/LENS-NEG-1 vectors; Lane 8 §13 categories 1–5. Emission is blocked
 on VERIFIED repair status for every consumed SR pin plus the retired-form
 residue check in §1.3. Vector files are corpus content (§5); the corpus adds only the
@@ -1698,6 +1743,9 @@ first/middle/terminal ordinary pages; rejected wrong family/query/mode/basis;
 version/reserved/end/range corruption; and unique-by-Type outer plus inner
 continuation. These are CONFORMANCE rows over the existing vector and
 `MeasurementRow` identities, not new fixtures, domains, or measurement fields.
+The same run byte-compares the index module extracted from `codexConstants()`
+with `interfaces/index-codex.bin`, recomputes profileId/genesisCommitment, and
+tests C-6's canonical admission page against `admissionAt`.
 
 ---
 
@@ -1766,10 +1814,11 @@ skew) and the F7/X17 comparison.
 
 ```text
 target: FX-ARC's release/closure locator key under B0_SELECT
-1. publish 65 Locator/1 occurrences targeting the same key (more than two
-   LOCATOR_POSTINGS_VISIT_MAX windows), using the B0-declared score mode
-   (`SCORE_LATEST` for repaired `Locator/1`)
-2. self-withdraw every occurrence; assert the one-way SR-10 status flips
+1. as trusted `P_pub`, publish 66 Locator/1 occurrences targeting the same key;
+   self-withdraw the first 65 and leave the 66th live (more than two
+   LOCATOR_POSTINGS_VISIT_MAX windows), using `SCORE_LATEST`
+2. as untrusted `P_evil`, append 33 live, later Locator/1 occurrences with the
+   same target; set `SelectSpec.principalId=P_pub`
 3. call selectBestLocator(target, spec, basis, cursor=0), then follow only the
    returned cursor until CURSOR_END
 4. on every call assert:
@@ -1777,6 +1826,8 @@ target: FX-ARC's release/closure locator key under B0_SELECT
        posting visited and stays <= LOCATOR_TOTAL_POSTING_READ_MAX
      an unexhausted suffix returns PARTIAL + nextCursor, even with no live item
      only the terminal page returns COMPLETE; no call scans ahead for liveness
+     no P_evil occurrence wins; the aggregate winner is P_pub's 66th occurrence
+     changing only spec.principalId rejects an old cursor as wrong context
 5. report gas/wall per page and cursor-chain length; compare against the same
    fixed call bounds before spray
 ```
@@ -1870,7 +1921,9 @@ The compact contract other chapters and Stage B rely on:
   ≠ protocol-freeze.
 - **Obligations on other lanes:** all consumed SR-1..SR-18 owning-chapter
   repairs and retired-form residue checks verify before golden-vector
-  emission; the closed ReferenceRole/content-profile boundary is reflected in
+  emission; the byte-exact index Codex module/full Codex pair is manifest
+  content and the result registry exposes only the canonical admission page;
+  the closed trusted-Principal B0/content-profile boundary is reflected in
   fixture schemas before vector minting; measured rows replace the chapters' schedule-arithmetic
   [HYPOTHESIS] tables (Lane 2 §2.5, Lane 4 §5.6, Lane 5 §5.3/§9, Lane 6 §3.6,
   Lane 7 §9, Lane 8 §8.4).

@@ -20,6 +20,9 @@ decrements on last-live-occurrence withdrawal (SR-18d, §3.3); ordinals are
 two-slot layout (§2.4/§3.6); digest keys use the encoding chapter's `u16
 algCode` (SR-18a, §3.5); all key formulas regenerate under the SR-1
 `abi.encode` discipline (§2.1).
+Final protocol-audit repair: §0.1 now owns the exact index Codex bytes embedded
+in the Realm profile, and §7 scopes every B0 locator selector to one nonzero
+trusted Principal without importing client content conformance on-chain.
 
 ---
 
@@ -62,6 +65,190 @@ are the durable contract; physical slot packing is replaceable until frozen
 [DERIVED INVARIANT — system-constitution.md "Physical storage layout is
 replaceable until frozen. The semantic query contract … is the durable part";
 VERIFIED].
+
+### 0.1 Index Codex module — canonical bytes consumed by the Realm profile
+
+[PROPOSAL — final protocol-audit repair.] This chapter owns one modular Core
+artifact, `indexCodexBytes`. It is the byte-exact commitment to the
+implementation-independent B0 query grammar: closed query/status codes,
+semantic bounds, continuation layouts, and the context/canonical-end selectors
+that distinguish one query from another. The encoding chapter embeds these
+bytes once, length-delimited, in `codexConstantsBytes`; it does **not** hash
+this module separately. Thus `profileId` commits to the module through the
+single reconstructable `codexConstantsHash`, and `codexConstants()` exposes
+the exact module bytes from state.
+
+All integers below are unsigned big-endian fixed width; all names are the
+printed ASCII bytes. Table and row order is exactly the order printed here.
+
+```text
+indexCodexBytes :=
+  u16 indexCodexRevision                         // = 1
+  u16 limitCount                                 // = 18
+  limitCount × (u16 nameLen || asciiName || u256 value)
+  u16 codeTableCount                             // = 14
+  codeTableCount × CodeTable
+  u16 cursorLayoutCount                          // = 3
+  cursorLayoutCount × CursorLayout
+  u16 contextSelectorCount                       // = 4
+  contextSelectorCount × ContextSelector
+  u16 continuationCount                          // = 4
+  continuationCount × Continuation
+
+CodeTable :=
+  u16 tableNameLen || asciiTableName || u16 rowCount ||
+  rowCount × (u32 code || u16 nameLen || asciiName)
+
+CursorLayout :=
+  u8 layoutCode || u8 layoutVersion || u8 fieldCount ||
+  fieldCount × (
+    u16 fieldNameLen || asciiFieldName || u16 lowBit || u16 bitWidth ||
+    u8 constraintCode || u256 constraintValue
+  )
+// constraintValue is zero when constraintCode=ANY and is the required value
+// when constraintCode=EQ.
+
+ContextSelector :=
+  u8 selectorCode || u16 outputBitCount || u16 tokenBytesLen || tokenBytes
+// Evaluate tokenBytes left-to-right as the fixed-width ABI words named by the
+// ContextToken/1 table, then lowN(keccak256(abi.encode(words))).
+// LITERAL_U256 is the only variable-width token encoding:
+// u8(TOKEN_LITERAL_U256) || u256(value). Every other token is one u8 code.
+
+Continuation :=
+  u8 familyCode || u8 layoutCode || u8 contextSelectorCode ||
+  u8 canonicalEndRuleCode || u8 positionRuleCode || u8 endpointModePolicyCode
+```
+
+The 18 limit rows are:
+
+```text
+ORDINAL_NONE=0
+ORDINAL_MAX=281474976710655
+MAX_INDEX_SPECS=8
+MAX_PAGE_ITEMS=512
+MAX_PAGE_ITEMS_HYDRATED=256
+PAGE_SCAN_MAX=1024
+PAGE_CURSOR_VERSION=1
+CURSOR_END=0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+POSTING_KEY_CANDIDATE_MAX=43
+POSTING_KEY_DEDUP_COMPARE_MAX=903
+DISTINCT_OCCURRENCE_KEYS_MAX=43
+INDEX_HEAD_TOUCH_MAX=44
+F_MAX=44
+LOCATOR_POSTINGS_VISIT_MAX=32
+LOCATOR_BOUNDARY_PROBES_MAX=48
+LOCATOR_TOTAL_POSTING_READ_MAX=80
+BINDING_PROBES_MAX=48
+BATCH_PROBES_MAX=64
+```
+
+The 14 closed code tables are:
+
+```text
+IndexKind/1:
+  1 KIND_BY_TYPE; 2 KIND_UNIQUE_BY_TYPE; 3 KIND_BY_RECORD;
+  4 KIND_BY_PRINCIPAL; 5 KIND_TARGET; 6 KIND_ROLE; 7 KIND_SPEC;
+  8 KIND_BINDING_HIST; 9 KIND_DIGEST
+IndexSpecKind/1:
+  1 SCALAR_EQ; 2 REF_BACKLINK; 3 DIGEST_EQ
+Completeness/1:
+  0 UNKNOWN; 1 COMPLETE; 2 PARTIAL; 3 UNSUPPORTED
+OccurrenceStatus/1:
+  0 NEVER_ADMITTED; 1 ACTIVE; 2 WITHDRAWN; 3 PRE_WITHDRAWN
+PageEndpointMode/1:
+  1 PAGE_RAW; 2 PAGE_HYDRATED
+LocatorScoreMode/1:
+  1 SCORE_FIELD_MAX; 2 SCORE_LATEST
+PostingsMode/1:
+  0 LIVENESS; 1 RAW_AUDIT
+IndexErrorSignature/1:
+  1 ErrPageCursor(uint256); 2 ErrSelectCursor(uint256);
+  3 ErrSelectBasis(uint64,uint64)
+CursorFieldConstraint/1:
+  0 ANY; 1 EQ
+ContextToken/1:
+  1 DOM_PK; 2 REALM_ID; 3 REALM_BASIS_AT_H; 4 LITERAL_U256;
+  5 ENDPOINT_MODE; 6 TYPE_SCHEMA_ID; 7 INDEX_KIND; 8 INDEX_ORDINAL;
+  9 VALUE_KEY; 10 TARGET_KEY; 11 ROLE_ORDINAL; 12 SCORE_MODE;
+  13 SCORE_FIELD_ORDINAL; 14 PRINCIPAL_ID
+ContinuationFamily/1:
+  1 ORDINARY; 2 ADMISSION_LOG; 3 UNIQUE_BY_TYPE; 4 SELECT_BEST_LOCATOR
+CanonicalEndRule/1:
+  1 POSTINGS_FIRST_ORD_GT_H; 2 ADMISSION_H;
+  3 UNIQUE_OUTER_FIRST_ORD_GT_H; 4 SELECT_ROLE_FIRST_ORD_GT_H
+PositionRule/1:
+  1 ORDINARY_NEXT_LT_END_NONZERO; 2 ADMISSION_NEXT_LE_END;
+  3 UNIQUE_OUTER_INNER_CANONICAL; 4 SELECT_WINDOW_BOUNDARY
+EndpointModePolicy/1:
+  0 NONE; 1 RAW_OR_HYDRATED
+```
+
+The three cursor layouts are the following rows. `layoutVersion=1` for every
+row; this versions even the selector token whose wire layout has no in-band
+version field. Fields are in increasing `lowBit` order:
+
+```text
+layoutCode 1 PAGE_CURSOR_V1:
+  nextPosition (0,48,ANY,0)
+  claimedEnd   (48,48,ANY,0)
+  basisOrdinal (96,48,ANY,0)
+  version      (144,8,EQ,1)
+  contextTag   (152,103,ANY,0)
+  reserved     (255,1,EQ,0)
+
+layoutCode 2 UNIQUE_TYPE_CURSOR_V1:
+  outerNextIndex (0,48,ANY,0)
+  innerPlusOne   (48,48,ANY,0)
+  basisOrdinal   (96,48,ANY,0)
+  version        (144,8,EQ,1)
+  contextTag     (152,103,ANY,0)
+  reserved       (255,1,EQ,0)
+
+layoutCode 3 SELECT_CURSOR_V1:
+  nextIndex     (0,48,ANY,0)
+  claimedEnd    (48,48,ANY,0)
+  basisOrdinal  (96,48,ANY,0)
+  contextTag    (144,111,ANY,0)
+  reserved      (255,1,EQ,0)
+```
+
+The four context-selector token streams are:
+
+```text
+selectorCode 1, outputBitCount=103, ORDINARY:
+  DOM_PK, REALM_ID, REALM_BASIS_AT_H, LITERAL_U256(1), ENDPOINT_MODE,
+  TYPE_SCHEMA_ID, INDEX_KIND, INDEX_ORDINAL, VALUE_KEY
+selectorCode 2, outputBitCount=103, ADMISSION_LOG:
+  DOM_PK, REALM_ID, REALM_BASIS_AT_H, LITERAL_U256(1), LITERAL_U256(3)
+selectorCode 3, outputBitCount=103, UNIQUE_BY_TYPE:
+  DOM_PK, REALM_ID, REALM_BASIS_AT_H, LITERAL_U256(1), LITERAL_U256(4),
+  ENDPOINT_MODE, TYPE_SCHEMA_ID
+selectorCode 4, outputBitCount=111, SELECT_BEST_LOCATOR:
+  DOM_PK, TARGET_KEY, PRINCIPAL_ID, TYPE_SCHEMA_ID, ROLE_ORDINAL,
+  SCORE_MODE, SCORE_FIELD_ORDINAL
+```
+
+The four continuation rows are:
+
+```text
+ORDINARY:            (family=1, layout=1, context=1, end=1, position=1, mode=1)
+ADMISSION_LOG:       (family=2, layout=1, context=2, end=2, position=2, mode=0)
+UNIQUE_BY_TYPE:      (family=3, layout=2, context=3, end=3, position=3, mode=1)
+SELECT_BEST_LOCATOR: (family=4, layout=3, context=4, end=4, position=4, mode=0)
+```
+
+The textual range/canonicalization rules in §§5.1a and 7 are the normative
+meaning of those closed rule codes; the bytes above make choosing a different
+rule, family, field layout, tag preimage, code, or bound move
+`codexConstantsHash`. `MAX_INDEX_SPECS` and the three IndexSpec kind codes are
+serialized only here even though the encoding chapter owns their wire use;
+the encoding-owned structural `REF_INSTANCES_MAX` stays in the encoding module
+and is not duplicated here. Physical-layout choices (`POSTINGS_PER_SLOT`, slot bit
+packing, and the disposable F4 bakeoff state) are implementation/cell facts,
+not B0 query semantics, and are excluded. Stage B emits one byte vector for
+this module and byte-identically extracts it from the length-delimited section
+of `codexConstants()` in Solidity, TypeScript, and Rust.
 
 ---
 
@@ -1316,6 +1503,7 @@ uint8  constant LOCATOR_BOUNDARY_PROBES_MAX = 48;
 uint16 constant LOCATOR_TOTAL_POSTING_READ_MAX = 80;
 
 struct SelectSpec {                 // supplied or pinned by the consumer
+  bytes32 principalId;              // REQUIRED nonzero trusted author
   bytes32 typeSchemaId;             // the locator-evidence Type to consider
   uint8   roleOrdinal;              // role whose target identifies the content
   uint8   scoreMode;                // 1 = SCORE_FIELD_MAX, 2 = SCORE_LATEST
@@ -1334,6 +1522,9 @@ function selectBestLocator(
     uint256 nextCursor,
     Completeness completeness
 );
+
+error ErrSelectCursor(uint256 cursor);
+error ErrSelectBasis(uint64 requestedBasis, uint64 currentHighWater);
 ```
 
 Algorithm (deterministic pseudocode):
@@ -1344,6 +1535,7 @@ unsupportedSelect():
 
 validateSelectSpec(targetKey, spec, H):
   if targetKey == 0: return false
+  if spec.principalId == 0: return false
   meta = TypeSchemaMeta[spec.typeSchemaId]
   if meta does not exist || uint64(meta.admitOrdinal) > H: return false
   role = declaredRole(spec.typeSchemaId, spec.roleOrdinal)
@@ -1366,6 +1558,11 @@ validateSelectSpec(targetKey, spec, H):
 postingAt(key, index):
   word = SLOAD(pdataSlot(key, index / POSTINGS_PER_SLOT))
   return lane48(word, index % POSTINGS_PER_SLOT)
+
+principalIdAt(ord):
+  po = logSlotB(ord).principalOrd
+  assert po != 0
+  return principalByOrd(po)             // exact full-width admitted author
 
 canonicalEndAtBasis(key, H, head):
   // Return the first physical index whose ordinal is > H, or head.count.
@@ -1426,6 +1623,7 @@ selectBestLocator(targetKey, spec, basisOrdinal, cursor):
     windowVisited += 1                 // count EVERY scan posting first
     assert ord <= H                    // guaranteed by canonical upper bound
     if !liveAt(ord, H): continue
+    if principalIdAt(ord) != spec.principalId: continue
     score = (spec.scoreMode == SCORE_LATEST)
       ? ord
       : extractUint64(body(ord), spec.scoreFieldOrdinal)
@@ -1456,7 +1654,7 @@ SelectCursor (uint256, nonzero and never CURSOR_END):
   reserved        bit  [255]      0
 
 contextTag = low111(keccak256(abi.encode(
-  DOM_PK, targetKey, spec.typeSchemaId, uint256(spec.roleOrdinal),
+  DOM_PK, targetKey, spec.principalId, spec.typeSchemaId, uint256(spec.roleOrdinal),
   uint256(spec.scoreMode), uint256(spec.scoreFieldOrdinal))))
 ```
 
@@ -1475,8 +1673,11 @@ cursor also requires an emitted window boundary
 end-position cursor, a basis/context mismatch, a nonzero reserved bit, or any
 other malformed encoding reverts `ErrSelectCursor`.
 
-The u111 context commitment is cursor-misuse detection, not an authorization
-primitive. Bit 255 is zero so an encoded resumable cursor cannot collide with
+The u111 context commitment binds the exact trusted Principal filter but is
+still cursor-misuse detection, not an authorization primitive. Trust is the
+consumer's choice of the nonzero full-width `spec.principalId`; Core merely
+enforces exact equality against the admitted Occurrence author. Bit 255 is zero
+so an encoded resumable cursor cannot collide with
 `CURSOR_END`. Stateless cursors cannot prove that a caller consumed earlier
 pages: a resumed page's `COMPLETE` applies to the suffix beginning at its
 validated `nextIndex`. Whole-query absence requires either an initial
@@ -1487,9 +1688,11 @@ Exactness notes:
 - `LOCATOR_POSTINGS_VISIT_MAX = 32` bounds sequential candidate visits, live
   or dead. `LOCATOR_BOUNDARY_PROBES_MAX = 48` bounds the canonical-end search;
   `postingsVisited` counts **both** boundary point reads and sequential visits,
-  so `LOCATOR_TOTAL_POSTING_READ_MAX = 80` is the honest per-call physical-read
-  ceiling. Repriced worst case: `48 × 2,100 + 32 × 8,820 ≈ 383k` gas before
-  fixed overhead [HYPOTHESIS]. Dead-posting spray therefore yields bounded
+  so `LOCATOR_TOTAL_POSTING_READ_MAX = 80` is the honest per-call **postings**
+  read ceiling. Principal hydration for each live sequential candidate is
+  additional and bounded by the same 32 visits. Repriced worst case:
+  `48 × 2,100 + 32 × (8,820 + 2,100) ≈ 450k` gas before fixed overhead
+  [HYPOTHESIS]. Dead or untrusted-posting spray therefore yields bounded
   `PARTIAL + nextCursor`, never unbounded look-ahead or false `COMPLETE`.
 - The canonical boundary includes exactly the postings whose strictly
   ascending ordinal is `≤ H`. Later appends necessarily have ordinal `> H`,
@@ -1510,8 +1713,20 @@ Exactness notes:
   combines window winners under the same total order until `COMPLETE`; the
   function never scans beyond the declared window to decide whether a live
   candidate remains.
+- B0 eligibility is exactly: structurally admitted evidence of the declared
+  Type, under the declared target role and score shape, authored by the exact
+  nonzero trusted `spec.principalId`, and live at `H`. Every live occurrence
+  by another Principal is charged to the bounded window and skipped before
+  scoring. Untrusted spray can therefore force honest `PARTIAL` progress and
+  cost, but can never win. URI syntax, dereference reachability, content-profile
+  conformance, and availability health are not B0 predicates and are never
+  inferred from structural admission. They remain explicit client checks under
+  the content chapter's `SELECT_PROFILE_V2`. A client MUST validate a B0 winner
+  before use; when those checks matter, fallback is a profile-aware client fold
+  over the canonical trusted-Principal candidate pages, not a claim that this
+  on-chain selector returned the globally best content-conformant locator.
 - Full declaration validation precedes the postings-head lookup. An unknown
-  Type, undeclared role/`REF_BACKLINK` obligation, invalid score mode,
+  Type, zero trusted Principal, undeclared role/`REF_BACKLINK` obligation, invalid score mode,
   non-u64/non-extractable score field, or missing `SCALAR_EQ` score declaration
   returns `UNSUPPORTED` with zero visits and `CURSOR_END`; none can become
   `COMPLETE + empty`.
@@ -1542,7 +1757,7 @@ reads unbounded [kickoff falsifier 5]:
 | `CURSOR_END` | 2^256−1 | terminal result sentinel; never accepted as input |
 | `LOCATOR_POSTINGS_VISIT_MAX` | 32 | sequential locator postings per call, dead included |
 | `LOCATOR_BOUNDARY_PROBES_MAX` | 48 | canonical upper-bound point reads per call |
-| `LOCATOR_TOTAL_POSTING_READ_MAX` | 80 | honest total: boundary probes + sequential visits |
+| `LOCATOR_TOTAL_POSTING_READ_MAX` | 80 | honest postings total: boundary probes + sequential visits; Principal/body hydration is gas-accounted separately |
 | `BINDING_PROBES_MAX` | 48 | binary-search probes per basis-pinned binding read |
 | `BATCH_PROBES_MAX` | 64 | binary-search probes for exact receipt batch |
 | `ORDINAL_MAX` | 2^48−1 | admission ceiling; revert, never wrap |
@@ -1764,6 +1979,9 @@ The compact contract other chapters rely on:
 `CURSOR_END = 2^256−1`; `PAGE_CURSOR_VERSION = 1`; the exact
 `PageCursorV1`/`UniqueTypeCursorV1` encodings and `ErrPageCursor` in §5.1a;
 the §8 limits table; the §5.3 page maxima.
+The canonical profile commitment is `indexCodexBytes` (§0.1), embedded once
+length-delimited in encoding-owned `codexConstantsBytes`; no index-local hash
+or second state getter exists.
 
 **Key derivation** (stable grammar): `pk(typeSchemaId, indexKind,
 indexOrdinal, valueKey)` with the closed `KIND_*` set (§2.1) and the
@@ -1784,6 +2002,9 @@ with encoding-owned hashed domain words and `abi.encode` fixed words.
 - Every generic continuation is a canonical, query- and basis-bound `uint256`
   token from §5.1a. Ordinary, hydrated, admission, and unique-by-Type families
   cannot exchange cursors; malformed or stale tokens revert `ErrPageCursor`.
+- Admission enumeration exists only as `admissionLogPage(PageRequest) ->
+  PageResult`; `admissionAt(uint64)` is a point read and there is no alternate
+  range-page/cursor/result ABI.
 - Mandatory indexing: an accepted Occurrence is present in every applicable
   family in the same atomic call; there is no admitted-but-unindexed state.
 - `counts()` liveCount is revocation-aware at current basis, O(1).
@@ -1801,10 +2022,15 @@ with encoding-owned hashed domain words and `abi.encode` fixed words.
 - `selectBestLocator` scans at most 32 sequential postings, counting dead ones,
   plus at most 48 logarithmic point reads to recompute the canonical
   ordinal-at-basis boundary; `postingsVisited` reports both (≤80). It validates
-  the declared Type/role/score indexes before lookup, rejects any cursor whose
+  a nonzero trusted full-width Principal plus the declared Type/role/score
+  indexes before lookup, skips every differently authored occurrence before
+  scoring, rejects any cursor whose
   claimed end differs from the canonical boundary, and returns `PARTIAL` only
   with a validated resumable cursor.
 - Full `bytes32 PrincipalId` width preserved in every key, item, and ABI.
+  `SelectSpec.principalId` is mandatory/nonzero and part of SelectCursor
+  context; only exactly matching admitted authors can win. This is a
+  structural selector, not URI/content/health conformance.
 
 **External functions** (Solidity signatures as defined above): `getTypeSchema`,
 `getRecord`, `getEnvelope`, `getOccurrence`, `getOccurrenceByOrdinal`,

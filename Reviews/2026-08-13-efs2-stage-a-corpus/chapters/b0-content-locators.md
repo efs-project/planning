@@ -215,8 +215,11 @@ There are no Type-created callbacks and no unbounded traversal during
 admission. A Record that passes Core structure but fails this profile remains
 immutable admitted evidence with the same RecordId; a conforming reader grades
 it `PROFILE_MALFORMED(reason)` and excludes it from verified execution,
-exact-closure claims, or best-locator eligibility as applicable. It is never
-silently reclassified as structurally invalid or deleted.
+exact-closure claims, and the explicit client-tier `SELECT_PROFILE_V2` fold as
+applicable. It is never silently reclassified as structurally invalid or
+deleted. In particular, profile failure does **not** retroactively make a
+structurally admitted Locator ineligible for the index chapter's B0 selector:
+B0 cannot evaluate URI grammar, reachability, or these content relationships.
 
 For all multi-Type target sets below, the Type role uses
 `expectedType = ANY`; the listed set is content-profile conformance. A
@@ -923,7 +926,10 @@ and indexes", line 180-184, VERIFIED]. Division of labor under SR-18c:
 - **B0 posture over Locator/1** [PROPOSAL — minimal posture; no body change]:
   `Locator/1` declares no `uint64` score field, so B0 on-chain selection over
   locator candidates runs in the index chapter's recency mode (latest by
-  AdmissionOrdinal at basis B); a publisher wanting field-scored selection
+  AdmissionOrdinal at basis B) and requires the consumer to supply one nonzero
+  trusted full-width `principalId`. Only live Locator occurrences authored by
+  that exact Principal can win; differently authored records consume bounded
+  scan budget but are skipped. A publisher wanting field-scored selection
   compiles its score into one canonical body field at publication, per the
   index chapter's SelectSpec rules.
 
@@ -932,7 +938,7 @@ The exact B0 selector surface consumed here is:
 ```solidity
 function selectBestLocator(
     bytes32 targetKey,
-    SelectSpec calldata spec,       // one uint64 score field or SCORE_LATEST
+    SelectSpec calldata spec,       // trusted principalId + declared score/latest
     uint64 basisOrdinal,
     uint256 cursor
 ) external view returns (
@@ -944,8 +950,9 @@ function selectBestLocator(
 );
 ```
 
-`LOCATOR_POSTINGS_VISIT_MAX = 32` bounds sequential postings visited, dead
-included; the owner additionally accounts for its bounded canonical-end
+`SelectSpec.principalId` MUST be nonzero and is bound into every continuation
+context. `LOCATOR_POSTINGS_VISIT_MAX = 32` bounds sequential postings visited,
+dead and untrusted included; the owner additionally accounts for its bounded canonical-end
 probes in `postingsVisited`. On an initial `cursor == 0`, `basisOrdinal == 0`
 pins the current high-water once. A resumable cursor commits that exact basis,
 canonical end, target, and `SelectSpec`; every continuation uses the same
@@ -956,11 +963,19 @@ cursor chain. An undeclared/invalid Type-role-score profile is `UNSUPPORTED`,
 not `COMPLETE + empty`; an unavailable basis is UNKNOWN at the client boundary
 (and an invalid on-chain basis/cursor reverts), never a lower-priority
 fallthrough. The sole B0 total order is `(score desc, AdmissionOrdinal asc)`.
-For either `COMPLETE` or `PARTIAL`, no eligible winner is encoded exactly as
+For either `COMPLETE` or `PARTIAL`, no structurally eligible trusted-Principal
+winner is encoded exactly as
 `bestOrdinal = 0, bestScore = 0`. Implementations track `winnerPresent`
 separately from the score: an eligible real occurrence may have score zero and
 then returns its nonzero ordinal (with `bestScore = 0`). Sentinel comparison
-must never cause that candidate to disappear.
+must never cause that candidate to disappear. This B0 eligibility statement is
+deliberately narrow: exact trusted Principal + structural admission + live at
+the pinned basis + declared Type/role/score. URI syntax, dereference success,
+content-profile conformance, and health evidence are client-tier predicates.
+A client validates the returned Locator before using it and, if it needs a
+conforming fallback, runs the explicit profile-aware fold over the canonical
+trusted-Principal candidate pages. The B0 result is never described as the
+globally best usable or healthy locator.
 
 **`SELECT_PROFILE_V2` — the client-tier graded fold (explicitly deferred;
 NOT B0)** [PROPOSAL — re-scoped by SR-18c from this chapter's draft, where
@@ -1142,9 +1157,11 @@ Solidity/TypeScript/Rust):
    serves one bad chunk → MISMATCH → fallback completes → A3); resume from a
    different client using only public Records + fresh bitmap; executable gate
    refuses at k = n−1.
-5. **Selection**: B0 on-chain selection vectors (single declared score field;
-   examination budget bounds TOTAL postings visited, live or dead; spray of
-   self-revoked postings → honest `PARTIAL` + cursor) are owned by the index
+5. **Selection**: B0 on-chain selection vectors (nonzero trusted Principal;
+   single declared score field; examination budget bounds TOTAL postings
+   visited, live/dead/untrusted; a differently authored higher-score Locator
+   never wins; spray of self-revoked or untrusted postings → honest `PARTIAL`
+   + cursor) are owned by the index
    chapter per SR-18c. Deferred with `SELECT_PROFILE_V2` (minted only if the
    profile graduates): two implementations, one Plan, one basis →
    byte-identical selection; candidate-page truncation → PARTIAL-labeled
@@ -1194,9 +1211,12 @@ projecting `0xEF01` as raw sha1 `0x11 14‖d` is explicitly lossy of framing.
   for Plans, mounts, and clients.
 - Best-locator evidence shapes (§10): `Locator/1` + `DurabilityGrade/1` +
   `AvailabilityObservation/1` feed the B0 on-chain bounded selection owned by
-  [[b0-indexes]] §7 (SR-18c; single declared score field, total-postings
-  examination budget, canonical pinned-basis cursor, `PARTIAL + nextCursor`,
-  and no false-empty result for undeclared/unavailable input). The
+  [[b0-indexes]] §7 (SR-18c; nonzero trusted full-width Principal, single declared score field, total-postings
+  examination budget, required exact trusted Principal, canonical pinned-basis
+  cursor, `PARTIAL + nextCursor`, and no false-empty result for
+  undeclared/unavailable input). Core structural selection does not evaluate
+  URI/content/health conformance; clients validate and fall back through the
+  profile tier before use. The
   `CandidateSet`/`LocatorEvidence`/`SelectionKey`
   fold is the client-tier `SELECT_PROFILE_V2`, **explicitly deferred** — Lane
   5 supplies (P, B) from the Plan only if the profile graduates.

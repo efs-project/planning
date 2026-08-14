@@ -180,8 +180,10 @@ fails the build — the registry can never silently drift again.
 
 [PROPOSAL — added post-red-team; the realm chapter's `profileId` (§2.3 there) and
 `genesisCommitment` (§2.4 there) consume this hash, and it must be state-readable. This
-chapter owns it: one canonical, ordered, versioned serialization of every Core constant
-this chapter pins. Harness/bakeoff-only constants are kept out of the Core profile hash.]
+chapter owns the outer artifact: one canonical, ordered, versioned serialization
+of every Core constant it pins plus the byte-exact length-delimited module owned
+by the index chapter. Harness/bakeoff-only constants are kept out of the Core
+profile hash.]
 
 ```
 codexConstantsBytes :=
@@ -189,9 +191,11 @@ codexConstantsBytes :=
   u16 mcVersion                  // = MC_VERSION = 1
   ---- closed domain table (§1.3): active id/key/slot/tag rows only, table order ----
   u16 coreDomainCount ‖ coreDomainCount × ( u16 len ‖ asciiBytes )
-  ---- named numeric constants (§2.6 incl. REF_INSTANCES_MAX, plus
+  ---- encoding/Realm-owned named numeric constants (§2.6 incl.
+       REF_INSTANCES_MAX but excluding index-module-owned MAX_INDEX_SPECS, plus
        PROTOCOL_MAJOR=0, PROTOCOL_MINOR=0, SENTINEL_BOUND=2^16,
-       REALM_MIN_TX_GAS=16777216, POLICY_GAS_MAX=200000), table order ----
+       REALM_MIN_TX_GAS=16777216, POLICY_GAS_MAX=200000), table order;
+       no b0-indexes §0.1 limit name is duplicated here ----
   u16 constCount  ‖ constCount  × ( u16 nameLen ‖ asciiName ‖ u64 value )
   ---- named fixed words, name order: exact Realm implementation/admin slots ----
   u16 wordCount   ‖ wordCount × ( u16 nameLen ‖ asciiName ‖ bytes32 value )
@@ -200,12 +204,15 @@ codexConstantsBytes :=
       bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1)
   ---- digest algorithm table (§2.4), ascending algCode ----
   u16 algCount    ‖ algCount    × ( u16 algCode ‖ u16 digestLen ‖ u16 nameLen ‖ asciiName )
-  ---- closed code tables: field kinds (§2.2), reference selectors (§3.1),
-       error codes (§2.7), constraint kinds (§3.1) ----
+  ---- encoding-owned closed code tables: field kinds (§2.2), reference
+       selectors (§3.1), error codes (§2.7), constraint kinds (§3.1);
+       IndexSpecKind/1 is serialized only in indexCodexBytes ----
   u16 kindCount   ‖ kindCount   × ( u8 code ‖ u16 nameLen ‖ asciiName )
   u16 selCount    ‖ selCount    × ( u8 code ‖ u16 nameLen ‖ asciiName )
   u16 errCount    ‖ errCount    × ( u16 code ‖ u16 nameLen ‖ asciiName )
   u16 cstrCount   ‖ cstrCount   × ( u8 code ‖ u16 nameLen ‖ asciiName )
+  ---- canonical modular index Codex artifact (b0-indexes §0.1) ----
+  u32 indexCodexLen ‖ indexCodexBytes
   ---- derived intrinsic ids: kernel-known Types (SR-11) + intrinsic schemas (§3.4 meta-Type, §6), name order ----
   u16 idCount     ‖ idCount     × ( u16 nameLen ‖ asciiName ‖ bytes32 id )
 codexConstantsHash := keccak256(codexConstantsBytes)
@@ -220,7 +227,9 @@ corpusDomainManifestBytes :=
   )
 ```
 
-Rules: every Core constant appears exactly once in `codexConstantsBytes`; every active
+Rules: every Core constant appears exactly once in `codexConstantsBytes`,
+either directly in an encoding-owned table or inside the one
+`indexCodexBytes` module; every active
 domain row appears exactly once in `corpusDomainManifestBytes`. Ordering is the printed
 table order (auditable against this chapter's text). The `fixture`, `bakeoff`, and
 `evidence` classes are therefore covered by H-DOMTABLE/corpusVersion without changing
@@ -228,7 +237,13 @@ the Realm-visible Core `codexConstantsHash`. The derived-id section's values (TY
 TYPE_BINDING_TOMBSTONE_V1, TYPE_WITHDRAWAL_V1 per SR-11's closed list, plus the intrinsic
 TypeSchemaIds of §3.4/§6) are computed from intrinsic blobs at the Stage B Codex build — the
 serialization is pinned here, the byte values mint in Stage B (Stage A ships no byte
-vectors). State-readability: Core exposes `codexConstants()` returning the exact bytes and
+vectors). `indexCodexLen` is the exact byte length of the index chapter's
+version-1 serialization; zero, truncation, trailing module bytes, a second
+index module, or a module whose internal counts/lengths do not consume exactly
+`indexCodexLen` rejects the Codex build. There is deliberately no
+`indexCodexHash`: the module must be reconstructed from the returned bytes and
+is committed once by the outer hash. State-readability: Core exposes
+`codexConstants()` returning the exact bytes and
 `codexConstantsHash()` returning the hash (interface in "Interfaces exposed"); a reader can
 therefore re-derive the hash the realm chapter's `profileId` commits to from state alone.
 `PROTOCOL_MAJOR` and `PROTOCOL_MINOR` are profile constants, not InitConfig
@@ -1302,10 +1317,15 @@ memory-level evidence, PLAUSIBLE):
     `efs2/record/2` ⇒ different ids; unknown `metaCodecVersion` deterministic rejection.
 12. Evolution shapes: one instance of each §6 Record, round-tripped.
 13. Codex constants: `codexConstantsBytes` serialization + `codexConstantsHash`
-    recomputation across the three languages (§1.6); `corpusDomainManifestBytes`
+    recomputation across the three languages (§1.6); byte-exact extraction and
+    independent decoding of the one length-delimited `indexCodexBytes` module,
+    including every limit/code/layout/context/continuation row from the index
+    chapter §0.1 and rejection of length/count/order/tag-selector drift; `corpusDomainManifestBytes`
     serialization; H-DOMTABLE domain-registry/class/scope sweep, including proof that
     non-Core classes are absent from the Core hash and present in the corpus manifest
-    (§1.3).
+    (§1.3). A one-word index limit/code/layout/context mutation changes
+    `codexConstantsHash`, `profileId`, and `genesisCommitment`; no independent
+    index hash can be supplied to mask the mutation.
 14. ResolutionPlan/1 seam: canonical bodies at N=0, 1, and 64 equal
     `u16(frameLen) ‖ frame`; Plan parsing starts at offset 2; wrong/mismatched
     length prefix, trailing byte, `frameLen > 4,192`, a second field, or a
@@ -1403,7 +1423,8 @@ Those results consume zero/one runtime REF budget respectively.
 Contract points other lanes consume: domain table §1.3 (closed, SET-WIDE per SR-1, with
 scope classes, the Core-hash/non-Core-manifest partition, and retired spellings);
 sentinel space §1.4; salt rule §1.5;
-`codexConstantsBytes`/`codexConstantsHash` §1.6 (consumed by the realm chapter's `profileId`
+`codexConstantsBytes`/`codexConstantsHash` §1.6, including the canonical
+length-delimited index-owner module (consumed by the realm chapter's `profileId`
 and `genesisCommitment`, SR-16); the ONE u16 `algCode` table §2.4 (SR-18a — content chapter's
 u8 tags and index chapter's u32 algId retired); size constants §2.6 (SR-5 values;
 `REF_INSTANCES_MAX` per SR-18e); `OccurrenceRef` = `(bytes32, uint16)`, packed 34 bytes;

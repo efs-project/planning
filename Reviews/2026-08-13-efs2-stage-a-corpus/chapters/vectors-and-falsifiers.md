@@ -317,6 +317,12 @@ member level (Stage B may add members, never remove).
   `DOM_RESULT_SCHEMA`, and `DOM_MEASUREMENT_RESULT` are present with exact
   `bakeoff/evidence/evidence` classes, excluded from the Core
   `codexConstantsHash`, and included in `corpusDomainManifestBytes`;
+  exact `indexCodexBytes` version-1 serialization (18 limits, 14 code tables,
+  three cursor layouts, four context selectors including the trusted-Principal
+  selector token, and four continuation rows), embedded once behind its u32
+  length in `codexConstantsBytes`; module count/length/order/token drift moves
+  the sole outer hash, then `profileId` and `genesisCommitment`, while any
+  separately supplied index hash is rejected;
   sentinel-space output rejection; SR-14 worked PrincipalId examples A/B
   (fixed formula; output bytes
   mint in Stage B) and C (after its canonical chainRef fixture is supplied);
@@ -720,7 +726,8 @@ member level (Stage B may add members, never remove).
   and honest about truncation and coverage; index incompleteness can never
   read as absence. [Anchors candidate falsifier 6; constitution honest-query
   trace; kickoff "page keys" gate.]
-- **Shape:** input = `(pk components | log range, PageRequest{cursor,
+- **Shape:** input = `(pk components | admission-log request,
+  PageRequest{cursor,
   maxItems, basisOrdinal})`; output = `PageResult{realmBasis,
   highWaterOrdinal, cursor, items, coverage, completeness}`.
 - **Impl:** SOL authoritative; TS/RS recompute pages from reconstructed state.
@@ -757,6 +764,11 @@ member level (Stage B may add members, never remove).
   consume `selectBestLocator` from cursor 0 to exhaustion — every physical
   posting and boundary probe appears in `postingsVisited`, each nonterminal
   page is `PARTIAL + nextCursor`, and per-call work remains bounded;
+  **trusted-Principal selector:** `SelectSpec.principalId` zero is
+  UNSUPPORTED; a higher-scored/later occurrence by another Principal is
+  visited and charged but never wins; changing only the trusted Principal
+  rejects a continuation from the prior context; untrusted-only windows may
+  be empty PARTIAL, never false COMPLETE or a winner;
   **selector sentinel:** no live winner returns `(0,0)` while a real candidate
   with score zero wins with its nonzero ordinal; combining windows uses the
   explicit winner-present bit, never score zero as absence;
@@ -769,6 +781,11 @@ member level (Stage B may add members, never remove).
   encodings to reject/return UNSUPPORTED rather than `COMPLETE`-empty;
   **last-live count:** the GV-9 two-occurrence sequence agrees with page folds
   and changes unique-by-Type live count only on the last withdrawal.
+  Admission enumeration has exactly one positive surface:
+  `admissionLogPage(PageRequest) -> PageResult` with the canonical admission
+  PageCursorV1; `admissionAt(uint64)` is independently tested as a point read
+  and no alternate range-page/u64-continuation schema may appear in the ABI or
+  result registry.
   `reconciles: RP-4,10,15,18`; `requiresPins: SR-4, SR-10, SR-15,
   SR-18b, SR-18c, SR-18d`.
 
@@ -815,7 +832,8 @@ member level (Stage B may add members, never remove).
   nested `GitObjectClosure/1` bodies; and two non-interchangeable selection suites:
 
   ```text
-  B0_SELECT:          SOL/TS/RS; one declared u64 score field (or SCORE_LATEST);
+  B0_SELECT:          SOL/TS/RS; one nonzero trusted Principal plus one
+                      declared u64 score field (or SCORE_LATEST);
                       total physical postings visited is bounded; returns
                       cursor + basis + Completeness
   SELECT_PROFILE_V2: TS/RS client tier only; Locator + DurabilityGrade +
@@ -824,10 +842,15 @@ member level (Stage B may add members, never remove).
   ```
 - **Impl:** SOL (`ChunkTreeVerify` and `B0_SELECT` only), TS, RS; the deferred
   rich profile has no SOL implementation.
-- **Pass:** identical proof booleans and B0 window winners; every Core
+- **Pass:** identical proof booleans and B0 window winners under the exact
+  trusted Principal; every Core
   structural error rejects at admission, while every content-only failure is
   admitted as immutable evidence but returns the exact bounded
-  `PROFILE_MALFORMED(reason)`/ineligible result; `SELECT_PROFILE_V2`, if included, is compared only between
+  `PROFILE_MALFORMED(reason)`/ineligible result **only in the explicit client
+  profile**. Such a failure does not remove structurally admitted,
+  trusted-Principal evidence from B0 candidacy; clients validate a B0 winner
+  and use the profile-aware candidate-page fold for fallback before use.
+  `SELECT_PROFILE_V2`, if included, is compared only between
   TS/RS under one explicit profile, Plan, and basis. Exact BLOB/TREE/COMMIT/TAG
   preimages reproduce their algorithm-tagged native Git OIDs; a clean second
   implementation's object database passes `git fsck --full`, stock clone, and
@@ -852,7 +875,8 @@ member level (Stage B may add members, never remove).
   conformance/walk (write-side convenience gets a read-side check — §0.2),
   nested dedup, walk-depth PARTIAL; name-not-in-closure = the ONLY provable
   absence this layer grounds; **B0_SELECT:** declared-score/latest members,
-  total-posting visit accounting, dead-spray `PARTIAL + cursor`, claimed-time
+  exact trusted-Principal filtering, total-posting visit accounting,
+  dead/untrusted spray `PARTIAL + cursor`, claimed-time
   manipulation cannot move the score; **SELECT_PROFILE_V2 (deferred):** only
   if the explicit client profile is included, candidate-page truncation ⇒
   PARTIAL-labeled result, all-MISMATCH ⇒ `CONTENT_MISMATCH`, and claimed-time
@@ -892,7 +916,13 @@ member level (Stage B may add members, never remove).
   finalityParam, gas-floor, zero-policy, ref/kind mismatch, noncanonical/high-
   bit/nonzero-address failures; revision 1 uses the initial policy and genesis
   authority exactly. Full `genesisFacts()` re-encodes every preimage and
-  recomputes profileId/genesisCommitment/RealmId. RealmRevisionId vectors;
+  hashes the exact `codexConstants()` bytes, decodes the sole length-delimited
+  index module, and recomputes profileId/genesisCommitment/RealmId. Missing,
+  duplicate, truncated, trailing, reordered, or selector-mutated module bytes
+  fail C-4 as `UNSUPPORTED_PROFILE`. C-6 reads a one-item canonical
+  `admissionLogPage`, compares it to `admissionAt`, and validates the exact
+  Realm/basis/high-water/canonical-end/coverage/Completeness/cursor semantics
+  from those bytes. RealmRevisionId vectors;
   A-1 wrong-chain (C-1); A-2 lookalike Core with
   divergent canonicalization — caught by C-6's recompute-one-envelope
   semantic spot-check; A-3 profile spoof → `UNSUPPORTED_PROFILE`, client MUST

@@ -172,9 +172,11 @@ profileId = keccak256(abi.encode(
     bytes32 codexConstantsHash))           // owned by the encoding chapter
 ```
 [PROPOSAL — regenerated field-for-field under SR-1. Per SR-16 the encoding
-chapter owns the `codexConstantsHash` definition — the hash over the full
-ordered table of domain constants, codec versions, and bound constants — and
-the state-readable `codexConstants()`; this chapter consumes both here, in
+chapter owns the outer `codexConstantsHash` definition — the hash over the full
+ordered table of domain constants, codec versions, bound constants, and the
+one length-delimited `indexCodexBytes` module owned by the index chapter — and
+the state-readable `codexConstants()`; there is no separate index hash. This
+chapter consumes the exact bytes and outer hash here, in
 §2.4, and in §8.2, and requires that the hash cover every constant named in
 this chapter. DEPENDS-ON: encoding chapter (SR-16).]
 
@@ -302,8 +304,14 @@ C-2 GENESIS   fetch genesisFacts(); recompute genesisCommitment (§2.4) and
 C-3 REALM-ID  recompute RealmId (§2.2) from section A; compare with
               core.realmId() AND with any externally supplied RealmId (from
               the EFS link, receipt, or citation that led here). (A-2/A-4)
-C-4 PROFILE   client supports profileId; on mismatch the client MUST return
-              UNSUPPORTED_PROFILE and MUST NOT best-effort-decode. (A-3)
+C-4 PROFILE   fetch the exact codexConstants() bytes; require their keccak256
+              equals genesisFacts.codexConstantsHash; parse every section,
+              including the one length-delimited indexCodexBytes module, with
+              exact revision/count/length exhaustion; then recompute profileId.
+              The client MUST support that exact profile/module. Any mismatch,
+              unknown code/layout/context selector, omitted module, duplicate
+              module, or trailing byte returns UNSUPPORTED_PROFILE and MUST
+              NOT best-effort-decode. (A-3)
 C-5 REVISION  revisionCount >= 1; activatedAtBlock strictly increasing;
               currentRevision().implementationCodehash ==
               EXTCODEHASH(implementation account per §7.1); the exact proxy/
@@ -313,9 +321,14 @@ C-5 REVISION  revisionCount >= 1; activatedAtBlock strictly increasing;
 C-6 SEMANTIC  if admissionCount > 0: fetch one admitted envelope's canonical
               unsigned header+RecordId bytes plus each selected Record body;
               recompute EnvelopeId and each leaf RecordId, and compare
-              with the state mappings (§8). A canonicalization lookalike
-              fails here even with a copied genesis struct. This checks
-              semantic identity, not the unstored main witness. (A-2/A-3)
+              with the state mappings (§8). Also call admissionLogPage from
+              cursor zero with maxItems=1 at one resolved basis, compare its
+              item to admissionAt, and validate its Realm/basis/high-water,
+              canonical end, coverage, Completeness, and (when PARTIAL) exact
+              PageCursorV1/context bytes from the decoded index module. A
+              canonicalization or index-semantics lookalike fails here even
+              with copied genesis/Codex mirrors. This checks semantic identity
+              and query behavior, not the unstored main witness. (A-2/A-3)
 C-7 HONESTY   all of C-1..C-6 are only as strong as the endpoint's answers.
               A client either (a) cross-checks >= 2 independent endpoints,
               (b) verifies eth_getProof against a block hash it trusts, or
@@ -1426,8 +1439,11 @@ W-0  BOOTSTRAP   verify descriptor per C-1..C-7 (§3). Abort on any failure.
 W-1  GENESIS     read genesisFacts(): chainRef, protocolMajor/minor,
                  codexConstantsHash, every ordered InitConfig/1 field,
                  deployBlock, deployCodehash, profileId, initConfigHash,
-                 genesisCommitment, and realmId. Re-encode InitConfig/1,
-                 recompute all four hashes/IDs, and compare.
+                 genesisCommitment, and realmId. Read codexConstants(), require
+                 its hash to equal codexConstantsHash, decode the exact
+                 length-delimited indexCodexBytes module with no duplicate or
+                 trailing bytes, then re-encode InitConfig/1, recompute all
+                 four hashes/IDs, and compare.
 W-2  REVISIONS   n := revisionCount(); for i in 1..n read revisionAt(i);
                  require revisionOrdinal and activatedAtBlock strictly
                  increase, firstAdmissionOrdinal is nondecreasing, and each
@@ -1570,6 +1586,7 @@ struct BindingHistoryEntry {
 }
 
 struct SelectSpec {
+  bytes32 principalId;
   bytes32 typeSchemaId;
   uint8 roleOrdinal;
   uint8 scoreMode;
@@ -1651,9 +1668,6 @@ function receiptOf(bytes32 envelopeId, uint16 leafIndex) external view
   returns (AdmissionReceiptView memory);      // logical AdmissionReceipt/1
 function admissionAt(uint64 ordinal) external view
   returns (OccurrenceRef memory);             // direct two-word log read
-function admissionPage(uint64 startOrdinal, uint16 maxCount) external view
-  returns (OccurrenceRef[] memory page, uint64 nextCursor,
-           Completeness completeness, uint64 highWater, uint48 basisBlock);
 function admissionBatchCount() external view returns (uint64);
 function admissionBatchAt(uint64 batchId) external view returns (
   uint64 firstOrdinal, uint16 acceptedCount, uint48 admittedAtBlock,
@@ -1692,6 +1706,10 @@ function getReceipt(uint64 ordinal) external view
 // Exact index-owner pages/counts/helpers:
 function admissionLogPage(PageRequest calldata req) external view
   returns (PageResult memory);
+// This is the sole admission enumeration ABI. Its uint256 PageCursorV1 binds
+// Realm, realmBasisAt(H), H, the admission context, and canonical end; its
+// PageResult carries high-water, coverage, and Completeness. admissionAt is a
+// point read only. No parallel range-page or uint64 continuation ABI exists.
 function pagePostings(bytes32 typeSchemaId, uint8 indexKind,
                       uint8 indexOrdinal, bytes32 valueKey,
                       PageRequest calldata req) external view
@@ -1720,6 +1738,8 @@ function selectBestLocator(bytes32 targetKey, SelectSpec calldata spec,
 // COMPLETE/PARTIAL with no eligible winner returns bestOrdinal=0,bestScore=0.
 // Winner presence is tracked independently; a real candidate score of zero is
 // valid and returns its nonzero ordinal.
+// spec.principalId is nonzero, full-width, cursor-bound, and exact: live
+// occurrences by any other Principal are charged to coverage and skipped.
 
 // IBindingRead/1 — byte-identical current Binding-owner signatures.
 function readHead(bytes32 bindingKey) external view
@@ -1781,7 +1801,8 @@ The compact contract other chapters rely on:
 - **RealmDescriptor/1** three-section field set (§2.1); RealmId is the only
   identity; section C is untrusted.
 - **Client MUST-checks C-1..C-7** (§3) — conformance list for any direct
-  client, including the guest Web Client.
+  client, including byte-exact Codex/index-module parsing in C-4 and a
+  canonical admission-page semantic probe in C-6.
 - **QR-1..QR-8** qualifying-Realm assumption names (§4.1) — cite these
   instead of inventing per-chapter chain assumptions.
 - **BasisGrade** enum incl. `UNAVAILABLE_SOURCE_BASIS` with normative
@@ -1827,7 +1848,9 @@ The compact contract other chapters rely on:
   byte-identical named `IRealmIndexRead/1` and `IBindingRead/1` owner surfaces,
   covering envelope, occurrence/log, batch, enumerable nonce consumption and
   point replay state, retained pre-withdrawal evidence, Record, Type-cache,
-  effects, index, and Binding comparison points; no intent event log or private DB.
+  effects, index, and Binding comparison points; admission enumeration exists
+  only as index-owned `admissionLogPage(PageRequest)`, with `admissionAt` as a
+  point read; no intent event log, private DB, or parallel page ABI.
 - **Completeness**: one external byte vocabulary `UNKNOWN=0, COMPLETE=1,
   PARTIAL=2, UNSUPPORTED=3`; index `PageResult` pages carry
   cursor/high-water/basis, while Binding `readHistory` keeps its exact owner

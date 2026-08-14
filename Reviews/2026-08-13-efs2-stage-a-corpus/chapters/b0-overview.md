@@ -407,7 +407,12 @@ keccak256(revisionDescriptorBytes)))`,
 owns `revisionDescriptorBytes`. The encoding chapter's variant is superseded;
 the encoding chapter also gains the `codexConstantsHash` definition and a
 state-readable `codexConstants()` that the realm chapter's `profileId` and
-`genesisCommitment` consume.
+`genesisCommitment` consume. The index chapter owns one exact version-1
+`indexCodexBytes` module (closed query/status codes, semantic limits, cursor
+layouts, context selectors, and continuation rules); encoding embeds it once
+as `u32 length || bytes` inside `codexConstantsBytes`. There is no second
+index hash: state readers reconstruct the module from the existing Codex bytes
+and verify the one outer hash.
 
 Realm bootstrap is byte-exact: B0 is protocol 0.0 and `InitConfig/1` is
 `abi.encode(uint16(1),uint8 finalityRuleKind,uint32 finalityParam,uint8
@@ -454,7 +459,13 @@ regenerates). (c) Best-locator selection: the index chapter owns the B0
 on-chain bounded algorithm (single declared score field) **with the
 examination budget bounding TOTAL postings visited, live or dead** (a
 spray of self-revoked postings degrades to honest `PARTIAL` + cursor, never
-an unbounded scan — THE LINE). Selection tracks winner presence separately:
+an unbounded scan — THE LINE). Its `SelectSpec` requires one nonzero trusted
+full-width `principalId`, binds it into the SelectCursor context, and skips
+every differently authored occurrence before scoring; untrusted spray can
+cost windows but can never win. B0 eligibility is only structural + exact
+Principal + live-at-basis + declared Type/role/score. URI syntax,
+reachability, content-profile conformance, and health remain client-tier
+checks. Selection tracks winner presence separately:
 no winner returns `(ordinal=0,score=0)`, while a real score-zero winner has a
 nonzero ordinal; the content chapter's richer
 CandidateSet/SelectionKey profile is the client-tier `SELECT_PROFILE_V2`,
@@ -487,6 +498,9 @@ at least one, scan/item stop order is fixed, and each PARTIAL result encodes the
 exact next physical or outer/inner state, including empty dead-only pages;
 COMPLETE alone returns `CURSOR_END`. This preserves MeasurementRow's existing
 `uint256 nextCursor` identity and requires byte-identical SOL/TS/RS progress.
+The admission family has exactly one enumerator, `admissionLogPage(PageRequest)
+→ PageResult`; `admissionAt(uint64)` remains a point read. No parallel uint64
+range cursor/result tuple is part of the Core ABI or result registry.
 
 A Lens result carries `ResolvedTarget(targetKind,targetA,targetLeaf)` as one
 indivisible value. NONE/RECORD require leaf zero; OCCURRENCE preserves the
