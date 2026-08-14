@@ -1,15 +1,17 @@
 # EFS Media Library / Booru intake
 
-**Status:** completed evidence intake; non-authoritative product research
+**Status:** completed intake plus independently reviewed exact above-Core and
+walk-away candidate evidence; non-authoritative product research
 **Date:** 2026-08-14
 **Scope:** tagged image, video, and media-database use case for EFS 2.0
 
 #status/done #kind/research #repo/planning #topic/content #topic/efsv2 #topic/requirements #topic/privacy #topic/media-library
 
 > This packet does not adopt an application schema, change the EFS 2.0 spine,
-> freeze Core bytes, select a Realm, authorize a public corpus, or start an
-> implementation. It separates verified project state, prior research
-> recommendations, candidate fixture obligations, and open product choices.
+> freeze Core bytes, select a Realm, authorize a public corpus or publication,
+> or authorize a permanent implementation or deployment. It separates verified
+> project state, research recommendations, exact above-Core candidate evidence,
+> fixture obligations, and open product choices.
 
 ## Verdict
 
@@ -45,8 +47,9 @@ dispositions; none currently demonstrates a Core gap. See
   bounded contract Lens; exact mechanisms remain engineering questions. Rich
   search, ranking, moderation, and private policy do not become arbitrary Core
   execution.
-- Public on-chain metadata is public. Sensitive or private plaintext is handled
-  before signing or publication.
+- Public is the adopted default. Client/OS sensitivity policy handles sensitive
+  or explicitly private plaintext before signing or publication; a local-first
+  workflow does not reverse that classification default.
 
 Sources: [[Designs/efsv2/owner-rulings]],
 [[Designs/efsv2/system-constitution]], and
@@ -81,24 +84,27 @@ rights evidence and residual caveats. See
 
 ## Product clarification before design
 
-One choice changes the charter, first fixture presentation, and MVP acceptance
-tests:
+When the evidence gate for `V2-F2` eventually opens, one choice changes the
+charter, first fixture presentation, and MVP acceptance tests:
 
-- **Personal/local-first:** a personally useful private library can explicitly
-  promote reviewed objects into a deliberately operator-reviewed public
-  edition with attributed rights evidence and residual caveats.
+- **Personal/local-first:** local import, verification, organization and offline
+  browse form the first useful surface. Any later EFS publication still follows
+  the adopted public-by-default sensitivity policy; the fixture's local-only
+  relationship exercises the explicit-private path.
 - **Public-gallery-first:** an anonymous guest can browse that deliberately
   reviewed proof gallery, with personal/private features added around it.
 
 The intake recommendation is **personal/local-first**. It creates immediate use,
-makes privacy an honest default rather than a late exception, and still includes
-a narrow public share/export path that tests guest reads, plural curation,
-verified retrieval, and walk-away reconstruction.
+exercises explicit-private behavior before any signing or publication, and
+still includes a narrow reviewed public share/export path that tests guest
+reads, plural curation, verified retrieval, and walk-away reconstruction. It is
+a first-surface recommendation, not a privacy-policy exception.
 
 This media-use-case recommendation is evidence input to the existing `V2-F2`
 first-product implementation-scope decision, not a new Core decision or owner
 inbox item. Committing this packet neither confirms the ordering nor answers
-`V2-F2`.
+`V2-F2`. No owner action is requested now: the authoritative queue defers that
+decision until the freeze candidate proves all named workload traces.
 
 ## Contents
 
@@ -111,6 +117,8 @@ inbox item. Committing this packet neither confirms the ordering nor answers
   exact conditional failure traces, and measurement gates.
 - [[standards-and-adapters]] — current primary standards, ecosystem adapter
   boundary, and interoperability requirements.
+- [[candidate-fixture-evidence]] — exact A/A-prime/V, source, semantic,
+  range/fallback and walk-away evidence with explicit non-claims and gates.
 
 ## Provenance and method
 
@@ -122,3 +130,10 @@ covered prior-art inventory, current-Core pressure mapping, and current
 standards/interoperability. The intake began from a planning checkout clean and
 equal to `origin/main` at `ffef1be`; it was refreshed over `8b81bdd` before the
 exact-candidate and Stage B observations were reviewed.
+
+The exact media candidate was subsequently reconstructed by a separate
+standard-library implementation and retained at local no-remote commit
+`e8575e3edd30a71baf0dde87f297e0717525e2b3`. Its 121-row manifest,
+retained-only reconstruction gates and frozen commit received independent
+review with no Critical or Important finding. This is durable local evidence,
+not protocol adoption or publication.

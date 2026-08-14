@@ -50,8 +50,11 @@ display tags and duplicate-relation states must not be flattened.
 1. Every blob row contains digest algorithm, full SHA-256, exact byte length and
    the EFS exact commitment. Recompute after transport and before acceptance.
 2. Every source observation separately records source system, remote ID,
-   revision/change sequence where available, retrieval time, source URLs,
-   reported hashes, and a digest of retained raw source evidence.
+   revision/change sequence where available, retrieval time and precision,
+   source URLs, reported hashes, and a digest of an exact retained public
+   response-body/source-record artifact. Public evidence is screened before
+   retention; cookies, authorization data, request/client identifiers, private
+   Locators and unscreened HTTP headers are excluded.
 3. Every manifest declares schema/profile version and hashes or signs its exact
    bytes. If semantic JSON identity is needed, pin [RFC 8785 JCS](https://www.rfc-editor.org/rfc/rfc8785.html)
    and reject duplicate keys, invalid Unicode, unsafe paths and ambiguous
@@ -66,8 +69,9 @@ display tags and duplicate-relation states must not be flattened.
    implications are directional, versioned, sourced and reviewable.
 8. Exact duplicate, decoded-content equality, perceptual candidate and human
    duplicate judgment are four distinct states.
-9. Export a SHA-256 BagIt package containing normalized records plus retained raw
-   source snapshots. IIIF and WARC are optional projections/evidence packages.
+9. Export a SHA-256 BagIt package containing normalized records plus retained,
+   privacy-screened exact response-body/source-record snapshots. IIIF and WARC
+   are optional projections/evidence packages.
 10. Each importer/exporter is versioned and has a round-trip loss report; no
     normalized success may discard source information silently.
 

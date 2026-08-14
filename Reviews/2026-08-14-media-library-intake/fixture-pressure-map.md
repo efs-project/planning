@@ -48,22 +48,69 @@ The smallest fixture contains:
     directional tag implication, one ordered pool containing fixture media, and
     one region annotation on A. Each is attributed and versioned, and any raw
     imported term remains recoverable.
+12. **Selection payload:** one authored, versioned application statement
+    selects A as the preferred still representation without making the creative
+    work, edition, representation and exact blob the same identity. The
+    immutable statement does not itself prove a current/cardinality-one Binding
+    fold, basis or CAS result.
 
 An unrelated hard-negative image may exist as a transient conformance vector
 for perceptual matching. It need not become a library object.
+
+### Concrete candidate instances
+
+The smallest candidate must exercise the obligations above with these literal
+application-level atoms. They are fixture values for review, not frozen EFS
+Type names, Principal IDs, Record bytes, or an adopted vocabulary:
+
+- `C-source` authors vocabulary `fixture-vocab/1` raw alias
+  `cherry blossoms` -> `subject:cherry-blossom`, linked to the retained NPS
+  source observation, and directional implication `subject:cherry-blossom` ->
+  `subject:flower`;
+- `C-source` separately reports each retained source observation and rights
+  statement; NPS, Victoria Stauffenberg, Wikimedia Commons and Runner1928 stay
+  quoted source attribution rather than fixture actors or verified Principals;
+- `C-source` and `C-skeptic` each assert `subject:cherry-blossom` about
+  representation A, which references exact blob A; `C-source` asserts
+  `place:national-mall` from that retained
+  NPS observation, while
+  `C-skeptic` denies it with rationale `pixels alone do not establish location`;
+- A carries region `xywh=pixel:1710,690,1220,1030` on its stored 3,264 x 2,448
+  encoded-pixel canvas, with no orientation transform;
+- V carries normal-play-time interval `t=npt:12.8,21.4`;
+- ordered pool `fixture:ingest-derive-stream` has members `[A, A-prime, V]`
+  and explicitly makes no shared-work assertion;
+- `C-source` authors one exact-duplicate claim linking the two A source
+  observations to exact blob A without merging their source, provenance or
+  work identity; separate tool evidence marks A/A-prime as a probabilistic
+  near-duplicate candidate, while decoded-equality and additional human
+  duplicate-judgment rows remain uninstantiated;
+- `C-source` selects A at application purpose
+  `preferred-still-representation/0`; and
+- local-only collection `private:spring-reference` contains A with private tag
+  `personal:wallpaper-candidate`; none of those private markers or a digest of
+  their local state may occur in the public candidate bytes.
+
+Changing, omitting, or reversing one of these values must fail the later
+fixture verifier. A probabilistic match may not transfer tags, merge identity,
+authorize deletion, or set threshold policy.
 
 ## Identity separations the fixture must expose
 
 ```text
 FixtureCatalog / ordered pool
   ├─ CreativeWork S           stable still-work lineage
-  │    ├─ authored Edition    creator's release claim
-  │    ├─ Representation A    exact still-image bytes
+  │    ├─ authored Edition    source-attributed release claim
+  │    ├─ Selection claim     preferred Representation A payload
+  │    ├─ Representation A    still-image role/format
+  │    │    ├─ ExactBlob A    digest + length
   │    │    ├─ SourceObservation 1
-  │    │    └─ SourceObservation 2   same bytes, different provenance
-  │    └─ Representation A-prime     exact derivative bytes
+  │    │    └─ SourceObservation 2   same blob, different provenance
+  │    └─ Representation A-prime     derivative role/format
+  │         └─ ExactBlob A-prime     different digest + length
   └─ CreativeWork V           independently authored video work
-       └─ Representation V    exact video bytes
+       └─ Representation V    video role/format
+            └─ ExactBlob V    digest + length
 
 Curator 1 ── Tag/Rating/Warning claims ──┐
 Curator 2 ── conflicting claims ─────────┼─> work or representation
@@ -78,14 +125,14 @@ an ordered pool may group both without asserting shared authorship or lineage.
 
 | Fixture need | Current generic concept | Boundary |
 |---|---|---|
-| stable work/edition lineage | `ObjectGenesis/1`-chartered Object plus ordinary typed revision/relation Records | application profile chooses the semantics |
+| stable work/edition/selection lineage | `ObjectGenesis/1`-chartered Object plus ordinary typed revision/relation Records; a Principal-qualified cardinality-one Binding is separately required where current selection is needed | application statement exercises only the candidate payload/purpose, not the current fold, basis or CAS |
 | exact A, A-prime and V bytes | `ByteDigest/1`, `ChunkTree/1` and, where useful, `ArtifactClosure/1` | content-profile checks and byte verification are client work |
 | mirrors/source URLs | `Locator/1`, availability observations and typed source-observation Records | Locator never defines identity |
 | A-prime derived from A | ordinary typed relation between exact content/representation Records | do not misuse `RepresentationBinding/1`, which means exact-byte equivalence |
 | creator/curator/source provenance | authored Occurrences over author-neutral Records | identical content may have plural Occurrences |
 | tags, ratings and warnings | fixture-owned Topic/tag/classification Types with declared backlinks | rich vocabulary semantics remain above Core |
 | public collection/pool | typed membership/ordered-entry Records and backlinks | wide folding/search is client/index work |
-| preferred current edition/representation | Principal-qualified Binding at an application purpose/position | cardinality-one current selection |
+| preferred current edition/representation | Principal-qualified Binding at an application purpose/position | the fixture's immutable selection statement only pressure-tests a payload; it does not exercise current-fold, basis or CAS behavior |
 | curator point-policy | bounded Lens over Principal-qualified Binding positions | contract Lens is public and bounded |
 | private tag/collection | local database or encrypted local/export bundle | public Core cannot hide an indexed relationship |
 | exact duplicate | same digest/commitment Record plus plural source observations | exact byte reuse does not collapse provenance |

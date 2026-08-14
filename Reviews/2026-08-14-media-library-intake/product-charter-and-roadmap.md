@@ -1,14 +1,17 @@
-# EFS Media Library / Booru product charter and roadmap
+# EFS Media Library / Booru product-charter and research-roadmap recommendation
 
-**Status:** proposed durable product charter; common spine is mature research,
-first-product ordering is an unconfirmed media-use-case input to `V2-F2`
+**Status:** non-authoritative product-charter and research-roadmap
+recommendation; M0 evidence exit met, while first-product ordering remains
+deferred `V2-F2` input
 **Date:** 2026-08-14
 
-#status/draft #kind/product #repo/planning #topic/content #topic/efsv2 #topic/media-library
+#status/draft #kind/research #repo/planning #topic/content #topic/efsv2 #topic/media-library
 
 > This charter does not adopt application Type bytes, freeze Core, authorize a
 > public corpus, choose a Realm, or authorize implementation. It names the
-> durable product promises and the gates a later implementation must pass.
+> durable product promises and candidate gates a later implementation should
+> test. It is point-in-time research under `Reviews/`, not an adopted project
+> roadmap, Kanban assignment, or design-lifecycle artifact.
 
 ## Mission
 
@@ -28,13 +31,17 @@ portable evidence for another implementation to reconstruct the useful view.
    A Lens selects presentation; it does not rewrite disagreement into truth.
 3. **Private use works without publication.** Local tags and collections need
    no Core write. Encryption, exports and retrieval disclose their actual
-   leakage and recovery properties.
+   leakage and recovery properties. This explicit-private path does not reverse
+   the adopted public-by-default policy for material that is signed or
+   published to EFS.
 4. **Bytes are verified before use.** Locators are replaceable observations,
    never identity. Corrupt or unproven bytes are not displayed; large media can
    be checked incrementally.
-5. **Exit is a product feature.** Normalized records, raw source evidence,
-   exact manifests and media fixity support a second implementation and
-   operator without the originating app, hosted index or Commons.
+5. **Exit is a product feature.** Normalized records, privacy-screened exact
+   response-body/source-record evidence, manifests and media fixity support a
+   second implementation and operator without the originating app, hosted
+   index or Commons. Unscreened headers, credentials, client identifiers and
+   private Locators stay out of a public package.
 6. **Core remains generic.** Media semantics, moderation, search, ranking,
    recommendation, similarity, adapters and UI stay above Core unless an exact
    contract trace defeats every generic alternative.
@@ -51,9 +58,10 @@ portable evidence for another implementation to reconstruct the useful view.
 
 ## First-product ordering — unconfirmed `V2-F2` evidence input
 
-- **Personal/local-first (recommended):** import, verification, private
-  organization and offline browse are useful before publication; a reviewed
-  subset can be promoted into a small public catalog.
+- **Personal/local-first (recommended):** import, verification, local
+  organization and offline browse are useful before publication; an explicitly
+  private relationship remains local, while later EFS publication still uses
+  the adopted public-by-default sensitivity policy.
 - **Public-gallery-first:** anonymous guest browse of a deliberately
   operator-reviewed proof gallery is the first acceptance surface; private
   library behavior follows.
@@ -68,18 +76,19 @@ ordering or answer the broader `V2-F2` first-product implementation decision.
 The recommended personal/local-first MVP is complete only when one clean client
 can:
 
-1. import the exact fixture originals and raw source observations;
+1. import the exact fixture originals and screened exact public
+   response-body/source-record observations;
 2. compute SHA-256 plus size, retain embedded metadata, and create one pinned
    derivative without changing the original;
-3. browse originals and safe previews offline, apply a private tag/collection,
-   and search the local library;
+3. browse originals and safe previews offline, apply an explicitly private
+   tag/collection, and search the local library;
 4. publish a deliberately selected public catalog containing two conflicting
    curators, directional vocabulary edges, an ordered pool, image-region and
    video-time annotations, rights evidence and `NOASSERTION`;
 5. retrieve A, A-prime and requested ranges of V from plural Locators, reject a
    corrupt primary and verify the fallback;
-6. export normalized JSONL, raw adapter evidence, manifests and fixity in a
-   SHA-256 BagIt package; and
+6. export normalized JSONL, screened exact adapter/source evidence, manifests
+   and fixity in a SHA-256 BagIt package; and
 7. let a clean second implementation rebuild and serve the public selected view
    without the first app database or enhanced index.
 
@@ -87,9 +96,9 @@ The public-gallery-first variant uses steps 4–7 as its first visible surface,
 but that surface is not MVP-complete: full completion still requires steps
 1–7, including the private/offline fixture obligations.
 
-## Roadmap and exit gates
+## Recommended decomposition and exit gates
 
-### M0 — candidate evidence assembled; exit pending (current)
+### M0 — candidate evidence and walk-away capsule assembled (exit met)
 
 - still and video candidate bytes with retained, attributed open/public-domain
   rights evidence and explicit residual caveats;
@@ -97,14 +106,17 @@ but that surface is not MVP-complete: full completion still requires steps
 - deterministic derivative recipe arm;
 - first/middle/final `ChunkTree/1` proposal vectors;
 - concrete plural/public/private semantic atoms; and
-- authority-aware Core pressure map and standards/adapters review.
+- authority-aware Core pressure map and standards/adapters review;
+- independently accepted clean-room selected-view reconstruction; and
+- an independently reviewed, manifest-covered no-remote local retention
+  capsule that rebuilds from retained inputs.
 
 **Exit:** independent review finds no unlabelled adoption claim; every missing
 byte, authority and reconstruction obligation is explicit.
 
 ### M1 — exact profile and fixture
 
-- choose first-product ordering;
+- keep both first-surface variants testable without preempting `V2-F2`;
 - pin application profile versions and fixture actors;
 - produce A-prime twice and reproduce it independently;
 - instantiate candidate profile-pinned Type/Record/Occurrence fixture bytes
@@ -149,10 +161,27 @@ same selected catalog from named public inputs while preserving disagreement.
 **Exit:** published measurements meet explicit budgets and a second index
 implementation rebuilds equivalent coverage from portable public inputs.
 
-### M5 — community and preservation readiness
+### M5 — community profile and adversarial operations
+
+- authored comments, favorites/reactions, votes, follows and playlists without
+  turning aggregate counts into a canonical authority;
+- tag confidence, translations, histories, aliases/implications, edit and
+  governance claims, including cycles and hostile-tag disputes;
+- pseudonymous personas, block/mute policy, spam/Sybil pressure, abuse reports,
+  hot-subject load and plural moderation Lenses; and
+- moderation transparency, notice, appeal and viewer-controlled presentation
+  across at least two independently reconstructed policy views.
+
+**Exit:** two clients rebuild the same authored social/curation history from
+portable inputs; hostile fixtures cannot silently merge identity or authority;
+and operators can enforce lawful presentation without a protocol-canonical
+moderator, score or tag truth.
+
+### M6 — preservation and launch readiness
 
 - named steward, serving operator, plural curators and independent custody;
-- moderation/appeal/notice transparency and viewer-controlled Lenses;
+- exercised moderation escalation, notice/appeal operations and incident
+  response across the previously tested plural policy views;
 - availability audits, repair drills and repeat walk-away reconstruction; and
 - lawful operator presentation without a protocol-level canonical moderator.
 
@@ -177,13 +206,17 @@ implementation or mainnet deadline.
   IIIF and WARC are optional views/evidence adapters; and
 - current fixture pressure has not demonstrated a media-specific Core gap.
 
-### Open owner/product choices
+### Deferred owner/product gates — no action now
 
-1. Supply the media-use-case preference **personal/local-first** or
-   **public-gallery-first** as evidence to `V2-F2`; this charter does not itself
-   ratify either ordering.
-2. Later, separately authorize any public seed corpus and publication action;
-   an approved fixture design is not publication permission.
+The authoritative queue defers `V2-F2` until the freeze candidate proves all
+named workload traces. This research recommendation creates no immediate James
+ask.
+
+1. When that gate opens, supply **personal/local-first** as this media-use-case
+   lane's recommendation, or choose **public-gallery-first**; this charter does
+   not itself ratify either ordering.
+2. If a public seed corpus or publication is later proposed, authorize it
+   separately then; an approved fixture design is not publication permission.
 
 ### Open engineering choices, not owner decisions yet
 

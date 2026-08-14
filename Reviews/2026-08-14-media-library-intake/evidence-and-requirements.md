@@ -23,8 +23,9 @@ authority says so
 
 Labels mean:
 
-- **A** — required by current owner-adopted direction or constitution-level
-  acceptance obligation;
+- **A** — architecture acceptance obligation retained from either current
+  owner-adopted direction or the draft constitution. `A` does not by itself
+  mean owner-ratified; the source-precedence table above controls authority;
 - **R** — strong research recommendation, not yet an owner ruling; and
 - **T** — test obligation needed to distinguish a claim from a working product.
 
@@ -32,7 +33,7 @@ Labels mean:
 
 | ID | Label | Requirement | Likely layer |
 |---|---|---|---|
-| ML-ID-01 | A | Stable creative-work identity, exact blob identity, representation identity, authored publication, source submission and current selection remain distinct. | application profile over generic Core |
+| ML-ID-01 | A | Stable creative-work identity, exact blob identity, representation identity, authored publication, source submission and authored selection statements remain distinct from one another and from any Realm-qualified current Binding/fold. | application profile over generic Core |
 | ML-ID-02 | A | Every exact blob has an algorithm-tagged digest, exact byte length and a verifiable EFS commitment independent of Locator or storage provider. | content profile + client |
 | ML-ID-03 | R | Original, crop, edit, thumbnail, poster, preview, transcode, animation and alternate encode are separate exact blobs joined by attributable typed relations. | application profile |
 | ML-ID-04 | R | A second source post that resolves to the same bytes retains its own source identity and provenance; deduplication never erases source observations. | importer + application profile |
@@ -53,7 +54,7 @@ Labels mean:
 
 | ID | Label | Requirement | Likely layer |
 |---|---|---|---|
-| ML-SAFE-01 | R | Public bytes enter only through creator/rightsholder/steward authorization or an unambiguous open/public-domain basis; online availability is not permission. | intake operations + client ceremony |
+| ML-SAFE-01 | R | Public bytes enter only through creator/rightsholder/steward authorization or a documented, operator-reviewed open/public-domain basis with attributed evidence and residual caveats; online availability is not permission. | intake operations + client ceremony |
 | ML-SAFE-02 | R | Local staging detects unsupported formats, metadata leakage, duplicates, missing rights facts and policy hazards before any irreversible publication. | importer/client |
 | ML-SAFE-03 | R | Rights, consent and provenance are attributable claims with evidence, scope and explicit `NOASSERTION`; validation does not silently turn them into legal truth. | profile + presentation policy |
 | ML-SAFE-04 | A | Lenses and gateways may warn, blur, omit or refuse service. They cannot promise deletion of public bytes, establish rights/consent, or discharge operator duties. | client/gateway/operations |
@@ -84,9 +85,9 @@ Labels mean:
 | ID | Label | Requirement | Likely layer |
 |---|---|---|---|
 | ML-BYTE-01 | A | Locators are plural claims, not identity. A mismatching source is rejected and retrieval rotates without emitting unverified bytes. | content profile + client |
-| ML-BYTE-02 | A | Video and other large passive media support resumable arbitrary-range verification with `PARTIAL`, `COMPLETE`, `MISMATCH`, `STALLED` and `UNKNOWN` states. | chunk profile + client |
-| ML-BYTE-03 | R | Import preserves original embedded metadata and a raw source response or source-record digest; sanitized or re-encoded output is a new derivative. | importer + export |
-| ML-BYTE-04 | R | Export contains normalized records, raw adapter evidence, exact manifests and byte fixity in a conventional package a non-EFS operator can inspect. | export adapter |
+| ML-BYTE-02 | A/T | Video and other large passive media support resumable arbitrary-range verification and honest partial, complete, mismatch, stalled and unknown outcomes. The exact five uppercase labels are proposal/test vocabulary, not an adopted wire enum. | chunk profile + client |
+| ML-BYTE-03 | R | Import preserves original embedded metadata and an exact, privacy-screened public response-body/source-record artifact or its digest; unscreened headers, secrets, client identifiers and private Locators stay local. Sanitized or re-encoded output is a new derivative. | importer + export |
+| ML-BYTE-04 | R | Export contains normalized records, privacy-screened adapter/source evidence, exact manifests and byte fixity in a conventional package a non-EFS operator can inspect. | export adapter |
 | ML-BYTE-05 | A/T | A second implementation and operator reconstruct the selected catalog and verify its media without the original app, hosted index or Commons. | acceptance harness |
 
 ### Import, scale and operations
