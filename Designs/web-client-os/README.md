@@ -78,6 +78,28 @@ the normal design promotion ceremony.
     rename or repository creation is authorized in this pass.
 12. The Type/query-identity axis remains open. The latest owner response was
     not interpretable, so this set infers no choice.
+13. The application should be maintainable on a roughly 50-year horizon by
+    making open Web standards the durable surface. A 2026 library or builder
+    may help internally, but must remain replaceable without changing public
+    routes, component contracts, data, capabilities, storage, or actions.
+14. The official TC39 Signals model and compatible polyfill are the selected
+    application-state primitive now. Treat Signals as future JavaScript rather
+    than inventing an interim EFS state framework.
+15. Use modern and forward Web standards deliberately. A current lag in one
+    browser—especially iOS/Safari—does not veto the architecture; unsupported
+    engines receive an explicit reduced/unsupported outcome or rescue path
+    rather than forcing a lowest-common-denominator product.
+16. The same static SPA must be responsive across desktop, phone, tablet,
+    installed windows and changing input modes, and be installable as a PWA.
+    Online, offline-shell, retained-resource, stale-evidence and queued-write
+    states remain qualified rather than collapsed.
+17. Internationalization, Unicode/IRI safety, bidirectional layout, native
+    IME, accessibility, locale packs and global input/format behavior are
+    foundations from the first slice, not post-launch translation work.
+18. Build a sophisticated dynamic application from Signals, Web Components
+    and modern browser techniques. Seriously evaluate Web Awesome—including
+    its Page component—and Lit, but make each earn its bounded place through
+    performance, accessibility, privacy, failure and replacement evidence.
 
 ## Current recommendation
 
@@ -119,6 +141,8 @@ flowchart TB
 
 The detailed layer and extension contracts are in [[architecture-and-modules]].
 The first product slice and acceptance tests are in [[mvp-and-acceptance]].
+The selected standards surface and dated library/build recommendations are in
+[[technology-foundation]].
 
 ## Documents in this set
 
@@ -127,6 +151,7 @@ The first product slice and acceptance tests are in [[mvp-and-acceptance]].
 | `README.md` | Authority map, current recommendation, ownership, routing, and iteration state |
 | [[product-constitution-and-roadmap]] | Product constitution, complete requirement ledger, feature horizons, non-goals, and staged roadmap |
 | [[architecture-and-modules]] | Boot layers, logical package boundaries, module interfaces/configuration, lazy loading, fallback, security classes, and repository/tooling recommendation |
+| [[technology-foundation]] | Standards-first dynamic SPA, Signals state, Web Components/Lit/Web Awesome boundary, EFS design language, responsive/installable/offline delivery, i18n/accessibility, app lifecycle, and build/release posture |
 | [[mvp-and-acceptance]] | Fast guest read plus official basic File Browser writes over proposal-labelled adapters, user and agent journeys, threat boundaries, performance budgets, acceptance tests, and EFS v2 pressure |
 | [[privacy-and-agents]] | Privacy architecture reserves and first-class human/agent interaction model, including current web-standards posture |
 
@@ -214,8 +239,12 @@ fixed Web OS.
 
 The layered boot graph, module-slot model, service lifecycle, performance
 budgets, Files-write profile, privacy zones, agent tool contract, repository
-shape, and named interfaces in this set are recommendations for iteration. They
-are not owner rulings or implementation authorization.
+shape, and named interfaces in this set are recommendations for iteration. The
+standards-first surface, Signals direction, forward-browser posture,
+installability, responsive/global use and offline/online outcome separation are
+owner-directed product requirements; the exact Lit, Web Awesome, Vite,
+polyfill, package and version choices remain dated recommendations. None is
+implementation authorization.
 
 ## Historical Client/OS audit
 
@@ -238,7 +267,7 @@ preserves a requirement, not necessarily its old mechanism.
 | Agent sessions with plans, budgets, taint, and receipts | **Retain and broaden** | Agents are peer users. High-risk human checkpoints are default policy, not a permanent ban on explicitly delegated agent workflows |
 | Network broker and privacy-center requirements | **Retain, simplify MVP** | Start with audited explicit endpoints and zero hidden traffic; evolve toward capability-scoped network services without claiming anonymity |
 | Fragment grammar, handler grammar, exact package schema, and surface schema | **Retire as inherited bytes** | Recover use cases and fixtures, then derive the smallest versioned route/module/action schemas from current EFS v2 |
-| Lit, Vite, Web Awesome, HTMX, import maps, native Signals | **Retire as constitutional choices** | Reversible implementation candidates only; native Web Components are the proposed public UI seam |
+| Lit, Vite, Web Awesome, HTMX, import maps, native Signals | **Revise and separate by permanence** | Signals and Web Components become selected standards-shaped application surfaces. Thin Lit, Web Awesome Core and Vite are bounded replaceable recommendations; HTMX and inherited loader choices are not selected architecture. See [[technology-foundation]]. |
 | `os/` repository and historical SDK split | **Retire as assumed topology** | Logical Protocol SDK, Reader/Files modules, Web Client, OS runtime SDK, apps, and Drive adapters precede physical repository choices |
 | Built-in Rescue Shell inside the browser origin | **Revise** | Keep last-known-good in-origin recovery and add an independently retained viewer/CLI/native rescue path for origin loss |
 | Apps, folder Presentations, renderers, resolvers, storage/retrieval providers, Shells, and agents as extension points | **Retain** | Exact modules fill explicit user-controlled service slots with safe built-in fallback and no self-activation |
@@ -285,26 +314,31 @@ authority.
    telemetry are separate indicators.
 8. **Human and agent parity.** UI-only actions and agent-only authority paths
    are both design failures.
-9. **Standards where shipped; adapters where emerging.** Native Web
-   Components, ES modules, Workers, and core Wasm are available foundations.
-   WebGPU and Trusted Types are conditional profiles; WebMCP, WebNN, native
-   Signals, WASI, and the WebAssembly Component Model/WIT remain optional
-   adapters or tooling lanes.
+9. **Standards-first and forward, with honest capability profiles.** Semantic
+   HTML/CSS, ES modules, Web Components, standard browser services and the TC39
+   Signals shape are the application foundation. EFS may design against a
+   forward standard before universal implementation, using a narrow polyfill,
+   explicit reduced/unsupported result, or rescue reader rather than a legacy
+   application fork. A standards label never supplies a threat model.
 10. **Exit is tested.** A user can pin, export, reconstruct, replace defaults,
     and recover without the original operator or catalog.
 
 ## Current work sequence
 
 1. Review and iterate these design files with James and adjacent PMs.
-2. Convert the guest read and official wallet-owned File Browser write
+2. Run the fixed native-versus-Lit viewer, Web Awesome/Fluent/Lion control-pack,
+   native-versus-`<wa-page>` shell, static/PWA generation, storage-recovery,
+   and global-use fixtures in [[technology-foundation]] before freezing an
+   implementation closure.
+3. Convert the guest read and official wallet-owned File Browser write
    journeys into disposable fixtures against the current Core/Files
    candidates. An earlier empty-directory debugger is only a bring-up step.
-3. Measure critical-path bytes, main-thread work, RPC waterfalls, complete
+4. Measure critical-path bytes, main-thread work, RPC waterfalls, complete
    listing, corrupt fallback, read-after-create, and module lazy loading.
-4. Run security/privacy, accessibility/i18n, browser, agent, independent
+5. Run security/privacy, accessibility/i18n, browser, agent, independent
    implementation, and repository-boundary reviews.
-5. Return only measured Core gaps or mature product/permanence choices.
-6. Design any greenfield repository before creation; do not scaffold or begin
+6. Return only measured Core gaps or mature product/permanence choices.
+7. Design any greenfield repository before creation; do not scaffold or begin
    product implementation without explicit authorization.
 
 ## Explicit non-authorizations
@@ -317,9 +351,10 @@ This draft does not authorize:
   extension tree, a wallet dependency, or a selected Realm;
 - remote code activation, install/build hooks, ambient network, automatic
   wallet detection, automatic updates, or forced upgrades;
-- SES, Lit, Vite, Web Awesome, HTMX, WebMCP, WebNN, WebGPU, Wasm/WASI/WIT,
-  the WebAssembly Component Model, iframe profiles, or any other mechanism as constitutional
-  architecture; or
+- installing or freezing an exact Signals polyfill, Lit, Web Awesome, Vite,
+  pnpm, TypeScript, test, i18n, PWA, runner or other dependency/profile. The
+  product direction and bounded roles in [[technology-foundation]] constrain a
+  later selection but do not authorize dependencies or implementation; or
 - absorbing the App Store, native Drive, Arcade, Media, Git/Forge, EAP, Nanda,
   or other product lanes.
 

@@ -414,15 +414,32 @@ public path the only boot authority.
 
 Keep these distinct:
 
-1. `BootGeneration` — exact conserved base, Reader Kernel, trusted Viewer
+1. `AppReleaseGeneration` — one exact EFS Web Client delivery envelope. It
+   contains exactly one `BootGeneration` plus the complete first-party static
+   asset closure and release manifest needed by that Boot generation. A Worker
+   bootstrap artifact may be retained or referenced in that closure, but its
+   browser registration lifecycle remains separate.
+2. `BootGeneration` — exact conserved base, Reader Kernel, trusted Viewer
    Shell, System Chrome, fallback handlers, and recovery information.
-2. `HandlerPolicy` — mappings from input/action/scope to exact Presentation or
+3. `WorkerBootstrapGeneration` — the separately registered, immutable
+   Service Worker bootstrap for an installed stable-origin profile. Browser
+   update or activation of it selects neither an `AppReleaseGeneration` /
+   `BootGeneration` nor an `InstallGeneration`.
+4. `HandlerPolicy` — mappings from input/action/scope to exact Presentation or
    service modules. It contains no grants.
-3. `SystemProfile` — service-slot bindings, Shell selection, locale/theme,
+5. `SystemProfile` — service-slot bindings, Shell selection, locale/theme,
    privacy/network policy, and allowed background behavior.
-4. `InstallGeneration` — exact package set, runner, grants, health, retained
-   bytes, update state, and application-state compatibility.
-5. `SessionOverride` — ephemeral, bounded changes for one route/action/session.
+6. `InstallGeneration` — separate third-party/app/module state: exact package
+   set, runner, grants, health, retained bytes, update state, and
+   application-state compatibility. It is never folded into the first-party
+   `AppReleaseGeneration` closure.
+7. `SessionOverride` — ephemeral, bounded changes for one route/action/session.
+
+One EFS-owned accepted-App pointer atomically selects an exact
+`AppReleaseGeneration` and therefore its one contained `BootGeneration`; there
+is no second independently movable active-Boot pointer. `InstallGeneration`
+has its own local activation state. Browser activation of a
+`WorkerBootstrapGeneration` moves neither pointer.
 
 ### Configuration sources and precedence
 
@@ -430,7 +447,8 @@ Load candidate sources in this order, but never apply a generic
 “last writer wins” object merge:
 
 1. built-in last-known-good rescue defaults;
-2. exact active local `BootGeneration`;
+2. exact locally accepted `AppReleaseGeneration` and its contained
+   `BootGeneration`;
 3. locally pinned user `SystemProfile` snapshot;
 4. optional user-owned EFS profile resolved and verified after Reader Kernel
    starts;
@@ -665,28 +683,42 @@ still opens/exports what its declared compatibility covers.
 
 ## Browser mechanism posture
 
-### First-class shipped foundations
+[[technology-foundation]] owns the detailed dynamic-SPA, component, design
+language, responsive, PWA/offline, i18n/accessibility and build posture. This
+section records how those choices sit in the OS layers and trust boundary.
 
+### First-class standards-shaped foundations
+
+- semantic HTML and modern CSS Grid/container-query/logical-property layout;
 - autonomous Web Components as a public UI integration boundary;
 - document ES modules and import maps for trusted-shell resolution;
+- the official [TC39 Signals](https://github.com/tc39/proposal-signals) shape as
+  the selected in-process state primitive, through one exact compatible
+  polyfill until native;
 - dedicated module Workers and `MessagePort` RPC for heavy work and
   capability-shaped interfaces;
 - core WebAssembly with explicit imports for portable compute;
-- standard URL, Fetch, Streams, WebCrypto, Cache API, IndexedDB, and OPFS where
-  their browser support and durability limits fit the selected profile.
+- standard URL, Fetch, Streams, WebCrypto, Web App Manifest, Service Worker,
+  Cache API, IndexedDB, OPFS and ECMA-402 `Intl` where their explicit delivery,
+  durability, privacy and compatibility profile fits.
 
-Web Components provide composition, not security. Document import maps do not
-govern Worker dependency resolution and do not prove package integrity.
-Workers isolate event loops and DOM access, not ambient network/storage
-authority. Wasm linear memory does not define filesystem, network, identity,
-or signing capability.
+Signals are selected product direction even while the TC39 process continues;
+the proposal/polyfill revision is an adapter seam, and Signals never cross
+storage, Worker, capability, module or authority boundaries. Web Components
+provide composition, not security. Document import maps do not govern Worker
+dependency resolution and do not prove package integrity. Workers isolate
+event loops and DOM access, not ambient network/storage authority. Wasm linear
+memory does not define filesystem, network, identity, or signing capability.
 
-### Conditional, emerging, and tooling lanes — not kernel ABI
+### Conditional, emerging, and tooling lanes — not Kernel ABI
 
-- **Partial/conditional shipped:** WebGPU for optional acceleration; Trusted
-  Types together with CSP enforcement for origins/profiles that can deploy it.
+- **Forward/conditional Web profiles:** Navigation API, View Transitions,
+  File/Protocol/Share/Launch handlers and Window Controls Overlay for enhanced
+  navigation and installed-OS integration; WebGPU for optional acceleration;
+  Trusted Types together with CSP enforcement for origins/profiles that can
+  deploy it.
 - **Emerging:** WebMCP for page-tool adapters, WebNN for optional inference,
-  and native Signals or other still-moving reactivity standards.
+  and new browser-hosted agent/inference integration standards.
 - **Ecosystem/tooling rather than a native browser ABI:** WASI/WIT and the
   WebAssembly Component Model for a future cross-language runner lane.
 
@@ -761,35 +793,44 @@ authorized.
 |---|---|---|
 | Runtime/toolchain | current Active LTS Node pinned exactly | broad tooling support; Node is build/test infrastructure, never client runtime correctness |
 | Workspace/package manager | [pnpm workspace](https://pnpm.io/workspaces) with one committed lockfile | simple multi-package graph and current supply-chain controls; do not add Nx/Turborepo until task-graph timing proves need |
-| Static build | [Vite](https://vite.dev/guide/build) with relative `base` and multiple explicit entry chunks | directly supports static output and relative assets for unknown/IPFS bases; builder output must still pass clean static-host and hash-route tests |
-| Language | strict TypeScript for shipped control/domain code; small plain-JS boot/config only when it measurably reduces risk/cost | types are developer evidence, not runtime validation; every URL, chain response, package, store, RPC, and cross-realm message is decoded at runtime |
-| UI boundary | autonomous Web Components; optionally Lit inside a component | native stable composition/event seam; Lit may remove unsafe template/state boilerplate but never becomes public ABI |
+| Static build | [Vite 8](https://vite.dev/blog/announcing-vite8) with relative `base`, explicit WebProfile targets, app/rescue/Worker entrypoints and capability-aligned splitting | current best initial static builder; output must pass clean static-host, IPFS, alternative-builder and hash-route tests; Vite owns no runtime/public contract |
+| Language | strict TypeScript with erasable-syntax/verbatim-module discipline for shipped control/domain code; tiny plain-JS boot/config only when measured | emitted standards JavaScript is runtime; avoid TS runtime/module features and validate every URL, chain response, package, store, RPC, and cross-realm message |
+| Reactive state | TC39 Signals API plus one exact compatible polyfill until native | selected future-JavaScript model; pure computed state and owned effects; only plain versioned data crosses durable/authority boundaries |
+| UI boundary/renderer | autonomous Web Components; plain DOM for Boot/rescue/tiny elements; thin Lit inside nontrivial owned components when the fixed benchmark wins | standards-owned properties/events/slots/parts remain ABI; Lit reduces private rendering/lifecycle complexity but is replaceable and not automatically guest-critical |
+| Controls/design language | EFS semantic tokens and native root shell; selectively imported, pinned/self-hosted Web Awesome Core behind adapters | reusable accessible-oriented controls without vendor ownership of Kernel, routes, stored config, critical icons or root layout; `<wa-page>` is an optional Session Shell/comparator |
 | Format/basic lint | [Biome](https://biomejs.dev/) plus `tsc --noEmit` | one fast deterministic formatter/linter and type checker; add a narrow [type-aware typescript-eslint](https://typescript-eslint.io/getting-started/typed-linting/) pass only for rules Biome/TypeScript cannot express |
 | Unit/conformance | [Vitest](https://vitest.dev/guide/) | fast TypeScript-compatible tests for codecs, reducers, policy, fixtures, and module contracts; browser behavior still needs real browsers |
 | Browser/end-to-end | [Playwright](https://playwright.dev/docs/browsers) projects for Chromium, Firefox, and WebKit | one reproducible cross-engine harness; its patched WebKit is not branded Safari, so add real macOS Safari/iOS and Android/device runs |
 | Documentation | checked-in Markdown for architecture/ADRs/how-to; TypeDoc only for exported public APIs | keeps the active spine reviewable without a docs framework or server; generated docs never replace semantics/conformance fixtures |
 
-### Honest no-framework boundary
+### Standards-first, no application framework
 
-The Minimal Viewer Shell is small enough to test a native custom-element and
-plain state-machine implementation. “No framework” is not a product goal:
-home-grown template escaping, async state, focus restoration, form behavior,
-localization, keyed lists, and accessibility can cost more and fail more often
-than a small renderer. Compare native DOM and thin Lit implementations on the
-same folder/file fixture. Keep the custom-element properties/events and domain
-services identical, then choose on measured critical bytes, main-thread work,
-security review burden, accessibility, and maintenance complexity.
+The product direction is no React/Vue/Svelte-style application framework and
+no home-grown equivalent—not an absolutist ban on libraries. Signals provide
+one real reactive graph. Custom elements provide the component boundary. The
+hash URL provides the correctness router. EFS tokens plus native semantic CSS
+own the design language. Lit may implement nontrivial elements and Web Awesome
+Core may supply audited controls without entering any of those contracts.
 
-Do not start with a router, global state framework, dependency injection
-framework, component library, Storybook, design-system package, SSR/meta
-framework, or native Signals dependency. Add one only when a fixed workload
-demonstrates a concrete gap and the guest bundle can keep it out of unrelated
-routes.
+The Boot Core/resolving frame and independent rescue baseline use native
+HTML/CSS/DOM only. Compare direct Signals-to-DOM and thin Lit implementations
+of the same Minimal Viewer custom-element interface before deciding whether Lit
+enters that route's critical chunk. Compare the EFS native shell with current
+Core/MIT `<wa-page>` before using Page as an optional Session Shell. Keep
+properties/events, state inputs and domain services identical, then decide on
+measured bytes, main-thread work, focus/accessibility, privacy/failure behavior,
+security review burden and maintenance complexity.
+
+Do not start with another router, global store, dependency-injection framework,
+CSS-in-JS runtime, SSR/meta framework, Storybook requirement or opaque PWA
+generator. Add a replaceable tool only when a fixed workload demonstrates a
+gap and unrelated routes do not pay for it.
 
 ### Reproducibility and supply-chain floor
 
-- Pin the Node and package-manager release plus every direct dependency; use a
-  frozen shared lockfile in CI and retain build inputs.
+- Pin the Node and standalone package-manager release plus every direct and
+  transitive dependency; use a frozen shared lockfile in CI and retain the
+  exact dependency/build closure, not only registry coordinates.
 - Configure current pnpm controls such as delayed new releases,
   `blockExoticSubdeps`, lockfile trust/integrity, strict dependency builds, and
   an explicit `allowBuilds` list, after verifying their exact names against the
@@ -803,10 +844,18 @@ routes.
   capability diffs; keep production credentials out of builds.
 - Rebuild release artifacts in a clean environment, compare hashes or explain
   deterministic differences, sign/attest the exact output and source revision,
-  and archive the toolchain/lockfile/SBOM alongside it.
-- Treat a clean install with network disabled after the approved dependency
-  cache is populated as a reproducibility fixture. No build step contacts an
-  unlisted service or resolves a mutable “latest.”
+  and archive source/patches, all dependency tarballs, exact package-manager
+  and build-tool/native artifacts (or reproducible source), lockfile, integrity
+  map, licenses/SBOM and bootstrap instructions alongside it. Archive a
+  `BuildPlatformDescriptor` naming architecture, OS/kernel compatibility,
+  libc/userland, filesystem assumptions, locale, timezone and all relevant
+  environment inputs. Retain either an immutable complete base image/VM/rootfs
+  including every base layer or a reproducible source/bootstrap path for that
+  environment; do not treat an unnamed host system as part of the closure.
+- Run a cold air-gapped rebuild using only that retained closure—no
+  pre-populated registry cache, Corepack assumption, mutable download or
+  original service—from the retained environment on a fresh compatible host.
+  No build step contacts an unlisted service or resolves a mutable “latest.”
 
 ### Static SPA and deployment floor
 
@@ -853,10 +902,19 @@ the baseline must remain safe without assuming arbitrary response-header
 control; stronger origin profiles may add headers with measured capability
 labels.
 
-Service workers may later improve shell/offline behavior but do not participate
-in correctness. Browser caches are disposable acceleration; local journals and
-private state have separate versioned storage, migration, export, and recovery
-contracts.
+The build carries standards-based install metadata from the first product
+slice. A generation-safe Service Worker and offline shell are a first-class
+stable-origin delivery profile once their corrupt/partial install,
+old-client/new-worker skew, rollback and out-of-scope rescue fixtures pass.
+The browser-managed, content-named Worker bootstrap generation remains separate
+from the inert exact App release closure and EFS-owned accepted-App pointer;
+automatic Worker checking/activation cannot select an App/module release.
+They never participate in Realm/Files/artifact/action correctness: guest reads
+and supported foreground writes still pass after worker removal. Browser caches
+are disposable acceleration; exact retained resources, local journals and
+private state have separate qualified completeness, versioned storage,
+migration, export and recovery contracts. Exact CID releases are separate
+origins and do not silently inherit install identity, stores or grants.
 
 ## Architecture falsifiers
 

@@ -2,7 +2,7 @@
 
 **Status:** draft — smallest official Web Client product slice for iteration; no implementation or protocol/profile freeze is authorized
 **Target repos:** planning, client, sdk
-**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/efsv2/core-architecture-candidate]]
+**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/technology-foundation]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/efsv2/core-architecture-candidate]]
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14)
 **Last touched:** 2026-08-14
 
@@ -87,8 +87,11 @@ Files-certified write or conceal missing semantics behind a hosted service.
   collaboration, conflict merge, and a rich document editor;
 - arbitrary multi-Principal or delegated write policy beyond the fixed
   fixtures, even though the client shape must not foreclose it;
-- offline authoring claims, background synchronization, service-worker
-  correctness, durable browser custody, accounts-as-a-service, and recovery;
+- offline authoring/submission claims, background synchronization, Service
+  Worker dependence, durable browser custody, accounts-as-a-service, and full
+  local-state recovery. Static install metadata is foundational; a verified
+  offline shell may ship only if its separate generation/rollback fixture
+  passes and still cannot become guest/write correctness;
 - package installation, third-party executable Views, full Session Shell,
   Arcade Play, native mounts, private folders, or a default Commons;
 - ERC-1271 claims until a fixed smart-account fixture passes; an EOA-only
@@ -380,13 +383,39 @@ plan rather than silently redefining the target.
 - [ ] Canonical Files names use rich Unicode with NFC normalization; fixtures
       cover composed/decomposed forms, combining marks, emoji, RTL, CJK, native
       IME, bidi isolation, confusables, and URI-safe serialization.
+- [ ] The initial trusted document sets a valid BCP 47 `lang` and correct `dir`
+      before useful content. The MVP contains one complete built-in
+      baseline/recovery production pack and complete generated conformance
+      packs; a local choice and validated nonpersistent session locale can
+      switch those offline. Changing locale atomically updates document title,
+      visible strings, accessible names, announcements, number/date
+      presentation, direction and fallback without changing any canonical ID,
+      digest, URL target, ordering or signed bytes. A real locale is advertised
+      as supported only with complete reviewed release coverage.
+- [ ] Message fixtures reject missing/extra typed placeholders, string
+      concatenation, translator HTML and invalid fallback cycles. Expanded LTR,
+      synthetic RTL, CJK/Thai segmentation, long terms, emoji/combining marks,
+      missing messages and missing glyphs do not remove security/recovery UI.
+- [ ] IME composition survives rerender, validation and shortcuts. Real RTL,
+      Japanese/Chinese/Korean IME, an Indic script, Turkish casing and German
+      expansion pass bounded conformance catalogs/input samples; they do not by
+      themselves claim a complete production translation.
 - [ ] Host projections use reversible aliases without changing canonical
       names; Linux/macOS/Windows restrictions are tested by the OS Drives lane.
 - [ ] Keyboard, screen reader, zoom/reflow, visible focus, touch targets,
       orientation, reduced motion, high contrast, and error recovery meet the
       agreed WCAG 2.2 AA test plan.
-- [ ] Narrow mobile view keeps path, result, write progress, and trusted
-      ceremony operable without horizontal-only controls.
+- [ ] The same route/action model works at 320×568, 390×844, 768×1024,
+      1280×720 and 2560×1440, portrait/landscape, 400% zoom, installed
+      standalone mode, safe-area insets and coarse/fine/hybrid pointers.
+      Components respond to allocated containers; narrow views keep path,
+      result, write progress and trusted ceremony operable without
+      horizontal-only or hover-only controls.
+- [ ] Opening/closing and floating/split software keyboards, then rotating or
+      zooming during active IME composition, keeps the focused field, trusted
+      confirmation controls and validation/errors visible. Zoom is never
+      suppressed; absent `interactive-widget`/VirtualKeyboard support uses the
+      tested VisualViewport/scroll fallback or an explicit reduced profile.
 
 ### E. Agent parity
 
@@ -403,10 +432,79 @@ plan rather than silently redefining the target.
 
 - [ ] Each route publishes a bundle/request/main-thread report against the
       budgets above and fails CI on guest-to-explicit dependency leaks.
+- [ ] Browser conformance serves the exact release `dist/` from a dumb static
+      server—never Vite middleware/preview—and rejects Vite dev/HMR code,
+      absolute asset roots, local paths, Node built-ins, remote imports/CDNs,
+      undeclared output and unowned data URLs.
+- [ ] Two clean air-gapped builds succeed from the retained source, dependency
+      archives, standalone package-manager/toolchain/native artifacts,
+      licenses, integrity map, bootstrap instructions, declared
+      `BuildPlatformDescriptor`, and retained immutable base image/VM/rootfs or
+      reproducible environment source with no registry, Corepack, warm cache,
+      original service or unnamed host dependency. At least one build starts
+      from that retained environment on a fresh compatible host; output
+      differences are deterministic and explained against EFS
+      release-manifest invariants.
+- [ ] The static ingress/resolving frame contains no Lit or Web Awesome runtime
+      and no external font/icon. The direct-Signals versus thin-Lit Minimal
+      Viewer fixture decides whether Lit enters the viewer chunk; either result
+      preserves the same `efs-*` custom-element/plain-data contract and budget.
+- [ ] The fixed Web Awesome Core / Fluent WC v3 / Lion bakeoff selects a control
+      pack before MVP dependency freeze; Web Awesome is the current candidate,
+      not a pre-accepted result. The selected pack is pinned, self-hosted and
+      selectively imported only behind EFS presentation adapters. Blocking it
+      or its stylesheet/icon path leaves raw Files read, navigation,
+      open/download and recovery usable; no vendor tag/token enters Kernel,
+      route, stored settings or module interfaces.
+- [ ] The EFS native shell versus current Core/MIT `<wa-page>` fixture is
+      pre-selection evidence, not a requirement to ship a rejected dependency.
+      If Web Awesome remains selected, Page may become an optional Session
+      Shell only if focus, accessibility, privacy, failure and dependency
+      budgets pass; it is never the guest/root correctness boundary.
+- [ ] Application state uses the official TC39 Signals shape. Computed values
+      are pure, async effects cancel by route/action generation, and only
+      validated plain versioned data reaches Worker messages, storage, module
+      ports, plans and receipts.
 - [ ] Guest bundles contain no wallet, package installer, full Shell, Arcade,
       general agent runtime, inference model, or private-store initialization.
 - [ ] Background prefetch is absent by default in privacy/data-saver fixtures
       and never contacts an endpoint not shown in network policy.
+
+### G. Static, installed, and offline delivery
+
+- [ ] One output with relative assets and hash routes runs unchanged from an
+      ordinary static host, qualifying stable IPFS/DNSLink origin,
+      CID-subdomain, local loopback and independent retained copy. An IPFS path
+      gateway is rejected for active execution.
+- [ ] A valid relative Web App Manifest has explicit stable-origin `id`, scope,
+      hash-route start URL, name, language/direction, standalone display and
+      self-hosted ordinary/maskable icons. Installation remains optional and
+      no install shortcut performs authority-bearing work.
+- [ ] Fresh guest read and supported foreground writes pass with installation,
+      Service Worker, Cache, IndexedDB and OPFS unavailable or removed.
+- [ ] Installed phone/desktop windows preserve route, focus, resizing, browser
+      fallback and exact authority semantics; display mode changes chrome only.
+- [ ] If a Service Worker ships, its small content-named
+      `WorkerBootstrapGeneration` remains separate from inert staged
+      `AppReleaseGeneration` assets and the EFS-owned accepted-App pointer. It
+      refuses corrupt/partial App closures, never uses Worker activation to
+      select an App release, retains the prior healthy App generation, survives
+      process termination/airplane-mode shell reload and exposes an
+      out-of-scope rescue from a bootstrap boot loop.
+- [ ] The generation trace matches
+      [[architecture-and-modules#Configuration objects]]: one accepted-App
+      pointer atomically selects the `AppReleaseGeneration` and contained
+      `BootGeneration`; browser Worker activation and separate
+      `InstallGeneration` activation move neither implicitly.
+- [ ] Closing the last old client and restarting the browser exercises
+      user-agent automatic waiting-worker activation without changing the
+      accepted App generation. Network capture after PWA enablement discloses
+      browser-managed same-origin requests to the exact registered Worker
+      script; no hidden application/channel update endpoint appears.
+- [ ] Offline UI distinguishes shell readiness, complete verified retained
+      resource, stale/partial `UNKNOWN`, missing retained bytes, local draft,
+      signed queued action and network-required operation. Cache never proves
+      current absence or admission/finality.
 
 ## Threat boundary
 

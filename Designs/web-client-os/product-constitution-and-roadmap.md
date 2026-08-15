@@ -99,11 +99,16 @@ native IME, bidirectional text isolation, international names, locale-aware
 display, and canonical raw values beneath localization. Agents receive the
 same semantic structure rather than a visual-only shadow product.
 
-### 10. Open web standards are preferred without pretending drafts shipped
+### 10. Open Web standards are the durable surface, including forward ones
 
-Use standards that are broadly implemented when they fit. Keep emerging
-standards behind adapters and preserve semantic fallbacks. A standards label
-does not replace a threat model, capability contract, or compatibility test.
+Use semantic HTML, modern CSS, JavaScript and browser standards as the public
+application substrate. EFS may deliberately select a forward standard before
+every browser ships it; the official TC39 Signals shape is selected now through
+a compatible polyfill. One lagging engine does not force a legacy application
+fork. Feature detection yields the same semantic baseline, a narrow polyfill,
+an explicit reduced/unsupported outcome, or a rescue reader. A standards label
+still does not replace a threat model, capability contract, conformance test,
+or retained migration/recovery path.
 
 ## Requirements ledger
 
@@ -189,12 +194,27 @@ durable part.
 | WCOS-R43 | Rebuilds do not require original services. | Clearing all derived stores reconstructs exact public results from named Realms and carriers; local/private data has export/restore and migration checks. |
 | WCOS-R44 | Organizational death is a fixture. | The client generation, exact modules, plain files/manifests, and documentation can be pinned and used after every EFS-operated domain, catalog, gateway, and update service disappears. |
 
+### Standards-first application foundation
+
+| ID | Requirement | Acceptance consequence |
+|---|---|---|
+| WCOS-R45 | Durable application boundaries are Web standards and plain data. | Routes, component APIs, actions, Worker/module messages, storage and release metadata do not expose Lit, Web Awesome, Vite, package-manager, Signals-watcher or framework objects. Replacing a tool/library leaves those contracts intact. |
+| WCOS-R46 | TC39 Signals are the one in-process reactive state model. | Use the official proposal shape through an exact compatible polyfill until native. Computed state is pure; effects own cancellable I/O/render/checkpoint work; only validated plain data crosses persistence, Worker, capability, Wasm or authority boundaries. No competing EFS global store is introduced. |
+| WCOS-R47 | Web Components are the reusable UI boundary. | EFS components expose semantic custom-element properties, attributes, events, slots/parts and native form/accessibility behavior. Plain DOM or Lit may implement an element internally without changing consumers. |
+| WCOS-R48 | EFS owns its design language and critical shell. | Semantic `--efs-*` tokens, native landmarks, responsive layout, icons, focus and security chrome remain usable without a vendor design system. Web Awesome Core is a replaceable control pack; `<wa-page>` is a benchmark or optional Session Shell behind an EFS adapter, not Kernel/root ABI. |
+| WCOS-R49 | One adaptive product serves desktop, mobile and installed windows. | Native Grid/container queries, logical properties, intrinsic/dynamic sizing, safe areas, input-capability queries and preference media features adapt one route/action model. Width or user-agent labels never imply authority or input capability; 320 CSS px/400% zoom remains operable. |
+| WCOS-R50 | The static client is installable but never install-dependent. | A standards manifest gives stable-origin desktop/mobile installation metadata. Guest reading and supported foreground writes pass with no installation, Service Worker or retained browser state. Exact-CID releases do not pretend to share origin identity, grants or stores. |
+| WCOS-R51 | Online and offline outcomes are explicit. | Offline-ready shell, complete verified retained resource, stale/partial cached evidence, local draft, signed queued action and unsupported network operation remain distinct. Service Worker/cache are acceleration; journal/private stores have versioned migration, export and recovery before an offline-authoring claim. |
+| WCOS-R52 | Internationalization is an application contract. | BCP 47/Unicode/ECMA-402 locale preferences, document `lang`/`dir`, versioned full-message catalogs, immutable locale packs, bidi/IME discipline and authenticated-text provenance exist from the first slice. Locale output never changes protocol IDs, signatures, canonical order or equality. |
+| WCOS-R53 | Browser/app lifecycle interruption is normal. | Late async results cannot overwrite a newer route/action; useful drafts checkpoint incrementally; multi-tab update/journal coordination survives termination; no correctness depends on `unload`, Worker memory or an exact background schedule. |
+| WCOS-R54 | Forward capabilities fail honestly. | Modern standards can be required without designing down to the slowest engine. Each conditional API has measured support and a contained fallback, explicit `UNSUPPORTED_WEB_PROFILE`/reduced result, or reachable rescue; no silent misrender or authority weakening is accepted. |
+
 ## Feature horizons
 
 | Horizon | Included | Explicitly excluded or deferred |
 |---|---|---|
-| **MVP vertical** | Fast static guest file/folder links; explicit route/basis; honest complete-or-qualified listing; exact file detail; verified byte fallback; trusted safe preview/download; raw provenance; explicit lazy wallet connection; uniform `PrincipalId` plus separate actual signer; ordinary controls to create a folder, create a file from local bytes, and publish a new immutable revision; plan/sign/submit/read-back; human and structured-agent invocation; responsive accessible NFC/international UI | General accounts, automatic wallet detection, production/frozen write guarantees while contracts remain candidate-stage, certified arbitrary multi-Principal FilesRouter semantics, rename/move/copy/delete, global search, private folders, offline work claims, package install, third-party executable modules, Arcade Play, full Shell, native mounts |
-| **Near-term Web Client** | Rename/move and delete/whiteout after semantics mature; wallet and smart-account adapters; PWA shell; verified media ranges; folder Presentations; Arcade detail/Play; package consumption; local settings and handler bindings; first private overlays | General-purpose multi-user OS, automatic updates, background sync without proven recovery, unconstrained runners |
+| **MVP vertical** | Fast static guest file/folder links; explicit route/basis; honest complete-or-qualified listing; exact file detail; verified byte fallback; trusted safe preview/download; raw provenance; explicit lazy wallet connection; uniform `PrincipalId` plus separate actual signer; ordinary controls to create a folder, create a file from local bytes, and publish a new immutable revision; plan/sign/submit/read-back; human and structured-agent invocation; standards-first Signals/Web Component application skeleton; semantic native responsive shell; WCAG 2.2 AA/global-i18n architecture with one complete built-in baseline/recovery locale plus conformance packs; static manifest/install metadata; correctness with Service Worker and retained state absent | General accounts, automatic wallet detection, production/frozen write guarantees while contracts remain candidate-stage, certified arbitrary multi-Principal FilesRouter semantics, rename/move/copy/delete, global search, private folders, offline authoring/sync claims, production translations beyond reviewed complete packs, package install, third-party executable modules, Arcade Play, full Shell, native mounts |
+| **Near-term Web Client** | Rename/move and delete/whiteout after semantics mature; wallet and smart-account adapters; generation-safe PWA offline shell and exact retained-resource replay; first complete additional production translations plus verified inert installable/updateable language-pack generations; verified media ranges; folder Presentations; Arcade detail/Play; package consumption; local settings and handler bindings; first private overlays | General-purpose multi-user OS, automatic/forced updates, background sync without proven recovery, unconstrained runners |
 | **Personal OS foundation** | Journal/outbox; encrypted local/private state; identities and recovery; signer broker; permission center; install generations; rollback; Session Shell; themes/locales/fonts; storage/sync/retrieval modules; structured agent sessions | Claims that browser storage is durable or that one browser sandbox solves every adversary |
 | **Long-term extensible OS** | Plural Shells/modes; mature catalog-installed modules; additional Wasm/iframe/native/service runners; local inference; agents/automation; private credentials; Git/Forge, Media, Arcade, Nanda, EAP applications; Linux/macOS/Windows Drive adapters; user-published system profiles | A canonical operator, forced catalog, forced upgrade, universal safety badge, or one permanent implementation language/runtime |
 

@@ -38,8 +38,11 @@ perfect sandbox, or a solved prompt-injection boundary.
    imported credentials, local indexes, and unannounced module preferences need
    not become public protocol Records.
 5. **Network behavior is inspectable policy.** Official code has no hidden
-   analytics, fonts, price feeds, update checks, model calls, crash reporting,
-   or fallback endpoints. Speculative fetch is a privacy decision.
+   analytics, fonts, price feeds, application/channel update checks, model
+   calls, crash reporting, or fallback endpoints. Speculative fetch is a
+   privacy decision. A user-enabled PWA separately discloses the browser's
+   same-origin Service Worker script checks and lifecycle as a platform
+   residual; those checks cannot select an EFS App release.
 6. **Secrets never ride ordinary routes.** Query parameters are public-ish
    routing data. Fragment capabilities remain sensitive even though HTTP does
    not transmit the fragment; history, page code, screenshots, extensions,
@@ -149,6 +152,24 @@ not represented as “no network.”
 
 ## Local storage, offline, and recovery reserve
 
+[[technology-foundation#Installable PWA and static/IPFS delivery]] owns the
+delivery mechanics. Privacy and correctness require the product to say which
+offline claim it is making:
+
+| Offline outcome | Meaning |
+|---|---|
+| `SHELL_OFFLINE_READY` | One exact verified client generation can boot locally; no claim about the requested EFS resource |
+| `RESOURCE_RETAINED_VERIFIED` | Exact bytes and required semantic evidence are locally complete at a named basis |
+| `CACHED_STALE` / `UNKNOWN` | Some evidence is retained but cannot prove the requested current result |
+| `DRAFT_LOCAL` | Private work exists locally and has no admitted public effect |
+| `SIGNED_QUEUED` | Exact authorization is retained, but submission/admission/finality remains unresolved |
+| `OFFLINE_ACTION_UNSUPPORTED` | Fresh authority, carrier, Realm or foreground wallet/network interaction is required |
+
+Installation, a green browser “online” indicator, a cached response, a Service
+Worker, a retained UI row and an accepted wallet signature prove none of the
+other rows. `navigator.onLine` is only a scheduling hint; each explicit
+Realm/carrier operation produces the availability result.
+
 ### Storage classes
 
 | Class | Examples | Loss response |
@@ -175,13 +196,38 @@ replay and migrations are idempotent, tolerate staged orphans, and retain the
 old generation until recovery succeeds. `navigator.storage.persist()` is a
 best-effort request, not backup or a durability proof.
 
-A service worker may improve static-shell startup and offline replay after its
-generation, update, corruption, recovery, and cross-browser behavior is proven.
-It is not part of Realm, Files, artifact, or action correctness. A missing
-worker uses ordinary network boot. A controlling but broken or malicious worker
-can intercept that navigation; recovery requires a rescue URL outside its
-scope—preferably another origin—or explicit site-data reset, and the rescue
-generation must not depend on that worker.
+Stable HTTPS/DNSLink origins can preserve installation and origin-bound stores
+across exact client releases, but that mutable origin must pin/verify each
+generation. Every CID-subdomain release is a distinct origin: a new CID has no
+implicit access to the old Service Worker, Cache, IndexedDB, OPFS, grants,
+journal or installation identity. A state handoff is an explicit export/import
+or migration ceremony, never inferred continuity.
+
+The offline journal uses append-only, versioned plain records with stable
+intent/action IDs, Realm and basis, roles, exact input/payload digests and
+separate draft/planned/signed/submitted/admitted/finality states. Signals,
+provider handles and in-memory ports never become journal truth. Reconnect
+re-reads current preconditions and checks idempotent identity before replay;
+background events cannot select a signer, request a signature, guarantee a
+time, or delete an unresolved record. Foreground review/retry remains the
+universal path.
+
+A Service Worker may provide the stable-origin offline shell after its exact
+bootstrap, partial/corrupt App install, old-document/new-worker skew, rollback,
+recovery and cross-browser behavior is proven. Its small content-named
+`WorkerBootstrapGeneration` is separate from inert staged
+`AppReleaseGeneration` assets and the EFS-owned accepted-App pointer. Browser
+checks/automatic activation of an already accepted Worker bootstrap never
+select a new App release; `skipWaiting()` does not force a mixed session. The
+prior healthy App generation remains retained. No worker is part of Realm,
+Files, artifact or action correctness. A missing worker uses ordinary network
+boot. A controlling broken/malicious worker can intercept navigation; recovery
+requires a rescue URL outside its scope—preferably another origin—or explicit
+site-data reset, and the rescue generation must not depend on that worker.
+The exact relationship among App, Boot, Worker and separately installed module
+generations is defined once in
+[[architecture-and-modules#Configuration objects]]; privacy policy introduces
+no second activation pointer.
 
 ## Module privacy and isolation
 
@@ -331,12 +377,15 @@ must be refreshed before implementation selection.
 
 | Capability | Current posture | EFS use |
 |---|---|---|
+| Semantic HTML, modern CSS Grid/container queries/logical properties and preference/input media features | standards foundation; individual forward features remain profile-tested | native accessible responsive root shell across desktop/mobile/installed contexts; not authority or isolation |
 | [Autonomous custom elements / Web Components](https://html.spec.whatwg.org/multipage/custom-elements.html) | broadly shipped platform composition | public UI/module integration boundary; not isolation |
 | [JavaScript modules and import maps](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) | document support is usable; Worker resolution differs | trusted base loading and bundle-time mapping; not package integrity or general runtime registry |
+| [TC39 Signals](https://github.com/tc39/proposal-signals) | owner-selected future JavaScript surface; exact polyfill/proposal revision still moving | single in-process reactive model; never persistence, RPC, capability or authority ABI |
 | [Dedicated Workers](https://html.spec.whatwg.org/multipage/workers.html) and `MessagePort` | broadly shipped | responsiveness and capability-shaped RPC; not a least-authority sandbox |
 | [WebAssembly core](https://webassembly.org/features/) | broadly shipped with feature variance | portable compute with explicit imports; not a filesystem/network/permission ABI |
-| [Service Workers](https://www.w3.org/TR/service-workers/) | broadly available with lifecycle/platform differences | optional boot/offline acceleration after recovery proof; never semantic correctness |
+| [Web App Manifest](https://www.w3.org/TR/appmanifest/) and [Service Workers](https://www.w3.org/TR/service-workers/) | manifest/install and worker lifecycle standards with platform differences | installable static profile and generation-safe offline shell after recovery proof; never semantic correctness or required guest entry |
 | [Storage Standard](https://storage.spec.whatwg.org/), [IndexedDB](https://w3c.github.io/IndexedDB/), and [File System/OPFS](https://fs.spec.whatwg.org/) | usable but quota/eviction/device behavior varies | tiered cache/private state with explicit durability limits |
+| [BCP 47](https://datatracker.ietf.org/doc/html/rfc5646), [Unicode LDML](https://www.unicode.org/reports/tr35/) and [ECMA-402 `Intl`](https://tc39.es/ecma402/) | durable language/locale standards with implementation data that evolves | versioned message/locale packs and localized presentation; never canonical protocol equality or signing input |
 | [`iframe` sandbox](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#attr-iframe-sandbox), [CSP](https://www.w3.org/TR/CSP3/), [Permissions Policy](https://www.w3.org/TR/permissions-policy-1/), and [Trusted Types](https://www.w3.org/TR/trusted-types/) | important defenses with different maturity and enforcement | ingredients in named runner profiles; no single “secure sandbox” badge |
 | [WebMCP](https://webmachinelearning.github.io/webmcp/) | W3C Community Group draft/early implementation work | optional page-tool discovery/invocation adapter over the EFS-owned tool contract; not kernel ABI or authorization token |
 | [Web Neural Network API](https://www.w3.org/TR/webnn/) | Candidate Recommendation Draft; availability is not universal | optional inference-provider backend with semantic fallback |
