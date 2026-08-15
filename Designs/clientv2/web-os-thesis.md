@@ -5,9 +5,11 @@
 **Depends on:** [[fable-client-v2-handoff]], [[os-research-compass-for-fable]], [[agent-native-os-compass-for-fable]], [[read-lens-spec]], [[codex-envelope]], [[codex-kinds]], [[codex-kernel]], [[identity]], [[ops-doctrine]], [[apps-cookbook]], [[mirror-scheme-policy]], [[sdk-vs-client-responsibilities]]
 **Supersedes:** the 2026-05-26 ring-architecture sketch ([[2026-05-26-pm-client-os-architecture]]) as design truth — its instincts survive, its mechanisms are re-cut below
 **Reviewers:** —
-**Last touched:** 2026-07-22 — codex-gpt-5 (app-model research correction; original fable-5)
+**Last touched:** 2026-08-15 — historical routing banner; prior 2026-07-22 — codex-gpt-5 (app-model research correction; original fable-5)
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk
+
+> **Historical July 2026 research corpus; not active architecture.** Current direction: [[../web-client-os/README]]. Words such as “rules,” “wins,” “THE,” and “ruling” describe authority only inside that historical round.
 
 > **Evidence base:** 14-lane research corpus at `Reviews/2026-07-07-clientv2-corpus/` (dated primary sources in every lane digest), plus the full EFS v2 design set. Confidence markers as in [[fable-handoff-v2-tag-core]]: **[research-grounded]** — supported by shipped-system evidence or the v2 rulings; **[reasoned]** — argued but untested; **[open]** — genuinely undecided.
 

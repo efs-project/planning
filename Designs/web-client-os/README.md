@@ -5,7 +5,7 @@
 **Depends on:** [[Designs/efsv2/README]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/open-web-app-store/README]]
 **Inputs:** [[Designs/clientv2/README]] (historical requirements and mechanism evidence)
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14), @open-web-app-store-pm boundary review (2026-08-14), @os-drives-pm boundary review (2026-08-14)
-**Last touched:** 2026-08-14
+**Last touched:** 2026-08-15
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/cypherpunk-os #topic/app-model #topic/privacy #topic/read-path
 
@@ -34,8 +34,8 @@ they are not confined to a second-class read-only product.
 ## Direct owner direction recorded for this round
 
 The following product requirements were supplied directly by James on
-2026-08-14. They guide this draft but do not freeze protocol bytes or bypass
-the normal design promotion ceremony.
+2026-08-14 and 2026-08-15. They guide this draft but do not freeze protocol
+bytes or bypass the normal design promotion ceremony.
 
 1. Loading speed is a core product requirement. A linked file or folder must
    load only the bare requirements; cached account/profile state and unrelated
@@ -110,6 +110,27 @@ the normal design promotion ceremony.
     site-data loss or a malicious same-origin bootstrap is outside that
     guarantee. A stronger pin against a compromised origin is a separate
     sovereign-client research problem, not something ordinary PWA APIs prove.
+20. Recover Nix/Guix-style immutable closures, exact locks, generations,
+    rollback, GC roots, export and reproducibility evidence as foundational OS
+    requirements, adapted to browser and EFS realities rather than by embedding
+    the Nix evaluator or copying flakes.
+21. A hyperlink to another person's exact OS setup opens as inert read-only
+    inspection. `Try`, `Adopt`, `Fork`, attaching personal resources and
+    `Activate` are separate explicit operations. Shared configuration carries
+    no effective grants, secrets, identities, wallet state, private data,
+    handles, sessions or agent mandates.
+22. A trusted System Configuration Manager should retain and switch coherent
+    whole-system generations, stage and health-check candidates, keep prior
+    healthy generations, manage rollback/GC/export and remain reachable when a
+    candidate Shell or profile is broken. This is the foundation for experts
+    to build and share media, gaming, accessibility, development and other
+    specialized OS configurations.
+23. Core WebAssembly and WIT-shaped interfaces are a selected foundational
+    direction for portable non-DOM modules. The Component Model is the target
+    composition ABI through replaceable adapters; WASI interfaces are granted
+    selectively rather than becoming ambient POSIX or replacing EFS authority.
+    Native HTML/CSS/JavaScript and Web Components remain the trusted Shell and
+    fast Files path.
 
 ## Current recommendation
 
@@ -148,6 +169,9 @@ flowchart TB
 - Module discovery or recommendation never activates code or grants authority.
 - A small built-in rescue configuration remains usable when custom modules,
   catalogs, caches, or user profiles fail.
+- An exact system-profile link enters the same trusted Reader/Minimal Viewer as
+  an inert profile Inspector. Its package graph, executable closure, private
+  overlays and full Shell remain lazy until an explicit deeper operation.
 
 The detailed layer and extension contracts are in [[architecture-and-modules]].
 The first product slice and acceptance tests are in [[mvp-and-acceptance]].
@@ -162,6 +186,7 @@ The selected standards surface and dated library/build recommendations are in
 | [[product-constitution-and-roadmap]] | Product constitution, complete requirement ledger, feature horizons, non-goals, and staged roadmap |
 | [[architecture-and-modules]] | Boot layers, logical package boundaries, module interfaces/configuration, lazy loading, fallback, security classes, and repository/tooling recommendation |
 | [[technology-foundation]] | Standards-first dynamic SPA, Signals state, Web Components/Lit/Web Awesome boundary, EFS design language, responsive/installable/offline delivery, i18n/accessibility, app lifecycle, and build/release posture |
+| [[system-profiles-and-generations]] | Nix/Guix recovery, exact and follow profiles, safe social sharing, deterministic composition, System Configuration Manager, local activation/state/grant generations, rollback/GC/export, and the foundational Wasm/WIT/Component/WASI module direction |
 | [[mvp-and-acceptance]] | Fast guest read plus official basic File Browser writes over proposal-labelled adapters, user and agent journeys, threat boundaries, performance budgets, acceptance tests, and EFS v2 pressure |
 | [[privacy-and-agents]] | Privacy architecture reserves and first-class human/agent interaction model, including current web-standards posture |
 
@@ -271,6 +296,8 @@ preserves a requirement, not necessarily its old mechanism.
 | Fixed rings and one mandatory runner/cage set | **Retire as architecture** | Use trust classes and named runner profiles; Workers, Wasm, opaque iframes, SES, CSP, and the WebAssembly Component Model/WIT must each prove their actual boundary |
 | July package/channel/catalog model | **Replace at the generic boundary** | Consume the Open Web App Store's runtime-neutral `PackageHandoff`; runtime grants/activation remain local and one-way |
 | Immutable generations, optional updates, rollback, and retained releases | **Retain** | Split base, handler, system-profile, install, and session generations so unrelated modules need not update atomically |
+| Nix/Guix closure/profile analogy and hyperlinkable exact OS | **Retain requirements, replace mechanisms** | [[system-profiles-and-generations]] separates editable recipe, exact public profile lock/occurrence, package handoff, local install/state/grant generations and one coherent local selection tuple; it does not inherit Nix store paths, flakes, evaluator or July profile bytes |
+| Historical `gx` link auto-boots another person's generation | **Retire** | Every shared setup enters inert Inspect; Try, Adopt, Fork, personal-resource attachment and Activate are explicit independent transitions |
 | Full profile/private-store/package hydration before useful UI | **Retire** | Useful guest pixels precede all optional account, private, package, agent, and Shell hydration |
 | Cache, journal, offline, migrations, and recovery requirements | **Retain, defer mechanisms** | Cache is disposable; irreplaceable local/private state needs separate versioned migration/export/recovery proof before OS claims |
 | Persona/wallet/action separation | **Revise** | Uniform `PrincipalId`; mutable default account remains preference; actual signer/controller history, requester, submitter, and payer stay explicit |
@@ -332,23 +359,36 @@ authority.
    application fork. A standards label never supplies a threat model.
 10. **Exit is tested.** A user can pin, export, reconstruct, replace defaults,
     and recover without the original operator or catalog.
+11. **Systems are shareable; authority and private state are not.** Exact
+    profiles are inspectable, forkable and carrier-independent. Local grants,
+    identities, secrets, data and activation remain recipient-owned overlays.
 
 ## Current work sequence
 
 1. Review and iterate these design files with James and adjacent PMs.
-2. Run the fixed native-versus-Lit viewer, Web Awesome/Fluent/Lion control-pack,
+2. **MVP critical path:** convert the guest read and official wallet-owned File
+   Browser write journeys into disposable fixtures against the current
+   Core/Files candidates. An earlier empty-directory debugger is only a
+   bring-up step.
+3. **OS-preservation track in parallel:** validate exact profile/lock/follow
+   identity, the inert Inspector header and deletion/non-regression fixture.
+   Only those interface and zero-guest-cost seams gate the Files skeleton.
+   Full Try, whole-system activation/rollback, thousand-module and
+   Component/WASI execution experiments gate their later product lanes, not
+   the Files MVP.
+4. Run the fixed native-versus-Lit viewer, Web Awesome/Fluent/Lion control-pack,
    native-versus-`<wa-page>` shell, static/PWA generation, storage-recovery,
    and global-use fixtures in [[technology-foundation]] before freezing an
    implementation closure.
-3. Convert the guest read and official wallet-owned File Browser write
-   journeys into disposable fixtures against the current Core/Files
-   candidates. An earlier empty-directory debugger is only a bring-up step.
-4. Measure critical-path bytes, main-thread work, RPC waterfalls, complete
+5. Measure critical-path bytes, main-thread work, RPC waterfalls, complete
    listing, corrupt fallback, read-after-create, and module lazy loading.
-5. Run security/privacy, accessibility/i18n, browser, agent, independent
+6. Run security/privacy, accessibility/i18n, browser, agent, independent
    implementation, and repository-boundary reviews.
-6. Return only measured Core gaps or mature product/permanence choices.
-7. Design any greenfield repository before creation; do not scaffold or begin
+7. For the later OS lane, run deterministic profile evaluator, disposable Try,
+   activation/crash/rollback, revocation, large-graph and browser/native
+   Wasm/WIT fixtures in [[system-profiles-and-generations]].
+8. Return only measured Core gaps or mature product/permanence choices.
+9. Design any greenfield repository before creation; do not scaffold or begin
    product implementation without explicit authorization.
 
 ## Explicit non-authorizations
@@ -361,6 +401,9 @@ This draft does not authorize:
   extension tree, a wallet dependency, or a selected Realm;
 - remote code activation, install/build hooks, ambient network, automatic
   wallet detection, automatic updates, or forced upgrades;
+- a frozen system-profile/recipe/evaluator encoding, public profile catalog,
+  automatic shared-profile execution, grant/state inheritance, generic
+  full-authority WASI/POSIX world, or browser Nix evaluator;
 - installing or freezing an exact Signals polyfill, Lit, Web Awesome, Vite,
   pnpm, TypeScript, test, i18n, PWA, runner or other dependency/profile. The
   product direction and bounded roles in [[technology-foundation]] constrain a
@@ -384,6 +427,12 @@ This draft does not authorize:
       module implementations.
 - [ ] Determine which security-critical modules may update independently and
       which must activate atomically with the conserved boot generation.
+- [ ] Prove the exact profile graph, inert Inspector, disposable Try,
+      state/grant attachment, activation transaction, rollback, GC/export and
+      public-profile privacy model in [[system-profiles-and-generations]].
+- [ ] Select initial WIT worlds and Core/WASI feature profiles only after the
+      same exact component passes browser/native conformance, budget,
+      revocation and ambient-authority attacks.
 
 No item currently needs an owner ruling; these are evidence and engineering
 questions for the next pass.
@@ -404,6 +453,9 @@ questions for the next pass.
       separate in every trace.
 - [ ] Privacy and human/agent parity acceptance suites pass across official
       surfaces.
+- [ ] Exact/follow profiles and Inspect/Try/Adopt/Fork/Activate remain separate
+      across human and agent traces; shared objects carry no local authority or
+      private state.
 - [ ] App Store, Files/Core, Drives, Arcade, Media, Git/Forge, EAP, and Nanda
       owners have reviewed their boundary slices.
 - [ ] Any proposed Core change has a generic multi-consumer failing fixture,

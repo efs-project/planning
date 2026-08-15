@@ -4,7 +4,7 @@
 **Target repos:** planning, client, sdk
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/open-web-app-store/architecture]], [[Designs/efsv2/hierarchical-files-and-folders]]
 **Reviewers:** @historical-client-architecture (2026-08-14), @current-v2-read-path (2026-08-14), @web-platform-standards (2026-08-14), @os-drives-pm boundary review (2026-08-14)
-**Last touched:** 2026-08-14
+**Last touched:** 2026-08-15
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/cypherpunk-os #topic/app-model #topic/read-path #topic/privacy
 
@@ -29,6 +29,11 @@ browser mechanisms are still changing.
 | Full historical `Bootstrapper -> Kernel -> System Chrome -> Shell -> Apps` on every navigation | One coherent generation and policy environment | Public links pay full startup, profile, storage, wallet, and Shell cost; violates direct guest independence | Reject as the universal boot path |
 | Separate lightweight Web Client and separately implemented OS | Simple initial organization and very small guest bundle | Resolver, verification, diagnostics, action planning, accessibility, and cache semantics fork; later integration becomes redesign | Reject as product architecture |
 | **One module graph with guest and full boot profiles** | Shared truth and interfaces; minimal route cost; gradual promotion; replaceable services | Requires strict dependency direction, lifecycle contracts, and performance budgets | **Recommended** |
+
+For shareable whole-system configuration, this becomes an exact locked public
+profile plus a separate local activation generation. A monolithic image that
+folds in authority/private state and a live stack of independently moving slot
+pointers are both rejected. See [[system-profiles-and-generations]].
 
 ## Layer model
 
@@ -293,6 +298,7 @@ ModuleDescriptor
   provided interfaces + versions
   required interfaces + versions
   entrypoints and runner profiles
+  selected exact RunnerRealization reference(s)
   inert requested capability ceiling
   configuration schema + migration identity
   resource-cost hints
@@ -300,9 +306,11 @@ ModuleDescriptor
   provenance, compatibility, rights, advisory, and completeness evidence
 ```
 
-The generic package facts come from `PackageHandoff`. Runtime-local fields such
-as grants, selected runner, health, activation state, configuration secrets,
-and live instances stay outside it.
+The generic package facts come from `PackageHandoff`.
+[[system-profiles-and-generations#RunnerRealization]] defines the exact
+platform/ABI/adapter description selected for an executable slot. Runtime-local
+fields such as effective grants, health, activation state, configuration
+secrets, state bindings and live instances stay outside both objects.
 
 ### Service slots
 
@@ -360,22 +368,45 @@ inspect -> prepare -> activate -> healthy
 ```
 
 - `inspect` and dependency resolution execute no package code.
-- `prepare` verifies bytes and constructs the runner without granting live
-  capabilities.
-- `activate` installs exact local bindings and explicit grants atomically.
+- `prepare` verifies exact bytes, performs static import/feature/memory checks,
+  may compile already verified Core Wasm without instantiating it, and builds
+  inert host configuration. It does not evaluate an adapter entry module,
+  instantiate a component/module, run a Wasm start function, execute a package
+  hook or migration, or grant a live capability. Those actions begin only
+  after a frozen grant/limit plan at explicit Try, Activate, or Play.
+- `activate` selects exact broker-mediated module bindings under an attenuated
+  `ActivationHealthLease`; it does not make ordinary module grants live yet.
+- Preflight is host-observed and non-activating; `PREFLIGHT_FAILED` leaves the
+  current selection untouched;
 - `healthy` is profile-specific and cannot be self-attested by the module
-  alone.
+  alone. Its successful transaction may issue ordinary epoch-bound leases from
+  already authorized decisions. In runner lanes, before then there is no
+  signer, public EFS write, secret, live mutable volume or general-network
+  authority; a component that needs irreversible health effects cannot claim
+  atomic rollback. Trusted same-origin App/Boot code is outside that
+  attenuation: it executes only after explicit base acceptance and its
+  post-start rollback cannot claim to undo ambient/remote effects. A
+  post-selection failure is
+  `POST_START_FAILED_ROLLED_BACK` only after the predecessor tuple is actually
+  restored; otherwise the result is explicit activation recovery.
 - `deactivate` revokes ports, removes routes/listeners, tears down frames and
   Workers, and releases object URLs/resources.
 - `dispose` does not delete retained release bytes or user data without a
   separate action.
+
+At the system-profile level the only automatic edge is `Open -> Inspect`.
+From Inspect, `{Try | Adopt | Fork | Plan Activate}` are independent branches
+with separate plans and receipts; none implicitly performs another.
 
 ### Dependency and authority rules
 
 - Dependency graphs are locked before activation; runtime follows no bare
   name, range, tag, branch, URL, or ambient registry.
 - Required dependency cycles are rejected unless a later interface explicitly
-  defines a cycle-safe protocol. The initial module graph is a DAG.
+  defines a cycle-safe protocol. The generic App Store
+  `ResolvedPackageSet` may validly encode profile-defined SCCs; the initial Web
+  runner supports only a DAG and returns typed `UNSUPPORTED_DEPENDENCY_SCC`
+  rather than rejecting or reinterpreting the package Set itself.
 - A caller can invoke another module only through a granted service handle.
   Dependency does not imply capability inheritance.
 - A module returning a handle receives no authority beyond the handle's
@@ -393,9 +424,10 @@ updates or rollback are claimed:
 - accepting an update creates a new exact capsule/generation and requires an
   explicit capability and data-migration diff; grants, secrets, publisher
   succession, forks, and identical bytes do not inherit silently;
-- the candidate is prepared and health-checked before the active pointer
-  flips; failed health leaves the old generation active and records typed
-  evidence rather than half-activating the update;
+- the candidate is prepared and preflight-checked before the local selection
+  tuple changes; preflight failure leaves it untouched, while post-start
+  failure reports rollback only after the predecessor tuple is restored and
+  otherwise enters explicit recovery;
 - rollback reactivates an exact retained generation only when mutable-state
   compatibility is proved, or requires an explicit restore/migration recovery
   plan; it never silently rolls user data backward;
@@ -409,6 +441,11 @@ James's example `/extensions/fileretrieval/torrent` captures the desired user
 experience: system function is visibly mapped to a selected implementation in
 a user-owned namespace. The architecture preserves that idea without making a
 public path the only boot authority.
+
+[[system-profiles-and-generations]] owns the full Nix/Guix-informed object,
+sharing, composition, state/grant, activation, rollback, GC/export and trusted
+System Configuration Manager model. This section records how it intersects the
+Boot architecture.
 
 ### Configuration objects
 
@@ -424,30 +461,80 @@ Keep these distinct:
 3. `NetworkBootstrapGeneration` — the tiny release-neutral HTML/JavaScript
    entry served at the deployment scope for clean navigation, force reload and
    missing-Worker recovery. Ordinary App releases do not change it. It reads
-   `AcceptedAppState` before importing App code or registering a Worker and
-   selects no App, Boot or Install generation by itself. It remains part of
-   same-origin bootstrap trust rather than a cryptographic anchor.
+   `LocalSelectionState.currentSelection.app` (the logical
+   `AcceptedAppState` view) before importing App code or registering a Worker
+   and selects no App, Boot or install-binding generation by itself. It remains part
+   of same-origin bootstrap trust rather than a cryptographic anchor.
 4. `WorkerBootstrapGeneration` — the separately registered, immutable,
    scope-relative and release-neutral
    Service Worker bootstrap for an installed stable-origin profile. Browser
    update or activation of it selects neither an `AppReleaseGeneration` /
-   `BootGeneration` nor an `InstallGeneration`.
-5. `HandlerPolicy` — mappings from input/action/scope to exact Presentation or
-   service modules. It contains no grants.
-6. `SystemProfile` — service-slot bindings, Shell selection, locale/theme,
-   privacy/network policy, and allowed background behavior.
-7. `InstallGeneration` — separate third-party/app/module state: exact package
-   set, runner, grants, health, retained bytes, update state, and
-   application-state compatibility. It is never folded into the first-party
-   `AppReleaseGeneration` closure.
-8. `SessionOverride` — ephemeral, bounded changes for one route/action/session.
+   `BootGeneration` nor an `InstallBindingGeneration`.
+5. `SystemProfileRecipe` — optional editable exact/follow intent. It is inert,
+   may contain unresolved choices, and is never a boot or activation input.
+6. `SystemProfileLockId` / `SystemProfileGeneration` /
+   `ProfileEvidenceSnapshot` — respectively: canonical semantic configuration;
+   publisher-qualified authored occurrence binding that lock; and separately
+   versioned basis-qualified Locator/advisory/availability/provenance evidence.
+   The lock contains one nominated exact App/Boot plus separate compatibility
+   constraints, service slots, Shell and
+   HandlerPolicy, exact package/dependency/runner-realization IDs,
+   locale/theme, privacy/network/request ceilings, platform mapping and public
+   state-schema requirements. None contains effective grants, secrets, private
+   state, health or session data, and mutable handoff evidence never changes
+   the lock.
+7. `ProfileAdoption` / `PreparedPackageSet` — local inert retention intent and
+   complete verified package bytes. Neither executes or grants.
+8. `StateBranch` / `GrantDecisionGeneration` / `GrantRevocationLedger` —
+   separately versioned local mutable state, immutable scoped grant decisions
+   and monotonic expiry/revocation. They start fresh/empty for a foreign
+   profile; rollback never resurrects a revoked lease.
+9. `InstallBindingGeneration` — the OS-owned immutable exact package-set,
+   runner-realization, grant-decision, configuration/compatibility/migration
+   and state-attachment binding. Mutable health, retained-byte completeness,
+   runtime instance, update-candidate, failure and teardown state live in a
+   separate `InstallStatusLedger`. The App Store PM confirmed this split on
+   2026-08-15 and retired its umbrella-term intent; neither local object is
+   folded into `PackageHandoff` or the first-party `AppReleaseGeneration`.
+10. `SystemActivationGeneration` / `SystemActivationStatus` /
+    `LocalSelectionState` — one immutable local coherent
+    App/profile-lock/install/state/grant wiring with an optional authored
+    profile-generation reference, a mutable preflight/start/health /
+    rollback/recovery ledger, and one installation-scoped transactional
+    coordinator whose `AcceptedAppState` and `ActiveSystemState` views cannot
+    race as independent records. A local exact lock can activate without being
+    published first.
+11. `SessionGeneration` / `SessionLeaseLedger` / `SessionOverride` — one
+    immutable local runtime pin and policy, a mutable ledger for live handles /
+    expiry / revocation / teardown, and ephemeral attenuating changes for one
+    route/action/session. None can move either selection field.
 
-One EFS-owned accepted-App pointer atomically selects an exact
-`AppReleaseGeneration` and therefore its one contained `BootGeneration`; there
-is no second independently movable active-Boot pointer. `InstallGeneration`
-has its own local activation state. Browser activation of a
-`WorkerBootstrapGeneration` and network delivery of a
-`NetworkBootstrapGeneration` move neither pointer.
+One installation-scoped `LocalSelectionState` record in one IndexedDB
+transaction contains exact current and last-healthy `{app,
+systemActivation?}` tuples, tuple rollback candidates, epoch and a pending
+transaction that freezes transaction ID, monotonic fence,
+predecessor/candidate tuples, phase, attempt and health policy.
+`AcceptedAppState` and
+`ActiveSystemState` are logical projections of that record, not separately
+committed mutable pointers. The accepted App still selects exactly one
+`AppReleaseGeneration`/contained `BootGeneration` and remains a separate
+authority decision. Normal profile activation changes only the System field
+under the lock's exact nominated App/Boot precondition; compatibility permits
+an explicit adaptation to a new lock, not silent substitution. An App change
+while a System is active first derives a new exact local lock nominating the
+candidate App/Boot (or blocks), then creates newly authorized App-scoped
+grant/install bindings and a compatible successor
+`SystemActivationGeneration`. Package, configuration and state refs may remain
+unchanged, but neither the old lock nor old App-scoped grant decision is
+silently reused; the transaction then changes the coherent tuple. A compound
+base-plus-profile plan may change both fields only after presenting two
+separate authority effects. Worker activation and network bootstrap delivery
+change neither field.
+
+The CAS, multi-tab ownership and crash protocol is defined in
+[[system-profiles-and-generations#LocalSelectionState and SessionGeneration]];
+ordinary interruption resolves to old or new, while explicit recovery is
+reserved for unreadable/corrupt selection or unreconcilable external state.
 
 ### Domain-neutral accepted-release boot
 
@@ -467,10 +554,16 @@ Keep four artifacts/states distinct:
 2. `ChannelEnvelope` is mutable, replaceable discovery data that may nominate
    an exact candidate release and its Locators. Reading it installs, grants,
    migrates and activates nothing.
-3. `AcceptedAppState` is origin-local durable state containing at least the
-   accepted release ID, last healthy release ID, state-schema compatibility,
-   and incomplete staged transaction recovery. Public/shareable profile data
-   may nominate a release, but cannot move this pointer merely by resolving.
+3. `LocalSelectionState` is the origin- and installation-scoped durable
+   coordinator containing exact current/last-healthy
+   `{app, systemActivation?}` tuples, tuple rollback candidates, epoch,
+   state-schema compatibility and a pending transaction with frozen transaction
+   ID/fence, predecessor/candidate tuples, phase, attempt and health policy.
+   `AcceptedAppState` and `ActiveSystemState` are read views over this one
+   record. The accepted-App view is phase-discriminated: `BOOTING` returns
+   `ACTIVATION_IN_PROGRESS`, not an ordinary launchable candidate.
+   Public/shareable profile data may nominate a release, but cannot move the
+   tuple merely by resolving.
 4. `ReleaseStore` retains verified closure members under exact release keys.
    Same-origin scope-relative `releases/<ReleaseId>/...` resources may support
    network rehydration when the deployment retains them; Worker-served
@@ -488,11 +581,14 @@ generic repository Pages hostname are stateless mirrors/rescue profiles unless
 that entire origin is controlled for this application.
 
 On an ordinary returning launch, `NetworkBootstrapGeneration` or the accepted
-Worker bootstrap reads
-`AcceptedAppState` before considering a channel candidate and launches only
-the complete verified accepted closure. If the accepted closure is missing or
+Worker bootstrap reads the `AcceptedAppState` view of `LocalSelectionState`
+before considering a channel candidate and launches only the complete verified
+accepted closure. If the accepted closure is missing or
 corrupt, it offers exact-release rehydration, explicit upgrade, export/rescue,
 or a typed unavailable outcome; it does not silently run the channel head.
+If a frozen transaction is `BOOTING`, ordinary navigations render conserved
+`ACTIVATION_IN_PROGRESS`/recovery UI and import no candidate App code; only the
+current monotonic-fence coordinator may resume the exact candidate attempt.
 The network bootstrap must remain byte-identical across ordinary App-release
 publishes. A force reload may bypass Worker interception, but the network
 bootstrap still imports no App code until it has applied this rule. With no
@@ -503,24 +599,35 @@ Upgrade is a transaction rather than a Worker lifecycle event:
 
 1. discover an exact candidate without changing active state;
 2. fetch, verify and stage its complete `ReleaseClosure`;
-3. show release, capability, compatibility and data-migration differences;
-4. checkpoint/export mutable state when required and obtain explicit human or
+3. run static/isolated preflight; failure leaves the current tuple untouched;
+4. show release, trusted-base residual, capability, compatibility and
+   data-migration differences;
+5. checkpoint/export mutable state when required and obtain explicit human or
    authorized-agent acceptance;
-5. coordinate all controlled tabs, health-check the candidate, atomically
-   change the accepted-App pointer in one IndexedDB transaction, and reload new
-   navigations coherently while existing documents remain pinned to their old
-   release-member URLs; and
-6. retain the last healthy closure until rollback and mutable-state
+6. coordinate all controlled tabs, explicitly
+   derive/review a new exact local profile lock plus App-scoped successor
+   grant/install bindings and a compatible successor System activation if one
+   is active, then atomically
+   record the candidate tuple as `BOOTING` in one IndexedDB transaction;
+7. let only the fenced coordinator start it and run post-start host health.
+   Broker-mediated modules use `ActivationHealthLease`; trusted same-origin
+   App/Boot execution is explicitly accepted but ambient-effect-unconfined.
+   Mark `HEALTHY` or CAS-restore the predecessor before reporting rollback;
+   existing documents remain pinned to old release-member URLs; and
+8. retain the last healthy closure until rollback and mutable-state
    compatibility are proved.
 
 An ordinary App update does not register or update a Worker. If a candidate
 App requires a newer `WorkerBootstrapGeneration`, that bootstrap is a separate
-explicit transaction and must first prove it can serve both the currently
-accepted and candidate App closures. Registration, install, waiting and
-automatic activation move no App pointer. Only after the compatible Worker is
-active and healthy may the App transaction flip its one pointer. Failure or a
-crash therefore recovers to a coherent old accepted App, a coherent new
-accepted App, or an explicit blocked/rollback state—never a mixed graph.
+explicit transaction and must first prove it can serve the candidate plus every
+App closure reachable from current, last-healthy, pending, running-session and
+retained rollback selection tuples. If it cannot, removing/exporting the
+affected rollback roots is a separately disclosed and authorized effect rather
+than silent compatibility loss. Registration, install, waiting and automatic
+activation move no selection field. Only after the compatible Worker is active
+and healthy may the App transaction change the coherent selection tuple.
+Failure or a crash therefore recovers to a coherent old tuple, a coherent new
+tuple, or an explicit blocked/rollback state—never a mixed graph.
 
 This produces a conditional returning-browser guarantee, not an unbreakable
 Web pin: browser storage can be evicted or cleared, a force reload may bypass a
@@ -537,7 +644,9 @@ Load candidate sources in this order, but never apply a generic
 1. built-in last-known-good rescue defaults;
 2. exact locally accepted `AppReleaseGeneration` and its contained
    `BootGeneration`;
-3. locally pinned user `SystemProfile` snapshot;
+3. exact local `SystemActivationGeneration` and referenced
+   `SystemProfileLockId`, with only an optional authored
+   `SystemProfileGeneration` lineage reference;
 4. optional user-owned EFS profile resolved and verified after Reader Kernel
    starts;
 5. explicit one-shot session choice.
@@ -547,8 +656,10 @@ Per-field rules define the effective profile:
 - `BootGeneration` fixes the route parser, verifier/result law, conserved
   System Chrome, capability-broker ceiling, rescue entry, and allowed interface
   versions. No later source can replace or widen those fields.
-- A local `SystemProfile` binds only declared service slots to exact,
-  installed, verified, locally activated releases compatible with that base.
+- A local `SystemActivationGeneration` realizes declared lock slots through
+  exact verified `InstallBindingGeneration`s. An authored
+  `SystemProfileGeneration` only binds immutable public identity/metadata to a
+  lock; it never becomes installation-state-dependent.
 - A user-owned EFS profile is remote data after resolution. It may propose
   bindings and configuration, but becomes effective only through an exact
   local import/activation decision; it cannot directly grant, install, open
@@ -607,10 +718,13 @@ It cannot silently:
 - force full OS hydration when the requested resource has a guest path; or
 - carry secrets in the query string.
 
-If an exact nominated profile is already installed, locally approved, and
-compatible, the Boot Core may use its safe read bindings without waiting for
-full profile hydration. Otherwise the Minimal Viewer Shell uses rescue
-defaults and offers the candidate after useful data appears.
+An exact nominated profile always enters inert inspection. The Boot Core may
+already be using safe read bindings from an independently selected local
+`LocalSelectionState` before this navigation; a matching link merely observes
+and compares that fact and does not cause those bindings to load or become
+active. Otherwise the Minimal Viewer Shell uses rescue defaults and offers
+independent Try, Adopt, Fork and Plan Activate actions after useful data
+appears.
 
 ## Route-shaped loading architecture
 
@@ -639,8 +753,9 @@ defaults and offers the candidate after useful data appears.
   so it is never an unconditional performance trick.
 - Cached module bytes are keyed by exact closure commitment; cached semantic
   facts include exact basis/policy. Current conclusions are recomputed.
-- The full OS contributes zero transferred or evaluated JavaScript to the
-  ordinary guest-read critical path.
+- The full OS contributes zero unrequested executable bytes, compilation,
+  instantiation, evaluation, Worker startup or memory allocation—JavaScript,
+  Wasm or generated glue—to the ordinary guest-read critical path.
 
 ## Read and promotion flows
 
@@ -702,6 +817,11 @@ PackageHandoff
  -> scoped service ports
  -> health / exit / teardown / receipt
 ```
+
+Whole-profile activation is the larger transaction in
+[[system-profiles-and-generations#Activation, health and rollback]]. App
+activation or explicit Play remains separate: package presence and a configured
+handler do not execute an application.
 
 ## Error and fallback model
 
@@ -785,7 +905,11 @@ section records how those choices sit in the OS layers and trust boundary.
   polyfill until native;
 - dedicated module Workers and `MessagePort` RPC for heavy work and
   capability-shaped interfaces;
-- core WebAssembly with explicit imports for portable compute;
+- Core WebAssembly with explicit imports as a foundational portable compute
+  and non-DOM service substrate;
+- WIT-shaped interfaces as the selected direction for portable service
+  contracts, with the Component Model as the target composition ABI through
+  replaceable browser adapters and selectively granted WASI profiles;
 - standard URL, Fetch, Streams, WebCrypto, Web App Manifest, Service Worker,
   Cache API, IndexedDB, OPFS and ECMA-402 `Intl` where their explicit delivery,
   durability, privacy and compatibility profile fits.
@@ -798,7 +922,7 @@ dependency resolution and do not prove package integrity. Workers isolate
 event loops and DOM access, not ambient network/storage authority. Wasm linear
 memory does not define filesystem, network, identity, or signing capability.
 
-### Conditional, emerging, and tooling lanes — not Kernel ABI
+### Conditional, emerging, and tooling lanes — not implicit Kernel authority
 
 - **Forward/conditional Web profiles:** Navigation API, View Transitions,
   File/Protocol/Share/Launch handlers and Window Controls Overlay for enhanced
@@ -807,8 +931,11 @@ memory does not define filesystem, network, identity, or signing capability.
   deploy it.
 - **Emerging:** WebMCP for page-tool adapters, WebNN for optional inference,
   and new browser-hosted agent/inference integration standards.
-- **Ecosystem/tooling rather than a native browser ABI:** WASI/WIT and the
-  WebAssembly Component Model for a future cross-language runner lane.
+- **Foundational target through current tooling:** browsers execute Core Wasm
+  today, while WIT/Component artifacts currently require exact generated glue
+  such as a pinned `jco` representation. The adapter is replaceable tooling;
+  WIT-shaped EFS semantics and deny-by-default capability routing are the
+  durable direction. No generic `wasi:cli`/POSIX world is ambient authority.
 
 The EFS agent/action contract remains an owned versioned schema over
 capability-mediated RPC, with adapters to standards as they ship.
@@ -996,8 +1123,8 @@ stable-origin delivery profile once their corrupt/partial install,
 old-client/new-worker skew, rollback and out-of-scope rescue fixtures pass.
 The byte-conserved Network bootstrap and browser-managed, content-named Worker
 bootstrap generations remain separate from the inert exact App release closure
-and EFS-owned accepted-App pointer; neither automatic network delivery nor
-Worker checking/activation can select an App/module release. They never
+and EFS-owned `LocalSelectionState`; neither automatic network delivery nor
+Worker checking/activation can select an App or System generation. They never
 participate in Realm/Files/artifact/action correctness: guest reads
 and supported foreground writes still pass after worker removal. Browser caches
 are disposable acceleration; exact retained resources, local journals and
@@ -1014,6 +1141,12 @@ Revisit this architecture if any of the following occurs:
 - the OS and guest client need different Realm/Files/artifact semantics;
 - a module cannot be changed without reading or editing unrelated consumers;
 - a link/catalog/EFS path can activate code or grant authority;
+- opening a system-profile link performs Try, Adopt, Fork, closure fetch,
+  resource attachment or Activate rather than inert bounded inspection;
+- a shared profile carries effective grants, secrets, private state or agent
+  mandates, or a fork/update inherits them;
+- independently movable service-slot pointers can create a mixed system
+  generation or rollback silently changes mutable data;
 - a custom retrieval module is required to retrieve itself without a rescue
   bootstrap path;
 - an agent needs a hidden action API different from the human UI path;
@@ -1042,6 +1175,12 @@ Revisit this architecture if any of the following occurs:
 - [ ] Test whether the inspectable EFS configuration-tree projection remains
       usable when canonical configuration is private, encrypted, versioned,
       and partly unavailable.
+- [ ] Independently implement the canonical profile evaluator and run the
+      Inspect/Try/Adopt/Fork/Activate, state-branch, activation-epoch and
+      thousand-module fixtures in [[system-profiles-and-generations]].
+- [ ] Select initial Core Wasm feature, WIT world, Component adapter and
+      minimal WASI profiles only after browser/native semantic, budget,
+      revocation and ambient-authority conformance.
 
 ## Pre-promotion checklist
 

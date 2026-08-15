@@ -3,9 +3,11 @@
 **Target repos:** planning, client, sdk
 **Depends on:** [[web-os-thesis]], [[agent-native-os-compass-for-fable]], [[read-lens-spec]], [[codex-envelope]], [[deterministic-ids]], [[identity]], [[fable-client-v2-handoff]]
 **Reviewers:** —
-**Last touched:** 2026-07-07 — fable-5
+**Last touched:** 2026-08-15 — historical routing banner; original 2026-07-07 — fable-5
 
 #status/draft #kind/design #repo/planning #repo/client
+
+> **Historical July 2026 research corpus; not active architecture.** Current direction: [[../web-client-os/README]]. Any “rules,” principal-class, broker, runner, or mechanism language below describes that historical round only.
 
 ## What this rules
 

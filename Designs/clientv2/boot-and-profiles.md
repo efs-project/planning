@@ -3,9 +3,11 @@
 **Target repos:** planning, client, sdk
 **Depends on:** [[web-os-thesis]], [[read-lens-spec]], [[packages-and-updates]], [[fable-client-v2-handoff]]
 **Reviewers:** —
-**Last touched:** 2026-07-07 — fable-5
+**Last touched:** 2026-08-15 — historical routing banner; original 2026-07-07 — fable-5
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk
+
+> **Historical July 2026 research corpus; not active architecture.** Current direction: [[../web-client-os/README]]. Words such as “rules,” “wins,” “THE,” and “ruling” describe authority only inside that historical round. The `gx` auto-boot behavior below is explicitly superseded: shared setups now open in inert Inspect, with Try, Adopt, Fork, and Plan Activate as independent explicit operations.
 
 > Evidence: `Reviews/2026-07-07-clientv2-corpus/research/boot-deeplinks.md` (the F12 retry lane) and `Reviews/2026-07-07-clientv2-corpus/research/closures-generations.md`. Link grammar is ruled by [[read-lens-spec]] §1.2/§6 — this document **extends** it with OS link classes and a fragment carriage grammar; it never forks the web3:// derivation surface.
 

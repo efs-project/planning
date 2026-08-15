@@ -4,7 +4,7 @@
 **Target repos:** planning, client, sdk
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/efsv2/system-constitution]]
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14)
-**Last touched:** 2026-08-14
+**Last touched:** 2026-08-15
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/requirements #topic/cypherpunk-os #topic/privacy #topic/app-model
 
@@ -110,6 +110,17 @@ an explicit reduced/unsupported outcome, or a rescue reader. A standards label
 still does not replace a threat model, capability contract, conformance test,
 or retained migration/recovery path.
 
+### 11. Exact systems are shareable; local authority remains local
+
+People can publish, inspect, compare, fork, retain and reconstruct exact OS
+profiles. Opening a profile is inert. Try, Adopt, Fork, attaching personal
+resources and Activate are independent explicit actions. Shared profiles carry
+exact public software/configuration and requested ceilings, never effective
+grants, secrets, identities, wallets, private state, machine handles, sessions
+or agent mandates. One trusted configuration manager stages and selects
+coherent local activation generations while code, authority and mutable data
+retain separate rollback and recovery laws.
+
 ## Requirements ledger
 
 The mechanism examples are non-binding. Acceptance consequences are the
@@ -160,7 +171,7 @@ durable part.
 | WCOS-R24 | Links may nominate but not activate. | Query/fragment/module/profile input from another person cannot persist configuration, install code, grant authority, expose private state, or force full-OS boot. |
 | WCOS-R25 | Security-critical authority stays conserved. | Module pixels cannot supply or control the canonical signing, permission, recovery, install, update, or high-risk authorization result. Visual imitation remains a phishing residual; high-risk confirmation uses a recognizably isolated browser/wallet/native/external surface. Replacing the conserved logic requires an explicit base-generation change. |
 | WCOS-R26 | Failure has bounded fallback. | Content, Presentation, module, generation, and independent-rescue failures have distinct outcomes. Fallback follows local policy, preserves provenance, and is never silent. |
-| WCOS-R27 | Updates are optional exact generations. | A returning installed client launches the locally accepted exact App release while its persisted origin state and complete verified closure remain intact, even when its channel advertises a newer release. Discovery and staging never activate it: only an explicit authorized acceptance may atomically change the accepted-App pointer. Refusal is durable, grants do not inherit, and a missing/corrupt accepted release produces recovery choices rather than silently falling forward. Old retained generations remain inspectable and rollbackable subject to explicit local execution and data-compatibility policy. Ordinary Web origin trust, storage eviction/clearing, and first-visit limits remain explicit; defeating a malicious same-origin bootstrap requires an external trust anchor. |
+| WCOS-R27 | Updates are optional exact generations. | A returning installed client launches the locally accepted exact App release while its persisted origin state and complete verified closure remain intact, even when its channel advertises a newer release. Discovery and staging never activate it: only explicit authorized acceptance may change `LocalSelectionState.currentSelection.app`. If a full System is active, the same transaction selects a newly derived exact local profile lock, newly authorized App-scoped grant/install bindings and a compatible successor System activation so App/System cannot skew, mutate the old shared lock or silently inherit authority. Refusal is durable, and a missing/corrupt accepted release produces recovery choices rather than silently falling forward. Old retained generations remain inspectable and rollbackable subject to explicit local execution and data-compatibility policy. Ordinary Web origin trust, storage eviction/clearing, and first-visit limits remain explicit; defeating a malicious same-origin bootstrap requires an external trust anchor. |
 
 ### Privacy and local state
 
@@ -209,14 +220,29 @@ durable part.
 | WCOS-R53 | Browser/app lifecycle interruption is normal. | Late async results cannot overwrite a newer route/action; useful drafts checkpoint incrementally; multi-tab update/journal coordination survives termination; no correctness depends on `unload`, Worker memory or an exact background schedule. |
 | WCOS-R54 | Forward capabilities fail honestly. | Modern standards can be required without designing down to the slowest engine. Each conditional API has measured support and a contained fallback, explicit `UNSUPPORTED_WEB_PROFILE`/reduced result, or reachable rescue; no silent misrender or authority weakening is accepted. |
 
+### Shareable systems and portable execution
+
+| ID | Requirement | Acceptance consequence |
+|---|---|---|
+| WCOS-R55 | Exact and follow system-profile links are different products. | An exact link pins one publisher-qualified authored profile occurrence and canonical `SystemProfileLockId` containing the nominated exact App/Boot, complete dependency/realization graph and platform mapping. Mutable Locator/advisory/availability evidence stays in non-laundering snapshots. A follow read returns either a resolved receipt with exact candidate or an unresolved partial/equivocal/backward/unknown result. Paging and later plans pin a resolved candidate; a changed head requires a new diff only when the plan explicitly carries a currentness precondition. Neither link silently changes class or candidate. |
+| WCOS-R56 | Shared profiles enter inert inspection. | Opening a profile fetches only bounded trusted metadata/evidence pages through selected Reader policy. Passive showcase assets auto-load only from retained bytes or policy-approved carriers; contacting a profile-nominated carrier requires explicit privacy/size disclosure and `Load media`. Inspection executes no profile code, probes no wallet/private store, grants nothing and does not fetch a full executable closure merely to paint. |
+| WCOS-R57 | Inspect, Try, Adopt, Fork, resource attachment and Activate are separate operations. | Every transition has its own typed plan, effects, progress, receipt, cancellation and recovery. No button, URL, catalog or agent suggestion implicitly performs the next transition. |
+| WCOS-R58 | Configuration resolution is deterministic and inspectable. | Typed inert recipes consume exact `ResolvedPackageSetId`s and package-owned receipt values/references (or digests only after canonical receipt bytes exist), then resolve under exact lock schema/composition semantics, platform and Realm/basis inputs. Evaluator implementation/toolchain stays receipt evidence rather than lock identity. Every effective field preserves definition/merge provenance; two conforming evaluators produce the same canonical `SystemProfileLockId` or the format cannot freeze. Package catalog/source policy remains owned by its package resolver receipt. |
+| WCOS-R59 | One local coordinator selects a coherent system. | Activation stages complete exact closures and new state/migration outputs, then one installation-scoped IndexedDB `LocalSelectionState` atomically records the accepted App and optional exact System activation/install-binding/handler graph as `BOOTING`. Broker-mediated runners receive only bounded read/COW health leases and ordinary leases begin after `HEALTHY`; trusted same-origin App/Boot code is TCB and remains ambient-effect-unconfined unless a separately proven isolation profile is used. New navigations see activation progress, not the candidate. Post-start failure restores predecessor selection when possible but never claims to undo remote effects. App and System views are projections, not separately committed pointers. Crash recovery yields old coherent, new coherent or explicit recovery—never mixed slots or App/System skew. |
+| WCOS-R60 | Shared software, effective authority and mutable state have different identities. | Public profiles and `PackageHandoff`s exclude grants, secrets and private state. A recipient begins with empty `GrantDecisionGeneration` and fresh state; identical bytes, same publisher, update or fork never causes silent inheritance. A local exact profile lock may be tried and activated without publication; only a separate Publish plan creates public authored identity. Expiry/revocation is monotonic and checked live, so rollback cannot resurrect old authority or handles. |
+| WCOS-R61 | The configuration manager survives candidate failure. | Inspect, diff, permission/migration ceremony, activation, rollback, GC, repair and export remain reachable from conserved System Chrome/recovery even when the candidate Shell/profile cannot boot. |
+| WCOS-R62 | Rollback and retention are user-owned. | Current, last-healthy, every rollback candidate, both pending tuples, session, migration, outbox, revocation tombstone and user-pinned roots remain explicit with their transitive closures. A Worker update supports every rooted App or separately discloses removal/export. Code/config rollback never silently reverses data; complete exports reconstruct without publisher, catalog or EFS-operated domains. |
+| WCOS-R63 | Core Wasm and WIT-shaped interfaces are foundational for portable non-DOM modules. | The preferred service lane verifies exact Wasm/component bytes, runs off-main-thread with explicit imports/budgets, targets the Component Model through a replaceable adapter, and grants only named WASI/EFS resources. Native Web Shell/Files paths incur no mandatory Wasm boot cost. |
+| WCOS-R64 | Wasm portability and safety claims remain scoped. | Each exact `RunnerRealization` pins canonical component, WIT world, feature/WASI profile, platform adapter and derived representation closure without confusing canonical and generated bytes. Wasm supplies bounded module memory access and explicit imports but does not claim provenance, universal determinism/performance, DoS immunity, host-origin protection or automatic authority. |
+
 ## Feature horizons
 
 | Horizon | Included | Explicitly excluded or deferred |
 |---|---|---|
 | **MVP vertical** | Fast static guest file/folder links; explicit route/basis; honest complete-or-qualified listing; exact file detail; verified byte fallback; trusted safe preview/download; raw provenance; explicit lazy wallet connection; uniform `PrincipalId` plus separate actual signer; ordinary controls to create a folder, create a file from local bytes, and publish a new immutable revision; plan/sign/submit/read-back; human and structured-agent invocation; standards-first Signals/Web Component application skeleton; semantic native responsive shell; WCAG 2.2 AA/global-i18n architecture with one complete built-in baseline/recovery locale plus conformance packs; static manifest/install metadata; correctness with Service Worker and retained state absent | General accounts, automatic wallet detection, production/frozen write guarantees while contracts remain candidate-stage, certified arbitrary multi-Principal FilesRouter semantics, rename/move/copy/delete, global search, private folders, offline authoring/sync claims, production translations beyond reviewed complete packs, package install, third-party executable modules, Arcade Play, full Shell, native mounts |
-| **Near-term Web Client** | Rename/move and delete/whiteout after semantics mature; wallet and smart-account adapters; generation-safe PWA offline shell and exact retained-resource replay; first complete additional production translations plus verified inert installable/updateable language-pack generations; verified media ranges; folder Presentations; Arcade detail/Play; package consumption; local settings and handler bindings; first private overlays | General-purpose multi-user OS, automatic/forced updates, background sync without proven recovery, unconstrained runners |
-| **Personal OS foundation** | Journal/outbox; encrypted local/private state; identities and recovery; signer broker; permission center; install generations; rollback; Session Shell; themes/locales/fonts; storage/sync/retrieval modules; structured agent sessions | Claims that browser storage is durable or that one browser sandbox solves every adversary |
-| **Long-term extensible OS** | Plural Shells/modes; mature catalog-installed modules; additional Wasm/iframe/native/service runners; local inference; agents/automation; private credentials; Git/Forge, Media, Arcade, Nanda, EAP applications; Linux/macOS/Windows Drive adapters; user-published system profiles | A canonical operator, forced catalog, forced upgrade, universal safety badge, or one permanent implementation language/runtime |
+| **Near-term Web Client** | Rename/move and delete/whiteout after semantics mature; wallet and smart-account adapters; generation-safe PWA offline shell and exact retained-resource replay; first complete additional production translations plus verified inert installable/updateable language-pack generations; verified media ranges; folder Presentations; Arcade detail/Play; package consumption; local settings and handler bindings; first private overlays; read-only exact/follow system-profile Inspector and metadata adoption/export | General-purpose multi-user OS, automatic/forced updates, background sync without proven recovery, unconstrained runners, shared-profile execution |
+| **Personal OS foundation** | Journal/outbox; encrypted local/private state; identities and recovery; signer broker; permission center; exact profile recipes/locks; disposable Try; System Configuration Manager; state branches; install and system-activation generations; rollback/GC/export; Session Shell; themes/locales/fonts; storage/sync/retrieval modules; structured agent sessions; first Core-Wasm/WIT service worlds | Claims that browser storage is durable, that one browser sandbox solves every adversary, or that another person's profile can supply local authority |
+| **Long-term extensible OS** | Plural Shells/modes; mature catalog-installed modules; Component Model/WASI browser and native adapters; additional iframe/native/service runners; local inference; agents/automation; private credentials; Git/Forge, Media, Arcade, Nanda, EAP applications; Linux/macOS/Windows Drive adapters; public exact/follow profile galleries and format-compatible hardened launchers | A canonical operator, forced catalog, forced upgrade, universal safety badge, ambient POSIX/WASI, or one permanent implementation language/runtime |
 
 ## Staged roadmap
 
@@ -264,8 +290,12 @@ part of Files correctness.
 ### Slice E — personal OS promotion
 
 Promote the pinned guest context into local/private state, journal/outbox,
-identity/signing, package generations, Session Shell, and agents. Add each
-service behind a measured interface rather than replacing the guest stack.
+identity/signing, package generations, Session Shell, and agents. Introduce the
+trusted System Configuration Manager, exact profile generations, fresh
+state/grant attachments, one coherent local selection tuple and rollback/export.
+Add each service behind a measured interface rather than replacing the guest
+stack. A read-only profile Inspector may arrive earlier, but Try/Activate are
+not prerequisites for the Files MVP.
 
 ## Development venue and repository direction
 
@@ -288,7 +318,7 @@ wait for an explicit, collision-safe plan coordinated with active SDK work.
 - Optional services contribute zero code and zero network requests to routes
   that do not request them.
 - Replacing one retrieval or Presentation module does not change the pinned
-  semantic result or grant set.
+  semantic result or effective grant decisions.
 - A human and an authorized agent can complete the same supported operation
   through one action implementation and receive equivalent receipts.
 - Turning off every EFS-operated service leaves exact public reads and retained

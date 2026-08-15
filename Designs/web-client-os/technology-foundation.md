@@ -2,11 +2,11 @@
 
 **Status:** draft — owner-directed product posture plus dated implementation recommendations; no repository, dependency installation, or product implementation is authorized
 **Target repos:** planning, client, sdk
-**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/product-constitution-and-roadmap]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/privacy-and-agents]]
+**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/product-constitution-and-roadmap]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/web-client-os/privacy-and-agents]]
 **Reviewers:** @web-platform-standards (2026-08-14), @historical-client-architecture (2026-08-14), @current-v2-read-path (2026-08-14)
-**Last touched:** 2026-08-14
+**Last touched:** 2026-08-15
 
-#status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/web-platform #topic/pwa #topic/i18n #topic/accessibility #topic/performance
+#status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/web-platform #topic/pwa #topic/i18n #topic/accessibility #topic/performance #topic/wasm #topic/wasi
 
 ## Decision frame
 
@@ -27,6 +27,14 @@ James supplied the following product direction on 2026-08-14:
   screen/window/input conditions, and has internationalization and
   accessibility in its foundations; and
 - preserve the static SPA and IPFS/static-host deployment requirement.
+
+James additionally directed on 2026-08-15 that WebAssembly, WASI and related
+standards be treated as foundational, safe and recommended tools for portable,
+performant Web code where appropriate. EFS interprets that as selecting Core
+Wasm and WIT-shaped explicit interfaces for portable non-DOM modules, targeting
+the Component Model through replaceable adapters, and granting named WASI
+interfaces selectively. It does not mean ambient POSIX, direct DOM authority,
+or rewriting the native Web Shell and Files path in Wasm.
 
 “Fifty years” is a dependency and interface strategy, not a promise that an
 unchanged 2026 binary or toolchain will run everywhere in 2076. HTML, CSS,
@@ -56,6 +64,7 @@ until an authorized repository experiment and dependency review proves them.
 | Builder | [Vite 8](https://vite.dev/blog/announcing-vite8) with relative assets, explicit app/rescue/Worker entrypoints, capability-aligned splitting, minimal plugins and EFS-owned release manifests | replaceable build tool, absent from runtime/public contracts |
 | Delivery | one static hash-routed build; ordinary HTTPS, stable-origin IPFS/DNSLink, exact CID-subdomain release, local loopback and independent rescue profiles | no application server required for correctness |
 | Installed/offline profile | Web App Manifest plus a generation-safe Service Worker, Cache API, IndexedDB and optional OPFS when their separate acceptance gates pass | install/offline enhancement; guest read and foreground write never depend on it |
+| Portable service modules | Core WebAssembly in dedicated Workers; WIT-shaped interfaces; Component Model target through pinned browser adapters; selectively granted WASI/EFS resources | owner-directed foundational lane; exact WIT worlds, feature/WASI profiles, adapters and toolchains remain evidence-gated |
 | Global use | BCP 47, Unicode, ECMA-402 `Intl`, versioned message catalogs, logical CSS, bidi/IME discipline and WCAG 2.2 AA | foundation from the first slice, not later translation polish |
 
 The intended engineering posture is **no application framework**, not **no
@@ -321,7 +330,7 @@ and requires JavaScript for its accessible compact drawer. Consumers must
 still provide semantic landmarks, safe-area/fold/input policy, EFS tokens,
 offline icon handling and OS-specific layout behavior. See the official
 [Page documentation](https://webawesome.com/docs/components/page/) and
-[implementation](https://github.com/shoelace-style/webawesome/blob/next/packages/webawesome/src/components/page/page.ts).
+[reviewed implementation](https://github.com/shoelace-style/webawesome/blob/ecc6a94135d6d68d23fb59024be5cfdc0bd135ad/packages/webawesome/src/components/page/page.ts).
 
 Use an EFS-owned `efs-shell-layout` contract backed first by semantic light DOM
 and native CSS. Keep `<wa-page>` as:
@@ -435,24 +444,37 @@ has no controlled clients, including after shutdown/restart. Separate:
 
 - **`NetworkBootstrapGeneration`:** tiny release-neutral HTML/JavaScript at the
   deployment scope. It remains byte-identical across ordinary App releases and
-  reads the local accepted-App state before importing any App code or
-  registering a Worker. It is the force-reload/missing-Worker path, but remains
-  same-origin bootstrap trust.
+  reads the `AcceptedAppState` projection of local `LocalSelectionState` before
+  importing any App code or registering a Worker. It is the
+  force-reload/missing-Worker path, but remains same-origin bootstrap trust.
+  If the projection is `ACTIVATION_IN_PROGRESS`, ordinary navigation renders
+  conserved progress/recovery UI and imports no candidate App; only the fenced
+  coordinator resumes the frozen attempt.
 - **`WorkerBootstrapGeneration`:** a small conserved, content-named scope-level
   worker script registered only after explicit PWA enablement or separate
-  explicit Worker-bootstrap acceptance, and before any dependent App pointer
+  explicit Worker-bootstrap acceptance, and before any dependent App-selection
   change. Subsequent UA checks address that same immutable URL; its automatic
   activation cannot select a new app/module release or grant.
 - **`AppReleaseGeneration`:** an inert exact manifest and complete asset closure
-  staged under its own cache key. EFS verifies and health-checks it, then flips
-  an EFS-owned accepted-generation pointer only after explicit acceptance.
-  Worker `install`/`waiting`/`activate` is not that pointer.
+  staged under its own cache key. EFS verifies it and runs non-activating
+  preflight before explicit acceptance. The tuple transaction then records it
+  as `BOOTING`; post-start health later marks `HEALTHY` or restores the
+  predecessor. Worker `install`/`waiting`/`activate` changes no selection field.
 
 These generation names follow the single activation model in
 [[architecture-and-modules#Configuration objects]]: an
-`AppReleaseGeneration` contains exactly one `BootGeneration`, the accepted-App
-pointer selects both atomically, `InstallGeneration` remains separate
-third-party/module state, and neither bootstrap generation selects any of them.
+`AppReleaseGeneration` contains exactly one `BootGeneration`; one
+`LocalSelectionState` atomically coordinates its accepted App with an optional
+active `SystemActivationGeneration`; `InstallBindingGeneration` remains separate
+third-party/module identity; and neither bootstrap generation selects any of
+them.
+
+`ActivationHealthLease` is an enforceable pre-`HEALTHY` authority boundary for
+broker-mediated runner code only. A candidate App/Boot release executing as
+trusted same-origin ESM remains TCB with ambient Web APIs. Its isolated/static
+preflight may fail before selection; after explicit base acceptance,
+post-start health may restore the predecessor code/checkpointed state but
+cannot claim to undo arbitrary origin, wallet, network or remote effects.
 
 The installed boot is host-agnostic. It resolves relative assets and a
 standards-derived registration scope from its current deployment rather than
@@ -477,7 +499,11 @@ For the stable-origin offline profile:
 2. every staged child executable/static asset is checked against the EFS
    release manifest;
 3. a partial/corrupt install leaves the accepted App generation untouched;
-4. explicit App acceptance flips one local pointer only after health checks;
+4. explicit App acceptance follows verification and non-activating preflight,
+   then records one local selection tuple as `BOOTING` with a newly derived
+   exact local lock, newly authorized App-scoped grant/install bindings and a
+   compatible successor System activation when a full System is active;
+   post-start health separately marks `HEALTHY` or restores the predecessor;
 5. old documents remain pinned to matching assets until explicit safe reload;
    do not use `skipWaiting()`/`clients.claim()` to mix generations;
 6. retain the prior healthy App generation and keep user-data migration
@@ -490,13 +516,16 @@ Worker merely to stage it. A waiting
 Worker can activate automatically after the old clients close or the user
 agent shuts down. Stage only inert App release bytes before acceptance. A
 Worker-bootstrap change is a separate explicit transaction whose candidate
-must be backward-compatible with the currently accepted App and select no App
-pointer when it installs or activates. A stable scope-relative `sw.js` is
-acceptable only when it is genuinely conserved and release-neutral, because
-changing its bytes invokes browser-managed update and eventual activation.
-Content-looking filenames are policy: browsers do not validate the advertised
-digest, so deployment validation must reject changed bytes at an already
-published content-named URL.
+must serve the candidate and every App reachable from current, last-healthy,
+pending, running-session and retained rollback selection tuples, and select no
+App or System field when it installs or activates. Dropping an incompatible
+rollback root requires separate disclosure, export/removal choice and
+authorization. A stable scope-relative `sw.js` is acceptable only when it is
+genuinely conserved and release-neutral, because changing its bytes invokes
+browser-managed update and eventual activation. Content-looking filenames are
+policy: browsers do not validate the advertised digest, so deployment
+validation must reject changed bytes at an already published content-named
+URL.
 
 Application/channel update checks may discover exact candidates, but never
 activate a release, inherit grants, delete the old release or force an upgrade.
@@ -547,9 +576,9 @@ Storage responsibilities stay separate:
 Irreplaceable local/private state requires checksums, versioned schemas,
 copy-forward checkpointed migrations, explicit export/import, recovery tests,
 quota/eviction health and a retained old-schema reader. No browser transaction
-atomically spans all three stores; stage immutable data, verify it, and flip an
-active pointer in one IndexedDB transaction. `navigator.storage.persist()` is
-a best-effort request, never backup.
+atomically spans all three stores; stage immutable data, verify it, and change
+the local selection tuple in one IndexedDB transaction.
+`navigator.storage.persist()` is a best-effort request, never backup.
 
 Foreground replay on launch/focus and explicit retry is the baseline. Background
 Sync, Periodic Sync, Push, notifications and badges are conditional attention
@@ -676,6 +705,68 @@ include Arabic/Hebrew, Japanese/Chinese/Korean IMEs, an Indic script, Thai,
 Turkish casing, German expansion and locale-specific numbers/calendars/time
 zones. Automated audits are never represented as WCAG conformance.
 
+## Portable computation and service-module foundation
+
+[[system-profiles-and-generations#WebAssembly, WIT, Component Model and WASI foundation]]
+owns the complete runner/profile model. The technology baseline is:
+
+1. Trusted Boot, Reader, System Chrome and Shell remain native HTML/CSS/ESM
+   plus Web Components. Wasm adds no mandatory guest boot or DOM bridge.
+2. Portable non-DOM services preferentially use exact Core Wasm in a dedicated
+   Worker behind WIT-shaped, versioned, plain-data/resource interfaces.
+3. The Component Model is the target cross-language composition ABI. Browsers
+   currently need an exact generated representation such as pinned `jco`
+   output; that adapter/glue is TCB and replaceable tooling rather than EFS
+   public ABI.
+4. WASI 0.2/0.3 interfaces are selected individually under a named runner
+   profile. The baseline grants no filesystem preopens, sockets/HTTP,
+   environment, clock, randomness, locale, device, storage, wallet, signer or
+   EFS-write authority.
+5. Rich/legacy DOM applications remain in an opaque-origin iframe lane.
+   Untrusted Wasm cannot register executable custom elements in the trusted
+   Shell realm; it may drive an OS-owned semantic UI protocol.
+
+The browser realization is:
+
+```text
+verified component/Core closure
+ -> feature/profile validation
+ -> dedicated Worker
+ -> exact trusted binding adapter
+ -> typed MessagePort
+ -> Kernel capability/resource table
+```
+
+Verify each executable member and generated-glue asset before that member
+enters a compiler or module loader; `compileStreaming()` does not prove an EFS
+commitment. Launch readiness still requires the complete selected executable
+closure. Retain canonical Core/component bytes separately from each exact
+derived platform realization, including its WIT digest, feature/WASI profile,
+adapter/generator/shims, provenance and build closure. Compiled engine caches
+are performance only and never release identity unless explicitly published
+and selected as a realization.
+
+A WIT `resource` is an ABI handle, not a grant. The Kernel maps it to an opaque
+scoped capability and rechecks activation epoch, scope, basis, expiry, budget
+and revocation on every call. Dependencies still cannot inherit authority.
+
+Core Wasm provides bounds-checked isolated linear memory and explicit imports.
+When the host supplies only declared imports, this is a narrower authority
+surface than executing publisher JavaScript in the trusted same-origin realm;
+it is not a universal Wasm-versus-JavaScript safety ranking. It does not prove
+provenance, correctness, determinism, reproducible source, faster execution,
+host secrecy or immunity to infinite loops, memory/output bombs, side channels
+and browser runtime vulnerabilities. The runner rejects disallowed/unbounded
+memory, tables, features and imports before instantiation, enforces host-broker
+byte/request/storage/concurrency ceilings, terminates runaway Workers by a
+named deadline, revokes their epoch/handles, aborts cancellable host work and
+prevents late completions from committing effects.
+
+Threads, SIMD, shared memory, JSPI, GPU and other advanced features use named
+forward profiles. Static/IPFS guest correctness never requires
+cross-origin-isolation headers merely to support an optional high-performance
+module.
+
 ## Greenfield build and release posture
 
 No repository action is authorized. If implementation is authorized, begin
@@ -787,11 +878,12 @@ telemetry capability and informed local opt-in.
 
 | Class | Examples | Design treatment |
 |---|---|---|
-| Product-selected standards surface | semantic HTML/CSS, Custom Elements/DOM events/plain data, ES modules, URL/hash routes, TC39 Signals shape, installable/responsive/offline/i18n/accessibility outcomes | architecture may depend on the interface/outcome; exact profile and conformance still measured |
+| Product-selected standards surface | semantic HTML/CSS, Custom Elements/DOM events/plain data, ES modules, URL/hash routes, TC39 Signals shape, Core Wasm plus WIT-shaped portable-service interfaces, installable/responsive/offline/i18n/accessibility outcomes | architecture may depend on the interface/outcome; exact profile and conformance still measured |
 | Broadly shipped platform foundation | Fetch/Streams, Workers/MessagePort, WebCrypto, Manifest core, Service Worker, Cache API, IndexedDB, CSS Grid/container queries/logical properties, ECMA-402 Intl | use directly with explicit storage/lifecycle/security limits |
 | Forward/conditional Web profile | Navigation/View Transitions, OPFS, File/Protocol/Share/Launch handlers, Window Controls Overlay, WebGPU, Trusted Types enforcement | design and adapter now; feature-detect; provide honest reduced/unsupported result; never silent authority expansion |
 | Replaceable libraries/tooling | Signals polyfill, Lit, Web Awesome/Fluent/Lion control-pack candidates, Vite/Rolldown, pnpm, TypeScript, Biome, Vitest, Playwright, MF2 compiler | pin/audit; keep behind standards/data boundaries; replacement must pass the same fixtures |
-| Experimental extension/runners | WebMCP, WebNN, Wasm Component Model/WIT/WASI, SES and stronger browser runner profiles | research/module lanes; never direct guest correctness or ambient authority |
+| Foundational forward module target | Component Model through replaceable browser adapters; selectively granted WASI 0.2/0.3 profiles; exact generated browser representations | design portable non-DOM modules toward it; pin every profile/adapter; never direct guest correctness or ambient authority |
+| Experimental extension/runners | WebMCP, WebNN, SES, native Component browser APIs and stronger browser runner profiles | research/module lanes; never direct guest correctness or ambient authority |
 
 The Signals row is intentionally unusual: its native implementation is still
 a moving standards process, but James has directed EFS to treat its official
@@ -840,6 +932,20 @@ an intermediate store.
    only retained source/dependency/toolchain/license/integrity inputs and
    bootstrap instructions to produce two clean builds and compare their
    declared release invariants.
+9. **Core Wasm/WIT cross-runtime fixture.** Verify one exact module/component
+   before compilation, then run the same WIT-shaped contract through a pinned
+   browser Worker adapter and native runtime with canonical equivalent results
+   and typed errors. Attack undeclared network/storage/env/clock/random imports,
+   oversized memory/output/messages, infinite loop and stale handles; measure
+   startup, transfers, memory, termination and revocation. Any publisher JS in
+   generated glue or undeclared effect fails the lane. Before explicit run, an
+   instrumented adapter top level and Wasm start function must record zero
+   evaluation/instantiation through Inspect, Adopt, Keep Offline and Prepare.
+10. **Component representation rebuild.** From only the retained exact
+    toolchain closure, independently reproduce the canonical component and
+    browser representation, WIT digest, adapter/shim graph and artifact
+    manifest. A mismatch invalidates reproducibility evidence without changing
+    the already verified deployment-byte identity.
 
 The working selection is falsified if:
 
@@ -863,7 +969,12 @@ The working selection is falsified if:
 - English concatenation, physical-direction CSS, an IME-destroying rerender or
   inaccessible custom control enters the shared component foundation; or
 - a 2026 package/tool is necessary to reconstruct the application after its
-  maintainer or registry disappears.
+  maintainer or registry disappears;
+- Wasm enters the direct guest critical path without a measured user-visible
+  benefit, or a WIT/Component adapter becomes runtime/public ABI rather than a
+  replaceable exact representation; or
+- a module receives undeclared WASI/EFS resources, blocks the main UI, evades
+  revocation/budgets, or treats WIT resource ownership as authorization.
 
 ## Open evidence questions
 
@@ -885,6 +996,12 @@ The working selection is falsified if:
   authoring claim.
 - Vite output/rebuild and alternative-builder conformance on the final
   authorized workspace graph.
+- Initial Core Wasm feature profile, WIT worlds, Component adapter and minimal
+  WASI imports after browser/native semantic, performance, quota and
+  ambient-authority fixtures.
+- Whether an OS-owned accessible semantic UI protocol is useful for portable
+  Wasm components or whether nontrivial visual modules should remain native
+  trusted Web Components/opaque iframes.
 
 These are engineering evidence questions. None currently requires a new owner
 product choice or a Core/Files mechanism change.

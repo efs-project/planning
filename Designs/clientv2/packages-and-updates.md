@@ -3,9 +3,11 @@
 **Target repos:** planning, client, sdk
 **Depends on:** [[web-os-thesis]], [[read-lens-spec]], [[codex-kinds]], [[codex-envelope]], [[apps-cookbook]], [[ops-doctrine]], [[identity]]
 **Reviewers:** —
-**Last touched:** 2026-07-07 — fable-5
+**Last touched:** 2026-08-15 — historical routing banner; original 2026-07-07 — fable-5
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk
+
+> **Historical July 2026 research corpus; not active architecture.** Current direction: [[../web-client-os/README]]. Words such as “rules,” “wins,” “THE,” and “ruling” describe authority only inside that historical round.
 
 ## What this rules
 

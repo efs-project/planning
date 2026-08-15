@@ -2,9 +2,9 @@
 
 **Status:** draft — smallest official Web Client product slice for iteration; no implementation or protocol/profile freeze is authorized
 **Target repos:** planning, client, sdk
-**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/technology-foundation]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/efsv2/core-architecture-candidate]]
+**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/technology-foundation]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/efsv2/core-architecture-candidate]]
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14)
-**Last touched:** 2026-08-14
+**Last touched:** 2026-08-15
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/read-path #topic/files #topic/actions #topic/performance
 
@@ -94,6 +94,10 @@ Files-certified write or conceal missing semantics behind a hosted service.
   passes and still cannot become guest/write correctness;
 - package installation, third-party executable Views, full Session Shell,
   Arcade Play, native mounts, private folders, or a default Commons;
+- shared-profile Try, Adopt, Fork or Activate, whole-system configuration
+  management, public profile galleries, third-party Wasm/Component execution,
+  and hardened-launch profiles. Their object and authority seams are reserved
+  now, but none is required to ship the File Browser MVP;
 - ERC-1271 claims until a fixed smart-account fixture passes; an EOA-only
   adapter must report `ERC1271_UNSUPPORTED` rather than silently narrowing the
   Principal model.
@@ -287,11 +291,12 @@ host/gateway, RPC source, Realm fixture, content size, and network conditions.
 | Milestone | Provisional target | Accounting rule |
 |---|---:|---|
 | Static ingress document plus critical inline boot data | `<= 15 KiB` compressed | excludes browser framing; includes no remote fonts/telemetry |
-| Transferred guest-critical JS plus critical CSS | target `<= 250 KiB` compressed; `250–400 KiB` requires a dated measured exception; `> 400 KiB` fails this MVP budget | includes all transitive transferred code/styles before useful file/folder UI |
+| Transferred guest-critical executable bytes plus critical CSS | target `<= 250 KiB` compressed; `250–400 KiB` requires a dated measured exception; `> 400 KiB` fails this MVP budget | includes all transitive JavaScript, Wasm, generated adapter glue and styles before useful file/folder UI |
 | Full selected passive viewer closure | `<= 1.2 MiB` compressed before content bytes | historical ceiling to remeasure, not a spending allowance |
 | Trusted resolving frame | `<= 500 ms` warm and `<= 1.5 s` cold on the reference mid-tier device | static-host response included; chain/content completion excluded |
 | Useful verified viewer/listing | `<= 3 s` under the provisional source envelope below | report transfer/source wait, verification, render, and client-added time separately |
-| JS parse/compile/evaluate/execute before useful UI | cumulative `<= 150 ms` on the reference device | CSS/layout/render work is separately recorded |
+| Executable parse/compile/instantiate/evaluate/execute before useful UI | cumulative `<= 150 ms` on the reference device | report JavaScript, Wasm, adapter glue, Worker startup/transfers and CSS/layout/render work separately |
+| Peak client memory before useful UI | measured by route/browser; numeric gate selected by the first reference-device experiment | report main realm, Workers, Wasm memories, transfer copies and retained buffers separately; unrequested OS allocations fail |
 | Main-thread long tasks before useful UI | none over `50 ms`; cumulative `<= 150 ms` | measure by route and browser |
 | Avoidable serialized application waterfalls after shell fetch | `<= 2` | mandatory chain proof/index pagination is separately itemized |
 | Unrequested OS/write/package/agent bytes or requests | exactly `0` | cached evaluation and speculative network requests count |
@@ -430,8 +435,9 @@ plan rather than silently redefining the target.
 
 ### F. Performance and dependency hygiene
 
-- [ ] Each route publishes a bundle/request/main-thread report against the
-      budgets above and fails CI on guest-to-explicit dependency leaks.
+- [ ] Each route publishes a transfer/request/main-thread/Worker/Wasm/memory
+      report against the budgets above and fails CI on guest-to-explicit
+      dependency or allocation leaks.
 - [ ] Browser conformance serves the exact release `dist/` from a dumb static
       server—never Vite middleware/preview—and rejects Vite dev/HMR code,
       absolute asset roots, local paths, Node built-ins, remote imports/CDNs,
@@ -486,23 +492,26 @@ plan rather than silently redefining the target.
       fallback and exact authority semantics; display mode changes chrome only.
 - [ ] If a Service Worker ships, its small content-named
       `WorkerBootstrapGeneration` remains separate from inert staged
-      `AppReleaseGeneration` assets and the EFS-owned accepted-App pointer. It
+      `AppReleaseGeneration` assets and
+      `LocalSelectionState.currentSelection.app`. It
       refuses corrupt/partial App closures, never uses Worker activation to
       select an App release, retains the prior healthy App generation, survives
       process termination/airplane-mode shell reload and exposes an
       out-of-scope rescue from a bootstrap boot loop.
 - [ ] A tiny scope-relative `NetworkBootstrapGeneration` remains byte-identical
       across ordinary App-release publishes. On force reload or with no Worker,
-      it reads retained `AcceptedAppState` before importing any App code or
+      it reads the retained `AcceptedAppState` view of `LocalSelectionState`
+      before importing any App code or
       registering a Worker, then launches exact v12 or returns a typed
       pin-unavailable/recovery result. It never executes network-current v13 as
       an accidental fallback. A clean browser with no accepted state follows
       the separately declared fresh-visit default/chooser behavior.
 - [ ] The generation trace matches
-      [[architecture-and-modules#Configuration objects]]: one accepted-App
-      pointer atomically selects the `AppReleaseGeneration` and contained
-      `BootGeneration`; browser Worker activation and separate
-      `InstallGeneration` activation move neither implicitly.
+      [[architecture-and-modules#Configuration objects]]: one
+      `LocalSelectionState` atomically selects the accepted
+      `AppReleaseGeneration`/contained `BootGeneration` plus optional compatible
+      `SystemActivationGeneration`; browser Worker activation and mutable
+      install status move none implicitly.
 - [ ] Closing the last old client and restarting the browser exercises
       user-agent automatic waiting-worker activation without changing the
       accepted App generation. Network capture after PWA enablement discloses
@@ -515,17 +524,34 @@ plan rather than silently redefining the target.
       continue running byte-exact v12. No v13 Worker is installing or waiting,
       and refusal/cancel creates no activation or nag-based degradation.
 - [ ] Candidate v13 is staged as inert bytes only. Missing, truncated,
-      corrupt, wrong-media-type or health-check-failing members leave v12 and
-      its accepted pointer untouched. Explicit Upgrade verifies the complete
-      closure, presents capability/compatibility/migration differences,
-      coordinates tabs, records acceptance, flips one pointer, and produces
-      one coherent v13 session with v12 retained for compatible rollback.
-- [ ] Kill the browser at every App staging, verification, health-check,
-      accepted-pointer transaction and reload boundary. Restart yields complete
+      corrupt, wrong-media-type or preflight-failing members leave v12 and
+      `LocalSelectionState.currentSelection.app` untouched. Explicit Upgrade
+      verifies the complete closure, presents capability, compatibility,
+      trusted-base residual and migration differences, coordinates tabs,
+      records acceptance, atomically records the coherent candidate App/System
+      tuple as `BOOTING`, then either marks it `HEALTHY` or CAS-restores v12
+      before reporting post-start rollback. v12 remains retained for compatible
+      rollback.
+- [ ] Kill the browser at every App staging, verification, preflight,
+      selection-tuple transaction, post-start health and reload boundary.
+      Restart yields complete
       accepted v12, complete accepted v13, or an explicit blocked/rollback
       state. If a separately accepted Worker-bootstrap change is required,
       repeat at register, download, install, waiting, activation and reload;
-      that Worker serves both v12 and v13 and never changes the App pointer.
+      that Worker serves the candidate plus every current, last-healthy,
+      pending, session and retained rollback App and never changes an
+      App/System selection field.
+- [ ] During `BOOTING`, a second navigation receives conserved
+      `ACTIVATION_IN_PROGRESS` UI and imports no candidate App code; only the
+      fenced coordinator resumes the exact attempt. Broker-mediated modules
+      have no ordinary leases before `HEALTHY`. Candidate same-origin App code
+      is separately labelled TCB and effect-unconfined unless a named isolation
+      profile actually blocks direct browser globals; tuple rollback never
+      claims to undo ambient or remote effects.
+- [ ] Retain rollbackable v12 and v13, stage v14 that requires a newer Worker,
+      then prove that Worker can boot all three offline. If it cannot, v14
+      acceptance is blocked until the user explicitly exports or removes each
+      incompatible rollback root; no update silently strands retained v12/v13.
 - [ ] Mutating bytes at an already published content-named v12 Worker URL fails
       deployment validation; the filename is not treated as browser-verified
       integrity. Worker 404, wrong media type, parse/install rejection and
@@ -546,7 +572,7 @@ plan rather than silently redefining the target.
       explicit versioned export/import rather than inferred continuity.
 - [ ] Concurrent `/a/` and `/b/` fixtures on one origin use different canonical
       `InstallationScopeId` namespaces for IndexedDB, Cache, OPFS, locks,
-      channels and accepted pointers, with no accidental cross-selection.
+      channels and local selection records, with no accidental cross-selection.
       Adversarial sibling-path code still demonstrates same-origin access, so a
       shared-origin project host is rejected for the stateful installed profile
       and remains eligible only as a stateless mirror/rescue deployment.
@@ -554,6 +580,45 @@ plan rather than silently redefining the target.
       resource, stale/partial `UNKNOWN`, missing retained bytes, local draft,
       signed queued action and network-required operation. Cache never proves
       current absence or admission/finality.
+
+### H. Forward system-profile non-regression
+
+This is an architecture fixture, not a requirement to ship the profile manager
+or a generic third-party runner in the File Browser MVP.
+
+- [ ] A clean browser opens an exact foreign `SystemProfileGeneration` into a
+      bounded inert Inspector without wallet detection, private-store access,
+      module execution, complete closure fetch or full Shell boot.
+- [ ] Missing package or showcase bytes leave the exact profile and its
+      evidence inspectable while Try and Activate remain explicitly blocked or
+      `UNKNOWN`; absence of transport never becomes absence of the profile.
+- [ ] Exact and follow links are visually and structurally distinct. An exact
+      link never resolves `latest`; a follow link exposes the named channel,
+      curator/publisher policy, Realm/Lens/Plan, basis/coverage/head and frozen
+      selected exact generation/lock, or an unresolved typed result when no
+      unique actionable candidate exists. Paging and later operations pin a
+      resolved receipt. Channel movement creates a new receipt and never
+      substitutes; it fails an old plan only when that plan explicitly required
+      the candidate to remain current.
+- [ ] Opening, inspecting or keeping a profile inherits no grants, identities,
+      secrets, private state, wallet, storage handles, agent mandates or update
+      subscription. Try begins with an empty capability set and disposable
+      state unless the person or authorized agent explicitly attaches a
+      resource through trusted System Chrome.
+- [ ] A hostile profile cannot replace the Reader/Verifier, permission
+      ceremony, configuration manager, recovery UI or other conserved System
+      Chrome merely by configuring the corresponding service slot.
+- [ ] A synthetic one-thousand-module profile does not change the File Browser
+      guest critical-path request, byte or main-thread budgets. Its bounded
+      header is inspectable before any transitive package graph is loaded.
+- [ ] One disposable Core Wasm Worker behind a WIT-shaped, versioned interface
+      proves exact-byte verification before compilation, absence of undeclared
+      network/storage/wallet imports, bounded cancellation, and a typed
+      unsupported result for an unmet feature profile. It is evidence for the
+      later runner, not an MVP dependency or a claim that Wasm is universally
+      safe.
+- [ ] After deleting every profile-manager and runner artifact, the ordinary
+      exact file/folder route still satisfies sections A through G unchanged.
 
 ## Threat boundary
 
@@ -569,6 +634,7 @@ plan rather than silently redefining the target.
 
 - gateways, RPC endpoints, IPFS/HTTP/torrent carriers, Locators, caches, URLs,
   query/fragment fields, file bytes, names, media types, metadata, catalogs,
+  system-profile recipes/generations, package and runner requests,
   Presentation requests, modules, and page-advertised agent tools;
 - publishers, curators, other Principals, and connected accounts except for
   claims verified under the pinned policy;
@@ -655,6 +721,12 @@ sources, measured performance reports are attached, protocol/profile labels
 match demonstrated conformance, and independent reviewers reproduce both the
 cold guest link and official write journeys.
 
+Shipping shared-profile execution, the System Configuration Manager, generic
+Wasm/Component runners or a public gallery is not part of this MVP definition.
+The MVP must preserve their data, authority and activation boundaries and pass
+the non-regression fixture above without loading those systems on the guest
+path.
+
 It is not done because a mock UI renders, a wallet transaction succeeds, a
 local cache contains the new row, one browser works, a hosted endpoint fills a
 gap, or the full OS architecture looks plausible.
@@ -675,6 +747,9 @@ gap, or the full OS architecture looks plausible.
       path beyond its initial EOA arm?
 - [ ] What device/network/Realm fixture becomes the normative performance
       budget, and which provisional numbers need revision after measurement?
+- [ ] Which smallest profile header and disposable Core Wasm/WIT fixture prove
+      the forward seams without turning the Files MVP into an OS-runtime
+      project? See [[Designs/web-client-os/system-profiles-and-generations]].
 - [ ] The Type/query-identity axis remains open; the latest owner response was
       not interpretable and no choice is inferred.
 

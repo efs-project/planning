@@ -5,9 +5,11 @@
 **Depends on:** [[fable-client-v2-handoff]], [[os-research-compass-for-fable]], [[sdk-vs-client-responsibilities]]
 **Supersedes:** -
 **Reviewers:** Codex research pass, 2026-07-07
-**Last touched:** 2026-07-07 - codex-gpt-5
+**Last touched:** 2026-08-15 — historical routing banner; original 2026-07-07 — codex-gpt-5
 
 #status/draft #kind/research #repo/planning #repo/client #repo/sdk
+
+> **Historical July 2026 research corpus; not active architecture.** Current direction: [[../web-client-os/README]]. Any “rules,” principal-class, broker, runner, or mechanism language below describes that historical round only.
 
 ## What this is
 

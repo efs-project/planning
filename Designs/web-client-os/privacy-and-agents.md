@@ -2,10 +2,10 @@
 
 **Status:** draft — product requirements and extension seams for iteration; no privacy claim, agent protocol, signer delegation, or browser security profile is adopted
 **Target repos:** planning, client, sdk
-**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/mvp-and-acceptance]]
+**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/web-client-os/mvp-and-acceptance]]
 **Inputs:** [[Designs/clientv2/network-privacy]], [[Designs/clientv2/agent-native]], [[Designs/clientv2/agent-native-os-compass-for-fable]] (historical mechanism evidence)
 **Reviewers:** @web-platform-standards (2026-08-14), @historical-client-architecture (2026-08-14), @current-v2-read-path (2026-08-14)
-**Last touched:** 2026-08-14
+**Last touched:** 2026-08-15
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/privacy #topic/agents #topic/capabilities #topic/web-standards
 
@@ -53,6 +53,11 @@ perfect sandbox, or a solved prompt-injection boundary.
 8. **Exit includes private state.** Users can inspect, export, migrate, and
    restore critical local/private data without a hosted account or original
    EFS operator.
+9. **A public system profile is deliberate disclosure, never implicit sync.**
+   Publishing previews module, policy, endpoint, locale, app and provider facts
+   that can fingerprint a person. Exact public configuration excludes grants,
+   identities, secrets, wallets, private state, handles, sessions and agent
+   mandates by construction.
 
 ## Data and execution zones
 
@@ -62,6 +67,7 @@ The names are product zones, not protocol namespaces.
 |---|---|---|---|---|
 | `PUBLIC_REALM` | admitted Records, Bindings, public names, immutable revisions, public Locators | reconstructable cache only | at least the selected RPC/Realm path observes requests; DNS/CDN/network intermediaries and extensions may also observe | public semantics remain Realm/basis qualified |
 | `PUBLIC_ARTIFACT` | exact package/media/file bytes intended for broad retrieval | content-addressed cache or explicit retention | at least the chosen gateway/carrier observes retrieval; DNS/CDN, discovery/DHT, relays, providers/peers, network intermediaries, and extensions may observe identifiers, timing, or size | bytes verify against exact commitment; verification narrows integrity risk, not observer count |
+| `PUBLIC_PROFILE` | deliberately published exact/follow system configuration, module graph, policy ceilings, compatibility and showcase | exact metadata/closure only after explicit publish/retention | observers can infer software, interests, expertise, locale, privacy choices and providers; fetching closure members reveals further interest | profile is inert software/configuration evidence; it carries no effective local authority or private state |
 | `LOCAL_PRIVATE` | settings, grants, handler choices, drafts, journal, outbox, private indexes, agent memory | versioned IndexedDB/OPFS or later native store | not directly network-addressable, but same-origin code with read access and egress can exfiltrate it; a no-egress claim needs a measured runner/origin profile | local policy and OS account protect access; browser storage is revocable and trusted same-origin code remains a residual |
 | `PORTABLE_ENCRYPTED` | encrypted backup, private object, holder credential, shared vault | exact encrypted artifacts plus explicit key/capability management | ciphertext and metadata may be public or transported | possession/authorization to decrypt is separate from EFS admission |
 | `SESSION_VOLATILE` | uncommitted plan, unlocked capability, preview bytes, inference context | memory only by default | only named action endpoints | revoked on exit, timeout, lock, or capability withdrawal |
@@ -149,6 +155,10 @@ not represented as “no network.”
 - Module, profile, endpoint, wallet, or Lens hints from a shared link can
   nominate a choice but cannot persist it, activate code, open private state,
   or grant authority.
+- Exact and follow system-profile routes remain distinct. Opening either uses
+  inert inspection; Try, Adopt, Fork, personal-resource attachment and Activate
+  need separate local plans. A showcase page cannot substitute presentation
+  claims for the exact inspectable profile.
 
 ## Local storage, offline, and recovery reserve
 
@@ -191,10 +201,11 @@ recovery, export/import, and storage-health UI before claiming offline work.
 
 No browser transaction atomically commits across Cache API, IndexedDB, and
 OPFS. Stage immutable Cache/OPFS data under an exact generation ID, verify it,
-then flip the active-generation pointer in one IndexedDB transaction. Journal
-replay and migrations are idempotent, tolerate staged orphans, and retain the
-old generation until recovery succeeds. `navigator.storage.persist()` is a
-best-effort request, not backup or a durability proof.
+then change the coherent local selection tuple in one IndexedDB transaction.
+Journal replay and migrations are idempotent, tolerate staged orphans, and
+retain the old generation until recovery succeeds.
+`navigator.storage.persist()` is a best-effort request, not backup or a
+durability proof.
 
 Stable HTTPS/DNSLink origins can preserve installation and origin-bound stores
 across exact client releases, but that mutable origin must pin/verify each
@@ -211,6 +222,21 @@ selected, versioned data; cached executable/resource bytes should normally be
 re-fetched and re-verified, while wallets, signer relationships and browser
 grants are re-authorized for the new origin. No specific deployment hostname
 is a code-level trust exception.
+
+Exported grant decisions are inert audit/policy candidates, never portable
+effective authority. Import monotonic revocation tombstones before showing any
+grant candidate; the new origin/device starts with empty effective grants and
+requires fresh authorization against its selected App/Boot, platform and local
+policy.
+
+The profile/state model in [[system-profiles-and-generations]] adds no hidden
+exception: adoption roots inert metadata, `Keep Offline` separately roots exact
+software bytes, and `SystemActivationGeneration` references—but does not
+export—local state/grant wiring. Package GC cannot delete state, grants,
+journals, keys or drafts merely because a profile was removed. A foreign
+profile begins with fresh state and empty grants; attaching an existing
+read-only snapshot, copy-on-write branch, dedicated migrated branch or live
+volume is an explicit per-resource action.
 
 Browser storage is origin-wide, not isolated by URL path or Worker scope. All
 local stores are namespaced by canonical manifest ID and normalized deployment
@@ -232,16 +258,19 @@ A Service Worker may provide the stable-origin offline shell after its exact
 bootstrap, partial/corrupt App install, old-document/new-worker skew, rollback,
 recovery and cross-browser behavior is proven. Its small content-named
 `WorkerBootstrapGeneration` is separate from inert staged
-`AppReleaseGeneration` assets and the EFS-owned accepted-App pointer. Browser
+`AppReleaseGeneration` assets and
+`LocalSelectionState.currentSelection.app`. Browser
 checks/automatic activation of an already accepted Worker bootstrap never
 select a new App release; `skipWaiting()` does not force a mixed session. The
 prior healthy App generation remains retained. Candidate Workers are not
 registered before separate explicit Worker-bootstrap acceptance, and must
-remain compatible with the currently accepted App, because a waiting Worker
-may activate automatically after clients close or the user agent shuts down. No
-worker is part of Realm, Files, artifact or action correctness. A missing
-worker uses the release-neutral `NetworkBootstrapGeneration`, which reads
-accepted state before importing App code. A controlling broken/malicious
+remain compatible with every rooted current, last-healthy, pending, session
+and rollback App generation—or make removal/export of an incompatible root a
+separate reviewed effect—because a waiting Worker may activate automatically
+after clients close or the user agent shuts down. No worker is part of Realm,
+Files, artifact or action correctness. A missing
+worker uses the release-neutral `NetworkBootstrapGeneration`, which reads the
+logical `AcceptedAppState` view before importing App code. A controlling broken/malicious
 worker can intercept navigation; recovery
 requires a rescue URL outside its scope—preferably another origin—or explicit
 site-data reset, and the rescue generation must not depend on that worker.
@@ -266,10 +295,22 @@ computes effective grants. Important distinctions include:
 A module should receive copied immutable inputs or revocable service handles,
 not ambient DOM, storage, wallet, network, or global Reader objects. Same-origin
 Workers are a useful performance and API boundary, not a complete adversarial
-sandbox. Opaque-origin iframes, CSP, Permissions Policy, Trusted Types, Wasm
-imports, SES, and future Component/WASI runners are profile mechanisms to test;
-none alone establishes least authority, confidentiality, network denial,
-resource quotas, or freedom from browser exploits.
+sandbox. Core Wasm in a dedicated Worker with WIT-shaped explicit imports is
+the selected foundational direction for portable non-DOM services; the
+Component Model is the target through exact replaceable adapters and WASI
+interfaces are granted selectively. Opaque-origin iframes, CSP, Permissions
+Policy and Trusted Types remain the full-Web lane; SES is exceptional. None
+alone establishes least authority, confidentiality, network denial, resource
+quotas, host-origin secrecy or freedom from browser exploits.
+
+A WIT `resource` is an ABI handle, not authorization. The Kernel resource table
+rechecks exact generation, scope, basis, expiry, budget and revocation. Wasm
+bounds ordinary module accesses and protects host/runtime memory from a
+module's out-of-bounds access; it does not make the module's own memory
+confidential from the embedding runtime, binding glue or exported-memory
+observers. A trusted or malicious origin controls imports and can observe
+private inputs crossing the boundary, so data is not secret merely because its
+consumer is Wasm.
 
 Privacy-sensitive module activation therefore records runner residuals,
 effective grants, endpoint policy, retained data, teardown behavior, and an
@@ -300,11 +341,19 @@ describe -> propose intent -> compile/dry-run -> authorize -> execute
   second-class users.
 - An operation that only exists as a clickable button or only through an
   undocumented agent shortcut is a product defect.
+- System-profile operations use the same rule. An authorized agent may inspect,
+  compare, plan Try, Adopt, Fork, attach resources, Activate, roll back, export
+  and collect according to its mandate. Receiving a profile link in content or
+  a prompt grants only inspection.
 
 ### Stable owned tool contract
 
-The Kernel/OS owns a runtime-neutral, versioned JSON-Schema/IDL contract over
-capability-mediated RPC. Illustrative descriptor:
+The Kernel/OS owns one runtime-neutral, versioned semantic operation contract.
+WIT is its component-ABI binding; validated structured-clone/JSON Schema is its
+Worker `MessagePort`, WebMCP and agent-adapter binding. Generated or
+hand-written bindings must pass the same semantic, error, read-context,
+ActionPlan and ActionReceipt fixtures; neither binding may redefine behavior
+or become a second source of truth. Illustrative descriptor:
 
 ```text
 ToolDescriptor
@@ -391,7 +440,7 @@ Adapters may expose a subset or translate transport, but they may not alter
 tool meaning, bypass capabilities, weaken read context, or become correctness
 authority.
 
-## Web standards posture as of 2026-08-14
+## Web standards posture as of 2026-08-15
 
 This matrix distinguishes useful shipped foundations from moving targets. It
 must be refreshed before implementation selection.
@@ -403,7 +452,8 @@ must be refreshed before implementation selection.
 | [JavaScript modules and import maps](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) | document support is usable; Worker resolution differs | trusted base loading and bundle-time mapping; not package integrity or general runtime registry |
 | [TC39 Signals](https://github.com/tc39/proposal-signals) | owner-selected future JavaScript surface; exact polyfill/proposal revision still moving | single in-process reactive model; never persistence, RPC, capability or authority ABI |
 | [Dedicated Workers](https://html.spec.whatwg.org/multipage/workers.html) and `MessagePort` | broadly shipped | responsiveness and capability-shaped RPC; not a least-authority sandbox |
-| [WebAssembly core](https://webassembly.org/features/) | broadly shipped with feature variance | portable compute with explicit imports; not a filesystem/network/permission ABI |
+| [WebAssembly core](https://webassembly.org/features/) | broadly shipped with feature variance; Core 3.0 is the current specification generation | selected portable non-DOM compute/service substrate in dedicated Workers; exact feature profile and budgets required |
+| [WIT worlds](https://component-model.bytecodealliance.org/design/worlds.html), [Component Model](https://github.com/WebAssembly/component-model), and [WASI](https://wasi.dev/releases/) | WIT/Component/WASI ecosystem is advancing; WASI 0.2/0.3 are labelled stable by the WASI release process, not W3C Recommendations or natively shipped browser ABIs; browsers still need generated Core-Wasm/ESM adapters | selected interface/target direction through replaceable exact adapters and minimal named imports; never ambient POSIX, grants or native-browser assumption |
 | [Web App Manifest](https://www.w3.org/TR/appmanifest/) and [Service Workers](https://www.w3.org/TR/service-workers/) | manifest/install and worker lifecycle standards with platform differences | installable static profile and generation-safe offline shell after recovery proof; never semantic correctness or required guest entry |
 | [Storage Standard](https://storage.spec.whatwg.org/), [IndexedDB](https://w3c.github.io/IndexedDB/), and [File System/OPFS](https://fs.spec.whatwg.org/) | usable but quota/eviction/device behavior varies | tiered cache/private state with explicit durability limits |
 | [BCP 47](https://datatracker.ietf.org/doc/html/rfc5646), [Unicode LDML](https://www.unicode.org/reports/tr35/) and [ECMA-402 `Intl`](https://tc39.es/ecma402/) | durable language/locale standards with implementation data that evolves | versioned message/locale packs and localized presentation; never canonical protocol equality or signing input |
@@ -411,7 +461,6 @@ must be refreshed before implementation selection.
 | [WebMCP](https://webmachinelearning.github.io/webmcp/) | W3C Community Group draft/early implementation work | optional page-tool discovery/invocation adapter over the EFS-owned tool contract; not kernel ABI or authorization token |
 | [Web Neural Network API](https://www.w3.org/TR/webnn/) | Candidate Recommendation Draft; availability is not universal | optional inference-provider backend with semantic fallback |
 | [WebGPU](https://www.w3.org/TR/webgpu/) | shipped unevenly and still evolving | optional acceleration; never required for correctness |
-| [WASI](https://wasi.dev/releases/) and Component Model/WIT | useful ecosystem specifications, not a native browser component ABI | later Wasm runner/toolchain lane behind an EFS runtime profile |
 
 No stable primary web standard named **WebInference** was identified in this
 pass. The term is treated as James's product goal for an interchangeable local
@@ -478,6 +527,42 @@ private data. Model output is evidence/untrusted input, not protocol truth.
       user data.
 - [ ] Changing a handler or inference provider shows data/network/capability
       differences and does not silently broaden prior grants.
+- [ ] A default Wasm/WIT component probes network, storage, environment, clock,
+      randomness, wallet, signer, private Files and EFS writes; no undeclared
+      import/effect succeeds, budgets and termination remain observable, and a
+      malicious same-origin host is separately demonstrated as outside that
+      module boundary.
+
+### Shared profiles
+
+- [ ] Opening an exact/follow/showcase profile fetches only bounded inert
+      metadata/evidence through selected Reader policy; it executes no module,
+      reads no private local comparison before first paint and creates no grant
+      or durable root. Passive media auto-loads only from retained bytes or
+      policy-approved carriers; an attacker-controlled profile Locator records
+      zero contact until explicit `Load media` consent names observer and size.
+- [ ] Publish preview lists the profile's fingerprinting disclosures and omits
+      grants, identities, wallets, secrets, private endpoints/state, handles,
+      sessions and agent mandates by default.
+- [ ] Try begins with fresh ephemeral state and empty grants. Each selected
+      personal resource uses an explicit read-only/copy-on-write/dedicated/live
+      attachment plan; Exit/crash revokes ports and sweeps the lease without
+      touching active/private state.
+- [ ] Forking creates a local unpublished draft with local source lineage and
+      copies no authority, state, follower or update subscription. Only a
+      separate Publish plan creates public identity/`derivedFrom` evidence; a
+      local exact lock may be tried and activated without publishing.
+      Removing the profile leaves orphaned private state available for explicit
+      export/delete review.
+- [ ] A JavaScript-capable social unfurler opening exact, follow and showcase
+      URLs performs no wallet/private-store/module access and contacts no
+      profile-nominated carrier. Capability references never enter OpenGraph,
+      canonical-link, referrer, analytics, crash report or ordinary log
+      material.
+- [ ] Profile publisher, showcase publisher, follow selector/curator, fork
+      publisher and source-profile publisher remain separate labels. A hostile
+      `derivedFrom` claim never becomes source-author consent, endorsement or
+      an “official” badge without separately verified evidence.
 
 ### Agent parity and control
 
@@ -504,6 +589,8 @@ Revisit the architecture if:
 
 - useful guest reading requires wallet/profile/private-store access;
 - a public EFS tree becomes the only home for grants, secrets, or agent memory;
+- a shared profile link or public showcase executes, subscribes, installs,
+  reads local/private state, inherits grants or attaches personal resources;
 - caches or service workers become correctness or the only copy of authored
   state;
 - verified transport is described as anonymous or encrypted storage is
@@ -515,8 +602,8 @@ Revisit the architecture if:
   inspect an agent-only operation;
 - a model, WebMCP tool, package, catalog, or untrusted file can change the
   authority-bearing structure after approval;
-- WebNN, WebGPU, WebMCP, WASI, SES, or a particular runner is required for
-  semantic correctness; or
+- WebNN, WebGPU, WebMCP, SES, native Component support or a particular adapter
+  is required for semantic correctness; or
 - replacing an inference/network/storage module silently changes disclosure or
   authority.
 
@@ -537,6 +624,12 @@ Revisit the architecture if:
       Safari/WebKit, iOS, and Android.
 - [ ] Refresh WebMCP, WebNN, WebGPU, browser inference APIs, WASI, and Component
       Model evidence before selecting any implementation dependency.
+- [ ] Measure which public profile fields/combinations create unacceptable
+      identity, interest, location, accessibility or provider fingerprinting,
+      and design redacted showcases without mislabelling them exact profiles.
+- [ ] Prove agent and human parity for every System Configuration Manager
+      operation, including hostile-link inspection, mandate boundaries,
+      activation receipts and emergency rollback.
 
 ## Pre-promotion checklist
 

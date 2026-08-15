@@ -3,9 +3,11 @@
 **Target repos:** planning, client, sdk
 **Depends on:** [[web-os-thesis]], [[read-lens-spec]], [[codex-envelope]], [[codex-kernel]], [[fable-client-v2-handoff]]
 **Reviewers:** —
-**Last touched:** 2026-07-07 — fable-5
+**Last touched:** 2026-08-15 — historical routing banner; original 2026-07-07 — fable-5
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk
+
+> **Historical July 2026 research corpus; not active architecture.** Current direction: [[../web-client-os/README]]. Any “rules,” principal-class, broker, runner, or mechanism language below describes that historical round only.
 
 > Elaborates thesis **F5** ("the broker owns every packet"). Evidence: Reviews/2026-07-07-clientv2-corpus/research/network-privacy.md and Reviews/2026-07-07-clientv2-corpus/research/web-isolation.md. Where this doc and [[web-os-thesis]] disagree, the thesis wins until amended; disagreements are declared in Open questions, not smuggled.
 
