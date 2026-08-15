@@ -72,6 +72,13 @@ Names and exact bytes are open. `TypeSchema` is the current plain-language
 name; older files call similar concepts `TypeRevision`. EAS is not Core. An EAS
 import/export adapter remains possible if it provides real interoperability.
 
+Focused Type proposal: [[layered-type-system-and-data-abi]] compares the bundled
+B0 Type with a layered exact Type/Data ABI: nominal semantic commitments,
+logical shapes, representations, bounded contract-facing Views, separately
+covered QueryProfiles, ordinary compatibility/projection evidence, and
+human-readable Files/catalog aliases outside canonical identity. It is a
+review/experiment target, not an adopted Type system or frozen byte format.
+
 Focused Files proposal: [[hierarchical-files-and-folders]] defines the current
 greenfield candidate for stable File/Directory Objects, per-name Bindings,
 mount-local namespace/content Plans, complete directory enumeration, canonical
@@ -95,6 +102,7 @@ These are inputs, not competing active architectures:
 | [[mountable-filesystem-semantics]] | Adopted three-host read-only outcome and projection acceptance gates. |
 | [[hierarchical-files-and-folders]] | Current greenfield hierarchical Files/1 proposal; replaces July namespace mechanisms while preserving the adopted mount outcome. |
 | [[privacy-pass-synthesis]] and privacy corpus | Payload/read/metadata distinctions, privacy seams, and honest limitations. Old crypto/profile bytes are candidates. |
+| [[layered-type-system-and-data-abi]] | Current Type-system proposal: exact nominal Types, bounded Data Views, directional compatibility, query-profile evolution, tags/catalog paths, projections, modular EVM deployment, and falsifying experiments. |
 | [[deterministic-ids]], [[codex-envelope]], [[codex-kinds]], [[codex-kernel]] | July native v2 formulas and implementation hypotheses. Useful but superseded as an automatic baseline. |
 | [`../efs15/`](../efs15/) | Fully reviewed EAS-backed contraction and exact vectors. Historical evidence showing what semantic IDs, schemas, admission, and reads require. |
 | [Arcade](../arcade/README.md) | Project/release/artifact, verified runner, curation, rights, comments, and direct guest pressure test. |
