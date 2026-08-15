@@ -421,25 +421,113 @@ Keep these distinct:
    browser registration lifecycle remains separate.
 2. `BootGeneration` — exact conserved base, Reader Kernel, trusted Viewer
    Shell, System Chrome, fallback handlers, and recovery information.
-3. `WorkerBootstrapGeneration` — the separately registered, immutable
+3. `NetworkBootstrapGeneration` — the tiny release-neutral HTML/JavaScript
+   entry served at the deployment scope for clean navigation, force reload and
+   missing-Worker recovery. Ordinary App releases do not change it. It reads
+   `AcceptedAppState` before importing App code or registering a Worker and
+   selects no App, Boot or Install generation by itself. It remains part of
+   same-origin bootstrap trust rather than a cryptographic anchor.
+4. `WorkerBootstrapGeneration` — the separately registered, immutable,
+   scope-relative and release-neutral
    Service Worker bootstrap for an installed stable-origin profile. Browser
    update or activation of it selects neither an `AppReleaseGeneration` /
    `BootGeneration` nor an `InstallGeneration`.
-4. `HandlerPolicy` — mappings from input/action/scope to exact Presentation or
+5. `HandlerPolicy` — mappings from input/action/scope to exact Presentation or
    service modules. It contains no grants.
-5. `SystemProfile` — service-slot bindings, Shell selection, locale/theme,
+6. `SystemProfile` — service-slot bindings, Shell selection, locale/theme,
    privacy/network policy, and allowed background behavior.
-6. `InstallGeneration` — separate third-party/app/module state: exact package
+7. `InstallGeneration` — separate third-party/app/module state: exact package
    set, runner, grants, health, retained bytes, update state, and
    application-state compatibility. It is never folded into the first-party
    `AppReleaseGeneration` closure.
-7. `SessionOverride` — ephemeral, bounded changes for one route/action/session.
+8. `SessionOverride` — ephemeral, bounded changes for one route/action/session.
 
 One EFS-owned accepted-App pointer atomically selects an exact
 `AppReleaseGeneration` and therefore its one contained `BootGeneration`; there
 is no second independently movable active-Boot pointer. `InstallGeneration`
 has its own local activation state. Browser activation of a
-`WorkerBootstrapGeneration` moves neither pointer.
+`WorkerBootstrapGeneration` and network delivery of a
+`NetworkBootstrapGeneration` move neither pointer.
+
+### Domain-neutral accepted-release boot
+
+The installed stable-origin profile uses the browser origin it was loaded
+from; no EFS, gateway, ENS, GitHub Pages, or other deployment hostname is
+compiled into the boot contract. The Boot Core derives its base and Worker
+scope from standards URL/scope inputs and uses relative release members.
+
+Keep four artifacts/states distinct:
+
+1. `ReleaseClosure` is the immutable, self-contained body of one
+   `AppReleaseGeneration`. Its canonical manifest enumerates every sorted
+   member path, digest, byte length, media type, execution role and required
+   compatibility input. Plural retrieval Locators and an enclosing IPFS CID
+   are evidence about where to obtain that body, not its identity-bearing
+   manifest fields.
+2. `ChannelEnvelope` is mutable, replaceable discovery data that may nominate
+   an exact candidate release and its Locators. Reading it installs, grants,
+   migrates and activates nothing.
+3. `AcceptedAppState` is origin-local durable state containing at least the
+   accepted release ID, last healthy release ID, state-schema compatibility,
+   and incomplete staged transaction recovery. Public/shareable profile data
+   may nominate a release, but cannot move this pointer merely by resolving.
+4. `ReleaseStore` retains verified closure members under exact release keys.
+   Same-origin scope-relative `releases/<ReleaseId>/...` resources may support
+   network rehydration when the deployment retains them; Worker-served
+   synthetic paths are only local cache mounts and are never claimed as public
+   availability.
+
+Every local database, Cache namespace, OPFS subtree, lock, channel and pointer
+is additionally namespaced by an `InstallationScopeId` derived from the
+canonical same-origin manifest ID plus normalized deployment/Worker scope.
+This prevents accidental collision between `/a/` and `/b/` installations on
+one origin; it is not a security boundary, because same-origin sibling code can
+still access origin-wide storage. A stateful installed profile therefore
+requires an exclusive trusted origin. Deployments on a shared origin such as a
+generic repository Pages hostname are stateless mirrors/rescue profiles unless
+that entire origin is controlled for this application.
+
+On an ordinary returning launch, `NetworkBootstrapGeneration` or the accepted
+Worker bootstrap reads
+`AcceptedAppState` before considering a channel candidate and launches only
+the complete verified accepted closure. If the accepted closure is missing or
+corrupt, it offers exact-release rehydration, explicit upgrade, export/rescue,
+or a typed unavailable outcome; it does not silently run the channel head.
+The network bootstrap must remain byte-identical across ordinary App-release
+publishes. A force reload may bypass Worker interception, but the network
+bootstrap still imports no App code until it has applied this rule. With no
+readable accepted state it exposes a fresh-visit/default-release or typed
+recovery path; it cannot pretend to have preserved a local pin it cannot read.
+
+Upgrade is a transaction rather than a Worker lifecycle event:
+
+1. discover an exact candidate without changing active state;
+2. fetch, verify and stage its complete `ReleaseClosure`;
+3. show release, capability, compatibility and data-migration differences;
+4. checkpoint/export mutable state when required and obtain explicit human or
+   authorized-agent acceptance;
+5. coordinate all controlled tabs, health-check the candidate, atomically
+   change the accepted-App pointer in one IndexedDB transaction, and reload new
+   navigations coherently while existing documents remain pinned to their old
+   release-member URLs; and
+6. retain the last healthy closure until rollback and mutable-state
+   compatibility are proved.
+
+An ordinary App update does not register or update a Worker. If a candidate
+App requires a newer `WorkerBootstrapGeneration`, that bootstrap is a separate
+explicit transaction and must first prove it can serve both the currently
+accepted and candidate App closures. Registration, install, waiting and
+automatic activation move no App pointer. Only after the compatible Worker is
+active and healthy may the App transaction flip its one pointer. Failure or a
+crash therefore recovers to a coherent old accepted App, a coherent new
+accepted App, or an explicit blocked/rollback state—never a mixed graph.
+
+This produces a conditional returning-browser guarantee, not an unbreakable
+Web pin: browser storage can be evicted or cleared, a force reload may bypass a
+Worker, and executable code delivered by a compromised same origin remains
+inside the browser trust boundary. Stronger protection needs an external
+anchor such as an independently verified immutable URL, extension, native
+launcher, or future signed/isolated Web application profile.
 
 ### Configuration sources and precedence
 
@@ -906,10 +994,11 @@ The build carries standards-based install metadata from the first product
 slice. A generation-safe Service Worker and offline shell are a first-class
 stable-origin delivery profile once their corrupt/partial install,
 old-client/new-worker skew, rollback and out-of-scope rescue fixtures pass.
-The browser-managed, content-named Worker bootstrap generation remains separate
-from the inert exact App release closure and EFS-owned accepted-App pointer;
-automatic Worker checking/activation cannot select an App/module release.
-They never participate in Realm/Files/artifact/action correctness: guest reads
+The byte-conserved Network bootstrap and browser-managed, content-named Worker
+bootstrap generations remain separate from the inert exact App release closure
+and EFS-owned accepted-App pointer; neither automatic network delivery nor
+Worker checking/activation can select an App/module release. They never
+participate in Realm/Files/artifact/action correctness: guest reads
 and supported foreground writes still pass after worker removal. Browser caches
 are disposable acceleration; exact retained resources, local journals and
 private state have separate qualified completeness, versioned storage,

@@ -203,6 +203,22 @@ implicit access to the old Service Worker, Cache, IndexedDB, OPFS, grants,
 journal or installation identity. A state handoff is an explicit export/import
 or migration ceremony, never inferred continuity.
 
+The locally accepted App release is a private origin-local preference by
+default, not a public chain requirement. A user-owned EFS profile may publish
+or synchronize an exact release nomination, but resolving it cannot activate
+code or expose local state. Cross-origin migration exports only explicitly
+selected, versioned data; cached executable/resource bytes should normally be
+re-fetched and re-verified, while wallets, signer relationships and browser
+grants are re-authorized for the new origin. No specific deployment hostname
+is a code-level trust exception.
+
+Browser storage is origin-wide, not isolated by URL path or Worker scope. All
+local stores are namespaced by canonical manifest ID and normalized deployment
+scope to prevent accidental sibling-install collisions, but same-origin code
+can still inspect or mutate them. A stateful PWA therefore uses an exclusive
+trusted origin; shared-origin project paths are stateless mirror/rescue
+deployments, not independent personal-OS security domains.
+
 The offline journal uses append-only, versioned plain records with stable
 intent/action IDs, Realm and basis, roles, exact input/payload digests and
 separate draft/planned/signed/submitted/admitted/finality states. Signals,
@@ -219,13 +235,18 @@ recovery and cross-browser behavior is proven. Its small content-named
 `AppReleaseGeneration` assets and the EFS-owned accepted-App pointer. Browser
 checks/automatic activation of an already accepted Worker bootstrap never
 select a new App release; `skipWaiting()` does not force a mixed session. The
-prior healthy App generation remains retained. No worker is part of Realm,
-Files, artifact or action correctness. A missing worker uses ordinary network
-boot. A controlling broken/malicious worker can intercept navigation; recovery
+prior healthy App generation remains retained. Candidate Workers are not
+registered before separate explicit Worker-bootstrap acceptance, and must
+remain compatible with the currently accepted App, because a waiting Worker
+may activate automatically after clients close or the user agent shuts down. No
+worker is part of Realm, Files, artifact or action correctness. A missing
+worker uses the release-neutral `NetworkBootstrapGeneration`, which reads
+accepted state before importing App code. A controlling broken/malicious
+worker can intercept navigation; recovery
 requires a rescue URL outside its scope—preferably another origin—or explicit
 site-data reset, and the rescue generation must not depend on that worker.
-The exact relationship among App, Boot, Worker and separately installed module
-generations is defined once in
+The exact relationship among Network bootstrap, Worker bootstrap, App, Boot,
+and separately installed module generations is defined once in
 [[architecture-and-modules#Configuration objects]]; privacy policy introduces
 no second activation pointer.
 

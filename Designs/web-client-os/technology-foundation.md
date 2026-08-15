@@ -393,7 +393,7 @@ remain required evidence: a forward policy is not permission to ignore bugs.
 | Profile | Required behavior |
 |---|---|
 | Static browser core | Relative assets and hash routes; guest read and supported foreground writes work without installation, Service Worker or retained state |
-| Stable-origin PWA | Ordinary HTTPS or stable DNSLink/custom origin; manifest, optional offline shell, versioned local stores and continuity across exact releases |
+| Stable-origin PWA | Any qualifying exclusive ordinary HTTPS or stable DNSLink/custom origin; domain-neutral relative/scope-derived boot, manifest, optional offline shell, scope-namespaced origin-local accepted-release pointer, versioned stores and continuity across exact releases |
 | Immutable-CID generation | Exact isolated origin and independently pinnable release; a new CID is a new origin with no implied storage, grant, install or Service Worker continuity |
 | Independent rescue | Exact retained build/viewer outside the primary origin/update path, able to open/export its declared public/store compatibility without operator services |
 
@@ -433,10 +433,16 @@ acceptance. Browsers may check a registered worker script under user-agent
 policy and automatically activate a waiting worker once the old registration
 has no controlled clients, including after shutdown/restart. Separate:
 
-- **`WorkerBootstrapGeneration`:** a small conserved, content-named root-level
-  worker script registered only after explicit PWA enablement or an accepted
-  base-generation change. Subsequent UA checks address that same immutable URL;
-  its automatic activation cannot select a new app/module release or grant.
+- **`NetworkBootstrapGeneration`:** tiny release-neutral HTML/JavaScript at the
+  deployment scope. It remains byte-identical across ordinary App releases and
+  reads the local accepted-App state before importing any App code or
+  registering a Worker. It is the force-reload/missing-Worker path, but remains
+  same-origin bootstrap trust.
+- **`WorkerBootstrapGeneration`:** a small conserved, content-named scope-level
+  worker script registered only after explicit PWA enablement or separate
+  explicit Worker-bootstrap acceptance, and before any dependent App pointer
+  change. Subsequent UA checks address that same immutable URL; its automatic
+  activation cannot select a new app/module release or grant.
 - **`AppReleaseGeneration`:** an inert exact manifest and complete asset closure
   staged under its own cache key. EFS verifies and health-checks it, then flips
   an EFS-owned accepted-generation pointer only after explicit acceptance.
@@ -446,7 +452,23 @@ These generation names follow the single activation model in
 [[architecture-and-modules#Configuration objects]]: an
 `AppReleaseGeneration` contains exactly one `BootGeneration`, the accepted-App
 pointer selects both atomically, `InstallGeneration` remains separate
-third-party/module state, and `WorkerBootstrapGeneration` selects none of them.
+third-party/module state, and neither bootstrap generation selects any of them.
+
+The installed boot is host-agnostic. It resolves relative assets and a
+standards-derived registration scope from its current deployment rather than
+testing for named EFS domains. An immutable `ReleaseClosure` manifest binds
+every member's relative path, digest, length, media type and execution role.
+IndexedDB databases, Cache names, OPFS directories, locks and channels are
+namespaced by the canonical manifest ID plus normalized deployment scope, then
+release members use the exact release commitment—never a mutable URL, slug or
+channel name. Paths do not create Web security boundaries: the stateful PWA
+profile requires an exclusive trusted origin, while a shared-origin project
+path is a stateless mirror/rescue profile. Same-origin scope-relative
+`releases/<ReleaseId>/...` paths are useful
+rehydration locations only when the current static deployment or IPFS root DAG
+actually retains them; a Worker-only synthetic path is local acceleration, not
+evidence that another browser can retrieve the release. CID-subdomain copies
+remain exact rescue/rehydration transports with separate origin state.
 
 For the stable-origin offline profile:
 
@@ -463,6 +485,19 @@ For the stable-origin offline profile:
 7. failure, version skew and required reload are visible typed states; and
 8. a rescue URL outside the worker scope/origin survives a bootstrap boot loop.
 
+Ordinary App updates do not register a new Worker. Do not register a candidate
+Worker merely to stage it. A waiting
+Worker can activate automatically after the old clients close or the user
+agent shuts down. Stage only inert App release bytes before acceptance. A
+Worker-bootstrap change is a separate explicit transaction whose candidate
+must be backward-compatible with the currently accepted App and select no App
+pointer when it installs or activates. A stable scope-relative `sw.js` is
+acceptable only when it is genuinely conserved and release-neutral, because
+changing its bytes invokes browser-managed update and eventual activation.
+Content-looking filenames are policy: browsers do not validate the advertised
+digest, so deployment validation must reject changed bytes at an already
+published content-named URL.
+
 Application/channel update checks may discover exact candidates, but never
 activate a release, inherit grants, delete the old release or force an upgrade.
 After PWA enablement the browser may independently request the exact registered
@@ -470,6 +505,14 @@ Worker bootstrap URL under its lifecycle policy; that same-origin request and
 the possibility of automatic waiting-worker activation are named installed-
 profile network/trust residuals, not hidden EFS update semantics. Operator or
 catalog death must not prevent launching a pinned retained App generation.
+
+The resulting promise is deliberately precise: on a supported browser, while
+that origin's persisted site data and complete verified accepted release
+remain intact, ordinary launches and reloads keep running that release until
+an explicit authorized acceptance selects another. A clean first visit, site-
+data clearing, storage eviction/private mode, force reload behavior, or a
+malicious same-origin loader may break that continuity. The client reports
+those boundaries and never calls this an indefinite or cryptographic pin.
 
 ### Offline means several different things
 

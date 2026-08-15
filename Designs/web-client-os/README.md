@@ -100,6 +100,16 @@ the normal design promotion ceremony.
     and modern browser techniques. Seriously evaluate Web Awesome—including
     its Page component—and Lit, but make each earn its bounded place through
     performance, accessibility, privacy, failure and replacement evidence.
+19. For an installed stable-origin client, application upgrades are opt-in.
+    A returning browser should continue launching its locally accepted exact
+    release after the host advertises a newer release, until a person or
+    authorized agent explicitly accepts the new release. This policy is
+    domain-neutral and uses relative/scope-derived URLs rather than hard-coded
+    EFS hosts. Its honest Web guarantee is conditional on the origin's
+    persisted state and complete verified release closure remaining intact;
+    site-data loss or a malicious same-origin bootstrap is outside that
+    guarantee. A stronger pin against a compromised origin is a separate
+    sovereign-client research problem, not something ordinary PWA APIs prove.
 
 ## Current recommendation
 

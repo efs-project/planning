@@ -491,6 +491,13 @@ plan rather than silently redefining the target.
       select an App release, retains the prior healthy App generation, survives
       process termination/airplane-mode shell reload and exposes an
       out-of-scope rescue from a bootstrap boot loop.
+- [ ] A tiny scope-relative `NetworkBootstrapGeneration` remains byte-identical
+      across ordinary App-release publishes. On force reload or with no Worker,
+      it reads retained `AcceptedAppState` before importing any App code or
+      registering a Worker, then launches exact v12 or returns a typed
+      pin-unavailable/recovery result. It never executes network-current v13 as
+      an accidental fallback. A clean browser with no accepted state follows
+      the separately declared fresh-visit default/chooser behavior.
 - [ ] The generation trace matches
       [[architecture-and-modules#Configuration objects]]: one accepted-App
       pointer atomically selects the `AppReleaseGeneration` and contained
@@ -501,6 +508,48 @@ plan rather than silently redefining the target.
       accepted App generation. Network capture after PWA enablement discloses
       browser-managed same-origin requests to the exact registered Worker
       script; no hidden application/channel update endpoint appears.
+- [ ] A domain-neutral `v12 -> v13` fixture installs and accepts exact v12,
+      then changes the stable host's channel/current deployment to advertise
+      v13. Online launch, offline launch, ordinary reload, more-than-24-hour
+      update checks, closing every tab, browser restart and multi-tab use all
+      continue running byte-exact v12. No v13 Worker is installing or waiting,
+      and refusal/cancel creates no activation or nag-based degradation.
+- [ ] Candidate v13 is staged as inert bytes only. Missing, truncated,
+      corrupt, wrong-media-type or health-check-failing members leave v12 and
+      its accepted pointer untouched. Explicit Upgrade verifies the complete
+      closure, presents capability/compatibility/migration differences,
+      coordinates tabs, records acceptance, flips one pointer, and produces
+      one coherent v13 session with v12 retained for compatible rollback.
+- [ ] Kill the browser at every App staging, verification, health-check,
+      accepted-pointer transaction and reload boundary. Restart yields complete
+      accepted v12, complete accepted v13, or an explicit blocked/rollback
+      state. If a separately accepted Worker-bootstrap change is required,
+      repeat at register, download, install, waiting, activation and reload;
+      that Worker serves both v12 and v13 and never changes the App pointer.
+- [ ] Mutating bytes at an already published content-named v12 Worker URL fails
+      deployment validation; the filename is not treated as browser-verified
+      integrity. Worker 404, wrong media type, parse/install rejection and
+      denied candidate update all leave the old Worker and accepted v12
+      runnable without selecting v13. A blocked/recovery state is reserved for
+      a separately reproduced ambiguous post-activation or lost-storage case.
+- [ ] If accepted v12 bytes disappear, the client offers exact v12
+      rehydration, explicit v13 acceptance, export/rescue, or a typed exact-
+      release-unavailable outcome; it never silently falls forward. Clearing
+      site data is tested as an honest fresh visit, and force reload is tested
+      per selected browser profile against the conserved network loader.
+- [ ] The same unchanged build/boot contract passes on two unrelated stable
+      hostnames and at a random nested deployment prefix without compiled host
+      or root-path branches. The prefix has exactly one same-scope Worker
+      registration; its content-named script URL changes only after separate
+      explicit Worker-bootstrap acceptance. A CID-subdomain rescue has
+      separate storage/install identity, and cross-origin state movement is an
+      explicit versioned export/import rather than inferred continuity.
+- [ ] Concurrent `/a/` and `/b/` fixtures on one origin use different canonical
+      `InstallationScopeId` namespaces for IndexedDB, Cache, OPFS, locks,
+      channels and accepted pointers, with no accidental cross-selection.
+      Adversarial sibling-path code still demonstrates same-origin access, so a
+      shared-origin project host is rejected for the stateful installed profile
+      and remains eligible only as a stateless mirror/rescue deployment.
 - [ ] Offline UI distinguishes shell readiness, complete verified retained
       resource, stale/partial `UNKNOWN`, missing retained bytes, local draft,
       signed queued action and network-required operation. Cache never proves
