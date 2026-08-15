@@ -2,10 +2,10 @@
 
 **Status:** draft — working architecture for review; no schema bytes, runtime, registry, or implementation adopted
 **Target repos:** planning, contracts, sdk, client
-**Depends on:** [[Designs/efsv2/README]], [[Designs/efsv2/system-constitution]], [[Designs/clientv2/README]]
+**Depends on:** [[Designs/efsv2/README]], [[Designs/efsv2/system-constitution]], [[Designs/web-client-os/README]]
 **Inputs:** [[Designs/efsv2/hierarchical-files-and-folders]] (proposal-only `BindingScope` experiment)
-**Reviewers:** @core-authority-audit (2026-08-14), @adversarial-architecture (2026-08-14), @external-landscape (2026-08-14)
-**Last touched:** 2026-08-14
+**Reviewers:** @core-authority-audit (2026-08-14; boundary repair 2026-08-15), @adversarial-architecture (2026-08-14; boundary repair 2026-08-15), @external-landscape (2026-08-14), @web-client-os-pm boundary review (2026-08-15)
+**Last touched:** 2026-08-15
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/app-model #topic/trust #topic/content
 
@@ -75,9 +75,9 @@ remain separate gates.
 | OWS-R6 | Discovery, acquisition, verification, installation, authorization, execution, endorsement, and update authority are separate. | No transition implies the next; package declarations request ceilings and compatibility but grant nothing. |
 | OWS-R7 | Catalogs and search are plural and honest. | Every result names catalog/index sources, Realm/basis, coverage, freshness, cursor, and completeness. Unknown ecosystem-wide absence is never claimed. |
 | OWS-R8 | Names and namespaces cannot silently redirect dependencies. | Requirements name an exact Project plus accepted release-authority constraints; resolved Sets name exact Releases. Locators and registry URLs are acquisition evidence only. Forks, succession, or namespace transfers never retarget an existing lock. |
-| OWS-R9 | Updates are optional and non-mutating. | Accepting an update creates a new exact install generation. Pin, defer, reject, export, and rollback remain available. |
+| OWS-R9 | Updates are optional and non-mutating. | Approving an update candidate may authorize preparation and creation of a successor OS-owned immutable install binding; activation/selection is a separate explicit decision and receipt. A combined “Update now” ceremony may commit both atomically without collapsing them. Pin, defer, reject, export, and rollback remain available; old Releases and Sets do not mutate. |
 | OWS-R10 | Yanks, advisories, deprecation, succession, and compatibility are issuer-qualified evidence. | They do not erase Releases, delete retained bytes, mutate locks, globally revoke every catalog, or automatically block execution. |
-| OWS-R11 | Publisher and curator compromise do not rewrite retained history. | Retained generations survive any later compromise. Preventing a malicious new update additionally requires at least one uncompromised independently trusted policy authority plus visible authority changes, local anti-rollback state, and capability/dependency/provenance diffs. |
+| OWS-R11 | Publisher and curator compromise do not rewrite retained history. | Retained Releases, Sets, bytes, and immutable bindings referenced by the last-healthy selection survive any later compromise. Preventing a malicious new update additionally requires at least one uncompromised independently trusted policy authority plus visible authority changes, local anti-rollback state, and capability/dependency/provenance diffs. |
 | OWS-R12 | Git and builds are evidence, not package identity. | A package may use zero, one, or many repos; source migration and non-Git publication do not change the stable Project. |
 | OWS-R13 | Availability is distinct from integrity and identity. | Locators, custody, probes, latency, and durability observations remain plural claims; missing bytes are `UNKNOWN`/unavailable, not nonexistent. |
 | OWS-R14 | Exit is a product requirement. | Users can inspect, pin, export, mirror, reseed, reconstruct, and run retained software after the original publisher, catalog, registry, forge, index, and service disappear. |
@@ -99,7 +99,7 @@ remain separate gates.
 | Mirror/carrier | Exact bytes and retrieval claims | Identity, authorship, currentness, availability elsewhere, or retention guarantee |
 | Resolver | A candidate exact `ResolvedPackageSet` plus `ResolutionReceipt` | Authority to install, execute, or widen dependency sources |
 | User/admin | Trusted catalogs/evidence, update policy, local grants, activation, retention, and deletion | The meaning of other actors' authored evidence |
-| Web Client/OS | Verification, local policy, install generations, grants, sandboxing, activation, rollback UX | Protocol-wide package truth or mandatory catalog defaults |
+| Web Client/OS | Verification, local policy, immutable install bindings, mutable status ledgers, grants, sandboxing, activation, rollback UX | Protocol-wide package truth or mandatory catalog defaults |
 | Store/index operator | Search, browsing, recommendation, caches, moderation, and availability acceleration | Canonical completeness, identity, installation, or execution authority |
 
 ### Required journey: direct discovery
@@ -128,17 +128,23 @@ remain separate gates.
 ### Required journey: install, update, and rollback
 
 1. Resolve dependency requirements into an exact `ResolvedPackageSet`.
-2. Verify every executable member and required passive member; retain the
-   `ResolutionReceipt` and relevant evidence snapshot.
-3. Hand inert exact facts to the OS. The OS creates a disabled local install
-   generation, computes effective grants, and activates only after user/admin
-   policy.
+2. Retain the `ResolutionReceipt`, exact required-member declarations, and
+   source-qualified package evidence/basis in an inert `PackageHandoff`; this
+   is not local preparation status.
+3. The OS separately adopts the candidate, fetches and verifies every required
+   executable/passive member into local preparation status, records an
+   explicit grant decision, and may create a local immutable
+   `InstallBindingGeneration`; each step may stop without implying activation.
 4. A channel or catalog later proposes a different immutable Release/set.
 5. Review manifest, dependency, capability, source/provenance, compatibility,
    migration, yank, and advisory differences.
-6. Defer, reject, or create a new generation. Old retained generations remain
-   exact. Data rollback is claimed only when the OS can restore compatible
-   state; otherwise it reports rollback of bytes versus data separately.
+6. Defer, reject, or authorize preparation, a grant decision, and a successor
+   binding. Separately retain or change activation/selection; a combined
+   “Update now” transaction may commit both atomically but preserves distinct
+   decisions and receipts. Old retained Releases, Sets, bindings, and
+   last-healthy selection tuples remain exact. Data rollback is claimed only
+   when the OS can restore compatible state; otherwise it reports rollback of
+   bytes versus data separately.
 
 ## Architecture families considered
 
@@ -420,28 +426,44 @@ Policy and state are exportable together but remain different objects.
 
 Missing or lost state yields TOFU/`UNKNOWN` and forbids automatic staging; it
 does not manufacture evidence that a candidate is old or malicious. Retained
-generations remain runnable after any publisher or curator compromise.
+Releases, Sets, bytes, and immutable local bindings referenced by the
+last-healthy selection remain usable after any publisher or curator
+compromise.
 Preventing adoption of a malicious new candidate requires at least one
 uncompromised independently trusted policy authority; no data model can save a
 policy whose entire authorized trust base is compromised.
 
-### Local `InstallGeneration`
+### OS-owned install binding and status
 
-Owned by the Web Client/OS, not the public package profile. It records:
+The package/store layer stops at the inert `PackageHandoff`. The earlier local
+`InstallGeneration` wording is obsolete umbrella terminology: it combined an
+immutable attachment identity with mutable completeness, health, instance,
+update, migration, and failure observations.
 
-- exact Release, Manifest, `ResolvedPackageSet`, and retained bytes;
-- runner/profile implementation selected locally;
-- effective grants/denials and their provenance;
-- selected update policy/channel;
-- exact local `UpdateTrustState` reference/snapshot;
-- install, activation, health, and cache-completeness state;
-- local application-data generation and migration status; and
-- retained verification/evidence snapshots.
+The current [[Designs/web-client-os/system-profiles-and-generations#InstallBindingGeneration|Web Client/OS refinement]]
+keeps those lifecycles separate:
 
-Activation selects a generation; it never mutates the Release or Set. Binary
-rollback and application-data rollback are distinct. The OS snapshots or
-branches mutable state, supplies a tested reverse migration, or reports that
-data rollback is unsupported.
+- `InstallBindingGeneration` is an immutable **local** binding of an exact
+  Release/Set to the OS-selected `RunnerRealization`, immutable grant decision,
+  configuration and compatibility contracts, migration identities,
+  activation-unit identity, and state-attachment digest. It is neither public
+  package identity nor evidence that anything is healthy or running.
+- `InstallStatusLedger` carries mutable prepared/retained-byte completeness,
+  current health observations, runtime instances, update candidates, failures,
+  and teardown progress. A status change never changes install-binding
+  identity.
+- `UpdateTrustState`, state-branch contents/heads, grant revocation, evidence
+  snapshots, and coherent system activation/selection keep their own
+  identities and lifecycles rather than being folded into either object.
+
+Neither local object appears in `PackageHandoff`. `PackageHandoff` and
+`InstallStatusLedger` grant no authority; `InstallBindingGeneration` merely
+references a separately authorized OS-local `GrantDecisionGeneration` and
+never self-activates or alone creates effective authority. Creating a
+successor binding or changing activation/selection never mutates the Release
+or Set. Binary rollback and application-data rollback remain distinct: the OS
+snapshots or branches mutable state, supplies a tested reverse migration, or
+reports that data rollback is unsupported.
 
 ## Names, namespaces, forks, and succession
 
@@ -492,7 +514,8 @@ The package/store layer supplies an inert `PackageHandoff` containing:
 
 - publisher-qualified Project and authored immutable Release references;
 - canonical Manifest and package-profile/capability-schema IDs;
-- exact payload closure and member verification/completeness state;
+- exact payload closure, required-member declarations, and source-qualified
+  closure/completeness evidence—not the OS-local fetched/verified bitset;
 - exact `ResolvedPackageSet`, per-activation-unit `RuntimeRequest`s, component
   and delegation map, root-package maximum, and aggregate display/diff
   summary;
@@ -502,13 +525,19 @@ The package/store layer supplies an inert `PackageHandoff` containing:
   evidence;
 - provenance, SBOM/rights, rebuild, compatibility, yank, advisory, succession,
   and update-candidate evidence with verification status;
-- plural Locators, retained-byte completeness, and availability/durability
-  observations; and
-- explicit `COMPLETE/PARTIAL/UNKNOWN/UNSUPPORTED` status and coverage.
+- plural Locators and source-qualified availability/durability observations;
+  and
+- explicit discovery/evidence `COMPLETE/PARTIAL/UNKNOWN/UNSUPPORTED` status and
+  coverage, distinct from local preparation or retained-byte status.
 
 It excludes effective grants, local secrets, wallet/persona, filesystem
-handles, activation, application state, runtime instances, Shell defaults, and
-execution authority.
+handles, execution authority, and every OS-local preparation, install,
+trust-state, grant/revocation, state, evidence-snapshot, activation, selection,
+health, or instance object—including `RunnerRealization`,
+`PreparedPackageSet`, `InstallBindingGeneration`, `InstallStatusLedger`,
+`UpdateTrustState`, `GrantDecisionGeneration`, `GrantRevocationLedger`,
+`StateBranch`, `ProfileEvidenceSnapshot`, `SystemActivationGeneration`,
+`SystemActivationStatus`, and `LocalSelectionState`.
 
 The runtime must guarantee:
 
@@ -516,16 +545,22 @@ The runtime must guarantee:
    installation;
 2. execution requires supported versioned profile semantics, verified required
    closure, explicit Play/Launch, and local grants;
-3. effective authority for each activation unit equals that unit's scoped
-   request ∩ its runner/profile ceiling ∩ the root maximum and explicit
-   delegation map ∩ client policy ∩ user/admin/session grants ∩ current
-   platform support; the aggregate summary is never a grant input;
+3. the package layer defines only request and delegation ceilings; the OS owns
+   effective authority and evaluates every capability call against the exact
+   scoped request, runner/profile ceiling, root maximum and delegation map,
+   client policy, immutable `GrantDecisionGeneration`, current
+   `GrantRevocationLedger`, activation/session epoch, budgets, and platform
+   support; the aggregate summary is never a grant input, and an
+   `InstallBindingGeneration` only names the applicable decision rather than
+   becoming an effective grant;
 4. grants scope to the exact Release/Set/profile and do not silently follow an
    update, fork, identical bytes, or authority succession;
 5. unknown capability dimensions deny rather than acquire new meaning;
 6. no ambient network, wallet, signing, secrets, EFS write, storage, folder,
    DOM, or Shell authority;
-7. installed generations and old retained bytes remain exact and selectable;
+7. old exact Releases/Sets and retained bytes remain exact; eligible OS-local
+   bindings remain available for later activation, and activation selections
+   remain exact and selectable;
 8. resource isolation, quotas, revocation, spoof-resistant chrome, and browser
    exploit residuals remain explicit runtime work—zero EFS grants is not a
    universal safety proof; and
@@ -654,7 +689,8 @@ absence. Users may export to ordinary files/CAR/OCI/bundle transports without
 making that transport canonical.
 
 Publisher, catalog, index, registry, or steward death makes future updates
-stale/`UNKNOWN`; it does not mutate or disable retained generations.
+stale/`UNKNOWN`; it does not mutate retained Releases, Sets, bytes, or local
+bindings.
 
 ## Update, yank, advisory, and compromise behavior
 
@@ -665,7 +701,7 @@ application-defined release-head position. A reader resolves one or more such
 heads through its own pinned Plan at an explicit Realm/basis. “Channel” is
 application-profile vocabulary, not a Core or Lens primitive. “Latest” is
 never global or timestamp-derived. The client compares the candidate against
-the installed exact generation.
+the currently selected exact Release/Set and OS-local binding.
 
 ### Update review
 
@@ -687,12 +723,13 @@ boundaries are blocking diffs by default.
 ### Compromise
 
 - **Publisher compromised:** the attacker can publish new authored claims but
-  cannot mutate old IDs or retained generations. Thresholds,
+  cannot mutate old IDs, retained Sets/bytes, or OS-local bindings. Thresholds,
   cooldown/freshness, independent evidence, local `UpdateTrustState`, and
   explicit authority-change diffs can bound adoption only while at least one
   independently trusted policy authority remains uncompromised.
 - **Curator compromised:** recommendations and channel heads may change, but
-  package identity, retained generations, grants, and other catalogs do not.
+  package identity, retained Sets/bytes, local bindings/grants, and other
+  catalogs do not.
 - **Registry/index compromised:** corrupt/missing bytes fail exact verification;
   search becomes suspect/partial; direct IDs, retained data, and alternate
   carriers remain usable.
@@ -881,8 +918,8 @@ its runtime semantics into that envelope.
 | Catalog plurality | Direct link and two conflicting catalogs resolve the same exact Releases; each edition has finite scoped completeness | Global official/latest bit, catalog removal breaks direct access, or hosted DB becomes only source |
 | Catalog scale/spam | Rebuild 100k-entry catalog after curator/index disappearance amid one million forged backlinks with bounded pages and honest coverage | Global history scan, hidden completeness service, or unaffordable mandatory writer fan-out |
 | Dependency scale | TS and Rust resolve a 10k-node multigraph with cycles, peers, platforms, duplicate versions, typosquats, dependency confusion, yank, fork, corrupt primary, and good mirror to the same Set ID | Name/range execution, silent source fallback, non-deterministic Set identity, or unbounded traversal |
-| Publisher/curator compromise | Conflicting/stale heads across two Realms do not silently update; retained generation still runs; authority and capability diffs are visible; a still-independent policy authority blocks the malicious candidate | Compromise mutates installed software/grants, or the design claims to prevent malicious updates after its whole authorized trust base is lost |
-| Update/state rollback | Update creates new generation; byte rollback works; mutable-state restore works or is honestly unsupported | Existing Release mutates, old generation disappears, or data loss is labeled rollback success |
+| Publisher/curator compromise | Conflicting/stale heads across two Realms do not silently update; the recoverable last-healthy selection can still activate its retained exact Set and immutable bindings; authority and capability diffs are visible; a still-independent policy authority blocks the malicious candidate | Compromise mutates installed software/grants, or the design claims to prevent malicious updates after its whole authorized trust base is lost |
+| Update/state rollback | Update may stop after preparation, grant decision, or a successor immutable `InstallBindingGeneration`; a separate activation/selection decision has its own receipt, byte rollback works, and mutable-state restore works or is honestly unsupported | Existing Release/binding mutates, status changes binding identity, an earlier stage implies activation, the old binding disappears, or data loss is labeled rollback success |
 | Steward death | Publisher, curator, registry, forge, and original Locators disappear; exported exact Set remains inspectable, verifiable, runnable, and reseedable; updates become stale/UNKNOWN | Mandatory operator, live forge, or registry required for use/reconstruction |
 | Provenance rebuild | Exact Git/non-Git source, recipe, toolchain, and inputs reproduce or explicitly mismatch output without becoming publisher authority | “Signed/reproducible” becomes safe/official or Git identity becomes package identity |
 | Path/resource attack | Independent validators reject traversal, Unicode/case collisions, symlinks, special files, decompression bombs, oversized graphs, and malformed closures identically | Runner-dependent meaning or resource exhaustion before rejection |
@@ -929,9 +966,10 @@ measurement, and the result that would falsify the proposed primitive.
 - [ ] **Profile vocabulary:** capability-schema and runtime-profile IDs,
       unknown-field denial, passive versus active closure, remote-service
       boundary, and Presentation confinement need executable conformance tests.
-- [ ] **State rollback:** the OS owner must define how install generations bind
-      mutable application-data generations and when the UI reports byte-only
-      rollback versus full rollback.
+- [ ] **State rollback:** cross-design fixtures must prove how an immutable
+      `InstallBindingGeneration` state attachment, separate mutable
+      `StateBranch`, and coherent activation/selection report byte-only versus
+      full data rollback without status rewriting identity.
 - [ ] **Economics:** measure the aggregate package Type/index/Binding/Lens,
       catalog snapshot, spam, resolver, evidence, byte, and reconstruction
       bundle—not one cheap operation—before choosing Core or hosted placement.
@@ -947,7 +985,8 @@ permanence commitment that the design cannot settle.
 - [ ] Every OWS requirement has at least one passing acceptance trace and
       named authority/source.
 - [ ] Project, Release, content, Set, receipt, catalog, evidence, channel, and
-      install identities pass the mutation matrix in two implementations.
+      OS-local install-binding identities pass the mutation matrix; mutable
+      status-ledger changes do not perturb any immutable ID.
 - [ ] Dependency and catalog scale fixtures meet explicit time, memory, gas,
       state, page, and reconstruction budgets.
 - [ ] Publisher/curator/index compromise and steward-death fixtures pass

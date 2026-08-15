@@ -2,10 +2,10 @@
 
 **Status:** draft set — proposed working baseline for owner review; no protocol, package profile, runtime ABI, catalog, or implementation is adopted
 **Target repos:** planning, contracts, sdk, client
-**Depends on:** [[Designs/efsv2/README]], [[Designs/clientv2/README]]
+**Depends on:** [[Designs/efsv2/README]], [[Designs/web-client-os/README]]
 **Inputs:** [[Designs/efsv2/hierarchical-files-and-folders]] (proposal-only `BindingScope` experiment)
-**Reviewers:** @core-authority-audit (2026-08-14), @adversarial-architecture (2026-08-14), @external-landscape (2026-08-14)
-**Last touched:** 2026-08-14
+**Reviewers:** @core-authority-audit (2026-08-14; boundary repair 2026-08-15), @adversarial-architecture (2026-08-14; boundary repair 2026-08-15), @external-landscape (2026-08-14), @web-client-os-pm boundary review (2026-08-15)
+**Last touched:** 2026-08-15
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/app-model #topic/trust #topic/content
 
@@ -50,8 +50,8 @@ user-pinned update policy plus separate local anti-rollback state may borrow
 TUF-style roles, thresholds, freshness, and rollback protection. OCI, IPFS,
 Git, HTTP, and other systems are adapters
 or evidence sources, never package identity or completeness authority. Local
-installation, activation, grants, and application-state generations belong to
-the Web Client/OS.
+installation, activation, grants, `StateBranch` contents, and state
+attachments belong to the Web Client/OS.
 
 Full model and falsifiers: [[architecture]].
 
@@ -118,7 +118,7 @@ runtime choice.
 |---|---|---|
 | Package semantics | Project/release identity, manifests, profiles, exact payloads, dependency requirements and resolved-set identity | Runtime implementation and host-interface behavior stay with Web Client/OS |
 | Catalogs and trust | Permissionless catalog editions, curation/evidence claims, discovery completeness, update-policy inputs | Store/Shell presentation defaults and local policy UX stay with Web Client/OS |
-| Installation lifecycle | Generic handoff, update candidate semantics, export/reconstruction obligations | Install, activation, rollback UI, state generations, grants, sandboxing, quotas, and execution stay with Web Client/OS |
+| Installation lifecycle | Generic handoff, update candidate semantics, export/reconstruction obligations | OS-owned immutable `InstallBindingGeneration`, mutable status ledgers, activation/rollback UI, state branches, grants, sandboxing, quotas, and execution stay with [[Designs/web-client-os/README|Web Client/OS]] |
 | Source and builds | Release-to-source links, provenance, rebuild/SBOM/audit evidence | Git-native identity, clone/fetch/push, source collaboration, forge workflows, and Git transport stay with Git/Forge |
 | Files and presentation | Package profiles and attributable Presentation/renderer offers | File/Directory semantics stay with Files; verified handles and renderer enforcement stay with Web Client/OS |
 | Product-specific meaning | Generic package/catalog/evidence shapes | Arcade, Media, Nanda, EAP, and other PMs own their application semantics |
@@ -126,9 +126,22 @@ runtime choice.
 The runtime-neutral handoff to the Web Client/OS contains exact Project,
 Release, manifest, payload closure, resolved dependency set, per-activation
 runtime requests and delegation map, root maximum, publisher/curator/
-provenance evidence, availability/completeness, and update/yank/advisory
-state. Aggregate capability summaries are display/diff evidence only. The
-handoff never contains effective grants or execution authority.
+provenance evidence, source-qualified availability/completeness, and
+update-candidate/yank/advisory evidence. Aggregate capability summaries are
+display/diff evidence only. The handoff never contains effective grants or
+execution authority. It also contains no OS-local preparation, install,
+trust-state, grant/revocation, state, evidence-snapshot, activation, selection,
+health, or instance object—including `RunnerRealization`,
+`PreparedPackageSet`, `InstallBindingGeneration`, `InstallStatusLedger`,
+`UpdateTrustState`, `GrantDecisionGeneration`, `GrantRevocationLedger`,
+`StateBranch`, `ProfileEvidenceSnapshot`, `SystemActivationGeneration`,
+`SystemActivationStatus`, or `LocalSelectionState`.
+
+The earlier umbrella term `InstallGeneration` is obsolete because it mixed
+immutable attachment identity with mutable health, completeness, instance,
+update, and failure status. The current runtime split is defined by
+[[Designs/web-client-os/system-profiles-and-generations#InstallBindingGeneration]];
+the package/store layer does not recreate either local object.
 
 ## Requirements spine
 
@@ -143,7 +156,9 @@ non-negotiable themes are:
 5. explicit separation among discovery, acquisition, verification,
    installation, authorization, execution, endorsement, and update authority;
 6. no ambient registry/source fallback during dependency resolution;
-7. optional updates that create new generations rather than mutate old ones;
+7. optional updates that may create successor OS-local bindings and separately
+   change activation/selection rather than mutate old Releases or resolved
+   sets;
 8. yanks/advisories as additive issuer-qualified evidence;
 9. Git/build/provenance evidence without Git-derived package identity;
 10. offline retention, export, mirroring, rollback, and clean-room
@@ -212,7 +227,7 @@ This draft does not authorize:
   “safe” badge;
 - a Wasm/WASI/WIT, iframe, JavaScript, IWA, OCI, npm, Nix, or other runtime or
   package ABI selection; or
-- edits to the current clientv2, efsv2, Arcade, Media, Git/Forge, Nanda, EAP,
+- edits to the current Web Client/OS, efsv2, Arcade, Media, Git/Forge, Nanda, EAP,
   or Files spines without coordination with their owners.
 
 ## Pre-promotion checklist
@@ -222,8 +237,9 @@ This draft does not authorize:
 - [ ] Every requirement traces to an owner outcome, current Core obligation,
       consumer trace, current primary source, or explicit design inference.
 - [ ] `PackageRelease`, `ResolvedPackageSet`, `ResolutionReceipt`, and
-      `InstallGeneration` remain non-cyclic and semantically distinct in two
-      independent implementations.
+      `PackageHandoff` remain non-cyclic and semantically distinct in two
+      independent package implementations; OS status changes demonstrably do
+      not change `InstallBindingGeneration` identity.
 - [ ] Finite catalog reconstruction and search results expose basis, coverage,
       cursor, and honest completeness without a mandatory hosted index.
 - [ ] Publisher and curator compromise, stale update metadata, dependency
