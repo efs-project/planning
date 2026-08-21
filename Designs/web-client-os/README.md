@@ -133,6 +133,27 @@ The first product slice and acceptance tests are in [[mvp-and-acceptance]].
 Future mechanism research, experiments, schemas, and reviews should be linked
 from this set rather than expanding one permanent mega-document.
 
+## Implementation guidance leads
+
+### Modern Web Guidance and modern CSS agent skills
+
+James routed a 2026-08-21 Hacker News observation that coding models can lag
+newly Baseline web-platform features or incorrectly treat them as unavailable.
+Before Web Client / OS implementation begins, evaluate agent guidance that
+explicitly prefers modern CSS and current platform primitives while retaining
+the compatibility discipline in WCOS-R42:
+
+- [Paul Irish's `modern-css` Agent Skill](https://www.skills.sh/paulirish/dotfiles/modern-css)
+- [Google Chrome's Modern Web Guidance](https://developer.chrome.com/docs/modern-web-guidance/get-started)
+
+This is an implementation-tooling lead, not an adopted dependency or license,
+browser-support, accessibility, performance, or security conclusion. An
+implementation agent should inspect and pin the exact guidance version,
+review its rules against the EFS browser matrix and threat model, and record
+which rules are adopted, overridden, or rejected before using it in generated
+code. “Modern” never overrides semantic fallbacks, measured browser support,
+or the no-hidden-network and useful-pixels budgets.
+
 ## Authority map
 
 ### Owner-adopted EFS-wide inputs
