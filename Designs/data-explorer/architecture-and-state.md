@@ -190,13 +190,23 @@ The current candidate split survives as a hypothesis:
 
 This does not adopt those layer names or require separate processes/bundles.
 The dependency and authority direction is the property under test.
+An in-memory/fake adapter can validate that direction inside the App, but cannot
+prove the product boundary. The direct-guest claim additionally requires E1b's
+cold-browser trace through the real disposable SDK adapter and direct public
+Realm reads, with optional services and warm state removed. The shared guest
+adapter may be packaged as the Web Client/OS candidate `Reader Kernel`; the App
+stays above that boundary, while System Kernel/full-OS/Shell services stay out
+of the cold read path.
 
 ### Smallest journeys that can falsify the split
 
-1. **Cold guest folder to corrupt file:** open a direct Files route, page a
-   partial directory, select a file and reject a corrupt primary while using a
-   verified fallback. If Explorer must resolve Files semantics, decide
-   completeness or verify bytes itself, the shared Reader boundary is too weak.
+1. **Cold guest folder to corrupt file:** first replay the sealed facts through
+   E1a's fake source, then open the same direct Files route in E1b through the
+   real disposable adapter/public Realm path, page a partial directory and
+   reject a corrupt primary while using a verified fallback. If the qualified
+   facts differ, an optional index/warm cache is required, a dependency is
+   untraced, or Explorer must resolve Files semantics/verify bytes itself, the
+   shared Reader boundary is too weak.
 2. **Unknown exact Record to raw evidence:** open an unsupported Type, inspect
    exact identifiers/bytes/provenance and export a redacted trace. If an app
    needs SemanticSpec/Shape/Representation internals merely to remain useful,
@@ -506,6 +516,13 @@ tampered attempt. Tampering never changes the FileRevision or commitment.
 
 ### Qualification axes
 
+The experiment facts matrix is the complete evidence crosswalk: presence,
+coverage, support, validation, authority, lifecycle, selection, observation,
+bytes and effect. The compact product axes below are a presentation projection
+over that crosswalk, not a replacement or an adopted Core/SDK vocabulary. The
+Inspector retains the underlying evidence and any dimension that the compact
+projection cannot honestly express.
+
 These are grades, not one status badge:
 
 ```text
@@ -601,6 +618,8 @@ tables never become source bytes.
 
 Reject or substantially redesign this architecture if:
 
+- the direct-guest claim is supported only by an in-memory/fake source rather
+  than a cold real-adapter/public-Realm trace with optional services removed;
 - guest navigation loads wallet, profile, package, agent, private-store or OS
   code/requests before useful data;
 - Files and generic typed resources require different basis/outcome laws;

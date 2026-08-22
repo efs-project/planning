@@ -12,12 +12,14 @@
 ## Gate
 
 Do not begin a read-only production Data Explorer implementation, freeze product
-APIs, or request permanent Types/bytes until experiments E0–E4 have passed
-their exact scope. E5 is a separate gate before any executable third-party
-extension class; E6a is a separate gate before a write-capable MVP, and E6b
-gates its deferred operations only. A pass proves only that one disposable
-design survives the named corpus,
-environment and participants; it does not prove EFS v2 conformance.
+APIs, or request permanent Types/bytes until E0, E1a, E1b, E2, E3 and E4 have
+passed their exact scope. E1a proves deterministic UI/result isolation; it does
+not prove the direct-guest boundary. E1b is the separate integrated cold-browser
+gate required for that product claim. E5 is a separate gate before any
+executable third-party extension class; E6a is a separate gate before a write-
+capable MVP, and E6b gates its deferred operations only. A pass proves only that
+one disposable design survives the named corpus, environment and participants;
+it does not prove EFS v2 conformance.
 
 ## Shared fixture and evidence packet
 
@@ -70,6 +72,35 @@ The following are checked in every experiment that can encounter them:
 7. Keyboard and screen-reader paths exercise the same read, plan and result
    semantics as pointer paths.
 
+## Qualified facts-matrix crosswalk
+
+The shared fixture carries one versioned, disposable facts-matrix crosswalk for
+every case. It aligns with the umbrella contract-readiness requirement while
+leaving the owning Core/Solidity/SDK work free to change names and encodings.
+Each row records expected logical facts, evidence pointers and allowed/illegal
+combinations across these dimensions:
+
+| Umbrella fact dimension | Explorer crosswalk | Collapse forbidden |
+|---|---|---|
+| Presence | Exhaustive `ExplorerReadResult` branch | Unknown, conflict, opaque or masked into absence/presence |
+| Coverage | Page/range/closure coverage plus completeness evidence | Partial into complete; loaded rows into whole inventory |
+| Support | Adapter/projection/profile support and declared resource ceiling | Unsupported or limit exceeded into invalid/absent |
+| Validation | Structural and semantic Type/value validation evidence | Structurally decodable into semantically accepted |
+| Authority | Historical authority grade and evidence | Authorship/admission/existence into authorization |
+| Lifecycle | Authored, admitted, withdrawn, carried-only or unproved provenance | Carrier observation into Realm admission/currentness |
+| Selection | Current/not-current/conflict/unknown selection evidence | One observed candidate into canonical current selection |
+| Observation | Exact Realm, block/basis, policy/code context plus separate finality/freshness | Recorded basis into fresh/final/current |
+| Bytes | Verified/partial/unavailable/integrity-failed state plus all attempts | Retrieval failure into semantic absence; fallback success hiding corruption |
+| Effect | Explicitly out of scope for the E1a/E1b read arms; E6 plan/receipt/read-back state | Submission into committed effect or unknown into failure |
+
+E1a and E1b consume the same sealed fixture row IDs and produce this crosswalk
+before presentation. Semantic parity means equality of qualified logical facts
+and evidence meaning after adapter mapping; it does not require equality of
+transport attempts, timings, implementation objects or serialized bytes. The
+dimension labels, candidate values, fixture IDs, DTOs and mapping syntax are
+experiment vocabulary only—not adopted protocol bytes, SDK API or result-registry
+names. Illegal combinations are rejected rather than normalized for display.
+
 ## E0 — status language and workspace wireframe
 
 ### Question
@@ -114,50 +145,122 @@ ordinary-task threshold; if the default status makes two or more ordinary
 participants unable to navigate; or if an accessibility path uses weaker
 semantics. Repair the vocabulary/wireframe and rerun E0 before code prototypes.
 
-## E1 — cold guest Files vertical
+## E1a — deterministic fake-source Files vertical
 
 ### Question
 
-Can the Explorer deliver a useful direct Files experience with honest outcomes
-through the shared Reader/Files seam and no system hydration?
+Can the Explorer UI preserve every qualified fixture result, causal failure and
+recovery path without network/SDK nondeterminism obscuring a product defect?
 
 ### Prototype
 
-A disposable static web artifact with a replaceable in-memory adapter. It
-implements only route parse, trusted skeleton, direct Files resolution,
-tree/list/grid, breadcrumbs, paging, metadata, verified preview/download, raw
-and evidence export. It has no wallet, account, profile, package manager,
-extension host, service backend or production persistence.
+A disposable static web artifact with a replaceable in-memory fake source. It
+injects the sealed qualified fixture rows and implements route parse, trusted
+skeleton, tree/list/grid, breadcrumbs, paging, metadata, preview/download state,
+raw fallback and evidence export. It has no real SDK adapter, Realm transport,
+wallet, account, profile, package manager, extension host, service backend or
+production persistence.
 
 ### Pass
 
-- In a clean browser, the first useful directory page and one file metadata
-  view require zero wallet/account/profile/package/OS calls and zero
-  unrequested package or content bytes.
-- Every fixed Files case yields the expected qualified outcome in cold, warm
-  and offline-retained runs; cursor resume neither duplicates nor omits an item.
-- The same fixture can be reconstructed from canonical inputs with caches and
-  optional indexes removed.
-- Corrupt primary bytes are rejected, the intact eligible fallback is tried,
-  and both attempts remain visible. All-corrupt and unavailable cases never
-  render as valid or absent.
+- Every fixed Files case maps to the expected facts-matrix crosswalk and visible
+  outcome; deterministic reruns have no row loss or semantic drift.
+- Simulated page/cursor resume neither duplicates nor omits an item, and a
+  simulated basis change cannot merge into the existing page set.
+- Simulated corrupt-primary, verified-fallback, all-corrupt, unavailable and
+  unknown-Type cases retain every expected attempt/status and raw fallback.
 - Retained exact ranges open offline with explicit coverage; non-retained
   resources say unavailable/offline rather than missing.
 - Keyboard and screen-reader users can navigate, select, inspect and download.
-- Against the named cold-cache/network/device envelope, the prototype paints a
-  trusted skeleton immediately and reaches a useful viewer within three
-  seconds. The guest critical JavaScript target is at most 250 KiB compressed;
-  over 400 KiB is an automatic failure for this arm. These are disposable Web
-  Client/OS pressure targets, not protocol limits.
+- The trusted shell and built-in fake-source UI use no wallet/account/profile/
+  package/OS modules. The guest critical JavaScript target is at most 250 KiB
+  compressed; over 400 KiB is an automatic failure for this arm. This is a
+  disposable Web Client/OS pressure target, not a protocol limit.
+
+### Evidence ceiling
+
+E1a proves UI isolation, result-law coverage, accessibility behavior and a
+replaceable adapter seam. It cannot prove public Realm reachability, the real
+SDK adapter, dependency loading, network privacy, optional-indexer removal,
+fixed-basis pagination, byte verification or cold reconstruction. E1a failure
+blocks the affected UI design; E1a success never satisfies E1b or supports a
+direct-guest production claim.
+
+## E1b — integrated cold-browser direct-guest gate
+
+### Question
+
+Can the same qualified fixture survive the actual disposable product read path
+from a cold browser through the real disposable SDK adapter and direct public Realm reads,
+without ambient services or semantic drift?
+
+### Prototype
+
+Run the same disposable static artifact and sealed fixture through the actual
+candidate product adapter, public Realm transport and verified artifact path.
+Start each proof run in a fresh browser profile with empty memory/HTTP caches,
+service-worker state, Cache API, IndexedDB and local/session storage. Instrument
+the module dependency graph, browser storage/cache use, Worker/service-worker
+lifecycle and every network request/redirect with initiator, purpose, bytes and
+outcome. Do not substitute fixture DTO injection inside this arm.
+
+The fixture is available through canonical public Realm state and eligible
+content carriers. If an optional indexer exists, capture a comparison run, then
+remove or disable it and repeat from cold state. The index-free run is the
+required proof. Pin one exact Realm/block/policy/code basis for each paged read;
+a basis change creates a new read or explicit comparison, never a merged page.
+
+### Pass
+
+- Every fixture case has semantic parity with E1a across the full facts-matrix
+  crosswalk. Differences are limited to declared transport attempts, timing and
+  implementation diagnostics; no presence, coverage, support, validation,
+  authority, lifecycle, selection, observation, byte or effect fact changes.
+- The dependency and network trace shows only the static trusted App/shell, the
+  shared guest Reader/Files consumer path through the real disposable SDK
+  adapter, explicit public Realm reads and requested eligible carriers/content.
+  A Web Client/OS experiment may label that shared path `Reader Kernel`; the
+  Explorer remains above it and owns no resolver, verifier or Lens reducer. The
+  trace shows zero wallet, account, Commons, hosted indexer, package catalog,
+  System Kernel/full OS, Shell-service, profile-hydration or extension
+  dependency.
+- A fresh browser with no warm cache reaches the first qualified directory page,
+  one file metadata view and the raw fallback from public reads. No retained
+  local page, hidden fixture injection or privileged server response is needed.
+- With every optional indexer removed, cold reconstruction produces the same
+  semantic facts and independently derives all required pages/evidence from the
+  declared canonical inputs. Missing optional indexes may change measured cost,
+  never truth, reachability or completeness law.
+- Fixed-basis pagination is stable and resumable: the page/cursor chain has one
+  basis and order, neither duplicates nor omits fixture entries, rejects cursor/
+  basis mismatch and never combines rows observed under different bases.
+- Unknown/unsupported Types and failed rich projections retain canonical raw
+  bytes or exact safe encodings, identifiers, qualification and evidence through
+  the raw fallback without package/catalog discovery.
+- The actual product path handles verified bytes: it rejects the corrupt
+  primary, verifies the eligible fallback against the exact commitment and
+  retains both attempts.
+  All-corrupt, partial-coverage and unavailable cases remain distinct from
+  semantic absence and never reach a trusted renderer as valid bytes.
+- The trace contains zero unrequested package/content bytes and no negative
+  cache from timeout, unavailable carrier, integrity failure or partial query.
+- Against the named cold-browser/network/device envelope, the trusted skeleton
+  paints immediately and the first useful viewer arrives within three seconds.
+  The envelope and trace are retained; this is a product pressure target, not a
+  protocol limit.
 
 ### Stop or redesign
 
-Stop the architecture if guest reads require wallet/profile/OS/catalog
-hydration; if one outcome must be collapsed into value/error or absent; if
-correctness needs a privileged hosted index/cache; if corrupt bytes can reach a
-renderer; if basis cannot be retained across pages; or if the shared boundary
-cannot supply exact raw/evidence fallback. Route the smallest missing outcome
-or evidence-handle requirement to the owning lane before continuing.
+No read-only production claim may proceed if E1b cannot run without fake-source
+injection, a wallet/account/Commons/hosted indexer/package catalog/System
+Kernel/full-OS/Shell-service/profile/warm-cache dependency, an Explorer-owned
+resolver/verifier/Lens reducer, or an untraced network/module edge. Stop also
+for any E1a/E1b semantic parity mismatch, optional-indexer truth dependency,
+mixed-basis page, missing raw fallback, unverified rendered bytes, false
+absence, unreconstructible canonical dependency or hidden provider credential.
+Preserve the failing fixture and return the smallest missing SDK/Files/Core/
+product semantic plus alternatives and exact falsifier; do not weaken the
+crosswalk or adopt fixture/API/protocol bytes to force a pass.
 
 ## E2 — typed spreadsheet view
 
@@ -391,7 +494,7 @@ or E6a-scoped product.
 
 ```text
 E0 status/IA
-  -> E1 guest Files + E4 failure matrix
+  -> E1a fake-source Files + E1b cold public-read gate + E4 failure matrix
   -> E2 typed table + E3 provenance
   -> repair shared read/evidence seams
   -> read-only architecture checkpoint; still no automatic production start

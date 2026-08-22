@@ -17,10 +17,11 @@
 
 ### DATA-E1 — product/package boundary
 
-After E1 proves the same qualified guest results in direct and OS-hosted
-profiles, decide whether the first production Explorer ships as a separately
-versioned built-in App package, an independently deployable direct client that
-the Shell can host, or another reversible packaging arrangement.
+After E1a proves deterministic UI/result isolation and E1b proves the same
+qualified guest results through cold direct public reads in both direct and
+OS-hosted profiles, decide whether the first production Explorer ships as a
+separately versioned built-in App package, an independently deployable direct
+client that the Shell can host, or another reversible packaging arrangement.
 
 **Escalate only if:** packaging choices materially change guest boot weight,
 self-hostability, update/recovery authority or semantic parity. Repository and
@@ -74,8 +75,12 @@ mechanism ownership.
   provide a smaller equivalent.
 - Confirm that unsupported consumer projection and missing/tampered bytes can
   remain independent of semantic presence without a new Core noun.
-- Review E1/E4 falsifiers and name any case that cannot be reconstructed from
-  canonical inputs without a privileged index.
+- Review E1a/E1b/E4 falsifiers and name any case that cannot be reconstructed
+  from canonical inputs without a privileged index.
+- Confirm that the E1a/E1b disposable qualified facts-matrix crosswalk
+  preserves the umbrella presence/coverage/support/validation/authority/
+  lifecycle/selection/observation/bytes/effect distinctions without adopting
+  their candidate names or bytes in the Explorer.
 
 ### Files
 
@@ -89,6 +94,9 @@ mechanism ownership.
   compensating.
 - Name private, encrypted, writable and native-mount cases that must remain out
   of the first public guest fixture.
+- Confirm the canonical public inputs required for E1b's fixed-basis pages,
+  raw fallback, verified bytes and cold reconstruction after optional indexes
+  and warm caches are removed.
 
 ### SDK
 
@@ -102,6 +110,9 @@ mechanism ownership.
   attempts and do not expose provider credentials.
 - Map one deterministic action request/plan/receipt/read-back fixture without
   defining product UX or assuming permanent API/bytes.
+- Supply the real disposable adapter arm for E1b and a dependency/network trace
+  surface sufficient to compare every qualified fixture fact with E1a while
+  proving that no optional indexer or ambient system service supplies truth.
 
 ### Web Client / OS
 
@@ -122,6 +133,12 @@ mechanism ownership.
 - Assign ownership for offline storage quotas/migrations, safe preview, app
   recovery and extension grants without making those services direct guest
   boot dependencies.
+- Review E1b's cold-browser/module/storage/network trace and confirm that the
+  App reaches direct public Realm reads only through the shared guest Reader/
+  Files adapter, without System Kernel/full-OS/Shell-service, account, profile,
+  catalog or warm-cache hydration; E1a alone is insufficient. The candidate
+  Reader Kernel label does not put Explorer inside the Kernel or give it a
+  second resolver/verifier.
 
 ## Recording and escalation rule
 

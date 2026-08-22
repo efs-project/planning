@@ -29,11 +29,13 @@ create file, bounded local-file import and publish revision in the write-capable
 MVP arm, through the shared, independently proved action-plan/consent/receipt/
 read-back boundary.
 
-**Hard gates:** a read-only production slice waits for E0–E4: status/IA, guest
-Files, typed table, provenance/history and hostile-data/failure labs. Executable
-third-party extensions separately wait for E5, and a write-capable MVP waits
-for E6a; E6b gates only its deferred operations. No fixture result freezes
-Core, Files, Type/Data ABI, SDK or extension bytes.
+**Hard gates:** a read-only production slice waits for E0, E1a, E1b, E2, E3
+and E4. E1a retains the deterministic in-memory fake-source UI/result-law
+test; only E1b—the real disposable SDK adapter plus cold direct public Realm
+reads—can prove the direct-guest boundary. Executable third-party extensions
+separately wait for E5, and a write-capable MVP waits for E6a; E6b gates only
+its deferred operations. No fixture result freezes Core, Files, Type/Data ABI,
+SDK or extension bytes.
 
 **Owner feedback now:** none. Core, Files, SDK and Web Client/OS have bounded
 interface questions to answer during the experiment round; they are not a
@@ -234,8 +236,10 @@ expand the initial trusted computing base.
    owners; repair only real boundary contradictions.
 2. Produce design-only wireframes and the fixed corpus for E0–E5 without
    selecting permanent protocol, SDK or extension bytes.
-3. Run guest Files and hostile-data labs first; they validate the Reader/outcome
-   spine needed by every other prototype.
+3. Run E1a's deterministic fake-source Files lab, then E1b's separately traced
+   cold browser through the real disposable SDK adapter and direct public Realm
+   reads. Only the integrated E1b arm can support the guest product claim. Run
+   E4 hostile-data cases through both where applicable.
 4. Run typed table and provenance/history against the same exact fixture and
    compare exact-Type-only with one finite pinned projection arm.
 5. Run E5 only after the stable read/result contract exists; it gates
