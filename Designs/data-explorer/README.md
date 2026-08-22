@@ -50,8 +50,8 @@ high-quality research, brainstorming and experimentation. The product should:
   managers;
 - go beyond files to tables/spreadsheets, cards, galleries, timelines, graphs,
   raw Records, provenance/history and bounded application projections;
-- remain modern, featureful, usable, modular and extensible over a fifty-year
-  horizon; and
+- remain modern, featureful, usable, modular and extensible over a century-
+  scale, 100-year horizon; and
 - keep third-party code capability-limited and unable to redefine truth or
   silently acquire authority.
 

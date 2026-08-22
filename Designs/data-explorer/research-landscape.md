@@ -220,7 +220,8 @@ External products do not answer the hardest EFS questions:
   explained together without collapsing authority;
 - how immutable revisions and certified mutations yield honest undo/restore;
 - whether browser isolation is sufficient for hostile executable views; or
-- which product/API/byte forms should survive fifty years.
+- which product/API/byte forms should survive a century-scale, 100-year
+  horizon.
 
 Those remain EFS evidence questions tested in
 [[experiments-and-stop-conditions]], not gaps to fill by copying a competitor.
