@@ -11,7 +11,7 @@ New agent in the EFS planning vault — the brain for the EFS agent swarm. From 
 3. Open the [Designs owner decision inbox](../Designs/owner-decision-inbox.md) if your work touches design, prioritization, or a question for James; follow it to the owning folder's single live queue.
 4. If you have a specific task from James (chat or a previous turn), go do that. Stop reading this file.
 
-> **Decision rule:** unchecked boxes and "open questions" in source designs are not automatically James decisions. The owning folder's owner inbox says whether a choice is live now, evidence-gated, launch-only, settled, delegated, or superseded. Record adopted EFS v2 answers in [owner rulings](../Designs/efsv2/owner-rulings.md); use [[Owner-Inbox]] for broader non-design attention.
+> **Decision rule:** unchecked boxes and "open questions" in source designs are not automatically James decisions. The owning folder's owner inbox says whether a choice is live now, evidence-gated, launch-only, settled, delegated, or superseded. Record each adopted answer once in that queue's owning ruling history: EFS-wide Core/product rulings in [EFS v2 owner rulings](../Designs/efsv2/owner-rulings.md), SDK-specific rulings in [SDK v2 owner rulings](../Designs/sdkv2/owner-rulings.md), and broader non-design attention in [[Owner-Inbox]].
 
 ## Decision tree (if no task assigned)
 
@@ -56,6 +56,7 @@ Full map: [AGENTS.md § Where to find things](../AGENTS.md). Vault-specific extr
 | You need… | Look in… |
 |---|---|
 | An adopted EFS v2 owner ruling | [EFS v2 owner rulings](../Designs/efsv2/owner-rulings.md) |
+| Current EFS v2 SDK research, developer journeys, architecture, or experiment gates | [EFS v2 SDK spine](../Designs/sdkv2/README.md) |
 | A specific design | `Designs/README.md` (curated map) or grep `Designs/` |
 | Terminology | [[Glossary]] |
 | How something works in EFS | `Architecture/README.md` |

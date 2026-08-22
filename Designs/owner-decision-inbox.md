@@ -2,13 +2,14 @@
 
 **Status:** reference — decision packet; no choice is adopted until James answers and it is recorded in the owning history
 **Audience:** James first; designers second
-**Last reconciled:** 2026-08-14
+**Last reconciled:** 2026-08-22
 
 #status/reference #kind/decision #repo/planning
 
 > **Start here for design decisions.** This page owns choices about loose designs in `Designs/`. Each design subfolder owns its own queue:
 >
 > - [EFS v2 + OS decisions](./efsv2/owner-decision-inbox.md)
+> - [EFS v2 SDK decisions](./sdkv2/owner-decision-inbox.md) *(nothing to decide yet; the hybrid SDK and onchain-helper choices wait on experiments)*
 > - [Client v2 decisions](./clientv2/owner-decision-inbox.md)
 > - [EFS Arcade decisions](./arcade/owner-decision-inbox.md) *(initial D1–D7 packet awaits post-pass reconciliation; do not batch-answer it)*
 > - [Open Web App Store decisions](./open-web-app-store/owner-decision-inbox.md) *(nothing to decide yet; evidence gates stay in the architecture)*
@@ -106,6 +107,8 @@ Agents should choose reversible implementation details, record their rationale, 
 
 ## Recording rule
 
-This page has no live answer code. New EFS 2.0 rulings belong in
-[[efsv2/owner-rulings]] through the EFS 2.0 queue; historical questions stay
-unchanged except for explicit supersession notes.
+This page has no live answer code. EFS-wide Core/product rulings belong in
+[[efsv2/owner-rulings]] through the EFS 2.0 queue. SDK-specific mandate and
+architecture rulings belong in [[sdkv2/owner-rulings]] through the SDK v2
+queue. Never record one ruling in both; historical questions stay unchanged
+except for explicit supersession notes.
