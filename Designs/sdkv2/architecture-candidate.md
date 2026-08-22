@@ -74,6 +74,7 @@ Names below describe responsibilities, not frozen npm packages.
 | **type compiler** | Normalize exact input closure; generate TS/Solidity/docs/vectors/manifests; cost/bound and compatibility reports | Online authority, implicit dependency resolution, permanent ID allocation under an unfrozen profile |
 | **validation** | Portable deterministic validation grades and diagnostics; exact validator capability negotiation | Arbitrary callbacks, hidden network reads, admission policy |
 | **client/reconstruct** | Exact reads, bounded pages, reconciliation, offline replay, qualified caches, export/import | Wallet authority, product UI, hosted infrastructure, indexer truth |
+| **consumer adapter/codegen** | Compile a finite exact-Type/profile closure into the common lossless semantic envelope, exhaustive outcomes, evidence handles and consumer-specific generated DTO façades for Web Client/OS, Data Explorer and other products | Product navigation/view state, UI policy, a universal lowest-common-denominator DTO, or reinterpretation of raw evidence |
 | **actions** | Deterministic plans, role-separated authorization, simulation, submission evidence, observation and canonical read-back | Ambient signer, silent retries across changed plans, admission/authorship conflation |
 | **transport adapters** | Core/EVM RPC, retained archive, HTTP gateway, local state, optional indexer, optional EAS carrier | Semantic truth, default policy, absence inference |
 | **ethereum adapter** | Literal ABI inference, chain/Realm context, public client, wallet/signing adapter, receipts and reorg/finality observation | EFS Type meaning, global chain selection, mandatory viem runtime |
@@ -84,20 +85,34 @@ Infrastructure—keys, RPC fleets, relayers, pinning, indexer operation, servers
 databases, monitoring, and gateways—uses SDK capabilities but does not live
 inside the protocol SDK contract.
 
-### Web Client/OS consumption altitude
+### First-party product and confined-app consumption altitudes
 
-The Web Client/OS pressure model adds four consumer layers without changing
-the dependency direction: protocol/generated SDK; Files/artifact SDK;
-generated exact-Type consumer adapter; and a thin OS App SDK above a private
-Kernel provider SPI. The direct guest shell uses the first three and does not
-boot the OS capability broker. Confined applications use the App SDK and never
-receive raw signers, secrets, effective grants, provider selection, or a Kernel
-object. Product reducers see stable DTOs/outcomes, not Type/Data-ABI internals.
+The common lossless semantic adapter sits below two independently owned
+first-party products and the confined-app surface:
 
-The focused pressure review, proposed runtime-neutral semantic capability
-lifecycle, public/private split, and open streaming/subscription falsifiers are
-in [[web-client-os-boundary-pressure]]. These are coordination inputs, not
-adopted SDK or Web Client APIs.
+- **Web Client/OS** owns the direct Files/shell route. Its guest path composes
+  protocol/generated and Files/artifact SDKs with a Web/Files generated façade
+  and does not boot Data Explorer or the OS capability broker.
+- **Data Explorer** owns the independent general typed-data workbench. It
+  composes the same protocol/raw/outcome/query/evidence contract with an
+  Explorer-specific façade and uses Files/artifact services only for its Files
+  vertical. It is not a File Browser panel and does not create a second
+  resolver, verifier or semantic result law.
+- **Confined applications** use the thin OS App SDK above a private Kernel
+  provider SPI and never receive raw signers, secrets, effective grants,
+  provider selection, or a Kernel object.
+
+Product façades and reducers may differ; the common outer outcome discriminant,
+raw bytes, identity, authority, basis, currentness, coverage, byte
+locator/range/commitment and verification outcome, exact action-plan
+commitment/roles/authorization basis, effect receipt and qualified effect
+outcome may not. The exact point-in-time Data Explorer input is local-only
+planning commit
+`0486502f7264ee49d0598fb306cecb43dd6d0b8f` on
+`codex/data-explorer-pm`. The focused cross-product pressure review,
+runtime-neutral capability lifecycle, public/private split, and open
+streaming/subscription falsifiers are in [[web-client-os-boundary-pressure]].
+These are coordination inputs, not adopted SDK, Web Client or Explorer APIs.
 
 ## Package topology candidates
 

@@ -62,12 +62,12 @@ success.
 - Product UI, routing, Shell/OS policy, design language, wallet UX, or direct
   Files product scope. Those belong to the Web Client/OS PM; the SDK supplies
   capabilities and honest results.
-- The current File Browser's Data Explorer inspection presentation, editorial
-  policy, hosted indexer operation, or claims that derived data is complete.
-  Those remain with Web Client/OS product work. The founder's mandate also
-  names a Data Explorer PM as a coordination boundary; until that future role
-  has its own adopted spine, this charter does not manufacture a separate
-  product or transfer the current inspection fixture to it.
+- Web Client/OS direct Files/shell product UX or Data Explorer's independent
+  general typed-data workspace, navigation, views, projections, Inspector,
+  local policy, editorial choices, hosted indexer operation, or claims that
+  derived data is complete. The SDK supplies the common lossless semantic
+  adapter and consumer-facing generation seams; it does not own either
+  product.
 - Keys, accounts, RPC fleets, relayers, gateways, pinning services, databases,
   monitoring, agent mandates, or other infrastructure authority.
 - Owner adoption, design promotion, permanent publication, deployment,
@@ -79,8 +79,8 @@ success.
 |---|---|---|---|
 | EFS v2 Core/contracts architecture | Developer traces, exact ABI/result/limit needs, generated-code measurements, conformance vectors, minimal pressure packets | Protocol semantics, canonical bytes/IDs, contract/module boundary, indexes, admission/authority, deployment and upgrade rules | One cross-language freeze bundle; no SDK conformance claim before it passes |
 | Contracts implementation | Generated-source specification, consumer fixtures, compiler/reproducibility packet, gas/size/fuzz matrix | Actual Core interfaces/implementation and security review | ABI/vector/code identity parity in both repositories |
-| Web Client/OS PM | Wallet-free readers, route-shaped imports, qualified pagination/coverage, direct verification, raw export, indexer divergence diagnostics, action plans/receipts, and environment/bundle measurements | UI/boot/module architecture, direct Files and inspection experience, policy UX, indexing/materialization presentation, and OS capabilities | Same guest/write/inspection fixtures; SDK cannot force wallet/indexer/OS into guest path or turn derived omission into Core absence/completeness |
-| Data Explorer PM (future coordination boundary; not instantiated here) | Qualified query/result contracts, raw/basis/coverage seams, export and indexer divergence diagnostics | Its eventual adopted product/presentation/indexing scope | No derived system may claim Core authority, absence or completeness without the named proof |
+| Web Client/OS PM | Common lossless adapter plus wallet-free Reader/Files façades, route-shaped imports, qualified pages, verified bytes, raw export, action plans/receipts, and environment/bundle measurements | Direct Files/shell UX, boot/module architecture, policy UX and OS capabilities | Direct Files/shell remains useful without Data Explorer, wallet, indexer or OS boot; it does not fork semantic resolution or turn omission into absence/completeness |
+| Data Explorer PM | Common lossless adapter plus exact-ID/location/query façades, raw/evidence handles, qualified pages/cursors, verified bytes, action bindings, usability fixtures and generated Explorer DTO seams | Independent general typed-data product: workspace, navigation, selection, table/graph/raw/provenance views, Inspector, local policy and product presentation | Same outer discriminants, raw bytes, identity, authority, basis/currentness/coverage, byte-verification evidence, exact plan commitments/roles/authorization, receipts and qualified effect outcomes as Web/other SDK consumers; Explorer remains useful beyond Files without becoming a second resolver or SDK debugger |
 | Type authors | Compiler, lint, compatibility/bound report, generated artifacts, vectors and docs | Application semantics and proposed Type evolution | Core/Realm limits and owner freeze still govern admission/index promises |
 | Application/agent teams | Stable candidate façades, raw escape hatch, structured capabilities/plans/outcomes, testkit | Product policy, explicit sources, risk bearer, granted authority | No ambient authority or hidden fallback |
 
@@ -99,6 +99,14 @@ Every durable SDK claim records:
 | Layer | Core, Realm, Lens/policy, SDK/runtime, generated adapter, transport/infrastructure, or product |
 | Falsifier | The fixture/measurement that would overturn the claim or force escalation |
 | Freeze effect | Whether it can affect protocol bytes, public API, generated output, deployment, or only an experiment |
+
+The instantiated Data Explorer coordination input is the exact local-only
+planning commit `0486502f7264ee49d0598fb306cecb43dd6d0b8f` on
+`codex/data-explorer-pm`, particularly `Designs/data-explorer/README.md` and its
+ownership table. It is a point-in-time `#status/draft` input, not a merged,
+remote-visible, promoted, or protocol-authoritative dependency. If that branch
+moves, this charter continues to mean the cited commit until explicitly
+reconciled again.
 
 Source precedence follows [[../efsv2/system-constitution]]. A local compiler
 fixture, passing test suite, v1 ADR, EAS behavior, popular library, or deployed

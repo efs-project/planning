@@ -1,8 +1,9 @@
-# Web Client/OS pressure on the EFS v2 SDK boundary
+# Web Client/OS and Data Explorer pressure on the EFS v2 SDK boundary
 
-**Status:** reference — coordination pressure and SDK response; no Web Client, Files, CapabilityRPC, WIT, or Kernel name/API is adopted
+**Status:** reference — coordination pressure and SDK response; no Web Client, Data Explorer, Files, CapabilityRPC, WIT, or Kernel name/API is adopted
 **Target repos:** planning, sdk, client
 **Depends on:** [[README]], [[architecture-candidate]], [[developer-journeys]], [[../web-client-os/README]], [[../web-client-os/type-data-abi-boundary-pressure]]
+**Inputs:** Data Explorer draft at exact local-only planning commit `0486502f7264ee49d0598fb306cecb43dd6d0b8f` on `codex/data-explorer-pm` (`Designs/data-explorer/`)
 **Reviewers:** @web-client-os-pm (2026-08-22)
 **Last touched:** 2026-08-22
 
@@ -10,36 +11,42 @@
 
 ## Question
 
-Can the SDK v2 candidate support the requested direct guest Data Explorer
-inspection pressure inside the owner-directed File Browser path, and later
-confined OS applications, without leaking Type/Data-ABI machinery into product
-UI? Should MessagePort/structured-clone, WIT, and agent bindings be generated
-from one runtime-neutral semantic capability contract? Which parts are public
-SDK and which remain a private Kernel service-provider interface?
+Can the SDK v2 candidate support the Web Client/OS direct Files/shell path, the
+independent general typed-data Data Explorer, and later confined OS
+applications without leaking Type/Data-ABI machinery into product UI or
+creating competing semantic laws? Should MessagePort/structured-clone, WIT,
+and agent bindings be generated from one runtime-neutral semantic capability
+contract? Which parts are public SDK and which remain a private Kernel
+service-provider interface?
 
 The Web Client/OS layering and names in this review are pressure evidence from
 its PM. They do not transfer product/Kernel ownership to the SDK PM and do not
-freeze either design set. “Data Explorer” names an inspection consumer/fixture
-here; it does not create a second MVP or displace the official basic
-write-capable File Browser.
+freeze either design set. Data Explorer is separately instantiated as the
+independent general typed-data product at the exact point-in-time local-only
+draft commit cited above. That input corrects the ownership boundary; it does
+not adopt either product design or freeze an SDK/protocol mechanism.
 
 ## Verdict
 
-**Yes, with two distinct consumption altitudes and no bypass.**
+**Yes, with two runtime trust altitudes, three independently owned consumption
+paths, and no bypass.**
 
-1. The trusted direct guest shell and its Data Explorer inspection fixture use the low-level
-   protocol/generated and Files/artifact SDKs through an exact generated
-   consumer adapter. Product reducers and UI receive stable DTOs plus the
-   qualified outcome algebra; Type/Data-ABI machinery remains behind the
-   adapter. An explicit raw inspector can expose evidence handles without
-   making every component schema-aware.
-2. A confined app uses a thin OS App SDK generated from a semantic capability
+1. The trusted Web Client direct guest shell uses protocol/generated and
+   Files/artifact SDKs through the common lossless semantic adapter and a
+   Web/Files-specific façade. Web Client/OS owns this direct Files/shell
+   product path.
+2. The trusted Data Explorer uses the same common semantic adapter through an
+   Explorer-specific façade for arbitrary typed-data locations, IDs and
+   qualified queries. Data Explorer owns its workspace, navigation, views and
+   Inspector; Files is one vertical, not its outer boundary.
+3. A confined app uses a thin OS App SDK generated from a semantic capability
    contract. It never selects providers, accesses effective grants, sees raw
    signer/secret/Kernel objects, or calls low-level services directly.
 
-The direct first-party shell is not an OS-confined third-party app, so it need
-not route its guest read through the Kernel capability broker. It still uses
-the SDK stack; this is a trust-altitude distinction, not a bypass.
+The two direct first-party products are not OS-confined third-party apps, so
+their guest reads need not route through the Kernel capability broker. They
+still use the SDK stack and its common raw/identity/outcome/basis law; this is a
+trust-altitude distinction, not a bypass or permission to fork semantics.
 
 ## Candidate consumption stack
 
@@ -47,7 +54,9 @@ the SDK stack; this is a trust-altitude distinction, not a bypass.
 |---|---|---|
 | **Protocol/generated SDK** | Exact identities, raw-preserving codecs/validators, qualified Realm/Record/Occurrence/Binding/Plan reads, verification, generated Type façades | SDK PM owns ergonomics/tooling; Core owns truth/bytes/ABI |
 | **Files/artifact SDK** | One canonical route/name resolution interface, qualified directory paging, verified byte/range retrieval, and mutation-plan construction over the selected Files candidate | Files semantics and product behavior remain with Core/Web Client work; SDK PM owns reusable interface/tooling only after that contract is supplied |
-| **Generated consumer adapter** | Finite exact-Type/profile closure compiled into stable product DTOs, references, reducers' inputs, raw handles, and exhaustive outcomes | Joint seam: SDK owns generator/non-loss contract; product team owns the stable DTO needs and UI policy |
+| **Common lossless semantic adapter and generated consumer façades** | Finite exact-Type/profile closure compiled into one raw-preserving semantic envelope, exhaustive outcomes/evidence handles, and distinct Web/Files, Explorer or application DTO façades | SDK owns generator, semantic axes and non-loss contract; each product team owns its DTO requirements, reducers and UI policy |
+| **Web Client/OS direct Files/shell product** | Direct guest and write-capable Files experience over the Web/Files façade | Web Client/OS owns product state, navigation and presentation; it does not own a second resolver/verifier/result law |
+| **Data Explorer general typed-data product** | Independent workspace, table/graph/raw/provenance views and Inspector over the Explorer façade; Files/artifact services are optional for Files resources | Data Explorer owns product state, navigation, projections and presentation; it does not own a second resolver/verifier/result law |
 | **OS App SDK** | Thin capability client over scoped semantic operations, streams/progress, cancellation, receipts, and typed faults/results | Web Client/OS owns App/Kernel capability policy; SDK owns shared binding/codegen quality where delegated |
 | **Product reducers/SDKs** | Domain state and UI-oriented commands over stable DTOs/outcomes | Product/application team; must not redefine protocol truth |
 
@@ -56,30 +65,51 @@ OS, product DTOs, reducers, MessagePort, WIT, agent frameworks, wallets, or the
 Kernel. Generated consumer adapters depend on exact protocol/Files façades but
 do not make UI components understand Type descriptors or canonical encoding.
 
-## Direct guest inspection path inside the File Browser
+## Direct first-party product paths
+
+### Web Client/OS direct Files and shell
 
 ```text
 exact URL/link context
   -> explicit Realm/public read source
   -> protocol + Files resolver
-  -> exact generated consumer adapter
-  -> stable ExplorerOutcome<ExplorerDto>
-  -> product reducer / accessible UI
+  -> common lossless semantic adapter
+  -> generated Web/Files DTO + exhaustive outcome
+  -> direct shell reducer / accessible Files UI
 ```
 
-Required properties:
+### Data Explorer general typed-data workspace
+
+```text
+explicit EFS location / exact ID / bounded qualified query
+  -> explicit Realm/public read source
+  -> protocol reads + optional Files/artifact services
+  -> common lossless semantic adapter
+  -> generated Explorer DTO + evidence handle + exhaustive outcome
+  -> workspace / table / graph / raw / provenance / Inspector
+```
+
+Shared required properties:
 
 - no wallet, account/profile, Commons, hosted indexer, OS boot, Kernel session,
   package discovery, or capability broker before useful pinned data;
 - exact Realm/profile/Type/basis/coverage and raw bytes retained below the UI;
-- a product DTO that exposes ordinary domain data plus an evidence handle and
-  qualified status, without codec fields, schema graph traversal, byte offsets,
-  or generated-class identity;
+- product-specific DTOs that expose ordinary domain data plus evidence handles
+  and qualified status without codec fields, schema graph traversal, byte
+  offsets, or generated-class identity;
 - a deliberate **raw evidence inspector** route/component that can request the
   retained envelope, commitments, basis, diagnostics, and unknown bytes;
 - indexer/cache adapters may improve speed but are removable and cannot prove
   absence, completeness, authority, or currentness; and
-- current Web Client guest byte/parse/no-auth budgets remain integration gates.
+- current Web Client guest byte/parse/no-auth budgets remain integration gates
+  for its route, while Data Explorer declares and measures its own product
+  budgets without weakening the semantic contract.
+
+Web Client/OS remains useful as a direct Files/shell without booting Data
+Explorer. Data Explorer remains useful beyond Files and may use Files/artifact
+services for that vertical without becoming a File Browser panel. Neither
+product gets a private interpretation of raw evidence, identity, authority,
+basis, coverage, byte verification or action plans.
 
 The one case that intentionally surfaces Type machinery is a Type-authoring or
 protocol-debugging tool. That is an expert developer product over compiler/raw
@@ -237,7 +267,8 @@ not return raw internal objects through the public result contract.
 
 | Journey | Bypass? | Required path |
 |---|---|---|
-| Direct guest File Browser read plus Data Explorer inspection fixture | **No.** It intentionally does not use the OS App SDK. | Trusted shell calls protocol/Files SDK and generated consumer adapter directly, preserving the no-OS/no-auth path and the one File Browser product boundary. |
+| Direct guest Web Client/OS Files or shell read | **No.** It intentionally does not use the OS App SDK. | Trusted shell calls protocol/Files SDK, common lossless adapter and its Web/Files façade directly, preserving the no-OS/no-auth path. |
+| Independent Data Explorer read/query/inspection | **No.** Its direct first-party guest path intentionally need not use the OS App SDK. | Explorer calls protocol SDK, the same common lossless adapter and its Explorer façade; it adds Files/artifact services only for Files resources and remains independent of the Web shell. |
 | First-party write-capable File Browser | **No.** | Trusted write slice uses SDK action planning plus an explicitly injected signer/submitter capability and canonical read-back. Third-party apps request the equivalent action capability. |
 | Confined third-party app read/write | **No.** | OS App SDK only; Kernel privately routes to protocol/Files/action services. |
 | Raw evidence inspection | **No.** | Explicit inspector DTO/handle or scoped raw-evidence capability; ordinary reducers remain schema-agnostic. |
@@ -247,10 +278,11 @@ not return raw internal objects through the public result contract.
 | Emergency/rescue configuration | **No.** | Trusted recovery shell uses a minimal direct SDK path; it must not depend on a broken third-party app/provider graph. |
 
 There is therefore no current journey that justifies a UI component importing
-Type descriptor internals, a confined app receiving the Kernel object/raw
-signer, or the direct guest route booting CapabilityRPC. The two open pressure
-points are high-volume streams and resumable subscriptions; both are design
-falsifiers, not permission to leak private SPI.
+Type descriptor internals, a product creating a second semantic resolver, a
+confined app receiving the Kernel object/raw signer, or either direct guest
+product booting CapabilityRPC. The two open pressure points are high-volume
+streams and resumable subscriptions; both are design falsifiers, not
+permission to leak private SPI.
 
 ## Experiments added by this pressure
 
@@ -263,11 +295,16 @@ falsifiers, not permission to leak private SPI.
    recovered unambiguous receipt or an explicit `EFFECT_UNKNOWN` outcome.
 4. Kill and restart the Kernel/provider; reject stale epochs/ports and attempt
    cursor-qualified resume without duplicate effects.
-5. Build a Data Explorer inspection reducer inside the File Browser fixture
-   that imports only the generated consumer DTO and outcome contract; fail the
-   experiment if it imports descriptors/codecs, recomputes identities, depends
-   on raw service/provider selection, or creates a separate required product
-   boot path.
+5. Run the same hostile fixture through an independent Web Files/shell consumer
+   and an independent Data Explorer consumer. Allow distinct product DTOs and
+   navigation, but require the common outer outcome discriminant and every
+   semantic axis unchanged; identical retained raw bytes and identity; the
+   same authority/basis/currentness/coverage; the same attempted byte
+   locator/range, commitment, verification result and byte-state discriminant;
+   and the same exact plan commitment, roles, authorization basis, receipt and
+   qualified effect outcome. Fail if either imports descriptors/codecs,
+   recomputes identity, selects hidden providers, creates a second
+   resolver/verifier, or forces one product to boot the other.
 6. Build one confined app using only the generated App SDK; fail if it needs a
    raw signer, secret, effective grant, Kernel object, or provider selection to
    complete its declared journey.
@@ -278,8 +315,10 @@ falsifiers, not permission to leak private SPI.
 
 ## Open findings
 
-- The four-layer pressure model fits architecture arm C without changing its
-  protocol/raw/generated split.
+- The layered pressure model fits architecture arm C without changing its
+  protocol/raw/generated split. One common lossless adapter can serve Web
+  Client/OS and Data Explorer while their product DTOs and state remain
+  independently owned.
 - “One runtime-neutral contract” is viable as a **semantic generation source**,
   not necessarily one byte-identical transport or one public package.
 - `revoke` has two faces: public clients receive revocation and may relinquish
@@ -288,5 +327,6 @@ falsifiers, not permission to leak private SPI.
 - High-volume byte streams and resumable event subscriptions are the first
   concrete falsifiers for the proposed lifecycle and must be tested before the
   operation set freezes.
-- The direct guest shell legitimately lives below the OS App SDK. Requiring it
-  to open a Kernel session would violate the adopted no-OS guest boundary.
+- Both direct first-party guest products can legitimately live below the OS App
+  SDK. Requiring either to open a Kernel session would violate the no-OS guest
+  boundary; sharing the adapter does not merge their product ownership.

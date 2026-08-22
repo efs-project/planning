@@ -3,7 +3,7 @@
 **Status:** draft set — founder-authorized SDK experience and experiment program; no protocol bytes, package names, implementation, deployment, or release is adopted
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[../efsv2/README]], [[../efsv2/system-constitution]], [[../efsv2/core-architecture-candidate]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/README]], [[../web-client-os/type-data-abi-boundary-pressure]]
-**Inputs:** the existing `sdk/` repository and older SDK designs as historical evidence only
+**Inputs:** the existing `sdk/` repository and older SDK designs as historical evidence only; Data Explorer draft at local-only planning commit `0486502f7264ee49d0598fb306cecb43dd6d0b8f` on `codex/data-explorer-pm` (`Designs/data-explorer/`)
 **Last touched:** 2026-08-22
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/read-path #topic/onchain
@@ -48,6 +48,12 @@ candidate SDK.
    regeneration from pinned compiler inputs.
 5. Generated application façades behind adapters, so experiments can change
    bytes and contract calls without changing every product component.
+
+The Web Client/OS and Data Explorer are now two distinct first-party product
+consumers of that common seam. Web Client/OS owns the direct Files/shell path;
+Data Explorer owns the independent general typed-data workspace and views; the
+SDK owns the lossless semantic adapter beneath both, with consumer-specific
+generated façades above it.
 
 ### App teams must wait for freeze
 
@@ -101,6 +107,9 @@ flowchart TB
 This is architecture arm C in [[architecture-candidate]]. It combines the
 safe parts of generated bindings with the raw-preserving behavior required for
 unknown Types, future runtimes, evidence forwarding, and clean-room recovery.
+Its common semantic adapter serves both the direct Web Client/OS Files shell
+and the independent Data Explorer product without forcing either product's DTO
+or navigation model onto the other.
 
 ## Authority map
 
@@ -108,6 +117,7 @@ unknown Types, future runtimes, evidence forwarding, and clean-room recovery.
 |---|---|
 | **Owner-ratified** | EFS v2 is greenfield; Core is standalone in a qualifying Realm; Commons is optional; contract-readable bounded Lenses, declared automatic indexes, full state-readable Records, a direct guest File Browser, and cross-platform read-only mounts are required outcomes. |
 | **Owner-directed product baseline** | The guest path does not wait on wallet, profile, Commons, hosted indexer, or OS boot. The Web Client uses one `PrincipalId` product surface and targets a 64-Principal Lens if measurement supports it. This does not freeze the Core authority mechanism. |
+| **Instantiated product coordination input** | Data Explorer is an independent general-purpose typed-data product, not a File Browser panel. Its exact local-only draft input is planning commit `0486502f7264ee49d0598fb306cecb43dd6d0b8f`; it remains `#status/draft` and does not freeze SDK or protocol mechanisms. |
 | **Current candidate** | Realm, TypeSchema/TypeRevision, Record, Envelope/Context, Occurrence, admission, Binding, ResolutionPlan, layered Types, Views, QueryProfiles, and exact-Type generated adapters are comparison vocabulary and experiment inputs. |
 | **Historical evidence** | The current `sdk/` monorepo, its viem seam, source injection, profile stamps, typed errors, compile-in Solidity choice, and EAS integration can inform experiments. Its EAS identities, attester defaults, write graph, and package/API shape do not carry into v2. |
 | **Unknown / owner-frozen later** | Exact bytes, IDs, codecs, limits, authority model, validator grades, indexes, contract split, deployment and upgrade form, helper policy, package topology, compatibility promise, migration promise, and release scope. |
@@ -126,7 +136,7 @@ constitution/candidates, then older evidence. This set cannot override Core.
 | [[architecture-candidate]] | Three arms, recommended experiment, generation/runtime/onchain split, logical modules, topology candidates, compatibility, result model, and security invariants |
 | [[sdk-pm-charter]] | Durable SDK PM mandate, ownership boundaries, coordination contracts, and release discipline |
 | [[experiment-program]] | Adversarial matrix, proposed measurement tripwires, kill criteria, and production stop conditions |
-| [[web-client-os-boundary-pressure]] | Direct guest versus confined-app consumption, generated consumer boundary, and runtime-neutral CapabilityRPC assessment |
+| [[web-client-os-boundary-pressure]] | Web Client/OS direct Files/shell, independent Data Explorer, confined-app consumption, their common semantic adapter, and runtime-neutral CapabilityRPC assessment |
 | [[owner-rulings]] | Dated founder mandate and retained authority boundaries |
 | [[owner-decision-inbox]] | Evidence-gated choices; nothing needs an immediate founder answer |
 
