@@ -13,8 +13,9 @@
 
 Build a cypherpunk and CROPS Web Client that grows into a user-owned,
 extensible Web OS without making ordinary links pay the cost of booting that
-OS. A person following a link to a file or folder should get useful verified
-data quickly, without a wallet prompt, account, Commons, hosted EFS indexer, or
+OS. A person following a link to a file, folder, or specific App plus resource
+should get useful verified data quickly, without a wallet prompt, account,
+Commons, hosted EFS indexer, catalog search, Data Explorer intermediary, or
 full-system startup. The same codebase and interfaces should then promote that
 session into a write-capable File Browser and, later, a full personal OS.
 
@@ -140,6 +141,17 @@ bytes or bypass the normal design promotion ceremony.
     selected EFS Web Profile names their full, reduced, unsupported and rescue
     behavior. Guidance is build-time evidence, never runtime code or product
     authority.
+25. Any exact App can be a first-class deep-link target. App selection,
+    critical executable verification and the initial qualified resource read
+    should take the shortest generic path and overlap where safe; Data Explorer
+    is the default App for unqualified Files/data links and a raw fallback, not
+    a gateway through which every App must launch.
+26. The OS needs a good practical third-party App path without waiting for
+    perfect browser isolation. SES in a dedicated Worker is the leading
+    confined JavaScript candidate; LavaMoat/Endo dependency isolation is an
+    active inner hardening candidate; opaque iframes remain the full-DOM lane;
+    and Wasm/WIT remains foundational. Exact profiles and claims must be
+    measured, and none receives ambient authority by optimism.
 
 ## Current recommendation
 
@@ -151,21 +163,31 @@ flowchart TB
     LINK["Public or exact EFS link"]
     BIOS["BIOS / Boot Core<br/>route, exact base manifest, recovery"]
     READER["Reader Kernel<br/>Realm reader, Files resolver, artifact verifier"]
-    MIN["Minimal Viewer Shell<br/>trusted file/folder UI"]
+    PREP["Direct App entry preparer<br/>inert handoff/set/closure validation"]
+    MIN["Minimal Viewer Shell<br/>trusted progress + raw rescue"]
+    HOST["Minimal App Host<br/>trusted progress, launch, exit, fallback"]
     WRITE["Explicit Files-write slice<br/>identity, wallet, planner, signer, submitter"]
     SYSTEM["System Kernel services<br/>capabilities, private state, journal, packages, agents"]
     SHELL["Session Shell<br/>layout, launcher, workspaces, modes"]
     APPS["Apps and Presentation modules"]
 
-    LINK --> BIOS --> READER --> MIN
+    LINK --> BIOS --> READER
+    BIOS --> PREP --> HOST
+    READER --> MIN
+    READER --> HOST
+    MIN -->|"default Files/data App"| APPS
+    HOST -->|"eligible exact guest entry"| APPS
     MIN -->|"Create, edit, connect"| WRITE
     WRITE -->|"canonical read-back + receipt"| MIN
     MIN -->|"Open in OS"| SYSTEM
     SYSTEM --> SHELL --> APPS
 ```
 
-- The **guest critical path** contains only link ingress, the Boot Core, Reader
-  Kernel, and Minimal Viewer Shell.
+- An unqualified Files/data **guest critical path** contains only link ingress,
+  the Boot Core, Reader Kernel, and built-in guest Data Explorer/viewer slice.
+  A specific-App route instead adds only the pure direct-entry preparer,
+  Minimal App Host and that exact entry's verified critical runner closure. It
+  does not boot the installer, catalog, full Shell or Data Explorer.
 - **Write promotion** is explicit. An external link starts in `GuestRead`;
   wallet and action modules are lazy-loaded only after GuestRead establishes a
   pinned useful context and a person or authorized agent asks to create or
@@ -188,6 +210,9 @@ The selected standards surface and dated library/build recommendations are in
 [[technology-foundation]].
 The finite generated-code and app-facing boundary against the draft layered
 Type/Data ABI is in [[type-data-abi-boundary-pressure]].
+Generic specific-App links, minimum-time-to-data rules, practical SES/LavaMoat,
+iframe/Wasm runner lanes, instance leases and the Data Explorer fallback
+boundary are in [[app-runtime-and-direct-launch]].
 
 ## Documents in this set
 
@@ -196,6 +221,7 @@ Type/Data ABI is in [[type-data-abi-boundary-pressure]].
 | `README.md` | Authority map, current recommendation, ownership, routing, and iteration state |
 | [[product-constitution-and-roadmap]] | Product constitution, complete requirement ledger, feature horizons, non-goals, and staged roadmap |
 | [[architecture-and-modules]] | Boot layers, logical package boundaries, module interfaces/configuration, lazy loading, fallback, security classes, and repository/tooling recommendation |
+| [[app-runtime-and-direct-launch]] | Generic exact/follow App deep links, direct minimum-time-to-data launch, start classes, SES/LavaMoat/Endo, opaque iframe and Wasm lanes, instance leases, App SDK and fallback contracts |
 | [[technology-foundation]] | Standards-first dynamic SPA, Signals state, Web Components/Lit/Web Awesome boundary, EFS design language, responsive/installable/offline delivery, i18n/accessibility, app lifecycle, and build/release posture |
 | [[system-profiles-and-generations]] | Nix/Guix recovery, exact and follow profiles, safe social sharing, deterministic composition, System Configuration Manager, local activation/state/grant generations, rollback/GC/export, and the foundational Wasm/WIT/Component/WASI module direction |
 | [[mvp-and-acceptance]] | Fast guest read plus official basic File Browser writes over proposal-labelled adapters, user and agent journeys, threat boundaries, performance budgets, acceptance tests, and EFS v2 pressure |
@@ -325,7 +351,7 @@ preserves a requirement, not necessarily its old mechanism.
 | `Bootstrapper -> Kernel -> System Chrome -> Shell -> Apps` roles | **Simplify and retain** | Browser `BIOS -> Reader Kernel -> Minimal Viewer Shell` is the guest path; privileged services/System Chrome/Session Shell load only on promotion |
 | System Chrome versus replaceable Session Shell | **Retain** | Security ceremonies stay conserved; layout and ordinary presentation remain replaceable policy |
 | Capability ports, explicit grants, no ambient authority, typed plans/receipts | **Retain** | One service/action model for UI, apps, modules, and agents; capabilities are scoped, revocable, and budgeted |
-| Fixed rings and one mandatory runner/cage set | **Retire as architecture** | Use trust classes and named runner profiles; Workers, Wasm, opaque iframes, SES, CSP, and the WebAssembly Component Model/WIT must each prove their actual boundary |
+| Fixed rings and one mandatory runner/cage set | **Retire as architecture** | Use trust classes and named runner profiles. [[app-runtime-and-direct-launch]] makes SES Worker an active ordinary JavaScript candidate, opaque iframe the full-DOM lane and Wasm/WIT the portable-service foundation; each proves its actual boundary without pretending one cage solves every App. |
 | July package/channel/catalog model | **Replace at the generic boundary** | Consume the Open Web App Store's runtime-neutral `PackageHandoff`; runtime grants/activation remain local and one-way |
 | Immutable generations, optional updates, rollback, and retained releases | **Retain** | Split base, handler, system-profile, install, and session generations so unrelated modules need not update atomically |
 | Nix/Guix closure/profile analogy and hyperlinkable exact OS | **Retain requirements, replace mechanisms** | [[system-profiles-and-generations]] separates editable recipe, exact public profile lock/occurrence, package handoff, local install/state/grant generations and one coherent local selection tuple; it does not inherit Nix store paths, flakes, evaluator or July profile bytes |
@@ -371,8 +397,11 @@ authority.
    needs a narrow interface, but the non-replaceable trust root stays small and
    explicit.
 4. **Selection is not authority.** A link, EFS path, catalog, file extension,
-   MIME hint, module declaration, or agent suggestion can nominate a module;
-   only local policy and explicit grants may activate it.
+   MIME hint, module declaration, or agent suggestion can nominate a module.
+   A trusted host `OPEN`, retained exact policy, or matching agent mandate may
+   be the explicit Launch intent for an eligible confined guest; a URL can
+   only request it. The OS still records an exact all-denied local grant
+   decision, and every host authority requires a separate explicit grant.
 5. **Exact releases and reversible change.** Module graphs, dependencies,
    configuration, and updates are inspectable, immutable, rollbackable, and
    exportable.
