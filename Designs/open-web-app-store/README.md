@@ -4,8 +4,8 @@
 **Target repos:** planning, contracts, sdk, client
 **Depends on:** [[Designs/efsv2/README]], [[Designs/web-client-os/README]]
 **Inputs:** [[Designs/efsv2/hierarchical-files-and-folders]] (proposal-only `BindingScope` experiment)
-**Reviewers:** @core-authority-audit (2026-08-14; boundary repair 2026-08-15), @adversarial-architecture (2026-08-14; boundary repair 2026-08-15), @external-landscape (2026-08-14), @web-client-os-pm boundary review (2026-08-15)
-**Last touched:** 2026-08-15
+**Reviewers:** @core-authority-audit (2026-08-14; boundary repair 2026-08-15), @adversarial-architecture (2026-08-14; boundary repair 2026-08-15), @external-landscape (2026-08-14), @web-client-os-pm boundary review (2026-08-15), @abi-identity-lane, @catalog-trust-lane, and @scale-evolution-lane disposable-fixture review (2026-08-22)
+**Last touched:** 2026-08-22
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/app-model #topic/trust #topic/content
 
@@ -178,6 +178,12 @@ Future research, schemas, fixtures, threat analysis, and product work should
 become focused documents linked here rather than expanding one permanent
 mega-report.
 
+Latest disposable evidence:
+[[Reviews/2026-08-22-open-web-app-store-type-data-abi-pressure/README|Open Web App Store × layered Type/Data ABI pressure]].
+Its 71-check, independently reviewed fixture found no package-specific Core gap
+for this arm, but adopts no Type/View/query bytes, limits, runtime, resolver,
+catalog, or production mechanism.
+
 ## Consumer pressure already incorporated
 
 - **Arcade:** the same exact Release/closure supports guest Play and local
@@ -205,10 +211,11 @@ mega-report.
 ## Current work sequence
 
 1. Review and repair this current spine and [[architecture]].
-2. Turn the identity, catalog, dependency, update, and walk-away traces into
-   disposable Stage B fixture specifications. Exact bytes remain experimental.
-3. Test B0 fit before asking for a Core change: finite catalog reconstruction,
-   portable authorship across Realms, closure bounds, and bounded point reads.
+2. Use the completed disposable layered-Type/Data-ABI pressure fixture as
+   comparison evidence only; keep its exact bytes and limits experimental.
+3. Build the next disposable resolver arm from real dependency requirements,
+   while portable authorship across Realms, independent encoding, closure
+   budgets, and bounded point reads remain separate gates before profile freeze.
 4. Build no production registry. A later authorized product slice may use one
    finite catalog edition, direct links, one exact executable package, one
    dependency fixture, one update/advisory transition, and export/recovery.
