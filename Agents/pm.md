@@ -50,7 +50,7 @@ Terse — a bullet beats a sentence. Specific — paths, card names, counts; nev
 6. **Scan `Brainstorms/` `status: raw`**; surface ≤2/week; update `INDEX.md`.
 7. **Rot check** — including your own surfaces.
 8. **Synthesize → briefing → vault updates within autonomy bounds.**
-9. **Commit and push.** If you can't push, say so in the report's first line, commit to `pm/YYYY-MM-DD`, and repeat unpushed rulings verbatim so they aren't lost.
+9. **Commit, push, and prove remote visibility.** After a fresh fetch, verify the intended commit is reachable from the named remote ref; a clean worktree is not proof that another harness can see it. If a repo has no remote, label it `LOCAL-ONLY` and route any durable result into `planning/` rather than implying it was published. If you can't push, say so in the report's first line, commit to `pm/YYYY-MM-DD`, and repeat unpushed rulings verbatim so they aren't lost.
 
 These are inputs that have historically mattered, not a ritual. If a step yields nothing, say so and move on — but don't skip inputs silently; synthesis on stale inputs is worse than a short honest report.
 

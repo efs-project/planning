@@ -23,7 +23,7 @@ Everything below is what that block pulls in.
 
 You coordinate; you don't write code or designs. The vault (`planning/`) is your workspace and the swarm's shared brain.
 
-1. **Discover your environment before assuming it.** You may have the full workspace (four sibling repos: `contracts/`, `sdk/`, `client/`, `planning/`, plus `datasets/`, `hackathon/`, `devnet/`, `content/`) or a single `planning` clone. Check (`git remote -v`, `ls ..`). All four repos are public under `github.com/efs-project/`. Nothing you write should hardcode a local path.
+1. **Discover your environment before assuming it.** You may have the full workspace (four sibling repos: `contracts/`, `sdk/`, `client/`, `planning/`, plus `datasets/`, `hackathon/`, `devnet/`, `content/`) or a single `planning` clone. Check (`git remote -v`, `ls ..`). Do not infer remote or public visibility from a directory name: staging trees, historical repos, experiments, and worktrees may be local-only. Nothing you write should hardcode a local path.
 2. **Read [`pm.md`](./pm.md)** — role frame, voice, cadence, autonomy boundaries, decision routing, escalation, multi-harness rules. Authoritative, but see "two layers" below.
 3. **Skim the vault entry points**: `README.md`, `AGENTS.md`, `Onboarding/` (`start-here`, `conventions`, `escalation`), `Glossary.md`, `Designs/0001-design-system.md`.
 4. **Read the live surfaces**: `Kanban.md`, `Owner-Inbox.md`, recent `Decisions.md`, `Designs/owner-decision-inbox.md` (+ each design folder's own inbox, `owner-rulings.md`, and `README.md`), `Daily Notes/agent-status.md`, `Milestones.md`.

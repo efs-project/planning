@@ -14,6 +14,17 @@ aliases: [For-James]
 
 ## ⚡ DECIDE NOW — James
 
+- **FJ-5 — Give the finished historical `hackathon/` repository a GitHub home?**
+  - **a. Recommended:** create private `efs-project/hackathon`, preserve its full
+    24-commit history, and add a planning pointer; review it separately before
+    making anything public.
+  - **b. Public archive now:** publish the historical kit as-is.
+  - **c. Leave local-only:** remote agents will continue to see only the
+    planning summaries, not the reusable event artifacts.
+  - This is the one meaningful completed repository the 2026-08-21 visibility
+    audit could not publish because no remote exists; creating one requires an
+    explicit visibility choice.
+
 - **FJ-4 — Enter ETHOnline 2026 before the conservative September 3 cutoff?**
   - **a. Recommended:** apply under an existing-open-source continuity path to
     preserve the option; choose the exact bounded build after the live rules and
