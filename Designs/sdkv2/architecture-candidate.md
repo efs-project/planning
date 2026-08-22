@@ -108,7 +108,7 @@ locator/range/commitment and verification outcome, exact action-plan
 commitment/roles/authorization basis, effect receipt and qualified effect
 outcome may not. The exact point-in-time Data Explorer input is local-only
 planning commit
-`0486502f7264ee49d0598fb306cecb43dd6d0b8f` on
+`08bb5f2906191f0d87624d9a6ecc6788a8b2754d` on
 `codex/data-explorer-pm`. The focused cross-product pressure review,
 runtime-neutral capability lifecycle, public/private split, and open
 streaming/subscription falsifiers are in [[web-client-os-boundary-pressure]].

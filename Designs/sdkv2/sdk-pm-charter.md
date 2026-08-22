@@ -101,7 +101,7 @@ Every durable SDK claim records:
 | Freeze effect | Whether it can affect protocol bytes, public API, generated output, deployment, or only an experiment |
 
 The instantiated Data Explorer coordination input is the exact local-only
-planning commit `0486502f7264ee49d0598fb306cecb43dd6d0b8f` on
+planning commit `08bb5f2906191f0d87624d9a6ecc6788a8b2754d` on
 `codex/data-explorer-pm`, particularly `Designs/data-explorer/README.md` and its
 ownership table. It is a point-in-time `#status/draft` input, not a merged,
 remote-visible, promoted, or protocol-authoritative dependency. If that branch

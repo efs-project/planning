@@ -3,7 +3,7 @@
 **Status:** reference — coordination pressure and SDK response; no Web Client, Data Explorer, Files, CapabilityRPC, WIT, or Kernel name/API is adopted
 **Target repos:** planning, sdk, client
 **Depends on:** [[README]], [[architecture-candidate]], [[developer-journeys]], [[../web-client-os/README]], [[../web-client-os/type-data-abi-boundary-pressure]]
-**Inputs:** Data Explorer draft at exact local-only planning commit `0486502f7264ee49d0598fb306cecb43dd6d0b8f` on `codex/data-explorer-pm` (`Designs/data-explorer/`)
+**Inputs:** Data Explorer draft at exact local-only planning commit `08bb5f2906191f0d87624d9a6ecc6788a8b2754d` on `codex/data-explorer-pm` (`Designs/data-explorer/`)
 **Reviewers:** @web-client-os-pm (2026-08-22)
 **Last touched:** 2026-08-22
 
