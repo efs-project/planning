@@ -4,7 +4,7 @@
 **Target repos:** planning, client, sdk
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/open-web-app-store/architecture]], [[Designs/efsv2/hierarchical-files-and-folders]]
 **Reviewers:** @historical-client-architecture (2026-08-14), @current-v2-read-path (2026-08-14), @web-platform-standards (2026-08-14), @os-drives-pm boundary review (2026-08-14)
-**Last touched:** 2026-08-15
+**Last touched:** 2026-08-22
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/cypherpunk-os #topic/app-model #topic/read-path #topic/privacy
 
@@ -180,6 +180,34 @@ Resolved<T> =
   coverage + completeness + verification +
   diagnostics[] + resumption?
 ```
+
+#### Type/Data-ABI consumer boundary
+
+`Resolved<T>` is the qualification payload around an exhaustive discriminated
+result, not permission to return an optional value plus an arbitrary error
+string. The File Browser consumes the shared `ResourceOutcome<T>` and
+`ByteOutcome` laws in [[type-data-abi-boundary-pressure]]. `PRESENT`, `PARTIAL`,
+`UNKNOWN`, complete-basis `ABSENT`, `MASKED`, `CONFLICT`, `INVALID` and
+`UNSUPPORTED` remain distinct; byte availability and each Locator attempt are
+separate from semantic Record identity.
+
+One finite versioned Files consumer adapter is the only ordinary boundary from
+candidate EFS Type/Data machinery into the Web Client. Its generated codecs
+validate a pinned exact Type set, preserve unknown canonical bodies and project
+to stable Files domain DTOs. UI components, agent schemas, WIT ports and later
+native adapters receive those DTOs and qualified outcomes, never raw
+`SemanticSpec`, `LogicalShape`, `Representation`, `DataView`, `QueryProfile` or
+caller-selected schema objects. Those layers remain available through a lazy,
+read-only Inspector.
+
+Type packages, generators and arbitrary generated components execute neither
+on guest boot nor during decode. Any generated output used in a later build is
+trusted release input only after exact retention and the mandatory modern-Web
+evidence gate. Write plans bind a known adapter, interface revision and
+operation plus exact roles, effects, preconditions and read-back; remote Type
+metadata cannot manufacture an action or permission prompt. This is an
+exact-Type-first adapter recommendation, not adoption of the layered proposal
+or its bytes.
 
 `GATE` is an enforced Reader context, not a caller convention. Its evaluator
 must mechanically apply the requested finality/freshness/completeness policy

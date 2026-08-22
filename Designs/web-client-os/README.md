@@ -77,7 +77,9 @@ bytes or bypass the normal design promotion ceremony.
     reclaim `contracts`, `sdk`, `webclient`, and `drive` for active v2. No
     rename or repository creation is authorized in this pass.
 12. The Type/query-identity axis remains open. The latest owner response was
-    not interpretable, so this set infers no choice.
+    not interpretable, so this set infers no choice. The exact-Type-first
+    consumer boundary in [[type-data-abi-boundary-pressure]] is a reversible
+    adapter recommendation and pressure fixture, not an inferred selection.
 13. The application should be maintainable on a roughly 50-year horizon by
     making open Web standards the durable surface. A 2026 library or builder
     may help internally, but must remain replaceable without changing public
@@ -184,6 +186,8 @@ The detailed layer and extension contracts are in [[architecture-and-modules]].
 The first product slice and acceptance tests are in [[mvp-and-acceptance]].
 The selected standards surface and dated library/build recommendations are in
 [[technology-foundation]].
+The finite generated-code and app-facing boundary against the draft layered
+Type/Data ABI is in [[type-data-abi-boundary-pressure]].
 
 ## Documents in this set
 
@@ -195,6 +199,7 @@ The selected standards surface and dated library/build recommendations are in
 | [[technology-foundation]] | Standards-first dynamic SPA, Signals state, Web Components/Lit/Web Awesome boundary, EFS design language, responsive/installable/offline delivery, i18n/accessibility, app lifecycle, and build/release posture |
 | [[system-profiles-and-generations]] | Nix/Guix recovery, exact and follow profiles, safe social sharing, deterministic composition, System Configuration Manager, local activation/state/grant generations, rollback/GC/export, and the foundational Wasm/WIT/Component/WASI module direction |
 | [[mvp-and-acceptance]] | Fast guest read plus official basic File Browser writes over proposal-labelled adapters, user and agent journeys, threat boundaries, performance budgets, acceptance tests, and EFS v2 pressure |
+| [[type-data-abi-boundary-pressure]] | Finite exact-Type consumer adapter, generated codec/domain-DTO boundary, exhaustive read/byte outcomes, one Type-evolution fixture, and two generic Core pressure packets |
 | [[privacy-and-agents]] | Privacy architecture reserves and first-class human/agent interaction model, including current web-standards posture |
 
 Future mechanism research, experiments, schemas, and reviews should be linked
@@ -396,9 +401,12 @@ authority.
 2. Before any authorized Web experiment or implementation, retain the selected
    guidance snapshot, instantiate the EFS feature/profile evidence ledgers and
    put the native-first review fields in the repository contribution path.
-3. **MVP critical path:** convert the guest read and official wallet-owned File
-   Browser write journeys into disposable fixtures against the current
-   Core/Files candidates. An earlier empty-directory debugger is only a
+3. **MVP critical path:** freeze only the symbolic inputs in
+   [[type-data-abi-boundary-pressure]], then—after explicit experiment
+   authorization—convert its guest read and official wallet-owned File Browser
+   write journeys into one disposable exact-Type fixture against the current
+   Core/Files candidates. A finite-View comparator is optional and requires
+   separate authorization. An earlier empty-directory debugger is only a
    bring-up step.
 4. **OS-preservation track in parallel:** validate exact profile/lock/follow
    identity, the inert Inspector header and deletion/non-regression fixture.
@@ -440,7 +448,9 @@ This draft does not authorize:
   later selection but do not authorize dependencies or implementation;
 - installing, auto-updating or executing a guidance package, creating a
   repository, or treating a linked guide as permission to write product code;
-  or
+- freezing Type/package bytes, running a code generator or executable
+  Type/Data-ABI fixture, publishing a public test Record, or making a
+  protocol-conformance claim; or
 - absorbing the App Store, native Drive, Arcade, Media, Git/Forge, EAP, Nanda,
   or other product lanes.
 
@@ -452,6 +462,9 @@ This draft does not authorize:
 - [ ] Prove whether complete Realm-local directory enumeration and
       read-after-create require `BindingScope` exactly or a smaller generic
       declared-index contract.
+- [ ] Compare the exact-Type control with the finite pinned Data View arm in
+      [[type-data-abi-boundary-pressure]] without changing the UI/agent
+      contract, result law, authority, or raw-preservation behavior.
 - [ ] Compare FilesRouter certification with the explicitly labelled
       wallet-owned direct-Core debugging profile before selecting any product
       write mechanism.
@@ -480,6 +493,9 @@ questions for the next pass.
 - [ ] Guest read and basic create/write both pass fixed clean-browser fixtures
       without conflating the experimental write adapter with frozen Files
       semantics.
+- [ ] The finite Type/Data-ABI consumer adapter passes the browse, Binding/Lens,
+      write, tampered-fallback and Type-evolution matrix without leaking
+      semantic layers or executable generators into the guest/UI surface.
 - [ ] Performance budgets have measured device/network definitions and
       regression enforcement.
 - [ ] Module selection, installation, activation, grants, and execution remain

@@ -4,7 +4,7 @@
 **Target repos:** planning, client, sdk
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/technology-foundation]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/efsv2/core-architecture-candidate]]
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14)
-**Last touched:** 2026-08-15
+**Last touched:** 2026-08-22
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/read-path #topic/files #topic/actions #topic/performance
 
@@ -342,8 +342,11 @@ plan rather than silently redefining the target.
 
 - [ ] Corrupt primary bytes are rejected before display; a verified fallback
       succeeds without changing FileRevision identity.
-- [ ] With all Locators unavailable, the semantic file remains inspectable and
-      bytes are `BYTES_UNAVAILABLE`, not absent.
+- [ ] With complete eligible Locator/representation evidence and every eligible
+      candidate unavailable, the semantic file remains inspectable and bytes
+      are `BYTES_UNAVAILABLE`, never absence. With incomplete Locator evidence
+      or interrupted enumeration, return `BYTE_STATUS_UNKNOWN` with missing
+      coverage/resumption; neither state may populate a negative cache.
 - [ ] HTML/source/SVG/unknown fixtures remain inert; no embedded URL, script,
       form, WebSocket, WebRTC, wallet, or EFS write executes during browsing.
 - [ ] Text decoding failures, media-type disagreements, oversized content,
@@ -620,6 +623,69 @@ or a generic third-party runner in the File Browser MVP.
 - [ ] After deleting every profile-manager and runner artifact, the ordinary
       exact file/folder route still satisfies sections A through G unchanged.
 
+### I. Layered Type/Data-ABI boundary
+
+The fixed design matrix is [[type-data-abi-boundary-pressure]]. It is a
+design-only prerequisite for a later authorized disposable fixture, not
+permission to freeze Type bytes or publish test data.
+
+- [ ] One exact `FilesConsumerAdapterV0` profile pins the Core/Realm/Files
+      profiles, finite accepted exact Type revisions, generated codec closure,
+      result registry, separate BindingScope listing and ResolutionPlan
+      requirements, exact-Type query generation/coverage/basis requirements,
+      and trusted write interface.
+- [ ] Generated protocol values preserve the exact raw canonical body and
+      unknown fields. The ordinary UI, agent action schema, Worker/WIT service
+      and native adapter receive the same bounded Files domain DTOs instead of
+      `SemanticSpec`, `LogicalShape`, `Representation`, `DataView` or
+      `QueryProfile` objects.
+- [ ] Every read returns the discriminated `ResourceOutcome<T>` law. `PARTIAL`,
+      typed `UNKNOWN`, proved `ABSENT`, `MASKED`, `CONFLICT`, `INVALID` and
+      `UNSUPPORTED` cannot collapse into each other, a missing value, HTTP 404,
+      `ENOENT` or UI prose.
+- [ ] File bytes return a separate `ByteOutcome`, and each Locator attempt is
+      retained. A tampered primary plus a verified fallback yields verified
+      bytes with a visible `TAMPERED` attempt; it does not change the exact
+      FileRevision identity or poison remaining Locators. Complete eligible
+      coverage with tampering and no verified bytes yields `BYTES_TAMPERED`,
+      not generic unavailability.
+- [ ] Create-folder, create-file and publish-revision plans bind the exact
+      adapter/interface/operation, roles, effects, authorization artifacts,
+      expected revisions, predicted identifiers/commitments and canonical
+      read-back. A caller-provided Type, View or schema cannot create an
+      authority-bearing prompt. Human, agent, Worker/WIT and native bindings
+      preserve the same exhaustive `PlanOutcome` and versioned effect states;
+      signable plans require actual signer and historical authority basis, and
+      Direct-Core labels are digest-bound into plan and receipt.
+- [ ] DTO fields/evidence handles carry data-class and disclosure policy. Raw
+      inspection needs a distinct capability; redacted agents preserve action
+      semantics without private route/Locator/raw evidence. Untrusted names,
+      media hints and diagnostics render through trusted locale templates as
+      bounded escaped, bidi-safe and accessibility-tested data.
+- [ ] The disposable `FileRevisionFixture/1 -> /2` evolution adds one optional
+      field through a new exact Shape/Representation/Type. The old adapter
+      returns `UNSUPPORTED` while preserving raw evidence; the new adapter
+      accepts a finite v1/v2 set. If separately authorized, the optional bounded
+      Data View comparator pins each exact Type, `ViewRevisionId`, canonical
+      binding commitment and `IN_TYPE`/experiment-only detached placement; it
+      must produce the same UI/agent values and failures and never auto-admit
+      future Types.
+- [ ] Unqualified `ANY` never satisfies a closed reference role. A qualified
+      existence-only Record/Object target proves no authority/currentness;
+      exact self does not cross `/1 -> /2`; and any optional View-wide
+      `COMPLETE` result names one exact `ViewInventorySnapshot` with
+      `ViewRevisionId`, finite Type-inventory high-water, sorted exact-Type to
+      QueryProfile pairs, membership/coverage rule, Realm profile and basis,
+      while an open/current query remains `PARTIAL` after a later Type appears.
+- [ ] Type packages and generators contribute zero runtime requests, evaluated
+      code or critical-path bytes. Any generated Web output still passes the
+      mandatory WCOS-R65 modern-Web, accessibility, privacy, performance and
+      browser-profile evidence gate.
+- [ ] The experiment remains `protocolConformance=false`, deploys no public
+      Record or product code, contacts no live wallet, live Realm RPC or live
+      carrier, uses only synthetic retained Realm/carrier fixtures, and begins
+      only after separate owner authorization.
+
 ## Threat boundary
 
 ### Trusted for MVP correctness
@@ -674,6 +740,7 @@ journey cannot honestly pass without more evidence or a generic primitive.
 | Content publication/custody | exact artifact commitment plus plural mutable Locators | Candidate semantics; carrier adapters and retention evidence open | hosted upload service becomes semantic truth or bytes are hidden in cache |
 | Safe presentation | trusted built-in profiles over verified bytes | Client policy; implementable without Core noun | remote metadata registers executable UI or bypasses safe fallback |
 | Structured actions and receipts | generic `ActionPlan`/`ActionReceipt` | Client/SDK requirement; current names illustrative | UI, agents, and apps use divergent authority paths |
+| Generated Type/Data consumer boundary | finite exact-Type adapter, raw-preserving codecs, stable Files DTOs and optional bounded pinned Data View | Design pressure packet; exact bytes and executable comparison remain open | semantic layers or caller-selected schema leak into UI/actions, unknown data is discarded, or arbitrary future Types become accepted |
 
 If a row becomes a genuine gap, return a pressure packet with the exact user
 journey, invariant/read/write, failed generic primitive, proper layer, options,
@@ -751,7 +818,9 @@ gap, or the full OS architecture looks plausible.
       the forward seams without turning the Files MVP into an OS-runtime
       project? See [[Designs/web-client-os/system-profiles-and-generations]].
 - [ ] The Type/query-identity axis remains open; the latest owner response was
-      not interpretable and no choice is inferred.
+      not interpretable and no choice is inferred. The exact-Type-first adapter
+      and finite-View comparator in [[type-data-abi-boundary-pressure]] are
+      reversible experiment arms, not a ruling.
 
 ## Pre-promotion checklist
 
@@ -759,6 +828,8 @@ gap, or the full OS architecture looks plausible.
 - [ ] Core/Files candidate names remain proposal-labelled.
 - [ ] Guest-read and official-write fixtures have exact inputs and expected
       structured outputs.
+- [ ] The Type/Data-ABI adapter matrix passes without layer leakage, unknown
+      data loss, semantic/byte-status collapse, or schema-created authority.
 - [ ] Performance, accessibility, privacy, security, agent, and clean-browser
       acceptance suites have named owners.
 - [ ] No `<!-- AGENT-Q: -->` markers remain.
