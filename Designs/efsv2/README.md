@@ -20,6 +20,13 @@ candidate,” then stop unless you want the engineering detail. For a deep pass:
 
 Focused next-pass prompt: [[fable-efs2-core-engineering-kickoff]].
 
+Current readiness program: [[v2-contract-readiness-program]] separates
+`GO-CODE`, `GO-FREEZE`, and `GO-DEPLOY`; orders the remaining Type, identity,
+Realm, query, Lens, reconstruction, SDK, and Data Explorer gates; and forbids a
+calendar deadline from standing in for evidence or owner ratification. Its
+point-in-time executable-evidence reconciliation is the
+[2026-08-22 readiness baseline](../../Reviews/2026-08-22-v2-contract-readiness-baseline/README.md).
+
 ## The current shape
 
 ```mermaid

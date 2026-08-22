@@ -1,0 +1,706 @@
+# EFS v2 — contract-readiness program
+
+**Status:** draft — one-week disposable design and validation mission; no production implementation or freeze authority
+**Target repos:** planning, disposable experiments, contracts and SDK only after the gates below pass
+**Depends on:** [[README]], [[system-constitution]], [[core-architecture-candidate]], [[layered-type-system-and-data-abi]], [[hierarchical-files-and-folders]]
+**Supersedes:** —
+**Reviewers:** @codex-gpt-5 (Core, evidence, and product red teams; 2026-08-22)
+**Evidence baseline:** Stage A corpus plus the local B0, Git P6, Type/Data-ABI, application-pressure, and reconstruction experiments
+**Last touched:** 2026-08-22
+
+#status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #topic/efsv2 #topic/readiness
+
+## Verdict
+
+EFS v2 is ready for a focused contract-readiness program, but it is **not yet
+ready for durable contract implementation or a century-scale freeze**.
+
+The requirements and conceptual separations are unusually strong. Narrow
+disposable experiments have already proved that several important pieces can
+work: portable identities across three languages, exact Records and authored
+Occurrences, Realm-bound EOA admission, atomic multi-leaf application writes,
+Binding CAS/history in isolation, bounded postings, state-readable
+reconstruction of a small slice, and a layered Type/Data model across diverse
+applications. Those are real results, not merely prose.
+
+What is missing is one current, integrated semantic reference that makes all
+of those pieces interact under the greenfield model. In particular, no current
+prototype jointly proves generic Type validation, multi-leaf admission,
+Principal/Realm authority, Binding effects and complete scopes, Withdrawal,
+basis-qualified query results, a minimal contract Lens, and independent
+reconstruction. Physical contract topology cannot be selected honestly until
+that integrated behavior is measured.
+
+The recommended method is therefore:
+
+1. reconcile and qualify existing evidence rather than repeat it;
+2. seal a prose transition specification and trace corpus;
+3. implement an independent pure state-model oracle;
+4. implement a disposable monolithic Solidity system under test as the first
+   physical control;
+5. attack the uncertain seams through small controlled comparison arms;
+6. replay real application workloads against the same sealed expectations;
+7. let the SDK and Data Explorer teams expose unusable or dishonest semantics;
+8. only then cut a contract implementation recommendation.
+
+This is preferable to either a document-only “complete specification,” which
+would hide integration failures, or an upgradeable production scaffold, which
+would accidentally make storage and authority decisions before their semantics
+are understood.
+
+## Three different finish lines
+
+### A. `GO-CODE` — ready to begin real candidate contract engineering
+
+This means the semantic state machine, signed inputs, read contract, failure
+states, bounds, reconstruction contract, and initial module boundary are exact
+enough that engineers are implementing a known design in the real repositories.
+The implementation remains explicitly nondeployable and uses a candidate
+namespace until the later gates pass. Operator identities, exact deployment
+addresses, and performance optimization may remain open; possible admin and
+upgrade powers, interpretation boundaries, and safety ceilings may not.
+
+An experiment report can only **recommend** `GO-CODE`. Starting real contract
+work requires an explicitly recorded project-owner ruling approving the
+semantic candidate and every named deferral. A hold on any item in “What must
+be exact before production contract work” blocks `GO-CODE`.
+
+### B. `GO-FREEZE` — ready for a century-scale semantic freeze
+
+This is stricter. It additionally requires independent encoders and readers,
+golden vectors, adversarial review, measured gas/code/state ceilings, recovery
+from all supported carriers, explicit hash/codec/Realm succession paths,
+contract and SDK conformance, an owner-ratified freeze manifest, and a public
+statement of every consciously deferred capability.
+
+### C. `GO-DEPLOY` — ready for an operational deployment
+
+This adds deployment-specific security, administration, venue, monitoring,
+incident, migration/coexistence, reproducibility, source-verification, and
+operations gates. `GO-FREEZE` does not select a Commons or authorize a mainnet
+deployment by itself.
+
+The week targets the **largest completed prefix** of G0–G6 and produces the
+evidence map for the remaining gates. `GO-CODE` is evidence-gated, not
+calendar-gated; valuable progress may honestly end at `CONTINUE-DISPOSABLE`.
+
+## Starting evidence and its honest limits
+
+| Evidence | What it supports | What it does not support |
+|---|---|---|
+| Stage A corpus | Broad requirements, fixtures, traceability, candidate formulas, and falsifiers | Executable conformance or selected bytes |
+| B0 micro-spine | Selected cross-language identities, EOA admission, basic indexes, small reconstruction, gas and code-size signals | Current layered Type semantics, generic multi-leaf Core, Lens, KEL, or complete queries |
+| Git P6 | Atomic application-shaped 21-leaf write, retry/rollback pressure, real Git object distinctions | A generic Core rather than a fixture-specific harness |
+| Type/Data-ABI experiments | Exact Types, stable Objects, representations, Views, QueryProfiles, evolution, package closure, and application fit | Permanent bytes, full Core admission, production compiler, or settled View authority |
+| Files design | Concrete need for `BindingScope`, honest absence, and operation-bound routed consent | A working implementation or acceptable aggregate gas |
+| Application passes | Nanda, achievements, packages, media, Files, and Git fit ordinary application Types without new Core nouns | That every shared Core seam is integrated, safe, or affordable |
+
+Existing reports must be labeled by the source commit, experiment commit,
+fixture digest, toolchain, dirty state, known defects, rerun status, and claim
+scope. Grade both **observed result at its pinned commit** and **currency against
+the current candidate**: an old fixture can be `PASS` and `STALE` at the same
+time. “Stage B has not run” should be corrected to “narrow disposable B0 runs
+exist; current-greenfield integrated Stage B and freeze evidence do not.”
+Branch-only results stay evidence until intentionally reconciled.
+
+## The readiness gates
+
+### G0 — authority and evidence baseline
+
+Before adding mechanisms:
+
+- pin the current owner rulings, constitution, active candidate documents, and
+  correction register;
+- inventory every local experiment branch, result, toolchain, and known defect;
+- build one requirements-to-fixture-to-result ledger with separate observed-
+  result (`PROVED`, `REFUTED`, `PARTIAL`, `UNRUN`, `OUT-OF-SCOPE`) and
+  current-candidate (`CURRENT`, `STALE`, `CONFLICTING`) grades;
+- freeze only the disposable experiment corpus and error vocabulary for the
+  week, not protocol IDs or production bytes;
+- require all reports to distinguish direct observation from inference.
+
+**Pass:** two reviewers can independently say what is current, what was
+actually executed, and which claim each artifact supports.
+
+### G1 — semantic and identity candidate
+
+Settle an exact candidate for the distinctions contracts and SDKs cannot repair
+later:
+
+- semantic specification, logical shape, representation, bounded View, exact
+  Type revision, QueryProfile, Record, stable Object, Occurrence, and
+  Admission identities;
+- exact reference targets: Record, Object, Occurrence, exact Type, closed Type
+  group/View, and a tightly bounded existence target where justified;
+- `SELF`, mutually recursive groups, open-reader unions, unknown variants, and
+  cross-version references without ambient reinterpretation;
+- hash domains, canonical preimages, codec/version tags, byte limits, and a
+  coexistence path for future hashes and codecs;
+- Principal identity across EOAs and contract accounts without truncating
+  `bytes32` or pretending chain-dependent contract authority is universal;
+- Realm identity versus Realm implementation/policy revision;
+- public/private identity-domain separation and the rule that batching alone
+  never creates application meaning or safely mixes linkable public/private
+  material.
+
+Run four controlled ABI-shaping comparisons before choosing the integrated
+candidate:
+
+1. uniform `PrincipalId` versus a tagged `Account | Principal` author surface;
+2. self-contained Records versus shared Envelope/immutable Context using the
+   same accepted values and real application fixtures;
+3. portable authored publication plus destination Realm admission versus an
+   intentionally Realm-bound publication profile;
+4. a self-contained `RealmDescriptor`/bootstrap artifact carrying chain/genesis
+   identity, component commitments, policy/verifier revisions, possible admin
+   powers, and the boundary between admission basis and later finality evidence.
+
+The old 1–64 Envelope/Flatcard run is reduced and confounded. It is useful prior
+evidence, not the carrier decision. A survivor must preserve portable evidence,
+subset-carriage rules, replay safety, extraction, reconstruction, and
+application-level atomicity before its gas/storage advantage counts.
+
+The Type comparison is not “maximum expressiveness at any cost.” EFS should
+support arbitrary application meaning through permissionless exact Types and
+ordinary relations, while the onchain structural language remains small,
+bounded, deterministic, and non-executable. Rich validation and behavior may be
+compiled, run offchain, or published as evidence; Type authors do not inject
+callbacks into Core.
+
+The current working hypothesis to falsify is a **flat exact nominal Type**:
+every intrinsic constraint that changes accepted values and every closed
+reference role remains in exact Type identity, while query/index policy lives
+in a separate QueryProfile. Layered SemanticSpec/Shape/Representation IDs are
+useful compiler, catalog, and ablation outputs but have not earned permanent
+Core identity. Committed and detached ViewBindings remain adversarial
+comparators; neither is an assumed production default.
+
+**Pass:** TypeScript, Rust, and Solidity independently reproduce all IDs and
+reject all malformed or noncanonical twins. Changing meaning, shape, or
+representation cannot silently preserve an exact identity. A new compatible
+Type can be added without changing old bytes or letting an open reader grant
+authority. The four ABI-shaping comparisons above have a measured survivor or
+prove that their alternatives coexist without ambiguous IDs, signatures,
+storage, or reads.
+
+### G2 — integrated mutation and query state machine
+
+Build three independent artifacts in this order:
+
+1. a prose transition specification plus sealed input/output traces;
+2. a pure state-model oracle that does not import the Solidity implementation;
+3. a disposable monolithic Solidity system under test (SUT) as the first
+   physical control.
+
+The model and SUT contain the G1 survivor semantics for:
+
+- bootstrap and ordinary Type validation with statically bounded reference
+  extraction;
+- the selected Record/Context, authored-publication, multi-leaf Occurrence, and
+  Realm-admission shapes, including nonce, expiry, subset, and replay rules;
+- explicit target-existence and expected-revision evidence;
+- Principal-qualified Binding CAS, tombstones, Withdrawal, history, and no
+  resurrection;
+- `BindingScope` or a demonstrably better generic mechanism for complete
+  unknown-name enumeration;
+- exact-Type and finite-inventory View queries, QueryProfile generations,
+  high-water bases, pages/cursors, coverage, and honest completion;
+- the adopted generic query obligations: exact Type/Record/Occurrence/admission
+  reads, exact typed-scalar equality, typed references/backlinks and reverse
+  membership, content-digest lookup, authored-data enumeration,
+  revocation-aware current counts, and deterministic bounded locator selection;
+- public reads sufficient to reconstruct all authoritative state.
+
+QueryProfile testing must include active/pending generations, dual writes,
+interrupted backfill, cursor invalidation, Types added before/during/after
+backfill, 99–100% dead-posting dilution, hostile self-implementation spam,
+large simulated backfill, reconstruction, and exact authority for declaring
+terminal coverage. Any generic query obligation that cannot fit the aggregate
+gas/state budget returns to the project owner; it is not silently dropped.
+
+Effectful operations additionally bind one exact canonical plan/effect-set
+commitment: Principal, Realm, operation, executor and code/dependency basis,
+nonce, expiry, preconditions, maximum cost, atomicity, and exact effects.
+Human, agent, extension-host, TypeScript, and Solidity derivations must produce
+the same digest. A batch Envelope does **not** itself claim application-semantic
+atomic meaning; that comes only from a typed transaction Record or an explicit
+bounded profile rule.
+
+Define one normative facts matrix and lossless Core/Solidity/SDK/Explorer
+crosswalk. Keep at least these axes separate:
+
+```text
+presence:       FOUND | ABSENT_PROVEN | UNKNOWN | CONFLICT | OPAQUE | MASKED
+coverage:       COMPLETE | PARTIAL
+support:        SUPPORTED | UNSUPPORTED | LIMIT_EXCEEDED
+validation:     STRUCTURALLY_VALID | SEMANTICALLY_VALID | INVALID | UNPROVEN
+authority:      AUTHORIZED | DENIED | UNPROVEN
+lifecycle:      ADMITTED | WITHDRAWN | CARRIED_ONLY | UNPROVEN
+selection:      CURRENT | NOT_CURRENT | CONFLICT | UNKNOWN
+observation:    exact Realm/block/policy/code basis + separate finality/freshness
+bytes:          VERIFIED_AVAILABLE | PARTIAL | UNAVAILABLE | INTEGRITY_FAILED
+effect:         COMMITTED | NOT_COMMITTED_PROVEN | UNKNOWN
+```
+
+Applications may project these dimensions for users, but Core and the SDK must
+not collapse `UNKNOWN` into absence, `PARTIAL` into complete, failed retrieval
+into missing data, admission into finality, recorded basis into currentness, or
+evidence into authority. Cross-language vectors cover every legal state and
+reject illegal combinations.
+
+**Pass:** differential, model-based, property, and fuzz tests make the pure
+model and Solidity SUT agree on sealed traces they did not generate jointly;
+every atomic failure leaves zero partial effects; idempotent retry returns the
+same operation identity; a lost submission channel can be recovered as
+`COMMITTED`, proved `NOT_COMMITTED`, or `UNKNOWN`; canonical read-back mismatch
+never becomes success; fixed-basis pagination is stable; and terminal absence
+is possible only after the declared complete domain has been exhausted.
+
+### G3 — identity, Realm, and authority security
+
+Pressure the independent model and Solidity SUT with:
+
+- EOA and ERC-1271 Principals, relayers, distinct payers, contract upgrades,
+  EIP-7702 code changes, wrong-chain and wrong-Realm replay, nonce lanes,
+  expiry, signature malleability, simulation-to-admission substitution, and
+  reentrancy;
+- hostile ERC-1271 witnesses that revert, return malformed values, consume the
+  verifier gas cap, reenter, or change code/authority between observation and
+  admission;
+- actor versus semantic Principal versus submitter distinctions;
+- a self-authenticating Realm bootstrap/descriptor that commits chain/genesis,
+  component addresses and runtime code hashes, policy/validator/authority-
+  verifier revisions, possible admin/upgrade powers, and admission basis;
+- state-readable historical verifier/policy semantics, not merely a hash whose
+  defining bytes or dependency graph may disappear;
+- cross-Realm copying versus destination admission and recognition;
+- one disposable managed-Principal/succession profile and one second signature-
+  verifier profile proving additive rotation/recovery/delegation and algorithm
+  agility without retroactively graduating or reinterpreting old Occurrences;
+- operation- and executor-bound consent for routers that claim a plural action
+  such as rename, move, or multi-ref Git update.
+
+**Pass:** no caller can substitute a Principal, Realm, Binding/View mapping,
+Lens, operation, executor, dependency, or basis after authorization. Old
+Occurrences remain interpretable after account or implementation change;
+unknown verifier profiles fail closed; full-width Principal keys survive every
+ABI/storage/index path; and possible administrative powers are exact even if
+the eventual operator addresses remain undecided.
+
+### G4 — Lens and honest read contract
+
+Build the smallest contract Lens needed to prove the constitutional promise:
+
+- immutable or content-addressed Resolution Plans;
+- the risk bearer selects or approves the Plan;
+- exact, finite candidate Principals and bounded point resolution;
+- explicit Realm, policy/code basis, high-water, coverage, conflict, and result;
+- `FOUND`, `ABSENT_PROVEN`, `CONFLICT`, `UNKNOWN`, and `UNSUPPORTED` outcomes;
+- deterministic losing-evidence/provenance reads where promised;
+- rich personal/social policy compiled outside Core, never arbitrary onchain
+  graph walking.
+
+Run the owner-required cold/warm 1/8/32/64-Principal matrix for first, last,
+absent, conflict, unknown, and risk-bearer-selected outcomes. Then run the
+50-Principal Files plan as a separate application workload. Include conflicting
+catalogs, disappeared publishers/indexers, partial history, unknown Types, and
+hostile evidence.
+
+Finality and reorg observation live in a separate client observer harness, not
+inside Core truth. Fork/reorg tests must prove that pages or Lens inputs from
+different block bases are rejected rather than merged.
+
+**Pass:** the same inputs and basis produce the same result in independent
+implementations; no untrusted caller chooses the policy that authorizes itself;
+all loops and result sizes are statically bounded.
+
+### G5 — EVM realization and reconstruction
+
+Measure the integrated semantics before choosing architecture:
+
+1. monolithic state owner as the semantic control;
+2. immutable facet/router split with pinned state and selector ownership;
+3. narrow state-owning modules only if the measured pressure justifies them.
+
+“Monolithic” means one logical state machine and the first Solidity topology,
+not the source of expected truth. If that topology exceeds EIP-170 or other
+Realm ceilings, it falsifies the physical monolith—not the independently
+specified semantics.
+
+For identical fixtures measure deployed/runtime bytecode, cold/warm gas,
+calldata, state slots, event bytes, worst-case rollback, pagination, and growth.
+Attack storage collisions, selector collisions, reentrancy, stale dependencies,
+upgrade/reinterpretation paths, and denial-of-service at every cap.
+
+Before measurement, pin supported Realm/EVM assumptions and numeric acceptance
+budgets for runtime/initcode margin, transaction gas, calldata, validator work,
+page size, state growth, and aggregate application flows. Add a 100-year model
+covering ordinal/counter/cursor/nonce/expiry widths, checked overflow and
+terminal behavior, Type/index spam, worst-case churn, hash/codec coexistence,
+and long-lived deployment margins.
+
+Then give an independent reader codebase only one immutable Realm bootstrap
+artifact plus chain/RPC and carrier configuration. It must authenticate and
+discover the committed components and reconstruct Types, Records, Envelopes,
+Occurrences, admissions, indexes, Binding histories/scopes, Withdrawal state,
+Lens inputs, and completeness evidence without a manually supplied private ABI,
+module-address list, EFS-operated indexer, or writer-side database.
+
+**Pass:** at least one topology fits conservative EVM ceilings with safety
+margin, and independent state-only reconstruction is byte-identical for the
+authoritative projection. Otherwise revise semantics or bounds before selecting
+contracts.
+
+### G6 — developer and product proof
+
+Replay unchanged **logical** application fixtures and expected outcomes through
+the same contract and SDK boundary while retaining each arm's raw carrier bytes
+separately:
+
+- Git P6 including atomic multi-ref update, stale-CAS rollback, expiry retry,
+  checkpoint/export, and reconstruction;
+- Files directory churn including tombstone-first names, rename/move/copy,
+  `BindingScope`, 50-Principal Lens, complete pagination, bytes unavailable,
+  and operation-bound consent;
+- one typed table/spreadsheet view, exact raw/provenance inspection, export,
+  and an arbitrary untrusted stub emitting only an inert action intent; the
+  trusted Explorer host must regenerate the canonical plan;
+- Nanda typed request/response/evidence with unknown method/capability and
+  disappeared-provider behavior;
+- package/release finite closure with conflicting catalogs and no implicit
+  install, grant, or execution;
+- achievement issue/status/holder/reader separation and basis-qualified
+  current-point query;
+- media/large bytes with partial verification, unavailable carriers, and no
+  confusion between content identity and locator availability.
+
+Run Data Explorer's same fixture twice: once against a deterministic fake source
+for UI isolation and once in a cold browser through the real disposable SDK
+adapter and direct public reads. Require semantic parity, dependency/network
+tracing, optional-indexer removal, fixed-basis pagination, raw fallback,
+verified bytes, and cold reconstruction with no wallet, account, Commons,
+hosted indexer, package catalog, Kernel, OS boot, profile hydration, or warm
+cache.
+
+Run blinded, independent TypeScript and Solidity developer tasks: generate and
+evolve two representative Types, preserve an unknown future Type, perform point
+and paged reads, prepare and recover an effectful operation, and consume an
+exact Type onchain. Measure manual IDs/preimages/calldata, protocol literals,
+incorrect state collapses, completion/errors, and raw-escape use against the
+raw ABI baseline. A compiler emitting two languages is convenience, not an
+independent conformance implementation.
+
+Every SDK/Explorer failure returns a pressure packet with the unchanged
+fixture, expected and actual qualified facts, the smallest missing semantic,
+alternatives attempted at SDK/Realm/Lens/product layers, permanence cost, and
+an exact falsifier. A truth failure reopens G1–G5; an ergonomic failure stays
+outside Core.
+
+**Pass:** none of the named workloads exposes a need for a private Core noun or
+index; each preserves raw unknown data, provenance, basis, and completeness;
+the facts-matrix crosswalk is lossless; the safe SDK path is measurably easier
+than raw protocol construction; the direct guest route works without ambient
+services; and the Explorer explains results without inventing authority.
+Executable-extension sandbox security is not claimed by an inert week-one
+stub.
+
+Clean-browser Arcade, broader Git/Markdown/forge-social, three-host mounted
+filesystem, privacy/domain-separation, cross-Realm, and complete large-content
+traces remain `GO-FREEZE` gates if they do not fit the week. Their absence need
+not block `GO-CODE` only when the frozen candidate preserves an explicit
+additive path and no related byte/signature decision remains open.
+
+## Ordered week lanes — not calendar gates
+
+The seven lanes are dependency-ordered. Research, fixture preparation, and PM
+design can run in parallel, but a later implementation lane does not declare a
+pass over an unfinished earlier gate. The week ends with the largest completed
+prefix, even if that is only G1 or partial G2.
+
+### Lane 1 — reconcile, do not reinvent
+
+- inventory and replay existing B0, Type, Git, Files, application, and
+  reconstruction evidence on pinned commits;
+- repair the two-axis status ledger and isolate stale or overclaimed results;
+- freeze a disposable corpus, facts matrix, limits registry, and exact
+  toolchains for the week;
+- publish the transition spec, independent-model plan, and Solidity-SUT plan
+  before implementation.
+
+**Exit:** every planned test maps to a constitutional requirement or named
+falsifier; no duplicate experiment is scheduled without a stated reason.
+
+### Lane 2 — Type, carrier, Principal, and Realm bakeoffs
+
+- compare a bundled control, the flat exact-Type/split-QueryProfile hypothesis,
+  and committed/detached ViewBinding variants using identical accepted-value
+  semantics; retain layered sub-identities as an ablation;
+- rerun detached ViewBinding attacks using the actual caller-supplied binding,
+  exact issuer/basis, projection bytes, and state effects;
+- run the four G1 ABI-shaping comparisons for Principal, Record/Context,
+  portable/Realm-bound publication, and RealmDescriptor/bootstrap;
+- decide candidate semantics for `SELF`, closed groups, bounded existence
+  references, exact Views, QueryProfile coverage, public/private domains, and
+  batch versus application meaning;
+- extend independent ID/preimage vectors, malformed twins, and hash/codec
+  succession.
+
+**Exit:** one candidate or proven unambiguous coexistence plus documented losing
+arms; no permanent bytes. If no survivor exists, stay in this lane.
+
+### Lane 3 — transition spec, pure model, and Solidity SUT
+
+- seal the prose state transitions and expected traces independently;
+- implement the pure model for generic Type/reference validation,
+  publication/admission, Binding/Withdrawal, scopes, query coverage, and exact
+  effect commitments;
+- implement the simplest monolithic Solidity SUT without optimization;
+- differentially test success, failure atomicity, retry, dropped-response
+  recovery, and illegal facts-matrix combinations.
+
+**Exit:** the independent model and SUT agree on the small sealed corpus. A
+monolith size failure is recorded as a topology result, not “fixed” by changing
+expected semantics inside the SUT.
+
+### Lane 4 — Realm and authority security
+
+- run EOA, ERC-1271, EIP-7702, managed-Principal/succession, second-verifier,
+  relayer/payer, replay, code-change, reentrancy, and verifier-gas cases;
+- prove self-authenticating Realm bootstrap and state-readable historical
+  verifier/policy basis;
+- prove executor/operation/dependency/cost-bound plural consent and exact public
+  effect recovery.
+
+**Exit:** no authority or historical-interpretation P0 remains. Lens semantics
+do not stabilize before this exit.
+
+### Lane 5 — completeness, queries, Lens, applications, and reconstruction
+
+- run the full QueryProfile failure matrix and every adopted generic query
+  capability under aggregate cost;
+- implement `BindingScope`, known-name versus complete-directory semantics, and
+  the 1/8/32/64 contract Lens matrix;
+- run Git P6, Files churn, the separate 50-Principal Files Plan, and conflicting
+  or disappeared evidence;
+- reconstruct the full test Realm from one bootstrap artifact in an independent
+  reader; run reorg/finality tests in the client observer.
+
+**Exit:** absence is proved only at a terminal complete basis; no constructor-
+preloaded application Types/targets, writer oracle, manual module list, or
+private ABI is required.
+
+### Lane 6 — SDK and Data Explorer pressure
+
+- generate raw-preserving TypeScript artifacts and Solidity internal helpers
+  for two representative Types while retaining independent encoders;
+- run blinded developer tasks and compare against the raw ABI baseline;
+- run Data Explorer's guest/read/table/raw/provenance fixture against both the
+  deterministic fake and the cold direct integrated path;
+- use only an inert untrusted extension-intent stub; the trusted host
+  regenerates and verifies any canonical action plan;
+- route every truth failure backward through a pressure packet.
+
+**Exit:** unknowns and provenance remain accessible, direct-guest dependencies
+are proven, effect outcomes recover after channel loss, and no generated helper
+or product adapter becomes mutable hidden authority.
+
+### Lane 7 — measurement, red team, and readiness packet
+
+- run the achieved corpus in genuinely independent implementations;
+- measure the monolith, then only topology alternatives justified by the same
+  state projection;
+- run security, database/query, EVM, SDK, product, and long-horizon reviews;
+- produce the implementation spec, transition tables, ABI draft, limits sheet,
+  vector manifest, reconstruction recipe, threat model, known failures,
+  deferred capabilities, and owner packet.
+
+**Exit:** `CONTINUE-DISPOSABLE`, `REDESIGN`, or `RECOMMEND-GO-CODE`, with the
+exact highest completed gate. There is no `GO WITH HOLDS` for a must-be-exact
+item. Only a recorded project-owner ruling can turn a recommendation into
+`GO-CODE`; `GO-FREEZE` and `GO-DEPLOY` remain separate ceremonies.
+
+## SDK PM charter and boundary
+
+The SDK is a separate product and protocol-consumer authority, not generated
+after contracts are already fixed. Its week-one design must cover:
+
+- a small raw-preserving TypeScript runtime for exact bytes, provenance,
+  authority, basis, coverage, unknown values, and receipts;
+- a deterministic compiler that emits TypeScript DTOs/codecs/validators/query
+  builders/docs/vectors and Solidity `internal` exact-Type helpers;
+- transport-independent capability semantics across direct RPC, indexed reads,
+  gateways, simulation, and future transports;
+- plan commitments and recoverable outcomes for effectful calls when a channel
+  drops after submission, preserving `COMMITTED`, proved `NOT_COMMITTED`, and
+  `UNKNOWN` rather than guessing from transport success;
+- independent encoder/decoder conformance and version-skew handling;
+- optional deployed helpers only when stateless or bound to a finite immutable
+  dependency/basis contract and justified by measurement.
+
+The SDK must never hide `UNKNOWN`, turn discovery into authority, depend on one
+hosted service, or let a mutable generated/helper dependency reinterpret an old
+operation.
+
+## Data Explorer PM charter and boundary
+
+Data Explorer is a standalone guest-first typed-data workbench. It is not the
+Web Client/OS shell, the SDK, a package manager, or merely a prettier Files
+screen. Its architecture must support:
+
+- familiar tree, list, grid, sorting, search/filter, selection, details,
+  history, copy/move/rename/delete/restore, drag/drop, previews, and keyboard
+  accessibility where the underlying evidence permits them;
+- exact raw bytes, Type/Record/Occurrence/Admission separation, provenance,
+  Realm/basis/completeness, conflicts, unavailable carriers, and export;
+- configurable table/spreadsheet, gallery, timeline, graph, diff, and
+  application-defined Views over typed data;
+- a useful core with all extensions disabled;
+- sandboxed, capability-limited extensions that receive explicit inputs and
+  return derived projections or inert action intents which the trusted host
+  must independently re-derive before consent;
+- one shared consent/sign/submit/read-back pipeline for built-in and extension
+  actions;
+- modular adapters over the SDK so presentation never becomes protocol truth.
+
+The initial prototype should be read-heavy and reversible. Executable
+extensions, spreadsheet mutation semantics, collaborative formulas, app
+installation, and broad OS integration remain later research unless the
+pressure pass proves a freeze-sensitive Core requirement.
+
+The direct-guest gate is an end-to-end transport test, not an in-memory UI
+fixture: a cold browser must reach the disposable Realm through public reads and
+the real SDK adapter with optional services removed, while retaining raw
+fallback, basis, completeness, verified bytes, and dependency traces.
+
+## What must be exact before production contract work
+
+- every ID preimage, domain, canonical byte rule, and version tag used in state;
+- Type validation/reference extraction and all hard bounds;
+- the selected Record/Context/publication carrier and its subset/application-
+  atomicity rule;
+- Principal, signature/verifier, nonce, expiry, Realm, and admission-intent
+  transcript, including the proved future-identity extension path;
+- the self-authenticating RealmDescriptor/bootstrap, component/code/policy
+  commitments, historical semantics, and every possible admin/upgrade power;
+- state transition tables for admission, Binding, Withdrawal, scopes, query
+  coverage, and history;
+- the canonical operation/effect-set commitment, idempotent identity, cost/
+  precondition/atomicity bounds, effect-outcome recovery, and read-back rules;
+- the lossless facts matrix, error vocabulary, page/cursor/basis semantics, and
+  completeness proof across Core, Solidity, SDK, and product adapters;
+- the adopted typed query/index obligations and measured aggregate budget;
+- minimum contract Lens semantics and who selects it;
+- state-readable reconstruction ABI and required indexes;
+- storage ownership, upgrade/reinterpretation prohibition, and contract split;
+- predeclared conservative bytecode, gas, calldata, validator-work,
+  state-growth, century-width, and worst-case bounds;
+- SDK raw semantics and independent golden vectors.
+
+No item in this list may be carried as a `GO-CODE` hold. The evidence packet
+may recommend a candidate, but the project owner's recorded ratification is the
+final gate to work in the real contracts repository.
+
+## What may remain versioned or deferred
+
+- rich social and private Lenses beyond the minimal bounded contract profile;
+- a full KEL, default recovery composition, delegation UX, post-quantum suites,
+  and additional smart-account profiles, provided the disposable managed-
+  Principal and second-verifier profiles prove their identity/witness seams;
+- search, ranking, analytics, global catalogs, reputation algorithms, and
+  arbitrary joins;
+- Commons venue choice, cross-chain aggregation policy, relays, gateways, and
+  hosted indexers;
+- new application Types, Views, QueryProfiles, projections, and SDK generators;
+- rich Data Explorer extensions and collaborative spreadsheet behavior;
+- private payload conventions and future ZK/PIR profiles that do not require
+  changing the frozen public semantic model.
+
+Deferral is safe only when the current design proves an additive, versioned
+path and does not reserve a single vendor or mutable pointer as the escape
+hatch.
+
+## Kill criteria and mandatory redesign triggers
+
+Stop and revise the candidate if any experiment shows that:
+
+- a malformed or substituted ViewBinding/reference can authorize a value;
+- open Type discovery, `ANY`, or unknown variants can grant authority or cause
+  effects;
+- a query reports absence or currentness without a complete declared domain and
+  exact basis;
+- a tombstone, Withdrawal, reorg, or missing page resurrects older state;
+- historical Occurrences change meaning after account, Realm, policy, codec,
+  helper, or implementation change;
+- the Realm cannot authenticate its own components and historical policy/
+  verifier semantics from one bootstrap artifact;
+- an action plan, signer, executor, effect set, cost bound, dependency basis, or
+  read-back can be substituted, or an unknown effect outcome becomes success;
+- ordinary validation needs unbounded recursion, arbitrary callbacks, or an
+  application-private Core kind/index;
+- a required query capability or century-scale width/churn case cannot meet its
+  predeclared budget without losing honest completeness;
+- the authoritative state cannot be reconstructed without an EFS-operated
+  database, event-only body, or writer oracle;
+- no conservative EVM topology fits the integrated semantics;
+- the safe SDK workflow is materially harder than bypassing it, or different
+  generated implementations disagree on exact bytes;
+- Data Explorer must conceal basis, provenance, conflict, or incompleteness to
+  remain usable.
+
+## End-of-week packet
+
+The owner packet should be small enough to review and exact enough to build:
+
+1. one-page verdict and confidence ledger;
+2. survivor architecture and explicit losing alternatives;
+3. exact semantic state machine and read-result tables;
+4. identity/preimage/codec/signature manifest and vectors;
+5. ABI and storage-ownership draft;
+6. caps and measured worst-case costs;
+7. reconstruction proof and recipe;
+8. security model and unresolved high-risk items;
+9. application, SDK, and Data Explorer pressure results;
+10. freeze-now, version-later, and explicitly-out lists;
+11. owner decisions that cannot be derived from evidence;
+12. implementation sequence with tests carried forward unchanged.
+
+The packet records `CONTINUE-DISPOSABLE`, `REDESIGN`, or
+`RECOMMEND-GO-CODE`. It does not self-authorize implementation. Only after the
+project owner records `GO-CODE` may candidate contract engineering begin in the
+real repository, from the tested transition spec and golden corpus. It does not
+begin by copying the disposable Solidity SUT's storage layout. Freeze and
+deployment remain later, separately ratified gates.
+
+## Open questions
+
+- [ ] Does the corrected integrated Type comparator confirm the flat exact
+  Type plus split QueryProfile as the survivor, and what role, if any, do
+  committed or detached Views retain?
+- [ ] Which uniform `PrincipalId` versus tagged-author, self-contained Record
+  versus shared Context, portable versus Realm-bound publication, and
+  RealmDescriptor candidates survive the controlled G1 bakeoffs?
+- [ ] Can `BindingScope`, QueryProfile coverage, Withdrawal, and the minimum
+  contract Lens jointly meet honest completeness and conservative EVM bounds?
+- [ ] Which physical topology preserves one reconstruction contract and one
+  interpretation of old state with adequate code-size and gas margin?
+- [ ] Do the SDK and Data Explorer pressure passes expose any additional
+  freeze-sensitive semantic or read-ABI requirement?
+
+## Pre-promotion checklist
+
+- [ ] All `## Open questions` resolved or explicitly deferred with evidence
+- [ ] `**Target repos:**` confirmed after the experiment phase
+- [ ] Dependency chain reconciled against the active greenfield authority
+- [ ] No production byte, ID, limit, contract split, or deployment claim rests
+  on a synthetic or stale fixture
+- [ ] At least one independent security, EVM, database/query, SDK, and product
+  review has attacked the integrated candidate
+- [ ] The project owner has reviewed the GO/NO-GO packet; no calendar deadline
+  has been treated as promotion authority
+
+## Implementation notes
+
+This draft is being prepared in an isolated planning worktree. Experiment code
+belongs in the existing local disposable Stage B repository or a clean child
+worktree. No real-contract PR should be opened until the project owner has
+explicitly recorded `GO-CODE`.
