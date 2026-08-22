@@ -41,6 +41,10 @@ SDK or extension bytes.
 interface questions to answer during the experiment round; they are not a
 questionnaire for the owner.
 
+**Preliminary checkpoint:** [[preliminary-findings]] separates what the current
+research supports, what remains a product hypothesis and the exact evidence
+required before stronger claims.
+
 ## Product direction recorded for this round
 
 James directed on 2026-08-22 that the Data Explorer is a durable product lane,
@@ -199,6 +203,7 @@ Detailed boundaries are in [[architecture-and-state]] and
 | Document | Owns |
 |---|---|
 | `README.md` | Product direction, authority, charter, cross-lane boundary and current recommendation |
+| [[preliminary-findings]] | Phone-readable research findings, leading hypothesis, unproved claims and next evidence gates |
 | [[product-charter-and-roadmap]] | Personas, information architecture, journeys, modern file-manager baseline, MVP/next/later map, accessibility and offline requirements |
 | [[architecture-and-state]] | Explorer application modules, navigation/state model, read/write/batch/undo flows, cache namespaces and failure vocabulary |
 | [[views-extensions-and-capabilities]] | `ExplorerViewSpec`, built-in typed views, projection truth boundary, extension lifecycle, sandbox and capability/privacy model |
