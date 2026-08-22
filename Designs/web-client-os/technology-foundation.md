@@ -4,7 +4,7 @@
 **Target repos:** planning, client, sdk
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/product-constitution-and-roadmap]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/web-client-os/privacy-and-agents]]
 **Reviewers:** @web-platform-standards (2026-08-14), @historical-client-architecture (2026-08-14), @current-v2-read-path (2026-08-14)
-**Last touched:** 2026-08-15
+**Last touched:** 2026-08-22
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/web-platform #topic/pwa #topic/i18n #topic/accessibility #topic/performance #topic/wasm #topic/wasi
 
@@ -73,6 +73,184 @@ component lifecycle, router, state store, form system, or design system as one
 private framework. It should combine small replaceable libraries where they
 lower total complexity while keeping every durable boundary in plain standards
 and versioned data.
+
+## Modern Web guidance and evidence gate
+
+James approved on 2026-08-21 that implementation agents must not fall back to
+framework habits, stale training-data assumptions or the Web platform of five
+years ago. This is a mandatory contribution and review gate for every
+authorized HTML, CSS, client JavaScript, custom-element, browser-API, PWA,
+accessibility and performance task. Protocol-only work is exempt until it
+crosses a Web/client integration surface. The gate is design direction now; it
+does not authorize a repository, package installation or product code.
+
+The native decision order is:
+
+1. semantic HTML and built-in control behavior;
+2. modern CSS and the platform's layout, styling and interaction facilities;
+3. a standard browser API and a small EFS-owned adapter where proposal/profile
+   churn must be contained; then
+4. the smallest library whose measured accessibility, byte, complexity,
+   security and maintenance benefit earns its place.
+
+“Native first” is not “write every abstraction ourselves.” Lit, a control
+pack, a parser or another focused library can win its fixed comparison. It is
+also not “Baseline only.” The selected EFS Web Profile may require newly
+available, limited or experimental features. Each such use names feature
+detection or a profile-selected negative outcome plus full, reduced,
+unsupported and rescue behavior. Existence detection alone never proves
+support; the recorded fixture/profile result does. No lagging engine gets an
+architectural veto and no unsupported engine is allowed to fail silently.
+
+### Authority and evidence ladder
+
+| Rank | Input | What it may decide |
+|---|---|---|
+| 1 | This product constitution plus adopted threat, authority, accessibility, privacy and performance requirements | Product obligation and the bounds within which implementation choices are made |
+| 2 | The EFS feature-policy row, conforming to rank 1 | Selected Web Profile, implementation criticality, acceptable degradation and whether a dependency is permitted; it may narrow an implementation or add safeguards but never weaken an adopted requirement |
+| 3 | The applicable primary standards or proposal revision | Intended API and semantic contract; a draft/proposal is labeled honestly |
+| 4 | An exact measured browser/device/assistive-technology profile, selected [Web Platform Tests](https://web-platform-tests.org/) evidence and EFS fixtures | Whether the declared product profile actually works; upstream WPT evidence is not itself EFS conformance |
+| 5 | Pinned [web-features](https://github.com/web-platform-dx/web-features) and [MDN browser-compat-data](https://github.com/mdn/browser-compat-data) snapshots | Discovery, compatibility evidence and drift alarms; Baseline is advisory rather than an EFS product gate |
+| 6 | Pinned agent guidance, linters, validators and code-generation advice | Candidate implementation technique; never authority over the rows above |
+
+The initial broad guidance candidate is [Google Chrome Modern Web
+Guidance](https://developer.chrome.com/docs/modern-web-guidance/get-started).
+It covers far more than CSS, including HTML, native UI, performance,
+accessibility, passkeys and local AI; its WebMCP material is a useful
+implementation input. It does not establish EFS privacy, security,
+agent-authority, release or network policy. The research snapshot used for
+this design is the published
+[tree at `460e553`](https://github.com/GoogleChrome/modern-web-guidance/tree/460e5536b8e61034d83ff4af24bb0bf1112d2cb0),
+corresponding to package `0.0.184`; it is evidence, not the automatically
+selected implementation snapshot. That package defaults to Baseline Widely
+Available when a project supplies no target, so EFS must override it with its
+explicit forward profile. Its package also supports update and telemetry
+behavior. Any future authorized use must pin a retained source/artifact,
+operate offline with telemetry disabled (the inspected release exposes
+`DISABLE_TELEMETRY=1`), and verify the setting again when the snapshot changes.
+The inspected source repository declares its software code
+[Apache-2.0](https://github.com/GoogleChrome/modern-web-guidance-src/blob/main/LICENSE)
+and its documentation/`guides/` content
+[CC-BY-4.0](https://github.com/GoogleChrome/modern-web-guidance-src#license).
+Record and comply with every exact retained snapshot's applicable license,
+attribution and NOTICE material rather than treating the mixed closure as one
+license.
+
+[Paul Irish's `modern-css` skill at inspected commit
+`b91fbe2`](https://github.com/paulirish/dotfiles/blob/b91fbe2b302e28ec4e9ea36830ed2e7f0a30e2c3/agents/skills/modern-css/SKILL.md)
+is the initial focused CSS reference. The inspected repository exposes no
+detected redistribution license, so EFS links to and records that immutable
+source but does not vendor, copy or publish it unless permission/license is
+established. A CSS task uses the accepted retained broad snapshot and primary
+CSS/profile evidence. While Paul Irish's linked source remains accessible it is
+also consulted as external discovery evidence and recorded by commit; if it is
+unavailable, record `GUIDANCE_UNAVAILABLE` and continue with the retained and
+primary evidence. It is not a required gate input, offline-build dependency or
+part of the retained closure, and may become one only after permission or a
+suitable license is established.
+
+Use a small complementary evidence set rather than a marketplace “skill zoo”:
+
+- [WAI-ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/),
+  [ARIA-AT](https://aria-at.w3.org/about) evidence and the
+  [WAI evaluation approach](https://www.w3.org/WAI/test-evaluate/) for patterns
+  and human/assistive-technology verification;
+- [MDN's PWA best practices](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Best_practices),
+  primary Manifest/Service Worker/storage specifications and EFS generation
+  fixtures for install/offline behavior. This is portability/lifecycle
+  evidence only: EFS's accepted-App generation, separate Worker-bootstrap
+  acceptance, rollback and no-automatic-App-selection rules override generic
+  advice about asset, Worker or background-update activation;
+- selected upstream WPT cases and results, not a vendored execution of the
+  entire test corpus;
+- the [WebAssembly Component Model](https://component-model.bytecodealliance.org/)
+  and [WASI](https://wasi.dev/) primary material for the portable-service lane;
+  and
+- the current [WebMCP Community Group draft](https://webmachinelearning.github.io/webmcp/)
+  and its measured WPT evidence as a tracked agent-facing profile, never an
+  assumed baseline or a replacement for EFS Action Plans and receipts.
+
+Overlapping framework/front-end/design skill packs are not accumulated merely
+for coverage. A new guidance source enters only when it fills a named gap,
+brings primary or independently testable evidence, has an acceptable license
+and network/privacy posture, and can be pinned and later removed. The present
+known gaps—EFS exact generations, IPFS/static-host profiles, Unicode/bidi/IME,
+typed authority and `UNKNOWN`, reproducible closures, WIT budgets and real
+assistive-technology/mobile behavior—remain EFS-owned requirements even when a
+guide has no matching rule.
+
+### Required contribution trace
+
+For each applicable change, the author and an independent reviewer must:
+
+1. identify the accepted guidance snapshot by source, version/commit and
+   digest; query its relevant entries and record guide IDs or an explicit
+   `NO_GUIDANCE_MATCH`;
+2. inspect the applicable primary standard/proposal and pinned
+   web-features/BCD data, then record standards body, exact revision/status,
+   normative standing and whether the API is standard, draft, proposal or
+   vendor-specific;
+3. update or cite the EFS feature-policy row and measured Web Profile result.
+   Keep `standardsStatus`, `productCriticality` (`required|enhancement`), each
+   profile's `profileDisposition` (`full|reduced|unsupported|rescue`) and the
+   `experimentalExitCondition` separate; a proposal-stage API may still be
+   required in one selected forward profile;
+4. record why native HTML/CSS/API is sufficient or why a library earned its
+   exact runtime/build/maintenance cost;
+5. run the applicable semantic validation, accessibility/keyboard/IME/RTL/
+   forced-colors/reduced-motion, privacy/network, performance, PWA/offline and
+   cross-profile fixtures; and
+6. have review independently check the evidence and any adopted, overridden or
+   rejected guidance rather than accepting generated code because a guide
+   suggested it.
+
+These fields belong in the future repository's contribution template and
+release evidence bundle. A warning or tool failure is not waived merely by
+labeling a feature modern; a deliberate product/profile exception carries its
+reason, evidence, owner and review date.
+
+### Reproducible repository boundary
+
+Exact filenames remain an implementation detail, but an authorized greenfield
+repository must carry semantically equivalent artifacts for:
+
+- a repository-local agent/contributor rule that invokes this gate;
+- a guidance lock containing source/artifact identity and digest, license and
+  NOTICE material, telemetry/network settings, retrieval date, adopted/
+  overridden/rejected notes and deliberate refresh history;
+- a standards-evidence lock/closure containing source revision, digest,
+  license, retrieval time and local path for the applicable spec/proposal,
+  web-features/BCD snapshots and selected WPT source/results. Normal checks
+  query this closure locally; refresh is a separately diff-reviewed action;
+- a feature-policy ledger containing exact spec/proposal identity,
+  web-features feature ID/version, BCD key/data path, Baseline result and as-of
+  date, selected WPT revision/case and result URL, EFS fixture/result digest,
+  separate standards status and product criticality, each profile disposition,
+  detection/fallback, and experimental exit/review condition;
+- a measured browser-profile ledger naming exact engine/channel/build,
+  OS/device/input/assistive technology, cache/network state and required
+  journeys; and
+- machine-readable evidence receipts keyed by exact build digest, plus a
+  required CI-equivalent `verify:web-evidence` gate (name provisional) that
+  schema-validates the ledgers/receipts, verifies every referenced profile and
+  fixture exists, rejects incomplete matrices, expired experimental reviews
+  and missing result/build digests, and requires either a receipt or explicit
+  `NO_WEB_SURFACE_CHANGE` for every changed Web-surface path.
+
+The retained guidance closure is resolved deliberately before an implementation
+milestone and release, diff-reviewed, and usable without its original registry
+or site. It never auto-updates, executes install/build hooks without separate
+authorization, or contacts a telemetry/search service during ordinary work.
+No guidance package, guide text, search client, telemetry endpoint or remote
+import may enter the application bundle, Service Worker, runtime dependency
+graph or guest network trace. The shipped SPA must behave identically when all
+guidance material is absent.
+
+Guidance snapshots, search results, compatibility databases, review records and
+build attestations are reproducibility/provenance evidence. Changing them alone
+does not change `SystemProfileLockId`, package identity, App/Boot identity or
+effective authority; an executable or profile-policy change is separately
+identified, reviewed and activated.
 
 ## Application state and data flow
 
@@ -790,10 +968,16 @@ with this dated baseline and require every dependency to justify its place:
   Storybook requirement or opaque PWA generator in the initial closure;
 - Biome plus `tsc --noEmit`, adding narrowly justified type-aware ESLint rules
   only for gaps;
+- a profile-aware [Stylelint](https://stylelint.io/) configuration for authored
+  CSS and the [Nu HTML Checker](https://validator.w3.org/nu/) over source and
+  exact generated documents; neither may apply a generic compatibility rule
+  that silently narrows the selected Web Profile;
 - Vitest as Vite-coupled unit-test convenience, a builder-neutral pure-test
   lane, and Playwright against exact static output for reproducible
   Chromium/Firefox/WebKit automation, supplemented by real Safari/iOS/Android
-  and assistive-technology runs;
+  and assistive-technology runs; automated
+  [axe-core](https://github.com/dequelabs/axe-core) smoke augments but never
+  replaces those semantic and manual checks;
 - checked-in Markdown/ADRs and generated TypeDoc only for exported APIs; and
 - no production dependency install script unless explicitly allowlisted.
 
@@ -946,6 +1130,21 @@ an intermediate store.
     browser representation, WIT digest, adapter/shim graph and artifact
     manifest. A mismatch invalidates reproducibility evidence without changing
     the already verified deployment-byte identity.
+11. **Modern-guidance gate conformance.** In a disposable future repository,
+    pin and retain the accepted retainable guidance and standards-evidence
+    closures with licenses and telemetry disabled; run a representative HTML,
+    CSS, custom-element, experimental-API and PWA change through the required
+    trace, machine gate and independent review. Invoke the pinned retained
+    Google artifact directly with the pinned toolchain—never `@latest`. In an
+    egress-permitting fully captured test, run its search/retrieve operations
+    with `DISABLE_TELEMETRY=1` and assert zero DNS/HTTP attempts to
+    `play.googleapis.com` or any telemetry endpoint; retain the capture and
+    repeat after every guidance refresh. Disable each selected API, take the
+    guidance source and registry offline, and capture the guest runtime
+    network/bundle graph. Pass only if profile results remain explicit, the
+    build is reproducible from retained inputs, no guidance byte/request
+    reaches the product, and a no-match, unavailable external reference or
+    overridden recommendation remains a normal reviewable outcome.
 
 The working selection is falsified if:
 
@@ -974,7 +1173,11 @@ The working selection is falsified if:
   benefit, or a WIT/Component adapter becomes runtime/public ABI rather than a
   replaceable exact representation; or
 - a module receives undeclared WASI/EFS resources, blocks the main UI, evades
-  revocation/budgets, or treats WIT resource ownership as authorization.
+  revocation/budgets, or treats WIT resource ownership as authorization; or
+- an applicable contribution omits its pinned guidance/spec/profile trace, a
+  guide's Baseline default narrows the EFS forward profile, guidance updates
+  without deliberate diff/review, telemetry or remote guidance enters the
+  workflow unnoticed, or any guidance artifact enters runtime correctness.
 
 ## Open evidence questions
 
@@ -1002,6 +1205,10 @@ The working selection is falsified if:
 - Whether an OS-owned accessible semantic UI protocol is useful for portable
   Wasm components or whether nontrivial visual modules should remain native
   trusted Web Components/opaque iframes.
+- Exact initial Google guidance source/artifact snapshot and refresh cadence,
+  the first feature/browser-profile ledger encodings, and whether Paul Irish's
+  focused CSS material gains a license that permits retention rather than an
+  immutable external reference.
 
 These are engineering evidence questions. None currently requires a new owner
 product choice or a Core/Files mechanism change.

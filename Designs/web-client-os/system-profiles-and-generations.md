@@ -5,7 +5,7 @@
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/open-web-app-store/architecture]]
 **Inputs:** [[Designs/clientv2/boot-and-profiles]], [[Designs/clientv2/packages-and-updates]], [[Reviews/2026-07-07-clientv2-corpus/research/closures-generations]] (historical evidence)
 **Reviewers:** @functional-generation-architecture (2026-08-15), @wasm-wit-runtime (2026-08-15), @precedent-product-boundary (2026-08-15), @open-web-app-store-pm boundary review (2026-08-15)
-**Last touched:** 2026-08-15
+**Last touched:** 2026-08-22
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/cypherpunk-os #topic/app-model #topic/privacy #topic/wasm #topic/wasi
 
@@ -364,12 +364,11 @@ verified Core Wasm without instantiation. It never evaluates adapter entry
 modules, instantiates a component/module, runs a start function, package hook,
 migration or other module code, or creates live capabilities.
 
-The Open Web App Store PM confirmed on 2026-08-15 that its current
-`InstallGeneration` wording is obsolete umbrella terminology. The shared
-boundary is an OS-owned immutable `InstallBindingGeneration` plus mutable
+The Open Web App Store terminology repair is published and aligned: the
+obsolete `InstallGeneration` umbrella is retired. The shared boundary is an
+OS-owned immutable `InstallBindingGeneration` plus mutable
 `InstallStatusLedger`; `UpdateTrustState`, state-branch heads, grant revocation
-and evidence snapshots keep separate identities/lifecycles. The App Store file
-still needs that terminology repair before either design promotes. The handoff
+and evidence snapshots keep separate identities/lifecycles. The handoff
 continues to exclude every local object and gains no install/activation
 ownership.
 
@@ -1426,7 +1425,7 @@ cross-PM pressure questions.
       could be mistaken for current direction.
 - [x] Open Web App Store confirms the one-way `PackageHandoff` boundary and no
       duplicate package/catalog authority.
-- [ ] Open Web App Store publishes its confirmed terminology repair from the
+- [x] Open Web App Store publishes its confirmed terminology repair from the
       obsolete umbrella `InstallGeneration` to the OS-owned immutable
       `InstallBindingGeneration` plus separate mutable ledgers before either
       design is promoted.

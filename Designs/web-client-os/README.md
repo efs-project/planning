@@ -5,7 +5,7 @@
 **Depends on:** [[Designs/efsv2/README]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/open-web-app-store/README]]
 **Inputs:** [[Designs/clientv2/README]] (historical requirements and mechanism evidence)
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14), @open-web-app-store-pm boundary review (2026-08-14), @os-drives-pm boundary review (2026-08-14)
-**Last touched:** 2026-08-15
+**Last touched:** 2026-08-22
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/cypherpunk-os #topic/app-model #topic/privacy #topic/read-path
 
@@ -131,6 +131,13 @@ bytes or bypass the normal design promotion ceremony.
     selectively rather than becoming ambient POSIX or replacing EFS authority.
     Native HTML/CSS/JavaScript and Web Components remain the trusted Shell and
     fast Files path.
+24. Every authorized Web Client/OS implementation task must use the pinned
+    modern-Web guidance and standards-evidence gate in
+    [[technology-foundation]]. Semantic HTML, CSS and browser APIs are tried
+    before a library; current and experimental standards are welcome when the
+    selected EFS Web Profile names their full, reduced, unsupported and rescue
+    behavior. Guidance is build-time evidence, never runtime code or product
+    authority.
 
 ## Current recommendation
 
@@ -193,26 +200,46 @@ The selected standards surface and dated library/build recommendations are in
 Future mechanism research, experiments, schemas, and reviews should be linked
 from this set rather than expanding one permanent mega-document.
 
-## Implementation guidance leads
+## Mandatory modern-Web guidance gate
 
-### Modern Web Guidance and modern CSS agent skills
+### Pinned guidance, current evidence and native-first review
 
 James routed a 2026-08-21 Hacker News observation that coding models can lag
 newly Baseline web-platform features or incorrectly treat them as unavailable.
-Before Web Client / OS implementation begins, evaluate agent guidance that
-explicitly prefers modern CSS and current platform primitives while retaining
-the compatibility discipline in WCOS-R42:
+That risk is now a required implementation control, not a bookmark for a later
+agent. Before any authorized HTML, CSS, client JavaScript, custom-element,
+browser-API, PWA, accessibility or performance change is designed or reviewed,
+the contributor must consult an exact retained guidance snapshot and the
+applicable primary standards/profile evidence:
 
-- [Paul Irish's `modern-css` Agent Skill](https://www.skills.sh/paulirish/dotfiles/modern-css)
 - [Google Chrome's Modern Web Guidance](https://developer.chrome.com/docs/modern-web-guidance/get-started)
+  is the initial broad agent guidance candidate.
+- [Paul Irish's pinned `modern-css` skill](https://github.com/paulirish/dotfiles/blob/b91fbe2b302e28ec4e9ea36830ed2e7f0a30e2c3/agents/skills/modern-css/SKILL.md)
+  is a linked external CSS discovery reference. CSS work consults it while it
+  remains accessible and records unavailability honestly, but it is not part
+  of the required retained/offline guidance set unless its redistribution
+  license is resolved.
 
-This is an implementation-tooling lead, not an adopted dependency or license,
-browser-support, accessibility, performance, or security conclusion. An
-implementation agent should inspect and pin the exact guidance version,
-review its rules against the EFS browser matrix and threat model, and record
-which rules are adopted, overridden, or rejected before using it in generated
-code. “Modern” never overrides semantic fallbacks, measured browser support,
-or the no-hidden-network and useful-pixels budgets.
+The decision order is semantic HTML, then native CSS, then a standard browser
+API, then the smallest library that earns its retained bytes and maintenance
+surface. EFS's forward Web Profile overrides a guide's conservative browser
+default: limited or experimental standards may be selected deliberately, but
+must have feature detection or a profile-selected negative outcome and an
+honest reduced, unsupported or rescue path. Existence detection alone never
+proves support; the recorded fixture/profile result does. Each change records
+the exact guidance identity, matched guide IDs or no-match result, primary
+specification and compatibility evidence, profile outcome, native/library
+decision, overrides, and relevant accessibility, performance and privacy
+results.
+
+The required retained guidance and standards-evidence closure is pinned,
+offline, telemetry-disabled and deliberately refreshed; external discovery
+references remain non-gating and outside it. Guidance is never fetched through
+`@latest`, shipped in the SPA, contacted at runtime or treated as normative
+over EFS requirements and primary specifications. The complete source/evidence
+hierarchy, required future-repository artifacts and acceptance fixture are
+defined in [[technology-foundation]]. Protocol-only work is exempt until it
+crosses a Web/client integration surface.
 
 ## Authority map
 
@@ -366,29 +393,32 @@ authority.
 ## Current work sequence
 
 1. Review and iterate these design files with James and adjacent PMs.
-2. **MVP critical path:** convert the guest read and official wallet-owned File
+2. Before any authorized Web experiment or implementation, retain the selected
+   guidance snapshot, instantiate the EFS feature/profile evidence ledgers and
+   put the native-first review fields in the repository contribution path.
+3. **MVP critical path:** convert the guest read and official wallet-owned File
    Browser write journeys into disposable fixtures against the current
    Core/Files candidates. An earlier empty-directory debugger is only a
    bring-up step.
-3. **OS-preservation track in parallel:** validate exact profile/lock/follow
+4. **OS-preservation track in parallel:** validate exact profile/lock/follow
    identity, the inert Inspector header and deletion/non-regression fixture.
    Only those interface and zero-guest-cost seams gate the Files skeleton.
    Full Try, whole-system activation/rollback, thousand-module and
    Component/WASI execution experiments gate their later product lanes, not
    the Files MVP.
-4. Run the fixed native-versus-Lit viewer, Web Awesome/Fluent/Lion control-pack,
+5. Run the fixed native-versus-Lit viewer, Web Awesome/Fluent/Lion control-pack,
    native-versus-`<wa-page>` shell, static/PWA generation, storage-recovery,
    and global-use fixtures in [[technology-foundation]] before freezing an
    implementation closure.
-5. Measure critical-path bytes, main-thread work, RPC waterfalls, complete
+6. Measure critical-path bytes, main-thread work, RPC waterfalls, complete
    listing, corrupt fallback, read-after-create, and module lazy loading.
-6. Run security/privacy, accessibility/i18n, browser, agent, independent
+7. Run security/privacy, accessibility/i18n, browser, agent, independent
    implementation, and repository-boundary reviews.
-7. For the later OS lane, run deterministic profile evaluator, disposable Try,
+8. For the later OS lane, run deterministic profile evaluator, disposable Try,
    activation/crash/rollback, revocation, large-graph and browser/native
    Wasm/WIT fixtures in [[system-profiles-and-generations]].
-8. Return only measured Core gaps or mature product/permanence choices.
-9. Design any greenfield repository before creation; do not scaffold or begin
+9. Return only measured Core gaps or mature product/permanence choices.
+10. Design any greenfield repository before creation; do not scaffold or begin
    product implementation without explicit authorization.
 
 ## Explicit non-authorizations
@@ -407,7 +437,10 @@ This draft does not authorize:
 - installing or freezing an exact Signals polyfill, Lit, Web Awesome, Vite,
   pnpm, TypeScript, test, i18n, PWA, runner or other dependency/profile. The
   product direction and bounded roles in [[technology-foundation]] constrain a
-  later selection but do not authorize dependencies or implementation; or
+  later selection but do not authorize dependencies or implementation;
+- installing, auto-updating or executing a guidance package, creating a
+  repository, or treating a linked guide as permission to write product code;
+  or
 - absorbing the App Store, native Drive, Arcade, Media, Git/Forge, EAP, Nanda,
   or other product lanes.
 
@@ -462,3 +495,6 @@ questions for the next pass.
       alternatives, cost of deferral, and falsifier.
 - [ ] At least one `#status/review` round receives another agent or human
       review.
+- [ ] The future repository carries the pinned guidance lock, feature/profile
+      evidence ledgers, native-first contribution fields and zero-runtime-
+      guidance fixture required by [[technology-foundation]].
