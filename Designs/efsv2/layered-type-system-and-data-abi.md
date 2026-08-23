@@ -1,4 +1,4 @@
-# EFS 2.0 — layered Type system and Data ABI
+# EFS 2.0 — exact Type system and layered Data ABI experiments
 
 **Status:** draft — proposal and disposable experiment target; not adopted or frozen
 **Target repos:** planning, contracts, sdk, client
@@ -38,13 +38,17 @@ fifty-year exactness and deliberate, bounded cooperation.
 
 ## Status and authority
 
-This document promotes the leading layered architecture into a written
-comparison target because the project owner asked for the design and expert
-review. It does **not** adopt protocol bytes, authorize a permanent deployment,
-or close V2-E4, V2-E8, or V2-F1. The existing owner inbox remains authoritative:
-no immediate owner answer is required until disposable vectors, implementations,
-measurements, reconstruction, and adversarial reviews distinguish the remaining
-arms.
+This document began as the leading layered-identity comparison. The subsequent
+readiness reconciliation now selects a **flat exact nominal Type plus separate
+QueryProfile** as the `EXP-C0` Core control. SemanticSpec, Shape,
+Representation, compatibility, projection, and View descriptors remain useful
+compiler/catalog outputs and controlled comparison arms. They have not earned
+independent permanent Core identities.
+
+That is a reversible engineering selection, not adoption. This document does
+**not** freeze protocol bytes, authorize a permanent deployment, or close
+V2-E4, V2-E8, or V2-F1. No immediate owner answer is required; a named
+falsifier may reopen a losing arm.
 
 ## Goals
 
@@ -125,9 +129,10 @@ Primary precedents: [EIP-170](https://eips.ethereum.org/EIPS/eip-170),
 ### Does this enable hyperstructures and data interoperability?
 
 Directionally, yes. Exact content-addressed Types and Records provide immutable
-data legos. Bounded Views provide stable contract-facing sockets. Query profiles
-provide complete typed discovery at a stated Realm basis. Ordinary evidence and
-Lenses let communities evolve recommendations without mutating the substrate.
+data legos. Generated exact-Type adapters and, if they earn inclusion, bounded
+Views provide stable contract-facing sockets. QueryProfiles provide complete
+typed discovery at a stated Realm basis. Ordinary evidence and Lenses let
+communities evolve recommendations without mutating the substrate.
 
 It would be premature to call an upgradeable prototype a hyperstructure. A
 hyperstructure-grade deployment additionally needs an ownerless or credibly
@@ -195,29 +200,33 @@ Contract safety depends on an ambient mapping graph or human convention.
 **Use:** reject as the canonical identity model; retain structural comparison as
 an SDK analysis tool.
 
-### C — layered exact Type plus bounded Views — recommended
+### C — flat exact Type, split QueryProfile, optional layers — `EXP-C0`
 
 ```text
-SemanticSpecId + LogicalShapeId + RepresentationId
-        + intrinsic constraints + reference roles + ViewBindings
-        -> TypeRevisionId
+canonical semantic commitment + logical shape + representation
+        + intrinsic constraints + closed reference roles
+        -> TypeSchemaId
 
-TypeRevisionId + canonical body -> RecordId
+TypeSchemaId + canonical body -> RecordId
 
-TypeRevisionId + declared indexes -> QueryProfileId
+TypeSchemaId + declared indexes -> QueryProfileId
 ```
 
-**Strengths:** exact meaning and bytes remain immutable; indexes evolve without
-renaming data; Views enable bounded contract interoperability; richer mappings
-remain plural evidence; archives can reconstruct every layer.
+**Strengths:** exact meaning, accepted values, bytes, and reference extraction
+remain one equality check; indexes evolve without renaming data; the Core
+language stays bounded and non-executable; richer layered descriptors and
+mappings remain plural evidence; archives can reconstruct exact Types and
+Records without trusting a catalog.
 
-**Weaknesses:** more identifiers and result grades; query coverage becomes an
-explicit state machine; SDK quality is essential; first-class Views add one
-small permanent language that must justify its cost.
+**Weaknesses:** a representation or intrinsic-validation change creates a new
+Type even when applications consider it compatible; query coverage becomes an
+explicit state machine; SDK quality is essential; generated interoperability
+may fragment if common interfaces do not emerge.
 
-**Recommendation:** use C as the written Stage B comparison target while
-retaining A as the control. Reject C if the View or profile machinery cannot be
-kept small, bounded, reconstructible, and pleasant behind generated APIs.
+**Recommendation:** use C as the one integrated `EXP-C0` control. Retain A as
+the bundled-index control and the layered identities/View mechanisms below as
+targeted ablations. Reopen them only if an `EXP-C0` falsifier fires; do not
+schedule another symmetric architecture tournament by default.
 
 ### D — open ontology and executable adapters
 
@@ -233,10 +242,13 @@ non-deterministic long-term behavior.
 **Use:** ordinary offchain analysis and Lens-selected evidence only. Reject for
 Core execution.
 
-## Recommended layered model
+## Provisional exact-Type model and optional layers
 
 The formulas below define conceptual separation, not final bytes or names.
-Every identifier is versioned and domain-separated.
+Every identifier is versioned and domain-separated. In `EXP-C0`, only the exact
+Type and separate QueryProfile are assumed Core identities. Sections 1–4 also
+describe compiler/catalog outputs and hostile comparison arms; publishing one
+does not make it authoritative.
 
 ### 1. Semantic specification
 
@@ -305,7 +317,7 @@ tagged encoding. Numeric logical keys remain stable either way. Unknown-data
 preservation means retaining the original canonical body and exact Type—not
 round-tripping through an older lossy object model.
 
-### 4. Bounded Data View
+### 4. Bounded Data View — comparison arm
 
 A `ViewRevision` is a small, nominal, immutable contract-facing interface over
 data. It is closer to a WIT interface or a precisely specified ERC than to an
@@ -322,7 +334,7 @@ ViewRevision {
 ViewRevisionId = H(DOM_VIEW_REVISION, canonicalViewBytes)
 ```
 
-A Type may commit a bounded set of `ViewBinding`s:
+A comparison Type may commit a bounded set of `ViewBinding`s:
 
 ```text
 ViewBinding {
@@ -340,47 +352,50 @@ another.
 
 A ViewBinding proves only that the Type author committed a structurally valid
 mapping. It does not prove offchain truth or make an unknown publisher trusted.
+`EXP-C0` does not use such a mapping to authorize admission or contract effects;
+consumers use exact Types or generated consumer-pinned adapters unless this arm
+independently earns Core inclusion.
 
-### 5. Exact Type revision
+### 5. Exact Type schema
 
 ```text
-TypeRevisionId = H(
-  DOM_TYPE_REVISION,
+TypeSchemaId = H(
+  DOM_TYPE_SCHEMA,
   typeCodecVersion,
-  SemanticSpecId,
-  LogicalShapeId,
-  RepresentationId,
+  canonicalSemanticCommitmentBytes,
+  canonicalLogicalShapeBytes,
+  canonicalRepresentationBytes,
   intrinsicConstraintBytes,
-  typedReferenceRoleBytes,
-  canonicalViewBindingBytes
+  typedReferenceRoleBytes
 )
 ```
 
 The exact Type is what validates and decodes a canonical body. Anything that
 changes the accepted value set, reference extraction, body interpretation, or
-committed View projection creates a new Type revision.
+normative meaning creates a new Type schema.
 
 `typedReferenceRoleBytes` is the sole owner of semantic reference targets. It
-binds a field key to one closed target class: exact Type, exact View,
-Record/Object, Occurrence, `ANY`, `SELF`, or an exact member of the same
-Type-group. Mutually recursive exact Type roles use one canonical strongly
-connected component/group commitment, so no identifier requires a hash fixed
-point.
+binds a field key to one closed target class: exact Type, Record/Object,
+Occurrence, `SELF`, an exact member of the same Type-group, or a separately
+bounded existence target if that arm survives measurement. Unqualified `ANY`
+and View targets are not `EXP-C0` authority-bearing roles. Mutually recursive
+exact Type roles use one canonical strongly connected component/group
+commitment, so no identifier requires a hash fixed point.
 
-Because committed View bindings are inside `TypeRevisionId`, adding a View to
-an existing representation creates a new exact Type. T2/T3 must compare that
-safe but churn-heavy rule against separately immutable, consumer-pinned
-Type-to-View bindings. Detached mappings do not become trusted merely by being
-well formed; the experiment must either justify their authority and identity
-model or reject that arm for a named safety failure.
+SemanticSpec, LogicalShape, and Representation identifiers may be derived from
+the three canonical byte regions for catalogs, compiler caching, compatibility
+analysis, and ablation. Core need not register or trust them separately to
+validate the flat exact Type. A detached Type-to-View mapping does not become
+trusted merely by being well formed; the View arm must independently justify
+its authority and identity model.
 
 `Type` is the developer-facing shorthand. APIs and evidence use the exact
-`TypeRevisionId` when ambiguity matters.
+`TypeSchemaId` when ambiguity matters.
 
 ### 6. Record
 
 ```text
-RecordId = H(DOM_RECORD, TypeRevisionId, H(canonicalBody))
+RecordId = H(DOM_RECORD, TypeSchemaId, H(canonicalBody))
 ```
 
 Record identity remains author-neutral. Authorship, Realm admission, current
@@ -392,22 +407,29 @@ selection, and trust remain Occurrence, receipt, Binding, and Lens facts.
 QueryProfileId = H(
   DOM_QUERY_PROFILE,
   queryCodecVersion,
-  TypeRevisionId,
+  TypeSchemaId,
   canonicalIndexSpecs
 )
 ```
 
-Index declarations do not change `RecordId`. A Realm activates a bounded
-profile with explicit start, backfill, active/pending generation, coverage, and
-basis. `COMPLETE` is illegal before historical coverage is proved. A consumer
-that depends on a query pins both the Type and Query profile, usually through a
-reusable `ConsumerProfile` Record.
+Index declarations do not change `RecordId`. Profile identity grants no
+authority and does not imply Realm support. A Realm-qualified
+`QueryProfileActivation` names the exact Type/Profile, RealmRevision,
+generation, activation high-water, historical interval, covered-through
+high-water, `PENDING | ACTIVE_PARTIAL | TERMINAL_COMPLETE` state, and activation
+policy basis. Only an accepted Realm transition creates or advances it. That
+policy declares who may propose activation, who bears bounded backfill and
+future-write costs, and the fee rules. Terminal completion is derived from the
+state machine and an independently reconstructible postings commitment, never
+self-asserted by a Type author, operator, or indexer. A consumer pins the exact
+Type, QueryProfile, activation generation, and basis, usually through a reusable
+`ConsumerProfile` Record.
 
-This separation is the largest usability cost of Architecture C and the main
-reason Architecture A remains a control arm.
+This separation is the largest usability cost of `EXP-C0` and the main reason
+Architecture A remains a control arm.
 
 An exact-Type QueryProfile cannot by itself claim complete enumeration across
-every Type that implements a View. T4 therefore includes a separate disposable
+every Type that claims a View. T4 therefore includes a separate disposable
 `ViewQueryProfile` arm:
 
 ```text
@@ -416,7 +438,7 @@ ViewQueryProfileId = H(
   queryCodecVersion,
   ViewRevisionId,
   TypeInventoryHighWater,
-  sorted included TypeRevisionId -> QueryProfileId pairs,
+  sorted included TypeSchemaId -> QueryProfileId pairs,
   canonical membership and coverage rules
 )
 ```
@@ -433,15 +455,20 @@ pre-adopted Core index or final identity.
 Validation grades remain separate:
 
 1. **well-formed** — canonical bytes and envelope;
-2. **Type-valid** — the closed interpreter accepts the body;
-3. **View-projectable** — a committed direct binding yields the named View;
+2. **Type-valid** — the closed portable interpreter accepts the body;
+3. **View-projectable** — in the comparison arm, a committed direct binding
+   yields the named View;
 4. **Realm-admitted** — a named policy accepted the Occurrence at a basis;
 5. **currently effective** — lifecycle/current folds pass at a basis; and
 6. **endorsed** — a consumer or Lens accepts the Type, mapping, author, or
    evidence.
 
-Only the first three can be portable structural results. Stateful policies and
-trust never enter portable Record identity.
+Only well-formedness and Type-validity are required portable `EXP-C0` results;
+View projection is a portable result only inside that explicit comparison arm.
+A Realm admission policy may reject an otherwise Type-valid Occurrence but may
+not rename its Type/Record or claim portable invalidity. Stateful policies and
+trust never enter portable Record identity, and every receipt names their exact
+profile and result.
 
 ## Contract consumption modes
 
@@ -450,16 +477,16 @@ compatibility graph.
 
 ### EXACT
 
-The contract accepts a finite set of exact `TypeRevisionId`s and generated
+The contract accepts a finite set of exact `TypeSchemaId`s and generated
 decoders. This is the safest mode for financial and authority-sensitive logic.
 
-### PINNED_VIEW_SET
+### PINNED_VIEW_SET — comparison arm
 
 The contract pins a `ViewRevisionId` plus a finite set of accepted exact Types.
 Core performs the committed direct extraction. This reduces duplicated decoder
 logic without permitting new Types automatically.
 
-### SEMANTIC_VIEW
+### SEMANTIC_VIEW — comparison arm
 
 The contract pins both a `SemanticSpecId` and `ViewRevisionId`, and explicitly
 declares that those two commitments contain every fact relevant to its action.
@@ -774,7 +801,8 @@ domain-name authority as Type truth, a limitation visible in AT Protocol NSIDs.
 
 Candidate discovery arms to measure rather than pre-adopt:
 
-- exact point lookup by `TypeRevisionId`, View, and QueryProfile;
+- exact point lookup by `TypeSchemaId` and QueryProfile, plus View lookup only
+  in the explicit comparison arm;
 - bounded canonical enumeration of raw Type revisions, if its cost and spam
   behavior fit;
 - Types by `SemanticSpecId` and directly committed View, if those indexes fit;
@@ -934,7 +962,7 @@ every candidate mechanism.
 
 | Layer | Candidate responsibility |
 |---|---|
-| Core | Domain-separated exact IDs; tiny Type/View meta-codec; canonical structural validation; direct reference/View extraction; state-reconstruction inventory if measured viable; QueryProfile activation/coverage if selected; bounded pages and exact result grades. SemanticSpec/View discovery indexes and View-wide completeness remain explicit T4 arms. |
+| Core | Domain-separated exact IDs; tiny Type meta-codec; canonical structural validation; bounded direct reference extraction; state-reconstruction inventory if measured viable; QueryProfile activation/coverage; bounded pages and exact result grades. SemanticSpec/View identity, extraction, discovery indexes, and View-wide completeness remain explicit comparison arms. |
 | Ordinary EFS Records | Specs and packages; catalogs; tags; families; traits; successors; equivalence; projections; migrations; conformance; deprecation; consumer profiles; EAS/Arrow/Parquet/host mappings. |
 | SDK and code generation | Authoring DSL; mixin flattening; compatibility analysis; generated Solidity/TS/Rust; unknown preservation; catalog UX; adapters; rich validators; test corpus production. |
 | Realm | Admission policy, authority verification, query-profile generation, basis, receipts, and qualified current state. |
@@ -946,7 +974,7 @@ The logical surface should be decomposed even if several units compile into one
 physical contract:
 
 1. hash/domain and descriptor codec;
-2. Type/View registry and immutable descriptor bytes;
+2. exact Type registry, QueryProfile generations, and immutable descriptor bytes;
 3. Record validation and storage;
 4. Envelope/authorship and Realm admission;
 5. Query-profile postings and coverage;
@@ -1006,9 +1034,11 @@ router, or linked-library deployment.
 
 ### More concepts
 
-Developers may face `SemanticSpecId`, `TypeRevisionId`, `ViewRevisionId`, and
-`QueryProfileId` where EAS exposes one schema UID. Generated APIs, package
-manifests, and diagnostics must make the layers visible only when relevant.
+Developers must sometimes distinguish `TypeSchemaId` from `QueryProfileId`
+where EAS exposes one schema UID. Advanced compiler/catalog workflows may also
+surface SemanticSpec, Shape, Representation, or View identifiers. Generated
+APIs, package manifests, and diagnostics must show these layers only when
+relevant.
 
 ### Ecosystem fragmentation
 
@@ -1103,10 +1133,34 @@ unknown preservation, flattened authoring composition, immutable interfaces,
 and generated tooling. The EVM contribution is to make the smallest useful
 subset bounded and contract-readable while leaving rich reasoning outside Core.
 
-## Required disposable experiments
+## Disposable comparison inventory
 
-No result may set `protocolConformance=true`. The work is comparison evidence
-for V2-E4/V2-E8/V2-F1.
+No result may set `protocolConformance=true`. T1–T9 below are the full
+comparison/freeze inventory for V2-E4/V2-E8/V2-F1, **not** the current execution
+plan. A losing arm, million-record sweep, three-topology build, or full
+three-language SDK exercise runs only after an `EXP-C0` falsifier or when its
+specific `GO-FREEZE` gate opens.
+
+### `EXP-C0` minimum run
+
+The next throwaway run is one micro-Realm trace corpus, independent pure model,
+and monolithic Solidity SUT. It takes only these slices from the inventory:
+
+| Inventory | Minimum now |
+|---|---|
+| T1 | one exact TypeSchema/Record candidate codec; product, option, bounded list, exact reference, one recursive group; noncanonical/unknown/absent-versus-zero twins; independent vector recomputation |
+| T2/T3 | one bundled/layered/View comparator over identical accepted values; one same-shape wrong-meaning and caller-supplied View attack; exact-Type adapters remain the default |
+| T4 | one QueryProfile activation from `PENDING` through partial backfill to state-derived terminal completion, plus mixed-basis/cursor and empty-partial failures |
+| T5 | monolith only; record code/gas/state ceilings but build no facet/module arm unless the monolith fails a named profile |
+| T6/T7 | Files and Git as the primary exact-reference/disappearance traces; Nanda, EAP, media, packages, and Arcade remain thin no-new-Core-noun canaries |
+| T8 | one generated TypeScript façade over raw-preserving semantics; independent full SDK/codegen comparisons wait for G6/`GO-FREEZE` |
+| T9 | the micro-profile's legal maxima and first failure points; 64-leaf, million-record, and full topology sweeps wait for their measured gate |
+
+The run also includes two-leaf portable PublicationSet/destination AdmissionPlan,
+EOA/ERC-1271 admission with retained historical verifier result, one Binding
+CAS/tombstone/Withdrawal, one BindingScope page, 1/8/32/64 point Lens reads, and
+state-only reconstruction. The active ordering and exit rules live in
+[[v2-contract-readiness-program]].
 
 ### T1 — exact descriptor and Record vectors
 
@@ -1289,7 +1343,7 @@ Return measured limits and first failure points. Do not select caps by prose.
 
 ## Experiment kill criteria
 
-Reject or substantially redesign Architecture C if any of these holds:
+Reject or substantially redesign `EXP-C0` if any of these holds:
 
 1. View registration or extraction needs an open graph, callback, recursion, or
    attacker-shaped work.
@@ -1314,16 +1368,19 @@ Reject or substantially redesign Architecture C if any of these holds:
 
 ## Open questions
 
-- [ ] Do first-class bounded Data Views earn permanent Core inclusion over
-  exact-Type-only Core plus generated consumer adapters? Resolve with T3/T5.
-- [ ] Does split QueryProfile identity preserve enough usability and query
-  honesty to beat the bundled B0 control? Resolve with T2/T4/T9.
-- [ ] Should View bindings remain inside exact Type identity, or can separately
-  immutable consumer-pinned bindings avoid identity churn without weakening
-  authority? Resolve with T2/T3.
-- [ ] Can a View-wide query ever report useful, spam-resistant completeness
-  across a permissionless and growing Type inventory, or should applications
-  use exact common carriers/finite membership? Resolve with T4/T7.
+- [x] Which Type arm leads the disposable control? — `EXP-C0` uses flat exact
+  Types, split QueryProfiles, generated exact-Type adapters, and no
+  authority-bearing View mapping. This selects what to test, not a winner.
+- [ ] Do first-class bounded Data Views falsify the exact-Type-only Core under
+  T3/T5 while remaining bounded and unable to self-authorize?
+- [ ] Does split QueryProfile identity survive the bundled B0 comparator and
+  T2/T4/T9 usability, activation-authority, coverage, and reconstruction tests?
+- [ ] Does excluding committed or detached View bindings from authority create
+  unacceptable identity churn or prevent a required contract workload in
+  T2/T3?
+- [x] Is View-wide completeness required in `EXP-C0`? — No; use exact Types or
+  a pinned finite Type inventory. T4/T7 may reopen it with a bounded
+  counterexample.
 - [ ] Which representation arm gives the best combination of EVM cost,
   canonicalization simplicity, and unknown preservation? Resolve with T1/T2.
 - [ ] Which physical deployment shape preserves atomicity, immutability,
@@ -1331,8 +1388,9 @@ Reject or substantially redesign Architecture C if any of these holds:
 - [ ] Should production Core be immutable, or permit narrowly defined
   semantic-preserving upgrades whose full code/state basis is pinned? Return
   this to the owner only if both survive T5 and security review.
-- [ ] Should raw Types be enumerable by `SemanticSpecId` and View in Core, or
-  only through declared QueryProfiles/catalogs? Resolve with T4/T6/T9.
+- [x] How does `EXP-C0` enumerate raw Types? — Through exact-Type QueryProfiles
+  and ordinary catalogs, not SemanticSpec/View indexes. T4/T6/T9 may reopen
+  that selection.
 - [ ] Does a generic neutral sealed carrier meet the product privacy floor, or
   is selective disclosure/proof needed for the first release? Resolve with T7
   and the existing privacy gate.
@@ -1350,7 +1408,8 @@ must run before a decision packet is mature.
 
 ## Implementation notes
 
-No permanent implementation is authorized. After the owner reviews this
-written proposal, create a separate disposable experiment plan for T1–T9. Keep
-the B0 bundled Type arm as the control, retain exact artifacts and independent
-reconstruction, and return only measured failures or irreducible owner forks.
+No permanent implementation is authorized. `EXP-C0` permits design convergence
+and disposable experiments without waiting for an owner mechanism choice. Keep
+the B0 bundled Type arm and optional layers as targeted controls, retain exact
+artifacts and independent reconstruction, and return only measured failures or
+irreducible owner-value forks.

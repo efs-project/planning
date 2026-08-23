@@ -20,7 +20,8 @@ few seams still capable of changing it.
 
 ```mermaid
 flowchart LR
-    T["Type Schema<br/>meaning + shape + index declarations"]
+    T["Type Schema<br/>meaning + shape + representation + closed references"]
+    Q["QueryProfile<br/>indexes + coverage generation"]
     R["Record<br/>exact typed semantic content"]
     P["PublicationSet / source graph<br/>actor context + counted leaves"]
     S["SourceWitnessSidecar<br/>signature attests exact source node"]
@@ -30,6 +31,7 @@ flowchart LR
     A["Admission receipt<br/>Realm + policy + basis + ordinal"]
     I["Core indexes and current folds"]
     T --> R
+    T --> Q
     R --> P
     P --> O
     S -. attests .-> P
@@ -97,10 +99,9 @@ TypeSchema {
   bootstrapCodecVersion
   semanticNamespaceOrSpec
   canonicalBodyShape
+  canonicalRepresentation
   constraints
   referenceRoles[]
-  indexSpecs[]
-  structuralValidationProfile?
 }
 ```
 
@@ -108,16 +109,25 @@ TypeSchema {
 and not identified by a registry transaction. The prototype must use a tiny
 closed descriptor language: bounded body and collection sizes, canonical scalar
 encodings, statically extractable reference/index fields, and no arbitrary
-Type-created callbacks during admission. Optional external validators are
-ordinary evidence or explicitly bounded, revisioned Realm modules.
+Type-created callbacks during admission. `Type-valid` means only that this
+closed portable interpreter accepts the canonical body. A revisioned Realm
+admission policy may reject an otherwise Type-valid Occurrence, but it cannot
+rename its Type/Record or declare it portably invalid. Every receipt retains
+the exact policy/verifier profile and result. Rich external validators remain
+ordinary evidence.
 
-One 50-year identity question is deliberately open. Variant A hashes semantic
-meaning, shape, validation, reference roles, and canonical index obligations
-into one `TypeSchemaId`, giving portable query guarantees but changing RecordIds
-when indexing evolves. Variant B separates semantic `TypeId`, encoding
-`ShapeId`, validation/admission profile, and `IndexProfileId`, allowing query
-evolution but requiring explicit coverage and compatibility. Both must be
-implemented against the same fixtures; this prose does not choose by accident.
+`EXP-C0` provisionally selects one **flat exact nominal Type** for Core. The
+`TypeSchemaId` commits every byte that changes meaning, accepted values,
+canonical representation, or closed reference extraction. Index policy is not
+intrinsic to the Record value and lives in a separately versioned
+`QueryProfile`. SemanticSpec, Shape, Representation, compatibility, projection,
+and View descriptors remain useful compiler/catalog outputs and controlled
+comparison arms; they are not assumed independent Core identities.
+
+This is a reversible experiment selection, not a freeze. Falsify it if the
+same cross-language corpus shows unacceptable Record fragmentation or query
+evolution and a layered alternative preserves identical rejection behavior,
+bounded work, historical interpretation, and non-self-authorizing Views.
 
 Successor/compatibility/equivalence claims between Type Schemas are ordinary
 authored evidence. They never mutate the older schema or make a v2 body pretend
@@ -355,7 +365,8 @@ Baseline automatic indexes distinguish the different evidence sets:
 - Occurrences by Type, Record, and Principal; and
 - current Binding point reads with complete Realm-local absence at a basis.
 
-A Type creator may additionally declare a small bounded `IndexSpec[]`:
+A separately versioned QueryProfile may declare a small bounded `IndexSpec[]`
+for one exact Type:
 
 - exact equality on one canonical bounded scalar;
 - typed reference equality;
@@ -370,19 +381,43 @@ Candidate EVM layout:
 4. append typed reference postings keyed by target and role;
 5. keep Binding/current lifecycle state separate from immutable history.
 
-Every declared index is materialized automatically for every admitted item; an
-individual writer cannot opt out. Each onchain page returns a Realm revision,
-execution block number, applicable admission high-water, query generation,
-cursor, coverage, and completeness. One call sees atomic state. An offchain
-observer may bind dependent pages to one exact block hash/state root; separate
-ordinary transactions cannot claim that same exact basis merely because their
-reported block numbers match. Type authors pay or cause writers to pay declared
-fan-out, so limits and gas/state benchmarks are freeze gates. Mutable “add an
-index later” cannot imply complete historical absence. Under Type Variant A, a
-new canonical index means a new Type Schema. Under Variant B, a new
-`IndexProfileId` may preserve the semantic Type and Record IDs, but its start
-basis and coverage are explicit and any backfill stays `PARTIAL` until proved
-complete.
+Profile identity does not activate an index or grant authority. `EXP-C0` uses
+an explicit Realm-qualified activation state:
+
+```text
+QueryProfileActivation {
+  queryProfileId
+  exactTypeSchemaId
+  realmRevision
+  generation
+  activationHighWater
+  coveredHistoricalStart
+  coveredThroughHighWater
+  state: PENDING | ACTIVE_PARTIAL | TERMINAL_COMPLETE
+  activationPolicyBasis
+}
+```
+
+Only a Realm transition accepted under the named RealmRevision and activation
+policy creates or advances this state. The policy must state who may propose an
+activation, who bears backfill/future-write cost, and the bounded work and fee
+rules; a Type or QueryProfile author cannot self-assert support. Terminal
+completion is a state-machine result over the exact covered interval and
+postings commitment, independently reconstructible from Core state—not an
+author, operator, or indexer attestation.
+
+Every active declared index is materialized automatically for every admitted
+item in its covered generation; an individual writer cannot opt out. Each
+onchain page returns a Realm revision, execution block number, applicable
+admission high-water, QueryProfile generation, cursor, coverage, and
+completeness. One call sees atomic state. An offchain observer may bind
+dependent pages to one exact block hash/state root; separate ordinary
+transactions cannot claim that same exact basis merely because their reported
+block numbers match. The activation policy assigns declared fan-out and
+backfill costs, so limits and gas/state benchmarks are freeze gates. A later
+profile may preserve Type and Record IDs, but its activation basis and coverage
+are explicit and any backfill stays `PARTIAL` until the state machine proves
+terminal completion.
 
 ### Contract Resolution Plan (Lens)
 
@@ -489,18 +524,22 @@ the required basis is unavailable, the resolver returns `UNKNOWN`. If the user
 merely wants a personalized display, the user may supply a Plan; if a treasury
 acts on the value, the treasury must pin or approve the Plan.
 
-## Alternatives in the bakeoff
+## `EXP-C0` comparison inventory
 
-| Question | Candidate A | Candidate B | Evidence needed |
-|---|---|---|---|
-| Record shape | self-contained repeated headers | minimal Record + immutable Envelope/Context normalization | calldata, SSTORE, cold reads, extraction, archive closure |
-| Author surface | tagged Account or Principal | PrincipalId everywhere + intrinsic account Principal | ABI complexity, setup, gas, smart-account safety, future migration |
-| Physical deployment | one atomic Core | several narrow contracts/modules | reentrancy, atomicity, code size, upgrade and call costs |
-| Index pointer | full RecordId postings | append-only stable ordinal postings | storage/gas and century exhaustion/layout risk |
-| Type schema identity | publisher-qualified namespace | semantic spec commitment with optional qualification | collision of meaning vs convergence of shared standards |
-| Type/query identity | index + validator commitments inside Type ID | semantic Type/Shape plus separate validation and index profiles | portability, complete coverage, migration, RecordId stability |
-| Envelope leaf | inline Record bytes | RecordId plus separately available Record | one-tx availability and extraction proof |
-| Publication domain | portable authored Envelope + Realm AdmissionIntent | deliberately Realm-bound Envelope | replay safety, copyable provenance, destination recognition |
+`EXP-C0` is the implementation default. Before `RECOMMEND-GO-CODE`, every
+ABI-shaping seam gets one minimal sealed comparator; a full losing-arm
+implementation is required only if that comparator reopens the seam.
+
+| Question | `EXP-C0` default | Minimal comparator or reopen trigger |
+|---|---|---|
+| Record/carrier | minimal author-neutral Record + portable PublicationSet | one self-contained-Record trace; reopen on identity, subset-closure, atomicity, or material total-cost failure |
+| Author surface | full-width `PrincipalId` + zero-setup account Principal | one tagged-author trace; reopen on setup, hidden authority, portability, truncation, or material complexity/cost failure |
+| Physical deployment | one atomic monolithic disposable Core | measure code/gas/state only; compare facets/modules after a named profile ceiling fails |
+| Index pointer | full RecordId in semantic traces; ordinals are physical optimization only | prove any ordinal is full-width safe, state-readable, and identity-neutral before using it |
+| Type qualification | exact semantic commitment with explicit convergent or qualified mode | same-shape/different-meaning and hostile-republication trace |
+| Type/query identity | flat exact Type + separate Realm-activated QueryProfile | one bundled/layered/View trace; reopen on fragmentation, activation/completeness, or required-contract-interop failure |
+| Publication leaf | exact RecordId with the Record body state-readable on admission | one inline-body trace; reopen if extraction or atomic availability cannot be proved |
+| Publication domain | portable PublicationSet + destination-bound AdmissionPlan | one Realm-bound/replay trace; reopen on ambiguous authorship, replay, or destination-recognition failure |
 
 ## Falsifiers
 
@@ -526,7 +565,8 @@ Reject or redesign this architecture if:
 
 ## Open questions
 
-- [ ] Finalize the two bakeoff implementations and fixture corpus.
+- [ ] Seal the `EXP-C0` micro-Realm trace corpus and its minimal comparators;
+  build no full losing arm unless a named falsifier reopens it.
 - [ ] Define the Realm descriptor and admission/finality observation split.
 - [ ] Decide the developer name (`TypeSchema`, `TypeDefinition`, or another
   term) after the Fable review; `TypeRevision` is not presumed.

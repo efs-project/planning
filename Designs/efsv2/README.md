@@ -10,8 +10,25 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
-**This README is the phone summary.** Read through “Current technical
-candidate,” then stop unless you want the engineering detail. For a deep pass:
+Start with [[owner-guide]] for the ten-minute, plain-language explanation: the
+basic nouns, one photo from publication through reading, why the design can
+support hyperstructures, what is adopted, what is provisional, and which
+choices genuinely belong to the project owner later.
+
+The shortest accurate summary is:
+
+- EFS v2 is a public typed filesystem/database substrate designed for durable,
+  reconstructible records, not a guarantee that every offchain byte survives;
+- immutable Records preserve exact data, while Publications, Realm admission,
+  Bindings, queries, and Lenses preserve authorship, acceptance, currentness,
+  completeness, and reader policy without collapsing them into “truth”;
+- Core stays small, deterministic, permissionless, and reconstructible;
+- applications remain open-ended because anyone can define exact Types and
+  relations without adding an application-specific Core primitive; and
+- `EXP-C0` is now the one reversible engineering control. It is not frozen
+  bytes, a production contract, or a permanent owner ruling.
+
+For an engineering pass:
 
 1. [[system-constitution]] — detailed requirements synthesis;
 2. [[core-architecture-candidate]] — technical model, alternatives, and falsifiers;
@@ -67,29 +84,42 @@ flowchart TB
 
 ## Current technical candidate
 
-The current comparison target is deliberately smaller than the July design:
+The current disposable control is `EXP-C0`, deliberately smaller than the July
+design and selected so experiments have one default rather than several equal
+arms:
 
 ```text
-immutable Type Schema
+flat exact nominal Type Schema
+        +
+separately versioned QueryProfile
         +
 author-neutral exact Record
         +
-signed Envelope / immutable shared Context
+portable signed PublicationSet
         =
 authored Occurrence
         +
-Realm-qualified admission receipt, generic indexes, Binding, and Lens resolution
+destination-specific Admission Plan
+        +
+Realm-qualified receipt, indexes, Binding, bounded Lens, and reconstruction
 ```
 
-Names and exact bytes are open. `TypeSchema` is the current plain-language
-name; older files call similar concepts `TypeRevision`. EAS is not Core. An EAS
-import/export adapter remains possible if it provides real interoperability.
+`EXP-C0` also uses one full-width `PrincipalId` surface, a self-authenticating
+Realm bootstrap with append-only revisions, and a monolithic state owner as the
+first disposable Solidity control. Alternatives remain available only behind
+named falsifiers. This is permission to converge designs and throwaway
+experiments, not `GO-CODE`, `GO-FREEZE`, or deployment authority.
 
-Focused Type proposal: [[layered-type-system-and-data-abi]] compares the bundled
-B0 Type with a layered exact Type/Data ABI: nominal semantic commitments,
-logical shapes, representations, bounded contract-facing Views, separately
-covered QueryProfiles, ordinary compatibility/projection evidence, and
-human-readable Files/catalog aliases outside canonical identity. It is a
+Names and ceremony-final bytes remain open. `TypeSchema` is the current
+plain-language name; older files call similar concepts `TypeRevision`. EAS is
+not Core. An EAS import/export adapter remains possible if it provides real
+interoperability.
+
+Focused Type proposal: [[layered-type-system-and-data-abi]] now uses a flat
+exact nominal Type plus split QueryProfile as the `EXP-C0` Core control.
+Semantic, shape, representation, compatibility, projection, and View
+descriptors remain valuable compiler/catalog outputs and controlled comparison
+arms. They have not earned separate permanent Core identities. This remains a
 review/experiment target, not an adopted Type system or frozen byte format.
 
 Focused Files proposal: [[hierarchical-files-and-folders]] defines the current
@@ -126,20 +156,21 @@ These are inputs, not competing active architectures:
 
 ## Build order
 
-1. Review the constitution and current candidate against the full survivor
-   ledger and application fixtures.
-2. Implement two disposable Core prototypes: self-contained Records versus
-   immutable shared Context/Envelope normalization.
-3. Benchmark complete write, storage, index, reconstruction, and Lens costs—not
-   isolated happy paths—under named conservative current and separately named
-   future-scenario Realm execution profiles.
-4. Run the focused Fable 5 pass plus independent database, EVM/security,
-   standards, privacy, and long-horizon reviews.
-5. Integrate accepted findings, close the owner-sized choices, and only then
-   prepare the freeze bundle and contracts/SDK plan.
-6. In parallel, build the narrow direct Web Client/File Browser + one-game
-   Arcade slice behind an adapter so product work tests the model without
-   freezing it by accident.
+1. Seal `EXP-C0`'s transition, read-result, failure, and reconstruction traces.
+2. Build one micro-Realm differential experiment: an independent pure model
+   and deliberately simple monolithic Solidity SUT covering Type/Record,
+   two-leaf Publication, EOA/ERC-1271 admission, Binding/Withdrawal,
+   QueryProfile coverage, 1/8/32/64 point Lens reads, and reconstruction.
+3. Run one minimal sealed comparator for each ABI-shaping seam so every
+   falsifier is observable. Build no full losing-arm implementation unless the
+   comparator reopens it; do not repeat broad architecture tournaments.
+4. Price the complete write, index, Lens, history, and reconstruction workload
+   under named execution profiles, then let SDK and Data Explorer pressure
+   expose truth or usability failures.
+5. Return `CONTINUE-DISPOSABLE`, `REDESIGN`, or `RECOMMEND-GO-CODE` with a small
+   owner packet. Real repository contract engineering waits for the later
+   owner checkpoint; ceremony-final vectors and century proof wait for
+   `GO-FREEZE`.
 
 ## Hard holds
 

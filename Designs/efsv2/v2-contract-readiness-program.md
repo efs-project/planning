@@ -48,22 +48,56 @@ would hide integration failures, or an upgradeable production scaffold, which
 would accidentally make storage and authority decisions before their semantics
 are understood.
 
+## Current provisional control — `EXP-C0`
+
+The 2026-08-23 work direction authorizes agents to make reversible engineering
+selections while the project owner is traveling, preserve the losing
+alternatives and their falsifiers, and return only genuine product or value
+forks later. It is **not** an owner ratification of protocol law, `GO-CODE`, or
+permission to write production contracts.
+
+Use one integrated control rather than treating every plausible architecture as
+a co-equal implementation:
+
+| Surface | `EXP-C0` selection | Reopen only if |
+|---|---|---|
+| Type | Flat exact nominal `TypeSchema`: meaning, canonical shape/representation, intrinsic accepted-value constraints, and closed reference roles share one identity. Query/index policy lives in a separate `QueryProfile`. Layered descriptors and Views remain compiler/catalog outputs and comparison arms. | Exact-Type evolution creates unacceptable fragmentation and a layered arm independently preserves bounded work, identical rejection behavior, historical interpretation, and non-self-authorizing mappings. |
+| Record and carrier | Immutable author-neutral Record; portable ordered `PublicationSet` plus source witness; per-leaf Occurrence; destination-specific `AdmissionPlan` and witness. | Carriage changes Record/Occurrence identity, loses subset closure, enables replay, or permits a partial multi-leaf effect. |
+| Principal | One full-width `PrincipalId` API with zero-setup account Principals, Realm-qualified EOA/ERC-1271 verification, and retained historical verifier transcript. | It adds setup, hides authority basis, truncates identity, breaks portable authorship, or is materially worse than a tagged author surface. |
+| Realm | Self-authenticating immutable bootstrap plus append-only `RealmRevision` for code, execution profile, policy, verifier, and possible administration powers. Bare `chainId` is never identity. | The named genesis/deployment/fork/chain-ID cases create ambiguous identity, replay, or historical reads. |
+| Mutation | One atomic append-only state machine for multi-leaf admission, receipts, Binding CAS/history/tombstone, Withdrawal, exact effects, and no resurrection. | The independent model and SUT disagree, a failed action leaves effects, retry changes identity, or channel loss is mistaken for success. |
+| Query | Exact-Type QueryProfiles with Realm-qualified activation authority/cost basis, generation, covered interval, postings commitment, pages, and `COMPLETE/PARTIAL/UNKNOWN`; complete BindingScope enumeration is separate from a point read. | A required complete answer needs an unbounded scan, event-only/mutable private table, or hosted indexer, or any incomplete path reports absence. |
+| Lens | Immutable finite point `ResolutionPlan`; the risk bearer selects it; run 1/8/32/64-Principal experimental caps. | The beneficiary can self-authorize, work/results become unbounded, or independent implementations disagree. |
+| Realization | Independent pure state model plus one deliberately monolithic disposable Solidity SUT. | The semantics pass but the monolith exceeds a named execution profile; only then compare physical topologies. |
+
+`EXP-C0` chooses the next thing to falsify. It freezes no hash, codec, ABI,
+limit, storage layout, deployment topology, Realm, Commons, upgrade law, or
+product release.
+
 ## Three different finish lines
 
 ### A. `GO-CODE` — ready to begin real candidate contract engineering
 
 This means the semantic state machine, signed inputs, read contract, failure
-states, bounds, reconstruction contract, and initial module boundary are exact
-enough that engineers are implementing a known design in the real repositories.
-The implementation remains explicitly nondeployable and uses a candidate
-namespace until the later gates pass. Operator identities, exact deployment
-addresses, and performance optimization may remain open; possible admin and
-upgrade powers, interpretation boundaries, and safety ceilings may not.
+states, reconstruction obligations, interpretation boundaries, and provisional
+safety bounds are exact enough that engineers are implementing a known design
+in the real repositories. The implementation remains explicitly nondeployable
+and uses a candidate namespace until later gates pass. Possible admin and
+upgrade powers must already be visible.
+
+`GO-CODE` does **not** require ceremony-final identifier bytes, the final
+physical contract split, independent SDK conformance, exhaustive application
+traces, final century-width caps, or a production deployment manifest. Those
+belong to `GO-FREEZE`. It **does** require one exact, versioned, explicitly
+disposable candidate codec, ID domain/preimage set, bounds sheet, and golden
+trace corpus for every state-bearing value. Candidate engineering measures
+whether those bytes and bounds deserve the permanent namespace; it does not
+improvise them silently.
 
 An experiment report can only **recommend** `GO-CODE`. Starting real contract
 work requires an explicitly recorded project-owner ruling approving the
-semantic candidate and every named deferral. A hold on any item in “What must
-be exact before production contract work” blocks `GO-CODE`.
+semantic candidate and its named deferrals. The current travel-period
+authorization covers prose, sealed traces, and throwaway experiments only.
 
 ### B. `GO-FREEZE` — ready for a century-scale semantic freeze
 
@@ -151,11 +185,12 @@ separate fields.
 Settle an exact candidate for the distinctions contracts and SDKs cannot repair
 later:
 
-- semantic specification, logical shape, representation, bounded View, exact
-  Type revision, QueryProfile, Record, stable Object, Occurrence, and
-  Admission identities;
+- exact TypeSchema, QueryProfile, Record, stable Object, PublicationSet,
+  Occurrence, and Admission identities; layered semantic/shape/representation/
+  View identities remain explicit comparison outputs;
 - exact reference targets: Record, Object, Occurrence, exact Type, closed Type
-  group/View, and a tightly bounded existence target where justified;
+  group, and a tightly bounded existence target where justified; View targets
+  remain a comparison arm;
 - `SELF`, mutually recursive groups, open-reader unions, unknown variants, and
   cross-version references without ambient reinterpretation;
 - hash domains, canonical preimages, codec/version tags, byte limits, and a
@@ -168,8 +203,10 @@ later:
   never creates application meaning or safely mixes linkable public/private
   material.
 
-Run four controlled ABI-shaping comparisons before choosing the integrated
-candidate:
+`EXP-C0` provisionally selects the first practical arm for each of the four
+ABI-shaping seams below. Before `RECOMMEND-GO-CODE`, run one minimal sealed
+comparator for each seam so the stated falsifier is observable. Do not build
+full parallel implementations unless that comparator reopens the arm:
 
 1. uniform `PrincipalId` versus a tagged `Account | Principal` author surface;
 2. self-contained Records versus shared Envelope/immutable Context using the
@@ -208,7 +245,7 @@ retired field/variant keys, unknown or out-of-range selectors, and proof
 coordinate changes. External registry keys or interface selectors enter no EFS
 identity preimage without a separately frozen EFS profile.
 
-The current working hypothesis to falsify is a **flat exact nominal Type**:
+The selected `EXP-C0` hypothesis to falsify is a **flat exact nominal Type**:
 every intrinsic constraint that changes accepted values and every closed
 reference role remains in exact Type identity, while query/index policy lives
 in a separate QueryProfile. Layered SemanticSpec/Shape/Representation IDs are
@@ -220,9 +257,9 @@ comparators; neither is an assumed production default.
 reject all malformed or noncanonical twins. Changing meaning, shape, or
 representation cannot silently preserve an exact identity. A new compatible
 Type can be added without changing old bytes or letting an open reader grant
-authority. The four ABI-shaping comparisons above have a measured survivor or
-prove that their alternatives coexist without ambiguous IDs, signatures,
-storage, or reads.
+authority. Each selected ABI-shaping arm passes its minimal sealed comparator
+without ambiguous IDs, signatures, storage, or reads. A losing arm needs a full
+implementation only after the selected arm reaches its falsifier.
 
 ### G2 — integrated mutation and query state machine
 
@@ -579,13 +616,13 @@ falsifier; no duplicate experiment is scheduled without a stated reason.
 
 ### Lane 2 — Type, carrier, Principal, and Realm bakeoffs
 
-- compare a bundled control, the flat exact-Type/split-QueryProfile hypothesis,
-  and committed/detached ViewBinding variants using identical accepted-value
-  semantics; retain layered sub-identities as an ablation;
-- rerun detached ViewBinding attacks using the actual caller-supplied binding,
-  exact issuer/basis, projection bytes, and state effects;
-- run the four G1 ABI-shaping comparisons for Principal, Record/Context,
-  portable/Realm-bound publication, and RealmDescriptor/bootstrap;
+- implement the flat exact-Type/split-QueryProfile `EXP-C0` semantics in sealed
+  traces and run one minimal bundled/layered/View comparator with identical
+  accepted-value semantics, caller-supplied binding, exact issuer/basis,
+  projection bytes, and state effects;
+- run one minimal sealed comparator for the selected uniform Principal, shared
+  PublicationSet, portable publication/destination AdmissionPlan, and
+  RealmDescriptor/bootstrap arms; expand a losing arm only on falsification;
 - run Realm origin/fork/chain-ID collisions and Type evolution/selectors/
   absent-versus-zero/noncanonical twins under the same candidate bytes;
 - decide candidate semantics for `SELF`, closed groups, bounded existence
@@ -594,8 +631,10 @@ falsifier; no duplicate experiment is scheduled without a stated reason.
 - extend independent ID/preimage vectors, malformed twins, and hash/codec
   succession.
 
-**Exit:** one candidate or proven unambiguous coexistence plus documented losing
-arms; no permanent bytes. If no survivor exists, stay in this lane.
+**Exit:** `EXP-C0` survives each minimal comparator, or a named falsifier
+reopens the relevant arm and a replacement must separately pass. Document
+losing arms and freeze no permanent bytes. If no survivor exists, stay in this
+lane.
 
 ### Lane 3 — transition spec, pure model, and Solidity SUT
 
@@ -733,35 +772,54 @@ fixture: a cold browser must reach the disposable Realm through public reads and
 the real SDK adapter with optional services removed, while retaining raw
 fallback, basis, completeness, verified bytes, and dependency traces.
 
-## What must be exact before production contract work
+## What must be exact before candidate contract engineering (`GO-CODE`)
 
-- every ID preimage, domain, canonical byte rule, and version tag used in state;
-- Type validation/reference extraction and all hard bounds;
-- the selected Record/Context/publication carrier and its subset/application-
-  atomicity rule;
-- Principal, signature/verifier, nonce, expiry, Realm, and admission-intent
-  transcript, including the proved future-identity extension path;
-- the self-authenticating RealmDescriptor/bootstrap, component/code/policy
-  commitments, accepted execution/read/verifier profile, historical semantics,
-  activation/succession law, and every possible admin/upgrade power;
-- state transition tables for admission, Binding, Withdrawal, scopes, query
-  coverage, and history;
-- the canonical operation/effect-set commitment, idempotent identity, cost/
-  precondition/atomicity bounds, effect-outcome recovery, and read-back rules;
-- the lossless facts matrix, error vocabulary, page/cursor/basis semantics, and
-  completeness proof across Core, Solidity, SDK, and product adapters;
-- the adopted typed query/index obligations and measured aggregate budget;
-- minimum contract Lens semantics and who selects it;
-- state-readable reconstruction ABI and required indexes;
-- storage ownership, upgrade/reinterpretation prohibition, and contract split;
-- predeclared conservative bytecode, gas, calldata, validator-work,
-  result-size/returndata, state-growth, century-width, and worst-case bounds,
-  qualified to named Realm execution profiles;
-- SDK raw semantics and independent golden vectors.
+- one selected semantic noun set and interpretation boundary;
+- one exact, versioned, non-durable candidate codec, ID preimage/domain set,
+  bounds sheet, and golden trace/vector corpus for every state-bearing value;
+- exact transition tables for Type/Record validation, publication/admission,
+  Binding, Withdrawal, scopes, query coverage, Lens, and history;
+- signed-input domains and replay rules precise enough that no actor, author,
+  Realm, operation, effect set, nonce, expiry, or expected revision can be
+  substituted;
+- a lossless facts/error model, page/cursor/basis semantics, and the rule that
+  `UNKNOWN` or `PARTIAL` never becomes proved absence or success;
+- statically bounded validation/reference extraction and provisional safety
+  ceilings sufficient to show the candidate is not obviously impossible;
+- minimum risk-bearer-selected contract Lens semantics;
+- authoritative reconstruction obligations and the state that must expose
+  them, without selecting a final optimized ABI or physical topology;
+- historical Realm/verifier/policy interpretation and every *possible*
+  administration, upgrade, or succession power; and
+- sealed expected traces plus an independent model that real candidate code
+  must match.
 
-No item in this list may be carried as a `GO-CODE` hold. The evidence packet
-may recommend a candidate, but the project owner's recorded ratification is the
-final gate to work in the real contracts repository.
+No semantic ambiguity in this list may be carried as a `GO-CODE` hold. Exact
+ceremony bytes and final optimization evidence may. The project owner's
+recorded ratification remains the final gate to work in the real contracts
+repository.
+
+## What must additionally be exact before century freeze (`GO-FREEZE`)
+
+- every ceremony-final ID preimage, hash domain, canonical codec byte, version
+  tag, signature profile, and malformed-input rejection precedence, including
+  the explicit decision to adopt or replace each disposable candidate byte;
+- final Type grammar, reference roles, QueryProfile declarations, Record/
+  Publication/Occurrence carrier, and all hard caps;
+- final RealmDescriptor, component/code/policy commitments, execution/read/
+  verifier profiles, activation and succession law, and historical receipts;
+- final operation/effect-set, consent, idempotency, recovery, and read-back ABI;
+- the adopted query/index bundle and measured aggregate state/gas budget;
+- final Lens grammar and cap;
+- state-readable reconstruction ABI and indexes, independently replayed;
+- storage ownership, immutable or explicitly governed upgrade law, and final
+  contract topology;
+- measured conservative bytecode, gas, calldata, validator-work, returndata,
+  state-growth, century-width, and worst-case ceilings under named profiles;
+- independent cross-language encoders/readers, golden vectors, SDK raw
+  conformance, and clean-room regeneration; and
+- adversarial, application, shutdown, and recovery evidence required by the
+  freeze manifest.
 
 ## What may remain versioned or deferred
 
@@ -844,12 +902,16 @@ deployment remain later, separately ratified gates.
 
 ## Open questions
 
-- [ ] Does the corrected integrated Type comparator confirm the flat exact
-  Type plus split QueryProfile as the survivor, and what role, if any, do
-  committed or detached Views retain?
-- [ ] Which uniform `PrincipalId` versus tagged-author, self-contained Record
-  versus shared Context, portable versus Realm-bound publication, and
-  RealmDescriptor candidates survive the controlled G1 bakeoffs?
+- [x] Which arms lead the disposable integrated control? — `EXP-C0` selects
+  flat exact Type plus split QueryProfile, uniform full-width `PrincipalId`,
+  shared portable PublicationSet, destination-bound AdmissionPlan, and a
+  self-authenticating Realm bootstrap. This selects what to test, not a winner.
+- [ ] Does `EXP-C0`'s Type arm survive the minimal bundled/layered/View
+  comparator without self-authorizing mappings, historical reinterpretation,
+  dishonest completeness, or unacceptable fragmentation?
+- [ ] Do the selected Principal, carrier, publication-domain, and Realm
+  bootstrap arms survive their minimal sealed comparators and named hostile
+  traces?
 - [ ] Can `BindingScope`, QueryProfile coverage, Withdrawal, and the minimum
   contract Lens jointly meet honest completeness and conservative EVM bounds?
 - [ ] Which physical topology preserves one reconstruction contract and one
@@ -874,4 +936,5 @@ deployment remain later, separately ratified gates.
 This draft is being prepared in an isolated planning worktree. Experiment code
 belongs in the existing local disposable Stage B repository or a clean child
 worktree. No real-contract PR should be opened until the project owner has
-explicitly recorded `GO-CODE`.
+explicitly recorded `GO-CODE`. The 2026-08-23 travel-period authorization
+permits design convergence, sealed fixtures, and throwaway experiments only.
