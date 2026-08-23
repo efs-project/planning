@@ -4,7 +4,7 @@
 **Target repos:** planning, contracts, sdk, client
 **Depends on:** [[Designs/efsv2/README]], [[media-infrastructure]]
 **Reviewers:** 2026-08-14 — independent authority/architecture pass; no Critical or Important finding after repair
-**Last touched:** 2026-08-14
+**Last touched:** 2026-08-22
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/media-library #topic/onchain #topic/graph-queries #topic/read-path
 
@@ -274,6 +274,17 @@ including its reorg/finality caveats.
 | Realm reorg/finality change | follow explicit Realm finality policy and invalidate incompatible cursors/pages rather than rebasing them silently |
 | subgraph deletion | rebuild from declared chain state/events or deploy another compatible index |
 
+The
+[[media-infrastructure#Ethereum history and content-resolution pressure|history-availability pressure]]
+makes the last row conditional: reconstruction succeeds only when declared
+state is sufficient or a qualified archive/history source actually supplies
+the required raw state, bodies or receipts at the pinned basis through the
+declared evidence and verification path. A named capability is not proof, and
+a current RPC that has pruned old bodies or receipts does not prove absence.
+Any unverified or incomplete backfill keeps the activation and affected query
+`PARTIAL`/`UNKNOWN`; exact inspection or reconstruction that depends on one
+historical provider is a redesign trigger.
+
 ## API and SDK boundary
 
 Clients should depend on a provider-neutral query AST and page contract, not a
@@ -309,7 +320,8 @@ corpus:
 - 1/8/32/64-curator point policies;
 - 10k and synthetic 1m global checkpoints;
 - exact same-basis Core/view/Graph parity;
-- Graph backfill, reorg, lag, error, outage and reconstruction; and
+- Graph backfill, pruned-history/archive-capability loss, reorg, lag, error,
+  outage and reconstruction; and
 - no-Graph guest fallback.
 
 Report:
