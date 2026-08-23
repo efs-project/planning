@@ -48,6 +48,11 @@ candidate SDK.
    regeneration from pinned compiler inputs.
 5. Generated application façades behind adapters, so experiments can change
    bytes and contract calls without changing every product component.
+6. Separate accepted and observed Ethereum execution/RPC/account capability
+   profiles, block-hash-qualified read bases, basis-aware signature-verification
+   and account-authorization/submission receipts, and exact deployment
+   manifests. These are candidate evidence contracts, not frozen public names
+   or bytes.
 
 The Web Client/OS and Data Explorer are now two distinct first-party product
 consumers of that common seam. Web Client/OS owns the direct Files/shell path;
@@ -62,8 +67,9 @@ generated façades above it.
 - The exact signature and authorship model, index limits, page/completeness
   proofs, module ABI, deployment addresses, upgrade rules, or first Commons.
 - Permanent generated package names, public exports, Solidity interfaces,
-  helper addresses, media types, conformance claims, migration guarantees, or
-  a promise that the current layered Type proposal will ship.
+  helper addresses, exact supported chain/fork/provider/wallet/account matrix,
+  media types, conformance claims, migration guarantees, or a promise that the
+  current layered Type proposal will ship.
 
 ### Highest-leverage disposable work proposed after this review
 
@@ -77,6 +83,12 @@ generated façades above it.
    dishonest indexers, tampered bytes, an unavailable publisher, and an
    unknown profile; prove none becomes absence or success and reconstruct with
    zero mutable network requests.
+
+The three packets also carry the Ethereum standards corpus in
+[[ethereum-standards-census]]: liar providers, pinned-read fork changes,
+EOA/contract/counterfactual/delegated-account transitions, clear-signing
+substitution, returndata bombs, history expiry, absent precompiles/opcodes, and
+deterministic-deployment dependency drift.
 
 Exact fixtures, gates, and stop conditions are in [[experiment-program]].
 
@@ -118,7 +130,7 @@ or navigation model onto the other.
 | **Owner-ratified** | EFS v2 is greenfield; Core is standalone in a qualifying Realm; Commons is optional; contract-readable bounded Lenses, declared automatic indexes, full state-readable Records, a direct guest File Browser, and cross-platform read-only mounts are required outcomes. |
 | **Owner-directed product baseline** | The guest path does not wait on wallet, profile, Commons, hosted indexer, or OS boot. The Web Client uses one `PrincipalId` product surface and targets a 64-Principal Lens if measurement supports it. This does not freeze the Core authority mechanism. |
 | **Instantiated product coordination input** | Data Explorer is an independent general-purpose typed-data product, not a File Browser panel. Its exact local-only draft input is planning commit `08bb5f2906191f0d87624d9a6ecc6788a8b2754d`; it remains `#status/draft` and does not freeze SDK or protocol mechanisms. |
-| **Current candidate** | Realm, TypeSchema/TypeRevision, Record, Envelope/Context, Occurrence, admission, Binding, ResolutionPlan, layered Types, Views, QueryProfiles, and exact-Type generated adapters are comparison vocabulary and experiment inputs. |
+| **Current candidate** | Realm, TypeSchema/TypeRevision, Record, Envelope/Context, Occurrence, admission, Binding, ResolutionPlan, layered Types, Views, QueryProfiles, exact-Type generated adapters, and accepted-versus-observed execution/RPC/account/signature/deployment profiles are comparison vocabulary and experiment inputs. |
 | **Historical evidence** | The current `sdk/` monorepo, its viem seam, source injection, profile stamps, typed errors, compile-in Solidity choice, and EAS integration can inform experiments. Its EAS identities, attester defaults, write graph, and package/API shape do not carry into v2. |
 | **Unknown / owner-frozen later** | Exact bytes, IDs, codecs, limits, authority model, validator grades, indexes, contract split, deployment and upgrade form, helper policy, package topology, compatibility promise, migration promise, and release scope. |
 
@@ -132,6 +144,7 @@ constitution/candidates, then older evidence. This set cannot override Core.
 |---|---|
 | `README.md` | Phone checkpoint, authority map, current recommendation, and routing |
 | [[research-precedents]] | Official-source SDK, schema, codegen, Ethereum, and negotiation precedents; evidence only |
+| [[ethereum-standards-census]] | Exact dated EIP/ERC registry snapshot, integration classifications, requirements, falsifiers, exit paths, and cross-PM routing |
 | [[developer-journeys]] | Exact developer flows and their non-loss invariants |
 | [[architecture-candidate]] | Three arms, recommended experiment, generation/runtime/onchain split, logical modules, topology candidates, compatibility, result model, and security invariants |
 | [[sdk-pm-charter]] | Durable SDK PM mandate, ownership boundaries, coordination contracts, and release discipline |
@@ -156,6 +169,9 @@ constitution/candidates, then older evidence. This set cannot override Core.
 - No generic onchain schema VM, arbitrary validator callback, `delegatecall`
   extension, global mutable codec registry, or proxy helper is in the
   recommended experimental lane.
+- An EIP/ERC's `Final` status, a provider's `eth_config`, wallet capability,
+  interface answer, registry entry, address, code presence, receipt, or
+  successful call never proves chain support or EFS truth on its own.
 - No implementation may present this draft's illustrative names or result
   shapes as an adopted EFS API.
 

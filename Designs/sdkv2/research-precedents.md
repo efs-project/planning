@@ -3,7 +3,7 @@
 **Status:** reference — dated official-source research; evidence, not an adopted SDK or protocol design
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[README]]
-**Reviewers:** @offchain-precedents (2026-08-22), @onchain-precedents (2026-08-22)
+**Reviewers:** @offchain-precedents (2026-08-22), @onchain-precedents (2026-08-22), @wallet-account-standards (2026-08-22), @evm-execution-standards (2026-08-22), @rpc-data-interfaces (2026-08-22)
 **Last touched:** 2026-08-22
 
 #status/reference #kind/research #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/onchain #topic/read-path
@@ -23,6 +23,14 @@ read source, profile-stamped artifacts, typed error hierarchy, and concern for
 raw provenance are worth preserving. Its EAS substrate, identities, writer
 graph, fixed API/package shape, and v1-specific compile-in rationale are not a
 v2 baseline.
+
+The Ethereum-specific follow-up metadata-screened every proposal in exact
+official EIP/ERC repository snapshots and deeply reviewed the relevant
+provider, RPC, transaction, wallet, account, signature, proof, content,
+deployment, EVM, future-fork, and agent families. Its dated classifications,
+requirements, falsifiers, exit paths, and PM routing are in
+[[ethereum-standards-census]]. It is deliberately a census of useful pressure,
+not a claim that EFS should implement every proposal.
 
 ## Research conclusions
 
@@ -77,6 +85,10 @@ v2 baseline.
 | [ERC-1967](https://eips.ethereum.org/EIPS/eip-1967) and [EIP-1052](https://eips.ethereum.org/EIPS/eip-1052) | Proxy implementation/admin state can change; `EXTCODEHASH` identifies the code at the queried address, not hidden proxy semantics or mutable contracts/data the code reads. | Experimental helpers are direct deployments with no proxy, beacon, or diamond. Pin address/code plus semantic/result/limits and finite dependency/basis commitments, or restrict the helper to caller-supplied bytes. |
 | [EIP-170](https://eips.ethereum.org/EIPS/eip-170) and [EIP-3860](https://eips.ethereum.org/EIPS/eip-3860) | EVM runtime code is capped at 24,576 bytes and initcode at 49,152 bytes. | Generated code size is a first-class gate. Keep deliberate headroom and stop before size pressure drives an upgradeable or generic schema VM. |
 | [EIP-2929](https://eips.ethereum.org/EIPS/eip-2929) and [EIP-150](https://eips.ethereum.org/EIPS/eip-150) | Cold account access and call gas forwarding make deployed helpers materially costly under composition. | Compare cold/warm and nested calls; a helper must win end-to-end lifecycle measurements, not an isolated microbenchmark. |
+| [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193), [EIP-6963](https://eips.ethereum.org/EIPS/eip-6963), [EIP-1898](https://eips.ethereum.org/EIPS/eip-1898), [EIP-234](https://eips.ethereum.org/EIPS/eip-234), and [EIP-7910](https://eips.ethereum.org/EIPS/eip-7910) | Provider discovery, exact block-hash qualification, log-basis coherence, and execution-config observation can replace proprietary environment assumptions. | Keep provider selection explicit; separate accepted from observed capabilities; resolve finality tags once and pin the logical read. Provider metadata/config is evidence, not authority or proof. |
+| [EIP-712](https://eips.ethereum.org/EIPS/eip-712), [ERC-1271](https://eips.ethereum.org/EIPS/eip-1271), [ERC-6492](https://eips.ethereum.org/EIPS/eip-6492), [EIP-7702](https://eips.ethereum.org/EIPS/eip-7702), and [ERC-4337](https://eips.ethereum.org/EIPS/eip-4337) | Modern Ethereum signing is strategy- and basis-dependent: EOAs can delegate code, contract validity can change, and counterfactual/account-abstraction paths depend on factories and infrastructure. | Produce one exact typed EFS plan; keep EOA/1271/6492 signature verification separate from transaction, `userOpHash`, delegation-tuple and wallet/bundler authorization/submission receipts while binding each back to that plan and canonical read-back. Never permanently classify a signer from current code presence. |
+| [EIP-2718](https://eips.ethereum.org/EIPS/eip-2718), [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559), [EIP-2930](https://eips.ethereum.org/EIPS/eip-2930), and [EIP-5792](https://eips.ethereum.org/EIPS/eip-5792) | Typed transactions, modern fees/access lists, and capability-shaped wallet call batches are established interoperability surfaces. | Preserve unknown transaction envelopes raw, inject transaction construction, and treat wallet bundle status as submission evidence followed by canonical read-back. |
+| [EIP-4444](https://eips.ethereum.org/EIPS/eip-4444), [EIP-7642](https://eips.ethereum.org/EIPS/eip-7642), and [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) | Execution history and blob bytes are not guaranteed to remain available from ordinary nodes. | Make history/archive/byte availability explicit and reconstruct from retained durable evidence. Blob references are an optional ephemeral transport, never century storage. |
 | [EAS contracts](https://github.com/ethereum-attestation-service/eas-contracts), [EAS SDK](https://github.com/ethereum-attestation-service/eas-sdk), and [SchemaResolver](https://github.com/ethereum-attestation-service/eas-contracts/blob/master/contracts/resolver/SchemaResolver.sol) | EAS separates schema registration, attestations, and optional executable resolver policy. | EAS remains an optional attributable carrier adapter. Bind chain/address plus the exact schema text/UID/resolver/revocability tuple and independently decode payloads. Resolver code hash is only extra qualification: it neither proves immutable policy nor pins a proxy-backed resolver. No v2 identity or migration promise follows. |
 
 ## What this research supports
@@ -107,3 +119,6 @@ GraphQL, EAS, viem, npm package names, or any deployed reader as EFS protocol.
    complete consumer lifecycle cost, under cold calls and hostile inputs.
 5. Prove exact regeneration without a package registry, source website,
    publisher, original indexer, or mutable network read.
+6. Refresh the EIP/ERC snapshot before any release packet and prove each
+   advertised chain/provider/wallet/account/precompile/factory capability with
+   exact conformance vectors rather than proposal status or marketing labels.

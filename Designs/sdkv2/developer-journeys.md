@@ -2,7 +2,7 @@
 
 **Status:** draft — candidate experience contract; names and mechanics remain replaceable
 **Target repos:** planning, sdk, contracts, client
-**Depends on:** [[README]], [[../efsv2/system-constitution]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/type-data-abi-boundary-pressure]]
+**Depends on:** [[README]], [[ethereum-standards-census]], [[../efsv2/system-constitution]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/type-data-abi-boundary-pressure]]
 **Reviewers:** @local-authority (2026-08-22)
 **Last touched:** 2026-08-22
 
@@ -46,9 +46,12 @@ Every supported journey follows five rules:
 | Define a Type | Author a bounded descriptor closure; lint semantic commitments, logical shape, representation, references, declared indexes, Views and QueryProfiles; estimate generated and onchain cost. | The tool distinguishes candidate profile assumptions from adopted Core rules and never allocates a permanent ID under an unfrozen profile. |
 | Evolve a Type | Compare old and new closures; classify semantic, canonical-byte, generated-source, query-coverage, validator, and operational compatibility directionally; require an explicit successor or mapping claim. | An optional/additive-looking edit never silently mutates old Type meaning or proves bidirectional compatibility. |
 | Generate artifacts | From one exact retained input closure, emit TypeScript DTOs/builders/codecs/validators/reference extractors/docs/vectors, Solidity structs/internal libraries/interfaces/NatSpec/vectors, compatibility and bound reports, and a reproducibility manifest. | Output is deterministic, offline-regenerable, and names source closure plus generator/runtime/compiler identities and hashes. Package names are distribution metadata, not Type identity. |
+| Select an Ethereum environment | Explicitly select an EIP-1193 provider or non-wallet read source; compare observed chain, fork, RPC, system-contract, precompile and history capabilities with the accepted operation profile; retain disagreements and lifecycle events. | Provider name/RDNS, chain ID, `eth_config`, wallet label and “EVM compatible” never substitute for exact accepted capabilities. Chain/account/provider change invalidates the plan and basis-sensitive cache. |
 | Construct a Record | Use an exact generated builder or a lower-level raw API; validate bounded shape; encode canonical bytes; preview commitments/IDs under the selected experimental profile. | The result carries raw bytes, exact Type/profile, diagnostics, and limits. A decoded DTO cannot replace the bytes used for identity or signature. |
-| Author and sign | Produce a deterministic plan naming semantic author, actual signer/controller, signature domain, payload commitment, expected identifiers, expiry/replay limits, and human/agent-readable effects. | Author, signer, submitter/relayer, payer, beneficiary, and Realm admitter remain distinct roles. No ambient wallet selection. |
-| Publish | Submit exact bytes/envelope through an injected transport; preserve transaction/submission evidence; wait for the selected observation/finality policy; perform canonical read-back. | “Submitted,” “included,” “authored,” “admitted,” and “currently selected” are separate outcomes. |
+| Author and sign | Produce a deterministic EIP-712 plan naming semantic author, actual signer/controller, signature strategy/domain, payload/calldata/effect commitments, expected identifiers, nonce, expiry/replay policy and human/agent-readable effects; optionally derive a context-bound ERC-7730 clear-signing descriptor. | Author, signer, submitter/relayer, payer, beneficiary, and Realm admitter remain distinct roles. A clear-signing descriptor is presentation, not authority. No ambient wallet selection or raw app-requested EIP-7702 authorization. |
+| Verify a plan signature | Select a basis-aware EOA, ERC-1271, non-persistent ERC-6492, ERC-7913 or P-256 strategy over the exact EFS plan/message digest and return a signature-verification receipt. | Empty/present code and simulated magic-value success never permanently classify the account or create EFS Principal authority. Raw signature bytes are not plan identity or a replay key. |
+| Authorize account submission | Separately build and inspect the transaction/calls, ERC-4337 `userOpHash`, EIP-7702 authorization tuple or other account-specific commitment and bind it to the unchanged EFS plan/effects. | Wallet, bundler, paymaster or delegation acceptance does not verify the EFS EIP-712 digest and is not EFS authorship, admission or canonical effect success. |
+| Publish | Simulate the unchanged plan, request clear signing/authorization, submit through an injected EIP-2718 transaction or EIP-5792/account adapter, preserve per-layer receipts, wait for selected observation/finality, and perform canonical read-back. | “Simulated,” “wallet accepted,” “bundler accepted,” “submitted,” “included,” “authored,” “admitted,” and “currently selected” are separate outcomes. |
 | Admit to a Realm | Evaluate or submit the Realm's explicit admission operation; return the admission receipt, policy/version, actual authority basis, and any compare-and-swap precondition. | Realm admission does not retroactively create authorship, Type validity, global truth, or cross-Realm currentness. |
 | Read by exact identity | Read an exact object from Core or a qualified source; verify commitment/bytes; decode only under an accepted exact Type/profile; return raw plus view and evidence. | Unavailable or tampered bytes, unsupported profile, invalid value, and proved absence remain different results. |
 | Query by Type/field/reference | Execute an exact QueryProfile or named bounded query against Core, an indexer, or a reconstructed local source; page under a pinned basis and coverage claim. | An indexer/cache is acceleration evidence only. A missing or incomplete page cannot become `ABSENT` or `COMPLETE`. |
@@ -63,6 +66,7 @@ Every supported journey follows five rules:
 | Build an agent tool | Expose structured capabilities, plans, costs, risks, receipts, and outcomes; require the same operation-bound authority as a human path; support deterministic dry-run and replay. | An agent receives no ambient signer, wallet, filesystem, network, or policy authority, and never gets a second less-honest result model. |
 | Consume from Solidity | Pin protocol/result ABI, Type/descriptor, limits and required features; import a generated `internal` leaf library; call a bounded Core interface/probe; locally validate typed bytes/result evidence. | A capability probe, helper, registry, revert payload, or successful call cannot by itself prove semantic validity, completeness, or authority. |
 | Write from Solidity | Build or accept exact bounded inputs; validate locally; call the selected Core write ABI; verify role/domain/replay conditions; consume explicit results/events under the selected basis. | Generated code does not hide `msg.sender`, author/controller, payer, admitter, or external-call effects. V1 compile-in assumptions do not automatically apply. |
+| Deploy or verify a helper | Build from exact compiler inputs; recompute initcode/address; verify factory, runtime code, dependencies and basis; retain a local generated fallback. | CREATE2 address, registry entry, code presence or proxy slot is not helper identity or authority. Removing the helper cannot change correctness or reconstruction. |
 
 ## Journey details
 
@@ -112,6 +116,8 @@ singleton:
 ReadContext = {
   realm,
   protocolProfile,
+  acceptedEvmProfile,
+  observedRpcCapabilities,
   acceptedTypes,
   acceptedLimits,
   basisPolicy,
@@ -129,12 +135,20 @@ basis are values a caller can inspect and replace. Browser, server, test,
 archive, indexer, and clean-room sources implement the same narrow read
 capability; they do not gain wallet or write authority.
 
+For a logical multi-call/page/log read, a caller may request `safe` or
+`finalized` as policy, but the adapter resolves it once to an explicit block
+hash/number and then uses EIP-1898/EIP-234-shaped qualification throughout.
+Provider failover must prove the same basis or return a new qualified attempt;
+it cannot silently resume at another head. Pagination cursors carry that basis
+and coverage so a chain of pages can be tested for duplicates and omissions.
+
 ### 4. Write planning
 
 A write call is a pipeline rather than one opaque `publish()`:
 
 ```text
-construct -> validate -> plan -> review -> authorize -> submit -> observe -> read back
+construct -> validate -> plan -> simulate -> clear-sign -> authorize -> submit
+          -> receipt/finality -> canonical read-back
 ```
 
 The plan names every intended Core/Realm call, exact calldata or commitment,
@@ -142,6 +156,17 @@ expected effect, signer/controller and author relationship, payer, admission
 authority, compare-and-swap precondition, cost bound, expiry, replay domain,
 and expected identifiers. Human UI and agent tooling render the same plan.
 Unknown operation kinds or post-plan mutation invalidate authorization.
+
+The wallet/account adapter is selected only after the plan exists. EIP-5792,
+ERC-4337/bundler/paymaster, or an audited wallet-owned EIP-7702 flow may carry
+the transaction, but each layer returns its own receipt. Account, provider,
+chain, delegate code, EntryPoint, calldata, cost, nonce, deadline, basis or
+clear-signing presentation drift invalidates the authorization and restarts at
+planning. Verification APIs permit only explicitly non-persistent `eth_call` or
+revert-based counterfactual simulation. They prohibit a persistent ERC-6492
+prepare/deploy mode. Any persistent factory, preparation or deployment step is
+a separate inspected action plan with its own authorization, submission and
+effect receipt.
 
 ### 5. Solidity consumption
 
@@ -161,13 +186,41 @@ capability tuple match. A verified mismatch/forged response is `INVALID`, a
 known unsupported tuple is `UNSUPPORTED`, and genuinely unobservable state is
 `UNKNOWN`; the caller then applies an explicit local fallback policy.
 
+### 6. Ethereum signature and account authorization
+
+The experience has two linked operations rather than one permanent account
+class. First, EOA recovery, deployed ERC-1271, non-persistent ERC-6492,
+ERC-7913 and P-256 validation each name their required chain/fork/code/factory
+basis, canonicality policy and work limits while verifying the exact EFS
+plan/message digest. The receipt retains that digest and original signature;
+SDK-produced P-256 action signatures use the selected low-`s` canonical policy,
+and compatibility verification of high-`s` evidence remains explicitly
+noncanonical. Raw signature bytes never identify the plan or replay domain.
+
+Second, ERC-4337/account adapters, EIP-7702 delegation, EIP-5792 calls and
+ordinary transactions each expose their own digest or commitment and receipt,
+bound back to the unchanged EFS plan/effect commitment. Unsupported and
+unobservable are not invalid; a valid signature or accepted account submission
+is not admission, an OS grant, proof of semantic authorship or canonical effect
+success.
+
+### 7. Reproducible helper deployment
+
+The tool retains exact Solidity standard JSON, compiler/settings/`evmVersion`,
+sources/remappings/linking, constructor and immutable inputs, creation
+initcode/runtime bytes and hashes, CREATE2 factory/code hash/protocol, salt,
+expected address, dependency graph, observation block and local fallback.
+Deployment verifies the selected execution profile first and canonical
+read-back verifies runtime and dependencies afterward. No factory or helper is
+assumed present merely because an EIP is Final or an address is conventional.
+
 ## Environment profiles
 
 | Environment | Required properties | Explicitly optional |
 |---|---|---|
 | Browser guest | ESM, `Uint8Array`, AbortSignal-like cancellation, streaming where useful, no Node polyfills, no wallet touch, route-shaped loading, Web Worker compatibility | cache, indexer, gateway, OS services, signer |
-| Browser write | Same read path plus an explicitly injected planner/signer/submitter and canonical read-back | wallet connector, smart-account adapter, relayer |
-| Server | Deterministic headless reads, streaming/batching, bounded concurrency, source injection, structured logs without secret/raw-data leakage | database materialization, RPC pool, indexer |
+| Browser write | Same read path plus an explicitly selected EIP-1193 provider, planner, basis-aware signer/account strategy, submitter and canonical read-back; lifecycle drift invalidates plans | EIP-5792 wallet calls, ERC-4337 adapter, wallet-owned EIP-7702 integration, relayer/paymaster |
+| Server | Deterministic headless block-hash-pinned reads, explicit accepted/observed RPC profiles, streaming/batching, bounded concurrency, source injection, structured logs without secret/raw-data leakage | database materialization, RPC pool/quorum, archive/proof source, indexer |
 | Agent | Machine-readable capabilities/plans/receipts, dry-run, idempotency/replay controls, least authority | human UI renderer, remote agent protocol adapter |
 | Indexer | Raw retention, direct verification, basis/coverage ledger, resumable bounded ingestion, divergence reporting | GraphQL/SQL/product query surface |
 | Offline/archive | Zero mutable network reads, exact closure import/export, deterministic replay, unavailable-byte ledger | locally retained generated facades |
@@ -184,6 +237,8 @@ properties:
   conflict cases remain distinguishable;
 - expected results do not require exception parsing;
 - signing and submission roles are separately visible;
+- accepted and observed Ethereum profiles, signature strategy and every
+  submission/finality/read-back receipt remain separately inspectable;
 - no read path touches a wallet or mutable registry unexpectedly;
 - a dishonest or incomplete indexer can be removed without changing truth;
 - offline regeneration and reconstruction succeed from retained closure; and

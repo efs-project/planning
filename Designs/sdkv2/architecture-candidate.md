@@ -2,7 +2,7 @@
 
 **Status:** draft — three-arm comparison and recommended disposable path; no package/API/ABI is adopted
 **Target repos:** planning, sdk, contracts, client
-**Depends on:** [[README]], [[research-precedents]], [[developer-journeys]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/type-data-abi-boundary-pressure]]
+**Depends on:** [[README]], [[research-precedents]], [[ethereum-standards-census]], [[developer-journeys]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/type-data-abi-boundary-pressure]]
 **Reviewers:** @offchain-precedents (2026-08-22), @onchain-precedents (2026-08-22), @local-authority (2026-08-22)
 **Last touched:** 2026-08-22
 
@@ -77,7 +77,10 @@ Names below describe responsibilities, not frozen npm packages.
 | **consumer adapter/codegen** | Compile a finite exact-Type/profile closure into the common lossless semantic envelope, exhaustive outcomes, evidence handles and consumer-specific generated DTO façades for Web Client/OS, Data Explorer and other products | Product navigation/view state, UI policy, a universal lowest-common-denominator DTO, or reinterpretation of raw evidence |
 | **actions** | Deterministic plans, role-separated authorization, simulation, submission evidence, observation and canonical read-back | Ambient signer, silent retries across changed plans, admission/authorship conflation |
 | **transport adapters** | Core/EVM RPC, retained archive, HTTP gateway, local state, optional indexer, optional EAS carrier | Semantic truth, default policy, absence inference |
-| **ethereum adapter** | Literal ABI inference, chain/Realm context, public client, wallet/signing adapter, receipts and reorg/finality observation | EFS Type meaning, global chain selection, mandatory viem runtime |
+| **ethereum adapter** | Literal ABI inference, explicit provider selection, accepted/observed EVM and RPC profiles, block-hash-pinned calls/logs, wallet/signing strategies, receipts and reorg/finality observation | EFS Type meaning, global chain selection, provider metadata as trust, mandatory viem runtime |
+| **signature verification** | Basis-qualified EOA, deployed ERC-1271, non-persistent counterfactual ERC-6492, ERC-7913 and P-256 strategies over an exact plan/message digest plus exact receipts | Permanent EOA/contract classification, account authority from code presence, persistent counterfactual preparation, mutable verifier truth, raw signature bytes as action identity |
+| **account authorization/submission** | Separately bind wallet calls, transactions, ERC-4337 `userOpHash`, EIP-7702 authorization tuple and their receipts to one exact EFS plan/effect commitment | Presenting account/delegation/bundler/wallet acceptance as verification of the EFS EIP-712 digest, EFS authority, admission or canonical effect |
+| **deployment tooling** | Reproducible compiler/initcode/runtime/factory/dependency manifests, address and code-hash verification, local inline fallback | Helper authority, proxy/delegatecall default, registry-selected code, assumed factory availability |
 | **Solidity source set** | Generated internal libraries, narrow interfaces, result structs, constants, fixtures, reproducible compiler packet | Deployed mutable registry, upgrade authority, generic schema VM |
 | **testkit/conformance** | Golden/adversarial vectors, independent implementations, fake sources, mutation/property/fuzz harnesses, workload measurements | A substitute for an adopted conformance specification |
 
@@ -113,6 +116,41 @@ planning commit
 runtime-neutral capability lifecycle, public/private split, and open
 streaming/subscription falsifiers are in [[web-client-os-boundary-pressure]].
 These are coordination inputs, not adopted SDK, Web Client or Explorer APIs.
+
+### Ethereum standards profile set
+
+The following conceptual profiles keep five different questions from being
+collapsed into “EVM compatible.” Names and fields are illustrative experiment
+vocabulary, not frozen API or protocol bytes.
+
+| Profile | Candidate content | Required distinction |
+|---|---|---|
+| **Accepted execution profile** | chain ID; exact fork/opcode/precompile capabilities; compiler version/settings/`evmVersion`; runtime/initcode/transaction bounds; gas schedule; system contracts plus code hashes/ABIs; deterministic factory plus code hash/protocol | Caller policy that must be satisfied before generation, simulation, deployment, or semantic use |
+| **Observed execution profile** | EIP-1193 provider identity/lifecycle, EIP-695 chain ID, EIP-7910 `eth_config`, direct code/precompile/system-contract probes, observation time/basis and disagreements | Provider evidence that is compared with the accepted profile; never the trust root or a cacheable universal fact |
+| **RPC/read-evidence profile** | EIP-1898/234 support, finality tags, archive range, proof/log/receipt methods, batch/page limits, canonicality behavior, source identity/error fidelity; per-result chain/Realm/block hash+number, requested/observed finality, canonicality result, evidence kind and coverage | Capability and availability, separate from proof validity, finality, coverage and EFS completeness |
+| **Wallet/account profile** | selected provider/account, EIP-5792 capabilities, transaction/account adapter versions, ERC-4337 EntryPoint/bundler/paymaster profile, EIP-7702 delegate evidence, supported signature strategies | Wallet/account transport consent, separate from EFS author, Principal, admission, grant or effect success |
+| **Deployment profile** | compiler/reproducibility packet, exact factory protocol/code hash, initcode/runtime/address/salt, dependency identities/bases and fallback | Reproducibility and observed binding, separate from helper semantics or authority |
+
+`chainId` never implies a fork, precompile, RPC history range, deployed Core,
+wallet feature, or deterministic factory. EIP/ERC status never implies support
+on the selected chain. Provider, account, or chain changes invalidate the
+observed profile and every pending basis-sensitive plan; a state-changing path
+must re-plan and re-authorize rather than silently refreshing it.
+
+A candidate signature-verification receipt records the exact EFS plan/message
+digest, EOA/ERC-1271/ERC-6492/ERC-7913/P-256 strategy,
+signer/account/verifier, chain/Realm/block basis, direct/factory code identity,
+validation mode, signature-canonicality policy, result, availability and
+diagnostics. ERC-6492 verification in this surface is explicitly non-persistent
+simulation; persistent prepare/deploy work is prohibited.
+
+A separate candidate account-authorization/submission receipt binds its own
+digest or commitment—such as transaction hash inputs, ERC-4337 `userOpHash`,
+EIP-7702 chain/address/nonce authorization tuple or EIP-5792 calls—to the exact
+EFS plan/effect commitment and canonical read-back. Those receipts do not claim
+to verify the EFS EIP-712 digest. Persistent counterfactual preparation or
+deployment, whenever justified, is a separately planned, reviewed and
+authorized effect. Neither receipt name nor its bytes are frozen.
 
 ## Package topology candidates
 
@@ -167,9 +205,12 @@ The SDK never folds these clocks into one semver:
    versioned independently when the Core candidate requires it.
 4. **Realm and contract basis** — chain/Realm, address, code/implementation
    identity, observation block/finality, admission/policy version.
-5. **Generator artifact identity** — input closure, generator/plugins,
+5. **Ethereum capability/profile identity** — accepted and observed fork,
+   opcode, precompile, RPC, history, wallet/account, factory and system-contract
+   capabilities at an exact basis; never inferred from chain ID alone.
+6. **Generator artifact identity** — input closure, generator/plugins,
    language/compiler/settings, outputs and hashes.
-6. **Runtime distribution version** — npm/Solidity package/API evolution for
+7. **Runtime distribution version** — npm/Solidity package/API evolution for
    consumers; replaceable without changing old evidence.
 
 ### Rules
@@ -260,6 +301,13 @@ caller asked a read/reconstruction question. A low-level adapter may throw;
 the boundary responsible for the qualified EFS result must not accidentally
 turn it into absence, false, or an empty list.
 
+The provider-facing fault taxonomy separates transport unavailability,
+provider/RPC error, unsupported capability, history unavailable, basis not
+canonical, requested finality unavailable, proof invalid, response too large,
+and incomplete enumeration. Raw provider codes/data remain diagnostics, not a
+semantic classifier. A provider `null`, empty list, revert, rate limit, or
+timeout cannot prove an EFS negative.
+
 ## Capability and version negotiation
 
 Negotiation is positive and operation-specific:
@@ -277,8 +325,10 @@ Negotiation is positive and operation-specific:
    operation without reversing their inequality.
 5. Unknown required features produce `UNSUPPORTED`; there is no nearest-codec
    fallback or byte sniffing.
-6. ERC-165, media type, package metadata, catalog entries, or a handshake
-   string can optimize discovery but cannot complete semantic acceptance.
+6. ERC-165, EIP-7910 `eth_config`, EIP-6963 announcements, wallet capability
+   replies, media type, package metadata, catalog entries, registry records,
+   address/code presence, or a handshake string can optimize discovery but
+   cannot complete semantic acceptance.
 7. Reads may fall back to another explicitly configured source while retaining
    both attempts. Writes must re-plan and re-authorize if any accepted tuple,
    calldata, cost, signer, or destination changes.
@@ -291,6 +341,7 @@ For each frozen-for-experiment Type, generate only the bounded pieces a
 consumer selects:
 
 - Type/descriptor/profile/limits commitments;
+- accepted execution profile commitment and conservative compiler target;
 - typed structs and `internal pure` canonical encode/decode functions;
 - deterministic local validation and reference extraction;
 - explicit byte, element, depth, loop, allocation, and external-call bounds;
@@ -353,6 +404,17 @@ and retains a generated local correctness path.
 14. **Replaceable transport:** loss or corruption of one RPC, gateway,
     publisher, indexer, helper, package registry, or runtime does not change
     EFS truth and is visible in results.
+15. **Dynamic account honesty:** EOA, contract, counterfactual and delegated
+    classifications are basis-qualified strategies; code presence, wallet
+    label, verifier magic value or bundler result never becomes permanent
+    Principal authority.
+16. **Bounded external evidence:** returndata, revert data, proof nodes, logs,
+    pages, RPC batches and offchain lookups are size/work limited before copy or
+    decode; overflow returns a typed result and never an accidental OOG truth.
+17. **Digest separation:** the exact EFS plan commitment, signature digest,
+    transaction/call commitment, ERC-4337 `userOpHash`, EIP-7702 authorization
+    tuple and canonical effect receipt remain separately recomputable and
+    linked; one layer's acceptance never masquerades as another's verification.
 
 ## Core requirements surfaced by the SDK
 
@@ -367,6 +429,9 @@ provide enough exact contract for:
 - page/basis/coverage evidence adequate to support honest completeness;
 - historical authority and implementation basis without retroactive
   reinterpretation;
+- explicit execution/RPC/account/deployment profile inputs where Core behavior
+  depends on chain capabilities, without asking Core to adopt SDK-discovered
+  EIP/ERC bytes;
 - operation-bound write plans and deterministic read-back; and
 - complete archive closure and independent reconstruction.
 

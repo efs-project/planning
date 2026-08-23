@@ -2,7 +2,7 @@
 
 **Status:** draft — founder-authorized working charter; promotion and repo/release choices remain gated
 **Target repos:** planning, sdk, contracts, client
-**Depends on:** [[README]], [[architecture-candidate]], [[../efsv2/README]], [[../web-client-os/README]]
+**Depends on:** [[README]], [[architecture-candidate]], [[ethereum-standards-census]], [[../efsv2/README]], [[../web-client-os/README]]
 **Last touched:** 2026-08-22
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/onchain #topic/read-path
@@ -50,6 +50,7 @@ success.
 | Offchain public ergonomics | Candidate builders, readers, actions, result/fault model, pagination, batching, cancellation, streaming, caching contract, and browser/server/agent affordances |
 | Onchain SDK ergonomics | Generated internal libraries, narrow interfaces, explicit result structs, bounded work, reproducible compiler packets, and helper evaluation |
 | Compatibility tooling | Separate protocol, Type, query/View, generated-source, runtime, Realm/contract, and operational compatibility reports |
+| Ethereum interoperability program | Dated EIP/ERC census, accepted/observed execution and RPC profiles, wallet/account/signature adapters, transaction/read/deployment conformance, standards-specific falsifiers, deprecation and replacement paths |
 | Conformance and security evidence | Golden/adversarial vectors, property/fuzz suites, independent implementations, workload corpus, supply-chain/reproducibility checks, and stop conditions |
 | Release program | Experimental profile stamps, artifact manifests, deprecation/support windows, archive/export closure, and release-readiness packet after Core freeze |
 | Core pressure packets | Smallest missing semantic, affected consumers, failing fixture, measured impact, alternatives, falsifier, and requested Core decision |
@@ -117,6 +118,9 @@ helper never outranks owner-ratified EFS v2 direction.
 ### Phase 0 — research and reversible design
 
 - Maintain this source spine and official-source precedent ledger.
+- Refresh the exact EIP/ERC source snapshot and integration classification when
+  a relevant proposal, fork, wallet/provider surface, or release gate changes;
+  `Final` is never copied forward as a chain capability claim.
 - Map complete developer journeys and threat/basis boundaries.
 - Compare architecture arms with disposable artifacts.
 - Publish no permanent API, Type ID, conformance mark, or deployed helper.
@@ -155,6 +159,10 @@ helper never outranks owner-ratified EFS v2 direction.
   retained exact evidence through archived specs/vectors/source.
 - Periodic replacement drills assume npm, GitHub, hosted docs, default RPC,
   indexer, publisher, and current maintainers are unavailable.
+- Standards support remains an explicit matrix of specification snapshot,
+  selected chains/forks/providers/wallets/accounts, vectors, known deviations,
+  security evidence and removal path. Unsupported environments fail honestly;
+  they are not coerced into a generic “EVM compatible” promise.
 
 ## Release classes
 
@@ -184,6 +192,9 @@ reimplement retained EFS evidence.
   explicit capabilities, pure functions, and language-native generated types.
 - Expose raw evidence and manifests without importing a product UI or writer.
 - Keep transports and wallet/signing adapters optional and injected.
+- Keep the EFS plan commitment and signature-verification receipt separate from
+  transaction/call, ERC-4337 UserOperation, EIP-7702 delegation and wallet/
+  bundler authorization/submission receipts while binding each exactly.
 - Stabilize only after two independent consumers, one clean-room implementer,
   and the hostile fixture corpus use the surface.
 - Treat every exported convenience default as a policy decision requiring a
