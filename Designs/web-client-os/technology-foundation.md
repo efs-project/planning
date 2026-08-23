@@ -1067,7 +1067,7 @@ telemetry capability and informed local opt-in.
 | Forward/conditional Web profile | Navigation/View Transitions, OPFS, File/Protocol/Share/Launch handlers, Window Controls Overlay, WebGPU, Trusted Types enforcement | design and adapter now; feature-detect; provide honest reduced/unsupported result; never silent authority expansion |
 | Replaceable libraries/tooling | Signals polyfill, Lit, Web Awesome/Fluent/Lion control-pack candidates, Vite/Rolldown, pnpm, TypeScript, Biome, Vitest, Playwright, MF2 compiler | pin/audit; keep behind standards/data boundaries; replacement must pass the same fixtures |
 | Foundational forward module target | Component Model through replaceable browser adapters; selectively granted WASI 0.2/0.3 profiles; exact generated browser representations | design portable non-DOM modules toward it; pin every profile/adapter; never direct guest correctness or ambient authority |
-| Experimental extension/runners | WebMCP, WebNN, SES, native Component browser APIs and stronger browser runner profiles | research/module lanes; never direct guest correctness or ambient authority |
+| Active evidence-gated extension/runners | SES Worker Apps with an OS-owned outer Compartment, LavaMoat/Endo inner dependency isolation, opaque full-Web iframes, WebMCP, WebNN, native Component browser APIs and stronger delivery profiles | route-selected lazy module lanes; exact adapters and residuals; never the trusted direct Files correctness path or ambient authority; see [[app-runtime-and-direct-launch]] |
 
 The Signals row is intentionally unusual: its native implementation is still
 a moving standards process, but James has directed EFS to treat its official

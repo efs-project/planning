@@ -129,10 +129,11 @@ sequenceDiagram
     participant Reader as "Reader Kernel"
     participant Realm as "Explicit Realm source"
     participant Carrier as "Untrusted carriers"
-    participant View as "Minimal Viewer Shell"
+    participant Host as "Minimal Viewer Host / raw rescue"
+    participant Explorer as "Built-in Data Explorer guest entry"
 
     Person->>Boot: Open friendly or exact URL
-    Boot->>View: Paint trusted resolving frame
+    Boot->>Host: Paint trusted resolving frame
     Boot->>Reader: Typed BootRoute + INTERACTIVE ReadContext
     Reader->>Realm: Pin descriptor/code/admission basis, route, Mount, and namespace/content Plans
     Realm-->>Reader: Records, Bindings, pages, proofs/receipts
@@ -140,8 +141,12 @@ sequenceDiagram
     Reader->>Carrier: Try Locators for exact FileRevision/ArtifactRef
     Carrier-->>Reader: Candidate bytes and transport evidence
     Reader->>Reader: Verify digest, length, range/closure
-    Reader-->>View: Resolved resource + provenance + honest diagnostics
-    View-->>Person: Safe content/listing, status, inspect/download actions
+    Reader-->>Host: Resolved resource + provenance + honest diagnostics
+    Host->>Explorer: Validated qualified Files DTO
+    Explorer-->>Person: Safe content/listing and ordinary Files actions
+    alt Data Explorer unavailable or crashes
+      Host-->>Person: Raw identity, provenance, diagnostics and exact citation
+    end
 ```
 
 ### Invariants
@@ -337,6 +342,10 @@ plan rather than silently redefining the target.
       unique Principal in the active `namespacePlan`.
 - [ ] Deleting all browser state reproduces identical semantic IDs and
       qualified outcomes from the explicit Realm and carriers.
+- [ ] Removing or crashing the built-in Data Explorer guest entry leaves the
+      Minimal Viewer Host/raw rescue able to show the same resource identity,
+      provenance, qualification diagnostics and exact citation. Ordinary
+      listing/workspace UI may be unavailable; resource truth is not.
 
 ### B. Carrier and presentation safety
 
@@ -686,6 +695,38 @@ permission to freeze Type bytes or publish test data.
       carrier, uses only synthetic retained Realm/carrier fixtures, and begins
       only after separate owner authorization.
 
+### J. Generic direct-App non-regression
+
+Third-party execution remains outside the File Browser MVP, but the MVP
+skeleton must not force a later named App through Data Explorer or the full OS.
+The detailed fixture is [[app-runtime-and-direct-launch]]. Before its first
+authorized executable experiment, the architecture must preserve that:
+
+- [ ] an exact App plus resource route can branch from Boot Core through the
+      shared Reader/Verifier and Minimal App Host with no catalog search,
+      wallet, account, Commons, private profile, Data Explorer intermediary or
+      Session Shell;
+- [ ] exact App selection/critical-closure retrieval and the initial qualified
+      resource read may overlap. The complete allowed graph is frozen and each
+      member verifies before its parser/compiler sees it; the eager transitive
+      activation unit and policy are complete before linking, instantiation,
+      publisher evaluation/entry or iframe construction. A content-bound exact
+      trusted preparation/App Worker may start after its own bootstrap verifies
+      only with zero capabilities and no publisher material/evaluation;
+- [ ] a route can express launch intent but cannot create authority or a
+      browser user-activation token. A trusted host `OPEN`, retained exact
+      policy or matching agent mandate may serve as Launch for an eligible
+      confined SES/Wasm guest only after the OS records an exact all-denied
+      `GrantDecisionGeneration`; external/ambiguous navigation is
+      `ACTION_REQUIRED`, while Arcade Play, new capabilities,
+      private/state attachment and unaccepted direct-egress profiles remain
+      explicit;
+- [ ] executable bytes, derived code and semantic results use the complete
+      cache identity tuples in [[app-runtime-and-direct-launch]] rather than
+      URL, slug, channel, catalog or Locator; and
+- [ ] a missing, corrupt, denied, unsupported or crashing App leaves the
+      underlying resource, raw evidence and Data Explorer fallback reachable.
+
 ## Threat boundary
 
 ### Trusted for MVP correctness
@@ -693,6 +734,8 @@ permission to freeze Type bytes or publish test data.
 - the selected browser and operating system;
 - the exact client/BootGeneration bytes and conserved System Chrome;
 - protocol codecs, validators, Realm Reader, Files Resolver, and byte verifier;
+- the exact built-in Data Explorer guest entry for ordinary MVP Files UI, but
+  not as truth authority over the Reader result or raw rescue;
 - the locally selected chain/Realm descriptor and read/write policy inputs;
 - the wallet/signer only for the authority it actually proves.
 

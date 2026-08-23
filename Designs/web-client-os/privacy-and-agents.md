@@ -299,9 +299,12 @@ sandbox. Core Wasm in a dedicated Worker with WIT-shaped explicit imports is
 the selected foundational direction for portable non-DOM services; the
 Component Model is the target through exact replaceable adapters and WASI
 interfaces are granted selectively. Opaque-origin iframes, CSP, Permissions
-Policy and Trusted Types remain the full-Web lane; SES is exceptional. None
-alone establishes least authority, confidentiality, network denial, resource
-quotas, host-origin secrecy or freedom from browser exploits.
+Policy and Trusted Types remain the full-Web lane. An OS-owned SES Compartment
+in a dedicated Worker is the active confined-JavaScript App/service candidate,
+with LavaMoat/Endo dependency policy only as inner hardening; see
+[[app-runtime-and-direct-launch]]. None alone establishes least authority,
+confidentiality, network denial, resource quotas, host-origin secrecy or
+freedom from browser exploits.
 
 A WIT `resource` is an ABI handle, not authorization. The Kernel resource table
 rechecks exact generation, scope, basis, expiry, budget and revocation. Wasm
