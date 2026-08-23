@@ -2,7 +2,7 @@
 
 **Status:** reference — compact live queue; all mechanisms remain evidence-gated
 **Audience:** James first; Data Explorer and adjacent-lane designers second
-**Last reconciled:** 2026-08-22
+**Last reconciled:** 2026-08-23
 **Inputs:** [[README]], [[architecture-and-state]], [[views-extensions-and-capabilities]], [[experiments-and-stop-conditions]]
 
 #status/reference #kind/decision #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/read-path #topic/graph-queries #topic/app-model #topic/privacy
@@ -103,9 +103,19 @@ mechanism ownership.
 - Demonstrate provider-neutral, raw-preserving decoders for exact Types,
   unknown/unsupported data and versioned domain DTOs without collapsing
   qualified outcomes into value/error.
-- Provide a candidate paged result with explicit source, query/profile, basis,
-  order, cursor/resume, coverage and completeness plus opaque or exportable
-  evidence handles.
+- Provide a candidate paged result with explicit source, query/profile, block-
+  hash basis, requested/observed finality, canonicality request/provider response
+  and separately qualified assessment/evidence, evidence kind, order, cursor/
+  resume, coverage, completeness and causal history availability plus opaque or
+  exportable evidence handles. Keep provider observation,
+  authenticated header evidence, finality evidence, state proof and receipt/log
+  proof independent.
+- Demonstrate one-time resolution of a moving basis and hash-pinned calls/pages/
+  one-block logs; represent a multi-block history traversal with an exact
+  parent-linked ordered header-hash sequence, an anchor to separately qualified
+  head/canonicality evidence and per-block coverage. Unsupported/pruned/
+  noncanonical history must remain qualified rather than silently falling
+  forward or becoming absence.
 - Demonstrate verified metadata/range handles that retain corrupt/unavailable
   attempts and do not expose provider credentials.
 - Map one deterministic action request/plan/receipt/read-back fixture without
@@ -113,6 +123,15 @@ mechanism ownership.
 - Supply the real disposable adapter arm for E1b and a dependency/network trace
   surface sufficient to compare every qualified fixture fact with E1a while
   proving that no optional indexer or ambient system service supplies truth.
+- If an experiment explicitly enables a foreign address, transaction or content
+  reference, compare a removable, versioned import/serialization/reference
+  adapter that retains raw input and resolution attempts; requires or visibly
+  surfaces/rejects implicit chain, basis, resolver and interpretation defaults;
+  and enforces scheme/host/redirect/SSRF/privacy/size/time/recursion policy.
+  Parsing, location, a contract-returned callback result and content hints must
+  not create EFS identity, authority, currentness, permanence, byte integrity or
+  safe-rendering claims. Stronger callback validation requires exact profile
+  evidence. This optional arm is not a guest Files or initial SDK dependency.
 
 ### Web Client / OS
 

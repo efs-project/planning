@@ -5,7 +5,7 @@
 **Depends on:** [[README]], [[product-charter-and-roadmap]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/type-data-abi-boundary-pressure]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-08-22
+**Last touched:** 2026-08-23
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/read-path #topic/graph-queries #topic/app-model #topic/privacy
 
@@ -45,8 +45,10 @@ registry, built-in views, provenance Inspector and local coverage/cache state.
 Route every mutation to the shared Web Client/OS action boundary.
 
 **Advantages:** Files and arbitrary typed resources share one truth contract;
-view/layout changes remain local; web/CLI/native shells can reuse the same
-product DTOs; raw fallback is structural; extension authority can be bounded.
+view/layout changes remain local; web/CLI/native shells can reuse one exhaustive
+outcome/evidence law through versioned domain façades; raw fallback is
+structural; extension authority can be bounded. Product DTO shapes may differ;
+they do not collapse into one lowest-common-denominator object.
 
 **Costs:** more explicit state identities, adapter versions and result handling;
 the SDK/Reader boundary must support lossless raw inspection and qualified
@@ -103,7 +105,7 @@ data, understand evidence and express bounded intents.
 
 | Module | Responsibility | Must not own |
 |---|---|---|
-| Route and Location adapter | Accept explicit URLs, direct IDs, saved locations and query intents; produce a sanitized request for shared Reader services | Ambient chain/Realm defaults, wallet detection, hidden hosted index |
+| Route and Location adapter | Accept explicit EFS URLs, direct IDs, saved locations, query intents and explicitly enabled external-reference inputs; sanitize product input and request a versioned shared Reader/Artifact adapter | Semantic resolution, external codec/gateway/callback execution, provider or implicit chain/ABI selection, network/SSRF/redirect/privacy policy, byte verification, wallet detection or hidden hosted index |
 | Workspace controller | Tabs, panes, back/forward/up, history, selection, active view, compare and task references | Semantic truth, query completeness, package activation |
 | Inventory/query controller | Page/cursor lifecycle, query AST, coverage ledger, local filter/sort/group and resumable budgets | Fabricated global completeness or a canonical search provider |
 | Projection registry | Select built-in or explicitly activated finite projection by exact supported input/profile; preserve raw fallback | Type self-registration, action authority, silent future-Type acceptance |
@@ -144,8 +146,14 @@ ExplorerResource<T> {       # PRESENT branch only
   typeAndValidation
   provenance
   authorityAndSelection
-  basisFinalityFreshness
+  sourceObservation
+  basisContext
+  canonicalityObservation
+  canonicalityAssessment
+  finalityAndFreshness
+  evidenceGradeSummary
   coverageCompleteness
+  historyAvailability
   byteSummary
   evidenceHandles[]
   rawHandle
@@ -155,6 +163,8 @@ ExplorerPartial<T> {        # PARTIAL branch only
   knownFragments?
   missingCoverage[]
   qualification
+  readEvidenceSummary
+  historyAvailability
   evidenceHandles[]
   resume?
 }
@@ -171,11 +181,32 @@ ExplorerPage<T> {
 }
 ```
 
-`T` is a stable Explorer/domain DTO, not an arbitrary publisher-defined object.
+`T` is a versioned Explorer/domain façade DTO for the selected experiment, not
+an arbitrary publisher-defined object or a universal cross-product DTO.
 Unknown Types remain a qualified raw resource and may be shown through the
 read-only universal Inspector. Evidence handles are opaque, scoped,
 non-forgeable and disclosure-filtered. The UI never receives live provider,
-wallet, contract or storage objects.
+wallet, gateway, verifier, contract or storage objects.
+
+Concrete façades may name and serialize fields differently. Every façade must
+preserve the exhaustive outer outcome plus requested and observed chain/Realm/
+block basis, requested and observed finality, canonicality request/provider
+response and separately qualified assessment/evidence, source and evidence kind,
+authority/currentness, physical and semantic coverage, archive/history
+capability and causal availability, byte state, and disclosure-filtered attempt
+evidence. Product DTOs may add presentation fields; they may not merge, replace
+or reinterpret these axes. This is an observable product requirement, not
+adoption of an SDK profile, public API, result registry or bytes.
+
+Explorer declares read, coverage and presentation requirements and renders the
+returned evidence. Shared SDK/Reader/Files/Artifact adapters select sources,
+execute calls/pages/logs against explicit bases, verify proofs and bytes, map
+transport/history failures and—only for an explicitly enabled optional import
+adapter—enforce explicit chain/basis/interpretation plus network/SSRF/redirect/
+privacy/resource policy, execute the callback and retain its contract-returned,
+basis-qualified result. Any stronger callback-validation label requires exact
+profile evidence. Explorer neither recomputes those facts nor creates a second
+resolver, verifier or Lens reducer.
 
 ## Web Client/OS application-boundary pressure checkpoint
 
@@ -251,9 +282,12 @@ Explorer requires no executable third-party lane for MVP.
 The experiments need observable behavior, not these names or encodings:
 
 - a provider-neutral open/resolve call returning one exhaustive qualified
-  resource outcome under an explicit read context;
+  resource outcome under an explicit read context, with source observation,
+  explicit block-hash basis, requested/observed finality, canonicality
+  observation/assessment, evidence kind and causal history availability kept
+  independent;
 - a paged inventory/query call returning stable row DTOs plus source, basis,
-  order, cursor/resume, coverage and completeness evidence;
+  order, cursor/resume, coverage, completeness and history-frontier evidence;
 - a verified artifact handle for metadata and bounded ranges that retains all
   acquisition attempts without exposing provider credentials;
 - a raw/evidence handle for exact identifiers, canonical encodings and
@@ -499,6 +533,17 @@ The Explorer adopts the shared exhaustive law and presents at least:
 | `LOOP` | Active traversal re-entered the same qualified context |
 | `NOT_A_DIRECTORY` / `NO_CURRENT_VERSION` | Files-specific semantic failure, distinct from absence |
 
+Provider observation, authenticated header evidence, finality evidence, locally
+verified state proof, locally verified receipt/log proof, query coverage and history
+availability are independent Inspector facts. History availability is an
+independent causal qualification on every applicable semantic outcome, not a
+new absence outcome. A pruned/expired source, archive-range exclusion, exact-
+basis refusal, missing old body/receipt/state or invalid/incomplete proof never
+proves the semantic claim absent or permits silently following latest. A
+retained complete-basis absence proof may remain `ABSENT` while current history
+serving is unavailable; retained historical presence evidence likewise remains
+meaningful while referenced payload/blob bytes are separately unavailable.
+
 ### Byte outcomes
 
 | Outcome | Meaning / UI law |
@@ -530,8 +575,12 @@ typeValidation
 historicalAuthority
 RealmAdmission
 BindingOrLensSelection
-basis + finality + freshness
+sourceObservation + evidenceKind
+basis
+canonicalityObservation + canonicalityAssessment
+finality + freshness
 coverage + completeness
+historyCoverage + historyAvailability
 byteIntegrity + availability
 consumerAcceptance
 ```

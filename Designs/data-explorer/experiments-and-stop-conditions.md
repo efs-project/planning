@@ -5,7 +5,7 @@
 **Depends on:** [[README]], [[product-charter-and-roadmap]], [[architecture-and-state]], [[views-extensions-and-capabilities]], [[Reviews/2026-08-13-efs2-stage-a-corpus/chapters/bakeoff-spec]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-08-22
+**Last touched:** 2026-08-23
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/read-path #topic/graph-queries #topic/app-model #topic/privacy
 
@@ -37,10 +37,15 @@ All technical experiments use one versioned, disposable corpus containing:
 - table values covering present, absent-by-type, null, invalid, unsupported,
   unavailable, derived and unknown cells;
 - complete and partial query transcripts, empty partial pages, cursor resume,
-  stale/mismatched basis and provider disagreement;
+  stale/mismatched basis, independently selected provider agreement/
+  disagreement, valid/invalid/incomplete account or storage proof material,
+  ordinary receipt/log observations with and without a separately verified
+  receipt proof, and old state/body/receipt/log ranges unavailable from one or
+  all selected sources;
 - intact bytes, unavailable bytes, corrupt primary with intact fallback,
-  all-corrupt candidates, range-only content and active/unknown content that
-  must remain inert;
+  all-corrupt candidates, range-only content, a retained blob commitment whose
+  old blob bytes are unavailable, and active/unknown content that must remain
+  inert;
 - provenance with distinct author, admission, current selector, carrier and
   local observer; history with forks, losing claims and missing evidence; and
 - a benign extension, a crashing extension, resource-exhaustion attempts,
@@ -52,6 +57,24 @@ matrix, cold/warm/offline condition, network log, decoded result transcript,
 screenshots or recordings where consented, task notes and deviations. Test
 secrets and private user data are forbidden.
 
+For every E1b read-evidence row, retain the chain and Realm, explicit block
+hash and number, policy/code identities, requested and observed finality,
+canonicality request/provider response plus separately qualified canonicality
+assessment/evidence, explicitly selected source, evidence kind, exact query/
+slot/receipt/log/page/range coverage, and causal archive/history/blob
+availability. Candidate evidence kinds distinguish provider observation,
+locally verified state proof, locally verified receipt proof and local
+recomputation. A state proof covers only requested account/storage paths and
+requires verification against the state root of a header qualified under the
+run's declared header/finality policy. A receipt proof requires canonical
+receipt bytes plus index/path verification against that header's receipts root
+under the exact fork/encoding profile. Receipt evidence obtained through an ETH
+wire format must be re-encoded into consensus receipt form—including the typed
+envelope where applicable and a recomputed bloom—before receipts-root
+verification; retain the wire bytes separately. Otherwise receipts and logs
+remain source-qualified observations. Provider agreement is source-policy
+evidence, not authentication or proof.
+
 ## Common assertions
 
 The following are checked in every experiment that can encounter them:
@@ -61,8 +84,10 @@ The following are checked in every experiment that can encounter them:
 2. Only proved absence or explicit masking maps to not-found behavior. Timeout,
    partial inventory, missing bytes, unsupported Type and integrity failure do
    not create a `404`, empty-result conclusion or negative-cache entry.
-3. Exact source, basis, authority/current-selection context, coverage,
-   availability and integrity remain independently inspectable.
+3. Exact source, block-hash basis, requested/observed finality, canonicality
+   observation/assessment, evidence kind, authority/current-selection context,
+   coverage, causal history availability and integrity remain independently
+   inspectable.
 4. Repeating the read from a cold profile can reconstruct the same qualified
    outcome or explain a changed basis without trusting local cache/index state.
 5. The user can export an exact or redacted evidence packet and can reach raw
@@ -83,23 +108,35 @@ combinations across these dimensions:
 | Umbrella fact dimension | Explorer crosswalk | Collapse forbidden |
 |---|---|---|
 | Presence | Exhaustive `ExplorerReadResult` branch | Unknown, conflict, opaque or masked into absence/presence |
-| Coverage | Page/range/closure coverage plus completeness evidence | Partial into complete; loaded rows into whole inventory |
+| Coverage | Page/range/closure plus exact queried-slot, receipt/log and history-frontier coverage with completeness evidence | One proved slot, receipt or page into whole-inventory or whole-history proof |
 | Support | Adapter/projection/profile support and declared resource ceiling | Unsupported or limit exceeded into invalid/absent |
 | Validation | Structural and semantic Type/value validation evidence | Structurally decodable into semantically accepted |
 | Authority | Historical authority grade and evidence | Authorship/admission/existence into authorization |
 | Lifecycle | Authored, admitted, withdrawn, carried-only or unproved provenance | Carrier observation into Realm admission/currentness |
 | Selection | Current/not-current/conflict/unknown selection evidence | One observed candidate into canonical current selection |
-| Observation | Exact Realm, block/basis, policy/code context plus separate finality/freshness | Recorded basis into fresh/final/current |
+| Observation | Exact chain/Realm, block hash/number, policy/code context, requested/observed finality, canonicality request/provider response/assessment evidence, source, evidence kind and causal history/blob availability | Provider/tag/quorum/canonicality response or unproved receipt/log observation into authenticated proof/finality/canonicality; pruned/expired evidence into absence |
 | Bytes | Verified/partial/unavailable/integrity-failed state plus all attempts | Retrieval failure into semantic absence; fallback success hiding corruption |
 | Effect | Explicitly out of scope for the E1a/E1b read arms; E6 plan/receipt/read-back state | Submission into committed effect or unknown into failure |
 
 E1a and E1b consume the same sealed fixture row IDs and produce this crosswalk
-before presentation. Semantic parity means equality of qualified logical facts
-and evidence meaning after adapter mapping; it does not require equality of
-transport attempts, timings, implementation objects or serialized bytes. The
-dimension labels, candidate values, fixture IDs, DTOs and mapping syntax are
-experiment vocabulary only—not adopted protocol bytes, SDK API or result-registry
-names. Illegal combinations are rejected rather than normalized for display.
+before presentation. E1a records expected qualified facts, required evidence
+grades and simulated evidence pointers; it cannot claim to observe a provider,
+authenticate a header/root or verify proof material. E1b must reproduce the
+same logical facts and result branches while earning the actual source-
+qualified observation or locally verified proof grade. Semantic parity
+therefore excludes transport attempts, timing, implementation objects,
+serialized bytes and the deliberate simulated-to-earned evidence transition;
+the earned evidence kind, grade and scope must satisfy each sealed requirement.
+All non-pointer Observation facts—including requested basis/finality,
+policy/code context, canonicality requirement, scope and causal availability—
+remain equal. Only evidence-pointer provenance and an actual source satisfying
+the sealed source policy may differ. Transport/provider choice cannot change
+presence, coverage, support, validation, authority, lifecycle, selection, bytes
+or effect meaning.
+The dimension labels, candidate values, evidence kinds, fixture IDs, DTOs and
+mapping syntax are experiment vocabulary only—not adopted protocol bytes, SDK
+API or result-registry names. Illegal combinations are rejected rather than
+normalized for display.
 
 ## E0 — status language and workspace wireframe
 
@@ -204,18 +241,56 @@ the module dependency graph, browser storage/cache use, Worker/service-worker
 lifecycle and every network request/redirect with initiator, purpose, bytes and
 outcome. Do not substitute fixture DTO injection inside this arm.
 
-The fixture is available through canonical public Realm state and eligible
+Run two independently cold subruns against the same sealed fixture and declared
+public sources: a direct Data Explorer App route using the shared guest Reader/
+Files adapter, and an OS-hosted Data Explorer App route using that same adapter.
+The hosted subrun may add its declared minimal App container/chrome modules; it
+may not add a second resolver/verifier, profile hydration, privileged service
+or different truth input. Retain separate dependency/network/storage traces and
+compare their qualified outcomes.
+
+The fixture is available through declared public Realm inputs and eligible
 content carriers. If an optional indexer exists, capture a comparison run, then
 remove or disable it and repeat from cold state. The index-free run is the
-required proof. Pin one exact Realm/block/policy/code basis for each paged read;
-a basis change creates a new read or explicit comparison, never a merged page.
+required proof.
+
+Resolve any requested moving `safe`/`finalized` tag once. Retain the exact
+chain/Realm, block hash and number, policy/code identities, requested and
+observed finality, canonicality request/provider response and separately
+qualified canonicality assessment/evidence. Pin every state call and page
+contributing to one logical read to that explicit block hash. Pin each one-block
+log request to its explicit block hash; a multi-block history traversal retains
+the exact parent-linked ordered header-hash sequence, its anchor to separately
+qualified head/canonicality evidence, and per-block coverage. Unsupported or
+unavailable hash pinning yields a qualified `PARTIAL`, `UNKNOWN` or
+`UNSUPPORTED` result. A provider-reported or independently assessed
+noncanonical exact basis remains visible; when explicit policy permits, a
+losing-fork read may be `PRESENT` but cannot satisfy a canonical/final
+requirement. A basis change yields a new read or explicit comparison—never a
+number/tag fallback or merged page.
+
+Run a separately traced comparison through at least one independently operated,
+explicitly selected public source when available. A provider-neutral claim
+requires this comparison, but one comparison is only a necessary falsifier—not
+sufficient evidence for broad provider neutrality. If it is unavailable, that
+claim remains unproved. The comparison is not an ordinary guest-boot dependency
+or a hidden provider selector. Disagreement remains `CONFLICT` or `UNKNOWN`,
+and agreement never upgrades an observation into authenticated proof.
 
 ### Pass
 
 - Every fixture case has semantic parity with E1a across the full facts-matrix
   crosswalk. Differences are limited to declared transport attempts, timing and
-  implementation diagnostics; no presence, coverage, support, validation,
-  authority, lifecycle, selection, observation, byte or effect fact changes.
+  implementation diagnostics plus the required simulated-to-earned evidence
+  pointer transition and the actual selected source within sealed source policy.
+  Earned kind/grade/scope meets every sealed requirement; no basis/finality/
+  canonicality requirement, scope, causal availability, presence, coverage,
+  support, validation, authority, lifecycle, selection, byte or effect meaning
+  changes.
+- Direct and OS-hosted cold subruns produce the same qualified facts and earned
+  evidence grades from the same shared Reader inputs. Their trace delta contains
+  only declared App-container/chrome presentation modules; hosting cannot change
+  basis, source, coverage, authority/currentness, byte result or failure cause.
 - The dependency and network trace shows only the static trusted App/shell, the
   shared guest Reader/Files consumer path through the real disposable SDK
   adapter, explicit public Realm reads and requested eligible carriers/content.
@@ -229,11 +304,25 @@ a basis change creates a new read or explicit comparison, never a merged page.
   local page, hidden fixture injection or privileged server response is needed.
 - With every optional indexer removed, cold reconstruction produces the same
   semantic facts and independently derives all required pages/evidence from the
-  declared canonical inputs. Missing optional indexes may change measured cost,
-  never truth, reachability or completeness law.
-- Fixed-basis pagination is stable and resumable: the page/cursor chain has one
-  basis and order, neither duplicates nor omits fixture entries, rejects cursor/
-  basis mismatch and never combines rows observed under different bases.
+  declared public inputs plus earned canonicality assessment/qualification
+  evidence.
+  Missing optional indexes may change measured cost, never truth, reachability
+  or completeness law.
+- Fixed-basis pagination is stable and resumable. A snapshot inventory page/
+  cursor chain has one exact block-hash basis and order. A multi-block history
+  page/cursor chain has one immutable composite basis containing its parent-
+  linked ordered header-hash sequence and per-block coverage. Neither duplicates
+  nor omits fixture entries, accepts a cursor/basis mismatch or merges rows
+  outside its declared singular/composite basis.
+- The retained read-evidence packet earns every displayed evidence grade and
+  reports its exact scope. State proof does not prove omitted slots, calls,
+  logs, receipts, finality or historical completeness; receipt proof covers
+  only its verified receipt/path unless complete receipt coverage is separately
+  established. When required historical evidence was not retained, pruning or
+  expired blob availability yields causal `UNKNOWN`/`PARTIAL` for the claim and
+  unavailable for the affected source/bytes, never `ABSENT`. Previously retained
+  valid evidence may remain meaningful under its declared basis while current
+  source/byte availability is separately unavailable.
 - Unknown/unsupported Types and failed rich projections retain canonical raw
   bytes or exact safe encodings, identifiers, qualification and evidence through
   the raw fallback without package/catalog discovery.
@@ -256,11 +345,20 @@ injection, a wallet/account/Commons/hosted indexer/package catalog/System
 Kernel/full-OS/Shell-service/profile/warm-cache dependency, an Explorer-owned
 resolver/verifier/Lens reducer, or an untraced network/module edge. Stop also
 for any E1a/E1b semantic parity mismatch, optional-indexer truth dependency,
-mixed-basis page, missing raw fallback, unverified rendered bytes, false
-absence, unreconstructible canonical dependency or hidden provider credential.
+direct/OS-hosted semantic or evidence-grade divergence,
+re-resolved moving tag, number-only fallback, mixed-basis page/hash sequence,
+unearned proof/finality/canonicality label, missing raw fallback, unverified
+rendered bytes, false absence, a dependency hidden behind a positive/complete/
+canonical claim or hidden provider credential.
 Preserve the failing fixture and return the smallest missing SDK/Files/Core/
 product semantic plus alternatives and exact falsifier; do not weaken the
 crosswalk or adopt fixture/API/protocol bytes to force a pass.
+
+A pruned old-history source or unavailable expired blob is not by itself an
+E1b failure when the product preserves exact basis, requested coverage and its
+causal `UNKNOWN`/`PARTIAL`/unavailable result. It blocks only the stronger
+history, completeness or byte-availability claim that requires the missing
+evidence.
 
 ## E2 — typed spreadsheet view
 
@@ -348,9 +446,15 @@ and degraded inputs?
 ### Prototype
 
 A deterministic fault injector runs the E0–E3 surfaces through unavailable
-provider, timeout, reorg/basis change, partial pages, empty partial page,
-cursor mismatch, unsupported Type, invalid encoding, corrupt primary/fallback,
-oversize preview, renderer crash, storage eviction and offline transition.
+provider, timeout, null/empty/error/rate-limit responses, provider disagreement,
+exact-basis refusal, reorg/basis change, partial pages, empty partial page,
+cursor mismatch,
+invalid/incomplete proof, missing old state/body/receipt/log history, expired
+blob bytes, unsupported Type, invalid encoding, corrupt primary/fallback,
+oversize preview, renderer crash, storage eviction and offline transition. Any
+optional external-reference adapter also receives unknown-version, redirect,
+gateway, callback, omitted-chain/default-resolution, ABI-inference and privacy-
+policy failures.
 
 ### Pass
 
@@ -362,6 +466,19 @@ oversize preview, renderer crash, storage eviction and offline transition.
   session retain or explicitly supersede the original failure evidence.
 - A basis change aborts or restarts affected page/selection work visibly; no
   mixed-basis view claims one inventory.
+- Provider response shape, quorum, archive label or advertised range never
+  upgrades an observation to proof or turns unavailable history into absence.
+- External-reference inputs remain inert until their optional adapter is
+  explicitly enabled. Parsing, resolution, a contract-returned callback result,
+  content-type hints or byte retrieval remain qualified transport/application
+  evidence and never establish EFS authority, permanence or safe rendering.
+- Every enabled external-reference attempt uses an explicit chain/basis and
+  resolution/interpretation mode or visibly rejects/surfaces the standard's
+  default. Its trace contains only policy-allowed schemes, hosts and redirects;
+  bounded recursion, redirect count, bytes and time; and zero ambient wallet,
+  account, profile, cookie, authorization, referrer or private-network/metadata
+  access. Callback failure or a stronger validation claim without exact
+  profile evidence remains qualified failure/unknown, never missing content.
 - Oversize, malicious or crashing renderers terminate within the lab budget
   and leave raw/status/recovery controls responsive.
 - Storage eviction changes local retention state, never the claimed existence
@@ -371,8 +488,11 @@ oversize preview, renderer crash, storage eviction and offline transition.
 
 Any false absence, false integrity, mixed-basis completion, executable active
 content, secret-bearing log/export or unrecoverable host crash is a hard stop.
-Do not waive it as an edge case; shrink the supported surface or change the
-result/cache architecture and rerun the whole matrix.
+For an enabled external-reference arm, disallowed egress, ambient credential or
+interest leakage, implicit chain/ABI/resolution change, unbounded redirect/
+recursion/size/time, private-network/metadata access or callback-policy bypass
+stops that arm. Do not waive it as an edge case; shrink the supported surface or
+change the result/cache architecture and rerun the whole matrix.
 
 ## E5 — extension isolation and revocation
 
@@ -517,7 +637,9 @@ true:
 - guest useful reads require wallet, account, Commons, profile, OS, catalog,
   extension or privileged hosted infrastructure;
 - the shared boundary cannot preserve raw bytes/evidence and independently
-  qualified identity, Type, authority/currentness, coverage, availability and
+  qualified identity, Type, authority/currentness, source observation,
+  block-hash basis, requested/observed finality, canonicality observation/
+  assessment, evidence kind, coverage, causal history availability and
   integrity;
 - unknown, partial, unsupported, unavailable or tampered data can become
   absent, empty, valid, complete or negatively cached;

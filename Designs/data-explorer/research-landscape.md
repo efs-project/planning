@@ -5,7 +5,7 @@
 **Depends on:** [[README]], [[Designs/efsv2/README]], [[Designs/web-client-os/README]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-08-22
+**Last touched:** 2026-08-23
 
 #status/reference #kind/research #repo/planning #repo/client #repo/sdk #topic/read-path #topic/graph-queries #topic/app-model #topic/content #topic/privacy
 
@@ -25,7 +25,9 @@ The scan covered:
 - DBeaver as a database navigator/data editor;
 - VS Code as a virtual-workspace and untrusted-extension precedent;
 - GraphiQL/Apollo Explorer as typed query explorers;
-- Chrome DevTools Network as a raw trace/debug explorer; and
+- Chrome DevTools Network as a raw trace/debug explorer;
+- Ethereum execution-basis, proof, history-serving, blob-availability,
+  address/transaction-reference and contract-content standards; and
 - current EFS Core/Files, Type/Data ABI, Web Client/OS, App Store, Media, Git,
   EAP/Achievements and NANDA pressure evidence plus legacy `client/`.
 
@@ -71,6 +73,32 @@ generic raw/provenance inspection and reusable navigation/view mechanics. They
 do not justify a universal schema-driven app runtime. Domain reducers stay
 finite and owned; the Explorer composes their bounded outputs and always keeps
 the shared evidence path reachable.
+
+### Ethereum execution, history and reference-format pressure
+
+The following official standards were reviewed on 2026-08-22 as pressure on
+the disposable Explorer/SDK boundary. Their status or familiarity does not
+adopt an EFS API, codec, proof system, provider, retention policy or authority
+rule.
+
+| Sources | Explorer inference, not adoption |
+|---|---|
+| [EIP-1898](https://eips.ethereum.org/EIPS/eip-1898), [EIP-234](https://eips.ethereum.org/EIPS/eip-234), [EIP-1474](https://eips.ethereum.org/EIPS/eip-1474) | Resolve a moving tag once; retain block hash and number; issue supported state calls and one-block log filters by hash; preserve raw RPC outcomes. A tag or `requireCanonical` response is a provider observation, not authenticated finality/canonicality or EFS truth. Multi-block history needs a parent-linked header-hash sequence anchored to separately qualified head evidence plus separate coverage. |
+| [EIP-1186](https://eips.ethereum.org/EIPS/eip-1186) | A locally verified account/storage proof covers only requested paths against the selected header's state root. It does not prove calls, omitted slots, receipts/logs, finality, enumeration or historical completeness. Receipt/log proof needs a separate fork-aware receipt-path verifier against an authenticated receipts root. |
+| [EIP-4444](https://eips.ethereum.org/EIPS/eip-4444), [EIP-7642](https://eips.ethereum.org/EIPS/eip-7642), [ETH wire protocol](https://github.com/ethereum/devp2p/blob/master/caps/eth.md) | ETH peers may not serve old headers, bodies or receipts. Their advertised full-block range is a serving-capability claim, not proof of successful complete service, canonicality or absence. These standards do not define JSON-RPC or historical-state availability; test those provider capabilities separately. Wire receipts must be re-encoded into consensus receipt form, including the typed envelope and recomputed bloom where applicable, before receipts-root verification. Preserve causal availability and `UNKNOWN`/`PARTIAL` rather than manufacturing a negative fact from pruning, timeout, null or empty response. |
+| [EIP-4788](https://eips.ethereum.org/EIPS/eip-4788), [EIP-2935](https://eips.ethereum.org/EIPS/eip-2935), [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844), [EIP-7516](https://eips.ethereum.org/EIPS/eip-7516) | Recent beacon roots/execution hashes and blob commitments/price observations are bounded inputs, not generic finality, century history or permanent byte availability. An out-of-window root or unavailable old blob remains causal unavailability/unknown, not semantic absence. |
+| [ERC-7930](https://eips.ethereum.org/EIPS/eip-7930) | Treat the versioned binary chain-specific-address envelope as lossless interchange/import data, not a user-facing address display. Preserve raw input, profile interpretation and unknown versions; it establishes no EFS principal or authority. |
+| [ERC-7950](https://eips.ethereum.org/EIPS/eip-7950) | Treat the chain-qualified transaction-reference string as a locator/import format. It establishes no inclusion, finality, semantic effect or EFS authority. |
+| [ERC-3668](https://eips.ethereum.org/EIPS/eip-3668), [ERC-4804](https://eips.ethereum.org/EIPS/eip-4804), [ERC-5219](https://eips.ethereum.org/EIPS/eip-5219) | CCIP Read, `web3://` and contract-resource responses are optional, traced location/transport adapters. A callback yields a contract-returned, basis-qualified result; stronger validation is implementation/profile-specific and needs separate evidence. Require an explicit chain/basis and resolver/ABI interpretation or visibly reject/surface ERC-4804's implicit defaults and inference. None creates EFS authority, EFS byte integrity, permanence, privacy or safe rendering; failed acquisition is availability evidence. |
+
+**Inference for EFS:** the product needs independent source observation,
+authenticated proof evidence, finality evidence, basis, canonicality
+observation/assessment, coverage, history availability and byte axes. Explorer
+specifies and presents those outcomes; the shared SDK/Reader/Files/Artifact seam
+performs source access, proof/byte verification, callback execution/result
+qualification and failure mapping. No standard above creates a wallet-free
+public endpoint or an indexer-free reconstruction service; E1b must prove the
+actual cold direct-guest route.
 
 ## External product findings
 

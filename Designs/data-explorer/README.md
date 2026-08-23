@@ -5,7 +5,7 @@
 **Depends on:** [[Designs/efsv2/README]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/efsv2/layered-type-system-and-data-abi]], [[Designs/web-client-os/README]], [[Designs/open-web-app-store/README]]
 **Inputs:** [[Designs/clientv2/README]] and the product-pressure evidence linked from [[research-landscape]]
 **Reviewers:** —
-**Last touched:** 2026-08-22
+**Last touched:** 2026-08-23
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/read-path #topic/graph-queries #topic/app-model #topic/content #topic/privacy
 
@@ -19,7 +19,10 @@ typed EFS graph through honest, configurable views.
 workspace and projection layer. Files is the first vertical, not the product's
 outer boundary. Unknown Types always retain a safe raw inspection path. Rich
 projections are finite, versioned and removable. Extensions never become
-truth, install themselves, inherit authority or block raw access.
+truth, install themselves, inherit authority or block raw access. Data Explorer
+is the default App and raw fallback for unqualified Files/data routes; an exact
+route to another App uses the same shared Reader substrate without launching or
+passing through Explorer UI.
 
 **First product target:** direct guest Files browsing; tree/list/grid and a
 read-only typed table; exact provenance/history; verified preview/download;
@@ -99,7 +102,8 @@ See [[Designs/efsv2/owner-rulings]],
   explicit projections.
 - Web Client/OS proposes a finite exact-Type-first consumer adapter, stable
   Files DTOs, exhaustive `ResourceOutcome`/`ByteOutcome`, route-shaped guest
-  boot, and action plan/receipt/read-back flows.
+  boot, direct exact-App launch that does not require an Explorer intermediary,
+  and action plan/receipt/read-back flows.
 - Open Web App Store proposes inert package/catalog evidence and a one-way
   `PackageHandoff`; discovery and package evidence carry no local grants,
   activation or execution authority.
