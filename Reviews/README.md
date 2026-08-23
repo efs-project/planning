@@ -96,3 +96,7 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 ### Open Web App Store × layered Type/Data ABI pressure (2026-08-22)
 
 - [`2026-08-22-open-web-app-store-type-data-abi-pressure/`](./2026-08-22-open-web-app-store-type-data-abi-pressure/) — disposable, versioned application-layer fixture for exact Projects, authored Releases, selected dependency sets, finite catalogs, plural evidence, inert runtime handoff, bounded Type/View roots and reconstruction after publisher/catalog/forge disappearance. Three fresh runs pass 71/71 checks with identical non-measurement results; no protocol bytes, Core change, resolver, runtime, public catalog or implementation is adopted.
+
+### Web platform standards screen (2026-08-23)
+
+- [`2026-08-23-web-platform-standards-screen/`](./2026-08-23-web-platform-standards-screen/) — reproducible 1,228-row index across the pinned W3C `browser-specs`, TC39, WebAssembly and WASI catalogs, plus a high-recall primary-family review through WHATWG, CSS, Unicode/CLDR, IETF, WPT, web-features/BCD, ARIA-AT, Open UI and WICG. It records source/reproducibility limits, selected-feature status, forward-profile implications and negative evidence; no browser target, package, polyfill, runtime, repository or implementation is adopted.
