@@ -2,7 +2,7 @@
 
 **Status:** draft — working architecture for iteration; interface names, package shapes, runners, repository topology, and implementation tools are not adopted
 **Target repos:** planning, client, sdk
-**Depends on:** [[Designs/web-client-os/README]], [[Designs/open-web-app-store/architecture]], [[Designs/efsv2/hierarchical-files-and-folders]]
+**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/ethereum-standards-and-interop]], [[Designs/open-web-app-store/architecture]], [[Designs/efsv2/hierarchical-files-and-folders]]
 **Reviewers:** @historical-client-architecture (2026-08-14), @current-v2-read-path (2026-08-14), @web-platform-standards (2026-08-14), @os-drives-pm boundary review (2026-08-14)
 **Last touched:** 2026-08-22
 
@@ -147,7 +147,7 @@ Logical packages/interfaces:
 
 | Interface | Responsibility | Must not own |
 |---|---|---|
-| Protocol SDK | IDs, canonical codecs, runtime validators, Core ABI, proofs, low-level index reads | Files paths, browser UI, wallet policy |
+| Protocol SDK | IDs, canonical codecs, runtime validators, Core ABI, proofs, low-level index reads, exact-basis Ethereum RPC/signature/receipt evidence | Files paths, browser UI, wallet/provider policy |
 | Realm Reader | Explicit read contexts, admitted typed Records/Occurrences/Bindings, pagination, basis and completeness | Product reducers, global search, hidden endpoint authority |
 | Artifact Reader / Verifier | Exact manifests/closures, Locator attempts, verified whole bytes/ranges, fallback evidence | Release identity, presentation selection, execution grants |
 | Direct App handoff / entry preparer | Validate inert `PackageHandoff`, exact `ResolvedPackageSet` and canonical entry manifest; use Artifact Reader to reconstruct and verify the selected entry's full activation closure; emit prepared evidence and launch inputs | Catalog search, install/update policy, grants, activation, runner construction or code execution |
@@ -168,9 +168,11 @@ route can be audited without pulling those services into guest boot.
 
 The Reader's identity surface is uniformly `PrincipalId`. A contract Lens is
 expected to carry Principal entries—targeting 64 if the evidence supports
-it—not each controller key. Verifying the actual signer/account against a
-Principal's historical controller state is an authority operation beneath that
-surface.
+it—not each controller key. Verifying the actual signer descriptor and any
+involved account against a Principal's historical controller state is an
+authority operation beneath that surface. Signer, account sender, delegated
+account/code, outer sender, submitter/bundler/relayer and payer are independent
+roles; [[ethereum-standards-and-interop]] defines the common role schema.
 
 Conceptual result:
 
@@ -374,12 +376,15 @@ Illustrative slots include:
 ```text
 efs.realm.transport
 efs.realm.reader
+efs.ethereum.read
+efs.ethereum.resource
 efs.files.resolver
 efs.artifact.retrieval
 efs.presentation.handler
 efs.wallet.connector
 efs.identity.principal
 efs.signer.broker
+efs.ethereum.signature.verify
 efs.actions.planner
 efs.actions.submitter
 efs.local.storage
@@ -746,7 +751,8 @@ the Files tree is one inspectable/editable projection of it.
 A `defaultAccount` under a Principal profile is a mutable local or deliberately
 published UX/routing preference. It is not a Principal identifier, authority
 proof, or signer capability. Every operation independently resolves and
-records the actual account and historical authorization basis.
+records its signer descriptor, every involved account and historical
+authorization basis.
 
 ### Bootstrap recursion rule
 
@@ -836,14 +842,16 @@ URL
 existing pinned guest context
  -> explicit New folder / New file / Publish revision intent
  -> lazy wallet/action module load
- -> connect selected wallet adapter
- -> resolve author PrincipalId, suggested default account, and actual signer
+ -> explicitly discover/select an EIP-6963 provider
+ -> connect its narrow EIP-1193 adapter and recheck chain/account
+ -> resolve author PrincipalId, suggested default account, actual signer
+    descriptor, controller basis, execution sender, submitter and payer roles
  -> build deterministic ActionPlan
  -> trusted System Chrome preview
  -> authorize every adapter-required artifact
  -> sign authored publication plus Realm admission/CAS intent separately
  -> submit/monitor
- -> canonical Reader Kernel read-back
+ -> canonical exact-basis Reader Kernel read-back
  -> structured ActionReceipt
  -> return to Minimal Viewer Shell
 ```
@@ -851,6 +859,13 @@ existing pinned guest context
 Promotion preserves the route, exact basis, selected resource, and verified
 handles as inputs. It creates a new authority context; it does not retroactively
 make the guest session authorized or silently change Lens policy.
+
+The illustrative `efs.ethereum.*` slots are interoperability adapters, not a
+second protocol model. Their exact-block, provider, signature, receipt,
+external-resource and contract-realization evidence is defined in
+[[ethereum-standards-and-interop]]. Guest boot never binds or probes the wallet
+slot, and Apps never receive a raw provider, signer, RPC or registry object as
+ambient authority.
 
 The first official Web Client includes this write promotion in its normal File
 Browser. A raw diagnostic inspector can support contract bring-up, but a
