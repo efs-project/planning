@@ -53,6 +53,7 @@ flowchart TB
 
     subgraph K["Layer 1 — Kernel"]
       RK["Reader Kernel"]
+      PREP["Direct App handoff + entry preparer<br/>pure, inert, no install"]
       CAP["Capability and service router"]
       SYS["Lazy system services"]
     end
@@ -63,6 +64,7 @@ flowchart TB
 
     subgraph S["Layer 2 — Shell profiles"]
       MIN["Minimal Viewer Shell"]
+      APPHOST["Minimal App Host"]
       SESSION["Session Shell"]
     end
 
@@ -72,6 +74,10 @@ flowchart TB
     end
 
     LINK --> GEN --> RK --> MIN
+    GEN --> PREP --> APPHOST
+    RK --> APPHOST
+    MIN -->|"default Data Explorer guest entry"| APP
+    APPHOST --> APP
     HEALTH --> GEN
     RK --> CAP
     CAP --> SYS --> SEC --> SESSION
@@ -144,6 +150,7 @@ Logical packages/interfaces:
 | Protocol SDK | IDs, canonical codecs, runtime validators, Core ABI, proofs, low-level index reads | Files paths, browser UI, wallet policy |
 | Realm Reader | Explicit read contexts, admitted typed Records/Occurrences/Bindings, pagination, basis and completeness | Product reducers, global search, hidden endpoint authority |
 | Artifact Reader / Verifier | Exact manifests/closures, Locator attempts, verified whole bytes/ranges, fallback evidence | Release identity, presentation selection, execution grants |
+| Direct App handoff / entry preparer | Validate inert `PackageHandoff`, exact `ResolvedPackageSet` and canonical entry manifest; use Artifact Reader to reconstruct and verify the selected entry's full activation closure; emit prepared evidence and launch inputs | Catalog search, install/update policy, grants, activation, runner construction or code execution |
 | Files Resolver | Stable Files view, point lookup, complete-or-qualified directory pages, properties, opened files, transcripts | URL grammar, HTTP status, browser cache, native host aliases |
 | Presentation Router | Trusted mapping from resolved input profile and local handler policy to a presentation plan | Remote self-registration, installation, grants, execution |
 | Diagnostics | Stable result/error codes, provenance, explanation, resumption hints, structured progress | UI prose as the canonical error model |
@@ -151,6 +158,13 @@ Logical packages/interfaces:
 The generic Reader must not become path-only. Files, EAP, Git/Forge, packages,
 Arcade, Media, and other typed reducers are siblings over generic Records,
 Occurrences, Bindings, and artifacts.
+
+The direct App preparer is a small pure route slice adjacent to Artifact
+Reader, not the package manager. It consumes an already selected exact
+handoff/set, validates the entry and produces no authority-bearing or mutable
+installation object. Catalog discovery, updates, retention policy, activation
+selection and install lifecycle remain lazy system services, so a direct App
+route can be audited without pulling those services into guest boot.
 
 The Reader's identity surface is uniformly `PrincipalId`. A contract Lens is
 expected to carry Principal entries—targeting 64 if the evidence supports
@@ -281,12 +295,19 @@ residual even then.
 
 ### Layer 2 — Shell profiles
 
-There are two Shell profiles over the same Reader Kernel:
+There are three Shell profiles over the same Reader Kernel:
 
-1. **Minimal Viewer Shell** — trusted route navigation, file/folder listing,
-   provenance/completeness, safe preview/download, raw inspection, and explicit
-   Create/Play/Open-in-OS actions. It is part of the guest closure.
-2. **Session Shell** — layout, launcher, workspaces, focus, windowing or
+1. **Minimal Viewer Shell** — trusted route/progress/qualification, safe raw
+   inspection/download, recovery/fallback, and explicit Create/Launch/Open-in-
+   OS transitions. The ordinary file/folder list, workspace and projections
+   belong to the built-in Data Explorer guest entry, which is selected by this
+   Shell for unqualified Files/data links and is part of the MVP critical
+   closure. If Data Explorer fails, the smaller raw rescue remains usable.
+2. **Minimal App Host** — trusted route/progress/identity, direct launch,
+   exit/restart, focus return, permission escalation, provenance and raw/Data
+   Explorer fallback around one named App. It is part of the small generic App
+   path, not the full desktop.
+3. **Session Shell** — layout, launcher, workspaces, focus, windowing or
    non-window modes, notifications, activity, customization, and product
    navigation after full-session promotion.
 
@@ -298,7 +319,12 @@ if the selected Session Shell fails.
 ### Layer 3 — Apps and Presentation modules
 
 Apps and Presentations consume exact verified resources and scoped services.
-They do not become authority over the resources they display.
+They do not become authority over the resources they display. A named App link
+may branch from Boot Core/Reader into the Minimal App Host and that exact
+eligible `guestEntry`; Apps are not structurally forced behind Session Shell.
+Data Explorer is the built-in default for unqualified Files/data routes and a
+fallback, not an intermediary for a named App route. See
+[[app-runtime-and-direct-launch]].
 
 Useful package entry modes are:
 
@@ -761,9 +787,9 @@ appears.
 | Phase | Allowed work | Examples |
 |---|---|---|
 | Critical | Required to parse, verify, resolve, and paint the route | Boot Core, Reader Kernel slice, minimal CSS, built-in safe viewer |
-| Interactive | Directly requested route behavior after first useful frame | directory continuation, selected preview, raw inspector, exact-link controls |
+| Interactive | Directly requested route behavior after first useful frame | directory continuation, selected preview, raw inspector, exact-link controls, or a completely verified confined `guestEntry` admitted under an exact all-denied local grant decision |
 | Background | Optional warm-up permitted by local privacy/resource policy | fallback Locator probes, cache persistence, likely module prefetch, profile refresh |
-| Explicit | Code or authority required only after a user/agent action | wallet connector, action planner, signer, runtime, package installer, full Shell, inference model |
+| Explicit | Code or authority requiring a user action or agent mandate | wallet connector, action planner, signer, new grants, private/state attachment, package install, full Shell, inference model, Arcade Play, and full-Web/direct-egress launches not already accepted by exact local policy |
 
 ### Performance rules
 
@@ -771,6 +797,9 @@ appears.
 - No guest-critical module imports an explicit-phase module, even indirectly.
 - Exact dependency locks allow parallel fetch and verification; avoid
   serial package-discovery waterfalls.
+- A named-App route begins exact App selection/critical-closure work and its
+  qualified initial resource read in parallel, then supplies the same pinned
+  Reader result to the App. An exact route performs no catalog search.
 - Domain packages have no top-level network, wallet, storage, DOM, or
   registration side effects.
 - Present a stable trusted frame immediately; stream rows and verified ranges
@@ -833,14 +862,15 @@ path passes.
 not initialize the Session Shell, package manager, private stores, agents, or
 unrelated system services.
 
-### App activation
+### App direct launch and activation
 
 ```text
 PackageHandoff
  -> exact dependency/closure verification
  -> compatibility and policy evaluation
  -> effective capability intersection
- -> explicit Play/Launch
+ -> host start decision: eligible confined guest | prior exact authorization
+                         | explicit Play/Launch | blocked
  -> runner creation
  -> scoped service ports
  -> health / exit / teardown / receipt
@@ -849,7 +879,13 @@ PackageHandoff
 Whole-profile activation is the larger transaction in
 [[system-profiles-and-generations#Activation, health and rollback]]. App
 activation or explicit Play remains separate: package presence and a configured
-handler do not execute an application.
+handler do not execute an application. A URL may request Launch, but only a
+trusted host `OPEN`, retained exact policy or matching agent mandate supplies
+Launch intent for an exact confined guest entry. The URL supplies neither
+authority nor a browser transient-activation token: the OS records an exact
+all-denied local grant decision and passes only bounded initial data by value.
+The complete route, performance, runner and lease contract is in
+[[app-runtime-and-direct-launch]].
 
 ## Error and fallback model
 
@@ -985,6 +1021,7 @@ packages/
   route/
   reader/
   artifacts/
+  app-entry-preparer/ # inert exact handoff/set validation; no installer
   files/
   actions/
   viewer-shell/

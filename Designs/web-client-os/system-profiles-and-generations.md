@@ -315,30 +315,44 @@ snapshot mutates the authored generation or `SystemProfileLockId`.
 
 ### `RunnerRealization`
 
-Immutable platform-specific execution description selected by a profile. It
-contains no effective grant, local state or runtime instance. The working
-shape commits to:
+Immutable, tagged platform-specific execution description selected by a
+profile. It contains no effective grant, local state or runtime instance. All
+variants commit to:
 
-- the canonical executable Artifact/ArtifactClosure and its authored Release;
-- runner profile plus semantic-conformance version;
-- exact WIT package/world/interface versions and digests;
-- Component Model/Canonical ABI revision and options where applicable;
-- exact WASI package/interface versions;
-- required Core feature set and bounded memory/table declarations;
-- declared imports and exports;
+- the canonical executable Artifact/ArtifactClosure and authored Release;
+- exact runner profile, version and semantic-conformance version;
 - target platform/Web profile;
-- one exact browser adaptation closure or named native runtime profile;
-- adapter, generator, shim and toolchain closure;
-- deterministic environment inputs;
-- enforceable resource ceilings and UI-surface profile; and
+- selected executable closure and exact adapter/bootstrap/toolchain closure;
+- immutable construction policy, enforceable resource ceilings and UI-surface
+  profile; and
 - required conformance-suite/profile IDs.
 
-The canonical Core/component artifact remains distinct from a derived
-realization. A `jco`-style browser closure is a digest-linked platform output
-with its own provenance. A native runtime may consume the canonical component
-directly. Engine caches and local AOT/compiled output are optimizations, not
-identity, unless a profile deliberately publishes and selects them as an exact
-realization.
+A Wasm/Component variant additionally commits to exact WIT
+package/world/interface versions and digests, Component Model/Canonical ABI
+revision and options, exact WASI package/interface versions, required Core
+feature set and bounded memory/table declarations, declared imports/exports,
+one exact browser adaptation closure or named native runtime profile, and
+deterministic environment inputs.
+
+A SES Worker variant commits to exact SES/Endo implementation bytes and
+version, `lockdown()` options, outer Compartment/global/endowment profile,
+module loader/archive/compartment-map and policy formats, Worker bootstrap and
+construction mechanism, CSP/object-URL/network profile, quota/termination
+policy, and any LavaMoat-style inner dependency-policy realization.
+
+An opaque full-Web iframe variant commits to exact sandbox tokens,
+credential/origin mode, CSP/network/Permissions-Policy/storage/navigation
+profiles, verified closure-mount/resource-delivery mechanism, handshake and
+teardown profile, and Shell-owned surface/gesture policy. Any construction
+change that broadens these powers creates a different realization and a new
+instance lease; a MessagePort cannot retrofit construction authority.
+
+The canonical artifact remains distinct from a derived realization. A
+`jco`-style browser closure, SES archive, or iframe resource mount is a
+digest-linked platform output with its own provenance. A native runtime may
+consume a canonical component directly. Engine caches and local AOT/compiled
+output are optimizations, not identity, unless a profile deliberately
+publishes and selects them as an exact realization.
 
 ### `PackageHandoff` and `PreparedPackageSet`
 
@@ -358,8 +372,12 @@ evidence as a new package Release, Set, catalog judgment or update authority.
 `PreparedPackageSet` is local inert evidence that every member required by the
 selected platform/runner realization—executable, glue, configuration, schemas,
 required passive assets, notices/licenses and migration inputs—has been fetched
-and verified. Preparation
-may perform static import/feature/memory validation and compile already
+and verified. It names its exact coverage profile. For an executable entry,
+that coverage is the selected entry's full locked activation closure; a
+separately committed optional activation unit is not a deferred hole and needs
+its own complete preparation evidence before invocation. A broader offline/
+install profile may require all such units. Preparation may perform static
+import/feature/memory validation and compile already
 verified Core Wasm without instantiation. It never evaluates adapter entry
 modules, instantiates a component/module, runs a start function, package hook,
 migration or other module code, or creates live capabilities.
@@ -962,14 +980,25 @@ guest Files path.
    for rich/legacy DOM applications and games because the EFS Wasm service
    lane intentionally exposes no DOM and rich Web documents require document
    semantics.
-6. **Exceptional confined JavaScript:** only when data, Wasm and iframe lanes
-   cannot express the need. SES/Compartments remain a separately labeled
-   library/emerging boundary rather than foundational browser isolation.
+6. **SES Worker App:** ordinary evidence-gated JavaScript App/service lane in
+   one dedicated Worker. An OS-owned outer Compartment starts with no ambient
+   host globals and receives only hardened async capability stubs; an exact
+   LavaMoat/Endo dependency policy may further attenuate packages inside the
+   App. SES remains a library realization of a Stage-1 standards direction,
+   not process isolation or a CPU/memory-DoS guarantee. See
+   [[app-runtime-and-direct-launch]].
 7. **Native adapter:** later Wasmtime/other native hosts and Drive/device
    adapters implement compatible worlds with stronger fuel/resource controls.
 
 Untrusted Wasm does not receive direct DOM/custom-element registration. It may
 drive an OS-owned semantic UI surface or live inside an opaque app lane.
+
+The current LavaMoat browser integrations harden an application's dependencies
+and must not be mistaken for the outer boundary against a malicious publisher.
+The OS-owned SES Compartment/Worker, exact launch plan and instance lease remain
+that boundary. A simpler single-bundle SES profile may ship before per-package
+policy if the hostile fixture passes; perfect dependency attenuation is not a
+precondition for the first useful confined JavaScript App.
 
 ### Browser realization
 
