@@ -2,7 +2,7 @@
 
 **Status:** draft — owner-directed product posture plus dated implementation recommendations; no repository, dependency installation, or product implementation is authorized
 **Target repos:** planning, client, sdk
-**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/product-constitution-and-roadmap]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/web-client-os/privacy-and-agents]]
+**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/product-constitution-and-roadmap]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/web-client-os/privacy-and-agents]], [[Designs/web-client-os/ethereum-standards-and-interop]]
 **Reviewers:** @web-platform-standards (2026-08-14), @historical-client-architecture (2026-08-14), @current-v2-read-path (2026-08-14)
 **Last touched:** 2026-08-22
 
@@ -112,6 +112,15 @@ architectural veto and no unsupported engine is allowed to fail silently.
 | 4 | An exact measured browser/device/assistive-technology profile, selected [Web Platform Tests](https://web-platform-tests.org/) evidence and EFS fixtures | Whether the declared product profile actually works; upstream WPT evidence is not itself EFS conformance |
 | 5 | Pinned [web-features](https://github.com/web-platform-dx/web-features) and [MDN browser-compat-data](https://github.com/mdn/browser-compat-data) snapshots | Discovery, compatibility evidence and drift alarms; Baseline is advisory rather than an EFS product gate |
 | 6 | Pinned agent guidance, linters, validators and code-generation advice | Candidate implementation technique; never authority over the rows above |
+
+Ethereum application and interface standards use the same evidence law with
+one additional activation layer. A contributor records the exact official
+EIP/ERC repository revision and proposal status, the selected chain/fork or
+wallet/provider profile, measured implementation support, raw conformance
+evidence, EFS disposition, and explicit unsupported behavior. Final text does
+not prove chain activation, wallet/RPC support, safety, EFS adoption, or
+semantic authority. The current corpus map and exact boundaries are in
+[[ethereum-standards-and-interop]].
 
 The initial broad guidance candidate is [Google Chrome Modern Web
 Guidance](https://developer.chrome.com/docs/modern-web-guidance/get-started).

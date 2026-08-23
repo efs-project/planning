@@ -61,7 +61,8 @@ bytes or bypass the normal design promotion ceremony.
 7. The client uses one uniform `PrincipalId` surface. A Principal may have a
    mutable default/main controller account for ordinary workflows, but the
    Principal is stable identity and every operation still names and
-   historically verifies its actual signer account. Owner-supplied example:
+   historically verifies its actual signer descriptor and, when applicable,
+   the account it used. Owner-supplied example:
    `JamesCarnley.eth` may have three controller keys while preferring
    `0xaCf4C2950107eF9b1C37faA1F9a866C8F0da88b9` for routine routing; another
    authorized signer remains possible and must be recorded exactly.
@@ -152,6 +153,13 @@ bytes or bypass the normal design promotion ceremony.
     active inner hardening candidate; opaque iframes remain the full-DOM lane;
     and Wasm/WIT remains foundational. Exact profiles and claims must be
     measured, and none receives ambient authority by optimism.
+27. Use current Ethereum EIPs/ERCs deliberately at replaceable client, SDK,
+    wallet, read, signature, content, contract and agent boundaries. Proposal
+    status is not deployment/support/safety evidence; chain is not Realm;
+    Locator, registry, interface, metadata, provider announcement and agent
+    score are never authority. Guest boot performs no wallet discovery. The
+    complete pinned corpus screen and dispositions are in
+    [[ethereum-standards-and-interop]].
 
 ## Current recommendation
 
@@ -208,6 +216,9 @@ The detailed layer and extension contracts are in [[architecture-and-modules]].
 The first product slice and acceptance tests are in [[mvp-and-acceptance]].
 The selected standards surface and dated library/build recommendations are in
 [[technology-foundation]].
+The Ethereum read, wallet, signature, URI/content, contract-introspection,
+privacy and agent interoperability boundary is in
+[[ethereum-standards-and-interop]].
 The finite generated-code and app-facing boundary against the draft layered
 Type/Data ABI is in [[type-data-abi-boundary-pressure]].
 Generic specific-App links, minimum-time-to-data rules, practical SES/LavaMoat,
@@ -223,6 +234,7 @@ boundary are in [[app-runtime-and-direct-launch]].
 | [[architecture-and-modules]] | Boot layers, logical package boundaries, module interfaces/configuration, lazy loading, fallback, security classes, and repository/tooling recommendation |
 | [[app-runtime-and-direct-launch]] | Generic exact/follow App deep links, direct minimum-time-to-data launch, start classes, SES/LavaMoat/Endo, opaque iframe and Wasm lanes, instance leases, App SDK and fallback contracts |
 | [[technology-foundation]] | Standards-first dynamic SPA, Signals state, Web Components/Lit/Web Awesome boundary, EFS design language, responsive/installable/offline delivery, i18n/accessibility, app lifecycle, and build/release posture |
+| [[ethereum-standards-and-interop]] | Complete pinned EIP/ERC synthesis; exact-read, wallet, signature, URI/content, contract, privacy, cross-chain and agent adapter dispositions; SDK pressure and acceptance fixtures |
 | [[system-profiles-and-generations]] | Nix/Guix recovery, exact and follow profiles, safe social sharing, deterministic composition, System Configuration Manager, local activation/state/grant generations, rollback/GC/export, and the foundational Wasm/WIT/Component/WASI module direction |
 | [[mvp-and-acceptance]] | Fast guest read plus official basic File Browser writes over proposal-labelled adapters, user and agent journeys, threat boundaries, performance budgets, acceptance tests, and EFS v2 pressure |
 | [[type-data-abi-boundary-pressure]] | Finite exact-Type consumer adapter, generated codec/domain-DTO boundary, exhaustive read/byte outcomes, one Type-evolution fixture, and two generic Core pressure packets |
@@ -285,8 +297,9 @@ crosses a Web/client integration surface.
   useful Files data without wallet detection, account creation, Commons,
   hosted EFS indexing, or OS boot.
 - The official MVP is also a write-capable File Browser. Its public action
-  surface uses `PrincipalId`, while a mutable default controller account and
-  the actual historically verified signer remain separate.
+  surface uses `PrincipalId`, while a mutable default controller account, the
+  actual historically verified signer descriptor, and every execution/payer
+  account remain separate.
 - Rich Unicode/NFC names plus reversible host aliases are the Files naming
   direction. A 64-Principal contract Lens is the measurement target; Lens
   entries are Principals rather than underlying controller keys.
@@ -358,7 +371,7 @@ preserves a requirement, not necessarily its old mechanism.
 | Historical `gx` link auto-boots another person's generation | **Retire** | Every shared setup enters inert Inspect; Try, Adopt, Fork, personal-resource attachment and Activate are explicit independent transitions |
 | Full profile/private-store/package hydration before useful UI | **Retire** | Useful guest pixels precede all optional account, private, package, agent, and Shell hydration |
 | Cache, journal, offline, migrations, and recovery requirements | **Retain, defer mechanisms** | Cache is disposable; irreplaceable local/private state needs separate versioned migration/export/recovery proof before OS claims |
-| Persona/wallet/action separation | **Revise** | Uniform `PrincipalId`; mutable default account remains preference; actual signer/controller history, requester, submitter, and payer stay explicit |
+| Persona/wallet/action separation | **Revise** | Uniform `PrincipalId`; mutable default account remains preference; controller authorization, signer descriptor, account sender, requester, submitter/bundler/relayer, 7702 roles, and payer stay explicit |
 | Agent sessions with plans, budgets, taint, and receipts | **Retain and broaden** | Agents are peer users. High-risk human checkpoints are default policy, not a permanent ban on explicitly delegated agent workflows |
 | Network broker and privacy-center requirements | **Retain, simplify MVP** | Start with audited explicit endpoints and zero hidden traffic; evolve toward capability-scoped network services without claiming anonymity |
 | Fragment grammar, handler grammar, exact package schema, and surface schema | **Retire as inherited bytes** | Recover use cases and fixtures, then derive the smallest versioned route/module/action schemas from current EFS v2 |

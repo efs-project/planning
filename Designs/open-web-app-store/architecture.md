@@ -4,8 +4,9 @@
 **Target repos:** planning, contracts, sdk, client
 **Depends on:** [[Designs/efsv2/README]], [[Designs/efsv2/system-constitution]], [[Designs/web-client-os/README]]
 **Inputs:** [[Designs/efsv2/hierarchical-files-and-folders]] (proposal-only `BindingScope` experiment)
+**Dated evidence:** [SDK v2 Ethereum standards census at `4d3e736`](https://github.com/efs-project/planning/blob/4d3e736524ca04cdadfb26fdd628fcd206fc8084/Designs/sdkv2/ethereum-standards-census.md)
 **Reviewers:** @core-authority-audit (2026-08-14; boundary repair 2026-08-15), @adversarial-architecture (2026-08-14; boundary repair 2026-08-15), @external-landscape (2026-08-14), @web-client-os-pm boundary review (2026-08-15)
-**Last touched:** 2026-08-15
+**Last touched:** 2026-08-22
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/app-model #topic/trust #topic/content
 
@@ -498,6 +499,7 @@ closure-completeness rule, and runtime interpretation.
 | Confined component/app | Complete closure; versioned host-interface profile; no ambient DOM, network, wallet, secrets, storage, signing, or EFS data. |
 | Full-web app | Complete committed local code where the profile promises preserved execution; opaque-origin/sandbox behavior and message capabilities are runtime concerns. Mutable remote executable imports invalidate strict preserved-closure claims. |
 | Library/dependency | No automatic execution. Build/install hooks are separately declared executable nodes and require a runner/grant. |
+| Deployable EVM helper/module | The exact deployable closure commits initcode/runtime bytes and hashes plus constructor/immutable/link inputs. Separately attributable evidence names source/build/toolchain inputs, dependency closure, accepted chain/basis and—when used—factory address/runtime/protocol, salt/expected address, observed implementation/facet set, and upgrade authority. Package selection authorizes neither deployment, `delegatecall`, upgrade, nor use. |
 | Tool or local service/agent | Exact executable set plus explicit compute, storage, network, secret, signing, and inter-process requests. Installation starts disabled. |
 | Remote-service connector | Exact local schema/connector/skill closure; provider endpoint, API/model/runtime version, uptime, incidents, scopes, and data handling remain mutable observations. “Installed” means the connector is present, not the provider is running. |
 | Schema/profile/vector pack | First-class exact non-executable dependency used for reproducibility and conformance. Packaging it does not ratify its application semantics. |
@@ -507,6 +509,18 @@ profile that authenticates each released interval. Executable packages require
 their full locked executable closure before launch. Live transform output is
 session-derived data until deliberately retained, hashed, and published as a
 new exact representation.
+
+The SDK v2 standards handoff transfers only profile pressure. CALM-style
+content-addressed capability, impact, and dependency declarations are useful
+manifest precedent; they do not make registry-selected delegatecall modules an
+EFS default. CREATE2 or deterministic-factory output, a code-index result, a
+clone/proxy/diamond address, an implementation/facet slot, or a content resolver
+is basis-qualified discovery, deployment, or provenance evidence—not immutable
+package identity or authority. Mutable proxy/facet/code/authority state must be
+declared as an external boundary or captured in a new exact observation/update
+candidate. A retained package remains interpretable without the index, factory
+adapter, resolver, registry, or forge; unavailable reconstruction stays
+`UNKNOWN` rather than silently selecting another module.
 
 ## Runtime-neutral handoff
 
@@ -922,6 +936,7 @@ its runtime semantics into that envelope.
 | Update/state rollback | Update may stop after preparation, grant decision, or a successor immutable `InstallBindingGeneration`; a separate activation/selection decision has its own receipt, byte rollback works, and mutable-state restore works or is honestly unsupported | Existing Release/binding mutates, status changes binding identity, an earlier stage implies activation, the old binding disappears, or data loss is labeled rollback success |
 | Steward death | Publisher, curator, registry, forge, and original Locators disappear; exported exact Set remains inspectable, verifiable, runnable, and reseedable; updates become stale/UNKNOWN | Mandatory operator, live forge, or registry required for use/reconstruction |
 | Provenance rebuild | Exact Git/non-Git source, recipe, toolchain, and inputs reproduce or explicitly mismatch output without becoming publisher authority | “Signed/reproducible” becomes safe/official or Git identity becomes package identity |
+| EVM helper discovery/deployment drift | One exact helper Release discovered through a code index, conventional factory and external content resolver retains exact source/build/initcode/runtime/factory/dependency/authority evidence; after the index/resolver/forge disappear and the named factory is unavailable or code-mismatched, a clean client either reconstructs the same initcode/runtime/dependency closure, recomputes the claimed factory result and records any alternate local deployment separately, or reports `UNKNOWN`; proxy/facet/code/authority drift creates new evidence or an update candidate while the old Release remains unchanged; no discovery step deploys, upgrades, calls or grants `delegatecall` authority | Address, listing, proxy slot or resolver URL becomes identity/currentness; a live index/factory/gateway is required; drift mutates a Release; or discovery authorizes deployment, upgrade, call or execution |
 | Path/resource attack | Independent validators reject traversal, Unicode/case collisions, symlinks, special files, decompression bombs, oversized graphs, and malformed closures identically | Runner-dependent meaning or resource exhaustion before rejection |
 | Folder Presentation authority | Selection changes presentation only; no wallet/network/write/secret/Shell authority; update capability diff blocks widening | Discovery, compatibility, or curator recommendation becomes a grant |
 | Direct guest | Clean browser opens exact link, verifies/exports, and explicitly Plays supported exact closure without account/wallet/Commons/OS | Guest path boots OS, requires canonical index, hides basis, or executes before verification |

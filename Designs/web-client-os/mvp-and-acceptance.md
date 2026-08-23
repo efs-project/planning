@@ -2,7 +2,7 @@
 
 **Status:** draft — smallest official Web Client product slice for iteration; no implementation or protocol/profile freeze is authorized
 **Target repos:** planning, client, sdk
-**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/technology-foundation]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/efsv2/core-architecture-candidate]]
+**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/technology-foundation]], [[Designs/web-client-os/ethereum-standards-and-interop]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/efsv2/core-architecture-candidate]]
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14)
 **Last touched:** 2026-08-22
 
@@ -62,9 +62,9 @@ Files-certified write or conceal missing semantics behind a hosted service.
   action planner, signer ceremony, submitter, and optional content publisher.
 - Use a uniform `PrincipalId` surface. A selected Principal may have a mutable
   default/main controller account for ordinary routing, but every plan and
-  receipt names the actual signer account and its historical authorization
-  basis. The Principal is the author; its default account is neither the
-  Principal's identity nor a spendable substitute.
+  receipt names the actual signer descriptor, any account it uses, and its
+  historical authorization basis. The Principal is the author; its default
+  account is neither the Principal's identity nor a spendable substitute.
 - Pin the target Realm, parent Directory, exact Mount/config,
   `namespacePlan`, `contentPlan`, optional `metadataPlan`, current relevant
   Binding heads, and expected revisions before planning.
@@ -210,7 +210,8 @@ plan fails before signing.
 pinned folder/file context
  -> explicit New folder / New file / Publish revision
  -> load write profile and chosen wallet connector
- -> resolve Principal and actual controller account
+ -> resolve Principal, controller authorization, signer descriptor and all
+    execution/submission/payer accounts
  -> compile immutable ActionPlan from trusted schemas
  -> publish/store exact bytes when the operation has content
  -> trusted human or delegated-agent review
@@ -329,6 +330,11 @@ plan rather than silently redefining the target.
       worker, prior cache, or full OS.
 - [ ] A throwing EIP-1193 provider records zero property access and zero
       requests during guest navigation.
+- [ ] Guest navigation dispatches no EIP-6963 provider-discovery event and
+      observes no installed-wallet/provider metadata.
+- [ ] Every supported dependent state call uses one EIP-1898 block hash and
+      every required log query uses its exact EIP-234 basis. Unsupported exact
+      calls return `UNSUPPORTED/UNKNOWN`, never a hidden retry at `latest`.
 - [ ] Chain namespace/reference, Core address/deployment/profile, Realm
       descriptor and Realm/code/admission high-water/basis, route config,
       Principal set, root Mount, namespace/content/metadata Plan, Files path,
@@ -366,18 +372,40 @@ plan rather than silently redefining the target.
 - [ ] The File Browser creates an empty folder, a file with small fixed bytes,
       and a second immutable revision through ordinary controls.
 - [ ] No wallet code or provider access occurs before the explicit write action.
+- [ ] The explicit action discovers/selects an EIP-6963 provider and narrows it
+      behind EIP-1193. Self-attested provider UUID/RDNS/name/icon cannot
+      establish trust or execute active content.
+- [ ] `accountsChanged`, `chainChanged`, and disconnect events plus a
+      host-observed provider replacement invalidate every unapproved plan.
+      Chain/account/session generation are re-read before sign and submit;
+      malformed or silently mismatched provider responses fence stale work.
 - [ ] The plan uses `PrincipalId`; UI may suggest a default account, but the
-      actual signer and historical authorization receipt are explicit.
+      signer descriptor, controller basis, account sender, any 7702 roles,
+      outer sender, submitter/bundler/relayer and payer are explicit rather than
+      collapsed into it.
 - [ ] Under the current candidate, the PublicationEnvelope's exact
       `principalId`, ordered leaves, expiry, digest, and signer and the Realm
       AdmissionIntent's exact `realmId`, `envelopeId`, Binding `leafMask`,
       `action`, canonical ordered `expectedRevision` vector, nonce, expiry,
-      digest, and signer are separately inspectable for every operation; stale
+      digest, and signer descriptors are separately inspectable for every operation; stale
       expected revisions fail before or during admission and trigger a fresh
       plan rather than silent retry.
+- [ ] The Realm-bound authorization names its consumption authority, nonce
+      namespace, exact plan/effect digest, expiry and consume-or-idempotent-no-op
+      rule. Exact duplicate and concurrent submissions cannot create a second
+      effect; a portable identical PublicationEnvelope remains copyable without
+      creating a different authored statement.
 - [ ] Wallet rejection, user cancellation, provider disconnect, replacement,
       revert, dropped transaction, unavailable receipt, partial carrier
       upload, and `UNKNOWN` finality have distinct recoverable states.
+- [ ] EIP-5792 capability absence selects an explicit sequential fallback. The
+      receipt preserves version/ID/chain, requested and observed atomicity,
+      status category, raw capabilities and ordered transaction receipts; none
+      are per-call success. A partial or lost status remains qualified until
+      every effect is independently reconciled through canonical read-back.
+- [ ] Transaction evidence retains structured chain ID and hash and exports an
+      ERC-7950 citation; receipt execution status remains distinct from EFS
+      semantic success.
 - [ ] At a later pinned basis, a clean guest browser point-resolves the new
       folder/file name through the exact namespace Plan. The parent listing
       contains it if scope coverage is complete, or remains visibly qualified
