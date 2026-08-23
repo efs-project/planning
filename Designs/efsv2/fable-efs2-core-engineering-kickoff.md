@@ -3,8 +3,8 @@
 **Status:** reference — copy-ready kickoff; authority and design conclusions remain outside this prompt
 **Target repos:** planning, contracts, sdk
 **Authority input:** [[owner-rulings]]
-**Reads with:** [[README]], [[system-constitution]], [[core-architecture-candidate]], [[owner-decision-inbox]]
-**Last touched:** 2026-08-12
+**Reads with:** [[README]], [[system-constitution]], [[core-architecture-candidate]], [[ethereum-standards-and-execution-profile]], [[owner-decision-inbox]]
+**Last touched:** 2026-08-23
 
 #status/reference #kind/prompt #repo/planning #repo/contracts #repo/sdk #topic/efsv2 #topic/onchain #topic/graph-queries #topic/lenses
 
@@ -146,11 +146,18 @@ three production mounts, or full Arcade inside this pass.
 ### Standards and prior art
 
 Prefer established standards and justify every EFS invention. Re-check primary
-sources as relevant: EAS; EIP-1271/4337/6492/7702/7913 and draft EIP-8130;
+sources as relevant: EAS; ERC-1271, ERC-4337, ERC-6492, EIP-7702, ERC-7913,
+and draft EIP-8130;
 multihash/CID and deterministic CBOR; RFC 6920; RDF/RDFC and graph database
 index models; Git SHA-1/SHA-256 and ISO SWHID; capability and append-only data
 systems. Separate stable standards from drafts and avoid adopting a standard
 outside the problem it actually solves.
+
+Reuse the pinned exhaustive corpus receipt in
+[[Reviews/2026-08-23-efs2-core-eip-erc-pressure/README]] rather than recreating
+a wallet/URI matrix. Preserve official source revision, proposal status and
+dependencies, EFS disposition, target support, safety, and owner adoption as
+separate claims.
 
 ### Outputs
 

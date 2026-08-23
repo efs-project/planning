@@ -2,11 +2,11 @@
 
 **Status:** draft — one-week disposable design and validation mission; no production implementation or freeze authority
 **Target repos:** planning, disposable experiments, contracts and SDK only after the gates below pass
-**Depends on:** [[README]], [[system-constitution]], [[core-architecture-candidate]], [[layered-type-system-and-data-abi]], [[hierarchical-files-and-folders]]
+**Depends on:** [[README]], [[system-constitution]], [[core-architecture-candidate]], [[layered-type-system-and-data-abi]], [[hierarchical-files-and-folders]], [[ethereum-standards-and-execution-profile]]
 **Supersedes:** —
 **Reviewers:** @codex-gpt-5 (Core, evidence, and product red teams; 2026-08-22)
-**Evidence baseline:** Stage A corpus plus the local B0, Git P6, Type/Data-ABI, application-pressure, and reconstruction experiments
-**Last touched:** 2026-08-22
+**Evidence baseline:** Stage A corpus plus the local B0, Git P6, Type/Data-ABI, application-pressure, reconstruction, and pinned EIP/ERC standards screens
+**Last touched:** 2026-08-23
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #topic/efsv2 #topic/readiness
 
@@ -90,10 +90,12 @@ calendar-gated; valuable progress may honestly end at `CONTINUE-DISPOSABLE`.
 |---|---|---|
 | Stage A corpus | Broad requirements, fixtures, traceability, candidate formulas, and falsifiers | Executable conformance or selected bytes |
 | B0 micro-spine | Selected cross-language identities, EOA admission, basic indexes, small reconstruction, gas and code-size signals | Current layered Type semantics, generic multi-leaf Core, Lens, KEL, or complete queries |
+| G1 Task1C carrier oracle at `ae9d75bd` | Sealed acyclic portable source-witness graph versus destination PlanCore/Admission DAG traces and pure G1 fact grades | `EXPERIMENT_SELECTED` is not adoption or protocol conformance; OccurrenceKey conversion, revision literals, closure body, and independent Task4 comparator remain open |
 | Git P6 | Atomic application-shaped 21-leaf write, retry/rollback pressure, real Git object distinctions | A generic Core rather than a fixture-specific harness |
 | Type/Data-ABI experiments | Exact Types, stable Objects, representations, Views, QueryProfiles, evolution, package closure, and application fit | Permanent bytes, full Core admission, production compiler, or settled View authority |
 | Files design | Concrete need for `BindingScope`, honest absence, and operation-bound routed consent | A working implementation or acceptable aggregate gas |
 | Application passes | Nanda, achievements, packages, media, Files, and Git fit ordinary application Types without new Core nouns | That every shared Core seam is integrated, safe, or affordable |
+| [Pinned EIP/ERC screens](../../Reviews/2026-08-23-efs2-core-eip-erc-pressure/README.md) | Complete official-corpus inventory plus Core/read/Realm/verifier/realization constraints and negative controls | Target-chain activation or support, EFS adoption, exact profiles/bytes, or conformance |
 
 Existing reports must be labeled by the source commit, experiment commit,
 fixture digest, toolchain, dirty state, known defects, rerun status, and claim
@@ -111,7 +113,19 @@ Before adding mechanisms:
 
 - pin the current owner rulings, constitution, active candidate documents, and
   correction register;
+- source-lock the standards receipt: planning commit; official EIP/ERC source
+  revisions; corpus-index digest; proposal number/title/status/created/requires
+  metadata; EFS disposition; constraint gate; conformance owner; target
+  profile; fixture/result digest; claim scope and non-claims. Reuse one receipt
+  downstream rather than rerunning or copying its inventory at every gate;
+- grade adjacent CAIP, ENSIP, WalletConnect, external JSON-RPC, W3C/IETF, and
+  browser-wallet standards passes `UNRUN` unless separately pinned; the EIP/ERC
+  corpus does not silently cover them;
 - inventory every local experiment branch, result, toolchain, and known defect;
+- grade the sealed `ae9d75bd` Task1C carrier evidence before reusing
+  `PublicationEnvelope`, `Occurrence`, source-witness graph, PlanCore, or
+  Admission-DAG shorthand; preserve its `EXPERIMENT_SELECTED`,
+  `protocolConformance=false`, and `notAdopted=true` ceiling;
 - build one requirements-to-fixture-to-result ledger with separate observed-
   result (`PROVED`, `REFUTED`, `PARTIAL`, `UNRUN`, `OUT-OF-SCOPE`) and
   current-candidate (`CURRENT`, `STALE`, `CONFLICTING`) grades;
@@ -121,6 +135,16 @@ Before adding mechanisms:
 
 **Pass:** two reviewers can independently say what is current, what was
 actually executed, and which claim each artifact supports.
+
+**Current state:** `G0-PARTIAL`. The EIP/ERC corpus ingestion, classification,
+and selected design integration are pinned, but the reusable standards
+disposition receipt and the sealed Task1C/current-candidate reconciliation are
+not yet a complete independently locked G0 evidence ledger.
+
+Refresh the official standards delta before `GO-CODE` and repeat the complete
+screen before `GO-FREEZE`. Proposal status, accepted Realm support, observed
+endpoint/client behavior, safety, EFS disposition, and owner adoption remain
+separate fields.
 
 ### G1 — semantic and identity candidate
 
@@ -138,7 +162,8 @@ later:
   coexistence path for future hashes and codecs;
 - Principal identity across EOAs and contract accounts without truncating
   `bytes32` or pretending chain-dependent contract authority is universal;
-- Realm identity versus Realm implementation/policy revision;
+- Realm identity versus Realm implementation/policy/execution revision; a
+  versioned origin/lineage commitment is stronger than current `chainId`;
 - public/private identity-domain separation and the rule that batching alone
   never creates application meaning or safely mixes linkable public/private
   material.
@@ -155,6 +180,16 @@ candidate:
    identity, component commitments, policy/verifier revisions, possible admin
    powers, and the boundary between admission basis and later finality evidence.
 
+The Realm arm includes same addresses/code on different genesis states, two
+Core deployments on one chain, a chain-ID change on one continuing lineage,
+and divergent forks that retain one chain ID. Every later observer envelope for
+an admission or offchain dynamic read names an exact block hash. An onchain
+admission or Lens call records/uses its atomic execution coordinate,
+RealmRevision, and high-water but cannot know its eventual inclusion-block
+hash. Canonicality/finality remain separate observer evidence.
+Pass only if identity, branch-qualified currentness, replay, and succession are
+unambiguous.
+
 The old 1–64 Envelope/Flatcard run is reduced and confounded. It is useful prior
 evidence, not the carrier decision. A survivor must preserve portable evidence,
 subset-carriage rules, replay safety, extraction, reconstruction, and
@@ -166,6 +201,12 @@ ordinary relations, while the onchain structural language remains small,
 bounded, deterministic, and non-executable. Rich validation and behavior may be
 compiled, run offchain, or published as evidence; Type authors do not inject
 callbacks into Core.
+
+Identity and codec tests include hostile names, four-byte collisions, Unicode
+lookalikes, external address/display encodings, absent-versus-canonical-zero,
+retired field/variant keys, unknown or out-of-range selectors, and proof
+coordinate changes. External registry keys or interface selectors enter no EFS
+identity preimage without a separately frozen EFS profile.
 
 The current working hypothesis to falsify is a **flat exact nominal Type**:
 every intrinsic constraint that changes accepted values and every closed
@@ -196,6 +237,10 @@ The model and SUT contain the G1 survivor semantics for:
 
 - bootstrap and ordinary Type validation with statically bounded reference
   extraction;
+- append-only RealmRevision/accepted-execution-profile activation with exact
+  start/terminal high-waters and no retroactive reinterpretation, plus a
+  separate observer result for ambient chain-rule/profile mismatch that Core
+  bytecode may not be able to detect or stop;
 - the selected Record/Context, authored-publication, multi-leaf Occurrence, and
   Realm-admission shapes, including nonce, expiry, subset, and replay rules;
 - explicit target-existence and expected-revision evidence;
@@ -204,7 +249,8 @@ The model and SUT contain the G1 survivor semantics for:
 - `BindingScope` or a demonstrably better generic mechanism for complete
   unknown-name enumeration;
 - exact-Type and finite-inventory View queries, QueryProfile generations,
-  high-water bases, pages/cursors, coverage, and honest completion;
+  exact-block/high-water bases, pages/cursors, bounded return/error ABIs,
+  coverage, and honest completion;
 - the adopted generic query obligations: exact Type/Record/Occurrence/admission
   reads, exact typed-scalar equality, typed references/backlinks and reverse
   membership, content-digest lookup, authored-data enumeration,
@@ -218,6 +264,14 @@ large simulated backfill, reconstruction, and exact authority for declaring
 terminal coverage. Any generic query obligation that cannot fit the aggregate
 gas/state budget returns to the project owner; it is not silently dropped.
 
+Point proofs, logs, RPC/archive responses, table events, and optional indexers
+remain qualified inputs. Compare ERC-7208, ERC-7813, and ERC-8100 as data/query
+precedent while proving that mutable or event-only tables and self-declared
+schema/XML completeness cannot establish EFS semantic identity, authority, or
+`COMPLETE`. A successful point proof never proves enumeration; empty, short,
+timed-out, pruned, or cursor-invalid transport results remain `PARTIAL` or
+`UNKNOWN` unless the declared finite domain's terminal completion law passes.
+
 Effectful operations additionally bind one exact canonical plan/effect-set
 commitment: Principal, Realm, operation, executor and code/dependency basis,
 nonce, expiry, preconditions, maximum cost, atomicity, and exact effects.
@@ -225,6 +279,12 @@ Human, agent, extension-host, TypeScript, and Solidity derivations must produce
 the same digest. A batch Envelope does **not** itself claim application-semantic
 atomic meaning; that comes only from a typed transaction Record or an explicit
 bounded profile rule.
+
+Sealed traces distinguish an EFS plan signature from any EIP-712 presentation,
+wallet batch, user operation, delegation, relayer/payer authorization,
+transaction receipt, and canonical effect. Replay protection remains an EFS
+domain/Realm/nonce/expiry responsibility. Partial wallet-batch or receipt
+success cannot upgrade an unobserved Core effect.
 
 Define one normative facts matrix and lossless Core/Solidity/SDK/Explorer
 crosswalk. Keep at least these axes separate:
@@ -239,7 +299,7 @@ lifecycle:      ADMITTED | WITHDRAWN | CARRIED_ONLY | UNPROVEN
 selection:      CURRENT | NOT_CURRENT | CONFLICT | UNKNOWN
 observation:    exact Realm/block/policy/code basis + separate finality/freshness
 bytes:          VERIFIED_AVAILABLE | PARTIAL | UNAVAILABLE | INTEGRITY_FAILED
-effect:         COMMITTED | NOT_COMMITTED_PROVEN | UNKNOWN
+effect:         NOT_APPLICABLE | COMMITTED | NOT_COMMITTED_PROVEN | UNKNOWN
 ```
 
 Applications may project these dimensions for users, but Core and the SDK must
@@ -247,6 +307,13 @@ not collapse `UNKNOWN` into absence, `PARTIAL` into complete, failed retrieval
 into missing data, admission into finality, recorded basis into currentness, or
 evidence into authority. Cross-language vectors cover every legal state and
 reject illegal combinations.
+
+Pure G1 identity/carrier/structural results always use
+`authority=UNPROVEN`, `lifecycle=CARRIED_ONLY`, and
+`effect=NOT_APPLICABLE`, whether accepted or rejected structurally. A G1
+rejection is not proof that some external state stayed unchanged.
+`NOT_COMMITTED_PROVEN` is reserved for G2+ effect recovery over a declared
+state transition and exact basis.
 
 **Pass:** differential, model-based, property, and fuzz tests make the pure
 model and Solidity SUT agree on sealed traces they did not generate jointly;
@@ -262,8 +329,8 @@ Pressure the independent model and Solidity SUT with:
 
 - EOA and ERC-1271 Principals, relayers, distinct payers, contract upgrades,
   EIP-7702 code changes, wrong-chain and wrong-Realm replay, nonce lanes,
-  expiry, signature malleability, simulation-to-admission substitution, and
-  reentrancy;
+  expiry, ERC-191/ERC-2098/ERC-8111 encoding and malleability cases, ERC-5267
+  domain mismatch, simulation-to-admission substitution, and reentrancy;
 - hostile ERC-1271 witnesses that revert, return malformed values, consume the
   verifier gas cap, reenter, or change code/authority between observation and
   admission;
@@ -273,6 +340,19 @@ Pressure the independent model and Solidity SUT with:
   verifier revisions, possible admin/upgrade powers, and admission basis;
 - state-readable historical verifier/policy semantics, not merely a hash whose
   defining bytes or dependency graph may disappear;
+- an exact historical verifier transcript: digest/preimage and domain,
+  signer/account reference, any suite-specific key bytes, signature bytes,
+  suite revision and normalization policy, verifier code and
+  declared dependencies, Realm revision, execution coordinate, later exact
+  inclusion basis, gas/return-data policy, and result. Pure suites replay from
+  retained inputs. A stateful controller call needs a retained witness/profile
+  or remains a recorded Realm transition; never re-call current ERC-1271 code
+  to reinterpret an old admission;
+- in the initial EFS candidate, ERC-6492 only as an optional offchain/pre-
+  admission adapter—even though the ERC also permits contract callers—not an
+  admitted authority result; Final ERC-7913 as a disposable address-less second-verifier interface,
+  not Principal identity; EIP-7951 P-256 edge vectors plus a simulated
+  EIP-8151-style ambient `ecrecover` change that must not alter old results;
 - cross-Realm copying versus destination admission and recognition;
 - one disposable managed-Principal/succession profile and one second signature-
   verifier profile proving additive rotation/recovery/delegation and algorithm
@@ -294,7 +374,10 @@ Build the smallest contract Lens needed to prove the constitutional promise:
 - immutable or content-addressed Resolution Plans;
 - the risk bearer selects or approves the Plan;
 - exact, finite candidate Principals and bounded point resolution;
-- explicit Realm, policy/code basis, high-water, coverage, conflict, and result;
+- an onchain result exposing Realm/revision, execution block number,
+  applicable admission high-water, policy/code/execution profile, coverage,
+  conflict, and result; a separate observer envelope adds exact block hash,
+  source authentication, canonicality, and finality;
 - `FOUND`, `ABSENT_PROVEN`, `CONFLICT`, `UNKNOWN`, and `UNSUPPORTED` outcomes;
 - deterministic losing-evidence/provenance reads where promised;
 - rich personal/social policy compiled outside Core, never arbitrary onchain
@@ -309,6 +392,14 @@ hostile evidence.
 Finality and reorg observation live in a separate client observer harness, not
 inside Core truth. Fork/reorg tests must prove that pages or Lens inputs from
 different block bases are rejected rather than merged.
+
+EIP-1186-style point proofs remain an optional observer adapter. The observer,
+not the Lens contract, independently authenticates any header/state-root and
+exact key derivation and must not treat a point proof as enumeration coverage.
+Block numbers and tags may locate a block; only the accepted exact hash/state
+basis joins multiple offchain dynamic observations into one answer. One
+onchain transaction instead gets atomic EVM state by construction and never
+pretends to know its current block hash.
 
 **Pass:** the same inputs and basis produce the same result in independent
 implementations; no untrusted caller chooses the policy that authorizes itself;
@@ -339,17 +430,60 @@ covering ordinal/counter/cursor/nonce/expiry widths, checked overflow and
 terminal behavior, Type/index spam, worst-case churn, hash/codec coexistence,
 and long-lived deployment margins.
 
-Then give an independent reader codebase only one immutable Realm bootstrap
-artifact plus chain/RPC and carrier configuration. It must authenticate and
-discover the committed components and reconstruct Types, Records, Envelopes,
-Occurrences, admissions, indexes, Binding histories/scopes, Withdrawal state,
-Lens inputs, and completeness evidence without a manually supplied private ABI,
-module-address list, EFS-operated indexer, or writer-side database.
+Kill a physical arm against a **named Realm execution profile**, not a
+century-wide constant. Run at least one conservative control from rules
+actually activated in a disposable reference EVM environment and one
+separately named future sensitivity profile. Passing the control neither
+selects a venue nor declares the environment a qualifying Realm. Track
+runtime/initcode ceilings, per-transaction
+and block gas, calldata and block-byte bounds, warm/cold access, state creation
+and writes, user-net versus gross/block accounting, activated precompiles, and
+deployment facilities. A fork-planning or “scheduled” document is scenario
+evidence, not activation or freeze authority.
+
+Replay a compatible and a semantics-breaking ambient fork transition. The test
+must not pretend the fork itself invokes an EFS profile update. Record what the
+immutable Core can enforce, what only an external observer can qualify as
+`PROFILE_MISMATCH/UNKNOWN`, and which change forces explicit Realm succession.
+
+Physical negative controls include ERC-7201 versus ERC-8042 namespace/formula
+mismatch; ERC-1167 dependency loss; mutable ERC-1967/ERC-2535 routes; runtime-
+only or optimistic module manifests; and self-declared selector/interface
+mismatch. Core durability/currentness cannot depend on `SELFDESTRUCT`,
+transient or proposed expiring storage, `PREVRANDAO`, last-written metadata,
+historical log/body availability, or blobs. EIP-1014/code-hash observations and
+factories support deployment evidence only; none becomes semantic authority.
+
+Give an independent reader codebase one immutable Realm bootstrap artifact plus
+an independently authenticated exact/finalized block header and state root and
+declared chain/RPC and carrier configuration. It must derive the canonical
+inventory/closure/count/root under Core rules, discover the committed
+components, and reconstruct Types, Records, PublicationSets/source graphs,
+Occurrences, retained source/destination witness sidecars required by the
+selected profile, AdmissionPlans, admission receipts, indexes, Binding
+histories/scopes, Withdrawal state, Lens inputs, and completeness evidence
+without a manually supplied private ABI, module-address list, EFS-operated
+indexer, or writer-side database.
+
+The recipe records `RealmId`, `RealmRevision`, exact block hash/number and state
+root, source commitment and authentication method,
+execution/projection/codec/hash/verifier profiles, canonical inventory closure
+and item count, and projection digest/root. Two independently written
+reconstructors prove projection determinism—not source authority or domain
+completeness—by rejecting missing preimages, duplicate keys, noncanonical
+order, malformed lengths, trailing bytes, and items falsely included inside the
+declared canonical projection domain, and by producing identical authoritative
+bytes. Unrelated chain state outside that domain is not surplus input. Repeat
+through reorg rollback/replay with old bodies, receipts, logs,
+trie-node-by-hash retrieval, and blob bytes unavailable. If authoritative
+reconstruction then needs historical data, the candidate fails its state-only
+promise; that dependency is an exact falsifier, not a passing `UNKNOWN`.
 
 **Pass:** at least one topology fits conservative EVM ceilings with safety
-margin, and independent state-only reconstruction is byte-identical for the
-authoritative projection. Otherwise revise semantics or bounds before selecting
-contracts.
+margin, the source and finite projection domain are independently authenticated
+under the declared Core rules, and two independent state-only reconstructors
+produce the same authoritative bytes. Otherwise revise semantics or bounds
+before selecting contracts.
 
 ### G6 — developer and product proof
 
@@ -364,7 +498,10 @@ separately:
   and operation-bound consent;
 - one typed table/spreadsheet view, exact raw/provenance inspection, export,
   and an arbitrary untrusted stub emitting only an inert action intent; the
-  trusted Explorer host must regenerate the canonical plan;
+  trusted Explorer host must regenerate the canonical plan. Replay ERC-7813-
+  and ERC-8100-shaped inputs through optional adapters while retaining raw
+  state, fixed basis, `PARTIAL/UNKNOWN`, and no authority or completeness from
+  a schema/XML declaration;
 - Nanda typed request/response/evidence with unknown method/capability and
   disappeared-provider behavior;
 - package/release finite closure with conflicting catalogs and no implicit
@@ -389,6 +526,13 @@ exact Type onchain. Measure manual IDs/preimages/calldata, protocol literals,
 incorrect state collapses, completion/errors, and raw-escape use against the
 raw ABI baseline. A compiler emitting two languages is convenience, not an
 independent conformance implementation.
+
+For every Ethereum-facing feature, the SDK and Explorer distinguish the
+Realm's accepted profile (`REQUIRED | OPTIONAL | FORBIDDEN | UNKNOWN_PROFILE`)
+from observed endpoint/wallet/client support (`SUPPORTED | UNSUPPORTED |
+DEGRADED | FAILED | NOT_OBSERVED`) and the canonical EFS effect. Unknown
+methods, return shapes, verifier suites, precompiles, and capabilities fail
+closed without erasing portable data.
 
 Every SDK/Explorer failure returns a pressure packet with the unchanged
 fixture, expected and actual qualified facts, the smallest missing semantic,
@@ -424,6 +568,9 @@ prefix, even if that is only G1 or partial G2.
 - repair the two-axis status ledger and isolate stale or overclaimed results;
 - freeze a disposable corpus, facts matrix, limits registry, and exact
   toolchains for the week;
+- pin one reusable standards-disposition/support receipt and current versus
+  future Realm execution-profile drafts; do not copy the full corpus into
+  later gates;
 - publish the transition spec, independent-model plan, and Solidity-SUT plan
   before implementation.
 
@@ -439,6 +586,8 @@ falsifier; no duplicate experiment is scheduled without a stated reason.
   exact issuer/basis, projection bytes, and state effects;
 - run the four G1 ABI-shaping comparisons for Principal, Record/Context,
   portable/Realm-bound publication, and RealmDescriptor/bootstrap;
+- run Realm origin/fork/chain-ID collisions and Type evolution/selectors/
+  absent-versus-zero/noncanonical twins under the same candidate bytes;
 - decide candidate semantics for `SELF`, closed groups, bounded existence
   references, exact Views, QueryProfile coverage, public/private domains, and
   batch versus application meaning;
@@ -467,7 +616,8 @@ expected semantics inside the SUT.
 - run EOA, ERC-1271, EIP-7702, managed-Principal/succession, second-verifier,
   relayer/payer, replay, code-change, reentrancy, and verifier-gas cases;
 - prove self-authenticating Realm bootstrap and state-readable historical
-  verifier/policy basis;
+  verifier/policy basis with a retained exact transcript and no current-state
+  recall;
 - prove executor/operation/dependency/cost-bound plural consent and exact public
   effect recovery.
 
@@ -483,7 +633,9 @@ do not stabilize before this exit.
 - run Git P6, Files churn, the separate 50-Principal Files Plan, and conflicting
   or disappeared evidence;
 - reconstruct the full test Realm from one bootstrap artifact in an independent
-  reader; run reorg/finality tests in the client observer.
+  reader with canonical count/root and hostile extra/missing/reordered inputs;
+  run reorg/finality tests and unavailable-history/proof-source cases in the
+  client observer.
 
 **Exit:** absence is proved only at a terminal complete basis; no constructor-
 preloaded application Types/targets, writer oracle, manual module list, or
@@ -496,6 +648,8 @@ private ABI is required.
 - run blinded developer tasks and compare against the raw ABI baseline;
 - run Data Explorer's guest/read/table/raw/provenance fixture against both the
   deterministic fake and the cold direct integrated path;
+- expose accepted Realm profile versus observed endpoint/wallet/client support
+  and canonical effect as separate SDK/Explorer results;
 - use only an inert untrusted extension-intent stub; the trusted host
   regenerates and verifies any canonical action plan;
 - route every truth failure backward through a pressure packet.
@@ -508,7 +662,7 @@ or product adapter becomes mutable hidden authority.
 
 - run the achieved corpus in genuinely independent implementations;
 - measure the monolith, then only topology alternatives justified by the same
-  state projection;
+  state projection, under named activated-current and future-scenario profiles;
 - run security, database/query, EVM, SDK, product, and long-horizon reviews;
 - produce the implementation spec, transition tables, ABI draft, limits sheet,
   vector manifest, reconstruction recipe, threat model, known failures,
@@ -540,6 +694,13 @@ after contracts are already fixed. Its week-one design must cover:
 The SDK must never hide `UNKNOWN`, turn discovery into authority, depend on one
 hosted service, or let a mutable generated/helper dependency reinterpret an old
 operation.
+
+Wallet, provider, ENS/URI/resource, account-abstraction, and browser adapter
+details remain owned by
+[[Designs/web-client-os/ethereum-standards-and-interop]]. The Core readiness
+program consumes that layer's qualified evidence receipt at G6; it does not
+copy those matrices into G1–G5 or apply Web contribution gates to protocol-only
+experiments.
 
 ## Data Explorer PM charter and boundary
 
@@ -581,7 +742,8 @@ fallback, basis, completeness, verified bytes, and dependency traces.
 - Principal, signature/verifier, nonce, expiry, Realm, and admission-intent
   transcript, including the proved future-identity extension path;
 - the self-authenticating RealmDescriptor/bootstrap, component/code/policy
-  commitments, historical semantics, and every possible admin/upgrade power;
+  commitments, accepted execution/read/verifier profile, historical semantics,
+  activation/succession law, and every possible admin/upgrade power;
 - state transition tables for admission, Binding, Withdrawal, scopes, query
   coverage, and history;
 - the canonical operation/effect-set commitment, idempotent identity, cost/
@@ -593,7 +755,8 @@ fallback, basis, completeness, verified bytes, and dependency traces.
 - state-readable reconstruction ABI and required indexes;
 - storage ownership, upgrade/reinterpretation prohibition, and contract split;
 - predeclared conservative bytecode, gas, calldata, validator-work,
-  state-growth, century-width, and worst-case bounds;
+  result-size/returndata, state-growth, century-width, and worst-case bounds,
+  qualified to named Realm execution profiles;
 - SDK raw semantics and independent golden vectors.
 
 No item in this list may be carried as a `GO-CODE` hold. The evidence packet
@@ -631,6 +794,12 @@ Stop and revise the candidate if any experiment shows that:
 - a tombstone, Withdrawal, reorg, or missing page resurrects older state;
 - historical Occurrences change meaning after account, Realm, policy, codec,
   helper, or implementation change;
+- historical ERC-1271 or other stateful authority evidence is re-called against
+  current code/state instead of preserving the admitted transcript/result and
+  any reproduction witness required by its selected profile;
+- a self-declared interface, registry, metadata/schema declaration, proof,
+  endpoint, wallet capability, or proposal status becomes EFS authority,
+  semantic identity, target support, or query completeness;
 - the Realm cannot authenticate its own components and historical policy/
   verifier semantics from one bootstrap artifact;
 - an action plan, signer, executor, effect set, cost bound, dependency basis, or
@@ -661,8 +830,10 @@ The owner packet should be small enough to review and exact enough to build:
 8. security model and unresolved high-risk items;
 9. application, SDK, and Data Explorer pressure results;
 10. freeze-now, version-later, and explicitly-out lists;
-11. owner decisions that cannot be derived from evidence;
-12. implementation sequence with tests carried forward unchanged.
+11. pinned standards disposition/status/dependency manifest plus accepted and
+    observed Realm execution/read/verifier support profiles;
+12. owner decisions that cannot be derived from evidence;
+13. implementation sequence with tests carried forward unchanged.
 
 The packet records `CONTINUE-DISPOSABLE`, `REDESIGN`, or
 `RECOMMEND-GO-CODE`. It does not self-authorize implementation. Only after the

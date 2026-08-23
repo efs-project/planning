@@ -2,10 +2,10 @@
 
 **Status:** draft — buildable comparison target, not frozen protocol
 **Target repos:** planning, contracts, sdk
-**Depends on:** [[system-constitution]]
+**Depends on:** [[system-constitution]], [[ethereum-standards-and-execution-profile]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-08-12
+**Last touched:** 2026-08-23
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #topic/efsv2 #topic/onchain #topic/graph-queries #topic/lenses
 
@@ -22,14 +22,20 @@ few seams still capable of changing it.
 flowchart LR
     T["Type Schema<br/>meaning + shape + index declarations"]
     R["Record<br/>exact typed semantic content"]
-    E["Envelope / immutable context<br/>Principal + Actor + signature + leaves"]
-    O["Occurrence<br/>EnvelopeId + leaf index"]
+    P["PublicationSet / source graph<br/>actor context + counted leaves"]
+    S["SourceWitnessSidecar<br/>signature attests exact source node"]
+    O["Occurrence<br/>source graph/node + leaf index"]
+    AP["AdmissionPlan<br/>exact sources + destination action"]
+    D["DestinationWitnessSidecar<br/>signature authorizes exact plan"]
     A["Admission receipt<br/>Realm + policy + basis + ordinal"]
     I["Core indexes and current folds"]
     T --> R
-    R --> O
-    E --> O
-    O --> A
+    R --> P
+    P --> O
+    S -. attests .-> P
+    O --> AP
+    D -. authorizes .-> AP
+    AP --> A
     A --> I
 ```
 
@@ -37,7 +43,9 @@ The crucial separations are:
 
 ```text
 RecordId       = what exact typed semantic content is this?
-OccurrenceRef  = who published this exact Record in which signed Envelope?
+OccurrenceRef  = which exact source graph/node carried this Record at which leaf?
+Source witness = who attested that graph/node under which authority context?
+AdmissionPlan  = which exact sources and destination action are authorized?
 Admission      = what did this Realm accept, under which policy and basis?
 Binding head   = what value does one Principal currently select for one slot?
 Lens result    = what does this reader/contract accept under one explicit Plan?
@@ -52,13 +60,30 @@ its stable identity separate from revisioned implementation and policy:
 
 ```text
 RealmId       = H(immutable profile + chain reference + genesis/deployment commitment)
-RealmRevision = H(RealmId + implementation/code basis + policy + generation)
+RealmRevision = H(RealmId + implementation/code basis + policy + accepted execution profile + generation)
 ```
+
+`chain reference` is a versioned origin/lineage commitment, never a bare
+current `chainId`. The Realm candidate must distinguish same-chain competing
+Core deployments, different genesis states with matching addresses/code, a
+contentious split whose branches retain one chain ID, and a chain-ID change on
+one continuing lineage. `RealmRevision` commits the accepted execution/fork
+profile; later observations confirm the realized chain rules or report a
+mismatch. A chain hard fork does not automatically call Core or create a Realm
+revision, and a semantics-breaking ambient change may force explicit Realm
+succession. A direct onchain read executes against one atomic EVM state and can
+expose its Realm revision, execution block number, and high-water, but the
+contract cannot know its current block hash. A later/offchain observer envelope
+pins the exact block hash and, when proof-bearing, an authenticated state-root
+basis. The admitting transaction likewise cannot know its eventual inclusion-
+block hash.
 
 An allowed implementation upgrade does not rename every author, Lens, and
 Binding. A semantics-breaking replacement is a new Realm or an explicit
-successor. Admission receipts bind the actual RealmRevision and block/state
-basis used. The exact descriptor and upgrade boundary remain a bakeoff target.
+successor. Admission receipts bind the actual RealmRevision, execution order,
+and verifier basis used; later observer evidence binds exact inclusion block,
+state, canonicality, and finality. The exact descriptor and upgrade boundary
+remain a bakeoff target.
 
 The same Record can exist in several Realms. An admission, ordinal, current
 binding, revocation, and completeness answer is always Realm-qualified.
@@ -128,58 +153,99 @@ the stable ObjectId. Exact later Records reference that ObjectId. Topics and
 ownerless literals can use separate canonical genesis/value profiles rather
 than fake owners.
 
-### Envelope or immutable shared Context
+### Portable source graph and destination Admission Plan
+
+The current observed G1 carrier evidence is the sealed Task1C corpus at clean
+experiment commit `ae9d75bd52d247fe8699475ac1e770fe268efbdb`. It is
+`EXPERIMENT_SELECTED`, `protocolConformance=false`, and `notAdopted=true`.
+OccurrenceKey conversion, separately reviewed revision literals, one missing
+Git closure body, and the independent Task4 comparator remain open. The
+experiment oracle is not regenerated here; G0 records it and G1 runs only the
+missing profile-placement/comparator delta.
+
+Its load-bearing candidate is an acyclic source/publication and destination
+Admission DAG:
 
 ```text
-PublicationEnvelope {
-  profile
-  principalId
-  actor/account authority witness
-  publication nonce / replay domain / expiry as required
-  ordered RecordIds or Record leaves
+PublicationSet {
+  semanticAuthor
+  sourcePublicationActor
+  sourceAuthorityProfileAndEpoch
+  publicationNonceAndExpiry
+  visibilityDomain
+  countedOrderedRecordRootAndCount
+  suites
+}
+
+portableSourceGraph = f(PublicationSetId)
+realmBoundSourceGraph = f(portableSourceGraphId, PlanCoreId)
+
+SourceWitnessSidecar {
+  attestedSourceGraphOrNodeId
+  exact source witness bytes
   signature
 }
 
-AdmissionIntent? {
-  realmId
-  action
-  occurrenceRefs
-  nonce / expiry
-  authorization witness
+PlanCore {
+  PublicationSetId
+  SelectionSpecId
+  EffectGraphId
+  applicationProfile
+  destination RealmId / RealmRevisionId / Core
+  destination authority / nonce / expiry / action
+  reviewed expected-revision projection
+}
+
+AdmissionPlan {
+  exact source OccurrenceIds
+  PlanCoreId
+}
+
+DestinationWitnessSidecar {
+  AdmissionPlanId
+  exact destination witness bytes
+  signature
 }
 ```
 
-The Publication Envelope amortizes repeated author, actor, signature, replay,
-and optional batch data. Moving a Record into another Envelope does not change
-RecordId. A separate Realm-bound admission intent can authorize local effects
-without silently making the authored publication itself Realm-local. The
-bakeoff must compare portable and intentionally Realm-bound publication
-profiles, including cross-Realm replay and subset carriage; candidate syntax is
-not allowed to discard portable signed evidence accidentally.
+Source and destination witness signatures are sidecars excluded from the
+identity they attest. Destination authorization targets the exact
+`AdmissionPlanId`. G1 Admission identity contains no future admitted
+Occurrence, receipt/result, resulting root/state, inclusion block, or finality.
+G2 owns state transitions and receipt outputs; G3 owns signature/verifier
+authorization. Binding the standards execution profile through the already-
+committed `RealmRevisionId` must not change this publication DAG.
 
-`leafIndex` is simply the zero-based position of one Record inside the signed
-Envelope. It distinguishes two occurrences of Records carried together without
-forcing an ID into every child:
+The carrier arms still compare self-contained per-Record witnesses against one
+immutable shared Context witness, and portable against deliberately Realm-bound
+source graphs, using one `PublicationSet`. Moving a Record between valid
+carriage modes does not change `RecordId`, authored node, source Occurrence, or
+normalized semantic commitment. Inline carriage can prove available exact
+bytes; ID-only carriage remains `UNKNOWN/UNAVAILABLE/UNPROVEN`.
+
+`leafIndex` is the zero-based Record position inside the counted ordered
+`PublicationSet`. It distinguishes source Occurrences without forcing an ID
+into every child:
 
 ```text
-Envelope E contains [ProjectRecord, ReleaseRecord, LocatorRecord]
-Occurrence(ProjectRecord) = (E, 0)
-Occurrence(ReleaseRecord) = (E, 1)
-Occurrence(LocatorRecord) = (E, 2)
+PublicationSet P contains [ProjectRecord, ReleaseRecord, LocatorRecord]
+Occurrence(ProjectRecord) = sourceNode(P, 0)
+Occurrence(ReleaseRecord) = sourceNode(P, 1)
+Occurrence(LocatorRecord) = sourceNode(P, 2)
 ```
 
-The final bakeoff must compare RecordId-list leaves with inline canonical
-Record leaves and prove extraction, data availability, and atomicity behavior.
-Admitted Record bodies remain state-readable in both variants; only the
-Envelope leaf encoding and context-amortization mechanism are under comparison.
+The remaining comparator must preserve extraction, data availability, subset
+carriage, replay safety, and application atomicity. Admitted Record bodies
+remain state-readable; carrier/context encoding remains experimental.
 
 ### Occurrence
 
-An Occurrence is an authored publication event identified by
-`(EnvelopeId, leafIndex)`. It answers who asserted a Record, with which actor
-and signature context. Ten curators can independently endorse the same
-`GameRelease` Record: the semantic RecordId is shared, while ten Occurrences
-preserve ten provenance trails.
+An Occurrence is a source-authored publication event identified from an acyclic
+source graph/node and `leafIndex`. Its identity excludes the witness signature;
+the retained sidecar lets G3 establish who asserted the Record, with which
+actor and authority context. Ten curators can independently endorse the same
+`GameRelease` Record: the semantic RecordId is shared, while ten source
+Occurrences preserve ten provenance trails.
 
 Replies, withdrawals, reviews, and authority-sensitive citations may target an
 Occurrence when the authored event matters. Pure semantic references target a
@@ -194,19 +260,35 @@ and never become destination truth merely because the bytes were copied.
 AdmissionReceipt {
   occurrenceRef
   realmId
+  realmRevisionId
+  admissionBlockNumber
+  admissionHighWater
   policyAndImplementationRevision
-  authorityBasis
+  authorityVerifierProfile
+  signedDigestAndDomain  // destination verifier transcript; not G1 Admission identity
+  verifierCodeAndDependencyBasis
+  boundedVerifierResult
   admissionOrdinal
   acceptedStatus
 }
 ```
 
-Finality is observed later at a named block/proof basis; a contract cannot know
-the future finality of its own current transaction. The durable receipt records
-accepted Occurrences; a reverted or rejected attempt normally leaves no state
-and is returned as call error/evidence rather than a permanent receipt.
+Exact inclusion hash and finality are observed later at a named block/proof
+basis; a contract cannot know the hash or future finality of its own current
+transaction. The durable receipt records accepted Occurrences; a reverted or
+rejected attempt normally leaves no state and is returned as call
+error/evidence rather than a permanent receipt.
 Admission receipts remain state-readable and never masquerade as portable
-unqualified current truth.
+unqualified current truth. If an ERC-1271 call is used, its digest,
+signer/account reference, any suite-specific key bytes, signature bytes,
+suite/normalization rule, verifier realization, Realm
+revision, execution coordinate, later exact inclusion basis, EFS gas/return-
+data policy, and success/malformed/revert result remain auditable. Pure suites
+must be replayable from retained inputs. A stateful controller result is either
+backed by the selected profile's retained witness/dependency law or remains the
+recorded historical Realm transition; current ERC-1271 state is never used to
+rewrite it. A bounded EFS admission profile is not a claim of unrestricted
+compatibility with every possible ERC-1271 contract.
 
 ### Binding and withdrawal
 
@@ -242,12 +324,14 @@ AccountPrincipal/1 = { authorityKind, originIfRequired, accountOrKey }
 PrincipalId = H(domain, canonical(AccountPrincipal/1))
 ```
 
-An EOA authority may be chain-independent; a contract-account authority is
-Realm-qualified unless a standard proves equivalent code/control across
-Realms. Admission uses a versioned authority verifier rather than the unsafe
-shortcut `hasCode ? ERC1271 : ecrecover`, because EIP-7702 accounts may have
-code while retaining EOA-key authority. ERC-1271 works locally; ERC-7913 is a
-future addressless-actor seam, not stable Principal identity. The author
+An EOA authority may be chain-independent; contract-account authority is
+Realm-qualified unless a versioned EFS profile independently proves and
+records equivalent code and control at named bases across Realms. Admission
+uses a versioned authority verifier rather than the unsafe shortcut
+`hasCode ? ERC-1271 : ecrecover`, because EIP-7702 accounts may have code while
+retaining EOA-key authority. ERC-1271 works locally. Final ERC-7913 is an
+optional address-less verifier interface; its `(verifier, key)` pair is not
+stable Principal identity or proof of cross-Realm authority. The author
 Principal remains separate from relayer and payer.
 
 Later managed Principals may add portable genesis, multiple actors, delegation,
@@ -287,9 +371,12 @@ Candidate EVM layout:
 5. keep Binding/current lifecycle state separate from immutable history.
 
 Every declared index is materialized automatically for every admitted item; an
-individual writer cannot opt out. Each page pins a Realm/block or admission
-high-water mark and returns cursor,
-coverage, and completeness. Type authors pay or cause writers to pay declared
+individual writer cannot opt out. Each onchain page returns a Realm revision,
+execution block number, applicable admission high-water, query generation,
+cursor, coverage, and completeness. One call sees atomic state. An offchain
+observer may bind dependent pages to one exact block hash/state root; separate
+ordinary transactions cannot claim that same exact basis merely because their
+reported block numbers match. Type authors pay or cause writers to pay declared
 fan-out, so limits and gas/state benchmarks are freeze gates. Mutable “add an
 index later” cannot imply complete historical absence. Under Type Variant A, a
 new canonical index means a new Type Schema. Under Variant B, a new

@@ -2,10 +2,10 @@
 
 **Status:** draft — proposal and disposable experiment target; not adopted or frozen
 **Target repos:** planning, contracts, sdk, client
-**Depends on:** [[system-constitution]], [[core-architecture-candidate]], [[hierarchical-files-and-folders]], [[../web-client-os/README]]
+**Depends on:** [[system-constitution]], [[core-architecture-candidate]], [[hierarchical-files-and-folders]], [[ethereum-standards-and-execution-profile]], [[../web-client-os/README]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-08-14
+**Last touched:** 2026-08-23
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/onchain #topic/graph-queries #topic/app-model
 
@@ -89,11 +89,14 @@ The first permanent Type layer does not:
 
 It changes the concern from a likely hard blocker into a design and measurement
 constraint. EIP-170 limits each deployed runtime, not the total logic reachable
-through calls. External libraries, separate modules, and EIP-2535 facets can
-distribute logic across deployed runtimes. ERC-7201-style namespaced storage
-can make shared storage layouts explicit. ERC-1167 minimal proxies are only a
-cheap repeated-instance overlay: every clone still delegates to one
-implementation that must independently fit the runtime limit.
+through calls. External libraries, separate modules, and ERC-2535 facets can
+distribute logic across deployed runtimes. Final ERC-7201 supplies a namespace
+annotation and slot formula, not compiler enforcement or a frozen layout;
+Final ERC-8042 supplies a distinct Diamond Storage formula. A prototype must
+name the formula used for every namespace and must not silently mix them.
+ERC-1167 minimal proxies are only a cheap repeated-instance overlay: every
+clone still delegates to one implementation that must independently fit the
+runtime limit.
 
 That does not make the choice free:
 
@@ -1090,6 +1093,7 @@ possible so the ecosystem is not trapped by one toolchain.
 | RDF/OWL/SHACL | Plural vocabularies, graph-shaped metadata, shapes as separate validation inputs, explicit validation reports. | Open-world reasoning, recursive/undefined validation, SPARQL callbacks, or global ontological entailment during contract reads. |
 | Unison | Content-addressed immutable definitions, names as mutable metadata, canonical handling of recursive groups. | A general content-addressed programming language or executable dependency graph in Core. |
 | Solidity ABI / ERCs | Exact nominal interfaces and ecosystem coordination through narrow standards. | Assuming selectors or shape alone specify behavior, trust, or query completeness. |
+| Ethereum dType/table/representation proposals | Registry, schema, table, projection, and introspection mechanics plus useful attacks from ERC-1900/1921/2157/7208/7813/8074/8100/8119. | Mutable registry/admin meaning, four-byte or human-string identity, event-only completeness, or self-declared canonicality/authority. |
 | Arrow / Parquet | Logical versus physical analytical representation and extension metadata. | Treating an optimized table file as the canonical graph or silently coercing unknown/large values. |
 
 The research conclusion is not that EFS needs a more exotic type theory. The
@@ -1116,7 +1120,9 @@ Implement independent Solidity, TypeScript, and Rust encoders/decoders for:
   Occurrence, `ANY`, `SELF`, and group member—including one two-Type mutually
   recursive SCC with no identifier fixed point;
 - positional and tagged representation arms;
-- unknown field/variant preservation; and
+- unknown field/variant preservation, absent-versus-canonical-zero, separated
+  field-key and union-selector domains, retired coordinates, and malformed,
+  out-of-range, incomplete, or unknown selectors; and
 - malformed lengths, duplicate/reserved keys, non-canonical order, excessive
   depth/work, and trailing bytes.
 
@@ -1133,6 +1139,13 @@ bindings against detached immutable consumer-pinned mappings, including the
 identity churn of adding a View and malicious detached mappings. Exercise
 cross-version chat replies and exact EAP lifecycle targets without traversing
 family or trait graphs.
+
+Add additive and retired fields, changed defaults, key/tag collisions,
+unknown-selector preservation for open readers, fail-closed exhaustive
+effectful readers, and a proof-bearing experimental representation whose field
+coordinates either remain stable or force a new Representation revision. Do
+not import unbounded-list or SSZ assumptions into Core merely because the
+evolution fixtures were inspired by EIP-7495/7688/7916/8016.
 
 Pass only if every writer/reader direction and information-loss result is
 machine-readable and no test relies on a mutable name or publisher endpoint.
@@ -1181,12 +1194,23 @@ Measure runtime/initcode by module, deployment gas, cold/warm calls, complete
 admission and View/query reads, revert atomicity, reconstruction inputs,
 upgrade/freeze manifest, and adversarial reentrancy/storage/selector cases.
 
-Kill an individual physical arm if any runtime exceeds 24,576 bytes, initcode
-exceeds 49,152 bytes, or any test finds direct-call mutation, swallowed failure,
-partial commit, reentrant half-state, selector/default-dispatch collision,
-foreign-namespace write, route/manifest mutation, uncommitted delegatecall,
-unreconstructible current or historical code/routing, or any mutation path in
-an arm labeled immutable/hyperstructure.
+Run against a named conservative profile from an actually activated disposable
+reference EVM environment and separately named future-scenario profiles; this
+selects no venue and confers no qualifying-Realm status. Record runtime/initcode,
+transaction/block gas, calldata/returndata, warm/cold access, state-write, and
+precompile assumptions. Semantics must survive profile changes; feasibility
+and topology conclusions remain profile-qualified.
+
+Negative controls include ERC-7201/8042 namespace-formula mismatch, ERC-1167
+dependency loss, mutable ERC-1967/ERC-2535 routes, runtime-only or optimistic
+module manifests, and self-declared selector/interface mismatches.
+
+Kill an individual physical arm if it exceeds the selected named profile's
+predeclared safety margin or any test finds direct-call mutation, swallowed
+failure, partial commit, reentrant half-state, selector/default-dispatch
+collision, foreign-namespace write, route/manifest mutation, uncommitted
+delegatecall, unreconstructible current or historical code/routing, or any
+mutation path in an arm labeled immutable/hyperstructure.
 
 ### T6 — names, tags, and catalogs
 

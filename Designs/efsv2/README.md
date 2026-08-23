@@ -15,8 +15,10 @@ candidate,” then stop unless you want the engineering detail. For a deep pass:
 
 1. [[system-constitution]] — detailed requirements synthesis;
 2. [[core-architecture-candidate]] — technical model, alternatives, and falsifiers;
-3. [[owner-rulings]] — what James actually adopted; and
-4. [[owner-decision-inbox]] — evidence gates, not a questionnaire.
+3. [[ethereum-standards-and-execution-profile]] — exact Realm/EVM/read evidence
+   boundary recovered from the complete EIP/ERC corpus;
+4. [[owner-rulings]] — what James actually adopted; and
+5. [[owner-decision-inbox]] — evidence gates, not a questionnaire.
 
 Focused next-pass prompt: [[fable-efs2-core-engineering-kickoff]].
 
@@ -26,6 +28,10 @@ Realm, query, Lens, reconstruction, SDK, and Data Explorer gates; and forbids a
 calendar deadline from standing in for evidence or owner ratification. Its
 point-in-time executable-evidence reconciliation is the
 [2026-08-22 readiness baseline](../../Reviews/2026-08-22-v2-contract-readiness-baseline/README.md).
+The Core-facing standards supplement is
+[the 2026-08-23 EIP/ERC pressure screen](../../Reviews/2026-08-23-efs2-core-eip-erc-pressure/README.md);
+it reuses the complete shared corpus index and selects no protocol bytes or
+target-chain support.
 
 ## The current shape
 
@@ -110,6 +116,7 @@ These are inputs, not competing active architectures:
 | [[hierarchical-files-and-folders]] | Current greenfield hierarchical Files/1 proposal; replaces July namespace mechanisms while preserving the adopted mount outcome. |
 | [[privacy-pass-synthesis]] and privacy corpus | Payload/read/metadata distinctions, privacy seams, and honest limitations. Old crypto/profile bytes are candidates. |
 | [[layered-type-system-and-data-abi]] | Current Type-system proposal: exact nominal Types, bounded Data Views, directional compatibility, query-profile evolution, tags/catalog paths, projections, modular EVM deployment, and falsifying experiments. |
+| [[ethereum-standards-and-execution-profile]] and [its pinned Core pressure screen](../../Reviews/2026-08-23-efs2-core-eip-erc-pressure/README.md) | Current draft rule for separating portable EFS semantics, accepted Realm execution profiles, observer read/evidence profiles, observed target support, and optional standards adapters. Exact profiles and limits remain open. |
 | [[deterministic-ids]], [[codex-envelope]], [[codex-kinds]], [[codex-kernel]] | July native v2 formulas and implementation hypotheses. Useful but superseded as an automatic baseline. |
 | [`../efs15/`](../efs15/) | Fully reviewed EAS-backed contraction and exact vectors. Historical evidence showing what semantic IDs, schemas, admission, and reads require. |
 | [Arcade](../arcade/README.md) | Project/release/artifact, verified runner, curation, rights, comments, and direct guest pressure test. |
@@ -124,7 +131,8 @@ These are inputs, not competing active architectures:
 2. Implement two disposable Core prototypes: self-contained Records versus
    immutable shared Context/Envelope normalization.
 3. Benchmark complete write, storage, index, reconstruction, and Lens costs—not
-   isolated happy paths.
+   isolated happy paths—under named conservative current and separately named
+   future-scenario Realm execution profiles.
 4. Run the focused Fable 5 pass plus independent database, EVM/security,
    standards, privacy, and long-horizon reviews.
 5. Integrate accepted findings, close the owner-sized choices, and only then
@@ -136,7 +144,8 @@ These are inputs, not competing active architectures:
 ## Hard holds
 
 - No EAS carrier, kind table, Type/Record formula, Principal/KEL mechanism,
-  Lens grammar, index layout, Realm descriptor, or contract split is frozen.
+  Lens grammar, index layout, Realm descriptor, accepted execution/read
+  profile, verifier suite, or contract split is frozen.
 - No Commons venue or canonical EFS home chain is selected.
 - No v1 compatibility, migration, coexistence, or legacy-read requirement.
 - No durable Arcade, EAP, Nanda, or other production seed before the relevant
@@ -146,6 +155,6 @@ These are inputs, not competing active architectures:
 
 ## Status
 
-The two active docs are `#status/draft`. They become review-ready only after
+The active spine remains `#status/draft`. It becomes review-ready only after
 the prototype/Fable/adversarial passes are integrated. Promotion remains the
 owner's normal human-gated ceremony.

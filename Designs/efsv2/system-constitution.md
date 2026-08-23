@@ -5,7 +5,7 @@
 **Authority input:** [[owner-rulings]]
 **Supersedes:** the EFS 1.5 bridge target and the July five-kind/native-envelope architecture as automatic baselines
 **Reviewers:** —
-**Last touched:** 2026-08-12
+**Last touched:** 2026-08-23
 
 #status/draft #kind/spec #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/requirements #topic/lenses #topic/onchain
 
@@ -105,6 +105,10 @@ may coexist; choosing a default is client policy rather than protocol truth.
   and moving selections are distinct concepts.
 - A chain-independent ID does not imply globally current authority. Realm,
   policy, and basis qualify admission, order, revocation, and current state.
+- A Realm revision commits an accepted execution profile; it does not control
+  the underlying chain's future hard forks. Realized-profile mismatch is an
+  explicit observer result, and a semantics-breaking ambient change may require
+  a successor Realm rather than silent continued conformance.
 - External references are self-describing enough to distinguish profile, kind,
   algorithm, and origin where those distinctions matter.
 
@@ -134,6 +138,15 @@ may coexist; choosing a default is client policy rather than protocol truth.
 - Historical admission records the authority and implementation basis used at
   admission. A later smart-account upgrade, controller rotation, or Core
   upgrade does not silently reinterpret an old Occurrence.
+- Contract-signature validity is an admission observation pinned to its Realm,
+  execution coordinate, account/verifier code and state basis, verifier suite,
+  signed digest/domain, bounded-call policy, and result; a later observer adds
+  exact inclusion-block hash and finality. Historical Occurrences are never
+  reinterpreted by calling the account's current ERC-1271 implementation. Pure
+  signature-suite validity is reproducible from retained inputs; stateful
+  controller authorization and Realm admission remain separate recorded facts
+  unless an exact retained witness/profile makes the controller call itself
+  reproducible.
 - Key rotation, delegation, recovery, organizations, and future signature
   suites remain extension requirements. A full custom KEL is not frozen into
   the MVP merely to reserve them.
@@ -156,6 +169,11 @@ may coexist; choosing a default is client policy rather than protocol truth.
 - History is append-only evidence. Withdrawal, revocation, tombstones, and
   replacement do not erase prior bytes or unexpectedly resurrect an older
   value.
+- Core durability, currentness, revocation, and reconstruction never depend on
+  code erasure, transient/expiring storage, or last-written-block metadata.
+  Authored semantic time is explicit typed data; block hash/number, timestamp,
+  slot, admission ordinal, and write age are observation coordinates. Biasable
+  onchain randomness never defines durable identity or authority.
 - A signed Envelope may carry a subset or amortize context and authentication;
   that fact alone does not assert an application-semantic transaction. Git
   multi-ref and similar all-or-nothing meaning lives in one typed transaction
@@ -207,13 +225,28 @@ may coexist; choosing a default is client policy rather than protocol truth.
 - Every enumeration is hard-bounded and exposes Realm, policy/code basis,
   high-water mark, cursor, coverage, and `COMPLETE`, `PARTIAL`, `UNSUPPORTED`,
   or `UNKNOWN` status. `UNKNOWN` is never absence.
+- An EVM historical/offchain read basis identifies an exact block hash. Block
+  number and tags are lookup conveniences, not mergeable truth; canonicality
+  and finality remain separate observations. One direct onchain call sees
+  atomic current state and can expose its execution block number and high-water,
+  but cannot know its current block hash. An empty or shorter transport response
+  proves no absence unless the exact requested finite domain and terminal
+  cursor/count/commitment establish complete coverage.
 - Canonical Type, Record, Occurrence, admission, index, and current-fold bytes
   required to reconstruct authoritative Core state remain state-readable; they
   are never replaced by hash-only body elision, event logs, or private hosted
   databases.
 - A second implementation can reconstruct Types, Records, Occurrences,
   admissions, indexes, and current folds from the declared Realm state and
-  byte carriers without an EFS-operated service.
+  byte carriers without an EFS-operated service. Source authority and
+  completeness are established first from an independently authenticated Realm
+  bootstrap and exact/finalized block-state basis, plus the state-readable
+  inventory, closure, count, and root commitments required by Core rules. Two
+  independently written readers then prove deterministic projection—not source
+  authority or completeness—by rejecting missing, duplicate, noncanonical,
+  malformed, or trailing inputs and any item falsely included inside the
+  declared canonical projection domain, and by reproducing identical bytes.
+  Unrelated state outside that declared domain is not “surplus” input.
 - Upgradeable early contracts may fix code and add capabilities, but the
   interpretation used for already-admitted data remains identifiable. Semantic
   evolution uses versioned Types/profiles and explicit successor or redirect
@@ -328,7 +361,11 @@ The design cannot freeze until at least these traces pass:
    optional adapter experiment, not a hidden dependency.
 4. Run the focused Fable 5 engineering pass and independent long-horizon,
    database, EVM-security, and standards review.
-5. Freeze only after all surviving ambiguity is either resolved or explicitly
+5. Pin each required standard's official source revision/status/dependencies,
+   its EFS disposition, the accepted Realm execution/read profile, and actual
+   target support separately. Proposal status, venue support, safety, and owner
+   adoption never collapse into one claim.
+6. Freeze only after all surviving ambiguity is either resolved or explicitly
    versioned for coexistence. The goal is the last change to EFS 2.0's initial meaning,
    not the last EFS implementation.
 
