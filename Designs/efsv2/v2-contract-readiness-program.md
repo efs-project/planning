@@ -125,6 +125,7 @@ calendar-gated; valuable progress may honestly end at `CONTINUE-DISPOSABLE`.
 | Stage A corpus | Broad requirements, fixtures, traceability, candidate formulas, and falsifiers | Executable conformance or selected bytes |
 | B0 micro-spine | Selected cross-language identities, EOA admission, basic indexes, small reconstruction, gas and code-size signals | Current layered Type semantics, generic multi-leaf Core, Lens, KEL, or complete queries |
 | G1 Task1C carrier oracle at `ae9d75bd` | Sealed acyclic portable source-witness graph versus destination PlanCore/Admission DAG traces and pure G1 fact grades | `EXPERIMENT_SELECTED` is not adoption or protocol conformance; OccurrenceKey conversion, revision literals, closure body, and independent Task4 comparator remain open |
+| [[Reviews/2026-08-23-efs2-exp-c0-semantic-seal/README|`EXP-C0` symbolic semantic seal]] | One integrated 61-trace transition/read/authority/query/Lens/reconstruction contract plus declared future minimum comparators and lossless result profiles | Exact disposable bytes/digests, pure-model or Solidity execution, measured bounds, protocol conformance, or a G2 pass |
 | Git P6 | Atomic application-shaped 21-leaf write, retry/rollback pressure, real Git object distinctions | A generic Core rather than a fixture-specific harness |
 | Type/Data-ABI experiments | Exact Types, stable Objects, representations, Views, QueryProfiles, evolution, package closure, and application fit | Permanent bytes, full Core admission, production compiler, or settled View authority |
 | Files design | Concrete need for `BindingScope`, honest absence, and operation-bound routed consent | A working implementation or acceptable aggregate gas |
@@ -270,6 +271,11 @@ Build three independent artifacts in this order:
 3. a disposable monolithic Solidity system under test (SUT) as the first
    physical control.
 
+The first artifact's symbolic semantic layer is sealed in the
+[[Reviews/2026-08-23-efs2-exp-c0-semantic-seal/README|`EXP-C0` semantic trace packet]].
+Its exact disposable byte/digest layer remains pending, so the pure model and
+SUT are not yet authorized to claim trace agreement.
+
 The model and SUT contain the G1 survivor semantics for:
 
 - bootstrap and ordinary Type validation with statically bounded reference
@@ -327,17 +333,22 @@ Define one normative facts matrix and lossless Core/Solidity/SDK/Explorer
 crosswalk. Keep at least these axes separate:
 
 ```text
-presence:       FOUND | ABSENT_PROVEN | UNKNOWN | CONFLICT | OPAQUE | MASKED
-coverage:       COMPLETE | PARTIAL
-support:        SUPPORTED | UNSUPPORTED | LIMIT_EXCEEDED
-validation:     STRUCTURALLY_VALID | SEMANTICALLY_VALID | INVALID | UNPROVEN
-authority:      AUTHORIZED | DENIED | UNPROVEN
-lifecycle:      ADMITTED | WITHDRAWN | CARRIED_ONLY | UNPROVEN
-selection:      CURRENT | NOT_CURRENT | CONFLICT | UNKNOWN
+presence:       FOUND | ABSENT_PROVEN | UNKNOWN | CONFLICT | OPAQUE | MASKED | NOT_APPLICABLE
+coverage:       COMPLETE | PARTIAL | NOT_APPLICABLE
+support:        SUPPORTED | UNSUPPORTED | LIMIT_EXCEEDED | NOT_APPLICABLE
+validation:     STRUCTURALLY_VALID | SEMANTICALLY_VALID | INVALID | UNPROVEN | NOT_APPLICABLE
+authority:      AUTHORIZED | DENIED | UNPROVEN | NOT_APPLICABLE
+lifecycle:      ADMITTED | WITHDRAWN | CARRIED_ONLY | UNPROVEN | NOT_APPLICABLE
+selection:      CURRENT | NOT_CURRENT | CONFLICT | UNKNOWN | NOT_APPLICABLE
 observation:    exact Realm/block/policy/code basis + separate finality/freshness
-bytes:          VERIFIED_AVAILABLE | PARTIAL | UNAVAILABLE | INTEGRITY_FAILED
+bytes:          VERIFIED_AVAILABLE | PARTIAL | UNAVAILABLE | INTEGRITY_FAILED | NOT_APPLICABLE
 effect:         NOT_APPLICABLE | COMMITTED | NOT_COMMITTED_PROVEN | UNKNOWN
+projection:     MATCHED | MISSING_REQUIRED_ITEM | INTEGRITY_FAILED | NOT_APPLICABLE
 ```
+
+`NOT_APPLICABLE` is legal only when the result kind genuinely does not speak to
+that axis. It cannot hide an unavailable, unsupported, unproven, or failed
+check.
 
 Applications may project these dimensions for users, but Core and the SDK must
 not collapse `UNKNOWN` into absence, `PARTIAL` into complete, failed retrieval

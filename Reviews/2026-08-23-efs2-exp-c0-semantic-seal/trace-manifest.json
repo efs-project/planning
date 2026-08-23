@@ -1,0 +1,2624 @@
+{
+  "format": "efs2-exp-c0-symbolic-traces/1",
+  "candidate": "EXP-C0",
+  "sealLevel": "SEMANTIC_SYMBOLIC",
+  "bytesStatus": "UNSELECTED",
+  "protocolConformance": false,
+  "notAdopted": true,
+  "sourcePins": {
+    "planningCommit": "4119c7ac30b64b490674accc07ce1f15206df2f6",
+    "priorG1CarrierOracleCommit": "ae9d75bd52d247fe8699475ac1e770fe268efbdb"
+  },
+  "nonclaims": [
+    "No production codec, hash, ID formula, ABI, limit, storage layout, contract topology, Realm, or deployment is selected.",
+    "No trace proves chain canonicality, finality, offchain byte permanence, target-chain support, or hyperstructure status.",
+    "Named states are ordering anchors only; required stateDelta objects and qualified result envelopes are authoritative.",
+    "Symbolic paths and values must become exact disposable candidate bytes and digests before an implementation claims agreement."
+  ],
+  "symbols": {
+    "realms": [
+      "RA",
+      "RB_SAME_CHAIN_DIFFERENT_CORE",
+      "RC_SAME_CHAIN_ID_DIFFERENT_GENESIS",
+      "RA_LEFT_FORK",
+      "RA_RIGHT_FORK"
+    ],
+    "principals": [
+      "ALICE_EOA",
+      "VAULT_ERC1271",
+      "CAROL_EOA_WITH_7702_CODE",
+      "COUNCIL",
+      "MALLORY",
+      "RELAYER",
+      "PAYER",
+      "QUERY_SPONSOR",
+      "TREASURY",
+      "WRITER_EOA"
+    ],
+    "type": "T_NOTE",
+    "records": [
+      "REC_A_ALPHA",
+      "REC_B_BETA_REF_A",
+      "REC_C_GAMMA",
+      "REC_D_DELTA_REF_C",
+      "REC_CAROL_EPSILON",
+      "REC_FUTURE_ZETA"
+    ],
+    "publicationSets": [
+      "PUB_ALICE_AB",
+      "PUB_VAULT_CD",
+      "PUB_CAROL_ONE",
+      "PUB_WRITER_ONE"
+    ],
+    "queryProfile": "QP_TOPIC_G1",
+    "bindingKey": "ALICE/POSITION_K",
+    "resolutionPlan": "PLAN_COUNCIL_THEN_ALICE"
+  },
+  "candidateSemantics": {
+    "nonceScope": "(RealmId, semanticAuthor, nonceLane)",
+    "nonceRule": "one nonce may name only one exact AdmissionPlan; exact retry recovers that operation",
+    "expiryCoordinate": "candidate Realm execution coordinate",
+    "expiryRule": "valid iff executionCoordinate < expiryCoordinate",
+    "queryActivationPolicy": {
+      "policyId": "QAP_RA_REV0",
+      "authorizedActivator": "COUNCIL",
+      "backfillPayer": "QUERY_SPONSOR",
+      "backfillPayerConsent": "CONSENT_QUERY_SPONSOR_QP_TOPIC_G1",
+      "futureWriterCostAuthority": "RA_REV0_ADMISSION_POLICY_MAX_FANOUT_1",
+      "unconsentingCostBearer": "PAYER",
+      "maximumFanout": 1,
+      "maximumCost": "COST_CAP_QP_TOPIC_G1"
+    },
+    "verifierSelectionRule": "use only the exact verifier profile bound by the signed plan; never dispatch by hasCode",
+    "withdrawalRule": "append issuer-qualified lifecycle evidence; never delete a Record or rewind a Binding",
+    "queryCompletionRule": "only a Realm transition may derive terminal completion from the exact interval, high-water, count/root, and postings commitment",
+    "expiryPositiveControl": "P0 executes at EXPIRY_ALICE_P0_MINUS_1",
+    "replayBinding": [
+      "RealmId",
+      "RealmRevision",
+      "Core commitment",
+      "semantic author",
+      "actor",
+      "verifier profile",
+      "nonce lane",
+      "nonce",
+      "expiry coordinate",
+      "exact ordered effect set",
+      "preconditions",
+      "executor and dependency basis",
+      "maximum cost"
+    ],
+    "externalDependencyRule": "an external code, verifier, or dependency observation never mutates Realm state; profile-dependent current recognition requires the exact declared basis, while retained historical receipts keep their original basis",
+    "resultKindRule": "coverage qualifies an exact point or declared finite scope only; mutation and submission outcomes use coverage=NOT_APPLICABLE",
+    "projectionRule": "every trace is projected through LOSSLESS_ALL_LAYERS; a convenience label may never replace the qualified envelope"
+  },
+  "stateModel": {
+    "realmBootstraps": {
+      "key": "RealmId",
+      "value": "immutable origin/genesis and Core bootstrap descriptor with disclosed powers",
+      "mutation": "CREATE_ONCE"
+    },
+    "realmRevisions": {
+      "key": "(RealmId, generation)",
+      "value": "component/code, execution, policy, verifier, administration, activation interval",
+      "mutation": "APPEND_ONLY"
+    },
+    "types": {
+      "key": "TypeSchemaId",
+      "value": "canonical descriptor bytes",
+      "mutation": "CREATE_ONCE_EXACT"
+    },
+    "records": {
+      "key": "RecordId",
+      "value": "(TypeSchemaId, canonical body bytes)",
+      "mutation": "CREATE_ONCE_EXACT"
+    },
+    "publicationSets": {
+      "key": "PublicationSetId",
+      "value": "ordered counted Record leaves and exact author context",
+      "mutation": "CREATE_ONCE_EXACT"
+    },
+    "occurrences": {
+      "key": "OccurrenceId",
+      "value": "(PublicationSetId, leaf index)",
+      "mutation": "CREATE_ONCE_EXACT"
+    },
+    "sourceWitnesses": {
+      "key": "SourceWitnessId",
+      "value": "exact publication digest, Principal, verifier profile, nonce and expiry basis",
+      "mutation": "CREATE_ONCE_EXACT"
+    },
+    "operations": {
+      "key": "OperationId",
+      "value": "exact plan digest and canonical effect outcome",
+      "mutation": "CREATE_ONCE_THEN_READ_BACK"
+    },
+    "admissions": {
+      "key": "AdmissionId",
+      "value": "Occurrence, RealmRevision, policy/verifier basis, ordinal and operation",
+      "mutation": "APPEND_ONLY"
+    },
+    "verifierTranscripts": {
+      "key": "AdmissionId",
+      "value": "digest/domain, account, signature, profile, code/dependency basis, bounded call and result",
+      "mutation": "CREATE_ONCE_EXACT"
+    },
+    "bindingHeads": {
+      "key": "(PrincipalId, position)",
+      "value": "(revision, exact target or tombstone, producing operation)",
+      "mutation": "CAS_ONLY"
+    },
+    "bindingHistory": {
+      "key": "(PrincipalId, position, revision)",
+      "value": "immutable prior/head value",
+      "mutation": "APPEND_ONLY"
+    },
+    "bindingScopes": {
+      "key": "(PrincipalId, scope ordinal)",
+      "value": "position with unique membership proof",
+      "mutation": "APPEND_UNIQUE_NEVER_REMOVE"
+    },
+    "withdrawals": {
+      "key": "(issuer PrincipalId, OccurrenceId)",
+      "value": "withdrawal operation and basis",
+      "mutation": "APPEND_ONLY"
+    },
+    "queryProfileDefinitions": {
+      "key": "QueryProfileId",
+      "value": "exact Type and bounded index declaration",
+      "mutation": "CREATE_ONCE_EXACT"
+    },
+    "queryProfileActivations": {
+      "key": "(RealmId, QueryProfileId, generation)",
+      "value": "policy/cost basis, interval, covered-through, state and postings commitment",
+      "mutation": "MONOTONIC_STATE_MACHINE"
+    },
+    "indexPostings": {
+      "key": "(activation generation, index key, posting ordinal)",
+      "value": "exact admitted subject",
+      "mutation": "APPEND_ONLY"
+    },
+    "resolutionPlans": {
+      "key": "ResolutionPlanId",
+      "value": "purpose, scope, ordered Principals, combiner and cap",
+      "mutation": "CREATE_ONCE_EXACT"
+    },
+    "counters": {
+      "admissionHighWater": "increments once per admitted Occurrence",
+      "bindingRevision": "increments once per successful CAS/tombstone",
+      "scopeCount": "increments once per new unique position",
+      "coverageHighWater": "advances monotonically only through accepted coverage transitions"
+    },
+    "canonicalProjection": {
+      "projectionPayload": "deterministically ordered serialization of exactly projectionPayloadCollections",
+      "finiteInventoryCount": "derived from projectionPayload and included beside it in the projection envelope and root preimage",
+      "projectionRoot": "derived from DOMAIN_EXP_C0_STATE_PROJECTION_V1 || projectionPayload || finiteInventoryCount; never included in projectionPayload or recursively in its own preimage"
+    },
+    "noncePlans": {
+      "key": "(RealmId, semanticAuthor PrincipalId, nonceLane, nonce)",
+      "value": "exact AdmissionPlan digest and resulting OperationId",
+      "mutation": "CREATE_ONCE_EXACT_RETRY_READS_BACK"
+    },
+    "basePostings": {
+      "key": "(base index kind, exact key, admission ordinal)",
+      "value": "exact admitted subject and AdmissionId",
+      "mutation": "APPEND_ONLY"
+    },
+    "costCommitments": {
+      "key": "OperationId",
+      "value": "payer, consent or policy authority, maximum cost and realized candidate charge",
+      "mutation": "CREATE_ONCE_EXACT"
+    },
+    "projectionPayloadCollections": [
+      "realmBootstraps",
+      "realmRevisions",
+      "types",
+      "records",
+      "publicationSets",
+      "occurrences",
+      "sourceWitnesses",
+      "noncePlans",
+      "operations",
+      "admissions",
+      "verifierTranscripts",
+      "basePostings",
+      "bindingHeads",
+      "bindingHistory",
+      "bindingScopes",
+      "withdrawals",
+      "queryProfileDefinitions",
+      "queryProfileActivations",
+      "indexPostings",
+      "resolutionPlans",
+      "costCommitments",
+      "counters"
+    ],
+    "derivedProjection": {
+      "finiteInventoryCount": "exact cardinality of entries in the deterministically ordered projectionPayload",
+      "projectionRoot": "DOMAIN_EXP_C0_STATE_PROJECTION_V1 commitment over projectionPayload plus finiteInventoryCount; projectionRoot is excluded from its own preimage"
+    }
+  },
+  "projectionSets": {
+    "LOSSLESS_ALL_LAYERS": {
+      "layers": [
+        "CORE_RESULT",
+        "SOLIDITY_ABI_RESULT",
+        "SDK_QUALIFIED_RESULT",
+        "EXPLORER_RAW_DETAILS_RESULT"
+      ],
+      "mustPreserve": [
+        "result kind",
+        "exact subject or declared finite domain",
+        "Realm, RealmRevision, execution coordinate, admission high-water, observer block hash/state root, finality and freshness bases",
+        "every result-axis value including projectionIntegrity",
+        "payload identity, page members, cursor, operation or receipt identity",
+        "policy, verifier profile, code/dependency and provenance commitments",
+        "raw retained envelope or exact link to it"
+      ],
+      "rule": "friendly labels may simplify display but may not omit or rewrite any retained field"
+    }
+  },
+  "stateProjection": [
+    "realmBootstrapsAndRevisionsWithDisclosedPowers",
+    "typesCanonicalDescriptorsRecordBodiesAndPreimages",
+    "publicationSetsOccurrencesSourceWitnessesAndNoncePlans",
+    "operationsAdmissionsVerifierTranscriptsAndBasePostings",
+    "bindingHeadsHistoryScopesAndWithdrawals",
+    "queryProfileDefinitionsActivationsCoverageAndIndexPostings",
+    "resolutionPlansRequiredPointInputsAndCostCommitments",
+    "allNamedCountersFiniteInventoryCountAndProjectionRoot"
+  ],
+  "resultAxes": {
+    "presence": [
+      "FOUND",
+      "ABSENT_PROVEN",
+      "UNKNOWN",
+      "CONFLICT",
+      "OPAQUE",
+      "MASKED",
+      "NOT_APPLICABLE"
+    ],
+    "coverage": [
+      "COMPLETE",
+      "PARTIAL",
+      "NOT_APPLICABLE"
+    ],
+    "support": [
+      "SUPPORTED",
+      "UNSUPPORTED",
+      "LIMIT_EXCEEDED",
+      "NOT_APPLICABLE"
+    ],
+    "validation": [
+      "STRUCTURALLY_VALID",
+      "SEMANTICALLY_VALID",
+      "INVALID",
+      "UNPROVEN",
+      "NOT_APPLICABLE"
+    ],
+    "authority": [
+      "AUTHORIZED",
+      "DENIED",
+      "UNPROVEN",
+      "NOT_APPLICABLE"
+    ],
+    "lifecycle": [
+      "ADMITTED",
+      "WITHDRAWN",
+      "CARRIED_ONLY",
+      "UNPROVEN",
+      "NOT_APPLICABLE"
+    ],
+    "selection": [
+      "CURRENT",
+      "NOT_CURRENT",
+      "CONFLICT",
+      "UNKNOWN",
+      "NOT_APPLICABLE"
+    ],
+    "bytes": [
+      "VERIFIED_AVAILABLE",
+      "PARTIAL",
+      "UNAVAILABLE",
+      "INTEGRITY_FAILED",
+      "NOT_APPLICABLE"
+    ],
+    "effect": [
+      "COMMITTED",
+      "NOT_COMMITTED_PROVEN",
+      "UNKNOWN",
+      "NOT_APPLICABLE"
+    ],
+    "projectionIntegrity": [
+      "MATCHED",
+      "MISSING_REQUIRED_ITEM",
+      "INTEGRITY_FAILED",
+      "NOT_APPLICABLE"
+    ]
+  },
+  "resultProfiles": {
+    "BOOTSTRAP_COMMITTED": {
+      "kind": "MUTATION",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "STRUCTURALLY_VALID",
+      "authority": "NOT_APPLICABLE",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "COMMITTED",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "PURE_STRUCTURAL_VALID": {
+      "kind": "POINT",
+      "presence": "FOUND",
+      "coverage": "COMPLETE",
+      "support": "SUPPORTED",
+      "validation": "STRUCTURALLY_VALID",
+      "authority": "NOT_APPLICABLE",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "VERIFIED_AVAILABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "PURE_VALID_CARRIED": {
+      "kind": "POINT",
+      "presence": "FOUND",
+      "coverage": "COMPLETE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "UNPROVEN",
+      "lifecycle": "CARRIED_ONLY",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "VERIFIED_AVAILABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "MUTATION_COMMITTED": {
+      "kind": "MUTATION",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "AUTHORIZED",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "COMMITTED",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "MUTATION_INVALID_UNCHANGED": {
+      "kind": "MUTATION",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "INVALID",
+      "authority": "UNPROVEN",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_COMMITTED_PROVEN",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "MUTATION_DENIED_UNCHANGED": {
+      "kind": "MUTATION",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "DENIED",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_COMMITTED_PROVEN",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "MUTATION_CONFLICT_UNCHANGED": {
+      "kind": "MUTATION",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "AUTHORIZED",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "CONFLICT",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_COMMITTED_PROVEN",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "MUTATION_PRECONDITION_UNCHANGED": {
+      "kind": "MUTATION",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "AUTHORIZED",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_COMMITTED_PROVEN",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "LIMIT_REJECTED_UNCHANGED": {
+      "kind": "MUTATION",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "LIMIT_EXCEEDED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "AUTHORIZED",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_COMMITTED_PROVEN",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "BINDING_TOMBSTONE_COMMITTED": {
+      "kind": "MUTATION",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "AUTHORIZED",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_CURRENT",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "COMMITTED",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "WITHDRAWAL_COMMITTED": {
+      "kind": "MUTATION",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "AUTHORIZED",
+      "lifecycle": "WITHDRAWN",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "COMMITTED",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "IDEMPOTENT_OPERATION_FOUND": {
+      "kind": "POINT",
+      "presence": "FOUND",
+      "coverage": "COMPLETE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "AUTHORIZED",
+      "lifecycle": "ADMITTED",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "COMMITTED",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "HISTORICAL_RECEIPT_FOUND_COMPLETE": {
+      "kind": "POINT",
+      "presence": "FOUND",
+      "coverage": "COMPLETE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "AUTHORIZED",
+      "lifecycle": "ADMITTED",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "READ_ABSENT_COMPLETE": {
+      "kind": "POINT",
+      "presence": "ABSENT_PROVEN",
+      "coverage": "COMPLETE",
+      "support": "SUPPORTED",
+      "validation": "NOT_APPLICABLE",
+      "authority": "NOT_APPLICABLE",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_CURRENT",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "READ_UNKNOWN_PARTIAL": {
+      "kind": "SCOPE",
+      "presence": "UNKNOWN",
+      "coverage": "PARTIAL",
+      "support": "SUPPORTED",
+      "validation": "UNPROVEN",
+      "authority": "UNPROVEN",
+      "lifecycle": "UNPROVEN",
+      "selection": "UNKNOWN",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "READ_CONFLICT_COMPLETE": {
+      "kind": "AGGREGATE",
+      "presence": "CONFLICT",
+      "coverage": "COMPLETE",
+      "support": "SUPPORTED",
+      "validation": "UNPROVEN",
+      "authority": "UNPROVEN",
+      "lifecycle": "UNPROVEN",
+      "selection": "CONFLICT",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "READ_INVALID_REQUEST": {
+      "kind": "REQUEST",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "INVALID",
+      "authority": "NOT_APPLICABLE",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "QUERY_FOUND_PARTIAL": {
+      "kind": "SCOPE",
+      "presence": "FOUND",
+      "coverage": "PARTIAL",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "AUTHORIZED",
+      "lifecycle": "ADMITTED",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "QUERY_EMPTY_PARTIAL": {
+      "kind": "SCOPE",
+      "presence": "UNKNOWN",
+      "coverage": "PARTIAL",
+      "support": "SUPPORTED",
+      "validation": "NOT_APPLICABLE",
+      "authority": "NOT_APPLICABLE",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "QUERY_FOUND_COMPLETE": {
+      "kind": "SCOPE",
+      "presence": "FOUND",
+      "coverage": "COMPLETE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "AUTHORIZED",
+      "lifecycle": "ADMITTED",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "BYTES_FAILED_RECORD_FOUND": {
+      "kind": "BYTES",
+      "presence": "FOUND",
+      "coverage": "COMPLETE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "NOT_APPLICABLE",
+      "lifecycle": "ADMITTED",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "INTEGRITY_FAILED",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "BYTES_UNAVAILABLE_RECORD_FOUND": {
+      "kind": "BYTES",
+      "presence": "FOUND",
+      "coverage": "COMPLETE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "NOT_APPLICABLE",
+      "lifecycle": "ADMITTED",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "UNAVAILABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "BYTES_PARTIAL_RECORD_FOUND": {
+      "kind": "BYTES",
+      "presence": "FOUND",
+      "coverage": "COMPLETE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "NOT_APPLICABLE",
+      "lifecycle": "ADMITTED",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "PARTIAL",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "SUBMISSION_UNKNOWN": {
+      "kind": "SUBMISSION",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "UNPROVEN",
+      "authority": "UNPROVEN",
+      "lifecycle": "UNPROVEN",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "UNKNOWN",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "READ_DENIED": {
+      "kind": "REQUEST",
+      "presence": "UNKNOWN",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "DENIED",
+      "lifecycle": "UNPROVEN",
+      "selection": "UNKNOWN",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "RECONSTRUCTION_COMPLETE": {
+      "kind": "RECONSTRUCTION",
+      "presence": "FOUND",
+      "coverage": "COMPLETE",
+      "support": "SUPPORTED",
+      "validation": "STRUCTURALLY_VALID",
+      "authority": "NOT_APPLICABLE",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "VERIFIED_AVAILABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "MATCHED"
+    },
+    "RECONSTRUCTION_PARTIAL": {
+      "kind": "RECONSTRUCTION",
+      "presence": "UNKNOWN",
+      "coverage": "PARTIAL",
+      "support": "SUPPORTED",
+      "validation": "UNPROVEN",
+      "authority": "NOT_APPLICABLE",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "MISSING_REQUIRED_ITEM"
+    },
+    "RECONSTRUCTION_INVALID": {
+      "kind": "RECONSTRUCTION",
+      "presence": "UNKNOWN",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "INVALID",
+      "authority": "NOT_APPLICABLE",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "INTEGRITY_FAILED"
+    },
+    "UNSUPPORTED": {
+      "kind": "REQUEST",
+      "presence": "UNKNOWN",
+      "coverage": "NOT_APPLICABLE",
+      "support": "UNSUPPORTED",
+      "validation": "UNPROVEN",
+      "authority": "UNPROVEN",
+      "lifecycle": "UNPROVEN",
+      "selection": "UNKNOWN",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "PROFILE_MISMATCH": {
+      "kind": "REQUEST",
+      "presence": "UNKNOWN",
+      "coverage": "NOT_APPLICABLE",
+      "support": "UNSUPPORTED",
+      "validation": "UNPROVEN",
+      "authority": "UNPROVEN",
+      "lifecycle": "UNPROVEN",
+      "selection": "UNKNOWN",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "VERIFIER_DENIED": {
+      "kind": "VERIFIER",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "DENIED",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "VERIFIER_AUTHORIZED": {
+      "kind": "VERIFIER",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "AUTHORIZED",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "STATE_FOUND_COMPLETE": {
+      "kind": "POINT",
+      "presence": "FOUND",
+      "coverage": "COMPLETE",
+      "support": "SUPPORTED",
+      "validation": "STRUCTURALLY_VALID",
+      "authority": "NOT_APPLICABLE",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "RECORD_FOUND_COMPLETE": {
+      "kind": "POINT",
+      "presence": "FOUND",
+      "coverage": "COMPLETE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "NOT_APPLICABLE",
+      "lifecycle": "ADMITTED",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "BINDING_FOUND_COMPLETE": {
+      "kind": "POINT",
+      "presence": "FOUND",
+      "coverage": "COMPLETE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "AUTHORIZED",
+      "lifecycle": "ADMITTED",
+      "selection": "CURRENT",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "PURE_STRUCTURAL_INVALID": {
+      "kind": "POINT",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "INVALID",
+      "authority": "NOT_APPLICABLE",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_APPLICABLE",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "ADMISSION_COMMITTED": {
+      "kind": "MUTATION",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "AUTHORIZED",
+      "lifecycle": "ADMITTED",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "COMMITTED",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    },
+    "MUTATION_AUTHORITY_UNPROVEN_UNCHANGED": {
+      "kind": "MUTATION",
+      "presence": "NOT_APPLICABLE",
+      "coverage": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID",
+      "authority": "UNPROVEN",
+      "lifecycle": "NOT_APPLICABLE",
+      "selection": "NOT_APPLICABLE",
+      "bytes": "NOT_APPLICABLE",
+      "effect": "NOT_COMMITTED_PROVEN",
+      "projectionIntegrity": "NOT_APPLICABLE"
+    }
+  },
+  "traceGroups": [
+    {
+      "id": "REALM",
+      "traces": [
+        {
+          "id": "R0_BOOTSTRAP_RA",
+          "preState": "S_EMPTY",
+          "input": "BOOTSTRAP_RA_REV0_WITH_ORIGIN_GENESIS_CORE_EXECUTION_POLICY_VERIFIER_AND_ALL_POWERS_DISCLOSED",
+          "expectedProfile": "BOOTSTRAP_COMMITTED",
+          "expectedPostState": "S_RA0",
+          "postStateRelation": "ATOMIC_CHANGE",
+          "receipt": "NO_ADMISSION_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [
+              "realmBootstraps[RA]=ORIGIN_RA+GENESIS_RA+CORE_RA0+DISCLOSED_POWERS",
+              "realmRevisions[RA,0]=COMPONENTS+EXECUTION_PROFILE+POLICY+VERIFIER+ADMINISTRATION+ACTIVATION_INTERVAL"
+            ],
+            "mustChange": [],
+            "mustAdvance": [
+              "finiteInventoryCount:0->2",
+              "projectionRoot:ROOT(S_EMPTY)->ROOT(S_RA0)"
+            ],
+            "mustNotChange": [
+              "types:*",
+              "records:*",
+              "publicationSets:*",
+              "occurrences:*",
+              "operations:*",
+              "admissions:*",
+              "bindingHeads:*",
+              "withdrawals:*",
+              "queryProfileActivations:*",
+              "indexPostings:*",
+              "admissionHighWater=0",
+              "noncePlans:*",
+              "basePostings:*",
+              "costCommitments:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Realm identity commits origin/genesis and Core bootstrap rather than bare chainId.",
+            "Revision zero and every possible power are state-readable.",
+            "Bootstrap success does not claim authored admission or hyperstructure status."
+          ]
+        },
+        {
+          "id": "R1_SAME_CHAIN_DIFFERENT_CORE",
+          "preState": "S_RA0",
+          "input": "DERIVE_RB_ID_ON_RA_CHAIN_WITH_DIFFERENT_CORE_COMMITMENT",
+          "expectedProfile": "PURE_STRUCTURAL_VALID",
+          "expectedPostState": "S_RA0",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "RA and RB derive distinct RealmIds, cache keys, receipt domains, and replay domains.",
+            "Deriving or inspecting RB does not add it to RA state."
+          ]
+        },
+        {
+          "id": "R2_SAME_CHAIN_ID_DIFFERENT_GENESIS",
+          "preState": "S_RA0",
+          "input": "DERIVE_RC_ID_WITH_MATCHING_CHAIN_ID_ADDRESSES_AND_CODE_BUT_DIFFERENT_GENESIS",
+          "expectedProfile": "PURE_STRUCTURAL_VALID",
+          "expectedPostState": "S_RA0",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "RC cannot alias RA even when chainId, addresses, and visible code match."
+          ]
+        },
+        {
+          "id": "R3A_LEFT_BRANCH_EXACT_COMPLETE",
+          "preState": "S_RA_SHARED_PREFORK",
+          "input": "READ_RA_LEFT_AT_EXACT_LEFT_BLOCK_HASH_AND_STATE_ROOT",
+          "expectedProfile": "STATE_FOUND_COMPLETE",
+          "expectedPostState": "S_RA_SHARED_PREFORK",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "componentResults": [
+            {
+              "label": "left qualified answer",
+              "subject": "RA finite projection",
+              "basis": "LEFT_BLOCK_HASH+LEFT_STATE_ROOT",
+              "expectedProfile": "STATE_FOUND_COMPLETE"
+            }
+          ],
+          "assertions": [
+            "The left branch is internally complete at its own exact observer basis.",
+            "Completeness does not claim finality or global canonicality."
+          ]
+        },
+        {
+          "id": "R3B_RIGHT_BRANCH_EXACT_COMPLETE",
+          "preState": "S_RA_SHARED_PREFORK",
+          "input": "READ_RA_RIGHT_AT_EXACT_RIGHT_BLOCK_HASH_AND_STATE_ROOT",
+          "expectedProfile": "STATE_FOUND_COMPLETE",
+          "expectedPostState": "S_RA_SHARED_PREFORK",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "componentResults": [
+            {
+              "label": "right qualified answer",
+              "subject": "RA finite projection",
+              "basis": "RIGHT_BLOCK_HASH+RIGHT_STATE_ROOT",
+              "expectedProfile": "STATE_FOUND_COMPLETE"
+            }
+          ],
+          "assertions": [
+            "The right branch is internally complete at its own exact observer basis.",
+            "Completeness does not claim finality or global canonicality."
+          ]
+        },
+        {
+          "id": "R3C_DIVERGENT_BRANCH_AGGREGATE",
+          "preState": "S_RA_SHARED_PREFORK",
+          "input": "AGGREGATE_LEFT_AND_RIGHT_WITHOUT_FINALITY_POLICY",
+          "expectedProfile": "READ_CONFLICT_COMPLETE",
+          "expectedPostState": "S_RA_SHARED_PREFORK",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "componentResults": [
+            {
+              "label": "left component",
+              "subject": "RA finite projection",
+              "basis": "LEFT_BLOCK_HASH+LEFT_STATE_ROOT",
+              "expectedProfile": "STATE_FOUND_COMPLETE"
+            },
+            {
+              "label": "right component",
+              "subject": "RA finite projection",
+              "basis": "RIGHT_BLOCK_HASH+RIGHT_STATE_ROOT",
+              "expectedProfile": "STATE_FOUND_COMPLETE"
+            },
+            {
+              "label": "two-observation aggregate",
+              "subject": "declared finite set {LEFT,RIGHT}",
+              "basis": "AGGREGATE_BASIS_LEFT_RIGHT",
+              "expectedProfile": "READ_CONFLICT_COMPLETE"
+            }
+          ],
+          "assertions": [
+            "Both attributed branch answers and their bases are retained.",
+            "The aggregate reports CONFLICT; it does not silently choose current or final."
+          ]
+        },
+        {
+          "id": "R4_HIDDEN_ADMIN_REJECT",
+          "preState": "S_RA0",
+          "input": "BOOTSTRAP_WITH_OMITTED_MUTABLE_BEACON_OR_POLICY_OWNER",
+          "expectedProfile": "MUTATION_INVALID_UNCHANGED",
+          "expectedPostState": "S_RA0",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "An omitted mutation path fails bootstrap authentication.",
+            "Disclosed mutability never implies hyperstructure status."
+          ]
+        },
+        {
+          "id": "R5_UNANNOUNCED_POST_BOOTSTRAP_MUTATION",
+          "preState": "S_VAULT_CD_ADMITTED_V1_EXTERNAL_V2",
+          "input": "USE_UNANNOUNCED_COMPONENT_POLICY_OR_VERIFIER_CHANGE_AS_IF_RA_REVISION_ZERO",
+          "expectedProfile": "PROFILE_MISMATCH",
+          "expectedPostState": "S_VAULT_CD_ADMITTED_V1_EXTERNAL_V2",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_NEW_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "componentResults": [
+            {
+              "label": "historical admission",
+              "subject": "ADMISSION_RECEIPT_VAULT_CD_V1",
+              "basis": "RA_REV0+VAULT_V1_BASIS",
+              "expectedProfile": "HISTORICAL_RECEIPT_FOUND_COMPLETE"
+            },
+            {
+              "label": "current undeclared profile use",
+              "subject": "VAULT_V2 current recognition",
+              "basis": "EXTERNAL_V2_WITHOUT_REALM_REVISION",
+              "expectedProfile": "PROFILE_MISMATCH"
+            }
+          ],
+          "assertions": [
+            "No new profile-dependent admission or effect is recognized without a declared RealmRevision and exact basis.",
+            "The historical V1 receipt remains readable under its retained basis.",
+            "A Realm with this undisclosed effective mutation cannot claim the candidate hyperstructure conditions."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TYPE_AND_PUBLICATION",
+      "traces": [
+        {
+          "id": "T0_EXACT_TYPE_AND_RECORDS",
+          "preState": "PORTABLE_EMPTY",
+          "input": "T_NOTE_AND_REC_A_REC_B_CANONICAL",
+          "expectedProfile": "PURE_VALID_CARRIED",
+          "expectedPostState": "PORTABLE_T_NOTE_A_B",
+          "postStateRelation": "PURE_ARTIFACTS_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [
+              "PortableArtifactStore.types[T_NOTE]=CANONICAL_DESCRIPTOR",
+              "PortableArtifactStore.records[REC_A_ALPHA]=T_NOTE+ALPHA_BYTES",
+              "PortableArtifactStore.records[REC_B_BETA_REF_A]=T_NOTE+BETA_BYTES+CLOSED_REF_REC_A"
+            ],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "REC_B extracts exactly one closed reference to REC_A.",
+            "Author, Realm, and QueryProfile do not change Record identity."
+          ]
+        },
+        {
+          "id": "T1_NONCANONICAL_TWIN",
+          "preState": "PORTABLE_T_NOTE_A_B",
+          "input": "REC_B_WITH_ABSENT_ZERO_DUPLICATE_RESERVED_MALFORMED_UNKNOWN_LIMIT_OR_TRAILING_TWIN",
+          "expectedProfile": "PURE_STRUCTURAL_INVALID",
+          "expectedPostState": "PORTABLE_T_NOTE_A_B",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "The first deterministic structural error rejects without adding a twin artifact or changing any Realm state."
+          ]
+        },
+        {
+          "id": "P0_EOA_TWO_LEAF_ADMIT_AND_BIND_BEFORE_EXPIRY",
+          "preState": "S_RA0",
+          "input": "PUB_ALICE_AB_PLUS_PLAN_BIND_K_TO_REC_B_AT_EXPIRY_MINUS_ONE",
+          "expectedProfile": "ADMISSION_COMMITTED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "postStateRelation": "ATOMIC_CHANGE",
+          "receipt": "ADMISSION_RECEIPT_ALICE_AB",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [
+              "types[T_NOTE]=CANONICAL_DESCRIPTOR",
+              "records[REC_A_ALPHA]=T_NOTE+ALPHA_BYTES",
+              "records[REC_B_BETA_REF_A]=T_NOTE+BETA_BYTES+CLOSED_REF_REC_A",
+              "publicationSets[PUB_ALICE_AB]=ORDERED[REC_A_ALPHA,REC_B_BETA_REF_A]+ALICE_EOA",
+              "occurrences[OA]=PUB_ALICE_AB[0]",
+              "occurrences[OB]=PUB_ALICE_AB[1]",
+              "sourceWitnesses[SW_ALICE_AB]=EXACT_PUBLICATION+ALICE+EOA_PROFILE+NONCE+EXPIRY",
+              "operations[OP_P0]=EXACT_ADMISSION_PLAN+COMMITTED",
+              "admissions[AA]=OA+RA_REV0+ORDINAL_1+OP_P0",
+              "admissions[AB]=OB+RA_REV0+ORDINAL_2+OP_P0",
+              "bindingHistory[ALICE_EOA,POSITION_K,1]=REC_B_BETA_REF_A",
+              "bindingScopes[ALICE_EOA,0]=POSITION_K",
+              "noncePlans[RA,ALICE_EOA,LANE0,NONCE_P0]=PLAN_P0_DIGEST+OP_P0",
+              "verifierTranscripts[AA]=P0_DIGEST+ALICE+EOA_PROFILE+VALID_SIGNATURE",
+              "verifierTranscripts[AB]=SAME_EXACT_EOA_BASIS",
+              "basePostings[TYPE,T_NOTE,1]=REC_A_ALPHA+AA",
+              "basePostings[TYPE,T_NOTE,2]=REC_B_BETA_REF_A+AB"
+            ],
+            "mustChange": [
+              "bindingHeads[ALICE_EOA,POSITION_K]:ABSENT->{revision:1,target:REC_B_BETA_REF_A,operation:OP_P0}"
+            ],
+            "mustAdvance": [
+              "admissionHighWater:0->2",
+              "bindingRevision[ALICE_EOA,POSITION_K]:0->1",
+              "scopeCount[ALICE_EOA]:0->1",
+              "finiteInventoryCount:COUNT(S_RA0)->COUNT(S_ADMITTED_ALICE_AB_BIND_K_REV1)",
+              "projectionRoot:ROOT(S_RA0)->ROOT(S_ADMITTED_ALICE_AB_BIND_K_REV1)"
+            ],
+            "mustNotChange": [
+              "realmBootstraps[RA]",
+              "realmRevisions[RA,0]",
+              "withdrawals:*",
+              "queryProfileActivations:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Author, actor, relayer, payer, destination, nonce, expiry, effects, verifier profile, and expected revision remain distinct.",
+            "Both leaves, postings, receipts, Binding revision one, and one scope row commit together.",
+            "executionCoordinate=expiryCoordinate-1 is valid."
+          ]
+        },
+        {
+          "id": "P0B_INVALID_EOA_SIGNATURE_WRONG_PRINCIPAL",
+          "preState": "S_RA0",
+          "input": "P0_PLAN_WITH_SIGNATURE_NOT_VALID_FOR_DECLARED_ALICE_EOA",
+          "expectedProfile": "MUTATION_DENIED_UNCHANGED",
+          "expectedPostState": "S_RA0",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Relayer or payer identity cannot substitute for the semantic author's declared verifier result."
+          ]
+        },
+        {
+          "id": "P1_INVALID_SECOND_LEAF_ATOMIC_REJECT",
+          "preState": "S_RA0",
+          "input": "PUB_ALICE_A_AND_MALFORMED_B_PLUS_SAME_PLAN",
+          "expectedProfile": "MUTATION_INVALID_UNCHANGED",
+          "expectedPostState": "S_RA0",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "No first leaf, posting, receipt, nonce consumption, scope row, or Binding effect survives."
+          ]
+        },
+        {
+          "id": "P2A_SOURCE_WITNESS_AS_DESTINATION_AUTHORITY",
+          "preState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "input": "REUSE_SOURCE_WITNESS_TO_AUTHORIZE_NEW_DESTINATION_EFFECT",
+          "expectedProfile": "MUTATION_DENIED_UNCHANGED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_NEW_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Portable publication authorship is not destination admission or effect authority."
+          ]
+        },
+        {
+          "id": "P2B1_WRONG_DESTINATION_REALM",
+          "preState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "input": "TAMPER_SIGNED_PLAN_DESTINATION_REALM_RA_TO_RB",
+          "expectedProfile": "MUTATION_DENIED_UNCHANGED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_NEW_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Destination Realm is an individually falsifiable signed replay coordinate."
+          ]
+        },
+        {
+          "id": "P2B2_WRONG_REALM_REVISION",
+          "preState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "input": "TAMPER_SIGNED_PLAN_REALM_REVISION_RA0_TO_RA1",
+          "expectedProfile": "MUTATION_DENIED_UNCHANGED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_NEW_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Realm revision is an individually falsifiable signed replay coordinate."
+          ]
+        },
+        {
+          "id": "P2B3_WRONG_CORE_COMMITMENT",
+          "preState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "input": "TAMPER_SIGNED_PLAN_CORE_COMMITMENT_CORE_RA0_TO_OTHER_CORE",
+          "expectedProfile": "MUTATION_DENIED_UNCHANGED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_NEW_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Core commitment is an individually falsifiable signed replay coordinate."
+          ]
+        },
+        {
+          "id": "P2C1_SUBSTITUTED_ACTOR",
+          "preState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "input": "TAMPER_SIGNED_PLAN_ACTOR_ALICE_TO_MALLORY",
+          "expectedProfile": "MUTATION_DENIED_UNCHANGED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_NEW_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Actor is an individually falsifiable signed authority coordinate."
+          ]
+        },
+        {
+          "id": "P2C2_SUBSTITUTED_EFFECT_SET",
+          "preState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "input": "TAMPER_SIGNED_PLAN_ORDERED_EFFECT_SET",
+          "expectedProfile": "MUTATION_DENIED_UNCHANGED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_NEW_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "The exact ordered effect set is an individually falsifiable signed coordinate."
+          ]
+        },
+        {
+          "id": "P2C3_SUBSTITUTED_BINDING_PRECONDITION",
+          "preState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "input": "TAMPER_SIGNED_PLAN_EXPECTED_BINDING_REVISION",
+          "expectedProfile": "MUTATION_DENIED_UNCHANGED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_NEW_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "A tampered precondition fails authority before execution; B1 separately tests an authorized but stale CAS."
+          ]
+        },
+        {
+          "id": "P2D_SAME_NONCE_DIFFERENT_PLAN",
+          "preState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "input": "SAME_REALM_AUTHOR_LANE_AND_NONCE_WITH_DIFFERENT_ADMISSION_PLAN",
+          "expectedProfile": "MUTATION_CONFLICT_UNCHANGED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_NEW_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "One scoped nonce names only one exact AdmissionPlan; a different plan is conflict, not retry."
+          ]
+        },
+        {
+          "id": "P2E_AT_EXPIRY_BOUNDARY_REJECT",
+          "preState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "input": "NEW_PLAN_EXECUTES_AT_EXPIRY_COORDINATE",
+          "expectedProfile": "MUTATION_PRECONDITION_UNCHANGED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_NEW_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "The boundary is exclusive: executionCoordinate=expiryCoordinate is invalid."
+          ]
+        },
+        {
+          "id": "P2F_AFTER_EXPIRY_REJECT",
+          "preState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "input": "NEW_PLAN_EXECUTES_AFTER_EXPIRY_COORDINATE",
+          "expectedProfile": "MUTATION_PRECONDITION_UNCHANGED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_NEW_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "executionCoordinate>expiryCoordinate is invalid and cannot consume the nonce."
+          ]
+        },
+        {
+          "id": "P3_EXACT_RETRY_IDEMPOTENT",
+          "preState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "input": "EXACT_RETRY_OF_P0",
+          "expectedProfile": "IDEMPOTENT_OPERATION_FOUND",
+          "expectedPostState": "S_ADMITTED_ALICE_AB_BIND_K_REV1",
+          "postStateRelation": "IDEMPOTENT_SAME_OPERATION",
+          "receipt": "SAME_ADMISSION_RECEIPT_ALICE_AB",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "The exact operation identity and receipt are recovered.",
+            "No duplicate posting, receipt, nonce, scope row, admission ordinal, high-water increment, or Binding revision is created."
+          ]
+        },
+        {
+          "id": "P4A_EIP7702_DECLARED_EOA_PROFILE",
+          "preState": "S_RA0",
+          "input": "CAROL_WITH_CODE_VALID_EOA_SIGNATURE_DECLARED_EOA_PROFILE",
+          "expectedProfile": "ADMISSION_COMMITTED",
+          "expectedPostState": "S_CAROL_ADMISSION",
+          "postStateRelation": "ATOMIC_CHANGE",
+          "receipt": "ADMISSION_RECEIPT_CAROL_EOA_PROFILE",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [
+              "types[T_NOTE]=CANONICAL_DESCRIPTOR",
+              "records[REC_CAROL_EPSILON]=T_NOTE+EPSILON_BYTES",
+              "publicationSets[PUB_CAROL_ONE]=ORDERED[REC_CAROL_EPSILON]+CAROL_EOA_WITH_7702_CODE",
+              "sourceWitnesses[SW_CAROL]=EXACT_PUBLICATION+CAROL+EOA_PROFILE+NONCE+EXPIRY",
+              "noncePlans[RA,CAROL_EOA_WITH_7702_CODE,LANE0,NONCE_P4A]=PLAN_P4A_DIGEST+OP_P4A",
+              "operations[OP_P4A]=CAROL_EOA_PLAN+COMMITTED",
+              "occurrences[OCAROL]=PUB_CAROL_ONE[0]",
+              "admissions[ACAROL]=OCAROL+RA_REV0+ORDINAL_1+OP_P4A",
+              "verifierTranscripts[ACAROL]=EOA_DIGEST+CAROL+VALID_SIGNATURE+EOA_PROFILE",
+              "basePostings[TYPE,T_NOTE,1]=REC_CAROL_EPSILON+ACAROL"
+            ],
+            "mustChange": [],
+            "mustAdvance": [
+              "admissionHighWater:0->1",
+              "finiteInventoryCount:COUNT(S_RA0)->COUNT(S_CAROL_ADMISSION)",
+              "projectionRoot:ROOT(S_RA0)->ROOT(S_CAROL_ADMISSION)"
+            ],
+            "mustNotChange": [
+              "realmBootstraps[RA]",
+              "realmRevisions[RA,0]",
+              "verifierTranscripts[ACAROL].profile!=ERC1271",
+              "bindingHeads[ALICE_EOA,*]"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Verifier selection follows the declared signed profile, never hasCode.",
+            "Contract-like returndata cannot create ambient ERC-1271 fallback."
+          ]
+        },
+        {
+          "id": "P4B_EIP7702_INVALID_EOA_MAGIC_IGNORED",
+          "preState": "S_RA0",
+          "input": "CAROL_INVALID_EOA_SIGNATURE_WHILE_7702_CODE_RETURNS_ERC1271_MAGIC",
+          "expectedProfile": "MUTATION_DENIED_UNCHANGED",
+          "expectedPostState": "S_RA0",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "The declared EOA profile rejects; code-provided ERC-1271 magic is irrelevant and creates no fallback."
+          ]
+        },
+        {
+          "id": "P4C_DECLARED_ERC1271_PROFILE_BASIS_MISMATCH",
+          "preState": "S_RA0",
+          "input": "CAROL_PLAN_DECLARES_ERC1271_BUT_LACKS_EXACT_PINNED_VERIFIER_CODE_OR_DEPENDENCY_BASIS",
+          "expectedProfile": "MUTATION_AUTHORITY_UNPROVEN_UNCHANGED",
+          "expectedPostState": "S_RA0",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Changing the declared verifier profile or omitting its exact basis cannot reuse an EOA witness."
+          ]
+        },
+        {
+          "id": "P5A_ERC1271_V1_ADMISSION",
+          "preState": "S_RA0_VAULT_V1_ACCEPTS",
+          "input": "PUB_VAULT_CD_WITH_SIGNATURE_S1_ACCEPTED_BY_EXACT_VAULT_V1_BASIS",
+          "expectedProfile": "ADMISSION_COMMITTED",
+          "expectedPostState": "S_VAULT_CD_ADMITTED_V1",
+          "postStateRelation": "ATOMIC_CHANGE",
+          "receipt": "ADMISSION_RECEIPT_VAULT_CD_V1",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [
+              "types[T_NOTE]=CANONICAL_DESCRIPTOR",
+              "records[REC_C_GAMMA]=T_NOTE+GAMMA_BYTES",
+              "records[REC_D_DELTA_REF_C]=T_NOTE+DELTA_BYTES+CLOSED_REF_REC_C",
+              "publicationSets[PUB_VAULT_CD]=ORDERED[REC_C_GAMMA,REC_D_DELTA_REF_C]+VAULT_ERC1271",
+              "occurrences[OC]=PUB_VAULT_CD[0]",
+              "occurrences[OD]=PUB_VAULT_CD[1]",
+              "operations[OP_P5A]=VAULT_CD_PLAN+COMMITTED",
+              "admissions[AC]=OC+RA_REV0+ORDINAL_NEXT+OP_P5A",
+              "admissions[AD]=OD+RA_REV0+ORDINAL_NEXT_PLUS_ONE+OP_P5A",
+              "verifierTranscripts[AC]=S1+ERC1271_PROFILE+VAULT_V1_CODE_DEPENDENCY_BASIS+BOUNDED_CALL_RESULT_MAGIC",
+              "verifierTranscripts[AD]=SAME_EXACT_V1_BASIS",
+              "sourceWitnesses[SW_VAULT_CD]=EXACT_PUBLICATION+VAULT_ERC1271+ERC1271_PROFILE+NONCE+EXPIRY",
+              "noncePlans[RA,VAULT_ERC1271,LANE0,NONCE_P5A]=PLAN_P5A_DIGEST+OP_P5A",
+              "basePostings[TYPE,T_NOTE,1]=REC_C_GAMMA+AC",
+              "basePostings[TYPE,T_NOTE,2]=REC_D_DELTA_REF_C+AD"
+            ],
+            "mustChange": [],
+            "mustAdvance": [
+              "admissionHighWater:0->2",
+              "finiteInventoryCount:COUNT(S_RA0_VAULT_V1_ACCEPTS)->COUNT(S_VAULT_CD_ADMITTED_V1)",
+              "projectionRoot:ROOT(S_RA0_VAULT_V1_ACCEPTS)->ROOT(S_VAULT_CD_ADMITTED_V1)"
+            ],
+            "mustNotChange": [
+              "realmBootstraps[RA]",
+              "realmRevisions[RA,0]",
+              "verifierTranscripts[AC].basis!=VAULT_V1",
+              "verifierTranscripts[AD].basis!=VAULT_V1"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "The receipt retains digest, domain, account, signature, profile, code/dependency basis, bounded call policy/result, and execution coordinate."
+          ]
+        },
+        {
+          "id": "P5B_ERC1271_EXTERNAL_CHANGE_TO_V2",
+          "preState": "S_VAULT_CD_ADMITTED_V1",
+          "input": "OBSERVE_EXTERNAL_VAULT_CODE_CHANGE_TO_V2_WITHOUT_EFS_TRANSITION",
+          "expectedProfile": "VERIFIER_DENIED",
+          "expectedPostState": "S_VAULT_CD_ADMITTED_V1_EXTERNAL_V2",
+          "postStateRelation": "EXTERNAL_OBSERVATION_ONLY",
+          "receipt": "NO_EFS_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "observedExternalDelta": [
+            "VAULT_ERC1271.codeBasis:VAULT_V1->VAULT_V2",
+            "VAULT_V2.currentRecognition[S1]=DENIED"
+          ],
+          "assertions": [
+            "External code changes no EFS Realm state.",
+            "Current V2 rejection of S1 is a separate observation, not a rewrite of V1 history."
+          ]
+        },
+        {
+          "id": "P5C_ERC1271_HISTORICAL_RECEIPT_STABLE",
+          "preState": "S_VAULT_CD_ADMITTED_V1_EXTERNAL_V2",
+          "input": "READ_VAULT_CD_ADMISSION_USING_RETAINED_V1_TRANSCRIPT",
+          "expectedProfile": "HISTORICAL_RECEIPT_FOUND_COMPLETE",
+          "expectedPostState": "S_VAULT_CD_ADMITTED_V1_EXTERNAL_V2",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "ADMISSION_RECEIPT_VAULT_CD_V1",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "componentResults": [
+            {
+              "label": "historical receipt",
+              "subject": "ADMISSION_RECEIPT_VAULT_CD_V1",
+              "basis": "RA_REV0+VAULT_V1_TRANSCRIPT",
+              "expectedProfile": "HISTORICAL_RECEIPT_FOUND_COMPLETE"
+            },
+            {
+              "label": "current recognition",
+              "subject": "SIGNATURE_S1",
+              "basis": "VAULT_V2_CURRENT_BASIS",
+              "expectedProfile": "VERIFIER_DENIED"
+            }
+          ],
+          "assertions": [
+            "Current Vault code is never recalled to reinterpret the historical admission."
+          ]
+        },
+        {
+          "id": "P5D_ERC1271_LATER_ACCEPTANCE_NO_RETRO_ADMISSION",
+          "preState": "S_VAULT_CD_ADMITTED_V1_EXTERNAL_V2",
+          "input": "SIGNATURE_S2_WAS_REJECTED_AT_V1_BASIS_BUT_V2_CURRENTLY_ACCEPTS",
+          "expectedProfile": "READ_ABSENT_COMPLETE",
+          "expectedPostState": "S_VAULT_CD_ADMITTED_V1_EXTERNAL_V2",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_HISTORICAL_ADMISSION_RECEIPT_S2",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "componentResults": [
+            {
+              "label": "historical admission point",
+              "subject": "ADMISSION_FOR_S2",
+              "basis": "RA_REV0+VAULT_V1_BASIS",
+              "expectedProfile": "READ_ABSENT_COMPLETE"
+            },
+            {
+              "label": "current recognition",
+              "subject": "SIGNATURE_S2",
+              "basis": "VAULT_V2_CURRENT_BASIS",
+              "expectedProfile": "VERIFIER_AUTHORIZED"
+            }
+          ],
+          "assertions": [
+            "Current recognition cannot manufacture a past admission or occurrence."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BINDING",
+      "traces": [
+        {
+          "id": "B0_CAS_UPDATE_REV2",
+          "preState": "S_BIND_K_REC_B_REV1",
+          "input": "ALICE_BIND_K_TO_REC_A_EXPECT_REV1",
+          "expectedProfile": "MUTATION_COMMITTED",
+          "expectedPostState": "S_BIND_K_REC_A_REV2",
+          "postStateRelation": "ATOMIC_CHANGE",
+          "receipt": "BINDING_OPERATION_RECEIPT_REV2",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [
+              "operations[OP_B0]=BIND_REV2_PLAN+COMMITTED",
+              "bindingHistory[ALICE_EOA,POSITION_K,2]=REC_A_ALPHA"
+            ],
+            "mustChange": [
+              "bindingHeads[ALICE_EOA,POSITION_K]:{revision:1,target:REC_B_BETA_REF_A}->{revision:2,target:REC_A_ALPHA,operation:OP_B0}"
+            ],
+            "mustAdvance": [
+              "bindingRevision[ALICE_EOA,POSITION_K]:1->2",
+              "finiteInventoryCount:COUNT(S_BIND_K_REC_B_REV1)->COUNT(S_BIND_K_REC_A_REV2)",
+              "projectionRoot:ROOT(S_BIND_K_REC_B_REV1)->ROOT(S_BIND_K_REC_A_REV2)"
+            ],
+            "mustNotChange": [
+              "bindingScopes[ALICE_EOA]=[POSITION_K]",
+              "withdrawals:*",
+              "queryProfileActivations:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "History appends and the scope contains POSITION_K exactly once."
+          ]
+        },
+        {
+          "id": "B1_STALE_CAS_ZERO_EFFECT",
+          "preState": "S_BIND_K_REC_A_REV2",
+          "input": "ALICE_BIND_K_TO_REC_B_EXPECT_REV1",
+          "expectedProfile": "MUTATION_CONFLICT_UNCHANGED",
+          "expectedPostState": "S_BIND_K_REC_A_REV2",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "No otherwise valid admission, nonce, receipt, posting, history, scope, or Binding side effect survives a stale precondition."
+          ]
+        },
+        {
+          "id": "B2_TOMBSTONE_REV3",
+          "preState": "S_BIND_K_REC_A_REV2",
+          "input": "ALICE_TOMBSTONE_K_EXPECT_REV2",
+          "expectedProfile": "BINDING_TOMBSTONE_COMMITTED",
+          "expectedPostState": "S_BIND_K_TOMBSTONE_REV3",
+          "postStateRelation": "ATOMIC_CHANGE",
+          "receipt": "BINDING_TOMBSTONE_OPERATION_RECEIPT_REV3",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [
+              "operations[OP_B2]=TOMBSTONE_REV3_PLAN+COMMITTED",
+              "bindingHistory[ALICE_EOA,POSITION_K,3]=TOMBSTONE"
+            ],
+            "mustChange": [
+              "bindingHeads[ALICE_EOA,POSITION_K]:{revision:2,target:REC_A_ALPHA}->{revision:3,tombstone:true,operation:OP_B2}"
+            ],
+            "mustAdvance": [
+              "bindingRevision[ALICE_EOA,POSITION_K]:2->3",
+              "finiteInventoryCount:COUNT(S_BIND_K_REC_A_REV2)->COUNT(S_BIND_K_TOMBSTONE_REV3)",
+              "projectionRoot:ROOT(S_BIND_K_REC_A_REV2)->ROOT(S_BIND_K_TOMBSTONE_REV3)"
+            ],
+            "mustNotChange": [
+              "withdrawals:*",
+              "bindingScopes[ALICE_EOA]=[POSITION_K]"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Prior values remain historical and cannot become current by fallback.",
+            "A Binding tombstone is not a Withdrawal."
+          ]
+        },
+        {
+          "id": "B3_WITHDRAW_NO_RESURRECTION",
+          "preState": "S_BIND_K_TOMBSTONE_REV3",
+          "input": "ALICE_WITHDRAWS_OCCURRENCE_THAT_PRODUCED_REV2",
+          "expectedProfile": "WITHDRAWAL_COMMITTED",
+          "expectedPostState": "S_BIND_K_TOMBSTONE_REV3_PLUS_WITHDRAWAL",
+          "postStateRelation": "ATOMIC_APPEND_ONLY",
+          "receipt": "WITHDRAWAL_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [
+              "withdrawals[ALICE_EOA,OCCURRENCE_BIND_REV2]=OP_B3+EXACT_BASIS",
+              "operations[OP_B3]=WITHDRAWAL+COMMITTED"
+            ],
+            "mustChange": [],
+            "mustAdvance": [
+              "finiteInventoryCount:COUNT(S_BIND_K_TOMBSTONE_REV3)->COUNT(S_BIND_K_TOMBSTONE_REV3_PLUS_WITHDRAWAL)",
+              "projectionRoot:ROOT(S_BIND_K_TOMBSTONE_REV3)->ROOT(S_BIND_K_TOMBSTONE_REV3_PLUS_WITHDRAWAL)"
+            ],
+            "mustNotChange": [
+              "bindingHeads[ALICE_EOA,POSITION_K]={revision:3,tombstone:true}",
+              "bindingHistory[ALICE_EOA,POSITION_K,*]",
+              "bindingScopes[ALICE_EOA]=[POSITION_K]",
+              "records:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Withdrawal deletes no Record, rewinds no Binding, withdraws no other issuer's Occurrence, and resurrects no prior head."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "QUERY",
+      "traces": [
+        {
+          "id": "Q0_UNAUTHORIZED_PROFILE_ACTIVATION",
+          "preState": "S_ADMITTED_ALICE_AB",
+          "input": "MALLORY_SELF_ACTIVATES_QP_TOPIC_UNDER_QAP_RA_REV0",
+          "expectedProfile": "MUTATION_DENIED_UNCHANGED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "QueryProfile identity grants no activation authority.",
+            "QAP_RA_REV0 authorizes COUNCIL, not MALLORY."
+          ]
+        },
+        {
+          "id": "Q0B_FANOUT_LIMIT_ACTIVATION_REJECT",
+          "preState": "S_ADMITTED_ALICE_AB",
+          "input": "COUNCIL_ACTIVATION_REQUESTS_FANOUT_2_WHEN_QAP_RA_REV0_CAP_IS_1",
+          "expectedProfile": "LIMIT_REJECTED_UNCHANGED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Fanout limit is independently falsifiable."
+          ]
+        },
+        {
+          "id": "Q0D_COST_CAP_ACTIVATION_REJECT",
+          "preState": "S_ADMITTED_ALICE_AB",
+          "input": "COUNCIL_ACTIVATION_EXCEEDS_COST_CAP_QP_TOPIC_G1_WITH_FANOUT_1",
+          "expectedProfile": "LIMIT_REJECTED_UNCHANGED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Maximum activation/backfill cost is independently falsifiable."
+          ]
+        },
+        {
+          "id": "Q0C_UNCONSENTING_COST_BEARER_SUBSTITUTION",
+          "preState": "S_ADMITTED_ALICE_AB",
+          "input": "COUNCIL_SUBSTITUTES_PAYER_FOR_QUERY_SPONSOR_WITHOUT_CONSENT",
+          "expectedProfile": "MUTATION_DENIED_UNCHANGED",
+          "expectedPostState": "S_ADMITTED_ALICE_AB",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Activation authority is not authority to charge an unconsenting payer.",
+            "The exact sponsor consent and future-writer cost rule are part of the activation policy basis."
+          ]
+        },
+        {
+          "id": "Q1A_AUTHORIZED_ACTIVATION_AND_PARTIAL_BACKFILL",
+          "preState": "S_ADMITTED_ALICE_AB",
+          "input": "COUNCIL_ACTIVATES_QP_TOPIC_WITH_QUERY_SPONSOR_CONSENT_FANOUT_1_AND_PARTIAL_BACKFILL",
+          "expectedProfile": "MUTATION_COMMITTED",
+          "expectedPostState": "S_QP_TOPIC_ACTIVE_PARTIAL",
+          "postStateRelation": "ATOMIC_CHANGE",
+          "receipt": "QP_ACTIVATION_AND_PARTIAL_COVERAGE_RECEIPTS",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [
+              "queryProfileDefinitions[QP_TOPIC_G1]=EXACT_T_NOTE_TOPIC_INDEX_FANOUT_1",
+              "queryProfileActivations[RA,QP_TOPIC_G1,1]={state:ACTIVE_PARTIAL,type:T_NOTE,realmRevision:0,interval:0..ACTIVATION_HIGH_WATER,coveredThrough:NONTERMINAL,policy:QAP_RA_REV0,actor:COUNCIL,sponsor:QUERY_SPONSOR,consent:CONSENT_QUERY_SPONSOR_QP_TOPIC_G1,futureWriterRule:RA_REV0_ADMISSION_POLICY_MAX_FANOUT_1,maxCost:COST_CAP_QP_TOPIC_G1}",
+              "operations[OP_Q1A]=ACTIVATE_AND_PARTIAL_BACKFILL+COMMITTED",
+              "indexPostings[QP_TOPIC_G1,1,COVERED_TOPIC,*]=EXACT_COVERED_ITEMS_ONLY",
+              "costCommitments[OP_Q1A]=QUERY_SPONSOR+CONSENT_QUERY_SPONSOR_QP_TOPIC_G1+COST_WITHIN_CAP"
+            ],
+            "mustChange": [],
+            "mustAdvance": [
+              "coverageHighWater[QP_TOPIC_G1,1]:UNSTARTED->NONTERMINAL",
+              "finiteInventoryCount:COUNT(S_ADMITTED_ALICE_AB)->COUNT(S_QP_TOPIC_ACTIVE_PARTIAL)",
+              "projectionRoot:ROOT(S_ADMITTED_ALICE_AB)->ROOT(S_QP_TOPIC_ACTIVE_PARTIAL)"
+            ],
+            "mustNotChange": [
+              "queryProfileActivations[RA,QP_TOPIC_G1,1].state!=TERMINAL_COMPLETE",
+              "queryProfileActivations[RA,QP_TOPIC_G1,1].terminalCountRoot=ABSENT",
+              "indexPostings outside declared covered interval:*",
+              "costCommitments charged to PAYER:* ABSENT"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Activation records exact authority, cost, consent, generation, interval, and basis.",
+            "New covered writes dual-write only under the separately pinned future-writer rule."
+          ]
+        },
+        {
+          "id": "Q1B_NONEMPTY_PARTIAL_PAGE",
+          "preState": "S_QP_TOPIC_ACTIVE_PARTIAL",
+          "input": "READ_NONEMPTY_PAGE_BEFORE_TERMINAL_COVERAGE",
+          "expectedProfile": "QUERY_FOUND_PARTIAL",
+          "expectedPostState": "S_QP_TOPIC_ACTIVE_PARTIAL",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "componentResults": [
+            {
+              "label": "nonempty partial scope",
+              "subject": "T_NOTE under QP_TOPIC_G1 generation 1",
+              "basis": "RA_REV0+NONTERMINAL_COVERAGE_HIGH_WATER",
+              "expectedProfile": "QUERY_FOUND_PARTIAL"
+            }
+          ],
+          "assertions": [
+            "A nonempty partial page proves neither complete scope nor absence."
+          ]
+        },
+        {
+          "id": "Q1C_EMPTY_PARTIAL_PAGE",
+          "preState": "S_QP_TOPIC_ACTIVE_PARTIAL",
+          "input": "READ_EMPTY_PAGE_BEFORE_TERMINAL_COVERAGE",
+          "expectedProfile": "QUERY_EMPTY_PARTIAL",
+          "expectedPostState": "S_QP_TOPIC_ACTIVE_PARTIAL",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "componentResults": [
+            {
+              "label": "empty partial scope",
+              "subject": "T_NOTE under QP_TOPIC_G1 generation 1",
+              "basis": "RA_REV0+NONTERMINAL_COVERAGE_HIGH_WATER",
+              "expectedProfile": "QUERY_EMPTY_PARTIAL"
+            }
+          ],
+          "assertions": [
+            "An empty partial page is UNKNOWN/PARTIAL, never absence."
+          ]
+        },
+        {
+          "id": "Q1D_AUTHORIZED_FUTURE_WRITE_DUAL_POSTING",
+          "preState": "S_QP_TOPIC_ACTIVE_PARTIAL",
+          "input": "WRITER_ADMITS_REC_FUTURE_ZETA_WITHIN_CAP_UNDER_RA_REV0_ADMISSION_POLICY_MAX_FANOUT_1",
+          "expectedProfile": "ADMISSION_COMMITTED",
+          "expectedPostState": "S_QP_TOPIC_ACTIVE_PARTIAL_PLUS_FUTURE_WRITE",
+          "postStateRelation": "ATOMIC_CHANGE",
+          "receipt": "ADMISSION_RECEIPT_WRITER_ZETA",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [
+              "records[REC_FUTURE_ZETA]=T_NOTE+ZETA_BYTES",
+              "publicationSets[PUB_WRITER_ONE]=ORDERED[REC_FUTURE_ZETA]+WRITER_EOA",
+              "occurrences[OZETA]=PUB_WRITER_ONE[0]",
+              "sourceWitnesses[SW_WRITER_ZETA]=EXACT_PUBLICATION+WRITER_EOA+EOA_PROFILE+NONCE+EXPIRY",
+              "noncePlans[RA,WRITER_EOA,LANE0,NONCE_Q1D]=PLAN_Q1D_DIGEST+OP_Q1D",
+              "operations[OP_Q1D]=ADMIT_ZETA+COMMITTED",
+              "admissions[AZETA]=OZETA+RA_REV0+ORDINAL_3+OP_Q1D",
+              "verifierTranscripts[AZETA]=Q1D_DIGEST+WRITER_EOA+EOA_PROFILE+VALID_SIGNATURE",
+              "basePostings[TYPE,T_NOTE,3]=REC_FUTURE_ZETA+AZETA",
+              "indexPostings[QP_TOPIC_G1,1,TOPIC_ZETA,3]=AZETA",
+              "costCommitments[OP_Q1D]=WRITER_EOA+RA_REV0_ADMISSION_POLICY_MAX_FANOUT_1+COST_WITHIN_CAP"
+            ],
+            "mustChange": [],
+            "mustAdvance": [
+              "admissionHighWater:2->3",
+              "finiteInventoryCount:COUNT(S_QP_TOPIC_ACTIVE_PARTIAL)->COUNT(S_QP_TOPIC_ACTIVE_PARTIAL_PLUS_FUTURE_WRITE)",
+              "projectionRoot:ROOT(S_QP_TOPIC_ACTIVE_PARTIAL)->ROOT(S_QP_TOPIC_ACTIVE_PARTIAL_PLUS_FUTURE_WRITE)"
+            ],
+            "mustNotChange": [
+              "queryProfileActivations[RA,QP_TOPIC_G1,1].state=ACTIVE_PARTIAL",
+              "queryProfileActivations[RA,QP_TOPIC_G1,1].generation=1",
+              "costCommitments charged to PAYER:* ABSENT",
+              "unrelated queryProfileActivations:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "The separately adopted future-writer rule authorizes exactly one generation-one posting and its bounded cost.",
+            "The activation remains PARTIAL; one dual-write does not complete historical backfill."
+          ]
+        },
+        {
+          "id": "Q1E_UNCONSENTED_FUTURE_WRITE_CHARGE_REJECT",
+          "preState": "S_QP_TOPIC_ACTIVE_PARTIAL",
+          "input": "OTHERWISE_WITHIN_CAP_FUTURE_WRITE_SUBSTITUTES_UNCONSENTING_PAYER_FOR_AUTHORIZED_WRITER_COST_RULE",
+          "expectedProfile": "MUTATION_DENIED_UNCHANGED",
+          "expectedPostState": "S_QP_TOPIC_ACTIVE_PARTIAL",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Neither activation authority nor writer authority permits charging PAYER without pinned policy authority or consent."
+          ]
+        },
+        {
+          "id": "Q2_PREMATURE_TERMINAL_REJECT",
+          "preState": "S_QP_TOPIC_ACTIVE_PARTIAL",
+          "input": "DECLARE_TERMINAL_WITH_MISSING_INTERVAL_POSTING_COUNT_OR_ROOT",
+          "expectedProfile": "MUTATION_PRECONDITION_UNCHANGED",
+          "expectedPostState": "S_QP_TOPIC_ACTIVE_PARTIAL",
+          "postStateRelation": "SAME_AS_PRE",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Neither profile author, activator, operator, nor indexer can self-assert COMPLETE."
+          ]
+        },
+        {
+          "id": "Q3_STATE_DERIVED_TERMINAL_COMPLETE",
+          "preState": "S_QP_TOPIC_ALL_INTERVALS_PROCESSED",
+          "input": "ADVANCE_WITH_EXACT_INTERVAL_HIGH_WATER_COUNT_ROOT_AND_POSTINGS_COMMITMENT",
+          "expectedProfile": "MUTATION_COMMITTED",
+          "expectedPostState": "S_QP_TOPIC_TERMINAL_COMPLETE",
+          "postStateRelation": "ATOMIC_CHANGE",
+          "receipt": "QP_TERMINAL_COVERAGE_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [
+              "queryProfileActivations[RA,QP_TOPIC_G1,1].terminalCountRoot=COUNT_AND_ROOT_OVER_EXACT_DECLARED_DOMAIN",
+              "operations[OP_Q3]=TERMINALIZE_QP_TOPIC_G1+COMMITTED"
+            ],
+            "mustChange": [
+              "queryProfileActivations[RA,QP_TOPIC_G1,1].state:ACTIVE_PARTIAL->TERMINAL_COMPLETE"
+            ],
+            "mustAdvance": [
+              "coverageHighWater[QP_TOPIC_G1,1]:NONTERMINAL->ACTIVATION_HIGH_WATER",
+              "finiteInventoryCount:COUNT(S_QP_TOPIC_ALL_INTERVALS_PROCESSED)->COUNT(S_QP_TOPIC_TERMINAL_COMPLETE)",
+              "projectionRoot:ROOT(S_QP_TOPIC_ALL_INTERVALS_PROCESSED)->ROOT(S_QP_TOPIC_TERMINAL_COMPLETE)"
+            ],
+            "mustNotChange": [
+              "types:*",
+              "records:*",
+              "publicationSets:*",
+              "admissions:*",
+              "bindingHeads:*",
+              "unrelated queryProfileActivations:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "componentResults": [
+            {
+              "label": "terminal query read",
+              "subject": "T_NOTE under QP_TOPIC_G1 generation 1",
+              "basis": "RA_REV0+TERMINAL_HIGH_WATER+COUNT_ROOT",
+              "expectedProfile": "QUERY_FOUND_COMPLETE"
+            }
+          ],
+          "assertions": [
+            "Complete applies only to the exact Type, generation, finite interval, high-water, ordering, and Realm/observer basis."
+          ]
+        },
+        {
+          "id": "Q4A_KNOWN_CURSOR_COORDINATE_MISMATCH",
+          "preState": "S_QP_TOPIC_TERMINAL_COMPLETE",
+          "input": "USE_CURSOR_WITH_WRONG_GENERATION_HIGH_WATER_ORDERING_REALM_REVISION_OR_BLOCK_HASH",
+          "expectedProfile": "READ_INVALID_REQUEST",
+          "expectedPostState": "S_QP_TOPIC_TERMINAL_COMPLETE",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "A known coordinate mismatch is a deterministic invalid request, not missing data."
+          ]
+        },
+        {
+          "id": "Q4B_REQUIRED_BASIS_UNAVAILABLE",
+          "preState": "S_QP_TOPIC_TERMINAL_COMPLETE",
+          "input": "REQUEST_CURSOR_CONTINUATION_WHILE_ITS_EXACT_AUTHENTICATED_BASIS_IS_UNAVAILABLE",
+          "expectedProfile": "READ_UNKNOWN_PARTIAL",
+          "expectedPostState": "S_QP_TOPIC_TERMINAL_COMPLETE",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Unavailable basis remains UNKNOWN/PARTIAL; it is not an invalid cursor or an empty scope."
+          ]
+        },
+        {
+          "id": "Q5_POINT_FOUND_SCOPE_PARTIAL",
+          "preState": "S_QP_TOPIC_ACTIVE_PARTIAL",
+          "input": "READ_EXACT_REC_A_POINT_AND_REQUEST_COMPLETE_T_NOTE_SCOPE",
+          "expectedProfile": "QUERY_FOUND_PARTIAL",
+          "expectedPostState": "S_QP_TOPIC_ACTIVE_PARTIAL",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "componentResults": [
+            {
+              "label": "point",
+              "subject": "REC_A_ALPHA",
+              "basis": "RA_REV0+EXACT_POINT_STATE_BASIS",
+              "expectedProfile": "RECORD_FOUND_COMPLETE"
+            },
+            {
+              "label": "scope",
+              "subject": "all T_NOTE under QP_TOPIC_G1 generation 1",
+              "basis": "RA_REV0+NONTERMINAL_COVERAGE_HIGH_WATER",
+              "expectedProfile": "QUERY_FOUND_PARTIAL"
+            }
+          ],
+          "assertions": [
+            "A complete exact point proof establishes no enumeration completeness."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LENS_AND_RESULTS",
+      "traces": [
+        {
+          "id": "L0_PROVED_ABSENCE_ALLOWS_PINNED_FALLBACK",
+          "preState": "S_COUNCIL_ABSENT_ALICE_BIND_REC_A",
+          "input": "RESOLVE_PLAN_COUNCIL_THEN_ALICE_AT_FIXED_BASIS",
+          "expectedProfile": "BINDING_FOUND_COMPLETE",
+          "expectedPostState": "S_COUNCIL_ABSENT_ALICE_BIND_REC_A",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "componentResults": [
+            {
+              "label": "higher priority point",
+              "subject": "COUNCIL/POSITION_K",
+              "basis": "FIXED_LENS_BASIS",
+              "expectedProfile": "READ_ABSENT_COMPLETE"
+            },
+            {
+              "label": "selected fallback point",
+              "subject": "ALICE_EOA/POSITION_K",
+              "basis": "SAME_FIXED_LENS_BASIS",
+              "expectedProfile": "BINDING_FOUND_COMPLETE"
+            }
+          ],
+          "assertions": [
+            "Only authoritative complete local absence at the higher priority permits the pinned fallback."
+          ]
+        },
+        {
+          "id": "L1_PARTIAL_HIGHER_PRIORITY_BLOCKS_FALLBACK",
+          "preState": "S_COUNCIL_UNKNOWN_ALICE_BIND_REC_A",
+          "input": "RESOLVE_PINNED_PLAN_WITH_MISSING_COUNCIL_BASIS",
+          "expectedProfile": "READ_UNKNOWN_PARTIAL",
+          "expectedPostState": "S_COUNCIL_UNKNOWN_ALICE_BIND_REC_A",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "UNKNOWN or PARTIAL never becomes absence and never silently falls through."
+          ]
+        },
+        {
+          "id": "L2_BENEFICIARY_PLAN_SUBSTITUTION",
+          "preState": "S_TREASURY_PINS_SAFE_PLAN",
+          "input": "MALLORY_SUPPLIES_PLAN_RANKING_MALLORY_FIRST",
+          "expectedProfile": "READ_DENIED",
+          "expectedPostState": "S_TREASURY_PINS_SAFE_PLAN",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Wrong planId, purpose, scope, Realm, position, combiner, or cap cannot reuse the risk-bearer's consent."
+          ]
+        },
+        {
+          "id": "L3A_UNSUPPORTED_REQUIRED_PROFILE",
+          "preState": "S_SAFE_PLAN_WITH_UNSUPPORTED_REQUIRED_PROFILE",
+          "input": "RESOLVE_WITH_REQUIRED_PROFILE_NOT_SUPPORTED_BY_REALM",
+          "expectedProfile": "UNSUPPORTED",
+          "expectedPostState": "S_SAFE_PLAN_WITH_UNSUPPORTED_REQUIRED_PROFILE",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Unsupported policy is explicit and never becomes absence or fallback."
+          ]
+        },
+        {
+          "id": "L3B_REQUIRED_PROFILE_BASIS_UNAVAILABLE",
+          "preState": "S_TREASURY_PINS_SAFE_PLAN",
+          "input": "RESOLVE_SUPPORTED_PROFILE_WITH_EXACT_REQUIRED_BASIS_UNAVAILABLE",
+          "expectedProfile": "READ_UNKNOWN_PARTIAL",
+          "expectedPostState": "S_TREASURY_PINS_SAFE_PLAN",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "A supported profile with unavailable basis is UNKNOWN/PARTIAL, not UNSUPPORTED or absent."
+          ]
+        },
+        {
+          "id": "X0A_RECORD_FOUND_BYTES_INTEGRITY_FAILED",
+          "preState": "S_RECORD_AND_ADMISSION_PRESENT",
+          "input": "FETCH_BYTES_FOR_PRESENT_RECORD_THAT_FAIL_RECORD_ID_INTEGRITY",
+          "expectedProfile": "BYTES_FAILED_RECORD_FOUND",
+          "expectedPostState": "S_RECORD_AND_ADMISSION_PRESENT",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Integrity failure does not erase the Record or prove absence."
+          ]
+        },
+        {
+          "id": "X0B_RECORD_FOUND_BYTES_UNAVAILABLE",
+          "preState": "S_RECORD_AND_ADMISSION_PRESENT",
+          "input": "FETCH_PRESENT_RECORD_WHEN_ALL_DECLARED_LOCATORS_ARE_UNAVAILABLE",
+          "expectedProfile": "BYTES_UNAVAILABLE_RECORD_FOUND",
+          "expectedPostState": "S_RECORD_AND_ADMISSION_PRESENT",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Unavailability does not erase the Record or imply corrupt bytes."
+          ]
+        },
+        {
+          "id": "X0C_RECORD_FOUND_BYTES_PARTIAL",
+          "preState": "S_RECORD_AND_ADMISSION_PRESENT",
+          "input": "FETCH_ONLY_VERIFIED_PREFIX_OR_RANGE_OF_PRESENT_RECORD",
+          "expectedProfile": "BYTES_PARTIAL_RECORD_FOUND",
+          "expectedPostState": "S_RECORD_AND_ADMISSION_PRESENT",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Verified partial bytes are neither complete bytes nor unavailable bytes."
+          ]
+        },
+        {
+          "id": "X1_DROPPED_SUBMISSION_CHANNEL",
+          "preState": "S_BEFORE_UNOBSERVED_OPERATION",
+          "input": "RPC_OR_WALLET_ACK_THEN_CHANNEL_LOSS_WITHOUT_CANONICAL_STATE_BASIS",
+          "expectedProfile": "SUBMISSION_UNKNOWN",
+          "expectedPostState": "UNKNOWN",
+          "postStateRelation": "UNOBSERVED",
+          "receipt": "TRANSPORT_RECEIPT_IS_NOT_EFS_RECEIPT",
+          "stateDelta": {
+            "knowledge": "UNOBSERVED",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [],
+            "unresolved": [
+              "OP_X1 absent with full Realm projection equal to pre-state",
+              "OP_X1 committed with its exact atomic declared effect set",
+              "no partially committed effect set is legal"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Only canonical state read-back may upgrade UNKNOWN to COMMITTED or NOT_COMMITTED_PROVEN."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "RECONSTRUCTION",
+      "traces": [
+        {
+          "id": "Z0_STATE_ONLY_RECONSTRUCTION",
+          "preState": "S_FULL_MICRO_REALM",
+          "input": "BOOTSTRAP_PLUS_AUTHENTICATED_STATE_BASIS_WITH_LOGS_INDEXER_WRITER_DB_CACHE_WALLET_COMMONS_AND_MANUAL_MODULE_LIST_REMOVED",
+          "expectedProfile": "RECONSTRUCTION_COMPLETE",
+          "expectedPostState": "S_FULL_MICRO_REALM",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "An independent reader enumerates the declared finite projection and reproduces its exact disposable digest.",
+            "Unrelated chain state outside the declared projection is ignored."
+          ]
+        },
+        {
+          "id": "Z1A_RECONSTRUCTION_MISSING_REQUIRED_ITEM",
+          "preState": "S_FULL_MICRO_REALM",
+          "input": "OMIT_REQUIRED_PAGE_PREIMAGE_OR_COMPONENT_FROM_READER_INPUT",
+          "expectedProfile": "RECONSTRUCTION_PARTIAL",
+          "expectedPostState": "S_FULL_MICRO_REALM",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "Missing input remains qualified incomplete; it cannot manufacture a smaller complete Realm."
+          ]
+        },
+        {
+          "id": "Z1B_RECONSTRUCTION_SUBSTITUTED_DUPLICATED_OR_REORDERED_ITEM",
+          "preState": "S_FULL_MICRO_REALM",
+          "input": "SUBSTITUTE_DUPLICATE_OR_REORDER_ONE_REQUIRED_PROJECTION_ITEM",
+          "expectedProfile": "RECONSTRUCTION_INVALID",
+          "expectedPostState": "S_FULL_MICRO_REALM",
+          "postStateRelation": "READ_ONLY",
+          "receipt": "NO_RECEIPT",
+          "stateDelta": {
+            "knowledge": "EXACT",
+            "mustAdd": [],
+            "mustChange": [],
+            "mustAdvance": [],
+            "mustNotChange": [
+              "RealmState:*"
+            ]
+          },
+          "requiredProjectionSet": "LOSSLESS_ALL_LAYERS",
+          "assertions": [
+            "A deterministically detected mismatch is INVALID with projection integrity failure, not mere incompleteness."
+          ]
+        }
+      ]
+    }
+  ],
+  "illegalCombinations": [
+    "presence=ABSENT_PROVEN with coverage=PARTIAL",
+    "presence=ABSENT_PROVEN with support=UNSUPPORTED or LIMIT_EXCEEDED",
+    "kind=MUTATION or kind=SUBMISSION with coverage other than NOT_APPLICABLE",
+    "kind=SCOPE with an empty page and presence=ABSENT_PROVEN unless coverage=COMPLETE over the exact declared finite domain and basis",
+    "effect=UNKNOWN with coverage other than NOT_APPLICABLE",
+    "coverage=COMPLETE from a short page, timeout, point proof applied to a scope, event scan, indexer claim, or unavailable basis",
+    "validation=SEMANTICALLY_VALID solely because a Realm admitted the Occurrence",
+    "authority=AUTHORIZED from signature shape, hasCode, current ERC1271 code, self-declared interface, or unpinned policy",
+    "selection=CURRENT without a bounded Binding or Lens evaluation at the stated basis",
+    "effect=COMMITTED from wallet, bundler, RPC, transaction, or relayer acknowledgement without canonical effect read-back",
+    "bytes=PARTIAL, UNAVAILABLE, or INTEGRITY_FAILED implying presence=ABSENT_PROVEN",
+    "projectionIntegrity=MISSING_REQUIRED_ITEM or INTEGRITY_FAILED represented as MATCHED",
+    "presence=MASKED represented as absence without retaining mask policy and basis"
+  ],
+  "notCoveredByMinimum": [
+    "OPAQUE and MASKED product projections beyond their no-collapse rules",
+    "wide conflict-combiner matrices beyond one pinned Lens conflict rule",
+    "X1 canonical committed and not-committed follow-up read-backs after the submission-uncertainty control",
+    "full verifier gas, returndata, reentrancy, delegation lifecycle, signature-suite and malleability corpus",
+    "all final topology arms, application workloads, and scale ceilings"
+  ],
+  "minimumComparators": [
+    "flat exact Type versus one bundled and one layered/View trace over identical accepted values",
+    "full-width Principal versus one tagged author trace",
+    "portable shared PublicationSet versus one self-contained and one Realm-bound trace",
+    "self-authenticating Realm bootstrap versus bare chainId and visible-root-only controls"
+  ],
+  "freezeOnlyExpansion": [
+    "ceremony-final independent cross-language codecs, IDs, rejection precedence, and hard caps",
+    "full signature malleability, ERC1271 gas, return-data, reentrancy, recursive dependency, and second-suite corpus",
+    "all supported proxy, beacon, facet, library, registry, pause, and emergency-power shapes",
+    "million-record QueryProfile pressure, dead postings, hostile hot values, and final cost allocation",
+    "complete cold and warm Lens gas matrix and all final caps",
+    "two independent reconstructors, authenticated proof inputs, reorg replay, and clean-room toolchain regeneration",
+    "final physical topology, production manifest, target Realm, Commons, and hyperstructure claim"
+  ],
+  "stateDeltaSchema": {
+    "authority": "expectedPostState is a human ordering alias; stateDelta is the machine-facing semantic contract",
+    "knowledge": [
+      "EXACT",
+      "UNOBSERVED"
+    ],
+    "exactRule": "EXACT requires all four lists. The complete authoritative projection is unchanged except for paths named by mustAdd, mustChange, or mustAdvance; mustNotChange may add stronger local assertions. Every authoritative state change recomputes finiteInventoryCount and projectionRoot.",
+    "unobservedRule": "UNOBSERVED is legal only for a dropped submission channel. It asserts neither change nor equality and must name the unresolved atomic alternatives.",
+    "pathGrammar": "symbolic collection[key]=value, collection[key]:from->to, or counter:from->to; exact disposable paths and digests replace these expressions in the byte seal",
+    "rejectionRule": "every effectful rejection has empty mustAdd, mustChange, and mustAdvance plus mustNotChange=[RealmState:*], including nonces, receipts, postings, scopes, counters, and projection root"
+  },
+  "namedStates": {
+    "S_EMPTY": "No Realm bootstrap, revision, Type, Record, Publication, Occurrence, operation, admission, Binding, Withdrawal, QueryProfile activation, posting, or counter entry.",
+    "S_RA0": "R0 applied to S_EMPTY: RA bootstrap and revision zero exist; all data-plane collections are empty and every data-plane counter is zero.",
+    "S_RA_SHARED_PREFORK": "One authenticated RA state before two observer branches; neither descendant is assumed canonical or final.",
+    "PORTABLE_EMPTY": "No portable candidate artifacts in the disposable artifact store; no Realm state is implied.",
+    "PORTABLE_T_NOTE_A_B": "T0 applied to PORTABLE_EMPTY.",
+    "S_ADMITTED_ALICE_AB_BIND_K_REV1": "P0 applied to S_RA0.",
+    "S_CAROL_ADMISSION": "P4A applied to S_RA0.",
+    "S_RA0_VAULT_V1_ACCEPTS": "S_RA0 plus the exact externally observed VAULT_V1 verifier dependency basis pinned by RA revision zero.",
+    "S_VAULT_CD_ADMITTED_V1": "P5A applied to S_RA0_VAULT_V1_ACCEPTS.",
+    "S_VAULT_CD_ADMITTED_V1_EXTERNAL_V2": "Same authoritative Realm state as S_VAULT_CD_ADMITTED_V1 plus a later external VAULT_V2 observation.",
+    "S_BIND_K_REC_B_REV1": "Alias of S_ADMITTED_ALICE_AB_BIND_K_REV1.",
+    "S_BIND_K_REC_A_REV2": "B0 applied to S_BIND_K_REC_B_REV1.",
+    "S_BIND_K_TOMBSTONE_REV3": "B2 applied to S_BIND_K_REC_A_REV2.",
+    "S_BIND_K_TOMBSTONE_REV3_PLUS_WITHDRAWAL": "B3 applied to S_BIND_K_TOMBSTONE_REV3.",
+    "S_ADMITTED_ALICE_AB": "S_ADMITTED_ALICE_AB_BIND_K_REV1 viewed at the QueryProfile seam.",
+    "S_QP_TOPIC_ACTIVE_PARTIAL": "Q1A applied to S_ADMITTED_ALICE_AB with activation generation one and a nonterminal coverage high-water.",
+    "S_QP_TOPIC_ALL_INTERVALS_PROCESSED": "S_QP_TOPIC_ACTIVE_PARTIAL after all declared postings exist, before terminal count/root acceptance.",
+    "S_QP_TOPIC_TERMINAL_COMPLETE": "Q3 applied to S_QP_TOPIC_ALL_INTERVALS_PROCESSED.",
+    "S_COUNCIL_ABSENT_ALICE_BIND_REC_A": "Pinned Lens basis where Council position K is authoritatively absent and Alice position K is REC_A.",
+    "S_COUNCIL_UNKNOWN_ALICE_BIND_REC_A": "Pinned Lens request where Alice is known but the required Council basis is unavailable.",
+    "S_TREASURY_PINS_SAFE_PLAN": "TREASURY has pinned PLAN_COUNCIL_THEN_ALICE for the exact purpose, scope, Realm, position, and cap.",
+    "S_SAFE_PLAN_WITH_UNSUPPORTED_REQUIRED_PROFILE": "The pinned Plan names a profile this candidate Realm does not support.",
+    "S_RECORD_AND_ADMISSION_PRESENT": "The exact Record and its admission are present at a pinned basis; byte retrieval is evaluated separately.",
+    "S_BEFORE_UNOBSERVED_OPERATION": "Exact Realm state before OP_X1 submission, with no observation of its canonical outcome.",
+    "S_FULL_MICRO_REALM": "One compatible reference branch: R0 then P0, B0, B2, B3, Q1A, Q1D, and the Q3 completion law over that branch's exact interval, plus PLAN_COUNCIL_THEN_ALICE. Alternative Carol and Vault verifier controls are excluded rather than merged across conflicting admission ordinals.",
+    "S_QP_TOPIC_ACTIVE_PARTIAL_PLUS_FUTURE_WRITE": "Q1D applied to S_QP_TOPIC_ACTIVE_PARTIAL; the activation remains partial while the new admitted write is present in both base and generation-one query postings."
+  },
+  "factsMatrix": {
+    "portableValidity": "Type/Record structural and semantic result under exact portable interpreter",
+    "realmAdmission": "destination occurrence, policy, verifier, lifecycle and operation basis",
+    "pointKnowledge": "exact key presence at one exact Realm/observer basis",
+    "scopeCoverage": "declared finite domain, generation, cursor, high-water, ordering and completion commitment",
+    "byteAvailability": "separate from Record presence and admission",
+    "authority": "exact principal, plan, verifier profile and historical/current basis",
+    "selection": "Binding or risk-bearer-approved finite Lens result",
+    "effect": "canonical operation read-back, never transport acknowledgement",
+    "projectionIntegrity": "independent reconstruction and cross-layer preservation",
+    "finality": "retained observer evidence; intentionally not collapsed into any result axis"
+  }
+}

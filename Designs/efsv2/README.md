@@ -50,6 +50,12 @@ The Core-facing standards supplement is
 it reuses the complete shared corpus index and selects no protocol bytes or
 target-chain support.
 
+The first design-only G2 artifact is the
+[[Reviews/2026-08-23-efs2-exp-c0-semantic-seal/README|`EXP-C0` symbolic semantic seal]]:
+61 integrated transition/read/authority/query/Lens/reconstruction traces and
+their lossless result profiles. Exact disposable bytes, the independent model,
+and the Solidity SUT remain pending; this is not a G2 pass.
+
 ## The current shape
 
 ```mermaid
