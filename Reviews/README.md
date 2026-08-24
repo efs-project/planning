@@ -104,3 +104,7 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 ### IPFS maintainership transition and EFS impact (2026-08-24)
 
 - [`2026-08-24-ipfs-maintainership-transition.md`](./2026-08-24-ipfs-maintainership-transition.md) — primary-source and HN-comment assessment of Shipyard's September 30 exit from IPFS maintenance and public-utility operations; distinguishes protocol survival from maintainership, persistence, gateway, routing and browser-delivery risk; confirms IPFS remains an optional EFS carrier; and routes one cold carrier-extinction acceptance trace without adopting a storage provider, protocol, or Core change.
+
+### Debloat.dev open-source directory intake (2026-08-24)
+
+- [`2026-08-24-debloat-directory-intake.md`](./2026-08-24-debloat-directory-intake.md) — point-in-time product and HN-comment assessment of a fast, guest-friendly open-source alternatives directory; preserves its concrete catalog, Wanted, machine-readable, curation, governance and exit lessons; and parks a curator-qualified, independently verified Open Alternatives catalog as a possible future Open Web App Store/Data Explorer fixture without importing the live database, creating a global default index, or adding an EFS Core requirement.
