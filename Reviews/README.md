@@ -100,3 +100,7 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 ### Web platform standards screen (2026-08-23)
 
 - [`2026-08-23-web-platform-standards-screen/`](./2026-08-23-web-platform-standards-screen/) — reproducible 1,228-row index across the pinned W3C `browser-specs`, TC39, WebAssembly and WASI catalogs, plus a high-recall primary-family review through WHATWG, CSS, Unicode/CLDR, IETF, WPT, web-features/BCD, ARIA-AT, Open UI and WICG. It records source/reproducibility limits, selected-feature status, forward-profile implications and negative evidence; no browser target, package, polyfill, runtime, repository or implementation is adopted.
+
+### IPFS maintainership transition and EFS impact (2026-08-24)
+
+- [`2026-08-24-ipfs-maintainership-transition.md`](./2026-08-24-ipfs-maintainership-transition.md) — primary-source and HN-comment assessment of Shipyard's September 30 exit from IPFS maintenance and public-utility operations; distinguishes protocol survival from maintainership, persistence, gateway, routing and browser-delivery risk; confirms IPFS remains an optional EFS carrier; and routes one cold carrier-extinction acceptance trace without adopting a storage provider, protocol, or Core change.
