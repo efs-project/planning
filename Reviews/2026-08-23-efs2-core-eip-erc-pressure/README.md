@@ -10,6 +10,12 @@
 
 #status/done #kind/review #repo/planning #repo/contracts #repo/sdk #topic/efsv2 #topic/read-path #topic/identity #topic/types #topic/reconstruction #topic/ethereum-standards
 
+> **Archival routing note (2026-08-25):** the evidence below remains unchanged.
+> The active [[Designs/efsv2/ethereum-standards-and-execution-profile]] now
+> supersedes and retargets this review's fresh pre-`GO-CODE` re-pin instruction
+> to candidate engineering / `GO-FREEZE` or an earlier named change trigger. Do
+> not read the 2026-08-23 scheduling sentence as a current V2-C1 prerequisite.
+
 ## Verdict
 
 The corpus supports EFS v2's direction, but it also exposes one missing design

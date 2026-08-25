@@ -1,10 +1,11 @@
 # EFS v2 — candidate MVP build-start packet
 
-**Status:** draft recommendation held at the cross-lane handoff; current
-disposition `CONTINUE-DISPOSABLE`; no production implementation, deployment, or
-protocol freeze
+**Status:** draft technical recommendation after the exact cross-lane handoff;
+`technicalDisposition = RECOMMEND-GO-CODE`, `recommendedOwnerAnswer = YES`,
+`ownerDecision = PENDING`, and `goCodeAuthorized = false`; no production
+implementation, deployment, or protocol freeze
 **Target repos:** planning and disposable SDK/Explorer fixtures; real contracts,
-SDK package, and client implementation only after an owner `GO-CODE` ruling
+SDK package, and client implementation only after an owner `V2-C1 YES` ruling
 **Depends on:** [[v2-contract-readiness-program]], [[system-constitution]],
 [[core-architecture-candidate]], [[exp-c0-v0-data-structure-profile]],
 [[exp-c0-v0-result-api-profile]],
@@ -16,10 +17,11 @@ SDK package, and client implementation only after an owner `GO-CODE` ruling
 
 ## Recommendation
 
-Prepare to start one top-to-bottom, explicitly nondeployable EFS v2 candidate,
-but do not issue `RECOMMEND-GO-CODE` yet. The Core-side exact handoff exists;
-the raw SDK and no-wallet Explorer must first consume that same source lock
-without a P0/P1 truth mismatch.
+Recommend that the project owner authorize one top-to-bottom, explicitly
+nondeployable EFS v2 candidate. The Core, raw SDK, and no-wallet Explorer now pin
+the same exact source lock, and the final static cross-lane audit found no P0/P1
+truth or read-ABI mismatch. This `RECOMMEND-GO-CODE` disposition does not itself
+authorize candidate engineering.
 
 Do not wait for `GO-FREEZE` evidence before learning from real contract and SDK
 engineering. Do not let candidate engineering silently freeze the disposable
@@ -45,10 +47,11 @@ explicit Realm + authenticated read basis
     -> minimal Files profile with verified bytes
 ```
 
-This is enough to prove the substrate from contract state to a human-visible
-application while preserving the larger EFS goal. Git, packages, achievements,
-agents, media, and future applications stay ordinary Types and relations; none
-needs an application-specific Core kind.
+If implemented, this vertical will pressure-test the substrate from contract
+state to a human-visible application while preserving the larger EFS goal. Git,
+packages, achievements, agents, media, and future applications are still
+expected to remain ordinary Types and relations; any contrary implementation
+result reopens the generic Core boundary.
 
 ## Current build-start checkpoint
 
@@ -58,11 +61,16 @@ needs an application-specific Core kind.
 - The evidence ledger still reports zero of 61 sealed semantic traces with a
   complete literal request/result/pre-state/post-state replay bundle. The
   vertical fixture is integration evidence, not a disguised replay claim.
-- The SDK and Data Explorer have not yet consumed the exact Core source lock.
-  Their handoff is the remaining pre-recommendation gate, not a reason to reopen
-  every settled candidate default.
-- V2-C1 is the one remaining owner build-start choice, but it stays out of the
-  answerable queue until that cross-lane gate and final audit are green.
+- The SDK at `57d04f85ae2687ee8ea63d945378df5a9a6492a5` and Data Explorer
+  at `8d90ecbf85390f1151fa1b2dbf93852a1bfc8448` consumed the exact Core
+  `b9088d6a24f4d40bcca6ba300523b25cc7c608d2` source lock. Their common
+  receipt is byte-identical, both bounded role checks pass, and the final
+  [[Reviews/2026-08-25-efs2-exp-c0-cross-lane-acceptance/README|cross-lane review]]
+  reports no unresolved P0/P1 truth mismatch.
+- V2-C1 is now the one answerable owner build-start choice:
+  `technicalDisposition = RECOMMEND-GO-CODE`,
+  `recommendedOwnerAnswer = YES`, `ownerDecision = PENDING`, and
+  `goCodeAuthorized = false`.
 
 ## Candidate semantic surface
 
@@ -108,8 +116,9 @@ separate exact profile so adding an index never reinterprets an old Record.
   bundles are not required to begin candidate engineering; any trace claimed
   implemented does require its literal request/result/pre/post bundle.
 - Exit M0 only when Core, SDK, and Explorer pin the same exact handoff and the
-  two consumer adapters preserve every qualified field. The Core side is
-  present; cross-lane consumption is pending.
+  two consumer adapters preserve every qualified field. The committed static
+  serialized-consumption slice now satisfies this source-lock exit. It does not
+  claim the broader G6 runtime/direct-reader program is complete.
 
 ### M1 — candidate Core skeleton
 
@@ -191,7 +200,9 @@ engineering:
 - private/encrypted folders, rich EFS OS policy, ranked/full-text/global search,
   or high-frequency telemetry;
 - exhaustive 61-trace replay, all application profiles, Rust conformance, two
-  independent reconstructors, or century-scale gas/availability evidence; and
+  independent reconstructors, or century-scale gas/availability evidence;
+- the still-unrun losing-arm comparators named by the 2026-08-23 semantic seal,
+  absent a current exact-candidate falsifier; and
 - polished Explorer filesystem UX, extensions, writes, app store, Git forge,
   or collaboration suite.
 
@@ -214,11 +225,13 @@ These should not be sent to the owner as abstract design questions:
 
 ## Decisions that genuinely belong to the owner
 
-Before real candidate code begins, the owner must authorize `GO-CODE` for a
+Before real candidate code begins, the owner must record `V2-C1 YES` for a
 **nondeployable, replaceable candidate** while retaining the explicit
-`GO-FREEZE` and `GO-DEPLOY` gates. The owner should not answer yet: V2-C1 becomes
-answerable only after the exact Core/SDK/Explorer handoff and final cross-lane
-audit are green.
+`GO-FREEZE` and `GO-DEPLOY` gates. The exact Core/SDK/Explorer handoff and final
+cross-lane audit are green, so V2-C1 is answerable now. The technical
+fields are `technicalDisposition = RECOMMEND-GO-CODE` and
+`recommendedOwnerAnswer = YES`, but `ownerDecision = PENDING` and
+`goCodeAuthorized = false`; only the owner's recorded ruling can authorize work.
 
 The first product target is already selected as a delegated candidate default:
 direct-guest raw Explorer plus the minimum Files slice, with Core/SDK-only as a
@@ -241,7 +254,8 @@ verification cost or developer pressure falsifies that default.
 
 ## Build-start stop conditions
 
-Do not recommend `GO-CODE` if any of these remains true:
+Do not retain `technicalDisposition = RECOMMEND-GO-CODE` if any of these remains
+true:
 
 - JavaScript, independent vector emitters, and Solidity disagree on a
   state-bearing preimage used by the first slice;
@@ -251,6 +265,7 @@ Do not recommend `GO-CODE` if any of these remains true:
 - terminal query absence can be manufactured from a Boolean or partial scan;
 - generic raw reads discard canonical values or need an application-specific
   subject kind;
+- a current named comparator falsifier remains unexplained;
 - the first SDK/Explorer adapters require a wallet, Commons, hosted indexer, or
   friendlier lossy result as truth; or
 - the declared projection cannot enumerate every state collection needed to

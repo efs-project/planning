@@ -6,7 +6,7 @@ system is v1 evidence; the EFS 1.5 bridge and July native-envelope/five-kind v2
 round are historical design evidence. Nothing inherits a place in EFS 2.0
 without passing the greenfield requirements and product traces.
 
-> **Current status:** James has ratified the greenfield direction and the Core / optional Commons / Web Client and OS layer boundary. The disposable `EXP-C0/v0` Core integration control now exists; the disposition remains `CONTINUE-DISPOSABLE` while the SDK and no-wallet Data Explorer consume its exact source lock. V2-C1 is the one held owner build-start choice and is not ready to answer. Sepolia is the first development Commons, not a permanent or canonical venue selection. The constitution and architecture below are drafts for engineering review, not ceremony-final bytes or permission to deploy permanent contracts.
+> **Current status:** James has ratified the greenfield direction and the Core / optional Commons / Web Client and OS layer boundary. The source-locked disposable `EXP-C0/v0` control now has byte-identical committed SDK and no-wallet Data Explorer consumers without an unresolved P0/P1 truth mismatch. V2-C1 routing is `technicalDisposition = RECOMMEND-GO-CODE`, `recommendedOwnerAnswer = YES`, `ownerDecision = PENDING`, and `goCodeAuthorized = false`. Sepolia is the first development Commons, not a permanent or canonical venue selection. The constitution and architecture below are drafts for engineering review, not ceremony-final bytes or permission to deploy permanent contracts.
 
 ## Read this on a phone
 
@@ -49,9 +49,9 @@ The Core-facing standards supplement is
 [the 2026-08-23 EIP/ERC pressure screen](../../Reviews/2026-08-23-efs2-core-eip-erc-pressure/README.md);
 it reuses the complete shared corpus index and selects no protocol bytes or
 target-chain support. That exact receipt is the standards source lock for this
-disposable `GO-CODE` candidate. Refresh its delta before `GO-FREEZE`, when the
-pinned corpus changes, or when a new standards-sensitive seam appears—not as a
-ritual while the candidate source lock is unchanged.
+source-locked disposable build-start candidate. Refresh its delta before
+`GO-FREEZE`, when the pinned corpus changes, or when a new standards-sensitive
+seam appears—not as a ritual while the candidate source lock is unchanged.
 
 The symbolic G2 spine is the
 [[Reviews/2026-08-23-efs2-exp-c0-semantic-seal/README|`EXP-C0` semantic seal]]:
@@ -66,10 +66,10 @@ preimages and invariants, not complete replay: its claim ledger still reports
 zero fully bundled trace executions and no protocol conformance.
 
 The current contraction packet is [[mvp-build-start-packet]]. It turns the
-surviving uncertainty into one **held** owner build-start choice, named
-engineering tasks, and later freeze/deployment gates. The Core packet exists;
-same-source-lock SDK/Explorer consumption is the remaining gate before a
-`RECOMMEND-GO-CODE` disposition. It authorizes nothing by itself.
+surviving uncertainty into one **answerable** owner build-start choice, named
+engineering tasks, and later freeze/deployment gates. Core, SDK, and Explorer
+now share the exact source lock, and the bounded cross-lane review supports
+`technicalDisposition = RECOMMEND-GO-CODE`. It authorizes nothing by itself.
 
 ## The current shape
 
@@ -180,22 +180,24 @@ These are inputs, not competing active architectures:
 
 ## Build order
 
-1. **Core source-lock candidate — present.** The symbolic seal, exact
+1. **Core source-locked build-start candidate — present.** The symbolic seal, exact
    `EXP-C0/v0` structures/results/codec packet, narrowed JavaScript/Solidity
    controls, and literal `HELLO_FILES` vertical now form one integrated
    disposable handoff. Its ledger still reports zero fully bundled replays of
    the 61 sealed traces; do not relabel the integration fixture as one.
-2. **Core source-lock audit — current.** Repair any P0/P1 exactness defect and
-   pin the resulting fixture/checksums without freezing a protocol namespace.
-3. **SDK and Data Explorer consumption — next.** Both PM lanes consume that
-   exact lock unchanged, preserve raw qualified results, and report truth
-   mismatches back to Core. The Explorer path remains guest-first and no-wallet.
-4. **Cross-lane readiness verdict.** Return `REDESIGN` on a semantic falsifier,
-   stay `CONTINUE-DISPOSABLE` on an unresolved truth mismatch, or emit
-   `RECOMMEND-GO-CODE` only after the handoff is green.
-5. **Owner checkpoint, then real engineering.** V2-C1 becomes answerable only
-   after step 4. Ceremony-final vectors, permanent topology, century evidence,
-   and any deployment remain separate `GO-FREEZE`/`GO-DEPLOY` work.
+2. **Core source-lock audit — complete for build-start routing.** The
+   source-locked disposable packet is at `b9088d6`; no protocol namespace or
+   candidate byte is frozen.
+3. **SDK and Data Explorer consumption — complete for the bounded static gate.**
+   Both PM lanes consumed that exact lock unchanged and preserved the required
+   raw qualified results. This does not claim the Explorer direct-runtime gates.
+4. **Cross-lane `technicalDisposition = RECOMMEND-GO-CODE`.** The exact
+   committed receipt/report review found no unresolved P0/P1 truth mismatch.
+5. **Owner checkpoint — current.** V2-C1 is answerable;
+   `recommendedOwnerAnswer = YES`, `ownerDecision = PENDING`, and
+   `goCodeAuthorized = false`. Ceremony-final vectors, permanent topology,
+   century evidence, and deployment remain separate `GO-FREEZE`/`GO-DEPLOY`
+   work.
 
 ## Hard holds
 
@@ -211,8 +213,9 @@ These are inputs, not competing active architectures:
 
 ## Status
 
-The active spine remains `#status/draft`. The Core disposable integrated
-control exists, but the current disposition is `CONTINUE-DISPOSABLE` until SDK
-and Data Explorer consume the same source lock and the final cross-lane audit is
-green. Only then may the packet recommend V2-C1 to the owner. Promotion, freeze, and
-deployment remain separate human-gated ceremonies.
+The active spine remains `#status/draft`. Core, SDK, and Data Explorer consume
+the same exact source lock, and the final bounded cross-lane audit is green. The
+current routing is `technicalDisposition = RECOMMEND-GO-CODE`,
+`recommendedOwnerAnswer = YES`, `ownerDecision = PENDING`, and
+`goCodeAuthorized = false`. Promotion, freeze, and deployment remain separate
+human-gated ceremonies.

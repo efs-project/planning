@@ -5,7 +5,7 @@
 **Depends on:** [[system-constitution]], [[ethereum-standards-and-execution-profile]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-08-23
+**Last touched:** 2026-08-25
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #topic/efsv2 #topic/onchain #topic/graph-queries #topic/lenses
 
@@ -182,8 +182,9 @@ experiment commit `ae9d75bd52d247fe8699475ac1e770fe268efbdb`. It is
 `EXPERIMENT_SELECTED`, `protocolConformance=false`, and `notAdopted=true`.
 OccurrenceKey conversion, separately reviewed revision literals, one missing
 Git closure body, and the independent Task4 comparator remain open. The
-experiment oracle is not regenerated here; G0 records it and G1 runs only the
-missing profile-placement/comparator delta.
+experiment oracle is not regenerated here. Under the 2026-08-25 build-start
+contraction, these are named candidate-engineering or `GO-FREEZE` tasks unless a
+current exact-candidate falsifier makes one a blocking semantic contradiction.
 
 Its load-bearing candidate is an acyclic source/publication and destination
 Admission DAG:
@@ -256,9 +257,11 @@ Occurrence(ReleaseRecord) = sourceNode(P, 1)
 Occurrence(LocatorRecord) = sourceNode(P, 2)
 ```
 
-The remaining comparator must preserve extraction, data availability, subset
-carriage, replay safety, and application atomicity. Admitted Record bodies
-remain state-readable; carrier/context encoding remains experimental.
+The remaining comparator must eventually preserve extraction, data
+availability, subset carriage, replay safety, and application atomicity.
+Absent a current falsifier, it is candidate-engineering or `GO-FREEZE` work,
+not a blanket pre-recommendation gate. Admitted Record bodies remain
+state-readable; carrier/context encoding remains experimental.
 
 ### Occurrence
 
@@ -538,9 +541,18 @@ acts on the value, the treasury must pin or approve the Plan.
 
 ## `EXP-C0` comparison inventory
 
-`EXP-C0` is the implementation default. Before `RECOMMEND-GO-CODE`, every
-ABI-shaping seam gets one minimal sealed comparator; a full losing-arm
-implementation is required only if that comparator reopens the seam.
+> **2026-08-25 build-start routing correction:** the later exact `EXP-C0/v0`
+> packet, [[v2-contract-readiness-program]], and [[mvp-build-start-packet]]
+> supersede the 2026-08-23 semantic seal's original blanket scheduling of all
+> four losing-arm comparators before `RECOMMEND-GO-CODE`. The historical seal
+> remains accurate evidence of what was then planned; this correction does not
+> claim the unrun comparators passed. Remaining comparators are named candidate-
+> engineering or `GO-FREEZE` gates unless a current exact-candidate falsifier
+> fires, in which case the affected seam reopens before work continues.
+
+`EXP-C0` is the implementation default. The inventory below remains the
+required comparator and reopen map; a full losing-arm implementation is
+required only if its comparator reaches the named falsifier.
 
 | Question | `EXP-C0` default | Minimal comparator or reopen trigger |
 |---|---|---|
@@ -583,7 +595,7 @@ engineering without pretending that those bytes are frozen:
 
 | Former question | Build-start disposition |
 |---|---|
-| Trace corpus and comparators | The 61 traces retain an honest evidence ledger; partial executable controls and the separate `HELLO_FILES` integration control are sufficient for `GO-CODE`. Exact replay bundles are engineering and freeze evidence. |
+| Trace corpus and comparators | The 61 traces retain an honest evidence ledger; partial executable controls, the separate `HELLO_FILES` integration control, and exact committed consumer gate support `technicalDisposition = RECOMMEND-GO-CODE` and `recommendedOwnerAnswer = YES`. `ownerDecision = PENDING` and `goCodeAuthorized = false`. Unrun losing-arm comparators and exact replay bundles remain named engineering/freeze evidence unless a current falsifier fires. |
 | Realm descriptor versus observation | Use self-authenticating bootstrap/revisions plus exact execution profile and separately attributed source/finality observation. This is a candidate default; production powers and venue remain freeze/deployment gates. |
 | Developer Type name | Use `TypeSchema` in the candidate API and `TypeSchemaId` for exact identity. Ergonomic aliases may change before freeze without changing the semantic object. |
 | Codec, values, references, vectors | Use the bounded flat nominal Type law, selected ascending-field canonical body, closed reference roles, and the JavaScript/Solidity corpus in [[exp-c0-v0-codec-domain-bounds-vector-contract]]. Recursive data graphs live in Records, not recursive Type evaluation. Rust and clean-room vectors are freeze evidence. |

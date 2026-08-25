@@ -6,7 +6,7 @@
 **Feeds:** [[core-architecture-candidate]], [[layered-type-system-and-data-abi]], [[v2-contract-readiness-program]]
 **Evidence:** [[Reviews/2026-08-23-efs2-core-eip-erc-pressure/README]], [[Reviews/2026-08-22-web-client-os-eip-erc-screen/README]]
 **Reviewers:** @eip-exhaustive-audit, @erc-exhaustive-audit, @g1-task1c-impl (2026-08-23)
-**Last touched:** 2026-08-23
+**Last touched:** 2026-08-25
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #topic/efsv2 #topic/ethereum-standards #topic/read-path #topic/identity #topic/reconstruction #topic/onchain
 
@@ -578,7 +578,18 @@ evidence. Active v2 spines should use the corrected terms.
 
 ## Refresh and freeze rule
 
-Before `GO-CODE`:
+**2026-08-25 build-start contraction:** this active design supersedes the
+2026-08-23 requirement to perform a fresh EIP/ERC re-pin before the owner may
+answer V2-C1. For the current source-locked disposable candidate, the pinned
+2026-08-23 corpus remains the bounded build-start standards receipt while its
+source revisions and the candidate's standards-sensitive seams remain
+unchanged. This does not complete G0 or G5, prove target activation/support, or
+freeze an execution profile.
+
+The former pre-build-start list is retargeted to candidate engineering and
+`GO-FREEZE`, or runs earlier if the official corpus advances, a known correction
+lands, a current falsifier appears, or candidate code introduces a standards-
+sensitive seam outside the pinned receipt:
 
 - re-pin official EIP/ERC heads;
 - diff every A–E candidate and every new proposal;
@@ -608,8 +619,8 @@ profiles can be added, but no new standard silently reinterprets old facts.**
 - [ ] Which activated disposable reference EVM profiles serve the G5
   comparison, and what conservative margins apply below their published
   ceilings without selecting a venue?
-- [ ] Which verifier suites must be available in the first Core candidate, and
-  which merely need a proved additive path before `GO-CODE`?
+- [ ] Which verifier suites must be available before candidate code depends on
+  them, and which merely need a proved additive path before `GO-FREEZE`?
 - [ ] What state-readable descriptor/closure is sufficient to reproduce
   historical ERC-1271 and policy decisions without preserving arbitrary
   executable dependencies forever?

@@ -14,8 +14,8 @@
 #   - Queues are DISCOVERED (`find`), never a hardcoded list. A hardcoded list
 #     is itself a hand-maintained index and would rot exactly like the READMEs
 #     this was built to compensate for.
-#   - Parses the inbox files AS THEY ALREADY ARE. It adds no markup and requires
-#     no edits to files the PM does not own.
+#   - Parses the inbox headings as they already are. An item may add one optional
+#     `**Reply forms:**` line; queues without it retain the plain-ID fallback.
 #   - HOLDS ARE SURFACED FIRST AND LOUDEST. A held queue must never read as
 #     answerable — that is the specific failure this tool exists to prevent.
 #   - IT NEVER DROPS CONTENT SILENTLY. Both ways this script can quietly lie —
@@ -85,6 +85,57 @@ HOLD_ROWS=""; QUEUE_ROWS=""
 n_ask=0; n_reval=0; n_evid=0; n_sched=0; n_hold=0
 WARNINGS=0
 
+flush_item() {
+  [[ -n "${pending_heading:-}" ]] || return 0
+
+  local question row link sec
+  question="$pending_title"
+  if [[ -n "$pending_reply" ]]; then
+    question="${question}<br>Reply exactly: ${pending_reply}"
+  fi
+  link="[${pending_id}](${rel}#$(anchor "$pending_heading"))"
+  row="| ${link} | ${question} | \`${qname}\` |
+"
+
+  case "$pending_bucket" in
+    ASK)
+      if [[ $held -eq 1 ]]; then
+        REVAL_ROWS="${REVAL_ROWS}${row}"; n_reval=$((n_reval + 1))
+      else
+        ASK_ROWS="${ASK_ROWS}${row}"; n_ask=$((n_ask + 1))
+      fi
+      qcount=$((qcount + 1)) ;;
+    REVALIDATE)
+      REVAL_ROWS="${REVAL_ROWS}${row}"; n_reval=$((n_reval + 1))
+      qcount=$((qcount + 1)) ;;
+    EVIDENCE)
+      EVID_ROWS="${EVID_ROWS}${row}"; n_evid=$((n_evid + 1))
+      qcount=$((qcount + 1)) ;;
+    SCHEDULED)
+      SCHED_ROWS="${SCHED_ROWS}${row}"; n_sched=$((n_sched + 1))
+      qcount=$((qcount + 1)) ;;
+    OTHER)
+      WARNINGS=$((WARNINGS + 1))
+      sec="$pending_section"
+      [[ -n "$sec" ]] || sec="(no '## ' heading yet — item precedes the first section)"
+      {
+        echo "WARNING: ITEM DROPPED — ${rel}"
+        echo "  ### ${pending_heading}"
+        echo "  sits under '## ${sec}', which classify() does not recognize, so it"
+        echo "  appears NOWHERE in Open-Decisions.md — not even as 'not askable'."
+        echo "  Fix: rename the section to a recognized phrase, or add a case to"
+        echo "  classify() in scripts/open-decisions.sh."
+      } >&2 ;;
+  esac
+
+  pending_heading=""
+  pending_id=""
+  pending_title=""
+  pending_reply=""
+  pending_section=""
+  pending_bucket="OTHER"
+}
+
 # Loose second net for the hold detector below. Deliberately phrase-based, not
 # just the word "hold": the corpus is full of "threshold", "browser-held key"
 # and an option literally labelled "Hold and reconcile", none of which are holds.
@@ -141,50 +192,28 @@ for q in $QUEUES; do
   fi
 
   section=""; bucket="OTHER"; qcount=0
+  pending_heading=""; pending_id=""; pending_title=""; pending_reply=""
+  pending_section=""; pending_bucket="OTHER"
   while IFS= read -r line; do
     case "$line" in
       '## '*)
+        flush_item
         section="${line#\#\# }"; bucket="$(classify "$section")" ;;
       '### '*)
-        heading="${line#\#\#\# }"
-        id="${heading%%—*}"; id="$(printf '%s' "$id" | sed -E 's/ *$//')"
-        title="${heading#*—}"; title="$(printf '%s' "$title" | sed -E 's/^ *//')"
-        [[ "$title" != "$heading" ]] || title=""
-        link="[${id}](${rel}#$(anchor "$heading"))"
-        row="| ${link} | ${title} | \`${qname}\` |
-"
-        case "$bucket" in
-          ASK)
-            if [[ $held -eq 1 ]]; then
-              REVAL_ROWS="${REVAL_ROWS}${row}"; n_reval=$((n_reval + 1))
-            else
-              ASK_ROWS="${ASK_ROWS}${row}"; n_ask=$((n_ask + 1))
-            fi
-            qcount=$((qcount + 1)) ;;
-          REVALIDATE)
-            REVAL_ROWS="${REVAL_ROWS}${row}"; n_reval=$((n_reval + 1))
-            qcount=$((qcount + 1)) ;;
-          EVIDENCE)
-            EVID_ROWS="${EVID_ROWS}${row}"; n_evid=$((n_evid + 1))
-            qcount=$((qcount + 1)) ;;
-          SCHEDULED)
-            SCHED_ROWS="${SCHED_ROWS}${row}"; n_sched=$((n_sched + 1))
-            qcount=$((qcount + 1)) ;;
-          OTHER)
-            WARNINGS=$((WARNINGS + 1))
-            sec="$section"
-            [[ -n "$sec" ]] || sec="(no '## ' heading yet — item precedes the first section)"
-            {
-              echo "WARNING: ITEM DROPPED — ${rel}"
-              echo "  ### ${heading}"
-              echo "  sits under '## ${sec}', which classify() does not recognize, so it"
-              echo "  appears NOWHERE in Open-Decisions.md — not even as 'not askable'."
-              echo "  Fix: rename the section to a recognized phrase, or add a case to"
-              echo "  classify() in scripts/open-decisions.sh."
-            } >&2 ;;
-        esac ;;
+        flush_item
+        pending_heading="${line#\#\#\# }"
+        pending_id="${pending_heading%%—*}"; pending_id="$(printf '%s' "$pending_id" | sed -E 's/ *$//')"
+        pending_title="${pending_heading#*—}"; pending_title="$(printf '%s' "$pending_title" | sed -E 's/^ *//')"
+        [[ "$pending_title" != "$pending_heading" ]] || pending_title=""
+        pending_section="$section"
+        pending_bucket="$bucket" ;;
+      '**Reply forms:** '*)
+        if [[ -n "$pending_heading" ]]; then
+          pending_reply="${line#\*\*Reply forms:\*\* }"
+        fi ;;
     esac
   done < "$q"
+  flush_item
 
   flag="ok"; [[ $held -eq 1 ]] && flag="**HELD**"
   QUEUE_ROWS="${QUEUE_ROWS}| [\`${qname}\`](${rel}) | ${qcount} | ${reconciled} | ${flag} |
@@ -227,7 +256,7 @@ cat <<EOF
 EOF
 if [[ $n_ask -gt 0 ]]; then
   printf '| ID | Question | Queue |\n|---|---|---|\n%s\n' "$ASK_ROWS"
-  echo "Reply with the code and any exception in plain English, e.g. \`R1A\` or \`R1B, but keep locate/read naming provisional\`."
+  echo "Use the exact reply form shown for each item. If none is shown, reply with its stable ID and plain-language choice."
 else
   echo "_Nothing is awaiting an answer right now._"
 fi

@@ -13,10 +13,33 @@
 ## Verdict
 
 EFS v2 now has one current, integrated **disposable Core control** and an exact
-candidate handoff. It is close to a `GO-CODE` recommendation, but the current
-disposition is **`CONTINUE-DISPOSABLE`** while the SDK and Data Explorer consume
-that same source lock. It is not ready for durable contract implementation, a
-century-scale freeze, or deployment.
+candidate handoff consumed unchanged by committed SDK and Data Explorer lanes.
+The bounded static cross-lane gate found no unresolved P0/P1 truth mismatch, so
+V2-C1 is answerable. Current routing is
+`technicalDisposition = RECOMMEND-GO-CODE`,
+`recommendedOwnerAnswer = YES`, `ownerDecision = PENDING`, and
+`goCodeAuthorized = false`. It is not ready for durable contract
+implementation, a century-scale freeze, or deployment.
+
+The current gate vector is literal; it is not a largest-prefix claim:
+
+| Field | Current value |
+|---|---|
+| `G0` | `PARTIAL` |
+| `G1` | `PARTIAL` |
+| `G2` | `PARTIAL` |
+| `G3` | `PARTIAL` |
+| `G4` | `PARTIAL` |
+| `G5` | `PARTIAL` |
+| `G6` | `PARTIAL` |
+| `boundedSameSourceLockSubgate` | `PASS` |
+| `explorerE1a` | `NOT_PROVEN_BY_THIS_CONTRACT` |
+| `explorerE1b` | `NOT_RUN` |
+| `runtimeDependencyTrace` | `NOT_RUN` |
+| `exactExecutableTraceReplayCount` | `0` |
+
+Only the bounded same-source-lock subgate passed. No G0–G6 gate is currently
+recorded complete.
 
 The requirements and conceptual separations are unusually strong. The
 2026-08-25 `EXP-C0/v0` packet now composes exact candidate structures,
@@ -35,13 +58,13 @@ state-derived reconstruction remain candidate engineering work. Final physical
 topology, production caps, independent clean-room conformance, and ceremony
 bytes remain `GO-FREEZE` work.
 
-The immediate readiness gate is therefore not another architecture tournament.
-The raw-preserving SDK fixture and no-wallet Explorer fixture must consume the
-exact same Core handoff and return any truth mismatch to Core. Until that
-cross-lane check is green, this program must not emit `RECOMMEND-GO-CODE` and
-V2-C1 must not be placed in the owner's answerable queue. If it stays green,
-V2-C1 becomes the one build-start choice; only the owner's recorded ruling can
-authorize real candidate contract engineering.
+The immediate source-lock gate is green. The raw-preserving SDK fixture and
+no-wallet Explorer fixture consumed the exact same Core handoff, retained their
+role-specific ceilings, and returned no unresolved P0/P1 truth mismatch. This
+supports `technicalDisposition = RECOMMEND-GO-CODE` and
+`recommendedOwnerAnswer = YES`; `ownerDecision = PENDING` and
+`goCodeAuthorized = false`. Only the owner's recorded ruling can authorize real
+candidate contract engineering.
 
 ## Current provisional control — `EXP-C0`
 
@@ -109,9 +132,11 @@ incident, migration/coexistence, reproducibility, source-verification, and
 operations gates. `GO-FREEZE` does not select a Commons or authorize a mainnet
 deployment by itself.
 
-The week targets the **largest completed prefix** of G0–G6 and produces the
-evidence map for the remaining gates. `GO-CODE` is evidence-gated, not
-calendar-gated; valuable progress may honestly end at `CONTINUE-DISPOSABLE`.
+The original program method targets the **largest completed prefix** of G0–G6
+and produces an evidence map for the remaining gates. That is generic sequencing
+vocabulary, not a claim about the current achievement. Current status is the
+literal vector above; build-start authorization is evidence- and owner-gated,
+not calendar-gated.
 
 ## Starting evidence and its honest limits
 
@@ -127,6 +152,15 @@ calendar-gated; valuable progress may honestly end at `CONTINUE-DISPOSABLE`.
 | Files design | Concrete need for `BindingScope`, honest absence, and operation-bound routed consent | A working implementation or acceptable aggregate gas |
 | Application passes | Nanda, achievements, packages, media, Files, and Git fit ordinary application Types without new Core nouns | That every shared Core seam is integrated, safe, or affordable |
 | [Pinned EIP/ERC screens](../../Reviews/2026-08-23-efs2-core-eip-erc-pressure/README.md) | Complete official-corpus inventory plus Core/read/Realm/verifier/realization constraints and negative controls | Target-chain activation or support, EFS adoption, exact profiles/bytes, or conformance |
+
+**2026-08-25 build-start routing contraction:** the symbolic semantic seal's
+original instruction to run all four losing-arm comparators before
+`RECOMMEND-GO-CODE` is historical scheduling, not the current build-start gate.
+The later exact packet, partial invariant controls, application pressure, and
+cross-lane source-lock acceptance exposed no current falsifier. They do not
+prove every comparator or a full G1/G2 pass. Remaining losing-arm comparators
+are candidate-engineering or `GO-FREEZE` work; any current falsifier reopens its
+owning seam before engineering continues.
 
 Existing reports must be labeled by the source commit, experiment commit,
 fixture digest, toolchain, dirty state, known defects, rerun status, and claim
@@ -167,9 +201,9 @@ Before adding mechanisms:
 **Pass:** two reviewers can independently say what is current, what was
 actually executed, and which claim each artifact supports.
 
-**Current state:** `G0-PARTIAL`, but **candidate-sufficient for this `GO-CODE`
-handoff**. The 2026-08-23 Core pressure screen is the reusable standards source
-lock for the disposable candidate:
+**Current state:** `G0-PARTIAL`. The bounded same-source-lock subgate uses the
+2026-08-23 Core pressure screen as the reusable standards source lock for the
+disposable candidate:
 
 - planning input `e4180cca2d13df205b05bb886a60969e084a9fc3`;
 - official EIP source `f767a1e8078e17c9b381a91d35a09492189ede1b`;
@@ -212,9 +246,9 @@ later:
 
 `EXP-C0` provisionally selects the first practical arm for each of the four
 ABI-shaping seams below. The exact packet, narrowed controls, and application
-pressure make those selections candidate-sufficient for the build-start
-handoff; they do not make them permanent winners. Candidate code measures the
-named falsifiers, and only a triggered falsifier justifies a full losing-arm
+pressure support those source-locked disposable candidate defaults; they do not
+complete G1 or make the selections permanent winners. Candidate code measures
+the named falsifiers, and only a triggered falsifier justifies a full losing-arm
 implementation:
 
 1. uniform `PrincipalId` versus a tagged `Account | Principal` author surface;
@@ -262,7 +296,7 @@ useful compiler, catalog, and ablation outputs but have not earned permanent
 Core identity. Committed and detached ViewBindings remain adversarial
 comparators; neither is an assumed production default.
 
-**Pass:** TypeScript, Rust, and Solidity independently reproduce all IDs and
+**Full G1 pass:** TypeScript, Rust, and Solidity independently reproduce all IDs and
 reject all malformed or noncanonical twins. Changing meaning, shape, or
 representation cannot silently preserve an exact identity. A new compatible
 Type can be added without changing old bytes or letting an open reader grant
@@ -270,8 +304,7 @@ authority. Each selected ABI-shaping arm passes its minimal sealed comparator
 without ambiguous IDs, signatures, storage, or reads. A losing arm needs a full
 implementation only after the selected arm reaches its falsifier.
 
-**Current state:** `G1-PARTIAL`, but **candidate-sufficient for the build-start
-handoff**. The packet selects exact nominal Types with split QueryProfiles, a
+**Current state:** `G1-PARTIAL`. The packet selects exact nominal Types with split QueryProfiles, a
 uniform full-width Principal surface, author-neutral Records plus portable
 PublicationSets and destination Plans, and a self-authenticating Realm
 bootstrap/revision shape. The bounded closed-Type control and application
@@ -655,31 +688,38 @@ services; and the Explorer explains results without inventing authority.
 Executable-extension sandbox security is not claimed by an inert week-one
 stub.
 
-**Current state:** `G6-PARTIAL` and the remaining pre-recommendation gate. The
-Core-side literal `HELLO_FILES` fixture exists, but the SDK and Data Explorer
-have not yet consumed its exact source lock unchanged. Their disposable
-adapters must preserve raw values, basis, coverage, acquisition evidence, and
-the no-wallet/no-ambient-service path. A P0/P1 truth mismatch reopens the owning
-Core seam; an ergonomic or implementation gap becomes named candidate work.
+**Current state:** `G6-PARTIAL`. The narrow pre-recommendation source-lock slice
+is green: committed SDK and Data Explorer adapters consumed the exact
+`HELLO_FILES` source lock, preserved the required static raw values, basis,
+coverage, acquisition evidence, and no-wallet dependency declarations, and
+reported no unresolved P0/P1 mismatch. The cold direct-reader/runtime trace,
+blinded developer tasks, broader workloads, and full G6 exit remain candidate
+engineering or later freeze work. A future truth mismatch still reopens the
+owning Core seam; an ergonomic or implementation gap becomes named candidate
+work.
 
 Clean-browser Arcade, broader Git/Markdown/forge-social, three-host mounted
 filesystem, privacy/domain-separation, cross-Realm, and complete large-content
 traces remain `GO-FREEZE` gates if they do not fit the week. Their absence need
-not block `GO-CODE` only when the frozen candidate preserves an explicit
+not block candidate engineering only when the source-locked disposable
+candidate preserves an explicit
 additive path and no related byte/signature decision remains open.
 
 ## Ordered week lanes — not calendar gates
 
 The seven lanes are dependency-ordered. Research, fixture preparation, and PM
 design can run in parallel, but a later implementation lane does not declare a
-pass over an unfinished earlier gate. The week ends with the largest completed
-prefix, even if that is only G1 or partial G2.
+pass over an unfinished earlier gate. “Largest completed prefix” is the generic
+program method, not the current status representation.
 
-**Current checkpoint:** lanes 1–5 have produced a candidate-sufficient Core
-source-lock packet plus explicitly deferred engineering/freeze work, not full
-gate passes. Lane 6's same-source-lock SDK/Explorer consumption is next. Lane 7
-may emit `RECOMMEND-GO-CODE` only after that check and a final cross-lane audit;
-the disposition remains `CONTINUE-DISPOSABLE` until then.
+**Current checkpoint:** `G0=PARTIAL`, `G1=PARTIAL`, `G2=PARTIAL`,
+`G3=PARTIAL`, `G4=PARTIAL`, `G5=PARTIAL`, and `G6=PARTIAL`. Only
+`boundedSameSourceLockSubgate=PASS`; `explorerE1a=NOT_PROVEN_BY_THIS_CONTRACT`,
+`explorerE1b=NOT_RUN`, `runtimeDependencyTrace=NOT_RUN`, and
+`exactExecutableTraceReplayCount=0`. This bounded evidence supports
+`technicalDisposition = RECOMMEND-GO-CODE` and
+`recommendedOwnerAnswer = YES`; `ownerDecision = PENDING` and
+`goCodeAuthorized = false`.
 
 ### Lane 1 — reconcile, do not reinvent
 
@@ -718,6 +758,11 @@ falsifier; no duplicate experiment is scheduled without a stated reason.
 reopens the relevant arm and a replacement must separately pass. Document
 losing arms and freeze no permanent bytes. If no survivor exists, stay in this
 lane.
+
+This remains the full lane-2 exit, not a claim made by the narrower build-start
+recommendation. The 2026-08-25 contraction retargets still-unrun losing-arm
+comparators to candidate engineering or `GO-FREEZE` unless a current falsifier
+exists.
 
 ### Lane 3 — transition spec, pure model, and Solidity SUT
 
@@ -790,10 +835,12 @@ or product adapter becomes mutable hidden authority.
   vector manifest, reconstruction recipe, threat model, known failures,
   deferred capabilities, and owner packet.
 
-**Exit:** `CONTINUE-DISPOSABLE`, `REDESIGN`, or `RECOMMEND-GO-CODE`, with the
-exact highest completed gate. There is no `GO WITH HOLDS` for a must-be-exact
-item. Only a recorded project-owner ruling can turn a recommendation into
-`GO-CODE`; `GO-FREEZE` and `GO-DEPLOY` remain separate ceremonies.
+**Generic lane-7 exit vocabulary — not a current achievement:**
+`CONTINUE-DISPOSABLE`, `REDESIGN`, or `RECOMMEND-GO-CODE`, accompanied by the
+full literal G0–G6 status vector and relevant subgate statuses. There is no
+`GO WITH HOLDS` for a must-be-exact item. Only a recorded project-owner ruling
+can authorize candidate code; `GO-FREEZE` and `GO-DEPLOY` remain separate
+ceremonies.
 
 ## SDK PM charter and boundary
 
@@ -977,11 +1024,13 @@ The owner packet should be small enough to review and exact enough to build:
 13. implementation sequence with tests carried forward unchanged.
 
 The packet records `CONTINUE-DISPOSABLE`, `REDESIGN`, or
-`RECOMMEND-GO-CODE`. It does not self-authorize implementation. Only after the
-project owner records `GO-CODE` may candidate contract engineering begin in the
-real repository, from the tested transition spec and golden corpus. It does not
-begin by copying the disposable Solidity SUT's storage layout. Freeze and
-deployment remain later, separately ratified gates.
+`RECOMMEND-GO-CODE`. It does not self-authorize implementation. In the current
+packet, `ownerDecision = PENDING` and `goCodeAuthorized = false`; candidate
+contract engineering may begin in the real repository only after the owner
+records `V2-C1 YES` and authorization is explicitly updated. It begins from the
+tested transition spec and golden corpus, not by copying the disposable
+Solidity SUT's storage layout. Freeze and deployment remain later, separately
+ratified gates.
 
 ## Open questions
 
@@ -1007,9 +1056,11 @@ deployment remain later, separately ratified gates.
 - [x] Must physical topology be chosen before `GO-CODE`? — No. Start from the
   monolithic semantic control, measure it, and split only against the same state
   projection. Permanent topology and storage ownership remain `GO-FREEZE`.
-- [ ] Do the SDK and Data Explorer preserve the exact Core source lock without
-  exposing a P0/P1 truth or read-ABI mismatch? — This is the sole remaining
-  cross-lane gate before this program may issue `RECOMMEND-GO-CODE`.
+- [x] Do the SDK and Data Explorer preserve the exact Core source lock without
+  exposing a P0/P1 truth or read-ABI mismatch? — Yes for the bounded committed
+  serialized-consumption gate, as recorded by the
+  [[Reviews/2026-08-25-efs2-exp-c0-cross-lane-acceptance/README|cross-lane review]].
+  The direct-runtime and wider G6 program remain explicitly incomplete.
 
 ## Pre-promotion checklist
 
@@ -1028,5 +1079,6 @@ deployment remain later, separately ratified gates.
 This draft is being prepared in an isolated planning worktree. Experiment code
 belongs in the existing local disposable Stage B repository or a clean child
 worktree. No real-contract PR should be opened until the project owner has
-explicitly recorded `GO-CODE`. The 2026-08-23 travel-period authorization
-permits design convergence, sealed fixtures, and throwaway experiments only.
+explicitly recorded `V2-C1 YES`; currently `ownerDecision = PENDING` and
+`goCodeAuthorized = false`. The 2026-08-23 travel-period authorization permits
+design convergence, sealed fixtures, and throwaway experiments only.

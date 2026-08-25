@@ -7,10 +7,17 @@
 
 #status/reference #kind/decision #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2
 
-> **Build-start sequencing hold (2026-08-25): do not ask V2-C1 until the SDK and Explorer consume the exact Core source lock without a P0/P1 truth mismatch.**
+> **Build-start evidence gate passed (2026-08-25): V2-C1 is answerable.**
 
-`GO-CODE` is the one remaining owner build-start choice. The current disposition
-is `CONTINUE-DISPOSABLE`. The 2026-08-25 instruction to work top-to-bottom
+- `technicalDisposition = RECOMMEND-GO-CODE`
+- `recommendedOwnerAnswer = YES`
+- `ownerDecision = PENDING`
+- `goCodeAuthorized = false`
+
+V2-C1 is the one remaining owner build-start choice. The four fields above are
+deliberately separate: reviewed technical evidence recommends an answer, but
+only James can record the owner decision and authorize candidate code. The
+2026-08-25 instruction to work top-to-bottom
 selects the direct guest Explorer plus minimum Files profile as the candidate
 vertical; it does not authorize permanent code, a protocol freeze, or
 deployment.
@@ -41,24 +48,31 @@ the measured selections are:
 
 The current consolidated packet is [[mvp-build-start-packet]]. The owner need not
 decide final bytes, caps, topology, or the first product slice to authorize
-nondeployable candidate engineering. The owner should not answer the build-start choice
-yet: first the SDK and Explorer must preserve the exact Core handoff. If that
-cross-lane gate remains green, the owner checkpoint decides only `GO-CODE` and
-leaves measured implementation questions to the engineers.
+nondeployable candidate engineering. The SDK and Explorer now preserve the
+exact Core handoff, and the final bounded cross-lane gate is green. The owner
+checkpoint therefore decides only V2-C1 and leaves measured implementation
+questions to the engineers.
 
-## Decide after evidence — build-start handoff, do not answer yet
+## Decide now — build-start handoff
 
 ### V2-C1 — Authorize replaceable nondeployable candidate engineering
 
-Authorize `GO-CODE` for one measured, explicitly replaceable EFS v2 candidate:
+Authorize one measured, explicitly replaceable EFS v2 candidate:
 monolithic Core control, raw-preserving SDK, and guest Explorer adapter. This
 does **not** authorize ceremony-final bytes, a protocol freeze, production
 deployment, permanent data, a Commons venue, or a release claim. The
-current disposition is `CONTINUE-DISPOSABLE`; the recommendation becomes
-**yes** only if all three lanes pin the same exact fixture/checksums, the SDK and
-Explorer preserve raw values/basis/coverage/acquisition evidence, the direct
-guest route requires no wallet or ambient service, and the final cross-lane
-audit finds no P0/P1 truth mismatch.
+`technicalDisposition = RECOMMEND-GO-CODE`: all three lanes pin the
+same exact fixture/checksums, the bounded SDK and Explorer consumers preserve
+the required raw values/basis/coverage/acquisition evidence and no-wallet
+dependency declaration, and the final cross-lane audit found no unresolved
+P0/P1 truth mismatch.
+
+**Reply forms:** `V2-C1 YES`, `V2-C1 NO`, or `V2-C1 DEFER`
+
+`technicalDisposition = RECOMMEND-GO-CODE`; `recommendedOwnerAnswer = YES`;
+`ownerDecision = PENDING`; `goCodeAuthorized = false`. Until James records
+`V2-C1 YES`, candidate engineering remains unauthorized and the source-locked
+disposable bytes remain unfrozen.
 
 ## Delegated candidate defaults — reopen only on a named falsifier
 
@@ -334,7 +348,7 @@ Superseded with the old envelope grammar.
 
 Superseded with the old record grammar; author time never proves chronology.
 
-### Q3 / Q4 — still held
+### Q3 / Q4 — historical issue inventory
 
 Remain historical issue inventory only. Re-open a narrow question if a current
 prototype exposes it.

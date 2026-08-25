@@ -205,7 +205,9 @@ Explorer UI, or deployment. It earns candidate engineering confidence only.
 - [x] Generated clean-room contract pins the exact HELLO bytes, payload hash,
   Result/Bytes ABI and decoded axes, Type envelope corpus, consumer pointers,
   dependency ceilings, and nonadoption/receipt rules
-- [ ] Core, SDK, and Explorer consume the same source lock
+- [x] Core, SDK, and Explorer consume the same source lock — exact committed
+  receipts and role reports are pinned by the
+  [[Reviews/2026-08-25-efs2-exp-c0-cross-lane-acceptance/README|cross-lane review]]
 - [ ] Direct-reader arm replaces the fake Reader without semantic divergence
 - [ ] Every declared collection reconstructs from state
 - [ ] At least one `#status/review` pass

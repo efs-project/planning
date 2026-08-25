@@ -37,7 +37,7 @@ aliases: [For-James]
 
 ## 🕐 WHEN YOU HAVE TIME
 
-- **EFS 2.0 consolidation is in engineering review** — the phone-readable README points to the detailed draft constitution and Core candidate; the old P/LP packet is superseded as a live queue. Nothing needs your answer until the evidence gates return a real fork. Start at [the EFS 2.0 README](./Designs/efsv2/README.md) only when you want the current model.
+- **One EFS 2.0 choice is answerable: V2-C1.** Start at [Open-Decisions.md](./Open-Decisions.md), which links to the owning EFS v2 queue and its exact reply forms. Current routing is `technicalDisposition = RECOMMEND-GO-CODE`, `recommendedOwnerAnswer = YES`, `ownerDecision = PENDING`, and `goCodeAuthorized = false`; the evidence does not authorize code by itself.
 - **Other design queues are held for evidence.** The old Client `OS1`/`OS2` and root `R1` packets are not live James decisions. See [Open-Decisions.md](./Open-Decisions.md) for the generated held/evidence inventory.
 - **Vault process changes landed 2026-07-23** — see [[Decisions]]. One thing needs your nod: whether to keep the structural SOUL edits (escalation dial re-keyed off the dead milestone, "ignore design bodies" inverted for a design phase). Say the word and I revert them.
 - Frame-review the proposed design process → [[Brainstorms/2026-05-28-pm-design-process-synthesis]] (then I formalize it)

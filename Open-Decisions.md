@@ -5,7 +5,7 @@
      Regenerate in the same commit as any decision-state change.
      On conflict: git checkout --ours Open-Decisions.md && ./scripts/open-decisions.sh -->
 
-**Generated:** 2026-08-25 · **Ask now: 0** · Held/revalidate: 7 · Awaiting evidence: 6 · Scheduled: 2
+**Generated:** 2026-08-25 · **Ask now: 1** · Held/revalidate: 7 · Awaiting evidence: 5 · Scheduled: 2
 
 This page answers one question: *what does the owner actually need to decide right now?*
 It is a **view with zero authority** — every item's truth lives in its owning queue.
@@ -19,12 +19,15 @@ the owner through a gate the designers deliberately closed.
 |---|---|
 | `arcade` | **Reconciliation hold (2026-08-08 / @pm):** do not ask D1–D7 as a batch. Later validation and James's direction changed their shared premises: Arcade is a possible founding-product pilot; Andromeda replaces Norman for the first slice; the launch proof is one game with no durable EFS write; and client placement plus runner/network permissions are unresolved. Preserve these questions as the initial-pass inventory, then recut only the decisions that still block the one-game slice. |
 | `clientv2` | **Greenfield product-layer hold (2026-08-12):** no July client/OS question is currently answerable; recut only after direct guest Files/Arcade and Core-reader evidence creates a real product fork. |
-| `efsv2` | **Build-start sequencing hold (2026-08-25): do not ask V2-C1 until the SDK and Explorer consume the exact Core source lock without a P0/P1 truth mismatch.** |
 
 
-## Ask now (0)
+## Ask now (1)
 
-_Nothing is awaiting an answer right now._
+| ID | Question | Queue |
+|---|---|---|
+| [V2-C1](Designs/efsv2/owner-decision-inbox.md#v2-c1--authorize-replaceable-nondeployable-candidate-engineering) | Authorize replaceable nondeployable candidate engineering<br>Reply exactly: `V2-C1 YES`, `V2-C1 NO`, or `V2-C1 DEFER` | `efsv2` |
+
+Use the exact reply form shown for each item. If none is shown, reply with its stable ID and plain-language choice.
 
 ## Inventoried but not askable (7)
 
@@ -41,11 +44,10 @@ Under a hold or pending revalidation. Listed so nothing is invisible — **not**
 | [D7](Designs/arcade/owner-decision-inbox.md#d7--the-public-sepolia-permanence-answer) | The public Sepolia-permanence answer | `arcade` |
 
 
-## Waiting on evidence (6) — do not ask
+## Waiting on evidence (5) — do not ask
 
 | ID | Question | Queue |
 |---|---|---|
-| [V2-C1](Designs/efsv2/owner-decision-inbox.md#v2-c1--authorize-replaceable-nondeployable-candidate-engineering) | Authorize replaceable nondeployable candidate engineering | `efsv2` |
 | [V2-E7](Designs/efsv2/owner-decision-inbox.md#v2-e7--commons-venue-criteria) | Commons venue criteria | `efsv2` |
 | [V2-F1](Designs/efsv2/owner-decision-inbox.md#v2-f1--freeze-the-minimum-semantic-protocol) | Freeze the minimum semantic protocol | `efsv2` |
 | [V2-F2](Designs/efsv2/owner-decision-inbox.md#v2-f2--first-product-implementation-scope) | First product implementation scope | `efsv2` |
@@ -67,7 +69,7 @@ Under a hold or pending revalidation. Listed so nothing is invisible — **not**
 |---|---|---|---|
 | [`arcade`](Designs/arcade/owner-decision-inbox.md) | 7 | 2026-08-08 — merged to main; original questions held | **HELD** |
 | [`clientv2`](Designs/clientv2/owner-decision-inbox.md) | 0 | 2026-08-12 | **HELD** |
-| [`efsv2`](Designs/efsv2/owner-decision-inbox.md) | 4 | 2026-08-25 | **HELD** |
+| [`efsv2`](Designs/efsv2/owner-decision-inbox.md) | 4 | 2026-08-25 | ok |
 | [`media-library`](Designs/media-library/owner-decision-inbox.md) | 4 | 2026-08-14 — initial design packet | ok |
 | [`open-web-app-store`](Designs/open-web-app-store/owner-decision-inbox.md) | 0 | 2026-08-14 | ok |
 | [`Designs (root)`](Designs/owner-decision-inbox.md) | 0 | 2026-08-14 | ok |
