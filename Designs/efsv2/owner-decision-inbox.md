@@ -2,62 +2,121 @@
 
 **Status:** reference — compact live queue; mechanisms remain evidence-gated
 **Audience:** James first; designers second
-**Last reconciled:** 2026-08-12
+**Last reconciled:** 2026-08-25
 **Inputs:** [[system-constitution]], [[core-architecture-candidate]], [[owner-rulings]], [[assumptions-and-requirements]], and the preserved July decision/review corpus in git history
 
 #status/reference #kind/decision #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2
 
-> **Nothing here needs an immediate owner answer.** James ratified the
-> greenfield name and layer boundary on 2026-08-12. The current work is to
-> prototype and pressure-test the candidate, then return only choices that the
-> evidence cannot settle.
+> **Build-start sequencing hold (2026-08-25): do not ask V2-C1 until the SDK and Explorer consume the exact Core source lock without a P0/P1 truth mismatch.**
 
-## Decide after evidence — do not answer yet
+`GO-CODE` is the one remaining owner build-start choice. The current disposition
+is `CONTINUE-DISPOSABLE`. The 2026-08-25 instruction to work top-to-bottom
+selects the direct guest Explorer plus minimum Files profile as the candidate
+vertical; it does not authorize permanent code, a protocol freeze, or
+deployment.
+
+## 2026-08-25 build-start evidence update
+
+The disposable `EXP-C0/v0` pass has reduced the early mechanism questions to
+provisional engineering selections rather than abstract owner forks. Two of
+the measured selections are:
+
+- **V2-E1 Principal surface:** the full-width uniform `PrincipalId` arm has no
+  pre-write setup transaction, uses one ABI word in steady-state author APIs
+  versus two for `Account | Principal`, binds authority kind/origin in identity,
+  and keeps one historical keyspace across a later managed association. The
+  representative comparator measured keyed reads/writes no worse than the
+  tagged arm. Use uniform `PrincipalId` in the candidate; reopen only if full
+  first-admission descriptor persistence plus EOA/ERC-1271 verification fails
+  the aggregate budget or developer-ergonomics test. This is evidence, not an
+  owner freeze ruling.
+- **V2-E2 Contract Lens floor:** an immutable point ResolutionPlan at 1/8/32/64
+  Principals now runs in independent JavaScript and mapping-backed Solidity.
+  Proved absence alone permits fallback; unknown/conflict/unsupported/mixed
+  basis stops. The last-found path measured 30,504 / 92,369 / 314,759 / 616,577
+  gas on the first measured resolve and 7,699 / 30,113 / 108,979 / 220,280 on
+  the immediately repeated resolve under the disposable solc 0.8.30 Osaka
+  profile. Use 64 as a candidate experiment cap; production
+  cap and topology remain freeze evidence.
+
+The current consolidated packet is [[mvp-build-start-packet]]. The owner need not
+decide final bytes, caps, topology, or the first product slice to authorize
+nondeployable candidate engineering. The owner should not answer the build-start choice
+yet: first the SDK and Explorer must preserve the exact Core handoff. If that
+cross-lane gate remains green, the owner checkpoint decides only `GO-CODE` and
+leaves measured implementation questions to the engineers.
+
+## Decide after evidence — build-start handoff, do not answer yet
+
+### V2-C1 — Authorize replaceable nondeployable candidate engineering
+
+Authorize `GO-CODE` for one measured, explicitly replaceable EFS v2 candidate:
+monolithic Core control, raw-preserving SDK, and guest Explorer adapter. This
+does **not** authorize ceremony-final bytes, a protocol freeze, production
+deployment, permanent data, a Commons venue, or a release claim. The
+current disposition is `CONTINUE-DISPOSABLE`; the recommendation becomes
+**yes** only if all three lanes pin the same exact fixture/checksums, the SDK and
+Explorer preserve raw values/basis/coverage/acquisition evidence, the direct
+guest route requires no wallet or ambient service, and the final cross-lane
+audit finds no P0/P1 truth mismatch.
+
+## Delegated candidate defaults — reopen only on a named falsifier
+
+### V2-C2 — First vertical product target
+
+Use the direct no-wallet raw Data Explorer plus the minimum Files profile so
+Core, SDK, verified bytes, and a human-visible filesystem path are measured
+together. This follows the owner's explicit top-to-bottom overnight direction.
+Fall back to Core and SDK alone only on a named integration blocker. This does
+not commit the eventual Explorer UX, filesystem profile, or contract topology.
 
 ### V2-E1 — Principal surface
 
-Compare one uniform `PrincipalId` author/Lens/index API—with Realm-qualified
-EOA and smart accounts represented as zero-setup account Principals—against a
-tagged `Account | Principal` author reference. Return gas, setup, smart-account,
-historical-authority, developer-complexity, and managed-identity migration
-results. James's preference is one semantic Principal surface; it is not frozen
-until the comparison proves it honest and simpler.
+Use one uniform full-width `PrincipalId` author/Lens/index API, including
+zero-setup account Principals. Reopen only if aggregate first-admission
+descriptor/verification cost or developer complexity exceeds the candidate
+budget. This is a build default, not frozen identity bytes.
 
 ### V2-E2 — Contract Lens floor
 
-Prototype exact point/path resolution for public Plans of 1, 8, 32, and 64
-Principals. Measure first/last/absent/conflict/unknown, cold and warm reads, and
-risk-bearer policy. Evidence must distinguish this bounded Core promise from
-wide sorted directories and rich private OS Lenses.
+Use immutable point `ResolutionPlanV0` plus
+`FIRST_FOUND_AFTER_PROVED_ABSENCE`, measuring 1/8/32/64 Principals and using 64
+as the candidate experiment ceiling. Reopen the cap/topology if integrated Core
+gas or result bounds fail. Wide directories and rich private Lenses remain
+separate.
 
 ### V2-E3 — Record and shared-context bakeoff
 
-Implement self-contained Records and minimal Records plus immutable
-Envelope/Context normalization against the same Arcade, Git, EAP, Nanda,
-Markdown, Topic/literal, and privacy fixtures. Compare calldata, storage, cold
-reads, extraction, replay, archive closure, and clean-room reconstruction.
+Use author-neutral exact Records plus separate portable `PublicationSet`,
+per-leaf `Occurrence`, and destination Admission. Reopen only if an application
+fixture cannot preserve required immutable context without application-specific
+Core state, or integrated cost materially favors a lossless smaller split.
 
 ### V2-E4 — Type and index budget
 
-Price the complete automatic Type/equality/typed-reference/backlink bundle,
-including hostile hot values and decades of churn. Determine safe Type-creator
-limits, canonicalization rules, page/basis/completeness ABI, and whether any
-old on-chain query promise exceeds the aggregate budget.
+Use the bounded flat nominal Type, selected ascending-field ABI body law,
+exact-Type QueryProfiles, automatic equality/reference/backlink obligations,
+32-member candidate pages, and exact basis/completeness model. Measure hostile
+values and churn in candidate code; return to James only if the aggregate
+budget requires dropping a constitutional query promise.
 
 ### V2-E5 — Realm bootstrap and authority history
 
-Specify and attack a self-contained Realm descriptor for a fresh L3, EOA and
-ERC-1271 admission, historical implementation/authority basis, finality
-observation, upgrade semantics, and independent state reconstruction. No
-Commons or another chain may be required.
+Use a self-authenticating Realm bootstrap plus append-only revisions, explicit
+disclosed powers, exact EOA/ERC-1271 profiles and retained historical
+transcripts, with observer finality kept separate. No Commons or other chain is
+required. Reopen only if the integrated authority/reconstruction control finds
+a missing identity-bearing coordinate.
 
-### V2-E6 — Web Client and OS vertical slice
+### V2-E8 — Shared Types and validators
 
-Build a clean-browser direct guest File Browser plus one verified Arcade view
-behind an adapter. Prove Web/OS Files parity, no-Commons operation, honest
-`UNKNOWN`, tampered-primary rejection, and verified fallback. Then decide
-whether the first Web Client also needs writes and how it is packaged relative
-to EFS OS.
+Use ordinary application Types, structural canonical validation, finite closed
+references, separately versioned behavior/query profiles, and generated SDK
+validators. Do not add arbitrary onchain callbacks or application-specific Core
+kinds. Reopen only if a real application requires semantics that cannot be
+represented or validated losslessly within bounded generic mechanisms.
+
+## Decide after evidence — do not answer yet
 
 ### V2-E7 — Commons venue criteria
 
@@ -66,13 +125,6 @@ a measurable venue matrix: capture and censorship resistance, public
 source/state, rule-change/governance risk, force inclusion, independent RPC and
 node operation, finality, state availability, fees, walk-away reconstruction,
 and exit/successor behavior.
-
-### V2-E8 — Shared Types and validators
-
-Run the focused portable-schema/validator pass against the minimal Type Schema
-candidate. Prove reusable application semantics, structural validation,
-records-by-Type, loss-aware EAS interoperability, recursive-Type safety, and no
-arbitrary unbounded validator callbacks.
 
 ## Decide after evidence — freeze choices, do not answer yet
 

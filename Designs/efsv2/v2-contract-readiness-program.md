@@ -6,47 +6,42 @@
 **Supersedes:** —
 **Reviewers:** @codex-gpt-5 (Core, evidence, and product red teams; 2026-08-22)
 **Evidence baseline:** Stage A corpus plus the local B0, Git P6, Type/Data-ABI, application-pressure, reconstruction, and pinned EIP/ERC standards screens
-**Last touched:** 2026-08-23
+**Last touched:** 2026-08-25
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #topic/efsv2 #topic/readiness
 
 ## Verdict
 
-EFS v2 is ready for a focused contract-readiness program, but it is **not yet
-ready for durable contract implementation or a century-scale freeze**.
+EFS v2 now has one current, integrated **disposable Core control** and an exact
+candidate handoff. It is close to a `GO-CODE` recommendation, but the current
+disposition is **`CONTINUE-DISPOSABLE`** while the SDK and Data Explorer consume
+that same source lock. It is not ready for durable contract implementation, a
+century-scale freeze, or deployment.
 
-The requirements and conceptual separations are unusually strong. Narrow
-disposable experiments have already proved that several important pieces can
-work: portable identities across three languages, exact Records and authored
-Occurrences, Realm-bound EOA admission, atomic multi-leaf application writes,
-Binding CAS/history in isolation, bounded postings, state-readable
-reconstruction of a small slice, and a layered Type/Data model across diverse
-applications. Those are real results, not merely prose.
+The requirements and conceptual separations are unusually strong. The
+2026-08-25 `EXP-C0/v0` packet now composes exact candidate structures,
+preimages, bounded result/query/Lens/projection laws, independent JavaScript and
+Solidity controls, and one literal `HELLO_FILES` vertical. Earlier evidence also
+covers portable identities, exact Records and authored Occurrences,
+Realm-qualified admission, atomic multi-leaf application writes, Binding
+CAS/history, bounded postings, and application fit without private Core nouns.
+Those are real results, not merely prose.
 
-What is missing is one current, integrated semantic reference that makes all
-of those pieces interact under the greenfield model. In particular, no current
-prototype jointly proves generic Type validation, multi-leaf admission,
-Principal/Realm authority, Binding effects and complete scopes, Withdrawal,
-basis-qualified query results, a minimal contract Lens, and independent
-reconstruction. Physical contract topology cannot be selected honestly until
-that integrated behavior is measured.
+The packet deliberately makes a narrower claim than a finished Core. Its claim
+ledger still reports **zero of 61 sealed semantic traces** with complete literal
+request/result/pre-state/post-state replay bundles. The monolithic SUT, generic
+Type interpreter, verifier/submission transitions, QueryProfile backfill, and
+state-derived reconstruction remain candidate engineering work. Final physical
+topology, production caps, independent clean-room conformance, and ceremony
+bytes remain `GO-FREEZE` work.
 
-The recommended method is therefore:
-
-1. reconcile and qualify existing evidence rather than repeat it;
-2. seal a prose transition specification and trace corpus;
-3. implement an independent pure state-model oracle;
-4. implement a disposable monolithic Solidity system under test as the first
-   physical control;
-5. attack the uncertain seams through small controlled comparison arms;
-6. replay real application workloads against the same sealed expectations;
-7. let the SDK and Data Explorer teams expose unusable or dishonest semantics;
-8. only then cut a contract implementation recommendation.
-
-This is preferable to either a document-only “complete specification,” which
-would hide integration failures, or an upgradeable production scaffold, which
-would accidentally make storage and authority decisions before their semantics
-are understood.
+The immediate readiness gate is therefore not another architecture tournament.
+The raw-preserving SDK fixture and no-wallet Explorer fixture must consume the
+exact same Core handoff and return any truth mismatch to Core. Until that
+cross-lane check is green, this program must not emit `RECOMMEND-GO-CODE` and
+V2-C1 must not be placed in the owner's answerable queue. If it stays green,
+V2-C1 becomes the one build-start choice; only the owner's recorded ruling can
+authorize real candidate contract engineering.
 
 ## Current provisional control — `EXP-C0`
 
@@ -126,6 +121,7 @@ calendar-gated; valuable progress may honestly end at `CONTINUE-DISPOSABLE`.
 | B0 micro-spine | Selected cross-language identities, EOA admission, basic indexes, small reconstruction, gas and code-size signals | Current layered Type semantics, generic multi-leaf Core, Lens, KEL, or complete queries |
 | G1 Task1C carrier oracle at `ae9d75bd` | Sealed acyclic portable source-witness graph versus destination PlanCore/Admission DAG traces and pure G1 fact grades | `EXPERIMENT_SELECTED` is not adoption or protocol conformance; OccurrenceKey conversion, revision literals, closure body, and independent Task4 comparator remain open |
 | [[Reviews/2026-08-23-efs2-exp-c0-semantic-seal/README|`EXP-C0` symbolic semantic seal]] | One integrated 61-trace transition/read/authority/query/Lens/reconstruction contract plus declared future minimum comparators and lossless result profiles | Exact disposable bytes/digests, pure-model or Solidity execution, measured bounds, protocol conformance, or a G2 pass |
+| [`EXP-C0/v0` exact disposable control](../../Reviews/2026-08-25-efs2-exp-c0-v0-control/README.md) | One exact candidate data/result/codec handoff, selected JavaScript/Solidity controls, a declared 28-collection projection, and one literal `HELLO_FILES` integration fixture | Complete replay of any of the 61 sealed traces, a live SDK/browser path, protocol adoption, durable bytes, a production Core, or deployment |
 | Git P6 | Atomic application-shaped 21-leaf write, retry/rollback pressure, real Git object distinctions | A generic Core rather than a fixture-specific harness |
 | Type/Data-ABI experiments | Exact Types, stable Objects, representations, Views, QueryProfiles, evolution, package closure, and application fit | Permanent bytes, full Core admission, production compiler, or settled View authority |
 | Files design | Concrete need for `BindingScope`, honest absence, and operation-bound routed consent | A working implementation or acceptable aggregate gas |
@@ -171,15 +167,25 @@ Before adding mechanisms:
 **Pass:** two reviewers can independently say what is current, what was
 actually executed, and which claim each artifact supports.
 
-**Current state:** `G0-PARTIAL`. The EIP/ERC corpus ingestion, classification,
-and selected design integration are pinned, but the reusable standards
-disposition receipt and the sealed Task1C/current-candidate reconciliation are
-not yet a complete independently locked G0 evidence ledger.
+**Current state:** `G0-PARTIAL`, but **candidate-sufficient for this `GO-CODE`
+handoff**. The 2026-08-23 Core pressure screen is the reusable standards source
+lock for the disposable candidate:
 
-Refresh the official standards delta before `GO-CODE` and repeat the complete
-screen before `GO-FREEZE`. Proposal status, accepted Realm support, observed
-endpoint/client behavior, safety, EFS disposition, and owner adoption remain
-separate fields.
+- planning input `e4180cca2d13df205b05bb886a60969e084a9fc3`;
+- official EIP source `f767a1e8078e17c9b381a91d35a09492189ede1b`;
+- official ERC source `9c718c7c02372a6b7e300990511cd6fdff7f1dfa`;
+- shared corpus-index SHA-256
+  `4315e018d019c409b56e4cb2b60ca708b7dc32d4768faad2a7f4f0293502995f`.
+
+That receipt's proposal status, target activation/support, EFS disposition, and
+non-adoption boundaries remain intact. A standards delta refresh is required
+before `GO-FREEZE`, whenever the pinned corpus advances or a known correction
+lands, or when candidate code introduces a standards-sensitive seam not covered
+by the receipt. It is not a recurring pre-`GO-CODE` ritual while this exact
+source lock is unchanged. The complete independently reviewed G0 evidence
+ledger and the sealed Task1C/current-candidate reconciliation remain useful
+evidence-hygiene work, but neither is an unresolved semantic input to the exact
+`EXP-C0/v0` build-start handoff.
 
 ### G1 — semantic and identity candidate
 
@@ -205,9 +211,11 @@ later:
   material.
 
 `EXP-C0` provisionally selects the first practical arm for each of the four
-ABI-shaping seams below. Before `RECOMMEND-GO-CODE`, run one minimal sealed
-comparator for each seam so the stated falsifier is observable. Do not build
-full parallel implementations unless that comparator reopens the arm:
+ABI-shaping seams below. The exact packet, narrowed controls, and application
+pressure make those selections candidate-sufficient for the build-start
+handoff; they do not make them permanent winners. Candidate code measures the
+named falsifiers, and only a triggered falsifier justifies a full losing-arm
+implementation:
 
 1. uniform `PrincipalId` versus a tagged `Account | Principal` author surface;
 2. self-contained Records versus shared Envelope/immutable Context using the
@@ -262,6 +270,17 @@ authority. Each selected ABI-shaping arm passes its minimal sealed comparator
 without ambiguous IDs, signatures, storage, or reads. A losing arm needs a full
 implementation only after the selected arm reaches its falsifier.
 
+**Current state:** `G1-PARTIAL`, but **candidate-sufficient for the build-start
+handoff**. The packet selects exact nominal Types with split QueryProfiles, a
+uniform full-width Principal surface, author-neutral Records plus portable
+PublicationSets and destination Plans, and a self-authenticating Realm
+bootstrap/revision shape. The bounded closed-Type control and application
+pressure have not exposed a Core-level falsifier. A wider Type grammar,
+fragmentation/churn measurements, exhaustive malformed twins, Rust and second
+clean-room encoders, hidden-power topology, and final succession/profile law are
+candidate-engineering or `GO-FREEZE` work; none may be represented as already
+proved or frozen.
+
 ### G2 — integrated mutation and query state machine
 
 Build three independent artifacts in this order:
@@ -273,8 +292,13 @@ Build three independent artifacts in this order:
 
 The first artifact's symbolic semantic layer is sealed in the
 [[Reviews/2026-08-23-efs2-exp-c0-semantic-seal/README|`EXP-C0` semantic trace packet]].
-Its exact disposable byte/digest layer remains pending, so the pure model and
-SUT are not yet authorized to claim trace agreement.
+The exact disposable C0/v0 data/result/codec profiles and focused executable
+controls now exist under `Reviews/2026-08-25-efs2-exp-c0-v0-control/`.
+Independent emitters, JavaScript, and Solidity agree on the current essential,
+Plan/Effect/Operation, and three-Result vector subsets. Query, projection,
+Principal, Lens, acquisition, and transition invariants also run. This does not
+authorize a broad trace-agreement claim: the control ledger still reports zero
+of 61 traces with the complete literal request/result/pre/post bundle.
 
 The model and SUT contain the G1 survivor semantics for:
 
@@ -371,6 +395,16 @@ same operation identity; a lost submission channel can be recovered as
 never becomes success; fixed-basis pagination is stable; and terminal absence
 is possible only after the declared complete domain has been exhausted.
 
+**Current state:** `G2-PARTIAL`. The symbolic seal, exact disposable profiles,
+cross-language preimage controls, literal Result vectors, all-28 collection
+registry, terminal-query/cursor controls, and partial monolithic mutation SUT
+exist. Remaining G2 work is ordinary candidate engineering: the complete Type
+interpreter's generic Solidity realization and multi-Type closure,
+QueryProfile activation/backfill transitions, exact verifier/submission flows,
+genuinely complete state reconstruction, and literal bundles for any trace
+promoted from partial invariant evidence. See
+[[mvp-build-start-packet]] for the recommended contraction.
+
 ### G3 — identity, Realm, and authority security
 
 Pressure the independent model and Solidity SUT with:
@@ -415,6 +449,14 @@ unknown verifier profiles fail closed; full-width Principal keys survive every
 ABI/storage/index path; and possible administrative powers are exact even if
 the eventual operator addresses remain undecided.
 
+**Current state:** `G3-PARTIAL`. The uniform full-width Principal arm now wins
+the disposable steady-state API/key comparator over tagged `Account |
+Principal`, with the tagged arm and falsifier preserved. Realm/Core/genesis/
+disclosed-power identity sensitivity and exclusive-expiry/nonce controls run.
+Exact EOA/ERC-1271/EIP-7702 verifier transitions, historical transcript replay,
+hidden implementation-power topology, and branch-qualified observer cases
+remain candidate engineering/security work.
+
 ### G4 — Lens and honest read contract
 
 Build the smallest contract Lens needed to prove the constitutional promise:
@@ -452,6 +494,15 @@ pretends to know its current block hash.
 **Pass:** the same inputs and basis produce the same result in independent
 implementations; no untrusted caller chooses the policy that authorizes itself;
 all loops and result sizes are statically bounded.
+
+**Current state:** `G4-PARTIAL`. Independent JavaScript and mapping-backed
+Solidity controls agree on immutable 1/8/32/64-Principal point resolution:
+proved absence permits fallback and unknown/conflict/unsupported/mixed basis
+stops. The 64-principal last-found path measured 616,577 gas on its first
+resolve and 220,280 on its immediately repeated resolve in the disposable solc
+0.8.30 Osaka harness. Literal Lens Result bundles,
+Core storage integration, conflict/observer profiles, and the separate
+50-Principal Files workload remain.
 
 ### G5 — EVM realization and reconstruction
 
@@ -533,6 +584,14 @@ under the declared Core rules, and two independent state-only reconstructors
 produce the same authoritative bytes. Otherwise revise semantics or bounds
 before selecting contracts.
 
+**Current state:** `G5-PARTIAL`. The disposable monolithic controls and declared
+28-collection projection make the state/reconstruction obligation exact enough
+to engineer against; they are not reconstruction from a complete live Core.
+Implementing state-derived enumeration, running two independent reconstructors,
+measuring the integrated monolith, and selecting any permanent physical
+topology are candidate-engineering and `GO-FREEZE` work. Physical topology is
+therefore not an unanswered owner design fork at build start.
+
 ### G6 — developer and product proof
 
 Replay unchanged **logical** application fixtures and expected outcomes through
@@ -596,6 +655,13 @@ services; and the Explorer explains results without inventing authority.
 Executable-extension sandbox security is not claimed by an inert week-one
 stub.
 
+**Current state:** `G6-PARTIAL` and the remaining pre-recommendation gate. The
+Core-side literal `HELLO_FILES` fixture exists, but the SDK and Data Explorer
+have not yet consumed its exact source lock unchanged. Their disposable
+adapters must preserve raw values, basis, coverage, acquisition evidence, and
+the no-wallet/no-ambient-service path. A P0/P1 truth mismatch reopens the owning
+Core seam; an ergonomic or implementation gap becomes named candidate work.
+
 Clean-browser Arcade, broader Git/Markdown/forge-social, three-host mounted
 filesystem, privacy/domain-separation, cross-Realm, and complete large-content
 traces remain `GO-FREEZE` gates if they do not fit the week. Their absence need
@@ -608,6 +674,12 @@ The seven lanes are dependency-ordered. Research, fixture preparation, and PM
 design can run in parallel, but a later implementation lane does not declare a
 pass over an unfinished earlier gate. The week ends with the largest completed
 prefix, even if that is only G1 or partial G2.
+
+**Current checkpoint:** lanes 1–5 have produced a candidate-sufficient Core
+source-lock packet plus explicitly deferred engineering/freeze work, not full
+gate passes. Lane 6's same-source-lock SDK/Explorer consumption is next. Lane 7
+may emit `RECOMMEND-GO-CODE` only after that check and a final cross-lane audit;
+the disposition remains `CONTINUE-DISPOSABLE` until then.
 
 ### Lane 1 — reconcile, do not reinvent
 
@@ -917,18 +989,27 @@ deployment remain later, separately ratified gates.
   flat exact Type plus split QueryProfile, uniform full-width `PrincipalId`,
   shared portable PublicationSet, destination-bound AdmissionPlan, and a
   self-authenticating Realm bootstrap. This selects what to test, not a winner.
-- [ ] Does `EXP-C0`'s Type arm survive the minimal bundled/layered/View
-  comparator without self-authorizing mappings, historical reinterpretation,
-  dishonest completeness, or unacceptable fragmentation?
-- [ ] Do the selected Principal, carrier, publication-domain, and Realm
-  bootstrap arms survive their minimal sealed comparators and named hostile
-  traces?
-- [ ] Can `BindingScope`, QueryProfile coverage, Withdrawal, and the minimum
-  contract Lens jointly meet honest completeness and conservative EVM bounds?
-- [ ] Which physical topology preserves one reconstruction contract and one
-  interpretation of old state with adequate code-size and gas margin?
-- [ ] Do the SDK and Data Explorer pressure passes expose any additional
-  freeze-sensitive semantic or read-ABI requirement?
+- [x] Is the Type arm sufficient to start candidate engineering? — Yes for the
+  bounded exact nominal/split-QueryProfile candidate: the closed-Type control
+  and application passes exposed no Core falsifier. Wider grammar,
+  fragmentation/churn, layered/View clean-room comparison, and permanent bytes
+  remain engineering or `GO-FREEZE` work.
+- [x] Are Principal, carrier, publication-domain, and Realm shapes sufficient
+  to start candidate engineering? — Yes as disposable structures and selected
+  defaults. Exact verifier transitions, hidden-power attacks, observer branch
+  cases, succession, and independent conformance remain security engineering
+  or `GO-FREEZE` work.
+- [x] Are `BindingScope`, QueryProfile coverage, Withdrawal, and minimum Lens
+  semantics exact enough to engineer? — Yes: their candidate structures,
+  failure vocabulary, bounded controls, and Lens measurements are explicit.
+  Integrated transitions and aggregate budgets are code tasks; a measured
+  constitutional failure is the falsifier that reopens design.
+- [x] Must physical topology be chosen before `GO-CODE`? — No. Start from the
+  monolithic semantic control, measure it, and split only against the same state
+  projection. Permanent topology and storage ownership remain `GO-FREEZE`.
+- [ ] Do the SDK and Data Explorer preserve the exact Core source lock without
+  exposing a P0/P1 truth or read-ABI mismatch? — This is the sole remaining
+  cross-lane gate before this program may issue `RECOMMEND-GO-CODE`.
 
 ## Pre-promotion checklist
 

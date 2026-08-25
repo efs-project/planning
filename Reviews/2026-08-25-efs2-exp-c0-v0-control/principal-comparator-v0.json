@@ -1,0 +1,112 @@
+{
+  "format": "efs2-v2-e1-principal-surface-comparator/0",
+  "profileVersion": 0,
+  "protocolConformance": false,
+  "durable": false,
+  "arms": {
+    "uniform": "full-width PrincipalId derived from the EXP-C0/v0 Principal descriptor",
+    "tagged": "AuthorRef { ACCOUNT | PRINCIPAL, bytes32 value } with disposable bakeoff author key"
+  },
+  "inputs": {
+    "eoaPrincipal": {
+      "authorityKind": 1,
+      "originLineage": "0x",
+      "account": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "erc1271Principal": {
+      "authorityKind": 2,
+      "originLineage": "0x65766d3a33313333373a67656e657369732d41",
+      "account": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "taggedEoa": {
+      "kind": 0,
+      "value": "0x000000000000000000000000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "taggedErc1271": {
+      "kind": 0,
+      "value": "0x000000000000000000000000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "taggedManaged": {
+      "kind": 1,
+      "value": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    "messageId": "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "eoaVerifierProfileId": "0x9191919191919191919191919191919191919191919191919191919191919191",
+    "erc1271VerifierProfileId": "0x9292929292929292929292929292929292929292929292929292929292929292",
+    "managedAuthorityRef": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "associationOrdinal": "17"
+  },
+  "expected": {
+    "uniformEoaPrincipalId": "0xd2b78ce29c18b7339d04311cf898b594370b1055428a10dfd740eff5db3725bc",
+    "uniformErc1271PrincipalId": "0x1fc209a0c0dee081630ce271766c6c14d76926feb5f5d3a4c0898afc742e70c4",
+    "taggedEoaAuthorKey": "0x72ca1c2ff7d5ecc65d302f5c63674a4a9e44f666c2a37ee09c5165d4da6fbcea",
+    "taggedErc1271AuthorKey": "0x10f023e316bf74027001066179a05578512b51589a8b09025139e9f8e94e470d",
+    "taggedManagedPrincipalKey": "0x8351faf1c030472ffdbbcc117fc35fb25660431488df3a9792daebd5d9ba8038",
+    "uniformEoaSignatureDigest": "0x001e26da2d1184c1215e42f382a1a7bd4a2fcfe87039e753cc7e2bf5564d022b",
+    "uniformErc1271SignatureDigest": "0x15ae1fd5a288749eebea9a0fa9761dd6cf1abc85fe5cd6c8044fa596351199fc",
+    "taggedEoaSignatureDigest": "0x3f0278924b68c669a0aabe432823863df72df50491958cf458e4a0ef29142b07",
+    "taggedErc1271SignatureDigest": "0x2ba508cd66cc7c75a400db081394f869298cb8e2c5181cd13fd25050ede4050c",
+    "abiBytes": {
+      "uniformEoaDescriptor": 160,
+      "uniformErc1271Descriptor": 192,
+      "uniformAuthorApiKey": 32,
+      "taggedAuthorRef": 64,
+      "uniformSignaturePreimage": 160,
+      "taggedSignaturePreimage": 160
+    }
+  },
+  "comparison": {
+    "uniform": {
+      "firstWriteSetupTransactions": 0,
+      "authorApiWords": 1,
+      "authorMappingKeyShape": "bytes32 PrincipalId",
+      "authorityClassBoundInIdentity": true,
+      "historicalVerifierBasisRequiredForEoa": true,
+      "historicalVerifierBasisRequiredForErc1271": true,
+      "managedAssociationRewritesOldIds": false,
+      "managedAssociationQueryKeyspaces": 1
+    },
+    "tagged": {
+      "firstWriteSetupTransactions": 0,
+      "authorApiWords": 2,
+      "authorMappingKeyShape": "keccak256(ACCOUNT_OR_PRINCIPAL tag, bytes32 value)",
+      "authorityClassBoundInIdentity": false,
+      "historicalVerifierBasisRequiredForEoa": true,
+      "historicalVerifierBasisRequiredForErc1271": true,
+      "managedAssociationRewritesOldIds": false,
+      "managedAssociationQueryKeyspaces": 2
+    }
+  },
+  "solidityGas": {
+    "command": "forge test --gas-report --match-contract ExpC0PrincipalComparatorTest",
+    "compiler": "solc 0.8.30",
+    "evmVersion": "osaka",
+    "optimizerRuns": 200,
+    "viaIr": true,
+    "deploymentCost": 430625,
+    "deploymentSizeBytes": 1773,
+    "functions": {
+      "uniformPrincipalId": { "min": 1085, "average": 1089, "median": 1085, "max": 1097, "calls": 3 },
+      "taggedAuthorKey": { "min": 481, "average": 481, "median": 481, "max": 481, "calls": 4 },
+      "writeUniform": { "min": 44700, "average": 44700, "median": 44700, "max": 44700, "calls": 3 },
+      "writeTagged": { "min": 44789, "average": 44893, "median": 44945, "max": 44945, "calls": 3 },
+      "readUniform": { "min": 2496, "average": 2496, "median": 2496, "max": 2496, "calls": 3 },
+      "readTagged": { "min": 2708, "average": 2708, "median": 2708, "max": 2708, "calls": 4 },
+      "associateUniform": { "min": 66889, "average": 66889, "median": 66889, "max": 66889, "calls": 1 },
+      "associateTagged": { "min": 67892, "average": 67892, "median": 67892, "max": 67892, "calls": 1 }
+    },
+    "measurementBoundary": "Disposable harness calls under the pinned Foundry profile. Writes are first zero-to-nonzero keyed writes; reads occur after representative writes in the same test transaction. This does not measure verification, PrincipalRecord persistence, production deployment, or aggregate admission gas."
+  },
+  "provisionalRecommendation": {
+    "arm": "UNIFORM_FULL_WIDTH_PRINCIPAL_ID",
+    "status": "DISPOSABLE_COMPARATOR_EVIDENCE_ONLY",
+    "basis": [
+      "zero pre-write setup transactions tie",
+      "one-word author API instead of two words",
+      "authority kind and origin bind PrincipalId instead of living only in a verifier sidecar",
+      "representative uniform keyed reads and writes are no more expensive in this harness",
+      "managed association preserves one historical keyspace instead of two"
+    ],
+    "remainingFalsifier": "Reopen if full first-admission descriptor persistence plus EOA/ERC1271 verification creates an aggregate budget or developer-complexity failure; this comparator does not measure those paths."
+  }
+}

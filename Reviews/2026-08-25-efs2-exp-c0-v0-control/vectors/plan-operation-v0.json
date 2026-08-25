@@ -1,0 +1,61 @@
+{
+  "format": "efs2-exp-c0-v0-plan-operation-vector/0",
+  "profileVersion": 0,
+  "protocolConformance": false,
+  "durable": false,
+  "codec": "SOLIDITY_ABI_V2_ABI_ENCODE",
+  "inputs": {
+    "plan": {
+      "occurrenceIds": [
+        "0xd4ef0b18b79a80d7794a0e9ab55b74da7a769ec134f5920e926c72a60e5dffb0",
+        "0xd7666f18fc6fca4641654072f0dd4e780230b1f77d0e3dc33fbd3a67bee25829"
+      ],
+      "realmId": "0x9e289671410f2b79594923c400395dd6196f90419c55b6fc1370ef5a08022633",
+      "realmRevisionId": "0x6f02a444ef364f0869c54fce0ea261c1d7c017419068d27cbadeb6d25c280ecd",
+      "coreCommitment": "0x3030303030303030303030303030303030303030303030303030303030303030",
+      "semanticAuthor": "0xd2b78ce29c18b7339d04311cf898b594370b1055428a10dfd740eff5db3725bc",
+      "actor": "0xd2b78ce29c18b7339d04311cf898b594370b1055428a10dfd740eff5db3725bc",
+      "verifierProfileId": "0x9191919191919191919191919191919191919191919191919191919191919191",
+      "nonceLane": 3,
+      "nonce": "7",
+      "expiryCoordinate": "100",
+      "executorCommitment": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "dependencyCommitment": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "payer": "0xd2b78ce29c18b7339d04311cf898b594370b1055428a10dfd740eff5db3725bc",
+      "maximumCost": "1000000",
+      "effects": [
+        {
+          "kind": 1,
+          "principalId": "0xd2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2d2",
+          "positionKey": "0xc1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1",
+          "recordId": "0x3fcaf90c6ed3c59d312f2179f4c7eac58c12f338b804c172ba706d003c0e36d3",
+          "occurrenceId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "expectedRevision": 0,
+          "queryProfileId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "generation": 0,
+          "coverageHighWater": "0",
+          "terminalCount": 0,
+          "terminalPostingsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "kind": 5,
+          "principalId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "positionKey": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "recordId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "occurrenceId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "expectedRevision": 0,
+          "queryProfileId": "0x7deb23272bc24a4c95f099885e1bdd0e26f665d9b6eb55c5a24120032a77b7e1",
+          "generation": 1,
+          "coverageHighWater": "2",
+          "terminalCount": 2,
+          "terminalPostingsRoot": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        }
+      ]
+    }
+  },
+  "expected": {
+    "admissionPlanId": "0x1768a00edb985996fca3199f348e4e73e1408cd973852ec43fa553961dade331",
+    "effectSetId": "0x01f935b7491f0a975c45231cc89e7f6292fd0e26bb5b0ea09f170bc0fd0d1df7",
+    "operationId": "0x7f0a1608eceb675210af92310dce098bfddb7645cfb7fb8d54ac410450660e38"
+  }
+}

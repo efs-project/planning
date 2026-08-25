@@ -1,0 +1,8 @@
+[profile.default]
+src = "src-sol"
+test = "test-sol"
+solc_version = "0.8.30"
+evm_version = "osaka"
+optimizer = true
+optimizer_runs = 200
+via_ir = true

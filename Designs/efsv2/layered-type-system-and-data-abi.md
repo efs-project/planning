@@ -359,20 +359,35 @@ independently earns Core inclusion.
 ### 5. Exact Type schema
 
 ```text
-TypeSchemaId = H(
-  DOM_TYPE_SCHEMA,
-  typeCodecVersion,
-  canonicalSemanticCommitmentBytes,
-  canonicalLogicalShapeBytes,
-  canonicalRepresentationBytes,
-  intrinsicConstraintBytes,
-  typedReferenceRoleBytes
+TypeSchemaEnvelope = abi.encode(
+  u16 codecVersion,
+  bytes payloadBytes
 )
+
+TypeSchemaId = keccak256(abi.encode(
+  DOMAIN_TYPE,
+  u16 PROFILE_VERSION,
+  u16 codecVersion,
+  bytes payloadBytes
+))
 ```
 
 The exact Type is what validates and decodes a canonical body. Anything that
 changes the accepted value set, reference extraction, body interpretation, or
 normative meaning creates a new Type schema.
+
+The bounded outer envelope is canonicalized before any codec dispatch. Its
+exact bytes are the stored and exported Type value. A reader that does not know
+`codecVersion` still retains the raw envelope and payload, recomputes the exact
+ID, and reports `UNSUPPORTED`, `UNPROVEN`, and semantic reconstruction
+`INCOMPLETE`; it never guesses codec 0. A Realm may interpret or admit only
+codecs its exact revision supports. Malformed outer/payload bytes, known-codec
+unknown coordinates, and wrong-key integrity failures remain distinct. This is
+current disposable pressure-test law, not ceremony-final protocol bytes.
+
+Codec 0's payload owns the canonical semantic commitment, logical shape,
+representation, intrinsic constraints, and typed reference roles. It does not
+repeat the outer codec coordinate.
 
 `typedReferenceRoleBytes` is the sole owner of semantic reference targets. It
 binds a field key to one closed target class: exact Type, Record/Object,

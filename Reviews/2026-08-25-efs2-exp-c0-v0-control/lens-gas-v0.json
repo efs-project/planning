@@ -1,0 +1,38 @@
+{
+  "format": "efs2-exp-c0-v0-lens-gas/0",
+  "protocolConformance": false,
+  "durable": false,
+  "toolchain": {
+    "forge": "1.7.1 (4072e48705af9d93e3c0f6e29e93b5e9a40caed8)",
+    "solc": "0.8.30",
+    "evmVersion": "osaka",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "viaIR": true
+  },
+  "measurementProvenance": {
+    "command": "forge test --match-contract ExpC0LensControlTest --match-test testPlansAt1_8_32_64AndGasEnvelope -vvvv 2>&1 | rg 'emit LensGas'",
+    "contract": "ExpC0LensControlTest",
+    "test": "testPlansAt1_8_32_64AndGasEnvelope",
+    "event": "LensGas(uint8 principalCount,uint8 scenario,uint256 gasUsed,uint256 probeCount)",
+    "scenarioCodes": {
+      "1": "first measured resolve",
+      "2": "immediately repeated resolve"
+    },
+    "inputPaths": [
+      "foundry.toml",
+      "src-sol/ExpC0LensControl.sol",
+      "test-sol/ExpC0LensControl.t.sol"
+    ],
+    "inputHashAlgorithm": "SHA256_EACH_UTF8_PATH_NUL_DECIMAL_BYTE_LENGTH_NUL_RAW_BYTES_IN_ORDER",
+    "inputsSha256": "8a561308ef0b5de8553482824b4710fd2acfc3bef3b344046418b11e6779dda6"
+  },
+  "scenario": "registered exact ResolutionPlan; last principal FOUND after every earlier principal ABSENT_PROVEN; return retains every probe",
+  "measurements": [
+    { "principalCount": 1, "coldGas": 30504, "warmGas": 7699 },
+    { "principalCount": 8, "coldGas": 92369, "warmGas": 30113 },
+    { "principalCount": 32, "coldGas": 314759, "warmGas": 108979 },
+    { "principalCount": 64, "coldGas": 616577, "warmGas": 220280 }
+  ],
+  "claimScope": "Disposable monolithic mapping-backed point resolver only. Excludes transaction intrinsic gas, calldata pricing, plan registration, cross-contract Core calls, proof verification, final ABI selection, and production storage topology."
+}

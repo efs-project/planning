@@ -6,7 +6,7 @@ system is v1 evidence; the EFS 1.5 bridge and July native-envelope/five-kind v2
 round are historical design evidence. Nothing inherits a place in EFS 2.0
 without passing the greenfield requirements and product traces.
 
-> **Current status:** James has ratified the greenfield direction and the Core / optional Commons / Web Client and OS layer boundary. Sepolia is the first development Commons, not a permanent or canonical venue selection. The constitution and architecture below are drafts for engineering review, not ceremony-final bytes or permission to deploy permanent contracts.
+> **Current status:** James has ratified the greenfield direction and the Core / optional Commons / Web Client and OS layer boundary. The disposable `EXP-C0/v0` Core integration control now exists; the disposition remains `CONTINUE-DISPOSABLE` while the SDK and no-wallet Data Explorer consume its exact source lock. V2-C1 is the one held owner build-start choice and is not ready to answer. Sepolia is the first development Commons, not a permanent or canonical venue selection. The constitution and architecture below are drafts for engineering review, not ceremony-final bytes or permission to deploy permanent contracts.
 
 ## Read this on a phone
 
@@ -48,13 +48,28 @@ point-in-time executable-evidence reconciliation is the
 The Core-facing standards supplement is
 [the 2026-08-23 EIP/ERC pressure screen](../../Reviews/2026-08-23-efs2-core-eip-erc-pressure/README.md);
 it reuses the complete shared corpus index and selects no protocol bytes or
-target-chain support.
+target-chain support. That exact receipt is the standards source lock for this
+disposable `GO-CODE` candidate. Refresh its delta before `GO-FREEZE`, when the
+pinned corpus changes, or when a new standards-sensitive seam appears—not as a
+ritual while the candidate source lock is unchanged.
 
-The first design-only G2 artifact is the
-[[Reviews/2026-08-23-efs2-exp-c0-semantic-seal/README|`EXP-C0` symbolic semantic seal]]:
+The symbolic G2 spine is the
+[[Reviews/2026-08-23-efs2-exp-c0-semantic-seal/README|`EXP-C0` semantic seal]]:
 61 integrated transition/read/authority/query/Lens/reconstruction traces and
-their lossless result profiles. Exact disposable bytes, the independent model,
-and the Solidity SUT remain pending; this is not a G2 pass.
+their lossless result profiles. The 2026-08-25 disposable exact packet now adds
+[[exp-c0-v0-data-structure-profile]], [[exp-c0-v0-result-api-profile]], and
+[[exp-c0-v0-codec-domain-bounds-vector-contract]], with the top-to-bottom
+[[exp-c0-v0-hello-files-trace]], plus independent JavaScript and Solidity
+controls under
+`Reviews/2026-08-25-efs2-exp-c0-v0-control/`. It proves selected exact
+preimages and invariants, not complete replay: its claim ledger still reports
+zero fully bundled trace executions and no protocol conformance.
+
+The current contraction packet is [[mvp-build-start-packet]]. It turns the
+surviving uncertainty into one **held** owner build-start choice, named
+engineering tasks, and later freeze/deployment gates. The Core packet exists;
+same-source-lock SDK/Explorer consumption is the remaining gate before a
+`RECOMMEND-GO-CODE` disposition. It authorizes nothing by itself.
 
 ## The current shape
 
@@ -117,7 +132,9 @@ named falsifiers. This is permission to converge designs and throwaway
 experiments, not `GO-CODE`, `GO-FREEZE`, or deployment authority.
 
 Names and ceremony-final bytes remain open. `TypeSchema` is the current
-plain-language name; older files call similar concepts `TypeRevision`. EAS is
+plain-language name; its disposable C0 wire is a raw-preserving bounded outer
+codec envelope whose exact codec and payload bytes determine identity. Older
+files call similar concepts `TypeRevision`. EAS is
 not Core. An EAS import/export adapter remains possible if it provides real
 interoperability.
 
@@ -133,9 +150,10 @@ greenfield candidate for stable File/Directory Objects, per-name Bindings,
 mount-local namespace/content Plans, complete directory enumeration, canonical
 URLs, exact views, immutable file revisions, verified bytes, and the shared
 Web/OS/mount resolver. Complete listing and certified filesystem writes depend
-on the draft's generic `BindingScope` and executor/operation-bound consent
-experiments; neither is current B0. It is a draft experiment target, not a
-frozen profile or owner decision packet.
+on generic `BindingScope` and executor/operation-bound consent. Their exact
+candidate structures and focused disposable controls now exist; integrated
+Core transitions, aggregate cost, and product behavior remain engineering
+tasks. This is not a frozen Files profile or owner decision packet.
 
 ## Evidence map
 
@@ -162,21 +180,22 @@ These are inputs, not competing active architectures:
 
 ## Build order
 
-1. Seal `EXP-C0`'s transition, read-result, failure, and reconstruction traces.
-2. Build one micro-Realm differential experiment: an independent pure model
-   and deliberately simple monolithic Solidity SUT covering Type/Record,
-   two-leaf Publication, EOA/ERC-1271 admission, Binding/Withdrawal,
-   QueryProfile coverage, 1/8/32/64 point Lens reads, and reconstruction.
-3. Run one minimal sealed comparator for each ABI-shaping seam so every
-   falsifier is observable. Build no full losing-arm implementation unless the
-   comparator reopens it; do not repeat broad architecture tournaments.
-4. Price the complete write, index, Lens, history, and reconstruction workload
-   under named execution profiles, then let SDK and Data Explorer pressure
-   expose truth or usability failures.
-5. Return `CONTINUE-DISPOSABLE`, `REDESIGN`, or `RECOMMEND-GO-CODE` with a small
-   owner packet. Real repository contract engineering waits for the later
-   owner checkpoint; ceremony-final vectors and century proof wait for
-   `GO-FREEZE`.
+1. **Core source-lock candidate — present.** The symbolic seal, exact
+   `EXP-C0/v0` structures/results/codec packet, narrowed JavaScript/Solidity
+   controls, and literal `HELLO_FILES` vertical now form one integrated
+   disposable handoff. Its ledger still reports zero fully bundled replays of
+   the 61 sealed traces; do not relabel the integration fixture as one.
+2. **Core source-lock audit — current.** Repair any P0/P1 exactness defect and
+   pin the resulting fixture/checksums without freezing a protocol namespace.
+3. **SDK and Data Explorer consumption — next.** Both PM lanes consume that
+   exact lock unchanged, preserve raw qualified results, and report truth
+   mismatches back to Core. The Explorer path remains guest-first and no-wallet.
+4. **Cross-lane readiness verdict.** Return `REDESIGN` on a semantic falsifier,
+   stay `CONTINUE-DISPOSABLE` on an unresolved truth mismatch, or emit
+   `RECOMMEND-GO-CODE` only after the handoff is green.
+5. **Owner checkpoint, then real engineering.** V2-C1 becomes answerable only
+   after step 4. Ceremony-final vectors, permanent topology, century evidence,
+   and any deployment remain separate `GO-FREEZE`/`GO-DEPLOY` work.
 
 ## Hard holds
 
@@ -192,6 +211,8 @@ These are inputs, not competing active architectures:
 
 ## Status
 
-The active spine remains `#status/draft`. It becomes review-ready only after
-the prototype/Fable/adversarial passes are integrated. Promotion remains the
-owner's normal human-gated ceremony.
+The active spine remains `#status/draft`. The Core disposable integrated
+control exists, but the current disposition is `CONTINUE-DISPOSABLE` until SDK
+and Data Explorer consume the same source lock and the final cross-lane audit is
+green. Only then may the packet recommend V2-C1 to the owner. Promotion, freeze, and
+deployment remain separate human-gated ceremonies.

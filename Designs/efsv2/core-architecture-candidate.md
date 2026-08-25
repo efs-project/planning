@@ -95,8 +95,12 @@ binding, revocation, and completeness answer is always Realm-qualified.
 Working replacement for the confusing name `TypeRevision`:
 
 ```text
-TypeSchema {
-  bootstrapCodecVersion
+TypeSchemaEnvelope {
+  codecVersion: u16
+  payloadBytes
+}
+
+TypeSchemaPayloadV0 {
   semanticNamespaceOrSpec
   canonicalBodyShape
   canonicalRepresentation
@@ -104,6 +108,12 @@ TypeSchema {
   referenceRoles[]
 }
 ```
+
+The disposable C0 control stores and exports the exact bounded outer envelope
+bytes. It canonicalizes the outer `(uint16 codecVersion, bytes payloadBytes)`
+before dispatch. Unknown canonical codecs remain raw-preserved and
+identifiable, but are `UNSUPPORTED`, `UNPROVEN`, and semantically `INCOMPLETE`;
+they are never decoded as v0 or admitted by a Realm that does not support them.
 
 “Schema” is the developer-facing analogue of an EAS Schema, but it is portable
 and not identified by a registry transaction. The prototype must use a tiny
@@ -117,8 +127,10 @@ the exact policy/verifier profile and result. Rich external validators remain
 ordinary evidence.
 
 `EXP-C0` provisionally selects one **flat exact nominal Type** for Core. The
-`TypeSchemaId` commits every byte that changes meaning, accepted values,
-canonical representation, or closed reference extraction. Index policy is not
+`TypeSchemaId` commits the profile version, outer codec version, and exact
+payload bytes, which in turn commit every coordinate that changes meaning,
+accepted values, canonical representation, or closed reference extraction.
+Index policy is not
 intrinsic to the Record value and lives in a separately versioned
 `QueryProfile`. SemanticSpec, Shape, Representation, compatibility, projection,
 and View descriptors remain useful compiler/catalog outputs and controlled
@@ -563,26 +575,28 @@ Reject or redesign this architecture if:
 14. aggregate gas/state for the mandatory index bundle is not economically
    credible on the intended L2/L3 profile.
 
-## Open questions
+## Candidate disposition of former open questions
 
-- [ ] Seal the `EXP-C0` micro-Realm trace corpus and its minimal comparators;
-  build no full losing arm unless a named falsifier reopens it.
-- [ ] Define the Realm descriptor and admission/finality observation split.
-- [ ] Decide the developer name (`TypeSchema`, `TypeDefinition`, or another
-  term) after the Fable review; `TypeRevision` is not presumed.
-- [ ] Specify canonical meta-codec, value canonicalization, recursive Type
-  references, and cross-language vectors.
-- [ ] Specify the exact minimal index declaration and page-result ABI.
-- [ ] Define Binding/Withdrawal authority and no-resurrection state machine.
-- [ ] Benchmark public Resolution Plans of 1, 8, 32, and 64 Principals.
-- [ ] Decide whether ownerless exact content is a subjectless Record, a generic
-  Value profile, or both projections of one Record algebra.
-- [ ] Prove the same generic traces for Arcade, Git, EAP, Nanda, Markdown,
-  Topics/literals, anonymous browse, privacy, and the mounted filesystem.
+These are no longer one undifferentiated design queue. The disposable
+`EXP-C0/v0` packet selects enough exact structure to start candidate
+engineering without pretending that those bytes are frozen:
+
+| Former question | Build-start disposition |
+|---|---|
+| Trace corpus and comparators | The 61 traces retain an honest evidence ledger; partial executable controls and the separate `HELLO_FILES` integration control are sufficient for `GO-CODE`. Exact replay bundles are engineering and freeze evidence. |
+| Realm descriptor versus observation | Use self-authenticating bootstrap/revisions plus exact execution profile and separately attributed source/finality observation. This is a candidate default; production powers and venue remain freeze/deployment gates. |
+| Developer Type name | Use `TypeSchema` in the candidate API and `TypeSchemaId` for exact identity. Ergonomic aliases may change before freeze without changing the semantic object. |
+| Codec, values, references, vectors | Use the bounded flat nominal Type law, selected ascending-field canonical body, closed reference roles, and the JavaScript/Solidity corpus in [[exp-c0-v0-codec-domain-bounds-vector-contract]]. Recursive data graphs live in Records, not recursive Type evaluation. Rust and clean-room vectors are freeze evidence. |
+| Query/index declaration and page ABI | Use separate exact `QueryProfile`, the declared automatic equality/reference/backlink obligations, exact cursor, bounded page, basis, and coverage states in [[exp-c0-v0-data-structure-profile]] and [[exp-c0-v0-result-api-profile]]. Final caps are measurements. |
+| Binding/Withdrawal state machine | Use Principal-qualified position heads/history/scope, compare-and-set revisions, tombstones, issuer-qualified Withdrawal, and no implicit resurrection. Candidate code must finish the transition tests. |
+| Public Resolution Plan | The 1/8/32/64 controls select immutable point plans and proved-absence-only fallback; 64 is an experiment ceiling, not a permanent cap. |
+| Ownerless exact content | Not a Core fork for this MVP. Represent content through ordinary exact Records/Types; a future generic Value façade must prove that it is a lossless projection rather than a second identity. |
+| Application breadth | Arcade, Git, EAP, Nanda, packages, and Files already fit as ordinary application Types in pressure evidence. Remaining Markdown, privacy, mount, and scale replays are freeze/product evidence unless candidate code finds a generic semantic gap. |
 
 ## Pre-promotion checklist
 
-- [ ] All `## Open questions` resolved or explicitly deferred (cite where)
+- [x] Former open questions classified as candidate defaults, engineering work,
+  or later gates in this document and [[mvp-build-start-packet]]
 - [x] `**Target repos:**` confirmed
 - [ ] `**Depends on:**` chain — all dependencies accepted or landed
 - [x] No `<!-- AGENT-Q: -->` comments left in the design body

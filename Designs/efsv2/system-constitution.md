@@ -369,35 +369,30 @@ The design cannot freeze until at least these traces pass:
    versioned for coexistence. The goal is the last change to EFS 2.0's initial meaning,
    not the last EFS implementation.
 
-## Open questions
+## Candidate defaults and later gates
 
-- [ ] Can uniform `PrincipalId` plus zero-setup account
-  Principals beat a tagged account/principal author reference on gas, security,
-  developer simplicity, and future managed-Principal migration?
-- [ ] What is the smallest contract Lens/Resolution Plan that covers real
-  contract configuration and trust-list reads without pretending wide sorted
-  enumeration is cheap?
-- [ ] Which exact Type/index declarations are safe for arbitrary Type creators,
-  and how are writer-paid state growth and hot-value spam bounded?
-- [ ] Does Type identity include shape, validation, and canonical index
-  obligations, or do separately identified profiles preserve RecordId stability
-  while exposing honest coverage?
-- [ ] Are authored Occurrences portable across Realms with separate admission
-  intents, or deliberately Realm-bound? Preserve the portable signed-evidence
-  requirement unless owner-reviewed evidence justifies narrowing it.
-- [ ] Which Record/Occurrence/Context normalization wins the two-prototype
-  bakeoff?
-- [ ] What Realm descriptor lets a direct client bootstrap a fresh qualifying L3 without a
-  global registry while preventing deployment/profile confusion?
-- [ ] Which old on-chain query promises survive the aggregate gas/state budget?
-- [ ] What is the first Commons candidate evaluation process? No venue choice is
-  needed for Core or the direct Web Client.
-- [ ] Does the first Web Client ship only read-only Files plus one Arcade view,
-  or also explicit writes?
+The early questions below now have an explicit disposition. These are
+replaceable `EXP-C0/v0` defaults, not owner-ratified protocol bytes:
+
+| Seam | Candidate disposition | What can still change it |
+|---|---|---|
+| Author API | Uniform full-width `PrincipalId` with zero-setup account Principals. | Integrated verification/persistence cost or a concrete migration/security failure. |
+| Contract Lens | Immutable bounded point `ResolutionPlan`; proved absence alone permits fallback; measure 1/8/32/64 Principals. | Integrated gas/result ceilings or a real contract consumer that cannot be expressed. |
+| Type and indexes | Exact nominal Type identity includes meaning, value shape, representation, intrinsic validation, and closed references. Separately identified QueryProfiles carry index and coverage obligations. | Hostile-value/state-growth measurements may reduce automatic obligations or caps, but may not manufacture completeness. |
+| Artifact normalization | Author-neutral Record, portable authored PublicationSet, per-leaf Occurrence, and destination-bound AdmissionPlan/receipt. | A literal application trace showing lost identity, provenance, atomicity, or materially worse aggregate cost. |
+| Realm bootstrap | Self-authenticating bootstrap and append-only revisions disclose powers and exact execution/read profiles; attributed source/finality observations remain separate. No registry or Commons is required. | A bootstrap/reconstruction control exposing an identity-bearing omission. |
+| Query breadth | Exact scalar/reference/backlink and bounded point/Lens reads are in the candidate. Wide ranking, global sorted enumeration, and search remain application/index layers. | Candidate benchmarks determine caps and whether any promised automatic posting is unaffordable. |
+| Commons | Venue criteria and comparison remain later deployment work. | No venue decision blocks Core, SDK, or direct guest Explorer candidate engineering. |
+| First product loop | Direct no-wallet raw Explorer plus minimum read-only Files profile. Writes, Arcade polish, extensions, and OS mount integration follow the lossless Reader seam. | Fall back to Core/SDK-only only on a named integration blocker. |
+
+The remaining uncertainty is therefore either an engineering measurement, an
+explicit freeze/deployment choice, or a falsifier—not an invitation to reopen
+the whole architecture while beginning the candidate.
 
 ## Pre-promotion checklist
 
-- [ ] All `## Open questions` resolved or explicitly deferred (cite where)
+- [x] Former open questions classified as candidate defaults, engineering work,
+  or later gates in this document and [[mvp-build-start-packet]]
 - [x] `**Target repos:**` confirmed
 - [x] No design lifecycle dependencies; [[owner-rulings]] is an authority input
 - [x] No `<!-- AGENT-Q: -->` comments left in the design body
