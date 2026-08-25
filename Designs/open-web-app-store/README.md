@@ -201,6 +201,15 @@ catalog, or production mechanism.
 - **Git/Forge:** package identity never derives from repo URL, repo ID, branch,
   commit/tree/tag OID, checkpoint, or bundle digest. Exact source and rebuild
   evidence link to a Release without authorizing it.
+- **SDK v2/Ethereum standards:** the dated
+  [standards census at `4d3e736`](https://github.com/efs-project/planning/blob/4d3e736524ca04cdadfb26fdd628fcd206fc8084/Designs/sdkv2/ethereum-standards-census.md)
+  contributes content-addressed capability/impact/dependency-manifest precedent
+  and EVM deployment/proxy/content-resolution pressure. Code indexes, factory
+  addresses, proxy/facet state, resolver URLs, and registry membership remain
+  discovery or provenance evidence. A future EVM helper profile's preservation
+  or deployment claim requires exact source/build/initcode/runtime/dependency/
+  authority evidence and a local reconstruction path; no listing authorizes
+  deployment, upgrade, `delegatecall`, or use.
 - **Media:** passive exact media may consume independently verified ranges;
   executable content requires the full locked closure. A Presentation or
   renderer offer is evidence, not authority over the media or folder.

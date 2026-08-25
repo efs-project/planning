@@ -2,10 +2,11 @@
 
 **Status:** draft — product requirements and extension seams for iteration; no privacy claim, agent protocol, signer delegation, or browser security profile is adopted
 **Target repos:** planning, client, sdk
-**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/web-client-os/mvp-and-acceptance]]
+**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/web-client-os/mvp-and-acceptance]], [[Designs/web-client-os/ethereum-standards-and-interop]]
+**Standards profile:** [[Designs/web-client-os/web-platform-standards-and-forward-profile]]
 **Inputs:** [[Designs/clientv2/network-privacy]], [[Designs/clientv2/agent-native]], [[Designs/clientv2/agent-native-os-compass-for-fable]] (historical mechanism evidence)
 **Reviewers:** @web-platform-standards (2026-08-14), @historical-client-architecture (2026-08-14), @current-v2-read-path (2026-08-14)
-**Last touched:** 2026-08-15
+**Last touched:** 2026-08-23
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/privacy #topic/agents #topic/capabilities #topic/web-standards
 
@@ -249,7 +250,8 @@ The offline journal uses append-only, versioned plain records with stable
 intent/action IDs, Realm and basis, roles, exact input/payload digests and
 separate draft/planned/signed/submitted/admitted/finality states. Signals,
 provider handles and in-memory ports never become journal truth. Reconnect
-re-reads current preconditions and checks idempotent identity before replay;
+re-reads current preconditions plus the named authorization-consumption or
+exact-idempotence state before replay;
 background events cannot select a signer, request a signature, guarantee a
 time, or delete an unresolved record. Foreground review/retry remains the
 universal path.
@@ -397,10 +399,11 @@ pause, expiry, revocation, and emergency stop
 invocation log and local receipt retention
 ```
 
-The semantic author Principal, actual signer/controller account, agent session,
-requesting App, submitter/relayer, and payer remain distinct. An agent session
-is not automatically an EFS Principal, and a model provider is never the
-author merely because it generated content.
+The semantic author Principal, controller authorization, signer descriptor,
+account sender, any 7702 authority/delegate, outer sender, agent session,
+requesting App, submitter/bundler/relayer, and paymaster/payer remain distinct.
+An agent session is not automatically an EFS Principal, and a model provider is
+never the author merely because it generated content.
 
 ### Untrusted-content boundary
 
@@ -420,7 +423,11 @@ The system must structurally separate control from data:
 5. Bind authorization to the exact final plan digest. Re-planning, changed
    calldata, changed carrier, changed recipient, or changed bytes invalidates
    the prior approval unless the mandate explicitly covers the change.
-6. Treat model output, memory, WebMCP tools, MCP/A2A metadata, web pages, files,
+6. Bind every authority-bearing plan to the named consumption or exact
+   idempotence rule in [[ethereum-standards-and-interop]]. An exact signed retry
+   must not create a second Realm-bound effect; agent and human paths use the
+   same nonce namespace and canonical read-back.
+7. Treat model output, memory, WebMCP tools, MCP/A2A metadata, web pages, files,
    package manifests, and catalog claims as untrusted inputs until the trusted
    schema and local policy say otherwise.
 
@@ -443,20 +450,23 @@ Adapters may expose a subset or translate transport, but they may not alter
 tool meaning, bypass capabilities, weaken read context, or become correctness
 authority.
 
-## Web standards posture as of 2026-08-15
+## Web and Ethereum standards posture as of 2026-08-23
 
 This matrix distinguishes useful shipped foundations from moving targets. It
-must be refreshed before implementation selection.
+must be refreshed before implementation selection. The complete Web-wide
+catalog screen, exact status corrections and EFS profile contract are in
+[[web-platform-standards-and-forward-profile]]; this section narrows them to
+privacy and agent consequences.
 
 | Capability | Current posture | EFS use |
 |---|---|---|
-| Semantic HTML, modern CSS Grid/container queries/logical properties and preference/input media features | standards foundation; individual forward features remain profile-tested | native accessible responsive root shell across desktop/mobile/installed contexts; not authority or isolation |
+| Semantic HTML, modern CSS Grid/container size queries/logical properties and preference/input media features | standards foundation; style/scroll-state and other forward features remain profile-tested | native accessible responsive root shell across desktop/mobile/installed contexts; not authority or isolation |
 | [Autonomous custom elements / Web Components](https://html.spec.whatwg.org/multipage/custom-elements.html) | broadly shipped platform composition | public UI/module integration boundary; not isolation |
 | [JavaScript modules and import maps](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) | document support is usable; Worker resolution differs | trusted base loading and bundle-time mapping; not package integrity or general runtime registry |
 | [TC39 Signals](https://github.com/tc39/proposal-signals) | owner-selected future JavaScript surface; exact polyfill/proposal revision still moving | single in-process reactive model; never persistence, RPC, capability or authority ABI |
 | [Dedicated Workers](https://html.spec.whatwg.org/multipage/workers.html) and `MessagePort` | broadly shipped | responsiveness and capability-shaped RPC; not a least-authority sandbox |
 | [WebAssembly core](https://webassembly.org/features/) | broadly shipped with feature variance; Core 3.0 is the current specification generation | selected portable non-DOM compute/service substrate in dedicated Workers; exact feature profile and budgets required |
-| [WIT worlds](https://component-model.bytecodealliance.org/design/worlds.html), [Component Model](https://github.com/WebAssembly/component-model), and [WASI](https://wasi.dev/releases/) | WIT/Component/WASI ecosystem is advancing; WASI 0.2/0.3 are labelled stable by the WASI release process, not W3C Recommendations or natively shipped browser ABIs; browsers still need generated Core-Wasm/ESM adapters | selected interface/target direction through replaceable exact adapters and minimal named imports; never ambient POSIX, grants or native-browser assumption |
+| [WIT worlds](https://component-model.bytecodealliance.org/design/worlds.html), [Component Model](https://github.com/WebAssembly/component-model), and [WASI](https://wasi.dev/releases/) | WIT/Component/WASI ecosystem is advancing; WASI 0.3.1 and the 0.2 compatibility line are released through the WASI process, not W3C Recommendations or natively shipped browser ABIs; browsers still need generated Core-Wasm/ESM adapters | selected interface/target direction through replaceable exact adapters and minimal named imports; never ambient POSIX, grants or native-browser assumption |
 | [Web App Manifest](https://www.w3.org/TR/appmanifest/) and [Service Workers](https://www.w3.org/TR/service-workers/) | manifest/install and worker lifecycle standards with platform differences | installable static profile and generation-safe offline shell after recovery proof; never semantic correctness or required guest entry |
 | [Storage Standard](https://storage.spec.whatwg.org/), [IndexedDB](https://w3c.github.io/IndexedDB/), and [File System/OPFS](https://fs.spec.whatwg.org/) | usable but quota/eviction/device behavior varies | tiered cache/private state with explicit durability limits |
 | [BCP 47](https://datatracker.ietf.org/doc/html/rfc5646), [Unicode LDML](https://www.unicode.org/reports/tr35/) and [ECMA-402 `Intl`](https://tc39.es/ecma402/) | durable language/locale standards with implementation data that evolves | versioned message/locale packs and localized presentation; never canonical protocol equality or signing input |
@@ -474,6 +484,19 @@ WebGPU, Wasm, browser model APIs, and future standards behind
 WebMCP does not replace an OS agent protocol. It exposes tools associated with
 a document/page environment and is not itself proof of installation,
 Principal identity, local grant, signer authority, or MCP wire compatibility.
+
+Ethereum agent and privacy ERCs are optional evidence adapters under the same
+law. [ERC-8001](https://eips.ethereum.org/EIPS/eip-8001) can describe exact
+multi-agent intent/acceptance, while Draft
+[ERC-8004](https://eips.ethereum.org/EIPS/eip-8004), Final
+[ERC-8126](https://eips.ethereum.org/EIPS/eip-8126), and emerging tool/wallet
+registries can contribute identity, reputation, validation and discovery
+observations. None creates an OS `AgentSession`, mandate, capability, install,
+launch, or safety verdict. [ERC-5564](https://eips.ethereum.org/EIPS/eip-5564)
+and [ERC-6538](https://eips.ethereum.org/EIPS/eip-6538) reserve a useful
+stealth-payment adapter but do not make public EFS use anonymous, replace a
+Principal, or authorize automatic scans/funding. Exact dispositions and
+fixtures are in [[ethereum-standards-and-interop]].
 
 ## Inference provider reserve
 
@@ -583,6 +606,9 @@ private data. Model output is evidence/untrusted input, not protocol truth.
       applicable live ports; already-public admitted actions remain public.
 - [ ] A scoped signer mandate and a human-confirmed signing policy both use the
       same ActionPlan digest and record which policy authorized the effect.
+- [ ] Replaying that exact signed digest exercises the same named
+      authorization-consumption or exact-idempotence rule as a human action;
+      an agent retry cannot create a second Realm-bound effect.
 - [ ] Local and remote inference providers can be swapped without changing the
       domain action schema; remote use visibly discloses the sent data class.
 

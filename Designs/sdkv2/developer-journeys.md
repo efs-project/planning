@@ -4,7 +4,7 @@
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[README]], [[ethereum-standards-census]], [[../efsv2/system-constitution]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/type-data-abi-boundary-pressure]]
 **Reviewers:** @local-authority (2026-08-22)
-**Last touched:** 2026-08-22
+**Last touched:** 2026-08-25
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/read-path #topic/onchain
 
@@ -18,7 +18,9 @@ state is not a successful developer experience.
 
 This document specifies journeys and invariants, not frozen method names. Terms
 such as `TypeRevision`, `PreparedRecord`, `ReadContext`, `ActionPlan`, and
-`ResourceOutcome` are illustrative candidate vocabulary.
+`ResourceOutcome` are illustrative candidate vocabulary. In the disposable
+`EXP-C0` lane, every such convenience view is carried inside the literal shared
+`ResultV0` outer envelope recorded in [[exp-c0-mvp-packet]].
 
 ## Cross-cutting experience contract
 
@@ -54,7 +56,7 @@ Every supported journey follows five rules:
 | Publish | Simulate the unchanged plan, request clear signing/authorization, submit through an injected EIP-2718 transaction or EIP-5792/account adapter, preserve per-layer receipts, wait for selected observation/finality, and perform canonical read-back. | “Simulated,” “wallet accepted,” “bundler accepted,” “submitted,” “included,” “authored,” “admitted,” and “currently selected” are separate outcomes. |
 | Admit to a Realm | Evaluate or submit the Realm's explicit admission operation; return the admission receipt, policy/version, actual authority basis, and any compare-and-swap precondition. | Realm admission does not retroactively create authorship, Type validity, global truth, or cross-Realm currentness. |
 | Read by exact identity | Read an exact object from Core or a qualified source; verify commitment/bytes; decode only under an accepted exact Type/profile; return raw plus view and evidence. | Unavailable or tampered bytes, unsupported profile, invalid value, and proved absence remain different results. |
-| Query by Type/field/reference | Execute an exact QueryProfile or named bounded query against Core, an indexer, or a reconstructed local source; page under a pinned basis and coverage claim. | An indexer/cache is acceleration evidence only. A missing or incomplete page cannot become `ABSENT` or `COMPLETE`. |
+| Query by Type/field/reference | Execute an exact QueryProfile or named bounded query against Core, an indexer, or a reconstructed local source; page under a pinned basis and coverage claim. | An indexer/cache is acceleration evidence only. A missing or incomplete page cannot become `ABSENT_PROVEN` or `COMPLETE`. |
 | Work with Bindings | Enumerate or point-read a declared Binding scope; preserve history/currentness basis, compare-and-swap state, withdrawals, conflicts, and completeness. | “No current binding” requires a proved complete scope/basis; it is not inferred from a timeout or cache miss. |
 | Resolve through a Lens | Supply the exact Lens/ResolutionPlan, risk-bearer policy, bounded Principal set, purpose, Type/View requirements, conflict rule, and basis; inspect all candidate evidence and the chosen result. | The Lens is explicit policy over evidence, not hidden universal truth. Unsupported policy and incomplete candidates remain visible. |
 | Preserve unknown data | Parse only the closed envelope/header needed to identify and bound evidence; retain the full original bytes and unknown sections; permit export/relay without semantic success. | Unknown is neither invalid nor empty. Re-encoding a partial decoded object never substitutes for original bytes. |
@@ -139,8 +141,11 @@ For a logical multi-call/page/log read, a caller may request `safe` or
 `finalized` as policy, but the adapter resolves it once to an explicit block
 hash/number and then uses EIP-1898/EIP-234-shaped qualification throughout.
 Provider failover must prove the same basis or return a new qualified attempt;
-it cannot silently resume at another head. Pagination cursors carry that basis
-and coverage so a chain of pages can be tested for duplicates and omissions.
+it cannot silently resume at another head. C0 pagination cursors additionally
+commit query identity, Type/Profile, Profile activation generation, Realm
+revision, ordering, admission high-water, limits, basis and coverage. A chain
+of pages can then be tested for duplicates/omissions and rejects mixed streams
+rather than silently resuming them.
 
 ### 4. Write planning
 
@@ -151,22 +156,9 @@ construct -> validate -> plan -> simulate -> clear-sign -> authorize -> submit
           -> receipt/finality -> canonical read-back
 ```
 
-The plan names every intended Core/Realm call, exact calldata or commitment,
-expected effect, signer/controller and author relationship, payer, admission
-authority, compare-and-swap precondition, cost bound, expiry, replay domain,
-and expected identifiers. Human UI and agent tooling render the same plan.
-Unknown operation kinds or post-plan mutation invalidate authorization.
+The plan names every intended Core/Realm call, exact calldata or commitment, expected effect, signer/controller and author relationship, payer, admission authority, compare-and-swap precondition, executor/dependency basis, cost bound, expiry, replay domain, and expected identifiers. Human UI and agent tooling render the same plan. Unknown operation kinds or post-plan mutation invalidate authorization.
 
-The wallet/account adapter is selected only after the plan exists. EIP-5792,
-ERC-4337/bundler/paymaster, or an audited wallet-owned EIP-7702 flow may carry
-the transaction, but each layer returns its own receipt. Account, provider,
-chain, delegate code, EntryPoint, calldata, cost, nonce, deadline, basis or
-clear-signing presentation drift invalidates the authorization and restarts at
-planning. Verification APIs permit only explicitly non-persistent `eth_call` or
-revert-based counterfactual simulation. They prohibit a persistent ERC-6492
-prepare/deploy mode. Any persistent factory, preparation or deployment step is
-a separate inspected action plan with its own authorization, submission and
-effect receipt.
+The wallet/account adapter is selected only after the plan exists. C0 retains three separately inspectable linked records: plan-signature verification; account authorization/submission; and canonical per-effect read-back. EIP-5792, ERC-4337/bundler/paymaster, or an audited wallet-owned EIP-7702 flow may carry the transaction, but their acceptance does not replace either EFS signature verification or canonical effect. Account, provider, chain, delegate code, EntryPoint, calldata, cost, nonce, deadline, basis or clear-signing presentation drift invalidates the authorization and restarts at planning. Verification APIs permit only explicitly non-persistent `eth_call` or revert-based counterfactual simulation. They prohibit a persistent ERC-6492 prepare/deploy mode. Any persistent factory, preparation or deployment step is a separate inspected plan with its own authorization, submission and effect recovery.
 
 ### 5. Solidity consumption
 
@@ -253,7 +245,7 @@ The executable form of this ledger is specified in [[experiment-program]].
   bound, and preserve an unknown Type without embedding an open schema VM?
 - [ ] Which exact result axes belong in the cross-language contract rather
   than language-specific ergonomic wrappers?
-- [ ] Which query coverage/completeness proof can make `ABSENT` honest for each
+- [ ] Which query coverage/completeness proof can make `ABSENT_PROVEN` honest for each
   adopted Core index and Binding scope?
 - [ ] Which signer/controller/Principal surface survives the Core authority
   bakeoff while preserving the owner-directed uniform product experience?

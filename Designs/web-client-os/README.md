@@ -5,7 +5,7 @@
 **Depends on:** [[Designs/efsv2/README]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/open-web-app-store/README]]
 **Inputs:** [[Designs/clientv2/README]] (historical requirements and mechanism evidence)
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14), @open-web-app-store-pm boundary review (2026-08-14), @os-drives-pm boundary review (2026-08-14)
-**Last touched:** 2026-08-22
+**Last touched:** 2026-08-23
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/cypherpunk-os #topic/app-model #topic/privacy #topic/read-path
 
@@ -34,8 +34,8 @@ they are not confined to a second-class read-only product.
 
 ## Direct owner direction recorded for this round
 
-The following product requirements were supplied directly by James on
-2026-08-14 and 2026-08-15. They guide this draft but do not freeze protocol
+The following product requirements were supplied directly by James from
+2026-08-14 through 2026-08-23. They guide this draft but do not freeze protocol
 bytes or bypass the normal design promotion ceremony.
 
 1. Loading speed is a core product requirement. A linked file or folder must
@@ -61,7 +61,8 @@ bytes or bypass the normal design promotion ceremony.
 7. The client uses one uniform `PrincipalId` surface. A Principal may have a
    mutable default/main controller account for ordinary workflows, but the
    Principal is stable identity and every operation still names and
-   historically verifies its actual signer account. Owner-supplied example:
+   historically verifies its actual signer descriptor and, when applicable,
+   the account it used. Owner-supplied example:
    `JamesCarnley.eth` may have three controller keys while preferring
    `0xaCf4C2950107eF9b1C37faA1F9a866C8F0da88b9` for routine routing; another
    authorized signer remains possible and must be recorded exactly.
@@ -152,6 +153,21 @@ bytes or bypass the normal design promotion ceremony.
     active inner hardening candidate; opaque iframes remain the full-DOM lane;
     and Wasm/WIT remains foundational. Exact profiles and claims must be
     measured, and none receives ambient authority by optimism.
+27. Use current Ethereum EIPs/ERCs deliberately at replaceable client, SDK,
+    wallet, read, signature, content, contract and agent boundaries. Proposal
+    status is not deployment/support/safety evidence; chain is not Realm;
+    Locator, registry, interface, metadata, provider announcement and agent
+    score are never authority. Guest boot performs no wallet discovery. The
+    complete pinned corpus screen and dispositions are in
+    [[ethereum-standards-and-interop]].
+28. Screen the whole Web standards surface with the same seriousness as the
+    EIP/ERC pass. Useful modern or emerging HTML, CSS, JavaScript, browser,
+    accessibility, internationalization, WebAssembly, WASI, media, compute and
+    agent standards are first-class design inputs even before universal
+    shipment. Standards maturity selects an exact adapter, build target and
+    full/reduced/unsupported/rescue outcome; it is not a conservative veto.
+    The reproducible census and current dispositions are in
+    [[web-platform-standards-and-forward-profile]].
 
 ## Current recommendation
 
@@ -208,6 +224,12 @@ The detailed layer and extension contracts are in [[architecture-and-modules]].
 The first product slice and acceptance tests are in [[mvp-and-acceptance]].
 The selected standards surface and dated library/build recommendations are in
 [[technology-foundation]].
+The pinned Web-platform catalog index, primary-family review, forward feature dispositions and
+versioned browser/profile contract are in
+[[web-platform-standards-and-forward-profile]].
+The Ethereum read, wallet, signature, URI/content, contract-introspection,
+privacy and agent interoperability boundary is in
+[[ethereum-standards-and-interop]].
 The finite generated-code and app-facing boundary against the draft layered
 Type/Data ABI is in [[type-data-abi-boundary-pressure]].
 Generic specific-App links, minimum-time-to-data rules, practical SES/LavaMoat,
@@ -223,6 +245,8 @@ boundary are in [[app-runtime-and-direct-launch]].
 | [[architecture-and-modules]] | Boot layers, logical package boundaries, module interfaces/configuration, lazy loading, fallback, security classes, and repository/tooling recommendation |
 | [[app-runtime-and-direct-launch]] | Generic exact/follow App deep links, direct minimum-time-to-data launch, start classes, SES/LavaMoat/Endo, opaque iframe and Wasm lanes, instance leases, App SDK and fallback contracts |
 | [[technology-foundation]] | Standards-first dynamic SPA, Signals state, Web Components/Lit/Web Awesome boundary, EFS design language, responsive/installable/offline delivery, i18n/accessibility, app lifecycle, and build/release posture |
+| [[web-platform-standards-and-forward-profile]] | Reproducible four-catalog Web/ECMAScript/Wasm/WASI index plus primary-family review, non-conservative feature dispositions, named delivery/runtime profiles, negative selections and conformance program |
+| [[ethereum-standards-and-interop]] | Complete pinned EIP/ERC synthesis; exact-read, wallet, signature, URI/content, contract, privacy, cross-chain and agent adapter dispositions; SDK pressure and acceptance fixtures |
 | [[system-profiles-and-generations]] | Nix/Guix recovery, exact and follow profiles, safe social sharing, deterministic composition, System Configuration Manager, local activation/state/grant generations, rollback/GC/export, and the foundational Wasm/WIT/Component/WASI module direction |
 | [[mvp-and-acceptance]] | Fast guest read plus official basic File Browser writes over proposal-labelled adapters, user and agent journeys, threat boundaries, performance budgets, acceptance tests, and EFS v2 pressure |
 | [[type-data-abi-boundary-pressure]] | Finite exact-Type consumer adapter, generated codec/domain-DTO boundary, exhaustive read/byte outcomes, one Type-evolution fixture, and two generic Core pressure packets |
@@ -285,8 +309,9 @@ crosses a Web/client integration surface.
   useful Files data without wallet detection, account creation, Commons,
   hosted EFS indexing, or OS boot.
 - The official MVP is also a write-capable File Browser. Its public action
-  surface uses `PrincipalId`, while a mutable default controller account and
-  the actual historically verified signer remain separate.
+  surface uses `PrincipalId`, while a mutable default controller account, the
+  actual historically verified signer descriptor, and every execution/payer
+  account remain separate.
 - Rich Unicode/NFC names plus reversible host aliases are the Files naming
   direction. A 64-Principal contract Lens is the measurement target; Lens
   entries are Principals rather than underlying controller keys.
@@ -358,7 +383,7 @@ preserves a requirement, not necessarily its old mechanism.
 | Historical `gx` link auto-boots another person's generation | **Retire** | Every shared setup enters inert Inspect; Try, Adopt, Fork, personal-resource attachment and Activate are explicit independent transitions |
 | Full profile/private-store/package hydration before useful UI | **Retire** | Useful guest pixels precede all optional account, private, package, agent, and Shell hydration |
 | Cache, journal, offline, migrations, and recovery requirements | **Retain, defer mechanisms** | Cache is disposable; irreplaceable local/private state needs separate versioned migration/export/recovery proof before OS claims |
-| Persona/wallet/action separation | **Revise** | Uniform `PrincipalId`; mutable default account remains preference; actual signer/controller history, requester, submitter, and payer stay explicit |
+| Persona/wallet/action separation | **Revise** | Uniform `PrincipalId`; mutable default account remains preference; controller authorization, signer descriptor, account sender, requester, submitter/bundler/relayer, 7702 roles, and payer stay explicit |
 | Agent sessions with plans, budgets, taint, and receipts | **Retain and broaden** | Agents are peer users. High-risk human checkpoints are default policy, not a permanent ban on explicitly delegated agent workflows |
 | Network broker and privacy-center requirements | **Retain, simplify MVP** | Start with audited explicit endpoints and zero hidden traffic; evolve toward capability-scoped network services without claiming anonymity |
 | Fragment grammar, handler grammar, exact package schema, and surface schema | **Retire as inherited bytes** | Recover use cases and fixtures, then derive the smallest versioned route/module/action schemas from current EFS v2 |
@@ -428,8 +453,9 @@ authority.
 
 1. Review and iterate these design files with James and adjacent PMs.
 2. Before any authorized Web experiment or implementation, retain the selected
-   guidance snapshot, instantiate the EFS feature/profile evidence ledgers and
-   put the native-first review fields in the repository contribution path.
+   guidance snapshot, reproduce or deliberately refresh the pinned standards
+   census, instantiate the EFS feature/profile evidence ledgers and put the
+   native-first review fields in the repository contribution path.
 3. **MVP critical path:** freeze only the symbolic inputs in
    [[type-data-abi-boundary-pressure]], then—after explicit experiment
    authorization—convert its guest read and official wallet-owned File Browser

@@ -2,7 +2,7 @@
 
 **Status:** draft — owner-directed product architecture and researched runtime candidate; route bytes, runner profiles, package format, capability IDL, security claims, performance budgets, and implementation remain evidence-gated
 **Target repos:** planning, client, sdk
-**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/open-web-app-store/architecture]]
+**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/web-client-os/ethereum-standards-and-interop]], [[Designs/open-web-app-store/architecture]]
 **Inputs:** [[Designs/clientv2/fable-third-party-app-model-handoff]], [[Designs/clientv2/sdk-boundaries]]
 **Reviewers:** @direct-app-architecture (2026-08-22), @runtime-security (2026-08-22)
 **Last touched:** 2026-08-22
@@ -221,6 +221,14 @@ DirectAppLaunchPlan
 does not flow back into it, and cannot be reconstructed from publisher strings
 alone. A prepared set proves exact retained bytes; it neither grants authority
 nor starts code.
+
+Ethereum standards do not create an alternate launch lane. ERC-5169 client
+script URIs, ERC-5219 contract resources, Web3 URLs, ENS/contenthash,
+contract/token metadata, interface registries, agent/tool registries and
+executable proposal calldata remain source-qualified inert evidence. The host
+still requires exact verified bootstrap and eager execution closure, a chosen
+runner realization, explicit start class, effective grants and an instance
+lease. See [[ethereum-standards-and-interop]].
 
 Mutable fetch/retention progress, availability, health, failures and teardown
 remain in their status ledgers and never enter the launch-plan or install-

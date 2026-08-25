@@ -8,6 +8,31 @@ A lightweight parking lot for future ideas, "we should do X someday" drops, and 
 
 ## Open
 
+### Curator-qualified Open Alternatives starter catalog
+*(James, 2026-08-24; prompted by [debloat.dev](https://debloat.dev/) and its [HN discussion](https://news.ycombinator.com/item?id=49410362))*
+
+Explore a Debloat-like **Open Alternatives catalog** as a candidate EFS demo
+dataset or client-recommended catalog: fast guest browsing that answers "what
+open-source project replaces X?", with stable project pages, exact releases,
+feature gaps, license/platform evidence, discussion, plural rankings, and a
+Wanted request-to-solution workflow. Its narrow task-shaped UX is more useful
+than making one undifferentiated index answer every discovery question.
+
+"Default" must mean a replaceable, curator-qualified recommendation over an
+exact finite catalog edition—not an official bit, global Core truth, or required
+intermediary for direct data links. The live directory is discovery evidence,
+not an authorized seed: no reusable catalog-data license or complete immutable
+export was found, its fields are mutable operator claims, and its anonymous
+feedback and small rating samples do not establish quality or safety. Do not
+mirror its descriptions, ratings, comments, or database without permission.
+
+If this becomes a real fixture, independently verify roughly 10–20 projects
+from primary repositories/releases/licenses and include competing curators, a
+project family, partial replacement, moved/stale repository, disputed claim,
+Wanted request, honest `UNKNOWN`/`PARTIAL`, direct guest links, and
+reconstruction after the original directory/index disappears. It adds no new
+Core primitive. Full intake: [[Reviews/2026-08-24-debloat-directory-intake]].
+
 ### Media lifecycle workload pressure-test portfolio
 *(James, 2026-08-14)*
 

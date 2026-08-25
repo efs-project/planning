@@ -4,7 +4,7 @@
 **Target repos:** planning, contracts, sdk, client
 **Depends on:** [[Designs/efsv2/README]], [[query-and-indexing]]
 **Reviewers:** 2026-08-14 — independent authority/architecture pass; no Critical or Important finding after repair
-**Last touched:** 2026-08-14
+**Last touched:** 2026-08-22
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/media-library #topic/content #topic/privacy #topic/read-path
 
@@ -176,6 +176,35 @@ The Stage A passive-range machine in
 host-neutral range contract in
 [[Designs/efsv2/mountable-filesystem-semantics]] are the principal inputs.
 
+### Ethereum history and content-resolution pressure
+
+The
+[SDK v2 Ethereum standards census at `4d3e736`](https://github.com/efs-project/planning/blob/4d3e736524ca04cdadfb26fdd628fcd206fc8084/Designs/sdkv2/ethereum-standards-census.md)
+is dated pressure evidence, not a media carrier, privacy scheme, address format
+or SDK API adoption. It reinforces these existing boundaries:
+
+- EIP-4844/7516 blob commitments and fee observations are ephemeral
+  carrier/availability evidence. Contracts cannot retrieve the blob bytes, and
+  availability does not meet the century-preservation contract. Any useful
+  bytes must be independently verified and retained through a durable lane.
+- EIP-4444/7642 pressure means a current RPC may not serve old bodies or
+  receipts. History capability, requested basis and coverage remain explicit;
+  missing history makes the affected provenance, admission or currentness
+  qualification `UNKNOWN`, never absent or false.
+- ERC-3668, ERC-4804, ERC-5219 and ERC-1577 are optional resolution/import
+  adapters. They yield inert Locator/source evidence with the exact request,
+  resolver/contract, basis and response provenance retained. Independent byte
+  verification, media classification and safe presentation still apply.
+- ERC-7930/7950 address and transaction-reference formats are lossless,
+  versioned import/display codecs only. ERC-5564/6538 stealth-address patterns
+  may later supply optional privacy/Locator evidence, but establish no EFS
+  Principal, rights truth, content confidentiality or private-media guarantee.
+
+The generic SDK should preserve the causal availability reason and raw evidence
+needed to distinguish history unavailable, carrier unavailable, resolver
+failure and byte mismatch. These are result qualifications and Locator-attempt
+facts, not new media Types or Core truth.
+
 ### Derivation and media-processing worker
 
 Thumbnailing, metadata sanitation, waveform generation, remuxing and
@@ -293,6 +322,10 @@ export format, not the Core data model. See
 - `UNKNOWN`, incomplete coverage and provider failure never become “no result.”
 - A valid record with unavailable bytes stays visible as metadata with an
   unavailable-media state.
+- Carrier availability and historical-evidence availability remain separate:
+  verified bytes do not prove retrievable provenance/history, while pruned
+  history does not erase a present Exact Blob or justify rejecting verified
+  fallback bytes.
 - A digest mismatch blocks only the affected Exact Blob/Locator observation;
   it does not erase the Work or silently accept a fallback without verification.
 - Loss of a disposable index triggers rebuild or degraded bounded browsing;
@@ -322,6 +355,11 @@ reconstruction. Do not replace it with a prose-only example.
 - deleting every project cache/index still permits reconstruction from declared
   inputs;
 - one Locator corrupts, one is unavailable and one verifies;
+- at one pinned basis, old RPC bodies/receipts disappear, an ephemeral blob is
+  no longer retrievable, one external resolver returns mismatched bytes and one
+  durable mirror verifies; identity stays present, affected history is
+  `UNKNOWN`, failed byte attempts remain explicit and the verified fallback
+  succeeds without identity drift;
 - a viewer policy blocks the media request before any thumbnail fetch; and
 - Booru and Plex surfaces resolve the same Work/Blob identities.
 

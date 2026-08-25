@@ -4,7 +4,7 @@
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[../efsv2/README]], [[../efsv2/system-constitution]], [[../efsv2/core-architecture-candidate]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/README]], [[../web-client-os/type-data-abi-boundary-pressure]]
 **Inputs:** the existing `sdk/` repository and older SDK designs as historical evidence only; Data Explorer draft at local-only planning commit `08bb5f2906191f0d87624d9a6ecc6788a8b2754d` on `codex/data-explorer-pm` (`Designs/data-explorer/`)
-**Last touched:** 2026-08-22
+**Last touched:** 2026-08-25
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/read-path #topic/onchain
 
@@ -24,6 +24,14 @@
   Core module topology, contract ABI, helper deployment, and release topology
   all wait for evidence and the normal owner freeze ceremony.
 
+**C0 handoff:** the sealed `EXP-C0` semantic packet at separately checked-out
+planning commit `a68b00a` now supplies the shared experiment law: every layer
+projects one literal `ResultV0` outer envelope; cursors bind Profile generation,
+Realm revision, high-water and basis; and plan-signature, account/submission,
+and canonical-effect receipts remain separate. [[exp-c0-mvp-packet]] records
+the SDK-only build boundary and the remaining candidate Core packet; it does
+not merge or freeze the C0 source packet.
+
 The durable idea is not “a TypeScript library.” It is a reproducible contract
 between exact evidence and replaceable tools: historical bytes remain usable
 after today’s npm packages, RPC providers, indexers, build systems, and EFS
@@ -39,7 +47,7 @@ candidate SDK.
 
 1. Exact-Type-first boundaries with raw canonical evidence retained beside any
    decoded value.
-2. Exhaustive read results that keep `UNKNOWN`, `PARTIAL`, `ABSENT`,
+2. Exhaustive read results that keep `UNKNOWN`, `PARTIAL`, `ABSENT_PROVEN`,
    `CONFLICT`, `INVALID`, `UNSUPPORTED`, byte availability, authority, basis,
    completeness, and currentness separate.
 3. Explicit read capabilities, signers, submitters, payers, Realm admission,
@@ -149,6 +157,7 @@ constitution/candidates, then older evidence. This set cannot override Core.
 | [[architecture-candidate]] | Three arms, recommended experiment, generation/runtime/onchain split, logical modules, topology candidates, compatibility, result model, and security invariants |
 | [[sdk-pm-charter]] | Durable SDK PM mandate, ownership boundaries, coordination contracts, and release discipline |
 | [[experiment-program]] | Adversarial matrix, proposed measurement tripwires, kill criteria, and production stop conditions |
+| [[exp-c0-mvp-packet]] | Source-locked C0 shared-envelope handoff, first disposable TypeScript/generated/Solidity slice, Core dependency packet, and preservation fixture |
 | [[web-client-os-boundary-pressure]] | Web Client/OS direct Files/shell, independent Data Explorer, confined-app consumption, their common semantic adapter, and runtime-neutral CapabilityRPC assessment |
 | [[owner-rulings]] | Dated founder mandate and retained authority boundaries |
 | [[owner-decision-inbox]] | Evidence-gated choices; nothing needs an immediate founder answer |

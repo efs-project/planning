@@ -1,0 +1,90 @@
+{
+  "fixtureVersion": "exp-c0-sdk-mvp-source-only/0",
+  "requiredResultFields": [
+    "kind",
+    "subjectOrFiniteDomain",
+    "realm",
+    "profile",
+    "payload",
+    "commitments"
+  ],
+  "requiredProfileAxes": [
+    "presence",
+    "coverage",
+    "support",
+    "validation",
+    "authority",
+    "lifecycle",
+    "selection",
+    "bytes",
+    "effect",
+    "projectionIntegrity"
+  ],
+  "requiredCursorCoordinates": [
+    "queryIdentity",
+    "typeIdentity",
+    "queryProfileIdentity",
+    "activationGeneration",
+    "realmRevision",
+    "ordering",
+    "admissionHighWater",
+    "basis",
+    "coverage"
+  ],
+  "cases": [
+    {
+      "id": "Q1C_EMPTY_PARTIAL_PAGE",
+      "kind": "page",
+      "subjectOrFiniteDomain": "declared-finite-domain",
+      "realm": { "realmId": "R0", "realmRevision": "0", "executionCoordinate": "admission:7", "admissionHighWater": "7" },
+      "profile": { "presence": "FOUND", "coverage": "PARTIAL", "support": "SUPPORTED", "validation": "SEMANTICALLY_VALID", "authority": "AUTHORIZED", "lifecycle": "ADMITTED", "selection": "NOT_APPLICABLE", "bytes": "NOT_APPLICABLE", "effect": "NOT_APPLICABLE", "projectionIntegrity": "NOT_APPLICABLE" },
+      "payload": { "rawEnvelope": "retained", "page": { "rows": [], "cursor": { "queryIdentity": "Q0", "typeIdentity": "T_NOTE", "queryProfileIdentity": "QP0", "activationGeneration": "1", "realmRevision": "0", "ordering": "admission-ascending", "admissionHighWater": "7", "basis": "block:0xabc", "coverage": "PARTIAL" } } },
+      "commitments": { "protocolResultAbi": "candidate-v0", "queryProfile": "QP0" }
+    },
+    {
+      "id": "Q4A_STALE_CURSOR",
+      "kind": "page",
+      "subjectOrFiniteDomain": "declared-finite-domain",
+      "realm": { "realmId": "R0", "realmRevision": "1", "executionCoordinate": "admission:9", "admissionHighWater": "9" },
+      "profile": { "presence": "UNKNOWN", "coverage": "PARTIAL", "support": "SUPPORTED", "validation": "NOT_APPLICABLE", "authority": "NOT_APPLICABLE", "lifecycle": "NOT_APPLICABLE", "selection": "NOT_APPLICABLE", "bytes": "NOT_APPLICABLE", "effect": "NOT_APPLICABLE", "projectionIntegrity": "NOT_APPLICABLE" },
+      "payload": { "rawEnvelope": "retained", "page": { "rows": [], "cursor": { "queryIdentity": "Q0", "typeIdentity": "T_NOTE", "queryProfileIdentity": "QP0", "activationGeneration": "0", "realmRevision": "0", "ordering": "admission-ascending", "admissionHighWater": "7", "basis": "block:0xabc", "coverage": "PARTIAL" } } },
+      "commitments": { "protocolResultAbi": "candidate-v0", "queryProfile": "QP0" }
+    },
+    {
+      "id": "X0B_BYTES_UNAVAILABLE",
+      "kind": "bytes",
+      "subjectOrFiniteDomain": "record:REC_B",
+      "realm": { "realmId": "R0", "realmRevision": "0", "executionCoordinate": "admission:7", "admissionHighWater": "7" },
+      "profile": { "presence": "FOUND", "coverage": "COMPLETE", "support": "SUPPORTED", "validation": "SEMANTICALLY_VALID", "authority": "AUTHORIZED", "lifecycle": "ADMITTED", "selection": "NOT_APPLICABLE", "bytes": "UNAVAILABLE", "effect": "NOT_APPLICABLE", "projectionIntegrity": "NOT_APPLICABLE" },
+      "payload": { "rawEnvelope": "retained", "byteRange": { "attempts": ["locator-a-unavailable"] } },
+      "commitments": { "protocolResultAbi": "candidate-v0", "type": "T_NOTE" }
+    },
+    {
+      "id": "X1_DROPPED_SUBMISSION_CHANNEL",
+      "kind": "effect-recovery",
+      "subjectOrFiniteDomain": "operation:OP0",
+      "realm": { "realmId": "R0", "realmRevision": "0", "executionCoordinate": "unobserved", "admissionHighWater": "7" },
+      "profile": { "presence": "NOT_APPLICABLE", "coverage": "NOT_APPLICABLE", "support": "SUPPORTED", "validation": "NOT_APPLICABLE", "authority": "UNPROVEN", "lifecycle": "NOT_APPLICABLE", "selection": "NOT_APPLICABLE", "bytes": "NOT_APPLICABLE", "effect": "UNKNOWN", "projectionIntegrity": "NOT_APPLICABLE" },
+      "payload": { "rawEnvelope": "retained", "receipt": { "planSignature": "linked", "accountSubmission": "acknowledged", "canonicalEffect": "unobserved" } },
+      "commitments": { "protocolResultAbi": "candidate-v0", "operationPlan": "OP0" }
+    },
+    {
+      "id": "B1_STALE_CAS_ZERO_EFFECT",
+      "kind": "effect-recovery",
+      "subjectOrFiniteDomain": "operation:OP1",
+      "realm": { "realmId": "R0", "realmRevision": "0", "executionCoordinate": "admission:8", "admissionHighWater": "8" },
+      "profile": { "presence": "NOT_APPLICABLE", "coverage": "COMPLETE", "support": "SUPPORTED", "validation": "SEMANTICALLY_VALID", "authority": "AUTHORIZED", "lifecycle": "NOT_APPLICABLE", "selection": "NOT_APPLICABLE", "bytes": "NOT_APPLICABLE", "effect": "NOT_COMMITTED_PROVEN", "projectionIntegrity": "NOT_APPLICABLE" },
+      "payload": { "rawEnvelope": "retained", "receipt": { "planSignature": "verified", "accountSubmission": "included", "canonicalEffect": "pre-post-equal" } },
+      "commitments": { "protocolResultAbi": "candidate-v0", "operationPlan": "OP1" }
+    },
+    {
+      "id": "Z1A_RECONSTRUCTION_MISSING_REQUIRED_ITEM",
+      "kind": "reconstruction",
+      "subjectOrFiniteDomain": "projection:R0",
+      "realm": { "realmId": "R0", "realmRevision": "0", "executionCoordinate": "admission:8", "admissionHighWater": "8" },
+      "profile": { "presence": "UNKNOWN", "coverage": "PARTIAL", "support": "SUPPORTED", "validation": "NOT_APPLICABLE", "authority": "NOT_APPLICABLE", "lifecycle": "NOT_APPLICABLE", "selection": "NOT_APPLICABLE", "bytes": "NOT_APPLICABLE", "effect": "NOT_APPLICABLE", "projectionIntegrity": "MISSING_REQUIRED_ITEM" },
+      "payload": { "rawEnvelope": "retained", "projection": { "missing": ["record:REC_B"] } },
+      "commitments": { "protocolResultAbi": "candidate-v0", "projectionManifest": "P0" }
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[README]], [[research-precedents]], [[ethereum-standards-census]], [[developer-journeys]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/type-data-abi-boundary-pressure]]
 **Reviewers:** @offchain-precedents (2026-08-22), @onchain-precedents (2026-08-22), @local-authority (2026-08-22)
-**Last touched:** 2026-08-22
+**Last touched:** 2026-08-25
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/onchain #topic/read-path
 
@@ -243,28 +243,51 @@ The SDK never folds these clocks into one semver:
 
 ## Result and error model
 
+### `EXP-C0` shared outer envelope
+
+The independently sealed semantic packet at planning commit `a68b00a` is an
+input to this draft, not an adopted ABI. For the disposable C0 lane, the
+cross-language contract is nevertheless literal: every Core, Solidity, SDK,
+and product result starts as the same retained `ResultV0` outer envelope. A
+generated or product-specific resource DTO is payload inside that envelope, not
+an alternate result law.
+
+```text
+ResultV0 {
+  kind + exact subject or declared finite domain
+  RealmId + RealmRevision + execution coordinate + admission high-water
+  optional observer block hash/number/state-root/source/finality/freshness
+  complete result profile { presence, coverage, support, validation, authority,
+    lifecycle, selection, bytes, effect, projection integrity }
+  raw envelope plus optional value/page/byte-range/receipt/projection payload
+  exact policy/profile/code/provenance/limits commitments and bounded diagnostics
+}
+```
+
+Core supplies only the execution/Realm state facts it can establish. An
+offchain observer adds a block-hash-qualified source, finality, canonicality,
+proof and history-availability evidence without claiming that provider output
+is Core truth. The envelope must retain raw bytes when obtained and must be
+serializable as a fixture/export record without converting a decoded DTO back
+into identity or signature bytes.
+
 ### Expected evidence states are values
 
 The cross-language model has exhaustive expected outcomes. The exact syntax is
 not frozen; the required distinctions are:
 
 ```text
-ResourceOutcome<T> =
-  PRESENT    { value, raw, identity, authority, basis, coverage, validation, bytes }
-  PARTIAL    { known, raw?, missing, basis, coverage, reason }
-  UNKNOWN    { subject, attemptedBasis, reason, rawEvidence?, retryability? }
-  ABSENT     { subject, completeNegativeBasis, coverage }
-  MASKED     { subject, explicitPolicy, basis }
-  CONFLICT   { candidates, policy, basis }
-  INVALID    { raw?, diagnostics, basis }
-  UNSUPPORTED{ subject, requiredCapability, observedCapability?, rawEvidence? }
+ResourceOutcome<T> = ResultV0 where `profile.presence` is
+  FOUND | ABSENT_PROVEN | UNKNOWN | CONFLICT | OPAQUE | MASKED | NOT_APPLICABLE
 ```
 
-`UNKNOWN` with no raw evidence means the subject could not be observed under
-the attempted basis. Located but opaque/unrecognized evidence normally returns
-`UNSUPPORTED` with its immutable raw envelope; partial or invalid evidence
-retains raw bytes whenever they were actually obtained. All evidence-bearing
-outcomes remain byte-for-byte relayable without semantic success.
+`UNKNOWN` with no raw evidence means the subject could not be observed under the
+attempted basis. Located but opaque/unrecognized evidence has
+`support=UNSUPPORTED` and its immutable raw envelope; partial or invalid
+evidence retains raw bytes whenever they were actually obtained. All
+evidence-bearing outcomes remain byte-for-byte relayable without semantic
+success. A convenience discriminant may be derived for a language façade, but
+it is never the stored, exported, cross-language, or product boundary.
 
 Byte availability is a separate outcome such as verified present,
 unavailable, commitment mismatch/tampered, unsupported locator, policy-blocked,
@@ -272,15 +295,16 @@ or unknown. A resource may be present while its payload bytes are unavailable.
 Plan generation similarly distinguishes ready, needs authority, needs funds,
 needs bytes, conflict, unsupported, invalid, and unknown.
 
-Effect completion has its own per-effect receipt algebra. Illustrative
-discriminants are `EFFECT_COMMITTED { basis, evidence }`,
-`EFFECT_NOT_COMMITTED { completeBasis, evidence }`,
-`EFFECT_UNKNOWN { attemptedBasis, reason, recovery? }`, and
-`EFFECT_REJECTED { reason, evidence }`. A multi-effect action carries one entry
-per effect. Transport loss, cancellation or revocation races never coerce
-`EFFECT_UNKNOWN` into committed or not committed.
+Effect completion has its own per-effect receipt algebra inside
+`ResultV0.profile.effect`: `COMMITTED`, `NOT_COMMITTED_PROVEN`, `UNKNOWN`, or
+`NOT_APPLICABLE`. A locally rejected plan, simulation, signature, wallet, or
+submission is a bounded diagnostic or planning/submission outcome—not an
+`EFFECT_REJECTED` canonical-effect state. `NOT_COMMITTED_PROVEN` requires the
+exact pre/post state basis to prove equality. A multi-effect action carries one
+entry per effect; transport loss, cancellation or revocation races never coerce
+`UNKNOWN` into committed or proved-not-committed.
 
-Only a complete exact negative basis permits `ABSENT`. A protocol negative
+Only a complete exact negative basis permits `ABSENT_PROVEN`. A protocol negative
 cache may contain that exact absence or a `MASKED` result backed by a retained
 selected whiteout/policy and scope; it preserves the discriminant and never
 turns a local presentation mask into protocol absence. `UNKNOWN`, `PARTIAL`,
@@ -332,6 +356,14 @@ Negotiation is positive and operation-specific:
 7. Reads may fall back to another explicitly configured source while retaining
    both attempts. Writes must re-plan and re-authorize if any accepted tuple,
    calldata, cost, signer, or destination changes.
+
+### C0 page, receipt, and reconstruction commitments
+
+`ResultV0` page payloads carry an opaque resumable cursor. Its candidate preimage commits query identity, exact Type and QueryProfile identity, activation generation, Realm revision, ordering, admission high-water, exact basis, limits, and coverage state. A cursor from another generation, ordering, high-water, Realm revision or basis is rejected; a product opens a new stream or presents an explicit comparison rather than merging pages.
+
+The action payload links three receipts without flattening their digests: (1) **plan-signature verification** records exact EFS plan/message digest, verifier strategy, signer/account, historical code/dependency and chain/Realm basis, result, availability and diagnostics; (2) **account authorization/submission** records its own transaction/call, user-operation, delegation, or wallet-call commitment plus transport receipts, bound back to the unchanged plan/effect commitment; and (3) **canonical effect recovery** records exact per-effect read-back basis, matching state evidence and C0 effect outcome. Only the third is the upgrade path after a lost channel.
+
+Reconstruction imports a finite raw state-projection closure from bootstrap and an authenticated exact basis. The closure names member order, count/root/digest and availability. Missing, substituted, duplicate or reordered members are qualified projection-integrity outcomes; logs, indexers, caches, wallet state, Commons and a manual module list are never required inputs.
 
 ## Onchain shape
 
@@ -427,13 +459,19 @@ provide enough exact contract for:
 - a result ABI that distinguishes absence, partial, unknown, invalid,
   unsupported and conflict where those states are possible;
 - page/basis/coverage evidence adequate to support honest completeness;
+- execution coordinate, Realm revision, admission high-water and enough bounded
+  commitments to populate the Core-owned portion of `ResultV0`;
+- cursor/Profile-generation/ordering/high-water/basis commitments sufficient to
+  reject mixed page streams;
 - historical authority and implementation basis without retroactive
   reinterpretation;
 - explicit execution/RPC/account/deployment profile inputs where Core behavior
   depends on chain capabilities, without asking Core to adopt SDK-discovered
   EIP/ERC bytes;
-- operation-bound write plans and deterministic read-back; and
-- complete archive closure and independent reconstruction.
+- operation-bound write plans and deterministic read-back;
+- separately linked plan-signature, account/submission, and canonical-effect
+  recovery receipts; and
+- complete state-projection closure and independent reconstruction.
 
 A requested Core change requires a multi-consumer failing fixture, the smallest
 missing semantic, an exact falsifier, and evidence that an SDK/Realm/Lens/
