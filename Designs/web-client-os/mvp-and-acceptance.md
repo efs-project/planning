@@ -2,9 +2,9 @@
 
 **Status:** draft — smallest official Web Client product slice for iteration; no implementation or protocol/profile freeze is authorized
 **Target repos:** planning, client, sdk
-**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/technology-foundation]], [[Designs/web-client-os/ethereum-standards-and-interop]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/efsv2/core-architecture-candidate]]
+**Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/technology-foundation]], [[Designs/web-client-os/web-platform-standards-and-forward-profile]], [[Designs/web-client-os/ethereum-standards-and-interop]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/efsv2/core-architecture-candidate]]
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14)
-**Last touched:** 2026-08-22
+**Last touched:** 2026-08-23
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/read-path #topic/files #topic/actions #topic/performance
 
@@ -515,6 +515,18 @@ plan rather than silently redefining the target.
       general agent runtime, inference model, or private-store initialization.
 - [ ] Background prefetch is absent by default in privacy/data-saver fixtures
       and never contacts an endpoint not shown in network policy.
+- [ ] The release carries a generated `EfsWebProfile` ledger. Each selected
+      forward feature has an exact spec/proposal revision, purpose, build or
+      header prerequisite, semantic probe, privacy/permission effects,
+      full/reduced/unsupported/rescue behavior and measured browser/device/AT
+      evidence. Baseline or property existence alone cannot pass the row.
+- [ ] A parser-negative build proves that proposal syntax unsupported by the
+      guest target never reaches its critical bundle, while the forward target
+      uses the standard-shaped source/API rather than a legacy architecture.
+- [ ] Navigation, BFCache, prerender and session-restore fixtures cannot revive
+      an expired grant, App instance, wallet session, transient activation or
+      stale action plan. Presentation may restore only after authority state is
+      independently revalidated.
 
 ### G. Static, installed, and offline delivery
 
@@ -528,6 +540,15 @@ plan rather than silently redefining the target.
       no install shortcut performs authority-bearing work.
 - [ ] Fresh guest read and supported foreground writes pass with installation,
       Service Worker, Cache, IndexedDB and OPFS unavailable or removed.
+- [ ] Cross-origin verified reads reject `no-cors` opaque responses as
+      unreadable transport evidence. Exact bytes are verified before decoding;
+      an accepted canonical-text profile with a missing required encoding or
+      invalid bytes fails rather than accepting replacement characters.
+      Missing/conflicting transport `Content-Type`/charset and browser-sniffed
+      type remain separate from protocol media type and never rewrite it.
+- [ ] Portable-static and header-controlled delivery profiles make different
+      CSP, Trusted Types, COOP/COEP/CORP and shared-memory claims. A dumb static
+      or IPFS host never inherits protections that require response headers.
 - [ ] Installed phone/desktop windows preserve route, focus, resizing, browser
       fallback and exact authority semantics; display mode changes chrome only.
 - [ ] If a Service Worker ships, its small content-named

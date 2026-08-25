@@ -5,7 +5,7 @@
 **Depends on:** [[Designs/efsv2/README]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/open-web-app-store/README]]
 **Inputs:** [[Designs/clientv2/README]] (historical requirements and mechanism evidence)
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14), @open-web-app-store-pm boundary review (2026-08-14), @os-drives-pm boundary review (2026-08-14)
-**Last touched:** 2026-08-22
+**Last touched:** 2026-08-23
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/cypherpunk-os #topic/app-model #topic/privacy #topic/read-path
 
@@ -34,8 +34,8 @@ they are not confined to a second-class read-only product.
 
 ## Direct owner direction recorded for this round
 
-The following product requirements were supplied directly by James on
-2026-08-14 and 2026-08-15. They guide this draft but do not freeze protocol
+The following product requirements were supplied directly by James from
+2026-08-14 through 2026-08-23. They guide this draft but do not freeze protocol
 bytes or bypass the normal design promotion ceremony.
 
 1. Loading speed is a core product requirement. A linked file or folder must
@@ -160,6 +160,14 @@ bytes or bypass the normal design promotion ceremony.
     score are never authority. Guest boot performs no wallet discovery. The
     complete pinned corpus screen and dispositions are in
     [[ethereum-standards-and-interop]].
+28. Screen the whole Web standards surface with the same seriousness as the
+    EIP/ERC pass. Useful modern or emerging HTML, CSS, JavaScript, browser,
+    accessibility, internationalization, WebAssembly, WASI, media, compute and
+    agent standards are first-class design inputs even before universal
+    shipment. Standards maturity selects an exact adapter, build target and
+    full/reduced/unsupported/rescue outcome; it is not a conservative veto.
+    The reproducible census and current dispositions are in
+    [[web-platform-standards-and-forward-profile]].
 
 ## Current recommendation
 
@@ -216,6 +224,9 @@ The detailed layer and extension contracts are in [[architecture-and-modules]].
 The first product slice and acceptance tests are in [[mvp-and-acceptance]].
 The selected standards surface and dated library/build recommendations are in
 [[technology-foundation]].
+The pinned Web-platform catalog index, primary-family review, forward feature dispositions and
+versioned browser/profile contract are in
+[[web-platform-standards-and-forward-profile]].
 The Ethereum read, wallet, signature, URI/content, contract-introspection,
 privacy and agent interoperability boundary is in
 [[ethereum-standards-and-interop]].
@@ -234,6 +245,7 @@ boundary are in [[app-runtime-and-direct-launch]].
 | [[architecture-and-modules]] | Boot layers, logical package boundaries, module interfaces/configuration, lazy loading, fallback, security classes, and repository/tooling recommendation |
 | [[app-runtime-and-direct-launch]] | Generic exact/follow App deep links, direct minimum-time-to-data launch, start classes, SES/LavaMoat/Endo, opaque iframe and Wasm lanes, instance leases, App SDK and fallback contracts |
 | [[technology-foundation]] | Standards-first dynamic SPA, Signals state, Web Components/Lit/Web Awesome boundary, EFS design language, responsive/installable/offline delivery, i18n/accessibility, app lifecycle, and build/release posture |
+| [[web-platform-standards-and-forward-profile]] | Reproducible four-catalog Web/ECMAScript/Wasm/WASI index plus primary-family review, non-conservative feature dispositions, named delivery/runtime profiles, negative selections and conformance program |
 | [[ethereum-standards-and-interop]] | Complete pinned EIP/ERC synthesis; exact-read, wallet, signature, URI/content, contract, privacy, cross-chain and agent adapter dispositions; SDK pressure and acceptance fixtures |
 | [[system-profiles-and-generations]] | Nix/Guix recovery, exact and follow profiles, safe social sharing, deterministic composition, System Configuration Manager, local activation/state/grant generations, rollback/GC/export, and the foundational Wasm/WIT/Component/WASI module direction |
 | [[mvp-and-acceptance]] | Fast guest read plus official basic File Browser writes over proposal-labelled adapters, user and agent journeys, threat boundaries, performance budgets, acceptance tests, and EFS v2 pressure |
@@ -441,8 +453,9 @@ authority.
 
 1. Review and iterate these design files with James and adjacent PMs.
 2. Before any authorized Web experiment or implementation, retain the selected
-   guidance snapshot, instantiate the EFS feature/profile evidence ledgers and
-   put the native-first review fields in the repository contribution path.
+   guidance snapshot, reproduce or deliberately refresh the pinned standards
+   census, instantiate the EFS feature/profile evidence ledgers and put the
+   native-first review fields in the repository contribution path.
 3. **MVP critical path:** freeze only the symbolic inputs in
    [[type-data-abi-boundary-pressure]], then—after explicit experiment
    authorization—convert its guest read and official wallet-owned File Browser

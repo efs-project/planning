@@ -3,8 +3,9 @@
 **Status:** draft — working architecture for iteration; interface names, package shapes, runners, repository topology, and implementation tools are not adopted
 **Target repos:** planning, client, sdk
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/ethereum-standards-and-interop]], [[Designs/open-web-app-store/architecture]], [[Designs/efsv2/hierarchical-files-and-folders]]
+**Standards profile:** [[Designs/web-client-os/web-platform-standards-and-forward-profile]]
 **Reviewers:** @historical-client-architecture (2026-08-14), @current-v2-read-path (2026-08-14), @web-platform-standards (2026-08-14), @os-drives-pm boundary review (2026-08-14)
-**Last touched:** 2026-08-22
+**Last touched:** 2026-08-23
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/cypherpunk-os #topic/app-model #topic/read-path #topic/privacy
 
@@ -800,6 +801,10 @@ appears.
 ### Performance rules
 
 - Every package/module is assigned to one phase per boot profile.
+- Every route also selects a named EFS Web Profile slice. Parse-level syntax,
+  delivery headers and advanced browser adapters absent from that slice stay
+  out of its critical closure; this does not weaken the source architecture or
+  prevent a richer profile from using them immediately.
 - No guest-critical module imports an explicit-phase module, even indirectly.
 - Exact dependency locks allow parallel fetch and verification; avoid
   serial package-discovery waterfalls.
@@ -971,7 +976,9 @@ still opens/exports what its declared compatibility covers.
 ## Browser mechanism posture
 
 [[technology-foundation]] owns the detailed dynamic-SPA, component, design
-language, responsive, PWA/offline, i18n/accessibility and build posture. This
+language, responsive, PWA/offline, i18n/accessibility and build posture.
+[[web-platform-standards-and-forward-profile]] owns the complete standards
+screen, forward dispositions, named Web profiles and conformance ledger. This
 section records how those choices sit in the OS layers and trust boundary.
 
 ### First-class standards-shaped foundations
@@ -1003,7 +1010,9 @@ memory does not define filesystem, network, identity, or signing capability.
 
 ### Conditional, emerging, and tooling lanes — not implicit Kernel authority
 
-- **Forward/conditional Web profiles:** Navigation API, View Transitions,
+- **Forward/conditional Web profiles:** Navigation API/URLPattern, native
+  popover/commands, modern CSS scoping/layout/color/overlay facilities,
+  scheduler and storage-bucket adapters, View Transitions,
   File/Protocol/Share/Launch handlers and Window Controls Overlay for enhanced
   navigation and installed-OS integration; WebGPU for optional acceleration;
   Trusted Types together with CSP enforcement for origins/profiles that can
