@@ -3,7 +3,7 @@
 **Status:** draft — disposable SDK/Core handoff; no package, bytes, ABI, deployment, or support promise is adopted
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[README]], [[architecture-candidate]], [[developer-journeys]], [[experiment-program]], [[../efsv2/layered-type-system-and-data-abi]]
-**Inputs:** sealed semantic source `a68b00a` / `Reviews/2026-08-23-efs2-exp-c0-semantic-seal` in the separately checked-out `codex/v2-readiness-week` branch; it is a semantic input, not merged protocol authority
+**Inputs:** sealed semantic source `a68b00a` / `Reviews/2026-08-23-efs2-exp-c0-semantic-seal`; exact disposable serialized Core source commit `b9088d6a24f4d40bcca6ba300523b25cc7c608d2`, handoff SHA-256 `2e8d191e4dd7c2130378e09f3cbc5b71441906cbaa6c448c30139aafe9ec203d`; neither source is merged protocol authority
 **Supersedes:** —
 **Reviewers:** —
 **Last touched:** 2026-08-25
@@ -14,7 +14,7 @@
 
 **Purpose:** turn the sealed `EXP-C0` semantic result law into the smallest buildable, disposable SDK slice. It gives one raw-preserving TypeScript runtime, one generated exact-Type facade lane, and one Solidity-consumer lane the same outer `ResultV0` contract. It does **not** choose final names, encodings, selectors, package publication, deployment, or a production API.
 
-**Start only after Core supplies one versioned disposable struct/vector packet.** It must cover the C0 state-bearing inputs, result axes and legal combinations, page cursor coordinates, operation/effect commitment, receipt links, and state projection manifest. Until then, the fixture below may test adapter preservation only; it cannot claim Core conformance.
+**The first serialized Core-consumer packet is now source-locked and consumed.** Five exact committed artifacts carry the consumer contract, handoff, HELLO trace, Result vectors, and Type-envelope vectors. An independent SDK checker imports none of Core's implementation or test code and passes exact hash, decode/re-encode/recommit, pointer, raw-retention, `uint64`, codec-1, and mutation checks. This clears the input blocker for the next disposable SDK implementation; it does not claim Core conformance or make any candidate byte durable.
 
 ## C0 source lock and authority boundary
 
@@ -106,9 +106,13 @@ The application contract supplies its own authority and calls the narrow Core in
 
 A direct stateless `STATICCALL` helper is optional only after the generated leaf has a measured size/gas failure. It must be code-hash-pinned, reproducible, finite-dependency/basis-qualified, and accompanied by identical local generated fallback. It cannot define validity, authority, completeness, absence, admission, signing, or effect success.
 
-## Required disposable Core packet
+## Disposable Core packet received for this lane
 
-Before an executable C0 model/SUT/SDK integration, Core and SDK co-design the following candidate structs and golden vectors:
+The exact Core handoff names a broader disposable packet around the following
+integration groups. This SDK check directly consumes only the Result, Bytes,
+Type-envelope, HELLO, and source-lock projections needed for the S0C boundary;
+later SDK experiments may ingest additional pinned vectors without importing
+Core implementation code.
 
 1. Realm bootstrap/revision and execution-coordinate/high-water values.
 2. Exact Type, Record body, PublicationSet, Occurrence, AdmissionPlan, Binding CAS/tombstone/Withdrawal, QueryProfile activation, and finite projection manifest inputs.
@@ -117,15 +121,27 @@ Before an executable C0 model/SUT/SDK integration, Core and SDK co-design the fo
 5. Operation/effect-set preimage, replay domain, signature domain, and three linked receipt shapes: plan-signature verification, account/submission, and canonical per-effect read-back.
 6. State projection member ordering, count/root/digest, availability and missing/substitution/reordering behavior.
 
-This is a C0 integration blocker, not an SDK request to freeze production structs. Package names, class shapes, product DTOs, cache implementation, transport adapters, cancellation and UI remain SDK/product work once the candidate packet exists.
+The five-file SDK intake does not reproduce Core's model, generator, Solidity,
+or test implementation. It is enough to start the SDK's disposable runtime and
+generated-facade work while keeping package names, class shapes, product DTOs,
+cache implementation, transport adapters, cancellation and UI in SDK/product
+scope. The candidate packet remains disposable and unadopted.
 
 ## Disposable fixture
 
-`Reviews/2026-08-25-sdkv2-exp-c0-mvp/` is a source-only preservation fixture. Its JSON cases exercise an empty partial page, a stale cursor, unavailable bytes, a dropped submission channel, a proved-no-effect recovery, and missing reconstruction input. Its checker verifies the field/axis contract, forbids `EFFECT_REJECTED`, and rejects a cursor missing any C0 coordinate. It tests no hash, codec, Core ABI, provider, wallet, transaction, or deployment.
+`Reviews/2026-08-25-sdkv2-exp-c0-mvp/` contains two distinct evidence layers.
+The source-only JSON cases exercise an empty partial page, a stale cursor,
+unavailable bytes, a dropped submission channel, a proved-no-effect recovery,
+and missing reconstruction input. The clean-room layer retains five exact Core
+serialized inputs plus a role-neutral source-lock receipt and SDK report. Its
+checker validates five raw artifact locks, 21 required pointers, four Result
+encodings, six Type envelopes, exact Bytes semantics, and 13 adversarial
+mutations. It uses no Core source, scripts, generators, or tests. Neither layer
+tests a provider, wallet, transaction, deployed contract, or production SDK.
 
 ## Open questions
 
-- [ ] Which exact disposable canonical encoding and bounds packet will C0 select for the six required Core groups above?
+- [x] For the `EXP-C0/v0` S0C consumer boundary only, exact disposable Result, Bytes, and Type-envelope encoding and bounds are pinned by Core commit `b9088d6a24f4d40bcca6ba300523b25cc7c608d2` and the role-neutral receipt. This is not a freeze.
 - [ ] Which bounded Core detail-code set is sufficient for the fixture without encoding provider faults as semantic truth?
 - [ ] Do generated exact leaves meet the selected execution-profile budget before a helper is considered?
 - [ ] Can a second independent offchain implementation preserve this packet without sharing runtime semantic code?

@@ -245,12 +245,15 @@ The SDK never folds these clocks into one semver:
 
 ### `EXP-C0` shared outer envelope
 
-The independently sealed semantic packet at planning commit `a68b00a` is an
-input to this draft, not an adopted ABI. For the disposable C0 lane, the
-cross-language contract is nevertheless literal: every Core, Solidity, SDK,
-and product result starts as the same retained `ResultV0` outer envelope. A
-generated or product-specific resource DTO is payload inside that envelope, not
-an alternate result law.
+The independently sealed semantic packet at planning commit `a68b00a` and the
+exact disposable serialized packet at Core commit
+`b9088d6a24f4d40bcca6ba300523b25cc7c608d2` are inputs to this draft, not an
+adopted ABI. The SDK clean-room checker consumes five serialized artifacts from
+that exact commit without importing Core implementation code. For the
+disposable C0 lane, the cross-language contract is nevertheless literal: every
+Core, Solidity, SDK, and product result starts as the same retained `ResultV0`
+outer envelope. A generated or product-specific resource DTO is payload inside
+that envelope, not an alternate result law.
 
 ```text
 ResultV0 {

@@ -24,13 +24,17 @@
   Core module topology, contract ABI, helper deployment, and release topology
   all wait for evidence and the normal owner freeze ceremony.
 
-**C0 handoff:** the sealed `EXP-C0` semantic packet at separately checked-out
-planning commit `a68b00a` now supplies the shared experiment law: every layer
-projects one literal `ResultV0` outer envelope; cursors bind Profile generation,
-Realm revision, high-water and basis; and plan-signature, account/submission,
-and canonical-effect receipts remain separate. [[exp-c0-mvp-packet]] records
-the SDK-only build boundary and the remaining candidate Core packet; it does
-not merge or freeze the C0 source packet.
+**C0 handoff:** the semantic seal at planning commit `a68b00a` supplies the
+shared experiment law. The SDK lane has now independently consumed the exact
+serialized Core packet at commit
+`b9088d6a24f4d40bcca6ba300523b25cc7c608d2` without merging Core or importing
+its source, scripts, generators, or tests. The disposable checker preserves one
+literal `ResultV0`, decimal-string `uint64` values, raw Bytes and Type envelopes,
+cursor/basis facts, and separate plan-signature, account/submission, and
+canonical-effect receipts across exact decode, re-encode, and recommit. This is
+source-locked experiment evidence, not a freeze, conformance result, package,
+or production API. [[exp-c0-mvp-packet]] records the exact boundary and next
+SDK experiments.
 
 The durable idea is not “a TypeScript library.” It is a reproducible contract
 between exact evidence and replaceable tools: historical bytes remain usable
@@ -186,11 +190,11 @@ constitution/candidates, then older evidence. This set cannot override Core.
 
 ## Current phase
 
-This first pass writes research and an experimentable design. The founder
-mandate permits later bounded experimentation, but no experiment is executed
-until this first-pass architecture receives review and a run packet fixes its
-profile, closure, gates, and destruction conditions. This pass does not
-claim a Kanban card, alter the historical SDK, publish packages, compile
-generated artifacts, deploy contracts, promote a design, or adopt protocol
-choices. The next gate is owner review of the recommended experimental arm,
-followed by a bounded disposable-experiment packet.
+The research spine now has two bounded disposable checks: the six-case semantic
+preservation fixture and an independent clean-room consumer of five exact
+serialized Core artifacts. Neither alters the historical SDK, publishes a
+package, compiles generated leaves, deploys a contract, promotes a design, or
+adopts protocol choices. The next gate is implementation of the unpublished
+TypeScript evidence runtime and one exact-Type generated TypeScript/Solidity
+fixture against this retained packet, followed by the independent codec,
+unknown-survival, reconstruction, and size/gas gates in [[experiment-program]].
