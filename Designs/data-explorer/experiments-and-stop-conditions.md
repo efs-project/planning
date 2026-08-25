@@ -5,7 +5,7 @@
 **Depends on:** [[README]], [[product-charter-and-roadmap]], [[architecture-and-state]], [[views-extensions-and-capabilities]], [[Reviews/2026-08-13-efs2-stage-a-corpus/chapters/bakeoff-spec]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-08-23
+**Last touched:** 2026-08-25
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/read-path #topic/graph-queries #topic/app-model #topic/privacy
 
@@ -22,6 +22,35 @@ one disposable design survives the named corpus, environment and participants;
 it does not prove EFS v2 conformance.
 
 ## Shared fixture and evidence packet
+
+### `EXP-C0/v0` minimum pressure slice
+
+Before broad Files/table fixtures, E1a and E1b share one sealed, disposable C0
+row set: `R0_BOOTSTRAP_RA`, `T0_EXACT_TYPE_AND_RECORDS`,
+`P0_EOA_TWO_LEAF_ADMIT_AND_BIND_BEFORE_EXPIRY`, one byte case from `X0A–X0C`,
+and the corresponding `ResultV0` result profiles. It proves only the direct
+guest chain below; it does not claim a directory, generic query, write, or
+production product:
+
+```text
+direct route -> exact bootstrap/revision/basis -> Type/Record/Occurrence
+             -> verified byte attempt(s) -> raw/provenance Inspector
+```
+
+The fixture passes only when every C0 input/output can be retained as canonical
+raw bytes or exact safe encodings and every displayed fact projects from the
+same `ResultV0` envelope. A corrupt primary plus verified eligible fallback
+retains both attempts. Unavailable, integrity-failed, or partially acquired
+bytes remain separate from the presence and lifecycle of the Record or
+Occurrence.
+
+The first page-shaped C0 follow-up is `Q1A`/`Q1B` and the hostile continuation
+is `Q4A`. Its opaque continuation commits exact `QueryProfileId` and Type,
+activation generation, Realm revision, ordering, admission high-water, and one
+exact observation basis. A C0 fixture rejects any continuation missing or
+changing one of those members. This is a semantic fixture addition: it prevents
+mixed-generation/basis pagination from being disguised as UI recovery; it is
+not a cursor format, public SDK API, or protocol byte selection.
 
 All technical experiments use one versioned, disposable corpus containing:
 
@@ -100,8 +129,10 @@ The following are checked in every experiment that can encounter them:
 ## Qualified facts-matrix crosswalk
 
 The shared fixture carries one versioned, disposable facts-matrix crosswalk for
-every case. It aligns with the umbrella contract-readiness requirement while
-leaving the owning Core/Solidity/SDK work free to change names and encodings.
+every case. The C0 rows use the seal's literal `ResultV0` envelope; surrounding
+product façades may remain versioned experiment vocabulary. This aligns with the
+umbrella contract-readiness requirement while leaving the owning Core/Solidity/
+SDK work free to change names and encodings.
 Each row records expected logical facts, evidence pointers and allowed/illegal
 combinations across these dimensions:
 
@@ -137,6 +168,13 @@ The dimension labels, candidate values, evidence kinds, fixture IDs, DTOs and
 mapping syntax are experiment vocabulary only—not adopted protocol bytes, SDK
 API or result-registry names. Illegal combinations are rejected rather than
 normalized for display.
+
+For the C0 rows, the Inspector must show the exact subject/finite domain;
+RealmId, RealmRevision, execution coordinate and admission high-water; observer
+basis/root/source and finality/freshness evidence when present; the full result
+profile; payload when applicable; policy/profile/code/provenance commitments;
+and projection-integrity result. A compact ordinary view may collapse its
+presentation only after retaining a direct Inspector/raw path to each field.
 
 ## E0 — status language and workspace wireframe
 
@@ -198,6 +236,12 @@ raw fallback and evidence export. It has no real SDK adapter, Realm transport,
 wallet, account, profile, package manager, extension host, service backend or
 production persistence.
 
+It begins with the C0 minimum pressure slice. The fake source supplies the
+sealed bootstrap/basis, exact Type/Record/Occurrence, byte-attempt transcript,
+literal `ResultV0`, and Q1/Q4 cursor-commitment cases as simulated evidence.
+It must not manufacture a friendlier decoded value, cursor, or absence result
+that cannot be projected from those rows.
+
 ### Pass
 
 - Every fixed Files case maps to the expected facts-matrix crosswalk and visible
@@ -240,6 +284,14 @@ service-worker state, Cache API, IndexedDB and local/session storage. Instrument
 the module dependency graph, browser storage/cache use, Worker/service-worker
 lifecycle and every network request/redirect with initiator, purpose, bytes and
 outcome. Do not substitute fixture DTO injection inside this arm.
+
+The first E1b subrun is the C0 minimum slice before directory/table work: the
+direct guest route obtains the exact bootstrap/revision/basis, reads one exact
+Type/Record/Occurrence through the real disposable adapter, makes verified byte
+attempts, and presents raw/provenance Inspector evidence. It earns the relevant
+`ResultV0` observation/proof grades from public reads; E1a's simulated grade is
+not reused. Q1/Q4 follow only after this point path survives and prove the
+opaque cursor commitment against the same exact basis.
 
 Run two independently cold subruns against the same sealed fixture and declared
 public sources: a direct Data Explorer App route using the shared guest Reader/
@@ -309,7 +361,8 @@ and agreement never upgrades an observation into authenticated proof.
   Missing optional indexes may change measured cost, never truth, reachability
   or completeness law.
 - Fixed-basis pagination is stable and resumable. A snapshot inventory page/
-  cursor chain has one exact block-hash basis and order. A multi-block history
+  cursor chain binds exact QueryProfile/type, activation generation, Realm
+  revision, order, admission high-water and one exact block-hash basis. A multi-block history
   page/cursor chain has one immutable composite basis containing its parent-
   linked ordered header-hash sequence and per-block coverage. Neither duplicates
   nor omits fixture entries, accepts a cursor/basis mismatch or merges rows

@@ -5,7 +5,7 @@
 **Depends on:** [[README]], [[product-charter-and-roadmap]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/type-data-abi-boundary-pressure]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-08-23
+**Last touched:** 2026-08-25
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/read-path #topic/graph-queries #topic/app-model #topic/privacy
 
@@ -124,6 +124,63 @@ interface and dependency direction.
 
 Names below are conceptual product contracts, not frozen TypeScript, WIT,
 JSON, SDK or protocol bytes.
+
+### `EXP-C0/v0` trace-bound result law
+
+The current disposable Core control contributes one non-public input contract:
+the Explorer must render the seal's **literal** qualified result envelope, not
+reduce it to the earlier product-friendly status names. For the C0 pressure
+slice, the Reader retains and the Inspector can disclose:
+
+```text
+ResultV0 {
+  kind
+  exact subject or declared finite domain
+  RealmId + RealmRevision + execution coordinate + admission high-water
+  optional observer block hash + state root/source + finality/freshness evidence
+  result profile over all axes below
+  value/page/receipt/bytes payload when applicable
+  exact policy/profile/code/provenance commitments used
+  projection-integrity result
+}
+```
+
+The result profile retains distinct `presence`, `coverage`, `support`,
+`validation`, `authority`, `lifecycle`, `selection`, `bytes`, `effect`, and
+`projection integrity` axes. The App may choose concise labels and defer detail
+to the Inspector, but it may not omit, merge, fabricate, or replace an axis.
+Canonical Record/Occurrence/byte inputs and their exact encodings remain below
+the façade and remain exportable through the raw/evidence path. This paragraph
+does not freeze `ResultV0` as an SDK or Explorer export.
+
+An opaque page cursor is an uninterpreted continuation token to the App, **not**
+an under-specified commitment. The disposable C0 cursor binds, at minimum,
+`RealmId`, exact `QueryProfileId`, exact Type, activation generation, Realm
+revision, declared ordering, admission high-water, and the exact observation
+basis. The resume request must bind the same tuple. Any missing, changed, or
+unavailable member returns the qualified `UNKNOWN`, `PARTIAL`, or `UNSUPPORTED`
+outcome required by the Reader; it never resumes against a new basis, quietly
+starts a new stream, or turns an empty page into absence. This commitment law
+applies even where the first point-read slice has no page.
+
+### First vertical slice — direct guest to raw evidence
+
+The first C0 pressure journey is deliberately smaller than the Files MVP:
+
+```text
+explicit direct guest route
+  -> exact Realm bootstrap + Realm revision + observation basis
+  -> one exact Type + immutable Record + authored/admitted Occurrence
+  -> verified eligible byte acquisition (including corrupt-primary/fallback)
+  -> built-in raw/provenance Inspector carrying ResultV0
+```
+
+The route is a product selector, not a future URI grammar. It may request a
+friendly Files location only when the shared Reader returns the exact selected
+subject under the retained basis. The built-in raw Inspector is the only view
+required to finish this slice; tree/list/grid/table views consume the same
+qualified resource/page boundary later and cannot delay, reinterpret, or hide
+the vertical result. Extensions are disabled.
 
 ```text
 ExplorerOpenRequest {

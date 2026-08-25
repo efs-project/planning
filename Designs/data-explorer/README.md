@@ -5,7 +5,7 @@
 **Depends on:** [[Designs/efsv2/README]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/efsv2/layered-type-system-and-data-abi]], [[Designs/web-client-os/README]], [[Designs/open-web-app-store/README]]
 **Inputs:** [[Designs/clientv2/README]] and the product-pressure evidence linked from [[research-landscape]]
 **Reviewers:** —
-**Last touched:** 2026-08-23
+**Last touched:** 2026-08-25
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/read-path #topic/graph-queries #topic/app-model #topic/content #topic/privacy
 
@@ -39,6 +39,15 @@ reads—can prove the direct-guest boundary. Executable third-party extensions
 separately wait for E5, and a write-capable MVP waits for E6a; E6b gates only
 its deferred operations. No fixture result freezes Core, Files, Type/Data ABI,
 SDK or extension bytes.
+
+**Current disposable pressure:** `EXP-C0/v0` supplies the first integrated
+micro-Realm control, not a product schema. The smallest Explorer slice is one
+direct guest route to an exact bootstrap/basis, one exact Type/Record/Occurrence
+read, verified byte acquisition, and a raw/provenance Inspector. Its Reader
+boundary carries the seal's literal `ResultV0` qualification envelope and its
+opaque cursors bind their query/profile context rather than merely a position.
+Tree/list/grid/table and extension seams remain modular consumers; none blocks
+or redefines this first slice.
 
 **Owner feedback now:** none. Core, Files, SDK and Web Client/OS have bounded
 interface questions to answer during the experiment round; they are not a
@@ -112,6 +121,12 @@ Their names, identifiers, codecs, limits, query profiles, adapter APIs,
 `BindingScope`, FilesRouter, extension interfaces and repositories are not
 frozen. Data Explorer depends on observable outcomes and versioned seams, not
 on minting those candidates by accident.
+
+`EXP-C0/v0` is the one temporary control for this next pressure round. Explorer
+must consume its exact candidate inputs through an adapter, retain canonical raw
+bytes and qualified outcomes, and return missing semantics to Core. It does not
+make the candidate's names, structures, cursors, result profiles or bytes an
+Explorer API, public route grammar, Type, or product compatibility promise.
 
 ## Product charter
 
@@ -219,6 +234,7 @@ Detailed boundaries are in [[architecture-and-state]] and
 
 | Horizon | Product outcome |
 |---|---|
+| **First trace slice** | Direct guest route to one exact bootstrap/revision/basis, one exact Type/Record/Occurrence, verified byte acquisition including corrupt-primary/eligible-fallback evidence, and a raw/provenance Inspector that retains literal `ResultV0`. It is the E1a/E1b prerequisite, not a public route, API, or standalone product claim. |
 | **MVP target** | Guest Files navigation; tree/list/grid; breadcrumbs, tabs, search/filter/sort; metadata and verified preview/download; local favorites/recents; raw typed inspection; read-only exact-Type table; provenance/history and exact citations; explicit failure/coverage status; retained-resource offline reading; full keyboard/screen-reader/touch parity; create folder, create file, user-selected local-file import and publish revision only if the shared certified action boundary passes. No executable third-party extensions. |
 | **Next** | Copy, move, rename and mask/unlink after their shared semantics pass; dual-pane and compare; robust multiselect/batch plans; modelled undo/redo and restore/fork; drag/drop plus keyboard alternative; editable typed table; cards/gallery/timeline/graph; personal and explicitly published saved Explorer views; provider-neutral richer search; offline drafts and queued unsigned plans; declarative third-party projection packs. |
 | **Later** | Sandboxed executable views/analysis; cross-Realm compare and separately consented transfer; private encrypted mounts after their profile; collaborative view/activity handoff; agent/automation entry through OS capabilities; derived datasets/formulas with explicit lineage; larger native/CLI parity and specialized application projections. |
@@ -243,9 +259,11 @@ expand the initial trusted computing base.
 
 1. Review this first-pass design with the Core, Files, SDK and Web Client/OS
    owners; repair only real boundary contradictions.
-2. Produce design-only wireframes and the fixed corpus for E0–E5 without
-   selecting permanent protocol, SDK or extension bytes.
-3. Run E1a's deterministic fake-source Files lab, then E1b's separately traced
+2. Bind the E1a/E1b facts matrix to the disposable `EXP-C0/v0` micro-Realm:
+   exact bootstrap/basis, one exact Type/Record/Occurrence, verified bytes and
+   the literal qualified `ResultV0` envelope. Keep all candidate bytes and
+   adapter names disposable.
+3. Run E1a's deterministic fake-source version of that slice, then E1b's separately traced
    cold browser through the real disposable SDK adapter and direct public Realm
    reads. Only the integrated E1b arm can support the guest product claim. Run
    E4 hostile-data cases through both where applicable.
