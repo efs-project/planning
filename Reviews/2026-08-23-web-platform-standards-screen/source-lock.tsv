@@ -1,0 +1,32 @@
+source_id	source_url	exact_revision_or_version	retrieved_on	role	generator_input	reproducibility_note
+w3c-browser-specs	https://github.com/w3c/browser-specs	ed32e90108908ce4f3c886cb343dc4e4f87c360c	2026-08-23	Web-wide browser-specification umbrella	yes	Pinned Git checkout reproduces 807 umbrella rows
+tc39-proposals	https://github.com/tc39/proposals	600a4278a7cabcb53915fa97296b5688529ddd07	2026-08-23	ECMAScript and ECMA-402 proposal inventories	yes	Pinned Git checkout reproduces 329 supplemental rows
+webassembly-proposals	https://github.com/WebAssembly/proposals	f0db14a5555abf7b931667fd289755124a3bf37e	2026-08-23	Core and browser-integration proposal inventory	yes	Pinned Git checkout reproduces 61 supplemental rows
+wasi-proposals	https://github.com/WebAssembly/WASI	3071db04c857b3a2c047d3d1ac694bc41f021796	2026-08-23	WASI proposal and release inventory	yes	Pinned Git checkout reproduces 31 supplemental rows
+component-model	https://github.com/WebAssembly/component-model	1af0b35e1bfc03bd4ad9603be2f676316ff9f420	2026-08-23	WIT Canonical ABI concurrency and resource review	no	Pinned primary source manually reviewed
+web-features	https://github.com/web-platform-dx/web-features	7a18cb476688e853b3e82938a33782497ec89a0c	2026-08-23	Feature and Baseline implementation evidence	no	Pinned implementation-evidence source manually reviewed
+browser-compat-data	https://github.com/mdn/browser-compat-data	493cef41d0f0de67c5eafe2cf84413850cd4de90	2026-08-23	Browser shipping and drift evidence	no	Pinned implementation-evidence source manually reviewed
+wpt	https://github.com/web-platform-tests/wpt	53bc812da2ed81179ebd1ba76b2d197cc4747d12	2026-08-23	Cross-browser conformance-test routing	no	HEAD recorded by git ls-remote; selected tests not executed in this design pass
+csswg-drafts	https://github.com/w3c/csswg-drafts	a15d7f71cde12307e36424147e2e17f060240544	2026-08-23	CSS Snapshot and module primary text	no	HEAD recorded by git ls-remote; selected primary families manually reviewed
+aria-at	https://github.com/w3c/aria-at	51aad51114c51b882809ebf6c173fab832cfab13	2026-08-23	Assistive-technology implementation evidence	no	HEAD recorded by git ls-remote; no EFS browser/AT conformance claim
+open-ui	https://github.com/openui/open-ui	8812cdc228a21f9366a21a07041b451603a3ca26	2026-08-23	Emerging control anatomy and behavior evidence	no	HEAD recorded by git ls-remote; incubator evidence only
+cldr	https://github.com/unicode-org/cldr	95f50133dc17b9d3e4cd355dbe4e30a1ccb1a185	2026-08-23	Locale data and MessageFormat evidence	no	HEAD recorded by git ls-remote; product data target remains CLDR 48.2
+ecma402	https://github.com/tc39/ecma402	b1c961988b9a07894b1dc3dc2b5626ea48387d61	2026-08-23	ECMA-402 living specification	no	HEAD recorded by git ls-remote; ECMA-402 13th edition is the dated standard
+ecma262	https://262.ecma-international.org/17.0/	17th-edition-2026-06	2026-08-23	ECMAScript language standard	no	Dated published edition manually reviewed
+ecma429	https://ecma-international.org/publications-and-standards/standards/ecma-429/	1st-edition-2025-12	2026-08-23	Minimum Common Web Platform API portability floor	no	Dated published edition manually reviewed
+webmcp	https://github.com/webmachinelearning/webmcp	fca7462d703c628f4cf110ddadd51e8e5b52a579	2026-08-23	Agent-facing WebMCP draft	no	HEAD recorded by git ls-remote; Draft Community Group Report only
+w3c-tr-index	https://www.w3.org/TR/	sha256:3fd7f1cd20bcfae2c5444aca92d6b5668d350701450d14f80760765a2a0b2a52	2026-08-23	W3C publication-history count backstop	no	Retrieved response was hashed but is not retained; count is dated non-reproducible evidence
+whatwg-html	https://github.com/whatwg/html	508a037333d8a1806504303aeb489d931fabbef6	2026-08-23	HTML Living Standard core	no	Pinned primary source manually reviewed
+whatwg-dom	https://github.com/whatwg/dom	94d41b30c97fe086c76be8a692ff74ed4db08407	2026-08-23	DOM Living Standard core	no	Pinned primary source manually reviewed
+whatwg-url	https://github.com/whatwg/url	55d6699373ba68a16ec182f34222a74ed8bc3dac	2026-08-23	Browser URL semantics	no	Pinned primary source manually reviewed
+whatwg-encoding	https://github.com/whatwg/encoding	a985b62a9b45c17da3e17a9f0a0b4e30c34c4a8a	2026-08-23	Browser encoding semantics	no	Pinned primary source manually reviewed
+whatwg-mimesniff	https://github.com/whatwg/mimesniff	39aa53511b13953d84fef8d4131d6f61d0ccbde6	2026-08-23	Browser MIME sniffing semantics	no	Pinned primary source manually reviewed
+whatwg-fetch	https://github.com/whatwg/fetch	4a2b67d0d5ea7942ff80f6fcc3da3d587c03d0ce	2026-08-23	Browser request and CORS semantics	no	Pinned primary source manually reviewed
+whatwg-streams	https://github.com/whatwg/streams	b9ba9f49d95b4280be0dc2372377a006c3a91c18	2026-08-23	Streams and transfer semantics	no	Pinned primary source manually reviewed
+whatwg-websockets	https://github.com/whatwg/websockets	9879e5cf0d66c66af6990e4c75f72dda794e1b87	2026-08-23	WebSocket semantics	no	Pinned primary source manually reviewed
+whatwg-storage	https://github.com/whatwg/storage	1933f424de8d0b2d1073e10f3fb77bd12b11efca	2026-08-23	Storage keys persistence and pressure	no	Pinned primary source manually reviewed
+whatwg-fs	https://github.com/whatwg/fs	cd55e5582e9c915c6341479bceaa4216f7a05413	2026-08-23	OPFS and File System semantics	no	Pinned primary source manually reviewed
+whatwg-fullscreen	https://github.com/whatwg/fullscreen	7c38d773117aa1e6bfa13754afe77483f40c908f	2026-08-23	Fullscreen construction and lifecycle	no	Pinned primary source manually reviewed
+whatwg-urlpattern	https://github.com/whatwg/urlpattern	aeb2019cf3aa1fb31af134a682c0255302a41297	2026-08-23	URLPattern routing semantics	no	Pinned primary source manually reviewed
+unicode	https://www.unicode.org/versions/Unicode17.0.0/	17.0.0	2026-08-23	Unicode character and algorithm version	no	Stable published version; selected UAX and UTS revisions are recorded in the design
+cldr-release	https://cldr.unicode.org/index/downloads/cldr-48	48.2	2026-08-23	Locale data and UTS 35 including stable MF2	no	Stable published data release; implementation subset remains evidence-gated

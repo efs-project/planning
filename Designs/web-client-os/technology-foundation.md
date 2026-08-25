@@ -3,8 +3,9 @@
 **Status:** draft — owner-directed product posture plus dated implementation recommendations; no repository, dependency installation, or product implementation is authorized
 **Target repos:** planning, client, sdk
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/product-constitution-and-roadmap]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/web-client-os/privacy-and-agents]], [[Designs/web-client-os/ethereum-standards-and-interop]]
+**Standards profile:** [[Designs/web-client-os/web-platform-standards-and-forward-profile]]
 **Reviewers:** @web-platform-standards (2026-08-14), @historical-client-architecture (2026-08-14), @current-v2-read-path (2026-08-14)
-**Last touched:** 2026-08-22
+**Last touched:** 2026-08-23
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/web-platform #topic/pwa #topic/i18n #topic/accessibility #topic/performance #topic/wasm #topic/wasi
 
@@ -35,6 +36,14 @@ Wasm and WIT-shaped explicit interfaces for portable non-DOM modules, targeting
 the Component Model through replaceable adapters, and granting named WASI
 interfaces selectively. It does not mean ambient POSIX, direct DOM authority,
 or rewriting the native Web Shell and Files path in Wasm.
+
+On 2026-08-23 James explicitly broadened this from a technology shortlist to a
+Web-wide standards obligation: inspect HTML, CSS, JavaScript and the rest of
+the browser platform with the same high-recall discipline used for EIPs/ERCs,
+and prefer valuable modern standards even when they are new. The pinned census,
+dispositions and versioned `EfsWebProfile` contract live in
+[[web-platform-standards-and-forward-profile]]. This file owns the concrete
+application/tooling recommendation built on that profile.
 
 “Fifty years” is a dependency and interface strategy, not a promise that an
 unchanged 2026 binary or toolchain will run everywhere in 2076. HTML, CSS,
@@ -121,6 +130,13 @@ evidence, EFS disposition, and explicit unsupported behavior. Final text does
 not prove chain activation, wallet/RPC support, safety, EFS adoption, or
 semantic authority. The current corpus map and exact boundaries are in
 [[ethereum-standards-and-interop]].
+
+Web-platform work uses the same law. The complete four-catalog metadata screen,
+pinned/manual primary-family sources and cross-family dispositions are in
+[[web-platform-standards-and-forward-profile]]. An item being a Living
+Standard, Recommendation, Working Draft, Community Group draft, TC39 stage,
+Wasm phase or shipped feature reports evidence—not automatic adoption or
+rejection. Product value and the named profile decide whether EFS uses it.
 
 The initial broad guidance candidate is [Google Chrome Modern Web
 Guidance](https://developer.chrome.com/docs/modern-web-guidance/get-started).
@@ -315,11 +331,11 @@ store only small serializable navigation state; canonical resources remain in
 the URL/read context.
 
 The [Navigation API](https://html.spec.whatwg.org/multipage/nav-history-apis.html#navigation-api)
-and [View Transitions](https://www.w3.org/TR/css-view-transitions-1/) are
-forward enhancement profiles. They may improve interception, focus/scroll
-restoration, continuity, and motion, but a missing implementation preserves
-the same hash-route result. Reduced-motion policy can remove every decorative
-transition.
+is required for the Forward Shell profile through the routing adapter; the
+same contract reduces to hash/History routing when it is unavailable. It owns
+no unique route identity or authority. [View Transitions](https://www.w3.org/TR/css-view-transitions-1/)
+remain a removable enhancement for continuity and motion. Reduced-motion
+policy can remove every decorative transition.
 
 Do not rely on `unload` or an always-running page. Browsers freeze, discard,
 restore from back/forward cache, terminate Workers, and kill installed windows.
@@ -541,7 +557,7 @@ The native shell uses:
 - semantic `<header>`, named `<nav>`, one `<main>`, optional `<aside>` and
   `<footer>` plus a working skip link before optional components upgrade;
 - CSS Grid/Subgrid for page and pane structure, with
-  [container queries](https://www.w3.org/TR/css-contain-3/) for components
+  [container size queries](https://www.w3.org/TR/css-conditional-5/) for components
   placed in changing workspaces;
 - logical properties and writing modes rather than left/right assumptions;
 - `min()`, `max()`, `clamp()`, `minmax()`, intrinsic sizing and content-driven
@@ -781,7 +797,7 @@ required for HTTPS links, import/export, layout or authority.
 
 ### Locale and message contract
 
-Use [BCP 47](https://datatracker.ietf.org/doc/html/rfc5646) locale tags,
+Use [BCP 47](https://datatracker.ietf.org/doc/bcp47/) locale tags,
 [Unicode locale identifiers](https://www.unicode.org/reports/tr35/) and the
 platform [ECMA-402 `Intl`](https://tc39.es/ecma402/) implementations. Store
 structured preferences—`uiLanguage`, `formatLocale`, `timeZone`, `calendar`,
@@ -813,8 +829,9 @@ Translator-provided HTML or JavaScript never executes, and a pack is never a
 dynamic-import target merely because its digest verifies.
 
 [Unicode MessageFormat 2](https://www.unicode.org/reports/tr35/tr35-78/tr35-messageFormat.html)
-is the preferred forward authoring candidate. Freeze a tested stable subset and
-interpret/compile it with pinned client-owned code backed by `Intl`; do not
+is the normatively stable message-syntax and data-model direction in UTS 35
+Part 9. Freeze a tested EFS function subset and interpret/compile it with
+pinned client-owned code backed by `Intl`; do not
 expose a particular JavaScript MF2 runtime as the EFS ABI until its round-trip,
 tooling and implementation evidence passes. Built-in catalogs may be
 precompiled to JavaScript only as trusted App-release build output. Fluent/ICU
@@ -905,8 +922,8 @@ owns the complete runner/profile model. The technology baseline is:
    currently need an exact generated representation such as pinned `jco`
    output; that adapter/glue is TCB and replaceable tooling rather than EFS
    public ABI.
-4. WASI 0.2/0.3 interfaces are selected individually under a named runner
-   profile. The baseline grants no filesystem preopens, sockets/HTTP,
+4. WASI 0.3.1 and 0.2 compatibility interfaces are selected individually under
+   named runner profiles. The baseline grants no filesystem preopens, sockets/HTTP,
    environment, clock, randomness, locale, device, storage, wallet, signer or
    EFS-write authority.
 5. Rich/legacy DOM applications remain in an opaque-origin iframe lane.
@@ -1072,11 +1089,11 @@ telemetry capability and informed local opt-in.
 | Class | Examples | Design treatment |
 |---|---|---|
 | Product-selected standards surface | semantic HTML/CSS, Custom Elements/DOM events/plain data, ES modules, URL/hash routes, TC39 Signals shape, Core Wasm plus WIT-shaped portable-service interfaces, installable/responsive/offline/i18n/accessibility outcomes | architecture may depend on the interface/outcome; exact profile and conformance still measured |
-| Broadly shipped platform foundation | Fetch/Streams, Workers/MessagePort, WebCrypto, Manifest core, Service Worker, Cache API, IndexedDB, CSS Grid/container queries/logical properties, ECMA-402 Intl | use directly with explicit storage/lifecycle/security limits |
-| Forward/conditional Web profile | Navigation/View Transitions, OPFS, File/Protocol/Share/Launch handlers, Window Controls Overlay, WebGPU, Trusted Types enforcement | design and adapter now; feature-detect; provide honest reduced/unsupported result; never silent authority expansion |
+| Broadly shipped platform foundation | Fetch/Streams, Workers/MessagePort, WebCrypto Level 1, Manifest core, Service Worker, Cache API, IndexedDB, CSS Grid/container size queries/logical properties, ECMA-402 Intl | use directly with explicit storage/lifecycle/security limits |
+| Forward/conditional Web profile | Navigation API/URLPattern, native popover/commands, container style/scroll-state queries, modern CSS scoping/color/overlays, scheduling and Storage Bucket adapters, OPFS, File/Protocol/Share/Launch handlers, Window Controls Overlay, WebCrypto Level 2 algorithms, WebGPU, Trusted Types enforcement | design and adapter now; use semantic probes rather than existence alone; provide honest reduced/unsupported/rescue result; never silent authority expansion |
 | Replaceable libraries/tooling | Signals polyfill, Lit, Web Awesome/Fluent/Lion control-pack candidates, Vite/Rolldown, pnpm, TypeScript, Biome, Vitest, Playwright, MF2 compiler | pin/audit; keep behind standards/data boundaries; replacement must pass the same fixtures |
-| Foundational forward module target | Component Model through replaceable browser adapters; selectively granted WASI 0.2/0.3 profiles; exact generated browser representations | design portable non-DOM modules toward it; pin every profile/adapter; never direct guest correctness or ambient authority |
-| Active evidence-gated extension/runners | SES Worker Apps with an OS-owned outer Compartment, LavaMoat/Endo inner dependency isolation, opaque full-Web iframes, WebMCP, WebNN, native Component browser APIs and stronger delivery profiles | route-selected lazy module lanes; exact adapters and residuals; never the trusted direct Files correctness path or ambient authority; see [[app-runtime-and-direct-launch]] |
+| Foundational forward module target | Component Model through replaceable browser adapters; a WASI 0.3.1 async profile plus separate 0.2 compatibility realization; exact generated browser representations | design portable non-DOM modules toward it; pin every profile/adapter; never direct guest correctness or ambient authority |
+| Active evidence-gated extension/runners | SES Worker Apps with an OS-owned outer Compartment, LavaMoat/Endo inner dependency isolation, opaque full-Web iframes, WebMCP, WebNN, pinned Component browser adapters and stronger delivery profiles; future native Component APIs only after exact profile evidence | route-selected lazy module lanes; exact adapters and residuals; never the trusted direct Files correctness path or ambient authority; see [[app-runtime-and-direct-launch]] |
 
 The Signals row is intentionally unusual: its native implementation is still
 a moving standards process, but James has directed EFS to treat its official
