@@ -153,6 +153,15 @@ Canonical Record/Occurrence/byte inputs and their exact encodings remain below
 the façade and remain exportable through the raw/evidence path. This paragraph
 does not freeze `ResultV0` as an SDK or Explorer export.
 
+The [[Reviews/2026-08-25-data-explorer-exp-c0-consumption/README|C0 clean-room consumer packet]]
+locks this boundary through five serialized inputs only. Its role-neutral source
+receipt retains the exact Core handoff, while the Explorer report retains raw
+Result bytes, raw known and opaque Type envelopes, the literal qualification
+codes, and the derived projection separately. The checker owns no Core codec,
+resolver, verifier, Lens reducer, or source module. This static contract pass is
+not a Reader implementation, E1a UI execution, E1b cold-browser trace, or
+conformance result.
+
 An opaque page cursor is an uninterpreted continuation token to the App, **not**
 an under-specified commitment. The disposable C0 cursor binds, at minimum,
 `RealmId`, exact `QueryProfileId`, exact Type, activation generation, Realm

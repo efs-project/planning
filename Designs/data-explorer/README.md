@@ -49,6 +49,13 @@ opaque cursors bind their query/profile context rather than merely a position.
 Tree/list/grid/table and extension seams remain modular consumers; none blocks
 or redefines this first slice.
 
+The clean-room [[Reviews/2026-08-25-data-explorer-exp-c0-consumption/README|serialized-consumption packet]]
+now passes against exact Core commit `b9088d6a24f4d40bcca6ba300523b25cc7c608d2`.
+It proves that Explorer can preserve the five-file C0 authority surface, raw
+Result/Type bytes, independent qualification grades, and zero wallet/account/
+Commons/hosted-indexer/OS dependencies without importing Core code. It is a
+static prerequisite only: E1a is not proved, and E1b remains `NOT_RUN`.
+
 **Owner feedback now:** none. Core, Files, SDK and Web Client/OS have bounded
 interface questions to answer during the experiment round; they are not a
 questionnaire for the owner.

@@ -108,3 +108,7 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 ### Debloat.dev open-source directory intake (2026-08-24)
 
 - [`2026-08-24-debloat-directory-intake.md`](./2026-08-24-debloat-directory-intake.md) — point-in-time product and HN-comment assessment of a fast, guest-friendly open-source alternatives directory; preserves its concrete catalog, Wanted, machine-readable, curation, governance and exit lessons; and parks a curator-qualified, independently verified Open Alternatives catalog as a possible future Open Web App Store/Data Explorer fixture without importing the live database, creating a global default index, or adding an EFS Core requirement.
+
+### Data Explorer `EXP-C0/v0` serialized consumption (2026-08-25)
+
+- [`2026-08-25-data-explorer-exp-c0-consumption/`](./2026-08-25-data-explorer-exp-c0-consumption/) — independent five-file serialized-only consumption packet locked to exact Core commit `b9088d6a24f4d40bcca6ba300523b25cc7c608d2`; preserves direct guest dependencies, raw Result and Type-envelope bytes, literal `UNKNOWN`/`PARTIAL`, and nonadoption ceilings without importing Core code. This static prerequisite proves neither E1a nor E1b; E1b remains `NOT_RUN`.

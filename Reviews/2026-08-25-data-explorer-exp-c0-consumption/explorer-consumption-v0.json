@@ -1,0 +1,155 @@
+{
+  "format": "efs2-data-explorer-exp-c0-serialized-consumption/0",
+  "status": "COMMIT_READY_SERIALIZED_CONSUMPTION_PASS",
+  "profile": "EXP-C0/v0",
+  "sourceLock": {
+    "path": "core-source-lock-v0.json",
+    "sha256": "c750a63b248d5a9a24d591046aa439d4e1b2eb07b127d49d734700b3048a2858"
+  },
+  "authorizedInputs": [
+    {
+      "path": "inputs/consumer-contract-v0.json",
+      "sourcePath": "Reviews/2026-08-25-efs2-exp-c0-v0-control/consumer-contract-v0.json",
+      "sha256": "7be0ca1c742fcc61d16316456e2e8937de50c6e6864a5533d24e614d2caee512"
+    },
+    {
+      "path": "inputs/handoff-v0.json",
+      "sourcePath": "Reviews/2026-08-25-efs2-exp-c0-v0-control/handoff-v0.json",
+      "sha256": "2e8d191e4dd7c2130378e09f3cbc5b71441906cbaa6c448c30139aafe9ec203d"
+    },
+    {
+      "path": "inputs/hello-files-v0.json",
+      "sourcePath": "Reviews/2026-08-25-efs2-exp-c0-v0-control/hello-files-v0.json",
+      "sha256": "8841b6cd3c831ddeb80331614f421b17e8211594888eb657754f65ee28fa6a3f"
+    },
+    {
+      "path": "inputs/result-v0.json",
+      "sourcePath": "Reviews/2026-08-25-efs2-exp-c0-v0-control/vectors/result-v0.json",
+      "sha256": "9fbadbce871d3be5d8ed4fbd74c36d3f15f01b8923259b99d3b5104dd176f6bf"
+    },
+    {
+      "path": "inputs/type-envelope-v0.json",
+      "sourcePath": "Reviews/2026-08-25-efs2-exp-c0-v0-control/vectors/type-envelope-v0.json",
+      "sha256": "773660ae883e6ae4ecc28f853c681e229564eb33b9de02f4d3ae668140587a65"
+    }
+  ],
+  "inputBoundary": {
+    "serializedJsonOnly": true,
+    "coreSourceImports": false,
+    "coreScriptImports": false,
+    "coreTestImports": false,
+    "checkerDependencies": [
+      "node:assert/strict",
+      "node:crypto",
+      "node:fs",
+      "node:path",
+      "node:url"
+    ]
+  },
+  "directGuest": {
+    "enabled": true,
+    "requiresWallet": false,
+    "requiresAccount": false,
+    "requiresCommons": false,
+    "requiresHostedIndexer": false,
+    "requiresOsBoot": false
+  },
+  "forbiddenOwnership": [
+    "CORE_CODEC",
+    "CORE_VERIFIER",
+    "CORE_RESOLVER",
+    "LENS_REDUCER"
+  ],
+  "evidenceCeiling": {
+    "staticSerializedConsumption": "PASS",
+    "e1a": "NOT_PROVEN_BY_THIS_CONTRACT",
+    "e1b": "NOT_RUN",
+    "runtimeDependencyTrace": "NOT_RUN",
+    "serializedDependencyClaimsOnly": true
+  },
+  "qualifiedResult": {
+    "rawFacts": {
+      "authority": 3,
+      "bytes": 1,
+      "coverage": 1,
+      "effect": 255,
+      "lifecycle": 1,
+      "presence": 1,
+      "selection": 255,
+      "support": 1,
+      "validation": 2
+    },
+    "namedFacts": {
+      "authority": "UNPROVEN",
+      "bytes": "VERIFIED_AVAILABLE",
+      "coverage": "COMPLETE",
+      "effect": "NOT_APPLICABLE",
+      "lifecycle": "ADMITTED",
+      "presence": "FOUND",
+      "selection": "NOT_APPLICABLE",
+      "support": "SUPPORTED",
+      "validation": "SEMANTICALLY_VALID"
+    },
+    "qualificationCodesThatMustNotCollapse": {
+      "bytesPartial": 2,
+      "coveragePartial": 2,
+      "effectUnknown": 3,
+      "presenceUnknown": 3,
+      "selectionUnknown": 4
+    },
+    "observerBasisRef": "inputs/hello-files-v0.json#/payload/result/observerBasis"
+  },
+  "rawRetention": {
+    "resultV0": {
+      "ref": "inputs/hello-files-v0.json#/payload/result/encoded",
+      "sha256RawBytes": "1ed444d4a1fd2df6bf85744118f11b0dc7d1c831b5b19a3e026d0f4499a687be"
+    },
+    "canonicalFileBytes": {
+      "ref": "inputs/hello-files-v0.json#/payload/portable/fileBytes",
+      "sha256RawBytes": "46cb2287d98e6c3631441aa16bd25bbc335c4ca63d69e102566c557697098775"
+    },
+    "typeEnvelopes": {
+      "directory": {
+        "ref": "inputs/hello-files-v0.json#/payload/portable/typeEnvelopes/directory/rawTypeBytes",
+        "typeSchemaId": "0x061067d13aee6394624a096fc29f614a6f16c6079b2c11c17c058501dda5e93a",
+        "sha256RawBytes": "71f48aaef08d68297986bbb264a97b723cf30f52feb5f82dcb9f2d3ff8910240"
+      },
+      "directoryEntry": {
+        "ref": "inputs/hello-files-v0.json#/payload/portable/typeEnvelopes/directoryEntry/rawTypeBytes",
+        "typeSchemaId": "0xd63f423920189ec2f52c3b2bcb32cf3adac40b9098a3a27007e099e14f7245c5",
+        "sha256RawBytes": "e0c9f6e6a338edc41af06bb2d4618f87dcef7d209ae260b83d3002cc13af18a9"
+      },
+      "file": {
+        "ref": "inputs/hello-files-v0.json#/payload/portable/typeEnvelopes/file/rawTypeBytes",
+        "typeSchemaId": "0xeeb5b5269631033ee0d4c723eb04b617f2b8fc98fc29d17ad73281f39acb22f2",
+        "sha256RawBytes": "9aff0185bc3a1bb00d2edde886813176635dfb89f0d2fba12c51cc00772b4152"
+      },
+      "fileRevision": {
+        "ref": "inputs/hello-files-v0.json#/payload/portable/typeEnvelopes/fileRevision/rawTypeBytes",
+        "typeSchemaId": "0x406fec19d346cdf3c1539c83928e217102ee0ad70d44007b78c146575b89c09c",
+        "sha256RawBytes": "b21ea291ebb0f4aa1d41783f56bbaa5ad571424e77827dcb221e3b7311f24fa8"
+      }
+    },
+    "opaqueUnknownTypeControl": {
+      "ref": "inputs/type-envelope-v0.json#/opaqueCodec1/rawTypeBytes",
+      "support": "UNSUPPORTED",
+      "validation": "UNPROVEN",
+      "semanticReconstruction": "INCOMPLETE",
+      "rawRetention": "EXACT"
+    }
+  },
+  "explorerProjection": {
+    "listRowRef": "inputs/hello-files-v0.json#/payload/adapter/explorer/listRow",
+    "inspectorRef": "inputs/hello-files-v0.json#/payload/adapter/explorer/inspector",
+    "projectionRoot": "0x0ac36d419f64f925d13139ec8b9a2831552a7980633c8f7ba122db6815f55417",
+    "entryCount": 57,
+    "viewAuthority": "DERIVED_PRESENTATION_ONLY"
+  },
+  "nonadoption": {
+    "protocolConformance": false,
+    "durable": false,
+    "productionReady": false,
+    "deploymentAuthorized": false,
+    "freezeAuthorized": false
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "format": "efs2-exp-c0-v0-build-handoff/0",
+  "status": "DISPOSABLE_BUILD_START_CANDIDATE",
+  "profile": "EXP-C0/v0",
+  "protocolConformance": false,
+  "durable": false,
+  "productionReady": false,
+  "deploymentAuthorized": false,
+  "freezeAuthorized": false,
+  "semanticSeal": {
+    "commit": "a68b00a2839b0d6b6e7c85e861349e45eeb8d35d",
+    "path": "Reviews/2026-08-23-efs2-exp-c0-semantic-seal/trace-manifest.json",
+    "traceCount": 61
+  },
+  "exactExecutableTraceReplayCount": 0,
+  "selectedCandidateLaws": {
+    "typeEnvelope": "RAW_PRESERVING_UINT16_CODEC_BYTES_PAYLOAD",
+    "typeBody": "ABI_TUPLE_V0_ASCENDING_FIELD_KEY",
+    "referenceRoles": "EXACT_TARGET_TYPE_OR_ZERO_SELF_TYPE",
+    "realmTypeSchemaCap": 16,
+    "principalSurface": "UNIFORM_FULL_WIDTH_PRINCIPAL_ID",
+    "resultEnvelope": "RESULT_V0_LITERAL_QUALIFIED",
+    "rawPointSubject": "COLLECTION_ENTRY",
+    "collectionCount": 28,
+    "positionCoordinates": "FULL_WIDTH_PURPOSE_SUBJECT_FIELD_ROLE",
+    "lensRequestScope": "PLAN_PURPOSE_SUBJECT_PLUS_CALLER_FIELD_ROLE_DERIVES_POSITION",
+    "bindingScope": "PRINCIPAL_PURPOSE_SUBJECT_CONTIGUOUS_ORDINALS",
+    "effectUnion": "CLOSED_TAGGED_CANONICAL_KIND_TARGET_ORDER",
+    "queryCursorCoordinates": 11,
+    "exactBytesIndexKey": "TYPE_FIELD_CANONICAL_BYTES_DOMAIN_SEPARATED",
+    "queryPageLimit": 32,
+    "lensCombiner": "FIRST_FOUND_AFTER_PROVED_ABSENCE",
+    "lensCandidateCaps": [1, 8, 32, 64],
+    "byteAcquisition": "ORDERED_SUPPLEMENTARY_EVIDENCE_KECCAK256_C0",
+    "byteReadRequest": "CANONICAL_SELF_CONTAINED_REALM_RECORD_DIGEST_RANGE_SOURCE_BASIS_PREIMAGE",
+    "sourceDescriptor": "CANONICAL_REALM_LINEAGE_COMPONENT_ENDPOINT_SET_PREIMAGE",
+    "realmLaunch": "CANONICAL_ORIGIN_COMPONENT_RUNTIME_CODE_EVIDENCE_TRANSITIVE_CROSS_LINKS",
+    "sourceObservation": "ATTRIBUTED_UNPROVEN_NOT_AUTHENTICATED",
+    "sourceObservationEvidence": "CANONICAL_PACKET_BOUND_TO_REQUEST_RESULT_SOURCE_AND_BASIS",
+    "projectionInventory": "27_POPULATED_PLUS_WITHDRAWALS_DECLARED_EMPTY",
+    "verticalControl": "HELLO_FILES_V0_RAW_PRESERVING_TOP_TO_BOTTOM",
+    "filesStableObjectIdentity": "CREATOR_SALT_CHARTER_NO_MUTABLE_LABEL",
+    "firstContractShape": "MONOLITHIC_NONDEPLOYABLE_MEASUREMENT_CANDIDATE"
+  },
+  "designs": [
+    "Designs/efsv2/exp-c0-v0-data-structure-profile.md",
+    "Designs/efsv2/exp-c0-v0-result-api-profile.md",
+    "Designs/efsv2/exp-c0-v0-codec-domain-bounds-vector-contract.md",
+    "Designs/efsv2/exp-c0-v0-hello-files-trace.md",
+    "Designs/efsv2/mvp-build-start-packet.md"
+  ],
+  "pinnedVectors": [
+    {
+      "path": "Reviews/2026-08-25-efs2-exp-c0-v0-control/vectors/essential-v0.json",
+      "sha256": "949b9a4a7aaf90d3d8de5bbbddf40c0daf82409b2653b64ee9cff4d4dbbafd5c"
+    },
+    {
+      "path": "Reviews/2026-08-25-efs2-exp-c0-v0-control/vectors/type-envelope-v0.json",
+      "sha256": "773660ae883e6ae4ecc28f853c681e229564eb33b9de02f4d3ae668140587a65"
+    },
+    {
+      "path": "Reviews/2026-08-25-efs2-exp-c0-v0-control/vectors/plan-operation-v0.json",
+      "sha256": "b6a58fcdaac3db9d4335e74054f195a4ea2e684b9dc3389fc17ef5c119002162"
+    },
+    {
+      "path": "Reviews/2026-08-25-efs2-exp-c0-v0-control/vectors/result-v0.json",
+      "sha256": "9fbadbce871d3be5d8ed4fbd74c36d3f15f01b8923259b99d3b5104dd176f6bf"
+    },
+    {
+      "path": "Reviews/2026-08-25-efs2-exp-c0-v0-control/type-interpreter-v0.json",
+      "sha256": "2e4be16ffa7cba92fdf9cdc4ccaa824f58595b91fe85d5bb17cca1436beba810"
+    },
+    {
+      "path": "Reviews/2026-08-25-efs2-exp-c0-v0-control/principal-comparator-v0.json",
+      "sha256": "08de74616ea2b901b7bb87fc9bc2f1fcd316b3dff35ec4f176ffef2e59c21999"
+    },
+    {
+      "path": "Reviews/2026-08-25-efs2-exp-c0-v0-control/lens-gas-v0.json",
+      "sha256": "932dfe2871f72bef71f8cb8c2a05b57f90399699eec1486c88a2b1cd6b179862"
+    },
+    {
+      "path": "Reviews/2026-08-25-efs2-exp-c0-v0-control/hello-files-v0.json",
+      "sha256": "8841b6cd3c831ddeb80331614f421b17e8211594888eb657754f65ee28fa6a3f"
+    },
+    {
+      "path": "Reviews/2026-08-25-efs2-exp-c0-v0-control/consumer-contract-v0.json",
+      "sha256": "7be0ca1c742fcc61d16316456e2e8937de50c6e6864a5533d24e614d2caee512"
+    }
+  ],
+  "verificationCommands": [
+    "node --test test/*.test.cjs",
+    "node --test test/hello-files-v0.test.cjs",
+    "node --test test/serialized-hello-files-v0.test.cjs",
+    "node --test test/lens-gas-v0.test.cjs",
+    "node --test test/consumer-contract-v0.test.cjs",
+    "node --test test/type-interpreter-vector-generator.test.cjs",
+    "forge clean && forge test",
+    "node --check scripts/build-essential-vector.cjs",
+    "node --check scripts/build-type-interpreter-vector.cjs",
+    "node --check scripts/build-type-envelope-vector.cjs",
+    "node --check scripts/build-plan-vector.cjs",
+    "node --check scripts/build-result-vector.cjs",
+    "node --check scripts/build-hello-files-vector.cjs",
+    "node --check scripts/build-consumer-contract.cjs"
+  ],
+  "ownerDecisionsBeforeCandidateCode": [
+    "GO_CODE_NONDEPLOYABLE_REPLACEABLE_CANDIDATE"
+  ],
+  "delegatedCandidateDefaults": [
+    "FIRST_PRODUCT_RAW_GUEST_EXPLORER_PLUS_MINIMUM_FILES"
+  ],
+  "engineeringWorkNotOwnerDecisions": [
+    "IMPLEMENT_MONOLITHIC_CORE_SKELETON",
+    "IMPLEMENT_EXACT_EOA_AND_ERC1271_VERIFIER_TRANSCRIPTS",
+    "IMPLEMENT_QUERY_ACTIVATION_BACKFILL_AND_LITERAL_PAGE_RESULTS",
+    "IMPLEMENT_COMPLETE_STATE_PROJECTION_AND_INDEPENDENT_RECONSTRUCTION",
+    "IMPLEMENT_RAW_PRESERVING_TYPESCRIPT_SDK",
+    "IMPLEMENT_NO_WALLET_GUEST_EXPLORER_INSPECTOR",
+    "MEASURE_CODE_SIZE_GAS_RETURNDATA_AND_STATE_GROWTH"
+  ]
+}

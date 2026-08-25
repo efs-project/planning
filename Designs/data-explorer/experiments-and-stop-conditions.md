@@ -52,6 +52,16 @@ changing one of those members. This is a semantic fixture addition: it prevents
 mixed-generation/basis pagination from being disguised as UI recovery; it is
 not a cursor format, public SDK API, or protocol byte selection.
 
+Before E1a, the independent
+[[Reviews/2026-08-25-data-explorer-exp-c0-consumption/README|serialized-consumption check]]
+must pass in `commit-ready` mode against one exact Core source commit. It accepts
+exactly the handoff, consumer contract, HELLO packet, Result vector, and Type
+envelope vector as serialized JSON; it imports no Core implementation. A pass
+proves only the static authority/preservation boundary. It does not execute the
+fake Reader/UI, public transport, SDK adapter, verifier, or browser dependency
+graph, so it satisfies neither E1a nor E1b. E1b remains `NOT_RUN` until the two
+independently cold direct and OS-hosted runs below are retained.
+
 All technical experiments use one versioned, disposable corpus containing:
 
 - a public Realm, direct Route/Mount and Files root that can reconstruct from
