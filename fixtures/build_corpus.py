@@ -1,7 +1,7 @@
 # DISPOSABLE protocolConformance=false notAdopted=true goCodeAuthorized=false
 # Builds the sealed integrated fixture corpus (types, records, bindings, cases).
 # Deterministic: fixed constants only. Emits fixtures/corpus.json + SHA256SUMS.
-import json, hashlib, sys
+import json, hashlib, sys, os
 from keccak import keccak256
 from abi_min import encode_tuple, encode_envelope, _word
 
@@ -292,7 +292,7 @@ corpus = {
     "cases": cases, "stateScript": state_script, "callbackCases": callback_cases,
 }
 out = json.dumps(corpus, indent=1, sort_keys=True)
-open("corpus.json", "w").write(out + "\n")
+open(os.path.join(os.path.dirname(__file__), "corpus.json"), "w").write(out + "\n")
 sha = hashlib.sha256(out.encode() + b"\n").hexdigest()
-open("SHA256SUMS", "w").write(f"{sha}  corpus.json\n")
+open(os.path.join(os.path.dirname(__file__), "SHA256SUMS"), "w").write(f"{sha}  corpus.json\n")
 print(f"corpus.json sealed sha256={sha} types={len(TYPES)} records={len(RECORDS)} cases={len(cases)} state={len(state_script)} cb={len(callback_cases)}")
