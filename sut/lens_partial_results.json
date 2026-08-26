@@ -1,0 +1,1 @@
+[{"case":"lens.unknown.first","result":"UNKNOWN_STOP"},{"case":"lens.absent.then.found","result":"FOUND_FALLBACK"},{"case":"lens.conflict.stops","result":"STOPPED"},{"case":"query.partial.empty","result":"PARTIAL_STOP"},{"case":"query.complete.empty","result":"PROCEED"},{"case":"withdraw.current.vs.historical","result":"SEPARATED"}]

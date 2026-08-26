@@ -1,0 +1,100 @@
+[
+ {
+  "id": "A_SEMPIN.r_act_overcap",
+  "consumer": "A_SEMPIN",
+  "oracle": "REJECT",
+  "sut": "DECODE_ONLY",
+  "agree": false
+ },
+ {
+  "id": "A_SEMPIN.r_act_transfer",
+  "consumer": "A_SEMPIN",
+  "oracle": "REJECT",
+  "sut": "EFFECT",
+  "agree": false
+ },
+ {
+  "id": "A_SEMPIN.r_act_v11",
+  "consumer": "A_SEMPIN",
+  "oracle": "REJECT",
+  "sut": "EFFECT",
+  "agree": false
+ },
+ {
+  "id": "A_SEMPIN.r_act_wrongtarget",
+  "consumer": "A_SEMPIN",
+  "oracle": "REJECT",
+  "sut": "DECODE_ONLY",
+  "agree": false
+ },
+ {
+  "id": "N_PRED.r_note11_mood",
+  "consumer": "N_PRED",
+  "oracle": "ACCEPT",
+  "sut": "REJECT",
+  "agree": false
+ },
+ {
+  "id": "N_PRED.r_note11_nomood",
+  "consumer": "N_PRED",
+  "oracle": "ACCEPT",
+  "sut": "REJECT",
+  "agree": false
+ },
+ {
+  "id": "N_PRED.r_note12",
+  "consumer": "N_PRED",
+  "oracle": "ACCEPT",
+  "sut": "REJECT",
+  "agree": false
+ },
+ {
+  "id": "N_PRED.r_reply_x",
+  "consumer": "N_PRED",
+  "oracle": "ACCEPT",
+  "sut": "REJECT",
+  "agree": false
+ },
+ {
+  "id": "N_SEMPIN.r_hostile_backlink",
+  "consumer": "N_SEMPIN",
+  "oracle": "REJECT",
+  "sut": "ACCEPT",
+  "agree": false
+ },
+ {
+  "id": "N_SEMPIN.r_note11_mood",
+  "consumer": "N_SEMPIN",
+  "oracle": "REJECT",
+  "sut": "ACCEPT",
+  "agree": false
+ },
+ {
+  "id": "N_SEMPIN.r_note11_nomood",
+  "consumer": "N_SEMPIN",
+  "oracle": "REJECT",
+  "sut": "ACCEPT",
+  "agree": false
+ },
+ {
+  "id": "N_SEMPIN.r_note_ok",
+  "consumer": "N_SEMPIN",
+  "oracle": "REJECT",
+  "sut": "ACCEPT",
+  "agree": false
+ },
+ {
+  "id": "N_SEMPIN.r_note_reply",
+  "consumer": "N_SEMPIN",
+  "oracle": "REJECT",
+  "sut": "ACCEPT",
+  "agree": false
+ },
+ {
+  "id": "N_SEMPIN.r_reply_x",
+  "consumer": "N_SEMPIN",
+  "oracle": "REJECT",
+  "sut": "ACCEPT",
+  "agree": false
+ }
+]

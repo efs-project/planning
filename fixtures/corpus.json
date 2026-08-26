@@ -1,0 +1,1822 @@
+{
+ "bindings": {
+  "a_twin_stolen": {
+   "auth": "issuer-stolen",
+   "bindingId": "3b1fe948cba00fac1abdb4b477d6281ea91fced7974e360b82c3bc1e9c70d905",
+   "mappingHex": "0000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000",
+   "sem": "SEM_ACT",
+   "type": "ACT_TWIN"
+  },
+  "a_v1": {
+   "auth": "deploy-pinned",
+   "bindingId": "35ba470f3c9c913916e41566f5607c6a78a9f61ee197beb7fdcd6d05d0f2585c",
+   "mappingHex": "0000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000",
+   "sem": "SEM_ACT",
+   "type": "ACT_V1"
+  },
+  "a_v11": {
+   "auth": "issuer",
+   "bindingId": "5dc6108cbd32bbdb988c9bea17bbd0d678220cd3f03a231f9bb0f673baa24413",
+   "mappingHex": "0000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000",
+   "sem": "SEM_ACT",
+   "type": "ACT_V1_1"
+  },
+  "a_v2_drop": {
+   "auth": "issuer",
+   "bindingId": "4590eb14db9d8a3557b959955062683e095f9db482bef8c468e6dc87538687b1",
+   "mappingHex": "0000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000",
+   "sem": "SEM_ACT",
+   "type": "ACT_V2"
+  },
+  "v_exactconst_forge": {
+   "auth": "none",
+   "bindingId": "3d500c9a14a9e9f8750745d9a8112d40b53f0af8ab08d334f0974389a987fa18",
+   "mappingHex": "000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000",
+   "sem": "SEM_NOTE",
+   "type": "NOTE_TWIN"
+  },
+  "v_note10": {
+   "auth": "deploy-pinned",
+   "bindingId": "267c31d7d3b8df276f774e819ef000b08ee2c055211b4188773f3420bcbf126a",
+   "mappingHex": "0000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000",
+   "sem": "SEM_NOTE",
+   "type": "NOTE_1_0"
+  },
+  "v_note11": {
+   "auth": "issuer",
+   "bindingId": "3002f1cf40d234ca0284c81762f9a0167352cf1de868ad3c08f2a2061da94490",
+   "mappingHex": "0000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000",
+   "sem": "SEM_NOTE",
+   "type": "NOTE_1_1"
+  },
+  "v_note12_att": {
+   "auth": "none",
+   "bindingId": "900a7d5803f207c4ec5a07dac02e09bcc371a57b5941d3a35ae0ac97edb31c6b",
+   "mappingHex": "0000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000",
+   "sem": "SEM_NOTE",
+   "type": "NOTE_1_2"
+  },
+  "v_note20_lossy": {
+   "auth": "issuer",
+   "bindingId": "f2c1e38ab18f1571a9a6f9884056de6a7fbc86cb1f84453989fdaf352bd9b1ed",
+   "mappingHex": "0000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000",
+   "sem": "SEM_NOTE",
+   "type": "NOTE_2_0"
+  },
+  "v_twin_stolen": {
+   "auth": "issuer-stolen",
+   "bindingId": "f069a9a28cff6ebb682a7f660f1f12699650193b71968ca1b9fd92c2bfedf87d",
+   "mappingHex": "0000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000",
+   "sem": "SEM_NOTE",
+   "type": "NOTE_TWIN"
+  }
+ },
+ "callbackCases": [
+  {
+   "guarded": false,
+   "id": "CB.ok",
+   "record": "r_note_ok",
+   "validator": "honest"
+  },
+  {
+   "guarded": false,
+   "id": "CB.revert",
+   "record": "r_note_ok",
+   "validator": "revert"
+  },
+  {
+   "guarded": false,
+   "id": "CB.gasgrief.naive",
+   "record": "r_note_ok",
+   "validator": "gasgrief"
+  },
+  {
+   "guarded": true,
+   "id": "CB.gasgrief.guarded",
+   "record": "r_note_ok",
+   "validator": "gasgrief"
+  },
+  {
+   "guarded": false,
+   "id": "CB.bomb.naive",
+   "record": "r_note_ok",
+   "validator": "bomb"
+  },
+  {
+   "guarded": true,
+   "id": "CB.bomb.guarded",
+   "record": "r_note_ok",
+   "validator": "bomb"
+  },
+  {
+   "guarded": true,
+   "id": "CB.reenter",
+   "record": "r_note_ok",
+   "validator": "reenter"
+  },
+  {
+   "guarded": true,
+   "id": "CB.mutate",
+   "record": "r_note_ok",
+   "validator": "mutable"
+  },
+  {
+   "guarded": true,
+   "id": "CB.addrmeaning",
+   "record": "r_note_ok",
+   "validator": "addr"
+  }
+ ],
+ "cases": [
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.r_note_ok",
+   "note": "",
+   "record": "r_note_ok"
+  },
+  {
+   "binding": null,
+   "consumer": "N_FIN",
+   "id": "N_FIN.r_note_ok",
+   "note": "",
+   "record": "r_note_ok"
+  },
+  {
+   "binding": "v_note10",
+   "consumer": "N_SEMPIN",
+   "id": "N_SEMPIN.r_note_ok",
+   "note": "",
+   "record": "r_note_ok"
+  },
+  {
+   "binding": "v_note10",
+   "consumer": "N_SEMISS",
+   "id": "N_SEMISS.r_note_ok",
+   "note": "",
+   "record": "r_note_ok"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.r_note_ok",
+   "note": "",
+   "record": "r_note_ok"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.r_note_ok",
+   "note": "",
+   "record": "r_note_ok"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.r_note_reply",
+   "note": "",
+   "record": "r_note_reply"
+  },
+  {
+   "binding": null,
+   "consumer": "N_FIN",
+   "id": "N_FIN.r_note_reply",
+   "note": "",
+   "record": "r_note_reply"
+  },
+  {
+   "binding": "v_note10",
+   "consumer": "N_SEMPIN",
+   "id": "N_SEMPIN.r_note_reply",
+   "note": "",
+   "record": "r_note_reply"
+  },
+  {
+   "binding": "v_note10",
+   "consumer": "N_SEMISS",
+   "id": "N_SEMISS.r_note_reply",
+   "note": "",
+   "record": "r_note_reply"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.r_note_reply",
+   "note": "",
+   "record": "r_note_reply"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.r_note_reply",
+   "note": "",
+   "record": "r_note_reply"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.r_note11_mood",
+   "note": "",
+   "record": "r_note11_mood"
+  },
+  {
+   "binding": null,
+   "consumer": "N_FIN",
+   "id": "N_FIN.r_note11_mood",
+   "note": "",
+   "record": "r_note11_mood"
+  },
+  {
+   "binding": "v_note11",
+   "consumer": "N_SEMPIN",
+   "id": "N_SEMPIN.r_note11_mood",
+   "note": "",
+   "record": "r_note11_mood"
+  },
+  {
+   "binding": "v_note11",
+   "consumer": "N_SEMISS",
+   "id": "N_SEMISS.r_note11_mood",
+   "note": "",
+   "record": "r_note11_mood"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.r_note11_mood",
+   "note": "",
+   "record": "r_note11_mood"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.r_note11_mood",
+   "note": "",
+   "record": "r_note11_mood"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.r_note11_nomood",
+   "note": "",
+   "record": "r_note11_nomood"
+  },
+  {
+   "binding": null,
+   "consumer": "N_FIN",
+   "id": "N_FIN.r_note11_nomood",
+   "note": "",
+   "record": "r_note11_nomood"
+  },
+  {
+   "binding": "v_note11",
+   "consumer": "N_SEMPIN",
+   "id": "N_SEMPIN.r_note11_nomood",
+   "note": "",
+   "record": "r_note11_nomood"
+  },
+  {
+   "binding": "v_note11",
+   "consumer": "N_SEMISS",
+   "id": "N_SEMISS.r_note11_nomood",
+   "note": "",
+   "record": "r_note11_nomood"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.r_note11_nomood",
+   "note": "",
+   "record": "r_note11_nomood"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.r_note11_nomood",
+   "note": "",
+   "record": "r_note11_nomood"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.r_note12",
+   "note": "",
+   "record": "r_note12"
+  },
+  {
+   "binding": null,
+   "consumer": "N_FIN",
+   "id": "N_FIN.r_note12",
+   "note": "",
+   "record": "r_note12"
+  },
+  {
+   "binding": "v_note12_att",
+   "consumer": "N_SEMPIN",
+   "id": "N_SEMPIN.r_note12",
+   "note": "",
+   "record": "r_note12"
+  },
+  {
+   "binding": "v_note12_att",
+   "consumer": "N_SEMISS",
+   "id": "N_SEMISS.r_note12",
+   "note": "",
+   "record": "r_note12"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.r_note12",
+   "note": "",
+   "record": "r_note12"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.r_note12",
+   "note": "",
+   "record": "r_note12"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.r_note20",
+   "note": "",
+   "record": "r_note20"
+  },
+  {
+   "binding": null,
+   "consumer": "N_FIN",
+   "id": "N_FIN.r_note20",
+   "note": "",
+   "record": "r_note20"
+  },
+  {
+   "binding": "v_note20_lossy",
+   "consumer": "N_SEMPIN",
+   "id": "N_SEMPIN.r_note20",
+   "note": "",
+   "record": "r_note20"
+  },
+  {
+   "binding": "v_note20_lossy",
+   "consumer": "N_SEMISS",
+   "id": "N_SEMISS.r_note20",
+   "note": "",
+   "record": "r_note20"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.r_note20",
+   "note": "",
+   "record": "r_note20"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.r_note20",
+   "note": "",
+   "record": "r_note20"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.r_twin",
+   "note": "",
+   "record": "r_twin"
+  },
+  {
+   "binding": null,
+   "consumer": "N_FIN",
+   "id": "N_FIN.r_twin",
+   "note": "",
+   "record": "r_twin"
+  },
+  {
+   "binding": "v_twin_stolen",
+   "consumer": "N_SEMPIN",
+   "id": "N_SEMPIN.r_twin",
+   "note": "",
+   "record": "r_twin"
+  },
+  {
+   "binding": "v_twin_stolen",
+   "consumer": "N_SEMISS",
+   "id": "N_SEMISS.r_twin",
+   "note": "",
+   "record": "r_twin"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.r_twin",
+   "note": "",
+   "record": "r_twin"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.r_twin",
+   "note": "",
+   "record": "r_twin"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.r_reply_x",
+   "note": "",
+   "record": "r_reply_x"
+  },
+  {
+   "binding": null,
+   "consumer": "N_FIN",
+   "id": "N_FIN.r_reply_x",
+   "note": "",
+   "record": "r_reply_x"
+  },
+  {
+   "binding": "v_note11",
+   "consumer": "N_SEMPIN",
+   "id": "N_SEMPIN.r_reply_x",
+   "note": "",
+   "record": "r_reply_x"
+  },
+  {
+   "binding": "v_note11",
+   "consumer": "N_SEMISS",
+   "id": "N_SEMISS.r_reply_x",
+   "note": "",
+   "record": "r_reply_x"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.r_reply_x",
+   "note": "",
+   "record": "r_reply_x"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.r_reply_x",
+   "note": "",
+   "record": "r_reply_x"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.r_hostile_backlink",
+   "note": "",
+   "record": "r_hostile_backlink"
+  },
+  {
+   "binding": null,
+   "consumer": "N_FIN",
+   "id": "N_FIN.r_hostile_backlink",
+   "note": "",
+   "record": "r_hostile_backlink"
+  },
+  {
+   "binding": "v_note10",
+   "consumer": "N_SEMPIN",
+   "id": "N_SEMPIN.r_hostile_backlink",
+   "note": "",
+   "record": "r_hostile_backlink"
+  },
+  {
+   "binding": "v_note10",
+   "consumer": "N_SEMISS",
+   "id": "N_SEMISS.r_hostile_backlink",
+   "note": "",
+   "record": "r_hostile_backlink"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.r_hostile_backlink",
+   "note": "",
+   "record": "r_hostile_backlink"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.r_hostile_backlink",
+   "note": "",
+   "record": "r_hostile_backlink"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.r_unknown_codec",
+   "note": "",
+   "record": "r_unknown_codec"
+  },
+  {
+   "binding": null,
+   "consumer": "N_FIN",
+   "id": "N_FIN.r_unknown_codec",
+   "note": "",
+   "record": "r_unknown_codec"
+  },
+  {
+   "binding": null,
+   "consumer": "N_SEMPIN",
+   "id": "N_SEMPIN.r_unknown_codec",
+   "note": "",
+   "record": "r_unknown_codec"
+  },
+  {
+   "binding": null,
+   "consumer": "N_SEMISS",
+   "id": "N_SEMISS.r_unknown_codec",
+   "note": "",
+   "record": "r_unknown_codec"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.r_unknown_codec",
+   "note": "",
+   "record": "r_unknown_codec"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.r_unknown_codec",
+   "note": "",
+   "record": "r_unknown_codec"
+  },
+  {
+   "binding": "v_exactconst_forge",
+   "consumer": "N_SEMOPEN",
+   "id": "N_SEMOPEN.r_twin.forge",
+   "note": "caller-supplied exactConstant forge; no gate",
+   "record": "r_twin"
+  },
+  {
+   "binding": "v_note11",
+   "consumer": "N_SEMOPEN",
+   "id": "N_SEMOPEN.r_note11",
+   "note": "caller-supplied honest binding; no gate",
+   "record": "r_note11_mood"
+  },
+  {
+   "binding": "v_exactconst_forge",
+   "consumer": "N_SEMPIN",
+   "id": "N_SEMPIN.r_twin.forge",
+   "note": "forge vs pin gate",
+   "record": "r_twin"
+  },
+  {
+   "binding": "v_exactconst_forge",
+   "consumer": "N_SEMISS",
+   "id": "N_SEMISS.r_twin.forge",
+   "note": "forge vs issuer gate (unsigned)",
+   "record": "r_twin"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.m_trailing",
+   "note": "",
+   "record": "m_trailing"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.m_trailing",
+   "note": "",
+   "record": "m_trailing"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.m_trailing",
+   "note": "",
+   "record": "m_trailing"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.m_noncanon_offset",
+   "note": "",
+   "record": "m_noncanon_offset"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.m_noncanon_offset",
+   "note": "",
+   "record": "m_noncanon_offset"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.m_noncanon_offset",
+   "note": "",
+   "record": "m_noncanon_offset"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.m_absent_nonzero",
+   "note": "",
+   "record": "m_absent_nonzero"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.m_absent_nonzero",
+   "note": "",
+   "record": "m_absent_nonzero"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.m_absent_nonzero",
+   "note": "",
+   "record": "m_absent_nonzero"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.m_swapped",
+   "note": "",
+   "record": "m_swapped"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.m_swapped",
+   "note": "",
+   "record": "m_swapped"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.m_swapped",
+   "note": "",
+   "record": "m_swapped"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.m_len_lie",
+   "note": "",
+   "record": "m_len_lie"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.m_len_lie",
+   "note": "",
+   "record": "m_len_lie"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.m_len_lie",
+   "note": "",
+   "record": "m_len_lie"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.m_inner_short",
+   "note": "",
+   "record": "m_inner_short"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.m_inner_short",
+   "note": "",
+   "record": "m_inner_short"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.m_inner_short",
+   "note": "",
+   "record": "m_inner_short"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.m_pad_dirty",
+   "note": "",
+   "record": "m_pad_dirty"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.m_pad_dirty",
+   "note": "",
+   "record": "m_pad_dirty"
+  },
+  {
+   "binding": null,
+   "consumer": "ARCH",
+   "id": "ARCH.m_pad_dirty",
+   "note": "",
+   "record": "m_pad_dirty"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.r_sci_dist",
+   "note": "",
+   "record": "r_sci_dist"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.r_sci_dist",
+   "note": "",
+   "record": "r_sci_dist"
+  },
+  {
+   "binding": null,
+   "consumer": "N_EXACT",
+   "id": "N_EXACT.r_sci_dur",
+   "note": "",
+   "record": "r_sci_dur"
+  },
+  {
+   "binding": null,
+   "consumer": "N_PRED",
+   "id": "N_PRED.r_sci_dur",
+   "note": "",
+   "record": "r_sci_dur"
+  },
+  {
+   "binding": null,
+   "consumer": "A_EXACT",
+   "id": "A_EXACT.r_act_transfer",
+   "note": "",
+   "record": "r_act_transfer"
+  },
+  {
+   "binding": null,
+   "consumer": "A_FIN",
+   "id": "A_FIN.r_act_transfer",
+   "note": "",
+   "record": "r_act_transfer"
+  },
+  {
+   "binding": "a_v1",
+   "consumer": "A_SEMPIN",
+   "id": "A_SEMPIN.r_act_transfer",
+   "note": "",
+   "record": "r_act_transfer"
+  },
+  {
+   "binding": "a_v1",
+   "consumer": "A_SEMISS",
+   "id": "A_SEMISS.r_act_transfer",
+   "note": "",
+   "record": "r_act_transfer"
+  },
+  {
+   "binding": null,
+   "consumer": "A_PRED",
+   "id": "A_PRED.r_act_transfer",
+   "note": "",
+   "record": "r_act_transfer"
+  },
+  {
+   "binding": null,
+   "consumer": "A_EXACT",
+   "id": "A_EXACT.r_act_overcap",
+   "note": "",
+   "record": "r_act_overcap"
+  },
+  {
+   "binding": null,
+   "consumer": "A_FIN",
+   "id": "A_FIN.r_act_overcap",
+   "note": "",
+   "record": "r_act_overcap"
+  },
+  {
+   "binding": "a_v1",
+   "consumer": "A_SEMPIN",
+   "id": "A_SEMPIN.r_act_overcap",
+   "note": "",
+   "record": "r_act_overcap"
+  },
+  {
+   "binding": "a_v1",
+   "consumer": "A_SEMISS",
+   "id": "A_SEMISS.r_act_overcap",
+   "note": "",
+   "record": "r_act_overcap"
+  },
+  {
+   "binding": null,
+   "consumer": "A_PRED",
+   "id": "A_PRED.r_act_overcap",
+   "note": "",
+   "record": "r_act_overcap"
+  },
+  {
+   "binding": null,
+   "consumer": "A_EXACT",
+   "id": "A_EXACT.r_act_v11",
+   "note": "",
+   "record": "r_act_v11"
+  },
+  {
+   "binding": null,
+   "consumer": "A_FIN",
+   "id": "A_FIN.r_act_v11",
+   "note": "",
+   "record": "r_act_v11"
+  },
+  {
+   "binding": "a_v11",
+   "consumer": "A_SEMPIN",
+   "id": "A_SEMPIN.r_act_v11",
+   "note": "",
+   "record": "r_act_v11"
+  },
+  {
+   "binding": "a_v11",
+   "consumer": "A_SEMISS",
+   "id": "A_SEMISS.r_act_v11",
+   "note": "",
+   "record": "r_act_v11"
+  },
+  {
+   "binding": null,
+   "consumer": "A_PRED",
+   "id": "A_PRED.r_act_v11",
+   "note": "",
+   "record": "r_act_v11"
+  },
+  {
+   "binding": null,
+   "consumer": "A_EXACT",
+   "id": "A_EXACT.r_act_v2_deleg",
+   "note": "",
+   "record": "r_act_v2_deleg"
+  },
+  {
+   "binding": null,
+   "consumer": "A_FIN",
+   "id": "A_FIN.r_act_v2_deleg",
+   "note": "",
+   "record": "r_act_v2_deleg"
+  },
+  {
+   "binding": "a_v2_drop",
+   "consumer": "A_SEMPIN",
+   "id": "A_SEMPIN.r_act_v2_deleg",
+   "note": "",
+   "record": "r_act_v2_deleg"
+  },
+  {
+   "binding": "a_v2_drop",
+   "consumer": "A_SEMISS",
+   "id": "A_SEMISS.r_act_v2_deleg",
+   "note": "",
+   "record": "r_act_v2_deleg"
+  },
+  {
+   "binding": null,
+   "consumer": "A_PRED",
+   "id": "A_PRED.r_act_v2_deleg",
+   "note": "",
+   "record": "r_act_v2_deleg"
+  },
+  {
+   "binding": null,
+   "consumer": "A_EXACT",
+   "id": "A_EXACT.r_act_twin",
+   "note": "",
+   "record": "r_act_twin"
+  },
+  {
+   "binding": null,
+   "consumer": "A_FIN",
+   "id": "A_FIN.r_act_twin",
+   "note": "",
+   "record": "r_act_twin"
+  },
+  {
+   "binding": "a_twin_stolen",
+   "consumer": "A_SEMPIN",
+   "id": "A_SEMPIN.r_act_twin",
+   "note": "",
+   "record": "r_act_twin"
+  },
+  {
+   "binding": "a_twin_stolen",
+   "consumer": "A_SEMISS",
+   "id": "A_SEMISS.r_act_twin",
+   "note": "",
+   "record": "r_act_twin"
+  },
+  {
+   "binding": null,
+   "consumer": "A_PRED",
+   "id": "A_PRED.r_act_twin",
+   "note": "",
+   "record": "r_act_twin"
+  },
+  {
+   "binding": null,
+   "consumer": "A_EXACT",
+   "id": "A_EXACT.r_act_wrongtarget",
+   "note": "",
+   "record": "r_act_wrongtarget"
+  },
+  {
+   "binding": null,
+   "consumer": "A_FIN",
+   "id": "A_FIN.r_act_wrongtarget",
+   "note": "",
+   "record": "r_act_wrongtarget"
+  },
+  {
+   "binding": "a_v1",
+   "consumer": "A_SEMPIN",
+   "id": "A_SEMPIN.r_act_wrongtarget",
+   "note": "",
+   "record": "r_act_wrongtarget"
+  },
+  {
+   "binding": "a_v1",
+   "consumer": "A_SEMISS",
+   "id": "A_SEMISS.r_act_wrongtarget",
+   "note": "",
+   "record": "r_act_wrongtarget"
+  },
+  {
+   "binding": null,
+   "consumer": "A_PRED",
+   "id": "A_PRED.r_act_wrongtarget",
+   "note": "",
+   "record": "r_act_wrongtarget"
+  }
+ ],
+ "constants": {
+  "ATTACKER": "0x2222222222222222222222222222222222222222",
+  "ISSUER": "0x1111111111111111111111111111111111111111",
+  "RECIPIENT": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1",
+  "TRANSFER_CAP": 1000
+ },
+ "disclaimer": "DISPOSABLE protocolConformance=false notAdopted=true goCodeAuthorized=false; all IDs fixture-local; production coordinates BLOCKED_BY_CORE_INPUT",
+ "domains": {
+  "DOM_BIND": "7b2bf036ff983587b456170f0a3a17236f47d931e689fc487ada5eca995a251c",
+  "DOM_RECORD": "96a526f7f2ecec50cc072061092335d4ae54b5f3d70f53ceb8d3711aac667211",
+  "DOM_SCHEMA": "f3da78a6091aa1ac99e4523cc75c926aab10ace023657c4c8184e7b9fef1053e",
+  "DOM_SEM": "be7bdda27db1a568f3bd3d7276074baf36563d610cc91888d3a0f524f4832b49",
+  "DOM_TYPE": "947b367c0295a2f9dace6dcb2b81cb8f12972df724a387c63287d6b034a78955"
+ },
+ "records": {
+  "m_absent_nonzero": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000e0a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003e800000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000006666666666666666666666666666666666666666666666666666666666666666000000000000000000000000000000000000000000000000000000000000000b68656c6c6f20776f726c64000000000000000000000000000000000000000000",
+   "recordId": "463f57ac97e36b4a562b1a55f1973267794f13601b6df37fd0d85adc21a10f58",
+   "type": "NOTE_1_0",
+   "typeId": "88d004a38b37eb6aa8b325641f4192eac80bd9077f077d034ddc4cfd9b4c4d85"
+  },
+  "m_inner_short": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000d0a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003e800000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b68656c6c6f20776f726c64000000000000000000000000000000000000000000",
+   "recordId": "519ad4f04b7c278c45ad64d7ac2faa366cfe3a2ca314e5368c934ae352448e1f",
+   "type": "NOTE_1_0",
+   "typeId": "88d004a38b37eb6aa8b325641f4192eac80bd9077f077d034ddc4cfd9b4c4d85"
+  },
+  "m_len_lie": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000e0a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003e800000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100068656c6c6f20776f726c64000000000000000000000000000000000000000000",
+   "recordId": "3d6386d55470fcb98cf110187d316892157d19991dc210d5a8d0d04d403f1810",
+   "type": "NOTE_1_0",
+   "typeId": "88d004a38b37eb6aa8b325641f4192eac80bd9077f077d034ddc4cfd9b4c4d85"
+  },
+  "m_noncanon_offset": {
+   "envelopeHex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000100a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003e800000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b68656c6c6f20776f726c64000000000000000000000000000000000000000000",
+   "recordId": "a6622151f382fa9a1c366fa29224e96a3312f9ef34d4086cc0803fbfe4daf58c",
+   "type": "NOTE_1_0",
+   "typeId": "88d004a38b37eb6aa8b325641f4192eac80bd9077f077d034ddc4cfd9b4c4d85"
+  },
+  "m_pad_dirty": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000e0a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003e800000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b68656c6c6f20776f726c64000000000000000000000000000000000000000099",
+   "recordId": "5e3eea769898220016ca8f3f55bce60d4f333be1d0a525649e95448ede60c835",
+   "type": "NOTE_1_0",
+   "typeId": "88d004a38b37eb6aa8b325641f4192eac80bd9077f077d034ddc4cfd9b4c4d85"
+  },
+  "m_swapped": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000e000000000000000000000000000000000000000000000000000000000000003e8a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b68656c6c6f20776f726c64000000000000000000000000000000000000000000",
+   "recordId": "fd761af0ca97286909b0726e8766dc70bb74a7c51e77c6a52cc1ca8ae21c2456",
+   "type": "NOTE_1_0",
+   "typeId": "88d004a38b37eb6aa8b325641f4192eac80bd9077f077d034ddc4cfd9b4c4d85"
+  },
+  "m_trailing": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000e0a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003e800000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b68656c6c6f20776f726c64000000000000000000000000000000000000000000deadbe",
+   "recordId": "97bf35e194dd645b0637df617d0f1a49a39f44e8b791cc540622c4e48c9dde70",
+   "type": "NOTE_1_0",
+   "typeId": "88d004a38b37eb6aa8b325641f4192eac80bd9077f077d034ddc4cfd9b4c4d85"
+  },
+  "r_act_equip": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000a0c1f35e3c8f354e6f77972343fb166026f936e6410effb021907161765aef870700000000000000000000000000000000000000000000000000000000000000018136f3f9ec0df1ad28b983a113e34789e83dbac5ae16fe4627a60fe30d22aea20000000000000000000000000000000000000000000000000000000000000002b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0",
+   "recordId": "2522577f5fd231f17e259c49f5d41db0d4545f16fb163db5decdf5dd037dadaf",
+   "type": "ACT_V1",
+   "typeId": "197b9f752e9e3ae84033e46eac81043cbff4861c97050705eb05f864b88a4edb"
+  },
+  "r_act_equip2": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000a0c1f35e3c8f354e6f77972343fb166026f936e6410effb021907161765aef870700000000000000000000000000000000000000000000000000000000000000018136f3f9ec0df1ad28b983a113e34789e83dbac5ae16fe4627a60fe30d22aea20000000000000000000000000000000000000000000000000000000000000002b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2",
+   "recordId": "5da8ef1f56c9bbea915fe481d1071e86a053c68860db7923ef88492730e8d460",
+   "type": "ACT_V1",
+   "typeId": "197b9f752e9e3ae84033e46eac81043cbff4861c97050705eb05f864b88a4edb"
+  },
+  "r_act_equip_pants": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000a0c1f35e3c8f354e6f77972343fb166026f936e6410effb021907161765aef870700000000000000000000000000000000000000000000000000000000000000015c2ebf2d5a2e0b1f9c8a70a607d77a60fc1cafe686dc59792c3ef44f7db602190000000000000000000000000000000000000000000000000000000000000003b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3",
+   "recordId": "d8e7f774f49be5b8b6caa796b1bbe8fb45aed19ef222cfb205d6fe7309d06c8a",
+   "type": "ACT_V1",
+   "typeId": "197b9f752e9e3ae84033e46eac81043cbff4861c97050705eb05f864b88a4edb"
+  },
+  "r_act_overcap": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000a0c1f35e3c8f354e6f77972343fb166026f936e6410effb021907161765aef87070000000000000000000000000000000000000000000000000000000000000002c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c10000000000000000000000000000000000000000000000000000000000001388b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+   "recordId": "66f4e4590554a121c46ceccbd901392eb30d2079115f9d9d8313ddae764c81b2",
+   "type": "ACT_V1",
+   "typeId": "197b9f752e9e3ae84033e46eac81043cbff4861c97050705eb05f864b88a4edb"
+  },
+  "r_act_transfer": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000a0c1f35e3c8f354e6f77972343fb166026f936e6410effb021907161765aef87070000000000000000000000000000000000000000000000000000000000000002c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c100000000000000000000000000000000000000000000000000000000000001f4b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+   "recordId": "096f1ea7980c4946c90e882c20a9e6c2e4add0ef72d46bf814bdef4a178817ce",
+   "type": "ACT_V1",
+   "typeId": "197b9f752e9e3ae84033e46eac81043cbff4861c97050705eb05f864b88a4edb"
+  },
+  "r_act_twin": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000a0c1f35e3c8f354e6f77972343fb166026f936e6410effb021907161765aef87070000000000000000000000000000000000000000000000000000000000000002c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c100000000000000000000000000000000000000000000000000000000000001f4b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+   "recordId": "188717d7f8e44f31eb20b381bd84fda462c111205a851b3dd38391434334d338",
+   "type": "ACT_TWIN",
+   "typeId": "b47726e139d0d06cb3d77a074785892e0594fb5d523c07c0f779398a8d44f149"
+  },
+  "r_act_v11": {
+   "envelopeHex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000140c1f35e3c8f354e6f77972343fb166026f936e6410effb021907161765aef87070000000000000000000000000000000000000000000000000000000000000002c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c100000000000000000000000000000000000000000000000000000000000001f4b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b100000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000002676d000000000000000000000000000000000000000000000000000000000000",
+   "recordId": "04dd63982960b93c4f91b35c792164a24f29140bd2dafcdf571ecc1e8dc9e3cd",
+   "type": "ACT_V1_1",
+   "typeId": "379b619a08c31cccdfc7915c9d4d86c60d7f11f710e92205357f5e0543880f06"
+  },
+  "r_act_v2_deleg": {
+   "envelopeHex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000160c1f35e3c8f354e6f77972343fb166026f936e6410effb021907161765aef87070000000000000000000000000000000000000000000000000000000000000002c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c100000000000000000000000000000000000000000000000000000000000001f4b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b100000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000001dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000",
+   "recordId": "28d93c56f0349a9a0f07c4e50e1921a0d90019ad3bb2301716716e5baaafafee",
+   "type": "ACT_V2",
+   "typeId": "4053d6d0c7af4ac8de578f67aafdb6dcc231ad6c0611301a3d7044a088ec45c6"
+  },
+  "r_act_wrongtarget": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000a0c1f35e3c8f354e6f77972343fb166026f936e6410effb021907161765aef87070000000000000000000000000000000000000000000000000000000000000002a20b2403aec36245e9a6bf8c52d58c9c742c69346ac67316bf7964367565aa5700000000000000000000000000000000000000000000000000000000000001f4b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+   "recordId": "2e12134cec51146d95d8f1baa6877319d90ec13b49d6589b199f780ed7ee3452",
+   "type": "ACT_V1",
+   "typeId": "197b9f752e9e3ae84033e46eac81043cbff4861c97050705eb05f864b88a4edb"
+  },
+  "r_char_gob": {
+   "envelopeHex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000004051515151515151515151515151515151515151515151515151515151515151510000000000000000000000000000000000000000000000000000000000000002",
+   "recordId": "c1f35e3c8f354e6f77972343fb166026f936e6410effb021907161765aef8707",
+   "type": "CHAR",
+   "typeId": "6ba81d8e0959a224f1617628543174b589bc1a0ad33bbb48c50e55e6c5e2c6ef"
+  },
+  "r_hostile_backlink": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000e0a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003ef00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000012522577f5fd231f17e259c49f5d41db0d4545f16fb163db5decdf5dd037dadaf000000000000000000000000000000000000000000000000000000000000000c7365652061747461636865640000000000000000000000000000000000000000",
+   "recordId": "24e13cff9c2f7f56cde26795b7852b8586d5615a2083de944e3f0f0f69aa02bf",
+   "type": "NOTE_1_0",
+   "typeId": "88d004a38b37eb6aa8b325641f4192eac80bd9077f077d034ddc4cfd9b4c4d85"
+  },
+  "r_inst_ice": {
+   "envelopeHex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000040f37b62596eee0ce91f1b22bfa35b34e92ee7f1314c6d93c76da84476f32e9fa0c1f35e3c8f354e6f77972343fb166026f936e6410effb021907161765aef8707",
+   "recordId": "8136f3f9ec0df1ad28b983a113e34789e83dbac5ae16fe4627a60fe30d22aea2",
+   "type": "ITEMINST",
+   "typeId": "03f8e4dabe86e7011431ab727a1fd471c34e5c2c15b11f0ff4e099551db5067d"
+  },
+  "r_inst_ice2": {
+   "envelopeHex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000040f37b62596eee0ce91f1b22bfa35b34e92ee7f1314c6d93c76da84476f32e9fa0c1f35e3c8f354e6f77972343fb166026f936e6410effb021907161765aef8707",
+   "recordId": "8136f3f9ec0df1ad28b983a113e34789e83dbac5ae16fe4627a60fe30d22aea2",
+   "type": "ITEMINST",
+   "typeId": "03f8e4dabe86e7011431ab727a1fd471c34e5c2c15b11f0ff4e099551db5067d"
+  },
+  "r_inst_pants": {
+   "envelopeHex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000004050ac8490a363d591280d976ac3cadea2695e3fd9151d76ec96a79b90ce4ba9c0c1f35e3c8f354e6f77972343fb166026f936e6410effb021907161765aef8707",
+   "recordId": "5c2ebf2d5a2e0b1f9c8a70a607d77a60fc1cafe686dc59792c3ef44f7db60219",
+   "type": "ITEMINST",
+   "typeId": "03f8e4dabe86e7011431ab727a1fd471c34e5c2c15b11f0ff4e099551db5067d"
+  },
+  "r_item_iceshirt": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000037f3c19f27932beaf81860707e7bdd0fef7fd38052c88405c071df843a48cf6b300000000000000000000000000000000000000000000000000000000000000096963652073686972740000000000000000000000000000000000000000000000",
+   "recordId": "f37b62596eee0ce91f1b22bfa35b34e92ee7f1314c6d93c76da84476f32e9fa0",
+   "type": "ITEMDEF",
+   "typeId": "088849e8793af2e335b1c18fd5166822c489a45f301f235977bb80f1e002c144"
+  },
+  "r_item_pants": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000047f3c19f27932beaf81860707e7bdd0fef7fd38052c88405c071df843a48cf6b3000000000000000000000000000000000000000000000000000000000000000a776f6f6c2070616e747300000000000000000000000000000000000000000000",
+   "recordId": "50ac8490a363d591280d976ac3cadea2695e3fd9151d76ec96a79b90ce4ba9c0",
+   "type": "ITEMDEF",
+   "typeId": "088849e8793af2e335b1c18fd5166822c489a45f301f235977bb80f1e002c144"
+  },
+  "r_note11_mood": {
+   "envelopeHex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000180a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003ea00000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000a73756e6e7920706f73740000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000573756e6e79000000000000000000000000000000000000000000000000000000",
+   "recordId": "3d3eb680d7577c06e54a44ecfda384335d0d5c75d6a97376c168fc9e1442abb9",
+   "type": "NOTE_1_1",
+   "typeId": "20e67d2c5b55ebb25c5a3b7e1ecc1e161e131d9b80df125f905d089a2b597980"
+  },
+  "r_note11_nomood": {
+   "envelopeHex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000160a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003eb00000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000a706c61696e20706f737400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000",
+   "recordId": "43aac371987e88114978c3a9535d49e256ceb6b41094a6ecd7ced8cd600485b2",
+   "type": "NOTE_1_1",
+   "typeId": "20e67d2c5b55ebb25c5a3b7e1ecc1e161e131d9b80df125f905d089a2b597980"
+  },
+  "r_note12": {
+   "envelopeHex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000140a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003ec00000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000007f00dfeedc0ffee00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b6165732d3235362d67636d000000000000000000000000000000000000000000",
+   "recordId": "927a655fcb9a55e55ba87a9b9bc0798fa4dc54418f581fb64d59f8452d3709c2",
+   "type": "NOTE_1_2",
+   "typeId": "737e9c6b93f3665b3fb55f75c6d1728c826fc8c981b447baed63bcc97eb5a5a4"
+  },
+  "r_note20": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000e0a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003ed00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f82a1626c6f636b732d6f70617175650000000000000000000000000000000000",
+   "recordId": "af15a9e47ba203c8feb1694d97af578b5a11a0b5d176862cc03948c27b94d5c7",
+   "type": "NOTE_2_0",
+   "typeId": "9e8a8ed02c7eb9e9a8fdff570388737b039b75046d835526e7cb9cc6b7a78921"
+  },
+  "r_note_ok": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000e0a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003e800000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b68656c6c6f20776f726c64000000000000000000000000000000000000000000",
+   "recordId": "a20b2403aec36245e9a6bf8c52d58c9c742c69346ac67316bf7964367565aa57",
+   "type": "NOTE_1_0",
+   "typeId": "88d004a38b37eb6aa8b325641f4192eac80bd9077f077d034ddc4cfd9b4c4d85"
+  },
+  "r_note_reply": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000e0a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003e900000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000001a20b2403aec36245e9a6bf8c52d58c9c742c69346ac67316bf7964367565aa57000000000000000000000000000000000000000000000000000000000000000972653a2068656c6c6f0000000000000000000000000000000000000000000000",
+   "recordId": "14e0149270286bb50e97c74af5c24cd7622b30008ac29ce97b5b12134a92692e",
+   "type": "NOTE_1_0",
+   "typeId": "88d004a38b37eb6aa8b325641f4192eac80bd9077f077d034ddc4cfd9b4c4d85"
+  },
+  "r_reply_x": {
+   "envelopeHex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000160a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003ee00000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000001a20b2403aec36245e9a6bf8c52d58c9c742c69346ac67316bf7964367565aa570000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000001363726f73732d76657273696f6e207265706c7900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000",
+   "recordId": "04fb563d5feeb036192f4bb56e4a9f0d7b38c656b3a6b04d8eb2cec4b90f5c52",
+   "type": "NOTE_1_1",
+   "typeId": "20e67d2c5b55ebb25c5a3b7e1ecc1e161e131d9b80df125f905d089a2b597980"
+  },
+  "r_ruleset1": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000001e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1",
+   "recordId": "7f3c19f27932beaf81860707e7bdd0fef7fd38052c88405c071df843a48cf6b3",
+   "type": "RULESET",
+   "typeId": "d3b8f415073ddd78e1880d11b7716c192ae8f58ffbb274e6c681317dd17855f7"
+  },
+  "r_ruleset2": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000002e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2",
+   "recordId": "63962aa241885aa4a54e127511f87758c6931686c97902901580039703e4e0b0",
+   "type": "RULESET",
+   "typeId": "d3b8f415073ddd78e1880d11b7716c192ae8f58ffbb274e6c681317dd17855f7"
+  },
+  "r_sci_dist": {
+   "envelopeHex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000002af1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1",
+   "recordId": "0456a0f3fb4e27a4c544ee709cc64fa764593376b02f2608e199d4ac26ce91b8",
+   "type": "SCI_DIST",
+   "typeId": "57764664332004346e09bdd252b33b5a2e1aed65910015d07db36ddfc6a6c9f0"
+  },
+  "r_sci_dur": {
+   "envelopeHex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000002af1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1",
+   "recordId": "a0d8bb0f3997a4b7763ff24c927d4b6862192462f6c7e4c5663b9daeda69e194",
+   "type": "SCI_DUR",
+   "typeId": "c522ff2c0f4129615de9eb95857d7ac3f19cf640a7790352cc378dd9a8095fc7"
+  },
+  "r_twin": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000e0a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000003e800000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b68656c6c6f20776f726c64000000000000000000000000000000000000000000",
+   "recordId": "2ff8654b863b685fb4d040de417b4040c664a0dec28854e44b6cab89b74cf48f",
+   "type": "NOTE_TWIN",
+   "typeId": "dde6b0e01d5d090255a6c8cf46f5e7a0e3dd8c7b6a28da89414cf75a1529e7ae"
+  },
+  "r_unknown_codec": {
+   "envelopeHex": "0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000119f0102036f70617175652d667574757265000000000000000000000000000000",
+   "recordId": "66049e65793a7921ed16720fbef51def28bcb27849424622d1fa4fa1c9d85d8c",
+   "type": "NOTE_FUTURE_CODEC",
+   "typeId": "4805e1dadfa8f44638591a82f24df668c941a0bdda034133f4f4dbf9968f5416"
+  }
+ },
+ "semanticSpecs": {
+  "SEM_ACT": {
+   "meaning": "sem/action: actor,verb,target,amountWei,basis",
+   "semanticSpecId": "09ccb6ddc25f1794a51a8036982d7e900db50aed1c3386a95274cc326d1d6a36"
+  },
+  "SEM_NOTE": {
+   "meaning": "sem/note: author(b32), createdAt(u64), body(bytes utf8), replyTo(opt b32)",
+   "semanticSpecId": "11446edbfe3f527c2f8f6c3e7d344208fa0e00955e23bd3c6a3b25bf37b951d1"
+  }
+ },
+ "stateScript": [
+  {
+   "expect": "ADMITTED",
+   "op": "admit",
+   "realm": "A",
+   "record": "r_act_equip",
+   "rev": 1
+  },
+  {
+   "expect": "DENIED",
+   "op": "admit",
+   "realm": "B",
+   "record": "r_act_equip",
+   "rev": 1
+  },
+  {
+   "expect": "EFFECT",
+   "expectedRev": 0,
+   "leavesOk": true,
+   "op": "equip",
+   "record": "r_act_equip"
+  },
+  {
+   "note": "forbid NEW goblin+ICE equips; grandfather existing",
+   "op": "policyRev",
+   "realm": "A",
+   "rev": 2
+  },
+  {
+   "expect": "POLICY_DENIED",
+   "expectedRev": 1,
+   "leavesOk": true,
+   "op": "equip",
+   "record": "r_act_equip2"
+  },
+  {
+   "expect": "REVERT_NO_PARTIAL",
+   "expectedRev": 1,
+   "leavesOk": false,
+   "op": "equip",
+   "record": "r_act_equip_pants"
+  },
+  {
+   "expect": "CAS_CONFLICT",
+   "expectedRev": 7,
+   "leavesOk": true,
+   "op": "equip",
+   "record": "r_act_equip_pants"
+  },
+  {
+   "expect": "EFFECT",
+   "expectedRev": 1,
+   "leavesOk": true,
+   "op": "equip",
+   "record": "r_act_equip_pants"
+  },
+  {
+   "expect": "IDEMPOTENT_RECEIPT",
+   "expectedRev": 1,
+   "op": "equipReplay",
+   "record": "r_act_equip_pants"
+  },
+  {
+   "expect": "WITHDRAWN",
+   "op": "withdraw",
+   "record": "r_note_ok"
+  },
+  {
+   "expect": "NOT_CURRENT",
+   "op": "checkCurrent",
+   "record": "r_note_ok"
+  },
+  {
+   "consumer": "N_EXACT",
+   "expect": "OK",
+   "op": "readHistorical",
+   "record": "r_note_ok"
+  },
+  {
+   "count": 0,
+   "expect": "PARTIAL_STOP",
+   "grade": "PARTIAL",
+   "op": "uniqueQuery"
+  },
+  {
+   "count": 0,
+   "expect": "PROCEED",
+   "grade": "COMPLETE",
+   "op": "uniqueQuery"
+  },
+  {
+   "expect": "UNKNOWN_STOP",
+   "inputs": [
+    "UNKNOWN",
+    "FOUND"
+   ],
+   "op": "lens"
+  },
+  {
+   "expect": "FOUND_FALLBACK",
+   "inputs": [
+    "ABSENT_PROVED",
+    "FOUND"
+   ],
+   "op": "lens"
+  }
+ ],
+ "types": {
+  "ACT_TWIN": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 3,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 4,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 5,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    }
+   ],
+   "meaning": "action-gwei/1.0: identical shape, amountOrSlot in GWEI not wei",
+   "meaningHash": "713e23d6992764bda4b919a74937c2b4b832fe620920baf414f55fff71d75cb8",
+   "schemaHash": "ab3227f8ea45d215a925cfb16f0ef43d708e5950aa325d9a0a71a9e8c11ca3a6",
+   "typeId": "b47726e139d0d06cb3d77a074785892e0594fb5d523c07c0f779398a8d44f149"
+  },
+  "ACT_V1": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 3,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 4,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 5,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    }
+   ],
+   "meaning": "action/1.0: actor,verb(1=EQUIP,2=TRANSFER),target,amountOrSlot(wei),basis",
+   "meaningHash": "dea8a9e38c1d9ca7a42f40684a1bb36280e78d316fa10b1bfbfaec813daefa37",
+   "schemaHash": "ab3227f8ea45d215a925cfb16f0ef43d708e5950aa325d9a0a71a9e8c11ca3a6",
+   "typeId": "197b9f752e9e3ae84033e46eac81043cbff4861c97050705eb05f864b88a4edb"
+  },
+  "ACT_V1_1": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 3,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 4,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 5,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 6,
+     "kind": "bytes",
+     "max": 64,
+     "opt": true
+    }
+   ],
+   "meaning": "action/1.1: action/1.0 + optional inert memo",
+   "meaningHash": "d4a6596fbb0e5f576842b9bf605d57f5abec89ecc2fc17c0bdcebb91e4ce18d6",
+   "schemaHash": "14c6f06cb065fa3ee0a0662cc9215c6fa8cecaada30b787c2be159c0156bcbc1",
+   "typeId": "379b619a08c31cccdfc7915c9d4d86c60d7f11f710e92205357f5e0543880f06"
+  },
+  "ACT_V2": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 3,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 4,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 5,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 6,
+     "kind": "bytes",
+     "max": 64,
+     "opt": true
+    },
+    {
+     "key": 7,
+     "kind": "b32",
+     "max": 0,
+     "opt": true
+    }
+   ],
+   "meaning": "action/2.0: + optional DELEGATE who may also act (authority widening)",
+   "meaningHash": "6b494078ebaac2fefeed09ca4001ea3f2b77f3a43d9ceb05ff02c88ff43b6071",
+   "schemaHash": "cb13bff769e32fdd639baf16ae49c06051ad8cc4b7bbda1c39ec4c2b0aa518c8",
+   "typeId": "4053d6d0c7af4ac8de578f67aafdb6dcc231ad6c0611301a3d7044a088ec45c6"
+  },
+  "CHAR": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    }
+   ],
+   "meaning": "rpg/character/1.0: owner,race(1=human,2=goblin)",
+   "meaningHash": "2007d972bbb4d3e22ae25dbc8f9e43b6b8b155444bc5ca3d1272117bcd172b30",
+   "schemaHash": "0ca82cac664500a2b8d8865e9168cf0f22ede3e1833676234e501aa8c63d34df",
+   "typeId": "6ba81d8e0959a224f1617628543174b589bc1a0ad33bbb48c50e55e6c5e2c6ef"
+  },
+  "ITEMDEF": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "bytes",
+     "max": 64,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 3,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 4,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    }
+   ],
+   "meaning": "rpg/itemdef/1.0: name,slot,tagsBitfield,ruleset",
+   "meaningHash": "7197141881df8afab89491cedc1ed4d06e9fd04a05087ac66ad822d20e6902fb",
+   "schemaHash": "2f314d2c539a88d0a9f211f518d60031ec8f528e05e4bfdf7a6bca13011359b3",
+   "typeId": "088849e8793af2e335b1c18fd5166822c489a45f301f235977bb80f1e002c144"
+  },
+  "ITEMINST": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    }
+   ],
+   "meaning": "rpg/iteminstance/1.0: def,owner",
+   "meaningHash": "f01d71a02b7e20170e2254d17dddf00edd81b18113259aaf91322f3ff9650927",
+   "schemaHash": "48885500b93ac07adf773c79c04dfcf5e75068fbb09f6f63e406f1f8f4a7559a",
+   "typeId": "03f8e4dabe86e7011431ab727a1fd471c34e5c2c15b11f0ff4e099551db5067d"
+  },
+  "NOTE_1_0": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 3,
+     "kind": "bytes",
+     "max": 512,
+     "opt": false
+    },
+    {
+     "key": 4,
+     "kind": "b32",
+     "max": 0,
+     "opt": true
+    }
+   ],
+   "meaning": "note/1.0: author,createdAt,body(utf8),replyTo->Note",
+   "meaningHash": "5d3b4ff86a82b956e2874bdb6fac48768ce5df7ca237d33ba729bfce57d9eee2",
+   "schemaHash": "31e6266dfdb2b009b871d1e5f700c8e80cad4d741705712ea08a2a44532da1d7",
+   "typeId": "88d004a38b37eb6aa8b325641f4192eac80bd9077f077d034ddc4cfd9b4c4d85"
+  },
+  "NOTE_1_1": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 3,
+     "kind": "bytes",
+     "max": 512,
+     "opt": false
+    },
+    {
+     "key": 4,
+     "kind": "b32",
+     "max": 0,
+     "opt": true
+    },
+    {
+     "key": 5,
+     "kind": "bytes",
+     "max": 32,
+     "opt": true
+    }
+   ],
+   "meaning": "note/1.1: note/1.0 + optional inert mood",
+   "meaningHash": "2aeeeb7338c016014f88e11609298ce73c8870533144abe068b774899da6ec9f",
+   "schemaHash": "cbea11b8aaced66c89faf34e9f3e82ed790693f8ccb80fffc99d3ed4cc3966ad",
+   "typeId": "20e67d2c5b55ebb25c5a3b7e1ecc1e161e131d9b80df125f905d089a2b597980"
+  },
+  "NOTE_1_2": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 3,
+     "kind": "bytes",
+     "max": 512,
+     "opt": false
+    },
+    {
+     "key": 4,
+     "kind": "b32",
+     "max": 0,
+     "opt": true
+    },
+    {
+     "key": 5,
+     "kind": "bytes",
+     "max": 32,
+     "opt": false
+    }
+   ],
+   "meaning": "note/1.2: body is ciphertext under required scheme (key 5 COLLIDES with 1.1 mood)",
+   "meaningHash": "c90be808e7f5e52d2653a4c3345904841748c669421fe1e171d70689ded60dcd",
+   "schemaHash": "8b470b8e281e6015fc1571415e9e38cfe7ccf50a842e2cd71bb083c7489f4bfe",
+   "typeId": "737e9c6b93f3665b3fb55f75c6d1728c826fc8c981b447baed63bcc97eb5a5a4"
+  },
+  "NOTE_2_0": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 3,
+     "kind": "bytes",
+     "max": 2048,
+     "opt": false
+    },
+    {
+     "key": 4,
+     "kind": "b32",
+     "max": 0,
+     "opt": true
+    }
+   ],
+   "meaning": "note/2.0: blocks(rich opaque list), breaking successor of note/1.x",
+   "meaningHash": "0971c0e41e293b08f1ca550e26d423a020da5984f49b3d7884cae6a364a3e46d",
+   "schemaHash": "21f872e790cbdcc66c1a9c22d423c7be555c7da17913ef0bb5d9e4a830c40896",
+   "typeId": "9e8a8ed02c7eb9e9a8fdff570388737b039b75046d835526e7cb9cc6b7a78921"
+  },
+  "NOTE_FUTURE_CODEC": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 3,
+     "kind": "bytes",
+     "max": 512,
+     "opt": false
+    },
+    {
+     "key": 4,
+     "kind": "b32",
+     "max": 0,
+     "opt": true
+    }
+   ],
+   "meaning": "note/9.9: future representation",
+   "meaningHash": "317aff4ece06950fa880e7c0346428feb64576ba349bb88673e8f11b0576aea2",
+   "schemaHash": "31e6266dfdb2b009b871d1e5f700c8e80cad4d741705712ea08a2a44532da1d7",
+   "typeId": "4805e1dadfa8f44638591a82f24df668c941a0bdda034133f4f4dbf9968f5416"
+  },
+  "NOTE_TWIN": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 3,
+     "kind": "bytes",
+     "max": 512,
+     "opt": false
+    },
+    {
+     "key": 4,
+     "kind": "b32",
+     "max": 0,
+     "opt": true
+    }
+   ],
+   "meaning": "command/1.0: body is a shell command the reader must execute",
+   "meaningHash": "81a1cddd80458cec778fe29d2225bddf6f825e9a835c6d078b9a4e9a2ab17efa",
+   "schemaHash": "31e6266dfdb2b009b871d1e5f700c8e80cad4d741705712ea08a2a44532da1d7",
+   "typeId": "dde6b0e01d5d090255a6c8cf46f5e7a0e3dd8c7b6a28da89414cf75a1529e7ae"
+  },
+  "RULESET": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    }
+   ],
+   "meaning": "rpg/ruleset/1.0: version,rulesHash",
+   "meaningHash": "248d2cb0358d20c981e4cc2345be633c52ef6760f5916473646bbddcde1c2fe7",
+   "schemaHash": "6af3e76367f78bb8f9fee82e16ebdd988e0f3b7cfbcd90e1522650d5416026e0",
+   "typeId": "d3b8f415073ddd78e1880d11b7716c192ae8f58ffbb274e6c681317dd17855f7"
+  },
+  "SCI_DIST": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    }
+   ],
+   "meaning": "sci/length-meters: value in meters under frame",
+   "meaningHash": "081a500287464006f6512f6c5aae5394e94a42447dc02199efd49eae3ffe690b",
+   "schemaHash": "6af3e76367f78bb8f9fee82e16ebdd988e0f3b7cfbcd90e1522650d5416026e0",
+   "typeId": "57764664332004346e09bdd252b33b5a2e1aed65910015d07db36ddfc6a6c9f0"
+  },
+  "SCI_DUR": {
+   "fields": [
+    {
+     "key": 1,
+     "kind": "u64",
+     "max": 0,
+     "opt": false
+    },
+    {
+     "key": 2,
+     "kind": "b32",
+     "max": 0,
+     "opt": false
+    }
+   ],
+   "meaning": "sci/time-seconds: value in seconds under calibration",
+   "meaningHash": "a32f571bd7b9bfdf608c4fd90a688a29d21f42815d8ef76baaf18fd495227281",
+   "schemaHash": "6af3e76367f78bb8f9fee82e16ebdd988e0f3b7cfbcd90e1522650d5416026e0",
+   "typeId": "c522ff2c0f4129615de9eb95857d7ac3f19cf640a7790352cc378dd9a8095fc7"
+  }
+ }
+}

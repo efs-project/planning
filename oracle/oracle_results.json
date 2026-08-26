@@ -1,0 +1,1073 @@
+[
+ {
+  "id": "N_EXACT.r_note_ok",
+  "consumer": "N_EXACT",
+  "record": "r_note_ok",
+  "binding": null,
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_FIN.r_note_ok",
+  "consumer": "N_FIN",
+  "record": "r_note_ok",
+  "binding": null,
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_SEMPIN.r_note_ok",
+  "consumer": "N_SEMPIN",
+  "record": "r_note_ok",
+  "binding": "v_note10",
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_SEMISS.r_note_ok",
+  "consumer": "N_SEMISS",
+  "record": "r_note_ok",
+  "binding": "v_note10",
+  "outcome": "REJECT",
+  "detail": "binding-not-issuer-signed",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.r_note_ok",
+  "consumer": "N_PRED",
+  "record": "r_note_ok",
+  "binding": null,
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "ARCH.r_note_ok",
+  "consumer": "ARCH",
+  "record": "r_note_ok",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.r_note_reply",
+  "consumer": "N_EXACT",
+  "record": "r_note_reply",
+  "binding": null,
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_FIN.r_note_reply",
+  "consumer": "N_FIN",
+  "record": "r_note_reply",
+  "binding": null,
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_SEMPIN.r_note_reply",
+  "consumer": "N_SEMPIN",
+  "record": "r_note_reply",
+  "binding": "v_note10",
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_SEMISS.r_note_reply",
+  "consumer": "N_SEMISS",
+  "record": "r_note_reply",
+  "binding": "v_note10",
+  "outcome": "REJECT",
+  "detail": "binding-not-issuer-signed",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.r_note_reply",
+  "consumer": "N_PRED",
+  "record": "r_note_reply",
+  "binding": null,
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "ARCH.r_note_reply",
+  "consumer": "ARCH",
+  "record": "r_note_reply",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.r_note11_mood",
+  "consumer": "N_EXACT",
+  "record": "r_note11_mood",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-pinned-type",
+  "note": ""
+ },
+ {
+  "id": "N_FIN.r_note11_mood",
+  "consumer": "N_FIN",
+  "record": "r_note11_mood",
+  "binding": null,
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_SEMPIN.r_note11_mood",
+  "consumer": "N_SEMPIN",
+  "record": "r_note11_mood",
+  "binding": "v_note11",
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_SEMISS.r_note11_mood",
+  "consumer": "N_SEMISS",
+  "record": "r_note11_mood",
+  "binding": "v_note11",
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.r_note11_mood",
+  "consumer": "N_PRED",
+  "record": "r_note11_mood",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "shape-mismatch",
+  "note": ""
+ },
+ {
+  "id": "ARCH.r_note11_mood",
+  "consumer": "ARCH",
+  "record": "r_note11_mood",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.r_note11_nomood",
+  "consumer": "N_EXACT",
+  "record": "r_note11_nomood",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-pinned-type",
+  "note": ""
+ },
+ {
+  "id": "N_FIN.r_note11_nomood",
+  "consumer": "N_FIN",
+  "record": "r_note11_nomood",
+  "binding": null,
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_SEMPIN.r_note11_nomood",
+  "consumer": "N_SEMPIN",
+  "record": "r_note11_nomood",
+  "binding": "v_note11",
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_SEMISS.r_note11_nomood",
+  "consumer": "N_SEMISS",
+  "record": "r_note11_nomood",
+  "binding": "v_note11",
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.r_note11_nomood",
+  "consumer": "N_PRED",
+  "record": "r_note11_nomood",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "shape-mismatch",
+  "note": ""
+ },
+ {
+  "id": "ARCH.r_note11_nomood",
+  "consumer": "ARCH",
+  "record": "r_note11_nomood",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.r_note12",
+  "consumer": "N_EXACT",
+  "record": "r_note12",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-pinned-type",
+  "note": ""
+ },
+ {
+  "id": "N_FIN.r_note12",
+  "consumer": "N_FIN",
+  "record": "r_note12",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-in-finite-set",
+  "note": ""
+ },
+ {
+  "id": "N_SEMPIN.r_note12",
+  "consumer": "N_SEMPIN",
+  "record": "r_note12",
+  "binding": "v_note12_att",
+  "outcome": "REJECT",
+  "detail": "binding-not-pinned",
+  "note": ""
+ },
+ {
+  "id": "N_SEMISS.r_note12",
+  "consumer": "N_SEMISS",
+  "record": "r_note12",
+  "binding": "v_note12_att",
+  "outcome": "REJECT",
+  "detail": "binding-not-issuer-signed",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.r_note12",
+  "consumer": "N_PRED",
+  "record": "r_note12",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "shape-mismatch",
+  "note": ""
+ },
+ {
+  "id": "ARCH.r_note12",
+  "consumer": "ARCH",
+  "record": "r_note12",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.r_note20",
+  "consumer": "N_EXACT",
+  "record": "r_note20",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-pinned-type",
+  "note": ""
+ },
+ {
+  "id": "N_FIN.r_note20",
+  "consumer": "N_FIN",
+  "record": "r_note20",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-in-finite-set",
+  "note": ""
+ },
+ {
+  "id": "N_SEMPIN.r_note20",
+  "consumer": "N_SEMPIN",
+  "record": "r_note20",
+  "binding": "v_note20_lossy",
+  "outcome": "REJECT",
+  "detail": "binding-not-pinned",
+  "note": ""
+ },
+ {
+  "id": "N_SEMISS.r_note20",
+  "consumer": "N_SEMISS",
+  "record": "r_note20",
+  "binding": "v_note20_lossy",
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.r_note20",
+  "consumer": "N_PRED",
+  "record": "r_note20",
+  "binding": null,
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "ARCH.r_note20",
+  "consumer": "ARCH",
+  "record": "r_note20",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.r_twin",
+  "consumer": "N_EXACT",
+  "record": "r_twin",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-pinned-type",
+  "note": ""
+ },
+ {
+  "id": "N_FIN.r_twin",
+  "consumer": "N_FIN",
+  "record": "r_twin",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-in-finite-set",
+  "note": ""
+ },
+ {
+  "id": "N_SEMPIN.r_twin",
+  "consumer": "N_SEMPIN",
+  "record": "r_twin",
+  "binding": "v_twin_stolen",
+  "outcome": "REJECT",
+  "detail": "binding-not-pinned",
+  "note": ""
+ },
+ {
+  "id": "N_SEMISS.r_twin",
+  "consumer": "N_SEMISS",
+  "record": "r_twin",
+  "binding": "v_twin_stolen",
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.r_twin",
+  "consumer": "N_PRED",
+  "record": "r_twin",
+  "binding": null,
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "ARCH.r_twin",
+  "consumer": "ARCH",
+  "record": "r_twin",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.r_reply_x",
+  "consumer": "N_EXACT",
+  "record": "r_reply_x",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-pinned-type",
+  "note": ""
+ },
+ {
+  "id": "N_FIN.r_reply_x",
+  "consumer": "N_FIN",
+  "record": "r_reply_x",
+  "binding": null,
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_SEMPIN.r_reply_x",
+  "consumer": "N_SEMPIN",
+  "record": "r_reply_x",
+  "binding": "v_note11",
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_SEMISS.r_reply_x",
+  "consumer": "N_SEMISS",
+  "record": "r_reply_x",
+  "binding": "v_note11",
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.r_reply_x",
+  "consumer": "N_PRED",
+  "record": "r_reply_x",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "shape-mismatch",
+  "note": ""
+ },
+ {
+  "id": "ARCH.r_reply_x",
+  "consumer": "ARCH",
+  "record": "r_reply_x",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.r_hostile_backlink",
+  "consumer": "N_EXACT",
+  "record": "r_hostile_backlink",
+  "binding": null,
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_FIN.r_hostile_backlink",
+  "consumer": "N_FIN",
+  "record": "r_hostile_backlink",
+  "binding": null,
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_SEMPIN.r_hostile_backlink",
+  "consumer": "N_SEMPIN",
+  "record": "r_hostile_backlink",
+  "binding": "v_note10",
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_SEMISS.r_hostile_backlink",
+  "consumer": "N_SEMISS",
+  "record": "r_hostile_backlink",
+  "binding": "v_note10",
+  "outcome": "REJECT",
+  "detail": "binding-not-issuer-signed",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.r_hostile_backlink",
+  "consumer": "N_PRED",
+  "record": "r_hostile_backlink",
+  "binding": null,
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "ARCH.r_hostile_backlink",
+  "consumer": "ARCH",
+  "record": "r_hostile_backlink",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.r_unknown_codec",
+  "consumer": "N_EXACT",
+  "record": "r_unknown_codec",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "unsupported-codec",
+  "note": ""
+ },
+ {
+  "id": "N_FIN.r_unknown_codec",
+  "consumer": "N_FIN",
+  "record": "r_unknown_codec",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-in-finite-set",
+  "note": ""
+ },
+ {
+  "id": "N_SEMPIN.r_unknown_codec",
+  "consumer": "N_SEMPIN",
+  "record": "r_unknown_codec",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "no-binding",
+  "note": ""
+ },
+ {
+  "id": "N_SEMISS.r_unknown_codec",
+  "consumer": "N_SEMISS",
+  "record": "r_unknown_codec",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "no-binding",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.r_unknown_codec",
+  "consumer": "N_PRED",
+  "record": "r_unknown_codec",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_UNSUPPORTED_CODEC",
+  "note": ""
+ },
+ {
+  "id": "ARCH.r_unknown_codec",
+  "consumer": "ARCH",
+  "record": "r_unknown_codec",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_SEMOPEN.r_twin.forge",
+  "consumer": "N_SEMOPEN",
+  "record": "r_twin",
+  "binding": "v_exactconst_forge",
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": "caller-supplied exactConstant forge; no gate"
+ },
+ {
+  "id": "N_SEMOPEN.r_note11",
+  "consumer": "N_SEMOPEN",
+  "record": "r_note11_mood",
+  "binding": "v_note11",
+  "outcome": "ACCEPT",
+  "detail": "ok",
+  "note": "caller-supplied honest binding; no gate"
+ },
+ {
+  "id": "N_SEMPIN.r_twin.forge",
+  "consumer": "N_SEMPIN",
+  "record": "r_twin",
+  "binding": "v_exactconst_forge",
+  "outcome": "REJECT",
+  "detail": "binding-not-pinned",
+  "note": "forge vs pin gate"
+ },
+ {
+  "id": "N_SEMISS.r_twin.forge",
+  "consumer": "N_SEMISS",
+  "record": "r_twin",
+  "binding": "v_exactconst_forge",
+  "outcome": "REJECT",
+  "detail": "binding-not-issuer-signed",
+  "note": "forge vs issuer gate (unsigned)"
+ },
+ {
+  "id": "N_EXACT.m_trailing",
+  "consumer": "N_EXACT",
+  "record": "m_trailing",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_ENV_TRAILING",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.m_trailing",
+  "consumer": "N_PRED",
+  "record": "m_trailing",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_ENV_TRAILING",
+  "note": ""
+ },
+ {
+  "id": "ARCH.m_trailing",
+  "consumer": "ARCH",
+  "record": "m_trailing",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.m_noncanon_offset",
+  "consumer": "N_EXACT",
+  "record": "m_noncanon_offset",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_NONCANON_OFFSET",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.m_noncanon_offset",
+  "consumer": "N_PRED",
+  "record": "m_noncanon_offset",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_NONCANON_OFFSET",
+  "note": ""
+ },
+ {
+  "id": "ARCH.m_noncanon_offset",
+  "consumer": "ARCH",
+  "record": "m_noncanon_offset",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.m_absent_nonzero",
+  "consumer": "N_EXACT",
+  "record": "m_absent_nonzero",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_ABSENT_NONZERO",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.m_absent_nonzero",
+  "consumer": "N_PRED",
+  "record": "m_absent_nonzero",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_ABSENT_NONZERO",
+  "note": ""
+ },
+ {
+  "id": "ARCH.m_absent_nonzero",
+  "consumer": "ARCH",
+  "record": "m_absent_nonzero",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.m_swapped",
+  "consumer": "N_EXACT",
+  "record": "m_swapped",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_U64_RANGE",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.m_swapped",
+  "consumer": "N_PRED",
+  "record": "m_swapped",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_U64_RANGE",
+  "note": ""
+ },
+ {
+  "id": "ARCH.m_swapped",
+  "consumer": "ARCH",
+  "record": "m_swapped",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.m_len_lie",
+  "consumer": "N_EXACT",
+  "record": "m_len_lie",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_TRUNC_BYTES",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.m_len_lie",
+  "consumer": "N_PRED",
+  "record": "m_len_lie",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_TRUNC_BYTES",
+  "note": ""
+ },
+ {
+  "id": "ARCH.m_len_lie",
+  "consumer": "ARCH",
+  "record": "m_len_lie",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.m_inner_short",
+  "consumer": "N_EXACT",
+  "record": "m_inner_short",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_PAD_DIRTY",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.m_inner_short",
+  "consumer": "N_PRED",
+  "record": "m_inner_short",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_PAD_DIRTY",
+  "note": ""
+ },
+ {
+  "id": "ARCH.m_inner_short",
+  "consumer": "ARCH",
+  "record": "m_inner_short",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.m_pad_dirty",
+  "consumer": "N_EXACT",
+  "record": "m_pad_dirty",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_PAD_DIRTY",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.m_pad_dirty",
+  "consumer": "N_PRED",
+  "record": "m_pad_dirty",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "E_PAD_DIRTY",
+  "note": ""
+ },
+ {
+  "id": "ARCH.m_pad_dirty",
+  "consumer": "ARCH",
+  "record": "m_pad_dirty",
+  "binding": null,
+  "outcome": "STORE_RAW",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.r_sci_dist",
+  "consumer": "N_EXACT",
+  "record": "r_sci_dist",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-pinned-type",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.r_sci_dist",
+  "consumer": "N_PRED",
+  "record": "r_sci_dist",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "shape-mismatch",
+  "note": ""
+ },
+ {
+  "id": "N_EXACT.r_sci_dur",
+  "consumer": "N_EXACT",
+  "record": "r_sci_dur",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-pinned-type",
+  "note": ""
+ },
+ {
+  "id": "N_PRED.r_sci_dur",
+  "consumer": "N_PRED",
+  "record": "r_sci_dur",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "shape-mismatch",
+  "note": ""
+ },
+ {
+  "id": "A_EXACT.r_act_transfer",
+  "consumer": "A_EXACT",
+  "record": "r_act_transfer",
+  "binding": null,
+  "outcome": "EFFECT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "A_FIN.r_act_transfer",
+  "consumer": "A_FIN",
+  "record": "r_act_transfer",
+  "binding": null,
+  "outcome": "EFFECT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "A_SEMPIN.r_act_transfer",
+  "consumer": "A_SEMPIN",
+  "record": "r_act_transfer",
+  "binding": "a_v1",
+  "outcome": "EFFECT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "A_SEMISS.r_act_transfer",
+  "consumer": "A_SEMISS",
+  "record": "r_act_transfer",
+  "binding": "a_v1",
+  "outcome": "REJECT",
+  "detail": "binding-not-issuer-signed",
+  "note": ""
+ },
+ {
+  "id": "A_PRED.r_act_transfer",
+  "consumer": "A_PRED",
+  "record": "r_act_transfer",
+  "binding": null,
+  "outcome": "EFFECT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "A_EXACT.r_act_overcap",
+  "consumer": "A_EXACT",
+  "record": "r_act_overcap",
+  "binding": null,
+  "outcome": "DECODE_ONLY",
+  "detail": "over-cap",
+  "note": ""
+ },
+ {
+  "id": "A_FIN.r_act_overcap",
+  "consumer": "A_FIN",
+  "record": "r_act_overcap",
+  "binding": null,
+  "outcome": "DECODE_ONLY",
+  "detail": "over-cap",
+  "note": ""
+ },
+ {
+  "id": "A_SEMPIN.r_act_overcap",
+  "consumer": "A_SEMPIN",
+  "record": "r_act_overcap",
+  "binding": "a_v1",
+  "outcome": "DECODE_ONLY",
+  "detail": "over-cap",
+  "note": ""
+ },
+ {
+  "id": "A_SEMISS.r_act_overcap",
+  "consumer": "A_SEMISS",
+  "record": "r_act_overcap",
+  "binding": "a_v1",
+  "outcome": "REJECT",
+  "detail": "binding-not-issuer-signed",
+  "note": ""
+ },
+ {
+  "id": "A_PRED.r_act_overcap",
+  "consumer": "A_PRED",
+  "record": "r_act_overcap",
+  "binding": null,
+  "outcome": "DECODE_ONLY",
+  "detail": "over-cap",
+  "note": ""
+ },
+ {
+  "id": "A_EXACT.r_act_v11",
+  "consumer": "A_EXACT",
+  "record": "r_act_v11",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-pinned-type",
+  "note": ""
+ },
+ {
+  "id": "A_FIN.r_act_v11",
+  "consumer": "A_FIN",
+  "record": "r_act_v11",
+  "binding": null,
+  "outcome": "EFFECT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "A_SEMPIN.r_act_v11",
+  "consumer": "A_SEMPIN",
+  "record": "r_act_v11",
+  "binding": "a_v11",
+  "outcome": "EFFECT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "A_SEMISS.r_act_v11",
+  "consumer": "A_SEMISS",
+  "record": "r_act_v11",
+  "binding": "a_v11",
+  "outcome": "EFFECT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "A_PRED.r_act_v11",
+  "consumer": "A_PRED",
+  "record": "r_act_v11",
+  "binding": null,
+  "outcome": "EFFECT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "A_EXACT.r_act_v2_deleg",
+  "consumer": "A_EXACT",
+  "record": "r_act_v2_deleg",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-pinned-type",
+  "note": ""
+ },
+ {
+  "id": "A_FIN.r_act_v2_deleg",
+  "consumer": "A_FIN",
+  "record": "r_act_v2_deleg",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-in-finite-set",
+  "note": ""
+ },
+ {
+  "id": "A_SEMPIN.r_act_v2_deleg",
+  "consumer": "A_SEMPIN",
+  "record": "r_act_v2_deleg",
+  "binding": "a_v2_drop",
+  "outcome": "REJECT",
+  "detail": "binding-not-pinned",
+  "note": ""
+ },
+ {
+  "id": "A_SEMISS.r_act_v2_deleg",
+  "consumer": "A_SEMISS",
+  "record": "r_act_v2_deleg",
+  "binding": "a_v2_drop",
+  "outcome": "DECODE_ONLY",
+  "detail": "future-variant-has-unprojected-effect-field(delegate)",
+  "note": ""
+ },
+ {
+  "id": "A_PRED.r_act_v2_deleg",
+  "consumer": "A_PRED",
+  "record": "r_act_v2_deleg",
+  "binding": null,
+  "outcome": "EFFECT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "A_EXACT.r_act_twin",
+  "consumer": "A_EXACT",
+  "record": "r_act_twin",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-pinned-type",
+  "note": ""
+ },
+ {
+  "id": "A_FIN.r_act_twin",
+  "consumer": "A_FIN",
+  "record": "r_act_twin",
+  "binding": null,
+  "outcome": "REJECT",
+  "detail": "not-in-finite-set",
+  "note": ""
+ },
+ {
+  "id": "A_SEMPIN.r_act_twin",
+  "consumer": "A_SEMPIN",
+  "record": "r_act_twin",
+  "binding": "a_twin_stolen",
+  "outcome": "REJECT",
+  "detail": "binding-not-pinned",
+  "note": ""
+ },
+ {
+  "id": "A_SEMISS.r_act_twin",
+  "consumer": "A_SEMISS",
+  "record": "r_act_twin",
+  "binding": "a_twin_stolen",
+  "outcome": "EFFECT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "A_PRED.r_act_twin",
+  "consumer": "A_PRED",
+  "record": "r_act_twin",
+  "binding": null,
+  "outcome": "EFFECT",
+  "detail": "ok",
+  "note": ""
+ },
+ {
+  "id": "A_EXACT.r_act_wrongtarget",
+  "consumer": "A_EXACT",
+  "record": "r_act_wrongtarget",
+  "binding": null,
+  "outcome": "DECODE_ONLY",
+  "detail": "wrong-recipient",
+  "note": ""
+ },
+ {
+  "id": "A_FIN.r_act_wrongtarget",
+  "consumer": "A_FIN",
+  "record": "r_act_wrongtarget",
+  "binding": null,
+  "outcome": "DECODE_ONLY",
+  "detail": "wrong-recipient",
+  "note": ""
+ },
+ {
+  "id": "A_SEMPIN.r_act_wrongtarget",
+  "consumer": "A_SEMPIN",
+  "record": "r_act_wrongtarget",
+  "binding": "a_v1",
+  "outcome": "DECODE_ONLY",
+  "detail": "wrong-recipient",
+  "note": ""
+ },
+ {
+  "id": "A_SEMISS.r_act_wrongtarget",
+  "consumer": "A_SEMISS",
+  "record": "r_act_wrongtarget",
+  "binding": "a_v1",
+  "outcome": "REJECT",
+  "detail": "binding-not-issuer-signed",
+  "note": ""
+ },
+ {
+  "id": "A_PRED.r_act_wrongtarget",
+  "consumer": "A_PRED",
+  "record": "r_act_wrongtarget",
+  "binding": null,
+  "outcome": "DECODE_ONLY",
+  "detail": "wrong-recipient",
+  "note": ""
+ }
+]
