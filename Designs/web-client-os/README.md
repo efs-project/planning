@@ -5,7 +5,7 @@
 **Depends on:** [[Designs/efsv2/README]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/open-web-app-store/README]]
 **Inputs:** [[Designs/clientv2/README]] (historical requirements and mechanism evidence)
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14), @open-web-app-store-pm boundary review (2026-08-14), @os-drives-pm boundary review (2026-08-14)
-**Last touched:** 2026-08-23
+**Last touched:** 2026-08-26
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/cypherpunk-os #topic/app-model #topic/privacy #topic/read-path
 
@@ -235,6 +235,13 @@ Type/Data ABI is in [[type-data-abi-boundary-pressure]].
 Generic specific-App links, minimum-time-to-data rules, practical SES/LavaMoat,
 iframe/Wasm runner lanes, instance leases and the Data Explorer fallback
 boundary are in [[app-runtime-and-direct-launch]].
+The pinned DeepSeek Harness/Cordis paper and implementation review, mature
+plugin-system comparison, owned-resource/dependency laws and hostile fixture
+queue are in
+[[Reviews/2026-08-26-module-plugin-systems-pressure/README]]. Its current disposition
+is to adopt the lifecycle/composition requirements in the trusted host control
+plane without selecting Cordis or another plugin framework as the EFS ABI,
+configuration language, security boundary or runtime.
 
 ## Documents in this set
 

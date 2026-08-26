@@ -5,7 +5,7 @@
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/web-client-os/ethereum-standards-and-interop]], [[Designs/open-web-app-store/architecture]]
 **Inputs:** [[Designs/clientv2/fable-third-party-app-model-handoff]], [[Designs/clientv2/sdk-boundaries]]
 **Reviewers:** @direct-app-architecture (2026-08-22), @runtime-security (2026-08-22)
-**Last touched:** 2026-08-22
+**Last touched:** 2026-08-26
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/cypherpunk-os #topic/app-model #topic/read-path #topic/privacy #topic/wasm #topic/wasi
 
@@ -631,6 +631,16 @@ later port cannot grant a sandbox flag, loosen CSP, change opaque-origin mode,
 or retroactively deny an already available browser API. Any widening that
 changes construction policy destroys the instance and creates a new lease.
 
+An opaque frame reports origin `null`, and its `WindowProxy` survives
+navigation, so origin checks or `event.source` alone cannot authenticate the
+verified document generation. The trusted exact bootstrap—not publisher code—
+performs a one-shot challenge bound to a fresh nonce, the captured
+`contentWindow`, exact bootstrap/closure identity, instance lease and epoch.
+Only the matching response receives the capability `MessagePort`; the global
+message listener is then removed. Every frame `load`/navigation fences the old
+epoch and revokes the port before any later document can speak for the former
+one. Wrong, replayed and sibling-`null`-origin challenges receive no port.
+
 Sandboxing does not by itself block HTTP, WebSocket, subresources, WebRTC,
 self-navigation, renderer hangs, browser exploits, or already-sent remote
 effects. A claimed network-denied profile needs a measured, cross-browser
@@ -693,6 +703,11 @@ terminates Workers, releases URLs/mounts/resources, and restores focus.
 Teardown is idempotent and ledgered. It cannot undo remote effects already
 sent. Persistent user state and retained verified package bytes are not
 deleted; deletion is a separate reviewed action.
+
+Frame removal is best-effort browser teardown, not proof that the frame had a
+separate renderer/process or that a busy renderer could not temporarily stall
+the host. Browser-specific hang, navigation and late-message behavior remains
+measured residual evidence.
 
 ### Common capability protocol
 

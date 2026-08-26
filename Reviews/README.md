@@ -108,3 +108,7 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 ### Debloat.dev open-source directory intake (2026-08-24)
 
 - [`2026-08-24-debloat-directory-intake.md`](./2026-08-24-debloat-directory-intake.md) — point-in-time product and HN-comment assessment of a fast, guest-friendly open-source alternatives directory; preserves its concrete catalog, Wanted, machine-readable, curation, governance and exit lessons; and parks a curator-qualified, independently verified Open Alternatives catalog as a possible future Open Web App Store/Data Explorer fixture without importing the live database, creating a global default index, or adding an EFS Core requirement.
+
+### DeepSeek Harness, Cordis, and modular-system pressure (2026-08-26)
+
+- [`2026-08-26-module-plugin-systems-pressure/`](./2026-08-26-module-plugin-systems-pressure/) — pinned DeepSeek Harness and Cordis-paper/code review plus OSGi, Eclipse, VS Code/LSP, WebExtensions, Nix/Guix, Kubernetes, systemd/D-Bus, WordPress, Figma, SES and Wasm comparison; retains owned-resource lifecycle, explicit dependency, consumer-first withdrawal and transactional-reconciliation laws while rejecting a same-realm plugin framework as EFS identity, authority, confinement or production-update architecture. Adds exact direct-route, teardown, provider, conflict, crash, external-effect, cross-lane, hostile-runtime, migration, scale and provenance fixtures without adopting a runtime or Core change.
