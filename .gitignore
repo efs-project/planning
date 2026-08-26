@@ -2,3 +2,4 @@ sut/out/
 sut/cache/
 sut/lib/forge-std/
 __pycache__/
+overnight2/**/__pycache__/
