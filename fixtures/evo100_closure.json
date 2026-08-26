@@ -1,0 +1,3033 @@
+{
+ "count": 100,
+ "disclaimer": "DISPOSABLE scale-only stretch; not production-scale evidence",
+ "meaningful": 16,
+ "types": [
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     false,
+     0
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ],
+    [
+     4,
+     "u64",
+     false,
+     0
+    ],
+    [
+     5,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "action-gwei/1.0: identical shape, amountOrSlot in GWEI not wei",
+   "name": "ACT_TWIN",
+   "status": "MEANINGFUL",
+   "typeId": "b47726e139d0d06cb3d77a074785892e0594fb5d523c07c0f779398a8d44f149"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     false,
+     0
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ],
+    [
+     4,
+     "u64",
+     false,
+     0
+    ],
+    [
+     5,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "action/1.0: actor,verb(1=EQUIP,2=TRANSFER),target,amountOrSlot(wei),basis",
+   "name": "ACT_V1",
+   "status": "MEANINGFUL",
+   "typeId": "197b9f752e9e3ae84033e46eac81043cbff4861c97050705eb05f864b88a4edb"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     false,
+     0
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ],
+    [
+     4,
+     "u64",
+     false,
+     0
+    ],
+    [
+     5,
+     "b32",
+     false,
+     0
+    ],
+    [
+     6,
+     "bytes",
+     true,
+     64
+    ]
+   ],
+   "meaning": "action/1.1: action/1.0 + optional inert memo",
+   "name": "ACT_V1_1",
+   "status": "MEANINGFUL",
+   "typeId": "379b619a08c31cccdfc7915c9d4d86c60d7f11f710e92205357f5e0543880f06"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     false,
+     0
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ],
+    [
+     4,
+     "u64",
+     false,
+     0
+    ],
+    [
+     5,
+     "b32",
+     false,
+     0
+    ],
+    [
+     6,
+     "bytes",
+     true,
+     64
+    ],
+    [
+     7,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "action/2.0: + optional DELEGATE who may also act (authority widening)",
+   "name": "ACT_V2",
+   "status": "MEANINGFUL",
+   "typeId": "4053d6d0c7af4ac8de578f67aafdb6dcc231ad6c0611301a3d7044a088ec45c6"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     false,
+     0
+    ]
+   ],
+   "meaning": "rpg/character/1.0: owner,race(1=human,2=goblin)",
+   "name": "CHAR",
+   "status": "MEANINGFUL",
+   "typeId": "6ba81d8e0959a224f1617628543174b589bc1a0ad33bbb48c50e55e6c5e2c6ef"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     64
+    ],
+    [
+     2,
+     "u64",
+     false,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "rpg/itemdef/1.0: name,slot,tagsBitfield,ruleset",
+   "name": "ITEMDEF",
+   "status": "MEANINGFUL",
+   "typeId": "088849e8793af2e335b1c18fd5166822c489a45f301f235977bb80f1e002c144"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "rpg/iteminstance/1.0: def,owner",
+   "name": "ITEMINST",
+   "status": "MEANINGFUL",
+   "typeId": "03f8e4dabe86e7011431ab727a1fd471c34e5c2c15b11f0ff4e099551db5067d"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     false,
+     0
+    ],
+    [
+     3,
+     "bytes",
+     false,
+     512
+    ],
+    [
+     4,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "note/1.0: author,createdAt,body(utf8),replyTo->Note",
+   "name": "NOTE_1_0",
+   "status": "MEANINGFUL",
+   "typeId": "88d004a38b37eb6aa8b325641f4192eac80bd9077f077d034ddc4cfd9b4c4d85"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     false,
+     0
+    ],
+    [
+     3,
+     "bytes",
+     false,
+     512
+    ],
+    [
+     4,
+     "b32",
+     true,
+     0
+    ],
+    [
+     5,
+     "bytes",
+     true,
+     32
+    ]
+   ],
+   "meaning": "note/1.1: note/1.0 + optional inert mood",
+   "name": "NOTE_1_1",
+   "status": "MEANINGFUL",
+   "typeId": "20e67d2c5b55ebb25c5a3b7e1ecc1e161e131d9b80df125f905d089a2b597980"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     false,
+     0
+    ],
+    [
+     3,
+     "bytes",
+     false,
+     512
+    ],
+    [
+     4,
+     "b32",
+     true,
+     0
+    ],
+    [
+     5,
+     "bytes",
+     false,
+     32
+    ]
+   ],
+   "meaning": "note/1.2: body is ciphertext under required scheme (key 5 COLLIDES with 1.1 mood)",
+   "name": "NOTE_1_2",
+   "status": "MEANINGFUL",
+   "typeId": "737e9c6b93f3665b3fb55f75c6d1728c826fc8c981b447baed63bcc97eb5a5a4"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     false,
+     0
+    ],
+    [
+     3,
+     "bytes",
+     false,
+     2048
+    ],
+    [
+     4,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "note/2.0: blocks(rich opaque list), breaking successor of note/1.x",
+   "name": "NOTE_2_0",
+   "status": "MEANINGFUL",
+   "typeId": "9e8a8ed02c7eb9e9a8fdff570388737b039b75046d835526e7cb9cc6b7a78921"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     false,
+     0
+    ],
+    [
+     3,
+     "bytes",
+     false,
+     512
+    ],
+    [
+     4,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "note/9.9: future representation",
+   "name": "NOTE_FUTURE_CODEC",
+   "status": "MEANINGFUL",
+   "typeId": "4805e1dadfa8f44638591a82f24df668c941a0bdda034133f4f4dbf9968f5416"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     false,
+     0
+    ],
+    [
+     3,
+     "bytes",
+     false,
+     512
+    ],
+    [
+     4,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "command/1.0: body is a shell command the reader must execute",
+   "name": "NOTE_TWIN",
+   "status": "MEANINGFUL",
+   "typeId": "dde6b0e01d5d090255a6c8cf46f5e7a0e3dd8c7b6a28da89414cf75a1529e7ae"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "rpg/ruleset/1.0: version,rulesHash",
+   "name": "RULESET",
+   "status": "MEANINGFUL",
+   "typeId": "d3b8f415073ddd78e1880d11b7716c192ae8f58ffbb274e6c681317dd17855f7"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "sci/length-meters: value in meters under frame",
+   "name": "SCI_DIST",
+   "status": "MEANINGFUL",
+   "typeId": "57764664332004346e09bdd252b33b5a2e1aed65910015d07db36ddfc6a6c9f0"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "sci/time-seconds: value in seconds under calibration",
+   "name": "SCI_DUR",
+   "status": "MEANINGFUL",
+   "typeId": "c522ff2c0f4129615de9eb95857d7ac3f19cf640a7790352cc378dd9a8095fc7"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/0: synthetic closure member, state=REQUIRED",
+   "name": "SCALE_000",
+   "state": "REQUIRED",
+   "status": "SCALE_ONLY",
+   "typeId": "08ddf930f2daf7c834c24f02b3ac64c89d78d121aa9dda36fa24f0ac4d04c397"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/1: synthetic closure member, state=OPTIONAL",
+   "name": "SCALE_001",
+   "state": "OPTIONAL",
+   "status": "SCALE_ONLY",
+   "typeId": "3393bf0ba70f0c466d2c386c36b20efb70f6f0724ab5ee46cc3f43730f5c3a7d"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/2: synthetic closure member, state=LAZY_REF",
+   "name": "SCALE_002",
+   "state": "LAZY_REF",
+   "status": "SCALE_ONLY",
+   "typeId": "cd065bb09ae490302909ca249b27f67c9e20016817210587f894bbae1d6b2461"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/3: synthetic closure member, state=CORRUPT",
+   "name": "SCALE_003",
+   "state": "CORRUPT",
+   "status": "SCALE_ONLY",
+   "typeId": "1a6bc33b728162cf590da3dfd64f4c76519d9c05087ea705a8f852684e34267d"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/4: synthetic closure member, state=UNAVAILABLE",
+   "name": "SCALE_004",
+   "state": "UNAVAILABLE",
+   "status": "SCALE_ONLY",
+   "typeId": "972708631314cb071004cbb748624130e8138dc52394ee8299ead03cbdb46feb"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/5: synthetic closure member, state=UNSUPPORTED",
+   "name": "SCALE_005",
+   "state": "UNSUPPORTED",
+   "status": "SCALE_ONLY",
+   "typeId": "3a388e93d2b319334c3ed5d8e12f4e316830bddffff7856c3154d0c6f7212c1f"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/6: synthetic closure member, state=REQUIRED",
+   "name": "SCALE_006",
+   "state": "REQUIRED",
+   "status": "SCALE_ONLY",
+   "typeId": "b1a030a768438c8dd6a44db86ff475f2c56c4a9359ffa389cd33badd5061e8c5"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/7: synthetic closure member, state=OPTIONAL",
+   "name": "SCALE_007",
+   "state": "OPTIONAL",
+   "status": "SCALE_ONLY",
+   "typeId": "f8e717d9b73189d6529b8b3356256ed5c79a94e8d1d58ea754f755ca893e45e2"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/8: synthetic closure member, state=LAZY_REF",
+   "name": "SCALE_008",
+   "state": "LAZY_REF",
+   "status": "SCALE_ONLY",
+   "typeId": "a659341e002dc9b1c626b3c5501e82b6194fbd8b05891f4be39b387926afd187"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/9: synthetic closure member, state=CORRUPT",
+   "name": "SCALE_009",
+   "state": "CORRUPT",
+   "status": "SCALE_ONLY",
+   "typeId": "c94fa0bd5272cdb6b4a4f26d301fb4e37ae5ff54cc92e4f48d85c56fe4f66366"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/10: synthetic closure member, state=UNAVAILABLE",
+   "name": "SCALE_010",
+   "state": "UNAVAILABLE",
+   "status": "SCALE_ONLY",
+   "typeId": "8d1b6e80ee5695f87f7846eea3abf3c2e28829daad6f78ec592c90f2ff829617"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/11: synthetic closure member, state=UNSUPPORTED",
+   "name": "SCALE_011",
+   "state": "UNSUPPORTED",
+   "status": "SCALE_ONLY",
+   "typeId": "55c1e08961adf074a0ea174b47c31a319223a59adea1f7ddcaf0c8ed4b0e501e"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/12: synthetic closure member, state=REQUIRED",
+   "name": "SCALE_012",
+   "state": "REQUIRED",
+   "status": "SCALE_ONLY",
+   "typeId": "6968c82eb3c64d9b8c4e89d9d3a06f2a5634a513ae6278e4e567ba43e517c3c8"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/13: synthetic closure member, state=OPTIONAL",
+   "name": "SCALE_013",
+   "state": "OPTIONAL",
+   "status": "SCALE_ONLY",
+   "typeId": "5fbb3704687ad60d2e6c9387f3e5c0f813feed8f769363ec381ea3f3b3267b36"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/14: synthetic closure member, state=LAZY_REF",
+   "name": "SCALE_014",
+   "state": "LAZY_REF",
+   "status": "SCALE_ONLY",
+   "typeId": "5e44460b8ea99f4fc2eb081e8534dc16b18609d4f6bcfa34c1553cd3ff0fdd50"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/15: synthetic closure member, state=CORRUPT",
+   "name": "SCALE_015",
+   "state": "CORRUPT",
+   "status": "SCALE_ONLY",
+   "typeId": "2842f250a83e6cd26d3e40721e855d4f2c66494b20a676e9c01018db9ef3cf44"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/16: synthetic closure member, state=UNAVAILABLE",
+   "name": "SCALE_016",
+   "state": "UNAVAILABLE",
+   "status": "SCALE_ONLY",
+   "typeId": "ac5c6cc326d2dd1517f02d0df4b75aacf8907e003f7a383c318b35184c2603c0"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/17: synthetic closure member, state=UNSUPPORTED",
+   "name": "SCALE_017",
+   "state": "UNSUPPORTED",
+   "status": "SCALE_ONLY",
+   "typeId": "c1045a06604c6530a8c5c61504739e6c54366c6c07171f073652e31d9a78e5c0"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/18: synthetic closure member, state=REQUIRED",
+   "name": "SCALE_018",
+   "state": "REQUIRED",
+   "status": "SCALE_ONLY",
+   "typeId": "15783aae7a5f0069ba30f3c82112a518da4d0d743ebd1536b472cd973686243f"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/19: synthetic closure member, state=OPTIONAL",
+   "name": "SCALE_019",
+   "state": "OPTIONAL",
+   "status": "SCALE_ONLY",
+   "typeId": "5c36fbffe81d82ada33817efdd6c1d4e3710e5574e1af2b745cfb3f869da032b"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/20: synthetic closure member, state=LAZY_REF",
+   "name": "SCALE_020",
+   "state": "LAZY_REF",
+   "status": "SCALE_ONLY",
+   "typeId": "23d32a1591a354228cae6bfe9e44304f0e91025c96bc2435bf84dbce00fb1d47"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/21: synthetic closure member, state=CORRUPT",
+   "name": "SCALE_021",
+   "state": "CORRUPT",
+   "status": "SCALE_ONLY",
+   "typeId": "71a40528c87b94e0070ebb6975068d463ef8677274150d9c12678bf8b5627c35"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/22: synthetic closure member, state=UNAVAILABLE",
+   "name": "SCALE_022",
+   "state": "UNAVAILABLE",
+   "status": "SCALE_ONLY",
+   "typeId": "6ea6fef5cc183952708cd65bd3800f45a281f1d7aee7f39183e9b4185526f8a9"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/23: synthetic closure member, state=UNSUPPORTED",
+   "name": "SCALE_023",
+   "state": "UNSUPPORTED",
+   "status": "SCALE_ONLY",
+   "typeId": "67af4c8c4f088f4b70b04d135265423096423d32e190939b040ef3ffc32a1b7a"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/24: synthetic closure member, state=REQUIRED",
+   "name": "SCALE_024",
+   "state": "REQUIRED",
+   "status": "SCALE_ONLY",
+   "typeId": "2fcb971599c3c018c224830963a11105988d600340e8103008702fac55ed43d6"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/25: synthetic closure member, state=OPTIONAL",
+   "name": "SCALE_025",
+   "state": "OPTIONAL",
+   "status": "SCALE_ONLY",
+   "typeId": "1a550003cc929df01a1153d6e56eb07a142bcf6f608ed9ca1838f9286483f182"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/26: synthetic closure member, state=LAZY_REF",
+   "name": "SCALE_026",
+   "state": "LAZY_REF",
+   "status": "SCALE_ONLY",
+   "typeId": "0c86c60961105f6e749c0cafc8123d21a2af0c0af8ab097ae8a3baa5b8f5a80d"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/27: synthetic closure member, state=CORRUPT",
+   "name": "SCALE_027",
+   "state": "CORRUPT",
+   "status": "SCALE_ONLY",
+   "typeId": "4383d4f576a8f19463131e18829fe88f36e59658e11592c933ca39b4b4f0acbc"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/28: synthetic closure member, state=UNAVAILABLE",
+   "name": "SCALE_028",
+   "state": "UNAVAILABLE",
+   "status": "SCALE_ONLY",
+   "typeId": "a6018547f16704b9879d342ac2bb253b96684043d913875cf92dbae0028131dd"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/29: synthetic closure member, state=UNSUPPORTED",
+   "name": "SCALE_029",
+   "state": "UNSUPPORTED",
+   "status": "SCALE_ONLY",
+   "typeId": "93978ccee31bfc8bb76dd1fe754506118694024dd822dafc54846de25830e706"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/30: synthetic closure member, state=REQUIRED",
+   "name": "SCALE_030",
+   "state": "REQUIRED",
+   "status": "SCALE_ONLY",
+   "typeId": "67006f0b0f0753fe6657573b7c86c2755423e4f05a21872896adc1eeb0cf919a"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/31: synthetic closure member, state=OPTIONAL",
+   "name": "SCALE_031",
+   "state": "OPTIONAL",
+   "status": "SCALE_ONLY",
+   "typeId": "4eb3e907ad29a9a31ec7f97c600e9368e073429c8a4212aa24e18ea042755dc5"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/32: synthetic closure member, state=LAZY_REF",
+   "name": "SCALE_032",
+   "state": "LAZY_REF",
+   "status": "SCALE_ONLY",
+   "typeId": "c6b915195342db75ac6cb938b5e9bfaea0afa217c822b93527dc322367685df9"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/33: synthetic closure member, state=CORRUPT",
+   "name": "SCALE_033",
+   "state": "CORRUPT",
+   "status": "SCALE_ONLY",
+   "typeId": "ce6a07eb44f97b10b3f8043ef4fe2395e9ca0f8974d7d7a3b0c96ca1f7c24d54"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/34: synthetic closure member, state=UNAVAILABLE",
+   "name": "SCALE_034",
+   "state": "UNAVAILABLE",
+   "status": "SCALE_ONLY",
+   "typeId": "c7dd45049084fe97bdea724874e975d10cbc66f41db932f2ef6b6ec19b1cb8b3"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/35: synthetic closure member, state=UNSUPPORTED",
+   "name": "SCALE_035",
+   "state": "UNSUPPORTED",
+   "status": "SCALE_ONLY",
+   "typeId": "8a406814ccd12dda961bf7366ec24f887a2921a8ff916872f90993366533d7af"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/36: synthetic closure member, state=REQUIRED",
+   "name": "SCALE_036",
+   "state": "REQUIRED",
+   "status": "SCALE_ONLY",
+   "typeId": "dfae69d13a1b7967c6a6de3b4697b9a06e4d4f92fd6f5328b5819113ba263aa4"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/37: synthetic closure member, state=OPTIONAL",
+   "name": "SCALE_037",
+   "state": "OPTIONAL",
+   "status": "SCALE_ONLY",
+   "typeId": "fa9259bcbc0b6737dad91674702a3fb294111fba46d016dbe37141376c9ee598"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/38: synthetic closure member, state=LAZY_REF",
+   "name": "SCALE_038",
+   "state": "LAZY_REF",
+   "status": "SCALE_ONLY",
+   "typeId": "98a0dff68de729117a51194f17f3aac6277d1b7ac8a7fdc39718a85e0af422de"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/39: synthetic closure member, state=CORRUPT",
+   "name": "SCALE_039",
+   "state": "CORRUPT",
+   "status": "SCALE_ONLY",
+   "typeId": "3e105a121548693e10a1658e247f7960bc1344f91bb98de03c6aca84e607b0f8"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/40: synthetic closure member, state=UNAVAILABLE",
+   "name": "SCALE_040",
+   "state": "UNAVAILABLE",
+   "status": "SCALE_ONLY",
+   "typeId": "407386c066d877cc56b2a49b16564b9c088e4b94d64960f0ef0cbbd11725a4d5"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/41: synthetic closure member, state=UNSUPPORTED",
+   "name": "SCALE_041",
+   "state": "UNSUPPORTED",
+   "status": "SCALE_ONLY",
+   "typeId": "6ffff419e12cc0088482e6669193e6afa6f8a1f1a377b3fb596b727002e7291f"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/42: synthetic closure member, state=REQUIRED",
+   "name": "SCALE_042",
+   "state": "REQUIRED",
+   "status": "SCALE_ONLY",
+   "typeId": "2d6e349f9996e69b2deea74522de4d4b98e7bd8ff1b83b1ec113e453663094db"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/43: synthetic closure member, state=OPTIONAL",
+   "name": "SCALE_043",
+   "state": "OPTIONAL",
+   "status": "SCALE_ONLY",
+   "typeId": "a8a5c382de7de17c2c8137dca610ed1f76daa38969528e0e30d8f083db15accf"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/44: synthetic closure member, state=LAZY_REF",
+   "name": "SCALE_044",
+   "state": "LAZY_REF",
+   "status": "SCALE_ONLY",
+   "typeId": "35b741a1c1f834f7c01052600a34faf84f79853cb66fde989a3273371e825625"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/45: synthetic closure member, state=CORRUPT",
+   "name": "SCALE_045",
+   "state": "CORRUPT",
+   "status": "SCALE_ONLY",
+   "typeId": "cf997382963db488c9c6df37793848e92e16eb1809f92c9bd945d1f2c24ac255"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/46: synthetic closure member, state=UNAVAILABLE",
+   "name": "SCALE_046",
+   "state": "UNAVAILABLE",
+   "status": "SCALE_ONLY",
+   "typeId": "3966185c4033caa419e0c16a5bfd6d7d793fe869f739e7f5c794d1826ea439d8"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/47: synthetic closure member, state=UNSUPPORTED",
+   "name": "SCALE_047",
+   "state": "UNSUPPORTED",
+   "status": "SCALE_ONLY",
+   "typeId": "9172710788a827ee81a9ce056197b527a2bc343516f5dd75d56b9a620cc02d5c"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/48: synthetic closure member, state=REQUIRED",
+   "name": "SCALE_048",
+   "state": "REQUIRED",
+   "status": "SCALE_ONLY",
+   "typeId": "244f6ccb566516b6c4fa9154557d8672ea40ca1fb1aed76889321ce4d8b0d7aa"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/49: synthetic closure member, state=OPTIONAL",
+   "name": "SCALE_049",
+   "state": "OPTIONAL",
+   "status": "SCALE_ONLY",
+   "typeId": "fccf5927f60c49a803450c243642a023e40c2445ee2ee225f8cfa81a2b4ef154"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/50: synthetic closure member, state=LAZY_REF",
+   "name": "SCALE_050",
+   "state": "LAZY_REF",
+   "status": "SCALE_ONLY",
+   "typeId": "74f1fe1910a00c4bc463f9d35cbd13e67d00ff91b2882afb860b60868cd9c968"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/51: synthetic closure member, state=CORRUPT",
+   "name": "SCALE_051",
+   "state": "CORRUPT",
+   "status": "SCALE_ONLY",
+   "typeId": "d44cd1d08b38addce76a51bfafecbeadc861e5830153f2daba4b9eb661496002"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/52: synthetic closure member, state=UNAVAILABLE",
+   "name": "SCALE_052",
+   "state": "UNAVAILABLE",
+   "status": "SCALE_ONLY",
+   "typeId": "621a80b5a7d8e0e82760db15a6edb1126b14f540671bd80aa59700178748b577"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/53: synthetic closure member, state=UNSUPPORTED",
+   "name": "SCALE_053",
+   "state": "UNSUPPORTED",
+   "status": "SCALE_ONLY",
+   "typeId": "b49206a6e72ea09bf4db89fed1d5ed3b5d9fb6b8c0d067c1c1750d306ab5b59c"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/54: synthetic closure member, state=REQUIRED",
+   "name": "SCALE_054",
+   "state": "REQUIRED",
+   "status": "SCALE_ONLY",
+   "typeId": "4f132b1c15d41f22c968cbbb9469ac8c89be0597df6dea1375fc47f89c4f079d"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/55: synthetic closure member, state=OPTIONAL",
+   "name": "SCALE_055",
+   "state": "OPTIONAL",
+   "status": "SCALE_ONLY",
+   "typeId": "0b8e0daa1d55381a834bb8829737e89a9159d6e0fc923a33bf1c4f05f3b5bb0a"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/56: synthetic closure member, state=LAZY_REF",
+   "name": "SCALE_056",
+   "state": "LAZY_REF",
+   "status": "SCALE_ONLY",
+   "typeId": "79deffca36b4c22f29078ec05cba01936f4aba9ed6513076cb6bde9b2de2d977"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/57: synthetic closure member, state=CORRUPT",
+   "name": "SCALE_057",
+   "state": "CORRUPT",
+   "status": "SCALE_ONLY",
+   "typeId": "4e6df9ddece76409993b6b2da44b98ad379e11604526a0fb1dd81d30afc7abfe"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/58: synthetic closure member, state=UNAVAILABLE",
+   "name": "SCALE_058",
+   "state": "UNAVAILABLE",
+   "status": "SCALE_ONLY",
+   "typeId": "4f694a4b43e8260335042462886a51eed20451154989e685e3620f016a0ec560"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/59: synthetic closure member, state=UNSUPPORTED",
+   "name": "SCALE_059",
+   "state": "UNSUPPORTED",
+   "status": "SCALE_ONLY",
+   "typeId": "b0e2968383cd897885cd35abf88b5cf62a9751e9fc501c464043b8d297525343"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/60: synthetic closure member, state=REQUIRED",
+   "name": "SCALE_060",
+   "state": "REQUIRED",
+   "status": "SCALE_ONLY",
+   "typeId": "b5be97174522caa23909193d6a40595a4b033af12eba221cd6e6b1f9ada05502"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/61: synthetic closure member, state=OPTIONAL",
+   "name": "SCALE_061",
+   "state": "OPTIONAL",
+   "status": "SCALE_ONLY",
+   "typeId": "06e86cb097e6e6b3bb697c21c7ef2cbf96bb351732e0a179ea614ef8ec9bc0f9"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/62: synthetic closure member, state=LAZY_REF",
+   "name": "SCALE_062",
+   "state": "LAZY_REF",
+   "status": "SCALE_ONLY",
+   "typeId": "08eaecab40df72811ab14ea859f27d2862893b46b35f4828dc6c84eb5d5d0b7d"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/63: synthetic closure member, state=CORRUPT",
+   "name": "SCALE_063",
+   "state": "CORRUPT",
+   "status": "SCALE_ONLY",
+   "typeId": "9613b962a2d789d434441b1d530956e577d2498d61e399b2edf7f95c2ca3cf51"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/64: synthetic closure member, state=UNAVAILABLE",
+   "name": "SCALE_064",
+   "state": "UNAVAILABLE",
+   "status": "SCALE_ONLY",
+   "typeId": "9554c2a9e2df7407c8e1a677a6856b143e75a19a6e57644cd8e28b8f1757eba5"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/65: synthetic closure member, state=UNSUPPORTED",
+   "name": "SCALE_065",
+   "state": "UNSUPPORTED",
+   "status": "SCALE_ONLY",
+   "typeId": "b0fc0ccd2416c79de9e5ea5567b6f9de9d6eb7025e1f886b139d977e9a047b7e"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/66: synthetic closure member, state=REQUIRED",
+   "name": "SCALE_066",
+   "state": "REQUIRED",
+   "status": "SCALE_ONLY",
+   "typeId": "53c2813224498a0a865387058059095b31a59736db8fc536bbe6d71ff71ddeb1"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/67: synthetic closure member, state=OPTIONAL",
+   "name": "SCALE_067",
+   "state": "OPTIONAL",
+   "status": "SCALE_ONLY",
+   "typeId": "a6de2489d791e9e1b7501d36b3f46fbc5bb007c33038612caac669ea6bee1ea3"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/68: synthetic closure member, state=LAZY_REF",
+   "name": "SCALE_068",
+   "state": "LAZY_REF",
+   "status": "SCALE_ONLY",
+   "typeId": "6fd7c6ab4c85672d08c30ca24baa289a545149e8f05d10a776d58b796f06faef"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/69: synthetic closure member, state=CORRUPT",
+   "name": "SCALE_069",
+   "state": "CORRUPT",
+   "status": "SCALE_ONLY",
+   "typeId": "3a1e6d28a6506188806cb517494048790a02f6569850aefe4c01f4e07fc3eb60"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/70: synthetic closure member, state=UNAVAILABLE",
+   "name": "SCALE_070",
+   "state": "UNAVAILABLE",
+   "status": "SCALE_ONLY",
+   "typeId": "790f0c549427b79ecfe56035252b980828e8b1e7bdcc91f5698a63128ccda2cc"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/71: synthetic closure member, state=UNSUPPORTED",
+   "name": "SCALE_071",
+   "state": "UNSUPPORTED",
+   "status": "SCALE_ONLY",
+   "typeId": "723d3af1be54ec7f23d7cc1cdcf10794aa9ed8a76a00d2038317523099020696"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/72: synthetic closure member, state=REQUIRED",
+   "name": "SCALE_072",
+   "state": "REQUIRED",
+   "status": "SCALE_ONLY",
+   "typeId": "45f7afef479fb9023cfe489aea7a166fe0511d81fccc4eb67aa0931c670fbbab"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/73: synthetic closure member, state=OPTIONAL",
+   "name": "SCALE_073",
+   "state": "OPTIONAL",
+   "status": "SCALE_ONLY",
+   "typeId": "c402fce008ad2bcc9f935bdb93e577e729d425d0145abbb52be2ea5847ed4f80"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/74: synthetic closure member, state=LAZY_REF",
+   "name": "SCALE_074",
+   "state": "LAZY_REF",
+   "status": "SCALE_ONLY",
+   "typeId": "ef417e7290c17a4764da248e95d5213c3dd399e9ff772b256d4b54a778699907"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/75: synthetic closure member, state=CORRUPT",
+   "name": "SCALE_075",
+   "state": "CORRUPT",
+   "status": "SCALE_ONLY",
+   "typeId": "d767635b062aee08f62ad897c5bec057d99e0adfb279fd2e17a237eee62e614c"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/76: synthetic closure member, state=UNAVAILABLE",
+   "name": "SCALE_076",
+   "state": "UNAVAILABLE",
+   "status": "SCALE_ONLY",
+   "typeId": "659c29e3956851d2ce62a77aeb704fabe71027e34bb0c2c2d94e02b3113fce7f"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/77: synthetic closure member, state=UNSUPPORTED",
+   "name": "SCALE_077",
+   "state": "UNSUPPORTED",
+   "status": "SCALE_ONLY",
+   "typeId": "0c507acf41faa2244729b2dc9e5b690127ea8f0bb47d478f3f5c5f057020c4ce"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/78: synthetic closure member, state=REQUIRED",
+   "name": "SCALE_078",
+   "state": "REQUIRED",
+   "status": "SCALE_ONLY",
+   "typeId": "56e25e6d1eaaa7df5fb87a0c413562a80aee052c299747b0a35f361ab56f6d96"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/79: synthetic closure member, state=OPTIONAL",
+   "name": "SCALE_079",
+   "state": "OPTIONAL",
+   "status": "SCALE_ONLY",
+   "typeId": "e41caf0302c9212e2eb44f72a34350c3599f1cfdf6220a9ff9b298fc23f34c1d"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "u64",
+     false,
+     0
+    ],
+    [
+     2,
+     "bool",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/80: synthetic closure member, state=LAZY_REF",
+   "name": "SCALE_080",
+   "state": "LAZY_REF",
+   "status": "SCALE_ONLY",
+   "typeId": "07306c479b5c51165684ebd0e9467b1a89025ef6fa0185c38921305388fa7ee7"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bool",
+     false,
+     0
+    ],
+    [
+     2,
+     "bytes",
+     true,
+     128
+    ],
+    [
+     3,
+     "b32",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/81: synthetic closure member, state=CORRUPT",
+   "name": "SCALE_081",
+   "state": "CORRUPT",
+   "status": "SCALE_ONLY",
+   "typeId": "22e1580a626128a98ab3c5751b17a06645cedbd3d94abe139a71a7b4664d3951"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     2,
+     "b32",
+     true,
+     0
+    ],
+    [
+     3,
+     "u64",
+     false,
+     0
+    ],
+    [
+     4,
+     "bool",
+     false,
+     0
+    ]
+   ],
+   "meaning": "scale-only/82: synthetic closure member, state=UNAVAILABLE",
+   "name": "SCALE_082",
+   "state": "UNAVAILABLE",
+   "status": "SCALE_ONLY",
+   "typeId": "3b29e675fe066a0c5ec7382e7988155b769b7c292253731ebc545be045269775"
+  },
+  {
+   "fields": [
+    [
+     1,
+     "b32",
+     false,
+     0
+    ],
+    [
+     2,
+     "u64",
+     true,
+     0
+    ],
+    [
+     3,
+     "bool",
+     false,
+     0
+    ],
+    [
+     4,
+     "bytes",
+     false,
+     128
+    ],
+    [
+     5,
+     "b32",
+     true,
+     0
+    ]
+   ],
+   "meaning": "scale-only/83: synthetic closure member, state=UNSUPPORTED",
+   "name": "SCALE_083",
+   "state": "UNSUPPORTED",
+   "status": "SCALE_ONLY",
+   "typeId": "8fa0c38cf43c5403172d2d5b48fe399d9e8768a461db8cf713aee981bdb5f4fd"
+  }
+ ]
+}
