@@ -390,3 +390,45 @@ People should be able to use **burner wallets for transactionless interactions**
 - Burner key custody / "share hex not ENS in archival URLs" (ARCH-9) — burners are ephemeral keys; how do they map to a durable user identity?
 
 Not blocking. A candidate for a dedicated brainstorm/design (likely an SDK + lens-model concern). **Update 2026-07-01:** the *burner-session* half **shipped** — contracts **PR #39 "instant Sepolia burner session"** merged to `main` (chain-aware burner + network persistence). **Update 2026-07-05 — graduated into EFS v2 →** [[deterministic-ids]] + [[efs-v2-holistic-redesign]]. Fable's v2 identity work directly takes up both threads: the **identity crux** splits *authorization* (live, chain-bound — the B′ account, ERC-1271/4337/7702) from *authorship* (eternal, chain-free key signatures + key-event log), and **named lenses (lens-as-LIST)** give the "these addresses are ME / a curator I follow" grouping without editing URLs. Transactionless/one-popup writes fall out of v2's deterministic one-tx parents-first batches. Watch the v2 designs; this parking-lot entry is now tracked there.
+
+### Native account abstraction: enshrine verification, keep EFS authority programmable
+*(James lead, 2026-08-30; [Ben Adams on EIP-8141 vs EIP-8130](https://x.com/ben_a_adams/status/2093340730068496430); primary specs: [EIP-8141](https://eips.ethereum.org/EIPS/eip-8141), [EIP-8130](https://eips.ethereum.org/EIPS/eip-8130))*
+
+Ben Adams argues for EIP-8141's narrower native-AA boundary: Ethereum verifies
+scheme-tagged signatures and execution/payment approvals, while each account
+defines what those approvals mean. EIP-8130 instead makes actors, scopes,
+administrative roles, expiry, locking, sequence/replay state, and a singleton
+Keystore legible to consensus. His reason for changing position is not only
+flexibility: Nethermind and ethrex implemented the revised 8141 design on a
+devnet, and its sender-local public-validation dependency rule is intended to
+bound mempool invalidation without freezing a wallet-authority vocabulary.
+
+**What this means for EFS:**
+
+- It strengthens the existing EFS split between durable authorship and live,
+  chain-bound authorization. Native AA may transport and verify an EFS write;
+  it must not become the identity of an EFS author, the meaning of a
+  `PrincipalId`, or the authority by which readers accept claims.
+- 8141's signature list and account-defined composition are a plausible future
+  rail for main + burner + passkey/P-256 + recovery/PQ combinations, scoped
+  agent/session credentials, sponsorship, batching, and execute-then-pay. EFS
+  should preserve these as wallet-policy choices rather than encode one actor,
+  scope-bit, admin, or singleton-keystore model into its own permanent bytes.
+- EFS cannot assume 8141 shipment, uniform public-mempool propagation, or
+  cross-chain support. The current EIP-712/ERC-1271/4337/7702 paths and a plain
+  EOA fallback remain the compatibility floor; chain profiles must report
+  exact support instead of treating EIP status as deployed capability.
+- The article exposes one concrete pressure test: can one logical EFS write
+  plan preserve the same record IDs, recovered authorship, effects preview,
+  and receipt across (a) legacy EOA submission, (b) ERC-4337/7702 smart-account
+  submission, and (c) a disposable 8141 frame-transaction adapter, including
+  separate execution and payment approvers? Any semantic drift means the
+  Submitter boundary is leaking transaction mechanics into EFS meaning.
+
+**Tracking trigger:** carry this into the wallet/action and held authority
+passes when either selects a native-AA adapter or freezes signer/principal
+semantics. Before then it is dated pressure evidence, not a Core requirement,
+dependency, supported-chain claim, or recommendation that EFS standardize an
+authority schema. Related: [[Designs/clientv2/wallet-and-actions]],
+[[Designs/clientv2/identity]], [[Designs/web-client-os/ethereum-standards-and-interop]],
+and the burner/multi-wallet entry above.
