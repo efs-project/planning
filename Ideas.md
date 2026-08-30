@@ -432,3 +432,74 @@ dependency, supported-chain claim, or recommendation that EFS standardize an
 authority schema. Related: [[Designs/clientv2/wallet-and-actions]],
 [[Designs/clientv2/identity]], [[Designs/web-client-os/ethereum-standards-and-interop]],
 and the burner/multi-wallet entry above.
+
+### Remotely paged immutable EFS indexes on Arweave
+*(James lead, 2026-08-30; [Sam Williams's announcement](https://x.com/samecwilliams/status/2093849872776515622); [HyperBEAM PR #1108](https://github.com/permaweb/HyperBEAM/pull/1108), merged to `edge` 2026-08-29)*
+
+HyperBEAM's `hb_store_arlmdb` adapts read-only LMDB 1.0 stores to Arweave as a
+remote page source. The demonstrated index contains 8.6 billion ID-to-global-
+offset rows in one ~160 GB transaction. It uses 64 KiB LMDB pages aligned
+inside Arweave's 256 KiB chunks and a defragmented layout that co-locates the
+meta/root pages and clusters branch pages. A fully cold point lookup touches
+six pages via three chunk GETs (768 KiB); as the ~75 MB branch region warms,
+most later lookups need one leaf-chunk GET. Failed range fetches surface as
+unavailable, while a miss is returned only after the relevant leaf was read.
+
+**EFS relation:** this is strong implementation precedent for the existing
+off-chain snapshot/index lane, not a replacement for EFS Core. A deterministic
+materialized index could package a large catalog, typed-backlink set, directory,
+historical admission set, or other bounded query surface as an immutable
+artifact; a client would fetch only the B-tree path needed for a query rather
+than download or independently index the whole history. The authoritative
+inputs remain EFS Records, Occurrences, admission receipts, Realm policy, and
+their pinned basis. The remote database remains an accelerator whose publisher,
+schema, basis, coverage, build recipe, artifact digest, and completeness claim
+must be explicit.
+
+**Non-negotiable EFS semantics:**
+
+- unavailable, corrupt, unverified, unsupported, stale, or incompletely covered
+  pages yield qualified `UNKNOWN`/unavailable—not proven absence;
+- `not found` is usable only when the artifact's declared complete coverage and
+  the exact searched leaf/range are verified at the pinned basis;
+- one publisher's LMDB transaction never becomes canonical graph truth, global
+  discovery authority, Realm admission, or a substitute for contract-readable
+  bounded indexes;
+- the artifact must be reproducible from retained authoritative inputs, and
+  independent rebuilds should converge byte-for-byte or explain every allowed
+  source of nondeterminism;
+- Arweave is one replaceable carrier. The identity and verification envelope
+  must permit independent mirrors, local copies, and later formats without
+  renaming the indexed EFS state.
+
+**Research handoff for Codex agents:**
+
+1. Pin and inspect PR #1108, `hb_store_arlmdb`, `hb_store_arweave`, the
+   `lmdb-defrag` tool, and the exact Arweave chunk/range APIs. State whether the
+   client obtains and verifies transaction/chunk proofs or trusts its node for
+   bytes, offsets, tags, and range completeness.
+2. Map the mechanism onto EFS snapshot concepts: source Realm/revision, block
+   or admission basis, Type/View/QueryProfile, coverage interval/set, build
+   implementation, artifact root, supersession, and qualified read result.
+3. Compare LMDB with at least SQLite, immutable sorted-table/B-tree, and a
+   Merkleized page format for deterministic builds, page authentication,
+   HTTP/Arweave range access, browser support, range scans, compression, and
+   independent implementations. Do not choose LMDB because the demo used it.
+4. Threat-model malicious publishers/nodes, wrong offset metadata, truncated or
+   mixed-version pages, unavailable branch/leaf chunks, cache poisoning, stale
+   snapshots, incomplete backfills presented as complete, and gateway loss.
+5. Specify one disposable synthetic EFS-graph experiment: deterministic build;
+   publish or locally emulate Arweave-aligned chunks; cold/warm point and bounded
+   range reads; byte/proof verification; independent rebuild; corrupt/missing-
+   page failures; and proof that `UNKNOWN` never collapses to absence. Report
+   bytes fetched, latency, cache size, build size/time, rebuild equality, and
+   which trust assumptions remain.
+
+**Stop condition:** return evidence and a smallest useful experiment plan. Do
+not publish a durable dataset, spend funds, create an Arweave dependency, alter
+Core/Type/QueryProfile bytes, or implement a production adapter without a
+separate authorization. Tracked in [[Kanban]]. Related existing lane:
+[[Designs/efsv2/core-architecture-candidate]] §Indexes and the off-chain
+`EFS-in-Postgres` card—the Postgres pattern is a mutable operator service; this
+idea is a portable immutable read artifact, so they complement rather than
+replace one another.
