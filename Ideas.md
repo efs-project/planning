@@ -503,3 +503,106 @@ separate authorization. Tracked in [[Kanban]]. Related existing lane:
 `EFS-in-Postgres` card—the Postgres pattern is a mutable operator service; this
 idea is a portable immutable read artifact, so they complement rather than
 replace one another.
+
+### AO, HyperBEAM, and PermawebOS competitive architecture deep dive
+*(James lead, 2026-08-30; canonical entry points: [AO](https://ao.arweave.net/), [Permaweb link tree](https://linktr.ee/permaweb), [HyperBEAM](https://github.com/permaweb/HyperBEAM), [PermawebOS](https://github.com/permaweb/os); triggering [PermawebOS Ethereum-signing release](https://x.com/aoTheComputer/status/2093322717068206290))*
+
+**Current PM classification:** first-tier adjacent platform and plausible main
+competitor at the *combined ecosystem/platform* layer; not yet established as
+the main competitor to every EFS layer. Arweave alone is a durable byte carrier
+and complement. ArFS/ArDrive compete with Files. AO/HyperBEAM/PermawebOS now
+extend upward into computation, wallet/signing, naming, deployment, routing,
+bundling, marketplaces, agents and infrastructure economics, overlapping the
+combined ambition of EFS Core + EFS OS + Open Web App Store. The deepest
+non-overlap is semantic: AO begins with permanent messages and distributed
+process computation; EFS begins with portable typed information, plural claims,
+Realm admission, Bindings and reader-selected Lens policy.
+
+The 2026-07-29 [[Reviews/2026-07-29-ardrive-teardown-corpus/os-ecosystem|permaweb OS/ecosystem lane]] is useful but now time-bounded. It found no end-user
+OS-like shell and treated `aos` as a developer Lua REPL. The August PermawebOS
+node/bundler distribution and browser wallet materially change that surface:
+the name now covers deployable HyperBEAM environments with measured hardware
+evidence plus a wallet/publisher/workbench integrated into AO's network portal.
+The old null result must be preserved as dated history, then refreshed rather
+than silently overwritten.
+
+**Architecture map to verify, not inherit:**
+
+```text
+Arweave permanent storage
+  -> AO message/process protocol and economic network
+  -> AO-Core / HyperBEAM execution and routing
+  -> PermawebOS node, bundler and wallet environments
+  -> Bazar, names, agents, financial protocols and permanent applications
+```
+
+**Deep-dive questions:**
+
+1. **Protocol truth and execution.** Pin AO-Core/HyperBEAM specifications and
+   implementation. What is a process, message, state, scheduler, assignment,
+   result and computable-value address? Which results are independently
+   replayable/verifiable, which depend on attested executors/zones, and where
+   can equivocation, ordering or availability occur?
+2. **Storage and durability.** Separate Arweave consensus, transaction data,
+   bundles, gateways, bundlers, indexes and local HyperBEAM stores. Determine
+   the exact proof and trust path for bytes, range reads, process history and
+   state. Test what survives loss of the canonical portal, gateway, indexer,
+   scheduler, bundler, operator, wallet publisher and application team.
+3. **PermawebOS product boundary.** Audit the signed node images, Linux/SNP/
+   LapEE/AndEE models, measurement devices, zones, provisioning/update path,
+   wallet/browser extension, publishing, app connections and permissions.
+   Separate marketing name, OS distribution, wallet and network service. Treat
+   the alpha/beta as architecture evidence until audits and operational history
+   justify stronger claims.
+4. **Identity, authority and trust.** Trace AR keys, Ethereum-key support,
+   wallet-derived addresses, AO process ownership, zone identities, names,
+   delegation, recovery, rotation, multisig/session/agent authority and
+   revocation. Compare explicitly with EFS `PrincipalId` vs actual signer,
+   portable authorship, Realm-qualified authorization and Lens-selected trust.
+5. **Information model and queries.** Determine how apps represent files,
+   metadata, relations, schemas, indexes, mutable heads, provenance, moderation,
+   deletion/withdrawal and complete absence. Test whether inter-app semantics
+   are shared protocol, conventions, process-local state or indexer APIs. This
+   is the likely EFS differentiation axis; do not assume it without examples.
+6. **Application and OS experience.** Hands-on trace wallet onboarding, guest
+   reads, publish/deploy, Bazar install/use or asset acquisition without buying,
+   names, app-to-wallet permissions, direct links, updates/rollback, offline/
+   local state, accessibility/mobile, recovery and provider switching. Compare
+   with EFS BIOS -> Reader Kernel -> Shell -> Apps, System Chrome, direct App
+   launch, capability grants, exact generations and Files as the flagship loop.
+7. **Developer and operator experience.** Build the smallest documented AO app
+   locally/test-only, inspect SDKs, message/debug flows, deployment receipts,
+   costs and failure recovery; separately examine what running a HyperBEAM or
+   PermawebOS node/bundler demands. Do not fund wallets, publish permanently or
+   expose a node in this pass.
+8. **Economics, governance and adoption.** Use primary/onchain/repository/app-
+   usage evidence where possible: active developers/users/processes, repeat use,
+   storage/compute costs, latency, token/subsidy dependence, operator diversity,
+   upgrades, authorities, audits and corporate concentration. Distinguish
+   acquired users, farming activity, uploads and durable recurring product use.
+9. **Integration seams.** Evaluate Arweave as an EFS carrier; AO as optional
+   computation/agent backend; HyperBEAM as index/resolver/execution provider;
+   PermawebOS measurements as source-qualified evidence; AO names/Bazar/wallet
+   interoperability; and EFS typed records as a semantic/provenance layer for
+   AO applications. Imported AO results must retain process, node/zone,
+   measurement, history and basis and never become unqualified EFS truth.
+10. **Competitive response.** For each EFS surface label the result `WORRY`,
+    `INTEGRATE`, `BORROW`, `DIFFERENTIATE`, or `IGNORE FOR NOW`, with evidence,
+    confidence, trigger and smallest EFS requirement change. Include the
+    strongest case that AO makes EFS redundant and the strongest case that its
+    compute-first model leaves EFS's semantic/trust problem unsolved.
+
+**Required deliverables:** a dated source corpus; terminology and architecture
+map; claim/evidence register; direct EFS comparison matrix; threat/authority/
+centralization map; hands-on traces with exact versions and receipts; adoption
+and maturity assessment with unknowns shown; integration candidates; falsified
+EFS assumptions; and a short executive verdict answering (a) main competitor
+to what, (b) how much to worry now, (c) what to integrate, (d) what EFS should
+do differently, and (e) what evidence would change the verdict.
+
+**Boundaries:** research and disposable local/test traces only. No asset trade,
+token or wallet funding, permanent upload, public post, external message, node
+deployment, staking, durable dataset, architecture adoption, Core/Type/profile
+bytes, dependency or product commitment without separate authorization. Keep
+the remotely paged LMDB investigation as a linked mechanism-specific child,
+not a duplicate of this ecosystem pass. Tracked in [[Kanban]].
