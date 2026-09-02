@@ -40,7 +40,7 @@ The full protocol, conventions, and hard rules live in [`AGENTS.md`](./AGENTS.md
 | `Tasks.md` | Global rollups via the Obsidian Tasks plugin (open questions, blocked items, pre-promotion checklists). |
 | `Milestones.md` | Cross-repo milestone tracking. Devcon 2026-11 is the only current dated milestone; v2 and mainnet scope remain open. |
 | `ETHOnline-2026.md` | Dated ETHGlobal opportunity, deadline discrepancy, candidate EFS slice, and follow-up checklist. Not a milestone. |
-| `Devcon/` | Devcon 8 speaker-application research, ranked talk concepts, submitted proposal record, and follow-up status. Not a design or delivery commitment. See [`Devcon/README.md`](./Devcon/README.md). |
+| `Devcon/` | Devcon 8 accepted-talk record, submitted-application research, and delivery and attendance follow-ups. Not an EFS design or launch commitment. See [`Devcon/README.md`](./Devcon/README.md). |
 | `_Index.base` | Obsidian Bases queries (starter views shipped; tune in Obsidian). |
 | `_Notes.canvas` | Obsidian Canvas — freeform whiteboard. |
 | `Daily Notes/` | Human's per-day notes; also catch-all for uncategorized content. |

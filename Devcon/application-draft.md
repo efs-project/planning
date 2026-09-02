@@ -1,7 +1,7 @@
 # Devcon 8 application record
 
-**Status:** submitted; final public proposal page captured 2026-08-06
-**Proposal:** [Who Can Turn Off Your Ethereum App? A Full-Stack Walk-Away Test](https://cfp.devcon.org/devcon8/talk/review/WZPKY3CBX3B78PZDQBPDQNAC9QRAB8TJ)
+**Status:** accepted and participation confirmed 2026-09-02
+**Public session:** [Who Can Turn Off Your Ethereum App? A Full-Stack Walk-Away Test](https://devcon.org/en/schedule/devcon8/SPVJV8/)
 **Direct form:** [cfp.devcon.org/devcon8/submit](https://cfp.devcon.org/devcon8/submit/)
 
 Teach a layer-by-layer approach to decentralizing Ethereum apps. EFS supplies
@@ -225,7 +225,8 @@ speaker's credibility and the case study if a reviewer checks.
 - [x] Complete Account, Profile, and CAPTCHA.
 - [x] Press final Submit; do not stop at Save as Draft.
 - [x] Capture the proposal URL/ID and on-screen confirmation.
-- [ ] Record the confirmation email if one arrives.
+- [x] Record public-safe acceptance and participation status without copying
+  private email or speaker-portal content.
 - [x] Record the submission below and update [[README]].
 
 ## Submission record
@@ -233,8 +234,19 @@ speaker's credibility and the case study if a reviewer checks.
 - Submitted: **yes**
 - Submitted at: **2026-08-06 before 00:46 CDT**
 - Proposal ID/URL: [WZPKY3CBX3B78PZDQBPDQNAC9QRAB8TJ](https://cfp.devcon.org/devcon8/talk/review/WZPKY3CBX3B78PZDQBPDQNAC9QRAB8TJ)
-- Confirmation received: **on-screen confirmation captured; email not yet recorded**
+- Submission confirmation received: **on-screen confirmation captured**
 - Exact submitted text differs from this record: **no known difference in the public title, abstract, description, resources, or biography; final public page captured in chat**
+
+## Acceptance record
+
+- Accepted: **yes; notification received 2026-09-02**
+- Participation confirmed: **yes; 2026-09-02**
+- Accepted track: **Permissionless Networks**
+- Accepted format: **Talk, 20 minutes plus 5 minutes Q&A**
+- Public session page: [devcon.org/en/schedule/devcon8/SPVJV8](https://devcon.org/en/schedule/devcon8/SPVJV8/)
+- Exact session date, time, and room: **not yet announced**
+- Program caveat: **organizers may still request changes to duration, format, or focus**
+- Private correspondence: **not copied into this repository**
 
 ## Alternate titles, only if James dislikes the primary
 

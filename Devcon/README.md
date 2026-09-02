@@ -1,13 +1,14 @@
-# Devcon 8 speaker application
+# Devcon 8 accepted talk
 
-Submission record and follow-up control center for James's Devcon 8 application.
-This folder is an application and research surface, not an EFS design ruling or
-a promise to ship v2 by Devcon.
+Application record and delivery control center for James's Devcon 8 talk. This
+folder is a conference-planning surface, not an EFS design ruling or a promise
+to ship v2 by Devcon.
 
-**Status (2026-08-11):** proposal submitted; final public page captured; James
-has a Devcon ticket; speaker selection and attendance follow-ups remain open.
+**Status (2026-09-02):** proposal accepted; James confirmed participation; the
+public session page is live. Talk delivery, scheduling, visa, and travel
+follow-ups remain open.
 
-**Proposal:** [Who Can Turn Off Your Ethereum App? A Full-Stack Walk-Away Test](https://cfp.devcon.org/devcon8/talk/review/WZPKY3CBX3B78PZDQBPDQNAC9QRAB8TJ)
+**Session:** [Who Can Turn Off Your Ethereum App? A Full-Stack Walk-Away Test](https://devcon.org/en/schedule/devcon8/SPVJV8/)
 
 ## Deadline record
 
@@ -44,13 +45,17 @@ Ticket, visa, travel, and EFS participation follow-ups are in
 [[attendance-checklist]]. Keep sensitive travel and identity details out of this
 repository.
 
-## Submission completed
+## Acceptance completed
 
 The proposal was submitted before the conservative live-form cutoff. The final
 public page, on-screen confirmation, and review URL are recorded in
 [[application-draft]].
-Add the confirmation email there if one arrives. Use the proposal edit page for
-material corrections only, not continued polishing.
+
+Devcon accepted the talk in the **Permissionless Networks** track as a
+**20-minute talk plus 5 minutes of Q&A**. James confirmed participation on
+2026-09-02. Do not add private acceptance email content, signed-in speaker
+portal links, or confidential visa-support material here. Record only resulting
+public-safe status and actions.
 
 ## Owner confirmations
 
@@ -62,8 +67,10 @@ material corrections only, not continued polishing.
 - [x] CFP account/login completed.
 - [x] Proposal submitted, not merely saved as a draft.
 - [x] Proposal URL and on-screen confirmation recorded below.
+- [x] Proposal accepted and participation confirmed.
+- [ ] James personally reviews the official Speaker Guidelines.
 
-**Submission record:** [submitted proposal](https://cfp.devcon.org/devcon8/talk/review/WZPKY3CBX3B78PZDQBPDQNAC9QRAB8TJ); on-screen confirmation captured; email not yet recorded.
+**Public record:** [accepted Devcon 8 session](https://devcon.org/en/schedule/devcon8/SPVJV8/); acceptance and participation confirmation recorded 2026-09-02.
 
 ## Contact boundary
 
@@ -72,16 +79,16 @@ reviewer or bypass the public process. The official speaker contact is
 [speak@devcon.org](mailto:speak@devcon.org). Current track leads and reviewers
 were not publicly listed during the research pass.
 
-## After submission
+## After acceptance
 
-- Watch for decisions beginning at the end of August; all decisions are expected
-  by the end of September.
-- James already has a ticket, so visa support does not wait for speaker
-  acceptance. Follow [[attendance-checklist]] now: ask
-  [visa@devcon.org](mailto:visa@devcon.org) what conference-document packet it
-  provides and whether its optional Ticket Confirmation Letter is the organizer
-  invitation, confirm the correct route with an official Indian visa authority,
-  then request only the documents that route requires and apply.
+- The exact session date, time, room, and presentation logistics have not been
+  announced. Keep November 3-6 available and record official updates when they
+  arrive.
+- Follow [[attendance-checklist]] now. The private confirmed-speaker portal
+  supersedes the pre-acceptance visa inquiry, and its confidential support intake
+  is due by **2026-09-29**.
+- Keep the session educational and non-promotional. EFS remains the concrete
+  case study for a generally useful walk-away test.
 - Build the talk around preverified records and an offline recording. Never make
   conference Wi-Fi, a faucet, a fresh transaction, or one RPC the demo's single
   point of failure.
