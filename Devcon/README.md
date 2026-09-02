@@ -85,8 +85,8 @@ were not publicly listed during the research pass.
   announced. Keep November 3-6 available and record official updates when they
   arrive.
 - Follow [[attendance-checklist]] now. The private confirmed-speaker portal
-  supersedes the pre-acceptance visa inquiry, and its confidential support intake
-  is due by **2026-09-29**.
+  supersedes the pre-acceptance visa inquiry. Its confidential support intake was
+  completed on **2026-09-02**, before the 2026-09-29 deadline.
 - Keep the session educational and non-promotional. EFS remains the concrete
   case study for a generally useful walk-away test.
 - Build the talk around preverified records and an offline recording. Never make

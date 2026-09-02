@@ -23,10 +23,9 @@ also warns that India may deny entry for the wrong visa type.
   verify that it covers this trip before starting a new application.
 - [ ] Check that the passport has at least **six months of validity at the time
   of the visa application** and **two blank pages**.
-- [ ] Complete the confidential visa-support intake linked from the signed-in
-  confirmed-speaker page as soon as possible and no later than **2026-09-29**.
-  Submit identity details only through the organizer's secure flow; do not copy
-  the form link or submitted details into this repository.
+- [x] Confidential visa-support intake submitted through the organizer's secure
+  flow on **2026-09-02**, before the 2026-09-29 deadline. The form link and
+  submitted identity details are intentionally not stored in this repository.
 - [ ] Set up the encrypted document-return method specified by the organizers.
 - [ ] When the organizer's supporting letters arrive, apply personally through
   the [Government of India eVisa portal](https://indianvisaonline.gov.in/evisa/)
