@@ -26,7 +26,8 @@ also warns that India may deny entry for the wrong visa type.
 - [x] Confidential visa-support intake submitted through the organizer's secure
   flow on **2026-09-02**, before the 2026-09-29 deadline. The form link and
   submitted identity details are intentionally not stored in this repository.
-- [ ] Set up the encrypted document-return method specified by the organizers.
+- [x] FlowCrypt set up and the encryption key backed up on **2026-09-02**.
+  Key material and backup details are intentionally not stored here.
 - [ ] When the organizer's supporting letters arrive, apply personally through
   the [Government of India eVisa portal](https://indianvisaonline.gov.in/evisa/)
   using the speaker conference-visa instructions in the private portal. Recheck
