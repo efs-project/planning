@@ -37,7 +37,17 @@ read-back basis. Expected IDs and post-state are computed independently of the
 SDK under test. Product labels may be friendly, but the Inspector/export keeps
 the full evidence.
 
-## Thirteen observable tests
+For M0-06 through M0-08, one trace record spans intent through canonical
+read-back. It binds the exact `writePlanDigest`, imported `operationKind`,
+predicted target/effect identifiers, and therefore the same retained operation
+identity to the complete ordered wallet-provider method log,
+prompt/non-prompt classification and total, every returned value/error, and
+every applicable authorship, authorization, submission, EVM,
+admission/effect, byte-store, and read-back receipt. The observed method list
+must exactly equal the fixture's declared list; an unrecorded provider
+interaction or a second plan/operation in that trace fails the test.
+
+## Nine observable tests
 
 1. **M0-01 — clean guest route.** A fresh browser with no cache, service worker,
    account, wallet, Commons, hosted indexer, OS, or Data Explorer opens an exact
@@ -70,60 +80,59 @@ the full evidence.
    not change. With the fallback removed, no bytes are rendered and the
    semantic File still does not become absent.
 
-6. **M0-06 — one-prompt relayed EOA write.** Create one small file through the
-   normal path. The wallet sees exactly one EIP-712 signature request for the
-   exact imported C0 `WritePlan` and no transaction prompt; a distinct relayer
-   submits and pays. Authorship/publication, authorization, submission, EVM,
-   admission/effect, byte-store, and read-back evidence remain separate.
+6. **M0-06 — relayed EOA small-file effect.** Create the suite's one small file
+   through the normal path. The complete wallet-provider log contains exactly
+   the declared methods and exactly one prompt: the EIP-712 signature request
+   for this operation's imported C0 `WritePlan`; it contains no wallet
+   transaction prompt. A distinct relayer submits and pays. Every receipt and
+   the independently recomputed File Object/charter, `ChunkTree`, initial
+   FileRevision, DirectoryEntry, name-slot/file-head Bindings, byte commitment,
+   verified bytes, point result, and qualified parent listing bind back to the
+   same `writePlanDigest`, `CREATE_SMALL_FILE` operation, and provider trace.
+   Each acknowledgement advances only its own stage; semantic effect remains
+   `UNKNOWN` until that same operation's matching canonical read-back produces
+   `READ_BACK_VERIFIED` and `effect=COMMITTED`.
 
-7. **M0-07 — direct EOA fallback.** With relay or typed-data support unavailable,
-   create one empty directory with exactly one transaction prompt and no prior
-   `WritePlan` signature prompt. The result says
+7. **M0-07 — direct EOA empty-directory effect.** With relay or typed-data
+   support unavailable, create the suite's one empty directory. The complete
+   wallet-provider log contains exactly the declared methods and exactly one
+   prompt: the direct transaction request; it contains no preceding
+   `WritePlan` signature request. The result says
    `DIRECT_EOA_TRANSACTION_AUTHORSHIP`, `EXPERIMENTAL_DIRECT_CORE`, and
    `filesPreconditionCertified=false`; it never claims portable authorship or
-   certified Files routing.
+   certified Files routing. All transaction/admission receipts and the
+   independently recomputed Object/Record/Occurrence, charter and name-slot
+   Binding effects, expected revisions, parent point lookup, and qualified
+   listing bind to the same `writePlanDigest`, `CREATE_DIRECTORY` operation,
+   and provider trace. Transaction approval or execution remains non-semantic
+   until that exact operation's matching canonical read-back.
 
-8. **M0-08 — zero-prompt session after grant.** Canonically establish and
-   independently read back one bounded revocable C0 grant, then publish one
-   routine revision with zero wallet requests. The session still signs and both
-   client and Core check profile, Realm/Core/executor, Principal/root/Route,
-   operation, nonce, expiry, revocation, and byte/value/gas ceilings. After
-   revocation, the same attempt fails explicitly without widening or silent
-   wallet fallback.
+8. **M0-08 — zero-prompt session revision effect.** Canonically establish and
+   independently read back one bounded revocable C0 grant, then publish the
+   suite's one second immutable revision. The complete wallet-provider method
+   log for this routine operation is empty: zero calls and zero prompts after
+   the prior grant; the separately recorded session-key signature is not hidden
+   or called a wallet prompt. Client and Core check profile,
+   Realm/Core/executor, Principal/root/Route, operation, nonce, expiry,
+   revocation, and byte/value/gas ceilings. Every receipt and the recomputed
+   file-head expected revision, new immutable FileRevision, selected head,
+   verified bytes, and still-readable prior revision bind to the same
+   `writePlanDigest`, `PUBLISH_FILE_REVISION` operation, and empty provider
+   trace. Bundler/relay or transaction acknowledgement remains non-semantic
+   until matching canonical read-back. A stale revision rejects rather than
+   replanning; after revocation, the same attempt fails explicitly without
+   widening or silent wallet fallback.
 
-9. **M0-09 — folder effect.** Ordinary File Browser controls create an empty
-   directory in one atomic C0 transaction. Canonical read-back independently
-   matches the planned Object/Record/Occurrence, charter and name-slot Binding
-   effects, expected revisions, parent point lookup, and scope-qualified parent
-   listing.
-
-10. **M0-10 — file effect.** Ordinary controls create a small file from fixed
-    local bytes. Read-back matches the planned File Object/charter,
-    `ChunkTree`, initial FileRevision, DirectoryEntry, name-slot/file-head
-    Bindings, byte commitment, verified bytes, and listing result.
-
-11. **M0-11 — revision effect.** Ordinary controls publish a second immutable
-    revision using the expected file-head revision. Read-back selects the new
-    head and verified bytes while the prior revision remains readable by exact
-    ID; a stale expected revision rejects rather than silently replanning.
-
-12. **M0-12 — acknowledgement is not success.** For a controlled write, pause
-    independently after wallet approval, relay/bundler acknowledgement,
-    transaction hash, and successful EVM receipt. At every pause operation
-    stage may advance, but semantic `effect` remains `UNKNOWN` and the File
-    Browser does not show success. Only an exact matching canonical read-back
-    produces `READ_BACK_VERIFIED` and `effect=COMMITTED`; mismatch or unavailable
-    evidence remains explicit.
-
-13. **M0-13 — clean-browser reopen.** Delete all browser state and open the
-    exact link produced by M0-10/M0-11 with no wallet or Data Explorer. The File
-    Browser independently derives the same semantic IDs and returns the same
-    qualified selected revision and verified bytes at the cited basis, subject
-    only to honestly reported later-basis finality/currentness observations.
+9. **M0-09 — clean-browser reopen.** Delete all browser state and open the
+   exact folder, file, and revision links produced by M0-06 through M0-08 with
+   no wallet or Data Explorer. The File Browser independently derives the same
+   semantic IDs and returns the same qualified folder result, selected
+   revision, and verified bytes at the cited bases, subject only to honestly
+   reported later-basis finality/currentness observations.
 
 ## Pass rule
 
-All thirteen tests pass in the declared browsers and independent oracle. Any
+All nine tests pass in the declared browsers and independent oracle. Any
 missing raw bytes or qualification axis, mixed basis, hidden provider/wallet
 touch, unlabelled fallback, non-atomic planned effect, prompt overrun, false
 absence, tampered presentation, or success before matching read-back fails the
@@ -152,7 +161,7 @@ authorization.
 
 ## Pre-promotion checklist
 
-- [ ] All thirteen test procedures have deterministic fixtures and independent expected values
+- [ ] All nine test procedures have deterministic fixtures and independent expected values
 - [ ] `**Target repos:**` confirmed
 - [ ] Upstream MVP-C0 dependencies accepted or explicitly retained as disposable inputs
 - [ ] No `<!-- AGENT-Q: -->` comments remain

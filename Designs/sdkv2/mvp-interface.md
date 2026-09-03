@@ -28,8 +28,9 @@ byte-carrier, ordered genesis, point-result, and receipt semantics in
 ### One non-loss product result rule
 
 Product APIs return operation-specific typed results. They do **not** freeze
-one oversized wire enum. Every typed result retains, directly or through an
-inspectable evidence handle:
+one oversized wire enum. Exact, page, and byte read families expose or import
+the upstream `PointResult` law and retain, directly or through an inspectable
+evidence handle:
 
 - the imported point outcome `FOUND | ABSENT_PROVEN | UNKNOWN | CONFLICT`;
 - exact domain and committed basis;
@@ -45,16 +46,23 @@ drop them. Decoded or generated DTOs are views over retained bytes. Unknown
 fields and unsupported variants remain exportable and must survive cache,
 worker, storage, and adapter round trips.
 
+Write-stage families do not synthesize a point outcome or canonical effect.
+They retain handles to every source read and its full qualification, the exact
+plan bytes/digest and predicted effects, then add only their own separate
+authorship, authorization, submission, EVM, and admission/effect receipts and
+operation stage. Only canonical read-back adds new qualified point/page/byte
+reads and may establish the imported canonical effect verdict.
+
 The product-facing families are deliberately separate:
 
 ```text
 ExactReadResult<T>      = imported PointResult<T> + rawEvidence
 ScopedPageResult<T>     = exact page contract + qualified items + rawEvidence
 VerifiedByteResult      = semantic point + range + attempts + verified bytes?
-PlannedWrite            = exact WritePlan bytes/digest + preview + roles
-AuthorizedWrite         = PlannedWrite + authorship/authorization evidence
-SubmittedWrite          = AuthorizedWrite + submission/EVM progress receipts
-CanonicalReadBack<T>    = planned effects + qualified independent reads
+PlannedWrite            = source-read evidence handles + exact WritePlan bytes/digest + preview + roles
+AuthorizedWrite         = PlannedWrite + authorship/authorization receipt + stage; no point/effect verdict
+SubmittedWrite          = AuthorizedWrite + submission/EVM/admission progress receipts + stage; no point/effect verdict
+CanonicalReadBack<T>    = planned effects + new qualified independent reads + comparison verdict
 ```
 
 These are semantic families, not adopted TypeScript names or serialized bytes.

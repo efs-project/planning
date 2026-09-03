@@ -19,11 +19,6 @@ Commons, hosted EFS indexer, catalog search, Data Explorer intermediary, or
 full-system startup. The same codebase and interfaces should then promote that
 session into a write-capable File Browser and, later, a full personal OS.
 
-For MVP0, File Browser is the first thin direct guest and write-capable
-journey. [[Designs/data-explorer/README|Data Explorer]] is a separate general
-typed-data workspace and Inspector/view consumer over the same SDK seams. It is
-not a route gateway, and it owns no second write stack.
-
 The OS is deliberately modular. Retrieval methods, Realm transports, Files
 resolution, presentation handlers, wallet connectors, signers, storage,
 search, synchronization, inference providers, agent bridges, Shell policy, and
@@ -149,10 +144,9 @@ bytes or bypass the normal design promotion ceremony.
     authority.
 25. Any exact App can be a first-class deep-link target. App selection,
     critical executable verification and the initial qualified resource read
-    should take the shortest generic path and overlap where safe. Exact File
-    Browser routes open File Browser directly; general typed-data routes may
-    select Data Explorer and its raw Inspector. Neither is a gateway through
-    which the other or any exact App must launch.
+    should take the shortest generic path and overlap where safe; Data Explorer
+    is the default App for unqualified Files/data links and a raw fallback, not
+    a gateway through which every App must launch.
 26. The OS needs a good practical third-party App path without waiting for
     perfect browser isolation. SES in a dedicated Worker is the leading
     confined JavaScript candidate; LavaMoat/Endo dependency isolation is an
@@ -174,6 +168,26 @@ bytes or bypass the normal design promotion ceremony.
     full/reduced/unsupported/rescue outcome; it is not a conservative veto.
     The reproducible census and current dispositions are in
     [[web-platform-standards-and-forward-profile]].
+
+## 2026-09-03 MVP-C0 product reconciliation
+
+The dated 2026-08-14 through 2026-08-23 list above remains faithful to its
+original owner attribution. The current reconciliation is recorded separately.
+The owner's [[Designs/efsv2/owner-rulings#Disposable MVP-C0 and wallet-approval direction|2026-09-03 MVP-C0 ruling]]
+authorizes only a disposable Core/Files control and no Web Client/product
+implementation; the same ledger's
+[[Designs/efsv2/owner-rulings#EFS 2.0 greenfield system boundary|greenfield boundary]]
+requires a direct guest File Browser. The
+[[Designs/efsv2/disposable-mvp-profile|MVP-C0 profile]] also excludes a shipped
+File Browser and Data Explorer.
+
+For this bounded product-pressure design, File Browser is therefore the first
+thin direct guest and write-capable journey. The separate
+[[Designs/data-explorer/README|Data Explorer]] is a general typed-data workspace
+and Inspector/view consumer over the same SDK seams. It is not a route gateway,
+and it owns no second write stack. This paragraph is a 2026-09-03 design
+reconciliation, not a claim that James supplied it during the earlier
+attribution window.
 
 ## Current recommendation
 
@@ -265,7 +279,7 @@ configuration language, security boundary or runtime.
 | [[web-platform-standards-and-forward-profile]] | Reproducible four-catalog Web/ECMAScript/Wasm/WASI index plus primary-family review, non-conservative feature dispositions, named delivery/runtime profiles, negative selections and conformance program |
 | [[ethereum-standards-and-interop]] | Complete pinned EIP/ERC synthesis; exact-read, wallet, signature, URI/content, contract, privacy, cross-chain and agent adapter dispositions; SDK pressure and acceptance fixtures |
 | [[system-profiles-and-generations]] | Nix/Guix recovery, exact and follow profiles, safe social sharing, deterministic composition, System Configuration Manager, local activation/state/grant generations, rollback/GC/export, and the foundational Wasm/WIT/Component/WASI module direction |
-| [[mvp0-acceptance]] | Thirteen observable tests for the bounded clean-guest, folder/file/revision write, prompt, tamper, qualification, canonical read-back, and clean-reopen gate |
+| [[mvp0-acceptance]] | Nine observable tests for the bounded clean-guest, three path-bound folder/file/revision writes, prompt, tamper, qualification, canonical read-back, and clean-reopen gate |
 | [[mvp-and-acceptance]] | Broader product roadmap and freeze catalog: future journeys, performance, delivery, global-use, OS-preservation, security, and compatibility gates; not the MVP0 gate |
 | [[type-data-abi-boundary-pressure]] | Finite exact-Type consumer adapter, generated codec/domain-DTO boundary, exhaustive read/byte outcomes, one Type-evolution fixture, and two generic Core pressure packets |
 | [[privacy-and-agents]] | Privacy architecture reserves and first-class human/agent interaction model, including current web-standards posture |
