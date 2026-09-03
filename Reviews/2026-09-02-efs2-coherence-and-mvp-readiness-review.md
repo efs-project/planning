@@ -2,8 +2,8 @@
 
 **Status:** finished review record; point-in-time (2026-09-02/03); proposes freely and adopts nothing. No freeze, repository, runtime ABI, venue, product scope, or implementation is authorized by this document, and nothing here answers an owner question.
 **Commissioned by:** @james, via the PM prompt "EFS 2.0 — top-down coherence and MVP-readiness review"
-**Agent:** @efs2-coherence-review (claude-fable-5.1 → claude-opus-5), 2026-09-02/03
-**Method:** read-only reader lanes over the whole design surface, twelve seam and cross-cutting lanes including a never-decided sweep, three direction judges with deliberately different lenses, and a two-lens adversarial verification pass over the findings. Full method, counts and limits: §11.
+**Agent:** @efs2-coherence-review (harness claude-code), 2026-09-02/03
+**Method:** read-only reader lanes over the whole design surface, twelve seam and cross-cutting lanes including a never-decided sweep, three direction judges with deliberately different lenses, and a two-lens adversarial verification pass over the blocking findings. Full method, counts and limits: §11.
 **Corpus:** [`2026-09-02-efs2-coherence-review-corpus/`](./2026-09-02-efs2-coherence-review-corpus/README.md) — every lane map, seam report, judgement, and the [findings ledger](./2026-09-02-efs2-coherence-review-corpus/findings-ledger.md)
 **Reviewed tip:** `main` at `8ae846a`; branches `codex/v2-readiness-week@2573f08`, `codex/sdkv2-pm@57d04f8`, `codex/data-explorer-pm@8d90ecb`, `lab/2026-08-26-fable-consumer-tournament@70d78a5`
 
@@ -140,25 +140,29 @@ The full ledger with per-finding verification verdicts, evidence, and source lan
 
 ### Where the work lands
 
-The lanes produced 549 candidate findings before clustering and verification. Their distribution is itself a finding, because it says who has to do what:
+The lanes produced 623 candidate findings before clustering and verification. Their distribution is itself a finding, because it says who has to do what:
 
 | Owning set | Blocking | MVP-relevant | WRONG | UNDECIDED | DRIFT | MISSING | DIRECTION | DEFECT | CUT | UNVERIFIABLE | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| `efsv2` | 21 | 121 | 17 | 59 | 35 | 40 | 11 | 32 | 7 | 4 | 205 |
-| `vault-process` | 8 | 28 | | 1 | 12 | 5 | | 47 | | 8 | 73 |
-| `owner` | 16 | 46 | 1 | 37 | 6 | 8 | 10 | 1 | 2 | 3 | 68 |
-| `web-client-os` | 6 | 48 | 5 | 18 | | 24 | 5 | 3 | 12 | | 67 |
+| `efsv2` | 24 | 135 | 21 | 62 | 37 | 41 | 12 | 47 | 7 | 8 | 235 |
+| `vault-process` | 12 | 37 | | 1 | 12 | 6 | | 63 | | 8 | 90 |
+| `owner` | 21 | 52 | 1 | 39 | 7 | 10 | 11 | 1 | 2 | 3 | 74 |
+| `web-client-os` | 6 | 52 | 5 | 21 | | 25 | 5 | 3 | 12 | 1 | 72 |
 | `arcade` | 1 | 29 | 6 | 1 | 12 | 6 | | 9 | 5 | 1 | 40 |
-| `sdk` | 2 | 20 | | 6 | 7 | 7 | | 4 | 3 | | 27 |
+| `sdk` | 4 | 24 | | 8 | 7 | 9 | 1 | 8 | 3 | | 36 |
 | `git-forge` | 1 | 10 | | 8 | 7 | 2 | 2 | 1 | 2 | 2 | 24 |
 | `media-library` | 1 | 13 | 4 | 3 | 5 | 2 | | 5 | 2 | | 21 |
 | `open-web-app-store` | | 5 | 2 | 1 | | 4 | 1 | 2 | 4 | 2 | 16 |
+| `data-explorer` | | 5 | | | 1 | | | 4 | 2 | | 7 |
 | `clientv2` | | 2 | | | 3 | | | 2 | | | 5 |
 | `efs15` | | | | | | | | 2 | | 1 | 3 |
+| **All** | **70** | **364** | **39** | **144** | **91** | **105** | **32** | **147** | **39** | **26** | **623** |
 
-Three shapes stand out. `vault-process` is almost entirely `DEFECT` — hygiene, not disagreement, and mostly cheap. `owner` is almost entirely `UNDECIDED` — James's queue is short but every item on it is currently invisible to the queue machinery. And `efsv2` carries the bulk of everything, which is correct for a Core lane but means it is also the bottleneck: it owns 21 of the 56 blocking candidates and cannot resolve most of them without the two decisions above it.
+Three shapes stand out. `vault-process` is 63 of 90 `DEFECT` — hygiene, not disagreement, and mostly cheap. `owner` is 39 of 74 `UNDECIDED` — James's queue is short but every item on it is currently invisible to the queue machinery. And `efsv2` carries the bulk of everything, which is correct for a Core lane but means it is also the bottleneck: it owns 24 of the 70 blocking candidates and cannot resolve most of them without the two decisions above it.
 
-Note the honest caveat: these are candidates. Many describe the same underlying problem found by different lanes, and the verification pass drops some. The ledger carries the clustered, verified set.
+`data-explorer` appears as an owning set only because a branch carries a product set that `main` has never seen. That row is itself the process finding in §2, restated as an arithmetic.
+
+Note the honest caveat: these are candidates, and this table counts them before clustering. Many describe the same underlying problem found by several lanes independently. The ledger carries the clustered set, with the verification verdicts on the blocking rows.
 
 ### The ten distinct blockers
 
@@ -271,10 +275,12 @@ The readiness branch's own milestone program is close to this in substance. The 
 
 ## 11. Method and limits
 
-Twenty-two reader lanes over `main` and four over the unmerged branches; twelve seam and cross-cutting lanes; three direction judges with deliberately different lenses; a never-decided sweep; and a two-lens adversarial verification pass over every clustered finding, one lens testing textual accuracy and currency, the other materiality and classification, with refuted and already-dispositioned findings recorded rather than deleted.
+Twenty-two reader lanes over `main` and four over the unmerged branches; twelve seam and cross-cutting lanes; three direction judges with deliberately different lenses; a never-decided sweep; and a two-lens adversarial verification pass over the clusters the lanes rated blocking, one lens testing textual accuracy and currency, the other materiality and classification, each trying to refute the finding, with refuted and already-dispositioned findings recorded rather than deleted.
+
+Verification was not run over every cluster, and the ledger says so row by row. The blocking clusters were attacked because they are the ones a decision would rest on; the rest carry only the corroboration of independent lanes converging on them. A ledger row marked "not separately verified" is a citation to check, not an established fact.
 
 Every lane was read-only on the vault and wrote to a scratchpad; every finding carries file-and-heading citations; seam lanes returned to the sources rather than trusting a summary; and the dated defects were re-checked rather than inherited. Where a later lane corrected an earlier one — most notably a claim that the candidate and the layered Type proposal use two different Record identity preimages, when both reduce to the same formula written at different levels of detail — the correction is recorded in the ledger and this report follows it.
 
-Limits: two session usage interruptions delayed several lanes, which were re-run from cache; the model changed from Claude Fable 5.1 to Claude Opus 5 partway through, so lane outputs are not from a single model. Reading depth varies by lane and each map records its own: the eight Stage A subsystem chapters were read in full, the harness and falsifier chapters at list depth, and the 166 KB lens-architecture review at summary and cost-table depth. No live chain state was reachable. The four branches were read as evidence of project state, not as adopted design.
+Limits: two session usage interruptions delayed several lanes, which were re-run from cache, and the reviewing model changed partway through, so lane outputs are not all from one model. Reading depth varies by lane and each map records its own: the eight Stage A subsystem chapters were read in full, the harness and falsifier chapters at list depth, and the 166 KB lens-architecture review at summary and cost-table depth. No live chain state was reachable. The four branches were read as evidence of project state, not as adopted design.
 
 **Nothing in this review is adopted.** Owner rulings go through the decision inbox and James. No freeze, repository, runtime ABI, venue, product scope, or implementation is authorized here.
