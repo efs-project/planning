@@ -13,7 +13,7 @@
 
 **Does the design hold together?** At the concept level, yes, and better than the volume suggests. Every current document uses the same algebra — a Record is author-neutral exact content, an Occurrence is who published it, Admission is what a Realm accepted, a Binding is one Principal's current answer, a Lens is one reader's policy — and no seam is conceptually unsound. Three independent judges, given deliberately different lenses, returned the same verdict: **mostly right, over-scoped**.
 
-**Can you start the MVP James directed on 2026-08-14 — an official write-capable File Browser?** Not honestly, yet, and not because anything needs more design. Six engineering choices the write path depends on are written down nowhere on `main`: how a directory is listed completely, where a created file's bytes live, which Principal shape the write path uses, how many signatures a folder costs, which Type arm the first Realm mints, and three unminted constants that make every `RealmId` uncomputable. There is also no EFS 2.0 SDK design on `main`, and the write journey lazily loads one. Each of these needs one page that *chooses*, not another pass.
+**Can you start the MVP James directed on 2026-08-14 — an official write-capable File Browser?** Not honestly, yet, and not because anything needs more design. Seven engineering choices the write path depends on are written down nowhere on `main`: who mints the first Realm and creates its root directory, how a directory is listed completely, where a created file's bytes live, which Principal shape the write path uses, how many signatures a folder costs, which Type arm that first Realm mints, and three unminted constants that make every `RealmId` uncomputable. There is also no EFS 2.0 SDK design on `main`, and the write journey lazily loads one. Each of these needs one page that *chooses*, not another pass. Two of the seven are hard stops with no fallback in any document — the genesis path and the byte carrier. The rest have a shippable answer already written somewhere; they need someone to pick it. §4 says which is which, after verification.
 
 **Can you start a disposable, nondeployable candidate now?** Yes — and on unmerged branches the project already did. `codex/v2-readiness-week` carries an executed JavaScript and Solidity control with vectors and measured Lens gas, a build-start packet whose technical disposition is `RECOMMEND-GO-CODE`, and the vault's only answerable owner item (**V2-C1**). `main` does not have any of it, and `main`'s generated roll-up says **Ask now: 0**.
 
@@ -30,7 +30,7 @@
 | `efsv2/` spine | current | draft, untouched since the 2026-08-13 import | Sound shape; three weeks behind its own inputs; three Type vocabularies; five constitutional promises with no primitive |
 | Stage A B0 corpus | proposal-only evidence | red-teamed spec; Stage B unrun on `main` | The most internally cohesive artifact in the vault. Zero of its 16 spine edits applied; complete directory enumeration missing from its own gap register |
 | `hierarchical-files-and-folders.md` | current (`#status/review`) | reviewed proposal | Coherent on B0; needs two primitives B0 does not have, one of them genesis-or-never |
-| `layered-type-system-and-data-abi.md` | current, README-designated "the focused Type proposal" | draft, zero reviewers | A third vocabulary; the owner's answer on this axis was lost and never re-asked |
+| `layered-type-system-and-data-abi.md` | current, README-designated "the focused Type proposal" | draft, zero reviewers | A third vocabulary. The owner deliberately left the long-run axis open as a bakeoff question; a later attempt to get a client-side answer came back uninterpretable and nobody re-asked it |
 | Identity / Lens / privacy (July) | historical | evidence | Correctly demoted. The sensitivity policy layer James named as a deliverable is designed nowhere |
 | `web-client-os/` | current spine | draft; peer-agent reviewed, no owner sign-off | The most internally coherent product set. Scope inflation, and it is the only place the owner's authority is recorded |
 | `open-web-app-store/` | current | draft, reviewed | Its boundary with the OS is genuinely settled on both sides. Not on the MVP path; over-scoped for anything shipping this year |
@@ -90,7 +90,7 @@ Every lane converged on this independently. It is a `vault-process` and `owner` 
 
 The same applies to the spine silence, stated precisely: since the reconciliation handoff was promised on 2026-08-14, three commits have touched `Designs/efsv2/`, and all three *added new drafts* — hierarchical Files, the layered Type proposal, and one spine touch. None of them modified the constitution, the core architecture candidate, the decision inbox, or the ruling ledger, which all still sit at the 2026-08-13 import.
 
-**"Ask now: 0" is structurally blind.** `scripts/open-decisions.sh` classifies decide-now, after-evidence, at-launch, settled, delegated and superseded. There is no bucket for an *authorization*. Every spine ends in "after explicit experiment authorization"; the client set's non-authorizations forbid every candidate repository name; the Core Kanban card expired 2026-08-16 annotated "no owner ask"; Stage A's own status says no prototype has executed the corpus. The single decision that would start work has no place on `main` to live, so the generated page is mechanically correct and substantively false.
+**"Ask now: 0" is true of the queues and false of the project.** This one was verified against the script and my first reading of it was wrong, so the corrected version is the one to act on. `scripts/open-decisions.sh` does have an authorization bucket: its classifier maps any `Decide now` heading to `ASK`. Nothing is structurally blind. The failure is simpler and more fixable — on `main`, no queue files the build-start authorization under such a heading, so there is nothing for the bucket to hold. Every spine ends in "after explicit experiment authorization"; the client set's non-authorizations forbid every candidate repository name; the Core Kanban card expired 2026-08-16 annotated "no owner ask"; Stage A's own status says no prototype has executed the corpus. The readiness branch settles the question by demonstration: it files **V2-C1** under `## Decide now — build-start handoff` with three reply forms, which is exactly the shape the machinery already reads. So the repair is not a tooling change. It is one heading and one item, on `main`.
 
 **Four unmerged branches hold the project's actual state.** `codex/v2-readiness-week` (4 ahead, 7 behind) rewrites the README, constitution, candidate and inbox; adds `mvp-build-start-packet.md`, `v2-contract-readiness-program.md`, `owner-guide.md` and four `exp-c0-v0-*` profiles; adds an executed control under `Reviews/2026-08-25-efs2-exp-c0-v0-control/` with JavaScript and Solidity implementations, tests and vectors; and converts V2-E1 through V2-E4 from "compare and return evidence" into delegated candidate defaults with measured backing — including a point `ResolutionPlan` at 1/8/32/64 Principals measured at 30,504 / 92,369 / 314,759 / 616,577 gas on first resolve. That measurement carries its own honest scope, which anyone quoting it must carry too: a disposable monolithic mapping-backed resolver only, excluding intrinsic gas, calldata pricing, plan registration, cross-contract calls, and production storage topology. `codex/sdkv2-pm` holds the only EFS 2.0 SDK design set plus two 2026-08-22 founder rulings (an SDK PM mandate, and a 100-year preservation horizon) that `main` records nowhere. `codex/data-explorer-pm` holds a separate first-party product lane James directed on 2026-08-22, whose write-capable arm names the same three operations as the web-client-os MVP. The orphan `lab/2026-08-26-fable-consumer-tournament` reports 119/119 differential agreement between an independent Python oracle and a Solidity system under test across 16 Types, 36 Records and 119 cases, and finds that pinning an exact Type costs about 0.05% of gas while the flexible arms are the expensive ones.
 
@@ -176,7 +176,7 @@ Three shapes stand out. `vault-process` is 63 of 90 `DEFECT` — hygiene, not di
 
 `data-explorer` appears as an owning set only because a branch carries a product set that `main` has never seen. That row is itself the process finding in §2, restated as an arithmetic.
 
-Note the honest caveat: these are candidates, and this table counts them before clustering. Many describe the same underlying problem found by several lanes independently. The ledger carries the clustered set, with the verification verdicts on the blocking rows.
+Note the honest caveat: these are candidates, and this table counts them before clustering. Many describe the same underlying problem found by several lanes independently. Clustering reduces the 623 to 268 distinct problems, of which the ledger keeps 267 — one was dropped in verification as already dispositioned and immaterial. 153 of those are MVP-relevant. The ledger carries the clustered set, with the verification verdicts and corrected wording on the blocking rows.
 
 ### The ten distinct blockers
 
@@ -185,13 +185,36 @@ Read against the MVP, the blocking candidates collapse into ten problems, and on
 1. **Complete directory listing has no Core primitive** — required by the constitution, by the 2026-07-22 mount ruling, by Files, and by the MVP's read-after-create criterion; absent from B0 and from Stage A's own gap register; genesis-or-never for whichever Realm the MVP mints. `efsv2`.
 2. **No byte carrier for a created file** — the MVP's own open question; the inherited default is a public gateway to a single pin, which the IPFS-stewardship review rules out as a critical path; the only storage direction is a superseded pre-greenfield ruling; who pays is unrecorded. `owner` with `efsv2` costing.
 3. **No EFS 2.0 SDK on `main`** — every set calls one; the real design is on an unmerged branch that four current documents cite. `sdk` and `vault-process`.
-4. **Nobody is authorized to build, and the process cannot represent an authorization** — §2. `owner` and `vault-process`.
+4. **Nobody is authorized to build, and `main` files the question nowhere** — the queue machinery would carry it; no queue on `main` asks it. §2. `owner` and `vault-process`.
 5. **The Principal shape for writes is unowned** — direction 7's worked example describes a multi-controller Principal; Core offers a single-key account Principal with no rotation, where three keys are three Principals; the stolen-key consequence is written nowhere a first writer would see it. `owner` via V2-E1.
-6. **Type arm and genesis Type registration** — the axis is explicitly unruled and the owner's answer was lost; Files silently assumes one arm; no document says how a Type reaches a Realm or who ships the dev-Realm genesis set. `efsv2`.
+6. **Type arm and genesis Type registration** — two separate things, and only the second is a blocker. The owner deliberately left the long-run identity axis open, in writing, as "a 50-year bakeoff question" (`owner-rulings.md`), so its openness is a recorded position and not a gap. What is missing is the MVP-scoped choice: which arm the first Realm mints, how a Type reaches a Realm at all, and who ships the dev-Realm genesis set — none of which any document answers. The client set separately records that its own attempt to get an answer "was not interpretable, so this set infers no choice" (`web-client-os/README.md`), and no queue re-asks it. `efsv2`.
 7. **Twenty-eight directions unledgered and the spine three weeks behind** — §2. `vault-process`.
 8. **No repository and no Realm deployment or churn ceremony** — four documents name four different containers; nobody owns the key; every semantic iteration is a new `RealmId` with no successor pointer. `owner`.
 9. **The write ceremony costs two wallet signatures per operation, and no document says so** — it follows from the candidate's own admission rules, is inherited unacknowledged by the client, and is worse than the v1 one-click bar it replaces. `efsv2` with `web-client-os`.
 10. **Arcade's placement and sequencing are stated five ways with no owner** — and one deadline (ETHOnline) was defaulting to an Arcade slice whose recut has not happened. `owner`.
+
+### What adversarial verification did to that list
+
+The ten above are the lanes' reading. Every blocking cluster behind them was then handed to two verifiers who were told to refute it — one on the text, one on whether "blocking" was the right word for a write-capable File Browser on Sepolia. The second lens was deliberately primed to downgrade, so read its results as a floor rather than a neutral estimate. What came back:
+
+| Outcome | Count |
+|---|---:|
+| Survived as blocking | 5 |
+| Downgraded to important | 16 |
+| Downgraded to minor | 5 |
+| Dropped: already dispositioned and refuted on materiality | 1 |
+
+Nothing was refuted on its text. Twenty-one of twenty-seven came back `CONFIRMED_WITH_CORRECTION`, meaning the problem is real and my wording of it was not precise enough; the corrected wording is in the ledger and supersedes the summary above wherever the two differ.
+
+The five that survived as hard blockers are worth naming, because they are the actual gate:
+
+1. **No genesis path** — nobody mints the Realm, admits the Files Types, or creates the root directory, mount and route. The one executed trace on a branch simply assumes the fixture already has them. (Blocker 6 above, second half.)
+2. **No byte carrier** — Slice C is inside the stated MVP floor, its acceptance test explicitly refuses `BYTES_UNAVAILABLE` and local optimistic state, and unlike complete listing there is no designed fallback to ship instead. (Blocker 2.)
+3. **The client's MVP critical path is gated on frozen-for-experiment inputs no Core document owns** — the phrase naming those inputs appears exactly once in the whole vault, in the client file that depends on them.
+4. **Twenty-eight owner directions outside every ledger** — including the ones that bind Core. (Blocker 7.)
+5. **Nobody has been asked to authorize the build** — corrected as above: the machinery would carry the question, `main` does not ask it. (Blocker 4.)
+
+The five downgrades that matter most to sequencing: complete directory listing has a designed fallback the acceptance document already permits, so it is a choice rather than a wall; the missing SDK is real but the write fixture can carry hand-written codecs; the Principal question reduces to one direction that is unsatisfiable as written rather than to a missing design; the two-signature ceremony needs a sentence, not a redesign; and the Type-identity axis is an owner-recorded open question, not a gap. None of the five stops a disposable slice. All five block a defensible public claim about it.
 
 ## 5. Direction: the honest read
 
