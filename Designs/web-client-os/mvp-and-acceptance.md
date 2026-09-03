@@ -1,17 +1,23 @@
-# Web Client MVP architecture, journeys, and acceptance
+# Web Client broader roadmap and freeze catalog
 
-**Status:** draft — smallest official Web Client product slice for iteration; no implementation or protocol/profile freeze is authorized
+**Status:** draft — broader product roadmap and freeze catalog; not the bounded MVP0 gate and no implementation or protocol/profile freeze is authorized
 **Target repos:** planning, client, sdk
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/technology-foundation]], [[Designs/web-client-os/web-platform-standards-and-forward-profile]], [[Designs/web-client-os/ethereum-standards-and-interop]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/efsv2/core-architecture-candidate]]
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14)
-**Last touched:** 2026-08-23
+**Last touched:** 2026-09-03
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/read-path #topic/files #topic/actions #topic/performance
 
-## Outcome
+> **Routing notice (2026-09-03).** The current bounded pass/fail surface is
+> [[mvp0-acceptance]]. This long-form document (929 lines before this routing
+> update) is retained as a broader roadmap and freeze catalog. Older candidate
+> action/signature/result shapes and every feature beyond that overlay are
+> non-gating proposal evidence, not MVP0 law.
 
-The MVP is an official, static, self-hostable File Browser with two deliberately
-different entry paths:
+## Catalog outcome
+
+The broader target catalog describes an official, static, self-hostable File
+Browser with two deliberately different entry paths:
 
 1. a very fast unauthenticated read path for public file and folder links; and
 2. an explicit promotion into a basic write-capable File Browser for creating
@@ -321,7 +327,12 @@ numbers. Until then, a missing measurement fails the evidence gate; an
 exception between 250 and 400 KiB names evidence, approver, expiry, and removal
 plan rather than silently redefining the target.
 
-## Acceptance fixtures
+## Broader acceptance catalog
+
+The fixtures below preserve future product, standards, performance, delivery,
+accessibility, OS, and freeze pressure. They do not add tests to the thirteen-
+test MVP0 gate or block that gate unless [[mvp0-acceptance]] explicitly imports
+one.
 
 ### A. Cold guest and exactness
 
