@@ -327,7 +327,7 @@ plan rather than silently redefining the target.
 ## Broader acceptance catalog
 
 The fixtures below preserve future product, standards, performance, delivery,
-accessibility, OS, and freeze pressure. They do not add tests to the thirteen-
+accessibility, OS, and freeze pressure. They do not add tests to the nine-
 test MVP0 gate or block that gate unless [[mvp0-acceptance]] explicitly imports
 one.
 

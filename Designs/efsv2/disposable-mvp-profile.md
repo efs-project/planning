@@ -50,7 +50,7 @@ One MVP-C0 run contains:
 - create-empty-directory, create-small-file, and publish-file-revision, each by
   one Principal and one atomic Core transaction;
 - one normal EOA `WritePlan` approval per write, one direct-EOA transaction
-  fallback per write, and one bounded smart/session permission path; and
+  fallback per write, and one bounded same-Principal session path; and
 - canonical read-back plus a second implementation's state-only reconstruction
   of Types, Records, Occurrences, admissions, Bindings, scope postings, Files
   roots, and retained EOA witnesses.
@@ -95,7 +95,7 @@ marked retired; they are never relabeled conformant.
 | Surface | MVP-C0 control | What remains open |
 |---|---|---|
 | Type/query identity | Stage A B0 bundled `TypeSchemaId`, including all declared index obligations; `KIND_BINDING_SCOPE` is added to the same C0-only bundle at genesis | layered semantic Type/shape/representation/validation/QueryProfile split |
-| Principal | intrinsic account Principal; EOA first, Realm-qualified smart account/session experiment second | tagged author surface, managed Principal, succession, recovery, portable contract identity |
+| Principal | one intrinsic bootstrap account Principal; direct EOA and bounded delegated-session verification paths for that same Principal | tagged author surface, managed Principal, succession, recovery, portable contract identity |
 | Realm | fresh local EVM chain, one atomic Core, immutable for the run | venue, upgradeability, Commons, physical module split |
 | Files | root Directory; one-Principal namespace/content Plans; bounded complete listing; create directory/file/revision | multi-Principal writes, certified exclusivity, rename/move/delete, private and cross-Realm mounts |
 | bytes | separate state-readable small-byte carrier selected and bounded per run | production carrier mix, economic tier, permanent maximum, long-term custody |
@@ -137,8 +137,10 @@ account-migration profile exists, loss or theft of the EOA can strand or
 capture that Principal's current Bindings. C0 uses synthetic data precisely so
 that this known limitation creates no user dependency.
 
-For contract accounts, retained call bytes and the historical authority/code
-basis show what Core accepted, but a later reader cannot replay a time-varying
+The session arm uses that same bootstrap Principal with the distinct retained
+delegation basis in §4.3. It does not introduce a contract-account Principal.
+For future contract-account comparisons, retained call bytes and the historical
+authority/code basis show what Core accepted, but a later reader cannot replay a time-varying
 ERC-1271 verdict as timeless authorship. Such evidence is labelled
 Realm-and-basis-qualified. C0 never promotes it to detachable portable proof.
 
@@ -146,7 +148,8 @@ Realm-and-basis-qualified. C0 never promotes it to detachable portable proof.
 
 ### 4.1 One composite approval and publication identity
 
-The normal EOA path presents exactly one wallet approval: one EIP-712 signature
+After explicitly recorded connection/network setup, the normal EOA path
+presents exactly one routine wallet approval: one EIP-712 signature
 over `WritePlan/1`. A relayer or other payer submits the resulting transaction;
 the EOA is not then asked to approve a second transaction.
 
@@ -367,8 +370,9 @@ realm-neutral authorship signature. That stronger property requires either:
 2. a prior bounded delegation whose signed scope explicitly authorizes the
    publication profile.
 
-Neither is smuggled into the one-prompt claim. The second option is the session
-experiment in §4.3, not a permanent delegation design.
+Neither is smuggled into the one-prompt claim. Section 4.3 exercises bounded
+delegation only for Realm-bound C0 WritePlans; it does not establish the
+stronger detachable-authorship property or a permanent delegation design.
 
 ### 4.2 Separate meanings and receipts
 
@@ -388,18 +392,57 @@ the plan and admission/effect receipts. Wallet acknowledgement, signature
 creation, a relay job ID, transaction hash, and even a successful transaction
 receipt are earlier evidence states, not canonical EFS success.
 
-### 4.3 Smart/session-wallet path
+### 4.3 Same-Principal delegated-session path
 
-A smart account may approve one initial bounded and revocable session grant.
+The bootstrap EOA approves one bounded, revocable C0 session grant for its
+existing `bootstrapPrincipalId`. This is an explicit alternative verification
+path, not a new smart-account Principal. G7's immutable namespace/content
+Plans, their sole Principal, the File Object, and the existing file-head
+Binding author/key identity stay unchanged; only the authorized actual signer
+differs. A revision advances the same head by ordinary CAS, not a new signer's
+head or a widened/replaced Plan.
+
+The run-frozen C0 grant codec/domain and verification rules are committed with
+the experiment's source/Codex inputs before genesis; this is no permanent
+grant framework or additional Files mutation kind. After runtime activation,
+the EOA signs the exact grant digest, Core independently recovers the
+bootstrap EOA before registering it, and independent read-back verifies the
+grant's exact bytes, approval witness, registration receipt, and state basis.
+Replaying registration cannot reset consumed budgets/nonces or revive a
+revoked grant.
 The grant binds at least:
 
-- C0 profile, Realm, Core, executor/code hash, and session public key;
+- run/C0 profile, unsigned publication profile, chain/Realm, Core,
+  executor/code hash, and session public key;
 - allowed operation kinds: create directory, create small file, publish
   revision;
-- allowed root/Route and Principal;
+- allowed root/Route and the exact `bootstrapPrincipalId`;
 - per-operation and aggregate byte/value/gas ceilings;
-- nonce domain, expiry, and an on-chain revocation location; and
+- grant identifier, nonce domain, expiry, and a state-readable revocation
+  location controlled only by the bootstrap EOA; and
 - whether a relayer or paymaster may submit.
+
+For a delegated write, Core performs §4.1 steps 1–3 unchanged, then verifies
+the canonical low-s session signature over that exact `writePlanDigest`
+against the public key named by the registered grant. This replaces the
+normal EOA steps 4–5: the session key does **not** pass direct EOA recovery
+equality with the Principal. Core instead verifies the retained EOA grant
+approval and its same-Principal scope, membership of the target under the
+granted root/Route, all publication/effect/operation constraints, nonce,
+expiry, executor/code, revocation, and remaining per-operation/aggregate
+byte/value/gas budgets at admission. Nonce and budget consumption commit
+atomically with the write or revert with it.
+
+Each fresh Occurrence retains the unsigned envelope, WritePlan, exact grant
+and EOA approval witness, session signature, actual signer, and
+`C0_DELEGATED_SESSION_V1` authority/witness basis. That basis includes the
+state-readable grant/revocation/budget evidence and admission basis needed
+for a second reader to recompute authorization independently, not a stored
+`valid=true` verdict or a later live grant check. The envelope's
+`principalId=bootstrapPrincipalId`, `authorityRef=0`, `authEpoch=0` and ordinary
+Envelope/Occurrence identity rules remain unchanged; the grant linkage lives
+in the explicitly distinct C0 witness/receipt, not a replacement author ID.
+The normal `C0_COMPOSITE_EOA_V1` branch remains unchanged.
 
 After that grant is canonical and independently read back, the session key may
 sign routine WritePlans without a wallet prompt. The target is zero routine
@@ -410,7 +453,17 @@ receipt never substitutes for canonical read-back.
 
 If the grant is missing, expired, revoked, over budget, or unavailable at the
 required basis, the client returns `UNKNOWN` or a typed authorization failure;
-it does not silently fall back to a broader wallet permission.
+it does not silently fall back to a broader wallet permission. Core rejects
+any unproved check without mutation. Revocation bars later writes; it never
+rewrites already admitted revision history or retroactively invalidates the
+authority proved at an earlier admission basis.
+
+Connection/network setup, grant approval/registration, and revocation have
+separate complete provider/prompt totals linked to each dependent operation,
+plus full first-use/lifecycle totals as required by
+[[../web-client-os/mvp0-acceptance#Setup and full first-use accounting]].
+This same-Principal session control is not proof of arbitrary real smart-wallet
+interoperability, full AA, recovery, or detached realm-neutral authorship.
 
 ### 4.4 Direct EOA fallback
 
@@ -562,7 +615,8 @@ Stop the run before further writes if any of these occurs:
 - Type or index admission can occur outside the committed C0 bundle, or a
   writer can bypass mandatory indexing;
 - `BindingScope` was not active before the first Files Binding;
-- normal EOA or direct fallback needs more than one user prompt;
+- a routine normal EOA or direct fallback needs more than one user prompt,
+  or setup/revocation calls or prompts are omitted from the linked totals;
 - a session write escapes its grant, continues after revocation/expiry, or is
   reported successful before canonical read-back;
 - EOA witness reconstruction depends on logs, historical calldata, or trust in

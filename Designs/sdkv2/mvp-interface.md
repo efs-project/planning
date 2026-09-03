@@ -122,7 +122,16 @@ Authorization has three explicit profiles:
 |---|---:|---|
 | relayed EOA, normal | 1 | one EIP-712 signature over the exact imported `WritePlan`; authorship/publication and Realm-effect authorization meanings remain separate |
 | direct EOA fallback | 1 transaction prompt | no preceding `WritePlan` signature prompt; calldata carries the same plan and the receipt says `DIRECT_EOA_TRANSACTION_AUTHORSHIP`, never portable authorship |
-| smart/session | 0 after grant | a prior bounded, revocable grant is canonical and independently read back; the session still signs, checks scope/expiry/revocation/ceilings, and emits receipts |
+| same-Principal delegated session | 0 after grant | the bootstrap EOA's bounded, revocable grant is canonical and independently read back; the session signs under `C0_DELEGATED_SESSION_V1`, retains its actual signer and grant/admission basis, and leaves Principal, immutable Plans, File and head Binding author/key unchanged |
+
+These are routine budgets after explicit connection/network and, when needed,
+grant setup. Preserve the separately linked setup/routine/revocation provider
+logs and call/prompt totals, including full first-use and lifecycle totals,
+required by [[../web-client-os/mvp0-acceptance#Setup and full first-use accounting]].
+Setup is never free or charged to another run; guest reads and planning still
+touch no wallet. Session verification imports the distinct alternative path
+in [[../efsv2/disposable-mvp-profile#4.3 Same-Principal delegated-session path]],
+not direct EOA recovery equality, arbitrary smart-wallet compatibility, or AA.
 
 The SDK never widens a missing, expired, revoked, over-budget, or unavailable
 session grant into ambient wallet authority. It returns a typed authorization

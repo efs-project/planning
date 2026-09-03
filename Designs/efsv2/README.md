@@ -108,8 +108,9 @@ commits to both a portable publication digest and exact Realm effects. Their
 receipts and meanings remain separate; this realm-bound signature does not
 claim detachable realm-neutral authorship. Direct EOA fallback uses one
 transaction prompt with weaker chain/transaction-bound authorship evidence.
-A bounded revocable smart/session grant targets zero routine wallet prompts
-after its initial approval. In every arm, wallet acknowledgement and a
+A bounded revocable delegation from the bootstrap EOA targets zero routine
+wallet prompts for the same Principal after recorded setup/grant approval;
+first-use totals retain that cost. In every arm, wallet acknowledgement and a
 transaction receipt precede canonical read-back and are not EFS success.
 Point outcome stays separate from authority, currentness, finality, integrity,
 availability, returned bytes, and canonical effect; receipt progress never

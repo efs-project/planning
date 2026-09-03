@@ -24,8 +24,9 @@ universal result enum or reinterpret the ordered genesis in
 
 The normal write target is one relayed-EOA wallet prompt for the exact C0
 `WritePlan`. Direct EOA is a separately labelled one-transaction-prompt
-fallback. Smart/session operation reaches zero routine wallet prompts only
-after its bounded revocable grant is canonical and independently read back.
+fallback. Same-Principal session operation reaches zero routine wallet prompts
+only after the bootstrap EOA's bounded revocable grant is canonical and
+independently read back; linked first-use totals retain setup/grant prompts.
 Wallet, relay, bundler, user-operation, and transaction acknowledgements are
 progress evidence, never semantic success.
 

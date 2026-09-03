@@ -45,7 +45,37 @@ prompt/non-prompt classification and total, every returned value/error, and
 every applicable authorship, authorization, submission, EVM,
 admission/effect, byte-store, and read-back receipt. The observed method list
 must exactly equal the fixture's declared list; an unrecorded provider
-interaction or a second plan/operation in that trace fails the test.
+interaction or a second product plan/operation in that trace fails the test.
+
+### Setup and full first-use accounting
+
+Routine traces begin only after explicit setup: the selected bootstrap EOA
+is connected, the wallet is on the manifest chain, and, for M0-08, its bounded
+same-Principal grant is canonical and independently read back. These are
+preconditions, not free actions. Guest tests M0-01–M0-05 and M0-09 still make
+zero wallet/provider touches; setup starts only on explicit write intent.
+
+For each M0-06–M0-08 operation, retain linked setup, routine, and (when used)
+revocation traces under the same `runId`, browser/wallet session, Principal,
+chain/Realm/profile, and operation identity. Setup records connection,
+network-switch/add-chain, permission/grant approval, registration/submission,
+and grant read-back, including every method, prompt/non-prompt classification,
+returned value/error, and receipt. Declare the ordered method list before each
+phase; record actual provider-call totals and prompt totals separately for
+setup, routine, and revocation. A reused setup/grant cites its original trace
+and basis in this run; a preconnected wallet cannot erase first-use cost or
+borrow setup evidence from another run.
+
+For every operation, display both its incremental totals and its full
+first-use totals: the latter sum the uniquely linked required setup traces
+plus that routine trace, for provider calls and prompts independently. Shared
+setup is attributed once in the suite-wide total, never omitted from an
+operation's first-use cost. Show revocation separately and include it in the
+full lifecycle total. Rejections, retries, and setup failures remain visible
+and cannot be counted as routine success. The routine prompt budget is exactly
+one message signature for M0-06, exactly one transaction for M0-07, and zero
+wallet calls/prompts for M0-08; no numeric setup or first-use total is asserted
+until the declared fixture's complete log supplies it.
 
 ## Nine observable tests
 
@@ -81,8 +111,9 @@ interaction or a second plan/operation in that trace fails the test.
    semantic File still does not become absent.
 
 6. **M0-06 — relayed EOA small-file effect.** Create the suite's one small file
-   through the normal path. The complete wallet-provider log contains exactly
-   the declared methods and exactly one prompt: the EIP-712 signature request
+   through the normal path after the linked setup above. The complete routine
+   wallet-provider log contains exactly the declared methods and exactly one
+   prompt: the EIP-712 signature request
    for this operation's imported C0 `WritePlan`; it contains no wallet
    transaction prompt. A distinct relayer submits and pays. Every receipt and
    the independently recomputed File Object/charter, `ChunkTree`, initial
@@ -94,9 +125,10 @@ interaction or a second plan/operation in that trace fails the test.
    `READ_BACK_VERIFIED` and `effect=COMMITTED`.
 
 7. **M0-07 — direct EOA empty-directory effect.** With relay or typed-data
-   support unavailable, create the suite's one empty directory. The complete
-   wallet-provider log contains exactly the declared methods and exactly one
-   prompt: the direct transaction request; it contains no preceding
+   support unavailable, create the suite's one empty directory after linked
+   setup. The complete routine wallet-provider log contains exactly the
+   declared methods and exactly one prompt: the direct transaction request;
+   it contains no preceding
    `WritePlan` signature request. The result says
    `DIRECT_EOA_TRANSACTION_AUTHORSHIP`, `EXPERIMENTAL_DIRECT_CORE`, and
    `filesPreconditionCertified=false`; it never claims portable authorship or
@@ -107,10 +139,12 @@ interaction or a second plan/operation in that trace fails the test.
    and provider trace. Transaction approval or execution remains non-semantic
    until that exact operation's matching canonical read-back.
 
-8. **M0-08 — zero-prompt session revision effect.** Canonically establish and
-   independently read back one bounded revocable C0 grant, then publish the
-   suite's one second immutable revision. The complete wallet-provider method
-   log for this routine operation is empty: zero calls and zero prompts after
+8. **M0-08 — zero-prompt session revision effect.** In the linked setup trace,
+   the bootstrap EOA grants the bounded same-Principal delegation in
+   [[../efsv2/disposable-mvp-profile#4.3 Same-Principal delegated-session path]].
+   Canonically establish and independently read back that grant, then publish
+   the suite's one second immutable revision of M0-06's File. The complete
+   wallet-provider method log for this routine operation is empty: zero calls and zero prompts after
    the prior grant; the separately recorded session-key signature is not hidden
    or called a wallet prompt. Client and Core check profile,
    Realm/Core/executor, Principal/root/Route, operation, nonce, expiry,
@@ -120,8 +154,24 @@ interaction or a second plan/operation in that trace fails the test.
    `writePlanDigest`, `PUBLISH_FILE_REVISION` operation, and empty provider
    trace. Bundler/relay or transaction acknowledgement remains non-semantic
    until matching canonical read-back. A stale revision rejects rather than
-   replanning; after revocation, the same attempt fails explicitly without
-   widening or silent wallet fallback.
+   replanning; after revocation, an otherwise valid attempt with fresh nonce
+   and current CAS fails explicitly without widening or silent wallet fallback.
+   Independently verify the retained grant
+   approval, session signature, and `C0_DELEGATED_SESSION_V1` authority basis;
+   the actual session signer differs from the bootstrap EOA, but the declared
+   `bootstrapPrincipalId`, both immutable Plan IDs and contents, File Object,
+   and existing file-head Binding author/key identity remain unchanged. Its
+   head value/revision advances by the ordinary CAS rule, and the prior
+   revision remains readable. Reject an ungranted signer, substituted Principal
+   or grant, changed Plan/root/Route/profile/executor, invalid signature, stale
+   nonce, expiry, unavailable authority basis, revocation, or exceeded budget;
+   no such attempt may mutate the head or widen a Plan. Isolate each negative
+   case against otherwise valid inputs so another failure cannot mask it. Retain each negative
+   attempt and any setup/revocation prompts in the linked lifecycle log.
+   Revocation rejects later writes without invalidating the already admitted
+   second revision or its historical authority receipt. This is a
+   same-Principal session control, not arbitrary smart-wallet interoperability
+   or full account abstraction.
 
 9. **M0-09 — clean-browser reopen.** Delete all browser state and open the
    exact folder, file, and revision links produced by M0-06 through M0-08 with

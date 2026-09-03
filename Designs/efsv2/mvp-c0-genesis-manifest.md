@@ -309,6 +309,14 @@ In one `ADMIT_RESOLUTION_PLANS` WritePlan, admit exactly two immutable
 Both use the bounded C0 point combiner. Point-read, validate, and recompute
 both IDs before continuing. No ambient default Plan is legal.
 
+The post-genesis delegated-session control in
+[[disposable-mvp-profile#4.3 Same-Principal delegated-session path]] acts for
+this same `bootstrapPrincipalId`. It neither adds a smart-account/session-key
+Principal to either Plan nor replaces their immutable IDs or contents. A
+session revision targets the EOA-authored File and its existing head Binding
+author/key; the grant changes only the permitted actual signer and retained
+authority basis.
+
 ### G8 — Create the public Mount configuration
 
 In one `ADMIT_MOUNT_CONFIG` WritePlan, admit one `PublicFilesMountConfig/1`
