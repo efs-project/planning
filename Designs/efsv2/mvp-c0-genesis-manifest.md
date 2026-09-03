@@ -96,7 +96,7 @@ byteStoreAddress = create2Address(
 ```
 
 Core construction does not take `byteStoreAddress`, so this order has no
-cross-address cycle. Neither constructor takes `experimentCommitment`. After
+cross-address cycle. Neither constructor takes `experimentCommitment`.
 `codexConstantsBytes` contains the fixed C0 grammar/domain/capability material
 whose hash is in the seed; it contains no derived contract address,
 `experimentCommitment`, or `c0ProfileId`. After both contracts exist and their
