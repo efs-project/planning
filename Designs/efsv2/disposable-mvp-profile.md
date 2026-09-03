@@ -124,11 +124,13 @@ author reference; actual signer, relayer, payer, Realm, authority basis, and
 verification profile remain separately inspectable. The proposal-stage source
 is [Stage A's Principal/authority chapter](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-principal-authority.md).
 
-For the EOA arm, Core persists the exact canonical `WritePlan` bytes and the
-accepted low-s secp256k1 witness needed for a second implementation to recover
-the signer. Reconstruction must independently recompute the typed-data digest,
-recover the EOA, derive the account Principal, and compare all four with the
-admission receipt. A stored `valid=true` bit or event is not sufficient.
+For the EOA arm, Core persists the exact canonical unsigned publication
+statement, `WritePlan` bytes, and accepted low-s secp256k1 witness needed for a
+second implementation to recover the signer. Reconstruction must independently
+recompute every RecordId, the portable publication digest, EnvelopeId,
+OccurrenceRefs, Realm-effects digest, and outer typed-data digest; recover the
+EOA; derive the account Principal; and compare those values with the admission
+receipt. A stored `valid=true` bit or event is not sufficient.
 
 This does not solve key loss. Until a separately reviewed managed-Principal or
 account-migration profile exists, loss or theft of the EOA can strand or
@@ -142,19 +144,92 @@ Realm-and-basis-qualified. C0 never promotes it to detachable portable proof.
 
 ## 4. One-approval write law
 
-### 4.1 One composite approval
+### 4.1 One composite approval and publication identity
 
 The normal EOA path presents exactly one wallet approval: one EIP-712 signature
 over `WritePlan/1`. A relayer or other payer submits the resulting transaction;
 the EOA is not then asked to approve a second transaction.
 
-The typed value commits to two separately recomputable meanings:
+MVP-C0 reuses the exact unsigned Stage A `PublicationEnvelope/1` field layout,
+RecordId vector rule, EnvelopeId formula, and Occurrence mapping. It does not
+mint a parallel content identity. The canonical unsigned statement and its
+portable digest are:
 
 ```text
+PublicationEnvelope/1 unsigned fields, in order:
+  profile       uint16   = 1
+  principalId   bytes32
+  authorityRef  bytes32  = 0
+  authEpoch     uint64   = 0
+  pubNonce      bytes32
+  notAfter      uint64
+  recordIds     bytes32[]
+
+DS_ENV = keccak256(abi.encode(
+  keccak256("EIP712Domain(string name,string version)"),
+  keccak256("EFS2-Envelope"), keccak256("1")))
+ENVELOPE_TYPESTRING =
+  "PublicationEnvelope(uint16 profile,bytes32 principalId,bytes32 authorityRef,uint64 authEpoch,bytes32 pubNonce,uint64 notAfter,bytes32[] recordIds)"
+ENVELOPE_TYPEHASH = keccak256(bytes(ENVELOPE_TYPESTRING))
+recordIdsHash = keccak256(abi.encodePacked(recordIds))
+publicationStatementPreimage = abi.encode(
+  ENVELOPE_TYPEHASH, profile, principalId, authorityRef, authEpoch,
+  pubNonce, notAfter, recordIdsHash)
+publicationStructHash = keccak256(publicationStatementPreimage)
+publicationDigest = keccak256(
+  0x1901 || DS_ENV || publicationStructHash)
+
+DOM_ENVELOPE = keccak256("efs2/envelope/1")
+EnvelopeId = keccak256(abi.encode(DOM_ENVELOPE, publicationDigest))
+OccurrenceRef(i) = (EnvelopeId, uint16(i))
+DOM_OCCURRENCE = keccak256("efs2/occurrence/1")
+OccurrenceKey(i) = keccak256(abi.encode(
+  DOM_OCCURRENCE, EnvelopeId, uint256(i)))
+```
+
+`recordIds` is the full ordered vector with `1 <= length <= 64`; selected
+inline bodies must independently recompute their positional RecordIds. Witness,
+Realm, selected mask, carrier, and transaction bytes never enter EnvelopeId.
+The portable `publicationDigest` is therefore byte-for-byte the Stage A
+`eip712EnvelopeDigest`, and the resulting EnvelopeId and OccurrenceRefs are
+Stage-A-compatible identities.
+
+The witness profile is intentionally different. C0 does **not** attach a
+chain-free EOA signature directly to `publicationDigest`. Instead the one
+Realm-bound WritePlan signature contains that digest. `c0ProfileId` is derived
+from the final, post-deployment commitment defined by
+[[mvp-c0-genesis-manifest#1. Roles and immutable inputs]]:
+
+```text
+DOM_C0_PROFILE = keccak256("efs2/mvp-c0/profile/1")
+c0ProfileId = keccak256(abi.encode(
+  DOM_C0_PROFILE, experimentCommitment))
+```
+
+`c0ProfileId` is neither the unsigned envelope's `profile=1` field nor Core's
+Stage A-derived `coreProfileId`. The typed WritePlan commits to two separately
+recomputable meanings:
+
+```text
+ExpectedRevision/1 {
+  leafIndex  uint16
+  revision   uint32
+}
+
+EXPECTED_REVISION_TYPESTRING =
+  "ExpectedRevision(uint16 leafIndex,uint32 revision)"
+EXPECTED_REVISION_TYPEHASH =
+  keccak256(bytes(EXPECTED_REVISION_TYPESTRING))
+expectedRevisionsHash = keccak256(concat(
+  keccak256(abi.encode(
+    EXPECTED_REVISION_TYPEHASH, item.leafIndex, item.revision))
+  for item in strictly increasing leafIndex order))
+
 C0RealmEffects/1 {
   realmId                bytes32
   core                   address
   routeConfigId          bytes32
+  genesisReceiptHash     bytes32
   operationKind          uint8
   envelopeId             bytes32
   leafMask               uint64
@@ -163,10 +238,13 @@ C0RealmEffects/1 {
   byteCommitment         bytes32
 }
 
+REALM_EFFECTS_TYPESTRING =
+  "C0RealmEffects(bytes32 realmId,address core,bytes32 routeConfigId,bytes32 genesisReceiptHash,uint8 operationKind,bytes32 envelopeId,uint64 leafMask,bytes32 expectedRevisionsHash,address stateByteStore,bytes32 byteCommitment)"
+REALM_EFFECTS_TYPEHASH = keccak256(bytes(REALM_EFFECTS_TYPESTRING))
 realmEffectsDigest = keccak256(abi.encode(
-  keccak256("efs2/mvp-c0/realm-effects/1"), realmId, core, routeConfigId,
-  operationKind, envelopeId, leafMask, expectedRevisionsHash,
-  stateByteStore, byteCommitment))
+  REALM_EFFECTS_TYPEHASH, realmId, core, routeConfigId, genesisReceiptHash,
+  operationKind, envelopeId, leafMask, expectedRevisionsHash, stateByteStore,
+  byteCommitment))
 
 WritePlan/1 {
   c0ProfileId          bytes32
@@ -187,6 +265,14 @@ EIP712Domain {
   verifyingContract = selected C0 Core
 }
 
+WRITE_DOMAIN_TYPESTRING =
+  "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+WRITE_DOMAIN_TYPEHASH = keccak256(bytes(WRITE_DOMAIN_TYPESTRING))
+domainSeparator = keccak256(abi.encode(
+  WRITE_DOMAIN_TYPEHASH,
+  keccak256("EFS2-MVP-C0-WritePlan"), keccak256("1"),
+  chainId, verifyingContract))
+
 WRITE_PLAN_TYPESTRING =
   "WritePlan(bytes32 c0ProfileId,bytes32 publicationDigest,bytes32 realmId,bytes32 realmEffectsDigest,address executor,bytes32 executorCodeHash,uint192 nonceKey,uint64 nonceSeq,uint64 notAfter)"
 WRITE_PLAN_TYPEHASH = keccak256(bytes(WRITE_PLAN_TYPESTRING))
@@ -196,6 +282,12 @@ writePlanStructHash = keccak256(abi.encode(
   nonceKey, nonceSeq, notAfter))
 writePlanDigest = keccak256(0x1901 || domainSeparator || writePlanStructHash)
 ```
+
+Every declared `C0RealmEffects` and `WritePlan` field appears exactly once and
+in the same order in its type string and hash preimage. The
+`realmEffectsDigest` binds only its declared fields. Executor/code hash, nonce
+lane, expiry, `c0ProfileId`, and `publicationDigest` are bound by the outer
+`WritePlan`; prose must not attribute them to the sub-digest.
 
 `operationKind` is closed for C0:
 
@@ -215,18 +307,55 @@ Zero and all other values reject. Kinds 1 and 3–6 are legal only before the
 bootstrap seal; kind 7 is legal exactly once; kinds 2, 8, and 9 are the runtime
 Files subset. `routeConfigId` is exactly zero for pre-Route bootstrap kinds
 1–6, and it is the manifest-pinned nonzero Route for the seal and every later
-write. `stateByteStore` is always the manifest-pinned carrier. The byte
-commitment is nonzero only for the two byte-writing kinds and exactly zero for
-the others. `expectedRevisionsHash` commits the strictly ordered CAS vector,
-including an exact empty-vector hash when none applies.
+write. `genesisReceiptHash` is exactly zero for every bootstrap write through
+the seal and is the persisted nonzero G12 receipt hash for every runtime write.
+`stateByteStore` is always the manifest-pinned carrier. The byte commitment is
+nonzero only for the two byte-writing kinds and exactly zero for the others.
+`expectedRevisionsHash` commits the strictly ordered CAS vector, including the
+hash of the empty byte string when no item applies.
 
-`publicationDigest` is the portable digest of the exact Principal, ordered
-Record leaves, and publication context. `realmEffectsDigest` commits to the
-exact Realm, Core, selected leaves, expected Binding revisions, operation kind,
-Route, byte-store commitment when present, nonce lane, and expiry. The Core
-recomputes both before mutation; omission, reordering, substitution, expiry,
-wrong executor/code, stale CAS, or a different byte commitment reverts the
-whole call.
+`publicationDigest` commits the exact unsigned Principal, publication fields,
+and ordered Record leaves. `realmEffectsDigest` commits exactly the Realm,
+Core, Route, genesis receipt, operation kind, derived EnvelopeId, selected
+leaves, expected Binding revisions, byte store, and byte commitment. The outer
+WritePlan additionally commits the C0 profile, publication digest,
+executor/code hash, nonce lane, and expiry. Core recomputes all three preimages
+before mutation; omission, reordering, substitution, expiry, wrong
+executor/code, stale CAS, wrong genesis receipt, or a different byte
+commitment reverts the whole call.
+
+For the normal EOA arm, C0's sole write entrypoint verifies the composite
+witness in this order:
+
+1. decode the exact unsigned `PublicationEnvelope/1` fields and selected inline
+   bodies; recompute every carried RecordId, `publicationDigest`, EnvelopeId,
+   and selected OccurrenceRef;
+2. require `plan.realmId == effects.realmId == Core.realmId`,
+   `effects.core == verifyingContract == address(Core)`,
+   `plan.publicationDigest == publicationDigest`,
+   `publication.notAfter == plan.notAfter`,
+   `effects.envelopeId == EnvelopeId`, a nonzero in-range `leafMask`, the
+   correct Route/genesis-receipt rule for the operation kind, and the exact SR-3
+   `expectedRevisionsHash` for all selected CAS-bearing leaves;
+3. recompute `c0ProfileId` from Core's persisted final
+   `experimentCommitment`, then recompute `realmEffectsDigest` and
+   `writePlanDigest` field-for-field;
+4. enforce canonical 65-byte secp256k1 encoding, low-s, valid v, nonzero
+   recovery, and recover the EOA from `writePlanDigest`; and
+5. require that EOA to equal the address encoded by the declared intrinsic
+   account Principal before persisting the exact unsigned envelope, WritePlan,
+   witness, and `C0_COMPOSITE_EOA_V1` authority basis with each fresh
+   Occurrence's admission receipt.
+
+The mapping from `(EnvelopeId, leafIndex)` to RecordId, Principal, status, and
+admission ordinal remains the Stage A mapping. What varies is the verifier
+input: Stage A's `AuthorityVerifierV1.verify(principal,
+eip712EnvelopeDigest,envelopeWitness,...)` expects a direct chain-free envelope
+witness; C0 verifies `writePlanDigest` and records the explicit composite
+basis. Therefore C0 structurally reuses SR-17's ordinary Record admission and
+atomic Type-cache materialization through a `publishWithPlanC0` variant, but it
+does not call the composite witness a Stage A envelope witness or claim Stage A
+witness compatibility.
 
 One signature therefore approves both the publication and its exact local
 effects without collapsing their meanings. Because the EIP-712 domain is
@@ -317,13 +446,17 @@ FileRevision        immutable selected generation
 ChunkTree/digest    exact byte identity and range geometry
 carrier handle      where this run stored those bytes
 Locator             authored claim connecting retrieval to the carrier
-availability        observed ability to obtain and verify bytes at a basis
+availability        observed ability to obtain bytes at a basis
+integrity           independent digest/tree/proof verdict for obtained bytes
 ```
 
 Finding a File or Locator does not imply available bytes. Missing carrier data
-is `bytes=UNAVAILABLE` or `bytes=UNKNOWN`, never `ABSENT_PROVEN` for the File.
-The carrier address/code hash and exact capability are committed by the run
-manifest and Route evidence; the carrier never becomes a hidden singleton.
+is `availability=UNAVAILABLE` and `bytes=NOT_RETURNED` (or `UNKNOWN` on either
+axis), never `ABSENT_PROVEN` for the File. Bytes that can be read but do not
+match the selected digest/tree are `availability=AVAILABLE`, `bytes=RETURNED`,
+and `integrity=FAILED`; they are never upgraded to verified bytes. The carrier
+address/code hash and exact capability are committed by the run manifest and
+Route evidence; the carrier never becomes a hidden singleton.
 
 There is no permanent numeric file cap. Each run measures candidate sizes and
 records `maxStateFileBytes` and `maxReadRangeBytes` in its immutable experiment
@@ -350,25 +483,54 @@ into the outcome or into one `ok` bit:
 ```text
 PointResult<T> {
   outcome
-  value?       // present only for FOUND
-  domain       // exact Realm, query/profile, subject and key
-  basis        // block hash/state root/Realm revision/admission high
-  coverage     // COMPLETE | PARTIAL | UNKNOWN
-  support      // SUPPORTED | UNSUPPORTED | UNKNOWN
-  validation   // VALID | INVALID | UNKNOWN
-  bytes        // NOT_APPLICABLE | AVAILABLE_VERIFIED | UNAVAILABLE | UNKNOWN
-  effect       // NOT_APPLICABLE | PLANNED | AUTHORIZED | SUBMITTED |
-               // ADMITTED | READ_BACK_VERIFIED | REVERTED | UNKNOWN
+  value?        // present only for FOUND
+  domain        // exact Realm, query/profile, subject and key
+  basis         // block hash/state root/Realm revision/admission high
+  coverage      // COMPLETE | PARTIAL | UNKNOWN
+  support       // SUPPORTED | UNSUPPORTED | UNKNOWN
+  validation    // VALID | INVALID | UNKNOWN
+  authority     // AUTHORIZED_AT_BASIS | UNAUTHORIZED_PROVEN |
+                // UNKNOWN | NOT_APPLICABLE
+  currentness   // CURRENT_AT_BASIS | HISTORICAL | SUPERSEDED |
+                // UNKNOWN | NOT_APPLICABLE
+  finality      // FINAL | UNFINALIZED | UNKNOWN | NOT_APPLICABLE
+  integrity     // VERIFIED | FAILED | UNKNOWN | NOT_APPLICABLE
+  availability  // AVAILABLE | UNAVAILABLE | UNKNOWN | NOT_APPLICABLE
+  bytes         // RETURNED | NOT_RETURNED | UNKNOWN | NOT_APPLICABLE
+  effect        // COMMITTED | NOT_COMMITTED_PROVEN | UNKNOWN |
+                // NOT_APPLICABLE
   evidenceCommitment
   reasonCode?
 }
 ```
 
+`validation` is Type/profile and semantic validation; `integrity` is exact
+digest/tree/proof verification. `availability=AVAILABLE` says bytes were
+obtainable at the named observation basis, while `bytes=RETURNED` says this
+response carries them. Neither implies `integrity=VERIFIED`: obtained bytes may
+fail their committed digest. Authority, currentness, finality, integrity, and
+availability are independent claims and retain their own basis/evidence.
+
+Write-journey progress is not canonical effect. It remains in separate
+receipts with a stage such as:
+
+```text
+OperationStage =
+  PLANNED | AUTHORIZED | SUBMITTED | INCLUDED |
+  REVERTED | READ_BACK_VERIFIED | UNKNOWN
+```
+
+`effect=COMMITTED` requires canonical read-back of the exact planned effects at
+the named basis. A proved revert or proved unchanged relevant state may support
+`NOT_COMMITTED_PROVEN`. A wallet acknowledgement, authorization receipt,
+submission ID, pending transaction, or transaction receipt changes an
+operation stage but never by itself changes canonical effect from `UNKNOWN`.
+
 Rules:
 
 1. `FOUND` means one value is selected under the named point rule at the exact
-   basis. It does not imply bytes, finality, currentness elsewhere, or write
-   success.
+   basis. It does not imply authority, currentness elsewhere, finality,
+   integrity, availability, returned bytes, or committed write effect.
 2. `ABSENT_PROVEN` requires supported and valid evaluation over complete
    coverage of the whole named domain at the committed basis.
 3. `UNKNOWN` covers unavailable basis/evidence, incomplete coverage,

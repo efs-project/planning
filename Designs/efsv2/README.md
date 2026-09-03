@@ -97,8 +97,11 @@ control so permanent questions do not block measurement. It uses the bundled
 B0 Type/index arm, genesis-time `BindingScope`, an intrinsic account Principal,
 a separately identified state-readable small-byte carrier, and the canonical
 four-outcome point law. [[mvp-c0-genesis-manifest]] orders Core initialization,
-index activation, SR-17 Type admission, Principal/root/Plans/Mount/Route
-creation, and independently verified post-state roots.
+using a non-cyclic predeployment seed followed by a postdeployment
+address/code-bound experiment commitment and one-time seal, then index
+activation, SR-17 Type admission, Principal/root/Plans/Mount/Route creation,
+and independently verified seal-transaction post-state roots before runtime
+writes are enabled.
 
 The normal relayed EOA path has one composite EIP-712 `WritePlan` approval that
 commits to both a portable publication digest and exact Realm effects. Their
@@ -108,6 +111,9 @@ transaction prompt with weaker chain/transaction-bound authorship evidence.
 A bounded revocable smart/session grant targets zero routine wallet prompts
 after its initial approval. In every arm, wallet acknowledgement and a
 transaction receipt precede canonical read-back and are not EFS success.
+Point outcome stays separate from authority, currentness, finality, integrity,
+availability, returned bytes, and canonical effect; receipt progress never
+masquerades as committed effect.
 
 These are temporary experiment choices only. Web Client/product work remains
 separately held; no Type/query axis, carrier limit, Principal model, product,

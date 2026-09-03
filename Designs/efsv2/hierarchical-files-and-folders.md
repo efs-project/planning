@@ -1170,9 +1170,12 @@ It supports only same-Principal create-empty-directory, create-small-file, and
 publish-revision through one atomic Core call. Its normal relayed EOA path asks
 for one composite EIP-712 `WritePlan` signature. That signature commits to both
 the portable publication digest and the exact Realm effects—selected leaves,
-CAS revisions, Route, byte commitment, nonce, expiry, executor, and code hash—
-while preserving separate publication, authorization, submission,
-admission/effect, and canonical-read-back receipts.
+CAS revisions, Route, genesis receipt, and byte commitment. The outer WritePlan
+separately binds the C0 profile, executor/code hash, nonce, and expiry while
+preserving separate publication, authorization, submission, admission/effect,
+and canonical-read-back receipts. C0 reuses the unsigned Stage A envelope
+digest, EnvelopeId, and Occurrence mapping, but its retained composite witness
+signs the Realm-bound WritePlan rather than that chain-free digest directly.
 
 Because the composite signature is Realm/chain/Core-bound, this arm does not
 claim independently detachable realm-neutral authorship. That requires either
@@ -1578,11 +1581,16 @@ FOUND | ABSENT_PROVEN | UNKNOWN | CONFLICT
 
 The full Files terms above remain typed reason, validation, bytes, effect, or
 presentation detail. Every point result separately carries domain, committed
-basis, coverage, support, validation, bytes, and write effect. `FOUND` does not
-promise available bytes. Unsupported or malformed inputs return `UNKNOWN` with
-their separate dimension/reason rather than growing a competing point enum.
-Merged absence is legal only when every source is complete, supported, valid,
-and `ABSENT_PROVEN` for the same committed basis and domain. Any partial page,
+basis, coverage, support, validation, authority, currentness, finality,
+integrity, availability, returned-byte status, and canonical write effect.
+`FOUND` does not promise any of those qualifications. Bytes may be available
+and returned while integrity is `FAILED`. Canonical effect is only
+`COMMITTED | NOT_COMMITTED_PROVEN | UNKNOWN | NOT_APPLICABLE`; planning,
+authorization, submission, inclusion/revert, and read-back are separate receipt
+stages. Unsupported or malformed inputs return `UNKNOWN` with their separate
+dimension/reason rather than growing a competing point enum. Merged absence is
+legal only when every source is complete, supported, valid, and
+`ABSENT_PROVEN` for the same committed basis and domain. Any partial page,
 provider failure, unavailable history, unsupported profile, invalid evidence,
 or basis mismatch is `UNKNOWN`; unresolved incompatible values are `CONFLICT`.
 

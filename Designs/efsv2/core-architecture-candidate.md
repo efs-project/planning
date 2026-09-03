@@ -172,8 +172,12 @@ additional publication signature or a prior scoped delegation. The normal EOA
 path is relayed after the one signature. Direct EOA fallback uses one
 transaction prompt and records weaker transaction-bound authorship evidence.
 A bounded revocable smart/session grant targets zero routine wallet prompts
-after initial approval. Details and success semantics are normative only for
-the experiment in [[disposable-mvp-profile#4. One-approval write law]].
+after initial approval. C0 derives the same unsigned Stage A publication
+digest, EnvelopeId, and `(EnvelopeId, leafIndex)` OccurrenceRefs, but explicitly
+records that its retained composite EOA witness signs the outer WritePlan—not
+the chain-free envelope digest directly. Details and success semantics are
+normative only for the experiment in
+[[disposable-mvp-profile#4. One-approval write law]].
 
 `leafIndex` is simply the zero-based position of one Record inside the signed
 Envelope. It distinguishes two occurrences of Records carried together without
@@ -384,13 +388,17 @@ unavailable carrier never changes a `FOUND` File into absence.
 
 The experiment's canonical point outcome is exactly
 `FOUND | ABSENT_PROVEN | UNKNOWN | CONFLICT`. Domain, committed basis,
-coverage, support, validation, bytes, and write effect remain separate
-dimensions. Merged absence is proved only when every input is complete,
-supported, valid, and `ABSENT_PROVEN` at the same committed basis and domain.
-Any missing/provider failure, partial coverage, unsupported profile, invalid
-evidence, or basis mismatch is `UNKNOWN`; material unresolved disagreement is
-`CONFLICT`. Files-specific errors remain detail around this law rather than a
-competing universal point enum.
+coverage, support, validation, authority, currentness, finality, integrity,
+availability, bytes, and canonical write effect remain separate dimensions.
+Available/returned bytes can still fail integrity. Canonical effect is only
+`COMMITTED | NOT_COMMITTED_PROVEN | UNKNOWN | NOT_APPLICABLE`; planned,
+authorized, submitted, included, reverted, and read-back-verified are separate
+operation/receipt stages. Merged absence is proved only when every input is
+complete, supported, valid, and `ABSENT_PROVEN` at the same committed basis and
+domain. Any missing/provider failure, partial coverage, unsupported profile,
+invalid evidence, or basis mismatch is `UNKNOWN`; material unresolved
+disagreement is `CONFLICT`. Files-specific errors remain detail around this law
+rather than a competing universal point enum.
 
 ## Modular contract shape to prototype
 

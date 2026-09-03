@@ -37,17 +37,21 @@ The run assigns four explicit roles:
 | bootstrap author | one freshly generated synthetic EOA whose intrinsic account Principal creates the root, Plans, Mount, and Route |
 | relayer/payer | submits typed WritePlans and pays gas; it may equal the operator but never the bootstrap Principal by inference |
 
-Before deployment the operator canonicalizes and hashes `ExperimentInputsV1`:
+Bootstrap uses two non-cyclic commitments. Before deployment the operator
+canonicalizes and hashes `ExperimentSeedInputsV1`:
 
 ```text
-ExperimentInputsV1 {
+ExperimentSeedInputsV1 {
   namespace = "efs2/mvp-c0/2026-09-03"
   runId
   sourceCommitments[]
   toolchainCommitments[]
   chainConfigCommitment
-  coreInitCodeHash
-  byteStoreInitCodeHash
+  deploymentFactoryAddress
+  coreCreate2Salt
+  byteStoreCreate2Salt
+  coreCreationCodeTemplateHash
+  byteStoreCreationCodeTemplateHash
   codexConstantsHash
   indexCapabilityRoot
   orderedTypeGroupRoot
@@ -61,12 +65,73 @@ ExperimentInputsV1 {
   destructionPolicyHash
 }
 
-experimentCommitment = keccak256(canonical(ExperimentInputsV1))
+DOM_EXPERIMENT_SEED = keccak256("efs2/mvp-c0/experiment-seed/1")
+seedInputsHash = keccak256(canonical(ExperimentSeedInputsV1))
+experimentSeed = keccak256(abi.encode(DOM_EXPERIMENT_SEED, seedInputsHash))
 ```
 
 `sourceCommitments` include the exact Stage A corpus tip, this profile/manifest
 commit, and both independent codec implementations. Toolchain versions and
 compiler flags are content-addressed. `runId` is random and nonzero.
+`canonical(...)` is the C0 run codec: field order above, unsigned integers at
+their declared fixed widths, fixed-width values unpadded beyond that width,
+and arrays encoded as a fixed-width count followed by length-delimited elements
+in manifest order. No machine path or secret enters it.
+
+After `experimentSeed` is fixed, concrete init code and CREATE2 addresses are
+computed in this acyclic order:
+
+```text
+coreInitCode = coreCreationCodeTemplate ||
+  abi.encode(experimentSeed, codexConstantsBytes)
+coreInitCodeHash = keccak256(coreInitCode)
+coreAddress = create2Address(
+  deploymentFactoryAddress, coreCreate2Salt, coreInitCodeHash)
+
+byteStoreInitCode = byteStoreCreationCodeTemplate || abi.encode(
+  experimentSeed, coreAddress, maxStateFileBytes, maxReadRangeBytes)
+byteStoreInitCodeHash = keccak256(byteStoreInitCode)
+byteStoreAddress = create2Address(
+  deploymentFactoryAddress, byteStoreCreate2Salt, byteStoreInitCodeHash)
+```
+
+Core construction does not take `byteStoreAddress`, so this order has no
+cross-address cycle. Neither constructor takes `experimentCommitment`. After
+`codexConstantsBytes` contains the fixed C0 grammar/domain/capability material
+whose hash is in the seed; it contains no derived contract address,
+`experimentCommitment`, or `c0ProfileId`. After both contracts exist and their
+code is read back, the operator canonicalizes:
+
+```text
+ExperimentDeploymentV1 {
+  experimentSeed
+  coreAddress
+  coreCreate2Salt
+  coreInitCodeHash
+  coreRuntimeCodeHash
+  byteStoreAddress
+  byteStoreCreate2Salt
+  byteStoreInitCodeHash
+  byteStoreRuntimeCodeHash
+}
+
+DOM_EXPERIMENT_DEPLOYMENT =
+  keccak256("efs2/mvp-c0/experiment-deployment/1")
+deploymentHash = keccak256(canonical(ExperimentDeploymentV1))
+experimentCommitment = keccak256(abi.encode(
+  DOM_EXPERIMENT_DEPLOYMENT, experimentSeed, deploymentHash))
+
+DOM_C0_PROFILE = keccak256("efs2/mvp-c0/profile/1")
+c0ProfileId = keccak256(abi.encode(
+  DOM_C0_PROFILE, experimentCommitment))
+```
+
+The seed commits source, toolchain, chain, semantics, measured bounds, code
+templates, and salts without depending on derived init code. The final
+`experimentCommitment` transitively commits all seed inputs and directly
+commits the actual addresses and init/runtime code hashes. `c0ProfileId` is the
+WritePlan profile reference. It is distinct from the Stage A-derived
+`coreProfileId` returned by `genesisFacts()` after initialization.
 
 The byte bounds are not hand-picked defaults. The pre-genesis measurement
 sweeps candidate exact-byte sizes and chooses the largest candidate satisfying
@@ -86,40 +151,57 @@ the run; the operator does not patch state manually and continue.
 
 ### G0 — Freeze the run
 
-1. Recompute `experimentCommitment` independently in two implementations.
-2. Require exact equality of the canonical bytes and digest.
+1. Recompute `experimentSeed` independently in two implementations.
+2. Require exact equality of the seed-input bytes and digest.
 3. Require a clean local EVM chain with its chain ID/genesis hash committed by
    `chainConfigCommitment` and no prior C0 deployment.
-4. Record the intended CREATE/CREATE2 addresses and init-code hashes for Core
-   and the byte store.
+4. Construct the two init-code values in the order above and independently
+   recompute their hashes and intended CREATE2 addresses. The Core address is
+   fixed before it enters byte-store init code.
 
 No deployment occurs until G0 passes.
 
 ### G1 — Deploy and verify the state-readable byte carrier
 
-1. Deploy `MvpC0StateByteStore` with `experimentCommitment`,
-   `maxStateFileBytes`, and `maxReadRangeBytes` immutable.
-2. Read its exact runtime code, code hash, public parameters, empty coverage,
-   and empty byte count from state.
-3. Recompute the expected carrier address/code hash and compare.
+1. Deploy `MvpC0StateByteStore` with `experimentSeed`, the precomputed
+   `coreAddress`, `maxStateFileBytes`, and `maxReadRangeBytes` immutable. It
+   begins `UNSEALED` and rejects every byte write.
+2. Read its exact runtime code, code hash, seed, expected Core, public
+   parameters, empty coverage, and empty byte count from state.
+3. Recompute the expected carrier address/init/runtime code hashes and compare.
 
 The byte store is a carrier only. It does not mint File, FileRevision,
 ChunkTree, Record, or Locator identity.
 
 ### G2 — Deploy and initialize Core
 
-1. Deploy one atomic C0 Core whose init code commits to the namespaced B0
-   Codex, the WritePlan profile, and the index capability root.
-2. Call `initialize` once with the exact Stage A `InitConfig/1` tuple. Set its
-   existing `initialPolicyCommitment` field to the C0 hash of the exact null
-   policy bytes plus `experimentCommitment`; do not append a field or change
-   the tuple grammar.
-3. Read `genesisFacts()` and `codexConstants()`; recompute
-   `codexConstantsHash`, `profileId`, `initConfigHash`, `genesisCommitment`,
-   and `RealmId` independently.
-4. Require chain reference, Core address, code hash, all configuration fields,
+1. Deploy one atomic C0 Core whose constructor commits `experimentSeed` and the
+   namespaced B0 Codex, WritePlan, and index capability bytes. It begins
+   `UNINITIALIZED` and rejects publication.
+2. Read both contracts' actual addresses and runtime code from state; recompute
+   init-code hashes from the frozen creation-code templates and constructor
+   bytes. Build `ExperimentDeploymentV1`; require two implementations to
+   produce the same `experimentCommitment` and `c0ProfileId`.
+3. Call the C0 wrapper `initializeC0(initConfigBytes,
+   experimentDeploymentBytes)` once. It recomputes the final commitment and
+   C0 profile, checks its stored seed/address/code hashes, decodes the exact
+   Stage A `InitConfig/1` tuple unchanged, and requires the existing
+   `initialPolicyCommitment` field to equal
+   `keccak256(abi.encode(keccak256("efs2/mvp-c0/initial-policy/1"),
+   keccak256(nullPolicyBytes), experimentCommitment))` before storing that
+   tuple. No field is appended or rewritten.
+4. In that same transaction, Core calls the byte store's one-time
+   `sealFromCore(experimentDeploymentBytes)`. The store recomputes the same
+   commitment, requires `msg.sender == coreAddress`, persists
+   `experimentCommitment`, and changes `UNSEALED -> SEALED_EMPTY`. Either both
+   initialization and seal commit or both revert.
+5. Read `c0GenesisFacts()`, `genesisFacts()`, and `codexConstants()`; require
+   the exact seed, final commitment, C0 profile, byte-store address/code hash,
+   `codexConstantsHash`, `coreProfileId`, `initConfigHash`,
+   `genesisCommitment`, and `RealmId` to recompute independently.
+6. Require chain reference, addresses, code hashes, all configuration fields,
    and recomputed IDs to match. Unknown, duplicate, reordered, or trailing
-   Codex material aborts.
+   Codex or deployment material aborts.
 
 No application Record or Binding is admitted during G2.
 
@@ -140,7 +222,7 @@ application write, require it to contain exactly the C0 bundle:
    coverage.
 
 Recompute `indexCapabilityRoot` from the returned ordered entries and compare
-it with `ExperimentInputsV1` and the Core/Codex commitment. Any missing,
+it with `ExperimentSeedInputsV1` and the Core/Codex commitment. Any missing,
 additional, mutable, or post-genesis capability aborts. In particular,
 `BindingScope` cannot be enabled after the first Binding while retaining a
 complete-listing claim.
@@ -148,10 +230,14 @@ complete-listing claim.
 ### G4 — Admit Types through SR-17
 
 `TypeSchemaGroup/1` is the intrinsic bootstrap meta-Type recognized by Core.
-All other C0 Types enter as Records of that meta-Type through ordinary
-publication/admission exactly as Stage A SR-17 specifies: Core validates the
-group and atomically materializes every deterministic parsed-schema cache entry
-in the same admission. There is no standalone registration entrypoint and no
+All other C0 Types enter as Records of that meta-Type through the C0
+`publishWithPlanC0` variation of ordinary admission. C0 structurally reuses
+SR-17's TypeSchemaGroup body, derived TypeSchemaIds, one Record/Occurrence
+spine, group validation, and atomic materialization of every deterministic
+parsed-schema cache entry in the same admission. It varies only the publication
+witness: the composite Realm-bound WritePlan signature is verified under
+`C0_COMPOSITE_EOA_V1`, not mislabelled as Stage A's direct chain-free envelope
+signature. There is no standalone registration entrypoint and no
 admit-then-materialize interval.
 
 The schema author signs one `ADMIT_TYPE_GROUP` WritePlan per group. For these
@@ -173,6 +259,9 @@ Within each group, Type blobs are bytewise sorted by derived
 `TypeSchemaId`. After each admission:
 
 - recompute the group Record/Envelope/Occurrence IDs and admission receipt;
+- recompute the exact unsigned Stage A publication digest, derive EnvelopeId
+  and OccurrenceRefs, then separately verify the retained composite WritePlan
+  witness and `C0_COMPOSITE_EOA_V1` authority basis;
 - point-read every Type and cache entry;
 - verify its bundled index declarations against `indexCapabilityRoot`;
 - require automatic Type/Record/Occurrence/Principal/admission indexing; and
@@ -280,21 +369,28 @@ preSealAdmissionHigh
 ```
 
 The seal is evidence, not an upgrade/admin power. Core performs only the
-ordinary Type-structural validation; it gains no application-specific callback
-or bootstrap effect. The operator submits the seal only after all referenced
-exact point reads succeed and `preSealAdmissionHigh` equals the complete
-admission high immediately before the seal operation, and both independent
-readers verify those conditions afterward.
+ordinary Type-structural validation of the Record. Separately, the C0
+bootstrap state machine treats successful completion of this one operation as
+`BOOTSTRAP_OPEN -> RECEIPT_PENDING`: it closes every publication/runtime-write
+entrypoint before returning, while leaving read/proof endpoints available. The
+byte store checks this Core state and rejects writes while receipt-pending. The
+operator submits the seal only after all referenced exact point reads succeed
+and `preSealAdmissionHigh` equals the complete admission high immediately
+before the seal operation. Any attempt to write between the seal and activation
+must revert and invalidates the run if it does not.
 
 ### G12 — Persist and verify post-state roots
 
-At the first block after the seal transaction, independently read and persist
-`MvpC0GenesisReceiptV1`:
+Use the successful G11 transaction receipt's exact `blockNumber`, `blockHash`,
+and `transactionIndex`. Read and persist `MvpC0GenesisReceiptV1` against that
+exact block—not the next block and not a later `latest` snapshot:
 
 ```text
 experimentCommitment
 realmId
 genesisCommitment
+sealTransactionHash
+sealTransactionIndex
 blockNumber
 blockHash
 stateRoot
@@ -312,13 +408,24 @@ byteStoreStateRoot
 bootstrapSealRecordId
 routeConfigId
 canonicalReadBackRoot
+
+DOM_C0_GENESIS_RECEIPT =
+  keccak256("efs2/mvp-c0/genesis-receipt/1")
+genesisReceiptBodyHash = keccak256(canonical(
+  MvpC0GenesisReceiptV1 fields above, in order))
+genesisReceiptHash = keccak256(abi.encode(
+  DOM_C0_GENESIS_RECEIPT, genesisReceiptBodyHash))
 ```
 
 Each named logical root is the hash of an ordered, length-delimited set of
-state-readable point/page results at this exact block hash; its codec and
-ordering are part of the C0 run inputs. `canonicalReadBackRoot` commits to all
-other returned roots and exact IDs. The receipt also carries account/storage
-proofs tying Core and byte-store state to `stateRoot`.
+state-readable point/page results at the seal receipt's exact `blockHash`; its
+codec and ordering are part of the C0 run inputs. Because G11 entered
+`RECEIPT_PENDING` before returning, the seal transaction's immediate Core and
+byte-store post-state equals their end-of-block state even if unrelated
+transactions follow it in the block. `canonicalReadBackRoot` commits to the
+seal transaction hash/index, all other returned roots, and exact IDs. The
+receipt also carries account/storage proofs tying Core and byte-store state to
+that block's `stateRoot`.
 
 Both implementations must:
 
@@ -330,20 +437,32 @@ Both implementations must:
    genesis-active `BindingScope`;
 5. resolve the root, Plans, Mount, and Route to the expected `FOUND` results;
    and
-6. produce byte-identical `MvpC0GenesisReceiptV1` and
-   `canonicalReadBackRoot`.
+6. require Core state to be `RECEIPT_PENDING`, prove that no Core or byte-store
+   runtime mutation followed the seal, and produce byte-identical
+   `MvpC0GenesisReceiptV1` and `canonicalReadBackRoot`; and
+7. only after both readers agree, hash the exact receipt and let the bootstrap
+   author call the one-use `activateRuntime(experimentCommitment,
+   genesisReceiptHash)` transition. Core persists that hash and changes
+   `RECEIPT_PENDING -> RUNTIME_ACTIVE`; a separate activation receipt records
+   this later state change.
 
 An empty root listing is `ABSENT_PROVEN` per name domain only after the complete
 scope pages close at this basis; an empty page alone proves nothing.
 
+G12's genesis receipt always describes the G11 seal post-state. The activation
+transaction is not folded back into it. Runtime writes remain contract-gated
+until activation succeeds, and the first post-genesis operation below must
+name the persisted `genesisReceiptHash`.
+
 ## 3. First post-genesis write
 
-The genesis is usable only after one synthetic create-file operation proves the
-whole profile:
+After G12 activation, the genesis is usable only after one synthetic
+create-file operation proves the whole profile:
 
 1. plan exact bytes and store them through `MvpC0StateByteStore`;
 2. create File Object/charter, ChunkTree, FileRevision, DirectoryEntry,
-   file-head Binding, and name-slot Binding in one normal EOA WritePlan;
+   file-head Binding, and name-slot Binding in one normal EOA WritePlan that
+   places the persisted `genesisReceiptHash` in `C0RealmEffects/1`;
 3. submit through a distinct relayer;
 4. preserve authorship/publication, authorization, submission,
    admission/effect, and byte-store receipts separately;
