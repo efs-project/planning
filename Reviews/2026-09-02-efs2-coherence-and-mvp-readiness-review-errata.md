@@ -16,11 +16,15 @@ interpretation.
 
 1. **Core experiment authorization.** The readiness branch's
    `RECOMMEND-GO-CODE` technical disposition, its control, and its V2-C1 packet
-   are proposal/evidence, not an authorization to build, deploy, or run a Core
-   experiment.  The review's “can you start” answer must be read as evidence
-   that a disposable candidate had been exercised, not permission inherited
-   from that evidence.  Review integration likewise grants no experiment,
-   product, deployment, or freeze authority.
+   are proposal/evidence; the branch itself grants no authority.  The review's
+   “can you start” answer must not infer permission from that branch evidence.
+   It is nevertheless false that `main` has no build authorization: the current
+   Core candidate, Stage A status record, and Core Kanban card explicitly permit
+   a **disposable Core Stage B** comparison/prototype.  That existing permission
+   is bounded: it does not authorize permanent deployment, a semantic freeze,
+   durable product data, or Web Client/product implementation.  The separate
+   Web Client/product hold remains in force.  Integrating this review and errata
+   grants no additional experiment, product, deployment, or freeze authority.
 
 2. **Genesis and Type admission.** The review overstates the absence of a
    starting path when it says nobody admits Files Types.  Stage A's SR-17 and
