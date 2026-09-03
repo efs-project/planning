@@ -8,7 +8,7 @@
 **Authority:** [[owner-rulings]] — especially the 2026-08-12 greenfield boundary and the adopted Linux/macOS/Windows read-only outcome
 **Supersedes:** the July path-derived TAGDEF, redirect/moved-to, global whiteout-object, and DATA/file-hybrid mechanisms in [[fs-pass-synthesis]] and related historical files; it does not supersede [[mountable-filesystem-semantics]]'s adopted three-host outcome or acceptance tests
 **Reviewers:** @files-core-exact-review, @files-requirement-matrix, and @files-schema-redteam (2026-08-14)
-**Last touched:** 2026-08-14
+**Last touched:** 2026-09-03
 
 #status/review #kind/design #repo/planning #repo/sdk #topic/efsv2 #topic/content #topic/read-path #topic/lenses
 
@@ -19,6 +19,11 @@
 > `FilesRouter`, and the first
 > public/single-Realm fixture are experiment arms. Return only an irreducible
 > product or permanence fork to the owner.
+>
+> [[disposable-mvp-profile]] now selects one smaller namespaced Core/Files
+> control and [[mvp-c0-genesis-manifest]] orders its bootstrap. This authorizes
+> no Web Client/product implementation and adopts no permanent Files bytes,
+> Type/query model, carrier, Principal, or write grammar.
 
 ## Problem
 
@@ -77,6 +82,10 @@ filesystem-level mutation preconditions across a plural Plan.
 10. The canonical Files model is platform-neutral. Host filenames, inode/file
     IDs, xattrs, caches, and adapters are reversible projections, never EFS
     identity.
+11. MVP-C0 temporarily selects one Principal, complete genesis-time
+    `BindingScope`, state-readable small-byte carrier, three same-Principal
+    writes, and one composite `WritePlan` approval. That overlay is disposable
+    evidence, not an amendment to the permanent Files candidate.
 
 ## 1. Layer boundary
 
@@ -352,6 +361,13 @@ admitted Records. `RoutedAdmissionIntent/1` is a signed Core interface
 structure, not an application Record. A future proposal may admit one of these
 derived artifacts as evidence only by defining and minting a separate exact
 Type.
+
+For MVP-C0, the exact subset and dependency order are fixed by
+[[mvp-c0-genesis-manifest#G4 — Admit Types through SR-17]]. The experiment uses
+the bundled B0 Type/index-identity arm and admits every TypeSchema group through
+SR-17. It does not mint split semantic Type, representation, validation, View,
+or QueryProfile identities. The SDK-facing seam retains a discriminated future
+split arm so this temporary choice cannot become an accidental permanent ABI.
 
 ### 3.1 Shared ObjectGenesis/1
 
@@ -699,6 +715,14 @@ cannot be replayed into another logical listing.
 `BindingScope` must exist at Realm genesis. An upgrade that begins indexing
 only future mutations cannot claim complete old directories without an exact,
 completeness-gated backfill transition.
+
+The MVP-C0 Realm includes `KIND_BINDING_SCOPE` in its namespaced genesis Codex
+and capability root before admitting any application Binding. This is the
+control needed to test complete directory listing. It does not adopt
+`BindingScope`, its numeric code, its physical layout, or bundled placement for
+a permanent EFS v2 profile. If the scope fixture fails, C0 relabels listing
+`PARTIAL` and stops the complete-listing claim; it never substitutes a hosted
+index.
 
 ### 5.3 Listing algorithm
 
@@ -1083,6 +1107,15 @@ An open file handle pins `(FilesView, effectiveMount, File Object,
 FileRevision, ChunkTree)`. A later head change affects a new open, not an
 existing handle.
 
+MVP-C0 chooses one separate state-readable `MvpC0StateByteStore` for synthetic
+small files. Its address, code hash, run-local bounds, and capability are
+committed by the genesis manifest. Exact bytes must be reconstructable from
+state/code and proofs without logs, transaction calldata, an operator database,
+or a gateway. The File Object, FileRevision, ChunkTree/digest, carrier handle,
+Locator, and observed availability remain separate. Each run selects a finite
+cap from measured gas/state/read/client margins; this document adopts no
+permanent numeric cap or production custody policy.
+
 ### 7.4 Retrieval observers and interest privacy
 
 Integrity, authority, completeness, availability, and lookup privacy are
@@ -1129,6 +1162,33 @@ Preview/Play action may grant a separately reviewed runner capability only
 after required closure verification.
 
 ## 8. Namespace and file mutation
+
+### MVP-C0 one-approval overlay
+
+The disposable control does not use the certified FilesRouter profile below.
+It supports only same-Principal create-empty-directory, create-small-file, and
+publish-revision through one atomic Core call. Its normal relayed EOA path asks
+for one composite EIP-712 `WritePlan` signature. That signature commits to both
+the portable publication digest and the exact Realm effects—selected leaves,
+CAS revisions, Route, byte commitment, nonce, expiry, executor, and code hash—
+while preserving separate publication, authorization, submission,
+admission/effect, and canonical-read-back receipts.
+
+Because the composite signature is Realm/chain/Core-bound, this arm does not
+claim independently detachable realm-neutral authorship. That requires either
+an additional publication signature or a previously approved scoped
+delegation. Direct EOA fallback is one transaction prompt with honestly weaker
+transaction-bound authorship evidence. A bounded revocable smart/session grant
+may enable zero routine wallet prompts after initial approval. Wallet
+acknowledgement and transaction receipt never equal canonical EFS success;
+read-back at a committed basis must match the plan and receipts.
+
+Cross-Principal atomicity, `O_EXCL`, `NOREPLACE`, overwrite, rename/move,
+unlink, and `FILES_PRECONDITION_CERTIFIED` remain future FilesRouter work. A C0
+Route keeps `writeRouter=0` and labels the external manifest-bound direct Core
+path `EXPERIMENTAL_DIRECT_CORE` with
+`filesPreconditionCertified=false`; it never calls zero Router fields a
+certified writable Route.
 
 ### 8.1 Operation shapes
 
@@ -1327,8 +1387,10 @@ be `FILES_PROFILE_VALIDATED`; otherwise the Router returns
 fails even if the human-readable path is
 unchanged; unrelated blocks/admissions do not fail an operation.
 
-Every participating Principal signs a `RoutedAdmissionIntent/1` with the same
-exact Router address/code hash and `operationRecordId`.
+In this future certified-router profile, each participating Principal supplies
+an independently authorized `RoutedAdmissionIntent/1` for the same exact Router
+address/code hash and `operationRecordId`; this is not the default MVP-C0
+ceremony.
 `preflightFilesViewId` records what the signer reviewed; the Router does not
 require a future inclusion block to equal that historical block. Instead the
 operation commits the Realm revision and exact dependency/result expectations. At
@@ -1507,6 +1569,22 @@ RANGE_NOT_SATISFIABLE
 PROJECTION_COLLISION
 UNSUPPORTED_HOST_PATH
 ```
+
+MVP-C0 projects point queries through one smaller canonical law:
+
+```text
+FOUND | ABSENT_PROVEN | UNKNOWN | CONFLICT
+```
+
+The full Files terms above remain typed reason, validation, bytes, effect, or
+presentation detail. Every point result separately carries domain, committed
+basis, coverage, support, validation, bytes, and write effect. `FOUND` does not
+promise available bytes. Unsupported or malformed inputs return `UNKNOWN` with
+their separate dimension/reason rather than growing a competing point enum.
+Merged absence is legal only when every source is complete, supported, valid,
+and `ABSENT_PROVEN` for the same committed basis and domain. Any partial page,
+provider failure, unavailable history, unsupported profile, invalid evidence,
+or basis mismatch is `UNKNOWN`; unresolved incompatible values are `CONFLICT`.
 
 Only `ABSENT_PROVEN` or an intentionally hidden `MASKED` result may project to
 ordinary `404`/`ENOENT`. `UNKNOWN`, incomplete pages, unavailable history, or
@@ -2170,7 +2248,14 @@ disposable accelerators whose contents are checked against the exact view.
 
 ## 14. Implementation sequence
 
-1. **Freeze-input preparation:** close the V2-E1 uniform-Principal experiment;
+0. **Disposable MVP-C0 first:** instantiate [[disposable-mvp-profile]] through
+   [[mvp-c0-genesis-manifest]] on a fresh local Realm with synthetic data.
+   Exercise B0-bundled Types/indexes, genesis-time `BindingScope`, one
+   state-readable carrier, the composite one-approval path, direct fallback,
+   bounded session permission, canonical result law/read-back, and independent
+   reconstruction. Create a new Realm for every semantic change. This step
+   authorizes no Web Client/product implementation.
+1. **Permanent freeze-input preparation:** after C0 evidence, close the V2-E1 uniform-Principal experiment;
    pin the generic `ObjectGenesis/1` schema; mint candidate Files Type blobs
    and Unicode/name tables; repair empty `ChunkTree/1`; add `BindingScope` and
    `RoutedAdmissionIntent/1` and retained consent metadata to the candidate
@@ -2195,6 +2280,11 @@ disposable accelerators whose contents are checked against the exact view.
    owner-sized choices close only through V2-F1/F2.
 
 ## Open questions
+
+The permanent questions below remain evidence-gated. The bundled Type/query
+arm, intrinsic account Principal, measured carrier bounds, and WritePlan used
+by MVP-C0 are temporary controls and do not require an owner answer before the
+run.
 
 - [ ] **Evidence gate — Unicode:** archive/hash the candidate Unicode 17 tables,
   produce cross-language name vectors, and compare rich names against the ASCII
@@ -2265,9 +2355,12 @@ disposable accelerators whose contents are checked against the exact view.
 
 ## Implementation notes
 
-No durable implementation is authorized by this draft. Disposable Stage B
-experiments should use isolated worktrees and retain exact toolchains, inputs,
-vectors, measurements, and nonconformance labels.
+No durable implementation is authorized by this draft. The current disposable
+Stage B target is [[disposable-mvp-profile]], with bootstrap ordering in
+[[mvp-c0-genesis-manifest]]. It should use an isolated implementation worktree
+and retain exact toolchains, inputs, vectors, measurements, receipts,
+nonconformance labels, and retired-Realm evidence. The control does not
+authorize Web Client/product work.
 
 After promotion, track independently:
 

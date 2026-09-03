@@ -2,8 +2,8 @@
 
 **Status:** reference — compact live queue; mechanisms remain evidence-gated
 **Audience:** James first; designers second
-**Last reconciled:** 2026-08-12
-**Inputs:** [[system-constitution]], [[core-architecture-candidate]], [[owner-rulings]], [[assumptions-and-requirements]], and the preserved July decision/review corpus in git history
+**Last reconciled:** 2026-09-03
+**Inputs:** [[system-constitution]], [[core-architecture-candidate]], [[disposable-mvp-profile]], [[mvp-c0-genesis-manifest]], [[owner-rulings]], [[assumptions-and-requirements]], and the preserved July decision/review corpus in git history
 
 #status/reference #kind/decision #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2
 
@@ -11,6 +11,13 @@
 > greenfield name and layer boundary on 2026-08-12. The current work is to
 > prototype and pressure-test the candidate, then return only choices that the
 > evidence cannot settle.
+>
+> James's 2026-09-03 direction supplies reversible MVP-C0 controls for the B0
+> bundled Type/index arm and wallet-prompt target. Those controls are enough to
+> run the experiment and are not permanent answers to V2-E1/E4/E5/F1/F2. Do not
+> ask for the Type/query axis, carrier limit, Principal future, product scope,
+> venue, or freeze merely to execute C0. Web Client/product implementation
+> remains separately held.
 
 ## Decide after evidence — do not answer yet
 
@@ -22,6 +29,10 @@ tagged `Account | Principal` author reference. Return gas, setup, smart-account,
 historical-authority, developer-complexity, and managed-identity migration
 results. James's preference is one semantic Principal surface; it is not frozen
 until the comparison proves it honest and simpler.
+
+MVP-C0 temporarily exercises one intrinsic account Principal, retained EOA
+witness verification, direct-transaction fallback, and one bounded/revocable
+session grant. That evidence feeds this comparison without closing it.
 
 ### V2-E2 — Contract Lens floor
 
@@ -44,6 +55,10 @@ including hostile hot values and decades of churn. Determine safe Type-creator
 limits, canonicalization rules, page/basis/completeness ABI, and whether any
 old on-chain query promise exceeds the aggregate budget.
 
+The namespaced MVP-C0 Realm uses the B0 bundled Type/index arm plus
+genesis-active `BindingScope` only as a control. No answer here is required
+before that run, and its SDK seam must retain the later split profile.
+
 ### V2-E5 — Realm bootstrap and authority history
 
 Specify and attack a self-contained Realm descriptor for a fresh L3, EOA and
@@ -51,13 +66,18 @@ ERC-1271 admission, historical implementation/authority basis, finality
 observation, upgrade semantics, and independent state reconstruction. No
 Commons or another chain may be required.
 
+[[mvp-c0-genesis-manifest]] closes only the ordered local synthetic experiment
+bootstrap. A permanent Realm descriptor, venue, upgrade policy, and operator
+model remain this evidence gate.
+
 ### V2-E6 — Web Client and OS vertical slice
 
-Build a clean-browser direct guest File Browser plus one verified Arcade view
-behind an adapter. Prove Web/OS Files parity, no-Commons operation, honest
-`UNKNOWN`, tampered-primary rejection, and verified fallback. Then decide
-whether the first Web Client also needs writes and how it is packaged relative
-to EFS OS.
+After separate implementation authorization, build a clean-browser direct
+guest File Browser against the shared Core/Files/SDK contract. Prove Web/OS
+Files parity, no-Commons operation, honest `UNKNOWN`, tampered-primary
+rejection, verified fallback, and the bounded write journey selected for that
+product gate. Then decide permanent Web Client/OS packaging. Arcade may remain
+one optional fixture; it is not a product or MVP dependency.
 
 ### V2-E7 — Commons venue criteria
 
@@ -87,9 +107,12 @@ adversarial review pass.
 ### V2-F2 — First product implementation scope
 
 Choose the first permanent contracts/SDK/Web Client release after the freeze
-candidate proves the direct guest, contract Lens, Arcade, Git/Markdown, EAP,
+candidate proves the direct guest, contract Lens, generic Files, Git/Markdown, EAP,
 large-content, and mounted-filesystem traces. Commons venue and full EFS OS may
 remain later without weakening Core.
+
+MVP-C0 and its later SDK/client acceptance overlays are experiment definitions,
+not release authorization or an implicit answer to this choice.
 
 ## Superseded questions — never revive silently
 

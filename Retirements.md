@@ -32,3 +32,6 @@ What rulings have **retired**, and what replaced it. Input to `./scripts/needs-i
 | `EFS 1.5 bridge` | 2026-08-08 greenfield-successor ruling | 2026-08-12 |
 | `v1 coexistence` | 2026-08-08 greenfield-successor ruling | 2026-08-12 |
 | `additive sibling 1.5 EAS schemas` | 2026-08-08 greenfield-successor ruling | 2026-08-12 |
+| `read-only-first product loop` | 2026-09-03 MVP-C0 scope ruling | 2026-09-03 |
+| `in parallel, build the narrow direct Web Client/File Browser + one-game Arcade slice` | 2026-09-03 MVP-C0 scope ruling | 2026-09-03 |
+| `two EIP-712 signatures / multiple wallet prompts per operation as an acceptable default MVP write ceremony` | 2026-09-03 one-approval write ruling | 2026-09-03 |

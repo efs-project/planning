@@ -18,7 +18,9 @@ candidate,” then stop unless you want the engineering detail. For a deep pass:
 3. [[owner-rulings]] — what James actually adopted; and
 4. [[owner-decision-inbox]] — evidence gates, not a questionnaire.
 
-Focused next-pass prompt: [[fable-efs2-core-engineering-kickoff]].
+Current bounded experiment: [[disposable-mvp-profile]] with the ordered
+[[mvp-c0-genesis-manifest]]. The earlier focused review prompt remains
+[[fable-efs2-core-engineering-kickoff]].
 
 ## The current shape
 
@@ -88,6 +90,29 @@ on the draft's generic `BindingScope` and executor/operation-bound consent
 experiments; neither is current B0. It is a draft experiment target, not a
 frozen profile or owner decision packet.
 
+### Disposable MVP-C0 control
+
+[[disposable-mvp-profile]] selects one visibly namespaced, throwaway Stage B
+control so permanent questions do not block measurement. It uses the bundled
+B0 Type/index arm, genesis-time `BindingScope`, an intrinsic account Principal,
+a separately identified state-readable small-byte carrier, and the canonical
+four-outcome point law. [[mvp-c0-genesis-manifest]] orders Core initialization,
+index activation, SR-17 Type admission, Principal/root/Plans/Mount/Route
+creation, and independently verified post-state roots.
+
+The normal relayed EOA path has one composite EIP-712 `WritePlan` approval that
+commits to both a portable publication digest and exact Realm effects. Their
+receipts and meanings remain separate; this realm-bound signature does not
+claim detachable realm-neutral authorship. Direct EOA fallback uses one
+transaction prompt with weaker chain/transaction-bound authorship evidence.
+A bounded revocable smart/session grant targets zero routine wallet prompts
+after its initial approval. In every arm, wallet acknowledgement and a
+transaction receipt precede canonical read-back and are not EFS success.
+
+These are temporary experiment choices only. Web Client/product work remains
+separately held; no Type/query axis, carrier limit, Principal model, product,
+venue, contract topology, deployment, or freeze is adopted.
+
 ## Evidence map
 
 These are inputs, not competing active architectures:
@@ -103,6 +128,8 @@ These are inputs, not competing active architectures:
 | [[hierarchical-files-and-folders]] | Current greenfield hierarchical Files/1 proposal; replaces July namespace mechanisms while preserving the adopted mount outcome. |
 | [[privacy-pass-synthesis]] and privacy corpus | Payload/read/metadata distinctions, privacy seams, and honest limitations. Old crypto/profile bytes are candidates. |
 | [[layered-type-system-and-data-abi]] | Current Type-system proposal: exact nominal Types, bounded Data Views, directional compatibility, query-profile evolution, tags/catalog paths, projections, modular EVM deployment, and falsifying experiments. |
+| [[disposable-mvp-profile]] | Namespaced Core/Files Stage B control: exact temporary scope, one-approval write law, result law, state-readable small bytes, and stop/destruction rules. |
+| [[mvp-c0-genesis-manifest]] | Ordered C0 Realm/application bootstrap and independently verifiable post-state-root contract. |
 | [[deterministic-ids]], [[codex-envelope]], [[codex-kinds]], [[codex-kernel]] | July native v2 formulas and implementation hypotheses. Useful but superseded as an automatic baseline. |
 | [`../efs15/`](../efs15/) | Fully reviewed EAS-backed contraction and exact vectors. Historical evidence showing what semantic IDs, schemas, admission, and reads require. |
 | [Arcade](../arcade/README.md) | Project/release/artifact, verified runner, curation, rights, comments, and direct guest pressure test. |
@@ -112,19 +139,25 @@ These are inputs, not competing active architectures:
 
 ## Build order
 
-1. Review the constitution and current candidate against the full survivor
-   ledger and application fixtures.
-2. Implement two disposable Core prototypes: self-contained Records versus
-   immutable shared Context/Envelope normalization.
-3. Benchmark complete write, storage, index, reconstruction, and Lens costs—not
-   isolated happy paths.
-4. Run the focused Fable 5 pass plus independent database, EVM/security,
+1. Instantiate [[disposable-mvp-profile]] through the ordered
+   [[mvp-c0-genesis-manifest]] on a fresh local Realm with synthetic data.
+2. Implement the C0 Core, five-seam SDK boundary, state-readable byte carrier,
+   one-approval WritePlan paths, canonical read-back, and a clean-room second
+   reader. Measure complete write, read, state, prompt, and reconstruction
+   costs—not isolated happy paths.
+3. Stop or create a new namespaced Realm whenever an identity, result,
+   capability, or authorization rule changes; retain falsifiers and exact
+   evidence without promoting the control to a default.
+4. Use C0 results to resume the permanent Record/context, Type/query,
+   Principal, index, carrier, and physical-contract bakeoffs.
+5. Run the focused Fable 5 pass plus independent database, EVM/security,
    standards, privacy, and long-horizon reviews.
-5. Integrate accepted findings, close the owner-sized choices, and only then
-   prepare the freeze bundle and contracts/SDK plan.
-6. In parallel, build the narrow direct Web Client/File Browser + one-game
-   Arcade slice behind an adapter so product work tests the model without
-   freezing it by accident.
+6. Integrate accepted findings, close only irreducible owner-sized choices,
+   and only then prepare the freeze bundle and contracts/SDK plan.
+
+Web Client/product implementation is not a parallel C0 step. It remains held
+until separately authorized. Arcade remains an optional application fixture,
+not an MVP dependency or first-product selection.
 
 ## Hard holds
 
@@ -134,11 +167,14 @@ These are inputs, not competing active architectures:
 - No v1 compatibility, migration, coexistence, or legacy-read requirement.
 - No durable Arcade, EAP, Nanda, or other production seed before the relevant
   semantic IDs and reconstruction contracts freeze.
+- No product implementation is authorized by the disposable MVP-C0 Core/Files
+  control or by its future SDK/acceptance overlays.
 - Upgradeable prototype contracts are acceptable; silent reinterpretation of
   old admitted data is not.
 
 ## Status
 
-The two active docs are `#status/draft`. They become review-ready only after
-the prototype/Fable/adversarial passes are integrated. Promotion remains the
-owner's normal human-gated ceremony.
+The constitution and Core candidate remain `#status/draft`; the Files proposal
+remains `#status/review`; and the two MVP-C0 documents are `#status/draft`.
+Passing a disposable run produces evidence, not promotion. Any status change
+still follows the owner's normal human-gated ceremony.

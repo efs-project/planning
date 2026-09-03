@@ -1,7 +1,7 @@
 # EFS v2 — Owner rulings & notes (James)
 
 **Status:** reference — append-only, dated ruling ledger. NOT a design: decisions/directions only. The design docs get updated to match separately.
-**Last touched:** 2026-08-12
+**Last touched:** 2026-09-03
 
 #status/reference #kind/note
 
@@ -219,3 +219,34 @@ The 2026-07-22 cross-platform read-only mount requirement and research-before-MV
   Commons features/operator/brand; and all candidate Core primitives and bytes.
 
 — ruled by @james, 2026-08-12
+
+## 2026-09-03
+
+### Disposable MVP-C0 and wallet-approval direction
+
+- **Run one visibly namespaced, disposable Core/Files MVP-C0 control.** Use the
+  B0 bundled Type/index arm only as that control; keep the permanent
+  Type/query-identity bakeoff and an SDK seam capable of a later split. This
+  direction authorizes no permanent protocol/profile, semantic freeze, public
+  or permanent deployment, durable product data, or Web Client/product
+  implementation.
+- **The normal EOA target is one wallet approval.** One composite EIP-712
+  `WritePlan` may bind the portable publication digest and exact Realm effects,
+  while authorship/publication, authorization, submission, admission/effect,
+  and canonical-read-back meanings and receipts stay distinct. Because the
+  signature is Realm/chain/Core-bound, this arm does not claim independently
+  detachable realm-neutral authorship; that requires another signature or a
+  prior scoped delegation.
+- **Direct EOA fallback is also one prompt, but different evidence.** A direct
+  Core transaction may carry the full plan in one transaction prompt. Its
+  authorship evidence is chain/transaction-bound and weaker than a separately
+  signed portable publication; clients must label it rather than upgrade the
+  claim.
+- **Smart/session wallets target zero routine prompts after permission.** One
+  initial bounded, expiring, and revocable grant may authorize a session key to
+  sign routine in-scope WritePlans. Wallet acknowledgement, bundler/relay
+  acceptance, and an EVM transaction receipt never equal canonical EFS
+  success; exact admission/effect receipts and canonical read-back remain
+  required.
+
+— ruled by @james, 2026-09-03

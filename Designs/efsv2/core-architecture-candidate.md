@@ -5,7 +5,7 @@
 **Depends on:** [[system-constitution]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-08-12
+**Last touched:** 2026-09-03
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #topic/efsv2 #topic/onchain #topic/graph-queries #topic/lenses
 
@@ -15,6 +15,12 @@ The constitution says what EFS 2.0 must accomplish. Engineers now need one
 small candidate they can implement, attack, measure, and reject without
 mistaking it for the final answer. This document names that candidate and the
 few seams still capable of changing it.
+
+[[disposable-mvp-profile]] is the bounded implementation overlay for the next
+Stage B control, and [[mvp-c0-genesis-manifest]] is its ordered application
+bootstrap. Their B0-bundled Type/index, Principal, carrier, result, and
+authorization choices are namespaced experimental inputs. They do not settle
+the alternatives or open questions in this document.
 
 ## Candidate in one picture
 
@@ -151,11 +157,23 @@ AdmissionIntent? {
 
 The Publication Envelope amortizes repeated author, actor, signature, replay,
 and optional batch data. Moving a Record into another Envelope does not change
-RecordId. A separate Realm-bound admission intent can authorize local effects
-without silently making the authored publication itself Realm-local. The
-bakeoff must compare portable and intentionally Realm-bound publication
-profiles, including cross-Realm replay and subset carriage; candidate syntax is
-not allowed to discard portable signed evidence accidentally.
+RecordId. Outside the disposable C0 control, distinct portable authorship and
+Realm-bound effect authorization remain one bakeoff arm. The bakeoff must
+compare portable and intentionally Realm-bound publication profiles, including
+cross-Realm replay and subset carriage; candidate syntax is not allowed to
+discard portable signed evidence accidentally.
+
+MVP-C0 tests a narrower one-approval construction: one EIP-712 `WritePlan`
+signature commits to both the portable publication digest and the exact
+Realm-effect digest. The two meanings and their receipts remain distinct. The
+outer signature is Realm/chain/Core-bound, so this arm does not claim
+independently detachable realm-neutral authorship; that requires either an
+additional publication signature or a prior scoped delegation. The normal EOA
+path is relayed after the one signature. Direct EOA fallback uses one
+transaction prompt and records weaker transaction-bound authorship evidence.
+A bounded revocable smart/session grant targets zero routine wallet prompts
+after initial approval. Details and success semantics are normative only for
+the experiment in [[disposable-mvp-profile#4. One-approval write law]].
 
 `leafIndex` is simply the zero-based position of one Record inside the signed
 Envelope. It distinguishes two occurrences of Records carried together without
@@ -261,6 +279,14 @@ without rewriting history. Reject uniform Principals if the abstraction adds
 setup blocks, hides authority basis, fractures portable EOA authorship, or costs
 more complexity than it removes.
 
+MVP-C0 temporarily selects the intrinsic account-Principal arm without closing
+that comparison. It persists the exact normal-path WritePlan bytes and accepted
+low-s EOA witness so a second implementation can recompute the digest, recover
+the signer, derive the Principal, and compare the admission basis from state
+alone. Contract-account verdicts remain Realm-and-basis-qualified; direct EOA
+fallback remains transaction-bound. Key loss/recovery is unsolved and only
+synthetic authorship is permitted.
+
 ### Indexes
 
 Baseline automatic indexes distinguish the different evidence sets:
@@ -296,6 +322,13 @@ new canonical index means a new Type Schema. Under Variant B, a new
 `IndexProfileId` may preserve the semantic Type and Record IDs, but its start
 basis and coverage are explicit and any backfill stays `PARTIAL` until proved
 complete.
+
+For MVP-C0 only, the B0 bundled arm is extended at genesis with
+`KIND_BINDING_SCOPE` from [[hierarchical-files-and-folders#5. Complete
+directory enumeration: BindingScope]]. That capability is committed in the
+same namespaced Type/index bundle before any Files Binding. It permits the C0
+empty-root and later directory-listing claims to close as complete without
+pretending the permanent Type/query-identity bakeoff has been answered.
 
 ### Contract Resolution Plan (Lens)
 
@@ -340,6 +373,24 @@ Generic application profiles build on Records:
 
 Core knows none of these names. Their Type Schemas and declared reference
 indexes are sufficient.
+
+MVP-C0 adds one separate state-readable small-byte carrier. File Object,
+FileRevision, ChunkTree/digest, carrier handle, Locator, and observed
+availability remain distinct. Each run records and enforces measured finite
+write/range bounds; no C0 number becomes a permanent protocol cap. A missing or
+unavailable carrier never changes a `FOUND` File into absence.
+
+### MVP-C0 point-result projection
+
+The experiment's canonical point outcome is exactly
+`FOUND | ABSENT_PROVEN | UNKNOWN | CONFLICT`. Domain, committed basis,
+coverage, support, validation, bytes, and write effect remain separate
+dimensions. Merged absence is proved only when every input is complete,
+supported, valid, and `ABSENT_PROVEN` at the same committed basis and domain.
+Any missing/provider failure, partial coverage, unsupported profile, invalid
+evidence, or basis mismatch is `UNKNOWN`; material unresolved disagreement is
+`CONFLICT`. Files-specific errors remain detail around this law rather than a
+competing universal point enum.
 
 ## Modular contract shape to prototype
 
@@ -439,6 +490,9 @@ Reject or redesign this architecture if:
 
 ## Open questions
 
+The following are permanent-design questions. None must be answered merely to
+run the namespaced [[disposable-mvp-profile|MVP-C0]] control.
+
 - [ ] Finalize the two bakeoff implementations and fixture corpus.
 - [ ] Define the Realm descriptor and admission/finality observation split.
 - [ ] Decide the developer name (`TypeSchema`, `TypeDefinition`, or another
@@ -463,5 +517,9 @@ Reject or redesign this architecture if:
 
 ## Implementation notes
 
-The next implementation is disposable prototype code. It must not deploy
-permanent bytes or become a product dependency merely because it is first.
+The next implementation is the disposable [[disposable-mvp-profile|MVP-C0]]
+control initialized by [[mvp-c0-genesis-manifest]]. It must not deploy
+permanent bytes, authorize Web Client/product work, or become a dependency
+merely because it is first. Wallet acknowledgement and transaction receipt are
+not completion; the run ends each write only after canonical read-back and
+independent reconstruction evidence agree.
