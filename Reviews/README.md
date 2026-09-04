@@ -112,3 +112,7 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 ### DeepSeek Harness, Cordis, and modular-system pressure (2026-08-26)
 
 - [`2026-08-26-module-plugin-systems-pressure/`](./2026-08-26-module-plugin-systems-pressure/) — pinned DeepSeek Harness and Cordis-paper/code review plus OSGi, Eclipse, VS Code/LSP, WebExtensions, Nix/Guix, Kubernetes, systemd/D-Bus, WordPress, Figma, SES and Wasm comparison; retains owned-resource lifecycle, explicit dependency, consumer-first withdrawal and transactional-reconciliation laws while rejecting a same-realm plugin framework as EFS identity, authority, confinement or production-update architecture. Adds exact direct-route, teardown, provider, conflict, crash, external-effect, cross-lane, hostile-runtime, migration, scale and provenance fixtures without adopting a runtime or Core change.
+
+### Portable EFS agent roles (2026-09-03)
+
+- [`2026-09-03-agent-role-system/`](./2026-09-03-agent-role-system/) — owner-approved operating briefs, cross-harness instruction research, bounded implementation and fresh-context review evidence. Stable roles and explicit task handoffs do not grant authority or launch workers; native-harness tests are distinguished from document and helper validation. Start with the live [role roster](../Agents/README.md).
