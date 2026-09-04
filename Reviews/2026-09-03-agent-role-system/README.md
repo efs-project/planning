@@ -19,9 +19,11 @@ Start with the live [role roster](../../Agents/README.md) and [launch contract](
 
 Two pre-implementation experts reviewed platform portability and local responsibility/authority boundaries. The document implementation then received an independent task review. That review found one mutable public-query policy embedded in the Media SOUL; commit `979dad6` replaced it with a route to the assigned source revision's media/Core rulings. Scoped re-review confirmed the issue addressed with no new breakage. No underlying media policy changed.
 
-The helper's independent task review found that headings/comments alone counted as nonempty section content. Commit `52304ce` added rejection and regression fixtures; scoped review confirmed the integrity gap addressed. The suite now passes 60 assertions. A remaining minor formatting edge case (substantive text after a closing HTML comment on the same line) is carried into final review, not treated as a semantic or permission guarantee.
+The helper's independent task review found that headings/comments alone counted as nonempty section content. Commit `52304ce` added rejection and regression fixtures. Whole-branch review then found a related hidden-section bypass and false rejections around comments. Commit `9997131` corrected comment handling across the whole brief; final scoped re-review confirmed both findings addressed with no new breakage. The latest suite passes 67 assertions; the live roster validates 16 roles and 62 routing keys. These checks do not prove role semantics or runtime permissions.
 
 The fresh-context probe handled all eight synthetic cases consistently with the documented ownership, review-only, collision, source-revision and handoff boundaries. This is interpretation evidence, not an automatic permission or locking guarantee. Native Claude/Antigravity role startup is not established by the probe; see its explicit limits and the [harness matrix](../../Agents/harnesses.md).
+
+The complete main-relative change received independent whole-branch review. All findings were addressed. Controller reruns of syntax, the behavioral suite, live-roster checks, open-decisions, tri-sync and whitespace checks passed. Concurrent PM research from main at `316f6a8` was preserved, including both dated status entries and review-index entries; no product-design branch or protocol change is part of this rollout. James explicitly authorized main merge and push after verification.
 
 ## What to watch in real use
 
