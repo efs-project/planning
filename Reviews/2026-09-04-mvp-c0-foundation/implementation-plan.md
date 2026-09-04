@@ -68,7 +68,7 @@ pure tree test; it does not change Task 3's disclosed measurement cap.
 ## Task 3: Independent local-EVM recovery and measurement inputs
 
 **Files:** create `reference/chunk-tree.mjs`, `test/local-carrier.test.mjs`,
-`scripts/measure-carrier.mjs`, `README.md`; update `scripts/check.mjs` to include
+`scripts/measure-carrier.mjs`, `scripts/local-carrier.mjs`, `README.md`; update `scripts/check.mjs` to include
 integration. Write a generated non-secret `artifacts/carrier-measurements.json`
 only if the report contains genuine observed values and explicit coverage.
 
@@ -76,6 +76,9 @@ only if the report contains genuine observed values and explicit coverage.
 Node starts one loopback Anvil instance with no persistent chain state, cleans
 it up even on failure, deploys these experimental components and uses independent
 reference encoding/tree computation, not the Solidity helper as expected output.
+The shared `local-carrier.mjs` owns only local process lifecycle, ABI deployment,
+serialized transaction helpers and observed context. Keep independent content
+verification in `reference/chunk-tree.mjs`; setup reuse is not a parity oracle.
 Check the JavaScript tree against `fixtures/chunk-tree-known.json`, which was
 derived separately using `cast`, including the two wrong three-chunk roots.
 
