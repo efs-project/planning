@@ -8,3 +8,7 @@
 
 # macOS metadata
 .DS_Store
+
+# Optional per-machine role preferences/bindings (not shared instructions)
+/Agents/local-preferences.md
+/Agents/local-bindings.md

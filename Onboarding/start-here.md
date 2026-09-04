@@ -6,14 +6,16 @@ New agent in the EFS planning vault — the brain for the EFS agent swarm. From 
 
 ## First five minutes
 
-1. `cd <your planning checkout> && git fetch origin && git rebase --autostash origin/main`. Always sync before reading or writing.
+1. Identify the assigned checkout/branch/revision, inspect dirty state and follow [safe sync](./conventions.md#git-sync). Do not rebase another worker's branch or an assigned pinned review. Offline starts label freshness/visibility gaps.
 2. Open [[Kanban]]. Read columns in order: **In Flight**, **Blocked**, **Backlog**.
 3. Open the [Designs owner decision inbox](../Designs/owner-decision-inbox.md) if your work touches design, prioritization, or a question for James; follow it to the owning folder's single live queue.
 4. If you have a specific task from James (chat or a previous turn), go do that. Stop reading this file.
 
+For a named role, use the [roster](../Agents/README.md), [shared launch](../Agents/launch.md) and only its selected brief. If launched explicitly unassigned, orient read-only and report readiness; do not claim work automatically. The tree below is for an authorized request to pick work, not a permission grant from a role name.
+
 > **Decision rule:** unchecked boxes and "open questions" in source designs are not automatically James decisions. The owning folder's owner inbox says whether a choice is live now, evidence-gated, launch-only, settled, delegated, or superseded. Record adopted EFS v2 answers in [owner rulings](../Designs/efsv2/owner-rulings.md); use [[Owner-Inbox]] for broader non-design attention.
 
-## Decision tree (if no task assigned)
+## Decision tree (when asked to pick work)
 
 ```
 Is there an In Flight card claimed by you?
@@ -40,7 +42,7 @@ Move the card from **Backlog** to **In Flight** in `Kanban.md` and add the annot
 
 ```markdown
 - [ ] Implement [[0007-offline-sync]] #repo/client #repo/sdk
-  — @claude-opus-4.7, branch claude/offline-sync, claimed 2026-05-21, expires 2026-05-24
+  — @web-client-dev (harness claude-code, session offline-sync-20260903-a), branch example/offline-sync, claimed 2026-09-03, expires 2026-09-06
 ```
 
 3-day expiry by default; update it whenever you check in.

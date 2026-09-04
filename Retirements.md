@@ -23,6 +23,11 @@ What rulings have **retired**, and what replaced it. Input to `./scripts/needs-i
 
 | Retired phrase | Ruling | Cleared |
 |---|---|---|
+| `James promotes it via the usual ceremony` | 2026-09-03 portable-role process: name-stable living ops docs, no promotion | 2026-09-03 |
+| `bash 4+` | 2026-09-03 portable-role process: preserve the existing macOS bash 3.2 script requirement | 2026-09-03 |
+| `unauthenticated GitHub REST` | 2026-09-03 portable-role process: planning observation stays files/git-only | 2026-09-03 |
+| `skip vault writes if another PM logged within the hour` | 2026-09-03 portable-role process: distinct sessions/scopes; status is advisory, overlap needs handoff | 2026-09-03 |
+| `When James rules in chat, append to` | 2026-09-03 portable-role process: ruling history follows its owning queue, never duplicated | 2026-09-03 |
 | `EAS-core` | 2026-07-07 carrier ruling | 2026-07-23 |
 | `EAS carrier` | 2026-07-07 carrier ruling | 2026-07-23 |
 | `identity = EAS UID` | 2026-07-07 carrier ruling | 2026-07-23 |
