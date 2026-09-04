@@ -257,6 +257,30 @@ test_structural_only_required_sections_block_trusted_launch() {
   assert_status 1
 }
 
+test_html_comment_boundaries_do_not_supply_or_hide_required_content() {
+  make_fixture
+  sed -i '' '/^## Owns$/i\
+<!--' "$FIXTURE/Agents/beta/SOUL.md"
+  sed -i '' 's/Its bounded work\./Hidden obsolete scope.\
+-->/' "$FIXTURE/Agents/beta/SOUL.md"
+  run_helper "$FIXTURE" launch "Exact Alias"
+  assert_status 1
+  assert_not_contains "Role ID: beta"
+
+  make_fixture
+  sed -i '' 's/Its bounded work\./<!-- note --> Actual scope./' "$FIXTURE/Agents/beta/SOUL.md"
+  run_helper "$FIXTURE" check
+  assert_status 0
+
+  make_fixture
+  sed -i '' 's/Its bounded work\./<!-- obsolete heading\
+## Old Owns\
+-->\
+Actual scope./' "$FIXTURE/Agents/beta/SOUL.md"
+  run_helper "$FIXTURE" check
+  assert_status 0
+}
+
 test_paths_with_spaces_and_pm_legacy_brief_pass() {
   local saved_tmp="$TEST_TMP"
   TEST_TMP="$saved_tmp/fixture tree with spaces"
@@ -298,6 +322,7 @@ test_missing_and_unsafe_briefs_are_rejected
 test_empty_and_malformed_registries_are_rejected
 test_missing_and_empty_required_sections_are_rejected
 test_structural_only_required_sections_block_trusted_launch
+test_html_comment_boundaries_do_not_supply_or_hide_required_content
 test_paths_with_spaces_and_pm_legacy_brief_pass
 test_corruption_of_an_unrelated_row_blocks_launch
 test_usage_errors_have_runtime_status

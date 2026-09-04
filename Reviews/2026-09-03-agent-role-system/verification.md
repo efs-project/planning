@@ -105,3 +105,42 @@ $ /bin/bash scripts/agent-role.sh check
 16 role(s) checked; 62 routing key(s) validated.
 Limits: this checker does not prove semantics, locks, permission enforcement, runtime support, or all project links.
 ```
+
+## Task 2 final-review comment-state correction
+
+Root cause: `section_has_content` recognized `##` headings before accounting
+for HTML-comment state. A commented-out `## Owns` therefore opened the required
+section, and its hidden prose was treated as body content. The same line-based
+shortcut discarded non-comment text after a closed inline comment and let an H2
+inside a multiline comment terminate a real section.
+
+RED, with the real helper copied into the disposable fixture tree:
+
+```text
+$ /bin/bash scripts/test-agent-role.sh
+FAIL: expected exit 1, got 0; stderr:
+FAIL: stdout unexpectedly contained [Role ID: beta]
+FAIL: expected exit 0, got 1; stderr: invalid role registry: brief for 'beta' lacks a nonempty 'Owns' section
+FAIL: expected exit 0, got 1; stderr: invalid role registry: brief for 'beta' lacks a nonempty 'Owns' section
+4 of 67 assertions failed.
+```
+
+The failing cases use an entirely commented-out `Owns` heading and hidden
+scope, an inline `<!-- note --> Actual scope.`, and a multiline comment that
+contains `## Old Owns` before an actual body line. The first executes
+`launch "Exact Alias"` and proves that no trusted beta launch output is
+emitted.
+
+GREEN after the helper strips comment ranges while carrying state across the
+whole brief, then recognizes headings and content only in the remaining text:
+
+```text
+$ /bin/bash scripts/test-agent-role.sh
+PASS: 67 assertions
+
+$ /bin/bash -n scripts/agent-role.sh
+$ /bin/bash -n scripts/test-agent-role.sh
+$ /bin/bash scripts/agent-role.sh check
+16 role(s) checked; 62 routing key(s) validated.
+Limits: this checker does not prove semantics, locks, permission enforcement, runtime support, or all project links.
+```

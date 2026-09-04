@@ -64,19 +64,35 @@ section_has_content() {
   local brief="$1"
   local heading="$2"
   awk -v wanted="## $heading" '
-    $0 == wanted { seen = 1; next }
-    seen && /^## / { exit }
+    {
+      text = ""
+      remainder = $0
+      while (length(remainder) > 0) {
+        if (in_comment) {
+          comment_end = index(remainder, "-->")
+          if (comment_end == 0) {
+            remainder = ""
+          } else {
+            remainder = substr(remainder, comment_end + 3)
+            in_comment = 0
+          }
+        } else {
+          comment_start = index(remainder, "<!--")
+          if (comment_start == 0) {
+            text = text remainder
+            remainder = ""
+          } else {
+            text = text substr(remainder, 1, comment_start - 1)
+            remainder = substr(remainder, comment_start + 4)
+            in_comment = 1
+          }
+        }
+      }
+      if (text == wanted) { seen = 1; next }
+      if (seen && text ~ /^## /) { exit }
+    }
     seen {
-      text = $0
       sub(/^[[:space:]]*/, "", text)
-      if (in_comment) {
-        if (text ~ /-->/) in_comment = 0
-        next
-      }
-      if (text ~ /^<!--/) {
-        if (text !~ /-->/) in_comment = 1
-        next
-      }
       if (text ~ /^#+[[:space:]]/) next
       if (text !~ /^[[:space:]]*$/) content = 1
     }
