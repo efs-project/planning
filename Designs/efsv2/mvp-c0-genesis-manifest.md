@@ -5,7 +5,7 @@
 **Depends on:** [[disposable-mvp-profile]], [[core-architecture-candidate]], [[hierarchical-files-and-folders]], and the [Stage A SR-17 control](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-overview.md)
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-09-03
+**Last touched:** 2026-09-04
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #topic/efsv2 #topic/content #topic/coherence
 
@@ -255,8 +255,16 @@ Admit groups in this exact dependency order:
 | 3 — Files | `DirectoryEntry/1`, `DirectoryWhiteout/1`, `FileRevision/1`, `PublicFilesMountConfig/1`, `MountDescriptor/1`, `FilesRouteConfig/1` |
 | 4 — experiment seal | `MvpC0BootstrapSeal/1` |
 
-Within each group, Type blobs are bytewise sorted by derived
-`TypeSchemaId`. After each admission:
+Within each group, freeze member order exactly as listed left-to-right in the
+table above. Assign zero-based member indexes before encoding Type blobs;
+encode local references using SR-17's `SELF`/`GROUP_REF(k)` rules and those
+assigned indexes, not the eventual derived Type IDs. Then
+encode the ordered `groupBytes`, derive `groupHash`, and derive each
+`TypeSchemaId` using SR-17's member-index formula. Type IDs are outputs of
+this process, never sort keys: sorting by them would change the group hash
+and the IDs used to sort. Missing, duplicate, substituted or reordered members
+reject against the manifest's committed ordered group inventory; no fixed-point
+search or post-hash reordering is permitted. After each admission:
 
 - recompute the group Record/Envelope/Occurrence IDs and admission receipt;
 - recompute the exact unsigned Stage A publication digest, derive EnvelopeId

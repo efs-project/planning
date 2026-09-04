@@ -6,7 +6,7 @@
 **Companion:** [[mvp-c0-genesis-manifest]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-09-03
+**Last touched:** 2026-09-04
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/content #topic/read-path #topic/coherence
 
@@ -421,6 +421,25 @@ The grant binds at least:
 - grant identifier, nonce domain, expiry, and a state-readable revocation
   location controlled only by the bootstrap EOA; and
 - whether a relayer or paymaster may submit.
+
+For C0, the signed `WritePlan.nonceKey` selects exactly one session grant.
+Normal composite-EOA and direct-EOA writes use lane zero; session grants bind
+a nonzero `uint192 nonceKey` in their EOA-approved bytes. Registration records
+the immutable mapping `(bootstrapPrincipalId, nonceKey) -> grantId` and rejects
+any collision with a different grant, including revoked or expired grants.
+The mapping is retained and the lane is never recycled. It is not a truncated
+hash-to-lane convention. The grant's own identifier is derived by its committed
+run codec without including a self-referential identifier field in its preimage.
+
+A session write must match both the exact registered grant and its signed
+nonce lane. Two grants for the same session key therefore cannot authorize
+the same signed plan interchangeably. Substituting a grant, including after
+revocation of the original, rejects before any nonce, budget or Files mutation.
+Registration replay cannot change this mapping or reset consumption. Retained
+authority evidence includes this mapping at admission, so later revocation or
+another grant never reinterprets an earlier write. This narrows the C0 nonce
+lane rules without changing the `WritePlan/1` field list or granting detachable
+realm-neutral authorship.
 
 For a delegated write, Core performs §4.1 steps 1–3 unchanged, then verifies
 the canonical low-s session signature over that exact `writePlanDigest`
