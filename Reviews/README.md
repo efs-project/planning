@@ -4,6 +4,10 @@ Analysis, critique, and build-record artifacts produced by review/architecture a
 
 ## Contents
 
+### AGNTCY and shared public agent data (2026-09-03)
+
+- [`2026-09-03-agntcy-deep-dive/`](./2026-09-03-agntcy-deep-dive/README.md) — released Directory/OASF storage, discovery and exact skill-bundle audit; Identity, SLIM, SHADI, LF governance and adoption; overlap with EFS profiles/SOUL/shared knowledge; source-pinned fidelity/current-state caveats; and one disposable conventional-baseline-versus-EFS comparison. Records interoperability opportunities without adopting an agent-specific Core primitive, runtime, public registry or new deadline.
+
 ### Schema-freeze build record (2026-06-02) — the contracts schema-freeze design arc
 These four are one cohesive set (plan → critique → synthesis → blueprint) behind the Sepolia schema freeze. Canonical decisions landed as `contracts/docs/adr/` ADR-0048–0055 + the `schema-freeze` branch freeze table.
 - [`2026-06-02-schema-freeze-build-plan.md`](./2026-06-02-schema-freeze-build-plan.md) — implementation plan (r2)
