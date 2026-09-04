@@ -1,11 +1,11 @@
 # EFS v2 overnight MVP convergence
 
-**Status:** active design and disposable-experiment run; no production or freeze authority
+**Status:** completed design/disposable-experiment handoff; no production or freeze authority
 **Coordinator:** v2-pm, Codex session `019fe3e5-c8ed-7e72-9d8e-9a0ea79ff5ea`
 **Authorization:** James approved the proposed convergence run with “Engage,” 2026-09-04.
 **Window:** stop when the deliverables are complete, or by 09:00 America/Chicago on 2026-09-04; record unfinished work honestly.
 
-#status/draft #kind/review #repo/planning #topic/efsv2 #topic/coherence
+#status/done #kind/review #repo/planning #topic/efsv2 #topic/coherence
 
 ## Goal and boundaries
 
@@ -59,13 +59,13 @@ proposal; scope and outputs are summarized above.
 
 - [x] Refresh sources, verify the owned worktree, run baseline decision and tri-sync checks.
 - [x] Dispatch ten bounded role-owner lanes and two independent review lanes.
-- [ ] Compare August and September state/identity/result/authority assumptions; classify evidence as reusable, profile-specific or unproved.
-- [ ] Reconcile SDK, Web Client and Explorer feedback into one minimal consumer handoff; preserve unfamiliar bytes and all independent evidence dimensions.
-- [ ] Resolve independently confirmed implementation blockers; attach a falsifying example or test to every semantic repair.
+- [x] Compare August and September state/identity/result/authority assumptions; classify evidence as reusable, profile-specific or unproved.
+- [x] Reconcile SDK and Explorer feedback with the substitute Web Client acceptance mapping; preserve unfamiliar bytes and all independent evidence dimensions.
+- [x] Resolve independently confirmed draft contradictions; attach counterexamples or exact conflicting source evidence. Remaining codec/runtime tasks are not claimed implemented.
 - [x] Complete a compact proposed contracts engineering handoff with the first runnable tickets and artifact/test expectations.
 - [x] Incorporate one workflow from each product lane; separate MVP blockers from deliberate later capabilities.
-- [ ] Run focused checks and independent final review; commit/push exact verified paths on feature branches.
-- [ ] Publish the morning result: buildable scope, source/interface handoff, evidence, residual blockers and genuine owner choices. Pause the overnight follow-up.
+- [x] Run focused checks and independent final review; prepare exact verified paths for feature-branch publication.
+- [x] Prepare the morning result: buildable scope, source/interface handoff, evidence, residual blockers and genuine owner choices. Publication and heartbeat-stop receipts belong to the coordinating task.
 
 ## Lane receipts
 
@@ -96,7 +96,7 @@ role agent or product repository.
 - Coordination: all ten task messages were delivered successfully.
 - Overnight follow-up: `efs-v2-overnight-mvp-convergence`, hourly, ends by the
   window above or earlier on completion. Do not redispatch completed lanes.
-- Current result: work in progress; no new runtime, compatibility or review-pass claim.
+- First checkpoint at `5d75309`: work in progress; no new runtime or compatibility claim.
 
 ### First concrete findings and repairs
 
@@ -124,7 +124,7 @@ role agent or product repository.
   runnable tickets and the specific old-harness shortcuts that must not be
   transplanted as a finished Core. No repository or runtime was created.
 
-### Role-owner collection
+### Role-owner collection at the first checkpoint
 
 [Seven completed reports](./lane-results.md) support one local Core/Files
 round trip as the next joined deliverable and expose three small application
@@ -139,3 +139,116 @@ On each continuation, inspect the current branch/dirty state and this file,
 retrieve only new lane results, and update the smallest useful checkpoint.
 Keep new findings and their evidence here or in linked lane artifacts; do not
 grow a second agent-management framework.
+
+## Converged handoff — 2026-09-04
+
+**Outcome:** the bounded design reconciliation passed its scoped final review.
+The next milestone is one local synthetic create-file transaction followed by
+independent directory, revision and verified-byte recovery. The principal
+remaining dependency is an executable exact-byte/Core package, not another
+round of broad Type-system brainstorming. This does not mean the nine
+Core/browser journeys ran or that the permanent v2 design is frozen.
+
+### Exact consumer inputs
+
+Root's two Core draft repairs are at
+`5d7530993339a0786aa41e1dbb0fd786cd450f32`; the subsequent SDK receipt-timing
+clarification and application-document repairs are in this checkpoint's
+containing commit. Resolve that commit before handing sources to an
+implementer; do not use an unpinned moving branch tip.
+
+| Completed role | Exact published commit | Artifact path from repository root |
+|---|---|---|
+| SDK PM | `e9536b7d97d3e3f8d135798458680686b034e892` | `Reviews/2026-09-04-sdk-mvp-convergence/README.md` |
+| Data Explorer PM | `df0ddd3b77fad7dae4e84c3cde6b009d703cc0cb` | `Reviews/2026-09-04-explorer-mvp-convergence/README.md` |
+
+The additional artifacts at that SDK commit are:
+
+- `Reviews/2026-09-04-sdk-mvp-convergence/core-delta-5d75309.md`
+- `Reviews/2026-09-04-sdk-mvp-convergence/evidence-closure-probe.mjs`
+- `Reviews/2026-09-04-sdk-mvp-convergence/evidence-closure-probe.test.mjs`
+
+Use `git show <commit>:<path>` after fetching planning. The role branches were
+not whole-merged into this branch: their exact reports remain evidence, not
+imports of every older mechanism or branch-local decision. Both owners
+explicitly consumed the two Core repairs through `5d75309`. Their reports
+predate this checkpoint's SDK wording repair; do not claim they reviewed that
+later text. Independent final review covers the integrated delta instead.
+
+August consumer work used serialized Core source
+`b9088d6a24f4d40bcca6ba300523b25cc7c608d2`; the later readiness tip `2573f08`
+is not its actual input. Reuse preservation laws, independent serialization
+and mutation-test techniques. Do not reuse split-Type/QueryProfile IDs,
+`ResultV0` enums/bytes, old limits or a static pass as September execution.
+`SPLIT_FUTURE` stays unsupported; never invent `queryProfileId=typeSchemaId`.
+
+### The same five interfaces, with honest timing
+
+| Seam | Joined consumer contract |
+|---|---|
+| Exact read | Preserve raw bytes and every qualification/basis. A missing rich renderer does not turn an upstream FOUND into UNKNOWN; unsupported semantic evaluation remains explicitly unsupported. |
+| Scoped page | Retain observed entries and same-basis continuation/closure evidence. A partial or zero-row filtered result is not an empty directory or proof of absence. |
+| Verified bytes | Record each eligible attempt; obtained corrupt bytes are not trusted content. Fallback pins the same commitment, never another release or subject. |
+| Plan / authorize / submit | Pure wallet-free planning; prepared evidence includes only obtained witnesses/local checks. Direct approval/submission can be one provider call. Core receipts are attached only after observed acceptance. |
+| Canonical read-back | Independently compare every planned effect at a committed basis, retaining the earlier plan/read/receipt journey and raw evidence, not only a success DTO. |
+
+Small product cards may point to an inspectable/exportable evidence closure;
+they do not need a universal oversized result wrapper. Unknown fields and
+wide integers survive. Missing backing is partial/unavailable export, never
+complete evidence. This preserves developer ergonomics without losing facts.
+
+The SDK counterexample is concrete: after a direct wallet returns a transaction
+hash but before execution, there is no Core authorization receipt. The old
+`AuthorizedWrite` prerequisite could not represent that legal state. The
+draft now illustrates `PreparedWrite` and explicitly preserves receipt timing
+and lineage, without adopting public names or adding another prompt.
+
+### Verification and evidence ceiling
+
+- Coordinator reran the SDK's nine synthetic representation tests on Node
+  v24.11.0: **9/9 pass**, plus both syntax checks. They preserve declared
+  evidence closure, profile/run separation and raw/unknown/wide-number data.
+  They do not authenticate facts, prove that all necessary edges were
+  declared, execute a wallet/Core/browser, or implement a C0 codec.
+- Root's eight seam-law tests cover only the synthetic Type-group dependency
+  and grant-lane models described above. The two suites have different scopes;
+  their counts must not be added into a Core/browser-conformance claim.
+- Explorer produced a five-case design/UX matrix, **no new executed probe**.
+  August E1a remains unproved and E1b unrun. Participant/accessibility review,
+  fake shared-Inspector evidence and actual cold-browser evidence stay
+  distinct. A local C0 run is not the older public-Realm E1b gate.
+- All nine real M0 tests remain **NOT_RUN**. The
+  [acceptance map](./acceptance-map.md) names exact missing artifacts and
+  actual wallet/provider-trace requirements, including setup and lifecycle.
+- Fresh final checks: root law tests **8/8 pass**; `git diff --check`,
+  `open-decisions.sh --check` and `tri-sync-check.sh` pass. Five added relative
+  Markdown file targets and three source-pinned report artifacts resolve.
+- Independent `contracts_handoff` review accepted the four source-document
+  edits with no findings; `c0_boundary_review` accepted the integrated handoff
+  with one minor artifact-path clarification, now applied. These are scoped
+  design reviews, not audits of a complete implementation or main-merge approval.
+
+### What work comes next
+
+Follow the three [engineering tickets](./contracts-handoff.md):
+
+1. Lock one disposable build and finish exact run-only manifest, capability,
+   Type-group and grant codecs with independent vectors. No invented
+   per-consumer defaults; include widths, bounds and declared group indexes.
+2. Measure the small byte carrier and implement/bootstrap/seal one fresh
+   synthetic Realm with real authority verification and state-only evidence.
+3. Join create-file and independent recovery; consume the emitted artifacts
+   through the SDK, then add direct-directory and granted-session revision
+   arms. Test prior accepted-but-superseded receipt recovery separately from
+   current expiry/revocation; no replayed effects or present-authority claim.
+
+This run stops at the reconciled design/experiment handoff rather than silently
+creating a runtime repository. Existing disposable Core permission remains;
+production repo/code, thin product/browser implementation, public deployment,
+durable data, main integration and protocol freeze retain their separate gates.
+No new irreducible owner decision was found for the bounded next experiment.
+
+The other six products have [one bounded workflow each](./lane-results.md).
+They need neither new Core nouns nor inclusion in the Files MVP on the evidence
+examined. Their later adapter suggestions are not newly dispatched work.
+Web Client / OS remains on James's newer extension assignment; do not retask it.

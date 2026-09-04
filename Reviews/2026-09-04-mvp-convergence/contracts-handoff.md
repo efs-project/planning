@@ -84,3 +84,19 @@ undesignable and not invitations to choose production defaults silently.
 The current run may design and test those seams. Production repository creation,
 candidate product implementation and public deployment remain separate
 authorization questions. No such work was performed by this review.
+
+## Consumer delta consumed — 2026-09-04
+
+Use the source-pinned SDK/Explorer packets in the [converged handoff](./README.md#converged-handoff--2026-09-04),
+not the August ABI as a shortcut. The SDK interface now separates prepared
+local evidence from Core-accepted authorization: direct approval/submission
+may be one provider invocation, and actual Core receipts arrive only when
+observed. Export the entire prior read/plan/receipt journey with independent
+read-back. Missing evidence cannot be filled with fabricated receipts.
+
+Ticket 3 also needs a prior-acceptance recovery case: an acknowledged or
+unacknowledged admitted write may later be superseded while its grant expires
+or is revoked. Recover the historical effect and authority basis without
+resubmission, current-authorization inference or a second application of
+effects. A lost receipt is not evidence of noncommit. This is an explicit
+implementation test, not a claimed defect or newly passed trace.

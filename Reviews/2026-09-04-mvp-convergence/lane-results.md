@@ -81,3 +81,30 @@ does not transfer long-term product ownership.
 No product-specific new owner question is needed for the bounded adapter
 recommendations. This is not authorization to ship those products or combine
 their scopes into MVP-C0.
+
+## Follow-up integration — 2026-09-04
+
+The pending statements above describe the first checkpoint at `5d75309`.
+SDK and Explorer have now completed their owned handoffs; exact commits,
+five-seam synthesis and probe limits are in the [converged handoff](./README.md#converged-handoff--2026-09-04).
+
+All three application-document deltas were checked independently against the
+actual sources before the following narrow draft changes:
+
+- **App Store Release:** architecture's OWS-R4 already excluded labels from
+  identity, while its PackageRelease paragraph included them. Align that
+  paragraph with separate attributable version-label claims, as modeled by
+  the August 22 fixture's PackageReleaseType/VersionLabelClaimType. No Type
+  bytes, authority/succession policy or product profile is adopted.
+- **App Store evidence:** date-qualify the Stage A report's unrun statement and
+  point to later bounded application evidence. Do not rewrite historical
+  STATUS or claim the full Stage B program or deployed product completed.
+- **Booru query:** keep both illustrative candidates. The two-field assertion
+  is not a partial encoding of the richer polarity/scope/confidence/evidence
+  claim; an exact probe needs every canonical field. Otherwise enumerate and
+  evaluate bounded complete candidates at one basis/policy. The application
+  profile is still not selected.
+
+These are source-coherence repairs, not newly executed App Store/Booru tests.
+The SDK's separate pre-submit/Core-receipt counterexample is also repaired in
+the integrated five-seam draft; its nine tests are representation-only.

@@ -6,7 +6,7 @@
 **Consumers:** [[../web-client-os/mvp0-acceptance]], [[../data-explorer/README]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-09-03
+**Last touched:** 2026-09-04
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/client #topic/efsv2 #topic/read-path #topic/coherence
 
@@ -49,9 +49,11 @@ worker, storage, and adapter round trips.
 Write-stage families do not synthesize a point outcome or canonical effect.
 They retain handles to every source read and its full qualification, the exact
 plan bytes/digest and predicted effects, then add only their own separate
-authorship, authorization, submission, EVM, and admission/effect receipts and
-operation stage. Only canonical read-back adds new qualified point/page/byte
-reads and may establish the imported canonical effect verdict.
+authorship, authorization, submission, EVM, and admission/effect receipts when
+actually observed, plus operation stage. Local pre-submit checks and acquired
+witnesses are not Core-accepted authorization. Only canonical read-back adds
+new qualified point/page/byte reads and may establish the imported canonical
+effect verdict.
 
 The product-facing families are deliberately separate:
 
@@ -60,9 +62,9 @@ ExactReadResult<T>      = imported PointResult<T> + rawEvidence
 ScopedPageResult<T>     = exact page contract + qualified items + rawEvidence
 VerifiedByteResult      = semantic point + range + attempts + verified bytes?
 PlannedWrite            = source-read evidence handles + exact WritePlan bytes/digest + preview + roles
-AuthorizedWrite         = PlannedWrite + authorship/authorization receipt + stage; no point/effect verdict
-SubmittedWrite          = AuthorizedWrite + submission/EVM/admission progress receipts + stage; no point/effect verdict
-CanonicalReadBack<T>    = planned effects + new qualified independent reads + comparison verdict
+PreparedWrite           = PlannedWrite + selected path + local checks + obtained witnesses/evidence + stage; no Core receipt prerequisite or point/effect verdict
+SubmittedWrite          = PreparedWrite + actually observed submission/EVM/admission progress receipts + stage; no point/effect verdict
+CanonicalReadBack<T>    = prior journey/evidence handles + planned effects + new qualified independent reads + comparison verdict
 ```
 
 These are semantic families, not adopted TypeScript names or serialized bytes.
@@ -137,9 +139,18 @@ The SDK never widens a missing, expired, revoked, over-budget, or unavailable
 session grant into ambient wallet authority. It returns a typed authorization
 failure or `UNKNOWN` as required by the imported law.
 
-Submission accepts only the unchanged authorized plan. It preserves the
-authorship/publication, authorization, submission, EVM transaction, and
-admission/effect receipts as separate evidence. A wallet confirmation, relay
+Execution submits only the unchanged plan through its explicitly selected
+authorization path. Direct EOA approval and submission may share one provider
+invocation: neither a preceding `WritePlan` signature nor a Core-acceptance
+receipt is a prerequisite. The submitted transaction still undergoes Core's
+authorization checks. Pre-submit evidence records only local checks and any
+witness actually obtained; it never claims Core acceptance.
+
+Attach Core authorization and admission/effect receipts only when observed.
+Preserve them separately from authorship/publication, submission and EVM
+transaction evidence, retaining the unchanged plan, source reads and prior
+journey at every stage. Missing evidence is not success; an inapplicable
+witness is not fabricated to fill a result family. A wallet confirmation, relay
 job, bundler/user-operation acknowledgement, transaction hash, or successful
 transaction receipt advances operation progress only; `effect` remains
 `UNKNOWN` until the next seam proves otherwise.

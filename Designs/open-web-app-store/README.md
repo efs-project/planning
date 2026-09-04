@@ -5,7 +5,7 @@
 **Depends on:** [[Designs/efsv2/README]], [[Designs/web-client-os/README]]
 **Inputs:** [[Designs/efsv2/hierarchical-files-and-folders]] (proposal-only `BindingScope` experiment)
 **Reviewers:** @core-authority-audit (2026-08-14; boundary repair 2026-08-15), @adversarial-architecture (2026-08-14; boundary repair 2026-08-15), @external-landscape (2026-08-14), @web-client-os-pm boundary review (2026-08-15), @abi-identity-lane, @catalog-trust-lane, and @scale-evolution-lane disposable-fixture review (2026-08-22)
-**Last touched:** 2026-08-22
+**Last touched:** 2026-09-04
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/app-model #topic/trust #topic/content
 
@@ -88,9 +88,12 @@ Occurrences, Realm Admissions, Principal-qualified Bindings, bounded
 ResolutionPlans, automatic indexes, exact content closures, Locators,
 `ArtifactRelease/1`, and inert `RuntimeRequest/1`. It has not frozen bytes,
 contracts, Type IDs, index layouts, Principal/succession mechanics, Lens
-grammar, or application Types. Stage B implementation, measurement,
-reconstruction, and deployment have not run. See
-[[Reviews/2026-08-13-efs2-stage-a-corpus/STATUS]].
+grammar, or application Types. The 2026-08-13
+[[Reviews/2026-08-13-efs2-stage-a-corpus/STATUS|Stage A STATUS]] records that
+Stage B had not run at that checkpoint. Subsequent bounded application-layer
+experiments are recorded in the 2026-08-22 Type/Data ABI pressure report linked
+below; they do not establish completion of the full Stage B program, deployed
+App Store functionality, or protocol conformance.
 
 ### Historical inputs retained as evidence
 

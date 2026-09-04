@@ -4,7 +4,7 @@
 **Target repos:** planning, contracts, sdk, client
 **Depends on:** [[Designs/efsv2/README]], [[media-infrastructure]]
 **Reviewers:** 2026-08-14 — independent authority/architecture pass; no Critical or Important finding after repair
-**Last touched:** 2026-08-22
+**Last touched:** 2026-09-04
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/media-library #topic/onchain #topic/graph-queries #topic/read-path
 
@@ -129,6 +129,15 @@ Candidate application shapes to test, in order:
 2. a generic application `Position(target, tag)` with bounded Lens resolution;
 3. a workload-proven generic small compound key; and
 4. a redeployable bounded view/query contract over existing Core indexes.
+
+The two-field assertion is a distinct minimal-profile candidate, not a partial
+encoding of [[booru-app#Attributable tag claims]]. An exact RecordId probe
+requires the exact Type/profile and every canonical identity-bearing body
+field. For the richer claim shape, target and tagConcept alone cannot determine
+the RecordId: use bounded indexed candidates and evaluate the complete claims,
+including polarity, scope, confidence and evidence references, at the same
+basis and curator policy. No application profile is selected by this query
+sketch.
 
 Do not add a media-specific Core contract merely because the first application
 schema is inconvenient. A Core escalation requires the exact failure trace and
