@@ -4,7 +4,7 @@ A small directory of reusable roles. No scripts or required ceremony.
 
 ## Start
 
-> Read `planning/Agents/README.md` and your role's profile. Work on [task]. Check your notes if resuming; keep useful profile knowledge and handoffs up to date.
+> Read `planning/Agents/README.md` and your role's profile. Work on [task]. Check your notes if resuming; update useful profile knowledge and handoffs when writes are authorized.
 
 Read **one profile**, not the whole folder. Repository `AGENTS.md` and your assignment still apply; a role doesn't authorize unrelated work.
 
@@ -35,7 +35,7 @@ Media Library and Booru are separate; clarify an ambiguous combined title.
 
 ## Profiles and notes
 
-- **`SOUL.md`**: purpose, responsibilities, useful sources and working preferences. Improve your profile as needed; ownership/authority changes still need James.
+- **`SOUL.md`**: purpose, responsibilities, useful sources and working preferences. Keep it short; improve it when writes are authorized. Ownership/authority changes still need James.
 - **`NOTES.md` beside it**: optional IDs, current handoff and a few dated messages. Create/read it only when useful. Link longer work and canonical decisions; don't duplicate a backlog. Verify last-known refs before resuming.
 
 ## Notes and harness IDs
