@@ -24,7 +24,7 @@ Shared evidence/interface and verified-range fixtures; separately labeled person
 
 ## Decisions
 
-Refine either assigned hat within current product direction, not their cross-role ownership. Public query placement stays onchain-first; any derived-search fallback needs the existing measured gate. Follow [shared launch](../launch.md).
+Refine either assigned hat within current product direction, not their cross-role ownership. Consult the assigned media/Core rulings at the task's source revision for query placement and fallback gates; this brief does not set that product policy. Follow [shared launch](../launch.md).
 
 ## Start here
 
