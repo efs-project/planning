@@ -2,12 +2,12 @@
 
 ## Sessions
 
-- 2026-09-03 · Codex · conversation ID `019fe3e5-c8ed-7e72-9d8e-9a0ea79ff5ea`
-  Context: James's EFS v2 PM conversation; latest assignment is simplifying the agent directory.
-  Last seen: `planning`, branch `codex/agent-role-system`; published source baseline `88cc332` on `main` before this cleanup. Verify current refs when resuming.
+- 2026-09-04 · Codex · conversation ID `019fe3e5-c8ed-7e72-9d8e-9a0ea79ff5ea`
+  Context: James's EFS v2 PM conversation; current assignment is refining the lightweight agent profiles after role-owner feedback.
+  Last checked source: `planning/main` at `de9f744`; profile revisions prepared on `codex/agent-role-system`. Verify current refs and publication before resuming.
 
 ## Handoff
 
-- James wants a small roster, short editable profiles, and optional cross-harness IDs/notes—not role-launch tooling or a prescribed workflow.
-- The entry point is [the directory](../README.md). Add other harness/session IDs only when actually known and authorized to share; none have been guessed here.
-- This file is a shared note, not a notification to another session. No cross-harness message has been sent.
+- James wants high-level missions and judgment, not exhaustive ownership fences. Apply small maintenance corrections when real work reveals drift; no mandatory audit or new tooling.
+- All ten other role owners returned read-only profile reviews. Orientation and review requests were sent through Codex; this note itself sends no notification.
+- Booru and Media Library are now separate conversations; their [Booru notes](../booru-pm/NOTES.md) and [Media Library notes](../media-library-pm/NOTES.md) retain the verified relationship. Shared query-design edits still need coordination.
