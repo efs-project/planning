@@ -127,3 +127,43 @@ ceiling. No source-lock test, Core/SDK experiment, browser execution or
 participant session was rerun. New work is this matrix and gate reconciliation
 only; structural/link checks and planning validation are recorded in the
 commit handoff. Existing August design files and receipts remain unchanged.
+
+## Upstream delta consumed — 2026-09-04
+
+**Delta source:** September `5d7530993339a0786aa41e1dbb0fd786cd450f32`,
+`codex/mvp-c0-coherence`. The S1–S3 comparison above remains pinned to
+`12ef4c5`; it is not retroactively relabelled. This acknowledgement consumes
+the two draft repairs and the coordinator's
+`Reviews/2026-09-04-mvp-convergence/README.md` / `acceptance-map.md` at the
+delta commit. No branch merge or rebase is involved.
+
+- **G4 ordering:** declared left-to-right member order and zero-based indexes
+  are fixed before Type/group hashing; `SELF` / `GROUP_REF(k)` retain their
+  sentinel meaning. Explorer must preserve those source indexes and raw
+  references; a display sort cannot reorder the canonical group or rederive
+  its IDs. Group parsing/hashing still belongs to the shared codec.
+- **Grant-bound lanes:** normal/direct EOA uses lane zero. Every nonzero
+  session lane is permanently bound to one grant per bootstrap Principal,
+  including after expiry/revocation. Inspector/action evidence must retain the
+  exact grant, nonce lane and admission basis; retry or grant renewal cannot
+  silently substitute a grant or recycle a lane. Historical receipts retain
+  their original authority basis. Enforcement remains with SDK/Core, not UI.
+
+The inspected delta does not change the five seams, point-result law or
+`WritePlan` field list. The facts/UX matrix and next deliverable therefore stand;
+their next September fixtures must name the repaired source. An affected run
+must follow the existing new-run/profile-commitment rule, not overwrite old
+evidence. The save timeline still cannot award committed effect from a grant,
+signature, nonce reservation or transaction acknowledgement.
+
+The coordinator reports independent repair review and **8/8 synthetic law
+tests**; those tests were not rerun here. They establish neither full Type
+parsing/signatures/nonce-budget enforcement nor Core/browser execution. The
+nine MVP0 journeys remain unrun in that checkpoint. In M0-05 reporting, no
+verified bytes for presentation must not relabel a corrupt attempt's
+`availability=AVAILABLE`, `bytes=RETURNED`, `integrity=FAILED` axes.
+
+The Web Client/OS lane's superseding owner assignment is respected; no retask
+or dependency on its response is introduced. Explorer's handoff is reconciled
+through this exact delta, not a claim about later branch heads. No new owner
+choice or production authority follows.
