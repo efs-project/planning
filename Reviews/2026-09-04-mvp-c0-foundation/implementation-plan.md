@@ -83,4 +83,9 @@ derived separately using `cast`, including the two wrong three-chunk roots.
 - [ ] Independently implement tree/body/RecordId and range verification. Use serialized transaction/state reads, not events as the reconstruction source. No claims of account/storage proof verification.
 - [ ] Exercise the real carrier on loopback EVM; test atomic rollback, phase gate, and changed deployment/context. Validate runtime code against observed hashes.
 - [ ] Measure candidate sizes `[0,1,4096,8192,12289]` under a disclosed test cap of 16384 bytes; report actual write/full-read/range-read gas, stored-byte counts and response sizes. Mark proof, full-Core overhead and formal cap selection unmeasured. Do not derive a valid experimentSeed from this partial report.
+  Use receipt `gasUsed` for the carrier/host write and deliberately sent local
+  read-method transactions, or identify a different observed execution metric
+  precisely; never call `eth_estimateGas` an actual receipt measurement.
+  Ordinary product reads remain RPC calls, not wallet transactions. Pin Anvil
+  to Cancun and report its effective block gas limit without disabling bounds.
 - [ ] Run the single check command, regenerate measurement output and review the complete increment. README states precisely what ran, what remains NOT_RUN and next complete-Type/Core input task. Commit exact paths and hand off without reopening permanent design choices.
