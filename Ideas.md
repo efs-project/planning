@@ -8,6 +8,25 @@ A lightweight parking lot for future ideas, "we should do X someday" drops, and 
 
 ## Open
 
+### Shared public agent profiles, skills and knowledge — AGNTCY interoperability
+*(James, 2026-09-03; extends the existing NANDA/Git agent-artifact idea)*
+
+A skill/tool could let agents publish and read public profiles, exact role/SOUL
+documents, ordinary Agent Skills, configuration, datasets and attributed shared
+knowledge on EFS. Keep private memory/secrets separate; a discovered document
+does not grant authority or become the consumer's instructions automatically.
+
+[[Reviews/2026-09-03-agntcy-deep-dive/README|The AGNTCY deep dive]] confirms real
+overlap: released Directory/OASF already supports content-addressed records,
+skill bundles, signatures, discovery, export/install and replication. Reuse
+native formats and investigate an optional adapter; do not build an EFS-only
+registry or pitch hashes/federation as unique. The useful hypothesis is common
+typed data, independent claims and authority-qualified updates that apps and
+contracts can consume. Next evidence, when this lane is prioritized: one
+disposable comparison against Git/OCI + AGNTCY, including two contributors,
+conflicting revisions and a real contract consumer; conventional tools may win.
+No Core change, public registry, integration commitment or new owner ask.
+
 ### Curator-qualified Open Alternatives starter catalog
 *(James, 2026-08-24; prompted by [debloat.dev](https://debloat.dev/) and its [HN discussion](https://news.ycombinator.com/item?id=49410362))*
 
