@@ -27,5 +27,6 @@ const config=JSON.parse(run('forge',['config','--json'],true));
 assert.equal(config.evm_version,'cancun'); assert.equal(config.optimizer,true);
 assert.equal(config.optimizer_runs,200); assert.equal(config.via_ir,true);
 console.log(`Node ${process.version}; ethers ${installed.version}; ${compiler.trim()}`);
-run(process.execPath,['--test','test/*.test.mjs']);
 run('forge',['test','--use',solc,'--offline','-v']);
+// Live Node integration consumes freshly compiled out/ ABIs and bytecode.
+run(process.execPath,['--test','test/*.test.mjs']);
