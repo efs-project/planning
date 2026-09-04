@@ -77,3 +77,31 @@ records a fresh Codex instruction-interpretation probe; it is not a native
 startup-discovery or permission-enforcement test. Claude's restricted probe was
 unauthenticated, and Antigravity was not invoked. Neither runtime is claimed as
 passed here.
+
+## Task 2 fix round 1
+
+RED, before structural-only section lines were excluded:
+
+```text
+$ /bin/bash scripts/test-agent-role.sh
+FAIL: expected exit 1, got 0; stderr:
+FAIL: stdout unexpectedly contained [Role ID: beta]
+FAIL: expected exit 1, got 0; stderr:
+3 of 60 assertions failed.
+```
+
+The new real-helper fixtures put either `### Placeholder` or
+`<!-- intentionally blank -->` in beta's otherwise empty `Owns` section. The
+first executes `launch "Exact Alias"` and proves trusted role output is blocked,
+not merely that a source token changed.
+
+GREEN after the helper ignored headings and HTML comments as structural lines:
+
+```text
+$ /bin/bash scripts/test-agent-role.sh
+PASS: 60 assertions
+
+$ /bin/bash scripts/agent-role.sh check
+16 role(s) checked; 62 routing key(s) validated.
+Limits: this checker does not prove semantics, locks, permission enforcement, runtime support, or all project links.
+```

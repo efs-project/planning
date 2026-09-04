@@ -66,7 +66,20 @@ section_has_content() {
   awk -v wanted="## $heading" '
     $0 == wanted { seen = 1; next }
     seen && /^## / { exit }
-    seen && $0 !~ /^[[:space:]]*$/ { content = 1 }
+    seen {
+      text = $0
+      sub(/^[[:space:]]*/, "", text)
+      if (in_comment) {
+        if (text ~ /-->/) in_comment = 0
+        next
+      }
+      if (text ~ /^<!--/) {
+        if (text !~ /-->/) in_comment = 1
+        next
+      }
+      if (text ~ /^#+[[:space:]]/) next
+      if (text !~ /^[[:space:]]*$/) content = 1
+    }
     END { exit content ? 0 : 1 }
   ' "$brief"
 }
