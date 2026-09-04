@@ -17,6 +17,8 @@ Run from anywhere — scripts use absolute paths via `$VAULT_ROOT` derived from 
 | `open-decisions.sh` | Regenerate `Open-Decisions.md` — the roll-up of every `Designs/**/owner-decision-inbox.md`, holds first and loudest. Warns on stderr (and exits 1) if an item falls under an unrecognized section or a queue may have an undetected hold. | In the same commit as any decision-state change. |
 | `needs-integration.sh` | From `Retirements.md`, find documents that still contradict a ruling the owner already made — "decided but not yet integrated". `--brief` for one line per phrase. | Before claiming a decision is done; when picking up integration work. |
 | `agent-activity.sh` | Show recent commits per agent based on the `Agent:` trailer. | Weekly; before triaging the promotion queue. |
+| `agent-role.sh` | Read-only validator and router for the canonical `Agents/README.md` role registry. `list` prints IDs/names/brief paths; `launch` prints a copyable role prompt; `check` validates routing, safe reachable briefs and required nonempty sections. | Before starting a named role; after changing the roster or a role brief. |
+| `test-agent-role.sh` | Behavioral adversarial fixtures for `agent-role.sh`. Copies the real helper into temporary vault trees and checks results, exit codes and no helper writes. | When changing `agent-role.sh` or its registry contract. |
 
 ## Git hooks
 
@@ -39,9 +41,17 @@ cd <your planning checkout>
 ./scripts/open-decisions.sh             # writes Open-Decisions.md; --stdout to preview
 ./scripts/needs-integration.sh          # --brief for one line per phrase
 ./scripts/agent-activity.sh [days]      # default: 7
+./scripts/agent-role.sh list
+./scripts/agent-role.sh launch "EFS Contracts Dev"
+./scripts/agent-role.sh check
+/bin/bash ./scripts/test-agent-role.sh
 ```
 
 All checks exit 0 on "clean" and a non-zero code on "issues found" — friendly for CI later if we ever add it. **Exit 0 is not automatically a clean bill of health**: read the output for whether anything was in scope to check. `stale-cards.sh` and `promotion-check.sh` both say so explicitly when they checked nothing.
+
+`agent-role.sh` is optional and read-only: it does not start an agent, grant authority, write state, or verify runtime support. Its `launch` output identifies the actual planning checkout only for the current machine. A receiving machine must look up the assigned branch and commit from the task or handoff instead of copying that local path.
+
+No-shell fallback: open [Agents/README.md](../Agents/README.md), select an exact ID, name, or alias from its roster, then copy the [universal prompt](../Agents/launch.md#universal-prompt--no-shell-required) and name the selected brief. Markdown remains the canonical interface.
 
 ## Adding a script
 

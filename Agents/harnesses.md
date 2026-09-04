@@ -4,13 +4,13 @@ One roster and one brief per role; adapters only route to them. A native instruc
 
 ## Startup matrix
 
-Document-verified as of 2026-09-03. **Native runtime startup is not tested by this document rollout**; reading files inside Codex is not a fresh-session discovery test. Record future smoke tests separately by harness/version/revision, supplied prompt, observed loaded sources, and result.
+Document-verified as of 2026-09-03. **Native runtime startup is not tested by this document rollout**; reading files inside Codex is not a fresh-session discovery test. A fresh Codex instruction-interpretation probe is recorded separately in [scenario review](../Reviews/2026-09-03-agent-role-system/scenario-review.md): it exercised supplied Markdown situations, not startup discovery or permission enforcement. The same record reports only an unauthenticated restricted Claude connectivity probe and no Antigravity invocation; neither is a native role-startup pass. Record future smoke tests separately by harness/version/revision, supplied prompt, observed loaded sources, and result.
 
 | Harness | Document-verified loading route | EFS use | Native runtime test |
 |---|---|---|---|
-| Codex | Discovers `AGENTS.md` through its bounded project instruction hierarchy; an override can take precedence and only one matching file is included per directory. | Root [AGENTS.md](../AGENTS.md) routes to the roster. Explicitly read the chosen SOUL; its filename alone is not auto-discovered. | Not run |
-| Claude Code | Loads `CLAUDE.md`; documented `@AGENTS.md` import shares project instructions. | Thin root [CLAUDE.md](../CLAUDE.md) imports only AGENTS; the universal prompt selects one brief. | Not run |
-| Antigravity | Workspace rules are created through the UI; manual activation and file references are documented. | Optional manual rule pointing to shared files, or universal explicit-read prompt; no rule is installed here. | Not run |
+| Codex | Discovers `AGENTS.md` through its bounded project instruction hierarchy; an override can take precedence and only one matching file is included per directory. | Root [AGENTS.md](../AGENTS.md) routes to the roster. Explicitly read the chosen SOUL; its filename alone is not auto-discovered. | Not run; scenario interpretation only |
+| Claude Code | Loads `CLAUDE.md`; documented `@AGENTS.md` import shares project instructions. | Thin root [CLAUDE.md](../CLAUDE.md) imports only AGENTS; the universal prompt selects one brief. | Not run; restricted probe was unauthenticated |
+| Antigravity | Workspace rules are created through the UI; manual activation and file references are documented. | Optional manual rule pointing to shared files, or universal explicit-read prompt; no rule is installed here. | Not run; no invocation |
 | Future/other harness | Native loading is unknown until verified. | Supply repository instructions, roster, launch contract and one brief explicitly, plus the exact source revision. | Not run |
 
 Sources: [Codex project instructions](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [Claude Code memory and AGENTS import](https://code.claude.com/docs/en/memory#agentsmd), [Antigravity rules](https://antigravity.google/docs/ide/rules/). The broader [research record](../Reviews/2026-09-03-agent-role-system/research.md) separates source claims from testing.

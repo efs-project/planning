@@ -29,6 +29,12 @@ This table is the sole registry of IDs, names, exact aliases, brief paths, and u
 
 **Split legacy label:** `Media Library / Booru PM` (also `EFS Media Library / Booru PM`) is intentionally not an automatic alias. Ask which assignment is intended: shared media infrastructure/personal playback → `media-library-pm`; tagged gallery/discovery/curation → `booru-pm`. A task spanning both names one acceptance owner and the other as collaborator; it does not recombine the roles. The media brief explicitly separates its shared-infrastructure and provisional personal-library product hats.
 
+## Optional local routing helper
+
+From a planning checkout, `./scripts/agent-role.sh list` prints the canonical IDs, names and brief paths; `./scripts/agent-role.sh launch "EFS Contracts Dev"` prints a copyable prompt for one exact route; and `./scripts/agent-role.sh check` validates this table and reachable brief structure. The helper reads only. It does not start a worker, grant authority, enforce permissions, create a lock, or prove that a harness loaded these files.
+
+The generated prompt shows the derived location of its actual planning checkout for same-machine use. That location is not portable evidence: on a different machine, obtain the assigned branch and commit from the task or handoff. Without a shell, resolve an exact roster entry by eye and use the [universal no-shell prompt](./launch.md#universal-prompt--no-shell-required) with that entry's brief; the Markdown roster remains canonical.
+
 ## Maintenance and authority
 
 Briefs are name-stable living operations documents, never numbered or promoted through the protocol-design ceremony. General PM curates this registry; each role may refine its operational notes within an authorized scope. Ownership, authority, cross-role boundaries, and global workflow changes require owner approval. [Human authority](../Onboarding/authority.md) remains unchanged; reusable professional briefs grant no accounts, credentials, private context, or authority to another human.
