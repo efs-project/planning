@@ -6,9 +6,9 @@ Per-convention quick-lookup. Canonical rules: [[design-system]].
 
 Before work, identify the assigned branch/revision and inspect dirty state, relevant cards/status/handoffs and visible related branches. Fetch when available to verify freshness. For ordinary main-based work, update only your owned clean worktree against the intended upstream; never rebase another worker's branch, change an assigned pinned review/experiment revision, or autostash unrelated edits. Distinct authorized scopes can use isolated worktrees; overlapping edits require an agreed split or handoff. No status note means no proof of an idle checkout.
 
-Commit and push completed authorized changes unless the assignment restricts publication. A read-only report does not authorize these mutations. Offline independent work can continue locally within scope: state exact source commit and freshness/visibility gaps. Distinguish local committed, remote-reachable and merged results in the [shared handoff](../Agents/handoff-template.md).
+Commit and push completed authorized changes unless the assignment restricts publication. A read-only report does not authorize these mutations. Offline independent work can continue locally within scope: state exact source commit and freshness/visibility gaps. Distinguish local committed, remote-reachable and merged results in any handoff; optional [role notes](../Agents/README.md#notes-and-harness-ids) are enough.
 
-On push rejection, inspect divergence and ownership first; reconcile only your own clean branch, preserving other work. If a rebase gets gnarly (>5 minutes of resolving), back off and surface in chat. Never force-push. The [shared launch contract](../Agents/launch.md) adds session collision/source-resolution details without changing authority.
+On push rejection, inspect divergence and ownership first; reconcile only your own clean branch, preserving other work. If a rebase gets gnarly (>5 minutes of resolving), back off and surface in chat. Never force-push.
 
 ## Commit-message style
 

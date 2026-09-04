@@ -1,42 +1,60 @@
-# EFS agent roles
+# EFS agents
 
-Portable operating briefs for named roles, independent of model, harness, or chat title. Start or resume with [the shared launch contract](./launch.md); [harness loading](./harnesses.md) and an optional [handoff template](./handoff-template.md) support that same contract. The General PM's existing [brief](./pm.md) and [launch prompt](./pm-launch.md) keep their paths.
+A small directory of reusable roles. No scripts or required ceremony.
 
-## Roster
+## Start
 
-This table is the sole registry of IDs, names, exact aliases, brief paths, and use classifications. Match IDs, names, or semicolon-separated aliases case-insensitively; do not guess a fuzzy match. `established` means an established role definition, **not a running task, permission, product approval, or design freeze**. `on-demand` roles start only for a bounded assignment. Historical model-shaped slugs cannot be reliably mapped to a single role; preserve their history unchanged.
+> Read `planning/Agents/README.md` and your role's profile. Work on [task]. Check your notes if resuming; keep useful profile knowledge and handoffs up to date.
 
-<!-- role-registry:start -->
-| Role ID | Name | Aliases | Brief | Use |
-|---|---|---|---|---|
-| pm | EFS Project Manager | Project Manager; General PM; EFS General PM | [PM SOUL](./pm.md) | established |
-| v2-pm | EFS v2 PM | v2 PM | [SOUL](./v2-pm/SOUL.md) | established |
-| web-client-os-pm | EFS Web Client / OS PM | Web Client / OS PM | [SOUL](./web-client-os-pm/SOUL.md) | established |
-| sdk-pm | EFS SDK PM | SDK PM; EFS v2 SDK PM; v2 SDK PM | [SOUL](./sdk-pm/SOUL.md) | established |
-| git-forge-pm | EFS Git / Forge PM | Git / Forge PM | [SOUL](./git-forge-pm/SOUL.md) | established |
-| arcade-pm | EFS Arcade PM | Arcade PM | [SOUL](./arcade-pm/SOUL.md) | established |
-| native-filesystem-pm | EFS Drive / Native Filesystem PM | Drive / Native Filesystem PM; OS Drivers PM; EFS OS Drivers PM; OS Drives PM; EFS OS Drives PM | [SOUL](./native-filesystem-pm/SOUL.md) | established |
-| app-store-pm | EFS Open Web App Store PM | Open Web App Store PM | [SOUL](./app-store-pm/SOUL.md) | established |
-| data-explorer-pm | EFS Files / Data Explorer PM | Files / Data Explorer PM; Data Explorer PM; EFS Data Explorer PM; Data Explorer PM (Files app); EFS Data Explorer PM (Files app); Files PM; EFS Files PM | [SOUL](./data-explorer-pm/SOUL.md) | established |
-| media-library-pm | EFS Media Library PM | Media Library PM | [SOUL](./media-library-pm/SOUL.md) | established |
-| booru-pm | EFS Booru PM | Booru PM | [SOUL](./booru-pm/SOUL.md) | established |
-| contracts-dev | EFS Contracts Dev | Contracts Dev | [SOUL](./contracts-dev/SOUL.md) | established |
-| web-client-dev | EFS Web Client Dev | Web Client Dev | [SOUL](./web-client-dev/SOUL.md) | established |
-| sdk-dev | EFS SDK Dev | SDK Dev | [SOUL](./sdk-dev/SOUL.md) | on-demand |
-| integration-test-lead | EFS Integration & Test Lead | Integration & Test Lead | [SOUL](./integration-test-lead/SOUL.md) | on-demand |
-| security-reviewer | EFS Security Reviewer | Security Reviewer | [SOUL](./security-reviewer/SOUL.md) | on-demand |
-<!-- role-registry:end -->
+Read **one profile**, not the whole folder. Repository `AGENTS.md` and your assignment still apply; a role doesn't authorize unrelated work.
 
-**Split legacy label:** `Media Library / Booru PM` (also `EFS Media Library / Booru PM`) is intentionally not an automatic alias. Ask which assignment is intended: shared media infrastructure/personal playback → `media-library-pm`; tagged gallery/discovery/curation → `booru-pm`. A task spanning both names one acceptance owner and the other as collaborator; it does not recombine the roles. The media brief explicitly separates its shared-infrastructure and provisional personal-library product hats.
+## Profiles
 
-## Optional local routing helper
+Folder names are stable role IDs, independent of harness or model.
 
-From a planning checkout, `./scripts/agent-role.sh list` prints the canonical IDs, names and brief paths; `./scripts/agent-role.sh launch "EFS Contracts Dev"` prints a copyable prompt for one exact route; and `./scripts/agent-role.sh check` validates this table and reachable brief structure. The helper reads only. It does not start a worker, grant authority, enforce permissions, create a lock, or prove that a harness loaded these files.
+| Role / familiar name | Profile |
+|---|---|
+| Project Manager / General PM | [pm](./pm/SOUL.md) |
+| v2 PM | [v2-pm](./v2-pm/SOUL.md) · [notes](./v2-pm/NOTES.md) |
+| Web Client / OS PM | [web-client-os-pm](./web-client-os-pm/SOUL.md) |
+| SDK PM | [sdk-pm](./sdk-pm/SOUL.md) |
+| Git / Forge PM | [git-forge-pm](./git-forge-pm/SOUL.md) |
+| Arcade PM | [arcade-pm](./arcade-pm/SOUL.md) |
+| OS Drivers / Drive / Native Filesystem PM | [native-filesystem-pm](./native-filesystem-pm/SOUL.md) |
+| Open Web App Store PM | [app-store-pm](./app-store-pm/SOUL.md) |
+| Data Explorer / Files PM | [data-explorer-pm](./data-explorer-pm/SOUL.md) |
+| Media Library PM | [media-library-pm](./media-library-pm/SOUL.md) |
+| Booru PM | [booru-pm](./booru-pm/SOUL.md) |
+| Contracts Dev | [contracts-dev](./contracts-dev/SOUL.md) |
+| Web Client Dev | [web-client-dev](./web-client-dev/SOUL.md) |
+| SDK Dev | [sdk-dev](./sdk-dev/SOUL.md) |
+| Integration & Test Lead | [integration-test-lead](./integration-test-lead/SOUL.md) |
+| Security Reviewer | [security-reviewer](./security-reviewer/SOUL.md) |
 
-The generated prompt shows the derived location of its actual planning checkout for same-machine use. That location is not portable evidence: on a different machine, obtain the assigned branch and commit from the task or handoff. Without a shell, resolve an exact roster entry by eye and use the [universal no-shell prompt](./launch.md#universal-prompt--no-shell-required) with that entry's brief; the Markdown roster remains canonical.
+Media Library and Booru are separate; clarify an ambiguous combined title.
 
-## Maintenance and authority
+## Profiles and notes
 
-Briefs are name-stable living operations documents, never numbered or promoted through the protocol-design ceremony. General PM curates this registry; each role may refine its operational notes within an authorized scope. Ownership, authority, cross-role boundaries, and global workflow changes require owner approval. [Human authority](../Onboarding/authority.md) remains unchanged; reusable professional briefs grant no accounts, credentials, private context, or authority to another human.
+- **`SOUL.md`**: purpose, responsibilities, useful sources and working preferences. Improve your profile as needed; ownership/authority changes still need James.
+- **`NOTES.md` beside it**: optional IDs, current handoff and a few dated messages. Create/read it only when useful. Link longer work and canonical decisions; don't duplicate a backlog. Verify last-known refs before resuming.
 
-Keep current tasks on the existing [Kanban](../Kanban.md), decisions in their owning queues/history, and exact source revisions in task handoffs. Do not add a per-role status database, shadow board, mandatory empty handoff, scheduler, or independent per-harness persona. Design maps may be branch-visible; the [launch contract](./launch.md#resolve-the-source-not-just-the-folder) explains source resolution. A missing map is not evidence that its work does not exist.
+## Notes and harness IDs
+
+Copy into `NOTES.md` when needed; omit unused fields:
+
+```markdown
+# <Role> notes
+## Sessions
+- <date> · <Codex / Claude Code / Antigravity> · <conversation/session/agent ID>
+  Context: <EFS task; shareable workspace label if needed>
+  Last seen: <repo, branch, commit; local-only or pushed>. Replaces: <older ID, if relevant>.
+## Handoff
+- <What changed; source/test links; unfinished work; next useful action>
+## Messages
+- <date> · <sender harness/ID> → <recipient harness/ID or role>: <brief note>
+  Acknowledged: <recipient/date, only when actually observed>
+```
+
+IDs locate sessions; they don't prove identity, grant access or authorize contact. Record only verified EFS details you may share: tracked notes can be public. No tokens, private share links, personal data or transcripts. Private bindings may use ignored `Agents/local/` (local-only, not a secret store).
+
+Notes don't notify another harness. Use available messaging tools within scope after confirming the recipient, or leave a note for its next session. Mark sent/read/acknowledged only when observed. Sync shared notes when authorized; preserve others' messages. Silence isn't evidence of refusal or absence.

@@ -18,6 +18,8 @@ Append-only one-line decisions log. Mirrors the pattern in `contracts/docs/decis
 
 ## 2026-09
 
+- 2026-09-03 (@james via chat): **Simplify the agent directory to a small roster, short profiles and optional cross-harness notes/IDs.** Remove the role helper/tests, staffing classifications and mandatory launch/handoff procedures; keep profile knowledge separate from session notes and preserve old paths as brief pointers. Agents may retain verified, shareable EFS conversation/agent IDs and short messages, without publishing credentials/private transcripts or treating notes as automatic delivery. This supersedes the tooling/process portion of the earlier same-day rollout, not EFS protocol or role ownership. — ruled by @james, 2026-09-03
+
 - 2026-09-03 (@james via chat): **Approve the lightweight portable EFS role roster, SOUL briefs and handoff system, with additional expert review followed by implementation; merge and push to main after verification.** This is vault-process approval for the [operating-document contract](Reviews/2026-09-03-agent-role-system/design.md), not protocol/product adoption, new human authority, runtime permissions, new running tasks, deployment or a design freeze. SOULs remain name-stable living operations documents; the old PM SOUL numbering/promotion question is superseded without a design-promotion ceremony. — ruled by @james, 2026-09-03
 
 ## 2026-08

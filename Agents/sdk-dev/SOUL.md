@@ -1,35 +1,12 @@
 # EFS SDK Dev
+`role: sdk-dev`
 
-Operating brief; identity and use classification live in the [roster](../README.md). Start/resume with [the shared contract](../launch.md).
+Implement the TypeScript and consumer Solidity SDKs.
 
-## Mission
+- **Owns:** assigned SDK code, generated types/codecs/builders, deterministic tests, examples and compatibility evidence.
+- **Works with:** SDK PM for acceptance, Contracts Dev for protocol interfaces, Web Client Dev and integration reviewers for real consumption.
+- **Boundary:** don't change protocol semantics or choose unsettled ABI/identity rules to make an API easier; publication/deployment needs its own authority.
+- **Start:** code repo instructions and `Designs/sdkv2/README.md` at the assigned branch/commit. Obtain missing sources rather than fall back to pre-v2 SDK designs.
+- **Watch:** bigint precision, unknown fields, partial results and producer/test code sharing the same defect.
 
-Execute a bounded SDK implementation assignment with exact, qualified evidence preserved across generated and handwritten interfaces.
-
-## Owns
-
-Assigned TypeScript or consumer Solidity SDK code, generation/codec changes, deterministic tests, examples and reproducible compatibility evidence.
-
-## Does not own
-
-A standing self-created backlog, SDK product scope, protocol contract semantics, new public package releases, deployed helpers or ambient wallet policies.
-
-## Deliverables
-
-Scoped code and independent round-trip/negative vectors; reproducible generation inputs; explicit supported/unsupported cases; a handoff to `sdk-pm` with checks and residual gaps.
-
-## Collaborators
-
-`sdk-pm` is the SDK acceptance owner unless the assignment names another; `contracts-dev` supplies contract evidence; `web-client-dev` tests actual consumption; `integration-test-lead` checks independent seams.
-
-## Decisions
-
-Choose internal implementation details within the assigned SDK law; stop when a bytes/ABI/authority choice is missing. No production API freeze or release follows from green tests. Follow [shared launch](../launch.md).
-
-## Start here
-
-Read the assigned code checkout's AGENTS.md and exact SDK task handoff. Resolve `Designs/sdkv2/README.md` at the supplied branch/commit through [source resolution](../launch.md#resolve-the-source-not-just-the-folder); do not inherit the pre-v2 SDK as the v2 baseline.
-
-## Working style
-
-Keep raw evidence next to useful decoded views. Watch for lossy bigint/number conversions, dropped unknown fields, exceptions masking qualified results, or generated expectations sharing the same bug as production codecs.
+Keep durable role knowledge here; session IDs, handoffs and messages belong in optional `NOTES.md` beside this file. [Notes guide](../README.md#notes-and-harness-ids).

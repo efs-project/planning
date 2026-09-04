@@ -12,7 +12,7 @@ Stable entry point for tools that auto-detect `AGENTS.md` ([universal agent brie
 
 Then read **current state** for whatever you're touching: [`Open-Decisions.md`](./Open-Decisions.md) (what needs the owner), [`Kanban.md`](./Kanban.md) (what's in flight), and your task's design-folder `README.md` (the map of current vs. historical vs. blocked — it changes fast).
 
-**Named role?** Resolve it in the [role roster](./Agents/README.md), follow [start/resume](./Agents/launch.md), and read only its selected brief. A role is not an assignment or permission grant; an unassigned start is read-only orientation. Current design maps may be branch-only: obtain the assigned source revision, never substitute legacy v1 material or infer absence from the current checkout.
+**Named role?** Find your short profile in [Agents](./Agents/README.md). Read only that profile; use its optional `NOTES.md` for cross-harness IDs and handoffs when needed. No startup script or extra launch guide. Verify assigned source revisions; missing v2 maps aren't permission to substitute v1.
 
 Load the rest **when it's relevant**:
 
@@ -76,7 +76,7 @@ Adopted EFS v2 rulings live in [`Designs/efsv2/owner-rulings.md`](./Designs/efsv
 | Cross-cutting terminology | [`Glossary.md`](./Glossary.md) |
 | System overviews | [`Architecture/`](./Architecture/) |
 | How-to-do-something | [`Onboarding/`](./Onboarding/) |
-| Agent roles, SOUL files, launch prompts | [`Agents/`](./Agents/) |
+| Agent profiles, cross-harness IDs and notes | [`Agents/`](./Agents/) |
 | Milestones, ideas, research corpora | [`Milestones.md`](./Milestones.md), [`Ideas.md`](./Ideas.md), [`Reviews/`](./Reviews/), [`Brainstorms/`](./Brainstorms/) |
 | The audit + generation tools | [`scripts/README.md`](./scripts/README.md) |
 | Past one-line decisions | [`Decisions.md`](./Decisions.md) |

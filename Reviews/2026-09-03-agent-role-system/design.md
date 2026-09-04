@@ -1,5 +1,7 @@
 # Portable EFS agent roles — implementation contract
 
+> Historical, superseded by James's later 2026-09-03 simplification. Do not reimplement this tooling contract. Current directory: [Agents/README.md](../../Agents/README.md).
+
 **Status:** owner-approved direction; operating-document implementation, not an EFS protocol design or permission system.
 **Date:** 2026-09-03
 

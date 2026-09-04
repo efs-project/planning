@@ -23,6 +23,7 @@ What rulings have **retired**, and what replaced it. Input to `./scripts/needs-i
 
 | Retired phrase | Ruling | Cleared |
 |---|---|---|
+| `agent-role.sh` | 2026-09-03 owner-requested simplification: plain directory and optional profile notes | 2026-09-03 |
 | `James promotes it via the usual ceremony` | 2026-09-03 portable-role process: name-stable living ops docs, no promotion | 2026-09-03 |
 | `bash 4+` | 2026-09-03 portable-role process: preserve the existing macOS bash 3.2 script requirement | 2026-09-03 |
 | `unauthenticated GitHub REST` | 2026-09-03 portable-role process: planning observation stays files/git-only | 2026-09-03 |

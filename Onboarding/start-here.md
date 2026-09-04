@@ -11,7 +11,7 @@ New agent in the EFS planning vault — the brain for the EFS agent swarm. From 
 3. Open the [Designs owner decision inbox](../Designs/owner-decision-inbox.md) if your work touches design, prioritization, or a question for James; follow it to the owning folder's single live queue.
 4. If you have a specific task from James (chat or a previous turn), go do that. Stop reading this file.
 
-For a named role, use the [roster](../Agents/README.md), [shared launch](../Agents/launch.md) and only its selected brief. If launched explicitly unassigned, orient read-only and report readiness; do not claim work automatically. The tree below is for an authorized request to pick work, not a permission grant from a role name.
+For a named role, read its short [profile](../Agents/README.md); check optional role notes when resuming or coordinating. No separate launch procedure. If unassigned, orient read-only; the tree below is for an authorized request to pick work.
 
 > **Decision rule:** unchecked boxes and "open questions" in source designs are not automatically James decisions. The owning folder's owner inbox says whether a choice is live now, evidence-gated, launch-only, settled, delegated, or superseded. Record adopted EFS v2 answers in [owner rulings](../Designs/efsv2/owner-rulings.md); use [[Owner-Inbox]] for broader non-design attention.
 

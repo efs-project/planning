@@ -1,5 +1,7 @@
 # Portable EFS agent-role system
 
+> **Superseded later on 2026-09-03:** James requested a simple directory, profiles and optional cross-harness notes. The helper/tests were removed and the launch/handoff guides reduced to pointers. This folder preserves the earlier rollout's evidence, not current instructions or startup reading. Use [Agents/README.md](../../Agents/README.md); the earlier code/docs remain recoverable at Git commit `88cc332`.
+
 **Status:** implementation/review evidence for the owner-approved operating-document system; no EFS protocol adoption or runtime permission grant.
 **Date:** 2026-09-03
 

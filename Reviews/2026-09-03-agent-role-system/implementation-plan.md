@@ -1,5 +1,7 @@
 # Portable EFS agent roles implementation plan
 
+> Historical completed plan, superseded by James's later 2026-09-03 simplification. Do not execute it again. Current directory: [Agents/README.md](../../Agents/README.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox syntax for tracking.
 
 **Goal:** Make EFS roles reusable and handoffs reliable across James's agent harnesses.
