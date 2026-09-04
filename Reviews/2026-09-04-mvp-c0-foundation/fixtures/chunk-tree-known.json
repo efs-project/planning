@@ -1,0 +1,53 @@
+{
+  "status": "SYNTHETIC_COMPONENT_VECTORS_NOT_A_GENESIS",
+  "namespace": "efs2/mvp-c0/2026-09-03",
+  "runId": "0x2d60f4e0a7dbb38aef90530611572334aa72911b4e1bd0e0946599001f06ca53",
+  "provenance": {
+    "method": "Clean-room derivation with Foundry cast 1.7.1, without reading Solidity or JavaScript implementations",
+    "recordDomain": "efs2/record/1",
+    "leaf": "keccak256(0x00 || chunk)",
+    "parent": "keccak256(0x01 || left || right); ordered pairs; promote odd tail unchanged",
+    "body": "big-endian uint32 chunkSize || uint32 chunkCount || uint64 totalSize || bytes32 root",
+    "recordId": "keccak256(abi.encode(domRecord, typeId, keccak256(body)))",
+    "pattern": "For named bytesN vectors, byte[i] = i mod 251",
+    "warning": "The fixed Type ID is synthetic and has not been admitted. The random run marker is non-secret fixture context, not a valid C0 run."
+  },
+  "typeId": "0x1111111111111111111111111111111111111111111111111111111111111111",
+  "domRecord": "0xa9b8140bd3398d14fe72a4e868ca64b6bb119c3ee51354b50457d56da12552e3",
+  "vectors": [
+    {
+      "name": "empty", "payload": "empty", "chunkSize": 262144, "chunkCount": 0, "totalSize": 0,
+      "body": "0x00040000000000000000000000000000f2ee15ea639b73fa3db9b34a245bdfa015c260c598b211bf05a1ecc4b3e3b4f2",
+      "root": "0xf2ee15ea639b73fa3db9b34a245bdfa015c260c598b211bf05a1ecc4b3e3b4f2",
+      "recordId": "0xa93083b1473bbe6fd33836a46c5d8290cba2c1e2017542d48c47d8f532aa9f84"
+    },
+    {
+      "name": "hello", "payload": "utf8:hello", "chunkSize": 4096, "chunkCount": 1, "totalSize": 5,
+      "body": "0x00001000000000010000000000000005aa872873635ad305d25327a952b25396b95b3ddfcfd661ab26241a853f70451c",
+      "root": "0xaa872873635ad305d25327a952b25396b95b3ddfcfd661ab26241a853f70451c",
+      "recordId": "0x87110d56143d39288704faa9bf67b56d92ae39c442d9cb0d56f271468d9d38d2"
+    },
+    {
+      "name": "bytes4097", "payload": "i-mod-251", "chunkSize": 4096, "chunkCount": 2, "totalSize": 4097,
+      "body": "0x00001000000000020000000000001001113e8f5bd4119a204f74e0ac437d9f3ed438b80cdcb2ed69706621ee0a3e5bfd",
+      "root": "0x113e8f5bd4119a204f74e0ac437d9f3ed438b80cdcb2ed69706621ee0a3e5bfd",
+      "recordId": "0xe178ba5c7fe788191fc0fe9d6b1302bc34d665977b30e78abbbe06cc655b7c98"
+    },
+    {
+      "name": "bytes8193", "payload": "i-mod-251", "chunkSize": 4096, "chunkCount": 3, "totalSize": 8193,
+      "body": "0x00001000000000030000000000002001e37bb5d72c61958b2f3e99451d13c8dd11df318bfbc49874b6e63cc419fa76ba",
+      "root": "0xe37bb5d72c61958b2f3e99451d13c8dd11df318bfbc49874b6e63cc419fa76ba",
+      "recordId": "0xcc8d28193a623bf9bf7c2675674ad8bffac4f248bc6f783af2758b8d7df0c4de"
+    },
+    {
+      "name": "bytes16385", "payload": "i-mod-251", "chunkSize": 4096, "chunkCount": 5, "totalSize": 16385,
+      "body": "0x000010000000000500000000000040017b3b20a0317f809afdf2bfe894ff69253da2bf52d60aa2a1cb8aeeb740638c01",
+      "root": "0x7b3b20a0317f809afdf2bfe894ff69253da2bf52d60aa2a1cb8aeeb740638c01",
+      "recordId": "0x639b6f1767d53a530e03a1390ff5cc5a08fe0a15f5a31c2496fa3eff66185194"
+    }
+  ],
+  "invalidThreeChunkRoots": {
+    "duplicateLast": "0x9070dc814691f60983bea75674381f53ce49d7e39b1e7d286440449db1852398",
+    "sortedPairsWithPromotion": "0xcc61919a562dd70f3c27fd6e426b7b46cedbe03235dec81e73e85ab041265495"
+  }
+}

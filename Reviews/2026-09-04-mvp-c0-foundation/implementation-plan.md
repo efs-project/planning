@@ -55,6 +55,9 @@ functions for later independent integration; it contains no admission state.
 `entries(uint256,uint32)->(bytes32[],uint256)` plus public facts/counts.
 Inventory limit is 1..64, cursor<=count; next cursor equals count at end.
 Use the source-pinned ChunkTree tree and B0 Record formula.
+Consume controller-provided `fixtures/chunk-tree-known.json` as independently
+derived expected values. Five-chunk coverage needs a test cap above 16384 or a
+pure tree test; it does not change Task 3's disclosed measurement cap.
 
 - [ ] Write failing tests for unsealed/unauthorized/repeated/mismatched seals, wrong runtime hashes, wrong context and enclosing rollback.
 - [ ] Implement seal and frozen-context checks; make enclosing initialization revert leave carrier unsealed.
@@ -73,6 +76,8 @@ only if the report contains genuine observed values and explicit coverage.
 Node starts one loopback Anvil instance with no persistent chain state, cleans
 it up even on failure, deploys these experimental components and uses independent
 reference encoding/tree computation, not the Solidity helper as expected output.
+Check the JavaScript tree against `fixtures/chunk-tree-known.json`, which was
+derived separately using `cast`, including the two wrong three-chunk roots.
 
 - [ ] Write red parity and recovery tests: Node seed/deployment bytes and hashes equal independently executing Solidity; recovered complete file verifies after discarding local data; mutated recovered bytes fail; missing/empty differ; multiple chunks and partial final chunk verify.
 - [ ] Independently implement tree/body/RecordId and range verification. Use serialized transaction/state reads, not events as the reconstruction source. No claims of account/storage proof verification.
