@@ -9,6 +9,8 @@
     "test": "node --test test/*.test.mjs",
     "demo": "node scripts/demo.mjs",
     "test:browser": "node scripts/browser-check.mjs",
+    "test:extensions": "node scripts/browser-extensions.mjs",
+    "test:files-ui": "node --test test/files-ui.browser.mjs",
     "measure": "node scripts/measure.mjs",
     "typecheck": "tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext sdk/sample.ts"
   },

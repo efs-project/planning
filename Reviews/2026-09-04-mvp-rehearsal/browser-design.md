@@ -114,3 +114,13 @@ flags and idempotent teardown/resource revocation.
 The report records executed browser/model checks and manual/browser evidence
 separately. Full C0/M0, real wallet behavior, browser compatibility, public
 deployment and product adoption remain unclaimed.
+
+## 2026-09-04 extension addendum
+
+The active entry is now `web/workflow-app.mjs`; the first-checkpoint `app.mjs`
+above remains reference only. [Extension results](extension-results.md) record
+three view controllers, exact revision routes, upload/download/history, loaded
+schema tables and typed deterministic challenges. Small binaries are supported;
+the lab limit stays 16 KiB. Cancellation stops pre-submit continuation but cannot
+undo an already-approved grant or already-submitted effect. This qualification
+supersedes any reading of the earlier "performs no write" sentence as rollback.

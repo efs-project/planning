@@ -44,11 +44,11 @@
     },
     {
       "operation": "Solidity consumer current file eth_estimateGas",
-      "gasUsed": "45760"
+      "gasUsed": "45772"
     },
     {
       "operation": "Solidity consumer exact typed u64 eth_estimateGas",
-      "gasUsed": "50828"
+      "gasUsed": "50840"
     }
   ],
   "runtimeBytes": {

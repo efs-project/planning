@@ -3,6 +3,12 @@
 **Status:** engineering handoff from the disposable workflow rehearsal. It is
 not a claim that the permanent EFS protocol or a public MVP is complete.
 
+**2026-09-04 follow-up:** [workflow extension](extension-results.md) has now
+implemented the first exact-schema table, small upload/download/history flows
+and reproducible typed Arcade challenge named below. The remaining Core,
+large-file, real-wallet and deployment gaps are unchanged; the map below is the
+retained first-checkpoint handoff, not a claim those UI extensions are still absent.
+
 ## The useful result
 
 There is now an actual connected path: browser -> SDK -> local EVM contracts

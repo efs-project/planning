@@ -1,6 +1,9 @@
 # EFS MVP rehearsal
 
 **Status:** joined local rehearsal executed and reviewed; not full C0 or a production MVP
+**Latest increment:** [workflow extension and review closure](extension-results.md) —
+exact Files links/history/upload/download, a lossless exact-schema table, and
+shared typed challenges; 95 Node and 27 joined browser journeys pass.
 **Source:** MVP-C0 foundation `bbad508`, merged with planning main `fffe293` at `35113aa`.
 **Authority:** James requested on 2026-09-04 that v2 PM perform the design work,
 validation and prototypes needed for an MVP spanning contracts, SDK, Web Client,
@@ -58,7 +61,7 @@ must enumerate every shortcut and may never count its successes as M0/C0 passes.
   validation must derive expectations from serialized bytes, not call the
   implementation's validation functions as its oracle.
 
-## Results
+## First-checkpoint results (retained history)
 
 Fresh final local runs on 2026-09-04:
 
@@ -112,6 +115,8 @@ Do not expose it through a tunnel or use its test accounts anywhere else.
 ```sh
 npm run measure
 npm run test:browser
+npm run test:extensions
+npm run test:files-ui
 ```
 
 Browser checks use locked Playwright 1.62.1. Supply an installed Chromium path

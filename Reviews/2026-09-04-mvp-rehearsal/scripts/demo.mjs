@@ -13,6 +13,12 @@ const staticFiles = new Map([
   ['/', ['web/index.html', 'text/html']], ['/index.html', ['web/index.html', 'text/html']],
   ['/styles.css', ['web/styles.css', 'text/css']], ['/app.mjs', ['web/app.mjs', 'text/javascript']],
   ['/model.mjs', ['web/model.mjs', 'text/javascript']], ['/bootstrap.mjs', ['web/bootstrap.mjs', 'text/javascript']],
+  ['/files-view.mjs', ['web/files-view.mjs', 'text/javascript']],
+  ['/workflow-app.mjs', ['web/workflow-app.mjs', 'text/javascript']],
+  ['/workflow.css', ['web/workflow.css', 'text/css']],
+  ['/data-view.mjs', ['web/data-view.mjs', 'text/javascript']],
+  ['/arcade-view.mjs', ['web/arcade-view.mjs', 'text/javascript']],
+  ['/game-source.mjs', ['web/game-source.mjs', 'text/javascript']],
   ['/sdk/index.js', ['sdk/index.js', 'text/javascript']], ['/sdk/index.mjs', ['sdk/index.js', 'text/javascript']],
   ['/vendor/ethers.js', ['node_modules/ethers/dist/ethers.min.js', 'text/javascript']],
 ]);

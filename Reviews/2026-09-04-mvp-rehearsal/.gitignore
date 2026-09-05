@@ -6,3 +6,4 @@ broadcast/
 playwright-report/
 test-results/
 artifacts/browser-failure.png
+artifacts/extension-failure.png

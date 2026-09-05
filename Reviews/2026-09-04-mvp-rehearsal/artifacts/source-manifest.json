@@ -1,7 +1,7 @@
 {
   "kind": "local source and output inventory, not C0 identity or signed attestation",
   "profile": "efs-lab/1",
-  "generatedAt": "2026-09-05T00:55:00.807Z",
+  "generatedAt": "2026-09-05T01:31:36.633Z",
   "sourceFiles": [
     {
       "path": "consumer/LabRead.sol",
@@ -21,15 +21,19 @@
     },
     {
       "path": "package.json",
-      "sha256": "d1027f2465ae1017333f8e557a600c87992b5f45c4e2cf9710d448339095b2cc"
+      "sha256": "71bb1ec93b700d42bf2f6d367b6a5fc05bacab3c7a66fec027d5d08bc516fae4"
     },
     {
       "path": "scripts/bootstrap.mjs",
-      "sha256": "4bf282ad53ac326332223f7ab20702d3b52b9ea917e58b9d73ce4377fffdabfa"
+      "sha256": "78c61000874aee2eed00b5498000318ba2b4b69c6ee21f234bf0c082498a18e1"
     },
     {
       "path": "scripts/browser-check.mjs",
       "sha256": "d5ed64c400b8d5b3a8778edf7c467dfcc144b18484c25e7105be22871c994d7c"
+    },
+    {
+      "path": "scripts/browser-extensions.mjs",
+      "sha256": "92004026a8ab6e57aee4ad657319e8ffe07e03a63f59d27a537a8c7cbb7e278a"
     },
     {
       "path": "scripts/check.mjs",
@@ -37,7 +41,7 @@
     },
     {
       "path": "scripts/demo.mjs",
-      "sha256": "4ca2b3fbeb88420de30d6d49263501c1c075f96ab190750cc639c21565f3d676"
+      "sha256": "34bca9702fdc56816b5526a735bc4b6fbdfd7da0fc13431f2807d0874cf85475"
     },
     {
       "path": "scripts/local-chain.mjs",
@@ -49,7 +53,7 @@
     },
     {
       "path": "scripts/snapshot.mjs",
-      "sha256": "3d4b8dbe15621c9a365bd7a33899eefed6aecf0d8c0f043e468646d59189a9e5"
+      "sha256": "669ed861e55b4457bb71fb3b12efe308abcea6cc955b633fd5016aac9b8a1a7d"
     },
     {
       "path": "sdk/index.d.ts",
@@ -80,6 +84,26 @@
       "sha256": "6f681cb6a5cbfc2b4e2389b1947ff3128b6273bb1837ce92ff910a17be6437f7"
     },
     {
+      "path": "test/arcade-view.test.mjs",
+      "sha256": "1403c0a239be603228fa51a499959c9b95e4b5b1dedf6cea0fc107c89aa85c1d"
+    },
+    {
+      "path": "test/data-view.test.mjs",
+      "sha256": "f4b08c72ad0d34870e24b133075418d9e84d421c95dc20a52cb0940739cd3be4"
+    },
+    {
+      "path": "test/extension-seeds.test.mjs",
+      "sha256": "c6f8f9d8d4010a294a6cf8e3f6976c09164cd1f606ab24b27531488caca5ef67"
+    },
+    {
+      "path": "test/files-ui.browser.mjs",
+      "sha256": "d3c1e9ba3507589ffd7f961a72052fd0ffcf5fa2a1e335401d82d62b6655a9c8"
+    },
+    {
+      "path": "test/files-view.test.mjs",
+      "sha256": "3ac3b4fda5777271c33a92f2bd4a1edbd04fde5f03287085fc61e975516be0ac"
+    },
+    {
       "path": "test/integration.test.mjs",
       "sha256": "f655f454695dd7793fb08f6f6e02d645f07f82505be5c61e89557c26646570e3"
     },
@@ -108,16 +132,28 @@
       "sha256": "a3ac55d9be820ec75ed09887e7ea992dc419620bb7b9c8f04745eca7f70479b1"
     },
     {
+      "path": "web/arcade-view.mjs",
+      "sha256": "346c236d3fc5dd2a885c2687c7da58421851d70dac85f5a4876eecf69586d435"
+    },
+    {
       "path": "web/bootstrap.mjs",
-      "sha256": "f570ce1abd81756fae1a5d58dc081ea310d717d04125116f37c7ef8870aedb42"
+      "sha256": "daf46f59a7e9e4d9ef3ebf1ff0b64af9dacc2b80069161d681d494206cf2d7f5"
+    },
+    {
+      "path": "web/data-view.mjs",
+      "sha256": "cfe6d47231252e9ee23cec2f5a568363d740d6cca95fbbe715d9f8487ef9127f"
+    },
+    {
+      "path": "web/files-view.mjs",
+      "sha256": "00f7436a540bdeb1b1f4c2c23ef5806838f35230e11e82f18dc53b3323e27d16"
     },
     {
       "path": "web/game-source.mjs",
-      "sha256": "a65c0dcfb1e31030d7d3d2ec14ef052ca51c163c767a2f7f3061fb3215eaaa58"
+      "sha256": "1b695a148d5aa8931228326f48f2e1ec3b72e19e40b55dc32635af1ca7290fd3"
     },
     {
       "path": "web/index.html",
-      "sha256": "2e84eedc6e0d95f64a6fa1808d0e9b2e5c24c15c2d292ccc2f6b5215caaad439"
+      "sha256": "9b9f077a45fb48a2a86a31555e16c26d87df28744cf6f8401665ed37f094d20f"
     },
     {
       "path": "web/model.mjs",
@@ -126,33 +162,57 @@
     {
       "path": "web/styles.css",
       "sha256": "a8e67369be37c153fbea740a5114e2c1cf184c8064bef41d83e17521447bffc2"
+    },
+    {
+      "path": "web/workflow-app.mjs",
+      "sha256": "db28e7718462b1b0c462cc9f0fd3ce93ca1a039ed4358a4b7d30103c49ae0b31"
+    },
+    {
+      "path": "web/workflow.css",
+      "sha256": "bd87d94063140050924d7d84bde66bad685c8be5089a1c34b7bb51159e5cee58"
     }
   ],
   "artifactFiles": [
     {
+      "path": "artifacts/arcade-challenge-desktop.png",
+      "sha256": "82b877194a25607e83fd14490656059595411ea7bb08f8699ac135df35b4500b"
+    },
+    {
       "path": "artifacts/arcade-desktop.png",
-      "sha256": "2a4c187b7285508a506e7d6fd4838dd94a909061f774adafe6161f48a1dca2bc"
+      "sha256": "27a3ae8cf0e6a367d1c057679ae0cd0b0ed972a4e6959fd583e48302e7a5768d"
+    },
+    {
+      "path": "artifacts/browser-extension-results.json",
+      "sha256": "aa1181e68a82fa180b47eea344a4265ee6c3382ab9f4f19668a96ccf9323a944"
     },
     {
       "path": "artifacts/browser-results.json",
-      "sha256": "6241514224d092e52ace1fc23eae4508f0b489a7bb76eb7b68e1bfeff6522efc"
+      "sha256": "53b78ad0af715f50528161492e5e501bb65dc6fee0992906db185073fa6bd5d1"
     },
     {
       "path": "artifacts/data-desktop.png",
-      "sha256": "56b8e5ed573b0b12fb1c61b6e21d4d826cad53e31df8cd4c55b8d6e97c4e0247"
+      "sha256": "d055a619ade6bf44493395bcd0255f5f7d55940e8e3d8f49ff84681f09ed31a1"
+    },
+    {
+      "path": "artifacts/data-table-desktop.png",
+      "sha256": "4e5706e67077b080ea7ca657536ac4b6e0d0561e332d8bb432384e681332c912"
+    },
+    {
+      "path": "artifacts/data-table-mobile.png",
+      "sha256": "7d9611b5c6e5b43f7e14b7380594c22c51235e4ef8260bbd8771b7312c2b6753"
     },
     {
       "path": "artifacts/files-desktop.png",
-      "sha256": "55766d8c349d3bff0e1166691703a5d8cf256bdf8fab4a264b4a56a0eab059f5"
+      "sha256": "1d5426be9487f55d9384c637281d1d179459f92f2412592e071204204785a1a5"
     },
     {
       "path": "artifacts/files-mobile.png",
-      "sha256": "f0890bf087032a6c5eb8474e9c12d98e1ff7de0b7a8714ef2741570107e61a44"
+      "sha256": "a5237a6b4c01e79451bead7efcdf9947598615eeb763901d4894790952401476"
     },
     {
       "path": "artifacts/measurements.json",
-      "sha256": "913bd2bbd5bfdc590d6c39ab5202eed5d7ac290f8ff1ecd930f17cbd0dabed2f"
+      "sha256": "739caa724d2d78d5d89dc6381a305903acb7187e253db9b25ffd50fc9c17fe24"
     }
   ],
-  "sourceTreeSha256": "aeedcde869dda637c0a6a810de545dcd633cf4b3e01a3c5245cab4d4dc8f1368"
+  "sourceTreeSha256": "010829e74f4fefcb63a2002aa079dbfae453e0820d009f523c29e9407cd070fe"
 }

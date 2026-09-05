@@ -1,0 +1,115 @@
+{
+  "profile": "efs-lab/1",
+  "c0Conformance": false,
+  "generatedAt": "2026-09-05T01:27:30.647Z",
+  "browser": "148.0.7778.96",
+  "results": [
+    {
+      "name": "exact directory link and continuation retain one pre-mined basis",
+      "status": "PASS",
+      "elapsedMs": 2738
+    },
+    {
+      "name": "keyboard skip link moves focus without changing the selected Files route",
+      "status": "PASS",
+      "elapsedMs": 32
+    },
+    {
+      "name": "old exact game revision is readable and downloadable without execution",
+      "status": "PASS",
+      "elapsedMs": 1539
+    },
+    {
+      "name": "binary upload round-trips exactly after one local message approval",
+      "status": "PASS",
+      "elapsedMs": 5700
+    },
+    {
+      "name": "oversize upload rejects before signing or session setup",
+      "status": "PASS",
+      "elapsedMs": 59
+    },
+    {
+      "name": "Data exact-schema table keeps large u64 values and numeric ordering lossless",
+      "status": "PASS",
+      "elapsedMs": 1654
+    },
+    {
+      "name": "loaded-row filter, keyboard selection, copy and mobile table preserve scope and precision",
+      "status": "PASS",
+      "elapsedMs": 295
+    },
+    {
+      "name": "Data retains a unavailable payload as a visible failed row",
+      "status": "PASS",
+      "elapsedMs": 842
+    },
+    {
+      "name": "Data retains a corrupt payload as a visible failed row",
+      "status": "PASS",
+      "elapsedMs": 846
+    },
+    {
+      "name": "same exact challenge and release reproduce the obstacle sequence after Stop",
+      "status": "PASS",
+      "elapsedMs": 3999
+    },
+    {
+      "name": "a fresh browser context reconstructs the same challenge sequence with no wallet",
+      "status": "PASS",
+      "elapsedMs": 2398
+    },
+    {
+      "name": "another shared typed challenge changes sequence and preserves the sandbox",
+      "status": "PASS",
+      "elapsedMs": 2733
+    },
+    {
+      "name": "delayed Play cannot mount after stop",
+      "status": "PASS",
+      "elapsedMs": 173
+    },
+    {
+      "name": "delayed Play cannot mount after navigate",
+      "status": "PASS",
+      "elapsedMs": 1527
+    },
+    {
+      "name": "corrupt game bytes never launch and remain inspectable",
+      "status": "PASS",
+      "elapsedMs": 2236
+    },
+    {
+      "name": "missing challenge never falls back to random game configuration",
+      "status": "PASS",
+      "elapsedMs": 265
+    },
+    {
+      "name": "malformed file link fails closed without silently selecting another node",
+      "status": "PASS",
+      "elapsedMs": 8
+    },
+    {
+      "name": "Cancel fences a pending new session write on the actual SDK",
+      "status": "PASS",
+      "elapsedMs": 594
+    },
+    {
+      "name": "Cancel fences a pending established session write on the actual SDK",
+      "status": "PASS",
+      "elapsedMs": 391
+    }
+  ],
+  "errors": [],
+  "externalRequests": [],
+  "providerCounts": {
+    "rpc:eth_chainId": 187,
+    "rpc:eth_getBlockByNumber": 17,
+    "rpc:eth_getCode": 374,
+    "rpc:eth_call": 996,
+    "rpc:eth_getBlockByHash": 170,
+    "wallet:eth_signTypedData_v4": 2,
+    "relay:eth_sendTransaction": 2,
+    "rpc:eth_getTransactionReceipt": 1
+  }
+}

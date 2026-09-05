@@ -70,3 +70,14 @@ Remaining engineering is in [build-readiness.md](build-readiness.md). SDK,
 Web Client / OS, Data Explorer and Arcade PMs returned bounded read-only
 [consumer handoffs](pm-handoff.md). No new agent task or product repository was created, and
 no review was interpreted as main-merge authority.
+
+## 2026-09-04 workflow extension
+
+James requested fleshing out the prototype. Three disjoint agents implemented
+Files, Data and Arcade controllers; v2 PM joined them through a native-module
+shell, real seeded contract state, pinned routes, responsive styling and browser
+fault injection. [Extension results](extension-results.md) record 24 Solidity,
+95 Node, strict TypeScript, 8 original plus 19 extended EVM/browser journeys and
+9 separate mock-SDK browser regressions. Independent review closed Record-ID
+substitution, pre-submit cancellation, skip-link and full-basis findings.
+No Core/SDK wire or product-repo change. All nine C0 M0 rows remain NOT_RUN.

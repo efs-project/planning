@@ -20,4 +20,5 @@ window.EfsLabSdk = (async () => {
   window.EFS_LAB_BOOTSTRAP = bootstrap;
   return sdkModule.createLabSdk(bootstrap);
 })();
-await import('./app.mjs');
+// app.mjs is retained first-checkpoint evidence; only this new shell is active.
+await import('./workflow-app.mjs');
