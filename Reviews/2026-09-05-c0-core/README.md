@@ -70,8 +70,10 @@ admission, G3 capability activation, or any C0 browser row.
 
 The [next stateful increment](stateful-integration.md) records the state owners,
 exact dispatch rule and twelve adversarial acceptance cases for application
-admission, Binding and postings. It is the next build specification, not a
-completed capability.
+admission, Binding and postings. Its [implementation plan](stateful-plan.md)
+now advances pure key/effect helpers, then one atomic stateful kernel and an
+independent state reader. This remains unfinished capability work, not a
+completed C0 acceptance claim.
 
 ## Owner followups
 
