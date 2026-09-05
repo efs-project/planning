@@ -1,0 +1,964 @@
+{
+  "format": "efs-c0-temporary-type-inputs/1",
+  "sourceRevision": "1a51c5d728766f25d31fcf7575e578dca3aaf780",
+  "qualificationAscii": "c0-type-inputs-20260905-v1",
+  "meaningTemplate": "Temporary engineering input for {name}; exact source commitment attached. Not ceremony-final.",
+  "sources": {
+    "encoding": {
+      "path": "Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-encoding-and-ids.md",
+      "sha256": "2fa220cebcc4d7f6eeb38b8c3388e1c45d6421e9480384c4fe3587a586253d94"
+    },
+    "content": {
+      "path": "Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-content-locators.md",
+      "sha256": "3b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd"
+    },
+    "binding": {
+      "path": "Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-binding.md",
+      "sha256": "f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d"
+    },
+    "files": {
+      "path": "Designs/efsv2/hierarchical-files-and-folders.md",
+      "sha256": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456"
+    },
+    "genesis": {
+      "path": "Designs/efsv2/mvp-c0-genesis-manifest.md",
+      "sha256": "5d1a4235e09f141059e21076be56f07baa032509739a370fa64ef8b1aaccf7cf"
+    }
+  },
+  "temporaryChoices": [
+    "Every meaning and namespaceQualifier is explicitly laboratory metadata, not paraphrased canonical meaning. specDigest is SHA-256 of the exact primary source file bytes, not of this meaning.",
+    "Files, ObjectGenesis and seal IndexSpecs are not fully pinned by their field-model documents. This candidate uses the explicit lists below (Files/seal backlinks for every role; no scalar indexes).",
+    "G11 specifies seal field order only: this candidate chooses hashes/Realm/roots as BYTES_FIXED(32), address as BYTES_FIXED(20), Principal as PRINCIPAL, admission high as UINT(8), exact typed record/object refs as shown. These are not claimed source-fixed MC/1 bytes.",
+    "ChunkTree count and size minima are zero under Files 7.2. The unique empty form remains a contextual profile check, not expressible by MC/1 INT_RANGE.",
+    "Route enum numeric codes and read/profile rules are not invented as MC/1 constraints; UINT(1) preserves the source width."
+  ],
+  "groups": [
+    [
+      {
+        "name": "ObjectGenesis/1",
+        "source": "files",
+        "section": "3.1",
+        "fields": [
+          {
+            "name": "publisher",
+            "kind": "PRINCIPAL"
+          },
+          {
+            "name": "salt",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "meaning",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "BYTES_FIXED",
+              "width": 32
+            }
+          }
+        ],
+        "roles": [],
+        "indexes": [],
+        "constraints": [],
+        "profileRules": [
+          "salt entropy; Files meaning present; publisher charter is a Binding fact, not ObjectGenesis ownership"
+        ]
+      },
+      {
+        "name": "ResolutionPlan/1",
+        "source": "encoding",
+        "section": "3.4",
+        "fields": [
+          {
+            "name": "frame",
+            "kind": "BYTES",
+            "max": 4192
+          }
+        ],
+        "roles": [],
+        "indexes": [],
+        "constraints": [],
+        "profileRules": [
+          "frame length 96+64*N, N<=64; exact Lens grammar and finite Principals are not ReferenceRoles"
+        ]
+      },
+      {
+        "name": "ByteDigest/1",
+        "source": "content",
+        "section": "4",
+        "fields": [
+          {
+            "name": "digest",
+            "kind": "DIGEST"
+          }
+        ],
+        "roles": [],
+        "indexes": [],
+        "constraints": [],
+        "profileRules": [
+          "content algorithms 0xef01, 0x12, 0x1b only; no size field; no declared digest index"
+        ]
+      },
+      {
+        "name": "ChunkTree/1",
+        "source": "content",
+        "section": "5.1 + Files 7.2 override",
+        "fields": [
+          {
+            "name": "chunkSize",
+            "kind": "UINT",
+            "width": 4
+          },
+          {
+            "name": "chunkCount",
+            "kind": "UINT",
+            "width": 4
+          },
+          {
+            "name": "totalSize",
+            "kind": "UINT",
+            "width": 8
+          },
+          {
+            "name": "merkleRoot",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          }
+        ],
+        "roles": [],
+        "indexes": [],
+        "constraints": [
+          {
+            "kind": 1,
+            "fieldIdx": 0,
+            "min": "4096",
+            "max": "8388608"
+          },
+          {
+            "kind": 1,
+            "fieldIdx": 1,
+            "min": "0",
+            "max": "16777216"
+          },
+          {
+            "kind": 1,
+            "fieldIdx": 2,
+            "min": "0",
+            "max": "18446744073709551615"
+          }
+        ],
+        "profileRules": [
+          "chunkSize multiple of 4096; nonempty chunkCount=ceil(totalSize/chunkSize), nonzero root; sole empty tuple (262144,0,0,keccak256(0x02))"
+        ]
+      },
+      {
+        "name": "Locator/1",
+        "source": "content",
+        "section": "2.1 + 3",
+        "fields": [
+          {
+            "name": "subject",
+            "kind": "REF"
+          },
+          {
+            "name": "uri",
+            "kind": "BYTES",
+            "max": 2048
+          },
+          {
+            "name": "observedDigest",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "DIGEST"
+            }
+          },
+          {
+            "name": "observedSize",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "UINT",
+              "width": 8
+            }
+          },
+          {
+            "name": "observedAtClaim",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "UINT",
+              "width": 8
+            }
+          }
+        ],
+        "roles": [
+          {
+            "name": "subject",
+            "targetClass": 1,
+            "expectedType": "ANY",
+            "fieldIdx": 0
+          }
+        ],
+        "indexes": [
+          {
+            "kind": 2,
+            "target": 0
+          }
+        ],
+        "constraints": [
+          {
+            "kind": 2,
+            "fieldIdx": 1
+          }
+        ],
+        "profileRules": [
+          "subject allowed ObjectGenesis/1, ByteDigest/1, ChunkTree/1, ArtifactClosure/1; C0 does not admit ArtifactClosure/1; all-or-none observations; observed digest not Git framed; absolute printable ASCII URI"
+        ]
+      },
+      {
+        "name": "RepresentationBinding/1",
+        "source": "content",
+        "section": "2.1 + 6",
+        "fields": [
+          {
+            "name": "subject",
+            "kind": "REF"
+          },
+          {
+            "name": "externalKind",
+            "kind": "UINT",
+            "width": 1
+          },
+          {
+            "name": "externalDigest",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "DIGEST"
+            }
+          },
+          {
+            "name": "externalUri",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "BYTES",
+              "max": 2048
+            }
+          }
+        ],
+        "roles": [
+          {
+            "name": "subject",
+            "targetClass": 1,
+            "expectedType": "ANY",
+            "fieldIdx": 0
+          }
+        ],
+        "indexes": [
+          {
+            "kind": 2,
+            "target": 0
+          }
+        ],
+        "constraints": [],
+        "profileRules": [
+          "subject allowed ChunkTree/1 or ArtifactClosure/1 (latter not C0); externalKind 1 digest or 2 URI; exactly one matching option; actual byte equivalence is evidence"
+        ]
+      }
+    ],
+    [
+      {
+        "name": "BindingSet/1",
+        "source": "binding",
+        "section": "3.2",
+        "fields": [
+          {
+            "name": "purpose",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "subject",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "fieldRole",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "targetRecord",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "REF"
+            }
+          },
+          {
+            "name": "targetOccurrence",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "OCCREF"
+            }
+          },
+          {
+            "name": "predecessor",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "OCCREF"
+            }
+          }
+        ],
+        "roles": [
+          {
+            "name": "targetRecord",
+            "targetClass": 1,
+            "expectedType": "ANY",
+            "fieldIdx": 3
+          },
+          {
+            "name": "targetOccurrence",
+            "targetClass": 4,
+            "expectedType": "ANY",
+            "fieldIdx": 4
+          },
+          {
+            "name": "predecessor",
+            "targetClass": 4,
+            "expectedType": "ANY",
+            "fieldIdx": 5
+          }
+        ],
+        "indexes": [
+          {
+            "kind": 2,
+            "target": 0
+          },
+          {
+            "kind": 2,
+            "target": 1
+          },
+          {
+            "kind": 2,
+            "target": 2
+          }
+        ],
+        "constraints": [],
+        "profileRules": [
+          "kernel effect: exactly one target; predecessor and CAS rules; position words are not references"
+        ]
+      },
+      {
+        "name": "BindingTombstone/1",
+        "source": "binding",
+        "section": "3.2",
+        "fields": [
+          {
+            "name": "purpose",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "subject",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "fieldRole",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "predecessor",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "OCCREF"
+            }
+          }
+        ],
+        "roles": [
+          {
+            "name": "predecessor",
+            "targetClass": 4,
+            "expectedType": "ANY",
+            "fieldIdx": 3
+          }
+        ],
+        "indexes": [
+          {
+            "kind": 2,
+            "target": 0
+          }
+        ],
+        "constraints": [],
+        "profileRules": [
+          "kernel tombstone and CAS; not Files whiteout"
+        ]
+      },
+      {
+        "name": "Withdrawal/1",
+        "source": "binding",
+        "section": "3.2",
+        "fields": [
+          {
+            "name": "target",
+            "kind": "OCCREF"
+          }
+        ],
+        "roles": [
+          {
+            "name": "target",
+            "targetClass": 4,
+            "expectedType": "ANY",
+            "fieldIdx": 0
+          }
+        ],
+        "indexes": [
+          {
+            "kind": 2,
+            "target": 0
+          }
+        ],
+        "constraints": [],
+        "profileRules": [
+          "body exactly 34 bytes; carriage withdrawal is not semantic revocation"
+        ]
+      }
+    ],
+    [
+      {
+        "name": "DirectoryEntry/1",
+        "source": "files",
+        "section": "3.2",
+        "fields": [
+          {
+            "name": "parent",
+            "kind": "REF"
+          },
+          {
+            "name": "name",
+            "kind": "STRING",
+            "max": 255
+          },
+          {
+            "name": "child",
+            "kind": "REF"
+          },
+          {
+            "name": "mountOverride",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "REF"
+            }
+          }
+        ],
+        "roles": [
+          {
+            "name": "parent",
+            "targetClass": 5,
+            "expectedType": "TYPE:ObjectGenesis/1",
+            "fieldIdx": 0
+          },
+          {
+            "name": "child",
+            "targetClass": 5,
+            "expectedType": "TYPE:ObjectGenesis/1",
+            "fieldIdx": 2
+          },
+          {
+            "name": "mountOverride",
+            "targetClass": 1,
+            "expectedType": "GROUP_REF:4",
+            "fieldIdx": 3
+          }
+        ],
+        "indexes": [
+          {
+            "kind": 2,
+            "target": 0
+          },
+          {
+            "kind": 2,
+            "target": 1
+          },
+          {
+            "kind": 2,
+            "target": 2
+          }
+        ],
+        "constraints": [],
+        "profileRules": [
+          "FilesName/1; parent directory, child File/Directory charter; mount root equals child; cycles contextual"
+        ]
+      },
+      {
+        "name": "DirectoryWhiteout/1",
+        "source": "files",
+        "section": "3.2",
+        "fields": [
+          {
+            "name": "parent",
+            "kind": "REF"
+          },
+          {
+            "name": "name",
+            "kind": "STRING",
+            "max": 255
+          }
+        ],
+        "roles": [
+          {
+            "name": "parent",
+            "targetClass": 5,
+            "expectedType": "TYPE:ObjectGenesis/1",
+            "fieldIdx": 0
+          }
+        ],
+        "indexes": [
+          {
+            "kind": 2,
+            "target": 0
+          }
+        ],
+        "constraints": [],
+        "profileRules": [
+          "FilesName/1; parent directory charter; selected Binding hides lower tiers"
+        ]
+      },
+      {
+        "name": "FileRevision/1",
+        "source": "files",
+        "section": "3.3",
+        "fields": [
+          {
+            "name": "node",
+            "kind": "REF"
+          },
+          {
+            "name": "content",
+            "kind": "REF"
+          },
+          {
+            "name": "mediaType",
+            "kind": "STRING",
+            "max": 255
+          },
+          {
+            "name": "charset",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "STRING",
+              "max": 64
+            }
+          },
+          {
+            "name": "executableHint",
+            "kind": "BOOL"
+          },
+          {
+            "name": "parents",
+            "kind": "ARRAY",
+            "max": 8,
+            "inner": {
+              "name": "",
+              "kind": "REF"
+            }
+          }
+        ],
+        "roles": [
+          {
+            "name": "node",
+            "targetClass": 5,
+            "expectedType": "TYPE:ObjectGenesis/1",
+            "fieldIdx": 0
+          },
+          {
+            "name": "content",
+            "targetClass": 1,
+            "expectedType": "TYPE:ChunkTree/1",
+            "fieldIdx": 1
+          },
+          {
+            "name": "parents",
+            "targetClass": 1,
+            "expectedType": "SELF",
+            "fieldIdx": 5
+          }
+        ],
+        "indexes": [
+          {
+            "kind": 2,
+            "target": 0
+          },
+          {
+            "kind": 2,
+            "target": 1
+          },
+          {
+            "kind": 2,
+            "target": 2
+          }
+        ],
+        "constraints": [],
+        "profileRules": [
+          "sorted unique same-File parents; FILE meaning; FILES_MEDIA_HINTS_V1; executableHint is not authority"
+        ]
+      },
+      {
+        "name": "PublicFilesMountConfig/1",
+        "source": "files",
+        "section": "3.4",
+        "fields": [
+          {
+            "name": "namespacePlan",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "REF"
+            }
+          },
+          {
+            "name": "contentPlan",
+            "kind": "REF"
+          },
+          {
+            "name": "metadataPlan",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "REF"
+            }
+          },
+          {
+            "name": "propertyProfile",
+            "kind": "OPTION",
+            "inner": {
+              "name": "",
+              "kind": "REF"
+            }
+          }
+        ],
+        "roles": [
+          {
+            "name": "namespacePlan",
+            "targetClass": 1,
+            "expectedType": "TYPE:ResolutionPlan/1",
+            "fieldIdx": 0
+          },
+          {
+            "name": "contentPlan",
+            "targetClass": 1,
+            "expectedType": "TYPE:ResolutionPlan/1",
+            "fieldIdx": 1
+          },
+          {
+            "name": "metadataPlan",
+            "targetClass": 1,
+            "expectedType": "TYPE:ResolutionPlan/1",
+            "fieldIdx": 2
+          },
+          {
+            "name": "propertyProfile",
+            "targetClass": 1,
+            "expectedType": "ANY",
+            "fieldIdx": 3
+          }
+        ],
+        "indexes": [
+          {
+            "kind": 2,
+            "target": 0
+          },
+          {
+            "kind": 2,
+            "target": 1
+          },
+          {
+            "kind": 2,
+            "target": 2
+          },
+          {
+            "kind": 2,
+            "target": 3
+          }
+        ],
+        "constraints": [],
+        "profileRules": [
+          "exact Files Plan purpose/root scope; namespace required for Directory, absent for File; metadata/property both absent in C0"
+        ]
+      },
+      {
+        "name": "MountDescriptor/1",
+        "source": "files",
+        "section": "3.4",
+        "fields": [
+          {
+            "name": "rootNode",
+            "kind": "REF"
+          },
+          {
+            "name": "profileId",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "configRef",
+            "kind": "REF"
+          }
+        ],
+        "roles": [
+          {
+            "name": "rootNode",
+            "targetClass": 5,
+            "expectedType": "TYPE:ObjectGenesis/1",
+            "fieldIdx": 0
+          },
+          {
+            "name": "configRef",
+            "targetClass": 1,
+            "expectedType": "ANY",
+            "fieldIdx": 2
+          }
+        ],
+        "indexes": [
+          {
+            "kind": 2,
+            "target": 0
+          },
+          {
+            "kind": 2,
+            "target": 1
+          }
+        ],
+        "constraints": [],
+        "profileRules": [
+          "public profile config must be PublicFilesMountConfig/1; ANY is source-prescribed profile dispatch, not authority"
+        ]
+      },
+      {
+        "name": "FilesRouteConfig/1",
+        "source": "files",
+        "section": "3.5",
+        "fields": [
+          {
+            "name": "realmId",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "rootMount",
+            "kind": "REF"
+          },
+          {
+            "name": "filesProfileId",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "basisMode",
+            "kind": "UINT",
+            "width": 1
+          },
+          {
+            "name": "completenessPolicy",
+            "kind": "UINT",
+            "width": 1
+          },
+          {
+            "name": "freshnessPolicyId",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "writeRouter",
+            "kind": "BYTES_FIXED",
+            "width": 20
+          },
+          {
+            "name": "writeRouterCodeHash",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          }
+        ],
+        "roles": [
+          {
+            "name": "rootMount",
+            "targetClass": 1,
+            "expectedType": "GROUP_REF:4",
+            "fieldIdx": 1
+          }
+        ],
+        "indexes": [
+          {
+            "kind": 2,
+            "target": 0
+          }
+        ],
+        "constraints": [],
+        "profileRules": [
+          "basis/completeness enum semantics; zero freshness means no claim; C0 writer fields zero, EXPERIMENTAL_DIRECT_CORE is not FilesRouter certification"
+        ]
+      }
+    ],
+    [
+      {
+        "name": "MvpC0BootstrapSeal/1",
+        "source": "genesis",
+        "section": "G11",
+        "shapeStatus": "TEMPORARY_LAB_CHOICE_NOT_FIXED_BY_G11",
+        "fields": [
+          {
+            "name": "experimentCommitment",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "realmId",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "coreCodeHash",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "byteStoreAddress",
+            "kind": "BYTES_FIXED",
+            "width": 20
+          },
+          {
+            "name": "byteStoreCodeHash",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "codexConstantsHash",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "indexCapabilityRoot",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "orderedTypeGroupRoot",
+            "kind": "BYTES_FIXED",
+            "width": 32
+          },
+          {
+            "name": "bootstrapPrincipalId",
+            "kind": "PRINCIPAL"
+          },
+          {
+            "name": "rootDirectoryObjectId",
+            "kind": "REF"
+          },
+          {
+            "name": "namespacePlanId",
+            "kind": "REF"
+          },
+          {
+            "name": "contentPlanId",
+            "kind": "REF"
+          },
+          {
+            "name": "mountConfigId",
+            "kind": "REF"
+          },
+          {
+            "name": "rootMountId",
+            "kind": "REF"
+          },
+          {
+            "name": "routeConfigId",
+            "kind": "REF"
+          },
+          {
+            "name": "preSealAdmissionHigh",
+            "kind": "UINT",
+            "width": 8
+          }
+        ],
+        "roles": [
+          {
+            "name": "rootDirectoryObjectId",
+            "targetClass": 5,
+            "expectedType": "TYPE:ObjectGenesis/1",
+            "fieldIdx": 9
+          },
+          {
+            "name": "namespacePlanId",
+            "targetClass": 1,
+            "expectedType": "TYPE:ResolutionPlan/1",
+            "fieldIdx": 10
+          },
+          {
+            "name": "contentPlanId",
+            "targetClass": 1,
+            "expectedType": "TYPE:ResolutionPlan/1",
+            "fieldIdx": 11
+          },
+          {
+            "name": "mountConfigId",
+            "targetClass": 1,
+            "expectedType": "TYPE:PublicFilesMountConfig/1",
+            "fieldIdx": 12
+          },
+          {
+            "name": "rootMountId",
+            "targetClass": 1,
+            "expectedType": "TYPE:MountDescriptor/1",
+            "fieldIdx": 13
+          },
+          {
+            "name": "routeConfigId",
+            "targetClass": 1,
+            "expectedType": "TYPE:FilesRouteConfig/1",
+            "fieldIdx": 14
+          }
+        ],
+        "indexes": [
+          {
+            "kind": 2,
+            "target": 0
+          },
+          {
+            "kind": 2,
+            "target": 1
+          },
+          {
+            "kind": 2,
+            "target": 2
+          },
+          {
+            "kind": 2,
+            "target": 3
+          },
+          {
+            "kind": 2,
+            "target": 4
+          },
+          {
+            "kind": 2,
+            "target": 5
+          }
+        ],
+        "constraints": [],
+        "profileRules": [
+          "all G11 actual deployment/root values and pre-seal admission high independently read back; no authority from the seal itself"
+        ]
+      }
+    ]
+  ]
+}

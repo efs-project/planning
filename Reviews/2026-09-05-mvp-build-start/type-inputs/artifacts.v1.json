@@ -1,0 +1,1288 @@
+{
+  "format": "efs-c0-temporary-type-artifacts/1",
+  "sourceRevision": "1a51c5d728766f25d31fcf7575e578dca3aaf780",
+  "inputSha256": "92cc6d8e0d158ad6dc80c83616e2b0379760b797890ec4bd9fcb44b1545ad33e",
+  "sources": {
+    "encoding": {
+      "path": "Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-encoding-and-ids.md",
+      "sha256": "2fa220cebcc4d7f6eeb38b8c3388e1c45d6421e9480384c4fe3587a586253d94"
+    },
+    "content": {
+      "path": "Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-content-locators.md",
+      "sha256": "3b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd"
+    },
+    "binding": {
+      "path": "Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-binding.md",
+      "sha256": "f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d"
+    },
+    "files": {
+      "path": "Designs/efsv2/hierarchical-files-and-folders.md",
+      "sha256": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456"
+    },
+    "genesis": {
+      "path": "Designs/efsv2/mvp-c0-genesis-manifest.md",
+      "sha256": "5d1a4235e09f141059e21076be56f07baa032509739a370fa64ef8b1aaccf7cf"
+    }
+  },
+  "temporaryChoices": [
+    "Every meaning and namespaceQualifier is explicitly laboratory metadata, not paraphrased canonical meaning. specDigest is SHA-256 of the exact primary source file bytes, not of this meaning.",
+    "Files, ObjectGenesis and seal IndexSpecs are not fully pinned by their field-model documents. This candidate uses the explicit lists below (Files/seal backlinks for every role; no scalar indexes).",
+    "G11 specifies seal field order only: this candidate chooses hashes/Realm/roots as BYTES_FIXED(32), address as BYTES_FIXED(20), Principal as PRINCIPAL, admission high as UINT(8), exact typed record/object refs as shown. These are not claimed source-fixed MC/1 bytes.",
+    "ChunkTree count and size minima are zero under Files 7.2. The unique empty form remains a contextual profile check, not expressible by MC/1 INT_RANGE.",
+    "Route enum numeric codes and read/profile rules are not invented as MC/1 constraints; UINT(1) preserves the source width."
+  ],
+  "admissionExecuted": false,
+  "fullC0": false,
+  "groups": [
+    {
+      "groupIndex": 1,
+      "temporaryGroupHash": "0x1fb957291908997d47bbec6ca940acd85ee122be34e9f105e5a0af411f45321c",
+      "groupBytes": 1765,
+      "recordBodyBytes": 1767,
+      "remainingCarriageBytes": 6425,
+      "groupHex": "000600ec0001000f4f626a65637447656e657369732f31006654656d706f7261727920656e67696e656572696e6720696e70757420666f72204f626a65637447656e657369732f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d7631000000000000000300097075626c697368657209000473616c74042000076d65616e696e670e00000420000000000000000000d6000100105265736f6c7574696f6e506c616e2f31006754656d706f7261727920656e67696e656572696e6720696e70757420666f72205265736f6c7574696f6e506c616e2f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200202fa220cebcc4d7f6eeb38b8c3388e1c45d6421e9480384c4fe3587a586253d9463302d747970652d696e707574732d32303236303930352d7631000000000000000100056672616d65051060000000000000000000cd0001000c427974654469676573742f31006354656d706f7261727920656e67696e656572696e6720696e70757420666f7220427974654469676573742f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200203b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd63302d747970652d696e707574732d32303236303930352d7631000000000000000100066469676573740a000000000000000001be0001000b4368756e6b547265652f31006254656d706f7261727920656e67696e656572696e6720696e70757420666f72204368756e6b547265652f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200203b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd63302d747970652d696e707574732d32303236303930352d7631000000000000000400096368756e6b53697a650204000a6368756e6b436f756e7402040009746f74616c53697a650208000a6d65726b6c65526f6f740420000000000000000301000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000080000001010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000001020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffff013f000100094c6f6361746f722f31006054656d706f7261727920656e67696e656572696e6720696e70757420666f72204c6f6361746f722f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200203b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd63302d747970652d696e707574732d32303236303930352d7631000000000000000500077375626a656374070003757269050800000e6f627365727665644469676573740e00000a000c6f6273657276656453697a650e00000208000f6f627365727665644174436c61696d0e0000020800010000077375626a65637401000000000000000000000000000000000000000000000000000000000000000000000000010200000000010201014b00010017526570726573656e746174696f6e42696e64696e672f31006e54656d706f7261727920656e67696e656572696e6720696e70757420666f7220526570726573656e746174696f6e42696e64696e672f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200203b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd63302d747970652d696e707574732d32303236303930352d7631000000000000000400077375626a65637407000c65787465726e616c4b696e640201000e65787465726e616c4469676573740e00000a000b65787465726e616c5572690e000005080000010000077375626a6563740100000000000000000000000000000000000000000000000000000000000000000000000001020000000000",
+      "recordBodyHex": "06e5000600ec0001000f4f626a65637447656e657369732f31006654656d706f7261727920656e67696e656572696e6720696e70757420666f72204f626a65637447656e657369732f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d7631000000000000000300097075626c697368657209000473616c74042000076d65616e696e670e00000420000000000000000000d6000100105265736f6c7574696f6e506c616e2f31006754656d706f7261727920656e67696e656572696e6720696e70757420666f72205265736f6c7574696f6e506c616e2f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200202fa220cebcc4d7f6eeb38b8c3388e1c45d6421e9480384c4fe3587a586253d9463302d747970652d696e707574732d32303236303930352d7631000000000000000100056672616d65051060000000000000000000cd0001000c427974654469676573742f31006354656d706f7261727920656e67696e656572696e6720696e70757420666f7220427974654469676573742f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200203b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd63302d747970652d696e707574732d32303236303930352d7631000000000000000100066469676573740a000000000000000001be0001000b4368756e6b547265652f31006254656d706f7261727920656e67696e656572696e6720696e70757420666f72204368756e6b547265652f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200203b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd63302d747970652d696e707574732d32303236303930352d7631000000000000000400096368756e6b53697a650204000a6368756e6b436f756e7402040009746f74616c53697a650208000a6d65726b6c65526f6f740420000000000000000301000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000080000001010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000001020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffff013f000100094c6f6361746f722f31006054656d706f7261727920656e67696e656572696e6720696e70757420666f72204c6f6361746f722f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200203b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd63302d747970652d696e707574732d32303236303930352d7631000000000000000500077375626a656374070003757269050800000e6f627365727665644469676573740e00000a000c6f6273657276656453697a650e00000208000f6f627365727665644174436c61696d0e0000020800010000077375626a65637401000000000000000000000000000000000000000000000000000000000000000000000000010200000000010201014b00010017526570726573656e746174696f6e42696e64696e672f31006e54656d706f7261727920656e67696e656572696e6720696e70757420666f7220526570726573656e746174696f6e42696e64696e672f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200203b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd63302d747970652d696e707574732d32303236303930352d7631000000000000000400077375626a65637407000c65787465726e616c4b696e640201000e65787465726e616c4469676573740e00000a000b65787465726e616c5572690e000005080000010000077375626a6563740100000000000000000000000000000000000000000000000000000000000000000000000001020000000000",
+      "members": [
+        {
+          "memberIndex": 0,
+          "name": "ObjectGenesis/1",
+          "source": {
+            "path": "Designs/efsv2/hierarchical-files-and-folders.md",
+            "sha256": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456",
+            "section": "3.1"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "salt entropy; Files meaning present; publisher charter is a Binding fact, not ObjectGenesis ownership"
+          ],
+          "temporaryTypeSchemaId": "0x1dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44",
+          "blobBytes": 236,
+          "maxStructuralBodyBytes": 97,
+          "descriptor": {
+            "name": "ObjectGenesis/1",
+            "meaning": "Temporary engineering input for ObjectGenesis/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "publisher",
+                "kind": "PRINCIPAL"
+              },
+              {
+                "name": "salt",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "meaning",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "BYTES_FIXED",
+                  "width": 32
+                }
+              }
+            ],
+            "roles": [],
+            "indexes": [],
+            "constraints": []
+          },
+          "blobHex": "0001000f4f626a65637447656e657369732f31006654656d706f7261727920656e67696e656572696e6720696e70757420666f72204f626a65637447656e657369732f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d7631000000000000000300097075626c697368657209000473616c74042000076d65616e696e670e000004200000000000000000"
+        },
+        {
+          "memberIndex": 1,
+          "name": "ResolutionPlan/1",
+          "source": {
+            "path": "Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-encoding-and-ids.md",
+            "sha256": "2fa220cebcc4d7f6eeb38b8c3388e1c45d6421e9480384c4fe3587a586253d94",
+            "section": "3.4"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "frame length 96+64*N, N<=64; exact Lens grammar and finite Principals are not ReferenceRoles"
+          ],
+          "temporaryTypeSchemaId": "0x05cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e",
+          "blobBytes": 214,
+          "maxStructuralBodyBytes": 4194,
+          "descriptor": {
+            "name": "ResolutionPlan/1",
+            "meaning": "Temporary engineering input for ResolutionPlan/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "2fa220cebcc4d7f6eeb38b8c3388e1c45d6421e9480384c4fe3587a586253d94"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "frame",
+                "kind": "BYTES",
+                "max": 4192
+              }
+            ],
+            "roles": [],
+            "indexes": [],
+            "constraints": []
+          },
+          "blobHex": "000100105265736f6c7574696f6e506c616e2f31006754656d706f7261727920656e67696e656572696e6720696e70757420666f72205265736f6c7574696f6e506c616e2f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200202fa220cebcc4d7f6eeb38b8c3388e1c45d6421e9480384c4fe3587a586253d9463302d747970652d696e707574732d32303236303930352d7631000000000000000100056672616d650510600000000000000000"
+        },
+        {
+          "memberIndex": 2,
+          "name": "ByteDigest/1",
+          "source": {
+            "path": "Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-content-locators.md",
+            "sha256": "3b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd",
+            "section": "4"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "content algorithms 0xef01, 0x12, 0x1b only; no size field; no declared digest index"
+          ],
+          "temporaryTypeSchemaId": "0x7e82f3afc17fea0499f3aace8dd43a140af5b27fb807eb7de578c2b3f33ff0e0",
+          "blobBytes": 205,
+          "maxStructuralBodyBytes": 68,
+          "descriptor": {
+            "name": "ByteDigest/1",
+            "meaning": "Temporary engineering input for ByteDigest/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "3b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "digest",
+                "kind": "DIGEST"
+              }
+            ],
+            "roles": [],
+            "indexes": [],
+            "constraints": []
+          },
+          "blobHex": "0001000c427974654469676573742f31006354656d706f7261727920656e67696e656572696e6720696e70757420666f7220427974654469676573742f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200203b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd63302d747970652d696e707574732d32303236303930352d7631000000000000000100066469676573740a0000000000000000"
+        },
+        {
+          "memberIndex": 3,
+          "name": "ChunkTree/1",
+          "source": {
+            "path": "Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-content-locators.md",
+            "sha256": "3b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd",
+            "section": "5.1 + Files 7.2 override"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "chunkSize multiple of 4096; nonempty chunkCount=ceil(totalSize/chunkSize), nonzero root; sole empty tuple (262144,0,0,keccak256(0x02))"
+          ],
+          "temporaryTypeSchemaId": "0xf6c0966e2acc9f6b1bad9ac20f07da3b00cc418aafc8481dedcdc5f35f8767e8",
+          "blobBytes": 446,
+          "maxStructuralBodyBytes": 48,
+          "descriptor": {
+            "name": "ChunkTree/1",
+            "meaning": "Temporary engineering input for ChunkTree/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "3b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "chunkSize",
+                "kind": "UINT",
+                "width": 4
+              },
+              {
+                "name": "chunkCount",
+                "kind": "UINT",
+                "width": 4
+              },
+              {
+                "name": "totalSize",
+                "kind": "UINT",
+                "width": 8
+              },
+              {
+                "name": "merkleRoot",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              }
+            ],
+            "roles": [],
+            "indexes": [],
+            "constraints": [
+              {
+                "kind": 1,
+                "fieldIdx": 0,
+                "min": "4096",
+                "max": "8388608"
+              },
+              {
+                "kind": 1,
+                "fieldIdx": 1,
+                "min": "0",
+                "max": "16777216"
+              },
+              {
+                "kind": 1,
+                "fieldIdx": 2,
+                "min": "0",
+                "max": "18446744073709551615"
+              }
+            ]
+          },
+          "blobHex": "0001000b4368756e6b547265652f31006254656d706f7261727920656e67696e656572696e6720696e70757420666f72204368756e6b547265652f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200203b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd63302d747970652d696e707574732d32303236303930352d7631000000000000000400096368756e6b53697a650204000a6368756e6b436f756e7402040009746f74616c53697a650208000a6d65726b6c65526f6f740420000000000000000301000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000080000001010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000001020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffff"
+        },
+        {
+          "memberIndex": 4,
+          "name": "Locator/1",
+          "source": {
+            "path": "Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-content-locators.md",
+            "sha256": "3b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd",
+            "section": "2.1 + 3"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "subject allowed ObjectGenesis/1, ByteDigest/1, ChunkTree/1, ArtifactClosure/1; C0 does not admit ArtifactClosure/1; all-or-none observations; observed digest not Git framed; absolute printable ASCII URI"
+          ],
+          "temporaryTypeSchemaId": "0x3f7e004c5c927d00b259c22e05f8ab653b277901e35ca1b84a77cfebd635360d",
+          "blobBytes": 319,
+          "maxStructuralBodyBytes": 2169,
+          "descriptor": {
+            "name": "Locator/1",
+            "meaning": "Temporary engineering input for Locator/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "3b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "subject",
+                "kind": "REF"
+              },
+              {
+                "name": "uri",
+                "kind": "BYTES",
+                "max": 2048
+              },
+              {
+                "name": "observedDigest",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "DIGEST"
+                }
+              },
+              {
+                "name": "observedSize",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "UINT",
+                  "width": 8
+                }
+              },
+              {
+                "name": "observedAtClaim",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "UINT",
+                  "width": 8
+                }
+              }
+            ],
+            "roles": [
+              {
+                "name": "subject",
+                "targetClass": 1,
+                "expectedType": "ANY",
+                "fieldIdx": 0
+              }
+            ],
+            "indexes": [
+              {
+                "kind": 2,
+                "target": 0
+              }
+            ],
+            "constraints": [
+              {
+                "kind": 2,
+                "fieldIdx": 1
+              }
+            ]
+          },
+          "blobHex": "000100094c6f6361746f722f31006054656d706f7261727920656e67696e656572696e6720696e70757420666f72204c6f6361746f722f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200203b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd63302d747970652d696e707574732d32303236303930352d7631000000000000000500077375626a656374070003757269050800000e6f627365727665644469676573740e00000a000c6f6273657276656453697a650e00000208000f6f627365727665644174436c61696d0e0000020800010000077375626a65637401000000000000000000000000000000000000000000000000000000000000000000000000010200000000010201"
+        },
+        {
+          "memberIndex": 5,
+          "name": "RepresentationBinding/1",
+          "source": {
+            "path": "Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-content-locators.md",
+            "sha256": "3b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd",
+            "section": "2.1 + 6"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "subject allowed ChunkTree/1 or ArtifactClosure/1 (latter not C0); externalKind 1 digest or 2 URI; exactly one matching option; actual byte equivalence is evidence"
+          ],
+          "temporaryTypeSchemaId": "0xf37c39f5944784990119dd7a8874b423cf7e16d7a0d255c89ee6b02972893d2d",
+          "blobBytes": 331,
+          "maxStructuralBodyBytes": 2153,
+          "descriptor": {
+            "name": "RepresentationBinding/1",
+            "meaning": "Temporary engineering input for RepresentationBinding/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "3b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "subject",
+                "kind": "REF"
+              },
+              {
+                "name": "externalKind",
+                "kind": "UINT",
+                "width": 1
+              },
+              {
+                "name": "externalDigest",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "DIGEST"
+                }
+              },
+              {
+                "name": "externalUri",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "BYTES",
+                  "max": 2048
+                }
+              }
+            ],
+            "roles": [
+              {
+                "name": "subject",
+                "targetClass": 1,
+                "expectedType": "ANY",
+                "fieldIdx": 0
+              }
+            ],
+            "indexes": [
+              {
+                "kind": 2,
+                "target": 0
+              }
+            ],
+            "constraints": []
+          },
+          "blobHex": "00010017526570726573656e746174696f6e42696e64696e672f31006e54656d706f7261727920656e67696e656572696e6720696e70757420666f7220526570726573656e746174696f6e42696e64696e672f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200203b7e7bad60f3ba98b089d1075330a4e71ae9b1267c02eda2ffad68fa3ca54cfd63302d747970652d696e707574732d32303236303930352d7631000000000000000400077375626a65637407000c65787465726e616c4b696e640201000e65787465726e616c4469676573740e00000a000b65787465726e616c5572690e000005080000010000077375626a6563740100000000000000000000000000000000000000000000000000000000000000000000000001020000000000"
+        }
+      ]
+    },
+    {
+      "groupIndex": 2,
+      "temporaryGroupHash": "0x2c6ce5633a9d6ffab87f4ad6153ea42db7efa431c80abfdb64d7903306515341",
+      "groupBytes": 1022,
+      "recordBodyBytes": 1024,
+      "remainingCarriageBytes": 7168,
+      "groupHex": "000301c20001000c42696e64696e675365742f31006354656d706f7261727920656e67696e656572696e6720696e70757420666f722042696e64696e675365742f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d63302d747970652d696e707574732d32303236303930352d763100000000000000060007707572706f7365042000077375626a656374042000096669656c64526f6c650420000c7461726765745265636f72640e00000700107461726765744f6363757272656e63650e000008000b7072656465636573736f720e000008000300000c7461726765745265636f72640100000000000000000000000000000000000000000000000000000000000000000300000100107461726765744f6363757272656e636504000000000000000000000000000000000000000000000000000000000000000004000002000b7072656465636573736f7204000000000000000000000000000000000000000000000000000000000000000005000000030200020102020000000001380001001242696e64696e67546f6d6273746f6e652f31006954656d706f7261727920656e67696e656572696e6720696e70757420666f722042696e64696e67546f6d6273746f6e652f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d63302d747970652d696e707574732d32303236303930352d763100000000000000040007707572706f7365042000077375626a656374042000096669656c64526f6c650420000b7072656465636573736f720e000008000100000b7072656465636573736f72040000000000000000000000000000000000000000000000000000000000000000030000000102000000000000fc0001000c5769746864726177616c2f31006354656d706f7261727920656e67696e656572696e6720696e70757420666f72205769746864726177616c2f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d63302d747970652d696e707574732d32303236303930352d7631000000000000000100067461726765740800010000067461726765740400000000000000000000000000000000000000000000000000000000000000000000000001020000000000",
+      "recordBodyHex": "03fe000301c20001000c42696e64696e675365742f31006354656d706f7261727920656e67696e656572696e6720696e70757420666f722042696e64696e675365742f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d63302d747970652d696e707574732d32303236303930352d763100000000000000060007707572706f7365042000077375626a656374042000096669656c64526f6c650420000c7461726765745265636f72640e00000700107461726765744f6363757272656e63650e000008000b7072656465636573736f720e000008000300000c7461726765745265636f72640100000000000000000000000000000000000000000000000000000000000000000300000100107461726765744f6363757272656e636504000000000000000000000000000000000000000000000000000000000000000004000002000b7072656465636573736f7204000000000000000000000000000000000000000000000000000000000000000005000000030200020102020000000001380001001242696e64696e67546f6d6273746f6e652f31006954656d706f7261727920656e67696e656572696e6720696e70757420666f722042696e64696e67546f6d6273746f6e652f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d63302d747970652d696e707574732d32303236303930352d763100000000000000040007707572706f7365042000077375626a656374042000096669656c64526f6c650420000b7072656465636573736f720e000008000100000b7072656465636573736f72040000000000000000000000000000000000000000000000000000000000000000030000000102000000000000fc0001000c5769746864726177616c2f31006354656d706f7261727920656e67696e656572696e6720696e70757420666f72205769746864726177616c2f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d63302d747970652d696e707574732d32303236303930352d7631000000000000000100067461726765740800010000067461726765740400000000000000000000000000000000000000000000000000000000000000000000000001020000000000",
+      "members": [
+        {
+          "memberIndex": 0,
+          "name": "BindingSet/1",
+          "source": {
+            "path": "Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-binding.md",
+            "sha256": "f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d",
+            "section": "3.2"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "kernel effect: exactly one target; predecessor and CAS rules; position words are not references"
+          ],
+          "temporaryTypeSchemaId": "0x3d40b6b53db7885be062d89270f41085fa8c59738cbc66fe28857d0573ef3a91",
+          "blobBytes": 450,
+          "maxStructuralBodyBytes": 199,
+          "descriptor": {
+            "name": "BindingSet/1",
+            "meaning": "Temporary engineering input for BindingSet/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "purpose",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "subject",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "fieldRole",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "targetRecord",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "REF"
+                }
+              },
+              {
+                "name": "targetOccurrence",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "OCCREF"
+                }
+              },
+              {
+                "name": "predecessor",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "OCCREF"
+                }
+              }
+            ],
+            "roles": [
+              {
+                "name": "targetRecord",
+                "targetClass": 1,
+                "expectedType": "ANY",
+                "fieldIdx": 3
+              },
+              {
+                "name": "targetOccurrence",
+                "targetClass": 4,
+                "expectedType": "ANY",
+                "fieldIdx": 4
+              },
+              {
+                "name": "predecessor",
+                "targetClass": 4,
+                "expectedType": "ANY",
+                "fieldIdx": 5
+              }
+            ],
+            "indexes": [
+              {
+                "kind": 2,
+                "target": 0
+              },
+              {
+                "kind": 2,
+                "target": 1
+              },
+              {
+                "kind": 2,
+                "target": 2
+              }
+            ],
+            "constraints": []
+          },
+          "blobHex": "0001000c42696e64696e675365742f31006354656d706f7261727920656e67696e656572696e6720696e70757420666f722042696e64696e675365742f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d63302d747970652d696e707574732d32303236303930352d763100000000000000060007707572706f7365042000077375626a656374042000096669656c64526f6c650420000c7461726765745265636f72640e00000700107461726765744f6363757272656e63650e000008000b7072656465636573736f720e000008000300000c7461726765745265636f72640100000000000000000000000000000000000000000000000000000000000000000300000100107461726765744f6363757272656e636504000000000000000000000000000000000000000000000000000000000000000004000002000b7072656465636573736f72040000000000000000000000000000000000000000000000000000000000000000050000000302000201020200000000"
+        },
+        {
+          "memberIndex": 1,
+          "name": "BindingTombstone/1",
+          "source": {
+            "path": "Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-binding.md",
+            "sha256": "f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d",
+            "section": "3.2"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "kernel tombstone and CAS; not Files whiteout"
+          ],
+          "temporaryTypeSchemaId": "0xd9a17f2bdf9d885520b42b39778ec88f792b9b5a4fe0851cc388b2932b31add1",
+          "blobBytes": 312,
+          "maxStructuralBodyBytes": 131,
+          "descriptor": {
+            "name": "BindingTombstone/1",
+            "meaning": "Temporary engineering input for BindingTombstone/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "purpose",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "subject",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "fieldRole",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "predecessor",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "OCCREF"
+                }
+              }
+            ],
+            "roles": [
+              {
+                "name": "predecessor",
+                "targetClass": 4,
+                "expectedType": "ANY",
+                "fieldIdx": 3
+              }
+            ],
+            "indexes": [
+              {
+                "kind": 2,
+                "target": 0
+              }
+            ],
+            "constraints": []
+          },
+          "blobHex": "0001001242696e64696e67546f6d6273746f6e652f31006954656d706f7261727920656e67696e656572696e6720696e70757420666f722042696e64696e67546f6d6273746f6e652f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d63302d747970652d696e707574732d32303236303930352d763100000000000000040007707572706f7365042000077375626a656374042000096669656c64526f6c650420000b7072656465636573736f720e000008000100000b7072656465636573736f720400000000000000000000000000000000000000000000000000000000000000000300000001020000000000"
+        },
+        {
+          "memberIndex": 2,
+          "name": "Withdrawal/1",
+          "source": {
+            "path": "Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-binding.md",
+            "sha256": "f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d",
+            "section": "3.2"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "body exactly 34 bytes; carriage withdrawal is not semantic revocation"
+          ],
+          "temporaryTypeSchemaId": "0xc8261b4f9cd91e465be894c8fc41f45bc5a221b08db1ef8a610325b439b9c605",
+          "blobBytes": 252,
+          "maxStructuralBodyBytes": 34,
+          "descriptor": {
+            "name": "Withdrawal/1",
+            "meaning": "Temporary engineering input for Withdrawal/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "target",
+                "kind": "OCCREF"
+              }
+            ],
+            "roles": [
+              {
+                "name": "target",
+                "targetClass": 4,
+                "expectedType": "ANY",
+                "fieldIdx": 0
+              }
+            ],
+            "indexes": [
+              {
+                "kind": 2,
+                "target": 0
+              }
+            ],
+            "constraints": []
+          },
+          "blobHex": "0001000c5769746864726177616c2f31006354656d706f7261727920656e67696e656572696e6720696e70757420666f72205769746864726177616c2f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020f0e95a7c84943c25e55e41b0688b9c3a770dd0c31a5c131465f8e15a1fca465d63302d747970652d696e707574732d32303236303930352d7631000000000000000100067461726765740800010000067461726765740400000000000000000000000000000000000000000000000000000000000000000000000001020000000000"
+        }
+      ]
+    },
+    {
+      "groupIndex": 3,
+      "temporaryGroupHash": "0xca4c6d90b4284749bd3333705ef44faa12e4de15c8e689f015eb1acb8da4b78a",
+      "groupBytes": 2345,
+      "recordBodyBytes": 2347,
+      "remainingCarriageBytes": 5845,
+      "groupHex": "0006018c000100104469726563746f7279456e7472792f31006754656d706f7261727920656e67696e656572696e6720696e70757420666f72204469726563746f7279456e7472792f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d763100000000000000040006706172656e740700046e616d650600ff00056368696c6407000d6d6f756e744f766572726964650e0000070003000006706172656e74051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c440000000100056368696c64051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c4402000002000d6d6f756e744f766572726964650100000000000000000000000000000000000000000000000000000000000001040300000003020002010202000000000113000100134469726563746f727957686974656f75742f31006a54656d706f7261727920656e67696e656572696e6720696e70757420666f72204469726563746f727957686974656f75742f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d763100000000000000020006706172656e740700046e616d650600ff0001000006706172656e74051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44000000000102000000000001a30001000e46696c655265766973696f6e2f31006554656d706f7261727920656e67696e656572696e6720696e70757420666f722046696c655265766973696f6e2f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d7631000000000000000600046e6f6465070007636f6e74656e740700096d65646961547970650600ff0007636861727365740e0000060040000e65786563757461626c6548696e74010007706172656e74730b000800000700030000046e6f6465051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44000000010007636f6e74656e7401f6c0966e2acc9f6b1bad9ac20f07da3b00cc418aafc8481dedcdc5f35f8767e8010000020007706172656e747301000000000000000000000000000000000000000000000000000000000000000105000000030200020102020000000001fb000100185075626c696346696c65734d6f756e74436f6e6669672f31006f54656d706f7261727920656e67696e656572696e6720696e70757420666f72205075626c696346696c65734d6f756e74436f6e6669672f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d76310000000000000004000d6e616d657370616365506c616e0e000007000b636f6e74656e74506c616e07000c6d65746164617461506c616e0e000007000f70726f706572747950726f66696c650e000007000400000d6e616d657370616365506c616e0105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e00000001000b636f6e74656e74506c616e0105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e01000002000c6d65746164617461506c616e0105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e02000003000f70726f706572747950726f66696c6501000000000000000000000000000000000000000000000000000000000000000003000000040200020102020203000000000155000100114d6f756e7444657363726970746f722f31006854656d706f7261727920656e67696e656572696e6720696e70757420666f72204d6f756e7444657363726970746f722f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d763100000000000000030008726f6f744e6f646507000970726f66696c65496404200009636f6e666967526566070002000008726f6f744e6f6465051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44000000010009636f6e6669675265660100000000000000000000000000000000000000000000000000000000000000000200000002020002010000000001890001001246696c6573526f757465436f6e6669672f31006954656d706f7261727920656e67696e656572696e6720696e70757420666f722046696c6573526f757465436f6e6669672f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d7631000000000000000800077265616c6d496404200009726f6f744d6f756e7407000e66696c657350726f66696c6549640420000962617369734d6f646502010012636f6d706c6574656e657373506f6c6963790201001166726573686e657373506f6c69637949640420000b7772697465526f75746572041400137772697465526f75746572436f64654861736804200001000009726f6f744d6f756e740100000000000000000000000000000000000000000000000000000000000001040100000001020000000000",
+      "recordBodyHex": "09290006018c000100104469726563746f7279456e7472792f31006754656d706f7261727920656e67696e656572696e6720696e70757420666f72204469726563746f7279456e7472792f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d763100000000000000040006706172656e740700046e616d650600ff00056368696c6407000d6d6f756e744f766572726964650e0000070003000006706172656e74051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c440000000100056368696c64051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c4402000002000d6d6f756e744f766572726964650100000000000000000000000000000000000000000000000000000000000001040300000003020002010202000000000113000100134469726563746f727957686974656f75742f31006a54656d706f7261727920656e67696e656572696e6720696e70757420666f72204469726563746f727957686974656f75742f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d763100000000000000020006706172656e740700046e616d650600ff0001000006706172656e74051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44000000000102000000000001a30001000e46696c655265766973696f6e2f31006554656d706f7261727920656e67696e656572696e6720696e70757420666f722046696c655265766973696f6e2f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d7631000000000000000600046e6f6465070007636f6e74656e740700096d65646961547970650600ff0007636861727365740e0000060040000e65786563757461626c6548696e74010007706172656e74730b000800000700030000046e6f6465051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44000000010007636f6e74656e7401f6c0966e2acc9f6b1bad9ac20f07da3b00cc418aafc8481dedcdc5f35f8767e8010000020007706172656e747301000000000000000000000000000000000000000000000000000000000000000105000000030200020102020000000001fb000100185075626c696346696c65734d6f756e74436f6e6669672f31006f54656d706f7261727920656e67696e656572696e6720696e70757420666f72205075626c696346696c65734d6f756e74436f6e6669672f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d76310000000000000004000d6e616d657370616365506c616e0e000007000b636f6e74656e74506c616e07000c6d65746164617461506c616e0e000007000f70726f706572747950726f66696c650e000007000400000d6e616d657370616365506c616e0105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e00000001000b636f6e74656e74506c616e0105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e01000002000c6d65746164617461506c616e0105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e02000003000f70726f706572747950726f66696c6501000000000000000000000000000000000000000000000000000000000000000003000000040200020102020203000000000155000100114d6f756e7444657363726970746f722f31006854656d706f7261727920656e67696e656572696e6720696e70757420666f72204d6f756e7444657363726970746f722f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d763100000000000000030008726f6f744e6f646507000970726f66696c65496404200009636f6e666967526566070002000008726f6f744e6f6465051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44000000010009636f6e6669675265660100000000000000000000000000000000000000000000000000000000000000000200000002020002010000000001890001001246696c6573526f757465436f6e6669672f31006954656d706f7261727920656e67696e656572696e6720696e70757420666f722046696c6573526f757465436f6e6669672f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d7631000000000000000800077265616c6d496404200009726f6f744d6f756e7407000e66696c657350726f66696c6549640420000962617369734d6f646502010012636f6d706c6574656e657373506f6c6963790201001166726573686e657373506f6c69637949640420000b7772697465526f75746572041400137772697465526f75746572436f64654861736804200001000009726f6f744d6f756e740100000000000000000000000000000000000000000000000000000000000001040100000001020000000000",
+      "members": [
+        {
+          "memberIndex": 0,
+          "name": "DirectoryEntry/1",
+          "source": {
+            "path": "Designs/efsv2/hierarchical-files-and-folders.md",
+            "sha256": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456",
+            "section": "3.2"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "FilesName/1; parent directory, child File/Directory charter; mount root equals child; cycles contextual"
+          ],
+          "temporaryTypeSchemaId": "0x3a73cfe3e879b527c049645c5a2db3e8f4040a374a36bc5167643c2920642722",
+          "blobBytes": 396,
+          "maxStructuralBodyBytes": 354,
+          "descriptor": {
+            "name": "DirectoryEntry/1",
+            "meaning": "Temporary engineering input for DirectoryEntry/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "parent",
+                "kind": "REF"
+              },
+              {
+                "name": "name",
+                "kind": "STRING",
+                "max": 255
+              },
+              {
+                "name": "child",
+                "kind": "REF"
+              },
+              {
+                "name": "mountOverride",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "REF"
+                }
+              }
+            ],
+            "roles": [
+              {
+                "name": "parent",
+                "targetClass": 5,
+                "expectedType": "1dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44",
+                "fieldIdx": 0
+              },
+              {
+                "name": "child",
+                "targetClass": 5,
+                "expectedType": "1dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44",
+                "fieldIdx": 2
+              },
+              {
+                "name": "mountOverride",
+                "targetClass": 1,
+                "expectedType": "GROUP_REF:4",
+                "fieldIdx": 3
+              }
+            ],
+            "indexes": [
+              {
+                "kind": 2,
+                "target": 0
+              },
+              {
+                "kind": 2,
+                "target": 1
+              },
+              {
+                "kind": 2,
+                "target": 2
+              }
+            ],
+            "constraints": []
+          },
+          "blobHex": "000100104469726563746f7279456e7472792f31006754656d706f7261727920656e67696e656572696e6720696e70757420666f72204469726563746f7279456e7472792f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d763100000000000000040006706172656e740700046e616d650600ff00056368696c6407000d6d6f756e744f766572726964650e0000070003000006706172656e74051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c440000000100056368696c64051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c4402000002000d6d6f756e744f76657272696465010000000000000000000000000000000000000000000000000000000000000104030000000302000201020200000000"
+        },
+        {
+          "memberIndex": 1,
+          "name": "DirectoryWhiteout/1",
+          "source": {
+            "path": "Designs/efsv2/hierarchical-files-and-folders.md",
+            "sha256": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456",
+            "section": "3.2"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "FilesName/1; parent directory charter; selected Binding hides lower tiers"
+          ],
+          "temporaryTypeSchemaId": "0x05eb791f96746078774b78b919153e652df372d1e86fcf8d802fee1df3e3badb",
+          "blobBytes": 275,
+          "maxStructuralBodyBytes": 289,
+          "descriptor": {
+            "name": "DirectoryWhiteout/1",
+            "meaning": "Temporary engineering input for DirectoryWhiteout/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "parent",
+                "kind": "REF"
+              },
+              {
+                "name": "name",
+                "kind": "STRING",
+                "max": 255
+              }
+            ],
+            "roles": [
+              {
+                "name": "parent",
+                "targetClass": 5,
+                "expectedType": "1dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44",
+                "fieldIdx": 0
+              }
+            ],
+            "indexes": [
+              {
+                "kind": 2,
+                "target": 0
+              }
+            ],
+            "constraints": []
+          },
+          "blobHex": "000100134469726563746f727957686974656f75742f31006a54656d706f7261727920656e67696e656572696e6720696e70757420666f72204469726563746f727957686974656f75742f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d763100000000000000020006706172656e740700046e616d650600ff0001000006706172656e74051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c440000000001020000000000"
+        },
+        {
+          "memberIndex": 2,
+          "name": "FileRevision/1",
+          "source": {
+            "path": "Designs/efsv2/hierarchical-files-and-folders.md",
+            "sha256": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456",
+            "section": "3.3"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "sorted unique same-File parents; FILE meaning; FILES_MEDIA_HINTS_V1; executableHint is not authority"
+          ],
+          "temporaryTypeSchemaId": "0x70e18fd87e4d254def230ccb1a7873c760ef95851b6e200fd3597c5fd7442bfa",
+          "blobBytes": 419,
+          "maxStructuralBodyBytes": 647,
+          "descriptor": {
+            "name": "FileRevision/1",
+            "meaning": "Temporary engineering input for FileRevision/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "node",
+                "kind": "REF"
+              },
+              {
+                "name": "content",
+                "kind": "REF"
+              },
+              {
+                "name": "mediaType",
+                "kind": "STRING",
+                "max": 255
+              },
+              {
+                "name": "charset",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "STRING",
+                  "max": 64
+                }
+              },
+              {
+                "name": "executableHint",
+                "kind": "BOOL"
+              },
+              {
+                "name": "parents",
+                "kind": "ARRAY",
+                "max": 8,
+                "inner": {
+                  "name": "",
+                  "kind": "REF"
+                }
+              }
+            ],
+            "roles": [
+              {
+                "name": "node",
+                "targetClass": 5,
+                "expectedType": "1dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44",
+                "fieldIdx": 0
+              },
+              {
+                "name": "content",
+                "targetClass": 1,
+                "expectedType": "f6c0966e2acc9f6b1bad9ac20f07da3b00cc418aafc8481dedcdc5f35f8767e8",
+                "fieldIdx": 1
+              },
+              {
+                "name": "parents",
+                "targetClass": 1,
+                "expectedType": "SELF",
+                "fieldIdx": 5
+              }
+            ],
+            "indexes": [
+              {
+                "kind": 2,
+                "target": 0
+              },
+              {
+                "kind": 2,
+                "target": 1
+              },
+              {
+                "kind": 2,
+                "target": 2
+              }
+            ],
+            "constraints": []
+          },
+          "blobHex": "0001000e46696c655265766973696f6e2f31006554656d706f7261727920656e67696e656572696e6720696e70757420666f722046696c655265766973696f6e2f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d7631000000000000000600046e6f6465070007636f6e74656e740700096d65646961547970650600ff0007636861727365740e0000060040000e65786563757461626c6548696e74010007706172656e74730b000800000700030000046e6f6465051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44000000010007636f6e74656e7401f6c0966e2acc9f6b1bad9ac20f07da3b00cc418aafc8481dedcdc5f35f8767e8010000020007706172656e7473010000000000000000000000000000000000000000000000000000000000000001050000000302000201020200000000"
+        },
+        {
+          "memberIndex": 3,
+          "name": "PublicFilesMountConfig/1",
+          "source": {
+            "path": "Designs/efsv2/hierarchical-files-and-folders.md",
+            "sha256": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456",
+            "section": "3.4"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "exact Files Plan purpose/root scope; namespace required for Directory, absent for File; metadata/property both absent in C0"
+          ],
+          "temporaryTypeSchemaId": "0x6577b3026df6f8cbe5fd1f4709a64755b192d599f57253de6387bf79bc09a692",
+          "blobBytes": 507,
+          "maxStructuralBodyBytes": 131,
+          "descriptor": {
+            "name": "PublicFilesMountConfig/1",
+            "meaning": "Temporary engineering input for PublicFilesMountConfig/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "namespacePlan",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "REF"
+                }
+              },
+              {
+                "name": "contentPlan",
+                "kind": "REF"
+              },
+              {
+                "name": "metadataPlan",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "REF"
+                }
+              },
+              {
+                "name": "propertyProfile",
+                "kind": "OPTION",
+                "inner": {
+                  "name": "",
+                  "kind": "REF"
+                }
+              }
+            ],
+            "roles": [
+              {
+                "name": "namespacePlan",
+                "targetClass": 1,
+                "expectedType": "05cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e",
+                "fieldIdx": 0
+              },
+              {
+                "name": "contentPlan",
+                "targetClass": 1,
+                "expectedType": "05cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e",
+                "fieldIdx": 1
+              },
+              {
+                "name": "metadataPlan",
+                "targetClass": 1,
+                "expectedType": "05cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e",
+                "fieldIdx": 2
+              },
+              {
+                "name": "propertyProfile",
+                "targetClass": 1,
+                "expectedType": "ANY",
+                "fieldIdx": 3
+              }
+            ],
+            "indexes": [
+              {
+                "kind": 2,
+                "target": 0
+              },
+              {
+                "kind": 2,
+                "target": 1
+              },
+              {
+                "kind": 2,
+                "target": 2
+              },
+              {
+                "kind": 2,
+                "target": 3
+              }
+            ],
+            "constraints": []
+          },
+          "blobHex": "000100185075626c696346696c65734d6f756e74436f6e6669672f31006f54656d706f7261727920656e67696e656572696e6720696e70757420666f72205075626c696346696c65734d6f756e74436f6e6669672f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d76310000000000000004000d6e616d657370616365506c616e0e000007000b636f6e74656e74506c616e07000c6d65746164617461506c616e0e000007000f70726f706572747950726f66696c650e000007000400000d6e616d657370616365506c616e0105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e00000001000b636f6e74656e74506c616e0105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e01000002000c6d65746164617461506c616e0105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e02000003000f70726f706572747950726f66696c650100000000000000000000000000000000000000000000000000000000000000000300000004020002010202020300000000"
+        },
+        {
+          "memberIndex": 4,
+          "name": "MountDescriptor/1",
+          "source": {
+            "path": "Designs/efsv2/hierarchical-files-and-folders.md",
+            "sha256": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456",
+            "section": "3.4"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "public profile config must be PublicFilesMountConfig/1; ANY is source-prescribed profile dispatch, not authority"
+          ],
+          "temporaryTypeSchemaId": "0x8ac5bdff2615f825b887f086e40fdc902edec4e99962ffa5c7db79d661623721",
+          "blobBytes": 341,
+          "maxStructuralBodyBytes": 96,
+          "descriptor": {
+            "name": "MountDescriptor/1",
+            "meaning": "Temporary engineering input for MountDescriptor/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "rootNode",
+                "kind": "REF"
+              },
+              {
+                "name": "profileId",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "configRef",
+                "kind": "REF"
+              }
+            ],
+            "roles": [
+              {
+                "name": "rootNode",
+                "targetClass": 5,
+                "expectedType": "1dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44",
+                "fieldIdx": 0
+              },
+              {
+                "name": "configRef",
+                "targetClass": 1,
+                "expectedType": "ANY",
+                "fieldIdx": 2
+              }
+            ],
+            "indexes": [
+              {
+                "kind": 2,
+                "target": 0
+              },
+              {
+                "kind": 2,
+                "target": 1
+              }
+            ],
+            "constraints": []
+          },
+          "blobHex": "000100114d6f756e7444657363726970746f722f31006854656d706f7261727920656e67696e656572696e6720696e70757420666f72204d6f756e7444657363726970746f722f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d763100000000000000030008726f6f744e6f646507000970726f66696c65496404200009636f6e666967526566070002000008726f6f744e6f6465051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44000000010009636f6e66696752656601000000000000000000000000000000000000000000000000000000000000000002000000020200020100000000"
+        },
+        {
+          "memberIndex": 5,
+          "name": "FilesRouteConfig/1",
+          "source": {
+            "path": "Designs/efsv2/hierarchical-files-and-folders.md",
+            "sha256": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456",
+            "section": "3.5"
+          },
+          "shapeStatus": "SOURCE_FIELD_LAYOUT_WITH_TEMPORARY_METADATA_AND_DECLARED_CHOICES",
+          "profileRules": [
+            "basis/completeness enum semantics; zero freshness means no claim; C0 writer fields zero, EXPERIMENTAL_DIRECT_CORE is not FilesRouter certification"
+          ],
+          "temporaryTypeSchemaId": "0x86ad0a3fb916bfc6757f9912d004541f3f341a2c889ce35689a4030c631c93d6",
+          "blobBytes": 393,
+          "maxStructuralBodyBytes": 182,
+          "descriptor": {
+            "name": "FilesRouteConfig/1",
+            "meaning": "Temporary engineering input for FilesRouteConfig/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c456"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "realmId",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "rootMount",
+                "kind": "REF"
+              },
+              {
+                "name": "filesProfileId",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "basisMode",
+                "kind": "UINT",
+                "width": 1
+              },
+              {
+                "name": "completenessPolicy",
+                "kind": "UINT",
+                "width": 1
+              },
+              {
+                "name": "freshnessPolicyId",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "writeRouter",
+                "kind": "BYTES_FIXED",
+                "width": 20
+              },
+              {
+                "name": "writeRouterCodeHash",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              }
+            ],
+            "roles": [
+              {
+                "name": "rootMount",
+                "targetClass": 1,
+                "expectedType": "GROUP_REF:4",
+                "fieldIdx": 1
+              }
+            ],
+            "indexes": [
+              {
+                "kind": 2,
+                "target": 0
+              }
+            ],
+            "constraints": []
+          },
+          "blobHex": "0001001246696c6573526f757465436f6e6669672f31006954656d706f7261727920656e67696e656572696e6720696e70757420666f722046696c6573526f757465436f6e6669672f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e0100120020beb3e073df429600b8ac376b2a9511785b744b8f573f4106db6931b86931c45663302d747970652d696e707574732d32303236303930352d7631000000000000000800077265616c6d496404200009726f6f744d6f756e7407000e66696c657350726f66696c6549640420000962617369734d6f646502010012636f6d706c6574656e657373506f6c6963790201001166726573686e657373506f6c69637949640420000b7772697465526f75746572041400137772697465526f75746572436f64654861736804200001000009726f6f744d6f756e740100000000000000000000000000000000000000000000000000000000000001040100000001020000000000"
+        }
+      ]
+    },
+    {
+      "groupIndex": 4,
+      "temporaryGroupHash": "0x86d6d121e879c57bbbf1f125b0172f1d6fb97470213007d10f0040ad28d03e67",
+      "groupBytes": 860,
+      "recordBodyBytes": 862,
+      "remainingCarriageBytes": 7330,
+      "groupHex": "00010358000100144d76704330426f6f7473747261705365616c2f31006b54656d706f7261727920656e67696e656572696e6720696e70757420666f72204d76704330426f6f7473747261705365616c2f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200205d1a4235e09f141059e21076be56f07baa032509739a370fa64ef8b1aaccf7cf63302d747970652d696e707574732d32303236303930352d7631000000000000001000146578706572696d656e74436f6d6d69746d656e74042000077265616c6d49640420000c636f7265436f646548617368042000106279746553746f726541646472657373041400116279746553746f7265436f64654861736804200012636f646578436f6e7374616e74734861736804200013696e6465784361706162696c697479526f6f74042000146f7264657265645479706547726f7570526f6f7404200014626f6f7473747261705072696e636970616c4964090015726f6f744469726563746f72794f626a656374496407000f6e616d657370616365506c616e496407000d636f6e74656e74506c616e496407000d6d6f756e74436f6e666967496407000b726f6f744d6f756e74496407000d726f757465436f6e66696749640700147072655365616c41646d697373696f6e4869676802080006000015726f6f744469726563746f72794f626a6563744964051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c4409000001000f6e616d657370616365506c616e49640105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e0a000002000d636f6e74656e74506c616e49640105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e0b000003000d6d6f756e74436f6e6669674964016577b3026df6f8cbe5fd1f4709a64755b192d599f57253de6387bf79bc09a6920c000004000b726f6f744d6f756e744964018ac5bdff2615f825b887f086e40fdc902edec4e99962ffa5c7db79d6616237210d000005000d726f757465436f6e66696749640186ad0a3fb916bfc6757f9912d004541f3f341a2c889ce35689a4030c631c93d60e0000000602000201020202030204020500000000",
+      "recordBodyHex": "035c00010358000100144d76704330426f6f7473747261705365616c2f31006b54656d706f7261727920656e67696e656572696e6720696e70757420666f72204d76704330426f6f7473747261705365616c2f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200205d1a4235e09f141059e21076be56f07baa032509739a370fa64ef8b1aaccf7cf63302d747970652d696e707574732d32303236303930352d7631000000000000001000146578706572696d656e74436f6d6d69746d656e74042000077265616c6d49640420000c636f7265436f646548617368042000106279746553746f726541646472657373041400116279746553746f7265436f64654861736804200012636f646578436f6e7374616e74734861736804200013696e6465784361706162696c697479526f6f74042000146f7264657265645479706547726f7570526f6f7404200014626f6f7473747261705072696e636970616c4964090015726f6f744469726563746f72794f626a656374496407000f6e616d657370616365506c616e496407000d636f6e74656e74506c616e496407000d6d6f756e74436f6e666967496407000b726f6f744d6f756e74496407000d726f757465436f6e66696749640700147072655365616c41646d697373696f6e4869676802080006000015726f6f744469726563746f72794f626a6563744964051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c4409000001000f6e616d657370616365506c616e49640105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e0a000002000d636f6e74656e74506c616e49640105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e0b000003000d6d6f756e74436f6e6669674964016577b3026df6f8cbe5fd1f4709a64755b192d599f57253de6387bf79bc09a6920c000004000b726f6f744d6f756e744964018ac5bdff2615f825b887f086e40fdc902edec4e99962ffa5c7db79d6616237210d000005000d726f757465436f6e66696749640186ad0a3fb916bfc6757f9912d004541f3f341a2c889ce35689a4030c631c93d60e0000000602000201020202030204020500000000",
+      "members": [
+        {
+          "memberIndex": 0,
+          "name": "MvpC0BootstrapSeal/1",
+          "source": {
+            "path": "Designs/efsv2/mvp-c0-genesis-manifest.md",
+            "sha256": "5d1a4235e09f141059e21076be56f07baa032509739a370fa64ef8b1aaccf7cf",
+            "section": "G11"
+          },
+          "shapeStatus": "TEMPORARY_LAB_CHOICE_NOT_FIXED_BY_G11",
+          "profileRules": [
+            "all G11 actual deployment/root values and pre-seal admission high independently read back; no authority from the seal itself"
+          ],
+          "temporaryTypeSchemaId": "0x3625f9c1765d2391f950672d92a9cfeeb2a38834327e628e64443c28d45ee716",
+          "blobBytes": 856,
+          "maxStructuralBodyBytes": 476,
+          "descriptor": {
+            "name": "MvpC0BootstrapSeal/1",
+            "meaning": "Temporary engineering input for MvpC0BootstrapSeal/1; exact source commitment attached. Not ceremony-final.",
+            "specDigest": {
+              "algCode": 18,
+              "hex": "5d1a4235e09f141059e21076be56f07baa032509739a370fa64ef8b1aaccf7cf"
+            },
+            "qualifier": "63302d747970652d696e707574732d32303236303930352d7631000000000000",
+            "fields": [
+              {
+                "name": "experimentCommitment",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "realmId",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "coreCodeHash",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "byteStoreAddress",
+                "kind": "BYTES_FIXED",
+                "width": 20
+              },
+              {
+                "name": "byteStoreCodeHash",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "codexConstantsHash",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "indexCapabilityRoot",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "orderedTypeGroupRoot",
+                "kind": "BYTES_FIXED",
+                "width": 32
+              },
+              {
+                "name": "bootstrapPrincipalId",
+                "kind": "PRINCIPAL"
+              },
+              {
+                "name": "rootDirectoryObjectId",
+                "kind": "REF"
+              },
+              {
+                "name": "namespacePlanId",
+                "kind": "REF"
+              },
+              {
+                "name": "contentPlanId",
+                "kind": "REF"
+              },
+              {
+                "name": "mountConfigId",
+                "kind": "REF"
+              },
+              {
+                "name": "rootMountId",
+                "kind": "REF"
+              },
+              {
+                "name": "routeConfigId",
+                "kind": "REF"
+              },
+              {
+                "name": "preSealAdmissionHigh",
+                "kind": "UINT",
+                "width": 8
+              }
+            ],
+            "roles": [
+              {
+                "name": "rootDirectoryObjectId",
+                "targetClass": 5,
+                "expectedType": "1dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44",
+                "fieldIdx": 9
+              },
+              {
+                "name": "namespacePlanId",
+                "targetClass": 1,
+                "expectedType": "05cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e",
+                "fieldIdx": 10
+              },
+              {
+                "name": "contentPlanId",
+                "targetClass": 1,
+                "expectedType": "05cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e",
+                "fieldIdx": 11
+              },
+              {
+                "name": "mountConfigId",
+                "targetClass": 1,
+                "expectedType": "6577b3026df6f8cbe5fd1f4709a64755b192d599f57253de6387bf79bc09a692",
+                "fieldIdx": 12
+              },
+              {
+                "name": "rootMountId",
+                "targetClass": 1,
+                "expectedType": "8ac5bdff2615f825b887f086e40fdc902edec4e99962ffa5c7db79d661623721",
+                "fieldIdx": 13
+              },
+              {
+                "name": "routeConfigId",
+                "targetClass": 1,
+                "expectedType": "86ad0a3fb916bfc6757f9912d004541f3f341a2c889ce35689a4030c631c93d6",
+                "fieldIdx": 14
+              }
+            ],
+            "indexes": [
+              {
+                "kind": 2,
+                "target": 0
+              },
+              {
+                "kind": 2,
+                "target": 1
+              },
+              {
+                "kind": 2,
+                "target": 2
+              },
+              {
+                "kind": 2,
+                "target": 3
+              },
+              {
+                "kind": 2,
+                "target": 4
+              },
+              {
+                "kind": 2,
+                "target": 5
+              }
+            ],
+            "constraints": []
+          },
+          "blobHex": "000100144d76704330426f6f7473747261705365616c2f31006b54656d706f7261727920656e67696e656572696e6720696e70757420666f72204d76704330426f6f7473747261705365616c2f313b20657861637420736f7572636520636f6d6d69746d656e742061747461636865642e204e6f7420636572656d6f6e792d66696e616c2e01001200205d1a4235e09f141059e21076be56f07baa032509739a370fa64ef8b1aaccf7cf63302d747970652d696e707574732d32303236303930352d7631000000000000001000146578706572696d656e74436f6d6d69746d656e74042000077265616c6d49640420000c636f7265436f646548617368042000106279746553746f726541646472657373041400116279746553746f7265436f64654861736804200012636f646578436f6e7374616e74734861736804200013696e6465784361706162696c697479526f6f74042000146f7264657265645479706547726f7570526f6f7404200014626f6f7473747261705072696e636970616c4964090015726f6f744469726563746f72794f626a656374496407000f6e616d657370616365506c616e496407000d636f6e74656e74506c616e496407000d6d6f756e74436f6e666967496407000b726f6f744d6f756e74496407000d726f757465436f6e66696749640700147072655365616c41646d697373696f6e4869676802080006000015726f6f744469726563746f72794f626a6563744964051dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c4409000001000f6e616d657370616365506c616e49640105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e0a000002000d636f6e74656e74506c616e49640105cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e0b000003000d6d6f756e74436f6e6669674964016577b3026df6f8cbe5fd1f4709a64755b192d599f57253de6387bf79bc09a6920c000004000b726f6f744d6f756e744964018ac5bdff2615f825b887f086e40fdc902edec4e99962ffa5c7db79d6616237210d000005000d726f757465436f6e66696749640186ad0a3fb916bfc6757f9912d004541f3f341a2c889ce35689a4030c631c93d60e0000000602000201020202030204020500000000"
+        }
+      ]
+    }
+  ]
+}

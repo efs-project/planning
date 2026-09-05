@@ -1,103 +1,103 @@
 {
   "profile": "efs-lab/1",
   "c0Conformance": false,
-  "generatedAt": "2026-09-05T01:27:30.647Z",
+  "generatedAt": "2026-09-05T08:59:48.669Z",
   "browser": "148.0.7778.96",
   "results": [
     {
       "name": "exact directory link and continuation retain one pre-mined basis",
       "status": "PASS",
-      "elapsedMs": 2738
+      "elapsedMs": 2262
     },
     {
       "name": "keyboard skip link moves focus without changing the selected Files route",
       "status": "PASS",
-      "elapsedMs": 32
+      "elapsedMs": 28
     },
     {
       "name": "old exact game revision is readable and downloadable without execution",
       "status": "PASS",
-      "elapsedMs": 1539
+      "elapsedMs": 1434
     },
     {
       "name": "binary upload round-trips exactly after one local message approval",
       "status": "PASS",
-      "elapsedMs": 5700
+      "elapsedMs": 4201
     },
     {
       "name": "oversize upload rejects before signing or session setup",
       "status": "PASS",
-      "elapsedMs": 59
+      "elapsedMs": 75
     },
     {
       "name": "Data exact-schema table keeps large u64 values and numeric ordering lossless",
       "status": "PASS",
-      "elapsedMs": 1654
+      "elapsedMs": 1565
     },
     {
       "name": "loaded-row filter, keyboard selection, copy and mobile table preserve scope and precision",
       "status": "PASS",
-      "elapsedMs": 295
+      "elapsedMs": 102
     },
     {
       "name": "Data retains a unavailable payload as a visible failed row",
       "status": "PASS",
-      "elapsedMs": 842
+      "elapsedMs": 830
     },
     {
       "name": "Data retains a corrupt payload as a visible failed row",
       "status": "PASS",
-      "elapsedMs": 846
+      "elapsedMs": 823
     },
     {
       "name": "same exact challenge and release reproduce the obstacle sequence after Stop",
       "status": "PASS",
-      "elapsedMs": 3999
+      "elapsedMs": 2940
     },
     {
       "name": "a fresh browser context reconstructs the same challenge sequence with no wallet",
       "status": "PASS",
-      "elapsedMs": 2398
+      "elapsedMs": 1899
     },
     {
       "name": "another shared typed challenge changes sequence and preserves the sandbox",
       "status": "PASS",
-      "elapsedMs": 2733
+      "elapsedMs": 2233
     },
     {
       "name": "delayed Play cannot mount after stop",
       "status": "PASS",
-      "elapsedMs": 173
+      "elapsedMs": 156
     },
     {
       "name": "delayed Play cannot mount after navigate",
       "status": "PASS",
-      "elapsedMs": 1527
+      "elapsedMs": 1469
     },
     {
       "name": "corrupt game bytes never launch and remain inspectable",
       "status": "PASS",
-      "elapsedMs": 2236
+      "elapsedMs": 1645
     },
     {
       "name": "missing challenge never falls back to random game configuration",
       "status": "PASS",
-      "elapsedMs": 265
+      "elapsedMs": 258
     },
     {
       "name": "malformed file link fails closed without silently selecting another node",
       "status": "PASS",
-      "elapsedMs": 8
+      "elapsedMs": 9
     },
     {
       "name": "Cancel fences a pending new session write on the actual SDK",
       "status": "PASS",
-      "elapsedMs": 594
+      "elapsedMs": 605
     },
     {
       "name": "Cancel fences a pending established session write on the actual SDK",
       "status": "PASS",
-      "elapsedMs": 391
+      "elapsedMs": 376
     }
   ],
   "errors": [],
@@ -106,7 +106,7 @@
     "rpc:eth_chainId": 187,
     "rpc:eth_getBlockByNumber": 17,
     "rpc:eth_getCode": 374,
-    "rpc:eth_call": 996,
+    "rpc:eth_call": 995,
     "rpc:eth_getBlockByHash": 170,
     "wallet:eth_signTypedData_v4": 2,
     "relay:eth_sendTransaction": 2,

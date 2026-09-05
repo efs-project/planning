@@ -1,7 +1,7 @@
 {
   "profile": "efs-lab/1",
   "c0Conformance": false,
-  "generatedAt": "2026-09-05T01:25:42.201Z",
+  "generatedAt": "2026-09-05T09:02:14.220Z",
   "browser": "148.0.7778.96",
   "results": [
     {
@@ -43,7 +43,7 @@
     "rpc:eth_chainId": 160,
     "rpc:eth_getBlockByNumber": 19,
     "rpc:eth_getCode": 320,
-    "rpc:eth_call": 940,
+    "rpc:eth_call": 935,
     "rpc:eth_getBlockByHash": 141,
     "wallet:eth_signTypedData_v4": 2,
     "relay:eth_sendTransaction": 4,
@@ -52,5 +52,5 @@
     "rpc:eth_getTransactionByHash": 1,
     "session:eth_signTypedData_v4": 2
   },
-  "runtimeRequestCount": 1619
+  "runtimeRequestCount": 1614
 }

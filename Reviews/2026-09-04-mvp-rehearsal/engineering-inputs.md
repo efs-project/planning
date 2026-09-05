@@ -125,3 +125,16 @@ fails bounded reconstruction would return a concrete measured design fork.
 - [Stage A encoding](../2026-08-13-efs2-stage-a-corpus/chapters/b0-encoding-and-ids.md), MC/1 and SR-17.
 - [Files fields and contextual rules](../../Designs/efsv2/hierarchical-files-and-folders.md), sections 3–8.
 - [Tested seed/carrier codec](../2026-09-04-mvp-c0-foundation/run-codec.md).
+
+## 2026-09-05 input-materialization correction
+
+The table above is a historical task inventory, not the source of field bytes.
+Materialization found that `ByteDigest/1` has exactly one `DIGEST` field and
+**no size field**, per [content §4](../2026-08-13-efs2-stage-a-corpus/chapters/b0-content-locators.md).
+The earlier "digest and size semantics" wording must not become a descriptor.
+The same content chapter uses `expectedType = ANY` when a reference accepts a
+profile-defined set of multiple TypeSchemas. The profile validates that set;
+Core does not encode an invented set-valued reference constraint. This is
+distinct from inventing an unqualified parent role or treating existence as
+authority. Consume the [source-pinned input experiment](../2026-09-05-mvp-build-start/plan.md)
+and its explicit temporary metadata/index choices, not prose paraphrase hashes.
