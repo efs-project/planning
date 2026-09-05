@@ -12,9 +12,9 @@
 
 ## Global Constraints
 
-- Continue from `824d856`. Prior experiments, candidate descriptor bytes, source commitments and historical measurement artifacts remain unchanged.
+- Continue from `824d856`. Candidate descriptor bytes, source commitments, prior probe behavior and historical measurement artifacts remain unchanged. Task 2 may extend the shared parser with the explicit dependency-returning interface below; preserve its existing strict interface and rerun its regressions.
 - Disposable local work only. No new product repository, main merge, public deployment, permanent IDs, release or protocol freeze. Root publishes the owned feature branch.
-- `MAX_ENVELOPE_LEAVES=64`, `MAX_BODY_BYTES=8192`, `REF_INSTANCES_MAX=16`, `MAX_INDEX_SPECS=8`; at most 43 distinct occurrence-level posting keys. Binding history/Scope and unique-Type transitions are outside that occurrence-key list and must be budgeted separately.
+- `MAX_ENVELOPE_LEAVES=64`, `MAX_BODY_BYTES=8192`, aggregate carried canonical bodies `MAX_ENVELOPE_BODY_BYTES=8192`, `REF_INSTANCES_MAX=16`, `MAX_INDEX_SPECS=8`; at most 43 distinct occurrence-level posting keys. Binding history/Scope and unique-Type transitions are outside that occurrence-key list and must be budgeted separately. The final encoded EnvelopeWire's 16384-byte cap remains an outer-decoder obligation; the trusted typed host is not that wire decoder.
 - All Principal IDs are bytes32. All ordinal ABIs are uint64; successful physical ordinals are positive and strictly below `2^48-1`. Successful Binding revisions are positive and strictly below `2^32-1`.
 - Preserve ordinary Record/Envelope/Occurrence/key identities. The three kernel effect IDs come from actual admitted G4 group-2 bytes/member order, not names, shape, independent singleton blobs or test-supplied effect flags.
 - STRUCT-EVM body validity is not target validity, authority, Files semantics, currentness, NFC or full Unicode conformance. Do not broaden the existing ASCII/DIRECT descriptor on-ramp in this task.
@@ -138,19 +138,83 @@ to the existing MC/1 table. Canonical field slices include full prefixes.
 ## Task 2: One store and atomic shadow/replay admission
 
 **Files:** create `src/StateStore.sol`, `src/StateKernel.sol`,
-`test/StatefulHarness.sol` and `test/StateKernel.t.sol`. Any necessary small
+`test/StatefulHarness.sol` and `test/StateKernel.t.sol`; minimally extend
+`../2026-09-05-c0-admission/src/TypeGroupParser.sol` for bounded dependencies.
+Any necessary small
 shared data structs live with their owning library, not a generic catch-all.
 
-**Input boundary:** the internal `StateKernel.admit` receives a verified-context
-publication containing exact EnvelopeId, authenticated bytes32 Principal,
-canonical unsigned envelope, retained accepting-batch evidence, full ordered
-RecordIds, selected `(leafIndex,typeId,body)` rows, a nonzero uint64 mask, exact
-ordered `(leafIndex,uint32 revision)` CAS items and a batch identifier. The
-real authority layer will be its only product caller; the named test host
-`publishTrustedForTest` exposes this boundary solely for kernel tests. The
-kernel always recomputes selected ordinary Record IDs itself. The input
-context and all exported row/result tuple definitions must be written in
-StateKernel/StateStore and reported before a separate reader consumes them.
+**Input boundary:** implement the following internal interface in StateKernel.
+The real authority layer will be its only product caller; the named test host
+`publishTrustedForTest` exposes it solely for kernel tests. No caller chooses
+an accepting batch ID, admission ordinal or independently trusted envelope
+bytes. Every selected ordinary Record ID and the portable Envelope ID are
+recomputed, using the source Envelope EIP-712 identity, not a WritePlan hash.
+Require `header.principalId == verified.authenticatedPrincipal`, otherwise
+`AUTH_PRINCIPAL_MISMATCH(bytes32 declared,bytes32 computed)`. Retain exactly
+`abi.encode(header,recordIds)` as the immutable unsigned spine.
+
+```solidity
+struct EnvelopeHeader {
+    uint16 profile; bytes32 principalId; bytes32 authorityRef;
+    uint64 authEpoch; bytes32 pubNonce; uint64 notAfter;
+}
+struct SelectedLeaf { uint16 leafIndex; bytes32 typeId; bytes body; }
+struct ExpectedRevision { uint16 leafIndex; uint32 revision; }
+struct VerifiedContext {
+    bytes32 authenticatedPrincipal; uint32 revisionOrdinal;
+    uint256 authorityBasis; bytes32 authorityCodehash;
+}
+struct Publication {
+    bytes32 envelopeId; // checked commitment, not trusted identity
+    EnvelopeHeader header; bytes32[] recordIds; uint64 leafMask;
+    SelectedLeaf[] leaves; ExpectedRevision[] expectedRevisions;
+}
+struct LeafResult { uint16 leafIndex; uint8 outcome; uint64 admissionOrdinal; }
+struct AdmitResult {
+    bytes32 envelopeId; uint64 envelopeOrdinal; uint64 acceptingBatchId;
+    LeafResult[] leaves;
+}
+struct Init {
+    bytes32 realmId; bytes32 initialRevisionId;
+    bytes intrinsicGroupBytes; bytes objectGroup1Bytes; bytes kernelGroup2Bytes;
+}
+function initialize(StateStore.Store storage s, Init memory init) internal;
+function admit(StateStore.Store storage s, VerifiedContext memory verified,
+    Publication memory publication) internal returns (AdmitResult memory);
+```
+
+Outcome 1 is ADMITTED, 2 ALREADY_ADMITTED. Allocate a fresh accepting batch
+only if freshCount is positive; all-ACTIVE returns batch ID zero without writes.
+`block.number` supplies the batch block. The sole synthetic initialized
+revision is ordinal 1 mapped to `initialRevisionId`; other revision ordinals
+reject until real revision machinery joins. Retain the verified authority
+basis/codehash on the batch, never on the Envelope. This test boundary does
+not authenticate or interpret arbitrary witness profiles. Authenticated intent
+nonces/`batchIntentLane` are unfinished outer-layer work; do not populate
+fictional evidence or call unchanged counters proof of nonce validation.
+
+One-time initialization parses/verifies the exact intrinsic shape already
+tested by AdmissionProbe, storing its original bytes, cache, Type ordinal 1
+and bootstrap provenance `(groupRecordId=0,admittedAtOrdinal=0)`. Commit to the
+actual configured group-1/group-2 byte hashes without installing those caches.
+Only ordinary admission of those exact bytes activates ObjectGenesis from
+group-1 member 0 (six members) and kernel effects from group-2 members 0/1/2
+(three members). Earlier selected admission makes them visible to later leaves.
+OBJECT targets always require the exact active ObjectGenesis Type, even for
+an ANY expected-Type marker; a nonzero declared expected Type is additional.
+
+**Bounded parser bridge:** extend the same parser with
+`parseWithDependencies(bytes groupBytes) internal pure returns
+(bytes32 groupHash, SchemaCache[] schemas, bytes32[] externalTypeIds)`.
+It defers only literal external expected-Type membership, collecting those IDs
+at `resolve`'s literal-external branch in stable member/role order. Valid
+ANY/SELF/GROUP_REF add no dependency; preserve all reserved sentinel, role,
+range and self-index checks. Dedup and return at most 256 IDs (use a counter
+that represents 256). The caller must prove every returned ID exists in
+persisted or earlier-selected Type-cache state **before** exposing these caches.
+This interface is structural parsing, not admitted-cache validation. Do not
+scan/copy the historical Type inventory, duplicate the parser, accept caller
+cache bytes, or satisfy dependencies from later/unselected carriage.
 
 **Store:** one mapping each for immutable Record rows, Envelope spines,
 Type-cache provenance, occurrence lifecycle and two-word Binding heads, plus
@@ -160,6 +224,56 @@ Binding history is only its RAW_AUDIT posting family. Canonical bytes and
 authority evidence are state-readable, not event-only. Keep all state in the
 eventual Core's storage via internal libraries. No external mutable registry
 or helper contract owns part of the atomic state.
+
+Use these StateStore rows and exact raw test-host getters for Task 3:
+
+```solidity
+struct Counts {
+    uint64 records; uint64 envelopes; uint64 types; uint64 principals;
+    uint64 admissions; uint64 batches; uint64 postingKeys; uint64 bindingKeys;
+}
+struct RecordRow {
+    bytes32 typeId; bytes body; uint64 recordOrdinal; uint64 firstAdmissionOrdinal;
+}
+struct EnvelopeRow { bytes canonicalUnsignedEnvelope; uint64 envelopeOrdinal; }
+struct TypeRow {
+    bytes32 groupRecordId; uint16 memberIndex; uint64 typeOrdinal;
+    uint64 admittedAtOrdinal; bytes cacheBytes;
+}
+struct PrincipalRow { uint64 principalOrdinal; uint64 firstAdmissionOrdinal; }
+struct AdmissionRow { bytes32 envelopeId; uint256 packed; }
+struct LifecycleRow { uint256 packed; }
+struct BindingRow { uint256 meta; bytes32 target; }
+struct PostingRow { uint256 head; }
+struct BatchRow { uint256 meta; uint256 authorityBasis; bytes32 authorityCodehash; }
+```
+
+`counts()`, `bootstrap()` (all retained initialization facts and active IDs),
+`recordIdAt(uint64)`/`record(bytes32)`,
+`envelopeIdAt(uint64)`/`envelope(bytes32)`,
+`typeIdAt(uint64)`/`typeRow(bytes32)`,
+`principalIdAt(uint64)`/`principal(bytes32)`, `admissionAt(uint64)`,
+`occurrence(bytes32,uint16)`, `batchAt(uint64)`, `postingKeyAt(uint64)`,
+`postingHead(bytes32)`, `postingWord(bytes32,uint64)`,
+`bindingKeyAt(uint64)`/`binding(bytes32)`.
+Inventory ordinals are one-based. Explicitly reject out-of-range inventory
+reads; absent point rows are distinguishable by their zero ordinal/head and
+must not be called proof of global absence. Posting words use zero-based
+physical word indices, checked against `ceil(count/5)`.
+
+All packed words use the source layouts: two-word reversible admission log,
+sole OccStatus, two-word Binding head, posting head, five-u48 lanes and batch
+meta. Hydrate Record/Principal through immutable Envelope vector and reverse
+Type/Principal ordinals, not extra copies in each log row. Record live count is
+exclusively the byRecord posting head. First-touch key inventories are needed
+to detect extraneous state; they are not extra revision histories.
+
+Use local errors `ReferenceUnproved(uint16 leaf,uint8 role)` and
+`ReferenceClassUnsupported(uint16 leaf,uint8 role,uint8 targetClass)` for this
+internal resolver's unproved/unsupported states. These do not propose new
+permanent public selectors or mean malformed bytes. Known false references
+use the source `E_REF_UNSATISFIED` shape. The eventual adapter maps these to
+qualified knowledge/capability outcomes.
 
 **Plan/replay algorithm:**
 
@@ -200,15 +314,28 @@ liveness. Two sibling Withdrawals see the first planned terminal target.
   Test all twelve cases in the controlling stateful specification, with exact
   source-level typed rejections and full observable-state comparison after
   failure. No test-only seed port enters src/.
+- [ ] Test dependency-returning parser equivalence to the unchanged strict
+  interface with exactly the returned dependencies; omission rejects. Cover
+  repeated external IDs, reserved sentinels, missing dependency rollback and
+  earlier-selected versus later/unselected dependency visibility. Re-run the
+  prior admission/parser and current body regressions after the small extension.
 - [ ] Add test-host-only setup for exhaustion/PRE_WITHDRAWN source guards;
   label it unauthenticated setup, not proof of a working pre-withdrawal path.
   Exercise real kernel state for admitted-target withdrawal, retries and counts.
+- [ ] Reject oversized vectors, out-of-mask/duplicate/reordered selected rows,
+  body identity mismatch and aggregate body bytes above 8192 before staging;
+  test the aggregate bound with individually legal bodies. Do not claim final
+  wire-size enforcement from this typed host's ABI calldata size.
 - [ ] Provide bounded raw state-read accessors in the test host for independent
   enumeration. They are not the final public PageCursor/query ABI and must not
   invent COMPLETE at an unverified basis. Preserve raw history/Scope flags.
 - [ ] Run full Solidity regression, normal runtime build-size checks and
   self-review; report the exact exported tuples, managed-host deployment size
   status, RED/GREEN and unresolved source questions before committing.
+  Measure runtime early enough to report a real fit problem while the task is
+  still bounded. Source-file splitting is not a physical size solution. The
+  root's unselected fallback and deployment-commitment obligation are recorded
+  in codex-integration-notes.md; do not silently introduce an external helper.
 
 ## Task 3: Independent state reconstruction and local-chain pressure
 

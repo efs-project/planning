@@ -63,7 +63,10 @@ required Files mutation or M0 journey is dropped by these exclusions.
    body's cache.
 4. Current-envelope OCCREF rejects in every selected reference position,
    including retry/partial-admission paths. A staged current envelope is never
-   exposed to occurrence-target resolution.
+   exposed to occurrence-target resolution. External retained-envelope
+   membership is independent of target lifecycle: unadmitted or withdrawn
+   leaves remain referenceable, out-of-range leaves reject, and an unavailable
+   envelope is unproved/UNKNOWN, not absence or structural invalidity.
 5. Two full-width Principals derive distinct keys at the same position. A payer
    or caller cannot substitute authority or choose another author's key.
 6. Missing/extra/duplicate/reordered CAS items reject. First write requires
@@ -86,8 +89,13 @@ required Files mutation or M0 journey is dropped by these exclusions.
     posting key. Withdrawal decrements exactly that deduplicated set once;
     unique-Type live count changes only at last-live zero crossing. History and
     BindingScope never decrement, compact or filter by occurrence liveness.
+    Separate synthetic admitted schemas must exercise SCALAR_EQ/DIGEST_EQ:
+    the sixteen retained candidates have 27 REF_BACKLINK specs and no value
+    index specs, so that inventory alone cannot prove the value-index family.
 12. Valid earlier leaves followed by invalid final reference/CAS/withdrawal
-    leave rows, counters, postings and nonce unchanged. Test ordinal/revision
+    leave rows, counters and postings unchanged; authenticated nonce rollback
+    remains required through the eventual outer entrypoint, not a synthetic
+    unused counter in the trusted host. Test ordinal/revision
     exhaustion explicitly; do not wrap or allocate the reserved guard value.
 
 Tests of PRE_WITHDRAWN source rejection may use clearly labelled internal

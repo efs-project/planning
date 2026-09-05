@@ -48,6 +48,24 @@ test harness; do not introduce a production `bind()` entrypoint or smuggle an
 arbitrary mutation under a Files operation name. Required C0 Files paths and
 their authenticated publication boundary are unchanged.
 
+The initial stateful resolver also needs a precise reference-support row.
+For external OCCREF, retained Envelope membership is checkable even when the
+target leaf is NEVER_ADMITTED or WITHDRAWN; local lifecycle is not reference
+existence. An unavailable external envelope yields `REFERENCE_UNPROVED`, a
+bounded preflight refusal with UNKNOWN knowledge, not invalid bytes or proven
+absence. Current-envelope OCCREF still rejects unconditionally. RECORD/OBJECT
+references use the explicit selected/persisted Record rule, with OBJECT's exact
+ObjectGenesis Type requirement. That class check is not publisher ownership
+or authority from a charter Binding.
+
+TYPESCHEMA and PRINCIPAL remain valid reference grammar classes, but the cited
+B0 corpus does not supply their runtime existence predicate and none of the
+sixteen C0 candidates uses either class. The first resolver must report them
+as unsupported capability, not invalid classes, until that predicate is
+specified and tested. A later C0 capability serializer must not advertise full
+five-class resolution from evidence covering only the three implemented
+classes. This is a scoped engineering gap, not a permanent Type restriction.
+
 Index overlay work must carry `KIND_BINDING_SCOPE=0x0a` and its exact value-key
 domain through the Codex, point/page/cursor decoders and RAW_AUDIT rules. Its
 first-bind **and first-tombstone** admission anchor is appended exactly once,
@@ -59,6 +77,30 @@ not its unimplemented byte layout. Before deployment, freeze the actual
 ordered tables, error/status/program rules and independent vectors, with
 explicit source-to-overlay ownership. No source prose hash or nonzero dummy
 commitment substitutes for the table bytes.
+
+## Physical fit gate
+
+Measure the combined runtime under the ordinary 24,576-byte deployment limit;
+internal library files still inline into that runtime. Keep one Core storage
+owner and do not hide an oversized host with an unlimited-size setting. First
+separate essential raw state getters from offchain snapshot/hydration work.
+If validation code still prevents fit, the preferred **unselected fallback**
+is an immutable, stateless parser/body helper called by STATICCALL during
+preflight, not an external mutable registry or delegatecall facet system.
+Core would retain all dependency/reference/authority checks and state choices.
+This fallback requires an explicit run-local physical-layout amendment,
+bounded calls/returndata, retained address and runtime codehash, independent
+dependency verification and new aggregate measurements. It is not the unchanged
+B0 one-physical-Core layout.
+
+The current `ExperimentDeploymentV1` lists only Core and byte-store runtime
+hashes. A helper-backed complete run therefore needs a versioned dependency
+commitment/readback refinement first; verifying Core's codehash alone would
+not verify the helper. No helper topology has been selected by this note.
+The [current architecture](../../Designs/efsv2/core-architecture-candidate.md#modular-contract-shape-to-prototype)
+and [C0 control table](../../Designs/efsv2/disposable-mvp-profile.md#2-temporary-control-choices)
+leave the physical split open to measurement; B0 admission §5.4 remains the
+baseline being compared.
 
 ## Concrete input work, in dependency order
 
@@ -87,6 +129,10 @@ commitment substitutes for the table bytes.
   and [Binding §4](../2026-08-13-efs2-stage-a-corpus/chapters/b0-binding.md):
   authenticated pre-withdrawal and terminal occurrence behavior, qualified by
   C0 §4's explicit witness incompatibility and closed operation table.
+- [Authorship §3.1](../2026-08-13-efs2-stage-a-corpus/chapters/b0-authorship-envelope.md)
+  separates portable occurrence membership from the Realm-local lifecycle;
+  [encoding §3.1](../2026-08-13-efs2-stage-a-corpus/chapters/b0-encoding-and-ids.md)
+  supplies the five valid reference classes and exact-Type qualification.
 - [Foundation run codec](../2026-09-04-mvp-c0-foundation/run-codec.md) and
   [measurement limits](../2026-09-04-mvp-c0-foundation/README.md):
   reusable exact encoding, not a completed or valid bootstrap report.
