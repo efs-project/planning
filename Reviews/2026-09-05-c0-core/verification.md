@@ -1,6 +1,6 @@
 # Application-body checkpoint verification
 
-**Status:** controller tests and both task reviews pass; final joined review in progress. Structural parsing evidence only.
+**Status:** controller tests, both task reviews and final joined review pass. Structural parsing evidence only.
 
 This increment continues from published `4d09403` in the same owned
 `codex/mvp-c0-coherence` worktree. No prior candidate bytes, admission probe,
@@ -33,7 +33,11 @@ historical measurements or `efs-lab/1` browser were changed.
 - Both task reviews independently approve specification and quality with no
   findings. SDK/Web Client PM re-reviews closed the scoped acceptance edits;
   the stateful reviewer approved the next-increment specification and its
-  explicit C0 evidence exclusions. Final joined checkpoint review remains.
+  explicit C0 evidence exclusions. Final joined review of `4d09403..8dbb7c1`
+  approved feature-branch publication with no P0/P1/P2/P3 findings.
+- All 32 local Markdown links in the five checkpoint documents resolve.
+  Decision roll-up, design tri-sync and whitespace checks pass. Final
+  prepublication checks run again after this closure note.
 
 Local commands from the worktree root:
 

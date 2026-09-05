@@ -78,4 +78,8 @@ using the existing reader before calling the harness; no caller-invented
 - [x] Implement the reader and a local-chain differential test using the prior managed `withProbe`, `makePublication`, `submit` and independent `parseGroup` functions. Deploy only the test harness on that managed chain with its synthetic payer and normal runtime/gas ceilings.
 - [x] Compare Solidity and JS results for valid and deliberately malformed ObjectGenesis, BindingSet, DirectoryEntry, FileRevision, ChunkTree and nontrivial all-kind literal fixtures. Recompute Record IDs independently from ordinary domain/type/body preimages; mutations get new IDs rather than failing merely on stale hashes.
 - [x] Run Node tests and the full new Solidity suite. Recheck the original Type materializer and admission tests if unchanged dependency assumptions are in doubt; do not regenerate historical measurements. Record resources of the new validator harness as component evidence, not a full-Core fit claim.
-- [ ] Write `verification.md` with commands/results, review findings, what could improve and explicit remaining gaps. Update this README and the existing MVP-C0 Kanban card/status once for this session. Root handles independent review, exact-path commit/push and then the next joined stateful admission/Binding step.
+- [x] Write `verification.md` with commands/results, review findings, what could improve and explicit remaining gaps. Update this README and the existing MVP-C0 Kanban card/status once for this session. Root handles independent review, exact-path commit/push and then the next joined stateful admission/Binding step.
+
+Both implementation tasks and the final joined checkpoint review are complete.
+This plan does not close the continuous Core track or the native MVP goal; the
+next requirement is [stateful admission/Binding/postings](stateful-integration.md).
