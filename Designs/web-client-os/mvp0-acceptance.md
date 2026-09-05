@@ -5,9 +5,16 @@
 **Depends on:** [[../efsv2/disposable-mvp-profile]], [[../efsv2/mvp-c0-genesis-manifest]], [[../sdkv2/mvp-interface]], [[README]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-09-03
+**Last touched:** 2026-09-04
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/read-path #topic/coherence
+
+> **2026-09-04 scope update:** James has now authorized local disposable
+> browser/SDK/Files/data/Arcade prototypes, not product repository creation or
+> public release. The [workflow lab](../../Reviews/2026-09-04-mvp-rehearsal/README.md)
+> exercises real local contract/browser interactions under `efs-lab/1`; it does
+> not implement full MVP-C0. All nine tests below still require their exact C0
+> inputs and remain NOT_RUN until that profile is executed.
 
 ## Purpose
 

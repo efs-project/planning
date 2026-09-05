@@ -4,6 +4,10 @@ Analysis, critique, and build-record artifacts produced by review/architecture a
 
 ## Contents
 
+### Joined local MVP workflow rehearsal (2026-09-04)
+
+- [`2026-09-04-mvp-rehearsal/`](./2026-09-04-mvp-rehearsal/README.md) — real local Solidity, five-seam SDK, browser Files/data and explicit verified game launch; compiled-in Solidity consumer, adversarial checks, runtime/storage measurements and three-repo build blueprint. Uses a separate `efs-lab/1` profile: not full C0, M0 conformance, product creation, real-wallet compatibility or public deployment evidence.
+
 ### AGNTCY and shared public agent data (2026-09-03)
 
 - [`2026-09-03-agntcy-deep-dive/`](./2026-09-03-agntcy-deep-dive/README.md) — released Directory/OASF storage, discovery and exact skill-bundle audit; Identity, SLIM, SHADI, LF governance and adoption; overlap with EFS profiles/SOUL/shared knowledge; source-pinned fidelity/current-state caveats; and one disposable conventional-baseline-versus-EFS comparison. Records interoperability opportunities without adopting an agent-specific Core primitive, runtime, public registry or new deadline.

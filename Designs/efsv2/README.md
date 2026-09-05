@@ -116,9 +116,18 @@ Point outcome stays separate from authority, currentness, finality, integrity,
 availability, returned bytes, and canonical effect; receipt progress never
 masquerades as committed effect.
 
-These are temporary experiment choices only. Web Client/product work remains
-separately held; no Type/query axis, carrier limit, Principal model, product,
+These are temporary experiment choices only. James's 2026-09-04 direction now
+authorizes local SDK/browser/Files/data/Arcade prototypes as well; permanent
+product/repository/release work is not adopted. No Type/query axis, carrier limit, Principal model, product,
 venue, contract topology, deployment, or freeze is adopted.
+
+The [joined workflow rehearsal](../../Reviews/2026-09-04-mvp-rehearsal/README.md)
+now connects real local Solidity, the five-seam SDK, browser Files/data and an
+explicitly launched verified game, with a compiled-in Solidity consumer.
+It is separately namespaced `efs-lab/1`, not the full C0 Type/admission/index/
+Binding/Lens/genesis implementation. Its passes do not replace any M0/C0 row.
+See [build readiness](../../Reviews/2026-09-04-mvp-rehearsal/build-readiness.md)
+for measured limits and the ordered full-C0 implementation slices.
 
 ## Evidence map
 

@@ -1,0 +1,158 @@
+{
+  "kind": "local source and output inventory, not C0 identity or signed attestation",
+  "profile": "efs-lab/1",
+  "generatedAt": "2026-09-05T00:55:00.807Z",
+  "sourceFiles": [
+    {
+      "path": "consumer/LabRead.sol",
+      "sha256": "07967edf2faa11aa187ab257ab54b1a8402621170cb82dd570b279adedbeb3b2"
+    },
+    {
+      "path": "consumer/LabReadConsumer.sol",
+      "sha256": "203f16fd90a840b352dcab3c070bf882fb6d5f92216f890f75af2cc32609f958"
+    },
+    {
+      "path": "foundry.toml",
+      "sha256": "a44b717e307aae76dd1af9a5f3fefd2c46cf8227d196a4c2c8e2bb87a9dac87d"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "d49ca75b325a2686b3ab46dbf9f8a76f1cc1c31a780affd51406faac1271518a"
+    },
+    {
+      "path": "package.json",
+      "sha256": "d1027f2465ae1017333f8e557a600c87992b5f45c4e2cf9710d448339095b2cc"
+    },
+    {
+      "path": "scripts/bootstrap.mjs",
+      "sha256": "4bf282ad53ac326332223f7ab20702d3b52b9ea917e58b9d73ce4377fffdabfa"
+    },
+    {
+      "path": "scripts/browser-check.mjs",
+      "sha256": "d5ed64c400b8d5b3a8778edf7c467dfcc144b18484c25e7105be22871c994d7c"
+    },
+    {
+      "path": "scripts/check.mjs",
+      "sha256": "bff01e5fac86902890d2389de250aed128963c7383ff03225493f5ae5e04fdc6"
+    },
+    {
+      "path": "scripts/demo.mjs",
+      "sha256": "4ca2b3fbeb88420de30d6d49263501c1c075f96ab190750cc639c21565f3d676"
+    },
+    {
+      "path": "scripts/local-chain.mjs",
+      "sha256": "8a48c5f8273fc968e5de349ce9000f0577e435361173ede588aee3cd94bb5472"
+    },
+    {
+      "path": "scripts/measure.mjs",
+      "sha256": "8144906ffb837d1fa75a87d4233774ab559a2e21d603f6caf3045c04c6dcc32a"
+    },
+    {
+      "path": "scripts/snapshot.mjs",
+      "sha256": "3d4b8dbe15621c9a365bd7a33899eefed6aecf0d8c0f043e468646d59189a9e5"
+    },
+    {
+      "path": "sdk/index.d.ts",
+      "sha256": "533f805061a2d1da989edfb1b80383fbe5b4135f98d4cc7bc1239c9cd9763d30"
+    },
+    {
+      "path": "sdk/index.js",
+      "sha256": "1a992b17011bc63574bf99dcf801625d7058226e836e479e8111306203629479"
+    },
+    {
+      "path": "sdk/sample.ts",
+      "sha256": "5c5fbec3a1f53ca5fd65131aece5915486592b91566c7501a6590c0e0214bb72"
+    },
+    {
+      "path": "src/EfsLab.sol",
+      "sha256": "81900ae529a1a68396a3e718ad254163ff05381b442381240794d4b341494d83"
+    },
+    {
+      "path": "src/EfsLabBytes.sol",
+      "sha256": "2d30e1a5e1c4c92462ccaf06a039a558a7971c55baba4e97418fe4519e64b8a8"
+    },
+    {
+      "path": "test-sol/EfsLab.t.sol",
+      "sha256": "6b45c584a0ba91734f5887b64c1f1fbc81326e8808ac6b5455a5feafd9618540"
+    },
+    {
+      "path": "test-sol/SolidityConsumer.t.sol",
+      "sha256": "6f681cb6a5cbfc2b4e2389b1947ff3128b6273bb1837ce92ff910a17be6437f7"
+    },
+    {
+      "path": "test/integration.test.mjs",
+      "sha256": "f655f454695dd7793fb08f6f6e02d645f07f82505be5c61e89557c26646570e3"
+    },
+    {
+      "path": "test/sdk-authority.test.mjs",
+      "sha256": "e59e76d0f8661a8ba586c1d7972bd9243b7f82e7aca46cc67641936aecb7c6d6"
+    },
+    {
+      "path": "test/sdk-unit.test.mjs",
+      "sha256": "de03715752c0d8f1da12bcd815232f61eb9e2fd5f3028c5fcee775bf68fb103e"
+    },
+    {
+      "path": "test/server.test.mjs",
+      "sha256": "50cd0d8c79fa03f877aaea6a289b673cee2d478f6ae145db95432b52aaf80285"
+    },
+    {
+      "path": "test/web-model.test.mjs",
+      "sha256": "5063f017651a32f8a2bc415ee3d47ece1315dafec91042768c4f28fa0190cddf"
+    },
+    {
+      "path": "test/web-surface.test.mjs",
+      "sha256": "5ae339d736472798c59ebe310152f0c5897b0c65c4510ccefc2317887445c7c3"
+    },
+    {
+      "path": "web/app.mjs",
+      "sha256": "a3ac55d9be820ec75ed09887e7ea992dc419620bb7b9c8f04745eca7f70479b1"
+    },
+    {
+      "path": "web/bootstrap.mjs",
+      "sha256": "f570ce1abd81756fae1a5d58dc081ea310d717d04125116f37c7ef8870aedb42"
+    },
+    {
+      "path": "web/game-source.mjs",
+      "sha256": "a65c0dcfb1e31030d7d3d2ec14ef052ca51c163c767a2f7f3061fb3215eaaa58"
+    },
+    {
+      "path": "web/index.html",
+      "sha256": "2e84eedc6e0d95f64a6fa1808d0e9b2e5c24c15c2d292ccc2f6b5215caaad439"
+    },
+    {
+      "path": "web/model.mjs",
+      "sha256": "c758975dd0ab79da50dcb6bbc2256a91ce0f132f9b2d7b4e8650b07639fc21a8"
+    },
+    {
+      "path": "web/styles.css",
+      "sha256": "a8e67369be37c153fbea740a5114e2c1cf184c8064bef41d83e17521447bffc2"
+    }
+  ],
+  "artifactFiles": [
+    {
+      "path": "artifacts/arcade-desktop.png",
+      "sha256": "2a4c187b7285508a506e7d6fd4838dd94a909061f774adafe6161f48a1dca2bc"
+    },
+    {
+      "path": "artifacts/browser-results.json",
+      "sha256": "6241514224d092e52ace1fc23eae4508f0b489a7bb76eb7b68e1bfeff6522efc"
+    },
+    {
+      "path": "artifacts/data-desktop.png",
+      "sha256": "56b8e5ed573b0b12fb1c61b6e21d4d826cad53e31df8cd4c55b8d6e97c4e0247"
+    },
+    {
+      "path": "artifacts/files-desktop.png",
+      "sha256": "55766d8c349d3bff0e1166691703a5d8cf256bdf8fab4a264b4a56a0eab059f5"
+    },
+    {
+      "path": "artifacts/files-mobile.png",
+      "sha256": "f0890bf087032a6c5eb8474e9c12d98e1ff7de0b7a8714ef2741570107e61a44"
+    },
+    {
+      "path": "artifacts/measurements.json",
+      "sha256": "913bd2bbd5bfdc590d6c39ab5202eed5d7ac290f8ff1ecd930f17cbd0dabed2f"
+    }
+  ],
+  "sourceTreeSha256": "aeedcde869dda637c0a6a810de545dcd633cf4b3e01a3c5245cab4d4dc8f1368"
+}

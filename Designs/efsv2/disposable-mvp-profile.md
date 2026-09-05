@@ -17,6 +17,13 @@
 > [[2026-09-02-efs2-coherence-and-mvp-readiness-review-errata|coherence review
 > errata]]; the review remains evidence rather than authority.
 
+> **2026-09-04 scope update.** James subsequently authorized disposable local
+> SDK, browser, Files/data and Arcade prototypes before product repositories
+> are created. The [workflow rehearsal](../../Reviews/2026-09-04-mvp-rehearsal/README.md)
+> uses that authority under its own `efs-lab/1` namespace. It does not implement
+> this full profile or turn its passes into C0 conformance. Public deployment,
+> durable data, permanent product release, promotion and freeze remain separate.
+
 ## Problem
 
 The EFS v2 design has enough exact proposal-stage material to run a useful

@@ -1,0 +1,66 @@
+{
+  "profile": "efs-lab/1",
+  "c0Conformance": false,
+  "compiler": "0.8.30+commit.73712a01",
+  "node": "v26.0.0",
+  "evm": "cancun",
+  "optimizerRuns": 200,
+  "viaIR": true,
+  "measurements": [
+    {
+      "operation": "direct create file and retained receipt",
+      "payloadBytes": 0,
+      "gasUsed": "648985"
+    },
+    {
+      "operation": "direct create file and retained receipt",
+      "payloadBytes": 32,
+      "gasUsed": "702878"
+    },
+    {
+      "operation": "direct create file and retained receipt",
+      "payloadBytes": 256,
+      "gasUsed": "1017786"
+    },
+    {
+      "operation": "direct create file and retained receipt",
+      "payloadBytes": 1024,
+      "gasUsed": "2096291"
+    },
+    {
+      "operation": "direct create file and retained receipt",
+      "payloadBytes": 4096,
+      "gasUsed": "6408536"
+    },
+    {
+      "operation": "direct create file and retained receipt",
+      "payloadBytes": 16384,
+      "gasUsed": "23659787"
+    },
+    {
+      "operation": "relayed exact typed u64 record",
+      "payloadBytes": 8,
+      "gasUsed": "626222"
+    },
+    {
+      "operation": "Solidity consumer current file eth_estimateGas",
+      "gasUsed": "45760"
+    },
+    {
+      "operation": "Solidity consumer exact typed u64 eth_estimateGas",
+      "gasUsed": "50828"
+    }
+  ],
+  "runtimeBytes": {
+    "core": 15624,
+    "byteStore": 1658,
+    "consumer": 2604
+  },
+  "deploymentGas": "3860519",
+  "caveats": [
+    "Gas is this synthetic local Cancun lab, not full C0 or a named L2 fee forecast.",
+    "Payload a-bytes include full storage and retained operation history; equal-content deduplication changes costs.",
+    "Consumer estimates include transaction intrinsic cost; these are not just inner STATICCALL gas.",
+    "Small inline payloads only; use full C0 ChunkTree work for large-file design."
+  ]
+}

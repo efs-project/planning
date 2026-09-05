@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>EFS Local Workflow Lab</title>
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    .schema-card{white-space:normal}.typed-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.typed-summary code{color:var(--muted)}.typed-valid,.typed-unknown{border:1px solid #3c5a2b;border-radius:99px;color:#d9ffad;padding:.25rem .5rem}.typed-unknown{border-color:#725b32;color:#ffd996}.field-table{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#101419}.field-table td:first-child{width:30%;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}.field-table td:last-child{word-break:break-word}.schema-card details{margin-top:13px}.schema-card summary{cursor:pointer;color:var(--cyan)}.schema-card pre{white-space:pre-wrap;word-break:break-word;color:#aeb9c6;max-height:310px;overflow:auto}.typed-empty{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <a class="skip" href="#workspace">Skip to workspace</a>
+  <header class="topbar">
+    <a class="brand" href="#files" aria-label="EFS workflow lab home"><span class="mark">E</span><span>EFS <small>workflow lab</small></span></a>
+    <div class="lab-pill"><span aria-hidden="true"></span> LOCAL · SYNTHETIC</div>
+    <div class="basis" id="basis-summary">Connecting to explicit lab configuration…</div>
+  </header>
+  <div class="shell">
+    <nav class="rail" aria-label="Lab areas">
+      <button class="rail-item active" data-tab="files" aria-current="page"><span>▱</span>Files</button>
+      <button class="rail-item" data-tab="data"><span>⌗</span>Data</button>
+      <button class="rail-item" data-tab="arcade"><span>◇</span>Arcade</button>
+    </nav>
+    <aside class="sidebar" aria-label="File tree">
+      <div class="pane-head"><p class="eyebrow">Pinned scope</p><h2>Files</h2></div>
+      <button class="tree-node selected" id="root-node" data-directory="root"><span>⌄</span><b>Lab root</b></button>
+      <div class="tree" id="tree"></div>
+      <div class="side-note"><b>Guest reads</b><br>No wallet, account, indexer, or game execution.</div>
+    </aside>
+    <main id="workspace" tabindex="-1">
+      <section class="view active" data-view="files" aria-labelledby="files-title">
+        <div class="view-head">
+          <div><p class="eyebrow">Exact directory · fixed basis</p><h1 id="files-title">Lab root</h1><p id="pathline">/</p></div>
+          <div class="actions"><button data-action="folder">New folder</button><button class="primary" data-action="file">New text file</button></div>
+        </div>
+        <div class="notice quiet" id="files-notice" role="status">Loading qualified directory evidence…</div>
+        <div class="file-table-wrap">
+          <table class="file-table"><thead><tr><th>Name</th><th>Kind</th><th>Revision</th><th>Evidence</th></tr></thead><tbody id="file-list"></tbody></table>
+        </div>
+        <article class="preview" id="file-preview" hidden>
+          <div class="preview-head"><div><p class="eyebrow">Verified read</p><h2 id="preview-name">File</h2></div><button data-action="revision">Revise text</button></div>
+          <pre id="preview-body"></pre>
+        </article>
+      </section>
+
+      <section class="view" data-view="data" aria-labelledby="data-title">
+        <div class="view-head"><div><p class="eyebrow">General typed-data view</p><h1 id="data-title">Data inspector</h1><p>Presentation never changes identity or qualification.</p></div><button id="refresh-data">Refresh basis</button></div>
+        <div class="notice quiet" id="data-notice" role="status">Select Data to read the typed inventory.</div>
+        <div class="data-grid"><div><h2>Typed records</h2><div class="record-list" id="record-list"></div></div><div><h2>Selected record</h2><div class="schema-card" id="schema-card">No record selected.</div></div></div>
+      </section>
+
+      <section class="view" data-view="arcade" aria-labelledby="arcade-title">
+        <div class="view-head"><div><p class="eyebrow">Explicit execution rehearsal</p><h1 id="arcade-title">Signal Drift</h1><p>An original, tiny lab game. Browse first; verify and launch only on Play.</p></div></div>
+        <div class="game-card">
+          <div class="game-copy"><div class="game-art" aria-hidden="true"><i></i><i></i><i></i><strong>◇</strong></div><div><span class="tag">Original lab content</span><h2>Signal Drift</h2><p>Guide the signal through a field of interference. Arrow keys, WASD, or pointer. No network, wallet, storage, or host bridge.</p><dl><div><dt>Launch policy</dt><dd>Explicit Play</dd></div><div><dt>Sandbox</dt><dd>Scripts only</dd></div><div><dt>Bytes</dt><dd id="game-byte-state">Not requested</dd></div></dl><div class="actions"><button class="primary" id="play-game">Verify &amp; Play</button><button id="stop-game" disabled>Stop</button></div></div></div>
+          <div class="game-stage" id="game-stage" aria-live="polite"><p>Game not running. Browsing has executed no content.</p></div>
+        </div>
+      </section>
+    </main>
+    <aside class="evidence" aria-labelledby="evidence-title">
+      <div class="pane-head"><p class="eyebrow">Inspectable backing</p><h2 id="evidence-title">Evidence</h2></div>
+      <div id="evidence-summary" class="evidence-summary"><p>Select a result to inspect exact evidence.</p></div>
+      <details><summary>Raw export</summary><pre id="raw-evidence">No evidence selected.</pre></details>
+    </aside>
+  </div>
+
+  <dialog id="write-dialog" aria-labelledby="write-title">
+    <form method="dialog" id="write-form"><div class="dialog-head"><div><p class="eyebrow">Deterministic plan first</p><h2 id="write-title">Create</h2></div><button class="icon" id="close-write" type="button" aria-label="Close">×</button></div>
+      <label>Name<input id="write-name" required maxlength="80" autocomplete="off"></label>
+      <label id="content-label">Text content<textarea id="write-content" rows="7" spellcheck="true"></textarea></label>
+      <fieldset><legend>Local approval rehearsal</legend><label><input type="radio" name="mode" value="RELAYED_EOA" checked> Relayed · one message confirmation</label><label><input type="radio" name="mode" value="DIRECT_EOA"> Direct · one transaction confirmation</label><label><input type="radio" name="mode" value="SESSION"> Session · zero routine confirmations after setup</label></fieldset>
+      <div class="plan-box" id="plan-preview">Planning is wallet-free. Review the exact digest before approval.</div>
+      <div class="dialog-actions"><button id="cancel-write" type="button">Cancel</button><button class="primary" id="plan-submit" value="default">Plan &amp; continue</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title"><form method="dialog"><div class="dialog-head"><div><p class="eyebrow">Simulated local wallet</p><h2 id="confirm-title">Approve exact plan?</h2></div></div><p id="confirm-copy"></p><code id="confirm-digest"></code><p class="warning-copy">This is a deliberate lab confirmation, not a browser extension or real account.</p><div class="dialog-actions"><button value="cancel">Reject</button><button class="primary" value="approve">Approve once</button></div></form></dialog>
+  <div class="statusbar"><span id="live-status" role="status" aria-live="polite">Guest mode · 0 wallet calls</span><button id="copy-evidence">Copy evidence</button></div>
+  <script type="importmap">{"imports":{"ethers":"./vendor/ethers.js"}}</script>
+  <script type="module" src="./bootstrap.mjs"></script>
+</body>
+</html>

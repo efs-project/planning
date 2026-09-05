@@ -1,0 +1,56 @@
+{
+  "profile": "efs-lab/1",
+  "c0Conformance": false,
+  "generatedAt": "2026-09-05T00:53:01.555Z",
+  "browser": "148.0.7778.96",
+  "results": [
+    {
+      "name": "guest boot and verified file read use zero wallet/relay/session calls",
+      "status": "PASS"
+    },
+    {
+      "name": "relayed file creation has exactly one simulated message approval",
+      "status": "PASS"
+    },
+    {
+      "name": "direct directory creation has exactly one simulated transaction approval",
+      "status": "PASS"
+    },
+    {
+      "name": "session setup is separate; a second routine revision has zero wallet calls",
+      "status": "PASS"
+    },
+    {
+      "name": "typed Data inspector decodes schema-qualified payloads",
+      "status": "PASS"
+    },
+    {
+      "name": "Arcade browsing is inert; explicit Play verifies bytes and starts an isolated game",
+      "status": "PASS"
+    },
+    {
+      "name": "cold browser reopens the latest verified revision with zero wallet calls",
+      "status": "PASS"
+    },
+    {
+      "name": "mobile viewport keeps file reading usable without horizontal page overflow",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "failedResources": [],
+  "providerCounts": {
+    "rpc:eth_chainId": 71,
+    "rpc:eth_getBlockByNumber": 17,
+    "rpc:eth_getCode": 142,
+    "rpc:eth_call": 417,
+    "rpc:eth_getBlockByHash": 54,
+    "wallet:eth_signTypedData_v4": 2,
+    "relay:eth_sendTransaction": 4,
+    "rpc:eth_getTransactionReceipt": 4,
+    "wallet:eth_sendTransaction": 1,
+    "rpc:eth_getTransactionByHash": 1,
+    "session:eth_signTypedData_v4": 2
+  },
+  "runtimeRequestCount": 732
+}

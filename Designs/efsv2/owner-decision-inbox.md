@@ -2,7 +2,7 @@
 
 **Status:** reference — compact live queue; mechanisms remain evidence-gated
 **Audience:** James first; designers second
-**Last reconciled:** 2026-09-03
+**Last reconciled:** 2026-09-04
 **Inputs:** [[system-constitution]], [[core-architecture-candidate]], [[disposable-mvp-profile]], [[mvp-c0-genesis-manifest]], [[owner-rulings]], [[assumptions-and-requirements]], and the preserved July decision/review corpus in git history
 
 #status/reference #kind/decision #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2
@@ -16,8 +16,10 @@
 > bundled Type/index arm and wallet-prompt target. Those controls are enough to
 > run the experiment and are not permanent answers to V2-E1/E4/E5/F1/F2. Do not
 > ask for the Type/query axis, carrier limit, Principal future, product scope,
-> venue, or freeze merely to execute C0. Web Client/product implementation
-> remains separately held.
+> venue, or freeze merely to execute C0. James's later 2026-09-04 direction
+> additionally authorizes local SDK/browser/Files/data/Arcade prototypes before
+> product repositories exist. That does not authorize public deployment,
+> permanent product release or protocol promotion.
 
 ## Decide after evidence — do not answer yet
 
@@ -72,8 +74,11 @@ model remain this evidence gate.
 
 ### V2-E6 — Web Client and OS vertical slice
 
-After separate implementation authorization, build a clean-browser direct
-guest File Browser against the shared Core/Files/SDK contract. Prove Web/OS
+Local disposable browser implementation is now authorized (2026-09-04).
+The [joined workflow lab](../../Reviews/2026-09-04-mvp-rehearsal/README.md) supplies
+real contract/SDK/browser evidence for a smaller explicit `efs-lab/1` profile,
+not full C0. Next bind the clean-browser direct guest File Browser to the
+actual C0 Core/Files/SDK contract. Prove Web/OS
 Files parity, no-Commons operation, honest `UNKNOWN`, tampered-primary
 rejection, verified fallback, and the bounded write journey selected for that
 product gate. Then decide permanent Web Client/OS packaging. Arcade may remain
@@ -113,6 +118,9 @@ remain later without weakening Core.
 
 MVP-C0 and its later SDK/client acceptance overlays are experiment definitions,
 not release authorization or an implicit answer to this choice.
+The September local workflow rehearsal likewise does not close this gate;
+its [build handoff](../../Reviews/2026-09-04-mvp-rehearsal/build-readiness.md)
+separates immediately executable engineering from permanent release choices.
 
 ## Superseded questions — never revive silently
 

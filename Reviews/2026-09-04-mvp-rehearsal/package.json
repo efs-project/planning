@@ -1,0 +1,17 @@
+{
+  "name": "efs-mvp-workflow-laboratory",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "26.0.0" },
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "test": "node --test test/*.test.mjs",
+    "demo": "node scripts/demo.mjs",
+    "test:browser": "node scripts/browser-check.mjs",
+    "measure": "node scripts/measure.mjs",
+    "typecheck": "tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext sdk/sample.ts"
+  },
+  "dependencies": { "ethers": "6.15.0" },
+  "devDependencies": { "typescript": "5.9.3", "playwright": "1.62.1" }
+}
