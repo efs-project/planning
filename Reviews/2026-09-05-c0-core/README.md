@@ -55,7 +55,7 @@ ambiguity before bootstrap: the C0 account-support overlay must be explicit,
 not a B0 module falsely advertising unimplemented verification paths. They
 also identify the exact capability/group-root/session bytes still to build.
 
-## Current increment
+## Completed body checkpoint
 
 [Application-body validation plan](body-validation-plan.md): a reusable Solidity
 validator and an independent JavaScript reader exercised against actual admitted
@@ -68,12 +68,18 @@ This closes structural body parsing/extraction only. It does not
 claim stateful target validity, Files semantic validity, completed application
 admission, G3 capability activation, or any C0 browser row.
 
-The [next stateful increment](stateful-integration.md) records the state owners,
+## Current stateful increment
+
+The [stateful increment](stateful-integration.md) records the state owners,
 exact dispatch rule and twelve adversarial acceptance cases for application
 admission, Binding and postings. Its [implementation plan](stateful-plan.md)
-now advances pure key/effect helpers, then one atomic stateful kernel and an
-independent state reader. This remains unfinished capability work, not a
-completed C0 acceptance claim.
+has completed the pure key/effect helpers at `e10bc56` plus review fix
+`0c3b9ee`: 39 Solidity and 15 Node regression checks pass, with independent
+task review closed. See the [stateful evidence and retrospective](stateful-verification.md).
+Next is one atomic stateful kernel, then an independent state reader. The
+bounded input/dependency/readback interfaces and SDK transaction-correlation
+requirements are pinned in the plan. This remains unfinished capability work,
+not a completed C0 acceptance claim.
 
 ## Owner followups
 

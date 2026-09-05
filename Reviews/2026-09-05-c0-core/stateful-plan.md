@@ -107,31 +107,31 @@ Scope(kind10). Those are separate state transitions, never decremented as
 occurrence keys. `digest` rejects unknown algorithms or wrong lengths according
 to the existing MC/1 table. Canonical field slices include full prefixes.
 
-- [ ] Write a literal FIRST_BIND test against an explicit failing stub. Use
+- [x] Write a literal FIRST_BIND test against an explicit failing stub. Use
   first predecessor NONE, expected revision 0 and new ordinal 7; require
   `(state=1,revision=1,ordinal=7,targetKind=1,targetA=literal,targetLeaf=0)`.
   Run the focused test and capture the expected assertion/revert failure.
-- [ ] Implement minimal decode/advance; extend RED/GREEN through T1–T6,
+- [x] Implement minimal decode/advance; extend RED/GREEN through T1–T6,
   withdraw-current bound/tombstone, stale predecessor/revision, ordinal and
   revision guards, exclusive target options and target clearing. Load actual
   group-2 caches through the existing real parser and RecordBody for canonical
   effect tests; same-shaped non-kernel Type must return NONE.
   Fresh head-producing ordinals must strictly exceed the previous head's
   producing ordinal, in addition to the physical exhaustion guard.
-- [ ] Add independent literal preimage tests before implementing IndexKeys.
+- [x] Add independent literal preimage tests before implementing IndexKeys.
   Example expected base key is computed directly as
   `keccak256(abi.encode(keccak256("efs2/pk/1"), bytes32(0), uint256(3), uint256(0), recordId))`,
   without using any IndexKeys helper. Test full-width Principal separation,
   scalar prefix/hash framing, full occurrence leaf, all digest rows and errors.
-- [ ] Test repeated equal refs across two roles: one general key, one key for
+- [x] Test repeated equal refs across two roles: one general key, one key for
   each distinct predicate, and no additional REF_BACKLINK key. Test separate
   SCALAR_EQ declarations, equal DIGEST values deduping globally, zero/present
   options, actual sixteen candidate caches, and the 43-key bound. Keep the
   traversal order supplied by `RecordBody` and dense role indexes intact.
-- [ ] Test head pack/unpack with literal expected bit words, zero/first/last
+- [x] Test head pack/unpack with literal expected bit words, zero/first/last
   legal states and bounds. Fuzz lawful heads and same-key CAS transitions;
   success must have exact fields, not only pack/unpack self-agreement.
-- [ ] Run the full new Solidity suite, whitespace checks, self-review and
+- [x] Run the full new Solidity suite, whitespace checks, self-review and
   commit the three owned files. Report literal RED/GREEN evidence and any
   source ambiguity. Root reviews this task before the kernel consumes it.
 
@@ -275,6 +275,19 @@ permanent public selectors or mean malformed bytes. Known false references
 use the source `E_REF_UNSATISFIED` shape. The eventual adapter maps these to
 qualified knowledge/capability outcomes.
 
+**Test-only transaction correlation:** a normal mined transaction receipt does
+not expose `AdmitResult`. After the actual kernel call returns, StatefulHarness
+emits exactly one bounded event `TrustedHostAdmissionResult(bytes32 indexed
+envelopeId,uint64 envelopeOrdinal,uint64 acceptingBatchId,StateKernel.LeafResult[]
+leaves)` from the test host. This is instrumentation, not a final Core event
+or an authenticated receipt. Keep it out of src/. All-ACTIVE still performs no
+storage writes. Task 3 must correlate that transaction's event with exact
+submitted publication, canonical receipt/basis and hydrated state before
+attributing fresh versus reused effects; state after a race alone is insufficient.
+Ordinary Core-state reconstruction must still work without any event/history
+transport. Missing transaction correlation yields UNKNOWN contribution, not
+an invented batch zero or successful fresh admission.
+
 **Plan/replay algorithm:**
 
 ```text
@@ -329,6 +342,9 @@ liveness. Two sibling Withdrawals see the first planned terminal target.
 - [ ] Provide bounded raw state-read accessors in the test host for independent
   enumeration. They are not the final public PageCursor/query ABI and must not
   invent COMPLETE at an unverified basis. Preserve raw history/Scope flags.
+- [ ] Test the bounded test-host result event on fresh, mixed and all-ACTIVE
+  calls, including exact reused/fresh ordinals; it must follow the returned
+  kernel result and cannot replace independently checked storage state.
 - [ ] Run full Solidity regression, normal runtime build-size checks and
   self-review; report the exact exported tuples, managed-host deployment size
   status, RED/GREEN and unresolved source questions before committing.
@@ -357,6 +373,22 @@ state fold or expected-root helper. Its reconstructed result must match every
 enumerated actual row/head/posting and reject missing, duplicated, substituted
 or reordered evidence. Incomplete transport yields basis-qualified UNKNOWN,
 not a valid empty state. Retain originals for audit; no browser state is truth.
+
+Keep transaction contribution separate from state reconstruction. The test-only
+host event may establish `ALL_REUSED | MIXED | ALL_FRESH` only after receipt/log
+source, exact submitted publication, fixed host runtime and canonical block
+basis are checked and all per-leaf original/new receipt rows are independently
+hydrated. A no-log snapshot must still reconstruct Core state; it must leave
+transaction contribution UNKNOWN. Test a racing admission and substituted
+transaction/event evidence. Do not infer fresh contribution from desired
+post-state or expose a zero accepting-batch sentinel as a real batch.
+
+Compose verified Envelope membership and local lifecycle as separate same-pin
+reads. A locally zero Envelope row does not prove portable source absence.
+For RAW_AUDIT history/Scope, require the complete contiguous origin-to-high-water
+word chain at that basis before COMPLETE; count equality or a terminal suffix
+does not prove closure. Preserve withdrawn producers, hydrate their lifecycle,
+and read the current head separately instead of folding only live history.
 
 - [ ] Write literal reader tests before implementation for one Record/first
   Binding, withdrawn old producer, current-source tombstone and duplicate
