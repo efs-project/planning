@@ -130,9 +130,31 @@ contract KernelValuesTest {
             e.kind == 3 && e.targetKind == 2 && e.targetA == targetEnvelope && e.targetLeaf == 42, "withdraw decode"
         );
 
-        RecordBody.CheckedBody memory empty;
-        e = h.decode(ids, keccak256("same-shaped ordinary type"), empty);
-        require(e.kind == 0, "non-kernel remains ordinary");
+        TypeGroupParser.SchemaCache memory ordinary = parseLiteralSchema(
+            6,
+            hex"0001610420000162042000016304200001640e0000070001650e0000080001660e000008",
+            bytes.concat(hex"0003", role(0, 1, 3), role(1, 4, 4), role(2, 4, 5)),
+            hex"0003020002010202"
+        );
+        require(
+            ordinary.typeId != ids.setType && ordinary.typeId != ids.tombstoneType
+                && ordinary.typeId != ids.withdrawalType,
+            "ordinary Type has distinct identity"
+        );
+        RecordBody.CheckedBody memory ordinaryBody = RecordBody.validate(
+            ordinary,
+            bytes.concat(
+                abi.encodePacked(PURPOSE, SUBJECT, FIELD_ROLE),
+                hex"01",
+                abi.encodePacked(TARGET),
+                hex"00",
+                hex"01",
+                abi.encodePacked(predecessorEnvelope, uint16(513))
+            )
+        );
+        require(ordinaryBody.fields.length == 6 && ordinaryBody.references.length == 2, "same BindingSet shape");
+        e = h.decode(ids, ordinary.typeId, ordinaryBody);
+        require(e.kind == 0, "same-shaped non-kernel remains ordinary");
     }
 
     function testBindingSetRequiresExactlyOneTarget() public view {
