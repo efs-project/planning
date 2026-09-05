@@ -50,13 +50,28 @@ the capabilities that genesis must actually prove. Physical linking versus
 inlining is measured once the joined runtime exists; it is not a permanent
 contract-topology decision.
 
+The [Codex integration notes](codex-integration-notes.md) close a source-scope
+ambiguity before bootstrap: the C0 account-support overlay must be explicit,
+not a B0 module falsely advertising unimplemented verification paths. They
+also identify the exact capability/group-root/session bytes still to build.
+
 ## Current increment
 
 [Application-body validation plan](body-validation-plan.md): a reusable Solidity
 validator and an independent JavaScript reader exercised against actual admitted
-Type caches. This closes structural body parsing/extraction only. It does not
+Type caches. Fresh controller checks pass: 21 Solidity tests and 15 Node tests,
+including 39 independently identified valid/malformed body comparisons. See
+[verification and retrospective](verification.md) for review status, component
+resources, repaired design seams and remaining gaps.
+
+This closes structural body parsing/extraction only. It does not
 claim stateful target validity, Files semantic validity, completed application
 admission, G3 capability activation, or any C0 browser row.
+
+The [next stateful increment](stateful-integration.md) records the state owners,
+exact dispatch rule and twelve adversarial acceptance cases for application
+admission, Binding and postings. It is the next build specification, not a
+completed capability.
 
 ## Owner followups
 

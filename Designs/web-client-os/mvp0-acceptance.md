@@ -5,7 +5,7 @@
 **Depends on:** [[../efsv2/disposable-mvp-profile]], [[../efsv2/mvp-c0-genesis-manifest]], [[../sdkv2/mvp-interface]], [[README]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-09-04
+**Last touched:** 2026-09-05
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/read-path #topic/coherence
 
@@ -84,6 +84,42 @@ one message signature for M0-06, exactly one transaction for M0-07, and zero
 wallet calls/prompts for M0-08; no numeric setup or first-use total is asserted
 until the declared fixture's complete log supplies it.
 
+### Semantic File claim before presentation
+
+For every File Browser read below, the noun **File** and its normal open action
+require the shared Files adapter to establish the claim selected by the route:
+its path result, direct-ID result, or exact immutable FileRevision citation.
+A **Current** label additionally
+requires an established current-head claim; an exact-revision result alone
+never supplies it.
+The required selected dependency chain must satisfy the Files profile at the
+cited basis. A verified Record ID, structurally decoded body, existence-only
+reference or matching content digest cannot supply that semantic claim.
+Any name validation required by the selected Files profile is separate from
+Core's well-formed UTF-8 check; stored signed bytes are never silently
+normalized to make that profile pass.
+
+An exact historical revision does not need a later current head or a valid
+current path placement. If its own required Files chain is established, it may
+open explicitly as an exact revision at its basis. Conversely, a semantically
+established File whose content is unavailable remains a File, without a trusted
+preview. Normal preview/download-as-File requires both the requested semantic
+claim and verified eligible content. Unresolved, unsupported, conflicting or
+invalid claims retain **Inspect record** and raw evidence export; they do not
+gain a normal File action, fall through to another candidate, become “not
+found,” or populate a negative cache. The ordinary UI may summarize semantic
+and content state separately; the shared Inspector retains the full axes.
+
+Exercise these cases inside M0-01–M0-05 and M0-09, not as an extra acceptance
+suite: byte-verified, structurally decoded FileRevision body with an unavailable
+or wrong-kind required target; a selected name invalid under that profile
+(including non-NFC when the profile requires NFC); unavailable
+full-profile evidence; unresolved higher-priority head with a valid lower
+candidate; independently valid exact historical revision with current head
+unavailable; and established File with unavailable or tampered content. Assert
+the labels, enabled actions, raw inspection and absence/cache behavior, not
+merely the presence of qualification fields.
+
 ## Nine observable tests
 
 1. **M0-01 — clean guest route.** A fresh browser with no cache, service worker,
@@ -112,10 +148,12 @@ until the declared fixture's complete log supplies it.
 
 5. **M0-05 — tamper rejection and eligible fallback.** Return wrong bytes from
    the first eligible carrier and correct bytes from a second controlled
-   source. The first attempt records available/returned/failed-integrity, only
-   the verified fallback reaches presentation, and FileRevision identity does
-   not change. With the fallback removed, no bytes are rendered and the
-   semantic File still does not become absent.
+   source. The first attempt records available/returned/failed-integrity.
+   Only the verified fallback reaches trusted File preview/download, and only
+   after the semantic claim above is established; FileRevision identity does
+   not change. With the fallback removed, no bytes are rendered; an established
+   semantic File does not become absent, while an unresolved exact Record
+   remains inspectable without being promoted to a File.
 
 6. **M0-06 — relayed EOA small-file effect.** Create the suite's one small file
    through the normal path after the linked setup above. The complete routine
@@ -192,7 +230,7 @@ until the declared fixture's complete log supplies it.
 All nine tests pass in the declared browsers and independent oracle. Any
 missing raw bytes or qualification axis, mixed basis, hidden provider/wallet
 touch, unlabelled fallback, non-atomic planned effect, prompt overrun, false
-absence, tampered presentation, or success before matching read-back fails the
+absence, an unestablished semantic File claim, tampered presentation, or success before matching read-back fails the
 gate. A passing gate supports only the next disposable experiment review.
 
 ## Outside MVP0

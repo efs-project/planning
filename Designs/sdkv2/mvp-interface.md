@@ -6,7 +6,7 @@
 **Consumers:** [[../web-client-os/mvp0-acceptance]], [[../data-explorer/README]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-09-04
+**Last touched:** 2026-09-05
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/client #topic/efsv2 #topic/read-path #topic/coherence
 
@@ -70,6 +70,38 @@ CanonicalReadBack<T>    = prior journey/evidence handles + planned effects + new
 These are semantic families, not adopted TypeScript names or serialized bytes.
 An implementation may use distinct per-Type façades as long as the non-loss
 contract is mechanically tested.
+
+#### Record assessment without an unqualified “valid” flag
+
+Within the existing exact-read/evidence seam, distinguish four checks:
+**identity** (Record ID recomputed from the exact Record domain, TypeSchemaId
+and retained canonical body bytes), **structure**
+(canonical field slices, extracted references and declared structural constraints),
+**targets** (reference checks with their own outcomes, coverage and exact
+basis), and **profile acceptance** (what one named application validator can
+establish). These are separately evidenced checks, not a sixth SDK seam or
+four replacement universal point enums. A later failed or unavailable check
+does not erase earlier evidence; successful parsing does not prove that any
+target exists.
+
+The generic reader exposes raw/decoded evidence, not caller-selected
+`read<T>()` or an unqualified `Valid<T>`. Only an exact generated Type/profile
+adapter may introduce its application-specific `T` in an accepted branch,
+naming the profile, validator and evidence. Unknown Types remain exportable
+with unsupported/not-evaluated acceptance, never absence. Friendly labels
+may say “ID verified,” “structurally decoded,” “references checked at basis …,”
+or “accepted by profile …”; a single green “Valid” cannot stand for all four.
+Cached parser layout is an internal Core/reader concern, not app-facing API.
+
+Consumer falsifier: at one pinned basis, compare a Files-accepted control
+DirectoryEntry with requested-ID/body substitution; a self-consistent Record ID over an invalid
+OPTION flag; a well-formed child reference to the wrong target kind; a
+name such as `a/b` whose reference targets all matched at the pinned basis but
+whose Files profile fails; and an identity-verified, well-formed Record of an
+unfamiliar Type. Retain raw evidence in every case, preserve each independently
+successful earlier check, and produce a Files-specific view only where that Files claim
+is established. Test the boundary through the existing seams rather than
+adding a parallel validation/signing stack.
 
 ### The five seams
 
