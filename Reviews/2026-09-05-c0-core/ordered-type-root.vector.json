@@ -1,0 +1,20 @@
+{
+  "status": "unimplemented-run-local-codec-vector",
+  "fullC0": false,
+  "inputArtifactCommit": "63ef611fdca71755bfcd9348e30dec74c1af29e5",
+  "inputArtifact": "../2026-09-05-mvp-build-start/type-inputs/artifacts.v1.json",
+  "domainLabel": "efs2/mvp-c0/ordered-type-groups/1",
+  "domain": "0x55446fe0f18bcb914b1ffcea6357063094732fdbd16387f0363c11be79c57b3f",
+  "groupByteLengths": [1765, 1022, 2345, 860],
+  "memberCounts": [6, 3, 6, 1],
+  "groupHashes": [
+    "0x1fb957291908997d47bbec6ca940acd85ee122be34e9f105e5a0af411f45321c",
+    "0x2c6ce5633a9d6ffab87f4ad6153ea42db7efa431c80abfdb64d7903306515341",
+    "0xca4c6d90b4284749bd3333705ef44faa12e4de15c8e689f015eb1acb8da4b78a",
+    "0x86d6d121e879c57bbbf1f125b0172f1d6fb97470213007d10f0040ad28d03e67"
+  ],
+  "manifestByteLength": 160,
+  "manifestHex": "0x55446fe0f18bcb914b1ffcea6357063094732fdbd16387f0363c11be79c57b3f1fb957291908997d47bbec6ca940acd85ee122be34e9f105e5a0af411f45321c2c6ce5633a9d6ffab87f4ad6153ea42db7efa431c80abfdb64d7903306515341ca4c6d90b4284749bd3333705ef44faa12e4de15c8e689f015eb1acb8da4b78a86d6d121e879c57bbbf1f125b0172f1d6fb97470213007d10f0040ad28d03e67",
+  "orderedTypeGroupRoot": "0xd554b170314582bc23fb91167efacda04f28e84472ae90905a6704393a1549c7",
+  "swappedGroupsOneAndThreeRoot": "0x7b9f59ece8fcd2f8f94d728bf5bdaa347f056d2f57f4257d83df8737192aa37b"
+}

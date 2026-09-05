@@ -140,8 +140,27 @@ to the existing MC/1 table. Canonical field slices include full prefixes.
 **Files:** create `src/StateStore.sol`, `src/StateKernel.sol`,
 `test/StatefulHarness.sol` and `test/StateKernel.t.sol`; minimally extend
 `../2026-09-05-c0-admission/src/TypeGroupParser.sol` for bounded dependencies.
+Integration amendment: the joined via-IR build also permits only the two
+memory-safe assembly annotations in `BindingFold.sol`/`IndexKeys.sol`, with
+an explicit offset/remaining-length guard before BindingFold's word load
+(`RecordBody.InvalidBody(2)` on truncation). Add a malformed checked-body
+regression and preserve all valid helper semantics. Array shrink annotations
+require count not to exceed the already allocated array. No helper redesign.
 Any necessary small
 shared data structs live with their owning library, not a generic catch-all.
+
+**Physical-size checkpoint:** the first joined draft is 41,470 runtime bytes
+and 50,823 creation bytes, so Task 2 is not accepted or normally deployable.
+Parser/body-only helper variants also exceed the runtime cap. Before further
+acceptance expansion, perform one isolated opaque-cache/pure-preparation helper
+measurement with every required raw getter and the unchanged state journal.
+Include immutable helper address/codehash, bounded gas and bounded returndata
+before decoding in the measured code. Keep flattened references/keys/effect
+preparation pure; dependency/target/authority/CAS/lifecycle/replay stay in Core.
+Rerun the initial joined regressions and preparation equivalence. Report both
+runtimes, initcode, margins and any unmeasured bounds before selecting a layout.
+The current draft remains recoverable; no physical topology, final bound or
+complete C0 deployment is implied by this experiment.
 
 **Input boundary:** implement the following internal interface in StateKernel.
 The real authority layer will be its only product caller; the named test host
@@ -382,6 +401,20 @@ hydrated. A no-log snapshot must still reconstruct Core state; it must leave
 transaction contribution UNKNOWN. Test a racing admission and substituted
 transaction/event evidence. Do not infer fresh contribution from desired
 post-state or expose a zero accepting-batch sentinel as a real batch.
+
+Use a concrete stale-preparation race: a preview sees all-fresh, a competing
+transaction admits the exact publication, and the prepared transaction then
+executes all-reused. Include two ordered transactions in one managed block so
+the batch's block number alone cannot establish causality. Verify both real
+receipt/event results and the single actual state transition. Manual mining,
+if used, is restored in cleanup; this remains synthetic local execution.
+
+The snapshot basis binds chain, host address, block number/hash, observed host
+runtime and explicit local RPC source. Independent recomputation of this
+controlled node's returned state is not an Ethereum consensus/state proof.
+Preserve that provenance instead of upgrading source observation to a
+cryptographic proof. Missing or mixed-basis transport cannot yield a verified
+state reconstruction or COMPLETE audit result.
 
 Compose verified Envelope membership and local lifecycle as separate same-pin
 reads. A locally zero Envelope row does not prove portable source absence.

@@ -1,8 +1,9 @@
 # Stateful integration evidence and retrospective
 
-**Status:** in progress. Pure Binding/index helpers are implemented and their
-independent task review is closed after one focused test correction. The stateful kernel,
-independent state reader and full C0 journeys are not complete.
+**Status:** in progress. Pure Binding/index helpers are reviewed. The first
+joined stateful draft compiles but exceeds normal deployment limits; bounded
+size diagnosis is the immediate next gate. The stateful kernel, independent
+state reader and full C0 journeys are not complete.
 
 ## Evidence so far
 
@@ -32,6 +33,53 @@ That explicit identity-versus-shape falsifier now uses a real parsed non-kernel
 descriptor and valid body. The scoped re-review approved the correction with
 no new breakage and no remaining findings. Helpers are ready for Task 2 to
 consume; this is not stateful admission or whole-branch review completion.
+
+## First joined physical measurement
+
+The actual compiled `StatefulHarness` artifact is **41,470 bytes of runtime**
+against the normal 24,576-byte limit, and **50,823 bytes of creation bytecode**
+before constructor arguments against the 49,152-byte initcode limit. The
+normal `forge build --sizes` gate fails. Root independently read those byte
+lengths from the compiled artifact and reran that normal size command: exit 1,
+with the same runtime/initcode sizes. Forge's ability to execute this test host
+does not establish normal Anvil/EVM deployment.
+
+Root also reran the current Core Solidity suite: 44 passed, zero failed or
+skipped (21 body, 18 helper and five initial state/dependency/memory-guard
+tests; four fuzz properties at 128 runs). This remains an oversized Forge
+test host, not normal deployment or a complete twelve-case acceptance pass.
+The independent reader is unfinished. The implementer's three isolated
+compiler-input measurements are:
+
+| Diagnostic layout | Host runtime / creation bytes | Helper runtime / creation bytes |
+|---|---:|---:|
+| Inline, publish-only host (required getters removed for diagnosis) | 39,048 / 48,401 | none |
+| Parser/body STATICCALL helper, required getters retained | 29,901 / 33,970 | 15,110 / 15,136 |
+| Parser/body helper, publish-only host | 27,329 / 31,398 | 15,110 / 15,136 |
+
+These are implementer-reported measurements of actual typed ABI calls, not
+subtraction of isolated component sizes. All three still exceed the normal
+runtime cap. They also omit helper codehash, gas and predecode returndata
+bounds, so they are optimistic, not accepted deployment layouts. Removing
+required readback does not solve the size problem and is not a scope change.
+
+The next bounded experiment keeps every raw getter and the same touched-row
+journal. It moves all pure preparation behind a shallow helper ABI: opaque
+compiled caches, flat references, distinct posting keys and a decoded effect.
+Core still owns target/dependency checks, authority, CAS, lifecycle and replay.
+The measurement must include immutable helper identity and bounded STATICCALL
+handling before dynamic decode. Comparing this one boundary first avoids
+simultaneously rewriting the sensitive state journal. It remains unselected;
+normal deployment, measured worst cases and the deployment commitment would
+still need validation even if both runtimes fit.
+
+No unlimited-size setting, external mutable registry or silent helper was
+added to the current draft. The experimental compiler profile remains native
+Solidity 0.8.30, Cancun, optimizer 200 and via IR.
+
+This is useful falsification of the inlined physical layout, not evidence
+against the data semantics and not a reason to hide the deployment gate.
+Follow the [physical-fit qualifications](codex-integration-notes.md#physical-fit-gate).
 
 ## What the design pass changed
 
@@ -63,7 +111,7 @@ consume; this is not stateful admission or whole-branch review completion.
   counts. These shapes may inform disposable adapters, not public ABI freeze.
 - **Physical size:** a source module is not a separate deployed runtime.
   Combined code size and costs must be measured. The unselected immutable
-  STATICCALL validation-helper fallback would require its own codehash and
+  STATICCALL preparation-helper candidate would require its own codehash and
   deployment commitment, not just a passing Core codehash.
 
 ## What could have gone better
@@ -79,6 +127,12 @@ implementation or SDK wrappers; do not respond by adding duplicate state.
 An adversarial test needs the actual hostile shape, not only a suggestive
 label. The helper review's lookalike correction is the specific improvement
 from this checkpoint. Extra test counts would not replace that falsifier.
+
+Physical fit should have been measured with the earliest joined skeleton,
+before expanding its behavior matrix. Passing component sizes concealed the
+cost of nested ABI transport and state-journal machinery when combined.
+The correction is an explicit normal-size gate and one attributable layout
+experiment at a time, not larger artificial limits or deleted obligations.
 
 ## Next work and owner followups
 

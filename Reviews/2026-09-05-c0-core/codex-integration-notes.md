@@ -82,13 +82,17 @@ commitment substitutes for the table bytes.
 
 Measure the combined runtime under the ordinary 24,576-byte deployment limit;
 internal library files still inline into that runtime. Keep one Core storage
-owner and do not hide an oversized host with an unlimited-size setting. First
-separate essential raw state getters from offchain snapshot/hydration work.
-If validation code still prevents fit, the preferred **unselected fallback**
-is an immutable, stateless parser/body helper called by STATICCALL during
-preflight, not an external mutable registry or delegatecall facet system.
+owner and do not hide an oversized host with an unlimited-size setting.
+The [joined measurements](stateful-verification.md#first-joined-physical-measurement)
+show the inline host does not fit, and a parser/body-only helper does not fit
+even when required getters are removed for diagnosis. Keep those getters.
+The next **unselected candidate** is an immutable, stateless pure-preparation
+helper called by STATICCALL during preflight: opaque compiled cache bytes,
+flat references, posting keys and decoded effects, without deep schema/body
+ABI decoding in Core. It is not an external mutable registry or delegatecall
+facet system. Leave the existing state journal unchanged for that measurement.
 Core would retain all dependency/reference/authority checks and state choices.
-This fallback requires an explicit run-local physical-layout amendment,
+This candidate requires an explicit run-local physical-layout amendment,
 bounded calls/returndata, retained address and runtime codehash, independent
 dependency verification and new aggregate measurements. It is not the unchanged
 B0 one-physical-Core layout.
@@ -110,7 +114,7 @@ baseline being compared.
 | Encoding tables | Ordered domain, bounds, algorithm, field/selector/error/constraint grammars | Materialize exact C0 tables and declare every overlay difference once. Keep index-owned limits/codes out of duplicate encoding rows. |
 | Authority module | B0 byte grammar and explicit C0 authorization obligations | Encode the C0 support table, exact verifier/basis rules, session-grant fields/ID/approval/metering and retained evidence. No unsupported path may appear ACTIVE. |
 | Index module/capabilities | B0 index tables/cursor rules; C0 scope override; G3 family list | Implement every G3 family, exact capability entry ordering/root codec and declaration mapping. A documentary list is not an active capability. |
-| Type-group root | Sixteen exact candidate blobs and per-group/member identities | Specify and independently encode the aggregate ordered group-root preimage. Preserve the 6/3/6/1 inventory and its source order. |
+| Type-group root | Sixteen exact candidate blobs; [160-byte run-local root grammar and literal vector](bootstrap-inputs.md) | Implement independent codecs and enforce the seed's expected inventory during G4, then reconstruct from retained state. Preserve the 6/3/6/1 inventory/order; one-off vector agreement is not bootstrap completion. |
 | Run bounds | Component-only carrier/schema measurements | Measure complete Core+carrier operations and the required read/proof/client costs before selecting valid immutable run bounds. |
 
 ## Source anchors

@@ -75,11 +75,20 @@ exact dispatch rule and twelve adversarial acceptance cases for application
 admission, Binding and postings. Its [implementation plan](stateful-plan.md)
 has completed the pure key/effect helpers at `e10bc56` plus review fix
 `0c3b9ee`: 39 Solidity and 15 Node regression checks pass, with independent
-task review closed. See the [stateful evidence and retrospective](stateful-verification.md).
-Next is one atomic stateful kernel, then an independent state reader. The
+task review closed. The first stateful draft passes its initial tests but is
+too large for normal deployment. A parser/body-only helper is also too large;
+the immediate next step is a measured, bounded pure-preparation boundary that
+keeps one atomic store and all required readback. See the
+[stateful evidence and retrospective](stateful-verification.md) for exact
+sizes, qualifications and the unselected next experiment. Then finish the
+stateful acceptance cases and independent state reader. The
 bounded input/dependency/readback interfaces and SDK transaction-correlation
 requirements are pinned in the plan. This remains unfinished capability work,
 not a completed C0 acceptance claim.
+
+[Bootstrap input refinements](bootstrap-inputs.md) specify the four-group
+commitment and clarify the existing digest point/backlink path without changing
+candidate Type bytes. The literal root vector is not an implemented bootstrap.
 
 ## Owner followups
 

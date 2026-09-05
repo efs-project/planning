@@ -5,7 +5,7 @@
 **Depends on:** [[disposable-mvp-profile]], [[core-architecture-candidate]], [[hierarchical-files-and-folders]], and the [Stage A SR-17 control](../../Reviews/2026-08-13-efs2-stage-a-corpus/chapters/b0-overview.md)
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-09-04
+**Last touched:** 2026-09-05
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #topic/efsv2 #topic/content #topic/coherence
 
@@ -217,7 +217,9 @@ application write, require it to contain exactly the C0 bundle:
 5. declared scalar equality, typed references, and typed backlinks needed by
    the admitted Types;
 6. current Binding point reads and history;
-7. digest lookup used by the C0 byte/Files Types; and
+7. digest lookup used by the C0 byte/Files Types: deterministic ByteDigest
+   RecordId → exact point read → declared backlinks, without inventing a
+   DIGEST_EQ declaration in the fixed Type blobs; and
 8. `KIND_BINDING_SCOPE`, with its C0 value-key domain and complete genesis
    coverage.
 
@@ -226,6 +228,12 @@ it with `ExperimentSeedInputsV1` and the Core/Codex commitment. Any missing,
 additional, mutable, or post-genesis capability aborts. In particular,
 `BindingScope` cannot be enabled after the first Binding while retaining a
 complete-listing claim.
+
+General `KIND_DIGEST` support is a separate capability from populated
+DIGEST_EQ postings. The fixed sixteen candidate Types declare no DIGEST_EQ;
+an empty kind-9 page cannot stand in for the required ByteDigest read path or
+prove bytes unavailable. See the [run-local bootstrap input refinements](../../Reviews/2026-09-05-c0-core/bootstrap-inputs.md)
+for the source-backed mapping and still-unimplemented capability codec.
 
 ### G4 — Admit Types through SR-17
 
