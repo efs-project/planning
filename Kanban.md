@@ -50,12 +50,11 @@ kanban-plugin: board
 
 - [ ] **ArDrive product teardown → EFS File Browser feature requirements** (@ardrive-teardown) — all three deliverables landed 2026-07-29: teardown record [[2026-07-29-ardrive-product-teardown]] + 14-file corpus in `Reviews/`, [[file-browser-requirements]] draft in `Designs/clientv2/` (must-match / do-differently / can-skip + lenses-in-a-file-UI + mount constraints + 19 acceptance tests), positioning line included in both. Adversarially verified (7-reviewer pass: fact-check, rulings-consistency, conventions, 4 personas) and revised before landing. Awaiting review of the `#status/draft` requirements doc. #repo/planning #repo/client #kind/task
   — @ardrive-teardown (claude-fable-5) → awaiting review, no expiry
-- [ ] **PM SOUL [[Agents/pm]]** drafted, at #status/review — awaiting @james promote (low priority). #repo/planning #kind/design
-  — @pm → awaiting @james, no expiry
 
 
 ## Done
 
+- [x] **Superseded the PM SOUL numbering/promotion question** — [[Agents/pm]] remains a name-stable living operating brief under the owner-approved portable-role process (2026-09-03, [[Decisions]]). This closes the obsolete operating-document question, not a human design promotion, protocol freeze, or claim that rollout verification is complete. #repo/planning #kind/ops
 - [x] **Folded the stale Ring-3 OS SDK and legacy Client Skeleton cards into the active [[Designs/web-client-os/README|Web Client/OS spine]]** — surviving capability, modular UI, caching and media needs remain; fixed rings, the old `client/` placement and the contracts explorer as successor architecture do not. This is routing cleanup, not implementation authorization. #repo/planning #repo/client #repo/sdk #kind/design
 - [x] **Recovered, corrected, and routed the 2026-08-13 Claude evidence round** — preserved all 30 distinct completed reports with provenance under [[Reviews/2026-08-13-claude-evidence-round/README]], added a correction register, repaired the accidental research-as-decision framing, and routed venue/L1, runner, and Arcade evidence without choosing a venue, policy, publication, or product disposition. The seven analyst prompts remain inside their held owning gates; **Ask now stays 0**. #repo/planning #repo/contracts #repo/client #kind/task
 - [x] **Retired the v1-only `EFSUploadGateway` wrapper task** — its one-popup, atomic batching, AA, and gas requirements survive in the greenfield successor ledger; the proposed wrapper does not. #repo/contracts #repo/planning #kind/design

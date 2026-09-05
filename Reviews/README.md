@@ -4,6 +4,10 @@ Analysis, critique, and build-record artifacts produced by review/architecture a
 
 ## Contents
 
+### AGNTCY and shared public agent data (2026-09-03)
+
+- [`2026-09-03-agntcy-deep-dive/`](./2026-09-03-agntcy-deep-dive/README.md) — released Directory/OASF storage, discovery and exact skill-bundle audit; Identity, SLIM, SHADI, LF governance and adoption; overlap with EFS profiles/SOUL/shared knowledge; source-pinned fidelity/current-state caveats; and one disposable conventional-baseline-versus-EFS comparison. Records interoperability opportunities without adopting an agent-specific Core primitive, runtime, public registry or new deadline.
+
 ### Schema-freeze build record (2026-06-02) — the contracts schema-freeze design arc
 These four are one cohesive set (plan → critique → synthesis → blueprint) behind the Sepolia schema freeze. Canonical decisions landed as `contracts/docs/adr/` ADR-0048–0055 + the `schema-freeze` branch freeze table.
 - [`2026-06-02-schema-freeze-build-plan.md`](./2026-06-02-schema-freeze-build-plan.md) — implementation plan (r2)
@@ -118,3 +122,7 @@ These four are one cohesive set (plan → critique → synthesis → blueprint) 
 - [`2026-09-02-efs2-coherence-and-mvp-readiness-review.md`](./2026-09-02-efs2-coherence-and-mvp-readiness-review.md) — commissioned whole-surface read of every EFS 2.0 design set, the Stage A and evidence corpora, the ruling ledgers, the sibling code repositories, and the four unmerged planning branches. Verdict: the concept algebra is coherent and the direction is mostly right but over-scoped; the structural fault is that owner authority and the project's most advanced work are recorded where the vault's own process cannot see them. Separates WRONG / UNDECIDED / DRIFT / MISSING / DIRECTION / DEFECT / CUT / UNVERIFIABLE, routes every finding to an owning set, names ten distinct blockers under the write-capable File Browser MVP, and proposes a cut list and a smallest slice. Adopts nothing; no freeze, repository, venue, or implementation is authorized.
 - [`2026-09-02-efs2-coherence-review-corpus/`](./2026-09-02-efs2-coherence-review-corpus/README.md) — 26 reader-lane maps, 12 seam reports, 3 direction judgements, and the [findings ledger](./2026-09-02-efs2-coherence-review-corpus/findings-ledger.md), which carries every clustered finding with its repair class, owning set and source lanes, the adversarial-verification verdicts on the blocking rows, and the findings that were refuted or found already dispositioned.
 - [`2026-09-02-efs2-coherence-and-mvp-readiness-review-errata.md`](./2026-09-02-efs2-coherence-and-mvp-readiness-review-errata.md) — controlling correction record for the review's over-broad Core-authorization, genesis/admission, complete-listing, two-signature, placeholder-constant, branch-count, and verification readings. It preserves the review and corpus as evidence and adopts no architecture, experiment, repository, deployment, or protocol decision.
+
+### Portable EFS agent roles (2026-09-03)
+
+- [`2026-09-03-agent-role-system/`](./2026-09-03-agent-role-system/) — owner-approved operating briefs, cross-harness instruction research, bounded implementation and fresh-context review evidence. Stable roles and explicit task handoffs do not grant authority or launch workers; native-harness tests are distinguished from document and helper validation. Start with the live [role roster](../Agents/README.md).
