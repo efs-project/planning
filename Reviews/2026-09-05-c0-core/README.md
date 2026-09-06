@@ -151,6 +151,9 @@ The [read overlay](read-overlay.md) fixes the shared read surface and SDK
 evidence/budget contract; the [Codex materialization selection](codex-materialization.md)
 uses one compiled exact artifact instead of a general onchain interpreter.
 Their implementations and full capability/authority coverage remain next work.
+The [next point-read plan](point-reads-plan.md) implements the shared original
+Type/Record/Envelope projections and bounded storage-byte access first; it
+preserves the separate trusted host and later query/authority/initializer work.
 
 ## Owner followups
 
