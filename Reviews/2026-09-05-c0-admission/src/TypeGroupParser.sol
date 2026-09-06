@@ -60,7 +60,9 @@ library TypeGroupParser {
         uint256 own;
         uint256 count;
         bytes32[] admitted;
+        Dependencies dependencies;
     }
+    struct Dependencies { bool deferExternal; uint256 count; bytes32[] ids; }
     bytes32 constant DOM_GROUP = keccak256("efs2/typeschema-group/1");
     bytes32 constant DOM_TYPE = keccak256("efs2/typeschema/1");
 
@@ -69,6 +71,9 @@ library TypeGroupParser {
         pure
         returns (bytes32 groupHash, SchemaCache[] memory schemas)
     {
+        return parseGroup(groupBytes,admittedTypes,Dependencies(false,0,new bytes32[](0)));
+    }
+    function parseGroup(bytes memory groupBytes,bytes32[] memory admittedTypes,Dependencies memory dependencies) private pure returns(bytes32 groupHash,SchemaCache[] memory schemas) {
         if (groupBytes.length > 8190) revert InvalidSchema();
         Cursor memory c = Cursor(groupBytes, 0);
         uint256 n = number(c, 2);
@@ -77,9 +82,17 @@ library TypeGroupParser {
         schemas = new SchemaCache[](n);
         for (uint256 i; i < n; ++i) {
             bytes memory b = take(c, number(c, 2));
-            schemas[i] = blob(b, Context(groupHash, i, n, admittedTypes));
+            schemas[i] = blob(b, Context(groupHash, i, n, admittedTypes, dependencies));
         }
         end(c);
+    }
+
+    function parseWithDependencies(bytes memory groupBytes) internal pure returns(bytes32 groupHash, SchemaCache[] memory schemas,bytes32[] memory externalTypeIds) {
+        Dependencies memory d=Dependencies(true,0,new bytes32[](256));
+        (groupHash,schemas)=parseGroup(groupBytes,new bytes32[](0),d);
+        externalTypeIds=d.ids;
+        uint256 n=d.count;
+        assembly ("memory-safe") { mstore(externalTypeIds,n) }
     }
 
     function blob(bytes memory b, Context memory ctx) private pure returns (SchemaCache memory s) {
@@ -247,6 +260,13 @@ library TypeGroupParser {
             return typeId(ctx.groupHash, k);
         }
         if (e < 65536) revert InvalidSchema();
+        if(ctx.dependencies.deferExternal) {
+            Dependencies memory d=ctx.dependencies;
+            for(uint256 i;i<d.count;++i) if(d.ids[i]==expected) return expected;
+            if(d.count==256) revert InvalidSchema();
+            d.ids[d.count++]=expected;
+            return expected;
+        }
         for (uint256 i; i < ctx.admitted.length; ++i) {
             if (ctx.admitted[i] == expected) return expected;
         }

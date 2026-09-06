@@ -219,7 +219,8 @@ library BindingFold {
     }
 
     function word(bytes memory value, uint256 offset) private pure returns (bytes32 out) {
-        assembly { out := mload(add(add(value, 32), offset)) }
+        if (offset > value.length || value.length - offset < 32) revert RecordBody.InvalidBody(2);
+        assembly ("memory-safe") { out := mload(add(add(value, 32), offset)) }
     }
 
     function short(bytes memory value, uint256 offset) private pure returns (uint16) {

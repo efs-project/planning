@@ -81,7 +81,7 @@ library IndexKeys {
                 revert InvalidIndex(index.kind, index.target);
             }
         }
-        assembly { mstore(keys, count) }
+        assembly ("memory-safe") { mstore(keys, count) }
     }
 
     function add(bytes32[] memory keys, uint256 count, bytes32 key) private pure returns (uint256) {
