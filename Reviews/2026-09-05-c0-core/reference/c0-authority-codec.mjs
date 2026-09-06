@@ -85,13 +85,17 @@ function headerValues(header) {
 function revisionValues(rows) {
   if (!Array.isArray(rows) || rows.length > 64) failValue();
   let previous = -1;
-  return rows.map(row => {
+  const values = [];
+  for (let i = 0; i < rows.length; i++) {
+    if (!Object.hasOwn(rows, i)) failValue();
+    const row = rows[i];
     const leafIndex = discriminator(field(row, 'leafIndex'), 63);
     const revision = unsigned(field(row, 'revision'), 32);
     if (leafIndex <= previous) failValue();
     previous = leafIndex;
-    return [leafIndex, revision];
-  });
+    values.push([leafIndex, revision]);
+  }
+  return values;
 }
 
 function effectsValues(effects) {
@@ -127,7 +131,11 @@ export function publicationDigest(header, recordIds) {
   return checked(() => {
     const values = headerValues(header);
     if (!Array.isArray(recordIds) || recordIds.length < 1 || recordIds.length > 64) failValue();
-    const ids = recordIds.map(value => fixedHex(value, 32));
+    const ids = [];
+    for (let i = 0; i < recordIds.length; i++) {
+      if (!Object.hasOwn(recordIds, i)) failValue();
+      ids.push(fixedHex(recordIds[i], 32));
+    }
     const recordIdsHash = keccak256(concat(ids));
     const structHash = keccak256(abi.encode(
       ['bytes32', 'uint16', 'bytes32', 'bytes32', 'uint64', 'bytes32', 'uint64', 'bytes32'],

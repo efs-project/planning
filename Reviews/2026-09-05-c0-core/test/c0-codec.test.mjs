@@ -209,6 +209,34 @@ test('hash inputs reject wrong counts, order, widths and numeric representations
   invalidValue(() => effectsHash(mutate(effects, 'realmId', undefined)));
 });
 
+test('hash inputs reject fully and partially sparse Record and CAS vectors', () => {
+  const sparseRecords = [
+    Array(1),
+    Object.assign(Array(2), { 1: W[13] }),
+    Object.assign(Array(3), { 0: W[13], 2: W[14] }),
+    Object.assign(Array(2), { 0: W[13] }),
+  ];
+  const sparseRows = [
+    Array(1),
+    Object.assign(Array(2), { 1: rows[0] }),
+    Object.assign(Array(3), { 0: rows[0], 2: rows[1] }),
+    Object.assign(Array(2), { 0: rows[0] }),
+  ];
+  const inheritedRecord = Array(1);
+  const recordPrototype = Object.create(Array.prototype);
+  recordPrototype[0] = W[13];
+  Object.setPrototypeOf(inheritedRecord, recordPrototype);
+  const inheritedRow = Array(1);
+  const rowPrototype = Object.create(Array.prototype);
+  rowPrototype[0] = rows[0];
+  Object.setPrototypeOf(inheritedRow, rowPrototype);
+  for (const values of [...sparseRecords, inheritedRecord]) invalidValue(() => publicationDigest(header, values));
+  for (const values of [...sparseRows, inheritedRow]) invalidValue(() => expectedRevisionsHash(values));
+  assert.equal(publicationDigest(header, recordIds), PUBLICATION_DIGEST, 'dense Records unchanged');
+  assert.equal(expectedRevisionsHash(rows), CAS_HASH, 'dense CAS unchanged');
+  assert.equal(expectedRevisionsHash([]), '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470', 'empty CAS remains legal');
+});
+
 test('all truncations and trailing bytes are malformed known framing', () => {
   const raw = frame();
   for (let bytes = 0; bytes < (raw.length - 2) / 2; bytes++) invalidFraming(raw.slice(0, 2 + bytes * 2));
@@ -268,8 +296,10 @@ test('64-CAS direct and composite maxima retain unsigned full-width values', () 
     assert.deepEqual(decoded.expectedRevisions.at(-1), { leafIndex: 63, revision: 4294967295n });
     assert.equal(decoded.plan.nonceKey, 2n ** 192n - 1n);
     assert.equal(decoded.plan.nonceSeq, 2n ** 64n - 1n);
+    assert.equal(decoded.plan.notAfter, 2n ** 64n - 1n);
     assert.equal(decoded.effects.leafMask, 2n ** 64n - 1n);
     assert.equal(decoded.admittedAtTimestamp, 2n ** 64n - 1n);
+    assert.equal(decoded.previousSequence, 2n ** 64n - 1n);
   }
 });
 
