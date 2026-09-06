@@ -152,6 +152,11 @@ operation. Do not silently mix them with a historical-H page.
 
 ## Capability-to-engine mapping
 
+The next [occurrence/receipt component](occurrence-receipt-design.md) specifies
+the exact current-state joins and bounded accepting-batch search for rows4–5.
+Its [implementation plan](occurrence-receipt-plan.md) does not include pages,
+Principal authority evidence, or full Core initialization.
+
 The [101-byte manifest](bootstrap-inputs.md#closed-capability-manifest-for-the-next-serializer)
 still has exactly eighteen rows. The additional origin/intrinsic helpers
 complete row 1, not a nineteenth support bit.

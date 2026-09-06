@@ -161,6 +161,10 @@ after missing negative tests, duplicated frame validation and returned-Envelope
 evidence assertions were repaired. The
 [verification checkpoint](point-reads-verification.md) preserves the separate
 trusted host and later occurrence/query/authority/initializer work.
+The next [occurrence/receipt design](occurrence-receipt-design.md) and
+[bounded implementation plan](occurrence-receipt-plan.md) add current-state
+admission/lifecycle and original accepting-batch projections, without another
+store or write path. They are not yet implementation evidence.
 
 ## Owner followups
 

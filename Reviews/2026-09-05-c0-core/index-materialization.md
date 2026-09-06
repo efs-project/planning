@@ -112,7 +112,8 @@ PostingsMode/1:
 IndexErrorSignature/2:
   1 ErrPageCursor(uint256);
   4 ErrIndexQueryUnsupported(bytes32,uint8,uint8,bytes32);
-  5 ErrPageBasis(uint64,uint64); 6 ErrReadState(bytes32)
+  5 ErrPageBasis(uint64,uint64); 6 ErrReadState(bytes32);
+  7 ErrReadOrdinal(uint64)
 CursorFieldConstraint/1:
   0 ANY; 1 EQ
 ContextToken/2:
@@ -133,12 +134,16 @@ EndpointModePolicy/1:
 
 Retained PRE_WITHDRAWN vocabulary does not enable C0 pre-withdrawal mutation.
 Omit LocatorScoreMode and selector-only errors2/3, ContextToken10–14,
-family/end/position4. Do not recycle those codes. New signature row codes4–6
+family/end/position4. Do not recycle those codes. New signature row codes4–7
 are local registry identifiers, **not** Solidity selectors or MC/1 structural
 error codes. Their strings must agree with the separate frozen ABI_RESULT
 registry, which owns actual ABI decoding. `ErrReadState` is shared across
 point/query projections. Unknown/provider-supplied reverts are not automatically
 verified Core errors; the read overlay's runtime/profile/source checks apply.
+`ErrReadOrdinal` names invalid caller ordinals for the selected
+[occurrence/receipt reads](occurrence-receipt-design.md); corrupt retained
+state remains `ErrReadState`. This row selection precedes implementation and
+does not claim that capability rows4–5 are already enabled.
 
 ## Cursors and continuation
 
