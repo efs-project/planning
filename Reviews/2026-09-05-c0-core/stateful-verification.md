@@ -63,15 +63,35 @@ runtime cap. They also omit helper codehash, gas and predecode returndata
 bounds, so they are optimistic, not accepted deployment layouts. Removing
 required readback does not solve the size problem and is not a scope change.
 
-The next bounded experiment keeps every raw getter and the same touched-row
-journal. It moves all pure preparation behind a shallow helper ABI: opaque
+The subsequent bounded experiment kept every raw getter and the same touched-row
+journal. It moved all pure preparation behind a shallow helper ABI: opaque
 compiled caches, flat references, distinct posting keys and a decoded effect.
 Core still owns target/dependency checks, authority, CAS, lifecycle and replay.
-The measurement must include immutable helper identity and bounded STATICCALL
-handling before dynamic decode. Comparing this one boundary first avoids
-simultaneously rewriting the sensitive state journal. It remains unselected;
-normal deployment, measured worst cases and the deployment commitment would
-still need validation even if both runtimes fit.
+The measurement includes immutable helper identity and bounded STATICCALL
+handling before dynamic decode. Root reproduced the normal size gate:
+**26,988-byte host runtime / 29,217-byte creation**, and **18,805-byte helper
+runtime / 18,831-byte creation**. The host is still 2,412 bytes over the limit.
+Root also reproduced nine focused passing tests: five initial regressions plus
+opaque-cache/preparation equivalence over all sixteen candidates, wrong helper
+identity, oversized input/output handling and STATICCALL write refusal.
+
+The helper's finite gas/input/output limits are provisional experiment values,
+not validated maxima for all legal schemas or a complete C0 resource profile.
+In particular opaque caches still carry expanded ABI bytes; moving their
+decoder does not eliminate transport or storage costs. No fit or full
+acceptance claim follows from the focused tests.
+
+The next isolated refinement replaces journal serialization only: typed pools
+for immutable Record/Envelope/Type insertions, fixed words for the other rows,
+and the same chronological replay and reverse lookup. Explicit memory copies
+must prevent later mutations from changing earlier snapshots. Every immutable
+insertion asserts the full empty prestate; all earlier-selected visibility,
+retry behavior and full-width metadata remain intact. Keep required getters
+and the guarded helper boundary, with no coalescing or simultaneous lookup
+algorithm change. This targets bookkeeping costs, not reduced semantics.
+
+The layout remains unselected. Normal deployment, worst-case measurements and
+the dependency-aware deployment commitment remain required even after a fit.
 
 No unlimited-size setting, external mutable registry or silent helper was
 added to the current draft. The experimental compiler profile remains native
@@ -80,6 +100,38 @@ Solidity 0.8.30, Cancun, optimizer 200 and via IR.
 This is useful falsification of the inlined physical layout, not evidence
 against the data semantics and not a reason to hide the deployment gate.
 Follow the [physical-fit qualifications](codex-integration-notes.md#physical-fit-gate).
+
+### Next resource falsifier: small group, large opaque cache
+
+A source/arithmetic review found a concrete generic-parser pressure case:
+sixteen members, each with sixty-four BOOL fields. Use distinct one-byte
+printable Type names; per member, field names are `0x21..0x60`. Empty meaning,
+absent specDigest, zero 32-byte qualifier, zero roles/indexes/constraints and
+`validationProfile=0` are accepted by the current parser grammar. Each field
+descriptor is `u16(1) || nameByte || u8(BOOL=1)`. There is no extra group name
+or compatibility-count suffix.
+
+| Quantity | Bytes |
+|---|---:|
+| One Type blob | 306 |
+| Sixteen-member group | 4,930 |
+| SR-17 Record body including group-byte length | 4,932 |
+| One `abi.encode(SchemaCache)` | 20,864 |
+| Complete helper `CompiledGroup` return | 336,096 |
+| Provisional helper group-output cap | 131,072 |
+
+Root independently reconstructed the fixture framing and encoded the exact
+ABI structs: the byte counts above agree, with return size exceeding the
+provisional cap by 205,024 bytes. This is **not yet an actual parser/helper
+execution or gas measurement**; the separate call-gas cap could fail first.
+The fixture is not an additional permitted group in the fixed G4 inventory.
+
+Retain it for the next resource sweep. It shows why cache transport/storage
+must be measured independently of original descriptor length and why current
+experiment caps cannot claim generic maxima. It does not establish that
+simply increasing the cap is viable: compact cache representation, storage
+cost, call gas and whole-transaction limits need measured comparison. Keep the
+current journal-size experiment isolated rather than changing its caps too.
 
 ## What the design pass changed
 
@@ -133,6 +185,9 @@ before expanding its behavior matrix. Passing component sizes concealed the
 cost of nested ABI transport and state-journal machinery when combined.
 The correction is an explicit normal-size gate and one attributable layout
 experiment at a time, not larger artificial limits or deleted obligations.
+The sequential journal's useful invariant is exact planned replay, not the
+incidental use of ABI-encoded bytes for every row; preserve the invariant while
+measuring a simpler representation.
 
 ## Next work and owner followups
 

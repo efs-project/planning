@@ -86,11 +86,15 @@ owner and do not hide an oversized host with an unlimited-size setting.
 The [joined measurements](stateful-verification.md#first-joined-physical-measurement)
 show the inline host does not fit, and a parser/body-only helper does not fit
 even when required getters are removed for diagnosis. Keep those getters.
-The next **unselected candidate** is an immutable, stateless pure-preparation
+The guarded pure-preparation helper also leaves Core 2,412 bytes too large;
+the next measurement changes only its serialized journal to typed insertion
+pools and fixed words, preserving chronological replay and required readback.
+The **unselected candidate** is an immutable, stateless pure-preparation
 helper called by STATICCALL during preflight: opaque compiled cache bytes,
 flat references, posting keys and decoded effects, without deep schema/body
 ABI decoding in Core. It is not an external mutable registry or delegatecall
-facet system. Leave the existing state journal unchanged for that measurement.
+facet system. Do not combine the next journal representation change with
+coalescing or an unrelated lookup algorithm.
 Core would retain all dependency/reference/authority checks and state choices.
 This candidate requires an explicit run-local physical-layout amendment,
 bounded calls/returndata, retained address and runtime codehash, independent
@@ -113,7 +117,7 @@ baseline being compared.
 | Seed/deployment bytes | Independent packed JS/Solidity codecs and exact deployment framing | Supply complete real sources/toolchain/chain/capability/measurement inputs, then re-verify on the actual Core. |
 | Encoding tables | Ordered domain, bounds, algorithm, field/selector/error/constraint grammars | Materialize exact C0 tables and declare every overlay difference once. Keep index-owned limits/codes out of duplicate encoding rows. |
 | Authority module | B0 byte grammar and explicit C0 authorization obligations | Encode the C0 support table, exact verifier/basis rules, session-grant fields/ID/approval/metering and retained evidence. No unsupported path may appear ACTIVE. |
-| Index module/capabilities | B0 index tables/cursor rules; C0 scope override; G3 family list | Implement every G3 family, exact capability entry ordering/root codec and declaration mapping. A documentary list is not an active capability. |
+| Index module/capabilities | B0 index tables/cursor rules; C0 scope override; [closed 101-byte manifest and declaration mapping](bootstrap-inputs.md#closed-capability-manifest-for-the-next-serializer) | Integrate the versioned INDEX module and independently validate every enabled point/page/continuation. The manifest is unimplemented; a documentary list is not an active capability. |
 | Type-group root | Sixteen exact candidate blobs; [160-byte run-local root grammar and literal vector](bootstrap-inputs.md) | Implement independent codecs and enforce the seed's expected inventory during G4, then reconstruct from retained state. Preserve the 6/3/6/1 inventory/order; one-off vector agreement is not bootstrap completion. |
 | Run bounds | Component-only carrier/schema measurements | Measure complete Core+carrier operations and the required read/proof/client costs before selecting valid immutable run bounds. |
 

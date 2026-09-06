@@ -162,6 +162,18 @@ runtimes, initcode, margins and any unmeasured bounds before selecting a layout.
 The current draft remains recoverable; no physical topology, final bound or
 complete C0 deployment is implied by this experiment.
 
+**Follow-on size refinement:** the guarded opaque-helper variant is measured
+at 26,988 host / 18,805 helper runtime bytes and still fails. Keep that helper
+boundary and every raw getter while replacing only serialized journal rows:
+typed immutable Record/Envelope/Type insertion pools and fixed-word entries
+for all other row kinds, preserving chronological replay and reverse lookup.
+Explicitly copy memory snapshots; assert entire empty insertion prestates;
+preserve intrinsic-Type existence and earlier-selected cache/Record visibility.
+External OCCREF must still use persisted Envelope membership. No coalescing,
+raw-slot write API or lookup-algorithm rewrite in this variant. Add repeated
+word/head, staged duplicate, memory-independence and dirty-prestate regressions;
+report normal sizes and focused results before selecting a physical layout.
+
 **Input boundary:** implement the following internal interface in StateKernel.
 The real authority layer will be its only product caller; the named test host
 `publishTrustedForTest` exposes it solely for kernel tests. No caller chooses

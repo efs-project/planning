@@ -96,12 +96,94 @@ implements byte lookup nor proves byte unavailability. The complete C0 run
 must demonstrate the actual ByteDigest point/backlink path against its own
 admitted inventory, with normal basis/coverage qualification.
 
+## Closed capability manifest for the next serializer
+
+Use a fixed inventory with behavior defined by capability code. Do not store
+live posting counts, mutable coverage or caller-selectable RAW_AUDIT flags in
+the immutable manifest. This is a run-local engineering format, not an
+implemented capability getter or the unchanged B0 INDEX module.
+
+```text
+D = keccak256(UTF8("efs2/mvp-c0/index-capabilities/1"))
+manifest = D:bytes32 || orderedTypeGroupRoot:bytes32
+           || resolvedReferenceClasses:uint8 || Entry[18]
+Entry = capabilityCode:uint8 || supportCode:uint8
+indexCapabilityRoot = keccak256(manifest)
+```
+
+The encoding is exactly 101 packed bytes, with entries 1 through 18 in that
+order; no ABI padding, offsets, count or trailing bytes. `supportCode` is 0
+(explicitly unsupported) or 1 (enabled from genesis), never a confidence or
+test-result code. A complete G3 C0 bundle requires all eighteen rows to be 1;
+zero rows can describe unfinished tooling but are not valid complete genesis.
+Do not advertise a planned row as enabled before its implementation is present.
+
+For the current C0 resolver, `resolvedReferenceClasses` must equal `0x19`:
+bit `class−1` names runtime resolution support for classes 1/4/5. Any other
+mask rejects in this closed version. Classes 2/3 remain valid structural grammar, with explicitly
+unsupported runtime existence resolution. This does not confuse a full-width
+Principal-valued field with a PRINCIPAL-class reference.
+
+| Code | Capability (existing kind where applicable) | Fixed behavior |
+|---:|---|---|
+| 1 | Type point | Exact admitted cache/Type; explicit intrinsic meta-Type case. |
+| 2 | Record point | Retained exact Type/body/first admission, not deleted by withdrawal. |
+| 3 | Envelope point | Retained unsigned header and full membership vector. |
+| 4 | Occurrence point | Exact mapping plus lifecycle, including non-active states. |
+| 5 | Receipt point | Accepting-batch evidence; lifecycle remains separately qualified. |
+| 6 | Global admission page | Admission-order log and its own bounded continuation. |
+| 7 | Unique Records by Type (2) | Stable first-occurrence anchors; live if any occurrence is live at the basis; nested cursor budget. |
+| 8 | Occurrences by Type (1) | Mandatory occurrence posting with basis liveness. |
+| 9 | Occurrences by Record (3) | Mandatory occurrence posting; supplies Record live-set transitions. |
+| 10 | Occurrences by Principal (4) | Mandatory occurrence posting; full bytes32 Principal. |
+| 11 | General backlinks (5) | All actual extracted refs; stable dedup and basis liveness. |
+| 12 | Typed-role backlinks (6) | Exact Type/role predicate; stable dedup and basis liveness. |
+| 13 | Scalar equality (7) | Declared SCALAR_EQ only; undeclared query is UNSUPPORTED. |
+| 14 | Binding point | Current head and bounded at-basis lookup; authoritative Realm-local UNSET. |
+| 15 | Binding history (8) | RAW_AUDIT physical revisions; no lifecycle filtering or decrement. |
+| 16 | General digest equality (9) | Declared DIGEST_EQ population; ordinary basis liveness. |
+| 17 | ByteDigest lookup recipe | Exact digest-derived Record point, then declared backlinks; no new physical index. |
+| 18 | BindingScope (10) | RAW_AUDIT first-bind or first-tombstone anchor once; never filtered or decremented. |
+
+Reference-class support qualifies rows 11/12. History/Scope hydrate lifecycle
+separately; RAW_AUDIT is fixed by kind, not a caller flag. A bounded page can
+be PARTIAL even with no items. An empty final suffix cannot prove whole-query
+absence without its complete origin-to-high-water continuation chain.
+External transport failure remains UNKNOWN, not an authoritative empty result.
+
+Verify the manifest's Type root against the independently established seed
+root, then independently derive descriptor declarations from retained groups:
+6/3/6/1 members, 27 REF_BACKLINK, zero SCALAR_EQ and zero DIGEST_EQ. Do not
+duplicate that inventory or changing posting totals in the root. Required
+general/role postings arise from actual refs; REF_BACKLINK creates no third
+posting family. A supported, not-yet-populated family is not unsupported.
+
+Place these exact manifest bytes once in a **versioned C0 INDEX module** and
+return the same bytes from the capability getter. Do not include RealmId,
+deployment addresses or an enclosing Codex hash: those introduce avoidable
+commitment cycles. Final owner-module framing, code/layout tables and Scope's
+domain/cursor/RAW_AUDIT amendments still need exact integration before Codex
+minting. B0's unchanged history-only RAW_AUDIT rule cannot describe C0 Scope.
+The enclosing Codex commitment is not replaced by `indexCapabilityRoot`.
+
+Why this choice: fixed code/support pairs are easy to inspect and reject when
+reordered or duplicated. A compressed support bitset would save only a few
+dozen bytes but obscure rows; a generic extension registry adds an unneeded
+late-activation mechanism to a deliberately genesis-fixed run.
+
+The source obligations are [G3](../../Designs/efsv2/mvp-c0-genesis-manifest.md#g3--activate-and-prove-index-capabilities-before-writes),
+[INDEX §§0.1/3/5](../2026-08-13-efs2-stage-a-corpus/chapters/b0-indexes.md),
+[Files §5](../../Designs/efsv2/hierarchical-files-and-folders.md#5-complete-directory-enumeration-bindingscope)
+and [Codex ownership](../2026-08-13-efs2-stage-a-corpus/chapters/b0-encoding-and-ids.md).
+All eighteen enabled claims need actual bounded endpoint/continuation evidence;
+raw storage getters and passing key helpers alone do not meet that gate.
+
 ## Remaining input work, not owner questions
 
 1. Implement/review the aggregate-root codec and wire its expected inventory
    into actual G4 admission and G12 reconstruction.
-2. Specify ordered capability-entry fields/widths/root and map actual Type
-   declarations, digest-read behavior and RAW_AUDIT BindingScope explicitly.
+2. Implement the closed capability manifest above, integrate its versioned
+   INDEX ownership and independently verify every enabled endpoint/continuation.
 3. Specify the C0 authority module support/basis/error program rather than
    copying B0's unsupported active verifier rows. Composite EOA, direct EOA
    and same-Principal session remain three distinct retained evidence paths.
