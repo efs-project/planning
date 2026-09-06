@@ -1,10 +1,68 @@
 # Stateful integration evidence and retrospective
 
-**Status:** all three implementation tasks independently reviewed, including
-the reader's batch-metadata correction at `bfc696f`. Final whole-plan review
-and complete C0 journeys are not finished.
+**Status:** bounded stateful increment complete through `3e56bc0`; all three
+task gates, final whole-plan review and its single fix/re-review wave are
+closed, with two nonblocking maintenance followups below. Complete C0 journeys
+and the native MVP goal remain unfinished.
 
 ## Evidence so far
+
+### Final whole-plan gate at 3e56bc0
+
+The full `824d856..5d694a0` review found one Important historical replay
+regression and two maintenance minors. The consolidated fix
+`3e56bc0ca7098a16d472ef989702eafbeb07fad7` changes exactly the materializer,
+its inventory tests/README, the explicit unique-Type nested branches and
+local cast/selector invariant handling. Its scoped re-review found no
+Critical/Important residual. Root independently reproduced:
+
+- **62/62 expanded Node checks**, including 17 Type-input checks and actual
+  managed-chain reconstruction, race, retry and resource scenarios;
+- **86/86 Core Forge executions** (76 distinct functions, 128-run fuzz), plus
+  **28/28 parser/admission executions**, zero failures/skips;
+- normal build-size gate, unchanged runtime sizes of 6,186 / 24,179 / 18,805
+  bytes for Core/library/helper; and
+- default `materialize.mjs --check`, with byte-identical archived artifact and
+  unchanged SHA256 inputs `250b183e0fd261a473f51c68661badfa74a289db16a85900cd0c1a3d574862fc`
+  and artifact `b9602653db99cf810d7a1fb367f538b65378931ecabfd532f6a5d86913480ccb`.
+
+Default source acquisition now reads bounded raw local Git blobs at the exact
+recorded revision; it never fetches/checks out/falls back to current prose and
+never weakens source hashes. Explicit working-tree mode checks current bytes
+and refuses their known drift. The compiled metadata changed, so the worker
+forced a fresh AST/build-info build and measured new actual deployed code;
+root's subsequent managed runs verified current artifact/runtime agreement.
+
+| Component | Deployed-code keccak256 at this measurement | Deployment gas |
+|---|---|---:|
+| Core | `0xceee7b7983cabcf38f67b4c17289d3251df038577507915c6c42ce765546cb49` | 2,243,495 |
+| AdmissionLibrary | `0xd64d16c9b94f8e4e55c236ee5127db90878916c48947e78cb78bd6d859918abf` | 5,281,973 |
+| PreparationHelper | `0xfb7a6e93fbeb756d5db901cac83963cd3059003d245a5f81aeaff54905b82480` | 4,120,023 |
+
+These are code identities for this disposable deployment, not permanent
+addresses or pins. Root again observed exact retry/sweep gases recorded below;
+the 16,777,216 transaction cap, failed 16/32/64 cases and 397-byte library
+margin are unchanged. Managed cleanup succeeds. Older hashes/measurements
+remain historical evidence, not rewritten to match this build.
+
+Two scoped-review **Minor followups are parked**, not called repaired:
+
+1. `inventory.test.mjs` hardcodes today's genesis hash for a positive
+   working-tree test. Future legitimate prose changes can intercept its
+   intended inventory assertion. Use independently hashed current test inputs
+   or isolated fixtures in the next source-tool maintenance pass, while keeping
+   historical byte equality pinned. Default historical replay is repaired now.
+2. `StateKernel.sol`'s new lifecycle comment incorrectly calls every bit after
+   the admission lane reserved. Correct mapping is status bits0–7, admission
+   ordinal8–55, withdrawal ordinal56–103, reserved104–255. Extraction code is
+   correct; fix the comment before copying it into real-contract documentation.
+
+The final review protocol allows one consolidated fix and one scoped re-review;
+root records these nonblocking residuals rather than opening an endless cleanup
+loop. Costs of deferral are future test maintenance and a misleading comment,
+not observed wrong state. No load-bearing correctness finding remains against
+this bounded stateful plan. Unrelated cast warnings and two pre-existing
+whole-file formatting differences also remain disclosed.
 
 ### Task 3 reader and real transaction pressure at bfc696f
 
@@ -421,6 +479,14 @@ independent semantic fold before it can claim all those rows are correct.
 
 ### Historical generator check discovered during Task 3
 
+**Attribution correction and closure at final review:** the observations below
+describe the Task 3 checkpoint, not an out-of-range whole-plan defect. The
+whole-plan base `824d856` still has the frozen genesis hash; manifest prose
+changed inside this increment at `566b628`. Thus the generator regression
+arose in-range. It is repaired by `3e56bc0`'s explicit pinned-source acquisition
+and exact artifact replay, with the positive live-source test fragility parked
+above. No archived Type IDs or bytes were regenerated.
+
 The implementer's expanded Node run includes two failures outside the Task 3
 paths: `source-pinned inventory materializes sixteen members in four
 independently parsed ordered groups` and `source drift, reordered inventory,
@@ -452,9 +518,9 @@ part of the current reader task.
 
 Task 2's implementation and independent review are complete at `e6dcb40`.
 The [Task 3 reader](stateful-plan.md) is implemented at `f47c6b1` with reviewed
-fix `bfc696f`; all three task gates are closed. Perform the final whole-plan
-review once, retaining the deferred Task 2 maintenance findings and explicit
-runtime/resource limitations, then continue authenticated code and bootstrap.
+fix `bfc696f`; the final whole-plan gate is now closed at `3e56bc0` with the
+two nonblocking followups above. Continue the [common authority codec plan](authority-codec-plan.md),
+then authenticated code and bootstrap, retaining measured runtime/resource limits.
 Do not restart the completed helper/kernel/reader sequence. Retain
 the [twelve stateful acceptance cases](stateful-integration.md), the SDK
 causality/closure checks and [explicit C0 qualifications](codex-integration-notes.md).
@@ -477,6 +543,10 @@ fallback as a transparent split of one atomic Files operation. Measure each
 complete required Files mutation with authority and carrier joined; refuse an
 oversized plan before prompting or use an explicitly different workflow.
 Session automation can change prompt counts, not cross-transaction atomicity.
+The SDK PM's [pre-prompt evidence refinement](authority-order-and-evidence.md#sdk-prompt-eligibility-without-an-unsigned-simulation-fiction)
+uses exact-operation resource profiles without pretending an absent signature
+can pass full authorization simulation. READY only justifies requesting the
+witness; unmeasured Files remain UNKNOWN. No new Core preview ABI is selected.
 The [required Files shapes](../../Designs/efsv2/hierarchical-files-and-folders.md#81-operation-shapes)
 are four fresh leaves for empty-directory creation, seven for initial file
 creation and three for revision (including their prescribed charter/Binding

@@ -123,6 +123,73 @@ requires actual transaction/receipt evidence at the same basis; unavailable
 history leaves that dimension UNKNOWN, not invalidating completed state
 reconstruction or fabricating detachable authorship/consensus proof.
 
+## SDK prompt eligibility without an unsigned simulation fiction
+
+The SDK PM's read-only pressure pass preserves the existing five seams. Keep
+current permission at a stated basis, plural historical accepting batches,
+transaction contribution and canonical effect as separate projections of one
+action result, with inspectable evidence. A current denial does not erase a
+verified historical batch or a prior committed effect. No sixth seam, public
+packed-evidence DTO or extra continuation family is selected here.
+
+Before the one composite-signature prompt, that signature does not yet exist.
+Select **source-qualified resource profiles**, not a new Core preview API, for
+the first positive prompt gate. READY means evidence justifies asking for the
+required witness; authorization remains NOT_EVALUATED. It is not a promise of
+future inclusion, no races, valid signature or committed effect.
+
+- A **proven upper bound** covers whole-transaction gross gas, valid authority,
+  planning/replay, carrier, intrinsic calldata and witness variability. A bound
+  plus an explicit reserve within the cap can justify READY. A loose bound
+  above the cap proves neither failure nor fit and therefore yields UNKNOWN.
+- A **calibrated envelope** requires actual joined measurements covering the
+  exact finite operation/state/resource cell and its dominance dimensions,
+  with a named reserve and an explicit disposable-run policy. It can justify
+  a visibly weaker READY, never a mathematical bound or leaf-count extrapolation.
+- A **raw estimate**, dummy-signature call, parser arithmetic or simple-Record
+  measurement is diagnostic only. It cannot alone justify READY or REFUSED.
+  Missing coverage or contradictory evidence remains UNKNOWN/CONFLICT. An
+  actual hard structural violation or unsupported selected policy may refuse.
+
+Every positive result binds exact plan/effects, basis/state class, operation,
+selected/fresh classification, auth/carrier branches, byte/witness bounds,
+chain/fork/cap, all participating code commitments and the resource-profile
+commitment. Include outer transaction type and access/authorization-list
+assumptions. Recheck these bindings wallet-free immediately before requesting
+authorization; drift requires a new preview, not an automatic wallet request.
+The deterministic SDK planner may match bounded facts it already owns to a
+profile that dominates remaining Core work; it must not duplicate the state
+planner to manufacture those facts. Uncovered dimensions yield UNKNOWN.
+
+For the narrow direct branch, the submitter must guarantee no EIP-7702
+authorization list; an unsupported path refuses and an unestablished guarantee
+is UNKNOWN before prompting. Core's empty-code/origin checks alone do not
+prove this transaction-envelope policy. EIP-7702 processes authorizations
+before execution and does not roll them back when execution fails; EFS atomic
+rollback must not be presented as rollback of those delegation changes.
+This is a selected SDK/submitter safety policy, not a new onchain detection
+capability. See [EIP-7702 behavior](https://eips.ethereum.org/EIPS/eip-7702#behavior).
+
+The actual four/seven/three-leaf Files operations remain UNKNOWN until valid
+authority, actual typed bodies/reference fan-out and carrier work are covered.
+A future same-planner summary could improve profile matching but would not
+itself prove cost; revisit it only if measured exact-operation profiles are
+unusably conservative. The current planner returns after replay and exposes
+no such seam. No hidden mutation hook, unauthenticated VerifiedContext or
+duplicate journal is authorized by this prompt gate.
+
+UI refusals offer Edit/Cancel/Inspect with zero wallet requests. UNKNOWN offers
+Recheck/Cancel/Inspect, also with zero requests. Smaller masks are new signed
+effects, not a transparent atomic fallback. After ambiguous submission, recover
+the exact prior transaction/result before considering resubmission. A still
+valid unchanged composite plan can reuse its signature only after that recovery
+and fresh preflight; a new direct-wallet request is another counted prompt.
+
+This is an unimplemented SDK integration requirement, not a measured prompt
+count. The next falsifiers include changed basis/plan/mask/profile invalidating
+READY before the wallet, a known over-cap refusal, uncovered Files yielding
+UNKNOWN, and a rejected publish never being described as undoing a delegation.
+
 ## Required falsifiers
 
 | Case | Required result |

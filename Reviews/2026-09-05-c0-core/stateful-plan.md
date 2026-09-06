@@ -540,3 +540,13 @@ inventory run remains 55/57 because of the independently diagnosed source-pin
 replay issue; no archived IDs/bytes were regenerated. Final whole-plan review
 is a separate remaining controller gate, not another implementation task or
 an implied full-C0 completion.
+
+Final gate closure at `3e56bc0`: the full `824d856..5d694a0` review and one
+consolidated fix/scoped re-review are complete. The in-range historical source
+regression is repaired without changing retained bytes. Root reproduced
+62 expanded Node, 86 Core and 28 parser/admission passes and normal sizes.
+Two nonblocking followups (live-source positive test fragility and lifecycle
+packing comment) are explicitly parked in [verification](stateful-verification.md#final-whole-plan-gate-at-3e56bc0).
+Do not restart these three tasks. Continue the separate
+[common authority codec increment](authority-codec-plan.md); full C0/native
+MVP goal remains active. No main merge, public deployment or freeze is implied.

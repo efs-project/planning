@@ -62,7 +62,9 @@ The [authority-module/preflight boundary](authority-module-boundary.md) now
 selects distinct C0 verifier programs and bounded operation-only validation
 before the existing state planner. The [batch-evidence codec draft](batch-authority-evidence.md)
 specifies a bounded per-batch extension without overwriting Envelope evidence
-or the original full basis word. Both remain inputs for the next implementation.
+or the original full basis word. The [common codec implementation plan](authority-codec-plan.md)
+is the next two-task increment: pure commitments/retention plus independent
+reader agreement, not another mutation path or an authentication-complete claim.
 
 ## Completed body checkpoint
 
@@ -99,8 +101,12 @@ real same-block contribution, full raw-history reconstruction and resource
 sweeps. Sixteen fresh simple Records exceed the normal transaction budget;
 smaller-mask fallback is multiple transactions, not an atomic Files fallback.
 See [stateful evidence and retrospective](stateful-verification.md) for exact
-costs, the repaired unchecked batch fields and the historical source-pin test
-failure. All three task gates are closed; final whole-plan review remains.
+costs and repaired unchecked batch fields. The final whole-plan review and
+single fix/re-review wave now close at `3e56bc0`: historical replay reproduces
+the unchanged artifact; root's expanded62 Node,86 Core and28 parser checks and
+normal sizes pass. Two nonblocking maintenance followups remain explicit;
+the full source-pin failure is no longer open. All three task gates and this
+bounded final gate are closed.
 Authentication, complete bootstrap and actual Files operations are the next
 integration work, not capabilities completed by this trusted-context slice.
 
