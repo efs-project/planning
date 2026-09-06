@@ -279,6 +279,62 @@ test('InitConfig is exact, omits executor and refuses every altered word and len
   assert.throws(() => initConfig(selection(), h(0)));
 });
 
+function assertHex(actual, expected, field) {
+  assert.equal(actual.toLowerCase(), expected.toLowerCase(), field);
+}
+
+function assertSelectionResult(actual, expected) {
+  for (const field of ['initConfigVersion', 'finalityRuleKind', 'finalityParam', 'upgradeAuthorityKind', 'declaredTxGasLimit']) {
+    assert.equal(actual[field], BigInt(expected[field]), field);
+  }
+  for (const field of ['upgradeAuthorityRef', 'nullPolicyHash', 'bootstrapExecutor']) {
+    assertHex(actual[field], expected[field], field);
+  }
+}
+
+function assertCommitmentResults(actual, expected, field) {
+  assert.equal(actual.length, expected.length, `${field}.length`);
+  for (let index = 0; index < expected.length; ++index) {
+    assert.equal(actual[index].label, expected[index].label, `${field}[${index}].label`);
+    assertHex(actual[index].digest, expected[index].digest, `${field}[${index}].digest`);
+  }
+}
+
+function assertSeedResult(actual, expected) {
+  assert.equal(actual.base.namespace, expected.base.namespace, 'base.namespace');
+  for (const field of [
+    'runId', 'chainConfigCommitment', 'coreCreate2Salt', 'byteStoreCreate2Salt',
+    'coreCreationCodeTemplateHash', 'byteStoreCreationCodeTemplateHash', 'codexConstantsHash',
+    'indexCapabilityRoot', 'orderedTypeGroupRoot', 'byteMeasurementReportHash', 'destructionPolicyHash',
+  ]) assertHex(actual.base[field], expected.base[field], `base.${field}`);
+  for (const field of ['deploymentFactoryAddress', 'schemaAuthorAddress', 'bootstrapAuthorAddress']) {
+    assertHex(actual.base[field], expected.base[field], `base.${field}`);
+  }
+  assertCommitmentResults(actual.base.sourceCommitments, expected.base.sourceCommitments, 'base.sourceCommitments');
+  assertCommitmentResults(actual.base.toolchainCommitments, expected.base.toolchainCommitments, 'base.toolchainCommitments');
+  for (const field of ['maxStateFileBytes', 'maxReadRangeBytes', 'transactionGasMargin', 'stateGrowthMargin']) {
+    assert.equal(actual.base[field], BigInt(expected.base[field]), `base.${field}`);
+  }
+  for (const field of [
+    'admissionLibraryCreate2Salt', 'preparationHelperCreate2Salt', 'admissionCreationCodeTemplateHash',
+    'preparationCreationCodeTemplateHash', 'coreLinkReferencesHash',
+  ]) assertHex(actual[field], expected[field], field);
+}
+
+function assertComponentResult(actual, expected, field) {
+  assertHex(actual.account, expected.account, `${field}.account`);
+  for (const name of ['create2Salt', 'initCodeHash', 'runtimeCodeHash']) {
+    assertHex(actual[name], expected[name], `${field}.${name}`);
+  }
+}
+
+function assertDeploymentResult(actual, expected) {
+  assertHex(actual.experimentSeed, expected.experimentSeed, 'experimentSeed');
+  for (const field of ['core', 'byteStore', 'admissionLibrary', 'preparationHelper']) {
+    assertComponentResult(actual[field], expected[field], field);
+  }
+}
+
 test('deployed pure Solidity receiver agrees with independent bytes and hashes under normal caps', { timeout: 240000 }, async t => {
   compileStateful();
   const artifact = JSON.parse(readFileSync(new URL('../out/C0BootstrapCodecHarness.sol/C0BootstrapCodecHarness.json', import.meta.url)));
@@ -300,33 +356,27 @@ test('deployed pure Solidity receiver agrees with independent bytes and hashes u
     };
     assert.equal(await call('encodeSelection', [selection()]), SELECTION_RAW);
     const opened = await call('openSelection', [SELECTION_RAW, SELECTION_DIGEST]);
-    assert.equal(opened.initConfigVersion, 1n); assert.equal(opened.declaredTxGasLimit, 16777216n);
-    assert.equal(opened.bootstrapExecutor.toLowerCase(), a(0x21));
+    assertSelectionResult(opened, selection());
     assert.equal(await call('nullPolicyBytes', []), NULL_POLICY_BYTES);
     assert.equal(await call('encodeSeed', [seed()]), SEED_RAW);
     const decodedSeed = await call('decodeSeed', [SEED_RAW]);
-    assert.equal(decodedSeed.base.namespace, baseSeed().namespace);
-    assert.equal(decodedSeed.base.sourceCommitments[0].label, 'c0/init-selection/1');
-    assert.equal(decodedSeed.base.sourceCommitments[0].digest, SELECTION_DIGEST);
-    assert.equal(decodedSeed.base.maxStateFileBytes, 8192n);
-    assert.equal(decodedSeed.admissionCreationCodeTemplateHash, h(16));
-    assert.equal(decodedSeed.preparationCreationCodeTemplateHash, h(17));
-    assert.equal(decodedSeed.coreLinkReferencesHash, h(18));
+    assertSeedResult(decodedSeed, seed());
     assert.equal(await call('selectionDigest', [seed()]), SELECTION_DIGEST);
     assert.equal(await call('experimentSeed', [seed()]), EXPECTED_SEED);
     assert.equal(await call('encodeDeployment', [deployment()]), DEPLOYMENT_RAW);
     const decodedDeployment = await call('decodeDeployment', [DEPLOYMENT_RAW]);
-    assert.equal(decodedDeployment.experimentSeed, h(1));
-    assert.equal(decodedDeployment.core.account.toLowerCase(), a(0x31));
-    assert.equal(decodedDeployment.byteStore.runtimeCodeHash, h(44));
-    assert.equal(decodedDeployment.admissionLibrary.account.toLowerCase(), a(0x33));
-    assert.equal(decodedDeployment.preparationHelper.initCodeHash, h(47));
+    assertDeploymentResult(decodedDeployment, deployment());
     assert.equal(await call('experimentCommitment', [deployment()]), EXPECTED_COMMITMENT);
     assert.equal(await call('c0ProfileId', [EXPECTED_COMMITMENT]), EXPECTED_PROFILE);
     assert.equal(await call('initConfig', [selection(), EXPECTED_COMMITMENT]), INIT_CONFIG_RAW);
     await call('requireInitConfig', [INIT_CONFIG_RAW, selection(), EXPECTED_COMMITMENT]);
     const maxSelection = { ...selection(), declaredTxGasLimit: (1n << 64n) - 1n };
-    assert.equal((await call('decodeSelection', [await call('encodeSelection', [maxSelection])])).declaredTxGasLimit, (1n << 64n) - 1n);
+    assertSelectionResult(await call('decodeSelection', [await call('encodeSelection', [maxSelection])]), maxSelection);
+    const maxSeedU64 = seed();
+    maxSeedU64.base = { ...maxSeedU64.base, maxStateFileBytes: (1n << 64n) - 1n,
+      maxReadRangeBytes: (1n << 64n) - 1n, transactionGasMargin: (1n << 64n) - 1n,
+      stateGrowthMargin: (1n << 64n) - 1n };
+    assertSeedResult(await call('decodeSeed', [await call('encodeSeed', [maxSeedU64])]), maxSeedU64);
     return { gas: BigInt(receipt.gasUsed), initcodeBytes: (artifact.bytecode.object.length - 2) / 2,
       runtimeBytes: (deployed.length - 2) / 2, cleanup: lab.cleanup };
   });
