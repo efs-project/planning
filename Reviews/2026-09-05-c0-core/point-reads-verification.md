@@ -1,7 +1,8 @@
 # Exact point reads — verification and next integration
 
-**Status:** implemented through `a9d3890`, task-approved after one fix round,
-and independently rerun. Whole-increment review/publication is not complete.
+**Status:** implemented through `154fcbe`, task and whole-increment reviews
+closed after their scoped fixes; independently rerun. Feature-branch evidence
+only, not a main merge or integrated-MVP completion.
 
 This executes the [point-read plan](point-reads-plan.md), not the whole
 [read overlay](read-overlay.md) or C0 profile. The [implementation](src/StatePointReads.sol)
@@ -28,6 +29,12 @@ in unchanged files; none names one of the five new source/test files.
 The actual compiler is `0.8.30+commit.73712a01`, Cancun/optimizer200/viaIR.
 Root compared all five working-file SHA-256 values to the worker's final
 report and exact five-file commit; no kernel/cache/parser/carrier bytes changed.
+
+After final-review test-only fix `154fcbe`, root repeated the full expanded
+Node command: **92/92**, exit0, no failures/skips/cancellations/todo, in15.87s.
+Solidity source, Forge tests and deployment host are byte-for-byte unchanged
+from the151-test run at `a9d3890`; that is the retained Solidity evidence,
+not a claim that an unnecessary second Solidity run occurred.
 
 The independent managed-node test normally deploys the test host, compares
 actual runtime with compiler links/immutables, admits all four candidate
@@ -89,6 +96,17 @@ fresh covering checks above reproduce the fixed code. Runtime fell162 bytes.
 The report now corrects its earlier coverage overstatement. Nonblocking test
 organization remains a maintenance followup: split the large combined test
 contract if further growth makes fixture/failure navigation difficult.
+
+Whole-increment review of `ca1c15a..f50e9ee` found one further evidence gap:
+sparse and post-withdrawal Envelope tests derived IDs from publication inputs,
+not the getter's returned bytes. The single final fix `154fcbe` compares all
+returned fields and exact unsigned bytes, decodes returned header/membership,
+and independently derives the requested ID from those returned values. Its
+sparse vector now has64 distinct IDs, exposing order/substitution errors.
+Scoped final re-review approved the fix, with no new breakage; the remaining
+test-organization note is nonblocking. No production getter defect was found
+in that final pass. Lesson: every independent-read claim must trace back to
+the returned evidence; hashing a correct fixture proves the fixture instead.
 
 Worker self-review exposed the sentinel and malformed-global-meta cases before
 task review; the worker reports dedicated failing tests before their fixes.

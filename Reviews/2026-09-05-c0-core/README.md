@@ -155,9 +155,10 @@ now pin concrete serializer inputs, retire an understated aggregate fan-out
 estimate and keep optional convenience reads outside the first Core surface.
 Their implementations and full capability/authority coverage remain next work.
 The [point-read plan](point-reads-plan.md) now implements shared original
-Type/Record/Envelope projections and bounded storage-byte access at `a9d3890`.
-Root reproduced151 Forge/92 Node checks; independent task review closed after
-missing negative tests and duplicated frame validation were repaired. The
+Type/Record/Envelope projections and bounded storage-byte access through `154fcbe`.
+Root reproduced151 Forge/92 Node checks; task and whole-increment review closed
+after missing negative tests, duplicated frame validation and returned-Envelope
+evidence assertions were repaired. The
 [verification checkpoint](point-reads-verification.md) preserves the separate
 trusted host and later occurrence/query/authority/initializer work.
 
