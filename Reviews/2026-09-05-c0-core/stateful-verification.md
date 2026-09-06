@@ -1,11 +1,43 @@
 # Stateful integration evidence and retrospective
 
-**Status:** in progress. Helpers and the selected stateful kernel task are
-independently reviewed. Normal deployment and a publication smoke pass;
-independent state reconstruction is next. The full stateful plan and complete
-C0 journeys are not finished.
+**Status:** all three implementation tasks independently reviewed, including
+the reader's batch-metadata correction at `bfc696f`. Final whole-plan review
+and complete C0 journeys are not finished.
 
 ## Evidence so far
+
+### Task 3 reader and real transaction pressure at bfc696f
+
+Implementation `f47c6b1` plus review correction `bfc696f` adds a bounded,
+independent pinned-state reader and normally deployed managed-chain tests.
+Root freshly reran the final **45 Node tests: 45 passed, zero failed/skipped**.
+The unchanged producer code also passed root's **86 Core / 28 admission-parser**
+checks and normal size gate during this review turn. Those earlier synthetic
+probe tests retain their own witness semantics, not the new C0 wrapper's law.
+
+The reader independently recomputes ordinary identities, Type caches,
+chronological admission/lifecycle, Binding heads, complete RAW_AUDIT history,
+all ten posting families and their origin-to-high-water words. It checks the
+three complete runtime identities and dependency getters at one EIP-1898
+block-hash pin, with finite row/response/work budgets. Transaction contribution
+is separate and requires exact submitted transaction, receipt and event
+correlation; a no-log state read leaves contribution UNKNOWN.
+
+One Important review finding was repaired: the first version ignored two
+batch authority words. The fix checks complete row shape and both independent
+synthetic fixture expectations for every batch. Forty-six added outcome/audit
+assertions exercise all four historical batches, missing metadata/expectations,
+substitution and malformed shapes. Missing evidence is UNKNOWN/PARTIAL;
+contradictory complete evidence is INVALID/PARTIAL. Focused RED/GREEN is in
+the implementation report; scoped re-review approved with no remaining or
+introduced Critical/Important issue. This validates synthetic row integrity,
+not actual Principal authentication.
+
+The real same-block race produces one transition and correctly correlated
+ALL_FRESH/ALL_REUSED outcomes. Invalid-last-leaf and terminal-source failures
+leave all enumerable kernel state unchanged. Actual retry/sweep costs and
+the resulting Files constraints are recorded below. Three-component slice
+fit is not four-component G0 initialization or authenticated Files acceptance.
 
 ### Canonical Task 2 implementation at e6dcb40
 
@@ -387,11 +419,83 @@ independent semantic fold before it can claim all those rows are correct.
 
 ## Next work and owner followups
 
-Execute [Task 2 and Task 3](stateful-plan.md):
-one store, atomic shadow/replay, actual postings/lifecycle/history effects,
-normal-runtime local-chain tests and independent state reconstruction. Retain
+### Historical generator check discovered during Task 3
+
+The implementer's expanded Node run includes two failures outside the Task 3
+paths: `source-pinned inventory materializes sixteen members in four
+independently parsed ordered groups` and `source drift, reordered inventory,
+and missing exact dependencies cannot produce an artifact` in
+`../2026-09-05-mvp-build-start/type-inputs/inventory.test.mjs`.
+Root reproduced both failures with the focused test command. They fail before
+inventory behavior because `materialize.mjs:40` reads live-checkout source
+bytes rather than acquiring them at `inputs.v1.json.sourceRevision`.
+
+The frozen expected genesis SHA256 is
+`5d1a4235e09f141059e21076be56f07baa032509739a370fa64ef8b1aaccf7cf`;
+the current file and Task 3 base `aff1f6f` both hash to
+`5ff293fbaa66f786a59d77d9b64a137c03e4dbe42c76350e785c9f742b7a1be6`.
+Manifest, input, materializer and tests have no changes since that base.
+Root separately fetched all five source files from the recorded
+`1a51c5d728766f25d31fcf7575e578dca3aaf780` Git revision and verified every
+expected source digest, including genesis. This is a pre-existing historical
+replay/source-acquisition mismatch, not permission to refresh expected hashes
+or regenerate the four candidate Type groups. Expanded-suite results must
+remain reported with failures; they are not all-green Task 3 evidence.
+
+Followup: supply an explicit pinned-source acquisition path for historical
+materialization and the new G0 closure, keeping hash verification mandatory
+and ordinary source-drift negatives intact. A frozen artifact's reproduction
+must not depend on today's working-tree prose. No source/fixture rewrite is
+part of the current reader task.
+
+### Continue the integrated work
+
+Task 2's implementation and independent review are complete at `e6dcb40`.
+The [Task 3 reader](stateful-plan.md) is implemented at `f47c6b1` with reviewed
+fix `bfc696f`; all three task gates are closed. Perform the final whole-plan
+review once, retaining the deferred Task 2 maintenance findings and explicit
+runtime/resource limitations, then continue authenticated code and bootstrap.
+Do not restart the completed helper/kernel/reader sequence. Retain
 the [twelve stateful acceptance cases](stateful-integration.md), the SDK
 causality/closure checks and [explicit C0 qualifications](codex-integration-notes.md).
+
+Root's fresh actual-transaction rerun at `f47c6b1` reproduces final-only/mixed/all-ACTIVE retry
+gas of 545,833 / 3,581,018 / 2,917,031. Its unique UINT8 Record sweep in a
+64-member Envelope reports 1 and 8 fresh selected leaves succeeding at
+2,512,688 and 7,735,429 gas; 16/32/64 fail under the explicit 16,777,216
+transaction ceiling with unchanged state. Ten selections of at most seven
+leaves admit all64 using the same Envelope. The retained bounded call traces
+classify 16 fresh as out of gas and 32/64 as out of gas/out of memory; each
+failure reconstructs unchanged state. The later metadata-integrity correction
+changes no producer code or measured transaction costs. These numbers are fixture results, not a
+general eight-Record maximum or a valid final C0 write budget.
+
+**SDK/Files consequence:** splitting selected masks preserves Envelope identity
+but changes signed `WritePlan` effects. It does not preserve one signature,
+one wallet prompt or atomicity across those transactions. Do not offer that
+fallback as a transparent split of one atomic Files operation. Measure each
+complete required Files mutation with authority and carrier joined; refuse an
+oversized plan before prompting or use an explicitly different workflow.
+Session automation can change prompt counts, not cross-transaction atomicity.
+The [required Files shapes](../../Designs/efsv2/hierarchical-files-and-folders.md#81-operation-shapes)
+are four fresh leaves for empty-directory creation, seven for initial file
+creation and three for revision (including their prescribed charter/Binding
+leaves). Those actual typed bodies, reference fan-out and carrier costs are the
+next load-bearing budget cases; eight simple UINT8 successes do not prove
+seven Files leaves fit. Optimize only if those integrated cases need it, not
+to turn the structural64 limit into an invented atomic-capacity promise.
+
+The [reviewed authority-order refinement](authority-order-and-evidence.md)
+closes current authorization versus historical receipt lookup, shared lane-zero
+sequencing and the narrow direct caller rule; exact codecs and wrapper tests
+remain next work. It logs the later product fallback-availability question
+without requesting an owner answer for this local run.
+The [module/preflight refinement](authority-module-boundary.md) and
+[exact batch-evidence draft](batch-authority-evidence.md) turn those rules
+into the next concrete codec and operation-validation boundaries. They avoid
+a second state planner, retain historical observations and distinguish G6's
+two-leaf root from runtime directory creation. No encoded module or executed
+authenticated wrapper follows from these design inputs.
 
 There is no immediate owner question. Full authenticated intent/nonce paths,
 exact bootstrap/capabilities, Lens/Files, SDK/static-SPA integration and all nine

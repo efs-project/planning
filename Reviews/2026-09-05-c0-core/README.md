@@ -58,6 +58,11 @@ The [authority-order refinement](authority-order-and-evidence.md) separates
 currently authorized retries from historical result reads and records the
 direct-EOA boundary and per-batch evidence requirements. It closes design
 ambiguities, not executed authentication or session coverage.
+The [authority-module/preflight boundary](authority-module-boundary.md) now
+selects distinct C0 verifier programs and bounded operation-only validation
+before the existing state planner. The [batch-evidence codec draft](batch-authority-evidence.md)
+specifies a bounded per-batch extension without overwriting Envelope evidence
+or the original full basis word. Both remain inputs for the next implementation.
 
 ## Completed body checkpoint
 
@@ -88,14 +93,16 @@ implementation at `e6dcb40` adds constructor identity refusal and fixes mixed
 retry allocation, reducing library runtime to 24,179 bytes (397 spare).
 Independent task review approved; root reproduced 86 Core executions
 (76 distinct), 28 parser/admission and 34 Node passes plus a fresh current-code
-deployment smoke. The immediate next step is the independent reader over this
-one atomic store, chronological replay and complete raw readback. See the
-[stateful evidence and retrospective](stateful-verification.md) for exact
-sizes, retry cost correction and limited smoke evidence. The independent
-state reader has not been completed by that smoke. The
-bounded input/dependency/readback interfaces and SDK transaction-correlation
-requirements are pinned in the plan. This remains unfinished capability work,
-not a completed C0 acceptance claim.
+deployment smoke. The independent reader is now implemented at `f47c6b1` with
+reviewed integrity fix `bfc696f`; root's final 45 Node tests pass, including
+real same-block contribution, full raw-history reconstruction and resource
+sweeps. Sixteen fresh simple Records exceed the normal transaction budget;
+smaller-mask fallback is multiple transactions, not an atomic Files fallback.
+See [stateful evidence and retrospective](stateful-verification.md) for exact
+costs, the repaired unchecked batch fields and the historical source-pin test
+failure. All three task gates are closed; final whole-plan review remains.
+Authentication, complete bootstrap and actual Files operations are the next
+integration work, not capabilities completed by this trusted-context slice.
 
 [Bootstrap input refinements](bootstrap-inputs.md) specify the four-group
 commitment, closed capability manifest and existing digest point/backlink path

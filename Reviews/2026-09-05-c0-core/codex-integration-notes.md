@@ -163,6 +163,15 @@ fixes shared lane-zero sequencing and selects a narrow direct caller rule.
 It records the source tension and required falsifiers, not an encoded module
 or executed wrapper.
 
+The [module/preflight refinement](authority-module-boundary.md) selects a
+distinct C0 verifier version rather than relabeling B0's hardcoded programs,
+the direct-Core executor convention and bounded operation-only validation
+before the existing planner. The [batch-evidence codec](batch-authority-evidence.md)
+drafts exact composite/direct retention (at most 1,036 bytes), with one
+immutable value per accepting batch and separate transaction contribution.
+Exact module rows, outer wire/operation guards and joined implementation are
+still required; neither draft supplies full session or G0 coverage.
+
 Common codecs plus composite/direct verification and batch evidence are a
 useful intermediate package. It must leave session NOT_IMPLEMENTED until the
 complete grant/program path executes; it cannot mint a complete C0 run. Encode

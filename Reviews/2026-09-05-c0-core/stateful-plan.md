@@ -509,25 +509,34 @@ word chain at that basis before COMPLETE; count equality or a terminal suffix
 does not prove closure. Preserve withdrawn producers, hydrate their lifecycle,
 and read the current head separately instead of folding only live history.
 
-- [ ] Write literal reader tests before implementation for one Record/first
+- [x] Write literal reader tests before implementation for one Record/first
   Binding, withdrawn old producer, current-source tombstone and duplicate
   evidence. Establish failing RED against an explicit reader stub.
-- [ ] Admit the exact four candidate groups into the new kernel through the
+- [x] Admit the exact four candidate groups into the new kernel through the
   trusted test host, then the Object/charter batch, rebind/lifecycle and mixed
   retry scenarios. Independently reconstruct every required posting family,
   immutable byte record, scope/history anchor and head at a pinned block.
-- [ ] Run actual transactions for invalid-final-leaf rollback, race and retry;
+- [x] Run actual transactions for invalid-final-leaf rollback, race and retry;
   hash full enumerated state before/after (excluding chain transaction count)
   and verify no kernel mutation. Test tampered/missing reader evidence.
-- [ ] Run full new Node/Solidity suites; record runtime/deployment and ordinary
+- [x] Run full new Node/Solidity suites; record runtime/deployment and ordinary
   batch costs as internal-kernel evidence only. Do not regenerate old snapshots.
-- [ ] Include the measured retry falsifier as real local transactions: one
+- [x] Include the measured retry falsifier as real local transactions: one
   small Record repeated through a 64-leaf Envelope, prior admission of 63 via
   small masks, then final-only versus mixed selection from equivalent state.
   Retain exact receipts/state and gas ceilings. Separately sweep 1/8/16/32/64
   simple selected/fresh counts; report actual success or resource refusal,
   never structural caps as a guaranteed single-transaction capacity. Preserve
   selected-leaf fallback and do not expand gas limits to make a case pass.
-- [ ] Report all required stateful acceptance outcomes and remaining public
+- [x] Report all required stateful acceptance outcomes and remaining public
   authority/bootstrap/page/Lens/Files integration. Root performs independent
   task/joined review, updates durable handoff and continues toward full C0.
+
+Task 3 implementation `f47c6b1`, review correction `bfc696f`: scoped spec and
+quality review approved after repairing unchecked batch authority metadata.
+Root reproduced the final 45 Node checks, with unchanged producer 86 Core and
+28 admission/parser checks and normal size gate. The expanded historical
+inventory run remains 55/57 because of the independently diagnosed source-pin
+replay issue; no archived IDs/bytes were regenerated. Final whole-plan review
+is a separate remaining controller gate, not another implementation task or
+an implied full-C0 completion.
