@@ -373,6 +373,22 @@ contract PointReadsTest {
         h.seedRecordForTest(p.recordIds[0], metaId, body, groupRecord.recordOrdinal, groupRecord.firstAdmissionOrdinal);
         expectReadError(address(h), abi.encodeCall(h.getTypeSchema, (typeId)), typeId);
 
+        body = abi.decode(abi.encode(groupRecord.body), (bytes));
+        body[4] = 0;
+        body[5] = 0;
+        h.seedRecordForTest(p.recordIds[0], metaId, body, groupRecord.recordOrdinal, groupRecord.firstAdmissionOrdinal);
+        expectReadError(address(h), abi.encodeCall(h.getTypeSchema, (typeId)), typeId);
+
+        body = memorySlice(groupRecord.body, 0, groupRecord.body.length - 1);
+        uint256 truncatedRawLength = body.length - 2;
+        // This fixture preserves the outer BYTES prefix so the member bound is the intended refusal.
+        // forge-lint: disable-next-line(unsafe-typecast)
+        body[0] = bytes1(uint8(truncatedRawLength >> 8));
+        // forge-lint: disable-next-line(unsafe-typecast)
+        body[1] = bytes1(uint8(truncatedRawLength));
+        h.seedRecordForTest(p.recordIds[0], metaId, body, groupRecord.recordOrdinal, groupRecord.firstAdmissionOrdinal);
+        expectReadError(address(h), abi.encodeCall(h.getTypeSchema, (typeId)), typeId);
+
         h.seedRecordForTest(
             p.recordIds[0], metaId, groupRecord.body, groupRecord.recordOrdinal, groupRecord.firstAdmissionOrdinal
         );
@@ -575,6 +591,9 @@ contract PointReadsTest {
         expectReadError(address(h), abi.encodeCall(h.getRecord, (recordId)), recordId);
         h.seedRecordForTest(recordId, metaId, new bytes(0), 2, 1);
         h.seedCountsForTest(1, 0, 1, 1);
+        expectReadError(address(h), abi.encodeCall(h.getRecord, (recordId)), recordId);
+        bytes32 unknownType = keccak256("record-unknown-Type");
+        h.seedRecordForTest(recordId, unknownType, new bytes(0), 1, 1);
         expectReadError(address(h), abi.encodeCall(h.getRecord, (recordId)), recordId);
         bytes32 unknown = keccak256("inconsistent-unknown-record");
         h.seedRecordForTest(unknown, metaId, new bytes(0), 0, 0);

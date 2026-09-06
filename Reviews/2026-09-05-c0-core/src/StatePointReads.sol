@@ -81,11 +81,8 @@ library StatePointReads {
             revert StorageByteView.ErrReadState(subject);
         }
         bytes storage raw = s.init.intrinsicGroupBytes;
-        uint256 n = raw.length;
-        if (n > 8190 || n < 4 || _u16(raw, 0, subject) != 1) revert StorageByteView.ErrReadState(subject);
-        uint256 memberLength = _u16(raw, 2, subject);
-        if (memberLength == 0 || memberLength != n - 4) revert StorageByteView.ErrReadState(subject);
-        return StorageByteView.slice(raw, 0, n, subject);
+        _intrinsicMemberLength(raw, subject);
+        return StorageByteView.slice(raw, 0, raw.length, subject);
     }
 
     function getRecord(StateStore.Store storage s, bytes32 recordId)
@@ -179,11 +176,15 @@ library StatePointReads {
 
     function _intrinsicBlob(StateStore.Store storage s, bytes32 subject) private view returns (bytes memory) {
         bytes storage raw = s.init.intrinsicGroupBytes;
+        uint256 memberLength = _intrinsicMemberLength(raw, subject);
+        return StorageByteView.slice(raw, 4, memberLength, subject);
+    }
+
+    function _intrinsicMemberLength(bytes storage raw, bytes32 subject) private view returns (uint256 memberLength) {
         uint256 n = raw.length;
         if (n > 8190 || n < 4 || _u16(raw, 0, subject) != 1) revert StorageByteView.ErrReadState(subject);
-        uint256 memberLength = _u16(raw, 2, subject);
+        memberLength = _u16(raw, 2, subject);
         if (memberLength == 0 || memberLength != n - 4) revert StorageByteView.ErrReadState(subject);
-        return StorageByteView.slice(raw, 4, memberLength, subject);
     }
 
     function _ordinaryMemberRange(StateStore.Store storage s, StateStore.TypeRow storage row, bytes32 subject)
