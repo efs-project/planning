@@ -232,6 +232,19 @@ function reconstruct(s, expected) {
   // Batch closure is independent of logs: exactly partition [1, high-water].
   const batchByOrdinal = new Map(); let next = 1n, previousBlock = 0n;
   s.batches.forEach((x, i) => {
+    if (x.row == null) incomplete('missing batch row');
+    assert(Array.isArray(x.row) && x.row.length <= 3, 'batch row shape');
+    if (x.row.length < 3 || [0, 1, 2].some(k => x.row[k] == null)) incomplete('missing batch field');
+    const authority = expected.syntheticBatchAuthority;
+    if (authority?.authorityBasis == null || authority?.authorityCodehash == null) incomplete('missing synthetic batch authority expectation');
+    for (const value of [x.row[0], x.row[1], authority.authorityBasis]) {
+      assert(typeof value === 'string' && /^(0|[1-9][0-9]{0,77})$/.test(value) && BigInt(value) < (1n << 256n), 'batch uint256 shape');
+    }
+    for (const value of [x.row[2], authority.authorityCodehash]) assert(typeof value === 'string' && /^0x[0-9a-f]{64}$/.test(value), 'batch codehash shape');
+    // Caller-supplied fixture commitments, never inferred from snapshot or logs.
+    // Matching these synthetic values is integrity checking, not B0 authentication.
+    equal(x.row[1], authority.authorityBasis, 'synthetic batch authority basis');
+    equal(x.row[2], authority.authorityCodehash, 'synthetic batch authority codehash');
     const [metaWord] = x.row, meta = BigInt(metaWord), first = meta & M48, count = (meta >> 48n) & 65535n, block = (meta >> 64n) & M48, revision = (meta >> 112n) & 0xffffffffn;
     equal(first, next, 'batch origin closure'); assert(count > 0n && count <= 64n && first + count - 1n <= counts[4]);
     assert(block >= previousBlock && block > 0n && block <= BigInt(basis.number)); equal(revision, 1n, 'synthetic revision'); equal(meta >> 144n, 0n, 'batch reserved bits');

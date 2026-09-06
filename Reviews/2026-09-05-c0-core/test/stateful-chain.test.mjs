@@ -63,6 +63,33 @@ test('real linked slice independently reconstructs all four unchanged groups', {
     assert.deepEqual(result.counts.slice(0, 6), ['4', '4', '17', '1', '4', '4']);
     assert.equal(result.audit, 'COMPLETE');
     assert.equal(result.contribution, 'UNKNOWN');
+    // Every historical batch must match independently supplied synthetic fields;
+    // neither a complete snapshot nor a recent receipt authenticates these fields.
+    const authorityCases = [
+      ['substituted basis', 'INVALID', x => { x.row[1] = '4661'; }],
+      ['substituted codehash', 'INVALID', x => { x.row[2] = W(0xabce); }],
+      ['missing basis', 'UNKNOWN', x => { delete x.row[1]; }],
+      ['missing codehash', 'UNKNOWN', x => { delete x.row[2]; }],
+      ['truncated row', 'UNKNOWN', x => { x.row.length = 1; }],
+      ['missing row', 'UNKNOWN', x => { delete x.row; }],
+      ['malformed row', 'INVALID', x => { x.row = { ...x.row }; }],
+      ['extra field', 'INVALID', x => { x.row.push('0'); }],
+      ['malformed basis', 'INVALID', x => { x.row[1] = '-1'; }],
+      ['overflow basis', 'INVALID', x => { x.row[1] = String(1n << 256n); }],
+      ['malformed codehash', 'INVALID', x => { x.row[2] = '0x01'; }],
+    ];
+    const observed = [], wanted = [];
+    for (let i = 0; i < 4; i++) for (const [name, outcome, mutate] of authorityCases) {
+      const snapshot = structuredClone(result.snapshot); mutate(snapshot.batches[i]);
+      const verdict = verifyState(snapshot, lab.expected);
+      observed.push([i, name, verdict.outcome, verdict.audit]); wanted.push([i, name, outcome, 'PARTIAL']);
+    }
+    for (const key of ['authorityBasis', 'authorityCodehash']) {
+      const expected = structuredClone(lab.expected); delete expected.syntheticBatchAuthority?.[key];
+      const verdict = verifyState(result.snapshot, expected);
+      observed.push([key, verdict.outcome, verdict.audit]); wanted.push([key, 'UNKNOWN', 'PARTIAL']);
+    }
+    assert.deepEqual(observed, wanted, 'synthetic batch authority integrity (not authentication)');
     // Independent cast keccak of domain word + exact first Envelope + uint256(0).
     assert.equal(result.entries[0].occurrenceId, '0x7f5c4ca0f2fd60e02708813f0fa83f62b03432348cbf3c8ed0e1398ab317bca7');
     Object.assign(report, { resources: lab.resources, expected: lab.expected, cleanup: lab.cleanup });
