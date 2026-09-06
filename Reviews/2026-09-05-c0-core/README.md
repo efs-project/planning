@@ -79,9 +79,9 @@ The [typed request boundary](outer-request-boundary.md) selects ordinary
 calldata and the existing Principal structure, with independent logical and
 actual-call byte budgets. Its [bounded preparation plan](request-bounds-plan.md)
 now executes at `0696b21`: root reproduced 118 Core and 78 expanded Node passes,
-including the real receiver and hostile ABI cases. Independent task review
-approved; [final review and exact evidence](request-verification.md) remain
-separately tracked. This preserves the single external witness and existing
+including the real receiver and hostile ABI cases. Both independent task and
+[final whole-increment review](request-verification.md) approved through
+`c13a368`, without a final fix wave. This preserves the single external witness and existing
 identities; bounded preparation is not authenticated Core or Files acceptance.
 SDK review kept five public seams and clarified original-input snapshot and
 readiness boundaries without adding another signature.

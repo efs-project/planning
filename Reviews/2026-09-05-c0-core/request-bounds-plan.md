@@ -59,7 +59,7 @@ function prepare(
 - `limitForTest(uint64 fileCap) external pure returns(uint256)` may expose only the internal size arithmetic for the u64 maximum case. No test mutation surface or trusted admission is added.
 - JS uses existing `compileStateful`, `withStateful`, `TX_GAS` from `scripts/local-stateful.mjs` for bounded test-artifact deployment and cleanup. Do not alter that transport/helper or import a producer encoder to define expected identities.
 
-- [ ] **Step 1: Add a compiling interface stub and behavioral failing tests.**
+- [x] **Step 1: Add a compiling interface stub and behavioral failing tests.**
 
 Start the helper with its signatures and named errors, ending `prepare` with
 `revert E_EMPTY_ENVELOPE();`. The first green-path assertion must then fail
@@ -91,7 +91,7 @@ For exact W=16384, use N=K=M=64 and body lengths `[1505,1,...,1]`; CAS indexes
 At F=0 the composite call is exactly21412 bytes; at F=32 a W=16416 sample can
 reach the logical-wire refusal without first exceeding actual call size.
 
-- [ ] **Step 2: Run the focused RED and retain the precise failure.**
+- [x] **Step 2: Run the focused RED and retain the precise failure.**
 
 From the Core review directory, resolve the existing pinned SOLC path with
 `scripts/local-stateful.mjs`'s exported `SOLC`; put any shell assignment on its
@@ -99,7 +99,7 @@ own line before use. Run `forge test --offline --use "$C0_REQUEST_SOLC" --match-
 Record actual command, source state, assertion failure and exit; compile/setup
 errors must be corrected before claiming behavioral RED.
 
-- [ ] **Step 3: Implement the ordered bounded scan, then materialize.**
+- [x] **Step 3: Implement the ordered bounded scan, then materialize.**
 
 Implement the spec's eight guard stages and exact signatures. `E_BOUNDS(1)`
 uses `uint16`; all existing B0 error widths remain exact. The two new C0
@@ -136,7 +136,7 @@ as bounded memory. Return it with digest and W. A second independent caller
 EnvelopeId/mask is not part of this interface. Do not refactor the closed codec
 to optimize bounded copies speculatively.
 
-- [ ] **Step 4: Challenge bounds, precedence and ABI aliasing.**
+- [x] **Step 4: Challenge bounds, precedence and ABI aliasing.**
 
 Cover at least:
 
@@ -164,7 +164,7 @@ focused trace to confirm the publication length scan precedes body copies.
 Report the specific inspected path, not a global decoder or memory-safety
 proof. There are no kernel writes in this receiver.
 
-- [ ] **Step 5: Independently encode/deploy/compare from JS.**
+- [x] **Step 5: Independently encode/deploy/compare from JS.**
 
 Use the exact tuple types in the spec and manually counted W/call formulas.
 Construct the four printed arithmetic rows and independently hash each Record,
@@ -178,7 +178,7 @@ check the refusal cases that can be distinguished through exact revert data,
 and record actual runtime/initcode/deploy gas. No assertion that component fit
 establishes future Core fit. Close the runner even when a check fails.
 
-- [ ] **Step 6: Covering checks, self-review and exact commit.**
+- [x] **Step 6: Covering checks, self-review and exact commit.**
 
 From Core, build fresh AST/build-info because a new Solidity source was added:
 
@@ -202,9 +202,11 @@ Keep unavailable evidence explicit rather than claiming it was observed.
 
 ## Controller completion and next join
 
-Root independently checks the component, obtains the normal task/final gate,
-updates the existing status/card and publishes only the authorized feature
-branch. The next increment consumes this component in the compiled C0
-authority/write path with one kernel planner and fresh-only evidence/nonce
-persistence. Complete bootstrap/Files/session/SDK/static-SPA remain the native
+Root independently checked the component and obtained task/final approval
+through `c13a368`; [evidence](request-verification.md) retains the exact scope.
+Only authorized feature-branch publication follows. Real bootstrap input
+codecs now precede the owner/authority join so that this component enters the
+actual C0 path, not another synthetic initialized host. That path retains one
+kernel planner and fresh-only evidence/nonce persistence.
+Complete bootstrap/Files/session/SDK/static-SPA remain the native
 goal; this preparation component alone closes none of those acceptance rows.

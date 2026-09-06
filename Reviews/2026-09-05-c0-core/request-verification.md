@@ -1,7 +1,7 @@
 # Bounded C0 request checkpoint
 
-**Status:** implementation and independent task review pass; final whole-increment
-review pending. This is publication preparation, not authenticated Core or MVP
+**Status:** implementation, independent task review and final whole-increment
+review pass. This is publication preparation, not authenticated Core or MVP
 acceptance.
 
 ## What now executes
@@ -78,8 +78,11 @@ No claim that the output is warning-free is made.
 
 The independent task gate approved both specification compliance and code
 quality, with no Critical/Important findings. Its one Minor is the warning
-noise above. The final whole-increment gate remains pending; task approval
-is not final approval or MVP readiness.
+noise above. The independent final gate reviewed `e1b0484..c13a368`, including
+the code, this evidence and the real-bootstrap/SDK design handoff, and approved
+with no new actionable findings. It used root's supplied execution evidence
+rather than duplicating suites. The gate closes without a fix wave; it is
+feature-branch handoff approval, not MVP, main/public/permanent approval.
 
 What could have gone better: the test fixture initially used shortened ignored
 Principal/witness inputs, so its call length was 1,668 rather than the intended
