@@ -151,6 +151,14 @@ provenance or code correctness.
    Initialize Core and seal its carrier in the existing atomic enclosing call.
    A failed dependency, context, root or seal assertion rolls back that call.
 
+The [real initialization boundary](initialization-boundary.md) supplies the
+missing bounded seed/selection/intrinsic/group opening, exact configuration
+selection and one-time bootstrap-executor check. Its third wrapper argument
+refines the old two-argument transport; InitConfig/1 itself is unchanged.
+Only that seed-committed executor may initialize. Runtime/getter/CREATE2
+consistency still does not prove construction from the committed templates;
+independent G0 provenance remains mandatory even for an authorized caller.
+
 This explicitly refines G0's two-initcode construction and G1's two-component
 wording. The later G2–G12 obligations remain, including capability activation
 before application writes. A three-contract trusted-host smoke does not

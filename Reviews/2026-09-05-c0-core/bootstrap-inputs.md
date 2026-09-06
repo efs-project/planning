@@ -8,6 +8,9 @@ clarifies G3's existing digest-read obligation. It preserves the exact sixteen
 [candidate Types](../2026-09-05-mvp-build-start/type-inputs/artifacts.v1.json),
 their source commitments and the [manifest's](../../Designs/efsv2/mvp-c0-genesis-manifest.md)
 6/3/6/1 member order. Capability/authority serialization remains separate work.
+The [real initializer refinement](initialization-boundary.md) now specifies
+how to authenticate the seed's expected roots and carry original group bytes;
+a repeated seed hash or caller-matching root is not that proof.
 
 ## Ordered Type-root codec, version 1
 

@@ -124,7 +124,7 @@ baseline being compared.
 
 | Input | Already available | Work still required |
 |---|---|---|
-| Seed/deployment bytes | Independent packed JS/Solidity codecs and exact deployment framing | Supply complete real sources/toolchain/chain/capability/measurement inputs, then re-verify on the actual Core. |
+| Seed/deployment bytes | Independent V1 JS/Solidity component codecs; [V2 four-component framing](dependency-deployment-v2.md) and [real initialization boundary](initialization-boundary.md) specified | Implement V2/selection/genesis codecs and bounded seed/group openings; enforce the explicit one-time executor. Supply complete real inputs and independently verify construction, not just runtime consistency. |
 | Encoding tables | Ordered domain, bounds, algorithm, field/selector/error/constraint grammars | Materialize exact C0 tables and declare every overlay difference once. Keep index-owned limits/codes out of duplicate encoding rows. |
 | Authority module | B0 byte grammar and explicit C0 authorization obligations | Encode the C0 support table, exact verifier/basis rules, session-grant fields/ID/approval/metering and retained evidence. No unsupported path may appear ACTIVE. |
 | Index module/capabilities | B0 index tables/cursor rules; C0 scope override; [closed 101-byte manifest and declaration mapping](bootstrap-inputs.md#closed-capability-manifest-for-the-next-serializer) | Integrate the versioned INDEX module and independently validate every enabled point/page/continuation. The manifest is unimplemented; a documentary list is not an active capability. |

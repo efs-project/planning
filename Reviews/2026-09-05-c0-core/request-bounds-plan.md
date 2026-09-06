@@ -8,7 +8,7 @@
 
 **Tech Stack:** Existing Solidity 0.8.30, Cancun, optimizer200/viaIR, Forge/Anvil1.7.1, Node26 and existing ethers6.15. No installations.
 
-**Spec:** [Outer request boundary](outer-request-boundary.md), especially “Two different byte budgets” and “First implementation boundary: publication preparation only”. Principal/witness/operation rules in the rest of that note constrain the subsequent wrapper; this task must not execute them early.
+**Spec:** [Outer request boundary](outer-request-boundary.md), especially “Publication, actual-call and payload byte budgets” and “First implementation boundary: publication preparation only”. Principal/witness/operation/SDK snapshot rules in the rest of that note constrain the subsequent wrapper or adapter; this task must not execute them early.
 
 ## Global Constraints
 

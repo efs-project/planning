@@ -1,8 +1,9 @@
 # C0 authenticated request: bounded standard calldata
 
-**Status:** selected reversible input for the next joined-Core implementation;
-ABI-size arithmetic checked, external decoder and authenticated execution not
-implemented. This is not a permanent EFS interface or a complete C0 run.
+**Status:** selected reversible input for the joined-Core implementation;
+[bounded preparation and the external test receiver execute](request-verification.md).
+Authenticated execution remains unimplemented. This is not a permanent EFS
+interface or a complete C0 run.
 
 ## One call, existing identities
 
@@ -51,7 +52,7 @@ Alternatives not selected:
 - A new packed request grammar would add another parser and SDK encoding
   surface before measurement demonstrates a need for it.
 
-## Two different byte budgets
+## Publication, actual-call and payload byte budgets
 
 Keep 1–64 full RecordIds, 1–64 selected leaves, at most 64 CAS rows, and both
 individual and aggregate carried-body limits of 8,192. Selected indexes are
@@ -212,6 +213,44 @@ The SDK emits canonical standard ABI. Recovery/authentication keys are the
 specified publication/plan/effects commitments, not a hash of one arbitrary
 transaction encoding. Any raw transaction digest remains transport evidence.
 
+### SDK stage and snapshot contract
+
+The SDK PM's read-only review found no need for a sixth public seam, low-level
+publish method or extra signature. The private operation adapter constructs
+these ten arguments inside the existing intent → PlannedWrite → PreparedWrite
+→ SubmittedWrite → CanonicalReadBack flow. Apps do not construct packed
+descriptors or independently choose EnvelopeIds and selected masks.
+
+Internal `C0Request.Prepared` is **bounded-input evidence inside PlannedWrite**,
+not SDK PreparedWrite, READY, authorization, operation validity, gas fit or an
+effect. A bounds result may say BOUNDS_SATISFIED while later checks remain
+NOT_EVALUATED/UNKNOWN. Do not promote a component's struct name into SDK status.
+
+Before copying or normalizing caller values, the SDK must validate original
+`recordIds`, `selectedLeaves` and `expectedRevisions` as actual dense arrays
+with an own property at every index. Then privately snapshot their nested
+values and byte buffers; that same immutable snapshot feeds commitments and
+standard ABI encoding. Reject holes/prototype-supplied indexes and invalid
+order before any prompt. Do not compact, default, sort, dedupe, coerce or repair;
+duplicate RecordIds and an empty CAS vector remain legal. The closed codec's
+sparse-vector checks do not yet implement this three-container SDK boundary.
+
+Keep `equivalentPublicationWireBytes`, `plannedCanonicalCallBytes` and
+`payloadBytes` distinct in private diagnostics, with their respective W,
+branch/run-derived and F limits. Recheck actual encoded call/payload bytes
+before submission; even passing all three is not measured resource readiness.
+Recovery retains original raw transaction bytes and independently decodes and
+recomputes their semantic commitments; never normalize away distinct transport
+evidence merely because two accepted ABI layouts describe the same intent.
+
+SDK acceptance falsifiers: sparse/prototype indexes in each of the three
+containers refuse before encoding/prompt; caller or buffer mutation after
+planning changes neither digest nor calldata; legal duplicates/empty CAS
+round-trip; bad order rejects rather than sorts; semantic-equivalent ABI
+layouts preserve commitments but distinct raw evidence; semantic mutation
+changes the commitment or refuses. These are next adapter obligations, not
+tests executed by the publication-preparation component.
+
 Solidity 0.8.30 documents that its decoder does not enforce strict ABI mode
 although its encoder produces it; calldata avoids automatic whole-value
 copies when kept in that location. These facts motivate the bounded scan,
@@ -238,7 +277,9 @@ Direct calls are 96 bytes smaller. The last row with a 4,096-byte payload is
 6,788 composite / 6,692 direct. A 4,096-byte arithmetic sample is not a selected
 run file cap or a successful carrier/gas measurement.
 
-Implement the request boundary in the continuous Core track, then falsify:
+The preparation subset now executes in the continuous Core track; the
+[checkpoint](request-verification.md) distinguishes its evidence from the
+subsequent authority/join obligations below:
 
 - Body totals pass but `W` exceeds its cap; cap-1/exact/cap+1 rounded cases;
   actual-call excess, payload excess and an alias-amplified body vector.
