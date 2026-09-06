@@ -54,6 +54,10 @@ The [Codex integration notes](codex-integration-notes.md) close a source-scope
 ambiguity before bootstrap: the C0 account-support overlay must be explicit,
 not a B0 module falsely advertising unimplemented verification paths. They
 also identify the exact capability/group-root/session bytes still to build.
+The [authority-order refinement](authority-order-and-evidence.md) separates
+currently authorized retries from historical result reads and records the
+direct-EOA boundary and per-batch evidence requirements. It closes design
+ambiguities, not executed authentication or session coverage.
 
 ## Completed body checkpoint
 

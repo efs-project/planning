@@ -157,11 +157,17 @@ Before implementation, specify these three concrete inputs:
    lane or grant ID in its own preimage. Admission-time historical evidence
    must not be reinterpreted through a later live grant.
 
+The [selected retry-order and evidence refinement](authority-order-and-evidence.md)
+now distinguishes currently authorized writes from public historical reads,
+fixes shared lane-zero sequencing and selects a narrow direct caller rule.
+It records the source tension and required falsifiers, not an encoded module
+or executed wrapper.
+
 Common codecs plus composite/direct verification and batch evidence are a
 useful intermediate package. It must leave session NOT_IMPLEMENTED until the
-complete grant/program path executes; it cannot mint a complete C0 run. Define
-retry/nonce/budget ordering explicitly against B0's write-free all-ACTIVE
-receipt lookup and C0's authentication law. Preserve the weaker direct-transaction
+complete grant/program path executes; it cannot mint a complete C0 run. Encode
+and test the selected C0 ordering instead of inheriting B0's expired-retry
+shortcut. Preserve the weaker direct-transaction
 evidence grade: ordinary Core state cannot recover an unavailable transaction
 signature or turn sender observation into detachable publication proof.
 Tests must cover multiple accepting batches for one Envelope, wrong fields,
