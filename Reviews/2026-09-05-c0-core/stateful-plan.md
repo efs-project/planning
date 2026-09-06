@@ -403,32 +403,32 @@ cache bytes. Withdrawal decrements the original target's re-derived distinct
 key set once, not the Withdrawal source's keys; then zero-crosses unique-Type
 liveness. Two sibling Withdrawals see the first planned terminal target.
 
-- [ ] Write failing tests for Object + charter Binding in one call, whole-call
+- [x] Write failing tests for Object + charter Binding in one call, whole-call
   rollback on invalid last leaf, and early-selected group → typed instance.
   Require exact row/counter/key/head outputs; stub must fail behavior, not compile.
-- [ ] Implement store/read primitives and shadow/replay using Task 1 helpers.
+- [x] Implement store/read primitives and shadow/replay using Task 1 helpers.
   Test all twelve cases in the controlling stateful specification, with exact
   source-level typed rejections and full observable-state comparison after
   failure. No test-only seed port enters src/.
-- [ ] Test dependency-returning parser equivalence to the unchanged strict
+- [x] Test dependency-returning parser equivalence to the unchanged strict
   interface with exactly the returned dependencies; omission rejects. Cover
   repeated external IDs, reserved sentinels, missing dependency rollback and
   earlier-selected versus later/unselected dependency visibility. Re-run the
   prior admission/parser and current body regressions after the small extension.
-- [ ] Add test-host-only setup for exhaustion/PRE_WITHDRAWN source guards;
+- [x] Add test-host-only setup for exhaustion/PRE_WITHDRAWN source guards;
   label it unauthenticated setup, not proof of a working pre-withdrawal path.
   Exercise real kernel state for admitted-target withdrawal, retries and counts.
-- [ ] Reject oversized vectors, out-of-mask/duplicate/reordered selected rows,
+- [x] Reject oversized vectors, out-of-mask/duplicate/reordered selected rows,
   body identity mismatch and aggregate body bytes above 8192 before staging;
   test the aggregate bound with individually legal bodies. Do not claim final
   wire-size enforcement from this typed host's ABI calldata size.
-- [ ] Provide bounded raw state-read accessors in the test host for independent
+- [x] Provide bounded raw state-read accessors in the test host for independent
   enumeration. They are not the final public PageCursor/query ABI and must not
   invent COMPLETE at an unverified basis. Preserve raw history/Scope flags.
-- [ ] Test the bounded test-host result event on fresh, mixed and all-ACTIVE
+- [x] Test the bounded test-host result event on fresh, mixed and all-ACTIVE
   calls, including exact reused/fresh ordinals; it must follow the returned
   kernel result and cannot replace independently checked storage state.
-- [ ] Run full Solidity regression, normal runtime build-size checks and
+- [x] Run full Solidity regression, normal runtime build-size checks and
   self-review; report the exact exported tuples, managed-host deployment size
   status, RED/GREEN and unresolved source questions before committing.
   Measure runtime early enough to report a real fit problem while the task is
@@ -448,6 +448,17 @@ external RPC or unlimited code-size switch. If the stateful host exceeds the
 real deployment limit, return the measured size and narrow the physical
 topology problem explicitly; do not call an undeployable component ready.
 
+Use the selected three-component slice: deploy the real PreparationHelper and
+AdmissionLibrary, resolve every compiler-declared link in StatefulHarness,
+verify the library's runtime own-address patch from compiler metadata and
+construct the host with independently derived expected dependency identities.
+Verify complete actual runtimes and the four immutable dependency getters.
+No etched deployment, guessed library selector/patch offset or raw unpatched
+template hash substitutes for actual code. The four-component G0 V2 design
+also includes the carrier and real authority/bootstrap; it is not completed
+by this slice. Each actual transaction uses the source 16,777,216-gas ceiling,
+not an inference from the local node's larger block gas default.
+
 The reader consumes a pinned-block snapshot through Task 2's actual read ABI.
 It independently recomputes ordinary IDs, descriptor-derived caches, selected
 admission ordering, lifecycle, Binding transitions, counts and all posting
@@ -456,6 +467,14 @@ state fold or expected-root helper. Its reconstructed result must match every
 enumerated actual row/head/posting and reject missing, duplicated, substituted
 or reordered evidence. Incomplete transport yields basis-qualified UNKNOWN,
 not a valid empty state. Retain originals for audit; no browser state is truth.
+
+The collector must have explicit finite row, response-byte and total-work
+budgets, reported as local evidence-collection limits rather than protocol
+maxima. Check returned counts and remaining work before allocating or looping;
+never narrow a large ordinal/count through imprecise JavaScript numbers.
+Exhausted or unavailable collection is incomplete/UNKNOWN with its attempted
+basis, not malformed data, proven absence or a completed zero-row snapshot.
+Test inflated counts and truncated/oversized responses without huge allocations.
 
 Keep transaction contribution separate from state reconstruction. The test-only
 host event may establish `ALL_REUSED | MIXED | ALL_FRESH` only after receipt/log
@@ -473,8 +492,11 @@ the batch's block number alone cannot establish causality. Verify both real
 receipt/event results and the single actual state transition. Manual mining,
 if used, is restored in cleanup; this remains synthetic local execution.
 
-The snapshot basis binds chain, host address, block number/hash, observed host
-runtime and explicit local RPC source. Independent recomputation of this
+The snapshot basis binds chain, host address, block number/hash, complete host
+and both dependency runtimes/identities, and explicit local RPC source. Fetch
+all state and code at that pin; mismatched or missing required dependency
+evidence cannot establish verified kernel execution merely from Core's hash.
+Independent recomputation of this
 controlled node's returned state is not an Ethereum consensus/state proof.
 Preserve that provenance instead of upgrading source observation to a
 cryptographic proof. Missing or mixed-basis transport cannot yield a verified
@@ -499,6 +521,13 @@ and read the current head separately instead of folding only live history.
   and verify no kernel mutation. Test tampered/missing reader evidence.
 - [ ] Run full new Node/Solidity suites; record runtime/deployment and ordinary
   batch costs as internal-kernel evidence only. Do not regenerate old snapshots.
+- [ ] Include the measured retry falsifier as real local transactions: one
+  small Record repeated through a 64-leaf Envelope, prior admission of 63 via
+  small masks, then final-only versus mixed selection from equivalent state.
+  Retain exact receipts/state and gas ceilings. Separately sweep 1/8/16/32/64
+  simple selected/fresh counts; report actual success or resource refusal,
+  never structural caps as a guaranteed single-transaction capacity. Preserve
+  selected-leaf fallback and do not expand gas limits to make a case pass.
 - [ ] Report all required stateful acceptance outcomes and remaining public
   authority/bootstrap/page/Lens/Files integration. Root performs independent
   task/joined review, updates durable handoff and continues toward full C0.

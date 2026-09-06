@@ -1,12 +1,60 @@
 # Stateful integration evidence and retrospective
 
-**Status:** in progress. Pure Binding/index helpers are reviewed. The first
-inline stateful draft exceeds normal deployment limits. A linked layout now
-passes normal deployment and a publication smoke; full stateful acceptance is
-the next gate. The stateful kernel, independent
-state reader and full C0 journeys are not complete.
+**Status:** in progress. Helpers and the selected stateful kernel task are
+independently reviewed. Normal deployment and a publication smoke pass;
+independent state reconstruction is next. The full stateful plan and complete
+C0 journeys are not finished.
 
 ## Evidence so far
+
+### Canonical Task 2 implementation at e6dcb40
+
+The selected implementation is committed locally at
+`e6dcb40dc81e576bba15bd9899c00a330ff7801a`; independent task review approved
+spec compliance and quality, with no Critical/Important findings.
+Root freshly reran **86 Core Solidity executions (76 distinct test functions)**,
+**28 prior admission/parser tests**, and **34 Node executions**: all passed,
+zero failed/skipped. The Core total includes ten inherited repeats; the prior
+authenticated probe tests do not authenticate the new trusted host.
+
+Root also reproduced current-source normal sizes and a fresh managed local
+deployment/publication smoke. Core/library/helper runtimes are
+6,186/24,179/18,805 bytes. Current Core creation plus constructor arguments is
+11,810 bytes; the group-plus-Object publication receipt used 11,317,773 gas.
+All three actual runtimes and immutable identities matched, selected raw-state
+assertions passed and the owned child exited cleanly. The smoke's normal
+Cancun node uses a larger transaction allowance than the source C0 ceiling;
+this observed receipt is below that ceiling, but Task 3 must enforce it on
+every transaction and finish independent reconstruction.
+
+Actual runtime hashes for this source and its local deployment order:
+
+```text
+PreparationHelper fb7a6e93fbeb756d5db901cac83963cd3059003d245a5f81aeaff54905b82480
+AdmissionLibrary  990786dc086bda28f0625545792c0ef181d63b3c17412329a70772f493483686
+Core              2114dd92f551b215706338f6c15c9d9908caed739fd47a26b0b13d9d8e1df131
+```
+
+These are not the earlier experimental runtime-template hashes. Formatting
+can change compiler metadata/hash without changing measured code lengths.
+They describe the committed trusted-host slice, not permanent EFS identity.
+
+Deferred minor findings for the final whole-plan review:
+
+- Add explicit braces to the currently correct nested unique-Record revival
+  branch (`StateKernel.sol:436`) so its `else` binding is easier to maintain.
+- Document intentional packed-field/selector truncation invariants and resolve
+  justified cast lint narrowly (`StateKernel.sol:140`, `Preparation.t.sol:201`).
+  No incorrect cast was found; current build output is not lint-clean.
+
+The review's resource qualification is not a missing Task 2 claim: caps were
+explicitly provisional in its scope. Normal-budget transaction sweeps and
+full authority/bootstrap/resource validation remain required downstream.
+A saved worker size log contained an earlier test-only lookalike fixture
+excerpt; root's fresh final-source size/suite runs above supersede that log for
+current verification. No production-size claim relies on that stale excerpt.
+
+### Reviewed helper baseline
 
 Controller verification of `e10bc56`, repeated after fix `0c3b9ee`:
 
@@ -217,9 +265,9 @@ simply increasing the cap is viable: compact cache representation, storage
 cost, call gas and whole-transaction limits need measured comparison. Keep the
 selected stateful acceptance work separate rather than silently changing caps.
 
-### Journal allocation pressure to measure next
+### Journal allocation pressure and correction
 
-A read-only review found a reachable mixed-retry concern: the selected
+A read-only review found a reachable mixed-retry concern: the initial selected
 prototype reserves `256 * selectedLeaves + 4` Change entries whenever any
 leaf is fresh. Sixty-three ACTIVE leaves plus one fresh leaf therefore reserve
 the same capacity as sixty-four fresh leaves, although ACTIVE leaves stage no
@@ -237,8 +285,7 @@ changes, three unique-Type changes, plus the largest exclusive special branch:
 That is at most **185 per fresh leaf**, plus five call-wide Envelope/Principal/
 batch rows. The existing 256-per-selected capacity has slack, but the selected
 count wastes memory on retries. A proposed `256 * freshCount + 5` capacity
-keeps conservative slack without changing journal entries or their order;
-it requires an actual regression and normal-size recheck before adoption.
+keeps conservative slack without changing journal entries or their order.
 
 The minimal falsifier uses one retained 64-leaf Envelope repeating a small
 ordinary Record, with 63 occurrences already admitted via small masks. Compare
@@ -248,6 +295,33 @@ selected/fresh counts separately from group parsing and maximum reference
 fan-out. Structural carriage caps are not guaranteed single-transaction
 capacity; source-selected-leaf fallback remains necessary. No new owner
 decision or broader journal rewrite follows from this targeted measurement.
+
+The implementer then reproduced the mixed-retry defect and applied that
+allocation-only correction. Root independently reran the stable regression
+against StateKernel SHA256
+`d4456cad413bfaaa8c1efa2f61bcfe9bfb143913ceb812e1c6c3028bd63fc858`:
+
+| Host-call gas measurement | Before (implementer RED) | After (root-reproduced GREEN) |
+|---|---:|---:|
+| Select only the final fresh leaf | 374,101 | 374,678 |
+| Select 63 ACTIVE plus one fresh leaf | 30,820,604 | 3,277,006 |
+| Select 64 all-ACTIVE leaves afterward | 2,653,526 | 2,655,004 |
+
+These are `gasleft()` deltas around host calls inside Forge, not actual
+transaction receipts or maxima. Snapshot/revert restores identical storage
+for the first two calls; the fixed final-only → restore → mixed → all-ACTIVE
+order does not establish identical access warmth. The test also compares
+complete observable final state and exact fresh batch/ordinal outcomes. Root
+reproduced its passing bounded-overhead assertion. The prior source/log keeps
+the RED evidence; the initial retained linked variant uses the old allocation.
+
+Root's normal size gate still passes after this correction and the constructor
+identity guard: Core runtime/creation **6,186/8,514**, library **24,179/24,211**,
+helper **18,805/18,831** bytes. Library runtime margin is now **397 bytes**.
+The earlier successful deployment smoke remains evidence for its retained
+pre-correction artifact; the canonical rerun above covers the current source.
+Independent task review approved the scoped implementation. The fix does not guarantee that sixty-four
+fresh items or arbitrary legal schemas fit the transaction budget.
 
 ## What the design pass changed
 

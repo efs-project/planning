@@ -131,6 +131,43 @@ baseline being compared.
 | Type-group root | Sixteen exact candidate blobs; [160-byte run-local root grammar and literal vector](bootstrap-inputs.md) | Implement independent codecs and enforce the seed's expected inventory during G4, then reconstruct from retained state. Preserve the 6/3/6/1 inventory/order; one-off vector agreement is not bootstrap completion. |
 | Run bounds | Component-only carrier/schema measurements | Measure complete Core+carrier operations and the required read/proof/client costs before selecting valid immutable run bounds. |
 
+## Next authenticated boundary, after stateful reconstruction
+
+The next bounded authority increment should reuse C0's exact publication,
+ExpectedRevision, RealmEffects and WritePlan fields/type strings, plus its
+intrinsic EOA descriptor/Principal identity. The existing authenticated
+[Type probe](../2026-09-05-c0-admission/run-codec.md#sole-write-shape) supplies
+composite-signature recovery and independent-vector evidence, not a finished
+wrapper. Its arbitrary nonce lanes, one-schema-author/one-leaf scope, singular
+Envelope witness, documentary basis label and probe genesis are explicit
+shortcuts; preserve the old evidence rather than silently adopting them.
+
+Before implementation, specify these three concrete inputs:
+
+1. Versioned C0 AUTHORITY branch/program/error/basis rows and failure order,
+   including EOA code observations and exact direct-caller rules. Reuse the
+   B0 owner-module grammar, not its unsupported ACTIVE verifier inventory.
+2. Historical evidence per fresh accepting batch: exact plan/effects/witness,
+   actual signer and context, with grant linkage for session writes. B0's
+   256-bit basis word is fully occupied; an evidence/grant ID needs an explicit
+   extension, not unused bits or a documentary string hash.
+3. Exact grant/EOA approval/registration/revocation bytes and metering units.
+   Normal composite/direct writes use lane zero; a session's approved nonzero
+   uint192 lane maps permanently to one grant. No truncated hash lane, recycled
+   lane or grant ID in its own preimage. Admission-time historical evidence
+   must not be reinterpreted through a later live grant.
+
+Common codecs plus composite/direct verification and batch evidence are a
+useful intermediate package. It must leave session NOT_IMPLEMENTED until the
+complete grant/program path executes; it cannot mint a complete C0 run. Define
+retry/nonce/budget ordering explicitly against B0's write-free all-ACTIVE
+receipt lookup and C0's authentication law. Preserve the weaker direct-transaction
+evidence grade: ordinary Core state cannot recover an unavailable transaction
+signature or turn sender observation into detachable publication proof.
+Tests must cover multiple accepting batches for one Envelope, wrong fields,
+signer/sender/lane, replay/expiry and whole-call rollback. This is source-mapped
+remaining engineering, not an owner identity redesign or a completed codec.
+
 ## Source anchors
 
 - [Encoding §1.6](../2026-08-13-efs2-stage-a-corpus/chapters/b0-encoding-and-ids.md):

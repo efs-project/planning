@@ -79,12 +79,16 @@ task review closed. Inline stateful layouts fail normal deployment and the
 typed-journal attempt was larger. The selected fixed linked-admission layout
 now passes normal deployment and a real local publication smoke: Core 6,186,
 AdmissionLibrary 24,190 and preparation helper 18,805 runtime bytes. The library
-has only 386 bytes spare. The immediate next step is completing the stateful
-acceptance matrix and constructor identity guards, keeping one atomic store,
-chronological replay and all required readback. See the
+has only 386 bytes spare in that original measurement. The canonical
+implementation at `e6dcb40` adds constructor identity refusal and fixes mixed
+retry allocation, reducing library runtime to 24,179 bytes (397 spare).
+Independent task review approved; root reproduced 86 Core executions
+(76 distinct), 28 parser/admission and 34 Node passes plus a fresh current-code
+deployment smoke. The immediate next step is the independent reader over this
+one atomic store, chronological replay and complete raw readback. See the
 [stateful evidence and retrospective](stateful-verification.md) for exact
-sizes and the limited smoke evidence. The independent state reader follows
-Task 2 review; it has not been completed by that smoke. The
+sizes, retry cost correction and limited smoke evidence. The independent
+state reader has not been completed by that smoke. The
 bounded input/dependency/readback interfaces and SDK transaction-correlation
 requirements are pinned in the plan. This remains unfinished capability work,
 not a completed C0 acceptance claim.
