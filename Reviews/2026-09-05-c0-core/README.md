@@ -172,6 +172,12 @@ The [verification checkpoint](occurrence-receipt-verification.md) retains the
 full evidence; final whole-increment review approved through `50268e3` without
 a fix wave. Initialized/authenticated Core remains the integration boundary.
 
+The next [Binding read component](binding-reads-design.md) uses packed current
+heads and bounded raw-history lookup, preserving one basis and original
+producing occurrences. It supplies the foundation for the shared page/Scope
+engine; its [implementation plan](binding-reads-plan.md) names one bounded
+code/test task. It does not replace the remaining required read capabilities.
+
 The [SDK/static Files handoff](browser-integration-handoff.md) reconciles the
 PMs' source-backed adapter responsibilities and the next joined browser trace.
 It preserves the existing lab control, specifies one SDK truth adapter and
