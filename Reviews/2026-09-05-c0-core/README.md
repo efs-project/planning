@@ -63,8 +63,15 @@ selects distinct C0 verifier programs and bounded operation-only validation
 before the existing state planner. The [batch-evidence codec draft](batch-authority-evidence.md)
 specifies a bounded per-batch extension without overwriting Envelope evidence
 or the original full basis word. The [common codec implementation plan](authority-codec-plan.md)
-is the next two-task increment: pure commitments/retention plus independent
+is the current two-task increment: pure commitments/retention plus independent
 reader agreement, not another mutation path or an authentication-complete claim.
+Its [execution/review checkpoint](authority-codec-verification.md) records the
+reviewed Solidity implementation/test hardening through `aff4d8c` and the
+reviewed independent reader at `5f16e56`. Root reproduced 107 Core, 28 parser
+and 76 Node passes, including actual deployed cross-language agreement. The
+final joined codec gate is still pending. Exact authority
+rows and a source-reviewed wrapper sequence now supply concrete next inputs
+without splitting or duplicating the existing state planner.
 
 ## Completed body checkpoint
 

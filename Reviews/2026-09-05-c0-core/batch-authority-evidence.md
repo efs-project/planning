@@ -1,7 +1,9 @@
 # C0 batch authority evidence: first executable boundary
 
-**Status:** draft reversible engineering input for composite/direct C0;
-not implemented, a complete C0 module, or permanent protocol bytes.
+**Status:** reversible composite/direct C0 framing input; pure Solidity encoder
+and independent reader implemented and task-reviewed, joined review pending. Persistence and
+authentication are not implemented; this is not a complete C0 module or
+permanent protocol bytes. See [execution basis](authority-codec-verification.md).
 
 This closes the retention format needed by the
 [selected authorization/retry law](authority-order-and-evidence.md).
@@ -147,14 +149,23 @@ the sequence prestate and exhaustion bounds, and evidence length before
 calling the kernel. All operation/Files checks must also have passed by the
 kernel's first journal write, not merely after it returns.
 
+Keep all nonce/evidence preparation in memory until the existing kernel has
+completed its own plan and replay. In particular, consuming the sequence
+before calling `admit` would put later kernel semantic checks after the first
+wrapper write. The [concrete wrapper sequence](authority-module-boundary.md#concrete-sequence-around-the-current-admit)
+uses its existing return value; it introduces no prepare/commit API. The
+all-reused path still calls the kernel for persisted-Type/self-envelope
+OCCREF validation and never allocates new evidence.
+
 Persist the prepared extension at the actual returned batch ID in the same
 transaction as the accepted sequence, kernel and carrier effects. Post-call
 batch-ID/prestate checks may assert an already selected invariant, not make a
 new semantic authorization decision. A failure anywhere reverts every EFS
 store; no external authority callback can observe an intermediate journal.
-The exact operation preflight integration is still being selected against the
-397-byte admission-library margin; this note does not assume the current
-all-in-one `admit` exposes a prepare/commit hook that it does not have.
+The exact Files/carrier operation validators still need implementation and
+measurement against the 397-byte admission-library margin. The current
+all-in-one `admit` does not expose a prepare/commit hook and the nonce/evidence
+join does not require one.
 
 Provide a bounded state getter by positive batch ID. Existing batch counts
 are the enumeration authority; zero/out-of-range is an error, not a receipt.

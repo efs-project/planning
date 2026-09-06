@@ -169,8 +169,12 @@ the direct-Core executor convention and bounded operation-only validation
 before the existing planner. The [batch-evidence codec](batch-authority-evidence.md)
 drafts exact composite/direct retention (at most 1,036 bytes), with one
 immutable value per accepting batch and separate transaction contribution.
-Exact module rows, outer wire/operation guards and joined implementation are
-still required; neither draft supplies full session or G0 coverage.
+The module note now supplies exact source-reviewed rows/programs; their actual
+serialization, outer wire/operation guards and joined implementation are still
+required. The [codec checkpoint](authority-codec-verification.md) records the
+reviewed pure Solidity encoder and independent reader/deployed agreement;
+the joined codec gate remains pending.
+Neither that component nor the written rows supply full session or G0 coverage.
 
 Common codecs plus composite/direct verification and batch evidence are a
 useful intermediate package. It must leave session NOT_IMPLEMENTED until the
