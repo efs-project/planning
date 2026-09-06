@@ -172,11 +172,20 @@ The [verification checkpoint](occurrence-receipt-verification.md) retains the
 full evidence; final whole-increment review approved through `50268e3` without
 a fix wave. Initialized/authenticated Core remains the integration boundary.
 
-The next [Binding read component](binding-reads-design.md) uses packed current
+The [Binding read component](binding-reads-design.md) uses packed current
 heads and bounded raw-history lookup, preserving one basis and original
 producing occurrences. It supplies the foundation for the shared page/Scope
 engine; its [implementation plan](binding-reads-plan.md) names one bounded
-code/test task. It does not replace the remaining required read capabilities.
+code/test task. The partial implementation at `ae9367d` passes its first actual
+Binding scenario but the combined test host exceeds the normal runtime cap
+by2,160 bytes. The [constraint/evidence record](binding-reads-verification.md)
+keeps the task open pending measured layout, remaining tests and independent
+review. It does not replace the remaining required read capabilities.
+
+The [nested-prefix refinement](read-overlay.md#nested-unique-prefix-refinement)
+separates consumed query coverage from boundary-only inspections to avoid a
+binary search per nested Record. Its retained finite model is not Solidity,
+full cursor, storage or gas evidence; those remain in the next page task.
 
 The [SDK/static Files handoff](browser-integration-handoff.md) reconciles the
 PMs' source-backed adapter responsibilities and the next joined browser trace.

@@ -1,7 +1,8 @@
 # Binding heads and retained history at one basis
 
-**Status:** selected reversible implementation specification; not implemented
-or a completed C0 capability. Continues the published occurrence checkpoint.
+**Status:** selected reversible specification; partial implementation at `ae9367d`
+exceeds the normal host runtime cap. See [measured constraint](binding-reads-verification.md).
+Not a completed C0 capability; continues the published occurrence checkpoint.
 
 Implement the existing [B0 Binding reads](../2026-08-13-efs2-stage-a-corpus/chapters/b0-binding.md)
 and [INDEX Binding-at-basis law](../2026-08-13-efs2-stage-a-corpus/chapters/b0-indexes.md)

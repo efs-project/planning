@@ -200,10 +200,67 @@ be retained before a real Core can claim complete receipt reconstruction.
 
 Keep B0's two page cursor grammars and context formulas unchanged, applying
 the ordinary formula to Scope's explicit kind 10. Charge every outer and
-inner posting examined to PAGE_SCAN_MAX=1,024; a dead-only window can return
-empty PARTIAL with a resumable cursor. Validate canonical ends from state,
+inner **consumed** posting to PAGE_SCAN_MAX=1,024; a dead-only window can return
+empty PARTIAL with a resumable cursor. Boundary-only inspections are separately
+accounted work, as explicitly refined below. Validate canonical ends from state,
 reserved/version bits, query/mode/RealmRevision context and every physical
 position. A resumed suffix's COMPLETE is not proof that prior pages were read.
+
+### Nested unique-prefix refinement
+
+For historical unique-Type walks, do not require a binary upper-bound search
+for every nested Record. A valid strictly increasing list `p` with count `n`
+has `i < upper_bound(H)` exactly when `i < n && p[i] <= H`. The outer canonical
+end remains checked exactly as before. An active inner cursor may prove its
+position is in the canonical prefix by this checked direct predicate, instead
+of materializing the inner end. Both cursor encodings and context tags stay
+unchanged; all inspected packed words/ordinals and Record associations retain
+their state-integrity checks. This relies on admission-maintained ordering;
+it does not audit unvisited rows.
+
+This is an **explicit C0 refinement** of B0 INDEX§3.3/5.1a's "every examined"
+and "without prefetch" wording. A boundary-only inspection reads an ordinal
+solely to prove prefix membership or normalize a cursor. It does not inspect
+lifecycle, hydrate, emit or consume that position. It is excluded from
+`coverage`, but must be separately counted in instrumentation and gas evidence.
+No prefetch means no semantic consumption beyond the stopping point; it does
+not forbid these bounded boundary checks. Every eligible inner item actually
+processed is charged once to coverage and the shared scan budget.
+
+Use this exact next-state order:
+
+1. At loop entry, test membership before charged lifecycle processing. A
+   physical position at count needs no posting read; lastOrdinal≤H permits
+   the count fast path. A resumed position outside the prefix is a cursor
+   error, not a successful empty page.
+2. On a live match, emit the stable outer Record anchor and advance to the next
+   outer position with innerPlusOne0; do not inspect the next inner item.
+3. After a dead inner item, advance its index. If continuing, the next loop
+   entry checks membership. If stopping now, one boundary-only check normalizes
+   the cursor: still eligible → retain this inner position; exhausted → advance
+   outer, possibly COMPLETE. Never emit a cursor that its next call must reject.
+4. Stopping immediately after an outer anchor may emit `(outer,1)`. Verify
+   that this anchor is the retained Record's first admission and first by-Record
+   posting, so its inner index0 is known eligible at H. On resume, repeat the
+   required identity checks without consuming the outer candidate twice.
+
+The [finite model](reference/unique-prefix-model.mjs) compared12,830 range
+predicates and1,290,330 inner stop/coverage cases against an independently
+computed end, including u48-near-boundary positions and a counterexample when
+ordering is absent. Root ran it with Node26 at the Binding design checkpoint.
+It establishes finite ordered-list equivalence only: no actual cursor words,
+packed storage, outer-loop integration, Solidity, normal-cap or gas proof.
+Those remain required in the shared-page task. An implementation should avoid
+the model's redundant per-step boundary checks by reusing the checked candidate.
+
+Do not infer a read-gas guarantee from this improvement. Measure boundary,
+lifecycle and hydration work separately, especially dead-only pages. No
+unmeasured `gasleft()` threshold is selected here. An underfunded call remains
+a call failure/UNKNOWN to a consumer, not a fabricated successful PARTIAL;
+successful bounded stopping must have an exact progressing cursor and enough
+measured return budget. Lowering maxItems alone cannot bound a dead-only scan.
+
+### Result-size measurement inputs
 
 Keep maximum raw items 512 and hydrated items 256 for the next measurement,
 not as already-proven gas fit. Actual canonical ABI return sizes are:
@@ -271,6 +328,12 @@ cursor stop/corruption case; dead-only empty PARTIAL; unique anchor withdrawn
 while another occurrence is live; historical Binding before/after tombstone
 and withdrawal; Scope first tombstone and no duplicate anchor; exact ABI sizes;
 bounded scans/probes/read gas; one-basis SDK reconstruction after new writes.
+For the nested-prefix refinement, compare exact items/coverage/completeness/
+cursor words against an end-based oracle: resume at last eligible and refuse
+at end; dead scan-stop before next `<H`/`==H`/`>H`/no physical next; last dead
+item of the last outer Record; live match coinciding with either limit; outer
+anchor/inner/between-Record stops; new writes beside a pinned-H continuation;
+and malformed boundary words as separately labeled state-refusal cases.
 
 SDK cases also include staged Type-subread failures; whole Record body versus
 extracted groupBytes; supported zero versus unsupported-no-value and forged
