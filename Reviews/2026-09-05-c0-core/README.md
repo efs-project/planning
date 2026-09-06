@@ -153,7 +153,9 @@ uses one compiled exact artifact instead of a general onchain interpreter.
 Its exact domain/raw-string rows and the [INDEX revision-2 inventory](index-materialization.md)
 now pin concrete serializer inputs, retire an understated aggregate fan-out
 estimate and keep optional convenience reads outside the first Core surface.
-Their implementations and full capability/authority coverage remain next work.
+The [outer revision-2 row sheet](outer-materialization.md) now closes numeric,
+code-dictionary and fixed-format inventory as well. Serializer implementation,
+full capability/authority coverage and actual joined budgets remain next work.
 The [point-read plan](point-reads-plan.md) now implements shared original
 Type/Record/Envelope projections and bounded storage-byte access through `154fcbe`.
 Root reproduced151 Forge/92 Node checks; task and whole-increment review closed
@@ -161,10 +163,19 @@ after missing negative tests, duplicated frame validation and returned-Envelope
 evidence assertions were repaired. The
 [verification checkpoint](point-reads-verification.md) preserves the separate
 trusted host and later occurrence/query/authority/initializer work.
-The next [occurrence/receipt design](occurrence-receipt-design.md) and
-[bounded implementation plan](occurrence-receipt-plan.md) add current-state
-admission/lifecycle and original accepting-batch projections, without another
-store or write path. They are not yet implementation evidence.
+The [occurrence/receipt design](occurrence-receipt-design.md) and
+[bounded implementation plan](occurrence-receipt-plan.md) now execute at
+`08c2a16`: current admission/lifecycle and original accepting-batch projections,
+without another store or write path. Root reproduced160 Forge/93 Node checks
+and normal18,664-byte host deployment; independent task review approved.
+The [verification checkpoint](occurrence-receipt-verification.md) retains the
+full evidence and outstanding final increment review/initialized-Core boundary.
+
+The [SDK/static Files handoff](browser-integration-handoff.md) reconciles the
+PMs' source-backed adapter responsibilities and the next joined browser trace.
+It preserves the existing lab control, specifies one SDK truth adapter and
+keeps wallet/action code out of guest boot. Its prerequisite is the actual
+initialized/authenticated C0 ABI and run, not a test-harness address swap.
 
 ## Owner followups
 

@@ -72,7 +72,7 @@ methods for the fixed rows/dictionaries/counts used below. No such setter in
 src/. Keep probe accounting private; tests may trace storage access but do not
 add an unnecessary public probe-count ABI to the normal host.
 
-- [ ] **Step 1: Compile the interfaces and capture behavioral RED.**
+- [x] **Step 1: Compile the interfaces and capture behavioral RED.**
 
 Start with compiling refusal stubs and an actual normal admission fixture.
 Use the unchanged helper/library and a valid group Record admission from
@@ -93,7 +93,7 @@ Run focused `forge test --offline --use <cached solc0.8.30> --match-path test/Oc
 Preserve successful compilation and the expected behavioral failing output in
 the report/ignored log. Import/compiler failure is not behavioral RED.
 
-- [ ] **Step 2: Implement shared no-copy Envelope metadata and hydration.**
+- [x] **Step 2: Implement shared no-copy Envelope metadata and hydration.**
 
 Extract current `getEnvelope` framing checks without weakening any guard or
 changing its absence/return ABI. Return its ordinal/count/Principal/epoch as
@@ -124,7 +124,7 @@ Ordinal inputs0/at-sentinel/over-H use ErrReadOrdinal after retained-H checks;
 known corrupted joins use ErrReadState with the spec's pair/ordinal subject.
 Do not infer authority, revalidate content bytes, or enable PRE_WITHDRAWN.
 
-- [ ] **Step 3: Implement bounded accepting-batch lookup and receipt.**
+- [x] **Step 3: Implement bounded accepting-batch lookup and receipt.**
 
 Decode/validate every batch probe's48/16/48/32 metadata and zero high bits.
 Use positive batchCount≤H and the greatest first boundary≤ordinal, e.g.:
@@ -147,7 +147,7 @@ arithmetic and checked ranges. No full state/history scan. Return original
 basis/codehash/block/revision, joined epoch and exact ordinal, accepted1 and
 current lifecycle. Receipt search is not performed for ordinary hydration.
 
-- [ ] **Step 4: Validate real transitions and targeted corrupted-state refusal.**
+- [x] **Step 4: Validate real transitions and targeted corrupted-state refusal.**
 
 Real admission cases: fresh; sparse leaf63; two calls selecting different
 leaves of the same Envelope; same Record in different Envelopes; all-reused
@@ -177,7 +177,7 @@ those synthetic rows were admitted. Compare otherwise-identical hydration
 with small and maximum stored body/cache lengths, confirming no byte-length
 proportional read/copy. Rerun old `PointReads.t.sol` after metadata extraction.
 
-- [ ] **Step 5: Independently reconstruct normal-deployment results.**
+- [x] **Step 5: Independently reconstruct normal-deployment results.**
 
 Use unchanged `compileStateful`/`withStateful` and normal host deployment,
 artifact links/immutables and resource caps as in point-reads.test.mjs. Keep
@@ -202,7 +202,7 @@ Report actual runtime/initcode/deploy gas, representative occurrence/receipt
 gas and exact returndata; enforce normal caps and managed cleanup. Results
 remain test-host/component evidence, not authenticated full initialized C0.
 
-- [ ] **Step 6: Cover, self-review, and commit exact files.**
+- [x] **Step 6: Cover, self-review, and commit exact files.**
 
 Run `forge build --force --ast --build-info --offline --use <cached solc0.8.30>`;
 full Core `forge test --offline --use <cached solc0.8.30>` once; expanded Node

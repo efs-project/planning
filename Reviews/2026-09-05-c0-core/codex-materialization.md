@@ -62,10 +62,10 @@ unsupported-query and actual returndata-size gaps. `selectBestLocator` is
 outside the eighteen C0 capabilities: no active selector/layout/context or
 promise of its ranking behavior may be copied in and then left unimplemented.
 Existing numeric codes kept by the overlay retain their values; omission is
-not renumbering or reassignment. The exact outer/INDEX row sheet is required
-before serializer implementation; INDEX's selected row sheet is now linked
-above. The remaining outer inventory is not a license to invent missing tables
-from this architecture note.
+not renumbering or reassignment. The [outer sheet](outer-materialization.md)
+and linked INDEX sheet are the exact serializer inputs; unresolved owner
+programs and dependency/result inventory cannot be invented from this
+architecture note.
 
 An intermediate artifact with session explicitly reserved/unsupported can
 test encoders and composite/direct work. It is **not a complete C0 Codex or
@@ -76,8 +76,9 @@ There is no late mutable bit flip to promote the intermediate artifact.
 ## Source-to-C0 outer-table disposition
 
 The following closes which B0 material may enter the active outer inventory;
-the exact revision-2 framing and string/result registry are the next bounded
-serializer spec. Source: encoding §§1.3/1.6/2.6, current TypeGroupParser,
+the [outer row sheet](outer-materialization.md) now supplies exact revision-2
+framing, numeric/code tables and fixed grammar. ABI_RESULT still requires the
+actual joined Core. Source: encoding §§1.3/1.6/2.6, current TypeGroupParser,
 RecordBody/IndexKeys and StateStore. Omitted portable meanings are not reused.
 
 | Rows | C0 disposition |
@@ -150,7 +151,8 @@ truncation and length mismatch. These are not domain-preimage rows subject
 to the `efs2/...` domain grammar or its 64-byte bound: in particular the
 PublicationEnvelope type string is longer. This section does not introduce
 arbitrary user-provided string constants or change any portable identity.
-All remaining outer section ordering is preserved.
+Existing outer sections preserve their relative order; the supplemental
+constant/grammar insertions are explicit in the [outer sheet](outer-materialization.md).
 With the exact names/values above, this raw-string section is414 bytes,
 including its two-byte count; use that independently derived length as a
 literal framing check, not a substitute for validating every row.
@@ -240,9 +242,10 @@ Omit B0's unsupported intrinsic evolution Types, with no zero placeholders.
 
 ## Validation and remaining work
 
-1. Finish the remaining exact outer numeric/ABI_RESULT inventory and complete
-   session/error program rows. Use the selected INDEX/domain/raw-string inputs;
-   distinguish inert metadata from executable promises explicitly.
+1. Use the selected [outer inventory](outer-materialization.md) alongside
+   INDEX/domain/raw-string inputs. Complete ABI_RESULT and session/error
+   programs, and classify the remaining dependency budgets; distinguish inert
+   metadata from executable promises explicitly.
 2. Implement two independently structured full encoders/readers, strict
    original-input validation and literal vectors; reject reordered/duplicate/
    missing/unknown rows, extra/truncated bytes and cross-version confusion.
