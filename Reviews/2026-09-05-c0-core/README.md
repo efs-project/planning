@@ -145,7 +145,8 @@ The [bootstrap codec component](bootstrap-codecs-verification.md) now implements
 the V2 seed/deployment and configuration-selection readers through `c2b5f7b`.
 Root reproduced131 Core/91 expanded Node and unchanged V1 tests; task review
 approved after complete deployed-field/u64 comparisons were added. Final
-whole-increment review remains pending. These tests do not initialize Core.
+whole-increment review approved `de58903..a0af29f` without a blocking fix wave.
+These tests do not initialize Core.
 The [read overlay](read-overlay.md) fixes the shared read surface and SDK
 evidence/budget contract; the [Codex materialization selection](codex-materialization.md)
 uses one compiled exact artifact instead of a general onchain interpreter.
