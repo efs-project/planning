@@ -198,7 +198,9 @@ contract PreparationTest {
                     )
                 )
             );
-        require(!ok && bytes4(e) == Preparation.HelperIdentity.selector, "wrong helper must reject");
+        // The returndata length guard makes narrowing to the revert selector exact.
+        // forge-lint: disable-next-line(unsafe-typecast)
+        require(!ok && e.length >= 4 && bytes4(e) == Preparation.HelperIdentity.selector, "wrong helper must reject");
     }
 
     function testReturndataBoundAndStaticWriteRefusal() public {
@@ -210,7 +212,12 @@ contract PreparationTest {
                     h.invoke, (Preparation.Config(address(bomb), address(bomb).codehash), hex"", 8192, 1000000)
                 )
             );
-        require(!ok && bytes4(e) == Preparation.HelperOutput.selector, "oversized output rejected before decode");
+        // The returndata length guard makes narrowing to the revert selector exact.
+        require(
+            // forge-lint: disable-next-line(unsafe-typecast)
+            !ok && e.length >= 4 && bytes4(e) == Preparation.HelperOutput.selector,
+            "oversized output rejected before decode"
+        );
         PreparationWriter w = new PreparationWriter();
         (ok,) = address(h)
             .staticcall(
@@ -229,6 +236,8 @@ contract PreparationTest {
                     (Preparation.Config(address(bomb), address(bomb).codehash), new bytes(163841), 8192, 1000000)
                 )
             );
-        require(!ok && bytes4(e) == Preparation.HelperInput.selector, "oversized calldata rejected");
+        // The returndata length guard makes narrowing to the revert selector exact.
+        // forge-lint: disable-next-line(unsafe-typecast)
+        require(!ok && e.length >= 4 && bytes4(e) == Preparation.HelperInput.selector, "oversized calldata rejected");
     }
 }

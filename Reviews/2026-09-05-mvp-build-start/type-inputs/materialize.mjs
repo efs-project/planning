@@ -1,11 +1,17 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { resolve } from 'node:path';
+import { isAbsolute, relative, resolve } from 'node:path';
 import { encodeBlob, encodeGroup, derive } from './encoder.mjs';
 import { parseGroup } from './parser.mjs';
 const root = new URL('../../../', import.meta.url);
+const rootPath = realpathSync(fileURLToPath(root));
 const inputUrl = new URL('./inputs.v1.json', import.meta.url);
+const MAX_SOURCES = 32;
+const MAX_SOURCE_BYTES = 1024 * 1024;
+const MAX_TOTAL_SOURCE_BYTES = 8 * 1024 * 1024;
+const GIT_TIMEOUT_MS = 5000;
 const order = [
     ['ObjectGenesis/1', 'ResolutionPlan/1', 'ByteDigest/1', 'ChunkTree/1', 'Locator/1', 'RepresentationBinding/1'],
     ['BindingSet/1', 'BindingTombstone/1', 'Withdrawal/1'],
@@ -13,6 +19,76 @@ const order = [
     ['MvpC0BootstrapSeal/1']
 ];
 const sha = b => createHash('sha256').update(b).digest('hex');
+function sourceEntries(input) {
+    if (!input.sources || typeof input.sources !== 'object' || Array.isArray(input.sources))
+        throw Error('invalid sources');
+    const entries = Object.values(input.sources);
+    if (entries.length === 0 || entries.length > MAX_SOURCES)
+        throw Error('source count limit');
+    for (const s of entries) {
+        if (!s || typeof s.path !== 'string' || s.path.length === 0 || isAbsolute(s.path)
+            || s.path.includes('\\') || s.path.includes(':')
+            || s.path.split('/').some(part => part === '' || part === '.' || part === '..'))
+            throw Error('invalid source path: ' + String(s?.path));
+        if (typeof s.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(s.sha256))
+            throw Error('invalid source sha256: ' + s.path);
+    }
+    return entries;
+}
+function git(args, maxBuffer) {
+    return execFileSync('git', ['-C', rootPath, ...args], {
+        timeout: GIT_TIMEOUT_MS,
+        maxBuffer,
+        stdio: ['ignore', 'pipe', 'pipe']
+    });
+}
+function requireRevision(revision) {
+    try {
+        git(['cat-file', '-e', `${revision}^{commit}`], 64 * 1024);
+    } catch {
+        throw Error('source revision unavailable: ' + revision);
+    }
+}
+function revisionSource(s, revision) {
+    try {
+        return git(['cat-file', 'blob', `${revision}:${s.path}`], MAX_SOURCE_BYTES + 1);
+    } catch {
+        throw Error('source blob unavailable or exceeds byte limit: ' + revision + ':' + s.path);
+    }
+}
+function workingTreeSource(s) {
+    const path = resolve(rootPath, s.path);
+    let real;
+    try {
+        real = realpathSync(path);
+    } catch {
+        throw Error('working-tree source unavailable: ' + s.path);
+    }
+    const fromRoot = relative(rootPath, real);
+    if (fromRoot.startsWith('..') || isAbsolute(fromRoot))
+        throw Error('invalid source path: ' + s.path);
+    const stat = statSync(real);
+    if (!stat.isFile() || stat.size > MAX_SOURCE_BYTES)
+        throw Error('working-tree source unavailable or exceeds byte limit: ' + s.path);
+    return readFileSync(real);
+}
+function verifySources(input, sourceMode) {
+    if (!['revision', 'working-tree'].includes(sourceMode))
+        throw Error('invalid source mode: ' + sourceMode);
+    if (typeof input.sourceRevision !== 'string' || !/^[0-9a-f]{40}$/.test(input.sourceRevision))
+        throw Error('invalid source revision');
+    const entries = sourceEntries(input);
+    if (sourceMode === 'revision') requireRevision(input.sourceRevision);
+    let total = 0;
+    for (const s of entries) {
+        const bytes = sourceMode === 'revision' ? revisionSource(s, input.sourceRevision) : workingTreeSource(s);
+        total += bytes.length;
+        if (bytes.length > MAX_SOURCE_BYTES || total > MAX_TOTAL_SOURCE_BYTES)
+            throw Error('source byte limit');
+        if (sha(bytes) !== s.sha256)
+            throw Error('source commitment mismatch: ' + s.path);
+    }
+}
 // Upper bound on structurally legal bodies, before contextual profile rules.
 function maxBody(f) {
     if (f.kind === 'BOOL')
@@ -33,14 +109,10 @@ function maxBody(f) {
         return 2 + f.max * maxBody(f.inner);
     throw Error('body-size subset');
 }
-export function buildArtifacts(input = JSON.parse(readFileSync(inputUrl, 'utf8'))) {
+export function buildArtifacts(input = JSON.parse(readFileSync(inputUrl, 'utf8')), { sourceMode = 'revision' } = {}) {
     if (input.format !== 'efs-c0-temporary-type-inputs/1')
         throw Error('input format');
-    for (const s of Object.values(input.sources)) {
-        const digest = sha(readFileSync(new URL(s.path, root)));
-        if (digest !== s.sha256)
-            throw Error('source commitment mismatch: ' + s.path);
-    }
+    verifySources(input, sourceMode);
     if (JSON.stringify(input.groups.map(g => g.map(s => s.name))) !== JSON.stringify(order))
         throw Error('ordered inventory mismatch');
     const qualification = Buffer.from(input.qualificationAscii, 'ascii');
@@ -109,7 +181,9 @@ export function buildArtifacts(input = JSON.parse(readFileSync(inputUrl, 'utf8')
     };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-    const result = buildArtifacts(), output = JSON.stringify(result, null, 2) + '\n', outUrl = new URL('./artifacts.v1.json', import.meta.url);
+    const sourceMode = process.argv.includes('--working-tree') ? 'working-tree' : 'revision';
+    const result = buildArtifacts(undefined, { sourceMode });
+    const output = JSON.stringify(result, null, 2) + '\n', outUrl = new URL('./artifacts.v1.json', import.meta.url);
     if (process.argv.includes('--write'))
         writeFileSync(outUrl, output);
     else if (process.argv.includes('--check')) {

@@ -136,11 +136,17 @@ library StateKernel {
         uint256 fresh;
         for (uint256 i; i < p.leaves.length; ++i) {
             SelectedLeaf memory leaf = p.leaves[i];
-            uint256 status = s.occurrences[occKey(p.envelopeId, leaf.leafIndex)].packed;
-            if (uint8(status) > 1) revert E_NO_RESURRECTION(p.envelopeId, leaf.leafIndex);
-            uint64 ord = uint64((status >> 8) & GUARD);
-            r.leaves[i] = LeafResult(leaf.leafIndex, uint8(status) == 1 ? 2 : 1, ord);
-            if (uint8(status) == 0) ++fresh;
+            uint256 packedStatus = s.occurrences[occKey(p.envelopeId, leaf.leafIndex)].packed;
+            // Lifecycle packing fixes status in the low byte and the admission
+            // ordinal in the next 48 bits; the remaining bits are reserved.
+            // forge-lint: disable-next-line(unsafe-typecast)
+            uint8 status = uint8(packedStatus);
+            if (status > 1) revert E_NO_RESURRECTION(p.envelopeId, leaf.leafIndex);
+            // GUARD masks the shifted value to the declared u48 ordinal range.
+            // forge-lint: disable-next-line(unsafe-typecast)
+            uint64 ord = uint64((packedStatus >> 8) & GUARD);
+            r.leaves[i] = LeafResult(leaf.leafIndex, status == 1 ? 2 : 1, ord);
+            if (status == 0) ++fresh;
         }
         Plan memory plan;
         plan.config = config;
@@ -433,8 +439,13 @@ library StateKernel {
             else liveDelta(s, p, keys[i], false);
         }
         bytes32 unique = IndexKeys.posting(typeId, 2, 0, 0);
-        if (add && live == 0) if (uint64(beforeHead) == 0) append(s, p, unique, ord, false);
-        else liveDelta(s, p, unique, true);
+        if (add && live == 0) {
+            if (uint64(beforeHead) == 0) {
+                append(s, p, unique, ord, false);
+            } else {
+                liveDelta(s, p, unique, true);
+            }
+        }
         if (!add && live == 1) liveDelta(s, p, unique, false);
     }
 

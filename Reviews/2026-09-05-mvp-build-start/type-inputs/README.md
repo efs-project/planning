@@ -17,11 +17,29 @@ node --test Reviews/2026-09-05-mvp-build-start/type-inputs/*.test.mjs
 node Reviews/2026-09-05-mvp-build-start/type-inputs/materialize.mjs --check
 ```
 
-To deliberately regenerate the temporary output after reviewing an input
-change, use the same materializer with `--write`. Without a flag it emits JSON
-to stdout. `--check` verifies pinned source-file SHA-256 digests, independently
-parses every member, reconstructs ordered IDs, and compares the complete result
-byte-for-byte with the retained artifact. No RPC, signing, or transaction is used.
+By default the materializer reads each source as a local Git blob at the input's
+exact 40-character `sourceRevision`; it does not read current files, fetch,
+checkout, or fall back when a revision or blob is unavailable. `--check`
+therefore reproduces historical inputs and compares the complete result
+byte-for-byte with the retained artifact. Pass `--working-tree` only for an
+explicit live-source drift check: the same committed SHA-256 values remain
+mandatory, so changed source bytes are refused rather than silently refreshing
+the candidate. The programmatic equivalent is
+`buildArtifacts(input, { sourceMode: 'revision' | 'working-tree' })`, with
+`revision` the default.
+
+To deliberately regenerate the temporary output after separately reviewing an
+input change, use the same materializer with `--write`; add `--working-tree`
+only when the reviewed input commitments intentionally describe live bytes.
+Without `--write` or `--check` it emits JSON to stdout. Both modes independently
+parse every member and reconstruct the ordered IDs. No RPC, signing, transaction,
+network fetch, dependency, or archive system is used.
+
+Source acquisition accepts at most 32 safe repository-relative paths, 1 MiB per
+source and 8 MiB total. Local Git operations use argument-vector invocation,
+a five-second timeout and bounded output; working-tree mode resolves paths inside
+the repository and accepts regular files only. Revisions must be exact lowercase
+commit SHAs and expected source digests exact lowercase SHA-256 values.
 
 - `inputs.v1.json`: explicit field trees, role targets, indexes, constraints,
   source sections, contextual rule inventory, and labelled temporary choices.
