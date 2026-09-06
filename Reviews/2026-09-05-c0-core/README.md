@@ -141,6 +141,9 @@ The [real initialization boundary](initialization-boundary.md) adds the missing
 seed/group proof carriage and an explicitly pinned one-time bootstrap executor.
 It keeps the trusted test host separate and makes configuration/deployment
 provenance checks explicit; the new initializer itself is not implemented.
+The next [bootstrap codec plan](bootstrap-codecs-plan.md) implements only the
+V2 seed/deployment and configuration-selection readers for that actual owner.
+Its independent byte tests are prerequisites, not a substitute for initialization.
 
 ## Owner followups
 
