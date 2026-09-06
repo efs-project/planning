@@ -19,6 +19,10 @@ const abi = AbiCoder.defaultAbiCoder();
 const bytes = value => Buffer.from(value.replace(/^0x/, ''), 'hex');
 const byteLength = value => (value.length - 2) / 2;
 const word = value => '0x' + BigInt(value).toString(16).padStart(64, '0');
+const envelopeTypes = [
+  'tuple(uint16 profile,bytes32 principalId,bytes32 authorityRef,uint64 authEpoch,bytes32 pubNonce,uint64 notAfter)',
+  'bytes32[]',
+];
 
 function artifact(name) {
   return JSON.parse(readFileSync(join(ROOT, 'out', name + '.sol', name + '.json'), 'utf8'));
@@ -67,6 +71,24 @@ function rawBlobs(groupBytes) {
   }
   assert.equal(position, source.length, 'exact group end');
   return out;
+}
+
+function assertEnvelopeProjection(actual, expected, ordinal, label) {
+  const expectedUnsigned = abi.encode(envelopeTypes, [expected.header, expected.recordIds]);
+  assert.equal(actual[0], expectedUnsigned, label + ' exact unsigned bytes');
+  assert.deepEqual(
+    [actual[1], actual[2], actual[3], actual[4]],
+    [BigInt(ordinal), BigInt(expected.recordIds.length), expected.header.principalId, BigInt(expected.header.authEpoch)],
+    label + ' every projected field',
+  );
+  const [returnedHeader, returnedVector] = abi.decode(envelopeTypes, actual[0]);
+  const returnedRecordIds = [...returnedVector];
+  assert.deepEqual(returnedRecordIds, expected.recordIds, label + ' returned membership order');
+  assert.equal(
+    ordinaryEnvelope(returnedHeader, returnedRecordIds),
+    expected.envelopeId,
+    label + ' identity independently derived from returned bytes',
+  );
 }
 
 test('normal point-read host returns independently verified retained bytes at one pinned source', { timeout: 240000 }, async t => {
@@ -183,17 +205,7 @@ test('normal point-read host returns independently verified retained bytes at on
         knownTypes.push(typeId);
       }
       const envelope = await call('getEnvelope', [item.p.envelopeId], blockTag);
-      const expectedUnsigned = abi.encode(
-        ['tuple(uint16 profile,bytes32 principalId,bytes32 authorityRef,uint64 authEpoch,bytes32 pubNonce,uint64 notAfter)', 'bytes32[]'],
-        [item.p.header, item.p.recordIds],
-      );
-      assert.equal(envelope[0], expectedUnsigned, 'exact unsigned Envelope');
-      assert.deepEqual(
-        [envelope[1], envelope[2], envelope[3], envelope[4]],
-        [BigInt(groupIndex + 1), 1n, item.p.header.principalId, 0n],
-        'Envelope projected fields',
-      );
-      assert.equal(ordinaryEnvelope(item.p.header, item.p.recordIds), item.p.envelopeId, 'independent Envelope identity');
+      assertEnvelopeProjection(envelope, item.p, groupIndex + 1, 'ordinary Envelope');
     }
     assert.equal(knownTypes.length, 17, 'intrinsic plus all sixteen candidate Types');
 
@@ -204,12 +216,16 @@ test('normal point-read host returns independently verified retained bytes at on
     const unknownEnvelope = await call('getEnvelope', [keccak256(Buffer.from('unknown-Envelope'))], blockTag);
     assert.deepEqual([...unknownEnvelope], ['0x', 0n, 0n, ZeroHash, 0n], 'unknown Envelope sentinel');
 
-    const sparseLeaves = Array.from({ length: 64 }, () => groupLeaf(lab.inputs.meta, '0x' + lab.inputs.candidates.groups[3].groupHex));
+    const sparseLeaves = Array.from({ length: 64 }, (_, index) => ({
+      typeId: lab.inputs.meta,
+      body: '0x' + (0x1000 + index).toString(16).padStart(4, '0'),
+    }));
+    sparseLeaves[63] = groupLeaf(lab.inputs.meta, '0x' + lab.inputs.candidates.groups[3].groupHex);
     const sparse = publication(sparseLeaves, 800, { selected: [63] });
+    assert.equal(new Set(sparse.recordIds).size, 64, 'sparse membership values are distinct');
     await pointPublish(sparse);
     const sparseEnvelope = await call('getEnvelope', [sparse.envelopeId]);
-    assert.equal(sparseEnvelope[2], 64n, 'full sparse membership retained');
-    assert.equal(ordinaryEnvelope(sparse.header, sparse.recordIds), sparse.envelopeId, 'sparse Envelope identity');
+    assertEnvelopeProjection(sparseEnvelope, sparse, 5, 'sparse Envelope');
 
     const withdrawalType = lab.inputs.candidates.groups.flatMap(group => group.members)
       .find(member => member.descriptor.name === 'Withdrawal/1').temporaryTypeSchemaId;
@@ -218,7 +234,7 @@ test('normal point-read host returns independently verified retained bytes at on
     const retainedRecord = await call('getRecord', [publications[0].p.recordIds[0]]);
     const retainedEnvelope = await call('getEnvelope', [publications[0].p.envelopeId]);
     assert.equal(ordinaryRecord(retainedRecord[0], retainedRecord[1]), publications[0].p.recordIds[0], 'withdrawn source Record retained');
-    assert.equal(ordinaryEnvelope(publications[0].p.header, publications[0].p.recordIds), publications[0].p.envelopeId, 'withdrawn source Envelope retained');
+    assertEnvelopeProjection(retainedEnvelope, publications[0].p, 1, 'post-withdraw retained Envelope');
 
     const groupSizes = lab.inputs.candidates.groups.map((group, index) => ({ index, bytes: group.groupHex.length / 2 }));
     const smallest = groupSizes.reduce((a, b) => a.bytes <= b.bytes ? a : b);
