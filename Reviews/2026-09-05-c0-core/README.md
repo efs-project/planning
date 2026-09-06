@@ -150,10 +150,16 @@ These tests do not initialize Core.
 The [read overlay](read-overlay.md) fixes the shared read surface and SDK
 evidence/budget contract; the [Codex materialization selection](codex-materialization.md)
 uses one compiled exact artifact instead of a general onchain interpreter.
+Its exact domain/raw-string rows and the [INDEX revision-2 inventory](index-materialization.md)
+now pin concrete serializer inputs, retire an understated aggregate fan-out
+estimate and keep optional convenience reads outside the first Core surface.
 Their implementations and full capability/authority coverage remain next work.
-The [next point-read plan](point-reads-plan.md) implements the shared original
-Type/Record/Envelope projections and bounded storage-byte access first; it
-preserves the separate trusted host and later query/authority/initializer work.
+The [point-read plan](point-reads-plan.md) now implements shared original
+Type/Record/Envelope projections and bounded storage-byte access at `a9d3890`.
+Root reproduced151 Forge/92 Node checks; independent task review closed after
+missing negative tests and duplicated frame validation were repaired. The
+[verification checkpoint](point-reads-verification.md) preserves the separate
+trusted host and later occurrence/query/authority/initializer work.
 
 ## Owner followups
 

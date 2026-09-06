@@ -15,7 +15,7 @@
 - Owned planning-mvp-c0 feature branch only. No product repo/main merge/PR/public deployment/durable data/permanent bytes or protocol approval.
 - Preserve StateStore, StateKernel, Preparation/Helper, admission library, all existing codecs/candidate Types and test transport. No new write path, owner state, duplicated cache/group store or changed storage layout.
 - Add only five named files. Root owns docs/status/review/publication; worker uses apply_patch, exact staging/message file, actual model/role/harness trailers; no push or children.
-- Original group≤8190; Record body≤8192; Envelope membership1..64 and exact unsigned bytes256+32N≤2304. Bound before allocation/copy/narrowing. Type/Envelope public ordinals remain u48; admissions remain u64 with physical u48 checks.
+- Original group≤8190; Record body≤8192; Envelope membership1..64 and exact unsigned bytes256+32N≤2304. Bound before allocation/copy/narrowing. Type/Envelope public ordinals remain u48; admissions remain u64 with physical u48 checks. Known ordinals must be strictly below `(2^48)-1`, the kernel's exhaustion boundary; test acceptance at `(2^48)-2` and refusal at the boundary itself.
 - Cache is trusted canonical abi.encode(SchemaCache), at most131072 bytes. Checked header/tail projection is not a general arbitrary-cache validator. Do not copy the full TypeRow/cache to memory, recompile a group, import parser runtime into point-read code or add a helper call.
 - Unknown Type uses typeOrdinal0, not admissionOrdinal0. Intrinsic Type has ordinal1/admission0/zero group RecordId/index0. Empty Record body is not absence. Withdrawals do not erase original Type/Record/Envelope bytes.
 - Core getter projection is not portable validity/current authority/finality proof. Independent reader verifies original Record/group/member/Envelope identities at one pinned source; synthetic corruption never represents admitted real state.
@@ -85,7 +85,7 @@ seed/corrupt the owned storage rows/cache words or clear initialization for
 adversarial tests; name every such method ForTest. A small bytes-only test
 host can expose word/slice and inspect padding. Do not add these ports to src/.
 
-- [ ] **Step 1: Compiling stubs and behavioral RED.**
+- [x] **Step 1: Compiling stubs and behavioral RED.**
 
 Create the interfaces and minimal test hosts, with valid reads initially
 refusing through the named error. Use the existing intrinsic literal in
@@ -106,7 +106,7 @@ Run focused `forge test --offline --use "$C0_POINT_SOLC" --match-path test/Point
 using the existing cached compiler. Record successful compilation then expected
 behavioral assertion/error failure. Import/setup failures do not count as RED.
 
-- [ ] **Step 2: Implement checked word/slice reading.**
+- [x] **Step 2: Implement checked word/slice reading.**
 
 Guard arithmetic before memory allocation and source reads:
 
@@ -131,7 +131,7 @@ Assert complete bytes and final padding; a fuzz test bounded to8192 bytes
 compares to a simple independent memory slice. Word tests cover aligned versus
 unaligned, short data, last full word and out-of-bounds reads.
 
-- [ ] **Step 3: Implement Type origin/blob/cache-count projection.**
+- [x] **Step 3: Implement Type origin/blob/cache-count projection.**
 
 Keep storage references. For unknown typeOrdinal0, require consistent zero
 origin/index/admission metadata; getTypeSchema also checks empty cache before
@@ -171,7 +171,7 @@ entire cache instead. Ordinary full-group/Record identity reconstruction is
 an independent consumer obligation; the getter checks its bounded source
 join and cached selected-blob identity, not a second admission program.
 
-- [ ] **Step 4: Implement Record/Envelope projections and negative cases.**
+- [x] **Step 4: Implement Record/Envelope projections and negative cases.**
 
 Record absence uses its zero recordOrdinal with consistent zero Type/first
 admission/body. Known recordOrdinal fits physical u48/counter; first admission
@@ -195,7 +195,7 @@ overflow/counter inconsistency; Record body8193; Envelope short/trailing/bad
 offset/count0 or65/noncanonical header scalar. Assert exact error selector and
 subject. Test corrupted initialized state separately from unknown sentinels.
 
-- [ ] **Step 5: Independent normal-deployment comparison.**
+- [x] **Step 5: Independent normal-deployment comparison.**
 
 Use existing managed withStateful/compileStateful exports. Deploy the new
 PointReadHarness normally through `lab.send`/receipt/rpc, using the existing
@@ -221,7 +221,7 @@ observations separate from full initialized/authenticated Core or Lens fit.
 Exercise storage-cache malformed cases in Forge only; do not present synthetic
 corruption or the isolated byte host as valid admission evidence.
 
-- [ ] **Step 6: Cover, self-review and commit the five owned files.**
+- [x] **Step 6: Cover, self-review and commit the five owned files.**
 
 Run forced AST/build-info build, full Core Forge and
 `node --test test/*.test.mjs ../2026-09-05-c0-admission/integration.test.mjs ../2026-09-05-mvp-build-start/type-inputs/*.test.mjs`.
@@ -230,3 +230,9 @@ Report RED/GREEN, exact counts/commands/exit statuses, new warnings, receiver
 measurements/cleanup, source pins, corruption cases and explicit remaining
 G3/initializer/authentication gaps. Stage only the five files and commit via
 message file. No push; root owns task/final review and feature publication.
+
+Execution: implementation `09c7bfb`, task-review fix `a9d3890`; current checks
+and exact claim boundary are in [point-read verification](point-reads-verification.md).
+Historical RED is implementer-observed/report-only, not a preserved independent
+transcript. Root reproduced the final covering tests; task review and its
+single scoped fix round are closed. Whole-increment review is separate.

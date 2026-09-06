@@ -54,7 +54,7 @@ relabel the changed artifact as B0 revision 1.
 | Outer encoding | Actual bounded field/constraint/algorithm grammar and active domains; concrete derived IDs from retained groups. | Inventory every retained/changed/omitted row; no silently active metadata for absent behavior. |
 | Derived Type inventory | Intrinsic meta-Type and actual group-2 BindingSet/Tombstone/Withdrawal members, not B0 singleton candidates. | Recompute exact IDs from original group bytes; omit unsupported B0 intrinsic evolution schemas rather than zero placeholders. |
 | AUTHORITY | Exact [revision-2/verifier-C001 programs](authority-module-boundary.md); composite/direct profiles 6/7; same-Principal session is a required later branch. | Complete branch/error/basis/retention/grant/metering bytes and implementation. No unimplemented profile may be ACTIVE. |
-| INDEX | Versioned B0-owned limits/codes/cursors plus Scope kind10, fixed RAW_AUDIT kinds8/10, exact read overlay/errors and one 101-byte manifest. | Fix full framing/table order once; verify the capability getter returns the same manifest bytes. |
+| INDEX | [Exact revision-2 inventory](index-materialization.md): fourteen limits, thirteen code tables, retained cursors/contexts, Scope kind10, fixed RAW_AUDIT kinds8/10 and one 101-byte manifest. | Independently serialize/read the selected rows; verify the capability getter returns the same manifest bytes. |
 | C0 admission/bootstrap | Exact request, batch-evidence, initialization-selection and V2 run/deployment grammars. | Classify local format/derived bounds separately from universal field limits; do not duplicate AUTHORITY or INDEX-owned constants. |
 
 The [read overlay](read-overlay.md) closes the source-group readback,
@@ -63,8 +63,9 @@ outside the eighteen C0 capabilities: no active selector/layout/context or
 promise of its ranking behavior may be copied in and then left unimplemented.
 Existing numeric codes kept by the overlay retain their values; omission is
 not renumbering or reassignment. The exact outer/INDEX row sheet is required
-before serializer implementation, not a license for an implementer to invent
-missing tables from this architecture note.
+before serializer implementation; INDEX's selected row sheet is now linked
+above. The remaining outer inventory is not a license to invent missing tables
+from this architecture note.
 
 An intermediate artifact with session explicitly reserved/unsupported can
 test encoders and composite/direct work. It is **not a complete C0 Codex or
@@ -97,19 +98,151 @@ DIRECT-only references, conservative supported OPTION/schema-depth and reference
 extraction rules are C0 acceptance restrictions, not a claim of full unchanged
 B0 grammar acceptance. Keep the established Type bytes and identities intact.
 
-Before serializer dispatch, select one encoding-owned raw-string table for
-the unchanged PublicationEnvelope type/domain strings; B0's template does not
-already encode them. AUTHORITY's six WritePlan/effects/CAS strings remain only
-in their current owner constants. Classify the C0 `/2` seed/deployment domains,
-profile `/1`, ordered-group/capability/selection/null-policy/initial-policy
-domains and reserved source label explicitly; their interpretation is fixed,
-but executor/salts/finality and chosen limits remain run inputs. No dummy
-value or prose hash resolves these missing framing rows.
+## Encoding-owned C0 domains and exact raw strings
+
+Retain the twelve identity domains and four key domains above in their B0
+table order, append Scope's `efs2/vk/binding-scope/1`, then append the following
+eight rows in the printed order. Thus the selected revision-2 outer domain
+table has **25 rows**. Its existing `u16 count`, then `u16 len || asciiBytes`
+framing remains unchanged; the symbolic names below aid review but are not
+extra bytes in this domain section. Each domain word is `H(exactAsciiValue)`.
+
+| Name | Exact ASCII value |
+|---|---|
+| DOM_EXPERIMENT_SEED | `efs2/mvp-c0/experiment-seed/2` |
+| DOM_EXPERIMENT_DEPLOYMENT | `efs2/mvp-c0/experiment-deployment/2` |
+| DOM_C0_PROFILE | `efs2/mvp-c0/profile/1` |
+| DOM_ORDERED_TYPE_GROUPS | `efs2/mvp-c0/ordered-type-groups/1` |
+| DOM_INDEX_CAPABILITIES | `efs2/mvp-c0/index-capabilities/1` |
+| DOM_INITIALIZATION_SELECTION | `efs2/mvp-c0/initialization-selection/1` |
+| DOM_NULL_POLICY | `efs2/mvp-c0/null-policy/1` |
+| DOM_INITIAL_POLICY | `efs2/mvp-c0/initial-policy/1` |
+
+These are encoding-owned PROFILE interpretation constants, not optional
+measurement metadata. INDEX owns the capability manifest's layout and rows,
+but does not define a second domain constant. The manifest's leading domain
+word is a use of this constant, not a duplicate constant-definition row.
+The old V1 run codec remains unchanged evidence; its `/1` seed/deployment
+domains are not additional active V2 rows.
+
+Immediately **after the domain table and before named numeric constants**,
+add the following revision-2 section. Integers use the outer format's
+big-endian widths. Strings are exact ASCII bytes without NUL termination.
+
+```text
+u16 rawStringCount = 6
+for each row, in the printed name order:
+  u16 nameLen || asciiName || u16 valueLen || exactAsciiValue
+```
+
+| Name | Exact ASCII value |
+|---|---|
+| C0_INITIALIZATION_SELECTION_LABEL | `c0/init-selection/1` |
+| C0_SEED_NAMESPACE | `efs2/mvp-c0/2026-09-03` |
+| PUBLICATION_DOMAIN_NAME | `EFS2-Envelope` |
+| PUBLICATION_DOMAIN_TYPE | `EIP712Domain(string name,string version)` |
+| PUBLICATION_DOMAIN_VERSION | `1` |
+| PUBLICATION_ENVELOPE_TYPE | `PublicationEnvelope(uint16 profile,bytes32 principalId,bytes32 authorityRef,uint64 authEpoch,bytes32 pubNonce,uint64 notAfter,bytes32[] recordIds)` |
+
+All six raw-string rows are encoding-owned PROFILE constants. Require the
+exact count, names, order and values; reject duplicates, unknown/missing rows,
+truncation and length mismatch. These are not domain-preimage rows subject
+to the `efs2/...` domain grammar or its 64-byte bound: in particular the
+PublicationEnvelope type string is longer. This section does not introduce
+arbitrary user-provided string constants or change any portable identity.
+All remaining outer section ordering is preserved.
+With the exact names/values above, this raw-string section is414 bytes,
+including its two-byte count; use that independently derived length as a
+literal framing check, not a substitute for validating every row.
+
+AUTHORITY constants31–36 remain the sole definitions of its six
+WritePlan/effects/CAS strings. The Publication domain version `1` above is a
+distinct semantic constant, not a second definition of the WritePlan domain
+version. Their equal raw value does not merge the two protocols.
+
+Source checks: [C0PlanCodec](src/C0PlanCodec.sol) publication type/domain;
+[C0RunCodecV2](src/C0RunCodecV2.sol) V2 domains and reserved source label;
+the unchanged [V1 input codec](../2026-09-04-mvp-c0-foundation/src/C0RunCodec.sol)
+still enforces that exact namespace inside V2;
+[C0InitializationSelection](src/C0InitializationSelection.sol) selection and
+policy domains; [bootstrap inputs](bootstrap-inputs.md) ordered-group and
+capability commitments; [AUTHORITY ownership](authority-module-boundary.md)
+constants31–36. The bootstrap source and deployed codec comparisons are
+covered by the [closed codec checkpoint](bootstrap-codecs-verification.md).
+
+Keep the domain uses distinct. With `H = keccak256` and `abi = abi.encode`:
+
+- Experiment seed is `H(abi(DOM_EXPERIMENT_SEED, H(seedBytesV2)))`;
+  deployment commitment is
+  `H(abi(DOM_EXPERIMENT_DEPLOYMENT, experimentSeed, H(deployBytesV2)))`.
+- C0 profile is `H(abi(DOM_C0_PROFILE, experimentCommitment))`, not the
+  separate B0 Core profile formula that commits the complete Codex.
+- Ordered-group manifest is `abi(DOM_ORDERED_TYPE_GROUPS, bytes32[4])`;
+  its hash is retained once as the capability manifest's ordered Type root.
+  The capability root hashes the exact complete 101-byte packed manifest.
+- Selection begins with its domain word in the nine-word ABI transport;
+  its complete hash occupies the seed source row with the reserved label.
+- Null-policy **bytes** are `abi(DOM_NULL_POLICY)`; `nullPolicyHash` hashes
+  those bytes and is **not** the domain word itself. Initial policy is
+  `H(abi(DOM_INITIAL_POLICY, nullPolicyHash, experimentCommitment))`.
+
+For C0, extend REALM_CONFIG's transport inventory beyond B0's
+InitConfig/RealmRevision to the retained SeedV2, DeploymentV2 and
+InitializationSelection transports. Selected executor, selection digest,
+run ID, authors, salts, addresses/code hashes, finality, chosen limits and
+derived seed/deployment/profile/policy IDs are run values, not extra literal
+PROFILE constants. Their interpretation rules and framing bounds still
+require the exact PROFILE inventory; moving their values here cannot hide a
+missing rule. Construction/measurement reports remain EVIDENCE_ONLY while
+their authenticated commitments remain mandatory run inputs. Getter/error/
+result signatures belong to ABI_RESULT, not this domain or raw-string table.
+
+## Selected exact intrinsic opening and derived Type rows
+
+Use the **existing85-byte Core candidate** for this disposable full-C0
+artifact, not the older admission probe's differently named/meta-described
+Type. No new descriptor design or changed application Type bytes are needed.
+The selected descriptor is `TypeSchemaGroup/1`, empty meaning, absent
+specDigest, zero qualifier, one `groupBytes BYTES(max8190)` field and no
+roles/indexes/constraints. Its exact encoding is:
+
+```text
+blob = hex"0001001154797065536368656d6147726f75702f31000000"
+       || bytes32(0)
+       || hex"0001000a67726f75704279746573051ffe0000000000000000"
+rawGroup = uint16(1) || uint16(81) || blob
+```
+
+The blob is81 bytes, raw group85. Its group hash is
+`0xfb8f8bc5451b7f4c0f310320a566a57bc35d4c4f5ca796632ac2248545536bde`.
+Root independently compared this literal against the current fixture encoder
+and derived the ID using the separate Type-input reader. The initializer must
+match this exact retained group opening and its derived meta-Type, not merely
+accept any group with a shape-compatible one-field schema. This selects the
+reversible experiment artifact; it freezes no permanent Type identity.
+
+The final derived-ID section has `idCount=4`, named rows in this exact order,
+with unchanged `u16 nameLen || asciiName || bytes32 id` framing:
+
+| Name | Exact derived ID |
+|---|---|
+| TYPE_BINDING_SET_V1 | `0x3d40b6b53db7885be062d89270f41085fa8c59738cbc66fe28857d0573ef3a91` |
+| TYPE_BINDING_TOMBSTONE_V1 | `0xd9a17f2bdf9d885520b42b39778ec88f792b9b5a4fe0851cc388b2932b31add1` |
+| TYPE_SCHEMA_GROUP_V1 | `0x8579a7ae3b45b341133398999f7113e2abf5d01c5f8a4f78b3d7927dd754293d` |
+| TYPE_WITHDRAWAL_V1 | `0xc8261b4f9cd91e465be894c8fc41f45bc5a221b08db1ef8a610325b439b9c605` |
+
+Only the meta-Type is installed intrinsically at G2. The three kernel-known
+ordinary Types are group2 members0/1/2 and still enter through ordinary G4
+admission; this table identifies them, not pre-admits them. Root recomputed
+their IDs from the original group bytes with the independent parser and prior
+group closure, rather than trusting the candidate JSON's supplied IDs.
+Omit B0's unsupported intrinsic evolution Types, with no zero placeholders.
 
 ## Validation and remaining work
 
-1. Finish the exact outer/INDEX inventory and complete session/error program
-   rows. Distinguish inert metadata from executable promises explicitly.
+1. Finish the remaining exact outer numeric/ABI_RESULT inventory and complete
+   session/error program rows. Use the selected INDEX/domain/raw-string inputs;
+   distinguish inert metadata from executable promises explicitly.
 2. Implement two independently structured full encoders/readers, strict
    original-input validation and literal vectors; reject reordered/duplicate/
    missing/unknown rows, extra/truncated bytes and cross-version confusion.

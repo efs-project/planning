@@ -66,6 +66,11 @@ aggregate initialization bounds and normal-limit deployment/initialization
 measurements remain required. Do not borrow the publication call ceiling for
 this different one-time transport or relax EVM limits to make it fit.
 
+The [Codex intrinsic selection](codex-materialization.md#selected-exact-intrinsic-opening-and-derived-type-rows)
+now pins that existing 85-byte candidate's exact opening and derived meta-Type
+for this disposable artifact. Shape-compatible substitute metadata is not an
+alternative accepted opening; this selects bytes, not an initializer budget.
+
 ## Pin configuration and a one-time bootstrap executor
 
 Existing seed fields do not uniquely choose finality or the declared gas
@@ -137,8 +142,9 @@ Before any mutation, the real wrapper must:
 1. Bound/decode exact SeedInputsV2, recompute the constructor's seed, and
    authenticate the reserved selection opening and bootstrap executor. Check
    the seed's Codex hash against retained exact bytes.
-2. Validate complete Codex ownership/intrinsic IDs and the exact versioned
-   capability manifest. Derive group hashes/root and 6/3/6/1 members/dependency
+2. Validate complete Codex ownership/intrinsic IDs, match the selected exact
+   intrinsic group opening, and validate the exact versioned capability
+   manifest. Derive group hashes/root and 6/3/6/1 members/dependency
    closure from raw groups; compare to the seed's expected root, never the
    same caller's unauthenticated root. Derive the enabled capability root from
    actual Codex bytes, not a separate supplied manifest, and require
