@@ -69,7 +69,9 @@ Its [execution/review checkpoint](authority-codec-verification.md) records the
 reviewed Solidity implementation/test hardening through `aff4d8c` and the
 reviewed independent reader at `5f16e56`. Root reproduced 107 Core, 28 parser
 and 76 Node passes, including actual deployed cross-language agreement. The
-final joined codec gate is still pending. Exact authority
+final gate found and closed a sparse-JS-array commitment bug at `1ce66df`;
+root's final covering 77 Node checks pass, with unchanged deployed agreement.
+Both task gates and the single final fix/re-review wave are closed. Exact authority
 rows and a source-reviewed wrapper sequence now supply concrete next inputs
 without splitting or duplicating the existing state planner.
 

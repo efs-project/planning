@@ -370,9 +370,9 @@ two-leaf root and G7's two Plans provide no arbitrary-subset escape hatch.
 
 ## Next implementation inputs and acceptance
 
-The first common-codec increment can implement the exact C0 hashes and
-[packed batch retention](batch-authority-evidence.md) without pretending its
-test context is an initialized run. Before joining real writes, finish:
+The [completed common-codec increment](authority-codec-verification.md)
+implements the exact C0 hashes and [packed batch retention](batch-authority-evidence.md)
+without treating its test context as an initialized run. Before joining real writes, finish:
 
 - serialize/test the exact AUTHORITY rows above and finish outer admission guards;
 - external request framing and total byte budget;

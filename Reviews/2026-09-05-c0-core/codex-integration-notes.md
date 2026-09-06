@@ -173,7 +173,8 @@ The module note now supplies exact source-reviewed rows/programs; their actual
 serialization, outer wire/operation guards and joined implementation are still
 required. The [codec checkpoint](authority-codec-verification.md) records the
 reviewed pure Solidity encoder and independent reader/deployed agreement;
-the joined codec gate remains pending.
+the joined codec gate and sparse-vector final fix close at `1ce66df`, with
+root's covering 77 Node checks passing.
 Neither that component nor the written rows supply full session or G0 coverage.
 
 Common codecs plus composite/direct verification and batch evidence are a

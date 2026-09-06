@@ -1,7 +1,7 @@
 # C0 commitment and batch-evidence codec checkpoint
 
-**Status:** Both task reviews approved, with fresh controller checks.
-Final joined codec review remains pending.
+**Status:** Both task reviews and the final joined codec gate are closed
+through `1ce66df`, with fresh controller checks.
 This is disposable bytes/hash evidence, not authenticated C0 or MVP completion.
 
 ## What this increment closes
@@ -29,6 +29,10 @@ decodes literal and actual Solidity output field-for-field, preserving full
 integer widths and distinguishing malformed framing from unsupported tags.
 Decoded data remains a plain object, not an authentication verdict.
 
+The final fix at `1ce66df` rejects sparse Record/CAS arrays, including inherited
+entries, before committing their contents. Missing positions cannot silently
+become shorter vectors. Valid dense hashes and the legal empty CAS are unchanged.
+
 The two 57-byte internal-library artifacts are compiler stubs, not proposed
 deployed helpers. The 5,227-byte runtime / 5,253-byte initcode harness merely
 exposes the pure functions for tests. Its fit cannot establish the future
@@ -48,6 +52,7 @@ bytes with only 397 bytes spare.
 | `5f16e56` independent reader | Expanded Core/admission/Type-input Node | 76 pass, including 14 new codec tests; independently reproduced by root |
 | Same source | Full Core and admission/parser | 107 and 28 pass; independently reproduced by root |
 | Same source | Actual local codec deployment and full bytes/hash agreement | Gas 1,183,550; runtime 5,227; initcode 5,253; exact code read-back and managed cleanup; independently reproduced by root |
+| `1ce66df` final JS-only fix | Focused codec and expanded Node | 15 and 77 pass; root independently reproduced the covering 77 with the same actual deployment costs and cleanup |
 
 The full 106/28/62 suite results are the original implementation's execution
 evidence, not a claim they were rerun at the hardened head. The extra codec
@@ -73,15 +78,27 @@ silent toolchain substitution was involved. Root independently ran a fresh
 
 Task 2's independent review approved spec and quality with no blocking issue.
 Root directly reproduced the reported executions and deployment observations,
-resolving the review's execution-evidence qualification. Two minor followups
-are passed to the joined review: the maximum-width test should explicitly
-assert `plan.notAfter` and `previousSequence` (both values are set but omitted
-from that assertion loop); existing unsafe-cast warnings remain a disclosed
-Core warning baseline, not pristine build output. Ordinary field-for-field
-decoding and the decoder itself are correct in the reviewed scope.
+resolving the review's execution-evidence qualification.
 
-The final joined codec gate has not completed. These approvals and deployed
-agreement do not establish an authenticated state transition or completed C0.
+Final review covered every change from `61d86e0` through `bd07708`, including
+both tasks, test hardening and the written authority/wrapper inputs. It found
+one Important defect: JavaScript `Array.map` skips missing entries, so sparse
+Record/CAS vectors could hash as shorter vectors. The original implementer
+first reproduced a behavioral failure (14 focused tests pass, one fails with
+`Missing expected exception`), then replaced both loops with bounded own-index
+validation. Fully sparse, leading/interior/trailing holes and prototype-filled
+positions now reject the exact `InvalidCodecError / INVALID_VALUE` result.
+The same final wave added the two requested maximum-width assertions for
+`plan.notAfter` and `previousSequence` in both branches.
+
+The single scoped re-review approved `bd07708..1ce66df`, closing both findings
+without new breakage. Root independently reproduced 77 final-source Node
+passes and exact deployment agreement. Solidity sources are unchanged by the
+fix; the preceding 107 Core / 28 parser execution and fresh AST/build evidence
+remain correctly labelled rather than claimed as new runs. Existing unsafe-cast
+warnings are a disclosed unchanged Core/test baseline, not pristine output.
+The final codec gate is closed; authentication, state transitions and completed
+C0 remain outside this increment.
 
 ## What could have gone better
 
@@ -92,14 +109,19 @@ placing historic full-suite results under a new-head heading. Tests written
 from independently framed bytes and source preimages matter more than two
 implementations sharing the same expected-output helper.
 
+Include malformed host-language containers, not only malformed encoded bytes.
+The original dense-array tests and cross-language agreement did not challenge
+JavaScript holes; a short adversarial input probe found a real commitment bug.
+The final fix deliberately stays at the two input boundaries, without adding a
+generic collection framework or changing valid identities.
+
 The next integration should use this common codec directly in an actual
 authenticated write. Do not turn the prerequisite into a new serialization
 framework or repeat the already closed body/stateful reviews.
 
 ## Remaining integration and owner followups
 
-First close the joined codec review.
-Then wire exact C0 authority programs, bounded outer request decoding,
+Next wire exact C0 authority programs, bounded outer request decoding,
 operation-only preflight, fresh-only sequence consumption and per-batch
 persistence around the existing state planner. All semantic checks must pass
 before journal replay; the returned result is not a preflight object.

@@ -1,7 +1,8 @@
 # C0 batch authority evidence: first executable boundary
 
 **Status:** reversible composite/direct C0 framing input; pure Solidity encoder
-and independent reader implemented and task-reviewed, joined review pending. Persistence and
+and independent reader implemented, with task and final review closed at
+`1ce66df`. Persistence and
 authentication are not implemented; this is not a complete C0 module or
 permanent protocol bytes. See [execution basis](authority-codec-verification.md).
 
