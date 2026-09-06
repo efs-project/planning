@@ -9,6 +9,157 @@ library StatePointReads {
     uint256 private constant ORDINAL_MAX = (uint256(1) << 48) - 1;
     uint256 private constant CACHE_MAX = 131072;
 
+    error ErrReadOrdinal(uint64 ordinal);
+
+    struct IndexedReceiptView {
+        bytes32 envelopeId;
+        uint16 leafIndex;
+        bytes32 realmId;
+        bytes32 realmRevisionId;
+        uint256 authorityBasis;
+        bytes32 authorityCodehash;
+        uint64 authEpoch;
+        uint64 admissionOrdinal;
+        uint48 admittedAtBlock;
+        uint8 acceptedStatus;
+        uint8 occurrenceStatus;
+        uint64 revokedAtOrdinal;
+    }
+
+    struct EnvelopeMetadata {
+        uint64 ordinal;
+        uint16 leafCount;
+        bytes32 principalId;
+        uint64 authEpoch;
+        uint256 byteLength;
+    }
+
+    struct HydratedOccurrence {
+        bytes32 envelopeId;
+        uint16 leafIndex;
+        bytes32 recordId;
+        bytes32 typeSchemaId;
+        bytes32 principalId;
+        uint8 status;
+        uint64 ordinal;
+        uint64 revokedAtOrdinal;
+    }
+
+    struct BatchMetadata {
+        uint64 first;
+        uint16 count;
+        uint48 admittedAtBlock;
+        uint256 authorityBasis;
+        bytes32 authorityCodehash;
+    }
+
+    struct ProbeBudget {
+        uint8 used;
+    }
+
+    function getOccurrence(StateStore.Store storage s, bytes32 envelopeId, uint16 leafIndex)
+        internal
+        view
+        returns (
+            uint8 status,
+            uint64 ordinal,
+            bytes32 recordId,
+            bytes32 typeSchemaId,
+            bytes32 principalId,
+            uint64 revokedAtOrdinal
+        )
+    {
+        _requireOccurrenceCounters(s, envelopeId);
+        uint256 lifecycle = s.occurrences[StateKernel.occKey(envelopeId, leafIndex)].packed;
+        if (lifecycle == 0) return (0, 0, 0, 0, 0, 0);
+        (HydratedOccurrence memory occurrence,) = _hydrate(s, envelopeId, leafIndex, 0, lifecycle, envelopeId);
+        return (
+            occurrence.status,
+            occurrence.ordinal,
+            occurrence.recordId,
+            occurrence.typeSchemaId,
+            occurrence.principalId,
+            occurrence.revokedAtOrdinal
+        );
+    }
+
+    function getOccurrenceByOrdinal(StateStore.Store storage s, uint64 ordinal)
+        internal
+        view
+        returns (
+            bytes32 envelopeId,
+            uint16 leafIndex,
+            bytes32 recordId,
+            bytes32 typeSchemaId,
+            bytes32 principalId,
+            uint8 status,
+            uint64 revokedAtOrdinal
+        )
+    {
+        bytes32 subject = bytes32(uint256(ordinal));
+        _requireOccurrenceCounters(s, subject);
+        _requireRequestedOrdinal(ordinal, s.count.admissions);
+        StateStore.AdmissionRow storage admission = s.admissions[ordinal];
+        uint256 packed = admission.packed;
+        if (admission.envelopeId == 0 || packed >> 112 != 0) revert StorageByteView.ErrReadState(subject);
+        // The remaining high bits were validated before selecting the low leaf field.
+        // forge-lint: disable-next-line(unsafe-typecast)
+        leafIndex = uint16(packed);
+        (HydratedOccurrence memory occurrence,) = _hydrate(
+            s,
+            admission.envelopeId,
+            leafIndex,
+            ordinal,
+            s.occurrences[StateKernel.occKey(admission.envelopeId, leafIndex)].packed,
+            subject
+        );
+        return (
+            occurrence.envelopeId,
+            occurrence.leafIndex,
+            occurrence.recordId,
+            occurrence.typeSchemaId,
+            occurrence.principalId,
+            occurrence.status,
+            occurrence.revokedAtOrdinal
+        );
+    }
+
+    function getReceipt(StateStore.Store storage s, uint64 ordinal) internal view returns (IndexedReceiptView memory) {
+        bytes32 subject = bytes32(uint256(ordinal));
+        _requireOccurrenceCounters(s, subject);
+        _requireRequestedOrdinal(ordinal, s.count.admissions);
+        if (s.init.initialRevisionId == 0) revert StorageByteView.ErrReadState(subject);
+        StateStore.AdmissionRow storage admission = s.admissions[ordinal];
+        uint256 packed = admission.packed;
+        if (admission.envelopeId == 0 || packed >> 112 != 0) revert StorageByteView.ErrReadState(subject);
+        // The remaining high bits were validated before selecting the low leaf field.
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint16 leafIndex = uint16(packed);
+        (HydratedOccurrence memory occurrence, uint64 authEpoch) = _hydrate(
+            s,
+            admission.envelopeId,
+            leafIndex,
+            ordinal,
+            s.occurrences[StateKernel.occKey(admission.envelopeId, leafIndex)].packed,
+            subject
+        );
+        BatchMetadata memory batch = _acceptingBatch(s, ordinal, subject);
+        return IndexedReceiptView(
+            occurrence.envelopeId,
+            occurrence.leafIndex,
+            s.init.realmId,
+            s.init.initialRevisionId,
+            batch.authorityBasis,
+            batch.authorityCodehash,
+            authEpoch,
+            occurrence.ordinal,
+            batch.admittedAtBlock,
+            1,
+            occurrence.status,
+            occurrence.revokedAtOrdinal
+        );
+    }
+
     function getTypeSchema(StateStore.Store storage s, bytes32 typeId)
         internal
         view
@@ -119,35 +270,249 @@ library StatePointReads {
             uint64 authEpoch
         )
     {
+        EnvelopeMetadata memory metadata = _envelopeMetadata(s, envelopeId);
+        if (metadata.ordinal == 0) {
+            return (new bytes(0), 0, 0, 0, 0);
+        }
+        canonicalUnsignedEnvelope = StorageByteView.slice(
+            s.envelopes[envelopeId].canonicalUnsignedEnvelope, 0, metadata.byteLength, envelopeId
+        );
+        // Values are bounded before both narrowings.
+        // forge-lint: disable-next-line(unsafe-typecast)
+        envelopeOrdinal = uint48(metadata.ordinal);
+        leafCount = metadata.leafCount;
+        principalId = metadata.principalId;
+        authEpoch = metadata.authEpoch;
+    }
+
+    function _hydrate(
+        StateStore.Store storage s,
+        bytes32 envelopeId,
+        uint16 leafIndex,
+        uint64 expectedOrdinal,
+        uint256 lifecycle,
+        bytes32 subject
+    ) private view returns (HydratedOccurrence memory occurrence, uint64 authEpoch) {
+        if (lifecycle == 0) revert StorageByteView.ErrReadState(subject);
+        // Lifecycle status occupies the validated low byte.
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint8 status = uint8(lifecycle);
+        // Both values are masked to their declared u48 packed ranges before narrowing.
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint64 ordinal = uint64((lifecycle >> 8) & ORDINAL_MAX);
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint64 revokedAtOrdinal = uint64((lifecycle >> 56) & ORDINAL_MAX);
+        if (
+            lifecycle >> 104 != 0 || ordinal == 0 || ordinal >= ORDINAL_MAX || ordinal > s.count.admissions
+                || (expectedOrdinal != 0 && ordinal != expectedOrdinal) || (status == 1 && revokedAtOrdinal != 0)
+                || (status == 2
+                    && (revokedAtOrdinal <= ordinal
+                        || revokedAtOrdinal > s.count.admissions
+                        || revokedAtOrdinal >= ORDINAL_MAX)) || (status != 1 && status != 2)
+        ) revert StorageByteView.ErrReadState(subject);
+
+        StateStore.AdmissionRow storage admission = s.admissions[ordinal];
+        uint256 packed = admission.packed;
+        if (admission.envelopeId == 0 || admission.envelopeId != envelopeId || packed >> 112 != 0) {
+            revert StorageByteView.ErrReadState(subject);
+        }
+        // All three values are masked to their packed widths before narrowing.
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint16 loggedLeaf = uint16(packed);
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint64 typeOrdinal = uint64((packed >> 16) & ORDINAL_MAX);
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint64 principalOrdinal = uint64((packed >> 64) & ORDINAL_MAX);
+        if (loggedLeaf != leafIndex) revert StorageByteView.ErrReadState(subject);
+        _validOrdinal(typeOrdinal, s.count.types, subject);
+        _validOrdinal(principalOrdinal, s.count.principals, subject);
+
+        EnvelopeMetadata memory envelope = _envelopeMetadataChecked(s, envelopeId, subject);
+        if (leafIndex >= envelope.leafCount || s.envelopeIds[envelope.ordinal] != envelopeId) {
+            revert StorageByteView.ErrReadState(subject);
+        }
+        bytes32 recordId = bytes32(
+            StorageByteView.word(s.envelopes[envelopeId].canonicalUnsignedEnvelope, 256 + 32 * leafIndex, subject)
+        );
+        StateStore.RecordRow storage record = s.records[recordId];
+        _validOrdinal(record.recordOrdinal, s.count.records, subject);
+        _validAdmissionAt(record.firstAdmissionOrdinal, ordinal, s.count.admissions, subject);
+        if (record.typeId == 0 || s.recordIds[record.recordOrdinal] != recordId) {
+            revert StorageByteView.ErrReadState(subject);
+        }
+
+        bytes32 typeSchemaId = s.typeIds[typeOrdinal];
+        StateStore.TypeRow storage typeRow = s.types[typeSchemaId];
+        if (typeSchemaId == 0 || record.typeId != typeSchemaId || typeRow.typeOrdinal != typeOrdinal) {
+            revert StorageByteView.ErrReadState(subject);
+        }
+        _validOrdinal(typeRow.typeOrdinal, s.count.types, subject);
+        if (typeSchemaId == s.init.metaTypeId) {
+            if (
+                typeRow.typeOrdinal != 1 || typeRow.admittedAtOrdinal != 0 || typeRow.groupRecordId != 0
+                    || typeRow.memberIndex != 0
+            ) revert StorageByteView.ErrReadState(subject);
+        } else {
+            _validAdmissionAt(typeRow.admittedAtOrdinal, ordinal, s.count.admissions, subject);
+        }
+
+        bytes32 principalId = s.principalIds[principalOrdinal];
+        StateStore.PrincipalRow storage principal = s.principals[principalId];
+        if (principalId == 0 || principalId != envelope.principalId || principal.principalOrdinal != principalOrdinal) {
+            revert StorageByteView.ErrReadState(subject);
+        }
+        _validOrdinal(principal.principalOrdinal, s.count.principals, subject);
+        _validAdmissionAt(principal.firstAdmissionOrdinal, ordinal, s.count.admissions, subject);
+
+        occurrence = HydratedOccurrence(
+            envelopeId, leafIndex, recordId, typeSchemaId, principalId, status, ordinal, revokedAtOrdinal
+        );
+        authEpoch = envelope.authEpoch;
+    }
+
+    function _acceptingBatch(StateStore.Store storage s, uint64 ordinal, bytes32 subject)
+        private
+        view
+        returns (BatchMetadata memory candidate)
+    {
+        uint64 highWater = s.count.admissions;
+        uint64 batchCount = s.count.batches;
+        if (batchCount == 0 || batchCount >= ORDINAL_MAX || batchCount > highWater) {
+            revert StorageByteView.ErrReadState(subject);
+        }
+        ProbeBudget memory budget;
+        uint64 lo = 1;
+        uint64 hi = batchCount;
+        uint64 cachedId;
+        BatchMetadata memory cached;
+        while (lo < hi) {
+            uint64 mid = lo + (hi - lo + 1) / 2;
+            cached = _batchProbe(s, mid, highWater, subject, budget);
+            cachedId = mid;
+            if (cached.first <= ordinal) lo = mid;
+            else hi = mid - 1;
+        }
+        if (cachedId == lo) candidate = cached;
+        else candidate = _batchProbe(s, lo, highWater, subject, budget);
+        uint256 candidateEnd = uint256(candidate.first) + candidate.count;
+        if (candidate.first > ordinal || ordinal >= candidateEnd) revert StorageByteView.ErrReadState(subject);
+
+        BatchMetadata memory previous;
+        if (lo > 1) {
+            if (cachedId == lo - 1) previous = cached;
+            else previous = _batchProbe(s, lo - 1, highWater, subject, budget);
+            if (uint256(previous.first) + previous.count != candidate.first) {
+                revert StorageByteView.ErrReadState(subject);
+            }
+        }
+        BatchMetadata memory nextBatch;
+        if (lo < batchCount) {
+            if (cachedId == lo + 1) nextBatch = cached;
+            else nextBatch = _batchProbe(s, lo + 1, highWater, subject, budget);
+            if (candidateEnd != nextBatch.first) revert StorageByteView.ErrReadState(subject);
+        }
+
+        BatchMetadata memory firstBatch;
+        if (lo == 1) firstBatch = candidate;
+        else if (lo == 2) firstBatch = previous;
+        else if (cachedId == 1) firstBatch = cached;
+        else firstBatch = _batchProbe(s, 1, highWater, subject, budget);
+        if (firstBatch.first != 1) revert StorageByteView.ErrReadState(subject);
+
+        BatchMetadata memory lastBatch;
+        if (lo == batchCount) lastBatch = candidate;
+        else if (lo + 1 == batchCount) lastBatch = nextBatch;
+        else if (cachedId == batchCount) lastBatch = cached;
+        else lastBatch = _batchProbe(s, batchCount, highWater, subject, budget);
+        if (uint256(lastBatch.first) + lastBatch.count != uint256(highWater) + 1) {
+            revert StorageByteView.ErrReadState(subject);
+        }
+    }
+
+    function _batchProbe(
+        StateStore.Store storage s,
+        uint64 batchId,
+        uint64 highWater,
+        bytes32 subject,
+        ProbeBudget memory budget
+    ) private view returns (BatchMetadata memory result) {
+        if (++budget.used > 64) revert StorageByteView.ErrReadState(subject);
+        StateStore.BatchRow storage row = s.batches[batchId];
+        uint256 meta = row.meta;
+        // All fields are masked to their packed widths before narrowing.
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint64 first = uint64(meta & ORDINAL_MAX);
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint16 count = uint16((meta >> 48) & type(uint16).max);
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint48 admittedAtBlock = uint48((meta >> 64) & ORDINAL_MAX);
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint32 revision = uint32((meta >> 112) & type(uint32).max);
+        if (
+            meta >> 144 != 0 || first == 0 || first >= ORDINAL_MAX || count == 0 || count > 64 || revision != 1
+                || uint256(first) + count > uint256(highWater) + 1
+        ) revert StorageByteView.ErrReadState(subject);
+        result = BatchMetadata(first, count, admittedAtBlock, row.authorityBasis, row.authorityCodehash);
+    }
+
+    function _envelopeMetadata(StateStore.Store storage s, bytes32 envelopeId)
+        private
+        view
+        returns (EnvelopeMetadata memory)
+    {
         _requireInitialized(s, envelopeId);
+        return _envelopeMetadataChecked(s, envelopeId, envelopeId);
+    }
+
+    function _envelopeMetadataChecked(StateStore.Store storage s, bytes32 envelopeId, bytes32 subject)
+        private
+        view
+        returns (EnvelopeMetadata memory metadata)
+    {
         StateStore.EnvelopeRow storage row = s.envelopes[envelopeId];
         uint256 n = row.canonicalUnsignedEnvelope.length;
         if (row.envelopeOrdinal == 0) {
-            if (n != 0) revert StorageByteView.ErrReadState(envelopeId);
-            return (new bytes(0), 0, 0, 0, 0);
+            if (n != 0) revert StorageByteView.ErrReadState(subject);
+            return metadata;
         }
-        _validOrdinal(row.envelopeOrdinal, s.count.envelopes, envelopeId);
+        _validOrdinal(row.envelopeOrdinal, s.count.envelopes, subject);
         bytes storage raw = row.canonicalUnsignedEnvelope;
-        if (n < 288 || n > 2304) revert StorageByteView.ErrReadState(envelopeId);
-        uint256 profile = StorageByteView.word(raw, 0, envelopeId);
-        principalId = bytes32(StorageByteView.word(raw, 32, envelopeId));
-        uint256 authorityRef = StorageByteView.word(raw, 64, envelopeId);
-        uint256 epoch = StorageByteView.word(raw, 96, envelopeId);
-        uint256 notAfter = StorageByteView.word(raw, 160, envelopeId);
-        uint256 arrayOffset = StorageByteView.word(raw, 192, envelopeId);
-        uint256 count = StorageByteView.word(raw, 224, envelopeId);
+        if (n < 288 || n > 2304) revert StorageByteView.ErrReadState(subject);
+        uint256 profile = StorageByteView.word(raw, 0, subject);
+        bytes32 principalId = bytes32(StorageByteView.word(raw, 32, subject));
+        uint256 authorityRef = StorageByteView.word(raw, 64, subject);
+        uint256 epoch = StorageByteView.word(raw, 96, subject);
+        uint256 notAfter = StorageByteView.word(raw, 160, subject);
+        uint256 arrayOffset = StorageByteView.word(raw, 192, subject);
+        uint256 count = StorageByteView.word(raw, 224, subject);
         if (
             profile != 1 || authorityRef != 0 || epoch != 0 || notAfter > type(uint64).max || arrayOffset != 224
                 || count == 0 || count > 64 || n != 256 + 32 * count
-        ) revert StorageByteView.ErrReadState(envelopeId);
-        canonicalUnsignedEnvelope = StorageByteView.slice(raw, 0, n, envelopeId);
-        // Values are bounded before both narrowings.
+        ) revert StorageByteView.ErrReadState(subject);
+        // Count and epoch were bounded before narrowing.
         // forge-lint: disable-next-line(unsafe-typecast)
-        envelopeOrdinal = uint48(row.envelopeOrdinal);
+        uint16 narrowedCount = uint16(count);
         // forge-lint: disable-next-line(unsafe-typecast)
-        leafCount = uint16(count);
-        // forge-lint: disable-next-line(unsafe-typecast)
-        authEpoch = uint64(epoch);
+        uint64 narrowedEpoch = uint64(epoch);
+        metadata = EnvelopeMetadata(row.envelopeOrdinal, narrowedCount, principalId, narrowedEpoch, n);
+    }
+
+    function _requireOccurrenceCounters(StateStore.Store storage s, bytes32 subject) private view {
+        _requireInitialized(s, subject);
+        if (
+            s.typeIds[1] != s.init.metaTypeId || s.count.records >= ORDINAL_MAX || s.count.envelopes >= ORDINAL_MAX
+                || s.count.principals >= ORDINAL_MAX || s.count.admissions >= ORDINAL_MAX
+        ) revert StorageByteView.ErrReadState(subject);
+    }
+
+    function _requireRequestedOrdinal(uint64 ordinal, uint64 highWater) private pure {
+        if (ordinal == 0 || ordinal >= ORDINAL_MAX || ordinal > highWater) revert ErrReadOrdinal(ordinal);
+    }
+
+    function _validAdmissionAt(uint64 ordinal, uint64 at, uint64 current, bytes32 subject) private pure {
+        if (ordinal == 0 || ordinal >= ORDINAL_MAX || current >= ORDINAL_MAX || ordinal > at || ordinal > current) {
+            revert StorageByteView.ErrReadState(subject);
+        }
     }
 
     function _requireInitialized(StateStore.Store storage s, bytes32 subject) private view {
