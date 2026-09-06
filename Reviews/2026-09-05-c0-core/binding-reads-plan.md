@@ -13,7 +13,8 @@ occurrence joins, factor storage/basis primitives and preserve the write path.
 Forge/Anvil1.7.1, Node26 and local ethers6.15; no new dependency.
 
 **Spec:** [binding-reads-design.md](binding-reads-design.md), implementing the
-Binding portion of [read-overlay.md](read-overlay.md).
+Binding portion of [read-overlay.md](read-overlay.md), with the selected
+[fixed read-library packaging](read-library-layout.md) after the measured cap failure.
 
 ## Global Constraints
 
@@ -24,7 +25,7 @@ Binding portion of [read-overlay.md](read-overlay.md).
 - Count every historical boundary posting probe against 48, including repeated/end/neighbor probes; no unbounded fallback or history fold.
 - Bound a kernel body to at most167 bytes before copying; do not copy a Type cache or call Preparation for reads.
 - Normal caps remain24,576 runtime bytes,49,152 initcode bytes and16,777,216 transaction gas.
-- One linked-admission path and managed loopback only; no public RPC, personal wallet, new product repo, main merge, durable release or worker push.
+- Preserve the sole linked-admission write path; add only the two fixed pinned read libraries in the selected packaging. Managed loopback only; no public RPC, personal wallet, new product repo, main merge, durable release or worker push.
 - No worker subagents. Parent owns documentation and independent review.
 
 ---
@@ -37,6 +38,8 @@ Binding portion of [read-overlay.md](read-overlay.md).
 - Modify: `Reviews/2026-09-05-c0-core/src/BindingFold.sol`
 - Create: `Reviews/2026-09-05-c0-core/src/StateReadPrimitives.sol`
 - Create: `Reviews/2026-09-05-c0-core/src/StateBindingReads.sol`
+- Create: `Reviews/2026-09-05-c0-core/src/PointReadLibrary.sol`
+- Create: `Reviews/2026-09-05-c0-core/src/QueryReadLibrary.sol`
 - Create: `Reviews/2026-09-05-c0-core/test/BindingReadHarness.sol`
 - Create: `Reviews/2026-09-05-c0-core/test/BindingReads.t.sol`
 - Create: `Reviews/2026-09-05-c0-core/test/binding-reads.test.mjs`
@@ -92,11 +95,52 @@ occurrence initialized/counter checks. No duplicate body/cache or Envelope
 framing validator. The basis primitive additionally rejects zero retained
 initialRevisionId as ErrReadState, after existing initialization checks.
 
-The normal BindingReadHarness extends unchanged OccurrenceReadHarness with
-the same constructor and only the three new forwards. A separate synthetic
+The normal BindingReadHarness extends unchanged StatefulHarness and forwards
+all eleven read signatures through the two fixed libraries, with the constructor,
+immutable getters and exact dependency guards in the packaging specification.
+This explicitly replaces the original internally inlined inheritance after its
+26,736-byte runtime failure; keep the older occurrence host unchanged. A separate synthetic
 subclass may add narrowly named ForTest setters needed by corruption fixtures;
 no mutation or probe-count API in src/ or the normal host. Do not inherit an
 existing test suite, which would silently count its tests twice.
+
+- [ ] **Resumption step: Resolve the measured normal-cap RED with fixed packaging.**
+
+Retain the original RED and partial GREEN evidence; do not fabricate a fresh
+behavioral RED for unchanged code. The existing Node normal-cap assertion is
+the failing acceptance test for this packaging change. Each new library
+forwarder has exactly this pattern (with its listed existing method's types):
+
+```solidity
+library QueryReadLibrary {
+  function getBindingHead(StateStore.Store storage s, bytes32 key)
+    external view returns (BindingFold.Head memory, bytes32, uint64)
+  { return StateBindingReads.getBindingHead(s, key); }
+}
+// Host family guard; point uses role1 and address(PointReadLibrary).
+function requireQueryRead() private view {
+  if (address(QueryReadLibrary).code.length == 0 ||
+      address(QueryReadLibrary).codehash != queryReadCodehash)
+    revert ReadCodeMismatch(2);
+}
+function getBindingHead(bytes32 key) external view
+  returns (BindingFold.Head memory, bytes32, uint64)
+{
+  requireQueryRead();
+  return QueryReadLibrary.getBindingHead(s, key);
+}
+```
+
+Use the unchanged base constructor with the first four parameters. Check and
+store both additional library identities at construction. Forge fixtures pass
+`address(PointReadLibrary).codehash` and `address(QueryReadLibrary).codehash`;
+no alternate writer or mocked Store. First compile and measure each component
+with the unchanged normal-cap Node gate; then finish the original matrix below.
+Before correcting each observed partial-code mismatch, write a focused valid
+fixture that reaches the claimed guard: final-word tail when selecting a
+nonfinal lane, selected boundary probe outside the search counter, initialized
+state versus history-input precedence, and exact Type before body copy. Test
+counted-bound derivation without adding a production instrumentation API.
 
 - [ ] **Step 1: Capture an actual-admission behavioral RED.**
 
@@ -233,7 +277,9 @@ all H cuts against a simple independent linear fold in the test oracle.
 - [ ] **Step 5: Verify the normally deployed host against an independent reader.**
 
 Use unchanged scripts/local-stateful.mjs compile/managed deployment utilities.
-Patch only the new host's compiler links/immutables in the new Node test;
+Deploy both new no-argument libraries on that managed chain, then deploy the
+new host with the six-argument constructor. Patch only the new host's compiler
+links/immutables and the new library own-address patches in the new Node test;
 preserve independently checked helper/library runtime expectations. Use the
 existing source reader for retained state; its `foldAdmissions` supports an
 origin-contiguous admission prefix. Never use the new getters or only submitted
@@ -286,6 +332,24 @@ historical and complete/paged history gas/returndata. Head ABI is288 bytes;
 history ABI is128+192N bytes (12,416 at64). Independently encode/check formulas.
 Assert normal24,576/49,152/16,777,216 limits and managed cleanup.
 
+Match compiler references by exact source/target for AdmissionLibrary,
+PointReadLibrary and QueryReadLibrary; reject any unknown/missing target or
+unpatched window. Compare all eleven host function input/output/tuple/mutability
+shapes to the prior fixture's ABI and independently compare actual complete
+runtimes for the host, helper, admission library and both new libraries.
+The unchanged state reader already checks every `expected.components` member;
+append the two libraries and independently assert the four new identity getters
+in this test. Rebind `lab.core`, `lab.iface` and expected host identity as the
+existing occurrence Node test does; do not modify the shared managed runner.
+
+Capture a static onchain-consumer test against the actual host, and compare
+retained-state snapshots before/after ordinary read transactions as well as
+STATICCALL reads. No normal read mutates state or invokes the preparation helper.
+Use separately labeled synthetic code replacement for missing/wrong-code
+refusals at construction and before each read family; assert exact
+`ReadCodeMismatch(1)`/`ReadCodeMismatch(2)` bytes. Caller/state error tests run
+with matching dependencies so a code guard cannot mask the advertised error.
+
 If the inherited host fails deployment size/gas, return NEEDS_CONTEXT with
 exact artifact sizes and failure evidence. Do not weaken tests/limits or
 implement an unauthorized layout workaround. That is a controller layout
@@ -298,14 +362,14 @@ full Core Forge suite and expanded Node suite:
 
 ```sh
 node --test test/*.test.mjs ../2026-09-05-c0-admission/integration.test.mjs ../2026-09-05-mvp-build-start/type-inputs/*.test.mjs
-forge fmt --check src/StatePointReads.sol src/BindingFold.sol src/StateReadPrimitives.sol src/StateBindingReads.sol test/BindingReadHarness.sol test/BindingReads.t.sol
+forge fmt --check src/StatePointReads.sol src/BindingFold.sol src/StateReadPrimitives.sol src/StateBindingReads.sol src/PointReadLibrary.sol src/QueryReadLibrary.sol test/BindingReadHarness.sol test/BindingReads.t.sol
 git diff --check
 ```
 
 Report compiler/runtime/settings/source pins, exact commands, behavioral
 RED/GREEN, resource failures and warnings honestly. Reread the owned diff for
 write-predicate drift, doubled hydration/parser logic and unrelated changes.
-Stage exactly the seven code/test paths; keep the report/logs ignored. Use
+Stage exactly the nine code/test paths; keep the report/logs ignored. Use
 commit-message file and actual model/role/harness trailers, no push. Return
 DONE/NEEDS_CONTEXT status, immutable commit, one-line tests and report path.
 Parent performs independent tests/task review and integration review.

@@ -136,7 +136,9 @@ without changing candidate Type bytes. Neither a vector nor a capability list
 is an implemented bootstrap or evidence that all endpoints work.
 The [dependency-aware deployment V2 design](dependency-deployment-v2.md)
 specifies the four-component commitment and acyclic link/initcode sequence;
-its implementation and full G0–G12 execution remain outstanding.
+the later [fixed read-library refinement](read-library-layout.md) requires a
+separate six-component V3 profile for the actual joined host. V2 codec evidence
+below remains a control; full G0–G12 execution remains outstanding.
 The [real initialization boundary](initialization-boundary.md) adds the missing
 seed/group proof carriage and an explicitly pinned one-time bootstrap executor.
 It keeps the trusted test host separate and makes configuration/deployment
@@ -181,6 +183,10 @@ Binding scenario but the combined test host exceeds the normal runtime cap
 by2,160 bytes. The [constraint/evidence record](binding-reads-verification.md)
 keeps the task open pending measured layout, remaining tests and independent
 review. It does not replace the remaining required read capabilities.
+Compile-only layout and projection probes are now complete. The selected
+[two fixed read libraries](read-library-layout.md) preserve the stronger
+read checks and all eleven read ABIs; deployment and remaining matrix are
+still unverified. No V2 deployment frame is silently extended by this choice.
 
 The [nested-prefix refinement](read-overlay.md#nested-unique-prefix-refinement)
 separates consumed query coverage from boundary-only inspections to avoid a

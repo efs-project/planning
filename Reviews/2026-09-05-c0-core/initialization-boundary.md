@@ -13,7 +13,12 @@ A read-only abstract base is optional deduplication, not a prerequisite; it
 may contain no initialization, mutation or caller-supplied VerifiedContext.
 Raw getters alone do not implement G3's bounded point/page capabilities.
 
-Keep the [five-argument constructor](dependency-deployment-v2.md#acyclic-construction-and-deployment).
+The original [five-argument constructor](dependency-deployment-v2.md#acyclic-construction-and-deployment)
+belongs to the retained four-component V2 proposal. The later
+[fixed read-library layout](read-library-layout.md) requires the actual Core
+constructor also to pin both read-library runtime hashes, under a new closed
+V3 deployment profile. The initialization semantics below are unchanged; the
+old constructor/component count is not sufficient for that successor.
 It retains the seed and exact bounded Codex, pins the compiler-linked admission
 library and preparation helper, checks actual dependency code, and remains
 UNINITIALIZED. No synthetic Realm/revision ID, application admission, carrier

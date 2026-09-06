@@ -41,7 +41,7 @@ Forge test's aggregate gas is not a normal transaction budget. Build warnings
 include pre-existing diagnostics and new checked-narrowing lints; output is
 not labeled pristine.
 
-## What this taught us and the next measured step
+## What this taught us and the original next measured step
 
 The18,664-byte predecessor already included raw inventory/inspection ports
 and trusted publication. Its remaining headroom was not a final Core budget.
@@ -59,8 +59,48 @@ Only after those measurements may a layout refinement be selected. The
 existing V2 deployment frame has four fixed components and only AdmissionLibrary
 link windows. A new linked read module cannot silently enter that representation.
 Its trust, source/runtime pins, deployment codec and static-consumer behavior
-would require explicit additional design and evidence. No such choice is
-selected by this size failure.
+require explicit additional design and evidence. The size failure alone did
+not select a new layout; the subsequent bounded comparison is recorded below.
+
+## Completed compile-only comparison and selected refinement
+
+At immutable source `ae9367d`, the original worker compiled source-identical
+full-oracle, raw-free trusted and read-only shells. Root read the full report
+and analyzer, then reran the analyzer: all eleven required ABI shapes and
+forwarding bodies match; constructor and surface-inventory assertions pass.
+
+| Shell | Runtime bytes | Full fixture initcode bytes |
+|---|---:|---:|
+| Full oracle control | 26,736 | 32,360 |
+| Raw-free trusted | 23,855 | 29,478 |
+| Read-only | 21,458 | 27,060 |
+
+All use the same compiler/settings and 3,296 constructor-argument bytes.
+These are compile-only bounds, not deployments or authenticated Core budgets.
+Omitting raw inspection ports would save 2,881 bytes but remove the independent
+oracle surface from this host; neither smaller shell implements authority.
+
+A final worker-only compile comparison removed history association decoding,
+then also historical head association revalidation. Full-host runtimes were
+26,713 and 26,115 bytes respectively (23/621 bytes saved). Exact ABI parity
+passed in the retained analyzer; root read the complete report, but did not
+rerun these candidate compilations. Those candidates deliberately change
+synthetic-corruption refusal semantics and still exceed the normal cap.
+Neither is selected and neither changed tracked implementation source.
+
+Selected next: [two fixed read libraries](read-library-layout.md), retaining
+the stronger specified reads, all eleven host ABIs and the sole existing
+writer. This requires explicit new dependency/code-pin/deployment evidence
+and a separately versioned actual C0 profile. A read-only source review found
+no simpler established alternative and emphasized delegatecall privilege,
+compiler-generated storage references, flat links and independently expected
+runtime hashes. Those qualifications are included in the specification.
+Implementation, deployment and the remaining Binding matrix are still pending.
+
+Retrospective: measure executable component boundaries before accumulating
+another large read family. Source-level factoring alone does not create a
+deployable boundary. Measure every new library as well as Core; do not move
+an oversized artifact out of one file and call the size constraint solved.
 
 ## Remaining task and owner followups
 

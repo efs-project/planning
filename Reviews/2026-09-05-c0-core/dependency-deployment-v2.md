@@ -1,7 +1,10 @@
 # Dependency-aware deployment for the linked C0 prototype
 
-**Status:** selected engineering direction for the next disposable run;
-encoding and full G0 integration are unimplemented. Not permanent EFS bytes.
+**Status:** retained four-component engineering specification; the
+[packed codec component](bootstrap-codecs-verification.md) is implemented,
+but full G0 integration is not. The [selected read-library layout](read-library-layout.md)
+requires an explicitly versioned six-component successor, not an extension or
+reinterpretation of these V2 bytes. Not permanent EFS bytes.
 
 The [measured linked slice](stateful-verification.md#selected-linked-layout)
 needs four fixed components in the complete run: Core, state byte carrier,

@@ -148,7 +148,9 @@ retained revision. Current head absence with a nonzero history head is corruptio
 
 No storage, admission, authority, identity, candidate Type or portable encoding
 change. Normal caps remain24,576 runtime bytes,49,152 initcode bytes and
-16,777,216 transaction gas. One linked-admission path and managed loopback only.
+16,777,216 transaction gas. Preserve the sole admission write path; the
+[fixed read-library refinement](read-library-layout.md) explicitly adds two
+pinned read-code dependencies after the measured size failure. Managed loopback only.
 No public RPC, personal wallet, new product repo, main merge or durable release.
 
 Test real SET→SET→TOMBSTONE→withdraw-current, withdraw-stale, first tombstone,
@@ -160,10 +162,12 @@ and the new history input/terminal rules. Rerun existing point, occurrence and
 write regressions after internal factoring. Measure original dependencies and
 the integrated normal host; no giant Forge test deployment is normal-cap proof.
 
-If the inherited test-oracle host exceeds normal limits, report the actual
-artifact and stop the task for a measured layout decision. Do not raise limits,
-omit required reads or introduce a new deployment topology silently. The host
-contains raw oracle/trusted ports and is not the final authenticated Core budget.
+The inherited test-oracle host exceeded normal limits and the task stopped
+for the required measured layout decision. Resume under the linked-read
+refinement without raising limits, omitting required reads or relaxing the
+historical association checks. The host retains its raw oracle/trusted ports
+and is not the final authenticated Core budget. If any newly measured component
+still exceeds a cap, report it rather than silently changing this layout.
 
 Next is the shared classifier/cursor/page engine (including Scope), using the
 existing read overlay; then authenticated Core/Files/SDK/static integration.
