@@ -141,9 +141,15 @@ The [real initialization boundary](initialization-boundary.md) adds the missing
 seed/group proof carriage and an explicitly pinned one-time bootstrap executor.
 It keeps the trusted test host separate and makes configuration/deployment
 provenance checks explicit; the new initializer itself is not implemented.
-The next [bootstrap codec plan](bootstrap-codecs-plan.md) implements only the
-V2 seed/deployment and configuration-selection readers for that actual owner.
-Its independent byte tests are prerequisites, not a substitute for initialization.
+The [bootstrap codec component](bootstrap-codecs-verification.md) now implements
+the V2 seed/deployment and configuration-selection readers through `c2b5f7b`.
+Root reproduced131 Core/91 expanded Node and unchanged V1 tests; task review
+approved after complete deployed-field/u64 comparisons were added. Final
+whole-increment review remains pending. These tests do not initialize Core.
+The [read overlay](read-overlay.md) fixes the shared read surface and SDK
+evidence/budget contract; the [Codex materialization selection](codex-materialization.md)
+uses one compiled exact artifact instead of a general onchain interpreter.
+Their implementations and full capability/authority coverage remain next work.
 
 ## Owner followups
 

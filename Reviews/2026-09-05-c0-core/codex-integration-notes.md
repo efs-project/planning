@@ -216,3 +216,11 @@ No owner question is needed for this refinement. The engineer implementing the
 serializer must return exact bytes and executed coverage before calling G0–G3
 complete. Public deployment, permanent support/profile choices and release
 remain outside this run.
+
+The [materialization decision](codex-materialization.md) selects independent
+full offchain encoders plus an exact compiled length/hash check in the closed
+Core, not a general onchain Codex interpreter. Its explicit outer-table
+dispositions prevent unsupported B0 behavior and physical slots from entering
+the active C0 inventory. The [read overlay](read-overlay.md) closes the
+eighteen-row engine mapping, exact Type origin and unsupported-count semantics.
+Neither document is an encoded complete Codex or implemented capability proof.

@@ -129,7 +129,7 @@ Principal-valued field with a PRINCIPAL-class reference.
 
 | Code | Capability (existing kind where applicable) | Fixed behavior |
 |---:|---|---|
-| 1 | Type point | Exact admitted cache/Type; explicit intrinsic meta-Type case. |
+| 1 | Type point | Exact original member blob plus source-group origin; explicit intrinsic meta-Type case. |
 | 2 | Record point | Retained exact Type/body/first admission, not deleted by withdrawal. |
 | 3 | Envelope point | Retained unsigned header and full membership vector. |
 | 4 | Occurrence point | Exact mapping plus lifecycle, including non-active states. |
@@ -180,6 +180,9 @@ The source obligations are [G3](../../Designs/efsv2/mvp-c0-genesis-manifest.md#g
 and [Codex ownership](../2026-08-13-efs2-stage-a-corpus/chapters/b0-encoding-and-ids.md).
 All eighteen enabled claims need actual bounded endpoint/continuation evidence;
 raw storage getters and passing key helpers alone do not meet that gate.
+The [read overlay](read-overlay.md) now maps the rows to shared read engines,
+preserves the owner ABIs and closes Type-origin, query-refusal and returndata
+accounting details. Its implementation and measurement remain outstanding.
 
 ## Remaining input work, not owner questions
 

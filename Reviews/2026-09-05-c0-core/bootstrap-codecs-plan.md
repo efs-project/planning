@@ -40,10 +40,15 @@
 **Interfaces:**
 
 Consume unchanged `C0RunCodec.SeedInputs`, `Commitment`, `encodeSeed` and
-`decodeSeed` from `../../2026-09-04-mvp-c0-foundation/src/C0RunCodec.sol`
-(relative to the new Solidity source directory). Do not copy its private
-parser or change V1's domain/array grammar. Existing Foundry allow_paths covers
-the sibling Reviews package; do not add a product dependency/remapping.
+`decodeSeed` from the unchanged sibling foundation's `src/C0RunCodec.sol`.
+Foundry 1.7.1 resolves the Solidity source-unit import spelling
+`C0Admission/../../2026-09-04-mvp-c0-foundation/src/C0RunCodec.sol` through the
+existing remapping anchor. Both direct `../../…` and shortened `../…`
+spellings failed import resolution before behavioral RED. Verify
+the compiled source content hash against the actual sibling file, rather than
+assuming that a matching basename proves identity. Do not copy its private
+parser, change V1's domain/array grammar, or add a dependency/remapping/config
+change. Existing Foundry `allow_paths` covers the sibling Reviews package.
 
 `C0RunCodecV2` defines:
 
@@ -132,7 +137,7 @@ codec, not any Solidity helper. Small selection fields use Numbers with exact
 integer/width checks; declaredTxGasLimit and V1 u64 fields keep bigint/canonical
 decimal input and bigint decoded output. Bytes/addresses use exact hex.
 
-- [ ] **Step 1: Write compiling stubs and first behavioral tests.**
+- [x] **Step 1: Write compiling stubs and first behavioral tests.**
 
 Use the signatures above and named errors; initially have seed/deployment/
 selection encoding refuse. Build a synthetic selection with kind2/param1,
@@ -157,14 +162,14 @@ deployment as `0002 || seed32 || four literal 116-byte components`. Use
 distinct addresses 0x31..0x34 and distinct hash words; zero salts are legal.
 Do not call either producer encoder to define expected bytes.
 
-- [ ] **Step 2: Run and record behavioral RED.**
+- [x] **Step 2: Run and record behavioral RED.**
 
 From the Core directory resolve the existing local compiler as in the prior
 request task; run `forge test --offline --use "$C0_BOOTSTRAP_SOLC" --match-path test/C0BootstrapCodec.t.sol -vv`.
 Compilation must succeed; the first valid encoding assertion must fail on the
 stub's named error, not a missing import/export. Record precise source/exit.
 
-- [ ] **Step 3: Implement bounded framing and shared validation.**
+- [x] **Step 3: Implement bounded framing and shared validation.**
 
 For V2 seed decode, check total length/version before copying the bounded V1
 slice. Decode the last five words at exact packed positions, validate the
@@ -204,7 +209,7 @@ return abi.encode(value.initConfigVersion, value.finalityRuleKind,
   value.declaredTxGasLimit, policy);
 ```
 
-- [ ] **Step 4: Challenge every meaningful input and framing boundary.**
+- [x] **Step 4: Challenge every meaningful input and framing boundary.**
 
 Add exact success/refusal assertions for short/trailing/version/zero/duplicate
 deployment inputs; every field mutation changes the appropriate commitment or
@@ -232,7 +237,7 @@ commitment arrays before delegating to V1; check before spread/Array.from/copy.
 Do not import producer objects to assert their own expected output. Preserve
 byte/numeric widths at u64 max and refuse Number/coercion in wide fields.
 
-- [ ] **Step 5: Independently encode and compare a deployed pure receiver.**
+- [x] **Step 5: Independently encode and compare a deployed pure receiver.**
 
 Implement the JS reader with byte-bounded input validation before Buffer
 allocation and no automatic normalization. Reuse only the unchanged V1 JS
@@ -244,7 +249,7 @@ do not edit that transport. Compare every decoded field and exact encoded
 bytes/hash for compact valid fixtures, selection/InitConfig opening and u64
 boundaries. Report pure receiver sizes/gas only, not real initialized Core.
 
-- [ ] **Step 6: Verify, self-review and commit only owned files.**
+- [x] **Step 6: Verify, self-review and commit only owned files.**
 
 Run fresh `forge build --ast --build-info --force`, full Core `forge test`,
 and `node --test test/*.test.mjs ../2026-09-05-c0-admission/integration.test.mjs ../2026-09-05-mvp-build-start/type-inputs/*.test.mjs`
