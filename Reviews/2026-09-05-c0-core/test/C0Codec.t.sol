@@ -424,6 +424,8 @@ contract C0CodecTest {
     function testHandFramedCompositeEvidenceExactBytes() public view {
         C0BatchEvidence.Evidence memory e = baseEvidence(1);
         e.expectedRevisions = fixtureRows();
+        e.witness =
+            hex"0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f4041";
         e.observedAccountCode = abi.encodePacked(hex"ef0100", address(0xd1e6a7e));
         bytes memory expected = manualEvidence(e);
         require(expected.length == 664, "manual composite length");
@@ -464,6 +466,18 @@ contract C0CodecTest {
         expectError(
             abi.encodeCall(h.encodeEvidence, (e)),
             abi.encodeWithSelector(C0BatchEvidence.UnsupportedBranch.selector, uint8(3))
+        );
+    }
+
+    function testEvidenceFramingPrecedesCasValidation() public view {
+        C0BatchEvidence.Evidence memory e = baseEvidence(1);
+        e.expectedRevisions = new StateKernel.ExpectedRevision[](2);
+        e.expectedRevisions[0] = StateKernel.ExpectedRevision(1, 0);
+        e.expectedRevisions[1] = StateKernel.ExpectedRevision(1, 1);
+        e.witness = new bytes(64);
+        expectError(
+            abi.encodeCall(h.encodeEvidence, (e)),
+            abi.encodeWithSelector(C0BatchEvidence.InvalidEvidenceFraming.selector)
         );
     }
 
