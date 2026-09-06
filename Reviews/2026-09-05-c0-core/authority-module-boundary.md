@@ -375,7 +375,7 @@ implements the exact C0 hashes and [packed batch retention](batch-authority-evid
 without treating its test context as an initialized run. Before joining real writes, finish:
 
 - serialize/test the exact AUTHORITY rows above and finish outer admission guards;
-- external request framing and total byte budget;
+- implement the [selected typed request framing and total byte budget](outer-request-boundary.md), starting with its [bounded preparation component](request-bounds-plan.md);
 - per-operation shape/relationship checks, phase transitions and byte preflight;
 - precedence of wrapper operation errors versus kernel Type/reference/CAS
   failures, and historical retry handling;

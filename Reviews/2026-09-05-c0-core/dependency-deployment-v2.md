@@ -188,7 +188,8 @@ healthy verified Core inferred from its own codehash.
 
 The measured slice's constructor, link offsets and runtime hashes are inputs
 to reproduce that slice only; do not freeze them into this future full run.
-The admission library's 386-byte headroom and legal large-cache pressure case
+The admission library's original 386-byte headroom is now 397 bytes after the
+reviewed `e6dcb40` refinement; that narrow margin and the legal large-cache pressure case
 remain explicit followups. There is no immediate owner question: these are
 reversible engineering tasks. Public deployment and permanent adoption still
 require separate authority.

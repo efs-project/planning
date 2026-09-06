@@ -75,6 +75,13 @@ Both task gates and the single final fix/re-review wave are closed. Exact author
 rows and a source-reviewed wrapper sequence now supply concrete next inputs
 without splitting or duplicating the existing state planner.
 
+The next [typed request boundary](outer-request-boundary.md) selects ordinary
+calldata and the existing Principal structure, with independent logical and
+actual-call byte budgets. Its [bounded preparation plan](request-bounds-plan.md)
+implements the first input component before the authority join; the written
+size checks and synthetic ABI examples are not an executed receiver or Files
+acceptance. It preserves the single external witness and existing identities.
+
 ## Completed body checkpoint
 
 [Application-body validation plan](body-validation-plan.md): a reusable Solidity
