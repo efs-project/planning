@@ -75,14 +75,16 @@ exact dispatch rule and twelve adversarial acceptance cases for application
 admission, Binding and postings. Its [implementation plan](stateful-plan.md)
 has completed the pure key/effect helpers at `e10bc56` plus review fix
 `0c3b9ee`: 39 Solidity and 15 Node regression checks pass, with independent
-task review closed. The first stateful draft passes its initial tests but is
-too large for normal deployment. The guarded pure-preparation helper reduced
-the host to 26,988 bytes, still 2,412 over the limit. The immediate next step
-is a typed insertion/fixed-word journal refinement, preserving one atomic
-store, chronological replay and all required readback. See the
+task review closed. Inline stateful layouts fail normal deployment and the
+typed-journal attempt was larger. The selected fixed linked-admission layout
+now passes normal deployment and a real local publication smoke: Core 6,186,
+AdmissionLibrary 24,190 and preparation helper 18,805 runtime bytes. The library
+has only 386 bytes spare. The immediate next step is completing the stateful
+acceptance matrix and constructor identity guards, keeping one atomic store,
+chronological replay and all required readback. See the
 [stateful evidence and retrospective](stateful-verification.md) for exact
-sizes, qualifications and the unselected next experiment. Then finish the
-stateful acceptance cases and independent state reader. The
+sizes and the limited smoke evidence. The independent state reader follows
+Task 2 review; it has not been completed by that smoke. The
 bounded input/dependency/readback interfaces and SDK transaction-correlation
 requirements are pinned in the plan. This remains unfinished capability work,
 not a completed C0 acceptance claim.
@@ -91,6 +93,9 @@ not a completed C0 acceptance claim.
 commitment, closed capability manifest and existing digest point/backlink path
 without changing candidate Type bytes. Neither a vector nor a capability list
 is an implemented bootstrap or evidence that all endpoints work.
+The [dependency-aware deployment V2 design](dependency-deployment-v2.md)
+specifies the four-component commitment and acyclic link/initcode sequence;
+its implementation and full G0–G12 execution remain outstanding.
 
 ## Owner followups
 

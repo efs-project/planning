@@ -1,8 +1,9 @@
 # Stateful integration evidence and retrospective
 
 **Status:** in progress. Pure Binding/index helpers are reviewed. The first
-joined stateful draft compiles but exceeds normal deployment limits; bounded
-size diagnosis is the immediate next gate. The stateful kernel, independent
+inline stateful draft exceeds normal deployment limits. A linked layout now
+passes normal deployment and a publication smoke; full stateful acceptance is
+the next gate. The stateful kernel, independent
 state reader and full C0 journeys are not complete.
 
 ## Evidence so far
@@ -81,17 +82,100 @@ In particular opaque caches still carry expanded ABI bytes; moving their
 decoder does not eliminate transport or storage costs. No fit or full
 acceptance claim follows from the focused tests.
 
-The next isolated refinement replaces journal serialization only: typed pools
+The next isolated refinement replaced journal serialization only: typed pools
 for immutable Record/Envelope/Type insertions, fixed words for the other rows,
 and the same chronological replay and reverse lookup. Explicit memory copies
-must prevent later mutations from changing earlier snapshots. Every immutable
-insertion asserts the full empty prestate; all earlier-selected visibility,
-retry behavior and full-width metadata remain intact. Keep required getters
-and the guarded helper boundary, with no coalescing or simultaneous lookup
-algorithm change. This targets bookkeeping costs, not reduced semantics.
+prevent later mutations from changing earlier snapshots. Every immutable
+insertion asserts the full empty prestate; earlier-selected visibility,
+retry behavior and full-width metadata were preserved, with no coalescing or
+simultaneous lookup-algorithm change.
 
-The layout remains unselected. Normal deployment, worst-case measurements and
-the dependency-aware deployment commitment remain required even after a fit.
+That implementation **increased** host runtime to **28,866 bytes** (creation
+31,095), 1,878 bytes larger than the opaque/serialized baseline. Root reproduced
+the normal size failure and sixteen focused passing tests, including snapshot
+independence, full insertion prestates, repeated word/head writes, full-width
+transport and joined duplicate Record/Type reuse. It is retained as a negative
+result and is **not selected**. The smaller guarded opaque/serialized variant
+remains the comparison baseline. This result does not prove all possible typed
+journals are larger, and no optimizer sweep is being substituted for a design.
+
+### Selected linked layout
+
+The fitting experiment preserves the smaller baseline's algorithm and
+uses one immutable linked Solidity admission library. Core keeps its public
+entrypoints, initialization and all required raw getters; the library executes
+the unchanged planning/replay kernel against Core's actual storage reference.
+The preparation helper remains a guarded STATICCALL dependency. This adds no
+second store, mutable selector router, facet registry or upgrade authority.
+
+| Candidate | Main consequence | Next action |
+|---|---|---|
+| Linked admission library | Moves planning and replay together; full trusted access to Core storage | Selected for reversible Task 2 continuation after reproduced normal deployment. |
+| External view planner | Needs Core read callbacks and transport/decoding of the complete journal; returned values still require trusted planner semantics | Not selected; the smaller linkage experiment fits. |
+
+The library is **trusted Core execution, not a sandbox**. No user selects its
+address, storage slot or delegatecall payload. Check the actual compiler-linked
+target's nonempty code and independently expected immutable runtime codehash
+on every entry; expose that identity for reconstruction. Preserve failure
+propagation, chronological replay and zero external calls during replay.
+
+Solidity's external-library calling convention passes a storage pointer as a
+slot, not the contents of the store. Its deployed runtime also incorporates the
+library's own address for direct-call protection, so a raw compiler runtime
+template hash is not the deployed-library hash. Use real link references and
+deployed-code verification. These details are sourced from the pinned
+[Solidity 0.8.30 library documentation](https://docs.soliditylang.org/en/v0.8.30/contracts.html#libraries).
+EIP-6780 does not turn delegatecall into a sandbox or prove code quality; its
+[SELFDESTRUCT rule](https://eips.ethereum.org/EIPS/eip-6780) is not a replacement
+for this identity and trust boundary.
+
+Root independently reproduced the normal size gate (exit 0):
+
+| Component | Runtime bytes | Creation bytes before arguments | Runtime margin |
+|---|---:|---:|---:|
+| Core test host | 6,186 | 8,474 | 18,390 |
+| AdmissionLibrary | 24,190 | 24,222 | **386** |
+| PreparationHelper | 18,805 | 18,831 | 5,771 |
+
+Root also reproduced 20 focused test executions, zero failures/skips: 15
+distinct tests and five inherited repeats, not twenty distinct checks.
+Linkage cases cover two independent Core stores, wrong/missing/changed code,
+direct library mutation-call refusal and exact helper-failure rollback.
+Runtime substitutions use explicitly synthetic Forge etch; those tests alone
+are not deployment evidence. Existing unsafe-typecast lint warnings remain
+visible; a successful size command is not a lint-clean claim.
+
+A separate fresh root-managed Anvil smoke then deployed all three actual
+contracts under normal Cancun size/gas limits and admitted the existing first
+Type group plus a later selected ObjectGenesis. Core initcode including
+arguments was 11,770 bytes. Deployment gas was 4,120,023 helper / 5,284,337
+library / 2,240,086 Core. The publication used **11,317,414 gas**, an observation,
+not a maximum. Counts were `(2,1,7,1,2,1,7,0)` for Records, Envelopes, Types,
+Principals, admissions, batches, posting keys and Binding keys. The owned
+child exited cleanly; no public RPC, unlimited-size flag or runtime etch was
+used in that deployment run.
+
+Actual library runtime hash was
+`0xf2fbfc50b998c960cab182a67fc8f4ba7b8c184bb73ebbce94bfd8cc483a93af`,
+distinct from its raw template hash. The driver applied the compiler's own
+address immutable metadata (offset 41, length 32 for this artifact), verified
+complete runtime bytes, linked Core using actual compiler references and
+checked all four identity getters. These offsets/hashes belong to the retained
+measurement, not the next full Core artifact.
+
+The driver fetched every resulting inventory/row/posting, recomputed Record
+identities and checked selected exact provenance, Envelope, batch and posting
+assertions without using events. It did **not** independently derive every
+cache, packed admission field or posting family; it used `latest` on an owned
+idle node, not Task 3's pinned-basis independent fold. Its trusted context is
+synthetic and does not authenticate a Principal or establish wallet UX.
+
+Select this layout for the reversible prototype. Before completing Task 2,
+add construction-time linked identity refusal as well as per-call guards,
+finish all twelve cases and remeasure every changed runtime. Library headroom
+is narrow. Full authority/bootstrap/Files fit, resource sweeps and the
+[dependency-aware G0 V2 implementation](dependency-deployment-v2.md) remain
+open. Slice fit is not full fit or an MVP-ready declaration.
 
 No unlimited-size setting, external mutable registry or silent helper was
 added to the current draft. The experimental compiler profile remains native
@@ -131,7 +215,39 @@ must be measured independently of original descriptor length and why current
 experiment caps cannot claim generic maxima. It does not establish that
 simply increasing the cap is viable: compact cache representation, storage
 cost, call gas and whole-transaction limits need measured comparison. Keep the
-current journal-size experiment isolated rather than changing its caps too.
+selected stateful acceptance work separate rather than silently changing caps.
+
+### Journal allocation pressure to measure next
+
+A read-only review found a reachable mixed-retry concern: the selected
+prototype reserves `256 * selectedLeaves + 4` Change entries whenever any
+leaf is fresh. Sixty-three ACTIVE leaves plus one fresh leaf therefore reserve
+the same capacity as sixty-four fresh leaves, although ACTIVE leaves stage no
+changes. The source-derived initialized-array geometry is 98,329 memory words
+(3,146,528 bytes) before payloads. If the compiled allocator materializes that
+geometry, memory expansion alone is about 19.18 million gas. This is **not a
+measured execution trace**; compiler allocation and actual high-water remain
+to be checked. The [source transaction budget and candidate limits](../2026-08-13-efs2-stage-a-corpus/chapters/b0-realm-admission.md#56-eip-7825-arithmetic--cap-and-stage-b-hypotheses)
+must not be confused with this smoke's normal Cancun node defaults.
+
+The current source's conservative journal-capacity derivation is:
+four own Record/reverse/admission/lifecycle rows, up to `43 * 3` own posting
+changes, three unique-Type changes, plus the largest exclusive special branch:
+32 group-cache rows, eight first-Binding rows, or 49 withdrawal-target changes.
+That is at most **185 per fresh leaf**, plus five call-wide Envelope/Principal/
+batch rows. The existing 256-per-selected capacity has slack, but the selected
+count wastes memory on retries. A proposed `256 * freshCount + 5` capacity
+keeps conservative slack without changing journal entries or their order;
+it requires an actual regression and normal-size recheck before adoption.
+
+The minimal falsifier uses one retained 64-leaf Envelope repeating a small
+ordinary Record, with 63 occurrences already admitted via small masks. Compare
+all-ACTIVE retry, one-fresh-only selection and the mixed 64-selected call from
+equivalent prestates; record exact state, gas and memory. Then sweep 1/8/16/32/64
+selected/fresh counts separately from group parsing and maximum reference
+fan-out. Structural carriage caps are not guaranteed single-transaction
+capacity; source-selected-leaf fallback remains necessary. No new owner
+decision or broader journal rewrite follows from this targeted measurement.
 
 ## What the design pass changed
 
@@ -162,9 +278,9 @@ current journal-size experiment isolated rather than changing its caps too.
   requires an origin-to-high-water chain at one basis, not only matching
   counts. These shapes may inform disposable adapters, not public ABI freeze.
 - **Physical size:** a source module is not a separate deployed runtime.
-  Combined code size and costs must be measured. The unselected immutable
-  STATICCALL preparation-helper candidate would require its own codehash and
-  deployment commitment, not just a passing Core codehash.
+  Measured inline layouts fail; a fixed linked admission library and guarded
+  preparation helper fit this slice. Both dependencies need independently
+  checked identities and deployment commitments, not only a Core codehash.
 
 ## What could have gone better
 
@@ -188,6 +304,12 @@ experiment at a time, not larger artificial limits or deleted obligations.
 The sequential journal's useful invariant is exact planned replay, not the
 incidental use of ABI-encoded bytes for every row; preserve the invariant while
 measuring a simpler representation.
+
+The typed journal was plausibly simpler but made runtime larger. Retaining
+the failed result prevented us from adopting an intuition as an optimization.
+Once normal deployment passed, stop exploring physical variants and finish
+the actual stateful matrix. A smoke that retrieves all rows still needs an
+independent semantic fold before it can claim all those rows are correct.
 
 ## Next work and owner followups
 

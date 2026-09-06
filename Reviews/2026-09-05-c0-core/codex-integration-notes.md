@@ -87,24 +87,34 @@ The [joined measurements](stateful-verification.md#first-joined-physical-measure
 show the inline host does not fit, and a parser/body-only helper does not fit
 even when required getters are removed for diagnosis. Keep those getters.
 The guarded pure-preparation helper also leaves Core 2,412 bytes too large;
-the next measurement changes only its serialized journal to typed insertion
-pools and fixed words, preserving chronological replay and required readback.
-The **unselected candidate** is an immutable, stateless pure-preparation
+the typed-journal attempt increased runtime and is not selected. The selected
+prototype retains the smaller serialized journal and moves the unchanged
+admission kernel behind one immutable, explicitly linked Solidity library,
+while Core keeps initialization and required readback. This is trusted
+DELEGATECALL execution with full Core storage authority, not a sandbox.
+There is no generic target/slot/payload port, mutable link or selector router.
+The **selected preparation boundary** is an immutable, stateless pure-preparation
 helper called by STATICCALL during preflight: opaque compiled cache bytes,
 flat references, posting keys and decoded effects, without deep schema/body
 ABI decoding in Core. It is not an external mutable registry or delegatecall
-facet system. Do not combine the next journal representation change with
+facet system. Do not combine this continuation with a journal rewrite,
 coalescing or an unrelated lookup algorithm.
-Core would retain all dependency/reference/authority checks and state choices.
-This candidate requires an explicit run-local physical-layout amendment,
+Core retains all dependency/reference/state choices; actual authenticated
+authority still needs the outer wrapper. This run-local layout requires
 bounded calls/returndata, retained address and runtime codehash, independent
 dependency verification and new aggregate measurements. It is not the unchanged
 B0 one-physical-Core layout.
 
 The current `ExperimentDeploymentV1` lists only Core and byte-store runtime
-hashes. A helper-backed complete run therefore needs a versioned dependency
-commitment/readback refinement first; verifying Core's codehash alone would
-not verify the helper. No helper topology has been selected by this note.
+hashes. A helper/library-backed complete run therefore needs a versioned
+dependency commitment/readback refinement first; verifying Core's codehash
+alone does not verify linked execution and preparation dependencies. Check the
+actual linked address and independently expected library runtime hash on every
+entry and before initialization, including its constructor-generated address
+patch. The [V2 deployment refinement](dependency-deployment-v2.md) specifies the
+closed four-component commitment and acyclic linking/deployment order; its
+codecs and full bootstrap are not implemented. Only reversible prototype
+topology is selected, not permanent product topology.
 The [current architecture](../../Designs/efsv2/core-architecture-candidate.md#modular-contract-shape-to-prototype)
 and [C0 control table](../../Designs/efsv2/disposable-mvp-profile.md#2-temporary-control-choices)
 leave the physical split open to measurement; B0 admission §5.4 remains the

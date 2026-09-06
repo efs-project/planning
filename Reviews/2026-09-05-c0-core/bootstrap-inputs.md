@@ -189,8 +189,10 @@ raw storage getters and passing key helpers alone do not meet that gate.
    and same-Principal session remain three distinct retained evidence paths.
 4. Specify session grant/approval bytes, ID, nonce lanes, revocation and exact
    metering; the current trusted state host establishes none of that authority.
-5. If measured runtime requires a stateless helper, first version the deployment
-   dependency commitment/readback. That topology remains unselected.
+5. Implement the [dependency-aware V2 deployment refinement](dependency-deployment-v2.md)
+   for the selected linked prototype. Preserve V1 evidence; verify all four
+   components, actual links/runtime patches and atomic initialization/seal.
+   The normal three-contract smoke is not complete G0–G12 evidence.
 
 The read-only bootstrap-input reviewer found this root format and digest
 mapping coherent, conditional on expected-root enforcement and state retention.

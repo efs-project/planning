@@ -4,7 +4,7 @@
 
 **Goal:** Give the continuous Core track one reusable stateful admission kernel with atomic Record/Type/Occurrence/Binding/posting effects and independently reconstructable state.
 
-**Architecture:** Pure key/effect helpers consume the existing checked bodies. One internal kernel plans an ascending-leaf, write-free shadow and commits its recorded effects into one store. A test-only trusted-context host exercises that kernel; it is not the authenticated C0 entrypoint and never substitutes for the eventual real authority/genesis integration.
+**Architecture:** Pure key/effect helpers consume the existing checked bodies. One internal kernel, reached through a fixed linked admission adapter, plans an ascending-leaf, write-free shadow and commits its recorded effects into one Core store. A guarded stateless preparation helper handles structural work. A test-only trusted-context host exercises that kernel; it is not the authenticated C0 entrypoint and never substitutes for the eventual real authority/genesis integration.
 
 **Tech Stack:** Existing Solidity 0.8.30/Cancun/optimizer 200/via IR and Node 26/ethers 6.15. No new dependencies.
 
@@ -149,6 +149,10 @@ require count not to exceed the already allocated array. No helper redesign.
 Any necessary small
 shared data structs live with their owning library, not a generic catch-all.
 
+**Completed measurement history — do not redispatch these experiments.** The
+three paragraphs below retain the successive hypotheses; the selected
+continuation afterward is the current implementation direction.
+
 **Physical-size checkpoint:** the first joined draft is 41,470 runtime bytes
 and 50,823 creation bytes, so Task 2 is not accepted or normally deployable.
 Parser/body-only helper variants also exceed the runtime cap. Before further
@@ -173,6 +177,52 @@ External OCCREF must still use persisted Envelope membership. No coalescing,
 raw-slot write API or lookup-algorithm rewrite in this variant. Add repeated
 word/head, staged duplicate, memory-independence and dirty-prestate regressions;
 report normal sizes and focused results before selecting a physical layout.
+
+**Measured rejection and next boundary:** the typed-journal host grew to
+28,866 bytes and is not selected. Return to the guarded opaque/serialized
+baseline for one immutable linked `AdmissionLibrary` adapter around the
+existing internal kernel. Keep initialization and raw getters in Core; pass
+only Core's actual storage reference through the compiler's typed library
+call. Check the actual linked target and expected immutable runtime codehash
+before every call. No arbitrary delegatecall entrypoint, selector router,
+mutable link, second state owner or semantic rewrite. Treat the library as
+fully trusted Core code. Measure all three runtimes/initcodes, test isolation,
+identity/direct-call rejection and unchanged rollback, then normally deploy
+the linked slice locally if it fits. Preserve the old variants and make the
+new one separately recoverable. This is an explicit C0 physical-layout
+experiment, not the unchanged B0 one-physical-runtime implementation.
+
+**Selected continuation after measurement:** root reproduced ordinary deployment
+and publication with this linked layout. Continue Task 2 in the canonical Core
+track from the separately preserved linked-admission variant, retaining its
+serialized store and opaque preparation boundary. Runtime measurements were
+6,186 Core / 24,190 AdmissionLibrary / 18,805 PreparationHelper bytes; the
+library has only 386 bytes spare. Recheck normal sizes after every source fix;
+never delete an acceptance obligation to preserve that margin.
+
+Task 2 ownership additionally includes `src/AdmissionLibrary.sol`,
+`src/Preparation.sol`, `src/PreparationHelper.sol`, `test/Preparation.t.sol`,
+`test/LinkedAdmission.t.sol` and the bounded `linked-smoke.mjs` driver. Preserve
+the measured variant and its original logs unchanged. Do not carry synthetic
+typed-journal production code into the selected serialized implementation.
+Useful acceptance tests may be adapted only to the actual selected invariants.
+Add the linked runtime identity/nonempty-code guard at construction as well as
+every publication; an incorrectly configured host must not initialize. Keep
+the changed/missing-code post-deployment refusal tests. Preparation identity
+must likewise be checked before initialization uses it. The library has full
+Core storage trust; it is not a Type-author extension or generic plugin port.
+
+The selected internal `StateKernel.admit` additionally takes
+`Preparation.Config memory` (fixed helper address and expected runtime hash);
+initialization uses that same pinned config. `AdmissionLibrary.admit` is the
+compiler-typed external library adapter, not a new public authority ABI. The
+four dependency identity getters are added to the preserved raw test-host ABI.
+Complete the twelve-case matrix, bounded dependency/carriage checks, exact
+events, full regression and self-review before the Task 2 review handoff. The
+smoke establishes a normal local slice deployment and selected raw assertions,
+not Task 3's independent pinned-basis fold or authenticated C0 bootstrap.
+Resource caps remain provisional; return any new measured limit violation
+explicitly. Root owns dependency-aware G0 design and final publication.
 
 **Input boundary:** implement the following internal interface in StateKernel.
 The real authority layer will be its only product caller; the named test host
@@ -209,9 +259,11 @@ struct Init {
     bytes32 realmId; bytes32 initialRevisionId;
     bytes intrinsicGroupBytes; bytes objectGroup1Bytes; bytes kernelGroup2Bytes;
 }
-function initialize(StateStore.Store storage s, Init memory init) internal;
+function initialize(StateStore.Store storage s, Init memory init,
+    Preparation.Config memory prep) internal;
 function admit(StateStore.Store storage s, VerifiedContext memory verified,
-    Publication memory publication) internal returns (AdmitResult memory);
+    Publication memory publication, Preparation.Config memory prep)
+    internal returns (AdmitResult memory);
 ```
 
 Outcome 1 is ADMITTED, 2 ALREADY_ADMITTED. Allocate a fresh accepting batch
@@ -381,8 +433,8 @@ liveness. Two sibling Withdrawals see the first planned terminal target.
   status, RED/GREEN and unresolved source questions before committing.
   Measure runtime early enough to report a real fit problem while the task is
   still bounded. Source-file splitting is not a physical size solution. The
-  root's unselected fallback and deployment-commitment obligation are recorded
-  in codex-integration-notes.md; do not silently introduce an external helper.
+  selected fixed dependencies and deployment-commitment obligation are recorded
+  in codex-integration-notes.md; do not silently change the physical topology.
 
 ## Task 3: Independent state reconstruction and local-chain pressure
 
