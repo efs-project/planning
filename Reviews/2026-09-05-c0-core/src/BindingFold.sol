@@ -181,31 +181,28 @@ library BindingFold {
         head.targetA = target;
     }
 
-    function validateHead(Head memory head) private pure {
+    function validHead(Head memory head) internal pure returns (bool) {
         if (head.state == 0) {
-            if (
-                head.revision != 0 || head.admissionOrdinal != 0 || head.targetKind != 0 || head.tombstoneCause != 0
-                    || head.targetA != bytes32(0) || head.targetLeaf != 0
-            ) revert InvalidHead();
-            return;
+            return !(head.revision != 0 || head.admissionOrdinal != 0 || head.targetKind != 0
+                    || head.tombstoneCause != 0 || head.targetA != bytes32(0) || head.targetLeaf != 0);
         }
         if (
             head.revision == 0 || head.revision >= type(uint32).max || head.admissionOrdinal == 0
                 || head.admissionOrdinal >= ORDINAL_GUARD
-        ) revert InvalidHead();
+        ) return false;
         if (head.state == 1) {
-            if (
-                (head.targetKind != 1 && head.targetKind != 2) || head.tombstoneCause != 0 || head.targetA == bytes32(0)
-                    || (head.targetKind == 1 && head.targetLeaf != 0)
-            ) revert InvalidHead();
-        } else if (head.state == 2) {
-            if (
-                head.targetKind != 0 || (head.tombstoneCause != 1 && head.tombstoneCause != 2)
-                    || head.targetA != bytes32(0) || head.targetLeaf != 0
-            ) revert InvalidHead();
-        } else {
-            revert InvalidHead();
+            return !((head.targetKind != 1 && head.targetKind != 2) || head.tombstoneCause != 0
+                    || head.targetA == bytes32(0) || (head.targetKind == 1 && head.targetLeaf != 0));
         }
+        if (head.state == 2) {
+            return !(head.targetKind != 0 || (head.tombstoneCause != 1 && head.tombstoneCause != 2)
+                    || head.targetA != bytes32(0) || head.targetLeaf != 0);
+        }
+        return false;
+    }
+
+    function validateHead(Head memory head) private pure {
+        if (!validHead(head)) revert InvalidHead();
     }
 
     function ordinal(bytes32 key, uint64 previous, uint64 proposed) private pure {

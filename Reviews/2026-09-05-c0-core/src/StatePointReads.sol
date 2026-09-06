@@ -97,22 +97,9 @@ library StatePointReads {
         )
     {
         bytes32 subject = bytes32(uint256(ordinal));
-        _requireOccurrenceCounters(s, subject);
-        _requireRequestedOrdinal(ordinal, s.count.admissions);
-        StateStore.AdmissionRow storage admission = s.admissions[ordinal];
-        uint256 packed = admission.packed;
-        if (admission.envelopeId == 0 || packed >> 112 != 0) revert StorageByteView.ErrReadState(subject);
-        // The remaining high bits were validated before selecting the low leaf field.
-        // forge-lint: disable-next-line(unsafe-typecast)
-        leafIndex = uint16(packed);
-        (HydratedOccurrence memory occurrence,) = _hydrate(
-            s,
-            admission.envelopeId,
-            leafIndex,
-            ordinal,
-            s.occurrences[StateKernel.occKey(admission.envelopeId, leafIndex)].packed,
-            subject
-        );
+        uint64 currentH = requireState(s, subject);
+        _requireRequestedOrdinal(ordinal, currentH);
+        HydratedOccurrence memory occurrence = _hydrateOrdinalChecked(s, ordinal, subject);
         return (
             occurrence.envelopeId,
             occurrence.leafIndex,
@@ -121,6 +108,44 @@ library StatePointReads {
             occurrence.principalId,
             occurrence.status,
             occurrence.revokedAtOrdinal
+        );
+    }
+
+    function requireState(StateStore.Store storage s, bytes32 subject) internal view returns (uint64 currentH) {
+        _requireOccurrenceCounters(s, subject);
+        currentH = s.count.admissions;
+    }
+
+    function hydrateOrdinal(StateStore.Store storage s, uint64 ordinal, bytes32 subject)
+        internal
+        view
+        returns (HydratedOccurrence memory)
+    {
+        uint64 currentH = requireState(s, subject);
+        if (ordinal == 0 || ordinal >= ORDINAL_MAX || ordinal > currentH) {
+            revert StorageByteView.ErrReadState(subject);
+        }
+        return _hydrateOrdinalChecked(s, ordinal, subject);
+    }
+
+    function _hydrateOrdinalChecked(StateStore.Store storage s, uint64 ordinal, bytes32 subject)
+        private
+        view
+        returns (HydratedOccurrence memory occurrence)
+    {
+        StateStore.AdmissionRow storage admission = s.admissions[ordinal];
+        uint256 packed = admission.packed;
+        if (admission.envelopeId == 0 || packed >> 112 != 0) revert StorageByteView.ErrReadState(subject);
+        // The remaining high bits were validated before selecting the low leaf field.
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint16 leafIndex = uint16(packed);
+        (occurrence,) = _hydrate(
+            s,
+            admission.envelopeId,
+            leafIndex,
+            ordinal,
+            s.occurrences[StateKernel.occKey(admission.envelopeId, leafIndex)].packed,
+            subject
         );
     }
 
