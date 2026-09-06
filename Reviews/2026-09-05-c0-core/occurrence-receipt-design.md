@@ -1,7 +1,7 @@
 # Current occurrence and indexed-receipt reads
 
 **Status:** implemented at `08c2a16`, independently tested and task-reviewed;
-final increment review pending. Not full C0. See the
+final increment review approved through `50268e3`. Not full C0. See the
 [verification checkpoint](occurrence-receipt-verification.md).
 
 This makes rows 4 and 5 of the [read overlay](read-overlay.md) executable on

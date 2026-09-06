@@ -169,7 +169,8 @@ The [occurrence/receipt design](occurrence-receipt-design.md) and
 without another store or write path. Root reproduced160 Forge/93 Node checks
 and normal18,664-byte host deployment; independent task review approved.
 The [verification checkpoint](occurrence-receipt-verification.md) retains the
-full evidence and outstanding final increment review/initialized-Core boundary.
+full evidence; final whole-increment review approved through `50268e3` without
+a fix wave. Initialized/authenticated Core remains the integration boundary.
 
 The [SDK/static Files handoff](browser-integration-handoff.md) reconciles the
 PMs' source-backed adapter responsibilities and the next joined browser trace.
