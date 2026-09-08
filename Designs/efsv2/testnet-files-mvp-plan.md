@@ -24,6 +24,12 @@ and upgrade continuity have not been demonstrated end to end. All nine
 full-C0 browser journeys remain `NOT_RUN` in the inspected acceptance ledger.
 Component tests are useful, but they do not close this gap.
 
+The [September 8 real-state foundation experiment](../../Reviews/2026-09-08-upgradeable-foundation/README.md)
+now carries the bounded upgrade work. Its
+[consumer checkpoint](../../Reviews/2026-09-08-upgradeable-foundation/consumer-checkpoint.md)
+turns the next Lens, rename and authored-tag joins into explicit expected
+outcomes; its boundary tests must not be mistaken for a working Files browser.
+
 ## Proposal
 
 ### The product in five sentences
@@ -56,6 +62,11 @@ also verifies deployment/runtime evidence, including the actual proxy admins.
 Neither relies on the unchanged proxy shell alone. Missing activation or a partial endpoint upgrade must
 block ordinary writes. A failed coupled upgrade must leave the previous configuration
 intact. These are tests to implement, not properties the current code has.
+
+The prototype history must retain the Core admission high-water at activation
+as well as the block. U1 writes can precede a U2 activation in the same block;
+block-only history would make independent historical interpretation ambiguous.
+The exact source-pinned experiment ABI remains disposable.
 
 The UI must say **Upgradeable testnet**, show who can upgrade it, and make no
 immutable-hyperstructure claim. An upgrade controller can install bad code;
@@ -164,13 +175,20 @@ sync and huge-file performance are not quietly included in this first release.
 
 ### The owner's 15-minute acceptance walkthrough
 
-Open as guest. Create `Trip/`, a note and image. Edit the note and open its old
+Open as guest. Create `trip/`, a note and image. Edit the note and open its old
 version. Rename it and move the folder; inspect the unchanged IDs. Tag both
 files `ocean` and filter them. Switch between two disagreeing Lenses and inspect
 why the answer changed. Remove and restore a placement. Export it and reopen
 in a clean reader. Upgrade the populated test Realm, reload, read old links,
 and make a new edit. An interrupted upload and a rejected stale edit should
 be understandable without reading Solidity or the type specification.
+
+The lowercase name is deliberate for the first contract-checkable
+`FILES_ROUTER_ASCII_NAME_V1` arm. Also try `Trip/` and an NFC Unicode name:
+both can be valid rich Files names while unsupported by that selected router.
+The UI must say unsupported, not invalid, and never silently lowercase or
+rewrite the intent. Full rich-name certification is a separate measured gate;
+the ASCII experiment is not the final modern-file-browser naming promise.
 
 **Done means this works, the automated counterparts agree, and limitations
 are explicit.** Not “every future design question is answered,” and not

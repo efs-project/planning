@@ -61,7 +61,10 @@ continues calling the old one.
 The host exposes raw read-only inventory/getters equivalent to StatefulHarness
 for counts, bootstrap, records, Types, envelopes, admissions, bindings, batches
 and postings. It exposes `currentRevision()` and `revisionAt(uint32)` for the
-fixture execution history. Every returned original batch keeps the original
+fixture execution history, retaining full ordered component identities,
+activation block and the real Core admission high-water at activation. The
+set ID commits this boundary. Test a U1 write and U2 activation in the same
+block; block-only inference is insufficient. Every returned original batch keeps the original
 revision ordinal; do not use legacy revision-one projections for new batches.
 
 The fixture write API is:
@@ -129,12 +132,34 @@ immutable keyed bytes. Do not describe detached byte staging as file publication
 `test/upgrade-chain.test.mjs`, `verification.md` and a bounded evidence-report
 fixture under this directory. Update `package.json` scripts. Consume the exact
 ABI emitted by Task 1; do not create another contract or authoritative store.
+One additional shared change is permitted in
+`Reviews/2026-09-05-c0-core/reference/state-reader.mjs`: extract its existing
+batch-evidence check into an explicit callback/policy seam for the new fixture
+reader, preserving the old `verifyState`/`readState` revision-one-only defaults.
+All ordinary identity/body/reference/fold/index reconstruction remains shared.
+Add focused tests that prove the legacy entry still rejects revision two.
+Do not duplicate the 200-line reconstruction body or rewrite batch revisions
+to trick the legacy verifier.
 
 **Interfaces:** the host's raw inventory, fixture operator-signed operations,
 execution history, and generated ABI/source pins. Reuse `fixtureInputs`,
 `publication`, `groupLeaf` and the independent group/body decoder from the
 existing experiments, but preserve revision histories instead of coercing
-them into the older verifier's revision-one contract.
+  them into the older verifier's revision-one contract.
+
+Task 1's fixture history returns the complete ordered ExecutionSet, including
+activation block and `activationAdmissionHigh` read from actual Core counts at
+activation (initially zero). Its batch authorityBasis is the configured operator address
+encoded as uint256; authorityCodehash is the actual fixture Core implementation
+runtime codehash. The full execution-set ID is separately bound by the signed
+plan and checked revision history. Neither field proves portable author authority.
+Validate original batch revision, execution membership and admission interval
+against independently checked history, never against only the current revision.
+Revision r's fresh admissions occupy `(activationHigh[r], activationHigh[r+1]]`
+(or through the snapshot high for the current revision). Also check nondecreasing
+activation blocks, but never require U1 batches to have a strictly earlier block:
+a U1 write and U2 activation can legitimately share a block. Test this case.
+Bound history collection and preserve raw byte/ID checks when history is missing.
 
 - [ ] Write failing Node tests for substituted record bytes/ID, missing
   historical revision, tampered implementation/admin evidence and a stale
@@ -150,6 +175,15 @@ them into the older verifier's revision-one contract.
   history, then admit valid U2 data and reject invalid/stale/replayed actions.
   Independent reconstruction of IDs, body validation, bindings and postings
   must be exercised; the producer's getters alone are not the oracle.
+  Install the four existing groups in separate bounded publications. Use the
+  actual admitted `ChunkTree/1` Type as the carrier's configured treeType, not
+  the small synthetic Type constant used by the contract unit fixtures.
+  Include one complete small-file metadata publication after root bootstrap:
+  File Object + publisher charter Binding + ChunkTree + FileRevision + revision
+  head Binding + DirectoryEntry + name-slot Binding. Stage exact bytes
+  separately, and measure this seven-leaf publication as one actual transaction.
+  This proves structural/reference/Binding atomicity and cost, not FilesRouter
+  semantic certification, `NOREPLACE`, full auth or one wallet approval.
 - [ ] Record measured deployment/runtime/transaction costs and the exact
   accepted/rejected cases. Update the parent design with newly discovered
   gotchas and the next bounded Files/Lens/browser join. This task does not
@@ -163,3 +197,11 @@ the old Binding read files. Product/browser evolution continues after this
 foundation checkpoint through a separately scoped task using the same Store.
 The controller verifies evidence and requests independent review before any
 completed feature-branch publication.
+
+## Controller refinements during execution
+
+The SDK consumer review required complete block-pinnable execution history,
+not just ordinal getters. Independent-reader planning exposed the same-block
+upgrade case, so Task 1 also retains the actual admission high at activation in
+the signed execution commitment and tests that boundary. This is a fixture-local
+extension of the planned full-history requirement, not a permanent ABI choice.

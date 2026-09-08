@@ -40,6 +40,9 @@ and activates the new revision atomically after upgrading both endpoints.
 Test-only partial-upgrade entrypoints live in test utilities. Both endpoints
 check the active set from U1 onward. Deliberately malicious upgrade authority
 can replace these checks; this experiment does not claim otherwise.
+Activation history includes both block number and actual admission high-water:
+an old-revision write and the upgrade may share a block. The admission boundary
+keeps their historical rules distinguishable without event-log dependence.
 
 ## Required experiment
 
@@ -73,11 +76,24 @@ results with a visible Lens and an explanation of selection/coverage. The
 next task must consume real admitted state, not create a parallel authoritative
 JavaScript file tree. Exact-Type evolution and missing/tampered evidence are
 additional pressure cases, not promises of arbitrary old-app compatibility.
+The [consumer checkpoint](consumer-checkpoint.md) fixes the next scenario's
+expected outcomes and SDK/UX boundaries after the owning PMs' read-only review.
 
 ## Evidence ledger
 
-- Baseline: five existing StateKernel tests pass after the narrow interrupted
-  test-helper compile repair. No new upgrade behavior is implemented yet.
-- Upgrade implementation, normal deployment, independent read-back and browser
-  joins: not run at specification time; record exact commands/results in the
-  verification note as each checkpoint finishes.
+- [Validation-frontier canaries](validation-frontier.md): real direct-host
+  tests demonstrate additive exact-Type coexistence, strict reference rejection,
+  and why structural admission must not masquerade as Files validity. This is
+  separate from upgrade evidence.
+
+- Upgrade contract component: implemented at `00588b4`; the controller
+  reproduced all 14 new tests, covering populated upgrades, locked initialization,
+  stale consent, atomic failure and same-block admission boundaries. Independent
+  task review is in progress; managed-chain verification is the next task.
+- Regression: the controller also ran all 162 current Core Forge tests, passing,
+  including the five original StateKernel cases. This worktree contains the
+  separately preserved unfinished Binding-read increment; passing tests do not
+  review or complete that increment.
+- Normal managed-chain deployment/receipt measurements, independent upgrade
+  read-back and browser joins: not run yet. Component execution gas is not
+  actual transaction-receipt gas. Record each later checkpoint separately.
