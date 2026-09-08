@@ -315,4 +315,6 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-08
 
+- @v2-pm (harness codex, session upgrade-foundation-20260908): Extending the owner-approved disposable prototype with real EFS state behind upgradeable endpoints, independent reconstruction, and a Binding-native Files/Lens/tag scenario. Preserving the interrupted Binding-read increment; no product repository, public deployment or permanent protocol change. / next: implement and review the bounded upgrade foundation, then join observable file operations to the same Store.
+
 - @v2-pm (harness codex, session testnet-mvp-plan-20260908): Recorded James's testnet-upgrade/full-browser requirement and drafted [[Designs/efsv2/testnet-files-mvp-plan|five build checkpoints with sixteen observable acceptance journeys]], backed by primary-source upgrade research and two independent source audits. Recommendation: Transparent proxies plus explicit execution revisions and storage/activation checks; diamond and permanent authority not selected. Preserved the interrupted C0 source changes untouched. / next: bounded proposal review and documentation checks, then owner-visible build handoff; no new upgrade tests, product repositories, public deployment or full-MVP claim.
