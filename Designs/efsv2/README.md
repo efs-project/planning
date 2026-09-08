@@ -10,6 +10,13 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
+**2026-09-08: [[testnet-files-mvp-plan|The testnet Files MVP build plan]]** is
+the short path from the current prototypes to a browser the owner can verify:
+sixteen observable journeys, controlled testnet upgrades, five build
+checkpoints and a 15-minute walkthrough. Upgradeability is required;
+Transparent proxies are a recommendation, not an adopted permanent policy.
+The full browser and upgrade tests are not implemented by this planning pass.
+
 **This README is the phone summary.** Read through “Current technical
 candidate,” then stop unless you want the engineering detail. For a deep pass:
 

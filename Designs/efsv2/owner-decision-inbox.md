@@ -2,7 +2,7 @@
 
 **Status:** reference — compact live queue; mechanisms remain evidence-gated
 **Audience:** James first; designers second
-**Last reconciled:** 2026-09-04
+**Last reconciled:** 2026-09-08
 **Inputs:** [[system-constitution]], [[core-architecture-candidate]], [[disposable-mvp-profile]], [[mvp-c0-genesis-manifest]], [[owner-rulings]], [[assumptions-and-requirements]], and the preserved July decision/review corpus in git history
 
 #status/reference #kind/decision #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2
@@ -20,6 +20,14 @@
 > additionally authorizes local SDK/browser/Files/data/Arcade prototypes before
 > product repositories exist. That does not authorize public deployment,
 > permanent product release or protocol promotion.
+
+> **2026-09-08 requirement:** the testnet contracts must support upgrades and
+> the MVP must demonstrate the full core Files workflow, including Lenses,
+> tags and filters. [[testnet-files-mvp-plan]] supplies the proposed sequence
+> and observable acceptance bar. Pattern/activation engineering feeds E5;
+> browser lifecycle evidence feeds E6. Product repository creation and public
+> deployment remain separate permissions; no permanent venue/freeze decision
+> is needed to review or refine this plan.
 
 ## Decide after evidence — do not answer yet
 
@@ -72,6 +80,10 @@ Commons or another chain may be required.
 bootstrap. A permanent Realm descriptor, venue, upgrade policy, and operator
 model remain this evidence gate.
 
+For the upgradeable testnet, use the separately versioned foundation and
+populated-state upgrade gate in [[testnet-files-mvp-plan]], not the immutable
+C0 deployment selection. The existing control remains evidence.
+
 ### V2-E6 — Web Client and OS vertical slice
 
 Local disposable browser implementation is now authorized (2026-09-04).
@@ -83,6 +95,11 @@ Files parity, no-Commons operation, honest `UNKNOWN`, tampered-primary
 rejection, verified fallback, and the bounded write journey selected for that
 product gate. Then decide permanent Web Client/OS packaging. Arcade may remain
 one optional fixture; it is not a product or MVP dependency.
+
+The September 8 [[testnet-files-mvp-plan|full Files acceptance contract]] adds
+rename/move, remove/restore, Lens disagreements, tags/filter coverage and
+upgrade continuity to the build target. Close it against the actual testnet
+contracts, not by relabeling `efs-lab/1` results as full-C0 results.
 
 ### V2-E7 — Commons venue criteria
 
