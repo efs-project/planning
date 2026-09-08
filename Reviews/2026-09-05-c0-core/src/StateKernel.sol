@@ -124,11 +124,22 @@ library StateKernel {
         Publication memory p,
         Preparation.Config memory config
     ) internal returns (AdmitResult memory r) {
+        return admitAtRevision(s, v, p, config, 1);
+    }
+
+    /// @notice Explicit host-checked revision seam; legacy admission stays revision one.
+    function admitAtRevision(
+        StateStore.Store storage s,
+        VerifiedContext memory v,
+        Publication memory p,
+        Preparation.Config memory config,
+        uint32 activeRevision
+    ) internal returns (AdmitResult memory r) {
         if (s.init.realmId == 0) revert InvalidInitialization();
         if (p.header.principalId != v.authenticatedPrincipal) {
             revert AUTH_PRINCIPAL_MISMATCH(p.header.principalId, v.authenticatedPrincipal);
         }
-        if (v.revisionOrdinal != 1) revert InvalidRevision(v.revisionOrdinal);
+        if (activeRevision == 0 || v.revisionOrdinal != activeRevision) revert InvalidRevision(v.revisionOrdinal);
         carriage(p);
         r.envelopeId = p.envelopeId;
         r.envelopeOrdinal = s.envelopes[p.envelopeId].envelopeOrdinal;
