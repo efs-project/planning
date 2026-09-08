@@ -250,3 +250,23 @@ The 2026-07-22 cross-platform read-only mount requirement and research-before-MV
   required.
 
 — ruled by @james, 2026-09-03
+
+## 2026-09-08
+
+### Upgradeable testnet and an understandable Files MVP
+
+- **Contracts must be upgradeable while EFS v2 is on testnet.** Research
+  diamonds and other appropriate EVM development patterns and form a build
+  plan. A diamond is a suggested option, not a selected architecture.
+- **The MVP must demonstrate a working file browser:** directory listings,
+  creation, deletion/removal, renaming and other core file operations,
+  including Lenses, tags and filters. Observable user workflows should make
+  the dense designs understandable and test whether the system works well.
+
+— ruled by @james, 2026-09-08
+
+Interpretation boundary: this request authorizes research and planning. It
+does not select a proxy pattern, permanent upgrade authority, protocol freeze,
+public deployment or product repository creation. The implementation proposal
+is [[testnet-files-mvp-plan]]. Existing immutable C0 selections remain named
+experimental controls, not the deployment template for an upgradeable testnet.

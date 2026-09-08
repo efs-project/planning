@@ -24,6 +24,12 @@
 > this full profile or turn its passes into C0 conformance. Public deployment,
 > durable data, permanent product release, promotion and freeze remain separate.
 
+> **2026-09-08 testnet direction.** The owner now requires upgradeable testnet
+> contracts and a full Files browser acceptance pass. This immutable control
+> is reusable evidence, not that testnet's deployment template. Follow
+> [[testnet-files-mvp-plan]] for the proposed versioned upgrade foundation and
+> real-repository build sequence; preserve this profile's bytes and limits.
+
 ## Problem
 
 The EFS v2 design has enough exact proposal-stage material to run a useful
