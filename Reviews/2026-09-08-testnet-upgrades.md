@@ -74,8 +74,9 @@ The read-only upgrade audit found eight specific retrofit hazards:
 
 Source entry points: [[2026-09-05-c0-core/initialization-boundary]],
 [[2026-09-05-c0-core/authority-module-boundary]],
-[[2026-09-05-c0-core/browser-integration-handoff]], and
-[[2026-09-05-c0-core/read-library-layout]]. Executable references are
+and [[2026-09-05-c0-core/browser-integration-handoff]]. The newer
+`Reviews/2026-09-05-c0-core/read-library-layout.md` is local unpublished input,
+not a required link in this documentation-only handoff. Executable references are
 `Reviews/2026-09-05-c0-core/{test/StatefulHarness.sol,src/StateKernel.sol,src/StateStore.sol,src/C0PlanCodec.sol,src/C0InitializationSelection.sol}`
 and `Reviews/2026-09-04-mvp-c0-foundation/src/MvpC0StateByteStore.sol`.
 The inspected uncommitted V3 deployment draft is local evidence only; do not
@@ -209,7 +210,7 @@ throwaway spike before repository creation.
 Integrated review closed the identified authority-source, actual-admin,
 coupled-configuration, initialization and unpublished-measurement issues.
 Documentation checks: recursive tri-sync, current decision roll-up, whitespace
-and all fourteen wiki links in the two new documents passed. The retirement
+and the wiki links in the two new documents passed. The retirement
 scan had no active phrases; the new upgrade requirement is integrated by
 explicit control-versus-testnet pointers, not by erasing immutable experiment
 history. These checks concern this planning packet, not contract correctness.
