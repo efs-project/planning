@@ -1,6 +1,9 @@
 // Local fixture relay only: no wallet, write RPC, directory crawl or hosted service.
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
+import { gzip as gzipCallback } from 'node:zlib';
+import { promisify } from 'node:util';
+const gzip=promisify(gzipCallback);
 const json=x=>JSON.stringify(x,(_,v)=>typeof v==='bigint'?String(v):v);
 const files=new Map([
   ['/','../web/index.html'],['/screen/app.mjs','../web/app.mjs'],
@@ -11,7 +14,19 @@ const files=new Map([
 const quantity=x=>typeof x==='string'&&/^0x(?:0|[1-9a-f][0-9a-f]*)$/.test(x);
 const hex=(x,n)=>typeof x==='string'&&new RegExp('^0x[0-9a-fA-F]{'+n+'}$').test(x);
 const block=x=>x&&Object.keys(x).length===2&&hex(x.blockHash,64)&&x.requireCanonical===true;
-export async function startScreenServer({config,rpc,addresses,selectors}){
+function deliveryChoice(header='',allowGzip=false){
+  const entries=header.toLowerCase().split(',').map(item=>{
+    const [name,...params]=item.trim().split(';');
+    const quality=params.length===0?1:params.length===1&&/^q=(?:0(?:\.\d{0,3})?|1(?:\.0{0,3})?)$/.test(params[0].trim())?Number(params[0].trim().slice(2)):0;
+    return {name:name.trim(),quality};
+  });
+  const quality=name=>{const matches=entries.filter(e=>e.name===name);return matches.length?Math.min(...matches.map(e=>e.quality)):undefined;};
+  const wildcard=quality('*'),identity=quality('identity')??(wildcard===0?0:1);
+  const zipped=allowGzip?(quality('gzip')??wildcard??0):0;
+  return zipped>0&&zipped>=identity?'gzip':identity>0?'identity':null;
+}
+export async function startScreenServer({config,rpc,addresses,selectors,delivery='identity'}){
+  if(!['identity','gzip'].includes(delivery))throw Error('fixture delivery');
   const targets=new Set(addresses.map(a=>a.toLowerCase())),methods=new Set(selectors),trace=[];
   let url,delayMs=0,closed=false;
   function valid({method,params:p}){
@@ -25,9 +40,18 @@ export async function startScreenServer({config,rpc,addresses,selectors}){
     return false;
   }
   const server=http.createServer(async(req,res)=>{
-    const send=(status,body,type='application/json')=>{if(res.destroyed)return;res.writeHead(status,{'content-type':type,'cache-control':'no-store',
+    const send=async(status,body,type='application/json')=>{
+      if(res.destroyed)return;
+      const raw=Buffer.isBuffer(body)?body:Buffer.from(body),eligible=req.method==='GET'&&status===200;
+      const selected=eligible?deliveryChoice(req.headers['accept-encoding'],raw.length>=1024&&delivery==='gzip'):'identity';
+      if(selected===null){res.writeHead(406,{'content-length':0,'cache-control':'no-store','vary':'Accept-Encoding'});res.end();return;}
+      const compressed=selected==='gzip';
+      const payload=compressed?await gzip(raw,{level:6}):raw;
+      if(res.destroyed)return;
+      res.writeHead(status,{'content-type':type,'cache-control':'no-store','content-length':payload.length,
+      ...(eligible?{'vary':'Accept-Encoding'}:{}),...(compressed?{'content-encoding':'gzip'}:{}),
       'x-content-type-options':'nosniff','referrer-policy':'no-referrer',
-      'content-security-policy':"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"});res.end(body);};
+      'content-security-policy':"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"});res.end(payload);};
     try{
       if(closed||req.headers.host!==new URL(url).host)return send(403,json({error:'host refused'}));
       const path=new URL(req.url,url).pathname;
@@ -57,5 +81,6 @@ export async function startScreenServer({config,rpc,addresses,selectors}){
   await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
   url='http://127.0.0.1:'+server.address().port;
   return {url,trace,setDelay(ms){if(ms!==0&&ms!==50)throw Error('fixture delay');delayMs=ms;},
+    setDelivery(value){if(!['identity','gzip'].includes(value))throw Error('fixture delivery');delivery=value;},
     async close(){closed=true;server.closeAllConnections();await new Promise((resolve,reject)=>server.close(e=>e?reject(e):resolve()));}};
 }

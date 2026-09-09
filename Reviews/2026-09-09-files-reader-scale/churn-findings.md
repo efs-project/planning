@@ -87,3 +87,7 @@ No owner choice is needed to begin those reversible experiments. The results
 do not reopen exact Types or require a Files-specific Core noun. They do make
 general directory pagination and long-lived-folder UX concrete remaining MVP
 work, alongside profile-checked writes and content reads.
+
+The [SDK and Data Explorer consumer review](next-experiments.md) now turns
+these into bounded acquisition-chain, read-helper and Files-first presentation
+acceptance plans. The reference-collector ceiling stays a separate experiment.
