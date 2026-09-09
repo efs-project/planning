@@ -49,7 +49,7 @@ requires the computer and Codex to remain available.
    The [real-store B0 point checkpoint](../2026-09-05-c0-core/lens-point-verification.md)
    is implemented at `29859b2`, task-reviewed and parent-reproduced with200 Core
    Forge/14 upgrade Forge/185 broad Node passes. All24 Lens outcomes/gas rows
-   reproduce. Final whole-increment review remains pending; revision-one
+   reproduce. Final whole-increment review approves through `95eac01`; revision-one
    mechanics precede the separate populated-upgrade/Files reader join.
 4. **Expose one shared SDK path in the SPA.** Zero-wallet guest reading;
    opaque intent preparation; receipt versus committed readback; scoped

@@ -1,7 +1,8 @@
 # Real-store Lens resolution: implementation and cost checkpoint
 
 **Status:** source `29859b2` passes independent task review and fresh parent
-integration regression; final whole-increment review is pending. Disposable revision-one host,
+integration regression; final whole-increment review approves experimental
+publication through `95eac01`. Disposable revision-one host,
 not authenticated C0, upgraded reads, a finished Files browser or v1 parity.
 
 ## What now executes
@@ -51,6 +52,13 @@ Critical/Important findings. It checked the unchanged point/head/basis and
 deployment-provenance dependencies as named risks without rerunning the suite.
 Its one nonblocking note is six intentional test-only cast diagnostics; they
 remain visible and explained below. No production source fix was requested.
+
+The separate final reviewer read the whole `15b5a4c..95eac01` increment,
+including bulk probe/evidence, carrier observations and Files/SDK handoffs.
+It independently checked62 Lens source pins,40 bulk runtime/support pins,
+the probe/vector/lifecycle hashes and all24 retained Lens rows. No
+Critical/Important or new Minor finding remained. This closes the
+experimental-branch publication gate, not a main merge or production release.
 
 The independent JavaScript oracle reparses exact body bytes and reverifies the
 retained snapshot through the original reader. It does not use the getter under

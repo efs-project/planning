@@ -208,7 +208,7 @@ The [B0 Lens checkpoint](lens-point-verification.md) at `29859b2` adds actual
 EXACT/PRIORITY/THRESHOLD point resolution over admitted Plans and checked
 Binding heads. Independent task review approves; parent200 Core Forge/14 upgrade
 Forge/185 broad Node checks pass and all24 measurement rows reproduce. Final
-whole-increment review is tracked in that checkpoint. The64-source agreement/conflict scenarios use
+whole-increment review approves through `95eac01`. The64-source agreement/conflict scenarios use
 1.54m/2.13m resolve transaction gas, materially above the older schedule-only
 model but within unchanged limits. Query runtime is19,181 bytes. A deployed
 admin-pinned consumer and an independent retained-state oracle agree; none of
