@@ -27,7 +27,7 @@ async function approveConsent(page) {
 }
 async function fillPrompt(page, name, textValue) {
   await page.waitForSelector('#prompt-dialog[open]');
-  await page.fill('#prompt-input', name);
+  if (!(await page.$eval('#prompt-input', e => e.readOnly))) await page.fill('#prompt-input', name);
   if (textValue !== undefined) await page.fill('#prompt-text', textValue);
   await page.click('#prompt-ok');
 }

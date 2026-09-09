@@ -13,8 +13,8 @@
     <span class="brand">EFS <span>/ Files</span></span>
     <span class="session">
       <span id="signer-label" class="guest">Guest · no wallet</span>
-      <select id="signer" aria-label="Local session"><option value="guest">Guest (read only)</option></select>
-      <span id="prompts" class="badge" title="Simulated local approvals this session">0 approvals</span>
+      <select id="signer" aria-label="Act as"><option value="guest">Guest (read only)</option></select>
+      <span id="prompts" class="badge" aria-label="Counted simulated approvals with the disposable local test key">0 approvals</span>
     </span>
   </header>
   <main data-state="loading">
@@ -36,6 +36,7 @@
     <section class="listing" aria-labelledby="list-title">
       <div class="list-head"><h2 id="list-title">Files</h2><span id="coverage" class="badge">Not read yet</span></div>
       <p id="status" role="status" tabindex="-1">Guest reading requires no wallet and no prompts.</p>
+      <p id="op-status" role="alert" hidden></p>
       <ul id="rows" aria-label="Current files"></ul>
       <section id="attention" class="attention" hidden aria-labelledby="attention-title"><h3 id="attention-title">Needs attention</h3><ul id="attention-rows" aria-label="Unresolved placements"></ul></section>
       <details id="trash" class="history" hidden><summary id="trash-summary">Removed items</summary><p>Removed placements are masked, not erased. Restoring re-places the same File; nothing here deletes bytes or history.</p><ul id="trash-rows" aria-label="Removed items"></ul></details>
@@ -55,14 +56,14 @@
     <div id="file-body"></div>
   </dialog>
   <dialog id="consent" aria-labelledby="consent-title">
-    <div class="dialog-head"><h2 id="consent-title">Approve this operation?</h2><button id="consent-cancel" type="button">Cancel</button></div>
+    <div class="dialog-head"><h2 id="consent-title">Approve (simulated test signing)?</h2><button id="consent-cancel" type="button">Cancel</button></div>
     <div id="consent-body"></div>
     <p class="consent-note">Simulated approval with a disposable local test key. This counts as one approval; nothing is sent until you approve.</p>
     <div class="consent-actions"><button id="consent-approve" type="button">Approve and submit</button></div>
   </dialog>
   <dialog id="prompt-dialog" aria-labelledby="prompt-title">
     <div class="dialog-head"><h2 id="prompt-title">Name</h2><button id="prompt-cancel" type="button">Cancel</button></div>
-    <form id="prompt-form" method="dialog"><label id="prompt-label">Name<input id="prompt-input" type="text" autocomplete="off" required></label><textarea id="prompt-text" rows="5" hidden aria-label="Note text"></textarea><button id="prompt-ok" type="submit">Continue</button></form>
+    <form id="prompt-form" method="dialog"><label id="prompt-label">Name<input id="prompt-input" type="text" autocomplete="off" required></label><textarea id="prompt-text" rows="5" hidden aria-label="Note text" placeholder="Write your note…"></textarea><button id="prompt-ok" type="submit">Continue</button></form>
   </dialog>
   <noscript>This Files prototype requires JavaScript to verify and display the local contract reads.</noscript>
 </body></html>

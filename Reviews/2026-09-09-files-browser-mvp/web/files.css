@@ -8,13 +8,15 @@
 /* ---- files-browser additions ---- */
 .session{display:flex;gap:.6rem;align-items:center}
 .session select{font:inherit;padding:.15rem .3rem}
-.session .author{color:#0a6b3d;font-weight:600}
+.session .author{color:#7ee2ae;font-weight:600}
 #crumbs{display:flex;flex-wrap:wrap;gap:.15rem;align-items:baseline;font-size:1.25rem;font-weight:700}
 #crumbs .crumb{background:none;border:none;color:#2456c9;cursor:pointer;font:inherit;padding:0;text-decoration:underline}
 #crumbs .slash{color:#999;font-weight:400}
 .toolbar{display:flex;gap:.5rem;flex-wrap:wrap;margin:.4rem 0}
 .toolbar button,.toolbar .upload{border:1px solid #bbb;border-radius:.4rem;background:#fff;padding:.35rem .7rem;font:inherit;cursor:pointer}
-.toolbar .upload input{display:none}
+.toolbar .upload input{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}
+.toolbar .upload{position:relative}
+.toolbar .upload:focus-within{outline:3px solid #276dda;outline-offset:3px}
 .row-actions{display:flex;gap:.3rem;flex-wrap:wrap;align-items:center}
 .row-button{border:1px solid #ccc;border-radius:.35rem;background:#fafafa;padding:.2rem .5rem;font:inherit;font-size:.82rem;cursor:pointer}
 .row-button:hover{background:#eef}
@@ -29,10 +31,21 @@
 img.preview{max-width:100%;max-height:16rem;border:1px solid #ddd;border-radius:.4rem;image-rendering:pixelated}
 .tags{display:flex;gap:.4rem;flex-wrap:wrap;margin:.3rem 0}
 .tag-chip{background:#e8f0fe;border-radius:1rem;padding:.15rem .6rem;font-size:.85rem;display:inline-flex;gap:.3rem;align-items:center}
-.chip-remove{border:none;background:none;cursor:pointer;font-size:1rem;line-height:1;padding:0}
+.chip-remove{border:none;background:none;cursor:pointer;font-size:1rem;line-height:1;padding:.3rem .45rem;min-width:24px;min-height:24px}
 .revisions{list-style:none;padding:0;display:grid;gap:.35rem}
 .revisions li{border-left:3px solid #d7d7cf;padding-left:.6rem}
 #file-panel{max-width:44rem;width:92vw}
 #file-panel .content{margin-bottom:.8rem}
 .head-actions{display:flex;gap:.4rem}
 #export{margin-left:.5rem}
+
+#op-status{color:#a01919;background:#fdf0f0;border-radius:.4rem;padding:.4rem .6rem;font-weight:600}
+main[data-writing] .row-button,main[data-writing] .toolbar button,main[data-writing] .toolbar .upload{opacity:.55;cursor:wait;pointer-events:none}
+.controls{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:600px){
+  :is(#rows,#attention-rows,#history-rows,#trash-rows) li{grid-template-columns:minmax(0,1fr)}
+  .session{flex-wrap:wrap}
+  .top{height:auto;padding:.4rem .8rem}
+  #consent dl,#why dl{grid-template-columns:minmax(0,1fr)}
+  .controls{grid-template-columns:minmax(0,1fr)}
+}

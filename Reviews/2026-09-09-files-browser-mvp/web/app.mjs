@@ -48,10 +48,12 @@ function consent(title, facts) {
     dialog.showModal();
   });
 }
-function prompt(title, { withText = false, initial = '', initialText = '' } = {}) {
+function prompt(title, { withText = false, initial = '', initialText = '', label = 'Name', nameReadOnly = false } = {}) {
   return new Promise(resolve => {
     $('prompt-title').textContent = title;
-    $('prompt-input').value = initial; $('prompt-text').hidden = !withText; $('prompt-text').value = initialText;
+    $('prompt-label').firstChild.textContent = label;
+    $('prompt-input').value = initial; $('prompt-input').readOnly = nameReadOnly;
+    $('prompt-text').hidden = !withText; $('prompt-text').value = initialText;
     const dialog = $('prompt-dialog');
     const done = v => { dialog.onclose = null; $('prompt-form').onsubmit = null; $('prompt-cancel').onclick = null; dialog.close(); resolve(v); };
     $('prompt-form').onsubmit = e => { e.preventDefault(); done({ name: $('prompt-input').value, text: $('prompt-text').value }); };
@@ -61,12 +63,15 @@ function prompt(title, { withText = false, initial = '', initialText = '' } = {}
     $('prompt-input').focus();
   });
 }
-function toast(message, isError = false) { $('status').textContent = message; $('status').classList.toggle('error', isError); }
+function toast(message, isError = false) {
+  if (isError) { const op = $('op-status'); op.hidden = false; op.textContent = 'Problem: ' + message; }
+  else { $('op-status').hidden = true; $('status').textContent = message; }
+}
 
 // ---- the write pipeline ----------------------------------------------------
-async function submitRaw(to, data, gasLimit) {
-  const nonce = BigInt(await writePath.transactionCount(session.wallet.address));
-  const raw = await session.wallet.signTransaction({ chainId: 31337, nonce: Number(nonce), gasLimit, gasPrice: 2000000000n, to, data });
+async function submitRaw(to, data, gasLimit, wallet = session.wallet) {
+  const nonce = BigInt(await writePath.transactionCount(wallet.address));
+  const raw = await wallet.signTransaction({ chainId: 31337, nonce: Number(nonce), gasLimit, gasPrice: 2000000000n, to, data });
   const hash = await writePath.publish(raw);
   for (let i = 0; i < 400; i++) { const r = await writePath.receipt(hash); if (r) return r; await new Promise(ok => setTimeout(ok, 25)); }
   throw Error('no receipt within the bounded wait');
@@ -86,7 +91,7 @@ function friendlyError(e) {
     ErrUnauthorizedAuthor: 'This signer is not authorized for that author.',
     ErrSourceMismatch: 'The source placement changed. Read again and retry.',
   };
-  return decoded ? (map[decoded.name] ?? 'Refused by the router: ' + decoded.name) : (e.message ?? 'The operation failed before submission.');
+  return decoded ? (map[decoded.name] ?? 'Refused by the router: ' + decoded.name) : (e.message ?? 'The operation could not finish. Nothing may have changed — read again.');
 }
 let writing = false;
 async function runOperation(kindLabel, intent, facts) {
@@ -94,28 +99,31 @@ async function runOperation(kindLabel, intent, facts) {
   if (writing) { toast('One change at a time: the previous operation is still in flight.', true); return null; }
   writing = true;
   main.dataset.writing = 'true';
+  // Snapshot the signer at flow start: switching mid-flight must not swap keys.
+  const signerWallet = session.wallet, signerPrincipal = session.principal, signerKey = session.signer;
   try {
     const write = config.write;
     const execution = await latestExecution(writePath.callLatest, config.expected.core);
-    const plan = planOperation({ ...intent, principal: session.principal, pubNonce: BigInt(Date.now()) * 1000n + BigInt(pubCounter++) });
+    const plan = planOperation({ ...intent, principal: signerPrincipal, pubNonce: BigInt(Date.now()) * 1000n + BigInt(pubCounter++) });
     if (plan.status !== 'PLANNED') { toast(plan.status === 'UNSUPPORTED' ? 'Unsupported (not invalid): ' + plan.reason : 'Refused: ' + plan.reason, true); return null; }
     const ok = await consent('Approve: ' + kindLabel, [...facts,
-      ['Operation leaves', String(plan.publication.leaves.length) + ' record' + (plan.publication.leaves.length === 1 ? '' : 's') + ', atomic'],
-      ['Envelope', short(plan.predicted.envelopeId)],
-      ['Signer', write.authors[session.signer].label + ' (disposable local key)'],
+      ['Records written', String(plan.publication.leaves.length) + ' (all at once or not at all)'],
+      ['Operation ID', short(plan.predicted.envelopeId)],
+      ['Signer', write.authors[signerKey].label + ' (disposable local key)'],
     ]);
-    if (!ok) { toast('Cancelled before submission; nothing was sent.'); return null; }
+    if (!ok) { toast('Cancelled before submission; nothing was sent.'); return 'CANCELLED'; }
+    toast('Submitting… waiting for the network receipt.');
     const block = await writePath.latestBlock();
     const deadline = BigInt(block.timestamp) + 3600n;
     const coreNonce = BigInt(Date.now()) * 4096n + BigInt(pubCounter++);
-    const authorNonce = await latestAuthorNonce(writePath.callLatest, write.router, session.principal);
+    const authorNonce = await latestAuthorNonce(writePath.callLatest, write.router, signerPrincipal);
     const operatorWallet = new Wallet(write.operatorKey);
     const prepared = await authorizeOperation(plan, {
-      authorWallet: session.wallet, operatorWallet, router: write.router, core: config.expected.core,
+      authorWallet: signerWallet, operatorWallet, router: write.router, core: config.expected.core,
       chainId: 31337, executionSetId: execution.executionSetId, coreRevision: execution.revision,
       coreNonce, authorNonce, deadline,
     });
-    const receipt = await submitRaw(write.router, encodeExecute(prepared), 16777216n);
+    const receipt = await submitRaw(write.router, encodeExecute(prepared), 16777216n, signerWallet);
     if (receipt.status !== '0x1') { toast('The transaction was mined but rejected; nothing was changed.', true); return null; }
     return { plan, receipt };
   } catch (e) { toast(friendlyError(e), true); return null; }
@@ -192,17 +200,18 @@ function explain(row, button) {
 function rowActions(row) {
   const usable = row.outcome === 'FOUND';
   const box = document.createElement('span'); box.className = 'row-actions';
-  const add = (label, fn, title2) => { const b = text('button', label, 'row-button'); b.type = 'button'; if (title2) b.title = title2; b.addEventListener('click', fn); box.append(b); return b; };
+  const add = (label, fn, title2) => { const b = text('button', label, 'row-button'); b.type = 'button'; if (title2) b.title = title2; b.setAttribute('aria-label', label + ': ' + (row.value?.name ?? row.outcome)); b.addEventListener('click', fn); box.append(b); return b; };
   if (usable && row.value.kind === 'DIRECTORY') add('Open', () => { path = [...path, { name: row.value.name, subject: row.value.subject }]; refresh({ samePin: true }); });
-  if (usable && row.value.kind === 'FILE') add('Open', () => filePanel(row));
+  const safe = fn => () => Promise.resolve(fn()).catch(e => toast(friendlyError(e), true));
+  if (usable && row.value.kind === 'FILE') add('Open', safe(() => filePanel(row)));
   if (usable && session.signer !== 'guest') {
-    add('Rename', () => renameFlow(row, false));
-    add('Move', () => renameFlow(row, true));
+    add('Rename', safe(() => renameFlow(row, false)));
+    add('Move', safe(() => renameFlow(row, true)));
     if (row.value.kind === 'FILE') {
-      add('Copy', () => copyFlow(row));
-      add('Link', () => placementFlow(row), 'Add another placement of the SAME file');
+      add('Copy', safe(() => copyFlow(row)));
+      add('Link', safe(() => placementFlow(row)), 'Add another placement of the SAME file');
     }
-    add('Remove', () => removeFlow(row));
+    add('Remove', safe(() => removeFlow(row)));
   }
   const why = text('button', 'Why?', 'why-button'); why.type = 'button'; why.dataset.why = row.fieldRole;
   why.setAttribute('aria-label', 'Why this result: ' + (row.value?.name ?? row.outcome));
@@ -222,16 +231,19 @@ async function tagsFor(rows) {
   return byNode;
 }
 
+let renderToken = 0;
 async function render(s) {
+  const token = ++renderToken;
   current = s;
   const presentation = presentListing(s);
   const nameFilter = $('filter').value.trim().toLowerCase();
   let rows = allRows(s);
-  let tagMap = null, tagNote = '';
+  let tagMap = null, tagNote = '', tagBroken = false;
   if ($('tag-filter').value.trim()) {
-    try { tagMap = await tagsFor(s.rows ?? []); tagNote = ' · tag filter is positive-only over the loaded rows (' + s.coverage + ' coverage)'; }
-    catch { tagNote = ' · tag filter unavailable'; }
+    try { tagMap = await tagsFor(s.rows ?? []); tagNote = ' · tag filter shows only files confirmed to carry this tag (' + s.coverage + ' coverage)'; }
+    catch { tagBroken = true; tagNote = ' · the tag filter could not run — showing nothing rather than guessing'; }
   }
+  if (token !== renderToken) return; // a newer render superseded this one
   for (const id of ['rows', 'attention-rows', 'history-rows']) $(id).replaceChildren();
   $('attention').hidden = presentation.attention.length === 0;
   $('attention-title').textContent = 'Needs attention (' + presentation.attention.length + ')';
@@ -242,11 +254,12 @@ async function render(s) {
   for (const row of rows) {
     const usable = row.outcome === 'FOUND';
     if (usable && nameFilter && !row.value.name.toLowerCase().includes(nameFilter)) { filtered++; continue; }
+    if (usable && tagBroken) { filtered++; continue; }
     if (usable && tagMap && !tagMap.get(row.value.nodeId)) { filtered++; continue; }
     const li = document.createElement('li');
     li.dataset.role = row.fieldRole; li.dataset.outcome = row.outcome; li.dataset.result = stringify(row);
     if (!usable) li.className = 'unresolved';
-    const title = usable ? row.value.name : row.outcome === 'MASKED' ? 'Masked position' : row.outcome === 'ABSENT' ? 'No agreed placement' : 'Unresolved position';
+    const title = usable ? row.value.name : row.outcome === 'MASKED' ? 'Removed here (hidden, not erased)' : row.outcome === 'ABSENT' ? 'Nothing agreed at this name' : 'Sources disagree — needs attention';
     const info = document.createElement('div');
     info.append(text('div', title + (usable && row.value.kind === 'DIRECTORY' ? '/' : ''), 'row-title'));
     info.append(text('div', usable ? (row.value.kind === 'DIRECTORY' ? 'Folder' : 'File') + ' · ' + short(row.value.nodeId) : row.outcome + ' · position ' + short(row.fieldRole), 'row-meta'));
@@ -260,7 +273,7 @@ async function render(s) {
   toast(presentation.summary + filterNote + tagNote);
   $('more').hidden = unavailable || !s.continuation;
   $('export').hidden = unavailable || !s.rows?.length;
-  $('basis').textContent = `Pinned block ${s.basis.blockNumber} · host revision ${s.basis.revision} · ${scope.stats().requests} RPC reads this acquisition · acquisition ${acquisitions}`;
+  $('basis').textContent = `Snapshot ${acquisitions} · pinned block ${s.basis.blockNumber} · host revision ${s.basis.revision} · ${scope.stats().requests} network reads`;
   main.dataset.block = String(s.basis.blockNumber); main.dataset.revision = s.basis.executionSetId;
   await renderTrash();
 }
@@ -279,15 +292,20 @@ async function renderTrash() {
       info.append(text('div', 'removed placement · File ' + short(item.object) + ' · not erased', 'row-meta'));
       const actions = document.createElement('span'); actions.className = 'row-actions';
       const restore = text('button', 'Restore', 'row-button'); restore.type = 'button';
-      restore.addEventListener('click', () => restoreFlow(item)); actions.append(restore);
+      restore.setAttribute('aria-label', 'Restore ' + item.name);
+      restore.addEventListener('click', () => restoreFlow(item).catch(e => toast(friendlyError(e), true))); actions.append(restore);
       li.append(info, actions); $('trash-rows').append(li);
     }
-  } catch { $('trash').hidden = true; }
+  } catch {
+    $('trash').hidden = false;
+    $('trash-summary').textContent = 'Removed items — currently unreadable (this is not proof of none)';
+    $('trash-rows').replaceChildren();
+  }
 }
 
 // ---- flows -----------------------------------------------------------------
-async function afterWrite(result, message) {
-  if (!result) return;
+async function afterWrite(result, message, { verifyBytes = null } = {}) {
+  if (!result || result === 'CANCELLED') return;
   await refresh({});
   // canonical read-back: all predicted records present at the fresh basis
   try {
@@ -296,8 +314,14 @@ async function afterWrite(result, message) {
       const r = await acquire(() => scope.call('getRecord', [id]));
       if (r.status !== 'OK' || r.values[2] === 0n) missing.push(id);
     }
-    toast(missing.length ? 'Submitted, but read-back could not verify every effect yet.' : message + ' Committed and read back at block ' + current.basis.blockNumber + '.');
+    let byteNote = '';
+    if (verifyBytes && !missing.length) {
+      const check = await acquire(() => openFile(scope, { mountId: config.mounts[$('lens').value], fileId: verifyBytes }));
+      byteNote = check.outcome === 'FOUND' && check.value.integrity === 'VERIFIED' ? '' : ' Bytes are not yet readable from the carrier.';
+    }
+    toast(missing.length ? 'Submitted, but read-back could not verify every effect yet.' : message + ' Committed and read back at block ' + current.basis.blockNumber + '.' + byteNote);
   } catch { toast(message + ' Submitted; read-back unavailable.', true); }
+  $('status').focus();
 }
 async function newFolderFlow() {
   const input = await prompt('New folder name'); if (!input?.name) return;
@@ -310,48 +334,70 @@ async function newFolderFlow() {
 const crumbText = () => path.map(p => p.name || 'trip').join('/') + '/';
 async function priorOfName(name) { const { nameRole } = await import('/Reviews/2026-09-09-files-reader/index.mjs'); return priorOf(FIXTURE.namePurpose, here(), nameRole(name)); }
 async function newNoteFlow() {
-  const input = await prompt('New note', { withText: true, initialText: 'Write your note…' }); if (!input?.name) return;
-  const bytesHex = toHex(new TextEncoder().encode(input.text));
-  const intent = { kind: 'createFile', mountId: config.mounts[$('lens').value], parent: here(), name: input.name, bytesHex, mediaType: 'text/plain', charset: 'utf-8', priors: { destination: await priorOfName(input.name) } };
-  const result = await runOperation('create note “' + input.name + '”', intent, [['Note', input.name], ['In', crumbText()], ['Bytes', String((bytesHex.length - 2) / 2)]]);
-  if (result) {
-    const staged = await stageBytes(result.plan.predicted.treeId, result.plan.publication.leaves[2].body, bytesHex, input.name);
-    await afterWrite(result, staged ? 'Note created with verified bytes.' : 'Note created; bytes not staged yet.');
+  let draft = { name: '', text: '' };
+  while (true) {
+    const input = await prompt('New note', { withText: true, initial: draft.name, initialText: draft.text }); if (!input?.name) return;
+    draft = input;
+    const bytesHex = toHex(new TextEncoder().encode(input.text));
+    const intent = { kind: 'createFile', mountId: config.mounts[$('lens').value], parent: here(), name: input.name, bytesHex, mediaType: 'text/plain', charset: 'utf-8', priors: { destination: await priorOfName(input.name) } };
+    const result = await runOperation('create note “' + input.name + '”', intent, [['Note', input.name], ['In', crumbText()], ['Bytes', String((bytesHex.length - 2) / 2)], ['Step', '1 of 2 — the bytes are staged in a second approval']]);
+    if (result === 'CANCELLED') return; // deliberate stop; nothing sent
+    if (!result) continue; // failure: re-open with the draft intact
+    const staged = await stageAndRemember(result, bytesHex, input.name);
+    await afterWrite(result, staged ? 'Note created with verified bytes.' : 'Note created; bytes not staged yet — open the file to stage them.', { verifyBytes: staged ? result.plan.predicted.objectId : null });
+    return;
   }
+}
+// Staging retained for retry: an unstaged create/edit keeps its bytes in
+// memory so the file panel can offer Stage bytes now.
+const pendingBytes = new Map();
+async function stageAndRemember(result, bytesHex, label) {
+  const treeLeaf = result.plan.publication.leaves[result.plan.op.kind === 3 ? 0 : 2]; // edit: tree is leaf 0; create: leaf 2
+  const staged = await stageBytes(result.plan.predicted.treeId, treeLeaf.body, bytesHex, label);
+  if (!staged) pendingBytes.set(result.plan.op.kind === 3 ? result.plan.op.object : result.plan.predicted.objectId, { treeId: result.plan.predicted.treeId, body: treeLeaf.body, data: bytesHex, label });
+  else pendingBytes.delete(result.plan.op.kind === 3 ? result.plan.op.object : result.plan.predicted.objectId);
+  return staged;
 }
 async function uploadFlow(file) {
   if (!file) return;
   const bytesHex = toHex(new Uint8Array(await file.arrayBuffer()));
   if ((bytesHex.length - 2) / 2 > 16384) { toast('This prototype stages at most 16 KiB per file.', true); return; }
-  const name = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, '-');
+  let name = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, '-');
+  if (name !== file.name) {
+    const choice = await prompt('This folder accepts a-z 0-9 . _ - only. Upload “' + file.name + '” as', { initial: name });
+    if (!choice?.name) return;
+    name = choice.name;
+  }
   const intent = { kind: 'createFile', mountId: config.mounts[$('lens').value], parent: here(), name, bytesHex, mediaType: file.type || 'application/octet-stream', charset: null, priors: { destination: await priorOfName(name) } };
-  const result = await runOperation('upload “' + name + '”', intent, [['Image', name + (name === file.name ? '' : ' (renamed to fit the ASCII arm; original: ' + file.name + ')')], ['In', crumbText()], ['Bytes', String((bytesHex.length - 2) / 2)]]);
-  if (result) {
-    const staged = await stageBytes(result.plan.predicted.treeId, result.plan.publication.leaves[2].body, bytesHex, name);
-    await afterWrite(result, staged ? 'Image uploaded with verified bytes.' : 'Image record created; bytes not staged.');
+  const result = await runOperation('upload “' + name + '”', intent, [['Image', name], ['In', crumbText()], ['Bytes', String((bytesHex.length - 2) / 2)], ['Step', '1 of 2 — the bytes are staged in a second approval']]);
+  if (result && result !== 'CANCELLED') {
+    const staged = await stageAndRemember(result, bytesHex, name);
+    await afterWrite(result, staged ? 'Image uploaded with verified bytes.' : 'Image record created; bytes not staged — open the file to stage them.', { verifyBytes: staged ? result.plan.predicted.objectId : null });
   }
 }
 async function renameFlow(row, move) {
   const input = await prompt(move ? 'Move “' + row.value.name + '” into folder path (blank = here) and name' : 'Rename “' + row.value.name + '”', { initial: row.value.name });
   if (!input?.name) return;
-  let destParent = here(), ancestorNames = [];
+  let destParent = here(), ancestorNames = [], destLabel = crumbText();
   if (move) {
-    const target = await prompt('Destination folder path from root, e.g. photos or photos/docs (blank = root)');
+    const target = await prompt('Move “' + row.value.name + '” into', { label: 'Folder path from the top, e.g. photos or photos/docs (blank = this folder)', initial: '' });
     if (target === null) return;
     const segments = target.name.split('/').filter(Boolean);
-    let subject = path[0].subject;
-    for (const segment of segments) {
-      const found = await acquire(() => lookupName(scope, { mountId: config.mounts[$('lens').value], subject, name: segment }));
-      if (found.outcome !== 'FOUND' || found.value.kind !== 'DIRECTORY') { toast('Destination folder not found: ' + segment, true); return; }
-      subject = found.value.subject;
+    if (segments.length) {
+      let subject = path[0].subject;
+      for (const segment of segments) {
+        const found = await acquire(() => lookupName(scope, { mountId: config.mounts[$('lens').value], subject, name: segment }));
+        if (found.outcome !== 'FOUND' || found.value.kind !== 'DIRECTORY') { toast('Destination folder not found: ' + segment + '. Nothing was moved.', true); return; }
+        subject = found.value.subject;
+      }
+      destParent = subject; ancestorNames = segments; destLabel = (path[0].name || 'trip') + '/' + segments.join('/') + '/';
     }
-    destParent = subject; ancestorNames = segments;
   }
   const result = await runOperation(move ? 'move' : 'rename', {
     kind: 'renameMove', mountId: config.mounts[$('lens').value], parent: destParent, name: input.name,
     sourceParent: here(), sourceName: row.value.name, object: row.value.nodeId, ancestorNames,
     priors: { destination: await priorOf(FIXTURE.namePurpose, destParent, (await import('/Reviews/2026-09-09-files-reader/index.mjs')).nameRole(input.name)), source: await priorOfName(row.value.name) },
-  }, [['From', crumbText() + row.value.name], ['To', input.name], ['Identity', 'File Object unchanged: ' + short(row.value.nodeId)]]);
+  }, [['From', crumbText() + row.value.name], ['Into folder', destLabel], ['New name', input.name], ['Identity', 'File Object unchanged: ' + short(row.value.nodeId)]]);
   await afterWrite(result, (move ? 'Moved.' : 'Renamed.') + ' The file identity did not change.');
 }
 async function copyFlow(row) {
@@ -450,25 +496,39 @@ function renderContent(body, row, content, revisionLabel = 'current') {
     }
   } else if (v.integrity === 'BYTES_UNAVAILABLE') {
     section.append(text('p', 'Bytes are not currently available from the configured carrier. The file is not absent; its identity and metadata are verified.'));
+    const pending = pendingBytes.get(row.value.nodeId);
+    if (pending && session.signer !== 'guest') {
+      const retry = text('button', 'Stage bytes now', 'row-button'); retry.type = 'button';
+      retry.addEventListener('click', async () => {
+        const staged = await stageBytes(pending.treeId, pending.body, pending.data, pending.label).catch(e => { toast(friendlyError(e), true); return false; });
+        if (staged) { pendingBytes.delete(row.value.nodeId); $('file-panel').close(); toast('Bytes staged and verifiable; open the file again.'); }
+      });
+      section.append(retry);
+    }
   } else {
     section.append(text('p', 'Returned bytes FAILED verification and are not previewed.'));
   }
   body.append(section);
 }
 async function editNote(row, contentValue, initialText) {
-  const input = await prompt('Edit “' + row.value.name + '”', { withText: true, initial: row.value.name, initialText });
-  if (!input) return;
-  const bytesHex = toHex(new TextEncoder().encode(input.text));
-  const intent = {
-    kind: 'edit', mountId: config.mounts[$('lens').value], fileId: row.value.nodeId, bytesHex,
-    mediaType: contentValue.mediaType, charset: contentValue.charset, priorRevisionId: contentValue.revisionId,
-    priors: { head: await priorOf(FIXTURE.headPurpose, row.value.nodeId, FIXTURE.headRole) },
-  };
-  const result = await runOperation('edit note', intent, [['Note', row.value.name], ['New bytes', String((bytesHex.length - 2) / 2)], ['Race safety', 'compare-and-swap on the current revision']]);
-  if (result) {
-    const staged = await stageBytes(result.plan.predicted.treeId, result.plan.publication.leaves[0].body, bytesHex, row.value.name);
+  let draft = initialText;
+  while (true) {
+    const input = await prompt('Edit “' + row.value.name + '”', { withText: true, initial: row.value.name, initialText: draft, nameReadOnly: true });
+    if (!input) return; // deliberate close; the note is unchanged
+    draft = input.text;
+    const bytesHex = toHex(new TextEncoder().encode(input.text));
+    const intent = {
+      kind: 'edit', mountId: config.mounts[$('lens').value], fileId: row.value.nodeId, bytesHex,
+      mediaType: contentValue.mediaType, charset: contentValue.charset, priorRevisionId: contentValue.revisionId,
+      priors: { head: await priorOf(FIXTURE.headPurpose, row.value.nodeId, FIXTURE.headRole) },
+    };
+    const result = await runOperation('edit note', intent, [['Note', row.value.name], ['New bytes', String((bytesHex.length - 2) / 2)], ['Race safety', 'compare-and-swap on the current revision'], ['Step', '1 of 2 — the bytes are staged in a second approval']]);
+    if (result === 'CANCELLED') return;
+    if (!result) continue; // failure (e.g. stale edit): re-open with the draft intact
+    const staged = await stageAndRemember(result, bytesHex, row.value.name);
     $('file-panel').close();
-    await afterWrite(result, staged ? 'Edited; new revision verified.' : 'Edited; bytes not staged.');
+    await afterWrite(result, staged ? 'Edited; new revision verified.' : 'Edited; bytes not staged — open the file to stage them.', { verifyBytes: staged ? row.value.nodeId : null });
+    return;
   }
 }
 function renderRevisions(body, row, revisions) {
@@ -482,6 +542,8 @@ function renderRevisions(body, row, revisions) {
     if (r.revisionId && !r.current) {
       const openOld = text('button', 'Open this revision', 'row-button'); openOld.type = 'button';
       openOld.addEventListener('click', async () => {
+        if (openOld.disabled) return;
+        openOld.disabled = true;
         const old = await acquire(() => openFile(scope, { mountId: config.mounts[$('lens').value], fileId: row.value.nodeId, revisionId: r.revisionId }));
         const container = document.createElement('div'); li.append(container);
         renderContent(container, row, old, 'revision ' + r.revision);
@@ -512,6 +574,7 @@ function renderTags(body, row, tags) {
     const chip = text('span', label(t.tagId) + ' · by ' + (t.principal === config.authors.A ? 'A' : t.principal === config.authors.B ? 'B' : short(t.principal)), 'tag-chip');
     if (session.signer !== 'guest' && t.principal === session.principal) {
       const un = text('button', '×', 'chip-remove'); un.type = 'button'; un.title = 'Withdraw my tag (other authors keep theirs)';
+      un.setAttribute('aria-label', 'Withdraw my tag: ' + label(t.tagId));
       un.addEventListener('click', async () => {
         const result = await runOperation('untag', { kind: 'untag', mountId: config.mounts[$('lens').value], object: row.value.nodeId, label: label(t.tagId), priors: { tag: await priorOf(FIXTURE.tagPurpose, row.value.nodeId, t.tagId) } }, [['Untag', label(t.tagId)], ['Scope', 'withdraws only YOUR assertion']]);
         if (result) { $('file-panel').close(); await afterWrite(result, 'Your tag was withdrawn; other authors keep theirs.'); }
@@ -558,6 +621,7 @@ async function exportFolder() {
 // ---- loading ---------------------------------------------------------------
 async function load(g) {
   if (busy || g !== generation) return; busy = true; main.dataset.state = 'loading';
+  $('more').setAttribute('aria-disabled', 'true');
   $('coverage').textContent = 'Reading more';
   try {
     const result = await acquire(() => stream.loadMore());
@@ -570,7 +634,7 @@ async function load(g) {
     }
     await render(result);
   } catch (e) { if (g === generation) { $('coverage').textContent = 'Read unavailable'; toast('The read could not finish: ' + e.message, true); } }
-  finally { if (g === generation) { busy = false; main.dataset.state = 'settled'; } }
+  finally { if (g === generation) { busy = false; main.dataset.state = 'settled'; $('more').setAttribute('aria-disabled', 'false'); } }
 }
 async function refresh({ samePin = false } = {}) {
   const g = ++generation;
@@ -601,6 +665,7 @@ async function refresh({ samePin = false } = {}) {
     $('coverage').textContent = 'Read unavailable';
     toast('No folder result: ' + e.message + '. This is not an empty-folder claim.', true);
     main.dataset.state = 'settled';
+    $('status').focus();
   }
 }
 
@@ -610,10 +675,11 @@ $('refresh').addEventListener('click', () => { if (config) refresh({}); });
 $('lens').addEventListener('change', () => { if (config) refresh({}); });
 $('filter').addEventListener('input', () => { if (current) render(current); });
 $('tag-filter').addEventListener('change', () => { if (current) render(current); });
-$('export').addEventListener('click', exportFolder);
-$('new-folder').addEventListener('click', newFolderFlow);
-$('new-note').addEventListener('click', newNoteFlow);
-$('upload').addEventListener('change', e => { uploadFlow(e.target.files[0]); e.target.value = ''; });
+const guarded = fn => (...args) => Promise.resolve(fn(...args)).catch(e => toast(friendlyError(e), true));
+$('export').addEventListener('click', guarded(exportFolder));
+$('new-folder').addEventListener('click', guarded(newFolderFlow));
+$('new-note').addEventListener('click', guarded(newNoteFlow));
+$('upload').addEventListener('change', guarded(e => { const f = e.target.files[0]; e.target.value = ''; return uploadFlow(f); }));
 $('signer').addEventListener('change', () => {
   const value = $('signer').value;
   if (value === 'guest') { session.signer = 'guest'; session.wallet = null; session.principal = null; }

@@ -65,6 +65,25 @@ Prior experiments' files and published evidence are untouched; where this
 branch's compatible reader extensions supersede their byte-pins at this
 revision, that is stated here instead of rewriting their history.
 
+## UX review
+
+An independent UX/accessibility review (22 findings) ran against the app
+source. Applied: draft preservation on failed note create/edit (the stale-edit
+message is now true), Move consent shows the actual destination folder and a
+blank path means "this folder", a visible submitting state with double-submit
+protection and signer snapshots, "verified bytes" claims only after an
+integrity read-back plus a "Stage bytes now" retry for unstaged files,
+two-step approvals labeled "1 of 2", upload renames proposed instead of
+silently applied, error messages in a separate `role="alert"` region with
+focus landing on the outcome, readable author-label contrast, keyboard-focusable
+upload control, accessible names on row/restore/tag-chip actions, honest
+"currently unreadable" Trash state, honest tag-filter failure (shows nothing
+rather than guessing), plain-language copy (snapshots, Records written,
+"Removed here (hidden, not erased)"), phone-width row stacking and dialog
+grids. Deferred as known polish: a folder picker for Move (today: typed path
+with validation), collapsing row actions behind a menu at phone widths,
+border-contrast tuning on secondary buttons.
+
 ## Honest limits
 
 Deep-churn folders still exhaust the read budget (the retained 64/60 control;
