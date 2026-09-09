@@ -1,8 +1,9 @@
 # Managed upgrade foundation verification — 2026-09-08
 
-**Status:** independently reconstructed local fixture evidence; integrated review pending.
+**Status:** independently reconstructed local fixture evidence; integrated review approved.
 **Scope:** Task 2 of [the implementation plan](upgradeable-foundation-plan.md).
-No product repository, public RPC, real key, public deployment, main merge or push.
+No product repository, public RPC, real key, public deployment or main merge.
+Experimental-branch publication shares evidence, not a deployed protocol.
 This is not a complete Files MVP, FilesRouter certification or portable authorship.
 
 ## Reproduce
@@ -212,3 +213,52 @@ This proves controlled fixture upgrades and structural/reference/Binding
 atomicity, not NOREPLACE, Files authorization/route semantics, one real-wallet
 approval, portable authors, malicious-admin safety, arbitrary storage-layout
 compatibility, production governance or a browser Files journey.
+
+## Controller verification and review closeout
+
+The final integrated review covers only the new foundation increment
+`83cbec4..a81d1ef`, including implementation `00588b4`, managed evidence
+`aafc5c0`, correction `2b29671`, canaries and design integration. It is approved
+for experimental-branch publication with **no remaining actionable findings**.
+It does not approve older branch history, the separately preserved dirty
+Binding-read increment, a main merge or production deployment.
+
+The controller independently ran:
+
+- New foundation Forge suite: **14/14 PASS**.
+- Current Core Forge suite: **162/162 PASS**.
+- All current Core and foundation Node files: **79/79 PASS**, including
+  **11/11** managed-reader checks and both direct-host canary scenarios.
+- All three retained snapshots through the independent reader offline:
+  **VERIFIED / VERIFIED / VERIFIED**.
+- Whitespace, design tri-sync and generated decision-rollup checks: pass.
+
+Broad worktree runs include unfinished local Binding work. Passing those tests
+does not turn that work into reviewed or remotely published code. The new
+contracts and explicit shared seams have their own scoped reviews.
+
+Task 1 and Task 2 received independent spec/quality reviews. A separate scoped
+review confirmed the revision-zero classification and exact error-argument
+corrections; no new breakage was found. The final reviewer inspected the whole
+new increment and independently matched all 28 compiler-source pins, all 12
+support pins and the dependency lock, checked saved sizes/gas and retained
+histories, and found no additional issues. Reviewers did not repeat the
+controller's suites or represent them as independent audit runs.
+
+Two reversible engineering rulings were made during implementation:
+
+1. **Share reconstruction through an explicit batch-policy extension.** This
+   avoids two diverging identity/body/Binding verifiers; the old reader remains
+   revision-one-only. Cost if wrong: a shared-reader regression affects both
+   experiments, so legacy-default regressions are required and retained.
+2. **Add admission high-water to execution activation history.** Block alone
+   cannot separate an old write and later activation in the same block. Cost
+   if wrong: rework this disposable tuple/reader; no permanent EFS ABI or
+   deployed data depends on it.
+
+The next gate is the existing [consumer checkpoint](consumer-checkpoint.md):
+measure complete routed creation and atomic rename, then join real Bindings,
+explicit Lenses, authored-current tags and the shared SDK to a static browser.
+Compatibility Views, real wallets, full authority and export/recovery remain
+separate acceptance work. No additional design polling is needed for this
+local next slice.

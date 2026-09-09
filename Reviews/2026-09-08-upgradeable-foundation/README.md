@@ -1,6 +1,6 @@
 # Real EFS state through an upgradeable foundation
 
-**Status:** local disposable foundation implemented; final review in progress
+**Status:** reviewed local disposable foundation; Files/Lens/browser join remains open
 **Authority:** James approved fleshing out the prototype and validating the
 foundation on 2026-09-08. No product repo, public deployment or protocol freeze.
 **Parent plan:** [[Designs/efsv2/testnet-files-mvp-plan]]
@@ -106,8 +106,8 @@ expected outcomes and SDK/UX boundaries after the owning PMs' read-only review.
   source-pinned normal deployments, actual proxy-admin evidence, independently
   reconstructed retained state, same-block history, stale/altered/replayed
   operations, legacy-reader behavior, bounded history and exceptional cleanup.
-  Task review is Approved; its two minor corrections are included and awaiting
-  scoped re-review. See [the detailed verification](verification.md).
+  Task review, scoped correction review and final integrated review are Approved.
+  See [the detailed verification and closeout](verification.md).
 - The real seven-leaf small-file metadata publication costs **about 14.15 million gas**
   in the observed runs, leaving **about 2.63 million** below the experiment's 16,777,216
   cap. Byte staging is separate. Four candidate groups are installed separately;

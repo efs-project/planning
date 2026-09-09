@@ -93,7 +93,7 @@ whose EIP-712 payload also binds exact tree ID/body/data digest, execution set,
 nonce and expiry; use the existing C0ChunkTree validator, bounded upload and
 immutable keyed bytes. Do not describe detached byte staging as file publication.
 
-- [ ] Write failing contract regressions before new production logic. Start
+- [x] Write failing contract regressions before new production logic. Start
   with the legacy revision-two rejection and the new path accepting a real
   group under revision two with the original batch packing. A reverting stub
   can make a new-interface red executable; remove the stub when implemented.
@@ -101,26 +101,26 @@ immutable keyed bytes. Do not describe detached byte staging as file publication
   body/wrong reference rollback, nonce replay, unauthorized sender, locked
   implementation, one-time bootstrap, partial endpoint upgrade and atomic
   failed upgrade. Explain the expected failure in the report.
-- [ ] Implement the revision wrapper/seam without copying the kernel body.
+- [x] Implement the revision wrapper/seam without copying the kernel body.
   Implement separate ERC-7201 namespace roots for the unchanged EFS Store,
   fixture control and U2 presentation extension; verify the roots independently.
-- [ ] Use actual OpenZeppelin Transparent proxies/ProxyAdmins. The test fixture
+- [x] Use actual OpenZeppelin Transparent proxies/ProxyAdmins. The test fixture
   deploys and initializes both endpoints atomically; explicit bootstrap roles
   account for factory msg.sender and actual admin creation order. Record the
   ordered Core/carrier implementation identities, fixed libraries/helper and
   expected actual ProxyAdmin/controller addresses. No public actual-admin getter
   is assumed on the stock proxy; keep source/runtime verification separate.
-- [ ] From U1, guard ordinary writes using local slot/self checks and bounded
+- [x] From U1, guard ordinary writes using local slot/self checks and bounded
   peer/configuration reads. Compare the whole active configuration, not just
   proxy codehash. The fixture controller's normal upgrade path upgrades both
   implementations and activates their new execution set in one transaction.
   Partial/direct-upgrade test paths belong in the fixture, not the host API.
-- [ ] U2 adds a persistent presentation label in its separate namespace. Old
+- [x] U2 adds a persistent presentation label in its separate namespace. Old
   Types, Records, bindings, posting words, byte contents and nonce state remain.
   No arbitrary-layout-change safety or protection from malicious admins is
   claimed. Test a migration that reverts and require rollback of both proxy
   implementation changes and the activation history.
-- [ ] Run focused Forge tests during iteration, the new suite once before
+- [x] Run focused Forge tests during iteration, the new suite once before
   committing, and the existing StateKernelTest baseline. Use the installed
   solc binary through `--offline --use` when needed. Stage exact paths only.
   Record red/green output, warnings, source changes and missing evidence in
@@ -161,16 +161,16 @@ activation blocks, but never require U1 batches to have a strictly earlier block
 a U1 write and U2 activation can legitimately share a block. Test this case.
 Bound history collection and preserve raw byte/ID checks when history is missing.
 
-- [ ] Write failing Node tests for substituted record bytes/ID, missing
+- [x] Write failing Node tests for substituted record bytes/ID, missing
   historical revision, tampered implementation/admin evidence and a stale
   prepared operation crossing U1→U2. Expected results are literal
   `INVALID`, `UNKNOWN`, or verified exact matches, not a generic success flag.
-- [ ] Build a managed loopback-only Anvil runner with its own ephemeral port,
+- [x] Build a managed loopback-only Anvil runner with its own ephemeral port,
   synthetic operator keys, normal size/gas ceilings and guaranteed cleanup.
   Link actual compiler artifacts; independently compare installed runtimes,
   immutable admin openings and actual `ProxyAdmin.owner()` at a pinned basis.
   Capture compiler/source/dependency hashes, source commit and actual receipts.
-- [ ] Populate real Type groups and object/Binding/content data. Export the
+- [x] Populate real Type groups and object/Binding/content data. Export the
   retained state, upgrade, compare unchanged legacy IDs/bytes and new execution
   history, then admit valid U2 data and reject invalid/stale/replayed actions.
   Independent reconstruction of IDs, body validation, bindings and postings
@@ -184,7 +184,7 @@ Bound history collection and preserve raw byte/ID checks when history is missing
   separately, and measure this seven-leaf publication as one actual transaction.
   This proves structural/reference/Binding atomicity and cost, not FilesRouter
   semantic certification, `NOREPLACE`, full auth or one wallet approval.
-- [ ] Record measured deployment/runtime/transaction costs and the exact
+- [x] Record measured deployment/runtime/transaction costs and the exact
   accepted/rejected cases. Update the parent design with newly discovered
   gotchas and the next bounded Files/Lens/browser join. This task does not
   label the foundation experiment a complete Files MVP.
