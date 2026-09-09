@@ -5,7 +5,7 @@
 **Depends on:** [[system-constitution]], [[core-architecture-candidate]], [[hierarchical-files-and-folders]], [[../sdkv2/mvp-interface]], [[../web-client-os/mvp0-acceptance]]
 **Supersedes:** — preserves the disposable C0 experiment as evidence
 **Reviewers:** Codex `mvp_browser_acceptance` and `testnet_upgrade_boundary` — bounded source/plan review corrections closed, 2026-09-08
-**Last touched:** 2026-09-08
+**Last touched:** 2026-09-09
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/human-overview #topic/content
 
@@ -29,6 +29,16 @@ now carries the bounded upgrade work. Its
 [consumer checkpoint](../../Reviews/2026-09-08-upgradeable-foundation/consumer-checkpoint.md)
 turns the next Lens, rename and authored-tag joins into explicit expected
 outcomes; its boundary tests must not be mistaken for a working Files browser.
+
+The [September 9 lifecycle/performance checkpoint](../../Reviews/2026-09-09-files-parity-performance/README.md)
+adds actual raw-Core create/edit/rename/move/retraction and two-author tag
+operations on both sides of the upgrade. It independently checks every
+checkpoint and complete rollback after a stale rename. This closes a useful
+data/atomicity question, not the end-to-end rows below. Its
+[v1 capability inventory](../../Reviews/2026-09-09-files-parity-performance/parity.md)
+also retains chunks, mirrors, collections, redirects and sorting as explicit
+parity work. Generic Type expressibility is not a substitute for demonstrating
+their contract/SDK/browser behavior.
 
 ## Proposal
 
@@ -80,6 +90,16 @@ remaining. These are measured design constraints, not full Files certification.
 Keep Files/router behavior outside that nearly full admission component and
 measure complete routed creation and atomic rename before treating their fit
 as established. Do not make an atomic operation appear to pass by splitting it.
+
+The September 9 [source-A/B experiment](../../Reviews/2026-09-09-files-parity-performance/comparison.md)
+reduces the matched U1 creation from about **14.21 to 8.68 million gas**,
+edit by about **22%**, and rename/move by about **28%**, without changing
+stored formats or validation rules. This memory-only optimization leaves just
+**43 runtime bytes** in the admission library. It improves the raw-operation
+budget; it does not close router fit, adversarial collision costs, bounded
+listing, or the SDK/browser acceptance rows. Preserve the original baseline
+and measure those joins explicitly rather than treating this as a completed
+performance budget.
 
 The SDK consumes complete execution context, not an app-supplied revision
 number alone. Preserve original acceptance history separately from today's
