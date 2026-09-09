@@ -1,6 +1,7 @@
 # Guest Files screen over the bounded reader
 
-**Status:** disposable implementation in progress; not public C0 or v1 parity.
+**Status:** implemented and independently reviewed local guest-read checkpoint;
+not public C0 or v1 parity. See [verification and measured results](verification.md).
 
 Implements the read-only part of the [consumer build card](../2026-09-09-v1-parity-overnight/consumer-build-card.md)
 using the published [shared reader](../2026-09-09-files-reader/verification.md)

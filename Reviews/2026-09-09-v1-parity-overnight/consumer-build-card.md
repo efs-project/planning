@@ -1,19 +1,33 @@
-# Next visible result: one useful Files screen
+# Visible result: one useful Files screen, with remaining joins
 
-**Status:** bounded consumer work card; not implemented or a new SDK/profile ABI.
+**Status:** bounded consumer work card; guest screen now implemented, other
+joins still open. Not a new SDK/profile ABI or full Files parity.
 The [upgrade-aware read prerequisite](../2026-09-08-upgradeable-foundation/upgrade-read-verification.md)
 now passes. Reuse the [existing consumer specification](../2026-09-08-upgradeable-foundation/consumer-checkpoint.md)
 and [directory dataflow](directory-read-next.md), not a second file-tree model.
 
-**September 9 read join:** the [bounded shared Files reader](../2026-09-09-files-reader/README.md)
+**September 9 guest-screen checkpoint:** the [actual static SPA](../2026-09-09-files-screen/verification.md)
+uses this shared reader, not an exported oracle tree. Seven pinned observations
+× three Lenses match independent reconstruction in Chromium; phone explanation,
+keyboard focus, enlarged text, cancellation and failed-prefix handling pass.
+Independent re-review approved `48338b0`. The corrected 50ms-injected browser
+median is 2.158 s to the first four positions and 0.533 s for the next four,
+with module/config delivery counted separately from RPC bytes. The
+[larger-folder experiment](../2026-09-09-files-reader-scale/README.md) exposes
+a scope-lifetime limit; it prevents claiming general pagination support.
+The onchain Files operation boundary, full Solidity Files interpretation,
+bytes/heads and actual wallet writes remain subsequent joins.
+
+**Earlier September 9 read join:** the [bounded shared Files reader](../2026-09-09-files-reader/README.md)
 now interprets actual mounted root folders through the populated read profile.
 Task-reviewed scope/adapter commits `c581366`/`eb14059` pass a fresh 14-group
 parent run, including all three views, historical charters, bad selections,
 partial discovery and old/new pinned upgrade reads. The executable `.mjs`
 entrypoint and adjacent TypeScript declarations are a disposable consumer
 seam, not the public SDK. Root-only ASCII names, no bytes/head traversal,
-synthetic authority and trusted local source remain explicit. This advances
-join 1 and the reader part of join 2; the screen and write router remain open.
+synthetic authority and trusted local source remain explicit. That checkpoint
+advanced join 1 and the reader part of join 2; the guest-screen follow-on is
+reported above. The write router remains open.
 
 Its identical eight-name/two-node 0/50ms baseline now includes cold source
 qualification and fresh final sealing. The current scheduling follow-on keeps

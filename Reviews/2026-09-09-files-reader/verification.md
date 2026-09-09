@@ -157,9 +157,14 @@ These are reversible experiment choices, not project-owner protocol rulings.
 
 ## Remaining gaps and next checks
 
-The next visible join is the [existing guest Files screen](../2026-09-09-v1-parity-overnight/consumer-build-card.md),
-using this same reader. Phone/keyboard behavior, explanation clarity and
-actual browser timing need their own evidence. Profile-checked onchain writes,
+The [guest Files screen](../2026-09-09-files-screen/verification.md) now uses
+this same unchanged reader. Real Chromium checks cover seven observations
+across all three Lenses, phone/keyboard behavior and 0/50ms browser timing;
+independent re-review approved the corrected UI at `48338b0`. The separate
+[folder-size pressure](../2026-09-09-files-reader-scale/README.md) exposes the
+512-request lifetime cap: 32 unique Files use all of it, and larger examples
+stop with labeled prior prefixes. No general directory-size claim follows.
+Profile-checked onchain writes,
 FileRevision/head/byte traversal, current attributed tags/filters, and the
 full [v1 inventory](../2026-09-09-files-parity-performance/parity.md) remain open.
 The raw publication fixture is not a FilesRouter validation certificate.
@@ -168,16 +173,21 @@ The manifest and RPC are explicitly trusted local configuration, authority is
 synthetic operator only, and finality is provisional. Complete same-source
 agreement is not independent consensus proof. Names are root-only ASCII;
 rich names are unsupported, not automatically invalid. Charter history and
-scope work are finite. Wider unique-node/author workloads need measurement.
+scope work are finite. Unique-node size is now measured above; wider-author
+folders and resumable acquisition lifetimes still need their own evidence.
 
 The managed runner deploys U1/U2 code before initialization. It therefore
 does not prove correct historical-manifest selection for an implementation
 deployed later; that is an explicit followup, not evidence of data loss.
 
 The final reviewer independently confirmed all 20 current scope codec
-input/output shapes against compiled Core/Admin artifacts. Retaining that
-structural comparison as a regression remains a minor followup: small numeric
-round trips cannot prove every width. There is no present ABI mismatch.
+input/output shapes against compiled Core/Admin artifacts. The follow-on
+[`abi-shapes.test.mjs`](test/abi-shapes.test.mjs) now retains that comparison
+against both U1/U2 and Admin. Its same-selector, wrong-output-width negative
+control catches an error that small numeric round trips could miss. The new
+isolated regression passes (1/1); independent review reproduced 1/1 and
+approved this test for the experiment branch. This is static shape evidence,
+not large-value runtime execution proof. No runtime code or public export changed.
 
 Declaration accuracy for integer epochs and pending evidence timestamps was
 fixed at `3b396d9`, with strict sample RED/GREEN evidence. A fresh parent run
