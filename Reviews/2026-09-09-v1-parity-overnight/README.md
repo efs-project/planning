@@ -1,6 +1,7 @@
 # Overnight v1-parity and usability run
 
-**Status:** active disposable prototype work, not a finished MVP or parity claim.
+**Status:** overnight checkpoint retained; heartbeat paused at the September 9,
+09:00 America/Chicago cutoff. MVP and v1 parity remain unfinished.
 **Authority:** James's September 9 request to continue overnight, validate v1
 capabilities and measure v2 performance and UX. Existing experiment branch only.
 
@@ -43,9 +44,12 @@ explicit gaps until demonstrated or separately deferred by James.
 Native-goal bookkeeping is separate: the existing integrated-MVP goal reports
 `usageLimited`; an attempted new goal was refused because it is unfinished.
 No false completion or goal-state workaround was used. The existing thread
-heartbeat is active hourly through September 9, 09:00 America/Chicago. It
-respects actual usage availability and checkpoints at the cutoff. Local work
-requires the computer and Codex to remain available.
+heartbeat was paused through the app at September 9, 14:00 UTC (09:00
+America/Chicago), and its persisted PAUSED state was verified. Its scope,
+recurrence, notification preferences and target task were otherwise preserved.
+The native goal was not marked complete. A future authorized continuation can
+start from the reviewed checkpoint and next bounded plan; no local prototype
+server or test run is intentionally left running by this pass.
 
 ## Execute in this order
 
