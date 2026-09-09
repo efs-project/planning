@@ -165,7 +165,9 @@ function createScope(source,expected,caps,signal) {
       }).finally(()=>{running.delete(job);pump();});
     }
   }
-  function rpc(method,params,purpose) {
+  async function rpc(method,params,purpose) {
+    // Convert immediate stop/budget failures into promises so grouped controls
+    // always attach rejection handlers to every acquisition they have started.
     live();
     return new Promise((resolve,reject)=>{queue.push({method,params:clone(params),purpose,resolve,reject});pump();});
   }
@@ -193,23 +195,30 @@ function createScope(source,expected,caps,signal) {
     return raw;
   }
   async function context(purpose,fresh=false) {
-    const values=await read(expected.core,'fixtureReadContext',[],purpose,fresh);
-    const counts=(await read(expected.core,'counts',[],purpose,fresh))[0];
+    const [values,[counts]]=await Promise.all([
+      read(expected.core,'fixtureReadContext',[],purpose,fresh),read(expected.core,'counts',[],purpose,fresh),
+    ]);
     equal(values[0],basis.executionSetId,'context execution');equal(values[1],basis.revision,'context revision');
     equal(values[2],basis.blockNumber,'context block');equal(values[3],basis.admissionHigh,'context admission');
     equal(counts[4],basis.admissionHigh,'context admission counts');
   }
   async function canonical(purpose) {
-    const raw=header((await rpc('eth_getBlockByNumber',['0x'+basis.blockNumber.toString(16),false],purpose)).result,basis.blockNumber);
+    const [headerResult,chainResult]=await Promise.all([
+      rpc('eth_getBlockByNumber',['0x'+basis.blockNumber.toString(16),false],purpose),rpc('eth_chainId',[],purpose),
+    ]);
+    const raw=header(headerResult.result,basis.blockNumber);
     equal(raw.hash,basis.blockHash,'canonical header changed');equal(raw.stateRoot,basis.stateRoot,'canonical header state root');
-    const chain=(await rpc('eth_chainId',[],purpose)).result;
+    const chain=chainResult.result;
     check(quantity(chain),'chain quantity');equal(BigInt(chain),basis.chainId,'chain changed');
   }
   async function qualify(requested) {
     beginWindow();
-    const chain=(await rpc('eth_chainId',[],'qualification')).result;
+    const [chainResult,headerResult]=await Promise.all([
+      rpc('eth_chainId',[],'qualification'),rpc('eth_getBlockByNumber',[requested,false],'qualification'),
+    ]);
+    const chain=chainResult.result;
     check(quantity(chain),'chain quantity');equal(BigInt(chain),expected.chainId,'chain mismatch');
-    const h=header((await rpc('eth_getBlockByNumber',[requested,false],'qualification')).result,requested==='latest'?undefined:requested);
+    const h=header(headerResult.result,requested==='latest'?undefined:requested);
     pin=freeze({blockHash:h.hash,requireCanonical:true});
     // One fetch per distinct address, even when component and implementation inventories overlap.
     const codeByAddress=new Map();
@@ -217,14 +226,18 @@ function createScope(source,expected,caps,signal) {
     await Promise.all([...codeByAddress].map(async([address,code])=>{
       const r=await rpc('eth_getCode',[address,pin],'qualification');equal(r.result,code,'complete runtime '+address);
     }));
-    const current=(await read(expected.core,'currentRevision'))[0];
+    const [[current],guarded,[counts]]=await Promise.all([
+      read(expected.core,'currentRevision'),read(expected.core,'fixtureReadContext'),read(expected.core,'counts'),
+    ]);
     check(current>=1n&&current<=16n,'history revision budget');
-    const guarded=await read(expected.core,'fixtureReadContext');
-    const counts=(await read(expected.core,'counts'))[0];
     equal(guarded[3],counts[4],'context admission counts');
+    // Acquire bounded independent revisions together, then validate the history in order.
+    const revisions=await Promise.all(Array.from({length:Number(current)},(_,i)=>Promise.all([
+      read(expected.core,'revisionAt',[i+1]),read(expected.execution.carrier,'revisionAt',[i+1]),
+    ])));
     const history=[];
     for(let ordinal=1;ordinal<=Number(current);ordinal++) {
-      const [core,carrier]=await Promise.all([read(expected.core,'revisionAt',[ordinal]),read(expected.execution.carrier,'revisionAt',[ordinal])]);
+      const [core,carrier]=revisions[ordinal-1];
       equal(abi.encode([EXECUTION],[core[0]]),abi.encode([EXECUTION],[carrier[0]]),'peer history');
       const e=Object.fromEntries(EXECUTION_FIELDS.split(',').map((field,i)=>[field.split(' ')[1],core[0][i]]));
       equal(e.ordinal,ordinal,'origin-contiguous revisions');equal(e.id,executionId(e),'complete execution-set commitment');
@@ -243,28 +256,34 @@ function createScope(source,expected,caps,signal) {
     }
     const active=history.at(-1);
     basis=freeze({source:identity,epoch,chainId:BigInt(chain),core:expected.core,blockNumber:BigInt(h.number),blockHash:h.hash,stateRoot:h.stateRoot,executionSetId:active.id,revision:current,admissionHigh:guarded[3]});
-    await context('qualification');
-    await Promise.all(['core','carrier'].map(async kind=>{
-      const address=expected.execution[kind];
-      const [impl,admin,owner,configuration,revision]=await Promise.all([
-        rpc('eth_getStorageAt',[address,IMPLEMENTATION_SLOT,pin],'qualification'),
-        rpc('eth_getStorageAt',[address,ADMIN_SLOT,pin],'qualification'),
-        read(expected.execution[kind+'Admin'],'owner'),read(address,'configuration'),
-        kind==='core'?Promise.resolve([current]):read(address,'currentRevision'),
-      ]);
-      for(const [r,key] of [[impl,'Implementation'],[admin,'Admin']]) {
-        check(typeof r.result==='string'&&/^0x0{24}[0-9a-fA-F]{40}$/.test(r.result),'canonical '+kind+' '+key+' slot');
-        equal('0x'+r.result.slice(-40),active[kind+key],'actual '+kind+' '+key+' slot');
-      }
-      // Exact source-supplied proxy runtime above includes its immutable admin openings.
-      equal(owner[0],active.controller,'actual ProxyAdmin owner');
-      equal(configuration[0],active[kind+'Configuration'],'installed configuration');
-      equal(revision[0],current,'endpoint active revision');
-    }));
-    for(const name of ['preparationHelper','preparationCodehash','admissionLibrary','admissionCodehash'])equal((await read(expected.core,name))[0],expected.getters[name],'dependency '+name);
-    const boot=(await read(expected.core,'bootstrap'))[0],init=expected.init;
-    const original=[init.realmId,init.initialRevisionId,init.intrinsicGroupBytes,keccak256(init.objectGroup1Bytes),keccak256(init.kernelGroup2Bytes),groupType(init.intrinsicGroupBytes,0)];
-    original.forEach((value,i)=>equal(boot[i],value,'bootstrap commitment '+i));
+    await Promise.all([
+      context('qualification'),
+      ...['core','carrier'].map(async kind=>{
+        const address=expected.execution[kind];
+        const [impl,admin,owner,configuration,revision]=await Promise.all([
+          rpc('eth_getStorageAt',[address,IMPLEMENTATION_SLOT,pin],'qualification'),
+          rpc('eth_getStorageAt',[address,ADMIN_SLOT,pin],'qualification'),
+          read(expected.execution[kind+'Admin'],'owner'),read(address,'configuration'),
+          kind==='core'?Promise.resolve([current]):read(address,'currentRevision'),
+        ]);
+        for(const [r,key] of [[impl,'Implementation'],[admin,'Admin']]) {
+          check(typeof r.result==='string'&&/^0x0{24}[0-9a-fA-F]{40}$/.test(r.result),'canonical '+kind+' '+key+' slot');
+          equal('0x'+r.result.slice(-40),active[kind+key],'actual '+kind+' '+key+' slot');
+        }
+        // Exact source-supplied proxy runtime above includes its immutable admin openings.
+        equal(owner[0],active.controller,'actual ProxyAdmin owner');
+        equal(configuration[0],active[kind+'Configuration'],'installed configuration');
+        equal(revision[0],current,'endpoint active revision');
+      }),
+      ...['preparationHelper','preparationCodehash','admissionLibrary','admissionCodehash'].map(async name=>{
+        equal((await read(expected.core,name))[0],expected.getters[name],'dependency '+name);
+      }),
+      (async()=>{
+        const boot=(await read(expected.core,'bootstrap'))[0],init=expected.init;
+        const original=[init.realmId,init.initialRevisionId,init.intrinsicGroupBytes,keccak256(init.objectGroup1Bytes),keccak256(init.kernelGroup2Bytes),groupType(init.intrinsicGroupBytes,0)];
+        original.forEach((value,i)=>equal(boot[i],value,'bootstrap commitment '+i));
+      })(),
+    ]);
     await canonical('qualification');live();endWindow();
   }
   const unavailable = error => ({status:'UNAVAILABLE',reason:error.message,evidenceId:error.evidenceId??null});
@@ -287,7 +306,7 @@ function createScope(source,expected,caps,signal) {
       sealFlight=(async()=>{
         try {
           live();beginWindow();await Promise.all([...dataWork]);live();
-          await canonical('seal');await context('seal',true);live();endWindow();
+          await Promise.all([canonical('seal'),context('seal',true)]);live();endWindow();
           return {status:'SEALED',basis,evidence:scope.evidence()};
         }
         catch(error){stop(error.message);return {status:'UNAVAILABLE',reason:error.message,evidence:scope.evidence()};}
