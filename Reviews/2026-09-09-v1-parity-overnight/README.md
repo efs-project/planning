@@ -38,7 +38,7 @@ requires the computer and Codex to remain available.
    190 Core Forge/14 upgrade Forge/178 Node checks pass; independent task review
    approves the source. Real density256 and a257 clamp case verify; optional513
    exceeds the unchanged diagnostic collector budget and is not a pass.
-   Final increment review covers the accompanying evidence/docs. Resolved
+   Final increment review also approves the accompanying evidence/docs. Resolved
    Files/dead-name performance and the remaining query families are still
    unfinished; raw anchors are not usable current file rows. The
    [next executable handoff](directory-read-next.md) now starts at that join.
