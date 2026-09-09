@@ -1,10 +1,10 @@
 /** Disposable ASCII/root-directory adapter. No wallet, bytes or actions surface. */
 export interface Limits {readonly maxRequests:number;readonly maxBytes:number;readonly responseBytes:number;readonly maxInFlight:number;readonly deadlineMs:number}
 export const DEFAULT_LIMITS:Readonly<Limits>;
-export interface ReaderSource {identity:string;epoch:string|number;request(method:string,params:readonly unknown[],options:{signal:AbortSignal;maxBytes:number}):Promise<unknown>}
+export interface ReaderSource {identity:string;epoch:number;request(method:string,params:readonly unknown[],options:{signal:AbortSignal;maxBytes:number}):Promise<unknown>}
 export interface ReaderContext {expected:Readonly<Record<string,unknown>>;limits?:Partial<Limits>}
-export interface Basis {readonly source:string;readonly epoch:string|number;readonly chainId:bigint;readonly core:string;readonly blockNumber:bigint;readonly blockHash:string;readonly stateRoot:string;readonly executionSetId:string;readonly revision:bigint;readonly admissionHigh:bigint}
-export interface Evidence {readonly id:number;readonly sequence:number;readonly method:string;readonly params:readonly unknown[];readonly purpose:string;readonly bytes:number;readonly startedMs:number;readonly endedMs:number;readonly result?:unknown;readonly error?:Readonly<Record<string,unknown>>}
+export interface Basis {readonly source:string;readonly epoch:number;readonly chainId:bigint;readonly core:string;readonly blockNumber:bigint;readonly blockHash:string;readonly stateRoot:string;readonly executionSetId:string;readonly revision:bigint;readonly admissionHigh:bigint}
+export interface Evidence {readonly id:number;readonly sequence:number;readonly method:string;readonly params:readonly unknown[];readonly purpose:string;readonly bytes:number;readonly startedMs:number;readonly endedMs:number|null;readonly result?:unknown;readonly error?:Readonly<Record<string,unknown>>}
 export interface Scope {
   readonly basis:Basis;
   call(name:'getRecord'|'getOccurrence'|'getOccurrenceByOrdinal'|'getBindingHead'|'getBindingAtBasis'|'readHistory'|'pagePostingsHydrated'|'resolve'|'validatePlan',args?:readonly unknown[]):Promise<{status:'OK';values:readonly unknown[];evidenceId:number}|{status:'UNAVAILABLE';reason:string;evidenceId:number|null}>;

@@ -1,8 +1,22 @@
 import { createFixtureReader,lookupName,openDirectory,assessRecord,nameAssessment } from '../index.mjs';
-import type { ReaderSource,ReaderContext } from '../index.mjs';
+import type { ReaderSource,ReaderContext,Evidence } from '../index.mjs';
 async function guest(source:ReaderSource,context:ReaderContext,mountId:string){
+  // @ts-expect-error Reader sources require a nonnegative safe-integer epoch.
+  const invalidSourceEpoch:ReaderSource={...source,epoch:'not-a-number'};
+  void invalidSourceEpoch;
   const opened=await createFixtureReader({source,context}).open();
   if(opened.status!=='READY')return opened.reason;
+  const basisEpoch:number=opened.scope.basis.epoch;
+  void basisEpoch;
+  for(const evidence of opened.scope.evidence()){
+    const endedMs:number|null=evidence.endedMs;
+    if(endedMs!==null){
+      const completedAt:number=endedMs;
+      void completedAt;
+    }
+  }
+  const pendingEvidence:Evidence={id:0,sequence:0,method:'pending',params:[],purpose:'test',bytes:0,startedMs:0,endedMs:null};
+  void pendingEvidence;
   const result=await lookupName(opened.scope,{mountId,name:'note.txt'});
   if(result.outcome==='FOUND'){
     const id:string=result.value.nodeId;
