@@ -1,7 +1,8 @@
 # Fixed read libraries for the C0 prototype
 
 **Status:** synthetic revision-one host implementation and normal deployment
-evidence complete; see [Binding verification](binding-reads-verification.md).
+evidence complete for [Binding](binding-reads-verification.md) and the bounded
+[audit-page extension](audit-pages-verification.md).
 Authenticated C0 and V3 integration remain pending. Not a protocol freeze.
 
 The [Binding size gate](binding-reads-verification.md) found a 26,736-byte
@@ -20,7 +21,7 @@ read code behind two fixed Solidity library boundaries, not merely source files:
 | Fixed library | Exposed library forwarders | Internal implementation |
 |---|---|---|
 | PointReadLibrary | getTypeSchema, getTypeOrigin, intrinsicTypeGroupBytes, getRecord, getEnvelope, getOccurrence, getOccurrenceByOrdinal, getReceipt | StatePointReads |
-| QueryReadLibrary | getBindingHead, getBindingAtBasis, readHistory | StateBindingReads |
+| QueryReadLibrary | getBindingHead, getBindingAtBasis, readHistory; pagePostings, pagePostingsHydrated, counts | StateBindingReads; StateAuditPages |
 
 Each library method is `external view`, with `StateStore.Store storage s` as
 its first parameter and the same remaining parameters/returns as the existing
@@ -30,8 +31,11 @@ Use only compiler-generated storage-reference calls, never hand-encoded slot
 pointers or a generic delegatecall dispatcher. Keep both libraries link-free:
 QueryReadLibrary compiles required internal point helpers into itself rather
 than calling PointReadLibrary. Verify this in actual compiler references.
-QueryReadLibrary implements only the three named methods in this increment;
-its name is not evidence that the future page engine fits or exists.
+The initial Binding increment implements the first three methods. The following
+audit-page increment adds the three page/count forwards for exact kinds8/10
+only; all other query tuples are explicitly unsupported. Its measured runtime
+is14,811 bytes. This is not evidence that every remaining query family exists
+or that the complete query engine fits.
 
 These storage-reference calls use DELEGATECALL. The libraries are trusted
 implementation with access to the caller's storage, not sandboxed extensions.
@@ -72,6 +76,14 @@ getters. No separately supplied address may override a compiler link. Dependency
 guards precede read-state/caller guards; once dependencies match, all existing
 read error/absence/basis precedence stays intact. This host-specific error is
 not a newly adopted permanent Core INDEX signature.
+
+`AuditPageReadHarness` derives from that same host and adds three guarded
+page/count methods without another Store. The sole base-host source change
+makes the query guard internal for reuse. The normal audit host measures12,485
+runtime bytes and18,396 full initcode bytes. Both hosts retain the same six
+constructor arguments; separate synthetic subclasses remain corruption fixtures,
+not normal deployed-host evidence. Details and response/gas costs are in the
+[audit checkpoint](audit-pages-verification.md).
 
 ## Deployment commitment consequence
 

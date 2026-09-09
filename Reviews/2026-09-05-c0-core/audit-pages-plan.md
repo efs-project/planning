@@ -10,6 +10,12 @@
 
 **Spec:** [read-overlay.md](read-overlay.md), [B0 INDEX §5](../2026-08-13-efs2-stage-a-corpus/chapters/b0-indexes.md#5-the-page-result-abi-every-enumeration), [fixed libraries](read-library-layout.md), and [next directory checkpoint](../2026-09-09-v1-parity-overnight/directory-read-next.md). This is execution of that selected disposable surface, not a new Type/query/authority architecture.
 
+**Execution checkpoint:** task source `ae99e1a` passes independent spec/quality
+review and fresh parent190 Core Forge/14 upgrade Forge/178 Node controls.
+See [verification and explicit optional-scale limits](audit-pages-verification.md).
+The checklist below retains the original execution requirements, not a claim
+that optional513/10,303 fixtures or the excluded consumer joins were completed.
+
 ## Global Constraints
 
 - No storage, admission, authority, identity, candidate Type or portable encoding change.

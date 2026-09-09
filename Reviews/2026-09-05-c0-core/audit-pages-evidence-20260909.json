@@ -1,0 +1,975 @@
+{
+  "evidenceStanding": "Worker managed-run observation; not a retained full-state snapshot, public deployment, resolved Files listing or parity claim. Parent rerun and independent review are recorded separately in audit-pages-verification.md.",
+  "sourceCommit": "ae99e1a24b6d8bf25f3428d3a192e869777e7510",
+  "sourcePinChecks": 19,
+  "observation": {
+    "compiler": {
+      "version": "0.8.30+commit.73712a01"
+    },
+    "settings": {
+      "remappings": [
+        "C0Admission/=../2026-09-05-c0-admission/src/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "test/AuditPageReadHarness.sol": "AuditPageReadHarness"
+      },
+      "evmVersion": "cancun",
+      "libraries": {},
+      "viaIR": true
+    },
+    "sourcePins": {
+      "../2026-09-05-c0-admission/src/TypeGroupParser.sol": "0x586b5d360092ed79faaf69114aadbe7dd487b9a7c2690ef55c5c6443d3f2bc86",
+      "src/AdmissionLibrary.sol": "0x58bdba5c0a12d7e8f2fdf6d8217a205b81b8075080d1dd27b03c4dfc5b8201c2",
+      "src/AuditPageCursor.sol": "0xde4c99554ff6a3b73c0f1e3ef6fbd5572e8c6c32ff8e54fd95c5dd868ab51c6c",
+      "src/BindingFold.sol": "0xecf170a723ffff6966b6439c2305dcbae427ccc70c68aad632b950631dd307ee",
+      "src/IndexKeys.sol": "0x82dbf6754e96cd113fc5ecd8536c50ed464f626214947de51f20e85650fb4d43",
+      "src/PointReadLibrary.sol": "0x29b035c5182826a17a497059dbfe9f2680e6e504962cdb2aea48cf75a4487d79",
+      "src/Preparation.sol": "0x2200c3eb67c8ce1c52d3bf5418abf8bde29254d1a004355f83e458f8f4ad7c81",
+      "src/QueryReadLibrary.sol": "0x805786ff76a1d9400b2ca3f3971122e2e956837649e3e8ef962fefe043f55ec3",
+      "src/RecordBody.sol": "0xd08b372ae170699dc246bf3e28ca843b4ac45a1b4347fc45d39258cdd1b0873e",
+      "src/StateAuditPages.sol": "0xfd2c2c4d552338f491a54d50b961f6dfe9cbf90fb2d212465217a3c504821d28",
+      "src/StateBindingReads.sol": "0xeec44ef6744955055cfc3bf68dc77a19c6eb0ade0b39870c0bf72a0d00b965f9",
+      "src/StateKernel.sol": "0x09964761aa0fed1f2ba5ca673b2d6ffad41c8e92cc4bb513783e539415dc215a",
+      "src/StatePointReads.sol": "0xf956b46649de1719885c1843b04a97cb67910a0cc3982a9e353503769e4c89a1",
+      "src/StateReadPrimitives.sol": "0xc8bae9362172be337d7976a4ab85c67251f955c68d193dce21fa3255d30e6e17",
+      "src/StateStore.sol": "0x4e4eac82091ef3614c777bba4bd8a43d957115765fdcc699339af03eb206a8a1",
+      "src/StorageByteView.sol": "0x870732b622c6ea6be4b30e6b47367e138810b2236565bb5a688e41591bff8d4c",
+      "test/AuditPageReadHarness.sol": "0xc8e0932e67e033ebaa9556952c8685dc14f0c2cf274c6bae4b630e96d37b255d",
+      "test/BindingReadHarness.sol": "0xc7053650cf3e73b4d96932c91acf64885e3f5bd01a48557aa1b1c721dd9c72b3",
+      "test/StatefulHarness.sol": "0x44e2aa292c72c963ef23ac42b2b48c537bb71a751b1a5faede48ea09be35beac"
+    },
+    "measurements": [
+      {
+        "density": 1,
+        "mode": 1,
+        "limit": 1,
+        "items": 1,
+        "coverage": 1,
+        "returndataBytes": 288,
+        "estimatedGas": "60589",
+        "transactionGas": "60589",
+        "sourceBlock": "0x54cb00c1fead2b4fcbffdff80863945af96f56e29c60c56fa9368fc8752215ba"
+      },
+      {
+        "density": 1,
+        "mode": 2,
+        "limit": 1,
+        "items": 1,
+        "coverage": 1,
+        "returndataBytes": 576,
+        "estimatedGas": "121725",
+        "transactionGas": "121725",
+        "sourceBlock": "0x54cb00c1fead2b4fcbffdff80863945af96f56e29c60c56fa9368fc8752215ba"
+      },
+      {
+        "density": 8,
+        "method": "counts",
+        "estimatedGas": "49181",
+        "transactionGas": "49181",
+        "returndataBytes": 160,
+        "sourceBlock": "0x56967266f26d5fdf2ce7e537293e703edc50dbab5d214b8db8fe52f396d1880b"
+      },
+      {
+        "density": 8,
+        "mode": 1,
+        "limit": 65535,
+        "items": 8,
+        "coverage": 8,
+        "returndataBytes": 512,
+        "estimatedGas": "79371",
+        "transactionGas": "79371",
+        "sourceBlock": "0x56967266f26d5fdf2ce7e537293e703edc50dbab5d214b8db8fe52f396d1880b"
+      },
+      {
+        "density": 8,
+        "mode": 1,
+        "requests": 1
+      },
+      {
+        "density": 8,
+        "mode": 2,
+        "limit": 65535,
+        "items": 8,
+        "coverage": 8,
+        "returndataBytes": 2368,
+        "estimatedGas": "481142",
+        "transactionGas": "481142",
+        "sourceBlock": "0x56967266f26d5fdf2ce7e537293e703edc50dbab5d214b8db8fe52f396d1880b"
+      },
+      {
+        "density": 8,
+        "mode": 2,
+        "requests": 1
+      },
+      {
+        "density": 64,
+        "method": "counts",
+        "estimatedGas": "49181",
+        "transactionGas": "49181",
+        "returndataBytes": 160,
+        "sourceBlock": "0xdbefa9fe6de81f5905fbfceed55eba8828855ee7651b604a10900477841c0cec"
+      },
+      {
+        "density": 64,
+        "mode": 1,
+        "limit": 65535,
+        "items": 64,
+        "coverage": 64,
+        "returndataBytes": 2304,
+        "estimatedGas": "201028",
+        "transactionGas": "201028",
+        "sourceBlock": "0xdbefa9fe6de81f5905fbfceed55eba8828855ee7651b604a10900477841c0cec"
+      },
+      {
+        "density": 64,
+        "mode": 1,
+        "requests": 1
+      },
+      {
+        "density": 64,
+        "mode": 2,
+        "limit": 65535,
+        "items": 64,
+        "coverage": 64,
+        "returndataBytes": 16704,
+        "estimatedGas": "2609016",
+        "transactionGas": "2609016",
+        "sourceBlock": "0xdbefa9fe6de81f5905fbfceed55eba8828855ee7651b604a10900477841c0cec"
+      },
+      {
+        "density": 64,
+        "mode": 2,
+        "requests": 1
+      },
+      {
+        "density": 256,
+        "method": "counts",
+        "estimatedGas": "49181",
+        "transactionGas": "49181",
+        "returndataBytes": 160,
+        "sourceBlock": "0x0243eace0d9aee8a2ae8c9fbd5554344b00b935aafba66304a5836af2c372862"
+      },
+      {
+        "density": 256,
+        "mode": 1,
+        "limit": 65535,
+        "items": 256,
+        "coverage": 256,
+        "returndataBytes": 8448,
+        "estimatedGas": "619679",
+        "transactionGas": "619679",
+        "sourceBlock": "0x0243eace0d9aee8a2ae8c9fbd5554344b00b935aafba66304a5836af2c372862"
+      },
+      {
+        "density": 256,
+        "mode": 1,
+        "requests": 1
+      },
+      {
+        "density": 256,
+        "mode": 2,
+        "limit": 65535,
+        "items": 256,
+        "coverage": 256,
+        "returndataBytes": 65856,
+        "estimatedGas": "10240801",
+        "transactionGas": "10240801",
+        "sourceBlock": "0x0243eace0d9aee8a2ae8c9fbd5554344b00b935aafba66304a5836af2c372862"
+      },
+      {
+        "density": 256,
+        "mode": 2,
+        "requests": 1
+      }
+    ],
+    "managed": {
+      "txGasCeiling": "16777216",
+      "nodeArgs": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "62150",
+        "--chain-id",
+        "31337",
+        "--hardfork",
+        "cancun",
+        "--gas-limit",
+        "33554432",
+        "--accounts",
+        "0",
+        "--no-cors",
+        "--silent"
+      ],
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [
+          "C0Admission/=../2026-09-05-c0-admission/src/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/StatefulHarness.sol": "StatefulHarness"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sourcePins": {
+        "../2026-09-05-c0-admission/src/TypeGroupParser.sol": "0x586b5d360092ed79faaf69114aadbe7dd487b9a7c2690ef55c5c6443d3f2bc86",
+        "src/AdmissionLibrary.sol": "0x58bdba5c0a12d7e8f2fdf6d8217a205b81b8075080d1dd27b03c4dfc5b8201c2",
+        "src/BindingFold.sol": "0xecf170a723ffff6966b6439c2305dcbae427ccc70c68aad632b950631dd307ee",
+        "src/IndexKeys.sol": "0x82dbf6754e96cd113fc5ecd8536c50ed464f626214947de51f20e85650fb4d43",
+        "src/Preparation.sol": "0x2200c3eb67c8ce1c52d3bf5418abf8bde29254d1a004355f83e458f8f4ad7c81",
+        "src/RecordBody.sol": "0xd08b372ae170699dc246bf3e28ca843b4ac45a1b4347fc45d39258cdd1b0873e",
+        "src/StateKernel.sol": "0x09964761aa0fed1f2ba5ca673b2d6ffad41c8e92cc4bb513783e539415dc215a",
+        "src/StateStore.sol": "0x4e4eac82091ef3614c777bba4bd8a43d957115765fdcc699339af03eb206a8a1",
+        "test/StatefulHarness.sol": "0x44e2aa292c72c963ef23ac42b2b48c537bb71a751b1a5faede48ea09be35beac",
+        "src/PreparationHelper.sol": "0x3b6bff4fb8a12929ad3261dbf455a50427013eba59c7f8d029ca8463817c1d6c"
+      },
+      "inputPins": {
+        "candidateFile": "0x5a5c0ea69f0642e8c7faa42af949c0cb65a35e5673e1aebebf40a7cb905869c8",
+        "groups": [
+          "0x9979945ce07959a64020c1b16656b43c70d0e7c12d8bdd70908ff76b3f5d4108",
+          "0xb73d9647fe976e376eb7c0810e6325e297f77e5c788055e2fc6fe200cd0ffc26",
+          "0x6b7d597a04da84609d706683e082ec9dd4f9d0b8608b71cecfeb576a5463121c",
+          "0xdb810effbd958fd35c11d30d1c969e3d9f740e81d6115eca72410f2c3609c0cb"
+        ],
+        "intrinsic": "0x4cadbc9c8e9bf5f63c84c6641f860db2d3184c643b3e6d3f66208d1135e1f4c4"
+      },
+      "deployment": {
+        "helper": {
+          "runtimeBytes": 18805,
+          "initcodeBytes": 18831,
+          "gas": "4120023"
+        },
+        "library": {
+          "runtimeBytes": 24503,
+          "initcodeBytes": 24535,
+          "gas": "5351899",
+          "ownAddressPatches": {
+            "library_deploy_address": [
+              {
+                "start": 41,
+                "length": 32
+              }
+            ]
+          },
+          "methodIdentifiers": {
+            "admit(StateStore.Store storage,StateKernel.VerifiedContext,StateKernel.Publication,Preparation.Config)": "b08062e7"
+          }
+        },
+        "core": {
+          "runtimeBytes": 6186,
+          "initcodeBytes": 11810,
+          "gas": "2243495",
+          "links": {
+            "src/AdmissionLibrary.sol": {
+              "AdmissionLibrary": [
+                {
+                  "start": 260,
+                  "length": 20
+                },
+                {
+                  "start": 6048,
+                  "length": 20
+                }
+              ]
+            }
+          },
+          "immutables": {
+            "74234": "preparationHelper",
+            "74236": "preparationCodehash",
+            "74238": "admissionLibrary",
+            "74240": "admissionCodehash"
+          }
+        }
+      }
+    },
+    "cleanup": {
+      "pid": 27718,
+      "exitCode": 0,
+      "signal": null,
+      "stopped": true
+    },
+    "readLibraries": {
+      "PointReadLibrary": {
+        "runtimeBytes": 12103,
+        "initcodeBytes": 12133,
+        "deploymentGas": "2670670",
+        "codehash": "0x9e387443dc962648c2f7d68b8051856f0f3ccde97c6c8d0d548be20f3404e8cf"
+      },
+      "QueryReadLibrary": {
+        "runtimeBytes": 14811,
+        "initcodeBytes": 14841,
+        "deploymentGas": "3255809",
+        "codehash": "0x9afcdcc98af6b0b4df48829f94c800052503808fdc2216681fef7ba1cec8d342"
+      }
+    },
+    "host": {
+      "runtimeBytes": 12485,
+      "initcodeBytes": 18396,
+      "constructorBytes": 3360,
+      "deploymentGas": "3614018",
+      "codehash": "0xfd4b1f40a69df41db500e2f67fd3bb9e4018b227a377da30524c521e3cfb9db9",
+      "links": {
+        "src/AdmissionLibrary.sol": {
+          "AdmissionLibrary": [
+            {
+              "start": 267,
+              "length": 20
+            },
+            {
+              "start": 10312,
+              "length": 20
+            }
+          ]
+        },
+        "src/PointReadLibrary.sol": {
+          "PointReadLibrary": [
+            {
+              "start": 1440,
+              "length": 20
+            },
+            {
+              "start": 3659,
+              "length": 20
+            },
+            {
+              "start": 4017,
+              "length": 20
+            },
+            {
+              "start": 6272,
+              "length": 20
+            },
+            {
+              "start": 7321,
+              "length": 20
+            },
+            {
+              "start": 7550,
+              "length": 20
+            },
+            {
+              "start": 8579,
+              "length": 20
+            },
+            {
+              "start": 9255,
+              "length": 20
+            },
+            {
+              "start": 12020,
+              "length": 20
+            },
+            {
+              "start": 14835,
+              "length": 20
+            }
+          ]
+        },
+        "src/QueryReadLibrary.sol": {
+          "QueryReadLibrary": [
+            {
+              "start": 1476,
+              "length": 20
+            },
+            {
+              "start": 4441,
+              "length": 20
+            },
+            {
+              "start": 5283,
+              "length": 20
+            },
+            {
+              "start": 6956,
+              "length": 20
+            },
+            {
+              "start": 7207,
+              "length": 20
+            },
+            {
+              "start": 8972,
+              "length": 20
+            },
+            {
+              "start": 12267,
+              "length": 20
+            },
+            {
+              "start": 14732,
+              "length": 20
+            }
+          ]
+        }
+      },
+      "runtimeLinks": {
+        "src/AdmissionLibrary.sol": {
+          "AdmissionLibrary": [
+            {
+              "start": 7761,
+              "length": 20
+            }
+          ]
+        },
+        "src/PointReadLibrary.sol": {
+          "PointReadLibrary": [
+            {
+              "start": 1108,
+              "length": 20
+            },
+            {
+              "start": 1466,
+              "length": 20
+            },
+            {
+              "start": 3721,
+              "length": 20
+            },
+            {
+              "start": 4770,
+              "length": 20
+            },
+            {
+              "start": 4999,
+              "length": 20
+            },
+            {
+              "start": 6028,
+              "length": 20
+            },
+            {
+              "start": 6704,
+              "length": 20
+            },
+            {
+              "start": 9469,
+              "length": 20
+            },
+            {
+              "start": 12284,
+              "length": 20
+            }
+          ]
+        },
+        "src/QueryReadLibrary.sol": {
+          "QueryReadLibrary": [
+            {
+              "start": 1890,
+              "length": 20
+            },
+            {
+              "start": 2732,
+              "length": 20
+            },
+            {
+              "start": 4405,
+              "length": 20
+            },
+            {
+              "start": 4656,
+              "length": 20
+            },
+            {
+              "start": 6421,
+              "length": 20
+            },
+            {
+              "start": 9716,
+              "length": 20
+            },
+            {
+              "start": 12181,
+              "length": 20
+            }
+          ]
+        }
+      },
+      "immutables": {
+        "27157": "pointReadLibrary",
+        "27159": "pointReadCodehash",
+        "27161": "queryReadLibrary",
+        "27163": "queryReadCodehash",
+        "74234": "preparationHelper",
+        "74236": "preparationCodehash",
+        "74238": "admissionLibrary",
+        "74240": "admissionCodehash"
+      }
+    },
+    "sourceBlocks": {
+      "small-subset-0": {
+        "number": "10",
+        "hash": "0x9df88163b3b562f838bcdedc7aaf73a3d2fe9b6872de610607b3f433b2c8bed8",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-1": {
+        "number": "10",
+        "hash": "0xa91978f4b8612a3bb74b65aa7ea3b03393c7418d3cfbe8c0ed75aae778075dd2",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-2": {
+        "number": "10",
+        "hash": "0xfadb7e7c47f88c4d130aa2a2f9b528758b5117afd2439889a91ae9cab4507908",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-3": {
+        "number": "10",
+        "hash": "0xe2ee1c1d82d7cc7123b6e6a9e6d377520242f8d02621ce6188de4a0459216a5c",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-4": {
+        "number": "10",
+        "hash": "0x51d5284c3dafc51f33528ed6e59b3bc6cde930ebef0aab26508de203937c3aa6",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-5": {
+        "number": "10",
+        "hash": "0x95b47516ed4237b7eff73a68f10bda766519de2e91bbcfbc38076eb4b3a539a0",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-6": {
+        "number": "10",
+        "hash": "0x31958478205aa4273430f5c6f8d4bf1d77f39539a69fcb66229f530873ee7230",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-7": {
+        "number": "10",
+        "hash": "0x22053966ebcf1b9a66dbbc3152fcba4de847900e2db9f4614b1664815598fffe",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-8": {
+        "number": "10",
+        "hash": "0xd34c38cd63b10d8c176513ef2ee20a5a0bc383ab9f307ae8b38c06dde0911b9b",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-9": {
+        "number": "10",
+        "hash": "0x07319c8a2d026c2f3f86074614758f742b58508d28f0d9f7aa34a3f7f217e736",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-10": {
+        "number": "10",
+        "hash": "0xb90cebcbf3d00c087b1a588f323b076e43b02a2813a38798af6e1d800906de09",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-11": {
+        "number": "10",
+        "hash": "0x00e0bef24a50506c9896d0d3181948341e9ee045cecd85bb667c0db8315a6c1d",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-12": {
+        "number": "10",
+        "hash": "0x9fdad30a0903a54ceec3868c355fc4e4b80f95b56aaf406224a13c5399436402",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-13": {
+        "number": "10",
+        "hash": "0x102a7a081c756377b5264ce6545c2424f6ef161af85f5db5c947c447d074762f",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-14": {
+        "number": "10",
+        "hash": "0x785219e610f42c7146722a39e80cf886cd64b16f70813274a53dbe494bd01731",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "small-subset-15": {
+        "number": "10",
+        "hash": "0xa10d468bc890c95c335e3723bd2823563d7a4b0b40671a0d3d4c07d238805a45",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "density1": {
+        "number": "10",
+        "hash": "0x54cb00c1fead2b4fcbffdff80863945af96f56e29c60c56fa9368fc8752215ba",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "same-role-and-two-principals": {
+        "number": "15",
+        "hash": "0x3b64af4ecf91375f5094deb2b204fc9a35168f6a8455fa1339e224128108852c",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "later-withdrawals": {
+        "number": "18",
+        "hash": "0x6b840fc163503ab8526aa2562b3354910fb8e138bf01cc1c6ceb67608ad2c536",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "density8": {
+        "number": "19",
+        "hash": "0x56967266f26d5fdf2ce7e537293e703edc50dbab5d214b8db8fe52f396d1880b",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "pinned-continuation-after-write": {
+        "number": "23",
+        "hash": "0xf9fc4ad0c392947684d941f3ec5f399e1c5a25d155e8db497009d41e349f3ef3",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "density64": {
+        "number": "30",
+        "hash": "0xdbefa9fe6de81f5905fbfceed55eba8828855ee7651b604a10900477841c0cec",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "density256": {
+        "number": "57",
+        "hash": "0x0243eace0d9aee8a2ae8c9fbd5554344b00b935aafba66304a5836af2c372862",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "hydrated-clamp257": {
+        "number": "61",
+        "hash": "0xe61ec72ef1fc99a4f80d97534b04769d6c011b6d62af394b06a41ea654489826",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      },
+      "final": {
+        "number": "61",
+        "hash": "0xed3a6614a6385ba0a013fb6a5973976441482f969c57d4999363afa97a13db19",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:62150"
+      }
+    },
+    "exhaustiveSmall": {
+      "orderedSubsets": 16,
+      "admissionPositions": 4,
+      "Hcuts": 7,
+      "limits": [
+        1,
+        2,
+        3
+      ],
+      "modes": [
+        1,
+        2
+      ]
+    },
+    "setupBatches": [
+      {
+        "width": 7,
+        "transactionGas": "7794819"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9455122"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9430430"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9373531"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9475986"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9339355"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9460582"
+      },
+      {
+        "width": 7,
+        "transactionGas": "7786483"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9453262"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9430886"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9373555"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9478850"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9339355"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9453286"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9431774"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9373987"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9476862"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9343259"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9453742"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9431354"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9374525"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9479166"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9341792"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9456478"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9442754"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9375466"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9475986"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9339775"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9453286"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9430430"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9374455"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9475962"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9339439"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9453346"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9431438"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9374551"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9476538"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9339451"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9454306"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9431964"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9374071"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9477426"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9340363"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9454294"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9431426"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9374551"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9481612"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9339451"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9453382"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9430982"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9376457"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9476058"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9339427"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9453370"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9431438"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9374633"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9476058"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9339883"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9453382"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9430490"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9374551"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9476526"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9340807"
+      },
+      {
+        "width": 8,
+        "transactionGas": "9453802"
+      },
+      {
+        "width": 1,
+        "transactionGas": "1517586"
+      }
+    ],
+    "unverifiedDensity513": {
+      "outcome": "UNKNOWN",
+      "reason": "posting word/remaining-work budget",
+      "boundary": "Transactions admitted, but no complete independent retained-state verification; not a verified real density."
+    },
+    "boundary": "Real trusted admissions with independent retained reconstruction; raw anchors are not current Files rows. Synthetic revision one, not authenticated C0 or upgrade evidence."
+  }
+}

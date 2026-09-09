@@ -1,9 +1,11 @@
 # Next executable directory-read checkpoint
 
-**Status:** implementation handoff for the already-selected read surface;
-not implemented pages, a new public ABI or a second directory model.
+**Status:** consumer handoff for the already-selected read surface. The
+[raw/hydrated audit-page prerequisite](../2026-09-05-c0-core/audit-pages-verification.md)
+is implemented at `ae99e1a`; current Files resolution and upgrade-aware reads
+remain next. Not a new public ABI or a second directory model.
 
-**Start only after the Binding task's tests and review close.** Reuse its
+The Binding task's tests and review are closed. Reuse its
 checked Store/posting/occurrence primitives and fixed read-library boundary.
 The authority is [read-overlay.md](../2026-09-05-c0-core/read-overlay.md),
 [B0 INDEX §5](../2026-08-13-efs2-stage-a-corpus/chapters/b0-indexes.md#5-the-page-result-abi-every-enumeration)
@@ -31,6 +33,33 @@ Keep the initial revision-one host separate from the populated-upgrade host.
 The consumer join must add actual revision-at-H qualification from retained
 activation history; returning the initial revision for every H cannot certify
 post-upgrade observations. Preserve `acceptedUnder` versus `observedWith`.
+
+### Concrete upgrade-join checks from the current source
+
+The September 9 source pass identified three specific seams, not a reason to
+reopen the data model:
+
+- `StateReadPrimitives.basis` currently returns `initialRevisionId`, and
+  `StatePointReads.getReceipt` has a revision-one-only accepting-batch policy.
+  Merely attaching these read forwards to the upgrade proxy would not produce
+  truthful upgraded receipts. Preserve the revision-one control; test an
+  explicit historical policy against the existing independent upgrade reader.
+- The upgrade fixture's execution commitment currently names its helper and
+  admission library, not the two new read libraries. The next joined fixture
+  must source-pin their exact linked runtimes and qualify them in its observed
+  execution evidence. A correct proxy-shell hash does not cover delegated
+  read code, and an observed hash is not an independently expected hash.
+- `activationAdmissionHigh` may repeat across upgrades with no intervening
+  admissions. Test U1 data at H, U2 activation at that same H, and a second
+  activation without new data, including an old cursor and an old receipt.
+  Pin the source block/execution observation as well as H. Make the selected
+  page-basis rule explicit and check B0's same-H/different-realmBasis cursor
+  refusal. Do not infer original acceptance from the latest implementation or
+  silently reinterpret the cursor because the admission count did not change.
+
+These are bounded next-increment obligations. They change neither the current
+audit-page task nor the older upgrade evidence, and do not establish a new
+permanent Realm revision or deployment format.
 
 ## Discriminating fixtures
 

@@ -31,13 +31,17 @@ requires the computer and Codex to remain available.
    independent task and final increment reviews approved. The separate upgrade
    Forge suite also passes14/14. The host is synthetic and revision-one only;
    this does not complete actual C0 or directory enumeration.
-2. **Bound directory discovery.** Implement the already-specified ordinary
-   page/cursor engine and BindingScope against the same Store. Prove first
-   tombstone anchors, no duplicate anchors on same-name churn, pinned-H
-   continuation and honest terminal coverage. Measure distinct-name churn;
-   do not confuse a raw anchor page with a resolved Files listing. The
-   [next executable handoff](directory-read-next.md) pins the fixtures and
-   cost questions without claiming a completed page implementation.
+2. **Audit inventory — completed bounded source checkpoint.** The
+   [ordinary audit-page implementation](../2026-09-05-c0-core/audit-pages-verification.md)
+   at `ae99e1a` verifies real Scope/history pages, first tombstone anchors,
+   same-name churn, pinned-H continuation and historical lifecycle. Parent
+   190 Core Forge/14 upgrade Forge/178 Node checks pass; independent task review
+   approves the source. Real density256 and a257 clamp case verify; optional513
+   exceeds the unchanged diagnostic collector budget and is not a pass.
+   Final increment review covers the accompanying evidence/docs. Resolved
+   Files/dead-name performance and the remaining query families are still
+   unfinished; raw anchors are not usable current file rows. The
+   [next executable handoff](directory-read-next.md) now starts at that join.
 3. **Join actual Lens and Files operations.** Follow the
    [one-screen consumer checkpoint](../2026-09-08-upgradeable-foundation/consumer-checkpoint.md):
    A-first/B-first/EXACT, real directory/file semantics, source/destination
@@ -79,6 +83,14 @@ The existing `efs-lab/1` browser still passes its nine isolated UI regressions,
 but [a fresh latency probe](browser-latency.md) found ninety RPC requests to
 show eight rows. This is a concrete SDK integration constraint, not evidence
 that v2 contract queries themselves take ninety calls.
+
+The actual new contract pages provide a second control: eight raw/hydrated
+anchors cost79,371/481,142 gas;256 cost619,679/10,240,801 gas. Those are page-only
+measurements, not finished folder reads. The maximum hydrated response is65,856
+bytes: choose caller budgets and small UI pages deliberately. Read-only phone
+and keyboard probes also found two consumer followups: Evidence is hidden on
+narrow screens, and finishing pagination loses keyboard focus. Both are
+documented for the joined screen rather than claimed fixed by contract tests.
 
 ## Owner followups
 

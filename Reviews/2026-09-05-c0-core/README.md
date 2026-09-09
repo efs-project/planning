@@ -194,6 +194,16 @@ These are synthetic revision-one results, not authenticated C0, populated
 upgrade reads or the remaining page/Scope capabilities. No V2 deployment frame
 is silently extended by this choice.
 
+The next [audit-page checkpoint](audit-pages-verification.md) at `ae99e1a`
+implements raw/hydrated kinds8/10 and current counts through that same query
+library. Real retained inventories verify through256 plus a257 hydration-clamp
+case; parent190 Core Forge/14 upgrade Forge/178 serial Node checks pass, and
+independent task review approves the bounded source. A256-anchor page costs
+619,679 gas raw or10,240,801 hydrated. Optional real513 exceeds the unchanged
+whole-state collector budget and remains unverified. Raw Scope anchors are not
+current Files rows; revision-aware upgrade reads, actual Lens/Files resolution,
+the shared SDK/SPA join and other query families remain unfinished.
+
 The [nested-prefix refinement](read-overlay.md#nested-unique-prefix-refinement)
 separates consumed query coverage from boundary-only inspections to avoid a
 binary search per nested Record. Its retained finite model is not Solidity,

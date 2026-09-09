@@ -120,3 +120,64 @@ PARTIAL/COMPLETE, unchanged basis, read-only channels, no page errors and no
 external requests. Close every context, browser and managed demo in `finally`.
 The initial six samples were an ad hoc read-only diagnostic; no new benchmark
 framework or retained automated performance gate is claimed.
+
+## Mobile and keyboard control, September 9
+
+A separate read-only probe used the unchanged rehearsal sources at `aba0b4c`
+(the following `c4098d4` changes only planning files). Before starting the
+managed chain, both EfsLab artifacts' metadata source hashes were compared
+with their actual Solidity source files. No rebuild or dependency install was
+needed. Chromium and the eleven-file fixture were the same as above; these
+are two functional observations, not timing samples or an accessibility audit.
+
+| Check | Phone, 390 × 844 | Desktop, 1440 × 960 |
+| --- | --- | --- |
+| Document/body width | 390 / 390 px | 1440 / 1440 px |
+| Files table / scroll-container width | 358 / 358 px | 732 / 732 px |
+| Loaded rows | 8, then 11 | 8, then 11 |
+| Focused first row + Enter | Opens sample-01.txt and its verified text | Same |
+| New-folder dialog width / height | 354 / 808 px | 570 / 846.44 px |
+| Initial dialog focus | Name input | Name input |
+| Escape after entering an unsubmitted name | Closes; focus returns to New folder | Same |
+| Wallet, relay or session calls | 0 | 0 |
+| Page errors / external requests | 0 / 0 | 0 / 0 |
+
+The test focused the row directly, then pressed Enter; it did **not** prove
+the complete Tab order, screen-reader announcements, touch targets, zoom,
+virtual-keyboard behavior or usability on physical phones. No signature or
+write was attempted. The small fixture had no document-level horizontal
+overflow. A tall, internally scrollable dialog still needs a physical-phone
+check with the virtual keyboard open.
+
+A further fresh 320 × 568 context reproduced a keyboard paging gap. After
+focusing Load more and pressing Enter, all eleven rows appeared but focus
+became `BODY`; the next Tab reached Copy evidence, not the new rows. In
+`files-view.mjs`, `renderPage` disables the focused control during the read,
+replaces the rows and hides that control at completion, with no focus handoff.
+The new-folder dialog provides the useful contrasting behavior: explicit
+initial Name focus, native modal Tab navigation and restored opener on Escape.
+At this narrower viewport, Tab reached Cancel and scrolled it into view
+(bottom526.94 px in a568 px viewport); document width remained320 px. No wallet,
+relay/session calls or page errors occurred. Evidence was actually hidden.
+
+The joined screen needs a regression for focus during and after asynchronous
+paging, including a failed/retried page and route cancellation. Preserve the
+user's list position when a continuation control disappears; do not steal
+focus after the user has moved elsewhere. The observed defect is recorded,
+not patched in this control browser, and no complete keyboard audit is claimed.
+
+The other UX gap is that `web/styles.css` hides the Evidence pane
+below 1100 px. `web/workflow-app.mjs` retains a Copy evidence export, but that
+is not a readable mobile “Why this result?” view. The joined v2 screen should
+provide an accessible inline disclosure or sheet for basis, completeness,
+conflict and verification details. Keep the plain-language result visible;
+raw IDs/JSON should be optional. This is a consumer acceptance item, not a
+reason to redesign the Core or claim this control browser is already v2.
+
+Reproduce by starting `startDemo({ compileFirst: false })` only after those
+artifact source-hash checks, opening a fresh context at each viewport and the
+exact fixture-directory route, then loading its second page. Focus the first
+row, press Enter and wait for enabled verified download plus exact file text.
+Return to the directory, focus New folder, press Enter, fill only Name and
+press Escape. Check dialog closure, restored focus, geometry and read-only
+channel counts; close browser contexts and the managed demo in `finally`.
