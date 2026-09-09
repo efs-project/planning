@@ -44,7 +44,7 @@ assert(report.operations.every(op => BigInt(op.gasUsed) <= 16777216n));
 
 ## Task 2: Bounded admission-journal lookup optimization
 
-**Files:** Modify only `Reviews/2026-09-05-c0-core/src/StateKernel.sol` and, if needed for a focused memory-only unit, new `src/StateJournal.sol`; add focused tests under that Core test directory. Add `optimized.json` and the explanation of the measured comparison here. Do not modify `StateStore` layout, Type IDs, record encoding, Binding semantics or reference validation.
+**Files:** Modify only `Reviews/2026-09-05-c0-core/src/StateKernel.sol` and, if needed for a focused memory-only unit, new `src/StateJournal.sol`; add focused tests under that Core test directory. Add `comparison.test.mjs`, `optimized.json` and `comparison.md` here. The new comparison test imports the unchanged Task 1 runner and uses a separate opt-in `EFS_FILES_PERF_OPTIMIZED=1` export that writes only `optimized.json`; it must never use the baseline-export flag. Do not modify `StateStore` layout, Type IDs, record encoding, Binding semantics or reference validation.
 
 **Interfaces:** `admit` / `admitAtRevision` inputs and outputs, full replay ordering, errors and stored rows stay unchanged. Consume Task 1's same `runFileLifecycle` to compare actual operation receipts. Add no public production API.
 
