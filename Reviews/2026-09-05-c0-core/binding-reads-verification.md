@@ -2,7 +2,7 @@
 
 **Current status, September 9:** the fixed-library implementation at `d95c358`
 deploys under normal limits and passes its assigned matrix and parent regression
-run. Independent task review approved; final increment review is underway. This is a synthetic
+run. Independent task and final increment reviews approved this checkpoint. This is a synthetic
 revision-one trusted-admission host, not authenticated C0 or a finished MVP.
 The earlier failed checkpoint below is preserved as dated evidence.
 
@@ -219,7 +219,11 @@ diff. Verdict: spec compliant and approved, no Critical/Important finding.
 Its one Minor item is scoped safety explanations for narrowing lint notices.
 Keep this as cleanup before product extraction; don't alter validated runtime
 metadata merely to hide warnings or imply the output is pristine. Final
-whole-increment review is pending at this editing checkpoint.
+whole-increment review of `9b62c42..4f25bfc` approved experiment publication with
+no Critical/Important finding. It independently checked V3 framing and related
+ABI/lifecycle assumptions. Two stale documentation labels were corrected in
+`a2ed7b4`; neither changed code or the acceptance claim. Source,
+metadata, original REDs and the independent review remain distinct evidence.
 
 ### Retrospective and remaining work
 

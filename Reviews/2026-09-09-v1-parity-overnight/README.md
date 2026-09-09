@@ -23,12 +23,14 @@ requires the computer and Codex to remain available.
 
 ## Execute in this order
 
-1. **Finish the interrupted Binding reader — task verified, final review underway.** The existing
+1. **Binding reader — completed bounded checkpoint.** The existing
    [selected task](../2026-09-05-c0-core/binding-reads-plan.md) now has normal-limit
    deployments, independent current/historical read agreement, strict refusals,
    static consumption and [measured costs](../2026-09-05-c0-core/binding-reads-verification.md).
    Original size-failure evidence remains. Parent181 Forge/177 Node checks pass;
-   independent task review approved. The host is synthetic and revision-one only.
+   independent task and final increment reviews approved. The separate upgrade
+   Forge suite also passes14/14. The host is synthetic and revision-one only;
+   this does not complete actual C0 or directory enumeration.
 2. **Bound directory discovery.** Implement the already-specified ordinary
    page/cursor engine and BindingScope against the same Store. Prove first
    tombstone anchors, no duplicate anchors on same-name churn, pinned-H

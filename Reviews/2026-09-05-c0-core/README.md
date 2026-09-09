@@ -189,7 +189,7 @@ preserves that failure and the September9 linked deployment/matrix at `d95c358`:
 host10,738 bytes, current read51,823 gas, full64-entry history6,377,148 gas.
 The selected [two fixed read libraries](read-library-layout.md) preserve the
 stronger checks and all eleven read ABIs. Parent181 Forge/177 Node regressions
-pass and independent task review approved; final increment review is underway.
+pass and independent task/final increment reviews approved this checkpoint.
 These are synthetic revision-one results, not authenticated C0, populated
 upgrade reads or the remaining page/Scope capabilities. No V2 deployment frame
 is silently extended by this choice.
