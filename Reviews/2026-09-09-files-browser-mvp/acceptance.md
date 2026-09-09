@@ -27,9 +27,18 @@ This table claims nothing about public testnets, real wallets or production.
 | 15 | Upgrade populated state | PASS | Live U1→U2 upgrade mid-journey: same addresses, rows and old revisions survive, host revision 2 visible, new write succeeds (`journeys.browser.mjs` step 12; foundation suite covers stale-plan refusal + rollback) |
 | 16 | Independent use | COMPONENT | FilesRouterV1 is itself an on-chain consumer of `resolve` (plan-wide preconditions), and `UpgradeStaticConsumer` covers static reads; **a dedicated standalone Solidity Lens-consumer fixture comparing FOUND/ABSENT/CONFLICT/UNKNOWN against the browser was not rebuilt tonight** |
 
-Ergonomics (`ux.browser.mjs`): 320px reachability without horizontal scroll,
-keyboard-only create flow, Escape-restores-opener, cancel-is-not-approval,
-200% text without clipping. Real-device and WAN behavior untested.
+Ergonomics (`ux.browser.mjs`, PASS + screenshots in `evidence/browser/`):
+320px reachability without horizontal scroll, keyboard-only create flow,
+Escape-restores-opener, cancel-is-not-approval, 200% text without clipping.
+Real-device and WAN behavior untested.
+
+Read-path measurements (`evidence/read-path-perf.json`, loopback, 0/50 ms
+injected per-RPC delay): qualify 36 requests (653 ms at 50 ms), full root
+listing 56 requests (1,193 ms), **folder navigation on the shared pinned
+scope 28 requests / 712 ms vs 82 requests for a fresh scope** (the simple
+candidate the correctness-first ruling asked to compare — no segment
+machinery needed at ordinary folder sizes), verified file open 9 requests /
+322 ms. Deep-churn behavior unchanged (row 2).
 
 Rows 2/10/11/12/16's gaps are the honest remainder; none is hidden behind a
 green summary. The churn row (2) is the standing engineering priority from

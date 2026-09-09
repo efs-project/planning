@@ -4,6 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { chromium } from '../../2026-09-04-mvp-rehearsal/node_modules/playwright/index.mjs';
 import { compileUpgrade, withUpgrade } from '../../2026-09-08-upgradeable-foundation/scripts/local-upgrade.mjs';
 import { startEnvironment, compileRouter } from '../scripts/environment.mjs';
@@ -16,7 +17,7 @@ const focused = page => page.evaluate(() => document.activeElement?.id || docume
 
 test('phone, keyboard, 200% text and focus behavior', { timeout: 600000 }, async () => {
   compileUpgrade(); compileRouter();
-  if (exporting) await mkdir(evidenceDir, { recursive: false }); // exclusive: never overwrite prior evidence
+  if (exporting) { if (existsSync(evidenceDir)) throw Error('evidence/browser already exists; refusing to overwrite'); await mkdir(evidenceDir, { recursive: true }); }
   const browser = await chromium.launch({ headless: true, ...(process.env.EFS_LAB_CHROMIUM ? { executablePath: process.env.EFS_LAB_CHROMIUM } : {}) });
   try {
     await withUpgrade(async lab => {
@@ -56,7 +57,7 @@ test('phone, keyboard, 200% text and focus behavior', { timeout: 600000 }, async
       await whyButton.focus(); await page.keyboard.press('Enter');
       await page.waitForSelector('#why[open]');
       await page.keyboard.press('Escape');
-      await page.waitForSelector('#why:not([open])');
+      await page.waitForFunction(() => !document.getElementById('why').open);
       assert.equal(await page.evaluate(() => document.activeElement?.className), 'why-button', 'Escape restores focus to the opener');
 
       // Keyboard-only: sign in, create a folder, approve — no mouse.
@@ -87,7 +88,7 @@ test('phone, keyboard, 200% text and focus behavior', { timeout: 600000 }, async
       assert(!(await page.$$eval('#rows li .row-title', els => els.map(e => e.textContent))).includes('never-created/'), 'cancel had no semantic effect');
 
       // 200% text: controls stay visible and unclipped.
-      await page.addStyleTag({ content: 'html{font-size:200%}' });
+      await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
       await settle(page);
       const clipped = await page.evaluate(() => {
         const ids = ['refresh', 'lens', 'coverage', 'status', 'signer', 'prompts'];
