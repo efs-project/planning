@@ -323,6 +323,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-09
 
+- @v2-pm (harness codex, session audit-pages-heartbeat-20260909-0745): Continuing from reviewed/published `aba0b4c`; executing [[Reviews/2026-09-05-c0-core/audit-pages-plan|audit-backed Scope/history page plan]] through the existing ABI and fixed reader boundary. / next: actual raw/hydrated pages, historical cursor/lifecycle checks and real/synthetic-separated costs; no all-query, upgraded-read or full Files claim.
+
 - @v2-pm (harness codex, session v1-parity-overnight-20260909): Resuming James's authorized v1-parity/performance/UX prototype work from published `9b62c42`; completing the interrupted [[Reviews/2026-09-05-c0-core/binding-reads-plan|bounded Binding read checkpoint]] before directory/Lens/SDK/browser integration. Native goal remains usage-limited; overnight heartbeat renewed through 09:00 Chicago. / next: complete managed readback and resource evidence, then the next joined consumer gap; no product repo, main merge, public deployment or freeze.
 
 - @v2-pm (harness codex, session v1-parity-overnight-20260909 checkpoint): Binding reader at `d95c358` now normally deploys and independently matches retained state; task/final increment reviews approved, parent181 Core Forge +14 upgrade Forge +177 Node pass. Existing browser9/9 checks pass, but six latency samples expose90 RPC calls for eight rows (6.88s with50ms/request). [[Reviews/2026-09-09-v1-parity-overnight/README|Overnight handoff]] records SDK PM guidance and the next real directory-page/churn experiment. / next: page/Scope integration from the reviewed checkpoint; not complete v1 parity.
