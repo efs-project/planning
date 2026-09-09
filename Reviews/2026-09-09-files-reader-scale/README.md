@@ -3,6 +3,10 @@
 **Status:** initial six-shape measurement complete; exposes a consumer limit,
 not v1 parity. No limit or SDK redesign adopted.
 
+Follow-on: [historical-name churn](churn-findings.md) separates four visible
+placements from the cost of retired names and identifies a distinct reference
+collector ceiling. It does not overwrite this initial report.
+
 Question: does the successful eight-name/two-File workload hide repeated
 charter work or a practical pagination limit? Use the unchanged qualified
 [reader](../2026-09-09-files-reader/verification.md), actual local contracts and
@@ -80,8 +84,18 @@ enumeration may cost more than today's visible folder.
 Reproduce without overwriting retained evidence:
 
 ```sh
+node --input-type=module -e "import {compileUpgrade} from './Reviews/2026-09-08-upgradeable-foundation/scripts/local-upgrade.mjs'; compileUpgrade();"
 node --test --test-concurrency=1 Reviews/2026-09-09-files-reader-scale/scale.test.mjs
 ```
 
+The first command creates the foundation's ignored Forge artifacts with the
+already installed pinned offline toolchain; it is required in a fresh checkout.
 The optional `EFS_FILES_SCALE_EVIDENCE=1` exporter writes the named evidence
 file; use it only in a fresh disposable copy or after preserving the old file.
+
+Independent review at `75e88e5` found no Critical/Important issue. It reconciled
+all twelve samples, returned rows/oracle values, six source hashes, 41 contract
+source pins, 15 support pins, eleven artifacts and compiler/dependency inputs.
+Its one minor fresh-checkout prerequisite is documented and the offline build
+command was executed successfully. The reviewer did not repeat the live EVM
+run; the 7/7 execution above is the parent's evidence.
