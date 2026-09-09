@@ -2,5 +2,9 @@
   "name": "efs-local-upgrade-foundation",
   "private": true,
   "type": "module",
+  "scripts": {
+    "test:upgrade": "node --test test/upgrade-chain.test.mjs",
+    "evidence:upgrade": "EFS_UPGRADE_EVIDENCE=1 node --test test/upgrade-chain.test.mjs"
+  },
   "dependencies": { "@openzeppelin/contracts": "5.6.1" }
 }

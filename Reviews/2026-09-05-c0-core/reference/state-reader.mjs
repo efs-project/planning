@@ -181,7 +181,16 @@ function groupParts(raw, knownTypes) {
   return { ...parsed, blobs };
 }
 const equal = (a, c, label) => assert.deepEqual(plain(a), plain(c), label);
-function reconstruct(s, expected) {
+function legacyBatchPolicy({ row, revision }, expected) {
+  const authority = expected.syntheticBatchAuthority;
+  if (authority?.authorityBasis == null || authority?.authorityCodehash == null) incomplete('missing synthetic batch authority expectation');
+  assert(typeof authority.authorityBasis === 'string' && /^(0|[1-9][0-9]{0,77})$/.test(authority.authorityBasis) && BigInt(authority.authorityBasis) < (1n << 256n), 'batch uint256 shape');
+  assert(typeof authority.authorityCodehash === 'string' && /^0x[0-9a-f]{64}$/.test(authority.authorityCodehash), 'batch codehash shape');
+  equal(row[1], authority.authorityBasis, 'synthetic batch authority basis');
+  equal(row[2], authority.authorityCodehash, 'synthetic batch authority codehash');
+  equal(revision, 1n, 'synthetic revision');
+}
+function reconstruct(s, expected, batchPolicy = legacyBatchPolicy) {
   if (!s?.complete || !s.basis) incomplete('incomplete snapshot');
   const basis = s.basis;
   for (const k of ['source', 'core', 'chainId']) equal(basis[k], expected[k], 'basis ' + k);
@@ -235,19 +244,14 @@ function reconstruct(s, expected) {
     if (x.row == null) incomplete('missing batch row');
     assert(Array.isArray(x.row) && x.row.length <= 3, 'batch row shape');
     if (x.row.length < 3 || [0, 1, 2].some(k => x.row[k] == null)) incomplete('missing batch field');
-    const authority = expected.syntheticBatchAuthority;
-    if (authority?.authorityBasis == null || authority?.authorityCodehash == null) incomplete('missing synthetic batch authority expectation');
-    for (const value of [x.row[0], x.row[1], authority.authorityBasis]) {
+    for (const value of [x.row[0], x.row[1]]) {
       assert(typeof value === 'string' && /^(0|[1-9][0-9]{0,77})$/.test(value) && BigInt(value) < (1n << 256n), 'batch uint256 shape');
     }
-    for (const value of [x.row[2], authority.authorityCodehash]) assert(typeof value === 'string' && /^0x[0-9a-f]{64}$/.test(value), 'batch codehash shape');
-    // Caller-supplied fixture commitments, never inferred from snapshot or logs.
-    // Matching these synthetic values is integrity checking, not B0 authentication.
-    equal(x.row[1], authority.authorityBasis, 'synthetic batch authority basis');
-    equal(x.row[2], authority.authorityCodehash, 'synthetic batch authority codehash');
+    assert(typeof x.row[2] === 'string' && /^0x[0-9a-f]{64}$/.test(x.row[2]), 'batch codehash shape');
     const [metaWord] = x.row, meta = BigInt(metaWord), first = meta & M48, count = (meta >> 48n) & 65535n, block = (meta >> 64n) & M48, revision = (meta >> 112n) & 0xffffffffn;
     equal(first, next, 'batch origin closure'); assert(count > 0n && count <= 64n && first + count - 1n <= counts[4]);
-    assert(block >= previousBlock && block > 0n && block <= BigInt(basis.number)); equal(revision, 1n, 'synthetic revision'); equal(meta >> 144n, 0n, 'batch reserved bits');
+    assert(block >= previousBlock && block > 0n && block <= BigInt(basis.number)); equal(meta >> 144n, 0n, 'batch reserved bits');
+    batchPolicy({ row: x.row, first, count, block, revision, high: counts[4], basis }, expected);
     for (let j = 0n; j < count; j++) batchByOrdinal.set(first + j, { batch: BigInt(i + 1), first, count, block });
     next += count; previousBlock = block;
   });
@@ -324,6 +328,13 @@ export async function readState(lab, options = {}) {
   let attemptedBasis = null;
   try { const snapshot = await collectState(lab, { ...options, onBasis: basis => { attemptedBasis = basis; options.onBasis?.(basis); } }); return verifyState(snapshot, lab.expected); }
   catch (error) { return { outcome: error instanceof assert.AssertionError ? 'INVALID' : 'UNKNOWN', audit: 'PARTIAL', contribution: 'UNKNOWN', basis: null, attemptedBasis, reason: error.message }; }
+}
+
+/** Explicit fixture policy seam. Identity/body/reference/fold/index checks stay
+ * shared; ordinary verifyState/readState remain revision-one-only. */
+export function verifyStateWithBatchPolicy(snapshot, expected, batchPolicy) {
+  try { assert.equal(typeof batchPolicy, 'function'); return reconstruct(snapshot, expected, batchPolicy); }
+  catch (error) { return { outcome: error instanceof Incomplete ? 'UNKNOWN' : 'INVALID', audit: 'PARTIAL', contribution: 'UNKNOWN', basis: null, attemptedBasis: snapshot?.basis ?? null, reason: error.message, snapshot }; }
 }
 
 export function verifyContribution(evidence, state, submitted, iface, expected) {
