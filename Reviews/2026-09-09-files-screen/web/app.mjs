@@ -9,6 +9,8 @@ $('close-why').addEventListener('click',()=>closeWhy(true));
 $('why').addEventListener('close',()=>{if(opener?.isConnected)opener.focus();opener=null;});
 function allRows(s){return [...(s?.rows??[]),...(s?.unresolved??[]),...(s?.masked??[]),...(s?.absent??[])];}
 function explain(row,button){
+  if(!current||!button.isConnected)return;
+  const observation=current;
   opener=button;const body=$('why-body');body.replaceChildren();
   const messages={FOUND:'This Lens selects an exact Directory Entry. The reader checked its parent, name, File Object and publisher charter. The file content has not been read.',
     CONFLICT:'The required sources disagree. No File Object is selected; there is no valid preview or action target to borrow from a losing claim.',
@@ -16,24 +18,30 @@ function explain(row,button){
     MASKED:'This Lens selects a mask at this position. It hides the placement, not the underlying File Object or its bytes.',
     ABSENT:'No agreed value is selected by this Lens at this observation. This does not prove that the file exists nowhere.'};
   body.append(text('p',messages[row.outcome]??'This position is unresolved.'));
-  if(current?.rowsEvidence==='PRIOR_SEALED')body.append(text('p','These are prior sealed rows. The latest attempt failed; they are not a fresh complete result.'));
-  const dl=document.createElement('dl');
-  for(const [label,value] of [
+  if(observation.rowsEvidence==='PRIOR_SEALED')body.append(text('p','These are prior sealed rows. The latest attempt failed; they are not a fresh complete result.'));
+  function facts(items){const dl=document.createElement('dl');for(const [label,value] of items)dl.append(text('dt',label),text('dd',value));return dl;}
+  body.append(facts([
     ['Result',row.outcome],['Lens',$('lens').selectedOptions[0].textContent],['Observation',$('snapshot').selectedOptions[0].textContent],
+    ['Pinned block',String(observation.basis.blockNumber)+' · host revision '+observation.basis.revision],
+    ['Enumeration',observation.coverage],['Availability',row.qualification?.availability??observation.qualification.availability],['Reason',row.reason??'No row error'],
+  ]));
+  const identity=document.createElement('details');identity.id='identity-details';identity.append(text('summary','Exact identities and verification details'));
+  identity.append(facts([
     ['Namespace Plan',config.plans[$('lens').value]],['Mount',config.mounts[$('lens').value]],
     ['Claim source A',config.authors.A],['Claim source B',config.authors.B],
-    ['Block',String(current.basis.blockNumber)],['Block hash',current.basis.blockHash],['Execution set',current.basis.executionSetId],
+    ['Block hash',observation.basis.blockHash],['Execution set',observation.basis.executionSetId],
     ['Position role',row.fieldRole],['Selected Entry',row.selectedId??'None'],['File Object',row.value?.nodeId??'None'],
     ['File publisher',row.value?.publisher??'Not selected'],['Publisher charter',row.value?row.value.historicalCharter+' · '+row.value.maintenance:'Not selected'],
-    ['Enumeration',current.coverage],['Availability',row.qualification?.availability??current.qualification.availability],['Reason',row.reason??'No row error'],
-  ]){dl.append(text('dt',label),text('dd',value));}body.append(dl);
+  ]));body.append(identity);
   body.append(text('p','A and B are named claim sources. A File publisher is a separate fact; a B-priority claim is not proof that B created or signed the file. Integrity is qualified against the configured local source, not independent consensus.','evidence-note'));
-  const details=document.createElement('details');details.append(text('summary','Inspect '+(current.evidence?.length??0)+' actual read attempts'));
-  details.addEventListener('toggle',()=>{if(details.open&&details.children.length===1)details.append(text('pre',stringify(current.evidence)));});body.append(details);
+  const details=document.createElement('details');details.id='rpc-details';details.append(text('summary','Inspect '+(observation.evidence?.length??0)+' actual read attempts'));
+  details.addEventListener('toggle',()=>{if(details.open&&details.children.length===1)details.append(text('pre',stringify(observation.evidence)));});body.append(details);
   $('why').showModal();
 }
 function render(s,{focusNewFrom=null}={}){
-  current=s;const priorFocus=document.activeElement?.dataset.why,rows=allRows(s);$('rows').replaceChildren();
+  const priorFocus=document.activeElement?.dataset.why??opener?.dataset.why;
+  if($('why').open)closeWhy();
+  current=s;const rows=allRows(s);$('rows').replaceChildren();
   for(const row of rows){
     const li=document.createElement('li');li.dataset.role=row.fieldRole;li.dataset.outcome=row.outcome;li.dataset.result=stringify(row);
     if(row.outcome!=='FOUND')li.className='unresolved';
@@ -48,7 +56,7 @@ function render(s,{focusNewFrom=null}={}){
   const unresolved=(s.unresolved??[]).length;
   $('status').textContent=unavailable?'Latest attempt failed: '+s.reason+'. '+(rows.length?'Showing prior sealed rows only.':'No complete folder result is available.'):
     `${s.rows.length} validated placement${s.rows.length===1?'':'s'}${unresolved?`; ${unresolved} unresolved position${unresolved===1?'':'s'}`:''}. `+
-    (s.coverage==='COMPLETE'?'All source positions were traversed; unresolved positions still need attention.':'More source positions remain. Names are sorted within the loaded portion only.');
+    (s.coverage==='COMPLETE'?'All source positions were traversed.'+(unresolved?' Unresolved positions still need attention.':''):'More source positions remain. Names are sorted within the loaded portion only.');
   $('more').hidden=unavailable||!s.continuation;$('more').setAttribute('aria-disabled','false');$('more').textContent='Load more';
   $('basis').textContent=`Pinned block ${s.basis.blockNumber} · host revision ${s.basis.revision} · ${scope.stats().requests} RPC reads · ${scope.stats().bytes.toLocaleString()} result bytes`;
   main.dataset.block=String(s.basis.blockNumber);main.dataset.revision=s.basis.executionSetId;

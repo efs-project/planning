@@ -48,6 +48,9 @@ test('real guest SPA matches retained Core observations and exposes qualified, a
       await page.setViewportSize({width,height:844});
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
       await conflict.locator('button').click();assert(await page.locator('#why').isVisible());
+      assert.equal(await page.locator('#identity-details').getAttribute('open'),null);
+      assert.equal(await page.locator('#identity-details dd').first().isVisible(),false,'exact IDs start collapsed');
+      await page.locator('#identity-details summary').click();assert.equal(await page.locator('#identity-details dd').first().isVisible(),true);
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
       await page.keyboard.press('Escape');assert.equal(await page.locator(':focus').getAttribute('data-why'),role('note.txt'));
     }
@@ -78,12 +81,20 @@ test('real guest SPA matches retained Core observations and exposes qualified, a
     await page.locator('#refresh').click();await settled(page);
     const prefix=ordered(await rows(page));
     const pageSelector=screen.lab.readIface.getFunction('pagePostingsHydrated').selector;
-    await page.route('**/rpc',async route=>{const body=route.request().postDataJSON();if(body.method==='eth_call'&&body.params[0].data.startsWith(pageSelector))return route.fulfill({status:502,contentType:'application/json',body:json({error:'injected continuation failure'})});return route.continue();});
-    await page.locator('#more').click();await settled(page);
+    let releaseFailure,enteredFailure;
+    const failureGate=new Promise(resolve=>{releaseFailure=resolve;}),failureEntered=new Promise(resolve=>{enteredFailure=resolve;});
+    await page.route('**/rpc',async route=>{const body=route.request().postDataJSON();if(body.method==='eth_call'&&body.params[0].data.startsWith(pageSelector)){enteredFailure();await failureGate;return route.fulfill({status:502,contentType:'application/json',body:json({error:'injected continuation failure'})});}return route.continue();});
+    await page.locator('#more').click();await failureEntered;
+    await page.locator('[data-why]').first().click();assert.equal(await page.locator('#why').isVisible(),true);
+    releaseFailure();await settled(page);
+    assert.equal(await page.locator('#why').isVisible(),false,'listing transition invalidates the open prior explanation');
     assert.equal(await page.locator('#coverage').textContent(),'Read unavailable');
     assert.match(await page.locator('#status').innerText(),/prior sealed rows only/);
     assert.deepEqual(ordered(await rows(page)),prefix);assert.equal(await page.locator('#more').isVisible(),false);
-    await page.locator('[data-why]').first().click();assert.match(await page.locator('#why-body').innerText(),/prior sealed rows/);await page.keyboard.press('Escape');
+    await page.locator('[data-why]').first().click();assert.match(await page.locator('#why-body').innerText(),/prior sealed rows/);
+    const attempts=Number((await page.locator('#rpc-details summary').innerText()).match(/\d+/)[0]);await page.locator('#rpc-details summary').click();
+    assert.equal(JSON.parse(await page.locator('#rpc-details pre').innerText()).length,attempts,'one immutable evidence snapshot');
+    await page.keyboard.press('Escape');
     await page.unroute('**/rpc');report.checks.push('failed continuation retains labeled prior sealed prefix, never stale COMPLETE');
     await context.close();
     for(const delayMs of [0,50])for(let sample=0;sample<3;sample++){
