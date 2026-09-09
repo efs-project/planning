@@ -70,9 +70,8 @@ library StateBindingReads {
 
         (bytes32 historyKey, StateReadPrimitives.PostingHead memory history) =
             _checkedHistoryHead(s, bindingKey, current, highWaterOrdinal);
-        uint64 end = _firstAfter(s, historyKey, history, selectedH, bindingKey);
+        (uint64 end, uint64 ordinal) = _firstAfter(s, historyKey, history, selectedH, bindingKey);
         if (end == 0) return (head, realmBasis, selectedH);
-        uint64 ordinal = StateReadPrimitives.postingAt(s, historyKey, history, end - 1, bindingKey);
         head = _decodeAt(s, bindingKey, historyKey, history, uint32(end), ordinal).head;
         return (head, realmBasis, selectedH);
     }
@@ -83,8 +82,8 @@ library StateBindingReads {
         returns (BindingHistoryEntry[] memory entries, uint32 nextRevision, uint8 completeness)
     {
         (,, uint64 currentH) = StateReadPrimitives.basis(s, 0, bindingKey);
-        BindingFold.Head memory current = _checkedCurrentHead(s, bindingKey, currentH);
         if (fromRevision == 0 || limit == 0 || limit > 64) revert ErrReadHistory(fromRevision, limit);
+        BindingFold.Head memory current = _checkedCurrentHead(s, bindingKey, currentH);
         (bytes32 historyKey, StateReadPrimitives.PostingHead memory history) =
             _checkedHistoryHead(s, bindingKey, current, currentH);
         uint64 start = uint64(fromRevision) - 1;
@@ -157,7 +156,7 @@ library StateBindingReads {
         StateReadPrimitives.PostingHead memory history,
         uint64 selectedH,
         bytes32 subject
-    ) private view returns (uint64 end) {
+    ) private view returns (uint64 end, uint64 selected) {
         uint64 lo;
         uint64 hi = history.count;
         ProbeBudget memory budget;
@@ -168,7 +167,6 @@ library StateBindingReads {
             else hi = mid;
         }
         end = lo;
-        uint64 selected;
         if (end != 0) {
             selected = _countedPostingAt(s, historyKey, history, end - 1, subject, budget);
             if (selected > selectedH) revert StorageByteView.ErrReadState(subject);
@@ -212,7 +210,7 @@ library StateBindingReads {
         result.source = StatePointReads.hydrateOrdinal(s, ordinal, key);
         ParsedMutation memory mutation = _decodeBody(s, result.source, key);
         if (mutation.kind == 1 || mutation.kind == 2) {
-            _validateDirect(s, key, historyKey, history, revision, mutation, result.source.principalId);
+            _validateDirect(s, key, historyKey, history, revision, ordinal, mutation, result.source.principalId);
             result.head = _directHead(mutation, revision, ordinal);
             return result;
         }
@@ -227,7 +225,7 @@ library StateBindingReads {
         ) revert StorageByteView.ErrReadState(key);
         ParsedMutation memory targetMutation = _decodeBody(s, target, key);
         if (targetMutation.kind != 1 && targetMutation.kind != 2) revert StorageByteView.ErrReadState(key);
-        _validateDirect(s, key, historyKey, history, revision - 1, targetMutation, target.principalId);
+        _validateDirect(s, key, historyKey, history, revision - 1, targetOrdinal, targetMutation, target.principalId);
         result.head = BindingFold.Head(2, 0, 2, revision, ordinal, bytes32(0), 0);
     }
 
@@ -237,6 +235,7 @@ library StateBindingReads {
         bytes32 historyKey,
         StateReadPrimitives.PostingHead memory history,
         uint32 revision,
+        uint64 ordinal,
         ParsedMutation memory mutation,
         bytes32 principal
     ) private view {
@@ -253,6 +252,7 @@ library StateBindingReads {
             revert StorageByteView.ErrReadState(key);
         }
         uint64 previousOrdinal = StateReadPrimitives.postingAt(s, historyKey, history, uint64(revision) - 2, key);
+        if (previousOrdinal >= ordinal) revert StorageByteView.ErrReadState(key);
         StatePointReads.HydratedOccurrence memory previous = StatePointReads.hydrateOrdinal(s, previousOrdinal, key);
         if (mutation.predecessorEnvelope != previous.envelopeId || mutation.predecessorLeaf != previous.leafIndex) {
             revert StorageByteView.ErrReadState(key);
@@ -276,6 +276,10 @@ library StateBindingReads {
         view
         returns (ParsedMutation memory mutation)
     {
+        if (
+            occurrence.typeSchemaId != s.init.bindingSetType && occurrence.typeSchemaId != s.init.bindingTombstoneType
+                && occurrence.typeSchemaId != s.init.withdrawalType
+        ) revert StorageByteView.ErrReadState(key);
         StateStore.RecordRow storage record = s.records[occurrence.recordId];
         uint256 length = record.body.length;
         if (length > 167) revert StorageByteView.ErrReadState(key);

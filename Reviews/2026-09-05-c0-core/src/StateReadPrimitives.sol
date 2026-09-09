@@ -64,10 +64,11 @@ library StateReadPrimitives {
         if (ordinal == 0 || ordinal >= ORDINAL_GUARD || ordinal > head.last) {
             revert StorageByteView.ErrReadState(subject);
         }
-        if (position + 1 == head.count) {
-            if (ordinal != head.last) revert StorageByteView.ErrReadState(subject);
-            uint256 used = 48 * ((position % 5) + 1);
+        uint64 finalPosition = head.count - 1;
+        if (position / 5 == finalPosition / 5) {
+            uint256 used = 48 * ((finalPosition % 5) + 1);
             if (used < 240 && packed >> used != 0) revert StorageByteView.ErrReadState(subject);
         }
+        if (position == finalPosition && ordinal != head.last) revert StorageByteView.ErrReadState(subject);
     }
 }
