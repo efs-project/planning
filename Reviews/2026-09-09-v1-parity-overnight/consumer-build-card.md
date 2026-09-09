@@ -2,6 +2,10 @@
 
 **Status:** bounded consumer work card; guest screen now implemented, other
 joins still open. Not a new SDK/profile ABI or full Files parity.
+The [latest presentation](../2026-09-09-files-screen/files-lanes-verification.md)
+at `84ef041` applies Data Explorer's Files/attention/history separation and
+preserves every checked position. [Consumer follow-ups](../2026-09-09-files-reader-scale/next-experiments.md)
+keep resumable read acquisition and slow churn distinct from UI polish.
 The [upgrade-aware read prerequisite](../2026-09-08-upgradeable-foundation/upgrade-read-verification.md)
 now passes. Reuse the [existing consumer specification](../2026-09-08-upgradeable-foundation/consumer-checkpoint.md)
 and [directory dataflow](directory-read-next.md), not a second file-tree model.

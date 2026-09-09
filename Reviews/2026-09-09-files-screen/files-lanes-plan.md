@@ -1,6 +1,7 @@
 # Files first; diagnostics still inspectable
 
-**Status:** next bounded presentation experiment, based on the read-only Data
+**Status:** implemented and reviewed at `84ef041`; see
+[verification](files-lanes-verification.md). Based on the read-only Data
 Explorer review of `b623b42` recorded in
 [consumer follow-ups](../2026-09-09-files-reader-scale/next-experiments.md).
 No reader, cursor, traversal, budget, Core, content or write behavior changes.

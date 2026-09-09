@@ -4,6 +4,32 @@
 **Authority:** James's September 9 request to continue overnight, validate v1
 capabilities and measure v2 performance and UX. Existing experiment branch only.
 
+## Latest useful checkpoint
+
+The [Files-first guest screen](../2026-09-09-files-screen/files-lanes-verification.md)
+at `84ef041` reads actual qualified contract data through the shared reader.
+Seven observations across A-first/B-first/EXACT match independent reconstruction.
+Current Files, attention and historical positions now have separate presentation;
+phone, keyboard, 200% text, cancellation, recovered-file focus and failed-prefix
+checks pass. The first four agreeing Files take a median 2.172 s with 50ms
+injected per-RPC delay; the next four take 0.538 s. These are local experiments,
+not a WAN or full Files-MVP claim.
+
+[Same-data compression](../2026-09-09-files-screen/delivery-verification.md)
+reduces its exact earlier screen's non-RPC body by 73.4% without removing checks.
+It does not solve the [larger-folder and churn limit](../2026-09-09-files-reader-scale/churn-findings.md):
+the prototype's 512-request lifetime can stop before four surviving files are
+found. The separate 96/128 reference-collector refusals are not performance
+measurements. No reader budget was increased to make the report green.
+
+The [SDK/Data Explorer follow-on plan](../2026-09-09-files-reader-scale/next-experiments.md)
+selects reversible same-observation acquisition segments, a separately measured
+read-helper comparison and verifier scalability. The presentation part is now
+implemented; yield-oriented scan/continuation is not. FilesRouter actions,
+heads/content, tags/filters and real wallets remain the subsequent integration
+work. The [v1 inventory](../2026-09-09-files-parity-performance/parity.md) still
+names the advanced capability gaps; the whole parity row is not checked off.
+
 ## Working goal
 
 Demonstrate the [v1 capability inventory](../2026-09-09-files-parity-performance/parity.md)
@@ -63,13 +89,16 @@ requires the computer and Codex to remain available.
    cumulative Scope listings agree with the full retained-state oracle.
    Malformed winners, conflict, unavailable rows and incomplete discovery
    remain distinct. This is offchain fixture interpretation, not an onchain
-   Files certificate; the router, bytes/head traversal and browser remain open.
+   Files certificate; the router, bytes/head traversal and browser were still
+   open at that checkpoint. The guest browser join below has since advanced.
 4. **Expose one shared SDK path in the SPA.** Zero-wallet guest reading;
    opaque intent preparation; receipt versus committed readback; scoped
    evidence reuse; bounded concurrent hydration; preserved drafts on races,
    navigation and upgrade. Start with the [small guest Files screen](consumer-build-card.md)
    and measure its real RPC path separately from offline retained-snapshot
-   replay. Do not create an authoritative browser-side tree.
+   replay. Its guest-read portion is now implemented in the current screen
+   above; intent preparation/actions and real-wallet evidence remain open.
+   Do not create an authoritative browser-side tree.
 5. **Walk and measure the joined system.** Repeat before/after populated
    upgrades; compare a fresh guest reader and a Solidity consumer; then close
    remaining v1 rows in useful order. Label synthetic wallet results and
@@ -135,3 +164,28 @@ native goal's usage-limited state may need James's app controls; scheduling
 does not claim to reset it. Actual wallet compatibility, acceptable paid-chain
 costs and prioritization of advanced parity rows should be revisited with the
 working browser, not inferred from synthetic tests.
+
+## What this loop changed in our approach
+
+- The initial eight-name/two-File screen was a useful control but a weak scale
+  workload. Unique File Objects and many retired names exposed independent
+  costs before we could mistake a small successful demo for directory parity.
+- First useful result matters more than first source page. Four current Files
+  can still be undiscoverable within the present lifetime after enough churn.
+  Preserve the failure and fix acquisition, not only the progress wording.
+- Smaller HTTP delivery is worthwhile, but its measured byte saving does not
+  remove RPC dependency depth. Keep network delivery and checked read-call
+  shape as separate controls rather than crediting one with the other's cost.
+- Real UI review caught things contract tests could not: mutable explanations
+  across an in-flight update, IDs dominating the phone drawer, a weak text-size
+  test, and recovered-file keyboard focus. Each was reproduced and corrected.
+- PM input made the next choices narrower: Files/attention/history is a
+  presentation change; same-observation segments are a reversible SDK
+  experiment; a mandatory helper, current-name index or history pruning would
+  be a distinct Core/owner decision. No such permanent decision was made.
+
+The next highest-leverage implementation is the bounded same-observation
+continuation arm on the already independently verified 64/60 fixture. Then
+measure the optional read-helper arm against the same result law, alongside
+the FilesRouter/head/content joins. Do not rerun the whole architecture-design
+process or call this guest checkpoint a finished MVP.

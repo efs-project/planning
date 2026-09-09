@@ -8,6 +8,17 @@ necessary, but not enough to make a useful browser.
 
 ## 1. Separate an observation from one acquisition lifetime
 
+The [source-grounded implementation plan](acquisition-segments-plan.md) checks
+this recommendation against the actual compact Basis, boolean continuation,
+private cursor state and scope factory. It is the next executable increment;
+none of that future behavior is claimed implemented here.
+SDK's follow-on review narrows the first arm to one closure-owned replacement
+scope, initially Node-only. Request-function identity is a private capability
+guard, not portable semantic bytes. Only the last sealed evidence frontier
+can seed the replacement; failed/unsealed tail attempts remain separate cost
+evidence. The longer-term advice below does not require a generic chain system
+or a new UI/API in that first increment.
+
 SDK recommendation: keep one logical directory observation while allowing
 several independently bounded acquisition segments behind the existing scoped
 reader/opaque continuation seam. Do not reset counters inside one scope or

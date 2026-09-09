@@ -1,7 +1,9 @@
 # Guest Files screen over the bounded reader
 
 **Status:** implemented and independently reviewed local guest-read checkpoint;
-not public C0 or v1 parity. See [verification and measured results](verification.md).
+not public C0 or v1 parity. Start with the
+[current Files-first screen and evidence](files-lanes-verification.md);
+the [initial screen verification](verification.md) retains the earlier checkpoint.
 The separate [same-data delivery comparison](delivery-verification.md) measures
 optional compression; it does not resolve the read-lifecycle/churn limit.
 

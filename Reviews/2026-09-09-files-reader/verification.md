@@ -195,3 +195,9 @@ of all 18 groups on the corrected source passed, with zero failures,
 cancellations or skips (71,032.08 ms). Runtime and retained performance-source
 pins are unchanged. The scoped final re-review confirms the mismatch is
 addressed with no new breakage. No blocking finding is being silently discarded.
+
+At the final guest-screen checkpoint `84ef041`, main freshly ran
+`node --test Reviews/2026-09-09-files-reader/test/*.test.mjs`: **19/19** pass,
+36,539.15 ms, zero failures/skips/cancellations. This includes the new static
+ABI regression and the unchanged live reader/scheduling controls; it does not
+turn the separate directory-size or oracle-limit refusals into passes.
