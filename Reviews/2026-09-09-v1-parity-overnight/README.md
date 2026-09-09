@@ -56,8 +56,14 @@ requires the computer and Codex to remain available.
    Forge/19 foundation Forge/196 Node tests, five independently reverified
    snapshots and12 matching normal query measurements. Existing writer and
    accepted history remain unchanged. Final whole-increment review approves
-   experimental publication through `66f9da8`. Files interpretation/router and the
-   browser are still outstanding, not completed by this read prerequisite.
+   experimental publication through `66f9da8`. The next
+   [bounded shared Files reader](../2026-09-09-files-reader/README.md) now has
+   task-reviewed scope/adapter code at `c581366`/`eb14059` and a fresh 14-group
+   parent pass. Actual root Mount/Plan/charter/selected Entry checks and
+   cumulative Scope listings agree with the full retained-state oracle.
+   Malformed winners, conflict, unavailable rows and incomplete discovery
+   remain distinct. This is offchain fixture interpretation, not an onchain
+   Files certificate; the router, bytes/head traversal and browser remain open.
 4. **Expose one shared SDK path in the SPA.** Zero-wallet guest reading;
    opaque intent preparation; receipt versus committed readback; scoped
    evidence reuse; bounded concurrent hydration; preserved drafts on races,

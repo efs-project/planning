@@ -6,6 +6,9 @@ existing experiment branch only. Source baseline `31a4fbd`.
 
 **Checkpoint:** portable scope at `c581366` and Files adapter at `eb14059`
 are independently task-reviewed; parent's fresh 14 test groups pass.
+The same-evidence scheduling follow-on at `428249c` is also task-reviewed,
+and a fresh parent run passes all 18 reader groups. See
+[verification, performance and remaining gaps](verification.md).
 This is not a completed screen or parity claim. The [acceptance cases](acceptance-cases.md)
 make the expected user-visible outcomes and timing disclosures concrete.
 

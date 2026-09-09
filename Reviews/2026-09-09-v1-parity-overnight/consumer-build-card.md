@@ -5,6 +5,21 @@ The [upgrade-aware read prerequisite](../2026-09-08-upgradeable-foundation/upgra
 now passes. Reuse the [existing consumer specification](../2026-09-08-upgradeable-foundation/consumer-checkpoint.md)
 and [directory dataflow](directory-read-next.md), not a second file-tree model.
 
+**September 9 read join:** the [bounded shared Files reader](../2026-09-09-files-reader/README.md)
+now interprets actual mounted root folders through the populated read profile.
+Task-reviewed scope/adapter commits `c581366`/`eb14059` pass a fresh 14-group
+parent run, including all three views, historical charters, bad selections,
+partial discovery and old/new pinned upgrade reads. The executable `.mjs`
+entrypoint and adjacent TypeScript declarations are a disposable consumer
+seam, not the public SDK. Root-only ASCII names, no bytes/head traversal,
+synthetic authority and trusted local source remain explicit. This advances
+join 1 and the reader part of join 2; the screen and write router remain open.
+
+Its identical eight-name/two-node 0/50ms baseline now includes cold source
+qualification and fresh final sealing. The current scheduling follow-on keeps
+every check and compares exact baseline/candidate evidence. It is not a causal
+comparison with the older eleven-file browser fixture below.
+
 ## What James should be able to see
 
 Open a static SPA without a wallet. One real folder contains a note, another
