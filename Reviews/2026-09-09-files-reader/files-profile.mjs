@@ -9,10 +9,13 @@ export const TYPES=Object.freeze({
   'DirectoryWhiteout/1':'0x05eb791f96746078774b78b919153e652df372d1e86fcf8d802fee1df3e3badb',
   'PublicFilesMountConfig/1':'0x6577b3026df6f8cbe5fd1f4709a64755b192d599f57253de6387bf79bc09a692',
   'MountDescriptor/1':'0x8ac5bdff2615f825b887f086e40fdc902edec4e99962ffa5c7db79d661623721',
+  'FileRevision/1':'0x70e18fd87e4d254def230ccb1a7873c760ef95851b6e200fd3597c5fd7442bfa',
+  'ChunkTree/1':'0xf6c0966e2acc9f6b1bad9ac20f07da3b00cc418aafc8481dedcdc5f35f8767e8',
 });
 const hash=s=>keccak256(toUtf8Bytes(s)),H=(...words)=>keccak256(concat(words));
 const tag=(d,s)=>H(hash('efs2/'+d+'/1'),hash(s));
-export const FIXTURE=Object.freeze({publicProfile:hash('efs.fixture.files-public-ascii-read/1'),planScopeDomain:hash('efs.fixture.files-plan-scope/1'),lensProfile:hash('efs2/lens-semantics/b0/1'),fileMeaning:hash('efs2/files/meaning/file/1'),directoryMeaning:hash('efs2/files/meaning/directory/1'),charterPurpose:tag('purpose','objects/publisher-charter/1'),namePurpose:tag('purpose','files/name-slot/1'),charterRole:'0x'+'0'.repeat(63)+'1'});
+export const FIXTURE=Object.freeze({publicProfile:hash('efs.fixture.files-public-ascii-read/1'),planScopeDomain:hash('efs.fixture.files-plan-scope/1'),lensProfile:hash('efs2/lens-semantics/b0/1'),fileMeaning:hash('efs2/files/meaning/file/1'),directoryMeaning:hash('efs2/files/meaning/directory/1'),charterPurpose:tag('purpose','objects/publisher-charter/1'),namePurpose:tag('purpose','files/name-slot/1'),headPurpose:tag('purpose','files/revision-head/1'),headRole:tag('fieldrole','files/current-revision/1'),tagPurpose:tag('purpose','files/tag-current/1'),removedPurpose:tag('purpose','files/removed-item/1'),charterRole:'0x'+'0'.repeat(63)+'1'});
+export const tagId=label=>tag('files-tag',label);
 export const nameRole=name=>tag('fieldrole',name);
 export const positionKey=(purpose,subject,fieldRole)=>H(hash('efs2/position/1'),purpose,subject,fieldRole);
 export const bindingKey=(principal,purpose,subject,fieldRole)=>H(hash('efs2/binding/1'),principal,positionKey(purpose,subject,fieldRole));
@@ -22,6 +25,8 @@ export const purposeAndScope=(kind,root)=>{
   return H(hash('efs2/plan-purpose/1'),tag('purpose','files/'+kind+'-plan/1'),H(FIXTURE.planScopeDomain,FIXTURE.publicProfile,root));
 };
 export const ordinaryRecord=(type,body)=>H(hash('efs2/record/1'),type,keccak256(body));
+export const contentDigest=data=>keccak256(concat(['0x00',data]));
+export const byteLength=data=>BigInt(getBytes(data).length);
 export function nameAssessment(name){
   if(typeof name!=='string')return {status:'MALFORMED',reason:'NAME_TYPE'};
   const n=new TextEncoder().encode(name).length;
@@ -57,6 +62,17 @@ export function assessRecord(recordId,typeId,body){
       case 'MountDescriptor/1':field('rootNode',ref);field('profileId',word);field('configRef',ref);break;
       case 'PublicFilesMountConfig/1':field('namespacePlan',()=>option(ref));field('contentPlan',ref);field('metadataPlan',()=>option(ref));field('propertyProfile',()=>option(ref));break;
       case 'ResolutionPlan/1':field('frame',()=>variable(4192));break;
+      case 'ChunkTree/1':{
+        const u32=()=>{const v=take(4);return v[0]*16777216+v[1]*65536+v[2]*256+v[3];};
+        const u64=()=>{const v=take(8);let n=0n;for(const x of v)n=n*256n+BigInt(x);return n;};
+        field('chunkSize',u32);field('chunkCount',u32);field('totalSize',u64);field('merkleRoot',word);break;
+      }
+      case 'FileRevision/1':{
+        const flag=()=>{const v=take(1)[0];if(v>1)throw Error('BOOL_FLAG');return v===1;};
+        field('node',ref);field('content',ref);field('mediaType',()=>variable(255,true));
+        field('charset',()=>option(()=>variable(64,true)));field('executableHint',flag);
+        field('parents',()=>{const n=u16();if(n>8)throw Error('PARENTS_MAX');return Array.from({length:n},ref);});break;
+      }
     }
     if(at!==b.length)throw Error('TRAILING_BYTES');
     return {status:'ACCEPTED',type,fields,raw};

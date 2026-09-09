@@ -17,7 +17,12 @@ const APPLICATION = Object.freeze({
   resolve:'function resolve(bytes32 planRecordId,bytes32 positionKey) view returns ((uint8 presence,uint8 reasonCode,(uint8 targetKind,bytes32 targetA,uint16 targetLeaf) target,uint16 winnerIndex,uint16 winnerTier,uint64 winnerAdmissionOrdinal,uint16 presentCount,uint16 agreeCount,(bytes32 realmRevisionId,uint64 blockNumber,uint64 admissionHigh,uint8 basisKind) basis))',
   validatePlan:'function validatePlan(bytes32 planRecordId) view returns (bool,uint8)',
 });
-const codec = new Interface([...Object.values(APPLICATION),
+// Carrier byte views share the same pinned budgets/evidence path as Core reads.
+const CARRIER_APPLICATION = Object.freeze({
+  hasFixtureBytes:'function hasFixtureBytes(bytes32 treeId) view returns (bool)',
+  readFixtureBytes:'function readFixtureBytes(bytes32 treeId) view returns (bytes)',
+});
+const codec = new Interface([...Object.values(APPLICATION),...Object.values(CARRIER_APPLICATION),
   'function bootstrap() view returns ((bytes32 realmId,bytes32 initialRevisionId,bytes intrinsicGroupBytes,bytes32 objectGroup1Hash,bytes32 kernelGroup2Hash,bytes32 metaTypeId,bytes32 objectGenesisType,bytes32 bindingSetType,bytes32 bindingTombstoneType,bytes32 withdrawalType))',
   'function configuration() view returns (bytes32)',
   'function currentRevision() view returns (uint32)',
@@ -294,6 +299,17 @@ function createScope(source,expected,caps,signal) {
         try {
           live();check(!sealing,'scope sealing');check(Object.hasOwn(APPLICATION,name),'unsupported application call');beginWindow();
           const r=await call(expected.core,name,args,'data');live();
+          return {status:'OK',values:r.values,evidenceId:r.evidenceId};
+        }catch(error){return unavailable(error);}
+      })();
+      dataWork.add(work);work.then(()=>dataWork.delete(work));
+      return work;
+    },
+    carrierCall(name,args=[]) {
+      const work=(async()=>{
+        try {
+          live();check(!sealing,'scope sealing');check(Object.hasOwn(CARRIER_APPLICATION,name),'unsupported carrier call');beginWindow();
+          const r=await call(expected.execution.carrier,name,args,'data');live();
           return {status:'OK',values:r.values,evidenceId:r.evidenceId};
         }catch(error){return unavailable(error);}
       })();

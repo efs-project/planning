@@ -8,6 +8,7 @@ export interface Evidence {readonly id:number;readonly sequence:number;readonly 
 export interface Scope {
   readonly basis:Basis;
   call(name:'getRecord'|'getOccurrence'|'getOccurrenceByOrdinal'|'getBindingHead'|'getBindingAtBasis'|'readHistory'|'pagePostingsHydrated'|'resolve'|'validatePlan',args?:readonly unknown[]):Promise<{status:'OK';values:readonly unknown[];evidenceId:number}|{status:'UNAVAILABLE';reason:string;evidenceId:number|null}>;
+  carrierCall(name:'hasFixtureBytes'|'readFixtureBytes',args?:readonly unknown[]):Promise<{status:'OK';values:readonly unknown[];evidenceId:number}|{status:'UNAVAILABLE';reason:string;evidenceId:number|null}>;
   seal():Promise<{status:'SEALED';basis:Basis;evidence:readonly Evidence[]}|{status:'UNAVAILABLE';reason:string;evidence:readonly Evidence[]}>;
   close():void;stats():Readonly<LimitsStats>;evidence():readonly Evidence[];
 }
@@ -15,23 +16,35 @@ export interface LimitsStats {requests:number;bytes:number;cacheHits:number;inFl
 export function createFixtureReader(options:{source:ReaderSource;context:ReaderContext}):Readonly<{open(options?:{blockTag?:string;signal?:AbortSignal}):Promise<{status:'READY';scope:Scope}|{status:'UNAVAILABLE';reason:string;evidence:readonly Evidence[]}>}>;
 export type Coverage='COMPLETE'|'PARTIAL'|'UNKNOWN';
 export interface Qualification {readonly status:'QUALIFIED'|'UNAVAILABLE';readonly coverage:Coverage;readonly support:'FIXTURE_ASCII_ONLY'|'UNSUPPORTED';readonly validation:'FIXTURE_FILES_VALIDATED'|'UNRESOLVED'|'NO_SELECTED_NODE';readonly integrity:'SOURCE_PINNED_EXACT_ABI'|'UNAVAILABLE';readonly authority:'SYNTHETIC_OPERATOR_ONLY';readonly finality:'PROVISIONAL';readonly availability:'OBTAINED'|'PARTIAL'|'UNAVAILABLE';readonly effect:'NOT_APPLICABLE'}
-export interface NodeValue {readonly nodeId:string;readonly kind:'FILE'|'DIRECTORY';readonly name:string;readonly publisher:string;readonly historicalCharter:'VALID';readonly maintenance:'MAINTAINED'|'NOT_MAINTAINED'|'WRONG_TARGET';readonly content:'NOT_READ';readonly mountId:string;readonly mountOverride:string|null}
+export interface NodeValue {readonly nodeId:string;readonly kind:'FILE'|'DIRECTORY';readonly name:string;readonly publisher:string;readonly historicalCharter:'VALID';readonly maintenance:'MAINTAINED'|'NOT_MAINTAINED'|'WRONG_TARGET';readonly content:'NOT_READ';readonly mountId:string;readonly mountOverride:string|null;readonly subject:string}
 export type FoundRow={readonly outcome:'FOUND';readonly fieldRole:string;readonly selectedId:string;readonly value:NodeValue};
 export type UnresolvedRow={readonly outcome:'UNKNOWN';readonly fieldRole?:string;readonly reason:string;readonly detail?:string;readonly value?:never}|{readonly outcome:'CONFLICT';readonly fieldRole:string;readonly value?:never};
 export type MaskedRow={readonly outcome:'MASKED';readonly fieldRole:string;readonly selectedId:string;readonly value?:never};
 export type AbsentRow={readonly outcome:'ABSENT';readonly fieldRole:string;readonly value?:never};
 export type Row=FoundRow|UnresolvedRow|MaskedRow|AbsentRow;
-export interface Observation {readonly basis:Basis;readonly domain:'FIXTURE_ROOT_DIRECTORY_ONLY';readonly evidence:readonly Evidence[]}
+export interface Observation {readonly basis:Basis;readonly domain:'FIXTURE_ROOT_DIRECTORY_ONLY'|'FIXTURE_DIRECTORY_SUBTREE'|'FIXTURE_FILE_CONTENT';readonly evidence:readonly Evidence[]}
 export type PointResult=Observation&((FoundRow&{readonly qualification:Qualification&{readonly status:'QUALIFIED'}})|((UnresolvedRow|MaskedRow|AbsentRow)&{readonly qualification:Qualification}));
-export function lookupName(scope:Scope,options:{mountId:string;name:string}):Promise<PointResult>;
+export function lookupName(scope:Scope,options:{mountId:string;subject?:string;name:string}):Promise<PointResult>;
+export interface FileContentValue {readonly fileId:string;readonly revisionId:string;readonly mediaType:string;readonly charset:string|null;readonly executableHint:boolean;readonly parents:readonly string[];readonly totalSize:string;readonly bytes:string|null;readonly rawBytes?:string;readonly integrity:'VERIFIED'|'DIGEST_MISMATCH'|'BYTES_UNAVAILABLE'}
+export type FileContentResult=Observation&{readonly qualification:Qualification}&({readonly outcome:'FOUND';readonly value:FileContentValue}|{readonly outcome:'ABSENT'|'CONFLICT'}|{readonly outcome:'UNKNOWN';readonly reason:string;readonly detail?:string});
+export function openFile(scope:Scope,options:{mountId:string;fileId:string}):Promise<FileContentResult>;
+export interface HistoryRow {readonly principal:string;readonly revision:string;readonly ordinal:string|null;readonly kind:'ENTRY'|'WHITEOUT'|'TOMBSTONE'|'TRUNCATED';readonly target:string|null;readonly child:string|null}
+export type HistoryResult=Observation&{readonly qualification:Qualification}&({readonly outcome:'FOUND';readonly value:{readonly name:string;readonly subject:string;readonly timeline:readonly HistoryRow[]}}|{readonly outcome:'UNKNOWN';readonly reason:string;readonly detail?:string});
+export function openHistory(scope:Scope,options:{mountId:string;subject?:string;name:string}):Promise<HistoryResult>;
+export interface RevisionRow {readonly principal:string;readonly revision:string;readonly ordinal:string;readonly revisionId:string|null;readonly mediaType:string|null;readonly parents:readonly string[];readonly current:boolean}
+export type RevisionsResult=Observation&{readonly qualification:Qualification}&({readonly outcome:'FOUND';readonly value:{readonly fileId:string;readonly revisions:readonly RevisionRow[]}}|{readonly outcome:'UNKNOWN';readonly reason:string;readonly detail?:string});
+export function openRevisions(scope:Scope,options:{mountId:string;fileId:string}):Promise<RevisionsResult>;
 export interface DirectorySnapshot extends Observation {
   readonly coverage:Coverage;readonly rows:readonly (FoundRow&{readonly qualification:Qualification})[];readonly unresolved:readonly (UnresolvedRow&{readonly qualification:Qualification})[];readonly masked:readonly (MaskedRow&{readonly qualification:Qualification})[];readonly absent:readonly (AbsentRow&{readonly qualification:Qualification})[];
   readonly progress:readonly {readonly principal:string;readonly cursor:bigint;readonly scanned:bigint;readonly complete:boolean}[];
   readonly continuation:boolean;readonly qualification:Qualification;readonly rowsEvidence:'CURRENT_SEALED'|'PRIOR_SEALED';readonly reason?:string;readonly detail?:string;readonly priorSealed?:DirectorySnapshot|null;
 }
-export function openDirectory(scope:Scope,options:{mountId:string;pageSize?:number}):Readonly<{loadMore():Promise<DirectorySnapshot>;snapshot():DirectorySnapshot|null;close():void}>;
-export const TYPES:Readonly<Record<'ObjectGenesis/1'|'ResolutionPlan/1'|'BindingSet/1'|'BindingTombstone/1'|'DirectoryEntry/1'|'DirectoryWhiteout/1'|'PublicFilesMountConfig/1'|'MountDescriptor/1',string>>;
-export const FIXTURE:Readonly<Record<'publicProfile'|'planScopeDomain'|'lensProfile'|'fileMeaning'|'directoryMeaning'|'charterPurpose'|'namePurpose'|'charterRole',string>>;
+export function openDirectory(scope:Scope,options:{mountId:string;subject?:string;pageSize?:number}):Readonly<{loadMore():Promise<DirectorySnapshot>;snapshot():DirectorySnapshot|null;close():void}>;
+export const TYPES:Readonly<Record<'ObjectGenesis/1'|'ResolutionPlan/1'|'BindingSet/1'|'BindingTombstone/1'|'DirectoryEntry/1'|'DirectoryWhiteout/1'|'PublicFilesMountConfig/1'|'MountDescriptor/1'|'FileRevision/1'|'ChunkTree/1',string>>;
+export const FIXTURE:Readonly<Record<'publicProfile'|'planScopeDomain'|'lensProfile'|'fileMeaning'|'directoryMeaning'|'charterPurpose'|'namePurpose'|'headPurpose'|'headRole'|'tagPurpose'|'removedPurpose'|'charterRole',string>>;
+export function tagId(label:string):string;
+export function contentDigest(data:string):string;
+export function byteLength(data:string):bigint;
 export type RecordAssessment={status:'ACCEPTED';type:keyof typeof TYPES;fields:Record<string,unknown>;raw:RawRecord}|{status:'MALFORMED'|'UNSUPPORTED';reason:string;raw:RawRecord};
 export interface RawRecord {recordId:string;typeId:string;body:string;fields:string[]}
 export function assessRecord(recordId:string,typeId:string,body:string):RecordAssessment;

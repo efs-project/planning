@@ -1,5 +1,5 @@
 // Root-directory-only fixture reader. No bytes, revision heads, actions or wallet.
-import { FIXTURE,TYPES,assessRecord,nameAssessment,nameRole,positionKey,bindingKey,bindingScopeKey,purposeAndScope,parsePlan } from './files-profile.mjs';
+import { FIXTURE,TYPES,assessRecord,nameAssessment,nameRole,positionKey,bindingKey,bindingScopeKey,purposeAndScope,parsePlan,contentDigest,byteLength } from './files-profile.mjs';
 const ZERO='0x'+'0'.repeat(64),END=(1n<<256n)-1n,MASK48=(1n<<48n)-1n;
 const caches=new WeakMap();
 const freeze=x=>{if(x&&typeof x==='object'){for(const v of Object.values(x))freeze(v);Object.freeze(x);}return x;};
@@ -79,9 +79,11 @@ async function mount(scope,id){return memo(cache(scope).mounts,id,async()=>{
   return freeze({mountId:id,root,namespace,content,namespacePlan:c.namespacePlan,contentPlan:c.contentPlan});
 });}
 const unknown=e=>({outcome:'UNKNOWN',reason:e.reason??'EVIDENCE_UNAVAILABLE',detail:e.message});
-async function resolveRole(scope,m,fieldRole,requestedName){
+// subject: the listed directory's node id. The mount root remains the plan
+// scope anchor; child directories share the mount's namespace plan (§4.2).
+async function resolveRole(scope,m,subject,fieldRole,requestedName){
   try{
-    const [r]=await call(scope,'resolve',[m.namespacePlan,positionKey(FIXTURE.namePurpose,m.root.nodeId,fieldRole)]);
+    const [r]=await call(scope,'resolve',[m.namespacePlan,positionKey(FIXTURE.namePurpose,subject,fieldRole)]);
     const b=r[8];readBasis(scope,b[0],b[2]);require(b[1]===scope.basis.blockNumber&&b[3]===0n,'BASIS_MISMATCH');
     if(r[0]===3n)return {outcome:'CONFLICT',fieldRole};
     if(r[0]===2n)return {outcome:'ABSENT',fieldRole};
@@ -89,26 +91,126 @@ async function resolveRole(scope,m,fieldRole,requestedName){
     require(r[2][0]===1n&&r[2][2]===0n);
     const selectedId=r[2][1],entry=await record(scope,selectedId);
     require(entry.type==='DirectoryEntry/1'||entry.type==='DirectoryWhiteout/1');const f=entry.fields;
-    require(f.parent===m.root.nodeId&&nameRole(f.name)===fieldRole&&(requestedName===undefined||requestedName===f.name));
+    require(f.parent===subject&&nameRole(f.name)===fieldRole&&(requestedName===undefined||requestedName===f.name));
     const name=nameAssessment(f.name);require(name.status==='ACCEPTED',name.status==='UNSUPPORTED'?'UNSUPPORTED_NAME':'MALFORMED_SELECTED');
     if(entry.type==='DirectoryWhiteout/1')return {outcome:'MASKED',fieldRole,selectedId};
     const child=await node(scope,f.child);
     let override=null;if(f.mountOverride){override=await mount(scope,f.mountOverride);require(override.root.nodeId===f.child);}
-    return {outcome:'FOUND',fieldRole,selectedId,value:{...child,name:f.name,mountId:override?.mountId??m.mountId,mountOverride:f.mountOverride}};
+    // Navigation handle: a child DIRECTORY without an override mount is listed
+    // under the SAME mount with subject=f.child — never by re-following mountId.
+    return {outcome:'FOUND',fieldRole,selectedId,value:{...child,name:f.name,mountId:override?.mountId??m.mountId,mountOverride:f.mountOverride,subject:f.child}};
   }catch(e){return {...unknown(e),fieldRole};}
+}
+async function directorySubject(scope,m,subject){
+  if(subject===undefined||subject===m.root.nodeId){require(m.root.kind==='DIRECTORY','NOT_A_DIRECTORY');return m.root.nodeId;}
+  const n=await node(scope,subject);require(n.kind==='DIRECTORY','NOT_A_DIRECTORY');return n.nodeId;
 }
 const missing=reason=>['EVIDENCE_UNAVAILABLE','RECORD_UNAVAILABLE','CHARTER_SOURCE_UNAVAILABLE','CHARTER_HISTORY_LIMIT','LENS_UNKNOWN'].includes(reason);
 function qualification(status,coverage,outcome,reason){return freeze({status,coverage,support:reason?.startsWith('UNSUPPORTED')?'UNSUPPORTED':'FIXTURE_ASCII_ONLY',validation:outcome==='FOUND'?'FIXTURE_FILES_VALIDATED':outcome==='UNKNOWN'?'UNRESOLVED':'NO_SELECTED_NODE',integrity:status==='QUALIFIED'?'SOURCE_PINNED_EXACT_ABI':'UNAVAILABLE',authority:'SYNTHETIC_OPERATOR_ONLY',finality:'PROVISIONAL',availability:status==='QUALIFIED'&&!missing(reason)?'OBTAINED':'UNAVAILABLE',effect:'NOT_APPLICABLE'});}
-async function sealed(scope,value,coverage='COMPLETE'){
+async function sealed(scope,value,coverage='COMPLETE',domain='FIXTURE_ROOT_DIRECTORY_ONLY'){
   const seal=await scope.seal();
-  if(seal.status!=='SEALED')return freeze({...unknown(new Failure('SEAL_FAILED',seal.reason)),basis:scope.basis,domain:'FIXTURE_ROOT_DIRECTORY_ONLY',qualification:qualification('UNAVAILABLE','UNKNOWN','UNKNOWN'),evidence:seal.evidence});
-  return freeze({...value,basis:scope.basis,domain:'FIXTURE_ROOT_DIRECTORY_ONLY',qualification:qualification('QUALIFIED',missing(value.reason)?'UNKNOWN':coverage,value.outcome,value.reason),evidence:seal.evidence});
+  if(seal.status!=='SEALED')return freeze({...unknown(new Failure('SEAL_FAILED',seal.reason)),basis:scope.basis,domain,qualification:qualification('UNAVAILABLE','UNKNOWN','UNKNOWN'),evidence:seal.evidence});
+  return freeze({...value,basis:scope.basis,domain,qualification:qualification('QUALIFIED',missing(value.reason)?'UNKNOWN':coverage,value.outcome,value.reason),evidence:seal.evidence});
 }
+const domainFor=(m,subject)=>subject===m?.root.nodeId?'FIXTURE_ROOT_DIRECTORY_ONLY':'FIXTURE_DIRECTORY_SUBTREE';
 /** A top-level acquisition: do not overlap with another top-level use of scope. */
-export async function lookupName(scope,{mountId,name}){
+export async function lookupName(scope,{mountId,subject,name}){
+  let result,dom='FIXTURE_ROOT_DIRECTORY_ONLY';
+  try{const n=nameAssessment(name);require(n.status==='ACCEPTED',n.status==='UNSUPPORTED'?'UNSUPPORTED_NAME':'MALFORMED_NAME');const m=await mount(scope,mountId);const s=await directorySubject(scope,m,subject);dom=domainFor(m,s);result=await resolveRole(scope,m,s,nameRole(name),name);}
+  catch(e){result=unknown(e);}return sealed(scope,result,'COMPLETE',dom);
+}
+/** Verified file content at the mount's content plan. Top-level acquisition. */
+export async function openFile(scope,{mountId,fileId}){
+  let result,revisionId=null;
+  try{
+    const m=await mount(scope,mountId);
+    const file=await node(scope,fileId);require(file.kind==='FILE','NOT_A_FILE');
+    const [r]=await call(scope,'resolve',[m.contentPlan,positionKey(FIXTURE.headPurpose,fileId,FIXTURE.headRole)]);
+    const b=r[8];readBasis(scope,b[0],b[2]);require(b[1]===scope.basis.blockNumber&&b[3]===0n,'BASIS_MISMATCH');
+    if(r[0]===3n)result={outcome:'CONFLICT'};
+    else if(r[0]===2n)result={outcome:'ABSENT'};
+    else{
+      require(r[0]===1n,r[0]===4n?'UNSUPPORTED_PLAN':'LENS_UNKNOWN');
+      require(r[2][0]===1n&&r[2][2]===0n);
+      revisionId=r[2][1];
+      const rev=await record(scope,revisionId,'FileRevision/1');const f=rev.fields;
+      require(f.node===fileId,'REVISION_NODE_MISMATCH');
+      const tree=await record(scope,f.content,'ChunkTree/1');const t=tree.fields;
+      require(t.chunkCount===1&&t.totalSize<=16384n,'UNSUPPORTED_CHUNKS');
+      const has=await scope.carrierCall('hasFixtureBytes',[f.content]);
+      if(has.status!=='OK')throw new Failure('EVIDENCE_UNAVAILABLE',has.reason);
+      if(!has.values[0])result={outcome:'FOUND',value:{fileId,revisionId,mediaType:f.mediaType,charset:f.charset,executableHint:f.executableHint,parents:f.parents,totalSize:String(t.totalSize),bytes:null,integrity:'BYTES_UNAVAILABLE'}};
+      else{
+        const read=await scope.carrierCall('readFixtureBytes',[f.content]);
+        if(read.status!=='OK')throw new Failure('EVIDENCE_UNAVAILABLE',read.reason);
+        const data=read.values[0];
+        const okBytes=byteLength(data)===t.totalSize&&contentDigest(data)===t.merkleRoot;
+        // Mismatching bytes are returned with failed integrity, never as verified.
+        result={outcome:'FOUND',value:{fileId,revisionId,mediaType:f.mediaType,charset:f.charset,executableHint:f.executableHint,parents:f.parents,totalSize:String(t.totalSize),bytes:okBytes?data:null,rawBytes:okBytes?undefined:data,integrity:okBytes?'VERIFIED':'DIGEST_MISMATCH'}};
+      }
+    }
+  }catch(e){result=unknown(e);}
+  return sealed(scope,result,'COMPLETE','FIXTURE_FILE_CONTENT');
+}
+/** Per-principal timeline of one name slot, oldest first. Top-level acquisition. */
+export async function openHistory(scope,{mountId,subject,name}){
+  let result,dom='FIXTURE_ROOT_DIRECTORY_ONLY';
+  try{
+    const n=nameAssessment(name);require(n.status==='ACCEPTED',n.status==='UNSUPPORTED'?'UNSUPPORTED_NAME':'MALFORMED_NAME');
+    const m=await mount(scope,mountId);const s=await directorySubject(scope,m,subject);dom=domainFor(m,s);
+    const fieldRole=nameRole(name),principals=[...new Set(m.namespace.entries.map(e=>e.principal))];
+    const timeline=[];
+    for(const principal of principals){
+      const key=bindingKey(principal,FIXTURE.namePurpose,s,fieldRole);
+      const [history,next,complete]=await call(scope,'readHistory',[key,1,64]);
+      require(history.length<=64&&(complete===1n||complete===2n),'HISTORY_MISMATCH');
+      for(const h of history){
+        if(h[1]>scope.basis.admissionHigh)continue;
+        const [at,atBasis,atH]=await call(scope,'getBindingAtBasis',[key,h[1]]);
+        require(equal(atBasis,scope.basis.executionSetId)&&atH===h[1],'HISTORY_MISMATCH');
+        let entryKind='TOMBSTONE',target=null,child=null;
+        if(at[0]===1n&&at[1]===1n){
+          const rec=await record(scope,at[5]);
+          entryKind=rec.type==='DirectoryWhiteout/1'?'WHITEOUT':'ENTRY';target=at[5];
+          if(rec.type==='DirectoryEntry/1')child=rec.fields.child;
+        }
+        timeline.push({principal,revision:String(at[3]),ordinal:String(h[1]),kind:entryKind,target,child});
+      }
+      if(complete===2n)timeline.push({principal,revision:'>64',ordinal:null,kind:'TRUNCATED',target:null,child:null});
+    }
+    timeline.sort((a,b)=>(BigInt(a.ordinal??0)<BigInt(b.ordinal??0)?-1:1));
+    result={outcome:'FOUND',value:{name,subject:s,timeline}};
+  }catch(e){result=unknown(e);}
+  return sealed(scope,result,'COMPLETE',dom);
+}
+/** Revision chain of one file under the content plan's selected principal. */
+export async function openRevisions(scope,{mountId,fileId}){
   let result;
-  try{const n=nameAssessment(name);require(n.status==='ACCEPTED',n.status==='UNSUPPORTED'?'UNSUPPORTED_NAME':'MALFORMED_NAME');const m=await mount(scope,mountId);require(m.root.kind==='DIRECTORY','NOT_A_DIRECTORY');result=await resolveRole(scope,m,nameRole(name),name);}
-  catch(e){result=unknown(e);}return sealed(scope,result);
+  try{
+    const m=await mount(scope,mountId);
+    const file=await node(scope,fileId);require(file.kind==='FILE','NOT_A_FILE');
+    const principals=[...new Set(m.content.entries.map(e=>e.principal))];
+    const revisions=[];
+    for(const principal of principals){
+      const key=bindingKey(principal,FIXTURE.headPurpose,fileId,FIXTURE.headRole);
+      const [history,,complete]=await call(scope,'readHistory',[key,1,64]);
+      require(history.length<=64&&(complete===1n||complete===2n),'HISTORY_MISMATCH');
+      for(const h of history){
+        if(h[1]>scope.basis.admissionHigh)continue;
+        const [at,atBasis,atH]=await call(scope,'getBindingAtBasis',[key,h[1]]);
+        require(equal(atBasis,scope.basis.executionSetId)&&atH===h[1],'HISTORY_MISMATCH');
+        if(at[0]===1n&&at[1]===1n){
+          const rev=await record(scope,at[5],'FileRevision/1');
+          require(rev.fields.node===fileId,'REVISION_NODE_MISMATCH');
+          revisions.push({principal,revision:String(at[3]),ordinal:String(h[1]),revisionId:at[5],mediaType:rev.fields.mediaType,parents:rev.fields.parents,current:false});
+        }else revisions.push({principal,revision:String(at[3]),ordinal:String(h[1]),revisionId:null,mediaType:null,parents:[],current:false});
+      }
+    }
+    revisions.sort((a,b)=>(BigInt(a.ordinal)<BigInt(b.ordinal)?-1:1));
+    if(revisions.length)revisions.at(-1).current=true;
+    result={outcome:'FOUND',value:{fileId,revisions}};
+  }catch(e){result=unknown(e);}
+  return sealed(scope,result,'COMPLETE','FIXTURE_FILE_CONTENT');
 }
 
 function checkedPage(scope,state,page,rows,pageSize){
@@ -126,18 +228,19 @@ function checkedPage(scope,state,page,rows,pageSize){
   for(let i=0;i<rows.length;i++){const r=rows[i];require(BigInt(ids[i])===r[0]&&r[0]>previous&&r[0]<=scope.basis.admissionHigh,'PAGE_ORDINAL');require(r[4]===state.principal&&(r[5]===1n||r[5]===2n)&&(r[5]===1n?r[6]===0n:r[6]>r[0]&&r[6]<=scope.basis.admissionHigh),'PAGE_SOURCE');previous=r[0];}
   state.last=previous;state.scanned=scanned;state.cursor=cursor;state.complete=complete===1n;
 }
-export function openDirectory(scope,{mountId,pageSize=8}){
+export function openDirectory(scope,{mountId,subject,pageSize=8}){
   require(Number.isInteger(pageSize)&&pageSize>=1&&pageSize<=8,'PAGE_SIZE');
-  let closed=false,flight=null,sources=null,positions=new Map(),last=null,latest=null;
+  let closed=false,flight=null,sources=null,positions=new Map(),last=null,latest=null,listDomain='FIXTURE_ROOT_DIRECTORY_ONLY';
   const progress=ss=>(ss??[]).map(s=>({principal:s.principal,cursor:s.cursor,scanned:s.scanned,complete:s.complete}));
   function snapshot(rowsMap,ss,coverage){const all=[...rowsMap.values()];return {coverage,rows:all.filter(r=>r.outcome==='FOUND').sort((a,b)=>a.value.name<b.value.name?-1:a.value.name>b.value.name?1:0),unresolved:all.filter(r=>r.outcome==='UNKNOWN'||r.outcome==='CONFLICT'),masked:all.filter(r=>r.outcome==='MASKED'),absent:all.filter(r=>r.outcome==='ABSENT'),progress:progress(ss),continuation:!(ss?.every(s=>s.complete)??false)};}
   async function step(){
     let ss=sources?.map(s=>({...s,roles:[...s.roles]})),next=new Map(positions),failure;
     try{
-      require(!closed,'STREAM_CLOSED');const m=await mount(scope,mountId);require(m.root.kind==='DIRECTORY','NOT_A_DIRECTORY');
+      require(!closed,'STREAM_CLOSED');const m=await mount(scope,mountId);
+      const listed=await directorySubject(scope,m,subject);listDomain=domainFor(m,listed);
       ss??=[...new Set(m.namespace.entries.map(e=>e.principal))].map(principal=>({principal,cursor:0n,scanned:0n,last:0n,end:null,tag:null,roles:[],complete:false}));
       const pages=await Promise.all(ss.filter(s=>!s.complete).map(async s=>{
-        try{const [page,rows]=await call(scope,'pagePostingsHydrated',[ZERO,10,0,bindingScopeKey(s.principal,FIXTURE.namePurpose,m.root.nodeId),[s.cursor,pageSize,scope.basis.admissionHigh]]);checkedPage(scope,s,page,rows,pageSize);return {s,rows};}catch(e){return {s,error:e};}
+        try{const [page,rows]=await call(scope,'pagePostingsHydrated',[ZERO,10,0,bindingScopeKey(s.principal,FIXTURE.namePurpose,listed),[s.cursor,pageSize,scope.basis.admissionHigh]]);checkedPage(scope,s,page,rows,pageSize);return {s,rows};}catch(e){return {s,error:e};}
       }));
       const roles=new Set([...positions].filter(([,v])=>v.outcome==='UNKNOWN').map(([r])=>r));
       await Promise.all(pages.map(async ({s,rows,error})=>{
@@ -147,7 +250,7 @@ export function openDirectory(scope,{mountId,pageSize=8}){
           require(occurrence[0]===row[1]&&occurrence[1]===row[2]&&occurrence[2]===row[3]&&occurrence[4]===row[4]&&occurrence[5]===row[5]&&occurrence[6]===row[6],'ANCHOR_SOURCE');
           const a=await record(scope,row[3]);require(a.type==='BindingSet/1'||a.type==='BindingTombstone/1','ANCHOR_TYPE');const f=a.fields;
           require(occurrence[3]===a.raw.typeId,'ANCHOR_SOURCE');
-          require(f.purpose===FIXTURE.namePurpose&&f.subject===m.root.nodeId,'ANCHOR_SCOPE');
+          require(f.purpose===FIXTURE.namePurpose&&f.subject===listed,'ANCHOR_SCOPE');
           const k=bindingKey(s.principal,f.purpose,f.subject,f.fieldRole);
           const [at,b,H]=await call(scope,'getBindingAtBasis',[k,row[0]]);require(equal(b,scope.basis.executionSetId)&&H===row[0]&&at[3]===1n&&at[4]===row[0],'ANCHOR_FIRST_MUTATION');
           if(a.type==='BindingSet/1')require((f.targetRecord===null)!==(f.targetOccurrence===null)&&at[0]===1n&&at[1]===(f.targetRecord?1n:2n)&&at[5]===(f.targetRecord??f.targetOccurrence.envelopeId)&&at[6]===BigInt(f.targetOccurrence?.leafIndex??0),'ANCHOR_TARGET');
@@ -156,19 +259,19 @@ export function openDirectory(scope,{mountId,pageSize=8}){
           roles.add(f.fieldRole);
         }));const rejected=checked.find(r=>r.status==='rejected');if(rejected)throw rejected.reason;}catch(e){failure??=e;}
       }));
-      const resolved=await Promise.all([...roles].map(async r=>[r,await resolveRole(scope,m,r)]));for(const [r,v] of resolved)next.set(r,v);
+      const resolved=await Promise.all([...roles].map(async r=>[r,await resolveRole(scope,m,listed,r)]));for(const [r,v] of resolved)next.set(r,v);
       require(!closed,'STREAM_CLOSED');
     }catch(e){failure=e;}
     // Drain all internally owned row work before the one aggregate seal.
     const seal=await scope.seal();
     if(seal.status!=='SEALED'||closed)failure=new Failure(closed?'STREAM_CLOSED':'SEAL_FAILED',seal.reason);
-    if(failure){latest=freeze({...snapshot(positions,sources,positions.size?'PARTIAL':'UNKNOWN'),basis:scope.basis,domain:'FIXTURE_ROOT_DIRECTORY_ONLY',reason:failure.reason??failure.message,detail:failure.message,rowsEvidence:'PRIOR_SEALED',qualification:qualification('UNAVAILABLE',positions.size?'PARTIAL':'UNKNOWN','UNKNOWN'),evidence:seal.evidence,priorSealed:last});return latest;}
+    if(failure){latest=freeze({...snapshot(positions,sources,positions.size?'PARTIAL':'UNKNOWN'),basis:scope.basis,domain:listDomain,reason:failure.reason??failure.message,detail:failure.message,rowsEvidence:'PRIOR_SEALED',qualification:qualification('UNAVAILABLE',positions.size?'PARTIAL':'UNKNOWN','UNKNOWN'),evidence:seal.evidence,priorSealed:last});return latest;}
     const coverage=ss.every(s=>s.complete)?'COMPLETE':'PARTIAL';
     for(const [r,v] of next)next.set(r,freeze({...v,qualification:qualification('QUALIFIED',missing(v.reason)?'UNKNOWN':'COMPLETE',v.outcome,v.reason)}));
     const rows=[...next.values()],unavailable=rows.filter(r=>missing(r.reason)).length;
     const validation=rows.some(r=>r.outcome==='UNKNOWN'||r.outcome==='CONFLICT')?'UNKNOWN':rows.some(r=>r.outcome==='FOUND')?'FOUND':'ABSENT';
     const aggregate={...qualification('QUALIFIED',coverage,validation),availability:unavailable?(unavailable===rows.length?'UNAVAILABLE':'PARTIAL'):'OBTAINED',support:rows.some(r=>r.reason?.startsWith('UNSUPPORTED'))?'UNSUPPORTED':'FIXTURE_ASCII_ONLY'};
-    sources=ss;positions=next;last=freeze({...snapshot(next,ss,coverage),basis:scope.basis,domain:'FIXTURE_ROOT_DIRECTORY_ONLY',rowsEvidence:'CURRENT_SEALED',qualification:aggregate,evidence:seal.evidence});latest=last;return last;
+    sources=ss;positions=next;last=freeze({...snapshot(next,ss,coverage),basis:scope.basis,domain:listDomain,rowsEvidence:'CURRENT_SEALED',qualification:aggregate,evidence:seal.evidence});latest=last;return last;
   }
   return Object.freeze({loadMore(){if(!flight)flight=step().finally(()=>{flight=null;});return flight;},snapshot(){return latest;},close(){closed=true;}});
 }

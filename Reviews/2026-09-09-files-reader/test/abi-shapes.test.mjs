@@ -14,12 +14,21 @@ test('all actual reader ABI input/output shapes match compiled U1/U2 and Admin, 
   const bundle=new URL('../../2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.js',import.meta.url).href;
   const imported=source.replace(relative,JSON.stringify(bundle))+'\nexport {codec as testCodec};\n';
   const {testCodec}=await import('data:text/javascript;base64,'+Buffer.from(imported).toString('base64'));
-  const functions=testCodec.fragments.filter(f=>f.type==='function');assert.equal(functions.length,20,'closed current scope surface');
+  // 20 Core/Admin fragments plus the 2 carrier byte views added for file content.
+  const functions=testCodec.fragments.filter(f=>f.type==='function');assert.equal(functions.length,22,'closed current scope surface');
+  const CARRIER_NAMES=['hasFixtureBytes','readFixtureBytes'];
   async function artifact(path){return new Interface(JSON.parse(await readFile(new URL('../../2026-09-08-upgradeable-foundation/out/'+path,import.meta.url),'utf8')).abi);}
   const admin=await artifact('ProxyAdmin.sol/ProxyAdmin.json');
+  for(const carrierVersion of ['UpgradeableFixtureCarrier','UpgradeableFixtureCarrierU2']){
+    const carrier=await artifact('UpgradeableFixtureCarrier.sol/'+carrierVersion+'.json');
+    for(const fragment of functions.filter(f=>CARRIER_NAMES.includes(f.name))){
+      const signature=fragment.format('sighash'),compiled=carrier.getFunction(signature);
+      assert(compiled,carrierVersion+' missing '+signature);assert.deepEqual(shape(fragment),shape(compiled),carrierVersion+' / '+signature);
+    }
+  }
   for(const version of ['UpgradeableReadFixtureCore','UpgradeableReadFixtureCoreU2']){
     const core=await artifact('UpgradeableReadFixtureCore.sol/'+version+'.json');
-    for(const fragment of functions){
+    for(const fragment of functions.filter(f=>!CARRIER_NAMES.includes(f.name))){
       const signature=fragment.format('sighash'),compiled=core.getFunction(signature)??admin.getFunction(signature);
       assert(compiled,version+' missing '+signature);assert.deepEqual(shape(fragment),shape(compiled),version+' / '+signature);
     }
