@@ -15,10 +15,13 @@ Source framing is [B0 encoding §1.6](../2026-08-13-efs2-stage-a-corpus/chapters
 Unsigned integers are fixed-width big-endian; names are exact ASCII, no NUL.
 The following order is exact. Existing sections preserve their relative order;
 the raw-string section, supplemental constants and grammar dictionaries are
-explicit additions in this still-unminted outer revision2.
+explicit additions first specified in outer revision2. The
+[V3 dependency refinement](dependency-deployment-v3.md#active-codex-interpretation)
+selects still-unminted outer revision3/grammar2 for the new run framing;
+embedded owner-module revisions and other row meanings are unchanged.
 
 ```text
-u16 codexRevision=2 || u16 mcVersion=1
+u16 codexRevision=3 || u16 mcVersion=1
 DomainTable[25]                         // existing u16 count, u16 len + bytes
 RawStringTable[6]                       // exact414 bytes, selected sheet
 u16 constCount=25 || NumericRow[25]
@@ -91,18 +94,20 @@ remain evidence, not reasons to silently raise the transaction cap.
 ## Six supplemental C0 numeric rows
 
 ```text
-C0_GRAMMAR_REVISION=1
+C0_GRAMMAR_REVISION=2
 C0_COMMITMENT_COUNT_MAX=64
 C0_COMMITMENT_LABEL_BYTES_MAX=64
-C0_SEED_V2_GUARD_MIN_BYTES=712
-C0_SEED_V2_GUARD_MAX_BYTES=13690
+C0_SEED_V3_GUARD_MIN_BYTES=840
+C0_SEED_V3_GUARD_MAX_BYTES=13818
 C0_PUBLICATION_WIRE_MAX_BYTES=16384
 ```
 
 These encoding-owned PROFILE constants have distinct meanings from the
-universal structural limits. The seed bounds name actual codec prechecks;
-they are not tight accepted-length extrema (the closed experiment found
-730..13645). Do not add derived-size/version synonyms for each fixed format.
+universal structural limits. The seed bounds name selected V3 prechecks;
+they are not tight accepted-length extrema (V3 grammar gives858..13773).
+The closed V2 codec's corresponding730..13645 evidence is unchanged; V3
+implementation must test its new extremes. Do not add derived-size/version
+synonyms for each fixed format.
 
 This is the smaller adequate alternative to a large table of every field
 width/derived size. A lone grammar revision without these distinct acceptance
@@ -144,12 +149,14 @@ numeric codes: actual `InvalidBody(uint16)`/`InvalidSchema()` and exposed or
 bubbled Solidity signatures belong to ABI_RESULT. `INTRINSIC` does not claim
 that admission performs full Unicode normalization/STRUCT-FULL.
 
-## Exact meaning of grammar revision1
+## Exact meaning of grammar revision2
 
 The revision selects these fixed rules together, not “whatever future code
 does.” A semantic change requires a new grammar and outer artifact revision.
 Unchanged Type/Record/Envelope identity formulas and underlying field/operand
 widths remain in the source encoding; this does not revise portable bytes.
+Relative to the earlier grammar1, only the Seed/Deployment interpretation and
+run-domain selection change; schema, Request, Selection and batch rules do not.
 
 Schema rules:
 
@@ -182,13 +189,13 @@ Fixed transport rules consume the already exact field sequences and checks:
 
 | Transport | Selected interpretation and ownership |
 |---|---|
-| SeedV2 | `u16(2)` + exact existing SeedInputs encoding + five bytes32 suffix fields, in [C0RunCodecV2](src/C0RunCodecV2.sol) order. Both commitment lists are nonempty/bounded; entries have exact u32 frame length, u16 label length, label and digest32. Labels use `[A-Za-z0-9._/-]`, strictly increasing raw-byte lexicographic order; digests nonzero. Exact namespace and one required nonzero selection-label digest. Supplemental rows bound lists/labels/precheck lengths. |
-| DeploymentV2 | `u16(2)` + seed32 + Core/ByteStore/AdmissionLibrary/PreparationHelper, each address20/salt32/initHash32/runtimeHash32. Derived size498. Nonzero seed/hashes and distinct nonzero addresses; salts may be zero. |
+| SeedV3 | `u16(3)` + exact existing V1 SeedInputs encoding + nine bytes32 suffix fields, in [V3 deployment](dependency-deployment-v3.md#seed-v3) order: four dependency salts, four dependency template hashes, Core link-map hash. Both commitment lists are nonempty/bounded; entries have exact u32 frame length, u16 label length, label and digest32. Labels use `[A-Za-z0-9._/-]`, strictly increasing raw-byte lexicographic order; digests nonzero. Exact namespace and one required nonzero selection-label digest. Supplemental rows bound lists/labels/precheck lengths. |
+| DeploymentV3 | `u16(3)` + seed32 + Core/ByteStore/AdmissionLibrary/PreparationHelper/PointReadLibrary/QueryReadLibrary, each address20/salt32/initHash32/runtimeHash32. Derived size730. Nonzero seed/hashes and six distinct nonzero addresses; salts may be zero. Exact target-aware Core link-map2 is pinned by SeedV3, not an unnamed Admission-only map. |
 | Selection/InitConfig | Existing nine-word/seven-word canonical ABI sequences in [C0InitializationSelection](src/C0InitializationSelection.sol), derived288/224 bytes. InitConfigVersion1; finality0..3 with positive parameter only for2, otherwise zero; immutable upgrade authority0/ref0; declared gas≥REALM_MIN_TX_GAS; exact null-policy hash; nonzero executor. Policy derives from the deployment commitment. |
 | Request | Exact typed ABI and validation order from [C0Request](src/C0Request.sol) and [request boundary](outer-request-boundary.md). Profile1/reserved authorityRef0/authEpoch0; vectors/CAS/body limits use existing universal rows. Equivalent publication wire=`544+32N+160L+sum(ceil32(body))`, capped16384. Actual call limit=`21412+ceil32(F)` with authenticated run file cap F; ordinary ABI acceptance remains selected. |
 | Batch evidence | Exact version1 packed field order from [batch evidence](batch-authority-evidence.md), implemented in [C0BatchEvidence](src/C0BatchEvidence.sol). Derive Plan220/Effects241/CAS6 and branch maxima from that one layout. Descriptor/witness/code observation rules are consumed from AUTHORITY, not redefined by another constant table. Only existing composite/direct branches are described; session still requires its own completed program/evidence specification. |
 
-No competing fixed-size rows for498/288/224/220/241/1036. Their values follow
+No competing fixed-size rows for730/288/224/220/241/1036. Their values follow
 from the selected complete field sequences, not from independent tunable
 limits. The seed's source/toolchain commitments open the actual retained
 inputs; linking this prose is not a substitute for those bytes.

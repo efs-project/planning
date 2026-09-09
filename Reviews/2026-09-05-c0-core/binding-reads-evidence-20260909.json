@@ -1,0 +1,548 @@
+{
+  "status": "worker measured; disposable revision-one trusted host, not authenticated C0",
+  "implementationCommit": "d95c358ab2eee3ee1e26c52cedc54f04134a0d4b",
+  "observation": {
+    "compiler": {
+      "version": "0.8.30+commit.73712a01"
+    },
+    "settings": {
+      "remappings": [
+        "C0Admission/=../2026-09-05-c0-admission/src/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "test/BindingReadHarness.sol": "BindingReadHarness"
+      },
+      "evmVersion": "cancun",
+      "libraries": {},
+      "viaIR": true
+    },
+    "sourcePins": {
+      "../2026-09-05-c0-admission/src/TypeGroupParser.sol": {
+        "keccak256": "0x586b5d360092ed79faaf69114aadbe7dd487b9a7c2690ef55c5c6443d3f2bc86",
+        "urls": [
+          "bzz-raw://24446ce927006cceb49faa5be29cbb969fbe5b9097813d508cfdb427e5b4e844",
+          "dweb:/ipfs/Qmamj7mg3vm649XhiZCjKYmjM92MQNYhFoSeZ9XSTYv7SR"
+        ],
+        "license": "MIT"
+      },
+      "src/AdmissionLibrary.sol": {
+        "keccak256": "0x58bdba5c0a12d7e8f2fdf6d8217a205b81b8075080d1dd27b03c4dfc5b8201c2",
+        "urls": [
+          "bzz-raw://c48dd54d70c33c2c80eb2f7ffdd9c869915d058a5bf48d7f88198556504338b8",
+          "dweb:/ipfs/QmQY4cAdytqU9BTG5MS2CrRQs5Lyj3pPHBkFxMFufCBDKg"
+        ],
+        "license": "MIT"
+      },
+      "src/BindingFold.sol": {
+        "keccak256": "0xecf170a723ffff6966b6439c2305dcbae427ccc70c68aad632b950631dd307ee",
+        "urls": [
+          "bzz-raw://bb40883788b30b8eecce1895d1370e3b63ea75a7d89d04c0483c280f774ec410",
+          "dweb:/ipfs/QmUGf4f5CjkaknDafC1sCqZbVcaS2d16gaPsg1LSJ7FJXy"
+        ],
+        "license": "MIT"
+      },
+      "src/IndexKeys.sol": {
+        "keccak256": "0x82dbf6754e96cd113fc5ecd8536c50ed464f626214947de51f20e85650fb4d43",
+        "urls": [
+          "bzz-raw://933d2b43fea0ac521330b03ccc9027222a2cc9ea23d6515bb988e2416dd2ff83",
+          "dweb:/ipfs/QmZgukQQpKH15LRKRFzhX5x6fqCWjzTrDAhaRio25pPArs"
+        ],
+        "license": "MIT"
+      },
+      "src/PointReadLibrary.sol": {
+        "keccak256": "0x29b035c5182826a17a497059dbfe9f2680e6e504962cdb2aea48cf75a4487d79",
+        "urls": [
+          "bzz-raw://466b0d8ba03ca322fc36aeb2ee4e37fceac35f85ad0505a5a3c78a5ba695a676",
+          "dweb:/ipfs/QmcodTQgLk9YFroTUL2egdrFS9M1vDMSyy2NVeMZyMCWBK"
+        ],
+        "license": "MIT"
+      },
+      "src/Preparation.sol": {
+        "keccak256": "0x2200c3eb67c8ce1c52d3bf5418abf8bde29254d1a004355f83e458f8f4ad7c81",
+        "urls": [
+          "bzz-raw://60e64c99a28c6c514ef64025353cb34aa4ef37c4f8cf5369be006704dbe799f8",
+          "dweb:/ipfs/QmUiK4ZUXJXK2yyyanAsimxBuVB1fZE7BWDk6gkNh4VH17"
+        ],
+        "license": "MIT"
+      },
+      "src/QueryReadLibrary.sol": {
+        "keccak256": "0xed916d6033ec178e0a2634519559834703ae0da9cba455abdc790d234d4c200a",
+        "urls": [
+          "bzz-raw://786e7f2aa46fc1343158b690797d192be6e7a6b368e87e87b019fd1b09ecea4d",
+          "dweb:/ipfs/QmbFe3zTuJKSsq8WzGLxigWB5gZorAG6XWqoRQKmUX39S9"
+        ],
+        "license": "MIT"
+      },
+      "src/RecordBody.sol": {
+        "keccak256": "0xd08b372ae170699dc246bf3e28ca843b4ac45a1b4347fc45d39258cdd1b0873e",
+        "urls": [
+          "bzz-raw://5c9d1518f3847b277e753dc4703223cdcac4cc719370473295d0730550374370",
+          "dweb:/ipfs/QmTwAJpQhqe5puao8M4HKgqRjSTtsNApc7kz7DBGzzfen4"
+        ],
+        "license": "MIT"
+      },
+      "src/StateBindingReads.sol": {
+        "keccak256": "0xeec44ef6744955055cfc3bf68dc77a19c6eb0ade0b39870c0bf72a0d00b965f9",
+        "urls": [
+          "bzz-raw://c3df39ebf14bbe4d0f4103553dafc27b45db1a305c3f143e021aed207d725a12",
+          "dweb:/ipfs/Qme2MHLn8md5g1MGbHr5HHCBJ424mYFDjLHGaRhsKRY6qk"
+        ],
+        "license": "MIT"
+      },
+      "src/StateKernel.sol": {
+        "keccak256": "0x09964761aa0fed1f2ba5ca673b2d6ffad41c8e92cc4bb513783e539415dc215a",
+        "urls": [
+          "bzz-raw://57b9838cacfebd548c86f369d08d9de1b21bad77fa40239da19e562f873b1a88",
+          "dweb:/ipfs/QmSA9Ea5ESdzWTCqY6rRUJVZQEHQh1BAXQFKZCZaJFz8iZ"
+        ],
+        "license": "MIT"
+      },
+      "src/StatePointReads.sol": {
+        "keccak256": "0xf956b46649de1719885c1843b04a97cb67910a0cc3982a9e353503769e4c89a1",
+        "urls": [
+          "bzz-raw://4a9fe5e981b68afe6bc86ed92955a2662fb38b760b131a3c2c583596a97b60b6",
+          "dweb:/ipfs/QmYb6eaRab8pN9QA2YQ73kP1AGu3TgJhU25CqEzJm59Yay"
+        ],
+        "license": "MIT"
+      },
+      "src/StateReadPrimitives.sol": {
+        "keccak256": "0xc8bae9362172be337d7976a4ab85c67251f955c68d193dce21fa3255d30e6e17",
+        "urls": [
+          "bzz-raw://3ce59c573c0f09e492655a95ce213a00ea7e76c48d23b3209877b20c1d531a12",
+          "dweb:/ipfs/QmZoMDpdoE8nei4jsWmVhp3BAZzqh8HA7rbCWA7tsnrULD"
+        ],
+        "license": "MIT"
+      },
+      "src/StateStore.sol": {
+        "keccak256": "0x4e4eac82091ef3614c777bba4bd8a43d957115765fdcc699339af03eb206a8a1",
+        "urls": [
+          "bzz-raw://890b4b2809494ac1159e7a5d6dc1da0a00d69fc635533170fd3c989f6505d9b9",
+          "dweb:/ipfs/QmS757huJKexwHPKR1YRXJRMMuoTH9Hp3Y6Q75VZgtvJ7F"
+        ],
+        "license": "MIT"
+      },
+      "src/StorageByteView.sol": {
+        "keccak256": "0x870732b622c6ea6be4b30e6b47367e138810b2236565bb5a688e41591bff8d4c",
+        "urls": [
+          "bzz-raw://408959ec7a9b5de5d3c200f4f4da9567892bd67e126c095d973399dcd965273a",
+          "dweb:/ipfs/Qmf6p1YM3CoMWdkmmb3hCr58VSQ8CU7HvtWXrhUAdXuVi2"
+        ],
+        "license": "MIT"
+      },
+      "test/BindingReadHarness.sol": {
+        "keccak256": "0x73c8a7c25945b614c534a51cb106f8d1a4d57ff595ff04703d12742ebf5a82fd",
+        "urls": [
+          "bzz-raw://dcf9ac16c54ce6f5c882bc7424ee9ef8ac5ffaf1e13f6532533fb8984a3de65a",
+          "dweb:/ipfs/QmWriMhKZCingaLY87jtYk9pCM7XC3c2xEwFwaDzDWteLr"
+        ],
+        "license": "MIT"
+      },
+      "test/StatefulHarness.sol": {
+        "keccak256": "0x44e2aa292c72c963ef23ac42b2b48c537bb71a751b1a5faede48ea09be35beac",
+        "urls": [
+          "bzz-raw://5813614522305c8e9ff5eac6cca62e2c17454dcf859ce6f5fbbc20970d62cfdf",
+          "dweb:/ipfs/QmagyR8LjjD3DQZj3UAiACCqJ1hcg4ZWy5pDwP4WzvHcCz"
+        ],
+        "license": "MIT"
+      }
+    },
+    "measurements": [
+      {
+        "name": "getBindingHead",
+        "args": [
+          "0x350cb79191d3c536f3dba338b317fe7988ac3d8cbf77b2050722f277f2c17bef"
+        ],
+        "estimatedGas": "51823",
+        "transactionGas": "51823",
+        "returndataBytes": 288
+      },
+      {
+        "name": "getBindingAtBasis",
+        "args": [
+          "0x350cb79191d3c536f3dba338b317fe7988ac3d8cbf77b2050722f277f2c17bef",
+          "4"
+        ],
+        "estimatedGas": "149943",
+        "transactionGas": "149351",
+        "returndataBytes": 288
+      },
+      {
+        "name": "readHistory",
+        "args": [
+          "0x350cb79191d3c536f3dba338b317fe7988ac3d8cbf77b2050722f277f2c17bef",
+          "1",
+          "64"
+        ],
+        "estimatedGas": "550615",
+        "transactionGas": "548097",
+        "returndataBytes": 1088
+      },
+      {
+        "name": "readHistory",
+        "args": [
+          "0x350cb79191d3c536f3dba338b317fe7988ac3d8cbf77b2050722f277f2c17bef",
+          "1",
+          "1"
+        ],
+        "estimatedGas": "144252",
+        "transactionGas": "144252",
+        "returndataBytes": 320
+      },
+      {
+        "name": "readHistory",
+        "args": [
+          "0xcb3a01667adb12c9fa5e4bdd95ce713fd58a03a90616911a9ae2cb3936321155",
+          "1",
+          "64"
+        ],
+        "estimatedGas": "6412457",
+        "transactionGas": "6377148",
+        "returndataBytes": 12416
+      }
+    ],
+    "managed": {
+      "txGasCeiling": "16777216",
+      "nodeArgs": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "60870",
+        "--chain-id",
+        "31337",
+        "--hardfork",
+        "cancun",
+        "--gas-limit",
+        "33554432",
+        "--accounts",
+        "0",
+        "--no-cors",
+        "--silent"
+      ],
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [
+          "C0Admission/=../2026-09-05-c0-admission/src/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/StatefulHarness.sol": "StatefulHarness"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sourcePins": {
+        "../2026-09-05-c0-admission/src/TypeGroupParser.sol": "0x586b5d360092ed79faaf69114aadbe7dd487b9a7c2690ef55c5c6443d3f2bc86",
+        "src/AdmissionLibrary.sol": "0x58bdba5c0a12d7e8f2fdf6d8217a205b81b8075080d1dd27b03c4dfc5b8201c2",
+        "src/BindingFold.sol": "0xecf170a723ffff6966b6439c2305dcbae427ccc70c68aad632b950631dd307ee",
+        "src/IndexKeys.sol": "0x82dbf6754e96cd113fc5ecd8536c50ed464f626214947de51f20e85650fb4d43",
+        "src/Preparation.sol": "0x2200c3eb67c8ce1c52d3bf5418abf8bde29254d1a004355f83e458f8f4ad7c81",
+        "src/RecordBody.sol": "0xd08b372ae170699dc246bf3e28ca843b4ac45a1b4347fc45d39258cdd1b0873e",
+        "src/StateKernel.sol": "0x09964761aa0fed1f2ba5ca673b2d6ffad41c8e92cc4bb513783e539415dc215a",
+        "src/StateStore.sol": "0x4e4eac82091ef3614c777bba4bd8a43d957115765fdcc699339af03eb206a8a1",
+        "test/StatefulHarness.sol": "0x44e2aa292c72c963ef23ac42b2b48c537bb71a751b1a5faede48ea09be35beac",
+        "src/PreparationHelper.sol": "0x3b6bff4fb8a12929ad3261dbf455a50427013eba59c7f8d029ca8463817c1d6c"
+      },
+      "inputPins": {
+        "candidateFile": "0x5a5c0ea69f0642e8c7faa42af949c0cb65a35e5673e1aebebf40a7cb905869c8",
+        "groups": [
+          "0x9979945ce07959a64020c1b16656b43c70d0e7c12d8bdd70908ff76b3f5d4108",
+          "0xb73d9647fe976e376eb7c0810e6325e297f77e5c788055e2fc6fe200cd0ffc26",
+          "0x6b7d597a04da84609d706683e082ec9dd4f9d0b8608b71cecfeb576a5463121c",
+          "0xdb810effbd958fd35c11d30d1c969e3d9f740e81d6115eca72410f2c3609c0cb"
+        ],
+        "intrinsic": "0x4cadbc9c8e9bf5f63c84c6641f860db2d3184c643b3e6d3f66208d1135e1f4c4"
+      },
+      "deployment": {
+        "helper": {
+          "runtimeBytes": 18805,
+          "initcodeBytes": 18831,
+          "gas": "4120023"
+        },
+        "library": {
+          "runtimeBytes": 24503,
+          "initcodeBytes": 24535,
+          "gas": "5351899",
+          "ownAddressPatches": {
+            "library_deploy_address": [
+              {
+                "start": 41,
+                "length": 32
+              }
+            ]
+          },
+          "methodIdentifiers": {
+            "admit(StateStore.Store storage,StateKernel.VerifiedContext,StateKernel.Publication,Preparation.Config)": "b08062e7"
+          }
+        },
+        "core": {
+          "runtimeBytes": 6186,
+          "initcodeBytes": 11810,
+          "gas": "2243495",
+          "links": {
+            "src/AdmissionLibrary.sol": {
+              "AdmissionLibrary": [
+                {
+                  "start": 260,
+                  "length": 20
+                },
+                {
+                  "start": 6048,
+                  "length": 20
+                }
+              ]
+            }
+          },
+          "immutables": {
+            "68785": "preparationHelper",
+            "68787": "preparationCodehash",
+            "68789": "admissionLibrary",
+            "68791": "admissionCodehash"
+          }
+        }
+      }
+    },
+    "cleanup": {
+      "pid": 8729,
+      "exitCode": 0,
+      "signal": null,
+      "stopped": true
+    },
+    "readLibraries": {
+      "PointReadLibrary": {
+        "runtimeBytes": 12103,
+        "initcodeBytes": 12133,
+        "deploymentGas": "2670670",
+        "codehash": "0x9e387443dc962648c2f7d68b8051856f0f3ccde97c6c8d0d548be20f3404e8cf"
+      },
+      "QueryReadLibrary": {
+        "runtimeBytes": 10231,
+        "initcodeBytes": 10261,
+        "deploymentGas": "2265765",
+        "codehash": "0x8fb5a65dacd38cac71a35185cdd825b2507422e4cccb27e2a2b23b5e9cb7a37a"
+      }
+    },
+    "host": {
+      "runtimeBytes": 10738,
+      "initcodeBytes": 16649,
+      "constructorBytes": 3360,
+      "deploymentGas": "3236061",
+      "codehash": "0x9908c70e91c0f9456ff06e6be3701f0f80b25aa653ccf4a72540c3031349745a",
+      "links": {
+        "src/AdmissionLibrary.sol": {
+          "AdmissionLibrary": [
+            {
+              "start": 267,
+              "length": 20
+            },
+            {
+              "start": 9757,
+              "length": 20
+            }
+          ]
+        },
+        "src/PointReadLibrary.sol": {
+          "PointReadLibrary": [
+            {
+              "start": 1440,
+              "length": 20
+            },
+            {
+              "start": 3626,
+              "length": 20
+            },
+            {
+              "start": 3984,
+              "length": 20
+            },
+            {
+              "start": 5913,
+              "length": 20
+            },
+            {
+              "start": 6962,
+              "length": 20
+            },
+            {
+              "start": 7191,
+              "length": 20
+            },
+            {
+              "start": 8220,
+              "length": 20
+            },
+            {
+              "start": 8700,
+              "length": 20
+            },
+            {
+              "start": 11465,
+              "length": 20
+            },
+            {
+              "start": 12985,
+              "length": 20
+            }
+          ]
+        },
+        "src/QueryReadLibrary.sol": {
+          "QueryReadLibrary": [
+            {
+              "start": 1476,
+              "length": 20
+            },
+            {
+              "start": 4408,
+              "length": 20
+            },
+            {
+              "start": 6597,
+              "length": 20
+            },
+            {
+              "start": 6848,
+              "length": 20
+            },
+            {
+              "start": 13134,
+              "length": 20
+            }
+          ]
+        }
+      },
+      "runtimeLinks": {
+        "src/AdmissionLibrary.sol": {
+          "AdmissionLibrary": [
+            {
+              "start": 7206,
+              "length": 20
+            }
+          ]
+        },
+        "src/PointReadLibrary.sol": {
+          "PointReadLibrary": [
+            {
+              "start": 1075,
+              "length": 20
+            },
+            {
+              "start": 1433,
+              "length": 20
+            },
+            {
+              "start": 3362,
+              "length": 20
+            },
+            {
+              "start": 4411,
+              "length": 20
+            },
+            {
+              "start": 4640,
+              "length": 20
+            },
+            {
+              "start": 5669,
+              "length": 20
+            },
+            {
+              "start": 6149,
+              "length": 20
+            },
+            {
+              "start": 8914,
+              "length": 20
+            },
+            {
+              "start": 10434,
+              "length": 20
+            }
+          ]
+        },
+        "src/QueryReadLibrary.sol": {
+          "QueryReadLibrary": [
+            {
+              "start": 1857,
+              "length": 20
+            },
+            {
+              "start": 4046,
+              "length": 20
+            },
+            {
+              "start": 4297,
+              "length": 20
+            },
+            {
+              "start": 10583,
+              "length": 20
+            }
+          ]
+        }
+      },
+      "immutables": {
+        "21708": "pointReadLibrary",
+        "21710": "pointReadCodehash",
+        "21712": "queryReadLibrary",
+        "21714": "queryReadCodehash",
+        "68785": "preparationHelper",
+        "68787": "preparationCodehash",
+        "68789": "admissionLibrary",
+        "68791": "admissionCodehash"
+      }
+    },
+    "sourceBlocks": {
+      "first-set": {
+        "number": "10",
+        "hash": "0x787146a1c26b9cccbbbcbe05a254843a9dbde22942fa46c417d1194a2d6a3b6a",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:60870"
+      },
+      "withdraw-stale": {
+        "number": "12",
+        "hash": "0x2fabd1616fbaab1b5a4bd5887f52140a7fda76d4fbd34121ee3b428e9c8c4ccb",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:60870"
+      },
+      "withdraw-current-tombstone": {
+        "number": "14",
+        "hash": "0xe1a61083618733e40d40a792a2d6926469e850726ecf8e9367bf3356ec8dc60b",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:60870"
+      },
+      "all-transitions": {
+        "number": "21",
+        "hash": "0x53fae78c24d4832980817dcdbf5cff7a3f693a491aed17be99e083446bcf2dd0",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:60870"
+      },
+      "65-real-revisions": {
+        "number": "86",
+        "hash": "0x9b7c3a1fa0bf1c1d2961212bc35b4f789c511ced68438bf19a1619b9bf0e3d0c",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:60870"
+      }
+    },
+    "boundary": "synthetic revision-one trusted-admission host; not authenticated C0, V3 bootstrap, authority or page/Scope completion"
+  }
+}

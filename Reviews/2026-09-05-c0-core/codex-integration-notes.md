@@ -113,7 +113,10 @@ actual linked address and independently expected library runtime hash on every
 entry and before initialization, including its constructor-generated address
 patch. The [V2 deployment refinement](dependency-deployment-v2.md) specifies the
 closed four-component commitment and acyclic linking/deployment order; its
-codecs and full bootstrap are not implemented. Only reversible prototype
+codecs are [implemented and reviewed](bootstrap-codecs-verification.md), while
+full bootstrap is not. The later [read-library refinement](read-library-layout.md)
+requires the closed [six-component V3 successor](dependency-deployment-v3.md)
+and target-aware links. V2 code/evidence stays unchanged. Only reversible prototype
 topology is selected, not permanent product topology.
 The [current architecture](../../Designs/efsv2/core-architecture-candidate.md#modular-contract-shape-to-prototype)
 and [C0 control table](../../Designs/efsv2/disposable-mvp-profile.md#2-temporary-control-choices)
@@ -124,7 +127,7 @@ baseline being compared.
 
 | Input | Already available | Work still required |
 |---|---|---|
-| Seed/deployment bytes | Independent V1 JS/Solidity component codecs; [V2 four-component framing](dependency-deployment-v2.md) and [real initialization boundary](initialization-boundary.md) specified | Implement V2/selection/genesis codecs and bounded seed/group openings; enforce the explicit one-time executor. Supply complete real inputs and independently verify construction, not just runtime consistency. |
+| Seed/deployment bytes | Independent V1 and [V2/selection codecs](bootstrap-codecs-verification.md); [V3 six-component framing](dependency-deployment-v3.md) and [real initialization boundary](initialization-boundary.md) specified | Implement V3/target-link-map/genesis and bounded seed/group openings; enforce the explicit one-time executor. Supply complete real inputs and independently verify construction, not just runtime consistency. |
 | Encoding tables | Ordered domain, bounds, algorithm, field/selector/error/constraint grammars | Materialize exact C0 tables and declare every overlay difference once. Keep index-owned limits/codes out of duplicate encoding rows. |
 | Authority module | B0 byte grammar and explicit C0 authorization obligations | Encode the C0 support table, exact verifier/basis rules, session-grant fields/ID/approval/metering and retained evidence. No unsupported path may appear ACTIVE. |
 | Index module/capabilities | B0 index tables/cursor rules; C0 scope override; [closed 101-byte manifest and declaration mapping](bootstrap-inputs.md#closed-capability-manifest-for-the-next-serializer) | Integrate the versioned INDEX module and independently validate every enabled point/page/continuation. The manifest is unimplemented; a documentary list is not an active capability. |

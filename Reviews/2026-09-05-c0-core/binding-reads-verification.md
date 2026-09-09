@@ -1,7 +1,10 @@
-# Binding reads: partial implementation and runtime-size constraint
+# Binding reads: runtime constraint and linked-reader checkpoint
 
-**Status:** incomplete at `ae9367d` — normal runtime limit fails; not a
-completed Binding capability, authenticated Core or MVP checkpoint.
+**Current status, September 9:** the fixed-library implementation at `d95c358`
+deploys under normal limits and passes its assigned matrix and parent regression
+run. Independent task review approved; final increment review is underway. This is a synthetic
+revision-one trusted-admission host, not authenticated C0 or a finished MVP.
+The earlier failed checkpoint below is preserved as dated evidence.
 
 The [design](binding-reads-design.md) and [single implementation task](binding-reads-plan.md)
 started from `4ece846`. The partial implementation changes only seven named
@@ -114,3 +117,128 @@ No owner answer is needed for the current reversible diagnosis. No main merge,
 public deployment, production repository, durable data or protocol freeze is
 authorized or implied. Shared pages/Scope, actual initializer/authority and
 Files/SDK/static-SPA integration remain the subsequent joined-MVP work.
+
+## September 9: linked implementation and actual managed reads
+
+The selected [fixed library boundary](read-library-layout.md) is implemented
+at `d95c358ab2eee3ee1e26c52cedc54f04134a0d4b`, resuming the original task from
+`4ece846` through partial `ae9367d`. All eleven public read shapes remain.
+The exclusive admission writer, Store, Type/identity bytes and authority are
+unchanged. Both read libraries are fixed, runtime-pinned trusted DELEGATECALL
+dependencies; external-view does not make them a security sandbox.
+
+The assigned matrix now covers actual SET/replace/tombstone/withdraw/rebind,
+stale versus current withdrawal, first tombstone, Record/Occurrence targets,
+full-width Principal isolation and all retained historical H cuts. Unchanged
+`readState` and `foldAdmissions` independently reconstruct every head field
+and history entry from retained source state. No expected answer comes from
+the new read methods or submitted intent alone. Sixty-five real revisions
+exercise the full 64-entry partial page and terminal continuation.
+
+Synthetic corruptions additionally exercise packed heads/postings, Record and
+occurrence joins, exact kernel Types/bodies, predecessors and withdrawal
+association. A synthetic `2^31`-entry conceptual posting list observes exactly
+35 search/boundary SLOADs, within48; this is not billions of real admissions.
+Exact-Type rejection occurs before even loading body length. Ordinary read
+transactions and a separately deployed STATICCALL consumer leave all retained
+state unchanged; unavailable PreparationHelper does not affect reads.
+
+Two new behavioral REDs found and corrected read-side defects: history-input
+validation order after initialization, and a later-ordinal predecessor on a
+withdrawal-only history page. The original size RED and already-dirty fixes
+were not relabeled as freshly observed behavioral REDs. Compiler warnings
+remain visible; this is not a warning-free build.
+
+### Measured resource envelope
+
+Worker measurements, with exact compiler, input, runtime, link/immutable and
+source-block pins, are retained in [the machine-readable evidence](binding-reads-evidence-20260909.json).
+These are actual normally deployed component/read transactions, not Forge
+fixture aggregate gas. Node26, Forge/Anvil1.7.1, Solc0.8.30/Cancun/optimizer200/
+viaIR; runtime24,576, full initcode49,152 and transaction gas16,777,216 caps
+remain unchanged.
+
+| Component | Runtime bytes | Full initcode bytes | Deployment gas |
+| --- | ---: | ---: | ---: |
+| BindingReadHarness | 10,738 | 16,649 | 3,236,061 |
+| PointReadLibrary | 12,103 | 12,133 | 2,670,670 |
+| QueryReadLibrary | 10,231 | 10,261 | 2,265,765 |
+| Unchanged PreparationHelper | 18,805 | 18,831 | 4,120,023 |
+| Unchanged AdmissionLibrary | 24,503 | 24,535 | 5,351,899 |
+
+| Read | Actual transaction gas | Returndata bytes |
+| --- | ---: | ---: |
+| Current head | 51,823 | 288 |
+| Historical head at H4 | 149,351 | 288 |
+| Complete five-entry history | 548,097 | 1,088 |
+| Partial one-entry history | 144,252 | 320 |
+| Partial 64-entry history of65 | 6,377,148 | 12,416 |
+
+History return size is `128 + 192N`. The host has substantial runtime headroom,
+but its unchanged AdmissionLibrary has only73 bytes. Do not conflate this
+standalone compiler artifact with the separate populated-upgrade fixture's
+24,533-byte admission artifact/43-byte headroom. Both remain tight. Required
+pages, authority, actual initialization and wider consumer workloads must be
+measured on their joined compiled boundaries.
+
+### Verification and review record
+
+Worker: focused Binding14/14, complete Core Forge181/181, Node94/94 covering
+Core, admission integration and Type-input checks; format/diff checks pass.
+Parent independently rebuilt the complete Core AST/build-info with `--force`
+and the cached exact compiler, then ran Core Forge:181 passed,0 failed,0 skipped.
+Parent's broader serial Node run passed177/177,0 failed/cancelled/skipped, in
+73.39s. It includes all Core Node tests, independent admission integration,
+Type-input comparisons, upgrade-foundation Node tests and Files lifecycle/
+performance tests. Binding measurements reproduced the table above; populated
+upgrade/lifecycle readback retained50 operations/40 verified checkpoints. Their
+full-inventory diagnostic1337 RPC calls remain distinct from folder browsing.
+Evidence-export flags were0; no historical measurement files were overwritten.
+Parent also ran the separate upgrade-foundation Forge suite:14/14 passed,
+0 failed/0 skipped. Its fixture aggregate gas is not the operation-cost table.
+
+Reproduce with the cached exact Solc0.8.30 path supplied to Forge `--use`:
+
+```sh
+# From this Core directory:
+forge build --ast --build-info --force --offline --use <cached-solc-0.8.30>
+forge test --offline --use <cached-solc-0.8.30>
+# From the planning worktree root:
+EFS_FILES_PERF_EVIDENCE=0 EFS_FILES_PERF_OPTIMIZED=0 EFS_UPGRADE_EVIDENCE=0 \
+node --test --test-concurrency=1 \
+  Reviews/2026-09-05-c0-core/test/*.test.mjs \
+  Reviews/2026-09-08-upgradeable-foundation/test/*.test.mjs \
+  Reviews/2026-09-09-files-parity-performance/*.test.mjs \
+  Reviews/2026-09-05-c0-admission/integration.test.mjs \
+  Reviews/2026-09-05-mvp-build-start/type-inputs/*.test.mjs
+```
+
+The independent task reviewer examined the complete nine-path source change
+from original pretask `4ece846` through `d95c358`, not only the latest incremental
+diff. Verdict: spec compliant and approved, no Critical/Important finding.
+Its one Minor item is scoped safety explanations for narrowing lint notices.
+Keep this as cleanup before product extraction; don't alter validated runtime
+metadata merely to hide warnings or imply the output is pristine. Final
+whole-increment review is pending at this editing checkpoint.
+
+### Retrospective and remaining work
+
+The fixed split resolves the measured oversized host without removing required
+reads, at the cost of two additional trusted deployments and per-family guards.
+If the chosen packaging proves unsuitable, change the disposable read/deployment
+layout and repeat joined costs; no application identity or durable data must be
+rewritten. The [explicit V3 specification](dependency-deployment-v3.md) describes
+the six-component successor needed for actual authenticated C0; it is not
+implemented V3 codec/constructor/seal evidence. V1/V2 controls remain unchanged.
+
+Preserve the earlier page-design ruling: a historical unique-prefix predicate
+with separately counted boundary-only reads, rather than new cursor storage.
+If it fails actual storage/gas testing, rework the page accounting and tests;
+the finite model is not deployment evidence. The [next directory task handoff](../2026-09-09-v1-parity-overnight/directory-read-next.md)
+tests that boundary plus lifetime distinct-name churn before browser polish.
+These are reversible engineering rulings, not owner-ratified permanent choices.
+
+No owner decision is required for that next local experiment. Still missing:
+ordinary bounded pages/Scope, actual Lens/Files/SDK/SPA join, authenticated
+initialization and remaining v1 features. This checkpoint does not validate
+post-upgrade revision selection or establish complete v1 parity.

@@ -44,10 +44,13 @@ module cannot replace concrete materialization.
 
 ## Closed overlay inventory
 
-Select outer `codexRevision=2` for the C0 overlay, preserving MC version 1
+Select outer `codexRevision=3` for the C0 overlay, preserving MC version 1
 and the distinct protocol major/minor values 0/0. Preserve portable
 Record/Envelope/Occurrence/Principal/Type identity formulas. This does not
-relabel the changed artifact as B0 revision 1.
+relabel the changed artifact as B0 revision 1. The
+[six-component V3 refinement](dependency-deployment-v3.md) advances the
+previous still-unminted outer revision2 and its fixed grammar1 to revision3/
+grammar2; embedded AUTHORITY/INDEX revision2 is unchanged.
 
 | Owner | Retain or change | Materialization gate |
 |---|---|---|
@@ -55,7 +58,7 @@ relabel the changed artifact as B0 revision 1.
 | Derived Type inventory | Intrinsic meta-Type and actual group-2 BindingSet/Tombstone/Withdrawal members, not B0 singleton candidates. | Recompute exact IDs from original group bytes; omit unsupported B0 intrinsic evolution schemas rather than zero placeholders. |
 | AUTHORITY | Exact [revision-2/verifier-C001 programs](authority-module-boundary.md); composite/direct profiles 6/7; same-Principal session is a required later branch. | Complete branch/error/basis/retention/grant/metering bytes and implementation. No unimplemented profile may be ACTIVE. |
 | INDEX | [Exact revision-2 inventory](index-materialization.md): fourteen limits, thirteen code tables, retained cursors/contexts, Scope kind10, fixed RAW_AUDIT kinds8/10 and one 101-byte manifest. | Independently serialize/read the selected rows; verify the capability getter returns the same manifest bytes. |
-| C0 admission/bootstrap | Exact request, batch-evidence, initialization-selection and V2 run/deployment grammars. | Classify local format/derived bounds separately from universal field limits; do not duplicate AUTHORITY or INDEX-owned constants. |
+| C0 admission/bootstrap | Exact request, batch-evidence, initialization-selection and V3 run/deployment grammars. | Classify local format/derived bounds separately from universal field limits; do not duplicate AUTHORITY or INDEX-owned constants. |
 
 The [read overlay](read-overlay.md) closes the source-group readback,
 unsupported-query and actual returndata-size gaps. `selectBestLocator` is
@@ -76,7 +79,7 @@ There is no late mutable bit flip to promote the intermediate artifact.
 ## Source-to-C0 outer-table disposition
 
 The following closes which B0 material may enter the active outer inventory;
-the [outer row sheet](outer-materialization.md) now supplies exact revision-2
+the [outer row sheet](outer-materialization.md) now supplies exact revision-3
 framing, numeric/code tables and fixed grammar. ABI_RESULT still requires the
 actual joined Core. Source: encoding §§1.3/1.6/2.6, current TypeGroupParser,
 RecordBody/IndexKeys and StateStore. Omitted portable meanings are not reused.
@@ -103,15 +106,15 @@ B0 grammar acceptance. Keep the established Type bytes and identities intact.
 
 Retain the twelve identity domains and four key domains above in their B0
 table order, append Scope's `efs2/vk/binding-scope/1`, then append the following
-eight rows in the printed order. Thus the selected revision-2 outer domain
+eight rows in the printed order. Thus the selected revision-3 outer domain
 table has **25 rows**. Its existing `u16 count`, then `u16 len || asciiBytes`
 framing remains unchanged; the symbolic names below aid review but are not
 extra bytes in this domain section. Each domain word is `H(exactAsciiValue)`.
 
 | Name | Exact ASCII value |
 |---|---|
-| DOM_EXPERIMENT_SEED | `efs2/mvp-c0/experiment-seed/2` |
-| DOM_EXPERIMENT_DEPLOYMENT | `efs2/mvp-c0/experiment-deployment/2` |
+| DOM_EXPERIMENT_SEED | `efs2/mvp-c0/experiment-seed/3` |
+| DOM_EXPERIMENT_DEPLOYMENT | `efs2/mvp-c0/experiment-deployment/3` |
 | DOM_C0_PROFILE | `efs2/mvp-c0/profile/1` |
 | DOM_ORDERED_TYPE_GROUPS | `efs2/mvp-c0/ordered-type-groups/1` |
 | DOM_INDEX_CAPABILITIES | `efs2/mvp-c0/index-capabilities/1` |
@@ -123,11 +126,11 @@ These are encoding-owned PROFILE interpretation constants, not optional
 measurement metadata. INDEX owns the capability manifest's layout and rows,
 but does not define a second domain constant. The manifest's leading domain
 word is a use of this constant, not a duplicate constant-definition row.
-The old V1 run codec remains unchanged evidence; its `/1` seed/deployment
-domains are not additional active V2 rows.
+The old V1/V2 run codecs remain unchanged evidence; their `/1` and `/2`
+seed/deployment domains are not additional active V3 rows.
 
 Immediately **after the domain table and before named numeric constants**,
-add the following revision-2 section. Integers use the outer format's
+retain the following section introduced at revision2. Integers use the outer format's
 big-endian widths. Strings are exact ASCII bytes without NUL termination.
 
 ```text
@@ -163,20 +166,23 @@ distinct semantic constant, not a second definition of the WritePlan domain
 version. Their equal raw value does not merge the two protocols.
 
 Source checks: [C0PlanCodec](src/C0PlanCodec.sol) publication type/domain;
-[C0RunCodecV2](src/C0RunCodecV2.sol) V2 domains and reserved source label;
+[C0RunCodecV2](src/C0RunCodecV2.sol) retained V2 baseline and reserved source label,
+with the new run domains selected by [V3 deployment](dependency-deployment-v3.md);
 the unchanged [V1 input codec](../2026-09-04-mvp-c0-foundation/src/C0RunCodec.sol)
-still enforces that exact namespace inside V2;
+still enforces that exact namespace inside both versioned wrappers;
 [C0InitializationSelection](src/C0InitializationSelection.sol) selection and
 policy domains; [bootstrap inputs](bootstrap-inputs.md) ordered-group and
 capability commitments; [AUTHORITY ownership](authority-module-boundary.md)
 constants31–36. The bootstrap source and deployed codec comparisons are
-covered by the [closed codec checkpoint](bootstrap-codecs-verification.md).
+covered by the [closed V2 codec checkpoint](bootstrap-codecs-verification.md).
+V3 code/vectors remain unimplemented; these domain rows are selected inputs,
+not a claim the old V2 source already executes the new grammar.
 
 Keep the domain uses distinct. With `H = keccak256` and `abi = abi.encode`:
 
-- Experiment seed is `H(abi(DOM_EXPERIMENT_SEED, H(seedBytesV2)))`;
+- Experiment seed is `H(abi(DOM_EXPERIMENT_SEED, H(seedBytesV3)))`;
   deployment commitment is
-  `H(abi(DOM_EXPERIMENT_DEPLOYMENT, experimentSeed, H(deployBytesV2)))`.
+  `H(abi(DOM_EXPERIMENT_DEPLOYMENT, experimentSeed, H(deployBytesV3)))`.
 - C0 profile is `H(abi(DOM_C0_PROFILE, experimentCommitment))`, not the
   separate B0 Core profile formula that commits the complete Codex.
 - Ordered-group manifest is `abi(DOM_ORDERED_TYPE_GROUPS, bytes32[4])`;
@@ -189,7 +195,7 @@ Keep the domain uses distinct. With `H = keccak256` and `abi = abi.encode`:
   `H(abi(DOM_INITIAL_POLICY, nullPolicyHash, experimentCommitment))`.
 
 For C0, extend REALM_CONFIG's transport inventory beyond B0's
-InitConfig/RealmRevision to the retained SeedV2, DeploymentV2 and
+InitConfig/RealmRevision to the retained SeedV3, DeploymentV3 and
 InitializationSelection transports. Selected executor, selection digest,
 run ID, authors, salts, addresses/code hashes, finality, chosen limits and
 derived seed/deployment/profile/policy IDs are run values, not extra literal

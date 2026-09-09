@@ -1,7 +1,8 @@
 # Real C0 owner and authenticated bootstrap inputs
 
 **Status:** selected reversible engineering input, not an implemented initializer
-or completed G0–G12 run. This refines the linked V2 wrapper only; it does not
+or completed G0–G12 run. The [V3 dependency successor](dependency-deployment-v3.md)
+updates the earlier V2 wrapper's component/framing inventory; it does not
 change Stage A InitConfig/1, candidate Type bytes or permanent EFS authority.
 
 ## One real owner, no trusted test entrypoint
@@ -19,15 +20,15 @@ belongs to the retained four-component V2 proposal. The later
 constructor also to pin both read-library runtime hashes, under a new closed
 V3 deployment profile. The initialization semantics below are unchanged; the
 old constructor/component count is not sufficient for that successor.
-It retains the seed and exact bounded Codex, pins the compiler-linked admission
-library and preparation helper, checks actual dependency code, and remains
+It retains the seed and exact bounded Codex, pins all three compiler-linked
+libraries and the preparation helper, checks actual dependency code, and remains
 UNINITIALIZED. No synthetic Realm/revision ID, application admission, carrier
 address or final experiment commitment is a constructor input.
 
 ## Carry the evidence needed to verify initialization
 
 The old two-argument initializer lacks the seed preimage and original group
-bytes. Repeating a seed hash in DeploymentV2 does not prove its Type/capability
+bytes. Repeating a seed hash in DeploymentV3 does not prove its Type/capability
 roots. `StateKernel.initialize` consumes supplied Realm/revision IDs and hashes
 group-1/2 bytes; the real wrapper must derive/authenticate those inputs first.
 
@@ -36,12 +37,12 @@ Use this run-local transport:
 ```solidity
 initializeC0(
     bytes calldata initConfigBytes,
-    bytes calldata deploymentBytesV2,
+    bytes calldata deploymentBytesV3,
     BootstrapMaterial calldata material
 )
 
 BootstrapMaterial = (
-    bytes seedInputsV2,
+    bytes seedInputsV3,
     bytes initializationSelectionBytes,
     bytes intrinsicGroupBytes,
     bytes[4] orderedGroupBytes
@@ -55,12 +56,13 @@ bodies in a second application store. Retain the seed/selection/genesis
 preimages and verified expected group hashes; retain exact group bodies when
 ordinarily admitted, so later recovery is state-readable.
 
-Bound outer lengths before decoding/copying. V2 deployment is exactly 498
+Bound outer lengths before decoding/copying. V3 deployment is exactly730
 bytes, InitConfig exactly 224, selection exactly 288. The existing seed grammar
-gives V2 a maximum 13,690 bytes: V1's 472 fixed bytes (including both array
-counts), plus at most 128 entries of 102 bytes, plus the V2 suffix/prefix 162.
-Its theoretical minimum is 712; requiring the reserved selection entry below
-narrows valid instances further. Each raw group remains within the existing
+gives V3 a maximum13,818 bytes: V1's472 fixed bytes (including both array
+counts), plus at most128 entries of102 bytes, plus the V3 suffix/prefix290.
+Its theoretical minimum is840; requiring the reserved selection entry below
+narrows valid instances to858..13,773. The retained V2 codec/tests keep their
+old712..13,690 outer guards; they are not V3 evidence. Each raw group remains within the existing
 8,190-byte meta-field bound and must pass canonical group/member validation.
 The four fixed array positions are not caller-selected inventory length.
 
@@ -144,7 +146,7 @@ selecting it; do not silently describe consistency checks as provenance.
 
 Before any mutation, the real wrapper must:
 
-1. Bound/decode exact SeedInputsV2, recompute the constructor's seed, and
+1. Bound/decode exact SeedInputsV3, recompute the constructor's seed, and
    authenticate the reserved selection opening and bootstrap executor. Check
    the seed's Codex hash against retained exact bytes.
 2. Validate complete Codex ownership/intrinsic IDs, match the selected exact
@@ -155,7 +157,7 @@ Before any mutation, the real wrapper must:
    actual Codex bytes, not a separate supplied manifest, and require
    `derivedIndexCapabilityRoot == decodedSeed.indexCapabilityRoot` before
    mutation. Matching Codex hashes does not replace this separate equality.
-3. Decode DeploymentV2; check seed, actual Core/carrier/dependency identities,
+3. Decode DeploymentV3; check seed, all six actual Core/carrier/dependency identities,
    salts, code hashes, CREATE2 consistency and carrier context/caps. G0 must
    already have proved the source/template/link/immutable construction that
    these onchain consistency checks cannot establish alone.
@@ -168,7 +170,7 @@ Before any mutation, the real wrapper must:
    internally; no public arbitrary VerifiedContext or supplied genesis IDs.
 
 Only then initialize the kernel's intrinsic state, retain exact genesis inputs
-and verified run roots/caps/authors, enter BOOTSTRAP_OPEN and call the V2
+and verified run roots/caps/authors, enter BOOTSTRAP_OPEN and call the V3
 carrier's one-time seal. All storage and the seal share one rollback boundary.
 A failure leaves both uninitialized/unsealed; no partial capability claim or
 application Record/Binding survives. No mutable configuration setter or
@@ -200,14 +202,14 @@ The selection above commits only predeployment values and avoids that cycle.
 - G2 installs no G4 application group. Before G4, all eighteen claimed G3
   capabilities have real bounded point/page/continuation evidence.
 - State-only reconstruction reproduces retained seed/selection/roots,
-  four-component deployment bytes, actual runtime identities, actual-block
+  six-component deployment bytes, actual runtime identities, actual-block
   genesis and revision 1 without trusting stored ID mirrors or requiring the
   original checkout. Source/template/initcode provenance additionally requires
   independently archived exact G0 templates, link maps and compiler artifacts;
   their retained hashes cannot recover missing construction material.
 
-Next: source-input/V2/genesis codecs → real owner plus atomic V2 carrier seal →
-required capability endpoints → independent G0 freeze → four-component
+Next: source-input/V3/genesis codecs → real owner plus atomic V3 carrier seal →
+required capability endpoints → independent G0 freeze → six-component
 initialize/seal/read-back/rollback journey. Keep the current request component
 on that same Core path; do not add an intermediate authenticated test Core.
 
@@ -220,10 +222,11 @@ product decisions. The selected role is disposable-run authority only.
 The scoped independent design review approved the structure with two precision
 edits, applied here: explicit capability-root equality and separation of
 state-readable consistency/genesis from separately archived construction proof.
-That review does not execute the missing initializer or validate a full run.
+That review predates the explicit V3 inventory refinement and does not execute
+the missing initializer, validate a full run or approve unseen V3 code.
 
 Source basis: [B0 InitConfig/genesis](../2026-08-13-efs2-stage-a-corpus/chapters/b0-realm-admission.md#24-genesiscommitment--exact-formula),
 [G2/G3/G4](../../Designs/efsv2/mvp-c0-genesis-manifest.md),
 [current kernel initializer](src/StateKernel.sol),
 [bootstrap roots/capabilities](bootstrap-inputs.md), and
-[V2 construction/provenance limits](dependency-deployment-v2.md).
+[V3 construction/provenance limits](dependency-deployment-v3.md).

@@ -3,7 +3,7 @@
 **Status:** retained four-component engineering specification; the
 [packed codec component](bootstrap-codecs-verification.md) is implemented,
 but full G0 integration is not. The [selected read-library layout](read-library-layout.md)
-requires an explicitly versioned six-component successor, not an extension or
+requires the [explicitly versioned six-component V3 successor](dependency-deployment-v3.md), not an extension or
 reinterpretation of these V2 bytes. Not permanent EFS bytes.
 
 The [measured linked slice](stateful-verification.md#selected-linked-layout)

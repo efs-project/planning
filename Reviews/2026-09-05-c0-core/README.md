@@ -139,6 +139,11 @@ specifies the four-component commitment and acyclic link/initcode sequence;
 the later [fixed read-library refinement](read-library-layout.md) requires a
 separate six-component V3 profile for the actual joined host. V2 codec evidence
 below remains a control; full G0–G12 execution remains outstanding.
+The [exact V3 specification](dependency-deployment-v3.md) now supplies the
+290-byte seed wrapper,730-byte deployment and target-aware link-map2. The
+unminted outer Codex advances explicitly to revision3/grammar2, with the same
+Type/identity and embedded owner-module meanings. This is design input, not
+implemented V3 codecs or actual initialization.
 The [real initialization boundary](initialization-boundary.md) adds the missing
 seed/group proof carriage and an explicitly pinned one-time bootstrap executor.
 It keeps the trusted test host separate and makes configuration/deployment
@@ -178,15 +183,16 @@ The [Binding read component](binding-reads-design.md) uses packed current
 heads and bounded raw-history lookup, preserving one basis and original
 producing occurrences. It supplies the foundation for the shared page/Scope
 engine; its [implementation plan](binding-reads-plan.md) names one bounded
-code/test task. The partial implementation at `ae9367d` passes its first actual
-Binding scenario but the combined test host exceeds the normal runtime cap
-by2,160 bytes. The [constraint/evidence record](binding-reads-verification.md)
-keeps the task open pending measured layout, remaining tests and independent
-review. It does not replace the remaining required read capabilities.
-Compile-only layout and projection probes are now complete. The selected
-[two fixed read libraries](read-library-layout.md) preserve the stronger
-read checks and all eleven read ABIs; deployment and remaining matrix are
-still unverified. No V2 deployment frame is silently extended by this choice.
+code/test task. The partial implementation at `ae9367d` exceeded the normal
+runtime cap by2,160 bytes. The [constraint/evidence record](binding-reads-verification.md)
+preserves that failure and the September9 linked deployment/matrix at `d95c358`:
+host10,738 bytes, current read51,823 gas, full64-entry history6,377,148 gas.
+The selected [two fixed read libraries](read-library-layout.md) preserve the
+stronger checks and all eleven read ABIs. Parent181 Forge/177 Node regressions
+pass and independent task review approved; final increment review is underway.
+These are synthetic revision-one results, not authenticated C0, populated
+upgrade reads or the remaining page/Scope capabilities. No V2 deployment frame
+is silently extended by this choice.
 
 The [nested-prefix refinement](read-overlay.md#nested-unique-prefix-refinement)
 separates consumed query coverage from boundary-only inspections to avoid a

@@ -79,7 +79,7 @@ and has a sole-target AdmissionLibrary link map. It **cannot represent this
 layout**. Do not extend its bytes, reinterpret a V2 frame or claim V2 bootstrap
 completion after deploying this host.
 
-The next actual C0 bootstrap must use an explicitly versioned closed V3 profile
+The next actual C0 bootstrap must use the [explicitly versioned closed V3 profile](dependency-deployment-v3.md)
 covering Core, ByteStore, AdmissionLibrary, PreparationHelper, PointReadLibrary
 and QueryReadLibrary. Preserve V1/V2 codecs, vectors and historical evidence.
 Its seed/template commitment must cover both new libraries and their salts;
@@ -91,7 +91,8 @@ No generic dependency graph or upgrade mechanism is implied.
 The real Core constructor will additionally pin both read runtime hashes; their
 addresses still come from compiler links. All library/helper addresses can be
 derived before Core, and carrier after Core, preserving acyclic construction.
-Initialize/seal/read-back must verify all six components. Exact V3 codec vectors,
+Initialize/seal/read-back must verify all six components. The exact V3 grammar
+is now specified; codec vectors,
 constructor integration and G0 provenance are a separate finite implementation
 step after the library artifacts have been measured. The current synthetic
 Init host has five components and does not stand in for that bootstrap.
