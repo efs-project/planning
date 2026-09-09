@@ -116,7 +116,7 @@ contract BindingReadHarness is StatefulHarness {
         }
     }
 
-    function _requireQueryRead() private view {
+    function _requireQueryRead() internal view {
         if (address(QueryReadLibrary).code.length == 0 || address(QueryReadLibrary).codehash != queryReadCodehash) {
             revert ReadCodeMismatch(2);
         }
