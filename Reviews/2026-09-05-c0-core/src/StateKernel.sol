@@ -89,6 +89,7 @@ library StateKernel {
         uint256 length;
         StateStore.Counts count;
         StateStore.Bootstrap init;
+        uint256[] slots;
     }
 
     function initialize(StateStore.Store storage s, Init memory init, Preparation.Config memory config) internal {
@@ -165,7 +166,7 @@ library StateKernel {
         plan.init = s.init;
         // ACTIVE leaves stage nothing. Each fresh leaf has a conservative
         // 256-change allowance; Envelope/Principal pairs and Batch add five.
-        plan.changes = new StateStore.Change[](fresh == 0 ? 0 : fresh * 256 + 5);
+        allocateJournal(plan, fresh == 0 ? 0 : fresh * 256 + 5);
         if (fresh == 0) {
             for (uint256 i; i < p.leaves.length; ++i) {
                 checked(
@@ -349,9 +350,8 @@ library StateKernel {
     ) private view returns (Preparation.PreparedRecord memory prepared) {
         StateStore.TypeRow memory tr = abi.decode(get(s, p, StateStore.Kind.Type, leaf.typeId, 0), (StateStore.TypeRow));
         if (tr.typeOrdinal == 0) revert E_UNKNOWN_TYPE(leaf.leafIndex);
-        prepared = Preparation.record(
-            p.config, tr.cacheBytes, leaf.typeId, leaf.body, recordId, principal, ids(p), bodyOnly
-        );
+        prepared =
+            Preparation.record(p.config, tr.cacheBytes, leaf.typeId, leaf.body, recordId, principal, ids(p), bodyOnly);
         for (uint256 j; j < prepared.references.length; ++j) {
             if (prepared.references[j].targetClass == 4 && prepared.references[j].targetId == envelopeId) {
                 revert E_SELF_ENVELOPE_OCCREF(leaf.leafIndex, prepared.references[j].leafIndex);
@@ -405,7 +405,9 @@ library StateKernel {
             }
         }
         for (uint256 i; i < ss.length; ++i) {
-            if (ss[i].typeId != keccak256(abi.encode(keccak256("efs2/typeschema/1"), gh, i))) revert InvalidCommitment();
+            if (ss[i].typeId != keccak256(abi.encode(keccak256("efs2/typeschema/1"), gh, i))) {
+                revert InvalidCommitment();
+            }
             StateStore.TypeRow memory row =
                 abi.decode(get(s, p, StateStore.Kind.Type, ss[i].typeId, 0), (StateStore.TypeRow));
             bytes memory cache = ss[i].cacheBytes;
@@ -605,16 +607,62 @@ library StateKernel {
         );
     }
 
+    // Memory-only index; persisted rows and journal replay ordering are unchanged.
+    // Admission bounds capacity to 64 * 256 + 5, so the table is at most 65536.
+    function allocateJournal(Plan memory p, uint256 capacity) internal pure {
+        p.changes = new StateStore.Change[](capacity);
+        if (capacity == 0) return;
+        uint256 size = 1;
+        while (size < capacity * 2) size <<= 1;
+        p.slots = new uint256[](size);
+    }
+
+    function journalSlot(Plan memory p, StateStore.Kind kind, bytes32 key, uint64 index)
+        private
+        pure
+        returns (uint256 slot)
+    {
+        uint256 size = p.slots.length;
+        // Three canonical ABI words in temporary free memory. Do not advance
+        // the allocator or overwrite Solidity's zero slot; no value escapes.
+        bytes32 hash;
+        assembly ("memory-safe") {
+            let ptr := mload(0x40)
+            mstore(ptr, and(kind, 0xff))
+            mstore(add(ptr, 0x20), key)
+            mstore(add(ptr, 0x40), and(index, 0xffffffffffffffff))
+            hash := keccak256(ptr, 0x60)
+        }
+        slot = uint256(hash) & (size - 1);
+        for (uint256 probes; probes < size; ++probes) {
+            uint256 row = p.slots[slot];
+            if (row == 0) return slot;
+            StateStore.Change memory c = p.changes[row - 1];
+            if (c.kind == kind && c.key == key && c.index == index) return slot;
+            slot = (slot + 1) & (size - 1);
+        }
+        assert(false);
+    }
+
     function get(StateStore.Store storage s, Plan memory p, StateStore.Kind kind, bytes32 key, uint64 index)
+        internal
+        view
+        returns (bytes memory value)
+    {
+        (value,) = journalRead(s, p, kind, key, index);
+    }
+
+    function journalRead(StateStore.Store storage s, Plan memory p, StateStore.Kind kind, bytes32 key, uint64 index)
         private
         view
-        returns (bytes memory)
+        returns (bytes memory value, uint256 slot)
     {
-        for (uint256 i = p.length; i > 0; --i) {
-            StateStore.Change memory c = p.changes[i - 1];
-            if (c.kind == kind && c.key == key && c.index == index) return c.afterValue;
+        if (p.slots.length != 0) {
+            slot = journalSlot(p, kind, key, index);
+            uint256 row = p.slots[slot];
+            if (row != 0) return (p.changes[row - 1].afterValue, slot);
         }
-        return StateStore.read(s, kind, key, index);
+        return (StateStore.read(s, kind, key, index), slot);
     }
 
     function put(
@@ -624,10 +672,11 @@ library StateKernel {
         bytes32 key,
         uint64 index,
         bytes memory value
-    ) private view {
+    ) internal view {
         assert(p.length < p.changes.length);
-        bytes memory beforeValue = get(s, p, kind, key, index);
+        (bytes memory beforeValue, uint256 slot) = journalRead(s, p, kind, key, index);
         p.changes[p.length++] = StateStore.Change(kind, key, index, beforeValue, value);
+        p.slots[slot] = p.length;
     }
 
     function next(uint64 n) private pure returns (uint64) {
