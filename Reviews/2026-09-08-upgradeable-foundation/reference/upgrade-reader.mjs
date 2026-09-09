@@ -23,10 +23,10 @@ export function verifyUpgradeBatch(row, history, high) {
   try {
     const meta = BigInt(row[0]), revision = (meta >> 112n) & 0xffffffffn;
     const first = meta & M48, count = (meta >> 48n) & 65535n, block = (meta >> 64n) & M48;
+    assert(revision > 0n && count > 0n && count <= 64n && (meta >> 144n) === 0n, 'batch shape');
     const at = history?.findIndex(e => BigInt(e.ordinal) === revision) ?? -1;
     if (at < 0) unknown('missing historical revision ' + revision);
     const e = history[at], end = history[at + 1] ? BigInt(history[at + 1].activationAdmissionHigh) : BigInt(high);
-    assert(revision > 0n && count > 0n && count <= 64n && (meta >> 144n) === 0n, 'batch shape');
     assert(first > BigInt(e.activationAdmissionHigh) && first + count - 1n <= end, 'historical admission interval');
     assert(block >= BigInt(e.activationBlock), 'before activation');
     if (history[at + 1]) assert(block <= BigInt(history[at + 1].activationBlock), 'after next activation');
@@ -82,9 +82,8 @@ export function verifyUpgradeState(snapshot, expected) {
   const execution = verifyExecution(snapshot, expected);
   let pending = execution.outcome === 'UNKNOWN' ? execution.reason : null;
   const state = verifyStateWithBatchPolicy(snapshot, expected, ({ row, high }) => {
-    if (execution.outcome !== 'VERIFIED') return;
-    const result = verifyUpgradeBatch(row, execution.history, high);
-    if (result.outcome === 'UNKNOWN') pending = result.reason;
+    const result = verifyUpgradeBatch(row, execution.outcome === 'VERIFIED' ? execution.history : undefined, high);
+    if (result.outcome === 'UNKNOWN') pending ??= result.reason;
     else assert.equal(result.outcome, 'VERIFIED', result.reason);
   });
   // Missing history never short-circuits exact raw Record/body/fold validation.

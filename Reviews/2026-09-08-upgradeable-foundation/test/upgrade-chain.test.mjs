@@ -5,7 +5,7 @@ import { compileUpgrade, withUpgrade } from '../scripts/local-upgrade.mjs';
 import { publication, groupLeaf } from '../../2026-09-05-c0-core/scripts/local-stateful.mjs';
 import { verifyState, readState, ordinaryRecord } from '../../2026-09-05-c0-core/reference/state-reader.mjs';
 import { keccak256 } from '../../2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 const concat = (...xs) => '0x' + xs.map(x => x.replace(/^0x/, '')).join('');
 const retained = s => Object.fromEntries(['bootstrap','counts','records','types','envelopes','principals','admissions','batches','bindings','postings','occurrences'].map(k => [k, s[k].map ? s[k].map(x => typeof x === 'object' ? { ...x, pin: undefined } : x) : s[k]]));
@@ -40,6 +40,19 @@ test('missing original revision is UNKNOWN, substituted authority is INVALID', (
   assert.equal(verifyUpgradeBatch(batch(1, 4, 20, 1), [history[1]], 5n).outcome, 'UNKNOWN');
   assert.equal(verifyUpgradeBatch(batch(1, 4, 20, 1, W(102)), history, 5n).outcome, 'INVALID');
 });
+// Break: an impossible ordinal becoming merely unavailable historical evidence.
+for (const available of [true,false]) {
+  test('revision-zero batch is INVALID with '+(available?'complete':'absent')+' history', () => {
+    assert.equal(verifyUpgradeBatch(batch(1,4,20,0),available?history:undefined,5n).outcome,'INVALID');
+  });
+  test('snapshot revision zero is INVALID with '+(available?'complete':'absent')+' history', () => {
+    const evidence=JSON.parse(readFileSync(new URL('../fixtures/managed-upgrade.json',import.meta.url),'utf8'));
+    const snapshot=evidence.snapshots.final;
+    snapshot.batches[0].row[0]=String(BigInt(snapshot.batches[0].row[0])&~(0xffffffffn<<112n));
+    if(!available)delete snapshot.execution;
+    assert.equal(verifyUpgradeState(snapshot,evidence.expected).outcome,'INVALID');
+  });
+}
 test('unavailable raw snapshot is UNKNOWN rather than an invalid execution claim', () => {
   assert.equal(verifyUpgradeState(undefined,{}).outcome,'UNKNOWN');
 });
@@ -117,9 +130,9 @@ test('managed source-pinned upgrade retains seven-leaf file metadata and refuses
     const accepted = await lab.submit(fresh); assert.equal(accepted.receipt.status,'0x1');
     await lab.reject(fresh,'FixtureNonce');
     const invalidObject=object(905);
-    await lab.reject(await lab.prepare(publication([{...invalidObject,body:invalidObject.body+'ff'}],15)),'InvalidBody');
+    await lab.reject(await lab.prepare(publication([{...invalidObject,body:invalidObject.body+'ff'}],15)),'InvalidBody',[1n]);
     const wrongType={...revision,body:concat(fileId,rootId,'000a746578742f706c61696e','0100057574662d38','01','0000')};
-    await lab.reject(await lab.prepare(publication([wrongType],16)),'E_REF_UNSATISFIED');
+    await lab.reject(await lab.prepare(publication([wrongType],16)),'E_REF_UNSATISFIED',[0n,1n]);
     const rebound=binding(charterPurpose,fileId,W(1),fileId);
     rebound.body=rebound.body.slice(0,-2)+concat('01',seven.envelopeId,'0001').slice(2);
     const charterKey=keccak256(concat(domain('efs2/binding/1'),principal,keccak256(concat(domain('efs2/position/1'),charterPurpose,fileId,W(1)))));

@@ -1,6 +1,6 @@
 # Managed upgrade foundation verification — 2026-09-08
 
-**Status:** independently reconstructed local fixture evidence; pending controller review.
+**Status:** independently reconstructed local fixture evidence; integrated review pending.
 **Scope:** Task 2 of [the implementation plan](upgradeable-foundation-plan.md).
 No product repository, public RPC, real key, public deployment, main merge or push.
 This is not a complete Files MVP, FilesRouter certification or portable authorship.
@@ -86,9 +86,10 @@ binary/input/output hashes, artifact hashes, source/support-code hashes, candida
 inputs, dependency lock and exact tool versions are retained. Solidity is 0.8.30,
 optimizer 200, via-IR, Cancun; OpenZeppelin is 5.6.1, ethers 6.15.0, Node 26.0.0,
 Foundry/Anvil 1.7.1. The code source is the approved Task 1 implementation,
-`00588b4`, carried through the assigned base `ec0579d`; the sample checkout HEAD
-is controller tag-canary commit `f5256df`. The Task 2 support-file hashes identify
-the then-uncommitted reader/runner exactly. Preserved dirty Binding work was not
+`00588b4`, carried through the assigned base `ec0579d` and controller tag-canary
+commit `f5256df`; the refreshed sample checkout HEAD is Task 2 `aafc5c0`. The
+support-file hashes identify the then-uncommitted review polish exactly.
+Preserved dirty Binding work was not
 edited or promoted by this task.
 
 Expected installed code is patched from compiler link and immutable locations,
@@ -117,6 +118,8 @@ shared change extracts an explicit batch-policy entry; identity, bodies, typed
 references, folds, lifecycle and indexes share the original reconstruction.
 Missing history returns `UNKNOWN`/`PARTIAL` after raw integrity checks; valid
 bytes with a substituted Record ID still return `INVALID`, even without history.
+History-independent batch-shape checks run before history lookup: revision zero
+is intrinsically `INVALID` with either complete or absent execution history.
 Missing raw snapshots and interrupted collections preserve UNKNOWN and any
 attempted basis. This never manufactures ABSENT or authenticated authority.
 
@@ -132,13 +135,13 @@ few dozen between runs. Exact sample values are in the fixture.
 | --- | ---: |
 | Atomic initialized proxy-pair bootstrap | 2,546,779 |
 | Group 1 / Group 2 | 10,551,055 / 6,706,092 |
-| Group 3 / Group 4 | 14,541,443 / 7,283,113 |
+| Group 3 / Group 4 | 14,541,443 / 7,283,101 |
 | Root Object + charter | approximately 3.24 million |
 | Separate 22-byte staging | 218,668 |
-| Seven-leaf metadata transaction | 14,150,069 |
+| Seven-leaf metadata transaction | 14,150,093 |
 | Atomic U1→U2 including both presentation migrations | 689,859 |
 
-The sampled seven-leaf transaction has **2,627,147 gas remaining** below the cap.
+The sampled seven-leaf transaction has **2,627,123 gas remaining** below the cap.
 The third group is more expensive than the file publication; groups cannot be
 combined merely because the unit-test function can run them together.
 
