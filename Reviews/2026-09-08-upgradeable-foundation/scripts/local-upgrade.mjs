@@ -21,14 +21,18 @@ export function compileUpgrade() {
   assert.equal(r.status,0,r.stdout+r.stderr);
 }
 function artifact(name) {
-  const file = name.endsWith('U2') ? name.slice(0,-2) : name;
+  const file = name === 'UpgradeStaticConsumer' ? 'UpgradeReads.t' : name.endsWith('U2') ? name.slice(0,-2) : name;
   return JSON.parse(readFileSync(join(ROOT,'out',file+'.sol',name+'.json'),'utf8'));
 }
 function patch(template, refs, values) {
   let code = template.replace(/^0x/,'');
+  const windows=[];
   for (const [id,positions] of Object.entries(refs ?? {})) {
     assert(values[id], 'unknown compiler patch ' + id);
+    assert(positions.length>0,'nonempty compiler windows');
     for (const p of positions) {
+      assert(Number.isInteger(p.start)&&Number.isInteger(p.length)&&p.length>0,'integer patch window');
+      assert(windows.every(q=>p.start+p.length<=q.start||q.start+q.length<=p.start),'overlapping/duplicate patch window'); windows.push(p);
       const value = values[id].replace(/^0x/,'').padStart(p.length*2,'0');
       assert.equal(value.length,p.length*2); assert(p.start >= 0 && (p.start+p.length)*2 <= code.length);
       code = code.slice(0,p.start*2)+value+code.slice((p.start+p.length)*2);
@@ -36,25 +40,38 @@ function patch(template, refs, values) {
   }
   assert(!code.includes('_'),'unresolved links'); return '0x'+code.toLowerCase();
 }
-function link(bytecode,address) {
+const profileMap = Object.freeze({
+  base: { core: 'UpgradeableFixtureCore', libraries: ['UpgradeAdmissionLibrary'] },
+  reads: { core: 'UpgradeableReadFixtureCore', libraries: ['UpgradeAdmissionLibrary','PointReadLibrary','UpgradeQueryReadLibrary'] }
+});
+assert.deepEqual(Object.keys(profileMap).sort(), ['base','reads']);
+const linkTargets = {
+  UpgradeAdmissionLibrary: 'src/UpgradeAdmissionLibrary.sol',
+  PointReadLibrary: '../2026-09-05-c0-core/src/PointReadLibrary.sol',
+  UpgradeQueryReadLibrary: 'src/UpgradeQueryReadLibrary.sol'
+};
+function link(bytecode,addresses = {}, expected = []) {
   const refs = {};
   for (const [file,libs] of Object.entries(bytecode.linkReferences ?? {})) for (const [name,positions] of Object.entries(libs)) {
-    assert.equal(file,'src/UpgradeAdmissionLibrary.sol'); assert.equal(name,'UpgradeAdmissionLibrary'); refs[name]=positions;
+    assert.equal(file,linkTargets[name], 'closed source-target link'); assert(!refs[name], 'duplicate link target'); refs[name]=positions.map(p=>{ assert.equal(p.length,20,'address link width'); return p; });
   }
-  return patch(bytecode.object,refs,{UpgradeAdmissionLibrary:address});
+  assert.deepEqual(Object.keys(refs).sort(), [...expected].sort(), 'exact link inventory');
+  return patch(bytecode.object,refs,addresses);
 }
-function compilerEvidence() {
-  const a = artifact('UpgradeableFixtureCore');
-  const info = readdirSync(join(ROOT,'out/build-info')).map(n => JSON.parse(readFileSync(join(ROOT,'out/build-info',n),'utf8'))).find(j => j.output?.contracts?.['src/UpgradeableFixtureCore.sol']?.UpgradeableFixtureCore?.evm?.bytecode?.object === a.bytecode.object.replace(/^0x/,''));
+function compilerEvidence(profile) {
+  const coreName = profileMap[profile].core;
+  const a = artifact(coreName);
+  const info = readdirSync(join(ROOT,'out/build-info')).map(n => JSON.parse(readFileSync(join(ROOT,'out/build-info',n),'utf8'))).find(j => j.output?.contracts?.['src/'+coreName+'.sol']?.[coreName]?.evm?.bytecode?.object === a.bytecode.object.replace(/^0x/,''));
   assert(info,'matching full compiler output');
   const names = {};
   function visit(node) { if (!node || typeof node !== 'object') return; if(node.mutability === 'immutable') names[node.id]=node.name; for (const v of Object.values(node)) if(typeof v === 'object') Array.isArray(v) ? v.forEach(visit) : visit(v); }
   for (const source of Object.values(info.output.sources)) visit(source.ast);
   const sourcePins = {};
   const metadataSources = {};
-  for (const name of ['UpgradeableFixtureCore','UpgradeableFixtureCoreU2','UpgradeableFixtureCarrier','UpgradeableFixtureCarrierU2','FixtureDeployment','PreparationHelper','UpgradeAdmissionLibrary','TransparentUpgradeableProxy','ProxyAdmin']) {
+  for (const name of [coreName,coreName+'U2',...(profile === 'reads' ? ['UpgradeableFixtureCore','UpgradeableFixtureCoreU2','PointReadLibrary','UpgradeQueryReadLibrary','UpgradeStaticConsumer'] : []),'UpgradeableFixtureCarrier','UpgradeableFixtureCarrierU2','FixtureDeployment','PreparationHelper','UpgradeAdmissionLibrary','TransparentUpgradeableProxy','ProxyAdmin']) {
     const generated=artifact(name), [[path,contract]]=Object.entries(generated.metadata.settings.compilationTarget);
     const compiled=info.output.contracts[path]?.[contract];assert(compiled,'complete compiled artifact '+name);
+    assert.deepEqual(generated.abi,compiled.abi,'compiler ABI '+name);
     for(const kind of ['bytecode','deployedBytecode']) {
       assert.equal(generated[kind].object.replace(/^0x/,''),compiled.evm[kind].object,'compiler artifact bytecode '+name);
       assert.deepEqual(generated[kind].linkReferences??{},compiled.evm[kind].linkReferences??{},'compiler link references');
@@ -72,12 +89,14 @@ function compilerEvidence() {
     sourcePins[name]=value.keccak256;
   }
   const git = args => { const r=spawnSync('git',args,{cwd:ROOT,encoding:'utf8'}); assert.equal(r.status,0); return r.stdout.trim(); };
-  const supportSourcePins=Object.fromEntries(['scripts/local-upgrade.mjs','reference/upgrade-reader.mjs','test/upgrade-chain.test.mjs','../2026-09-05-c0-core/reference/state-reader.mjs','../2026-09-05-c0-core/reference/record-body.mjs','../2026-09-05-c0-core/scripts/local-stateful.mjs','../2026-09-05-c0-admission/reader.mjs','../2026-09-05-c0-admission/codec.mjs','../2026-09-05-mvp-build-start/type-inputs/parser.mjs','../2026-09-05-mvp-build-start/type-inputs/encoder.mjs','../../Designs/efsv2/hierarchical-files-and-folders.md','../2026-08-13-efs2-stage-a-corpus/chapters/b0-encoding-and-ids.md'].map(path=>[path,keccak256(readFileSync(resolve(ROOT,path)))]));
+  const supportSourcePins=Object.fromEntries([...(profile==='reads'?['test/upgrade-reads.test.mjs','reference/upgrade-lens-resolver.mjs','../2026-09-05-c0-core/reference/lens-resolver.mjs']:[]),'scripts/local-upgrade.mjs','reference/upgrade-reader.mjs','test/upgrade-chain.test.mjs','../2026-09-05-c0-core/reference/state-reader.mjs','../2026-09-05-c0-core/reference/record-body.mjs','../2026-09-05-c0-core/scripts/local-stateful.mjs','../2026-09-05-c0-admission/reader.mjs','../2026-09-05-c0-admission/codec.mjs','../2026-09-05-mvp-build-start/type-inputs/parser.mjs','../2026-09-05-mvp-build-start/type-inputs/encoder.mjs','../../Designs/efsv2/hierarchical-files-and-folders.md','../2026-08-13-efs2-stage-a-corpus/chapters/b0-encoding-and-ids.md'].map(path=>[path,keccak256(readFileSync(resolve(ROOT,path)))]));
   const version=tool=>{const r=spawnSync(tool,['--version'],{encoding:'utf8',timeout:5000});assert.equal(r.status,0);return r.stdout.trim();};
   return { info,names,resources: { sourceCommit:git(['rev-parse','HEAD']),trackedDiffHash:keccak256(Buffer.from(git(['diff','--','../2026-09-05-c0-core','src','test/FixtureDeployment.sol']))),compiler:a.metadata.compiler,compilerBinaryHash:keccak256(readFileSync(SOLC)),versions:{node:process.version,forge:version('forge'),anvil:version('anvil'),ethers:JSON.parse(readFileSync(resolve(ROOT,'../2026-09-04-mvp-rehearsal/node_modules/ethers/package.json'),'utf8')).version},settings:a.metadata.settings,sourcePins,supportSourcePins,compilerInputHash:keccak256(Buffer.from(JSON.stringify(info.input))),compilerOutputHash:keccak256(Buffer.from(JSON.stringify(info.output))),dependencyLockHash:keccak256(readFileSync(join(ROOT,'package-lock.json'))),artifactPins:{} } };
 }
-export async function withUpgrade(action) {
-  const compiler = compilerEvidence();
+export async function withUpgrade(action, { profile = 'base' } = {}) {
+  assert(typeof profile === 'string' && Object.hasOwn(profileMap,profile), 'unknown upgrade profile');
+  const selected = profileMap[profile];
+  const compiler = compilerEvidence(profile);
   const reservation=createServer(); await new Promise((ok,no)=>{reservation.once('error',no);reservation.listen(0,'127.0.0.1',ok);});
   const port=reservation.address().port; await new Promise(ok=>reservation.close(ok));
   const args=['--host','127.0.0.1','--port',String(port),'--chain-id','31337','--hardfork','cancun','--gas-limit',String(TX_GAS*2n),'--accounts','0','--no-cors','--silent'];
@@ -109,13 +128,21 @@ export async function withUpgrade(action) {
     }
     const resources={...compiler.resources,txGasCeiling:String(TX_GAS),runtimeCeiling:24576,initcodeCeiling:49152,nodeArgs:args,deployment:{},inputPins:{}};
     const components={},implementations={};
-    async function deploy(name,constructorArgs=[],values={},library) {
+    async function deploy(name,constructorArgs=[],values={},links={}) {
       const a=artifact(name),iface=new Interface(a.abi),nonce=BigInt(await rpc('eth_getTransactionCount',[wallet.address,'pending']));
       const address=lower(getCreateAddress({from:wallet.address,nonce}));
       const immutableValues={};
       for(const id of Object.keys(a.deployedBytecode.immutableReferences??{})) immutableValues[id]=id==='library_deploy_address'?address:compiler.names[id]==='implementationSelf'?address:values[compiler.names[id]];
-      const runtime=patch(link(a.deployedBytecode,library),a.deployedBytecode.immutableReferences,immutableValues);
-      const creation=link(a.bytecode,library)+iface.encodeDeploy(constructorArgs).slice(2);
+      const coreHost = name === selected.core || name === selected.core+'U2';
+      const endpoint = coreHost || name.startsWith('UpgradeableFixtureCarrier');
+      const expectedLinks = endpoint ? (coreHost ? selected.libraries : ['UpgradeAdmissionLibrary']) : [];
+      const expectedNames = endpoint ? ['implementationSelf','bootstrapAuthority','preparationHelper','preparationCodehash','admissionLibrary','admissionCodehash',...(coreHost && profile === 'reads' ? ['pointReadLibrary','pointReadCodehash','queryReadLibrary','queryReadCodehash'] : [])] : name === 'FixtureDeployment' ? ['owner'] : name === 'UpgradeAdmissionLibrary' ? ['library_deploy_address'] : [];
+      assert.deepEqual(Object.keys(immutableValues).map(id=>compiler.names[id]??id).sort(), expectedNames.sort(), 'exact same-build immutable inventory '+name);
+      // Link and immutable windows must be disjoint, not just valid individually.
+      const windows = [...Object.values(a.deployedBytecode.linkReferences??{}).flatMap(x=>Object.values(x).flat()), ...Object.values(a.deployedBytecode.immutableReferences??{}).flat()].sort((a,b)=>a.start-b.start);
+      for(let i=1;i<windows.length;i++)assert(windows[i-1].start+windows[i-1].length<=windows[i].start,'overlapping compiler windows');
+      const runtime=patch(link(a.deployedBytecode,links,coreHost?expectedLinks:[]),a.deployedBytecode.immutableReferences,immutableValues);
+      const creation=link(a.bytecode,links,expectedLinks)+iface.encodeDeploy(constructorArgs).slice(2);
       assert(bytes(runtime)<=24576,'runtime ceiling');assert(bytes(creation)<=49152,'initcode ceiling including args');
       const r=await receipt(await send(creation),name);assert.equal(r.status,'0x1',name+' deployment');assert.equal(lower(r.contractAddress),address);
       assert.equal(await rpc('eth_getCode',[address,r.blockNumber]),runtime,'source-derived installed runtime '+name);
@@ -126,11 +153,16 @@ export async function withUpgrade(action) {
     const factory=await deploy('FixtureDeployment',[],{owner:wallet.address});
     const helper=await deploy('PreparationHelper');
     const library=await deploy('UpgradeAdmissionLibrary');
-    const values={bootstrapAuthority:factory.address,preparationHelper:helper.address,preparationCodehash:helper.codehash,admissionLibrary:library.address,admissionCodehash:library.codehash};
-    const core1=await deploy('UpgradeableFixtureCore',[factory.address,helper.address],values,library.address);
-    const carrier1=await deploy('UpgradeableFixtureCarrier',[factory.address,helper.address],values,library.address);
-    const core2=await deploy('UpgradeableFixtureCoreU2',[factory.address,helper.address],values,library.address);
-    const carrier2=await deploy('UpgradeableFixtureCarrierU2',[factory.address,helper.address],values,library.address);
+    const point=profile==='reads'?await deploy('PointReadLibrary'):null;
+    const query=profile==='reads'?await deploy('UpgradeQueryReadLibrary'):null;
+    const links={UpgradeAdmissionLibrary:library.address,...(point?{PointReadLibrary:point.address,UpgradeQueryReadLibrary:query.address}:{})};
+    const readValues=point?{pointReadLibrary:point.address,pointReadCodehash:point.codehash,queryReadLibrary:query.address,queryReadCodehash:query.codehash}:{};
+    const coreArgs=[factory.address,helper.address,...(point?[point.codehash,query.codehash]:[])];
+    const values={...readValues,bootstrapAuthority:factory.address,preparationHelper:helper.address,preparationCodehash:helper.codehash,admissionLibrary:library.address,admissionCodehash:library.codehash};
+    const core1=await deploy(selected.core,coreArgs,values,links);
+    const carrier1=await deploy('UpgradeableFixtureCarrier',[factory.address,helper.address],values,links);
+    const core2=await deploy(selected.core+'U2',coreArgs,values,links);
+    const carrier2=await deploy('UpgradeableFixtureCarrierU2',[factory.address,helper.address],values,links);
     for(const d of [core1,carrier1,core2,carrier2])implementations[d.address]={code:d.code};
     const inputs=fixtureInputs(),m=Object.fromEntries(inputs.candidates.groups.flatMap(g=>g.members.map(m=>[m.descriptor.name,m.temporaryTypeSchemaId]))),treeType=m['ChunkTree/1'];
     const core=lower(getCreateAddress({from:factory.address,nonce:1})),carrier=lower(getCreateAddress({from:factory.address,nonce:2}));
@@ -149,7 +181,7 @@ export async function withUpgrade(action) {
       resources.deployment[kind+'Admin']={address:admin,runtimeBytes:bytes(adminCode),initcodeBytes:bytes(adminArtifact.bytecode.object+abi.encode(['address'],[factory.address]).slice(2)),codehash:keccak256(adminCode)};
     }
     const boot=await receipt(await send(factory.iface.encodeFunctionData('deployPair',[core1.address,carrier1.address,operator.address,treeType,inputs.init]),factory.address),'atomic pair bootstrap');assert.equal(boot.status,'0x1');
-    const iface=core2.iface,carrierIface=carrier2.iface,adminIface=new Interface(adminArtifact.abi);
+    const iface=new Interface(artifact('UpgradeableFixtureCoreU2').abi),readIface=profile==='reads'?core2.iface:undefined,carrierIface=carrier2.iface,adminIface=new Interface(adminArtifact.abi);
     const errorAbi=[core2.artifact,library.artifact,helper.artifact].flatMap(a=>a.abi.filter(f=>f.type==='error'));
     const errorIface=new Interface([...new Map(errorAbi.map(f=>[JSON.stringify(f),f])).values()]);
     const expected={core,chainId:'31337',source,init:inputs.init,components,implementations,getters:{preparationHelper:helper.address,preparationCodehash:helper.codehash,admissionLibrary:library.address,admissionCodehash:library.codehash},execution:{core,carrier,coreAdmin,carrierAdmin,controller:factory.address,operator:operator.address,helper:helper.address,helperCodehash:helper.codehash,admissionLibrary:library.address,admissionCodehash:library.codehash,treeType}};
@@ -201,16 +233,17 @@ export async function withUpgrade(action) {
       const signature=await operator.signTypedData(typedDomain(carrier),{FixtureBytes:[{name:'treeId',type:'bytes32'},{name:'bodyHash',type:'bytes32'},{name:'dataHash',type:'bytes32'},{name:'executionSetId',type:'bytes32'},{name:'nonce',type:'uint64'},{name:'deadline',type:'uint64'}]},{treeId,bodyHash:keccak256(body),dataHash:keccak256(data),executionSetId:e.id,nonce:n,deadline});
       const tx=await send(carrierIface.encodeFunctionData('stageFixtureBytes',[treeId,body,data,revision,n,deadline,signature]),carrier);return{tx,receipt:await receipt(tx,'separate byte staging')};
     }
-    async function upgrade({before}={}) {
+    async function upgrade({before,migrate=true}={}) {
+      assert.equal(typeof migrate,'boolean','migrate must be boolean');
       let beforeTx;
       if(before){await rpc('evm_setAutomine',[false]);automine=false;beforeTx=await send(data(before),core);}
-      const tx=await send(factory.iface.encodeFunctionData('upgradePair',[core2.address,carrier2.address,iface.encodeFunctionData('migratePresentation',['Core U2',false]),carrierIface.encodeFunctionData('migratePresentation',['Carrier U2',false])]),factory.address);
+      const tx=await send(factory.iface.encodeFunctionData('upgradePair',[core2.address,carrier2.address,migrate?iface.encodeFunctionData('migratePresentation',['Core U2',false]):'0x',migrate?carrierIface.encodeFunctionData('migratePresentation',['Carrier U2',false]):'0x']),factory.address);
       if(before){await rpc('evm_mine');await rpc('evm_setAutomine',[true]);automine=true;}
       return {tx,...(beforeTx?{beforeReceipt:await receipt(beforeTx,'same-block U1 publication')} : {}),receipt:await receipt(tx,'atomic U1 to U2')};
     }
     const readBytes=(id,basis)=>call(carrier,carrierIface,'readFixtureBytes',[id],{blockHash:basis.hash,requireCanonical:true});
     const mine=async enabled=>{await rpc('evm_setAutomine',[enabled]);automine=enabled;};
-    result=await action({rpc,core,carrier,operator:operator.address,iface,expected,inputs,collectExecution,resources,cleanup,transactions,prepare,publish,submit,reject,stage,readBytes,upgrade,mine,send,receipt,data});
+    result=await action({rpc,core,carrier,operator:operator.address,iface,readIface,expected,inputs,collectExecution,resources,cleanup,transactions,prepare,publish,submit,reject,stage,readBytes,upgrade,mine,send,receipt,data});
   } finally {
     if(!automine&&child.exitCode===null){try{await rpc('evm_setAutomine',[true]);cleanup.automineRestored=true;}catch{cleanup.automineRestored=false;}}
     clearTimeout(watchdog);

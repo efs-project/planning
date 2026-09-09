@@ -91,11 +91,16 @@ export function resolveLens(state, expected, planId, position, { unavailableKeys
   if (!state?.snapshot || state.outcome !== "VERIFIED") return unknown(emptyResult(), 4);
   const verified = verifyState(state.snapshot, expected);
   if (verified.outcome !== "VERIFIED") return unknown(emptyResult(), 6);
-  let result = emptyResult({ realmRevisionId: expected.init.initialRevisionId,
-    blockNumber: BigInt(verified.basis.number), admissionHigh: BigInt(verified.counts[4]), basisKind: 0 });
+  const basis = { realmRevisionId: expected.init.initialRevisionId,
+    blockNumber: BigInt(verified.basis.number), admissionHigh: BigInt(verified.counts[4]), basisKind: 0 };
   const record = verified.snapshot.records.find((r) => r.id === planId);
-  if (!record) return unknown(result, 5);
-  const plan = parsePlan(record.row[0], record.row[1]);
+  return modelLens(record ? parsePlan(record.row[0], record.row[1]) : null, verified.fold.bindings, position, basis, { unavailableKeys });
+}
+
+// Plain expected B0 value only. No evidence qualification is performed here.
+export function modelLens(plan, bindings, position, basis, { unavailableKeys = new Set() } = {}) {
+  let result = emptyResult(basis);
+  if (!plan) return unknown(result, 5);
   if (plan.code !== 0) return { ...unknown(result, 7), rejectCode: plan.code };
   if (plan.profile !== PROFILE) return { ...result, presence: 4, reasonCode: 1 };
   const tiers = plan.combiner === 1 ? [...new Set(plan.entries.map((e) => e.tier))] : [null];
@@ -103,7 +108,7 @@ export function resolveLens(state, expected, planId, position, { unavailableKeys
     const entries = tier === null ? plan.entries : plan.entries.filter((e) => e.tier === tier);
     const keys = entries.map((e) => keyFor(e.principal, position));
     if (keys.some((key) => unavailableKeys.has(key))) return unknown(result, 6);
-    const consulted = entries.map((e, i) => ({ ...e, head: verified.fold.bindings.get(keys[i]) }));
+    const consulted = entries.map((e, i) => ({ ...e, head: bindings.get(keys[i]) }));
     result = decision(plan, consulted, result);
     if (result.presence !== 2) return result;
   }

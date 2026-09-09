@@ -58,7 +58,7 @@ library StateAuditPages {
         bytes32 valueKey,
         PageRequest memory req
     ) internal view returns (PageResult memory result) {
-        (result,) = page(s, T, kind, indexOrdinal, valueKey, req, false);
+        (result,) = page(s, T, kind, indexOrdinal, valueKey, req, false, false, 0);
     }
 
     function pagePostingsHydrated(
@@ -69,7 +69,31 @@ library StateAuditPages {
         bytes32 valueKey,
         PageRequest memory req
     ) internal view returns (PageResult memory, HydratedItem[] memory) {
-        return page(s, T, kind, indexOrdinal, valueKey, req, true);
+        return page(s, T, kind, indexOrdinal, valueKey, req, true, false, 0);
+    }
+
+    function pagePostingsAtReadBasis(
+        StateStore.Store storage s,
+        bytes32 T,
+        uint8 kind,
+        uint8 indexOrdinal,
+        bytes32 valueKey,
+        PageRequest memory req,
+        bytes32 readBasis
+    ) internal view returns (PageResult memory result) {
+        (result,) = page(s, T, kind, indexOrdinal, valueKey, req, false, true, readBasis);
+    }
+
+    function pagePostingsHydratedAtReadBasis(
+        StateStore.Store storage s,
+        bytes32 T,
+        uint8 kind,
+        uint8 indexOrdinal,
+        bytes32 valueKey,
+        PageRequest memory req,
+        bytes32 readBasis
+    ) internal view returns (PageResult memory, HydratedItem[] memory) {
+        return page(s, T, kind, indexOrdinal, valueKey, req, true, true, readBasis);
     }
 
     function counts(StateStore.Store storage s, bytes32 T, uint8 kind, uint8 indexOrdinal, bytes32 valueKey)
@@ -91,11 +115,17 @@ library StateAuditPages {
         uint8 indexOrdinal,
         bytes32 valueKey,
         PageRequest memory req,
-        bool hydrated
+        bool hydrated,
+        bool explicitBasis,
+        bytes32 readBasis
     ) private view returns (PageResult memory result, HydratedItem[] memory rows) {
         bytes32 key = IndexKeys.posting(T, kind, indexOrdinal, valueKey);
         uint64 currentH;
         (result.realmBasis,, currentH) = StateReadPrimitives.basis(s, 0, key);
+        if (explicitBasis) {
+            if (readBasis == 0) revert StorageByteView.ErrReadState(key);
+            result.realmBasis = readBasis;
+        }
         if (req.cursor == 0) {
             (, result.highWaterOrdinal,) = StateReadPrimitives.basis(s, req.basisOrdinal, key);
         } else {
