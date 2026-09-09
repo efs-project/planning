@@ -1,7 +1,8 @@
 # Fixed read libraries for the C0 prototype
 
-**Status:** selected reversible packaging refinement; implementation and normal
-deployment evidence pending. Not a protocol freeze or authenticated Core.
+**Status:** synthetic revision-one host implementation and normal deployment
+evidence complete; see [Binding verification](binding-reads-verification.md).
+Authenticated C0 and V3 integration remain pending. Not a protocol freeze.
 
 The [Binding size gate](binding-reads-verification.md) found a 26,736-byte
 combined host against the unchanged 24,576-byte runtime limit. Source-identical

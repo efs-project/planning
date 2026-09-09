@@ -160,7 +160,7 @@ uses one compiled exact artifact instead of a general onchain interpreter.
 Its exact domain/raw-string rows and the [INDEX revision-2 inventory](index-materialization.md)
 now pin concrete serializer inputs, retire an understated aggregate fan-out
 estimate and keep optional convenience reads outside the first Core surface.
-The [outer revision-2 row sheet](outer-materialization.md) now closes numeric,
+The [outer revision-3 row sheet](outer-materialization.md) now closes numeric,
 code-dictionary and fixed-format inventory as well. Serializer implementation,
 full capability/authority coverage and actual joined budgets remain next work.
 The [point-read plan](point-reads-plan.md) now implements shared original
