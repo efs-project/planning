@@ -5,6 +5,8 @@ import {BindingFold} from "./BindingFold.sol";
 import {StateBindingReads} from "./StateBindingReads.sol";
 import {StateStore} from "./StateStore.sol";
 import {StateAuditPages} from "./StateAuditPages.sol";
+import {LensPlan} from "./LensPlan.sol";
+import {StateLensReads} from "./StateLensReads.sol";
 
 library QueryReadLibrary {
     function pagePostings(
@@ -59,5 +61,29 @@ library QueryReadLibrary {
         returns (StateBindingReads.BindingHistoryEntry[] memory, uint32, uint8)
     {
         return StateBindingReads.readHistory(s, bindingKey, fromRevision, limit);
+    }
+
+    function resolve(StateStore.Store storage s, bytes32 planRecordId, bytes32 positionKey)
+        external
+        view
+        returns (LensPlan.ResolveResult memory)
+    {
+        return StateLensReads.resolve(s, planRecordId, positionKey);
+    }
+
+    function resolveStrict(StateStore.Store storage s, bytes32 planRecordId, bytes32 positionKey, uint8 acceptMask)
+        external
+        view
+        returns (LensPlan.ResolvedTarget memory, LensPlan.ResolveResult memory)
+    {
+        return StateLensReads.resolveStrict(s, planRecordId, positionKey, acceptMask);
+    }
+
+    function validatePlan(StateStore.Store storage s, bytes32 planRecordId) external view returns (bool, uint8) {
+        return StateLensReads.validatePlan(s, planRecordId);
+    }
+
+    function deriveBindingKey(bytes32 principalId, bytes32 positionKey) external pure returns (bytes32) {
+        return LensPlan.deriveBindingKey(principalId, positionKey);
     }
 }

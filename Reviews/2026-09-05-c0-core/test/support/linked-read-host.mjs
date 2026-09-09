@@ -112,7 +112,7 @@ function provenance(a, hostName) {
 }
 
 export async function withLinkedReadHost(hostName, action) {
-  assert(["BindingReadHarness","AuditPageReadHarness"].includes(hostName),"closed read hosts");
+  assert(["BindingReadHarness","AuditPageReadHarness","LensReadHarness"].includes(hostName),"closed read hosts");
   compileStateful();
   const a=artifact(hostName), names=provenance(a,hostName), iface=new Interface(a.abi);
   const report={compiler:a.metadata.compiler,settings:a.metadata.settings,sourcePins:a.metadata.sources,measurements:[]};
