@@ -2,6 +2,8 @@
 
 **Status:** implemented and independently reviewed local guest-read checkpoint;
 not public C0 or v1 parity. See [verification and measured results](verification.md).
+The separate [same-data delivery comparison](delivery-verification.md) measures
+optional compression; it does not resolve the read-lifecycle/churn limit.
 
 Implements the read-only part of the [consumer build card](../2026-09-09-v1-parity-overnight/consumer-build-card.md)
 using the published [shared reader](../2026-09-09-files-reader/verification.md)
