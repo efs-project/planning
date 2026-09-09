@@ -163,11 +163,50 @@ export function nonTimingOutcomes(report) {
 }
 
 export function encodeReport(report) {
+  const hash32=value=>typeof value==='string'&&/^0x[0-9a-f]{64}$/.test(value);
+  const nonempty=value=>typeof value==='string'&&value.trim().length>0;
+  const object=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
+  const uint=value=>Number.isSafeInteger(value)&&value>=0;
+  const pins=(value,required=[])=>object(value)&&Object.keys(value).length>0&&Object.values(value).every(hash32)&&required.every(k=>hash32(value[k]));
   assert(report?.complete,'complete lifecycle evidence required');
   assert.deepEqual(report.checkpoints.map(c=>c.name),checkpointNames,'all semantic checkpoints required');
   assert(report.checkpoints.every(c=>c.outcome==='VERIFIED'),'verified checkpoints required');
   assert(report.checkpoints.every(c=>Array.isArray(c.entries)&&c.heads&&c.histories&&c.basis?.hash),'checkpoint reconstruction evidence required');
-  assert(report.resources?.sourcePins && Object.keys(report.resources.sourcePins).length>0 && report.resources.compilerInputHash && report.resources.inputPins?.candidateFile,'source/compiler/input pins required');
+  assert(report.checkpoints.every(c=>hash32(c.retainedDigest)),'checkpoint retained digests required');
+  const r=report.resources,s=r?.settings;
+  assert(r&&/^[0-9a-f]{40}$/.test(r.sourceCommit),'source commit required');
+  for(const name of ['trackedDiffHash','compilerBinaryHash','compilerInputHash','compilerOutputHash','dependencyLockHash']) assert(hash32(r[name]),name+' required');
+  assert(nonempty(r.compiler?.version),'compiler version required');
+  assert(object(s)&&Array.isArray(s.remappings)&&s.remappings.length>0&&s.remappings.every(nonempty)&&typeof s.optimizer?.enabled==='boolean'&&uint(s.optimizer.runs)&&nonempty(s.metadata?.bytecodeHash)&&object(s.compilationTarget)&&Object.keys(s.compilationTarget).length>0&&Object.values(s.compilationTarget).every(nonempty)&&nonempty(s.evmVersion)&&object(s.libraries)&&typeof s.viaIR==='boolean','complete compiler settings required');
+  assert(['node','forge','anvil','ethers'].every(name=>nonempty(r.versions?.[name])),'tool versions required');
+  assert(pins(r.sourcePins)&&Object.keys(s.compilationTarget).every(path=>hash32(r.sourcePins[path])),'compiler source pins required');
+  assert(pins(r.supportSourcePins,['scripts/local-upgrade.mjs','reference/upgrade-reader.mjs','../2026-09-05-c0-core/reference/state-reader.mjs']),'runner/reader source pins required');
+  assert(pins(r.artifactPins,['FixtureDeployment','PreparationHelper','UpgradeAdmissionLibrary','UpgradeableFixtureCore','UpgradeableFixtureCoreU2','UpgradeableFixtureCarrier','UpgradeableFixtureCarrierU2','TransparentUpgradeableProxy','ProxyAdmin']),'complete artifact pins required');
+  assert(hash32(r.inputPins?.candidateFile)&&hash32(r.inputPins.intrinsic)&&Array.isArray(r.inputPins.groups)&&r.inputPins.groups.length===4&&r.inputPins.groups.every(hash32),'complete candidate input pins required');
+  assert(pins(report.workflowSourcePins,['workflow.mjs','workflow.test.mjs','../2026-09-08-upgradeable-foundation/test/tag-current.test.mjs']),'workflow source pins required');
+  assert.equal(r.runtimeCeiling,24576,'fixed runtime ceiling required');
+  assert.equal(r.initcodeCeiling,49152,'fixed initcode ceiling required');
+  assert.equal(r.txGasCeiling,String(TX_GAS),'fixed transaction ceiling required');
+  assert(object(r.deployment)&&Object.keys(r.deployment).length>0,'deployment measurements required');
+  for(const [name,component] of Object.entries(report.expected?.components??{})) {
+    const d=r.deployment[name==='core'?'coreProxy':name==='carrier'?'carrierProxy':name];
+    assert(d&&uint(d.runtimeBytes)&&d.runtimeBytes>0&&d.runtimeBytes<=r.runtimeCeiling&&uint(d.initcodeBytes)&&d.initcodeBytes>0&&d.initcodeBytes<=r.initcodeCeiling,'bounded deployment row '+name);
+    assert.equal(d.address,component.address,'deployment address '+name);
+    assert.equal(d.runtimeBytes,bytes(component.code),'source-observed runtime size '+name);
+    assert.equal(d.codehash,keccak256(component.code),'source-observed runtime hash '+name);
+  }
+  for(const d of Object.values(r.deployment)) assert(uint(d.runtimeBytes)&&d.runtimeBytes>0&&d.runtimeBytes<=r.runtimeCeiling&&uint(d.initcodeBytes)&&d.initcodeBytes>0&&d.initcodeBytes<=r.initcodeCeiling,'all deployment sizes bounded');
+  const reads=report.reads;
+  assert(reads&&['MEASURED','UNAVAILABLE'].includes(reads.availability),'explicit read measurement availability required');
+  if(reads.availability==='UNAVAILABLE') assert(nonempty(reads.reason),'unavailable read reason required');
+  else {
+    assert(nonempty(reads.scope)&&uint(reads.rpcCalls)&&uint(reads.jsonResultBytes),'measured read scope and counters required');
+    assert(reads.core&&/^\d+$/.test(reads.core.work)&&uint(reads.core.bytes)&&reads.execution&&uint(reads.execution.work)&&uint(reads.execution.bytes),'reader-supplied counters required');
+    assert.equal(BigInt(reads.rpcCalls),BigInt(reads.core.work)+BigInt(reads.execution.work),'read RPC count sum');
+    assert.equal(reads.jsonResultBytes,reads.core.bytes+reads.execution.bytes,'read byte count sum');
+    assert.deepEqual(reads.core,report.terminalSnapshot?.stats,'Core read counters match snapshot');
+    assert.deepEqual(reads.execution,report.terminalSnapshot?.execution?.collection,'execution read counters match snapshot');
+  }
   assert(report.terminalSnapshot?.complete,'terminal retained evidence required');
   const verified=verifyUpgradeState(report.terminalSnapshot,report.expected);
   assert.equal(verified.outcome,'VERIFIED','terminal reconstruction: '+verified.reason);

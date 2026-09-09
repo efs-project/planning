@@ -21,6 +21,58 @@ test('lifecycle API exists before the real-state workflow can run', async () => 
   assert.equal(typeof workflow.runFileLifecycle, 'function');
 });
 
+// Break: a successful lifecycle alone allowing incomplete resource provenance
+// or invented read/deployment measurements into the saved baseline.
+test('saved evidence gate requires pinned provenance and bounded resource measurements', async t => {
+  const { encodeReport } = await import(moduleUrl);
+  const saved=JSON.parse(readFileSync(baselineUrl,'utf8'));
+  assert.doesNotThrow(()=>encodeReport(saved));
+  const missing=[
+    'resources.sourceCommit','resources.trackedDiffHash','resources.compilerBinaryHash','resources.compiler',
+    'resources.compiler.version','resources.settings','resources.settings.optimizer','resources.settings.optimizer.runs',
+    'resources.settings.metadata','resources.settings.compilationTarget','resources.settings.evmVersion','resources.settings.viaIR',
+    'resources.settings.libraries','resources.settings.remappings','resources.versions','resources.versions.anvil',
+    'resources.compilerInputHash','resources.compilerOutputHash','resources.dependencyLockHash','resources.supportSourcePins',
+    'resources.artifactPins','resources.artifactPins.ProxyAdmin','resources.inputPins.groups','resources.inputPins.intrinsic',
+    'workflowSourcePins','workflowSourcePins.workflow.mjs','resources.deployment','resources.deployment.coreProxy',
+    'resources.deployment.UpgradeAdmissionLibrary.runtimeBytes','resources.deployment.UpgradeAdmissionLibrary.initcodeBytes',
+    'resources.runtimeCeiling','resources.initcodeCeiling','resources.txGasCeiling','reads','reads.availability',
+    'reads.scope','reads.rpcCalls','reads.jsonResultBytes','reads.core','reads.execution','checkpoints.3.retainedDigest',
+  ];
+  const locate=(r,path)=>{
+    // Dotted source filenames are map keys, not nested object paths.
+    if(path==='workflowSourcePins.workflow.mjs')return [r.workflowSourcePins,'workflow.mjs'];
+    const keys=path.split('.');return [keys.slice(0,-1).reduce((o,k)=>o[k],r),keys.at(-1)];
+  };
+  for(const path of missing) await t.test('reject missing '+path,()=>{
+    const broken=structuredClone(saved),[owner,key]=locate(broken,path);delete owner[key];
+    assert.throws(()=>encodeReport(broken),'missing '+path);
+  });
+  for(const [label,mutate] of [
+    ['malformed compiler hash',r=>r.resources.compilerBinaryHash='not-a-hash'],
+    ['empty compiler version',r=>r.resources.compiler.version=''],
+    ['empty input groups',r=>r.resources.inputPins.groups=[]],
+    ['missing input group',r=>r.resources.inputPins.groups.pop()],
+    ['malformed input group',r=>r.resources.inputPins.groups[0]='bad'],
+    ['empty workflow pins',r=>r.workflowSourcePins={}],
+    ['empty deployment rows',r=>r.resources.deployment={}],
+    ['runtime beyond ceiling',r=>r.resources.deployment.UpgradeAdmissionLibrary.runtimeBytes=24577],
+    ['initcode beyond ceiling',r=>r.resources.deployment.coreProxy.initcodeBytes=49153],
+    ['raised runtime ceiling',r=>r.resources.runtimeCeiling=24577],
+    ['raised gas ceiling',r=>r.resources.txGasCeiling='16777217'],
+    ['invalid checkpoint digest',r=>r.checkpoints[3].retainedDigest='bad'],
+    ['invalid read outcome',r=>r.reads.availability='VERIFIED'],
+    ['negative read count',r=>r.reads.rpcCalls=-1],
+    ['fractional read bytes',r=>r.reads.jsonResultBytes=1.5],
+    ['inconsistent read count',r=>r.reads.rpcCalls++],
+    ['unavailable reads without reason',r=>r.reads={availability:'UNAVAILABLE'}],
+  ]) await t.test('reject '+label,()=>{const broken=structuredClone(saved);mutate(broken);assert.throws(()=>encodeReport(broken),label);});
+  await t.test('accept explicitly unavailable reads with a reason',()=>{
+    const unavailable=structuredClone(saved);unavailable.reads={availability:'UNAVAILABLE',reason:'Reader counters unavailable for this evidence source.'};
+    assert.doesNotThrow(()=>encodeReport(unavailable));
+  });
+});
+
 // Breaks: wrong author/parent/name/head, erased revisions, lost upgrade data,
 // atomic CAS loss publishing a partial placement, or history masquerading as current tags.
 test('real lifecycle survives an upgrade with exact authored heads, immutable history and gas bounds', { timeout: 300000 }, async t => {

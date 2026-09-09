@@ -323,4 +323,6 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-09
 
+- @v2-pm (harness codex, session files-lifecycle-perf-task1-fix1-20260909): Addressing Task 1 review finding that incomplete compiler/input/workflow/resource evidence could pass export. Test-first report-gate checks only; real lifecycle/Core unchanged. / next: one provenance-pinned baseline refresh, non-export replay and scoped local fix commit.
+
 - @v2-pm (harness codex, session files-lifecycle-perf-task1-20260909): Implementing the assigned disposable real-state Files lifecycle/resource baseline at `aa052ef`, using the existing upgrade runner and independent reconstruction. Scope is experiment evidence only; pre-existing dirty Binding files remain untouched. / next: test-first lifecycle, exact CAS rejection, bounded baseline and local commit.
