@@ -34,6 +34,9 @@ listing and real-wallet UX are separate joins.
   why an unchanged-semantics journal optimization is worth testing.
 - [Matched performance comparison](comparison.md): frozen baseline versus
   separately retained optimized evidence, including costs and regressions.
+- [Bulk-create diagnostic](bulk-create-findings.md): one full metadata creation
+  fits, but two/three fresh files in one transaction exhaust forwarded gas;
+  separate one-file controls succeed and failed batches roll back completely.
 - [V1 baseline](v1-baseline.md): 259 freshly passing selected v1 tests,
   method-level gas and comparison limits. No v1 source was changed.
 - [Feature parity inventory](parity.md): all observed v1 capabilities stay
@@ -64,12 +67,14 @@ Stale conflicting generated output may first require `forge clean` in that
 specific experiment directory. Do not erase source or evidence files. The
 runners refuse mismatched artifacts rather than treating them as a test pass.
 
-The broader regression totals in [verification.md](verification.md) include
-preserved, unpublished Binding-read work in the local checkout. They are not
-a claim that the entire remote branch's suite is green. The focused managed
-lifecycle above uses committed runtime/support sources: all 26 non-dependency
-source pins were checked against Git HEAD. The unfinished read increment
-still needs its own review and publication before the full consumer join.
+The original regression totals in [verification.md](verification.md) included
+then-unpublished Binding work; that historical source qualification remains.
+Binding and audit-page increments have since passed independent review and
+been published through `15b5a4c`. The current
+[Lens checkpoint](../2026-09-05-c0-core/lens-point-verification.md) records the
+next source and measured join, with its own verification status. None of
+these separate read checkpoints makes this upgraded lifecycle an integrated
+Files browser. The focused lifecycle above retains its original runtime pins.
 
 ## What these measurements do not say
 
@@ -80,6 +85,12 @@ non-timing lifecycle outcomes reproduced by the controller and a separate
 task review approved. The raw operation fits the normal 16,777,216 transaction cap,
 but a future Files router must also fit. A passing gas cap is not a claim
 that the operation is cheap enough for users.
+
+The later bulk diagnostic makes this concrete: format capacity is not batch
+capacity. Even 14 valid fresh leaves can exceed the execution budget. Multi-file
+imports need explicit resumable progress above atomic file operations; neither
+one approval nor all-or-nothing behavior across transactions follows from this
+synthetic single-publication fixture.
 
 The tradeoff is code-size headroom: the candidate admission library is
 24,533 bytes, only 43 below the cap. This is not space for Files-specific

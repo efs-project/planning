@@ -1,0 +1,450 @@
+{
+  "evidenceKind": "LOCAL_DIAGNOSTIC_NOT_RETAINED_SNAPSHOT",
+  "observedAt": "2026-09-09",
+  "note": "Exact source/toolchain and probe hashes are retained. The script independently checked fresh managed state; full pre/post snapshots are not embedded in this report. Byte staging, FilesRouter and real-wallet consent are excluded.",
+  "standing": "SYNTHETIC_OPERATOR_RAW_CORE_BULK_ADMISSION_NOT_ROUTER_OR_WALLET",
+  "probeSourceHash": "0x74be3b7d38427b0fab03edcace0721959bae1cb1e0fe9f267b7d2f3fb9b6f09b",
+  "byteStaging": "EXCLUDED",
+  "arms": [
+    {
+      "width": 1,
+      "leaves": 7,
+      "calldataBytes": 3140,
+      "status": "0x1",
+      "gas": "8665111",
+      "estimate": {
+        "gas": "8902487"
+      },
+      "readback": "VERIFIED",
+      "retainedNewLeaves": 7,
+      "errorFrames": [],
+      "before": {
+        "number": "13",
+        "hash": "0xff4eb5a9bc498f5679b5009a921bb9d380079584b9ac8ec872b5633f876c5497",
+        "chainId": "31337",
+        "core": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+        "source": "managed-anvil:http://127.0.0.1:62717"
+      },
+      "after": {
+        "number": "14",
+        "hash": "0x80ae3bbabda868b66c76d103036665558ab59b6104a56fa73d92a8a5dcca174b",
+        "chainId": "31337",
+        "core": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+        "source": "managed-anvil:http://127.0.0.1:62717"
+      }
+    },
+    {
+      "width": 2,
+      "leaves": 14,
+      "calldataBytes": 5540,
+      "status": "0x0",
+      "gas": "16261750",
+      "estimate": {
+        "error": "execution reverted",
+        "data": "0x"
+      },
+      "readback": "VERIFIED",
+      "retainedNewLeaves": 0,
+      "errorFrames": [
+        {
+          "path": "root",
+          "type": "CALL",
+          "error": "execution reverted",
+          "gas": "0xfeea30",
+          "gasUsed": "0xf82276",
+          "selector": "0xbac75168",
+          "output": null
+        },
+        {
+          "path": "root/0",
+          "type": "DELEGATECALL",
+          "error": "execution reverted",
+          "gas": "0xfad7d3",
+          "gasUsed": "0xf6f576",
+          "selector": "0xbac75168",
+          "output": null
+        },
+        {
+          "path": "root/0/5",
+          "type": "DELEGATECALL",
+          "error": "out of gas: not enough gas for reentrancy sentry",
+          "gas": "0xf4bfd6",
+          "gasUsed": "0xf4bfd6",
+          "selector": "0xb565fb09",
+          "output": null
+        }
+      ],
+      "before": {
+        "number": "13",
+        "hash": "0xff4eb5a9bc498f5679b5009a921bb9d380079584b9ac8ec872b5633f876c5497",
+        "chainId": "31337",
+        "core": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+        "source": "managed-anvil:http://127.0.0.1:62717"
+      },
+      "after": {
+        "number": "14",
+        "hash": "0xecfd5636bd6d4d47e650df464ddc9ab7f677352c8c7b398b1e930b0d8f4fa8e8",
+        "chainId": "31337",
+        "core": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+        "source": "managed-anvil:http://127.0.0.1:62717"
+      },
+      "separateControls": [
+        {
+          "file": 1,
+          "gas": "8666023",
+          "status": "0x1",
+          "readback": "VERIFIED",
+          "basis": {
+            "number": "15",
+            "hash": "0xb9984c88fdddb3ee7f9a34c965e5e106470a270892dcc493fe159815eaf80cc3",
+            "chainId": "31337",
+            "core": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+            "source": "managed-anvil:http://127.0.0.1:62717"
+          }
+        },
+        {
+          "file": 2,
+          "gas": "8220147",
+          "status": "0x1",
+          "readback": "VERIFIED",
+          "basis": {
+            "number": "16",
+            "hash": "0xcf43a946f196a78cc79bd8cb8f4d0627101f4cf0371f3f7d5d621f95f4618d56",
+            "chainId": "31337",
+            "core": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+            "source": "managed-anvil:http://127.0.0.1:62717"
+          }
+        }
+      ]
+    },
+    {
+      "width": 3,
+      "leaves": 21,
+      "calldataBytes": 7940,
+      "status": "0x0",
+      "gas": "16262652",
+      "estimate": {
+        "error": "execution reverted",
+        "data": "0x"
+      },
+      "readback": "VERIFIED",
+      "retainedNewLeaves": 0,
+      "errorFrames": [
+        {
+          "path": "root",
+          "type": "CALL",
+          "error": "execution reverted",
+          "gas": "0xfe9168",
+          "gasUsed": "0xf825fc",
+          "selector": "0xbac75168",
+          "output": null
+        },
+        {
+          "path": "root/0",
+          "type": "DELEGATECALL",
+          "error": "execution reverted",
+          "gas": "0xfa7e76",
+          "gasUsed": "0xf69e34",
+          "selector": "0xbac75168",
+          "output": null
+        },
+        {
+          "path": "root/0/5",
+          "type": "DELEGATECALL",
+          "error": "out of gas: out of memory",
+          "gas": "0xf43b3e",
+          "gasUsed": "0xf43b3e",
+          "selector": "0xb565fb09",
+          "output": null
+        }
+      ],
+      "before": {
+        "number": "13",
+        "hash": "0xff4eb5a9bc498f5679b5009a921bb9d380079584b9ac8ec872b5633f876c5497",
+        "chainId": "31337",
+        "core": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+        "source": "managed-anvil:http://127.0.0.1:62717"
+      },
+      "after": {
+        "number": "14",
+        "hash": "0x649934347c45a312b39cb9b70a351fb854b35cc9fb7fe7b4178be88596f88a98",
+        "chainId": "31337",
+        "core": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+        "source": "managed-anvil:http://127.0.0.1:62717"
+      }
+    }
+  ],
+  "resources": {
+    "sourceCommit": "219bf614c0ad426075e100fcc9fce8b44972ba39",
+    "trackedDiffHash": "0x64b1c4d76827fcf1c0f7e9b5931d9a34229fce0bde7a8d2e8745d95bc3b2e797",
+    "compiler": {
+      "version": "0.8.30+commit.73712a01"
+    },
+    "compilerBinaryHash": "0xc174782ebcf32f998bff338a35ddf88077593d84761a2b12151bd4e9487acc02",
+    "versions": {
+      "node": "v26.0.0",
+      "forge": "forge Version: 1.7.1\nCommit SHA: 4072e48705af9d93e3c0f6e29e93b5e9a40caed8\nBuild Timestamp: 2026-05-08T07:54:31.470926000Z (1778226871)\nBuild Profile: dist",
+      "anvil": "anvil Version: 1.7.1\nCommit SHA: 4072e48705af9d93e3c0f6e29e93b5e9a40caed8\nBuild Timestamp: 2026-05-08T07:54:31.470926000Z (1778226871)\nBuild Profile: dist",
+      "ethers": "6.15.0"
+    },
+    "settings": {
+      "remappings": [
+        "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+        "C0Admission/=../2026-09-05-c0-admission/src/",
+        "C0Core/=../2026-09-05-c0-core/src/",
+        "C0Foundation/=../2026-09-04-mvp-c0-foundation/src/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "src/UpgradeableFixtureCore.sol": "UpgradeableFixtureCore"
+      },
+      "evmVersion": "cancun",
+      "libraries": {},
+      "viaIR": true
+    },
+    "sourcePins": {
+      "../2026-09-05-c0-admission/src/TypeGroupParser.sol": "0x586b5d360092ed79faaf69114aadbe7dd487b9a7c2690ef55c5c6443d3f2bc86",
+      "../2026-09-05-c0-core/src/BindingFold.sol": "0xecf170a723ffff6966b6439c2305dcbae427ccc70c68aad632b950631dd307ee",
+      "../2026-09-05-c0-core/src/IndexKeys.sol": "0x82dbf6754e96cd113fc5ecd8536c50ed464f626214947de51f20e85650fb4d43",
+      "../2026-09-05-c0-core/src/Preparation.sol": "0x2200c3eb67c8ce1c52d3bf5418abf8bde29254d1a004355f83e458f8f4ad7c81",
+      "../2026-09-05-c0-core/src/RecordBody.sol": "0xd08b372ae170699dc246bf3e28ca843b4ac45a1b4347fc45d39258cdd1b0873e",
+      "../2026-09-05-c0-core/src/StateKernel.sol": "0x09964761aa0fed1f2ba5ca673b2d6ffad41c8e92cc4bb513783e539415dc215a",
+      "../2026-09-05-c0-core/src/StateStore.sol": "0x4e4eac82091ef3614c777bba4bd8a43d957115765fdcc699339af03eb206a8a1",
+      "node_modules/@openzeppelin/contracts/interfaces/IERC1967.sol": "0xbf2aefe54b76d7f7bcd4f6da1080b7b1662611937d870b880db584d09cea56b5",
+      "node_modules/@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol": "0x3d8b816f00b4cabe9a9fb7e84908ef785d6e5b0ef988bcd3c52fe811b4559686",
+      "node_modules/@openzeppelin/contracts/proxy/beacon/IBeacon.sol": "0x20462ddb2665e9521372c76b001d0ce196e59dbbd989de9af5576cad0bd5628b",
+      "node_modules/@openzeppelin/contracts/utils/Address.sol": "0x0fa9e0d3a859900b5a46f70a03c73adf259603d5e05027a37fe0b45529d85346",
+      "node_modules/@openzeppelin/contracts/utils/Errors.sol": "0x6afa713bfd42cf0f7656efa91201007ac465e42049d7de1d50753a373648c123",
+      "node_modules/@openzeppelin/contracts/utils/LowLevelCall.sol": "0x6ba3db1346fc75a832aa6cd075e12f6f1fa172fa2122a020f324c319fe5be75e",
+      "node_modules/@openzeppelin/contracts/utils/StorageSlot.sol": "0xcf74f855663ce2ae00ed8352666b7935f6cddea2932fdf2c3ecd30a9b1cd0e97",
+      "node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol": "0xbeb5cad8aaabe0d35d2ec1a8414d91e81e5a8ca679add4cf57e2f33476861f40",
+      "src/UpgradeAdmissionLibrary.sol": "0xa6af04e0c786cc771801b62b219366d5c8bd1af6702cc57ff373306c9be40eda",
+      "src/UpgradeStorage.sol": "0x05a9cde3c1199ae6e571db4ebf9f18b275b51cd0a2efb3037b32d7b235093c75",
+      "src/UpgradeableFixtureCore.sol": "0xe23fca00ae375f951c2ac46b851cae4c1ec5528b5ef73c5d1fcaddd5e7300ece",
+      "../2026-09-04-mvp-c0-foundation/src/C0ChunkTree.sol": "0xf2af37919638326ea5d080f65e46a8aa3e41e381ed3fe9e70e96e26b0e4c0ce5",
+      "src/UpgradeableFixtureCarrier.sol": "0xcef8eee5d6b9481917eaa88935d2116b57cab0c9490fd01c18f8a0d3a28a8d30",
+      "node_modules/@openzeppelin/contracts/access/Ownable.sol": "0xff6d0bb2e285473e5311d9d3caacb525ae3538a80758c10649a4d61029b017bb",
+      "node_modules/@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol": "0x0ba33f46520b83144086db1c93072c12228edc7cc70a9edd09b530f5a40ce440",
+      "node_modules/@openzeppelin/contracts/proxy/Proxy.sol": "0x80935e4fae2c414f4e7789e13a820d06901182a5733ab006f8d68b5b09db993f",
+      "node_modules/@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol": "0x46f86003755f50eff00a7c5aaf493ae62e024142b8aec4493a313851d3c14872",
+      "node_modules/@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol": "0xdf97190b9e4cb6e9dba52bd6d1d02aa8be0e1fd1bbabc1cdcfd1486ac41d45bd",
+      "node_modules/@openzeppelin/contracts/utils/Context.sol": "0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2",
+      "test/FixtureDeployment.sol": "0x20c26c26d8075ecc2773d18cf82b1dd175a042f62c5ce93e483dab2045aa04c6",
+      "../2026-09-05-c0-core/src/PreparationHelper.sol": "0x3b6bff4fb8a12929ad3261dbf455a50427013eba59c7f8d029ca8463817c1d6c"
+    },
+    "supportSourcePins": {
+      "scripts/local-upgrade.mjs": "0x2f342d5b9ea5d3030c57fa5d6f4fbe4b8e6cf702dde2ad2f2ff3162aa930e28a",
+      "reference/upgrade-reader.mjs": "0x44e5ebb2d042a9f66a9b7655a1f0a96e20208dd85dacdec3f6a6b13507f3b2dc",
+      "test/upgrade-chain.test.mjs": "0xfe3c5fd1bcd7025990c96f42341f8fded86d681ecccd8343e6fa22a0649ed3bb",
+      "../2026-09-05-c0-core/reference/state-reader.mjs": "0x1434227aed5964a748d8e5d9f38f2ab8bf6eebeaca72bd539002c57db178fe20",
+      "../2026-09-05-c0-core/reference/record-body.mjs": "0x492b654a61a9d5611f762c4c197bcb7467c5d257865cd8ed73d711857412bd99",
+      "../2026-09-05-c0-core/scripts/local-stateful.mjs": "0x01e2c8a8ca1a17ac896571c01d23dc82c78d9a358a17bd89eac74f64cead7ca9",
+      "../2026-09-05-c0-admission/reader.mjs": "0xf93e5dba51e566f5b59b24839799430baed7cdfa00055b865ab129e013b6793e",
+      "../2026-09-05-c0-admission/codec.mjs": "0xea9e49d4aa48386c6d92913fd98c2d30804752069953494a419d6cdd1d2343ce",
+      "../2026-09-05-mvp-build-start/type-inputs/parser.mjs": "0x8a310f70fd7db700a6a8646fbef7930d6b315888aef9276744dde8b514c1ff9d",
+      "../2026-09-05-mvp-build-start/type-inputs/encoder.mjs": "0x1914b296e416d50e8f835390bd108c3c8d646bfb67f4ed38ce54349d632b0ce9",
+      "../../Designs/efsv2/hierarchical-files-and-folders.md": "0xcaad4a6341d147d6a9685c3fd39e57ac879d38cecfd2586cf4f34c0b314d350d",
+      "../2026-08-13-efs2-stage-a-corpus/chapters/b0-encoding-and-ids.md": "0xb322114060698ca4898b67e62cd797686c309e787ad0d0053b64229bc6cedb63"
+    },
+    "compilerInputHash": "0x1e4fd1089411e78b06f3f2fde03ffbf9023170424b050ddff34254f1436b96a2",
+    "compilerOutputHash": "0x3337531e8833c56944db8cbacbfbeb6c1e5dcea84f132e2100d7b72b85fff3b2",
+    "dependencyLockHash": "0x468794eb1d8a7c6af33a2a06ef28164cf60fdf86390b0385d3dde761909e08ba",
+    "artifactPins": {
+      "FixtureDeployment": "0xec0939fd159e4863e4d1653d69288e5e1f103b14434d9452896f063e7dc29652",
+      "PreparationHelper": "0xab2e50b612cc838d2c2393ec2472f51fc257176fcd93ec39c6db7b78a5d21cc6",
+      "UpgradeAdmissionLibrary": "0xcdaf7330722a2f7b3bc90d4e0c3a2465370792ef6b9c0523fae12646e95d21f2",
+      "UpgradeableFixtureCore": "0xb29f93474ceceab7a24953f07834dcc12020cb34f68b5fbf1df72bd5a459344e",
+      "UpgradeableFixtureCarrier": "0xbb7ceaf32f56f628cfccda42d9fdc9ad87879f3ea8455a24f491e5b809e3b970",
+      "UpgradeableFixtureCoreU2": "0x0b51048e536bcbb26aa1d878144f05375b46917b3b6b640fb8b8b99167a07a2b",
+      "UpgradeableFixtureCarrierU2": "0xe74d88d0840abdd26f9c4b2f7a22d252a7cb6cf89c076f8f17173ab576e72043",
+      "TransparentUpgradeableProxy": "0x3c7baa7dd2de98c5c804d7b447903c2eb5b5f9b635e596e5295173d4a3791f2f",
+      "ProxyAdmin": "0x017d82d67e625e1599e345114dfd6d08dee6f5e0d5a613498f119999de0f423e"
+    },
+    "txGasCeiling": "16777216",
+    "runtimeCeiling": 24576,
+    "initcodeCeiling": 49152,
+    "nodeArgs": [
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "62717",
+      "--chain-id",
+      "31337",
+      "--hardfork",
+      "cancun",
+      "--gas-limit",
+      "33554432",
+      "--accounts",
+      "0",
+      "--no-cors",
+      "--silent"
+    ],
+    "deployment": {
+      "FixtureDeployment": {
+        "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+        "runtimeBytes": 9402,
+        "initcodeBytes": 9469,
+        "gas": "2084328",
+        "codehash": "0x09cc5d59c2fcdaeb1e3c24568825e3213660be4c4226f8f6b43bfd779d8d9673",
+        "immutableNames": {
+          "23801": "owner"
+        }
+      },
+      "PreparationHelper": {
+        "address": "0x8764359d75dba3d1e3ff3d2f95ef484a9dde0b79",
+        "runtimeBytes": 18805,
+        "initcodeBytes": 18831,
+        "gas": "4120023",
+        "codehash": "0x9be9bcdb26b7ee3b55e80422a5103f7e64f9d73b4be535529e2c3245df553915",
+        "immutableNames": {}
+      },
+      "UpgradeAdmissionLibrary": {
+        "address": "0xd226ecebd1e4c36a7855f9a88304dcc8b48237f9",
+        "runtimeBytes": 24533,
+        "initcodeBytes": 24565,
+        "gas": "5358594",
+        "codehash": "0x6506240349c580c63b3f9c6a4d5e0844b173f6294af74eaa294d52ebb6a099be",
+        "immutableNames": {
+          "library_deploy_address": "library_deploy_address"
+        }
+      },
+      "UpgradeableFixtureCore": {
+        "address": "0x4c119a798a108c3225aa6d7f6235bafa784a37f4",
+        "runtimeBytes": 12774,
+        "initcodeBytes": 13438,
+        "gas": "2847263",
+        "codehash": "0x05dcd423b16202c7c1506c72efc9a09bc172cefcce961ce8b047145f8d7779bd",
+        "immutableNames": {
+          "22124": "implementationSelf",
+          "22126": "bootstrapAuthority",
+          "22128": "preparationHelper",
+          "22130": "preparationCodehash",
+          "22132": "admissionLibrary",
+          "22134": "admissionCodehash"
+        }
+      },
+      "UpgradeableFixtureCarrier": {
+        "address": "0x13a6c2149c7cb809d835eb119502a82960bf5a6c",
+        "runtimeBytes": 7637,
+        "initcodeBytes": 8273,
+        "gas": "1737118",
+        "codehash": "0x4505fc45e226fcf631ee903e0316cca5a03b393285864ec2d720a18dd0c8e514",
+        "immutableNames": {
+          "22124": "implementationSelf",
+          "22126": "bootstrapAuthority",
+          "22128": "preparationHelper",
+          "22130": "preparationCodehash",
+          "22132": "admissionLibrary",
+          "22134": "admissionCodehash"
+        }
+      },
+      "UpgradeableFixtureCoreU2": {
+        "address": "0x6388d37bc95f3d93ace005ae476bc890995fb1d7",
+        "runtimeBytes": 13229,
+        "initcodeBytes": 13893,
+        "gas": "2945644",
+        "codehash": "0xedbb1126a2932743cb0bcff7521d2a7e4faf76d075650b671ddecfbeb6700e67",
+        "immutableNames": {
+          "22124": "implementationSelf",
+          "22126": "bootstrapAuthority",
+          "22128": "preparationHelper",
+          "22130": "preparationCodehash",
+          "22132": "admissionLibrary",
+          "22134": "admissionCodehash"
+        }
+      },
+      "UpgradeableFixtureCarrierU2": {
+        "address": "0x99cbcfe3cc2c67e784f9e7b0fa32f9870697c0e1",
+        "runtimeBytes": 7999,
+        "initcodeBytes": 8635,
+        "gas": "1815397",
+        "codehash": "0x75ea47dfe12c8699f8e18cf8493724563942888418dec306c5e0fca526bdc4e0",
+        "immutableNames": {
+          "22124": "implementationSelf",
+          "22126": "bootstrapAuthority",
+          "22128": "preparationHelper",
+          "22130": "preparationCodehash",
+          "22132": "admissionLibrary",
+          "22134": "admissionCodehash"
+        }
+      },
+      "coreProxy": {
+        "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+        "runtimeBytes": 761,
+        "initcodeBytes": 6207,
+        "codehash": "0xeb8f48850c749e092cebb3df0e0c5a0b705f71f87d35f7704a28345d24603e6e",
+        "immutableAdminRefs": [
+          {
+            "start": 7,
+            "length": 32
+          }
+        ]
+      },
+      "coreAdmin": {
+        "address": "0x09e16501cb42eec019fcd5def4e37aab51d0db5b",
+        "runtimeBytes": 879,
+        "initcodeBytes": 1120,
+        "codehash": "0x76fb754dd80231f5dcd52a52e02f2616542696b256441cd7f75b9d4fd3bddbc6"
+      },
+      "carrierProxy": {
+        "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+        "runtimeBytes": 761,
+        "initcodeBytes": 3007,
+        "codehash": "0x5c5d2bc60ca9d00b57413c26da6af5fe3c6fee31d620e1c2c6e9e0037d28ae2c",
+        "immutableAdminRefs": [
+          {
+            "start": 7,
+            "length": 32
+          }
+        ]
+      },
+      "carrierAdmin": {
+        "address": "0xb665b3436060755c35962ce332e907a6935c3b5c",
+        "runtimeBytes": 879,
+        "initcodeBytes": 1120,
+        "codehash": "0x76fb754dd80231f5dcd52a52e02f2616542696b256441cd7f75b9d4fd3bddbc6"
+      }
+    },
+    "inputPins": {
+      "candidateFile": "0x5a5c0ea69f0642e8c7faa42af949c0cb65a35e5673e1aebebf40a7cb905869c8",
+      "groups": [
+        "0x9979945ce07959a64020c1b16656b43c70d0e7c12d8bdd70908ff76b3f5d4108",
+        "0xb73d9647fe976e376eb7c0810e6325e297f77e5c788055e2fc6fe200cd0ffc26",
+        "0x6b7d597a04da84609d706683e082ec9dd4f9d0b8608b71cecfeb576a5463121c",
+        "0xdb810effbd958fd35c11d30d1c969e3d9f740e81d6115eca72410f2c3609c0cb"
+      ],
+      "intrinsic": "0x4cadbc9c8e9bf5f63c84c6641f860db2d3184c643b3e6d3f66208d1135e1f4c4"
+    }
+  },
+  "cleanup": {
+    "pid": 38624,
+    "exitCode": 0,
+    "signal": null,
+    "stopped": true
+  },
+  "prestate": {
+    "basis": {
+      "number": "13",
+      "hash": "0xff4eb5a9bc498f5679b5009a921bb9d380079584b9ac8ec872b5633f876c5497",
+      "chainId": "31337",
+      "core": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "source": "managed-anvil:http://127.0.0.1:62717"
+    },
+    "counts": [
+      "6",
+      "5",
+      "17",
+      "1",
+      "6",
+      "5",
+      "17",
+      "1"
+    ]
+  }
+}

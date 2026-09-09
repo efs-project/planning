@@ -46,6 +46,11 @@ requires the computer and Codex to remain available.
    [one-screen consumer checkpoint](../2026-09-08-upgradeable-foundation/consumer-checkpoint.md):
    A-first/B-first/EXACT, real directory/file semantics, source/destination
    preconditions, attributed tags, remove versus retract, and restore.
+   The [real-store B0 point checkpoint](../2026-09-05-c0-core/lens-point-verification.md)
+   is implemented at `29859b2`, task-reviewed and parent-reproduced with200 Core
+   Forge/14 upgrade Forge/185 broad Node passes. All24 Lens outcomes/gas rows
+   reproduce. Final whole-increment review remains pending; revision-one
+   mechanics precede the separate populated-upgrade/Files reader join.
 4. **Expose one shared SDK path in the SPA.** Zero-wallet guest reading;
    opaque intent preparation; receipt versus committed readback; scoped
    evidence reuse; bounded concurrent hydration; preserved drafts on races,
@@ -91,6 +96,22 @@ bytes: choose caller budgets and small UI pages deliberately. Read-only phone
 and keyboard probes also found two consumer followups: Evidence is hidden on
 narrow screens, and finishing pagination loses keyboard focus. Both are
 documented for the joined screen rather than claimed fixed by contract tests.
+
+The [bulk-create probe](../2026-09-09-files-parity-performance/bulk-create-findings.md)
+adds a concrete write/UX limit: one 7-leaf metadata creation fits at 8.67m gas;
+two or three in one transaction exhaust forwarded admission gas. Independent
+readback proves full rollback, and the same two files succeed separately.
+Bulk jobs therefore need bounded preflight, resumable per-file progress and an
+honest distinction between approval count and transaction count. A format's
+64-leaf ceiling is not a throughput promise.
+
+Real Lens measurements also replace optimistic schedule arithmetic:64-source
+agreement/conflict costs1.54m/2.13m resolve transaction gas; the latter's repeat
+STATICCALL still costs1.56m marginal gas in the same transaction. The fixed
+Query library fits at19,181 runtime bytes. This is enough to continue measured
+integration, not a promise that resolving every row through a wide onchain
+view is cheap. Small scoped queries and exact-context evidence reuse need
+actual browser measurements.
 
 ## Owner followups
 

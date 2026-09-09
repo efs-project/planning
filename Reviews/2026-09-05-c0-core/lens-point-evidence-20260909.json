@@ -1,0 +1,2525 @@
+{
+  "schema": "efs-lens-point-task1-evidence/1",
+  "sourceCommit": "29859b2d7eccf47854ee731c8690ac1fc8dc1125",
+  "baseCommit": "219bf614c0ad426075e100fcc9fce8b44972ba39",
+  "branch": "codex/mvp-c0-coherence",
+  "authority": "Synthetic trusted publication only; current revision-one. Not authenticated C0 or upgraded reads.",
+  "scope": "Normally deployed Lens host with unchanged five-component layout; 24 observed scenarios, not a worst-case theorem.",
+  "command": "EFS_TASK3_EVIDENCE=0 node --test --test-concurrency=1 test/*.test.mjs ../2026-09-05-c0-admission/integration.test.mjs ../2026-09-05-mvp-build-start/type-inputs/*.test.mjs",
+  "totals": {
+    "forge": 200,
+    "coreNode": 66,
+    "expandedNode": 102,
+    "lensNode": 7,
+    "measuredScenarios": 24
+  },
+  "metadata": {
+    "LensReadHarness": {
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [
+          "C0Admission/=../2026-09-05-c0-admission/src/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "test/LensReadHarness.sol": "LensReadHarness"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sources": {
+        "../2026-09-05-c0-admission/src/TypeGroupParser.sol": {
+          "keccak256": "0x586b5d360092ed79faaf69114aadbe7dd487b9a7c2690ef55c5c6443d3f2bc86",
+          "urls": [
+            "bzz-raw://24446ce927006cceb49faa5be29cbb969fbe5b9097813d508cfdb427e5b4e844",
+            "dweb:/ipfs/Qmamj7mg3vm649XhiZCjKYmjM92MQNYhFoSeZ9XSTYv7SR"
+          ],
+          "license": "MIT"
+        },
+        "src/AdmissionLibrary.sol": {
+          "keccak256": "0x58bdba5c0a12d7e8f2fdf6d8217a205b81b8075080d1dd27b03c4dfc5b8201c2",
+          "urls": [
+            "bzz-raw://c48dd54d70c33c2c80eb2f7ffdd9c869915d058a5bf48d7f88198556504338b8",
+            "dweb:/ipfs/QmQY4cAdytqU9BTG5MS2CrRQs5Lyj3pPHBkFxMFufCBDKg"
+          ],
+          "license": "MIT"
+        },
+        "src/AuditPageCursor.sol": {
+          "keccak256": "0xde4c99554ff6a3b73c0f1e3ef6fbd5572e8c6c32ff8e54fd95c5dd868ab51c6c",
+          "urls": [
+            "bzz-raw://e4c36f93cff43f2860027a87c95dd31ca13d0adfd6198df4fba583b6764dc6d3",
+            "dweb:/ipfs/QmeoQywbaKzeUvoSZjWttzhaJwGcoJPFNrBVo1YKTqPHHR"
+          ],
+          "license": "MIT"
+        },
+        "src/BindingFold.sol": {
+          "keccak256": "0xecf170a723ffff6966b6439c2305dcbae427ccc70c68aad632b950631dd307ee",
+          "urls": [
+            "bzz-raw://bb40883788b30b8eecce1895d1370e3b63ea75a7d89d04c0483c280f774ec410",
+            "dweb:/ipfs/QmUGf4f5CjkaknDafC1sCqZbVcaS2d16gaPsg1LSJ7FJXy"
+          ],
+          "license": "MIT"
+        },
+        "src/IndexKeys.sol": {
+          "keccak256": "0x82dbf6754e96cd113fc5ecd8536c50ed464f626214947de51f20e85650fb4d43",
+          "urls": [
+            "bzz-raw://933d2b43fea0ac521330b03ccc9027222a2cc9ea23d6515bb988e2416dd2ff83",
+            "dweb:/ipfs/QmZgukQQpKH15LRKRFzhX5x6fqCWjzTrDAhaRio25pPArs"
+          ],
+          "license": "MIT"
+        },
+        "src/LensPlan.sol": {
+          "keccak256": "0x422390b9797e6a4cebd9566070ebc6a03ae362330456839d9f4abd6f0ef8096f",
+          "urls": [
+            "bzz-raw://566b05c9007641013333792361d36db3f1edd2567471cb5296da596988bfcb26",
+            "dweb:/ipfs/QmbwYTpDk9Mwo8hjDG2wENt1MK8FhXdQS7J5MH9sG4np3r"
+          ],
+          "license": "MIT"
+        },
+        "src/PointReadLibrary.sol": {
+          "keccak256": "0x29b035c5182826a17a497059dbfe9f2680e6e504962cdb2aea48cf75a4487d79",
+          "urls": [
+            "bzz-raw://466b0d8ba03ca322fc36aeb2ee4e37fceac35f85ad0505a5a3c78a5ba695a676",
+            "dweb:/ipfs/QmcodTQgLk9YFroTUL2egdrFS9M1vDMSyy2NVeMZyMCWBK"
+          ],
+          "license": "MIT"
+        },
+        "src/Preparation.sol": {
+          "keccak256": "0x2200c3eb67c8ce1c52d3bf5418abf8bde29254d1a004355f83e458f8f4ad7c81",
+          "urls": [
+            "bzz-raw://60e64c99a28c6c514ef64025353cb34aa4ef37c4f8cf5369be006704dbe799f8",
+            "dweb:/ipfs/QmUiK4ZUXJXK2yyyanAsimxBuVB1fZE7BWDk6gkNh4VH17"
+          ],
+          "license": "MIT"
+        },
+        "src/QueryReadLibrary.sol": {
+          "keccak256": "0xb6cb76f30818aebebf541f50d765490851489cec4cc12864233852f7f4e5a806",
+          "urls": [
+            "bzz-raw://ce9038a1368e5a6f9733dce401e140b7fe0b3a2f57d82bfa122d76f877d15a4c",
+            "dweb:/ipfs/QmQHEafoqHkTjngFffSPre4qZ7n2gRoiWDBDrAUyMwHGwQ"
+          ],
+          "license": "MIT"
+        },
+        "src/RecordBody.sol": {
+          "keccak256": "0xd08b372ae170699dc246bf3e28ca843b4ac45a1b4347fc45d39258cdd1b0873e",
+          "urls": [
+            "bzz-raw://5c9d1518f3847b277e753dc4703223cdcac4cc719370473295d0730550374370",
+            "dweb:/ipfs/QmTwAJpQhqe5puao8M4HKgqRjSTtsNApc7kz7DBGzzfen4"
+          ],
+          "license": "MIT"
+        },
+        "src/StateAuditPages.sol": {
+          "keccak256": "0xfd2c2c4d552338f491a54d50b961f6dfe9cbf90fb2d212465217a3c504821d28",
+          "urls": [
+            "bzz-raw://4cb3e62a5b72e81ff491b4278392b94c526a980f54364f8c1680dd0e0e8422bb",
+            "dweb:/ipfs/QmRRcXj7tyY4ifXn1ASyHRxpZiaEg4N8vx3Wu3ZoEVThBq"
+          ],
+          "license": "MIT"
+        },
+        "src/StateBindingReads.sol": {
+          "keccak256": "0xeec44ef6744955055cfc3bf68dc77a19c6eb0ade0b39870c0bf72a0d00b965f9",
+          "urls": [
+            "bzz-raw://c3df39ebf14bbe4d0f4103553dafc27b45db1a305c3f143e021aed207d725a12",
+            "dweb:/ipfs/Qme2MHLn8md5g1MGbHr5HHCBJ424mYFDjLHGaRhsKRY6qk"
+          ],
+          "license": "MIT"
+        },
+        "src/StateKernel.sol": {
+          "keccak256": "0x09964761aa0fed1f2ba5ca673b2d6ffad41c8e92cc4bb513783e539415dc215a",
+          "urls": [
+            "bzz-raw://57b9838cacfebd548c86f369d08d9de1b21bad77fa40239da19e562f873b1a88",
+            "dweb:/ipfs/QmSA9Ea5ESdzWTCqY6rRUJVZQEHQh1BAXQFKZCZaJFz8iZ"
+          ],
+          "license": "MIT"
+        },
+        "src/StateLensReads.sol": {
+          "keccak256": "0xe4cc5802ce77e0183eaad77ffd28cc49e5909209e57328188ae37f78f7294c89",
+          "urls": [
+            "bzz-raw://1cf4049e98ab0b9ad5bf6495c21e891627c14a6e8ecfc8d169b0e91a3abdd22f",
+            "dweb:/ipfs/QmbHgc7UfNN3ZVHYNjqUjpmBZAWJoZCUxhVQxJcNbYEJGa"
+          ],
+          "license": "MIT"
+        },
+        "src/StatePointReads.sol": {
+          "keccak256": "0xf956b46649de1719885c1843b04a97cb67910a0cc3982a9e353503769e4c89a1",
+          "urls": [
+            "bzz-raw://4a9fe5e981b68afe6bc86ed92955a2662fb38b760b131a3c2c583596a97b60b6",
+            "dweb:/ipfs/QmYb6eaRab8pN9QA2YQ73kP1AGu3TgJhU25CqEzJm59Yay"
+          ],
+          "license": "MIT"
+        },
+        "src/StateReadPrimitives.sol": {
+          "keccak256": "0xc8bae9362172be337d7976a4ab85c67251f955c68d193dce21fa3255d30e6e17",
+          "urls": [
+            "bzz-raw://3ce59c573c0f09e492655a95ce213a00ea7e76c48d23b3209877b20c1d531a12",
+            "dweb:/ipfs/QmZoMDpdoE8nei4jsWmVhp3BAZzqh8HA7rbCWA7tsnrULD"
+          ],
+          "license": "MIT"
+        },
+        "src/StateStore.sol": {
+          "keccak256": "0x4e4eac82091ef3614c777bba4bd8a43d957115765fdcc699339af03eb206a8a1",
+          "urls": [
+            "bzz-raw://890b4b2809494ac1159e7a5d6dc1da0a00d69fc635533170fd3c989f6505d9b9",
+            "dweb:/ipfs/QmS757huJKexwHPKR1YRXJRMMuoTH9Hp3Y6Q75VZgtvJ7F"
+          ],
+          "license": "MIT"
+        },
+        "src/StorageByteView.sol": {
+          "keccak256": "0x870732b622c6ea6be4b30e6b47367e138810b2236565bb5a688e41591bff8d4c",
+          "urls": [
+            "bzz-raw://408959ec7a9b5de5d3c200f4f4da9567892bd67e126c095d973399dcd965273a",
+            "dweb:/ipfs/Qmf6p1YM3CoMWdkmmb3hCr58VSQ8CU7HvtWXrhUAdXuVi2"
+          ],
+          "license": "MIT"
+        },
+        "test/AuditPageReadHarness.sol": {
+          "keccak256": "0xc8e0932e67e033ebaa9556952c8685dc14f0c2cf274c6bae4b630e96d37b255d",
+          "urls": [
+            "bzz-raw://b2e62580d7fcbc4b90b252dd59dd36e93cd24c34817c93a30298739fcfe4e618",
+            "dweb:/ipfs/QmdxbaLrcUBsty1HKhetxe5RgS2VpN75xHriYJMJgpWqBQ"
+          ],
+          "license": "MIT"
+        },
+        "test/BindingReadHarness.sol": {
+          "keccak256": "0xc7053650cf3e73b4d96932c91acf64885e3f5bd01a48557aa1b1c721dd9c72b3",
+          "urls": [
+            "bzz-raw://aec37709881252238aac221ab837e7e19e9c91b3526d17f3a6484d27dcb0a8da",
+            "dweb:/ipfs/QmREvYsqGZvjuuPfyfVAbtQHjEy7TU6vj9V6zBGWYjQRtk"
+          ],
+          "license": "MIT"
+        },
+        "test/LensReadHarness.sol": {
+          "keccak256": "0x84a850d0929a32226f00298cf8ad52378850464ce8dea325bb86ccc0c0f30ce7",
+          "urls": [
+            "bzz-raw://e2c7be96bb75db27850c71f2938b8924bfbc5ef06b6d128429df6039e1add1e5",
+            "dweb:/ipfs/QmNhpEZ7iyeGpVHbLabm7euUf9DhSKG19KdXa7anuLXVWg"
+          ],
+          "license": "MIT"
+        },
+        "test/StatefulHarness.sol": {
+          "keccak256": "0x44e2aa292c72c963ef23ac42b2b48c537bb71a751b1a5faede48ea09be35beac",
+          "urls": [
+            "bzz-raw://5813614522305c8e9ff5eac6cca62e2c17454dcf859ce6f5fbbc20970d62cfdf",
+            "dweb:/ipfs/QmagyR8LjjD3DQZj3UAiACCqJ1hcg4ZWy5pDwP4WzvHcCz"
+          ],
+          "license": "MIT"
+        }
+      },
+      "methodIdentifiers": {
+        "admissionAt(uint64)": "bf0bc5ba",
+        "admissionCodehash()": "f3108564",
+        "admissionLibrary()": "0cc81bdd",
+        "batchAt(uint64)": "b9142c75",
+        "binding(bytes32)": "3a49d747",
+        "bindingKeyAt(uint64)": "804a5cfa",
+        "bootstrap()": "fb969b0a",
+        "counts()": "817cc1ea",
+        "counts(bytes32,uint8,uint8,bytes32)": "bad4c1dd",
+        "deriveBindingKey(bytes32,bytes32)": "ed062aa4",
+        "envelope(bytes32)": "6df61148",
+        "envelopeIdAt(uint64)": "285a14a9",
+        "getBindingAtBasis(bytes32,uint64)": "80d639fe",
+        "getBindingHead(bytes32)": "7e84319a",
+        "getEnvelope(bytes32)": "2cfe0d2f",
+        "getOccurrence(bytes32,uint16)": "7342e13f",
+        "getOccurrenceByOrdinal(uint64)": "8c774145",
+        "getReceipt(uint64)": "25b36cbf",
+        "getRecord(bytes32)": "213681cd",
+        "getTypeOrigin(bytes32)": "79b7e053",
+        "getTypeSchema(bytes32)": "da15dab3",
+        "intrinsicTypeGroupBytes()": "ef2a2d26",
+        "occurrence(bytes32,uint16)": "a874b84c",
+        "pagePostings(bytes32,uint8,uint8,bytes32,(uint256,uint16,uint64))": "26eba25a",
+        "pagePostingsHydrated(bytes32,uint8,uint8,bytes32,(uint256,uint16,uint64))": "182f5e04",
+        "pointReadCodehash()": "05d223a2",
+        "pointReadLibrary()": "cdb9b116",
+        "postingHead(bytes32)": "5cdd4bb0",
+        "postingKeyAt(uint64)": "901c590e",
+        "postingWord(bytes32,uint64)": "68830b72",
+        "preparationCodehash()": "45dd7a05",
+        "preparationHelper()": "99e68807",
+        "principal(bytes32)": "e3eff408",
+        "principalIdAt(uint64)": "720086ff",
+        "publishTrustedForTest((bytes32,uint32,uint256,bytes32),(bytes32,(uint16,bytes32,bytes32,uint64,bytes32,uint64),bytes32[],uint64,(uint16,bytes32,bytes)[],(uint16,uint32)[]))": "22b827d5",
+        "queryReadCodehash()": "9fd59af9",
+        "queryReadLibrary()": "c44fb014",
+        "readHistory(bytes32,uint32,uint16)": "c870d3e5",
+        "record(bytes32)": "b5c645bd",
+        "recordIdAt(uint64)": "dfd3d5e8",
+        "resolve(bytes32,bytes32)": "077dda78",
+        "resolveStrict(bytes32,bytes32,uint8)": "39e050ac",
+        "typeIdAt(uint64)": "bb3d5017",
+        "typeRow(bytes32)": "3447d86a",
+        "validatePlan(bytes32)": "1b823c3f"
+      }
+    },
+    "QueryReadLibrary": {
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [
+          "C0Admission/=../2026-09-05-c0-admission/src/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/QueryReadLibrary.sol": "QueryReadLibrary"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sources": {
+        "../2026-09-05-c0-admission/src/TypeGroupParser.sol": {
+          "keccak256": "0x586b5d360092ed79faaf69114aadbe7dd487b9a7c2690ef55c5c6443d3f2bc86",
+          "urls": [
+            "bzz-raw://24446ce927006cceb49faa5be29cbb969fbe5b9097813d508cfdb427e5b4e844",
+            "dweb:/ipfs/Qmamj7mg3vm649XhiZCjKYmjM92MQNYhFoSeZ9XSTYv7SR"
+          ],
+          "license": "MIT"
+        },
+        "src/AuditPageCursor.sol": {
+          "keccak256": "0xde4c99554ff6a3b73c0f1e3ef6fbd5572e8c6c32ff8e54fd95c5dd868ab51c6c",
+          "urls": [
+            "bzz-raw://e4c36f93cff43f2860027a87c95dd31ca13d0adfd6198df4fba583b6764dc6d3",
+            "dweb:/ipfs/QmeoQywbaKzeUvoSZjWttzhaJwGcoJPFNrBVo1YKTqPHHR"
+          ],
+          "license": "MIT"
+        },
+        "src/BindingFold.sol": {
+          "keccak256": "0xecf170a723ffff6966b6439c2305dcbae427ccc70c68aad632b950631dd307ee",
+          "urls": [
+            "bzz-raw://bb40883788b30b8eecce1895d1370e3b63ea75a7d89d04c0483c280f774ec410",
+            "dweb:/ipfs/QmUGf4f5CjkaknDafC1sCqZbVcaS2d16gaPsg1LSJ7FJXy"
+          ],
+          "license": "MIT"
+        },
+        "src/IndexKeys.sol": {
+          "keccak256": "0x82dbf6754e96cd113fc5ecd8536c50ed464f626214947de51f20e85650fb4d43",
+          "urls": [
+            "bzz-raw://933d2b43fea0ac521330b03ccc9027222a2cc9ea23d6515bb988e2416dd2ff83",
+            "dweb:/ipfs/QmZgukQQpKH15LRKRFzhX5x6fqCWjzTrDAhaRio25pPArs"
+          ],
+          "license": "MIT"
+        },
+        "src/LensPlan.sol": {
+          "keccak256": "0x422390b9797e6a4cebd9566070ebc6a03ae362330456839d9f4abd6f0ef8096f",
+          "urls": [
+            "bzz-raw://566b05c9007641013333792361d36db3f1edd2567471cb5296da596988bfcb26",
+            "dweb:/ipfs/QmbwYTpDk9Mwo8hjDG2wENt1MK8FhXdQS7J5MH9sG4np3r"
+          ],
+          "license": "MIT"
+        },
+        "src/Preparation.sol": {
+          "keccak256": "0x2200c3eb67c8ce1c52d3bf5418abf8bde29254d1a004355f83e458f8f4ad7c81",
+          "urls": [
+            "bzz-raw://60e64c99a28c6c514ef64025353cb34aa4ef37c4f8cf5369be006704dbe799f8",
+            "dweb:/ipfs/QmUiK4ZUXJXK2yyyanAsimxBuVB1fZE7BWDk6gkNh4VH17"
+          ],
+          "license": "MIT"
+        },
+        "src/QueryReadLibrary.sol": {
+          "keccak256": "0xb6cb76f30818aebebf541f50d765490851489cec4cc12864233852f7f4e5a806",
+          "urls": [
+            "bzz-raw://ce9038a1368e5a6f9733dce401e140b7fe0b3a2f57d82bfa122d76f877d15a4c",
+            "dweb:/ipfs/QmQHEafoqHkTjngFffSPre4qZ7n2gRoiWDBDrAUyMwHGwQ"
+          ],
+          "license": "MIT"
+        },
+        "src/RecordBody.sol": {
+          "keccak256": "0xd08b372ae170699dc246bf3e28ca843b4ac45a1b4347fc45d39258cdd1b0873e",
+          "urls": [
+            "bzz-raw://5c9d1518f3847b277e753dc4703223cdcac4cc719370473295d0730550374370",
+            "dweb:/ipfs/QmTwAJpQhqe5puao8M4HKgqRjSTtsNApc7kz7DBGzzfen4"
+          ],
+          "license": "MIT"
+        },
+        "src/StateAuditPages.sol": {
+          "keccak256": "0xfd2c2c4d552338f491a54d50b961f6dfe9cbf90fb2d212465217a3c504821d28",
+          "urls": [
+            "bzz-raw://4cb3e62a5b72e81ff491b4278392b94c526a980f54364f8c1680dd0e0e8422bb",
+            "dweb:/ipfs/QmRRcXj7tyY4ifXn1ASyHRxpZiaEg4N8vx3Wu3ZoEVThBq"
+          ],
+          "license": "MIT"
+        },
+        "src/StateBindingReads.sol": {
+          "keccak256": "0xeec44ef6744955055cfc3bf68dc77a19c6eb0ade0b39870c0bf72a0d00b965f9",
+          "urls": [
+            "bzz-raw://c3df39ebf14bbe4d0f4103553dafc27b45db1a305c3f143e021aed207d725a12",
+            "dweb:/ipfs/Qme2MHLn8md5g1MGbHr5HHCBJ424mYFDjLHGaRhsKRY6qk"
+          ],
+          "license": "MIT"
+        },
+        "src/StateKernel.sol": {
+          "keccak256": "0x09964761aa0fed1f2ba5ca673b2d6ffad41c8e92cc4bb513783e539415dc215a",
+          "urls": [
+            "bzz-raw://57b9838cacfebd548c86f369d08d9de1b21bad77fa40239da19e562f873b1a88",
+            "dweb:/ipfs/QmSA9Ea5ESdzWTCqY6rRUJVZQEHQh1BAXQFKZCZaJFz8iZ"
+          ],
+          "license": "MIT"
+        },
+        "src/StateLensReads.sol": {
+          "keccak256": "0xe4cc5802ce77e0183eaad77ffd28cc49e5909209e57328188ae37f78f7294c89",
+          "urls": [
+            "bzz-raw://1cf4049e98ab0b9ad5bf6495c21e891627c14a6e8ecfc8d169b0e91a3abdd22f",
+            "dweb:/ipfs/QmbHgc7UfNN3ZVHYNjqUjpmBZAWJoZCUxhVQxJcNbYEJGa"
+          ],
+          "license": "MIT"
+        },
+        "src/StatePointReads.sol": {
+          "keccak256": "0xf956b46649de1719885c1843b04a97cb67910a0cc3982a9e353503769e4c89a1",
+          "urls": [
+            "bzz-raw://4a9fe5e981b68afe6bc86ed92955a2662fb38b760b131a3c2c583596a97b60b6",
+            "dweb:/ipfs/QmYb6eaRab8pN9QA2YQ73kP1AGu3TgJhU25CqEzJm59Yay"
+          ],
+          "license": "MIT"
+        },
+        "src/StateReadPrimitives.sol": {
+          "keccak256": "0xc8bae9362172be337d7976a4ab85c67251f955c68d193dce21fa3255d30e6e17",
+          "urls": [
+            "bzz-raw://3ce59c573c0f09e492655a95ce213a00ea7e76c48d23b3209877b20c1d531a12",
+            "dweb:/ipfs/QmZoMDpdoE8nei4jsWmVhp3BAZzqh8HA7rbCWA7tsnrULD"
+          ],
+          "license": "MIT"
+        },
+        "src/StateStore.sol": {
+          "keccak256": "0x4e4eac82091ef3614c777bba4bd8a43d957115765fdcc699339af03eb206a8a1",
+          "urls": [
+            "bzz-raw://890b4b2809494ac1159e7a5d6dc1da0a00d69fc635533170fd3c989f6505d9b9",
+            "dweb:/ipfs/QmS757huJKexwHPKR1YRXJRMMuoTH9Hp3Y6Q75VZgtvJ7F"
+          ],
+          "license": "MIT"
+        },
+        "src/StorageByteView.sol": {
+          "keccak256": "0x870732b622c6ea6be4b30e6b47367e138810b2236565bb5a688e41591bff8d4c",
+          "urls": [
+            "bzz-raw://408959ec7a9b5de5d3c200f4f4da9567892bd67e126c095d973399dcd965273a",
+            "dweb:/ipfs/Qmf6p1YM3CoMWdkmmb3hCr58VSQ8CU7HvtWXrhUAdXuVi2"
+          ],
+          "license": "MIT"
+        }
+      },
+      "methodIdentifiers": {
+        "counts(StateStore.Store storage,bytes32,uint8,uint8,bytes32)": "7372ddf9",
+        "deriveBindingKey(bytes32,bytes32)": "ed062aa4",
+        "getBindingAtBasis(StateStore.Store storage,bytes32,uint64)": "420f77c5",
+        "getBindingHead(StateStore.Store storage,bytes32)": "e67829e6",
+        "pagePostings(StateStore.Store storage,bytes32,uint8,uint8,bytes32,StateAuditPages.PageRequest)": "23bf9a44",
+        "pagePostingsHydrated(StateStore.Store storage,bytes32,uint8,uint8,bytes32,StateAuditPages.PageRequest)": "3838081e",
+        "readHistory(StateStore.Store storage,bytes32,uint32,uint16)": "019f721d",
+        "resolve(StateStore.Store storage,bytes32,bytes32)": "39a631fa",
+        "resolveStrict(StateStore.Store storage,bytes32,bytes32,uint8)": "dd4ba726",
+        "validatePlan(StateStore.Store storage,bytes32)": "85de9363"
+      }
+    },
+    "PointReadLibrary": {
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [
+          "C0Admission/=../2026-09-05-c0-admission/src/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/PointReadLibrary.sol": "PointReadLibrary"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sources": {
+        "../2026-09-05-c0-admission/src/TypeGroupParser.sol": {
+          "keccak256": "0x586b5d360092ed79faaf69114aadbe7dd487b9a7c2690ef55c5c6443d3f2bc86",
+          "urls": [
+            "bzz-raw://24446ce927006cceb49faa5be29cbb969fbe5b9097813d508cfdb427e5b4e844",
+            "dweb:/ipfs/Qmamj7mg3vm649XhiZCjKYmjM92MQNYhFoSeZ9XSTYv7SR"
+          ],
+          "license": "MIT"
+        },
+        "src/BindingFold.sol": {
+          "keccak256": "0xecf170a723ffff6966b6439c2305dcbae427ccc70c68aad632b950631dd307ee",
+          "urls": [
+            "bzz-raw://bb40883788b30b8eecce1895d1370e3b63ea75a7d89d04c0483c280f774ec410",
+            "dweb:/ipfs/QmUGf4f5CjkaknDafC1sCqZbVcaS2d16gaPsg1LSJ7FJXy"
+          ],
+          "license": "MIT"
+        },
+        "src/IndexKeys.sol": {
+          "keccak256": "0x82dbf6754e96cd113fc5ecd8536c50ed464f626214947de51f20e85650fb4d43",
+          "urls": [
+            "bzz-raw://933d2b43fea0ac521330b03ccc9027222a2cc9ea23d6515bb988e2416dd2ff83",
+            "dweb:/ipfs/QmZgukQQpKH15LRKRFzhX5x6fqCWjzTrDAhaRio25pPArs"
+          ],
+          "license": "MIT"
+        },
+        "src/PointReadLibrary.sol": {
+          "keccak256": "0x29b035c5182826a17a497059dbfe9f2680e6e504962cdb2aea48cf75a4487d79",
+          "urls": [
+            "bzz-raw://466b0d8ba03ca322fc36aeb2ee4e37fceac35f85ad0505a5a3c78a5ba695a676",
+            "dweb:/ipfs/QmcodTQgLk9YFroTUL2egdrFS9M1vDMSyy2NVeMZyMCWBK"
+          ],
+          "license": "MIT"
+        },
+        "src/Preparation.sol": {
+          "keccak256": "0x2200c3eb67c8ce1c52d3bf5418abf8bde29254d1a004355f83e458f8f4ad7c81",
+          "urls": [
+            "bzz-raw://60e64c99a28c6c514ef64025353cb34aa4ef37c4f8cf5369be006704dbe799f8",
+            "dweb:/ipfs/QmUiK4ZUXJXK2yyyanAsimxBuVB1fZE7BWDk6gkNh4VH17"
+          ],
+          "license": "MIT"
+        },
+        "src/RecordBody.sol": {
+          "keccak256": "0xd08b372ae170699dc246bf3e28ca843b4ac45a1b4347fc45d39258cdd1b0873e",
+          "urls": [
+            "bzz-raw://5c9d1518f3847b277e753dc4703223cdcac4cc719370473295d0730550374370",
+            "dweb:/ipfs/QmTwAJpQhqe5puao8M4HKgqRjSTtsNApc7kz7DBGzzfen4"
+          ],
+          "license": "MIT"
+        },
+        "src/StateKernel.sol": {
+          "keccak256": "0x09964761aa0fed1f2ba5ca673b2d6ffad41c8e92cc4bb513783e539415dc215a",
+          "urls": [
+            "bzz-raw://57b9838cacfebd548c86f369d08d9de1b21bad77fa40239da19e562f873b1a88",
+            "dweb:/ipfs/QmSA9Ea5ESdzWTCqY6rRUJVZQEHQh1BAXQFKZCZaJFz8iZ"
+          ],
+          "license": "MIT"
+        },
+        "src/StatePointReads.sol": {
+          "keccak256": "0xf956b46649de1719885c1843b04a97cb67910a0cc3982a9e353503769e4c89a1",
+          "urls": [
+            "bzz-raw://4a9fe5e981b68afe6bc86ed92955a2662fb38b760b131a3c2c583596a97b60b6",
+            "dweb:/ipfs/QmYb6eaRab8pN9QA2YQ73kP1AGu3TgJhU25CqEzJm59Yay"
+          ],
+          "license": "MIT"
+        },
+        "src/StateStore.sol": {
+          "keccak256": "0x4e4eac82091ef3614c777bba4bd8a43d957115765fdcc699339af03eb206a8a1",
+          "urls": [
+            "bzz-raw://890b4b2809494ac1159e7a5d6dc1da0a00d69fc635533170fd3c989f6505d9b9",
+            "dweb:/ipfs/QmS757huJKexwHPKR1YRXJRMMuoTH9Hp3Y6Q75VZgtvJ7F"
+          ],
+          "license": "MIT"
+        },
+        "src/StorageByteView.sol": {
+          "keccak256": "0x870732b622c6ea6be4b30e6b47367e138810b2236565bb5a688e41591bff8d4c",
+          "urls": [
+            "bzz-raw://408959ec7a9b5de5d3c200f4f4da9567892bd67e126c095d973399dcd965273a",
+            "dweb:/ipfs/Qmf6p1YM3CoMWdkmmb3hCr58VSQ8CU7HvtWXrhUAdXuVi2"
+          ],
+          "license": "MIT"
+        }
+      },
+      "methodIdentifiers": {
+        "getEnvelope(StateStore.Store storage,bytes32)": "a3088f8a",
+        "getOccurrence(StateStore.Store storage,bytes32,uint16)": "b522836f",
+        "getOccurrenceByOrdinal(StateStore.Store storage,uint64)": "d1cb8ed9",
+        "getReceipt(StateStore.Store storage,uint64)": "246c4d90",
+        "getRecord(StateStore.Store storage,bytes32)": "bd8d7350",
+        "getTypeOrigin(StateStore.Store storage,bytes32)": "7535e04f",
+        "getTypeSchema(StateStore.Store storage,bytes32)": "afd2b900",
+        "intrinsicTypeGroupBytes(StateStore.Store storage)": "0e339e0b"
+      }
+    },
+    "AdmissionLibrary": {
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [
+          "C0Admission/=../2026-09-05-c0-admission/src/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/AdmissionLibrary.sol": "AdmissionLibrary"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sources": {
+        "../2026-09-05-c0-admission/src/TypeGroupParser.sol": {
+          "keccak256": "0x586b5d360092ed79faaf69114aadbe7dd487b9a7c2690ef55c5c6443d3f2bc86",
+          "urls": [
+            "bzz-raw://24446ce927006cceb49faa5be29cbb969fbe5b9097813d508cfdb427e5b4e844",
+            "dweb:/ipfs/Qmamj7mg3vm649XhiZCjKYmjM92MQNYhFoSeZ9XSTYv7SR"
+          ],
+          "license": "MIT"
+        },
+        "src/AdmissionLibrary.sol": {
+          "keccak256": "0x58bdba5c0a12d7e8f2fdf6d8217a205b81b8075080d1dd27b03c4dfc5b8201c2",
+          "urls": [
+            "bzz-raw://c48dd54d70c33c2c80eb2f7ffdd9c869915d058a5bf48d7f88198556504338b8",
+            "dweb:/ipfs/QmQY4cAdytqU9BTG5MS2CrRQs5Lyj3pPHBkFxMFufCBDKg"
+          ],
+          "license": "MIT"
+        },
+        "src/BindingFold.sol": {
+          "keccak256": "0xecf170a723ffff6966b6439c2305dcbae427ccc70c68aad632b950631dd307ee",
+          "urls": [
+            "bzz-raw://bb40883788b30b8eecce1895d1370e3b63ea75a7d89d04c0483c280f774ec410",
+            "dweb:/ipfs/QmUGf4f5CjkaknDafC1sCqZbVcaS2d16gaPsg1LSJ7FJXy"
+          ],
+          "license": "MIT"
+        },
+        "src/IndexKeys.sol": {
+          "keccak256": "0x82dbf6754e96cd113fc5ecd8536c50ed464f626214947de51f20e85650fb4d43",
+          "urls": [
+            "bzz-raw://933d2b43fea0ac521330b03ccc9027222a2cc9ea23d6515bb988e2416dd2ff83",
+            "dweb:/ipfs/QmZgukQQpKH15LRKRFzhX5x6fqCWjzTrDAhaRio25pPArs"
+          ],
+          "license": "MIT"
+        },
+        "src/Preparation.sol": {
+          "keccak256": "0x2200c3eb67c8ce1c52d3bf5418abf8bde29254d1a004355f83e458f8f4ad7c81",
+          "urls": [
+            "bzz-raw://60e64c99a28c6c514ef64025353cb34aa4ef37c4f8cf5369be006704dbe799f8",
+            "dweb:/ipfs/QmUiK4ZUXJXK2yyyanAsimxBuVB1fZE7BWDk6gkNh4VH17"
+          ],
+          "license": "MIT"
+        },
+        "src/RecordBody.sol": {
+          "keccak256": "0xd08b372ae170699dc246bf3e28ca843b4ac45a1b4347fc45d39258cdd1b0873e",
+          "urls": [
+            "bzz-raw://5c9d1518f3847b277e753dc4703223cdcac4cc719370473295d0730550374370",
+            "dweb:/ipfs/QmTwAJpQhqe5puao8M4HKgqRjSTtsNApc7kz7DBGzzfen4"
+          ],
+          "license": "MIT"
+        },
+        "src/StateKernel.sol": {
+          "keccak256": "0x09964761aa0fed1f2ba5ca673b2d6ffad41c8e92cc4bb513783e539415dc215a",
+          "urls": [
+            "bzz-raw://57b9838cacfebd548c86f369d08d9de1b21bad77fa40239da19e562f873b1a88",
+            "dweb:/ipfs/QmSA9Ea5ESdzWTCqY6rRUJVZQEHQh1BAXQFKZCZaJFz8iZ"
+          ],
+          "license": "MIT"
+        },
+        "src/StateStore.sol": {
+          "keccak256": "0x4e4eac82091ef3614c777bba4bd8a43d957115765fdcc699339af03eb206a8a1",
+          "urls": [
+            "bzz-raw://890b4b2809494ac1159e7a5d6dc1da0a00d69fc635533170fd3c989f6505d9b9",
+            "dweb:/ipfs/QmS757huJKexwHPKR1YRXJRMMuoTH9Hp3Y6Q75VZgtvJ7F"
+          ],
+          "license": "MIT"
+        }
+      },
+      "methodIdentifiers": {
+        "admit(StateStore.Store storage,StateKernel.VerifiedContext,StateKernel.Publication,Preparation.Config)": "b08062e7"
+      }
+    },
+    "PreparationHelper": {
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [
+          "C0Admission/=../2026-09-05-c0-admission/src/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/PreparationHelper.sol": "PreparationHelper"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sources": {
+        "../2026-09-05-c0-admission/src/TypeGroupParser.sol": {
+          "keccak256": "0x586b5d360092ed79faaf69114aadbe7dd487b9a7c2690ef55c5c6443d3f2bc86",
+          "urls": [
+            "bzz-raw://24446ce927006cceb49faa5be29cbb969fbe5b9097813d508cfdb427e5b4e844",
+            "dweb:/ipfs/Qmamj7mg3vm649XhiZCjKYmjM92MQNYhFoSeZ9XSTYv7SR"
+          ],
+          "license": "MIT"
+        },
+        "src/BindingFold.sol": {
+          "keccak256": "0xecf170a723ffff6966b6439c2305dcbae427ccc70c68aad632b950631dd307ee",
+          "urls": [
+            "bzz-raw://bb40883788b30b8eecce1895d1370e3b63ea75a7d89d04c0483c280f774ec410",
+            "dweb:/ipfs/QmUGf4f5CjkaknDafC1sCqZbVcaS2d16gaPsg1LSJ7FJXy"
+          ],
+          "license": "MIT"
+        },
+        "src/IndexKeys.sol": {
+          "keccak256": "0x82dbf6754e96cd113fc5ecd8536c50ed464f626214947de51f20e85650fb4d43",
+          "urls": [
+            "bzz-raw://933d2b43fea0ac521330b03ccc9027222a2cc9ea23d6515bb988e2416dd2ff83",
+            "dweb:/ipfs/QmZgukQQpKH15LRKRFzhX5x6fqCWjzTrDAhaRio25pPArs"
+          ],
+          "license": "MIT"
+        },
+        "src/Preparation.sol": {
+          "keccak256": "0x2200c3eb67c8ce1c52d3bf5418abf8bde29254d1a004355f83e458f8f4ad7c81",
+          "urls": [
+            "bzz-raw://60e64c99a28c6c514ef64025353cb34aa4ef37c4f8cf5369be006704dbe799f8",
+            "dweb:/ipfs/QmUiK4ZUXJXK2yyyanAsimxBuVB1fZE7BWDk6gkNh4VH17"
+          ],
+          "license": "MIT"
+        },
+        "src/PreparationHelper.sol": {
+          "keccak256": "0x3b6bff4fb8a12929ad3261dbf455a50427013eba59c7f8d029ca8463817c1d6c",
+          "urls": [
+            "bzz-raw://088c12d380551243ac758f6f9b1ff38cf02cac03cb11193e0ea3cdaf4dd395c0",
+            "dweb:/ipfs/QmPR6tNbcxKdYTZLoS1TCB5AftJe1r8Njw1JN1JcoXqR43"
+          ],
+          "license": "MIT"
+        },
+        "src/RecordBody.sol": {
+          "keccak256": "0xd08b372ae170699dc246bf3e28ca843b4ac45a1b4347fc45d39258cdd1b0873e",
+          "urls": [
+            "bzz-raw://5c9d1518f3847b277e753dc4703223cdcac4cc719370473295d0730550374370",
+            "dweb:/ipfs/QmTwAJpQhqe5puao8M4HKgqRjSTtsNApc7kz7DBGzzfen4"
+          ],
+          "license": "MIT"
+        }
+      },
+      "methodIdentifiers": {
+        "compileGroup(bytes)": "f1cb8c8c",
+        "compileIntrinsic(bytes)": "a547d68a",
+        "prepareRecord(bytes,bytes32,bytes,bytes32,bytes32,(bytes32,bytes32,bytes32),bool)": "f973541e"
+      }
+    }
+  },
+  "componentProvenance": {
+    "n": 1,
+    "baseComponents": {
+      "helper": {
+        "runtimeBytes": 18805,
+        "initcodeBytes": 18831,
+        "gas": "4120023"
+      },
+      "library": {
+        "runtimeBytes": 24503,
+        "initcodeBytes": 24535,
+        "gas": "5351899",
+        "ownAddressPatches": {
+          "library_deploy_address": [
+            {
+              "start": 41,
+              "length": 32
+            }
+          ]
+        },
+        "methodIdentifiers": {
+          "admit(StateStore.Store storage,StateKernel.VerifiedContext,StateKernel.Publication,Preparation.Config)": "b08062e7"
+        }
+      },
+      "core": {
+        "runtimeBytes": 6186,
+        "initcodeBytes": 11810,
+        "gas": "2243495",
+        "links": {
+          "src/AdmissionLibrary.sol": {
+            "AdmissionLibrary": [
+              {
+                "start": 260,
+                "length": 20
+              },
+              {
+                "start": 6048,
+                "length": 20
+              }
+            ]
+          }
+        },
+        "immutables": {
+          "78827": "preparationHelper",
+          "78829": "preparationCodehash",
+          "78831": "admissionLibrary",
+          "78833": "admissionCodehash"
+        }
+      }
+    },
+    "inputPins": {
+      "candidateFile": "0x5a5c0ea69f0642e8c7faa42af949c0cb65a35e5673e1aebebf40a7cb905869c8",
+      "groups": [
+        "0x9979945ce07959a64020c1b16656b43c70d0e7c12d8bdd70908ff76b3f5d4108",
+        "0xb73d9647fe976e376eb7c0810e6325e297f77e5c788055e2fc6fe200cd0ffc26",
+        "0x6b7d597a04da84609d706683e082ec9dd4f9d0b8608b71cecfeb576a5463121c",
+        "0xdb810effbd958fd35c11d30d1c969e3d9f740e81d6115eca72410f2c3609c0cb"
+      ],
+      "intrinsic": "0x4cadbc9c8e9bf5f63c84c6641f860db2d3184c643b3e6d3f66208d1135e1f4c4"
+    },
+    "initialSetupTransactionGas": [
+      "10229885",
+      "6498467",
+      "1148697",
+      "1027766"
+    ],
+    "components": {
+      "PointReadLibrary": {
+        "runtimeBytes": 12103,
+        "initcodeBytes": 12133,
+        "deploymentGas": "2670670",
+        "codehash": "0x9e387443dc962648c2f7d68b8051856f0f3ccde97c6c8d0d548be20f3404e8cf"
+      },
+      "QueryReadLibrary": {
+        "runtimeBytes": 19181,
+        "initcodeBytes": 19211,
+        "deploymentGas": "4200956",
+        "codehash": "0xb6bd2ba03fe7b84de367d8ad6e6020978b9e9c8916b583f35c7f68e09d7b5f4d"
+      }
+    },
+    "host": {
+      "runtimeBytes": 14010,
+      "initcodeBytes": 19921,
+      "constructorBytes": 3360,
+      "deploymentGas": "3943579",
+      "codehash": "0x2d11979de3a888f020686d5a1b8a2230621ba478e55bfd357be9a0f6d0b6d555",
+      "links": {
+        "src/AdmissionLibrary.sol": {
+          "AdmissionLibrary": [
+            {
+              "start": 267,
+              "length": 20
+            },
+            {
+              "start": 10715,
+              "length": 20
+            }
+          ]
+        },
+        "src/PointReadLibrary.sol": {
+          "PointReadLibrary": [
+            {
+              "start": 1440,
+              "length": 20
+            },
+            {
+              "start": 3703,
+              "length": 20
+            },
+            {
+              "start": 4156,
+              "length": 20
+            },
+            {
+              "start": 6392,
+              "length": 20
+            },
+            {
+              "start": 7441,
+              "length": 20
+            },
+            {
+              "start": 7671,
+              "length": 20
+            },
+            {
+              "start": 8982,
+              "length": 20
+            },
+            {
+              "start": 9658,
+              "length": 20
+            },
+            {
+              "start": 12423,
+              "length": 20
+            },
+            {
+              "start": 16360,
+              "length": 20
+            }
+          ]
+        },
+        "src/QueryReadLibrary.sol": {
+          "QueryReadLibrary": [
+            {
+              "start": 1476,
+              "length": 20
+            },
+            {
+              "start": 4580,
+              "length": 20
+            },
+            {
+              "start": 5419,
+              "length": 20
+            },
+            {
+              "start": 7076,
+              "length": 20
+            },
+            {
+              "start": 7327,
+              "length": 20
+            },
+            {
+              "start": 8529,
+              "length": 20
+            },
+            {
+              "start": 9375,
+              "length": 20
+            },
+            {
+              "start": 12657,
+              "length": 20
+            },
+            {
+              "start": 12858,
+              "length": 20
+            },
+            {
+              "start": 13493,
+              "length": 20
+            },
+            {
+              "start": 16257,
+              "length": 20
+            }
+          ]
+        }
+      },
+      "runtimeLinks": {
+        "src/AdmissionLibrary.sol": {
+          "AdmissionLibrary": [
+            {
+              "start": 8164,
+              "length": 20
+            }
+          ]
+        },
+        "src/PointReadLibrary.sol": {
+          "PointReadLibrary": [
+            {
+              "start": 1152,
+              "length": 20
+            },
+            {
+              "start": 1605,
+              "length": 20
+            },
+            {
+              "start": 3841,
+              "length": 20
+            },
+            {
+              "start": 4890,
+              "length": 20
+            },
+            {
+              "start": 5120,
+              "length": 20
+            },
+            {
+              "start": 6431,
+              "length": 20
+            },
+            {
+              "start": 7107,
+              "length": 20
+            },
+            {
+              "start": 9872,
+              "length": 20
+            },
+            {
+              "start": 13809,
+              "length": 20
+            }
+          ]
+        },
+        "src/QueryReadLibrary.sol": {
+          "QueryReadLibrary": [
+            {
+              "start": 2029,
+              "length": 20
+            },
+            {
+              "start": 2868,
+              "length": 20
+            },
+            {
+              "start": 4525,
+              "length": 20
+            },
+            {
+              "start": 4776,
+              "length": 20
+            },
+            {
+              "start": 5978,
+              "length": 20
+            },
+            {
+              "start": 6824,
+              "length": 20
+            },
+            {
+              "start": 10106,
+              "length": 20
+            },
+            {
+              "start": 10307,
+              "length": 20
+            },
+            {
+              "start": 10942,
+              "length": 20
+            },
+            {
+              "start": 13706,
+              "length": 20
+            }
+          ]
+        }
+      },
+      "immutables": {
+        "28691": "pointReadLibrary",
+        "28693": "pointReadCodehash",
+        "28695": "queryReadLibrary",
+        "28697": "queryReadCodehash",
+        "78827": "preparationHelper",
+        "78829": "preparationCodehash",
+        "78831": "admissionLibrary",
+        "78833": "admissionCodehash"
+      }
+    },
+    "consumer": {
+      "runtimeBytes": 1477,
+      "initcodeBytes": 1503,
+      "deploymentGas": "372682",
+      "codehash": "0x59581f95d693b084bad7ff5a88b408171cdb0bbf7b8247d263eafb9b0068d78c"
+    },
+    "cleanup": {
+      "pid": 45963,
+      "exitCode": 0,
+      "signal": null,
+      "stopped": true
+    }
+  },
+  "gate": {
+    "gate": {
+      "runtimeBytes": 1889,
+      "initcodeBytes": 2142,
+      "deploymentGas": "462591",
+      "codehash": "0xc3d3423961fa567fbf000c84d60593381bd6ccd4a8ace3453b695fe5d9c1a0d0"
+    },
+    "basis": {
+      "number": "35",
+      "hash": "0xd051bb83023027131304aafb79929ab97f2cb892a25788c49643196c2e7b0634",
+      "chainId": "31337",
+      "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+      "source": "managed-anvil:http://127.0.0.1:63054"
+    },
+    "setupTransactionGas": [
+      "10229885",
+      "6498467",
+      "1148697",
+      "1027766",
+      "1180066",
+      "1076254",
+      "1929669",
+      "1809170",
+      "1101822",
+      "1059142",
+      "1617631",
+      "1632305",
+      "1650495",
+      "1764287",
+      "1523797",
+      "1528937",
+      "1633340",
+      "1607667",
+      "1800826",
+      "1751456",
+      "1040226",
+      "1073058"
+    ],
+    "cleanup": {
+      "pid": 45877,
+      "exitCode": 0,
+      "signal": null,
+      "stopped": true
+    }
+  },
+  "measurements": [
+    {
+      "n": 1,
+      "scenario": "exact-all",
+      "basis": {
+        "number": "13",
+        "hash": "0x10a49a0c44dfc57467665b86612e417d38f758ae712dc5f44ef211faf4040a57",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63058"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "1159782",
+        "1929669"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "92377",
+        "resolveStrict": "94729",
+        "validatePlan": "67435"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "99922",
+          "marginalFirst": "74543",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "130350",
+          "marginalFirst": "74578",
+          "marginalSecond": "29542"
+        }
+      }
+    },
+    {
+      "n": 1,
+      "scenario": "priority-first",
+      "basis": {
+        "number": "13",
+        "hash": "0xff0555722878c7e54d9d43e28c83fbb0b1b7fb91a9c943e23288880b57f56134",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63058"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "1161150",
+        "1929669"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "92361",
+        "resolveStrict": "94713",
+        "validatePlan": "67404"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "99906",
+          "marginalFirst": "74539",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "130330",
+          "marginalFirst": "74574",
+          "marginalSecond": "29538"
+        }
+      }
+    },
+    {
+      "n": 1,
+      "scenario": "priority-last",
+      "basis": {
+        "number": "13",
+        "hash": "0x2be20f671685c89bb093e3f2e742bcff21e4181fcfe35a96820e163ec024ef0c",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63058"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "1161150",
+        "1929669"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "92361",
+        "resolveStrict": "94713",
+        "validatePlan": "67404"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "99906",
+          "marginalFirst": "74539",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "130330",
+          "marginalFirst": "74574",
+          "marginalSecond": "29538"
+        }
+      }
+    },
+    {
+      "n": 1,
+      "scenario": "priority-absent",
+      "basis": {
+        "number": "12",
+        "hash": "0x038c6d5ad20fdd0a0fb130b3e91f83ef212f59088e380f513a3539b093b2fad7",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63058"
+      },
+      "presence": 2,
+      "setupTransactionGas": [
+        "1161138"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "91411",
+        "resolveStrict": "93763",
+        "validatePlan": "67404"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "98956",
+          "marginalFirst": "73589",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "128430",
+          "marginalFirst": "73624",
+          "marginalSecond": "28588"
+        }
+      }
+    },
+    {
+      "n": 1,
+      "scenario": "threshold-disagreement",
+      "basis": {
+        "number": "13",
+        "hash": "0xbc9ccac23f1f49e75e4ee89fe76ccdd6b21a8a886ec4483d58edf0ec04a052a4",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63058"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "1159806",
+        "1929669"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "93083",
+        "resolveStrict": "95435",
+        "validatePlan": "67478"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "100628",
+          "marginalFirst": "75249",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "131762",
+          "marginalFirst": "75284",
+          "marginalSecond": "30248"
+        }
+      }
+    },
+    {
+      "n": 1,
+      "scenario": "threshold-winner",
+      "basis": {
+        "number": "13",
+        "hash": "0x7c5c45cd68fef95d05436aeed51aacab8837db244cb71de0f4c3221266c89a2c",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63058"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "1159806",
+        "1929669"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "93083",
+        "resolveStrict": "95435",
+        "validatePlan": "67478"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "100628",
+          "marginalFirst": "75249",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "131762",
+          "marginalFirst": "75284",
+          "marginalSecond": "30248"
+        }
+      }
+    },
+    {
+      "n": 8,
+      "scenario": "exact-all",
+      "basis": {
+        "number": "20",
+        "hash": "0x765d2742f0fd51f3ce276b1b7027449862981515ef46f395d5b019fb7f0decba",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63062"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "1461265",
+        "1929669",
+        "1412858",
+        "1412870",
+        "1413326",
+        "1412870",
+        "1481270",
+        "1413782",
+        "1413314"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "221967",
+        "resolveStrict": "224347",
+        "validatePlan": "117270"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "229512",
+          "marginalFirst": "204133",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "333530",
+          "marginalFirst": "204168",
+          "marginalSecond": "103132"
+        }
+      }
+    },
+    {
+      "n": 8,
+      "scenario": "priority-first",
+      "basis": {
+        "number": "13",
+        "hash": "0xf462ab9825ca24df3f27ecd75c8549025600b7790d4cf38d4f4175aaa78ed24a",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63062"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "1461361",
+        "1929669"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "150470",
+        "resolveStrict": "152833",
+        "validatePlan": "116754"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "158015",
+          "marginalFirst": "132636",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "218536",
+          "marginalFirst": "132671",
+          "marginalSecond": "59635"
+        }
+      }
+    },
+    {
+      "n": 8,
+      "scenario": "priority-last",
+      "basis": {
+        "number": "13",
+        "hash": "0x96beb869e250e57a83056fa0f4f2bb509ed4ac6d3b1e02854627db9339ea541b",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63062"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "1461349",
+        "1929669"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "221207",
+        "resolveStrict": "223587",
+        "validatePlan": "116754"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "228752",
+          "marginalFirst": "203373",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "332010",
+          "marginalFirst": "203408",
+          "marginalSecond": "102372"
+        }
+      }
+    },
+    {
+      "n": 8,
+      "scenario": "priority-absent",
+      "basis": {
+        "number": "12",
+        "hash": "0x8ba76a52a066a325b3292cafa840d0bd53635831847024fed67999975b6b7ee7",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63062"
+      },
+      "presence": 2,
+      "setupTransactionGas": [
+        "1461361"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "220254",
+        "resolveStrict": "222634",
+        "validatePlan": "116754"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "227799",
+          "marginalFirst": "202420",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "330104",
+          "marginalFirst": "202455",
+          "marginalSecond": "101419"
+        }
+      }
+    },
+    {
+      "n": 8,
+      "scenario": "threshold-disagreement",
+      "basis": {
+        "number": "20",
+        "hash": "0x66136c6485cbe6e35d24696681b4dc2aca465db721d0731297599efffd65dad7",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63062"
+      },
+      "presence": 3,
+      "setupTransactionGas": [
+        "1461289",
+        "1929669",
+        "1412870",
+        "1412870",
+        "1413326",
+        "1808690",
+        "1429970",
+        "1413782",
+        "1412870"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "237437",
+        "resolveStrict": "239817",
+        "validatePlan": "117313"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "244982",
+          "marginalFirst": "219603",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "364470",
+          "marginalFirst": "219638",
+          "marginalSecond": "118602"
+        }
+      }
+    },
+    {
+      "n": 8,
+      "scenario": "threshold-winner",
+      "basis": {
+        "number": "20",
+        "hash": "0xa416187be282f3e1a4e3c98f416fbb48d63b485a76217b9290921f725f562f4c",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63062"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "1462201",
+        "1929669",
+        "1412870",
+        "1412870",
+        "1413326",
+        "1413782",
+        "1825790",
+        "1413782",
+        "1412870"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "236823",
+        "resolveStrict": "239203",
+        "validatePlan": "117313"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "244368",
+          "marginalFirst": "218989",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "363242",
+          "marginalFirst": "219024",
+          "marginalSecond": "117988"
+        }
+      }
+    },
+    {
+      "n": 32,
+      "scenario": "exact-all",
+      "basis": {
+        "number": "44",
+        "hash": "0xbd67421c021cdf4de300281c971307178552d0e9cd0c87fd5a87895099d9a97e",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63066"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "2494977",
+        "1929669",
+        "1412858",
+        "1412870",
+        "1413326",
+        "1412870",
+        "1481270",
+        "1413782",
+        "1413314",
+        "1412870",
+        "1412870",
+        "1481270",
+        "1413782",
+        "1412870",
+        "1412870",
+        "1412870",
+        "1482240",
+        "1412870",
+        "1412870",
+        "1413782",
+        "1412870",
+        "1482182",
+        "1412870",
+        "1413782",
+        "1412870",
+        "1412870",
+        "1481270",
+        "1412870",
+        "1413782",
+        "1412870",
+        "1413782",
+        "1481270",
+        "1412870"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "726633",
+        "resolveStrict": "729106",
+        "validatePlan": "346171"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "734178",
+          "marginalFirst": "708799",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "1150862",
+          "marginalFirst": "708834",
+          "marginalSecond": "415798"
+        }
+      }
+    },
+    {
+      "n": 32,
+      "scenario": "priority-first",
+      "basis": {
+        "number": "13",
+        "hash": "0x9a96789a6e7bfd5c58841661fa095c5a78e647bcd755ca3b9abe11ff0d07a6b1",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63066"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "2495361",
+        "1929669"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "407274",
+        "resolveStrict": "409672",
+        "validatePlan": "343951"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "414819",
+          "marginalFirst": "389440",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "636144",
+          "marginalFirst": "389475",
+          "marginalSecond": "220439"
+        }
+      }
+    },
+    {
+      "n": 32,
+      "scenario": "priority-last",
+      "basis": {
+        "number": "13",
+        "hash": "0x99f4e8798abdd00757f79f30455695b220fccdfab273882974c1e47c1956be92",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63066"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "2495361",
+        "1929669"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "723281",
+        "resolveStrict": "725754",
+        "validatePlan": "343951"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "730826",
+          "marginalFirst": "705447",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "1144158",
+          "marginalFirst": "705482",
+          "marginalSecond": "412446"
+        }
+      }
+    },
+    {
+      "n": 32,
+      "scenario": "priority-absent",
+      "basis": {
+        "number": "12",
+        "hash": "0x0dabd3f79f866e792e288416875fc53060cf99c84ba31b985371078c57b0bc2f",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63066"
+      },
+      "presence": 2,
+      "setupTransactionGas": [
+        "2495349"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "722317",
+        "resolveStrict": "724790",
+        "validatePlan": "343951"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "729862",
+          "marginalFirst": "704483",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "1142230",
+          "marginalFirst": "704518",
+          "marginalSecond": "411482"
+        }
+      }
+    },
+    {
+      "n": 32,
+      "scenario": "threshold-disagreement",
+      "basis": {
+        "number": "44",
+        "hash": "0xee89164da5e4f8a7c827d24736b9d17aa1ddfd8546c9adb89c2e8f5a5ad4c722",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63066"
+      },
+      "presence": 3,
+      "setupTransactionGas": [
+        "2495001",
+        "1929669",
+        "1412870",
+        "1412870",
+        "1413326",
+        "1412870",
+        "1481270",
+        "1413770",
+        "1413326",
+        "1412870",
+        "1412870",
+        "1481270",
+        "1413782",
+        "1412870",
+        "1412870",
+        "1412870",
+        "1482252",
+        "1808690",
+        "1412870",
+        "1413782",
+        "1412870",
+        "1430882",
+        "1464170",
+        "1412870",
+        "1413326",
+        "1412870",
+        "1429970",
+        "1464170",
+        "1413782",
+        "1412858",
+        "1412858",
+        "1429970",
+        "1465082"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "888252",
+        "resolveStrict": "890725",
+        "validatePlan": "346214"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "895797",
+          "marginalFirst": "870418",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "1474100",
+          "marginalFirst": "870453",
+          "marginalSecond": "577417"
+        }
+      }
+    },
+    {
+      "n": 32,
+      "scenario": "threshold-winner",
+      "basis": {
+        "number": "44",
+        "hash": "0x17ede6e68baf28c383ea3f04a6bb48a838b86d0a35d7af41b0776b4f24c6c397",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63066"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "2495001",
+        "1929669",
+        "1412870",
+        "1412870",
+        "1413326",
+        "1413782",
+        "1481258",
+        "1413782",
+        "1413326",
+        "1412870",
+        "1412870",
+        "1481270",
+        "1413782",
+        "1412870",
+        "1412870",
+        "1412870",
+        "1482252",
+        "1412870",
+        "1808690",
+        "1413782",
+        "1412870",
+        "1430870",
+        "1412870",
+        "1464170",
+        "1413326",
+        "1412870",
+        "1429970",
+        "1412870",
+        "1465070",
+        "1412870",
+        "1412870",
+        "1429970",
+        "1412870"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "887649",
+        "resolveStrict": "890122",
+        "validatePlan": "346214"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "895194",
+          "marginalFirst": "869815",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "1472894",
+          "marginalFirst": "869850",
+          "marginalSecond": "576814"
+        }
+      }
+    },
+    {
+      "n": 64,
+      "scenario": "exact-all",
+      "basis": {
+        "number": "76",
+        "hash": "0x4d8bfc370b73ffea85215f7f8881e3a8c2da177d0919975af2b0396b3802cda2",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63072"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "3873597",
+        "1929669",
+        "1412858",
+        "1412870",
+        "1413326",
+        "1412870",
+        "1481270",
+        "1413782",
+        "1413314",
+        "1412870",
+        "1412870",
+        "1481270",
+        "1413782",
+        "1412870",
+        "1412870",
+        "1412870",
+        "1482240",
+        "1412870",
+        "1412870",
+        "1413782",
+        "1412870",
+        "1482182",
+        "1412870",
+        "1413782",
+        "1412870",
+        "1412870",
+        "1481270",
+        "1412870",
+        "1413782",
+        "1412870",
+        "1413782",
+        "1481270",
+        "1412870",
+        "1412870",
+        "1412870",
+        "1412870",
+        "1481270",
+        "1412870",
+        "1412870",
+        "1412870",
+        "1412870",
+        "1481270",
+        "1412870",
+        "1413326",
+        "1413326",
+        "1412870",
+        "1482182",
+        "1412870",
+        "1413852",
+        "1412870",
+        "1412870",
+        "1481270",
+        "1412870",
+        "1413782",
+        "1412870",
+        "1414238",
+        "1481270",
+        "1412870",
+        "1412870",
+        "1412858",
+        "1412870",
+        "1481270",
+        "1412870",
+        "1413326",
+        "1412870"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "1544897",
+        "resolveStrict": "1547495",
+        "validatePlan": "791162"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "1552442",
+          "marginalFirst": "1527063",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "2531390",
+          "marginalFirst": "1527098",
+          "marginalSecond": "978062"
+        }
+      }
+    },
+    {
+      "n": 64,
+      "scenario": "priority-first",
+      "basis": {
+        "number": "13",
+        "hash": "0xd1f823b9953e85ed2cdbc003d56a90573d95a3d73ab697dba4992ea069a31dba",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63072"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "3874365",
+        "1929669"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "890244",
+        "resolveStrict": "892689",
+        "validatePlan": "786670"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "897789",
+          "marginalFirst": "872410",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "1474084",
+          "marginalFirst": "872445",
+          "marginalSecond": "575409"
+        }
+      }
+    },
+    {
+      "n": 64,
+      "scenario": "priority-last",
+      "basis": {
+        "number": "13",
+        "hash": "0x2aadf9a75a523600d14d38854a3a4477786630982306ebb80a51f3fbe9daa7f6",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63072"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "3874365",
+        "1929669"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "1538089",
+        "resolveStrict": "1540687",
+        "validatePlan": "786670"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "1545634",
+          "marginalFirst": "1520255",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "2517774",
+          "marginalFirst": "1520290",
+          "marginalSecond": "971254"
+        }
+      }
+    },
+    {
+      "n": 64,
+      "scenario": "priority-absent",
+      "basis": {
+        "number": "12",
+        "hash": "0xd09a0fe25a0c45f84806f2f1dd1357879242c202a59610be267e043e74d10426",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63072"
+      },
+      "presence": 2,
+      "setupTransactionGas": [
+        "3874365"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "1537110",
+        "resolveStrict": "1539708",
+        "validatePlan": "786670"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "1544655",
+          "marginalFirst": "1519276",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "2515816",
+          "marginalFirst": "1519311",
+          "marginalSecond": "970275"
+        }
+      }
+    },
+    {
+      "n": 64,
+      "scenario": "threshold-disagreement",
+      "basis": {
+        "number": "76",
+        "hash": "0x1ab1462bc71b6462e1474fb174bfb66e65652c36c197ead9d479839553564ef5",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63072"
+      },
+      "presence": 3,
+      "setupTransactionGas": [
+        "3873621",
+        "1929669",
+        "1412870",
+        "1412870",
+        "1413326",
+        "1412870",
+        "1481270",
+        "1413782",
+        "1413326",
+        "1412870",
+        "1412870",
+        "1481270",
+        "1413770",
+        "1412870",
+        "1412870",
+        "1412870",
+        "1482252",
+        "1412870",
+        "1412870",
+        "1413782",
+        "1412870",
+        "1482170",
+        "1412870",
+        "1413782",
+        "1412870",
+        "1412870",
+        "1481270",
+        "1412870",
+        "1413782",
+        "1412870",
+        "1413782",
+        "1481270",
+        "1412870",
+        "1808690",
+        "1412870",
+        "1412870",
+        "1429946",
+        "1412870",
+        "1464170",
+        "1412870",
+        "1412870",
+        "1429958",
+        "1413314",
+        "1464158",
+        "1412870",
+        "1412870",
+        "1430882",
+        "1412858",
+        "1465152",
+        "1412870",
+        "1412870",
+        "1430882",
+        "1414694",
+        "1464170",
+        "1412870",
+        "1414226",
+        "1429970",
+        "1412870",
+        "1464170",
+        "1412870",
+        "1412870",
+        "1430882",
+        "1413770",
+        "1464146",
+        "1412870"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "2127621",
+        "resolveStrict": "2130219",
+        "validatePlan": "791205"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "2135166",
+          "marginalFirst": "2109787",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "3696838",
+          "marginalFirst": "2109822",
+          "marginalSecond": "1560786"
+        }
+      }
+    },
+    {
+      "n": 64,
+      "scenario": "threshold-winner",
+      "basis": {
+        "number": "76",
+        "hash": "0x0af2641980fc591730abc058d061063a176b5bf226d26e72b151b82edbe9da6c",
+        "chainId": "31337",
+        "core": "0x27d478a215d1ffd0ab51b65b4df10bed36310cbd",
+        "source": "managed-anvil:http://127.0.0.1:63072"
+      },
+      "presence": 1,
+      "setupTransactionGas": [
+        "3873621",
+        "1929669",
+        "1412870",
+        "1412870",
+        "1413326",
+        "1412870",
+        "1481258",
+        "1413782",
+        "1413326",
+        "1412870",
+        "1412870",
+        "1481270",
+        "1413770",
+        "1412870",
+        "1412870",
+        "1412870",
+        "1482252",
+        "1412858",
+        "1412870",
+        "1413782",
+        "1412870",
+        "1482182",
+        "1412870",
+        "1413782",
+        "1412858",
+        "1412870",
+        "1481270",
+        "1412870",
+        "1413782",
+        "1412870",
+        "1413782",
+        "1481258",
+        "1412870",
+        "1412870",
+        "1808690",
+        "1412870",
+        "1429970",
+        "1412858",
+        "1412870",
+        "1464170",
+        "1413326",
+        "1429958",
+        "1412870",
+        "1412870",
+        "1464170",
+        "1412870",
+        "1430882",
+        "1412870",
+        "1413852",
+        "1464170",
+        "1412870",
+        "1429970",
+        "1414694",
+        "1412870",
+        "1464170",
+        "1414238",
+        "1429958",
+        "1412870",
+        "1412870",
+        "1464170",
+        "1412870",
+        "1429970",
+        "1412870",
+        "1412858",
+        "1464170"
+      ],
+      "returndataBytes": {
+        "resolve": 448,
+        "resolveStrict": 544,
+        "validatePlan": 64
+      },
+      "singleCallTransactionGas": {
+        "resolve": "2127033",
+        "resolveStrict": "2129631",
+        "validatePlan": "791205"
+      },
+      "consumerCalls": {
+        "once": {
+          "transactionGas": "2134578",
+          "marginalFirst": "2109199",
+          "marginalSecond": "0"
+        },
+        "twice": {
+          "transactionGas": "3695662",
+          "marginalFirst": "2109234",
+          "marginalSecond": "1560198"
+        }
+      }
+    }
+  ],
+  "buildWarnings": [
+    {
+      "category": "divide-before-multiply",
+      "location": "src/C0Request.sol:27:25"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/BindingFold.sol:175:22"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/BindingFold.sol:176:25"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/BindingFold.sol:178:27"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/BindingFold.sol:179:31"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/BindingFold.sol:180:27"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/IndexKeys.sol:68:68"
+    },
+    {
+      "category": "divide-before-multiply",
+      "location": "test/BindingReads.t.sol:643:24"
+    },
+    {
+      "category": "divide-before-multiply",
+      "location": "src/C0Request.sol:62:21"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/AuditPageCursor.sol:40:16"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/KernelValues.t.sol:378:31"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/Preparation.t.sol:164:58"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateKernel.sol:422:52"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateBindingReads.sol:75:62"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateReadPrimitives.sol:38:24"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateReadPrimitives.sol:39:23"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateReadPrimitives.sol:40:23"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateReadPrimitives.sol:41:24"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateBindingReads.sol:102:63"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateBindingReads.sol:104:17"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/AuditPageCursor.sol:42:34"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateReadPrimitives.sol:63:19"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/StateKernel.t.sol:128:27"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/C0BootstrapCodec.t.sol:137:39"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/RecordBody.sol:137:48"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateBindingReads.sol:117:24"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateKernel.sol:449:23"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateKernel.sol:456:17"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateKernel.sol:514:13"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateKernel.sol:514:33"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateKernel.sol:520:13"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateKernel.sol:559:24"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateKernel.sol:560:23"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/RecordBody.sol:191:36"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/KernelValues.t.sol:625:98"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/C0BootstrapCodec.t.sol:316:31"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/C0BootstrapCodec.t.sol:317:31"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateKernel.sol:562:24"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/C0Request.t.sol:44:35"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/StateKernel.t.sol:211:33"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/KernelValues.t.sol:642:41"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateKernel.sol:591:23"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "src/StateKernel.sol:592:16"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/LensReads.t.sol:98:24"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/C0Request.t.sol:106:52"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/C0Request.t.sol:119:52"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/C0Request.t.sol:120:59"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/C0Request.t.sol:120:70"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/StateKernel.t.sol:531:32"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/LensReads.t.sol:99:28"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/C0BootstrapCodec.t.sol:327:31"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/C0BootstrapCodec.t.sol:328:31"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/LensReads.t.sol:321:24"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/StateKernel.t.sol:1118:30"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/LensReads.t.sol:343:24"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/C0BootstrapCodec.t.sol:412:49"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/LensReads.t.sol:418:24"
+    },
+    {
+      "category": "unsafe-typecast",
+      "location": "test/LensReads.t.sol:422:24"
+    }
+  ],
+  "temporaryLogs": {
+    "build": "/tmp/efs-lens-build-20260909.log",
+    "forge": "/tmp/efs-lens-forge-full-20260909.log",
+    "node": "/tmp/efs-lens-node-expanded-20260909.log"
+  },
+  "evidenceKind": "LOCAL_OBSERVATIONS_NOT_FULL_RETAINED_SNAPSHOT",
+  "sourcePinChecks": 62
+}

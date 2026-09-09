@@ -262,3 +262,37 @@ explicit Lenses, authored-current tags and the shared SDK to a static browser.
 Compatibility Views, real wallets, full authority and export/recovery remain
 separate acceptance work. No additional design polling is needed for this
 local next slice.
+
+## September 9 carrier-vector diagnostic
+
+A later read-only-source probe at `219bf61` used the same source-pinned managed
+runner and unchanged carrier/kernel to stage the independent
+[known ChunkTree bodies](../2026-09-04-mvp-c0-foundation/fixtures/chunk-tree-known.json).
+It reused literal roots/bodies and documented `i mod 251` payloads, recomputing
+only RecordIds for the actual configured temporary ChunkTree Type instead of
+the vector file's synthetic Type. The vector-file keccak was
+`9ab1eda24dc4c46e7fecdab616d8320acb9da9a62e602da90dd13865e1bd3126`.
+
+| Payload | Merkle chunks | Staging receipt gas | Result |
+| --- | ---: | ---: | --- |
+| empty | 0 | 196,555 | staged and read byte-exactly |
+| hello, 5 bytes | 1 | 218,440 | staged and read byte-exactly |
+| 4,097 bytes | 2 | 3,154,347 | staged and read byte-exactly |
+| 8,193 bytes | 3, odd tail promoted | 6,069,510 | staged and read byte-exactly |
+| 16,385 bytes | 5 | 295,786 | rejected; hasFixtureBytes remained false |
+
+All five observations independently verified the Core/execution context.
+No ChunkTree Record was admitted by staging alone. After the populated pair
+upgrade, all four successful bodies still read byte-exactly. Managed node
+cleanup succeeded. The source-pinned carrier declares a 16,384-byte cap; this
+probe measured its over-cap refusal, not successful execution at the exact
+cap. Existing gas/runtime limits were unchanged.
+
+This ad hoc characterization did not add to the persisted Node-test total or
+refresh the historical fixture JSON. Reproduction: with the existing
+`compileUpgrade`/`withUpgrade` runner, iterate those five known vectors,
+`ordinaryRecord(configuredTreeType,body)`, `lab.stage`, `readUpgradeState`,
+`hasFixtureBytes` and exact `lab.readBytes`; then upgrade and re-read every
+successful body. It is not a file-publication or real-wallet test. The fixture
+validates multi-chunk geometry but stages/returns an entire small body: it does
+not yet provide independent chunk ingestion, range reads or large-file UX.

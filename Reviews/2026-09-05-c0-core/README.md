@@ -201,8 +201,18 @@ case; parent190 Core Forge/14 upgrade Forge/178 serial Node checks pass, and
 independent task/final increment reviews approve the bounded source/evidence. A256-anchor page costs
 619,679 gas raw or10,240,801 hydrated. Optional real513 exceeds the unchanged
 whole-state collector budget and remains unverified. Raw Scope anchors are not
-current Files rows; revision-aware upgrade reads, actual Lens/Files resolution,
+current Files rows; revision-aware upgrade reads, Files interpretation,
 the shared SDK/SPA join and other query families remain unfinished.
+
+The [B0 Lens checkpoint](lens-point-verification.md) at `29859b2` adds actual
+EXACT/PRIORITY/THRESHOLD point resolution over admitted Plans and checked
+Binding heads. Independent task review approves; parent200 Core Forge/14 upgrade
+Forge/185 broad Node checks pass and all24 measurement rows reproduce. Final
+whole-increment review is tracked in that checkpoint. The64-source agreement/conflict scenarios use
+1.54m/2.13m resolve transaction gas, materially above the older schedule-only
+model but within unchanged limits. Query runtime is19,181 bytes. A deployed
+admin-pinned consumer and an independent retained-state oracle agree; none of
+this makes the synthetic revision-one host authenticated or upgrade-aware.
 
 The [nested-prefix refinement](read-overlay.md#nested-unique-prefix-refinement)
 separates consumed query coverage from boundary-only inspections to avoid a

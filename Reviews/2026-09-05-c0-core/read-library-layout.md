@@ -2,7 +2,9 @@
 
 **Status:** synthetic revision-one host implementation and normal deployment
 evidence complete for [Binding](binding-reads-verification.md) and the bounded
-[audit-page extension](audit-pages-verification.md).
+[audit-page extension](audit-pages-verification.md). The
+[real-store Lens increment](lens-point-verification.md) adds measured B0 point
+resolution; its independent integration gate is recorded in that checkpoint.
 Authenticated C0 and V3 integration remain pending. Not a protocol freeze.
 
 The [Binding size gate](binding-reads-verification.md) found a 26,736-byte
@@ -21,9 +23,9 @@ read code behind two fixed Solidity library boundaries, not merely source files:
 | Fixed library | Exposed library forwarders | Internal implementation |
 |---|---|---|
 | PointReadLibrary | getTypeSchema, getTypeOrigin, intrinsicTypeGroupBytes, getRecord, getEnvelope, getOccurrence, getOccurrenceByOrdinal, getReceipt | StatePointReads |
-| QueryReadLibrary | getBindingHead, getBindingAtBasis, readHistory; pagePostings, pagePostingsHydrated, counts | StateBindingReads; StateAuditPages |
+| QueryReadLibrary | getBindingHead, getBindingAtBasis, readHistory; pagePostings, pagePostingsHydrated, counts; resolve, resolveStrict, validatePlan, deriveBindingKey | StateBindingReads; StateAuditPages; StateLensReads/LensPlan |
 
-Each library method is `external view`, with `StateStore.Store storage s` as
+Each state-reading library method is `external view`, with `StateStore.Store storage s` as
 its first parameter and the same remaining parameters/returns as the existing
 internal method. No library state variables, constructor arguments, mutators,
 fallback, arbitrary callback, dependency registry or configurable routing.
@@ -34,8 +36,11 @@ than calling PointReadLibrary. Verify this in actual compiler references.
 The initial Binding increment implements the first three methods. The following
 audit-page increment adds the three page/count forwards for exact kinds8/10
 only; all other query tuples are explicitly unsupported. Its measured runtime
-is14,811 bytes. This is not evidence that every remaining query family exists
-or that the complete query engine fits.
+was14,811 bytes. The following B0 Lens methods increase Query to19,181 bytes,
+leaving5,395 under the unchanged cap. `deriveBindingKey` is a pure helper with
+no storage argument; the host computes it without a delegated call or code
+guard. This is not evidence that every remaining query family exists or that
+the complete query engine fits.
 
 These storage-reference calls use DELEGATECALL. The libraries are trusted
 implementation with access to the caller's storage, not sandboxed extensions.
@@ -84,6 +89,14 @@ runtime bytes and18,396 full initcode bytes. Both hosts retain the same six
 constructor arguments; separate synthetic subclasses remain corruption fixtures,
 not normal deployed-host evidence. Details and response/gas costs are in the
 [audit checkpoint](audit-pages-verification.md).
+
+`LensReadHarness` derives from the audit host, preserving those six constructor
+arguments and existing methods. It measures14,010 runtime/19,921 full initcode
+bytes. Three Lens reads guard Query before state work; pure key derivation has
+no dependency. Ordinary admitted Plan Records and existing current Binding
+heads provide all state, with no second resolver registry. This host remains
+revision-one and synthetic-publication only; the retained upgrade execution
+set does not yet commit these read libraries or qualify their historical basis.
 
 ## Deployment commitment consequence
 
