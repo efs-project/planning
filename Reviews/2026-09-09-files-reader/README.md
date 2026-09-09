@@ -1,12 +1,12 @@
 # Bounded Files reader over the populated prototype
 
-**Status:** selected disposable implementation slice, not yet verified.
+**Status:** implemented disposable read slice; task-reviewed with fresh tests.
 **Authority:** James's overnight prototype/parity/performance direction;
 existing experiment branch only. Source baseline `31a4fbd`.
 
-**Checkpoint:** portable scope implemented at `c581366` and task-reviewed;
-parent's fresh five test groups pass. Files interpretation/listing remains
-Task2, not a completed screen or parity claim. The [acceptance cases](acceptance-cases.md)
+**Checkpoint:** portable scope at `c581366` and Files adapter at `eb14059`
+are independently task-reviewed; parent's fresh 14 test groups pass.
+This is not a completed screen or parity claim. The [acceptance cases](acceptance-cases.md)
 make the expected user-visible outcomes and timing disclosures concrete.
 
 ## Outcome
@@ -161,7 +161,10 @@ enumerated scope into an all-rows-valid claim.
 An opaque continuation is owned by this stream; it cannot be replayed into a
 different Mount, Plan, scope or page policy. Concurrent Load-more calls share
 one attempt. State is committed to the stream only after its aggregate seals.
-The snapshot keeps enumeration coverage distinct from row validation and
+The public snapshot exposes the latest attempt, including failures; its
+internal last-sealed row/cursor prefix remains unchanged on failure. Retained
+rows are explicitly prior evidence, not newly sealed results. The snapshot
+keeps enumeration coverage distinct from row validation and
 metadata/bytes-not-read. Partial sorting is local, never globally first-page
 order. For conflict/unresolved positions without a known name preimage, use
 the role identity, not a losing claimant's title, icon or action target.
@@ -189,3 +192,43 @@ reconstruction separate. Normal runtime/gas controls come from unchanged
 Core artifacts; these are reader timings, not new v1/v2 fee ratios. UI time,
 real wallet behavior and a deployed Solidity Files-profile validator remain
 unimplemented, explicitly named next joins.
+
+The current [managed runner](../2026-09-08-upgradeable-foundation/scripts/local-upgrade.mjs)
+deploys both U1 and U2 implementations before initialization. Its historical
+tests therefore do not establish discovery/selection of manifests for code
+deployed months later. A later-deployed upgrade with old-block reads under the
+correct historical manifest remains a followup; treating every future artifact
+as already present at an old block would fail this reader's inventory checks.
+This is a fixture/SDK context boundary, not evidence that old data was lost.
+
+## Selected latency follow-on
+
+The first live eight-name/two-node arm measured 36 cold-open requests and
+58 first-page requests. With 50 ms added to every transport request, cold
+open plus four sealed rows takes about 2.5 seconds. Continuation takes about
+0.66 seconds; cached point reuse still takes about 0.22 seconds because its
+four fresh seal checks are sequential. These are baseline local diagnostics,
+not browser paint or WAN percentiles.
+
+The next bounded experiment schedules independent qualification and sealing
+controls concurrently through the same pool of four. It keeps every required
+control, the same fixed block, caches, budgets, deadlines, cancellation and
+no-data-before-READY gate. The final header/chain and guarded-context/counts
+checks remain fresh; successful sealing waits for all four. Checks whose
+inputs really depend on a prior result still wait for it. No successful
+result may leave unresolved control work behind.
+
+Compare exact baseline source at `eb14059` and the candidate against one
+unchanged live eight-name/two-author fixture and the independent oracle.
+Alternate baseline/candidate order for three samples per 0/50 ms arm. Retain
+all phase timings, requests/bytes, raw evidence, source pins and peak work;
+successful control request multisets and qualified outcomes must agree.
+Failure cases need identical refusal meaning and bounds, not identical
+completion order or speculative control-attempt count. No timing threshold is
+a correctness test. If the candidate does not improve the delayed critical
+path, report that result instead of weakening qualification.
+
+Cross-scope code caching or a new aggregation contract may reduce requests,
+but adds a different trust/invalidation or onchain boundary. Neither belongs
+in this first scheduling comparison. The Files adapter and old contract,
+runner, oracle and measurement files stay unchanged.

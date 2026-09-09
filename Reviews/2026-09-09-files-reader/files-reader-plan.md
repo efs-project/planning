@@ -10,7 +10,7 @@
 ## Global Constraints
 
 - Existing isolated `codex/mvp-c0-coherence` experiment only. No main merge, product repository, public deployment, funds, permanent profile/Type/ABI adoption or frozen protocol choices.
-- Existing Store, writer, read façade, managed runner, original independent verifiers and historical JSON reports remain byte-identical. Add only this review directory's files. No change to comparator pins or existing runtime source.
+- Existing Store, writer, read façade, managed runner, original independent verifiers and historical JSON reports remain byte-identical. Add only this review directory's files. Task3 may modify this directory's reader-scope.mjs scheduling; no change to external comparator pins or existing contract runtime source.
 - Browser runtime modules use JavaScript/Uint8Array/TextDecoder and existing ethers only; no Node builtins, Buffer global, process, filesystem, producer/oracle import or dependency install. Import ethers through the existing relative browser ESM bundle path `../2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.js`; Node and browser use the same runtime module graph.
 - Scope lifetime budgets:512 requests,4 MiB serialized JSON-result bytes,262144 response bytes,4 in flight. Deadline30000 ms per active acquisition window: open ends at READY; next data call starts a window ending at successful seal; idle sealed-page time is excluded. Seal is a barrier that drains queued work and refuses new data calls until settled. Expiry invalidates the scope; lifetime request/byte budgets never reset. Validate configuration; no silent raised limits. Every data/code/storage query is pinned with requireCanonical:true; no latest fallback.
 - Original21-word execution-set/1 tuple/domain and original runtime/library commitments remain unchanged. Accepted expected manifest is trusted run configuration from the source-checked runner; RPC alone does not establish source authority or consensus proof.
@@ -118,7 +118,8 @@ export function nameAssessment(name) { /* ACCEPTED | MALFORMED | UNSUPPORTED */ 
 export async function lookupName(scope,{mountId,name}) { /* qualified point */ }
 export function openDirectory(scope,{mountId,pageSize=8}) { /* lazy stream */ }
 // stream.loadMore() -> cumulative qualified snapshot, single-flight;
-// stream.snapshot() -> last sealed snapshot; stream.close() closes stream only.
+// stream.snapshot() -> latest public observation (including failure);
+// stream.close() closes stream only. Internal last-sealed prefix stays separate.
 // snapshot: {basis,domain,coverage,rows,unresolved,masked,absent,progress,
 //            continuation:boolean,qualification,evidence}
 // rows/unresolved keyed by exact fieldRole; no phantom selected value on failures.
@@ -178,7 +179,7 @@ assert.equal(final.coverage,'COMPLETE');
 assert(!final.rows.some(r=>r.value.name==='note.txt' && fixture.oldNameMasked));
 ```
 
-  Commit a new cumulative stream state only after scope.seal passes. Keep
+  Commit a new cumulative trusted prefix only after scope.seal passes. Keep
   good prior rows on later partial/failure; mark new failure/current coverage
   honestly, not stale COMPLETE. A malformed selected row leaves enumeration
   coverage separate from row usability. Suppress only qualified masked/absent
@@ -186,6 +187,10 @@ assert(!final.rows.some(r=>r.value.name==='note.txt' && fixture.oldNameMasked));
   presentation. Do not derive a conflict title from losing evidence. Same-role
   deduplication and empty partial windows are explicit. Sorting is only over
   currently known names. A terminal suffix cannot certify an unobserved prefix.
+  On failure, loadMore() and snapshot() expose the same latest failed public
+  observation; label retained rows as prior sealed evidence. Do not add unsealed
+  rows/cursors to the internal last-sealed prefix. A caller using snapshot()
+  after failure must not accidentally recover a stale successful COMPLETE claim.
 
 - [ ] **Real fixture and independent oracle:** use unchanged withUpgrade reads
   profile and publications to admit candidate groups, meaning+charter Objects,
@@ -226,6 +231,103 @@ assert(!final.rows.some(r=>r.value.name==='note.txt' && fixture.oldNameMasked));
   no historical JSON writes. Self-review and exact nine-path commit using
   git commit -F and actual model/v2-pm/codex trailers. Return full results,
   missing checks, performance boundaries and source SHA. No push/subagents.
+
+## Task 3: Same-evidence bounded control scheduling
+
+**Files:** modify `reader-scope.mjs`; create
+`test/reader-scheduling.test.mjs` in this directory. No other edits.
+
+**Interfaces:** unchanged `createFixtureReader({source,context})`,
+open/call/seal/basis/evidence/stats and existing DEFAULT_LIMITS. Consume
+`mountedFixture`, A/B from `test/fixture.mjs`, `oracle`/`comparable` from
+`test/oracle.mjs`, `openDirectory`/`lookupName` from `files-reader.mjs`.
+The existing Files tests and implementations are protected in this task.
+
+- [ ] **Red scheduling control:** use the actual managed reads profile and
+  a wrapper around lab.rpc. After READY, hold each seal transport call until
+  all four controls have been issued or a bounded test-only timer releases
+  the first call. Assert four in flight before release, every request pinned
+  where applicable, and no seal result until every successful control returns.
+  The old sequential implementation must fail the concurrency assertion,
+  not merely time out. Restore/release all gates in finally.
+
+```js
+const sealed = scope.seal();
+// Wrapper counts actual header, chain, guarded-context and counts attempts.
+await releaseAfterFourOrBoundedTimeout();
+assert.equal(sealPeak, 4);
+assert.equal((await sealed).status, 'SEALED');
+```
+
+- [ ] **Schedule without weakening:** parallelize independent reads through
+  the existing rpc pool, never raw transport. Chain/header may be acquired
+  together but validate both before choosing the pin. Code inventory remains
+  exact. Current revision, guarded context and raw counts may join; bounded
+  history acquisitions may join once revision is validated, followed by
+  ordered history validation. Independent endpoint controls, dependency
+  getters and bootstrap may join, with all original equality/shape checks.
+  Final canonical header/chain and guarded-context/counts may join after
+  dataWork drains. Keep the barrier, singleflight, cancellation, deadlines,
+  cumulative budgets and no application data before full qualification.
+  Check failures do not create unhandled rejections or permit successful
+  READY/SEALED with pending control work; stop retains actual attempts and
+  ignored-signal late replies remain inert. Do not add caching, APIs, RPC
+  batching, adaptive limits or a second authoritative implementation.
+
+```js
+const [headerResult, chainResult] = await Promise.all([
+  rpc('eth_getBlockByNumber', [number, false], purpose),
+  rpc('eth_chainId', [], purpose),
+]);
+// Existing exact header, hash, root and chain checks still run.
+```
+
+- [ ] **Matched live comparison:** obtain baseline reader source using
+  read-only `git show eb14059fbd7fa105d80979a30a806b5660ddabd9:Reviews/2026-09-09-files-reader/reader-scope.mjs`.
+  Verify the exact source hash in the report. Import only in this Node test
+  via a data URL after replacing its one relative ethers bundle import with
+  that same installed bundle's absolute file URL. No copied baseline runtime
+  or altered old report is committed. Current runtime imports normally.
+
+  Set up the identical workload from the existing performance test: eight
+  names note.txt and n0.txt..n6.txt, two maintained File nodes shared among
+  placements, A and B binding identical Entries, A-first Mount, pageSize4.
+  Acquire full oracle once outside timers. For 0/50ms delay and three samples
+  alternate baseline/candidate order. Capture cold-open, first-sealed-page,
+  continuation and same-scope-point-reuse independently. Assert exact basis,
+  row/selected-ID/qualification/coverage and oracle agreement. Compare actual
+  successful method+params+raw-result multisets for each phase after ignoring
+  evidence sequence/timing; require the same requests/bytes and peak<=4.
+  Retain every timing, raw scope evidence and source pin; separate setup,
+  oracle, UI and bytes exclusions. Report medians/ranges only as descriptive
+  samples, not percentiles or a v1 ratio. No brittle wall-time pass threshold.
+
+```js
+for (const delayMs of [0, 50]) for (let sample=0; sample<3; sample++) {
+  const order = sample % 2 ? ['candidate','baseline'] : ['baseline','candidate'];
+  // Fresh scope per arm; same fixed live fixture and existing Files adapter.
+  // Compare both arms with the full retained-state oracle and each other.
+}
+```
+
+- [ ] **Focused refusal controls:** fail one of concurrently acquired final
+  controls while other responses arrive late, and abort while queued controls
+  remain. Assert UNAVAILABLE, peak/budgets retained, zero application calls
+  before READY, settled returned evidence, no post-failure success/caching.
+  Use existing single-fault validation suite unchanged for wrong code,
+  slots/history/context/chain and active-window/barrier regressions.
+
+- [ ] **Green and handoff:** run new scheduling tests plus every existing
+  reader test serially, syntax check the two changed paths, and unchanged
+  strict TS sample. Optional new scheduling evidence ONLY when
+  `EFS_FILES_SCHEDULING_EVIDENCE=1` to
+  `.superpowers/sdd/files-reader-plan/files-scheduling-evidence.json`.
+  No older JSON overwrite. Self-review, exact two-path commit using git
+  commit -F and real model/v2-pm/codex trailers. Report baseline/candidate
+  hashes, full commands/results, all measurements and failure boundaries
+  to task-3-report.md in this plan's scratch. No push/subagents. Parent runs
+  task review and chooses durable evidence; failed performance hypothesis
+  is a valid experiment outcome, not permission to discard validation.
 
 ## Parent integration
 
