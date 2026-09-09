@@ -4,6 +4,10 @@
 overnight authority. Not a permanent Core ABI, execution format or deployment.
 Source baseline: reviewed/published `72b59b0`.
 
+Source implementation and local test configuration are now at `bcd0643` /
+`45f3667`; see [fresh verification and performance](upgrade-read-verification.md)
+for the exact result, remaining consumer joins and publication-review status.
+
 ## Outcome and scope
 
 Use the same proxy Store for bounded Point/Binding/audit/Lens reads before and
@@ -119,3 +123,13 @@ All current caps remain: runtime24,576 bytes, full initcode49,152 bytes,
 transaction16,777,216 gas; independent collection/history limits unchanged.
 Normal failure retains evidence and triggers a bounded engineering refinement,
 not a raised cap, weakened check or silent new deployment dependency.
+
+## Reproducible local tests
+
+The installed Forge requires read permission for `vm.getCode` to load this
+fixture's own `out` artifacts. Add only `{ access = "read", path = "out" }`
+alongside the existing type-inputs read permission in the foundation's test
+configuration. No write permission, external path, compiler setting or contract
+behavior changes. The scratch configuration used to diagnose the failure is
+not the long-term test entrypoint. Ordinary local tests should work with the
+tracked configuration after this narrow repair.

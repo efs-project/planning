@@ -64,6 +64,29 @@ Observation hashes differ: both terminal observations are block 50, but baseline
 
 ## Reproduction and limits
 
+### September 9 runner integration
+
+The [upgrade-aware read increment](../2026-09-08-upgradeable-foundation/upgrade-read-design.md)
+necessarily extends `scripts/local-upgrade.mjs` with a separate closed reads
+profile. Its first broad regression passed the unchanged actual Files lifecycle
+but refused this comparison at the all-support-pins equality check. That
+refusal is correct for the original journal-only A/B boundary above.
+
+The integration plan therefore requires an explicitly pinned runner migration
+in the comparator: the frozen old runner or the one reviewed new runner, with
+all other support keys/hashes, workflow, inputs, compiler settings/binary,
+dependency lock, contract-source exceptions, semantic outputs, calldata and gas
+gates preserved. Unknown runner revisions or missing/extra support entries
+still refuse. Both historical JSON reports remain unchanged.
+
+A new run with that migrated runner is a **base-profile regression after read
+runner integration**, not a fresh isolated journal-only A/B experiment. It can
+check that the old outcomes and gas threshold still hold; the historical
+38.89%/38.01% attribution continues to come from the original saved pair.
+Any opt-in future export must name its changed support source and comparison
+scope rather than claiming all support sources were identical. See the new
+increment's verification report for the reviewed pin and final fresh results.
+
 Run from the planning worktree. The existing Node runners explicitly use the `SOLC` binary exported by `local-stateful.mjs` (the Hardhat-cached 0.8.30 binary on this machine), not an assumed Foundry offline compiler installation. That binary must already exist. Before a broad run after source changes or ordinary Forge tests, build complete AST evidence in each Solidity experiment with that same binary:
 
 ```sh

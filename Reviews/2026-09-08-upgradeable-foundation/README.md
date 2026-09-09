@@ -1,6 +1,7 @@
 # Real EFS state through an upgradeable foundation
 
-**Status:** reviewed local disposable foundation; Files/Lens/browser join remains open
+**Status:** reviewed local disposable foundation; populated Lens/read integration
+now passes, Files/browser join remains open
 **Authority:** James approved fleshing out the prototype and validating the
 foundation on 2026-09-08. No product repo, public deployment or protocol freeze.
 **Parent plan:** [[Designs/efsv2/testnet-files-mvp-plan]]
@@ -81,6 +82,16 @@ expected outcomes and SDK/UX boundaries after the owning PMs' read-only review.
 
 ## Evidence ledger
 
+- **September 9 current read increment:** [populated upgrade-aware reads](upgrade-read-verification.md)
+  at `bcd0643`, with the ordinary test-config repair at `45f3667`, preserve
+  the original Store and acceptance history. Parent 200 Core Forge, 19
+  foundation Forge and 196 Node checks pass; five source-pinned snapshots and
+  all 12 normal before/after query measurements reproduce. Task reviews approve;
+  final increment review is tracked in that report. The next visible target is
+  the [guest Files screen](../2026-09-09-v1-parity-overnight/consumer-build-card.md).
+  Earlier counts, gas and headroom below describe their original checkpoints,
+  not the current build. In particular, admission runtime margin is now
+  43 bytes; it has not been solved by adding read libraries.
 - [Validation-frontier canaries](validation-frontier.md): real direct-host
   tests demonstrate additive exact-Type coexistence, strict reference rejection,
   and why structural admission must not masquerade as Files validity. This is

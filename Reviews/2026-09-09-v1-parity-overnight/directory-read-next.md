@@ -2,7 +2,8 @@
 
 **Status:** consumer handoff for the already-selected read surface. The
 [raw/hydrated audit-page prerequisite](../2026-09-05-c0-core/audit-pages-verification.md)
-is implemented at `ae99e1a`; current Files resolution and upgrade-aware reads
+is implemented at `ae99e1a`; [populated upgrade-aware reads](../2026-09-08-upgradeable-foundation/upgrade-read-verification.md)
+now pass at `bcd0643`. Current Files resolution and the shared guest screen
 remain next. Not a new public ABI or a second directory model.
 
 The Binding task's tests and review are closed. Reuse its
@@ -16,7 +17,8 @@ this handoff identifies the user-facing proof and its likely falsifier.
 The [real-store B0 point checkpoint](../2026-09-05-c0-core/lens-point-verification.md)
 is implemented at `29859b2` and task-reviewed, with fresh integration checks
 tracked there. It supplies the existing generic combiners, not Files
-interpretation or upgraded reads. Keep those completion claims separate.
+interpretation; the separate upgrade-read report closes its observation
+integration, not Files semantics. Keep those completion claims separate.
 
 ## Build the discovery prerequisite, then resolve it
 
@@ -39,7 +41,7 @@ The consumer join must add actual revision-at-H qualification from retained
 activation history; returning the initial revision for every H cannot certify
 post-upgrade observations. Preserve `acceptedUnder` versus `observedWith`.
 
-### Concrete upgrade-join checks from the current source
+### Original upgrade-join checks and their resolution
 
 The September 9 source pass identified three specific seams, not a reason to
 reopen the data model:
@@ -62,9 +64,14 @@ reopen the data model:
   refusal. Do not infer original acceptance from the latest implementation or
   silently reinterpret the cursor because the admission count did not change.
 
-These are bounded next-increment obligations. They change neither the current
-audit-page task nor the older upgrade evidence, and do not establish a new
-permanent Realm revision or deployment format.
+The [new read increment](../2026-09-08-upgradeable-foundation/upgrade-read-verification.md)
+now supplies the checked observation basis before cursor encode/decode,
+source-qualified fixed read links through the original Core codehash
+commitment, and the actual U1/U2/U3 same-H and old-block controls. The original
+revision-one receipt getter remains absent from the new façade; unchanged
+raw batches and the independent upgrade reader check acceptance history.
+These results change neither older evidence nor the permanent Realm revision
+or deployment format. Do not reopen them as unfinished read prerequisites.
 
 ## Discriminating fixtures
 

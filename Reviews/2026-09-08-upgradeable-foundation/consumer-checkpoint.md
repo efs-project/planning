@@ -86,6 +86,9 @@ the owner walkthrough works:
 
 1. Revision-aware bounded read pages plus actual contract Plan validation and
    point Lens resolution, including full `(kind, target, leaf)` equality.
+   **Read prerequisite now implemented:** [upgrade-aware read verification](upgrade-read-verification.md)
+   demonstrates the populated proxy join at `bcd0643`, with independent
+   historical readback and measured costs. This does not complete joins 2/3.
 2. Files profile/router checks and authored-current tags, including the raw
    malformed-selected fixtures in [validation-frontier.md](validation-frontier.md).
 3. Static SPA + SDK projection/actions, followed by a populated upgrade and

@@ -51,10 +51,18 @@ requires the computer and Codex to remain available.
    Forge/14 upgrade Forge/185 broad Node passes. All24 Lens outcomes/gas rows
    reproduce. Final whole-increment review approves through `95eac01`; revision-one
    mechanics precede the separate populated-upgrade/Files reader join.
+   The [populated upgrade read increment](../2026-09-08-upgradeable-foundation/upgrade-read-verification.md)
+   now passes at `bcd0643` with test configuration at `45f3667`: parent200 Core
+   Forge/19 foundation Forge/196 Node tests, five independently reverified
+   snapshots and12 matching normal query measurements. Existing writer and
+   accepted history remain unchanged. Files interpretation/router and the
+   browser are still outstanding, not completed by this read prerequisite.
 4. **Expose one shared SDK path in the SPA.** Zero-wallet guest reading;
    opaque intent preparation; receipt versus committed readback; scoped
    evidence reuse; bounded concurrent hydration; preserved drafts on races,
-   navigation and upgrade. Do not create an authoritative browser-side tree.
+   navigation and upgrade. Start with the [small guest Files screen](consumer-build-card.md)
+   and measure its real RPC path separately from offline retained-snapshot
+   replay. Do not create an authoritative browser-side tree.
 5. **Walk and measure the joined system.** Repeat before/after populated
    upgrades; compare a fresh guest reader and a Solidity consumer; then close
    remaining v1 rows in useful order. Label synthetic wallet results and
