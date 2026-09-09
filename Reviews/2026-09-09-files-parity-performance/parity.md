@@ -36,10 +36,19 @@ validity alone does not enforce Files names/charters or automatic old-Type
 compatibility. The lifecycle/performance runner in this directory extends
 that evidence; it is not a certified FilesRouter or static browser.
 
-The next consumer join remains [the existing one-screen checkpoint](../2026-09-08-upgradeable-foundation/consumer-checkpoint.md):
-bounded reads and actual contract Lens/Files preconditions, exposed through one
-shared Reader/Actions API to a dumb-host static SPA. Do not replace it with a
-parallel browser-side authoritative tree. Full real-wallet evidence and the
+September 9 now supplies a [real guest Files SPA](../2026-09-09-files-screen/verification.md)
+over the bounded shared reader, matching seven actual contract observations
+across all three Lenses to independent reconstruction. This advances the read
+portion of [the one-screen checkpoint](../2026-09-08-upgradeable-foundation/consumer-checkpoint.md),
+not the whole directory-listing parity row: [size/churn pressure](../2026-09-09-files-reader-scale/churn-findings.md)
+still exposes partial discovery and slow first useful results. The historical
+positions have not vanished; usable enumeration needs more engineering.
+
+Next joins are bounded same-observation acquisition, actual contract Files
+preconditions/actions and head/content retrieval through the shared API.
+Do not replace the checked reader with a parallel browser-side authoritative
+tree or count prepublished layouts as executed Files operations.
+Full real-wallet evidence and the
 sixteen-row [owner walkthrough](../../Designs/efsv2/testnet-files-mvp-plan.md)
 remain separate completion gates.
 

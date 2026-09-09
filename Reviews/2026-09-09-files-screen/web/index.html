@@ -18,9 +18,11 @@
     </section>
     <p id="scenario" class="scenario">Loading the local fixture…</p>
     <section class="listing" aria-labelledby="list-title">
-      <div class="list-head"><h2 id="list-title">Folder positions</h2><span id="coverage" class="badge">Not read yet</span></div>
+      <div class="list-head"><h2 id="list-title">Files</h2><span id="coverage" class="badge">Not read yet</span></div>
       <p id="status" role="status" tabindex="-1">Reading requires no wallet. This prototype uses a synthetic operator.</p>
-      <ul id="rows" aria-label="Resolved and unresolved folder positions"></ul>
+      <ul id="rows" aria-label="Current files"></ul>
+      <section id="attention" class="attention" hidden aria-labelledby="attention-title"><h3 id="attention-title">Needs attention</h3><ul id="attention-rows" aria-label="Unresolved placements"></ul></section>
+      <details id="history" class="history" hidden><summary id="history-summary">Past or hidden positions</summary><p>These positions do not add current files to this Lens. Their retained evidence remains inspectable.</p><ul id="history-rows" aria-label="Past or hidden positions"></ul></details>
       <div class="more"><button id="more" type="button" hidden>Load more</button></div>
       <p id="basis" class="basis"></p>
     </section>

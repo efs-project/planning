@@ -15,6 +15,10 @@ async function complete(page){await settled(page);while(await page.locator('#mor
 async function rows(page){return page.locator('[data-result]').evaluateAll(nodes=>nodes.map(n=>JSON.parse(n.dataset.result)));}
 
 test('real guest SPA matches retained Core observations and exposes qualified, accessible progress',{timeout:300000},async()=>{
+  const lanesExport=process.env.EFS_FILES_LANES_EVIDENCE==='1';
+  const exportEvidence=lanesExport||Boolean(process.env.EFS_FILES_SCREEN_EVIDENCE);
+  const evidenceDir=new URL(lanesExport?'../evidence/files-lanes/':'../evidence/',import.meta.url);
+  if(lanesExport)await mkdir(evidenceDir); // Exclusive new result directory; never overwrite prior evidence.
   const browser=await chromium.launch({headless:true,...(executablePath?{executablePath}:{})});
   const errors=[],external=[],report={kind:'LIVE_GUEST_FILES_SCREEN_NOT_PUBLIC_C0',samples:[],checks:[],snapshots:{},exclusions:['physical phone','WAN percentiles','finality','content bytes','wallet writes','full v1 parity']};
   try{await withFilesScreen(async screen=>{
@@ -36,11 +40,28 @@ test('real guest SPA matches retained Core observations and exposes qualified, a
         await page.locator('#snapshot').selectOption(snapshot.id);await page.locator('#lens').selectOption(lens);await complete(page);
         const actual=await rows(page),expected=truths.get(snapshot.id).inventory(config.mounts[lens]).results;
         assert.deepEqual(ordered(actual),ordered(expected),snapshot.id+'/'+lens);
+        assert.equal(await page.locator('#rows>li').count(),expected.filter(r=>r.outcome==='FOUND').length,'only usable Files in primary list');
+        assert.equal(await page.locator('#attention-rows>li').count(),expected.filter(r=>['CONFLICT','UNKNOWN'].includes(r.outcome)).length);
+        assert.equal(await page.locator('#history-rows>li').count(),expected.filter(r=>['ABSENT','MASKED'].includes(r.outcome)).length);
+        assert.equal(await page.locator('#history').isVisible(),expected.some(r=>['ABSENT','MASKED'].includes(r.outcome)));
         assert.equal(await page.locator('main').getAttribute('data-block'),String(truths.get(snapshot.id).basis.blockNumber));
         assert.equal(await page.locator('main').getAttribute('data-revision'),String(truths.get(snapshot.id).basis.realmRevisionId));
       }
     }
     report.checks.push('all seven pinned observations × three Lenses match independent full reconstruction');
+    report.checks.push('every returned position accounted across Files, attention and historical lanes');
+    await page.locator('#snapshot').selectOption('masked');await page.locator('#lens').selectOption('aFirst');await complete(page);
+    const hiddenPosition=page.locator('#history-rows [data-role="'+role('note.txt')+'"]');
+    assert.equal(await hiddenPosition.isVisible(),false,'masked position is not a phantom file row');
+    for(const width of [390,320]){
+      await page.setViewportSize({width,height:844});await page.locator('#history>summary').focus();await page.keyboard.press('Enter');
+      assert.equal(await hiddenPosition.isVisible(),true);await hiddenPosition.locator('button').click();
+      assert.match(await page.locator('#why-body').innerText(),/selects a mask/);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+      await page.keyboard.press('Escape');assert.equal(await page.locator(':focus').getAttribute('data-why'),role('note.txt'));
+      await page.locator('#history>summary').click();
+    }
+    report.checks.push('past/hidden positions remain phone and keyboard inspectable without primary file rows');
+    await page.setViewportSize({width:1280,height:900});
     await page.locator('#snapshot').selectOption('disagree');await page.locator('#lens').selectOption('exact');await complete(page);
     const conflict=page.locator('[data-role="'+role('note.txt')+'"]');assert.equal(await conflict.getAttribute('data-outcome'),'CONFLICT');
     assert.match(await conflict.innerText(),/Unresolved position/);assert.doesNotMatch(await conflict.innerText(),/note.txt/);
@@ -78,6 +99,15 @@ test('real guest SPA matches retained Core observations and exposes qualified, a
     const failed=await rows(page);assert(failed.some(r=>r.outcome==='UNKNOWN'));assert(failed.some(r=>r.outcome==='FOUND'));
     assert.doesNotMatch(await page.locator('#status').innerText(),/empty folder/i);await page.unroute('**/rpc');
     report.checks.push('missing selected Entry produces unresolved evidence, not empty or fallback');
+    const n0=truths.get('agreement').inventory(config.mounts.aFirst).results.find(r=>r.fieldRole===role('n0.txt')).selectedId.slice(2);
+    await page.route('**/rpc',async route=>{const body=route.request().postDataJSON();if(body.method==='eth_call'&&body.params[0].data===selector+n0)return route.fulfill({status:502,contentType:'application/json',body:json({error:'temporary n0 Entry failure'})});return route.continue();});
+    await page.locator('#refresh').click();await settled(page);
+    assert.equal(await page.locator('#attention-rows [data-role="'+role('n0.txt')+'"]').count(),1);
+    assert.equal(await page.locator('#rows [data-role="'+role('n0.txt')+'"]').count(),0);
+    await page.unroute('**/rpc');await page.locator('#more').focus();await page.keyboard.press('Enter');await settled(page);
+    assert.equal(await page.locator('#rows [data-role="'+role('n0.txt')+'"]').count(),1);
+    assert.equal(await page.locator(':focus').getAttribute('data-why'),role('n0.txt'),'recovered prior attention row is the first newly usable File');
+    report.checks.push('keyboard continuation focuses recovered File before later new positions');
     await page.locator('#refresh').click();await settled(page);
     const prefix=ordered(await rows(page));
     const pageSelector=screen.lab.readIface.getFunction('pagePostingsHydrated').selector;
@@ -111,16 +141,24 @@ test('real guest SPA matches retained Core observations and exposes qualified, a
       assert.equal(await p.evaluate(()=>window.walletTouches),0);
       const resources=await p.evaluate(()=>[...performance.getEntriesByType('navigation'),...performance.getEntriesByType('resource')].map(x=>({name:new URL(x.name).pathname,transferSize:x.transferSize,encodedBodySize:x.encodedBodySize,decodedBodySize:x.decodedBodySize,duration:x.duration})));
       report.samples.push({delayMs,sample,navigationToRowsMs:firstMs,continuationMs:moreMs,first:{requests:first.length,jsonResultBytes:first.reduce((s,x)=>s+x.bytes,0)},continuation:{requests:more.length,jsonResultBytes:more.reduce((s,x)=>s+x.bytes,0)},resources:resources.filter(x=>x.name!=='/rpc')});
-      if(sample===0&&delayMs===0&&process.env.EFS_FILES_SCREEN_EVIDENCE){
-        const dir=new URL('../evidence/',import.meta.url);await mkdir(dir,{recursive:true});await p.screenshot({path:new URL('desktop.png',dir).pathname,fullPage:true});
-        await p.setViewportSize({width:390,height:844});await p.locator('[data-why]').first().click();await p.screenshot({path:new URL('phone.png',dir).pathname,fullPage:true});
+      if(sample===0&&delayMs===0&&exportEvidence){
+        if(!lanesExport)await mkdir(evidenceDir,{recursive:true});await p.screenshot({path:new URL('desktop.png',evidenceDir).pathname,fullPage:true});
+        await p.setViewportSize({width:390,height:844});await p.locator('[data-why]').first().click();await p.screenshot({path:new URL('phone.png',evidenceDir).pathname,fullPage:true});
+        if(lanesExport){
+          await p.keyboard.press('Escape');await p.setViewportSize({width:1280,height:900});
+          await p.locator('#snapshot').selectOption('disagree');await p.locator('#lens').selectOption('exact');await complete(p);
+          await p.screenshot({path:new URL('attention.png',evidenceDir).pathname,fullPage:true});
+          await p.locator('#snapshot').selectOption('masked');await p.locator('#lens').selectOption('aFirst');await complete(p);
+          await p.locator('#history>summary').click();await p.setViewportSize({width:390,height:844});
+          await p.screenshot({path:new URL('history-phone.png',evidenceDir).pathname,fullPage:true});
+        }
       }
       await ctx.close();
     }
     assert.equal(errors.length,0,json(errors));assert.equal(external.length,0,json(external));report.checks.push('zero page errors, external requests or wallet access');
     report.browser=browser.version();report.sourceCommit=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
-    report.sourcePins={};for(const p of ['scripts/server.mjs','test/screen-fixture.mjs','test/files-screen.browser.mjs','web/app.mjs','web/rpc-source.mjs','web/index.html','web/files.css'])report.sourcePins[p]=createHash('sha256').update(await readFile(new URL('../'+p,import.meta.url))).digest('hex');
-    if(process.env.EFS_FILES_SCREEN_EVIDENCE){await mkdir(new URL('../evidence/',import.meta.url),{recursive:true});await writeFile(new URL('../evidence/browser.json',import.meta.url),json(report)+'\n');}
+    report.sourcePins={};for(const p of ['scripts/server.mjs','test/screen-fixture.mjs','test/files-screen.browser.mjs','web/app.mjs','web/listing-presentation.mjs','web/rpc-source.mjs','web/index.html','web/files.css'])report.sourcePins[p]=createHash('sha256').update(await readFile(new URL('../'+p,import.meta.url))).digest('hex');
+    if(exportEvidence){if(!lanesExport)await mkdir(evidenceDir,{recursive:true});await writeFile(new URL('browser.json',evidenceDir),json(report)+'\n',lanesExport?{flag:'wx'}:{});}
     console.log(json({checks:report.checks,samples:report.samples.map(({resources,...x})=>x),browser:report.browser}));
   });}finally{await browser.close();}
 });

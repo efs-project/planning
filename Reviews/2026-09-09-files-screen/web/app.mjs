@@ -1,5 +1,6 @@
 import { createFixtureReader,openDirectory } from '/Reviews/2026-09-09-files-reader/index.mjs';
 import { boundedJSON,createRPCSource } from './rpc-source.mjs';
+import { presentListing } from './listing-presentation.mjs';
 const $=id=>document.getElementById(id),main=document.querySelector('main'),stringify=x=>JSON.stringify(x,(_,v)=>typeof v==='bigint'?String(v):v,2);
 let config,reader,scope,stream,cancel,generation=0,current=null,busy=false,opener=null;
 const short=x=>x?x.slice(0,10)+'…'+x.slice(-8):'not available';
@@ -41,39 +42,44 @@ function explain(row,button){
 function render(s,{focusNewFrom=null}={}){
   const priorFocus=document.activeElement?.dataset.why??opener?.dataset.why;
   if($('why').open)closeWhy();
-  current=s;const rows=allRows(s);$('rows').replaceChildren();
+  current=s;const rows=allRows(s),presentation=presentListing(s);
+  for(const id of ['rows','attention-rows','history-rows'])$(id).replaceChildren();
+  $('attention').hidden=presentation.attention.length===0;$('attention-title').textContent='Needs attention ('+presentation.attention.length+')';
+  const past=presentation.history.length;$('history').hidden=past===0;
+  $('history-summary').textContent=past+' past or hidden position'+(past===1?'':'s')+' examined';
   for(const row of rows){
     const li=document.createElement('li');li.dataset.role=row.fieldRole;li.dataset.outcome=row.outcome;li.dataset.result=stringify(row);
     if(row.outcome!=='FOUND')li.className='unresolved';
-    const title=row.value?.name??(row.outcome==='MASKED'?'Masked position':row.outcome==='ABSENT'?'No agreed placement':'Unresolved position');
+    const usable=row.outcome==='FOUND';
+    const title=usable?row.value.name:row.outcome==='MASKED'?'Masked position':row.outcome==='ABSENT'?'No agreed placement':'Unresolved position';
     const info=document.createElement('div');info.append(text('div',title,'row-title'));
-    info.append(text('div',row.value?'File · '+short(row.value.nodeId)+' · metadata checked':row.outcome+' · position '+short(row.fieldRole),'row-meta'));
+    info.append(text('div',usable?'File · '+short(row.value.nodeId)+' · metadata checked':row.outcome+' · position '+short(row.fieldRole),'row-meta'));
     const button=text('button','Why?','why-button');button.type='button';button.dataset.why=row.fieldRole;button.setAttribute('aria-label','Why this result: '+title);
-    button.addEventListener('click',()=>explain(row,button));li.append(info,button);$('rows').append(li);
+    button.addEventListener('click',()=>explain(row,button));li.append(info,button);
+    $(usable?'rows':['ABSENT','MASKED'].includes(row.outcome)?'history-rows':'attention-rows').append(li);
   }
   const unavailable=s.qualification.status!=='QUALIFIED';
   $('coverage').textContent=unavailable?'Read unavailable':s.coverage==='COMPLETE'?'Listing complete':'Partial listing';
-  const unresolved=(s.unresolved??[]).length;
-  $('status').textContent=unavailable?'Latest attempt failed: '+s.reason+'. '+(rows.length?'Showing prior sealed rows only.':'No complete folder result is available.'):
-    `${s.rows.length} validated placement${s.rows.length===1?'':'s'}${unresolved?`; ${unresolved} unresolved position${unresolved===1?'':'s'}`:''}. `+
-    (s.coverage==='COMPLETE'?'All source positions were traversed.'+(unresolved?' Unresolved positions still need attention.':''):'More source positions remain. Names are sorted within the loaded portion only.');
+  $('status').textContent=presentation.summary;
   $('more').hidden=unavailable||!s.continuation;$('more').setAttribute('aria-disabled','false');$('more').textContent='Load more';
   $('basis').textContent=`Pinned block ${s.basis.blockNumber} · host revision ${s.basis.revision} · ${scope.stats().requests} RPC reads · ${scope.stats().bytes.toLocaleString()} result bytes`;
   main.dataset.block=String(s.basis.blockNumber);main.dataset.revision=s.basis.executionSetId;
-  if(focusNewFrom){const added=rows.find(r=>!focusNewFrom.has(r.fieldRole));if(added)$('rows').querySelector(`[data-why="${added.fieldRole}"]`)?.focus();else if(!$('more').hidden)$('more').focus();else $('status').focus();}
-  else if(priorFocus)$('rows').querySelector(`[data-why="${priorFocus}"]`)?.focus();
+  if(focusNewFrom){const added=presentation.files.find(r=>!focusNewFrom.has(r.fieldRole));if(added)$('rows').querySelector(`[data-why="${added.fieldRole}"]`)?.focus();else if(!$('more').hidden)$('more').focus();else $('status').focus();}
+  else if(priorFocus){const prior=main.querySelector(`[data-why="${priorFocus}"]`);if(prior&&(!prior.closest('#history')||$('history').open))prior.focus();else $('status').focus();}
 }
 async function load(g,{keyboard=false}={}){
   if(busy||g!==generation)return;busy=true;main.dataset.state='loading';$('more').setAttribute('aria-disabled','true');$('more').textContent='Reading…';
   $('coverage').textContent='Reading more';$('status').textContent=current?'Checking the next page. Existing rows belong to the previous sealed page.':'Checking the pinned source, Lens and selected metadata…';
-  const previous=keyboard?new Set(allRows(current).map(r=>r.fieldRole)):null;
+  const previous=keyboard?new Set(allRows(current).filter(r=>r.outcome==='FOUND').map(r=>r.fieldRole)):null;
   try{const result=await stream.loadMore();if(g!==generation)return;render(result,{focusNewFrom:previous});}
   catch(e){if(g!==generation)return;$('coverage').textContent='Read unavailable';$('status').textContent='The read could not finish: '+e.message;$('more').hidden=true;}
   finally{if(g===generation){busy=false;main.dataset.state='settled';}}
 }
 async function refresh(){
   const g=++generation;cancel?.abort();stream?.close();scope?.close();cancel=new AbortController();stream=null;scope=null;current=null;busy=false;
-  closeWhy();$('rows').replaceChildren();$('more').hidden=true;$('basis').textContent='';main.dataset.state='loading';delete main.dataset.block;delete main.dataset.revision;
+  closeWhy();for(const id of ['rows','attention-rows','history-rows'])$(id).replaceChildren();
+  $('attention').hidden=true;$('history').hidden=true;$('history').open=false;
+  $('more').hidden=true;$('basis').textContent='';main.dataset.state='loading';delete main.dataset.block;delete main.dataset.revision;
   $('coverage').textContent='Reading observation';$('status').textContent='Checking the pinned source before listing this folder…';
   const selected=config.snapshots.find(s=>s.id===$('snapshot').value);$('scenario').textContent=selected.description;
   try{

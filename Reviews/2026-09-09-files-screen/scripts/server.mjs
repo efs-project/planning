@@ -8,6 +8,7 @@ const json=x=>JSON.stringify(x,(_,v)=>typeof v==='bigint'?String(v):v);
 const files=new Map([
   ['/','../web/index.html'],['/screen/app.mjs','../web/app.mjs'],
   ['/screen/files.css','../web/files.css'],['/screen/rpc-source.mjs','../web/rpc-source.mjs'],
+  ['/screen/listing-presentation.mjs','../web/listing-presentation.mjs'],
   ...['index.mjs','reader-scope.mjs','files-reader.mjs','files-profile.mjs'].map(p=>['/Reviews/2026-09-09-files-reader/'+p,'../../2026-09-09-files-reader/'+p]),
   ['/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.js','../../2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.js'],
 ]);
