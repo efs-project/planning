@@ -85,11 +85,15 @@ expected outcomes and SDK/UX boundaries after the owning PMs' read-only review.
   tests demonstrate additive exact-Type coexistence, strict reference rejection,
   and why structural admission must not masquerade as Files validity. This is
   separate from upgrade evidence.
+- Authored-current tags: four additional direct-host checks pass for an ordinary
+  tag Type, two authors, deduplicated immutable content, untag/re-tag and exact
+  stale-CAS rollback. Raw live occurrence counts are not current tag counts;
+  see the same validation-frontier note for the measured scope.
 
 - Upgrade contract component: implemented at `00588b4`; the controller
   reproduced all 14 new tests, covering populated upgrades, locked initialization,
   stale consent, atomic failure and same-block admission boundaries. Independent
-  task review is in progress; managed-chain verification is the next task.
+  task review is Approved; managed-chain verification is running separately.
 - Regression: the controller also ran all 162 current Core Forge tests, passing,
   including the five original StateKernel cases. This worktree contains the
   separately preserved unfinished Binding-read increment; passing tests do not

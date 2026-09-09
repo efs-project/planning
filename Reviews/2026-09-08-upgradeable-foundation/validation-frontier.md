@@ -59,3 +59,33 @@ DirectoryEntry canaries contain no name-slot Bindings and are not an automated
 The architectural lesson is small: retain and verify exact facts in Core;
 prove the application interpretation at its explicit boundary. The SDK should
 make that distinction easy to use without claiming a universal “valid” bit.
+
+## Authored tags: a concrete use of ordinary Types
+
+```sh
+node --test Reviews/2026-09-08-upgradeable-foundation/test/tag-current.test.mjs
+```
+
+Fresh result: **4/4 pass** (one scenario plus three subtests), 9 real local
+transactions; maximum publication gas 10,410,963. The fixture admits an ordinary
+`FrontierTagAssertion/1`, one generic Object, and Principal-qualified current-tag
+Bindings for synthetic A and B. No tag primitive was added to Core.
+
+| State | Immutable assertion Records | Core-ACTIVE assertion occurrences | Current authored tag claims |
+| --- | ---: | ---: | ---: |
+| A and B assert the same tag on the same Object | 1 | 2 | 2 |
+| A untags via its Binding tombstone | 1 | 2 | 1, from B |
+| A re-tags with a fresh occurrence/current Binding | 1 | 3 | 2 |
+
+The independent reader reconstructs both authors, exact Record deduplication,
+distinct occurrences, current heads, history and the declared scalar posting.
+The stale-CAS negative case asserts exact `ErrCasRevision(key,1,3)` in preflight
+and the mined trace, plus unchanged retained state. Cleanup is checked.
+
+**Important SDK/query consequence:** an index's `live` occurrence count is not
+the number of current application claims. A separate Binding tombstone does
+not withdraw the old assertion occurrence. Use postings as candidates and
+join the Principal-qualified current head; do not count old assertions as
+current tags. This is a component test on one generic Object, not a Files
+charter, multi-file filtered listing, Lens implementation or authentication
+proof. Those remain in [the joined consumer checkpoint](consumer-checkpoint.md).
