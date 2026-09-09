@@ -5,6 +5,23 @@
 **Authority:** James's September 9 request to continue overnight, validate v1
 capabilities and measure v2 performance and UX. Existing experiment branch only.
 
+## September 9 owner-priority correction
+
+James clarified after this checkpoint: **engineering correctness comes before
+extreme efficiency; neither the current limits nor the Ethereum library is
+frozen.** See the [owner ruling](../../Designs/efsv2/owner-rulings.md#correctness-before-extreme-efficiency-in-the-mvp-prototype).
+Keep the measurements below with their original settings. Their unchanged caps
+are comparison controls, not requirements for new candidates; a larger download
+is acceptable when a better library improves the engineering.
+
+This supersedes the next-step selection below: first compare sensible reader
+budgets and simpler acquisition/API choices before implementing segments solely
+to preserve 512 requests. Segments and a read helper remain candidates, not
+required architecture. Preserve validation, cancellation and honest coverage;
+measure performance to explain tradeoffs. The [updated experiment handoff](../2026-09-09-files-reader-scale/next-experiments.md)
+separates this direction from the retained earlier advice. No runtime, captured
+evidence or paused scheduling state changed with this correction.
+
 ## Latest useful checkpoint
 
 The [Files-first guest screen](../2026-09-09-files-screen/files-lanes-verification.md)

@@ -6,6 +6,35 @@ read-only on September 9. Neither changed files or selected permanent bytes.
 Their advice agrees with the measured blocker: truthful partial results are
 necessary, but not enough to make a useful browser.
 
+## September 9 owner correction — governs the next work
+
+The [correctness-first owner ruling](../../Designs/efsv2/owner-rulings.md#correctness-before-extreme-efficiency-in-the-mvp-prototype)
+supersedes the fixed-budget sequencing in the retained PM advice below. The
+512-request, byte, concurrency, timeout and collector settings are adjustable
+experiment choices. Existing ethers reuse is not a library selection or a
+bundle-size requirement.
+
+Before implementing acquisition segments, compare a sensibly configured
+single-scope candidate and simpler acquisition/page choices against the retained
+64/60 control. Record each candidate's settings, oracle agreement, failure and
+cancellation behavior, total work and time to useful Files. Prefer the simplest
+correct option; do not add a segment framework just to avoid raising a cap.
+A higher cap may resolve a refusal without improving latency or scaling, so
+report those outcomes separately. Independent reference-collector budgets may
+also increase; the earlier 96/128 refusals remain historical, not retroactive
+passes.
+
+If library limitations complicate correctness or the SDK API, evaluate a
+replacement on validation/encoding behavior, error handling, TypeScript and
+browser fit, maintenance and interoperability. Accept a larger bundle when it
+buys better engineering. No replacement is chosen by this note. Preserve
+resource accounting and truthful failure/coverage behavior with any settings.
+
+The earlier segment plan below remains a conditional experiment if it offers
+a real lifecycle or UX benefit after that comparison. Its exact two-segment and
+512-request settings are controls for that arm only, not product constraints.
+No new owner answer or overnight restart is implied by this handoff correction.
+
 ## 1. Separate an observation from one acquisition lifetime
 
 The [source-grounded implementation plan](acquisition-segments-plan.md) checks

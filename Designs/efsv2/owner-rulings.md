@@ -1,7 +1,7 @@
 # EFS v2 — Owner rulings & notes (James)
 
 **Status:** reference — append-only, dated ruling ledger. NOT a design: decisions/directions only. The design docs get updated to match separately.
-**Last touched:** 2026-09-03
+**Last touched:** 2026-09-09
 
 #status/reference #kind/note
 
@@ -270,3 +270,26 @@ does not select a proxy pattern, permanent upgrade authority, protocol freeze,
 public deployment or product repository creation. The implementation proposal
 is [[testnet-files-mvp-plan]]. Existing immutable C0 selections remain named
 experimental controls, not the deployment template for an upgradeable testnet.
+
+## 2026-09-09
+
+### Correctness before extreme efficiency in the MVP prototype
+
+- **Current limits are not set in stone.** Prototype budgets and numeric caps
+  may change as engineering evidence develops; they are not product guarantees
+  or permanent protocol selections.
+- **A better Ethereum library is acceptable even if the download is larger.**
+  The current dependency is not frozen. Engineering correctness takes priority
+  over extreme efficiency at this stage.
+
+— ruled by @james, 2026-09-09
+
+Engineering follow-through: prefer a correct, understandable and maintainable
+SDK over elaborate machinery introduced only to preserve an arbitrary cap or
+bundle target. Keep earlier measurements and their settings as historical
+controls; compare changed candidates explicitly. Resource accounting,
+cancellation, truthful partial results and actual execution-venue constraints
+still matter, but do not make today's configurable numbers architectural law.
+This priority does not select a replacement library, freeze an ABI, authorize
+public deployment or resume the paused overnight run. The next-work correction
+is in [[Reviews/2026-09-09-files-reader-scale/next-experiments]].

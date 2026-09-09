@@ -23,6 +23,7 @@ What rulings have **retired**, and what replaced it. Input to `./scripts/needs-i
 
 | Retired phrase | Ruling | Cleared |
 |---|---|---|
+| `Do not reset counters inside one scope or raise its limits` | [[Designs/efsv2/owner-rulings#Correctness before extreme efficiency in the MVP prototype]] — counters remain honest; candidate limits may change. Earlier review advice is retained with dated corrections. | 2026-09-09 |
 | `agent-role.sh` | 2026-09-03 owner-requested simplification: plain directory and optional profile notes | 2026-09-03 |
 | `James promotes it via the usual ceremony` | 2026-09-03 portable-role process: name-stable living ops docs, no promotion | 2026-09-03 |
 | `bash 4+` | 2026-09-03 portable-role process: preserve the existing macOS bash 3.2 script requirement | 2026-09-03 |

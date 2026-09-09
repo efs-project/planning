@@ -5,6 +5,17 @@ a public continuation format. Implements the first
 [SDK advisory](next-experiments.md) before the separate helper/oracle experiments.
 No Core, writer, Store, permanent identity, public SDK or RPC limit increase.
 
+## September 9 priority correction — conditional candidate, not required next step
+
+James's subsequent [correctness-first direction](../../Designs/efsv2/owner-rulings.md#correctness-before-extreme-efficiency-in-the-mvp-prototype)
+supersedes this plan's fixed-limit sequencing. The [updated handoff](next-experiments.md#september-9-owner-correction--governs-the-next-work)
+first compares sensible budgets and simpler acquisition choices. Do not build
+this machinery solely to retain 512 requests. The plan below preserves the
+reviewed candidate and its acceptance cases; unchanged limits and two segments
+describe that comparison arm, not frozen SDK or product constraints. Its
+correctness requirements still apply if continuation is selected. Library and
+download-size choices also remain open. No candidate implementation changed.
+
 ## Why this is the next step
 
 The verified 64-name/60-retraction page-four control seals 60 positions before
