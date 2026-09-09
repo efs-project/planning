@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EFS · Guest Files experiment</title>
+  <meta name="description" content="Read-only EFS prototype: compare file placements through three Lenses at pinned local observations.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/screen/files.css">
+  <script type="module" src="/screen/app.mjs"></script>
+</head>
+<body>
+  <header class="top"><span class="brand">EFS <span>/ Files</span></span><span class="guest">Guest · no wallet</span></header>
+  <main data-state="loading">
+    <div class="heading"><div><p class="eyebrow">LOCAL READ-ONLY EXPERIMENT</p><h1>trip<span class="slash">/</span></h1></div><button id="refresh" type="button">Read again</button></div>
+    <section class="controls" aria-label="Folder context">
+      <label>Lens<select id="lens"><option value="aFirst">A first</option><option value="bFirst">B first</option><option value="exact">Both agree</option></select></label>
+      <label>Prepublished observation<select id="snapshot"></select></label>
+    </section>
+    <p id="scenario" class="scenario">Loading the local fixture…</p>
+    <section class="listing" aria-labelledby="list-title">
+      <div class="list-head"><h2 id="list-title">Folder positions</h2><span id="coverage" class="badge">Not read yet</span></div>
+      <p id="status" role="status" tabindex="-1">Reading requires no wallet. This prototype uses a synthetic operator.</p>
+      <ul id="rows" aria-label="Resolved and unresolved folder positions"></ul>
+      <div class="more"><button id="more" type="button" hidden>Load more</button></div>
+      <p id="basis" class="basis"></p>
+    </section>
+    <div class="boundaries"><p>Metadata only. File content, navigation, tags and write actions are not connected here.</p><p>Synthetic operator, trusted local source, provisional chain. A and B are fixture labels, not proof of personal signatures.</p><p id="delay"></p></div>
+    <details class="operations"><summary>Remove or stop asserting: what is the difference?</summary><div class="cards">
+      <article><h2>Remove from this folder</h2><p>Planned behavior: mask this placement and record a removal marker. Lower-priority claims stay hidden. The File Object and its bytes are not erased.</p></article>
+      <article><h2>Stop asserting this name</h2><p>Planned behavior: retract your claim. Another source’s claim may become visible. This does not create a Removed item.</p></article>
+    </div><p>Explanation only; neither operation can be executed on this screen. Fixture layouts are separate publications, not proof of atomic rename or removal.</p></details>
+  </main>
+  <dialog id="why" aria-labelledby="why-title"><div class="dialog-head"><h2 id="why-title">Why this result?</h2><button id="close-why" type="button" autofocus>Close</button></div><div id="why-body"></div></dialog>
+  <noscript>This Files experiment requires JavaScript to verify and display the local contract reads.</noscript>
+</body></html>
