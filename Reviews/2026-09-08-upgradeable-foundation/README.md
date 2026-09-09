@@ -1,6 +1,6 @@
 # Real EFS state through an upgradeable foundation
 
-**Status:** local disposable prototype specification; execution in progress
+**Status:** local disposable foundation implemented; final review in progress
 **Authority:** James approved fleshing out the prototype and validating the
 foundation on 2026-09-08. No product repo, public deployment or protocol freeze.
 **Parent plan:** [[Designs/efsv2/testnet-files-mvp-plan]]
@@ -93,11 +93,48 @@ expected outcomes and SDK/UX boundaries after the owning PMs' read-only review.
 - Upgrade contract component: implemented at `00588b4`; the controller
   reproduced all 14 new tests, covering populated upgrades, locked initialization,
   stale consent, atomic failure and same-block admission boundaries. Independent
-  task review is Approved; managed-chain verification is running separately.
+  task review is Approved.
 - Regression: the controller also ran all 162 current Core Forge tests, passing,
   including the five original StateKernel cases. This worktree contains the
   separately preserved unfinished Binding-read increment; passing tests do not
   review or complete that increment.
-- Normal managed-chain deployment/receipt measurements, independent upgrade
-  read-back and browser joins: not run yet. Component execution gas is not
-  actual transaction-receipt gas. Record each later checkpoint separately.
+- Broad Node regression: **79/79 pass** across the current Core and foundation
+  test files, including the exact-Type/tag canaries and managed upgrade checks.
+  This likewise includes local Binding work and is not a claim that the whole
+  historical branch or its uncommitted changes have passed independent review.
+- Managed upgrade: the controller reproduced **11/11 passing Node checks**:
+  source-pinned normal deployments, actual proxy-admin evidence, independently
+  reconstructed retained state, same-block history, stale/altered/replayed
+  operations, legacy-reader behavior, bounded history and exceptional cleanup.
+  Task review is Approved; its two minor corrections are included and awaiting
+  scoped re-review. See [the detailed verification](verification.md).
+- The real seven-leaf small-file metadata publication costs **about 14.15 million gas**
+  in the observed runs, leaving **about 2.63 million** below the experiment's 16,777,216
+  cap. Byte staging is separate. Four candidate groups are installed separately;
+  the largest group publication is approximately 14.54 million gas. Neither
+  number includes a future FilesRouter or proves a one-wallet-approval path.
+- Browser joins, full FilesRouter authorization/profile enforcement and real
+  wallet UX: **not demonstrated by this checkpoint**. Contract component gas
+  and managed transaction-receipt gas remain separate measurements.
+
+## What this changed in the design
+
+The important results are not just green tests:
+
+- Preserve an admission boundary with each execution revision; block number
+  alone cannot explain an old write followed by an upgrade in the same block.
+- Expose exact-data validity, Files interpretation, executor support and
+  committed effects separately. Structurally valid bytes can still describe
+  an invalid filename or lack the required File/Directory charter.
+- Resolve current authored tags through their current Bindings; retained live
+  assertion occurrences are history/candidates, not a current-tag count.
+- Keep operation sizing visible. The admission library has only **330 bytes**
+  of runtime margin in this build, and full file creation has limited gas
+  headroom. Measure the routed operation and atomic rename before adding more
+  behavior to the same component or splitting an operation that must be atomic.
+
+These are reasons to keep the same verified Store under the next thin
+Files/Lens/SDK/browser join. They are not evidence of a completed filesystem,
+an audited deployment or century-long compatibility. Exact-Type coexistence
+is tested; automatic old-app compatibility still needs its explicit View or
+projection fixture.

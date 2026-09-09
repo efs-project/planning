@@ -61,12 +61,32 @@ references. U1 guards check the contract-observable configuration; the SDK
 also verifies deployment/runtime evidence, including the actual proxy admins.
 Neither relies on the unchanged proxy shell alone. Missing activation or a partial endpoint upgrade must
 block ordinary writes. A failed coupled upgrade must leave the previous configuration
-intact. These are tests to implement, not properties the current code has.
+intact. The disposable foundation now exercises these guards and rollback with
+real EFS state in 14 contract tests. This is not yet evidence for the full
+C0-authorized FilesRouter, SDK or browser path; those joins remain below.
 
 The prototype history must retain the Core admission high-water at activation
 as well as the block. U1 writes can precede a U2 activation in the same block;
 block-only history would make independent historical interpretation ambiguous.
 The exact source-pinned experiment ABI remains disposable.
+
+The managed September 8 experiment also publishes real FILE/DIRECTORY meanings,
+publisher charters and one seven-leaf small-file metadata operation using the
+same EFS Store. It preserves that inventory and exact bytes through U2 and
+independently reconstructs the exported snapshots offline. The operation costs
+about **14.15 million gas** under the **16,777,216** experiment cap, with byte
+staging separate; the linked admission library has only **330 runtime bytes**
+remaining. These are measured design constraints, not full Files certification.
+Keep Files/router behavior outside that nearly full admission component and
+measure complete routed creation and atomic rename before treating their fit
+as established. Do not make an atomic operation appear to pass by splitting it.
+
+The SDK consumes complete execution context, not an app-supplied revision
+number alone. Preserve original acceptance history separately from today's
+reader/basis; unavailable history remains unknown even when exact bytes can be
+checked. Decode emitted errors from fixed linked dependencies as well as the
+Core ABI. The prototype's synthetic operator and separate staging signatures
+do not settle portable authority or the one-approval wallet acceptance row.
 
 The UI must say **Upgradeable testnet**, show who can upgrade it, and make no
 immutable-hyperstructure claim. An upgrade controller can install bad code;
@@ -221,10 +241,12 @@ the workflow rather than becoming another mandatory reading stack.
 
 ## Implementation notes
 
-Research and two independent source audits informed this proposal. No new
-upgrade test, browser journey, product implementation or deployment was run
-for this planning pass. Existing experimental evidence remains under its own
-profile and source revision; it is not retroactively promoted by this plan.
+Research and two independent source audits informed the original proposal;
+that docs-only pass ran no new upgrade or browser implementation. The
+subsequently authorized [real-state foundation](../../Reviews/2026-09-08-upgradeable-foundation/README.md)
+has its own implementation and verification ledger. Its results do not
+retroactively promote the old experiment or mark the browser journeys passed.
+Each experiment remains qualified by its own profile and source revision.
 Review corrections made guest/no-Commons and contract Lens checks explicit,
 defined proposed removal/tag currentness, and separated contract-observable
 upgrade guards from independently reconstructed proxy-admin evidence. Both
