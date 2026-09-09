@@ -4,6 +4,11 @@
 **Authority:** James's overnight prototype/parity/performance direction;
 existing experiment branch only. Source baseline `31a4fbd`.
 
+**Checkpoint:** portable scope implemented at `c581366` and task-reviewed;
+parent's fresh five test groups pass. Files interpretation/listing remains
+Task2, not a completed screen or parity claim. The [acceptance cases](acceptance-cases.md)
+make the expected user-visible outcomes and timing disclosures concrete.
+
 ## Outcome
 
 Produce a real, bounded root-folder listing over the published upgrade read
@@ -68,7 +73,13 @@ successful sealed result. Budget/failure outcomes retain obtained evidence.
 
 Experimental scope limits: at most 512 requests, 4 MiB serialized JSON-result
 bytes in total, 262,144 bytes per response, 4 in flight and 30 seconds per
-scope. These are named test defaults, not public protocol limits or production
+active acquisition window. Opening owns one window, ending at READY. The next
+data call opens a window lasting through successful sealing; a seal with no
+data opens its own window. A seal is a barrier: drain already queued work and
+refuse new data work while sealing, then clear the deadline on success. Time
+spent reading a sealed page does not consume the next window. An expired
+window invalidates the scope; request/byte budgets never reset. These are
+named test defaults, not public protocol limits or production
 SLAs. The read transport must enforce response limits while acquiring bytes;
 the adapter also checks returned result sizes. Count failures and opening/
 sealing costs, not just successful data calls. No automatic HTTP retry.

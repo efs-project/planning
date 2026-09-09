@@ -11,8 +11,8 @@
 
 - Existing isolated `codex/mvp-c0-coherence` experiment only. No main merge, product repository, public deployment, funds, permanent profile/Type/ABI adoption or frozen protocol choices.
 - Existing Store, writer, read façade, managed runner, original independent verifiers and historical JSON reports remain byte-identical. Add only this review directory's files. No change to comparator pins or existing runtime source.
-- Browser runtime modules use JavaScript/Uint8Array/TextDecoder and existing ethers only; no Node builtins, Buffer global, process, filesystem, producer/oracle import or dependency install. Import ethers through the existing relative lib.esm path; a later SPA may map that exact module specifier to the installed browser distribution.
-- Scope limits:512 requests,4 MiB serialized JSON-result bytes,262144 response bytes,4 in flight,30000 ms. Validate configuration; no silent raised limits. Every data/code/storage query is pinned with requireCanonical:true; no latest fallback.
+- Browser runtime modules use JavaScript/Uint8Array/TextDecoder and existing ethers only; no Node builtins, Buffer global, process, filesystem, producer/oracle import or dependency install. Import ethers through the existing relative browser ESM bundle path `../2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.js`; Node and browser use the same runtime module graph.
+- Scope lifetime budgets:512 requests,4 MiB serialized JSON-result bytes,262144 response bytes,4 in flight. Deadline30000 ms per active acquisition window: open ends at READY; next data call starts a window ending at successful seal; idle sealed-page time is excluded. Seal is a barrier that drains queued work and refuses new data calls until settled. Expiry invalidates the scope; lifetime request/byte budgets never reset. Validate configuration; no silent raised limits. Every data/code/storage query is pinned with requireCanonical:true; no latest fallback.
 - Original21-word execution-set/1 tuple/domain and original runtime/library commitments remain unchanged. Accepted expected manifest is trusted run configuration from the source-checked runner; RPC alone does not establish source authority or consensus proof.
 - Names:1..255 ASCII bytes[a-z0-9._-], excluding dot/dot-dot. Clear Files violations are malformed; uppercase/non-ASCII are unsupported rather than auto-normalized or falsely classified. No full Unicode17 certification.
 - Actual Files point outcomes retain FOUND/ABSENT_PROVEN/UNKNOWN/CONFLICT plus typed reasons and separate qualification. Synthetic authority/provisional finality/effect NOT_APPLICABLE stay explicit. No onchain Files certificate, receipt façade, bytes/head traversal, UI or write-router completion claim.
@@ -47,6 +47,11 @@ Each `open` creates a distinct cancellation/budget lifetime. Qualification is
 single-flight only inside that scope, never globally shared across callers'
 signals or block selections. Manifest caps are 32 fixed components and 32
 recognized implementations; the existing execution-history cap is16.
+The deadline covers active windows, not human idle time: open ends its window
+at READY; first data call starts the next window; successful seal ends it.
+Seal drains already queued work before its fresh controls and refuses new data
+calls while sealing. Concurrent seals share the same barrier. Expiry closes
+the scope; lifetime counters/cache/evidence do not reset between windows.
 
 Allowed application calls are exactly `getRecord`, `getOccurrence`,
 `getOccurrenceByOrdinal`, `getBindingHead`, `getBindingAtBasis`, `readHistory`,
@@ -89,7 +94,7 @@ source.epoch++;
 assert.equal((await scope.seal()).status,'UNAVAILABLE');
 ```
 
-- [ ] **Seal and cancellation:** recheck the pinned header via its number, chain/source epoch and guarded context at the same block hash using fresh uncached calls. Do not compare old pinned execution with latest execution. Store no successful late result after abort/deadline; stop scheduling queued work. A failed validation attempt must not poison a later newly opened scope. All failure objects retain earlier raw evidence. Scope close aborts pending acquisition when transport supports the signal; otherwise late replies are inert.
+- [ ] **Seal and cancellation:** recheck the pinned header via its number, chain/source epoch and guarded context at the same block hash using fresh uncached calls after the seal barrier drains queued work. Do not compare old pinned execution with latest execution. Store no successful late result after abort/deadline; stop scheduling queued work. A failed validation attempt must not poison a later newly opened scope. All failure objects retain earlier raw evidence. Scope close aborts pending acquisition when transport supports the signal; otherwise late replies are inert. Test idle time longer than deadline after READY and after SEALED remains usable, an unsealed stalled acquisition expires, new data during sealing is refused, concurrent seals share the barrier, and lifetime request/byte counters never reset.
 
 - [ ] **Adversarial tests and green:** swapped runtime or expected dependency; wrong implementation/admin/owner/config/history; wrong/missing bootstrap; inconsistent H/header/context; mixed pin and reorg at seal; same-H upgrade with successful old-block read/new latest context; noncanonical/truncated/oversized ABI; mutated source/manifest input; independent concurrent opens and shared same-scope data calls; failed single-flight then fresh success; abort with queued/in-flight work; limits and zero wallet/write calls. Pure transport fixtures may inject responses, but actual U1/U2 qualification and history/code controls use the managed chain. Preserve exact error/reason and no-data-call assertions.
 
@@ -97,7 +102,7 @@ assert.equal((await scope.seal()).status,'UNAVAILABLE');
 
 ## Task 2: Selected Files semantics and a bounded directory stream
 
-**Files:** create `files-profile.mjs`, `files-reader.mjs`, `index.d.ts`,
+**Files:** create `files-profile.mjs`, `files-reader.mjs`, `index.mjs`, `index.d.mts`,
 `test/files-profile.test.mjs`, `test/files-reader.test.mjs`,
 `test/fixture.mjs`, `test/oracle.mjs`, `test/sample.ts` in this directory only.
 Task1 scope files are protected unless parent approves an exact supporting fix.
@@ -123,6 +128,13 @@ Use scope.call exclusively for live application evidence. Do not call the
 full-state oracle, lab raw ports, getReceipt, hosted index or producer fold
 from runtime modules. Keep root-directory-only scope explicit. An Entry's
 File node is not automatically a readable FileRevision or available content.
+One public lookup or Load-more step owns its scope's acquisition window through
+seal. Listing hydrates/resolves sibling rows internally, then seals the whole
+step; it must not call a separately sealing public lookup for each row.
+Concurrent Load-more calls share one step. Separate overlapping top-level
+operations should use separate scopes, not interleave independent seals.
+Use [acceptance-cases.md](acceptance-cases.md) for the three-view truth table
+and honest workload/timing disclosure; it adds no production scope.
 
 - [ ] **Red:** tests first for requested-ID substitution, strict OPTION/trailing-byte rejection, unknown exact Type, ASCII versus unsupported rich names, and selected Files outcome. Start an actual mounted fixture and request a known name/listing before implementing the adapter.
 
@@ -203,11 +215,15 @@ assert(!final.rows.some(r=>r.value.name==='note.txt' && fixture.oldNameMasked));
   distinct-name churn, historical charter cap and no wallet calls. Provide
   strict TypeScript declarations/sample showing callers narrow qualified
   results and cannot obtain usable node values from UNKNOWN/CONFLICT.
+  `index.mjs` is a minimal runtime re-export of the reader/Files entrypoints;
+  adjacent `index.d.mts` describes those same exports. The strict sample imports
+  the actual `.mjs` entrypoint, not a declaration-only pretend module. Test
+  runtime export/declaration agreement; keep this explicitly fixture-scoped.
 
 - [ ] **Green and handoff:** run all new reader tests serially, syntax checks
   and strict TypeScript sample with installed tsc. Save optional fresh measured
   report only to a parent-designated scratch path through an explicit env flag;
-  no historical JSON writes. Self-review and exact eight-path commit using
+  no historical JSON writes. Self-review and exact nine-path commit using
   git commit -F and actual model/v2-pm/codex trailers. Return full results,
   missing checks, performance boundaries and source SHA. No push/subagents.
 
