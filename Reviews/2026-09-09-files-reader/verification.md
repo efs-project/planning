@@ -3,8 +3,9 @@
 **Standing:** disposable prototype evidence, not v1 parity or a production SDK.
 The experiment starts from published `31a4fbd`; its scope and Files adapter
 are committed at `c581366` and `eb14059`. The matched scheduling follow-on at
-`428249c` is also task-reviewed; final increment review is pending. No main
-merge or permanent protocol adoption.
+`428249c` is also task-reviewed. Final whole-increment review approved
+`31a4fbd..f21c5e3` for experimental branch publication, with no Critical or
+Important findings. No main merge or permanent protocol adoption.
 
 ## Useful progress
 
@@ -118,7 +119,15 @@ node --test --test-concurrency=1 Reviews/2026-09-09-files-reader/test/*.test.mjs
 ```
 
 Fresh optional export uses `EFS_FILES_SCHEDULING_EVIDENCE=1` and writes only
-the plan's ignored scratch path, never this retained report. The comparison
+the plan's ignored scratch path, never this retained report. Create that
+directory first after review scratch is archived:
+
+```sh
+mkdir -p .superpowers/sdd/files-reader-plan
+EFS_FILES_SCHEDULING_EVIDENCE=1 node --test --test-concurrency=1 Reviews/2026-09-09-files-reader/test/reader-scheduling.test.mjs
+```
+
+The comparison
 loads exact baseline `eb14059` read-only from Git into a test-only module;
 there is no second committed runtime implementation.
 
@@ -165,7 +174,14 @@ The managed runner deploys U1/U2 code before initialization. It therefore
 does not prove correct historical-manifest selection for an implementation
 deployed later; that is an explicit followup, not evidence of data loss.
 
-Two review polish items remain for final-increment triage: structural ABI
-input/output comparison against artifacts (small numeric round trips cannot
-prove every width), and declaration accuracy for integer epochs/pending
-evidence timestamps. No blocking finding is being silently discarded.
+The final reviewer independently confirmed all 20 current scope codec
+input/output shapes against compiled Core/Admin artifacts. Retaining that
+structural comparison as a regression remains a minor followup: small numeric
+round trips cannot prove every width. There is no present ABI mismatch.
+
+Declaration accuracy for integer epochs and pending evidence timestamps was
+fixed at `3b396d9`, with strict sample RED/GREEN evidence. A fresh parent run
+of all 18 groups on the corrected source passed, with zero failures,
+cancellations or skips (71,032.08 ms). Runtime and retained performance-source
+pins are unchanged. The scoped final re-review confirms the mismatch is
+addressed with no new breakage. No blocking finding is being silently discarded.
