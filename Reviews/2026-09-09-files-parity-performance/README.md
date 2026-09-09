@@ -1,6 +1,6 @@
 # Files lifecycle and performance checkpoint
 
-**Status:** disposable local experiment; lifecycle and performance task reviews approved, integrated review pending.
+**Status:** reviewed disposable local experiment; lifecycle, performance and integrated publication reviews approved.
 **Scope:** continue the real v2 Store prototype toward v1 capabilities. No
 product repository, public deployment, main merge or permanent protocol choice.
 
@@ -47,9 +47,8 @@ dependencies already required by the September 8 managed runner:
 ```sh
 node --test --test-concurrency=1 \
   Reviews/2026-09-09-files-parity-performance/workflow.test.mjs \
-  Reviews/2026-09-08-upgradeable-foundation/test/upgrade-chain.test.mjs \
-  Reviews/2026-09-08-upgradeable-foundation/test/tag-current.test.mjs \
-  Reviews/2026-09-08-upgradeable-foundation/test/validation-frontier.test.mjs
+  Reviews/2026-09-09-files-parity-performance/comparison.test.mjs \
+  Reviews/2026-09-08-upgradeable-foundation/test/upgrade-chain.test.mjs
 ```
 
 Tests use a managed loopback EVM and shut it down. Do not set
@@ -64,6 +63,13 @@ upgrade experiment with `forge build --ast --build-info --force --offline
 Stale conflicting generated output may first require `forge clean` in that
 specific experiment directory. Do not erase source or evidence files. The
 runners refuse mismatched artifacts rather than treating them as a test pass.
+
+The broader regression totals in [verification.md](verification.md) include
+preserved, unpublished Binding-read work in the local checkout. They are not
+a claim that the entire remote branch's suite is green. The focused managed
+lifecycle above uses committed runtime/support sources: all 26 non-dependency
+source pins were checked against Git HEAD. The unfinished read increment
+still needs its own review and publication before the full consumer join.
 
 ## What these measurements do not say
 

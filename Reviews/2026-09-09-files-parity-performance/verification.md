@@ -1,6 +1,6 @@
 # September 9 controller verification
 
-**Status:** fresh local execution reproduced; task reviews approved, final integrated review pending.
+**Status:** fresh local execution reproduced; task and final integrated reviews approved for experimental-branch publication.
 **Increment:** `03825f1` onward on `codex/mvp-c0-coherence`, not the older
 branch history or the preserved unfinished Binding/read-library changes.
 
@@ -25,6 +25,13 @@ run took 48.47 seconds. The two test selections are disjoint. They include
 actual linked-contract reads/writes, retry/resource sweeps, malformed data,
 independent Type inputs, authored tags, managed upgrades and both lifecycle
 runs. The worker independently reports the same 160 checks in one run.
+
+These broad local totals include unpublished Binding-read changes. They are
+not a whole-remote-branch green claim. A separate source check confirmed that
+all 26 non-dependency compiled/support pins for the managed lifecycle match
+committed HEAD; the focused published experiment does not require silently
+promoting those unrelated edits. The README's primary command runs that
+focused managed workflow and comparison.
 
 The controller then ran `forge test --offline --use <the existing runner's
 Solidity 0.8.30 binary>` in each Solidity experiment:
@@ -65,6 +72,13 @@ controller allowed one bounded same-architecture size refinement after the
 first candidate exceeded the runtime cap. It did not authorize another
 dependency, storage redesign, relaxed validation or a larger cap. The cost
 of this choice was extra experiment time; the same acceptance bar remained.
+
+Final integrated review of `03825f1..41da912` approved experimental-branch
+publication with no Critical, Important or actionable Minor findings. Pure
+checks validated both saved reports, matching semantic projections, the
+single changed compiler source and current source hashes. The 43-byte margin,
+collision-resource uncertainty and missing consumer joins remain explicit.
+This final status/source-visibility clarification changes no tested code.
 
 No independent approval of the whole historical branch, dirty Binding work,
 production security, portable authorship, real-wallet behavior or complete
