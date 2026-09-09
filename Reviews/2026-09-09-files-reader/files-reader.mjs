@@ -120,19 +120,27 @@ export async function lookupName(scope,{mountId,subject,name}){
   catch(e){result=unknown(e);}return sealed(scope,result,'COMPLETE',dom);
 }
 /** Verified file content at the mount's content plan. Top-level acquisition. */
-export async function openFile(scope,{mountId,fileId}){
+export async function openFile(scope,{mountId,fileId,revisionId:requested}){
   let result,revisionId=null;
   try{
     const m=await mount(scope,mountId);
     const file=await node(scope,fileId);require(file.kind==='FILE','NOT_A_FILE');
-    const [r]=await call(scope,'resolve',[m.contentPlan,positionKey(FIXTURE.headPurpose,fileId,FIXTURE.headRole)]);
-    const b=r[8];readBasis(scope,b[0],b[2]);require(b[1]===scope.basis.blockNumber&&b[3]===0n,'BASIS_MISMATCH');
-    if(r[0]===3n)result={outcome:'CONFLICT'};
-    else if(r[0]===2n)result={outcome:'ABSENT'};
+    let selected=requested??null;
+    if(!selected){
+      const [r]=await call(scope,'resolve',[m.contentPlan,positionKey(FIXTURE.headPurpose,fileId,FIXTURE.headRole)]);
+      const b=r[8];readBasis(scope,b[0],b[2]);require(b[1]===scope.basis.blockNumber&&b[3]===0n,'BASIS_MISMATCH');
+      if(r[0]===3n)selected='CONFLICT';
+      else if(r[0]===2n)selected='ABSENT';
+      else{
+        require(r[0]===1n,r[0]===4n?'UNSUPPORTED_PLAN':'LENS_UNKNOWN');
+        require(r[2][0]===1n&&r[2][2]===0n);
+        selected=r[2][1];
+      }
+    }
+    if(selected==='CONFLICT')result={outcome:'CONFLICT'};
+    else if(selected==='ABSENT')result={outcome:'ABSENT'};
     else{
-      require(r[0]===1n,r[0]===4n?'UNSUPPORTED_PLAN':'LENS_UNKNOWN');
-      require(r[2][0]===1n&&r[2][2]===0n);
-      revisionId=r[2][1];
+      revisionId=selected;
       const rev=await record(scope,revisionId,'FileRevision/1');const f=rev.fields;
       require(f.node===fileId,'REVISION_NODE_MISMATCH');
       const tree=await record(scope,f.content,'ChunkTree/1');const t=tree.fields;
@@ -274,4 +282,62 @@ export function openDirectory(scope,{mountId,subject,pageSize=8}){
     sources=ss;positions=next;last=freeze({...snapshot(next,ss,coverage),basis:scope.basis,domain:listDomain,rowsEvidence:'CURRENT_SEALED',qualification:aggregate,evidence:seal.evidence});latest=last;return last;
   }
   return Object.freeze({loadMore(){if(!flight)flight=step().finally(()=>{flight=null;});return flight;},snapshot(){return latest;},close(){closed=true;}});
+}
+
+/** Removed items of one directory: per-principal enumeration of removal
+ *  markers under the removed-item purpose. ACTIVE markers are current Trash
+ *  rows; TOMBSTONED markers were restored. Top-level acquisition. */
+export async function openRemoved(scope,{mountId,subject}){
+  let result,dom='FIXTURE_ROOT_DIRECTORY_ONLY';
+  try{
+    const m=await mount(scope,mountId);
+    const s=subject===undefined?m.root.nodeId:subject;
+    const n=await node(scope,s);require(n.kind==='DIRECTORY','NOT_A_DIRECTORY');dom=domainFor(m,s);
+    const principals=[...new Set(m.namespace.entries.map(e=>e.principal))];
+    const items=[];
+    for(const principal of principals){
+      const state={principal,cursor:0n,scanned:0n,last:0n,end:null,tag:null,roles:[],complete:false};
+      while(!state.complete){
+        const [page,rows]=await call(scope,'pagePostingsHydrated',[ZERO,10,0,bindingScopeKey(principal,FIXTURE.removedPurpose,s),[state.cursor,8,scope.basis.admissionHigh]]);
+        checkedPage(scope,state,page,rows,8);
+        for(const row of rows){
+          const a=await record(scope,row[3]);
+          if(a.type!=='BindingSet/1')continue;
+          const f=a.fields;
+          require(f.purpose===FIXTURE.removedPurpose&&f.subject===s,'ANCHOR_SCOPE');
+          const key=bindingKey(principal,f.purpose,s,f.fieldRole);
+          const [head,basis,H]=await call(scope,'getBindingHead',[key]);readBasis(scope,basis,H);
+          const marker=await record(scope,f.fieldRole,'RemovalMarker/1');
+          const entry=await record(scope,marker.fields.entry,'DirectoryEntry/1');
+          items.push({principal,markerId:f.fieldRole,entryId:marker.fields.entry,
+            name:entry.fields.name,object:entry.fields.child,
+            active:head[0]===1n&&head[5]===f.fieldRole,revision:String(head[3])});
+        }
+      }
+    }
+    result={outcome:'FOUND',value:{subject:s,items}};
+  }catch(e){result=unknown(e);}
+  return sealed(scope,result,'COMPLETE',dom);
+}
+/** Current attributed tags of one node for the plan's trusted authors. */
+export async function openTags(scope,{mountId,nodeId,tagIds}){
+  let result;
+  try{
+    const m=await mount(scope,mountId);
+    await node(scope,nodeId);
+    const principals=[...new Set(m.namespace.entries.map(e=>e.principal))];
+    const current=[];
+    for(const principal of principals)for(const t of tagIds){
+      const key=bindingKey(principal,FIXTURE.tagPurpose,nodeId,t);
+      const [head,basis,H]=await call(scope,'getBindingHead',[key]);readBasis(scope,basis,H);
+      if(head[3]===0n)continue;
+      if(head[0]===1n&&head[1]===1n){
+        const assertion=await record(scope,head[5],'FileTagAssertion/1');
+        require(assertion.fields.tagId===t&&assertion.fields.target===nodeId,'TAG_TARGET_MISMATCH');
+        current.push({principal,tagId:t,active:true,assertionId:head[5]});
+      }else current.push({principal,tagId:t,active:false,assertionId:null});
+    }
+    result={outcome:'FOUND',value:{nodeId,current}};
+  }catch(e){result=unknown(e);}
+  return sealed(scope,result,'COMPLETE','FIXTURE_FILE_CONTENT');
 }

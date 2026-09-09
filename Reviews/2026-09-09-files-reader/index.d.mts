@@ -34,13 +34,19 @@ export function openHistory(scope:Scope,options:{mountId:string;subject?:string;
 export interface RevisionRow {readonly principal:string;readonly revision:string;readonly ordinal:string;readonly revisionId:string|null;readonly mediaType:string|null;readonly parents:readonly string[];readonly current:boolean}
 export type RevisionsResult=Observation&{readonly qualification:Qualification}&({readonly outcome:'FOUND';readonly value:{readonly fileId:string;readonly revisions:readonly RevisionRow[]}}|{readonly outcome:'UNKNOWN';readonly reason:string;readonly detail?:string});
 export function openRevisions(scope:Scope,options:{mountId:string;fileId:string}):Promise<RevisionsResult>;
+export interface RemovedItem {readonly principal:string;readonly markerId:string;readonly entryId:string;readonly name:string;readonly object:string;readonly active:boolean;readonly revision:string}
+export type RemovedResult=Observation&{readonly qualification:Qualification}&({readonly outcome:'FOUND';readonly value:{readonly subject:string;readonly items:readonly RemovedItem[]}}|{readonly outcome:'UNKNOWN';readonly reason:string;readonly detail?:string});
+export function openRemoved(scope:Scope,options:{mountId:string;subject?:string}):Promise<RemovedResult>;
+export interface TagState {readonly principal:string;readonly tagId:string;readonly active:boolean;readonly assertionId:string|null}
+export type TagsResult=Observation&{readonly qualification:Qualification}&({readonly outcome:'FOUND';readonly value:{readonly nodeId:string;readonly current:readonly TagState[]}}|{readonly outcome:'UNKNOWN';readonly reason:string;readonly detail?:string});
+export function openTags(scope:Scope,options:{mountId:string;nodeId:string;tagIds:readonly string[]}):Promise<TagsResult>;
 export interface DirectorySnapshot extends Observation {
   readonly coverage:Coverage;readonly rows:readonly (FoundRow&{readonly qualification:Qualification})[];readonly unresolved:readonly (UnresolvedRow&{readonly qualification:Qualification})[];readonly masked:readonly (MaskedRow&{readonly qualification:Qualification})[];readonly absent:readonly (AbsentRow&{readonly qualification:Qualification})[];
   readonly progress:readonly {readonly principal:string;readonly cursor:bigint;readonly scanned:bigint;readonly complete:boolean}[];
   readonly continuation:boolean;readonly qualification:Qualification;readonly rowsEvidence:'CURRENT_SEALED'|'PRIOR_SEALED';readonly reason?:string;readonly detail?:string;readonly priorSealed?:DirectorySnapshot|null;
 }
 export function openDirectory(scope:Scope,options:{mountId:string;subject?:string;pageSize?:number}):Readonly<{loadMore():Promise<DirectorySnapshot>;snapshot():DirectorySnapshot|null;close():void}>;
-export const TYPES:Readonly<Record<'ObjectGenesis/1'|'ResolutionPlan/1'|'BindingSet/1'|'BindingTombstone/1'|'DirectoryEntry/1'|'DirectoryWhiteout/1'|'PublicFilesMountConfig/1'|'MountDescriptor/1'|'FileRevision/1'|'ChunkTree/1',string>>;
+export const TYPES:Readonly<Record<'ObjectGenesis/1'|'ResolutionPlan/1'|'BindingSet/1'|'BindingTombstone/1'|'DirectoryEntry/1'|'DirectoryWhiteout/1'|'PublicFilesMountConfig/1'|'MountDescriptor/1'|'FileRevision/1'|'ChunkTree/1'|'RemovalMarker/1'|'FileTagAssertion/1',string>>;
 export const FIXTURE:Readonly<Record<'publicProfile'|'planScopeDomain'|'lensProfile'|'fileMeaning'|'directoryMeaning'|'charterPurpose'|'namePurpose'|'headPurpose'|'headRole'|'tagPurpose'|'removedPurpose'|'charterRole',string>>;
 export function tagId(label:string):string;
 export function contentDigest(data:string):string;

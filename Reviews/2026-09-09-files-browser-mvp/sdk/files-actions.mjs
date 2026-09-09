@@ -8,11 +8,7 @@ import { AbiCoder, Interface, keccak256, toUtf8Bytes, ZeroHash } from '../../202
 import { FIXTURE, TYPES, nameRole, positionKey, bindingKey, ordinaryRecord, contentDigest, byteLength, nameAssessment, tagId } from '../../2026-09-09-files-reader/index.mjs';
 
 const abi = AbiCoder.defaultAbiCoder();
-export const EXTENDED_TYPES = Object.freeze({
-  ...TYPES,
-  'RemovalMarker/1': '0x54edf1b86391ddfaa3baaab32b8c2792e1cffe57dbf9dcad08bdf9c0fa26ff08',
-  'FileTagAssertion/1': '0x0ffb25d529c74f072934c97553c8ca80fee89d2884218dd9edb804c4fd7478b6',
-});
+export const EXTENDED_TYPES = TYPES;
 export const KINDS = Object.freeze({ createFile: 1, createDir: 2, edit: 3, renameMove: 4, copy: 5, placement: 6, remove: 7, restore: 8, tag: 9, untag: 10 });
 
 const cat = (...parts) => '0x' + parts.map(p => String(p).replace(/^0x/, '')).join('');
@@ -250,6 +246,52 @@ export function encodeExecute(prepared) {
 
 export function decodeRouterError(data) {
   try { const e = routerInterface.parseError(data); return e ? { name: e.name, args: [...e.args].map(String) } : null; } catch { return null; }
+}
+
+// ---- write-support reads at LATEST state (planning needs current heads) ----
+// callLatest(to, data) -> result hex, relayed through the labeled write path.
+const READ_FRAGMENTS = new Interface([
+  'function getBindingHead(bytes32 bindingKey) view returns ((uint8,uint8,uint8,uint32,uint64,bytes32,uint16),bytes32,uint64)',
+  'function getOccurrenceByOrdinal(uint64 ordinal) view returns (bytes32,uint16,bytes32,bytes32,bytes32,uint8,uint64)',
+  'function currentRevision() view returns (uint32)',
+  'function revisionAt(uint32 ordinal) view returns ((uint32,uint64,uint64,address,address,address,address,bytes32,bytes32,address,address,address,address,address,bytes32,address,bytes32,bytes32,bytes32,bytes32,bytes32))',
+  'function resolve(bytes32 planRecordId,bytes32 positionKey) view returns ((uint8,uint8,(uint8,bytes32,uint16),uint16,uint16,uint64,uint16,uint16,(bytes32,uint64,uint64,uint8)))',
+  'function getRecord(bytes32 recordId) view returns (bytes32,bytes,uint64)',
+]);
+export const WRITE_SUPPORT_SELECTORS = Object.freeze([
+  ...['getBindingHead', 'getOccurrenceByOrdinal', 'currentRevision', 'revisionAt', 'resolve', 'getRecord'].map(n => READ_FRAGMENTS.getFunction(n).selector),
+  routerInterface.getFunction('execute').selector,
+  routerInterface.getFunction('authorNonce').selector,
+  routerInterface.getFunction('authorAccount').selector,
+]);
+export async function latestBindingState(callLatest, core, { principal, purpose, subject, fieldRole }) {
+  const key = bindingKey(principal, purpose, subject, fieldRole);
+  const [h] = READ_FRAGMENTS.decodeFunctionResult('getBindingHead', await callLatest(core, READ_FRAGMENTS.encodeFunctionData('getBindingHead', [key])));
+  if (h[3] === 0n) return { state: 'UNSET', prior: null, targetA: null };
+  const occ = READ_FRAGMENTS.decodeFunctionResult('getOccurrenceByOrdinal', await callLatest(core, READ_FRAGMENTS.encodeFunctionData('getOccurrenceByOrdinal', [h[4]])));
+  return { state: h[0] === 1n ? 'ACTIVE' : 'TOMBSTONE', targetA: h[5], prior: { revision: Number(h[3]), occurrence: { envelopeId: occ[0], leafIndex: Number(occ[1]) } } };
+}
+export async function latestExecution(callLatest, core) {
+  const [revision] = READ_FRAGMENTS.decodeFunctionResult('currentRevision', await callLatest(core, READ_FRAGMENTS.encodeFunctionData('currentRevision', [])));
+  const [row] = READ_FRAGMENTS.decodeFunctionResult('revisionAt', await callLatest(core, READ_FRAGMENTS.encodeFunctionData('revisionAt', [revision])));
+  return { revision: Number(revision), executionSetId: row[20] };
+}
+export async function latestAuthorNonce(callLatest, router, principal) {
+  return BigInt(await callLatest(router, routerInterface.encodeFunctionData('authorNonce', [principal])));
+}
+// ---- carrier byte staging (separate labeled approval) ----------------------
+const CARRIER_FRAGMENTS = new Interface([
+  'function stageFixtureBytes(bytes32 treeId,bytes body,bytes data,uint32 expectedRevision,uint64 nonce,uint64 deadline,bytes signature)',
+]);
+export async function authorizeStage({ operatorWallet, carrier, chainId, treeId, body, data, executionSetId, nonce, deadline }) {
+  return operatorWallet.signTypedData(
+    { name: 'EFS Upgrade Foundation', version: '1', chainId, verifyingContract: carrier },
+    { FixtureBytes: [{ name: 'treeId', type: 'bytes32' }, { name: 'bodyHash', type: 'bytes32' }, { name: 'dataHash', type: 'bytes32' }, { name: 'executionSetId', type: 'bytes32' }, { name: 'nonce', type: 'uint64' }, { name: 'deadline', type: 'uint64' }] },
+    { treeId, bodyHash: keccak256(body), dataHash: keccak256(data), executionSetId, nonce, deadline },
+  );
+}
+export function encodeStage({ treeId, body, data, revision, nonce, deadline, signature }) {
+  return CARRIER_FRAGMENTS.encodeFunctionData('stageFixtureBytes', [treeId, body, data, revision, nonce, deadline, signature]);
 }
 
 // ---- read helpers for priors (through the qualified scope) -----------------

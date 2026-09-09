@@ -41,5 +41,5 @@ async function guest(source:ReaderSource,context:ReaderContext,mountId:string){
 const name=nameAssessment('Trip');if(name.status==='UNSUPPORTED')name.reason;
 const record=assessRecord('0x','0x','0x');if(record.status!=='ACCEPTED')record.reason;
 void guest;
-const exportsAgree:{[K in keyof typeof import('../index.mjs')]:true}={DEFAULT_LIMITS:true,FIXTURE:true,TYPES:true,assessRecord:true,bindingKey:true,bindingScopeKey:true,byteLength:true,contentDigest:true,createFixtureReader:true,lookupName:true,nameAssessment:true,nameRole:true,openDirectory:true,openFile:true,openHistory:true,openRevisions:true,ordinaryRecord:true,parsePlan:true,positionKey:true,purposeAndScope:true,tagId:true};
+const exportsAgree:{[K in keyof typeof import('../index.mjs')]:true}={DEFAULT_LIMITS:true,FIXTURE:true,TYPES:true,assessRecord:true,bindingKey:true,bindingScopeKey:true,byteLength:true,contentDigest:true,createFixtureReader:true,lookupName:true,nameAssessment:true,nameRole:true,openDirectory:true,openFile:true,openHistory:true,openRemoved:true,openRevisions:true,openTags:true,ordinaryRecord:true,parsePlan:true,positionKey:true,purposeAndScope:true,tagId:true};
 void exportsAgree;

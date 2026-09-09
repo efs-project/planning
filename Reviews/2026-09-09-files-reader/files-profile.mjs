@@ -11,6 +11,8 @@ export const TYPES=Object.freeze({
   'MountDescriptor/1':'0x8ac5bdff2615f825b887f086e40fdc902edec4e99962ffa5c7db79d661623721',
   'FileRevision/1':'0x70e18fd87e4d254def230ccb1a7873c760ef95851b6e200fd3597c5fd7442bfa',
   'ChunkTree/1':'0xf6c0966e2acc9f6b1bad9ac20f07da3b00cc418aafc8481dedcdc5f35f8767e8',
+  'RemovalMarker/1':'0x54edf1b86391ddfaa3baaab32b8c2792e1cffe57dbf9dcad08bdf9c0fa26ff08',
+  'FileTagAssertion/1':'0x0ffb25d529c74f072934c97553c8ca80fee89d2884218dd9edb804c4fd7478b6',
 });
 const hash=s=>keccak256(toUtf8Bytes(s)),H=(...words)=>keccak256(concat(words));
 const tag=(d,s)=>H(hash('efs2/'+d+'/1'),hash(s));
@@ -67,6 +69,8 @@ export function assessRecord(recordId,typeId,body){
         const u64=()=>{const v=take(8);let n=0n;for(const x of v)n=n*256n+BigInt(x);return n;};
         field('chunkSize',u32);field('chunkCount',u32);field('totalSize',u64);field('merkleRoot',word);break;
       }
+      case 'RemovalMarker/1':field('entry',ref);break;
+      case 'FileTagAssertion/1':field('tagId',word);field('target',ref);break;
       case 'FileRevision/1':{
         const flag=()=>{const v=take(1)[0];if(v>1)throw Error('BOOL_FLAG');return v===1;};
         field('node',ref);field('content',ref);field('mediaType',()=>variable(255,true));

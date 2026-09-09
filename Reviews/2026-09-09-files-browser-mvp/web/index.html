@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EFS · Files</title>
+  <meta name="description" content="Local EFS Files browser prototype: browse, create, edit, organize and explain real contract-backed files.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/screen/files.css">
+  <script type="module" src="/screen/app.mjs"></script>
+</head>
+<body>
+  <header class="top">
+    <span class="brand">EFS <span>/ Files</span></span>
+    <span class="session">
+      <span id="signer-label" class="guest">Guest · no wallet</span>
+      <select id="signer" aria-label="Local session"><option value="guest">Guest (read only)</option></select>
+      <span id="prompts" class="badge" title="Simulated local approvals this session">0 approvals</span>
+    </span>
+  </header>
+  <main data-state="loading">
+    <div class="heading">
+      <nav id="crumbs" aria-label="Folder path"></nav>
+      <span class="head-actions"><button id="refresh" type="button">Read again</button></span>
+    </div>
+    <section class="controls" aria-label="Folder context">
+      <label>Lens<select id="lens"><option value="aFirst">A first</option><option value="bFirst">B first</option><option value="exact">Both agree</option></select></label>
+      <label>Filter<input id="filter" type="search" placeholder="name contains…" autocomplete="off"></label>
+      <label>Tag<input id="tag-filter" type="search" placeholder="tag (exact)" autocomplete="off"></label>
+    </section>
+    <section class="toolbar" aria-label="Actions" hidden id="toolbar">
+      <button id="new-folder" type="button">New folder</button>
+      <button id="new-note" type="button">New note</button>
+      <label class="upload">Upload image<input id="upload" type="file" accept="image/png,image/jpeg,image/gif"></label>
+    </section>
+    <p id="scenario" class="scenario">Starting the local prototype…</p>
+    <section class="listing" aria-labelledby="list-title">
+      <div class="list-head"><h2 id="list-title">Files</h2><span id="coverage" class="badge">Not read yet</span></div>
+      <p id="status" role="status" tabindex="-1">Guest reading requires no wallet and no prompts.</p>
+      <ul id="rows" aria-label="Current files"></ul>
+      <section id="attention" class="attention" hidden aria-labelledby="attention-title"><h3 id="attention-title">Needs attention</h3><ul id="attention-rows" aria-label="Unresolved placements"></ul></section>
+      <details id="trash" class="history" hidden><summary id="trash-summary">Removed items</summary><p>Removed placements are masked, not erased. Restoring re-places the same File; nothing here deletes bytes or history.</p><ul id="trash-rows" aria-label="Removed items"></ul></details>
+      <details id="history" class="history" hidden><summary id="history-summary">Past or hidden positions</summary><p>These positions do not add current files to this Lens. Their retained evidence remains inspectable.</p><ul id="history-rows" aria-label="Past or hidden positions"></ul></details>
+      <div class="more"><button id="more" type="button" hidden>Load more</button><button id="export" type="button" hidden>Export folder</button></div>
+      <p id="basis" class="basis"></p>
+    </section>
+    <div class="boundaries">
+      <p><strong>Upgradeable local testnet.</strong> The upgrade controller is the fixture deployment contract; an upgrade can replace the engine while keeping addresses and data. No immutable-hyperstructure claim.</p>
+      <p>Writes use clearly labeled <strong>disposable local test signers</strong> (simulated approvals, counted above) and a synthetic operator co-signature — not portable personal authorship. Real-wallet behavior is a separate manual test.</p>
+      <p id="delay"></p>
+    </div>
+  </main>
+  <dialog id="why" aria-labelledby="why-title"><div class="dialog-head"><h2 id="why-title">Why this result?</h2><button id="close-why" type="button" autofocus>Close</button></div><div id="why-body"></div></dialog>
+  <dialog id="file-panel" aria-labelledby="file-title">
+    <div class="dialog-head"><h2 id="file-title">File</h2><button id="close-file" type="button" autofocus>Close</button></div>
+    <div id="file-body"></div>
+  </dialog>
+  <dialog id="consent" aria-labelledby="consent-title">
+    <div class="dialog-head"><h2 id="consent-title">Approve this operation?</h2><button id="consent-cancel" type="button">Cancel</button></div>
+    <div id="consent-body"></div>
+    <p class="consent-note">Simulated approval with a disposable local test key. This counts as one approval; nothing is sent until you approve.</p>
+    <div class="consent-actions"><button id="consent-approve" type="button">Approve and submit</button></div>
+  </dialog>
+  <dialog id="prompt-dialog" aria-labelledby="prompt-title">
+    <div class="dialog-head"><h2 id="prompt-title">Name</h2><button id="prompt-cancel" type="button">Cancel</button></div>
+    <form id="prompt-form" method="dialog"><label id="prompt-label">Name<input id="prompt-input" type="text" autocomplete="off" required></label><textarea id="prompt-text" rows="5" hidden aria-label="Note text"></textarea><button id="prompt-ok" type="submit">Continue</button></form>
+  </dialog>
+  <noscript>This Files prototype requires JavaScript to verify and display the local contract reads.</noscript>
+</body></html>

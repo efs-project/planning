@@ -93,7 +93,7 @@ function compilerEvidence(profile) {
   const version=tool=>{const r=spawnSync(tool,['--version'],{encoding:'utf8',timeout:5000});assert.equal(r.status,0);return r.stdout.trim();};
   return { info,names,resources: { sourceCommit:git(['rev-parse','HEAD']),trackedDiffHash:keccak256(Buffer.from(git(['diff','--','../2026-09-05-c0-core','src','test/FixtureDeployment.sol']))),compiler:a.metadata.compiler,compilerBinaryHash:keccak256(readFileSync(SOLC)),versions:{node:process.version,forge:version('forge'),anvil:version('anvil'),ethers:JSON.parse(readFileSync(resolve(ROOT,'../2026-09-04-mvp-rehearsal/node_modules/ethers/package.json'),'utf8')).version},settings:a.metadata.settings,sourcePins,supportSourcePins,compilerInputHash:keccak256(Buffer.from(JSON.stringify(info.input))),compilerOutputHash:keccak256(Buffer.from(JSON.stringify(info.output))),dependencyLockHash:keccak256(readFileSync(join(ROOT,'package-lock.json'))),artifactPins:{} } };
 }
-export async function withUpgrade(action, { profile = 'base' } = {}) {
+export async function withUpgrade(action, { profile = 'base', watchdogMs = 300000 } = {}) {
   assert(typeof profile === 'string' && Object.hasOwn(profileMap,profile), 'unknown upgrade profile');
   const selected = profileMap[profile];
   const compiler = compilerEvidence(profile);
@@ -106,7 +106,7 @@ export async function withUpgrade(action, { profile = 'base' } = {}) {
   const kill=()=>{if(child.exitCode===null && child.signalCode===null)child.kill('SIGKILL');};
   const signal=()=>{kill();process.exitCode=130;};
   process.once('exit',kill);process.once('SIGINT',signal);process.once('SIGTERM',signal);
-  const watchdog=setTimeout(kill,300000), cleanup={}, transactions=[];
+  const watchdog=setTimeout(kill,watchdogMs), cleanup={}, transactions=[];
   let automine=true,result;
   async function rpc(method,params=[],{maxBytes=262144}={}) {
     assert(Number.isSafeInteger(maxBytes) && maxBytes>0 && maxBytes<=262144,'RPC response budget');

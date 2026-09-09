@@ -129,7 +129,7 @@ test('empty scopes, empty partial churn windows and bounded historical exhaustio
 });
 
 test('actual executable export and strict TypeScript result narrowing',async()=>{
-  const api=await import('../index.mjs');assert.deepEqual(Object.keys(api).sort(),['DEFAULT_LIMITS','FIXTURE','TYPES','assessRecord','bindingKey','bindingScopeKey','byteLength','contentDigest','createFixtureReader','lookupName','nameAssessment','nameRole','openDirectory','openFile','openHistory','openRevisions','ordinaryRecord','parsePlan','positionKey','purposeAndScope','tagId'].sort());
+  const api=await import('../index.mjs');assert.deepEqual(Object.keys(api).sort(),['DEFAULT_LIMITS','FIXTURE','TYPES','assessRecord','bindingKey','bindingScopeKey','byteLength','contentDigest','createFixtureReader','lookupName','nameAssessment','nameRole','openDirectory','openFile','openHistory','openRemoved','openRevisions','openTags','ordinaryRecord','parsePlan','positionKey','purposeAndScope','tagId'].sort());
   assert.equal(api.lookupName,lookupName);assert.equal(api.openDirectory,openDirectory);assert.equal(api.createFixtureReader,createFixtureReader);
   const check=spawnSync(process.execPath,[fileURLToPath(new URL('../../2026-09-04-mvp-rehearsal/node_modules/typescript/bin/tsc',import.meta.url)),'--strict','--noEmit','--module','NodeNext','--moduleResolution','NodeNext','--target','ES2022',fileURLToPath(new URL('./sample.ts',import.meta.url))],{encoding:'utf8'});assert.equal(check.status,0,String(check.stdout)+String(check.stderr));
 });
