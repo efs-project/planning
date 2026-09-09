@@ -86,8 +86,9 @@ expected outcomes and SDK/UX boundaries after the owning PMs' read-only review.
   at `bcd0643`, with the ordinary test-config repair at `45f3667`, preserve
   the original Store and acceptance history. Parent 200 Core Forge, 19
   foundation Forge and 196 Node checks pass; five source-pinned snapshots and
-  all 12 normal before/after query measurements reproduce. Task reviews approve;
-  final increment review is tracked in that report. The next visible target is
+  all 12 normal before/after query measurements reproduce. Task reviews and
+  final increment review through `66f9da8` approve experimental publication.
+  The next visible target is
   the [guest Files screen](../2026-09-09-v1-parity-overnight/consumer-build-card.md).
   Earlier counts, gas and headroom below describe their original checkpoints,
   not the current build. In particular, admission runtime margin is now

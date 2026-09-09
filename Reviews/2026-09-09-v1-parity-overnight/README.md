@@ -55,7 +55,8 @@ requires the computer and Codex to remain available.
    now passes at `bcd0643` with test configuration at `45f3667`: parent200 Core
    Forge/19 foundation Forge/196 Node tests, five independently reverified
    snapshots and12 matching normal query measurements. Existing writer and
-   accepted history remain unchanged. Files interpretation/router and the
+   accepted history remain unchanged. Final whole-increment review approves
+   experimental publication through `66f9da8`. Files interpretation/router and the
    browser are still outstanding, not completed by this read prerequisite.
 4. **Expose one shared SDK path in the SPA.** Zero-wallet guest reading;
    opaque intent preparation; receipt versus committed readback; scoped

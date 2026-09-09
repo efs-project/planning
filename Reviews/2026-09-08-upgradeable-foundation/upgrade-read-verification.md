@@ -1,7 +1,8 @@
 # Populated upgrade reads: verification and performance
 
 **Status:** source task reviewed at `bcd0643`, local test configuration at
-`45f3667`; fresh parent integration passes; final publication review pending.
+`45f3667`; fresh parent integration passes; final whole-increment review
+approves experimental publication through `66f9da8`.
 Disposable local evidence, not full Files/C0,
 SDK/SPA integration, public deployment or permanent protocol approval.
 
@@ -119,6 +120,29 @@ chain stopped normally. Final full diagnostic collection accounts for 1,628
 Core reads/612,864 JSON-result bytes plus 20 execution reads/13,593 bytes;
 this is not a guest folder-open path. Both historical performance JSON hashes
 and their original source/evidence boundary remain unchanged.
+
+### Final whole-increment review
+
+A fresh independent reviewer approved the complete range
+`72b59b0557e52ab1f98232094ed70508e811924c` through
+`66f9da85ed29a84062118a8facf92333a5e43098`, including implementation, test
+configuration, design/plan, performance evidence and consumer maps. There
+were **no Critical or Important findings**. Unchanged compiler/lint warning
+debt remains a nonblocking, explicitly deferred maintenance item.
+
+The reviewer independently checked all 41 Solidity/15 support pins, the
+retained report hash, all 12 measurement-to-transaction-receipt links,
+observation identities and five transitions, historical Core commitments,
+fixed dependency embeddings, protected-source/old-JSON preservation and
+cleanup. It inspected the parent's fresh suite logs without duplicating
+the same suite runs. The read dependency guard order, explicit cursor context,
+reverified oracle and narrow comparator/configuration repairs were also
+checked against their unchanged dependencies. No fix wave was needed.
+
+This closes the experimental-branch publication gate, not the MVP, a main
+merge, public deployment, permanent execution/Type/ABI choice or Files/SDK/SPA
+completion. The following closeout edits record this review only; runtime,
+tests and retained evidence remain exactly as reviewed.
 
 ### Reproduction
 
