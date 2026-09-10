@@ -27,7 +27,22 @@ Before anything else, because other people were building on them:
 
 ## 2. Where the money actually goes
 
-Steady-state tag = **2,838,264 gas**. MEASURED decomposition:
+Steady-state tag receipt = **2,838,264 gas** (MEASURED).
+
+> **Correction, 2026-09-10 evening (found by the PM's review).** The
+> decomposition below was measured on a *different* run — the first tag
+> admitted into a scope, receipt **3,046,997** — and its components sum to
+> 3,028,451: the shares are of that run (1,427,300 / 3,046,997 = 46.8%), not
+> of the steady-state total. The two runs differ by the scope and posting
+> heads a first tag allocates. Also, "94 distinct slots" counts *touched*
+> slots, not fresh allocations; by arithmetic at most ~64 can be fresh
+> (1,427,300 / 22,100), so every "all 94 fresh" extrapolation in later
+> documents is an upper bound. A reconciled baseline with retained traces,
+> classifying fresh / cold-rewrite / warm / restore per storage Kind, is
+> being produced as [gas-baseline-2026-09-10.md](gas-baseline-2026-09-10.md);
+> until it lands, read the table as the first-tag decomposition.
+
+First-tag decomposition (receipt 3,046,997; MEASURED):
 
 | Component | Gas | Share | Detail |
 | --- | --- | --- | --- |
@@ -40,8 +55,12 @@ Steady-state tag = **2,838,264 gas**. MEASURED decomposition:
 Three structural facts follow, all MEASURED:
 
 - **Cost scales per record, not per transaction.** ~1.42M/leaf for a 2-leaf
-  tag vs ~1.28M/leaf for a 4-leaf directory create. **Batching is a dead end** —
-  it amortises only the 21,000 intrinsic fee.
+  tag vs ~1.28M/leaf for a 4-leaf directory create. *Corrected 2026-09-10
+  evening:* comparing two different operations does not establish that
+  batching saves only the intrinsic fee; the honest test is the same final
+  state written as N transactions versus one batch, which has not been run.
+  What this comparison does show is that per-leaf work does not shrink with
+  leaf count in these two ops.
 - **91% of the plumbing sits below the Core entry point**, in one
   `UpgradeAdmissionLibrary` frame that also carries all the storage work.
   `CALLDATACOPY` alone is 48,291 gas there: the publication struct being
@@ -129,7 +148,7 @@ None of these removes a property from the ledger. None needs a sixth SDK seam.
 | 5 | Pack `EnvelopeRow` 2→1, `BatchRow` 3→1, Authority 2→1; drop the derivable duplicates in §4 | 1.2–1.4× ESTIMATED | Schema rigidity, migration pain. |
 | 6 | Stop materialising the publication in memory inside the admission library — calldata-region reads by offset, or pass leaf commitments so bodies are never copied | up to 28% in scope, ESTIMATED | Implementation only; one library, one boundary. |
 | 7 | Record bodies as bytecode (SSTORE2) rather than storage slots | ~216 vs ~625–690 gas/byte QUOTED | Reads become `EXTCODECOPY` + parse, not struct access. See decision C. |
-| 8 | Content-addressed dedup of identical bodies | up to 995× on a repeat, MEASURED (EthFS) | Needs a pointer registry. See decision B. |
+| 8 | Content-addressed dedup of identical bodies | up to 995× on a repeat, QUOTED from EthFS's own figures (5,158,527 → 5,186 is internal execution gas, not a transaction receipt; boundary differs from ours) | Needs a pointer registry. See decision B. |
 
 Compounding 1–6 plausibly reaches **400–700k for a tag** (ESTIMATED) — within
 2–3× of EAS while still providing bindings and enumeration, which EAS lacks. I

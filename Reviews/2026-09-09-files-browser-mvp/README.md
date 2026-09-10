@@ -176,6 +176,12 @@ walkthrough drivable against real local v2 contracts:
   owner's digest for Codex: where the work is, which intake corrections are
   now measured, what was ruled versus leaned on (with pros and cons), and the
   proposed prototyping split.
+- [reconciliation-with-codex-2026-09-10.md](reconciliation-with-codex-2026-09-10.md)
+  — Codex's reply accepted point by point (the tag-follows-the-file join is
+  the largest correction; the mixed-run gas table; ROSTER is not now-or-
+  never; D-D must reconcile August 12), the agreed split, and the prototype
+  test matrix. Dated correction sections were appended to the gas, index-
+  layer and tag documents rather than rewriting them.
 
 Prior experiments' files and published evidence are untouched; where this
 branch's compatible reader extensions supersede their byte-pins at this

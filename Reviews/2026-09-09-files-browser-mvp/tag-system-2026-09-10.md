@@ -309,6 +309,74 @@ with `VocabularyRelease/1` for contracts; label-at-first-use in the SDK;
 
 ---
 
+### 5b. Corrections after the PM's review (2026-09-10 evening)
+
+Codex's reply (`planning-mvp-c0/Reviews/2026-09-10-foundation-reply-after-economics.md`)
+found the largest hole in this document, and it is accepted:
+
+**Tags describe a File; the bitmap describes a mutable directory position.**
+The "index shadow" in §3 put one bit per (scope, attester, concept) at the
+*position* of the file the attester tagged. When the placer rebinds that
+position from File A to File B, every attester's bits at that position are
+stale — and clearing them is unbounded (1,000 attesters = 1,000 columns the
+placer cannot enumerate). Worse for NOT: an attester who tagged B while B was
+elsewhere has no bit at the new position, so "not tagged" would be a false
+negative. One-time ordinal verification at tag time does not fix either.
+Consequences, now the first prototype test rather than a claim:
+
+- **Truth is target-keyed.** A `TagSet` targets the stable File Object (or,
+  per the owner's 2026-09-10 discussion, a revision or a location — below);
+  "files in D tagged T by X under lens L" is a **join**: the lens-resolved
+  listing of D against X's `TagSet` per entry (≈ 2 cold reads per entry, so
+  ≈ 6–19k per entry including the K10 walk, ESTIMATED). Fine as an
+  `eth_call`; O(n) for a contract.
+- **Position bits are, at most, a positive accelerator**: a set bit yields a
+  candidate that the reader verifies against the attester's current `TagSet`
+  for the file *now* at that position (per hit, not per word). NOT-within-a-
+  listing over third-party tags cannot be accelerated this way; it is the
+  O(n) join, or a per-lens materialisation maintained by a delegated fold.
+- **Placer-derived fields are different.** For `FIELD_EQ` on the file's own
+  metadata (media type, size) the placer's write re-derives the bit, the
+  dependency is bounded, and the bitmap claims in `index-layer-2026-09-10.md`
+  hold. The constant-cost claim in §3 was oversold for attester-authored tags
+  and is withdrawn until the arms are measured.
+
+**Three tag subjects, from the owner's own examples.** A famous-baby-on-the-
+beach image v1 has clouds, v2 (another angle) does not: that tag is about
+*this version* (a `FileRevision` id). `/docs/efs.doc` changes content but is
+always "efs" and "ethereum": that is about *this file* (the stable File
+Object, which is what `TagSet.target` already is). "Whatever is at
+`/docs/efs.doc` is the EFS reference document": that is about *this location*
+(a position key). The Files design already separates File Object, immutable
+revisions and placements; `TagSet` gains a subject kind — `REVISION | FILE |
+LOCATION` — and the rule becomes: *a tag follows its declared subject; an
+indexing shortcut must never silently change what was tagged.* Index
+consequences: location tags are the one kind naturally keyed by position and
+persist across replacement; file tags follow the object and need the join;
+revision tags are content annotations reachable through the record backlink.
+UX defaults (Codex's, agreed): "Tag file" = FILE; image-content annotations =
+REVISION; LOCATION is an advanced option; a tag's details show its subject
+and author. Tests: edit contents (file tags stay), rename/move (file tags
+follow), replace with a different file at the same path (old file's tags do
+not transfer), deliberately tag the location (stays when the occupant
+changes).
+
+**Lens masking.** A high-priority whiteout, or an untagged high-priority
+file, must mask a tagged lower-priority file at the same name; filtering
+runs *after* lens selection, never before. Bound whiteouts are live
+candidates. `HEAD_LIVE` is a per-placer "current binding candidate" family,
+not "visible file" and not "has this tag".
+
+**Four details the prototype must settle** (accepted as stated): a commons
+string id is *lexical* identity, not agreement about meaning — relabelling A
+to "B" does not make typing B derive A; canonicalisation needs golden vectors
+(Unicode version, casing, whitespace, idempotence, malformed input); multiple
+`TagSet` shards need a deterministic partition so two shards cannot assert
+and deny the same concept or clear each other's bits; DENY is an explicit
+negative and withdrawing a stance must not silently become DENY or resurrect
+an older one; OR-only materialisation is not current after an implication is
+withdrawn. "Thousands of taggers" is a bounded-Lens target, not measured.
+
 ## 6. Contradictions and open items carried forward
 
 1. Two MEASURED tag figures (§4) — settle with the slot profile.

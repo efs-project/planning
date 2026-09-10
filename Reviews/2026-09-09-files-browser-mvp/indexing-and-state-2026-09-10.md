@@ -38,8 +38,13 @@ not archived). Everything else is as the strands report it.
    cold slot **110,020** gas (2,100 + 10,000 + 64 B × 1,530; ESTIMATED sum of
    QUOTED parts) instead of 22,100, and a rewrite of an existing cold slot
    **12,100** instead of 5,000. Reads are unchanged. Code deposit goes from
-   200 to 1,530 gas/byte. The tag write's 94 fresh slots would cost ~11.1M on
-   that schedule (ESTIMATED). Activation is undated; press tracks L1 for late
+   200 to 1,530 gas/byte. *If* all 94 touched slots of the tag write were
+   fresh it would cost ~11.1M on that schedule (ESTIMATED, an upper bound:
+   the fresh count is at most ~64 by arithmetic and is being classified in
+   [gas-baseline-2026-09-10.md](gas-baseline-2026-09-10.md)). "Reads
+   unchanged" means SLOAD pricing; EIP-8038 also raises cold account access
+   2,600 → 3,000 and adds a warm-access charge to `EXTCODECOPY`/`EXTCODESIZE`,
+   which matters for code-backed bodies. Activation is undated; press tracks L1 for late
    2026 and L2s have historically lagged 6–8 months and may set their own
    numbers. **Every proposal in gas-engineering §5 now has to be scored on
    both schedules**, and the allocate-versus-rewrite gap (4.4× today, 9.1×

@@ -374,6 +374,64 @@ scope; no bounties in the kernel.
 
 ---
 
+## 11a. Corrections after the PM's review (2026-09-10 evening)
+
+Codex's reply (`planning-mvp-c0/Reviews/2026-09-10-foundation-reply-after-economics.md`,
+`832c7ae` on `codex/mvp-c0-coherence`) supports the shape and corrects the
+following; each is accepted and carried into the prototype tests:
+
+- **ROSTER is not "now or never."** A per-directory placer roster can be
+  rebuilt later from the global inventories (kind-4 per-principal postings,
+  the binding-key inventory, the admission log) by the same bounded, verified
+  backfill this document describes — at a global-scan cost rather than a
+  per-scope one — provided a live hook can be installed at that time. The
+  decision is therefore "pay one slot per (principal, directory) now" versus
+  "pay a global backfill later", not permanence. The §11 row is withdrawn as
+  worded. Discovery of placers never grants authority or Lens membership.
+- **D-D must reconcile the 2026-08-12 ruling as well as 2026-07-15.**
+  August already says "Type creators choose the bounded fields and supported
+  index modes for their Types … every admitted item is indexed automatically
+  according to that declaration; an individual writer cannot opt out"
+  (`owner-rulings.md`, 2026-08-12). So "declared by the Type author" is not
+  new. What D-D actually adds is: later attachment, historical coverage,
+  attachment authority and cost ceilings, and retirement. Its ratification
+  is narrowed to those.
+- **Three ordinal domains, not one.** Admission ordinal, global binding-key
+  ordinal and zero-based position within a scope are different numbers; the
+  born-after-`d` test in §3 must not compare a binding-key ordinal with an
+  admission ordinal. K10 changes readers (historical prefix filtering,
+  hydration, posting-head checks) as well as storage; Codex owns that patch
+  with its readers.
+- **The reverse locator is missing.** K10 makes scope-position → binding-key
+  cheap; a rebind still needs binding-key → scope-position to update the
+  right bit. Options to price: a reverse map slot, or a caller-supplied
+  position verified against the scope list. No hidden linear walk.
+- **Type attachment is not a free cache write.** Type identity/cache
+  validation rejects altered cache data for the same Type, and Type records
+  are not owned by whoever registered them. Attachment needs an explicit
+  authority, an identified profile, an effective epoch and writer cost
+  ceilings; the already-loaded cache on a BindingSet leaf is not the target
+  File Type's cache, so cross-Type rebinds need old and new dependency
+  handling.
+- **A directory is not the whole universe.** Unbound Records and Occurrences
+  have no directory position; each family must name its universe (kind-1 for
+  Type-sourced families, kind-10 for scope-sourced), and directory bitmaps do
+  not replace the presence families.
+- **Coverage and cursors.** A set bit proves a current positive only if every
+  dependency maintains it; a clear bit needs coverage to prove a miss; page
+  COMPLETE also requires exhaustion of the selected universe. Scope count
+  does not change on a rebind, so a cursor must pin an authenticated block
+  basis, not `revision` alone.
+- **512 is a benchmark candidate.** `FIELD_EQ` over high-cardinality values
+  can allocate a fresh bucket word per item; bound inspected work and writes,
+  and measure sparse, hot and maximal-body cases.
+- **Sorted runs.** `openRun` at basis B followed by `submitRun` reading
+  *current* heads does not prove a snapshot at B; use history-at-B reads or
+  abort on drift. Materialised runs pack five u48 ordinals per word, not
+  eight u32; the +707k figure is understated.
+- **Attachment cannot silently tax unbounded future work**; admission-count
+  delay is not wall-clock; old snapshots stay qualified after retirement.
+
 ## 12. Verified, unverified, and next
 
 Verified today: the six kernel facts above; the v1 sort overlay's mechanics
