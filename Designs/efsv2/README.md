@@ -10,6 +10,12 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
+**2026-09-10: [[programmable-acceptance-experiment|The isolated acceptance lab]]**
+tests mandatory developer rules, paid/unique operations, historical equipment
+and generated TypeScript/Solidity consumers. It uses the `cf352ed` design input
+beside the pinned `92f2d6b` runtime without modifying Fable's browser/wallet/export
+lane. See its scoped evidence; it is not full-C0 integration or protocol adoption.
+
 **2026-09-08: [[testnet-files-mvp-plan|The testnet Files MVP build plan]]** is
 the short path from the current prototypes to a browser the owner can verify:
 sixteen observable journeys, controlled testnet upgrades, five build
