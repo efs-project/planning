@@ -1,0 +1,512 @@
+{
+  "runtime": "v26.0.0",
+  "standalone": true,
+  "gas": {
+    "deploy AcceptanceCore": "1760198",
+    "deploy OutfitRule": "267040",
+    "register Outfit": "184290",
+    "activate Outfit": "129234",
+    "deploy EquipRule": "605097",
+    "register Equip": "184130",
+    "activate Equip": "133734",
+    "deploy PaidClaimRule": "376405",
+    "register PaidClaim": "184142",
+    "activate PaidClaim": "133702",
+    "register OutfitV2": "184370",
+    "activate OutfitV2": "129234",
+    "deploy GeneratedHarness": "593104",
+    "write Outfit+Equip signed relay": "808966",
+    "exact retry zero value": "50221",
+    "paid claim direct": "457921",
+    "paid exact retry": "43648",
+    "mined paid then invalid Outfit rollback": "478454",
+    "write OutfitV2": "462965"
+  },
+  "transactionHashes": {
+    "deploy AcceptanceCore": "0xff60273663492827cdca6a13d2f98f3f44e50296dc43b2ea423d6b3a2a5bcc6d",
+    "deploy OutfitRule": "0x8fca1015a0028e28e96d975179c18a1e269297a778d738ad2726f417c7c1590b",
+    "register Outfit": "0x739efc98483d35912c391510b81a9c80028042c410db8fb42add1c15aa4fb53a",
+    "activate Outfit": "0xe8cf3dec4d92868b2b8ccc4f2e12d7cd1a1d30c5cb3b4cb8978477dd1dd0596f",
+    "deploy EquipRule": "0xc60efe26233a4aa4ea5dad071b83e9f7f7ce233c6c2151ea8e266d524e55788d",
+    "register Equip": "0x7a0512db0b58b7578f44df57430e332c93d39c19119be4c8a135d7ce0074bdca",
+    "activate Equip": "0x249dc5a2f16eae7d58fce14d2e262ec3962ed9e42a514f7a4f3d6a06fe1cbfa7",
+    "deploy PaidClaimRule": "0x4db083610d6b3689667cfa311fd760aa0595f96b02bb80d6fbb3e3c7a6b9c9bd",
+    "register PaidClaim": "0x7f157b114b6ba80c25eef10962f66ad4d1da0cd730d53ae1e18a33e6a74577a9",
+    "activate PaidClaim": "0x328b7dab617e11961ad89335539df5d00d0408b497321278c2ebd9d179d73de4",
+    "register OutfitV2": "0xd67b8478378b8d2f11052c8b69be1ddc451f3b0b49cada45f02060e11645b936",
+    "activate OutfitV2": "0x1c92770277d76d721f439f2bbd540fd8ec1cf969872944df107ab62256e985a9",
+    "deploy GeneratedHarness": "0x1cd1ab5ad2df9e1093987549e0a9a98986f2889024250e686ed3ceb31f029d39",
+    "write Outfit+Equip signed relay": "0xe4998e706d7d88f5519649788eec0020b413454feb996ebdb91f8a5d42d33cca",
+    "exact retry zero value": "0xd957faca247a44d71e5eb6173a87c261198e3c4683c5514146348122747fd74d",
+    "paid claim direct": "0xaf8b0e5da26ef10bd8046b6b009639c4a4fec175a9cf051c5dc553d6b9f9dc5f",
+    "paid exact retry": "0x6f248892c755b90a96bffb88613327dd7fb974ec84e3fcf7cdc1103843e8f0cb",
+    "mined paid then invalid Outfit rollback": "0xf46488be811a3391424b9f634945a990e29a891f9832418b18d2ce15c805a401",
+    "write OutfitV2": "0x30b67125c4577e37d7bea44fdb9373a9220eb7c7abd961248f60ae6e6da7cf49"
+  },
+  "stateTraces": {
+    "register Outfit": {
+      "tracer": "prestateTracer diffMode",
+      "changedStorageSlots": 7,
+      "newNonzeroStorageSlots": 7,
+      "changes": [
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x81ae19d0af04d234c22c8a1b6a6eeef6e342cfdd626e6efb5cf590a79efb7d62",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x81ae19d0af04d234c22c8a1b6a6eeef6e342cfdd626e6efb5cf590a79efb7d63",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x81ae19d0af04d234c22c8a1b6a6eeef6e342cfdd626e6efb5cf590a79efb7d64",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x81ae19d0af04d234c22c8a1b6a6eeef6e342cfdd626e6efb5cf590a79efb7d65",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x81ae19d0af04d234c22c8a1b6a6eeef6e342cfdd626e6efb5cf590a79efb7d66",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x81ae19d0af04d234c22c8a1b6a6eeef6e342cfdd626e6efb5cf590a79efb7d67",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x81ae19d0af04d234c22c8a1b6a6eeef6e342cfdd626e6efb5cf590a79efb7d68",
+          "transition": "zero-to-nonzero"
+        }
+      ]
+    },
+    "activate Outfit": {
+      "tracer": "prestateTracer diffMode",
+      "changedStorageSlots": 4,
+      "newNonzeroStorageSlots": 4,
+      "changes": [
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x39e000ee6ddab76e76752186a33c47587155c15ef278d3b33b12a413bc55c0ac",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x39e000ee6ddab76e76752186a33c47587155c15ef278d3b33b12a413bc55c0ad",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x39e000ee6ddab76e76752186a33c47587155c15ef278d3b33b12a413bc55c0ae",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x39e000ee6ddab76e76752186a33c47587155c15ef278d3b33b12a413bc55c0af",
+          "transition": "zero-to-nonzero"
+        }
+      ]
+    },
+    "write Outfit+Equip signed relay": {
+      "tracer": "prestateTracer diffMode",
+      "changedStorageSlots": 30,
+      "newNonzeroStorageSlots": 30,
+      "changes": [
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x33566ee7d43afa852a76fd6b2731f659e0710975ee7a3c268717d3d12a438c62",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xa216b631070bf6f9317435cc754a1c420aa67da33584785a0fc287e179d88794",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xa23e54bb06248128565173e0c31bea40b1b324b5a4a125e2a2c78cea32899c57",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xa23e54bb06248128565173e0c31bea40b1b324b5a4a125e2a2c78cea32899c58",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xa23e54bb06248128565173e0c31bea40b1b324b5a4a125e2a2c78cea32899c59",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xaa3ff94d4cf833b2f3a71d1d843522cc4455f6bd0190c31394178248e7914d30",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xbc1307993f6bd888d529b64ec77e83ac1c428ea41bf4e14546e45f4a54ac8627",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f6c",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f6d",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f6e",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f6f",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f70",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f71",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f72",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f73",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f74",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f75",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f76",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f77",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea0",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea1",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea2",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea3",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea4",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea5",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea6",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea8",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea9",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aeaa",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aeab",
+          "transition": "zero-to-nonzero"
+        }
+      ]
+    },
+    "exact retry zero value": {
+      "tracer": "prestateTracer diffMode",
+      "changedStorageSlots": 0,
+      "newNonzeroStorageSlots": 0,
+      "changes": []
+    },
+    "paid claim direct": {
+      "tracer": "prestateTracer diffMode",
+      "changedStorageSlots": 17,
+      "newNonzeroStorageSlots": 16,
+      "changes": [
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xa216b631070bf6f9317435cc754a1c420aa67da33584785a0fc287e179d88794",
+          "transition": "nonzero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x296599fda955dfcbd0e699e542cbe896abe0e1596d587573358abf8fbd87ff2a",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x46f8b2f5401a2ab8492fa5f2586b4cb50a062f3cee6178b0ed90a79e1092ef5f",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xc7d997d57b4d763db0dd5f16b4e0ac2adb9f63358be22d2267348edc05975326",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b708d",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b708e",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b708f",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7090",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7091",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7092",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7093",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7095",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7096",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7097",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7098",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+          "slot": "0x0000000000000000000000000000000000000000000000000000000000000004",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+          "slot": "0x7843dc9fc45039e3e64637b5e378980aa60122c929be85928e7335ad7ea2a69a",
+          "transition": "zero-to-nonzero"
+        }
+      ]
+    },
+    "paid exact retry": {
+      "tracer": "prestateTracer diffMode",
+      "changedStorageSlots": 0,
+      "newNonzeroStorageSlots": 0,
+      "changes": []
+    },
+    "mined paid then invalid Outfit rollback": {
+      "tracer": "prestateTracer diffMode",
+      "changedStorageSlots": 0,
+      "newNonzeroStorageSlots": 0,
+      "changes": []
+    },
+    "write OutfitV2": {
+      "tracer": "prestateTracer diffMode",
+      "changedStorageSlots": 18,
+      "newNonzeroStorageSlots": 17,
+      "changes": [
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xa216b631070bf6f9317435cc754a1c420aa67da33584785a0fc287e179d88794",
+          "transition": "nonzero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773a8",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773a9",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773aa",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773ab",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773ac",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773ad",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773ae",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773b0",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773b1",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773b2",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773b3",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x779d76befdade295e51f446076f7cbf8ce546e6183f781924c41b3f583e72c38",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x779d76befdade295e51f446076f7cbf8ce546e6183f781924c41b3f583e72c39",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x779d76befdade295e51f446076f7cbf8ce546e6183f781924c41b3f583e72c3a",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x779d76befdade295e51f446076f7cbf8ce546e6183f781924c41b3f583e72c3b",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xb9cf387b3311726678a49976624b8405e2ba541e11e5cc80290834bdec6d4cd9",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0xe337c8b2826af89e629dbd1faa61bac3e53abbd538de89489d9306c82b52d703",
+          "transition": "zero-to-nonzero"
+        }
+      ]
+    }
+  },
+  "readBack": {
+    "milliseconds": 164.3654160000001,
+    "rpcRequests": 22,
+    "basis": {
+      "chainId": "31337",
+      "core": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "blockNumber": 14,
+      "blockHash": "0x1e1d79593db97500f973309ff6d988a63125bed8d26bd0b4d7a40c2b5e0c87ed"
+    }
+  },
+  "stateAccounting": {
+    "kind": "measured address-qualified final slot diffs; excludes trie overhead and transient writes restored in the same transaction",
+    "outfitBodyBytes": 96,
+    "equipBodyBytes": 32,
+    "receiptFields": 13
+  },
+  "receipt": {
+    "accepted": true,
+    "author": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "typeId": "0xc9ce2c7a953024376d83d5b29ce8afec73ab5380ab0d3c612cf6591ae9fa212d",
+    "bodyHash": "0x525876128d9eb0ad1b9e0d64c9c51b1cd33790861c401ad2e3df0f670ce6a2a4",
+    "ruleId": "0xd611c2b843ae867d8abfbfd0216b062f3856711de4aef2578dc7cd8a34788d29",
+    "activationId": "0x6a385c18b804e7b3daad470ecac8e6432f46f8285bc1c0c2fcb9a3460ec47c4a",
+    "basis": "0x525876128d9eb0ad1b9e0d64c9c51b1cd33790861c401ad2e3df0f670ce6a2a4",
+    "planId": "0x492f11eec50371d574101cedb214ec04b8396a2f790dafacc343b37f7516da80",
+    "index": "0",
+    "blockNumber": "14",
+    "chainId": "31337",
+    "core": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "submitter": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+  }
+}

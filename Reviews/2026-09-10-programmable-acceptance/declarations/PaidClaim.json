@@ -1,0 +1,1 @@
+{"name":"PaidClaim","version":"1","fields":[{"name":"claimKey","kind":"bytes32"}],"rule":{"artifact":"PaidClaimRule","label":"paid.unique.v1","config":[{"name":"fee","kind":"uint256"}],"local":[{"name":"core","kind":"address"},{"name":"treasury","kind":"address"}],"mode":2,"gasLimit":250000}}

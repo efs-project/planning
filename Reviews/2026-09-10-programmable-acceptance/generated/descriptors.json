@@ -1,0 +1,136 @@
+[
+  {
+    "name": "Equip",
+    "version": "1",
+    "fields": [
+      {
+        "name": "outfitReceipt",
+        "kind": "bytes32"
+      }
+    ],
+    "rule": {
+      "artifact": "EquipRule",
+      "label": "equip.current.v1",
+      "config": [
+        {
+          "name": "outfitType",
+          "kind": "bytes32"
+        }
+      ],
+      "local": [
+        {
+          "name": "core",
+          "kind": "address"
+        },
+        {
+          "name": "admin",
+          "kind": "address"
+        }
+      ],
+      "mode": 1,
+      "gasLimit": 250000
+    },
+    "descriptor": "0xbaad5e6a086cad87e6e86132060258fefed2b218c9ca71382e96f28aa0b19c92"
+  },
+  {
+    "name": "Outfit",
+    "version": "1",
+    "fields": [
+      {
+        "name": "species",
+        "kind": "uint256"
+      },
+      {
+        "name": "shirt",
+        "kind": "uint256"
+      },
+      {
+        "name": "pants",
+        "kind": "uint256"
+      }
+    ],
+    "rule": {
+      "artifact": "OutfitRule",
+      "label": "outfit.compatibility.v1",
+      "config": [],
+      "local": [
+        {
+          "name": "core",
+          "kind": "address"
+        }
+      ],
+      "mode": 1,
+      "gasLimit": 150000
+    },
+    "descriptor": "0xe21621f716a01fc2bc40959975ddc2a1f74a8131a3dc88a9232f14fa3efa1210"
+  },
+  {
+    "name": "OutfitV2",
+    "version": "2-badge-structural-only",
+    "fields": [
+      {
+        "name": "species",
+        "kind": "uint256"
+      },
+      {
+        "name": "shirt",
+        "kind": "uint256"
+      },
+      {
+        "name": "pants",
+        "kind": "uint256"
+      },
+      {
+        "name": "badge",
+        "kind": "uint256"
+      }
+    ],
+    "rule": {
+      "artifact": "OutfitRule",
+      "label": "outfit.compatibility.v1",
+      "config": [],
+      "local": [
+        {
+          "name": "core",
+          "kind": "address"
+        }
+      ],
+      "mode": 1,
+      "gasLimit": 150000
+    },
+    "descriptor": "0xc75fc77827d97f74113e8a2f3461bf9d9077c7675ad11e0d07e33ca36f4c9259"
+  },
+  {
+    "name": "PaidClaim",
+    "version": "1",
+    "fields": [
+      {
+        "name": "claimKey",
+        "kind": "bytes32"
+      }
+    ],
+    "rule": {
+      "artifact": "PaidClaimRule",
+      "label": "paid.unique.v1",
+      "config": [
+        {
+          "name": "fee",
+          "kind": "uint256"
+        }
+      ],
+      "local": [
+        {
+          "name": "core",
+          "kind": "address"
+        },
+        {
+          "name": "treasury",
+          "kind": "address"
+        }
+      ],
+      "mode": 2,
+      "gasLimit": 250000
+    },
+    "descriptor": "0xc3c71076e3c67bc2eec33750fea8fe1bda5c43e1cad3eaf19b5b8db4d4e8c9af"
+  }
+]

@@ -1,0 +1,1 @@
+{"name":"Equip","version":"1","fields":[{"name":"outfitReceipt","kind":"bytes32"}],"rule":{"artifact":"EquipRule","label":"equip.current.v1","config":[{"name":"outfitType","kind":"bytes32"}],"local":[{"name":"core","kind":"address"},{"name":"admin","kind":"address"}],"mode":1,"gasLimit":250000}}

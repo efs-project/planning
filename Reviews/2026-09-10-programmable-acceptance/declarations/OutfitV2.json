@@ -1,0 +1,1 @@
+{"name":"OutfitV2","version":"2-badge-structural-only","fields":[{"name":"species","kind":"uint256"},{"name":"shirt","kind":"uint256"},{"name":"pants","kind":"uint256"},{"name":"badge","kind":"uint256"}],"rule":{"artifact":"OutfitRule","label":"outfit.compatibility.v1","config":[],"local":[{"name":"core","kind":"address"}],"mode":1,"gasLimit":150000}}
