@@ -162,6 +162,16 @@ walkthrough drivable against real local v2 contracts:
   posts, Hydrus is our shape); the five decisions that are the owner's.
   Strands, three architect memos and the judge in
   [research-2026-09-10/tags/](research-2026-09-10/tags/).
+- [index-layer-2026-09-10.md](index-layer-2026-09-10.md) — can indexes be a
+  separate, later-declared, crowd-backfilled layer contracts still rely on?
+  Yes, under three rules: hook the write path at declaration and backfill
+  only the past; one coverage frontier per (family, scope) column advanced
+  only by kernel-derived bits; contract reads revert outside coverage.
+  Six kernel facts verified (five ordinals per posting word; kind-10 carries
+  only an admission ordinal → the Etched K10 decision); the v1 sort overlay
+  re-homed as verified snapshot runs; D-D reduced to one ratification.
+  Strands, memos and judge in
+  [research-2026-09-10/index-layer/](research-2026-09-10/index-layer/).
 
 Prior experiments' files and published evidence are untouched; where this
 branch's compatible reader extensions supersede their byte-pins at this

@@ -251,7 +251,7 @@ after, with what I will do unless told otherwise).
 | D-A | **No** on-chain; **yes** in Graph-enhanced search "if nimbus has metadata saying its a child of clouds" | On-chain: placement is grouping, `implies` is an explicit edge. Off-chain: the search provider may expand over placement *or* implication edges under the reader's vocabulary; which one is a client/provider setting, defaulting to explicit `implies`. |
 | D-B | **Yes** | Commons salt = `keccak(NFC → lowercase → space→underscore)`; frozen. |
 | D-C | Keep v1's signed weight semantics (+1 "is nsfw", −1 "is NOT nsfw") without a separate `not_nsfw` tag | That is exactly DENY as polarity on the same concept: per author, assert / deny / silent. The carrier (`asserts[]`/`denies[]` vs a signed weight) is engineering; the index has two bit families either way. Graded weights beyond the sign stay unindexed (`confidence`). |
-| D-D | Explanation requested; "for the most part I agree" | Pending. Plain-language version below; the 2026-07-15 ruling stands until he answers. |
+| D-D | Explanation requested; "for the most part I agree"; then asked whether indexes could be a separate, later-declared, crowd-built layer | Pending. Plain-language version below; the follow-up question is answered in [index-layer-2026-09-10.md](index-layer-2026-09-10.md), which reduces D-D to one ratification (its §11). The 2026-07-15 ruling stands until he answers. |
 | D-E | **Acceptable** "if that's the best we can do"; asks whether thousands of taggers break anything | Answered below: no. |
 
 **D-D in plain language.** An "index" here is a list a contract — or the
