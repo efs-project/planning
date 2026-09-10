@@ -244,6 +244,56 @@ after, with what I will do unless told otherwise).
 | **D-D** | The 2026-07-15 "mandatory automatic indexing" ruling versus the measured cost. | **Amend, narrowly:** the target backlink (kind 5) and definition-keyed enumeration (kind 6 — "everything tagged T") stay automatic for every on-chain record; the other families are declared per Type. Tags get kind 5/6 plus the bitmap families. | His ruling; I recommended "opt-in per Type" without it in front of me. Stopping a family later is free; adding one later needs a paid pass over every record. |
 | **D-E** | Tag budget: is ≈ 50k gas per tag today (≈ 220k Glamsterdam) at the floor an acceptable design target, given booru density is out of reach? | **Yes**, and say so in the booru design's requirements (BOORU-15 measures; BOORU-04's "reverse an implication and fail the fixture" must be rewritten for read-time semantics). | It sets what the booru and media products may promise. |
 
+### 5a. Owner answers, 2026-09-10 (recorded in `Designs/efsv2/owner-rulings.md`)
+
+| # | Answer | Consequence |
+| --- | --- | --- |
+| D-A | **No** on-chain; **yes** in Graph-enhanced search "if nimbus has metadata saying its a child of clouds" | On-chain: placement is grouping, `implies` is an explicit edge. Off-chain: the search provider may expand over placement *or* implication edges under the reader's vocabulary; which one is a client/provider setting, defaulting to explicit `implies`. |
+| D-B | **Yes** | Commons salt = `keccak(NFC → lowercase → space→underscore)`; frozen. |
+| D-C | Keep v1's signed weight semantics (+1 "is nsfw", −1 "is NOT nsfw") without a separate `not_nsfw` tag | That is exactly DENY as polarity on the same concept: per author, assert / deny / silent. The carrier (`asserts[]`/`denies[]` vs a signed weight) is engineering; the index has two bit families either way. Graded weights beyond the sign stay unindexed (`confidence`). |
+| D-D | Explanation requested; "for the most part I agree" | Pending. Plain-language version below; the 2026-07-15 ruling stands until he answers. |
+| D-E | **Acceptable** "if that's the best we can do"; asks whether thousands of taggers break anything | Answered below: no. |
+
+**D-D in plain language.** An "index" here is a list a contract — or the
+browser with no Graph — can read to *find* records: "everything that points
+at file F", "everything tagged T", "everything by principal P", "every record
+whose field X = V", "every record carrying digest D". In July the owner ruled
+that every record written through EFS goes into every such list
+automatically, so no writer can hide from the index and anyone can build on
+anyone's data (unlike EAS, where indexing is a separate optional call). The
+reason is right and is kept. What was measured since: those automatic lists
+are ≈ 20% of every write, most have no reader yet, and a fresh list entry
+goes from 22,100 to 110,020 gas under Glamsterdam. The amendment on the
+table: keep two lists automatic for every record — "what points at this"
+(kind 5) and "all records of this Type/definition" (kind 6, which is what
+"everything tagged T" is) — and let the **Type definition**, written once by
+whoever defines the Type, declare which extra lists its records maintain.
+Writers still cannot opt out; the choice moves from each writer to the Type
+author, once. What it gives up: a Type author who leaves a list out cannot
+add it later without a paid pass over existing records. The question for the
+owner is therefore: *should the Type definition decide which extra indexes
+its records keep, with backlinks and per-Type enumeration always on?*
+Recommendation: yes.
+
+**Do thousands of taggers break anything? No.** Each `TagSet` is its own
+binding under its own principal, and the bitmap columns are per attester, so
+a thousand taggers create a thousand independent columns, each paid for by
+its writer. The only shared state per item is two list heads — the target
+backlink and the per-concept global posting — each rewritten once per
+assertion (5,000 today / 12,100 Glamsterdam) as part of that writer's cost;
+transactions serialise, so there is no contention failure mode. Reads scale
+with the *reader's lens*, not the crowd: a Lens of k principals reads k
+columns per predicate (plans are bounded at 1/8/32/64), regardless of how
+many people tagged. "What do all N taggers say about item X" is a paged walk
+of the target backlink, ≈ 2,100 gas per entry (≈ 2.1M per thousand taggers)
+— fine as an `eth_call`, not something a contract does inside a transaction;
+a contract that wants crowd counts uses a closed lens or a delegated fold.
+What §4 called unaffordable was a *single payer* replicating a booru (12.1M
+posts × 35 tags ≈ 424M assertions, ≈ 2×10¹³ gas at the floor), not fan-in on
+one item. The one hard per-transaction limit is EIP-7825: one `TagSet` holds
+≤ 16 concepts, so a 35-tag post is three `TagSet`s in one transaction
+(≈ 5.4M gas under Glamsterdam pricing, ESTIMATED), which fits.
+
 **Delegated defaults I will take** (the judge's D1, D4–D6, D8–D17, D20–D21):
 concept ids on one Type with two profiles; measure `TagSet` vs per-pair
 bodies in slots vs SSTORE2 on both schedules before choosing; drop `int256
