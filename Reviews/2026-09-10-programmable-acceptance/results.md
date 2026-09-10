@@ -1,6 +1,6 @@
 # Acceptance laboratory — evidence ledger
 
-**Status:** local execution verified; final review/publication disposition is recorded below. Standalone evidence only.
+**Status:** complete, locally verified and reviewed for experimental branch publication. Standalone evidence only.
 
 ## Verified starting point
 
@@ -244,10 +244,56 @@ Expected refused writes and mined status-0 rollback are positive test outcomes,
 not accepted data. Passing test counts do not waive later review findings. The
 evidence retains a trusted-local-RPC/no-state-proof and local-unfinalized boundary.
 
+After the final prose/comment corrections at `0c15fbb`, the parent repeated
+`npm run verify && npm audit` plus both `forge test --root contracts/consumer
+--offline -q` runs: all exited zero, with the same 20/13 Node/Anvil totals and
+zero known dependency vulnerabilities. Final localhost read-back observation was
+222.95 ms / 25 requests; normal local captures remained ignored, leaving the
+reviewed committed capture intact. Vault open-decision/tri-sync and whitespace
+checks also passed.
+
+## What the process should do better next time
+
+- Negative generated-binding tests belong in the first increment, not only an
+  independent review: preserving shape is not preserving a mandatory rule.
+- Check complete RPC ABI envelopes, not merely whether a library can decode
+  them. Preserve failed raw observations before parsing.
+- Compile accepted parameterized declarations, not just the four shipped
+  examples. The generated-name collision survived the first name-check fix.
+- Keep evidence from the original execution through retry/recovery. A new
+  transaction receipt cannot replace historical acceptance metadata.
+
+These corrections added checks and a few explicit configuration inputs, not a
+second SDK framework or application-specific Core nouns. The first-run tests
+were useful, but independent review materially improved what they established.
+
+## Final independent review disposition
+
+The whole-branch reviewer inspected `92f2d6b..0523236`, including the joined
+Core/rules, generated tooling, independent consumer, retained measurements and
+readiness claims. Verdict: **ready for experimental branch publication; no
+Critical or Important findings**. This is a code/design review, not a formal
+security audit, main merge or deployment approval.
+
+The single final wording wave `0523236..0c15fbb` was independently re-reviewed
+and approved: submitter now means the original immediate Core caller, not
+necessarily the transaction sender or gas/value funder; referenced Outfit checks
+are correctly attributed to EquipRule; the binding decoder's nonuniform error
+is explicit in the interface. No executable behavior or generated artifacts
+changed. No new review findings remained.
+
+**One deferred test improvement:** isolate every signed field using otherwise
+valid alternate inputs before accepting the real-Core port. Current code hashes
+the fields and tests safely reject substitutions; some tests also trigger later
+validity gates, so they do not independently prove each field's necessity.
+This is missing regression isolation, not an observed authorization bypass.
+The safe malformed-binding diagnostic is now documented; normalize it during
+porting only if the public interface promises a uniform error selector.
+
 ## Readiness decision
 
-**Engineering recommendation: implement this boundary in the real testnet Core
-as a small reviewed vertical slice, subject to the final review disposition.
+**Engineering recommendation: proceed to implement this boundary in the real
+testnet Core as a small reviewed vertical slice.
 Do not deploy this standalone coordinator as EFS v2.**
 
 The central architectural risk is tractable: custom validation can be mandatory,

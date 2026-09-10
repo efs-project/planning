@@ -2,6 +2,12 @@
 
 > For agentic workers: use `superpowers:subagent-driven-development` to execute and review these bounded tasks. This is disposable evidence, not a protocol selection.
 
+**Execution record (2026-09-10):** this plan has been executed and independently
+reviewed. The original task checklist below is retained as the requirements
+record, not an open work queue. See [results](results.md) for completed checks,
+review disposition and the distinct real-Core integration follow-up; do not
+restart this implementation from the unchecked historical boxes.
+
 **Goal:** mandatory developer rules, atomic stateful acceptance, generated developer helpers and a separately authored contract consumer.
 
 **Architecture:** an isolated small acceptance coordinator exercises the proposed boundary without modifying the pinned Files Core. Immutable Type descriptors commit a mandatory rule; each local activation commits the actual executor and configuration. Ordered plans enter one guarded writer. Receipts and exact bodies are state-readable without callbacks. Two ordinary applications supply the custom logic.
