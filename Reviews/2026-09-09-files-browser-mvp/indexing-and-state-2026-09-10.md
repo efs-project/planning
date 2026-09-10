@@ -210,6 +210,37 @@ and every declared field of every record to the indexed tier without anyone
 deciding it per field. The decision the owner is actually being asked for is
 which families are on by default and which are opt-in per Type.
 
+### 4a. Static ids and dynamic names — nothing from EAS is lost
+
+The owner's question (2026-09-10): with EAS a contract could lock to an
+attestation UID (static, on-chain forever) *or* point at a dynamic EFS name
+and read whatever is currently there; does v2 keep both?
+
+Yes, and the split is cleaner than EAS's:
+
+| | EAS (v1) | EFS v2 |
+| --- | --- | --- |
+| static reference | attestation UID — immutable payload, but *revocable*, so a locked contract must also check `revocationTime` | record id = keccak(type, body) — immutable, content-verifiable anywhere (a copied record proves itself without the origin chain), and never revocable: the bytes are the bytes |
+| dynamic reference | a name whose PIN the resolver reads for one attester | a binding at position `(purpose, subject, fieldRole)` under a principal, read through a Lens — the dynamic reference is `(position, lens)`, and an effectful consumer must pin which Lens/TypeId it trusts (consumer-tournament verdict, 2026-08-26) |
+| "still endorsed?" | fused into the UID's revocation flag | a separate fact: the binding. A record can be withdrawn from a position without the record ceasing to exist |
+
+So a contract that wants static trusted data locks to a record id (tier
+"state by id" in §4) and gets the same bytes forever; one that wants the
+live value reads a binding under a Lens it names; one that wants "the bytes
+*and* the author still stands by them" reads both. That is exactly EAS's two
+modes, with revocation no longer able to make a static reference dangle.
+
+The clarification I asked for is narrower than this. History *point reads*
+already exist and stay: a binding's prior states are retained (the kernel's
+binding-history family) and any old record resolves by id forever. What is
+open is whether any **contract** needs to *search the past by predicate* —
+"every file that was tagged `nsfw` as of block N", or "enumerate everything
+that was ever bound here" — because that is a separate, much larger index.
+Recommendation: index only the current state for contract search; keep
+history as point reads and as verifiable exports; add a history index later
+as an opt-in family paid by whoever needs it. Nothing about static ids or
+dynamic names changes under that recommendation.
+
 ---
 
 ## 5. MUD — what to take, what to refuse
@@ -377,6 +408,16 @@ pointer slot. Chunk-level, not just whole-file. No CDC yet.
 **C — bytecode-as-storage.** Yes for record bodies and chunks; the read
 asymmetry (≈300× at 20 KiB) and durability both point the same way. Plan for
 larger chunks under Glamsterdam.
+
+**Owner direction, 2026-09-10 (chat, not a protocol ruling).** On A, B and
+C James said: "1, 2, 3 sound like engineering problems and I guess I say
+Yes. I don't fully understand them, the options, or the tradeoffs so I trust
+you." This is direction to proceed with the measurements and prototypes in
+§9's next steps under the standing constraint that nothing freezes protocol
+choices; it is recorded here, not in `owner-rulings.md`. On history versus
+current he asked whether v2 loses EAS's "lock to a static UID" property —
+answered in §4a below. On tags he asked for a separate deep dive (running
+2026-09-10; result to be filed beside this document).
 
 **Clarifications that change the index design more than A/B/C:**
 
