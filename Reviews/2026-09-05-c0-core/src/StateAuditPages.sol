@@ -104,7 +104,8 @@ library StateAuditPages {
         bytes32 key = IndexKeys.posting(T, kind, indexOrdinal, valueKey);
         (bytes32 revision,, uint64 H) = StateReadPrimitives.basis(s, 0, key);
         if (!supported(T, kind, indexOrdinal)) revert ErrIndexQueryUnsupported(T, kind, indexOrdinal, valueKey);
-        StateReadPrimitives.PostingHead memory head = StateReadPrimitives.postingHead(s, key, true, H, key);
+        uint64 bound = kind == 10 ? StateReadPrimitives.scopeBound(s, H, key) : H;
+        StateReadPrimitives.PostingHead memory head = StateReadPrimitives.postingHead(s, key, true, bound, key);
         return (head.count, head.live, head.last, revision, H);
     }
 
@@ -140,14 +141,23 @@ library StateAuditPages {
             result.completeness = Completeness.UNSUPPORTED;
             return (result, rows);
         }
-        StateReadPrimitives.PostingHead memory head = StateReadPrimitives.postingHead(s, key, true, currentH, key);
-        uint64 end = prefixEnd(s, key, head, result.highWaterOrdinal);
+        bool k10 = kind == 10 && s.scopeLayout == 1;
+        uint64 bound = kind == 10 ? StateReadPrimitives.scopeBound(s, currentH, key) : currentH;
+        StateReadPrimitives.PostingHead memory head = StateReadPrimitives.postingHead(s, key, true, bound, key);
+        uint64 end = prefixEnd(s, key, head, result.highWaterOrdinal, currentH, k10);
         uint256 tag = AuditPageCursor.context(
-            s.init.realmId, result.realmBasis, hydrated ? 2 : 1, T, kind, indexOrdinal, valueKey
+            s.init.realmId,
+            result.realmBasis,
+            s.scopeLayout == 1 ? (hydrated ? 4 : 3) : (hydrated ? 2 : 1),
+            T,
+            kind,
+            indexOrdinal,
+            valueKey
         );
         uint64 next = req.cursor == 0 ? 0 : AuditPageCursor.decode(req.cursor, end, result.highWaterOrdinal, tag);
         uint64 previous = next == 0 ? 0 : StateReadPrimitives.postingAt(s, key, head, next - 1, key);
-        if (previous > result.highWaterOrdinal) revert StorageByteView.ErrReadState(key);
+        uint64 previousAdmission = previous == 0 ? 0 : admissionTime(s, key, previous, currentH, k10);
+        if (previousAdmission > result.highWaterOrdinal) revert StorageByteView.ErrReadState(key);
         uint256 limit = req.maxItems == 0 ? 1 : req.maxItems;
         uint256 maximum = hydrated ? 256 : 512;
         if (limit > maximum) limit = maximum;
@@ -156,13 +166,16 @@ library StateAuditPages {
         uint256 n;
         while (next < end && n < limit && result.coverage < SCAN_MAX) {
             uint64 ordinal = StateReadPrimitives.postingAt(s, key, head, next, key);
-            if (ordinal <= previous || ordinal > result.highWaterOrdinal) revert StorageByteView.ErrReadState(key);
+            uint64 admission = admissionTime(s, key, ordinal, currentH, k10);
+            if (ordinal <= previous || admission <= previousAdmission || admission > result.highWaterOrdinal) {
+                revert StorageByteView.ErrReadState(key);
+            }
             result.items[n] = bytes32(uint256(ordinal));
             if (hydrated) {
-                StatePointReads.HydratedOccurrence memory occurrence = StatePointReads.hydrateOrdinal(s, ordinal, key);
+                StatePointReads.HydratedOccurrence memory occurrence = StatePointReads.hydrateOrdinal(s, admission, key);
                 bool withdrawn = occurrence.status == 2 && occurrence.revokedAtOrdinal <= result.highWaterOrdinal;
                 rows[n] = HydratedItem(
-                    ordinal,
+                    admission,
                     occurrence.envelopeId,
                     occurrence.leafIndex,
                     occurrence.recordId,
@@ -172,6 +185,7 @@ library StateAuditPages {
                 );
             }
             previous = ordinal;
+            previousAdmission = admission;
             ++next;
             ++n;
             ++result.coverage;
@@ -185,27 +199,44 @@ library StateAuditPages {
 
     // At most 48 bisection probes plus two physical boundary probes. These
     // inspections are not consumed coverage. The sole writer supplies membership.
-    function prefixEnd(StateStore.Store storage s, bytes32 key, StateReadPrimitives.PostingHead memory head, uint64 H)
-        private
-        view
-        returns (uint64 end)
-    {
+    function prefixEnd(
+        StateStore.Store storage s,
+        bytes32 key,
+        StateReadPrimitives.PostingHead memory head,
+        uint64 H,
+        uint64 currentH,
+        bool k10
+    ) private view returns (uint64 end) {
         if (head.count == 0) return 0;
-        if (head.last <= H) return head.count;
+        if (admissionTime(s, key, head.last, currentH, k10) <= H) return head.count;
         uint64 lo;
         uint64 hi = head.count;
         while (lo < hi) {
             uint64 mid = lo + (hi - lo) / 2;
             uint64 ordinal = StateReadPrimitives.postingAt(s, key, head, mid, key);
-            if (ordinal <= H) lo = mid + 1;
+            if (admissionTime(s, key, ordinal, currentH, k10) <= H) lo = mid + 1;
             else hi = mid;
         }
         end = lo;
-        if (end > 0 && StateReadPrimitives.postingAt(s, key, head, end - 1, key) > H) {
+        if (
+            end > 0
+                && admissionTime(s, key, StateReadPrimitives.postingAt(s, key, head, end - 1, key), currentH, k10) > H
+        ) {
             revert StorageByteView.ErrReadState(key);
         }
-        if (end < head.count && StateReadPrimitives.postingAt(s, key, head, end, key) <= H) {
+        if (
+            end < head.count
+                && admissionTime(s, key, StateReadPrimitives.postingAt(s, key, head, end, key), currentH, k10) <= H
+        ) {
             revert StorageByteView.ErrReadState(key);
         }
+    }
+
+    function admissionTime(StateStore.Store storage s, bytes32 key, uint64 physical, uint64 currentH, bool k10)
+        private
+        view
+        returns (uint64)
+    {
+        return k10 ? StateReadPrimitives.firstBindingAdmission(s, physical, currentH, key) : physical;
     }
 }

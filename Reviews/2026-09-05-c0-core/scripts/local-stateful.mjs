@@ -46,6 +46,8 @@ function immutableNames(artifact) {
     const info = JSON.parse(readFileSync(join(ROOT, 'out/build-info', name), 'utf8'));
     const compiled = info.output?.contracts?.['test/StatefulHarness.sol']?.StatefulHarness;
     if (compiled?.evm?.bytecode?.object !== artifact.bytecode.object.replace(/^0x/, '')) continue;
+    if (compiled.evm.deployedBytecode.object !== artifact.deployedBytecode.object.replace(/^0x/, '')) continue;
+    if (JSON.stringify(compiled.evm.deployedBytecode.immutableReferences) !== JSON.stringify(artifact.deployedBytecode.immutableReferences)) continue;
     const ast = info.output?.sources?.['test/StatefulHarness.sol']?.ast;
     if (ast) return Object.fromEntries(ast.nodes.find(n => n.name === 'StatefulHarness').nodes.filter(n => n.mutability === 'immutable').map(n => [String(n.id), n.name]));
   }

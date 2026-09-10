@@ -61,7 +61,12 @@ function link(bytecode,addresses = {}, expected = []) {
 function compilerEvidence(profile) {
   const coreName = profileMap[profile].core;
   const a = artifact(coreName);
-  const info = readdirSync(join(ROOT,'out/build-info')).map(n => JSON.parse(readFileSync(join(ROOT,'out/build-info',n),'utf8'))).find(j => j.output?.contracts?.['src/'+coreName+'.sol']?.[coreName]?.evm?.bytecode?.object === a.bytecode.object.replace(/^0x/,''));
+  const info = readdirSync(join(ROOT,'out/build-info')).map(n => JSON.parse(readFileSync(join(ROOT,'out/build-info',n),'utf8'))).find(j => {
+    const compiled = j.output?.contracts?.['src/'+coreName+'.sol']?.[coreName]?.evm;
+    return compiled?.bytecode?.object === a.bytecode.object.replace(/^0x/,'')
+      && compiled.deployedBytecode.object === a.deployedBytecode.object.replace(/^0x/,'')
+      && JSON.stringify(compiled.deployedBytecode.immutableReferences ?? {}) === JSON.stringify(a.deployedBytecode.immutableReferences ?? {});
+  });
   assert(info,'matching full compiler output');
   const names = {};
   function visit(node) { if (!node || typeof node !== 'object') return; if(node.mutability === 'immutable') names[node.id]=node.name; for (const v of Object.values(node)) if(typeof v === 'object') Array.isArray(v) ? v.forEach(visit) : visit(v); }

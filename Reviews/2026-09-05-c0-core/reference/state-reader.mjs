@@ -60,7 +60,8 @@ function occurrenceKeys(e) {
 }
 
 /** Fold checked, origin-contiguous admission rows; not an authority verifier. */
-export function foldAdmissions(entries, ids) {
+export function foldAdmissions(entries, ids, scopeLayout = 0) {
+  assert(scopeLayout === 0 || scopeLayout === 1, 'explicit supported scope layout');
   const bindings = new Map(), histories = new Map(), scopes = new Map(), lifecycle = new Map(), postings = new Map(), bySource = new Map();
   function append(key, ordinal, audit = false) {
     const p = postings.get(key) ?? { ordinals: [], live: 0n, audit };
@@ -85,7 +86,12 @@ export function foldAdmissions(entries, ids) {
     if (fx.kind === 1 || fx.kind === 2) {
       const old = bindings.get(fx.key);
       assert.equal(fx.predecessor && source(fx.predecessor), old?.source ?? null, 'Binding predecessor');
-      if (!old) { const xs = scopes.get(fx.scope) ?? []; xs.push(e.ordinal); scopes.set(fx.scope, xs); append(pk(Z, 10, 0, fx.scope), e.ordinal, true); }
+      if (!old) {
+        const physical = scopeLayout === 1 ? BigInt(bindings.size + 1) : e.ordinal;
+        assert(physical > 0n && physical < M48, 'scope u48 guard');
+        const xs = scopes.get(fx.scope) ?? []; xs.push(physical); scopes.set(fx.scope, xs);
+        append(pk(Z, 10, 0, fx.scope), physical, true);
+      }
       bindings.set(fx.key, { state: fx.kind === 1 ? 1 : 2, revision: (old?.revision ?? 0n) + 1n, ordinal: e.ordinal, targetKind: fx.targetKind, target: fx.target, targetLeaf: fx.targetLeaf, cause: fx.kind === 2 ? 1 : 0, source: src });
       history(fx.key, e.ordinal);
     } else if (fx.kind === 3) {
@@ -139,6 +145,12 @@ export async function collectState({ rpc, iface, expected }, { blockTag = 'lates
   };
   for (const [name, c] of Object.entries(expected.components)) s.components[name] = { address: c.address, code: await get('eth_getCode', [c.address, pin]), pin: basis.hash };
   for (const name of ['preparationHelper', 'preparationCodehash', 'admissionLibrary', 'admissionCodehash']) s.getters[name] = await call(name);
+  if (iface.getFunction('scopeLayout') && expected.scopeLayout === undefined) incomplete('comparison host requires explicit expected scope layout');
+  // Old hosts have no selector and retain their original mode-0 contract.
+  // Any explicitly selected comparison host must expose the pinned discriminator.
+  const observedScopeLayout = expected.scopeLayout === undefined ? 0n : BigInt(await call('scopeLayout'));
+  assert(observedScopeLayout === 0n || observedScopeLayout === 1n, 'explicit supported scope layout');
+  s.scopeLayout = Number(observedScopeLayout);
   s.counts = await call('counts'); assert.equal(s.counts.length, 8);
   const counts = s.counts.map(BigInt), rows = counts.reduce((a, n) => a + n, 0n);
   if (counts.some(n => n > caps.rows) || rows > caps.rows || rows * 2n > caps.work - stats.work) incomplete('inflated inventory/remaining-work budget');
@@ -192,6 +204,9 @@ function legacyBatchPolicy({ row, revision }, expected) {
 }
 function reconstruct(s, expected, batchPolicy = legacyBatchPolicy) {
   if (!s?.complete || !s.basis) incomplete('incomplete snapshot');
+  const scopeLayout = expected.scopeLayout ?? 0;
+  assert(scopeLayout === 0 || scopeLayout === 1, 'explicit supported scope layout');
+  equal(s.scopeLayout ?? 0, scopeLayout, 'pinned scope layout');
   const basis = s.basis;
   for (const k of ['source', 'core', 'chainId']) equal(basis[k], expected[k], 'basis ' + k);
   assert(/^0x[0-9a-f]{64}$/i.test(basis.hash) && BigInt(basis.number) >= 0n, 'block pin');
@@ -297,7 +312,7 @@ function reconstruct(s, expected, batchPolicy = legacyBatchPolicy) {
   equal(s.types.map(x => x.id), typeOrder, 'complete ordered Type inventory'); equal(s.records.map(x => x.id), recordOrder, 'complete ordered Record inventory');
   equal(s.envelopes.map(x => x.id), envelopeOrder, 'complete ordered Envelope inventory'); equal(s.principals.map(x => x.id), principalOrder, 'complete ordered Principal inventory');
   for (const x of s.principals) equal(x.row, principals.get(x.id), 'Principal first admission');
-  const fold = foldAdmissions(entries, active), actualLife = new Map(s.occurrences.map(x => [x.id, x.row]));
+  const fold = foldAdmissions(entries, active, scopeLayout), actualLife = new Map(s.occurrences.map(x => [x.id, x.row]));
   const expectedSources = [];
   for (const [env, value] of envelopes) for (let leaf = 0; leaf < value.vector.length; leaf++) {
     const src = env + ':' + leaf; expectedSources.push(src); const life = fold.lifecycle.get(src);
