@@ -418,7 +418,11 @@ async function tagsFor(rows) {
   const byNode = new Map();
   for (const row of rows) {
     const result = await acquire(() => openTags(scope, { mountId: config.mounts[$('lens').value], nodeId: row.value.nodeId, tagIds: [t] }));
-    byNode.set(row.value.nodeId, result.outcome === 'FOUND' && result.value.current.some(c => c.active));
+    // UNKNOWN is not "does not carry this tag". Collapsing it to false would
+    // silently drop an unreadable file out of a filtered view, which is the
+    // filter asserting an absence it never established.
+    if (result.outcome !== 'FOUND') throw Error('tag state unreadable for ' + row.value.name + ': ' + (result.reason ?? result.outcome));
+    byNode.set(row.value.nodeId, result.value.current.some(c => c.active));
   }
   return byNode;
 }
@@ -744,7 +748,13 @@ function renderRevisions(body, row, revisions) {
   section.append(ul); body.append(section);
 }
 function renderHistory(body, history) {
-  if (history.outcome !== 'FOUND' || !history.value.timeline.length) return;
+  if (history.outcome !== 'FOUND') {
+    const section = document.createElement('section');
+    section.append(text('h3', 'Name timeline'));
+    section.append(text('p', 'The name history could not be read (' + (history.reason ?? history.outcome) + '). This is NOT the same as having no history.', 'row-meta'));
+    body.append(section); return;
+  }
+  if (!history.value.timeline.length) return;
   const section = document.createElement('section');
   const details = document.createElement('details');
   details.append(text('summary', 'Name timeline (' + history.value.timeline.length + ' events)'));
@@ -756,8 +766,13 @@ function renderTags(body, row, tags) {
   const section = document.createElement('section');
   section.append(text('h3', 'Tags'));
   const list = document.createElement('div'); list.className = 'tags';
-  const active = tags.outcome === 'FOUND' ? tags.value.current.filter(t => t.active) : [];
   const label = id => (config.knownTags ?? []).find(t => tagId(t) === id) ?? short(id);
+  if (tags.outcome !== 'FOUND') {
+    // Unreadable tag state must never render as "no tags".
+    list.append(text('span', 'Tags could not be read here (' + (tags.reason ?? tags.outcome) + '). This is NOT the same as having no tags.', 'row-meta'));
+    section.append(list); body.append(section); return;
+  }
+  const active = tags.value.current.filter(t => t.active);
   if (!active.length) list.append(text('span', 'No current tags from the trusted sources.', 'row-meta'));
   for (const t of active) {
     const chip = text('span', label(t.tagId) + ' · by ' + (t.principal === config.authors.A ? 'A' : t.principal === config.authors.B ? 'B' : short(t.principal)), 'tag-chip');
