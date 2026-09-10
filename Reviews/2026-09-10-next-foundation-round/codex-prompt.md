@@ -1,8 +1,12 @@
 # Codex prompt — affordable, programmable and durable EFS foundation
 
-**Status:** ready-to-send mission; execution has not started
+**Status:** superseded launch prompt; never sent or executed
 
-#status/handoff #kind/prompt #repo/planning #topic/efsv2
+#status/superseded #kind/prompt #repo/planning #topic/efsv2
+
+> Do not run unchanged. The replacement split and retained requirements are in
+> [[Reviews/2026-09-10-foundation-reply-after-economics]]. Original text follows
+> for comparison, not as an active assignment.
 
 Act as the EFS v2 PM and engineering coordinator. Implement and validate the
 next useful reversible foundation experiments, refine the designs from evidence,

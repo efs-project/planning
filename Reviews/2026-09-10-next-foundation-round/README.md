@@ -5,6 +5,11 @@
 
 #status/done #kind/review #repo/planning #topic/efsv2
 
+> **Subsequent intake, 2026-09-10:** neither prompt below was sent or run.
+> [[Reviews/2026-09-10-foundation-reply-after-economics]] reviews Fable's later
+> economics/index/tag work and replaces this execution split. Keep the original
+> intake below as dated evidence; do not launch these prompts unchanged.
+
 ## Recommendation
 
 Run [[fable-prompt|Fable's usable-reader and enumeration mission]] alongside

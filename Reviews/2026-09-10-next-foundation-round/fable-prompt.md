@@ -1,8 +1,12 @@
 # Fable prompt — useful, hard-to-misuse Files and bounded current browsing
 
-**Status:** ready-to-send mission; execution has not started
+**Status:** superseded launch prompt; never sent or executed
 
-#status/handoff #kind/prompt #repo/planning #topic/efsv2
+#status/superseded #kind/prompt #repo/planning #topic/efsv2
+
+> Do not run unchanged. The replacement split and retained requirements are in
+> [[Reviews/2026-09-10-foundation-reply-after-economics]]. Original text follows
+> for comparison, not as an active assignment.
 
 Work with Codex to turn the new EFS v2 design requirements into a more useful,
 less brittle prototype. Use your engineering judgment, independent reviewers

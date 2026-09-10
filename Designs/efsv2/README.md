@@ -12,10 +12,11 @@ without passing the greenfield requirements and product traces.
 
 **2026-09-10: [[data-model-readiness|Capability and build-readiness map]]** is
 the short answer to what useful peer features EFS covers and what remains.
-The newer [[Reviews/2026-09-10-next-foundation-round/README|Fable intake and two parallel missions]]
-records `0132e35`, source-confirmed silent-absence repairs, a concrete chunk-cost
-discrepancy and the next measured comparisons. Those missions are ready-to-send
-prompts, not newly executed prototype evidence.
+The latest [[Reviews/2026-09-10-foundation-reply-after-economics|reply after Fable's economics/index/tag work]]
+reviews `cb6e76e`, supports a revised prototype split and identifies the tag/placement,
+Lens-filter, K10 ordinal and coverage tests that must accompany it. It retires
+the unused [[Reviews/2026-09-10-next-foundation-round/README|earlier launch prompts]].
+This is reviewed planning; no new runtime experiment ran in either intake.
 [[programmable-type-acceptance]] now has separate lab evidence at `e358ad66`;
 Fable's `5ec070ce` repairs internal export integrity and adds a sponsored wallet
 harness. Neither closes the joined foundation. The
