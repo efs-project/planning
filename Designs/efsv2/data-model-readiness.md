@@ -18,7 +18,10 @@ This map connects [[system-constitution]], [[layered-type-system-and-data-abi]],
 [[testnet-files-mvp-plan]]. It does not replace their detailed contracts.
 Peer evidence: [[Reviews/2026-09-09-mud-and-validation-research]]. Current
 source reconciliation and expert research:
-[[Reviews/2026-09-10-foundation-design-review]]. The earlier
+[[Reviews/2026-09-10-foundation-design-review]]. The subsequent
+[[Reviews/2026-09-10-next-foundation-round/README|Fable intake and parallel missions]]
+reconciles the later `0132e35` report and source repairs; its economic claims
+still require reproduction. The earlier
 [[Reviews/2026-09-10-data-readiness-reconciliation]] remains dated evidence,
 including the old export defect; it is not the latest implementation inventory.
 
@@ -30,9 +33,9 @@ remaining capabilities.
 
 ## Capability ledger
 
-Evidence now distinguishes the PM design baseline `cf352ed6`, Fable Files
-`5ec070ce` and standalone acceptance `e358ad66`; full source hashes and paths
-are in the foundation review. This refresh is source inspection and review of
+Evidence now distinguishes the PM design baseline `2dce19a8`, Fable Files
+`0132e35` and standalone acceptance `e358ad66`; full source hashes and paths
+are in the foundation review and subsequent intake. This refresh is source inspection and review of
 retained results, not a fresh runtime rerun or merge of the three branches.
 Designed, demonstrated separately, and demonstrated together are different
 states; no row certifies feature parity or production readiness.
@@ -45,14 +48,14 @@ states; no row certifies feature parity or production readiness.
 | Authority, actors and delegated sessions — EAS/MUD | Realm authority + reusable scoped grants + SDK wallet transport | Files has an EIP-1193 harness with reserved first-claim identity; the design already calls for derived account Principals. Two-user Lens onboarding, actual wallet software, smart accounts, prospective recovery and scoped delegation remain unjoined. |
 | Atomic graphs, batches, idempotent retry | Core acceptance and explicit application transaction rules | Standalone rule/payment/Core-nonce rollback and duplicate execution exist. Preserve original-execution provenance on retry and join actual Files state. Outer transaction nonces/fees/delegation processing and earlier staging are outside rollback. |
 | Compatibility and unknown-safe editing — AT Protocol | Exact Type/View contracts + SDK linter/editors | Standalone old-editor refusal exists. Useful additive reading/preservation still needs a joined trace. Unknown data may be preserved; unknown permission restrictions must not be ignored when granting authority. |
-| Tags, backlinks, sets and qualified filters | Ordinary relation Types + Core declared indexes + Lens | Local tag/untag/positive filtering exists, but current renderTags maps UNKNOWN to “No current tags” (source-confirmed, not reproduced in this refresh). Prove checked consumer composition, mixed image/video targets and negative filtering over a closed universe. |
+| Tags, backlinks, sets and qualified filters | Ordinary relation Types + Core declared indexes + Lens | `5037910` repairs silent unreadable tag display/filter/history paths; source inspected, suites not rerun in this intake. Aggregate composition and real consumer type checking remain open. Prove mixed image/video targets and negative filtering over a closed universe. |
 | Index evolution, hot values and churn — MUD index modules | Core bounded query/coverage law; SDK pages; optional accelerators | 512 lifetime/48 live names require 2,988 requests in the retained run. Compare aggregate audit pages, current-candidate indexes and optional local acceleration; aggregation alone is not a lifetime-work fix. Preserve masks, history and generation/backfill coverage. |
 | Reactive synchronization and recovery — MUD | SDK browser-local snapshot/delta cache + replaceable services | Qualified readers exist; complete reorg/provider-switch/backfill convergence is not demonstrated here. Never make an EFS server authoritative or mandatory for the static SPA. |
 | Generated APIs, package composition and generic inspection — MUD/ComposeDB | One SDK Type-package workflow + Explorer | Bounded codegen and static inspection now exist separately. Integrate into the existing five seams and Files/Explorer; ordinary data access must retain the qualifications its claims need. |
 | Provider-independent bytes and complete export — IPLD/AT Protocol | Exact content/closure profiles + SDK exporter/verifier | V1 export repairs internal integrity. Actual checks do not establish selected currency/listing completeness or offline authorship. Add authenticated query reconstruction and nested recovery; a genuine header does not authenticate fabricated RPC answers. |
 | Revocation, withdrawal, expiry and deletion | Core lifecycle + explicit application and Files semantics | Local remove/restore works. Test issuer revocation versus holder rejection versus carriage withdrawal; none means erasing public history. |
 | Private data and publication safety | Encrypted-body profile + client/OS sensitivity and key handling | Detailed boundary exists; public browser is not private-folder evidence. Unsupported encrypted mounts remain opaque/unsupported, never falsely empty. |
-| Affordable storage and recoverable custody | State-readable canonical graph plus replaceable bulk-byte carriers | Roughly 8.7M-gas routed create is not all-in carriage: byte staging is separate. Decompose metadata/index/Binding cost, staging, reads, proof retention and recovery before choosing a carrier or changing Core's read promise. |
+| Affordable storage and recoverable custody | State-readable canonical graph plus replaceable bulk-byte carriers | Fable's later residual-cost/50x estimates lack retained attribution, and the reported fresh-chunk cost does not fit the inspected storage path. Reproduce exact fresh/restage/batch transactions, then compare compact storage, shared context and immutable code-backed bodies before availability-changing arms. Include indexes, staging, reads and recovery; preserve future generic contract reads. |
 | Upgradeability and long-lived history | Versioned Realm implementation/activation and state-readable receipts | Populated U3 repeat upgrade passes locally. Historic acceptance still needs exact rule/config evidence; retained privileged fixture entrypoints remain declared exceptions, not production defaults. |
 | Host filesystem usability | Shared Files reader plus read-only host adapters | Linux/macOS/Windows outcome is required. This browser pass does not replace the three-host golden view test. |
 | EAS import/export and external identifiers | Versioned adapter + explicit loss receipt | Required design seam, not identity-preserving round-trip proof. Preserve original schema/UID/chain evidence and explain missing policy/currentness. |
