@@ -17,7 +17,10 @@ This map connects [[system-constitution]], [[layered-type-system-and-data-abi]],
 [[programmable-type-acceptance]], [[hierarchical-files-and-folders]] and
 [[testnet-files-mvp-plan]]. It does not replace their detailed contracts.
 Peer evidence: [[Reviews/2026-09-09-mud-and-validation-research]]. Current
-prototype verification: [[Reviews/2026-09-10-data-readiness-reconciliation]].
+source reconciliation and expert research:
+[[Reviews/2026-09-10-foundation-design-review]]. The earlier
+[[Reviews/2026-09-10-data-readiness-reconciliation]] remains dated evidence,
+including the old export defect; it is not the latest implementation inventory.
 
 **Current conclusion:** enough structure exists to specify the next bounded
 implementation experiment. Feature-complete data acceptance, authenticated
@@ -27,25 +30,29 @@ remaining capabilities.
 
 ## Capability ledger
 
-Evidence is scoped to the PM design baseline `cce0c730` and Fable's local
-browser checkpoint `92f2d6b`, plus the dated verification linked above. Entries
-are not claims that no uninspected branch has additional work.
+Evidence now distinguishes the PM design baseline `cf352ed6`, Fable Files
+`5ec070ce` and standalone acceptance `e358ad66`; full source hashes and paths
+are in the foundation review. This refresh is source inspection and review of
+retained results, not a fresh runtime rerun or merge of the three branches.
+Designed, demonstrated separately, and demonstrated together are different
+states; no row certifies feature parity or production readiness.
 
 | Capability / useful precedent | Smallest appropriate EFS home | Current evidence and closing test |
 | --- | --- | --- |
-| Reusable exact Types, shape validation and generic contract reads — EAS/MUD | Core plus generated SDK accessors | Structural/index components exist. Generate one developer-authored Type and consume it from an independent contract and browser. |
-| Mandatory arbitrary developer acceptance — EAS resolvers/MUD hooks | Generic guarded Core/Realm extension; ordinary application rule code | Reopened concrete draft, not implemented. Invalid Outfit and paid unique issuance must fail through every accepting path. |
+| Reusable exact Types, shape validation and generic contract reads — EAS/MUD | Core plus generated SDK accessors | Structural/index components plus standalone generated TS/Solidity and an independent consumer exist. Join a developer-authored Type to the actual Files Core; the flat-word lab is not the full layered Type language. |
+| Mandatory arbitrary developer acceptance — EAS resolvers/MUD hooks | Generic guarded Core/Realm extension; ordinary application rule code | Demonstrated separately: Type-committed rules, explicit activation, Outfit/Equip and paid unique issuance. Join the upgradeable Core, Bindings and indexes; inventory every path claiming the same acceptance, including privileged migration. |
 | Mutable state and application logic — MUD tables/Systems | Immutable Records + authored current Bindings + permission-limited controllers | Files lifecycle works locally. Run RPG state transition, race/CAS, rule update and grandfathering without a game-specific Core primitive. |
-| Authority, actors and delegated sessions — EAS/MUD | Realm authority + reusable scoped grants + SDK wallet transport | Fable's preclaimed local accounts sign routed intents. First-claim squatting, smart accounts, recovery and real delegated sessions are not closed by that fixture. |
-| Atomic graphs, batches, idempotent retry | Core acceptance and explicit application transaction rules | Bounded local multi-leaf writes exist. Add rule/payment rollback, duplicate replay and ambiguous-submission recovery. A multi-transaction upload is not one atomic transaction. |
-| Compatibility and unknown-safe editing — AT Protocol | Exact Type/View contracts + SDK linter/editors | Written directional rules exist. Old editor must preserve unknown fields/variants or refuse; additive labels alone do not prove compatibility. |
-| Tags, backlinks, sets and qualified filters | Ordinary relation Types + Core declared indexes + Lens | Local tag/untag/filter works. Prove generic mixed image/video targets, issuer attribution, retraction, conflicts and negative filtering under complete coverage. No untyped identity coercion. |
-| Index evolution, hot values and churn — MUD index modules | Core bounded query/coverage law; SDK pages; optional accelerators | Local churn completes at measured bounds, but hundreds of lifetime names cost thousands of RPC requests. Compare contract-side page aggregation before inventing more client machinery. |
+| Authority, actors and delegated sessions — EAS/MUD | Realm authority + reusable scoped grants + SDK wallet transport | Files has an EIP-1193 harness with reserved first-claim identity; the design already calls for derived account Principals. Two-user Lens onboarding, actual wallet software, smart accounts, prospective recovery and scoped delegation remain unjoined. |
+| Atomic graphs, batches, idempotent retry | Core acceptance and explicit application transaction rules | Standalone rule/payment/Core-nonce rollback and duplicate execution exist. Preserve original-execution provenance on retry and join actual Files state. Outer transaction nonces/fees/delegation processing and earlier staging are outside rollback. |
+| Compatibility and unknown-safe editing — AT Protocol | Exact Type/View contracts + SDK linter/editors | Standalone old-editor refusal exists. Useful additive reading/preservation still needs a joined trace. Unknown data may be preserved; unknown permission restrictions must not be ignored when granting authority. |
+| Tags, backlinks, sets and qualified filters | Ordinary relation Types + Core declared indexes + Lens | Local tag/untag/positive filtering exists, but current renderTags maps UNKNOWN to “No current tags” (source-confirmed, not reproduced in this refresh). Prove checked consumer composition, mixed image/video targets and negative filtering over a closed universe. |
+| Index evolution, hot values and churn — MUD index modules | Core bounded query/coverage law; SDK pages; optional accelerators | 512 lifetime/48 live names require 2,988 requests in the retained run. Compare aggregate audit pages, current-candidate indexes and optional local acceleration; aggregation alone is not a lifetime-work fix. Preserve masks, history and generation/backfill coverage. |
 | Reactive synchronization and recovery — MUD | SDK browser-local snapshot/delta cache + replaceable services | Qualified readers exist; complete reorg/provider-switch/backfill convergence is not demonstrated here. Never make an EFS server authoritative or mandatory for the static SPA. |
-| Generated APIs, package composition and generic inspection — MUD/ComposeDB | One SDK Type-package workflow + Explorer | Handwritten Files helpers and existing five SDK seams are useful controls, not generic codegen. New Type must be inspectable without a custom screen. |
-| Provider-independent bytes and complete export — IPLD/AT Protocol | Exact content/closure profiles + SDK exporter/verifier | Live multichunk byte verification works. Current offline export verifier overclaims integrity; repair proof chain before calling it authenticated recovery. |
+| Generated APIs, package composition and generic inspection — MUD/ComposeDB | One SDK Type-package workflow + Explorer | Bounded codegen and static inspection now exist separately. Integrate into the existing five seams and Files/Explorer; ordinary data access must retain the qualifications its claims need. |
+| Provider-independent bytes and complete export — IPLD/AT Protocol | Exact content/closure profiles + SDK exporter/verifier | V1 export repairs internal integrity. Actual checks do not establish selected currency/listing completeness or offline authorship. Add authenticated query reconstruction and nested recovery; a genuine header does not authenticate fabricated RPC answers. |
 | Revocation, withdrawal, expiry and deletion | Core lifecycle + explicit application and Files semantics | Local remove/restore works. Test issuer revocation versus holder rejection versus carriage withdrawal; none means erasing public history. |
 | Private data and publication safety | Encrypted-body profile + client/OS sensitivity and key handling | Detailed boundary exists; public browser is not private-folder evidence. Unsupported encrypted mounts remain opaque/unsupported, never falsely empty. |
+| Affordable storage and recoverable custody | State-readable canonical graph plus replaceable bulk-byte carriers | Roughly 8.7M-gas routed create is not all-in carriage: byte staging is separate. Decompose metadata/index/Binding cost, staging, reads, proof retention and recovery before choosing a carrier or changing Core's read promise. |
 | Upgradeability and long-lived history | Versioned Realm implementation/activation and state-readable receipts | Populated U3 repeat upgrade passes locally. Historic acceptance still needs exact rule/config evidence; retained privileged fixture entrypoints remain declared exceptions, not production defaults. |
 | Host filesystem usability | Shared Files reader plus read-only host adapters | Linux/macOS/Windows outcome is required. This browser pass does not replace the three-host golden view test. |
 | EAS import/export and external identifiers | Versioned adapter + explicit loss receipt | Required design seam, not identity-preserving round-trip proof. Preserve original schema/UID/chain evidence and explain missing policy/currentness. |
@@ -92,24 +99,34 @@ policy require their own checks. Missing evidence remains unknown.
 
 ## Ordered build-readiness gates
 
-1. **Resolve the acceptance contract in a disposable extension.** Compare the
-   recommended mandatory-Type rule and mandatory-profile pair using one Outfit
-   and one paid/unique issuance. Produce real no-bypass and rollback evidence.
-2. **Generate and consume one ordinary Type.** A separately written Solidity
-   consumer and the browser use generated helpers. Include old-editor/new-Type
-   and malformed-input vectors. This exercises simplicity and expressiveness.
-3. **Repair export and make trust explicit.** Recompute content, Type, Record,
-   occurrence and selection commitments; separate self-consistency from a
-   verified chain/authority basis. Add tamper and multichunk recovery tests.
-4. **Replace simulated funding/approval with one real path.** Select either
-   sponsored signed intents or a clearly labeled direct-transaction path;
-   count actual wallet requests, staging transactions, cancellation and setup.
-   No hidden typed-signature-plus-transaction fallback. Session grants are a
-   separate scoped test, not inferred from an unlocked fixture key.
-5. **Bound the useful read path and recovery.** Compare canonical directory
-   page aggregation, current versus historical inventory, caching and transport
-   batching on the same churn workload; prove snapshot/delta/backfill/reorg
-   convergence and partial-result honesty before claiming scale.
+The integrated recommendation remains a generated, contract-validated Note used
+by two fresh users. The foundation review sharpens the parallel design tests;
+this list is not permission to begin runtime work in a research-only session.
+
+1. **Join acceptance and generated consumption to the actual Core.** Preserve
+   the standalone Outfit/paid-claim controls; inventory direct, relayed, imported,
+   bootstrap and upgraded paths. Check exact rule/activation, original execution
+   evidence and rollback scope. Profile-pair acceptance remains a comparison.
+2. **Make qualified composition the ordinary path.** Validate constructors and
+   serialized continuation; attack unknown tags, counts, filtered exports and
+   negative queries. Then demonstrate additive Note reading, safe old editing
+   and independent Solidity/browser agreement through the existing SDK seams.
+3. **Replace reserved identity with genuine onboarding.** Two fresh authors and
+   deliberate Lens inclusion; actual wallet software and separately counted
+   setup/sponsor behavior. Compare prospective recovery and scoped delegation;
+   refuse unknown restrictions. No silent signature-plus-transaction fallback.
+4. **Compare current reads and all-in costs.** Fixed live set with increasing
+   distinct-role history; aggregate pages versus current candidates; retained
+   whiteouts; index backfill/reorg/rebuild. Count inspected work, writes, bytes,
+   proof material and first useful/complete latency, not only RPC requests.
+5. **Authenticate selected-state recovery.** Nested export with independent
+   anchor policy, required state/code/evidence and selection/coverage interpreter.
+   Test coherent omission, stale revisions, real-header/fake-answer attacks and
+   loss of original publisher/provider. Destination reacceptance stays distinct.
+6. **Join private visibility and recovery.** Encrypted subtree must remain
+   opaque when unsupported/locked; private completeness names its manifest and
+   scope. Separately restore signing authority, ciphertext and decryption keys;
+   measure residual metadata leakage and any explicitly selected proof profile.
 
 Each gate produces a small reviewed change, independent read-back and a short
 user-visible trace. Reuse Fable's working browser and retained C0 controls.

@@ -12,13 +12,15 @@ without passing the greenfield requirements and product traces.
 
 **2026-09-10: [[data-model-readiness|Capability and build-readiness map]]** is
 the short answer to what useful peer features EFS covers and what remains.
-[[programmable-type-acceptance]] replaces the blanket admission-callback
-exclusion with a concrete mandatory developer-validation comparison. Fable's
-`92f2d6b` browser passes fresh local lifecycle/static/completeness checks;
-[[Reviews/2026-09-10-data-readiness-reconciliation|independent reconciliation]]
-also finds gaps in offline export verification, fixture Principal onboarding,
-real-wallet funding/approval, and the claimed scope of privileged writes.
-These are bounded prototype findings, not a permanent implementation verdict.
+[[programmable-type-acceptance]] now has separate lab evidence at `e358ad66`;
+Fable's `5ec070ce` repairs internal export integrity and adds a sponsored wallet
+harness. Neither closes the joined foundation. The
+[[Reviews/2026-09-10-foundation-design-review|expert foundation review]] integrates
+qualified read composition, current-versus-history enumeration, derived identity
+and recovery, exact rule activation, private visibility, all-in costs and
+authenticated recovery into the drafts. Its conclusions distinguish source
+inspection, retained test results and unrun comparisons. No permanent protocol,
+new repository, main merge or public deployment is authorized by that review.
 
 **2026-09-08: [[testnet-files-mvp-plan|The testnet Files MVP build plan]]** is
 the short path from the current prototypes to a browser the owner can verify:

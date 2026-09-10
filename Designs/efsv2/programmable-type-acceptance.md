@@ -72,11 +72,35 @@ or a policy administrator are declared dependencies of the rule, not changes
 to its bytes. If a rule delegates future policy to an administrator, that power
 must be visible; an immutable Type does not make that policy immutable.
 
+Pinning is an enforcement contract, not trusting an executor's ID getter. A
+binding profile names which runtime, immutable configuration, proxy/dependency
+bindings and execution environment it actually verifies. It must not claim a
+complete dependency closure by inspecting a top-level codehash or a self-reported
+manifest. General developer code can depend on local mutable state; accepting it
+under an explicit dependency policy does not certify chain-independent results
+or make those dependencies immutable. Unsupported verification profiles refuse
+their claimed grade, rather than silently falling back to address equality.
+
+Distinguish rule rejection, execution failure/resource exhaustion and missing
+binding evidence in diagnostics; all refuse acceptance, but they establish
+different facts. Compare moving operational gas caps into the exact activation
+instead of permanent Type meaning. Arbitrary EVM programs can observe gas and
+fork-specific behavior, so that move is not automatically semantics-preserving:
+the actual execution profile and resource policy stay pinned in plans/receipts.
+No operational limit or identity preimage is changed by this recommendation.
+
 Changing fixed rule meaning creates a new RuleId and, in arm A, a new exact
 Type. Changing an executor/configuration binding creates a new activation and
 requires the rule's binding policy to permit it. Historical receipts retain the
 old activation. A destination Realm rechecks local conditions or stores the
 source receipt as source-qualified evidence; copying bytes is not reacceptance.
+
+Callbacks themselves are not incompatible with portability. EAS supplies a
+useful mandatory-acceptance precedent; its stored old attestations are not
+automatically revalidated by a changed resolver. The EFS obligation is to retain
+exact historical rule/execution evidence and avoid treating a present address as
+timeless meaning. See the source-qualified comparison and EAS correction in
+[[Reviews/2026-09-10-foundation-design-review]].
 
 ### One guarded acceptance boundary
 
@@ -119,8 +143,13 @@ of EFS authority. Cross-chain effects are outside this atomicity guarantee.
 Every stateful plan accounts for all supplied value. A duplicate carrying fresh
 value is rejected or returns it under the explicit policy, never silently traps
 or transfers it. Specify unused allocation and refunds; test insufficient/excess
-value and reverting/reentrant refund recipients. Failed batches restore all
-participating balances except transaction gas.
+value and reverting/reentrant refund recipients. Failed acceptance reverts
+participating application payments, reservations, Core replay nonces and
+index/Binding effects within the same reverting execution boundary. Outer
+transaction nonce/delegation processing, protocol fees and previously committed
+staging remain outside that guarantee. In particular, EIP-7702 pre-execution
+delegation processing can persist despite execution failure; wallet/account-
+abstraction adapters must state their own outer accounting boundary.
 
 ### Batch observation and idempotence
 
@@ -141,8 +170,10 @@ occurrence, Realm, author, payment, or action still runs required acceptance.
 An exact duplicate of an already accepted operation returns its original result
 only after operation identity is established; it must neither accept a new
 operation nor charge again. Expired or revoked authority is not revived by a
-cached body check. Failed later items roll back earlier payment/reservation,
-nonces, accepted receipts, Bindings and index effects together.
+cached body check. Failed later items roll back earlier application payments/
+reservations, Core replay nonces, accepted receipts, Bindings and index effects
+together within that execution boundary; they do not undo external staging or
+transaction-level processing described above.
 
 A Type rule gates its declared acceptance events, not every later reference to
 its Records. An application-effective transition such as equip requires a new
@@ -236,6 +267,15 @@ All feed existing V2-E8/E5/F1 gates; none is a new immediate owner questionnaire
 - [ ] At least one round of `#status/review` with another agent or human comment
 
 ## Implementation notes
+
+The standalone `codex/programmable-acceptance` experiment at
+`e358ad66bb6471e1d89b1327d03c5ba7a286b116` demonstrates the Type-committed-rule
+arm, explicit activations, ordered rollback, generated TS/Solidity consumers
+and safe old-editor refusal. Its `Reviews/2026-09-10-programmable-acceptance/`
+README, results and design-followthrough are separate-branch evidence, not
+integration into the upgradeable Files Core. The profile-pair arm remains a
+comparison, general dependency equivalence is not proved, and useful additive
+editing is not established by refusal. [[data-model-readiness]] tracks the join.
 
 This changes the next design comparison, not the frozen meaning of any existing
 prototype Type. Retain existing C0/Fable evidence and use a named new experiment

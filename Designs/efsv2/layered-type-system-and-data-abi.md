@@ -416,6 +416,15 @@ reusable `ConsumerProfile` Record.
 This separation is the largest usability cost of Architecture C and the main
 reason Architecture A remains a control arm.
 
+Query results and their qualifications form one consumption contract, not a
+plain array with optional diagnostics. The composition laws in
+[[core-architecture-candidate#Qualified composition and independent verification]]
+apply to generated TS/Solidity readers, filters, joins and exports. In particular,
+complete candidate enumeration does not imply complete resolution or predicate
+knowledge. Current-candidate indexes, historical audit inventories and optional
+local accelerators must name which universe they cover. Index installation,
+live-set compaction and completed historical backfill are different events.
+
 An exact-Type QueryProfile cannot by itself claim complete enumeration across
 every Type that implements a View. T4 therefore includes a separate disposable
 `ViewQueryProfile` arm:
@@ -931,6 +940,25 @@ disclosed or proven under a separate bounded proof profile.
 Fail if “encrypted” is presented as graph-private while public Type/ref indexes
 reveal the relationship.
 
+Public ciphertext enumeration cannot establish complete plaintext names, Types,
+tags or absence. A private reader qualifies its result by the authenticated
+manifest/root, selected scope and key-capability epoch, without exposing secret
+capabilities in public receipts. Unsupported encryption, failed decryption,
+incomplete acquisition and a verified empty private manifest are different
+outcomes. Keep Core point results unchanged and carry opacity/support as their
+existing qualification dimensions; do not invent an encrypted-empty shortcut.
+
+Bind encrypted objects to their declared AEAD context and sharing/key epoch;
+rotate future access without claiming to revoke already copied keys/plaintext.
+Randomized encryption can intentionally sacrifice public deduplication and
+stable plaintext-derived IDs. Fields and relationships declared private must not
+be disclosed by public relations, indexes, mixed public/private envelopes, logs
+or diagnostics. The profile explicitly documents residual leakage, including
+update timing, sizes, access patterns and shared funding or recovery relationships;
+encryption alone does not hide these. A proof profile names the hidden-data predicate,
+public inputs, verifier/version and replay domain; ciphertext shape validation
+alone is not proof that hidden application data obeys its developer's rule.
+
 ### Data-science export
 
 Every export has two layers:
@@ -1104,6 +1132,9 @@ possible so the ecosystem is not trapped by one toolchain.
 | Avro | Directional writer/reader schema resolution, aliases, defaults, and explicit unions. | Runtime resolution ambiguity or implicit lossy promotions in state-changing contracts. |
 | IPLD Schemas | Separate logical Type from representation strategy; content-addressed typed links; explicit union representations. | Programmable advanced layouts inside permanent Core. |
 | AT Protocol Lexicon | Shared schemas, generated clients, open/closed unions, and independent application interoperability. | Domain-authority names as durable semantic identity or one network's repository assumptions. |
+| AT Protocol permission evolution | Reject unsupported permission declarations that may contain unknown restrictions. | Treating unknown authorization fields like harmless unknown data fields. |
+| MUD Store and database index practice | Generated typed access, scoped extensions, explicit index maintenance and snapshot/backfill discipline. | Treating a new index as historically complete, whole-array helpers as bounded pages, or a hosted indexer as authority. |
+| Tahoe-LAFS and IPLD CAR | Client-side encryption, explicit capability/retention assumptions and verifiable content-addressed transport. | Equating ciphertext availability with plaintext validity, or an archive container with complete authenticated application state. |
 | WIT / Component Model | Small nominal records/variants/interfaces separated from implementation; generated language bindings. | Treating behavior/API capability Types as ordinary persistent-data Types. |
 | CUE | Constraint unification, closed/open structures, reusable authoring fragments. | General unification or dynamic constraints onchain. Flatten them before publication. |
 | Smithy | Mixins and traits as authoring/codegen tools with a flattened effective model. | Ambient trait precedence or service-specific behavior in Core. |
@@ -1118,6 +1149,10 @@ separate logical and physical layers, explicit directional compatibility,
 unknown preservation, flattened authoring composition, immutable interfaces,
 and generated tooling. The EVM contribution is to make the smallest useful
 subset bounded and contract-readable while leaving rich reasoning outside Core.
+
+The source-grounded [[Reviews/2026-09-10-foundation-design-review|foundation review]]
+maps these lessons to existing design homes and discriminating tests; it does not
+adopt the peer systems' formats, services or privilege models.
 
 ## Required disposable experiments
 
