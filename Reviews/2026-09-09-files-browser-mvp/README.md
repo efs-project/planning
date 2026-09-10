@@ -139,6 +139,21 @@ walkthrough drivable against real local v2 contracts:
   shared scope vs fresh scope, 0/50ms injected delay (loopback only).
 - Screenshots: `evidence/browser/` (exported by the UX suite).
 
+## Economics and index research (2026-09-10)
+
+- [gas-engineering-2026-09-10.md](gas-engineering-2026-09-10.md) — measured
+  cost anatomy of a v2 write (2,838,264 gas / 94 slots for a tag), peer
+  comparison, the 1.26× ablation of the unqueryable posting families, ranked
+  proposals, Merkle findings.
+- [indexing-and-state-2026-09-10.md](indexing-and-state-2026-09-10.md) —
+  the ten posting families in plain terms, the directory-local ordinal that
+  already exists (kind-10 scope list), a costed bitmap index for the owner's
+  four queries on today's and Glamsterdam's gas schedules, the state-tier
+  rule, the MUD verdict (fork `store`, refuse the World), dedup and
+  bytecode-as-storage, and the decisions/clarifications the owner is asked
+  for. Verbatim research strands in
+  [research-2026-09-10/](research-2026-09-10/).
+
 Prior experiments' files and published evidence are untouched; where this
 branch's compatible reader extensions supersede their byte-pins at this
 revision, that is stated here instead of rewriting their history.

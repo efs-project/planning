@@ -102,7 +102,7 @@ export async function withUpgrade(action, { profile = 'base', watchdogMs = 30000
   // EFS_LAB_ANVIL_CORS=1 opts in to cross-origin RPC (default stays --no-cors):
   // the static-hosting browser suite loads the page from another local origin
   // and talks to this node directly, as a deployed page talks to a public RPC.
-  const args=['--host','127.0.0.1','--port',String(port),'--chain-id','31337','--hardfork','cancun','--gas-limit',String(TX_GAS*2n),'--accounts','0',...(process.env.EFS_LAB_ANVIL_CORS==='1'?[]:['--no-cors']),'--silent'];
+  const args=['--host','127.0.0.1','--port',String(port),'--chain-id','31337','--hardfork','cancun','--gas-limit',String(TX_GAS*2n),'--accounts','0',...(process.env.EFS_LAB_ANVIL_CORS==='1'?[]:['--no-cors']),...(process.env.EFS_LAB_ANVIL_STEPS==='1'?['--steps-tracing']:[]),'--silent'];
   const child=spawn('anvil',args,{stdio:'ignore'}); let spawnError;
   child.on('error',e=>{spawnError=e;});
   const url='http://127.0.0.1:'+port, source='managed-anvil:'+url;
