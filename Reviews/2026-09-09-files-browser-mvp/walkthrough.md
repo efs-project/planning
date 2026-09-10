@@ -36,9 +36,16 @@ clearly labeled disposable key; every approval is counted.
 - **New folder** → `vacation` → Approve. Watch the result: "Committed and
   read back at block N" — success is only claimed after an independent
   re-read, never from the transaction receipt alone.
-- Open `vacation`, **New note** → `plan.md`, type some text → Approve twice
-  (one approval publishes the metadata atomically, one stages the bytes —
-  both are counted; nothing is hidden).
+- Open `vacation`, **New note** → `plan.md`, type some text → Approve
+  **once**. That single signed approval covers the whole write: the file
+  record AND its byte commitment. The bytes themselves then stage as
+  permissionless content-addressed transactions (you'll see "Staging bytes:
+  chunk 1 of N…") — they need no further consent because they can only ever
+  match the commitment you already approved. Interrupt it and the file panel
+  offers **Stage missing bytes now**; only the missing chunks are sent.
+- Files are no longer capped at 16 KiB: a note or upload up to 1 MiB is
+  split into 4 KiB chunks under the same single approval, and read back only
+  if every chunk re-hashes into the committed Merkle root.
 - **Reload the page.** Everything is still there — it lives in the local
   contracts, not in the browser.
 - Open `plan.md` → **Edit note** → change the text → Approve. History now
@@ -75,18 +82,26 @@ clearly labeled disposable key; every approval is counted.
   it with no server running:
   `node scripts/verify-export.mjs ~/Downloads/efs-export-*.json`
   — the bytes re-hash offline against their on-chain commitments.
-- In the terminal, type `u` + Enter: the **populated** contracts upgrade
-  U1 → U2 in place (same addresses). Back in the browser hit **Read again**:
-  everything is still there, the footer shows *host revision 2*, old
-  revisions still open, and a new note still works.
+- In the terminal, type `u` + Enter: the **populated** contracts upgrade in
+  place (same addresses, next revision). Back in the browser hit **Read
+  again**: everything is still there, the footer shows the new host revision,
+  old revisions still open, and a new note still works.
+- **Export honesty:** in a folder large enough to paginate, the Export
+  button only appears once the listing reads *Listing complete* — a partial
+  listing can never masquerade as a full copy.
 
 ## What you are looking at (honesty box)
 
 - Guest reads: zero prompts, zero wallet code paths (tests assert it).
-- Writes: **simulated approvals** with disposable local keys plus a synthetic
-  operator co-signature. Authorization and all preconditions (occupied names,
-  stale edits, folder cycles, restore collisions) are enforced **by the
-  router contract**, not the UI — the tests submit around the UI to prove it.
+- Writes: **simulated approvals** with disposable local keys. Each approval
+  is a real EIP-712 author signature verified **on-chain by the Core**
+  (per-account nonce, deadline, executor binding): replaying it, submitting
+  it around the router, or altering the operation are all refused by the
+  contracts, not the UI — the authority suite proves each refusal. The
+  operator key is never served to the browser.
+- All preconditions (occupied names, stale edits, folder cycles, restore
+  collisions) are enforced **by the router contract**, not the UI — the
+  tests submit around the UI to prove it.
 - This is an upgradeable local testnet prototype. No immutable-hyperstructure
   claim, no real wallet, no public deployment, no frozen protocol bytes.
 
@@ -97,6 +112,10 @@ clearly labeled disposable key; every approval is counted.
 | Start (with upgrade key) | `node scripts/run.mjs --upgrade` |
 | Reset | Ctrl+C, then start again |
 | All contract + SDK tests | `node --test test/router.test.mjs test/reader-extensions.test.mjs` |
-| Browser journeys (real Chromium) | `node --test test/journeys.browser.mjs` |
+| Browser journeys (real Chromium) | `node --test --test-force-exit test/journeys.browser.mjs` |
+| Authority gauntlet (impersonation, replay, bypass, chunks) | `node --test test/authority.test.mjs` |
+| Standalone static hosting (generic server + direct RPC) | `node --test --test-force-exit test/static-hosting.browser.mjs` |
+| Completeness regressions (reader + browser copy) | `node --test --test-force-exit test/completeness-regressions.test.mjs test/completeness.browser.mjs` |
+| Churn / larger folders (writes evidence) | `node --test test/churn.perf.mjs` |
 | Verify an export offline | `node scripts/verify-export.mjs <file>` |
 | Router unit build | `cd contracts && forge build` |

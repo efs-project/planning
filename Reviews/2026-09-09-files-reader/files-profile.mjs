@@ -29,6 +29,18 @@ export const purposeAndScope=(kind,root)=>{
 export const ordinaryRecord=(type,body)=>H(hash('efs2/record/1'),type,keccak256(body));
 export const contentDigest=data=>keccak256(concat(['0x00',data]));
 export const byteLength=data=>BigInt(getBytes(data).length);
+export const EMPTY_CONTENT_ROOT=keccak256('0x02');
+// C0ChunkTree fold: pairwise keccak(0x01||L||R), odd node promoted unchanged.
+export function foldChunkLeaves(leaves){
+  if(!leaves.length)return EMPTY_CONTENT_ROOT;
+  let nodes=[...leaves];
+  while(nodes.length>1){
+    const next=[];
+    for(let i=0;i<nodes.length;i+=2)next.push(i+1<nodes.length?keccak256(concat(['0x01',nodes[i],nodes[i+1]])):nodes[i]);
+    nodes=next;
+  }
+  return nodes[0];
+}
 export function nameAssessment(name){
   if(typeof name!=='string')return {status:'MALFORMED',reason:'NAME_TYPE'};
   const n=new TextEncoder().encode(name).length;

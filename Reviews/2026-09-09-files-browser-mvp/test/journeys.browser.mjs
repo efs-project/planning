@@ -41,7 +41,7 @@ test('everyday loop in real Chromium: browse, create, edit, organize, explain, u
   const browser = await chromium.launch({ headless: true, ...(process.env.EFS_LAB_CHROMIUM ? { executablePath: process.env.EFS_LAB_CHROMIUM } : {}) });
   try {
     await withUpgrade(async lab => {
-      const { server } = await startEnvironment(lab, { write: true });
+      const { server, auth } = await startEnvironment(lab, { write: true });
       const context = await browser.newContext({ viewport: { width: 1280, height: 960 } });
       await context.addInitScript(() => { window.walletTouches = 0; Object.defineProperty(window, 'ethereum', { get() { window.walletTouches++; throw Error('wallet touched'); } }); });
       const errors = [];
@@ -76,7 +76,8 @@ test('everyday loop in real Chromium: browse, create, edit, organize, explain, u
       await page.click('#close-file');
       await page.click('#crumbs .crumb'); await settle(page);
 
-      // 3. Author A creates a folder and a note; one approval each (+1 staging).
+      // 3. Author A creates a folder and a note; ONE approval each — the note's
+      //    byte staging is covered by the same author-signed intent.
       await signIn(page, 'A');
       const create = page.click('#new-folder');
       await fillPrompt(page, 'journeys');
@@ -87,12 +88,11 @@ test('everyday loop in real Chromium: browse, create, edit, organize, explain, u
       await clickRowAction(page, 'journeys', 'Open'); await settle(page);
       const note = page.click('#new-note');
       await fillPrompt(page, 'diary.md', 'first entry');
-      await approveConsent(page); // publish approval
-      await approveConsent(page); // staging approval
+      await approveConsent(page); // the ONLY approval: intent covers records + bytes
       await note;
       await waitToast(page, 'Note created with verified bytes');
       await settle(page);
-      assert.equal(await page.textContent('#prompts'), '3 approvals');
+      assert.equal(await page.textContent('#prompts'), '2 approvals');
 
       // 4. Reload in a FRESH context: same data, same IDs (no browser cache).
       const context2 = await browser.newContext();
@@ -108,11 +108,23 @@ test('everyday loop in real Chromium: browse, create, edit, organize, explain, u
       await page.waitForSelector('#file-body button:has-text("Edit note")');
       const edit = page.click('#file-body button:has-text("Edit note")');
       await fillPrompt(page, 'diary.md', 'first entry, edited');
-      await approveConsent(page);
-      await approveConsent(page);
+      await approveConsent(page); // one approval covers the edit and its bytes
       await edit;
       await waitToast(page, 'Edited; new revision verified');
       await settle(page);
+
+      // 5b. An ordinary file BEYOND 16 KiB: one approval, multiple staged
+      //     chunks, verified read-back and display.
+      const bigText = 'The quick brown fox jumps over the lazy dog. '.repeat(500); // 22,500 bytes -> 6 chunks
+      const big = page.click('#new-note');
+      await fillPrompt(page, 'large.md', bigText);
+      await approveConsent(page); await big;
+      await waitToast(page, 'Note created with verified bytes'); await settle(page);
+      await clickRowAction(page, 'large.md', 'Open');
+      await page.waitForSelector('#file-panel[open]');
+      await page.waitForFunction(n => (document.querySelector('#file-body .note-view')?.textContent.length ?? 0) === n, bigText.length);
+      assert.match(await page.textContent('#file-body'), /integrity VERIFIED/);
+      await page.click('#close-file');
 
       // 6. Rename keeps identity; explain shows the unchanged File Object.
       const before = await idOf(page, 'diary.md');
@@ -166,8 +178,7 @@ test('everyday loop in real Chromium: browse, create, edit, organize, explain, u
 
       // 10. Upload an image; verified preview renders from a blob URL.
       await page.setInputFiles('#upload', { name: 'dot.png', mimeType: 'image/png', buffer: PNG_1PX });
-      await approveConsent(page);
-      await approveConsent(page);
+      await approveConsent(page); // one approval covers the record and its bytes
       await waitToast(page, 'Image uploaded with verified bytes'); await settle(page);
       await clickRowAction(page, 'dot.png', 'Open');
       await page.waitForSelector('#file-panel img.preview');
@@ -186,15 +197,15 @@ test('everyday loop in real Chromium: browse, create, edit, organize, explain, u
       assert(bundle.evidence.length > 0, 'raw evidence retained');
 
       // 12. Upgrade the POPULATED contracts in place; same addresses, data survives,
-      //     old citations readable, and a new write succeeds at revision 2.
-      const upgraded = await lab.upgrade();
+      //     old citations readable, and a new write succeeds at revision 3.
+      const upgraded = await auth.upgradeAgain();
       assert.equal(upgraded.receipt.status, '0x1');
       await page.click('#refresh'); await settle(page);
       assert((await rows(page)).includes('journal.md'), 'data survives the upgrade');
-      assert.match(await page.textContent('#basis'), /host revision 2/);
+      assert.match(await page.textContent('#basis'), /host revision 3/);
       const post = page.click('#new-note');
-      await fillPrompt(page, 'after-upgrade.md', 'written at revision 2');
-      await approveConsent(page); await approveConsent(page); await post;
+      await fillPrompt(page, 'after-upgrade.md', 'written at revision 3');
+      await approveConsent(page); await post;
       await waitToast(page, 'Note created with verified bytes'); await settle(page);
       assert((await rows(page)).includes('after-upgrade.md'));
 

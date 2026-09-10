@@ -82,10 +82,37 @@ const tomb = (purpose, subject, role, prior) => ({
   revision: prior.revision,
 });
 
+export const CHUNK_SIZE = 4096;
+export const MAX_CHUNK_COUNT = 256; // 1 MiB cap at the fixture chunk size
+const EMPTY_ROOT = keccak256('0x02');
+/** Law-correct ChunkTree builder (C0ChunkTree): 4 KiB chunks, 0x00-prefixed
+ *  leaves, 0x01-prefixed pairs, odd node promoted, keccak(0x02) empty. */
 export function contentLeaves(bytesHex) {
   const size = byteLength(bytesHex);
-  const tree = { typeId: EXTENDED_TYPES['ChunkTree/1'], body: cat('00001000', '00000001', size.toString(16).padStart(16, '0'), contentDigest(bytesHex)) };
-  return { tree, treeId: leafId(tree), data: bytesHex, size };
+  let chunkSize = CHUNK_SIZE, count, root, chunks = [], leaves = [];
+  if (size === 0n) {
+    chunkSize = 262144; count = 0; root = EMPTY_ROOT;
+  } else {
+    count = Number((size - 1n) / BigInt(CHUNK_SIZE)) + 1;
+    if (count > MAX_CHUNK_COUNT) throw Error('file exceeds the ' + MAX_CHUNK_COUNT + '-chunk prototype cap');
+    const raw = bytesHex.slice(2);
+    for (let i = 0; i < count; i++) {
+      const chunk = '0x' + raw.slice(i * CHUNK_SIZE * 2, (i + 1) * CHUNK_SIZE * 2);
+      chunks.push(chunk);
+      leaves.push(keccak256(cat('00', chunk)));
+    }
+    let nodes = [...leaves];
+    while (nodes.length > 1) {
+      const next = [];
+      for (let i = 0; i < nodes.length; i += 2) {
+        next.push(i + 1 < nodes.length ? keccak256(cat('01', nodes[i], nodes[i + 1])) : nodes[i]);
+      }
+      nodes = next;
+    }
+    root = nodes[0];
+  }
+  const tree = { typeId: EXTENDED_TYPES['ChunkTree/1'], body: cat(chunkSize.toString(16).padStart(8, '0'), count.toString(16).padStart(8, '0'), size.toString(16).padStart(16, '0'), root) };
+  return { tree, treeId: leafId(tree), data: bytesHex, size, chunkCount: count, chunks, leaves, root };
 }
 export const revisionLeaf = (fileId, treeId, mediaType, charset, parents = []) => ({
   typeId: EXTENDED_TYPES['FileRevision/1'],
@@ -121,7 +148,7 @@ export function planOperation(intent) {
     leaves = [object, charter.leaf];
     if (kind !== 'createDir') {
       let treeId = intent.treeId, treeLeafIncluded = false;
-      if (kind === 'createFile') { const c = contentLeaves(intent.bytesHex); treeId = c.treeId; leaves.push(c.tree); treeLeafIncluded = true; predicted.treeId = treeId; predicted.data = c.data; }
+      if (kind === 'createFile') { const c = contentLeaves(intent.bytesHex); treeId = c.treeId; leaves.push(c.tree); treeLeafIncluded = true; predicted.treeId = treeId; predicted.data = c.data; predicted.content = c; }
       const rev = revisionLeaf(objectId, treeId, intent.mediaType ?? 'text/plain', intent.charset ?? 'utf-8');
       predicted.revisionId = leafId(rev);
       const head = bind(P.headPurpose, objectId, P.headRole, predicted.revisionId);
@@ -137,7 +164,7 @@ export function planOperation(intent) {
   } else if (kind === 'edit') {
     const c = contentLeaves(intent.bytesHex);
     const rev = revisionLeaf(intent.fileId, c.treeId, intent.mediaType ?? 'text/plain', intent.charset ?? 'utf-8', [intent.priorRevisionId]);
-    predicted.treeId = c.treeId; predicted.revisionId = leafId(rev); predicted.data = c.data;
+    predicted.treeId = c.treeId; predicted.revisionId = leafId(rev); predicted.data = c.data; predicted.content = c;
     const head = bind(P.headPurpose, intent.fileId, P.headRole, predicted.revisionId, priors.head);
     leaves = [c.tree, rev, head.leaf];
     revisions = [[2, head.revision]];
@@ -248,6 +275,79 @@ export function decodeRouterError(data) {
   try { const e = routerInterface.parseError(data); return e ? { name: e.name, args: [...e.args].map(String) } : null; } catch { return null; }
 }
 
+// ---- revision-3 authority: author-signed intents, Core-verified ------------
+export const OP_TUPLE = 'tuple(uint8 kind,bytes32 mountId,bytes32 parent,bytes name,bytes32 sourceParent,bytes sourceName,bytes32 object,bytes32 aux,bytes[] ancestorNames)';
+export const INTENT_TUPLE = 'tuple(bytes32 opCommitment,bytes32 byteCommitment,address executor,bytes32 executorCodehash,uint64 nonce,uint64 deadline)';
+export const ROUTER2_ABI = [
+  'function execute(' + OP_TUPLE + ' op,' + PUBLICATION_TUPLE + ' publication,uint32 expectedRevision,' + INTENT_TUPLE + ' intent,bytes authorSig) returns (tuple(bytes32 envelopeId,uint64 envelopeOrdinal,uint64 acceptingBatchId,tuple(uint16 leafIndex,uint8 outcome,uint64 admissionOrdinal)[] leaves))',
+  'error ErrRoutedExecutor(address expected)',
+  'error ErrOpCommitment(bytes32 expected,bytes32 got)',
+  ...ROUTER_ABI.filter(f => f.startsWith('error') && !/ErrUnauthorizedAuthor|ErrAuthorNonce|ErrExpired|ErrPrincipalClaimed/.test(f)),
+];
+export const router2Interface = new Interface(ROUTER2_ABI);
+export const CORE3_ABI = [
+  'function claimPrincipal(bytes32 principal)',
+  'function principalAccount(bytes32 principal) view returns (address)',
+  'function principalNonce(bytes32 principal) view returns (uint64)',
+  'function executeAuthorized(' + PUBLICATION_TUPLE + ' publication,uint32 expectedRevision,' + INTENT_TUPLE + ' intent,bytes authorSignature) returns (tuple(bytes32 envelopeId,uint64 envelopeOrdinal,uint64 acceptingBatchId,tuple(uint16 leafIndex,uint8 outcome,uint64 admissionOrdinal)[] leaves))',
+  'error ErrPrincipalClaimed(bytes32 principal)',
+  'error ErrUnauthorizedPrincipal(bytes32 principal,address recovered)',
+  'error ErrIntentNonce(bytes32 principal,uint64 expected,uint64 got)',
+  'error ErrIntentExpired(uint64 deadline)',
+  'error ErrExecutorBinding(address expected,address sender)',
+  'error FixtureAuthorization()',
+  'error FixtureRevision()',
+];
+export const core3Interface = new Interface(CORE3_ABI);
+export const CARRIER3_ABI = [
+  'function stageChunk(bytes32 treeId,bytes body,uint32 index,bytes chunkData,bytes32[] leaves)',
+  'function chunkStatus(bytes32 treeId) view returns (uint32 chunkSize,uint32 chunkCount,uint64 totalSize,uint32 present,bytes32 root)',
+  'function hasChunk(bytes32 treeId,uint32 index) view returns (bool)',
+  'function readChunk(bytes32 treeId,uint32 index) view returns (bytes)',
+  'error ErrChunkTreeShape()',
+  'error ErrChunkIndex(uint32 index)',
+  'error ErrChunkLeafMismatch(uint32 index)',
+  'error ErrChunkImmutable(uint32 index)',
+  'error ErrChunkMissing(uint32 index)',
+];
+export const carrier3Interface = new Interface(CARRIER3_ABI);
+
+export const opCommitmentOf = op => keccak256(abi.encode([OP_TUPLE], [op]));
+export const byteCommitmentOf = (treeId, body) => keccak256(abi.encode(['bytes32', 'bytes32'], [treeId, keccak256(body)]));
+
+/** One author signature authorizes the whole operation: publication, exact
+ *  op, execution set, byte commitment and — when routed — the executor. */
+export async function authorizeIntentV3(plan, { authorWallet, core, chainId, executor, executorCodehash, executionSetId, nonce, deadline, byteCommitment }) {
+  const intent = {
+    opCommitment: plan.op ? opCommitmentOf(plan.op) : ZeroHash,
+    byteCommitment: byteCommitment ?? ZeroHash,
+    executor, executorCodehash, nonce, deadline,
+  };
+  const signature = await authorWallet.signTypedData(
+    { name: 'EFS Files Authority', version: '3', chainId, verifyingContract: core },
+    { AuthorIntent: [
+      { name: 'publicationHash', type: 'bytes32' }, { name: 'executionSetId', type: 'bytes32' },
+      { name: 'opCommitment', type: 'bytes32' }, { name: 'byteCommitment', type: 'bytes32' },
+      { name: 'executor', type: 'address' }, { name: 'executorCodehash', type: 'bytes32' },
+      { name: 'nonce', type: 'uint64' }, { name: 'deadline', type: 'uint64' },
+    ] },
+    { publicationHash: publicationHash(plan.publication), executionSetId, ...intent },
+  );
+  return { intent, signature };
+}
+export function encodeExecuteV2(plan, expectedRevision, intent, signature) {
+  return router2Interface.encodeFunctionData('execute', [plan.op, plan.publication, expectedRevision, intent, signature]);
+}
+export function encodeStageChunk({ treeId, body, index, chunkData, leaves }) {
+  return carrier3Interface.encodeFunctionData('stageChunk', [treeId, body, index, chunkData, leaves]);
+}
+export function decodeAuthorityError(data) {
+  for (const iface of [router2Interface, core3Interface, carrier3Interface, routerInterface]) {
+    try { const e = iface.parseError(data); if (e) return { name: e.name, args: [...e.args].map(String) }; } catch {}
+  }
+  return null;
+}
+
 // ---- write-support reads at LATEST state (planning needs current heads) ----
 // callLatest(to, data) -> result hex, relayed through the labeled write path.
 const READ_FRAGMENTS = new Interface([
@@ -278,6 +378,16 @@ export async function latestExecution(callLatest, core) {
 }
 export async function latestAuthorNonce(callLatest, router, principal) {
   return BigInt(await callLatest(router, routerInterface.encodeFunctionData('authorNonce', [principal])));
+}
+export async function latestPrincipalNonce(callLatest, core, principal) {
+  return BigInt(await callLatest(core, core3Interface.encodeFunctionData('principalNonce', [principal])));
+}
+export async function latestChunkPresence(callLatest, carrier, treeId, chunkCount) {
+  const present = [];
+  for (let i = 0; i < chunkCount; i++) {
+    present.push(BigInt(await callLatest(carrier, carrier3Interface.encodeFunctionData('hasChunk', [treeId, i]))) === 1n);
+  }
+  return present;
 }
 // ---- carrier byte staging (separate labeled approval) ----------------------
 const CARRIER_FRAGMENTS = new Interface([

@@ -2,7 +2,10 @@
 // This browser path deliberately does not import the Node retained-state oracle.
 import { AbiCoder, Interface, keccak256, toUtf8Bytes, ZeroHash } from '../2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.js';
 
-export const DEFAULT_LIMITS = Object.freeze({maxRequests:512,maxBytes:4194304,responseBytes:262144,maxInFlight:4,deadlineMs:30000});
+// Budgets are adjustable experiment settings (2026-09-09 correctness-first
+// ruling); raised for churn-heavy enumeration and chunked content. The 512-
+// request historical control remains reproducible by passing limits down.
+export const DEFAULT_LIMITS = Object.freeze({maxRequests:4096,maxBytes:33554432,responseBytes:262144,maxInFlight:16,deadlineMs:60000});
 const EXECUTION_FIELDS = 'uint32 ordinal,uint64 activationBlock,uint64 activationAdmissionHigh,address core,address carrier,address coreImplementation,address carrierImplementation,bytes32 coreCodehash,bytes32 carrierCodehash,address coreAdmin,address carrierAdmin,address controller,address operator,address helper,bytes32 helperCodehash,address admissionLibrary,bytes32 admissionCodehash,bytes32 treeType,bytes32 coreConfiguration,bytes32 carrierConfiguration,bytes32 id';
 const EXECUTION = 'tuple('+EXECUTION_FIELDS+')';
 const HEAD = '(uint8 state,uint8 targetKind,uint8 tombstoneCause,uint32 revision,uint64 admissionOrdinal,bytes32 targetA,uint16 targetLeaf)';
@@ -21,6 +24,9 @@ const APPLICATION = Object.freeze({
 const CARRIER_APPLICATION = Object.freeze({
   hasFixtureBytes:'function hasFixtureBytes(bytes32 treeId) view returns (bool)',
   readFixtureBytes:'function readFixtureBytes(bytes32 treeId) view returns (bytes)',
+  chunkStatus:'function chunkStatus(bytes32 treeId) view returns (uint32,uint32,uint64,uint32,bytes32)',
+  hasChunk:'function hasChunk(bytes32 treeId,uint32 index) view returns (bool)',
+  readChunk:'function readChunk(bytes32 treeId,uint32 index) view returns (bytes)',
 });
 const codec = new Interface([...Object.values(APPLICATION),...Object.values(CARRIER_APPLICATION),
   'function bootstrap() view returns ((bytes32 realmId,bytes32 initialRevisionId,bytes intrinsicGroupBytes,bytes32 objectGroup1Hash,bytes32 kernelGroup2Hash,bytes32 metaTypeId,bytes32 objectGenesisType,bytes32 bindingSetType,bytes32 bindingTombstoneType,bytes32 withdrawalType))',

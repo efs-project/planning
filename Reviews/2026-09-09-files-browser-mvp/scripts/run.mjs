@@ -12,11 +12,11 @@ compileUpgrade();
 compileRouter();
 console.log('Booting the disposable chain and seeding trip/ …');
 await withUpgrade(async lab => {
-  const { server } = await startEnvironment(lab, { write: true });
+  const { server, auth } = await startEnvironment(lab, { write: true });
   console.log('\n  EFS Files browser:  ' + server.url + '\n');
   console.log('  Guest reads need no wallet. Pick a local test signer (top right) to write.');
   console.log('  Reset: stop with Ctrl+C and start again — the chain is disposable.');
-  if (interactiveUpgrade) console.log("  Type 'u' + Enter to upgrade the populated contracts U1 -> U2 in place.");
+  if (interactiveUpgrade) console.log("  Type 'u' + Enter to upgrade the populated contracts in place (revision advances; data survives).");
   console.log("  Type 'q' + Enter (or Ctrl+C) to stop.\n");
   process.stdin.setEncoding('utf8');
   await new Promise(resolve => {
@@ -25,8 +25,10 @@ await withUpgrade(async lab => {
       if (cmd === 'q') resolve();
       if (cmd === 'u' && interactiveUpgrade) {
         console.log('Upgrading the populated contracts (same addresses, same data)…');
-        const result = await lab.upgrade();
-        console.log('Upgrade ' + (result.receipt.status === '0x1' ? 'complete: revision 2 active. Reload the browser and read again.' : 'FAILED'));
+        // Repeat the U3 pair: lab.upgrade() would reinstall U2 and drop the
+        // authority surface the served browser depends on.
+        const result = await auth.upgradeAgain();
+        console.log('Upgrade ' + (result.receipt.status === '0x1' ? 'complete: a new revision is active. Reload the browser and read again.' : 'FAILED'));
       }
     });
     process.on('SIGINT', resolve);

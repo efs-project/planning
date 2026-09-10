@@ -17,15 +17,81 @@ async function post(path, payload, maxBytes = 262144, signal) {
   if (!response.ok || !body || body.error !== undefined) { const e = Error(body?.error ?? 'relay refused'); e.data = body?.data ?? null; throw e; }
   return body.result;
 }
+// Microtask-window transport batching: logical requests (and their budgets)
+// are unchanged; concurrent calls coalesce into one HTTP round trip.
+function batching(flush) {
+  let queue = [];
+  return entry => new Promise((resolve, reject) => {
+    queue.push({ entry, resolve, reject });
+    if (queue.length === 1) queueMicrotask(async () => {
+      const batch = queue; queue = [];
+      try { await flush(batch); } catch (e) { for (const item of batch) item.reject(e); }
+    });
+  });
+}
 export function createRPCSource({ identity }) {
+  const enqueue = batching(async batch => {
+    if (batch.length === 1) {
+      const { entry, resolve, reject } = batch[0];
+      try { resolve(await post('/rpc', { method: entry.method, params: entry.params }, entry.maxBytes, entry.signal)); }
+      catch (e) { reject(e); }
+      return;
+    }
+    const body = batch.map((item, i) => ({ id: i, method: item.entry.method, params: item.entry.params }));
+    const maxBytes = Math.min(1048576 - 128, batch.reduce((n, item) => n + item.entry.maxBytes, 0));
+    const results = await post('/rpc-batch', { batch: body }, maxBytes);
+    for (const [i, item] of batch.entries()) {
+      const r = results[i];
+      if (r && r.error === undefined) item.resolve(r.result);
+      else { const e = Error(r?.error ?? 'batch entry failed'); e.data = r?.data ?? null; item.reject(e); }
+    }
+  });
   return Object.freeze({
     identity, epoch: 1,
     async request(method, params, { signal, maxBytes = 262144 } = {}) {
       if (!Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > 262144) throw Error('result bound');
-      const result = await post('/rpc', { method, params }, maxBytes, signal);
+      const result = await enqueue({ method, params, maxBytes, signal });
       if (new TextEncoder().encode(JSON.stringify(result)).byteLength > maxBytes) throw Error('result limit');
       return result;
     },
+  });
+}
+// Direct JSON-RPC source for STANDALONE STATIC HOSTING: talks straight to an
+// explicitly configured chain endpoint; no EFS-specific server involved.
+export function createDirectRPCSource({ identity, url }) {
+  const enqueue = batching(async batch => {
+    const body = batch.map((item, i) => ({ jsonrpc: '2.0', id: i, method: item.entry.method, params: item.entry.params }));
+    const response = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(batch.length === 1 ? body[0] : body), cache: 'no-store' });
+    const parsed = await boundedJSON(response, 1048576);
+    const rows = Array.isArray(parsed) ? parsed : [parsed];
+    for (const item of batch) {
+      const row = rows.find(x => x.id === batch.indexOf(item)) ?? rows[batch.indexOf(item)];
+      if (row && row.error === undefined) item.resolve(row.result);
+      else { const e = Error(row?.error?.message ?? 'rpc error'); e.data = row?.error?.data ?? null; item.reject(e); }
+    }
+  });
+  return Object.freeze({
+    identity, epoch: 1,
+    async request(method, params, { maxBytes = 262144 } = {}) {
+      const result = await enqueue({ method, params, maxBytes });
+      if (new TextEncoder().encode(JSON.stringify(result)).byteLength > maxBytes) throw Error('result limit');
+      return result;
+    },
+  });
+}
+export function directWritePath(url) {
+  const one = async (method, params) => {
+    const response = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }), cache: 'no-store' });
+    const body = await boundedJSON(response, 1048576);
+    if (body.error) { const e = Error(body.error.message ?? 'rpc error'); e.data = body.error.data ?? null; throw e; }
+    return body.result;
+  };
+  return Object.freeze({
+    callLatest: (to, data) => one('eth_call', [{ to, data, gas: '0x1000000' }, 'latest']),
+    transactionCount: address => one('eth_getTransactionCount', [address, 'pending']),
+    receipt: hash => one('eth_getTransactionReceipt', [hash]),
+    latestBlock: () => one('eth_getBlockByNumber', ['latest', false]),
+    publish: raw => one('eth_sendRawTransaction', [raw]),
   });
 }
 // Labeled write path: latest planning reads and raw-transaction publication.

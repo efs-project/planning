@@ -2,9 +2,9 @@
 // go through the FilesRouter with simulated, counted approvals from clearly
 // labeled disposable local test signers. One shared reader; no browser tree.
 import { createFixtureReader, openDirectory, openFile, openHistory, openRevisions, openRemoved, openTags, lookupName, FIXTURE, tagId } from '/Reviews/2026-09-09-files-reader/index.mjs';
-import { boundedJSON, createRPCSource, writePath } from './rpc-source.mjs';
+import { boundedJSON, createRPCSource, createDirectRPCSource, writePath, directWritePath } from './rpc-source.mjs';
 import { presentListing } from './listing-presentation.mjs';
-import { planOperation, authorizeAuthor, authorizeOperation, encodeExecute, decodeRouterError, latestBindingState, latestExecution, latestAuthorNonce, authorizeStage, encodeStage, contentLeaves, routerInterface, publicationHash } from '/Reviews/2026-09-09-files-browser-mvp/sdk/files-actions.mjs';
+import { planOperation, decodeRouterError, decodeAuthorityError, latestBindingState, latestExecution, latestPrincipalNonce, latestChunkPresence, authorizeIntentV3, encodeExecuteV2, encodeStageChunk, byteCommitmentOf } from '/Reviews/2026-09-09-files-browser-mvp/sdk/files-actions.mjs';
 import { Wallet } from '/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.js';
 
 const $ = id => document.getElementById(id), main = document.querySelector('main');
@@ -15,6 +15,7 @@ const toHex = bytes => '0x' + Array.from(bytes, b => b.toString(16).padStart(2, 
 const fromHex = hex => new Uint8Array((hex.length - 2) / 2).map((_, i) => parseInt(hex.slice(2 + 2 * i, 4 + 2 * i), 16));
 
 let config, reader, scope, stream, cancel, generation = 0, current = null, busy = false, opener = null;
+let transport = null; // {source, write, mode: 'relay' | 'direct-static'}
 let path = [], acquisitions = 1, pubCounter = 0;
 const session = { signer: 'guest', wallet: null, principal: null, approvals: 0 };
 let acquireChain = Promise.resolve();
@@ -70,14 +71,14 @@ function toast(message, isError = false) {
 
 // ---- the write pipeline ----------------------------------------------------
 async function submitRaw(to, data, gasLimit, wallet = session.wallet) {
-  const nonce = BigInt(await writePath.transactionCount(wallet.address));
+  const nonce = BigInt(await transport.write.transactionCount(wallet.address));
   const raw = await wallet.signTransaction({ chainId: 31337, nonce: Number(nonce), gasLimit, gasPrice: 2000000000n, to, data });
-  const hash = await writePath.publish(raw);
-  for (let i = 0; i < 400; i++) { const r = await writePath.receipt(hash); if (r) return r; await new Promise(ok => setTimeout(ok, 25)); }
-  throw Error('no receipt within the bounded wait');
+  const hash = await transport.write.publish(raw);
+  for (let i = 0; i < 400; i++) { const r = await transport.write.receipt(hash); if (r) return r; await new Promise(ok => setTimeout(ok, 25)); }
+  throw Error('The network did not confirm in time. Nothing may have changed — read again.');
 }
 function friendlyError(e) {
-  const decoded = e?.data ? decodeRouterError(e.data) : null;
+  const decoded = e?.data ? (decodeAuthorityError(e.data) ?? decodeRouterError(e.data)) : null;
   const map = {
     ErrDestinationOccupied: 'That name is already taken here. Nothing was changed.',
     ErrDestinationConflict: 'Sources disagree about that name. Nothing was changed.',
@@ -90,6 +91,13 @@ function friendlyError(e) {
     ErrMarkerInactive: 'This removed item was already restored.',
     ErrUnauthorizedAuthor: 'This signer is not authorized for that author.',
     ErrSourceMismatch: 'The source placement changed. Read again and retry.',
+    ErrUnauthorizedPrincipal: 'This signer is not the claimed account for that author.',
+    ErrIntentNonce: 'This exact approval was already used. Start the change again.',
+    ErrIntentExpired: 'The approval expired before submission. Start the change again.',
+    ErrExecutorBinding: 'This signed approval only works through its named router.',
+    ErrOpCommitment: 'The submitted operation does not match what was approved. Refused.',
+    ErrChunkImmutable: 'Different bytes were already staged at this position; content is write-once.',
+    ErrChunkLeafMismatch: 'These bytes do not match the committed content. Refused.',
   };
   return decoded ? (map[decoded.name] ?? 'Refused by the router: ' + decoded.name) : (e.message ?? 'The operation could not finish. Nothing may have changed — read again.');
 }
@@ -103,47 +111,63 @@ async function runOperation(kindLabel, intent, facts) {
   const signerWallet = session.wallet, signerPrincipal = session.principal, signerKey = session.signer;
   try {
     const write = config.write;
-    const execution = await latestExecution(writePath.callLatest, config.expected.core);
+    const execution = await latestExecution(transport.write.callLatest, config.expected.core);
     const plan = planOperation({ ...intent, principal: signerPrincipal, pubNonce: BigInt(Date.now()) * 1000n + BigInt(pubCounter++) });
     if (plan.status !== 'PLANNED') { toast(plan.status === 'UNSUPPORTED' ? 'Unsupported (not invalid): ' + plan.reason : 'Refused: ' + plan.reason, true); return null; }
-    const ok = await consent('Approve: ' + kindLabel, [...facts,
+    const content = plan.predicted.content ?? null;
+    const chunkNote = content && content.chunkCount > 0
+      ? [['Bytes', String((content.data.length - 2) / 2) + ' bytes in ' + content.chunkCount + ' chunk transaction' + (content.chunkCount === 1 ? '' : 's') + ', staged automatically — THIS single approval covers them']]
+      : [];
+    const ok = await consent('Approve: ' + kindLabel, [...facts, ...chunkNote,
       ['Records written', String(plan.publication.leaves.length) + ' (all at once or not at all)'],
       ['Operation ID', short(plan.predicted.envelopeId)],
-      ['Signer', write.authors[signerKey].label + ' (disposable local key)'],
+      ['Signer', write.authors[signerKey].label + ' (disposable local key, author-signed intent)'],
     ]);
     if (!ok) { toast('Cancelled before submission; nothing was sent.'); return 'CANCELLED'; }
     toast('Submitting… waiting for the network receipt.');
-    const block = await writePath.latestBlock();
+    const block = await transport.write.latestBlock();
     const deadline = BigInt(block.timestamp) + 3600n;
-    const coreNonce = BigInt(Date.now()) * 4096n + BigInt(pubCounter++);
-    const authorNonce = await latestAuthorNonce(writePath.callLatest, write.router, signerPrincipal);
-    const operatorWallet = new Wallet(write.operatorKey);
-    const prepared = await authorizeOperation(plan, {
-      authorWallet: signerWallet, operatorWallet, router: write.router, core: config.expected.core,
-      chainId: 31337, executionSetId: execution.executionSetId, coreRevision: execution.revision,
-      coreNonce, authorNonce, deadline,
+    const authorNonce = await latestPrincipalNonce(transport.write.callLatest, config.expected.core, signerPrincipal);
+    const { intent: signedIntent, signature } = await authorizeIntentV3(plan, {
+      authorWallet: signerWallet, core: config.expected.core, chainId: 31337,
+      executor: write.router, executorCodehash: write.routerCodehash,
+      executionSetId: execution.executionSetId, nonce: authorNonce, deadline,
+      byteCommitment: content ? byteCommitmentOf(content.treeId, content.tree.body) : undefined,
     });
-    const receipt = await submitRaw(write.router, encodeExecute(prepared), 16777216n, signerWallet);
+    const receipt = await submitRaw(write.router, encodeExecuteV2(plan, execution.revision, signedIntent, signature), 16777216n, signerWallet);
     if (receipt.status !== '0x1') { toast('The transaction was mined but rejected; nothing was changed.', true); return null; }
-    return { plan, receipt };
+    // Content chunks stage AUTOMATICALLY under the same approval: staging is
+    // permissionless, content-addressed and write-once — no further consent
+    // exists to ask for. Interruption leaves a resumable file.
+    let staged = { complete: true, done: 0, failed: 0 };
+    if (content && content.chunkCount > 0) {
+      staged = await stageContent(content, signerWallet);
+      if (!staged.complete) pendingBytes.set(plan.op.kind === 3 ? plan.op.object : plan.predicted.objectId, { content, label: kindLabel });
+      else pendingBytes.delete(plan.op.kind === 3 ? plan.op.object : plan.predicted.objectId);
+    }
+    return { plan, receipt, staged };
   } catch (e) { toast(friendlyError(e), true); return null; }
   finally { writing = false; delete main.dataset.writing; }
 }
-async function stageBytes(treeId, treeBody, dataHex, label) {
-  const write = config.write;
-  const ok = await consent('Approve: stage file bytes', [['What', label], ['Bytes', String((dataHex.length - 2) / 2)], ['Byte staging', 'separate carrier approval, counted']]);
-  if (!ok) return false;
-  const execution = await latestExecution(writePath.callLatest, config.expected.core);
-  const block = await writePath.latestBlock();
-  const deadline = BigInt(block.timestamp) + 3600n;
-  const nonce = BigInt(Date.now()) * 4096n + BigInt(pubCounter++);
-  const signature = await authorizeStage({ operatorWallet: new Wallet(write.operatorKey), carrier: write.carrier, chainId: 31337, treeId, body: treeBody, data: dataHex, executionSetId: execution.executionSetId, nonce, deadline });
-  const receipt = await submitRaw(write.carrier, encodeStage({ treeId, body: treeBody, data: dataHex, revision: execution.revision, nonce, deadline, signature }), 4000000n);
-  return receipt.status === '0x1';
+async function stageContent(content, wallet, onlyMissing = false) {
+  let done = 0, failed = 0;
+  let present = [];
+  if (onlyMissing) {
+    try { present = await latestChunkPresence(transport.write.callLatest, config.write.carrier, content.treeId, content.chunkCount); } catch { present = []; }
+  }
+  for (let i = 0; i < content.chunkCount; i++) {
+    if (present[i]) { done++; continue; }
+    toast('Staging bytes: chunk ' + (i + 1) + ' of ' + content.chunkCount + '…');
+    try {
+      const receipt = await submitRaw(config.write.carrier, encodeStageChunk({ treeId: content.treeId, body: content.tree.body, index: i, chunkData: content.chunks[i], leaves: content.leaves }), 4000000n, wallet);
+      if (receipt.status === '0x1') done++; else failed++;
+    } catch { failed++; }
+  }
+  return { complete: failed === 0, done, failed };
 }
 const nameOf = () => path.at(-1), here = () => nameOf().subject;
 async function priorOf(purpose, subject, role) {
-  const state = await latestBindingState(writePath.callLatest, config.expected.core, { principal: session.principal, purpose, subject, fieldRole: role });
+  const state = await latestBindingState(transport.write.callLatest, config.expected.core, { principal: session.principal, purpose, subject, fieldRole: role });
   return state.prior;
 }
 
@@ -272,7 +296,7 @@ async function render(s) {
   const filterNote = (nameFilter || tagMap) ? ' · ' + filtered + ' loaded row' + (filtered === 1 ? '' : 's') + ' hidden by filters (zero matches is not proof of zero total)' : '';
   toast(presentation.summary + filterNote + tagNote);
   $('more').hidden = unavailable || !s.continuation;
-  $('export').hidden = unavailable || !s.rows?.length;
+  $('export').hidden = unavailable || !s.rows?.length || s.coverage !== 'COMPLETE';
   $('basis').textContent = `Snapshot ${acquisitions} · pinned block ${s.basis.blockNumber} · host revision ${s.basis.revision} · ${scope.stats().requests} network reads`;
   main.dataset.block = String(s.basis.blockNumber); main.dataset.revision = s.basis.executionSetId;
   await renderTrash();
@@ -281,7 +305,10 @@ async function renderTrash() {
   if (session.signer === 'guest') { $('trash').hidden = true; return; }
   try {
     const removed = await acquire(() => openRemoved(scope, { mountId: config.mounts[$('lens').value], subject: here() }));
-    const items = removed.outcome === 'FOUND' ? removed.value.items.filter(i => i.active) : [];
+    // UNREADABLE is not EMPTY: an UNKNOWN result must never render as
+    // "no removed items" (the silent-absence bug class).
+    if (removed.outcome !== 'FOUND') throw Error(removed.reason ?? 'removed items unavailable');
+    const items = removed.value.items.filter(i => i.active);
     $('trash').hidden = items.length === 0;
     $('trash-summary').textContent = 'Removed items (' + items.length + ')';
     $('trash-rows').replaceChildren();
@@ -340,28 +367,20 @@ async function newNoteFlow() {
     draft = input;
     const bytesHex = toHex(new TextEncoder().encode(input.text));
     const intent = { kind: 'createFile', mountId: config.mounts[$('lens').value], parent: here(), name: input.name, bytesHex, mediaType: 'text/plain', charset: 'utf-8', priors: { destination: await priorOfName(input.name) } };
-    const result = await runOperation('create note “' + input.name + '”', intent, [['Note', input.name], ['In', crumbText()], ['Bytes', String((bytesHex.length - 2) / 2)], ['Step', '1 of 2 — the bytes are staged in a second approval']]);
+    const result = await runOperation('create note “' + input.name + '”', intent, [['Note', input.name], ['In', crumbText()]]);
     if (result === 'CANCELLED') return; // deliberate stop; nothing sent
     if (!result) continue; // failure: re-open with the draft intact
-    const staged = await stageAndRemember(result, bytesHex, input.name);
-    await afterWrite(result, staged ? 'Note created with verified bytes.' : 'Note created; bytes not staged yet — open the file to stage them.', { verifyBytes: staged ? result.plan.predicted.objectId : null });
+    await afterWrite(result, result.staged.complete ? 'Note created with verified bytes.' : 'Note created; some bytes are not staged yet — open the file to stage the rest.', { verifyBytes: result.staged.complete ? result.plan.predicted.objectId : null });
     return;
   }
 }
-// Staging retained for retry: an unstaged create/edit keeps its bytes in
-// memory so the file panel can offer Stage bytes now.
+// Bytes retained for resume: an interrupted upload keeps its chunk plan so
+// the file panel can stage only the missing chunks — no new approval needed.
 const pendingBytes = new Map();
-async function stageAndRemember(result, bytesHex, label) {
-  const treeLeaf = result.plan.publication.leaves[result.plan.op.kind === 3 ? 0 : 2]; // edit: tree is leaf 0; create: leaf 2
-  const staged = await stageBytes(result.plan.predicted.treeId, treeLeaf.body, bytesHex, label);
-  if (!staged) pendingBytes.set(result.plan.op.kind === 3 ? result.plan.op.object : result.plan.predicted.objectId, { treeId: result.plan.predicted.treeId, body: treeLeaf.body, data: bytesHex, label });
-  else pendingBytes.delete(result.plan.op.kind === 3 ? result.plan.op.object : result.plan.predicted.objectId);
-  return staged;
-}
 async function uploadFlow(file) {
   if (!file) return;
   const bytesHex = toHex(new Uint8Array(await file.arrayBuffer()));
-  if ((bytesHex.length - 2) / 2 > 16384) { toast('This prototype stages at most 16 KiB per file.', true); return; }
+  if ((bytesHex.length - 2) / 2 > 1048576) { toast('This prototype stages at most 1 MiB per file (256 chunks).', true); return; }
   let name = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, '-');
   if (name !== file.name) {
     const choice = await prompt('This folder accepts a-z 0-9 . _ - only. Upload “' + file.name + '” as', { initial: name });
@@ -369,10 +388,9 @@ async function uploadFlow(file) {
     name = choice.name;
   }
   const intent = { kind: 'createFile', mountId: config.mounts[$('lens').value], parent: here(), name, bytesHex, mediaType: file.type || 'application/octet-stream', charset: null, priors: { destination: await priorOfName(name) } };
-  const result = await runOperation('upload “' + name + '”', intent, [['Image', name], ['In', crumbText()], ['Bytes', String((bytesHex.length - 2) / 2)], ['Step', '1 of 2 — the bytes are staged in a second approval']]);
+  const result = await runOperation('upload “' + name + '”', intent, [['Image', name], ['In', crumbText()]]);
   if (result && result !== 'CANCELLED') {
-    const staged = await stageAndRemember(result, bytesHex, name);
-    await afterWrite(result, staged ? 'Image uploaded with verified bytes.' : 'Image record created; bytes not staged — open the file to stage them.', { verifyBytes: staged ? result.plan.predicted.objectId : null });
+    await afterWrite(result, result.staged.complete ? 'Image uploaded with verified bytes.' : 'Image record created; some bytes are not staged yet — open the file to stage the rest.', { verifyBytes: result.staged.complete ? result.plan.predicted.objectId : null });
   }
 }
 async function renameFlow(row, move) {
@@ -498,10 +516,11 @@ function renderContent(body, row, content, revisionLabel = 'current') {
     section.append(text('p', 'Bytes are not currently available from the configured carrier. The file is not absent; its identity and metadata are verified.'));
     const pending = pendingBytes.get(row.value.nodeId);
     if (pending && session.signer !== 'guest') {
-      const retry = text('button', 'Stage bytes now', 'row-button'); retry.type = 'button';
+      const retry = text('button', 'Stage missing bytes now', 'row-button'); retry.type = 'button';
       retry.addEventListener('click', async () => {
-        const staged = await stageBytes(pending.treeId, pending.body, pending.data, pending.label).catch(e => { toast(friendlyError(e), true); return false; });
-        if (staged) { pendingBytes.delete(row.value.nodeId); $('file-panel').close(); toast('Bytes staged and verifiable; open the file again.'); }
+        const staged = await stageContent(pending.content, session.wallet, true).catch(e => { toast(friendlyError(e), true); return { complete: false }; });
+        if (staged.complete) { pendingBytes.delete(row.value.nodeId); $('file-panel').close(); toast('All bytes staged and verifiable; open the file again.'); }
+        else toast('Some chunks are still missing (' + (staged.failed ?? '?') + ' failed). Try again.', true);
       });
       section.append(retry);
     }
@@ -522,12 +541,11 @@ async function editNote(row, contentValue, initialText) {
       mediaType: contentValue.mediaType, charset: contentValue.charset, priorRevisionId: contentValue.revisionId,
       priors: { head: await priorOf(FIXTURE.headPurpose, row.value.nodeId, FIXTURE.headRole) },
     };
-    const result = await runOperation('edit note', intent, [['Note', row.value.name], ['New bytes', String((bytesHex.length - 2) / 2)], ['Race safety', 'compare-and-swap on the current revision'], ['Step', '1 of 2 — the bytes are staged in a second approval']]);
+    const result = await runOperation('edit note', intent, [['Note', row.value.name], ['Race safety', 'compare-and-swap on the current revision']]);
     if (result === 'CANCELLED') return;
     if (!result) continue; // failure (e.g. stale edit): re-open with the draft intact
-    const staged = await stageAndRemember(result, bytesHex, row.value.name);
     $('file-panel').close();
-    await afterWrite(result, staged ? 'Edited; new revision verified.' : 'Edited; bytes not staged — open the file to stage them.', { verifyBytes: staged ? row.value.nodeId : null });
+    await afterWrite(result, result.staged.complete ? 'Edited; new revision verified.' : 'Edited; some bytes are not staged yet — open the file to stage the rest.', { verifyBytes: result.staged.complete ? row.value.nodeId : null });
     return;
   }
 }
@@ -600,6 +618,7 @@ $('close-file').addEventListener('click', () => $('file-panel').close());
 // ---- export ----------------------------------------------------------------
 async function exportFolder() {
   try {
+    if (current?.coverage !== 'COMPLETE') { toast('Export refused: this listing is ' + (current?.coverage ?? 'unavailable') + ', not COMPLETE — a partial folder must not masquerade as a full copy. Load all rows first.', true); return; }
     toast('Collecting the export bundle…');
     const bundle = { kind: 'EFS_FILES_EXPORT_V0', exportedAt: new Date().toISOString(), basis: current.basis, mountId: config.mounts[$('lens').value], subject: here(), pathLabel: crumbText(), coverage: current.coverage, rows: [], files: {}, evidence: current.evidence };
     for (const row of current.rows) {
@@ -630,7 +649,7 @@ async function load(g) {
       // Simple budget policy: transparently begin a fresh acquisition at the
       // SAME pinned block and continue; the acquisition counter stays honest.
       const reopened = await reader.open({ blockTag: '0x' + current?.basis.blockNumber?.toString(16) ?? 'latest', signal: cancel.signal });
-      if (reopened.status === 'READY') { scope?.close(); scope = reopened.scope; acquisitions++; stream = openDirectory(scope, { mountId: config.mounts[$('lens').value], subject: here(), pageSize: 8 }); return load(g); }
+      if (reopened.status === 'READY') { scope?.close(); scope = reopened.scope; acquisitions++; stream = openDirectory(scope, { mountId: config.mounts[$('lens').value], subject: here(), pageSize: 32 }); return load(g); }
     }
     await render(result);
   } catch (e) { if (g === generation) { $('coverage').textContent = 'Read unavailable'; toast('The read could not finish: ' + e.message, true); } }
@@ -658,7 +677,7 @@ async function refresh({ samePin = false } = {}) {
       if (opened.status !== 'READY') throw Error(opened.reason);
       scope = opened.scope; acquisitions++;
     }
-    stream = openDirectory(scope, { mountId: config.mounts[$('lens').value], subject: here(), pageSize: 8 });
+    stream = openDirectory(scope, { mountId: config.mounts[$('lens').value], subject: here(), pageSize: 32 });
     await load(g);
   } catch (e) {
     if (g !== generation) return;
@@ -689,9 +708,20 @@ $('signer').addEventListener('change', () => {
 addEventListener('pagehide', () => { generation++; cancel?.abort(); stream?.close(); scope?.close(); });
 
 try {
-  const response = await fetch('/config', { credentials: 'omit', cache: 'no-store' });
-  if (!response.ok) throw Error('fixture config unavailable');
-  config = await boundedJSON(response, 1048576);
+  // Relay mode (EFS local server) or standalone static hosting: a static
+  // export ships ./config.json with an explicit rpcUrl and talks JSON-RPC
+  // directly — no EFS-specific server endpoints involved.
+  const relay = await fetch('/config', { credentials: 'omit', cache: 'no-store' }).catch(() => null);
+  if (relay?.ok) {
+    config = await boundedJSON(relay, 1048576);
+    transport = { mode: 'relay', source: createRPCSource({ identity: config.expected.source }), write: writePath };
+  } else {
+    const staticResponse = await fetch('./config.json', { credentials: 'omit', cache: 'no-store' });
+    if (!staticResponse.ok) throw Error('fixture config unavailable');
+    config = await boundedJSON(staticResponse, 1048576);
+    if (typeof config.rpcUrl !== 'string' || !/^https?:\/\//.test(config.rpcUrl)) throw Error('static config missing an explicit rpcUrl');
+    transport = { mode: 'direct-static', source: createDirectRPCSource({ identity: config.expected.source, url: config.rpcUrl }), write: directWritePath(config.rpcUrl) };
+  }
   if (config.kind !== 'DISPOSABLE_FILES_BROWSER') throw Error('unsupported fixture');
   config.knownTags = config.knownTags ?? ['ocean', 'draft'];
   path = [{ name: config.rootLabel ?? 'trip', subject: config.root }];
@@ -702,8 +732,8 @@ try {
   const lens = query.get('lens');
   $('lens').value = ['aFirst', 'bFirst', 'exact'].includes(lens) ? lens : 'aFirst';
   $('scenario').textContent = config.scenario ?? 'Local upgradeable testnet fixture.';
-  $('delay').textContent = config.injectedDelayMs ? `Test transport: ${config.injectedDelayMs} ms injected before each RPC read.` : 'Local transport; no injected RPC delay.';
+  $('delay').textContent = transport.mode === 'direct-static' ? 'Standalone static hosting: direct JSON-RPC to ' + config.rpcUrl : config.injectedDelayMs ? `Test transport: ${config.injectedDelayMs} ms injected before each RPC read.` : 'Local transport; no injected RPC delay.';
   updateSession();
-  reader = createFixtureReader({ source: createRPCSource({ identity: config.expected.source }), context: { expected: config.expected } });
+  reader = createFixtureReader({ source: transport.source, context: { expected: config.expected } });
   await refresh({});
 } catch (e) { $('coverage').textContent = 'Read unavailable'; toast('Cannot start this local fixture: ' + e.message, true); main.dataset.state = 'settled'; }

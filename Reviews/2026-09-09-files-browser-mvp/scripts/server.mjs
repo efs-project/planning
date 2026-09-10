@@ -10,7 +10,9 @@ import { readFile } from 'node:fs/promises';
 import { Transaction } from '../../2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js';
 
 const json = x => JSON.stringify(x, (_, v) => typeof v === 'bigint' ? String(v) : v);
-const files = new Map([
+// URL path -> module-relative source. Exported so the static export ships the
+// EXACT same page the relay serves (no second copy of the module graph).
+export const BROWSER_FILES = new Map([
   ['/', '../web/index.html'],
   ['/screen/app.mjs', '../web/app.mjs'],
   ['/screen/files.css', '../web/files.css'],
@@ -29,7 +31,7 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
   const methods = new Set(selectors);
   // write: {router, carrier, core, latestSelectors:[...]} enables the labeled write path.
   const writeTargets = write ? new Set([write.router.toLowerCase(), write.carrier.toLowerCase()]) : new Set();
-  const latestCallTargets = write ? new Set([write.core.toLowerCase(), write.router.toLowerCase()]) : new Set();
+  const latestCallTargets = write ? new Set([write.core.toLowerCase(), write.router.toLowerCase(), write.carrier.toLowerCase()]) : new Set();
   const latestSelectors = new Set(write?.latestSelectors ?? []);
   const trace = [];
   let url, delayMs = 0, closed = false;
@@ -69,11 +71,11 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
       if (closed || req.headers.host !== new URL(url).host) return send(403, json({ error: 'host refused' }));
       const path = new URL(req.url, url).pathname;
       if (req.method === 'GET' && path === '/config') return send(200, json({ ...config, injectedDelayMs: delayMs, write: write ? config.writeConfig : null }));
-      if (req.method === 'GET' && files.has(path)) {
-        const body = await readFile(new URL(files.get(path), import.meta.url));
+      if (req.method === 'GET' && BROWSER_FILES.has(path)) {
+        const body = await readFile(new URL(BROWSER_FILES.get(path), import.meta.url));
         return send(200, body, path === '/' ? 'text/html; charset=utf-8' : path.endsWith('.css') ? 'text/css; charset=utf-8' : 'text/javascript; charset=utf-8');
       }
-      if (req.method !== 'POST' || !['/rpc', '/publish'].includes(path)) return send(404, json({ error: 'not found' }));
+      if (req.method !== 'POST' || !['/rpc', '/rpc-batch', '/publish'].includes(path)) return send(404, json({ error: 'not found' }));
       if (req.headers.origin !== url || req.headers['content-type'] !== 'application/json') return send(403, json({ error: 'same-origin JSON required' }));
       let size = 0; const chunks = [];
       for await (const chunk of req) { size += chunk.length; if (size > 262144) { send(413, json({ error: 'request too large' })); req.resume(); return; } chunks.push(chunk); }
@@ -94,6 +96,25 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
         } catch (e) { return send(502, json({ error: e.message, data: e.data ?? null })); }
       }
 
+      if (path === '/rpc-batch') {
+        if (!body || !Array.isArray(body.batch) || body.batch.length === 0 || body.batch.length > 64) return send(400, json({ error: 'batch shape refused' }));
+        for (const entry of body.batch) {
+          if (!entry || !Number.isSafeInteger(entry.id) || !valid(entry)) return send(400, json({ error: 'batch entry refused' }));
+        }
+        if (trace.length >= 16384) return send(429, json({ error: 'session request limit' }));
+        if (delayMs) await new Promise(r => setTimeout(r, delayMs)); // one delay per ROUND TRIP, matching real transport
+        const results = await Promise.all(body.batch.map(async entry => {
+          const attempt = { method: entry.method, params: entry.params, bytes: 0, batched: true };
+          trace.push(attempt);
+          try {
+            const result = await rpc(entry.method, entry.params);
+            attempt.bytes = Buffer.byteLength(json(result));
+            if (attempt.bytes > 262144) throw Error('response limit');
+            return { id: entry.id, result };
+          } catch (e) { attempt.error = e.message; return { id: entry.id, error: e.message, data: e.data ?? null }; }
+        }));
+        return send(200, json({ result: results }));
+      }
       if (!body || Object.keys(body).sort().join(',') !== 'method,params' || !valid(body)) return send(400, json({ error: 'request refused' }));
       if (trace.length >= 16384) return send(429, json({ error: 'session request limit' }));
       const attempt = { method: body.method, params: body.params, bytes: 0 };

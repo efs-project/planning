@@ -1,5 +1,5 @@
 // Root-directory-only fixture reader. No bytes, revision heads, actions or wallet.
-import { FIXTURE,TYPES,assessRecord,nameAssessment,nameRole,positionKey,bindingKey,bindingScopeKey,purposeAndScope,parsePlan,contentDigest,byteLength } from './files-profile.mjs';
+import { FIXTURE,TYPES,assessRecord,nameAssessment,nameRole,positionKey,bindingKey,bindingScopeKey,purposeAndScope,parsePlan,contentDigest,byteLength,foldChunkLeaves,EMPTY_CONTENT_ROOT } from './files-profile.mjs';
 const ZERO='0x'+'0'.repeat(64),END=(1n<<256n)-1n,MASK48=(1n<<48n)-1n;
 const caches=new WeakMap();
 const freeze=x=>{if(x&&typeof x==='object'){for(const v of Object.values(x))freeze(v);Object.freeze(x);}return x;};
@@ -144,17 +144,38 @@ export async function openFile(scope,{mountId,fileId,revisionId:requested}){
       const rev=await record(scope,revisionId,'FileRevision/1');const f=rev.fields;
       require(f.node===fileId,'REVISION_NODE_MISMATCH');
       const tree=await record(scope,f.content,'ChunkTree/1');const t=tree.fields;
-      require(t.chunkCount===1&&t.totalSize<=16384n,'UNSUPPORTED_CHUNKS');
+      const meta={fileId,revisionId,mediaType:f.mediaType,charset:f.charset,executableHint:f.executableHint,parents:f.parents,totalSize:String(t.totalSize)};
+      if(t.totalSize===0n){
+        // Canonical empty content: verified from the tree commitment alone.
+        require(t.merkleRoot===EMPTY_CONTENT_ROOT&&t.chunkCount===0,'MALFORMED_SELECTED');
+        result={outcome:'FOUND',value:{...meta,bytes:'0x',integrity:'VERIFIED'}};
+      }else{
       const has=await scope.carrierCall('hasFixtureBytes',[f.content]);
       if(has.status!=='OK')throw new Failure('EVIDENCE_UNAVAILABLE',has.reason);
-      if(!has.values[0])result={outcome:'FOUND',value:{fileId,revisionId,mediaType:f.mediaType,charset:f.charset,executableHint:f.executableHint,parents:f.parents,totalSize:String(t.totalSize),bytes:null,integrity:'BYTES_UNAVAILABLE'}};
-      else{
+      if(has.values[0]){
+        // Legacy pre-upgrade single-blob staging.
         const read=await scope.carrierCall('readFixtureBytes',[f.content]);
         if(read.status!=='OK')throw new Failure('EVIDENCE_UNAVAILABLE',read.reason);
         const data=read.values[0];
-        const okBytes=byteLength(data)===t.totalSize&&contentDigest(data)===t.merkleRoot;
+        const okBytes=byteLength(data)===t.totalSize&&t.chunkCount===1&&contentDigest(data)===t.merkleRoot;
         // Mismatching bytes are returned with failed integrity, never as verified.
-        result={outcome:'FOUND',value:{fileId,revisionId,mediaType:f.mediaType,charset:f.charset,executableHint:f.executableHint,parents:f.parents,totalSize:String(t.totalSize),bytes:okBytes?data:null,rawBytes:okBytes?undefined:data,integrity:okBytes?'VERIFIED':'DIGEST_MISMATCH'}};
+        result={outcome:'FOUND',value:{...meta,bytes:okBytes?data:null,rawBytes:okBytes?undefined:data,integrity:okBytes?'VERIFIED':'DIGEST_MISMATCH'}};
+      }else{
+        // Chunked staging: fetch every chunk, rebuild leaves, refold the tree.
+        require(t.chunkCount<=256,'UNSUPPORTED_CHUNKS');
+        const parts=[];let present=0;
+        for(let i=0;i<t.chunkCount;i++){
+          const one=await scope.carrierCall('readChunk',[f.content,i]);
+          if(one.status==='OK'){parts.push(one.values[0]);present++;}else parts.push(null);
+        }
+        if(present<t.chunkCount){
+          result={outcome:'FOUND',value:{...meta,bytes:null,integrity:'BYTES_UNAVAILABLE',chunksPresent:present,chunkCount:t.chunkCount}};
+        }else{
+          const data='0x'+parts.map(x=>x.slice(2)).join('');
+          const okBytes=byteLength(data)===t.totalSize&&foldChunkLeaves(parts.map(contentDigest))===t.merkleRoot;
+          result={outcome:'FOUND',value:{...meta,bytes:okBytes?data:null,rawBytes:okBytes?undefined:data,integrity:okBytes?'VERIFIED':'DIGEST_MISMATCH',chunksPresent:present,chunkCount:t.chunkCount}};
+        }
+      }
       }
     }
   }catch(e){result=unknown(e);}
@@ -237,7 +258,7 @@ function checkedPage(scope,state,page,rows,pageSize){
   state.last=previous;state.scanned=scanned;state.cursor=cursor;state.complete=complete===1n;
 }
 export function openDirectory(scope,{mountId,subject,pageSize=8}){
-  require(Number.isInteger(pageSize)&&pageSize>=1&&pageSize<=8,'PAGE_SIZE');
+  require(Number.isInteger(pageSize)&&pageSize>=1&&pageSize<=32,'PAGE_SIZE');
   let closed=false,flight=null,sources=null,positions=new Map(),last=null,latest=null,listDomain='FIXTURE_ROOT_DIRECTORY_ONLY';
   const progress=ss=>(ss??[]).map(s=>({principal:s.principal,cursor:s.cursor,scanned:s.scanned,complete:s.complete}));
   function snapshot(rowsMap,ss,coverage){const all=[...rowsMap.values()];return {coverage,rows:all.filter(r=>r.outcome==='FOUND').sort((a,b)=>a.value.name<b.value.name?-1:a.value.name>b.value.name?1:0),unresolved:all.filter(r=>r.outcome==='UNKNOWN'||r.outcome==='CONFLICT'),masked:all.filter(r=>r.outcome==='MASKED'),absent:all.filter(r=>r.outcome==='ABSENT'),progress:progress(ss),continuation:!(ss?.every(s=>s.complete)??false)};}
