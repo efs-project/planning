@@ -107,7 +107,7 @@ Mine, stated without softening:
 - **Real wallet software is untested.** The wallet suite drives a faithful EIP-1193 harness and proves request counts, payloads, balances and role separation. It does not prove MetaMask's UI. That remains a scripted manual gate.
 - **Enumeration cost is O(lifetime names), not O(live names).** 512 lifetime names ≈ 3,000 requests after budgets, batching and page-32. This is a data-model property (first-mutation anchor inventory), not a client-tuning gap, and "long-lasting" is exactly the regime where lifetime ≫ live. Contract-side page aggregation changes what Core stores, which makes it a now-decision.
 - **Privacy has no test coverage.** The requirement that an unsupported encrypted scope surfaces as opaque-and-unsupported rather than as a successful empty list is written down and never exercised. It is the same failure class as §1, so the §2.1 work is also the privacy-preserving work.
-- **Economics.** A costing pass against measured gas (createDir 5.15M, createFile 8.77M, ~104.5k per 4 KiB chunk) on current L2 prices is in flight as I write; I will send numbers separately rather than delay this.
+- **Economics.** Costed against live chain data — see §7, which supersedes this bullet. Short version: the system is **not** economically robust as currently built, and the reason is not what I expected.
 
 ---
 
@@ -126,3 +126,59 @@ Staying in my lane: the aggregate-level reshape (§2.1/§2.2) as a reversible pr
 If you want the result registry (§2.3) in my lane instead, say so and I will take it — it is the item I would prioritise first, because everything else attaches to it.
 
 **Session commits:** `d043945` (authenticated export + real-wallet path), `5ec070c` (28 confirmed review findings addressed), `5037910` (three silent-absence repairs + class scanner). All pushed, all suites green.
+
+---
+
+## 7. Economics — costed against live L2 data, 2026-09-10
+
+Measured gas taken to live prices (RPC-sampled 18:29–18:35 UTC, ETH $2,461.74). Two corrections to my own numbers come first, because they affect anything built on them.
+
+### 7.1 Corrections to my measured figures
+
+- **My 104,520 gas per 4 KiB chunk is below the EIP-7623 floor** (21,000 + 4,096 × 40 = 184,840). EIP-7623 was confirmed active on Base, OP and Scroll (not Arbitrum) by `eth_estimateGas` probing. **Real chunk staging costs ~1.77× my measured figure** on those chains. Anvil does not model this. Any per-chunk figure I have published should be read with that multiplier.
+- **EIP-7825 caps a single transaction at 16,777,216 gas** on Base and OP. A create-file at 8,766,869 is **52.3% of the hard cap**, so two file creations can never share a transaction. Note this is also exactly the `gasLimit` my prototype passes for routed execute — coincidental, but it means we are already writing at the ceiling.
+
+### 7.2 Where the money actually goes
+
+| Op | calldata+intrinsic | SLOADs | merkle/hash | **SSTORE residual** |
+|---|---|---|---|---|
+| tag (3,060,354) | 2.0% | 2.1% | 0.12% | **95.8%** |
+| create dir (5,148,912) | 1.2% | 1.2% | 0.07% | **97.5%** |
+| create file (8,766,869) | 0.7% | 0.7% | **0.04%** | **98.5%** |
+
+The number that should change our thinking: that residual implies **~133 fresh 32-byte slots (~4.1 KiB of new contract state) for a *tag*, and ~391 slots (~12.2 KiB) to store a 10 KiB file.** The metadata state we write for a file exceeds the file.
+
+**Merkle/hash verification is 0.04% of cost.** It is not a problem, and proposals to weaken content verification for performance should be rejected on evidence: they buy ~$0.00005 and cost us integrity.
+
+### 7.3 Feasibility today
+
+Everyday workload (1 folder, 10 files @ 40 KiB, 5 edits, 10 tags), per user:
+
+| OP Mainnet | Base | Scroll | Arbitrum One |
+|---|---|---|---|
+| **$0.41** | **$2.41** | **$4.20** | **$7.67** |
+
+Every chain sampled is pinned at its base-fee **floor** right now, so these are best cases. Base at 0.03 gwei → $12; at 0.1 gwei → **$40**. Scroll inverts the usual split — DA is ~79% of a create-file there and a 4 KiB chunk costs ~$0.039 in DA alone — so its cheap execution is a trap for content-heavy work.
+
+Verdict: defensible on OP today, borderline on Base, not viable on Arbitrum or Scroll, and one congestion spike from unacceptable everywhere.
+
+### 7.4 Levers, with the one that matters
+
+- **Move record bodies out of contract storage, keep commitments on-chain: ~50×.** Create-file 8,766,869 → ~150,360 gas; Base $0.1295 → $0.0022.
+- **SSTORE packing: 2–4×, and it costs us no verification property.** Pull it regardless of the decision below.
+- **Batching: <1%** — and EIP-7825 forbids two create-files per transaction anyway. Dead end.
+- **Blobs: ~nothing.** L1 blob DA ($0.0000107/KiB) is only 1.6× cheaper than Base's calldata pass-through. The 50× above comes entirely from *not doing the SSTOREs*, not from cheaper bytes.
+
+### 7.5 The architectural tension this creates — and a narrower lever I think we should measure first
+
+The 50× lever reads as "give up contract-enforced preconditions," which would gut what makes EFS trustworthy. I do not think that framing is quite right, and the distinction matters:
+
+**Admission-time precondition checks mostly read calldata, not storage.** `FilesRouterV2` validates new records via `_leaf(publication, i, type)` over `publication.leaves[]`, which is calldata. Those checks survive bodies leaving storage untouched.
+
+**What genuinely needs stored bodies is a smaller set than "all bodies":** `_requireDirectory` / `_meaning` read an existing object's genesis; restore reads a marker then its original entry; `core.resolve` reads ResolutionPlan frames (up to 4,192 bytes). Those are the on-chain reads of *previously admitted* bodies.
+
+So the real question is not "state or not" but **which fields any contract ever reads.** My reading of the router says the bulk of what we store — mediaType strings, charset, parents arrays, plan frames — is either never read on-chain or read only in narrow paths. A targeted split (store the few fields contracts read; commit the rest) could capture most of the 50× while keeping precondition enforcement fully on-chain.
+
+I have **not** measured this, and I am not proposing it as settled. I am proposing it as the next economics experiment, and I think it should run before any decision to move bodies wholesale.
+
+**The honest hyperstructure cost, stated plainly:** anything that leaves state weakens "someone with an RPC endpoint can reconstruct this" into "someone with an archive node or indexer can." Blobs prune in ~18 days, so they are not durable storage. That is a real reduction in the property I would defend hardest, and it should be a deliberate owner decision rather than a performance tweak.
