@@ -36,6 +36,14 @@ test('generator rejects both language keyword families and generated name collis
  assert.doesNotThrow(()=>validate([valid,{...valid,name:'ByteCount',fields:[{name:'uint8Count',kind:'uint256'}]}]));
 });
 
+test('parameterized generation rejects config names that shadow emitted functions and locals',async(t)=>{
+ const {renderDeclarations}=await import('../generator/generate.mjs');
+ for(const name of ['rule','kinds','descriptor','typeId','rid','shape','keccak256','encode','decode','register']) await t.test(name,()=>{
+  const declaration={name:'FeeControl',version:'1',fields:[{name:'claimKey',kind:'bytes32'}],rule:{artifact:'PaidClaimRule',label:'paid.unique.v1',config:[{name,kind:'uint256'}],local:[{name:'core',kind:'address'}],mode:2,gasLimit:250000}};
+  assert.throws(()=>renderDeclarations([declaration]),/invalid rule/);
+ });
+});
+
 test('representative accepted edge identifiers compile in both generated languages',async()=>{
  const {renderDeclarations}=await import('../generator/generate.mjs');
  const root=fileURLToPath(new URL('..',import.meta.url)),temp=mkdtempSync(join(tmpdir(),'efs-codegen-'));
@@ -43,9 +51,20 @@ test('representative accepted edge identifiers compile in both generated languag
   mkdirSync(join(temp,'generated'));
   for(const dependency of ['sdk','contracts','node_modules']) symlinkSync(join(root,dependency),join(temp,dependency));
   writeFileSync(join(temp,'package.json'),'{"type":"module"}');
-  const outputs=renderDeclarations([{name:'Classroom9',version:'1',fields:[{name:'whileLoop',kind:'uint256'},{name:'uint8Count',kind:'uint256'},{name:'enabled',kind:'bool'},{name:'receiver',kind:'address'}],rule:null}]);
+  const outputs=renderDeclarations([
+   {name:'Classroom9',version:'1',fields:[{name:'whileLoop',kind:'uint256'},{name:'uint8Count',kind:'uint256'},{name:'enabled',kind:'bool'},{name:'receiver',kind:'address'}],rule:null},
+   {name:'FeeControl',version:'1',fields:[{name:'claimKey',kind:'bytes32'}],rule:{artifact:'PaidClaimRule',label:'paid.unique.v1',config:[{name:'fee',kind:'uint256'}],local:[{name:'core',kind:'address'}],mode:2,gasLimit:250000}},
+   {name:'TypeControl',version:'1',fields:[{name:'outfitReceipt',kind:'bytes32'}],rule:{artifact:'EquipRule',label:'equip.current.v1',config:[{name:'outfitType',kind:'bytes32'}],local:[{name:'core',kind:'address'}],mode:1,gasLimit:250000}}
+  ]);
+  // The generator may reject an unsafe declaration, but every declaration it accepts must compile.
+  for(const [index,name] of ['rule','kinds','descriptor','typeId'].entries()) {
+   try {
+    const candidate=renderDeclarations([{name:`ShadowControl${index}`,version:'1',fields:[{name:'claimKey',kind:'bytes32'}],rule:{artifact:'PaidClaimRule',label:'paid.unique.v1',config:[{name,kind:'uint256'}],local:[{name:'core',kind:'address'}],mode:2,gasLimit:250000}}]);
+    for(const [file,body] of candidate) if(file!=='descriptors.json') outputs.set(file,body);
+   } catch(error) {assert.match(String(error),/invalid rule/);}
+  }
   for(const [name,body] of outputs) writeFileSync(join(temp,'generated',name),body);
-  execFileSync(process.execPath,[join(root,'node_modules/typescript/bin/tsc'),'--noEmit','--target','ES2022','--module','NodeNext','--moduleResolution','NodeNext','--allowImportingTsExtensions','--skipLibCheck',join(temp,'generated/Classroom9.ts')],{cwd:temp});
+  execFileSync(process.execPath,[join(root,'node_modules/typescript/bin/tsc'),'--noEmit','--target','ES2022','--module','NodeNext','--moduleResolution','NodeNext','--allowImportingTsExtensions','--skipLibCheck',...Array.from(outputs.keys()).filter(name=>name.endsWith('.ts')).map(name=>join(temp,'generated',name))],{cwd:temp});
   execFileSync('forge',['build','--root',temp,'--contracts','generated','--use','0.8.30','--via-ir','--optimize','--evm-version','cancun'],{cwd:temp,stdio:'pipe'});
  }finally{rmSync(temp,{recursive:true,force:true});}
 });

@@ -7,6 +7,8 @@ const reserved=new Set('constructor prototype __proto__ contract library struct 
 for(const keyword of 'break case catch class const continue debugger default do else export extends finally for if in instanceof let new switch throw try typeof var void while with yield await implements package protected static async as asserts any boolean declare get infer is keyof module namespace never readonly require number object set string symbol unique unknown from global of override out satisfies using constructor AT AcceptanceCore Fields RuleConfig makeCodec after alias apply auto byte copyof define final inline macro match mutable null partial promise reference relocatable sealed sizeof supports typedef'.split(' ')) reserved.add(keyword);
 for(const keyword of 'arguments eval anonymous indexed virtual emit revert transient layout hex unicode'.split(' ')) reserved.add(keyword);
 const ident=s=>typeof s==='string'&&/^[A-Za-z][A-Za-z0-9_]*$/.test(s)&&!reserved.has(s)&&!/^(?:u?int\d*|bytes\d*|u?fixed(?:\d+x\d+)?)$/.test(s);
+// Parameters share scope with emitted helper calls and local temporaries.
+const configReserved=new Set(['codeHash','r','core','expected','rid','shape','rule','kinds','descriptor','typeId','encode','decode','register','keccak256']);
 function exact(value,keys) { if(!value||typeof value!=='object'||Object.keys(value).sort().join()!==keys.sort().join()) throw Error('ambiguous declaration keys'); }
 function fields(fs,empty=false) {
   if(!Array.isArray(fs)||fs.length>8||(!empty&&!fs.length)) throw Error('field count');
@@ -19,7 +21,7 @@ export function validate(ds) {
     exact(d,['name','version','fields','rule']);
     if(!ident(d.name)||d.name==='makeCodec'||names.has(d.name.toLowerCase())||typeof d.version!=='string'||!d.version.trim()) throw Error('invalid or duplicate declaration');
     names.add(d.name.toLowerCase()); fields(d.fields);
-    if(d.rule!==null) { exact(d.rule,['artifact','label','config','local','mode','gasLimit']); fields(d.rule.config,true);fields(d.rule.local); if(d.rule.config.some(f=>['codeHash','r','core','expected'].includes(f.name))||!ident(d.rule.artifact)||typeof d.rule.label!=='string'||!d.rule.label||![1,2].includes(d.rule.mode)||!Number.isInteger(d.rule.gasLimit)||d.rule.gasLimit<25000||d.rule.gasLimit>500000) throw Error('invalid rule'); }
+    if(d.rule!==null) { exact(d.rule,['artifact','label','config','local','mode','gasLimit']); fields(d.rule.config,true);fields(d.rule.local); if(d.rule.config.some(f=>configReserved.has(f.name))||!ident(d.rule.artifact)||typeof d.rule.label!=='string'||!d.rule.label||![1,2].includes(d.rule.mode)||!Number.isInteger(d.rule.gasLimit)||d.rule.gasLimit<25000||d.rule.gasLimit>500000) throw Error('invalid rule'); }
   }
 }
 const canonical=d=>({name:d.name,version:d.version,fields:d.fields.map(f=>({name:f.name,kind:f.kind})),rule:d.rule&&{artifact:d.rule.artifact,label:d.rule.label,config:d.rule.config.map(f=>({name:f.name,kind:f.kind})),local:d.rule.local.map(f=>({name:f.name,kind:f.kind})),mode:d.rule.mode,gasLimit:d.rule.gasLimit}});
