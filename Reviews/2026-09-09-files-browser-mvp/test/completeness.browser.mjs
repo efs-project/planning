@@ -51,8 +51,9 @@ test('a partial listing cannot masquerade as a complete folder copy', { timeout:
       await page.click('#export');
       const download = await downloadPromise;
       const bundle = JSON.parse(await (await import('node:fs/promises')).readFile(await download.path(), 'utf8'));
-      assert.equal(bundle.coverage, 'COMPLETE');
-      assert.equal(bundle.rows.length, 40);
+      assert.equal(bundle.kind, 'EFS_FILES_EXPORT_V1');
+      assert.equal(bundle.coverage.listing, 'COMPLETE');
+      assert.equal(bundle.selection.length, 40);
 
       assert.deepEqual(errors, [], 'zero page errors');
       await context.close();

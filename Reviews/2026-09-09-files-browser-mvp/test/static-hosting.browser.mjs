@@ -44,8 +44,20 @@ test('static hosting: generic file server + direct RPC, no EFS endpoints', { tim
     await withUpgrade(async lab => {
       // World only — the EFS relay server is NEVER started in this suite.
       const { config, rpcUrl } = await startEnvironment(lab, { write: true, relay: false });
-      const exported = await exportStatic({ config, rpcUrl, outDir: dist });
-      assert(exported.written.includes('/config.json'), 'config.json exported');
+      // A DEFAULT static build is publishable: it must carry no signer keys.
+      const safe = await exportStatic({ config, rpcUrl, outDir: dist });
+      assert(safe.written.includes('/config.json'), 'config.json exported');
+      assert.equal(safe.disposableKeysIncluded, false, 'default build declares no keys');
+      const publishedConfig = await (await import('node:fs/promises')).readFile(join(dist, 'config.json'), 'utf8');
+      for (const author of Object.values(config.writeConfig.authors)) {
+        assert(!publishedConfig.includes(author.key), 'a default static build must never contain a signer private key');
+      }
+      assert(JSON.parse(publishedConfig).write.authors.A.principal, 'author identities are still published (only keys are withheld)');
+
+      // This suite then exercises the LOCAL write journey, which needs the
+      // fixture's disposable keys — an explicit, labeled opt-in.
+      const exported = await exportStatic({ config, rpcUrl, outDir: dist, includeDisposableKeys: true });
+      assert.equal(exported.disposableKeysIncluded, true);
       const statics = await startStaticServer({ root: dist });
 
       const context = await browser.newContext({ viewport: { width: 1280, height: 960 } });

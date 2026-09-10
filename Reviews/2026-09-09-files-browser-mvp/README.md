@@ -28,7 +28,29 @@ walkthrough drivable against real local v2 contracts:
   The carrier gains permissionless write-once content-addressed chunk staging
   (`stageChunk`, C0ChunkTree-law-validated, ≤1 MiB / 256 chunks).
   `FilesRouterV1.sol` is retained unchanged for history; the V1 gauntlet
-  still passes against it.
+  still passes against it. **`byteCommitment` is now enforced**, not merely
+  signed: the router derives it from the publication's own ChunkTree leaf for
+  createFile/edit (and checks the revision references that leaf), and requires
+  it to be zero for every other operation kind.
+- **`scripts/verify-export.mjs` + `sdk/export-bundle.mjs`** — authenticated
+  export (`EFS_FILES_EXPORT_V1`). The bundle carries the record graph, the
+  selection, content keyed by its ChunkTree id, the block header, the path
+  chain from the mount root, and the full pinned RPC transcript. The offline
+  verifier re-derives every commitment and labels each claim by what actually
+  establishes it: **SELF-CONSISTENT** (recomputed from the bundle's own bytes
+  — a fabricated-but-coherent bundle also reaches this tier),
+  **TRANSCRIPT-ATTESTED** (currency and existence, supported by the pinned
+  transcript, which is evidence rather than proof), **ANCHOR-DECLARED** (the
+  chain/block/Core/mount tuple the bundle cannot prove about itself) and
+  **NOT-PROVABLE-OFFLINE** (authorship provenance). `--recheck-manifest`
+  emits the consumed reads so any RPC endpoint you trust can replay them —
+  that replay, not the verifier, is what upgrades transcript claims.
+- **`web/wallet.mjs`** — the real-wallet path (EIP-1193). Sponsored mode:
+  **one** `eth_signTypedData_v4` request per operation, with an explicit,
+  replaceable sponsor submitting and paying; the sponsor cannot alter what was
+  signed and never builds a `claimPrincipal`. Direct mode is clearly labeled
+  and prompts once per transaction, honestly counted. Author, signer,
+  submitter and payer are separate roles.
 - **`sdk/files-actions.mjs`** — browser-portable five-seam actions: pure
   deterministic planning (apps never build leaf masks/CAS rows), explicit
   authorization, submission encoding, canonical read-back (only a fresh
@@ -88,9 +110,28 @@ walkthrough drivable against real local v2 contracts:
   exportable as copies).
 - `test/churn.perf.mjs` → `evidence/churn-perf.json` — churn-heavy and
   larger folders built through the ROUTED write path: the retained 64/60
-  shape 413 requests / 2.45 s at 50 ms (baseline: refusal at page 4, 7.7 s at
-  page 8); 512-lifetime/48-live 2,987 requests COMPLETE / 12.6 s at 50 ms;
-  300-live 3,409 requests COMPLETE / 13.3 s at 50 ms.
+  shape 414 requests / 2.43 s at 50 ms (baseline: refusal at page 4, 7.7 s at
+  page 8); 512-lifetime/48-live 2,988 requests COMPLETE / 12.3 s at 50 ms;
+  300-live 3,410 requests COMPLETE / 13.3 s at 50 ms. (Each count is one
+  request higher than the previous checkpoint: the priority lenses now
+  enumerate a third source principal — the one reserved for a wallet — which
+  costs exactly one page read per listing even though it holds no claims.)
+- `test/export-roundtrip.test.mjs` — a live world (multichunk **and** empty
+  file) exported through the same assembly the browser uses, verified offline
+  by the CLI in a separate process, then attacked: 15 hostile mutations
+  (tampered bytes, substituted record bodies, missing dependency, fabricated
+  basis, dummy evidence, orphan/missing content, forged header field,
+  contradictory transcript, renamed/retargeted selection, foreign-Core
+  transcript, hidden removal marker, case-duplicate key, odd-length bytes)
+  each refused. `test/export-verifier.test.mjs` pins the original defect: the
+  fabricated bundle from the 2026-09-10 review is refused, and V0 bundles are
+  rejected as unverifiable rather than silently re-certified.
+- `test/wallet.browser.mjs` — the wallet flow through an executable EIP-1193
+  harness whose key lives outside the page: sponsored mode proves exactly one
+  typed-data request per change with the wallet account's balance unchanged
+  and the sponsor's reduced; direct mode proves one prompt per transaction.
+  Cancellation, expiry and the served config (no sponsor key) are asserted.
+  This proves provider request counts and payloads — **not** real wallet UI.
 - `test/ux.browser.mjs` — 320px reachability, keyboard-only create,
   Escape-restores-opener, cancel-is-not-approval, 200% text.
 - `test/reader-extensions.test.mjs` — nested/content/history APIs vs the
@@ -122,6 +163,33 @@ grids. Deferred as known polish: a folder picker for Move (today: typed path
 with validation), collapsing row actions behind a menu at phone widths,
 border-contrast tuning on secondary buttons.
 
+## Corrections to earlier claims
+
+Four statements from the previous checkpoint were too strong, and are
+corrected here rather than quietly dropped:
+
+- **"Every write is an AuthorIntent" was wrong.** It is true of the supported
+  user path through FilesRouterV2. The upgraded Core still inherits the
+  operator-authorized `executeFixture` entrypoint from the foundation, so
+  privileged fixture/bootstrap writes remain possible. That is a declared
+  trust boundary of this prototype, not an untrusted-user exploit — and the
+  operator key is still never served to the browser.
+- **`claimPrincipal` is not production identity.** It binds an arbitrary
+  unclaimed id to `msg.sender`, first-come, once, with no ownership
+  derivation, migration or recovery. It is front-runnable by construction.
+  The fixture therefore *reserves* one principal for a wallet to claim, and
+  the app reports a squatted slot explicitly instead of silently deriving an
+  invisible identity.
+- **`byteCommitment` used to be signed metadata only.** It was not compared to
+  the publication. It is now enforced by the router (above); before this
+  change it constrained nothing on its own.
+- **Permissionless staging validates a caller-supplied commitment**, not a
+  previously admitted publication. Anyone may stage bytes for any
+  self-consistent tree. Content integrity, author admission and staging
+  economics are three separate things; the sponsor binds its *gas* to trees
+  named by an intent it verified, which is a funding policy, not a protocol
+  rule.
+
 ## Honest limits
 
 Folders beyond 512 lifetime names are unmeasured, and per-position enumeration
@@ -130,9 +198,11 @@ positions; a cheap current-folder listing needs contract-side aggregation —
 a design question, not a reader bug). Bytes cap at 1 MiB (256 × 4 KiB chunks);
 alternate-provider byte recovery is not built. Properties/typed tables,
 mirrors, collections, redirects, sorting and negative filters remain v1-parity
-gaps. Real-wallet prompts are untested — writes use counted simulated
-approvals on disposable local keys (simulated dialogs are NOT real-wallet
-evidence); the exact manual wallet test is in the handoff. Permissionless
+gaps. Real wallet **software** (MetaMask and friends) is still untested: the wallet
+suite drives a faithful EIP-1193 harness, which proves request counts,
+payloads and role separation but not another vendor's UI. The remaining
+manual gate is in the walkthrough. Simulated-signer dialogs remain simulated
+and are never counted as real-wallet evidence. Permissionless
 chunk staging means anyone may pay to stage committed bytes — spam costs the
 spammer gas and can only ever fill in exactly the committed content; pricing
 / incentives for who stages remain an open venue-economics question. All

@@ -46,7 +46,7 @@
     </section>
     <div class="boundaries">
       <p><strong>Upgradeable local testnet.</strong> The upgrade controller is the fixture deployment contract; an upgrade can replace the engine while keeping addresses and data. No immutable-hyperstructure claim.</p>
-      <p>Writes use clearly labeled <strong>disposable local test signers</strong> (simulated approvals, counted above) and a synthetic operator co-signature — not portable personal authorship. Real-wallet behavior is a separate manual test.</p>
+      <p>Writes are authorized by an <strong>EIP-712 author intent</strong> the Core verifies on-chain. Pick a clearly labeled <strong>disposable local test signer</strong> (simulated approvals, counted above) or a <strong>real wallet</strong>, which shows its own prompts — one signature per change when a sponsor is configured to submit and pay, otherwise one prompt per transaction, always labeled up front. Author identities here are claimed first-come by whoever asks first: fixture identity, not account ownership. The upgraded Core still keeps its operator-authorized fixture entrypoint, so this is the supported user path, not the contract's only write path.</p>
       <p id="delay"></p>
     </div>
   </main>

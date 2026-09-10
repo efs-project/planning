@@ -158,6 +158,7 @@ contract FilesRouterV2 {
 
     error ErrRoutedExecutor(address expected);
     error ErrOpCommitment(bytes32 expected, bytes32 got);
+    error ErrByteCommitment(bytes32 expected, bytes32 got);
     error ErrNameMalformed(uint8 code);
     error ErrNameUnsupported();
     error ErrParentNotDirectory(bytes32 node);
@@ -400,6 +401,10 @@ contract FilesRouterV2 {
         if (intent.executor != address(this)) revert ErrRoutedExecutor(intent.executor);
         bytes32 opCommitment = keccak256(abi.encode(op));
         if (intent.opCommitment != opCommitment) revert ErrOpCommitment(opCommitment, intent.opCommitment);
+        // The signed byteCommitment must equal the commitment derived from the
+        // ACTUAL publication's ChunkTree leaf for content-carrying kinds, and
+        // zero for every other kind. Without this it is unchecked metadata.
+        bytes32 expectedByteCommitment;
         Mount memory m = _mount(op.mountId);
         TypeIds memory T = typeIds;
         Purposes memory P = purposes;
@@ -416,10 +421,12 @@ contract FilesRouterV2 {
                 if (publication.leaves.length != 4) revert ErrTemplate(0, 3);
             } else if (op.kind == CREATE_FILE) {
                 (, objectId) = _leaf(publication, 0, T.objectGenesis);
-                (bytes memory tree,) = _leaf(publication, 2, T.chunkTree);
-                tree;
+                (bytes memory tree, bytes32 treeId) = _leaf(publication, 2, T.chunkTree);
                 (bytes memory rev,) = _leaf(publication, 3, T.fileRevision);
                 if (_word(rev, 0) != objectId) revert ErrTemplate(3, 4);
+                // The revision must reference the publication's OWN tree leaf.
+                if (_word(rev, 32) != treeId) revert ErrTemplate(3, 8);
+                expectedByteCommitment = keccak256(abi.encode(treeId, keccak256(tree)));
                 (bytes memory head,) = _leaf(publication, 4, T.bindingSet);
                 bytes32 revisionId = recordIdOf(T.fileRevision, rev);
                 if (!_binding(head, P.headPurpose, objectId, P.headRole, revisionId)) revert ErrTemplate(4, 5);
@@ -457,7 +464,9 @@ contract FilesRouterV2 {
             if (!_binding(head, P.headPurpose, op.object, P.headRole, recordIdOf(T.fileRevision, rev))) {
                 revert ErrTemplate(2, 5);
             }
-            _leaf(publication, 0, T.chunkTree);
+            (bytes memory tree, bytes32 treeId) = _leaf(publication, 0, T.chunkTree);
+            if (_word(rev, 32) != treeId) revert ErrTemplate(1, 8);
+            expectedByteCommitment = keccak256(abi.encode(treeId, keccak256(tree)));
             if (publication.leaves.length != 3) revert ErrTemplate(0, 3);
         } else if (op.kind == RENAME_MOVE) {
             _requireSupportedName(op.name);
@@ -545,6 +554,9 @@ contract FilesRouterV2 {
             revert ErrUnknownKind(op.kind);
         }
 
+        if (intent.byteCommitment != expectedByteCommitment) {
+            revert ErrByteCommitment(expectedByteCommitment, intent.byteCommitment);
+        }
         result = core.executeAuthorized(publication, expectedRevision, intent, authorSig);
         emit FilesOperation(op.kind, publication.header.principalId, result.envelopeId, result.acceptingBatchId);
     }

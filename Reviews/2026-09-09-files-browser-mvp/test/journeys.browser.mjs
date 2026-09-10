@@ -184,17 +184,24 @@ test('everyday loop in real Chromium: browse, create, edit, organize, explain, u
       await page.waitForSelector('#file-panel img.preview');
       await page.click('#close-file');
 
-      // 11. Export the folder and spot-check the bundle offline.
+      // 11. Export the folder, then INDEPENDENTLY verify the downloaded
+      //     bundle offline with the clean-reader CLI (a separate process,
+      //     no RPC): the authenticated-export round trip, end to end.
       const downloadPromise = page.waitForEvent('download');
       await page.click('#export');
       const download = await downloadPromise;
       const bundlePath = await download.path();
       const bundle = JSON.parse(await (await import('node:fs/promises')).readFile(bundlePath, 'utf8'));
-      assert.equal(bundle.kind, 'EFS_FILES_EXPORT_V0');
-      assert(bundle.rows.some(r => r.name === 'journal.md'));
-      const journal = Object.values(bundle.files).find(f => f.name === 'journal.md');
-      assert.equal(journal.integrity, 'VERIFIED');
-      assert(bundle.evidence.length > 0, 'raw evidence retained');
+      assert.equal(bundle.kind, 'EFS_FILES_EXPORT_V1');
+      const journal = bundle.selection.find(r => r.name === 'journal.md');
+      assert.equal(journal?.integrity, 'VERIFIED');
+      assert(bundle.records[journal.revisionRecordId], 'revision record retained');
+      assert(bundle.evidence.length > 0, 'raw transcript retained');
+      const { execFileSync } = await import('node:child_process');
+      const verdict = execFileSync(process.execPath, [new URL('../scripts/verify-export.mjs', import.meta.url).pathname, bundlePath], { encoding: 'utf8' });
+      assert.match(verdict, /OFFLINE verification complete relative to the DECLARED anchor/);
+      assert.match(verdict, /DirectoryEntry chain runs mount root/, 'subfolder export authenticates its path');
+      assert.match(verdict, /0 failed/);
 
       // 12. Upgrade the POPULATED contracts in place; same addresses, data survives,
       //     old citations readable, and a new write succeeds at revision 3.

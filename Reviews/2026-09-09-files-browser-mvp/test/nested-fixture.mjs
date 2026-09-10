@@ -2,7 +2,14 @@
 // staged verified bytes, revision history, a rename trail and authored tags.
 // Test-only composer over the shared foundation runner; not a second resolver.
 import assert from 'node:assert/strict';
-import { mountedFixture, cat, hash, tag, string, option, A, B, C } from '../../2026-09-09-files-reader/test/fixture.mjs';
+import { mountedFixture, cat, hash, tag, string, option, planBody, purposeScope, A, B, C } from '../../2026-09-09-files-reader/test/fixture.mjs';
+import { word } from '../../2026-09-05-c0-core/scripts/local-stateful.mjs';
+
+// A THIRD author identity, reserved for a real wallet to claim. It is left
+// UNCLAIMED on purpose: a wallet binds it once via claimPrincipal. Without a
+// reserved slot, a freshly claimed principal would author records that no
+// lens selects — invisible writes that look like data loss.
+export const WALLET_PRINCIPAL = word(0xfacadefacaden);
 
 export const HEAD = tag('purpose', 'files/revision-head/1');
 export const HEAD_ROLE = tag('fieldrole', 'files/current-revision/1');
@@ -70,5 +77,30 @@ export async function nestedFixture(lab) {
   await f.claim(A, 'kept.txt', extra);
   await f.claim(A, 'old.txt', extra, { whiteout: true });
 
-  return { ...f, photos, draft, extra, c1, c2, cp, cd, r1, r2, rp, rd };
+  // Re-mount the priority lenses so the reserved wallet identity is a real
+  // source. aFirst/bFirst gain it at the LOWEST priority (A and B keep
+  // precedence exactly as before); the content plan gains it so a
+  // wallet-authored file's revision head resolves. The `exact` lens is left
+  // untouched: it means unanimity, and a third never-claiming source would
+  // make every name ABSENT there.
+  async function walletVisibleMount(view) {
+    const sources = view === 'aFirst'
+      ? [{ principal: A, tier: 0 }, { principal: B, tier: 1 }, { principal: WALLET_PRINCIPAL, tier: 2 }]
+      : [{ principal: B, tier: 0 }, { principal: A, tier: 1 }, { principal: WALLET_PRINCIPAL, tier: 2 }];
+    const ns = f.leaf('ResolutionPlan/1', planBody(sources, { purpose: purposeScope('namespace', f.root) }));
+    const contentPlan = f.leaf('ResolutionPlan/1', planBody(
+      [{ principal: A, tier: 0 }, { principal: WALLET_PRINCIPAL, tier: 1 }], { purpose: purposeScope('content', f.root) }));
+    await f.admit([ns, contentPlan]);
+    const config = f.leaf('PublicFilesMountConfig/1', cat(option(f.id(ns)), f.id(contentPlan), option(null), option(null)));
+    await f.admit([config]);
+    const descriptor = f.leaf('MountDescriptor/1', cat(f.root, C.profile, f.id(config)));
+    await f.admit([descriptor]);
+    return { id: f.id(descriptor), plan: f.id(ns) };
+  }
+  for (const view of ['aFirst', 'bFirst']) {
+    const m = await walletVisibleMount(view);
+    f.mounts[view] = m.id; f.plans[view] = m.plan;
+  }
+
+  return { ...f, photos, draft, extra, c1, c2, cp, cd, r1, r2, rp, rd, walletPrincipal: WALLET_PRINCIPAL };
 }

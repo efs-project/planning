@@ -4,7 +4,9 @@
 import { createFixtureReader, openDirectory, openFile, openHistory, openRevisions, openRemoved, openTags, lookupName, FIXTURE, tagId } from '/Reviews/2026-09-09-files-reader/index.mjs';
 import { boundedJSON, createRPCSource, createDirectRPCSource, writePath, directWritePath } from './rpc-source.mjs';
 import { presentListing } from './listing-presentation.mjs';
-import { planOperation, decodeRouterError, decodeAuthorityError, latestBindingState, latestExecution, latestPrincipalNonce, latestChunkPresence, authorizeIntentV3, encodeExecuteV2, encodeStageChunk, byteCommitmentOf } from '/Reviews/2026-09-09-files-browser-mvp/sdk/files-actions.mjs';
+import { assembleExport } from '/Reviews/2026-09-09-files-browser-mvp/sdk/export-bundle.mjs';
+import { planOperation, decodeRouterError, decodeAuthorityError, latestBindingState, latestExecution, latestPrincipalNonce, latestPrincipalAccount, latestChunkPresence, authorizeIntentV3, encodeExecuteV2, encodeStageChunk, byteCommitmentOf, core3Interface } from '/Reviews/2026-09-09-files-browser-mvp/sdk/files-actions.mjs';
+import { detectProvider, principalFor, connect, signAuthorIntent, isRejection, sendTransaction, sponsorSubmit } from './wallet.mjs';
 import { Wallet } from '/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.js';
 
 const $ = id => document.getElementById(id), main = document.querySelector('main');
@@ -17,7 +19,9 @@ const fromHex = hex => new Uint8Array((hex.length - 2) / 2).map((_, i) => parseI
 let config, reader, scope, stream, cancel, generation = 0, current = null, busy = false, opener = null;
 let transport = null; // {source, write, mode: 'relay' | 'direct-static'}
 let path = [], acquisitions = 1, pubCounter = 0;
-const session = { signer: 'guest', wallet: null, principal: null, approvals: 0 };
+const session = { signer: 'guest', mode: 'guest', wallet: null, principal: null, account: null, approvals: 0, walletRequests: 0 };
+let provider = null; // real EIP-1193 provider, set at boot when present
+let outstandingIntent = null; // {nonce, deadline}: a signed approval that may still land
 let acquireChain = Promise.resolve();
 // The scope serializes top-level acquisitions; every reader call goes through here.
 function acquire(task) { const run = acquireChain.then(task, task); acquireChain = run.then(() => {}, () => {}); return run; }
@@ -25,13 +29,17 @@ function acquire(task) { const run = acquireChain.then(task, task); acquireChain
 // ---- session / prompts -----------------------------------------------------
 function updateSession() {
   const write = config.write;
-  $('signer-label').textContent = session.signer === 'guest' ? 'Guest · no wallet' : write.authors[session.signer].label + ' · simulated local signer';
+  $('signer-label').textContent = session.mode === 'wallet' ? 'Wallet ' + short(session.account) + ' · REAL EIP-1193 signer'
+    : session.signer === 'guest' ? 'Guest · no wallet' : write.authors[session.signer].label + ' · simulated local signer';
   $('signer-label').className = session.signer === 'guest' ? 'guest' : 'author';
-  $('prompts').textContent = session.approvals + ' approval' + (session.approvals === 1 ? '' : 's');
+  $('prompts').textContent = session.mode === 'wallet'
+    ? session.walletRequests + ' wallet request' + (session.walletRequests === 1 ? '' : 's')
+    : session.approvals + ' approval' + (session.approvals === 1 ? '' : 's');
   $('toolbar').hidden = session.signer === 'guest';
   main.dataset.signer = session.signer;
 }
 function countApproval() { session.approvals++; updateSession(); }
+function countWalletRequest() { session.walletRequests++; updateSession(); }
 
 // ---- consent dialog (the simulated wallet prompt) --------------------------
 function consent(title, facts) {
@@ -70,12 +78,14 @@ function toast(message, isError = false) {
 }
 
 // ---- the write pipeline ----------------------------------------------------
+async function waitReceipt(hash) {
+  for (let i = 0; i < 400; i++) { const r = await transport.write.receipt(hash); if (r) return r; await new Promise(ok => setTimeout(ok, 25)); }
+  throw Error('The network did not confirm in time. Nothing may have changed — read again.');
+}
 async function submitRaw(to, data, gasLimit, wallet = session.wallet) {
   const nonce = BigInt(await transport.write.transactionCount(wallet.address));
   const raw = await wallet.signTransaction({ chainId: 31337, nonce: Number(nonce), gasLimit, gasPrice: 2000000000n, to, data });
-  const hash = await transport.write.publish(raw);
-  for (let i = 0; i < 400; i++) { const r = await transport.write.receipt(hash); if (r) return r; await new Promise(ok => setTimeout(ok, 25)); }
-  throw Error('The network did not confirm in time. Nothing may have changed — read again.');
+  return waitReceipt(await transport.write.publish(raw));
 }
 function friendlyError(e) {
   const decoded = e?.data ? (decodeAuthorityError(e.data) ?? decodeRouterError(e.data)) : null;
@@ -109,6 +119,7 @@ async function runOperation(kindLabel, intent, facts) {
   main.dataset.writing = 'true';
   // Snapshot the signer at flow start: switching mid-flight must not swap keys.
   const signerWallet = session.wallet, signerPrincipal = session.principal, signerKey = session.signer;
+  const signerMode = session.mode, signerAccount = session.account;
   try {
     const write = config.write;
     const execution = await latestExecution(transport.write.callLatest, config.expected.core);
@@ -118,30 +129,91 @@ async function runOperation(kindLabel, intent, facts) {
     const chunkNote = content && content.chunkCount > 0
       ? [['Bytes', String((content.data.length - 2) / 2) + ' bytes in ' + content.chunkCount + ' chunk transaction' + (content.chunkCount === 1 ? '' : 's') + ', staged automatically — THIS single approval covers them']]
       : [];
-    const ok = await consent('Approve: ' + kindLabel, [...facts, ...chunkNote,
-      ['Records written', String(plan.publication.leaves.length) + ' (all at once or not at all)'],
-      ['Operation ID', short(plan.predicted.envelopeId)],
-      ['Signer', write.authors[signerKey].label + ' (disposable local key, author-signed intent)'],
-    ]);
-    if (!ok) { toast('Cancelled before submission; nothing was sent.'); return 'CANCELLED'; }
-    toast('Submitting… waiting for the network receipt.');
     const block = await transport.write.latestBlock();
-    const deadline = BigInt(block.timestamp) + 3600n;
+    const deadline = BigInt(block.timestamp) + 300n; // short: a signed intent is live authority until it expires
     const authorNonce = await latestPrincipalNonce(transport.write.callLatest, config.expected.core, signerPrincipal);
-    const { intent: signedIntent, signature } = await authorizeIntentV3(plan, {
-      authorWallet: signerWallet, core: config.expected.core, chainId: 31337,
-      executor: write.router, executorCodehash: write.routerCodehash,
-      executionSetId: execution.executionSetId, nonce: authorNonce, deadline,
-      byteCommitment: content ? byteCommitmentOf(content.treeId, content.tree.body) : undefined,
-    });
-    const receipt = await submitRaw(write.router, encodeExecuteV2(plan, execution.revision, signedIntent, signature), 16777216n, signerWallet);
+    const byteCommitment = content ? byteCommitmentOf(content.treeId, content.tree.body) : undefined;
+    let receipt, staged = { complete: true, done: 0, failed: 0 };
+    if (signerMode === 'wallet') {
+      // REAL wallet path: the wallet's OWN prompt is the approval — the app
+      // shows facts as context but never renders a simulated dialog here.
+      const sponsor = write.sponsor ?? null;
+      // A previously signed intent at this same one-time number may still be
+      // live (ambiguous submission): never request a second signature that
+      // races it — wait for the nonce to advance or the deadline to pass.
+      if (outstandingIntent && outstandingIntent.nonce === authorNonce && BigInt(block.timestamp) <= outstandingIntent.deadline) {
+        toast('An earlier signed approval with the same one-time number is still live until ' + new Date(Number(outstandingIntent.deadline) * 1000).toLocaleTimeString() + '. Waiting for it to land or expire before asking for a new signature — this prevents two approved operations racing for one slot.', true);
+        return null;
+      }
+      if (outstandingIntent && outstandingIntent.nonce !== authorNonce) outstandingIntent = null; // consumed or superseded
+      toast('Wallet approval: ' + kindLabel + ' — ' + (sponsor
+        ? 'ONE typed-data signature; the sponsor (' + sponsor.label + ', payer ' + short(sponsor.payer) + ') submits and pays. It cannot alter what you sign. The wallet shows commitment hashes: what they authorize is at most one Files operation for this author at this one-time number, on this chain and Core, before the deadline.'
+        : 'DIRECT mode: 1 signature plus ' + (1 + (content?.chunkCount ?? 0)) + ' transaction approval(s), paid by your account.'));
+      let signed;
+      try {
+        countWalletRequest(); // the prompt is shown whether or not it is approved
+        signed = await signAuthorIntent(provider, signerAccount, plan, {
+          core: config.expected.core, chainId: 31337,
+          executor: write.router, executorCodehash: write.routerCodehash,
+          executionSetId: execution.executionSetId, nonce: authorNonce, deadline, byteCommitment,
+        });
+      } catch (e) { if (isRejection(e)) { toast('Cancelled in the wallet; nothing was sent.'); return 'CANCELLED'; } throw e; }
+      const chunksBody = content && content.chunkCount > 0
+        ? content.chunks.map((chunkData, index) => ({ treeId: content.treeId, body: content.tree.body, index, chunkData, leaves: content.leaves })) : [];
+      if (sponsor) {
+        let result;
+        outstandingIntent = { nonce: authorNonce, deadline }; // live from the moment the signature leaves the wallet
+        try {
+          result = await sponsorSubmit(sponsor.url, { op: plan.op, publication: plan.publication, expectedRevision: execution.revision, intent: signed.intent, signature: signed.signature, chunks: chunksBody }, boundedJSON);
+        } catch (e) {
+          if (e.structured) { outstandingIntent = null; throw e; } // the sponsor answered and provably refused BEFORE submitting
+          // AMBIGUOUS submission: the sponsor connection failed. The signed
+          // intent's one-time number tells us whether it was consumed.
+          const nonceNow = await latestPrincipalNonce(transport.write.callLatest, config.expected.core, signerPrincipal).catch(() => null);
+          if (nonceNow !== null && nonceNow > authorNonce) { outstandingIntent = null; toast('The sponsor connection failed AFTER your approval was consumed. Reading back what actually landed…'); await refresh({}); return null; }
+          toast('The sponsor could not be reached. Your signed approval may still land until ' + new Date(Number(deadline) * 1000).toLocaleTimeString() + ' — treat this as PENDING, not failed. The app will not ask for a new signature for this slot until then.', true);
+          return null;
+        }
+        outstandingIntent = null;
+        receipt = { status: result.execute.status, transactionHash: result.execute.hash, gasUsed: result.execute.gasUsed, sponsored: true, payer: result.payer };
+        staged.done = result.chunks.filter(c => c.status === 'staged').length;
+        staged.failed = result.chunks.filter(c => c.status !== 'staged').length;
+        staged.complete = staged.failed === 0;
+      } else {
+        // DIRECT mode stages content FIRST: if anything stops midway, nothing
+        // was admitted — only harmless content-addressed bytes exist.
+        if (chunksBody.length) {
+          staged = await stageContent(content, null);
+          if (!staged.complete) { toast('Staging did not complete (' + staged.failed + ' chunk(s) failed); the admission was NOT submitted. Nothing is half-published — the staged bytes are inert until an admission references them.', true); return null; }
+        }
+        let hash;
+        try {
+          countWalletRequest();
+          hash = await sendTransaction(provider, { from: signerAccount, to: write.router, data: encodeExecuteV2(plan, execution.revision, signed.intent, signed.signature), gas: '0x1000000' });
+        } catch (e) { if (isRejection(e)) { toast('Signature given but the admission transaction was declined in the wallet; nothing was admitted. The signed approval simply expires unused at ' + new Date(Number(deadline) * 1000).toLocaleTimeString() + '.'); return 'CANCELLED'; } throw e; }
+        receipt = await waitReceipt(hash);
+      }
+    } else {
+      const ok = await consent('Approve: ' + kindLabel, [...facts, ...chunkNote,
+        ['Records written', String(plan.publication.leaves.length) + ' (all at once or not at all)'],
+        ['Operation ID', short(plan.predicted.envelopeId)],
+        ['Signer', write.authors[signerKey].label + ' (disposable local key, author-signed intent)'],
+      ]);
+      if (!ok) { toast('Cancelled before submission; nothing was sent.'); return 'CANCELLED'; }
+      toast('Submitting… waiting for the network receipt.');
+      const { intent: signedIntent, signature } = await authorizeIntentV3(plan, {
+        authorWallet: signerWallet, core: config.expected.core, chainId: 31337,
+        executor: write.router, executorCodehash: write.routerCodehash,
+        executionSetId: execution.executionSetId, nonce: authorNonce, deadline, byteCommitment,
+      });
+      receipt = await submitRaw(write.router, encodeExecuteV2(plan, execution.revision, signedIntent, signature), 16777216n, signerWallet);
+      // Content chunks stage AUTOMATICALLY under the same approval: staging is
+      // permissionless, content-addressed and write-once — no further consent
+      // exists to ask for. Interruption leaves a resumable file.
+      if (receipt.status === '0x1' && content && content.chunkCount > 0) staged = await stageContent(content, signerWallet);
+    }
     if (receipt.status !== '0x1') { toast('The transaction was mined but rejected; nothing was changed.', true); return null; }
-    // Content chunks stage AUTOMATICALLY under the same approval: staging is
-    // permissionless, content-addressed and write-once — no further consent
-    // exists to ask for. Interruption leaves a resumable file.
-    let staged = { complete: true, done: 0, failed: 0 };
     if (content && content.chunkCount > 0) {
-      staged = await stageContent(content, signerWallet);
       if (!staged.complete) pendingBytes.set(plan.op.kind === 3 ? plan.op.object : plan.predicted.objectId, { content, label: kindLabel });
       else pendingBytes.delete(plan.op.kind === 3 ? plan.op.object : plan.predicted.objectId);
     }
@@ -155,15 +227,83 @@ async function stageContent(content, wallet, onlyMissing = false) {
   if (onlyMissing) {
     try { present = await latestChunkPresence(transport.write.callLatest, config.write.carrier, content.treeId, content.chunkCount); } catch { present = []; }
   }
-  for (let i = 0; i < content.chunkCount; i++) {
-    if (present[i]) { done++; continue; }
-    toast('Staging bytes: chunk ' + (i + 1) + ' of ' + content.chunkCount + '…');
+  const missing = Array.from({ length: content.chunkCount }, (_, i) => i).filter(i => !present[i]);
+  done = content.chunkCount - missing.length;
+  if (session.mode === 'wallet' && config.write.sponsor) {
+    // Chunks-only sponsor request: staging is permissionless and covered by
+    // the already-signed byte commitment — no new wallet prompt exists.
+    toast('Staging ' + missing.length + ' chunk(s) via the sponsor…');
     try {
-      const receipt = await submitRaw(config.write.carrier, encodeStageChunk({ treeId: content.treeId, body: content.tree.body, index: i, chunkData: content.chunks[i], leaves: content.leaves }), 4000000n, wallet);
-      if (receipt.status === '0x1') done++; else failed++;
-    } catch { failed++; }
+      const result = await sponsorSubmit(config.write.sponsor.url, { chunks: missing.map(i => ({ treeId: content.treeId, body: content.tree.body, index: i, chunkData: content.chunks[i], leaves: content.leaves })) }, boundedJSON);
+      const staged = result.chunks.filter(c => c.status === 'staged').length;
+      return { complete: staged === missing.length, done: done + staged, failed: missing.length - staged };
+    } catch { return { complete: false, done, failed: missing.length }; }
+  }
+  for (const i of missing) {
+    toast('Staging bytes: chunk ' + (i + 1) + ' of ' + content.chunkCount + '…');
+    const data = encodeStageChunk({ treeId: content.treeId, body: content.tree.body, index: i, chunkData: content.chunks[i], leaves: content.leaves });
+    try {
+      if (session.mode === 'wallet') {
+        // Labeled DIRECT mode: each staging transaction is its own wallet
+        // prompt, paid by the wallet account.
+        countWalletRequest();
+        const hash = await sendTransaction(provider, { from: session.account, to: config.write.carrier, data, gas: '0x400000' });
+        const receipt = await waitReceipt(hash);
+        if (receipt.status === '0x1') done++; else failed++;
+      } else {
+        const receipt = await submitRaw(config.write.carrier, data, 4000000n, wallet);
+        if (receipt.status === '0x1') done++; else failed++;
+      }
+    } catch (e) { if (isRejection(e)) { failed += 1; toast('Staging stopped in the wallet; the file stays resumable.'); break; } failed++; }
   }
   return { complete: failed === 0, done, failed };
+}
+
+// ---- real wallet connection ------------------------------------------------
+async function walletConnectFlow() {
+  try {
+    provider = detectProvider(); // the FIRST touch of window.ethereum, on deliberate user action
+    if (!provider) throw Error('no EIP-1193 wallet is available in this browser');
+    countWalletRequest();
+    const { account } = await connect(provider, 31337);
+    toast('Wallet connected: ' + short(account) + '. Checking author identity…');
+    // Prefer the identity this fixture RESERVED for a wallet: it is a source
+    // in the mount's plans, so its writes are actually selected and readable.
+    // A derived identity is the fallback, and its writes would be invisible
+    // here — so a squatted reserved slot is reported, never silently swapped.
+    let principal = null, claimNeeded = false;
+    const reserved = config.write.walletPrincipal ?? null;
+    if (reserved) {
+      const owner = await latestPrincipalAccount(transport.write.callLatest, config.expected.core, reserved);
+      if (BigInt(owner) === 0n) { principal = reserved; claimNeeded = true; }
+      else if (owner.toLowerCase() === account.toLowerCase()) principal = reserved;
+      else throw Error('this fixture\u2019s reserved author identity is already claimed by ' + short(owner) + ', not your account. First-come claiming is a FIXTURE limitation, not production identity — restart the fixture for a fresh world.');
+    } else {
+      for (let salt = 0; salt < 4 && !principal; salt++) {
+        const candidate = principalFor(account, salt);
+        const owner = await latestPrincipalAccount(transport.write.callLatest, config.expected.core, candidate);
+        if (BigInt(owner) === 0n) { principal = candidate; claimNeeded = true; }
+        else if (owner.toLowerCase() === account.toLowerCase()) principal = candidate;
+      }
+      if (!principal) throw Error('no unclaimed author identity found for this account (first-come claiming is a fixture limitation, not production identity)');
+    }
+    if (claimNeeded) {
+      toast('One-time setup: the wallet will ask to send ONE claim transaction binding this author identity to your account (your account pays it).');
+      let hash;
+      try { countWalletRequest(); hash = await sendTransaction(provider, { from: account, to: config.expected.core, data: core3Interface.encodeFunctionData('claimPrincipal', [principal]), gas: '0x30000' }); }
+      catch (e) { if (isRejection(e)) throw Error('claim declined in the wallet; staying as guest'); throw e; }
+      const receipt = await waitReceipt(hash);
+      if (receipt.status !== '0x1') throw Error('the claim transaction was rejected on-chain');
+    }
+    session.signer = 'wallet'; session.mode = 'wallet'; session.wallet = null; session.principal = principal; session.account = account;
+    updateSession(); if (current) render(current);
+    toast(claimNeeded ? 'Author identity claimed. From here on: one wallet signature request per change' + (config.write.sponsor ? '; the sponsor pays the transactions.' : ' plus per-transaction approvals (no sponsor configured).')
+      : 'Wallet author ready: one signature request per change' + (config.write.sponsor ? '; the sponsor pays.' : ' (direct mode).'));
+  } catch (e) {
+    $('signer').value = 'guest';
+    session.signer = 'guest'; session.mode = 'guest'; session.wallet = null; session.principal = null; session.account = null;
+    updateSession(); toast(friendlyError(e), true);
+  }
 }
 const nameOf = () => path.at(-1), here = () => nameOf().subject;
 async function priorOf(purpose, subject, role) {
@@ -619,16 +759,27 @@ $('close-file').addEventListener('click', () => $('file-panel').close());
 async function exportFolder() {
   try {
     if (current?.coverage !== 'COMPLETE') { toast('Export refused: this listing is ' + (current?.coverage ?? 'unavailable') + ', not COMPLETE — a partial folder must not masquerade as a full copy. Load all rows first.', true); return; }
-    toast('Collecting the export bundle…');
-    const bundle = { kind: 'EFS_FILES_EXPORT_V0', exportedAt: new Date().toISOString(), basis: current.basis, mountId: config.mounts[$('lens').value], subject: here(), pathLabel: crumbText(), coverage: current.coverage, rows: [], files: {}, evidence: current.evidence };
-    for (const row of current.rows) {
-      bundle.rows.push({ name: row.value.name, kind: row.value.kind, nodeId: row.value.nodeId, selectedId: row.selectedId, fieldRole: row.fieldRole });
-      if (row.value.kind === 'FILE') {
-        const content = await acquire(() => openFile(scope, { mountId: config.mounts[$('lens').value], fileId: row.value.nodeId }));
-        if (content.outcome === 'FOUND') bundle.files[row.value.nodeId] = { name: row.value.name, revisionId: content.value.revisionId, mediaType: content.value.mediaType, charset: content.value.charset, totalSize: content.value.totalSize, integrity: content.value.integrity, bytes: content.value.bytes };
-        else bundle.files[row.value.nodeId] = { name: row.value.name, integrity: 'UNRESOLVED', partial: true };
-      }
-    }
+    toast('Collecting the authenticated export bundle…');
+    const mountId = config.mounts[$('lens').value];
+    const chainId = parseInt(await transport.source.request('eth_chainId', []), 16);
+    const header = await transport.source.request('eth_getBlockByNumber', ['0x' + current.basis.blockNumber.toString(16), false]);
+    if (!header || header.hash?.toLowerCase() !== current.basis.blockHash.toLowerCase()) throw Error('the transport returned a different block for the pinned height; export aborted');
+    const bundle = await assembleExport({
+      acquireRecord: id => acquire(() => scope.call('getRecord', [id])),
+      openFileById: id => acquire(() => openFile(scope, { mountId, fileId: id })),
+      sealScope: () => acquire(() => scope.seal()),
+      resolveEntry: async (parent, name) => {
+        const r = await acquire(() => lookupName(scope, { mountId, subject: parent, name }));
+        if (r.outcome !== 'FOUND') throw Error('the export path could not be re-authenticated at step ' + name);
+        return r.selectedId;
+      },
+      pathChain: path.slice(1).map(p => ({ name: p.name, subject: p.subject })),
+      rows: current.rows, listingCoverage: current.coverage,
+      basis: current.basis, header, chainId,
+      expected: { core: config.expected.core, carrier: config.expected.execution.carrier, source: config.expected.source },
+      mountId, subject: here(), pathLabel: crumbText(), planId: config.plans[$('lens').value],
+    });
+    bundle.exportedAt = new Date().toISOString();
     const blob = new Blob([JSON.stringify(bundle, (_, v) => typeof v === 'bigint' ? String(v) : v, 1)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = 'efs-export-' + String(current.basis.blockNumber) + '.json';
@@ -701,8 +852,9 @@ $('new-note').addEventListener('click', guarded(newNoteFlow));
 $('upload').addEventListener('change', guarded(e => { const f = e.target.files[0]; e.target.value = ''; return uploadFlow(f); }));
 $('signer').addEventListener('change', () => {
   const value = $('signer').value;
-  if (value === 'guest') { session.signer = 'guest'; session.wallet = null; session.principal = null; }
-  else { session.signer = value; session.wallet = new Wallet(config.write.authors[value].key); session.principal = config.write.authors[value].principal; }
+  if (value === 'wallet') { walletConnectFlow(); return; }
+  if (value === 'guest') { session.signer = 'guest'; session.mode = 'guest'; session.wallet = null; session.principal = null; session.account = null; }
+  else { session.signer = value; session.mode = 'simulated'; session.wallet = new Wallet(config.write.authors[value].key); session.principal = config.write.authors[value].principal; session.account = null; }
   updateSession(); if (current) render(current);
 });
 addEventListener('pagehide', () => { generation++; cancel?.abort(); stream?.close(); scope?.close(); });
@@ -727,6 +879,13 @@ try {
   path = [{ name: config.rootLabel ?? 'trip', subject: config.root }];
   if (config.write) for (const [key, author] of Object.entries(config.write.authors)) {
     const option = text('option', author.label + ' (local test signer)'); option.value = key; $('signer').append(option);
+  }
+  if (config.write) {
+    // The option is offered without probing for a provider: reading
+    // window.ethereum at boot would be wallet discovery, which guest
+    // browsing must never do. Detection happens on deliberate selection.
+    const option = text('option', 'Real wallet (EIP-1193, ' + (config.write.sponsor ? 'sponsored' : 'direct') + ')');
+    option.value = 'wallet'; $('signer').append(option);
   }
   const query = new URLSearchParams(location.search);
   const lens = query.get('lens');

@@ -17,11 +17,11 @@
    "delayMs": 0,
    "coverage": "COMPLETE",
    "rowsVisible": 4,
-   "requests": 443,
-   "bytes": 632280,
+   "requests": 444,
+   "bytes": 633180,
    "roundTrips": 264,
    "widestBatch": 15,
-   "elapsedMs": 138.8
+   "elapsedMs": 146.2
   },
   {
    "arm": "churn64",
@@ -31,11 +31,11 @@
    "delayMs": 50,
    "coverage": "COMPLETE",
    "rowsVisible": 4,
-   "requests": 443,
-   "bytes": 632280,
+   "requests": 444,
+   "bytes": 633180,
    "roundTrips": 264,
    "widestBatch": 15,
-   "elapsedMs": 4228.5
+   "elapsedMs": 4181.1
   },
   {
    "arm": "churn64",
@@ -45,11 +45,11 @@
    "delayMs": 0,
    "coverage": "COMPLETE",
    "rowsVisible": 4,
-   "requests": 413,
-   "bytes": 613488,
+   "requests": 414,
+   "bytes": 614388,
    "roundTrips": 304,
    "widestBatch": 16,
-   "elapsedMs": 130.6
+   "elapsedMs": 134.3
   },
   {
    "arm": "churn64",
@@ -59,11 +59,11 @@
    "delayMs": 50,
    "coverage": "COMPLETE",
    "rowsVisible": 4,
-   "requests": 413,
-   "bytes": 613488,
+   "requests": 414,
+   "bytes": 614388,
    "roundTrips": 304,
    "widestBatch": 16,
-   "elapsedMs": 2454.2
+   "elapsedMs": 2434.3
   },
   {
    "arm": "churn512",
@@ -73,11 +73,11 @@
    "delayMs": 0,
    "coverage": "COMPLETE",
    "rowsVisible": 48,
-   "requests": 2987,
-   "bytes": 2324952,
+   "requests": 2988,
+   "bytes": 2325852,
    "roundTrips": 2416,
    "widestBatch": 16,
-   "elapsedMs": 1050.5
+   "elapsedMs": 1065
   },
   {
    "arm": "churn512",
@@ -87,11 +87,11 @@
    "delayMs": 50,
    "coverage": "COMPLETE",
    "rowsVisible": 48,
-   "requests": 2987,
-   "bytes": 2324952,
+   "requests": 2988,
+   "bytes": 2325852,
    "roundTrips": 2416,
    "widestBatch": 16,
-   "elapsedMs": 12570.1
+   "elapsedMs": 12313.1
   },
   {
    "arm": "wide300",
@@ -101,11 +101,11 @@
    "delayMs": 0,
    "coverage": "COMPLETE",
    "rowsVisible": 300,
-   "requests": 3409,
-   "bytes": 2379136,
+   "requests": 3410,
+   "bytes": 2380036,
    "roundTrips": 3044,
    "widestBatch": 16,
-   "elapsedMs": 1012.4
+   "elapsedMs": 1150.2
   },
   {
    "arm": "wide300",
@@ -115,11 +115,11 @@
    "delayMs": 50,
    "coverage": "COMPLETE",
    "rowsVisible": 300,
-   "requests": 3409,
-   "bytes": 2379136,
+   "requests": 3410,
+   "bytes": 2380036,
    "roundTrips": 3044,
    "widestBatch": 16,
-   "elapsedMs": 13266.1
+   "elapsedMs": 13289
   }
  ]
 }

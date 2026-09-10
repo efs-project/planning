@@ -1,6 +1,6 @@
 // Shared local environment: seeded world + router + browser server.
 // Used by the interactive runner, the browser journeys and the walkthrough.
-import { Interface } from '../../2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js';
+import { Interface, Wallet } from '../../2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js';
 import { word } from '../../2026-09-05-c0-core/scripts/local-stateful.mjs';
 import { nestedFixture } from '../test/nested-fixture.mjs';
 import { routerFixture, compileRouter } from '../test/router-fixture.mjs';
@@ -12,7 +12,9 @@ const READ_CONTROLS = ['bootstrap', 'configuration', 'currentRevision', 'revisio
   'getRecord', 'getOccurrence', 'getOccurrenceByOrdinal', 'getBindingHead', 'getBindingAtBasis', 'readHistory', 'pagePostingsHydrated', 'resolve', 'validatePlan', 'hasFixtureBytes', 'readFixtureBytes',
   'chunkStatus', 'hasChunk', 'readChunk'];
 
-export async function startEnvironment(lab, { write = true, relay = true } = {}) {
+export async function startEnvironment(lab, { write = true, relay = true, sponsor = true } = {}) {
+  const sponsorWallet = new Wallet(word(0x5905905905n));
+  await lab.rpc('anvil_setBalance', [sponsorWallet.address, '0x3635c9adc5dea00000']);
   const f = await nestedFixture(lab);
   const r = await routerFixture(lab); // pre-upgrade continuity + type group
   const auth = await authorityFixture(lab); // revision-3 authority world
@@ -35,6 +37,13 @@ export async function startEnvironment(lab, { write = true, relay = true } = {})
       label: 'DISPOSABLE_LOCAL_TEST_SIGNERS',
       authorityVersion: 3,
       router: auth.router, routerCodehash: auth.routerCodehash, carrier, core: lab.core,
+      // Explicit, replaceable submitter+payer for wallet-signed intents.
+      // Only the ADDRESS and endpoint are served; the key stays server-side.
+      ...(sponsor ? { sponsor: { url: '/sponsor', payer: sponsorWallet.address, label: 'Local disposable sponsor (pays gas, cannot alter signed intents)' } } : {}),
+      // The author identity a real wallet may claim. Reserved and UNCLAIMED:
+      // it is a source in the aFirst/bFirst plans, so wallet-authored files
+      // are actually visible and readable. No key — the wallet holds it.
+      walletPrincipal: f.walletPrincipal,
       // NO operator key: the author-intent signature is the only authority
       // the served app can exercise.
       authors: {
@@ -56,8 +65,8 @@ export async function startEnvironment(lab, { write = true, relay = true } = {})
   const rpcUrl = auth.expected.source.replace(/^managed-anvil:/, '');
   const server = relay ? await startBrowserServer({
     config, rpc: lab.rpc, addresses, selectors: [...selectors],
-    write: write ? { router: auth.router, carrier, core: lab.core, latestSelectors } : null,
+    write: write ? { router: auth.router, carrier, core: lab.core, latestSelectors, ...(sponsor ? { sponsorKey: sponsorWallet.privateKey } : {}) } : null,
   }) : null;
-  return { f, r, auth, server, config, rpcUrl };
+  return { f, r, auth, server, config, rpcUrl, sponsor: sponsorWallet };
 }
 export { compileRouter };

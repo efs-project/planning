@@ -46,7 +46,8 @@ measured number in those trees; nothing here is prose-only.
    real local v2 contracts: guest zero-wallet nested browse, verified bytes
    (re-hashed before display) with historical revisions, create/edit/rename/
    move/copy-vs-placement/remove-restore/attributed tags, Lens disagreement
-   with explanations, offline-verifiable export, and a **live U1→U2 upgrade
+   with explanations, offline-verifiable export *(WRONG — see the
+   correction at the end of this file)*, and a **live U1→U2 upgrade
    of populated contracts followed by a new write**. Authority and all Files
    preconditions (NOREPLACE, stale CAS, cycles, restore collisions) are
    enforced **on-chain in FilesRouterV1** at ~0.7% gas overhead — tests
@@ -152,3 +153,43 @@ production Type ships them (the 9/64 collapse applies).
   with buffered output); the pinned solc 0.8.30 and rehearsal node_modules
   are the shared toolchain; `withUpgrade` now takes `watchdogMs` for
   long-lived environments.
+
+---
+
+## Correction — 2026-09-10: the export claim above was wrong
+
+"Offline-verifiable export" did not hold when this report was written, and
+the error was mine, not a misreading.
+
+**What was actually true at `92f2d6b`:** the browser emitted
+`EFS_FILES_EXPORT_V0`, and `scripts/verify-export.mjs` hashed the bundle's own
+inputs without ever comparing them to an authenticated expected commitment.
+It checked that a revision id was 66 characters long and that the evidence
+array was non-empty. A bundle of fabricated bytes with zeroed ids, a zeroed
+basis and `evidence: [{}]` therefore printed **"Clean offline verification:
+no RPC, no cache, no index"** and exited 0. Hashing an input without
+comparing it establishes nothing.
+
+**Who caught it:** the data-readiness reconciliation
+(`Reviews/2026-09-10-data-readiness-reconciliation.md`, PM worktree
+`codex/mvp-c0-coherence` at `cf352ed`), which reproduced the counterexample
+directly rather than taking the report's word for it. That was the right call
+and it is the reason the repair exists.
+
+**What was done about it:** the counterexample was first pinned as a failing
+regression (`test/export-verifier.test.mjs`), then the exporter and verifier
+were rebuilt as `EFS_FILES_EXPORT_V1` with tiered trust language — see
+[integration-notes.md](integration-notes.md) and the Evidence section of
+[README.md](README.md). Fifteen hostile bundle variants are now refused, and
+V0 bundles are rejected as unverifiable rather than silently re-certified.
+
+**What still is not true, stated plainly:** a fabricated-but-internally-
+coherent bundle still passes the self-consistency tier; record existence and
+revision currency are *transcript-attested*, not proven offline; and the
+trust anchor is *declared*, not proven. Closing that last gap needs
+`eth_getProof` state proofs, which are not built. Read the verifier's tier
+labels, not its exit code.
+
+Everything else in this report predates that repair; treat any other claim
+about export or offline recovery here as superseded by the README and
+acceptance ledger at the current checkpoint.

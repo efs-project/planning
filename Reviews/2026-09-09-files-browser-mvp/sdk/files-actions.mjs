@@ -382,6 +382,10 @@ export async function latestAuthorNonce(callLatest, router, principal) {
 export async function latestPrincipalNonce(callLatest, core, principal) {
   return BigInt(await callLatest(core, core3Interface.encodeFunctionData('principalNonce', [principal])));
 }
+export async function latestPrincipalAccount(callLatest, core, principal) {
+  const result = await callLatest(core, core3Interface.encodeFunctionData('principalAccount', [principal]));
+  return '0x' + result.slice(26);
+}
 export async function latestChunkPresence(callLatest, carrier, treeId, chunkCount) {
   const present = [];
   for (let i = 0; i < chunkCount; i++) {

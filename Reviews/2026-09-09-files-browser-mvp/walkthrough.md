@@ -76,12 +76,45 @@ clearly labeled disposable key; every approval is counted.
 - Switch signer to **Author B**, tag the same file, switch back to A and
   remove A's tag: B's tag survives — tags are attributed, not global.
 
+## 4b · Use a real wallet (3 min, optional)
+
+If you have a browser wallet, add its network as `http://127.0.0.1:<the anvil
+port printed at startup>`, chain id **31337**, then pick **Real wallet** in
+the signer menu. What you should see:
+
+1. The wallet asks to connect (1 request).
+2. A one-time **claim** transaction binding this fixture's reserved author
+   identity to your account — your account pays this one; it is setup, not a
+   per-change cost.
+3. From then on, **one signature request per change** — no transaction
+   prompts at all — because an explicitly named local sponsor submits and
+   pays. The sponsor cannot alter what you signed; it can only decline.
+
+The counter top-right switches to counting **wallet requests**, not simulated
+approvals. If no sponsor is configured, the app says **direct** up front and
+prompts once per transaction — it never silently degrades from one signature
+into signature-plus-transactions.
+
+**Honest gap:** the automated suite drives a faithful EIP-1193 harness, which
+proves the request counts and payloads but not a specific wallet's UI. The
+manual check that remains: confirm the popup shows domain *EFS Files
+Authority*, chain 31337, and that the tally matches the list above.
+
 ## 5 · Export and upgrade (3 min)
 
-- **Export folder** downloads a JSON bundle (files + evidence + basis). Verify
-  it with no server running:
+- **Export folder** downloads an authenticated bundle (records, selection,
+  content, block header, path chain and the full pinned read transcript).
+  Verify it with no server running:
   `node scripts/verify-export.mjs ~/Downloads/efs-export-*.json`
-  — the bytes re-hash offline against their on-chain commitments.
+  Read the verdict carefully — it deliberately does **not** say "verified"
+  flatly. It separates what it recomputed from the bundle's own bytes
+  (record ids, chunk trees, the selection graph), what only the retained
+  transcript attests (which revision is *current*, whether the listing is
+  complete), and what you must confirm yourself (the chain, block hash, Core
+  address and mount). Add `--recheck-manifest out.json` to get the exact
+  reads to replay against any node you trust; that replay is what turns
+  transcript claims into verified ones. Try tampering with a byte of
+  `content` and re-running it: the bundle is refused, not downgraded.
 - In the terminal, type `u` + Enter: the **populated** contracts upgrade in
   place (same addresses, next revision). Back in the browser hit **Read
   again**: everything is still there, the footer shows the new host revision,
@@ -93,12 +126,17 @@ clearly labeled disposable key; every approval is counted.
 ## What you are looking at (honesty box)
 
 - Guest reads: zero prompts, zero wallet code paths (tests assert it).
-- Writes: **simulated approvals** with disposable local keys. Each approval
-  is a real EIP-712 author signature verified **on-chain by the Core**
-  (per-account nonce, deadline, executor binding): replaying it, submitting
-  it around the router, or altering the operation are all refused by the
-  contracts, not the UI — the authority suite proves each refusal. The
-  operator key is never served to the browser.
+- Writes: either **simulated approvals** with disposable local keys, or a
+  **real wallet**. Either way the approval is an EIP-712 author signature
+  verified **on-chain by the Core** (per-account nonce, deadline, executor
+  binding): replaying it, submitting it around the router, or altering the
+  operation are all refused by the contracts, not the UI — the authority
+  suite proves each refusal. The operator key is never served to the browser.
+- What that does **not** mean: the upgraded Core still inherits the
+  operator-authorized fixture entrypoint, so "every write is an author
+  intent" is true of *this* user path, not of the contract as a whole. And
+  author identities here are claimed first-come by whoever asks first — that
+  is fixture identity, not account ownership.
 - All preconditions (occupied names, stale edits, folder cycles, restore
   collisions) are enforced **by the router contract**, not the UI — the
   tests submit around the UI to prove it.
