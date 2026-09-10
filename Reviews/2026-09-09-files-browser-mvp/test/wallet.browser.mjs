@@ -105,7 +105,8 @@ test('sponsored wallet flow: one signature per change, sponsor pays, honest fail
 
       // The served config must not leak the sponsor key.
       const served = await page.evaluate(() => fetch('/config').then(r => r.json()));
-      assert(!JSON.stringify(served).includes('sponsorKey'), 'sponsor key must never be served');
+      assert(!JSON.stringify(served).includes(sponsor.privateKey), 'the sponsor private key must never be served');
+      assert(!JSON.stringify(served).includes('sponsorKey'), 'no sponsor key field is served either');
       assert.equal(served.write.sponsor.payer, sponsor.address, 'sponsor payer address is public');
 
       // Connect: real provider prompts — accounts, then the ONE-TIME claim tx.

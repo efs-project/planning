@@ -282,6 +282,7 @@ export const ROUTER2_ABI = [
   'function execute(' + OP_TUPLE + ' op,' + PUBLICATION_TUPLE + ' publication,uint32 expectedRevision,' + INTENT_TUPLE + ' intent,bytes authorSig) returns (tuple(bytes32 envelopeId,uint64 envelopeOrdinal,uint64 acceptingBatchId,tuple(uint16 leafIndex,uint8 outcome,uint64 admissionOrdinal)[] leaves))',
   'error ErrRoutedExecutor(address expected)',
   'error ErrOpCommitment(bytes32 expected,bytes32 got)',
+  'error ErrByteCommitment(bytes32 expected,bytes32 got)',
   ...ROUTER_ABI.filter(f => f.startsWith('error') && !/ErrUnauthorizedAuthor|ErrAuthorNonce|ErrExpired|ErrPrincipalClaimed/.test(f)),
 ];
 export const router2Interface = new Interface(ROUTER2_ABI);

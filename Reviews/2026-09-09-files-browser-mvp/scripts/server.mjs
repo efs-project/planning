@@ -36,6 +36,10 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
   // author intent it has verified this session. Permissionless staging stays
   // permissionless on-chain; the sponsor's GAS is not permissionless.
   const sponsorApprovedTrees = new Set();
+  // Sponsor submissions are serialized: two overlapping requests would read
+  // the same `pending` transaction count and sign colliding nonces.
+  let sponsorQueue = Promise.resolve();
+  const serialize = work => { const run = sponsorQueue.then(work, work); sponsorQueue = run.then(() => {}, () => {}); return run; };
   const targets = new Set(addresses.map(a => a.toLowerCase()));
   const methods = new Set(selectors);
   // write: {router, carrier, core, latestSelectors:[...]} enables the labeled write path.
@@ -113,7 +117,8 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
         // lives here, server-side, and is never served to the page.
         if (!write?.sponsorKey) return send(403, json({ error: 'no sponsor configured' }));
         if (!body || typeof body !== 'object') return send(400, json({ error: 'sponsor request refused' }));
-        const { op, publication, expectedRevision, intent, signature, chunks: chunkStages } = body;
+        const { op, publication, expectedRevision, intent, signature, content: tree, chunks: chunkStages } = body;
+        let broadcast = false; // set the instant anything is actually sent
         try {
           // Rebuild ALL calldata server-side from the typed pieces (named
           // tuples encode from plain objects): the client cannot smuggle
@@ -121,8 +126,13 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
           // sponsor NEVER builds a claimPrincipal — identity claims must come
           // from the wallet account itself.
           const executeData = !publication ? null : router2Interface.encodeFunctionData('execute', [op, publication, Number(expectedRevision), intent, signature]);
-          const stages = (Array.isArray(chunkStages) ? chunkStages : []).slice(0, 256).map(c =>
-            carrier3Interface.encodeFunctionData('stageChunk', [c.treeId, c.body, Number(c.index), c.chunkData, c.leaves]));
+          // The tree (body + leaves) arrives ONCE for the whole request; a
+          // per-chunk copy made a large upload O(N^2) and exceeded the body
+          // limit before it could ever be sponsored.
+          const list = Array.isArray(chunkStages) ? chunkStages.slice(0, 256) : [];
+          if (list.length && (!tree || typeof tree.treeId !== 'string')) throw Error('sponsor refused: chunk request is missing its content tree');
+          const stages = list.map(c => ({ index: Number(c.index),
+            data: carrier3Interface.encodeFunctionData('stageChunk', [tree.treeId, tree.body, Number(c.index), c.chunkData, tree.leaves]) }));
           const leafIds = publication ? publication.leaves.map(l => ordinaryRecord(l.typeId, l.body)) : null;
           if (executeData) {
             // Author authenticity preflight: the principal must be a claimed
@@ -136,14 +146,16 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
           } else if (!stages.length) throw Error('sponsor refused: nothing to submit');
           // The sponsor pays only for staging bound to a verified intent —
           // either a leaf of THIS publication or one approved earlier.
-          for (const c of (Array.isArray(chunkStages) ? chunkStages : []).slice(0, 256)) {
-            const covered = (leafIds && leafIds.includes(String(c.treeId).toLowerCase())) || sponsorApprovedTrees.has(String(c.treeId).toLowerCase());
-            if (!covered) throw Error('sponsor refused: chunk tree ' + String(c.treeId).slice(0, 14) + '… is not covered by a verified author intent this session');
+          if (list.length) {
+            const treeId = String(tree.treeId).toLowerCase();
+            const covered = (leafIds && leafIds.includes(treeId)) || sponsorApprovedTrees.has(treeId);
+            if (!covered) throw Error('sponsor refused: chunk tree ' + treeId.slice(0, 14) + '… is not covered by a verified author intent this session');
           }
           const submit = async (to, data, gasLimit) => {
             const nonce = Number(BigInt(await rpc('eth_getTransactionCount', [sponsorWallet.address, 'pending'])));
             const raw = await sponsorWallet.signTransaction({ chainId: 31337, nonce, gasLimit, gasPrice: 2000000000n, to, data });
             const hash = await rpc('eth_sendRawTransaction', [raw]);
+            broadcast = true; // from here a refusal is AMBIGUOUS, never "not submitted"
             for (let i = 0; i < 400; i++) { const r = await rpc('eth_getTransactionReceipt', [hash]); if (r) return r; await new Promise(ok => setTimeout(ok, 25)); }
             throw Error('sponsor transaction not confirmed in time');
           };
@@ -153,7 +165,14 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
           // record whose bytes cannot be read.
           const staged = [];
           let stagedOk = 0;
-          for (const data of stages) {
+          for (const { index, data } of stages) {
+            // Already-present chunks are free: write-once staging makes a
+            // repeat a no-op, so paying for it again is pure waste (and this
+            // is exactly what resume needs).
+            try {
+              const present = await rpc('eth_call', [{ to: write.carrier, data: carrier3Interface.encodeFunctionData('hasChunk', [tree.treeId, index]), gas: '0x100000' }, 'latest']);
+              if (BigInt(present) === 1n) { staged.push({ status: 'staged', alreadyPresent: true }); stagedOk++; continue; }
+            } catch { /* fall through and let the normal path decide */ }
             try { await rpc('eth_call', [{ to: write.carrier, data, from: sponsorWallet.address, gas: '0x400000' }, 'latest']); }
             catch (e) { staged.push({ status: 'refused', error: e.message, data: e.data ?? null }); continue; }
             const r = await submit(write.carrier, data, 4000000n);
@@ -161,6 +180,7 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
             if (r.status === '0x1') stagedOk++;
           }
           if (executeData && stagedOk < stages.length) throw Error('sponsor refused: staging incomplete (' + stagedOk + '/' + stages.length + ' chunks); the admission was NOT submitted, nothing is half-published');
+          // (staging and admission run inside the serialized section above)
           const executeReceipt = executeData ? await submit(write.router, executeData, 16777216n) : null;
           trace.push({ method: 'sponsor', to: write.router.toLowerCase(), bytes: size });
           return send(200, json({ result: {
@@ -168,7 +188,12 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
             execute: executeReceipt ? { hash: executeReceipt.transactionHash, status: executeReceipt.status, gasUsed: String(BigInt(executeReceipt.gasUsed)) } : null,
             chunks: staged,
           } }));
-        } catch (e) { return send(502, json({ error: e.message, data: e.data ?? null })); }
+        } catch (e) {
+          // `submitted` tells the caller whether anything actually went out:
+          // a refusal AFTER broadcast is ambiguous, and the page must treat
+          // its signed intent as still live rather than provably unused.
+          return send(502, json({ error: e.message, data: e.data ?? null, submitted: broadcast }));
+        }
       }
       if (path === '/rpc-batch') {
         if (!body || !Array.isArray(body.batch) || body.batch.length === 0 || body.batch.length > 64) return send(400, json({ error: 'batch shape refused' }));

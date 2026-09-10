@@ -35,6 +35,9 @@ function updateSession() {
   $('prompts').textContent = session.mode === 'wallet'
     ? session.walletRequests + ' wallet request' + (session.walletRequests === 1 ? '' : 's')
     : session.approvals + ' approval' + (session.approvals === 1 ? '' : 's');
+  $('prompts').setAttribute('aria-label', session.mode === 'wallet'
+    ? 'Counted real wallet requests (EIP-1193)'
+    : 'Counted simulated approvals with the disposable local test key');
   $('toolbar').hidden = session.signer === 'guest';
   main.dataset.signer = session.signer;
 }
@@ -106,6 +109,7 @@ function friendlyError(e) {
     ErrIntentExpired: 'The approval expired before submission. Start the change again.',
     ErrExecutorBinding: 'This signed approval only works through its named router.',
     ErrOpCommitment: 'The submitted operation does not match what was approved. Refused.',
+    ErrByteCommitment: 'The approved content commitment does not match the bytes in this operation. Refused.',
     ErrChunkImmutable: 'Different bytes were already staged at this position; content is write-once.',
     ErrChunkLeafMismatch: 'These bytes do not match the committed content. Refused.',
   };
@@ -130,7 +134,13 @@ async function runOperation(kindLabel, intent, facts) {
       ? [['Bytes', String((content.data.length - 2) / 2) + ' bytes in ' + content.chunkCount + ' chunk transaction' + (content.chunkCount === 1 ? '' : 's') + ', staged automatically — THIS single approval covers them']]
       : [];
     const block = await transport.write.latestBlock();
-    const deadline = BigInt(block.timestamp) + 300n; // short: a signed intent is live authority until it expires
+    // A local chain only advances its clock when it mines, so the latest
+    // block can sit far behind wall clock: deriving a deadline from it alone
+    // can mint an already-expired intent, and can wedge the guard below
+    // forever. Take whichever clock is further ahead.
+    const wallClock = BigInt(Math.floor(Date.now() / 1000));
+    const now = BigInt(block.timestamp) > wallClock ? BigInt(block.timestamp) : wallClock;
+    const deadline = now + 300n; // short: a signed intent is live authority until it expires
     const authorNonce = await latestPrincipalNonce(transport.write.callLatest, config.expected.core, signerPrincipal);
     const byteCommitment = content ? byteCommitmentOf(content.treeId, content.tree.body) : undefined;
     let receipt, staged = { complete: true, done: 0, failed: 0 };
@@ -138,10 +148,18 @@ async function runOperation(kindLabel, intent, facts) {
       // REAL wallet path: the wallet's OWN prompt is the approval — the app
       // shows facts as context but never renders a simulated dialog here.
       const sponsor = write.sponsor ?? null;
+      // The unanimity lens resolves only what A and B agree on. A wallet
+      // author is not one of its sources, so a write made here would be
+      // admitted on-chain and then selected by nothing — the
+      // confirms-but-unreadable shape. Refuse it with the reason.
+      if ($('lens').value === 'exact') {
+        toast('The Both-agree lens only shows what Author A and Author B agree on, and your wallet identity is not one of its sources. A change made here would be committed on-chain and then visible to nobody, so it is refused. Switch to A-first or B-first to write.', true);
+        return null;
+      }
       // A previously signed intent at this same one-time number may still be
       // live (ambiguous submission): never request a second signature that
       // races it — wait for the nonce to advance or the deadline to pass.
-      if (outstandingIntent && outstandingIntent.nonce === authorNonce && BigInt(block.timestamp) <= outstandingIntent.deadline) {
+      if (outstandingIntent && outstandingIntent.nonce === authorNonce && now <= outstandingIntent.deadline) {
         toast('An earlier signed approval with the same one-time number is still live until ' + new Date(Number(outstandingIntent.deadline) * 1000).toLocaleTimeString() + '. Waiting for it to land or expire before asking for a new signature — this prevents two approved operations racing for one slot.', true);
         return null;
       }
@@ -158,15 +176,21 @@ async function runOperation(kindLabel, intent, facts) {
           executionSetId: execution.executionSetId, nonce: authorNonce, deadline, byteCommitment,
         });
       } catch (e) { if (isRejection(e)) { toast('Cancelled in the wallet; nothing was sent.'); return 'CANCELLED'; } throw e; }
+      // Live from the moment the signature exists, whichever submitter is
+      // used: a direct send can be just as ambiguous as a sponsored one.
+      outstandingIntent = { nonce: authorNonce, deadline };
+      // The tree travels ONCE per request, not per chunk.
+      const treePayload = content && content.chunkCount > 0
+        ? { treeId: content.treeId, body: content.tree.body, leaves: content.leaves } : null;
       const chunksBody = content && content.chunkCount > 0
-        ? content.chunks.map((chunkData, index) => ({ treeId: content.treeId, body: content.tree.body, index, chunkData, leaves: content.leaves })) : [];
+        ? content.chunks.map((chunkData, index) => ({ index, chunkData })) : [];
       if (sponsor) {
         let result;
-        outstandingIntent = { nonce: authorNonce, deadline }; // live from the moment the signature leaves the wallet
         try {
-          result = await sponsorSubmit(sponsor.url, { op: plan.op, publication: plan.publication, expectedRevision: execution.revision, intent: signed.intent, signature: signed.signature, chunks: chunksBody }, boundedJSON);
+          result = await sponsorSubmit(sponsor.url, { op: plan.op, publication: plan.publication, expectedRevision: execution.revision, intent: signed.intent, signature: signed.signature, content: treePayload, chunks: chunksBody }, boundedJSON);
         } catch (e) {
-          if (e.structured) { outstandingIntent = null; throw e; } // the sponsor answered and provably refused BEFORE submitting
+          // Only a refusal that provably predates broadcast clears the guard.
+          if (e.structured && !e.submitted) { outstandingIntent = null; throw e; }
           // AMBIGUOUS submission: the sponsor connection failed. The signed
           // intent's one-time number tells us whether it was consumed.
           const nonceNow = await latestPrincipalNonce(transport.write.callLatest, config.expected.core, signerPrincipal).catch(() => null);
@@ -190,8 +214,9 @@ async function runOperation(kindLabel, intent, facts) {
         try {
           countWalletRequest();
           hash = await sendTransaction(provider, { from: signerAccount, to: write.router, data: encodeExecuteV2(plan, execution.revision, signed.intent, signed.signature), gas: '0x1000000' });
-        } catch (e) { if (isRejection(e)) { toast('Signature given but the admission transaction was declined in the wallet; nothing was admitted. The signed approval simply expires unused at ' + new Date(Number(deadline) * 1000).toLocaleTimeString() + '.'); return 'CANCELLED'; } throw e; }
+        } catch (e) { if (isRejection(e)) { outstandingIntent = null; toast('Signature given but the admission transaction was declined in the wallet; nothing was admitted, and the approval was never broadcast.'); return 'CANCELLED'; } throw e; }
         receipt = await waitReceipt(hash);
+        outstandingIntent = null;
       }
     } else {
       const ok = await consent('Approve: ' + kindLabel, [...facts, ...chunkNote,
@@ -234,7 +259,10 @@ async function stageContent(content, wallet, onlyMissing = false) {
     // the already-signed byte commitment — no new wallet prompt exists.
     toast('Staging ' + missing.length + ' chunk(s) via the sponsor…');
     try {
-      const result = await sponsorSubmit(config.write.sponsor.url, { chunks: missing.map(i => ({ treeId: content.treeId, body: content.tree.body, index: i, chunkData: content.chunks[i], leaves: content.leaves })) }, boundedJSON);
+      const result = await sponsorSubmit(config.write.sponsor.url, {
+        content: { treeId: content.treeId, body: content.tree.body, leaves: content.leaves },
+        chunks: missing.map(i => ({ index: i, chunkData: content.chunks[i] })),
+      }, boundedJSON);
       const staged = result.chunks.filter(c => c.status === 'staged').length;
       return { complete: staged === missing.length, done: done + staged, failed: missing.length - staged };
     } catch { return { complete: false, done, failed: missing.length }; }
@@ -658,9 +686,12 @@ function renderContent(body, row, content, revisionLabel = 'current') {
     if (pending && session.signer !== 'guest') {
       const retry = text('button', 'Stage missing bytes now', 'row-button'); retry.type = 'button';
       retry.addEventListener('click', async () => {
-        const staged = await stageContent(pending.content, session.wallet, true).catch(e => { toast(friendlyError(e), true); return { complete: false }; });
-        if (staged.complete) { pendingBytes.delete(row.value.nodeId); $('file-panel').close(); toast('All bytes staged and verifiable; open the file again.'); }
-        else toast('Some chunks are still missing (' + (staged.failed ?? '?') + ' failed). Try again.', true);
+        retry.disabled = true; // staging is in flight: a second click would re-send every chunk
+        try {
+          const staged = await stageContent(pending.content, session.wallet, true).catch(e => { toast(friendlyError(e), true); return { complete: false }; });
+          if (staged.complete) { pendingBytes.delete(row.value.nodeId); $('file-panel').close(); toast('All bytes staged and verifiable; open the file again.'); }
+          else toast('Some chunks are still missing (' + (staged.failed ?? '?') + ' failed). Try again.', true);
+        } finally { retry.disabled = false; }
       });
       section.append(retry);
     }
@@ -775,6 +806,9 @@ async function exportFolder() {
       },
       pathChain: path.slice(1).map(p => ({ name: p.name, subject: p.subject })),
       rows: current.rows, listingCoverage: current.coverage,
+      // Positions the lens could not resolve are NOT in rows; carrying the
+      // count stops a COMPLETE listing from implying a complete file set.
+      unresolvedPositions: (current.unresolved ?? []).length,
       basis: current.basis, header, chainId,
       expected: { core: config.expected.core, carrier: config.expected.execution.carrier, source: config.expected.source },
       mountId, subject: here(), pathLabel: crumbText(), planId: config.plans[$('lens').value],

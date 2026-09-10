@@ -30,7 +30,7 @@
 // Usage: node scripts/verify-export.mjs <efs-export-*.json> [--recheck-manifest <out.json>]
 import { readFileSync, writeFileSync } from 'node:fs';
 import { keccak256, AbiCoder, toUtf8Bytes, concat, getBytes, encodeRlp } from '../../2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js';
-import { assessRecord, ordinaryRecord } from '../../2026-09-09-files-reader/files-profile.mjs';
+import { assessRecord, ordinaryRecord, FIXTURE } from '../../2026-09-09-files-reader/files-profile.mjs';
 
 const abi = AbiCoder.defaultAbiCoder();
 const file = process.argv[2];
@@ -128,6 +128,8 @@ if (mount) {
 }
 
 // ---- SELF-CONSISTENT · selection graph, content, in-bundle contradictions -
+const seenNames = new Set();
+const tally = { verified: 0, empty: 0, unavailable: 0, total: 0 };
 const liveObjects = new Map(); // objectId -> row name (for contradiction sweep)
 const liveRevisions = new Map(); // revisionRecordId -> row name
 const liveEntries = new Map(); // entryRecordId -> row name
@@ -141,10 +143,18 @@ for (const item of bundle.selection ?? []) {
     && entry.fields.child.toLowerCase() === String(item.objectId).toLowerCase(),
     label + ': entry record binds this subject, name and object [SELF-CONSISTENT]')) continue;
   if (entry.fields.mountOverride) { fail(label + ': mountOverride entries are outside EFS_FILES_EXPORT_V1 scope'); continue; }
+  if (seenNames.has(item.name)) { fail(label + ': two live rows claim the same name in one directory'); continue; }
+  seenNames.add(item.name);
+  // The declared kind is exporter narrative. The ObjectGenesis meaning the
+  // bundle already carries is what actually settles file vs directory — and
+  // without this, a file could be relabelled a folder to drop its bytes.
+  if (!check(genesis.fields.meaning === (item.kind === 'FILE' ? FIXTURE.fileMeaning : FIXTURE.directoryMeaning),
+    label + ': ObjectGenesis meaning matches the declared kind [SELF-CONSISTENT]')) continue;
   liveObjects.set(String(item.objectId).toLowerCase(), item.name);
   liveEntries.set(String(item.entryRecordId).toLowerCase(), item.name);
   if (item.kind !== 'FILE') { console.log('  --   ' + item.name + '/: folder — coverage NOT-COVERED (children absent from this shallow bundle)'); continue; }
-  if (item.integrity !== 'VERIFIED') { partial++; console.log('  --   ' + item.name + ': ' + item.integrity + ' (content explicitly NOT included/verified)'); continue; }
+  tally.total++;
+  if (item.integrity !== 'VERIFIED') { partial++; tally.unavailable++; console.log('  --   ' + item.name + ': ' + item.integrity + ' (content explicitly NOT included/verified)'); continue; }
   const revision = need(item.revisionRecordId, 'FileRevision/1', label);
   if (!revision) continue;
   liveRevisions.set(String(item.revisionRecordId).toLowerCase(), item.name);
@@ -164,19 +174,26 @@ for (const item of bundle.selection ?? []) {
     const canonical = chunkSize === 262144 && chunkCount === 0 && merkleRoot === EMPTY_ROOT
       && records[treeId].body.toLowerCase() === EMPTY_TREE_BODY;
     if (!check(canonical, label + ': empty-content record is the exact canonical tuple')) continue;
-    check(data.length === 0, label + ': declared empty and the included bytes are empty [SELF-CONSISTENT]');
+    if (!check(data.length === 0, label + ': declared empty and the included bytes are empty [SELF-CONSISTENT]')) continue;
+    tally.empty++;
   } else {
     const lawful = chunkSize >= 4096 && chunkSize % 4096 === 0 && chunkCount <= 256
       && BigInt(chunkCount) === (totalSize - 1n) / BigInt(chunkSize) + 1n;
     if (!check(lawful, label + ': ChunkTree geometry follows the carrier law (size ' + totalSize + ', ' + chunkCount + ' × ' + chunkSize + ')')) continue;
     if (BigInt(data.length) !== totalSize) { fail(label + ': included bytes are ' + data.length + ', record commits to ' + totalSize); continue; }
     const computed = foldChunks(data, chunkSize);
-    check(computed.count === chunkCount && computed.root === merkleRoot,
-      label + ': ' + totalSize + ' bytes re-chunk (by the record\'s own geometry) and fold to the committed root ' + merkleRoot.slice(0, 14) + '… [SELF-CONSISTENT]');
+    // A failed fold must stop this row: nothing below may describe these
+    // bytes as proven, and nothing may decode them for display.
+    if (!check(computed.count === chunkCount && computed.root === merkleRoot,
+      label + ': ' + totalSize + ' bytes re-chunk (by the record\'s own geometry) and fold to the committed root ' + merkleRoot.slice(0, 14) + '… [SELF-CONSISTENT]')) continue;
+    if (!check(String(item.totalSize ?? totalSize) === String(totalSize), label + ': declared size matches the ChunkTree commitment')) continue;
+    tally.verified++;
   }
   console.log('        currency: bytes proven for revision ' + item.revisionRecordId.slice(0, 14) + '…; that this revision is CURRENT is transcript-attested only');
-  if ((item.mediaType ?? '').startsWith('text/') && bytes !== '0x') {
-    try { console.log('        text: ' + JSON.stringify(new TextDecoder(item.charset ?? 'utf-8', { fatal: true }).decode(data)).slice(0, 80)); } catch {}
+  // Media type and charset come from the authenticated revision record, not
+  // from the exporter's row.
+  if ((revision.fields.mediaType ?? '').startsWith('text/') && bytes !== '0x') {
+    try { console.log('        text: ' + JSON.stringify(new TextDecoder(revision.fields.charset ?? 'utf-8', { fatal: true }).decode(data)).slice(0, 80)); } catch {}
   }
 }
 for (const treeId of Object.keys(content)) {
@@ -237,9 +254,15 @@ const recheck = [];
 for (const entry of evidence) {
   if (!entry || typeof entry.method !== 'string' || !Array.isArray(entry.params)) { unpinned++; continue; }
   const blockArg = entry.params.find(p => p && typeof p === 'object' && 'blockHash' in p);
-  if (blockArg) {
-    if (blockArg.blockHash?.toLowerCase() === trust.blockHash?.toLowerCase() && blockArg.requireCanonical === true) pinned++;
-    else { unpinned++; continue; }
+  const isPinned = !!blockArg && blockArg.blockHash?.toLowerCase() === trust.blockHash?.toLowerCase() && blockArg.requireCanonical === true;
+  // A STATEFUL read with no canonical pin is not evidence about the declared
+  // block at all: it must never witness a record, and must never enter the
+  // recheck manifest (replaying it would hit the endpoint's current head).
+  if (['eth_call', 'eth_getCode', 'eth_getStorageAt'].includes(entry.method)) {
+    if (!isPinned) { unpinned++; continue; }
+    pinned++;
+  } else if (blockArg) {
+    if (isPinned) pinned++; else { unpinned++; continue; }
   }
   if (entry.method === 'eth_call' && typeof entry.params[0]?.data === 'string') recheck.push({ method: entry.method, params: entry.params });
   if (entry.method === 'eth_call' && entry.params[0]?.data?.startsWith(GET_RECORD) && typeof entry.result === 'string') {
@@ -264,8 +287,12 @@ check(unbacked.length === 0 && pinned > 0,
 // ---- coverage axes, each with its true tier -------------------------------
 const cov = bundle.coverage ?? {};
 if (cov.listing !== 'COMPLETE') { partial++; console.log('  --   listing coverage ' + cov.listing + ' (exporter-reported): the row set is NOT known complete; absence of a name proves nothing'); }
-else console.log('  --   listing coverage COMPLETE — exporter-reported and transcript-attested at the declared block; NOT provable offline');
-console.log('  --   content: ' + (cov.content?.verified ?? 0) + ' verified, ' + (cov.content?.empty ?? 0) + ' empty, ' + (cov.content?.unavailable ?? 0) + ' explicitly unavailable of ' + (cov.content?.total ?? 0) + ' files');
+else console.log('  --   listing coverage COMPLETE — EXPORTER-REPORTED. This program cross-checks record existence against the transcript, and nothing else: the reads that would establish listing completeness and revision currency (resolve / getBindingHead / pagePostingsHydrated) are NOT matched here. Replay the recheck manifest to test them.');
+if (cov.unresolvedPositions) { partial++; console.log('  --   ' + cov.unresolvedPositions + ' position(s) in this folder were CONFLICT/UNKNOWN at export and are absent from the selection: a complete listing is not a complete set of resolved files'); }
+// Coverage counters are recomputed here, never echoed.
+check(tally.verified === (cov.content?.verified ?? -1) && tally.empty === (cov.content?.empty ?? -1)
+  && tally.unavailable === (cov.content?.unavailable ?? -1) && tally.total === (cov.content?.total ?? -1),
+  'content coverage: recomputed ' + tally.verified + ' verified / ' + tally.empty + ' empty / ' + tally.unavailable + ' unavailable of ' + tally.total + ' files matches the bundle\'s own counters');
 console.log('  --   authority: NOT-PROVABLE-OFFLINE — principal attribution is transcript-attested; author signatures were checked (if at all) at admission time on-chain and are not exportable; operator-era admissions are indistinguishable from author-intent admissions in record content');
 
 // ---- recheck manifest ------------------------------------------------------

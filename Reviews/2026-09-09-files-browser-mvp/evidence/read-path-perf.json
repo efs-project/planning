@@ -1,51 +1,52 @@
+{
  "samples": [
   {
    "delayMs": 0,
    "qualify": {
-    "elapsedMs": 73.3,
+    "elapsedMs": 15.8,
     "requests": 36
    },
    "rootListing": {
-    "elapsedMs": 126.9,
-    "requests": 56
+    "elapsedMs": 28.9,
+    "requests": 57
    },
    "childNavigationSharedScope": {
-    "elapsedMs": 50.4,
-    "requests": 28
+    "elapsedMs": 9.9,
+    "requests": 29
    },
    "openVerifiedFile": {
-    "elapsedMs": 16,
+    "elapsedMs": 3.3,
     "requests": 9
    },
    "childNavigationFreshScope": {
-    "elapsedMs": 90,
-    "requests": 82
+    "elapsedMs": 14.9,
+    "requests": 83
    },
-   "totalBytes": 352089
+   "totalBytes": 353633
   },
   {
    "delayMs": 50,
    "qualify": {
-    "elapsedMs": 653.2,
+    "elapsedMs": 325,
     "requests": 36
    },
    "rootListing": {
-    "elapsedMs": 1193,
-    "requests": 56
+    "elapsedMs": 1169,
+    "requests": 57
    },
    "childNavigationSharedScope": {
-    "elapsedMs": 712,
-    "requests": 28
+    "elapsedMs": 718.6,
+    "requests": 29
    },
    "openVerifiedFile": {
-    "elapsedMs": 322.1,
+    "elapsedMs": 333.9,
     "requests": 9
    },
    "childNavigationFreshScope": {
-    "elapsedMs": 1497.7,
-    "requests": 82
+    "elapsedMs": 1537.2,
+    "requests": 83
    },
-   "totalBytes": 352089
+   "totalBytes": 353633
   }
  ],
  "exclusions": [
@@ -53,14 +54,6 @@
   "finality",
   "production SLA",
   "large-folder churn (retained control in files-reader-scale)"
- ]
+ ],
+ "note": "Measured against the current nested fixture, whose aFirst/bFirst plans carry the reserved wallet principal as a third namespace source and a second content source; each listing step costs one page read more than the 2026-09-09 baseline."
 }
-✔ navigation and content read costs, shared scope vs fresh scope (16432.304167ms)
-ℹ tests 1
-ℹ suites 0
-ℹ pass 1
-ℹ fail 0
-ℹ cancelled 0
-ℹ skipped 0
-ℹ todo 0
-ℹ duration_ms 16883.871667

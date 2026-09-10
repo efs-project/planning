@@ -3,7 +3,7 @@
 // bundle. Assembly is NOT verification — scripts/verify-export.mjs re-derives
 // everything independently; this module only gathers and labels honestly.
 import { keccak256 } from '../../2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.js';
-import { assessRecord, ordinaryRecord, TYPES } from '../../2026-09-09-files-reader/files-profile.mjs';
+import { assessRecord, ordinaryRecord, TYPES, FIXTURE } from '../../2026-09-09-files-reader/files-profile.mjs';
 
 export const EXPORT_KIND = 'EFS_FILES_EXPORT_V1';
 
@@ -12,7 +12,7 @@ export const EXPORT_KIND = 'EFS_FILES_EXPORT_V1';
 // acquire queue; tests call the scope directly).
 export async function assembleExport({
   acquireRecord, openFileById, sealScope, resolveEntry = null,
-  rows, listingCoverage, basis, header, chainId, expected,
+  rows, listingCoverage, unresolvedPositions = 0, basis, header, chainId, expected,
   mountId, subject, pathLabel, planId, pathChain = [],
 }) {
   const records = {};
@@ -58,13 +58,21 @@ export async function assembleExport({
   const contentCoverage = { verified: 0, empty: 0, unavailable: 0, total: 0 };
   for (const row of rows) {
     const entry = await collect(row.selectedId, 'DirectoryEntry/1');
-    await collect(row.value.nodeId, 'ObjectGenesis/1');
+    const genesis = await collect(row.value.nodeId, 'ObjectGenesis/1');
+    // Kind is taken from the authenticated genesis record, not the row.
+    const kind = genesis.fields.meaning === FIXTURE.fileMeaning ? 'FILE'
+      : genesis.fields.meaning === FIXTURE.directoryMeaning ? 'DIRECTORY' : null;
+    if (!kind) throw Error('object has no recognised meaning and cannot be exported: ' + row.value.name);
+    if (kind !== row.value.kind) throw Error('listing row kind disagrees with the object genesis: ' + row.value.name);
     const item = {
-      name: row.value.name, kind: row.value.kind, fieldRole: row.fieldRole,
+      name: row.value.name, kind, fieldRole: row.fieldRole,
       entryRecordId: row.selectedId.toLowerCase(), objectId: row.value.nodeId.toLowerCase(),
     };
     if (entry.fields.child.toLowerCase() !== item.objectId) throw Error('listing row disagrees with its own entry record: ' + row.value.name);
-    if (row.value.kind === 'FILE') {
+    // Refuse at EXPORT exactly what the verifier refuses, with a name
+    // attached — never hand back a download that cannot verify.
+    if (entry.fields.mountOverride) throw Error('mountOverride placements are outside EFS_FILES_EXPORT_V1: ' + row.value.name);
+    if (kind === 'FILE') {
       contentCoverage.total++;
       const file = await openFileById(row.value.nodeId);
       if (file.outcome === 'FOUND' && file.value.integrity === 'VERIFIED') {
@@ -97,12 +105,16 @@ export async function assembleExport({
       // The DECLARED external anchor. The bundle cannot prove this anchor;
       // a verifier reports everything as conditional on it.
       chainId, blockNumber: String(basis.blockNumber), blockHash: basis.blockHash,
-      executionSetId: basis.executionSetId, revision: basis.revision,
+      executionSetId: basis.executionSetId, revision: String(basis.revision),
       header, expected: { core: expected.core, carrier: expected.carrier, source: expected.source },
     },
     scope: { mountId: mountId.toLowerCase(), subject: subject.toLowerCase(), pathLabel, pathChain: chainOut, planId, shallow: true },
     coverage: {
       listing: listingCoverage,
+      // Positions that were CONFLICT/UNKNOWN at export: a COMPLETE listing is
+      // not the same as a fully resolved one, and dropping them silently
+      // would let an export imply those files do not exist.
+      unresolvedPositions,
       content: contentCoverage,
       evidence: { entries: seal.evidence.length, sealed: true },
     },

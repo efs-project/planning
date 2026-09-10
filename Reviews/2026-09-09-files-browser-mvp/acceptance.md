@@ -35,12 +35,14 @@ Escape-restores-opener, cancel-is-not-approval, 200% text without clipping.
 Real-device and WAN behavior untested.
 
 Read-path measurements (`evidence/read-path-perf.json`, loopback, 0/50 ms
-injected per-RPC delay): qualify 36 requests (653 ms at 50 ms), full root
-listing 56 requests (1,193 ms), **folder navigation on the shared pinned
-scope 28 requests / 712 ms vs 82 requests for a fresh scope** (the simple
-candidate the correctness-first ruling asked to compare — no segment
-machinery needed at ordinary folder sizes), verified file open 9 requests /
-322 ms. Deep-churn behavior unchanged (row 2).
+injected per-RPC delay, re-measured 2026-09-10): qualify 36 requests (325 ms
+at 50 ms), full root listing 57 requests (1169 ms), **folder navigation on the
+shared pinned scope 29 requests / 718.6 ms vs 83 requests for a fresh scope**
+(the simple candidate the correctness-first ruling asked to compare — no
+segment machinery needed at ordinary folder sizes), verified file open 9
+requests / 333.9 ms. Each listing step costs one page read more than the
+2026-09-09 baseline: that is the reserved wallet principal being enumerated
+as a third namespace source. Deep-churn behavior unchanged (row 2).
 
 Static builds withhold signer keys by default (`export-static.mjs` whitelists
 config fields and refuses to write a build containing a disposable author

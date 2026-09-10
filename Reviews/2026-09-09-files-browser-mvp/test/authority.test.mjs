@@ -81,6 +81,17 @@ test('author-account authorization with routed consent binding', { timeout: 9000
     await auth.execute({ kind: 'createDir', mountId, parent: f.root, name: 'late', principal: auth.A },
       { expectError: 'ErrIntentExpired', patchIntent: s => { s.intent.deadline = 1n; } });
 
+    // 8b. byteCommitment is ENFORCED, not merely signed. The router derives
+    //     it from the publication's own ChunkTree leaf, so a stray value on a
+    //     contentless op and a forged value on a content op are both refused
+    //     before Core ever verifies the signature.
+    await auth.execute({ kind: 'createDir', mountId, parent: f.root, name: 'stray-commit', principal: auth.A },
+      { expectError: 'ErrByteCommitment', patchIntent: s => { s.intent.byteCommitment = '0x' + '99'.repeat(32); } });
+    await auth.execute({
+      kind: 'createFile', mountId, parent: f.root, name: 'wrong-commit.txt', principal: auth.A,
+      bytesHex: '0x' + 'cd'.repeat(4096), byteCommitment: '0x' + '99'.repeat(32),
+    }, { expectError: 'ErrByteCommitment' });
+
     // 9. Multi-chunk file: 10 KiB note (3 chunks) staged permissionlessly with
     //    an interruption (chunk 1 first skipped, then resumed), then admitted
     //    with ONE author signature carrying the byte commitment.

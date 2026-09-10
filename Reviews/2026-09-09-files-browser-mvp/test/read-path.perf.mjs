@@ -3,6 +3,7 @@
 // 0 ms / 50 ms injected per-RPC delay. Labeled loopback measurements only.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { writeFileSync } from 'node:fs';
 import { compileUpgrade, withUpgrade } from '../../2026-09-08-upgradeable-foundation/scripts/local-upgrade.mjs';
 import { nestedFixture } from './nested-fixture.mjs';
 import { createFixtureReader, openDirectory, openFile } from '../../2026-09-09-files-reader/index.mjs';
@@ -55,6 +56,12 @@ test('navigation and content read costs, shared scope vs fresh scope', { timeout
       });
       scope.close(); scope2.close();
     }
+    // Persist the evidence the way churn.perf.mjs does. Printing only is how
+    // this file's numbers silently went stale once already: the fixture grew
+    // a third namespace source and the retained JSON kept the old counts.
+    out.note = 'Measured against the current nested fixture, whose aFirst/bFirst plans carry the reserved wallet principal as a third namespace source and a second content source; each listing step costs one page read more than the 2026-09-09 baseline.';
+    writeFileSync(new URL('../evidence/read-path-perf.json', import.meta.url), JSON.stringify(out, null, 1));
     console.log(JSON.stringify(out, null, 1));
+    console.log('evidence/read-path-perf.json written');
   }, { profile: 'reads' });
 });

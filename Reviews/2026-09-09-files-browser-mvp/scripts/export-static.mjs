@@ -10,8 +10,9 @@ const json = x => JSON.stringify(x, (_, v) => typeof v === 'bigint' ? String(v) 
 
 // A static build is a PUBLISHABLE artifact: by default it carries NO signer
 // keys. The fixture's disposable local keys are included only on explicit
-// opt-in, and the result is scanned either way — a published build must never
-// contain a private key, even a disposable one.
+// opt-in; a default build is scanned for every key the caller knows about
+// before it is written. A published build must never contain a private key,
+// even a disposable one.
 export async function exportStatic({ config, rpcUrl, outDir, includeDisposableKeys = false }) {
   if (typeof rpcUrl !== 'string' || !/^https?:\/\//.test(rpcUrl)) throw Error('exportStatic requires an explicit rpcUrl');
   const written = [];
@@ -29,7 +30,13 @@ export async function exportStatic({ config, rpcUrl, outDir, includeDisposableKe
     label: writeConfig.label, authorityVersion: writeConfig.authorityVersion,
     router: writeConfig.router, routerCodehash: writeConfig.routerCodehash,
     carrier: writeConfig.carrier, core: writeConfig.core,
-    ...(writeConfig.sponsor ? { sponsor: writeConfig.sponsor } : {}),
+    // Whitelisted field by field (a spread would publish anything added
+    // later), and omitted entirely unless the sponsor is reachable from a
+    // static host — a relative '/sponsor' exists only in the local relay, so
+    // publishing it would advertise sponsored mode that cannot work.
+    ...(writeConfig.sponsor && /^https?:\/\//.test(writeConfig.sponsor.url ?? '')
+      ? { sponsor: { url: writeConfig.sponsor.url, payer: writeConfig.sponsor.payer, label: writeConfig.sponsor.label } }
+      : {}),
     ...(writeConfig.walletPrincipal ? { walletPrincipal: writeConfig.walletPrincipal } : {}),
     authors: Object.fromEntries(Object.entries(writeConfig.authors ?? {}).map(([id, a]) => [id, {
       principal: a.principal, label: a.label,

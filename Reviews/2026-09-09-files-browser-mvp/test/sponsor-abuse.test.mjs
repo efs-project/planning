@@ -32,10 +32,19 @@ test('the sponsor refuses abusive requests without spending gas', { timeout: 600
     //    self-consistent and would be accepted on-chain by the permissionless
     //    carrier — but the SPONSOR will not pay for it.
     const stranger = contentLeaves('0x' + 'ab'.repeat(4096));
-    const uncovered = await ask({ chunks: [{ treeId: stranger.treeId, body: stranger.tree.body, index: 0, chunkData: stranger.chunks[0], leaves: stranger.leaves }] });
+    const uncovered = await ask({
+      content: { treeId: stranger.treeId, body: stranger.tree.body, leaves: stranger.leaves },
+      chunks: [{ index: 0, chunkData: stranger.chunks[0] }],
+    });
     assert.equal(uncovered.status, 502);
     assert.match(uncovered.body.error, /not covered by a verified author intent/);
     assert.equal(await balance(), before, 'refused staging cost the sponsor nothing');
+
+    // 1b. Chunks with no content tree at all are refused before anything else.
+    const treeless = await ask({ chunks: [{ index: 0, chunkData: stranger.chunks[0] }] });
+    assert.equal(treeless.status, 502);
+    assert.match(treeless.body.error, /missing its content tree/);
+    assert.equal(await balance(), before, 'a treeless chunk request cost the sponsor nothing');
 
     // 2. A real publication with a forged signature: free simulation refuses
     //    before any transaction is broadcast.

@@ -99,6 +99,26 @@ test('valid export verifies offline; every hostile mutation fails', { timeout: 6
     // Hostile variants — every one must FAIL (exit 1), never re-certify.
     const attacks = [];
     const attack = (name, mutate) => { const b = clone(bundle); mutate(b); attacks.push([name, verify(b, name)]); };
+    // Every mutation must fail for the reason it targets. A generic
+    // "NOT verified" would also pass if the bundle died of an unrelated
+    // shape error, which would prove nothing about the property under test.
+    const EXPECTED = {
+      'tampered-bytes': /fold to the committed root/,
+      'substituted-record-body': /body does not hash to its id/,
+      'missing-dependency': /required record missing from bundle/,
+      'fabricated-basis': /re-hashes to the declared block hash/,
+      'dummy-evidence': /pinned to the declared block/,
+      'missing-content': /content bytes present/,
+      'orphan-content': /orphan content/,
+      'forged-header-field': /re-hashes to the declared block hash/,
+      'contradictory-transcript': /contradicts the bundle/,
+      'renamed-selection': /entry record binds this subject, name and object/,
+      'retargeted-selection': /entry record binds this subject, name and object/,
+      'foreign-core-transcript': /contradicts the bundle|witnessed by pinned reads/,
+      'hidden-removal-marker': /RemovalMarker over the entry presented as live/,
+      'case-duplicate-record-key': /duplicate key after case normalization/,
+      'odd-length-content': /malformed bytes/,
+    };
 
     attack('tampered-bytes', b => {
       const item = b.selection.find(i => i.name === 'multi.bin');
@@ -155,7 +175,17 @@ test('valid export verifies offline; every hostile mutation fails', { timeout: 6
     for (const [name, r] of attacks) {
       assert.notEqual(r.code, 0, name + ' must FAIL verification but exited 0:\n' + r.stdout);
       assert.match(r.stdout, /NOT verified/, name + ' must print the refusal verdict');
+      const expected = EXPECTED[name];
+      assert(expected, 'every mutation needs a declared expected failure: ' + name);
+      assert.match(r.stdout, expected, name + ' must fail for its OWN reason, not incidentally:\n' + r.stdout);
     }
+    // A row whose bytes failed the fold must lose its "bytes proven" claim:
+    // the verifier prints that line only after a successful fold, so counting
+    // it isolates the tampered row from the others that still verify.
+    const proven = out => (out.match(/\n {8}currency: bytes proven/g) ?? []).length;
+    const tampered = attacks.find(([n]) => n === 'tampered-bytes')[1];
+    assert(proven(tampered.stdout) === proven(good.stdout) - 1,
+      'a failed fold must drop exactly that row\'s proven-bytes claim (valid ' + proven(good.stdout) + ', tampered ' + proven(tampered.stdout) + ')');
     console.log('valid bundle verified; ' + attacks.length + ' hostile mutations all refused');
   }, { profile: 'reads', watchdogMs: 600000 });
 });

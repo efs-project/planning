@@ -35,21 +35,33 @@ const FABRICATED_V0 = {
   evidence: [{}],
 };
 
-test('fabricated bundle is refused, not certified', () => {
-  const { code, stdout } = run(FABRICATED_V0, 'fabricated');
+// The same fabrication wearing the CURRENT envelope, so it reaches the real
+// checks instead of stopping at the version gate.
+const FABRICATED_V1 = { ...FABRICATED_V0, kind: 'EFS_FILES_EXPORT_V1' };
+
+test('the V0 envelope is refused as unverifiable', () => {
+  const { code, stdout } = run(FABRICATED_V0, 'legacy-envelope');
+  assert.notEqual(code, 0);
+  assert.match(stdout, /predate the authenticated format/);
+});
+
+test('fabricated bundle is refused by the real checks, not certified', () => {
+  const { code, stdout } = run(FABRICATED_V1, 'fabricated');
   assert.notEqual(code, 0, 'fabricated bytes/zeroed basis must NOT verify cleanly:\n' + stdout);
+  assert(!/predate the authenticated format/.test(stdout), 'must reach the real checks, not the envelope gate');
+  assert.match(stdout, /FAIL/, 'a substantive check must fail');
   assert(!/Clean offline verification/.test(stdout), 'must not print the clean-verification claim');
 });
 
 test('nonsense with a valid-looking envelope is refused', () => {
   const { code } = run({
-    ...FABRICATED_V0,
+    ...FABRICATED_V1,
     files: { fake: { integrity: 'VERIFIED', bytes: '0x' + 'ab'.repeat(5000), revisionId: '0x' + '1'.repeat(64) } },
   }, 'nonsense');
   assert.notEqual(code, 0, 'arbitrary multikilobyte bytes with an unrelated revision id must not verify');
 });
 
 test('empty evidence and zeroed execution set are not "retained evidence"', () => {
-  const { code } = run({ ...FABRICATED_V0, evidence: [{}, {}, {}] }, 'dummy-evidence');
+  const { code } = run({ ...FABRICATED_V1, evidence: [{}, {}, {}] }, 'dummy-evidence');
   assert.notEqual(code, 0, 'dummy evidence entries must not count as retained evidence');
 });
