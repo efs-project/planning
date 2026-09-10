@@ -173,3 +173,76 @@ bulk data; Merkle-root-only designs genuinely fail the contract-readable rule.
   (Farcaster's tier purchases are event-only; ENS subnames via CCIP-Read cost
   zero on L1). We should know which of our seven records per file genuinely
   need to be in state, and I do not think we have ever asked that question.
+
+---
+
+## 8. Merkle commitments — one decision closed, one large pattern found
+
+An independent benchmark strand (Foundry, solc 0.8.30, prague pricing; mainnet
+figures verified by `cast receipt`) settles decision **C** and adds a lever
+bigger than anything in §5.
+
+### 8.1 Root-only is ruled out by our own constraint — definitively
+
+**No third-party contract can `view`-read a leaf given only a root in state.**
+This is structural, not a missing feature. `EXTSLOAD` ([EIP-2330](https://eips.ethereum.org/EIPS/eip-2330))
+was proposed precisely because *"while any off-chain application can read all
+contract storage data of all contracts, this is not possible for deployed smart
+contracts themselves"* — and it is **Stagnant, never shipped**. Every candidate
+escape fails: `EXTCODECOPY` reads bytecode (which means you stored the whole
+preimage — the opposite of root-only); `BLOBHASH` exposes a commitment, not
+data; logs are unreadable even by their emitting contract; CCIP-Read can only
+be driven by an off-chain client, never by another contract.
+
+So the owner's contract-readability rule **eliminates Merkle-root-only for
+metadata**, permanently. Decision C therefore narrows to a single question:
+bytecode-as-storage, yes or no. Commitment-only is not on the menu.
+
+Two corollaries worth recording:
+- **Crossover:** proof-guarded writes beat direct storage only below depth ~11
+  (≈2,048 leaves). Beyond that, `5,000 + 1,525d` exceeds a 22,100 direct write.
+- **Verifier micro-optimisation is pointless.** Under EIP-7623 the calldata
+  floor is 40 gas/non-zero byte, so proof calldata costs ~1,280 gas/level
+  against ~245 of verification compute. MEASURED: from depth ≈16 upward,
+  verifying and *not* verifying cost the same to the gas.
+
+### 8.2 Keep keccak — the margin is 350–950×
+
+| hash (2 inputs) | gas | vs keccak |
+| --- | --- | --- |
+| keccak256 | 42 | 1× |
+| SHA-256 precompile | 72 | 1.7× |
+| Poseidon2 (Huff, best case) | 14,845 | 353× |
+| poseidon-solidity T3 | 21,124 | 503× |
+| MiMC (Tornado, measured) | ~40,000 | ~950× |
+
+ZK-friendly hashes only pay when the same tree is proven inside a circuit. We
+have no circuit. Adopting one would be a ~500× self-inflicted cost.
+
+### 8.3 The pattern we should steal: don't store what you can recompute
+
+MEASURED, mainnet: the **beacon deposit contract appends to a depth-32 tree for
+50,462 gas**. An equivalent keccak append that recomputes and stores the root
+costs **~228,000** at the same depth — and beacon uses SHA-256, which is *more*
+expensive per hash. It is **4.5× cheaper while using a dearer hash.**
+
+The entire difference is architectural: it updates **one** frontier slot per
+append and computes the root **lazily in a view function**. Tornado and
+OpenZeppelin's `PushTree` instead recompute the root on every insert, paying
+`depth` hashes and ~`depth/2` SSTOREs each time.
+
+MEASURED decomposition of a depth-20 append: hashing is **0.5%** of the cost;
+the rest is storage traffic. That matches our own tag measurement exactly
+(hashing 0.9%). **Appending is storage-bound, and aggregates recomputed on
+every write are the expensive part.**
+
+**This applies directly to us.** Our `append()` writes a `PostingRow`
+aggregate — `count`, `live`, `last`, `flags` — on *every* posting append, for
+*every* key, on *every* leaf. Those are derivable from the posting words the
+same read already walks (§4 notes `last` and `live` are literally cross-checked
+against them today). Deferring aggregate maintenance to read time removes one
+slot write per key per leaf, on top of the §5.1 removal of unread families.
+
+I have not measured this on our code; it is the next ablation I would run. But
+the beacon contract is proof that the pattern is worth 4.5× in production, and
+our own numbers say we are paying exactly the cost it avoids.
