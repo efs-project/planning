@@ -102,14 +102,19 @@ commitment, not an independently validated oracle. Any later failure reverts
 all Core/app writes/value. Core mutations (registration, activation, execute,
 raw retention) share one lock; getters deliberately remain callable by hooks.
 Historical reads never invoke hooks. No migration/upgrade/admin accept API.
-Receipt submitter retains the original transaction sender (also payer); an
-exact retry through another allowed relay does not rewrite it. Chain/Core can
-also be inferred from Context.planId's authenticated signing domain.
+Receipt submitter retains the original immediate Core caller (`msg.sender`),
+which may be a controller contract. It does not universally identify the
+transaction sender, ultimate fee/value funder, or gas payer/sponsor; their
+coincidence in direct-to-Core EOA fixtures is not a general guarantee. An exact retry through another
+allowed relay does not rewrite it. Chain/Core can also be inferred from
+Context.planId's authenticated signing domain.
 
 Bounded errors: `InvalidItem(uint256 index)` for structural/activation/value-mode
 preflight, `IncorrectFunding(uint256 expected,uint256 actual)` for total value,
 `HookRefused(uint256 index)` for hook false/revert/return-size/gas rejection.
-`Refused()` covers auth/nonce/expiry/retry/registration/binding/lock rejection.
+`Refused()` covers explicit auth/nonce/expiry/retry/registration/binding/lock checks.
+A 96-byte binding response with noncanonical address upper bits also reverts
+during ABI decoding; that path is not normalized to `Refused()`.
 No untrusted revert data or diagnostic text is copied into the failure ABI.
 
 ## Application constructor ABI

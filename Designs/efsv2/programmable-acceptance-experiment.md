@@ -33,9 +33,11 @@ a separate lane.
   local execution constraints. Read-only rules use STATICCALL; stateful rules
   use ordinary CALL with atomic EVM rollback and exact funding. Developer code
   never executes by delegatecall in Core storage.
-- Retained receipts distinguish who authorized the action and who submitted/
-  funded its first execution. Exact retries return that old outcome; they do not
-  charge again or create a new action.
+- Retained receipts distinguish the authenticated author from the original
+  immediate Core caller, which may be a controller contract. They do not
+  universally identify the transaction sender, ultimate fee/value funder, or
+  gas payer/sponsor. Exact retries return the old outcome without fresh rule
+  value or a new action; retry gas is separate.
 - Outfit compatibility and current Equip eligibility are separate. An explicit
   application policy can preserve historical equipment after a rule update.
   An arbitrary link to an old Outfit is not an accepted new Equip.

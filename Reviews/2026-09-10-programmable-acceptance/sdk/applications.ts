@@ -31,7 +31,8 @@ export async function registerKnownRule<C extends Record<string,unknown>, L exte
 }
 
 /** Application rule convention: zero means the immediately previous staged Outfit.
- * Core still checks exact Type, author and index; this is NOT a literal receipt ID.
+ * EquipRule checks the referenced Outfit's exact Type, author and prior index;
+ * Core remains the authenticated guarded writer. This is NOT a literal receipt ID.
  */
 export function equipPreviousOutfit(equip:{registration:Registration;activationId:string}) {
  return Equip.item(equip.registration,{outfitReceipt:'0x'+'00'.repeat(32)},equip.activationId);
