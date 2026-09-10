@@ -153,6 +153,15 @@ walkthrough drivable against real local v2 contracts:
   bytecode-as-storage, and the decisions/clarifications the owner is asked
   for. Verbatim research strands in
   [research-2026-09-10/](research-2026-09-10/).
+- [tag-system-2026-09-10.md](tag-system-2026-09-10.md) — the tag deep dive:
+  a tag is a concept record with commons and namespaced profiles, every
+  string is a binding, hierarchy-as-inference is a typed edge and grouping
+  is never inference, `TagSet` assertions with DENY, bitmap families over the
+  scope ordinal with mandatory ordinal verification, read-time expansion by
+  default; costs on both schedules; booru evidence (Danbooru/e621 rewrite
+  posts, Hydrus is our shape); the five decisions that are the owner's.
+  Strands, three architect memos and the judge in
+  [research-2026-09-10/tags/](research-2026-09-10/tags/).
 
 Prior experiments' files and published evidence are untouched; where this
 branch's compatible reader extensions supersede their byte-pins at this

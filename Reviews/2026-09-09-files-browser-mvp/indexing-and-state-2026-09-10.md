@@ -416,8 +416,11 @@ you." This is direction to proceed with the measurements and prototypes in
 §9's next steps under the standing constraint that nothing freezes protocol
 choices; it is recorded here, not in `owner-rulings.md`. On history versus
 current he asked whether v2 loses EAS's "lock to a static UID" property —
-answered in §4a below. On tags he asked for a separate deep dive (running
-2026-09-10; result to be filed beside this document).
+answered in §4a below. On tags he asked for a separate deep dive; the result is
+[tag-system-2026-09-10.md](tag-system-2026-09-10.md), which also surfaces
+that the "opt-in per Type" recommendation in §9 below conflicts with the
+2026-07-15 mandatory-indexing ruling (`owner-rulings.md:44-62`) and turns it
+into decision D-D there.
 
 **Clarifications that change the index design more than A/B/C:**
 
