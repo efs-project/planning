@@ -172,6 +172,10 @@ walkthrough drivable against real local v2 contracts:
   re-homed as verified snapshot runs; D-D reduced to one ratification.
   Strands, memos and judge in
   [research-2026-09-10/index-layer/](research-2026-09-10/index-layer/).
+- [message-to-codex-2026-09-10.md](message-to-codex-2026-09-10.md) — the
+  owner's digest for Codex: where the work is, which intake corrections are
+  now measured, what was ruled versus leaned on (with pros and cons), and the
+  proposed prototyping split.
 
 Prior experiments' files and published evidence are untouched; where this
 branch's compatible reader extensions supersede their byte-pins at this
