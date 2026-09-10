@@ -5,7 +5,7 @@
 **Depends on:** [[system-constitution]], [[core-architecture-candidate]], [[hierarchical-files-and-folders]], [[../web-client-os/README]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-08-14
+**Last touched:** 2026-09-10
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/onchain #topic/graph-queries #topic/app-model
 
@@ -64,17 +64,21 @@ The Type system must provide all of the following together:
 8. Cross-language reconstruction after publishers, websites, indexers, and
    original client implementations disappear.
 9. A friendly SDK path that hides IDs and codec ceremony during ordinary use.
-10. A small Core whose work and state growth are statically bounded.
+10. A small Core with structural work/state bounds and explicit runtime budgets
+    for developer-programmed acceptance.
+11. Mandatory custom acceptance rules that cannot be bypassed by skipping the
+    SDK or optional controller; see [[programmable-type-acceptance]].
 
 ## Non-goals
 
 The first permanent Type layer does not:
 
 - infer human meaning from field names or structural similarity;
-- execute arbitrary Type-selected EVM, Wasm, JavaScript, SPARQL, or callback
-  validators during admission or reads;
+- execute arbitrary developer code during ordinary reads or run unbounded
+  admission programs; bounded mandatory EVM acceptance is a separate required
+  comparison in [[programmable-type-acceptance]];
 - implement general inheritance, higher-kinded types, typeclasses, row
-  inference, theorem proving, or arbitrary refinement logic onchain;
+  inference or theorem proving in the structural interpreter;
 - choose one global official Type, publisher, registry, namespace, or taxonomy;
 - make a Type tag, family claim, successor edge, or popularity score sufficient
   authority for a state-changing contract;
@@ -228,7 +232,9 @@ answers, callback and reentrancy risk, impossible complete enumeration, and
 non-deterministic long-term behavior.
 
 **Use:** ordinary offchain analysis and Lens-selected evidence only. Reject for
-Core execution.
+Core traversal/execution of this open graph. A single explicitly bound,
+budgeted acceptance rule is not this architecture; see
+[[programmable-type-acceptance]].
 
 ## Recommended layered model
 
@@ -354,8 +360,15 @@ TypeRevisionId = H(
 ```
 
 The exact Type is what validates and decodes a canonical body. Anything that
-changes the accepted value set, reference extraction, body interpretation, or
-committed View projection creates a new Type revision.
+changes the structurally valid canonical body set, reference extraction, body
+interpretation, or committed View projection creates a new Type revision.
+
+The formula above is the structural/control candidate, not a final preimage for
+programmable acceptance. The recommended comparison arm adds an exact mandatory
+rule commitment (or explicit no-rule) to Type identity; the alternative requires
+an exact Type/profile pair. No old vectors are renamed by this draft. Fixed
+rule changes and local activation changes have distinct versioning laws in
+[[programmable-type-acceptance]].
 
 `typedReferenceRoleBytes` is the sole owner of semantic reference targets. It
 binds a field key to one closed target class: exact Type, exact View,
@@ -430,15 +443,22 @@ pre-adopted Core index or final identity.
 Validation grades remain separate:
 
 1. **well-formed** — canonical bytes and envelope;
-2. **Type-valid** — the closed interpreter accepts the body;
+2. **structurally Type-valid** — the closed interpreter accepts the body;
 3. **View-projectable** — a committed direct binding yields the named View;
-4. **Realm-admitted** — a named policy accepted the Occurrence at a basis;
+4. **Realm-admitted** — required developer rules and Realm policy accepted the
+   Occurrence/action under a named activation and observation context;
 5. **currently effective** — lifecycle/current folds pass at a basis; and
 6. **endorsed** — a consumer or Lens accepts the Type, mapping, author, or
    evidence.
 
-Only the first three can be portable structural results. Stateful policies and
-trust never enter portable Record identity.
+Only the first three are portable structural results. A mandatory rule's fixed
+definition may enter Type/Record identity in the recommended acceptance arm;
+its local execution result, mutable state and trust do not. Ordinary reads
+inspect retained acceptance evidence, not arbitrary admission callbacks.
+New actions require their own acceptance; a generic reference does not rerun
+the target Type's rule or confer application authority. The exact attachment,
+stateful/read-only modes, no-bypass boundary and falsifiers are in
+[[programmable-type-acceptance]].
 
 ## Contract consumption modes
 
@@ -1281,8 +1301,11 @@ Reject or substantially redesign Architecture C if any of these holds:
    preserve one atomic state machine.
 7. T8 fails its deterministic-output, offline-recovery, zero-manual-ID, command,
    or strictly-lower manual-protocol-field thresholds against bundled B0.
-8. A workload requires Core to infer semantic equivalence, run arbitrary
-   validation code, or add an application-specific primitive.
+8. A workload requires Core to infer semantic equivalence, execute unbounded
+   admission code, invoke arbitrary code during ordinary reads, or add an
+   application-specific primitive. Bounded mandatory developer acceptance must
+   instead pass [[programmable-type-acceptance]]; inability to enforce it is
+   also a falsifier, not a reason to downgrade it to optional client checks.
 9. Exact Type/package reconstruction fails after publisher, catalog, generated
    code, and project-operated indexer removal.
 10. The neutral private carrier still leaks its inner Type or graph through a

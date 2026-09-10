@@ -293,3 +293,21 @@ still matter, but do not make today's configurable numbers architectural law.
 This priority does not select a replacement library, freeze an ABI, authorize
 public deployment or resume the paused overnight run. The next-work correction
 is in [[Reviews/2026-09-09-files-reader-scale/next-experiments]].
+
+## 2026-09-10
+
+### Mandatory developer validation before acceptance
+
+- **Schema developers must be able to supply arbitrary developer validation
+  code before their data is accepted.** James explicitly reaffirmed this
+  EAS-class requirement, then authorized design updates and ideation to close
+  useful capability gaps while prioritizing simplicity, ease of use and utility.
+
+— ruled by @james, 2026-09-10 (requirement recorded from the current conversation)
+
+This records the required outcome, not a Type preimage, callback ABI, execution
+mode, activation authority or deployment decision. The recommended comparison
+in [[programmable-type-acceptance]] is agent design work, not an owner-selected
+mechanism. Bounded execution, no ordinary-read callbacks, and honest historical
+versus current acceptance remain engineering obligations. It does not authorize
+public deployment, permanent protocol promotion or a claim of feature parity.

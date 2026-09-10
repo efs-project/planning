@@ -10,6 +10,16 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
+**2026-09-10: [[data-model-readiness|Capability and build-readiness map]]** is
+the short answer to what useful peer features EFS covers and what remains.
+[[programmable-type-acceptance]] replaces the blanket admission-callback
+exclusion with a concrete mandatory developer-validation comparison. Fable's
+`92f2d6b` browser passes fresh local lifecycle/static/completeness checks;
+[[Reviews/2026-09-10-data-readiness-reconciliation|independent reconciliation]]
+also finds gaps in offline export verification, fixture Principal onboarding,
+real-wallet funding/approval, and the claimed scope of privileged writes.
+These are bounded prototype findings, not a permanent implementation verdict.
+
 **2026-09-08: [[testnet-files-mvp-plan|The testnet Files MVP build plan]]** is
 the short path from the current prototypes to a browser the owner can verify:
 sixteen observable journeys, controlled testnet upgrades, five build
@@ -151,6 +161,8 @@ These are inputs, not competing active architectures:
 | [[hierarchical-files-and-folders]] | Current greenfield hierarchical Files/1 proposal; replaces July namespace mechanisms while preserving the adopted mount outcome. |
 | [[privacy-pass-synthesis]] and privacy corpus | Payload/read/metadata distinctions, privacy seams, and honest limitations. Old crypto/profile bytes are candidates. |
 | [[layered-type-system-and-data-abi]] | Current Type-system proposal: exact nominal Types, bounded Data Views, directional compatibility, query-profile evolution, tags/catalog paths, projections, modular EVM deployment, and falsifying experiments. |
+| [[programmable-type-acceptance]] | Mandatory developer-code acceptance, Type versus profile attachment, read-only/stateful modes, atomic failure, historical evidence, application-action scope and concrete falsifiers. |
+| [[data-model-readiness]] | Capability placement/evidence ledger, five joined use cases and ordered next implementation gates; not a feature-parity claim. |
 | [[disposable-mvp-profile]] | Namespaced Core/Files Stage B control: exact temporary scope, one-approval write law, result law, state-readable small bytes, and stop/destruction rules. |
 | [[mvp-c0-genesis-manifest]] | Ordered C0 Realm/application bootstrap and independently verifiable post-state-root contract. |
 | [[deterministic-ids]], [[codex-envelope]], [[codex-kinds]], [[codex-kernel]] | July native v2 formulas and implementation hypotheses. Useful but superseded as an automatic baseline. |

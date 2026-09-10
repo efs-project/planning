@@ -5,7 +5,7 @@
 **Depends on:** [[system-constitution]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-09-03
+**Last touched:** 2026-09-10
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #topic/efsv2 #topic/onchain #topic/graph-queries #topic/lenses
 
@@ -88,9 +88,13 @@ TypeSchema {
 “Schema” is the developer-facing analogue of an EAS Schema, but it is portable
 and not identified by a registry transaction. The prototype must use a tiny
 closed descriptor language: bounded body and collection sizes, canonical scalar
-encodings, statically extractable reference/index fields, and no arbitrary
-Type-created callbacks during admission. Optional external validators are
-ordinary evidence or explicitly bounded, revisioned Realm modules.
+encodings and statically extractable reference/index fields. Structural decoding
+remains closed and bounded. [[programmable-type-acceptance]] adds the required
+comparison for mandatory developer-programmed acceptance: Type-committed rules
+versus an explicit mandatory Type/profile pair, enforced at one guarded Realm
+commit boundary. Optional endorsements are a different feature. This reopens
+the earlier blanket callback exclusion, not the ban on unbounded work or
+arbitrary callbacks during ordinary reads; existing C0 controls are unchanged.
 
 One 50-year identity question is deliberately open. Variant A hashes semantic
 meaning, shape, validation, reference roles, and canonical index obligations
@@ -220,6 +224,7 @@ AdmissionReceipt {
   authorityBasis
   admissionOrdinal
   acceptedStatus
+  requiredRuleActivationAndActionContext? // programmable-acceptance arm
 }
 ```
 
@@ -229,6 +234,12 @@ accepted Occurrences; a reverted or rejected attempt normally leaves no state
 and is returned as call error/evidence rather than a permanent receipt.
 Admission receipts remain state-readable and never masquerade as portable
 unqualified current truth.
+For Types/profiles with a mandatory rule, the acceptance receipt binds its exact
+activation and action/context. A new action cannot borrow cached eligibility
+from accepted bytes. Raw references remain legal, but are not accepted
+application transitions. Stateful hooks authenticate their coordinator and
+share rollback/reentrancy protection with the complete acceptance boundary;
+see [[programmable-type-acceptance]].
 
 ### Binding and withdrawal
 
@@ -492,9 +503,12 @@ Reject or redesign this architecture if:
 11. Type bootstrap or recursive references create hash fixed points;
 12. a mutable parent changes already-admitted child meaning;
 13. one batch accidentally promises application-level atomicity it cannot
-   provide; or
+   provide;
 14. aggregate gas/state for the mandatory index bundle is not economically
-   credible on the intended L2/L3 profile.
+   credible on the intended L2/L3 profile; or
+15. a writer bypasses a Type/profile's mandatory developer rule while acquiring
+   the same accepted/effective application status, or failed acceptance leaves
+   payment, reservation, Binding or index effects behind.
 
 ## Open questions
 

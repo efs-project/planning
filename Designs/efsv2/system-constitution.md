@@ -5,7 +5,7 @@
 **Authority input:** [[owner-rulings]]
 **Supersedes:** the EFS 1.5 bridge target and the July five-kind/native-envelope architecture as automatic baselines
 **Reviewers:** —
-**Last touched:** 2026-08-12
+**Last touched:** 2026-09-10
 
 #status/draft #kind/spec #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/requirements #topic/lenses #topic/onchain
 
@@ -114,6 +114,12 @@ may coexist; choosing a default is client policy rather than protocol truth.
   shared Type definitions; precise shapes; named validation and admission
   policy; records browsable by Type; and application Types that require no Core
   contract upgrade.
+- A schema developer can supply code that must approve acceptance, not merely
+  optional client validation. Every path claiming the same acceptance enforces
+  the required rule, with bounded execution and atomic failure. Structural
+  decoding, historical acceptance and permission for a new action stay distinct.
+  [[programmable-type-acceptance]] compares the attachment and execution models;
+  no arbitrary-program equivalence or permanent callback ABI is presumed.
 - Canonical Records store only the bytes that define their typed semantic
   content. IDs and other derivable fields are not repeated as payload merely
   for convenience.
@@ -301,7 +307,8 @@ The design cannot freeze until at least these traces pass:
 | Trace | Required result |
 |---|---|
 | Fresh qualifying L3 | Deploy Core and generic fixtures; a clean, self-hosted Web Client opens an explicit supported Realm as a guest with no Commons, account, wallet prompt, OS profile, or hosted indexer. |
-| Type and admission validation | A malformed body fails deterministic structural validation. A bounded, version-identified Realm validator accepts or rejects a validly shaped Record without changing the portable Record ID, and the admission receipt exposes the validator/policy basis. |
+| Type and admission validation | A malformed body fails structural validation. Mandatory developer code rejects invalid application data through direct/batch/import/reuse/controller paths; failed stateful acceptance rolls back dependent effects. Receipts expose the exact rule/activation/context. Local execution does not rename an unchanged exact Type/Record; changing fixed rule meaning follows the chosen Type/profile versioning law. |
+| Developer workflow and recovery | One ordinary Type generates TS/Solidity helpers and generic inspection; an old editor preserves unknown data or refuses. Offline export verifies bytes against retained commitments and reports listing, content and authority/evidence completeness separately. |
 | One-transaction graph | Precompute IDs offline and atomically publish related typed Records and authored Occurrences; retries are idempotent and races are explicit. |
 | Independent rebuild | Delete all EFS project caches/databases and reconstruct from Realm state plus declared byte carriers with a second implementation. |
 | Honest query | Type, exact scalar, typed backlink, set enumeration, and Lens point reads paginate at a pinned basis; truncation or missing coverage returns `PARTIAL/UNKNOWN`, never empty. |

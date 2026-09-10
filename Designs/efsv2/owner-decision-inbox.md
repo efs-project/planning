@@ -2,7 +2,7 @@
 
 **Status:** reference — compact live queue; mechanisms remain evidence-gated
 **Audience:** James first; designers second
-**Last reconciled:** 2026-09-08
+**Last reconciled:** 2026-09-10
 **Inputs:** [[system-constitution]], [[core-architecture-candidate]], [[disposable-mvp-profile]], [[mvp-c0-genesis-manifest]], [[owner-rulings]], [[assumptions-and-requirements]], and the preserved July decision/review corpus in git history
 
 #status/reference #kind/decision #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2
@@ -115,6 +115,15 @@ Run the focused portable-schema/validator pass against the minimal Type Schema
 candidate. Prove reusable application semantics, structural validation,
 records-by-Type, loss-aware EAS interoperability, recursive-Type safety, and no
 arbitrary unbounded validator callbacks.
+
+The owner's mandatory developer-validation requirement is explicit in
+[[owner-rulings#Mandatory developer validation before acceptance]]. Compare
+[[programmable-type-acceptance]]: Type-committed rules versus a mandatory
+Type/profile pair, read-only and stateful rule modes, authenticated hook callers,
+no-bypass acceptance, full rollback/value accounting and retained historical
+evidence. Optional frontend checks do not close this gate. The concrete
+capability/build map is [[data-model-readiness]]; no immediate owner answer or
+permanent ABI choice is needed to refine these drafts and tests.
 
 ## Decide after evidence — freeze choices, do not answer yet
 

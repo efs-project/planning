@@ -23,6 +23,8 @@ What rulings have **retired**, and what replaced it. Input to `./scripts/needs-i
 
 | Retired phrase | Ruling | Cleared |
 |---|---|---|
+| `Type-created callbacks during admission` | [[Designs/efsv2/owner-rulings#Mandatory developer validation before acceptance]] — bounded mandatory acceptance replaces the blanket exclusion; exact attachment/ABI remains a comparison. | 2026-09-10 |
+| `validators during admission or reads` | [[Designs/efsv2/owner-rulings#Mandatory developer validation before acceptance]] — admission and ordinary-read execution are distinct. | 2026-09-10 |
 | `Do not reset counters inside one scope or raise its limits` | [[Designs/efsv2/owner-rulings#Correctness before extreme efficiency in the MVP prototype]] — counters remain honest; candidate limits may change. Earlier review advice is retained with dated corrections. | 2026-09-09 |
 | `agent-role.sh` | 2026-09-03 owner-requested simplification: plain directory and optional profile notes | 2026-09-03 |
 | `James promotes it via the usual ceremony` | 2026-09-03 portable-role process: name-stable living ops docs, no promotion | 2026-09-03 |
