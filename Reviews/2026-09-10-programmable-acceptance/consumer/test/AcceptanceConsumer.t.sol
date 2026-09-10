@@ -52,13 +52,13 @@ contract AcceptanceConsumerTest {
 
         equipRule = new EquipRule(address(core), address(this), outfitType);
         AT.Rule memory equipRuleDefinition = EquipCodec.rule(address(equipRule).codehash, outfitType);
-        equipType = EquipCodec.register(core, equipRuleDefinition);
+        equipType = EquipCodec.register(core, equipRuleDefinition, outfitType);
         bytes32 equipLocalConfig = keccak256(abi.encode(address(core), address(this)));
         equipActivation = core.activate(equipType, address(equipRule), equipLocalConfig);
 
         paidClaimRule = new PaidClaimRule(address(core), TREASURY, CLAIM_FEE);
         AT.Rule memory claimRuleDefinition = PaidClaimCodec.rule(address(paidClaimRule).codehash, CLAIM_FEE);
-        claimType = PaidClaimCodec.register(core, claimRuleDefinition);
+        claimType = PaidClaimCodec.register(core, claimRuleDefinition, CLAIM_FEE);
         bytes32 claimLocalConfig = keccak256(abi.encode(address(core), TREASURY));
         claimActivation = core.activate(claimType, address(paidClaimRule), claimLocalConfig);
 
@@ -252,6 +252,19 @@ contract AcceptanceConsumerTest {
         fakeConsumer.readOutfit(id);
     }
 
+    function testReadRefusesWrongChainWithCorrectCore() public {
+        (ForgedReadCore fake, AcceptanceConsumer fakeConsumer) = _fakeConsumer();
+        bytes memory body = abi.encode(uint256(2), uint256(3), uint256(1));
+        AT.Receipt memory receipt = _fakeReceipt(address(fake));
+        receipt.bodyHash = keccak256(body);
+        receipt.chainId = block.chainid + 1;
+        bytes32 id = fake.receiptId(receipt.planId, receipt.index);
+        fake.setEvidence(id, receipt, body);
+
+        vm.expectRevert(AcceptanceConsumer.WrongCoreContext.selector);
+        fakeConsumer.readOutfit(id);
+    }
+
     function testConstructorRefusesMismatchedLocalActivationPin() public {
         bytes32 equipLocalConfig = core.getActivation(equipActivation).localConfig;
         bytes32 claimLocalConfig = core.getActivation(claimActivation).localConfig;
@@ -263,6 +276,21 @@ contract AcceptanceConsumerTest {
             AcceptanceConsumer.ActivationPin(equipActivation, address(equipRule), equipLocalConfig),
             AcceptanceConsumer.ActivationPin(claimActivation, address(paidClaimRule), claimLocalConfig),
             CLAIM_FEE
+        );
+    }
+
+    function testConstructorRefusesAlteredPaidClaimRuleParameters() public {
+        bytes32 outfitLocalConfig = core.getActivation(outfitActivation).localConfig;
+        bytes32 equipLocalConfig = core.getActivation(equipActivation).localConfig;
+        bytes32 claimLocalConfig = core.getActivation(claimActivation).localConfig;
+        vm.expectRevert(AcceptanceConsumer.InvalidTypePin.selector);
+        new AcceptanceConsumer(
+            IAcceptanceConsumerCore(address(core)),
+            author,
+            AcceptanceConsumer.ActivationPin(outfitActivation, address(outfitRule), outfitLocalConfig),
+            AcceptanceConsumer.ActivationPin(equipActivation, address(equipRule), equipLocalConfig),
+            AcceptanceConsumer.ActivationPin(claimActivation, address(paidClaimRule), claimLocalConfig),
+            CLAIM_FEE + 1
         );
     }
 

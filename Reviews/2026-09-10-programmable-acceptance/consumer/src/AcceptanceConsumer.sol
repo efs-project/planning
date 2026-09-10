@@ -86,7 +86,7 @@ contract AcceptanceConsumer {
         outfitActivationId = outfitPin.activationId;
 
         AT.Rule memory equipRule = EquipCodec.rule(equipPin.hook.codehash, expectedOutfitType);
-        bytes32 expectedEquipType = EquipCodec.typeId(equipRule);
+        bytes32 expectedEquipType = EquipCodec.typeId(equipRule, expectedOutfitType);
         equipRuleId = _requireType(core_, expectedEquipType, equipRule);
         _requireActivation(core_, equipPin, expectedEquipType);
         equipTypeId = expectedEquipType;
@@ -94,7 +94,7 @@ contract AcceptanceConsumer {
         equipPolicy = equipPin.hook;
 
         AT.Rule memory paidClaimRule = PaidClaimCodec.rule(paidClaimPin.hook.codehash, paidClaimFee);
-        bytes32 expectedPaidClaimType = PaidClaimCodec.typeId(paidClaimRule);
+        bytes32 expectedPaidClaimType = PaidClaimCodec.typeId(paidClaimRule, paidClaimFee);
         paidClaimRuleId = _requireType(core_, expectedPaidClaimType, paidClaimRule);
         _requireActivation(core_, paidClaimPin, expectedPaidClaimType);
         paidClaimTypeId = expectedPaidClaimType;
