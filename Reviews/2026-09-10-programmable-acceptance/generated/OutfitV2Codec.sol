@@ -17,11 +17,19 @@ library OutfitV2Codec {
         v.pants = uint256(words[2]);
         v.badge = uint256(words[3]);
     }
-    function rule(bytes32 codeHash) internal pure returns(AT.Rule memory) { return AT.Rule(codeHash, bytes32(0x01dbb2a8e441545da08244ef3c5415ef01df2702473938d05950b31bfac649ca), 1, 150000); }
+    function rule(bytes32 codeHash) internal pure returns(AT.Rule memory) {
+        require(codeHash != 0, "mandatory code hash");
+        return AT.Rule(codeHash, bytes32(0x01dbb2a8e441545da08244ef3c5415ef01df2702473938d05950b31bfac649ca), 1, 150000);
+    }
     function typeId(AT.Rule memory r) internal pure returns(bytes32) {
+        AT.Rule memory expected = rule(r.codeHash);
+        require(r.codeHash == expected.codeHash && r.semanticConfig == expected.semanticConfig && r.mode == expected.mode && r.gasLimit == expected.gasLimit, "declaration rule mismatch");
         bytes32 rid = r.mode == 0 ? bytes32(0) : keccak256(abi.encode(keccak256("efs.acceptance.rule.v1"),r.codeHash,r.semanticConfig,r.mode,r.gasLimit));
         bytes32 shape = keccak256(abi.encode(keccak256("efs.acceptance.shape.v1"),kinds()));
         return keccak256(abi.encode(keccak256("efs.acceptance.type.v1"),descriptor(),shape,rid));
     }
-    function register(AcceptanceCore core, AT.Rule memory r) internal returns(bytes32) { return core.registerType(descriptor(),kinds(),r); }
+    function register(AcceptanceCore core, AT.Rule memory r) internal returns(bytes32) {
+        typeId(r);
+        return core.registerType(descriptor(),kinds(),r);
+    }
 }

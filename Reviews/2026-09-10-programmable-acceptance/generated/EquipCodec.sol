@@ -14,11 +14,19 @@ library EquipCodec {
 
         v.outfitReceipt = words[0];
     }
-    function rule(bytes32 codeHash, bytes32 outfitType) internal pure returns(AT.Rule memory) { return AT.Rule(codeHash, keccak256(abi.encode(bytes32(0x2074ecda09d00cc1d344de9c7b2beaa70ee9643851ccb7919ac93e269d4f1a26), outfitType)), 1, 250000); }
-    function typeId(AT.Rule memory r) internal pure returns(bytes32) {
+    function rule(bytes32 codeHash, bytes32 outfitType) internal pure returns(AT.Rule memory) {
+        require(codeHash != 0, "mandatory code hash");
+        return AT.Rule(codeHash, keccak256(abi.encode(bytes32(0x2074ecda09d00cc1d344de9c7b2beaa70ee9643851ccb7919ac93e269d4f1a26), outfitType)), 1, 250000);
+    }
+    function typeId(AT.Rule memory r, bytes32 outfitType) internal pure returns(bytes32) {
+        AT.Rule memory expected = rule(r.codeHash, outfitType);
+        require(r.codeHash == expected.codeHash && r.semanticConfig == expected.semanticConfig && r.mode == expected.mode && r.gasLimit == expected.gasLimit, "declaration rule mismatch");
         bytes32 rid = r.mode == 0 ? bytes32(0) : keccak256(abi.encode(keccak256("efs.acceptance.rule.v1"),r.codeHash,r.semanticConfig,r.mode,r.gasLimit));
         bytes32 shape = keccak256(abi.encode(keccak256("efs.acceptance.shape.v1"),kinds()));
         return keccak256(abi.encode(keccak256("efs.acceptance.type.v1"),descriptor(),shape,rid));
     }
-    function register(AcceptanceCore core, AT.Rule memory r) internal returns(bytes32) { return core.registerType(descriptor(),kinds(),r); }
+    function register(AcceptanceCore core, AT.Rule memory r, bytes32 outfitType) internal returns(bytes32) {
+        typeId(r, outfitType);
+        return core.registerType(descriptor(),kinds(),r);
+    }
 }

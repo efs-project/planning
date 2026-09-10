@@ -2,7 +2,7 @@ import { AbiCoder, id, keccak256, ZeroHash } from 'ethers';
 export type Field = {readonly name:string; readonly kind:'uint256'|'address'|'bytes32'|'bool'};
 export type Rule = {codeHash:string;semanticConfig:string;mode:number;gasLimit:number};
 export type Declaration = {name:string;version:string;fields:readonly Field[];rule:null|{artifact:string;label:string;config:readonly Field[];local:readonly Field[];mode:number;gasLimit:number}};
-export type Registration = {descriptor:string;kinds:string;rule:Rule;typeId:string};
+export type Registration = {descriptor:string;kinds:string;rule:Rule;typeId:string;config:Record<string,unknown>};
 export const abi = AbiCoder.defaultAbiCoder();
 export const hash = (types:readonly string[], values:readonly unknown[]) => keccak256(abi.encode(types,values));
 export function ruleId(r:Rule):string { return r.mode===0 ? ZeroHash : hash(['bytes32','bytes32','bytes32','uint8','uint32'],[id('efs.acceptance.rule.v1'),r.codeHash,r.semanticConfig,r.mode,r.gasLimit]); }
@@ -34,18 +34,26 @@ export function makeCodec<T extends Record<string,unknown>, C extends Record<str
     let rule:Rule={codeHash:ZeroHash,semanticConfig:ZeroHash,mode:0,gasLimit:0};
     if(declaration.rule) {
       const spec=declaration.rule;
+      if(codeHash===ZeroHash) throw Error('mandatory rule requires chosen nonzero code hash; artifact trust is checked during setup');
       const encoded=encodeFields(spec.config,config);
       const semanticConfig=spec.config.length ? keccak256('0x'+id(spec.label).slice(2)+encoded.slice(2)) : id(spec.label);
       rule={codeHash,semanticConfig,mode:spec.mode,gasLimit:spec.gasLimit};
     }
-    return {descriptor,kinds,rule,typeId:typeId(descriptor,kinds,rule)};
+    return {descriptor,kinds,rule,typeId:typeId(descriptor,kinds,rule),config:structuredClone(config)};
+  };
+  const requireRegistration=(candidate:Registration)=> {
+    try {
+      const expected=registration(candidate.rule.codeHash,candidate.config as C);
+      if(candidate.descriptor!==descriptor||candidate.kinds!==kinds||candidate.typeId!==expected.typeId||candidate.rule.codeHash!==expected.rule.codeHash||candidate.rule.semanticConfig!==expected.rule.semanticConfig||candidate.rule.mode!==expected.rule.mode||candidate.rule.gasLimit!==expected.rule.gasLimit) throw Error('declaration rule mismatch');
+    } catch(cause) {throw Error('UNKNOWN_EXACT_TYPE: registration does not satisfy this declaration',{cause});}
   };
   return {declaration,descriptor,kinds,registration,localConfig:(value:L)=>keccak256(encodeFields(declaration.rule?.local??[],value)),
     encode:(value:T)=>encodeFields(declaration.fields,value),
     decode:(body:string)=>decodeFields(declaration.fields,body) as T,
-    item:(registration:Registration,value:T,activationId=ZeroHash,funding=0n)=>({typeId:registration.typeId,activationId,body:encodeFields(declaration.fields,value),value:funding}),
+    item:(registration:Registration,value:T,activationId=ZeroHash,funding=0n)=>{requireRegistration(registration);return {typeId:registration.typeId,activationId,body:encodeFields(declaration.fields,value),value:funding};},
     edit:(exactType:string,registration:Registration,value:T,activationId:string,funding=0n)=> {
-      if(exactType!==registration.typeId||registration.descriptor!==descriptor||registration.kinds!==kinds||typeId(descriptor,kinds,registration.rule)!==exactType) throw Error('UNKNOWN_EXACT_TYPE: old editor refuses before preparing a write');
+      requireRegistration(registration);
+      if(exactType!==registration.typeId) throw Error('UNKNOWN_EXACT_TYPE: old editor refuses before preparing a write');
       return {typeId:exactType,activationId,body:encodeFields(declaration.fields,value),value:funding};
     }
   };

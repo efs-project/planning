@@ -14,9 +14,9 @@
     "activate PaidClaim": "133702",
     "register OutfitV2": "184370",
     "activate OutfitV2": "129234",
-    "deploy GeneratedHarness": "593104",
-    "write Outfit+Equip signed relay": "808966",
-    "exact retry zero value": "50221",
+    "deploy GeneratedHarness": "834285",
+    "write Outfit+Equip signed relay": "808940",
+    "exact retry zero value": "50200",
     "paid claim direct": "457921",
     "paid exact retry": "43648",
     "mined paid then invalid Outfit rollback": "478454",
@@ -35,13 +35,13 @@
     "activate PaidClaim": "0x328b7dab617e11961ad89335539df5d00d0408b497321278c2ebd9d179d73de4",
     "register OutfitV2": "0xd67b8478378b8d2f11052c8b69be1ddc451f3b0b49cada45f02060e11645b936",
     "activate OutfitV2": "0x1c92770277d76d721f439f2bbd540fd8ec1cf969872944df107ab62256e985a9",
-    "deploy GeneratedHarness": "0x1cd1ab5ad2df9e1093987549e0a9a98986f2889024250e686ed3ceb31f029d39",
-    "write Outfit+Equip signed relay": "0xe4998e706d7d88f5519649788eec0020b413454feb996ebdb91f8a5d42d33cca",
-    "exact retry zero value": "0xd957faca247a44d71e5eb6173a87c261198e3c4683c5514146348122747fd74d",
-    "paid claim direct": "0xaf8b0e5da26ef10bd8046b6b009639c4a4fec175a9cf051c5dc553d6b9f9dc5f",
-    "paid exact retry": "0x6f248892c755b90a96bffb88613327dd7fb974ec84e3fcf7cdc1103843e8f0cb",
-    "mined paid then invalid Outfit rollback": "0xf46488be811a3391424b9f634945a990e29a891f9832418b18d2ce15c805a401",
-    "write OutfitV2": "0x30b67125c4577e37d7bea44fdb9373a9220eb7c7abd961248f60ae6e6da7cf49"
+    "deploy GeneratedHarness": "0x6ceafad9d96fcbb78a385e026c4f7e6a63c16794b0e4045528fc2e0bcc5b938c",
+    "write Outfit+Equip signed relay": "0x41cff1e2c3aae4b88f251c72d3064e01dc1ff513740816f00a0f379a00302e35",
+    "exact retry zero value": "0x6263ec72f985c6a98858310dae11e7a1ba395e8f1c48f3e670f6a28cdf8de2e4",
+    "paid claim direct": "0x8d22caf0778f5cd9365eebc49863fb434d99476f7086d5ace866878bd60336a3",
+    "paid exact retry": "0x00b528babe4053167768b40c701261e0ffe1c3cb6d4346df6db6877089484a18",
+    "mined paid then invalid Outfit rollback": "0x968b6c7f726b05f73542913bfa5bfdfeefdde3fbb78cf8d6a19f5a498e6375c9",
+    "write OutfitV2": "0xa4a53c4f637362d68b8180341930a3f828a2c6fcef001a100bc0a159af84d083"
   },
   "stateTraces": {
     "register Outfit": {
@@ -120,7 +120,77 @@
       "changes": [
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x33566ee7d43afa852a76fd6b2731f659e0710975ee7a3c268717d3d12a438c62",
+          "slot": "0x42f0482e35c994b1be04140417ed823adf393a351b8fadc659156ea1f0e0347e",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x42f0482e35c994b1be04140417ed823adf393a351b8fadc659156ea1f0e0347f",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x42f0482e35c994b1be04140417ed823adf393a351b8fadc659156ea1f0e03480",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x449bfe9609b75aa588d53ad503f2695fcff5ba1bb1e4c0ca1992e793666dd71e",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x7dbd45ff75cb7f74f7de8fb84ce1d37610be6831710a5ade15348d8af8e1afab",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x7dbd45ff75cb7f74f7de8fb84ce1d37610be6831710a5ade15348d8af8e1afac",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x7dbd45ff75cb7f74f7de8fb84ce1d37610be6831710a5ade15348d8af8e1afad",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x7dbd45ff75cb7f74f7de8fb84ce1d37610be6831710a5ade15348d8af8e1afae",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x7dbd45ff75cb7f74f7de8fb84ce1d37610be6831710a5ade15348d8af8e1afaf",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x7dbd45ff75cb7f74f7de8fb84ce1d37610be6831710a5ade15348d8af8e1afb0",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x7dbd45ff75cb7f74f7de8fb84ce1d37610be6831710a5ade15348d8af8e1afb1",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x7dbd45ff75cb7f74f7de8fb84ce1d37610be6831710a5ade15348d8af8e1afb3",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x7dbd45ff75cb7f74f7de8fb84ce1d37610be6831710a5ade15348d8af8e1afb4",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x7dbd45ff75cb7f74f7de8fb84ce1d37610be6831710a5ade15348d8af8e1afb5",
+          "transition": "zero-to-nonzero"
+        },
+        {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "slot": "0x7dbd45ff75cb7f74f7de8fb84ce1d37610be6831710a5ade15348d8af8e1afb6",
           "transition": "zero-to-nonzero"
         },
         {
@@ -130,142 +200,72 @@
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xa23e54bb06248128565173e0c31bea40b1b324b5a4a125e2a2c78cea32899c57",
+          "slot": "0xc41d6948e6707a42f1777496d851ccc6e22b0f44da44f701b07acd35358ef1ca",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xa23e54bb06248128565173e0c31bea40b1b324b5a4a125e2a2c78cea32899c58",
+          "slot": "0xceab7ae4f939e60807b9d1f3f924afed255adafd8ab4c7d8dfdc053a5c6afd33",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xa23e54bb06248128565173e0c31bea40b1b324b5a4a125e2a2c78cea32899c59",
+          "slot": "0xceab7ae4f939e60807b9d1f3f924afed255adafd8ab4c7d8dfdc053a5c6afd34",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xaa3ff94d4cf833b2f3a71d1d843522cc4455f6bd0190c31394178248e7914d30",
+          "slot": "0xceab7ae4f939e60807b9d1f3f924afed255adafd8ab4c7d8dfdc053a5c6afd35",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xbc1307993f6bd888d529b64ec77e83ac1c428ea41bf4e14546e45f4a54ac8627",
+          "slot": "0xceab7ae4f939e60807b9d1f3f924afed255adafd8ab4c7d8dfdc053a5c6afd36",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f6c",
+          "slot": "0xceab7ae4f939e60807b9d1f3f924afed255adafd8ab4c7d8dfdc053a5c6afd37",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f6d",
+          "slot": "0xceab7ae4f939e60807b9d1f3f924afed255adafd8ab4c7d8dfdc053a5c6afd38",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f6e",
+          "slot": "0xceab7ae4f939e60807b9d1f3f924afed255adafd8ab4c7d8dfdc053a5c6afd39",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f6f",
+          "slot": "0xceab7ae4f939e60807b9d1f3f924afed255adafd8ab4c7d8dfdc053a5c6afd3a",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f70",
+          "slot": "0xceab7ae4f939e60807b9d1f3f924afed255adafd8ab4c7d8dfdc053a5c6afd3b",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f71",
+          "slot": "0xceab7ae4f939e60807b9d1f3f924afed255adafd8ab4c7d8dfdc053a5c6afd3c",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f72",
+          "slot": "0xceab7ae4f939e60807b9d1f3f924afed255adafd8ab4c7d8dfdc053a5c6afd3d",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f73",
+          "slot": "0xceab7ae4f939e60807b9d1f3f924afed255adafd8ab4c7d8dfdc053a5c6afd3e",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f74",
-          "transition": "zero-to-nonzero"
-        },
-        {
-          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f75",
-          "transition": "zero-to-nonzero"
-        },
-        {
-          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f76",
-          "transition": "zero-to-nonzero"
-        },
-        {
-          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xbc82848d891439c7a98983315a4410e766c33dad02e25125860c7dcacbbc2f77",
-          "transition": "zero-to-nonzero"
-        },
-        {
-          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea0",
-          "transition": "zero-to-nonzero"
-        },
-        {
-          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea1",
-          "transition": "zero-to-nonzero"
-        },
-        {
-          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea2",
-          "transition": "zero-to-nonzero"
-        },
-        {
-          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea3",
-          "transition": "zero-to-nonzero"
-        },
-        {
-          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea4",
-          "transition": "zero-to-nonzero"
-        },
-        {
-          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea5",
-          "transition": "zero-to-nonzero"
-        },
-        {
-          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea6",
-          "transition": "zero-to-nonzero"
-        },
-        {
-          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea8",
-          "transition": "zero-to-nonzero"
-        },
-        {
-          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aea9",
-          "transition": "zero-to-nonzero"
-        },
-        {
-          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aeaa",
-          "transition": "zero-to-nonzero"
-        },
-        {
-          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xd4d2e1aab4cb5acd3bdb051e380f914bd43c5994b7e44c4596475ef72161aeab",
+          "slot": "0xf18624a27f7c93e3fa3dc4365d4e3b9404f773a07319ece34bc6f71153280e06",
           "transition": "zero-to-nonzero"
         }
       ]
@@ -288,72 +288,72 @@
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x296599fda955dfcbd0e699e542cbe896abe0e1596d587573358abf8fbd87ff2a",
+          "slot": "0x21b7132ada4b01751854d7561f77a96bb45bc1359f0dc0dcc82390ef9e8194fc",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x46f8b2f5401a2ab8492fa5f2586b4cb50a062f3cee6178b0ed90a79e1092ef5f",
+          "slot": "0x397b340a0a015eb2459b89d5edc724c3a99ccfd843cd6cf4c8ad4a177ee6a33a",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xc7d997d57b4d763db0dd5f16b4e0ac2adb9f63358be22d2267348edc05975326",
+          "slot": "0x7f28e16c574bf0f15cc4e133a115af974fa5d31ef5698391bc66af8dc2f2ea6a",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b708d",
+          "slot": "0x908846ad39e0783ae4c2b7545329e13dc244d3a1d94411f266aaa2bf5b426647",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b708e",
+          "slot": "0x908846ad39e0783ae4c2b7545329e13dc244d3a1d94411f266aaa2bf5b426648",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b708f",
+          "slot": "0x908846ad39e0783ae4c2b7545329e13dc244d3a1d94411f266aaa2bf5b426649",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7090",
+          "slot": "0x908846ad39e0783ae4c2b7545329e13dc244d3a1d94411f266aaa2bf5b42664a",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7091",
+          "slot": "0x908846ad39e0783ae4c2b7545329e13dc244d3a1d94411f266aaa2bf5b42664b",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7092",
+          "slot": "0x908846ad39e0783ae4c2b7545329e13dc244d3a1d94411f266aaa2bf5b42664c",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7093",
+          "slot": "0x908846ad39e0783ae4c2b7545329e13dc244d3a1d94411f266aaa2bf5b42664d",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7095",
+          "slot": "0x908846ad39e0783ae4c2b7545329e13dc244d3a1d94411f266aaa2bf5b42664f",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7096",
+          "slot": "0x908846ad39e0783ae4c2b7545329e13dc244d3a1d94411f266aaa2bf5b426650",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7097",
+          "slot": "0x908846ad39e0783ae4c2b7545329e13dc244d3a1d94411f266aaa2bf5b426651",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xf3f9b19bed20de7ea792d38b579958334c8c16273c538d4c60f4cb40254b7098",
+          "slot": "0x908846ad39e0783ae4c2b7545329e13dc244d3a1d94411f266aaa2bf5b426652",
           "transition": "zero-to-nonzero"
         },
         {
@@ -392,100 +392,100 @@
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773a8",
+          "slot": "0x7bb6b1e85840b020c171e434051cc318c47ac48e6b4b05ebcc25dfb3ab5ee009",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773a9",
+          "slot": "0x7bb6b1e85840b020c171e434051cc318c47ac48e6b4b05ebcc25dfb3ab5ee00a",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773aa",
+          "slot": "0x7bb6b1e85840b020c171e434051cc318c47ac48e6b4b05ebcc25dfb3ab5ee00b",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773ab",
+          "slot": "0x7bb6b1e85840b020c171e434051cc318c47ac48e6b4b05ebcc25dfb3ab5ee00c",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773ac",
+          "slot": "0x8952191d098ccd8b31e5f625e499a390dc347844c4876f7a1dddb6f00a03e792",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773ad",
+          "slot": "0xc89f9a3793a6effeb26161a056ce1a47f1e5e597159fbf384f94d918dff42261",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773ae",
+          "slot": "0xc89f9a3793a6effeb26161a056ce1a47f1e5e597159fbf384f94d918dff42262",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773b0",
+          "slot": "0xc89f9a3793a6effeb26161a056ce1a47f1e5e597159fbf384f94d918dff42263",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773b1",
+          "slot": "0xc89f9a3793a6effeb26161a056ce1a47f1e5e597159fbf384f94d918dff42264",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773b2",
+          "slot": "0xc89f9a3793a6effeb26161a056ce1a47f1e5e597159fbf384f94d918dff42265",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x29cc92c2f14f68b35ca14d07c28570a7ede6fd421b4f3cc072723092e66773b3",
+          "slot": "0xc89f9a3793a6effeb26161a056ce1a47f1e5e597159fbf384f94d918dff42266",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x779d76befdade295e51f446076f7cbf8ce546e6183f781924c41b3f583e72c38",
+          "slot": "0xc89f9a3793a6effeb26161a056ce1a47f1e5e597159fbf384f94d918dff42267",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x779d76befdade295e51f446076f7cbf8ce546e6183f781924c41b3f583e72c39",
+          "slot": "0xc89f9a3793a6effeb26161a056ce1a47f1e5e597159fbf384f94d918dff42269",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x779d76befdade295e51f446076f7cbf8ce546e6183f781924c41b3f583e72c3a",
+          "slot": "0xc89f9a3793a6effeb26161a056ce1a47f1e5e597159fbf384f94d918dff4226a",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0x779d76befdade295e51f446076f7cbf8ce546e6183f781924c41b3f583e72c3b",
+          "slot": "0xc89f9a3793a6effeb26161a056ce1a47f1e5e597159fbf384f94d918dff4226b",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xb9cf387b3311726678a49976624b8405e2ba541e11e5cc80290834bdec6d4cd9",
+          "slot": "0xc89f9a3793a6effeb26161a056ce1a47f1e5e597159fbf384f94d918dff4226c",
           "transition": "zero-to-nonzero"
         },
         {
           "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-          "slot": "0xe337c8b2826af89e629dbd1faa61bac3e53abbd538de89489d9306c82b52d703",
+          "slot": "0xf330e2e2cefe0bda57b884eb27352b3d7574c9502b5e4d8c8b669b15d4ea8d46",
           "transition": "zero-to-nonzero"
         }
       ]
     }
   },
   "readBack": {
-    "milliseconds": 164.3654160000001,
-    "rpcRequests": 22,
+    "milliseconds": 204.37879199999998,
+    "rpcRequests": 25,
     "basis": {
       "chainId": "31337",
       "core": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
       "blockNumber": 14,
-      "blockHash": "0x1e1d79593db97500f973309ff6d988a63125bed8d26bd0b4d7a40c2b5e0c87ed"
+      "blockHash": "0x975c8945e6a06a06de28e84c4c2ffcbd43ef86873b2b4fa59605d06d03b783fd"
     }
   },
   "stateAccounting": {
@@ -502,7 +502,7 @@
     "ruleId": "0xd611c2b843ae867d8abfbfd0216b062f3856711de4aef2578dc7cd8a34788d29",
     "activationId": "0x6a385c18b804e7b3daad470ecac8e6432f46f8285bc1c0c2fcb9a3460ec47c4a",
     "basis": "0x525876128d9eb0ad1b9e0d64c9c51b1cd33790861c401ad2e3df0f670ce6a2a4",
-    "planId": "0x492f11eec50371d574101cedb214ec04b8396a2f790dafacc343b37f7516da80",
+    "planId": "0xfd43f9e8d5ebde1ed977150b366a40586831df75919efa332159b739c2ed0179",
     "index": "0",
     "blockNumber": "14",
     "chainId": "31337",

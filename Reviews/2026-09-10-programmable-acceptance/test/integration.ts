@@ -12,7 +12,7 @@ import { PaidClaim } from '../generated/PaidClaim.ts';
 import { planWrite, authorize, direct, submit, readBack, pinBasis, verifiedBody, exactRead } from '../sdk/adapter.ts';
 import { inspect } from '../web/inspector.ts';
 
-test('real Anvil: generated helpers, exact authorization, atomic custom applications and independent pinned reads', {timeout:120000}, async()=>{
+test('real Anvil: generated helpers, exact authorization, atomic custom applications and independent pinned reads', {timeout:120000}, async(t)=>{
  assert.ok(existsSync(new URL('../sdk/applications.ts',import.meta.url)), 'known-artifact registration and named previous-Outfit helper implemented');
  assert.ok(existsSync(new URL('../sdk/example.ts',import.meta.url)), 'ordinary named-field application example implemented');
  const { registerKnownRule, equipPreviousOutfit }=await import('../sdk/applications.ts');
@@ -60,6 +60,11 @@ test('real Anvil: generated helpers, exact authorization, atomic custom applicat
   const sr=await harness.revision(revFields,revised.registration.rule.codeHash);assert.equal(sr[0],OutfitV2.encode(revFields));assert.equal(sr[1],revised.registration.typeId);
   const se=await harness.equip({outfitReceipt:ZeroHash},equip.registration.rule.codeHash,outfit.registration.typeId);assert.equal(se[0],Equip.encode({outfitReceipt:ZeroHash}));assert.equal(se[1],equip.registration.typeId);
   const sp=await harness.paid({claimKey:id('claim')},paid.registration.rule.codeHash,fee);assert.equal(sp[0],PaidClaim.encode({claimKey:id('claim')}));assert.equal(sp[1],paid.registration.typeId);
+  for(const changed of [{codeHash:ZeroHash,semanticConfig:ZeroHash,mode:0,gasLimit:0},{...outfit.registration.rule,mode:2},{...outfit.registration.rule,gasLimit:500000},{...outfit.registration.rule,semanticConfig:id('wrong')}]) await assert.rejects(harness.checkOutfitRule(changed));
+  await assert.rejects(harness.registerOutfit(coreAddress,{codeHash:ZeroHash,semanticConfig:ZeroHash,mode:0,gasLimit:0}));
+  await assert.rejects(harness.checkEquipRule(equip.registration.rule,id('wrong outfit config')));
+  await assert.rejects(harness.checkPaidRule(paid.registration.rule,fee+1n));
+  assert.equal(await harness.checkEquipRule(equip.registration.rule,outfit.registration.typeId),equip.registration.typeId);
   const make=async(items:any[])=>planWrite(context,{author,executor:ZeroAddress,nonce:await core.nonces(author),deadline:BigInt((await provider.getBlock('latest'))!.timestamp+3600),items},[]);
   const batch=planOutfitAndEquip({context,author,executor:ZeroAddress,nonce:await core.nonces(author),deadline:BigInt((await provider.getBlock('latest'))!.timestamp+3600),outfit,equip,fields,sourceReads:[]});
   assert.equal(batch.digest,await core.hashPlan(batch.plan));
@@ -69,7 +74,8 @@ test('real Anvil: generated helpers, exact authorization, atomic custom applicat
   const verified=await readBack(readProvider,sent,basis);const readMs=performance.now()-start,readRequests=requests-beforeRequests;
   assert.equal(verified.effect,'COMMITTED');assert.equal(verified.reads.length,2);
   const retry=await submit(prepared,relay,{exactRetry:true});capture('exact retry zero value',retry.evmReceipt);assert.equal(await core.nonces(author),1n);
-  assert.equal((await readBack(readProvider,retry,await pinBasis(readProvider,context))).effect,'COMMITTED');
+  assert.equal((await readBack(readProvider,retry,await pinBasis(readProvider,context))).effect,'UNKNOWN');
+  assert.equal((await readBack(readProvider,{...retry,originalExecution:sent.execution},await pinBasis(readProvider,context))).effect,'COMMITTED');
   const malformed=await make([{...Outfit.item(outfit.registration,fields,outfit.activationId),body:'0x12'}]);await assert.rejects(submit(direct(malformed),owner));
   const failed=await make([Outfit.item(outfit.registration,{species:1n,shirt:2n,pants:1n},outfit.activationId)]);await assert.rejects(submit(direct(failed),owner));
   const paidPlan=await make([PaidClaim.item(paid.registration,{claimKey:id('claim')},paid.activationId,fee)]);
@@ -94,6 +100,43 @@ test('real Anvil: generated helpers, exact authorization, atomic custom applicat
   const originalSend=readProvider.send.bind(readProvider);
   readProvider.send=async(method:string,params:any)=>{const result=await originalSend(method,params);if(method==='eth_call'&&params[0].data.startsWith(core.interface.getFunction('getBody')!.selector)) return result.slice(0,-2)+'ff';return result;};
   assert.equal((await readBack(readProvider,sent,basis)).effect,'UNKNOWN');readProvider.send=originalSend;
+  const mutateTuple=(method:string,index:number,value:unknown)=>(raw:string)=>{const values=Array.from(core.interface.decodeFunctionResult(method,raw)[0]);values[index]=value;return core.interface.encodeFunctionResult(method,[values]);};
+  for(const [label,method,mutate] of [
+   ['receipt bool word 2','getReceipt',(raw:string)=>'0x'+'0'.repeat(63)+'2'+raw.slice(66)],
+   ['receipt trailing word','getReceipt',(raw:string)=>raw+'00'.repeat(32)],
+   ['Type trailing word','getType',(raw:string)=>raw+'00'.repeat(32)],
+   ['Type bool word 2','getType',(raw:string)=>raw.slice(0,66)+'0'.repeat(63)+'2'+raw.slice(130)],
+   ['Type contradictory ruleId','getType',mutateTuple('getType',3,id('contradiction'))],
+   ['receipt impossible original block zero','getReceipt',mutateTuple('getReceipt',9,0n)],
+   ['receipt contradictory nonzero original block','getReceipt',mutateTuple('getReceipt',9,1n)]
+  ] as const) await t.test(label,async()=>{
+   let malformed='';
+   readProvider.send=async(rpc:string,params:any)=>{const result=await originalSend(rpc,params);if(rpc==='eth_call'&&params[0].data.startsWith(core.interface.getFunction(method)!.selector)){malformed=mutate(result);return malformed;}return result;};
+   try {const result=await readBack(readProvider,sent,basis);assert.equal(result.effect,'UNKNOWN');assert.ok(result.reads.some(r=>r.evidence.some((e:any)=>e.output===malformed)),'malformed raw response retained');}finally{readProvider.send=originalSend;}
+  });
+  await t.test('read-back requires available original execution provenance',async()=>{
+   assert.equal((await readBack(readProvider,{prepared},basis)).effect,'UNKNOWN');
+  });
+  await t.test('pre-executed plan retrieval does not attribute original acceptance to retrieving relayer',async()=>{
+   const anotherRelay=await provider.getSigner(3);
+   const retrieved=await submit(prepared,anotherRelay);
+   const unknown=await readBack(readProvider,retrieved,await pinBasis(readProvider,context));
+   assert.equal(unknown.effect,'UNKNOWN');assert.match(unknown.reason!,/ORIGINAL_EXECUTION_PROVENANCE_REQUIRED/);
+   const reconciled=await readBack(readProvider,{...retrieved,originalExecution:sent.execution},await pinBasis(readProvider,context));
+   assert.equal(reconciled.effect,'COMMITTED');
+  });
+  await t.test('fresh original execution receipt conflicts stay unknown with raw provenance',async()=>{
+   readProvider.send=async(rpc:string,params:any)=>{const result=await originalSend(rpc,params);return rpc==='eth_getTransactionReceipt'?{...result,blockNumber:'0x1'}:result;};
+   try {const result=await readBack(readProvider,sent,basis);assert.equal(result.effect,'UNKNOWN');assert.ok(result.provenanceEvidence.length);}finally{readProvider.send=originalSend;}
+  });
+  await t.test('conflicting retained original journey cannot override known acceptance provenance',async()=>{
+   const result=await readBack(readProvider,{...sent,execution:{...sent.execution!,transactionHash:id('different execution')},originalExecution:sent.execution},basis);
+   assert.equal(result.effect,'UNKNOWN');assert.match(result.reason!,/CONTRADICTORY_ORIGINAL_EXECUTION_EVIDENCE/);
+  });
+  await t.test('Accepted log metadata must agree with its execution receipt',async()=>{
+   readProvider.send=async(rpc:string,params:any)=>{const result=await originalSend(rpc,params);return rpc==='eth_getTransactionReceipt'?{...result,logs:result.logs.map((log:any)=>({...log,blockHash:id('wrong event block')}))}:result;};
+   try {assert.equal((await readBack(readProvider,sent,basis)).effect,'UNKNOWN');}finally{readProvider.send=originalSend;}
+  });
   readProvider.send=async(method:string,params:any)=>{if(method==='eth_call'&&params[0].data.startsWith(core.interface.getFunction('getBody')!.selector)) throw Error('body transport unavailable');return originalSend(method,params);};
   assert.equal((await readBack(readProvider,sent,basis)).effect,'UNKNOWN');readProvider.send=originalSend;
   readProvider.send=async(method:string,params:any)=>{const result=await originalSend(method,params);if(method==='eth_call'&&params[0].data.startsWith(core.interface.getFunction('getReceipt')!.selector)){const decoded=Array.from(core.interface.decodeFunctionResult('getReceipt',result)[0]);decoded[1]=treasuryAddress;return core.interface.encodeFunctionResult('getReceipt',[decoded]);}return result;};

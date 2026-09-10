@@ -2,6 +2,7 @@ import { Contract, Interface, TypedDataEncoder, concat, id, keccak256, toQuantit
 import type { JsonRpcProvider, Signer } from 'ethers';
 import { hash, typeId, ruleId } from './codec.ts';
 export const CORE_ABI=[
+ 'event Accepted(bytes32 indexed receipt,bytes32 indexed typeId,address indexed author,bytes32 planId,uint256 index)',
  'function registerType(bytes32 descriptor,bytes kinds,(bytes32 codeHash,bytes32 semanticConfig,uint8 mode,uint32 gasLimit) rule) returns(bytes32)',
  'function activate(bytes32 typeId,address hook,bytes32 localConfig) returns(bytes32)',
  'function hashPlan((address author,address executor,uint256 nonce,uint256 deadline,(bytes32 typeId,bytes32 activationId,bytes body,uint256 value)[] items) plan) view returns(bytes32)',
@@ -38,12 +39,25 @@ export async function authorize(planned:Planned,signer:Signer) {
 export function direct(planned:Planned) {return {planned,signature:'0x',path:'DIRECT_EOA_TRANSACTION_AUTHORSHIP',stage:'PREPARED',effect:'UNKNOWN' as const};}
 export type Prepared=ReturnType<typeof direct>;
 export function recoverAuthor(p:Prepared) {const s=signing(p.planned.context,p.planned.plan);return verifyTypedData(s.domain,s.types,s.value,p.signature);}
+export type Execution={transactionHash:string;blockNumber:number;blockHash:string;submitter:string;acceptedLogs:{address:string;topics:string[];data:string}[]};
+function acceptanceLogs(planned:Planned,logs:readonly any[],context:{transactionHash:string;blockNumber:number;blockHash:string;transactionIndex:number|string}) {
+ const matching=logs.filter(log=>log.address.toLowerCase()===planned.context.core.toLowerCase()&&log.topics[0]===iface.getEvent('Accepted')!.topicHash);
+ if(matching.length!==planned.plan.items.length) throw Error('ORIGINAL_EXECUTION_PROVENANCE_REQUIRED');
+ return matching.map((log,i)=>{
+  if(log.removed===true||log.transactionHash!==context.transactionHash||log.blockHash!==context.blockHash||Number(BigInt(log.blockNumber))!==context.blockNumber||BigInt(log.transactionIndex)!==BigInt(context.transactionIndex)) throw Error('EXECUTION_LOG_CONTEXT_MISMATCH');
+  const parsed=iface.parseLog(log)!,expected=iface.encodeEventLog('Accepted',[planned.predictedReceiptIds[i],planned.plan.items[i].typeId,planned.plan.author,planned.digest,i]);
+  if(parsed.args.index!==BigInt(i)||log.data!==expected.data||JSON.stringify(log.topics.map((s:string)=>s.toLowerCase()))!==JSON.stringify(expected.topics.map(s=>s.toLowerCase()))) throw Error('EXECUTION_EVENT_MISMATCH');
+  return {address:log.address.toLowerCase(),topics:[...log.topics],data:log.data};
+ });
+}
 export async function submit(prepared:Prepared,submitter:Signer,options:{exactRetry?:boolean}={}) {
  const core=new Contract(prepared.planned.context.core,CORE_ABI,submitter);
  const value=options.exactRetry?0n:prepared.planned.plan.items.reduce((n,i)=>n+i.value,0n);
  const tx=await core.execute(prepared.planned.plan,prepared.signature,{value});
  const evmReceipt=await tx.wait();
- return {prepared,transactionHash:tx.hash,rawSubmittedCalldata:tx.data,evmReceipt,submittedBy:await submitter.getAddress(),exactRetry:options.exactRetry??false,stage:'MINED',effect:'UNKNOWN' as const};
+ let execution:Execution|undefined;
+ try {execution={transactionHash:tx.hash,blockNumber:evmReceipt.blockNumber,blockHash:evmReceipt.blockHash,submitter:evmReceipt.from,acceptedLogs:acceptanceLogs(prepared.planned,evmReceipt.logs,{transactionHash:tx.hash,blockNumber:evmReceipt.blockNumber,blockHash:evmReceipt.blockHash,transactionIndex:evmReceipt.index})};} catch { /* Idempotent retrieval emits no new acceptance: retain progress, require original provenance. */ }
+ return {prepared,transactionHash:tx.hash,rawSubmittedCalldata:tx.data,evmReceipt,execution,submittedBy:await submitter.getAddress(),exactRetry:options.exactRetry??false,stage:'MINED',effect:'UNKNOWN' as const};
 }
 export function scopedPage(query:unknown) {return {query,support:'UNSUPPORTED',coverage:'UNKNOWN',outcome:'UNKNOWN',reason:'Standalone lab has no scoped-page implementation'};}
 export async function pinBasis(provider:JsonRpcProvider,context:Context,blockNumber?:number):Promise<Basis> {
@@ -55,23 +69,26 @@ async function checkBasis(provider:JsonRpcProvider,basis:Basis) {
  const [chain,block]=await Promise.all([provider.send('eth_chainId',[]),provider.send('eth_getBlockByNumber',[toQuantity(basis.blockNumber),false])]);
  if(BigInt(chain)!==basis.chainId||!block||block.hash!==basis.blockHash) throw Error('BASIS_DISAGREEMENT');
 }
-async function call(provider:JsonRpcProvider,basis:Basis,method:string,args:unknown[]) {
+async function call(provider:JsonRpcProvider,basis:Basis,method:string,args:unknown[],evidence:unknown[]) {
  const input=iface.encodeFunctionData(method,args);
  const output=await provider.send('eth_call',[{to:basis.core,data:input},toQuantity(basis.blockNumber)]);
- return {value:iface.decodeFunctionResult(method,output)[0],raw:{method,input,output,blockNumber:basis.blockNumber,blockHash:basis.blockHash}};
+ const raw={method,input,output,blockNumber:basis.blockNumber,blockHash:basis.blockHash};evidence.push(raw);
+ const decoded=iface.decodeFunctionResult(method,output);
+ if(iface.encodeFunctionResult(method,decoded).toLowerCase()!==output.toLowerCase()) throw Error('NONCANONICAL_RETURN_ENVELOPE');
+ return {value:decoded[0],raw};
 }
 export async function exactRead(provider:JsonRpcProvider,basis:Basis,receiptId:string) {
  const evidence:unknown[]=[];
  const qualification={basis,support:'SUPPORTED_EXACT_ACCEPTANCE_RECEIPT',authority:'TRUSTED_LOCAL_RPC_NO_STATE_PROOF',currentness:'AT_PINNED_BASIS_ONLY',finality:'LOCAL_UNFINALIZED',coverage:'EXACT_RECEIPT_ONLY',currentPolicy:'NOT_EVALUATED'};
  try {
   await checkBasis(provider,basis);
-  const r=await call(provider,basis,'getReceipt',[receiptId]); evidence.push(r.raw);
+  const r=await call(provider,basis,'getReceipt',[receiptId],evidence);
   const receipt=r.value.toObject();
   if(!receipt.accepted) return {...qualification,outcome:'UNKNOWN',receipt:undefined,reason:'NO_ACCEPTED_RECEIPT_OBSERVED_NOT_ABSENCE_PROOF',evidence};
-  const t=await call(provider,basis,'getType',[receipt.typeId]); evidence.push(t.raw);
+  const t=await call(provider,basis,'getType',[receipt.typeId],evidence);
   const info=t.value;
   const rule={codeHash:info.rule.codeHash,semanticConfig:info.rule.semanticConfig,mode:Number(info.rule.mode),gasLimit:Number(info.rule.gasLimit)};
-  if(!info.exists||typeId(info.descriptor,info.kinds,rule)!==receipt.typeId||ruleId(rule)!==receipt.ruleId||receipt.chainId!==basis.chainId||receipt.core.toLowerCase()!==basis.core.toLowerCase()||receipt.blockNumber>BigInt(basis.blockNumber)||hash(['bytes32','bytes32','uint256'],[id('efs.acceptance.receipt.v1'),receipt.planId,receipt.index])!==receiptId) throw Error('RECEIPT_IDENTITY_MISMATCH');
+  if(!info.exists||typeId(info.descriptor,info.kinds,rule)!==receipt.typeId||ruleId(rule)!==info.ruleId||ruleId(rule)!==receipt.ruleId||receipt.chainId!==basis.chainId||receipt.core.toLowerCase()!==basis.core.toLowerCase()||receipt.blockNumber===0n||receipt.blockNumber>BigInt(basis.blockNumber)||hash(['bytes32','bytes32','uint256'],[id('efs.acceptance.receipt.v1'),receipt.planId,receipt.index])!==receiptId) throw Error('RECEIPT_IDENTITY_MISMATCH');
   await checkBasis(provider,basis);
   return {...qualification,outcome:'FOUND',receipt,typeInfo:info,validation:'IDENTITY_VERIFIED_HISTORICAL_ACCEPTANCE',evidence};
  } catch(error) {return {...qualification,outcome:'UNKNOWN',receipt:undefined,reason:String(error),evidence};}
@@ -80,22 +97,30 @@ export async function verifiedBody(provider:JsonRpcProvider,basis:Basis,receiptI
  const exact=await exactRead(provider,basis,receiptId),evidence=[...exact.evidence];
  if(exact.outcome!=='FOUND'||!exact.receipt) return {exact,evidence,integrity:'NOT_EVALUATED',availability:'UNKNOWN',returnedBytes:undefined};
  try {
-  const b=await call(provider,basis,'getBody',[receiptId]); evidence.push(b.raw); await checkBasis(provider,basis);
+  const b=await call(provider,basis,'getBody',[receiptId],evidence); await checkBasis(provider,basis);
   if(keccak256(b.value)!==exact.receipt.bodyHash) return {exact,evidence,integrity:'FAILED',availability:'AVAILABLE',returnedBytes:b.value};
   return {exact,evidence,integrity:'VERIFIED_EXACT_BODY',availability:'AVAILABLE',returnedBytes:b.value,verifiedBytes:b.value as string};
  } catch(error) {return {exact,evidence,integrity:'NOT_EVALUATED',availability:'UNKNOWN',reason:String(error),returnedBytes:undefined};}
 }
-export async function readBack(provider:JsonRpcProvider,journey:{prepared:Prepared;submittedBy?:string;exactRetry?:boolean},basis:Basis) {
- const p=journey.prepared.planned,reads=[];
+export async function readBack(provider:JsonRpcProvider,journey:{prepared:Prepared;execution?:Execution;originalExecution?:Execution;submittedBy?:string;exactRetry?:boolean},basis:Basis) {
+ const p=journey.prepared.planned,reads=[],provenanceEvidence:unknown[]=[];
  try {
   if(basis.core.toLowerCase()!==p.context.core.toLowerCase()||basis.chainId!==p.context.chainId) throw Error('CONTEXT_DISAGREEMENT');
   await checkBasis(provider,basis);
   for(const [i,item] of p.plan.items.entries()) {
    const b=await verifiedBody(provider,basis,p.predictedReceiptIds[i]); reads.push(b);
    const r=b.exact.receipt;
-   if(b.integrity!=='VERIFIED_EXACT_BODY'||!r||r.author.toLowerCase()!==p.plan.author.toLowerCase()||r.typeId!==item.typeId||r.activationId!==item.activationId||r.planId!==p.digest||r.index!==BigInt(i)||b.verifiedBytes!==item.body||(!journey.exactRetry&&journey.submittedBy&&r.submitter.toLowerCase()!==journey.submittedBy.toLowerCase())) throw Error('PLANNED_EFFECT_MISMATCH');
+   if(b.integrity!=='VERIFIED_EXACT_BODY'||!r||r.author.toLowerCase()!==p.plan.author.toLowerCase()||r.typeId!==item.typeId||r.activationId!==item.activationId||r.planId!==p.digest||r.index!==BigInt(i)||b.verifiedBytes!==item.body) throw Error('PLANNED_EFFECT_MISMATCH');
   }
+  if(journey.originalExecution&&journey.execution&&JSON.stringify(journey.originalExecution)!==JSON.stringify(journey.execution)) throw Error('CONTRADICTORY_ORIGINAL_EXECUTION_EVIDENCE');
+  const execution=journey.originalExecution??journey.execution;
+  if(!execution) throw Error('ORIGINAL_EXECUTION_PROVENANCE_REQUIRED');
+  const observed=await provider.send('eth_getTransactionReceipt',[execution.transactionHash]);
+  provenanceEvidence.push({method:'eth_getTransactionReceipt',input:execution.transactionHash,output:observed});
+  if(!observed||BigInt(observed.status)!==1n||observed.transactionHash!==execution.transactionHash||Number(BigInt(observed.blockNumber))!==execution.blockNumber||observed.blockHash!==execution.blockHash||observed.from.toLowerCase()!==execution.submitter.toLowerCase()||observed.to?.toLowerCase()!==p.context.core.toLowerCase()||execution.blockNumber>basis.blockNumber||JSON.stringify(acceptanceLogs(p,observed.logs,{...execution,transactionIndex:observed.transactionIndex}))!==JSON.stringify(execution.acceptedLogs)) throw Error('EXECUTION_PROVENANCE_MISMATCH');
+  await checkBasis(provider,{...basis,blockNumber:execution.blockNumber,blockHash:execution.blockHash});
+  for(const read of reads) if(read.exact.receipt!.blockNumber!==BigInt(execution.blockNumber)||read.exact.receipt!.submitter.toLowerCase()!==execution.submitter.toLowerCase()) throw Error('RECEIPT_EXECUTION_PROVENANCE_MISMATCH');
   await checkBasis(provider,basis);
-  return {journey,basis,reads,stage:'READ_BACK_VERIFIED',effect:'COMMITTED',applicationBasis:'RETAINED_OPAQUE_HOOK_COMMITMENT_NOT_INDEPENDENT_ORACLE'};
- } catch(error) {return {journey,basis,reads,stage:'READ_BACK_INCOMPLETE',effect:'UNKNOWN',reason:String(error)};}
+  return {journey,basis,reads,provenanceEvidence,stage:'READ_BACK_VERIFIED',effect:'COMMITTED',applicationBasis:'RETAINED_OPAQUE_HOOK_COMMITMENT_NOT_INDEPENDENT_ORACLE'};
+ } catch(error) {return {journey,basis,reads,provenanceEvidence,stage:'READ_BACK_INCOMPLETE',effect:'UNKNOWN',reason:String(error)};}
 }

@@ -31,6 +31,14 @@ are uint256, address, bytes32, bool, max eight flat words; this is not the final
 EFS codec. Generated libraries are genuine named-field Solidity codecs, not
 handwritten per-application decoders.
 
+Both `item` and `edit` rederive the declaration's mandatory mode, gas and
+semantic configuration from retained named config inputs. Internally
+consistent stripped/changed rules are still refused. Generated Solidity
+`typeId` and `register` perform the same declaration check: parameterized
+Equip helpers require the expected `outfitType` argument, and PaidClaim
+helpers the expected `fee`. Code-hash selection still requires trusted setup;
+an arbitrary caller-supplied hash is not an artifact proof.
+
 ## Setup: choose code and constructor policy explicitly
 
 ```ts
@@ -71,6 +79,24 @@ For direct EOA submission, use `submit(direct(planned), authorSigner)` with no
 preceding signature. An exact retry uses the unchanged prepared plan and
 `submit(prepared, submitter, { exactRetry: true })`; it supplies zero new value.
 Never use a new nonce as recovery from unknown submission without reconciliation.
+
+An idempotent retrieval emits no new Accepted events, even if it is the first
+submission this caller observed. Read-back therefore returns UNKNOWN when
+original acceptance provenance is unavailable. If the original journey is
+retained, pass it explicitly:
+
+```ts
+const reconciled = await readBack(independentReadProvider,
+  { ...retrieved, originalExecution: originalSubmitted.execution }, basis);
+```
+
+Read-back independently retrieves that original transaction receipt, checks
+its canonical block, exact ordered Accepted logs, author/Type/plan/items,
+original submitter and receipt block. It never substitutes the retry block
+or retry relayer for original acceptance. There is no unbounded event-search
+recovery implemented; absent or contradictory provenance stays UNKNOWN.
+Complete return envelopes are canonicalized by decode/re-encode comparison,
+with raw responses retained before decoding can fail.
 
 `equipPreviousOutfit` means the immediately preceding staged item under this
 specific Equip rule. Its encoded zero is a relative-reference convention,
