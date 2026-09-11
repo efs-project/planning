@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { compileUpgrade,withUpgrade,mountedFixture,A,B,C,role,key,hash,cat,option,string,planBody,purposeScope } from './fixture.mjs';
-import { createFixtureReader } from '../reader-scope.mjs';
+import { createFixtureReader,DEFAULT_LIMITS } from '../reader-scope.mjs';
 import { oracle,fromSnapshot,comparable } from './oracle.mjs';
 import { word } from '../../2026-09-05-c0-core/scripts/local-stateful.mjs';
 import { readFileSync,writeFileSync } from 'node:fs';
@@ -99,7 +99,7 @@ test('stream prefixes, single flight, unavailable out-of-order sibling, corrupti
     const source={identity:lab.expected.source,epoch:1,request:lab.rpc};s=await ready(lab,{source});source.epoch++;assert.equal((await lookupName(s,{mountId:f.mounts.aFirst,name:'note.txt'})).qualification.status,'UNAVAILABLE');
     const controller=new AbortController();s=await ready(lab,{signal:controller.signal});controller.abort();assert.equal((await openDirectory(s,{mountId:f.mounts.aFirst}).loadMore()).qualification.status,'UNAVAILABLE');
     s=await ready(lab);stream=openDirectory(s,{mountId:f.mounts.aFirst});stream.close();assert.equal((await stream.loadMore()).reason,'STREAM_CLOSED');assert.equal((await s.call('getRecord',[f.fileA])).status,'OK','stream.close must not close caller scope');s.close();
-    for(const n of [0,9,1.5,NaN])assert.throws(()=>openDirectory(s,{mountId:f.mounts.aFirst,pageSize:n}));
+    for(const n of [0,33,1.5,NaN])assert.throws(()=>openDirectory(s,{mountId:f.mounts.aFirst,pageSize:n}));
   },{profile:'reads'});
 });
 
@@ -161,7 +161,7 @@ test('eight-name two-node live read phases at identical 0 and 50 ms delays',{tim
       const stream=openDirectory(scope,{mountId:f.mounts.aFirst,pageSize:4});const first=await phase('first-sealed-page',()=>stream.loadMore());assert.equal(first.rows.length,4);assert.equal(first.coverage,'PARTIAL');
       const final=await phase('continuation',()=>stream.loadMore());compareList(final,truth,f.mounts.aFirst);
       const reuse=await phase('same-scope-point-reuse',()=>lookupName(scope,{mountId:f.mounts.aFirst,name:'note.txt'}));assert.equal(reuse.outcome,'FOUND');assert.equal(phases.at(-1).requests,4,'reuse still pays the complete seal');
-      assert(scope.stats().maxInFlight<=4);report.samples.push({delayMs:delay,sample,basis:scope.basis,phases,evidence:scope.evidence(),stats:scope.stats()});scope.close();
+      assert(scope.stats().maxInFlight<=DEFAULT_LIMITS.maxInFlight);report.samples.push({delayMs:delay,sample,basis:scope.basis,phases,evidence:scope.evidence(),stats:scope.stats()});scope.close();
     }
     t.diagnostic(stringify({workload:report.workload,samples:report.samples.map(({delayMs,sample,basis,phases})=>({delayMs,sample,basis,phases}))}));
     if(process.env.EFS_FILES_READER_EVIDENCE==='1')writeFileSync(new URL('../../../.superpowers/sdd/files-reader-plan/files-reader-evidence.json',import.meta.url),stringify(report)+'\n');

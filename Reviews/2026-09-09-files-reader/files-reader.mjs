@@ -1,5 +1,6 @@
 // Root-directory-only fixture reader. No bytes, revision heads, actions or wallet.
 import { FIXTURE,TYPES,assessRecord,nameAssessment,nameRole,positionKey,bindingKey,bindingScopeKey,purposeAndScope,parsePlan,contentDigest,byteLength,foldChunkLeaves,EMPTY_CONTENT_ROOT } from './files-profile.mjs';
+import { checkScopeContinuation } from './reader-scope.mjs';
 const ZERO='0x'+'0'.repeat(64),END=(1n<<256n)-1n,MASK48=(1n<<48n)-1n;
 const caches=new WeakMap();
 const freeze=x=>{if(x&&typeof x==='object'){for(const v of Object.values(x))freeze(v);Object.freeze(x);}return x;};
@@ -259,14 +260,16 @@ function checkedPage(scope,state,page,rows,pageSize){
 }
 export function openDirectory(scope,{mountId,subject,pageSize=8}){
   require(Number.isInteger(pageSize)&&pageSize>=1&&pageSize<=32,'PAGE_SIZE');
-  let closed=false,flight=null,sources=null,positions=new Map(),last=null,latest=null,listDomain='FIXTURE_ROOT_DIRECTORY_ONLY';
+  let closed=false,flight=null,handoff=null,sources=null,positions=new Map(),last=null,latest=null,predecessor=null,directoryContext=null,listDomain='FIXTURE_ROOT_DIRECTORY_ONLY';
+  const contextFor=(m,listed)=>JSON.stringify({mount:m,subject:listed},(_,v)=>typeof v==='bigint'?String(v):v);
   const progress=ss=>(ss??[]).map(s=>({principal:s.principal,cursor:s.cursor,scanned:s.scanned,complete:s.complete}));
   function snapshot(rowsMap,ss,coverage){const all=[...rowsMap.values()];return {coverage,rows:all.filter(r=>r.outcome==='FOUND').sort((a,b)=>a.value.name<b.value.name?-1:a.value.name>b.value.name?1:0),unresolved:all.filter(r=>r.outcome==='UNKNOWN'||r.outcome==='CONFLICT'),masked:all.filter(r=>r.outcome==='MASKED'),absent:all.filter(r=>r.outcome==='ABSENT'),progress:progress(ss),continuation:!(ss?.every(s=>s.complete)??false)};}
   async function step(){
-    let ss=sources?.map(s=>({...s,roles:[...s.roles]})),next=new Map(positions),failure;
+    let ss=sources?.map(s=>({...s,roles:[...s.roles]})),next=new Map(positions),failure,context;
     try{
       require(!closed,'STREAM_CLOSED');const m=await mount(scope,mountId);
       const listed=await directorySubject(scope,m,subject);listDomain=domainFor(m,listed);
+      context=contextFor(m,listed);
       ss??=[...new Set(m.namespace.entries.map(e=>e.principal))].map(principal=>({principal,cursor:0n,scanned:0n,last:0n,end:null,tag:null,roles:[],complete:false}));
       const pages=await Promise.all(ss.filter(s=>!s.complete).map(async s=>{
         try{const [page,rows]=await call(scope,'pagePostingsHydrated',[ZERO,10,0,bindingScopeKey(s.principal,FIXTURE.namePurpose,listed),[s.cursor,pageSize,scope.basis.admissionHigh]]);checkedPage(scope,s,page,rows,pageSize);return {s,rows};}catch(e){return {s,error:e};}
@@ -293,16 +296,35 @@ export function openDirectory(scope,{mountId,subject,pageSize=8}){
     }catch(e){failure=e;}
     // Drain all internally owned row work before the one aggregate seal.
     const seal=await scope.seal();
-    if(seal.status!=='SEALED'||closed)failure=new Failure(closed?'STREAM_CLOSED':'SEAL_FAILED',seal.reason);
+    if(seal.status!=='SEALED'||closed)failure??=new Failure(closed?'STREAM_CLOSED':'SEAL_FAILED',seal.reason);
     if(failure){latest=freeze({...snapshot(positions,sources,positions.size?'PARTIAL':'UNKNOWN'),basis:scope.basis,domain:listDomain,reason:failure.reason??failure.message,detail:failure.message,rowsEvidence:'PRIOR_SEALED',qualification:qualification('UNAVAILABLE',positions.size?'PARTIAL':'UNKNOWN','UNKNOWN'),evidence:seal.evidence,priorSealed:last});return latest;}
     const coverage=ss.every(s=>s.complete)?'COMPLETE':'PARTIAL';
     for(const [r,v] of next)next.set(r,freeze({...v,qualification:qualification('QUALIFIED',missing(v.reason)?'UNKNOWN':'COMPLETE',v.outcome,v.reason)}));
     const rows=[...next.values()],unavailable=rows.filter(r=>missing(r.reason)).length;
     const validation=rows.some(r=>r.outcome==='UNKNOWN'||r.outcome==='CONFLICT')?'UNKNOWN':rows.some(r=>r.outcome==='FOUND')?'FOUND':'ABSENT';
     const aggregate={...qualification('QUALIFIED',coverage,validation),availability:unavailable?(unavailable===rows.length?'UNAVAILABLE':'PARTIAL'):'OBTAINED',support:rows.some(r=>r.reason?.startsWith('UNSUPPORTED'))?'UNSUPPORTED':'FIXTURE_ASCII_ONLY'};
-    sources=ss;positions=next;last=freeze({...snapshot(next,ss,coverage),basis:scope.basis,domain:listDomain,rowsEvidence:'CURRENT_SEALED',qualification:aggregate,evidence:seal.evidence});latest=last;return last;
+    sources=ss;positions=next;directoryContext=context;last=freeze({...snapshot(next,ss,coverage),basis:scope.basis,domain:listDomain,rowsEvidence:'CURRENT_SEALED',qualification:aggregate,evidence:seal.evidence,...(predecessor?{priorSealed:predecessor}:{})});latest=last;return last;
   }
-  return Object.freeze({loadMore(){if(!flight)flight=step().finally(()=>{flight=null;});return flight;},snapshot(){return latest;},close(){closed=true;}});
+  async function resume(nextScope){
+    try{
+      require(!closed,'STREAM_CLOSED');require(last&&directoryContext,'NO_SEALED_FRONTIER');
+      const refusal=checkScopeContinuation(scope,nextScope);require(!refusal,refusal);
+      const m=await mount(nextScope,mountId),listed=await directorySubject(nextScope,m,subject);
+      require(contextFor(m,listed)===directoryContext,'FILES_CONTEXT_MISMATCH');
+      const seal=await nextScope.seal();require(seal.status==='SEALED','SEAL_FAILED');
+      require(!closed,'STREAM_CLOSED');
+      const changed=checkScopeContinuation(scope,nextScope);require(!changed,changed);
+      // Only the acquisition changes; sealed rows, cursors, roles, ordering,
+      // Mount/subject and previous snapshots remain owned by this closure.
+      predecessor=last;scope=nextScope;return freeze({status:'RESUMED'});
+    }catch(e){return freeze({status:'REFUSED',reason:e.reason??e.message});}
+  }
+  function loadMore(){if(handoff)return handoff.then(loadMore);if(!flight)flight=step().finally(()=>{flight=null;});return flight;}
+  return Object.freeze({
+    loadMore,
+    resume(nextScope){if(closed||flight||handoff)return Promise.resolve(freeze({status:'REFUSED',reason:closed?'STREAM_CLOSED':'STREAM_BUSY'}));handoff=resume(nextScope).finally(()=>{handoff=null;});return handoff;},
+    snapshot(){return latest;},close(){closed=true;}
+  });
 }
 
 /** Removed items of one directory: per-principal enumeration of removal

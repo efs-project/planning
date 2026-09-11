@@ -11,18 +11,21 @@ import { fixtureInputs, SOLC, TX_GAS, word } from '../../2026-09-05-c0-core/scri
 import { HISTORY_LIMIT, executionObject } from '../reference/upgrade-reader.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url)), abi = AbiCoder.defaultAbiCoder();
+const BUILD_ROOT = process.env.EFS_TEST_BUILD_ROOT ? resolve(process.env.EFS_TEST_BUILD_ROOT, 'foundation') : ROOT;
+const OUT = join(BUILD_ROOT, 'out');
 const IMPLEMENTATION_SLOT = '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
 const ADMIN_SLOT = '0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103';
 const bytes = x => (x.length - 2) / 2;
 const lower = x => x.toLowerCase();
 const asAddress = value => { assert(/^0x0{24}[0-9a-f]{40}$/i.test(value), 'canonical address word'); return lower('0x' + value.slice(-40)); };
 export function compileUpgrade() {
-  const r = spawnSync('forge',['build','--ast','--build-info','--offline','--use',SOLC],{cwd:ROOT,encoding:'utf8',timeout:240000,maxBuffer:4*1024*1024});
+  const isolated = process.env.EFS_TEST_BUILD_ROOT ? ['--out',OUT,'--cache-path',join(BUILD_ROOT,'cache'),'--build-info-path',join(OUT,'build-info')] : [];
+  const r = spawnSync('forge',['build','--ast','--build-info','--offline','--use',SOLC,...isolated],{cwd:ROOT,encoding:'utf8',timeout:240000,maxBuffer:4*1024*1024});
   assert.equal(r.status,0,r.stdout+r.stderr);
 }
 function artifact(name) {
   const file = name === 'UpgradeStaticConsumer' ? 'UpgradeReads.t' : name.endsWith('U2') ? name.slice(0,-2) : name;
-  return JSON.parse(readFileSync(join(ROOT,'out',file+'.sol',name+'.json'),'utf8'));
+  return JSON.parse(readFileSync(join(OUT,file+'.sol',name+'.json'),'utf8'));
 }
 function patch(template, refs, values) {
   let code = template.replace(/^0x/,'');
@@ -61,7 +64,7 @@ function link(bytecode,addresses = {}, expected = []) {
 function compilerEvidence(profile) {
   const coreName = profileMap[profile].core;
   const a = artifact(coreName);
-  const info = readdirSync(join(ROOT,'out/build-info')).map(n => JSON.parse(readFileSync(join(ROOT,'out/build-info',n),'utf8'))).find(j => j.output?.contracts?.['src/'+coreName+'.sol']?.[coreName]?.evm?.bytecode?.object === a.bytecode.object.replace(/^0x/,''));
+  const info = readdirSync(join(OUT,'build-info')).map(n => JSON.parse(readFileSync(join(OUT,'build-info',n),'utf8'))).find(j => j.output?.contracts?.['src/'+coreName+'.sol']?.[coreName]?.evm?.bytecode?.object === a.bytecode.object.replace(/^0x/,''));
   assert(info,'matching full compiler output');
   const names = {};
   function visit(node) { if (!node || typeof node !== 'object') return; if(node.mutability === 'immutable') names[node.id]=node.name; for (const v of Object.values(node)) if(typeof v === 'object') Array.isArray(v) ? v.forEach(visit) : visit(v); }

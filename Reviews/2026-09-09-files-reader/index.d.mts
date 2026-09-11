@@ -45,7 +45,9 @@ export interface DirectorySnapshot extends Observation {
   readonly progress:readonly {readonly principal:string;readonly cursor:bigint;readonly scanned:bigint;readonly complete:boolean}[];
   readonly continuation:boolean;readonly qualification:Qualification;readonly rowsEvidence:'CURRENT_SEALED'|'PRIOR_SEALED';readonly reason?:string;readonly detail?:string;readonly priorSealed?:DirectorySnapshot|null;
 }
-export function openDirectory(scope:Scope,options:{mountId:string;subject?:string;pageSize?:number}):Readonly<{loadMore():Promise<DirectorySnapshot>;snapshot():DirectorySnapshot|null;close():void}>;
+/** In-process only. Refusal keeps the old stream and never closes caller scopes. */
+export type DirectoryResumeResult={readonly status:'RESUMED'}|{readonly status:'REFUSED';readonly reason:string};
+export function openDirectory(scope:Scope,options:{mountId:string;subject?:string;pageSize?:number}):Readonly<{loadMore():Promise<DirectorySnapshot>;resume(nextScope:Scope):Promise<DirectoryResumeResult>;snapshot():DirectorySnapshot|null;close():void}>;
 export const TYPES:Readonly<Record<'ObjectGenesis/1'|'ResolutionPlan/1'|'BindingSet/1'|'BindingTombstone/1'|'DirectoryEntry/1'|'DirectoryWhiteout/1'|'PublicFilesMountConfig/1'|'MountDescriptor/1'|'FileRevision/1'|'ChunkTree/1'|'RemovalMarker/1'|'FileTagAssertion/1',string>>;
 export const FIXTURE:Readonly<Record<'publicProfile'|'planScopeDomain'|'lensProfile'|'fileMeaning'|'directoryMeaning'|'charterPurpose'|'namePurpose'|'headPurpose'|'headRole'|'tagPurpose'|'removedPurpose'|'charterRole',string>>;
 export function tagId(label:string):string;

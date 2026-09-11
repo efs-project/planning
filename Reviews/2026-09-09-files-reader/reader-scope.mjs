@@ -53,6 +53,20 @@ const quantity = x => typeof x==='string' && /^0x(?:0|[1-9a-f][0-9a-f]*)$/.test(
 const blockTag = x => x==='latest' || quantity(x);
 const freeze = x => {if(x && typeof x==='object'){for(const v of Object.values(x))freeze(v);Object.freeze(x);}return x;};
 const clone = x => structuredClone(x);
+// Module-private provenance: a caller-supplied basis or copied scope is not
+// independent qualification. No cursor tokens or serialized resume registry.
+const qualifiedScopes = new WeakMap();
+export function isQualifiedScope(scope) { return qualifiedScopes.has(scope); }
+const canonicalContext = value => JSON.stringify(value, (_, v) => typeof v === 'bigint' ? { bigint: String(v) } : v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map(k => [k, v[k]])) : v);
+export function checkScopeContinuation(previous, next) {
+  const before = qualifiedScopes.get(previous), after = qualifiedScopes.get(next);
+  if (!before || !after) return 'UNQUALIFIED_SCOPE';
+  if (previous === next) return 'SAME_ACQUISITION';
+  if (before.request !== after.request || before.context !== after.context) return 'BASIS_MISMATCH';
+  if (!before.idle() || !after.idle()) return 'SCOPE_BUSY';
+  try { after.live(); } catch (error) { return error.message; }
+  return null;
+}
 const executionId = e => keccak256(abi.encode(['bytes32',EXECUTION],[domain('efs.fixture.execution-set/1'),{...e,id:ZeroHash}]));
 function configurationId(e,core) {
   const impl=core?e.coreImplementation:e.carrierImplementation;
@@ -296,6 +310,8 @@ function createScope(source,expected,caps,signal) {
       })(),
     ]);
     await canonical('qualification');live();endWindow();
+    qualifiedScopes.set(scope, { request, context: canonicalContext({ basis, expected }), live,
+      idle: () => !sealing && dataWork.size === 0 && running.size === 0 && queue.length === 0 });
   }
   const unavailable = error => ({status:'UNAVAILABLE',reason:error.message,evidenceId:error.evidenceId??null});
   const scope=Object.freeze({

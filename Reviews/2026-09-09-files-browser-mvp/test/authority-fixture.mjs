@@ -4,7 +4,7 @@
 // to disposable author accounts IN CORE. Provides the one-signature routed
 // execute path and permissionless chunk staging used by tests and the env.
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { routerArtifact as artifact } from './router-fixture.mjs';
 import { Wallet, AbiCoder, Interface, keccak256, toBeHex } from '../../2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js';
 import { word, TX_GAS } from '../../2026-09-05-c0-core/scripts/local-stateful.mjs';
 import { FIXTURE } from '../../2026-09-09-files-reader/index.mjs';
@@ -32,8 +32,6 @@ function linked(artifact, libraries) {
   assert(!code.includes('_'), 'unresolved link references');
   return '0x' + code;
 }
-
-const artifact = name => JSON.parse(readFileSync(new URL('../contracts/out/' + name + '.json', import.meta.url), 'utf8'));
 
 export async function authorityFixture(lab) {
   const controller = lab.expected.execution.controller;

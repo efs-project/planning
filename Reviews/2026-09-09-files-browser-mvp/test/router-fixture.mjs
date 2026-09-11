@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { join, resolve } from 'node:path';
 import { Wallet, AbiCoder, Interface, keccak256, toBeHex } from '../../2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js';
 import { encodeGroup, derive } from '../../2026-09-05-mvp-build-start/type-inputs/encoder.mjs';
 import { publication, groupLeaf, word, SOLC, TX_GAS } from '../../2026-09-05-c0-core/scripts/local-stateful.mjs';
@@ -13,6 +14,9 @@ import { EXTENDED_TYPES, planOperation, authorizeAuthor, routerInterface, decode
 
 const abi = AbiCoder.defaultAbiCoder();
 const ROOT = fileURLToPath(new URL('../contracts', import.meta.url));
+const BUILD_ROOT = process.env.EFS_TEST_BUILD_ROOT ? resolve(process.env.EFS_TEST_BUILD_ROOT, 'router') : ROOT;
+const OUT = join(BUILD_ROOT, 'out');
+export const routerArtifact = name => JSON.parse(readFileSync(join(OUT, name + '.json'), 'utf8'));
 
 const DE = EXTENDED_TYPES['DirectoryEntry/1'].slice(2);
 const OG = EXTENDED_TYPES['ObjectGenesis/1'].slice(2);
@@ -22,7 +26,8 @@ export const NEW_GROUP_DESCRIPTORS = [
 ];
 
 export function compileRouter() {
-  const r = spawnSync('forge', ['build', '--offline', '--use', SOLC], { cwd: ROOT, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024, timeout: 240000 });
+  const isolated = process.env.EFS_TEST_BUILD_ROOT ? ['--out', OUT, '--cache-path', join(BUILD_ROOT, 'cache'), '--build-info', '--build-info-path', join(OUT, 'build-info')] : [];
+  const r = spawnSync('forge', ['build', '--offline', '--use', SOLC, ...isolated], { cwd: ROOT, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024, timeout: 240000 });
   assert.equal(r.status, 0, r.stdout + r.stderr);
 }
 
@@ -38,7 +43,7 @@ export async function routerFixture(lab, { nonceBase = 41000 } = {}) {
   assert.equal((await lab.publish(publication([groupLeaf(lab.inputs.meta, '0x' + raw.toString('hex'))], nonceBase))).receipt.status, '0x1');
 
   // 2. Deploy the router.
-  const artifact = JSON.parse(readFileSync(new URL('../contracts/out/FilesRouterV1.sol/FilesRouterV1.json', import.meta.url), 'utf8'));
+  const artifact = routerArtifact('FilesRouterV1.sol/FilesRouterV1');
   const typeIds = {
     objectGenesis: EXTENDED_TYPES['ObjectGenesis/1'], bindingSet: EXTENDED_TYPES['BindingSet/1'],
     bindingTombstone: EXTENDED_TYPES['BindingTombstone/1'], directoryEntry: EXTENDED_TYPES['DirectoryEntry/1'],

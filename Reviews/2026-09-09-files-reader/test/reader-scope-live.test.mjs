@@ -178,7 +178,7 @@ test('real read-profile scopes qualify, pin, share, seal and fail closed', {time
     const errors=await denied(async(m,p,o)=>{if(m==='eth_getCode')throw Object.assign(Error('transport fixture failure'),{code:-32000,data:'0x1234'});return measured(m,p,o);},/transport fixture failure/);
     assert(errors.evidence.some(e=>e.error?.data==='0x1234'&&e.error.code===-32000));
     for(const [limits,pattern] of [[{maxRequests:1},/request budget/],[{responseBytes:32},/response byte budget/],[{maxBytes:100},/total byte budget/]])await denied((m,p)=>measured(m,p),pattern,lab.expected,limits);
-    for(const limits of [{maxInFlight:5},{maxRequests:Infinity},{deadlineMs:0},{unknown:1}])await denied(measured,/limits/,lab.expected,limits);
+    for(const limits of [{maxInFlight:DEFAULT_LIMITS.maxInFlight+1},{maxRequests:Infinity},{deadlineMs:0},{unknown:1}])await denied(measured,/limits/,lab.expected,limits);
     let broken=true;
     const retryReader=make(async(m,p,o)=>{if(broken&&m==='eth_getCode')throw Error('temporary acquisition');return measured(m,p,o);});
     assert.equal((await retryReader.open({blockTag:'latest'})).reason,'temporary acquisition');broken=false;
