@@ -1,0 +1,64 @@
+Compiling 3 files with Solc 0.8.30
+Solc 0.8.30 finished in 3.31s
+Compiler run successful!
+
+Ran 5 tests for test/Examples.t.sol:ExamplesTest
+[PASS] testCallbackValidatorCannotReenterKernel() (gas: 759386)
+[PASS] testPlainMappingControlHasNativeOperator() (gas: 127155)
+[PASS] testProducerAuthorityAndCAS() (gas: 599861)
+[PASS] testProducerConsumerNativeInitialAndUpdate() (gas: 904617)
+[PASS] testReaderMissingAndWrongTypeRejects() (gas: 657485)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 7.84ms (2.16ms CPU time)
+
+Ran 7 tests for test/Types.t.sol:TypesTest
+[PASS] testBoundedStaticcallRejectsHostileResponses() (gas: 217137)
+[PASS] testBytesCanonicalAndMalformed() (gas: 135029)
+[PASS] testChangedAndMissingRuntimeRejected() (gas: 109338)
+[PASS] testDescriptorRetainedPortableBoundedAndImmutable() (gas: 232699)
+[PASS] testPermissionlessExactTypeRegistration() (gas: 273644)
+[PASS] testUintMalformedRejected() (gas: 109879)
+[PASS] testUnreviewedAndMissingValidatorsRejected() (gas: 93760)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 7.87ms (6.09ms CPU time)
+
+Ran 19 tests for test/GasOperations.t.sol:GasOperationsTest
+[PASS] testGasConsumerRead() (gas: 66624)
+[PASS] testGasCreateDirectory() (gas: 364108)
+[PASS] testGasCreateFileDeduplicatedRecord() (gas: 403810)
+[PASS] testGasCreateFileUniqueRecord() (gas: 521046)
+[PASS] testGasCreateRoot() (gas: 208782)
+[PASS] testGasEditFileUniqueRecord() (gas: 267517)
+[PASS] testGasHydratedPage16() (gas: 364385)
+[PASS] testGasHydratedPage32() (gas: 703155)
+[PASS] testGasMoveFile() (gas: 240796)
+[PASS] testGasPlainMappingInsert() (gas: 27634)
+[PASS] testGasPlainMappingRead() (gas: 7618)
+[PASS] testGasPlainMappingUpdate() (gas: 10820)
+[PASS] testGasProducerInitialPublish() (gas: 558984)
+[PASS] testGasProducerUpdate() (gas: 268725)
+[PASS] testGasRenameFile() (gas: 195060)
+[PASS] testGasStoreRecordDuplicate() (gas: 22860)
+[PASS] testGasStoreRecordUnique() (gas: 142865)
+[PASS] testGasUnlinkEmptyDirectory() (gas: 105878)
+[PASS] testGasUnlinkFile() (gas: 130309)
+Suite result: ok. 19 passed; 0 failed; 0 skipped; finished in 8.88ms (1.75ms CPU time)
+
+Ran 16 tests for test/Native.t.sol:NativeTest
+[PASS] testCreateRootDirectoryFileAndRead() (gas: 1143862)
+[PASS] testCursorsBoundScopeAndLimits() (gas: 641420)
+[PASS] testFuzzRecordIdentityAndImmutableHistory(uint256,uint256) (runs: 128, μ: 998378, ~: 999156)
+[PASS] testHistoricalInventoriesPinnedHighAndUnlinkedRetained() (gas: 1742302)
+[PASS] testHydratedDirectoryPage32AndStaleAfterRename() (gas: 15832797)
+[PASS] testIndexOnlyKernelMutates() (gas: 786462)
+[PASS] testInvalidBodyAtomicAndLimit() (gas: 762593)
+[PASS] testLivePagesContinuationStaleAfterEditAndEmptyEnd() (gas: 2669143)
+[PASS] testMandatoryIndexFailureRollsBackKernelRecordAndFile() (gas: 1113295)
+[PASS] testMissingReadsAndDepthLimit() (gas: 270328)
+[PASS] testNameConflictsAndBoundedGrammar() (gas: 2777775)
+[PASS] testNativeCallerIsolationAndForeignParents() (gas: 1503804)
+[PASS] testNestedPathMissingEmptyAndNonemptyRemoval() (gas: 1549123)
+[PASS] testRecordDedupTypeSeparationAndCrossDeployment() (gas: 4218168)
+[PASS] testStableIdentityHistoryEditMoveUnlinkRecreate() (gas: 1851193)
+[PASS] testStaleCASRejectsAllMutations() (gas: 1000380)
+Suite result: ok. 16 passed; 0 failed; 0 skipped; finished in 24.55ms (25.68ms CPU time)
+
+Ran 4 test suites in 33.26ms (49.14ms CPU time): 47 tests passed, 0 failed, 0 skipped (47 total tests)
