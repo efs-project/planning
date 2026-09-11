@@ -18,9 +18,14 @@ const ADMIN_SLOT = '0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b
 const bytes = x => (x.length - 2) / 2;
 const lower = x => x.toLowerCase();
 const asAddress = value => { assert(/^0x0{24}[0-9a-f]{40}$/i.test(value), 'canonical address word'); return lower('0x' + value.slice(-40)); };
-export function compileUpgrade() {
+export function upgradeBuildArgs({ fullBuild = process.env.EFS_TEST_FULL_BUILD === '1' } = {}) {
   const isolated = process.env.EFS_TEST_BUILD_ROOT ? ['--out',OUT,'--cache-path',join(BUILD_ROOT,'cache'),'--build-info-path',join(OUT,'build-info')] : [];
-  const r = spawnSync('forge',['build','--ast','--build-info','--offline','--use',SOLC,...isolated],{cwd:ROOT,encoding:'utf8',timeout:240000,maxBuffer:4*1024*1024});
+  // Opt-in only: incremental builds can leave unchanged artifacts carrying old
+  // AST IDs. A full build regenerates one coherent compiler/artifact bundle.
+  return ['build','--ast','--build-info','--offline','--use',SOLC,...isolated,...(fullBuild ? ['--force'] : [])];
+}
+export function compileUpgrade(options) {
+  const r = spawnSync('forge',upgradeBuildArgs(options),{cwd:ROOT,encoding:'utf8',timeout:240000,maxBuffer:4*1024*1024});
   assert.equal(r.status,0,r.stdout+r.stderr);
 }
 function artifact(name) {
@@ -61,24 +66,27 @@ function link(bytecode,addresses = {}, expected = []) {
   assert.deepEqual(Object.keys(refs).sort(), [...expected].sort(), 'exact link inventory');
   return patch(bytecode.object,refs,addresses);
 }
-function compilerEvidence(profile) {
-  const coreName = profileMap[profile].core;
-  const a = artifact(coreName);
-  const info = readdirSync(join(OUT,'build-info')).map(n => JSON.parse(readFileSync(join(OUT,'build-info',n),'utf8'))).find(j => j.output?.contracts?.['src/'+coreName+'.sol']?.[coreName]?.evm?.bytecode?.object === a.bytecode.object.replace(/^0x/,''));
-  assert(info,'matching full compiler output');
+function compilerImmutableNames(info) {
   const names = {};
   function visit(node) { if (!node || typeof node !== 'object') return; if(node.mutability === 'immutable') names[node.id]=node.name; for (const v of Object.values(node)) if(typeof v === 'object') Array.isArray(v) ? v.forEach(visit) : visit(v); }
-  for (const source of Object.values(info.output.sources)) visit(source.ast);
-  const sourcePins = {};
+  for (const source of Object.values(info.output?.sources ?? {})) visit(source.ast);
+  return names;
+}
+function assertCompilerEvidence(info, artifacts, currentSources) {
   const metadataSources = {};
-  for (const name of [coreName,coreName+'U2',...(profile === 'reads' ? ['UpgradeableFixtureCore','UpgradeableFixtureCoreU2','PointReadLibrary','UpgradeQueryReadLibrary','UpgradeStaticConsumer'] : []),'UpgradeableFixtureCarrier','UpgradeableFixtureCarrierU2','FixtureDeployment','PreparationHelper','UpgradeAdmissionLibrary','TransparentUpgradeableProxy','ProxyAdmin']) {
-    const generated=artifact(name), [[path,contract]]=Object.entries(generated.metadata.settings.compilationTarget);
-    const compiled=info.output.contracts[path]?.[contract];assert(compiled,'complete compiled artifact '+name);
+  const names = compilerImmutableNames(info);
+  assert(Object.keys(artifacts).length > 0, 'nonempty artifact inventory');
+  for (const [name,generated] of Object.entries(artifacts)) {
+    const [[path,contract]]=Object.entries(generated.metadata.settings.compilationTarget);
+    const compiled=info.output?.contracts?.[path]?.[contract];assert(compiled,'complete compiled artifact '+name);
     assert.deepEqual(generated.abi,compiled.abi,'compiler ABI '+name);
     for(const kind of ['bytecode','deployedBytecode']) {
       assert.equal(generated[kind].object.replace(/^0x/,''),compiled.evm[kind].object,'compiler artifact bytecode '+name);
-      assert.deepEqual(generated[kind].linkReferences??{},compiled.evm[kind].linkReferences??{},'compiler link references');
-      assert.deepEqual(generated[kind].immutableReferences??{},compiled.evm[kind].immutableReferences??{},'compiler immutable references');
+      assert.deepEqual(generated[kind].linkReferences??{},compiled.evm[kind].linkReferences??{},'compiler link references '+name+' '+kind);
+      assert.deepEqual(generated[kind].immutableReferences??{},compiled.evm[kind].immutableReferences??{},'compiler immutable references '+name+' '+kind);
+      for (const id of Object.keys(compiled.evm[kind].immutableReferences ?? {})) {
+        assert(id === 'library_deploy_address' || Object.hasOwn(names,id), 'compiler immutable AST reference '+name+' '+id);
+      }
     }
     for (const [path,value] of Object.entries(generated.metadata.sources)) {
       if (metadataSources[path]) assert.equal(metadataSources[path].keccak256,value.keccak256,'consistent artifact source hashes');
@@ -86,11 +94,37 @@ function compilerEvidence(profile) {
     }
   }
   for (const [name,value] of Object.entries(metadataSources)) {
-    const input = (info.input.sources[name] ?? info.input.sources[resolve(ROOT,name)])?.content; assert.equal(typeof input,'string','source content '+name);
-    assert.equal(keccak256(Buffer.from(input)),value.keccak256,'compiler source hash');
-    assert.equal(keccak256(readFileSync(resolve(ROOT,name))),value.keccak256,'current disk source hash');
-    sourcePins[name]=value.keccak256;
+    const input = (info.input?.sources?.[name] ?? info.input?.sources?.[resolve(ROOT,name)])?.content; assert.equal(typeof input,'string','source content '+name);
+    assert.equal(keccak256(Buffer.from(input)),value.keccak256,'compiler source hash '+name);
+    assert(info.output.sources?.[name]?.ast, 'compiler source AST '+name);
+    assert(currentSources[name] !== undefined, 'current disk source '+name);
+    assert.equal(keccak256(Buffer.from(currentSources[name])),value.keccak256,'current disk source hash '+name);
   }
+}
+export function selectCompilerEvidence(candidates, artifacts, currentSources) {
+  const failures = [];
+  for (const [index,info] of candidates.entries()) {
+    try {
+      assertCompilerEvidence(info, artifacts, currentSources);
+      return info;
+    } catch (error) {
+      if (!(error instanceof assert.AssertionError)) throw error;
+      failures.push((info.id ?? index)+': '+error.message.split('\n')[0]);
+    }
+  }
+  throw new Error('No coherent full compiler output matches all required artifacts and current sources. '+
+    'Rebuild the isolated foundation bundle with EFS_TEST_FULL_BUILD=1 (forge --force); do not mix compiler runs. '+failures.join('; '));
+}
+function compilerEvidence(profile) {
+  const coreName = profileMap[profile].core;
+  const artifacts = Object.fromEntries([coreName,coreName+'U2',...(profile === 'reads' ? ['UpgradeableFixtureCore','UpgradeableFixtureCoreU2','PointReadLibrary','UpgradeQueryReadLibrary','UpgradeStaticConsumer'] : []),'UpgradeableFixtureCarrier','UpgradeableFixtureCarrierU2','FixtureDeployment','PreparationHelper','UpgradeAdmissionLibrary','TransparentUpgradeableProxy','ProxyAdmin'].map(name => [name,artifact(name)]));
+  const a = artifacts[coreName];
+  const sourcePaths = new Set(Object.values(artifacts).flatMap(a => Object.keys(a.metadata.sources)));
+  const currentSources = Object.fromEntries([...sourcePaths].map(path => [path,readFileSync(resolve(ROOT,path))]));
+  const candidates = readdirSync(join(OUT,'build-info')).map(n => JSON.parse(readFileSync(join(OUT,'build-info',n),'utf8')));
+  const info = selectCompilerEvidence(candidates, artifacts, currentSources);
+  const names = compilerImmutableNames(info);
+  const sourcePins = Object.fromEntries(Object.values(artifacts).flatMap(a => Object.entries(a.metadata.sources).map(([path,value]) => [path,value.keccak256])));
   const git = args => { const r=spawnSync('git',args,{cwd:ROOT,encoding:'utf8'}); assert.equal(r.status,0); return r.stdout.trim(); };
   const supportSourcePins=Object.fromEntries([...(profile==='reads'?['test/upgrade-reads.test.mjs','reference/upgrade-lens-resolver.mjs','../2026-09-05-c0-core/reference/lens-resolver.mjs']:[]),'scripts/local-upgrade.mjs','reference/upgrade-reader.mjs','test/upgrade-chain.test.mjs','../2026-09-05-c0-core/reference/state-reader.mjs','../2026-09-05-c0-core/reference/record-body.mjs','../2026-09-05-c0-core/scripts/local-stateful.mjs','../2026-09-05-c0-admission/reader.mjs','../2026-09-05-c0-admission/codec.mjs','../2026-09-05-mvp-build-start/type-inputs/parser.mjs','../2026-09-05-mvp-build-start/type-inputs/encoder.mjs','../../Designs/efsv2/hierarchical-files-and-folders.md','../2026-08-13-efs2-stage-a-corpus/chapters/b0-encoding-and-ids.md'].map(path=>[path,keccak256(readFileSync(resolve(ROOT,path)))]));
   const version=tool=>{const r=spawnSync(tool,['--version'],{encoding:'utf8',timeout:5000});assert.equal(r.status,0);return r.stdout.trim();};
