@@ -7,6 +7,19 @@
 
 #status/done #kind/review #repo/planning #topic/efsv2
 
+> **Subsequent clarification and execution, 2026-09-10:** James prompted Fable
+> and authorized the Codex lane in [[Reviews/2026-09-10-k10-storage-plan]]. The
+> original ingestion below did not run prototypes; that new plan does.
+> The original “tags follow the File” claim was too broad: **a tag follows
+> its explicitly declared subject**. Organizational File labels may survive edits
+> and moves; exact-version claims must not silently transfer to newer contents;
+> intentional location labels may survive replacement. Uploading over an
+> existing file should normally create its next version. The proposed UI defaults
+> and combined search remain experiments, not an approved mandatory three-way
+> chooser. Fable should challenge the simplest alternatives and show edit, move,
+> copy, replacement and current-versus-history search. Preserve author and scope;
+> persistent organization labels do not certify future contents.
+
 ## The answer
 
 Yes: move to a focused prototype round. The new work makes the cost problem
@@ -15,10 +28,11 @@ engineering direction for packing, deduplication, code-backed immutable bytes,
 hook-first backfill and bounded bitmap queries. The remaining concerns below
 are executable falsifiers, not a request for another broad architecture survey.
 
-The largest issue is not a gas percentage: **tags describe a File, whereas the
-proposed bitmap describes a mutable directory position**. Replace File A with B
-at the same name and B must not inherit A's tags. Nor may filtering out a
-high-priority untagged File reveal a lower-priority tagged File. Solve these
+The largest issue is not a gas percentage: **a File-targeted tag describes that
+File, whereas the proposed bitmap describes a mutable directory position**.
+Replace File A with B at the same name and B must not inherit A's File-targeted
+tags. An intentionally location-targeted label has different semantics. Nor may
+filtering out a high-priority untagged File reveal a lower-priority tagged File. Solve these
 joins before claiming constant-cost, Lens-correct tag queries.
 
 Keep the current mandatory-indexing control. Prototype the narrower declaration
@@ -171,10 +185,11 @@ derived rather than authored does not by itself make a column current.
    rollback/resource failure. Admission-count delay is not guaranteed wall-clock
    migration time; retirement remains observable and old snapshots stay qualified.
 
-### Tags and HEAD_LIVE: preserve the selected File, not merely matching bits
+### Tags and HEAD_LIVE: preserve the declared subject and selected File
 
-**Required counterexample:** 1,000 independent authors tag File A at directory
-position i. Its placer rebinds i to File B. B must inherit none of A's tags.
+**Required counterexample:** 1,000 independent authors apply File-targeted tags
+to File A at directory position i. Its placer rebinds i to File B. B must inherit
+none of A's File-targeted tags.
 Repeat with second placement, move, remove/restore and tag withdrawal. One-time
 ordinal verification is insufficient; clearing every attester on a placement
 write is unbounded. Compare stable target-keyed predicates plus directory
