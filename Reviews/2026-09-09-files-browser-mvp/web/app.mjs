@@ -69,7 +69,7 @@ async function sponsorSend(action, body) {
     if (result.submitted === false || ['completed', 'failed'].includes(result.status)) recordAttempt(action, requestAttempt, { status: 'not-submitted' });
   };
   try { const result = await sponsorSubmit(action.sponsor.url, body, boundedJSON); ingest(result); return result; }
-  catch (e) { ingest(e); if (e.submitted === false) markAction(action, { authorization: 'closed' }); throw e; }
+  catch (e) { ingest(e); throw e; }
 }
 
 // ---- session / prompts -----------------------------------------------------
@@ -245,8 +245,10 @@ async function runOperation(kindLabel, intent, facts) {
           executionSetId: execution.executionSetId, nonce: authorNonce, deadline, byteCommitment,
         });
       } catch (e) { if (isRejection(e)) { markAction(captured, { authorization: 'closed' }); costEvent({ type: 'action/effect', actionId: captured.actionId, status: 'refused' }); toast('Cancelled in the wallet; nothing was sent.'); return 'CANCELLED'; } throw e; }
-      // Live from the moment the signature exists, whichever submitter is
-      // used: a direct send can be just as ambiguous as a sponsored one.
+      // Retain this guard after every signed outcome, including refusal,
+      // revert and success. A receipt does not revoke a signature. conflict()
+      // checks the current nonce and chain time; retaining the row also guards
+      // against nonce/time regression after a reorg.
       // The tree travels ONCE per request, not per chunk.
       const treePayload = content && content.chunkCount > 0
         ? { treeId: content.treeId, body: content.tree.body, leaves: content.leaves } : null;
@@ -258,7 +260,7 @@ async function runOperation(kindLabel, intent, facts) {
         try {
           result = await sponsorSend(captured, { op: plan.op, publication: plan.publication, expectedRevision: execution.revision, intent: signed.intent, signature: signed.signature, content: treePayload, chunks: chunksBody });
         } catch (e) {
-          // Only a refusal that provably predates broadcast clears the guard.
+          // A refusal before broadcast still leaves the author signature live.
           if (e.submitted === false) throw e;
           // AMBIGUOUS submission: the sponsor connection failed. The signed
           // intent's one-time number tells us whether it was consumed.
@@ -267,7 +269,6 @@ async function runOperation(kindLabel, intent, facts) {
           toast('The sponsor could not be reached. Your signed approval may still land until ' + new Date(Number(deadline) * 1000).toLocaleTimeString() + ' — treat this as PENDING, not failed. The app will not ask for a new signature for this slot until then.', true);
           return null;
         }
-        markAction(captured, { authorization: 'closed' });
         receipt = { status: result.execute.status, transactionHash: result.execute.hash, gasUsed: result.execute.gasUsed, sponsored: true, payer: result.payer };
         staged.done = result.chunks.filter(c => c.status === 'staged').length;
         staged.failed = result.chunks.filter(c => c.status !== 'staged').length;
@@ -281,8 +282,7 @@ async function runOperation(kindLabel, intent, facts) {
         }
         try {
           receipt = await walletSend(captured, write.router, encodeExecuteV2(plan, execution.revision, signed.intent, signed.signature), '0x1000000', 'execute');
-        } catch (e) { if (isRejection(e)) { markAction(captured, { authorization: 'closed' }); toast('Signature given but the admission transaction was declined in the wallet; nothing was admitted.'); return 'CANCELLED'; } throw e; }
-        markAction(captured, { authorization: 'closed' });
+        } catch (e) { if (isRejection(e)) { toast('Transaction declined in the wallet. Your earlier signature is still live; its approval slot remains guarded.'); return 'CANCELLED'; } throw e; }
       }
     } else {
       const ok = await consent('Approve: ' + kindLabel, [...facts, ...chunkNote,
@@ -299,7 +299,6 @@ async function runOperation(kindLabel, intent, facts) {
         executionSetId: execution.executionSetId, nonce: authorNonce, deadline, byteCommitment,
       });
       receipt = await submitRaw(write.router, encodeExecuteV2(plan, execution.revision, signedIntent, signature), 16777216n, signerWallet, captured, 'execute');
-      markAction(captured, { authorization: 'closed' });
       // Content chunks stage AUTOMATICALLY under the same approval: staging is
       // permissionless, content-addressed and write-once — no further consent
       // exists to ask for. Interruption leaves a resumable file.
@@ -1000,6 +999,7 @@ async function load(g) {
         } else reopened.scope.close();
       }
     }
+    if (g !== generation) return;
     await render(result);
   } catch (e) { if (g === generation) { $('coverage').textContent = 'Read unavailable'; toast('The read could not finish: ' + e.message, true); } }
   finally { if (g === generation) { busy = false; main.dataset.state = 'settled'; $('more').setAttribute('aria-disabled', 'false'); renderEconomics(); } }

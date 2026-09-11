@@ -105,6 +105,41 @@ test('browser rollover retains exact directory rows across bounded read acquisit
       assert.deepEqual(previous.sort(), Array.from({ length: 40 }, (_, i) => 'child' + String(i).padStart(2, '0') + '/'));
       assert(Number((await page.textContent('#basis')).match(/Snapshot (\d+)/)?.[1]) >= 3, 'multiple read acquisitions were needed');
       assert.equal(await page.textContent('#coverage'), 'Listing complete');
+      // Acquire again, then hold a postings response from the resumed scope.
+      // Navigation within this pin does not abort that scope: the app must
+      // reject the old generation even when its response arrives successfully.
+      await page.click('#refresh'); await page.waitForSelector('main[data-state="settled"]');
+      let reopening = false, intercepted = false, release, markIntercepted;
+      const held = new Promise(resolve => { release = resolve; });
+      const interceptedReady = new Promise(resolve => { markIntercepted = resolve; });
+      const selector = lab.readIface.getFunction('pagePostingsHydrated').selector;
+      await page.route(/\/rpc(?:-batch)?$/, async route => {
+        const body = route.request().postDataJSON(), requests = body.batch ?? [body];
+        if (requests.some(r => r.method === 'eth_getCode')) reopening = true;
+        if (reopening && !intercepted && requests.some(r => r.method === 'eth_call' && r.params[0].data.startsWith(selector))) {
+          const response = await route.fetch(); intercepted = true; markIntercepted(); await held; await route.fulfill({ response });
+        } else await route.continue();
+      });
+      try {
+        for (let i = 0; i < 12 && !intercepted; i++) {
+          await page.click('#more');
+          await Promise.race([page.waitForSelector('main[data-state="settled"]'), interceptedReady]);
+        }
+        assert(intercepted, 'held an actual resumed-scope postings response');
+        await page.evaluate(() => {
+          window.__staleRows = [];
+          new MutationObserver(() => {
+            if (document.querySelector('#crumbs').textContent === 'trip') {
+              const names = [...document.querySelectorAll('#rows .row-title')].map(e => e.textContent);
+              window.__staleRows.push(...names.filter(name => /^child\d/.test(name)));
+            }
+          }).observe(document.querySelector('#rows'), { childList: true, subtree: true });
+        });
+        await page.getByRole('button', { name: 'trip', exact: true }).click();
+        release(); await page.waitForSelector('main[data-state="settled"]');
+        assert.deepEqual(await page.evaluate(() => window.__staleRows), [], 'old folder never paints after navigating to root');
+        assert(!(await page.locator('#rows .row-title').allTextContents()).some(name => /^child\d/.test(name)));
+      } finally { release(); }
     } finally { await page.close(); await server.close(); }
   }, { profile: 'reads', watchdogMs: 600000 }); } finally { await browser.close(); }
 });
