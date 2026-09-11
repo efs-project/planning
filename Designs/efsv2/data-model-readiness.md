@@ -41,11 +41,15 @@ reader result across three acquisitions. That listing still costs 838 HTTP
 requests locally; remote browsing performance remains open. Fable's code-backed
 Type cache reports roughly 10% lower repeated-admission gas, but an actual valid
 large-Type admission test exposes its representation ceiling. Compact physical
-cache design, declaration transaction fit and populated-layout migration must
-be resolved before adopting that optimization. These are prototype findings,
-not new restrictions on the Type language. The full clickable upload/download/
-history walkthrough is being joined; it does not close the six foundation gates
-below.
+cache integration, declaration transaction fit and populated-layout migration
+must be resolved before adopting that optimization. A standalone Solidity codec
+now preserves exact logical caches while reducing the failing example from
+24,960 to 5,536 bytes; the complete admission path remains unmodified and RED.
+These are prototype findings, not new restrictions on the Type language.
+The clickable upload/download/history walkthrough is now joined and reviewed
+(`0e25194`, with separate control/candidate evidence); its 17-case control suite
+passes. The cost widget uses actual receipts plus explicitly manual four-chain
+models, not live quotes. This does not close the six foundation gates below.
 
 ## Capability ledger
 

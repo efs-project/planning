@@ -78,7 +78,7 @@ assert.equal(cost.totalWei, '42000000000000');
 - [x] Reproduce the lost `submitted` flag and partial-journal error in failing transport/server tests.
 - [x] Only `submitted === false` proves prebroadcast refusal. Mark attempts before broadcast; derive signed tx hash before awaiting RPC. Preserve partial metadata/chunk results and prior costs on errors.
 - [x] Recover status after response loss without weakening sponsor authority, same-origin checks or target allowlists. Missing sponsor process state remains UNKNOWN.
-- [ ] Test modified ID reuse, repeated status polls, partial chunks, lost responses and absence of private keys/signatures in journal responses; run focused tests with exclusive isolated builds.
+- [x] Test modified ID reuse, repeated status polls, partial chunks, lost responses and absence of private keys/signatures in journal responses; focused transport and joined wallet/economics tests passed with isolated artifacts.
 
 ## Task 4: Economics widget and safe browser action integration
 
@@ -86,22 +86,22 @@ assert.equal(cost.totalWei, '42000000000000');
 
 **Consumes:** Tasks 1–3. Capture environment/Core/execution, principal/account/provider chain, mount/Lens, source/destination and expected effect before authorization. Propagate action ID/context through every stage.
 
-- [ ] Browser test expandable action rows and manually pinned four-chain scenarios against independently fetched receipts, including chunks/failures/payer and incomplete totals. Keyboard/mobile must remain usable.
-- [ ] Persist public action/nonce/deadline/request metadata before broadcast; on reload reconcile known hashes and effect/nonce before conflicting authorization. Reselected files must match the original content commitment.
-- [ ] Account/chain/navigation changes cannot swap payer/destination/verification Lens. Preserve explicit signature/transaction prompts; no silent fallback.
+- [x] Browser test expandable action rows and manually pinned four-chain scenarios against independently fetched receipts, including chunks/failures/payer and incomplete totals. Keyboard/mobile checks pass; this is not actual wallet-extension UI.
+- [x] Persist public action/nonce/deadline/request metadata before broadcast; on reload reconcile known hashes and effect/nonce before conflicting authorization. Matching-byte recovery is demonstrated after metadata admission; pre-metadata DIRECT recovery remains an explicit hold.
+- [x] Account/chain/navigation changes cannot swap payer/destination/verification Lens. Preserve explicit signature/transaction prompts; no silent fallback.
 - [x] Replace record-existence success with qualified requested placement/head/mask/restore postconditions. Retain admitted-but-not-selected separately.
-- [ ] Integrate stream rollover without recursive busy guard; preserve sealed rows and navigation generation. Track RPC work separately from paid gas.
-- [ ] Provide Ethereum/OP/Base/Arbitrum scenario controls and fee/FX provenance. Missing DA/operator fees are not zero; no illustrative default is a live quote. Live read-only acquisition is optional and separately tested.
-- [ ] Static export serves the same modules and remains independent of EFS-specific server APIs for direct mode.
+- [x] Integrate stream rollover without recursive busy guard; preserve sealed rows and navigation generation. Track RPC work separately from paid gas.
+- [x] Provide Ethereum/OP/Base/Arbitrum scenario controls and fee/FX provenance. Missing DA/operator fees are not zero; no illustrative default is a live quote. Live fee acquisition is not implemented.
+- [x] Static export serves the same modules and remains independent of EFS-specific server APIs for direct mode.
 
 ## Task 5: Ordinary file usability and first joined walkthrough
 
 **Files:** browser files from Task 4; small route/download helpers; `P/sdk/files-actions.mjs` only for safe existing-operation composition; focused browser tests.
 
-- [ ] General file upload and verified byte download, without executing arbitrary HTML/scripts in app origin.
-- [ ] Hash routes for nested/history links, reload/back/forward and guest wallet-free boot; refuse invalid/out-of-root routes.
-- [ ] Restore historical content as a new authored revision using current CAS; preserve history. Clarify copy versus second placement.
-- [ ] Run guest → nested folder → >4 KiB upload → effect/byte verification → download → reload/recovery. Leave a usable local instance with its exact source/build identity.
+- [x] General file upload and verified byte download in Chromium, without executing arbitrary HTML/scripts in app origin. Manual Codex in-app download completion is still unconfirmed.
+- [x] Hash routes for nested/history links, reload/back/forward and guest wallet-free boot; refuse invalid/out-of-root routes.
+- [x] Restore historical content as a new authored revision using current CAS; preserve history. Clarify copy versus second placement. Unsupported executable metadata refuses; dedicated null-charset/metadata edge tests remain.
+- [x] Run guest → nested folder → >4 KiB upload → effect/byte verification → download → reload/recovery. Leave a usable local instance with its exact source/build identity.
 
 ## Task 6: Scale and remaining foundation gates
 
@@ -116,10 +116,10 @@ assert.equal(cost.totalWei, '42000000000000');
 
 ## Task 7: Review and handoff
 
-- [ ] Independent spec/quality review of each task, with important findings fixed before completion claims.
-- [ ] Integrated browser/static/wallet/reader checks on the exact candidate; preserve control evidence.
-- [ ] Update this record and short readiness spine with commits, fresh measurements, blockers and actual browser URL.
-- [ ] Commit/push scoped verified paths only; preserve Fable's work and all source workspaces.
+- [x] Independent spec/quality review of completed tasks, with important findings fixed. Task 6's unimplemented foundation gates are not certified.
+- [x] Integrated browser/static/wallet/reader checks on the named control and fresh optimized candidate; preserve their distinct evidence.
+- [x] Update this record and short readiness spine with commits, fresh measurements, blockers and actual browser URL.
+- [x] Commit/push scoped verified paths only; preserve Fable's work and all source workspaces.
 
 ## Sequencing decisions
 
@@ -169,8 +169,24 @@ Codex owns these follow-ups; no further major Fable run is requested. No index g
 
 The retained `P/type-cache-boundary-2026-09-11.md` and test at `8dcbb2b` distinguish the desired **RED** support target from passing diagnostics. In a fresh candidate base-Core world, a small Type declaration costs 1,679,410 gas and a two-small-Type group 1,878,190. The oversized single and small-then-oversized group revert at 11,796,852 and 12,248,985 gas. Candidate Type rows, records, counts, authorization nonce and helper CREATE nonce all roll back; no orphan cache survives. These are operator `executeFixture` receipts, not FilesRouter costs. Simply splitting the large ABI cache may still exceed the transaction budget; compact encoding must be measured, not assumed free. The actual support test intentionally stays red until that implementation exists.
 
+At `ca8635e`, a separate standalone Solidity codec now demonstrates lossless compression: the boundary cache becomes 5,536 bytes, with exact logical ABI/descriptors/IDs preserved across 19 helper/parser-valid Types and two explicitly synthetic width/envelope cases. Nineteen malformed inputs reject. Runtime is 7,700 bytes. Boundary pack/unpack/header transaction receipts are 756,051 / 366,714 / 129,113 gas, including intrinsic/calldata; these are **not** internal costs or full admission costs. Independent review approved the codec-only checkpoint. No compact cache was deployed into Core, so the integrated support test remains RED. Evidence: prototype `Reviews/2026-09-11-type-cache-codec-lab/README.md` and `evidence/candidate-run2.json`.
+
 ### Thousand-entry continuation result
 
 Reviewed checkpoint `8dcbb2b` retains `P/evidence/continuation-2026-09-11/{README.md,48.json,1000.json}` and the reproduction script. The controlled 1,000-entry run reached COMPLETE with exact name/object/selected-entry/kind agreement, 32 sealed pages and three same-basis acquisitions (4,096 / 4,096 / 3,368 logical calls). It observed 11,560 logical RPC calls, 838 HTTP requests and 8,372,489 response bytes. First useful prefix was 115.6 ms and complete reader time 2.78 s on local Node/Anvil; these are single local observations, not browser/WAN percentiles.
 
 Fixture creation used 1,001 separate signed transactions, totaling 5,169,088,831 gas; the maximum transaction was 5,279,773. That uses the fixed pre-optimization Solidity verification baseline, **not** Fable's new candidate. Peak owned Anvil cache was 6.53 GiB and was removed after confirmed exit. No giant traces or history-pruning flags were used. This proves correct continuation at 1,000 live names, not economical bulk seeding, low remote RPC load, 10,000-entry/high-churn behavior, broad Lenses or authenticated recovery. The next reader experiment should reduce round trips at the same qualified basis rather than remove completeness checks.
+
+The source/call-graph audit attributes an ordinary new child to about 11 distinct getters. Only 470 of the 11,560 observed attempts repeat; caching alone cannot address the dominant work. The recommended next experiment is an optional, exact-code-pinned, bounded STATICCALL aggregator behind the current qualified reader, retaining the same getters and final seal. Then compare a read-only Core facade that checks the execution basis once and batches records/resolutions. Neither removes lifetime-name scanning, and neither permits incomplete/failed items to become empty results. Measure inner work, outer RPC, HTTP, bytes, simulated gas and dependency-round latency separately. This is a design recommendation, not an installed ABI or measured speedup.
+
+### Clickable checkpoint and immediate next work
+
+`0e25194` joins ordinary routes/uploads/downloads/history with independent review. The final control suite passed 17/17 actual Chromium/chain checks and 68/68 pure tests. On the fresh Fable candidate, SDK semantic read-back passed 14/14; the four new file journeys, economics/continuation, everyday populated upgrade and standalone static path passed. A stale legacy expiry-text assertion was replaced by stronger independent expiry/nonce/payer checks, then both wallet cases and all four signed-guard/economics-wallet cases passed. Full details and source hashes: prototype `P/browser-integration-2026-09-11.md`. Strict direct-RPC identity validation is at `b898f62` with 22/22 tests and independent review.
+
+The current local demo is [http://127.0.0.1:60731](http://127.0.0.1:60731), started from a fresh coherent build of candidate Solidity and the final app hash `47175da9602dada97db5ce901f19a8cf99356feffac52b8c351f50e9efb8816d`. It is disposable, localhost-only, and lasts only while its process runs. The manual walkthrough created `photos/try-me.txt`, verified its bytes/effect, and displayed two actual receipts totaling 7,921,285 gas. Four-chain USD scenarios require manual assumptions; no current market quote is implied. The in-app browser's download-event observation timed out, although the exact Chromium download journeys pass; completed downloads in that host are not claimed. All test worlds have been disposed; the interactive demo intentionally remains running.
+
+Next bounded sequence, with no new owner choice required yet:
+
+1. Extract cache operations from the near-full admission library, then integrate the compact-large/raw-small comparison. Turn the retained large-Type admission RED green under the unchanged transaction cap; verify exact read/replay parity, valid/invalid records and late group failure rollback. Preserve the small-Type gas control and explicit old-layout migration hold.
+2. Run the bounded read-aggregation comparison on the same exact 48/1,000 controls with injected transport delay. Then extend churn, Lens width and finite-universe tag/filter coverage. Do not add an authoritative indexer or remove required indexes to make a benchmark pass.
+3. Improve safe public error-name diagnostics and pre-metadata DIRECT recovery; keep actual wallet, private opacity, authenticated state recovery and joined custom-Type acceptance visible as separate gates. The clickable first checkpoint does not certify all of Task 6.
