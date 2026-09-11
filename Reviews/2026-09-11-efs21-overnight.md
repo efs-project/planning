@@ -36,6 +36,24 @@ Isolated worktree created; implementation is underway. Unchanged control: 29 tar
 
 **First working slice, `aa6b1b6`:** compact native kernel, independent required navigation contract, retained Type descriptors, immutable bytes/history, paths/CAS, and real producer/consumer Solidity examples. Root reproduced all 47 tests, including 128 seeded fuzz cases. Independent review approved progression to receipt/browser testing with no blocking defects; one nonblocking cursor-test strengthening remains. Runtime sizes: kernel 9,236B, index 4,966B, registry 2,480B. Real receipt economics and clickable browser are now being implemented; neither is claimed complete.
 
+**Known control limitation remains:** passing those 201 control tests does not resolve the previously reproduced legal large-Type cache rejection. A valid schema can compile beyond the single code-blob ceiling. Full-profile cache/body storage work must retain or explicitly recover support for legal schemas; the native two-validator experiment does not solve the full Type language. [Retained boundary case](https://github.com/efs-project/planning/blob/aa6b1b62b733209aa5879743e81fd1f3a9143f8a/Reviews/2026-09-09-files-browser-mvp/type-cache-boundary-2026-09-11.md).
+
+**Receipt/browser slice, `df82bbc`:** two fresh local-chain benchmark runs agree, and root reproduced all four Node/browser tests. The browser performs actual nested create/open/edit/rename/reload/history/binary-upload/unlink operations. Independent review found two important failure-path bugs before launch: ambiguous transaction transport must retain a hash and reconcile, and failed navigation must invalidate the old writable folder. These are being fixed; no ready-to-click approval yet. No candidate persistent server has been started, and the existing 60731 world remains untouched.
+
+| Native candidate workload | Actual receipt gas |
+|---|---:|
+| First 41-byte file with cold caller/list state | 640,934 |
+| Subsequent new unique 41-byte file | 604,894 |
+| Second file reusing the same typed bytes | 424,638 |
+| Fresh-content 41-byte edit | 350,271 |
+| Same-content edit, still retaining a new revision | 163,536 |
+| Move and rename | 240,871 |
+| Unlink | 134,942 |
+| Producer contract's new uint256 value | 284,631 |
+| Plain mapping new value (fewer semantics) | 26,966 |
+
+These are native-profile receipts, not Forge test gas or full-v2 parity savings. A 41-byte payload currently becomes a 128-byte ABI-framed typed body. The under-1M short-create ambition is met; the under-250k fresh-edit ambition is **not**. Same-content dedup is not substituted for that edit workload. Kernel deployment including its required index/registry costs 3,723,287 gas, separately from user operations. [Detailed workload, read costs, exact evidence and limits](https://github.com/efs-project/planning/blob/df82bbc/Reviews/2026-09-11-efs21-pragmatic/README.md).
+
 ## How to interpret a cheaper result
 
 Some differences are deliberate profile choices; others are merely unimplemented features. Do not confuse them:
@@ -62,9 +80,16 @@ For tonight, basic contract operations and browsing remain state-readable with n
 ## Cost levers to investigate without dropping meaning
 
 - **Native history snapshots:** keep the same public historical Revision bytes, but store unchanged location metadata once. This targets repeated edits without dropping history or names; compare receipts before proposing adoption.
+- **Raw payload representation:** distinguish external-call ABI from the typed content being stored. A separate raw-byte Type can avoid persisting the inner offset/length/padding for file bodies. It has different exact Type/Record IDs and cannot reinterpret old records; measure it separately from storage compression. Empty raw bodies also mean a nonempty-body presence shortcut would be invalid.
 - **Stateless priority reader:** a small ordered-namespace, whole-path Lens can add useful contract composition without adding writes. It is not yet full per-segment/whiteout/threshold Lens parity.
 - **Full-profile byte placement:** the retained full create-file census has 48 Record slots: 21 row/header slots and 27 body-data words. Its unsigned envelope adds a further payload. The prior Type-cache optimization already demonstrated immutable code-backed storage. A later experiment can compare batch-packed immutable record/envelope bytes against individual storage words while preserving logical rows and exact IDs. It must include contract creation/pointer/read costs and support legal sizes without repeating the cache ceiling failure. [Retained slot census at the prototype checkpoint](https://github.com/efs-project/planning/blob/aa6b1b62b733209aa5879743e81fd1f3a9143f8a/Reviews/2026-09-09-files-browser-mvp/gas-baseline-2026-09-10.md#33-slots-by-family--createdir-createdir-1-and-createfile-createfile-1).
 
 The code-as-data idea is established prior art, not an EFS invention: Solady's SSTORE2 writes bytes into a STOP-prefixed contract and reads them with EXTCODECOPY. It does not prove savings for our exact workload; individual tiny deployments can be wasteful, and our Core proxy must not accidentally consume deployment nonces. [Solady SSTORE2 source](https://github.com/Vectorized/solady/blob/main/src/utils/SSTORE2.sol).
 
 These are experiments, not adopted storage layouts. No projected gas figure here is a measured result.
+
+## Optional index safety boundary
+
+The current next-step design keeps configuration, coverage and membership in an immutable trusted discovery coordinator. Its bounded maintenance call executes in a child frame; a tolerated failure rolls that child back and records DIRTY in the outer frame. Failure of the outer coordinator itself must still revert the entire file operation. A second callback to an already failing index does not reliably invalidate stale results.
+
+This costs calls and health bookkeeping, but preserves an important distinction: optional search can become unavailable without preventing an otherwise valid file write; it cannot quietly continue claiming stale positives or complete empty results. Namespace owners choose the additional write cost. The initial equality-index experiment uses current linked files, not full-v2 admission-occurrence semantics. No arbitrary third-party worker is treated as honest merely because it returns success.
