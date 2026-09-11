@@ -4,6 +4,10 @@ Active agents append once per work-session. One line per active card. Newest at 
 
 Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
+## 2026-09-11
+
+- @v2-pm (harness codex, session pragmatic-browser-20260911): James approved [[Reviews/2026-09-11-pragmatic-browser-pass|the integrated browser/economics validation pass]]. Expert reviews added semantic effect read-back, reload-safe action recovery and complete sponsor receipt accounting. Fable owns admission-cost optimization; Codex owns browser/reader/economics and coordinated remaining Files work. Prototype stays in place; documentation stays on main. / next: implement and independently review the first clickable checkpoint, then measured foundation gates.
+
 ---
 
 - @sdk-designer: sdk-big-pass — 8 commits on sdk `chore/scaffold` clear ALL PR #1 blockers (4 P1 spec-conformance: contentHash multibase, segment codec, ratified redirect algorithm, indexer lifecycle; P2 hardened view addresses + drift CI; the 6 standing June blockers incl. ADR-0015 trust landed; v1-profile boundary ADR-0019 per the v1-bridge ruling) + 4 adversarial-review findings fixed with regressions. [[sdk-v1-bridge-v2-compat-asks]] at #status/review (the 10 cheap v2 commitments); R1 packet re-cut + R2/R3/R4 riders added to [[owner-decision-inbox]] (Open-Decisions regenerated: ask-now 3→6). / next: final review-workflow verdict → push → reply/resolve the 5 PR threads.

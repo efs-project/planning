@@ -10,6 +10,8 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
+**2026-09-11:** [[../../Reviews/2026-09-11-pragmatic-browser-pass|Pragmatic browser pass]] is the approved execution map: one clickable prototype, complete action gas/USD accounting, safe recovery and independent Files-effect read-back, followed by measured scale and foundation gates. Progress and remaining gaps live there; this is not a protocol freeze.
+
 **2026-09-10: [[data-model-readiness|Capability and build-readiness map]]** is
 the short answer to what useful peer features EFS covers and what remains.
 The latest [reply after Fable's economics/index/tag work](https://github.com/efs-project/planning/blob/aae282df72f214d791963aeac1cf3c38d162c56e/Reviews/2026-09-10-foundation-reply-after-economics.md)
