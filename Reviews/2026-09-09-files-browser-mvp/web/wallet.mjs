@@ -85,8 +85,15 @@ export function sponsorRequestIdentity(body) {
   return { requestId: requestId ?? requestCommitment, requestCommitment };
 }
 
+const sponsorIdentityMatches = (value, identity) => typeof value?.requestId === 'string'
+  && typeof value?.requestCommitment === 'string'
+  && value.requestId === identity.requestId && value.requestCommitment === identity.requestCommitment;
+
 function sponsorEvidence(value, identity) {
-  return { ...identity, ...value,
+  // Never attribute an unbound refusal or another request's paid transactions
+  // to the action whose identity the caller persisted before dispatch.
+  if (!sponsorIdentityMatches(value, identity)) return { ...identity, status: 'unknown', submitted: null, transactions: [] };
+  return { ...value, ...identity,
     submitted: value?.submitted === true ? true : value?.submitted === false ? false : null,
     transactions: Array.isArray(value?.transactions) ? value.transactions : [],
   };
@@ -106,16 +113,18 @@ async function sponsorRequest(url, body, identity, boundedJSON) {
     // A failed fetch/body read does NOT prove that the sponsor was not reached.
     throw sponsorError('Sponsor response unavailable; submission is unknown.', sponsorEvidence(null, identity), { transport: true });
   }
-  if (!response.ok || parsed?.error !== undefined) {
-    const evidence = sponsorEvidence(parsed, identity);
+  const failure = !response.ok || parsed?.error !== undefined;
+  const value = failure ? parsed : parsed?.result;
+  if (!sponsorIdentityMatches(value, identity)) {
+    throw sponsorError('Sponsor response identity is missing or mismatched; submission is unknown.', sponsorEvidence(null, identity), { transport: true });
+  }
+  if (failure) {
+    const evidence = sponsorEvidence(value, identity);
     // Older app versions used `structured && !submitted` as a refusal guard.
     // Do not activate that legacy guard for null/missing/invalid evidence.
     throw sponsorError(parsed?.error ?? 'sponsor refused (' + response.status + ')', evidence, { structured: evidence.submitted !== null });
   }
-  if (!parsed?.result || typeof parsed.result !== 'object') {
-    throw sponsorError('Sponsor response is incomplete; submission is unknown.', sponsorEvidence(null, identity), { transport: true });
-  }
-  return sponsorEvidence(parsed.result, identity);
+  return sponsorEvidence(value, identity);
 }
 
 // Read-only recovery: never carries the author signature and never broadcasts.

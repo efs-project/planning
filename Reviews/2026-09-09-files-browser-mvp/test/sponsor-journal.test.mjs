@@ -73,7 +73,7 @@ test('wallet preserves explicit true/false/null submission evidence and partial 
   t.after(() => { globalThis.fetch = original; });
   for (const submitted of [true, false, null]) {
     const transactions = [{ phase: 'chunk', index: 0, hash: ZERO, status: 'confirmed', receipt: { gasUsed: '0x5208' } }];
-    globalThis.fetch = async () => new Response(json({ error: 'later stage failed', submitted, transactions }), { status: 502 });
+    globalThis.fetch = async () => new Response(json({ ...wallet.sponsorRequestIdentity({}), error: 'later stage failed', submitted, transactions }), { status: 502 });
     await assert.rejects(wallet.sponsorSubmit('/sponsor', {}, boundedJSON), e => {
       assert.equal(e.submitted, submitted);
       assert.deepEqual(e.transactions, transactions);
@@ -86,7 +86,7 @@ test('unknown structured replies cannot trigger the legacy prebroadcast-refusal 
   const original = globalThis.fetch;
   t.after(() => { globalThis.fetch = original; });
   for (const submitted of [null, undefined, 'false', 0]) {
-    globalThis.fetch = async () => new Response(json({ error: 'unconfirmed send', submitted }), { status: 502 });
+    globalThis.fetch = async () => new Response(json({ ...wallet.sponsorRequestIdentity({}), error: 'unconfirmed send', submitted }), { status: 502 });
     await assert.rejects(wallet.sponsorSubmit('/sponsor', {}, boundedJSON), error => {
       assert.equal(error.submitted, null);
       assert.equal(Boolean(error.structured && !error.submitted), false, 'old app cannot release its outstanding intent');
@@ -317,3 +317,50 @@ test('known public validation messages and recognized error selectors remain usa
   assert.equal(empty.body.error, 'sponsor refused: nothing to submit');
   assert.equal(empty.body.submitted, false);
 });
+
+for (const boundary of ['submit-success', 'submit-error', 'status-success', 'status-error']) {
+  test(boundary + ' missing or mismatched reply identity preserves local UNKNOWN without foreign evidence', async t => {
+    const original = globalThis.fetch;
+    t.after(() => { globalThis.fetch = original; });
+    const body = { ...request(), requestId: 'local-action' };
+    const identity = wallet.sponsorRequestIdentity(body);
+    const remoteIdentities = [
+      { ...identity, requestId: 'foreign-action' },
+      { ...identity, requestCommitment: ZERO },
+      { requestId: identity.requestId },
+      { requestCommitment: identity.requestCommitment },
+      {},
+    ];
+    for (const remoteIdentity of remoteIdentities) {
+      const calls = [];
+      const foreignHash = '0x' + 'fe'.repeat(32);
+      const evidence = { ...remoteIdentity, status: 'completed', submitted: false,
+        payer: router, execute: { hash: foreignHash }, chunks: [{ hash: foreignHash }],
+        transactions: [{ phase: 'execute', hash: foreignHash, status: 'confirmed', receipt: { gasUsed: '0x5208' } }] };
+      globalThis.fetch = async (url, options) => {
+        calls.push({ url, body: JSON.parse(options.body) });
+        return boundary.endsWith('error')
+          ? new Response(json({ ...evidence, error: 'foreign refusal' }), { status: 502 })
+          : new Response(json({ result: evidence }), { status: 200 });
+      };
+      const action = boundary.startsWith('submit')
+        ? wallet.sponsorSubmit('/sponsor', body, boundedJSON)
+        : wallet.sponsorStatus('/sponsor', identity, boundedJSON);
+      await assert.rejects(action, error => {
+        assert.equal(error.requestId, identity.requestId);
+        assert.equal(error.requestCommitment, identity.requestCommitment);
+        assert.equal(error.submitted, null);
+        assert.deepEqual(error.transactions, []);
+        assert.equal(error.result.requestId, identity.requestId);
+        assert.equal(error.result.requestCommitment, identity.requestCommitment);
+        assert.equal(error.result.submitted, null);
+        assert.deepEqual(error.result.transactions, []);
+        assert(!json(error.result).includes(foreignHash), 'foreign execute/chunk summaries must also be discarded');
+        assert.equal(Boolean(error.structured && !error.submitted), false);
+        return true;
+      });
+      assert.equal(calls.filter(call => call.url === '/sponsor').length, boundary.startsWith('submit') ? 1 : 0, 'never resubmit');
+      for (const call of calls.filter(call => call.url === '/sponsor/status')) assert.deepEqual(call.body, identity, 'recovery stays bound to local identity');
+    }
+  });
+}
