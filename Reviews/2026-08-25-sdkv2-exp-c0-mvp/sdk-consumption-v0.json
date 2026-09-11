@@ -1,0 +1,68 @@
+{
+  "format": "efs2-sdkv2-exp-c0-consumption/0",
+  "status": "EXACT_SOURCE_LOCKED_DISPOSABLE_EVIDENCE",
+  "profile": "EXP-C0/v0",
+  "verdict": "PASS_DISPOSABLE_CONSUMPTION_ONLY",
+  "allowedCoreSerializedInputs": [
+    "Reviews/2026-08-25-efs2-exp-c0-v0-control/consumer-contract-v0.json",
+    "Reviews/2026-08-25-efs2-exp-c0-v0-control/handoff-v0.json",
+    "Reviews/2026-08-25-efs2-exp-c0-v0-control/hello-files-v0.json",
+    "Reviews/2026-08-25-efs2-exp-c0-v0-control/vectors/result-v0.json",
+    "Reviews/2026-08-25-efs2-exp-c0-v0-control/vectors/type-envelope-v0.json"
+  ],
+  "vendoredInputDirectory": "Reviews/2026-08-25-sdkv2-exp-c0-mvp/core-inputs",
+  "coreSourceOrScriptImports": false,
+  "coreTestsImported": false,
+  "sourceReceipt": {
+    "path": "Reviews/2026-08-25-sdkv2-exp-c0-mvp/core-source-lock-v0.json",
+    "sha256": "c750a63b248d5a9a24d591046aa439d4e1b2eb07b127d49d734700b3048a2858",
+    "corePacketCommit": "b9088d6a24f4d40bcca6ba300523b25cc7c608d2",
+    "publicationBlocked": false
+  },
+  "checks": {
+    "exactCommittedBytes": true,
+    "rawSha256Locks": true,
+    "canonicalJsonAndPayloadHash": true,
+    "requiredSharedAndSdkPointers": true,
+    "resultDecodeReencodeRecommit": true,
+    "bytesDecodeReencodeDigest": true,
+    "helloSemanticFacts": true,
+    "typeEnvelopeDecodeReencodeRecommit": true,
+    "codec0PayloadDecodeReencode": true,
+    "codec1RawRetentionAndZeroEffectGrade": true,
+    "adversarialMutationsReject": true
+  },
+  "uint64Policy": {
+    "json": "UNSIGNED_DECIMAL_STRING",
+    "javascriptNumberNarrowing": false,
+    "maxObserved": "18446744073709551615"
+  },
+  "rawRetention": {
+    "resultEncodedSha256": "1ed444d4a1fd2df6bf85744118f11b0dc7d1c831b5b19a3e026d0f4499a687be",
+    "bytesPayloadSha256": "ae097c94eb8270c51a847c95fb1f57484620503d07387a8d0a358ee683185b6b",
+    "fileBytesSha256": "46cb2287d98e6c3631441aa16bd25bbc335c4ca63d69e102566c557697098775",
+    "codec1RawTypeBytesSha256": "b4a57916ef154b61c86c9c73f859e7698b87c63ac61407ee3e1382ac6587c482"
+  },
+  "receiptSeparation": {
+    "planAuthorization": "EFS_PLAN_SIGNATURE_VERIFICATION_RECEIPT",
+    "accountSubmission": "ACCOUNT_AUTHORIZATION_OR_SUBMISSION_RECEIPT",
+    "canonicalEffect": "CANONICAL_EFFECT_READ_BACK_RECEIPT",
+    "conflated": false,
+    "transportAcknowledgementProvesCanonicalEffect": false
+  },
+  "validatedCounts": {
+    "coreSerializedFiles": 5,
+    "requiredJsonPointers": 21,
+    "resultVectors": 4,
+    "typeEnvelopes": 6,
+    "adversarialMutations": 13
+  },
+  "nonadoption": {
+    "protocolConformance": false,
+    "durable": false,
+    "productionReady": false,
+    "deploymentAuthorized": false,
+    "freezeAuthorized": false,
+    "sdkPackagePublished": false
+  }
+}
