@@ -189,7 +189,8 @@ export async function withUpgrade(action, { profile = 'base' } = {}) {
     const iface=new Interface(artifact('UpgradeableFixtureCoreU2').abi),readIface=profile==='reads'?core2.iface:undefined,carrierIface=carrier2.iface,adminIface=new Interface(adminArtifact.abi);
     const errorAbi=[core2.artifact,library.artifact,helper.artifact].flatMap(a=>a.abi.filter(f=>f.type==='error'));
     const errorIface=new Interface([...new Map(errorAbi.map(f=>[JSON.stringify(f),f])).values()]);
-    const expected={core,chainId:'31337',source,init:inputs.init,components,implementations,getters:{preparationHelper:helper.address,preparationCodehash:helper.codehash,admissionLibrary:library.address,admissionCodehash:library.codehash},execution:{core,carrier,coreAdmin,carrierAdmin,controller:factory.address,operator:operator.address,helper:helper.address,helperCodehash:helper.codehash,admissionLibrary:library.address,admissionCodehash:library.codehash,treeType}};
+    // All recognized source-pinned fixture implementations retain fixed legacy layout.
+    const expected={core,chainId:'31337',source,scopeLayout:0,scopeLayoutProfile:'legacy-fixed-v0',init:inputs.init,components,implementations,getters:{preparationHelper:helper.address,preparationCodehash:helper.codehash,admissionLibrary:library.address,admissionCodehash:library.codehash},execution:{core,carrier,coreAdmin,carrierAdmin,controller:factory.address,operator:operator.address,helper:helper.address,helperCodehash:helper.codehash,admissionLibrary:library.address,admissionCodehash:library.codehash,treeType}};
     resources.inputPins={candidateFile:inputs.candidateFileHash,groups:inputs.candidates.groups.map(g=>keccak256('0x'+g.groupHex)),intrinsic:keccak256(inputs.init.intrinsicGroupBytes)};
     async function call(address,codec,name,args=[],pin='latest',get=rpc) {
       const data=await get('eth_call',[{to:address,data:codec.encodeFunctionData(name,args),gas:toBeHex(TX_GAS)},pin]);

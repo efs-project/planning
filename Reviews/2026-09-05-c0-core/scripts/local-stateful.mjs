@@ -119,7 +119,8 @@ export async function withStateful(action) {
     const creation = links(a.bytecode, library.address) + constructor.slice(2); assert((creation.length - 2) / 2 <= 49152);
     const tx = await send(creation), deploymentReceipt = await receipt(tx); assert.equal(deploymentReceipt.status, '0x1');
     const core = deploymentReceipt.contractAddress, iface = new Interface(a.abi); assert.equal(await rpc('eth_getCode', [core, deploymentReceipt.blockNumber]), coreCode);
-    const expected = { core, chainId: '31337', source, init: inputs.init, components: { core: { address: core, code: coreCode }, helper: { address: helper.address, code: helper.code }, library: { address: library.address, code: library.code } }, getters: values };
+    // This source-pinned harness always initializes the legacy layout.
+    const expected = { core, chainId: '31337', source, scopeLayout: 0, scopeLayoutProfile: 'legacy-fixed-v0', init: inputs.init, components: { core: { address: core, code: coreCode }, helper: { address: helper.address, code: helper.code }, library: { address: library.address, code: library.code } }, getters: values };
     // Independently declared fixture expectation for every batch, not observed state.
     expected.syntheticBatchAuthority = { authorityBasis: '4660', authorityCodehash: word(0xabcd) };
     const context = principal => ({ authenticatedPrincipal: principal, revisionOrdinal: 1, authorityBasis: 4660, authorityCodehash: word(0xabcd) });

@@ -41,9 +41,11 @@ Like the control, pages validate inspected metadata, not an exhaustive body-memb
 
 ## Independent consumer
 
-`foldAdmissions(entries, ids, scopeLayout = 0)` independently derives legacy admission anchors or global first-seen binding ordinals from the same events. It imports no writer/fold helper from Solidity. `readState` pins the getter on comparison hosts and requires explicit `expected.scopeLayout`; unknown full-width values refuse before narrowing. Legacy hosts/snapshots without this new API retain their mode-0 compatibility path.
+`foldAdmissions(entries, ids, scopeLayout = 0)` independently derives legacy admission anchors or global first-seen binding ordinals from the same events. It imports no writer/fold helper from Solidity. Both live collection and offline verification require explicit `expected.scopeLayout` (0 or 1). The comparison path requires the observed snapshot mode; live collection pins its getter. Unknown full-width values refuse before narrowing.
 
-Verification rejects a mismatched layout tag even for an empty snapshot. Relabeling nonempty physical words also fails reconstruction. Real local tests deploy both modes with source-pinned library/runtime bytes, admit matching publications, compare historical raw/hydrated pages, and verify unchanged occurrence and kind-8 identities.
+Trusted caller configuration may explicitly select `expected.scopeLayoutProfile = "legacy-fixed-v0"` **and** `expected.scopeLayout = 0` for an identified, source-pinned legacy-only host/execution. Only this profile permits a retained snapshot's missing observed field and getter-free collection. The default strict profile is `"comparison-v1"`; other profile values refuse. A missing expected mode always refuses. Source profiles are trusted execution expectations, not self-asserted snapshot capabilities: copying a profile field into the snapshot or removing a supplied ABI getter never selects legacy compatibility. Existing fixture builders now configure their known fixed-legacy sources explicitly; comparison hosts must override that source profile.
+
+Verification rejects missing or mismatched comparison-layout tags even for empty snapshots. Relabeling nonempty physical words also fails reconstruction. Real local tests deploy both modes with source-pinned library/runtime bytes, test missing expected/observed tags and stripped ABIs, admit matching publications, compare historical raw/hydrated pages, and verify unchanged occurrence and kind-8 identities.
 
 ## Integration cautions
 

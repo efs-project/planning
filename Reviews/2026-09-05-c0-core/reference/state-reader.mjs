@@ -115,9 +115,21 @@ export function foldAdmissions(entries, ids, scopeLayout = 0) {
 export const COLLECTION_LIMITS = Object.freeze({ rows: 4096n, responseBytes: 262144, totalBytes: 16777216, work: 50000n });
 class Incomplete extends Error {}
 const incomplete = message => { throw new Incomplete(message); };
+// Trusted caller policy for the pinned source/execution, never snapshot metadata
+// or an inference from a caller-supplied ABI. Fixed legacy sources have no getter.
+function scopeQualification(expected) {
+  const mode = expected.scopeLayout;
+  if (mode === undefined) incomplete('missing expected scope layout');
+  assert(mode === 0 || mode === 1, 'explicit supported scope layout');
+  const profile = expected.scopeLayoutProfile === undefined ? 'comparison-v1' : expected.scopeLayoutProfile;
+  assert(profile === 'comparison-v1' || profile === 'legacy-fixed-v0', 'supported scope layout source profile');
+  assert(profile !== 'legacy-fixed-v0' || mode === 0, 'fixed legacy source requires mode zero');
+  return { mode, legacy: profile === 'legacy-fixed-v0' };
+}
 const plain = value => typeof value === 'bigint' ? value.toString() : Array.isArray(value) ? value.map(plain) : value;
 const countNames = ['records', 'envelopes', 'types', 'principals', 'admissions', 'batches', 'postings', 'bindings'];
 export async function collectState({ rpc, iface, expected }, { blockTag = 'latest', limits = {}, onBasis } = {}) {
+  const qualification = scopeQualification(expected);
   const caps = { ...COLLECTION_LIMITS, ...limits }, stats = { work: 0n, bytes: 0, rows: 0n };
   for (const k of ['rows', 'work']) { caps[k] = BigInt(caps[k]); assert(caps[k] > 0n && caps[k] <= COLLECTION_LIMITS[k], 'bounded collection limit'); }
   for (const k of ['responseBytes', 'totalBytes']) assert(Number.isSafeInteger(caps[k]) && caps[k] > 0 && caps[k] <= COLLECTION_LIMITS[k], 'bounded byte limit');
@@ -145,11 +157,9 @@ export async function collectState({ rpc, iface, expected }, { blockTag = 'lates
   };
   for (const [name, c] of Object.entries(expected.components)) s.components[name] = { address: c.address, code: await get('eth_getCode', [c.address, pin]), pin: basis.hash };
   for (const name of ['preparationHelper', 'preparationCodehash', 'admissionLibrary', 'admissionCodehash']) s.getters[name] = await call(name);
-  if (iface.getFunction('scopeLayout') && expected.scopeLayout === undefined) incomplete('comparison host requires explicit expected scope layout');
-  // Old hosts have no selector and retain their original mode-0 contract.
-  // Any explicitly selected comparison host must expose the pinned discriminator.
-  const observedScopeLayout = expected.scopeLayout === undefined ? 0n : BigInt(await call('scopeLayout'));
+  const observedScopeLayout = qualification.legacy ? 0n : BigInt(await call('scopeLayout'));
   assert(observedScopeLayout === 0n || observedScopeLayout === 1n, 'explicit supported scope layout');
+  equal(Number(observedScopeLayout), qualification.mode, 'pinned scope layout');
   s.scopeLayout = Number(observedScopeLayout);
   s.counts = await call('counts'); assert.equal(s.counts.length, 8);
   const counts = s.counts.map(BigInt), rows = counts.reduce((a, n) => a + n, 0n);
@@ -204,9 +214,11 @@ function legacyBatchPolicy({ row, revision }, expected) {
 }
 function reconstruct(s, expected, batchPolicy = legacyBatchPolicy) {
   if (!s?.complete || !s.basis) incomplete('incomplete snapshot');
-  const scopeLayout = expected.scopeLayout ?? 0;
-  assert(scopeLayout === 0 || scopeLayout === 1, 'explicit supported scope layout');
-  equal(s.scopeLayout ?? 0, scopeLayout, 'pinned scope layout');
+  const qualification = scopeQualification(expected), scopeLayout = qualification.mode;
+  const observed = s.scopeLayout === undefined && qualification.legacy ? 0 : s.scopeLayout;
+  if (observed === undefined) incomplete('missing observed scope layout');
+  assert(observed === 0 || observed === 1, 'explicit supported observed scope layout');
+  equal(observed, scopeLayout, 'pinned scope layout');
   const basis = s.basis;
   for (const k of ['source', 'core', 'chainId']) equal(basis[k], expected[k], 'basis ' + k);
   assert(/^0x[0-9a-f]{64}$/i.test(basis.hash) && BigInt(basis.number) >= 0n, 'block pin');

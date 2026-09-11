@@ -38,6 +38,15 @@ function immutableNames(a) {
 test('real admitted snapshots require explicit layout and independently reconstruct both domains',{timeout:1200000},async()=>{
   compileStateful();
   await withStateful(async lab=>{
+    const historical=await readState(lab); assert.equal(historical.outcome,'VERIFIED',historical.reason);
+    const retainedLegacy=structuredClone(historical.snapshot); delete retainedLegacy.scopeLayout;
+    assert.equal(verifyState(retainedLegacy,lab.expected).outcome,'VERIFIED','explicit trusted fixed-legacy profile retains old snapshots');
+    const noSourceProfile={...lab.expected}; delete noSourceProfile.scopeLayoutProfile;
+    assert.notEqual(verifyState(retainedLegacy,noSourceProfile).outcome,'VERIFIED','missing legacy source policy cannot infer mode');
+    for(const profile of [null,'legacy','',2]) {
+      assert.equal(verifyState(historical.snapshot,{...lab.expected,scopeLayoutProfile:profile}).outcome,'INVALID','closed source profiles');
+    }
+    assert.equal(verifyState(historical.snapshot,{...lab.expected,scopeLayout:1}).outcome,'INVALID','fixed legacy profile rejects K10');
     const q=artifact('QueryReadLibrary');
     assert(bytes(q.deployedBytecode.object)<=24576);
     const qr=await lab.receipt(await lab.send(q.bytecode.object));
@@ -59,11 +68,23 @@ test('real admitted snapshots require explicit layout and independently reconstr
       assert(bytes(creation)<=49152 && bytes(runtime)<=24576);
       const receipt=await lab.receipt(await lab.send(creation)); assert.equal(receipt.status,'0x1');
       const host=receipt.contractAddress; assert.equal(await lab.rpc('eth_getCode',[host,receipt.blockNumber]),runtime);
-      const reader={...lab,iface,expected:{...lab.expected,core:host,scopeLayout:mode,
+      const reader={...lab,iface,expected:{...lab.expected,core:host,scopeLayout:mode,scopeLayoutProfile:'comparison-v1',
         components:{...lab.expected.components,core:{address:host,code:runtime},query:{address:qr.contractAddress,code:qcode}}}};
       const empty=await readState(reader); assert.equal(empty.outcome,'VERIFIED',empty.reason);
       assert.equal(verifyState(empty.snapshot,{...reader.expected,scopeLayout:1-mode}).outcome,'INVALID','zero-entry layout mismatch');
       const unselected={...reader.expected}; delete unselected.scopeLayout;
+      const unobserved=structuredClone(empty.snapshot); delete unobserved.scopeLayout;
+      assert.notEqual(verifyState(empty.snapshot,unselected).outcome,'VERIFIED','offline missing expected mode refuses');
+      assert.notEqual(verifyState(unobserved,reader.expected).outcome,'VERIFIED','offline missing observed mode refuses');
+      assert.notEqual(verifyState(unobserved,unselected).outcome,'VERIFIED','offline both missing modes refuse');
+      assert.notEqual(verifyState({...unobserved,scopeLayoutProfile:'legacy-fixed-v0'},reader.expected).outcome,'VERIFIED','snapshot cannot grant legacy qualification');
+      for(const invalid of [null,'0','1',2,256]) {
+        assert.notEqual(verifyState({...empty.snapshot,scopeLayout:invalid},reader.expected).outcome,'VERIFIED','malformed observed mode refuses');
+        assert.notEqual(verifyState(empty.snapshot,{...reader.expected,scopeLayout:invalid}).outcome,'VERIFIED','malformed expected mode refuses');
+      }
+      const strippedIface=new Interface(a.abi.filter(f=>f.name!=='scopeLayout'));
+      assert.notEqual((await readState({...reader,iface:strippedIface})).outcome,'VERIFIED','stripped ABI cannot supply observed mode');
+      assert.notEqual((await readState({...reader,iface:strippedIface,expected:unselected})).outcome,'VERIFIED','stripped ABI cannot select legacy');
       assert.equal((await readState({...reader,expected:unselected})).outcome,'UNKNOWN','comparison host requires explicit selection');
       const publish=async p=>{const r=await lab.receipt(await lab.send(iface.encodeFunctionData('publishTrustedForTest',[lab.context(p.header.principalId),p]),host));assert.equal(r.status,'0x1');};
       const groups=lab.inputs.candidates.groups, type=name=>groups.flatMap(g=>g.members).find(m=>m.descriptor.name===name).temporaryTypeSchemaId;

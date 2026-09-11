@@ -50,7 +50,8 @@ for (const available of [true,false]) {
     const snapshot=evidence.snapshots.final;
     snapshot.batches[0].row[0]=String(BigInt(snapshot.batches[0].row[0])&~(0xffffffffn<<112n));
     if(!available)delete snapshot.execution;
-    assert.equal(verifyUpgradeState(snapshot,evidence.expected).outcome,'INVALID');
+    // This retained fixture predates layout qualification and its trusted source is legacy-only.
+    assert.equal(verifyUpgradeState(snapshot,{...evidence.expected,scopeLayout:0,scopeLayoutProfile:'legacy-fixed-v0'}).outcome,'INVALID');
   });
 }
 test('unavailable raw snapshot is UNKNOWN rather than an invalid execution claim', () => {
