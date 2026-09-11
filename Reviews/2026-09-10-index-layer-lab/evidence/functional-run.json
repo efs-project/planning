@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-11T03:18:27.432Z",
+  "steps": [
+    {
+      "step": "upgrade",
+      "core4": "0x678378e0cc81d48581709cd0579cab0b5688c3ce",
+      "runtimeBytes": 21825,
+      "gas": "584409"
+    },
+    {
+      "step": "declare",
+      "familyId": "0x070e0d1ce7197afb7660b2cf77916495d560fab1bf5adb1bddb8b6c0a2afbe71",
+      "ordinal": "1",
+      "declaredAt": "104",
+      "gas": "354891"
+    },
+    {
+      "step": "differential-complete",
+      "positions": 20,
+      "checked": 80
+    },
+    {
+      "step": "done",
+      "names": 20
+    }
+  ],
+  "gas": {
+    "declare": "354891",
+    "placementHookFreshWord": "3133212",
+    "directRebindFieldChangeUncovered": "2950814",
+    "backfillChunk6WithSlotInit": "469925",
+    "placementHookWarmWord": "3109842",
+    "removeRebindClear": "5228210",
+    "directRebindFieldChangeCovered": "2919497",
+    "backfillChunk6Guarded": "423479",
+    "backfillGuardLoser": "41973",
+    "raceNoGuard": [
+      "178677",
+      "180677"
+    ],
+    "raceGuardWinnerLoser": [
+      "153637",
+      "41949"
+    ],
+    "backfillBornAfterDNoSlot": "44906",
+    "detach": "42409",
+    "placementAfterRetire": "3143873",
+    "unattachedPlacementU4": "3086500",
+    "placementAfterComplete": "3126954"
+  }
+}

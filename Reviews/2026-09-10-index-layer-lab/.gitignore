@@ -1,0 +1,3 @@
+# Forge build outputs (regenerable; the lab compiles offline with the pinned solc)
+out/
+cache/

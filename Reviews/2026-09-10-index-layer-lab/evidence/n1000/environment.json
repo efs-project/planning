@@ -1,0 +1,157 @@
+{
+  "label": "n1000",
+  "n": 1000,
+  "sparse": 64,
+  "startedAt": "2026-09-11T01:03:41.048Z",
+  "elapsedMs": 329772,
+  "hardfork": "cancun",
+  "chainId": 31337,
+  "nodeArgs": [
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "51485",
+    "--chain-id",
+    "31337",
+    "--hardfork",
+    "cancun",
+    "--gas-limit",
+    "33554432",
+    "--accounts",
+    "0",
+    "--no-cors",
+    "--silent"
+  ],
+  "versions": {
+    "node": "v24.11.0",
+    "anvil": "anvil Version: 1.7.1",
+    "forge": "forge Version: 1.7.1",
+    "solc": {
+      "version": "0.8.30+commit.73712a01"
+    },
+    "solcBinary": "/Users/james/Library/Caches/hardhat-nodejs/compilers-v2/macosx-amd64/solc-macosx-amd64-v0.8.30+commit.73712a01",
+    "ethers": "6.15.0"
+  },
+  "git": {
+    "commit": "c833ecd508643852aea372400bd44a771f50641c",
+    "branch": "fable/2026-09-09-files-browser",
+    "dirty": true
+  },
+  "labFoundry": "# Index-layer lab: compiles the lab contracts against the PINNED COPY of the\n# c0-core kernel (src/) and of the foundation core (foundation/). Disposable.\n[profile.default]\nsrc = \"lab\"\ntest = \"forge-test\"\nout = \"out\"\nlibs = []\nsolc = \"0.8.30\"\nevm_version = \"cancun\"\noptimizer = true\noptimizer_runs = 200\nvia_ir = true\nallow_paths = [\"..\"]\nremappings = [\n  \"C0Core/=src/\",\n  \"Foundation/=foundation/\",\n  \"C0Admission/=../2026-09-05-c0-admission/src/\",\n  \"@openzeppelin/contracts/=../2026-09-08-upgradeable-foundation/node_modules/@openzeppelin/contracts/\",\n]\n",
+  "addresses": {
+    "core": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+    "router": "0xd50f25958f195efc9f5f33a392d5219bab106a07",
+    "hook": "0x0aea357c95f0d1ffc5b63525dd88ede942c4473f",
+    "module": "0xb9954fc7356b2df7f6c2d81d4e8bac21de035139",
+    "core4": "0x8b803d6e52f5f81f89fc77a103caa22092920c81",
+    "admissionLibrary": "0xd226ecebd1e4c36a7855f9a88304dcc8b48237f9",
+    "principalA": "0x0000000000000000000000000000000000000000000000000000ffffffffffff",
+    "big": "0x67160bf2ff6010fee55be0da4eb019482aa1011dd892777c6e8d48b25531aef3",
+    "sparse": "0x1d750faa3ca1a3c3acd2eba6732885402c61dd5332e7cccebed3c899c710e08f",
+    "bench": "0x3f85d125b548ea7819add89f26e5dd16e1419ed2202e4887b5e0e9d16a983c9b",
+    "familyId": "0xdb3f6266fe25490966350c449d3cb80c84fc405bda7c1be1576f981f27e45ca8",
+    "fam2": "0x25debeec2f0f9c827da3e018b8a58fff650d3f50ad88cc4fd4c8b63005e28e46",
+    "familyOrdinal": "1",
+    "declaredAt": "2330"
+  },
+  "codeSizes": {
+    "core4": 21825,
+    "module": 10968,
+    "hook": 6412
+  },
+  "buckets": {
+    "fileA": "0xf9ba6074b2933ae29b89a06ddb9d05f9790a5211af6a9c0f9461e58620c36fdd",
+    "fileB": "0xa52f03088060293722b54d93799faf69df50deb9a4b04a90c95b5d8a7382f733",
+    "draft": "0x288917d25b62172c3ab98fad70b0cb417ddce2a8a563296dddca6293f9a8c741",
+    "extra": "0x69e4faedf4e2cf69035493434b74f43c463a2a2044c09646effa8d5b14da5562"
+  },
+  "scopes": {
+    "bigScope": "0x1257fc2040d17129df1c558c8b9bec105cabac8270ba0d06572cce2b4050b412",
+    "sparseScope": "0x606d5f4858f67b0f33c6523aee8f53b2fefb9757c16d36569886659929337d64"
+  },
+  "wall": {
+    "populateBig": {
+      "n": 1000,
+      "ms": 49494,
+      "totalGas": "3112982140"
+    },
+    "populateSparse": {
+      "n": 64,
+      "ms": 5622
+    },
+    "finishBig": {
+      "ms": 4080,
+      "extraCalls": 1
+    }
+  },
+  "rehosts": [
+    {
+      "why": "B: load D0 for U3/U4 baselines",
+      "tracing": true,
+      "block": 79,
+      "stateBytes": 790152,
+      "rssOfPreviousNodeBytes": 64733184,
+      "ms": 188
+    },
+    {
+      "why": "C: load D0 for population",
+      "tracing": false,
+      "block": 79,
+      "stateBytes": 790152,
+      "rssOfPreviousNodeBytes": 3310354432,
+      "ms": 1871
+    },
+    {
+      "why": "D: load D1 for the index phase",
+      "tracing": true,
+      "block": 1149,
+      "stateBytes": 10745916,
+      "rssOfPreviousNodeBytes": 500269056,
+      "ms": 413
+    }
+  ],
+  "finalAnvilRssBytes": 13942784,
+  "chunks": {
+    "32": {
+      "gas": "1913261",
+      "through": 32
+    },
+    "64": {
+      "gas": "3656759",
+      "through": 96
+    },
+    "128": {
+      "gas": "7266182",
+      "through": 224
+    },
+    "256": {
+      "gas": "14673829",
+      "through": 480
+    }
+  },
+  "maxChunk": {
+    "perEntryEstimate": 57872.2421875,
+    "fixedEstimate": -141465,
+    "attempts": [
+      {
+        "maxEntries": 288,
+        "estimateGas": "revert:0x",
+        "status": "0x0",
+        "gasUsed": 16257997
+      },
+      {
+        "maxEntries": 273,
+        "estimateGas": 16154781,
+        "status": "0x1",
+        "gasUsed": 15654878
+      }
+    ]
+  },
+  "oracle": {
+    "checked": 4012,
+    "mismatches": [],
+    "positions": 1003,
+    "ms": 1760
+  },
+  "fixturePath": "nestedFixture -> routerFixture -> authorityFixture (U3) -> indexLayerFixture (U4); operations via authorityFixture.execute (FilesRouterV2 -> executeAuthorized) and direct author-signed executeAuthorized; index calls via the U4 fallback -> IndexLayerModule. Phases A-D re-host anvil on one port with anvil_dumpState/anvil_loadState; dumps only from untraced nodes."
+}

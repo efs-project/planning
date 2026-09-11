@@ -1,0 +1,1193 @@
+{
+ "kind": "TAG_JOINS_OBJECT_KEYED_READER",
+ "date": "2026-09-10",
+ "K": 1000,
+ "lensCap": 64,
+ "labels": "every number MEASURED on a managed anvil (loopback); eth_call gas = debug_traceCall callTracer top-frame gasUsed at the reader's pinned block (includes 21,000 base + calldata intrinsic; gasExecution subtracts it)",
+ "sections": {
+  "rebinding": {
+   "directory": "0x3f85d125b548ea7819add89f26e5dd16e1419ed2202e4887b5e0e9d16a983c9b",
+   "fileA": "0x957b9ffd4e44b012690091b7912e7be5f678793b0e1cbc0792d97cf46e0df7b5",
+   "fileB": "0xbb78e7b4d770893f5b1bb5c35cb1e8471a611f4d293ee85e5eb8d49dd38a99b3",
+   "tagging": {
+    "count": 1000,
+    "elapsedMs": 46867,
+    "meanGasPerTag": "2335692"
+   },
+   "stages": [
+    {
+     "stage": "tagged",
+     "nameBindingRevision": 1,
+     "fileA": {
+      "active": 1000,
+      "inactive": 0,
+      "entries": 1000,
+      "readerRequests": 1184
+     },
+     "fileB": {
+      "active": 0,
+      "inactive": 0,
+      "entries": 0,
+      "readerRequests": 1183
+     },
+     "listings": {
+      "D": {
+       "rows": {
+        "b.txt": "0xbb78e7b4d770893f5b1bb5c35cb1e8471a611f4d293ee85e5eb8d49dd38a99b3",
+        "n.txt": "0x957b9ffd4e44b012690091b7912e7be5f678793b0e1cbc0792d97cf46e0df7b5"
+       },
+       "masked": 0,
+       "tagged": [
+        "n.txt"
+       ],
+       "untagged": [
+        "b.txt"
+       ]
+      }
+     }
+    },
+    {
+     "stage": "rebound N -> File B",
+     "nameBindingRevision": 3,
+     "fileA": {
+      "active": 1000,
+      "inactive": 0,
+      "entries": 1000,
+      "readerRequests": 1184
+     },
+     "fileB": {
+      "active": 0,
+      "inactive": 0,
+      "entries": 0,
+      "readerRequests": 1183
+     },
+     "listings": {
+      "D": {
+       "rows": {
+        "b.txt": "0xbb78e7b4d770893f5b1bb5c35cb1e8471a611f4d293ee85e5eb8d49dd38a99b3",
+        "n.txt": "0xbb78e7b4d770893f5b1bb5c35cb1e8471a611f4d293ee85e5eb8d49dd38a99b3"
+       },
+       "masked": 0,
+       "tagged": [],
+       "untagged": [
+        "b.txt",
+        "n.txt"
+       ]
+      }
+     }
+    },
+    {
+     "stage": "second placement of A",
+     "nameBindingRevision": 3,
+     "fileA": {
+      "active": 1000,
+      "inactive": 0,
+      "entries": 1000,
+      "readerRequests": 1184
+     },
+     "fileB": {
+      "active": 0,
+      "inactive": 0,
+      "entries": 0,
+      "readerRequests": 1183
+     },
+     "listings": {
+      "D": {
+       "rows": {
+        "a-again.txt": "0x957b9ffd4e44b012690091b7912e7be5f678793b0e1cbc0792d97cf46e0df7b5",
+        "b.txt": "0xbb78e7b4d770893f5b1bb5c35cb1e8471a611f4d293ee85e5eb8d49dd38a99b3",
+        "n.txt": "0xbb78e7b4d770893f5b1bb5c35cb1e8471a611f4d293ee85e5eb8d49dd38a99b3"
+       },
+       "masked": 0,
+       "tagged": [
+        "a-again.txt"
+       ],
+       "untagged": [
+        "b.txt",
+        "n.txt"
+       ]
+      }
+     }
+    },
+    {
+     "stage": "move A to moved/a-moved.txt",
+     "nameBindingRevision": 3,
+     "fileA": {
+      "active": 1000,
+      "inactive": 0,
+      "entries": 1000,
+      "readerRequests": 1184
+     },
+     "fileB": {
+      "active": 0,
+      "inactive": 0,
+      "entries": 0,
+      "readerRequests": 1183
+     },
+     "listings": {
+      "D": {
+       "rows": {
+        "b.txt": "0xbb78e7b4d770893f5b1bb5c35cb1e8471a611f4d293ee85e5eb8d49dd38a99b3",
+        "moved": "0x2ecdff60caebfa91aaa11a9a8168570b651f2aef3f12cfd1bef1256c78450a0d",
+        "n.txt": "0xbb78e7b4d770893f5b1bb5c35cb1e8471a611f4d293ee85e5eb8d49dd38a99b3"
+       },
+       "masked": 1,
+       "tagged": [],
+       "untagged": [
+        "b.txt",
+        "moved",
+        "n.txt"
+       ]
+      },
+      "D2": {
+       "rows": {
+        "a-moved.txt": "0x957b9ffd4e44b012690091b7912e7be5f678793b0e1cbc0792d97cf46e0df7b5"
+       },
+       "masked": 0,
+       "tagged": [
+        "a-moved.txt"
+       ],
+       "untagged": []
+      }
+     }
+    },
+    {
+     "stage": "remove A (unplaced)",
+     "nameBindingRevision": 3,
+     "fileA": {
+      "active": 1000,
+      "inactive": 0,
+      "entries": 1000,
+      "readerRequests": 1184
+     },
+     "fileB": {
+      "active": 0,
+      "inactive": 0,
+      "entries": 0,
+      "readerRequests": 1183
+     },
+     "listings": {
+      "D2": {
+       "rows": {},
+       "masked": 1,
+       "tagged": [],
+       "untagged": []
+      }
+     }
+    },
+    {
+     "stage": "restore A",
+     "nameBindingRevision": 3,
+     "fileA": {
+      "active": 1000,
+      "inactive": 0,
+      "entries": 1000,
+      "readerRequests": 1184
+     },
+     "fileB": {
+      "active": 0,
+      "inactive": 0,
+      "entries": 0,
+      "readerRequests": 1183
+     },
+     "listings": {
+      "D2": {
+       "rows": {
+        "a-moved.txt": "0x957b9ffd4e44b012690091b7912e7be5f678793b0e1cbc0792d97cf46e0df7b5"
+       },
+       "masked": 0,
+       "tagged": [
+        "a-moved.txt"
+       ],
+       "untagged": []
+      }
+     }
+    },
+    {
+     "stage": "attester 0 untags",
+     "nameBindingRevision": 3,
+     "fileA": {
+      "active": 999,
+      "inactive": 1,
+      "entries": 1000,
+      "readerRequests": 1184
+     },
+     "fileB": {
+      "active": 0,
+      "inactive": 0,
+      "entries": 0,
+      "readerRequests": 1183
+     },
+     "listings": {
+      "D2": {
+       "rows": {
+        "a-moved.txt": "0x957b9ffd4e44b012690091b7912e7be5f678793b0e1cbc0792d97cf46e0df7b5"
+       },
+       "masked": 0,
+       "tagged": [
+        "a-moved.txt"
+       ],
+       "untagged": []
+      },
+      "D": {
+       "rows": {
+        "b.txt": "0xbb78e7b4d770893f5b1bb5c35cb1e8471a611f4d293ee85e5eb8d49dd38a99b3",
+        "moved": "0x2ecdff60caebfa91aaa11a9a8168570b651f2aef3f12cfd1bef1256c78450a0d",
+        "n.txt": "0xbb78e7b4d770893f5b1bb5c35cb1e8471a611f4d293ee85e5eb8d49dd38a99b3"
+       },
+       "masked": 1,
+       "tagged": [],
+       "untagged": [
+        "b.txt",
+        "moved",
+        "n.txt"
+       ]
+      }
+     }
+    }
+   ],
+   "conclusion": "On the object-keyed reader, File B (the new occupant of N) never carries any attester's tag at any stage, and File A keeps all K (then K-1) through rebinding, a second placement, a move, remove, restore and one withdrawal. A position-keyed bitmap at (D, n.txt) would have carried K stale bits after the rebind (and no bit at a-again.txt / moved/a-moved.txt)."
+  },
+  "masking": {
+   "directory": "0x9c3cafe36851582b03b4b2d25802bb0918e64842ef65b5403199b3780c837757",
+   "files": {
+    "bTagged_w": "0xd054160c770b4971e6e9fe89947b0f379d2c24b130954b1376ebcc2121bf59b6",
+    "aWhiteout_w": "0x5fd8885959b1d0123d954a26f29183dd3e3f217b2436d99f5762b777f00fbc3a",
+    "bTagged_u": "0xa6cab687b5d004bcc1292b36c7aeaf2ac57f46675c3c96ec499262d61602449b",
+    "aUntagged_u": "0xb8920f2544271adee89c9cdbadcd583f3f6d60b1ae6496b67c8338430c0939ca"
+   },
+   "lensAB": {
+    "rows": {
+     "u.txt": "0xb8920f2544271adee89c9cdbadcd583f3f6d60b1ae6496b67c8338430c0939ca"
+    },
+    "masked": 1,
+    "tagged": [],
+    "untagged": [
+     "u.txt"
+    ]
+   },
+   "lensBA": {
+    "rows": {
+     "u.txt": "0xa6cab687b5d004bcc1292b36c7aeaf2ac57f46675c3c96ec499262d61602449b",
+     "w.txt": "0xd054160c770b4971e6e9fe89947b0f379d2c24b130954b1376ebcc2121bf59b6"
+    },
+    "tagged": [
+     "u.txt",
+     "w.txt"
+    ],
+    "untagged": []
+   },
+   "positionalCounterfactual": {
+    "B name binding revision at (M,w.txt)": 1,
+    "B name binding revision at (M,u.txt)": 1,
+    "note": "a bitmap keyed by position would carry a set bit in B's column at both names; the lens-selected occupant is A's whiteout / A's untagged file, so the object-keyed join correctly shows neither"
+   }
+  },
+  "pricing": {
+   "arms": [
+    {
+     "n": 100,
+     "arm": "unfiltered",
+     "lens": "lensAB (A tier 0, B tier 1)",
+     "pageSize": 32,
+     "build": {
+      "n": 100,
+      "tagsA": 25,
+      "tagsB": 10,
+      "buildFilesMs": 7512,
+      "buildTotalMs": 10462,
+      "createFileGas": {
+       "mean": "8538342",
+       "first": "8629920",
+       "last": "8608052"
+      }
+     },
+     "coverage": "COMPLETE",
+     "rowsEvidence": "CURRENT_SEALED",
+     "reason": null,
+     "detail": null,
+     "rowsVisible": 100,
+     "tagged": null,
+     "untagged": null,
+     "unknown": null,
+     "reader": {
+      "requests": 1139,
+      "bytes": 679148,
+      "cacheHits": 0,
+      "elapsedMs": 452.9,
+      "qualifyRequests": 40,
+      "qualifyBytes": 366796
+     },
+     "traced": {
+      "listing": {
+       "calls": 1131,
+       "gasTotal": 221124491,
+       "gasExecution": 196699283,
+       "responseBytes": 672300
+      },
+      "tags": {
+       "calls": 0,
+       "gasTotal": 0,
+       "gasExecution": 0,
+       "responseBytes": 0
+      },
+      "total": {
+       "calls": 1131,
+       "gasTotal": 221124491,
+       "gasExecution": 196699283,
+       "responseBytes": 672300
+      }
+     },
+     "byMethod": {
+      "listing": {
+       "getRecord": {
+        "calls": 408,
+        "gasTotal": 73460704,
+        "gasExecution": 64658284,
+        "responseBytes": 217312
+       },
+       "getBindingHead": {
+        "calls": 102,
+        "gasTotal": 17480016,
+        "gasExecution": 15279396,
+        "responseBytes": 59160
+       },
+       "getOccurrenceByOrdinal": {
+        "calls": 202,
+        "gasTotal": 43935380,
+        "gasExecution": 39649772,
+        "responseBytes": 91304
+       },
+       "getOccurrence": {
+        "calls": 102,
+        "gasTotal": 22093404,
+        "gasExecution": 19878576,
+        "responseBytes": 39576
+       },
+       "getBindingAtBasis": {
+        "calls": 202,
+        "gasTotal": 34702968,
+        "gasExecution": 30314140,
+        "responseBytes": 117160
+       },
+       "validatePlan": {
+        "calls": 2,
+        "gasTotal": 379382,
+        "gasExecution": 336230,
+        "responseBytes": 264
+       },
+       "pagePostingsHydrated": {
+        "calls": 5,
+        "gasTotal": 6431045,
+        "gasExecution": 6318449,
+        "responseBytes": 54420
+       },
+       "resolve": {
+        "calls": 100,
+        "gasTotal": 21930944,
+        "gasExecution": 19722300,
+        "responseBytes": 90000
+       },
+       "fixtureReadContext": {
+        "calls": 4,
+        "gasTotal": 582180,
+        "gasExecution": 497924,
+        "responseBytes": 1040
+       },
+       "counts": {
+        "calls": 4,
+        "gasTotal": 128468,
+        "gasExecution": 44212,
+        "responseBytes": 2064
+       }
+      },
+      "tags": {}
+     },
+     "perEntry": {
+      "readerRequests": 11.39,
+      "readerBytes": 6791,
+      "listingRequests": 11.31,
+      "listingGasTotal": 2211245,
+      "listingGasExecution": 1966993,
+      "listingBytes": 6723,
+      "totalRequests": 11.31,
+      "totalGasTotal": 2211245,
+      "totalGasExecution": 1966993
+     }
+    },
+    {
+     "n": 100,
+     "arm": "tag-filtered",
+     "lens": "lensAB (A tier 0, B tier 1)",
+     "pageSize": 32,
+     "build": {
+      "n": 100,
+      "tagsA": 25,
+      "tagsB": 10,
+      "buildFilesMs": 7512,
+      "buildTotalMs": 10462,
+      "createFileGas": {
+       "mean": "8538342",
+       "first": "8629920",
+       "last": "8608052"
+      }
+     },
+     "coverage": "COMPLETE",
+     "rowsEvidence": "CURRENT_SEALED",
+     "reason": null,
+     "detail": null,
+     "rowsVisible": 100,
+     "tagged": 30,
+     "untagged": 70,
+     "unknown": 0,
+     "reader": {
+      "requests": 1769,
+      "bytes": 1055588,
+      "cacheHits": 0,
+      "elapsedMs": 1027.8,
+      "qualifyRequests": 40,
+      "qualifyBytes": 366796
+     },
+     "traced": {
+      "listing": {
+       "calls": 1131,
+       "gasTotal": 221124491,
+       "gasExecution": 196699283,
+       "responseBytes": 672300
+      },
+      "tags": {
+       "calls": 430,
+       "gasTotal": 57229671,
+       "gasExecution": 48054775,
+       "responseBytes": 205240
+      },
+      "total": {
+       "calls": 1561,
+       "gasTotal": 278354162,
+       "gasExecution": 244754058,
+       "responseBytes": 877540
+      }
+     },
+     "byMethod": {
+      "listing": {
+       "getRecord": {
+        "calls": 408,
+        "gasTotal": 73460704,
+        "gasExecution": 64658284,
+        "responseBytes": 217312
+       },
+       "getBindingHead": {
+        "calls": 102,
+        "gasTotal": 17480016,
+        "gasExecution": 15279396,
+        "responseBytes": 59160
+       },
+       "getOccurrenceByOrdinal": {
+        "calls": 202,
+        "gasTotal": 43935380,
+        "gasExecution": 39649772,
+        "responseBytes": 91304
+       },
+       "getOccurrence": {
+        "calls": 102,
+        "gasTotal": 22093404,
+        "gasExecution": 19878576,
+        "responseBytes": 39576
+       },
+       "getBindingAtBasis": {
+        "calls": 202,
+        "gasTotal": 34702968,
+        "gasExecution": 30314140,
+        "responseBytes": 117160
+       },
+       "validatePlan": {
+        "calls": 2,
+        "gasTotal": 379382,
+        "gasExecution": 336230,
+        "responseBytes": 264
+       },
+       "pagePostingsHydrated": {
+        "calls": 5,
+        "gasTotal": 6431045,
+        "gasExecution": 6318449,
+        "responseBytes": 54420
+       },
+       "resolve": {
+        "calls": 100,
+        "gasTotal": 21930944,
+        "gasExecution": 19722300,
+        "responseBytes": 90000
+       },
+       "counts": {
+        "calls": 4,
+        "gasTotal": 128468,
+        "gasExecution": 44212,
+        "responseBytes": 2064
+       },
+       "fixtureReadContext": {
+        "calls": 4,
+        "gasTotal": 582180,
+        "gasExecution": 497924,
+        "responseBytes": 1040
+       }
+      },
+      "tags": {
+       "getBindingHead": {
+        "calls": 200,
+        "gasTotal": 34236361,
+        "gasExecution": 29921485,
+        "responseBytes": 116000
+       },
+       "getRecord": {
+        "calls": 30,
+        "gasTotal": 5227110,
+        "gasExecution": 4579890,
+        "responseBytes": 11640
+       },
+       "counts": {
+        "calls": 100,
+        "gasTotal": 3211700,
+        "gasExecution": 1105300,
+        "responseBytes": 51600
+       },
+       "fixtureReadContext": {
+        "calls": 100,
+        "gasTotal": 14554500,
+        "gasExecution": 12448100,
+        "responseBytes": 26000
+       }
+      }
+     },
+     "perEntry": {
+      "readerRequests": 17.69,
+      "readerBytes": 10556,
+      "listingRequests": 11.31,
+      "listingGasTotal": 2211245,
+      "listingGasExecution": 1966993,
+      "listingBytes": 6723,
+      "tagRequests": 4.3,
+      "tagGasTotal": 572297,
+      "tagGasExecution": 480548,
+      "tagBytes": 2052,
+      "totalRequests": 15.61,
+      "totalGasTotal": 2783542,
+      "totalGasExecution": 2447541
+     }
+    },
+    {
+     "n": 200,
+     "arm": "unfiltered",
+     "lens": "lensAB (A tier 0, B tier 1)",
+     "pageSize": 32,
+     "build": {
+      "n": 200,
+      "tagsA": 50,
+      "tagsB": 20,
+      "buildFilesMs": 19900,
+      "buildTotalMs": 27684,
+      "createFileGas": {
+       "mean": "8538214",
+       "first": "8646000",
+       "last": "8569306"
+      }
+     },
+     "coverage": "COMPLETE",
+     "rowsEvidence": "CURRENT_SEALED",
+     "reason": null,
+     "detail": null,
+     "rowsVisible": 200,
+     "tagged": null,
+     "untagged": null,
+     "unknown": null,
+     "reader": {
+      "requests": 2254,
+      "bytes": 1345744,
+      "cacheHits": 0,
+      "elapsedMs": 959.1,
+      "qualifyRequests": 40,
+      "qualifyBytes": 366796
+     },
+     "traced": {
+      "listing": {
+       "calls": 2240,
+       "gasTotal": 438301874,
+       "gasExecution": 389927010,
+       "responseBytes": 1333760
+      },
+      "tags": {
+       "calls": 0,
+       "gasTotal": 0,
+       "gasExecution": 0,
+       "responseBytes": 0
+      },
+      "total": {
+       "calls": 2240,
+       "gasTotal": 438301874,
+       "gasExecution": 389927010,
+       "responseBytes": 1333760
+      }
+     },
+     "byMethod": {
+      "listing": {
+       "getRecord": {
+        "calls": 808,
+        "gasTotal": 145471180,
+        "gasExecution": 128038984,
+        "responseBytes": 430112
+       },
+       "getBindingHead": {
+        "calls": 202,
+        "gasTotal": 34617248,
+        "gasExecution": 30259196,
+        "responseBytes": 117160
+       },
+       "getOccurrenceByOrdinal": {
+        "calls": 402,
+        "gasTotal": 87435768,
+        "gasExecution": 78906972,
+        "responseBytes": 181704
+       },
+       "getOccurrence": {
+        "calls": 202,
+        "gasTotal": 43753636,
+        "gasExecution": 39367376,
+        "responseBytes": 78376
+       },
+       "getBindingAtBasis": {
+        "calls": 402,
+        "gasTotal": 69062100,
+        "gasExecution": 60328140,
+        "responseBytes": 233160
+       },
+       "validatePlan": {
+        "calls": 2,
+        "gasTotal": 379382,
+        "gasExecution": 336230,
+        "responseBytes": 264
+       },
+       "pagePostingsHydrated": {
+        "calls": 8,
+        "gasTotal": 12477050,
+        "gasExecution": 12296774,
+        "responseBytes": 107552
+       },
+       "resolve": {
+        "calls": 200,
+        "gasTotal": 43861876,
+        "gasExecution": 39444600,
+        "responseBytes": 180000
+       },
+       "counts": {
+        "calls": 7,
+        "gasTotal": 224819,
+        "gasExecution": 77371,
+        "responseBytes": 3612
+       },
+       "fixtureReadContext": {
+        "calls": 7,
+        "gasTotal": 1018815,
+        "gasExecution": 871367,
+        "responseBytes": 1820
+       }
+      },
+      "tags": {}
+     },
+     "perEntry": {
+      "readerRequests": 11.27,
+      "readerBytes": 6729,
+      "listingRequests": 11.2,
+      "listingGasTotal": 2191509,
+      "listingGasExecution": 1949635,
+      "listingBytes": 6669,
+      "totalRequests": 11.2,
+      "totalGasTotal": 2191509,
+      "totalGasExecution": 1949635
+     }
+    },
+    {
+     "n": 200,
+     "arm": "tag-filtered",
+     "lens": "lensAB (A tier 0, B tier 1)",
+     "pageSize": 32,
+     "build": {
+      "n": 200,
+      "tagsA": 50,
+      "tagsB": 20,
+      "buildFilesMs": 19900,
+      "buildTotalMs": 27684,
+      "createFileGas": {
+       "mean": "8538214",
+       "first": "8646000",
+       "last": "8569306"
+      }
+     },
+     "coverage": "COMPLETE",
+     "rowsEvidence": "CURRENT_SEALED",
+     "reason": null,
+     "detail": null,
+     "rowsVisible": 200,
+     "tagged": 60,
+     "untagged": 140,
+     "unknown": 0,
+     "reader": {
+      "requests": 3514,
+      "bytes": 2098624,
+      "cacheHits": 0,
+      "elapsedMs": 3092,
+      "qualifyRequests": 40,
+      "qualifyBytes": 366796
+     },
+     "traced": {
+      "listing": {
+       "calls": 2240,
+       "gasTotal": 438301874,
+       "gasExecution": 389927010,
+       "responseBytes": 1333760
+      },
+      "tags": {
+       "calls": 860,
+       "gasTotal": 114459378,
+       "gasExecution": 96109550,
+       "responseBytes": 410480
+      },
+      "total": {
+       "calls": 3100,
+       "gasTotal": 552761252,
+       "gasExecution": 486036560,
+       "responseBytes": 1744240
+      }
+     },
+     "byMethod": {
+      "listing": {
+       "getRecord": {
+        "calls": 808,
+        "gasTotal": 145471180,
+        "gasExecution": 128038984,
+        "responseBytes": 430112
+       },
+       "getBindingHead": {
+        "calls": 202,
+        "gasTotal": 34617248,
+        "gasExecution": 30259196,
+        "responseBytes": 117160
+       },
+       "getOccurrenceByOrdinal": {
+        "calls": 402,
+        "gasTotal": 87435768,
+        "gasExecution": 78906972,
+        "responseBytes": 181704
+       },
+       "getOccurrence": {
+        "calls": 202,
+        "gasTotal": 43753636,
+        "gasExecution": 39367376,
+        "responseBytes": 78376
+       },
+       "getBindingAtBasis": {
+        "calls": 402,
+        "gasTotal": 69062100,
+        "gasExecution": 60328140,
+        "responseBytes": 233160
+       },
+       "validatePlan": {
+        "calls": 2,
+        "gasTotal": 379382,
+        "gasExecution": 336230,
+        "responseBytes": 264
+       },
+       "pagePostingsHydrated": {
+        "calls": 8,
+        "gasTotal": 12477050,
+        "gasExecution": 12296774,
+        "responseBytes": 107552
+       },
+       "resolve": {
+        "calls": 200,
+        "gasTotal": 43861876,
+        "gasExecution": 39444600,
+        "responseBytes": 180000
+       },
+       "counts": {
+        "calls": 7,
+        "gasTotal": 224819,
+        "gasExecution": 77371,
+        "responseBytes": 3612
+       },
+       "fixtureReadContext": {
+        "calls": 7,
+        "gasTotal": 1018815,
+        "gasExecution": 871367,
+        "responseBytes": 1820
+       }
+      },
+      "tags": {
+       "getBindingHead": {
+        "calls": 400,
+        "gasTotal": 68472746,
+        "gasExecution": 59842970,
+        "responseBytes": 232000
+       },
+       "getRecord": {
+        "calls": 60,
+        "gasTotal": 10454232,
+        "gasExecution": 9159780,
+        "responseBytes": 23280
+       },
+       "counts": {
+        "calls": 200,
+        "gasTotal": 6423400,
+        "gasExecution": 2210600,
+        "responseBytes": 103200
+       },
+       "fixtureReadContext": {
+        "calls": 200,
+        "gasTotal": 29109000,
+        "gasExecution": 24896200,
+        "responseBytes": 52000
+       }
+      }
+     },
+     "perEntry": {
+      "readerRequests": 17.57,
+      "readerBytes": 10493,
+      "listingRequests": 11.2,
+      "listingGasTotal": 2191509,
+      "listingGasExecution": 1949635,
+      "listingBytes": 6669,
+      "tagRequests": 4.3,
+      "tagGasTotal": 572297,
+      "tagGasExecution": 480548,
+      "tagBytes": 2052,
+      "totalRequests": 15.5,
+      "totalGasTotal": 2763806,
+      "totalGasExecution": 2430183
+     }
+    },
+    {
+     "n": 1000,
+     "arm": "unfiltered",
+     "lens": "lensAB (A tier 0, B tier 1)",
+     "pageSize": 32,
+     "build": {
+      "n": 1000,
+      "tagsA": 250,
+      "tagsB": 100,
+      "buildFilesMs": 195480,
+      "buildTotalMs": 294110,
+      "createFileGas": {
+       "mean": "8538084",
+       "first": "8590527",
+       "last": "8620227"
+      }
+     },
+     "coverage": "PARTIAL",
+     "rowsEvidence": "PRIOR_SEALED",
+     "reason": "SEAL_FAILED",
+     "detail": "request budget exceeded",
+     "rowsVisible": 352,
+     "tagged": null,
+     "untagged": null,
+     "unknown": null,
+     "reader": {
+      "requests": 4056,
+      "bytes": 2425828,
+      "cacheHits": 0,
+      "elapsedMs": 2086.7,
+      "qualifyRequests": 40,
+      "qualifyBytes": 366796
+     },
+     "traced": {
+      "listing": {
+       "calls": 4021,
+       "gasTotal": 788426465,
+       "gasExecution": 701596433,
+       "responseBytes": 2406996
+      },
+      "tags": {
+       "calls": 0,
+       "gasTotal": 0,
+       "gasExecution": 0,
+       "responseBytes": 0
+      },
+      "total": {
+       "calls": 4021,
+       "gasTotal": 788426465,
+       "gasExecution": 701596433,
+       "responseBytes": 2406996
+      }
+     },
+     "byMethod": {
+      "listing": {
+       "getRecord": {
+        "calls": 1448,
+        "gasTotal": 260748296,
+        "gasExecution": 229508624,
+        "responseBytes": 772128
+       },
+       "getBindingHead": {
+        "calls": 354,
+        "gasTotal": 60665820,
+        "gasExecution": 53028492,
+        "responseBytes": 205320
+       },
+       "getOccurrenceByOrdinal": {
+        "calls": 738,
+        "gasTotal": 160516416,
+        "gasExecution": 144859068,
+        "responseBytes": 333576
+       },
+       "getOccurrence": {
+        "calls": 354,
+        "gasTotal": 76677324,
+        "gasExecution": 68990352,
+        "responseBytes": 137352
+       },
+       "getBindingAtBasis": {
+        "calls": 738,
+        "gasTotal": 126785772,
+        "gasExecution": 110751660,
+        "responseBytes": 428040
+       },
+       "validatePlan": {
+        "calls": 2,
+        "gasTotal": 379382,
+        "gasExecution": 336230,
+        "responseBytes": 264
+       },
+       "pagePostingsHydrated": {
+        "calls": 13,
+        "gasTotal": 23502277,
+        "gasExecution": 23208637,
+        "responseBytes": 204980
+       },
+       "resolve": {
+        "calls": 365,
+        "gasTotal": 80047927,
+        "gasExecution": 71986395,
+        "responseBytes": 328500
+       },
+       "fixtureReadContext": {
+        "calls": 11,
+        "gasTotal": 1600995,
+        "gasExecution": 1369291,
+        "responseBytes": 2860
+       },
+       "counts": {
+        "calls": 11,
+        "gasTotal": 353287,
+        "gasExecution": 121583,
+        "responseBytes": 5676
+       }
+      },
+      "tags": {}
+     },
+     "perEntry": null
+    },
+    {
+     "n": 1000,
+     "arm": "tag-filtered",
+     "lens": "lensAB (A tier 0, B tier 1)",
+     "pageSize": 32,
+     "build": {
+      "n": 1000,
+      "tagsA": 250,
+      "tagsB": 100,
+      "buildFilesMs": 195480,
+      "buildTotalMs": 294110,
+      "createFileGas": {
+       "mean": "8538084",
+       "first": "8590527",
+       "last": "8620227"
+      }
+     },
+     "coverage": "PARTIAL",
+     "rowsEvidence": "PRIOR_SEALED",
+     "reason": "SEAL_FAILED",
+     "detail": "request budget exceeded",
+     "rowsVisible": 352,
+     "tagged": 0,
+     "untagged": 0,
+     "unknown": 0,
+     "reader": {
+      "requests": 4056,
+      "bytes": 2425828,
+      "cacheHits": 0,
+      "elapsedMs": 2115.6,
+      "qualifyRequests": 40,
+      "qualifyBytes": 366796
+     },
+     "traced": {
+      "listing": {
+       "calls": 4021,
+       "gasTotal": 788426465,
+       "gasExecution": 701596433,
+       "responseBytes": 2406996
+      },
+      "tags": {
+       "calls": 0,
+       "gasTotal": 0,
+       "gasExecution": 0,
+       "responseBytes": 0
+      },
+      "total": {
+       "calls": 4021,
+       "gasTotal": 788426465,
+       "gasExecution": 701596433,
+       "responseBytes": 2406996
+      }
+     },
+     "byMethod": {
+      "listing": {
+       "getRecord": {
+        "calls": 1448,
+        "gasTotal": 260748296,
+        "gasExecution": 229508624,
+        "responseBytes": 772128
+       },
+       "getBindingHead": {
+        "calls": 354,
+        "gasTotal": 60665820,
+        "gasExecution": 53028492,
+        "responseBytes": 205320
+       },
+       "getOccurrenceByOrdinal": {
+        "calls": 738,
+        "gasTotal": 160516416,
+        "gasExecution": 144859068,
+        "responseBytes": 333576
+       },
+       "getOccurrence": {
+        "calls": 354,
+        "gasTotal": 76677324,
+        "gasExecution": 68990352,
+        "responseBytes": 137352
+       },
+       "getBindingAtBasis": {
+        "calls": 738,
+        "gasTotal": 126785772,
+        "gasExecution": 110751660,
+        "responseBytes": 428040
+       },
+       "validatePlan": {
+        "calls": 2,
+        "gasTotal": 379382,
+        "gasExecution": 336230,
+        "responseBytes": 264
+       },
+       "pagePostingsHydrated": {
+        "calls": 13,
+        "gasTotal": 23502277,
+        "gasExecution": 23208637,
+        "responseBytes": 204980
+       },
+       "resolve": {
+        "calls": 352,
+        "gasTotal": 77196896,
+        "gasExecution": 69422496,
+        "responseBytes": 316800
+       },
+       "counts": {
+        "calls": 11,
+        "gasTotal": 353287,
+        "gasExecution": 121583,
+        "responseBytes": 5676
+       },
+       "fixtureReadContext": {
+        "calls": 11,
+        "gasTotal": 1600995,
+        "gasExecution": 1369291,
+        "responseBytes": 2860
+       }
+      },
+      "tags": {}
+     },
+     "perEntry": null
+    }
+   ],
+   "method": "listing = openDirectory(lensAB, Dn, pageSize 32) drained; filtered = the same listing then openTags(nodeId, [tagId(\"pricing\")]) per row (the browser's file-panel shape, applied to every row); reader.requests/bytes from scope.stats() minus qualification; gas from debug_traceCall per eth_call at the same pin; per-entry = phase totals / rows listed",
+   "tagDensity": "A tags every 4th entry, B every 10th (both principals of the lens)",
+   "readerLimits": "DEFAULT_LIMITS maxRequests 4096 / maxBytes 32 MiB per scope (reader-scope.mjs:8; limits() cannot be raised above the default)"
+  }
+ },
+ "lenses": {
+  "attesterLenses": [
+   {
+    "label": "lensK0",
+    "sources": 64
+   },
+   {
+    "label": "lensK1",
+    "sources": 64
+   },
+   {
+    "label": "lensK2",
+    "sources": 64
+   },
+   {
+    "label": "lensK3",
+    "sources": 64
+   },
+   {
+    "label": "lensK4",
+    "sources": 64
+   },
+   {
+    "label": "lensK5",
+    "sources": 64
+   },
+   {
+    "label": "lensK6",
+    "sources": 64
+   },
+   {
+    "label": "lensK7",
+    "sources": 64
+   },
+   {
+    "label": "lensK8",
+    "sources": 64
+   },
+   {
+    "label": "lensK9",
+    "sources": 64
+   },
+   {
+    "label": "lensK10",
+    "sources": 64
+   },
+   {
+    "label": "lensK11",
+    "sources": 64
+   },
+   {
+    "label": "lensK12",
+    "sources": 64
+   },
+   {
+    "label": "lensK13",
+    "sources": 64
+   },
+   {
+    "label": "lensK14",
+    "sources": 64
+   },
+   {
+    "label": "lensK15",
+    "sources": 56
+   }
+  ],
+  "lensAB": 2,
+  "lensBA": 2
+ },
+ "claims": {
+  "count": 1000,
+  "elapsedMs": 9071
+ },
+ "exclusions": [
+  "WAN latency",
+  "finality",
+  "production SLA",
+  "a positional-accelerator arm (no bitmap family exists in the MVP; §5b demoted it to a candidate generator, unmeasured here)",
+  "the three tag subjects (REVISION/LOCATION carriers do not exist in the MVP TagAssertion)"
+ ]
+}

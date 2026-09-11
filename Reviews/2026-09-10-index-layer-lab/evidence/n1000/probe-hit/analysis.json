@@ -1,0 +1,152 @@
+{
+  "op": "probe-hit",
+  "note": "probe: set bit -> true.",
+  "txHash": "0x964ff4ac9aac1f3a82595feed12688890f1fd87cc8f9b06e1d93d85e8cc4d5b5",
+  "blockNumber": 1166,
+  "status": "0x1",
+  "to": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+  "extra": {},
+  "receiptGasUsed": 42145,
+  "gasLimit": 16777216,
+  "intrinsic": {
+    "bytes": 132,
+    "zeroBytes": 32,
+    "nonzeroBytes": 100,
+    "tokens": 432,
+    "calldataGas": 1728,
+    "standard": 22728,
+    "floor7623": 25320,
+    "floorApplies": false,
+    "hardfork": "cancun",
+    "fromTrace": 22728,
+    "matches": true
+  },
+  "execution": {
+    "startGas": 16754488,
+    "gross": 19417,
+    "categoriesTotal": 19417,
+    "categoriesMatchGross": true,
+    "steps": 899
+  },
+  "refund": {
+    "nodeCounter": 0,
+    "model": 0,
+    "applied": 0
+  },
+  "reconciliation": {
+    "formula": "intrinsic.standard + execution.gross - refund.applied",
+    "value": 42145,
+    "receipt": 42145,
+    "residual": 0
+  },
+  "categories": {
+    "SSTORE": 0,
+    "SLOAD": 10500,
+    "KECCAK256": 390,
+    "LOG": 0,
+    "CALLDATA": 80,
+    "CALL_OVERHEAD": 5200,
+    "PRECOMPILE": 0,
+    "MEMORY": 221,
+    "STACK": 1492,
+    "CONTROL": 1002,
+    "ARITH": 522,
+    "CODE": 0,
+    "ENV": 10,
+    "OTHER": 0
+  },
+  "categoryCounts": {
+    "SSTORE": 0,
+    "SLOAD": 5,
+    "KECCAK256": 9,
+    "LOG": 0,
+    "CALLDATA": 15,
+    "CALL_OVERHEAD": 2,
+    "PRECOMPILE": 0,
+    "MEMORY": 47,
+    "STACK": 509,
+    "CONTROL": 133,
+    "ARITH": 174,
+    "CODE": 0,
+    "ENV": 5,
+    "OTHER": 0
+  },
+  "byContract": {
+    "IndexLayerModule": {
+      "address": "0xb9954fc7356b2df7f6c2d81d4e8bac21de035139",
+      "gas": 10441,
+      "n": 503
+    },
+    "Core proxy": {
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "gas": 4865,
+      "n": 46
+    },
+    "UpgradeableFixtureCoreU4 (impl)": {
+      "address": "0x8b803d6e52f5f81f89fc77a103caa22092920c81",
+      "gas": 4111,
+      "n": 350
+    }
+  },
+  "sstore": {
+    "sstoreOps": 0,
+    "distinctSlotsWritten": 0,
+    "writesByClass": {},
+    "gasByClass": {},
+    "slotsByFinalClass": {},
+    "modelMismatches": 0,
+    "refundModel": 0,
+    "byKind": {}
+  },
+  "sload": {
+    "ops": 5,
+    "coldOps": 5,
+    "warmOps": 0,
+    "distinctSlots": 5,
+    "gas": 10500,
+    "byKind": {
+      "ERC1967": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexFamilyOrdinal": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexFamily": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "Posting:k10": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexWord": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      }
+    },
+    "unattributed": []
+  },
+  "checks": {
+    "traceErrors": 0,
+    "sstoreModelMismatches": 0,
+    "prestateDiffMismatches": 0,
+    "unattributedReads": 0,
+    "unattributedWrites": 0
+  },
+  "writes": [],
+  "artifacts": {
+    "trace": "trace.json.gz",
+    "rawTraceBytes": 263835,
+    "prestate": "prestate-diff.json",
+    "storageOps": "storage-ops.json",
+    "receipt": "receipt.json",
+    "tx": "tx.json"
+  }
+}

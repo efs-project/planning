@@ -186,6 +186,15 @@ walkthrough drivable against real local v2 contracts:
   [scripts/measure/](scripts/measure/README.md); evidence (minus raw traces)
   in [evidence/gas-2026-09-10/](evidence/gas-2026-09-10/index.json).
   Independently verified by a second agent.
+- [prototype-round-1-2026-09-10.md](prototype-round-1-2026-09-10.md) — round-1
+  results: the byteCommitment matrix (31 rows, 0 findings), the tag-join
+  falsifiers at K = 1,000 (tags follow the file; lens masking holds; the join
+  costs +572k gas per entry and the reader cannot list 1,000 entries under
+  its request cap), and the generic index family lab (matrix passes; backfill
+  walk 56,397 gas per entry on today's layout; K10 saving ≈ 21k per entry,
+  ESTIMATED). Suites: `test/byte-commitment-matrix.test.mjs`,
+  `test/tag-joins.test.mjs`; lab:
+  [../2026-09-10-index-layer-lab/](../2026-09-10-index-layer-lab/README.md).
 - [reconciliation-with-codex-2026-09-10.md](reconciliation-with-codex-2026-09-10.md)
   — Codex's reply accepted point by point (the tag-follows-the-file join is
   the largest correction; the mixed-run gas table; ROSTER is not now-or-

@@ -1,0 +1,312 @@
+{
+  "op": "declare",
+  "note": "declare FIELD_EQ(DirectoryEntry/1.child); attaches to the Type at declaration.",
+  "txHash": "0x0e036dc63ee84492a638c165eee7348977636c857309eac51410b8cec272eeb3",
+  "blockNumber": 1150,
+  "status": "0x1",
+  "to": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+  "extra": {},
+  "receiptGasUsed": 354891,
+  "gasLimit": 16777216,
+  "intrinsic": {
+    "bytes": 68,
+    "zeroBytes": 31,
+    "nonzeroBytes": 37,
+    "tokens": 179,
+    "calldataGas": 716,
+    "standard": 21716,
+    "floor7623": 22790,
+    "floorApplies": false,
+    "hardfork": "cancun",
+    "fromTrace": 21716,
+    "matches": true
+  },
+  "execution": {
+    "startGas": 16755500,
+    "gross": 333175,
+    "categoriesTotal": 333175,
+    "categoriesMatchGross": true,
+    "steps": 6147
+  },
+  "refund": {
+    "nodeCounter": 0,
+    "model": 0,
+    "applied": 0
+  },
+  "reconciliation": {
+    "formula": "intrinsic.standard + execution.gross - refund.applied",
+    "value": 354891,
+    "receipt": 354891,
+    "residual": 0
+  },
+  "categories": {
+    "SSTORE": 148400,
+    "SLOAD": 155500,
+    "KECCAK256": 378,
+    "LOG": 2268,
+    "CALLDATA": 50,
+    "CALL_OVERHEAD": 5200,
+    "PRECOMPILE": 0,
+    "MEMORY": 1577,
+    "STACK": 10418,
+    "CONTROL": 5688,
+    "ARITH": 3686,
+    "CODE": 0,
+    "ENV": 10,
+    "OTHER": 0
+  },
+  "categoryCounts": {
+    "SSTORE": 7,
+    "SLOAD": 75,
+    "KECCAK256": 9,
+    "LOG": 1,
+    "CALLDATA": 13,
+    "CALL_OVERHEAD": 2,
+    "PRECOMPILE": 0,
+    "MEMORY": 332,
+    "STACK": 3523,
+    "CONTROL": 952,
+    "ARITH": 1228,
+    "CODE": 0,
+    "ENV": 5,
+    "OTHER": 0
+  },
+  "byContract": {
+    "IndexLayerModule": {
+      "address": "0xb9954fc7356b2df7f6c2d81d4e8bac21de035139",
+      "gas": 324211,
+      "n": 5751
+    },
+    "Core proxy": {
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "gas": 4859,
+      "n": 46
+    },
+    "UpgradeableFixtureCoreU4 (impl)": {
+      "address": "0x8b803d6e52f5f81f89fc77a103caa22092920c81",
+      "gas": 4105,
+      "n": 350
+    }
+  },
+  "sstore": {
+    "sstoreOps": 7,
+    "distinctSlotsWritten": 7,
+    "writesByClass": {
+      "FRESH": 7
+    },
+    "gasByClass": {
+      "FRESH": 148400
+    },
+    "slotsByFinalClass": {
+      "FRESH": 7
+    },
+    "modelMismatches": 0,
+    "refundModel": 0,
+    "byKind": {
+      "IndexLayer": {
+        "writes": 1,
+        "gas": 20000,
+        "classes": {
+          "FRESH": 1
+        }
+      },
+      "IndexFamily": {
+        "writes": 4,
+        "gas": 88400,
+        "classes": {
+          "FRESH": 4
+        }
+      },
+      "IndexFamilyOrdinal": {
+        "writes": 1,
+        "gas": 20000,
+        "classes": {
+          "FRESH": 1
+        }
+      },
+      "IndexTypeFamilies": {
+        "writes": 1,
+        "gas": 20000,
+        "classes": {
+          "FRESH": 1
+        }
+      }
+    }
+  },
+  "sload": {
+    "ops": 75,
+    "coldOps": 74,
+    "warmOps": 1,
+    "distinctSlots": 74,
+    "gas": 155500,
+    "byKind": {
+      "ERC1967": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "Type": {
+        "distinctSlots": 69,
+        "reads": 69,
+        "gas": 144900
+      },
+      "IndexTypeFamilies": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexLayer": {
+        "distinctSlots": 1,
+        "reads": 2,
+        "gas": 2200
+      },
+      "Counts": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexFamilyOrdinal": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      }
+    },
+    "unattributed": []
+  },
+  "checks": {
+    "traceErrors": 0,
+    "sstoreModelMismatches": 0,
+    "prestateDiffMismatches": 0,
+    "unattributedReads": 0,
+    "unattributedWrites": 0
+  },
+  "writes": [
+    {
+      "i": 5862,
+      "depth": 3,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x7ad4190a670a663c361ca97f6c48a07ded324000acffa3d597e46bee9add5a00",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "IndexLayer",
+      "member": "familyCount|detachDelay"
+    },
+    {
+      "i": 6024,
+      "depth": 3,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x0e0d9c431f984232c6b5b26d105faeca39981ed82e38a9b5eed4e30ba7ec7b4e",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0xdb3f6266fe25490966350c449d3cb80c84fc405bda7c1be1576f981f27e45ca8",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "IndexFamily",
+      "member": "id"
+    },
+    {
+      "i": 6029,
+      "depth": 3,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x0e0d9c431f984232c6b5b26d105faeca39981ed82e38a9b5eed4e30ba7ec7b4f",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x3a73cfe3e879b527c049645c5a2db3e8f4040a374a36bc5167643c2920642722",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "IndexFamily",
+      "member": "typeId"
+    },
+    {
+      "i": 6034,
+      "depth": 3,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x0e0d9c431f984232c6b5b26d105faeca39981ed82e38a9b5eed4e30ba7ec7b50",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000030000200200000001000020",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "IndexFamily",
+      "member": "program"
+    },
+    {
+      "i": 6039,
+      "depth": 3,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x0e0d9c431f984232c6b5b26d105faeca39981ed82e38a9b5eed4e30ba7ec7b51",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x00000000000000000000000000000000000000000000000000000000091a0102",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "IndexFamily",
+      "member": "packed"
+    },
+    {
+      "i": 6062,
+      "depth": 3,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xa8a07aea03576a81cf51ab438694a65b928279df98abbd59aed0b107bff3055b",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "IndexFamilyOrdinal",
+      "member": "ordinal"
+    },
+    {
+      "i": 6096,
+      "depth": 3,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x57d4ac02deee94ef0416e3cc4b3851b0febf5f0fc8b224cd4d8ad75852dff843",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "IndexTypeFamilies",
+      "member": "packed"
+    }
+  ],
+  "artifacts": {
+    "trace": "trace.json.gz",
+    "rawTraceBytes": 2378900,
+    "prestate": "prestate-diff.json",
+    "storageOps": "storage-ops.json",
+    "receipt": "receipt.json",
+    "tx": "tx.json"
+  }
+}

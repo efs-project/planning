@@ -1,0 +1,19 @@
+# Index-layer lab: compiles the lab contracts against the PINNED COPY of the
+# c0-core kernel (src/) and of the foundation core (foundation/). Disposable.
+[profile.default]
+src = "lab"
+test = "forge-test"
+out = "out"
+libs = []
+solc = "0.8.30"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = true
+allow_paths = [".."]
+remappings = [
+  "C0Core/=src/",
+  "Foundation/=foundation/",
+  "C0Admission/=../2026-09-05-c0-admission/src/",
+  "@openzeppelin/contracts/=../2026-09-08-upgradeable-foundation/node_modules/@openzeppelin/contracts/",
+]

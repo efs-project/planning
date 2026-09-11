@@ -1,0 +1,2436 @@
+{
+  "op": "hook-placement-fresh-word",
+  "note": "first post-attach placement: the fileA bucket word at word index 3 is fresh.",
+  "txHash": "0x653e7fd0c56de0c2c79653fae454203bdb32095d535b1edcb1c8522edeeb89eb",
+  "blockNumber": 1151,
+  "status": "0x1",
+  "to": "0xd50f25958f195efc9f5f33a392d5219bab106a07",
+  "extra": {},
+  "receiptGasUsed": 3201239,
+  "gasLimit": 16777216,
+  "intrinsic": {
+    "bytes": 2020,
+    "zeroBytes": 1354,
+    "nonzeroBytes": 666,
+    "tokens": 4018,
+    "calldataGas": 16072,
+    "standard": 37072,
+    "floor7623": 61180,
+    "floorApplies": false,
+    "hardfork": "cancun",
+    "fromTrace": 37072,
+    "matches": true
+  },
+  "execution": {
+    "startGas": 16740144,
+    "gross": 3164167,
+    "categoriesTotal": 3164167,
+    "categoriesMatchGross": true,
+    "steps": 256781
+  },
+  "refund": {
+    "nodeCounter": 0,
+    "model": 0,
+    "applied": 0
+  },
+  "reconciliation": {
+    "formula": "intrinsic.standard + execution.gross - refund.applied",
+    "value": 3201239,
+    "receipt": 3201239,
+    "residual": 0
+  },
+  "categories": {
+    "SSTORE": 1272600,
+    "SLOAD": 792900,
+    "KECCAK256": 29460,
+    "LOG": 4280,
+    "CALLDATA": 53517,
+    "CALL_OVERHEAD": 26272,
+    "PRECOMPILE": 3100,
+    "MEMORY": 159330,
+    "STACK": 411887,
+    "CONTROL": 237628,
+    "ARITH": 156775,
+    "CODE": 16172,
+    "ENV": 246,
+    "OTHER": 0
+  },
+  "categoryCounts": {
+    "SSTORE": 103,
+    "SLOAD": 1069,
+    "KECCAK256": 641,
+    "LOG": 2,
+    "CALLDATA": 778,
+    "CALL_OVERHEAD": 62,
+    "PRECOMPILE": 1,
+    "MEMORY": 19645,
+    "STACK": 140098,
+    "CONTROL": 41993,
+    "ARITH": 52193,
+    "CODE": 73,
+    "ENV": 123,
+    "OTHER": 0
+  },
+  "byContract": {
+    "UpgradeAdmissionLibrary (pinned kernel)": {
+      "address": "0xd226ecebd1e4c36a7855f9a88304dcc8b48237f9",
+      "gas": 2348757,
+      "n": 130065
+    },
+    "PreparationHelper": {
+      "address": "0x8764359d75dba3d1e3ff3d2f95ef484a9dde0b79",
+      "gas": 218376,
+      "n": 61030
+    },
+    "UpgradeableFixtureCoreU4 (impl)": {
+      "address": "0x8b803d6e52f5f81f89fc77a103caa22092920c81",
+      "gas": 152651,
+      "n": 24717
+    },
+    "PointReadLibrary": {
+      "address": "0x4c119a798a108c3225aa6d7f6235bafa784a37f4",
+      "gas": 95478,
+      "n": 5189
+    },
+    "UpgradeQueryReadLibrary": {
+      "address": "0x13a6c2149c7cb809d835eb119502a82960bf5a6c",
+      "gas": 87239,
+      "n": 9671
+    },
+    "FixtureDeployment (controller)": {
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "gas": 70281,
+      "n": 4970
+    },
+    "FilesRouterV2": {
+      "address": "0xd50f25958f195efc9f5f33a392d5219bab106a07",
+      "gas": 70220,
+      "n": 7975
+    },
+    "IndexedAdmission (hook)": {
+      "address": "0x0aea357c95f0d1ffc5b63525dd88ede942c4473f",
+      "gas": 62254,
+      "n": 7950
+    },
+    "UpgradeableFixtureCarrierU3 (impl)": {
+      "address": "0xb24372a1c5bfc01af7da711fa94fb48ee751896c",
+      "gas": 37660,
+      "n": 4014
+    },
+    "Core proxy": {
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "gas": 7129,
+      "n": 276
+    },
+    "Carrier proxy": {
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "gas": 6582,
+      "n": 276
+    },
+    "Core ProxyAdmin": {
+      "address": "0x09e16501cb42eec019fcd5def4e37aab51d0db5b",
+      "gas": 3770,
+      "n": 324
+    },
+    "Carrier ProxyAdmin": {
+      "address": "0xb665b3436060755c35962ce332e907a6935c3b5c",
+      "gas": 3770,
+      "n": 324
+    }
+  },
+  "sstore": {
+    "sstoreOps": 103,
+    "distinctSlotsWritten": 93,
+    "writesByClass": {
+      "COLD_REWRITE": 18,
+      "FRESH": 59,
+      "NOOP": 18,
+      "WARM_REWRITE": 8
+    },
+    "gasByClass": {
+      "COLD_REWRITE": 52200,
+      "FRESH": 1211500,
+      "NOOP": 8100,
+      "WARM_REWRITE": 800
+    },
+    "slotsByFinalClass": {
+      "REWRITE": 18,
+      "FRESH": 59,
+      "UNCHANGED_ZERO": 3,
+      "UNCHANGED": 13
+    },
+    "modelMismatches": 0,
+    "refundModel": 0,
+    "byKind": {
+      "Authority": {
+        "writes": 1,
+        "gas": 2900,
+        "classes": {
+          "COLD_REWRITE": 1
+        }
+      },
+      "Envelope": {
+        "writes": 12,
+        "gas": 201300,
+        "classes": {
+          "FRESH": 9,
+          "NOOP": 3
+        }
+      },
+      "EnvelopeId": {
+        "writes": 1,
+        "gas": 20000,
+        "classes": {
+          "FRESH": 1
+        }
+      },
+      "Record:DirectoryEntry/1": {
+        "writes": 7,
+        "gas": 126400,
+        "classes": {
+          "FRESH": 6,
+          "WARM_REWRITE": 1
+        }
+      },
+      "RecordId": {
+        "writes": 2,
+        "gas": 40000,
+        "classes": {
+          "FRESH": 2
+        }
+      },
+      "Admission": {
+        "writes": 4,
+        "gas": 80000,
+        "classes": {
+          "FRESH": 4
+        }
+      },
+      "Lifecycle": {
+        "writes": 2,
+        "gas": 40000,
+        "classes": {
+          "FRESH": 2
+        }
+      },
+      "PostingKey": {
+        "writes": 5,
+        "gas": 100000,
+        "classes": {
+          "FRESH": 5
+        }
+      },
+      "Word:k3": {
+        "writes": 2,
+        "gas": 40000,
+        "classes": {
+          "FRESH": 2
+        }
+      },
+      "Posting:k3": {
+        "writes": 2,
+        "gas": 40000,
+        "classes": {
+          "FRESH": 2
+        }
+      },
+      "Word:k1": {
+        "writes": 2,
+        "gas": 22900,
+        "classes": {
+          "COLD_REWRITE": 1,
+          "FRESH": 1
+        }
+      },
+      "Posting:k1": {
+        "writes": 2,
+        "gas": 5800,
+        "classes": {
+          "COLD_REWRITE": 2
+        }
+      },
+      "Word:k4": {
+        "writes": 2,
+        "gas": 20100,
+        "classes": {
+          "FRESH": 1,
+          "WARM_REWRITE": 1
+        }
+      },
+      "Posting:k4": {
+        "writes": 2,
+        "gas": 3000,
+        "classes": {
+          "COLD_REWRITE": 1,
+          "WARM_REWRITE": 1
+        }
+      },
+      "Word:k5": {
+        "writes": 3,
+        "gas": 25800,
+        "classes": {
+          "COLD_REWRITE": 2,
+          "FRESH": 1
+        }
+      },
+      "Posting:k5": {
+        "writes": 3,
+        "gas": 25800,
+        "classes": {
+          "COLD_REWRITE": 2,
+          "FRESH": 1
+        }
+      },
+      "Word:k6": {
+        "writes": 3,
+        "gas": 42900,
+        "classes": {
+          "FRESH": 2,
+          "COLD_REWRITE": 1
+        }
+      },
+      "Posting:k6": {
+        "writes": 3,
+        "gas": 25800,
+        "classes": {
+          "COLD_REWRITE": 2,
+          "FRESH": 1
+        }
+      },
+      "Word:k2": {
+        "writes": 2,
+        "gas": 22900,
+        "classes": {
+          "COLD_REWRITE": 1,
+          "FRESH": 1
+        }
+      },
+      "Posting:k2": {
+        "writes": 2,
+        "gas": 5800,
+        "classes": {
+          "COLD_REWRITE": 2
+        }
+      },
+      "Record:BindingSet/1": {
+        "writes": 9,
+        "gas": 170600,
+        "classes": {
+          "FRESH": 8,
+          "WARM_REWRITE": 1
+        }
+      },
+      "BindingKey": {
+        "writes": 1,
+        "gas": 20000,
+        "classes": {
+          "FRESH": 1
+        }
+      },
+      "Word:k10": {
+        "writes": 1,
+        "gas": 20000,
+        "classes": {
+          "FRESH": 1
+        }
+      },
+      "Posting:k10": {
+        "writes": 1,
+        "gas": 2900,
+        "classes": {
+          "COLD_REWRITE": 1
+        }
+      },
+      "Binding": {
+        "writes": 2,
+        "gas": 40000,
+        "classes": {
+          "FRESH": 2
+        }
+      },
+      "Word:k8": {
+        "writes": 1,
+        "gas": 20000,
+        "classes": {
+          "FRESH": 1
+        }
+      },
+      "Posting:k8": {
+        "writes": 1,
+        "gas": 20000,
+        "classes": {
+          "FRESH": 1
+        }
+      },
+      "Batch": {
+        "writes": 3,
+        "gas": 60000,
+        "classes": {
+          "FRESH": 3
+        }
+      },
+      "Counts": {
+        "writes": 8,
+        "gas": 6400,
+        "classes": {
+          "COLD_REWRITE": 2,
+          "WARM_REWRITE": 4,
+          "NOOP": 2
+        }
+      },
+      "Bootstrap": {
+        "writes": 13,
+        "gas": 1300,
+        "classes": {
+          "NOOP": 13
+        }
+      },
+      "IndexWord": {
+        "writes": 1,
+        "gas": 20000,
+        "classes": {
+          "FRESH": 1
+        }
+      }
+    }
+  },
+  "sload": {
+    "ops": 1069,
+    "coldOps": 343,
+    "warmOps": 726,
+    "distinctSlots": 346,
+    "gas": 792900,
+    "byKind": {
+      "ERC1967": {
+        "distinctSlots": 2,
+        "reads": 30,
+        "gas": 7000
+      },
+      "Control": {
+        "distinctSlots": 5,
+        "reads": 71,
+        "gas": 17100
+      },
+      "FixtureDeployment (controller) storage": {
+        "distinctSlots": 20,
+        "reads": 131,
+        "gas": 53100
+      },
+      "ProxyAdmin": {
+        "distinctSlots": 2,
+        "reads": 12,
+        "gas": 5200
+      },
+      "Carrier:ERC1967": {
+        "distinctSlots": 2,
+        "reads": 30,
+        "gas": 7000
+      },
+      "Carrier:Control": {
+        "distinctSlots": 5,
+        "reads": 36,
+        "gas": 13600
+      },
+      "Bootstrap": {
+        "distinctSlots": 13,
+        "reads": 68,
+        "gas": 32800
+      },
+      "Type": {
+        "distinctSlots": 166,
+        "reads": 352,
+        "gas": 367200
+      },
+      "Counts": {
+        "distinctSlots": 2,
+        "reads": 62,
+        "gas": 10200
+      },
+      "Record:MountDescriptor/1": {
+        "distinctSlots": 6,
+        "reads": 7,
+        "gas": 12700
+      },
+      "Record:PublicFilesMountConfig/1": {
+        "distinctSlots": 6,
+        "reads": 7,
+        "gas": 12700
+      },
+      "Router": {
+        "distinctSlots": 17,
+        "reads": 22,
+        "gas": 36200
+      },
+      "Record:ObjectGenesis/1": {
+        "distinctSlots": 14,
+        "reads": 30,
+        "gas": 31000
+      },
+      "Record:ResolutionPlan/1": {
+        "distinctSlots": 13,
+        "reads": 14,
+        "gas": 27400
+      },
+      "TypeId": {
+        "distinctSlots": 1,
+        "reads": 4,
+        "gas": 2400
+      },
+      "Binding": {
+        "distinctSlots": 2,
+        "reads": 12,
+        "gas": 5200
+      },
+      "UNATTRIBUTED": {
+        "distinctSlots": 4,
+        "reads": 4,
+        "gas": 8400
+      },
+      "Authority": {
+        "distinctSlots": 2,
+        "reads": 3,
+        "gas": 4300
+      },
+      "Envelope": {
+        "distinctSlots": 2,
+        "reads": 7,
+        "gas": 4700
+      },
+      "Lifecycle": {
+        "distinctSlots": 2,
+        "reads": 6,
+        "gas": 4600
+      },
+      "EnvelopeId": {
+        "distinctSlots": 1,
+        "reads": 2,
+        "gas": 2200
+      },
+      "Principal": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "Record:DirectoryEntry/1": {
+        "distinctSlots": 6,
+        "reads": 17,
+        "gas": 7700
+      },
+      "RecordId": {
+        "distinctSlots": 2,
+        "reads": 4,
+        "gas": 4400
+      },
+      "Admission": {
+        "distinctSlots": 4,
+        "reads": 8,
+        "gas": 8800
+      },
+      "Posting:k3": {
+        "distinctSlots": 2,
+        "reads": 8,
+        "gas": 4800
+      },
+      "PostingKey": {
+        "distinctSlots": 5,
+        "reads": 10,
+        "gas": 11000
+      },
+      "Word:k3": {
+        "distinctSlots": 2,
+        "reads": 6,
+        "gas": 4600
+      },
+      "Posting:k1": {
+        "distinctSlots": 2,
+        "reads": 6,
+        "gas": 4600
+      },
+      "Word:k1": {
+        "distinctSlots": 2,
+        "reads": 6,
+        "gas": 4600
+      },
+      "Posting:k4": {
+        "distinctSlots": 1,
+        "reads": 4,
+        "gas": 2400
+      },
+      "Word:k4": {
+        "distinctSlots": 1,
+        "reads": 4,
+        "gas": 2400
+      },
+      "Posting:k5": {
+        "distinctSlots": 3,
+        "reads": 9,
+        "gas": 6900
+      },
+      "Word:k5": {
+        "distinctSlots": 3,
+        "reads": 9,
+        "gas": 6900
+      },
+      "Posting:k6": {
+        "distinctSlots": 3,
+        "reads": 9,
+        "gas": 6900
+      },
+      "Word:k6": {
+        "distinctSlots": 3,
+        "reads": 9,
+        "gas": 6900
+      },
+      "Posting:k2": {
+        "distinctSlots": 2,
+        "reads": 6,
+        "gas": 4600
+      },
+      "Word:k2": {
+        "distinctSlots": 2,
+        "reads": 6,
+        "gas": 4600
+      },
+      "Record:BindingSet/1": {
+        "distinctSlots": 3,
+        "reads": 12,
+        "gas": 7200
+      },
+      "BindingKey": {
+        "distinctSlots": 1,
+        "reads": 2,
+        "gas": 2200
+      },
+      "Posting:k10": {
+        "distinctSlots": 1,
+        "reads": 4,
+        "gas": 2400
+      },
+      "Word:k10": {
+        "distinctSlots": 1,
+        "reads": 3,
+        "gas": 2300
+      },
+      "Posting:k8": {
+        "distinctSlots": 1,
+        "reads": 3,
+        "gas": 2300
+      },
+      "Word:k8": {
+        "distinctSlots": 1,
+        "reads": 3,
+        "gas": 2300
+      },
+      "Batch": {
+        "distinctSlots": 3,
+        "reads": 6,
+        "gas": 6600
+      },
+      "IndexTypeFamilies": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexFamily": {
+        "distinctSlots": 2,
+        "reads": 2,
+        "gas": 4200
+      },
+      "IndexWord": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      }
+    },
+    "unattributed": [
+      {
+        "slot": "0x6f94dbd6f4abbb1e3458682374e3802c20782251:0x2e09c72d55e002e21dff379e91654728e48bfe7e6aa3f6c60d703b5a4829bd18",
+        "reads": 1,
+        "gas": 2100
+      },
+      {
+        "slot": "0x6f94dbd6f4abbb1e3458682374e3802c20782251:0x2e09c72d55e002e21dff379e91654728e48bfe7e6aa3f6c60d703b5a4829bd19",
+        "reads": 1,
+        "gas": 2100
+      },
+      {
+        "slot": "0x6f94dbd6f4abbb1e3458682374e3802c20782251:0x90ba8613f9240d8731971557865e5b4c3bf22ae8ca4205ee71898979f96c9f0a",
+        "reads": 1,
+        "gas": 2100
+      },
+      {
+        "slot": "0x6f94dbd6f4abbb1e3458682374e3802c20782251:0x90ba8613f9240d8731971557865e5b4c3bf22ae8ca4205ee71898979f96c9f0b",
+        "reads": 1,
+        "gas": 2100
+      }
+    ]
+  },
+  "checks": {
+    "traceErrors": 0,
+    "sstoreModelMismatches": 0,
+    "prestateDiffMismatches": 0,
+    "unattributedReads": 4,
+    "unattributedWrites": 0
+  },
+  "writes": [
+    {
+      "i": 55090,
+      "depth": 3,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x5ef296c08c99e4087bfa6862ef9bf34542f8fa45aa3cf1413de46c6fd01c968e",
+      "original": "0x000000000000000000000000000000000000000000000000000000000000042a",
+      "before": "0x000000000000000000000000000000000000000000000000000000000000042a",
+      "value": "0x000000000000000000000000000000000000000000000000000000000000042b",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Authority",
+      "member": "principalNonce"
+    },
+    {
+      "i": 229797,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x53c41a60d7bbd5db8d43327f552aae30c644ab28a142fadf0cef76ae9dbab2cf",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Envelope",
+      "member": "canonicalUnsignedEnvelope[data]"
+    },
+    {
+      "i": 229823,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x53c41a60d7bbd5db8d43327f552aae30c644ab28a142fadf0cef76ae9dbab2d0",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000ffffffffffff",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Envelope",
+      "member": "canonicalUnsignedEnvelope[data]"
+    },
+    {
+      "i": 229849,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x53c41a60d7bbd5db8d43327f552aae30c644ab28a142fadf0cef76ae9dbab2d1",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "warmAtWrite": false,
+      "gas": 2200,
+      "model": 2200,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Envelope",
+      "member": "canonicalUnsignedEnvelope[data]"
+    },
+    {
+      "i": 229875,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x53c41a60d7bbd5db8d43327f552aae30c644ab28a142fadf0cef76ae9dbab2d2",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "warmAtWrite": false,
+      "gas": 2200,
+      "model": 2200,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Envelope",
+      "member": "canonicalUnsignedEnvelope[data]"
+    },
+    {
+      "i": 229901,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x53c41a60d7bbd5db8d43327f552aae30c644ab28a142fadf0cef76ae9dbab2d3",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000000000000000000000000000000000000000f27f",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Envelope",
+      "member": "canonicalUnsignedEnvelope[data]"
+    },
+    {
+      "i": 229927,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x53c41a60d7bbd5db8d43327f552aae30c644ab28a142fadf0cef76ae9dbab2d4",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "warmAtWrite": false,
+      "gas": 2200,
+      "model": 2200,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Envelope",
+      "member": "canonicalUnsignedEnvelope[data]"
+    },
+    {
+      "i": 229953,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x53c41a60d7bbd5db8d43327f552aae30c644ab28a142fadf0cef76ae9dbab2d5",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x00000000000000000000000000000000000000000000000000000000000000e0",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Envelope",
+      "member": "canonicalUnsignedEnvelope[data]"
+    },
+    {
+      "i": 229979,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x53c41a60d7bbd5db8d43327f552aae30c644ab28a142fadf0cef76ae9dbab2d6",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000002",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Envelope",
+      "member": "canonicalUnsignedEnvelope[data]"
+    },
+    {
+      "i": 230005,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x53c41a60d7bbd5db8d43327f552aae30c644ab28a142fadf0cef76ae9dbab2d7",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x724784c5aad886035b6b7eb19351e9dd4a9a6a3a90320df5696d18b5f0864b3a",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Envelope",
+      "member": "canonicalUnsignedEnvelope[data]"
+    },
+    {
+      "i": 230031,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x53c41a60d7bbd5db8d43327f552aae30c644ab28a142fadf0cef76ae9dbab2d8",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0xbaea8ceaad24c6c9f24e9730db1fa19e074e92fdbf3d2a099cb2d7c6e8087306",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Envelope",
+      "member": "canonicalUnsignedEnvelope[data]"
+    },
+    {
+      "i": 230077,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x4f38bd28b060b0bf76a059115a70a27948115cb57d19322780bf21995f3e295c",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000281",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Envelope",
+      "member": "canonicalUnsignedEnvelope(head)"
+    },
+    {
+      "i": 230098,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x4f38bd28b060b0bf76a059115a70a27948115cb57d19322780bf21995f3e295d",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000463",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Envelope",
+      "member": "envelopeOrdinal"
+    },
+    {
+      "i": 230477,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xa70af42fa1bade4de74ecbabd0ee2c840fd851975be8829ba0e09f3d84f21e78",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x2ef18608832af1f4fff04a05ea3431cc5b5d852d83e910b4fea78c59ff61867f",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "EnvelopeId",
+      "member": "id"
+    },
+    {
+      "i": 231071,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x0547653e9fe2c28e4d323960f0fe0fc8b5a309ac70ceb83d90e503482f82bd77",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x3a73cfe3e879b527c049645c5a2db3e8f4040a374a36bc5167643c2920642722",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Record:DirectoryEntry/1",
+      "member": "typeId"
+    },
+    {
+      "i": 231173,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x0173a0442bf99fe3f16ab19c2d4ebff403d980886fce052b3aaa874d7ee3575d",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x67160bf2ff6010fee55be0da4eb019482aa1011dd892777c6e8d48b25531aef3",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Record:DirectoryEntry/1",
+      "member": "body[data]"
+    },
+    {
+      "i": 231199,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x0173a0442bf99fe3f16ab19c2d4ebff403d980886fce052b3aaa874d7ee3575e",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0007682d667265736808209f602a29ccdd6e8d3556376f04d9de1217e28c0f88",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Record:DirectoryEntry/1",
+      "member": "body[data]"
+    },
+    {
+      "i": 231251,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x0173a0442bf99fe3f16ab19c2d4ebff403d980886fce052b3aaa874d7ee3575f",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0xc2c89a18b5858fbeaf0000000000000000000000000000000000000000000000",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Record:DirectoryEntry/1",
+      "member": "body[data]"
+    },
+    {
+      "i": 231265,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x0547653e9fe2c28e4d323960f0fe0fc8b5a309ac70ceb83d90e503482f82bd78",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000095",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Record:DirectoryEntry/1",
+      "member": "body(head)"
+    },
+    {
+      "i": 231286,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x0547653e9fe2c28e4d323960f0fe0fc8b5a309ac70ceb83d90e503482f82bd79",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000918",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Record:DirectoryEntry/1",
+      "member": "recordOrdinal|firstAdmissionOrdinal"
+    },
+    {
+      "i": 231312,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x0547653e9fe2c28e4d323960f0fe0fc8b5a309ac70ceb83d90e503482f82bd79",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000918",
+      "value": "0x00000000000000000000000000000000000000000000091b0000000000000918",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "WARM_REWRITE",
+      "kind": "Record:DirectoryEntry/1",
+      "member": "recordOrdinal|firstAdmissionOrdinal"
+    },
+    {
+      "i": 231679,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x0c6a176801486633a430eb56a96ca69fe6a8664e8ec8c8a21bf27bd981eae013",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x724784c5aad886035b6b7eb19351e9dd4a9a6a3a90320df5696d18b5f0864b3a",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "RecordId",
+      "member": "id"
+    },
+    {
+      "i": 232031,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x1d36367343311162280053ff466544a839641952f5133303d47fefc4caf203c7",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x2ef18608832af1f4fff04a05ea3431cc5b5d852d83e910b4fea78c59ff61867f",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Admission",
+      "member": "envelopeId"
+    },
+    {
+      "i": 232036,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x1d36367343311162280053ff466544a839641952f5133303d47fefc4caf203c8",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x00000000000000000000000000000000000000000000000100000000000b0000",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Admission",
+      "member": "packed"
+    },
+    {
+      "i": 232380,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xe555e7711abd618bb99d3eda973d6a49451bd937d69181bf43e3a13bfbafd3e3",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000091b01",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Lifecycle",
+      "member": "packed"
+    },
+    {
+      "i": 232788,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xe80ed4196c69300c19ff00fbbfd927fb57950f724ef48c2047ba56dd1e88ca10",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x391b8825280cb920f95e57621289cf8c231911bce9db9879db1b39478d8a5883",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "PostingKey",
+      "member": "id"
+    },
+    {
+      "i": 233143,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x65844ba9299177589773dc982c042858fa58bbcf4c1dde402fedafec6f837b90",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000000000000000000000000000000000000000091b",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Word:k3",
+      "member": "word"
+    },
+    {
+      "i": 233509,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x7bbc18f60ed14cd0d1ff37b70cf6b47104a348c5e29d8bdfada53983e6e5e8f6",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000091b00000000000000010000000000000001",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Posting:k3",
+      "member": "head"
+    },
+    {
+      "i": 233864,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x812fdbf06777da18db629a52330fb19f66cce5f1aeb91e1572a4a95da4609424",
+      "original": "0x0000000000000000000000000000000000000000000000000919000000000915",
+      "before": "0x0000000000000000000000000000000000000000000000000919000000000915",
+      "value": "0x000000000000000000000000000000000000091b000000000919000000000915",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Word:k1",
+      "member": "word"
+    },
+    {
+      "i": 234230,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x92d3262d3121110806b3ca361ac7cbcbcaec8a6ec86d328b8dcf5c3e905ec58d",
+      "original": "0x0000000000000000000000000000091900000000000004300000000000000430",
+      "before": "0x0000000000000000000000000000091900000000000004300000000000000430",
+      "value": "0x0000000000000000000000000000091b00000000000004310000000000000431",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Posting:k1",
+      "member": "head"
+    },
+    {
+      "i": 234585,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xd775abda217c472f76b9a0db66a0dc75da79763ec290eaa9ee95989d855d6874",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000000000000000000000000000000000000000091b",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Word:k4",
+      "member": "word"
+    },
+    {
+      "i": 234951,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x212f6120b2b07cf68937fd08b644c63260167d7e2b92a93e6bdc7bbdda0c4a48",
+      "original": "0x0000000000000000000000000000091a000000000000091a000000000000091a",
+      "before": "0x0000000000000000000000000000091a000000000000091a000000000000091a",
+      "value": "0x0000000000000000000000000000091b000000000000091b000000000000091b",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Posting:k4",
+      "member": "head"
+    },
+    {
+      "i": 235306,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x0e7ca6785ba0f9143042afe5a651758b04f7a9c382e7b692fc1cb4618e704fb8",
+      "original": "0x0000000000000000000000000000000000000000000000000815000000000813",
+      "before": "0x0000000000000000000000000000000000000000000000000815000000000813",
+      "value": "0x000000000000000000000000000000000000091b000000000815000000000813",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Word:k5",
+      "member": "word"
+    },
+    {
+      "i": 235672,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xf429307b346af36524bcf768be3bb7ea1450e4479acf22a9d4302080322a8da8",
+      "original": "0x0000000000000000000000000000081500000000000003ea00000000000003ea",
+      "before": "0x0000000000000000000000000000081500000000000003ea00000000000003ea",
+      "value": "0x0000000000000000000000000000091b00000000000003eb00000000000003eb",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Posting:k5",
+      "member": "head"
+    },
+    {
+      "i": 236027,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x717c51954856042cc45625b6ce80150d05c96f8f9001d1b15a0158b23c48f557",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000000000000000000000000000000000000000091b",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Word:k6",
+      "member": "word"
+    },
+    {
+      "i": 236393,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xb2eae54538068cbeab82d003c5a2d503b8da83bc6431fd91dd16dc94f3dcf363",
+      "original": "0x0000000000000000000000000000081500000000000003e800000000000003e8",
+      "before": "0x0000000000000000000000000000081500000000000003e800000000000003e8",
+      "value": "0x0000000000000000000000000000091b00000000000003e900000000000003e9",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Posting:k6",
+      "member": "head"
+    },
+    {
+      "i": 236748,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x30e2a2241b70d64e45d585306f73741d8e05e333ae15b8e315bc6def73aeb5f6",
+      "original": "0x000000000000000000000000080f0000000008070000000007ff0000000007f7",
+      "before": "0x000000000000000000000000080f0000000008070000000007ff0000000007f7",
+      "value": "0x000000000000091b00000000080f0000000008070000000007ff0000000007f7",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Word:k5",
+      "member": "word"
+    },
+    {
+      "i": 237114,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xdb8a841fd39d47365cb897c2d7dbea4b038a1ca698733cd51fc6d94ffa8d7f70",
+      "original": "0x0000000000000000000000000000080f00000000000000fe00000000000000fe",
+      "before": "0x0000000000000000000000000000080f00000000000000fe00000000000000fe",
+      "value": "0x0000000000000000000000000000091b00000000000000ff00000000000000ff",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Posting:k5",
+      "member": "head"
+    },
+    {
+      "i": 237469,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xef786b25cb5e00ed29cbfa66470b8878e06a4cee8473633db7abff9736e7236d",
+      "original": "0x000000000000000000000000000000000000000000000000000000000000080f",
+      "before": "0x000000000000000000000000000000000000000000000000000000000000080f",
+      "value": "0x000000000000000000000000000000000000000000000000091b00000000080f",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Word:k6",
+      "member": "word"
+    },
+    {
+      "i": 237835,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xb3f93a7b85ccb1fa8c3170b541580d09ed7bebdc44fb8e48a60dac26129769a6",
+      "original": "0x0000000000000000000000000000080f00000000000000fb00000000000000fb",
+      "before": "0x0000000000000000000000000000080f00000000000000fb00000000000000fb",
+      "value": "0x0000000000000000000000000000091b00000000000000fc00000000000000fc",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Posting:k6",
+      "member": "head"
+    },
+    {
+      "i": 238190,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x4372a4ea5a68cc0742d06b3141084f85448756dc9d5a9baa663ab6fea40f1d76",
+      "original": "0x0000000000000000000000000000000000000000000000000919000000000915",
+      "before": "0x0000000000000000000000000000000000000000000000000919000000000915",
+      "value": "0x000000000000000000000000000000000000091b000000000919000000000915",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Word:k2",
+      "member": "word"
+    },
+    {
+      "i": 238556,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x7d4e5d4d2cb88cce0b62ead6c78393c434e590064aa7ccb354f13a929bab5521",
+      "original": "0x0000000000000000000000000000091900000000000004300000000000000430",
+      "before": "0x0000000000000000000000000000091900000000000004300000000000000430",
+      "value": "0x0000000000000000000000000000091b00000000000004310000000000000431",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Posting:k2",
+      "member": "head"
+    },
+    {
+      "i": 239150,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x85560f60751d80b70f76f843ebb4a1decc7159e3d8493c3257d6672a9bffac8d",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x3d40b6b53db7885be062d89270f41085fa8c59738cbc66fe28857d0573ef3a91",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Record:BindingSet/1",
+      "member": "typeId"
+    },
+    {
+      "i": 239252,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xc67bf48f72898d4eda05087481b4e0c24ff267e33c63d6ee9a9f7096264d8fc5",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x163851e733acd76695728186e4315f008e5f1fdfd21fb5687fd3e1e8b7dba32c",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Record:BindingSet/1",
+      "member": "body[data]"
+    },
+    {
+      "i": 239278,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xc67bf48f72898d4eda05087481b4e0c24ff267e33c63d6ee9a9f7096264d8fc6",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x67160bf2ff6010fee55be0da4eb019482aa1011dd892777c6e8d48b25531aef3",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Record:BindingSet/1",
+      "member": "body[data]"
+    },
+    {
+      "i": 239304,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xc67bf48f72898d4eda05087481b4e0c24ff267e33c63d6ee9a9f7096264d8fc7",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x8185ab6765403cc92754bf51f27d9709d8e954462bea9a0132bd07a2af187725",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Record:BindingSet/1",
+      "member": "body[data]"
+    },
+    {
+      "i": 239330,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xc67bf48f72898d4eda05087481b4e0c24ff267e33c63d6ee9a9f7096264d8fc8",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x01724784c5aad886035b6b7eb19351e9dd4a9a6a3a90320df5696d18b5f0864b",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Record:BindingSet/1",
+      "member": "body[data]"
+    },
+    {
+      "i": 239382,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xc67bf48f72898d4eda05087481b4e0c24ff267e33c63d6ee9a9f7096264d8fc9",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x3a00000000000000000000000000000000000000000000000000000000000000",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Record:BindingSet/1",
+      "member": "body[data]"
+    },
+    {
+      "i": 239396,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x85560f60751d80b70f76f843ebb4a1decc7159e3d8493c3257d6672a9bffac8e",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000107",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Record:BindingSet/1",
+      "member": "body(head)"
+    },
+    {
+      "i": 239417,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x85560f60751d80b70f76f843ebb4a1decc7159e3d8493c3257d6672a9bffac8f",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000919",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Record:BindingSet/1",
+      "member": "recordOrdinal|firstAdmissionOrdinal"
+    },
+    {
+      "i": 239443,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x85560f60751d80b70f76f843ebb4a1decc7159e3d8493c3257d6672a9bffac8f",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000919",
+      "value": "0x00000000000000000000000000000000000000000000091c0000000000000919",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "WARM_REWRITE",
+      "kind": "Record:BindingSet/1",
+      "member": "recordOrdinal|firstAdmissionOrdinal"
+    },
+    {
+      "i": 239810,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xaa125ce6acbc18ebe28817847dc9daf6fdfd1db9f4a01674a13bfef0095b9111",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0xbaea8ceaad24c6c9f24e9730db1fa19e074e92fdbf3d2a099cb2d7c6e8087306",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "RecordId",
+      "member": "id"
+    },
+    {
+      "i": 240162,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x2e9a4e9540e7c0ffd6a7131f3e7b9427b3fccf28a3b392b0a943a31a8d999913",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x2ef18608832af1f4fff04a05ea3431cc5b5d852d83e910b4fea78c59ff61867f",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Admission",
+      "member": "envelopeId"
+    },
+    {
+      "i": 240167,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x2e9a4e9540e7c0ffd6a7131f3e7b9427b3fccf28a3b392b0a943a31a8d999914",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000010000000000080001",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Admission",
+      "member": "packed"
+    },
+    {
+      "i": 240511,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xb6c9a2a4b4dab248155974036af7e72a381420180e4daf60404eefaed38447c5",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000091c01",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Lifecycle",
+      "member": "packed"
+    },
+    {
+      "i": 240919,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x6da745c09422ddd77e8766e88d9b755de9b065e6616881335bacfdc9941a8632",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0xba767df897b0774df0abc00251fb3aff2658b55ff20d0970e7688e71b9450172",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "PostingKey",
+      "member": "id"
+    },
+    {
+      "i": 241274,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xcd62553aaadabf1e8ad2f6079ffba2942488524feb5cd9d03d22750ca69d5697",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000000000000000000000000000000000000000091c",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Word:k3",
+      "member": "word"
+    },
+    {
+      "i": 241640,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xb46c46e92636ea75cc37c79dcfcebc63850f76eefd58e5b91cd46cd959cbe7f1",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000091c00000000000000010000000000000001",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Posting:k3",
+      "member": "head"
+    },
+    {
+      "i": 241995,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x3254e6a5652cf6cc1bb075cdb0746486ab2298257d8f572cb2bfceef4e48fc72",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000000000000000000000000000000000000000091c",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Word:k1",
+      "member": "word"
+    },
+    {
+      "i": 242361,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x1395f473b873e3f5302ebb9d51b7010ee4e9ef0d97e0dee04d4afbd619011b17",
+      "original": "0x0000000000000000000000000000091a000000000000047e000000000000047e",
+      "before": "0x0000000000000000000000000000091a000000000000047e000000000000047e",
+      "value": "0x0000000000000000000000000000091c000000000000047f000000000000047f",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Posting:k1",
+      "member": "head"
+    },
+    {
+      "i": 242716,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xd775abda217c472f76b9a0db66a0dc75da79763ec290eaa9ee95989d855d6874",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x000000000000000000000000000000000000000000000000000000000000091b",
+      "value": "0x000000000000000000000000000000000000000000000000091c00000000091b",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "WARM_REWRITE",
+      "kind": "Word:k4",
+      "member": "word"
+    },
+    {
+      "i": 243082,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x212f6120b2b07cf68937fd08b644c63260167d7e2b92a93e6bdc7bbdda0c4a48",
+      "original": "0x0000000000000000000000000000091a000000000000091a000000000000091a",
+      "before": "0x0000000000000000000000000000091b000000000000091b000000000000091b",
+      "value": "0x0000000000000000000000000000091c000000000000091c000000000000091c",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "WARM_REWRITE",
+      "kind": "Posting:k4",
+      "member": "head"
+    },
+    {
+      "i": 243490,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x970c560cfe61ad27fd9214a5d5573599bb464d112a68192441200619b8db8dc7",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0xddddade9cde1f1566d4f5c8f936a236f1fc3b9b13906ca25bebc40b3a9bb534f",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "PostingKey",
+      "member": "id"
+    },
+    {
+      "i": 243845,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbce5cb4612c518be1e2d763691c5bd947b93db799f8a3cb68111641ccb6b092e",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000000000000000000000000000000000000000091c",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Word:k5",
+      "member": "word"
+    },
+    {
+      "i": 244211,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xef0fc9d23e656a0918c8ff7db31a3b7bf7d50adc1eba7afd185e04c554ced674",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000091c00000000000000010000000000000001",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Posting:k5",
+      "member": "head"
+    },
+    {
+      "i": 244619,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x516436c20c24053a52be63df1e5e5ab900cda5a57cdd3c0b4d4830a0aacaf43e",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0xfaaf7e522b888a93a788f1c4a56325fd0d3f178de39c4939b6c8eac0b0dd761a",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "PostingKey",
+      "member": "id"
+    },
+    {
+      "i": 244974,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xb096da33533e9abac6ca766a38992f0025aee100dbe3596adee441111573a757",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000000000000000000000000000000000000000091c",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Word:k6",
+      "member": "word"
+    },
+    {
+      "i": 245340,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x3986e312332120b5bea1062a4b1b84ba02ec3e54648a3fe865449aaa8210f1fb",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000091c00000000000000010000000000000001",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Posting:k6",
+      "member": "head"
+    },
+    {
+      "i": 245695,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x5a978623484c20b704aebe8f1de209812858b78d1b8726f87620b2392334973b",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000000000000000000000000000000000000000091c",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Word:k2",
+      "member": "word"
+    },
+    {
+      "i": 246061,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x4f0a2c3d8142d50a8d789acd76f4964153ffa4ae15eb57faf75c85de13d11436",
+      "original": "0x0000000000000000000000000000091a000000000000047e000000000000047e",
+      "before": "0x0000000000000000000000000000091a000000000000047e000000000000047e",
+      "value": "0x0000000000000000000000000000091c000000000000047f000000000000047f",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Posting:k2",
+      "member": "head"
+    },
+    {
+      "i": 246469,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xfb2c9b7ba5282e5d3c7850c8d7e198c494c73ee484d7d15ebde327a9f7595391",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x5b7abe7b8ad930e36a05e430c9e5b63dbf337cc35271a4c183999428191c379e",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "BindingKey",
+      "member": "id"
+    },
+    {
+      "i": 246824,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x822cfdffb1d00baea2fd354ba422cf2a84117079200ad648921b70fa22af8e13",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000000000000000000000000000000000000000091c",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Word:k10",
+      "member": "word"
+    },
+    {
+      "i": 247190,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xc513a347cd3fdcc5cf4905abbfdb5b203562aa7ebf3175cc263d96a7e633e762",
+      "original": "0x0000000000000000000100000000081600000000000003e800000000000003e8",
+      "before": "0x0000000000000000000100000000081600000000000003e800000000000003e8",
+      "value": "0x0000000000000000000100000000091c00000000000003e900000000000003e9",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Posting:k10",
+      "member": "head"
+    },
+    {
+      "i": 247556,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x3f3a4dad71e0b68afc468e730984a0c70a420c55382a769d391684817bb428d0",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x00000000000000000000000000000000000000000100000000091c0000000101",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Binding",
+      "member": "meta"
+    },
+    {
+      "i": 247561,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x3f3a4dad71e0b68afc468e730984a0c70a420c55382a769d391684817bb428d1",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x724784c5aad886035b6b7eb19351e9dd4a9a6a3a90320df5696d18b5f0864b3a",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Binding",
+      "member": "target"
+    },
+    {
+      "i": 247969,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x541088c06327561c136d48028666e13e6822f76c92ae6ff01635fd3df50068a7",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x9c4fcfb338e3d1791951a4e671b3abd0e42efa01efac1bc7d0743f40539d3eda",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "PostingKey",
+      "member": "id"
+    },
+    {
+      "i": 248324,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x3a52a69ae1ec968f8dd07cf18c7478d1f56afbd414c33a5f1547cc326a8f0113",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000000000000000000000000000000000000000091c",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Word:k8",
+      "member": "word"
+    },
+    {
+      "i": 248690,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbbb46a889a220709b0c5de346a5399552ada05a10550eafddc64c91ebb1254da",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000100000000091c00000000000000010000000000000001",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Posting:k8",
+      "member": "head"
+    },
+    {
+      "i": 249110,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x37fb520c369147c50766dacd43a47f7184b5e4c77eed333f29af07e046e6bac6",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x00000000000000000000000000000000000300000000047f000200000000091b",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Batch",
+      "member": "meta"
+    },
+    {
+      "i": 249115,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x37fb520c369147c50766dacd43a47f7184b5e4c77eed333f29af07e046e6bac7",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000e05fcc23807536bee418f142d19fa0d21bb0cff7",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Batch",
+      "member": "authorityBasis"
+    },
+    {
+      "i": 249119,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x37fb520c369147c50766dacd43a47f7184b5e4c77eed333f29af07e046e6bac8",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x6caab053b78a42d661f3a526fd856328ef2ef717b2e0d0b3b5799d9d67d5c097",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Batch",
+      "member": "authorityCodehash"
+    },
+    {
+      "i": 249651,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead00",
+      "original": "0x0000000000000001000000000000001300000000000004620000000000000917",
+      "before": "0x0000000000000001000000000000001300000000000004620000000000000917",
+      "value": "0x0000000000000001000000000000001300000000000004620000000000000919",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Counts",
+      "member": "records|envelopes|types|principals"
+    },
+    {
+      "i": 249681,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead00",
+      "original": "0x0000000000000001000000000000001300000000000004620000000000000917",
+      "before": "0x0000000000000001000000000000001300000000000004620000000000000919",
+      "value": "0x0000000000000001000000000000001300000000000004630000000000000919",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "WARM_REWRITE",
+      "kind": "Counts",
+      "member": "records|envelopes|types|principals"
+    },
+    {
+      "i": 249706,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead00",
+      "original": "0x0000000000000001000000000000001300000000000004620000000000000917",
+      "before": "0x0000000000000001000000000000001300000000000004630000000000000919",
+      "value": "0x0000000000000001000000000000001300000000000004630000000000000919",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Counts",
+      "member": "records|envelopes|types|principals"
+    },
+    {
+      "i": 249733,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead00",
+      "original": "0x0000000000000001000000000000001300000000000004620000000000000917",
+      "before": "0x0000000000000001000000000000001300000000000004630000000000000919",
+      "value": "0x0000000000000001000000000000001300000000000004630000000000000919",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Counts",
+      "member": "records|envelopes|types|principals"
+    },
+    {
+      "i": 249753,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead01",
+      "original": "0x000000000000047c000000000000176c0000000000000462000000000000091a",
+      "before": "0x000000000000047c000000000000176c0000000000000462000000000000091a",
+      "value": "0x000000000000047c000000000000176c0000000000000462000000000000091c",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "Counts",
+      "member": "admissions|batches|postingKeys|bindingKeys"
+    },
+    {
+      "i": 249785,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead01",
+      "original": "0x000000000000047c000000000000176c0000000000000462000000000000091a",
+      "before": "0x000000000000047c000000000000176c0000000000000462000000000000091c",
+      "value": "0x000000000000047c000000000000176c0000000000000463000000000000091c",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "WARM_REWRITE",
+      "kind": "Counts",
+      "member": "admissions|batches|postingKeys|bindingKeys"
+    },
+    {
+      "i": 249816,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead01",
+      "original": "0x000000000000047c000000000000176c0000000000000462000000000000091a",
+      "before": "0x000000000000047c000000000000176c0000000000000463000000000000091c",
+      "value": "0x000000000000047c00000000000017710000000000000463000000000000091c",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "WARM_REWRITE",
+      "kind": "Counts",
+      "member": "admissions|batches|postingKeys|bindingKeys"
+    },
+    {
+      "i": 249848,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead01",
+      "original": "0x000000000000047c000000000000176c0000000000000462000000000000091a",
+      "before": "0x000000000000047c00000000000017710000000000000463000000000000091c",
+      "value": "0x000000000000047d00000000000017710000000000000463000000000000091c",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "WARM_REWRITE",
+      "kind": "Counts",
+      "member": "admissions|batches|postingKeys|bindingKeys"
+    },
+    {
+      "i": 249858,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead02",
+      "original": "0x7e3956ef367928bf72c0b110c8fb8c4b9113099f01cfe64c3f4901237e76117d",
+      "before": "0x7e3956ef367928bf72c0b110c8fb8c4b9113099f01cfe64c3f4901237e76117d",
+      "value": "0x7e3956ef367928bf72c0b110c8fb8c4b9113099f01cfe64c3f4901237e76117d",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Bootstrap",
+      "member": "realmId"
+    },
+    {
+      "i": 249866,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead03",
+      "original": "0x5fc17fba7ad9506c33731ea2288218169ea22c653821134ba3955b869a2b10ae",
+      "before": "0x5fc17fba7ad9506c33731ea2288218169ea22c653821134ba3955b869a2b10ae",
+      "value": "0x5fc17fba7ad9506c33731ea2288218169ea22c653821134ba3955b869a2b10ae",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Bootstrap",
+      "member": "initialRevisionId"
+    },
+    {
+      "i": 249998,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x7785a261dc229fdfc7445435c19ffbaca725546cb65259ac55cca87d7ba7e2f7",
+      "original": "0x000100510001001154797065536368656d6147726f75702f3100000000000000",
+      "before": "0x000100510001001154797065536368656d6147726f75702f3100000000000000",
+      "value": "0x000100510001001154797065536368656d6147726f75702f3100000000000000",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Bootstrap",
+      "member": "intrinsicGroupBytes[data]"
+    },
+    {
+      "i": 250027,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x7785a261dc229fdfc7445435c19ffbaca725546cb65259ac55cca87d7ba7e2f8",
+      "original": "0x000000000000000000000000000000000000000000000000000000000001000a",
+      "before": "0x000000000000000000000000000000000000000000000000000000000001000a",
+      "value": "0x000000000000000000000000000000000000000000000000000000000001000a",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Bootstrap",
+      "member": "intrinsicGroupBytes[data]"
+    },
+    {
+      "i": 250075,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x7785a261dc229fdfc7445435c19ffbaca725546cb65259ac55cca87d7ba7e2f9",
+      "original": "0x67726f75704279746573051ffe00000000000000000000000000000000000000",
+      "before": "0x67726f75704279746573051ffe00000000000000000000000000000000000000",
+      "value": "0x67726f75704279746573051ffe00000000000000000000000000000000000000",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Bootstrap",
+      "member": "intrinsicGroupBytes[data]"
+    },
+    {
+      "i": 250091,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead04",
+      "original": "0x00000000000000000000000000000000000000000000000000000000000000ab",
+      "before": "0x00000000000000000000000000000000000000000000000000000000000000ab",
+      "value": "0x00000000000000000000000000000000000000000000000000000000000000ab",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Bootstrap",
+      "member": "intrinsicGroupBytes"
+    },
+    {
+      "i": 250102,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead05",
+      "original": "0x9979945ce07959a64020c1b16656b43c70d0e7c12d8bdd70908ff76b3f5d4108",
+      "before": "0x9979945ce07959a64020c1b16656b43c70d0e7c12d8bdd70908ff76b3f5d4108",
+      "value": "0x9979945ce07959a64020c1b16656b43c70d0e7c12d8bdd70908ff76b3f5d4108",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Bootstrap",
+      "member": "objectGroup1Hash"
+    },
+    {
+      "i": 250110,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead06",
+      "original": "0xb73d9647fe976e376eb7c0810e6325e297f77e5c788055e2fc6fe200cd0ffc26",
+      "before": "0xb73d9647fe976e376eb7c0810e6325e297f77e5c788055e2fc6fe200cd0ffc26",
+      "value": "0xb73d9647fe976e376eb7c0810e6325e297f77e5c788055e2fc6fe200cd0ffc26",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Bootstrap",
+      "member": "kernelGroup2Hash"
+    },
+    {
+      "i": 250118,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead07",
+      "original": "0x8579a7ae3b45b341133398999f7113e2abf5d01c5f8a4f78b3d7927dd754293d",
+      "before": "0x8579a7ae3b45b341133398999f7113e2abf5d01c5f8a4f78b3d7927dd754293d",
+      "value": "0x8579a7ae3b45b341133398999f7113e2abf5d01c5f8a4f78b3d7927dd754293d",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Bootstrap",
+      "member": "metaTypeId"
+    },
+    {
+      "i": 250126,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead08",
+      "original": "0x1dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44",
+      "before": "0x1dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44",
+      "value": "0x1dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Bootstrap",
+      "member": "objectGenesisType"
+    },
+    {
+      "i": 250134,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead09",
+      "original": "0x3d40b6b53db7885be062d89270f41085fa8c59738cbc66fe28857d0573ef3a91",
+      "before": "0x3d40b6b53db7885be062d89270f41085fa8c59738cbc66fe28857d0573ef3a91",
+      "value": "0x3d40b6b53db7885be062d89270f41085fa8c59738cbc66fe28857d0573ef3a91",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Bootstrap",
+      "member": "bindingSetType"
+    },
+    {
+      "i": 250142,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead0a",
+      "original": "0xd9a17f2bdf9d885520b42b39778ec88f792b9b5a4fe0851cc388b2932b31add1",
+      "before": "0xd9a17f2bdf9d885520b42b39778ec88f792b9b5a4fe0851cc388b2932b31add1",
+      "value": "0xd9a17f2bdf9d885520b42b39778ec88f792b9b5a4fe0851cc388b2932b31add1",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Bootstrap",
+      "member": "bindingTombstoneType"
+    },
+    {
+      "i": 250147,
+      "depth": 5,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead0b",
+      "original": "0xc8261b4f9cd91e465be894c8fc41f45bc5a221b08db1ef8a610325b439b9c605",
+      "before": "0xc8261b4f9cd91e465be894c8fc41f45bc5a221b08db1ef8a610325b439b9c605",
+      "value": "0xc8261b4f9cd91e465be894c8fc41f45bc5a221b08db1ef8a610325b439b9c605",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Bootstrap",
+      "member": "withdrawalType"
+    },
+    {
+      "i": 254953,
+      "depth": 4,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x4e13d5bc9254e3483efd0aea93981c9837d3ccb43e4bca308112bca838f2c159",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000010000000000000000000000000000000000000000000000000000000000",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "IndexWord",
+      "member": "bits"
+    }
+  ],
+  "artifacts": {
+    "trace": "trace.json.gz",
+    "rawTraceBytes": 100601268,
+    "prestate": "prestate-diff.json",
+    "storageOps": "storage-ops.json",
+    "receipt": "receipt.json",
+    "tx": "tx.json"
+  }
+}

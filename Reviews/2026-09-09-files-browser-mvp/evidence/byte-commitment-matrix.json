@@ -1,0 +1,588 @@
+{
+ "kind": "BYTE_COMMITMENT_CLASSIFICATION_MATRIX",
+ "date": "2026-09-10",
+ "router": "FilesRouterV2 (contracts/src/FilesRouterV2.sol) via Core U3 executeAuthorized; one author signature per row; refusals observed by eth_call preflight, two zero-on-content rows also mined",
+ "classification": {
+  "CONTENT": [
+   "createFile",
+   "edit"
+  ],
+  "NON_CONTENT": [
+   "createDir",
+   "renameMove",
+   "copy",
+   "placement",
+   "remove",
+   "restore",
+   "tag",
+   "untag"
+  ]
+ },
+ "rows": [
+  {
+   "kind": "createDir",
+   "kindCode": 2,
+   "classification": "NON_CONTENT",
+   "arm": "nonzero-signed",
+   "signedByteCommitment": "0x9999999999999999999999999999999999999999999999999999999999999999",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "0x9999999999999999999999999999999999999999999999999999999999999999"
+    ]
+   },
+   "note": "non-content: a stray signed commitment is refused (expected 0)",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "createDir",
+   "kindCode": 2,
+   "classification": "NON_CONTENT",
+   "arm": "zero (positive control)",
+   "signedByteCommitment": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "expected": {
+    "accepted": true
+   },
+   "actual": {
+    "accepted": true,
+    "gasUsed": "5113188"
+   },
+   "note": "non-content accepts zero",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "createFile",
+   "kindCode": 1,
+   "classification": "CONTENT",
+   "arm": "zero-signed (mined)",
+   "signedByteCommitment": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0xe29ca70c9f1d93aed6cb2736af04743db84994e20f648a50b9b657c37f16cb24",
+     "0x0000000000000000000000000000000000000000000000000000000000000000"
+    ],
+    "minedStatus": "0x0"
+   },
+   "note": "CONTENT: the author signed a ZERO commitment (a client that forgot to set it); router derives the expected value from the publication's own ChunkTree leaf and refuses; mined rejection proven",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "createFile",
+   "kindCode": 1,
+   "classification": "CONTENT",
+   "arm": "nonzero-forged-signed",
+   "signedByteCommitment": "0x9999999999999999999999999999999999999999999999999999999999999999",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0xe29ca70c9f1d93aed6cb2736af04743db84994e20f648a50b9b657c37f16cb24",
+     "0x9999999999999999999999999999999999999999999999999999999999999999"
+    ]
+   },
+   "note": "CONTENT: a signed commitment over no tree is refused",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "createFile",
+   "kindCode": 1,
+   "classification": "CONTENT",
+   "arm": "substitution: intent=tree X, publication=tree Y (signed)",
+   "signedByteCommitment": "0x65bc6cb6b2da67993176e00f423d6c4997bce43ee42146144e6c86b382b5eb73",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0xe29ca70c9f1d93aed6cb2736af04743db84994e20f648a50b9b657c37f16cb24",
+     "0x65bc6cb6b2da67993176e00f423d6c4997bce43ee42146144e6c86b382b5eb73"
+    ]
+   },
+   "note": "CONTENT: author signed the commitment of another tree (c3) while the publication carries c1",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "createFile",
+   "kindCode": 1,
+   "classification": "CONTENT",
+   "arm": "bearer swaps tree leaf after signing (X signed, Y submitted)",
+   "signedByteCommitment": "0xe29ca70c9f1d93aed6cb2736af04743db84994e20f648a50b9b657c37f16cb24",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0x91f0a142bc833e174fbb62b2a3a83827c0edad06f576c0c3e9da038bdb765de6",
+     "0xe29ca70c9f1d93aed6cb2736af04743db84994e20f648a50b9b657c37f16cb24"
+    ]
+   },
+   "note": "CONTENT: expected=commitment(c2) from the submitted leaves, got=commitment(c1) from the signature; refused at the router, before Core's signature check",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "createFile",
+   "kindCode": 1,
+   "classification": "CONTENT",
+   "arm": "mismatched revision->tree link (signed)",
+   "signedByteCommitment": "0xe29ca70c9f1d93aed6cb2736af04743db84994e20f648a50b9b657c37f16cb24",
+   "expected": {
+    "refusedBy": "ErrTemplate"
+   },
+   "actual": {
+    "refusedBy": "ErrTemplate",
+    "args": [
+     "3",
+     "8"
+    ]
+   },
+   "note": "CONTENT: revision.content != publication tree leaf id -> ErrTemplate(3,8) fires before the byte-commitment comparison",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "createFile",
+   "kindCode": 1,
+   "classification": "CONTENT",
+   "arm": "derived commitment (positive control)",
+   "signedByteCommitment": "0xe29ca70c9f1d93aed6cb2736af04743db84994e20f648a50b9b657c37f16cb24",
+   "expected": {
+    "accepted": true
+   },
+   "actual": {
+    "accepted": true,
+    "gasUsed": "8724391"
+   },
+   "note": "CONTENT: keccak(abi.encode(treeId, keccak(treeBody))) accepted",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "edit",
+   "kindCode": 3,
+   "classification": "CONTENT",
+   "arm": "zero-signed (mined)",
+   "signedByteCommitment": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0x91f0a142bc833e174fbb62b2a3a83827c0edad06f576c0c3e9da038bdb765de6",
+     "0x0000000000000000000000000000000000000000000000000000000000000000"
+    ],
+    "minedStatus": "0x0"
+   },
+   "note": "CONTENT: signed zero commitment refused; mined rejection proven",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "edit",
+   "kindCode": 3,
+   "classification": "CONTENT",
+   "arm": "nonzero-forged-signed",
+   "signedByteCommitment": "0x9999999999999999999999999999999999999999999999999999999999999999",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0x91f0a142bc833e174fbb62b2a3a83827c0edad06f576c0c3e9da038bdb765de6",
+     "0x9999999999999999999999999999999999999999999999999999999999999999"
+    ]
+   },
+   "note": "CONTENT: forged commitment refused",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "edit",
+   "kindCode": 3,
+   "classification": "CONTENT",
+   "arm": "substitution: intent=tree X, publication=tree Y (signed)",
+   "signedByteCommitment": "0x65bc6cb6b2da67993176e00f423d6c4997bce43ee42146144e6c86b382b5eb73",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0x91f0a142bc833e174fbb62b2a3a83827c0edad06f576c0c3e9da038bdb765de6",
+     "0x65bc6cb6b2da67993176e00f423d6c4997bce43ee42146144e6c86b382b5eb73"
+    ]
+   },
+   "note": "CONTENT: intent commits to c3, publication carries c2",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "edit",
+   "kindCode": 3,
+   "classification": "CONTENT",
+   "arm": "bearer swaps tree leaf after signing (X signed, Y submitted)",
+   "signedByteCommitment": "0x91f0a142bc833e174fbb62b2a3a83827c0edad06f576c0c3e9da038bdb765de6",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0x65bc6cb6b2da67993176e00f423d6c4997bce43ee42146144e6c86b382b5eb73",
+     "0x91f0a142bc833e174fbb62b2a3a83827c0edad06f576c0c3e9da038bdb765de6"
+    ]
+   },
+   "note": "CONTENT: expected=commitment(c3) from submitted leaves, got=commitment(c2) from the signature",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "edit",
+   "kindCode": 3,
+   "classification": "CONTENT",
+   "arm": "mismatched revision->tree link (signed)",
+   "signedByteCommitment": "0x91f0a142bc833e174fbb62b2a3a83827c0edad06f576c0c3e9da038bdb765de6",
+   "expected": {
+    "refusedBy": "ErrTemplate"
+   },
+   "actual": {
+    "refusedBy": "ErrTemplate",
+    "args": [
+     "1",
+     "8"
+    ]
+   },
+   "note": "CONTENT: revision.content != publication tree leaf id -> ErrTemplate(1,8)",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "edit",
+   "kindCode": 3,
+   "classification": "CONTENT",
+   "arm": "derived commitment (positive control)",
+   "signedByteCommitment": "0x91f0a142bc833e174fbb62b2a3a83827c0edad06f576c0c3e9da038bdb765de6",
+   "expected": {
+    "accepted": true
+   },
+   "actual": {
+    "accepted": true,
+    "gasUsed": "4160273"
+   },
+   "note": "CONTENT: derived commitment accepted",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "renameMove",
+   "kindCode": 4,
+   "classification": "NON_CONTENT",
+   "arm": "nonzero-signed",
+   "signedByteCommitment": "0x9999999999999999999999999999999999999999999999999999999999999999",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "0x9999999999999999999999999999999999999999999999999999999999999999"
+    ]
+   },
+   "note": "non-content: refused (expected 0)",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "renameMove",
+   "kindCode": 4,
+   "classification": "NON_CONTENT",
+   "arm": "zero (positive control)",
+   "signedByteCommitment": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "expected": {
+    "accepted": true
+   },
+   "actual": {
+    "accepted": true,
+    "gasUsed": "5381805"
+   },
+   "note": "non-content accepts zero",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "copy",
+   "kindCode": 5,
+   "classification": "NON_CONTENT",
+   "arm": "nonzero-signed",
+   "signedByteCommitment": "0x9999999999999999999999999999999999999999999999999999999999999999",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "0x9999999999999999999999999999999999999999999999999999999999999999"
+    ]
+   },
+   "note": "COPY is content-BY-REFERENCE (FileRevision names an already-admitted tree; no tree leaf in the publication) and the router classifies it NON-CONTENT: expected 0",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "copy",
+   "kindCode": 5,
+   "classification": "NON_CONTENT",
+   "arm": "bearer swaps referenced tree after signing",
+   "signedByteCommitment": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "expected": {
+    "refusedBy": "ErrUnauthorizedPrincipal"
+   },
+   "actual": {
+    "refusedBy": "ErrUnauthorizedPrincipal",
+    "args": [
+     "0x0000000000000000000000000000000000000000000000000000ffffffffffff",
+     "0xb25b10ddc955aD9C98b3f0B346Bf01877B8dc467"
+    ]
+   },
+   "note": "COPY: the router accepts (0 == 0); only Core's publicationHash-bound signature refuses. The byte commitment carries NO content binding for a copy",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "copy",
+   "kindCode": 5,
+   "classification": "NON_CONTENT",
+   "arm": "zero (positive control)",
+   "signedByteCommitment": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "expected": {
+    "accepted": true
+   },
+   "actual": {
+    "accepted": true,
+    "gasUsed": "7531389"
+   },
+   "note": "non-content accepts zero",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "placement",
+   "kindCode": 6,
+   "classification": "NON_CONTENT",
+   "arm": "nonzero-signed",
+   "signedByteCommitment": "0x9999999999999999999999999999999999999999999999999999999999999999",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "0x9999999999999999999999999999999999999999999999999999999999999999"
+    ]
+   },
+   "note": "non-content: refused",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "placement",
+   "kindCode": 6,
+   "classification": "NON_CONTENT",
+   "arm": "zero (positive control)",
+   "signedByteCommitment": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "expected": {
+    "accepted": true
+   },
+   "actual": {
+    "accepted": true,
+    "gasUsed": "3124903"
+   },
+   "note": "non-content accepts zero",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "remove",
+   "kindCode": 7,
+   "classification": "NON_CONTENT",
+   "arm": "nonzero-signed",
+   "signedByteCommitment": "0x9999999999999999999999999999999999999999999999999999999999999999",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "0x9999999999999999999999999999999999999999999999999999999999999999"
+    ]
+   },
+   "note": "non-content: refused",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "remove",
+   "kindCode": 7,
+   "classification": "NON_CONTENT",
+   "arm": "zero (positive control)",
+   "signedByteCommitment": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "expected": {
+    "accepted": true
+   },
+   "actual": {
+    "accepted": true,
+    "gasUsed": "5117079"
+   },
+   "note": "non-content accepts zero",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "restore",
+   "kindCode": 8,
+   "classification": "NON_CONTENT",
+   "arm": "nonzero-signed",
+   "signedByteCommitment": "0x9999999999999999999999999999999999999999999999999999999999999999",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "0x9999999999999999999999999999999999999999999999999999999999999999"
+    ]
+   },
+   "note": "non-content: refused",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "restore",
+   "kindCode": 8,
+   "classification": "NON_CONTENT",
+   "arm": "zero (positive control)",
+   "signedByteCommitment": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "expected": {
+    "accepted": true
+   },
+   "actual": {
+    "accepted": true,
+    "gasUsed": "4065234"
+   },
+   "note": "non-content accepts zero",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "tag",
+   "kindCode": 9,
+   "classification": "NON_CONTENT",
+   "arm": "nonzero-signed",
+   "signedByteCommitment": "0x9999999999999999999999999999999999999999999999999999999999999999",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "0x9999999999999999999999999999999999999999999999999999999999999999"
+    ]
+   },
+   "note": "non-content: refused",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "tag",
+   "kindCode": 9,
+   "classification": "NON_CONTENT",
+   "arm": "zero (positive control)",
+   "signedByteCommitment": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "expected": {
+    "accepted": true
+   },
+   "actual": {
+    "accepted": true,
+    "gasUsed": "3052376"
+   },
+   "note": "non-content accepts zero",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "untag",
+   "kindCode": 10,
+   "classification": "NON_CONTENT",
+   "arm": "nonzero-signed",
+   "signedByteCommitment": "0x9999999999999999999999999999999999999999999999999999999999999999",
+   "expected": {
+    "refusedBy": "ErrByteCommitment"
+   },
+   "actual": {
+    "refusedBy": "ErrByteCommitment",
+    "args": [
+     "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "0x9999999999999999999999999999999999999999999999999999999999999999"
+    ]
+   },
+   "note": "non-content: refused",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "untag",
+   "kindCode": 10,
+   "classification": "NON_CONTENT",
+   "arm": "zero (positive control)",
+   "signedByteCommitment": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "expected": {
+    "accepted": true
+   },
+   "actual": {
+    "accepted": true,
+    "gasUsed": "1692912"
+   },
+   "note": "non-content accepts zero",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "unknown",
+   "kindCode": 11,
+   "classification": "NON_CONTENT",
+   "arm": "zero-signed",
+   "signedByteCommitment": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "expected": {
+    "refusedBy": "ErrUnknownKind"
+   },
+   "actual": {
+    "refusedBy": "ErrUnknownKind",
+    "args": [
+     "11"
+    ]
+   },
+   "note": "an unsupported kind reverts before the byte-commitment comparison",
+   "verdict": "AS_CLASSIFIED"
+  },
+  {
+   "kind": "unknown",
+   "kindCode": 11,
+   "classification": "NON_CONTENT",
+   "arm": "nonzero-signed",
+   "signedByteCommitment": "0x9999999999999999999999999999999999999999999999999999999999999999",
+   "expected": {
+    "refusedBy": "ErrUnknownKind"
+   },
+   "actual": {
+    "refusedBy": "ErrUnknownKind",
+    "args": [
+     "11"
+    ]
+   },
+   "note": "same: ErrUnknownKind wins over ErrByteCommitment",
+   "verdict": "AS_CLASSIFIED"
+  }
+ ],
+ "findings": [],
+ "observations": [
+  "COPY carries content by reference (FileRevision.content names an admitted ChunkTree; the publication has no tree leaf) and is classified NON_CONTENT: the referenced tree is bound only by publicationHash inside the signed AuthorIntent digest, not by byteCommitment. A bearer that swaps the referenced tree is refused by Core (ErrUnauthorizedPrincipal), not by the router.",
+  "The classification is a local variable defaulting to zero (FilesRouterV2.sol:407); a future content-carrying branch that forgets to assign it would accept a zero commitment. This matrix is the regression that turns that into a red row for CREATE_FILE and EDIT; any NEW content kind must add a zero-signed row here.",
+  "ErrTemplate(3,8) / ErrTemplate(1,8) (revision.content != own tree leaf) fire BEFORE the byte-commitment comparison, so a mismatched link never reaches the commitment check."
+ ]
+}

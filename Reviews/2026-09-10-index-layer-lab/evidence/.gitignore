@@ -1,0 +1,3 @@
+# Full debug_traceTransaction responses (gzip) are retained locally and
+# regenerable; their sha256 is in each run's index.json.
+**/trace.json.gz
