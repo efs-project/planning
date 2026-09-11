@@ -62,6 +62,30 @@ export function createRPCSource({ identity }) {
 }
 // Direct JSON-RPC source for STANDALONE STATIC HOSTING: talks straight to an
 // explicitly configured chain endpoint; no EFS-specific server involved.
+// Validate the WHOLE envelope before resolving any batch member. A response
+// position is not a request identity, and a plausible result inside a malformed
+// or partial envelope is not safe to associate with an authoritative read.
+function checkedRPCResponses(parsed, expectedIds, isBatch) {
+  if (Array.isArray(parsed) !== isBatch) throw Error('invalid RPC response shape');
+  const rows = isBatch ? parsed : [parsed], expected = new Set(expectedIds), byId = new Map();
+  if (rows.length !== expected.size) throw Error('incomplete RPC response IDs');
+  for (const row of rows) {
+    if (!row || typeof row !== 'object' || Array.isArray(row) || row.jsonrpc !== '2.0'
+      || !expected.has(row.id) || byId.has(row.id)) throw Error('invalid RPC response identity');
+    const result = Object.hasOwn(row, 'result'), error = Object.hasOwn(row, 'error');
+    if (result === error) throw Error('invalid RPC result or error');
+    if (error && (!row.error || typeof row.error !== 'object' || Array.isArray(row.error)
+      || !Number.isSafeInteger(row.error.code) || typeof row.error.message !== 'string')) throw Error('invalid RPC error');
+    byId.set(row.id, row);
+  }
+  return expectedIds.map(id => byId.get(id));
+}
+function rpcValue(row) {
+  if (Object.hasOwn(row, 'error')) {
+    const e = Error(row.error.message); e.code = row.error.code; e.data = row.error.data ?? null; throw e;
+  }
+  return row.result;
+}
 export function createDirectRPCSource({ identity, url }) {
   const metrics = { logicalCalls: 0, httpBatches: 0, requestBytes: 0, responseBytes: 0 };
   const enqueue = batching(async batch => {
@@ -70,11 +94,10 @@ export function createDirectRPCSource({ identity, url }) {
     metrics.httpBatches++; metrics.requestBytes += new TextEncoder().encode(payload).byteLength;
     const response = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: payload, cache: 'no-store', signal: batch.length === 1 ? batch[0].entry.signal : undefined });
     const parsed = await boundedJSON(response, 1048576, undefined, n => { metrics.responseBytes += n; });
-    const rows = Array.isArray(parsed) ? parsed : [parsed];
-    for (const item of batch) {
-      const row = rows.find(x => x.id === batch.indexOf(item)) ?? rows[batch.indexOf(item)];
-      if (row && row.error === undefined) item.resolve(row.result);
-      else { const e = Error(row?.error?.message ?? 'rpc error'); e.data = row?.error?.data ?? null; item.reject(e); }
+    if (!response.ok) throw Error('RPC HTTP request failed');
+    const rows = checkedRPCResponses(parsed, body.map(row => row.id), batch.length !== 1);
+    for (const [i, item] of batch.entries()) {
+      try { item.resolve(rpcValue(rows[i])); } catch (e) { item.reject(e); }
     }
   });
   return Object.freeze({
@@ -101,8 +124,8 @@ export function directWritePath(url) {
   const one = async (method, params) => {
     const response = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }), cache: 'no-store' });
     const body = await boundedJSON(response, 1048576);
-    if (body.error) { const e = Error(body.error.message ?? 'rpc error'); e.data = body.error.data ?? null; throw e; }
-    return body.result;
+    if (!response.ok) throw Error('RPC HTTP request failed');
+    return rpcValue(checkedRPCResponses(body, [1], false)[0]);
   };
   return Object.freeze({
     callLatest: (to, data) => one('eth_call', [{ to, data, gas: '0x1000000' }, 'latest']),
