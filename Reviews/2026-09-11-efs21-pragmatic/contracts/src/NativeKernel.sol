@@ -21,6 +21,19 @@ contract NativeKernel {
         bool live;
     }
 
+    // Immutable locations are shared only within one file's revision history.
+    // Keys are creation revision 1 or the move's revision, never a dense counter.
+    struct StoredRevision {
+        bytes32 recordId;
+        uint64 locationRevision;
+        bool live;
+    }
+
+    struct HistoricalLocation {
+        bytes32 parent;
+        bytes name;
+    }
+
     struct Record {
         bytes32 typeId;
         bytes body;
@@ -45,9 +58,10 @@ contract NativeKernel {
     bytes32 public constant RECORD_DOMAIN = keccak256("EFS21_RECORD_V1");
     mapping(address => uint256) public fileNonce;
     mapping(bytes32 => FileInfo) private files;
-    mapping(bytes32 => Revision[]) private history;
+    mapping(bytes32 => StoredRevision[]) private history;
     mapping(bytes32 => Record) private records;
     mapping(bytes32 => bool) private hasRecord;
+    mapping(bytes32 => mapping(uint64 => HistoricalLocation)) private locations;
 
     error MissingFile();
     error MissingRecord();
@@ -95,7 +109,8 @@ contract NativeKernel {
         id = rootId(msg.sender);
         if (files[id].owner != address(0)) return id;
         files[id] = FileInfo(msg.sender, true, true, 1, bytes32(0));
-        history[id].push(Revision(bytes32(0), bytes32(0), "", true));
+        locations[id][1] = HistoricalLocation(bytes32(0), "");
+        history[id].push(StoredRevision(bytes32(0), 1, true));
         navigation.addNode(msg.sender, id, bytes32(0), "", true);
         emit FileChanged(id, msg.sender, 1);
     }
@@ -131,8 +146,8 @@ contract NativeKernel {
         FileInfo storage file = _ownedLive(id, expected);
         if (file.directory) revert DirectoryContentUnsupported();
         bytes32 rid = _store(typeId, body);
-        Revision storage old = history[id][file.revision - 1];
-        _revise(id, file, rid, old.parent, old.name, true);
+        uint64 locationRevision = history[id][file.revision - 1].locationRevision;
+        _revise(id, file, rid, locationRevision, true);
         navigation.touchNode(id);
     }
 
@@ -141,15 +156,17 @@ contract NativeKernel {
         if (file.directory) revert DirectoryMoveUnsupported();
         _parent(parent, msg.sender);
         _name(name);
-        _revise(id, file, file.recordId, parent, name, true);
+        uint64 locationRevision = file.revision + 1;
+        locations[id][locationRevision] = HistoricalLocation(parent, name);
+        _revise(id, file, file.recordId, locationRevision, true);
         navigation.moveNode(id, parent, name);
     }
 
     function unlink(bytes32 id, uint64 expected) external {
         FileInfo storage file = _ownedLive(id, expected);
         if (id == rootId(msg.sender)) revert RootRemovalUnsupported();
-        Revision storage old = history[id][file.revision - 1];
-        _revise(id, file, file.recordId, old.parent, old.name, false);
+        uint64 locationRevision = history[id][file.revision - 1].locationRevision;
+        _revise(id, file, file.recordId, locationRevision, false);
         navigation.removeNode(id);
     }
 
@@ -161,7 +178,9 @@ contract NativeKernel {
     /// @notice 1-based revision; an unlinked file's immutable history remains contract-readable.
     function revisionAt(bytes32 id, uint64 revision) external view returns (Revision memory) {
         if (revision == 0 || revision > history[id].length) revert InvalidRevision();
-        return history[id][revision - 1];
+        StoredRevision storage row = history[id][revision - 1];
+        HistoricalLocation storage location = locations[id][row.locationRevision];
+        return Revision(row.recordId, location.parent, location.name, row.live);
     }
 
     /// @notice Zero is exact absence under an existing live directory; invalid parents revert.
@@ -192,7 +211,8 @@ contract NativeKernel {
         _name(name);
         id = _fileId(msg.sender, ++fileNonce[msg.sender]);
         files[id] = FileInfo(msg.sender, directory, true, 1, rid);
-        history[id].push(Revision(rid, parent, name, true));
+        locations[id][1] = HistoricalLocation(parent, name);
+        history[id].push(StoredRevision(rid, 1, true));
         navigation.addNode(msg.sender, id, parent, name, directory);
         emit FileChanged(id, msg.sender, 1);
     }
@@ -209,10 +229,8 @@ contract NativeKernel {
         }
     }
 
-    function _revise(bytes32 id, FileInfo storage file, bytes32 rid, bytes32 parent, bytes memory name, bool live)
-        private
-    {
-        history[id].push(Revision(rid, parent, name, live));
+    function _revise(bytes32 id, FileInfo storage file, bytes32 rid, uint64 locationRevision, bool live) private {
+        history[id].push(StoredRevision(rid, locationRevision, live));
         ++file.revision;
         file.recordId = rid;
         file.live = live;
