@@ -12,6 +12,8 @@ Stable entry point for tools that auto-detect `AGENTS.md` ([universal agent brie
 
 Then read **current state** for whatever you're touching: [`Open-Decisions.md`](./Open-Decisions.md) (what needs the owner), [`Kanban.md`](./Kanban.md) (what's in flight), and your task's design-folder `README.md` (the map of current vs. historical vs. blocked — it changes fast).
 
+**Named role?** Find your short profile in [Agents](./Agents/README.md). Read only that profile; use its optional `NOTES.md` for cross-harness IDs and handoffs when needed. No startup script or extra launch guide. Verify assigned source revisions; missing v2 maps aren't permission to substitute v1.
+
 Load the rest **when it's relevant**:
 
 Rows are keyed to **what you are doing**, not to whether you feel unsure — if the action matches, open the file even if you think you already know the rule.
@@ -45,19 +47,19 @@ Adopted EFS v2 rulings live in [`Designs/efsv2/owner-rulings.md`](./Designs/efsv
 
 ## Hard rules (load-bearing, don't violate without checking)
 
-- **Pull before reading or writing.** `cd <your planning checkout> && git fetch origin && git rebase --autostash origin/main`. The vault is shared across multiple agents and machines.
+- **Verify source and ownership before syncing.** Inspect branch, revision, dirty state, relevant cards/status and visible related branches. Fetch when available; update only your own safe checkout when the assignment calls for it. Never rebase another worker's branch or autostash unrelated changes. Pinned review/experiment revisions stay pinned; offline work labels freshness and remote visibility gaps. See [Git sync](./Onboarding/conventions.md#git-sync).
 - **DO NOT number your own design drafts.** Save as `<slug>.md`, not `0007-<slug>.md`. Numbers are allocated only at the human-gated promotion ceremony; self-numbering bypasses review.
 - **Tri-sync invariant.** Design status appears in three places: prose `**Status:** X`, tag `#status/X`, and (post-promotion) filename `NNNN-<slug>.md`. All three change in the same commit.
 - **Promotion is human-only.** James writes the literal trust token `Promoted by @james on YYYY-MM-DD` in the design body. Agents may execute the `git mv` ceremony on his behalf only after he has written that token.
-- **Never force-push.** On push rejection: `git pull --rebase`, resolve conflicts (`Kanban.md` is the usual victim), push again. Force-pushing past a rebase conflict is a **Tier-1 stop-and-ask** — this vault is shared across agents and machines, and a force-push destroys work you can't see.
+- **Never force-push.** On push rejection, inspect remote divergence and ownership before reconciling in your own clean worktree; do not blindly rebase shared/dirty work. Force-pushing past a rebase conflict is a **Tier-1 stop-and-ask** — this vault is shared across agents and machines, and a force-push destroys work you can't see.
 - **Do not invent work.** If nothing in [`Onboarding/start-here.md`](./Onboarding/start-here.md)'s decision tree applies, stop and ask James in chat.
 - **Respect card TTLs.** In Flight cards expire (3-day default) and can be reclaimed; **Under Review and Blocked cards have no TTL and cannot be reclaimed without asking in chat.** WIP limits: 3 ready-for-promotion / 5 Under Review / 2 In Flight per agent.
-- **Append one dated line to `Daily Notes/agent-status.md` per work session** — it's how the swarm sees state without reading `git log`, and how two concurrent sessions detect each other.
+- **Append one dated line to `Daily Notes/agent-status.md` per authorized write session**, including role, harness, distinct non-secret session label and scope. Read-only/unassigned sessions report in chat. Status is advisory, not a cross-machine lock; overlapping writers need an agreed split/handoff even when they use the same harness. Preserve others' edits and stage exact paths.
 
 ## Every commit
 
 - Subject line: `<area>: <imperative summary>`. Areas: `design`, `kanban`, `docs`, `chore`, `promote`, `land`, `sync`, `status`, `pm`. **`pm:` is RESERVED for the PM role** — a non-PM agent editing a PM-owned file uses its own area, or `git log --grep='^pm:'` falsely attributes the work (this produced a "phantom second PM" on 2026-05-28). Full list: [`Onboarding/conventions.md`](./Onboarding/conventions.md).
-- Include `Agent: <slug>`, `Co-authored-by: <Model Name> <noreply@<vendor>>`, and `Harness: <claude-code|codex|…>` trailers. The `Agent:` slug is a stable identifier for agent + role (e.g. `claude-opus-4.7`, `codex-gpt-5`), enabling per-agent grep on `git log`.
+- Include `Agent: <role-id>`, `Co-authored-by: <actual known Model Name> <noreply@<vendor>>`, and `Harness: <actual harness>` trailers. Use the [roster](./Agents/README.md) role ID prospectively (e.g. `v2-pm`, `contracts-dev`); model and harness are separate, and neither identifies a session. Preserve historical model-shaped slugs unchanged; never guess their role.
 - **Before pushing, run `./scripts/open-decisions.sh --check`** — it fails if the generated decision roll-up no longer matches its sources.
 - **Run `./scripts/install-hooks.sh` once per clone.** Hooks are per-clone and not carried by git, so a fresh checkout has no commit validation.
 - **Write the commit message to a file and use `git commit -F <file>` — never embed `\n` inside `git commit -m`.** Some harnesses don't interpret the escape, so trailers land as a literal `\n` on one physical line; six vault commits already did, and `scripts/agent-activity.sh` buckets them as "unknown." Verify with `git log -1 --format='%B'` after your first commit.
@@ -74,7 +76,7 @@ Adopted EFS v2 rulings live in [`Designs/efsv2/owner-rulings.md`](./Designs/efsv
 | Cross-cutting terminology | [`Glossary.md`](./Glossary.md) |
 | System overviews | [`Architecture/`](./Architecture/) |
 | How-to-do-something | [`Onboarding/`](./Onboarding/) |
-| Agent roles, SOUL files, launch prompts | [`Agents/`](./Agents/) |
+| Agent profiles, cross-harness IDs and notes | [`Agents/`](./Agents/) |
 | Milestones, ideas, research corpora | [`Milestones.md`](./Milestones.md), [`Ideas.md`](./Ideas.md), [`Reviews/`](./Reviews/), [`Brainstorms/`](./Brainstorms/) |
 | The audit + generation tools | [`scripts/README.md`](./scripts/README.md) |
 | Past one-line decisions | [`Decisions.md`](./Decisions.md) |

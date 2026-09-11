@@ -4,9 +4,11 @@ Per-convention quick-lookup. Canonical rules: [[design-system]].
 
 ## Git sync
 
-Pull before reading or writing: `cd <your planning checkout> && git fetch origin && git rebase --autostash origin/main` (plain `pull --rebase` fails whenever another agent has uncommitted work — the normal state). Commit and push when a unit of work is done (Kanban move, finished draft, status change, answered question).
+Before work, identify the assigned branch/revision and inspect dirty state, relevant cards/status/handoffs and visible related branches. Fetch when available to verify freshness. For ordinary main-based work, update only your owned clean worktree against the intended upstream; never rebase another worker's branch, change an assigned pinned review/experiment revision, or autostash unrelated edits. Distinct authorized scopes can use isolated worktrees; overlapping edits require an agreed split or handoff. No status note means no proof of an idle checkout.
 
-On push rejection: `git pull --rebase`, resolve conflicts (`Kanban.md` is the likely victim), push again. If a rebase gets gnarly (>5 minutes of resolving), back off and surface in chat. Never force-push.
+Commit and push completed authorized changes unless the assignment restricts publication. A read-only report does not authorize these mutations. Offline independent work can continue locally within scope: state exact source commit and freshness/visibility gaps. Distinguish local committed, remote-reachable and merged results in any handoff; optional [role notes](../Agents/README.md#notes-and-harness-ids) are enough.
+
+On push rejection, inspect divergence and ownership first; reconcile only your own clean branch, preserving other work. If a rebase gets gnarly (>5 minutes of resolving), back off and surface in chat. Never force-push.
 
 ## Commit-message style
 
@@ -22,8 +24,8 @@ Trailers on agent-authored commits — each on its own real line, never glued on
 | Trailer | Value | Required? |
 |---|---|---|
 | `Co-authored-by:` | The actual model, `<Model> <noreply@vendor>` | Yes — enforced by `scripts/commit-msg-hook.sh` |
-| `Agent:` | Stable agent+role **slug**, *not* the model version — grep-friendly and durable across model upgrades | Yes — enforced by the hook |
-| `Harness:` | The tool the agent runs inside: `claude-code`, `codex`, … | Yes for any role that can run two concurrent sessions (PM does — see `Agents/pm.md`); recommended for every agent commit. Not yet hook-enforced |
+| `Agent:` | Stable [roster role ID](../Agents/README.md), not the model version or session — durable across model upgrades | Yes — trailer presence enforced by the hook |
+| `Harness:` | The actual tool the agent runs inside: `claude-code`, `codex`, …; not session identity | Yes for agent-authored commits; presence not yet hook-enforced |
 
 ```
 design: draft offline-sync — describe the offline sync proposal
@@ -31,13 +33,13 @@ design: draft offline-sync — describe the offline sync proposal
 Body paragraph or two.
 
 Co-authored-by: Claude Opus 4.7 <noreply@anthropic.com>
-Agent: claude-opus-4.7
+Agent: web-client-os-pm
 Harness: claude-code
 ```
 
-Slug forms in use: `Agent: pm`, `Agent: sdk-designer`, `Agent: codex-gpt-5`, `Agent: claude-opus-4.7`, `Agent: codex-gpt-5 (integration)`. Unlocks `git log --grep='^Agent: claude'`. Required for agent commits; James's manual Obsidian-UI commits (`vault backup: …`) are exempt and the hook skips them.
+Prospective examples: `Agent: pm`, `Agent: sdk-pm`, `Agent: contracts-dev`; use the roster's canonical ID even when launched by an alias. Historical slugs such as `codex-gpt-5`, `fable` and `claude-opus-*` served multiple roles: preserve them unchanged and do not silently reclassify their commits. James's manual Obsidian-UI commits (`vault backup: …`) remain exempt and the hook skips them.
 
-**Why `Harness:` is separate from `Agent:`.** The slug is stable per role, so two simultaneous sessions of the same role are indistinguishable by `Agent:` alone. `Harness:` is how a session finds *its own* watermark: `git log --grep='^Harness: <yours>'`. It is also matched by the commit-msg hook's literal-`\n` check, so a glued-on `Harness:` trailer fails the commit.
+**Role, harness, model and session are distinct.** Two simultaneous Codex sessions of one role have the same role/harness trailers. Give each a non-secret unique session label in its existing card/status/handoff and resume from its verified commit, not a harness-wide git-log watermark. Status is advisory, not a lock; overlap needs an agreed split/handoff. `Harness:` is also matched by the hook's literal-`\n` check, so a glued-on trailer fails the commit.
 
 Vendor noreply emails: `noreply@anthropic.com`, `noreply@openai.com`, `noreply@google.com`; otherwise `noreply@<vendor-domain>`.
 
@@ -188,8 +190,8 @@ In Flight card, and drafts-in-flight (in Backlog):
 
 ```markdown
 - [ ] Implement [[0007-offline-sync]] #repo/client
-  — @claude-opus-4.7, branch claude/offline-sync, claimed 2026-05-21, expires 2026-05-24
-- [ ] Draft: offline-sync #kind/design #repo/client — @claude-opus-4.7, started 2026-05-21
+  — @web-client-dev (harness claude-code, session offline-sync-20260903-a), branch example/offline-sync, claimed 2026-09-03, expires 2026-09-06
+- [ ] Draft: offline-sync #kind/design #repo/client — @web-client-os-pm (session offline-design-20260903-a), started 2026-09-03
 ```
 
 3-day default expiry on In Flight cards; after expiry any agent (or James) can reclaim. Update the expiry whenever you touch the card.
@@ -232,11 +234,11 @@ Never strip the frontmatter, never delete the footer, always update `list-collap
 
 ## Daily check-ins
 
-Active agents append once per work-session to `Daily Notes/agent-status.md`:
+Active agents append once per authorized write session to `Daily Notes/agent-status.md`; read-only/unassigned starts report in chat instead. Include role, actual harness, unique session label, scope and next action:
 
 ```markdown
-## 2026-05-21
-- @claude-opus-4.7: offline-sync — finished proposal section, opening for review
+## 2026-09-03
+- @web-client-os-pm (harness claude-code, session offline-design-20260903-a): offline-sync — finished the assigned proposal section / next: bounded review
 ```
 
 ## Pre-promotion checklist

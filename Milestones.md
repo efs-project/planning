@@ -14,8 +14,8 @@ honest, but must not invent dates, requirements, or launch commitments.
 
 ## Devcon presentation (2026-11)
 
-**Status:** speaker application submitted; selection pending; talk delivery
-scope remains unlocked until acceptance.
+**Status:** talk accepted and participation confirmed 2026-09-02; exact session
+date, time, room, and presentation logistics remain pending.
 
 The presentation should describe and demonstrate whatever is genuinely coherent
 by Devcon. It must not turn an unfinished v2 design into a launch promise.
@@ -34,7 +34,7 @@ by Devcon. It must not turn an unfinished v2 design into a launch promise.
   [[Designs/clientv2/README|Designs/clientv2/README.md]]. Its exact app lane,
   rendering ABI, and implementation target remain evidence-gated.
 
-### Submitted presentation shape — delivery details remain open
+### Accepted presentation shape - delivery details remain open
 
 - Identify centralized off switches across the full Ethereum app stack.
 - Use the public EFS Sepolia system as the working example.
@@ -45,8 +45,14 @@ by Devcon. It must not turn an unfinished v2 design into a launch promise.
 
 ### Hard requirements
 
-None locked. James will add them when the v2 research and implementation shape
-are concrete enough to make commitments meaningful.
+- Deliver the accepted **20-minute talk plus 5 minutes of Q&A** in the
+  **Permissionless Networks** track unless Devcon requests a program change.
+- Keep the session educational and non-promotional, with EFS used as a working
+  case study rather than a sales pitch.
+- Keep November 3-6 available until the exact session slot is assigned.
+- Show only claims and demonstrations that remain accurate at presentation
+  time, with a preverified offline fallback for the live demonstration.
+- Do not turn Devcon into a v2 implementation or mainnet launch deadline.
 
 ---
 

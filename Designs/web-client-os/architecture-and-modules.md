@@ -5,7 +5,7 @@
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/ethereum-standards-and-interop]], [[Designs/open-web-app-store/architecture]], [[Designs/efsv2/hierarchical-files-and-folders]]
 **Standards profile:** [[Designs/web-client-os/web-platform-standards-and-forward-profile]]
 **Reviewers:** @historical-client-architecture (2026-08-14), @current-v2-read-path (2026-08-14), @web-platform-standards (2026-08-14), @os-drives-pm boundary review (2026-08-14)
-**Last touched:** 2026-08-23
+**Last touched:** 2026-08-26
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/cypherpunk-os #topic/app-model #topic/read-path #topic/privacy
 
@@ -457,6 +457,119 @@ inspect -> prepare -> activate -> healthy
 At the system-profile level the only automatic edge is `Open -> Inspect`.
 From Inspect, `{Try | Adopt | Fork | Plan Activate}` are independent branches
 with separate plans and receipts; none implicitly performs another.
+
+### Spatiotemporal composition and owned-resource law
+
+The pinned DeepSeek Harness/Cordis and wider plugin-system pressure pass is in
+[[Reviews/2026-08-26-module-plugin-systems-pressure/README]]. Its disposition is
+**take the lifecycle laws, not the framework**. Cordis is credible evidence
+for trusted control-plane composition; it is not selected as the EFS public
+ABI, configuration language, package identity, browser loader, security
+boundary or production runtime.
+
+The runtime must distinguish four concepts that a simple service registry
+often collapses:
+
+```text
+ServiceContract
+  semantic interface + exact version/profile + conformance obligations
+
+ServiceSlot
+  user/system role requiring a ServiceContract under one selection law
+
+ProviderBinding
+  exact Release/Set + RunnerRealization + config/grant/state binding
+  selected for one activation generation
+
+ServiceLease
+  one consumer's scoped, revocable live handle to one provider generation
+```
+
+These are proposal names, not new Core Types or frozen runtime bytes. A flat
+string key, TypeScript declaration merge, package name, URL, catalog slug or
+mutable EFS path cannot carry all four identities. WIT-shaped contracts remain
+the leading language-neutral direction, with generated in-process,
+`MessagePort`, SES, Wasm and native bindings; the semantic contract, not one
+transport, is the API.
+
+Every dependency edge declares its meaning. At minimum, preparation-required,
+live-required, optional-fixed, optional-live/discoverable, membership/want,
+startup/teardown order, exclusion/conflict, exclusive singleton, brokered
+many-provider service and deterministic list/UI contribution cannot collapse
+into one `dependsOn` relation. Exact resolution records provider, interface,
+edge kind, cardinality, selection rationale and conflict provenance. It is
+permutation-invariant or fails; import order and callback-registration timing
+do not decide the graph. Unsupported cycles are visible before code runs.
+
+Dependency satisfaction may produce `PREPARED` or `AWAITING_GRANT`. It never
+confers authority or automatically starts untrusted code. Each activation or
+instance freezes one exact committed provider view. A direct provider change
+creates a new view even when the returned value is equal; a stable broker may
+absorb backend churn only when its contract explicitly defines selection,
+draining and in-flight failure.
+
+Every host resource for which the OS claims revocation or cleanup belongs to
+one generation-fenced lease. Ownership is registered before guest setup can
+re-enter teardown; new host effects are rejected after revocation begins.
+Guest cleanup is cooperative optimization. The host still revokes ports,
+aborts brokered work, removes frames, terminates Workers, releases URLs and
+handles, tears down children, and rejects late completions when guest cleanup
+throws or hangs.
+
+Provider retirement uses consumer-first barriers:
+
+1. fence the provider and issue no new calls or leases;
+2. remove it from new dependency resolution;
+3. notify and revoke, drain or restart dependent instances according to the
+   contract;
+4. retain only host-held binding metadata plus close/cancel-only handles needed
+   for teardown;
+5. close dependent handles and children;
+6. release provider-owned resources; and
+7. ledger `QUIESCENT`, `FAILED`, `TIMED_OUT`, `LEAKED` or `UNKNOWN` against the
+   observed generation.
+
+Ordinary invoke, subscribe, acquisition and external dispatch are fenced before
+guest notification. A service that genuinely needs a drain operation exposes a
+distinct attenuated cleanup interface with an operation allowlist, deadline,
+budget and final revocation; it cannot acquire new authority or dispatch a new
+network, chain, signing or public-write effect.
+
+Only host-mediated acquisition can claim structural cleanup. A timer,
+listener, port, temporary handle or execution surface may be released. A chain
+submission, public EFS write, network send, payment or export another party
+observed is an external emission. It remains in `ActionReceipt` or operation
+status as dispatched/confirmed/rejected/`REMOTE_STATUS_UNKNOWN`; disposing the
+module prevents future effects and never rewrites the prior one.
+
+Desired profile, exact resolved lock, accepted activation generation,
+observed status and last-healthy selection stay separate. Public/shareable
+configuration is finite inert data. Executable authoring languages, HMR and
+file watchers may compile/test a profile during development, but never become
+the canonical public config or production update mechanism. Reconciliation
+uses one versioned pure semantics and one implementation within each live path
+to prevent online/offline drift, while independent conforming evaluators remain
+freeze evidence. It uses detached candidate preparation, capability/state
+diff, explicit authority, coherent selector commit, host-observed health and
+proved predecessor restoration or explicit recovery.
+
+Any compiled minimum-route boot index is a derived optimization, not a second
+selector. It binds the accepted `SystemActivationGeneration`, exact resolved-
+lock/root digest, evaluator/conformance version, platform profile and route
+key. Its exact whole-index digest is retained in trusted local selection/cache
+evidence, or each route entry carries a proof against the accepted lock root;
+self-declared tuple fields do not authenticate the index body. Boot verifies
+the bytes plus tuple and entry membership before package fetch or evaluation.
+Stale, swapped, tampered or unsupported input falls back to the conserved
+Reader/minimal route.
+
+This control plane sits above the execution lanes. Same-realm ESM/Web
+Components are trusted-base code; SES in a Dedicated Worker is the leading
+untrusted-JavaScript service lane; Wasm/WIT in a Dedicated Worker is the
+leading portable service/compute lane; and an opaque-origin iframe is the
+full-Web UI lane with explicit egress/DoS residuals. Cordis service realms,
+JavaScript globals, Workers, isolated worlds and Web Components do not become
+security boundaries merely by naming them.
 
 ### Dependency and authority rules
 
@@ -1254,6 +1367,10 @@ Revisit this architecture if any of the following occurs:
 - [ ] Determine whether trusted in-process modules and confined out-of-process
       modules can share one service IDL without forcing all hot-path calls
       through serialization.
+- [ ] Compare a tiny custom owned-resource/reconciliation kernel with a
+      Cordis-style reference in disposable browser fixtures; selection needs
+      measured bytes, main-thread work, reentrant teardown, dependency
+      withdrawal, rollback failure and auditability rather than feature count.
 - [ ] Measure document import maps, bundle-time splitting, and verified dynamic
       module loading against IPFS/static hosting before selecting a loader.
 - [ ] Select and test the stable-origin, exact-CID, DNSLink, and independent

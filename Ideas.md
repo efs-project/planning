@@ -8,6 +8,25 @@ A lightweight parking lot for future ideas, "we should do X someday" drops, and 
 
 ## Open
 
+### Shared public agent profiles, skills and knowledge — AGNTCY interoperability
+*(James, 2026-09-03; extends the existing NANDA/Git agent-artifact idea)*
+
+A skill/tool could let agents publish and read public profiles, exact role/SOUL
+documents, ordinary Agent Skills, configuration, datasets and attributed shared
+knowledge on EFS. Keep private memory/secrets separate; a discovered document
+does not grant authority or become the consumer's instructions automatically.
+
+[[Reviews/2026-09-03-agntcy-deep-dive/README|The AGNTCY deep dive]] confirms real
+overlap: released Directory/OASF already supports content-addressed records,
+skill bundles, signatures, discovery, export/install and replication. Reuse
+native formats and investigate an optional adapter; do not build an EFS-only
+registry or pitch hashes/federation as unique. The useful hypothesis is common
+typed data, independent claims and authority-qualified updates that apps and
+contracts can consume. Next evidence, when this lane is prioritized: one
+disposable comparison against Git/OCI + AGNTCY, including two contributors,
+conflicting revisions and a real contract consumer; conventional tools may win.
+No Core change, public registry, integration commitment or new owner ask.
+
 ### Curator-qualified Open Alternatives starter catalog
 *(James, 2026-08-24; prompted by [debloat.dev](https://debloat.dev/) and its [HN discussion](https://news.ycombinator.com/item?id=49410362))*
 
@@ -390,3 +409,219 @@ People should be able to use **burner wallets for transactionless interactions**
 - Burner key custody / "share hex not ENS in archival URLs" (ARCH-9) — burners are ephemeral keys; how do they map to a durable user identity?
 
 Not blocking. A candidate for a dedicated brainstorm/design (likely an SDK + lens-model concern). **Update 2026-07-01:** the *burner-session* half **shipped** — contracts **PR #39 "instant Sepolia burner session"** merged to `main` (chain-aware burner + network persistence). **Update 2026-07-05 — graduated into EFS v2 →** [[deterministic-ids]] + [[efs-v2-holistic-redesign]]. Fable's v2 identity work directly takes up both threads: the **identity crux** splits *authorization* (live, chain-bound — the B′ account, ERC-1271/4337/7702) from *authorship* (eternal, chain-free key signatures + key-event log), and **named lenses (lens-as-LIST)** give the "these addresses are ME / a curator I follow" grouping without editing URLs. Transactionless/one-popup writes fall out of v2's deterministic one-tx parents-first batches. Watch the v2 designs; this parking-lot entry is now tracked there.
+
+### Native account abstraction: enshrine verification, keep EFS authority programmable
+*(James lead, 2026-08-30; [Ben Adams on EIP-8141 vs EIP-8130](https://x.com/ben_a_adams/status/2093340730068496430); primary specs: [EIP-8141](https://eips.ethereum.org/EIPS/eip-8141), [EIP-8130](https://eips.ethereum.org/EIPS/eip-8130))*
+
+Ben Adams argues for EIP-8141's narrower native-AA boundary: Ethereum verifies
+scheme-tagged signatures and execution/payment approvals, while each account
+defines what those approvals mean. EIP-8130 instead makes actors, scopes,
+administrative roles, expiry, locking, sequence/replay state, and a singleton
+Keystore legible to consensus. His reason for changing position is not only
+flexibility: Nethermind and ethrex implemented the revised 8141 design on a
+devnet, and its sender-local public-validation dependency rule is intended to
+bound mempool invalidation without freezing a wallet-authority vocabulary.
+
+**What this means for EFS:**
+
+- It strengthens the existing EFS split between durable authorship and live,
+  chain-bound authorization. Native AA may transport and verify an EFS write;
+  it must not become the identity of an EFS author, the meaning of a
+  `PrincipalId`, or the authority by which readers accept claims.
+- 8141's signature list and account-defined composition are a plausible future
+  rail for main + burner + passkey/P-256 + recovery/PQ combinations, scoped
+  agent/session credentials, sponsorship, batching, and execute-then-pay. EFS
+  should preserve these as wallet-policy choices rather than encode one actor,
+  scope-bit, admin, or singleton-keystore model into its own permanent bytes.
+- EFS cannot assume 8141 shipment, uniform public-mempool propagation, or
+  cross-chain support. The current EIP-712/ERC-1271/4337/7702 paths and a plain
+  EOA fallback remain the compatibility floor; chain profiles must report
+  exact support instead of treating EIP status as deployed capability.
+- The article exposes one concrete pressure test: can one logical EFS write
+  plan preserve the same record IDs, recovered authorship, effects preview,
+  and receipt across (a) legacy EOA submission, (b) ERC-4337/7702 smart-account
+  submission, and (c) a disposable 8141 frame-transaction adapter, including
+  separate execution and payment approvers? Any semantic drift means the
+  Submitter boundary is leaking transaction mechanics into EFS meaning.
+
+**Tracking trigger:** carry this into the wallet/action and held authority
+passes when either selects a native-AA adapter or freezes signer/principal
+semantics. Before then it is dated pressure evidence, not a Core requirement,
+dependency, supported-chain claim, or recommendation that EFS standardize an
+authority schema. Related: [[Designs/clientv2/wallet-and-actions]],
+[[Designs/clientv2/identity]], [[Designs/web-client-os/ethereum-standards-and-interop]],
+and the burner/multi-wallet entry above.
+
+### Remotely paged immutable EFS indexes on Arweave
+*(James lead, 2026-08-30; [Sam Williams's announcement](https://x.com/samecwilliams/status/2093849872776515622); [HyperBEAM PR #1108](https://github.com/permaweb/HyperBEAM/pull/1108), merged to `edge` 2026-08-29)*
+
+HyperBEAM's `hb_store_arlmdb` adapts read-only LMDB 1.0 stores to Arweave as a
+remote page source. The demonstrated index contains 8.6 billion ID-to-global-
+offset rows in one ~160 GB transaction. It uses 64 KiB LMDB pages aligned
+inside Arweave's 256 KiB chunks and a defragmented layout that co-locates the
+meta/root pages and clusters branch pages. A fully cold point lookup touches
+six pages via three chunk GETs (768 KiB); as the ~75 MB branch region warms,
+most later lookups need one leaf-chunk GET. Failed range fetches surface as
+unavailable, while a miss is returned only after the relevant leaf was read.
+
+**EFS relation:** this is strong implementation precedent for the existing
+off-chain snapshot/index lane, not a replacement for EFS Core. A deterministic
+materialized index could package a large catalog, typed-backlink set, directory,
+historical admission set, or other bounded query surface as an immutable
+artifact; a client would fetch only the B-tree path needed for a query rather
+than download or independently index the whole history. The authoritative
+inputs remain EFS Records, Occurrences, admission receipts, Realm policy, and
+their pinned basis. The remote database remains an accelerator whose publisher,
+schema, basis, coverage, build recipe, artifact digest, and completeness claim
+must be explicit.
+
+**Non-negotiable EFS semantics:**
+
+- unavailable, corrupt, unverified, unsupported, stale, or incompletely covered
+  pages yield qualified `UNKNOWN`/unavailable—not proven absence;
+- `not found` is usable only when the artifact's declared complete coverage and
+  the exact searched leaf/range are verified at the pinned basis;
+- one publisher's LMDB transaction never becomes canonical graph truth, global
+  discovery authority, Realm admission, or a substitute for contract-readable
+  bounded indexes;
+- the artifact must be reproducible from retained authoritative inputs, and
+  independent rebuilds should converge byte-for-byte or explain every allowed
+  source of nondeterminism;
+- Arweave is one replaceable carrier. The identity and verification envelope
+  must permit independent mirrors, local copies, and later formats without
+  renaming the indexed EFS state.
+
+**Research handoff for Codex agents:**
+
+1. Pin and inspect PR #1108, `hb_store_arlmdb`, `hb_store_arweave`, the
+   `lmdb-defrag` tool, and the exact Arweave chunk/range APIs. State whether the
+   client obtains and verifies transaction/chunk proofs or trusts its node for
+   bytes, offsets, tags, and range completeness.
+2. Map the mechanism onto EFS snapshot concepts: source Realm/revision, block
+   or admission basis, Type/View/QueryProfile, coverage interval/set, build
+   implementation, artifact root, supersession, and qualified read result.
+3. Compare LMDB with at least SQLite, immutable sorted-table/B-tree, and a
+   Merkleized page format for deterministic builds, page authentication,
+   HTTP/Arweave range access, browser support, range scans, compression, and
+   independent implementations. Do not choose LMDB because the demo used it.
+4. Threat-model malicious publishers/nodes, wrong offset metadata, truncated or
+   mixed-version pages, unavailable branch/leaf chunks, cache poisoning, stale
+   snapshots, incomplete backfills presented as complete, and gateway loss.
+5. Specify one disposable synthetic EFS-graph experiment: deterministic build;
+   publish or locally emulate Arweave-aligned chunks; cold/warm point and bounded
+   range reads; byte/proof verification; independent rebuild; corrupt/missing-
+   page failures; and proof that `UNKNOWN` never collapses to absence. Report
+   bytes fetched, latency, cache size, build size/time, rebuild equality, and
+   which trust assumptions remain.
+
+**Stop condition:** return evidence and a smallest useful experiment plan. Do
+not publish a durable dataset, spend funds, create an Arweave dependency, alter
+Core/Type/QueryProfile bytes, or implement a production adapter without a
+separate authorization. Tracked in [[Kanban]]. Related existing lane:
+[[Designs/efsv2/core-architecture-candidate]] §Indexes and the off-chain
+`EFS-in-Postgres` card—the Postgres pattern is a mutable operator service; this
+idea is a portable immutable read artifact, so they complement rather than
+replace one another.
+
+### AO, HyperBEAM, and PermawebOS competitive architecture deep dive
+*(James lead, 2026-08-30; canonical entry points: [AO](https://ao.arweave.net/), [Permaweb link tree](https://linktr.ee/permaweb), [HyperBEAM](https://github.com/permaweb/HyperBEAM), [PermawebOS](https://github.com/permaweb/os); triggering [PermawebOS Ethereum-signing release](https://x.com/aoTheComputer/status/2093322717068206290))*
+
+**Current PM classification:** first-tier adjacent platform and plausible main
+competitor at the *combined ecosystem/platform* layer; not yet established as
+the main competitor to every EFS layer. Arweave alone is a durable byte carrier
+and complement. ArFS/ArDrive compete with Files. AO/HyperBEAM/PermawebOS now
+extend upward into computation, wallet/signing, naming, deployment, routing,
+bundling, marketplaces, agents and infrastructure economics, overlapping the
+combined ambition of EFS Core + EFS OS + Open Web App Store. The deepest
+non-overlap is semantic: AO begins with permanent messages and distributed
+process computation; EFS begins with portable typed information, plural claims,
+Realm admission, Bindings and reader-selected Lens policy.
+
+The 2026-07-29 [[Reviews/2026-07-29-ardrive-teardown-corpus/os-ecosystem|permaweb OS/ecosystem lane]] is useful but now time-bounded. It found no end-user
+OS-like shell and treated `aos` as a developer Lua REPL. The August PermawebOS
+node/bundler distribution and browser wallet materially change that surface:
+the name now covers deployable HyperBEAM environments with measured hardware
+evidence plus a wallet/publisher/workbench integrated into AO's network portal.
+The old null result must be preserved as dated history, then refreshed rather
+than silently overwritten.
+
+**Architecture map to verify, not inherit:**
+
+```text
+Arweave permanent storage
+  -> AO message/process protocol and economic network
+  -> AO-Core / HyperBEAM execution and routing
+  -> PermawebOS node, bundler and wallet environments
+  -> Bazar, names, agents, financial protocols and permanent applications
+```
+
+**Deep-dive questions:**
+
+1. **Protocol truth and execution.** Pin AO-Core/HyperBEAM specifications and
+   implementation. What is a process, message, state, scheduler, assignment,
+   result and computable-value address? Which results are independently
+   replayable/verifiable, which depend on attested executors/zones, and where
+   can equivocation, ordering or availability occur?
+2. **Storage and durability.** Separate Arweave consensus, transaction data,
+   bundles, gateways, bundlers, indexes and local HyperBEAM stores. Determine
+   the exact proof and trust path for bytes, range reads, process history and
+   state. Test what survives loss of the canonical portal, gateway, indexer,
+   scheduler, bundler, operator, wallet publisher and application team.
+3. **PermawebOS product boundary.** Audit the signed node images, Linux/SNP/
+   LapEE/AndEE models, measurement devices, zones, provisioning/update path,
+   wallet/browser extension, publishing, app connections and permissions.
+   Separate marketing name, OS distribution, wallet and network service. Treat
+   the alpha/beta as architecture evidence until audits and operational history
+   justify stronger claims.
+4. **Identity, authority and trust.** Trace AR keys, Ethereum-key support,
+   wallet-derived addresses, AO process ownership, zone identities, names,
+   delegation, recovery, rotation, multisig/session/agent authority and
+   revocation. Compare explicitly with EFS `PrincipalId` vs actual signer,
+   portable authorship, Realm-qualified authorization and Lens-selected trust.
+5. **Information model and queries.** Determine how apps represent files,
+   metadata, relations, schemas, indexes, mutable heads, provenance, moderation,
+   deletion/withdrawal and complete absence. Test whether inter-app semantics
+   are shared protocol, conventions, process-local state or indexer APIs. This
+   is the likely EFS differentiation axis; do not assume it without examples.
+6. **Application and OS experience.** Hands-on trace wallet onboarding, guest
+   reads, publish/deploy, Bazar install/use or asset acquisition without buying,
+   names, app-to-wallet permissions, direct links, updates/rollback, offline/
+   local state, accessibility/mobile, recovery and provider switching. Compare
+   with EFS BIOS -> Reader Kernel -> Shell -> Apps, System Chrome, direct App
+   launch, capability grants, exact generations and Files as the flagship loop.
+7. **Developer and operator experience.** Build the smallest documented AO app
+   locally/test-only, inspect SDKs, message/debug flows, deployment receipts,
+   costs and failure recovery; separately examine what running a HyperBEAM or
+   PermawebOS node/bundler demands. Do not fund wallets, publish permanently or
+   expose a node in this pass.
+8. **Economics, governance and adoption.** Use primary/onchain/repository/app-
+   usage evidence where possible: active developers/users/processes, repeat use,
+   storage/compute costs, latency, token/subsidy dependence, operator diversity,
+   upgrades, authorities, audits and corporate concentration. Distinguish
+   acquired users, farming activity, uploads and durable recurring product use.
+9. **Integration seams.** Evaluate Arweave as an EFS carrier; AO as optional
+   computation/agent backend; HyperBEAM as index/resolver/execution provider;
+   PermawebOS measurements as source-qualified evidence; AO names/Bazar/wallet
+   interoperability; and EFS typed records as a semantic/provenance layer for
+   AO applications. Imported AO results must retain process, node/zone,
+   measurement, history and basis and never become unqualified EFS truth.
+10. **Competitive response.** For each EFS surface label the result `WORRY`,
+    `INTEGRATE`, `BORROW`, `DIFFERENTIATE`, or `IGNORE FOR NOW`, with evidence,
+    confidence, trigger and smallest EFS requirement change. Include the
+    strongest case that AO makes EFS redundant and the strongest case that its
+    compute-first model leaves EFS's semantic/trust problem unsolved.
+
+**Required deliverables:** a dated source corpus; terminology and architecture
+map; claim/evidence register; direct EFS comparison matrix; threat/authority/
+centralization map; hands-on traces with exact versions and receipts; adoption
+and maturity assessment with unknowns shown; integration candidates; falsified
+EFS assumptions; and a short executive verdict answering (a) main competitor
+to what, (b) how much to worry now, (c) what to integrate, (d) what EFS should
+do differently, and (e) what evidence would change the verdict.
+
+**Boundaries:** research and disposable local/test traces only. No asset trade,
+token or wallet funding, permanent upload, public post, external message, node
+deployment, staking, durable dataset, architecture adoption, Core/Type/profile
+bytes, dependency or product commitment without separate authorization. Keep
+the remotely paged LMDB investigation as a linked mechanism-specific child,
+not a duplicate of this ecosystem pass. Tracked in [[Kanban]].
