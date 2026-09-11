@@ -46,7 +46,12 @@ function checkSegment(segment) {
 function checkPath(pathSegments) {
   if (!Array.isArray(pathSegments)) refuse('INVALID_ROUTE', 'pathSegments must be an array.');
   if (pathSegments.length > MAX_ROUTE_SEGMENTS) refuse('ROUTE_TOO_LARGE', 'Route exceeds the prototype depth bound.');
-  return pathSegments.map(checkSegment);
+  const checked = [];
+  for (let index = 0; index < pathSegments.length; index++) {
+    if (!Object.hasOwn(pathSegments, index)) refuse('INVALID_PATH_SEGMENT', 'Route contains a missing path segment.');
+    checked.push(checkSegment(pathSegments[index]));
+  }
+  return checked;
 }
 
 function checkId(value) {

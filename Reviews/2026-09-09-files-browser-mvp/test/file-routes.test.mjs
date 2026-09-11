@@ -54,6 +54,12 @@ test('malformed encoding, traversal, separators, controls and ambiguous empty se
   routeError(() => api.decodeFilesRoute('#/files/v1/aFirst/a//b'), 'INVALID_PATH_SEGMENT');
 });
 
+test('sparse path arrays refuse instead of encoding an undecodable empty segment', () => {
+  for (const pathSegments of [Array(1), [, 'note'], ['folder', , 'note'], ['folder', ,]]) {
+    routeError(() => api.encodeFilesRoute({ lensId: 'aFirst', pathSegments }), 'INVALID_PATH_SEGMENT');
+  }
+});
+
 test('old and renamed routes remain separate observations and carry no authority claim', () => {
   const oldHash = api.encodeFilesRoute({ lensId: 'exact', pathSegments: ['old.txt'], fileId: FILE });
   const renamedHash = api.encodeFilesRoute({ lensId: 'exact', pathSegments: ['new.txt'], fileId: FILE });

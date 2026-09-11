@@ -73,3 +73,12 @@ test('attachment filename strips path components and controls while bytes stay e
   assert.equal(api.prepareVerifiedDownload(qualified(), '..').filename, 'download.bin');
   assert.equal(api.prepareVerifiedDownload(qualified(), 'folder/').filename, 'download.bin');
 });
+
+test('attachment filename removes bidi controls without removing useful Unicode or changing bytes', () => {
+  const spoof = api.prepareVerifiedDownload(qualified(), 'invoice\u202Egnp.exe');
+  assert.equal(spoof.filename, 'invoicegnp.exe');
+  assert.deepEqual([...spoof.bytes], [0, 255, 65, 128]);
+  for (const control of ['\u061c', '\u200e', '\u200f', '\u202a', '\u202b', '\u202c', '\u202d', '\u202e', '\u2066', '\u2067', '\u2068', '\u2069']) {
+    assert.equal(api.prepareVerifiedDownload(qualified(), `旅${control}行-ملاحظة-e\u0301.txt`).filename, '旅行-ملاحظة-e\u0301.txt');
+  }
+});
