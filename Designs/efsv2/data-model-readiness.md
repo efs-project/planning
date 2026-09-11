@@ -2,7 +2,7 @@
 
 **Status:** reference — requirements/evidence map, not feature-parity certification
 **Target repos:** planning, contracts, sdk, client
-**Last reconciled:** 2026-09-10
+**Last reconciled:** 2026-09-11
 
 #status/reference #kind/note #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/requirements
 
@@ -33,6 +33,19 @@ implementation experiment. Feature-complete data acceptance, authenticated
 offline recovery, general Type tooling and real-wallet simplicity are not yet
 proven. A usable local Files browser is significant progress, not proof of those
 remaining capabilities.
+
+**September 11 engineering checkpoint:** the
+[[../../Reviews/2026-09-11-pragmatic-browser-pass|pragmatic browser pass]] now has
+reviewed action-cost/recovery integration and an exact, COMPLETE 1,000-entry
+reader result across three acquisitions. That listing still costs 838 HTTP
+requests locally; remote browsing performance remains open. Fable's code-backed
+Type cache reports roughly 10% lower repeated-admission gas, but an actual valid
+large-Type admission test exposes its representation ceiling. Compact physical
+cache design, declaration transaction fit and populated-layout migration must
+be resolved before adopting that optimization. These are prototype findings,
+not new restrictions on the Type language. The full clickable upload/download/
+history walkthrough is being joined; it does not close the six foundation gates
+below.
 
 ## Capability ledger
 
