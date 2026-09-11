@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>EFS 2.1 · Files experiment</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+<header><div class="brand">efs<span>2.1</span></div><div><h1>Files, on Ethereum.</h1><p>A fresh-genesis filesystem experiment</p></div><span class="pill">LOCAL CANDIDATE</span></header>
+<aside class="notice">Disposable development wallet · public, permanent bytes · native caller authority. This is not production or full EFS v2. Portable authorization, Lenses, tags, restore and directory moves are unintegrated.</aside>
+<main><section class="workspace">
+<div class="toolbar"><nav id="breadcrumbs" aria-label="Folders"></nav><button id="reload">Reload canonical state</button></div>
+<div id="error" role="alert"></div><p id="listing-state" role="status">Connecting to isolated chain…</p>
+<table><thead><tr><th>Name</th><th>Kind</th><th>Revision</th><th>Action</th></tr></thead><tbody id="files"></tbody></table>
+<details class="create" open><summary>Add to this folder</summary><div class="form-grid"><label>New name<input id="new-name" autocomplete="off" placeholder="Notes.txt"></label><label>New text<textarea id="new-text" placeholder="Write something small…"></textarea></label></div><div class="buttons"><button id="create-text" class="primary">Create text file</button><button id="create-folder">Create folder</button><label class="upload">Upload file<input type="file" id="upload"></label><button id="upload-button">Upload bytes</button></div><small>Names: 1–64 printable ASCII bytes; percent sequences are literal. Uploads ≤ 4032 bytes.</small></details>
+</section>
+<section class="inspector"><h2 id="file-title">Open a file</h2><p id="file-state">Exact bytes are verified against their immutable RecordId.</p><div id="file-controls" hidden><label>File text<textarea id="file-text" rows="10"></textarea></label><div class="buttons"><button id="save" class="primary">Save revision</button><button id="download">Download bytes</button></div><label>Rename to<input id="rename"></label><div class="buttons"><button id="rename-button">Rename file</button><button id="unlink" class="danger">Unlink file</button></div><button id="history-button">Show history</button><ol id="history"></ol><pre id="history-bytes"></pre></div></section>
+<details class="diagnostics"><summary>Observation & contract interoperability</summary><pre id="basis"></pre><button id="read-quote">Read producer /swaps/eth-usdc</button><p id="quote-state">A separately deployed consumer resolves and reads canonical state. Benchmark publishes values; this fresh demo has no quote yet.</p><small>Observations trust this RPC; they are not cryptographic state proofs.</small></details>
+</main>
+<button id="gas-toggle" class="gas-toggle">Gas & modelled cost</button><aside id="gas-drawer" hidden><h2>Actual gas. Modelled cost.</h2><p>MODEL · 11 Sep 2026 defaults, not live quotes. Execution-only estimates exclude real L2 data / sequencer fees. Anvil is not an L2 gas meter.</p><div id="gas-journal"></div></aside>
+<script type="module" src="/app.mjs"></script></body></html>
