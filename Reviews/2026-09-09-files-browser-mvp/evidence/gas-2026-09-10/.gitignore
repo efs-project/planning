@@ -1,0 +1,5 @@
+# Raw debug_traceTransaction responses (~108 MB across 31 transactions) are
+# not committed. Their sha256 digests are recorded in index.json and the
+# scripts/measure/README.md commands regenerate them deterministically
+# (execution gas byte-identical; calldata differs by ±12-24 gas per run).
+trace.json.gz

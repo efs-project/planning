@@ -1,0 +1,365 @@
+{
+  "run": 3,
+  "sequence": "lead-marginal",
+  "environment": {
+    "commit": "e6de41402cce5be8b919410bc77267a702866583",
+    "dirty": true,
+    "anvil": "anvil Version: 1.7.1",
+    "solc": {
+      "version": "0.8.30+commit.73712a01"
+    }
+  },
+  "operations": [
+    {
+      "op": "tag-lbl0",
+      "kind": "tag",
+      "txHash": "0x66adcc61d9c948bc71e80c61d2abf91716581c8cf7b5c255b44b1c3b21d2853b",
+      "receiptGasUsed": 3046565,
+      "gross": 3009977,
+      "intrinsic": 36588,
+      "refundApplied": 0,
+      "residual": 0,
+      "steps": 212466,
+      "categories": {
+        "SSTORE": 1427300,
+        "SLOAD": 653800,
+        "KECCAK256": 26124,
+        "LOG": 4280,
+        "CALLDATA": 51970,
+        "CALL_OVERHEAD": 21600,
+        "PRECOMPILE": 3100,
+        "MEMORY": 141420,
+        "STACK": 341822,
+        "CONTROL": 195325,
+        "ARITH": 128904,
+        "CODE": 14166,
+        "ENV": 166,
+        "OTHER": 0
+      },
+      "sstore": {
+        "sstoreOps": 104,
+        "distinctSlotsWritten": 94,
+        "writesByClass": {
+          "FRESH": 68,
+          "NOOP": 18,
+          "WARM_REWRITE": 8,
+          "COLD_REWRITE": 10
+        },
+        "gasByClass": {
+          "FRESH": 1389400,
+          "NOOP": 8100,
+          "WARM_REWRITE": 800,
+          "COLD_REWRITE": 29000
+        },
+        "slotsByFinalClass": {
+          "FRESH": 68,
+          "UNCHANGED_ZERO": 3,
+          "REWRITE": 10,
+          "UNCHANGED": 13
+        },
+        "modelMismatches": 0
+      },
+      "sloadOps": 778,
+      "sloadDistinct": 288,
+      "checks": {
+        "traceErrors": 0,
+        "sstoreModelMismatches": 0,
+        "callTracerFrameMismatches": 0,
+        "callTracerFrames": 42,
+        "prestateDiffMismatches": 0,
+        "prestateChangedSlots": 78,
+        "finalValueMismatches": 0,
+        "unattributedWrites": 0
+      },
+      "glamsterdam": {
+        "note": "ESTIMATED: PM-supplied multipliers applied to MEASURED write counts by class (fresh x110,020; cold rewrite x12,100; every other SSTORE on an already-written slot x10,100). Not a prediction of total gas.",
+        "freshWrites": 68,
+        "coldRewrites": 10,
+        "warmWrites": 26,
+        "clears": 0,
+        "sstoreEstimate": 7864960
+      }
+    },
+    {
+      "op": "tag-lbl1",
+      "kind": "tag",
+      "txHash": "0xb318bb24823ec43af4d89048d76713639e5484186dfaee035c823d903d5c1e25",
+      "receiptGasUsed": 2804520,
+      "gross": 2767920,
+      "intrinsic": 36600,
+      "refundApplied": 0,
+      "residual": 0,
+      "steps": 208442,
+      "categories": {
+        "SSTORE": 1210500,
+        "SLOAD": 645000,
+        "KECCAK256": 25140,
+        "LOG": 4280,
+        "CALLDATA": 51967,
+        "CALL_OVERHEAD": 21600,
+        "PRECOMPILE": 3100,
+        "MEMORY": 139184,
+        "STACK": 335225,
+        "CONTROL": 191025,
+        "ARITH": 126567,
+        "CODE": 14166,
+        "ENV": 166,
+        "OTHER": 0
+      },
+      "sstore": {
+        "sstoreOps": 100,
+        "distinctSlotsWritten": 90,
+        "writesByClass": {
+          "COLD_REWRITE": 18,
+          "FRESH": 56,
+          "NOOP": 18,
+          "WARM_REWRITE": 8
+        },
+        "gasByClass": {
+          "COLD_REWRITE": 52200,
+          "FRESH": 1149400,
+          "NOOP": 8100,
+          "WARM_REWRITE": 800
+        },
+        "slotsByFinalClass": {
+          "REWRITE": 18,
+          "FRESH": 56,
+          "UNCHANGED_ZERO": 3,
+          "UNCHANGED": 13
+        },
+        "modelMismatches": 0
+      },
+      "sloadOps": 770,
+      "sloadDistinct": 284,
+      "checks": {
+        "traceErrors": 0,
+        "sstoreModelMismatches": 0,
+        "callTracerFrameMismatches": 0,
+        "callTracerFrames": 42,
+        "prestateDiffMismatches": 0,
+        "prestateChangedSlots": 74,
+        "finalValueMismatches": 0,
+        "unattributedWrites": 0
+      },
+      "glamsterdam": {
+        "note": "ESTIMATED: PM-supplied multipliers applied to MEASURED write counts by class (fresh x110,020; cold rewrite x12,100; every other SSTORE on an already-written slot x10,100). Not a prediction of total gas.",
+        "freshWrites": 56,
+        "coldRewrites": 18,
+        "warmWrites": 26,
+        "clears": 0,
+        "sstoreEstimate": 6641520
+      }
+    },
+    {
+      "op": "tag-lbl2",
+      "kind": "tag",
+      "txHash": "0xa14dd804355a9707ccf5aaafde2d619e3517c11ef5d62c68817c053915ccef45",
+      "receiptGasUsed": 2838264,
+      "gross": 2801664,
+      "intrinsic": 36600,
+      "refundApplied": 0,
+      "residual": 0,
+      "steps": 208320,
+      "categories": {
+        "SSTORE": 1244700,
+        "SLOAD": 645000,
+        "KECCAK256": 25140,
+        "LOG": 4280,
+        "CALLDATA": 51967,
+        "CALL_OVERHEAD": 21600,
+        "PRECOMPILE": 3100,
+        "MEMORY": 139163,
+        "STACK": 335033,
+        "CONTROL": 190857,
+        "ARITH": 126492,
+        "CODE": 14166,
+        "ENV": 166,
+        "OTHER": 0
+      },
+      "sstore": {
+        "sstoreOps": 100,
+        "distinctSlotsWritten": 90,
+        "writesByClass": {
+          "COLD_REWRITE": 16,
+          "FRESH": 58,
+          "NOOP": 18,
+          "WARM_REWRITE": 8
+        },
+        "gasByClass": {
+          "COLD_REWRITE": 46400,
+          "FRESH": 1189400,
+          "NOOP": 8100,
+          "WARM_REWRITE": 800
+        },
+        "slotsByFinalClass": {
+          "REWRITE": 16,
+          "FRESH": 58,
+          "UNCHANGED_ZERO": 3,
+          "UNCHANGED": 13
+        },
+        "modelMismatches": 0
+      },
+      "sloadOps": 770,
+      "sloadDistinct": 284,
+      "checks": {
+        "traceErrors": 0,
+        "sstoreModelMismatches": 0,
+        "callTracerFrameMismatches": 0,
+        "callTracerFrames": 42,
+        "prestateDiffMismatches": 0,
+        "prestateChangedSlots": 74,
+        "finalValueMismatches": 0,
+        "unattributedWrites": 0
+      },
+      "glamsterdam": {
+        "note": "ESTIMATED: PM-supplied multipliers applied to MEASURED write counts by class (fresh x110,020; cold rewrite x12,100; every other SSTORE on an already-written slot x10,100). Not a prediction of total gas.",
+        "freshWrites": 58,
+        "coldRewrites": 16,
+        "warmWrites": 26,
+        "clears": 0,
+        "sstoreEstimate": 6837360
+      }
+    },
+    {
+      "op": "createDir-m1",
+      "kind": "createDir",
+      "txHash": "0x5c5453803ef17ad97369f30fedfe118f3621b3d2643e276baa7216346f0925d8",
+      "receiptGasUsed": 5117380,
+      "gross": 5073848,
+      "intrinsic": 43532,
+      "refundApplied": 0,
+      "residual": 0,
+      "steps": 401649,
+      "categories": {
+        "SSTORE": 2191300,
+        "SLOAD": 966400,
+        "KECCAK256": 43782,
+        "LOG": 4280,
+        "CALLDATA": 171581,
+        "CALL_OVERHEAD": 22872,
+        "PRECOMPILE": 3100,
+        "MEMORY": 392061,
+        "STACK": 644669,
+        "CONTROL": 375870,
+        "ARITH": 242103,
+        "CODE": 15620,
+        "ENV": 210,
+        "OTHER": 0
+      },
+      "sstore": {
+        "sstoreOps": 163,
+        "distinctSlotsWritten": 142,
+        "writesByClass": {
+          "COLD_REWRITE": 23,
+          "FRESH": 103,
+          "NOOP": 18,
+          "WARM_REWRITE": 19
+        },
+        "gasByClass": {
+          "COLD_REWRITE": 66700,
+          "FRESH": 2114600,
+          "NOOP": 8100,
+          "WARM_REWRITE": 1900
+        },
+        "slotsByFinalClass": {
+          "REWRITE": 23,
+          "FRESH": 103,
+          "UNCHANGED_ZERO": 3,
+          "UNCHANGED": 13
+        },
+        "modelMismatches": 0
+      },
+      "sloadOps": 1364,
+      "sloadDistinct": 415,
+      "checks": {
+        "traceErrors": 0,
+        "sstoreModelMismatches": 0,
+        "callTracerFrameMismatches": 0,
+        "callTracerFrames": 54,
+        "prestateDiffMismatches": 0,
+        "prestateChangedSlots": 126,
+        "finalValueMismatches": 0,
+        "unattributedWrites": 0
+      },
+      "glamsterdam": {
+        "note": "ESTIMATED: PM-supplied multipliers applied to MEASURED write counts by class (fresh x110,020; cold rewrite x12,100; every other SSTORE on an already-written slot x10,100). Not a prediction of total gas.",
+        "freshWrites": 103,
+        "coldRewrites": 23,
+        "warmWrites": 37,
+        "clears": 0,
+        "sstoreEstimate": 11984060
+      }
+    },
+    {
+      "op": "createDir-m2",
+      "kind": "createDir",
+      "txHash": "0x515891cd50c7b04e23d0e21f81e316433474d7cc850a9700a0e972cd1313040c",
+      "receiptGasUsed": 5132853,
+      "gross": 5089297,
+      "intrinsic": 43556,
+      "refundApplied": 0,
+      "residual": 0,
+      "steps": 402661,
+      "categories": {
+        "SSTORE": 2205600,
+        "SLOAD": 964200,
+        "KECCAK256": 43614,
+        "LOG": 4280,
+        "CALLDATA": 171581,
+        "CALL_OVERHEAD": 22872,
+        "PRECOMPILE": 3100,
+        "MEMORY": 392020,
+        "STACK": 646205,
+        "CONTROL": 377232,
+        "ARITH": 242763,
+        "CODE": 15620,
+        "ENV": 210,
+        "OTHER": 0
+      },
+      "sstore": {
+        "sstoreOps": 163,
+        "distinctSlotsWritten": 141,
+        "writesByClass": {
+          "COLD_REWRITE": 21,
+          "FRESH": 104,
+          "NOOP": 18,
+          "WARM_REWRITE": 20
+        },
+        "gasByClass": {
+          "COLD_REWRITE": 60900,
+          "FRESH": 2134600,
+          "NOOP": 8100,
+          "WARM_REWRITE": 2000
+        },
+        "slotsByFinalClass": {
+          "REWRITE": 21,
+          "FRESH": 104,
+          "UNCHANGED_ZERO": 3,
+          "UNCHANGED": 13
+        },
+        "modelMismatches": 0
+      },
+      "sloadOps": 1362,
+      "sloadDistinct": 414,
+      "checks": {
+        "traceErrors": 0,
+        "sstoreModelMismatches": 0,
+        "callTracerFrameMismatches": 0,
+        "callTracerFrames": 54,
+        "prestateDiffMismatches": 0,
+        "prestateChangedSlots": 125,
+        "finalValueMismatches": 0,
+        "unattributedWrites": 0
+      },
+      "glamsterdam": {
+        "note": "ESTIMATED: PM-supplied multipliers applied to MEASURED write counts by class (fresh x110,020; cold rewrite x12,100; every other SSTORE on an already-written slot x10,100). Not a prediction of total gas.",
+        "freshWrites": 104,
+        "coldRewrites": 21,
+        "warmWrites": 38,
+        "clears": 0,
+        "sstoreEstimate": 12079980
+      }
+    }
+  ],
+  "elapsedMs": 32515
+}

@@ -1,0 +1,596 @@
+{
+  "op": "stageChunk-2",
+  "kind": "stageChunk",
+  "note": "Staging for createFile-2.",
+  "run": 1,
+  "txHash": "0xf058aca585d3869adb4c58794412b6d389268d0ed4b803135d7032e456237ae3",
+  "blockNumber": 88,
+  "status": "0x1",
+  "to": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+  "toName": "Carrier proxy",
+  "plan": {
+    "treeId": "0x4a5521388835656b1c66b6c3ae0c6a57942960a55e6f0a7468172444d32a9efa",
+    "bytes": 50,
+    "chunkCount": 1,
+    "chunkIndex": 0,
+    "chunkBytes": 50
+  },
+  "receiptGasUsed": 149489,
+  "gasLimit": 16777216,
+  "intrinsic": {
+    "bytes": 420,
+    "zeroBytes": 260,
+    "nonzeroBytes": 160,
+    "tokens": 900,
+    "calldataGas": 3600,
+    "standard": 24600,
+    "floor7623": 30000,
+    "floorApplies": false,
+    "hardfork": "cancun",
+    "fromTrace": 24600,
+    "matches": true
+  },
+  "execution": {
+    "startGas": 16752616,
+    "endRemaining": 16627727,
+    "gross": 124889,
+    "categoriesTotal": 124889,
+    "categoriesMatchGross": true,
+    "steps": 1409
+  },
+  "refund": {
+    "nodeCounter": 0,
+    "model": 0,
+    "cap": 29897,
+    "applied": 0,
+    "modelMatchesNode": true
+  },
+  "reconciliation": {
+    "formula": "intrinsic.standard + execution.gross - refund.applied",
+    "value": 149489,
+    "receipt": 149489,
+    "residual": 0,
+    "floor7623": 30000,
+    "floor7623Applies": false
+  },
+  "categories": {
+    "SSTORE": 106400,
+    "SLOAD": 8600,
+    "KECCAK256": 450,
+    "LOG": 1893,
+    "CALLDATA": 185,
+    "CALL_OVERHEAD": 2600,
+    "PRECOMPILE": 0,
+    "MEMORY": 230,
+    "STACK": 2271,
+    "CONTROL": 1354,
+    "ARITH": 900,
+    "CODE": 0,
+    "ENV": 6,
+    "OTHER": 0
+  },
+  "categoryCounts": {
+    "SSTORE": 6,
+    "SLOAD": 6,
+    "KECCAK256": 11,
+    "LOG": 1,
+    "CALLDATA": 31,
+    "CALL_OVERHEAD": 1,
+    "PRECOMPILE": 0,
+    "MEMORY": 55,
+    "STACK": 773,
+    "CONTROL": 224,
+    "ARITH": 298,
+    "CODE": 0,
+    "ENV": 3,
+    "OTHER": 0
+  },
+  "byOp": {
+    "SSTORE": {
+      "gas": 106400,
+      "n": 6
+    },
+    "SLOAD": {
+      "gas": 8600,
+      "n": 6
+    },
+    "DELEGATECALL": {
+      "gas": 2600,
+      "n": 1
+    },
+    "LOG2": {
+      "gas": 1893,
+      "n": 1
+    },
+    "JUMPI": {
+      "gas": 760,
+      "n": 76
+    },
+    "PUSH1": {
+      "gas": 540,
+      "n": 180
+    },
+    "JUMP": {
+      "gas": 512,
+      "n": 64
+    },
+    "KECCAK256": {
+      "gas": 450,
+      "n": 11
+    },
+    "PUSH2": {
+      "gas": 429,
+      "n": 143
+    },
+    "ADD": {
+      "gas": 222,
+      "n": 74
+    },
+    "DUP2": {
+      "gas": 180,
+      "n": 60
+    },
+    "MSTORE": {
+      "gas": 178,
+      "n": 37
+    },
+    "SWAP1": {
+      "gas": 174,
+      "n": 58
+    },
+    "SWAP2": {
+      "gas": 129,
+      "n": 43
+    },
+    "DUP3": {
+      "gas": 117,
+      "n": 39
+    },
+    "CALLDATACOPY": {
+      "gas": 114,
+      "n": 4
+    },
+    "DUP1": {
+      "gas": 108,
+      "n": 36
+    },
+    "AND": {
+      "gas": 90,
+      "n": 30
+    },
+    "SHL": {
+      "gas": 87,
+      "n": 29
+    },
+    "SUB": {
+      "gas": 87,
+      "n": 29
+    },
+    "GT": {
+      "gas": 87,
+      "n": 29
+    },
+    "JUMPDEST": {
+      "gas": 82,
+      "n": 82
+    },
+    "ISZERO": {
+      "gas": 78,
+      "n": 26
+    },
+    "DUP4": {
+      "gas": 69,
+      "n": 23
+    },
+    "SWAP3": {
+      "gas": 63,
+      "n": 21
+    },
+    "DUP5": {
+      "gas": 60,
+      "n": 20
+    },
+    "LT": {
+      "gas": 57,
+      "n": 19
+    },
+    "NOT": {
+      "gas": 57,
+      "n": 19
+    },
+    "PUSH0": {
+      "gas": 54,
+      "n": 27
+    },
+    "CALLDATALOAD": {
+      "gas": 51,
+      "n": 17
+    },
+    "PUSH4": {
+      "gas": 48,
+      "n": 16
+    },
+    "MLOAD": {
+      "gas": 45,
+      "n": 15
+    },
+    "POP": {
+      "gas": 42,
+      "n": 21
+    },
+    "EQ": {
+      "gas": 39,
+      "n": 13
+    },
+    "SHR": {
+      "gas": 36,
+      "n": 12
+    },
+    "OR": {
+      "gas": 33,
+      "n": 11
+    },
+    "DUP10": {
+      "gas": 30,
+      "n": 10
+    },
+    "SWAP4": {
+      "gas": 27,
+      "n": 9
+    },
+    "DUP7": {
+      "gas": 24,
+      "n": 8
+    },
+    "SWAP5": {
+      "gas": 24,
+      "n": 8
+    }
+  },
+  "byContract": {
+    "UpgradeableFixtureCarrierU3 (impl)": {
+      "address": "0xb24372a1c5bfc01af7da711fa94fb48ee751896c",
+      "gas": 119973,
+      "n": 1363
+    },
+    "Carrier proxy": {
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "gas": 4916,
+      "n": 46
+    }
+  },
+  "sstore": {
+    "sstoreOps": 6,
+    "distinctSlotsWritten": 5,
+    "writesByClass": {
+      "FRESH": 5,
+      "WARM_REWRITE": 1
+    },
+    "gasByClass": {
+      "FRESH": 106300,
+      "WARM_REWRITE": 100
+    },
+    "slotsByFinalClass": {
+      "FRESH": 5
+    },
+    "modelMismatches": 0,
+    "refundModel": 0,
+    "census": {
+      "ChunkStatus": {
+        "slots": 2,
+        "FRESH": 2,
+        "REWRITE": 0,
+        "CLEARED": 0,
+        "UNCHANGED": 0,
+        "UNCHANGED_ZERO": 0,
+        "writes": 3,
+        "gas": 42200
+      },
+      "Chunk": {
+        "slots": 3,
+        "FRESH": 3,
+        "REWRITE": 0,
+        "CLEARED": 0,
+        "UNCHANGED": 0,
+        "UNCHANGED_ZERO": 0,
+        "writes": 3,
+        "gas": 64200
+      }
+    },
+    "writesByKindClass": {
+      "ChunkStatus": {
+        "FRESH": 2,
+        "WARM_REWRITE": 1
+      },
+      "Chunk": {
+        "FRESH": 3
+      }
+    },
+    "glamsterdam": {
+      "note": "ESTIMATED: PM-supplied multipliers applied to MEASURED write counts by class (fresh x110,020; cold rewrite x12,100; every other SSTORE on an already-written slot x10,100). Not a prediction of total gas.",
+      "freshWrites": 5,
+      "coldRewrites": 0,
+      "warmWrites": 1,
+      "clears": 0,
+      "sstoreEstimate": 560200
+    }
+  },
+  "sload": {
+    "ops": 6,
+    "coldOps": 4,
+    "warmOps": 2,
+    "distinctSlots": 4,
+    "gas": 8600,
+    "byKind": {
+      "ERC1967": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "Control": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "ChunkStatus": {
+        "distinctSlots": 1,
+        "reads": 2,
+        "gas": 2200
+      },
+      "Chunk": {
+        "distinctSlots": 1,
+        "reads": 2,
+        "gas": 2200
+      }
+    },
+    "unattributed": []
+  },
+  "calls": [
+    {
+      "i": 35,
+      "depth": 1,
+      "op": "DELEGATECALL",
+      "target": "0xb24372a1c5bfc01af7da711fa94fb48ee751896c",
+      "name": "UpgradeableFixtureCarrierU3 (impl)",
+      "subtree": 119973,
+      "overhead": 2600
+    }
+  ],
+  "logs": [
+    {
+      "i": 1395,
+      "op": "LOG2",
+      "depth": 2,
+      "size": 96,
+      "topics": 2
+    }
+  ],
+  "checks": {
+    "traceErrors": 0,
+    "sstoreModelMismatches": 0,
+    "callTracerFrameMismatches": 0,
+    "callTracerFrames": 1,
+    "prestateDiffMismatches": 0,
+    "prestateChangedSlots": 5,
+    "finalValueMismatches": 0,
+    "unattributedWrites": 0
+  },
+  "writes": [
+    {
+      "i": 1095,
+      "depth": 2,
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "slot": "0xd14730a059cdd0a6af6f96f79e706c2ee379fedb3d78c3e6d5f228118c721655",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000320000000100001000",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "ChunkStatus",
+      "member": "chunkSize|chunkCount|totalSize|present",
+      "key": "0x4a5521388835656b1c66b6c3ae0c6a57942960a55e6f0a7468172444d32a9efa",
+      "index": null
+    },
+    {
+      "i": 1099,
+      "depth": 2,
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "slot": "0xd14730a059cdd0a6af6f96f79e706c2ee379fedb3d78c3e6d5f228118c721656",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0xebd4ada3875cf8c81b5e7f2ee574a56b69c13ab92a6bb75bce182efc3e3164ca",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "ChunkStatus",
+      "member": "root",
+      "key": "0x4a5521388835656b1c66b6c3ae0c6a57942960a55e6f0a7468172444d32a9efa",
+      "index": null
+    },
+    {
+      "i": 1283,
+      "depth": 2,
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "slot": "0xb1d54eb2069a5fd031cbea697165515cea97d9995d7df117db23659823d707c8",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x626173656c696e652066696c652074776f3a206120646966666572656e742073",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Chunk",
+      "member": "data[word]",
+      "key": "0x4a5521388835656b1c66b6c3ae0c6a57942960a55e6f0a7468172444d32a9efa",
+      "index": 0
+    },
+    {
+      "i": 1323,
+      "depth": 2,
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "slot": "0xb1d54eb2069a5fd031cbea697165515cea97d9995d7df117db23659823d707c9",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x696e676c652d6368756e6b20626f64792e0a0000000000000000000000000000",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Chunk",
+      "member": "data[word]",
+      "key": "0x4a5521388835656b1c66b6c3ae0c6a57942960a55e6f0a7468172444d32a9efa",
+      "index": 1
+    },
+    {
+      "i": 1337,
+      "depth": 2,
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "slot": "0x65740ec83ba68d54c803e549f1435174bbc12cb4f960083382e3418ead89a9e0",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000000000000000000000000000065",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "Chunk",
+      "member": "data(head)",
+      "key": "0x4a5521388835656b1c66b6c3ae0c6a57942960a55e6f0a7468172444d32a9efa",
+      "index": 0
+    },
+    {
+      "i": 1378,
+      "depth": 2,
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "slot": "0xd14730a059cdd0a6af6f96f79e706c2ee379fedb3d78c3e6d5f228118c721655",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000320000000100001000",
+      "value": "0x0000000000000000000000000000000100000000000000320000000100001000",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "WARM_REWRITE",
+      "kind": "ChunkStatus",
+      "member": "chunkSize|chunkCount|totalSize|present",
+      "key": "0x4a5521388835656b1c66b6c3ae0c6a57942960a55e6f0a7468172444d32a9efa",
+      "index": null
+    }
+  ],
+  "slots": [
+    {
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "slot": "0xd14730a059cdd0a6af6f96f79e706c2ee379fedb3d78c3e6d5f228118c721655",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "final": "0x0000000000000000000000000000000100000000000000320000000100001000",
+      "writes": 2,
+      "gas": 20100,
+      "classes": [
+        "FRESH",
+        "WARM_REWRITE"
+      ],
+      "finalClass": "FRESH",
+      "kind": "ChunkStatus",
+      "member": "chunkSize|chunkCount|totalSize|present",
+      "key": "0x4a5521388835656b1c66b6c3ae0c6a57942960a55e6f0a7468172444d32a9efa",
+      "index": null,
+      "finalOnChain": "0x0000000000000000000000000000000100000000000000320000000100001000",
+      "finalMatches": true
+    },
+    {
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "slot": "0xd14730a059cdd0a6af6f96f79e706c2ee379fedb3d78c3e6d5f228118c721656",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "final": "0xebd4ada3875cf8c81b5e7f2ee574a56b69c13ab92a6bb75bce182efc3e3164ca",
+      "writes": 1,
+      "gas": 22100,
+      "classes": [
+        "FRESH"
+      ],
+      "finalClass": "FRESH",
+      "kind": "ChunkStatus",
+      "member": "root",
+      "key": "0x4a5521388835656b1c66b6c3ae0c6a57942960a55e6f0a7468172444d32a9efa",
+      "index": null,
+      "finalOnChain": "0xebd4ada3875cf8c81b5e7f2ee574a56b69c13ab92a6bb75bce182efc3e3164ca",
+      "finalMatches": true
+    },
+    {
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "slot": "0xb1d54eb2069a5fd031cbea697165515cea97d9995d7df117db23659823d707c8",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "final": "0x626173656c696e652066696c652074776f3a206120646966666572656e742073",
+      "writes": 1,
+      "gas": 22100,
+      "classes": [
+        "FRESH"
+      ],
+      "finalClass": "FRESH",
+      "kind": "Chunk",
+      "member": "data[word]",
+      "key": "0x4a5521388835656b1c66b6c3ae0c6a57942960a55e6f0a7468172444d32a9efa",
+      "index": 0,
+      "finalOnChain": "0x626173656c696e652066696c652074776f3a206120646966666572656e742073",
+      "finalMatches": true
+    },
+    {
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "slot": "0xb1d54eb2069a5fd031cbea697165515cea97d9995d7df117db23659823d707c9",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "final": "0x696e676c652d6368756e6b20626f64792e0a0000000000000000000000000000",
+      "writes": 1,
+      "gas": 22100,
+      "classes": [
+        "FRESH"
+      ],
+      "finalClass": "FRESH",
+      "kind": "Chunk",
+      "member": "data[word]",
+      "key": "0x4a5521388835656b1c66b6c3ae0c6a57942960a55e6f0a7468172444d32a9efa",
+      "index": 1,
+      "finalOnChain": "0x696e676c652d6368756e6b20626f64792e0a0000000000000000000000000000",
+      "finalMatches": true
+    },
+    {
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "slot": "0x65740ec83ba68d54c803e549f1435174bbc12cb4f960083382e3418ead89a9e0",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "final": "0x0000000000000000000000000000000000000000000000000000000000000065",
+      "writes": 1,
+      "gas": 20000,
+      "classes": [
+        "FRESH"
+      ],
+      "finalClass": "FRESH",
+      "kind": "Chunk",
+      "member": "data(head)",
+      "key": "0x4a5521388835656b1c66b6c3ae0c6a57942960a55e6f0a7468172444d32a9efa",
+      "index": 0,
+      "finalOnChain": "0x0000000000000000000000000000000000000000000000000000000000000065",
+      "finalMatches": true
+    }
+  ],
+  "artifacts": {
+    "trace": "trace.json.gz",
+    "rawTraceBytes": 547732,
+    "prestate": "prestate-diff.json",
+    "calltree": "calltree.json",
+    "storageOps": "storage-ops.json",
+    "receipt": "receipt.json",
+    "tx": "tx.json"
+  }
+}

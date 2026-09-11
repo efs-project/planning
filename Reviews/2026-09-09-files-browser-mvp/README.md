@@ -176,6 +176,16 @@ walkthrough drivable against real local v2 contracts:
   owner's digest for Codex: where the work is, which intake corrections are
   now measured, what was ruled versus leaned on (with pros and cons), and the
   proposed prototyping split.
+- [gas-baseline-2026-09-10.md](gas-baseline-2026-09-10.md) — the reconciled
+  baseline: every transaction's components sum to its receipt (residual 0),
+  1,249 SSTOREs classified fresh / cold-rewrite / warm / no-op with zero
+  model mismatches, slots attributed to `StateStore` families by preimage
+  derivation (kernel untouched), the "steady state" shown to be a band whose
+  width is one 5-ordinal posting-word crossing (17,100), and the earlier
+  report's figures traced to the exact runs that produced them. Harness in
+  [scripts/measure/](scripts/measure/README.md); evidence (minus raw traces)
+  in [evidence/gas-2026-09-10/](evidence/gas-2026-09-10/index.json).
+  Independently verified by a second agent.
 - [reconciliation-with-codex-2026-09-10.md](reconciliation-with-codex-2026-09-10.md)
   — Codex's reply accepted point by point (the tag-follows-the-file join is
   the largest correction; the mixed-run gas table; ROSTER is not now-or-

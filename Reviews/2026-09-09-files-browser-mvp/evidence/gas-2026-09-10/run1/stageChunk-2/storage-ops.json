@@ -1,0 +1,86 @@
+[
+  {
+    "i": 16,
+    "op": "SLOAD",
+    "depth": 1,
+    "slot": "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc",
+    "value": null
+  },
+  {
+    "i": 375,
+    "op": "SLOAD",
+    "depth": 2,
+    "slot": "0x16441f06de582318aa5aa7dd3ed73cd50237cc85bb2c855ceb6dcdea0f675304",
+    "value": null
+  },
+  {
+    "i": 1066,
+    "op": "SLOAD",
+    "depth": 2,
+    "slot": "0xd14730a059cdd0a6af6f96f79e706c2ee379fedb3d78c3e6d5f228118c721655",
+    "value": null
+  },
+  {
+    "i": 1095,
+    "op": "SSTORE",
+    "depth": 2,
+    "slot": "0xd14730a059cdd0a6af6f96f79e706c2ee379fedb3d78c3e6d5f228118c721655",
+    "value": "0x0000000000000000000000000000000000000000000000320000000100001000"
+  },
+  {
+    "i": 1099,
+    "op": "SSTORE",
+    "depth": 2,
+    "slot": "0xd14730a059cdd0a6af6f96f79e706c2ee379fedb3d78c3e6d5f228118c721656",
+    "value": "0xebd4ada3875cf8c81b5e7f2ee574a56b69c13ab92a6bb75bce182efc3e3164ca"
+  },
+  {
+    "i": 1133,
+    "op": "SLOAD",
+    "depth": 2,
+    "slot": "0x65740ec83ba68d54c803e549f1435174bbc12cb4f960083382e3418ead89a9e0",
+    "value": null
+  },
+  {
+    "i": 1197,
+    "op": "SLOAD",
+    "depth": 2,
+    "slot": "0x65740ec83ba68d54c803e549f1435174bbc12cb4f960083382e3418ead89a9e0",
+    "value": null
+  },
+  {
+    "i": 1283,
+    "op": "SSTORE",
+    "depth": 2,
+    "slot": "0xb1d54eb2069a5fd031cbea697165515cea97d9995d7df117db23659823d707c8",
+    "value": "0x626173656c696e652066696c652074776f3a206120646966666572656e742073"
+  },
+  {
+    "i": 1323,
+    "op": "SSTORE",
+    "depth": 2,
+    "slot": "0xb1d54eb2069a5fd031cbea697165515cea97d9995d7df117db23659823d707c9",
+    "value": "0x696e676c652d6368756e6b20626f64792e0a0000000000000000000000000000"
+  },
+  {
+    "i": 1337,
+    "op": "SSTORE",
+    "depth": 2,
+    "slot": "0x65740ec83ba68d54c803e549f1435174bbc12cb4f960083382e3418ead89a9e0",
+    "value": "0x0000000000000000000000000000000000000000000000000000000000000065"
+  },
+  {
+    "i": 1342,
+    "op": "SLOAD",
+    "depth": 2,
+    "slot": "0xd14730a059cdd0a6af6f96f79e706c2ee379fedb3d78c3e6d5f228118c721655",
+    "value": null
+  },
+  {
+    "i": 1378,
+    "op": "SSTORE",
+    "depth": 2,
+    "slot": "0xd14730a059cdd0a6af6f96f79e706c2ee379fedb3d78c3e6d5f228118c721655",
+    "value": "0x0000000000000000000000000000000100000000000000320000000100001000"
+  }
+]

@@ -18,6 +18,12 @@ Before anything else, because other people were building on them:
 - **"~98.5% of a file creation is SSTORE" was wrong.** MEASURED: SSTORE is
   **46.8%** of a tag, **47.1%** of a directory create, **46.8%** of a file
   create. That figure came from gas-schedule arithmetic, not measurement.
+  *Corrected again 2026-09-10 evening (independent verification of the
+  baseline):* only the tag share was measured opcode gas; the 47.1% and 46.8%
+  were themselves schedule arithmetic (`fresh × 22,100 + updated × 5,000`
+  over the receipt). MEASURED shares of the receipt: createDir **43.1%**,
+  createFile **42.9%**, tag 46.8% first-ever / 43.2% steady
+  ([gas-baseline-2026-09-10.md](gas-baseline-2026-09-10.md) §7.11).
 - **"Chunk staging costs ~104k gas per 4 KiB" was wrong by ~29×.** MEASURED:
   **3,014,913 gas** for one 4 KiB chunk, 131 fresh slots, 96% SSTORE. Content
   really is stored on-chain, so my claim that "metadata costs 16× the content"

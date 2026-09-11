@@ -1,0 +1,95 @@
+{
+  "run": 2,
+  "sequence": "default",
+  "operations": [
+    "tag-first-ever",
+    "tag-steady-1",
+    "tag-steady-2",
+    "tag-first-in-scope",
+    "createDir-1",
+    "createDir-2",
+    "stageChunk-1",
+    "createFile-1",
+    "stageChunk-2",
+    "createFile-2"
+  ],
+  "startedAt": "2026-09-10T23:54:29.359Z",
+  "hardfork": "cancun",
+  "chainId": 31337,
+  "nodeArgs": [
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "52737",
+    "--chain-id",
+    "31337",
+    "--hardfork",
+    "cancun",
+    "--gas-limit",
+    "33554432",
+    "--accounts",
+    "0",
+    "--no-cors",
+    "--steps-tracing",
+    "--silent"
+  ],
+  "versions": {
+    "node": "v24.11.0",
+    "anvil": "anvil Version: 1.7.1",
+    "forge": "forge Version: 1.7.1",
+    "solc": {
+      "version": "0.8.30+commit.73712a01"
+    },
+    "solcBinary": "/Users/james/Library/Caches/hardhat-nodejs/compilers-v2/macosx-amd64/solc-macosx-amd64-v0.8.30+commit.73712a01",
+    "ethers": "6.15.0"
+  },
+  "compilerSettings": {
+    "foundation": {
+      "remappings": [
+        "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+        "C0Admission/=../2026-09-05-c0-admission/src/",
+        "C0Core/=../2026-09-05-c0-core/src/",
+        "C0Foundation/=../2026-09-04-mvp-c0-foundation/src/"
+      ],
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "metadata": {
+        "bytecodeHash": "ipfs"
+      },
+      "compilationTarget": {
+        "src/UpgradeableReadFixtureCore.sol": "UpgradeableReadFixtureCore"
+      },
+      "evmVersion": "cancun",
+      "libraries": {},
+      "viaIR": true
+    },
+    "mvpContracts": "# Disposable local files-browser router experiment.\n[profile.default]\nsrc = \"src\"\ntest = \"test\"\nout = \"out\"\nsolc = \"0.8.30\"\nevm_version = \"cancun\"\noptimizer = true\noptimizer_runs = 200\nvia_ir = true\nallow_paths = [\"../..\"]\nremappings = [\n  \"Foundation/=../../2026-09-08-upgradeable-foundation/src/\",\n  \"C0Core/=../../2026-09-05-c0-core/src/\",\n  \"C0Foundation/=../../2026-09-04-mvp-c0-foundation/src/\",\n  \"C0Admission/=../../2026-09-05-c0-admission/src/\",\n  \"@openzeppelin/contracts/=../../2026-09-08-upgradeable-foundation/node_modules/@openzeppelin/contracts/\",\n]\nast = true\nbuild_info = true\n"
+  },
+  "git": {
+    "commit": "e6de41402cce5be8b919410bc77267a702866583",
+    "branch": "fable/2026-09-09-files-browser",
+    "dirty": true,
+    "statusPorcelain": "M Reviews/2026-09-09-files-browser-mvp/contracts/cache/solidity-files-cache.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/Address.sol/Address.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/AuditPageCursor.sol/AuditPageCursor.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/AuthorityUpgrade.sol/AuthorityStorage.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/AuthorityUpgrade.sol/UpgradeableFixtureCarrierU3.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/AuthorityUpgrade.sol/UpgradeableFixtureCoreU3.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/BindingFold.sol/BindingFold.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/C0ChunkTree.sol/C0ChunkTree.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/ECDSA.sol/ECDSA.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/ERC1967Utils.sol/ERC1967Utils.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/Errors.sol/Errors.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/FilesRouterV1.sol/FilesRouterV1.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/FilesRouterV1.sol/IFixtureCore.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/FilesRouterV2.sol/FilesRouterV2.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/FilesRouterV2.sol/IFixtureCoreU3.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/IBeacon.sol/IBeacon.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/IERC1967.sol/IERC1967.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/IndexKeys.sol/IndexKeys.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/LensPlan.sol/LensPlan.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/LowLevelCall.sol/LowLevelCall.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/PointReadLibrary.sol/PointReadLibrary.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/Preparation.sol/IPreparation.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/Preparation.sol/Preparation.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/RecordBody.sol/RecordBody.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/StateAuditPages.sol/StateAuditPages.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/StateBindingReads.sol/StateBindingReads.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/StateKernel.sol/StateKernel.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/StateLensReads.sol/StateLensReads.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/StatePointReads.sol/StatePointReads.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/StateReadPrimitives.sol/StateReadPrimitives.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/StateStore.sol/StateStore.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/StorageByteView.sol/StorageByteView.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/StorageSlot.sol/StorageSlot.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/TypeGroupParser.sol/TypeGroupParser.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/UpgradeAdmissionLibrary.sol/UpgradeAdmissionLibrary.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/UpgradeQueryReadLibrary.sol/UpgradeQueryReadLibrary.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/UpgradeStorage.sol/FixtureEndpoint.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/UpgradeStorage.sol/IFixtureController.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/UpgradeStorage.sol/IFixtureEndpoint.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/UpgradeStorage.sol/UpgradeStorage.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/UpgradeableFixtureCarrier.sol/UpgradeableFixtureCarrier.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/UpgradeableFixtureCarrier.sol/UpgradeableFixtureCarrierU2.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/UpgradeableFixtureCore.sol/UpgradeableFixtureCore.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/UpgradeableFixtureCore.sol/UpgradeableFixtureCoreU2.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/UpgradeableReadFixtureCore.sol/UpgradeableReadFixtureCore.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/UpgradeableReadFixtureCore.sol/UpgradeableReadFixtureCoreU2.json\n D Reviews/2026-09-09-files-browser-mvp/contracts/out/build-info/13a7291db427f231.json\n D Reviews/2026-09-09-files-browser-mvp/contracts/out/build-info/1ca12f04002fd46d.json\n D Reviews/2026-09-09-files-browser-mvp/contracts/out/build-info/434edc1b8d8b1a9b.json\n D Reviews/2026-09-09-files-browser-mvp/contracts/out/build-info/f6f2acf50747e003.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/src/BindingFold.sol/BindingFold.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/src/LensPlan.sol/LensPlan.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/src/Preparation.sol/IPreparation.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/src/Preparation.sol/Preparation.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/src/StateBindingReads.sol/StateBindingReads.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/src/StateKernel.sol/StateKernel.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/src/StateStore.sol/StateStore.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/src/StorageByteView.sol/StorageByteView.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/src/UpgradeAdmissionLibrary.sol/UpgradeAdmissionLibrary.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/src/UpgradeStorage.sol/FixtureEndpoint.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/src/UpgradeStorage.sol/IFixtureController.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/src/UpgradeStorage.sol/IFixtureEndpoint.json\n M Reviews/2026-09-09-files-browser-mvp/contracts/out/src/UpgradeStorage.sol/UpgradeStorage.json\n?? Reviews/2026-09-09-files-browser-mvp/contracts/out/build-info/3d98c165192447cc.json\n?? Reviews/2026-09-09-files-browser-mvp/contracts/out/build-info/bfd9f46a4031929c.json\n?? Reviews/2026-09-09-files-browser-mvp/evidence/gas-2026-09-10/\n?? Reviews/2026-09-09-files-browser-mvp/scripts/measure/"
+  },
+  "addresses": {
+    "core": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+    "carrier": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+    "router": "0xd50f25958f195efc9f5f33a392d5219bab106a07",
+    "admissionLibrary": "0xd226ecebd1e4c36a7855f9a88304dcc8b48237f9",
+    "helper": "0x8764359d75dba3d1e3ff3d2f95ef484a9dde0b79",
+    "controller": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+    "coreImplementationU3": "0x1c5ca3c6336552ba1bf47eb00951994539067054",
+    "carrierImplementationU3": "0xb24372a1c5bfc01af7da711fa94fb48ee751896c",
+    "principalA": "0x0000000000000000000000000000000000000000000000000000ffffffffffff",
+    "principalB": "0x000000000000000000000000000000000000000000000000bbbbbbbbbbbbbbbb",
+    "fileA": "0x08209f602a29ccdd6e8d3556376f04d9de1217e28c0f88c2c89a18b5858fbeaf",
+    "fileB": "0x6ae53909e7044e7d2c58fbee4d00ebf2307e2561a5b3ac8560f061b1356e759e",
+    "root": "0xfb336963b5549a0abbb64aefcc583fd85513da909e7d03d4c453a7ed87d1e35a",
+    "mountId": "0x3663f12365a9af87ad8a11f4302efe88d2fd86ab93bd261042320ae7e3a3f51b"
+  },
+  "txGasLimit": "16777216",
+  "efsStoreSlot": "0xbeadc64d0e08a56352fe2b90d4cbb5452f5265a9cc2da0092cc0ce117cbead00",
+  "fixturePath": "startEnvironment(lab, { write: true, relay: false }) = nestedFixture -> routerFixture -> authorityFixture; operations via authorityFixture.execute / stageChunks (FilesRouterV2 -> Core U3 executeAuthorized)."
+}
