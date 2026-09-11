@@ -2,7 +2,9 @@
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
+import { mkdtemp, rm } from 'node:fs/promises';
 import { createServer } from 'node:net';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -132,6 +134,71 @@ function compilerEvidence(profile) {
   const version=tool=>{const r=spawnSync(tool,['--version'],{encoding:'utf8',timeout:5000});assert.equal(r.status,0);return r.stdout.trim();};
   return { info,names,resources: { sourceCommit:git(['rev-parse','HEAD']),trackedDiffHash:keccak256(Buffer.from(git(['diff','--','../2026-09-05-c0-core','src','test/FixtureDeployment.sol']))),compiler:a.metadata.compiler,compilerBinaryHash:keccak256(readFileSync(SOLC)),versions:{node:process.version,forge:version('forge'),anvil:version('anvil'),ethers:JSON.parse(readFileSync(resolve(ROOT,'../2026-09-04-mvp-rehearsal/node_modules/ethers/package.json'),'utf8')).version},settings:a.metadata.settings,sourcePins,supportSourcePins,compilerInputHash:keccak256(Buffer.from(JSON.stringify(info.input))),compilerOutputHash:keccak256(Buffer.from(JSON.stringify(info.output))),dependencyLockHash:keccak256(readFileSync(join(ROOT,'package-lock.json'))),artifactPins:{} } };
 }
+// Anvil's historical-state cache belongs to this one process invocation. Keep
+// all history while it is running, then remove only its exact mkdtemp path once
+// the child has confirmed exit. An unconfirmed exit is a retention condition,
+// never permission to delete a possibly live database.
+export async function withManagedAnvil(args, action, {
+  watchdogMs = 300000, stopGraceMs = 1000, cacheParent = tmpdir(),
+  spawnProcess = spawn, signalTarget = process, report = message => console.warn(message)
+} = {}) {
+  assert(Array.isArray(args) && args.every(arg => typeof arg === 'string'), 'Anvil argument list');
+  assert(!args.some(arg => arg === '--cache-path' || arg.startsWith('--cache-path=')), 'Anvil uses an owned cache path');
+  assert(Number.isSafeInteger(watchdogMs) && watchdogMs > 0, 'positive watchdog');
+  assert(Number.isSafeInteger(stopGraceMs) && stopGraceMs > 0, 'positive stop grace');
+  const cachePath = await mkdtemp(join(cacheParent, 'efs-anvil-cache-'));
+  const nodeArgs = [...args, '--cache-path', cachePath];
+  let child;
+  try { child = spawnProcess('anvil', nodeArgs, { stdio: 'ignore' }); }
+  catch (error) { await rm(cachePath, { recursive: true, force: true }); throw error; }
+  const cleanup = { cachePath, cacheRemoved: false, stopped: false };
+  let spawnError, exited = child.exitCode != null || child.signalCode != null, stopPromise;
+  let resolveExit;
+  const exit = new Promise(resolve => { resolveExit = resolve; });
+  const recordExit = () => { exited = true; resolveExit(); };
+  child.once('exit', recordExit);
+  // Failed spawn emits close without exit. A real ChildProcess close confirms
+  // no process/stdio remain, including ENOENT before a PID ever existed.
+  child.once('close', recordExit);
+  child.on('error', error => { spawnError = error; });
+  if (exited) resolveExit();
+  const requestKill = signal => { if (!exited) { try { child.kill(signal); } catch {} } };
+  async function awaitExit() {
+    let timer;
+    try { await Promise.race([exit, new Promise(resolve => { timer = setTimeout(resolve, stopGraceMs); })]); }
+    finally { clearTimeout(timer); }
+  }
+  async function stop() {
+    if (stopPromise) return stopPromise;
+    stopPromise = (async () => {
+      clearTimeout(watchdog);
+      if (!exited) { requestKill('SIGTERM'); await awaitExit(); }
+      if (!exited) { requestKill('SIGKILL'); await awaitExit(); }
+      Object.assign(cleanup, { pid: child.pid, exitCode: child.exitCode, signal: child.signalCode, stopped: exited });
+      if (exited) {
+        try { await rm(cachePath, { recursive: true, force: true }); cleanup.cacheRemoved = true; }
+        catch (error) { cleanup.cacheRemovalError = error.code ?? 'REMOVE_FAILED'; report(`Anvil stopped; cache removal failed (${cleanup.cacheRemovalError}). Retained cache: ${cachePath}`); }
+      } else report(`Anvil exit was not confirmed for PID ${child.pid ?? 'unknown'}. Retained cache: ${cachePath}`);
+      signalTarget.removeListener('exit', parentExit);
+      signalTarget.removeListener('SIGINT', interrupt);
+      signalTarget.removeListener('SIGTERM', terminate);
+      return cleanup;
+    })();
+    return stopPromise;
+  }
+  // The synchronous process exit hook cannot wait for proof of child exit. It
+  // only requests a kill and reports the path for subsequent checked cleanup.
+  const parentExit = () => { requestKill('SIGKILL'); if (!cleanup.cacheRemoved) report(`Parent exited before cache cleanup completed. Retained Anvil cache: ${cachePath}`); };
+  const interrupt = () => { signalTarget.exitCode = 130; void stop(); };
+  const terminate = () => { signalTarget.exitCode = 143; void stop(); };
+  signalTarget.once('exit', parentExit);
+  signalTarget.once('SIGINT', interrupt);
+  signalTarget.once('SIGTERM', terminate);
+  const watchdog = setTimeout(() => { void stop(); }, watchdogMs);
+  const node = { child, args: nodeArgs, cachePath, cleanup, stop, get spawnError() { return spawnError; } };
+  try { return await action(node); }
+  finally { await stop(); }
+}
 export async function withUpgrade(action, { profile = 'base', watchdogMs = 300000 } = {}) {
   assert(typeof profile === 'string' && Object.hasOwn(profileMap,profile), 'unknown upgrade profile');
   const selected = profileMap[profile];
@@ -142,13 +209,10 @@ export async function withUpgrade(action, { profile = 'base', watchdogMs = 30000
   // the static-hosting browser suite loads the page from another local origin
   // and talks to this node directly, as a deployed page talks to a public RPC.
   const args=['--host','127.0.0.1','--port',String(port),'--chain-id','31337','--hardfork','cancun','--gas-limit',String(TX_GAS*2n),'--accounts','0',...(process.env.EFS_LAB_ANVIL_CORS==='1'?[]:['--no-cors']),...(process.env.EFS_LAB_ANVIL_STEPS==='1'?['--steps-tracing']:[]),'--silent'];
-  const child=spawn('anvil',args,{stdio:'ignore'}); let spawnError;
-  child.on('error',e=>{spawnError=e;});
+  return withManagedAnvil(args, async node => {
+  const { child, cleanup } = node;
   const url='http://127.0.0.1:'+port, source='managed-anvil:'+url;
-  const kill=()=>{if(child.exitCode===null && child.signalCode===null)child.kill('SIGKILL');};
-  const signal=()=>{kill();process.exitCode=130;};
-  process.once('exit',kill);process.once('SIGINT',signal);process.once('SIGTERM',signal);
-  const watchdog=setTimeout(kill,watchdogMs), cleanup={}, transactions=[];
+  const transactions=[];
   let automine=true,result;
   async function rpc(method,params=[],{maxBytes=262144}={}) {
     assert(Number.isSafeInteger(maxBytes) && maxBytes>0 && maxBytes<=262144,'RPC response budget');
@@ -158,7 +222,7 @@ export async function withUpgrade(action, { profile = 'base', watchdogMs = 30000
     const j=JSON.parse(Buffer.concat(chunks,total).toString());if(j.error){const e=Error(j.error.message);e.data=j.error.data;throw e;}return j.result;
   }
   try {
-    let ready=false;for(let i=0;i<100&&!ready;i++){if(spawnError||child.exitCode!==null)throw Error('managed node startup');try{ready=await rpc('eth_chainId')==='0x7a69';}catch{}if(!ready)await delay(50);}assert(ready,'bounded readiness');
+    let ready=false;for(let i=0;i<100&&!ready;i++){if(node.spawnError||child.exitCode!==null||child.signalCode!==null)throw Error('managed node startup');try{ready=await rpc('eth_chainId')==='0x7a69';}catch{}if(!ready)await delay(50);}assert(ready,'bounded readiness');
     const wallet=new Wallet(word(0xc008)),operator=new Wallet(word(0xc009));await rpc('anvil_setBalance',[wallet.address,'0x3635c9adc5dea00000']);
     async function send(data,to) {
       const n=BigInt(await rpc('eth_getTransactionCount',[wallet.address,'pending']));
@@ -168,7 +232,7 @@ export async function withUpgrade(action, { profile = 'base', watchdogMs = 30000
     async function receipt(tx,label) {
       for(let i=0;i<300;i++){const r=await rpc('eth_getTransactionReceipt',[tx.hash]);if(r){assert(BigInt(r.gasUsed)<=TX_GAS);transactions.push({label,hash:tx.hash,from:tx.from,to:tx.to,calldata:tx.data,calldataHash:keccak256(tx.data),receipt:r,status:r.status,gasUsed:BigInt(r.gasUsed).toString(),blockNumber:BigInt(r.blockNumber).toString(),blockHash:r.blockHash,transactionIndex:BigInt(r.transactionIndex).toString()});return r;}await delay(25);}throw Error('bounded receipt wait');
     }
-    const resources={...compiler.resources,txGasCeiling:String(TX_GAS),runtimeCeiling:24576,initcodeCeiling:49152,nodeArgs:args,deployment:{},inputPins:{}};
+    const resources={...compiler.resources,txGasCeiling:String(TX_GAS),runtimeCeiling:24576,initcodeCeiling:49152,nodeArgs:node.args,deployment:{},inputPins:{}};
     const components={},implementations={};
     async function deploy(name,constructorArgs=[],values={},links={}) {
       const a=artifact(name),iface=new Interface(a.abi),nonce=BigInt(await rpc('eth_getTransactionCount',[wallet.address,'pending']));
@@ -285,13 +349,10 @@ export async function withUpgrade(action, { profile = 'base', watchdogMs = 30000
     }
     const readBytes=(id,basis)=>call(carrier,carrierIface,'readFixtureBytes',[id],{blockHash:basis.hash,requireCanonical:true});
     const mine=async enabled=>{await rpc('evm_setAutomine',[enabled]);automine=enabled;};
-    result=await action({rpc,core,carrier,operator:operator.address,iface,readIface,expected,inputs,collectExecution,resources,cleanup,transactions,prepare,publish,submit,reject,stage,readBytes,upgrade,mine,send,receipt,data});
+    result=await action({rpc,core,carrier,operator:operator.address,iface,readIface,expected,inputs,collectExecution,resources,cleanup,cachePath:node.cachePath,stopNode:node.stop,transactions,prepare,publish,submit,reject,stage,readBytes,upgrade,mine,send,receipt,data});
   } finally {
     if(!automine&&child.exitCode===null){try{await rpc('evm_setAutomine',[true]);cleanup.automineRestored=true;}catch{cleanup.automineRestored=false;}}
-    clearTimeout(watchdog);
-    if(child.exitCode===null){child.kill('SIGTERM');for(let i=0;i<40&&child.exitCode===null&&child.signalCode===null;i++)await delay(25);kill();for(let i=0;i<40&&child.exitCode===null&&child.signalCode===null;i++)await delay(25);}
-    Object.assign(cleanup,{pid:child.pid,exitCode:child.exitCode,signal:child.signalCode,stopped:child.exitCode!==null||child.signalCode!==null});
-    process.removeListener('exit',kill);process.removeListener('SIGINT',signal);process.removeListener('SIGTERM',signal);
   }
   return result;
+  }, { watchdogMs });
 }
