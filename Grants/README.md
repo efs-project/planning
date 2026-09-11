@@ -6,9 +6,9 @@ This folder is not a design, ADR, or parallel status board. It is the operationa
 
 ## Source of truth
 
-- `Grants/proposals.md` owns grant proposal status. Do not mirror its table into [[Kanban]], [[For-James]], or [[Decisions]].
+- `Grants/proposals.md` owns grant proposal status. Do not mirror its table into [[Kanban]], [[Owner-Inbox]], or [[Decisions]].
 - [[Kanban]] carries one pointer card for swarm visibility: "Grants - research + tracker + submissions".
-- [[For-James]] gets only real James decisions or deadlines, such as a program pick, submission sign-off, or external profile change he must personally make.
+- [[Owner-Inbox]] gets only real James decisions or deadlines, such as a program pick, submission sign-off, or external profile change he must personally make.
 - [[Decisions]] gets only project-positioning calls that outlive a grant, not per-proposal tactics.
 
 ## Operating contract
@@ -28,6 +28,7 @@ Row graduation rule: a lead becomes a [[proposals]] row only when it has a plaus
 | [[proposals]] | Submitted, drafting, and watchlist proposals. Single source of truth for status. |
 | [[efs-grant-packet]] | Reusable EFS pitch, links, milestones, and budget snippets. |
 | [[research-log]] | Dated grant-specific research notes, rejected leads, and community/funder intel. |
+| [[funding-income]] | Personal development support, paid-work leads, service hypotheses and sponsorship mechanics; no duplicate status table. |
 | [[nouns-dao-funding]] | Point-in-time Nouns DAO funding research, purchase analysis, pilot hypothesis, and deep-dive prompt; not an application decision. |
 | [[futo-microgrant-application]] | Worksheet supporting the USD 5,000 walk-away file-proof proposal submitted 2026-07-29. |
 | [[futo-microgrant-email]] | Exact submitted FUTO application email retained as evidence. |
@@ -68,7 +69,7 @@ If a funder-specific draft cannot answer "what would make this funder proud to h
 - `watching` - plausible future route, but no active application path yet.
 - `researching` - active fit/evidence check underway.
 - `drafting` - proposal or profile is being prepared.
-- `needs-signoff` - James must approve, send, or choose; mirror to [[For-James]] only for real forks/deadlines.
+- `needs-signoff` - James must approve, send, or choose; mirror to [[Owner-Inbox]] only for real forks/deadlines.
 - `submitted` - submitted and waiting.
 - `follow-up` - submitted and requires a reply, update, office-hours call, milestone, or clarification.
 - `accepted` - awarded or otherwise approved.
@@ -86,7 +87,7 @@ Weekly grant-ops pass:
   window.
 - Update `Last checked` and tighten `Gate / evidence needed`.
 - Move stale `researching` rows to `watching` or `archived`.
-- Surface only real James choices/deadlines to [[For-James]].
+- Surface only real James choices/deadlines to [[Owner-Inbox]].
 
 Monthly landscape pass:
 
@@ -102,6 +103,7 @@ Post-decision pass, within 48 hours:
 
 ## Open grant-ops tasks
 
+- [ ] Review the 2026-09-11 sweep: timely Arbitrum Open House go/no-go, Emergent Ventures preparation, FUTO Fellows residency fit and one paid-work lead. Details in [[proposals]] and [[funding-income]].
 - [ ] Update the KarmaHQ page team section; it currently lists no team members.
 - [ ] Decide whether the KarmaHQ "Total Funds Raised" value should remain `0` until funds are received or include prior in-kind/self-funded work.
 - [ ] Replace the bare KarmaHQ "Path to Success" wording with a sharper sustainability path.

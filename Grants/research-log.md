@@ -15,6 +15,199 @@ Rows touched:
 Next check:
 ```
 
+## 2026-09-11 - Funding and personal-income sweep
+
+Trigger: James requested another broad sweep, including new opportunities and
+ways to earn money that let him continue developing EFS. Three read-only expert
+lanes cover Ethereum, public-interest OSS and paid work. This is discovery and
+qualification, not a submission or new product commitment.
+
+Coverage and freshness: the findings below identify the rechecked/new routes.
+The July Nouns deep dive remains historical; no new governance or treasury
+audit was performed. Low-priority long-tail chain programs retain their older
+evidence unless explicitly discussed here. [[proposals]] alone owns EFS status.
+
+Storage and existing leads:
+
+- [FUTO Fellows](https://futo.tech/grants/fellows) is a newly identified,
+  rolling individual residency. It advertises up to USD 40k, travel, housing and
+  workspace in Austin. Residency feasibility and treatment of the pending
+  microgrant need resolving before a separate application. The collapsed
+  requirements were checked in the site's published client bundle: CV, project,
+  harm reduction, publication, accomplishments, target user, success measures,
+  resources and previous funding. Today's microgrant follow-up remains intact.
+- [Filecoin Open Grants](https://fil.org/grants) and
+  [devgrants](https://github.com/filecoin-project/devgrants) still accept
+  proposals up to USD 50k with dual MIT/Apache-2.0 outputs. The advertised
+  month-based review cycle makes this unsuitable as assumed immediate cash.
+  [Pin documentation](https://filecoin-project.github.io/filecoin-pin/index.html)
+  now supports Mainnet and ordinary IPFS tooling; the
+  [browser demo](https://pin.filecoin.cloud/) remains on Calibration. The old
+  cookbook URL returns Page Not Found. This corrects the earlier blanket
+  alpha/testnet description, without establishing an EFS integration.
+- [Filecoin's September 2 restructuring](https://www.filpgf.io/blog/a-sharper-pgf-how-filecoin-public-goods-funding-is-evolving/)
+  retires the combined batch model. [R&D](https://www.filpgf.io/rnd/) has no
+  published first RFP yet; Revenue Development is scoped to its named pods.
+  RetroPGF is paused, with late-Q3/early-Q4 reintroduction an expectation, not an
+  application deadline. Preserve the Batch 3 no-submit record.
+- [IPFS Utility Grants](https://ipfsgrants.io/utility-grants/) still displays the
+  March 15 closed call. No funded replacement call was verified. The
+  [Shipyard wind-down](https://ipshipyard.com/blog/2026-the-end-of-ipfs-at-shipyard/)
+  is a separate September 30 maintenance transition, not proof of the fund's
+  closure or a promised grant opportunity. Remove the unsupported next-round
+  date. Public CAR/DASL awardees remain useful proposal precedents.
+- [AR.IO grants](https://github.com/ar-io/ar-io-grants) explicitly closed and
+  archived June 12. [Arweave's funding directory](https://www.arweave.org/funding)
+  is an introduction route, not a current award offer.
+- [Sia](https://sia.tech/grants) still says paused until September, while its
+  [official pause announcement](https://forum.sia.tech/t/grants-program-summer-break/1142)
+  says end of Q3. Keep this closed-to-new-intake watch until explicit reopening.
+  September activity on [approved projects](https://forum.sia.tech/c/grants/8)
+  is existing-project reporting. New SDK/indexd rules and cross-chain limits
+  must be checked before an EFS adapter proposal. Public Obsidian_Log, JanusFS
+  and Vup Vault proposals offer relevant delivery/budget lessons.
+- [The Graph](https://thegraph.com/grants/) still has no open RFPs; its
+  [forum](https://forum.thegraph.com/c/community-grants/34) retains the July
+  pause notice. An evergreen Apply button does not establish reopening.
+- [Ocean Shipyard](https://oceanprotocol.com/build/shipyard) and its form are
+  reachable, but fresh reviewer/budget activity was not established. Downgrade
+  to watching. Its USD 30k average is historical, not an expected EFS award.
+- [Sentient](https://sentient.foundation/grants) still advertises rolling
+  applications. Its USD 42M commitment combines grant and investment routes;
+  the grant route is distinct. A
+  [product request](https://sentient.foundation/product-requests) must match a
+  real AI artifact. Earlier form amount choices are not freshly verified.
+- [Common Good Cyber Fund](https://www.isocfoundation.org/grant-programme/common-good-cyber-fund/)
+  is closed after the August 4 deadline; nonprofit eligibility also limits fit.
+
+Ethereum and event opportunities:
+
+- [Arbitrum Open House online](https://arbitrum-singapore.hackquest.io/buildathons/Arbitrum-Open-House-Singapore-Online-Buildathon)
+  is the strongest newly found dated fit check. Existing projects and Arbitrum
+  Sepolia demos are allowed. The shared USD 115k pool has prize and grant
+  tracks; awards have milestone conditions. The live schedule displays
+  registration closing October 2 at 12:01 and submissions October 4 at 10:59,
+  without a timezone. The [Foundation announcement](https://blog.arbitrum.foundation/builders-block-023-415k-in-prizes-at-open-house-singapore-apply-now/)
+  gives September 14 kickoff; the portal opens submissions September 13.
+  Decide scope/effort before kickoff, not at the closing date. The linked
+  legal PDF failed to load, so online solo/geographic eligibility and the
+  controlling timezone remain explicit checks.
+- The separate [Founder House](https://luma.com/openhouse-singapore) runs
+  October 23-25 in Singapore, accepts solo founders and existing prototypes,
+  and advertises a USD 300k shared prize/grant pool. Rolling selection has no
+  verified close date. Airfare and accommodation support were not promised.
+- [EF Office Hours](https://esp.ethereum.foundation/applicants/office-hours)
+  is available worldwide and can discuss a proof of concept. No active
+  [Open Rounds](https://esp.ethereum.foundation/applicants/open-rounds) or
+  [Wishlist](https://esp.ethereum.foundation/applicants/wishlist) was found.
+  The [current RFP](https://esp.ethereum.foundation/applicants/rfp/rtd8_india_academic)
+  concerns Indian universities/community activity, not generic EFS development.
+  Use routing/advice, not an assumed open grant application. Office Hours has
+  no cash award.
+- [Octant Epoch 13](https://octant.fillout.com/epoch-13) applications closed
+  September 10. Its [privacy eligibility](https://www.linkedin.com/pulse/epoch-13-privacy-round-my-project-eligible-octantapp-mkfkf)
+  requires working privacy software and users. A 100 ETH matching pool is not
+  a per-project award. Preserve the earlier EFS rejection and do not retrofit
+  EFS's provenance work into an unsupported privacy claim.
+- [Base Batches 004](https://www.base.org/batches) closed September 10 at
+  23:59 Pacific. Its USD 100k offer is investment, not a grant. Older Builder
+  Grants/weekly reward amounts were not reconfirmed; the old funding-docs route
+  redirects to the [investment fund](https://www.base.org/ecosystem-fund).
+- [Optimism Atlas](https://atlas.optimism.io/dashboard) announces September 18
+  discontinuation. Historical 2025 missions still labelled open are not proof
+  of current intake. No suitable successor EFS route was verified.
+- [ENS Builder Grants](https://builder.ensgrants.xyz/) is closed; Public Goods
+  working-group sunset notices supersede older open-grant descriptions. The
+  historical Prometheus image-authentication approval is a useful precedent,
+  not proof of disbursement. Current ENS security bounties/competition belong
+  in [[funding-income]], not an EFS grant application row.
+- Arbitrum DAO Season 3 and Firestarter are closed; Open House is a separate
+  program. [Gitcoin's revised budget](https://gov.gitcoin.co/t/proposal-gitcoin-dao-2026-budget-request-second-tranche-revised-and-expanded/25353)
+  plans Node Zero for October with a local-community focus, but does not
+  establish EFS eligibility or an application deadline.
+- [Giveth's September update](https://news.giveth.io/givnews56) announces a
+  Stellar round for September 21, not an Ethereum infrastructure round.
+  Year-round [verification](https://docs.giveth.io/projectverification) remains
+  useful with actual donors; no matching award is assumed.
+
+Individual and public-interest OSS support:
+
+- [Emergent Ventures](https://mercatus.tfaforms.net/5099527) is open to global
+  individual applicants aged 13+. No fixed deadline or typical award amount
+  is published. Its 1,500-word application asks for personal context, a
+  consensus view the applicant agrees with, the idea, rough budget and use of
+  time/partners. PDF attachments are not accepted. The typical one-week
+  response is not an award or payout promise. EFS fit is a research judgment;
+  James's personal narrative and real budget remain unprovided.
+- [GitHub Secure OSS](https://github.com/open-source/github-secure-open-source-fund)
+  advertises rolling interest, but the [official Session 5 deadline](https://github.blog/open-source/maintainers/what-50-open-source-projects-taught-us-about-security-in-the-ai-era/)
+  was before August 24. Next cohort timing is unknown. Maintainer age, Sponsors
+  region, licensing, adoption and governance are gates. USD 10k is staged as
+  6k during the program, 2k at six months and 2k at twelve, with obligations.
+- [NLnet's September call](https://nlnet.nl/news/2026/20260903-call.html)
+  warns that mostly LLM-generated work is ineligible and advises AI-using
+  applicants to wait for a revised policy. This is a substantive risk for
+  EFS's agent-heavy workflow, not cured by disclosure. The current
+  [GenAI policy](https://nlnet.nl/foundation/policies/generativeAI/) requires
+  proposal-assistance logs including model, timestamps, prompts and unedited
+  outputs, plus contribution transparency for funded work. Do not claim the
+  present repository workflow complies without assessing the actual work.
+- [Restack eligibility](https://nlnet.nl/restack/eligibility/) and
+  [CodeSupply eligibility](https://nlnet.nl/codesupply/eligibility/) prioritize
+  EU/Horizon-associated residents for equal proposals. Outside applicants
+  need exceptional quality, unique expertise and a clear European dimension.
+  Worldwide usefulness alone is not evidence of this. Ask these two gates at
+  the already-recorded September 30 office hour; hold submission meanwhile.
+- [OTF Internet Freedom Fund](https://www.opentech.fund/funds/internet-freedom-fund/)
+  accepts individuals worldwide subject to restrictions. Its USD 10k-900k
+  range (preferred 50k-200k) is performance-based contracting, with payment
+  against objectives and roughly 6-8 weeks for concept-note feedback. A real
+  censorship/surveillance-risk beneficiary and cash-flow plan are required.
+- [Sovereign Tech Fund](https://www.sovereign.tech/programs/fund) remains
+  global open intake for foundational OSS, not prototypes or user-facing file
+  storage services. Work must exceed EUR 50k and show relevance, prevalence
+  and underfunding; this is commissioned work, not personal unrestricted cash.
+  Its [2026 Fellowship](https://www.sovereign.tech/programs/fellowship/faq)
+  closed April 6 and requires contributions to three FOSS projects, including
+  maintenance of one. Worldwide freelance and German employment routes differ.
+
+Screened but not promoted to active applications:
+
+- [Prototype Fund Germany](https://wiki.prototypefund.de/index.php?title=%C3%9Cber_den_PTF_sprechen):
+  provisional October 1-November 30 call, but individual applicants must be
+  adults resident in Germany; James's eligibility is not established.
+- [Mozilla Fellowship](https://www.mozillafoundation.org/en/what-we-do/grantmaking/fellowship/2026-nominations-request/):
+  2026 nominations closed January 30; next call unknown.
+  [MOSS](https://www.mozilla.org/en-US/moss/) is on indefinite hiatus, and the
+  [Democracy x AI cohort](https://www.mozillafoundation.org/en/what-we-do/grantmaking/incubator/democracy-ai-cohort/)
+  has already been selected.
+- [1517 Medici](https://www.1517fund.com/medici): open invitation, minimum
+  USD 1k, no equity/IP claim, but student/dropout thesis and North America
+  restriction need qualification. Do not assume James meets these criteria.
+- [OTF ICRP](https://www.opentech.fund/research-2/icrp/): the September 7
+  application deadline passed. The later November date is an invited stage,
+  not fresh intake. Its USD 7k/month research support is historical for this
+  call, not an open income offer.
+
+Discovery sources:
+
+- [Karma funding map](https://www.karmahq.org/funding-map),
+  [OSS.Fund](https://www.oss.fund/),
+  [OSS Funded](https://ossfunded.org/) and
+  [UCL/CURIOSS funding list](https://github-pages.ucl.ac.uk/open-source/funding/)
+  provide different useful views. These are leads, not authoritative intake
+  checks; several listing deadlines have already passed.
+- Community checks include r/ethereum, r/ethfinance, r/hackathon, r/artificial,
+  IPFS/Sia forums and ecosystem governance. The
+  [September hackathon roundup](https://www.reddit.com/r/hackathon/comments/1vx4cak/blockchainai_hackathons_happening_in_september_2/)
+  exposed Arbitrum Open House for official follow-up; its ETHOnline signup
+  claim is stale for James, who did not register. The
+  [Sentient community announcement](https://www.reddit.com/r/artificial/comments/1uefv8p/42m_grant_for_open_source_ai_builders_by_sentient/)
+  points to the official rolling program but proves no acceptance rate.
+
+Income implications and proposed next work live in [[funding-income]].
+Private budgets, job applications and outreach messages are not published here.
+
 ## 2026-09-11 - FUTO response and NLnet reopening
 
 Trigger: James asked the PM to keep the whole EFS landscape and its deadlines
