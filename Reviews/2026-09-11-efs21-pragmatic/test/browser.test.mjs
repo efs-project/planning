@@ -31,7 +31,7 @@ test('browser filesystem loop writes contracts, reloads history, uploads bytes, 
         await page.getByRole('button',{name:'Open revision 1',exact:true}).click();
         await page.waitForFunction(()=>document.querySelector('#history-bytes').textContent.includes('first bytes'));
         assert.match(await page.locator('#history-bytes').textContent(),/first bytes/);
-        await page.screenshot({path:ROOT+'evidence/browser.png',fullPage:true});
+        if(process.env.EFS21_CAPTURE_SCREENSHOTS==='1')await page.screenshot({path:ROOT+'evidence/browser.png',fullPage:true});
         await page.getByLabel('New name').fill('nested');await page.getByRole('button',{name:'Create folder',exact:true}).click();
         await page.getByRole('button',{name:'nested',exact:true}).click();
         await page.getByLabel('Upload file').setInputFiles({name:'raw.bin',mimeType:'application/octet-stream',buffer:Buffer.from([0,1,255,2])});
@@ -43,7 +43,7 @@ test('browser filesystem loop writes contracts, reloads history, uploads bytes, 
         const id=(await w.client.call('resolve',[w.config.namespace,['Documents','renamed.txt'].map(n=>E.toUtf8Bytes(n))])).value;
         assert.equal((await w.client.call('fileInfo',[id])).value.revision,3n);
         await page.getByRole('button',{name:'Gas & modelled cost',exact:true}).click();assert.match(await page.locator('#gas-drawer').textContent(),/MODEL/);
-        await page.screenshot({path:ROOT+'evidence/gas-drawer.png',fullPage:true});
+        if(process.env.EFS21_CAPTURE_SCREENSHOTS==='1')await page.screenshot({path:ROOT+'evidence/gas-drawer.png',fullPage:true});
         await page.route(w.config.rpc,route=>route.abort());await page.getByRole('button',{name:'Reload canonical state',exact:true}).click();
         await page.waitForFunction(()=>document.querySelector('#error').textContent.length>0);
         assert.equal(await page.locator('#listing-state').textContent(),'Read failed — no empty-state claim');

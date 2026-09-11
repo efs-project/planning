@@ -14,4 +14,4 @@ await withWorld(async w=>{
     });
     return {url};
   });
-},{watchdogMs:12*60*60*1000});
+},{watchdogMs:18*60*60*1000});

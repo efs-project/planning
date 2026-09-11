@@ -18,11 +18,23 @@ export function validateConfig(config) {
   validateId(config.deploymentBlockHash);
   if (!/^0x[0-9a-fA-F]{40}$/.test(config.kernel)) throw Error('Malformed kernel');
 }
-export function createClient(E, config, {onAction = () => {}} = {}) {
+export function createClient(E, config, {onAction = () => {}, initialActions = []} = {}) {
   validateConfig(config);
   const abi = E.AbiCoder.defaultAbiCoder(), iface = new E.Interface(config.abi);
   const metrics = {httpRequests:0, logicalRpcCalls:0, responseBytes:0};
   let requestId = 0;
+  const unresolvedStatus=s=>['SUBMITTING','SUBMISSION_UNKNOWN','VERIFICATION_UNKNOWN'].includes(s);
+  const statuses=['SUBMITTING','SUBMISSION_UNKNOWN','VERIFICATION_UNKNOWN','MINED_UNVERIFIED','REVERTED','COMMITTED'];
+  if(!Array.isArray(initialActions))throw Error('Malformed saved journal');
+  const seen=new Set();
+  for(const a of initialActions){
+    if(!a||!statuses.includes(a.status)||!E.isHexString(a.hash,32)||seen.has(a.hash)||!E.isHexString(a.calldata)||E.keccak256(a.calldata)!==a.calldataHash||typeof a.verifyEffect!=='boolean'||(a.gasUsed!==null&&!/^\d+$/.test(a.gasUsed))||(a.receipt!==null&&a.receipt?.transactionHash!==a.hash))throw Error('Malformed saved journal; unresolved safety state cannot be discarded');
+    seen.add(a.hash);
+  }
+  const pending=initialActions.filter(a=>unresolvedStatus(a.status));
+  let submitting=false;
+  for(const a of pending){validateId(a.hash);if(a.status==='SUBMITTING')a.status='SUBMISSION_UNKNOWN';}
+  const unresolved=()=>pending.slice();
   async function rpc(method, params = []) {
     metrics.httpRequests++; metrics.logicalRpcCalls++;
     const res = await fetch(config.rpc, {method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({jsonrpc:'2.0',id:++requestId,method,params}), signal:AbortSignal.timeout(10000)});
@@ -70,24 +82,62 @@ export function createClient(E, config, {onAction = () => {}} = {}) {
     const p = result.value;
     return {...result,value:{entries:p[0].map(e=>({id:e.id,owner:e.file.owner,directory:e.file.directory,live:e.file.live,revision:e.file.revision,recordId:e.file.recordId,name:E.toUtf8String(e.name)})),next:[p.next.scope,p.next.revision,p.next.offset],complete:p.complete,generation:p.next.revision.toString()}};
   }
-  async function sendData(label,data,to,phase='action') {
+  async function sendData(label,data,to,phase='action',verifyEffect=false) {
+    if(submitting||pending.length)throw Error('Reconcile the unresolved action before submitting another write');
+    submitting=true;let action;
+    try{
     await observe();
     // Never accept user keys. This public, disposable key comes from our fresh-world config.
     if (config.devPrivateKey !== E.toBeHex(0xef521,32)) throw Error('Only the fixed public disposable development signer is allowed');
     const wallet = new E.Wallet(config.devPrivateKey);
     const nonce = Number(BigInt(await rpc('eth_getTransactionCount',[wallet.address,'pending'])));
     const raw = await wallet.signTransaction({chainId:31337,nonce,gasLimit:GAS_LIMIT,gasPrice:2000000000n,data,...(to?{to}:{})});
-    const hash = await rpc('eth_sendRawTransaction',[raw]);
+    const hash=E.keccak256(raw);
+    action={label,phase,hash,to,calldata:data,verifyEffect,gasUsed:null,calldataBytes:(data.length-2)/2,calldataHash:E.keccak256(data),receipt:null,status:'SUBMITTING'};
+    pending.push(action);onAction(action);
+    const returnedHash=await rpc('eth_sendRawTransaction',[raw]);
+    if(returnedHash!==hash)throw Error('Submission hash mismatch');
     let receipt;
     for (let i=0;i<200;i++) { receipt = await rpc('eth_getTransactionReceipt',[hash]); if (receipt) break; await new Promise(r=>setTimeout(r,50)); }
-    if (!receipt) throw Object.assign(Error('Submission unknown: receipt unavailable; reconcile hash before retry'), {hash,status:'SUBMISSION_UNKNOWN'});
-    const action = {label,phase,hash,gasUsed:BigInt(receipt.gasUsed).toString(),calldataBytes:(data.length-2)/2,calldataHash:E.keccak256(data),receipt,status:receipt.status==='0x1'?'MINED_UNVERIFIED':'REVERTED'};
-    onAction(action);
-    if (receipt.status !== '0x1') throw Object.assign(Error('Transaction reverted; gas retained in journal'), {action});
+    if(!receipt)throw Error('Receipt unavailable');
+    await settle(action,receipt);
+    if(action.status==='REVERTED')throw Object.assign(Error('Transaction reverted; gas retained in journal'),{action});
     return action;
+    }catch(error){
+      if(action&&pending.includes(action))throw markUnknown(action,error);
+      throw error;
+    }finally{submitting=false;}
+  }
+  function markUnknown(action,error){
+    action.status=action.receipt?'VERIFICATION_UNKNOWN':'SUBMISSION_UNKNOWN';
+    action.error=error.message;onAction(action);
+    return Object.assign(Error(`${action.status}: ${action.hash}. Reconcile read-only before any new write. ${error.message}`),{hash:action.hash,status:action.status,action});
+  }
+  async function settle(action,receipt){
+    if(receipt.transactionHash!==action.hash)throw Error('Receipt hash mismatch');
+    action.receipt=receipt;action.gasUsed=BigInt(receipt.gasUsed).toString();
+    action.status=receipt.status==='0x1'?'MINED_UNVERIFIED':'REVERTED';
+    if(receipt.status==='0x1'&&action.verifyEffect){
+      if(action.to!==config.kernel||E.keccak256(action.calldata)!==action.calldataHash)throw Error('Saved action identity mismatch');
+      const decoded=iface.parseTransaction({data:action.calldata});
+      await verifyWrite(action,decoded.name,decoded.args);
+    }
+    pending.splice(pending.indexOf(action),1);delete action.error;onAction(action);return action;
+  }
+  async function reconcile(){
+    if(submitting)throw Error('Wait for the current submission attempt');
+    const action=pending[0];if(!action)return {status:'NO_UNRESOLVED_ACTION'};
+    try{
+      await observe();
+      const receipt=await rpc('eth_getTransactionReceipt',[action.hash]);
+      if(!receipt){action.status='SUBMISSION_UNKNOWN';onAction(action);return action;}
+      return await settle(action,receipt);
+    }catch(error){throw markUnknown(action,error);}
   }
   async function write(method,args,label=method) {
-    const action=await sendData(label,iface.encodeFunctionData(method,args),config.kernel);
+    return sendData(label,iface.encodeFunctionData(method,args),config.kernel,'action',true);
+  }
+  async function verifyWrite(action,method,args) {
     if(method==='createFile'||method==='editFile')action.content={typeId:args[2],recordId:recordId(args[2],args[3]),encodedBodyBytes:E.getBytes(args[3]).length,bodyHash:E.keccak256(args[3])};
     const basis=await observe(action.receipt.blockNumber);
     if(basis.blockHash!==action.receipt.blockHash)throw Error('Receipt block changed; effect unknown');
@@ -109,5 +159,5 @@ export function createClient(E, config, {onAction = () => {}} = {}) {
     }else return action;
     action.status='COMMITTED';action.basis=basis;return action;
   }
-  return {rpc,observe,checkBasis,call,list,record,recordId,body,write,sendData,metrics,iface,config};
+  return {rpc,observe,checkBasis,call,list,record,recordId,body,write,sendData,reconcile,unresolved,metrics,iface,config};
 }

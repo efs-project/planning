@@ -48,7 +48,7 @@ export async function withWorld(action,{watchdogMs=300000,buildFirst=true}={}) {
     const producer=await deploy('QuoteProducer',[kernel,quoteType]),consumer=await deploy('QuoteReader'),mapping=await deploy('PlainQuoteMapping');
     const config={rpc:rpcURL,chainId:'31337',genesisHash:(await rpc('eth_getBlockByNumber',['0x0',false])).hash,kernel,codeHash:runtimes.NativeKernel.codeHash,devPrivateKey:key,namespace:wallet.address,bytesType,quoteType,producer,consumer,abi:artifact('NativeKernel').abi,consumerAbi:artifact('QuoteReader').abi};
     config.deploymentBlockNumber=setup[0].receipt.blockNumber;config.deploymentBlockHash=setup[0].receipt.blockHash;
-    const actions=[],client=createClient(E,config,{onAction:a=>actions.push(a)});
+    const actions=[],client=createClient(E,config,{onAction:a=>{const i=actions.findIndex(x=>x.hash===a.hash);if(i<0)actions.push(a);else actions[i]=a;}});
     const git=spawnSync('git',['rev-parse','HEAD'],{cwd:ROOT,encoding:'utf8'}).stdout.trim();
     const sourcePins=Object.fromEntries(readdirSync(`${ROOT}contracts/src`).filter(p=>p.endsWith('.sol')).map(p=>[p,E.keccak256(readFileSync(`${ROOT}contracts/src/${p}`))]));
     for(const name of ['NativeKernel','NavigationIndex','ExactTypeRegistry','BytesValidator','Uint256Validator','QuoteProducer','QuoteReader','PlainQuoteMapping']){

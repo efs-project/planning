@@ -1,0 +1,70 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {chromium} from '../../2026-09-04-mvp-rehearsal/node_modules/playwright/index.mjs';
+import {withWorld,E} from '../scripts/world.mjs';
+import {seed} from '../scripts/benchmark.mjs';
+import {withServer} from '../scripts/server.mjs';
+test('failed navigation never writes prior parent; unknown submission survives reload and reconciles read-only',async()=>{
+ await withWorld(async w=>{
+  const {root,folder}=await seed(w);
+  return withServer(w.config,async url=>{
+   const browser=await chromium.launch({headless:true});
+   try{
+    const page=await browser.newPage();await page.goto(url);
+    await page.getByLabel('New name').fill('safe.txt');await page.getByLabel('New text').fill('safe bytes');
+    const nonce=await w.client.rpc('eth_getTransactionCount',[w.config.namespace,'pending']);
+    await page.route(w.config.rpc,r=>r.abort());await page.getByRole('button',{name:'Documents',exact:true}).click();
+    await page.waitForFunction(()=>document.querySelector('#error').textContent.length>0);
+    await page.unroute(w.config.rpc);
+    assert.equal(await page.locator('#create-text').isDisabled(),true);
+    await page.locator('#create-text').evaluate(el=>el.onclick());
+    await page.waitForFunction(()=>!document.querySelector('#reload').disabled);
+    assert.equal(await w.client.rpc('eth_getTransactionCount',[w.config.namespace,'pending']),nonce);
+    assert.equal((await w.client.call('lookup',[w.config.namespace,root,E.toUtf8Bytes('safe.txt')])).value,'0x'+'0'.repeat(64));
+    await page.getByRole('button',{name:'Reload canonical state',exact:true}).click();
+    await page.getByRole('button',{name:'Create text file',exact:true}).click();
+    await page.waitForFunction(()=>document.querySelector('#file-state').textContent.includes('Verified 10 bytes'));
+    assert.notEqual((await w.client.call('lookup',[w.config.namespace,folder,E.toUtf8Bytes('safe.txt')])).value,'0x'+'0'.repeat(64));
+    await page.evaluate(()=>{location.hash='';});
+    await page.locator('#files').getByRole('button',{name:'Documents',exact:true}).waitFor();
+    await page.getByLabel('New name').fill('root-only.txt');await page.getByRole('button',{name:'Create text file',exact:true}).click();
+    await page.waitForFunction(()=>document.querySelector('#file-title').textContent==='root-only.txt');
+    assert.notEqual((await w.client.call('lookup',[w.config.namespace,root,E.toUtf8Bytes('root-only.txt')])).value,'0x'+'0'.repeat(64));
+    assert.equal((await w.client.call('lookup',[w.config.namespace,folder,E.toUtf8Bytes('root-only.txt')])).value,'0x'+'0'.repeat(64));
+    await page.evaluate(()=>{location.hash='Documents';});
+    await page.getByRole('button',{name:'safe.txt',exact:true}).waitFor();
+    let release,entered;const paused=new Promise(r=>{entered=r;}),gate=new Promise(r=>{release=r;});let held=false;
+    await page.route(w.config.rpc,async route=>{if(!held&&route.request().postDataJSON().method==='eth_call'){held=true;entered();await gate;}await route.continue();});
+    await page.getByRole('button',{name:'Reload canonical state',exact:true}).click();await paused;
+    await page.evaluate(()=>{location.hash='';});release();
+    await page.locator('#files').getByRole('button',{name:'Documents',exact:true}).waitFor();await page.unroute(w.config.rpc);
+    await page.getByLabel('New name').fill('race-root.txt');await page.getByRole('button',{name:'Create text file',exact:true}).click();
+    await page.waitForFunction(()=>document.querySelector('#file-title').textContent==='race-root.txt');
+    assert.notEqual((await w.client.call('lookup',[w.config.namespace,root,E.toUtf8Bytes('race-root.txt')])).value,'0x'+'0'.repeat(64));
+    assert.equal((await w.client.call('lookup',[w.config.namespace,folder,E.toUtf8Bytes('race-root.txt')])).value,'0x'+'0'.repeat(64));
+    await page.evaluate(()=>{location.hash='Documents';});await page.getByRole('button',{name:'safe.txt',exact:true}).waitFor();
+    await page.getByLabel('New name').fill('ambiguous.txt');
+    let sends=0;
+    await page.route(w.config.rpc,async route=>{
+      if(route.request().postDataJSON().method==='eth_sendRawTransaction'){sends++;await route.fetch();await route.abort();}else await route.continue();
+    });
+    await page.getByRole('button',{name:'Create text file',exact:true}).click();
+    await page.waitForFunction(()=>document.querySelector('#error').textContent.includes('SUBMISSION_UNKNOWN'));
+    assert.equal(sends,1);assert.equal(await page.locator('#create-text').isDisabled(),true);
+    assert.match(await page.locator('#gas-summary').textContent(),/1 unresolved/);
+    assert.match(await page.locator('#gas-journal').textContent(),/unknown gas/);
+    await page.unroute(w.config.rpc);await page.reload();
+    await page.waitForFunction(()=>!document.querySelector('#reload').disabled);
+    assert.equal(await page.locator('#create-text').isDisabled(),true);
+    const afterSubmission=await w.client.rpc('eth_getTransactionCount',[w.config.namespace,'pending']);
+    await page.getByRole('button',{name:'Gas & modelled cost',exact:true}).click();
+    await page.getByRole('button',{name:'Reconcile unresolved action',exact:true}).click();
+    await page.waitForFunction(()=>document.querySelector('#gas-summary').textContent.includes('0 unresolved'));
+    assert.equal(await w.client.rpc('eth_getTransactionCount',[w.config.namespace,'pending']),afterSubmission);
+    assert.match(await page.locator('#gas-journal').textContent(),/COMMITTED/);
+    assert.match(await page.locator('#gas-summary').textContent(),/Known receipt gas/);
+    return {};
+   }finally{await browser.close();}
+  });
+ });
+});
