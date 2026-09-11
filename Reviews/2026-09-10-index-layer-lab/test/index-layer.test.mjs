@@ -11,16 +11,28 @@ import { nestedFixture } from '../../2026-09-09-files-browser-mvp/test/nested-fi
 import { compileRouter, routerFixture } from '../../2026-09-09-files-browser-mvp/test/router-fixture.mjs';
 import { authorityFixture } from '../../2026-09-09-files-browser-mvp/test/authority-fixture.mjs';
 import { EXTENDED_TYPES } from '../../2026-09-09-files-browser-mvp/sdk/files-actions.mjs';
-import { FIXTURE, bindingScopeKey } from '../../2026-09-09-files-reader/index.mjs';
-import { compileLab, indexLayerFixture, bucketOf, scopeOf, str, NONE, COV, TRI, COMPLETENESS, DE, WHITEOUT, LAB, js } from '../scripts/lab-fixture.mjs';
+import { FIXTURE, bindingScopeKey, nameRole, ordinaryRecord } from '../../2026-09-09-files-reader/index.mjs';
+import { compileLab, indexLayerFixture, bucketOf, scopeOf, str, NONE, COV, TRI, COMPLETENESS, DE, WHITEOUT, LAB, js, DirectoryEntryLeaf, WhiteoutLeaf, BindLeaf } from '../scripts/lab-fixture.mjs';
+import { withLabWorld } from '../scripts/lab-world.mjs';
 
 const FILES = ['fileA', 'fileB', 'draft', 'extra'];
 
-test('FIELD_EQ family over DirectoryEntry.child: declare after data, delayed backfill, convergence, coverage, detach', { timeout: 1200000 }, async () => {
-  compileUpgrade(); compileRouter(); compileLab();
-  const evidence = { date: new Date().toISOString(), steps: [], gas: {} };
+// Round 2: the SAME matrix runs on two worlds. Mode 0 = the populated files-browser
+// pair on the genesis (legacy) kernel library, upgraded to U4 — the control.
+// Mode 1 = a fresh pair deployed from the lab's K10-patched build whose U1 core
+// selected scopeLayout = 1 before initialization, populated through the same
+// fixtures and router; the lab's module and hook read the stored discriminator.
+const WORLDS = [
+  { name: 'mode 0 (populated pair, legacy layout, genesis kernel library)', layout: 0, run: (fn, o) => withUpgrade(fn, { ...o, profile: 'reads' }), evidence: 'evidence/functional-run.json' },
+  { name: 'mode 1 (fresh pair, K10 layout selected before initialize, patched kernel)', layout: 1, run: (fn, o) => withLabWorld({ scopeLayout: 1 }, fn, o), evidence: 'evidence/functional-run-mode1.json' },
+];
+let compiled = false;
+
+for (const WORLD of WORLDS) test('FIELD_EQ family over DirectoryEntry.child — ' + WORLD.name + ': declare after data, delayed backfill, convergence, coverage, detach', { timeout: 1200000 }, async () => {
+  if (!compiled) { compileUpgrade(); compileRouter(); compileLab(); compiled = true; }
+  const evidence = { date: new Date().toISOString(), world: WORLD.name, scopeLayout: WORLD.layout, steps: [], gas: {} };
   const note = (step, extra = {}) => evidence.steps.push({ step, ...extra });
-  await withUpgrade(async lab => {
+  await WORLD.run(async lab => {
     const f = await nestedFixture(lab);
     await routerFixture(lab);
     const auth = await authorityFixture(lab);
@@ -39,7 +51,8 @@ test('FIELD_EQ family over DirectoryEntry.child: declare after data, delayed bac
 
     // ---- U4: the hooked core replaces U3 on the POPULATED pair --------------
     const ix = await indexLayerFixture(lab, auth);
-    note('upgrade', { core4: ix.core4.address, runtimeBytes: ix.core4.runtimeBytes, gas: String(BigInt(ix.upgradeReceipt.gasUsed)) });
+    assert.equal(ix.layout, WORLD.layout, 'the stored scopeLayout is the one this world selected');
+    note('upgrade', { core4: ix.core4.address, runtimeBytes: ix.core4.runtimeBytes, gas: String(BigInt(ix.upgradeReceipt.gasUsed)), scopeLayout: ix.layout });
     // Retired operator path: the only admission path is the hooked one.
     {
       const retired = await lab.publish({ envelopeId: ZeroHash, header: { profile: 1, principalId: A, authorityRef: ZeroHash, authEpoch: 0, pubNonce: ZeroHash, notAfter: 0 }, recordIds: [], leafMask: 0n, leaves: [], expectedRevisions: [] });
@@ -62,6 +75,10 @@ test('FIELD_EQ family over DirectoryEntry.child: declare after data, delayed bac
     const pre = await ix.oracle(A, idx);
     assert.equal(pre.positions.length, N_PRE + 1);
     assert(pre.positions[N_PRE].ordinal <= d, 'q00 predates d');
+    // Three ordinal domains (§11a): in mode 1 the raw kind-10 lane is a binding-key
+    // ordinal and must NOT equal the admission ordinal the hydrated row recovers.
+    if (WORLD.layout === 1) assert(pre.positions.every(p => p.lane < p.ordinal), 'mode 1: lanes are key ordinals, strictly below their first admission ordinal');
+    else assert(pre.positions.every(p => p.lane === p.ordinal), 'mode 0: lanes ARE first admission ordinals');
 
     // A scope that predates d has no coverage slot yet; the gap [0, liveFrom) is explicit.
     {
@@ -227,6 +244,32 @@ test('FIELD_EQ family over DirectoryEntry.child: declare after data, delayed bac
       assert.equal(c.slot, false); assert.equal(Number(c.state), COV.COMPLETE);
       const [pg] = (await ix.view('page', [familyId, lateScope, B.fileB, 0, 512, 0])).values;
       assert.equal(Number(pg.completeness), COMPLETENESS.COMPLETE);
+      // ---- THREE first-time bindings of the same scope in ONE publication (§8 item 1) ----
+      // leaf order: entry(fileA) | bind | whiteout | bind | entry(draft) | bind. The whiteout
+      // is a first binding with NO family (no bit) and must still consume a position, so
+      // positions are before+0 (fileA), before+1 (whiteout), before+2 (draft).
+      const before = Number((await ix.view('coverageOf', [familyId, lateScope])).values[0].scopeCount);
+      assert.equal(before, 1);
+      const e1 = DirectoryEntryLeaf(late, 'multi-a', objects.fileA), w = WhiteoutLeaf(late, 'multi-w'), e2 = DirectoryEntryLeaf(late, 'multi-b', objects.draft);
+      const b1 = BindLeaf(FIXTURE.namePurpose, late, nameRole('multi-a'), ordinaryRecord(e1.typeId, e1.body), null);
+      const bw = BindLeaf(FIXTURE.namePurpose, late, nameRole('multi-w'), ordinaryRecord(w.typeId, w.body), null);
+      const b2 = BindLeaf(FIXTURE.namePurpose, late, nameRole('multi-b'), ordinaryRecord(e2.typeId, e2.body), null);
+      const multi = await ix.directAdmit({ principal: A, leaves: [e1, b1.leaf, w, bw.leaf, e2, b2.leaf], revisions: [[1, 0], [3, 0], [5, 0]] });
+      evidence.gas.threeFirstBindingsOnePublication = String(multi.gasUsed);
+      const o = await ix.oracle(A, late);
+      assert.equal(o.positions.length, before + 3, 'three new positions');
+      assert.deepEqual([o.positions[before].bucket, o.positions[before + 1].bucket, o.positions[before + 2].bucket], [B.fileA, null, B.draft], 'oracle: leaf order');
+      assert.equal(o.positions[before + 1].targetType, WHITEOUT);
+      for (const [pos, k] of [[before, 'fileA'], [before + 1, null], [before + 2, 'draft']]) for (const kk of FILES) {
+        const got = await ix.view('probe', [familyId, lateScope, B[kk], pos]);
+        assert.equal(got.ok, true, 'multi: probe ' + pos + ' ' + kk + ' ' + js(got.error));
+        assert.equal(got.values[0], kk === k, 'multi-first-bindings: position ' + pos + ' bucket ' + kk);
+      }
+      const [pgA] = (await ix.view('page', [familyId, lateScope, B.fileA, 0, 512, 0])).values;
+      assert.deepEqual(pgA.items.map(Number), [before], 'fileA at before+0 only');
+      const [pgD] = (await ix.view('page', [familyId, lateScope, B.draft, 0, 512, 0])).values;
+      assert.deepEqual(pgD.items.map(Number), [before + 2], 'draft at before+2 only');
+      note('three-first-bindings-one-publication', { before, positions: before + 3, gas: String(multi.gasUsed) });
     }
 
     // ---- generic field walk: a STRING field (name) and a cross-Type family (FileRevision.mediaType) ----
@@ -284,8 +327,8 @@ test('FIELD_EQ family over DirectoryEntry.child: declare after data, delayed bac
     evidence.gas.unattachedPlacementU4 = String(unattached.gasUsed);
     evidence.gas.placementAfterComplete = String(after.gasUsed);
     note('done', { names: names.length });
-  }, { profile: 'reads', watchdogMs: 1200000 });
+  }, { watchdogMs: 1200000 });
   mkdirSync(LAB + 'evidence', { recursive: true });
-  writeFileSync(LAB + 'evidence/functional-run.json', JSON.stringify(evidence, null, 2) + '\n');
-  console.log('index-layer gas (receipts, MEASURED, not retained as traces):', evidence.gas);
+  writeFileSync(LAB + WORLD.evidence, JSON.stringify(evidence, null, 2) + '\n');
+  console.log('[' + WORLD.name + '] index-layer gas (receipts, MEASURED, not retained as traces):', evidence.gas);
 });

@@ -1,18 +1,21 @@
 {
-  "date": "2026-09-11T03:18:27.432Z",
+  "date": "2026-09-11T05:05:11.398Z",
+  "world": "mode 0 (populated pair, legacy layout, genesis kernel library)",
+  "scopeLayout": 0,
   "steps": [
     {
       "step": "upgrade",
       "core4": "0x678378e0cc81d48581709cd0579cab0b5688c3ce",
-      "runtimeBytes": 21825,
-      "gas": "584409"
+      "runtimeBytes": 21854,
+      "gas": "584409",
+      "scopeLayout": 0
     },
     {
       "step": "declare",
       "familyId": "0x070e0d1ce7197afb7660b2cf77916495d560fab1bf5adb1bddb8b6c0a2afbe71",
       "ordinal": "1",
       "declaredAt": "104",
-      "gas": "354891"
+      "gas": "354920"
     },
     {
       "step": "differential-complete",
@@ -20,32 +23,39 @@
       "checked": 80
     },
     {
+      "step": "three-first-bindings-one-publication",
+      "before": 1,
+      "positions": 4,
+      "gas": "6953433"
+    },
+    {
       "step": "done",
       "names": 20
     }
   ],
   "gas": {
-    "declare": "354891",
-    "placementHookFreshWord": "3133212",
-    "directRebindFieldChangeUncovered": "2950814",
-    "backfillChunk6WithSlotInit": "469925",
-    "placementHookWarmWord": "3109842",
-    "removeRebindClear": "5228210",
-    "directRebindFieldChangeCovered": "2919497",
-    "backfillChunk6Guarded": "423479",
-    "backfillGuardLoser": "41973",
+    "declare": "354920",
+    "placementHookFreshWord": "3134816",
+    "directRebindFieldChangeUncovered": "2955430",
+    "backfillChunk6WithSlotInit": "472513",
+    "placementHookWarmWord": "3111446",
+    "removeRebindClear": "5234341",
+    "directRebindFieldChangeCovered": "2923983",
+    "backfillChunk6Guarded": "425818",
+    "backfillGuardLoser": "44123",
     "raceNoGuard": [
-      "178677",
-      "180677"
+      "180907",
+      "182907"
     ],
     "raceGuardWinnerLoser": [
-      "153637",
-      "41949"
+      "155912",
+      "44099"
     ],
-    "backfillBornAfterDNoSlot": "44906",
-    "detach": "42409",
-    "placementAfterRetire": "3143873",
-    "unattachedPlacementU4": "3086500",
-    "placementAfterComplete": "3126954"
+    "backfillBornAfterDNoSlot": "47129",
+    "threeFirstBindingsOnePublication": "6953433",
+    "detach": "42415",
+    "placementAfterRetire": "3174340",
+    "unattachedPlacementU4": "3088430",
+    "placementAfterComplete": "3128558"
   }
 }

@@ -1,0 +1,177 @@
+{
+  "op": "probe-tail-miss",
+  "note": "probe: clear bit at a born-after-d position -> false via the kind-10 word (no slot needed).",
+  "txHash": "0xb6cf51382ce12d4720fe54c545b69b5a08d21cd73179971b7855de1de8ea88ca",
+  "blockNumber": 1166,
+  "status": "0x1",
+  "to": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+  "extra": {},
+  "receiptGasUsed": 54187,
+  "gasLimit": 16777216,
+  "intrinsic": {
+    "bytes": 132,
+    "zeroBytes": 30,
+    "nonzeroBytes": 102,
+    "tokens": 438,
+    "calldataGas": 1752,
+    "standard": 22752,
+    "floor7623": 25380,
+    "floorApplies": false,
+    "hardfork": "cancun",
+    "fromTrace": 22752,
+    "matches": true
+  },
+  "execution": {
+    "startGas": 16754464,
+    "gross": 31435,
+    "categoriesTotal": 31435,
+    "categoriesMatchGross": true,
+    "steps": 1258
+  },
+  "refund": {
+    "nodeCounter": 0,
+    "model": 0,
+    "applied": 0
+  },
+  "reconciliation": {
+    "formula": "intrinsic.standard + execution.gross - refund.applied",
+    "value": 54187,
+    "receipt": 54187,
+    "residual": 0
+  },
+  "categories": {
+    "SSTORE": 0,
+    "SLOAD": 21000,
+    "KECCAK256": 744,
+    "LOG": 0,
+    "CALLDATA": 80,
+    "CALL_OVERHEAD": 5200,
+    "PRECOMPILE": 0,
+    "MEMORY": 336,
+    "STACK": 2088,
+    "CONTROL": 1209,
+    "ARITH": 768,
+    "CODE": 0,
+    "ENV": 10,
+    "OTHER": 0
+  },
+  "categoryCounts": {
+    "SSTORE": 0,
+    "SLOAD": 10,
+    "KECCAK256": 17,
+    "LOG": 0,
+    "CALLDATA": 15,
+    "CALL_OVERHEAD": 2,
+    "PRECOMPILE": 0,
+    "MEMORY": 74,
+    "STACK": 713,
+    "CONTROL": 168,
+    "ARITH": 254,
+    "CODE": 0,
+    "ENV": 5,
+    "OTHER": 0
+  },
+  "byContract": {
+    "IndexLayerModule": {
+      "address": "0xd50f25958f195efc9f5f33a392d5219bab106a07",
+      "gas": 22459,
+      "n": 862
+    },
+    "Core proxy": {
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "gas": 4865,
+      "n": 46
+    },
+    "UpgradeableFixtureCoreU4 (impl)": {
+      "address": "0x0aea357c95f0d1ffc5b63525dd88ede942c4473f",
+      "gas": 4111,
+      "n": 350
+    }
+  },
+  "sstore": {
+    "sstoreOps": 0,
+    "distinctSlotsWritten": 0,
+    "writesByClass": {},
+    "gasByClass": {},
+    "slotsByFinalClass": {},
+    "modelMismatches": 0,
+    "refundModel": 0,
+    "byKind": {}
+  },
+  "sload": {
+    "ops": 10,
+    "coldOps": 10,
+    "warmOps": 0,
+    "distinctSlots": 10,
+    "gas": 21000,
+    "byKind": {
+      "ERC1967": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexFamilyOrdinal": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexFamily": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "Posting:k10": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexWord": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexCoverage": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "Store": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "Word:k10": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "BindingKey": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "Word:k8": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      }
+    },
+    "unattributed": []
+  },
+  "checks": {
+    "traceErrors": 0,
+    "sstoreModelMismatches": 0,
+    "prestateDiffMismatches": 0,
+    "unattributedReads": 0,
+    "unattributedWrites": 0
+  },
+  "writes": [],
+  "artifacts": {
+    "trace": "trace.json.gz",
+    "rawTraceBytes": 427228,
+    "prestate": "prestate-diff.json",
+    "storageOps": "storage-ops.json",
+    "receipt": "receipt.json",
+    "tx": "tx.json"
+  }
+}

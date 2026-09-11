@@ -1,0 +1,592 @@
+{
+  "op": "u4-upgrade",
+  "note": "upgradePair(U4 core, same U3 carrier).",
+  "txHash": "0x51c1da072feff1f28b03f6228b1967872f670ca482628c2ff5d038f76a305c80",
+  "blockNumber": 88,
+  "status": "0x1",
+  "to": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+  "extra": {},
+  "receiptGasUsed": 584409,
+  "gasLimit": 16777216,
+  "intrinsic": {
+    "bytes": 196,
+    "zeroBytes": 150,
+    "nonzeroBytes": 46,
+    "tokens": 334,
+    "calldataGas": 1336,
+    "standard": 22336,
+    "floor7623": 24340,
+    "floorApplies": false,
+    "hardfork": "cancun",
+    "fromTrace": 22336,
+    "matches": true
+  },
+  "execution": {
+    "startGas": 16754880,
+    "gross": 562073,
+    "categoriesTotal": 562073,
+    "categoriesMatchGross": true,
+    "steps": 6051
+  },
+  "refund": {
+    "nodeCounter": 0,
+    "model": 0,
+    "applied": 0
+  },
+  "reconciliation": {
+    "formula": "intrinsic.standard + execution.gross - refund.applied",
+    "value": 584409,
+    "receipt": 584409,
+    "residual": 0
+  },
+  "categories": {
+    "SSTORE": 402700,
+    "SLOAD": 111200,
+    "KECCAK256": 810,
+    "LOG": 4006,
+    "CALLDATA": 234,
+    "CALL_OVERHEAD": 1407,
+    "PRECOMPILE": 0,
+    "MEMORY": 2012,
+    "STACK": 9771,
+    "CONTROL": 4172,
+    "ARITH": 4281,
+    "CODE": 21400,
+    "ENV": 80,
+    "OTHER": 0
+  },
+  "categoryCounts": {
+    "SSTORE": 22,
+    "SLOAD": 72,
+    "KECCAK256": 10,
+    "LOG": 3,
+    "CALLDATA": 85,
+    "CALL_OVERHEAD": 14,
+    "PRECOMPILE": 0,
+    "MEMORY": 413,
+    "STACK": 3301,
+    "CONTROL": 650,
+    "ARITH": 1427,
+    "CODE": 14,
+    "ENV": 40,
+    "OTHER": 0
+  },
+  "byContract": {
+    "FixtureDeployment (controller)": {
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "gas": 489022,
+      "n": 2792
+    },
+    "UpgradeableFixtureCoreU4 (impl)": {
+      "address": "0xfe58655224dea0bb31bc1b1c55b47c415a80748d",
+      "gas": 27302,
+      "n": 1262
+    },
+    "UpgradeableFixtureCarrierU3 (impl)": {
+      "address": "0x362bff13a146fadabe13fd63672905154aeed6df",
+      "gas": 15860,
+      "n": 669
+    },
+    "Core proxy": {
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "gas": 10131,
+      "n": 287
+    },
+    "Carrier proxy": {
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "gas": 6948,
+      "n": 241
+    },
+    "Core ProxyAdmin": {
+      "address": "0x09e16501cb42eec019fcd5def4e37aab51d0db5b",
+      "gas": 6405,
+      "n": 400
+    },
+    "Carrier ProxyAdmin": {
+      "address": "0xb665b3436060755c35962ce332e907a6935c3b5c",
+      "gas": 6405,
+      "n": 400
+    }
+  },
+  "sstore": {
+    "sstoreOps": 22,
+    "distinctSlotsWritten": 22,
+    "writesByClass": {
+      "COLD_REWRITE": 2,
+      "NOOP": 1,
+      "FRESH": 19
+    },
+    "gasByClass": {
+      "COLD_REWRITE": 5800,
+      "NOOP": 100,
+      "FRESH": 396800
+    },
+    "slotsByFinalClass": {
+      "REWRITE": 2,
+      "UNCHANGED": 1,
+      "FRESH": 19
+    },
+    "modelMismatches": 0,
+    "refundModel": 0,
+    "byKind": {
+      "ERC1967": {
+        "writes": 1,
+        "gas": 2900,
+        "classes": {
+          "COLD_REWRITE": 1
+        }
+      },
+      "Carrier:ERC1967": {
+        "writes": 1,
+        "gas": 100,
+        "classes": {
+          "NOOP": 1
+        }
+      },
+      "UNATTRIBUTED": {
+        "writes": 20,
+        "gas": 399700,
+        "classes": {
+          "COLD_REWRITE": 1,
+          "FRESH": 19
+        }
+      }
+    }
+  },
+  "sload": {
+    "ops": 72,
+    "coldOps": 52,
+    "warmOps": 20,
+    "distinctSlots": 52,
+    "gas": 111200,
+    "byKind": {
+      "FixtureDeployment (controller) storage": {
+        "distinctSlots": 34,
+        "reads": 39,
+        "gas": 71900
+      },
+      "ProxyAdmin": {
+        "distinctSlots": 2,
+        "reads": 6,
+        "gas": 4600
+      },
+      "ERC1967": {
+        "distinctSlots": 2,
+        "reads": 7,
+        "gas": 4700
+      },
+      "Carrier:ERC1967": {
+        "distinctSlots": 2,
+        "reads": 6,
+        "gas": 4600
+      },
+      "Counts": {
+        "distinctSlots": 2,
+        "reads": 2,
+        "gas": 4200
+      },
+      "Control": {
+        "distinctSlots": 5,
+        "reads": 6,
+        "gas": 10600
+      },
+      "Carrier:Control": {
+        "distinctSlots": 5,
+        "reads": 6,
+        "gas": 10600
+      }
+    },
+    "unattributed": []
+  },
+  "checks": {
+    "traceErrors": 0,
+    "sstoreModelMismatches": 0,
+    "prestateDiffMismatches": 0,
+    "unattributedReads": 0,
+    "unattributedWrites": 20
+  },
+  "writes": [
+    {
+      "i": 995,
+      "depth": 3,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc",
+      "original": "0x000000000000000000000000798cf6d5e97369b5556f8f35160c96ea3434c5e1",
+      "before": "0x000000000000000000000000798cf6d5e97369b5556f8f35160c96ea3434c5e1",
+      "value": "0x000000000000000000000000fe58655224dea0bb31bc1b1c55b47c415a80748d",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "ERC1967",
+      "member": "implementation"
+    },
+    {
+      "i": 1641,
+      "depth": 3,
+      "address": "0xa3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "slot": "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc",
+      "original": "0x000000000000000000000000362bff13a146fadabe13fd63672905154aeed6df",
+      "before": "0x000000000000000000000000362bff13a146fadabe13fd63672905154aeed6df",
+      "value": "0x000000000000000000000000362bff13a146fadabe13fd63672905154aeed6df",
+      "warmAtWrite": true,
+      "gas": 100,
+      "model": 100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "NOOP",
+      "kind": "Carrier:ERC1967",
+      "member": "implementation"
+    },
+    {
+      "i": 5700,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x0000000000000000000000000000000000000000000000000000000000000003",
+      "original": "0x000000000000000000000002b665b3436060755c35962ce332e907a6935c3b5c",
+      "before": "0x000000000000000000000002b665b3436060755c35962ce332e907a6935c3b5c",
+      "value": "0x000000000000000000000003b665b3436060755c35962ce332e907a6935c3b5c",
+      "warmAtWrite": true,
+      "gas": 2900,
+      "model": 2900,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "COLD_REWRITE",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5760,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aa0",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000000000000000000057000000000000005800000003",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5781,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aa1",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000006f94dbd6f4abbb1e3458682374e3802c20782251",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5801,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aa2",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000a3a99a6685d17e6ee0ae6b89898b31766f439a44",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5822,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aa3",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000fe58655224dea0bb31bc1b1c55b47c415a80748d",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5843,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aa4",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000362bff13a146fadabe13fd63672905154aeed6df",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5851,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aa5",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x41b58b81a88005bf2ab16e80a336a994ad495ecea854ab4b1b8e4042bbad6e40",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5859,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aa6",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0xe37e408d30af707f0055b4cdb911b0adda68419f222e332524b5d2eb4872d357",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5879,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aa7",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x00000000000000000000000009e16501cb42eec019fcd5def4e37aab51d0db5b",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5899,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aa8",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000b665b3436060755c35962ce332e907a6935c3b5c",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5919,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aa9",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000008f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5939,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aaa",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000005a85a6be2fbc361740680b412853de5a6e1049fa",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5959,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aab",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x0000000000000000000000008764359d75dba3d1e3ff3d2f95ef484a9dde0b79",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5967,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aac",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0xb10df08adde4eaebe4b71c5fad3b18bbd5e7c52ca9766a2632333b30799ae98e",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5988,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aad",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x000000000000000000000000d226ecebd1e4c36a7855f9a88304dcc8b48237f9",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 5996,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aae",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x7036bfe73de59aa20dbcf8760c4b663f518c052217d5d37f872caf4a90ffd123",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 6004,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166aaf",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0xf6c0966e2acc9f6b1bad9ac20f07da3b00cc418aafc8481dedcdc5f35f8767e8",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 6012,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166ab0",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x2a4b1b16b2219025dda9f035e842ca90d744c4703ca43ee9ee8b5127433fa773",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 6021,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166ab1",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0xb348fe518ed90f0a9fef24f133bdcabadc4c60f31b2ac135b05bb5129a841967",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    },
+    {
+      "i": 6030,
+      "depth": 1,
+      "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+      "slot": "0x2e174c10e159ea99b867ce3205125c24a42d128804e4070ed6fcc8cc98166ab2",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x8a45ba0418b4c03812e25c197014edaa14914649ed1262cca2a78c4aa85e8538",
+      "warmAtWrite": false,
+      "gas": 22100,
+      "model": 22100,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "UNATTRIBUTED",
+      "member": null
+    }
+  ],
+  "artifacts": {
+    "trace": "trace.json.gz",
+    "rawTraceBytes": 1553535,
+    "prestate": "prestate-diff.json",
+    "storageOps": "storage-ops.json",
+    "receipt": "receipt.json",
+    "tx": "tx.json"
+  }
+}

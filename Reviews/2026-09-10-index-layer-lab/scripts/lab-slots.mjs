@@ -28,6 +28,7 @@ export async function buildLeanSlotMap(url, core, block, { router, carrier, prox
   const E = EFS_SLOT;
   put(c, E + STORE.counts0, 'Counts', 'records|envelopes|types|principals');
   put(c, E + STORE.counts1, 'Counts', 'admissions|batches|postingKeys|bindingKeys');
+  put(c, E + STORE.bindingKeys + 1n, 'Store', 'scopeLayout'); // K10 patch: appended discriminator (slot 28)
   for (const [name, off] of Object.entries(STORE.init)) put(c, E + off, 'Bootstrap', name);
   for (let i = 0n; i < 64n; i++) put(c, dataSlot(E + STORE.init.intrinsicGroupBytes) + i, 'Bootstrap', 'intrinsicGroupBytes[data]', null, Number(i));
   // Records: actual body words, labelled by Type name.

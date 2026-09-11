@@ -4,6 +4,8 @@ pragma solidity ^0.8.30;
 import {StateStore} from "./StateStore.sol";
 import {StatePointReads} from "./StatePointReads.sol";
 import {StorageByteView} from "./StorageByteView.sol";
+import {IndexKeys} from "./IndexKeys.sol";
+import {BindingFold} from "./BindingFold.sol";
 
 library StateReadPrimitives {
     struct PostingHead {
@@ -22,10 +24,48 @@ library StateReadPrimitives {
         returns (bytes32 realmBasis, uint64 selectedH, uint64 currentH)
     {
         currentH = StatePointReads.requireState(s, subject);
+        if (s.scopeLayout > 1) revert StorageByteView.ErrReadState(subject);
         realmBasis = s.init.initialRevisionId;
         if (realmBasis == 0) revert StorageByteView.ErrReadState(subject);
         if (requested > currentH || requested >= ORDINAL_GUARD) revert ErrPageBasis(requested, currentH);
         selectedH = requested == 0 ? currentH : requested;
+    }
+
+    /// Physical kind-10 values use this bound only in the explicitly selected K10 arm.
+    function scopeBound(StateStore.Store storage s, uint64 currentH, bytes32 subject) internal view returns (uint64) {
+        if (s.scopeLayout > 1) revert StorageByteView.ErrReadState(subject);
+        if (s.scopeLayout == 0) return currentH;
+        uint64 count = s.count.bindingKeys;
+        if (count >= ORDINAL_GUARD || count > currentH) revert StorageByteView.ErrReadState(subject);
+        return count;
+    }
+
+    /// Recover admission time through the unchanged kind-8 history, not a reverse map.
+    function firstBindingAdmission(StateStore.Store storage s, uint64 keyOrdinal, uint64 currentH, bytes32 subject)
+        internal
+        view
+        returns (uint64 first)
+    {
+        if (keyOrdinal == 0 || keyOrdinal >= ORDINAL_GUARD || keyOrdinal > s.count.bindingKeys) {
+            revert StorageByteView.ErrReadState(subject);
+        }
+        bytes32 key = s.bindingKeys[keyOrdinal];
+        if (key == 0) revert StorageByteView.ErrReadState(subject);
+        StateStore.BindingRow storage row = s.bindings[key];
+        BindingFold.Head memory binding = BindingFold.unpack(row.meta, row.target);
+        if (row.meta >> 120 != 0 || !BindingFold.validHead(binding) || binding.state == 0) {
+            revert StorageByteView.ErrReadState(subject);
+        }
+        bytes32 historyKey = IndexKeys.posting(0, 8, 0, key);
+        PostingHead memory history = postingHead(s, historyKey, true, currentH, subject);
+        if (
+            history.count == 0 || history.count != binding.revision || history.last != binding.admissionOrdinal
+                || history.count >= type(uint32).max
+        ) revert StorageByteView.ErrReadState(subject);
+        first = postingAt(s, historyKey, history, 0, subject);
+        if (history.count > 1 && postingAt(s, historyKey, history, 1, subject) <= first) {
+            revert StorageByteView.ErrReadState(subject);
+        }
     }
 
     function postingHead(StateStore.Store storage s, bytes32 key, bool audit, uint64 currentH, bytes32 subject)

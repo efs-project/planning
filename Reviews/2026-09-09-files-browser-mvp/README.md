@@ -195,6 +195,10 @@ walkthrough drivable against real local v2 contracts:
   ESTIMATED). Suites: `test/byte-commitment-matrix.test.mjs`,
   `test/tag-joins.test.mjs`; lab:
   [../2026-09-10-index-layer-lab/](../2026-09-10-index-layer-lab/README.md).
+- [prototype-round-2-2026-09-11.md](prototype-round-2-2026-09-11.md) — K10
+  measured on the lab: backfill 56,425 → 31,384 gas per entry (−44 %), chunk
+  cap 273 → 491, lane-to-admission derivations 3× dearer; the two-first-
+  bindings position bug fixed red → green; 10k partial.
 - [reconciliation-with-codex-2026-09-10.md](reconciliation-with-codex-2026-09-10.md)
   — Codex's reply accepted point by point (the tag-follows-the-file join is
   the largest correction; the mixed-run gas table; ROSTER is not now-or-

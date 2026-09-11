@@ -94,6 +94,9 @@ library StateStore {
         mapping(uint64 => bytes32) principalIds;
         mapping(uint64 => bytes32) postingKeys;
         mapping(uint64 => bytes32) bindingKeys;
+        // Disposable comparison arm: 0 = legacy admission anchors; 1 = K10 key ordinals.
+        // Appended, never reinterpret a populated Store.
+        uint256 scopeLayout;
     }
 
     // The write-free planner journals only rows touched by the bounded selected

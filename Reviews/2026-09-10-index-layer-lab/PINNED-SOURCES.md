@@ -53,3 +53,99 @@ d066811392602e02c64e52ec67ca655c254c0fd24864c37e7873ad67b2369e14  IndexLayerStor
 2fa764d5e81960d8aadaac59d77ab42495b01af373d9fdb191cf8f381fb01ff5  IndexedAdmission.sol
 6b6f494115d87ddf1267afe16e359c4618b3ac6439f11b51106043694857abd7  LabCoreU4.sol
 ```
+
+## Second pin (round 2, 2026-09-10 late evening) — Codex's K10 patch applied to `src/`
+
+Applied: `git diff 832c7ae..fe98f18 -- Reviews/2026-09-05-c0-core/src` (branch
+`origin/codex/mvp-c0-coherence`, commits `5a3520d` → `c38b1f4` → `fe98f18`),
+path-rewritten to this lab's `src/` and applied with `git apply` (clean; the
+lab's first pin was byte-identical to `832c7ae`, verified with `cmp` against
+`git show 832c7ae:…` before applying). The four patched files are now
+byte-identical to `git show fe98f18:Reviews/2026-09-05-c0-core/src/<file>`
+(verified with `cmp`); the other 19 files keep their first-pin hashes. The
+shared `Reviews/2026-09-05-c0-core/src` was NOT touched.
+
+```
+9e5617a01b417b3ea1e5f2d86786b016c82f898fb8c5caaa2c538c48cea3d84a  StateStore.sol
+b7b90cee7d348e544e832d69b79800e91227c3ac8f958857d9c8266edb2e6be8  StateKernel.sol
+1ff08cce1085fc3802c0496c8d00f13d8b9dfa3901a0fa084c9f37750a075d2e  StateReadPrimitives.sol
+7af536b6f09f03f646412d8909d8d62cfb7cce940473db71ffe004c81a253099  StateAuditPages.sol
+```
+
+What the patch changes for this lab: `StateStore.Store` gains one appended
+`uint256 scopeLayout` (Store slot 28, after the six inventory mappings; nothing
+before it moves), `StateKernel.selectScopeLayout` (pre-initialization only),
+`initialize`/`admit` refuse unknown layouts, `bindingEffect` appends
+`p.count.bindingKeys` instead of the admission ordinal to kind 10 in mode 1,
+and the readers (`StateReadPrimitives.scopeBound` / `firstBindingAdmission`,
+`StateAuditPages` prefix filtering + cursor contexts 3/4) recover admission
+time through kind-8 word 0.
+
+Compiled in the lab (solc 0.8.30, optimizer 200, via-IR, Cancun) after the
+patch — runtime bytes: `UpgradeAdmissionLibrary` **24,553 (23 bytes of EIP-170
+headroom, exactly Codex's figure)**, `UpgradeQueryReadLibrary` 21,557,
+`PointReadLibrary` 12,103, `IndexedAdmission` **7,311** and `IndexLayerModule`
+**11,715** (final round-2 artifacts, as recorded in every `environment.json →
+codeSizes`; the 6,933 / 10,968 first noted here were the step-1 intermediate
+build before `ScopeOrdinals`), `UpgradeableFixtureCoreU4` 21,854. After the post-review `ScopeOrdinals` fix (an
+added revert; matrix re-run 2/2 green, `evidence/matrix-run.txt`) the lab
+artifacts are `IndexedAdmission` 7,337 and `IndexLayerModule` 11,741 (+26 bytes
+each); the measured runs in `evidence/n1000-*` used the 7,311 / 11,715 builds.
+
+The **populated-pair path is unaffected by the patch**: `indexLayerFixture`
+links the U4 core and the hook to the admission library the foundation
+deployed at genesis (compiled from the shared, unpatched `c0-core/src`; the
+controller pins its codehash), so that world stays on the legacy kernel and
+`scopeLayout` reads 0. Expected and recorded: the lab-compiled
+`UpgradeAdmissionLibrary` artifact differs from the genesis one and is only
+ever deployed by the fresh-world arm (§9.3). Codex's `K10Scope.t.sol` /
+`K10ScopeHarness.sol` were not brought over: the mode-selection seam they
+demonstrate (`selectScopeLayout(s, 1)` before `initialize`) is reproduced by
+the lab's own U1 core (`lab/LabWorld.sol`), and the forge test depends on
+`BindingReadHarness` / `AuditPages.t.sol` / `StatefulHarness` and a
+`vm.readFile` permission that the lab does not otherwise need.
+
+Lab file hashed after the step-1 position fix (intermediate; superseded by the
+inventory below once `ScopeOrdinals` was introduced):
+
+```
+96cb5e5033efa41486a9187f4dcc7133962fe654440d21b87656b69f166052ae  IndexedAdmission.sol  (step 1, superseded)
+```
+
+## Round-2 foundation and lab inventory (2026-09-10 late evening)
+
+`foundation/` now holds 6 files. Two edits, both marked `LAB EDIT` in the
+file: `UpgradeableFixtureCore.sol` has `executeFixture` `virtual` (round 1)
+and `initialize` `virtual` (round 2, so the fresh-world U1 core can call
+`StateKernel.selectScopeLayout` before `StateKernel.initialize`).
+`UpgradeableFixtureCarrier.sol` is a byte-identical copy of the foundation's
+(needed by the fresh-world deployer; the `C0Foundation/` remapping was added
+to `foundry.toml` for its `C0ChunkTree` import).
+
+```
+8183346e15e882eb75714956e4dd447738aded27726b0fffa797ec8551ea486b  UpgradeAdmissionLibrary.sol
+28f02cb849703fa6158748a3f70108f092d4495f6bf42ef525c1606ab96038ec  UpgradeQueryReadLibrary.sol
+aae25edb210402f5fa96cd145645e7e447d251d0c250d52ac32230da301c140f  UpgradeStorage.sol
+30e845def382a687309038a48b36396cec90f96b28b56f756997efd35db5f290  UpgradeableFixtureCarrier.sol
+95ac7829173c70ed00ecaf838256e6a550dee1586985a33414472520c2efc3ae  UpgradeableFixtureCore.sol
+c1d60b6f13ec9958d7b7e7e9ba9fdcd6294d82a712aa22c8fe6cee22ecddb32f  UpgradeableReadFixtureCore.sol
+```
+
+`lab/FixtureDeployment.sol` is a copy of
+`Reviews/2026-09-08-upgradeable-foundation/test/FixtureDeployment.sol` (sha256
+of the original `53fee31b4b27c22761ded6d900eb4fb705e3437ba8cc7dfa8ea02b656547830e`) with its three `../src/` imports rewritten to
+`Foundation/` and a two-line header comment; `diff` against the original
+shows nothing else.
+
+Lab contracts after round 2 (re-hashed after the post-review `ScopeOrdinals` fix, 2026-09-11):
+
+```
+2abfb045e7026bc1c7a667902935a43b345fdb8672637726f377131b3df5b0b8  FieldWalk.sol
+e91e02b90f8744863d89494c51aa32eb4c575979ee85771aa02a6793e329728e  FixtureDeployment.sol
+0b9425abfd09e4dc0e5632e159490ba0b3c76e233192e794d275c5892f7e3489  IndexLayerModule.sol
+d066811392602e02c64e52ec67ca655c254c0fd24864c37e7873ad67b2369e14  IndexLayerStorage.sol
+61872f11bcb676086e0acf13eed3528567507a8494ec9a17252aef8d97cab46a  IndexedAdmission.sol
+6b6f494115d87ddf1267afe16e359c4618b3ac6439f11b51106043694857abd7  LabCoreU4.sol
+fdf210824afca95cc97e6088c939b296b22c300326aaf83fc21e61318bb86551  LabWorld.sol
+cc5b82d317b0c9546366b93f78c3369954d13c7dec3d0ed11f4341b3a9e26fdf  ScopeOrdinals.sol
+```

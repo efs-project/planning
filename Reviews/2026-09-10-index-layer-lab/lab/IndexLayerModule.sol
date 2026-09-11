@@ -10,11 +10,21 @@ import {TypeGroupParser} from "C0Admission/TypeGroupParser.sol";
 import {UpgradeStorage} from "Foundation/UpgradeStorage.sol";
 import {IndexLayerStorage} from "./IndexLayerStorage.sol";
 import {FieldWalk} from "./FieldWalk.sol";
+import {ScopeOrdinals} from "./ScopeOrdinals.sol";
 
 /// @notice Declared-family index layer: declare/attach, chunked backfill,
 /// the reverting probe, the bool-free tolerant probe, basis-committing pages,
 /// and two-step detach. Reached through the U4 core's fallback (delegatecall),
 /// so it operates on the proxy's storage. Disposable lab code.
+///
+/// Round 2: layout-aware. The Store's stored `scopeLayout` (0 legacy, 1 K10)
+/// selects how a kind-10 lane is read — never inferred from lane values. Every
+/// "born after d" decision (probe, backfill's first touch, coverageView's
+/// display liveFrom) and the reverse locator go through
+/// `ScopeOrdinals.admissionAt`, which in mode 1 recovers the key's first
+/// admission ordinal from kind-8 word 0. The backfill walk has a mode-0 control
+/// (today's admission → envelope → binding record walk) and a mode-1 form
+/// (lane → bindingKeys[k] → binding row → target record → field).
 contract IndexLayerModule {
     using IndexLayerStorage for IndexLayerStorage.Layout;
 
@@ -58,6 +68,11 @@ contract IndexLayerModule {
     uint256 private constant CURSOR_END = type(uint256).max;
     uint256 private constant SCAN_MAX = 8192; // positions inspected per page call (32 words)
     uint64 private constant NONE = type(uint64).max;
+
+    /// The stored discriminator (full word), for tests and the oracle. Never a value inference.
+    function scopeLayout() external view returns (uint256) {
+        return UpgradeStorage.efs().scopeLayout;
+    }
 
     // ---- declaration / attach (lab authority: anyone; Type-level) ----------
 
@@ -108,14 +123,15 @@ contract IndexLayerModule {
         IndexLayerStorage.Family storage f = l.families[ordinal];
         uint256 fp = f.packed;
         if (IndexLayerStorage.retiredAtOf(fp) != 0) revert Frozen(IndexLayerStorage.retiredAtOf(fp));
-        bytes32 k10 = IndexKeys.posting(bytes32(0), 10, 0, scopeKey);
-        uint64 count = uint64(s.postings[k10].head);
+        uint256 layout = ScopeOrdinals.layoutOf(s);
+        bytes32 k10 = ScopeOrdinals.k10(scopeKey);
+        uint64 count = ScopeOrdinals.count(s, k10);
         bytes32 ck = IndexLayerStorage.coverageKey(ordinal, scopeKey);
         uint256 cov = l.coverage[ck];
         uint32 revision;
         if (cov == 0) {
             // First touch: allocate a slot only for a scope that predates d.
-            liveFrom = lowerBound(s, k10, count, IndexLayerStorage.declaredAtOf(fp));
+            liveFrom = ScopeOrdinals.lowerBound(s, k10, count, IndexLayerStorage.declaredAtOf(fp), layout);
             if (liveFrom == 0) {
                 if (expectedThrough != NONE && expectedThrough != 0) revert Guard(0, expectedThrough);
                 return (0, 0, IndexLayerStorage.COV_COMPLETE); // born after d: complete by construction, no slot
@@ -127,13 +143,21 @@ contract IndexLayerModule {
         if (state == IndexLayerStorage.COV_COMPLETE) return (through, liveFrom, state);
         uint64 end = through + maxEntries;
         if (end > liveFrom) end = liveFrom;
-        bytes32 setType = s.init.bindingSetType;
-        bytes32 tombType = s.init.bindingTombstoneType;
         bytes32 famType = f.typeId;
         uint256 program = f.program;
-        for (uint64 i = through; i < end; ++i) {
-            (bool hit, bytes32 bucket) = derive(s, k10, i, scopeKey, famType, program, setType, tombType);
-            if (hit) l.setBit(ordinal, scopeKey, bucket, i);
+        if (layout == 0) {
+            bytes32 setType = s.init.bindingSetType;
+            bytes32 tombType = s.init.bindingTombstoneType;
+            for (uint64 i = through; i < end; ++i) {
+                (bool hit, bytes32 bucket) = derive(s, k10, i, scopeKey, famType, program, setType, tombType);
+                if (hit) l.setBit(ordinal, scopeKey, bucket, i);
+            }
+        } else {
+            uint64 keyCount = s.count.bindingKeys;
+            for (uint64 i = through; i < end; ++i) {
+                (bool hit, bytes32 bucket) = deriveK10(s, k10, i, famType, program, keyCount);
+                if (hit) l.setBit(ordinal, scopeKey, bucket, i);
+            }
         }
         through = end;
         ++revision;
@@ -142,10 +166,11 @@ contract IndexLayerModule {
         emit Backfilled(familyId, scopeKey, through, liveFrom, revision, state);
     }
 
-    /// TODAY'S LAYOUT WALK for one scope position (no K10 shortcut):
-    /// kind-10 word -> admission row -> envelope bytes (principal, leaf count,
-    /// record id word) -> BindingSet/Tombstone record body (purpose, subject,
-    /// role) -> binding key -> binding row -> target record type + body -> field.
+    /// MODE-0 (legacy layout) WALK for one scope position — the control:
+    /// kind-10 lane (= first admission ordinal) -> admission row -> envelope
+    /// bytes (principal, leaf count, record id word) -> BindingSet/Tombstone
+    /// record body (purpose, subject, role) -> binding key -> binding row ->
+    /// target record type + body -> field. Verifies the scope from the record.
     function derive(
         StateStore.Store storage s,
         bytes32 k10,
@@ -156,7 +181,7 @@ contract IndexLayerModule {
         bytes32 setType,
         bytes32 tombType
     ) private view returns (bool hit, bytes32 bucket) {
-        uint64 ord = ordinalAt(s, k10, position);
+        uint64 ord = ScopeOrdinals.laneAt(s, k10, position);
         if (ord == 0) revert WalkIntegrity(1, position);
         StateStore.AdmissionRow storage a = s.admissions[ord];
         bytes32 envelopeId = a.envelopeId;
@@ -185,6 +210,33 @@ contract IndexLayerModule {
         return (true, IndexKeys.scalar(FieldWalk.extract(body, program)));
     }
 
+    /// MODE-1 (K10 layout) WALK for one scope position: kind-10 lane (= global
+    /// binding-key ordinal k) -> bindingKeys[k] -> binding row -> target record
+    /// type + body -> field. Trusts the kernel's kind-10 inventory to name keys
+    /// of THIS scope (the sole writer appends it); the mode-0 walk instead
+    /// re-derives the scope from the BindingSet body. No admission row, no
+    /// envelope bytes, no BindingSet record are read.
+    function deriveK10(
+        StateStore.Store storage s,
+        bytes32 k10,
+        uint64 position,
+        bytes32 famType,
+        uint256 program,
+        uint64 keyCount
+    ) private view returns (bool hit, bytes32 bucket) {
+        uint64 k = ScopeOrdinals.laneAt(s, k10, position);
+        if (k == 0 || k > keyCount) revert WalkIntegrity(1, position);
+        bytes32 key = s.bindingKeys[k];
+        if (key == bytes32(0)) revert WalkIntegrity(5, position);
+        StateStore.BindingRow storage b = s.bindings[key];
+        BindingFold.Head memory h = BindingFold.unpack(b.meta, b.target);
+        if (h.state != 1 || h.targetKind != 1) return (false, 0);
+        StateStore.RecordRow storage tr = s.records[h.targetA];
+        if (tr.typeId != famType) return (false, 0);
+        bytes memory body = tr.body;
+        return (true, IndexKeys.scalar(FieldWalk.extract(body, program)));
+    }
+
     // ---- reads --------------------------------------------------------------
 
     /// The ONLY bool-returning read. The bool is unreachable outside coverage.
@@ -196,17 +248,20 @@ contract IndexLayerModule {
         uint256 fp = l.families[ordinal].packed;
         uint64 retiredAt = IndexLayerStorage.retiredAtOf(fp);
         if (retiredAt != 0) revert Frozen(retiredAt);
-        bytes32 k10 = IndexKeys.posting(bytes32(0), 10, 0, scopeKey);
-        uint64 count = uint64(s.postings[k10].head);
+        bytes32 k10 = ScopeOrdinals.k10(scopeKey);
+        uint64 count = ScopeOrdinals.count(s, k10);
         if (position >= count) revert NotAPosition(position, count);
         if (l.bit(ordinal, scopeKey, bucket, position)) return true;
         uint256 cov = l.coverage[IndexLayerStorage.coverageKey(ordinal, scopeKey)];
         (uint64 through, uint64 liveFrom,,) = IndexLayerStorage.unpackCoverage(cov);
         if (position < through) return false;
         uint64 d = IndexLayerStorage.declaredAtOf(fp);
-        if (ordinalAt(s, k10, position) > d) return false; // born after d: hook-maintained, no slot needed
+        uint256 layout = ScopeOrdinals.layoutOf(s);
+        // Born after d: hook-maintained, no slot needed. Mode 0: one lane read;
+        // mode 1: lane -> bindingKeys[k] -> kind-8 word 0 (three reads).
+        if (ScopeOrdinals.admissionAt(s, k10, position, layout) > d) return false;
         // Revert path only: without a slot, derive the gap's end so the error is honest (log N reads).
-        if (cov == 0) liveFrom = lowerBound(s, k10, count, d);
+        if (cov == 0) liveFrom = ScopeOrdinals.lowerBound(s, k10, count, d, layout);
         revert Uncovered(position, through, liveFrom);
     }
 
@@ -366,34 +421,18 @@ contract IndexLayerModule {
         c.declaredAt = IndexLayerStorage.declaredAtOf(fp);
         c.retiredAt = IndexLayerStorage.retiredAtOf(fp);
         c.highWater = s.count.admissions;
-        bytes32 k10 = IndexKeys.posting(bytes32(0), 10, 0, scopeKey);
-        c.scopeCount = uint64(s.postings[k10].head);
+        bytes32 k10 = ScopeOrdinals.k10(scopeKey);
+        c.scopeCount = ScopeOrdinals.count(s, k10);
         uint256 cov = l.coverage[IndexLayerStorage.coverageKey(ordinal, scopeKey)];
         if (cov != 0) {
             c.slot = true;
             (c.through, c.liveFrom, c.revision, c.state) = IndexLayerStorage.unpackCoverage(cov);
         } else {
-            // Display-side derivation only (log N reads): where the hook-maintained tail begins.
-            c.liveFrom = lowerBound(s, k10, c.scopeCount, c.declaredAt);
+            // Display-side derivation only (log N lane reads, 3x in mode 1): where the hook-maintained tail begins.
+            c.liveFrom = ScopeOrdinals.lowerBound(s, k10, c.scopeCount, c.declaredAt, ScopeOrdinals.layoutOf(s));
             c.state = c.liveFrom == 0 ? IndexLayerStorage.COV_COMPLETE : IndexLayerStorage.COV_NONE;
         }
         if (c.retiredAt != 0) c.state = IndexLayerStorage.COV_FROZEN;
-    }
-
-    /// First position whose first-binding ordinal is > d (the kind-10 list is ordinal-sorted).
-    function lowerBound(StateStore.Store storage s, bytes32 k10, uint64 count, uint64 d) private view returns (uint64) {
-        uint64 lo;
-        uint64 hi = count;
-        while (lo < hi) {
-            uint64 mid = lo + (hi - lo) / 2;
-            if (ordinalAt(s, k10, mid) <= d) lo = mid + 1;
-            else hi = mid;
-        }
-        return lo;
-    }
-
-    function ordinalAt(StateStore.Store storage s, bytes32 k10, uint64 position) private view returns (uint64) {
-        return uint64((s.postingWords[k10][position / 5] >> (48 * (position % 5))) & U48);
     }
 
     function scopeKeyOf(bytes32 principal, bytes32 purpose, bytes32 subject) external pure returns (bytes32) {

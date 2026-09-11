@@ -1,0 +1,21 @@
+{
+  "type": "0x1",
+  "chainId": "0x7a69",
+  "nonce": "0x48d",
+  "gasPrice": "0x77359400",
+  "gas": "0x1000000",
+  "to": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+  "value": "0x0",
+  "accessList": [],
+  "input": "0x3542440425debeec2f0f9c827da3e018b8a58fff650d3f50ad88cc4fd4c8b63005e28e461257fc2040d17129df1c558c8b9bec105cabac8270ba0d06572cce2b4050b412000000000000000000000000000000000000000000000000ffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000",
+  "r": "0xfa80ca09beb8416464e24addb062536f140942f479abbd41d599beadeac108e8",
+  "s": "0x2c5ae8199964e0f2427ed9b87d41df4532ad2173164492689d9b14ae7cfd4dc7",
+  "yParity": "0x1",
+  "v": "0x1",
+  "hash": "0x53aea34b470b2d47949e65ed7aba4bfb0d3cd3b8d8e5a3466c86f1084c3643c0",
+  "blockHash": "0x1ccc31b60286b4eb098730facfa3ac96070e79d49b9ffee48a071bf63e4d6465",
+  "blockNumber": "0x494",
+  "transactionIndex": "0x0",
+  "from": "0xf4fb1a53b6b4bba9c2d4668554e603b0b89f09bc",
+  "blockTimestamp": "0x6aa37c40"
+}

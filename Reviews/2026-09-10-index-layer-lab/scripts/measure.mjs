@@ -1,7 +1,13 @@
 #!/usr/bin/env node
 // Index-layer lab measurement with RETAINED receipts and traces.
 //
-//   node scripts/measure.mjs --n 1000 --sparse 64 --label n1000 [--skip-compile]
+//   node scripts/measure.mjs --n 1000 --sparse 64 --label n1000-mode0 [--skip-compile]
+//   node scripts/measure.mjs --n 1000 --sparse 64 --label n1000-mode1 --world fresh --layout 1
+//
+// Round 2: --world populated (default; the foundation's populated pair on the
+// genesis legacy kernel library — mode 0, the control) or --world fresh (a pair
+// deployed from the lab's K10-patched build whose U1 core selected
+// --layout 0|1 before initialization; see scripts/lab-world.mjs).
 //
 // Phases (anvil is re-hosted on the SAME port between them via anvil_dumpState /
 // anvil_loadState, because a node started with --steps-tracing keeps every
@@ -31,6 +37,7 @@ import { join, resolve } from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import { createHash } from 'node:crypto';
+import { ZeroHash } from '../../2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js';
 import { compileUpgrade, withUpgrade } from '../../2026-09-08-upgradeable-foundation/scripts/local-upgrade.mjs';
 import { nestedFixture } from '../../2026-09-09-files-browser-mvp/test/nested-fixture.mjs';
 import { compileRouter, routerFixture } from '../../2026-09-09-files-browser-mvp/test/router-fixture.mjs';
@@ -43,12 +50,16 @@ import { intrinsicGas, attributeSteps, categorize, classifyStorage } from '../..
 import { batchRpc, labelPostingKeys } from '../../2026-09-09-files-browser-mvp/scripts/measure/lib/slots.mjs';
 import { compileLab, indexLayerFixture, bucketOf, scopeOf, NONE, COV, DE, LAB } from './lab-fixture.mjs';
 import { buildLeanSlotMap } from './lab-slots.mjs';
+import { withLabWorld } from './lab-world.mjs';
 
 const args = process.argv.slice(2);
 const opt = (name, dflt) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : dflt; };
 const N = Number(opt('--n', '1000'));
 const SPARSE = Number(opt('--sparse', '64'));
-const LABEL = opt('--label', 'n' + N);
+const WORLD = opt('--world', 'populated');
+const LAYOUT = Number(opt('--layout', '0'));
+if (!['populated', 'fresh'].includes(WORLD) || ![0, 1].includes(LAYOUT) || (WORLD === 'populated' && LAYOUT !== 0)) throw new Error('--world populated|fresh, --layout 0|1 (populated is always 0)');
+const LABEL = opt('--label', 'n' + N + '-mode' + LAYOUT);
 const OUT = resolve(LAB, opt('--out', 'evidence/' + LABEL));
 const TX_GAS = 16777216n;
 const HARDFORK = 'cancun';
@@ -61,7 +72,8 @@ const log = (...x) => console.log('[' + LABEL + ']', ...x);
 
 if (!args.includes('--skip-compile')) { compileUpgrade(); compileRouter(); compileLab(); }
 const t0 = Date.now();
-await withUpgrade(async lab => {
+const withWorld = WORLD === 'fresh' ? (fn, o) => withLabWorld({ scopeLayout: LAYOUT }, fn, o) : withUpgrade;
+await withWorld(async lab => {
   const f = await nestedFixture(lab);
   await routerFixture(lab);
   const auth = await authorityFixture(lab);
@@ -85,7 +97,7 @@ await withUpgrade(async lab => {
     return d;
   }
   /** Kill the current anvil, start one on the SAME port with/without --steps-tracing, load `state`. */
-  async function rehost(tracing, why, state) {
+  async function rehost(tracing, why, state, extraArgs = []) {
     const t = Date.now();
     const rssBefore = rssOfPort();
     spawnSync('sh', ['-c', 'lsof -ti tcp:' + port + ' -sTCP:LISTEN | xargs kill -9'], { encoding: 'utf8' });
@@ -94,7 +106,7 @@ await withUpgrade(async lab => {
     for (let i = 0; i < 1200 && listening(); i++) await delay(100);
     if (listening()) throw new Error('port ' + port + ' still held after 120 s');
     // --no-request-size-limit: anvil_loadState carries the whole dump in one JSON body (default limit 2 MB).
-    const a = [...lab.resources.nodeArgs.filter(x => x !== '--steps-tracing'), '--no-request-size-limit']; if (tracing) a.push('--steps-tracing');
+    const a = [...lab.resources.nodeArgs.filter(x => x !== '--steps-tracing'), '--no-request-size-limit', ...extraArgs]; if (tracing) a.push('--steps-tracing');
     let child = null, ready = false;
     for (let attempt = 0; attempt < 5 && !ready; attempt++) {
       child = spawn('anvil', a, { stdio: 'ignore' }); anvils.push(child);
@@ -105,7 +117,7 @@ await withUpgrade(async lab => {
     if ((await rawRpc('anvil_loadState', [state])) !== true) throw new Error('anvil_loadState failed');
     currentTracing = tracing;
     const block = Number(await lab.rpc('eth_blockNumber'));
-    rehosts.push({ why, tracing, block, stateBytes: (state.length - 2) / 2, rssOfPreviousNodeBytes: rssBefore, ms: Date.now() - t });
+    rehosts.push({ why, tracing, extraArgs, block, stateBytes: (state.length - 2) / 2, rssOfPreviousNodeBytes: rssBefore, ms: Date.now() - t });
     log('rehost', why, 'tracing=' + tracing, 'block=' + block, 'state=' + ((state.length - 2) / 2 / 1048576).toFixed(1) + 'MiB', 'previous RSS=' + (rssBefore / 1048576).toFixed(0) + 'MiB', ((Date.now() - t) / 1000).toFixed(1) + 's');
   }
   process.on('exit', () => { for (const c of anvils) if (c.exitCode === null) c.kill('SIGKILL'); });
@@ -216,6 +228,8 @@ await withUpgrade(async lab => {
     await capture(phaseB, 'u3-createDir', (await auth.execute({ kind: 'createDir', mountId, parent: bench, name: 'u3-dir', principal: A })).receipt.transactionHash, 'U3 createDir under bench/ (4 leaves).');
   }
   let ix = await indexLayerFixture(lab, auth);
+  if (ix.layout !== LAYOUT) throw new Error('stored scopeLayout ' + ix.layout + ' != selected ' + LAYOUT);
+  log('world=' + WORLD, 'stored scopeLayout=' + ix.layout);
   await capture(phaseB, 'u4-upgrade', ix.upgradeReceipt.transactionHash, 'upgradePair(U4 core, same U3 carrier).');
   for (let i = 0; i < 3; i++) await capture(phaseB, 'u4-placement-' + i, (await place(bench, 'u4-' + i, FILES[i % 2])).receipt.transactionHash, 'U4 placement with NO family declared: wrapper overhead (pre-read + nested delegatecall + typeFamilies lookup).');
   {
@@ -229,8 +243,18 @@ await withUpgrade(async lab => {
   const ixB = ix;
 
   // ---- C (untraced): load D0 again, U4 upgrade, populate, dump D1 ----------------
-  await rehost(false, 'C: load D0 for population', D0);
+  // --prune-history: anvil otherwise clones the whole in-memory state as a
+  // historical snapshot on EVERY mined block (and serialises old snapshots to
+  // disk past its in-memory limit), so per-placement time grows linearly with
+  // the number of slots already written (MEASURED 35 ms -> 290 ms per placement
+  // over 3,400 placements; a receipt then exceeded the runner's 7.5 s wait).
+  // The population phase never reads history; the traced phases B/D do (the
+  // prevBlock storage reads in capture) and keep the default.
+  await rehost(false, 'C: load D0 for population', D0, ['--prune-history']);
   ix = await indexLayerFixture(lab, auth); // addresses differ from phase B (the lab wallet paid B's routed ops); each phase is analysed with its own
+  // Patient receipts during population only (the runners cap a receipt wait at 7.5 s).
+  const impatientReceipt = lab.receipt;
+  lab.receipt = async (tx, label) => { for (let i = 0; i < 4800; i++) { const r = await lab.rpc('eth_getTransactionReceipt', [tx.hash]); if (r) return r; await delay(25); } throw new Error('population receipt wait (120 s)'); };
   const big = (await auth.execute({ kind: 'createDir', mountId, parent: f.root, name: 'big', principal: A })).plan.predicted.objectId;
   const bigScope = scopeOf(A, big);
   {
@@ -246,6 +270,7 @@ await withUpgrade(async lab => {
     for (let i = 0; i < SPARSE; i++) sparseChildren.push((await auth.execute({ kind: 'createDir', mountId, parent: sparse, name: 's' + String(i).padStart(3, '0'), principal: A })).plan.predicted.objectId);
     wall.populateSparse = { n: SPARSE, ms: Date.now() - t };
   }
+  lab.receipt = impatientReceipt;
   const D1 = await dump('D1: populated (N=' + N + ', sparse=' + SPARSE + ')');
 
   // ---- D (traced): the index layer --------------------------------------------------
@@ -319,6 +344,18 @@ await withUpgrade(async lab => {
     await cap('backfill-sparse-' + SPARSE, r.hash, 'sparse arm: ' + SPARSE + ' distinct children (createDir objects) -> one fresh bucket word per entry; includes the slot init.');
     await cap('page-sparse', (await ix.tx('page', [familyId, sparseScope, bucketOf(sparseChildren[3]), 0, 16, 0])).hash, 'page over a single-hit bucket in the sparse scope.');
   }
+  // Codex's hydrated kind-10 reader on the big scope: does a page of 256 / 64 / 16
+  // items fit an eth_call with the transaction gas ceiling? (Observed: in mode 1
+  // the 256-item page reverted with empty data; the oracle no longer depends on it.)
+  const hydratedPageProbe = [];
+  for (const maxItems of [256, 64, 16]) {
+    const data = lab.readIface.encodeFunctionData('pagePostingsHydrated', [ZeroHash, 10, 0, bigScope, { cursor: 0, maxItems, basisOrdinal: 0 }]);
+    let estimate = null, ok = true, error = null;
+    try { estimate = Number(await lab.rpc('eth_estimateGas', [{ to: lab.core, data, gas: '0x' + TX_GAS.toString(16) }])); } catch (e) { estimate = 'revert:' + String(e.data ?? e.message).slice(0, 60); }
+    try { await lab.rpc('eth_call', [{ to: lab.core, data, gas: '0x' + TX_GAS.toString(16) }, 'latest']); } catch (e) { ok = false; error = String(e.data ?? e.message).slice(0, 80); }
+    hydratedPageProbe.push({ maxItems, estimateGas: estimate, ok, error });
+  }
+  log('hydratedPageProbe', JSON.stringify(hydratedPageProbe));
   const oracleResult = { checked: 0, mismatches: [] };
   {
     const t = Date.now();
@@ -342,13 +379,14 @@ await withUpgrade(async lab => {
 
   const environment = {
     label: LABEL, n: N, sparse: SPARSE, startedAt: new Date(t0).toISOString(), elapsedMs: Date.now() - t0, hardfork: HARDFORK, chainId: 31337, nodeArgs: lab.resources.nodeArgs,
+    world: { kind: WORLD, selectedScopeLayout: LAYOUT, storedScopeLayout: ix.layout, kernelLibrary: WORLD === 'fresh' ? 'lab-compiled (K10-patched src), deployed at genesis' : 'foundation genesis library (shared unpatched c0-core src), pinned by the controller', deployment: lab.resources.deployment ?? null, artifactPins: lab.resources.artifactPins ?? null },
     versions: { node: process.version, anvil: version('anvil'), forge: version('forge'), solc: lab.resources.compiler, solcBinary: SOLC, ethers: lab.resources.versions.ethers },
     git: { commit: git(['rev-parse', 'HEAD']), branch: git(['rev-parse', '--abbrev-ref', 'HEAD']), dirty: git(['status', '--porcelain']) !== '' },
     labFoundry: readFileSync(join(LAB, 'foundry.toml'), 'utf8'),
     addresses: { core, router, hook: ix.hook.address, module: ix.module.address, core4: ix.core4.address, admissionLibrary: lab.expected.execution.admissionLibrary, principalA: A, big, sparse, bench, familyId, fam2, familyOrdinal: String(familyOrdinal), declaredAt: String(d) },
     codeSizes: { core4: ix.core4.runtimeBytes, module: ix.module.runtimeBytes, hook: ix.hook.runtimeBytes },
     buckets: B, scopes: { bigScope, sparseScope },
-    wall, rehosts, finalAnvilRssBytes: rssOfPort(), chunks: Object.fromEntries(Object.entries(chunks).map(([k, v]) => [k, { gas: v.gas.toString(), through: v.through }])), maxChunk, oracle: oracleResult,
+    hydratedPageProbe, wall, rehosts, finalAnvilRssBytes: rssOfPort(), chunks: Object.fromEntries(Object.entries(chunks).map(([k, v]) => [k, { gas: v.gas.toString(), through: v.through }])), maxChunk, oracle: oracleResult,
     fixturePath: 'nestedFixture -> routerFixture -> authorityFixture (U3) -> indexLayerFixture (U4); operations via authorityFixture.execute (FilesRouterV2 -> executeAuthorized) and direct author-signed executeAuthorized; index calls via the U4 fallback -> IndexLayerModule. Phases A-D re-host anvil on one port with anvil_dumpState/anvil_loadState; dumps only from untraced nodes.',
   };
   json(join(OUT, 'environment.json'), environment);
@@ -356,8 +394,8 @@ await withUpgrade(async lab => {
   const files = [];
   (function walk(dir) { for (const e of readdirSync(dir, { withFileTypes: true })) { const p = join(dir, e.name); if (e.isDirectory()) walk(p); else files.push(p); } })(OUT);
   const index = files.sort().map(p => ({ path: p.slice(LAB.length), bytes: statSync(p).size, sha256: createHash('sha256').update(readFileSync(p)).digest('hex') }));
-  json(join(OUT, 'index.json'), { generatedAt: new Date().toISOString(), command: 'node scripts/measure.mjs --n ' + N + ' --sparse ' + SPARSE + ' --label ' + LABEL, files: index.filter(x => !x.path.endsWith('index.json')) });
+  json(join(OUT, 'index.json'), { generatedAt: new Date().toISOString(), command: 'node scripts/measure.mjs --n ' + N + ' --sparse ' + SPARSE + ' --label ' + LABEL + ' --world ' + WORLD + ' --layout ' + LAYOUT + (args.includes('--no-finish') ? ' --no-finish' : ''), files: index.filter(x => !x.path.endsWith('index.json')) });
   log('done in', ((Date.now() - t0) / 1000).toFixed(0) + 's');
   for (const c of anvils) if (c.exitCode === null) c.kill('SIGKILL');
-}, { profile: 'reads', watchdogMs: 7200000 });
+}, { profile: 'reads', watchdogMs: 14400000 });
 process.exit(0);

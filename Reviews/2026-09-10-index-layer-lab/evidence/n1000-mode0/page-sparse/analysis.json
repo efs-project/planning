@@ -1,0 +1,167 @@
+{
+  "op": "page-sparse",
+  "note": "page over a single-hit bucket in the sparse scope.",
+  "txHash": "0x8c4ca07360f1ed7fb8c79a2d02b689a5e460b467dc62d21323f6ec3eeab0594a",
+  "blockNumber": 1176,
+  "status": "0x1",
+  "to": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+  "extra": {},
+  "receiptGasUsed": 72994,
+  "gasLimit": 16777216,
+  "intrinsic": {
+    "bytes": 196,
+    "zeroBytes": 95,
+    "nonzeroBytes": 101,
+    "tokens": 499,
+    "calldataGas": 1996,
+    "standard": 22996,
+    "floor7623": 25990,
+    "floorApplies": false,
+    "hardfork": "cancun",
+    "fromTrace": 22996,
+    "matches": true
+  },
+  "execution": {
+    "startGas": 16754220,
+    "gross": 49998,
+    "categoriesTotal": 49998,
+    "categoriesMatchGross": true,
+    "steps": 7681
+  },
+  "refund": {
+    "nodeCounter": 0,
+    "model": 0,
+    "applied": 0
+  },
+  "reconciliation": {
+    "formula": "intrinsic.standard + execution.gross - refund.applied",
+    "value": 72994,
+    "receipt": 72994,
+    "residual": 0
+  },
+  "categories": {
+    "SSTORE": 0,
+    "SLOAD": 16900,
+    "KECCAK256": 528,
+    "LOG": 0,
+    "CALLDATA": 219,
+    "CALL_OVERHEAD": 5200,
+    "PRECOMPILE": 0,
+    "MEMORY": 902,
+    "STACK": 12146,
+    "CONTROL": 8549,
+    "ARITH": 5544,
+    "CODE": 0,
+    "ENV": 10,
+    "OTHER": 0
+  },
+  "categoryCounts": {
+    "SSTORE": 0,
+    "SLOAD": 9,
+    "KECCAK256": 12,
+    "LOG": 0,
+    "CALLDATA": 21,
+    "CALL_OVERHEAD": 2,
+    "PRECOMPILE": 0,
+    "MEMORY": 161,
+    "STACK": 4137,
+    "CONTROL": 1486,
+    "ARITH": 1848,
+    "CODE": 0,
+    "ENV": 5,
+    "OTHER": 0
+  },
+  "byContract": {
+    "IndexLayerModule": {
+      "address": "0xb9954fc7356b2df7f6c2d81d4e8bac21de035139",
+      "gas": 40830,
+      "n": 7285
+    },
+    "Core proxy": {
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "gas": 4961,
+      "n": 46
+    },
+    "UpgradeableFixtureCoreU4 (impl)": {
+      "address": "0x8b803d6e52f5f81f89fc77a103caa22092920c81",
+      "gas": 4207,
+      "n": 350
+    }
+  },
+  "sstore": {
+    "sstoreOps": 0,
+    "distinctSlotsWritten": 0,
+    "writesByClass": {},
+    "gasByClass": {},
+    "slotsByFinalClass": {},
+    "modelMismatches": 0,
+    "refundModel": 0,
+    "byKind": {}
+  },
+  "sload": {
+    "ops": 9,
+    "coldOps": 8,
+    "warmOps": 1,
+    "distinctSlots": 8,
+    "gas": 16900,
+    "byKind": {
+      "ERC1967": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "Bootstrap": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "Counts": {
+        "distinctSlots": 1,
+        "reads": 2,
+        "gas": 2200
+      },
+      "IndexFamilyOrdinal": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexFamily": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "Posting:k10": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexCoverage": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexWord": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      }
+    },
+    "unattributed": []
+  },
+  "checks": {
+    "traceErrors": 0,
+    "sstoreModelMismatches": 0,
+    "prestateDiffMismatches": 0,
+    "unattributedReads": 0,
+    "unattributedWrites": 0
+  },
+  "writes": [],
+  "artifacts": {
+    "trace": "trace.json.gz",
+    "rawTraceBytes": 2958040,
+    "prestate": "prestate-diff.json",
+    "storageOps": "storage-ops.json",
+    "receipt": "receipt.json",
+    "tx": "tx.json"
+  }
+}

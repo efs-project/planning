@@ -1,0 +1,61 @@
+{
+  "date": "2026-09-11T05:05:17.570Z",
+  "world": "mode 1 (fresh pair, K10 layout selected before initialize, patched kernel)",
+  "scopeLayout": 1,
+  "steps": [
+    {
+      "step": "upgrade",
+      "core4": "0xa6590cd384db9bdcc941fea52f0ef2ffdbaf5541",
+      "runtimeBytes": 21854,
+      "gas": "584409",
+      "scopeLayout": 1
+    },
+    {
+      "step": "declare",
+      "familyId": "0x070e0d1ce7197afb7660b2cf77916495d560fab1bf5adb1bddb8b6c0a2afbe71",
+      "ordinal": "1",
+      "declaredAt": "104",
+      "gas": "354920"
+    },
+    {
+      "step": "differential-complete",
+      "positions": 20,
+      "checked": 80
+    },
+    {
+      "step": "three-first-bindings-one-publication",
+      "before": 1,
+      "positions": 4,
+      "gas": "6955780"
+    },
+    {
+      "step": "done",
+      "names": 20
+    }
+  ],
+  "gas": {
+    "declare": "354920",
+    "placementHookFreshWord": "3137611",
+    "directRebindFieldChangeUncovered": "2979352",
+    "backfillChunk6WithSlotInit": "342880",
+    "placementHookWarmWord": "3114253",
+    "removeRebindClear": "5258621",
+    "directRebindFieldChangeCovered": "2943044",
+    "backfillChunk6Guarded": "277026",
+    "backfillGuardLoser": "44123",
+    "raceNoGuard": [
+      "129942",
+      "131942"
+    ],
+    "raceGuardWinnerLoser": [
+      "134174",
+      "44099"
+    ],
+    "backfillBornAfterDNoSlot": "51915",
+    "threeFirstBindingsOnePublication": "6955780",
+    "detach": "42415",
+    "placementAfterRetire": "3177147",
+    "unattachedPlacementU4": "3091237",
+    "placementAfterComplete": "3131365"
+  }
+}

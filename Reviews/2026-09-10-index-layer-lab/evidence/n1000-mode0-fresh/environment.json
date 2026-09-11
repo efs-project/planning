@@ -1,0 +1,230 @@
+{
+  "label": "n1000-mode0-fresh",
+  "n": 1000,
+  "sparse": 64,
+  "startedAt": "2026-09-11T03:48:59.249Z",
+  "elapsedMs": 309109,
+  "hardfork": "cancun",
+  "chainId": 31337,
+  "nodeArgs": [
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "59411",
+    "--chain-id",
+    "31337",
+    "--hardfork",
+    "cancun",
+    "--gas-limit",
+    "33554432",
+    "--accounts",
+    "0",
+    "--no-cors",
+    "--silent"
+  ],
+  "world": {
+    "kind": "fresh",
+    "selectedScopeLayout": 0,
+    "storedScopeLayout": 0,
+    "kernelLibrary": "lab-compiled (K10-patched src), deployed at genesis",
+    "deployment": {
+      "FixtureDeployment": {
+        "address": "0x8f14151e121ea14f6df378ec1f6147d588ee66b9",
+        "runtimeBytes": 9402,
+        "initcodeBytes": 9469,
+        "gas": "2084328",
+        "codehash": "0xe6ea2f996f50175d9e6011bc26e8388ce6efc60d2f577dfd40c222163f0e23ac"
+      },
+      "PreparationHelper": {
+        "address": "0x8764359d75dba3d1e3ff3d2f95ef484a9dde0b79",
+        "runtimeBytes": 18805,
+        "initcodeBytes": 18831,
+        "gas": "4120023",
+        "codehash": "0xb10df08adde4eaebe4b71c5fad3b18bbd5e7c52ca9766a2632333b30799ae98e"
+      },
+      "UpgradeAdmissionLibrary": {
+        "address": "0xd226ecebd1e4c36a7855f9a88304dcc8b48237f9",
+        "runtimeBytes": 24553,
+        "initcodeBytes": 24585,
+        "gas": "5362937",
+        "codehash": "0x7036bfe73de59aa20dbcf8760c4b663f518c052217d5d37f872caf4a90ffd123"
+      },
+      "PointReadLibrary": {
+        "address": "0x4c119a798a108c3225aa6d7f6235bafa784a37f4",
+        "runtimeBytes": 12103,
+        "initcodeBytes": 12133,
+        "gas": "2670658",
+        "codehash": "0xb39ea944484ee6bf8815e86c0c794b77d647db1e2574fef7fb1ba92b85bc2930"
+      },
+      "UpgradeQueryReadLibrary": {
+        "address": "0x13a6c2149c7cb809d835eb119502a82960bf5a6c",
+        "runtimeBytes": 21557,
+        "initcodeBytes": 21587,
+        "gas": "4714337",
+        "codehash": "0x2992f08929ce699d4651e84f28aff57149fa3d7c57c35461985d9a1bb35e038e"
+      },
+      "UpgradeableReadFixtureCoreK10": {
+        "address": "0x6388d37bc95f3d93ace005ae476bc890995fb1d7",
+        "runtimeBytes": 20949,
+        "initcodeBytes": 21977,
+        "gas": "4623632",
+        "codehash": "0x10eb6d619ced856d4287e18d753a233352c069957a07be90b1220097f9eb8438"
+      },
+      "UpgradeableFixtureCarrier": {
+        "address": "0x99cbcfe3cc2c67e784f9e7b0fa32f9870697c0e1",
+        "runtimeBytes": 7637,
+        "initcodeBytes": 8273,
+        "gas": "1737106",
+        "codehash": "0x4776393ee85e74998c4160846f85e658d127fab68be786e51ef3f0d03de64951"
+      }
+    },
+    "artifactPins": {
+      "FixtureDeployment": "0x468c091ef666f256b64ad69f66a6ae17419e90658fb115dae685b52042641e6e",
+      "PreparationHelper": "0x54fceb2102bbdc6079e6cd1eb8638ef6d0649a983c2fe6f21fca68adb6b04369",
+      "UpgradeAdmissionLibrary": "0x413d6fa14f488e328c211bc7d802dd75e31375e1aca0a12927252ce43c917f9f",
+      "PointReadLibrary": "0xb4b12e01ee3b99b80e5098d755119dac218d45a095786c995c672743e5fa62c7",
+      "UpgradeQueryReadLibrary": "0x3d2b73b4805e77e3c279e50c209ccc060cf1c9f3452615c0e54e4079e088f5e4",
+      "UpgradeableReadFixtureCoreK10": "0xfc1037f04ae2a25a25d325a967f9856cded567261e2f7332c5e98166fcaf034a",
+      "UpgradeableFixtureCarrier": "0xfb22858ff4f28d214b8aad99c64bdd56a8834d61a7dfe43be391cdc1a3b0b609"
+    }
+  },
+  "versions": {
+    "node": "v24.11.0",
+    "anvil": "anvil Version: 1.7.1",
+    "forge": "forge Version: 1.7.1",
+    "solc": {
+      "version": "0.8.30+commit.73712a01"
+    },
+    "solcBinary": "/Users/james/Library/Caches/hardhat-nodejs/compilers-v2/macosx-amd64/solc-macosx-amd64-v0.8.30+commit.73712a01",
+    "ethers": "6.15.0"
+  },
+  "git": {
+    "commit": "c711ee571226082865369fefdbd212e7fbf98d96",
+    "branch": "fable/2026-09-09-files-browser",
+    "dirty": true
+  },
+  "labFoundry": "# Index-layer lab: compiles the lab contracts against the PINNED COPY of the\n# c0-core kernel (src/) and of the foundation core (foundation/). Disposable.\n[profile.default]\nsrc = \"lab\"\ntest = \"forge-test\"\nout = \"out\"\nlibs = []\nsolc = \"0.8.30\"\nevm_version = \"cancun\"\noptimizer = true\noptimizer_runs = 200\nvia_ir = true\nallow_paths = [\"..\"]\nremappings = [\n  \"C0Core/=src/\",\n  \"Foundation/=foundation/\",\n  \"C0Admission/=../2026-09-05-c0-admission/src/\",\n  \"C0Foundation/=../2026-09-04-mvp-c0-foundation/src/\",\n  \"@openzeppelin/contracts/=../2026-09-08-upgradeable-foundation/node_modules/@openzeppelin/contracts/\",\n]\n",
+  "addresses": {
+    "core": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+    "router": "0xb24372a1c5bfc01af7da711fa94fb48ee751896c",
+    "hook": "0x2d6667693a0e02b41a490a075e054d28125e7d08",
+    "module": "0xd50f25958f195efc9f5f33a392d5219bab106a07",
+    "core4": "0x0aea357c95f0d1ffc5b63525dd88ede942c4473f",
+    "admissionLibrary": "0xd226ecebd1e4c36a7855f9a88304dcc8b48237f9",
+    "principalA": "0x0000000000000000000000000000000000000000000000000000ffffffffffff",
+    "big": "0x67160bf2ff6010fee55be0da4eb019482aa1011dd892777c6e8d48b25531aef3",
+    "sparse": "0x1d750faa3ca1a3c3acd2eba6732885402c61dd5332e7cccebed3c899c710e08f",
+    "bench": "0x3f85d125b548ea7819add89f26e5dd16e1419ed2202e4887b5e0e9d16a983c9b",
+    "familyId": "0xdb3f6266fe25490966350c449d3cb80c84fc405bda7c1be1576f981f27e45ca8",
+    "fam2": "0x25debeec2f0f9c827da3e018b8a58fff650d3f50ad88cc4fd4c8b63005e28e46",
+    "familyOrdinal": "1",
+    "declaredAt": "2330"
+  },
+  "codeSizes": {
+    "core4": 21854,
+    "module": 11715,
+    "hook": 7311
+  },
+  "buckets": {
+    "fileA": "0xf9ba6074b2933ae29b89a06ddb9d05f9790a5211af6a9c0f9461e58620c36fdd",
+    "fileB": "0xa52f03088060293722b54d93799faf69df50deb9a4b04a90c95b5d8a7382f733",
+    "draft": "0x288917d25b62172c3ab98fad70b0cb417ddce2a8a563296dddca6293f9a8c741",
+    "extra": "0x69e4faedf4e2cf69035493434b74f43c463a2a2044c09646effa8d5b14da5562"
+  },
+  "scopes": {
+    "bigScope": "0x1257fc2040d17129df1c558c8b9bec105cabac8270ba0d06572cce2b4050b412",
+    "sparseScope": "0x606d5f4858f67b0f33c6523aee8f53b2fefb9757c16d36569886659929337d64"
+  },
+  "wall": {
+    "populateBig": {
+      "n": 1000,
+      "ms": 51409,
+      "totalGas": "3117659152"
+    },
+    "populateSparse": {
+      "n": 64,
+      "ms": 5638
+    },
+    "finishBig": {
+      "ms": 7183,
+      "extraCalls": 1
+    }
+  },
+  "rehosts": [
+    {
+      "why": "B: load D0 for U3/U4 baselines",
+      "tracing": true,
+      "block": 77,
+      "stateBytes": 717216,
+      "rssOfPreviousNodeBytes": 63504384,
+      "ms": 210
+    },
+    {
+      "why": "C: load D0 for population",
+      "tracing": false,
+      "block": 77,
+      "stateBytes": 717216,
+      "rssOfPreviousNodeBytes": 9449930752,
+      "ms": 1923
+    },
+    {
+      "why": "D: load D1 for the index phase",
+      "tracing": true,
+      "block": 1147,
+      "stateBytes": 10704738,
+      "rssOfPreviousNodeBytes": 575111168,
+      "ms": 399
+    }
+  ],
+  "finalAnvilRssBytes": 160874496,
+  "chunks": {
+    "32": {
+      "gas": "1916312",
+      "through": 32
+    },
+    "64": {
+      "gas": "3660685",
+      "through": 96
+    },
+    "128": {
+      "gas": "7271859",
+      "through": 224
+    },
+    "256": {
+      "gas": "14683007",
+      "through": 480
+    }
+  },
+  "maxChunk": {
+    "perEntryEstimate": 57899.59375,
+    "fixedEstimate": -139289,
+    "attempts": [
+      {
+        "maxEntries": 288,
+        "estimateGas": "revert:0x",
+        "status": "0x0",
+        "gasUsed": 16257997
+      },
+      {
+        "maxEntries": 273,
+        "estimateGas": 16164732,
+        "status": "0x1",
+        "gasUsed": 15664520
+      }
+    ]
+  },
+  "oracle": {
+    "checked": 4012,
+    "mismatches": [],
+    "sample": {
+      "through": 1000,
+      "liveFrom": 1000,
+      "count": 1003,
+      "limit": 1003,
+      "rule": "positions < through and >= liveFrom are compared; the uncovered gap is skipped"
+    },
+    "positions": 1003,
+    "ms": 1611
+  },
+  "fixturePath": "nestedFixture -> routerFixture -> authorityFixture (U3) -> indexLayerFixture (U4); operations via authorityFixture.execute (FilesRouterV2 -> executeAuthorized) and direct author-signed executeAuthorized; index calls via the U4 fallback -> IndexLayerModule. Phases A-D re-host anvil on one port with anvil_dumpState/anvil_loadState; dumps only from untraced nodes."
+}

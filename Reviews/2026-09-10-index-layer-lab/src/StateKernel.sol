@@ -76,6 +76,7 @@ library StateKernel {
     );
     error U48_GUARD();
     error InvalidInitialization();
+    error InvalidScopeLayout(uint256 mode);
     error InvalidCommitment();
     error InvalidRevision(uint32 revisionOrdinal);
     error InvalidCasCarriage();
@@ -92,7 +93,18 @@ library StateKernel {
         uint256[] slots;
     }
 
+    function selectScopeLayout(StateStore.Store storage s, uint256 mode) internal {
+        if (mode > 1) revert InvalidScopeLayout(mode);
+        if (
+            s.init.realmId != 0 || s.init.initialRevisionId != 0 || s.count.records != 0 || s.count.envelopes != 0
+                || s.count.types != 0 || s.count.principals != 0 || s.count.admissions != 0 || s.count.batches != 0
+                || s.count.postingKeys != 0 || s.count.bindingKeys != 0
+        ) revert InvalidInitialization();
+        s.scopeLayout = mode;
+    }
+
     function initialize(StateStore.Store storage s, Init memory init, Preparation.Config memory config) internal {
+        if (s.scopeLayout > 1) revert InvalidScopeLayout(s.scopeLayout);
         if (
             s.init.realmId != 0 || init.realmId == 0 || init.initialRevisionId == 0
                 || init.objectGroup1Bytes.length == 0 || init.kernelGroup2Bytes.length == 0
@@ -136,7 +148,7 @@ library StateKernel {
         Preparation.Config memory config,
         uint32 activeRevision
     ) internal returns (AdmitResult memory r) {
-        if (s.init.realmId == 0) revert InvalidInitialization();
+        if (s.init.realmId == 0 || s.scopeLayout > 1) revert InvalidInitialization();
         if (p.header.principalId != v.authenticatedPrincipal) {
             revert AUTH_PRINCIPAL_MISMATCH(p.header.principalId, v.authenticatedPrincipal);
         }
@@ -310,7 +322,7 @@ library StateKernel {
             if (leaf.leafIndex >= n || (i != 0 && leaf.leafIndex <= p.leaves[i - 1].leafIndex)) revert E_BOUNDS(2);
             mask |= uint64(1) << leaf.leafIndex;
             total += leaf.body.length;
-            if (leaf.body.length > 8192 || total > 8192) revert E_BOUNDS(3);
+            if (total > 8192) revert E_BOUNDS(3);
             if (
                 p.recordIds[leaf.leafIndex]
                     != keccak256(abi.encode(keccak256("efs2/record/1"), leaf.typeId, keccak256(leaf.body)))
@@ -486,7 +498,11 @@ library StateKernel {
             p.count.bindingKeys = next(p.count.bindingKeys);
             put(s, p, StateStore.Kind.BindingKey, 0, p.count.bindingKeys, abi.encode(key));
             append(
-                s, p, IndexKeys.posting(0, 10, 0, IndexKeys.scope(principal, effect.purpose, effect.subject)), ord, true
+                s,
+                p,
+                IndexKeys.posting(0, 10, 0, IndexKeys.scope(principal, effect.purpose, effect.subject)),
+                s.scopeLayout == 0 ? ord : p.count.bindingKeys,
+                true
             );
         }
         saveBinding(s, p, key, afterHead, ord);

@@ -20,7 +20,9 @@ contract UpgradeableFixtureCore is FixtureEndpoint {
         address operator,
         bytes32 treeType,
         StateKernel.Init calldata init
-    ) external {
+    ) external virtual {
+        // LAB EDIT (index-layer lab, round 2): `virtual` added so the fresh-world
+        // U1 core can select StateKernel.selectScopeLayout BEFORE initialize.
         _initialize(controller, peer, admin, operator, treeType);
         StateKernel.initialize(UpgradeStorage.efs(), init, Preparation.Config(preparationHelper, preparationCodehash));
     }

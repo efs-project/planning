@@ -448,3 +448,10 @@ Next steps, folded into the sequence in indexing-and-state §9: prototype
 `backfill` + `probe` + `page` on the c0-core lab against a 10,000-entry
 scope; measure per-entry walk cost with and without K10; measure the hook per
 placement; then the sorted-run `submitRun` with the pigeonhole check.
+
+**Round-2 measurement (2026-09-11):** K10 on the lab — backfill walk 56,425 →
+31,384 gas per entry (−25,041, −44 %; MEASURED, N = 1,000, same chunks),
+largest chunk 273 → 491; every lane-to-admission derivation (coverage init,
+born-after-`d` probe, the hook's reverse locator) costs 3 reads instead of 1
+(locator ≈23k → ≈69k at N = 1,000). See
+[prototype-round-2-2026-09-11.md](prototype-round-2-2026-09-11.md).

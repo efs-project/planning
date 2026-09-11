@@ -89,7 +89,7 @@ export async function indexLayerFixture(lab, auth) {
   const upgraded = await lab.receipt(await lab.send(FACTORY.encodeFunctionData('upgradePair', [core4.address, auth.carrier3.address, '0x', '0x']), controller), 'index-layer upgrade');
   assert.equal(upgraded.status, '0x1', 'index-layer upgrade');
 
-  const iface = new Interface([...module.abi.filter(f => f.type !== 'constructor'), ...core4.abi.filter(f => f.type === 'error' && !module.abi.some(g => g.type === 'error' && g.name === f.name))]);
+  const iface = new Interface([...module.abi.filter(f => f.type !== 'constructor'), ...core4.abi.filter(f => f.type === 'error' && !module.abi.some(g => g.type === 'error' && g.name === f.name)), ...hook.abi.filter(f => f.type === 'error' && !module.abi.some(g => g.type === 'error' && g.name === f.name))]);
   const readIface = lab.readIface;
   const call = async (data, to = lab.core, block = 'latest', from = undefined) => lab.rpc('eth_call', [{ to, data, gas: toBeHex(TX_GAS), ...(from ? { from } : {}) }, block]);
   const decodeError = data => { for (const i of [iface, core3Interface, readIface]) { try { const e = i.parseError(data); if (e) return { name: e.name, args: [...e.args].map(x => typeof x === 'bigint' ? x : String(x)) }; } catch {} } return null; };
@@ -165,10 +165,24 @@ export async function indexLayerFixture(lab, auth) {
     return { entryId, ...(await directAdmit({ principal, leaves: [entry, b.leaf], revisions: [[1, b.revision]] })) };
   }
 
+  /** The Store's stored scope layout (0 legacy, 1 K10), read through the module
+   *  getter after the U4 upgrade. Never inferred from lane values. */
+  const layout = Number((await view('scopeLayout', [])).values[0]);
+  assert(layout === 0 || layout === 1, 'stored scopeLayout ' + layout);
+
   /** Off-chain oracle: for every kind-10 position of a name scope, the bucket
    *  the family SHOULD carry now (null when the head is not a live
    *  DirectoryEntry record). Walks the same rows the contract walks, through the
-   *  qualified read surface, so it is independent of the index-layer code. */
+   *  qualified read surface, so it is independent of the index-layer code.
+   *  Mode 0: raw kind-10 page (lanes = first admission ordinals) -> occurrence
+   *  -> BindingSet record -> key -> head. Mode 1: raw lanes are binding-key
+   *  ordinals; the oracle resolves `bindingKeyAt(lane)`, recovers the key's
+   *  FIRST admission through kind 8 (`readHistory(key, 1, 1)`, independent of
+   *  kind 10), hydrates that occurrence to the BindingSet record, recomputes the
+   *  key from its body and requires it to equal the inventory's, then reads the
+   *  head. (Codex's hydrated kind-10 page is NOT used: at 256 items on a
+   *  1,000-position scope it reverted with empty data inside a 16.7M-gas
+   *  eth_call — recorded by measure.mjs as `hydratedPageProbe`.) */
   async function oracle(principal, dir, { fieldIndex = 2, limit = Infinity } = {}) {
     const scopeKey = scopeOf(principal, dir);
     const items = [];
@@ -182,12 +196,25 @@ export async function indexLayerFixture(lab, auth) {
       cursor = pageResult.cursor; basisOrdinal = pageResult.highWaterOrdinal;
     }
     const out = [];
-    for (const item of items) {
-      const ordinal = BigInt(item);
-      const occ = await read('getOccurrenceByOrdinal', [ordinal]);
-      const [, body] = await read('getRecord', [occ[2]]);
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      let ordinal, recordId, laneKey = null;
+      if (layout === 0) {
+        ordinal = BigInt(item);
+        const occ = await read('getOccurrenceByOrdinal', [ordinal]);
+        recordId = occ[2];
+      } else {
+        [laneKey] = await read('bindingKeyAt', [BigInt(item)]); // the raw lane is a binding-key ordinal
+        const [history] = await read('readHistory', [laneKey, 1, 1]); // kind-8: the key's first admission
+        assert.equal(history.length, 1, 'oracle (mode 1): first history entry');
+        ordinal = BigInt(history[0].admissionOrdinal);
+        const occ = await read('getOccurrence', [history[0].envelopeId, Number(history[0].leafIndex)]);
+        recordId = occ[2];
+      }
+      const [, body] = await read('getRecord', [recordId]);
       const purpose = '0x' + body.slice(2, 66), subject = '0x' + body.slice(66, 130), role = '0x' + body.slice(130, 194);
       const key = bindingKey(principal, purpose, subject, role);
+      if (laneKey !== null) assert.equal(laneKey, key, 'oracle (mode 1): bindingKeys[lane] must be the key the hydrated row names');
       const [head] = await read('getBindingHead', [key]);
       let bucket = null, targetType = null;
       if (Number(head[0]) === 1 && Number(head[1]) === 1) {
@@ -200,10 +227,10 @@ export async function indexLayerFixture(lab, auth) {
           bucket = bucketOf(fields[fieldIndex]);
         }
       }
-      out.push({ position: out.length, ordinal, key, headState: Number(head[0]), targetType, bucket });
+      out.push({ position: out.length, ordinal, lane: BigInt(item), key, headState: Number(head[0]), targetType, bucket });
     }
-    return { scopeKey, positions: out };
+    return { scopeKey, positions: out, layout };
   }
 
-  return { hook, module, core4, iface, view, read, tx, send, waitReceipt, fundedWallet, directAdmit, rebindName, priors, oracle, call, decodeError, upgradeReceipt: upgraded };
+  return { hook, module, core4, iface, view, read, tx, send, waitReceipt, fundedWallet, directAdmit, rebindName, priors, oracle, call, decodeError, upgradeReceipt: upgraded, layout };
 }

@@ -15,5 +15,6 @@ remappings = [
   "C0Core/=src/",
   "Foundation/=foundation/",
   "C0Admission/=../2026-09-05-c0-admission/src/",
+  "C0Foundation/=../2026-09-04-mvp-c0-foundation/src/",
   "@openzeppelin/contracts/=../2026-09-08-upgradeable-foundation/node_modules/@openzeppelin/contracts/",
 ]

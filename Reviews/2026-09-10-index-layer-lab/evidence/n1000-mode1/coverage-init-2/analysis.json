@@ -1,0 +1,209 @@
+{
+  "op": "coverage-init-2",
+  "note": "coverage-slot init for a second family on the same scope (N entries, same binary search).",
+  "txHash": "0x53aea34b470b2d47949e65ed7aba4bfb0d3cd3b8d8e5a3466c86f1084c3643c0",
+  "blockNumber": 1172,
+  "status": "0x1",
+  "to": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+  "extra": {},
+  "receiptGasUsed": 140961,
+  "gasLimit": 16777216,
+  "intrinsic": {
+    "bytes": 132,
+    "zeroBytes": 56,
+    "nonzeroBytes": 76,
+    "tokens": 360,
+    "calldataGas": 1440,
+    "standard": 22440,
+    "floor7623": 24600,
+    "floorApplies": false,
+    "hardfork": "cancun",
+    "fromTrace": 22440,
+    "matches": true
+  },
+  "execution": {
+    "startGas": 16754776,
+    "gross": 118521,
+    "categoriesTotal": 118521,
+    "categoriesMatchGross": true,
+    "steps": 4281
+  },
+  "refund": {
+    "nodeCounter": 0,
+    "model": 0,
+    "applied": 0
+  },
+  "reconciliation": {
+    "formula": "intrinsic.standard + execution.gross - refund.applied",
+    "value": 140961,
+    "receipt": 140961,
+    "residual": 0
+  },
+  "categories": {
+    "SSTORE": 20000,
+    "SLOAD": 73600,
+    "KECCAK256": 2814,
+    "LOG": 2524,
+    "CALLDATA": 80,
+    "CALL_OVERHEAD": 5200,
+    "PRECOMPILE": 0,
+    "MEMORY": 973,
+    "STACK": 7143,
+    "CONTROL": 3165,
+    "ARITH": 3012,
+    "CODE": 0,
+    "ENV": 10,
+    "OTHER": 0
+  },
+  "categoryCounts": {
+    "SSTORE": 1,
+    "SLOAD": 36,
+    "KECCAK256": 63,
+    "LOG": 1,
+    "CALLDATA": 15,
+    "CALL_OVERHEAD": 2,
+    "PRECOMPILE": 0,
+    "MEMORY": 232,
+    "STACK": 2436,
+    "CONTROL": 504,
+    "ARITH": 986,
+    "CODE": 0,
+    "ENV": 5,
+    "OTHER": 0
+  },
+  "byContract": {
+    "IndexLayerModule": {
+      "address": "0xd50f25958f195efc9f5f33a392d5219bab106a07",
+      "gas": 109533,
+      "n": 3885
+    },
+    "Core proxy": {
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "gas": 4871,
+      "n": 46
+    },
+    "UpgradeableFixtureCoreU4 (impl)": {
+      "address": "0x0aea357c95f0d1ffc5b63525dd88ede942c4473f",
+      "gas": 4117,
+      "n": 350
+    }
+  },
+  "sstore": {
+    "sstoreOps": 1,
+    "distinctSlotsWritten": 1,
+    "writesByClass": {
+      "FRESH": 1
+    },
+    "gasByClass": {
+      "FRESH": 20000
+    },
+    "slotsByFinalClass": {
+      "FRESH": 1
+    },
+    "modelMismatches": 0,
+    "refundModel": 0,
+    "byKind": {
+      "IndexCoverage": {
+        "writes": 1,
+        "gas": 20000,
+        "classes": {
+          "FRESH": 1
+        }
+      }
+    }
+  },
+  "sload": {
+    "ops": 36,
+    "coldOps": 35,
+    "warmOps": 1,
+    "distinctSlots": 35,
+    "gas": 73600,
+    "byKind": {
+      "ERC1967": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexFamilyOrdinal": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexFamily": {
+        "distinctSlots": 3,
+        "reads": 3,
+        "gas": 6300
+      },
+      "Store": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "Posting:k10": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "IndexCoverage": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      },
+      "Word:k10": {
+        "distinctSlots": 8,
+        "reads": 9,
+        "gas": 16900
+      },
+      "BindingKey": {
+        "distinctSlots": 9,
+        "reads": 9,
+        "gas": 18900
+      },
+      "Word:k8": {
+        "distinctSlots": 9,
+        "reads": 9,
+        "gas": 18900
+      },
+      "Counts": {
+        "distinctSlots": 1,
+        "reads": 1,
+        "gas": 2100
+      }
+    },
+    "unattributed": []
+  },
+  "checks": {
+    "traceErrors": 0,
+    "sstoreModelMismatches": 0,
+    "prestateDiffMismatches": 0,
+    "unattributedReads": 0,
+    "unattributedWrites": 0
+  },
+  "writes": [
+    {
+      "i": 4217,
+      "depth": 3,
+      "address": "0x6f94dbd6f4abbb1e3458682374e3802c20782251",
+      "slot": "0xab1b4949daa346ad13d7dff4f4625f78676ca18a5fe200924184c7707a9a7c89",
+      "original": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "value": "0x00000000000000000000000000000001000000010000000003eb000000000000",
+      "warmAtWrite": true,
+      "gas": 20000,
+      "model": 20000,
+      "modelMatch": true,
+      "refundDelta": 0,
+      "class": "FRESH",
+      "kind": "IndexCoverage",
+      "member": "slot"
+    }
+  ],
+  "artifacts": {
+    "trace": "trace.json.gz",
+    "rawTraceBytes": 3249767,
+    "prestate": "prestate-diff.json",
+    "storageOps": "storage-ops.json",
+    "receipt": "receipt.json",
+    "tx": "tx.json"
+  }
+}

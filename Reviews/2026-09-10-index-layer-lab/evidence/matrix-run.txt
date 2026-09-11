@@ -1,0 +1,48 @@
+[mode 0 (populated pair, legacy layout, genesis kernel library)] index-layer gas (receipts, MEASURED, not retained as traces): {
+  declare: '354920',
+  placementHookFreshWord: '3134816',
+  directRebindFieldChangeUncovered: '2955430',
+  backfillChunk6WithSlotInit: '472513',
+  placementHookWarmWord: '3111446',
+  removeRebindClear: '5234341',
+  directRebindFieldChangeCovered: '2923983',
+  backfillChunk6Guarded: '425818',
+  backfillGuardLoser: '44123',
+  raceNoGuard: [ '180907', '182907' ],
+  raceGuardWinnerLoser: [ '155912', '44099' ],
+  backfillBornAfterDNoSlot: '47129',
+  threeFirstBindingsOnePublication: '6953433',
+  detach: '42415',
+  placementAfterRetire: '3174340',
+  unattachedPlacementU4: '3088430',
+  placementAfterComplete: '3128558'
+}
+✔ FIELD_EQ family over DirectoryEntry.child — mode 0 (populated pair, legacy layout, genesis kernel library): declare after data, delayed backfill, convergence, coverage, detach (8696.720833ms)
+[mode 1 (fresh pair, K10 layout selected before initialize, patched kernel)] index-layer gas (receipts, MEASURED, not retained as traces): {
+  declare: '354920',
+  placementHookFreshWord: '3137611',
+  directRebindFieldChangeUncovered: '2979352',
+  backfillChunk6WithSlotInit: '342880',
+  placementHookWarmWord: '3114253',
+  removeRebindClear: '5258621',
+  directRebindFieldChangeCovered: '2943044',
+  backfillChunk6Guarded: '277026',
+  backfillGuardLoser: '44123',
+  raceNoGuard: [ '129942', '131942' ],
+  raceGuardWinnerLoser: [ '134174', '44099' ],
+  backfillBornAfterDNoSlot: '51915',
+  threeFirstBindingsOnePublication: '6955780',
+  detach: '42415',
+  placementAfterRetire: '3177147',
+  unattachedPlacementU4: '3091237',
+  placementAfterComplete: '3131365'
+}
+✔ FIELD_EQ family over DirectoryEntry.child — mode 1 (fresh pair, K10 layout selected before initialize, patched kernel): declare after data, delayed backfill, convergence, coverage, detach (4507.675625ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13320.70625

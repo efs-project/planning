@@ -9,6 +9,7 @@ import {IndexKeys} from "C0Core/IndexKeys.sol";
 import {UpgradeAdmissionLibrary} from "Foundation/UpgradeAdmissionLibrary.sol";
 import {IndexLayerStorage} from "./IndexLayerStorage.sol";
 import {FieldWalk} from "./FieldWalk.sol";
+import {ScopeOrdinals} from "./ScopeOrdinals.sol";
 
 /// @notice The WRITE HOOK, wrapped around the pinned kernel's admission.
 ///
@@ -22,6 +23,16 @@ import {FieldWalk} from "./FieldWalk.sol";
 /// them warm, so the pre-read is net-free), the kernel admits, and the hook
 /// derives every bit from the resulting heads and target records in storage.
 /// Nothing from calldata becomes an index bit.
+///
+/// Positions (round 2, README §8 item 1): a first binding's position is the
+/// scope's PRE-admission kind-10 count plus the number of earlier first
+/// bindings of distinct keys in the same scope in this publication, in leaf
+/// order — exactly the order the kernel appends them. The pre-admission count
+/// is read in `preRead` (warm for the kernel's own append, so net-free). A
+/// second leaf on the same key inside one publication is a rebind the kernel
+/// journals against the first leaf's after-value; the hook skips it, because
+/// the first occurrence already reads the publication's FINAL head for that
+/// key from storage.
 library IndexedAdmission {
     using IndexLayerStorage for IndexLayerStorage.Layout;
 
@@ -31,11 +42,10 @@ library IndexedAdmission {
         bytes32 scopeKey; // kind-10 scope of the position
         uint256 meta; // binding meta before admission
         bytes32 target; // binding target before admission
+        uint64 scopeCount; // kind-10 count of the scope BEFORE admission (read only for a first binding)
     }
 
     error IndexIntegrity(uint8 code);
-
-    uint256 private constant U48 = (uint256(1) << 48) - 1;
 
     function admit(
         StateStore.Store storage s,
@@ -80,8 +90,12 @@ library IndexedAdmission {
                 role := mload(add(body, 96))
             }
             bytes32 key = BindingFold.bindingKey(principal, positionKey(purpose, subject, role));
+            bytes32 scopeKey = IndexKeys.scope(principal, purpose, subject);
             StateStore.BindingRow storage row = s.bindings[key];
-            pre[k++] = Pre(i, key, IndexKeys.scope(principal, purpose, subject), row.meta, row.target);
+            uint256 meta = row.meta;
+            // A first binding appends to the scope: read its count now (the kernel re-reads it warm).
+            uint64 count = uint8(meta) == 0 ? scopeCount(s, scopeKey) : 0;
+            pre[k++] = Pre(i, key, scopeKey, meta, row.target, count);
         }
     }
 
@@ -95,9 +109,31 @@ library IndexedAdmission {
 
     function afterAdmit(StateStore.Store storage s, StateKernel.AdmitResult memory r, Pre[] memory pre) private {
         IndexLayerStorage.Layout storage l = IndexLayerStorage.layout();
-        for (uint256 j; j < pre.length; ++j) {
+        uint256 n = pre.length;
+        uint256 layout = type(uint256).max; // read lazily: only a rebind needs the locator
+        // Pass 1: which leaves carry a position. `skip`: not freshly admitted, or a
+        // later leaf on a key an earlier admitted leaf already carries (the kernel
+        // treated it as a rebind of that leaf; the first occurrence reads the final
+        // head). `isNew`: the first binding of a distinct key in this publication.
+        bool[] memory skip = new bool[](n);
+        bool[] memory isNew = new bool[](n);
+        for (uint256 j; j < n; ++j) {
+            if (r.leaves[pre[j].leaf].outcome != 1) {
+                skip[j] = true;
+                continue;
+            }
+            for (uint256 i; i < j; ++i) {
+                if (!skip[i] && pre[i].key == pre[j].key) {
+                    skip[j] = true;
+                    break;
+                }
+            }
+            if (!skip[j]) isNew[j] = uint8(pre[j].meta) == 0;
+        }
+        // Pass 2: positions in leaf order from the pre-admission count, then bits.
+        for (uint256 j; j < n; ++j) {
+            if (skip[j]) continue;
             Pre memory e = pre[j];
-            if (r.leaves[e.leaf].outcome != 1) continue; // only freshly admitted leaves changed a head
             StateStore.BindingRow storage post = s.bindings[e.key];
             BindingFold.Head memory h1 = BindingFold.unpack(post.meta, post.target);
             BindingFold.Head memory h0 = BindingFold.unpack(e.meta, e.target);
@@ -106,7 +142,17 @@ library IndexedAdmission {
             uint256 famNew = newType == bytes32(0) ? 0 : l.typeFamilies[newType];
             uint256 famOld = oldType == bytes32(0) ? 0 : (oldType == newType ? famNew : l.typeFamilies[oldType]);
             if (famNew == 0 && famOld == 0) continue;
-            uint64 position = h0.state == 0 ? scopeCount(s, e.scopeKey) - 1 : locate(s, e.scopeKey, e.key);
+            uint64 position;
+            if (isNew[j]) {
+                uint64 before;
+                for (uint256 i; i < j; ++i) {
+                    if (isNew[i] && pre[i].scopeKey == e.scopeKey) ++before;
+                }
+                position = e.scopeCount + before;
+            } else {
+                if (layout == type(uint256).max) layout = ScopeOrdinals.layoutOf(s);
+                position = ScopeOrdinals.locate(s, ScopeOrdinals.k10(e.scopeKey), e.key, layout);
+            }
             bytes32[8] memory newBuckets;
             if (famNew != 0) {
                 bytes memory body = s.records[h1.targetA].body;
@@ -136,27 +182,6 @@ library IndexedAdmission {
     }
 
     function scopeCount(StateStore.Store storage s, bytes32 scopeKey) private view returns (uint64) {
-        return uint64(s.postings[IndexKeys.posting(bytes32(0), 10, 0, scopeKey)].head);
-    }
-
-    /// Reverse locator for a rebind: the key's first admission ordinal (kind-8
-    /// word 0, entry 0) found by binary search over the ordinal-sorted kind-10
-    /// list. O(log N) word reads, no extra storage, nothing from calldata.
-    function locate(StateStore.Store storage s, bytes32 scopeKey, bytes32 key) private view returns (uint64) {
-        uint64 first = uint64(s.postingWords[IndexKeys.posting(bytes32(0), 8, 0, key)][0] & U48);
-        bytes32 k10 = IndexKeys.posting(bytes32(0), 10, 0, scopeKey);
-        uint64 lo;
-        uint64 hi = uint64(s.postings[k10].head);
-        while (lo < hi) {
-            uint64 mid = lo + (hi - lo) / 2;
-            if (ordinalAt(s, k10, mid) < first) lo = mid + 1;
-            else hi = mid;
-        }
-        if (ordinalAt(s, k10, lo) != first) revert IndexIntegrity(1);
-        return lo;
-    }
-
-    function ordinalAt(StateStore.Store storage s, bytes32 k10, uint64 position) private view returns (uint64) {
-        return uint64((s.postingWords[k10][position / 5] >> (48 * (position % 5))) & U48);
+        return ScopeOrdinals.count(s, ScopeOrdinals.k10(scopeKey));
     }
 }
