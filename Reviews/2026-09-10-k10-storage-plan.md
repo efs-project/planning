@@ -6,9 +6,9 @@
 **Architecture:** retain the legacy admission-ordinal control. A fresh-initialization-only, explicitly identified K10 arm uses binding-key ordinals in scope words, with corresponding checked readers and independent reconstruction. Storage alternatives are a separate lab, not a silent rewrite of deployed C0 state.
 **Tech Stack:** existing Solidity 0.8.30, Cancun, optimizer 200, via IR, Foundry and Node test runner.
 **Spec:** [[Reviews/2026-09-10-foundation-reply-after-economics]], especially section 3. James authorized execution after prompting Fable.
-**Status:** authorized experiment plan; execution in progress
+**Status:** both experiments complete and reviewed; published on the owned experimental branch, not adopted protocol
 
-#status/draft #kind/task #repo/planning #topic/efsv2
+#status/done #kind/task #repo/planning #topic/efsv2
 
 ## Global Constraints
 
@@ -62,11 +62,20 @@
 
 ## Joint finish
 
-- [ ] Review each task, fix material findings, run fresh covering tests, and publish exact commits on the owned branch.
-- [ ] Update the handoff/status with measured results, current limitations and next integration steps. Give Fable the K10 commit independently of the storage experiment.
-- [ ] Preserve follow-ups: actual row-reencoding/shared-context patch, populated-layout migration, reverse locator comparison, joined 10k index run, and acceptance/evolution/continuity after the kernel checkpoint. This two-task plan does not claim to finish those later phases.
+- [x] Review each task, fix material findings, run fresh covering tests, and publish exact commits on the owned branch.
+- [x] Update the handoff/status with measured results, current limitations and next integration steps. Give Fable the K10 commit independently of the storage experiment.
+- [x] Preserve follow-ups: actual row-reencoding/shared-context patch, populated-layout migration, reverse locator comparison, joined 10k index run, and acceptance/evolution/continuity after the kernel checkpoint. This two-task plan does not claim to finish those later phases.
 
 ## Execution record
+
+Final whole-change review covered `832c7ae..c4dc3e8` and found no Critical,
+Important or actionable Minor issues. The controller's final covering runs
+passed 210 Core Forge, 19 upgrade Forge, 15 storage Forge and 30 selected Node
+tests; the deliberately non-isolated measurement run failed its coldness guard
+as expected. Tri-sync, generated rollup, formatting and whitespace checks pass.
+This closes the two experiments only. The joined Files/UI/index/carrier run,
+10k scale, production repository implementation and permanent choices remain
+outside this completion claim.
 
 Task 1 passed task review after one fix round: `c38b1f4` adds the fresh-only
 writer/readers; `fe98f18` closes missing offline layout qualification. Fresh
