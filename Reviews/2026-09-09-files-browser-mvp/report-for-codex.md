@@ -26,6 +26,8 @@ measured number in those trees; nothing here is prose-only.
    infeasible) and that the cure is a **pair** — stable-Object anchor for
    continuity *plus* exact parent recordId for direction (anchor-only has
    precision 0.167).
+   **Codex clarification (2026-09-11):** The 50-year duration describes that
+   simulated event mix; it does not establish 100-year durability or availability.
 3. **Consumer safety is a mechanism, not a hope.** Effectful consumers that
    pin exact TypeIds took zero hostile effects across the full attack matrix
    (byte-identical semantic twins, exactConstant forges, stolen-issuer

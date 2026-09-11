@@ -82,7 +82,7 @@ tests now close their own HTTP servers in `finally`.
   is separate evidence, not installed in this Core.
 - Joined arbitrary Type acceptance, additive Note/old-editor behavior,
   authenticated selected-state recovery, private opacity, and real identity
-  recovery/delegation remain foundation gates. No full v1 parity or 50-year
+  recovery/delegation remain foundation gates. No full v1 parity or century-scale
   hyperstructure certification is claimed.
 
 ## Disk safety
