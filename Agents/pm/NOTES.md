@@ -20,11 +20,14 @@
   [[Devcon/attendance-checklist|Devcon/attendance-checklist]]. Keep
   sensitive identity, visa, ticket and itinerary data out of Git.
 - Current funding state lives in [[Grants/proposals|Grants/proposals]].
-  The 2026-09-11 refresh found overdue FUTO follow-up and a newly open but gated
-  NLnet path; do not turn either into an application or send without James.
-- [[ETHOnline-2026|ETHOnline 2026]] needs one immediate factual answer:
-  whether James entered before signup closed. If yes, the project deadline is
-  2026-09-13 16:00 UTC; if no, retire the opportunity rather than carrying it.
+  James authorized one FUTO status follow-up, which was sent and verified in the
+  original Gmail thread on 2026-09-11; await a response without repeating or
+  reframing it. The grants agent's same-day refresh is published on `main`.
+- [[ETHOnline-2026|ETHOnline 2026]] is closed without entry. James confirmed on
+  2026-09-11 that he did not register; there is no submission deadline or live
+  owner action to carry forward.
 - Active Files/Core prototype worktrees are specialist evidence lanes. Inspect
   and coordinate with their owners; do not clean, merge, or recast them as PM
-  housekeeping.
+  housekeeping. The 2026-09-11 v2 checkpoint and clickable local browser were
+  pushed before this handoff; the remaining Type/read-scale failures are
+  engineering evidence rather than current owner decisions.
