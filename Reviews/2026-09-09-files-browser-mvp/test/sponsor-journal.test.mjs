@@ -30,13 +30,15 @@ function request(withChunks = false) {
       chunks: content.chunks.map((chunkData, index) => ({ index, chunkData })) } : {}) }));
 }
 
-async function environment(t, { failSendAt = 0, receiptStatus = '0x1', holdSend = null, refusePreflight = false, echoSecrets = false } = {}) {
+async function environment(t, { failSendAt = 0, receiptStatus = '0x1', holdSend = null, refusePreflight = false, echoSecrets = false, rpcFailure = null } = {}) {
   const sends = [], receipts = new Map();
   const rpc = async (method, params) => {
     if (method === 'eth_call') {
       if (params[0].to === core) return core3Interface.encodeFunctionResult('principalAccount', ['0x' + '44'.repeat(20)]);
+      if (params[0].to === router && rpcFailure?.at === 'author-preflight') throw Object.assign(Error(rpcFailure.message), { data: rpcFailure.data });
       if (params[0].to === router && refusePreflight) throw Error('author preflight refused');
       if (params[0].data.startsWith(carrier3Interface.getFunction('hasChunk').selector)) return carrier3Interface.encodeFunctionResult('hasChunk', [false]);
+      if (params[0].to === carrier && rpcFailure?.at === 'chunk-preflight') throw Object.assign(Error(rpcFailure.message), { data: rpcFailure.data });
       return '0x';
     }
     if (method === 'eth_getTransactionCount') return '0x' + sends.length.toString(16);
@@ -46,6 +48,7 @@ async function environment(t, { failSendAt = 0, receiptStatus = '0x1', holdSend 
       const receipt = { transactionHash: tx.hash, status: receiptStatus, gasUsed: '0x5208', effectiveGasPrice: '0x77359400', blockHash: '0x' + '56'.repeat(32), blockNumber: '0x1', from: tx.from, to: tx.to };
       receipts.set(tx.hash, receipt);
       if (holdSend) await holdSend;
+      if (rpcFailure?.at === 'send') throw Object.assign(Error(rpcFailure.message), { data: rpcFailure.data });
       if (sends.length === failSendAt) {
         if (echoSecrets) throw Object.assign(Error('RPC error with raw ' + params[0] + ', signature ' + signature + ', key ' + sponsorKey), { data: { raw: params[0], signature, sponsorKey } });
         throw Error('RPC response lost after accepting transaction');
@@ -280,4 +283,37 @@ test('malformed typed payload errors never echo supplied content into public rec
   const recovered = await env.post(wallet.sponsorRequestIdentity(body), '/sponsor/status');
   assert(!json(recovered.body).includes('private-file-content'));
   assert.equal(env.sends.length, 0);
+});
+
+for (const at of ['author-preflight', 'chunk-preflight', 'send']) {
+  test(at + ' arbitrary provider error text is never published or retained in status', async t => {
+    const privateParts = ['private decoded content', '0x68656c6c6f', '0x' + 'cd'.repeat(80)];
+    const env = await environment(t, { rpcFailure: { at, message: privateParts.join(' '), data: '0x68656c6c' } });
+    const body = { ...request(at === 'chunk-preflight'), requestId: 'provider-error-' + at };
+    const failed = await env.post(body);
+    assert.equal(failed.status, 502);
+    const recovered = await env.post(wallet.sponsorRequestIdentity(body), '/sponsor/status');
+    assert.equal(recovered.status, 200);
+    for (const response of [failed.body, recovered.body]) {
+      for (const secret of privateParts) assert(!json(response).includes(secret), 'public journal leaked ' + secret);
+      assert(!json(response).includes('0x68656c6c'), 'unrecognized short hex is not an error selector');
+    }
+    assert.equal(failed.body.submitted, at === 'send' ? null : false);
+  });
+}
+
+test('known public validation messages and recognized error selectors remain usable without provider prose', async t => {
+  // FixtureAuthorization() selector, independently fixed from the Core ABI.
+  const env = await environment(t, { rpcFailure: { at: 'author-preflight',
+    message: 'sponsor refused: private provider text must not impersonate an internal refusal', data: '0xa3b2ffc1' } });
+  const body = { ...request(), requestId: 'known-selector' };
+  const failed = await env.post(body);
+  const recovered = await env.post(wallet.sponsorRequestIdentity(body), '/sponsor/status');
+  assert.equal(failed.body.data, '0xa3b2ffc1');
+  assert.equal(recovered.body.result.data, '0xa3b2ffc1');
+  assert(!json(failed.body).includes('private provider text'));
+  assert(!json(recovered.body).includes('private provider text'));
+  const empty = await env.post({ requestId: 'safe-internal-message' });
+  assert.equal(empty.body.error, 'sponsor refused: nothing to submit');
+  assert.equal(empty.body.submitted, false);
 });

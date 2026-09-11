@@ -32,13 +32,19 @@ const block = x => x && Object.keys(x).length === 2 && hex(x.blockHash, 64) && x
 const canonical = value => Array.isArray(value) ? value.map(canonical)
   : value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
 const validRequestId = id => typeof id === 'string' && /^[a-zA-Z0-9:_-]{1,128}$/.test(id);
-// Never echo an RPC error's signed calldata/raw transaction (or provider
-// debug object) into the public recovery journal. Keep short revert selectors.
-const sponsorMessage = error => String(error?.message ?? error).replace(/0x[0-9a-fA-F]{64,}/g, '[redacted hex]').slice(0, 1024);
-const sponsorData = data => typeof data === 'string' && /^0x[0-9a-fA-F]{0,8}$/.test(data) ? data : null;
+// Provider errors may contain decoded plaintext, short hex, or signed calldata.
+// Never copy their prose. Only this private class marks messages constructed
+// by our own validation branches; matching an error's text/name is not trust.
+class SponsorRefusal extends Error {}
+const sponsorMessage = error => error instanceof SponsorRefusal ? error.message
+  : 'sponsor request failed; check the transaction journal before retrying';
+const sponsorErrorSelectors = new Set([router2Interface, carrier3Interface, core3Interface]
+  .flatMap(iface => iface.fragments.filter(fragment => fragment.type === 'error')
+    .map(fragment => iface.getError(fragment.format()).selector)));
+const sponsorData = data => typeof data === 'string' && sponsorErrorSelectors.has(data.toLowerCase()) ? data.toLowerCase() : null;
 const sponsorEncode = encode => {
   try { return encode(); }
-  catch { throw Error('sponsor refused: malformed typed request'); } // ABI errors can echo file contents/signatures
+  catch { throw new SponsorRefusal('sponsor refused: malformed typed request'); } // ABI errors can echo file contents/signatures
 };
 const publicReceipt = receipt => Object.fromEntries([
   'transactionHash', 'transactionIndex', 'blockHash', 'blockNumber', 'from', 'to', 'status',
@@ -194,7 +200,7 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
           // per-chunk copy made a large upload O(N^2) and exceeded the body
           // limit before it could ever be sponsored.
           const list = Array.isArray(chunkStages) ? chunkStages.slice(0, 256) : [];
-          if (list.length && (!tree || typeof tree.treeId !== 'string')) throw Error('sponsor refused: chunk request is missing its content tree');
+          if (list.length && (!tree || typeof tree.treeId !== 'string')) throw new SponsorRefusal('sponsor refused: chunk request is missing its content tree');
           const stages = sponsorEncode(() => list.map(c => ({ index: Number(c.index),
             data: carrier3Interface.encodeFunctionData('stageChunk', [tree.treeId, tree.body, Number(c.index), c.chunkData, tree.leaves]) })));
           const leafIds = publication ? publication.leaves.map(l => ordinaryRecord(l.typeId, l.body)) : null;
@@ -204,16 +210,16 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
             // simulation catches bad signatures, stale nonces and every
             // router precondition.
             const account = await rpc('eth_call', [{ to: write.core, data: core3Interface.encodeFunctionData('principalAccount', [publication.header.principalId]), gas: '0x100000' }, 'latest']);
-            if (BigInt('0x' + account.slice(26)) === 0n) throw Error('sponsor refused: unclaimed principal');
+            if (BigInt('0x' + account.slice(26)) === 0n) throw new SponsorRefusal('sponsor refused: unclaimed principal');
             await rpc('eth_call', [{ to: write.router, data: executeData, from: sponsorWallet.address, gas: '0x1000000' }, 'latest']);
             for (const id of leafIds) sponsorApprovedTrees.add(id);
-          } else if (!stages.length) throw Error('sponsor refused: nothing to submit');
+          } else if (!stages.length) throw new SponsorRefusal('sponsor refused: nothing to submit');
           // The sponsor pays only for staging bound to a verified intent —
           // either a leaf of THIS publication or one approved earlier.
           if (list.length) {
             const treeId = String(tree.treeId).toLowerCase();
             const covered = (leafIds && leafIds.includes(treeId)) || sponsorApprovedTrees.has(treeId);
-            if (!covered) throw Error('sponsor refused: chunk tree ' + treeId.slice(0, 14) + '… is not covered by a verified author intent this session');
+            if (!covered) throw new SponsorRefusal('sponsor refused: chunk tree is not covered by a verified author intent this session');
           }
           const submit = async (to, data, gasLimit, attempt) => {
             const nonce = Number(BigInt(await rpc('eth_getTransactionCount', [sponsorWallet.address, 'pending'])));
@@ -222,7 +228,7 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
             attempt.status = 'broadcasting';
             if (entry.submitted === false) entry.submitted = null;
             const hash = await rpc('eth_sendRawTransaction', [raw]);
-            if (hash?.toLowerCase() !== attempt.hash) throw Error('sponsor RPC returned a different transaction hash');
+            if (hash?.toLowerCase() !== attempt.hash) throw new SponsorRefusal('sponsor RPC returned a different transaction hash');
             entry.submitted = true;
             if (!attempt.receipt) attempt.status = 'pending';
             for (let i = 0; i < 400; i++) {
@@ -230,7 +236,7 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
               if (r && recordReceipt(entry, attempt, r)) return r;
               await new Promise(ok => setTimeout(ok, 25));
             }
-            throw Error('sponsor transaction not confirmed in time');
+            throw new SponsorRefusal('sponsor transaction not confirmed in time');
           };
           // STAGE FIRST, admit second: if the sponsor dies mid-staging the
           // author has lost nothing — no admission exists yet and staged
@@ -260,7 +266,7 @@ export async function startBrowserServer({ config, rpc, addresses, selectors, wr
             const r = await submit(write.carrier, data, 4000000n, attempt);
             if (r.status === '0x1') stagedOk++;
           }
-          if (executeData && stagedOk < stages.length) throw Error('sponsor refused: staging incomplete (' + stagedOk + '/' + stages.length + ' chunks); the admission was NOT submitted, nothing is half-published');
+          if (executeData && stagedOk < stages.length) throw new SponsorRefusal('sponsor refused: staging incomplete (' + stagedOk + '/' + stages.length + ' chunks); the admission was NOT submitted, nothing is half-published');
           // (staging and admission run inside the serialized section above)
           if (executeData) {
             const attempt = { phase: 'execute', index: null, hash: null, status: 'preparing', receipt: null };
