@@ -7,12 +7,12 @@
 From this experiment directory, with Forge/Anvil and Solidity 0.8.30 available:
 
 ```sh
-node --test test/*.test.mjs
+node --test --test-concurrency=1 test/*.test.mjs
 node scripts/benchmark.mjs
 node scripts/demo.mjs
 ```
 
-The benchmark command runs the same finite workload twice on separate owned nodes, saves compact [run 1](evidence/benchmark-1.json) and [run 2](evidence/benchmark-2.json), then closes each node and removes its exact cache directory. No full traces are retained. The demo prints a separate loopback URL; Ctrl-C/SIGTERM closes its server and managed node. An 18-hour watchdog keeps an evening launch available through the morning checkpoint, then terminates it. Finite benchmark/test nodes retain their five-minute watchdog. No periodic mining is enabled: history grows only with local actions. The old Files demo/port is untouched. The demo process stays foreground; do not treat it as production hosting.
+The canonical full-suite command uses `--test-concurrency=1`: only one new managed world / Forge build runs at a time. The benchmark command runs the same finite workload twice on separate owned nodes, saves compact [run 1](evidence/benchmark-1.json) and [run 2](evidence/benchmark-2.json), then closes each node and removes its exact cache directory. No full traces are retained. The demo prints a separate loopback URL; Ctrl-C/SIGTERM closes its server and managed node. An 18-hour watchdog keeps an evening launch available through the morning checkpoint, then terminates it. Finite benchmark/test nodes retain their five-minute watchdog. No periodic mining is enabled: history grows only with local actions. The old Files demo/port is untouched. The demo process stays foreground; do not treat it as production hosting.
 
 Dependencies reuse the installed pinned ethers 6.15.0 / Playwright bundle in `../2026-09-04-mvp-rehearsal/node_modules`; no new framework or installation. Forge builds this candidate's own project with ordinary EIP-170 size checks and 16,777,216 per-transaction/block gas ceiling. `NativeKernel` deploys its own navigation and registry internally; their costs are included in its setup receipt, not separately fabricated receipts.
 
