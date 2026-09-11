@@ -72,15 +72,71 @@ export async function sendTransaction(provider, { from, to, data, gas }) {
   return provider.request({ method: 'eth_sendTransaction', params: [{ from, to, data, gas }] });
 }
 
-export async function sponsorSubmit(sponsorUrl, body, boundedJSON) {
-  let response;
-  try { response = await fetch(sponsorUrl, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body, (_, v) => typeof v === 'bigint' ? String(v) : v), credentials: 'omit', cache: 'no-store' }); }
-  catch (e) { e.transport = true; throw e; } // the sponsor was NOT reached
-  const parsed = await boundedJSON(response, 1048576).catch(e => { e.transport = true; throw e; });
-  if (!response.ok || parsed?.error !== undefined) {
-    // A structured refusal: the sponsor answered and provably did not submit.
-    const e = Error(parsed?.error ?? 'sponsor refused (' + response.status + ')');
-    e.data = parsed?.data ?? null; e.structured = true; throw e;
+const sponsorJSON = value => JSON.stringify(value, (_, v) => typeof v === 'bigint' ? String(v) : v);
+const canonical = value => Array.isArray(value) ? value.map(canonical)
+  : value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
+
+// Persist this PUBLIC identity before submission, not the signed request or
+// file bytes. The server independently recomputes the same commitment. JSON
+// wire normalization makes bigint/string values and object key order stable.
+export function sponsorRequestIdentity(body) {
+  const { requestId, requestCommitment: ignored, ...request } = JSON.parse(sponsorJSON(body));
+  const requestCommitment = keccak256(toUtf8Bytes(sponsorJSON(canonical(request))));
+  return { requestId: requestId ?? requestCommitment, requestCommitment };
+}
+
+function sponsorEvidence(value, identity) {
+  return { ...identity, ...value,
+    submitted: value?.submitted === true ? true : value?.submitted === false ? false : null,
+    transactions: Array.isArray(value?.transactions) ? value.transactions : [],
+  };
+}
+
+function sponsorError(message, evidence, flags = {}) {
+  return Object.assign(Error(message), evidence, flags, { result: evidence, data: evidence.data ?? null });
+}
+
+async function sponsorRequest(url, body, identity, boundedJSON) {
+  let response, parsed;
+  try {
+    response = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: sponsorJSON(body), credentials: 'omit', cache: 'no-store' });
+    parsed = await boundedJSON(response, 1048576);
+  } catch {
+    // A failed fetch/body read does NOT prove that the sponsor was not reached.
+    throw sponsorError('Sponsor response unavailable; submission is unknown.', sponsorEvidence(null, identity), { transport: true });
   }
-  return parsed.result;
+  if (!response.ok || parsed?.error !== undefined) {
+    const evidence = sponsorEvidence(parsed, identity);
+    // Older app versions used `structured && !submitted` as a refusal guard.
+    // Do not activate that legacy guard for null/missing/invalid evidence.
+    throw sponsorError(parsed?.error ?? 'sponsor refused (' + response.status + ')', evidence, { structured: evidence.submitted !== null });
+  }
+  if (!parsed?.result || typeof parsed.result !== 'object') {
+    throw sponsorError('Sponsor response is incomplete; submission is unknown.', sponsorEvidence(null, identity), { transport: true });
+  }
+  return sponsorEvidence(parsed.result, identity);
+}
+
+// Read-only recovery: never carries the author signature and never broadcasts.
+// Unknown/missing process state is not permission to retry a signed operation.
+export async function sponsorStatus(sponsorUrl, identity, boundedJSON) {
+  const publicIdentity = { requestId: identity.requestId, requestCommitment: identity.requestCommitment };
+  return sponsorRequest(sponsorUrl.replace(/\/$/, '') + '/status', publicIdentity, publicIdentity, boundedJSON);
+}
+
+export async function sponsorSubmit(sponsorUrl, body, boundedJSON) {
+  const identity = sponsorRequestIdentity(body);
+  try { return await sponsorRequest(sponsorUrl, { ...body, ...identity }, identity, boundedJSON); }
+  catch (e) {
+    if (!e.transport) throw e;
+    // One status lookup can recover a lost response. No automatic resubmission,
+    // no polling loop, and no new signature. Caller retains the identity if
+    // the sponsor itself is unavailable or the request is still processing.
+    let recovered;
+    try { recovered = await sponsorStatus(sponsorUrl, identity, boundedJSON); }
+    catch { throw e; }
+    if (recovered.status === 'completed' && !recovered.error) return recovered;
+    throw sponsorError(recovered.error ?? e.message, recovered, { transport: true });
+  }
 }
