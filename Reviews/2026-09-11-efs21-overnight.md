@@ -40,6 +40,8 @@ Isolated worktree created; implementation is underway. Unchanged control: 29 tar
 
 **Receipt/browser slice, `df82bbc`:** two fresh local-chain benchmark runs agree, and root reproduced all four Node/browser tests. The browser performs actual nested create/open/edit/rename/reload/history/binary-upload/unlink operations. Independent review found two important failure-path bugs before launch: ambiguous transaction transport must retain a hash and reconcile, and failed navigation must invalidate the old writable folder. These are being fixed; no ready-to-click approval yet. No candidate persistent server has been started, and the existing 60731 world remains untouched.
 
+**Review closure, `bfddce3` / `3269c99`:** both findings are fixed and independently approved for this isolated prototype. Unknown submissions retain the locally computed transaction hash, survive browser reload, block further writes, and reconcile through read-only exact-block effect checks. Failed or changing routes cannot reuse an old writable folder. The floating cost drawer now includes running totals and unresolved/unknown-cost counts. Root reproduced all **six** integration/browser tests with serial execution so tests use one fresh Anvil/build at a time. The original receipt JSONs remain their explicitly pinned earlier checkpoint; contract sources have not changed yet. A same-profile history-storage implementation is now underway, before final candidate launch.
+
 | Native candidate workload | Actual receipt gas |
 |---|---:|
 | First 41-byte file with cold caller/list state | 640,934 |
