@@ -1,0 +1,5 @@
+[run2] stageChunk-1         gasUsed=    149,369 steps=    1,409 sstore=6
+[run2] createFile-1         gasUsed=  8,624,205 steps=  665,244 sstore=253
+[run2] stageChunk-1         receipt=149,369 reconciled=149,369 residual=0 sstore=6/5 classes={"FRESH":5,"WARM_REWRITE":1} unattributed=0 modelMismatch=0 frames=0/1
+[run2] createFile-1         receipt=8,624,205 reconciled=8,624,205 residual=0 sstore=253/219 classes={"FRESH":177,"NOOP":18,"WARM_REWRITE":32,"COLD_REWRITE":26} unattributed=0 modelMismatch=0 frames=0/57
+exit=0

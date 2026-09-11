@@ -117,7 +117,7 @@ export function buildSlotMap({ keys, extra = {} }) {
   }
   for (const id of keys.typeIds) {
     const p = mapSlot(E + STORE.types, id);
-    put(core, p, 'Type', 'groupRecordId', id); put(core, p + 1n, 'Type', 'memberIndex|typeOrdinal|admittedAtOrdinal', id); put(core, p + 2n, 'Type', 'cacheBytes(head)', id);
+    put(core, p, 'Type', 'groupRecordId', id); put(core, p + 1n, 'Type', 'memberIndex|typeOrdinal|admittedAtOrdinal', id); put(core, p + 2n, 'Type', 'cacheBytes(head)|cacheCode', id);
     for (let i = 0n; i < 256n; i++) put(core, dataSlot(p + 2n) + i, 'Type', 'cacheBytes[data]', id, Number(i));
   }
   for (const id of keys.principalIds) {

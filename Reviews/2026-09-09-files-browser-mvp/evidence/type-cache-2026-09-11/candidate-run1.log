@@ -1,0 +1,13 @@
+[run1] tag-first-ever       gasUsed=  2,745,225 steps=  204,703 sstore=104
+[run1] tag-steady-1         gasUsed=  2,503,133 steps=  200,659 sstore=100
+[run1] tag-steady-2         gasUsed=  2,537,813 steps=  200,781 sstore=100
+[run1] tag-first-in-scope   gasUsed=  2,546,193 steps=  201,580 sstore=101
+[run1] createDir-1          gasUsed=  4,622,839 steps=  389,695 sstore=163
+[run1] createDir-2          gasUsed=  4,701,992 steps=  389,667 sstore=163
+[run1] tag-first-ever       receipt=2,745,225 reconciled=2,745,225 residual=0 sstore=104/94 classes={"FRESH":68,"NOOP":18,"WARM_REWRITE":8,"COLD_REWRITE":10} unattributed=0 modelMismatch=0 frames=0/42
+[run1] tag-steady-1         receipt=2,503,133 reconciled=2,503,133 residual=0 sstore=100/90 classes={"COLD_REWRITE":18,"FRESH":56,"NOOP":18,"WARM_REWRITE":8} unattributed=0 modelMismatch=0 frames=0/42
+[run1] tag-steady-2         receipt=2,537,813 reconciled=2,537,813 residual=0 sstore=100/90 classes={"COLD_REWRITE":16,"FRESH":58,"NOOP":18,"WARM_REWRITE":8} unattributed=0 modelMismatch=0 frames=0/42
+[run1] tag-first-in-scope   receipt=2,546,193 reconciled=2,546,193 residual=0 sstore=101/91 classes={"COLD_REWRITE":17,"FRESH":58,"NOOP":18,"WARM_REWRITE":8} unattributed=0 modelMismatch=0 frames=0/42
+[run1] createDir-1          receipt=4,622,839 reconciled=4,622,839 residual=0 sstore=163/142 classes={"COLD_REWRITE":23,"FRESH":103,"NOOP":18,"WARM_REWRITE":19} unattributed=0 modelMismatch=0 frames=0/54
+[run1] createDir-2          receipt=4,701,992 reconciled=4,701,992 residual=0 sstore=163/144 classes={"COLD_REWRITE":21,"FRESH":107,"NOOP":18,"WARM_REWRITE":17} unattributed=0 modelMismatch=0 frames=0/54
+exit=0

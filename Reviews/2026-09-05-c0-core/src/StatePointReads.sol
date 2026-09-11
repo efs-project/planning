@@ -3,11 +3,12 @@ pragma solidity ^0.8.30;
 
 import {StateStore} from "./StateStore.sol";
 import {StateKernel} from "./StateKernel.sol";
+import {Preparation} from "./Preparation.sol";
 import {StorageByteView} from "./StorageByteView.sol";
 
 library StatePointReads {
     uint256 private constant ORDINAL_MAX = (uint256(1) << 48) - 1;
-    uint256 private constant CACHE_MAX = 131072;
+    uint256 private constant CACHE_MAX = Preparation.CACHE_CODE_MAX;
 
     error ErrReadOrdinal(uint64 ordinal);
 
@@ -197,11 +198,11 @@ library StatePointReads {
         )
     {
         _requireInitialized(s, typeId);
-        StateStore.TypeRow storage row = s.types[typeId];
+        StateStore.TypeCell storage row = s.types[typeId];
         if (row.typeOrdinal == 0) {
             if (
                 row.groupRecordId != 0 || row.memberIndex != 0 || row.admittedAtOrdinal != 0
-                    || row.cacheBytes.length != 0
+                    || row.cacheCode != address(0)
             ) {
                 revert StorageByteView.ErrReadState(typeId);
             }
@@ -217,7 +218,7 @@ library StatePointReads {
             (uint256 start, uint256 length) = _ordinaryMemberRange(s, row, typeId);
             canonicalBody = StorageByteView.slice(s.records[row.groupRecordId].body, start, length, typeId);
         }
-        (refRoleCount, indexSpecCount) = _cacheCounts(row.cacheBytes, typeId, canonicalBody);
+        (refRoleCount, indexSpecCount) = _cacheCounts(row.cacheCode, typeId, canonicalBody);
         // The ordinal was checked against the u48 exhaustion boundary before narrowing.
         // forge-lint: disable-next-line(unsafe-typecast)
         typeOrd = uint48(row.typeOrdinal);
@@ -230,7 +231,7 @@ library StatePointReads {
         returns (bytes32 groupRecordId, uint16 memberIndex, bool intrinsic)
     {
         _requireInitialized(s, typeId);
-        StateStore.TypeRow storage row = s.types[typeId];
+        StateStore.TypeCell storage row = s.types[typeId];
         if (row.typeOrdinal == 0) {
             if (row.groupRecordId != 0 || row.memberIndex != 0 || row.admittedAtOrdinal != 0) {
                 revert StorageByteView.ErrReadState(typeId);
@@ -251,7 +252,7 @@ library StatePointReads {
     function intrinsicTypeGroupBytes(StateStore.Store storage s) internal view returns (bytes memory) {
         _requireInitialized(s, s.init.metaTypeId);
         bytes32 subject = s.init.metaTypeId;
-        StateStore.TypeRow storage row = s.types[subject];
+        StateStore.TypeCell storage row = s.types[subject];
         _validOrdinal(row.typeOrdinal, s.count.types, subject);
         if (row.typeOrdinal != 1 || row.admittedAtOrdinal != 0 || row.groupRecordId != 0 || row.memberIndex != 0) {
             revert StorageByteView.ErrReadState(subject);
@@ -276,7 +277,7 @@ library StatePointReads {
         }
         _validOrdinal(row.recordOrdinal, s.count.records, recordId);
         _validAdmission(row.firstAdmissionOrdinal, s.count.admissions, recordId);
-        StateStore.TypeRow storage typeRow = s.types[row.typeId];
+        StateStore.TypeCell storage typeRow = s.types[row.typeId];
         if (typeRow.typeOrdinal == 0) revert StorageByteView.ErrReadState(recordId);
         _validOrdinal(typeRow.typeOrdinal, s.count.types, recordId);
         uint256 n = row.body.length;
@@ -367,7 +368,7 @@ library StatePointReads {
         }
 
         bytes32 typeSchemaId = s.typeIds[typeOrdinal];
-        StateStore.TypeRow storage typeRow = s.types[typeSchemaId];
+        StateStore.TypeCell storage typeRow = s.types[typeSchemaId];
         if (typeSchemaId == 0 || record.typeId != typeSchemaId || typeRow.typeOrdinal != typeOrdinal) {
             revert StorageByteView.ErrReadState(subject);
         }
@@ -542,7 +543,7 @@ library StatePointReads {
 
     function _requireInitialized(StateStore.Store storage s, bytes32 subject) private view {
         bytes32 metaTypeId = s.init.metaTypeId;
-        StateStore.TypeRow storage meta = s.types[metaTypeId];
+        StateStore.TypeCell storage meta = s.types[metaTypeId];
         if (s.init.realmId == 0 || metaTypeId == 0 || meta.typeOrdinal == 0) {
             revert StateKernel.InvalidInitialization();
         }
@@ -577,7 +578,7 @@ library StatePointReads {
         if (memberLength == 0 || memberLength != n - 4) revert StorageByteView.ErrReadState(subject);
     }
 
-    function _ordinaryMemberRange(StateStore.Store storage s, StateStore.TypeRow storage row, bytes32 subject)
+    function _ordinaryMemberRange(StateStore.Store storage s, StateStore.TypeCell storage row, bytes32 subject)
         private
         view
         returns (uint256 selectedStart, uint256 selectedLength)
@@ -615,33 +616,35 @@ library StatePointReads {
         if (pos != n) revert StorageByteView.ErrReadState(subject);
     }
 
-    function _cacheCounts(bytes storage cache, bytes32 typeId, bytes memory blob)
+    function _cacheCounts(address cache, bytes32 typeId, bytes memory blob)
         private
         view
         returns (uint8 roles, uint8 indexes)
     {
-        uint256 n = cache.length;
+        uint256 n = cache == address(0) ? 0 : cache.code.length;
+        if (n == 0) revert StorageByteView.ErrReadState(typeId);
+        n -= 1;
         if (n > CACHE_MAX || n < 320) revert StorageByteView.ErrReadState(typeId);
         if (
-            StorageByteView.word(cache, 0, typeId) != 32 || bytes32(StorageByteView.word(cache, 32, typeId)) != typeId
-                || bytes32(StorageByteView.word(cache, 64, typeId)) != keccak256(blob)
-                || StorageByteView.word(cache, 96, typeId) > 8192
+            StorageByteView.codeWord(cache, 0, typeId) != 32 || bytes32(StorageByteView.codeWord(cache, 32, typeId)) != typeId
+                || bytes32(StorageByteView.codeWord(cache, 64, typeId)) != keccak256(blob)
+                || StorageByteView.codeWord(cache, 96, typeId) > 8192
         ) revert StorageByteView.ErrReadState(typeId);
 
-        uint256 fieldsOffset = StorageByteView.word(cache, 128, typeId);
-        uint256 rolesOffset = StorageByteView.word(cache, 160, typeId);
-        uint256 indexesOffset = StorageByteView.word(cache, 192, typeId);
-        uint256 constraintsOffset = StorageByteView.word(cache, 224, typeId);
+        uint256 fieldsOffset = StorageByteView.codeWord(cache, 128, typeId);
+        uint256 rolesOffset = StorageByteView.codeWord(cache, 160, typeId);
+        uint256 indexesOffset = StorageByteView.codeWord(cache, 192, typeId);
+        uint256 constraintsOffset = StorageByteView.codeWord(cache, 224, typeId);
         if (fieldsOffset != 224) revert StorageByteView.ErrReadState(typeId);
         uint256 fieldsPos = _relativePosition(n, fieldsOffset, typeId);
         uint256 rolesPos = _relativePosition(n, rolesOffset, typeId);
         uint256 indexesPos = _relativePosition(n, indexesOffset, typeId);
         uint256 constraintsPos = _relativePosition(n, constraintsOffset, typeId);
 
-        uint256 fields = StorageByteView.word(cache, fieldsPos, typeId);
-        uint256 roleCount = StorageByteView.word(cache, rolesPos, typeId);
-        uint256 indexCount = StorageByteView.word(cache, indexesPos, typeId);
-        uint256 constraintCount = StorageByteView.word(cache, constraintsPos, typeId);
+        uint256 fields = StorageByteView.codeWord(cache, fieldsPos, typeId);
+        uint256 roleCount = StorageByteView.codeWord(cache, rolesPos, typeId);
+        uint256 indexCount = StorageByteView.codeWord(cache, indexesPos, typeId);
+        uint256 constraintCount = StorageByteView.codeWord(cache, constraintsPos, typeId);
         if (fields == 0 || fields > 64 || roleCount > 16 || indexCount > 8 || constraintCount > 32) {
             revert StorageByteView.ErrReadState(typeId);
         }

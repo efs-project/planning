@@ -1,0 +1,489 @@
+{
+  "generatedAt": "2026-09-11T19:31:58.902Z",
+  "root": "evidence/type-cache-2026-09-11/candidate",
+  "files": [
+    {
+      "path": "kernel.patch",
+      "bytes": 27029,
+      "sha256": "e950d13519d44e1a2b1a19bff7ef6bad0fe2f13fff3c428dc28a6ca826c38954",
+      "producedBy": "unknown",
+      "description": ""
+    },
+    {
+      "path": "kernel.patch.sha256",
+      "bytes": 120,
+      "sha256": "251c9248204c7d6323c1f65d76291c8372b03c19930712d201a6dfd70efd17e5",
+      "producedBy": "unknown",
+      "description": ""
+    },
+    {
+      "path": "readback.json",
+      "bytes": 56292,
+      "sha256": "4bca610e45eeacd717080e80d69d6d2abdab6426f4e073d2d7997b1ae6aa8546",
+      "producedBy": "unknown",
+      "description": ""
+    },
+    {
+      "path": "run1/createDir-1/analysis.json",
+      "bytes": 251442,
+      "sha256": "b56c7eb5eaa9d0e5c3537ab7b2ec4035bdcf8bbc6289ce12173af6a9ed483a27",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "derived reconciliation, categories, SSTORE classification, Kind attribution, checks"
+    },
+    {
+      "path": "run1/createDir-1/calltree.json",
+      "bytes": 89114,
+      "sha256": "5a828d1d54aef00d8ec82b8c00e7fc280d5b870241fe7987de74fd42fce955dd",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "debug_traceTransaction callTracer"
+    },
+    {
+      "path": "run1/createDir-1/prestate-diff.json",
+      "bytes": 24268,
+      "sha256": "e9ad42ed2d78fd9e4d2a4fb7dda296129dc33949dbcc608979f19623df3f449c",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "debug_traceTransaction prestateTracer diffMode"
+    },
+    {
+      "path": "run1/createDir-1/receipt.json",
+      "bytes": 2805,
+      "sha256": "5c6491a2b31cdda259db8acf38aa1d5e6460d3e6b5e54c9cb2ee3a85dc551048",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "eth_getTransactionReceipt"
+    },
+    {
+      "path": "run1/createDir-1/storage-ops.json",
+      "bytes": 162847,
+      "sha256": "c0015d2994ac127825195b13b94a7b9f545d6d0b3d0ebf87c5e776d5125e19b2",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "every SSTORE/SLOAD step (index, depth, slot, value) extracted from the trace"
+    },
+    {
+      "path": "run1/createDir-1/trace.json.gz",
+      "bytes": 5036347,
+      "sha256": "4700177d10b63ebe510c7a295a37ad3053179a2f9dedee19b00f2622669c5ba6",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "gzip of the raw debug_traceTransaction structLogs response (stack enabled, memory/storage disabled)"
+    },
+    {
+      "path": "run1/createDir-1/tx.json",
+      "bytes": 6230,
+      "sha256": "2752c7fa8c7f0393a8e2ad9fc541c7ac07c47c1d1312a5eebe42e4b35a14fa96",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "eth_getTransactionByHash (calldata, gas limit, access list)"
+    },
+    {
+      "path": "run1/createDir-2/analysis.json",
+      "bytes": 252691,
+      "sha256": "6188cc3a77e00281c538a996f34e92ac3cd3e5c257e3a9a19abd65f82cf160b2",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "derived reconciliation, categories, SSTORE classification, Kind attribution, checks"
+    },
+    {
+      "path": "run1/createDir-2/calltree.json",
+      "bytes": 89114,
+      "sha256": "0da8afaf4299b755e50f7370670c88771364257f6752475423fc835cbda938a9",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "debug_traceTransaction callTracer"
+    },
+    {
+      "path": "run1/createDir-2/prestate-diff.json",
+      "bytes": 24268,
+      "sha256": "66164bd5ea0878e1d2d945d32c20f3c36b3337269a7de04886290372cdd7a8c1",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "debug_traceTransaction prestateTracer diffMode"
+    },
+    {
+      "path": "run1/createDir-2/receipt.json",
+      "bytes": 2805,
+      "sha256": "0baebb55e42d51407aff2d4f462ce00a2bc6df9196bd0894009352d1a2d79aef",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "eth_getTransactionReceipt"
+    },
+    {
+      "path": "run1/createDir-2/storage-ops.json",
+      "bytes": 163491,
+      "sha256": "848b9323a83a80894a091a8d0ac3a1840c982c3ab78bdfabbf6be18261a92ea7",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "every SSTORE/SLOAD step (index, depth, slot, value) extracted from the trace"
+    },
+    {
+      "path": "run1/createDir-2/trace.json.gz",
+      "bytes": 5032982,
+      "sha256": "c092191c01277be74ad95d60c6b68df21a7fb13d49588f4a158474ec069d49e2",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "gzip of the raw debug_traceTransaction structLogs response (stack enabled, memory/storage disabled)"
+    },
+    {
+      "path": "run1/createDir-2/tx.json",
+      "bytes": 6230,
+      "sha256": "bb70d9b9759b9970c8c7ea903215956b6f2eafdd42a0fd45afb545f41d20ce9c",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "eth_getTransactionByHash (calldata, gas limit, access list)"
+    },
+    {
+      "path": "run1/environment.json",
+      "bytes": 5783,
+      "sha256": "db29f2046659c45c2cb99f6414bef8ec0fa5c6edb6fce9ef04b1ea6d6692e5e2",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "versions, node args, git revision, addresses"
+    },
+    {
+      "path": "run1/posting-key-labels.json",
+      "bytes": 63986,
+      "sha256": "b2fa1b242bd2b0cf570eb930e00cbc6ffe8800df4e80157990b767c4316f8098",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "posting key -> IndexKeys family preimage labels"
+    },
+    {
+      "path": "run1/store-keys.json",
+      "bytes": 55608,
+      "sha256": "e5693c545be67bf73c139e2bbb061a908877471f45746931db439a98f715dbe7",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "StateStore ordinal indexes enumerated at the final block (key universe for attribution)"
+    },
+    {
+      "path": "run1/summary.json",
+      "bytes": 12212,
+      "sha256": "cf495f714547b9bac997268634fd7f1163d15e6100daf3c62cc99a287e778b4b",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "per-run summary of every operation"
+    },
+    {
+      "path": "run1/tag-first-ever/analysis.json",
+      "bytes": 167707,
+      "sha256": "b88feb7d654ceece98d98172452b039211ae27fc86db0de41db71ae2f19bec4e",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "derived reconciliation, categories, SSTORE classification, Kind attribution, checks"
+    },
+    {
+      "path": "run1/tag-first-ever/calltree.json",
+      "bytes": 56840,
+      "sha256": "ddcd8a53a88453c8e0c6628c45fb4d104242867af88ee73165542ee86924baf1",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "debug_traceTransaction callTracer"
+    },
+    {
+      "path": "run1/tag-first-ever/prestate-diff.json",
+      "bytes": 15240,
+      "sha256": "5459030d4a4fc070d200d4016fa0748dd5bf01b85bcf9da0f6f749d7a0ae1fd1",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "debug_traceTransaction prestateTracer diffMode"
+    },
+    {
+      "path": "run1/tag-first-ever/receipt.json",
+      "bytes": 2805,
+      "sha256": "0d4850075135109ab9898da222c889418f38f9369f56b673cabd0c89c8fd1f85",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "eth_getTransactionReceipt"
+    },
+    {
+      "path": "run1/tag-first-ever/storage-ops.json",
+      "bytes": 106803,
+      "sha256": "1f99b6720fbb767d5f04e6697e16f1b6500e6151081daca617a3966ac6fcc6b4",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "every SSTORE/SLOAD step (index, depth, slot, value) extracted from the trace"
+    },
+    {
+      "path": "run1/tag-first-ever/trace.json.gz",
+      "bytes": 2670151,
+      "sha256": "6990c9ad179e41820d989931c410b33d4f5f84ad35d4fbe7842c3be494c1f36c",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "gzip of the raw debug_traceTransaction structLogs response (stack enabled, memory/storage disabled)"
+    },
+    {
+      "path": "run1/tag-first-ever/tx.json",
+      "bytes": 4630,
+      "sha256": "7676721b4c82eb69353736f934eb4494e872c20850dbab5ed7adf458341b7ddb",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "eth_getTransactionByHash (calldata, gas limit, access list)"
+    },
+    {
+      "path": "run1/tag-first-in-scope/analysis.json",
+      "bytes": 163716,
+      "sha256": "7b17fa44c35b69f5c3defdebf48224c99f2974ff4de0cbbe121813fa4e93255c",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "derived reconciliation, categories, SSTORE classification, Kind attribution, checks"
+    },
+    {
+      "path": "run1/tag-first-in-scope/calltree.json",
+      "bytes": 56840,
+      "sha256": "d89f5c3c77ff3f511feb864dfc3cedce065830275628f6c1c4499c8736124c18",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "debug_traceTransaction callTracer"
+    },
+    {
+      "path": "run1/tag-first-in-scope/prestate-diff.json",
+      "bytes": 15832,
+      "sha256": "f2f03c9e95407abec4244d01d5ce72496e2a82907c3cb29976a9a7f7eea95097",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "debug_traceTransaction prestateTracer diffMode"
+    },
+    {
+      "path": "run1/tag-first-in-scope/receipt.json",
+      "bytes": 2805,
+      "sha256": "a6033a02b401e09df844d0338910e1294dcca64bb610d049e60eebfc8167d730",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "eth_getTransactionReceipt"
+    },
+    {
+      "path": "run1/tag-first-in-scope/storage-ops.json",
+      "bytes": 105159,
+      "sha256": "b9fbd5e0d9cd6de01f7747a570b932f587cc0a08d4628959794e3d1b45fe8c45",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "every SSTORE/SLOAD step (index, depth, slot, value) extracted from the trace"
+    },
+    {
+      "path": "run1/tag-first-in-scope/trace.json.gz",
+      "bytes": 2623328,
+      "sha256": "c17bb6a454b701de1b82fa772c7abc39dc546eb8e564bfa2da2c9ec0a78faa53",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "gzip of the raw debug_traceTransaction structLogs response (stack enabled, memory/storage disabled)"
+    },
+    {
+      "path": "run1/tag-first-in-scope/tx.json",
+      "bytes": 4630,
+      "sha256": "ddc24ad2df88b22f9e8ac08d9f7a9ee4e4d903bc1c01ae2abcf1c6dbcea58573",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "eth_getTransactionByHash (calldata, gas limit, access list)"
+    },
+    {
+      "path": "run1/tag-steady-1/analysis.json",
+      "bytes": 162345,
+      "sha256": "44ef98562744baa4e94da3ca3c407e5f8ca97af5d8d136a24b557bf796cf1c2e",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "derived reconciliation, categories, SSTORE classification, Kind attribution, checks"
+    },
+    {
+      "path": "run1/tag-steady-1/calltree.json",
+      "bytes": 56840,
+      "sha256": "8504e557a70a7da419460ab8ef29bf04d1fe627417b6e052ec3298e23e23abce",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "debug_traceTransaction callTracer"
+    },
+    {
+      "path": "run1/tag-steady-1/prestate-diff.json",
+      "bytes": 15832,
+      "sha256": "bedc5e6c9ed85557b11a569253f0f56390f5b6621c94bfc03f85d0909c113943",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "debug_traceTransaction prestateTracer diffMode"
+    },
+    {
+      "path": "run1/tag-steady-1/receipt.json",
+      "bytes": 2805,
+      "sha256": "20f06cb1f785e8eee50fa495be3b0efbdc89c8ab4cc45653885281999e4b8369",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "eth_getTransactionReceipt"
+    },
+    {
+      "path": "run1/tag-steady-1/storage-ops.json",
+      "bytes": 104611,
+      "sha256": "ec142a10c650f3d03a9a78f1533ee287b98ff1567ef2337cf38b17976397b2f8",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "every SSTORE/SLOAD step (index, depth, slot, value) extracted from the trace"
+    },
+    {
+      "path": "run1/tag-steady-1/trace.json.gz",
+      "bytes": 2610117,
+      "sha256": "c2b6c367151c8b8363e74fb133e80a86162765b24f05c8a0e6eb206ad6788e3e",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "gzip of the raw debug_traceTransaction structLogs response (stack enabled, memory/storage disabled)"
+    },
+    {
+      "path": "run1/tag-steady-1/tx.json",
+      "bytes": 4630,
+      "sha256": "4f2584e29396aad73190ed2ca306c6c7b3da6c0f900ea57d5bc20dd97d8d385e",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "eth_getTransactionByHash (calldata, gas limit, access list)"
+    },
+    {
+      "path": "run1/tag-steady-2/analysis.json",
+      "bytes": 162246,
+      "sha256": "32fde5148091ec842e9b2319d4a6050f98e4ccb3f1457db67808448b33e724fc",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "derived reconciliation, categories, SSTORE classification, Kind attribution, checks"
+    },
+    {
+      "path": "run1/tag-steady-2/calltree.json",
+      "bytes": 56840,
+      "sha256": "1891966f0871d44cb3f8462b0201cf355b9362b65ed35e7a39cbbabecc31c5cf",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "debug_traceTransaction callTracer"
+    },
+    {
+      "path": "run1/tag-steady-2/prestate-diff.json",
+      "bytes": 15536,
+      "sha256": "b9a37bc94347c594fbe33895ce0e2e8523dc7f991b1d65b6a86e661a3e640ba7",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "debug_traceTransaction prestateTracer diffMode"
+    },
+    {
+      "path": "run1/tag-steady-2/receipt.json",
+      "bytes": 2805,
+      "sha256": "491a0ce16d4d69bf69a330d57890ee2ba4d94e06a802b09a210e429e23ee4c2b",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "eth_getTransactionReceipt"
+    },
+    {
+      "path": "run1/tag-steady-2/storage-ops.json",
+      "bytes": 104611,
+      "sha256": "ffb810944891f7504db585b361fec27e49e8b61312c26d056586f07258deb19b",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "every SSTORE/SLOAD step (index, depth, slot, value) extracted from the trace"
+    },
+    {
+      "path": "run1/tag-steady-2/trace.json.gz",
+      "bytes": 2612557,
+      "sha256": "cb5ecd15df368d25ec499bbb22d6f36f1dca334a3075ed8fbf95a7aa0b7669d7",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "gzip of the raw debug_traceTransaction structLogs response (stack enabled, memory/storage disabled)"
+    },
+    {
+      "path": "run1/tag-steady-2/tx.json",
+      "bytes": 4630,
+      "sha256": "04b68d81fce1bfc7e1ca40b392bda96ada55ece4b015f76d88f0bc47222f2965",
+      "producedBy": "node scripts/measure/baseline.mjs --run 1 --sequence default",
+      "description": "eth_getTransactionByHash (calldata, gas limit, access list)"
+    },
+    {
+      "path": "run2/createFile-1/analysis.json",
+      "bytes": 375480,
+      "sha256": "fac8397f82f6c28ce75b353241981429daa77a5f517d6ff039c4ec35142b43ec",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "derived reconciliation, categories, SSTORE classification, Kind attribution, checks"
+    },
+    {
+      "path": "run2/createFile-1/calltree.json",
+      "bytes": 122991,
+      "sha256": "d3039564bf12e62ac07b235f63712057595ee4f38de939908b3d65f11119a9ab",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "debug_traceTransaction callTracer"
+    },
+    {
+      "path": "run2/createFile-1/prestate-diff.json",
+      "bytes": 36108,
+      "sha256": "065088e584af52439e8d272083e140a917ebf3d8793354014c06616eecb61903",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "debug_traceTransaction prestateTracer diffMode"
+    },
+    {
+      "path": "run2/createFile-1/receipt.json",
+      "bytes": 2805,
+      "sha256": "e95fd8e371acdfebc685a31138d6ad4aab6671ef1d1d70ceca7838a650a9e6c4",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "eth_getTransactionReceipt"
+    },
+    {
+      "path": "run2/createFile-1/storage-ops.json",
+      "bytes": 215867,
+      "sha256": "b471cf15d26606a87928c625033d7803f2d71eeb4e1f7f790832169b3891b0ff",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "every SSTORE/SLOAD step (index, depth, slot, value) extracted from the trace"
+    },
+    {
+      "path": "run2/createFile-1/trace.json.gz",
+      "bytes": 8143603,
+      "sha256": "b161af5bda3991ff2d58a82a1eba8d5fa04c011e30e2cca16a2e04429c24b3be",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "gzip of the raw debug_traceTransaction structLogs response (stack enabled, memory/storage disabled)"
+    },
+    {
+      "path": "run2/createFile-1/tx.json",
+      "bytes": 8149,
+      "sha256": "fb7e4a424934c277bcf830db4a55556d0a767701ce05e64b36029c935d097a7e",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "eth_getTransactionByHash (calldata, gas limit, access list)"
+    },
+    {
+      "path": "run2/environment.json",
+      "bytes": 5772,
+      "sha256": "89770ee770f05117c06903f3ac4656bd522ec6dfd0a77729d66845847ba75e75",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "versions, node args, git revision, addresses"
+    },
+    {
+      "path": "run2/posting-key-labels.json",
+      "bytes": 56081,
+      "sha256": "846befbe61dcbae2bb65e3874f46770bb6e3e9a78382ce216f0bfef02ad70b62",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "posting key -> IndexKeys family preimage labels"
+    },
+    {
+      "path": "run2/stageChunk-1/analysis.json",
+      "bytes": 15381,
+      "sha256": "77d7f9eaa5a7fc7dd2836283b02b6029558ad1e9e9a731bb8ef427ea9d078eac",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "derived reconciliation, categories, SSTORE classification, Kind attribution, checks"
+    },
+    {
+      "path": "run2/stageChunk-1/calltree.json",
+      "bytes": 2164,
+      "sha256": "940d07d833677993062fde2673fffb5b80d3daa6dd1c3dc1ac9ca84703b03eef",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "debug_traceTransaction callTracer"
+    },
+    {
+      "path": "run2/stageChunk-1/prestate-diff.json",
+      "bytes": 2929,
+      "sha256": "0ed1e2653fa21731b94150a49378a9d33f2fb57c0845e3e45fba8bb278ab9340",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "debug_traceTransaction prestateTracer diffMode"
+    },
+    {
+      "path": "run2/stageChunk-1/receipt.json",
+      "bytes": 1909,
+      "sha256": "2ddbcc235ce3e0586b142fcdc62ad5966691a5152d8607e9899df1c988ea4f70",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "eth_getTransactionReceipt"
+    },
+    {
+      "path": "run2/stageChunk-1/storage-ops.json",
+      "bytes": 2298,
+      "sha256": "aead1d64640a8d153ef5e2311c60482e62fccc87d292c794681771b50a5303ad",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "every SSTORE/SLOAD step (index, depth, slot, value) extracted from the trace"
+    },
+    {
+      "path": "run2/stageChunk-1/trace.json.gz",
+      "bytes": 20407,
+      "sha256": "98bba0aef2bb396fd45f1bc4f8b52637a8dee2c1a748a549ce46e2a34bae1b41",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "gzip of the raw debug_traceTransaction structLogs response (stack enabled, memory/storage disabled)"
+    },
+    {
+      "path": "run2/stageChunk-1/tx.json",
+      "bytes": 1558,
+      "sha256": "4dbd20fb692f030fb6426daff3744fc2fed887aa9e0eaa632b9b67dfe09b03b6",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "eth_getTransactionByHash (calldata, gas limit, access list)"
+    },
+    {
+      "path": "run2/store-keys.json",
+      "bytes": 49307,
+      "sha256": "40d4671e60fe1a54884877c365de25f9f4f9b4d7a6443747ebb5e6ed673c6e75",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "StateStore ordinal indexes enumerated at the final block (key universe for attribution)"
+    },
+    {
+      "path": "run2/summary.json",
+      "bytes": 4033,
+      "sha256": "f4fafa639ff9c256144e6a9d7e6d2a6a8e10952f5c97179eebc12fc28559bb67",
+      "producedBy": "node scripts/measure/baseline.mjs --run 2 --sequence default",
+      "description": "per-run summary of every operation"
+    },
+    {
+      "path": "tables.md",
+      "bytes": 51992,
+      "sha256": "84e3089a5b955a17e58f270a43dab79b4d678452a1767f91f06755fc7c1caf89",
+      "producedBy": "node scripts/measure/report.mjs",
+      "description": "generated markdown tables"
+    },
+    {
+      "path": "index.json",
+      "bytes": null,
+      "sha256": null,
+      "producedBy": "node scripts/measure/report.mjs",
+      "description": "this index (hash not self-referential)"
+    }
+  ]
+}

@@ -54,7 +54,7 @@ contract StatefulHarness {
     }
 
     function typeRow(bytes32 id) external view returns (StateStore.TypeRow memory) {
-        return s.types[id];
+        return StateStore.typeRow(s, id);
     }
 
     function binding(bytes32 id) external view returns (StateStore.BindingRow memory) {

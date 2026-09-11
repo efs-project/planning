@@ -13,6 +13,19 @@ library StorageByteView {
         }
     }
 
+    /// One aligned word of a code-backed type cache (the runtime's first byte is a
+    /// STOP prefix; `offset` is payload-relative). Bounded exactly like `word`.
+    function codeWord(address cacheCode, uint256 offset, bytes32 subject) internal view returns (uint256 result) {
+        uint256 n = cacheCode == address(0) ? 0 : cacheCode.code.length;
+        if (n == 0) revert ErrReadState(subject);
+        n -= 1;
+        if (offset & 31 != 0 || offset > n || 32 > n - offset) revert ErrReadState(subject);
+        assembly ("memory-safe") {
+            extcodecopy(cacheCode, 0, add(offset, 1), 32)
+            result := mload(0)
+        }
+    }
+
     function slice(bytes storage value, uint256 start, uint256 length, bytes32 subject)
         internal
         view

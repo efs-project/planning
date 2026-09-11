@@ -1,0 +1,7 @@
+types=19 helper-recompile mismatches=0 pointers=0 pointer mismatches=0 canonicalHash=0x398a5f53a6ba15c8487370a6653f42085d5b8e9d626549a8500b3f0a3e2e9f84
+read gas (first type / last record): {
+  typeId: '0x8579a7ae3b45b341133398999f7113e2abf5d01c5f8a4f78b3d7927dd754293d',
+  getTypeSchema: 211045,
+  typeRow: 83947
+} 202725
+readback exit=0

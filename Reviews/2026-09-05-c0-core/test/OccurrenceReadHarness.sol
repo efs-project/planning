@@ -4,6 +4,7 @@ pragma solidity ^0.8.30;
 import {StatePointReads} from "../src/StatePointReads.sol";
 import {StateKernel} from "../src/StateKernel.sol";
 import {StateStore} from "../src/StateStore.sol";
+import {CacheCodeForTest} from "./CacheCodeForTest.sol";
 import {PointReadHarness} from "./PointReadHarness.sol";
 
 contract OccurrenceReadHarness is PointReadHarness {
@@ -92,7 +93,9 @@ contract SyntheticOccurrenceReadHarness is OccurrenceReadHarness {
         uint64 firstAdmission,
         bytes memory cache
     ) external {
-        s.types[typeId] = StateStore.TypeRow(groupRecordId, memberIndex, ordinal, firstAdmission, cache);
+        StateStore.writeType(
+            s, typeId, StateStore.TypeRow(groupRecordId, memberIndex, ordinal, firstAdmission, cache), CacheCodeForTest.deploy(cache)
+        );
     }
 
     function seedPrincipalForTest(bytes32 principalId, uint64 ordinal, uint64 firstAdmission) external {

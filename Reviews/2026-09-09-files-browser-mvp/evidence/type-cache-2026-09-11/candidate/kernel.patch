@@ -1,0 +1,536 @@
+diff --git a/Reviews/2026-09-05-c0-core/src/Preparation.sol b/Reviews/2026-09-05-c0-core/src/Preparation.sol
+index 15a7a73..0a0ebb3 100644
+--- a/Reviews/2026-09-05-c0-core/src/Preparation.sol
++++ b/Reviews/2026-09-05-c0-core/src/Preparation.sol
+@@ -37,6 +37,9 @@ library Preparation {
+     error HelperOutput(uint256 length);
+     error HelperInput(uint256 length);
+     error InvalidPreparation();
++    error HelperDeploy();
++    /// EIP-170 runtime ceiling less the one-byte STOP prefix of a code-backed cache.
++    uint256 internal constant CACHE_CODE_MAX = 24575;
+     // PROVISIONAL experiment ceilings, not final C0 caps.
+     uint256 internal constant GROUP_OUTPUT = 131072;
+     uint256 internal constant PREPARED_OUTPUT = 8192;
+@@ -64,6 +67,33 @@ library Preparation {
+         if (!ok) assembly ("memory-safe") { revert(add(output, 32), mload(output)) }
+     }
+ 
++    /// Deploys a compiled cache as immutable code through the pinned helper,
++    /// from the helper's own account (never the core's, whose nonce proxy
++    /// tooling predicts). The kernel never deploys an empty cache. The helper's
++    /// identity was verified by the `invoke` that necessarily preceded this
++    /// call in the same admission or initialization.
++    function deployCache(Config memory c, bytes memory cache) internal returns (address code) {
++        uint256 n = cache.length;
++        address target = c.helper;
++        uint32 selector = uint32(IPreparation.deployCache.selector);
++        bool ok = n <= CACHE_CODE_MAX;
++        // Scratch use of free memory and of the scratch words; nothing below
++        // depends on either.
++        assembly ("memory-safe") {
++            if ok {
++                let ptr := mload(0x40)
++                mstore(ptr, shl(224, selector))
++                mstore(add(ptr, 4), 0x20)
++                mstore(add(ptr, 36), n)
++                mcopy(add(ptr, 68), add(cache, 32), n)
++                ok := call(gas(), target, 0, ptr, add(n, 68), 0, 32)
++                code := mload(0)
++                ok := and(and(ok, eq(returndatasize(), 32)), iszero(iszero(code)))
++            }
++        }
++        if (!ok) revert HelperDeploy();
++    }
++
+     function intrinsic(Config memory c, bytes memory raw) internal view returns (CompiledType memory) {
+         return
+             abi.decode(
+@@ -103,6 +133,7 @@ library Preparation {
+ }
+ 
+ interface IPreparation {
++    function deployCache(bytes calldata cache) external returns (address);
+     function compileIntrinsic(bytes calldata raw) external view returns (Preparation.CompiledType memory);
+     function compileGroup(bytes calldata raw) external view returns (Preparation.CompiledGroup memory);
+     function prepareRecord(
+diff --git a/Reviews/2026-09-05-c0-core/src/PreparationHelper.sol b/Reviews/2026-09-05-c0-core/src/PreparationHelper.sol
+index 1cf00a8..250eec0 100644
+--- a/Reviews/2026-09-05-c0-core/src/PreparationHelper.sol
++++ b/Reviews/2026-09-05-c0-core/src/PreparationHelper.sol
+@@ -7,6 +7,25 @@ import {BindingFold} from "./BindingFold.sol";
+ import {IndexKeys} from "./IndexKeys.sol";
+ 
+ contract PreparationHelper {
++    error CacheDeployFailed();
++
++    /// Deploys `0x00 || cache` as immutable runtime code and returns its address.
++    /// Initcode: PUSH2 size, DUP1, PUSH1 10, RETURNDATASIZE, CODECOPY,
++    /// RETURNDATASIZE, RETURN — ten bytes returning the payload that follows them.
++    /// Inert public factory: the payload begins with STOP and can never execute;
++    /// a core trusts only pointers it stored itself.
++    function deployCache(bytes memory cache) external returns (address code) {
++        uint256 n = cache.length;
++        // Scratch use of free memory: nothing below depends on it.
++        assembly ("memory-safe") {
++            let init := mload(0x40)
++            mstore(init, or(shl(248, 0x61), or(shl(232, add(n, 1)), shl(168, 0x80600a3d393df300))))
++            mcopy(add(init, 11), add(cache, 32), n)
++            code := create(0, init, add(n, 11))
++        }
++        if (code == address(0)) revert CacheDeployFailed();
++    }
++
+     function compileIntrinsic(bytes memory raw) external pure returns (Preparation.CompiledType memory out) {
+         (, TypeGroupParser.SchemaCache[] memory ss) = TypeGroupParser.parse(raw, new bytes32[](0));
+         if (
+diff --git a/Reviews/2026-09-05-c0-core/src/StateKernel.sol b/Reviews/2026-09-05-c0-core/src/StateKernel.sol
+index d6aa1e7..cf3bf12 100644
+--- a/Reviews/2026-09-05-c0-core/src/StateKernel.sol
++++ b/Reviews/2026-09-05-c0-core/src/StateKernel.sol
+@@ -82,6 +82,10 @@ library StateKernel {
+     error MissingTypeDependency(bytes32 typeId);
+     error CacheConflict(bytes32 typeId);
+     uint64 private constant GUARD = (uint64(1) << 48) - 1;
++    /// keccak256(abi.encode(keccak256("EIP712Domain(string name,string version)"), keccak256("EFS2-Envelope"), keccak256("1")))
++    bytes32 private constant ENVELOPE_DOMAIN = 0xad872d31d7c6ce265e4ef38af3d323a95450b98bdfe0a43ecacfd134e60e3848;
++    /// keccak256("PublicationEnvelope(uint16 profile,bytes32 principalId,bytes32 authorityRef,uint64 authEpoch,bytes32 pubNonce,uint64 notAfter,bytes32[] recordIds)")
++    bytes32 private constant ENVELOPE_TYPEHASH = 0x41cb229615379fa5d2f5213653ed99aedca39e150a8add884383d1c269d1b921;
+ 
+     struct Plan {
+         Preparation.Config config;
+@@ -114,7 +118,9 @@ library StateKernel {
+             0,
+             0
+         );
+-        s.types[meta.typeId] = StateStore.TypeRow(0, 0, 1, 0, meta.cacheBytes);
++        StateStore.writeType(
++            s, meta.typeId, StateStore.TypeRow(0, 0, 1, 0, meta.cacheBytes), Preparation.deployCache(config, meta.cacheBytes)
++        );
+         s.typeIds[1] = meta.typeId;
+         s.count.types = 1;
+     }
+@@ -224,7 +230,7 @@ library StateKernel {
+         bytes32 countBefore = keccak256(abi.encode(s.count));
+         bytes32 initBefore = keccak256(abi.encode(s.init));
+         for (uint256 i; i < plan.length; ++i) {
+-            StateStore.replay(s, plan.changes[i]);
++            StateStore.replay(s, plan.changes[i], config);
+         }
+         assert(countBefore == keccak256(abi.encode(s.count)) && initBefore == keccak256(abi.encode(s.init)));
+         s.count = plan.count;
+@@ -241,7 +247,7 @@ library StateKernel {
+         uint256 casIndex
+     ) private view returns (uint256) {
+         SelectedLeaf memory leaf = p.leaves[i];
+-        Preparation.PreparedRecord memory prepared =
++        (Preparation.PreparedRecord memory prepared, uint64 typeOrdinal) =
+             checked(s, plan, leaf, p.envelopeId, p.recordIds[leaf.leafIndex], p.header.principalId, false);
+         BindingFold.Effect memory effect = prepared.effect;
+         uint32 expected;
+@@ -267,9 +273,9 @@ library StateKernel {
+                 put(s, plan, StateStore.Kind.RecordId, 0, rr.recordOrdinal, abi.encode(recordId));
+             }
+         }
++        // The leaf's own type row cannot change below: group() only creates
++        // member rows, and a member colliding with an existing row reverts.
+         if (leaf.typeId == plan.init.metaTypeId) group(s, plan, leaf.body, recordId, ord);
+-        StateStore.TypeRow memory tr =
+-            abi.decode(get(s, plan, StateStore.Kind.Type, leaf.typeId, 0), (StateStore.TypeRow));
+         put(
+             s,
+             plan,
+@@ -279,7 +285,7 @@ library StateKernel {
+             abi.encode(
+                 StateStore.AdmissionRow(
+                     p.envelopeId,
+-                    uint256(leaf.leafIndex) | (uint256(tr.typeOrdinal) << 16) | (uint256(principalOrdinal) << 64)
++                    uint256(leaf.leafIndex) | (uint256(typeOrdinal) << 16) | (uint256(principalOrdinal) << 64)
+                 )
+             )
+         );
+@@ -317,24 +323,13 @@ library StateKernel {
+             ) revert InvalidCommitment();
+         }
+         if (mask != p.leafMask) revert E_BOUNDS(2);
+-        bytes32 domain = keccak256(
+-            abi.encode(
+-                keccak256("EIP712Domain(string name,string version)"), keccak256("EFS2-Envelope"), keccak256("1")
+-            )
+-        );
+-        bytes32 statement = keccak256(
+-            abi.encode(
+-                keccak256(
+-                    "PublicationEnvelope(uint16 profile,bytes32 principalId,bytes32 authorityRef,uint64 authEpoch,bytes32 pubNonce,uint64 notAfter,bytes32[] recordIds)"
+-                ),
+-                p.header,
+-                keccak256(abi.encodePacked(p.recordIds))
+-            )
+-        );
++        bytes32 statement = keccak256(abi.encode(ENVELOPE_TYPEHASH, p.header, keccak256(abi.encodePacked(p.recordIds))));
+         if (
+             p.envelopeId
+                 != keccak256(
+-                    abi.encode(keccak256("efs2/envelope/1"), keccak256(abi.encodePacked(hex"1901", domain, statement)))
++                    abi.encode(
++                        keccak256("efs2/envelope/1"), keccak256(abi.encodePacked(hex"1901", ENVELOPE_DOMAIN, statement))
++                    )
+                 )
+         ) revert InvalidCommitment();
+     }
+@@ -347,9 +342,10 @@ library StateKernel {
+         bytes32 recordId,
+         bytes32 principal,
+         bool bodyOnly
+-    ) private view returns (Preparation.PreparedRecord memory prepared) {
++    ) private view returns (Preparation.PreparedRecord memory prepared, uint64 typeOrdinal) {
+         StateStore.TypeRow memory tr = abi.decode(get(s, p, StateStore.Kind.Type, leaf.typeId, 0), (StateStore.TypeRow));
+         if (tr.typeOrdinal == 0) revert E_UNKNOWN_TYPE(leaf.leafIndex);
++        typeOrdinal = tr.typeOrdinal;
+         prepared =
+             Preparation.record(p.config, tr.cacheBytes, leaf.typeId, leaf.body, recordId, principal, ids(p), bodyOnly);
+         for (uint256 j; j < prepared.references.length; ++j) {
+@@ -521,7 +517,7 @@ library StateKernel {
+         uint64 targetOrd = uint64((life >> 8) & GUARD);
+         Preparation.PreparedRecord memory prepared = Preparation.record(
+             p.config,
+-            s.types[rr.typeId].cacheBytes,
++            StateStore.cacheBytes(s.types[rr.typeId].cacheCode),
+             rr.typeId,
+             rr.body,
+             vector[e.targetLeaf],
+diff --git a/Reviews/2026-09-05-c0-core/src/StatePointReads.sol b/Reviews/2026-09-05-c0-core/src/StatePointReads.sol
+index 402afb9..6a38163 100644
+--- a/Reviews/2026-09-05-c0-core/src/StatePointReads.sol
++++ b/Reviews/2026-09-05-c0-core/src/StatePointReads.sol
+@@ -3,11 +3,12 @@ pragma solidity ^0.8.30;
+ 
+ import {StateStore} from "./StateStore.sol";
+ import {StateKernel} from "./StateKernel.sol";
++import {Preparation} from "./Preparation.sol";
+ import {StorageByteView} from "./StorageByteView.sol";
+ 
+ library StatePointReads {
+     uint256 private constant ORDINAL_MAX = (uint256(1) << 48) - 1;
+-    uint256 private constant CACHE_MAX = 131072;
++    uint256 private constant CACHE_MAX = Preparation.CACHE_CODE_MAX;
+ 
+     error ErrReadOrdinal(uint64 ordinal);
+ 
+@@ -197,11 +198,11 @@ library StatePointReads {
+         )
+     {
+         _requireInitialized(s, typeId);
+-        StateStore.TypeRow storage row = s.types[typeId];
++        StateStore.TypeCell storage row = s.types[typeId];
+         if (row.typeOrdinal == 0) {
+             if (
+                 row.groupRecordId != 0 || row.memberIndex != 0 || row.admittedAtOrdinal != 0
+-                    || row.cacheBytes.length != 0
++                    || row.cacheCode != address(0)
+             ) {
+                 revert StorageByteView.ErrReadState(typeId);
+             }
+@@ -217,7 +218,7 @@ library StatePointReads {
+             (uint256 start, uint256 length) = _ordinaryMemberRange(s, row, typeId);
+             canonicalBody = StorageByteView.slice(s.records[row.groupRecordId].body, start, length, typeId);
+         }
+-        (refRoleCount, indexSpecCount) = _cacheCounts(row.cacheBytes, typeId, canonicalBody);
++        (refRoleCount, indexSpecCount) = _cacheCounts(row.cacheCode, typeId, canonicalBody);
+         // The ordinal was checked against the u48 exhaustion boundary before narrowing.
+         // forge-lint: disable-next-line(unsafe-typecast)
+         typeOrd = uint48(row.typeOrdinal);
+@@ -230,7 +231,7 @@ library StatePointReads {
+         returns (bytes32 groupRecordId, uint16 memberIndex, bool intrinsic)
+     {
+         _requireInitialized(s, typeId);
+-        StateStore.TypeRow storage row = s.types[typeId];
++        StateStore.TypeCell storage row = s.types[typeId];
+         if (row.typeOrdinal == 0) {
+             if (row.groupRecordId != 0 || row.memberIndex != 0 || row.admittedAtOrdinal != 0) {
+                 revert StorageByteView.ErrReadState(typeId);
+@@ -251,7 +252,7 @@ library StatePointReads {
+     function intrinsicTypeGroupBytes(StateStore.Store storage s) internal view returns (bytes memory) {
+         _requireInitialized(s, s.init.metaTypeId);
+         bytes32 subject = s.init.metaTypeId;
+-        StateStore.TypeRow storage row = s.types[subject];
++        StateStore.TypeCell storage row = s.types[subject];
+         _validOrdinal(row.typeOrdinal, s.count.types, subject);
+         if (row.typeOrdinal != 1 || row.admittedAtOrdinal != 0 || row.groupRecordId != 0 || row.memberIndex != 0) {
+             revert StorageByteView.ErrReadState(subject);
+@@ -276,7 +277,7 @@ library StatePointReads {
+         }
+         _validOrdinal(row.recordOrdinal, s.count.records, recordId);
+         _validAdmission(row.firstAdmissionOrdinal, s.count.admissions, recordId);
+-        StateStore.TypeRow storage typeRow = s.types[row.typeId];
++        StateStore.TypeCell storage typeRow = s.types[row.typeId];
+         if (typeRow.typeOrdinal == 0) revert StorageByteView.ErrReadState(recordId);
+         _validOrdinal(typeRow.typeOrdinal, s.count.types, recordId);
+         uint256 n = row.body.length;
+@@ -367,7 +368,7 @@ library StatePointReads {
+         }
+ 
+         bytes32 typeSchemaId = s.typeIds[typeOrdinal];
+-        StateStore.TypeRow storage typeRow = s.types[typeSchemaId];
++        StateStore.TypeCell storage typeRow = s.types[typeSchemaId];
+         if (typeSchemaId == 0 || record.typeId != typeSchemaId || typeRow.typeOrdinal != typeOrdinal) {
+             revert StorageByteView.ErrReadState(subject);
+         }
+@@ -542,7 +543,7 @@ library StatePointReads {
+ 
+     function _requireInitialized(StateStore.Store storage s, bytes32 subject) private view {
+         bytes32 metaTypeId = s.init.metaTypeId;
+-        StateStore.TypeRow storage meta = s.types[metaTypeId];
++        StateStore.TypeCell storage meta = s.types[metaTypeId];
+         if (s.init.realmId == 0 || metaTypeId == 0 || meta.typeOrdinal == 0) {
+             revert StateKernel.InvalidInitialization();
+         }
+@@ -577,7 +578,7 @@ library StatePointReads {
+         if (memberLength == 0 || memberLength != n - 4) revert StorageByteView.ErrReadState(subject);
+     }
+ 
+-    function _ordinaryMemberRange(StateStore.Store storage s, StateStore.TypeRow storage row, bytes32 subject)
++    function _ordinaryMemberRange(StateStore.Store storage s, StateStore.TypeCell storage row, bytes32 subject)
+         private
+         view
+         returns (uint256 selectedStart, uint256 selectedLength)
+@@ -615,33 +616,35 @@ library StatePointReads {
+         if (pos != n) revert StorageByteView.ErrReadState(subject);
+     }
+ 
+-    function _cacheCounts(bytes storage cache, bytes32 typeId, bytes memory blob)
++    function _cacheCounts(address cache, bytes32 typeId, bytes memory blob)
+         private
+         view
+         returns (uint8 roles, uint8 indexes)
+     {
+-        uint256 n = cache.length;
++        uint256 n = cache == address(0) ? 0 : cache.code.length;
++        if (n == 0) revert StorageByteView.ErrReadState(typeId);
++        n -= 1;
+         if (n > CACHE_MAX || n < 320) revert StorageByteView.ErrReadState(typeId);
+         if (
+-            StorageByteView.word(cache, 0, typeId) != 32 || bytes32(StorageByteView.word(cache, 32, typeId)) != typeId
+-                || bytes32(StorageByteView.word(cache, 64, typeId)) != keccak256(blob)
+-                || StorageByteView.word(cache, 96, typeId) > 8192
++            StorageByteView.codeWord(cache, 0, typeId) != 32 || bytes32(StorageByteView.codeWord(cache, 32, typeId)) != typeId
++                || bytes32(StorageByteView.codeWord(cache, 64, typeId)) != keccak256(blob)
++                || StorageByteView.codeWord(cache, 96, typeId) > 8192
+         ) revert StorageByteView.ErrReadState(typeId);
+ 
+-        uint256 fieldsOffset = StorageByteView.word(cache, 128, typeId);
+-        uint256 rolesOffset = StorageByteView.word(cache, 160, typeId);
+-        uint256 indexesOffset = StorageByteView.word(cache, 192, typeId);
+-        uint256 constraintsOffset = StorageByteView.word(cache, 224, typeId);
++        uint256 fieldsOffset = StorageByteView.codeWord(cache, 128, typeId);
++        uint256 rolesOffset = StorageByteView.codeWord(cache, 160, typeId);
++        uint256 indexesOffset = StorageByteView.codeWord(cache, 192, typeId);
++        uint256 constraintsOffset = StorageByteView.codeWord(cache, 224, typeId);
+         if (fieldsOffset != 224) revert StorageByteView.ErrReadState(typeId);
+         uint256 fieldsPos = _relativePosition(n, fieldsOffset, typeId);
+         uint256 rolesPos = _relativePosition(n, rolesOffset, typeId);
+         uint256 indexesPos = _relativePosition(n, indexesOffset, typeId);
+         uint256 constraintsPos = _relativePosition(n, constraintsOffset, typeId);
+ 
+-        uint256 fields = StorageByteView.word(cache, fieldsPos, typeId);
+-        uint256 roleCount = StorageByteView.word(cache, rolesPos, typeId);
+-        uint256 indexCount = StorageByteView.word(cache, indexesPos, typeId);
+-        uint256 constraintCount = StorageByteView.word(cache, constraintsPos, typeId);
++        uint256 fields = StorageByteView.codeWord(cache, fieldsPos, typeId);
++        uint256 roleCount = StorageByteView.codeWord(cache, rolesPos, typeId);
++        uint256 indexCount = StorageByteView.codeWord(cache, indexesPos, typeId);
++        uint256 constraintCount = StorageByteView.codeWord(cache, constraintsPos, typeId);
+         if (fields == 0 || fields > 64 || roleCount > 16 || indexCount > 8 || constraintCount > 32) {
+             revert StorageByteView.ErrReadState(typeId);
+         }
+diff --git a/Reviews/2026-09-05-c0-core/src/StateStore.sol b/Reviews/2026-09-05-c0-core/src/StateStore.sol
+index d2758ab..78d17c4 100644
+--- a/Reviews/2026-09-05-c0-core/src/StateStore.sol
++++ b/Reviews/2026-09-05-c0-core/src/StateStore.sol
+@@ -1,6 +1,8 @@
+ // SPDX-License-Identifier: MIT
+ pragma solidity ^0.8.30;
+ 
++import {Preparation} from "./Preparation.sol";
++
+ library StateStore {
+     struct Counts {
+         uint64 records;
+@@ -25,6 +27,9 @@ library StateStore {
+         uint64 envelopeOrdinal;
+     }
+ 
++    /// @notice The logical type row: what admission plans against, what the
++    /// journal encodes, what `typeRow` views return. `cacheBytes` is the compiled
++    /// schema cache exactly as the preparation helper produced it.
+     struct TypeRow {
+         bytes32 groupRecordId;
+         uint16 memberIndex;
+@@ -33,6 +38,20 @@ library StateStore {
+         bytes cacheBytes;
+     }
+ 
++    /// @notice The stored type row. The compiled cache is not kept in storage
++    /// slots: it is deployed once, at type admission, as the immutable runtime
++    /// code at `cacheCode` (one STOP byte followed by the cache) by the pinned
++    /// preparation helper from ITS account (never from the core's, whose nonce
++    /// proxy tooling predicts), and loaded with EXTCODECOPY on every admission
++    /// and checked read. Three slots, as before; no data words.
++    struct TypeCell {
++        bytes32 groupRecordId;
++        uint16 memberIndex;
++        uint64 typeOrdinal;
++        uint64 admittedAtOrdinal;
++        address cacheCode;
++    }
++
+     struct PrincipalRow {
+         uint64 principalOrdinal;
+         uint64 firstAdmissionOrdinal;
+@@ -80,7 +99,7 @@ library StateStore {
+         Bootstrap init;
+         mapping(bytes32 => RecordRow) records;
+         mapping(bytes32 => EnvelopeRow) envelopes;
+-        mapping(bytes32 => TypeRow) types;
++        mapping(bytes32 => TypeCell) types;
+         mapping(bytes32 => PrincipalRow) principals;
+         mapping(uint64 => AdmissionRow) admissions;
+         mapping(bytes32 => LifecycleRow) occurrences;
+@@ -125,10 +144,67 @@ library StateStore {
+         bytes afterValue;
+     }
+ 
++    // TypeCell layout (asserted by the read tests through the Solidity accessors):
++    //   slot 0  groupRecordId
++    //   slot 1  memberIndex (bits 0-15) | typeOrdinal (16-79) | admittedAtOrdinal (80-143)
++    //   slot 2  cacheCode
++    /// The logical row of a type: scalar fields from the cell, the cache from code.
++    function typeRow(Store storage s, bytes32 id) internal view returns (TypeRow memory row) {
++        TypeCell storage c = s.types[id];
++        bytes32 group;
++        uint256 packed;
++        address code;
++        assembly ("memory-safe") {
++            group := sload(c.slot)
++            packed := sload(add(c.slot, 1))
++            code := shr(96, shl(96, sload(add(c.slot, 2))))
++        }
++        row.groupRecordId = group;
++        row.memberIndex = uint16(packed);
++        row.typeOrdinal = uint64(packed >> 16);
++        row.admittedAtOrdinal = uint64(packed >> 80);
++        row.cacheBytes = cacheBytes(code);
++    }
++
++    /// The whole cache behind `cacheCode`, byte-identical to what was admitted
++    /// (empty for the null pointer). A cell pointing at an account without code
++    /// is an impossible state and asserts.
++    function cacheBytes(address cacheCode) internal view returns (bytes memory out) {
++        if (cacheCode == address(0)) return out;
++        // An account without code is an impossible state: the decrement panics.
++        uint256 n = cacheCode.code.length - 1;
++        out = new bytes(n);
++        assembly ("memory-safe") {
++            extcodecopy(cacheCode, add(out, 32), 1, n)
++        }
++    }
++
++    /// Stores a logical row whose cache the caller has already deployed at
++    /// `cacheCode` (address(0) for an empty cache).
++    function writeType(Store storage s, bytes32 id, TypeRow memory row, address cacheCode) internal {
++        writeCell(
++            s,
++            id,
++            row.groupRecordId,
++            uint256(row.memberIndex) | (uint256(row.typeOrdinal) << 16) | (uint256(row.admittedAtOrdinal) << 80),
++            cacheCode
++        );
++    }
++
++    function writeCell(Store storage s, bytes32 id, bytes32 group, uint256 packed, address cacheCode) private {
++        TypeCell storage c = s.types[id];
++        assembly ("memory-safe") {
++            sstore(c.slot, group)
++            sstore(add(c.slot, 1), packed)
++            sstore(add(c.slot, 2), cacheCode)
++        }
++    }
++
++
+     function read(Store storage s, Kind k, bytes32 key, uint64 i) internal view returns (bytes memory) {
+         if (k == Kind.Record) return abi.encode(s.records[key]);
+         if (k == Kind.Envelope) return abi.encode(s.envelopes[key]);
+-        if (k == Kind.Type) return abi.encode(s.types[key]);
++        if (k == Kind.Type) return abi.encode(typeRow(s, key));
+         if (k == Kind.Principal) return abi.encode(s.principals[key]);
+         if (k == Kind.Admission) return abi.encode(s.admissions[i]);
+         if (k == Kind.Lifecycle) return abi.encode(s.occurrences[key]);
+@@ -144,7 +220,8 @@ library StateStore {
+         return abi.encode(s.bindingKeys[i]);
+     }
+ 
+-    function replay(Store storage s, Change memory c) internal {
++    /// A Kind.Type change deploys its cache through the pinned helper as it lands.
++    function replay(Store storage s, Change memory c, Preparation.Config memory config) internal {
+         assert(keccak256(read(s, c.kind, c.key, c.index)) == keccak256(c.beforeValue));
+         bytes memory v = c.afterValue;
+         bytes32 key = c.key;
+@@ -152,7 +229,20 @@ library StateStore {
+         Kind k = c.kind;
+         if (k == Kind.Record) s.records[key] = abi.decode(v, (RecordRow));
+         else if (k == Kind.Envelope) s.envelopes[key] = abi.decode(v, (EnvelopeRow));
+-        else if (k == Kind.Type) s.types[key] = abi.decode(v, (TypeRow));
++        else if (k == Kind.Type) {
++            // v = abi.encode(TypeRow), produced by this kernel's own planner:
++            // [0x20][groupRecordId][memberIndex][typeOrdinal][admittedAtOrdinal][0xa0][length][cache…];
++            // the cache is read in place as a bytes value, without a copy.
++            bytes32 group;
++            uint256 packed;
++            bytes memory cache;
++            assembly ("memory-safe") {
++                group := mload(add(v, 64))
++                packed := or(or(mload(add(v, 96)), shl(16, mload(add(v, 128)))), shl(80, mload(add(v, 160))))
++                cache := add(v, 224)
++            }
++            writeCell(s, key, group, packed, Preparation.deployCache(config, cache));
++        }
+         else if (k == Kind.Principal) s.principals[key] = abi.decode(v, (PrincipalRow));
+         else if (k == Kind.Admission) s.admissions[i] = abi.decode(v, (AdmissionRow));
+         else if (k == Kind.Lifecycle) s.occurrences[key] = abi.decode(v, (LifecycleRow));
+diff --git a/Reviews/2026-09-05-c0-core/src/StorageByteView.sol b/Reviews/2026-09-05-c0-core/src/StorageByteView.sol
+index c191c5e..75183c0 100644
+--- a/Reviews/2026-09-05-c0-core/src/StorageByteView.sol
++++ b/Reviews/2026-09-05-c0-core/src/StorageByteView.sol
+@@ -13,6 +13,19 @@ library StorageByteView {
+         }
+     }
+ 
++    /// One aligned word of a code-backed type cache (the runtime's first byte is a
++    /// STOP prefix; `offset` is payload-relative). Bounded exactly like `word`.
++    function codeWord(address cacheCode, uint256 offset, bytes32 subject) internal view returns (uint256 result) {
++        uint256 n = cacheCode == address(0) ? 0 : cacheCode.code.length;
++        if (n == 0) revert ErrReadState(subject);
++        n -= 1;
++        if (offset & 31 != 0 || offset > n || 32 > n - offset) revert ErrReadState(subject);
++        assembly ("memory-safe") {
++            extcodecopy(cacheCode, 0, add(offset, 1), 32)
++            result := mload(0)
++        }
++    }
++
+     function slice(bytes storage value, uint256 start, uint256 length, bytes32 subject)
+         internal
+         view
+diff --git a/Reviews/2026-09-08-upgradeable-foundation/src/UpgradeableFixtureCore.sol b/Reviews/2026-09-08-upgradeable-foundation/src/UpgradeableFixtureCore.sol
+index e6985bb..360ba64 100644
+--- a/Reviews/2026-09-08-upgradeable-foundation/src/UpgradeableFixtureCore.sol
++++ b/Reviews/2026-09-08-upgradeable-foundation/src/UpgradeableFixtureCore.sol
+@@ -76,7 +76,7 @@ contract UpgradeableFixtureCore is FixtureEndpoint {
+     }
+ 
+     function typeRow(bytes32 id) external view returns (StateStore.TypeRow memory) {
+-        return UpgradeStorage.efs().types[id];
++        return StateStore.typeRow(UpgradeStorage.efs(), id);
+     }
+ 
+     function binding(bytes32 id) external view returns (StateStore.BindingRow memory) {

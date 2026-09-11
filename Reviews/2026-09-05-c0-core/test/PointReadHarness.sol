@@ -4,6 +4,7 @@ pragma solidity ^0.8.30;
 import {StatePointReads} from "../src/StatePointReads.sol";
 import {StateKernel} from "../src/StateKernel.sol";
 import {StateStore} from "../src/StateStore.sol";
+import {CacheCodeForTest} from "./CacheCodeForTest.sol";
 import {StorageByteView} from "../src/StorageByteView.sol";
 import {StatefulHarness} from "./StatefulHarness.sol";
 
@@ -61,7 +62,12 @@ contract SyntheticPointReadHarness is PointReadHarness {
         uint64 admittedAtOrdinal,
         bytes memory cacheBytes
     ) external {
-        s.types[id] = StateStore.TypeRow(groupRecordId, memberIndex, typeOrdinal, admittedAtOrdinal, cacheBytes);
+        StateStore.writeType(
+            s,
+            id,
+            StateStore.TypeRow(groupRecordId, memberIndex, typeOrdinal, admittedAtOrdinal, cacheBytes),
+            CacheCodeForTest.deploy(cacheBytes)
+        );
     }
 
     function seedRecordForTest(
@@ -79,13 +85,16 @@ contract SyntheticPointReadHarness is PointReadHarness {
     }
 
     function corruptCacheWordForTest(bytes32 id, uint256 offset, uint256 next) external {
-        bytes storage cache = s.types[id].cacheBytes;
+        // The cache is immutable code: rewrite the row with a corrupted copy.
+        StateStore.TypeRow memory row = StateStore.typeRow(s, id);
+        bytes memory cache = row.cacheBytes;
         require(offset <= cache.length && 32 <= cache.length - offset, "test cache word range");
         for (uint256 i; i < 32; ++i) {
             // Test-only word decomposition deliberately selects the low byte.
             // forge-lint: disable-next-line(unsafe-typecast)
             cache[offset + i] = bytes1(uint8(next >> ((31 - i) * 8)));
         }
+        StateStore.writeType(s, id, row, CacheCodeForTest.deploy(cache));
     }
 }
 

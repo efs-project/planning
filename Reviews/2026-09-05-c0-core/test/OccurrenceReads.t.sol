@@ -613,7 +613,7 @@ contract OccurrenceReadsTest {
 
     function testHydrationDoesNotCopyRecordBodyOrTypeCache() public {
         (SyntheticOccurrenceReadHarness small, bytes32 smallEnvelope) = largeHydrationFixture(1, 1);
-        (SyntheticOccurrenceReadHarness large, bytes32 largeEnvelope) = largeHydrationFixture(8192, 131072);
+        (SyntheticOccurrenceReadHarness large, bytes32 largeEnvelope) = largeHydrationFixture(8192, 24575);
         uint256 smallGas = measuredOccurrence(small, smallEnvelope);
         uint256 largeGas = measuredOccurrence(large, largeEnvelope);
         require(smallGas == largeGas, "fixed metadata hydration cost");

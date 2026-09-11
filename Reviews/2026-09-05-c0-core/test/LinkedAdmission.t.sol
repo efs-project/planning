@@ -34,6 +34,11 @@ contract SelfRefPreparationForTest {
         faultPosition = position;
     }
 
+    // Cache deployment is forwarded to the real helper (deployed from ITS account).
+    function deployCache(bytes memory cache) external returns (address) {
+        return real.deployCache(cache);
+    }
+
     function compileIntrinsic(bytes memory raw) external view returns (Preparation.CompiledType memory) {
         return real.compileIntrinsic(raw);
     }

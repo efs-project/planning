@@ -82,6 +82,10 @@ library StateKernel {
     error MissingTypeDependency(bytes32 typeId);
     error CacheConflict(bytes32 typeId);
     uint64 private constant GUARD = (uint64(1) << 48) - 1;
+    /// keccak256(abi.encode(keccak256("EIP712Domain(string name,string version)"), keccak256("EFS2-Envelope"), keccak256("1")))
+    bytes32 private constant ENVELOPE_DOMAIN = 0xad872d31d7c6ce265e4ef38af3d323a95450b98bdfe0a43ecacfd134e60e3848;
+    /// keccak256("PublicationEnvelope(uint16 profile,bytes32 principalId,bytes32 authorityRef,uint64 authEpoch,bytes32 pubNonce,uint64 notAfter,bytes32[] recordIds)")
+    bytes32 private constant ENVELOPE_TYPEHASH = 0x41cb229615379fa5d2f5213653ed99aedca39e150a8add884383d1c269d1b921;
 
     struct Plan {
         Preparation.Config config;
@@ -114,7 +118,9 @@ library StateKernel {
             0,
             0
         );
-        s.types[meta.typeId] = StateStore.TypeRow(0, 0, 1, 0, meta.cacheBytes);
+        StateStore.writeType(
+            s, meta.typeId, StateStore.TypeRow(0, 0, 1, 0, meta.cacheBytes), Preparation.deployCache(config, meta.cacheBytes)
+        );
         s.typeIds[1] = meta.typeId;
         s.count.types = 1;
     }
@@ -224,7 +230,7 @@ library StateKernel {
         bytes32 countBefore = keccak256(abi.encode(s.count));
         bytes32 initBefore = keccak256(abi.encode(s.init));
         for (uint256 i; i < plan.length; ++i) {
-            StateStore.replay(s, plan.changes[i]);
+            StateStore.replay(s, plan.changes[i], config);
         }
         assert(countBefore == keccak256(abi.encode(s.count)) && initBefore == keccak256(abi.encode(s.init)));
         s.count = plan.count;
@@ -241,7 +247,7 @@ library StateKernel {
         uint256 casIndex
     ) private view returns (uint256) {
         SelectedLeaf memory leaf = p.leaves[i];
-        Preparation.PreparedRecord memory prepared =
+        (Preparation.PreparedRecord memory prepared, uint64 typeOrdinal) =
             checked(s, plan, leaf, p.envelopeId, p.recordIds[leaf.leafIndex], p.header.principalId, false);
         BindingFold.Effect memory effect = prepared.effect;
         uint32 expected;
@@ -267,9 +273,9 @@ library StateKernel {
                 put(s, plan, StateStore.Kind.RecordId, 0, rr.recordOrdinal, abi.encode(recordId));
             }
         }
+        // The leaf's own type row cannot change below: group() only creates
+        // member rows, and a member colliding with an existing row reverts.
         if (leaf.typeId == plan.init.metaTypeId) group(s, plan, leaf.body, recordId, ord);
-        StateStore.TypeRow memory tr =
-            abi.decode(get(s, plan, StateStore.Kind.Type, leaf.typeId, 0), (StateStore.TypeRow));
         put(
             s,
             plan,
@@ -279,7 +285,7 @@ library StateKernel {
             abi.encode(
                 StateStore.AdmissionRow(
                     p.envelopeId,
-                    uint256(leaf.leafIndex) | (uint256(tr.typeOrdinal) << 16) | (uint256(principalOrdinal) << 64)
+                    uint256(leaf.leafIndex) | (uint256(typeOrdinal) << 16) | (uint256(principalOrdinal) << 64)
                 )
             )
         );
@@ -317,24 +323,13 @@ library StateKernel {
             ) revert InvalidCommitment();
         }
         if (mask != p.leafMask) revert E_BOUNDS(2);
-        bytes32 domain = keccak256(
-            abi.encode(
-                keccak256("EIP712Domain(string name,string version)"), keccak256("EFS2-Envelope"), keccak256("1")
-            )
-        );
-        bytes32 statement = keccak256(
-            abi.encode(
-                keccak256(
-                    "PublicationEnvelope(uint16 profile,bytes32 principalId,bytes32 authorityRef,uint64 authEpoch,bytes32 pubNonce,uint64 notAfter,bytes32[] recordIds)"
-                ),
-                p.header,
-                keccak256(abi.encodePacked(p.recordIds))
-            )
-        );
+        bytes32 statement = keccak256(abi.encode(ENVELOPE_TYPEHASH, p.header, keccak256(abi.encodePacked(p.recordIds))));
         if (
             p.envelopeId
                 != keccak256(
-                    abi.encode(keccak256("efs2/envelope/1"), keccak256(abi.encodePacked(hex"1901", domain, statement)))
+                    abi.encode(
+                        keccak256("efs2/envelope/1"), keccak256(abi.encodePacked(hex"1901", ENVELOPE_DOMAIN, statement))
+                    )
                 )
         ) revert InvalidCommitment();
     }
@@ -347,9 +342,10 @@ library StateKernel {
         bytes32 recordId,
         bytes32 principal,
         bool bodyOnly
-    ) private view returns (Preparation.PreparedRecord memory prepared) {
+    ) private view returns (Preparation.PreparedRecord memory prepared, uint64 typeOrdinal) {
         StateStore.TypeRow memory tr = abi.decode(get(s, p, StateStore.Kind.Type, leaf.typeId, 0), (StateStore.TypeRow));
         if (tr.typeOrdinal == 0) revert E_UNKNOWN_TYPE(leaf.leafIndex);
+        typeOrdinal = tr.typeOrdinal;
         prepared =
             Preparation.record(p.config, tr.cacheBytes, leaf.typeId, leaf.body, recordId, principal, ids(p), bodyOnly);
         for (uint256 j; j < prepared.references.length; ++j) {
@@ -521,7 +517,7 @@ library StateKernel {
         uint64 targetOrd = uint64((life >> 8) & GUARD);
         Preparation.PreparedRecord memory prepared = Preparation.record(
             p.config,
-            s.types[rr.typeId].cacheBytes,
+            StateStore.cacheBytes(s.types[rr.typeId].cacheCode),
             rr.typeId,
             rr.body,
             vector[e.targetLeaf],

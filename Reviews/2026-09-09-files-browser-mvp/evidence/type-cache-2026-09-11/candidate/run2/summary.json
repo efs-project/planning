@@ -1,0 +1,148 @@
+{
+  "run": 2,
+  "sequence": "default",
+  "environment": {
+    "commit": "34a2978eab1ab3f8dd84a556495aef61161e3ca8",
+    "dirty": true,
+    "anvil": "anvil Version: 1.7.1",
+    "solc": {
+      "version": "0.8.30+commit.73712a01"
+    }
+  },
+  "operations": [
+    {
+      "op": "stageChunk-1",
+      "kind": "stageChunk",
+      "txHash": "0xccf8157159fe62bb0430917781a6f122605b34b9602ce175571f7002669ec466",
+      "receiptGasUsed": 149369,
+      "gross": 124889,
+      "intrinsic": 24480,
+      "refundApplied": 0,
+      "residual": 0,
+      "steps": 1409,
+      "categories": {
+        "SSTORE": 106400,
+        "SLOAD": 8600,
+        "KECCAK256": 450,
+        "LOG": 1893,
+        "CALLDATA": 185,
+        "CALL_OVERHEAD": 2600,
+        "PRECOMPILE": 0,
+        "MEMORY": 230,
+        "STACK": 2271,
+        "CONTROL": 1354,
+        "ARITH": 900,
+        "CODE": 0,
+        "ENV": 6,
+        "OTHER": 0
+      },
+      "sstore": {
+        "sstoreOps": 6,
+        "distinctSlotsWritten": 5,
+        "writesByClass": {
+          "FRESH": 5,
+          "WARM_REWRITE": 1
+        },
+        "gasByClass": {
+          "FRESH": 106300,
+          "WARM_REWRITE": 100
+        },
+        "slotsByFinalClass": {
+          "FRESH": 5
+        },
+        "modelMismatches": 0
+      },
+      "sloadOps": 6,
+      "sloadDistinct": 4,
+      "checks": {
+        "traceErrors": 0,
+        "sstoreModelMismatches": 0,
+        "callTracerFrameMismatches": 0,
+        "callTracerFrames": 1,
+        "prestateDiffMismatches": 0,
+        "prestateChangedSlots": 5,
+        "finalValueMismatches": 0,
+        "unattributedWrites": 0
+      },
+      "glamsterdam": {
+        "note": "ESTIMATED: PM-supplied multipliers applied to MEASURED write counts by class (fresh x110,020; cold rewrite x12,100; every other SSTORE on an already-written slot x10,100). Not a prediction of total gas.",
+        "freshWrites": 5,
+        "coldRewrites": 0,
+        "warmWrites": 1,
+        "clears": 0,
+        "sstoreEstimate": 560200
+      }
+    },
+    {
+      "op": "createFile-1",
+      "kind": "createFile",
+      "txHash": "0x037450ea293f78895cbb316fb4d13ac4d446274bbc2c4629b9a65e20ac3986ad",
+      "receiptGasUsed": 7688694,
+      "gross": 7635238,
+      "intrinsic": 53456,
+      "refundApplied": 0,
+      "residual": 0,
+      "steps": 633582,
+      "categories": {
+        "SSTORE": 3708600,
+        "SLOAD": 676900,
+        "KECCAK256": 68730,
+        "LOG": 4280,
+        "CALLDATA": 296395,
+        "CALL_OVERHEAD": 23172,
+        "PRECOMPILE": 3100,
+        "MEMORY": 824175,
+        "STACK": 1011742,
+        "CONTROL": 605740,
+        "ARITH": 380415,
+        "CODE": 31773,
+        "ENV": 216,
+        "OTHER": 0
+      },
+      "sstore": {
+        "sstoreOps": 253,
+        "distinctSlotsWritten": 219,
+        "writesByClass": {
+          "FRESH": 177,
+          "NOOP": 18,
+          "WARM_REWRITE": 32,
+          "COLD_REWRITE": 26
+        },
+        "gasByClass": {
+          "FRESH": 3621900,
+          "NOOP": 8100,
+          "WARM_REWRITE": 3200,
+          "COLD_REWRITE": 75400
+        },
+        "slotsByFinalClass": {
+          "FRESH": 177,
+          "UNCHANGED_ZERO": 3,
+          "REWRITE": 26,
+          "UNCHANGED": 13
+        },
+        "modelMismatches": 0
+      },
+      "sloadOps": 989,
+      "sloadDistinct": 289,
+      "checks": {
+        "traceErrors": 0,
+        "sstoreModelMismatches": 0,
+        "callTracerFrameMismatches": 0,
+        "callTracerFrames": 57,
+        "prestateDiffMismatches": 0,
+        "prestateChangedSlots": 203,
+        "finalValueMismatches": 0,
+        "unattributedWrites": 0
+      },
+      "glamsterdam": {
+        "note": "ESTIMATED: PM-supplied multipliers applied to MEASURED write counts by class (fresh x110,020; cold rewrite x12,100; every other SSTORE on an already-written slot x10,100). Not a prediction of total gas.",
+        "freshWrites": 177,
+        "coldRewrites": 26,
+        "warmWrites": 50,
+        "clears": 0,
+        "sstoreEstimate": 20293140
+      }
+    }
+  ],
+  "elapsedMs": 23875
+}

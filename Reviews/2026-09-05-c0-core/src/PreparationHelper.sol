@@ -7,6 +7,25 @@ import {BindingFold} from "./BindingFold.sol";
 import {IndexKeys} from "./IndexKeys.sol";
 
 contract PreparationHelper {
+    error CacheDeployFailed();
+
+    /// Deploys `0x00 || cache` as immutable runtime code and returns its address.
+    /// Initcode: PUSH2 size, DUP1, PUSH1 10, RETURNDATASIZE, CODECOPY,
+    /// RETURNDATASIZE, RETURN — ten bytes returning the payload that follows them.
+    /// Inert public factory: the payload begins with STOP and can never execute;
+    /// a core trusts only pointers it stored itself.
+    function deployCache(bytes memory cache) external returns (address code) {
+        uint256 n = cache.length;
+        // Scratch use of free memory: nothing below depends on it.
+        assembly ("memory-safe") {
+            let init := mload(0x40)
+            mstore(init, or(shl(248, 0x61), or(shl(232, add(n, 1)), shl(168, 0x80600a3d393df300))))
+            mcopy(add(init, 11), add(cache, 32), n)
+            code := create(0, init, add(n, 11))
+        }
+        if (code == address(0)) revert CacheDeployFailed();
+    }
+
     function compileIntrinsic(bytes memory raw) external pure returns (Preparation.CompiledType memory out) {
         (, TypeGroupParser.SchemaCache[] memory ss) = TypeGroupParser.parse(raw, new bytes32[](0));
         if (

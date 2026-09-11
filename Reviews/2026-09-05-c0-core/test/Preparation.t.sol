@@ -2,6 +2,7 @@
 pragma solidity ^0.8.30;
 import {Preparation, IPreparation} from "../src/Preparation.sol";
 import {PreparationHelper} from "../src/PreparationHelper.sol";
+import {StateStore} from "../src/StateStore.sol";
 import {TypeGroupParser} from "C0Admission/TypeGroupParser.sol";
 import {RecordBody} from "../src/RecordBody.sol";
 import {IndexKeys} from "../src/IndexKeys.sol";
@@ -239,5 +240,40 @@ contract PreparationTest {
         // The returndata length guard makes narrowing to the revert selector exact.
         // forge-lint: disable-next-line(unsafe-typecast)
         require(!ok && e.length >= 4 && bytes4(e) == Preparation.HelperInput.selector, "oversized calldata rejected");
+    }
+
+    function testDeployCacheRoundTripsFromHelperAccountAndRefusesOversize() public {
+        PreparationHelper helper = new PreparationHelper();
+        Preparation.Config memory c = Preparation.Config(address(helper), address(helper).codehash);
+        bytes memory cache = new bytes(1000);
+        for (uint256 i; i < cache.length; ++i) {
+            // Test-only byte fill.
+            // forge-lint: disable-next-line(unsafe-typecast)
+            cache[i] = bytes1(uint8(i));
+        }
+        address code = Preparation.deployCache(c, cache);
+        require(code != address(0) && code.code.length == 1001, "deployed payload size");
+        require(code.code[0] == 0x00, "STOP prefix");
+        require(keccak256(StateStore.cacheBytes(code)) == keccak256(cache), "byte-identical cache");
+        require(StateStore.cacheBytes(Preparation.deployCache(c, new bytes(0))).length == 0, "empty cache round-trips");
+        (bool ok, bytes memory e) = address(this).call(abi.encodeCall(this.deployOversizeForTest, (c)));
+        require(
+            !ok && keccak256(e) == keccak256(abi.encodeWithSelector(Preparation.HelperDeploy.selector)),
+            "oversized cache refused before any CREATE"
+        );
+        // Identity is verified by the invoke that precedes every deployment in the
+        // kernel; a target without deployCache fails closed.
+        (ok, e) = address(this).call(
+            abi.encodeCall(this.deployWrongHelperForTest, (Preparation.Config(address(this), address(this).codehash), cache))
+        );
+        require(!ok && bytes4(e) == Preparation.HelperDeploy.selector, "helper without deployCache must fail closed");
+    }
+
+    function deployOversizeForTest(Preparation.Config memory c) external {
+        Preparation.deployCache(c, new bytes(24576));
+    }
+
+    function deployWrongHelperForTest(Preparation.Config memory c, bytes memory cache) external {
+        Preparation.deployCache(c, cache);
     }
 }

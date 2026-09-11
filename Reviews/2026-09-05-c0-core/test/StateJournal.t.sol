@@ -3,6 +3,7 @@ pragma solidity ^0.8.30;
 
 import {StateKernel} from "../src/StateKernel.sol";
 import {StateStore} from "../src/StateStore.sol";
+import {Preparation} from "../src/Preparation.sol";
 
 contract StateJournalHarness {
     StateStore.Store private s;
@@ -22,7 +23,7 @@ contract StateJournalHarness {
         for (uint256 i; i < 3; ++i) {
             require(abi.decode(p.changes[i].beforeValue, (uint256)) == 41 + i, "sequential before");
             require(abi.decode(p.changes[i].afterValue, (uint256)) == 42 + i, "ordered after");
-            StateStore.replay(s, p.changes[i]);
+            StateStore.replay(s, p.changes[i], Preparation.Config(address(0), 0)); // no Type change: helper unused
             require(s.postingWords[key][3] == 42 + i, "ordered storage replay");
         }
     }

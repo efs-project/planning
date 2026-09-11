@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
+import {Preparation} from "./Preparation.sol";
+
 library StateStore {
     struct Counts {
         uint64 records;
@@ -25,12 +27,29 @@ library StateStore {
         uint64 envelopeOrdinal;
     }
 
+    /// @notice The logical type row: what admission plans against, what the
+    /// journal encodes, what `typeRow` views return. `cacheBytes` is the compiled
+    /// schema cache exactly as the preparation helper produced it.
     struct TypeRow {
         bytes32 groupRecordId;
         uint16 memberIndex;
         uint64 typeOrdinal;
         uint64 admittedAtOrdinal;
         bytes cacheBytes;
+    }
+
+    /// @notice The stored type row. The compiled cache is not kept in storage
+    /// slots: it is deployed once, at type admission, as the immutable runtime
+    /// code at `cacheCode` (one STOP byte followed by the cache) by the pinned
+    /// preparation helper from ITS account (never from the core's, whose nonce
+    /// proxy tooling predicts), and loaded with EXTCODECOPY on every admission
+    /// and checked read. Three slots, as before; no data words.
+    struct TypeCell {
+        bytes32 groupRecordId;
+        uint16 memberIndex;
+        uint64 typeOrdinal;
+        uint64 admittedAtOrdinal;
+        address cacheCode;
     }
 
     struct PrincipalRow {
@@ -80,7 +99,7 @@ library StateStore {
         Bootstrap init;
         mapping(bytes32 => RecordRow) records;
         mapping(bytes32 => EnvelopeRow) envelopes;
-        mapping(bytes32 => TypeRow) types;
+        mapping(bytes32 => TypeCell) types;
         mapping(bytes32 => PrincipalRow) principals;
         mapping(uint64 => AdmissionRow) admissions;
         mapping(bytes32 => LifecycleRow) occurrences;
@@ -125,10 +144,67 @@ library StateStore {
         bytes afterValue;
     }
 
+    // TypeCell layout (asserted by the read tests through the Solidity accessors):
+    //   slot 0  groupRecordId
+    //   slot 1  memberIndex (bits 0-15) | typeOrdinal (16-79) | admittedAtOrdinal (80-143)
+    //   slot 2  cacheCode
+    /// The logical row of a type: scalar fields from the cell, the cache from code.
+    function typeRow(Store storage s, bytes32 id) internal view returns (TypeRow memory row) {
+        TypeCell storage c = s.types[id];
+        bytes32 group;
+        uint256 packed;
+        address code;
+        assembly ("memory-safe") {
+            group := sload(c.slot)
+            packed := sload(add(c.slot, 1))
+            code := shr(96, shl(96, sload(add(c.slot, 2))))
+        }
+        row.groupRecordId = group;
+        row.memberIndex = uint16(packed);
+        row.typeOrdinal = uint64(packed >> 16);
+        row.admittedAtOrdinal = uint64(packed >> 80);
+        row.cacheBytes = cacheBytes(code);
+    }
+
+    /// The whole cache behind `cacheCode`, byte-identical to what was admitted
+    /// (empty for the null pointer). A cell pointing at an account without code
+    /// is an impossible state and asserts.
+    function cacheBytes(address cacheCode) internal view returns (bytes memory out) {
+        if (cacheCode == address(0)) return out;
+        // An account without code is an impossible state: the decrement panics.
+        uint256 n = cacheCode.code.length - 1;
+        out = new bytes(n);
+        assembly ("memory-safe") {
+            extcodecopy(cacheCode, add(out, 32), 1, n)
+        }
+    }
+
+    /// Stores a logical row whose cache the caller has already deployed at
+    /// `cacheCode` (address(0) for an empty cache).
+    function writeType(Store storage s, bytes32 id, TypeRow memory row, address cacheCode) internal {
+        writeCell(
+            s,
+            id,
+            row.groupRecordId,
+            uint256(row.memberIndex) | (uint256(row.typeOrdinal) << 16) | (uint256(row.admittedAtOrdinal) << 80),
+            cacheCode
+        );
+    }
+
+    function writeCell(Store storage s, bytes32 id, bytes32 group, uint256 packed, address cacheCode) private {
+        TypeCell storage c = s.types[id];
+        assembly ("memory-safe") {
+            sstore(c.slot, group)
+            sstore(add(c.slot, 1), packed)
+            sstore(add(c.slot, 2), cacheCode)
+        }
+    }
+
+
     function read(Store storage s, Kind k, bytes32 key, uint64 i) internal view returns (bytes memory) {
         if (k == Kind.Record) return abi.encode(s.records[key]);
         if (k == Kind.Envelope) return abi.encode(s.envelopes[key]);
-        if (k == Kind.Type) return abi.encode(s.types[key]);
+        if (k == Kind.Type) return abi.encode(typeRow(s, key));
         if (k == Kind.Principal) return abi.encode(s.principals[key]);
         if (k == Kind.Admission) return abi.encode(s.admissions[i]);
         if (k == Kind.Lifecycle) return abi.encode(s.occurrences[key]);
@@ -144,7 +220,8 @@ library StateStore {
         return abi.encode(s.bindingKeys[i]);
     }
 
-    function replay(Store storage s, Change memory c) internal {
+    /// A Kind.Type change deploys its cache through the pinned helper as it lands.
+    function replay(Store storage s, Change memory c, Preparation.Config memory config) internal {
         assert(keccak256(read(s, c.kind, c.key, c.index)) == keccak256(c.beforeValue));
         bytes memory v = c.afterValue;
         bytes32 key = c.key;
@@ -152,7 +229,20 @@ library StateStore {
         Kind k = c.kind;
         if (k == Kind.Record) s.records[key] = abi.decode(v, (RecordRow));
         else if (k == Kind.Envelope) s.envelopes[key] = abi.decode(v, (EnvelopeRow));
-        else if (k == Kind.Type) s.types[key] = abi.decode(v, (TypeRow));
+        else if (k == Kind.Type) {
+            // v = abi.encode(TypeRow), produced by this kernel's own planner:
+            // [0x20][groupRecordId][memberIndex][typeOrdinal][admittedAtOrdinal][0xa0][length][cache…];
+            // the cache is read in place as a bytes value, without a copy.
+            bytes32 group;
+            uint256 packed;
+            bytes memory cache;
+            assembly ("memory-safe") {
+                group := mload(add(v, 64))
+                packed := or(or(mload(add(v, 96)), shl(16, mload(add(v, 128)))), shl(80, mload(add(v, 160))))
+                cache := add(v, 224)
+            }
+            writeCell(s, key, group, packed, Preparation.deployCache(config, cache));
+        }
         else if (k == Kind.Principal) s.principals[key] = abi.decode(v, (PrincipalRow));
         else if (k == Kind.Admission) s.admissions[i] = abi.decode(v, (AdmissionRow));
         else if (k == Kind.Lifecycle) s.occurrences[key] = abi.decode(v, (LifecycleRow));

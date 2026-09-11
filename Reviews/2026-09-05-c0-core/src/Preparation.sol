@@ -37,6 +37,9 @@ library Preparation {
     error HelperOutput(uint256 length);
     error HelperInput(uint256 length);
     error InvalidPreparation();
+    error HelperDeploy();
+    /// EIP-170 runtime ceiling less the one-byte STOP prefix of a code-backed cache.
+    uint256 internal constant CACHE_CODE_MAX = 24575;
     // PROVISIONAL experiment ceilings, not final C0 caps.
     uint256 internal constant GROUP_OUTPUT = 131072;
     uint256 internal constant PREPARED_OUTPUT = 8192;
@@ -62,6 +65,33 @@ library Preparation {
         output = new bytes(n);
         assembly ("memory-safe") { returndatacopy(add(output, 32), 0, n) }
         if (!ok) assembly ("memory-safe") { revert(add(output, 32), mload(output)) }
+    }
+
+    /// Deploys a compiled cache as immutable code through the pinned helper,
+    /// from the helper's own account (never the core's, whose nonce proxy
+    /// tooling predicts). The kernel never deploys an empty cache. The helper's
+    /// identity was verified by the `invoke` that necessarily preceded this
+    /// call in the same admission or initialization.
+    function deployCache(Config memory c, bytes memory cache) internal returns (address code) {
+        uint256 n = cache.length;
+        address target = c.helper;
+        uint32 selector = uint32(IPreparation.deployCache.selector);
+        bool ok = n <= CACHE_CODE_MAX;
+        // Scratch use of free memory and of the scratch words; nothing below
+        // depends on either.
+        assembly ("memory-safe") {
+            if ok {
+                let ptr := mload(0x40)
+                mstore(ptr, shl(224, selector))
+                mstore(add(ptr, 4), 0x20)
+                mstore(add(ptr, 36), n)
+                mcopy(add(ptr, 68), add(cache, 32), n)
+                ok := call(gas(), target, 0, ptr, add(n, 68), 0, 32)
+                code := mload(0)
+                ok := and(and(ok, eq(returndatasize(), 32)), iszero(iszero(code)))
+            }
+        }
+        if (!ok) revert HelperDeploy();
     }
 
     function intrinsic(Config memory c, bytes memory raw) internal view returns (CompiledType memory) {
@@ -103,6 +133,7 @@ library Preparation {
 }
 
 interface IPreparation {
+    function deployCache(bytes calldata cache) external returns (address);
     function compileIntrinsic(bytes calldata raw) external view returns (Preparation.CompiledType memory);
     function compileGroup(bytes calldata raw) external view returns (Preparation.CompiledGroup memory);
     function prepareRecord(

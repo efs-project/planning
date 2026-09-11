@@ -531,7 +531,9 @@ contract PointReadsTest {
         expectReadError(address(h), abi.encodeCall(h.getTypeSchema, (typeId)), typeId);
         restoreType(h, typeId, typeRow, new bytes(319));
         expectReadError(address(h), abi.encodeCall(h.getTypeSchema, (typeId)), typeId);
-        restoreType(h, typeId, typeRow, new bytes(131073));
+        // A cache above the code ceiling can no longer exist (refused at the
+        // write by Preparation.deployCache); the largest legal size is checked.
+        restoreType(h, typeId, typeRow, new bytes(24575));
         expectReadError(address(h), abi.encodeCall(h.getTypeSchema, (typeId)), typeId);
 
         bytes memory cache = typeRow.cacheBytes;

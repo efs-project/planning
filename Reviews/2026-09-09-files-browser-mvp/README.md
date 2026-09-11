@@ -199,6 +199,12 @@ walkthrough drivable against real local v2 contracts:
   measured on the lab: backfill 56,425 → 31,384 gas per entry (−44 %), chunk
   cap 273 → 491, lane-to-admission derivations 3× dearer; the two-first-
   bindings position bug fixed red → green; 10k partial.
+- [type-cache-2026-09-11.md](type-cache-2026-09-11.md) — the admission-cost
+  candidate: the compiled Type cache as immutable code deployed by the pinned
+  helper instead of ~70 storage slots; −10 % on every routed admission
+  (steady tag 2,804,520 → 2,503,133), SSTORE and fresh counts unchanged,
+  suites green, read-back byte-identical; evidence under
+  `evidence/type-cache-2026-09-11/`; changed assumptions in its §7.
 - [reconciliation-with-codex-2026-09-10.md](reconciliation-with-codex-2026-09-10.md)
   — Codex's reply accepted point by point (the tag-follows-the-file join is
   the largest correction; the mixed-run gas table; ROSTER is not now-or-
