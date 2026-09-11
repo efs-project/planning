@@ -3,6 +3,41 @@ import assert from 'node:assert/strict';
 import { chromium } from '../../2026-09-04-mvp-rehearsal/node_modules/playwright/index.mjs';
 import { compileUpgrade, withUpgrade } from '../../2026-09-08-upgradeable-foundation/scripts/local-upgrade.mjs';
 import { startEnvironment, compileRouter } from '../scripts/environment.mjs';
+import { createLedger, exportLedger } from '../web/cost-ledger.mjs';
+test('defaults seeded in memory during another tab write survive the next locked action reread', { timeout: 600000 }, async () => {
+  compileUpgrade(); compileRouter(); const browser = await chromium.launch({ headless: true });
+  try { await withUpgrade(async lab => {
+    const { server } = await startEnvironment(lab, { write: true });
+    const context = await browser.newContext(), blocker = await context.newPage(), page = await context.newPage();
+    try {
+      await blocker.goto(server.url); await blocker.waitForSelector('main[data-state="settled"]');
+      // A valid pre-default export, retained while another writer owns the lock.
+      await blocker.evaluate(saved => {
+        localStorage.setItem('efs-files-cost-v1', saved);
+        navigator.locks.request('efs-files-authorizing-v1', async () => {
+          window.costLockHeld = true;
+          await new Promise(resolve => { window.releaseCostLock = resolve; });
+        });
+      }, exportLedger(createLedger({ sessionId: 'old-costs', createdAt: '2026-09-11T12:00:00Z' })));
+      await blocker.waitForFunction(() => window.costLockHeld);
+      const errors = []; page.on('pageerror', error => errors.push(error.message));
+      await page.goto(server.url); await page.waitForSelector('main[data-state="settled"]');
+      assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('efs-files-cost-v1')).feeSnapshots.length), 0, 'guest boot never overwrites the active writer');
+      await blocker.evaluate(() => window.releaseCostLock());
+      await blocker.close();
+      await page.selectOption('#signer', 'A'); await page.click('#new-note');
+      await page.fill('#prompt-input', 'lock-check.txt'); await page.fill('#prompt-text', 'Retained journal and useful defaults.'); await page.click('#prompt-ok');
+      await page.waitForFunction(() => document.querySelector('#consent').open || document.querySelector('#op-status').textContent, null, { timeout: 15000 });
+      assert.equal(await page.locator('#consent').getAttribute('open'), '', await page.textContent('#op-status'));
+      await page.click('#consent-approve');
+      await page.waitForFunction(() => !document.querySelector('main').dataset.writing, null, { timeout: 30000 });
+      const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('efs-files-cost-v1')));
+      assert.equal(saved.sessionId, 'old-costs'); assert.equal(saved.feeSnapshots.length, 4);
+      assert(saved.actions[0].attempts.some(a => a.receipt?.status === 'success'));
+      assert.deepEqual(errors, []);
+    } finally { await context.close(); await server.close(); }
+  }, { profile: 'reads' }); } finally { await browser.close(); }
+});
 test('real upload costs match independent chunk receipts; immutable context and reload recovery', { timeout: 600000 }, async () => {
   compileUpgrade(); compileRouter();
   const browser = await chromium.launch({ headless: true });
@@ -12,6 +47,9 @@ test('real upload costs match independent chunk receipts; immutable context and 
     const errors = []; page.on('pageerror', e => errors.push(e.message));
     try {
       await page.goto(server.url); await page.waitForSelector('main[data-state="settled"]');
+      const initialCosts = await page.evaluate(() => JSON.parse(localStorage.getItem('efs-files-cost-v1') ?? '{}'));
+      assert.deepEqual(initialCosts.feeSnapshots?.map(s => s.chainFamily).sort(), ['arbitrum', 'base', 'ethereum', 'optimism'], 'fresh boot has four useful rate snapshots without setup');
+      assert(initialCosts.fxSnapshots[0].usdPerEth, 'fresh boot has dated dollar conversion');
       await page.selectOption('#signer', 'A'); await page.click('#new-note');
       await page.fill('#prompt-input', 'cost-note.txt'); await page.fill('#prompt-text', 'Chunk sample '.repeat(900)); await page.click('#prompt-ok');
       await page.waitForSelector('#consent[open]');
@@ -26,23 +64,25 @@ test('real upload costs match independent chunk receipts; immutable context and 
       assert.equal(action.context.lensId, 'aFirst'); assert.equal(action.attempts.length, 4);
       let gas = 0n;
       for (const attempt of action.attempts) { const receipt = await lab.rpc('eth_getTransactionReceipt', [attempt.hash]); assert.equal(attempt.receipt.gasUsed, String(BigInt(receipt.gasUsed))); gas += BigInt(receipt.gasUsed); }
-      assert.match(await page.textContent('#economics > summary'), new RegExp(String(gas)));
+      assert.equal(await page.getAttribute('#economics > summary', 'data-gas-used'), String(gas));
       await page.waitForFunction(() => JSON.parse(localStorage.getItem('efs-files-recovery-v1')).actions.some(a => a.effect === 'COMMITTED' && a.bytes === 'VERIFIED'), null, { timeout: 15000 });
       await page.click('#economics > summary');
+      await page.locator('.cost-settings > summary').click();
       for (const family of ['ethereum', 'optimism', 'base', 'arbitrum']) {
         await page.selectOption('#economics select[name="family"]', family);
         await page.fill('#economics input[name="gasPrice"]', '1'); await page.fill('#economics input[name="l1Fee"]', '0.000001');
         await page.fill('#economics input[name="operatorFee"]', '0'); await page.fill('#economics input[name="fx"]', '2000');
-        await page.click('button:has-text("Pin manual model snapshot")');
+        await page.getByRole('button', { name: 'Apply estimates', exact: true }).click();
       }
-      await page.locator('#economics details > summary').first().click();
-      assert.equal(await page.locator('#economics details p').filter({ hasText: 'MANUAL MODEL' }).count(), 4, 'per-action four-chain alternatives');
+      await page.locator('.cost-actions > details > summary').first().click();
+      assert.equal(await page.locator('.cost-actions > details').first().locator('.cost-action-models p').count(), 4, 'per-action four-chain alternatives');
       const publicState = await page.evaluate(() => localStorage.getItem('efs-files-recovery-v1'));
       assert(!publicState.includes('Chunk sample')); assert(!publicState.includes('signature'));
       await page.reload(); await page.waitForSelector('main[data-state="settled"]');
-      assert.match(await page.textContent('#economics > summary'), new RegExp(String(gas)));
-      assert.match(await page.textContent('#economics > summary'), /arbitrum MODEL/, 'pinned scenarios survive reload');
-      await page.click('#economics > summary'); await page.click('button:has-text("Reconcile recorded actions")');
+      assert.equal(await page.getAttribute('#economics > summary', 'data-gas-used'), String(gas));
+      const restored = await page.evaluate(() => JSON.parse(localStorage.getItem('efs-files-cost-v1')));
+      for (const family of ['ethereum', 'optimism', 'base', 'arbitrum']) assert.equal(restored.feeSnapshots.filter(s => s.chainFamily === family).at(-1).executionGasPriceWei, '1000000000', 'manual rates survive reload without default overwrite');
+      await page.click('#economics > summary'); await page.locator('.cost-settings > summary').click(); await page.click('button:has-text("Reconcile recorded actions")');
       await page.waitForFunction(() => JSON.parse(localStorage.getItem('efs-files-recovery-v1')).actions.some(a => a.effect === 'COMMITTED' && a.bytes === 'VERIFIED'), null, { timeout: 90000 });
       assert.deepEqual(errors, []);
     } catch (error) { console.error(await page.evaluate(() => ({ status: document.querySelector('#status')?.textContent, problem: document.querySelector('#op-status')?.textContent, recovery: localStorage.getItem('efs-files-recovery-v1'), costs: localStorage.getItem('efs-files-cost-v1') }))); throw error; }
@@ -69,7 +109,7 @@ test('mined revert and lost publish response retain costs; interrupted chunks re
       await page.waitForFunction(() => !document.querySelector('main').dataset.writing, null, { timeout: 30000 });
       await page.waitForFunction(() => JSON.parse(localStorage.getItem('efs-files-recovery-v1')).actions.some(a => a.label.includes('partial') && a.effect === 'COMMITTED' && a.bytes === 'UNAVAILABLE'), null, { timeout: 15000 });
       await page.unroute('**/publish'); await page.reload(); await page.waitForSelector('main[data-state="settled"]'); await page.selectOption('#signer', 'A'); await page.click('#economics > summary');
-      const row = page.locator('#economics details').filter({ hasText: 'partial.txt' }); await row.locator('summary').click();
+      const row = page.locator('.cost-actions > details').filter({ hasText: 'partial.txt' }); await row.locator(':scope > summary').click();
       await row.locator('input[type="file"]').setInputFiles({ name: 'wrong.txt', mimeType: 'text/plain', buffer: Buffer.from('wrong') });
       await page.waitForFunction(() => document.querySelector('#op-status').textContent.includes('do not match'));
       await row.locator('input[type="file"]').setInputFiles({ name: 'original.txt', mimeType: 'text/plain', buffer: Buffer.from(original) });

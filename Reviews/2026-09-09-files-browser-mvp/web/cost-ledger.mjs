@@ -352,3 +352,81 @@ export function restoreLedger(serialized) {
   return result;
 }
 export function exportLedger(ledger) { return JSON.stringify(restoreLedger(ledger)); }
+
+/**
+ * Dated, editable scenario defaults, not current quotes or actual spending.
+ * Kept in this already-served module so the local prototype needs no server or
+ * chain restart. Provenance lives in schema-v1 source strings and survives export.
+ * The sampled gas price and the illustrative posting/operator assumptions are
+ * different evidence classes; neither establishes a foreign-chain EFS receipt.
+ */
+const PRESET_ASSUMPTIONS = 'Anvil receipt gas is an execution-only proxy. Rollup L1 posting: ILLUSTRATIVE, uncalibrated flat 0.000001 ETH per transaction, not an observed, conservative or exact fee. Operator fees: excluded (model input 0), not observed free. Alternatives, not additive spending or live quotes.';
+
+export const COST_PRESET = Object.freeze({
+  id: 'cost-preset-2026-09-11',
+  label: 'Dated estimates · 11 Sep 2026',
+  capturedAt: '2026-09-11T21:15:55.303Z',
+  assumptions: PRESET_ASSUMPTIONS,
+  fxSnapshot: Object.freeze({
+    id: 'cost-preset-2026-09-11:eth-usd',
+    capturedAt: '2026-09-11T21:14:11Z',
+    source: 'Web finance tool ETH/USD market observation at 2026-09-11T21:14:11Z; upstream vendor/public quote URL not supplied',
+    usdPerEth: '2537.34',
+  }),
+  feeSnapshots: Object.freeze([
+    Object.freeze({
+      id: 'cost-preset-2026-09-11:ethereum',
+      capturedAt: '2026-09-11T21:15:55.303Z',
+      chainFamily: 'ethereum',
+      executionGasPriceWei: '55176333',
+      l1FeeWei: 'not-applicable',
+      operatorFeeWei: 'not-applicable',
+      source: 'eth_gasPrice: 55176333 wei/gas (0.055176333 gwei), sampled 2026-09-11T21:15:55.303Z from https://ethereum-rpc.publicnode.com; chainId 1; accompanying latest block 25956788, block time 2026-09-11T21:15:47Z. Sample is not a block-pinned quote. Execution price applied to Anvil receipt gas as a model, not measured Ethereum EFS cost.',
+    }),
+    Object.freeze({
+      id: 'cost-preset-2026-09-11:optimism',
+      capturedAt: '2026-09-11T21:15:23.450Z',
+      chainFamily: 'optimism',
+      executionGasPriceWei: '1000499',
+      l1FeeWei: '1000000000000',
+      operatorFeeWei: '0',
+      source: `eth_gasPrice: 1000499 wei/gas (0.001000499 gwei), sampled 2026-09-11T21:15:23.450Z from https://mainnet.optimism.io; chainId 10; accompanying latest block 156781273, block time 2026-09-11T21:15:23Z. Sample is not a block-pinned quote. ${PRESET_ASSUMPTIONS}`,
+    }),
+    Object.freeze({
+      id: 'cost-preset-2026-09-11:base',
+      capturedAt: '2026-09-11T21:15:23.465Z',
+      chainFamily: 'base',
+      executionGasPriceWei: '6000000',
+      l1FeeWei: '1000000000000',
+      operatorFeeWei: '0',
+      source: `eth_gasPrice: 6000000 wei/gas (0.006 gwei), sampled 2026-09-11T21:15:23.465Z from https://mainnet.base.org; chainId 8453; accompanying latest block 51185988, block time 2026-09-11T21:15:23Z. Sample is not a block-pinned quote. ${PRESET_ASSUMPTIONS}`,
+    }),
+    Object.freeze({
+      id: 'cost-preset-2026-09-11:arbitrum',
+      capturedAt: '2026-09-11T21:15:37.814Z',
+      chainFamily: 'arbitrum',
+      executionGasPriceWei: '20020000',
+      l1FeeWei: '1000000000000',
+      operatorFeeWei: '0',
+      arbitrumMode: 'separate-execution',
+      source: `eth_gasPrice: 20020000 wei/gas (0.02002 gwei), sampled 2026-09-11T21:15:37.814Z from https://arb1.arbitrum.io/rpc; chainId 42161; accompanying latest block 504176093, block time 2026-09-11T21:15:37Z. Sample is not a block-pinned quote. Arbitrum separate-execution mode: Anvil gas excludes the posting component, so add the illustrative posting amount once. ${PRESET_ASSUMPTIONS}`,
+    }),
+  ]),
+});
+
+/**
+ * Add defaults only for absent fee families and an absent FX collection.
+ * Accepts a valid createLedger/restoreLedger state; never replaces snapshots,
+ * reattributes historical receipt FX, or discards hidden or visible history.
+ * Caller persists the returned ledger only when changed is true.
+ */
+export function seedCostDefaults(ledger) {
+  let next = ledger;
+  for (const snapshot of COST_PRESET.feeSnapshots) {
+    if (!next.feeSnapshots.some(existing => existing.chainFamily === snapshot.chainFamily)) {
+      next = reduceLedger(next, { type: 'fee/add', snapshot });
+    }
+  }
+  if (next.fxSnapshots.length === 0) next = reduceLedger(next, { type: 'fx/add', snapshot: COST_PRESET.fxSnapshot });
+  return { ledger: next, changed: next !== ledger };
+}

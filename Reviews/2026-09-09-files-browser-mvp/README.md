@@ -9,9 +9,11 @@ minutes, no Solidity needed); the honest per-row record is
 **September 11 update:** the browser now joins root-qualified guest deep links,
 general binary/empty-file uploads, inert verified downloads, explicit independent
 copies versus shared names, and restoration of old contents as a **new** version.
-The expandable **Gas & cost** panel retains actual action/chunk/revert receipts,
-separate read-work counters and four manually pinned chain-cost scenarios. These
-are models, not live mainnet/L2 quotes. Signed-action recovery and semantic effect
+The floating **Gas & cost** widget retains actual action/chunk/revert receipts,
+separate read-work counters and four editable chain-cost scenarios, now filled
+automatically from dated September 11 observations plus explicit assumptions.
+These are models, not live mainnet/L2 quotes; see the
+[widget update and verification](cost-widget-2026-09-11.md). Signed-action recovery and semantic effect
 read-back are shared across these flows. The retained
 [1,000-entry continuation experiment](evidence/continuation-2026-09-11/README.md)
 establishes exact complete reading on its named control, not low WAN RPC load.

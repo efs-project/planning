@@ -9,7 +9,7 @@ import { planOperation, recoveryDescriptor, readBackOperation, contentLeaves, de
 import { detectProvider, principalFor, connect, signAuthorIntent, isRejection, sendTransaction, sponsorSubmit, sponsorRequestIdentity, sponsorStatus } from './wallet.mjs';
 import { Wallet, keccak256 } from '/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.js';
 import { createActionJournal, assertWalletContext, assertDeploymentContext, withAuthorizationFence } from './action-journal.mjs';
-import { createLedger, reduceLedger, exportLedger, restoreLedger } from './cost-ledger.mjs';
+import { createLedger, reduceLedger, exportLedger, restoreLedger, seedCostDefaults } from './cost-ledger.mjs';
 import { createEconomicsPanel, normalizeReceipt, sponsorCostEvents, modelWei } from './economics-panel.mjs';
 import { encodeFilesRoute, decodeFilesRoute } from './file-routes.mjs';
 import { prepareVerifiedDownload } from './verified-download.mjs';
@@ -81,7 +81,15 @@ function costEvent(event) {
   ledger = next; renderEconomics();
 }
 function markAction(action, patch) { journal.mark(action.actionId, patch); renderEconomics(); }
-function rereadJournals() { journal = createActionJournal(localStorage); const saved = localStorage.getItem(costKey); if (saved) ledger = restoreLedger(saved); }
+function selectCostSnapshots() {
+  selectedModels = [...new Map(ledger.feeSnapshots.map(s => [s.chainFamily, s.id])).values()];
+  selectedFx = ledger.fxSnapshots.at(-1)?.id;
+}
+function rereadJournals() {
+  journal = createActionJournal(localStorage); const saved = localStorage.getItem(costKey);
+  ledger = seedCostDefaults(saved ? restoreLedger(saved) : ledger).ledger;
+  selectCostSnapshots();
+}
 function actionRuntime(context) { return { context: Object.freeze({ ...context }), transport, provider, wallet: session.wallet, mode: session.mode, sponsor: config.write.sponsor ? Object.freeze({ ...config.write.sponsor }) : null, nextAttempt: 0 }; }
 function lockControls(locked) { for (const id of ['signer', 'lens', 'refresh', 'new-folder', 'new-note', 'upload', 'more', 'export']) $(id).disabled = locked; }
 function attempt(action, phase, payer = 'user') {
@@ -230,8 +238,7 @@ async function runOperation(kindLabel, intent, facts) {
   try { return await withAuthorizationFence(navigator.locks, async () => {
   // Another tab may have signed while this page was idle: reread inside fence.
   if (storageError) throw Error(storageError);
-  journal = createActionJournal(localStorage);
-  const savedLedger = localStorage.getItem(costKey); if (savedLedger) ledger = restoreLedger(savedLedger);
+  rereadJournals();
   try {
     const write = config.write;
     await assertDeploymentContext(captured.transport.source, captured.context);
@@ -686,7 +693,7 @@ async function reconcileAction(actionId) {
 async function reconcileRecorded() {
   if (writing || !journal) return;
   try { await withAuthorizationFence(navigator.locks, async () => {
-    journal = createActionJournal(localStorage); const stored = localStorage.getItem(costKey); if (stored) ledger = restoreLedger(stored);
+    rereadJournals();
     for (const entry of journal.entries()) if (entry.context.environmentId === environmentId) await reconcileAction(entry.actionId);
   }); toast('Recorded actions reconciled with fresh qualified reads. Unknown entries are not permission to retry.'); }
   catch (e) { toast(friendlyError(e), true); }
@@ -701,7 +708,7 @@ async function resumeBytes(entry, file) {
   writing = true; main.dataset.writing = 'true'; lockControls(true);
   const action = { ...actionRuntime(entry.context), actionId: entry.actionId, nextAttempt: Date.now() };
   try { await withAuthorizationFence(navigator.locks, async () => {
-    journal = createActionJournal(localStorage); const saved = localStorage.getItem(costKey); if (saved) ledger = restoreLedger(saved);
+    rereadJournals();
     await reconcileAction(entry.actionId);
     const unresolved = ledger.actions.find(a => a.actionId === entry.actionId)?.attempts.some(a => a.status !== 'not-submitted' && !a.receipt);
     if (unresolved) throw Error('An earlier transaction is still unknown; refusing a blind chunk retry.');
@@ -1198,9 +1205,19 @@ try {
     journal = createActionJournal(localStorage);
     const saved = localStorage.getItem(costKey);
     ledger = saved ? restoreLedger(saved) : createLedger({ sessionId: crypto.randomUUID(), createdAt: new Date().toISOString() });
-    selectedModels = [...new Map(ledger.feeSnapshots.map(s => [s.chainFamily, s.id])).values()];
-    selectedFx = ledger.fxSnapshots.at(-1)?.id;
-  } catch (e) { storageError = e.message; ledger = createLedger({ sessionId: crypto.randomUUID(), createdAt: new Date().toISOString() }); }
+    const seeded = seedCostDefaults(ledger); ledger = seeded.ledger;
+    // Add public defaults without overwriting another tab's newer actions.
+    // If a writer holds the lock, guest viewing uses in-memory defaults; the
+    // next locked mutation rereads and preserves them with its journal event.
+    if (seeded.changed && navigator.locks?.request) await navigator.locks.request('efs-files-authorizing-v1', { mode: 'exclusive', ifAvailable: true }, lock => {
+      if (!lock) return;
+      const current = localStorage.getItem(costKey);
+      const fresh = seedCostDefaults(current ? restoreLedger(current) : ledger);
+      if (fresh.changed || !current) localStorage.setItem(costKey, exportLedger(fresh.ledger));
+      ledger = fresh.ledger;
+    });
+  } catch (e) { storageError = e.message; ledger ??= createLedger({ sessionId: crypto.randomUUID(), createdAt: new Date().toISOString() }); }
+  ledger = seedCostDefaults(ledger).ledger; selectCostSnapshots();
   $('economics').replaceChildren();
   economics = createEconomicsPanel($('economics'), {
     async onModel(values) { return withAuthorizationFence(navigator.locks, async () => {

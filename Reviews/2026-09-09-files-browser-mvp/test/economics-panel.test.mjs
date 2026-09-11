@@ -37,3 +37,9 @@ test('human model amounts convert exactly without binary rounding or silent zero
   assert.equal(api.modelWei('', 18), null);
   assert.throws(() => api.modelWei('0.0000000001', 9), /precision/);
 });
+test('readable dollar amounts round at cents without hiding positive sub-cent costs or unknowns', () => {
+  assert.equal(typeof api.formatUsd, 'function');
+  for (const [value, expected] of [[null, 'Unavailable'], ['0', '$0.00'], ['0.000002', '<$0.01'], ['0.0099', '<$0.01'], ['12.345', '$12.35'], ['999.999', '$1,000.00'], ['9007199254740993.12', '$9,007,199,254,740,993.12']]) {
+    assert.equal(api.formatUsd(value), expected);
+  }
+});
