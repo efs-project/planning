@@ -29,8 +29,8 @@ Row graduation rule: a lead becomes a [[proposals]] row only when it has a plaus
 | [[efs-grant-packet]] | Reusable EFS pitch, links, milestones, and budget snippets. |
 | [[research-log]] | Dated grant-specific research notes, rejected leads, and community/funder intel. |
 | [[nouns-dao-funding]] | Point-in-time Nouns DAO funding research, purchase analysis, pilot hypothesis, and deep-dive prompt; not an application decision. |
-| [[futo-microgrant-application]] | Active worksheet for the proposed USD 5,000 walk-away file-proof microgrant. |
-| [[futo-microgrant-email]] | Send-ready email draft for the FUTO microgrant application. |
+| [[futo-microgrant-application]] | Worksheet supporting the USD 5,000 walk-away file-proof proposal submitted 2026-07-29. |
+| [[futo-microgrant-email]] | Exact submitted FUTO application email retained as evidence. |
 | [[futo-fj-3b-demonstrator]] | Reading list and one-day build/reproduction checklist for the FUTO pre-submission proof. |
 
 ## External anchors
@@ -81,7 +81,9 @@ If a funder-specific draft cannot answer "what would make this funder proud to h
 
 Weekly grant-ops pass:
 
-- Refresh [[proposals]] rows with active deadlines, `follow-up`, or `needs-signoff`.
+- Refresh [[proposals]] rows with active deadlines, `follow-up`,
+  `needs-signoff`, or a submitted proposal older than its expected response
+  window.
 - Update `Last checked` and tighten `Gate / evidence needed`.
 - Move stale `researching` rows to `watching` or `archived`.
 - Surface only real James choices/deadlines to [[For-James]].

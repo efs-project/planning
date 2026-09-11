@@ -15,6 +15,47 @@ Rows touched:
 Next check:
 ```
 
+## 2026-09-11 - FUTO response and NLnet reopening
+
+Trigger: James asked the PM to keep the whole EFS landscape and its deadlines
+current rather than relying on a fixed weekly checklist.
+
+Official sources checked:
+
+- [NLnet application form](https://nlnet.nl/propose/),
+  [Restack](https://nlnet.nl/restack/), the
+  [2026-09-03 call](https://nlnet.nl/news/2026/20260903-call.html), and the
+  [2026-09-30 office hour](https://nlnet.nl/events/20260930/office-hour/);
+- [FUTO Grants](https://futo.tech/grants);
+- read-only connected-Gmail searches for FUTO and NLnet replies and sent
+  follow-ups. Message bodies and private account data are not retained here.
+
+Current read:
+
+- NLnet's Open Internet Stack transition is no longer a future watch. Restack
+  and CodeSupply are open, with a **2026-11-03 12:00 CET** deadline and an open
+  call route. A first grant is EUR 5k-50k.
+- EFS has thematic fit with Restack, but not yet a qualified application. EU
+  funds usually require a strong European dimension, and NLnet is revising its
+  GenAI policy. The current call warns that mostly LLM-generated work is
+  ineligible and advises AI-using applicants to wait for the new policy.
+- The 2026-09-30 office hour is the cheapest way to resolve both gates before
+  investing in a proposal. The November deadline falls at 05:00 CST on the day
+  Devcon begins, so waiting until the formal deadline is operationally unsafe.
+- FUTO's program remains open. No response to the EFS 2026-07-29 submission and
+  no sent follow-up were found in connected Gmail through 2026-09-11. This is
+  now a follow-up state, not ordinary waiting.
+
+Implication: keep NLnet as a high, gated research lead and ask the two narrow
+questions at office hours. Ask James to send or authorize one polite FUTO
+follow-up. Do not submit, contact either funder, or reshape EFS around a grant
+without owner approval.
+
+Rows touched: FUTO and NLnet in [[proposals]].
+
+Next check: FUTO response at the next PM sweep; NLnet policy and office-hour
+questions before 2026-09-30.
+
 ## 2026-07-31 - Nouns DAO funding fit
 
 Trigger: James asked whether Nouns DAO could fund EFS and whether buying a Noun for roughly 2 ETH would improve the chance of funding.

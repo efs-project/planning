@@ -16,7 +16,7 @@ Folder names are stable role IDs, independent of harness or model.
 
 | Role / familiar name | Profile |
 |---|---|
-| Project Manager / General PM | [pm](./pm/SOUL.md) |
+| Project Manager / General PM | [pm](./pm/SOUL.md) · [notes](./pm/NOTES.md) |
 | v2 PM | [v2-pm](./v2-pm/SOUL.md) · [notes](./v2-pm/NOTES.md) |
 | Web Client / OS PM | [web-client-os-pm](./web-client-os-pm/SOUL.md) |
 | SDK PM | [sdk-pm](./sdk-pm/SOUL.md) |

@@ -25,21 +25,22 @@ aliases: [For-James]
     audit could not publish because no remote exists; creating one requires an
     explicit visibility choice.
 
-- **FJ-4 — Enter ETHOnline 2026 before the conservative September 3 cutoff?**
-  - **a. Recommended:** apply under an existing-open-source continuity path to
-    preserve the option; choose the exact bounded build after the live rules and
-    sponsor prizes settle. Default candidate is the one-game Arcade
-    verified-artifact/fallback trace in [[ETHOnline-2026]].
-  - **b. Skip:** protect the EFS 2.0 Core and Arcade work from event pressure.
-  - Applying is not a promise to submit, use a sponsor, revive v1, or freeze the
-    successor design. The current official metadata says September 6, but an
-    earlier event page said September 3, so the earlier date is the safe one.
+- **FJ-4 — What is the final ETHOnline 2026 outcome? Answer now.**
+  - **a. Entered and submitting:** the live project deadline is **2026-09-13
+    16:00 UTC (11:00 CDT)**. Use only the bounded EFS slice and guardrails in
+    [[ETHOnline-2026]].
+  - **b. Entered but not submitting:** PM will record the deliberate withdrawal
+    and close the Kanban card.
+  - **c. Did not enter:** the entry option lapsed; PM will record that outcome
+    and close the Kanban card.
+  - No application confirmation is recorded in planning or connected Gmail.
+    This asks for factual state, not permission to create a new EFS milestone or
+    bend the EFS 2.0 design around the hackathon.
 
 ## 🕐 WHEN YOU HAVE TIME
 
 - **EFS 2.0 consolidation is in engineering review** — the phone-readable README points to the detailed draft constitution and Core candidate; the old P/LP packet is superseded as a live queue. Nothing needs your answer until the evidence gates return a real fork. Start at [the EFS 2.0 README](./Designs/efsv2/README.md) only when you want the current model.
 - **Other design queues are held for evidence.** The old Client `OS1`/`OS2` and root `R1` packets are not live James decisions. See [Open-Decisions.md](./Open-Decisions.md) for the generated held/evidence inventory.
-- **Vault process changes landed 2026-07-23** — see [[Decisions]]. One thing needs your nod: whether to keep the structural SOUL edits (escalation dial re-keyed off the dead milestone, "ignore design bodies" inverted for a design phase). Say the word and I revert them.
 - Frame-review the proposed design process → [[Brainstorms/2026-05-28-pm-design-process-synthesis]] (then I formalize it)
 
 ## ℹ️ FYI (no action)

@@ -6,6 +6,7 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-11
 
+- @pm (harness codex, session weekly-pm-baseline-20260911): Created the adaptive Tuesday whole-project PM heartbeat, established public-safe Devcon travel/talk tracking with internal rehearsal guardrails, refreshed overdue FUTO and newly reopened NLnet grant state, and repaired ETHOnline's stale entry question to the live September 13 project gate. No email, application, booking, purchase, implementation, design promotion, or specialist-worktree mutation was performed. / next: James answers FJ-4; PM publishes this baseline and the heartbeat performs its first landscape reconstruction on September 15.
 - @v2-pm (harness codex, session pragmatic-browser-20260911): James approved [[Reviews/2026-09-11-pragmatic-browser-pass|the integrated browser/economics validation pass]]. Expert reviews added semantic effect read-back, reload-safe action recovery and complete sponsor receipt accounting. Fable owns admission-cost optimization; Codex owns browser/reader/economics and coordinated remaining Files work. Prototype stays in place; documentation stays on main. / next: implement and independently review the first clickable checkpoint, then measured foundation gates.
 
 ---

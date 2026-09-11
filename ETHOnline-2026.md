@@ -4,8 +4,11 @@ Operational record for the ETHGlobal opportunity James surfaced on 2026-08-10.
 This is a way to test and show EFS, not a new EFS milestone or permission to bend
 the greenfield successor design around a hackathon.
 
-**Status (2026-08-11):** tracked; no application or project submission is
-recorded yet.
+**Status (2026-09-11):** the signup window closed 2026-09-06. No application
+confirmation is recorded in planning or was found in connected Gmail. James
+needs to confirm whether he entered through another path. If he did, the live
+event data gives a project deadline of **2026-09-13 16:00 UTC (11:00 CDT)**; if
+he did not, this opportunity has lapsed and should be closed.
 
 ## Live timing and evidence
 
@@ -14,15 +17,15 @@ recorded yet.
   event-specific route was intermittently returning a 404 on August 11, while
   the [official events listing](https://ethglobal.com/events) still exposed the
   event and its current metadata.
-- The current official event-listing metadata, refreshed 2026-08-11, gives a
+- The current official event metadata, rechecked 2026-09-11, gives a
   hacker signup deadline of **September 6 at 17:00 UTC (12:00 CDT)**. An earlier
   PM capture of the event-specific page on 2026-08-10 showed **September 3 at
   10:59 PM CDT**. Use September 3 only as a conservative internal cutoff and
   recheck the live application before relying on either timestamp.
-- That same 2026-08-10 event-page capture gave a project deadline of
-  **September 13 at 12:00 PM EDT (11:00 AM CDT)**, before the advertised event
-  end. The current event page is not rendering that detail, so it is only a
-  conservative internal cutoff until the participant rules are live again.
+- The live event payload now confirms the project submission deadline as
+  **September 13 at 16:00 UTC (11:00 AM CDT)** and lists judging as beginning
+  September 14 at 16:00 UTC. The submission deadline is before the advertised
+  event end.
 - The [announcement James shared](https://x.com/ethglobal/status/2086863835991028111)
   introduced continuity paths that allow an existing open-source project to
   enter as **From Scratch**, **Extend Open Source**, or **Ship a Feature**.
@@ -72,9 +75,12 @@ would distort the product or Genesis design.
 
 ## Follow-ups
 
-- [ ] James chooses `FJ-4` in [[Owner-Inbox]]: apply or deliberately skip.
-- [ ] If applying, submit by the internal **September 3** cutoff and record the
-  confirmation/application URL here.
+- [ ] James confirms `FJ-4` in [[Owner-Inbox]]: whether he entered before signup
+  closed. No confirmation was found in planning or connected Gmail.
+- [ ] If entered, submit the project by **2026-09-13 16:00 UTC (11:00 CDT)** and
+  retain the confirmation and public showcase URL.
+- [ ] If not entered, mark this opportunity lapsed, close its Kanban card, and
+  remove `FJ-4` from the live owner queue.
 - [ ] Recheck the live participant rules, continuity-track eligibility, sponsor
   prizes, team-size rule, AI-attribution rule, and project deadline.
 - [ ] Record a pre-event baseline commit and a narrow event worktree/branch or
