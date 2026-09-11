@@ -75,9 +75,9 @@ assert.equal(cost.totalWei, '42000000000000');
 
 **Interface:** stable request ID bound to the request commitment; success/errors include explicit `submitted` and per-attempt `transactions` (phase/index/hash/status/available receipt). A request-status operation retrieves the journal. Modified ID reuse refuses; retry cannot blindly rebroadcast.
 
-- [ ] Reproduce the lost `submitted` flag and partial-journal error in failing transport/server tests.
-- [ ] Only `submitted === false` proves prebroadcast refusal. Mark attempts before broadcast; derive signed tx hash before awaiting RPC. Preserve partial metadata/chunk results and prior costs on errors.
-- [ ] Recover status after response loss without weakening sponsor authority, same-origin checks or target allowlists. Missing sponsor process state remains UNKNOWN.
+- [x] Reproduce the lost `submitted` flag and partial-journal error in failing transport/server tests.
+- [x] Only `submitted === false` proves prebroadcast refusal. Mark attempts before broadcast; derive signed tx hash before awaiting RPC. Preserve partial metadata/chunk results and prior costs on errors.
+- [x] Recover status after response loss without weakening sponsor authority, same-origin checks or target allowlists. Missing sponsor process state remains UNKNOWN.
 - [ ] Test modified ID reuse, repeated status polls, partial chunks, lost responses and absence of private keys/signatures in journal responses; run focused tests with exclusive isolated builds.
 
 ## Task 4: Economics widget and safe browser action integration
@@ -89,7 +89,7 @@ assert.equal(cost.totalWei, '42000000000000');
 - [ ] Browser test expandable action rows and manually pinned four-chain scenarios against independently fetched receipts, including chunks/failures/payer and incomplete totals. Keyboard/mobile must remain usable.
 - [ ] Persist public action/nonce/deadline/request metadata before broadcast; on reload reconcile known hashes and effect/nonce before conflicting authorization. Reselected files must match the original content commitment.
 - [ ] Account/chain/navigation changes cannot swap payer/destination/verification Lens. Preserve explicit signature/transaction prompts; no silent fallback.
-- [ ] Replace record-existence success with qualified requested placement/head/mask/restore postconditions. Retain admitted-but-not-selected separately.
+- [x] Replace record-existence success with qualified requested placement/head/mask/restore postconditions. Retain admitted-but-not-selected separately.
 - [ ] Integrate stream rollover without recursive busy guard; preserve sealed rows and navigation generation. Track RPC work separately from paid gas.
 - [ ] Provide Ethereum/OP/Base/Arbitrum scenario controls and fee/FX provenance. Missing DA/operator fees are not zero; no illustrative default is a live quote. Live read-only acquisition is optional and separately tested.
 - [ ] Static export serves the same modules and remains independent of EFS-specific server APIs for direct mode.
@@ -135,3 +135,17 @@ assert.equal(cost.totalWei, '42000000000000');
 - Sponsor checkpoint `8f64217`: 15/15 focused HTTP/RPC tests passed. Independent review found arbitrary RPC error messages could leak decoded content into the public journal; the fix is in progress. Real-chain sponsor/wallet regression remains pending.
 - Task 4 is split into two non-overlapping implementers: SDK authored/selected effect read-back, and browser integration/recovery/economics. The discovered record-existence-only success path is not an acceptable handoff state.
 - SDK PM and Data Explorer PM received bounded read-only feedback requests. No second prototype or production repository was created. No claim of completed browser, large-directory readiness, lower production costs or adopted protocol changes is made at this checkpoint.
+
+### Subsequent reviewed checkpoints
+
+- Sponsor journal now has independent review through `a3c5994`, with 23 focused tests passing. Public errors no longer expose arbitrary provider prose, and server responses must match the locally retained request ID and commitment before their transaction evidence is accepted. Real-chain/browser integration is still a separate gate.
+- SDK authored-effect verification `94374ce` verifies exact occurrences, Binding revisions/targets and selected Files effects, not merely record presence. The browser then exposed an actual recovery bug: equivalent JSON object fields in a different order were refused. Fix `397fd3f` passed 14 real tests, including changed-value/type/missing/extra-field refusals, and independent review. Source order is not semantic; array order remains significant.
+- Safe route/download helpers `34a2978` plus `f84ea41` passed 13 tests and independent review after sparse-array and Unicode bidi-filename findings were fixed. These helpers alone do not establish routed browser or historical-restore readiness.
+- Browser integration has exercised multi-chunk receipt reconciliation, changed-context defenses, post-metadata interrupted-upload recovery and repeated listing acquisitions. Final candidate review and joined regression remain pending. Pre-metadata direct-wallet upload recovery and an actual wallet-extension walkthrough are not yet proven.
+- Verification uses a detached, fixed deployable contract checkpoint with exact Codex JavaScript/test changes. Fable's active admission/storage changes are not silently included: they need a fresh joined run when he hands off. A strict compiler-evidence selector now refuses mixed incremental artifact bundles; full-build verification is explicit.
+
+### Disk-safety incident
+
+James reported disk pressure during this pass. Eighteen completed Anvil historical-state cache directories occupied about 285 GiB. At the cleanup checkpoint there were no running Anvil processes or open handles into those directories; their latest modification was over 15 hours old. The exact disposable directories were permanently removed under James's explicit authorization, leaving about 288 GiB free. No source, reports, design files or workspaces were removed.
+
+Before further scale runs, the test wrapper must give each managed Anvil process its own cache directory and delete only that directory after confirmed process exit. Do not fix disk use by silently pruning historical blocks: that would change the read experiment. Scale runs also need explicit free-space/cache limits and partial failure reports. Abrupt process termination still needs an honest residual-cache diagnostic.
