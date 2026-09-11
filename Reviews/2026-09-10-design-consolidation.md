@@ -58,3 +58,13 @@ Recovery refs are published under `archive/planning-designs-2026-09-10/`:
 (`6c3f271`), and `coherence-review` (`d8076d0`). Agent-role and SDK source
 history already reaches main. These tags preserve original commits and their
 full evidence; they do not select a protocol version or move prototype files.
+
+**Cleanup completed:** the design integration is published on main at
+`1afd01a9673b6ea3c7147600d43843aab614e59d`. Retired the local/remote branch
+names where present: `codex/agent-role-system`, `codex/sdkv2-pm`,
+`codex/type-data-abi`, `codex/data-explorer-pm`,
+`codex/testnet-files-mvp-plan`, and
+`claude/efsv2-coherence-mvp-review-eslcr8`. All four existing design worktrees
+retain their exact files at detached checkpoints; no directory was removed.
+The five excluded code/evidence branches remain. Source tags and main were
+verified on origin before deletion; original commits remain recoverable.
