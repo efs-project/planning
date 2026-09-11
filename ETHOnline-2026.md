@@ -4,11 +4,11 @@ Operational record for the ETHGlobal opportunity James surfaced on 2026-08-10.
 This is a way to test and show EFS, not a new EFS milestone or permission to bend
 the greenfield successor design around a hackathon.
 
-**Status (2026-09-11):** the signup window closed 2026-09-06. No application
-confirmation is recorded in planning or was found in connected Gmail. James
-needs to confirm whether he entered through another path. If he did, the live
-event data gives a project deadline of **2026-09-13 16:00 UTC (11:00 CDT)**; if
-he did not, this opportunity has lapsed and should be closed.
+**Status (2026-09-11): closed without entry.** James confirmed that he did not
+register before the signup window closed. EFS will not participate in ETHOnline
+2026; no submission deadline or event work remains. Preserve this page as the
+opportunity record and reuse its Continuity-track lessons for a future event
+only when they fit work EFS already needs.
 
 ## Live timing and evidence
 
@@ -73,26 +73,14 @@ Tentative sponsor fits, only after their actual prize rules are published:
 Use at most one sponsor integration that improves the slice. Skip a bounty that
 would distort the product or Genesis design.
 
-## Follow-ups
+## Outcome and reusable lesson
 
-- [ ] James confirms `FJ-4` in [[Owner-Inbox]]: whether he entered before signup
-  closed. No confirmation was found in planning or connected Gmail.
-- [ ] If entered, submit the project by **2026-09-13 16:00 UTC (11:00 CDT)** and
-  retain the confirmation and public showcase URL.
-- [ ] If not entered, mark this opportunity lapsed, close its Kanban card, and
-  remove `FJ-4` from the live owner queue.
-- [ ] Recheck the live participant rules, continuity-track eligibility, sponsor
-  prizes, team-size rule, AI-attribution rule, and project deadline.
-- [ ] Record a pre-event baseline commit and a narrow event worktree/branch or
-  folder so existing work and event work are distinguishable.
-- [ ] Freeze the actual demo acceptance trace before implementation; the
-  one-game trace above is the default, not an adopted scope ruling.
-- [ ] Preserve prompts/specs and third-party code/assets with attribution and
-  rights evidence.
-- [ ] If entering a sponsor track, choose no more than one integration and write
-  down why it is useful without that sponsor's prize.
-- [ ] Submit before the verified project cutoff and retain the public showcase
-  URL, demo, repository commit, and judging feedback.
+- James confirmed on **2026-09-11** that he did not register. The live owner
+  question and Kanban card are closed without creating an EFS milestone,
+  submission, or implementation obligation.
+- For a future ETHGlobal event, recheck the then-current Continuity rules,
+  preserve the pre-event baseline and AI/spec attribution, and select a bounded
+  feature only if the event accelerates work EFS already needs.
 
 ## Guardrails
 

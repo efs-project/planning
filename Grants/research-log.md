@@ -42,19 +42,20 @@ Current read:
 - The 2026-09-30 office hour is the cheapest way to resolve both gates before
   investing in a proposal. The November deadline falls at 05:00 CST on the day
   Devcon begins, so waiting until the formal deadline is operationally unsafe.
-- FUTO's program remains open. No response to the EFS 2026-07-29 submission and
-  no sent follow-up were found in connected Gmail through 2026-09-11. This is
-  now a follow-up state, not ordinary waiting.
+- FUTO's program remains open. No response to the EFS 2026-07-29 submission was
+  found before James authorized one polite status follow-up on 2026-09-11. The
+  PM sent it in the original Gmail thread and verified the sent message. The
+  private message body is not retained here.
 
 Implication: keep NLnet as a high, gated research lead and ask the two narrow
-questions at office hours. Ask James to send or authorize one polite FUTO
-follow-up. Do not submit, contact either funder, or reshape EFS around a grant
-without owner approval.
+questions at office hours. Await FUTO's reply without restarting or reframing
+the submitted proposal. Do not submit another application, contact either
+funder again, or reshape EFS around a grant without owner approval.
 
 Rows touched: FUTO and NLnet in [[proposals]].
 
-Next check: FUTO response at the next PM sweep; NLnet policy and office-hour
-questions before 2026-09-30.
+Next check: FUTO response at the next PM sweep, with no automatic repeat
+follow-up; NLnet policy and office-hour questions before 2026-09-30.
 
 ## 2026-07-31 - Nouns DAO funding fit
 

@@ -25,18 +25,6 @@ aliases: [For-James]
     audit could not publish because no remote exists; creating one requires an
     explicit visibility choice.
 
-- **FJ-4 — What is the final ETHOnline 2026 outcome? Answer now.**
-  - **a. Entered and submitting:** the live project deadline is **2026-09-13
-    16:00 UTC (11:00 CDT)**. Use only the bounded EFS slice and guardrails in
-    [[ETHOnline-2026]].
-  - **b. Entered but not submitting:** PM will record the deliberate withdrawal
-    and close the Kanban card.
-  - **c. Did not enter:** the entry option lapsed; PM will record that outcome
-    and close the Kanban card.
-  - No application confirmation is recorded in planning or connected Gmail.
-    This asks for factual state, not permission to create a new EFS milestone or
-    bend the EFS 2.0 design around the hackathon.
-
 ## 🕐 WHEN YOU HAVE TIME
 
 - **EFS 2.0 consolidation is in engineering review** — the phone-readable README points to the detailed draft constitution and Core candidate; the old P/LP packet is superseded as a live queue. Nothing needs your answer until the evidence gates return a real fork. Start at [the EFS 2.0 README](./Designs/efsv2/README.md) only when you want the current model.
