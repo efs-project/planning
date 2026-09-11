@@ -1,0 +1,14 @@
+[profile.default]
+src = "src"
+test = "test"
+out = "out"
+libs = []
+allow_paths = [".."]
+remappings = ["C0State/=../2026-09-05-c0-core/src/"]
+solc = "0.8.30"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = true
+extra_output = ["storageLayout"]
+fuzz.runs = 128
