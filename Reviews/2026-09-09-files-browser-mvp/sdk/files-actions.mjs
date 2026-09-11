@@ -427,7 +427,15 @@ export async function readBindingState(scope, { principal, purpose, subject, fie
 
 const EFFECT_VERSION = 'EFS_FILES_EFFECT_V1';
 const insist = (ok, reason) => { if (!ok) throw Error(reason); };
-const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+// JSON object member order is not semantic. Preserve exact own field sets,
+// array positions/lengths and value types; never coerce or rewrite the input.
+const same = (a, b) => {
+  if (Object.is(a, b)) return true;
+  if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false;
+  if (Array.isArray(a) !== Array.isArray(b) || (Array.isArray(a) && a.length !== b.length)) return false;
+  const keys = Object.keys(a);
+  return keys.length === Object.keys(b).length && keys.every(key => Object.hasOwn(b, key) && same(a[key], b[key]));
+};
 const exactHex = (v, bytes) => typeof v === 'string' && (bytes ? new RegExp('^0x[0-9a-f]{' + bytes * 2 + '}$') : /^0x(?:[0-9a-f]{2})*$/).test(v);
 const uint = (v, bits) => { insist((typeof v === 'number' && Number.isSafeInteger(v)) || typeof v === 'bigint' || (typeof v === 'string' && /^(0|[1-9][0-9]*)$/.test(v)), 'MALFORMED_RECOVERY'); const n = BigInt(v); insist(n >= 0n && n < 1n << BigInt(bits), 'MALFORMED_RECOVERY'); return n; };
 const textName = hex => new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(hex.slice(2).match(/../g) ?? [], b => parseInt(b, 16)));

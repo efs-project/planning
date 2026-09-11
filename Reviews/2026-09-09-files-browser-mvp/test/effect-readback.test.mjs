@@ -102,6 +102,35 @@ test('independent authored occurrences and requested Files effects at one qualif
       await execute({ kind: 'copy', parent: dir.op.object, name: 'copy.txt', treeId: edit.predicted.treeId });
       await execute({ kind: 'placement', parent: dir.op.object, name: 'linked.txt', object: file.op.object });
     });
+    await t.test('recovery ignores object key insertion order but retains exact structural expectations', async () => {
+      const reorder = value => Array.isArray(value) ? value.map(reorder) : value !== null && typeof value === 'object'
+        ? Object.fromEntries(Object.entries(value).reverse().map(([key, child]) => [key, reorder(child)])) : value;
+      const descriptor = actions.recoveryDescriptor(edit);
+      assert(descriptor.expectedBindings[0].predecessor, 'edit includes a nested predecessor occurrence');
+      const reordered = JSON.parse(JSON.stringify(reorder(descriptor)));
+      const before = structuredClone(reordered);
+      assert.equal((await read(reordered)).effect, 'COMMITTED');
+      assert.deepEqual(reordered, before, 'read-back must not normalize caller-owned state in place');
+      for (const mutate of [
+        d => { d.expectedBindings[0].targetRecord = f.fileB; },
+        d => { d.expectedBindings[0].revision = String(d.expectedBindings[0].revision); },
+        d => { delete d.expectedBindings[0].targetOccurrence; },
+        d => { d.expectedBindings[0].extra = true; },
+        d => { d.expectedBindings[0].predecessor.leafIndex = String(d.expectedBindings[0].predecessor.leafIndex); },
+        d => { delete d.expectedBindings[0].predecessor.envelopeId; },
+        d => { d.expectedBindings[0].predecessor.extra = true; },
+      ]) {
+        const changed = structuredClone(descriptor); mutate(changed);
+        const result = await read(changed);
+        assert.equal(result.effect, 'UNKNOWN');
+        assert.equal(result.reason, 'BINDING_EXPECTATION_MISMATCH');
+      }
+      const swapped = actions.recoveryDescriptor(dir);
+      swapped.expectedBindings.reverse();
+      const result = await read(swapped);
+      assert.equal(result.effect, 'UNKNOWN');
+      assert.equal(result.reason, 'BINDING_EXPECTATION_MISMATCH');
+    });
     await t.test('remove verifies mask plus active marker; restore retires the marker', async () => {
       removed = await execute({ kind: 'remove', parent: dir.op.object, name: 'renamed.txt', object: file.op.object, selectedEntry: renamed.predicted.entryId, priors: { source: await prior(FIXTURE.namePurpose, dir.op.object, nameRole('renamed.txt')) } });
       await execute({ kind: 'restore', parent: dir.op.object, name: 'renamed.txt', object: file.op.object, markerId: removed.predicted.markerId, priors: { destination: await prior(FIXTURE.namePurpose, dir.op.object, nameRole('renamed.txt')), marker: await prior(FIXTURE.removedPurpose, dir.op.object, removed.predicted.markerId) } });
