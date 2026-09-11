@@ -2,8 +2,8 @@
 
 **Status:** reference — compact live queue; mechanisms remain evidence-gated
 **Audience:** James first; designers second
-**Last reconciled:** 2026-08-12
-**Inputs:** [[system-constitution]], [[core-architecture-candidate]], [[owner-rulings]], [[assumptions-and-requirements]], and the preserved July decision/review corpus in git history
+**Last reconciled:** 2026-09-10
+**Inputs:** [[system-constitution]], [[core-architecture-candidate]], [[disposable-mvp-profile]], [[mvp-c0-genesis-manifest]], [[owner-rulings]], [[assumptions-and-requirements]], and the preserved July decision/review corpus in git history
 
 #status/reference #kind/decision #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2
 
@@ -11,6 +11,23 @@
 > greenfield name and layer boundary on 2026-08-12. The current work is to
 > prototype and pressure-test the candidate, then return only choices that the
 > evidence cannot settle.
+>
+> James's 2026-09-03 direction supplies reversible MVP-C0 controls for the B0
+> bundled Type/index arm and wallet-prompt target. Those controls are enough to
+> run the experiment and are not permanent answers to V2-E1/E4/E5/F1/F2. Do not
+> ask for the Type/query axis, carrier limit, Principal future, product scope,
+> venue, or freeze merely to execute C0. James's later 2026-09-04 direction
+> additionally authorizes local SDK/browser/Files/data/Arcade prototypes before
+> product repositories exist. That does not authorize public deployment,
+> permanent product release or protocol promotion.
+
+> **2026-09-08 requirement:** the testnet contracts must support upgrades and
+> the MVP must demonstrate the full core Files workflow, including Lenses,
+> tags and filters. [[testnet-files-mvp-plan]] supplies the proposed sequence
+> and observable acceptance bar. Pattern/activation engineering feeds E5;
+> browser lifecycle evidence feeds E6. Product repository creation and public
+> deployment remain separate permissions; no permanent venue/freeze decision
+> is needed to review or refine this plan.
 
 ## Decide after evidence — do not answer yet
 
@@ -22,6 +39,10 @@ tagged `Account | Principal` author reference. Return gas, setup, smart-account,
 historical-authority, developer-complexity, and managed-identity migration
 results. James's preference is one semantic Principal surface; it is not frozen
 until the comparison proves it honest and simpler.
+
+MVP-C0 temporarily exercises one intrinsic account Principal, retained EOA
+witness verification, direct-transaction fallback, and one bounded/revocable
+session grant. That evidence feeds this comparison without closing it.
 
 ### V2-E2 — Contract Lens floor
 
@@ -44,6 +65,17 @@ including hostile hot values and decades of churn. Determine safe Type-creator
 limits, canonicalization rules, page/basis/completeness ABI, and whether any
 old on-chain query promise exceeds the aggregate budget.
 
+The namespaced MVP-C0 Realm uses the B0 bundled Type/index arm plus
+genesis-active `BindingScope` only as a control. No answer here is required
+before that run, and its SDK seam must retain the later split profile.
+
+The [[owner-rulings#Index families, dedup and bytecode storage — DELEGATED to engineering|September 10 engineering delegation]]
+permits measurement and prototyping without freezing those mechanisms. The
+ledger's [[owner-rulings#PENDING — mandatory automatic indexing versus per-Type declared families (D-D)|D-D indexing question]]
+is still pending, not permission to drop mandatory indexing or an immediate
+new questionnaire. Preserve the existing automatic-indexing obligations while
+the owning lane supplies the explanation and evidence for that question.
+
 ### V2-E5 — Realm bootstrap and authority history
 
 Specify and attack a self-contained Realm descriptor for a fresh L3, EOA and
@@ -51,13 +83,30 @@ ERC-1271 admission, historical implementation/authority basis, finality
 observation, upgrade semantics, and independent state reconstruction. No
 Commons or another chain may be required.
 
+[[mvp-c0-genesis-manifest]] closes only the ordered local synthetic experiment
+bootstrap. A permanent Realm descriptor, venue, upgrade policy, and operator
+model remain this evidence gate.
+
+For the upgradeable testnet, use the separately versioned foundation and
+populated-state upgrade gate in [[testnet-files-mvp-plan]], not the immutable
+C0 deployment selection. The existing control remains evidence.
+
 ### V2-E6 — Web Client and OS vertical slice
 
-Build a clean-browser direct guest File Browser plus one verified Arcade view
-behind an adapter. Prove Web/OS Files parity, no-Commons operation, honest
-`UNKNOWN`, tampered-primary rejection, and verified fallback. Then decide
-whether the first Web Client also needs writes and how it is packaged relative
-to EFS OS.
+Local disposable browser implementation is now authorized (2026-09-04).
+The [joined workflow lab](https://github.com/efs-project/planning/blob/aae282df72f214d791963aeac1cf3c38d162c56e/Reviews/2026-09-04-mvp-rehearsal/README.md) supplies
+real contract/SDK/browser evidence for a smaller explicit `efs-lab/1` profile,
+not full C0. Next bind the clean-browser direct guest File Browser to the
+actual C0 Core/Files/SDK contract. Prove Web/OS
+Files parity, no-Commons operation, honest `UNKNOWN`, tampered-primary
+rejection, verified fallback, and the bounded write journey selected for that
+product gate. Then decide permanent Web Client/OS packaging. Arcade may remain
+one optional fixture; it is not a product or MVP dependency.
+
+The September 8 [[testnet-files-mvp-plan|full Files acceptance contract]] adds
+rename/move, remove/restore, Lens disagreements, tags/filter coverage and
+upgrade continuity to the build target. Close it against the actual testnet
+contracts, not by relabeling `efs-lab/1` results as full-C0 results.
 
 ### V2-E7 — Commons venue criteria
 
@@ -74,6 +123,15 @@ candidate. Prove reusable application semantics, structural validation,
 records-by-Type, loss-aware EAS interoperability, recursive-Type safety, and no
 arbitrary unbounded validator callbacks.
 
+The owner's mandatory developer-validation requirement is explicit in
+[[owner-rulings#Mandatory developer validation before acceptance]]. Compare
+[[programmable-type-acceptance]]: Type-committed rules versus a mandatory
+Type/profile pair, read-only and stateful rule modes, authenticated hook callers,
+no-bypass acceptance, full rollback/value accounting and retained historical
+evidence. Optional frontend checks do not close this gate. The concrete
+capability/build map is [[data-model-readiness]]; no immediate owner answer or
+permanent ABI choice is needed to refine these drafts and tests.
+
 ## Decide after evidence — freeze choices, do not answer yet
 
 ### V2-F1 — Freeze the minimum semantic protocol
@@ -87,9 +145,15 @@ adversarial review pass.
 ### V2-F2 — First product implementation scope
 
 Choose the first permanent contracts/SDK/Web Client release after the freeze
-candidate proves the direct guest, contract Lens, Arcade, Git/Markdown, EAP,
+candidate proves the direct guest, contract Lens, generic Files, Git/Markdown, EAP,
 large-content, and mounted-filesystem traces. Commons venue and full EFS OS may
 remain later without weakening Core.
+
+MVP-C0 and its later SDK/client acceptance overlays are experiment definitions,
+not release authorization or an implicit answer to this choice.
+The September local workflow rehearsal likewise does not close this gate;
+its [build handoff](https://github.com/efs-project/planning/blob/aae282df72f214d791963aeac1cf3c38d162c56e/Reviews/2026-09-04-mvp-rehearsal/build-readiness.md)
+separates immediately executable engineering from permanent release choices.
 
 ## Superseded questions — never revive silently
 

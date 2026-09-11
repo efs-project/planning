@@ -5,7 +5,7 @@
 **Depends on:** [[system-constitution]], [[core-architecture-candidate]], [[hierarchical-files-and-folders]], [[../web-client-os/README]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-08-14
+**Last touched:** 2026-09-10
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/onchain #topic/graph-queries #topic/app-model
 
@@ -64,17 +64,21 @@ The Type system must provide all of the following together:
 8. Cross-language reconstruction after publishers, websites, indexers, and
    original client implementations disappear.
 9. A friendly SDK path that hides IDs and codec ceremony during ordinary use.
-10. A small Core whose work and state growth are statically bounded.
+10. A small Core with structural work/state bounds and explicit runtime budgets
+    for developer-programmed acceptance.
+11. Mandatory custom acceptance rules that cannot be bypassed by skipping the
+    SDK or optional controller; see [[programmable-type-acceptance]].
 
 ## Non-goals
 
 The first permanent Type layer does not:
 
 - infer human meaning from field names or structural similarity;
-- execute arbitrary Type-selected EVM, Wasm, JavaScript, SPARQL, or callback
-  validators during admission or reads;
+- execute arbitrary developer code during ordinary reads or run unbounded
+  admission programs; bounded mandatory EVM acceptance is a separate required
+  comparison in [[programmable-type-acceptance]];
 - implement general inheritance, higher-kinded types, typeclasses, row
-  inference, theorem proving, or arbitrary refinement logic onchain;
+  inference or theorem proving in the structural interpreter;
 - choose one global official Type, publisher, registry, namespace, or taxonomy;
 - make a Type tag, family claim, successor edge, or popularity score sufficient
   authority for a state-changing contract;
@@ -228,7 +232,9 @@ answers, callback and reentrancy risk, impossible complete enumeration, and
 non-deterministic long-term behavior.
 
 **Use:** ordinary offchain analysis and Lens-selected evidence only. Reject for
-Core execution.
+Core traversal/execution of this open graph. A single explicitly bound,
+budgeted acceptance rule is not this architecture; see
+[[programmable-type-acceptance]].
 
 ## Recommended layered model
 
@@ -354,8 +360,15 @@ TypeRevisionId = H(
 ```
 
 The exact Type is what validates and decodes a canonical body. Anything that
-changes the accepted value set, reference extraction, body interpretation, or
-committed View projection creates a new Type revision.
+changes the structurally valid canonical body set, reference extraction, body
+interpretation, or committed View projection creates a new Type revision.
+
+The formula above is the structural/control candidate, not a final preimage for
+programmable acceptance. The recommended comparison arm adds an exact mandatory
+rule commitment (or explicit no-rule) to Type identity; the alternative requires
+an exact Type/profile pair. No old vectors are renamed by this draft. Fixed
+rule changes and local activation changes have distinct versioning laws in
+[[programmable-type-acceptance]].
 
 `typedReferenceRoleBytes` is the sole owner of semantic reference targets. It
 binds a field key to one closed target class: exact Type, exact View,
@@ -403,6 +416,15 @@ reusable `ConsumerProfile` Record.
 This separation is the largest usability cost of Architecture C and the main
 reason Architecture A remains a control arm.
 
+Query results and their qualifications form one consumption contract, not a
+plain array with optional diagnostics. The composition laws in
+[[core-architecture-candidate#Qualified composition and independent verification]]
+apply to generated TS/Solidity readers, filters, joins and exports. In particular,
+complete candidate enumeration does not imply complete resolution or predicate
+knowledge. Current-candidate indexes, historical audit inventories and optional
+local accelerators must name which universe they cover. Index installation,
+live-set compaction and completed historical backfill are different events.
+
 An exact-Type QueryProfile cannot by itself claim complete enumeration across
 every Type that implements a View. T4 therefore includes a separate disposable
 `ViewQueryProfile` arm:
@@ -430,15 +452,22 @@ pre-adopted Core index or final identity.
 Validation grades remain separate:
 
 1. **well-formed** — canonical bytes and envelope;
-2. **Type-valid** — the closed interpreter accepts the body;
+2. **structurally Type-valid** — the closed interpreter accepts the body;
 3. **View-projectable** — a committed direct binding yields the named View;
-4. **Realm-admitted** — a named policy accepted the Occurrence at a basis;
+4. **Realm-admitted** — required developer rules and Realm policy accepted the
+   Occurrence/action under a named activation and observation context;
 5. **currently effective** — lifecycle/current folds pass at a basis; and
 6. **endorsed** — a consumer or Lens accepts the Type, mapping, author, or
    evidence.
 
-Only the first three can be portable structural results. Stateful policies and
-trust never enter portable Record identity.
+Only the first three are portable structural results. A mandatory rule's fixed
+definition may enter Type/Record identity in the recommended acceptance arm;
+its local execution result, mutable state and trust do not. Ordinary reads
+inspect retained acceptance evidence, not arbitrary admission callbacks.
+New actions require their own acceptance; a generic reference does not rerun
+the target Type's rule or confer application authority. The exact attachment,
+stateful/read-only modes, no-bypass boundary and falsifiers are in
+[[programmable-type-acceptance]].
 
 ## Contract consumption modes
 
@@ -682,6 +711,13 @@ without changing any member identity.
 
 ## Tags and Topics
 
+The [[owner-rulings#Tags — rulings on the tag deep dive|September 10 tag rulings and directions]]
+constrain this proposal: catalog grouping is not on-chain inference, the
+commons tag profile uses one concept per canonical string, and negative
+testimony is a stance on the same concept. Files names remain a separate
+unfolded namespace. Exact experimental Types and folding bytes are not
+retroactively changed by this reconciliation.
+
 Three different uses of the word “tag” must remain separate:
 
 1. **Wire field/variant keys** are permanent numeric schema coordinates. They
@@ -911,6 +947,25 @@ disclosed or proven under a separate bounded proof profile.
 Fail if “encrypted” is presented as graph-private while public Type/ref indexes
 reveal the relationship.
 
+Public ciphertext enumeration cannot establish complete plaintext names, Types,
+tags or absence. A private reader qualifies its result by the authenticated
+manifest/root, selected scope and key-capability epoch, without exposing secret
+capabilities in public receipts. Unsupported encryption, failed decryption,
+incomplete acquisition and a verified empty private manifest are different
+outcomes. Keep Core point results unchanged and carry opacity/support as their
+existing qualification dimensions; do not invent an encrypted-empty shortcut.
+
+Bind encrypted objects to their declared AEAD context and sharing/key epoch;
+rotate future access without claiming to revoke already copied keys/plaintext.
+Randomized encryption can intentionally sacrifice public deduplication and
+stable plaintext-derived IDs. Fields and relationships declared private must not
+be disclosed by public relations, indexes, mixed public/private envelopes, logs
+or diagnostics. The profile explicitly documents residual leakage, including
+update timing, sizes, access patterns and shared funding or recovery relationships;
+encryption alone does not hide these. A proof profile names the hidden-data predicate,
+public inputs, verifier/version and replay domain; ciphertext shape validation
+alone is not proof that hidden application data obeys its developer's rule.
+
 ### Data-science export
 
 Every export has two layers:
@@ -1084,6 +1139,9 @@ possible so the ecosystem is not trapped by one toolchain.
 | Avro | Directional writer/reader schema resolution, aliases, defaults, and explicit unions. | Runtime resolution ambiguity or implicit lossy promotions in state-changing contracts. |
 | IPLD Schemas | Separate logical Type from representation strategy; content-addressed typed links; explicit union representations. | Programmable advanced layouts inside permanent Core. |
 | AT Protocol Lexicon | Shared schemas, generated clients, open/closed unions, and independent application interoperability. | Domain-authority names as durable semantic identity or one network's repository assumptions. |
+| AT Protocol permission evolution | Reject unsupported permission declarations that may contain unknown restrictions. | Treating unknown authorization fields like harmless unknown data fields. |
+| MUD Store and database index practice | Generated typed access, scoped extensions, explicit index maintenance and snapshot/backfill discipline. | Treating a new index as historically complete, whole-array helpers as bounded pages, or a hosted indexer as authority. |
+| Tahoe-LAFS and IPLD CAR | Client-side encryption, explicit capability/retention assumptions and verifiable content-addressed transport. | Equating ciphertext availability with plaintext validity, or an archive container with complete authenticated application state. |
 | WIT / Component Model | Small nominal records/variants/interfaces separated from implementation; generated language bindings. | Treating behavior/API capability Types as ordinary persistent-data Types. |
 | CUE | Constraint unification, closed/open structures, reusable authoring fragments. | General unification or dynamic constraints onchain. Flatten them before publication. |
 | Smithy | Mixins and traits as authoring/codegen tools with a flattened effective model. | Ambient trait precedence or service-specific behavior in Core. |
@@ -1098,6 +1156,10 @@ separate logical and physical layers, explicit directional compatibility,
 unknown preservation, flattened authoring composition, immutable interfaces,
 and generated tooling. The EVM contribution is to make the smallest useful
 subset bounded and contract-readable while leaving rich reasoning outside Core.
+
+The source-grounded [foundation review](https://github.com/efs-project/planning/blob/aae282df72f214d791963aeac1cf3c38d162c56e/Reviews/2026-09-10-foundation-design-review.md)
+maps these lessons to existing design homes and discriminating tests; it does not
+adopt the peer systems' formats, services or privilege models.
 
 ## Required disposable experiments
 
@@ -1281,8 +1343,11 @@ Reject or substantially redesign Architecture C if any of these holds:
    preserve one atomic state machine.
 7. T8 fails its deterministic-output, offline-recovery, zero-manual-ID, command,
    or strictly-lower manual-protocol-field thresholds against bundled B0.
-8. A workload requires Core to infer semantic equivalence, run arbitrary
-   validation code, or add an application-specific primitive.
+8. A workload requires Core to infer semantic equivalence, execute unbounded
+   admission code, invoke arbitrary code during ordinary reads, or add an
+   application-specific primitive. Bounded mandatory developer acceptance must
+   instead pass [[programmable-type-acceptance]]; inability to enforce it is
+   also a falsifier, not a reason to downgrade it to optional client checks.
 9. Exact Type/package reconstruction fails after publisher, catalog, generated
    code, and project-operated indexer removal.
 10. The neutral private carrier still leaks its inner Type or graph through a

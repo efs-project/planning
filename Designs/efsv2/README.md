@@ -10,6 +10,36 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
+**2026-09-10: [[data-model-readiness|Capability and build-readiness map]]** is
+the short answer to what useful peer features EFS covers and what remains.
+The latest [reply after Fable's economics/index/tag work](https://github.com/efs-project/planning/blob/aae282df72f214d791963aeac1cf3c38d162c56e/Reviews/2026-09-10-foundation-reply-after-economics.md)
+reviews `cb6e76e`, supports a revised prototype split and identifies the tag/placement,
+Lens-filter, K10 ordinal and coverage tests that must accompany it. It retires
+the unused [earlier launch prompts](https://github.com/efs-project/planning/blob/aae282df72f214d791963aeac1cf3c38d162c56e/Reviews/2026-09-10-next-foundation-round/README.md).
+This is reviewed planning; no new runtime experiment ran in either intake.
+[[programmable-type-acceptance]] now has separate lab evidence at `e358ad66`;
+Fable's `5ec070ce` repairs internal export integrity and adds a sponsored wallet
+harness. Neither closes the joined foundation. The
+[expert foundation review](https://github.com/efs-project/planning/blob/aae282df72f214d791963aeac1cf3c38d162c56e/Reviews/2026-09-10-foundation-design-review.md) integrates
+qualified read composition, current-versus-history enumeration, derived identity
+and recovery, exact rule activation, private visibility, all-in costs and
+authenticated recovery into the drafts. Its conclusions distinguish source
+inspection, retained test results and unrun comparisons. No permanent protocol,
+new repository, main merge or public deployment is authorized by that review.
+
+The retained [[programmable-acceptance-experiment|acceptance experiment note]]
+records its separate implementation evidence and remaining integration gates.
+The [[owner-rulings#Tags — rulings on the tag deep dive|September 10 tag rulings]]
+and engineering delegation are also retained in the owner ledger; the pending
+indexing question remains routed through [[owner-decision-inbox#V2-E4 — Type and index budget|V2-E4]].
+
+**2026-09-08: [[testnet-files-mvp-plan|The testnet Files MVP build plan]]** is
+the short path from the current prototypes to a browser the owner can verify:
+sixteen observable journeys, controlled testnet upgrades, five build
+checkpoints and a 15-minute walkthrough. Upgradeability is required;
+Transparent proxies are a recommendation, not an adopted permanent policy.
+The full browser and upgrade tests are not implemented by this planning pass.
+
 **This README is the phone summary.** Read through “Current technical
 candidate,” then stop unless you want the engineering detail. For a deep pass:
 
@@ -18,7 +48,9 @@ candidate,” then stop unless you want the engineering detail. For a deep pass:
 3. [[owner-rulings]] — what James actually adopted; and
 4. [[owner-decision-inbox]] — evidence gates, not a questionnaire.
 
-Focused next-pass prompt: [[fable-efs2-core-engineering-kickoff]].
+Current bounded experiment: [[disposable-mvp-profile]] with the ordered
+[[mvp-c0-genesis-manifest]]. The earlier focused review prompt remains
+[[fable-efs2-core-engineering-kickoff]].
 
 ## The current shape
 
@@ -88,6 +120,45 @@ on the draft's generic `BindingScope` and executor/operation-bound consent
 experiments; neither is current B0. It is a draft experiment target, not a
 frozen profile or owner decision packet.
 
+### Disposable MVP-C0 control
+
+[[disposable-mvp-profile]] selects one visibly namespaced, throwaway Stage B
+control so permanent questions do not block measurement. It uses the bundled
+B0 Type/index arm, genesis-time `BindingScope`, an intrinsic account Principal,
+a separately identified state-readable small-byte carrier, and the canonical
+four-outcome point law. [[mvp-c0-genesis-manifest]] orders Core initialization,
+using a non-cyclic predeployment seed followed by a postdeployment
+address/code-bound experiment commitment and one-time seal, then index
+activation, SR-17 Type admission, Principal/root/Plans/Mount/Route creation,
+and independently verified seal-transaction post-state roots before runtime
+writes are enabled.
+
+The normal relayed EOA path has one composite EIP-712 `WritePlan` approval that
+commits to both a portable publication digest and exact Realm effects. Their
+receipts and meanings remain separate; this realm-bound signature does not
+claim detachable realm-neutral authorship. Direct EOA fallback uses one
+transaction prompt with weaker chain/transaction-bound authorship evidence.
+A bounded revocable delegation from the bootstrap EOA targets zero routine
+wallet prompts for the same Principal after recorded setup/grant approval;
+first-use totals retain that cost. In every arm, wallet acknowledgement and a
+transaction receipt precede canonical read-back and are not EFS success.
+Point outcome stays separate from authority, currentness, finality, integrity,
+availability, returned bytes, and canonical effect; receipt progress never
+masquerades as committed effect.
+
+These are temporary experiment choices only. James's 2026-09-04 direction now
+authorizes local SDK/browser/Files/data/Arcade prototypes as well; permanent
+product/repository/release work is not adopted. No Type/query axis, carrier limit, Principal model, product,
+venue, contract topology, deployment, or freeze is adopted.
+
+The [joined workflow rehearsal](https://github.com/efs-project/planning/blob/aae282df72f214d791963aeac1cf3c38d162c56e/Reviews/2026-09-04-mvp-rehearsal/README.md)
+now connects real local Solidity, the five-seam SDK, browser Files/data and an
+explicitly launched verified game, with a compiled-in Solidity consumer.
+It is separately namespaced `efs-lab/1`, not the full C0 Type/admission/index/
+Binding/Lens/genesis implementation. Its passes do not replace any M0/C0 row.
+See [build readiness](https://github.com/efs-project/planning/blob/aae282df72f214d791963aeac1cf3c38d162c56e/Reviews/2026-09-04-mvp-rehearsal/build-readiness.md)
+for measured limits and the ordered full-C0 implementation slices.
+
 ## Evidence map
 
 These are inputs, not competing active architectures:
@@ -103,6 +174,11 @@ These are inputs, not competing active architectures:
 | [[hierarchical-files-and-folders]] | Current greenfield hierarchical Files/1 proposal; replaces July namespace mechanisms while preserving the adopted mount outcome. |
 | [[privacy-pass-synthesis]] and privacy corpus | Payload/read/metadata distinctions, privacy seams, and honest limitations. Old crypto/profile bytes are candidates. |
 | [[layered-type-system-and-data-abi]] | Current Type-system proposal: exact nominal Types, bounded Data Views, directional compatibility, query-profile evolution, tags/catalog paths, projections, modular EVM deployment, and falsifying experiments. |
+| [[programmable-type-acceptance]] | Mandatory developer-code acceptance, Type versus profile attachment, read-only/stateful modes, atomic failure, historical evidence, application-action scope and concrete falsifiers. |
+| [[data-model-readiness]] | Capability placement/evidence ledger, five joined use cases and ordered next implementation gates; not a feature-parity claim. |
+| [[ethereum-standards-and-execution-profile]] | Retained standards pressure: source/status, accepted execution profile, actual venue support, signature observations, read basis and modular deployment limits remain distinct. Its August `EXP-C0` mechanism choices are not the September MVP-C0 overlay. |
+| [[disposable-mvp-profile]] | Namespaced Core/Files Stage B control: exact temporary scope, one-approval write law, result law, state-readable small bytes, and stop/destruction rules. |
+| [[mvp-c0-genesis-manifest]] | Ordered C0 Realm/application bootstrap and independently verifiable post-state-root contract. |
 | [[deterministic-ids]], [[codex-envelope]], [[codex-kinds]], [[codex-kernel]] | July native v2 formulas and implementation hypotheses. Useful but superseded as an automatic baseline. |
 | [`../efs15/`](../efs15/) | Fully reviewed EAS-backed contraction and exact vectors. Historical evidence showing what semantic IDs, schemas, admission, and reads require. |
 | [Arcade](../arcade/README.md) | Project/release/artifact, verified runner, curation, rights, comments, and direct guest pressure test. |
@@ -112,19 +188,26 @@ These are inputs, not competing active architectures:
 
 ## Build order
 
-1. Review the constitution and current candidate against the full survivor
-   ledger and application fixtures.
-2. Implement two disposable Core prototypes: self-contained Records versus
-   immutable shared Context/Envelope normalization.
-3. Benchmark complete write, storage, index, reconstruction, and Lens costs—not
-   isolated happy paths.
-4. Run the focused Fable 5 pass plus independent database, EVM/security,
+1. Instantiate [[disposable-mvp-profile]] through the ordered
+   [[mvp-c0-genesis-manifest]] on a fresh local Realm with synthetic data.
+2. Implement the C0 Core, five-seam SDK boundary, state-readable byte carrier,
+   one-approval WritePlan paths, canonical read-back, and a clean-room second
+   reader. Measure complete write, read, state, prompt, and reconstruction
+   costs—not isolated happy paths.
+3. Stop or create a new namespaced Realm whenever an identity, result,
+   capability, or authorization rule changes; retain falsifiers and exact
+   evidence without promoting the control to a default.
+4. Use C0 results to resume the permanent Record/context, Type/query,
+   Principal, index, carrier, and physical-contract bakeoffs.
+5. Run the focused Fable 5 pass plus independent database, EVM/security,
    standards, privacy, and long-horizon reviews.
-5. Integrate accepted findings, close the owner-sized choices, and only then
-   prepare the freeze bundle and contracts/SDK plan.
-6. In parallel, build the narrow direct Web Client/File Browser + one-game
-   Arcade slice behind an adapter so product work tests the model without
-   freezing it by accident.
+6. Integrate accepted findings, close only irreducible owner-sized choices,
+   and only then prepare the freeze bundle and contracts/SDK plan.
+
+Permanent Web Client/product repository and release work remain separately
+gated. The September 4 local SDK/browser/Files/data/Arcade prototype authority
+above does not select those permanent products. Arcade remains an optional
+application fixture, not an MVP dependency or first-product selection.
 
 ## Hard holds
 
@@ -134,11 +217,14 @@ These are inputs, not competing active architectures:
 - No v1 compatibility, migration, coexistence, or legacy-read requirement.
 - No durable Arcade, EAP, Nanda, or other production seed before the relevant
   semantic IDs and reconstruction contracts freeze.
+- No product implementation is authorized by the disposable MVP-C0 Core/Files
+  control or by its future SDK/acceptance overlays.
 - Upgradeable prototype contracts are acceptable; silent reinterpretation of
   old admitted data is not.
 
 ## Status
 
-The two active docs are `#status/draft`. They become review-ready only after
-the prototype/Fable/adversarial passes are integrated. Promotion remains the
-owner's normal human-gated ceremony.
+The constitution and Core candidate remain `#status/draft`; the Files proposal
+remains `#status/review`; and the two MVP-C0 documents are `#status/draft`.
+Passing a disposable run produces evidence, not promotion. Any status change
+still follows the owner's normal human-gated ceremony.

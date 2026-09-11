@@ -4,9 +4,18 @@
 **Target repos:** contracts, sdk
 **Depends on:** [[sdk-read-surface]], ADR-0056 (mirror scheme gate removed)
 **Reviewers:** —
-**Last touched:** 2026-06-19 — sdk-designer
+**Last touched:** 2026-08-23 — greenfield status correction
 
 #status/review #kind/design
+
+> **Historical v1 evidence.** “Production” and “freeze-safety” below describe
+> the deployed/pre-v2 router boundary at the dated snapshot, not an EFS v2
+> adoption or readiness result. The active greenfield spine is
+> [[Designs/efsv2/README]], and ERC-5219 is an optional G6 resource adapter under
+> [[Designs/web-client-os/ethereum-standards-and-interop]] and
+> [[Designs/efsv2/ethereum-standards-and-execution-profile]]. Locator or gateway success
+> cannot establish EFS v2 identity, authority, completeness, or byte
+> availability.
 
 ## Problem
 

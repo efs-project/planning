@@ -1,17 +1,23 @@
-# Web Client MVP architecture, journeys, and acceptance
+# Web Client broader roadmap and freeze catalog
 
-**Status:** draft — smallest official Web Client product slice for iteration; no implementation or protocol/profile freeze is authorized
+**Status:** draft — broader product roadmap and freeze catalog; not the bounded MVP0 gate and no implementation or protocol/profile freeze is authorized
 **Target repos:** planning, client, sdk
 **Depends on:** [[Designs/web-client-os/README]], [[Designs/web-client-os/architecture-and-modules]], [[Designs/web-client-os/technology-foundation]], [[Designs/web-client-os/web-platform-standards-and-forward-profile]], [[Designs/web-client-os/ethereum-standards-and-interop]], [[Designs/web-client-os/system-profiles-and-generations]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/efsv2/core-architecture-candidate]]
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14)
-**Last touched:** 2026-08-23
+**Last touched:** 2026-09-03
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/read-path #topic/files #topic/actions #topic/performance
 
-## Outcome
+> **Routing notice (2026-09-03).** The current bounded pass/fail surface is
+> [[mvp0-acceptance]]. This long-form document (929 lines before this routing
+> update) is retained as a broader roadmap and freeze catalog. Older candidate
+> action/signature/result shapes and every feature beyond that overlay are
+> non-gating proposal evidence, not MVP0 law.
 
-The MVP is an official, static, self-hostable File Browser with two deliberately
-different entry paths:
+## Catalog outcome
+
+The broader target catalog describes an official, static, self-hostable File
+Browser with two deliberately different entry paths:
 
 1. a very fast unauthenticated read path for public file and folder links; and
 2. an explicit promotion into a basic write-capable File Browser for creating
@@ -130,7 +136,7 @@ sequenceDiagram
     participant Realm as "Explicit Realm source"
     participant Carrier as "Untrusted carriers"
     participant Host as "Minimal Viewer Host / raw rescue"
-    participant Explorer as "Built-in Data Explorer guest entry"
+    participant Files as "Thin File Browser / raw Inspector"
 
     Person->>Boot: Open friendly or exact URL
     Boot->>Host: Paint trusted resolving frame
@@ -142,11 +148,8 @@ sequenceDiagram
     Carrier-->>Reader: Candidate bytes and transport evidence
     Reader->>Reader: Verify digest, length, range/closure
     Reader-->>Host: Resolved resource + provenance + honest diagnostics
-    Host->>Explorer: Validated qualified Files DTO
-    Explorer-->>Person: Safe content/listing and ordinary Files actions
-    alt Data Explorer unavailable or crashes
-      Host-->>Person: Raw identity, provenance, diagnostics and exact citation
-    end
+    Host->>Files: Validated qualified Files DTO
+    Files-->>Person: Safe content/listing, raw inspection, and ordinary Files actions
 ```
 
 ### Invariants
@@ -321,7 +324,12 @@ numbers. Until then, a missing measurement fails the evidence gate; an
 exception between 250 and 400 KiB names evidence, approver, expiry, and removal
 plan rather than silently redefining the target.
 
-## Acceptance fixtures
+## Broader acceptance catalog
+
+The fixtures below preserve future product, standards, performance, delivery,
+accessibility, OS, and freeze pressure. They do not add tests to the nine-
+test MVP0 gate or block that gate unless [[mvp0-acceptance]] explicitly imports
+one.
 
 ### A. Cold guest and exactness
 
@@ -348,10 +356,10 @@ plan rather than silently redefining the target.
       unique Principal in the active `namespacePlan`.
 - [ ] Deleting all browser state reproduces identical semantic IDs and
       qualified outcomes from the explicit Realm and carriers.
-- [ ] Removing or crashing the built-in Data Explorer guest entry leaves the
-      Minimal Viewer Host/raw rescue able to show the same resource identity,
-      provenance, qualification diagnostics and exact citation. Ordinary
-      listing/workspace UI may be unavailable; resource truth is not.
+- [ ] Removing or crashing the optional Data Explorer workspace leaves the
+      direct File Browser and shared raw Inspector able to show the same
+      listing, resource identity, provenance, qualification diagnostics and
+      exact citation. Data Explorer availability never gates Files UI or truth.
 
 ### B. Carrier and presentation safety
 
@@ -774,7 +782,9 @@ authorized executable experiment, the architecture must preserve that:
       cache identity tuples in [[app-runtime-and-direct-launch]] rather than
       URL, slug, channel, catalog or Locator; and
 - [ ] a missing, corrupt, denied, unsupported or crashing App leaves the
-      underlying resource, raw evidence and Data Explorer fallback reachable.
+      underlying resource and shared raw Inspector reachable through the
+      direct host/File Browser path; an available Data Explorer is an optional
+      separate workspace, not the required fallback.
 
 ## Threat boundary
 
@@ -783,10 +793,13 @@ authorized executable experiment, the architecture must preserve that:
 - the selected browser and operating system;
 - the exact client/BootGeneration bytes and conserved System Chrome;
 - protocol codecs, validators, Realm Reader, Files Resolver, and byte verifier;
-- the exact built-in Data Explorer guest entry for ordinary MVP Files UI, but
-  not as truth authority over the Reader result or raw rescue;
+- the thin File Browser and shared raw Inspector presentation for ordinary
+  Files UI, neither as truth authority over the Reader result;
 - the locally selected chain/Realm descriptor and read/write policy inputs;
 - the wallet/signer only for the authority it actually proves.
+
+Data Explorer is an optional separate workspace consumer. It is not trusted or
+required for MVP0 Files correctness.
 
 ### Untrusted inputs
 
@@ -871,20 +884,23 @@ work. No rename, repository creation, or import migration is authorized here;
 the transition must be coordinated with active SDK work and preceded by a
 collision-safe repository design.
 
-## Honest definition of done
+## Honest roadmap definition of done
 
-The design milestone is done when James can review this packet as a coherent
-baseline and every unresolved mechanism is plainly labelled. The MVP itself is
-done only when all required acceptance fixtures pass from reproducible exact
-sources, measured performance reports are attached, protocol/profile labels
-match demonstrated conformance, and independent reviewers reproduce both the
-cold guest link and official write journeys.
+The bounded MVP0 milestone is done only when all nine tests in
+[[mvp0-acceptance]] pass from reproducible exact sources. No additional fixture
+in this catalog blocks MVP0 unless that overlay explicitly imports it.
+
+The broader product/freeze milestone described by this roadmap is separately
+done only when the project owner selects its later-product criteria, those
+selected fixtures pass, measured reports are attached, protocol/profile labels
+match demonstrated conformance, and independent reviewers reproduce the
+relevant journeys. Review of this packet alone is not product completion.
 
 Shipping shared-profile execution, the System Configuration Manager, generic
-Wasm/Component runners or a public gallery is not part of this MVP definition.
-The MVP must preserve their data, authority and activation boundaries and pass
-the non-regression fixture above without loading those systems on the guest
-path.
+Wasm/Component runners, Data Explorer packaging, or a public gallery is not
+part of MVP0. Their catalog entries are roadmap/freeze or later-product
+criteria; MVP0 only preserves their boundaries without loading those systems
+on the guest path.
 
 It is not done because a mock UI renders, a wallet transaction succeeds, a
 local cache contains the new row, one browser works, a hosted endpoint fills a

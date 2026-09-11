@@ -16,7 +16,7 @@ Check `Designs/README.md` (curated map by topic and status), `Kanban.md` Backlog
 
 ### 2. Open a draft
 
-After `git fetch origin && git rebase --autostash origin/main`: `cp Designs/_template.md Designs/<descriptive-slug>.md`. The slug is **descriptive** (`offline-sync`, `sdk-cache-eviction`), not generic (`design-v2`); it can change later, since Obsidian auto-updates `[[wiki-links]]` on rename.
+Start from the current shared `main` after the read-first [[conventions#Git sync|Git sync]] checks and coordination with any overlapping writer; do not autostash another agent's work. Create `Designs/<descriptive-slug>.md` from `Designs/_template.md`. Keep ordinary design work on main; a branch needs an explicitly agreed exception and return-to-main handoff. The slug is **descriptive** (`offline-sync`, `sdk-cache-eviction`), not generic (`design-v2`); it can change later, since Obsidian auto-updates `[[wiki-links]]` on rename.
 
 **Root or subfolder?** `Designs/` has design *sets* — `efsv2/`, `clientv2/` — each with its own README, spine, and owner-decision inbox. If your design is **part of an existing set's reconciliation**, put it in that folder and add it to that folder's README in the same commit. If it **stands alone**, put it at `Designs/` root and add it to `Designs/README.md`'s content map. When in doubt, root — moving in later is a rename, moving out is a de-tangling.
 

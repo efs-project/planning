@@ -10,6 +10,7 @@
 >
 > - [EFS v2 + OS decisions](./efsv2/owner-decision-inbox.md)
 > - [EFS v2 SDK decisions](./sdkv2/owner-decision-inbox.md) *(nothing to decide yet; the hybrid SDK and onchain-helper choices wait on experiments)*
+> - [Data Explorer decisions](./data-explorer/owner-decision-inbox.md) *(future product choices remain evidence-gated; importing its designs adds no immediate owner question)*
 > - [Client v2 decisions](./clientv2/owner-decision-inbox.md)
 > - [EFS Arcade decisions](./arcade/owner-decision-inbox.md) *(initial D1–D7 packet awaits post-pass reconciliation; do not batch-answer it)*
 > - [Open Web App Store decisions](./open-web-app-store/owner-decision-inbox.md) *(nothing to decide yet; evidence gates stay in the architecture)*

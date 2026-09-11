@@ -5,7 +5,7 @@
 **Depends on:** [[system-constitution]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-08-12
+**Last touched:** 2026-09-10
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #topic/efsv2 #topic/onchain #topic/graph-queries #topic/lenses
 
@@ -15,6 +15,24 @@ The constitution says what EFS 2.0 must accomplish. Engineers now need one
 small candidate they can implement, attack, measure, and reject without
 mistaking it for the final answer. This document names that candidate and the
 few seams still capable of changing it.
+
+The [foundation research review](https://github.com/efs-project/planning/blob/aae282df72f214d791963aeac1cf3c38d162c56e/Reviews/2026-09-10-foundation-design-review.md)
+refines qualified consumption, enumeration, authority continuity, rule pinning,
+privacy and recovery below. These are draft engineering obligations, not new
+owner rulings or a selected storage layout. Prototype shortcuts are not the
+definition of the candidate.
+
+[[disposable-mvp-profile]] is the bounded implementation overlay for the next
+Stage B control, and [[mvp-c0-genesis-manifest]] is its ordered application
+bootstrap. Their B0-bundled Type/index, Principal, carrier, result, and
+authorization choices are namespaced experimental inputs. They do not settle
+the alternatives or open questions in this document.
+
+The retained [[ethereum-standards-and-execution-profile]] supplies standards
+pressure for accepted execution profiles, historical signature observations,
+exact read basis and modular deployment limits. Keep official status, actual
+venue support and an EFS acceptance claim separate. Its August `EXP-C0`
+mechanism selections do not replace this September candidate or MVP-C0 overlay.
 
 ## Candidate in one picture
 
@@ -82,9 +100,13 @@ TypeSchema {
 “Schema” is the developer-facing analogue of an EAS Schema, but it is portable
 and not identified by a registry transaction. The prototype must use a tiny
 closed descriptor language: bounded body and collection sizes, canonical scalar
-encodings, statically extractable reference/index fields, and no arbitrary
-Type-created callbacks during admission. Optional external validators are
-ordinary evidence or explicitly bounded, revisioned Realm modules.
+encodings and statically extractable reference/index fields. Structural decoding
+remains closed and bounded. [[programmable-type-acceptance]] adds the required
+comparison for mandatory developer-programmed acceptance: Type-committed rules
+versus an explicit mandatory Type/profile pair, enforced at one guarded Realm
+commit boundary. Optional endorsements are a different feature. This reopens
+the earlier blanket callback exclusion, not the ban on unbounded work or
+arbitrary callbacks during ordinary reads; existing C0 controls are unchanged.
 
 One 50-year identity question is deliberately open. Variant A hashes semantic
 meaning, shape, validation, reference roles, and canonical index obligations
@@ -151,11 +173,27 @@ AdmissionIntent? {
 
 The Publication Envelope amortizes repeated author, actor, signature, replay,
 and optional batch data. Moving a Record into another Envelope does not change
-RecordId. A separate Realm-bound admission intent can authorize local effects
-without silently making the authored publication itself Realm-local. The
-bakeoff must compare portable and intentionally Realm-bound publication
-profiles, including cross-Realm replay and subset carriage; candidate syntax is
-not allowed to discard portable signed evidence accidentally.
+RecordId. Outside the disposable C0 control, distinct portable authorship and
+Realm-bound effect authorization remain one bakeoff arm. The bakeoff must
+compare portable and intentionally Realm-bound publication profiles, including
+cross-Realm replay and subset carriage; candidate syntax is not allowed to
+discard portable signed evidence accidentally.
+
+MVP-C0 tests a narrower one-approval construction: one EIP-712 `WritePlan`
+signature commits to both the portable publication digest and the exact
+Realm-effect digest. The two meanings and their receipts remain distinct. The
+outer signature is Realm/chain/Core-bound, so this arm does not claim
+independently detachable realm-neutral authorship; that requires either an
+additional publication signature or a prior scoped delegation. The normal EOA
+path is relayed after the one signature. Direct EOA fallback uses one
+transaction prompt and records weaker transaction-bound authorship evidence.
+A bounded revocable smart/session grant targets zero routine wallet prompts
+after initial approval. C0 derives the same unsigned Stage A publication
+digest, EnvelopeId, and `(EnvelopeId, leafIndex)` OccurrenceRefs, but explicitly
+records that its retained composite EOA witness signs the outer WritePlan—not
+the chain-free envelope digest directly. Details and success semantics are
+normative only for the experiment in
+[[disposable-mvp-profile#4. One-approval write law]].
 
 `leafIndex` is simply the zero-based position of one Record inside the signed
 Envelope. It distinguishes two occurrences of Records carried together without
@@ -198,6 +236,7 @@ AdmissionReceipt {
   authorityBasis
   admissionOrdinal
   acceptedStatus
+  requiredRuleActivationAndActionContext? // programmable-acceptance arm
 }
 ```
 
@@ -207,6 +246,12 @@ accepted Occurrences; a reverted or rejected attempt normally leaves no state
 and is returned as call error/evidence rather than a permanent receipt.
 Admission receipts remain state-readable and never masquerade as portable
 unqualified current truth.
+For Types/profiles with a mandatory rule, the acceptance receipt binds its exact
+activation and action/context. A new action cannot borrow cached eligibility
+from accepted bytes. Raw references remain legal, but are not accepted
+application transitions. Stateful hooks authenticate their coordinator and
+share rollback/reentrancy protection with the complete acceptance boundary;
+see [[programmable-type-acceptance]].
 
 ### Binding and withdrawal
 
@@ -250,6 +295,12 @@ code while retaining EOA-key authority. ERC-1271 works locally; ERC-7913 is a
 future addressless-actor seam, not stable Principal identity. The author
 Principal remains separate from relayer and payer.
 
+An arbitrary first-come `claimPrincipal(bytes32)` registry is not this intrinsic
+derivation. A caller may publish a descriptor but cannot acquire an unrelated
+identity by registering its identifier first. Onboarding must also make explicit
+which Principals a Lens includes; successful publication alone does not make a
+new author's data selected by somebody else's Plan.
+
 Later managed Principals may add portable genesis, multiple actors, delegation,
 rotation, recovery, and signature-suite succession behind the same semantic
 `PrincipalId` API. Association or succession evidence cannot retroactively
@@ -260,6 +311,32 @@ and test whether one account Principal can graduate to a managed Principal
 without rewriting history. Reject uniform Principals if the abstraction adds
 setup blocks, hides authority basis, fractures portable EOA authorship, or costs
 more complexity than it removes.
+
+One uniform API does not itself promise same-ID recovery. Compare key-bound
+account succession, account-native recovery, and same-ID managed graduation
+against the same traces. Same-ID continuity requires an original charter or a
+transition authorized under the Principal's previously applicable authority
+policy and admitted at an explicit Realm basis. It does not replace the key
+inside an old intrinsic descriptor or retroactively reinterpret old Occurrences.
+Cross-Realm recognition and recovery disagreement remain visible.
+Recovery cannot invent authority after every recovery factor has been lost.
+
+Delegation is action-, resource-, audience-, Realm- and time/nonce-qualified as
+required by its profile. A child grant cannot widen its parent. Unsupported
+permission fields may restrict authority: refuse that grant rather than ignore
+those fields. This differs deliberately from preserving unknown ordinary data.
+Historical smart-account verification needs its execution/authority evidence;
+an account address or top-level codehash plus block number is insufficient to
+replay arbitrary state-dependent ERC-1271 validation. A stored admission verdict
+is an explicitly Realm-qualified attestation, not a timeless signature theorem.
+
+MVP-C0 temporarily selects the intrinsic account-Principal arm without closing
+that comparison. It persists the exact normal-path WritePlan bytes and accepted
+low-s EOA witness so a second implementation can recompute the digest, recover
+the signer, derive the Principal, and compare the admission basis from state
+alone. Contract-account verdicts remain Realm-and-basis-qualified; direct EOA
+fallback remains transaction-bound. Key loss/recovery is unsolved and only
+synthetic authorship is permitted.
 
 ### Indexes
 
@@ -296,6 +373,30 @@ new canonical index means a new Type Schema. Under Variant B, a new
 `IndexProfileId` may preserve the semantic Type and Record IDs, but its start
 basis and coverage are explicit and any backfill stays `PARTIAL` until proved
 complete.
+
+For MVP-C0 only, the B0 bundled arm is extended at genesis with
+`KIND_BINDING_SCOPE` from [[hierarchical-files-and-folders#5. Complete directory enumeration: BindingScope]].
+That capability is committed in the
+same namespaced Type/index bundle before any Files Binding. It permits the C0
+empty-root and later directory-listing claims to close as complete without
+pretending the permanent Type/query-identity bakeoff has been answered.
+
+Current browsing and historical audit enumeration are different query promises.
+Compare three implementations on the same workload: bounded canonical aggregate
+pages over the audit inventory; an atomically maintained per-Principal current
+candidate index; and optional verified browser-local snapshot/delta acceleration.
+Aggregation can remove RPC amplification without removing lifetime-distinct-role
+scans, and may require no new stored index. Bound inspected work, gas and returned
+bytes independently of the number of useful rows returned.
+
+A current candidate index must retain whiteouts/masks that suppress other
+Principals and discoverable unresolved candidates. It is not an index of one
+app's displayed files or one globally preferred Lens. Removing an irrelevant
+current candidate does not authorize deleting its historical evidence. Generation,
+scan basis, frontier, concurrent-write reconciliation and terminal coverage must
+be defined before an online index becomes active. Complete current membership
+does not automatically establish complete historical enumeration. See the
+[comparison and falsifiers](https://github.com/efs-project/planning/blob/aae282df72f214d791963aeac1cf3c38d162c56e/Reviews/2026-09-10-foundation-design-review.md).
 
 ### Contract Resolution Plan (Lens)
 
@@ -340,6 +441,82 @@ Generic application profiles build on Records:
 
 Core knows none of these names. Their Type Schemas and declared reference
 indexes are sufficient.
+
+MVP-C0 adds one separate state-readable small-byte carrier. File Object,
+FileRevision, ChunkTree/digest, carrier handle, Locator, and observed
+availability remain distinct. Each run records and enforces measured finite
+write/range bounds; no C0 number becomes a permanent protocol cap. A missing or
+unavailable carrier never changes a `FOUND` File into absence.
+
+Keep the state-readable canonical Core spine separate from bulk file bytes.
+External payload carriers can preserve exact content identity while differing in
+retention, availability and which bytes another contract can read. Historical
+calldata and bounded-retention blob data are not ordinary future contract
+getters; neither publication path alone establishes long-term retrieval and
+recovery obligations. Moving canonical Record/admission/index bodies out of state
+would change the constitutional reconstruction promise and requires an explicit
+alternative design; it is not a carrier optimization hidden in this draft.
+
+The economic comparison records metadata/receipt/index/Binding writes, byte
+staging, authority setup, sponsorship, read work, proof construction, retention
+and recovery separately. Report payload size, exact profile, execution fork and
+transaction boundaries. One fixture's create gas is not an all-in per-file cost.
+
+### MVP-C0 point-result projection
+
+The experiment's canonical point outcome is exactly
+`FOUND | ABSENT_PROVEN | UNKNOWN | CONFLICT`. Domain, committed basis,
+coverage, support, validation, authority, currentness, finality, integrity,
+availability, bytes, and canonical write effect remain separate dimensions.
+Available/returned bytes can still fail integrity. Canonical effect is only
+`COMMITTED | NOT_COMMITTED_PROVEN | UNKNOWN | NOT_APPLICABLE`; planned,
+authorized, submitted, included, reverted, and read-back-verified are separate
+operation/receipt stages. Merged absence is proved only when every input is
+complete, supported, valid, and `ABSENT_PROVEN` at the same committed basis and
+domain. Any missing/provider failure, partial coverage, unsupported profile,
+invalid evidence, or basis mismatch is `UNKNOWN`; material unresolved
+disagreement is `CONFLICT`. Files-specific errors remain detail around this law
+rather than a competing universal point enum.
+
+### Qualified composition and independent verification
+
+Ordinary generated reads retain the value or position result together with its
+query domain, exact Plans/profiles, committed observation, coverage, support and
+evidence references. Checked composition must derive qualifications for the new
+claim: mapping, filtering, joining, resolving or exporting cannot blindly copy an
+input's `COMPLETE` flag. Raw bytes/value extraction remains explicitly lower-level
+and cannot manufacture qualified acceptance, absence or completeness.
+
+There is no universal verified Boolean. Complete position enumeration can coexist
+with unresolved positions, untrusted authority or unavailable content. A negative
+filter or exact count requires closure of the relevant universe and predicate
+evidence; confirmed-positive-only filtering cannot be complemented into a proven
+negative. Unsupported encrypted scopes cannot become successful empty lists.
+
+SDK constructors, operation-specific combinators and exhaustive result handling
+should make the safe path ordinary. TypeScript types alone do not enforce this
+against assertions, JavaScript callers, fabricated serialized tags or a renderer
+that discards qualification. Validate at untrusted boundaries, bind resumed pages
+to the complete logical observation, and test empty-state/export/action consumers.
+Keep the existing SDK seams; these obligations do not select new public methods.
+
+Serialized `SEALED` or `COMPLETE` labels are claims, not credentials. Rehydration
+validates retained evidence and the continuation chain against the exact domain,
+observation, index generation, ordering and cursor semantics. Completeness needs
+gap-free coverage and validated terminal progress for every source required by
+the query. Duplicate segments do not advance coverage; missing, conflicting or
+mismatched segments cannot supply completion. Preserve earlier qualified rows
+separately when later acquisition fails; do not transplant them to a new basis.
+
+Recovery states which claims are internally recomputed, provider-checked, or
+authenticated against an independently accepted chain anchor. A rehashed header
+does not authenticate RPC results. Account/storage proofs need a trusted root,
+verified code/storage interpretation and complete inputs for the claimed query;
+membership proofs for returned rows do not prove no rows were omitted. An
+arbitrary computed `eth_call` result is not authenticated by attaching unrelated
+storage proofs. Retained authorship, acceptance then, selection at a basis and
+destination acceptance remain separately checked claims. See
+[Reviews/2026-09-10-foundation-design-review](https://github.com/efs-project/planning/blob/aae282df72f214d791963aeac1cf3c38d162c56e/Reviews/2026-09-10-foundation-design-review.md).
 
 ## Modular contract shape to prototype
 
@@ -433,11 +610,17 @@ Reject or redesign this architecture if:
 11. Type bootstrap or recursive references create hash fixed points;
 12. a mutable parent changes already-admitted child meaning;
 13. one batch accidentally promises application-level atomicity it cannot
-   provide; or
+   provide;
 14. aggregate gas/state for the mandatory index bundle is not economically
-   credible on the intended L2/L3 profile.
+   credible on the intended L2/L3 profile; or
+15. a writer bypasses a Type/profile's mandatory developer rule while acquiring
+   the same accepted/effective application status, or failed acceptance leaves
+   payment, reservation, Binding or index effects behind.
 
 ## Open questions
+
+The following are permanent-design questions. None must be answered merely to
+run the namespaced [[disposable-mvp-profile|MVP-C0]] control.
 
 - [ ] Finalize the two bakeoff implementations and fixture corpus.
 - [ ] Define the Realm descriptor and admission/finality observation split.
@@ -463,5 +646,9 @@ Reject or redesign this architecture if:
 
 ## Implementation notes
 
-The next implementation is disposable prototype code. It must not deploy
-permanent bytes or become a product dependency merely because it is first.
+The next implementation is the disposable [[disposable-mvp-profile|MVP-C0]]
+control initialized by [[mvp-c0-genesis-manifest]]. It must not deploy
+permanent bytes, authorize Web Client/product work, or become a dependency
+merely because it is first. Wallet acknowledgement and transaction receipt are
+not completion; the run ends each write only after canonical read-back and
+independent reconstruction evidence agree.

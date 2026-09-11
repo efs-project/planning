@@ -4,6 +4,8 @@ Per-convention quick-lookup. Canonical rules: [[design-system]].
 
 ## Git sync
 
+Ordinary planning designs and documentation are authored, reconciled, and published on `main`, so the owner and other agents can see them in the shared Obsidian vault. A planning branch is an explicitly agreed exception with a scope and return-to-main handoff, not the default home for an agent's designs. Coordinate overlapping main writes rather than keeping a private design backlog. Existing prototype code/workspaces remain in place until their own separately authorized cleanup; a design sync does not authorize moving code or merging an entire mixed branch.
+
 Before work, identify the assigned branch/revision and inspect dirty state, relevant cards/status/handoffs and visible related branches. Fetch when available to verify freshness. For ordinary main-based work, update only your owned clean worktree against the intended upstream; never rebase another worker's branch, change an assigned pinned review/experiment revision, or autostash unrelated edits. Distinct authorized scopes can use isolated worktrees; overlapping edits require an agreed split or handoff. No status note means no proof of an idle checkout.
 
 Commit and push completed authorized changes unless the assignment restricts publication. A read-only report does not authorize these mutations. Offline independent work can continue locally within scope: state exact source commit and freshness/visibility gaps. Distinguish local committed, remote-reachable and merged results in any handoff; optional [role notes](../Agents/README.md#notes-and-harness-ids) are enough.

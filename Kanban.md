@@ -54,6 +54,9 @@ kanban-plugin: board
 
 ## Done
 
+- [x] **Returned isolated design work to the shared main vault** — [[Reviews/2026-09-10-design-consolidation|source and routing map]] covers Core/Files, full Data Explorer, SDK seams, Web Client MVP0 and retained readiness/standards evidence. Current SDK and owner rulings preserved; prototype code/workspaces stay in place. Documentation integration, not a new implementation or validation result. #repo/planning #kind/task
+  — @v2-pm (harness codex, session design-consolidation-20260910); next: ordinary design updates on main, prototype cleanup only when separately coordinated
+
 - [x] **Reconciled the SDK v2 draft with the sealed `EXP-C0` semantic packet** — source-locked the non-merged readiness packet, added the literal shared `ResultV0` outer envelope, C0-only canonical effect axis, Profile-generation/Realm-revision/high-water/basis cursor law, three linked receipt classes, raw-byte and reconstruction exit, plus a six-case source-only preservation fixture. Defined the first unpublished TypeScript runtime slice, generated exact-Type facade boundary, and generated Solidity internal-leaf/default-no-helper boundary. This is a disposable SDK/Core handoff only: exact candidate structs/vectors, Core ABI, codecs, limits, package publication, deployment and production implementation remain blocked. #repo/planning #repo/sdk #repo/contracts #repo/client #kind/design
   — @codex-gpt-5 (harness codex), completed 2026-08-25; next: Core and SDK co-design the candidate struct/vector packet, then run the independent model/SUT and cross-language adapter fixture
 - [x] **Superseded the PM SOUL numbering/promotion question** — [[Agents/pm]] remains a name-stable living operating brief under the owner-approved portable-role process (2026-09-03, [[Decisions]]). This closes the obsolete operating-document question, not a human design promotion, protocol freeze, or claim that rollout verification is complete. #repo/planning #kind/ops

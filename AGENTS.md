@@ -47,6 +47,7 @@ Adopted EFS v2 rulings live in [`Designs/efsv2/owner-rulings.md`](./Designs/efsv
 
 ## Hard rules (load-bearing, don't violate without checking)
 
+- **Planning designs and documentation belong on `main`.** Keep authorized changes visible in the shared Obsidian vault; use a planning branch only for an explicitly agreed special circumstance, with a named return to main. Existing prototype code and its workspaces stay where they are until a separately coordinated cleanup; do not migrate them as part of documentation sync.
 - **Verify source and ownership before syncing.** Inspect branch, revision, dirty state, relevant cards/status and visible related branches. Fetch when available; update only your own safe checkout when the assignment calls for it. Never rebase another worker's branch or autostash unrelated changes. Pinned review/experiment revisions stay pinned; offline work labels freshness and remote visibility gaps. See [Git sync](./Onboarding/conventions.md#git-sync).
 - **DO NOT number your own design drafts.** Save as `<slug>.md`, not `0007-<slug>.md`. Numbers are allocated only at the human-gated promotion ceremony; self-numbering bypasses review.
 - **Tri-sync invariant.** Design status appears in three places: prose `**Status:** X`, tag `#status/X`, and (post-promotion) filename `NNNN-<slug>.md`. All three change in the same commit.

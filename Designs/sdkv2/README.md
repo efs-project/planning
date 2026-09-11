@@ -3,7 +3,7 @@
 **Status:** draft set — founder-authorized SDK experience and experiment program; no protocol bytes, package names, implementation, deployment, or release is adopted
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[../efsv2/README]], [[../efsv2/system-constitution]], [[../efsv2/core-architecture-candidate]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/README]], [[../web-client-os/type-data-abi-boundary-pressure]]
-**Inputs:** the existing `sdk/` repository and older SDK designs as historical evidence only; exact K10/storage/Fable reconciliation snapshot `aae282df72f214d791963aeac1cf3c38d162c56e` documented in [[files-integration-pressure]]; Data Explorer draft at local-only planning commit `08bb5f2906191f0d87624d9a6ecc6788a8b2754d` on `codex/data-explorer-pm` (`Designs/data-explorer/`)
+**Inputs:** the existing `sdk/` repository and older SDK designs as historical evidence only; exact K10/storage/Fable reconciliation snapshot `aae282df72f214d791963aeac1cf3c38d162c56e` documented in [[files-integration-pressure]]; Data Explorer's initial draft input was `08bb5f2906191f0d87624d9a6ecc6788a8b2754d`; its fuller design set is now reconciled on main at [[../data-explorer/README]]
 **Last touched:** 2026-09-10
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/read-path #topic/onchain
@@ -154,7 +154,7 @@ or navigation model onto the other.
 |---|---|
 | **Owner-ratified** | EFS v2 is greenfield; Core is standalone in a qualifying Realm; Commons is optional; contract-readable bounded Lenses, declared automatic indexes, full state-readable Records, a direct guest File Browser, and cross-platform read-only mounts are required outcomes. |
 | **Owner-directed product baseline** | The guest path does not wait on wallet, profile, Commons, hosted indexer, or OS boot. The Web Client uses one `PrincipalId` product surface and targets a 64-Principal Lens if measurement supports it. This does not freeze the Core authority mechanism. |
-| **Instantiated product coordination input** | Data Explorer is an independent general-purpose typed-data product, not a File Browser panel. Its exact local-only draft input is planning commit `08bb5f2906191f0d87624d9a6ecc6788a8b2754d`; it remains `#status/draft` and does not freeze SDK or protocol mechanisms. |
+| **Instantiated product coordination input** | Data Explorer is an independent general-purpose typed-data product, not a File Browser panel. The initial input at `08bb5f2906191f0d87624d9a6ecc6788a8b2754d` is historical; [[../data-explorer/README]] now routes the reconciled main-visible corpus. It remains `#status/draft` and does not freeze SDK or protocol mechanisms. |
 | **Current candidate** | Realm, TypeSchema/TypeRevision, Record, Envelope/Context, Occurrence, admission, Binding, ResolutionPlan, layered Types, Views, QueryProfiles, exact-Type generated adapters, and accepted-versus-observed execution/RPC/account/signature/deployment profiles are comparison vocabulary and experiment inputs. |
 | **Historical evidence** | The current `sdk/` monorepo, its viem seam, source injection, profile stamps, typed errors, compile-in Solidity choice, and EAS integration can inform experiments. Its EAS identities, attester defaults, write graph, and package/API shape do not carry into v2. |
 | **Unknown / owner-frozen later** | Exact bytes, IDs, codecs, limits, authority model, validator grades, indexes, contract split, deployment and upgrade form, helper policy, package topology, compatibility promise, migration promise, and release scope. |
@@ -176,6 +176,7 @@ constitution/candidates, then older evidence. This set cannot override Core.
 | [[experiment-program]] | Adversarial matrix, proposed measurement tripwires, kill criteria, and production stop conditions |
 | [[exp-c0-mvp-packet]] | Retained August source-locked shared-envelope comparison fixture and clean-room preservation evidence; not the presumed production result API |
 | [[files-integration-pressure]] | Exact K10/storage/Fable disposition, operation-specific assurance seam, restart/retry contract, and smallest integrated Files handoff |
+| [[mvp-interface]] | Retained September five-seam MVP-C0 consumer contract; reconciled alongside, not in place of, the newer integration-pressure direction |
 | [[web-client-os-boundary-pressure]] | Web Client/OS direct Files/shell, independent Data Explorer, confined-app consumption, their common semantic adapter, and runtime-neutral CapabilityRPC assessment |
 | [[owner-rulings]] | Dated founder mandate and retained authority boundaries |
 | [[owner-decision-inbox]] | Evidence-gated choices; nothing needs an immediate founder answer |

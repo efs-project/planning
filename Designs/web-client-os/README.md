@@ -2,10 +2,10 @@
 
 **Status:** draft set — owner-directed working baseline for iteration; no repository, runtime ABI, module profile, wallet stack, or product implementation is authorized
 **Target repos:** planning, client, sdk
-**Depends on:** [[Designs/efsv2/README]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/open-web-app-store/README]]
+**Depends on:** [[Designs/efsv2/README]], [[Designs/efsv2/hierarchical-files-and-folders]], [[Designs/sdkv2/mvp-interface]], [[Designs/open-web-app-store/README]]
 **Inputs:** [[Designs/clientv2/README]] (historical requirements and mechanism evidence)
 **Reviewers:** @current-v2-read-path (2026-08-14), @historical-client-architecture (2026-08-14), @web-platform-standards (2026-08-14), @open-web-app-store-pm boundary review (2026-08-14), @os-drives-pm boundary review (2026-08-14)
-**Last touched:** 2026-08-26
+**Last touched:** 2026-09-03
 
 #status/draft #kind/design #repo/planning #repo/client #repo/sdk #topic/efsv2 #topic/cypherpunk-os #topic/app-model #topic/privacy #topic/read-path
 
@@ -169,6 +169,26 @@ bytes or bypass the normal design promotion ceremony.
     The reproducible census and current dispositions are in
     [[web-platform-standards-and-forward-profile]].
 
+## 2026-09-03 MVP-C0 product reconciliation
+
+The dated 2026-08-14 through 2026-08-23 list above remains faithful to its
+original owner attribution. The current reconciliation is recorded separately.
+The owner's [[Designs/efsv2/owner-rulings#Disposable MVP-C0 and wallet-approval direction|2026-09-03 MVP-C0 ruling]]
+authorizes only a disposable Core/Files control and no Web Client/product
+implementation; the same ledger's
+[[Designs/efsv2/owner-rulings#EFS 2.0 greenfield system boundary|greenfield boundary]]
+requires a direct guest File Browser. The
+[[Designs/efsv2/disposable-mvp-profile|MVP-C0 profile]] also excludes a shipped
+File Browser and Data Explorer.
+
+For this bounded product-pressure design, File Browser is therefore the first
+thin direct guest and write-capable journey. The separate
+[[Designs/data-explorer/README|Data Explorer]] is a general typed-data workspace
+and Inspector/view consumer over the same SDK seams. It is not a route gateway,
+and it owns no second write stack. This paragraph is a 2026-09-03 design
+reconciliation, not a claim that James supplied it during the earlier
+attribution window.
+
 ## Current recommendation
 
 Use **one layered, versioned module graph with several boot profiles**, not a
@@ -180,9 +200,10 @@ flowchart TB
     BIOS["BIOS / Boot Core<br/>route, exact base manifest, recovery"]
     READER["Reader Kernel<br/>Realm reader, Files resolver, artifact verifier"]
     PREP["Direct App entry preparer<br/>inert handoff/set/closure validation"]
-    MIN["Minimal Viewer Shell<br/>trusted progress + raw rescue"]
+    MIN["Thin File Browser / Viewer<br/>trusted progress + raw Inspector"]
     HOST["Minimal App Host<br/>trusted progress, launch, exit, fallback"]
     WRITE["Explicit Files-write slice<br/>identity, wallet, planner, signer, submitter"]
+    EXPLORER["Separate Data Explorer<br/>typed workspace + Inspector/views"]
     SYSTEM["System Kernel services<br/>capabilities, private state, journal, packages, agents"]
     SHELL["Session Shell<br/>layout, launcher, workspaces, modes"]
     APPS["Apps and Presentation modules"]
@@ -191,7 +212,7 @@ flowchart TB
     BIOS --> PREP --> HOST
     READER --> MIN
     READER --> HOST
-    MIN -->|"default Files/data App"| APPS
+    READER -->|"explicit typed-data route"| EXPLORER
     HOST -->|"eligible exact guest entry"| APPS
     MIN -->|"Create, edit, connect"| WRITE
     WRITE -->|"canonical read-back + receipt"| MIN
@@ -199,11 +220,12 @@ flowchart TB
     SYSTEM --> SHELL --> APPS
 ```
 
-- An unqualified Files/data **guest critical path** contains only link ingress,
-  the Boot Core, Reader Kernel, and built-in guest Data Explorer/viewer slice.
+- A File Browser **guest critical path** contains only link ingress, the Boot
+  Core, Reader Kernel, and thin File Browser/viewer. A general typed-data route
+  may open the separate Data Explorer workspace over the same Reader result.
   A specific-App route instead adds only the pure direct-entry preparer,
-  Minimal App Host and that exact entry's verified critical runner closure. It
-  does not boot the installer, catalog, full Shell or Data Explorer.
+  Minimal App Host and that exact entry's verified critical runner closure. No
+  exact route boots the installer, catalog, full Shell, or another product.
 - **Write promotion** is explicit. An external link starts in `GuestRead`;
   wallet and action modules are lazy-loaded only after GuestRead establishes a
   pinned useful context and a person or authorized agent asks to create or
@@ -221,7 +243,9 @@ flowchart TB
   overlays and full Shell remain lazy until an explicit deeper operation.
 
 The detailed layer and extension contracts are in [[architecture-and-modules]].
-The first product slice and acceptance tests are in [[mvp-and-acceptance]].
+The bounded first product gate is in [[mvp0-acceptance]]. The larger
+[[mvp-and-acceptance]] document is retained as the broader roadmap and freeze
+catalog, not the MVP0 pass/fail surface.
 The selected standards surface and dated library/build recommendations are in
 [[technology-foundation]].
 The pinned Web-platform catalog index, primary-family review, forward feature dispositions and
@@ -255,7 +279,8 @@ configuration language, security boundary or runtime.
 | [[web-platform-standards-and-forward-profile]] | Reproducible four-catalog Web/ECMAScript/Wasm/WASI index plus primary-family review, non-conservative feature dispositions, named delivery/runtime profiles, negative selections and conformance program |
 | [[ethereum-standards-and-interop]] | Complete pinned EIP/ERC synthesis; exact-read, wallet, signature, URI/content, contract, privacy, cross-chain and agent adapter dispositions; SDK pressure and acceptance fixtures |
 | [[system-profiles-and-generations]] | Nix/Guix recovery, exact and follow profiles, safe social sharing, deterministic composition, System Configuration Manager, local activation/state/grant generations, rollback/GC/export, and the foundational Wasm/WIT/Component/WASI module direction |
-| [[mvp-and-acceptance]] | Fast guest read plus official basic File Browser writes over proposal-labelled adapters, user and agent journeys, threat boundaries, performance budgets, acceptance tests, and EFS v2 pressure |
+| [[mvp0-acceptance]] | Nine observable tests for the bounded clean-guest, three path-bound folder/file/revision writes, prompt, tamper, qualification, canonical read-back, and clean-reopen gate |
+| [[mvp-and-acceptance]] | Broader product roadmap and freeze catalog: future journeys, performance, delivery, global-use, OS-preservation, security, and compatibility gates; not the MVP0 gate |
 | [[type-data-abi-boundary-pressure]] | Finite exact-Type consumer adapter, generated codec/domain-DTO boundary, exhaustive read/byte outcomes, one Type-evolution fixture, and two generic Core pressure packets |
 | [[privacy-and-agents]] | Privacy architecture reserves and first-class human/agent interaction model, including current web-standards posture |
 
@@ -408,7 +433,9 @@ horizons and falsifiers show which seams must remain open.
 | Concern | This set owns | Neighbor owns |
 |---|---|---|
 | Core and Realm | How the client supplies, pins, displays, and preserves read/write context | EFS v2 owns Core semantics, Realm bootstrap, Principal, admission, indexes, Bindings, and Lens mechanics |
-| Files | Web/OS consumption, File Browser UX, module interfaces, semantic opened-file/view pinning, action planning, and honest states | Files design owns stable objects, paths, enumeration, revisions, content, resolver contracts, and certified write semantics |
+| SDK | File Browser inputs, trusted preview/prompt UX, and presentation of qualified outcomes | [[Designs/sdkv2/mvp-interface|SDK MVP-C0]] owns exact codecs, the five shared seams, deterministic planning, authorization verification, submission evidence, and canonical read-back |
+| Files | Web/OS consumption, File Browser UX, module interfaces, semantic opened-file/view pinning, and honest states | Files design owns stable objects, paths, enumeration, revisions, content, resolver contracts, and certified write semantics |
+| Data Explorer | Direct routing remains optional; File Browser may reuse the shared Inspector presentation | [[Designs/data-explorer/README|Data Explorer]] owns its separate typed-data workspace, navigation, selection, layout, and later projections; it owns no route gateway or write machinery |
 | Packages/catalogs | Installation, activation, local grants, runtime selection, lazy loading, rollback UI, and configured defaults | [[Designs/open-web-app-store/README|Open Web App Store]] owns generic Project/Release/package/dependency/catalog/trust/update evidence and the runtime-neutral `PackageHandoff` |
 | Native mounts | Consumption of shared resolver results only as needed for Web UI parity fixtures | OS Drives owns native handles, host aliases, projection behavior, errors, metadata projection, daemons, packaging, and three-host validation |
 | Product modules | Safe consumption and execution boundaries | Arcade, Media, Git/Forge, EAP, Nanda, and other PMs own their domain semantics and pressure fixtures |
@@ -463,13 +490,13 @@ authority.
    guidance snapshot, reproduce or deliberately refresh the pinned standards
    census, instantiate the EFS feature/profile evidence ledgers and put the
    native-first review fields in the repository contribution path.
-3. **MVP critical path:** freeze only the symbolic inputs in
-   [[type-data-abi-boundary-pressure]], then—after explicit experiment
-   authorization—convert its guest read and official wallet-owned File Browser
-   write journeys into one disposable exact-Type fixture against the current
-   Core/Files candidates. A finite-View comparator is optional and requires
-   separate authorization. An earlier empty-directory debugger is only a
-   bring-up step.
+3. **MVP0 critical path:** after explicit implementation authorization, run
+   [[mvp0-acceptance]] through the five seams in
+   [[Designs/sdkv2/mvp-interface]] against one exact local
+   [[Designs/efsv2/disposable-mvp-profile|MVP-C0]] run. This is a disposable
+   product-pressure fixture, not a Type/result/route/package freeze. Data
+   Explorer packaging and finite/rich View comparators require separate later
+   gates.
 4. **OS-preservation track in parallel:** validate exact profile/lock/follow
    identity, the inert Inspector header and deletion/non-regression fixture.
    Only those interface and zero-guest-cost seams gate the Files skeleton.
@@ -510,6 +537,8 @@ This draft does not authorize:
   later selection but do not authorize dependencies or implementation;
 - installing, auto-updating or executing a guidance package, creating a
   repository, or treating a linked guide as permission to write product code;
+- packaging or making Data Explorer a default route, or creating a second
+  product-local read/write stack;
 - freezing Type/package bytes, running a code generator or executable
   Type/Data-ABI fixture, publishing a public test Record, or making a
   protocol-conformance claim; or

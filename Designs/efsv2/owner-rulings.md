@@ -1,7 +1,7 @@
 # EFS v2 — Owner rulings & notes (James)
 
 **Status:** reference — append-only, dated ruling ledger. NOT a design: decisions/directions only. The design docs get updated to match separately.
-**Last touched:** 2026-08-12
+**Last touched:** 2026-09-10
 
 #status/reference #kind/note
 
@@ -219,3 +219,156 @@ The 2026-07-22 cross-platform read-only mount requirement and research-before-MV
   Commons features/operator/brand; and all candidate Core primitives and bytes.
 
 — ruled by @james, 2026-08-12
+
+## 2026-09-03
+
+### Disposable MVP-C0 and wallet-approval direction
+
+- **Run one visibly namespaced, disposable Core/Files MVP-C0 control.** Use the
+  B0 bundled Type/index arm only as that control; keep the permanent
+  Type/query-identity bakeoff and an SDK seam capable of a later split. This
+  direction authorizes no permanent protocol/profile, semantic freeze, public
+  or permanent deployment, durable product data, or Web Client/product
+  implementation.
+- **The normal EOA target is one wallet approval.** One composite EIP-712
+  `WritePlan` may bind the portable publication digest and exact Realm effects,
+  while authorship/publication, authorization, submission, admission/effect,
+  and canonical-read-back meanings and receipts stay distinct. Because the
+  signature is Realm/chain/Core-bound, this arm does not claim independently
+  detachable realm-neutral authorship; that requires another signature or a
+  prior scoped delegation.
+- **Direct EOA fallback is also one prompt, but different evidence.** A direct
+  Core transaction may carry the full plan in one transaction prompt. Its
+  authorship evidence is chain/transaction-bound and weaker than a separately
+  signed portable publication; clients must label it rather than upgrade the
+  claim.
+- **Smart/session wallets target zero routine prompts after permission.** One
+  initial bounded, expiring, and revocable grant may authorize a session key to
+  sign routine in-scope WritePlans. Wallet acknowledgement, bundler/relay
+  acceptance, and an EVM transaction receipt never equal canonical EFS
+  success; exact admission/effect receipts and canonical read-back remain
+  required.
+
+— ruled by @james, 2026-09-03
+
+## 2026-09-08
+
+### Upgradeable testnet and an understandable Files MVP
+
+- **Contracts must be upgradeable while EFS v2 is on testnet.** Research
+  diamonds and other appropriate EVM development patterns and form a build
+  plan. A diamond is a suggested option, not a selected architecture.
+- **The MVP must demonstrate a working file browser:** directory listings,
+  creation, deletion/removal, renaming and other core file operations,
+  including Lenses, tags and filters. Observable user workflows should make
+  the dense designs understandable and test whether the system works well.
+
+— ruled by @james, 2026-09-08
+
+Interpretation boundary: this request authorizes research and planning. It
+does not select a proxy pattern, permanent upgrade authority, protocol freeze,
+public deployment or product repository creation. The implementation proposal
+is [[testnet-files-mvp-plan]]. Existing immutable C0 selections remain named
+experimental controls, not the deployment template for an upgradeable testnet.
+
+## 2026-09-09
+
+### Correctness before extreme efficiency in the MVP prototype
+
+- **Current limits are not set in stone.** Prototype budgets and numeric caps
+  may change as engineering evidence develops; they are not product guarantees
+  or permanent protocol selections.
+- **A better Ethereum library is acceptable even if the download is larger.**
+  The current dependency is not frozen. Engineering correctness takes priority
+  over extreme efficiency at this stage.
+
+— ruled by @james, 2026-09-09
+
+Engineering follow-through: prefer a correct, understandable and maintainable
+SDK over elaborate machinery introduced only to preserve an arbitrary cap or
+bundle target. Keep earlier measurements and their settings as historical
+controls; compare changed candidates explicitly. Resource accounting,
+cancellation, truthful partial results and actual execution-venue constraints
+still matter, but do not make today's configurable numbers architectural law.
+This priority does not select a replacement library, freeze an ABI, authorize
+public deployment or resume the paused overnight run. The next-work correction
+is in [Reviews/2026-09-09-files-reader-scale/next-experiments](https://github.com/efs-project/planning/blob/c833ecd508643852aea372400bd44a771f50641c/Reviews/2026-09-09-files-reader-scale/next-experiments.md).
+
+## 2026-09-10
+
+### Mandatory developer validation before acceptance
+
+- **Schema developers must be able to supply arbitrary developer validation
+  code before their data is accepted.** James explicitly reaffirmed this
+  EAS-class requirement, then authorized design updates and ideation to close
+  useful capability gaps while prioritizing simplicity, ease of use and utility.
+
+— ruled by @james, 2026-09-10 (requirement recorded from the current conversation)
+
+This records the required outcome, not a Type preimage, callback ABI, execution
+mode, activation authority or deployment decision. The recommended comparison
+in [[programmable-type-acceptance]] is agent design work, not an owner-selected
+mechanism. Bounded execution, no ordinary-read callbacks, and honest historical
+versus current acceptance remain engineering obligations. It does not authorize
+public deployment, permanent protocol promotion or a claim of feature parity.
+
+### Index families, dedup and bytecode storage — DELEGATED to engineering
+
+- James on the three economics decisions in
+  [Reviews/2026-09-09-files-browser-mvp/gas-engineering-2026-09-10](https://github.com/efs-project/planning/blob/c833ecd508643852aea372400bd44a771f50641c/Reviews/2026-09-09-files-browser-mvp/gas-engineering-2026-09-10.md) and
+  [Reviews/2026-09-09-files-browser-mvp/indexing-and-state-2026-09-10](https://github.com/efs-project/planning/blob/c833ecd508643852aea372400bd44a771f50641c/Reviews/2026-09-09-files-browser-mvp/indexing-and-state-2026-09-10.md) —
+  A (finish the seven posting families as bitmaps over the directory
+  ordinal), B (chunk-level content dedup), C (record bodies and chunks as
+  bytecode): *"1, 2, 3 sound like engineering problems and I guess I say Yes.
+  I don't fully understand them, the options, or the tradeoffs so I trust
+  you."* Direction to measure and prototype; the standing constraint that
+  nothing freezes a protocol choice is unchanged.
+- The "opt-in per Type" half of A conflicts with the 2026-07-15 mandatory
+  automatic-indexing ruling above. James asked for an explanation before
+  deciding (PENDING, below). **Until he rules, the 2026-07-15 ruling stands.**
+
+### Tags — rulings on the tag deep dive
+
+Evidence: [Reviews/2026-09-09-files-browser-mvp/tag-system-2026-09-10](https://github.com/efs-project/planning/blob/c833ecd508643852aea372400bd44a771f50641c/Reviews/2026-09-09-files-browser-mvp/tag-system-2026-09-10.md).
+
+- **D-A — On-chain, grouping is not inference. RULED.** *"No. I realize that's
+  not practical onchain. When using enhanced searching via the graph then yes
+  I'd like that functionality if nimbus has metadata saying its a child of
+  clouds."* A catalog placement `/clouds/nimbus` never makes nimbus-tagged
+  items answer a `clouds` query on-chain; only an explicit implication edge
+  can. Enhanced (Graph) search may expand over child/implication metadata
+  under the reader's chosen vocabulary.
+- **D-B — One global id per canonical tag string. RULED: *"Yes."*** The
+  commons profile derives the concept id from the folded string
+  (`NFC → lowercase → space→underscore`); the folding rule is frozen once
+  chosen. Files names stay unfolded — a different object.
+- **D-C — A signed stance on the same tag, not a separate negative tag.
+  DIRECTION.** James: v1 tags carried a weight where +1 meant "this is nsfw"
+  and −1 meant "this is NOT nsfw", so the data shows whether a tag is merely
+  missing or the item really is not that thing — *"Can we keep something like
+  that? It might be helpful to know something is NOT a tag without having a
+  completely separate not_nsfw tag which seems redundant."* Yes: that is DENY
+  as a polarity on the same concept (assert / deny / silent, per author),
+  never a separate tag. Whether the carrier is a signed weight or an
+  asserts/denies pair is engineering.
+- **D-E — Tag budget. RULED: *"It's acceptable if that's the best we can
+  do."*** ≈ 50k gas per tag at the engineering floor today (≈ 220k under
+  Glamsterdam pricing) is the design target; bulk seeding of a booru-density
+  corpus by one payer is out of scope. James's follow-up — *"booru density is
+  just a scaling issue right? … Does it break our infrastructure if thousands
+  tag an item?"* — is answered in the evidence document §5a: no; each tagger
+  pays for their own column, and reads scale with the reader's lens size,
+  not with the crowd.
+
+— ruled by @james, 2026-09-10 (D-A, D-B, D-E); D-C and A/B/C are direction
+
+### PENDING — mandatory automatic indexing versus per-Type declared families (D-D)
+
+- James: *"I don't really understand what you said. I need explanation if
+  I'm to make a decision. But for the most part I agree and continue
+  trusting your technical expertise here."* Explanation delivered in chat on
+  2026-09-10 (also in the evidence document §5a). Not a ruling until James
+  answers; the 2026-07-15 ruling stands meanwhile.
+- No `Retirements.md` row: none of these rulings reduces to a live phrase
+  (the July path-derived tag identity is already superseded by the Files
+  spine, and its remaining mentions are in demoted July documents).

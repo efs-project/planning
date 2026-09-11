@@ -4,6 +4,13 @@ Analysis, critique, and build-record artifacts produced by review/architecture a
 
 ## Contents
 
+### Design consolidation and recovered reviews (2026-09-10)
+
+- [[2026-09-10-design-consolidation]] — main-visible Core, SDK, Explorer and product designs, exact source checkpoints, and prototype/evidence locations left unchanged. Documentation integration, not new validation or protocol adoption.
+- [[2026-09-02-efs2-coherence-and-mvp-readiness-review]] with [[2026-09-02-efs2-coherence-and-mvp-readiness-review-errata|its errata]] — historical top-down review; the linked lane corpus stays at its exact source. Do not treat September 2 findings as today's status.
+- [[2026-08-25-data-explorer-exp-c0-consumption/README|Explorer serialized-consumption review]] — historical static preservation evidence; scripts and JSON remain at the pinned source.
+- [[2026-09-04-explorer-mvp-convergence/README|Explorer September convergence]] — retained five-seam and separate-workspace reconciliation, not an executed browser gate.
+
 ### AGNTCY and shared public agent data (2026-09-03)
 
 - [`2026-09-03-agntcy-deep-dive/`](./2026-09-03-agntcy-deep-dive/README.md) — released Directory/OASF storage, discovery and exact skill-bundle audit; Identity, SLIM, SHADI, LF governance and adoption; overlap with EFS profiles/SOUL/shared knowledge; source-pinned fidelity/current-state caveats; and one disposable conventional-baseline-versus-EFS comparison. Records interoperability opportunities without adopting an agent-specific Core primitive, runtime, public registry or new deadline.

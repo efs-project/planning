@@ -4,14 +4,20 @@
 **Target repos:** planning, sdk, contracts
 **Depends on:** [[codex-envelope]], [[codex-kinds]], [[read-lens-spec]]
 **Base text:** [ops-economics-honesty.md](../../Reviews/2026-07-07-efsv2-corpus/ops-economics-honesty.md) + [attack-ops.md](../../Reviews/2026-07-07-efsv2-corpus/attack-ops.md) (red team: holds with mandatory repairs; the one conditional-fatal — checkpoint dependency — resolves via the adjudicated reading, below)
-**Last touched:** 2026-07-07
+**Last touched:** 2026-08-23
 
 #status/draft #kind/design #repo/planning #repo/sdk
+
+> **Historical July design evidence.** The active greenfield v2 authority is
+> [[README]], [[system-constitution]], [[core-architecture-candidate]],
+> [[owner-rulings]], and [[v2-contract-readiness-program]]. Statements below
+> are preserved as dated mechanism evidence and do not freeze current v2
+> relayer, payer, Lens, or execution-profile mechanics.
 
 ## Adopted core (unamended)
 
 - **Lenses:** protocol ships NO default lens (a genesis lens would be Etched reputation); clients ship defaults under conformance rules C1–C5 (disclosed, published-on-EFS as forkable lens objects, ejectable, no unknown-fallthrough, untrusted-labeled); lens manifests at `/.well-known/lens`; starter packs. Honest oligopoly posture: **EFS guarantees cheap exit, not plural equilibrium** — monoculture is monitored (canary via the observable proxies of amendment 10 — the as-stated read-share metric is unmeasurable) and answered by stewardship, never protocol machinery.
-- **Relayers:** the **mortality invariant is format-level** — no signed byte ever names a submission channel; relayer death is a UX event, never a data/identity event. Admission = per-identity budgets × borrowed-scarcity credentials (PoW prohibited by the Laurie–Clayton evidence); policy machine-readable at `/.well-known/relayer`. **2026-07-19 Base native-AA note:** EIP-8130 payer signatures / ERC-8168-style payer services can be another capability class behind this endpoint and can remove EntryPoint/bundler machinery on supporting venues; they do not remove sponsor budgets, abuse controls, privacy disclosure, or fallback obligations, and never enter the signed EFS envelope. See [[Reviews/2026-07-19-base-native-aa-impact]].
+- **Relayers:** the **mortality invariant is format-level** — no signed byte ever names a submission channel; relayer death is a UX event, never a data/identity event. Admission = per-identity budgets × borrowed-scarcity credentials (PoW prohibited by the Laurie–Clayton evidence); policy machine-readable at `/.well-known/relayer`. **2026-07-19 Base native-AA note:** EIP-8130 payer signatures / the external July payer-service proposal formerly described as “ERC-8168-style” can be another capability class behind this endpoint and can remove EntryPoint/bundler machinery on supporting venues; they do not remove sponsor budgets, abuse controls, privacy disclosure, or fallback obligations, and never enter the signed EFS envelope. **Corpus correction, 2026-08-23:** no ERC-8168 exists in the pinned official 611-ERC snapshot; the label was external proposal shorthand, not official ERC status. See [[Reviews/2026-07-19-base-native-aa-impact]].
 - **Censorship floor, stated with costs:** real on Stage-1+ rollups with working force-inclusion (delay-not-denial); recursive/absent on L3s and validiums; permissionless submission means a censor must stop *every* submitter, not just the author. The trusted-chain list gains a force-inclusion column. [Force-inclusion mechanics figures marked *training-knowledge — verify* in the base text; verification is a freeze-gate item.]
 - **Expiry:** MUST live inside the signed record bytes (`expiresAt` claim-body word — the stripped-expiry-copy attack disqualified property placement); storage clock-free, reads clock-aware; **STALE is a first-class read grade distinct from REVOKED**; the renewal ladder (pre-signed future-TID rungs, kernel future-bound; dead-man's switch; revoke-all via precomputed claimIds — pre-revocation legal per the envelope ruling).
 - **Kernel spam posture:** nothing new needed or permitted — gas meters, index shape contains (TAGDEF global enumeration demoted from birth), lenses defend.

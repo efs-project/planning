@@ -6,7 +6,7 @@
 **Inputs:** [[Designs/efsv2/hierarchical-files-and-folders]] (proposal-only `BindingScope` experiment)
 **Dated evidence:** [SDK v2 Ethereum standards census at `4d3e736`](https://github.com/efs-project/planning/blob/4d3e736524ca04cdadfb26fdd628fcd206fc8084/Designs/sdkv2/ethereum-standards-census.md)
 **Reviewers:** @core-authority-audit (2026-08-14; boundary repair 2026-08-15), @adversarial-architecture (2026-08-14; boundary repair 2026-08-15), @external-landscape (2026-08-14), @web-client-os-pm boundary review (2026-08-15)
-**Last touched:** 2026-08-22
+**Last touched:** 2026-09-04
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/app-model #topic/trust #topic/content
 
@@ -23,7 +23,9 @@ publication, exact identity, plural curation, exit, and long-term use.
 The opposite failure is to call every social or discovery problem a “Lens” and
 pretend the current Core candidate supplies search, ranking, completeness,
 moderation, dependency solving, install authority, or runtime isolation. It
-does not. B0 Lens is a bounded point-resolution candidate; Stage B has not run.
+does not. B0 Lens is a bounded point-resolution candidate; later bounded
+fixture evidence does not establish the full Stage B gate (see
+[[README#Proposal-only EFS inputs]] and its latest disposable evidence).
 
 The architecture must therefore define the generic application profile above
 Core, name where replaceable services are legitimate, preserve honest partial
@@ -235,8 +237,11 @@ manifest point in one direction to avoid identity cycles.
 
 ### `PackageRelease`
 
-An immutable authored claim connecting one Project, exact Manifest, exact
-payload closure, and human version label. Candidate EFS mapping: a new
+An immutable authored claim connecting one Project, exact Manifest and exact
+payload closure under the declared package profile. Human version labels are
+separate attributable claims targeting an exact authored Release; changing
+label testimony does not change that Release. This remains a proposed
+application model, not adopted Type bytes. Candidate EFS mapping: a new
 application Type following `ArtifactRelease/1`'s subject/artifact/version
 separation, or an explicit composition with `ArtifactRelease/1` only if
 fixtures prove its existing fields carry the exact Manifest without semantic
@@ -250,8 +255,8 @@ Two identity layers remain visible:
 
 Changing the manifest, requested capability ceiling, profile/schema ID,
 payload bytes, or Project creates a new Release. Changing a Locator,
-availability observation, catalog membership, review, advisory, rebuild, or
-other evidence does not.
+availability observation, catalog membership, version-label testimony, review,
+advisory, rebuild, or other evidence does not.
 
 The Release commits dependency **requirements**, not a universal transitive
 lock. One Release may resolve differently for explicit supported environments;
