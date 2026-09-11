@@ -1,0 +1,102 @@
+{
+  "scope": "STANDALONE_CODEC_ONLY_NOT_CORE_ADMISSION",
+  "status": "FAIL",
+  "deployments": {
+    "CompactCacheCodec": {
+      "address": "0x253ffc56a089dcc6e37a22f7cb8f3e00ba9be7e8",
+      "runtimeBytes": 355,
+      "initcodeBytes": 381,
+      "runtimeHash": "0xea86c0c19d654535266d022349b94e753a9c5552ed1aafc15c442b8a7e1874f1",
+      "gasUsed": "130021",
+      "transactionHash": "0x910485c8d594d7db524a5771e0ecf51f89646768922c53f56eb4413a36366901"
+    },
+    "PreparationHelper": {
+      "address": "0x01e67eb835af1cee9d8e3283ebc4a5692979d31d",
+      "runtimeBytes": 18953,
+      "initcodeBytes": 18979,
+      "runtimeHash": "0x728278d05be7a73df478d470792038b67c1a9a5398904254b42b721f2274fca0",
+      "gasUsed": "4152019",
+      "transactionHash": "0x5bd6740f148d17d2438e40174fdb30563ec8560ef04ae04358edfe45b57e96a6"
+    }
+  },
+  "sources": {
+    "CompactCacheCodec": {
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [
+          "C0Admission/=../2026-09-05-c0-admission/src/",
+          "C0Core/=../2026-09-05-c0-core/src/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/CompactCacheCodec.sol": "CompactCacheCodec"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sourcePins": {
+        "src/CompactCacheCodec.sol": "0xe15f906cf30c99c491df96239913226f18dbb8567c63df8c7fb101926b84bd3a"
+      }
+    },
+    "PreparationHelper": {
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [
+          "C0Admission/=../2026-09-05-c0-admission/src/",
+          "C0Core/=../2026-09-05-c0-core/src/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "../2026-09-05-c0-core/src/PreparationHelper.sol": "PreparationHelper"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sourcePins": {
+        "../2026-09-05-c0-admission/src/TypeGroupParser.sol": "0x586b5d360092ed79faaf69114aadbe7dd487b9a7c2690ef55c5c6443d3f2bc86",
+        "../2026-09-05-c0-core/src/BindingFold.sol": "0xecf170a723ffff6966b6439c2305dcbae427ccc70c68aad632b950631dd307ee",
+        "../2026-09-05-c0-core/src/IndexKeys.sol": "0x82dbf6754e96cd113fc5ecd8536c50ed464f626214947de51f20e85650fb4d43",
+        "../2026-09-05-c0-core/src/Preparation.sol": "0x6205b159edceb24879ee7c1855bf2d13fd5372a0d7907368e1b460a544af0055",
+        "../2026-09-05-c0-core/src/PreparationHelper.sol": "0x90be42418fc9b5dad97b9df9feb1eb590bcc51e1ab11eef53c5fd2792263b0a6",
+        "../2026-09-05-c0-core/src/RecordBody.sol": "0xd08b372ae170699dc246bf3e28ca843b4ac45a1b4347fc45d39258cdd1b0873e"
+      }
+    }
+  },
+  "cases": [],
+  "malformed": [],
+  "gasReceipts": [],
+  "cleanup": {
+    "cachePath": "/var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-anvil-cache-Sxbn9T",
+    "cacheRemoved": true,
+    "stopped": true,
+    "pid": 56727,
+    "exitCode": 0,
+    "signal": null
+  },
+  "basis": {
+    "hash": "0x81c018b6ded970924586d37df7d4b1ded83c2fc50a8ea8bb5ff79e8c41461483",
+    "number": "2"
+  },
+  "failure": {
+    "message": "execution reverted: custom error 0xeb3b721a",
+    "data": "0xeb3b721a"
+  }
+}

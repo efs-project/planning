@@ -1,0 +1,14 @@
+{
+  "scope": "STANDALONE_CODEC_ONLY_NOT_CORE_ADMISSION",
+  "status": "FAIL",
+  "deployments": {},
+  "sources": {},
+  "cases": [],
+  "malformed": [],
+  "gasReceipts": [],
+  "cleanup": null,
+  "failure": {
+    "message": "Compiling 8 files with Solc 0.8.30\nSolc 0.8.30 finished in 11.36ms\nError: Compiler run failed:\nError (6275): Source \"2026-09-05-c0-core/src/PreparationHelper.sol\" not found: File not found. Searched the following locations: \"/Users/james/Code/EFS/planning-fable-files-browser/Reviews/2026-09-11-type-cache-codec-lab\".\nParserError: Source \"2026-09-05-c0-core/src/PreparationHelper.sol\" not found: File not found. Searched the following locations: \"/Users/james/Code/EFS/planning-fable-files-browser/Reviews/2026-09-11-type-cache-codec-lab\".\n --> src/ReferenceImports.sol:6:1:\n  |\n6 | import {PreparationHelper} from \"../../2026-09-05-c0-core/src/PreparationHelper.sol\";\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n\n1 !== 0\n",
+    "data": null
+  }
+}

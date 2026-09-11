@@ -1,0 +1,372 @@
+{
+  "scope": "STANDALONE_CODEC_ONLY_NOT_CORE_ADMISSION",
+  "status": "PASS_CODEC_ONLY",
+  "deployments": {
+    "CompactCacheCodec": {
+      "address": "0x253ffc56a089dcc6e37a22f7cb8f3e00ba9be7e8",
+      "runtimeBytes": 7700,
+      "initcodeBytes": 7726,
+      "runtimeHash": "0x009ba2e68f5ff1cb38d3a1fb5249cee65e8b6ba1ca724f60c095c4ba8450d6ac",
+      "gasUsed": "1718528",
+      "transactionHash": "0xcf25567510f09d5043df55aefa8b2dbb785a800c09422f71f8dafc0ec53403a6"
+    },
+    "PreparationHelper": {
+      "address": "0x01e67eb835af1cee9d8e3283ebc4a5692979d31d",
+      "runtimeBytes": 18953,
+      "initcodeBytes": 18979,
+      "runtimeHash": "0x728278d05be7a73df478d470792038b67c1a9a5398904254b42b721f2274fca0",
+      "gasUsed": "4152019",
+      "transactionHash": "0x5bd6740f148d17d2438e40174fdb30563ec8560ef04ae04358edfe45b57e96a6"
+    }
+  },
+  "sources": {
+    "CompactCacheCodec": {
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [
+          "C0Admission/=../2026-09-05-c0-admission/src/",
+          "C0Core/=../2026-09-05-c0-core/src/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "src/CompactCacheCodec.sol": "CompactCacheCodec"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sourcePins": {
+        "src/CompactCacheCodec.sol": "0x68ac331e2d5ed6450e52914c43d61753800056ba6f7582a6ea133c4db9c079ac"
+      }
+    },
+    "PreparationHelper": {
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "settings": {
+        "remappings": [
+          "C0Admission/=../2026-09-05-c0-admission/src/",
+          "C0Core/=../2026-09-05-c0-core/src/"
+        ],
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "metadata": {
+          "bytecodeHash": "ipfs"
+        },
+        "compilationTarget": {
+          "../2026-09-05-c0-core/src/PreparationHelper.sol": "PreparationHelper"
+        },
+        "evmVersion": "cancun",
+        "libraries": {},
+        "viaIR": true
+      },
+      "sourcePins": {
+        "../2026-09-05-c0-admission/src/TypeGroupParser.sol": "0x586b5d360092ed79faaf69114aadbe7dd487b9a7c2690ef55c5c6443d3f2bc86",
+        "../2026-09-05-c0-core/src/BindingFold.sol": "0xecf170a723ffff6966b6439c2305dcbae427ccc70c68aad632b950631dd307ee",
+        "../2026-09-05-c0-core/src/IndexKeys.sol": "0x82dbf6754e96cd113fc5ecd8536c50ed464f626214947de51f20e85650fb4d43",
+        "../2026-09-05-c0-core/src/Preparation.sol": "0x6205b159edceb24879ee7c1855bf2d13fd5372a0d7907368e1b460a544af0055",
+        "../2026-09-05-c0-core/src/PreparationHelper.sol": "0x90be42418fc9b5dad97b9df9feb1eb590bcc51e1ab11eef53c5fd2792263b0a6",
+        "../2026-09-05-c0-core/src/RecordBody.sol": "0xd08b372ae170699dc246bf3e28ca843b4ac45a1b4347fc45d39258cdd1b0873e"
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "ObjectGenesis/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x1dc6366ab6cc72f3602e01be571613ab84ae40288fe07000f6d5eb688c923c44",
+      "logicalHash": "0xa41dd2cadd208dac3f9fe475a1c6787affac81141f27b43f2148d0e674f89e05",
+      "packedHash": "0x25ca8087e9b0caacb41dc3b7a3835c54aed03d6088ed45af9675028309c1967d",
+      "logicalBytes": 1344,
+      "packedBytes": 184
+    },
+    {
+      "name": "ResolutionPlan/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x05cc2a7f4eec5faff7e64f2f8374aca5f980d390fd4eee3b46c2f5c53853e61e",
+      "logicalHash": "0xb2f00e6b8f9a83b286650eeea0e7d43af7c31e4c97f05bc7e4a61c43369a66fb",
+      "packedHash": "0x887946714860589b4d972f2e9ada7a1183a2f1dbb966ff5f768ab1b2bac23e54",
+      "logicalBytes": 704,
+      "packedBytes": 124
+    },
+    {
+      "name": "ByteDigest/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x7e82f3afc17fea0499f3aace8dd43a140af5b27fb807eb7de578c2b3f33ff0e0",
+      "logicalHash": "0x27e2bf0481ed3dddc91d6522b77c391728d59e57a3261c73cccd8952384da0cd",
+      "packedHash": "0xe24e754ea0853d3aea7a475643ad177ef1e25ebaf2ac7be8570f9b3630d48ece",
+      "logicalBytes": 704,
+      "packedBytes": 123
+    },
+    {
+      "name": "ChunkTree/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0xf6c0966e2acc9f6b1bad9ac20f07da3b00cc418aafc8481dedcdc5f35f8767e8",
+      "logicalHash": "0xb751ae3b4fda429f80f3bc56e547d0a4cc742541eb48b1e592db5b7b737585e4",
+      "packedHash": "0xccc016a0b2184bbf60b6f7603f5d28b10f8cc9b37929dc0061f9b39fad104477",
+      "logicalBytes": 2048,
+      "packedBytes": 420
+    },
+    {
+      "name": "Locator/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x3f7e004c5c927d00b259c22e05f8ab653b277901e35ca1b84a77cfebd635360d",
+      "logicalHash": "0xd7b7fbe30ccfe3af3b0947c0b334349cfc9a4c7c0479eee41e5f1b6039050350",
+      "packedHash": "0xc2f4edae32624ad82297bd7c9805ad6aa010dac4301af01909e5854503f64233",
+      "logicalBytes": 2272,
+      "packedBytes": 367
+    },
+    {
+      "name": "RepresentationBinding/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0xf37c39f5944784990119dd7a8874b423cf7e16d7a0d255c89ee6b02972893d2d",
+      "logicalHash": "0xdf9598a4ec885915b83dcb6094ac7384f94d3303d2784b316f9e4d627ca5c1d7",
+      "packedHash": "0x317b2fb69829cf81fd36a0638b53f1af1d1f889b04ea2fa0b61b5afd44875204",
+      "logicalBytes": 1824,
+      "packedBytes": 269
+    },
+    {
+      "name": "BindingSet/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x3d40b6b53db7885be062d89270f41085fa8c59738cbc66fe28857d0573ef3a91",
+      "logicalHash": "0xa0dd69ded0667a3e2774d680559376deefdc50a183f9e8a041582db711d62720",
+      "packedHash": "0xb7a431d62dd5826a27f487b5595ab786d5f4839353fb2aeec42377eab8b8b2c2",
+      "logicalBytes": 2784,
+      "packedBytes": 404
+    },
+    {
+      "name": "BindingTombstone/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0xd9a17f2bdf9d885520b42b39778ec88f792b9b5a4fe0851cc388b2932b31add1",
+      "logicalHash": "0x58260b30bb9a3e07fb74753691065151e86201f1b5840cc4b146be6f2c4e42dc",
+      "packedHash": "0x333bbc80afae22072a0069a5804f018d5c1eb1a884e829703b32e5908fb7f4b8",
+      "logicalBytes": 1824,
+      "packedBytes": 256
+    },
+    {
+      "name": "Withdrawal/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0xc8261b4f9cd91e465be894c8fc41f45bc5a221b08db1ef8a610325b439b9c605",
+      "logicalHash": "0xcfc9a313b9554399cf125006cfd16374cc80ef15f223f6141a56f7ae909ea95f",
+      "packedHash": "0x1005bce25993b4c7eff669d59e6944cc3160cb0363c8e2305744391dfa0d6645",
+      "logicalBytes": 864,
+      "packedBytes": 159
+    },
+    {
+      "name": "DirectoryEntry/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x3a73cfe3e879b527c049645c5a2db3e8f4040a374a36bc5167643c2920642722",
+      "logicalHash": "0x1764459123b1a7a241f304f2f1653f4b3fe2f78185c24dc867ac9ca9e769f58d",
+      "packedHash": "0xea573e875914701b8689af2539584cb80aa14d6f931a5af65a5d5d5f7428390b",
+      "logicalBytes": 2144,
+      "packedBytes": 321
+    },
+    {
+      "name": "DirectoryWhiteout/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x05eb791f96746078774b78b919153e652df372d1e86fcf8d802fee1df3e3badb",
+      "logicalHash": "0x1008b6a4b1aa131302fc8d27712296328dfb31ee46af5ad174a7716aa4162406",
+      "packedHash": "0x232091c1a8c272341b8b950bd42123c027bfcfb8d59cc5a0de6c0f8705d07ffe",
+      "logicalBytes": 1184,
+      "packedBytes": 186
+    },
+    {
+      "name": "FileRevision/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x70e18fd87e4d254def230ccb1a7873c760ef95851b6e200fd3597c5fd7442bfa",
+      "logicalHash": "0x06f9ce3b215e652b4e5716be6f7b9fdccd686f915e7f2f7588c8f5c093c60ebc",
+      "packedHash": "0xb0758f0dc6567ba6b51b6faea0b348ae5907a60fffa98288c213650f84133c06",
+      "logicalBytes": 2784,
+      "packedBytes": 390
+    },
+    {
+      "name": "PublicFilesMountConfig/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x6577b3026df6f8cbe5fd1f4709a64755b192d599f57253de6387bf79bc09a692",
+      "logicalHash": "0x03bd7c504332466cf2fd544f0f839eb47173b73752c36f0d6a6c581ad41411f1",
+      "packedHash": "0x6b4d72204b3febd5fa39105aee70bb253741946f594eaabf5b685b37bf1356ad",
+      "logicalBytes": 2304,
+      "packedBytes": 384
+    },
+    {
+      "name": "MountDescriptor/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x8ac5bdff2615f825b887f086e40fdc902edec4e99962ffa5c7db79d661623721",
+      "logicalHash": "0x21f836af9584726e6c5bcfcab82394dbe005008ef886d39fc7923b152a44a183",
+      "packedHash": "0x97b43323aad051415770ecee64ce9adf5378f2f9e5e2d63279a9228ce2864f8e",
+      "logicalBytes": 1664,
+      "packedBytes": 258
+    },
+    {
+      "name": "FilesRouteConfig/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x86ad0a3fb916bfc6757f9912d004541f3f341a2c889ce35689a4030c631c93d6",
+      "logicalHash": "0xab185169bb71e68c5741847e1547257b3cda2e9b3f02083d7b8f58b6ce5a4dcd",
+      "packedHash": "0x651f245b73499b11ef7688f4529d1dacc9b3a67427038b1fd29a6c75e79092aa",
+      "logicalBytes": 3104,
+      "packedBytes": 411
+    },
+    {
+      "name": "MvpC0BootstrapSeal/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x3625f9c1765d2391f950672d92a9cfeeb2a38834327e628e64443c28d45ee716",
+      "logicalHash": "0xd5af9c20b2a1b2cb9c11851f71491cc9751c300ae92ce9215637672fda00fc3b",
+      "packedHash": "0x731f2b126c83fa726826898afc1a2359d728f9ce00a39328e3916a4c96d3974a",
+      "logicalBytes": 6464,
+      "packedBytes": 912
+    },
+    {
+      "name": "CodecSmall/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x7a6a874b382e372652e9921bb1ec6361caa13210700caaed55f46480bd8e1c50",
+      "logicalHash": "0xe4df3eef61581ba1e142a717590be84f5f58387908f3da32a0e31db4890f8418",
+      "packedHash": "0x17d3645a6cc011442e7df67db1b5a8448e059d2c9334025da6ff70466959661d",
+      "logicalBytes": 704,
+      "packedBytes": 121
+    },
+    {
+      "name": "CacheBoundary/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x7108681ae7e4614023474a13c8f14a21929331ac8551c7083705165d917fbbfa",
+      "logicalHash": "0x157ec484e3a43dcb876c812c3b2bb2acaa3e33386e39764f22de84f318d993ec",
+      "packedHash": "0x5090d47df8d465f6c2a07b4eb158e16070bd8d86903970db49d323893f5615e4",
+      "logicalBytes": 24960,
+      "packedBytes": 5536
+    },
+    {
+      "name": "CodecNested/1",
+      "classification": "ACTUAL_HELPER_PARSER_VALID",
+      "typeId": "0x7fffc61ac5e725328e45ec31b115d90639dd7fd42bd2bf079d754c40574af71e",
+      "logicalHash": "0x81c26e74b1198685c2a8ccba3f52ed310d88213ccea4be62e646224b6b65c223",
+      "packedHash": "0x3f063f7b4f028daf2d21667da6f234e1d2f310cac739cde02b0004e54e993f0a",
+      "logicalBytes": 2688,
+      "packedBytes": 498
+    },
+    {
+      "name": "synthetic-full-widths",
+      "classification": "CODEC_VALID_ONLY_NOT_PARSER_VALID",
+      "typeId": "0x7a6a874b382e372652e9921bb1ec6361caa13210700caaed55f46480bd8e1c50",
+      "logicalHash": "0xad83017b89c292a6ca3e7679c1a8d2f785010ec029d7d828508bfb24a4c70387",
+      "packedHash": "0x82031b282f43f03a16c652542f8c48620a54535cd4f7d9c798f7d2705dec8364",
+      "logicalBytes": 992,
+      "packedBytes": 223
+    }
+  ],
+  "malformed": [
+    "unknown format",
+    "nonzero reserved bits",
+    "zero fields",
+    "too many fields",
+    "too many roles",
+    "too many indexes",
+    "too many constraints",
+    "short field section",
+    "long field section",
+    "descriptor crosses section",
+    "field section padding",
+    "short header",
+    "truncated payload",
+    "trailing payload",
+    "trailing logical bytes",
+    "zero fields",
+    "65 fields",
+    "descriptor envelope overflow",
+    "truncated logical ABI"
+  ],
+  "gasReceipts": [
+    {
+      "sample": "small",
+      "method": "pack",
+      "gasUsed": "43385",
+      "effectiveGasPrice": "2000000000",
+      "transactionHash": "0xd50dd85673df9bd2fa4b2a9286e94c462e85a7da7fb56435f44cc7b0ec884fde",
+      "blockHash": "0x9c9d4c46ad545ee2faa35f34e4311ba37fff457671870e3adc32dbab3a00ffbd",
+      "blockNumber": "3",
+      "calldataBytes": 772,
+      "calldataHash": "0xd1f3c6d568ee2a3261db11444f320e656919a0efefc470812bea931ccfa98412",
+      "status": "0x1"
+    },
+    {
+      "sample": "small",
+      "method": "unpack",
+      "gasUsed": "32724",
+      "effectiveGasPrice": "2000000000",
+      "transactionHash": "0x2fc2bed4bd43b2773dc57ab1a3096a5b360f6d8108bf3f85b46eca19142d32bd",
+      "blockHash": "0x910356ff2f39d900ea1ce3871dea0140ff9af65fdc3ef9d545e2c2fdf0bb39ed",
+      "blockNumber": "4",
+      "calldataBytes": 196,
+      "calldataHash": "0x0612f173942a0e0a1c4c9a2ebe1f1539c7964c8b4402750d0a868cf32c48937c",
+      "status": "0x1"
+    },
+    {
+      "sample": "small",
+      "method": "readHeader",
+      "gasUsed": "26916",
+      "effectiveGasPrice": "2000000000",
+      "transactionHash": "0x9f9488db58ec23284ffd3846581f7a0049d010d4a159389cb38a4e083d607626",
+      "blockHash": "0xadad8251faa9a85c4e3e56587d69883ca04f664ef1a50ec6871fae5f8aecaf21",
+      "blockNumber": "5",
+      "calldataBytes": 196,
+      "calldataHash": "0x9a0325ddd03ea3cffd51e1d1cee6db1a226e39f0055e93d1e45c1f8f890621cd",
+      "status": "0x1"
+    },
+    {
+      "sample": "boundary",
+      "method": "pack",
+      "gasUsed": "756051",
+      "effectiveGasPrice": "2000000000",
+      "transactionHash": "0xf0143153e0e3c3ce04a5f7d70e81ec07c7ee5079856f8a0eb2358bbca7a863ba",
+      "blockHash": "0x74ced9cd93a8255e45c6bb7886d97cadf73fc504c41da4345aa1c558d4a6d5eb",
+      "blockNumber": "6",
+      "calldataBytes": 25028,
+      "calldataHash": "0x584408649bb47f59898c4bf0df0719ad5ca973ada62ec719c750380d351ef4cb",
+      "status": "0x1"
+    },
+    {
+      "sample": "boundary",
+      "method": "unpack",
+      "gasUsed": "366714",
+      "effectiveGasPrice": "2000000000",
+      "transactionHash": "0x4df05ebf973632e48ab4febdeb6f7a80c2cdeb22170704052620c8d220c4cb8e",
+      "blockHash": "0xeea8a221c4736cd4eb707e3668bd20dc771ac12f8cc74468873aed25e70e1b25",
+      "blockNumber": "7",
+      "calldataBytes": 5604,
+      "calldataHash": "0x1fe05528bd54f559296ebf520a5ac5f94623959ca479017b3b7b628620d7eb4f",
+      "status": "0x1"
+    },
+    {
+      "sample": "boundary",
+      "method": "readHeader",
+      "gasUsed": "129113",
+      "effectiveGasPrice": "2000000000",
+      "transactionHash": "0x8bc9143ac1c3805ffb2fef8f3394f764df8736663f169b52c3e0bfe8d11944c3",
+      "blockHash": "0x35010d84a287c2f3227e8d0d24eff784a35067db6f40a81adf3bcc75f00f7f4b",
+      "blockNumber": "8",
+      "calldataBytes": 5604,
+      "calldataHash": "0xad0b127492bf30eda464709d73b5d5c0eba3075c95cc3c13fc3db652d79380a9",
+      "status": "0x1"
+    }
+  ],
+  "cleanup": {
+    "cachePath": "/var/folders/xj/wwg7k2z54psbr2f_jb8xpytr0000gn/T/efs-anvil-cache-jwwuJO",
+    "cacheRemoved": true,
+    "stopped": true,
+    "pid": 57818,
+    "exitCode": 0,
+    "signal": null
+  },
+  "basis": {
+    "hash": "0xa55308cdaf3e57ebff3ede882a7b6c007c01c4408dbea869089f2aed78de4e71",
+    "number": "2"
+  }
+}
