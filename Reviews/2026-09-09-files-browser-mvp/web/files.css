@@ -49,3 +49,12 @@ main[data-writing] .row-button,main[data-writing] .toolbar button,main[data-writ
   #consent dl,#why dl{grid-template-columns:minmax(0,1fr)}
   .controls{grid-template-columns:minmax(0,1fr)}
 }
+/* Cost scenarios are alternatives, with all controls usable at phone widths. */
+.economics { margin: 1rem 0; padding: .75rem; border: 1px solid #bac7cd; border-radius: .5rem; overflow-wrap: anywhere; }
+.economics summary { cursor: pointer; }
+.economics details { margin: .75rem 0; }
+.economics button { margin: .25rem; }
+.cost-model { display: flex; flex-wrap: wrap; gap: .5rem; }
+.cost-model label { display: flex; flex-direction: column; flex: 1 1 12rem; min-width: 0; }
+.cost-model input, .cost-model select { width: 100%; min-width: 0; box-sizing: border-box; }
+main[data-writing="true"] #crumbs, main[data-writing="true"] #rows { pointer-events: none; }

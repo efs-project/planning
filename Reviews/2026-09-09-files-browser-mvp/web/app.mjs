@@ -5,9 +5,12 @@ import { createFixtureReader, openDirectory, openFile, openHistory, openRevision
 import { boundedJSON, createRPCSource, createDirectRPCSource, writePath, directWritePath } from './rpc-source.mjs';
 import { presentListing } from './listing-presentation.mjs';
 import { assembleExport } from '/Reviews/2026-09-09-files-browser-mvp/sdk/export-bundle.mjs';
-import { planOperation, decodeRouterError, decodeAuthorityError, latestBindingState, latestExecution, latestPrincipalNonce, latestPrincipalAccount, latestChunkPresence, authorizeIntentV3, encodeExecuteV2, encodeStageChunk, byteCommitmentOf, core3Interface } from '/Reviews/2026-09-09-files-browser-mvp/sdk/files-actions.mjs';
-import { detectProvider, principalFor, connect, signAuthorIntent, isRejection, sendTransaction, sponsorSubmit } from './wallet.mjs';
-import { Wallet } from '/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.js';
+import { planOperation, recoveryDescriptor, readBackOperation, contentLeaves, decodeRouterError, decodeAuthorityError, latestBindingState, latestExecution, latestPrincipalNonce, latestPrincipalAccount, latestChunkPresence, authorizeIntentV3, encodeExecuteV2, encodeStageChunk, byteCommitmentOf, core3Interface } from '/Reviews/2026-09-09-files-browser-mvp/sdk/files-actions.mjs';
+import { detectProvider, principalFor, connect, signAuthorIntent, isRejection, sendTransaction, sponsorSubmit, sponsorRequestIdentity, sponsorStatus } from './wallet.mjs';
+import { Wallet, keccak256 } from '/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.js';
+import { createActionJournal, assertWalletContext, assertDeploymentContext, withAuthorizationFence } from './action-journal.mjs';
+import { createLedger, reduceLedger, exportLedger, restoreLedger } from './cost-ledger.mjs';
+import { createEconomicsPanel, normalizeReceipt, sponsorCostEvents, modelWei } from './economics-panel.mjs';
 
 const $ = id => document.getElementById(id), main = document.querySelector('main');
 const stringify = x => JSON.stringify(x, (_, v) => typeof v === 'bigint' ? String(v) : v, 2);
@@ -21,10 +24,53 @@ let transport = null; // {source, write, mode: 'relay' | 'direct-static'}
 let path = [], acquisitions = 1, pubCounter = 0;
 const session = { signer: 'guest', mode: 'guest', wallet: null, principal: null, account: null, approvals: 0, walletRequests: 0 };
 let provider = null; // real EIP-1193 provider, set at boot when present
-let outstandingIntent = null; // {nonce, deadline}: a signed approval that may still land
+let journal, ledger, economics, environmentId, storageError = null;
+const costKey = 'efs-files-cost-v1';
+let selectedModels = [], selectedFx;
 let acquireChain = Promise.resolve();
 // The scope serializes top-level acquisitions; every reader call goes through here.
 function acquire(task) { const run = acquireChain.then(task, task); acquireChain = run.then(() => {}, () => {}); return run; }
+function renderEconomics() { if (economics && ledger) economics.render(ledger, journal?.entries() ?? [], transport.source.metrics?.(), { scenarioSnapshotIds: selectedModels, fxSnapshotId: selectedFx }); }
+function costEvent(event) {
+  const next = reduceLedger(ledger, event);
+  try { localStorage.setItem(costKey, exportLedger(next)); } catch { storageError = 'Cost recovery storage failed; submission stopped.'; throw Error(storageError); }
+  ledger = next; renderEconomics();
+}
+function markAction(action, patch) { journal.mark(action.actionId, patch); renderEconomics(); }
+function rereadJournals() { journal = createActionJournal(localStorage); const saved = localStorage.getItem(costKey); if (saved) ledger = restoreLedger(saved); }
+function actionRuntime(context) { return { context: Object.freeze({ ...context }), transport, provider, wallet: session.wallet, mode: session.mode, sponsor: config.write.sponsor ? Object.freeze({ ...config.write.sponsor }) : null, nextAttempt: 0 }; }
+function lockControls(locked) { for (const id of ['signer', 'lens', 'refresh', 'new-folder', 'new-note', 'upload', 'more', 'export']) $(id).disabled = locked; }
+function attempt(action, phase, payer = 'user') {
+  const attemptId = action.actionId + ':' + phase + ':' + action.nextAttempt++;
+  costEvent({ type: 'attempt/upsert', actionId: action.actionId, attemptId, phase, status: 'unknown', payer, payerAddress: payer === 'sponsor' ? action.sponsor?.payer : action.context.account });
+  return attemptId;
+}
+function recordAttempt(action, attemptId, patch) { costEvent({ type: 'attempt/upsert', actionId: action.actionId, attemptId, status: 'unknown', payer: 'unknown', ...patch }); }
+function recordReceipt(action, attemptId, receipt) { costEvent({ type: 'receipt/record', actionId: action.actionId, attemptId, receipt: normalizeReceipt(receipt) }); }
+async function walletSend(action, to, data, gas, phase) {
+  await assertDeploymentContext(action.transport.source, action.context);
+  await assertWalletContext(action.provider, action.context);
+  const attemptId = attempt(action, phase);
+  try {
+    countWalletRequest();
+    const hash = await sendTransaction(action.provider, { from: action.context.account, to, data, gas });
+    recordAttempt(action, attemptId, { hash, status: 'submitted' });
+    const receipt = await waitReceipt(hash, action.transport); recordReceipt(action, attemptId, receipt); return receipt;
+  } catch (e) { if (isRejection(e)) recordAttempt(action, attemptId, { status: 'not-submitted' }); throw e; }
+}
+async function sponsorSend(action, body) {
+  await assertDeploymentContext(action.transport.source, action.context);
+  const identity = sponsorRequestIdentity(body);
+  markAction(action, { ...identity, sponsorUrl: action.sponsor.url });
+  const requestAttempt = attempt(action, 'sponsor request ' + identity.requestId, 'sponsor');
+  const ingest = result => {
+    for (const event of sponsorCostEvents(action.actionId, result, action.sponsor.payer)) costEvent(event);
+    // This row represents the request's unresolved inventory, not a transaction.
+    if (result.submitted === false || ['completed', 'failed'].includes(result.status)) recordAttempt(action, requestAttempt, { status: 'not-submitted' });
+  };
+  try { const result = await sponsorSubmit(action.sponsor.url, body, boundedJSON); ingest(result); return result; }
+  catch (e) { ingest(e); if (e.submitted === false) markAction(action, { authorization: 'closed' }); throw e; }
+}
 
 // ---- session / prompts -----------------------------------------------------
 function updateSession() {
@@ -81,14 +127,20 @@ function toast(message, isError = false) {
 }
 
 // ---- the write pipeline ----------------------------------------------------
-async function waitReceipt(hash) {
-  for (let i = 0; i < 400; i++) { const r = await transport.write.receipt(hash); if (r) return r; await new Promise(ok => setTimeout(ok, 25)); }
+async function waitReceipt(hash, sourceTransport = transport) {
+  for (let i = 0; i < 400; i++) { const r = await sourceTransport.write.receipt(hash); if (r) return r; await new Promise(ok => setTimeout(ok, 25)); }
   throw Error('The network did not confirm in time. Nothing may have changed — read again.');
 }
-async function submitRaw(to, data, gasLimit, wallet = session.wallet) {
-  const nonce = BigInt(await transport.write.transactionCount(wallet.address));
-  const raw = await wallet.signTransaction({ chainId: 31337, nonce: Number(nonce), gasLimit, gasPrice: 2000000000n, to, data });
-  return waitReceipt(await transport.write.publish(raw));
+async function submitRaw(to, data, gasLimit, wallet, action, phase) {
+  await assertDeploymentContext(action.transport.source, action.context);
+  const nonce = BigInt(await action.transport.write.transactionCount(wallet.address));
+  const raw = await wallet.signTransaction({ chainId: BigInt(action.context.chainId), nonce: Number(nonce), gasLimit, gasPrice: 2000000000n, to, data });
+  const hash = keccak256(raw), attemptId = attempt(action, phase);
+  recordAttempt(action, attemptId, { hash }); // locally derived BEFORE publication ambiguity
+  const returned = await action.transport.write.publish(raw);
+  if (returned.toLowerCase() !== hash) throw Error('Published transaction hash mismatch; reconcile recorded hash.');
+  recordAttempt(action, attemptId, { status: 'submitted' });
+  const receipt = await waitReceipt(hash, action.transport); recordReceipt(action, attemptId, receipt); return receipt;
 }
 function friendlyError(e) {
   const decoded = e?.data ? (decodeAuthorityError(e.data) ?? decodeRouterError(e.data)) : null;
@@ -121,11 +173,22 @@ async function runOperation(kindLabel, intent, facts) {
   if (writing) { toast('One change at a time: the previous operation is still in flight.', true); return null; }
   writing = true;
   main.dataset.writing = 'true';
+  lockControls(true);
   // Snapshot the signer at flow start: switching mid-flight must not swap keys.
   const signerWallet = session.wallet, signerPrincipal = session.principal, signerKey = session.signer;
   const signerMode = session.mode, signerAccount = session.account;
+  const capturedLens = $('lens').value;
+  const captured = actionRuntime({ environmentId, chainId: '31337', core: config.expected.core, principal: signerPrincipal,
+    account: signerAccount ?? signerWallet?.address, mountId: intent.mountId, lensId: capturedLens, sourceId: config.expected.source,
+    destinationId: intent.parent ?? intent.fileId ?? intent.object ?? here(), router: config.write.router, carrier: config.write.carrier });
+  try { return await withAuthorizationFence(navigator.locks, async () => {
+  // Another tab may have signed while this page was idle: reread inside fence.
+  if (storageError) throw Error(storageError);
+  journal = createActionJournal(localStorage);
+  const savedLedger = localStorage.getItem(costKey); if (savedLedger) ledger = restoreLedger(savedLedger);
   try {
     const write = config.write;
+    await assertDeploymentContext(captured.transport.source, captured.context);
     const execution = await latestExecution(transport.write.callLatest, config.expected.core);
     const plan = planOperation({ ...intent, principal: signerPrincipal, pubNonce: BigInt(Date.now()) * 1000n + BigInt(pubCounter++) });
     if (plan.status !== 'PLANNED') { toast(plan.status === 'UNSUPPORTED' ? 'Unsupported (not invalid): ' + plan.reason : 'Refused: ' + plan.reason, true); return null; }
@@ -142,6 +205,15 @@ async function runOperation(kindLabel, intent, facts) {
     const now = BigInt(block.timestamp) > wallClock ? BigInt(block.timestamp) : wallClock;
     const deadline = now + 300n; // short: a signed intent is live authority until it expires
     const authorNonce = await latestPrincipalNonce(transport.write.callLatest, config.expected.core, signerPrincipal);
+    const conflict = journal.conflict(captured.context, String(authorNonce), String(BigInt(block.timestamp)));
+    if (conflict) throw Error('An earlier signed approval is still live for this author nonce. Reconcile it or wait for chain-confirmed expiry; no second signature requested.');
+    captured.context = Object.freeze({ ...captured.context, executionId: execution.executionSetId });
+    captured.actionId = crypto.randomUUID();
+    captured.plan = plan;
+    journal.begin({ actionId: captured.actionId, label: kindLabel, context: captured.context, nonce: String(authorNonce), deadline: String(deadline), descriptor: recoveryDescriptor(plan),
+      requestedFileId: [1, 3, 5].includes(plan.op.kind) ? plan.op.object : undefined,
+      content: content ? { treeId: content.treeId, size: String((content.data.length - 2) / 2), chunkCount: content.chunkCount, fileId: plan.op.object } : null });
+    costEvent({ type: 'action/start', actionId: captured.actionId, label: kindLabel, createdAt: new Date().toISOString(), context: captured.context });
     const byteCommitment = content ? byteCommitmentOf(content.treeId, content.tree.body) : undefined;
     let receipt, staged = { complete: true, done: 0, failed: 0 };
     if (signerMode === 'wallet') {
@@ -152,33 +224,29 @@ async function runOperation(kindLabel, intent, facts) {
       // author is not one of its sources, so a write made here would be
       // admitted on-chain and then selected by nothing — the
       // confirms-but-unreadable shape. Refuse it with the reason.
-      if ($('lens').value === 'exact') {
+      if (capturedLens === 'exact') {
         toast('The Both-agree lens only shows what Author A and Author B agree on, and your wallet identity is not one of its sources. A change made here would be committed on-chain and then visible to nobody, so it is refused. Switch to A-first or B-first to write.', true);
         return null;
       }
       // A previously signed intent at this same one-time number may still be
       // live (ambiguous submission): never request a second signature that
       // races it — wait for the nonce to advance or the deadline to pass.
-      if (outstandingIntent && outstandingIntent.nonce === authorNonce && now <= outstandingIntent.deadline) {
-        toast('An earlier signed approval with the same one-time number is still live until ' + new Date(Number(outstandingIntent.deadline) * 1000).toLocaleTimeString() + '. Waiting for it to land or expire before asking for a new signature — this prevents two approved operations racing for one slot.', true);
-        return null;
-      }
-      if (outstandingIntent && outstandingIntent.nonce !== authorNonce) outstandingIntent = null; // consumed or superseded
       toast('Wallet approval: ' + kindLabel + ' — ' + (sponsor
         ? 'ONE typed-data signature; the sponsor (' + sponsor.label + ', payer ' + short(sponsor.payer) + ') submits and pays. It cannot alter what you sign. The wallet shows commitment hashes: what they authorize is at most one Files operation for this author at this one-time number, on this chain and Core, before the deadline.'
         : 'DIRECT mode: 1 signature plus ' + (1 + (content?.chunkCount ?? 0)) + ' transaction approval(s), paid by your account.'));
       let signed;
       try {
+        await assertWalletContext(captured.provider, captured.context);
+        markAction(captured, { authorization: 'unknown' });
         countWalletRequest(); // the prompt is shown whether or not it is approved
-        signed = await signAuthorIntent(provider, signerAccount, plan, {
+        signed = await signAuthorIntent(captured.provider, signerAccount, plan, {
           core: config.expected.core, chainId: 31337,
           executor: write.router, executorCodehash: write.routerCodehash,
           executionSetId: execution.executionSetId, nonce: authorNonce, deadline, byteCommitment,
         });
-      } catch (e) { if (isRejection(e)) { toast('Cancelled in the wallet; nothing was sent.'); return 'CANCELLED'; } throw e; }
+      } catch (e) { if (isRejection(e)) { markAction(captured, { authorization: 'closed' }); costEvent({ type: 'action/effect', actionId: captured.actionId, status: 'refused' }); toast('Cancelled in the wallet; nothing was sent.'); return 'CANCELLED'; } throw e; }
       // Live from the moment the signature exists, whichever submitter is
       // used: a direct send can be just as ambiguous as a sponsored one.
-      outstandingIntent = { nonce: authorNonce, deadline };
       // The tree travels ONCE per request, not per chunk.
       const treePayload = content && content.chunkCount > 0
         ? { treeId: content.treeId, body: content.tree.body, leaves: content.leaves } : null;
@@ -186,19 +254,20 @@ async function runOperation(kindLabel, intent, facts) {
         ? content.chunks.map((chunkData, index) => ({ index, chunkData })) : [];
       if (sponsor) {
         let result;
+        await assertWalletContext(captured.provider, captured.context);
         try {
-          result = await sponsorSubmit(sponsor.url, { op: plan.op, publication: plan.publication, expectedRevision: execution.revision, intent: signed.intent, signature: signed.signature, content: treePayload, chunks: chunksBody }, boundedJSON);
+          result = await sponsorSend(captured, { op: plan.op, publication: plan.publication, expectedRevision: execution.revision, intent: signed.intent, signature: signed.signature, content: treePayload, chunks: chunksBody });
         } catch (e) {
           // Only a refusal that provably predates broadcast clears the guard.
-          if (e.structured && !e.submitted) { outstandingIntent = null; throw e; }
+          if (e.submitted === false) throw e;
           // AMBIGUOUS submission: the sponsor connection failed. The signed
           // intent's one-time number tells us whether it was consumed.
           const nonceNow = await latestPrincipalNonce(transport.write.callLatest, config.expected.core, signerPrincipal).catch(() => null);
-          if (nonceNow !== null && nonceNow > authorNonce) { outstandingIntent = null; toast('The sponsor connection failed AFTER your approval was consumed. Reading back what actually landed…'); await refresh({}); return null; }
+          if (nonceNow !== null && nonceNow > authorNonce) { toast('Approval nonce consumed; that is not proof of the requested effect. Reading independently…'); await reconcileAction(captured.actionId); }
           toast('The sponsor could not be reached. Your signed approval may still land until ' + new Date(Number(deadline) * 1000).toLocaleTimeString() + ' — treat this as PENDING, not failed. The app will not ask for a new signature for this slot until then.', true);
           return null;
         }
-        outstandingIntent = null;
+        markAction(captured, { authorization: 'closed' });
         receipt = { status: result.execute.status, transactionHash: result.execute.hash, gasUsed: result.execute.gasUsed, sponsored: true, payer: result.payer };
         staged.done = result.chunks.filter(c => c.status === 'staged').length;
         staged.failed = result.chunks.filter(c => c.status !== 'staged').length;
@@ -207,16 +276,13 @@ async function runOperation(kindLabel, intent, facts) {
         // DIRECT mode stages content FIRST: if anything stops midway, nothing
         // was admitted — only harmless content-addressed bytes exist.
         if (chunksBody.length) {
-          staged = await stageContent(content, null);
+          staged = await stageContent(content, null, false, captured);
           if (!staged.complete) { toast('Staging did not complete (' + staged.failed + ' chunk(s) failed); the admission was NOT submitted. Nothing is half-published — the staged bytes are inert until an admission references them.', true); return null; }
         }
-        let hash;
         try {
-          countWalletRequest();
-          hash = await sendTransaction(provider, { from: signerAccount, to: write.router, data: encodeExecuteV2(plan, execution.revision, signed.intent, signed.signature), gas: '0x1000000' });
-        } catch (e) { if (isRejection(e)) { outstandingIntent = null; toast('Signature given but the admission transaction was declined in the wallet; nothing was admitted, and the approval was never broadcast.'); return 'CANCELLED'; } throw e; }
-        receipt = await waitReceipt(hash);
-        outstandingIntent = null;
+          receipt = await walletSend(captured, write.router, encodeExecuteV2(plan, execution.revision, signed.intent, signed.signature), '0x1000000', 'execute');
+        } catch (e) { if (isRejection(e)) { markAction(captured, { authorization: 'closed' }); toast('Signature given but the admission transaction was declined in the wallet; nothing was admitted.'); return 'CANCELLED'; } throw e; }
+        markAction(captured, { authorization: 'closed' });
       }
     } else {
       const ok = await consent('Approve: ' + kindLabel, [...facts, ...chunkNote,
@@ -224,45 +290,50 @@ async function runOperation(kindLabel, intent, facts) {
         ['Operation ID', short(plan.predicted.envelopeId)],
         ['Signer', write.authors[signerKey].label + ' (disposable local key, author-signed intent)'],
       ]);
-      if (!ok) { toast('Cancelled before submission; nothing was sent.'); return 'CANCELLED'; }
+      if (!ok) { markAction(captured, { authorization: 'closed' }); costEvent({ type: 'action/effect', actionId: captured.actionId, status: 'refused' }); toast('Cancelled before submission; nothing was sent.'); return 'CANCELLED'; }
       toast('Submitting… waiting for the network receipt.');
+      markAction(captured, { authorization: 'unknown' });
       const { intent: signedIntent, signature } = await authorizeIntentV3(plan, {
         authorWallet: signerWallet, core: config.expected.core, chainId: 31337,
         executor: write.router, executorCodehash: write.routerCodehash,
         executionSetId: execution.executionSetId, nonce: authorNonce, deadline, byteCommitment,
       });
-      receipt = await submitRaw(write.router, encodeExecuteV2(plan, execution.revision, signedIntent, signature), 16777216n, signerWallet);
+      receipt = await submitRaw(write.router, encodeExecuteV2(plan, execution.revision, signedIntent, signature), 16777216n, signerWallet, captured, 'execute');
+      markAction(captured, { authorization: 'closed' });
       // Content chunks stage AUTOMATICALLY under the same approval: staging is
       // permissionless, content-addressed and write-once — no further consent
       // exists to ask for. Interruption leaves a resumable file.
-      if (receipt.status === '0x1' && content && content.chunkCount > 0) staged = await stageContent(content, signerWallet);
+      if (receipt.status === '0x1' && content && content.chunkCount > 0) staged = await stageContent(content, signerWallet, false, captured);
     }
-    if (receipt.status !== '0x1') { toast('The transaction was mined but rejected; nothing was changed.', true); return null; }
+    if (receipt.status !== '0x1') { costEvent({ type: 'action/effect', actionId: captured.actionId, status: 'refused' }); toast('Not saved here. Transaction reverted; its receipt gas still counts.', true); return null; }
     if (content && content.chunkCount > 0) {
-      if (!staged.complete) pendingBytes.set(plan.op.kind === 3 ? plan.op.object : plan.predicted.objectId, { content, label: kindLabel });
+      if (!staged.complete) pendingBytes.set(plan.op.kind === 3 ? plan.op.object : plan.predicted.objectId, { content, label: kindLabel, action: captured });
       else pendingBytes.delete(plan.op.kind === 3 ? plan.op.object : plan.predicted.objectId);
     }
-    return { plan, receipt, staged };
+    return { plan, receipt, staged, action: captured };
   } catch (e) { toast(friendlyError(e), true); return null; }
-  finally { writing = false; delete main.dataset.writing; }
+  }); } catch (e) { toast(friendlyError(e), true); return null; }
+  finally { writing = false; delete main.dataset.writing; $('lens').value = capturedLens; $('signer').value = signerKey; lockControls(false); renderEconomics(); }
 }
-async function stageContent(content, wallet, onlyMissing = false) {
+async function stageContent(content, wallet, onlyMissing = false, action) {
+  if (!action) throw Error('Captured recovery action required for chunk submission.');
   let done = 0, failed = 0;
   let present = [];
   if (onlyMissing) {
-    try { present = await latestChunkPresence(transport.write.callLatest, config.write.carrier, content.treeId, content.chunkCount); } catch { present = []; }
+    try { present = await latestChunkPresence(action.transport.write.callLatest, action.context.carrier, content.treeId, content.chunkCount); } catch { throw Error('Chunk presence unknown; refusing blind retry.'); }
   }
   const missing = Array.from({ length: content.chunkCount }, (_, i) => i).filter(i => !present[i]);
   done = content.chunkCount - missing.length;
-  if (session.mode === 'wallet' && config.write.sponsor) {
+  if (action.mode === 'wallet' && action.sponsor) {
     // Chunks-only sponsor request: staging is permissionless and covered by
     // the already-signed byte commitment — no new wallet prompt exists.
     toast('Staging ' + missing.length + ' chunk(s) via the sponsor…');
     try {
-      const result = await sponsorSubmit(config.write.sponsor.url, {
+      await assertWalletContext(action.provider, action.context);
+      const result = await sponsorSend(action, {
         content: { treeId: content.treeId, body: content.tree.body, leaves: content.leaves },
         chunks: missing.map(i => ({ index: i, chunkData: content.chunks[i] })),
-      }, boundedJSON);
+      });
       const staged = result.chunks.filter(c => c.status === 'staged').length;
       return { complete: staged === missing.length, done: done + staged, failed: missing.length - staged };
     } catch { return { complete: false, done, failed: missing.length }; }
@@ -271,20 +342,18 @@ async function stageContent(content, wallet, onlyMissing = false) {
     toast('Staging bytes: chunk ' + (i + 1) + ' of ' + content.chunkCount + '…');
     const data = encodeStageChunk({ treeId: content.treeId, body: content.tree.body, index: i, chunkData: content.chunks[i], leaves: content.leaves });
     try {
-      if (session.mode === 'wallet') {
+      if (action.mode === 'wallet') {
         // Labeled DIRECT mode: each staging transaction is its own wallet
         // prompt, paid by the wallet account.
-        countWalletRequest();
-        const hash = await sendTransaction(provider, { from: session.account, to: config.write.carrier, data, gas: '0x400000' });
-        const receipt = await waitReceipt(hash);
+        const receipt = await walletSend(action, action.context.carrier, data, '0x400000', 'chunk ' + i);
         if (receipt.status === '0x1') done++; else failed++;
       } else {
-        const receipt = await submitRaw(config.write.carrier, data, 4000000n, wallet);
+        const receipt = await submitRaw(action.context.carrier, data, 4000000n, wallet, action, 'chunk ' + i);
         if (receipt.status === '0x1') done++; else failed++;
       }
-    } catch (e) { if (isRejection(e)) { failed += 1; toast('Staging stopped in the wallet; the file stays resumable.'); break; } failed++; }
+    } catch (e) { failed = content.chunkCount - done; toast('Upload incomplete — choose the same file to continue. ' + friendlyError(e), true); break; }
   }
-  return { complete: failed === 0, done, failed };
+  return { complete: done === content.chunkCount, done, failed: content.chunkCount - done };
 }
 
 // ---- real wallet connection ------------------------------------------------
@@ -317,10 +386,22 @@ async function walletConnectFlow() {
     }
     if (claimNeeded) {
       toast('One-time setup: the wallet will ask to send ONE claim transaction binding this author identity to your account (your account pays it).');
-      let hash;
-      try { countWalletRequest(); hash = await sendTransaction(provider, { from: account, to: config.expected.core, data: core3Interface.encodeFunctionData('claimPrincipal', [principal]), gas: '0x30000' }); }
+      let receipt;
+      try { receipt = await withAuthorizationFence(navigator.locks, async () => {
+        if (storageError) throw Error(storageError); rereadJournals();
+        const block = await transport.write.latestBlock(), nonce = await latestPrincipalNonce(transport.write.callLatest, config.expected.core, principal);
+        const context = { environmentId, chainId: '31337', core: config.expected.core, principal, account, mountId: config.mounts[$('lens').value], lensId: $('lens').value, sourceId: config.expected.source, router: config.write.router, carrier: config.write.carrier };
+        if (journal.conflict(context, String(nonce), String(BigInt(block.timestamp)))) throw Error('An earlier claim or signed approval is unresolved; reconcile it before another wallet request.');
+        const action = { ...actionRuntime(context), actionId: crypto.randomUUID() };
+        journal.begin({ actionId: action.actionId, label: 'Claim author identity', context, nonce: String(nonce), deadline: String(BigInt(Math.floor(Date.now() / 1000)) + 300n) });
+        costEvent({ type: 'action/start', actionId: action.actionId, label: 'Claim author identity', createdAt: new Date().toISOString(), context });
+        markAction(action, { authorization: 'unknown' });
+        try {
+          const r = await walletSend(action, config.expected.core, core3Interface.encodeFunctionData('claimPrincipal', [principal]), '0x30000', 'claim');
+          markAction(action, { authorization: 'closed' }); return r;
+        } catch (e) { if (isRejection(e)) markAction(action, { authorization: 'closed' }); throw e; }
+      }); }
       catch (e) { if (isRejection(e)) throw Error('claim declined in the wallet; staying as guest'); throw e; }
-      const receipt = await waitReceipt(hash);
       if (receipt.status !== '0x1') throw Error('the claim transaction was rejected on-chain');
     }
     session.signer = 'wallet'; session.mode = 'wallet'; session.wallet = null; session.principal = principal; session.account = account;
@@ -349,7 +430,7 @@ function crumbs() {
   path.forEach((p, i) => {
     if (i) nav.append(text('span', ' / ', 'slash'));
     if (i === path.length - 1) nav.append(text('strong', p.name || 'trip'));
-    else { const b = text('button', p.name || 'trip', 'crumb'); b.type = 'button'; b.addEventListener('click', () => { path = path.slice(0, i + 1); refresh({ samePin: true }); }); nav.append(b); }
+    else { const b = text('button', p.name || 'trip', 'crumb'); b.type = 'button'; b.addEventListener('click', () => { if (writing) return; path = path.slice(0, i + 1); refresh({ samePin: true }); }); nav.append(b); }
   });
 }
 function explain(row, button) {
@@ -393,7 +474,7 @@ function rowActions(row) {
   const usable = row.outcome === 'FOUND';
   const box = document.createElement('span'); box.className = 'row-actions';
   const add = (label, fn, title2) => { const b = text('button', label, 'row-button'); b.type = 'button'; if (title2) b.title = title2; b.setAttribute('aria-label', label + ': ' + (row.value?.name ?? row.outcome)); b.addEventListener('click', fn); box.append(b); return b; };
-  if (usable && row.value.kind === 'DIRECTORY') add('Open', () => { path = [...path, { name: row.value.name, subject: row.value.subject }]; refresh({ samePin: true }); });
+  if (usable && row.value.kind === 'DIRECTORY') add('Open', () => { if (writing) return; path = [...path, { name: row.value.name, subject: row.value.subject }]; refresh({ samePin: true }); });
   const safe = fn => () => Promise.resolve(fn()).catch(e => toast(friendlyError(e), true));
   if (usable && row.value.kind === 'FILE') add('Open', safe(() => filePanel(row)));
   if (usable && session.signer !== 'guest') {
@@ -506,21 +587,79 @@ async function renderTrash() {
 async function afterWrite(result, message, { verifyBytes = null } = {}) {
   if (!result || result === 'CANCELLED') return;
   await refresh({});
-  // canonical read-back: all predicted records present at the fresh basis
+  // Independent SDK verification under the CAPTURED mount/Lens; bytes separate.
   try {
-    const missing = [];
-    for (const id of result.plan.publication.recordIds) {
-      const r = await acquire(() => scope.call('getRecord', [id]));
-      if (r.status !== 'OK' || r.values[2] === 0n) missing.push(id);
-    }
-    let byteNote = '';
-    if (verifyBytes && !missing.length) {
-      const check = await acquire(() => openFile(scope, { mountId: config.mounts[$('lens').value], fileId: verifyBytes }));
-      byteNote = check.outcome === 'FOUND' && check.value.integrity === 'VERIFIED' ? '' : ' Bytes are not yet readable from the carrier.';
-    }
-    toast(missing.length ? 'Submitted, but read-back could not verify every effect yet.' : message + ' Committed and read back at block ' + current.basis.blockNumber + '.' + byteNote);
-  } catch { toast(message + ' Submitted; read-back unavailable.', true); }
+    const checked = await withAuthorizationFence(navigator.locks, async () => { rereadJournals(); return reconcileAction(result.action.actionId); });
+    const needsBytes = [1, 3, 5].includes(result.plan.op.kind) || verifyBytes != null;
+    if (checked.effect === 'COMMITTED' && (!needsBytes || checked.bytes === 'VERIFIED')) toast(message + ' Committed and read back. Saved — selected effect independently verified.');
+    else if (checked.effect === 'COMMITTED') toast('File listed; content incomplete. Upload incomplete — choose the same file to continue.', true);
+    else toast(checked.admission === 'ADMITTED' ? 'Admitted, but not saved here under the captured Lens. Selection: ' + checked.selection : 'Sent — checking result. Requested effect is still unknown.', true);
+  } catch { toast('Sent — checking result. Read-back unavailable; no success claim.', true); }
   $('status').focus();
+}
+async function reconcileAction(actionId) {
+  const entry = journal.entries().find(a => a.actionId === actionId);
+  if (!entry || entry.context.environmentId !== environmentId) throw Error('Recovery belongs to a different deployment/source; switch back to reconcile it.');
+  const action = { ...actionRuntime(entry.context), actionId, nextAttempt: Date.now() };
+  await assertDeploymentContext(action.transport.source, action.context);
+  if (entry.requestId && entry.sponsorUrl && entry.sponsorUrl === config.write?.sponsor?.url) {
+    try {
+      const evidence = await sponsorStatus(entry.sponsorUrl, { requestId: entry.requestId, requestCommitment: entry.requestCommitment }, boundedJSON);
+      for (const event of sponsorCostEvents(actionId, evidence, config.write.sponsor.payer)) costEvent(event);
+      if (evidence.submitted === false || ['completed', 'failed'].includes(evidence.status)) {
+        for (const prior of ledger.actions.find(a => a.actionId === actionId)?.attempts ?? []) if (prior.phase === 'sponsor request ' + entry.requestId && prior.status === 'unknown') recordAttempt(action, prior.attemptId, { status: 'not-submitted' });
+      }
+    } catch { /* sponsor unavailable remains unknown; canonical chain read still useful */ }
+  }
+  for (const prior of ledger.actions.find(a => a.actionId === actionId)?.attempts ?? []) if (prior.hash && !prior.receipt) {
+    try { const receipt = await transport.write.receipt(prior.hash); if (receipt) recordReceipt(action, prior.attemptId, receipt); } catch { /* inclusion still unknown */ }
+  }
+  if (!entry.descriptor) return { admission: 'UNKNOWN', selection: 'UNKNOWN', effect: 'UNKNOWN', bytes: 'NOT_CHECKED' }; // setup receipt is not a Files effect
+  const opened = await reader.open({ blockTag: 'latest' });
+  if (opened.status !== 'READY') throw Error('Qualified recovery scope unavailable');
+  try {
+    const verified = await readBackOperation(opened.scope, entry.descriptor);
+    let bytes = 'NOT_CHECKED';
+    const requestedFileId = entry.requestedFileId ?? entry.content?.fileId;
+    if (requestedFileId && verified.effect === 'COMMITTED') {
+      const file = await openFile(opened.scope, { mountId: entry.context.mountId, fileId: requestedFileId });
+      bytes = file.outcome === 'FOUND' && file.value.integrity === 'VERIFIED' ? 'VERIFIED' : 'UNAVAILABLE';
+    }
+    const state = { admission: verified.admission, selection: verified.selection, effect: verified.effect, bytes };
+    markAction(action, state);
+    costEvent({ type: 'action/effect', actionId, status: verified.effect === 'COMMITTED' && (!requestedFileId || bytes === 'VERIFIED') ? 'verified' : 'unknown' });
+    return state;
+  } finally { opened.scope.close(); }
+}
+async function reconcileRecorded() {
+  if (writing || !journal) return;
+  try { await withAuthorizationFence(navigator.locks, async () => {
+    journal = createActionJournal(localStorage); const stored = localStorage.getItem(costKey); if (stored) ledger = restoreLedger(stored);
+    for (const entry of journal.entries()) if (entry.context.environmentId === environmentId) await reconcileAction(entry.actionId);
+  }); toast('Recorded actions reconciled with fresh qualified reads. Unknown entries are not permission to retry.'); }
+  catch (e) { toast(friendlyError(e), true); }
+}
+async function resumeBytes(entry, file) {
+  if (!file) return;
+  if (writing || session.signer === 'guest') { toast('Select the original signer before resuming bytes.', true); return; }
+  const bytes = toHex(new Uint8Array(await file.arrayBuffer()));
+  const content = contentLeaves(bytes);
+  if (content.treeId !== entry.content.treeId || String(file.size) !== entry.content.size) { toast('Reselected bytes do not match the original content tree. Nothing sent.', true); return; }
+  if (entry.context.environmentId !== environmentId || entry.context.principal !== session.principal || entry.context.account.toLowerCase() !== (session.account ?? session.wallet?.address)?.toLowerCase()) { toast('Return to the original deployment and signer to resume.', true); return; }
+  writing = true; main.dataset.writing = 'true'; lockControls(true);
+  const action = { ...actionRuntime(entry.context), actionId: entry.actionId, nextAttempt: Date.now() };
+  try { await withAuthorizationFence(navigator.locks, async () => {
+    journal = createActionJournal(localStorage); const saved = localStorage.getItem(costKey); if (saved) ledger = restoreLedger(saved);
+    await reconcileAction(entry.actionId);
+    const unresolved = ledger.actions.find(a => a.actionId === entry.actionId)?.attempts.some(a => a.status !== 'not-submitted' && !a.receipt);
+    if (unresolved) throw Error('An earlier transaction is still unknown; refusing a blind chunk retry.');
+    const state = journal.entries().find(a => a.actionId === entry.actionId);
+    if (state.effect !== 'COMMITTED') throw Error('Original requested metadata effect is not currently verified. Resume is refused; do not blindly reauthorize.');
+    const staged = await stageContent(content, action.wallet, true, action);
+    const checked = await reconcileAction(entry.actionId);
+    toast(staged.complete && checked.bytes === 'VERIFIED' ? 'Original file content independently verified.' : 'Upload incomplete — choose the same file to continue.', !staged.complete);
+  }); } catch (e) { toast(friendlyError(e), true); }
+  finally { writing = false; delete main.dataset.writing; lockControls(false); }
 }
 async function newFolderFlow() {
   const input = await prompt('New folder name'); if (!input?.name) return;
@@ -692,9 +831,8 @@ function renderContent(body, row, content, revisionLabel = 'current') {
       retry.addEventListener('click', async () => {
         retry.disabled = true; // staging is in flight: a second click would re-send every chunk
         try {
-          const staged = await stageContent(pending.content, session.wallet, true).catch(e => { toast(friendlyError(e), true); return { complete: false }; });
-          if (staged.complete) { pendingBytes.delete(row.value.nodeId); $('file-panel').close(); toast('All bytes staged and verifiable; open the file again.'); }
-          else toast('Some chunks are still missing (' + (staged.failed ?? '?') + ' failed). Try again.', true);
+          const entry = journal.entries().find(a => a.actionId === pending.action.actionId);
+          await resumeBytes(entry, new File([fromHex(pending.content.data)], 'original-bytes'));
         } finally { retry.disabled = false; }
       });
       section.append(retry);
@@ -843,17 +981,28 @@ async function load(g) {
   $('more').setAttribute('aria-disabled', 'true');
   $('coverage').textContent = 'Reading more';
   try {
-    const result = await acquire(() => stream.loadMore());
+    let result = await acquire(() => stream.loadMore());
     if (g !== generation) return;
     if (result.rowsEvidence === 'PRIOR_SEALED' && /budget/.test(result.detail ?? '')) {
       // Simple budget policy: transparently begin a fresh acquisition at the
       // SAME pinned block and continue; the acquisition counter stays honest.
-      const reopened = await reader.open({ blockTag: '0x' + current?.basis.blockNumber?.toString(16) ?? 'latest', signal: cancel.signal });
-      if (reopened.status === 'READY') { scope?.close(); scope = reopened.scope; acquisitions++; stream = openDirectory(scope, { mountId: config.mounts[$('lens').value], subject: here(), pageSize: 32 }); return load(g); }
+      const previous = scope, activeStream = stream;
+      const pin = result.basis?.blockNumber ?? current?.basis.blockNumber;
+      if (pin == null) throw Error('Continuation has no pinned basis');
+      const reopened = await reader.open({ blockTag: '0x' + BigInt(pin).toString(16), signal: cancel.signal });
+      if (g !== generation) { reopened.scope?.close(); return; }
+      if (reopened.status === 'READY') {
+        const handoff = await acquire(() => activeStream.resume(reopened.scope));
+        if (g !== generation) { reopened.scope.close(); return; }
+        if (handoff.status === 'RESUMED') {
+          scope = reopened.scope; acquisitions++; previous.close();
+          result = await acquire(() => activeStream.loadMore());
+        } else reopened.scope.close();
+      }
     }
     await render(result);
   } catch (e) { if (g === generation) { $('coverage').textContent = 'Read unavailable'; toast('The read could not finish: ' + e.message, true); } }
-  finally { if (g === generation) { busy = false; main.dataset.state = 'settled'; $('more').setAttribute('aria-disabled', 'false'); } }
+  finally { if (g === generation) { busy = false; main.dataset.state = 'settled'; $('more').setAttribute('aria-disabled', 'false'); renderEconomics(); } }
 }
 async function refresh({ samePin = false } = {}) {
   const g = ++generation;
@@ -877,7 +1026,7 @@ async function refresh({ samePin = false } = {}) {
       if (opened.status !== 'READY') throw Error(opened.reason);
       scope = opened.scope; acquisitions++;
     }
-    stream = openDirectory(scope, { mountId: config.mounts[$('lens').value], subject: here(), pageSize: 32 });
+    stream = openDirectory(scope, { mountId: config.mounts[$('lens').value], subject: here(), pageSize: config.directoryPageSize ?? 32 });
     await load(g);
   } catch (e) {
     if (g !== generation) return;
@@ -890,8 +1039,8 @@ async function refresh({ samePin = false } = {}) {
 
 // ---- wire up ---------------------------------------------------------------
 $('more').addEventListener('click', () => { if (!busy) load(generation); });
-$('refresh').addEventListener('click', () => { if (config) refresh({}); });
-$('lens').addEventListener('change', () => { if (config) refresh({}); });
+$('refresh').addEventListener('click', () => { if (config && !writing) refresh({}); });
+$('lens').addEventListener('change', () => { if (config && !writing) refresh({}); });
 $('filter').addEventListener('input', () => { if (current) render(current); });
 $('tag-filter').addEventListener('change', () => { if (current) render(current); });
 const guarded = fn => (...args) => Promise.resolve(fn(...args)).catch(e => toast(friendlyError(e), true));
@@ -900,6 +1049,7 @@ $('new-folder').addEventListener('click', guarded(newFolderFlow));
 $('new-note').addEventListener('click', guarded(newNoteFlow));
 $('upload').addEventListener('change', guarded(e => { const f = e.target.files[0]; e.target.value = ''; return uploadFlow(f); }));
 $('signer').addEventListener('change', () => {
+  if (writing) return;
   const value = $('signer').value;
   if (value === 'wallet') { walletConnectFlow(); return; }
   if (value === 'guest') { session.signer = 'guest'; session.mode = 'guest'; session.wallet = null; session.principal = null; session.account = null; }
@@ -924,9 +1074,40 @@ try {
     transport = { mode: 'direct-static', source: createDirectRPCSource({ identity: config.expected.source, url: config.rpcUrl }), write: directWritePath(config.rpcUrl) };
   }
   if (config.kind !== 'DISPOSABLE_FILES_BROWSER') throw Error('unsupported fixture');
+  if (config.directoryPageSize !== undefined && (!Number.isInteger(config.directoryPageSize) || config.directoryPageSize < 1 || config.directoryPageSize > 32)) throw Error('directoryPageSize must be an integer from 1 to 32');
+  const deployment = await transport.source.request('eth_getBlockByNumber', ['0x1', false]);
+  if (!deployment?.hash) throw Error('deployment identity unavailable');
+  environmentId = config.expected.source + '/' + config.expected.core + '/' + deployment.hash;
+  try {
+    journal = createActionJournal(localStorage);
+    const saved = localStorage.getItem(costKey);
+    ledger = saved ? restoreLedger(saved) : createLedger({ sessionId: crypto.randomUUID(), createdAt: new Date().toISOString() });
+    selectedModels = [...new Map(ledger.feeSnapshots.map(s => [s.chainFamily, s.id])).values()];
+    selectedFx = ledger.fxSnapshots.at(-1)?.id;
+  } catch (e) { storageError = e.message; ledger = createLedger({ sessionId: crypto.randomUUID(), createdAt: new Date().toISOString() }); }
+  $('economics').replaceChildren();
+  economics = createEconomicsPanel($('economics'), {
+    async onModel(values) { return withAuthorizationFence(navigator.locks, async () => {
+      rereadJournals();
+      const now = new Date().toISOString(), id = crypto.randomUUID();
+      costEvent({ type: 'fee/add', snapshot: { id, capturedAt: now, source: 'User-entered MANUAL MODEL assumptions; not a live quote', chainFamily: values.family,
+        executionGasPriceWei: modelWei(values.gasPrice, 9), l1FeeWei: modelWei(values.l1Fee, 18), operatorFeeWei: modelWei(values.operatorFee, 18),
+        ...(values.family === 'arbitrum' ? { arbitrumMode: 'separate-execution' } : {}) } });
+      selectedModels = selectedModels.filter(s => ledger.feeSnapshots.find(f => f.id === s)?.chainFamily !== values.family).concat(id);
+      if (values.fx) { selectedFx = crypto.randomUUID(); costEvent({ type: 'fx/add', snapshot: { id: selectedFx, capturedAt: now, source: 'User-entered manual ETH/USD snapshot', usdPerEth: values.fx } }); }
+      renderEconomics();
+    }); },
+    onExport() { const blob = new Blob([exportLedger(ledger)], { type: 'application/json' }), url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = 'efs-public-cost-journal.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); },
+    onReset() { if (!writing) withAuthorizationFence(navigator.locks, async () => { rereadJournals(); costEvent({ type: 'display/reset' }); journal.resetDisplay(); }).catch(e => toast(friendlyError(e), true)); },
+    onReconcile: reconcileRecorded,
+    onReselect: (entry, file) => resumeBytes(entry, file).catch(e => toast(friendlyError(e), true)),
+  });
+  renderEconomics();
+  if (storageError) $('economics').append(text('p', storageError + ' Existing cost/recovery history unavailable. Guest reading remains available.', 'error'));
   config.knownTags = config.knownTags ?? ['ocean', 'draft'];
   path = [{ name: config.rootLabel ?? 'trip', subject: config.root }];
   if (config.write) for (const [key, author] of Object.entries(config.write.authors)) {
+    if (!author.key) continue; // default static exports never contain local keys
     const option = text('option', author.label + ' (local test signer)'); option.value = key; $('signer').append(option);
   }
   if (config.write) {
@@ -942,6 +1123,6 @@ try {
   $('scenario').textContent = config.scenario ?? 'Local upgradeable testnet fixture.';
   $('delay').textContent = transport.mode === 'direct-static' ? 'Standalone static hosting: direct JSON-RPC to ' + config.rpcUrl : config.injectedDelayMs ? `Test transport: ${config.injectedDelayMs} ms injected before each RPC read.` : 'Local transport; no injected RPC delay.';
   updateSession();
-  reader = createFixtureReader({ source: transport.source, context: { expected: config.expected } });
+  reader = createFixtureReader({ source: transport.source, context: { expected: config.expected, ...(config.readerLimits ? { limits: config.readerLimits } : {}) } });
   await refresh({});
 } catch (e) { $('coverage').textContent = 'Read unavailable'; toast('Cannot start this local fixture: ' + e.message, true); main.dataset.state = 'settled'; }
