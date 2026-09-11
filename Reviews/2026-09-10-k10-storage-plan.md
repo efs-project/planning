@@ -48,17 +48,17 @@
 
 ## Task 2: State-readable immutable bytes and content-dedup comparison
 
-**Files:** create a self-contained lab at `Reviews/2026-09-10-storage-arms/` with `foundry.toml`, `src/ImmutableBytesArms.sol`, `test/ImmutableBytesArms.t.sol`, `test/LayoutHarness.sol`, and `README.md`. The layout harness imports actual `StateStore` structs; no existing C0 storage replacement in this task.
+**Files:** create a self-contained lab at `Reviews/2026-09-10-storage-arms/` with `foundry.toml`, `src/ImmutableBytesArms.sol`, `test/ImmutableBytesArms.t.sol`, `test/LayoutHarness.sol`, `README.md`, and a lab-local `.gitignore` for `/out/` and `/cache/` only. The layout harness imports actual `StateStore` structs; no existing C0 storage replacement in this task.
 
 **Interfaces:** equivalent `put(bytes)` and checked `read(id)` behavior for storage bytes, immutable code bytes, and content-addressed reuse with per-file/per-position references. Every returned byte string is checked against an exact length and content commitment. No private offchain body store. Reference keys bind publisher namespace, an exact revision/tree commitment, and position—not a mutable filename or continuing File whose future contents must change. Content upload grants no authority over another publisher's references. This is a storage experiment, not an alternative Files authorization model.
 
-- [ ] First write runnable storage-control tests for exact round-trip, repeat writes and differing bytes; add a failing expectation for cross-file/cross-position content-only reuse before implementing the dedup arm.
-- [ ] Implement a small state-bytes control and code-bytes arm using an inert prefix and immutable deployed payload, with explicit max length and code identity checks. Do not add a dependency solely to hide the experiment; name the design as code-backed immutable bytes, not proof of a production SSTORE2 integration.
-- [ ] Add content-only deduplication plus separately keyed file/position references. Same bytes across different references reuse one payload; different bytes never alias. Reject wrong length, malformed/substituted pointers and unavailable code. Do not overwrite a previously committed exact reference silently.
-- [ ] Test zero bytes, 1, 31, 32, 33, 1024 and 4096 byte payloads, with zero-filled and nonzero contents; identical restage; changed bytes; two files and two positions; fresh independent contract reading after original writer is no longer consulted; corruption and missing payload. The empty code payload is a real one-byte STOP contract, not address zero. Check same-length altered code, truncated/missing code, and reference/pointer substitution. Share no encoder-derived expected hashes with the decoder under test when a literal vector can establish the boundary.
-- [ ] Run measured first/repeat/different-file writes and cold/warm reads against identical payloads. Use `forge test --isolate` (installed CLI confirms separate top-level EVM transaction contexts) and a probe whose first and second reads are measured in one call, or explicitly demonstrated cooling. Keep setup outside the measured transaction. Report deployment/write/read costs separately, without future-fork or all-EFS savings claims.
-- [ ] Record actual Foundry compiler storage layouts for existing C0 row structs in the report and identify packing headroom from slots/offsets, not field counts. If already packed, say so; this measurement is input to a later actual row-reencoding/shared-context patch, not its implementation.
-- [ ] Run the complete lab suite and a task-scoped review; commit only task paths and write the provided report. Keep canonical protocol selection, carrier permanence guarantees and full integration open.
+- [x] First write runnable storage-control tests for exact round-trip, repeat writes and differing bytes; add a failing expectation for cross-file/cross-position content-only reuse before implementing the dedup arm.
+- [x] Implement a small state-bytes control and code-bytes arm using an inert prefix and immutable deployed payload, with explicit max length and code identity checks. Do not add a dependency solely to hide the experiment; name the design as code-backed immutable bytes, not proof of a production SSTORE2 integration.
+- [x] Add content-only deduplication plus separately keyed file/position references. Same bytes across different references reuse one payload; different bytes never alias. Reject wrong length, malformed/substituted pointers and unavailable code. Do not overwrite a previously committed exact reference silently.
+- [x] Test zero bytes, 1, 31, 32, 33, 1024 and 4096 byte payloads, with zero-filled and nonzero contents; identical restage; changed bytes; two files and two positions; fresh independent contract reading after original writer is no longer consulted; corruption and missing payload. The empty code payload is a real one-byte STOP contract, not address zero. Check same-length altered code, truncated/missing code, and reference/pointer substitution. Share no encoder-derived expected hashes with the decoder under test when a literal vector can establish the boundary.
+- [x] Run measured first/repeat/different-file writes and cold/warm reads against identical payloads. Use `forge test --isolate` (installed CLI confirms separate top-level EVM transaction contexts) and a probe whose first and second reads are measured in one call, or explicitly demonstrated cooling. Keep setup outside the measured transaction. Report deployment/write/read costs separately, without future-fork or all-EFS savings claims.
+- [x] Record actual Foundry compiler storage layouts for existing C0 row structs in the report and identify packing headroom from slots/offsets, not field counts. If already packed, say so; this measurement is input to a later actual row-reencoding/shared-context patch, not its implementation.
+- [x] Run the complete lab suite and a task-scoped review; commit only task paths and write the provided report. Keep canonical protocol selection, carrier permanence guarantees and full integration open.
 
 ## Joint finish
 
@@ -80,10 +80,38 @@ The seven-key fixture saves 40,023 gas for cold scope-to-key lookup but costs
 measurements, not transaction totals or directory-scale results. The upgrade
 admission library has only 23 runtime bytes spare: module decomposition is an
 explicit integration follow-up before adding features, not delivered headroom.
+That follow-up must preserve the sole commit path, bound any new cross-module
+calls/returndata, include every linked code identity in execution pinning, and
+measure ABI/call overhead; merely relocating bytecode is not a completed design.
 
 Experiment choices: keep legacy mode0 as default and opt into mode1 only before
 initialization; use a full-word discriminator in the same standalone slot;
 require explicit trusted read layout/profile. This costs a mode branch and an
 experimental read-configuration change, without reinterpreting populated state.
-The separate storage lab remains next; actual row-reencoding/shared-context
-optimization is not being bundled into it.
+The separate storage lab does not implement actual row-reencoding/shared-context
+optimization; that remains a later patch and measurement.
+
+Task 2 at `0ac5996` passed independent task review with no findings. The
+controller freshly reproduced all **15 tests**, the complete numeric tables,
+and imported compiler layouts. See [[Reviews/2026-09-10-storage-arms/README]].
+For 4KiB nonzero bytes, first-write call work is 2,957,811 gas in the simple
+state control versus 934,709 in the content-deduplicated code arm; a repeat
+dedup upload costs 18,709, with a separately cold new reference costing 60,490.
+All-zero state bytes instead cost 410,611, less than the code arm. These are
+not atomic upload-plus-reference receipts or full Files transactions.
+
+The state control has four metadata/head slots versus three in the code arm
+and is not a maximally packed competitor. The figures therefore support
+integration experiments, not a universal carrier savings percentage. Actual
+Core layouts already pack the small RecordRow, TypeRow and PrincipalRow fields;
+their respective head footprints are three, three and one slots. Unused bytes
+inside an existing slot are capacity, not measured savings.
+
+The storage decision remains a reversible comparison: keep exact byte reads
+and content reuse separate from publisher/reference authority, validate the
+pinned descriptor before copying, and keep the current carrier as a control.
+The cost of this bounded first delivery is that an optimized state control,
+shared contexts, actual Core integration and a joined Files transaction still
+need implementation and measurement. A single code payload also has a size
+ceiling; small-body and boundary tests do not establish a general large-file
+carrier or future-fork permanence.

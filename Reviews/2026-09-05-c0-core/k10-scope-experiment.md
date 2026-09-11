@@ -55,7 +55,15 @@ Verification rejects missing or mismatched comparison-layout tags even for empty
 - No per-binding reverse map is written. Posting word count and key/history row families are unchanged; selection adds one nonzero discriminator slot in K10. Read costs, initialization write cost and mutation transaction cost are separate questions.
 - Admission body-budget simplification retains checked cumulative addition and `total > 8192`; the former individual `leaf.body.length > 8192` predicate was logically redundant because lengths are nonnegative. Single-body and cumulative overflow cases remain covered.
 
-Detailed commands, RED/GREEN evidence, resource measurements, omissions and integration status are recorded in the task report supplied to the coordinating task. No 10k-scale or total transaction savings are claimed.
+Pinned-source integration check against Fable's `cb6e76e`: among the twelve
+delivered paths, only `Reviews/2026-09-08-upgradeable-foundation/scripts/local-upgrade.mjs`
+had changes relative to the K10 base. Its watchdog/CORS/step-tracing hunks are
+separate from the provenance/layout additions; preserve both. This was a
+read-only Git-object comparison, not a cherry-pick attempt, inspection of newer
+U3 work, or proof the combined build fits. Rebuild/repin the actual joined head.
+
+No 10k-scale or total transaction savings are claimed. Reproduction and review
+closeout below preserve the durable handoff independently of task scratch files.
 
 ## Measured evidence (2026-09-10)
 
@@ -73,3 +81,32 @@ Test-only consumer, seven actual first-tombstone keys in one scope after three u
 The cold lookup benefit is **40,023 gas** in this fixture. Cold lookup plus hydration is **4,471 gas more expensive**, not cheaper. These measurements do not cover 10k keys, arbitrary history depth, bulk write transactions, reverse lookup, full-page traversal, or changing hardware/provider costs.
 
 Fresh verification: Core Forge **210/210** (200 control tests + 10 K10 tests); upgrade Forge **19/19**; K10 independent/live Node **2/2**; legacy audit/binding Node **2/2**; upgrade chain/read Node **15/15**.
+
+## Reproduction and review closeout
+
+Run from the planning repository root with the existing lab dependencies:
+
+```sh
+forge test --root Reviews/2026-09-05-c0-core --summary
+forge test --root Reviews/2026-09-08-upgradeable-foundation --summary
+forge test --root Reviews/2026-09-05-c0-core --match-test testMeasureColdAndWarmLookupAndHistory -vvvv
+node --test --test-concurrency=1 Reviews/2026-09-05-c0-core/test/k10-scope.test.mjs Reviews/2026-09-05-c0-core/test/audit-pages.test.mjs Reviews/2026-09-05-c0-core/test/binding-reads.test.mjs Reviews/2026-09-05-c0-core/test/stateful-chain.test.mjs Reviews/2026-09-08-upgradeable-foundation/test/upgrade-chain.test.mjs Reviews/2026-09-08-upgradeable-foundation/test/upgrade-reads.test.mjs
+```
+
+The controller independently reproduced **210 Core + 19 upgrade Forge tests**,
+**30 Node tests** (including 11 stateful-chain tests), and all four gas figures.
+Tests start and stop disposable local chains; their passing status is not
+evidence of a public deployment. Incremental build-info selection now requires
+creation bytecode, deployed bytecode and immutable-reference metadata to match.
+If no coherent full compiler evidence exists, rebuild the relevant Foundry lab
+with `--force --ast --build-info`; a mismatched AST is not accepted as fallback.
+
+Retained test-first failures before implementation were: physical scope lane 4
+instead of required key ordinal 1; then wrong hydrated admission domain after
+the writer-only change; and the independent fold returning `[[4n]]` instead of
+`[[1n]]`. Each became green after its corresponding implementation change.
+Task review then found offline missing-layout fallback to mode0. The new
+zero-binding test reproduced **VERIFIED** with a missing expected mode before
+the fix. Explicit trusted source profiles closed that gap; scoped re-review
+found the issue addressed with no new breakage. Code checkpoints: `c38b1f4`
+(writer/readers) and `fe98f18` (offline qualification fix).
