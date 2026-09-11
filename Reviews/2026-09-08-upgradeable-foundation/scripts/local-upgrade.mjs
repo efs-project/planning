@@ -80,7 +80,9 @@ function assertCompilerEvidence(info, artifacts, currentSources) {
     const [[path,contract]]=Object.entries(generated.metadata.settings.compilationTarget);
     const compiled=info.output?.contracts?.[path]?.[contract];assert(compiled,'complete compiled artifact '+name);
     assert.deepEqual(generated.abi,compiled.abi,'compiler ABI '+name);
+    assert(compiled.evm && typeof compiled.evm === 'object' && !Array.isArray(compiled.evm), 'compiler EVM output '+name);
     for(const kind of ['bytecode','deployedBytecode']) {
+      assert(compiled.evm[kind] && typeof compiled.evm[kind] === 'object' && !Array.isArray(compiled.evm[kind]), 'compiler bytecode structure '+name+' '+kind);
       assert.equal(generated[kind].object.replace(/^0x/,''),compiled.evm[kind].object,'compiler artifact bytecode '+name);
       assert.deepEqual(generated[kind].linkReferences??{},compiled.evm[kind].linkReferences??{},'compiler link references '+name+' '+kind);
       assert.deepEqual(generated[kind].immutableReferences??{},compiled.evm[kind].immutableReferences??{},'compiler immutable references '+name+' '+kind);

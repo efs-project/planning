@@ -37,6 +37,32 @@ test('selects coherent current output after stale output with identical core byt
   assert.equal(runner.selectCompilerEvidence([stale, info], artifacts, currentSources), info);
 });
 
+for (const missing of ['evm', 'bytecode', 'deployedBytecode']) {
+  function incomplete(info) {
+    const candidate = structuredClone(info);
+    const compiled = candidate.output.contracts['src/Proxy.sol'].Proxy;
+    if (missing === 'evm') delete compiled.evm;
+    else delete compiled.evm[missing];
+    return candidate;
+  }
+  test('skips incomplete ' + missing + ' output before coherent candidate', () => {
+    const { artifacts, info, currentSources } = fixture();
+    assert.equal(runner.selectCompilerEvidence([incomplete(info), info], artifacts, currentSources), info);
+  });
+  test('refuses incomplete-only ' + missing + ' output with actionable reason', () => {
+    const { artifacts, info, currentSources } = fixture();
+    assert.throws(() => runner.selectCompilerEvidence([incomplete(info)], artifacts, currentSources),
+      /No coherent full compiler output.*EFS_TEST_FULL_BUILD=1.*compiler (EVM output|bytecode structure) Proxy/s);
+  });
+}
+
+test('propagates unexpected caller errors instead of skipping candidates', () => {
+  const { artifacts, info, currentSources } = fixture();
+  const error = new Error('unexpected source reader failure');
+  Object.defineProperty(currentSources, 'src/Proxy.sol', { get() { throw error; } });
+  assert.throws(() => runner.selectCompilerEvidence([info], artifacts, currentSources), caught => caught === error);
+});
+
 const corruptions = {
   'ABI': f => { f.info.output.contracts['src/Proxy.sol'].Proxy.abi = []; },
   'creation bytecode': f => { f.info.output.contracts['src/Proxy.sol'].Proxy.evm.bytecode.object = 'ff'; },
