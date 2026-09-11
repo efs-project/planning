@@ -38,10 +38,10 @@ Expert review sharpened the plan: accounting needs a recoverable action journal;
 
 **Interface:** `openDirectory(scope, options)` retains its methods and gains async `resume(nextScope)` returning `{status: 'RESUMED' | 'REFUSED', reason?}` for in-process acquisition rollover. Preserve sealed rows/frontier and fixed mount/subject; independently qualify and compare the entire basis/source context. Refuse mismatched, closed or in-flight handoffs without changing old state or closing shared scopes. No serialized public cursor format.
 
-- [ ] Write a failing real-reader regression using a small request budget and a fixed real fixture; traverse multiple acquisitions, retain each expected row exactly once and reach COMPLETE.
-- [ ] Implement scope handoff; retain the original data error when sealing also fails. Test changed source/epoch, block/hash, execution/high-water and close/in-flight refusal.
-- [ ] Parameterize compiler outputs AND all artifact loaders under `EFS_TEST_BUILD_ROOT` with separate foundation/router paths. Unset preserves legacy behavior; coordinate exclusive chain tests. Do not set `FOUNDRY_OUT` while loading old hard-coded artifacts.
-- [ ] Run `node --test R/test/continuation.test.mjs` and existing relevant reader/completeness tests; record exact commands and outcomes.
+- [x] Write a failing real-reader regression using a small request budget and a fixed real fixture; traverse multiple acquisitions, retain each expected row exactly once and reach COMPLETE.
+- [x] Implement scope handoff; retain the original data error when sealing also fails. Test changed source/epoch, block/hash, execution/high-water and close/in-flight refusal.
+- [x] Parameterize compiler outputs AND all artifact loaders under `EFS_TEST_BUILD_ROOT` with separate foundation/router paths. Unset preserves legacy behavior; coordinate exclusive chain tests. Do not set `FOUNDRY_OUT` while loading old hard-coded artifacts.
+- [x] Run `node --test R/test/continuation.test.mjs` and existing relevant reader/completeness tests; record exact commands and outcomes.
 
 ```js
 const stream = openDirectory(first.scope, { mountId, pageSize: 8 });
@@ -57,11 +57,11 @@ assert.deepEqual(continued.basis, partial.basis);
 
 **Interface:** `createLedger`, `reduceLedger`, `selectActionCosts`, `selectSessionCosts`, `exportLedger`, `restoreLedger`. JSON-safe decimal quantities and BigInt arithmetic; no DOM/fetch/storage. Document the event contract in the module for its browser consumer.
 
-- [ ] Write failing tests for successful/reverted receipts, duplicate hash ingestion, unknown attempts, multitransaction totals, payer split, separate environments sharing chainId 31337, and reset retaining unresolved state.
-- [ ] Stable action IDs and attempts; deduplicate fees by environment plus hash, not label/tree/index/nonce. Keep effect state separate from receipt state.
-- [ ] Ethereum: execution fee. OP/Base: execution plus explicit L1/operator components. Arbitrum: receipt-total gas with included-L1 marker OR execution plus posting, never both. Distinguish explicit zero, not-applicable and unknown.
-- [ ] Immutable fee/FX snapshot IDs/timestamps; missing FX leaves ETH known and USD unavailable. Four scenarios are alternatives, not additive spending. Export/restore validate fields/version and omit secrets/content.
-- [ ] Selectors report known subtotals and missing/unresolved counts. Run `node --test P/test/cost-ledger.test.mjs`.
+- [x] Write failing tests for successful/reverted receipts, duplicate hash ingestion, unknown attempts, multitransaction totals, payer split, separate environments sharing chainId 31337, and reset retaining unresolved state.
+- [x] Stable action IDs and attempts; deduplicate fees by environment plus hash, not label/tree/index/nonce. Keep effect state separate from receipt state.
+- [x] Ethereum: execution fee. OP/Base: execution plus explicit L1/operator components. Arbitrum: receipt-total gas with included-L1 marker OR execution plus posting, never both. Distinguish explicit zero, not-applicable and unknown.
+- [x] Immutable fee/FX snapshot IDs/timestamps; missing FX leaves ETH known and USD unavailable. Four scenarios are alternatives, not additive spending. Export/restore validate fields/version and omit secrets/content.
+- [x] Selectors report known subtotals and missing/unresolved counts. Run `node --test P/test/cost-ledger.test.mjs`.
 
 ```js
 // Independently calculated numeric fixture, not computed by the SUT:
@@ -82,7 +82,7 @@ assert.equal(cost.totalWei, '42000000000000');
 
 ## Task 4: Economics widget and safe browser action integration
 
-**Files:** `P/web/app.mjs`, `P/web/index.html`, `P/web/files.css`, `P/web/rpc-source.mjs`, new `P/web/economics-panel.mjs`, `P/web/action-journal.mjs`, module serving/export maps after Task 3, focused browser tests.
+**Files:** `P/web/app.mjs`, `P/web/index.html`, `P/web/files.css`, `P/web/rpc-source.mjs`, `P/sdk/files-actions.mjs` for its existing `readBackOperation` implementation, new `P/web/economics-panel.mjs`, `P/web/action-journal.mjs`, module serving/export maps after Task 3, focused browser tests.
 
 **Consumes:** Tasks 1–3. Capture environment/Core/execution, principal/account/provider chain, mount/Lens, source/destination and expected effect before authorization. Propagate action ID/context through every stage.
 
@@ -109,6 +109,7 @@ assert.equal(cost.totalWei, '42000000000000');
 - [ ] Controlled 10,000-entry and fixed-live/high-history sweeps. Distinguish repeated rebinds from distinct retired names; no unmeasured page-cost extrapolation or giant repeated traces.
 - [ ] Lens 1/8/32/64 sources, conflict/unknown/last-winner; unrelated attesters with fixed selected Lens; synthetic nsfw positive/negative queries over a named universe.
 - [ ] Atomic replacement and three tag subjects require a coordinated contract-interface checkpoint; preserve required indexing. Reduced guarantees are explicit marginal-cost/lost-behavior proposals.
+- [ ] Check ordinary host-file naming against the fixture's ASCII restriction (case, spaces, Unicode, normalization collisions), name limits, deep folders and moving a directory below itself. Unsupported names are not malformed data; this prototype restriction is not silently the future file-system requirement.
 - [ ] Join typed Note extension/safe old editing, mandatory custom validation and independent Solidity consumer; validate recovery's actual evidence tier and opaque private boundaries.
 - [ ] Primitive and semantics-matched EAS/MUD comparisons use identical transaction/payload boundaries; internal MUD gas spans are not receipt comparisons.
 
@@ -128,4 +129,9 @@ assert.equal(cost.totalWei, '42000000000000');
 
 ## Progress
 
-- 2026-09-11: approved scope extended by two current-source expert reviews; implementation not yet verified. Fable admission lane and Codex first checkpoint are separate owned scopes.
+- 2026-09-11: approved scope extended by two current-source expert reviews. Fable admission lane and Codex first checkpoint are separate owned scopes in the same existing prototype.
+- Reader checkpoint `2b505c0`: independent spec/quality review passed. Six real continuation tests passed; the existing suite passed 10/13 before three baseline-stale limit assertions were corrected and reran 3/3. No production limits changed. Additive private scope-brand helper passed its pure regression; genuine-brand integration assertion is assigned to the SDK suite. Retaining cumulative sealed predecessors still needs sustained-scale memory measurement.
+- Economics checkpoint `5dd4011`: 18/18 pure tests and independent spec/quality review passed. This validates receipt accounting and explicit four-chain manual scenarios, **not** live fee acquisition or the browser widget.
+- Sponsor checkpoint `8f64217`: 15/15 focused HTTP/RPC tests passed. Independent review found arbitrary RPC error messages could leak decoded content into the public journal; the fix is in progress. Real-chain sponsor/wallet regression remains pending.
+- Task 4 is split into two non-overlapping implementers: SDK authored/selected effect read-back, and browser integration/recovery/economics. The discovered record-existence-only success path is not an acceptable handoff state.
+- SDK PM and Data Explorer PM received bounded read-only feedback requests. No second prototype or production repository was created. No claim of completed browser, large-directory readiness, lower production costs or adopted protocol changes is made at this checkpoint.
