@@ -23,6 +23,8 @@ export const BROWSER_FILES = new Map([
   ['/screen/cost-ledger.mjs', '../web/cost-ledger.mjs'],
   ['/screen/action-journal.mjs', '../web/action-journal.mjs'],
   ['/screen/economics-panel.mjs', '../web/economics-panel.mjs'],
+  ['/screen/file-routes.mjs', '../web/file-routes.mjs'],
+  ['/screen/verified-download.mjs', '../web/verified-download.mjs'],
   ['/screen/listing-presentation.mjs', '../../2026-09-09-files-screen/web/listing-presentation.mjs'],
   ['/Reviews/2026-09-09-files-browser-mvp/sdk/files-actions.mjs', '../sdk/files-actions.mjs'],
   ['/Reviews/2026-09-09-files-browser-mvp/sdk/export-bundle.mjs', '../sdk/export-bundle.mjs'],

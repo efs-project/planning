@@ -20,13 +20,19 @@ You land in `trip/` with no wallet and **0 approvals** (top right — that
 counter never moves while you only read). Click **Open** on `photos/` —
 breadcrumbs show `trip / photos`; click `trip` to go back. Click **Open** on
 `note.txt`: the note's text appears only after its bytes were re-hashed
-against the on-chain commitment ("integrity VERIFIED"). Under **History**,
+against the on-chain commitment ("integrity VERIFIED"). Under **Versions**,
 open the older revision — the original text, still verifiable. Open
 `photos/pixel.png`: its bytes were deliberately never staged, so the browser
 says they are *unavailable* — not that the file doesn't exist.
 
 Click **Why?** on any row to see which Lens selected which claim, at which
 pinned block, with every RPC read inspectable.
+
+Folder, File and version selections now have hash URLs. Reload or use Back /
+Forward; guest reading still needs no wallet. A link to an old name that was
+renamed, removed or rebound to another File refuses as **No longer here** instead
+of silently opening different contents. The URL asks for a selection; the reader
+still verifies its ancestry from the mount root.
 
 ## 2 · Make it yours (5 min)
 
@@ -50,13 +56,21 @@ clearly labeled disposable key; every approval is counted.
   contracts, not in the browser.
 - Open `plan.md` → **Edit note** → change the text → Approve. History now
   shows two revisions; the old one still opens.
+- **Upload file** accepts binary and empty files too. Open a readable file and
+  choose **Download verified file**. The downloaded bytes are checked; HTML is
+  not executed in the app. The current 1 MiB and restricted ASCII naming limits
+  are visible prototype restrictions, not proposed universal filesystem rules.
+- Open an older version and choose **Restore as new current version**. This
+  writes a third version using the old contents; both previous versions survive.
+  Unavailable/unverified contents cannot be restored or downloaded. Historical
+  executable metadata is explicitly unsupported by this restoration path.
 
 ## 3 · Organize (3 min)
 
 - **Rename** `plan.md` → `itinerary.md`. The Why? drawer shows the File
   Object id **did not change** — names move, identity doesn't.
-- **Copy** it → `itinerary-v2.md` (a NEW file with the same bytes), then
-  **Link** it → `itinerary-link.md` (the SAME file under a second name).
+- **Make independent copy** → `itinerary-v2.md` (a NEW file with the same bytes),
+  then **Add another name** → `itinerary-link.md` (the SAME file under a second name).
   Edit the copy: the original is untouched. That's the difference.
 - **Remove** `itinerary.md`. It leaves the list and appears under **Removed
   items** — masked, not erased; the linked placement still works. **Restore**
@@ -75,6 +89,26 @@ clearly labeled disposable key; every approval is counted.
   disagreement history). **Why?** explains each answer.
 - Switch signer to **Author B**, tag the same file, switch back to A and
   remove A's tag: B's tag survives — tags are attributed, not global.
+
+## Gas and modeled dollars
+
+Expand **Gas & cost**. Its total and action rows include actual identified local
+receipts, including chunk staging, sponsored payments and mined failures. Expand
+an action to distinguish fees from the independently verified data effect.
+Read RPC calls/HTTP batches/bytes are shown separately; browsing is not a paid
+transaction.
+
+Pin manual Ethereum, OP, Base or Arbitrum scenarios with your chosen gas price,
+USD/ETH and explicitly modeled DA/operator fees. The four are alternative
+projections of the same actions, **not four charges or live quotes**. Blank fee
+or FX inputs remain unavailable, not zero. You can export this public cost
+journal. Hiding resolved costs never removes an unresolved signed-action guard.
+
+An interrupted action may leave a live signature even if the sponsor refused
+or a transaction failed. Use **Reconcile recorded actions** before retrying.
+Post-metadata interrupted uploads can resume after reselecting matching bytes;
+pre-metadata direct-wallet recovery is not yet implemented. Do not clear browser
+storage as a substitute for resolving an authorization.
 
 ## 4b · Use a real wallet (3 min, optional)
 

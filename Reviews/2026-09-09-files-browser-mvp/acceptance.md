@@ -10,6 +10,15 @@ test signers; author intents are verified on-chain (EIP-712, per-account
 nonces, executor binding) and the operator key is never served to the browser.
 This table claims nothing about public testnets, real wallets or production.
 
+**September 11 addendum:** [the joined browser checkpoint](browser-integration-2026-09-11.md)
+adds exact guest routes, general/empty uploads, verified downloads, restore-as-new,
+receipt economics and signed-action recovery. A separate exact 1,000-live-entry
+control now reaches COMPLETE across three acquisitions (838 HTTP requests).
+Thus the historical row-2 "beyond 512 unmeasured" note below is superseded for
+that named live-entry control only, not for high churn, WAN, or arbitrary Lenses.
+The addendum distinguishes baseline Solidity from fresh Fable-candidate runs;
+this older ledger is not a fresh uniform rerun of every row on one new deployment.
+
 | # | Journey (testnet-files-mvp-plan) | Status | Evidence / honest gaps |
 |---|---|---|---|
 | 1 | Guest browse | PASS | `journeys.browser.mjs` step 1: nested browse + breadcrumbs, throwing `window.ethereum` proves zero wallet touches; only configured transports (relay allowlists in `scripts/server.mjs`); no `/wallet` `/relay` `/session` endpoints exist |

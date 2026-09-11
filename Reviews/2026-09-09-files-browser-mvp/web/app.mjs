@@ -11,6 +11,8 @@ import { Wallet, keccak256 } from '/Reviews/2026-09-04-mvp-rehearsal/node_module
 import { createActionJournal, assertWalletContext, assertDeploymentContext, withAuthorizationFence } from './action-journal.mjs';
 import { createLedger, reduceLedger, exportLedger, restoreLedger } from './cost-ledger.mjs';
 import { createEconomicsPanel, normalizeReceipt, sponsorCostEvents, modelWei } from './economics-panel.mjs';
+import { encodeFilesRoute, decodeFilesRoute } from './file-routes.mjs';
+import { prepareVerifiedDownload } from './verified-download.mjs';
 
 const $ = id => document.getElementById(id), main = document.querySelector('main');
 const stringify = x => JSON.stringify(x, (_, v) => typeof v === 'bigint' ? String(v) : v, 2);
@@ -22,6 +24,48 @@ const fromHex = hex => new Uint8Array((hex.length - 2) / 2).map((_, i) => parseI
 let config, reader, scope, stream, cancel, generation = 0, current = null, busy = false, opener = null;
 let transport = null; // {source, write, mode: 'relay' | 'direct-static'}
 let path = [], acquisitions = 1, pubCounter = 0;
+let selection = null;
+const previewURLs = new Set();
+function releasePreviews() { for (const url of previewURLs) URL.revokeObjectURL(url); previewURLs.clear(); }
+function directoryRoute() { return { lensId: $('lens').value, pathSegments: path.slice(1).map(p => p.name) }; }
+function navigate(route, { samePin = true, replace = false } = {}) {
+  if (writing) return;
+  const hash = encodeFilesRoute(route);
+  if (hash !== location.hash) history[replace ? 'replaceState' : 'pushState'](null, '', hash);
+  return refresh({ samePin });
+}
+function closeFileSelection() {
+  const selected = selection;
+  selection = null; releasePreviews(); $('file-panel').close();
+  // A hash changed during authorization is the user's next navigation, not
+  // a new destination for the already-captured write. Do not overwrite it.
+  if (!selected || location.hash === encodeFilesRoute(selected.route)) history.replaceState(null, '', encodeFilesRoute(directoryRoute()));
+}
+// Only qualified lookup results establish ancestry. A route is just a request;
+// even a valid File ID cannot bypass its named path under this mount root.
+async function resolveRoute(activeScope, route, stillCurrent = () => true) {
+  const resolved = [{ name: config.rootLabel ?? 'trip', subject: config.root }];
+  const mountId = config.mounts[route.lensId];
+  let leaf = null;
+  for (let i = 0; i < route.pathSegments.length; i++) {
+    const name = route.pathSegments[i];
+    const found = await acquire(() => lookupName(activeScope, { mountId, subject: resolved.at(-1).subject, name }));
+    if (!stillCurrent()) return null;
+    if (found.qualification?.status !== 'QUALIFIED' || found.qualification.coverage !== 'COMPLETE' || found.outcome === 'UNKNOWN' || found.outcome === 'CONFLICT') {
+      throw Error('Route unresolved at “' + name + '”: ' + (found.reason ?? found.outcome) + '. No replacement was opened');
+    }
+    if (found.outcome !== 'FOUND') throw Error('No longer here: “' + name + '” is not selected at this path');
+    const fileLeaf = i === route.pathSegments.length - 1 && route.fileId;
+    if (fileLeaf) {
+      if (found.value.kind !== 'FILE' || found.value.nodeId.toLowerCase() !== route.fileId.toLowerCase()) throw Error('No longer here: this name no longer selects the requested File');
+      leaf = found;
+    } else {
+      if (found.value.kind !== 'DIRECTORY') throw Error('No longer here: “' + name + '” is not a folder');
+      resolved.push({ name, subject: found.value.subject });
+    }
+  }
+  return { path: resolved, row: leaf, mountId, route };
+}
 const session = { signer: 'guest', mode: 'guest', wallet: null, principal: null, account: null, approvals: 0, walletRequests: 0 };
 let provider = null; // real EIP-1193 provider, set at boot when present
 let journal, ledger, economics, environmentId, storageError = null;
@@ -84,7 +128,7 @@ function updateSession() {
   $('prompts').setAttribute('aria-label', session.mode === 'wallet'
     ? 'Counted real wallet requests (EIP-1193)'
     : 'Counted simulated approvals with the disposable local test key');
-  $('toolbar').hidden = session.signer === 'guest';
+  $('toolbar').hidden = session.signer === 'guest' || current?.qualification?.status !== 'QUALIFIED';
   main.dataset.signer = session.signer;
 }
 function countApproval() { session.approvals++; updateSession(); }
@@ -170,6 +214,7 @@ function friendlyError(e) {
 let writing = false;
 async function runOperation(kindLabel, intent, facts) {
   if (session.signer === 'guest') { toast('Reading is free for guests; select a local test signer to make changes.', true); return null; }
+  if (current?.qualification?.status !== 'QUALIFIED') { toast('Resolve a qualified folder before making changes. No stale destination was used.', true); return null; }
   if (writing) { toast('One change at a time: the previous operation is still in flight.', true); return null; }
   writing = true;
   main.dataset.writing = 'true';
@@ -178,6 +223,7 @@ async function runOperation(kindLabel, intent, facts) {
   const signerWallet = session.wallet, signerPrincipal = session.principal, signerKey = session.signer;
   const signerMode = session.mode, signerAccount = session.account;
   const capturedLens = $('lens').value;
+  const capturedHash = location.hash;
   const captured = actionRuntime({ environmentId, chainId: '31337', core: config.expected.core, principal: signerPrincipal,
     account: signerAccount ?? signerWallet?.address, mountId: intent.mountId, lensId: capturedLens, sourceId: config.expected.source,
     destinationId: intent.parent ?? intent.fileId ?? intent.object ?? here(), router: config.write.router, carrier: config.write.carrier });
@@ -312,7 +358,10 @@ async function runOperation(kindLabel, intent, facts) {
     return { plan, receipt, staged, action: captured };
   } catch (e) { toast(friendlyError(e), true); return null; }
   }); } catch (e) { toast(friendlyError(e), true); return null; }
-  finally { writing = false; delete main.dataset.writing; $('lens').value = capturedLens; $('signer').value = signerKey; lockControls(false); renderEconomics(); }
+  finally {
+    writing = false; delete main.dataset.writing; $('lens').value = capturedLens; $('signer').value = signerKey; lockControls(false); renderEconomics();
+    if (location.hash !== capturedHash) { await refresh({}); captured.navigationRefreshed = true; }
+  }
 }
 async function stageContent(content, wallet, onlyMissing = false, action) {
   if (!action) throw Error('Captured recovery action required for chunk submission.');
@@ -429,7 +478,7 @@ function crumbs() {
   path.forEach((p, i) => {
     if (i) nav.append(text('span', ' / ', 'slash'));
     if (i === path.length - 1) nav.append(text('strong', p.name || 'trip'));
-    else { const b = text('button', p.name || 'trip', 'crumb'); b.type = 'button'; b.addEventListener('click', () => { if (writing) return; path = path.slice(0, i + 1); refresh({ samePin: true }); }); nav.append(b); }
+    else { const b = text('button', p.name || 'trip', 'crumb'); b.type = 'button'; b.addEventListener('click', () => navigate({ lensId: $('lens').value, pathSegments: path.slice(1, i + 1).map(p => p.name) })); nav.append(b); }
   });
 }
 function explain(row, button) {
@@ -473,15 +522,15 @@ function rowActions(row) {
   const usable = row.outcome === 'FOUND';
   const box = document.createElement('span'); box.className = 'row-actions';
   const add = (label, fn, title2) => { const b = text('button', label, 'row-button'); b.type = 'button'; if (title2) b.title = title2; b.setAttribute('aria-label', label + ': ' + (row.value?.name ?? row.outcome)); b.addEventListener('click', fn); box.append(b); return b; };
-  if (usable && row.value.kind === 'DIRECTORY') add('Open', () => { if (writing) return; path = [...path, { name: row.value.name, subject: row.value.subject }]; refresh({ samePin: true }); });
+  if (usable && row.value.kind === 'DIRECTORY') add('Open', () => navigate({ ...directoryRoute(), pathSegments: [...directoryRoute().pathSegments, row.value.name] }));
   const safe = fn => () => Promise.resolve(fn()).catch(e => toast(friendlyError(e), true));
-  if (usable && row.value.kind === 'FILE') add('Open', safe(() => filePanel(row)));
+  if (usable && row.value.kind === 'FILE') add('Open', safe(() => navigate({ ...directoryRoute(), pathSegments: [...directoryRoute().pathSegments, row.value.name], fileId: row.value.nodeId })));
   if (usable && session.signer !== 'guest') {
     add('Rename', safe(() => renameFlow(row, false)));
     add('Move', safe(() => renameFlow(row, true)));
     if (row.value.kind === 'FILE') {
-      add('Copy', safe(() => copyFlow(row)));
-      add('Link', safe(() => placementFlow(row)), 'Add another placement of the SAME file');
+      add('Make independent copy', safe(() => copyFlow(row)), 'New File identity; edits stay separate');
+      add('Add another name', safe(() => placementFlow(row)), 'Same File identity; edits are shared');
     }
     add('Remove', safe(() => removeFlow(row)));
   }
@@ -511,6 +560,7 @@ let renderToken = 0;
 async function render(s) {
   const token = ++renderToken;
   current = s;
+  updateSession();
   const presentation = presentListing(s);
   const nameFilter = $('filter').value.trim().toLowerCase();
   let rows = allRows(s);
@@ -554,9 +604,11 @@ async function render(s) {
   await renderTrash();
 }
 async function renderTrash() {
+  const g = generation, activeScope = scope, mountId = config.mounts[$('lens').value], subject = here();
   if (session.signer === 'guest') { $('trash').hidden = true; return; }
   try {
-    const removed = await acquire(() => openRemoved(scope, { mountId: config.mounts[$('lens').value], subject: here() }));
+    const removed = await acquire(() => openRemoved(activeScope, { mountId, subject }));
+    if (g !== generation) return;
     // UNREADABLE is not EMPTY: an UNKNOWN result must never render as
     // "no removed items" (the silent-absence bug class).
     if (removed.outcome !== 'FOUND') throw Error(removed.reason ?? 'removed items unavailable');
@@ -576,6 +628,7 @@ async function renderTrash() {
       li.append(info, actions); $('trash-rows').append(li);
     }
   } catch {
+    if (g !== generation) return;
     $('trash').hidden = false;
     $('trash-summary').textContent = 'Removed items — currently unreadable (this is not proof of none)';
     $('trash-rows').replaceChildren();
@@ -585,7 +638,7 @@ async function renderTrash() {
 // ---- flows -----------------------------------------------------------------
 async function afterWrite(result, message, { verifyBytes = null } = {}) {
   if (!result || result === 'CANCELLED') return;
-  await refresh({});
+  if (!result.action.navigationRefreshed) await refresh({});
   // Independent SDK verification under the CAPTURED mount/Lens; bytes separate.
   try {
     const checked = await withAuthorizationFence(navigator.locks, async () => { rereadJournals(); return reconcileAction(result.action.actionId); });
@@ -698,9 +751,9 @@ async function uploadFlow(file) {
     name = choice.name;
   }
   const intent = { kind: 'createFile', mountId: config.mounts[$('lens').value], parent: here(), name, bytesHex, mediaType: file.type || 'application/octet-stream', charset: null, priors: { destination: await priorOfName(name) } };
-  const result = await runOperation('upload “' + name + '”', intent, [['Image', name], ['In', crumbText()]]);
+  const result = await runOperation('upload “' + name + '”', intent, [['File', name], ['In', crumbText()]]);
   if (result && result !== 'CANCELLED') {
-    await afterWrite(result, result.staged.complete ? 'Image uploaded with verified bytes.' : 'Image record created; some bytes are not staged yet — open the file to stage the rest.', { verifyBytes: result.staged.complete ? result.plan.predicted.objectId : null });
+    await afterWrite(result, result.staged.complete ? 'File uploaded with verified bytes.' : 'File record created; some bytes are not staged yet — open the file to stage the rest.', { verifyBytes: result.staged.complete ? result.plan.predicted.objectId : null });
   }
 }
 async function renameFlow(row, move) {
@@ -729,7 +782,7 @@ async function renameFlow(row, move) {
   await afterWrite(result, (move ? 'Moved.' : 'Renamed.') + ' The file identity did not change.');
 }
 async function copyFlow(row) {
-  const input = await prompt('Copy “' + row.value.name + '” as'); if (!input?.name) return;
+  const input = await prompt('Make independent copy of “' + row.value.name + '” as'); if (!input?.name) return;
   const content = await acquire(() => openFile(scope, { mountId: config.mounts[$('lens').value], fileId: row.value.nodeId }));
   if (content.outcome !== 'FOUND' || !content.value.revisionId) { toast('Cannot copy: current content is unresolved.', true); return; }
   const treeRecord = await acquire(() => scope.call('getRecord', [content.value.revisionId]));
@@ -745,7 +798,7 @@ async function copyFlow(row) {
   await afterWrite(result, 'Copied as a new file; edits to the copy will not change the original.');
 }
 async function placementFlow(row) {
-  const input = await prompt('Second placement name for the SAME file'); if (!input?.name) return;
+  const input = await prompt('Add another name for the SAME file (edits shared)'); if (!input?.name) return;
   const result = await runOperation('link placement', {
     kind: 'placement', mountId: config.mounts[$('lens').value], parent: here(), name: input.name,
     object: row.value.nodeId, priors: { destination: await priorOfName(input.name) },
@@ -777,25 +830,43 @@ async function restoreFlow(item) {
 }
 
 // ---- file panel ------------------------------------------------------------
-async function filePanel(row) {
+async function filePanel(row, selectedRoute, g = generation) {
   const dialog = $('file-panel'), body = $('file-body');
+  const activeScope = scope, mountId = config.mounts[selectedRoute.lensId], subject = here();
+  const selected = { row, route: selectedRoute, mountId, subject, generation: g };
+  selection = selected; releasePreviews();
   $('file-title').textContent = row.value.name;
   body.replaceChildren(text('p', 'Reading verified content…'));
-  dialog.showModal();
-  const mountId = config.mounts[$('lens').value];
+  if (!dialog.open) dialog.showModal();
   try {
     const [content, revisions, history, tags] = [
-      await acquire(() => openFile(scope, { mountId, fileId: row.value.nodeId })),
-      await acquire(() => openRevisions(scope, { mountId, fileId: row.value.nodeId })),
-      await acquire(() => openHistory(scope, { mountId, subject: here(), name: row.value.name })),
-      await acquire(() => openTags(scope, { mountId, nodeId: row.value.nodeId, tagIds: (config.knownTags ?? []).map(t => tagId(t)) })),
+      await acquire(() => openFile(activeScope, { mountId, fileId: row.value.nodeId })),
+      await acquire(() => openRevisions(activeScope, { mountId, fileId: row.value.nodeId })),
+      await acquire(() => openHistory(activeScope, { mountId, subject, name: row.value.name })),
+      await acquire(() => openTags(activeScope, { mountId, nodeId: row.value.nodeId, tagIds: (config.knownTags ?? []).map(t => tagId(t)) })),
     ];
+    const historical = selectedRoute.revisionId ? await acquire(() => openFile(activeScope, { mountId, fileId: row.value.nodeId, revisionId: selectedRoute.revisionId })) : null;
+    if (g !== generation || selection !== selected) return;
     body.replaceChildren();
+    if (historical) {
+      const back = text('button', 'Back to current', 'row-button'); back.type = 'button';
+      back.addEventListener('click', () => { const { revisionId, ...route } = selectedRoute; navigate(route); }); body.append(back);
+      renderContent(body, row, historical, 'selected historical version');
+      if (session.signer !== 'guest') {
+        try {
+          prepareVerifiedDownload(historical, row.value.name);
+          if (historical.value.executableHint) throw Error('unsupported executable metadata');
+          const restore = text('button', 'Restore as new current version', 'row-button'); restore.type = 'button';
+          restore.addEventListener('click', () => restoreVersion(selected, historical).catch(e => toast(friendlyError(e), true)));
+          body.append(restore, text('p', 'Creates a new revision with these verified bytes. Existing versions remain unchanged.', 'row-meta'));
+        } catch { body.append(text('p', 'Restore unavailable: requires complete verified bytes and non-executable metadata. This prototype edit API cannot preserve an executable hint.', 'row-meta')); }
+      }
+    }
     renderContent(body, row, content);
     renderTags(body, row, tags);
-    renderRevisions(body, row, revisions);
+    renderRevisions(body, row, revisions, selectedRoute);
     renderHistory(body, history);
-  } catch (e) { body.replaceChildren(text('p', 'Content unavailable: ' + e.message, 'error')); }
+  } catch (e) { if (g === generation && selection === selected) body.replaceChildren(text('p', 'Content unavailable: ' + e.message, 'error')); }
 }
 function renderContent(body, row, content, revisionLabel = 'current') {
   const section = document.createElement('section'); section.className = 'content';
@@ -804,15 +875,27 @@ function renderContent(body, row, content, revisionLabel = 'current') {
   const v = content.value;
   const meta = text('p', v.mediaType + ' · ' + v.totalSize + ' bytes · integrity ' + v.integrity, 'row-meta');
   section.append(meta);
-  if (v.integrity === 'VERIFIED' && v.bytes) {
-    if (v.mediaType.startsWith('image/') && !v.executableHint) {
+  let attachment = null;
+  try { attachment = prepareVerifiedDownload(content, row.value.name); } catch { /* no incomplete or unqualified download/preview */ }
+  if (attachment) {
+    const download = text('button', 'Download verified file', 'row-button'); download.type = 'button';
+    download.addEventListener('click', () => {
+      const safe = prepareVerifiedDownload(content, row.value.name), url = URL.createObjectURL(safe.blob), a = document.createElement('a');
+      a.href = url; a.download = safe.filename; document.body.append(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+    section.append(download);
+    // Explicit raster allowlist. SVG, HTML and scripts never render as active
+    // documents or carry their media type into a trusted-origin download.
+    if (['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/avif'].includes(v.mediaType) && !v.executableHint) {
       const img = document.createElement('img');
-      const blob = new Blob([fromHex(v.bytes)], { type: v.mediaType });
+      const blob = new Blob([attachment.bytes], { type: v.mediaType });
       img.src = URL.createObjectURL(blob); img.alt = row.value.name; img.className = 'preview';
+      previewURLs.add(img.src);
       section.append(img);
     } else if (v.mediaType === 'text/plain') {
       const pre = document.createElement('pre'); pre.className = 'note-view';
-      pre.textContent = new TextDecoder(v.charset ?? 'utf-8', { fatal: false }).decode(fromHex(v.bytes));
+      pre.textContent = new TextDecoder(v.charset ?? 'utf-8', { fatal: false }).decode(attachment.bytes);
       section.append(pre);
       if (session.signer !== 'guest' && revisionLabel === 'current') {
         const edit = text('button', 'Edit note', 'row-button'); edit.type = 'button';
@@ -856,14 +939,42 @@ async function editNote(row, contentValue, initialText) {
     const result = await runOperation('edit note', intent, [['Note', row.value.name], ['Race safety', 'compare-and-swap on the current revision']]);
     if (result === 'CANCELLED') return;
     if (!result) continue; // failure (e.g. stale edit): re-open with the draft intact
-    $('file-panel').close();
+    if (!result.action.navigationRefreshed) closeFileSelection();
     await afterWrite(result, result.staged.complete ? 'Edited; new revision verified.' : 'Edited; some bytes are not staged yet — open the file to stage the rest.', { verifyBytes: result.staged.complete ? row.value.nodeId : null });
     return;
   }
 }
-function renderRevisions(body, row, revisions) {
+async function restoreVersion(selected, historical) {
+  if (writing || selection !== selected || selected.generation !== generation) return;
+  // Re-acquire both ancestry and the CURRENT head. The old revision supplies
+  // only bytes/metadata; it can never become the new head by pointing backward.
+  const opened = await reader.open({ blockTag: 'latest' });
+  if (opened.status !== 'READY') throw Error('Fresh qualified current head unavailable; restore refused');
+  let old, currentHead, prior;
+  try {
+    await resolveRoute(opened.scope, selected.route);
+    old = await openFile(opened.scope, { mountId: selected.mountId, fileId: selected.row.value.nodeId, revisionId: historical.value.revisionId });
+    prepareVerifiedDownload(old, selected.row.value.name);
+    if (old.value.executableHint) throw Error('Restore refused: the current edit API cannot preserve executable metadata');
+    currentHead = await openFile(opened.scope, { mountId: selected.mountId, fileId: selected.row.value.nodeId });
+    if (currentHead.outcome !== 'FOUND' || currentHead.qualification?.status !== 'QUALIFIED' || currentHead.qualification.coverage !== 'COMPLETE' || !currentHead.value.revisionId) throw Error('Current version unresolved; restore refused');
+    prior = await priorOf(FIXTURE.headPurpose, selected.row.value.nodeId, FIXTURE.headRole);
+  } finally { opened.scope.close(); }
+  if (selection !== selected || generation !== selected.generation) return;
+  const result = await runOperation('restore version', {
+    kind: 'edit', mountId: selected.mountId, fileId: selected.row.value.nodeId,
+    // The existing SDK defaults null to UTF-8; empty string encodes its absent
+    // optional charset and therefore preserves historical null exactly.
+    bytesHex: old.value.bytes, mediaType: old.value.mediaType, charset: old.value.charset ?? '',
+    priorRevisionId: currentHead.value.revisionId, priors: { head: prior },
+  }, [['File', selected.row.value.name], ['Historical bytes', short(old.value.revisionId)], ['New revision', 'Uses current head compare-and-swap; no history is overwritten']]);
+  if (!result || result === 'CANCELLED') return;
+  if (!result.action.navigationRefreshed) closeFileSelection();
+  await afterWrite(result, 'Restored as a new current version; earlier versions remain readable.', { verifyBytes: selected.row.value.nodeId });
+}
+function renderRevisions(body, row, revisions, selectedRoute) {
   const section = document.createElement('section');
-  section.append(text('h3', 'History'));
+  section.append(text('h3', 'Versions'));
   if (revisions.outcome !== 'FOUND') { section.append(text('p', 'Revision history unavailable.')); body.append(section); return; }
   const ul = document.createElement('ul'); ul.className = 'revisions';
   for (const r of revisions.value.revisions) {
@@ -871,13 +982,7 @@ function renderRevisions(body, row, revisions) {
     li.append(text('span', 'Revision ' + r.revision + (r.current ? ' (current)' : '') + ' · ' + (r.mediaType ?? 'retracted') + ' · ' + short(r.revisionId ?? '')));
     if (r.revisionId && !r.current) {
       const openOld = text('button', 'Open this revision', 'row-button'); openOld.type = 'button';
-      openOld.addEventListener('click', async () => {
-        if (openOld.disabled) return;
-        openOld.disabled = true;
-        const old = await acquire(() => openFile(scope, { mountId: config.mounts[$('lens').value], fileId: row.value.nodeId, revisionId: r.revisionId }));
-        const container = document.createElement('div'); li.append(container);
-        renderContent(container, row, old, 'revision ' + r.revision);
-      });
+      openOld.addEventListener('click', () => navigate({ ...selectedRoute, revisionId: r.revisionId }));
       li.append(openOld);
     }
     ul.append(li);
@@ -887,14 +992,14 @@ function renderRevisions(body, row, revisions) {
 function renderHistory(body, history) {
   if (history.outcome !== 'FOUND') {
     const section = document.createElement('section');
-    section.append(text('h3', 'Name timeline'));
+    section.append(text('h3', 'Name history'));
     section.append(text('p', 'The name history could not be read (' + (history.reason ?? history.outcome) + '). This is NOT the same as having no history.', 'row-meta'));
     body.append(section); return;
   }
   if (!history.value.timeline.length) return;
   const section = document.createElement('section');
   const details = document.createElement('details');
-  details.append(text('summary', 'Name timeline (' + history.value.timeline.length + ' events)'));
+  details.append(text('summary', 'Name history (' + history.value.timeline.length + ' events)'));
   const ul = document.createElement('ul');
   for (const h of history.value.timeline) ul.append(text('li', 'rev ' + h.revision + ' · ' + h.kind + ' · source ' + short(h.principal)));
   details.append(ul); section.append(details); body.append(section);
@@ -918,7 +1023,7 @@ function renderTags(body, row, tags) {
       un.setAttribute('aria-label', 'Withdraw my tag: ' + label(t.tagId));
       un.addEventListener('click', async () => {
         const result = await runOperation('untag', { kind: 'untag', mountId: config.mounts[$('lens').value], object: row.value.nodeId, label: label(t.tagId), priors: { tag: await priorOf(FIXTURE.tagPurpose, row.value.nodeId, t.tagId) } }, [['Untag', label(t.tagId)], ['Scope', 'withdraws only YOUR assertion']]);
-        if (result) { $('file-panel').close(); await afterWrite(result, 'Your tag was withdrawn; other authors keep theirs.'); }
+        if (result && result !== 'CANCELLED') { if (!result.action.navigationRefreshed) closeFileSelection(); await afterWrite(result, 'Your tag was withdrawn; other authors keep theirs.'); }
       });
       chip.append(un);
     }
@@ -930,13 +1035,14 @@ function renderTags(body, row, tags) {
     add.addEventListener('click', async () => {
       const input = await prompt('Tag “' + row.value.name + '” with'); if (!input?.name) return;
       const result = await runOperation('tag', { kind: 'tag', mountId: config.mounts[$('lens').value], object: row.value.nodeId, label: input.name, priors: { tag: await priorOf(FIXTURE.tagPurpose, row.value.nodeId, tagId(input.name)) } }, [['Tag', input.name], ['On', row.value.name], ['Attribution', 'asserted by ' + config.write.authors[session.signer].label]]);
-      if (result) { if (!config.knownTags.includes(input.name)) config.knownTags.push(input.name); $('file-panel').close(); await afterWrite(result, 'Tagged.'); }
+      if (result && result !== 'CANCELLED') { if (!config.knownTags.includes(input.name)) config.knownTags.push(input.name); if (!result.action.navigationRefreshed) closeFileSelection(); await afterWrite(result, 'Tagged.'); }
     });
     section.append(add);
   }
   body.append(section);
 }
-$('close-file').addEventListener('click', () => $('file-panel').close());
+$('close-file').addEventListener('click', () => navigate(directoryRoute()));
+$('file-panel').addEventListener('cancel', e => { e.preventDefault(); navigate(directoryRoute()); });
 
 // ---- export ----------------------------------------------------------------
 async function exportFolder() {
@@ -970,6 +1076,7 @@ async function exportFolder() {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = 'efs-export-' + String(current.basis.blockNumber) + '.json';
     document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     toast('Export saved. Verify it in a clean reader with: node scripts/verify-export.mjs <file>');
   } catch (e) { toast('Export failed: ' + e.message, true); }
 }
@@ -1012,7 +1119,9 @@ async function refresh({ samePin = false } = {}) {
   // observation must NOT abort the live scope it keeps using.
   if (!samePin) { cancel?.abort(); cancel = new AbortController(); scope?.close(); scope = null; }
   else if (!cancel) cancel = new AbortController();
-  current = null; busy = false; closeWhy();
+  current = null; busy = false; closeWhy(); selection = null; renderToken++;
+  updateSession();
+  releasePreviews(); $('file-panel').close();
   for (const id of ['rows', 'attention-rows', 'history-rows', 'trash-rows']) $(id).replaceChildren();
   $('attention').hidden = true; $('history').hidden = true; $('trash').hidden = true;
   $('more').hidden = true; $('export').hidden = true; $('basis').textContent = '';
@@ -1020,14 +1129,20 @@ async function refresh({ samePin = false } = {}) {
   $('coverage').textContent = 'Reading observation';
   toast('Checking the pinned source before listing this folder…');
   try {
+    const requested = decodeFilesRoute(location.hash) ?? { lensId: $('lens').value, pathSegments: [] };
+    $('lens').value = requested.lensId;
     if (!scope) {
       const opened = await reader.open({ blockTag: samePin ? pin : 'latest', signal: cancel.signal });
       if (g !== generation) { opened.scope?.close(); return; }
       if (opened.status !== 'READY') throw Error(opened.reason);
       scope = opened.scope; acquisitions++;
     }
+    const resolved = await resolveRoute(scope, requested, () => g === generation);
+    if (g !== generation || !resolved) return;
+    path = resolved.path; crumbs();
     stream = openDirectory(scope, { mountId: config.mounts[$('lens').value], subject: here(), pageSize: config.directoryPageSize ?? 32 });
     await load(g);
+    if (g === generation && resolved.row) await filePanel(resolved.row, requested, g);
   } catch (e) {
     if (g !== generation) return;
     $('coverage').textContent = 'Read unavailable';
@@ -1040,7 +1155,7 @@ async function refresh({ samePin = false } = {}) {
 // ---- wire up ---------------------------------------------------------------
 $('more').addEventListener('click', () => { if (!busy) load(generation); });
 $('refresh').addEventListener('click', () => { if (config && !writing) refresh({}); });
-$('lens').addEventListener('change', () => { if (config && !writing) refresh({}); });
+$('lens').addEventListener('change', () => { if (config && !writing) navigate({ ...(selection?.route ?? directoryRoute()), lensId: $('lens').value }, { samePin: false }); });
 $('filter').addEventListener('input', () => { if (current) render(current); });
 $('tag-filter').addEventListener('change', () => { if (current) render(current); });
 const guarded = fn => (...args) => Promise.resolve(fn(...args)).catch(e => toast(friendlyError(e), true));
@@ -1056,7 +1171,8 @@ $('signer').addEventListener('change', () => {
   else { session.signer = value; session.mode = 'simulated'; session.wallet = new Wallet(config.write.authors[value].key); session.principal = config.write.authors[value].principal; session.account = null; }
   updateSession(); if (current) render(current);
 });
-addEventListener('pagehide', () => { generation++; cancel?.abort(); stream?.close(); scope?.close(); });
+addEventListener('hashchange', () => { if (reader && !writing) refresh({}); });
+addEventListener('pagehide', () => { generation++; releasePreviews(); cancel?.abort(); stream?.close(); scope?.close(); });
 
 try {
   // Relay mode (EFS local server) or standalone static hosting: a static

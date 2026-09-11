@@ -17,6 +17,8 @@
 .toolbar .upload input{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}
 .toolbar .upload{position:relative}
 .toolbar .upload:focus-within{outline:3px solid #276dda;outline-offset:3px}
+.prototype-limits{font-size:.85rem;color:var(--muted);margin:.7rem 0}
+.content>button{margin:.3rem .4rem .5rem 0}
 .row-actions{display:flex;gap:.3rem;flex-wrap:wrap;align-items:center}
 .row-button{border:1px solid #ccc;border-radius:.35rem;background:#fafafa;padding:.2rem .5rem;font:inherit;font-size:.82rem;cursor:pointer}
 .row-button:hover{background:#eef}

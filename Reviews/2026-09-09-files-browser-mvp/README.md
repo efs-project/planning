@@ -6,6 +6,21 @@ or parity certification. Start with [walkthrough.md](walkthrough.md) (15
 minutes, no Solidity needed); the honest per-row record is
 [acceptance.md](acceptance.md); the build plan was [plan.md](plan.md).
 
+**September 11 update:** the browser now joins root-qualified guest deep links,
+general binary/empty-file uploads, inert verified downloads, explicit independent
+copies versus shared names, and restoration of old contents as a **new** version.
+The expandable **Gas & cost** panel retains actual action/chunk/revert receipts,
+separate read-work counters and four manually pinned chain-cost scenarios. These
+are models, not live mainnet/L2 quotes. Signed-action recovery and semantic effect
+read-back are shared across these flows. The retained
+[1,000-entry continuation experiment](evidence/continuation-2026-09-11/README.md)
+establishes exact complete reading on its named control, not low WAN RPC load.
+The optimized Type cache still has an
+[actual large-Type admission failure](type-cache-boundary-2026-09-11.md);
+that must not silently become a schema restriction or a readiness claim.
+Exact combined/control evidence and remaining gaps are in
+[browser-integration-2026-09-11.md](browser-integration-2026-09-11.md).
+
 ## What this closes
 
 The September 9 gap was integration: reads, writes and the browser existed as

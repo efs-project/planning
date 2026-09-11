@@ -14,6 +14,7 @@ import { chromium } from '../../2026-09-04-mvp-rehearsal/node_modules/playwright
 import { Wallet } from '../../2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js';
 import { compileUpgrade, withUpgrade } from '../../2026-09-08-upgradeable-foundation/scripts/local-upgrade.mjs';
 import { startEnvironment, compileRouter } from '../scripts/environment.mjs';
+import { core3Interface, encodeExecuteV2, decodeAuthorityError } from '../sdk/files-actions.mjs';
 
 async function settle(page) { await page.waitForSelector('main[data-state="settled"]', { timeout: 60000 }); }
 async function rows(page) { return page.$$eval('#rows li .row-title', els => els.map(e => e.textContent)); }
@@ -27,7 +28,8 @@ async function waitToast(page, includes) {
   await page.waitForFunction(t => document.getElementById('status').textContent.includes(t), includes, { timeout: 90000 });
 }
 async function waitProblem(page, includes) {
-  await page.waitForFunction(t => document.getElementById('op-status').textContent.includes(t), includes, { timeout: 90000 });
+  await page.waitForFunction(() => !document.getElementById('op-status').hidden && !document.querySelector('main').dataset.writing, undefined, { timeout: 90000 });
+  assert((await page.textContent('#op-status')).includes(includes), await page.textContent('#op-status'));
 }
 
 // Harness provider: queues approval-gated requests; the TEST plays the user.
@@ -37,7 +39,7 @@ async function waitProblem(page, includes) {
 function injectWallet(privateKey) {
   return `(() => {
     const KEY = ${JSON.stringify(privateKey)};
-    const log = []; const queue = [];
+    const log = []; const queue = []; let connectedAccount = null;
     window.__wallet = { log, queue };
     async function rpc(method, params) {
       const b = await window.__harnessRpc(method, params);
@@ -47,7 +49,7 @@ function injectWallet(privateKey) {
     async function perform(method, params) {
       const { Wallet } = await import('/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.js');
       const wallet = new Wallet(KEY);
-      if (method === 'eth_requestAccounts') return [wallet.address];
+      if (method === 'eth_requestAccounts') { connectedAccount = wallet.address; return [wallet.address]; }
       if (method === 'eth_signTypedData_v4') {
         const payload = JSON.parse(params[1]);
         const { EIP712Domain, ...types } = payload.types;
@@ -66,7 +68,7 @@ function injectWallet(privateKey) {
       request({ method, params = [] }) {
         log.push({ method });
         if (method === 'eth_chainId') return Promise.resolve('0x7a69');
-        if (method === 'eth_accounts') return Promise.resolve([]);
+        if (method === 'eth_accounts') return Promise.resolve(connectedAccount ? [connectedAccount] : []);
         return new Promise((resolve, reject) => {
           queue.push({ method, params,
             approve: () => perform(method, params).then(resolve, reject),
@@ -88,6 +90,7 @@ test('sponsored wallet flow: one signature per change, sponsor pays, honest fail
   try {
     await withUpgrade(async lab => {
       const { server, sponsor } = await startEnvironment(lab, { write: true });
+      try {
       const walletKey = new Wallet('0x' + 'c0ffee'.repeat(10) + 'dead'); // disposable, generated for this run only
       await lab.rpc('anvil_setBalance', [walletKey.address, '0xde0b6b3a7640000']); // 1 ETH for the ONE claim tx
       const balance = async a => BigInt(await lab.rpc('eth_getBalance', [a, 'latest']));
@@ -153,18 +156,37 @@ test('sponsored wallet flow: one signature per change, sponsor pays, honest fail
 
       // Expired intent: hold the prompt open past the deadline, then approve —
       // the sponsor's free simulation refuses; nothing is submitted.
+      const expiredAccountBalance = await balance(walletKey.address), expiredSponsorBalance = await balance(sponsor.address);
+      const authorNonce = async () => BigInt(await lab.rpc('eth_call', [{ to: served.write.core, data: core3Interface.encodeFunctionData('principalNonce', [served.write.walletPrincipal]) }, 'latest']));
+      const nonceBeforeExpiry = await authorNonce();
+      let expiredRequest, expiredResponse;
+      await page.route('**/sponsor', async route => {
+        expiredRequest = route.request().postDataJSON(); // test-local only; never persisted or printed
+        const response = await route.fetch(); expiredResponse = await response.json(); await route.fulfill({ response });
+      });
       const expired = page.click('#new-note');
       await fillPrompt(page, 'stale.md', 'signed too late');
       await nextPrompt(page);
       await lab.rpc('evm_increaseTime', [4000]); await lab.rpc('evm_mine', []);
       await approve(page);
       await expired;
-      await waitProblem(page, 'The approval expired before submission'); await settle(page);
+      await waitProblem(page, 'check the transaction journal before retrying'); await settle(page);
+      assert.equal(expiredResponse.submitted, false); assert.deepEqual(expiredResponse.transactions, []);
+      assert.equal(expiredResponse.data, null, 'parameterized revert data stays private at the sponsor boundary');
+      const exactCall = encodeExecuteV2({ op: expiredRequest.op, publication: expiredRequest.publication }, expiredRequest.expectedRevision, expiredRequest.intent, expiredRequest.signature);
+      await assert.rejects(lab.rpc('eth_call', [{ from: sponsor.address, to: served.write.router, data: exactCall, gas: '0x1000000' }, 'latest']), error => {
+        const decoded = decodeAuthorityError(error.data);
+        return decoded?.name === 'ErrIntentExpired' && BigInt(decoded.args[0]) === BigInt(expiredRequest.intent.deadline);
+      }, 'independent exact signed-operation simulation proves contract expiry, not an unrelated refusal');
+      assert.equal(await authorNonce(), nonceBeforeExpiry, 'expired intent did not consume author nonce');
+      assert.equal(await balance(walletKey.address), expiredAccountBalance); assert.equal(await balance(sponsor.address), expiredSponsorBalance, 'sponsor paid nothing for refused simulation');
+      assert.equal((await requestCounts(page)).eth_sendTransaction, 1, 'expiry introduced no wallet transaction');
+      await page.unroute('**/sponsor');
       assert(!(await rows(page)).includes('stale.md'));
 
       assert.deepEqual(errors, [], 'zero page errors');
       await context.close();
-      await server.close();
+      } finally { await server.close(); }
     }, { profile: 'reads', watchdogMs: 900000 });
   } finally { await browser.close(); }
 });
@@ -175,6 +197,7 @@ test('direct wallet mode without a sponsor: every transaction is its own counted
   try {
     await withUpgrade(async lab => {
       const { server } = await startEnvironment(lab, { write: true, sponsor: false });
+      try {
       const walletKey = new Wallet('0x' + 'd1ce'.repeat(16));
       await lab.rpc('anvil_setBalance', [walletKey.address, '0x21e19e0c9bab2400000']);
       const context = await browser.newContext({ viewport: { width: 1280, height: 960 } });
@@ -207,7 +230,7 @@ test('direct wallet mode without a sponsor: every transaction is its own counted
       assert.equal(counts.eth_sendTransaction, 4, 'claim + admission + 2 chunks, each its own wallet prompt');
       assert.equal(await page.textContent('#prompts'), '6 wallet requests', 'connect + claim + signature + 3 transactions');
       await context.close();
-      await server.close();
+      } finally { await server.close(); }
     }, { profile: 'reads', watchdogMs: 900000 });
   } finally { await browser.close(); }
 });

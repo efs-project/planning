@@ -14,6 +14,7 @@ const PNG_1PX = Buffer.from('89504e470d0a1a0a0000000d494844520000000100000001080
 async function settle(page) { await page.waitForSelector('main[data-state="settled"]', { timeout: 60000 }); }
 async function rows(page) { return page.$$eval('#rows li .row-title', els => els.map(e => e.textContent)); }
 async function clickRowAction(page, name, action) {
+  await settle(page); // Closing a routed File now re-resolves its parent folder.
   const items = await page.$$('#rows li');
   for (const li of items) {
     const title = await li.$eval('.row-title', e => e.textContent);
@@ -42,6 +43,7 @@ test('everyday loop in real Chromium: browse, create, edit, organize, explain, u
   try {
     await withUpgrade(async lab => {
       const { server, auth } = await startEnvironment(lab, { write: true });
+      try {
       const context = await browser.newContext({ viewport: { width: 1280, height: 960 } });
       await context.addInitScript(() => { window.walletTouches = 0; Object.defineProperty(window, 'ethereum', { get() { window.walletTouches++; throw Error('wallet touched'); } }); });
       const errors = [];
@@ -136,12 +138,12 @@ test('everyday loop in real Chromium: browse, create, edit, organize, explain, u
       assert.equal(await idOf(page, 'journal.md'), before, 'stable identity across rename');
 
       // 7. Copy vs placement.
-      const copy = clickRowAction(page, 'journal.md', 'Copy');
+      const copy = clickRowAction(page, 'journal.md', 'Make independent copy');
       await fillPrompt(page, 'journal-copy.md');
       await approveConsent(page); await copy;
       await waitToast(page, 'Copied as a new file'); await settle(page);
       assert.notEqual(await idOf(page, 'journal-copy.md'), before, 'copy has a NEW identity');
-      const link = clickRowAction(page, 'journal.md', 'Link');
+      const link = clickRowAction(page, 'journal.md', 'Add another name');
       await fillPrompt(page, 'journal-link.md');
       await approveConsent(page); await link;
       await waitToast(page, 'Placement added'); await settle(page);
@@ -179,7 +181,7 @@ test('everyday loop in real Chromium: browse, create, edit, organize, explain, u
       // 10. Upload an image; verified preview renders from a blob URL.
       await page.setInputFiles('#upload', { name: 'dot.png', mimeType: 'image/png', buffer: PNG_1PX });
       await approveConsent(page); // one approval covers the record and its bytes
-      await waitToast(page, 'Image uploaded with verified bytes'); await settle(page);
+      await waitToast(page, 'File uploaded with verified bytes'); await settle(page);
       await clickRowAction(page, 'dot.png', 'Open');
       await page.waitForSelector('#file-panel img.preview');
       await page.click('#close-file');
@@ -219,11 +221,12 @@ test('everyday loop in real Chromium: browse, create, edit, organize, explain, u
       assert.deepEqual(errors, [], 'zero page errors');
       assert.equal(await page.evaluate(() => window.walletTouches), 0, 'no wallet discovery ever');
       await context.close();
-      await server.close();
+      } finally { await server.close(); }
     }, { profile: 'reads', watchdogMs: 900000 });
   } finally { await browser.close(); }
 });
 async function idOf(page, name) {
+  await settle(page);
   const items = await page.$$('#rows li');
   for (const li of items) {
     const title = await li.$eval('.row-title', e => e.textContent);
