@@ -3,8 +3,8 @@
 **Status:** draft set — founder-authorized SDK experience and experiment program; no protocol bytes, package names, implementation, deployment, or release is adopted
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[../efsv2/README]], [[../efsv2/system-constitution]], [[../efsv2/core-architecture-candidate]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/README]], [[../web-client-os/type-data-abi-boundary-pressure]]
-**Inputs:** the existing `sdk/` repository and older SDK designs as historical evidence only; Data Explorer draft at local-only planning commit `08bb5f2906191f0d87624d9a6ecc6788a8b2754d` on `codex/data-explorer-pm` (`Designs/data-explorer/`)
-**Last touched:** 2026-08-25
+**Inputs:** the existing `sdk/` repository and older SDK designs as historical evidence only; exact K10/storage/Fable reconciliation snapshot `aae282df72f214d791963aeac1cf3c38d162c56e` documented in [[files-integration-pressure]]; Data Explorer draft at local-only planning commit `08bb5f2906191f0d87624d9a6ecc6788a8b2754d` on `codex/data-explorer-pm` (`Designs/data-explorer/`)
+**Last touched:** 2026-09-10
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/read-path #topic/onchain
 
@@ -24,17 +24,22 @@
   Core module topology, contract ABI, helper deployment, and release topology
   all wait for evidence and the normal owner freeze ceremony.
 
-**C0 handoff:** the semantic seal at planning commit `a68b00a` supplies the
-shared experiment law. The SDK lane has now independently consumed the exact
-serialized Core packet at commit
-`b9088d6a24f4d40bcca6ba300523b25cc7c608d2` without merging Core or importing
-its source, scripts, generators, or tests. The disposable checker preserves one
-literal `ResultV0`, decimal-string `uint64` values, raw Bytes and Type envelopes,
-cursor/basis facts, and separate plan-signature, account/submission, and
-canonical-effect receipts across exact decode, re-encode, and recommit. This is
-source-locked experiment evidence, not a freeze, conformance result, package,
-or production API. [[exp-c0-mvp-packet]] records the exact boundary and next
-SDK experiments.
+**Retained-snapshot integration truth:** the August C0 lab independently preserves five
+serialized Core artifacts, including its literal fixture `ResultV0`, without
+importing Core implementation code. That remains source-locked comparison
+evidence, not the presumed universal SDK result API. The stronger September
+direction is operation-specific read/page/byte/plan/submission/read-back result
+families carrying one non-loss qualification and evidence contract.
+
+At the exact retained snapshot, the pinned Files-screen prototype exercises
+real guest File-metadata listing through a fixture-local reader and local upgradeable
+contracts, but it does not import the SDK lab. It does not read File content or
+complete browser write, canonical-effect recovery and reload-after-write. The
+next SDK contribution is
+a declaration-only Files adapter plus reusable conformance packet attached to
+that one browser path—not a second runtime or demo. See
+[[files-integration-pressure]] and the retained August fixture
+[[exp-c0-mvp-packet]].
 
 The durable idea is not “a TypeScript library.” It is a reproducible contract
 between exact evidence and replaceable tools: historical bytes remain usable
@@ -65,6 +70,9 @@ candidate SDK.
    and account-authorization/submission receipts, and exact deployment
    manifests. These are candidate evidence contracts, not frozen public names
    or bytes.
+7. Operation-specific results with a common non-loss qualification/evidence
+   contract, claim-specific assurance checks, checked portable export/restore,
+   and reconcile-before-retry after ambiguous submission.
 
 The Web Client/OS and Data Explorer are now two distinct first-party product
 consumers of that common seam. Web Client/OS owns the direct Files/shell path;
@@ -85,13 +93,18 @@ generated façades above it.
 
 ### Highest-leverage disposable work proposed after this review
 
-1. **One compiler fixture:** compile one small Type and one additive revision
+1. **One integrated Files adapter:** attach declaration-only read/byte/action
+   seams and parameterized conformance tests to the one Files path Fable will
+   integrate, using the pinned Files-screen checkpoint as starting evidence;
+   exercise verified open, lost-response restart/reconcile and a fresh
+   independent consumer without copying the fixture reader into a second SDK.
+2. **One compiler fixture:** compile one small Type and one additive revision
    to TypeScript, Solidity, docs, vectors, bounds, and a reproducibility
    manifest; compare two independent encoders and retain unknown raw bytes.
-2. **One Solidity three-arm measurement:** compare generated inline code, a
+3. **One Solidity three-arm measurement:** compare generated inline code, a
    bounded structural reader, and a stateless helper against the same three
    workloads, including cold calls and adversarial inputs.
-3. **One evidence/reconstruction harness:** inject missing pages, stale or
+4. **One evidence/reconstruction harness:** inject missing pages, stale or
    dishonest indexers, tampered bytes, an unavailable publisher, and an
    unknown profile; prove none becomes absence or success and reconstruct with
    zero mutable network requests.
@@ -161,7 +174,8 @@ constitution/candidates, then older evidence. This set cannot override Core.
 | [[architecture-candidate]] | Three arms, recommended experiment, generation/runtime/onchain split, logical modules, topology candidates, compatibility, result model, and security invariants |
 | [[sdk-pm-charter]] | Durable SDK PM mandate, ownership boundaries, coordination contracts, and release discipline |
 | [[experiment-program]] | Adversarial matrix, proposed measurement tripwires, kill criteria, and production stop conditions |
-| [[exp-c0-mvp-packet]] | Source-locked C0 shared-envelope handoff, first disposable TypeScript/generated/Solidity slice, Core dependency packet, and preservation fixture |
+| [[exp-c0-mvp-packet]] | Retained August source-locked shared-envelope comparison fixture and clean-room preservation evidence; not the presumed production result API |
+| [[files-integration-pressure]] | Exact K10/storage/Fable disposition, operation-specific assurance seam, restart/retry contract, and smallest integrated Files handoff |
 | [[web-client-os-boundary-pressure]] | Web Client/OS direct Files/shell, independent Data Explorer, confined-app consumption, their common semantic adapter, and runtime-neutral CapabilityRPC assessment |
 | [[owner-rulings]] | Dated founder mandate and retained authority boundaries |
 | [[owner-decision-inbox]] | Evidence-gated choices; nothing needs an immediate founder answer |
@@ -190,11 +204,19 @@ constitution/candidates, then older evidence. This set cannot override Core.
 
 ## Current phase
 
-The research spine now has two bounded disposable checks: the six-case semantic
-preservation fixture and an independent clean-room consumer of five exact
-serialized Core artifacts. Neither alters the historical SDK, publishes a
-package, compiles generated leaves, deploys a contract, promotes a design, or
-adopts protocol choices. The next gate is implementation of the unpublished
-TypeScript evidence runtime and one exact-Type generated TypeScript/Solidity
-fixture against this retained packet, followed by the independent codec,
-unknown-survival, reconstruction, and size/gas gates in [[experiment-program]].
+At the retained snapshot, the research spine has two bounded preservation
+checks plus one real browser-to-fixture-reader-to-local-contract guest-read
+checkpoint: the six-case semantic fixture, the clean-room consumer of five
+exact serialized Core artifacts, and guest metadata listing through that
+fixture reader and contracts. The browser checkpoint is separate from the SDK lab; these are not
+one integrated SDK path, and no claim is made about Fable's changing worktree.
+None publishes a package, compiles a production leaf, deploys a durable helper,
+promotes a design, or adopts protocol choices.
+
+The nearest gate is one declaration-and-conformance packet for that retained
+Files browser adapter path: list, verified bytes, plan/submit/reconcile and
+independently qualified effect read-back, including checked serialization
+boundaries and whole-journey
+measurements. In parallel, the unpublished compiler and Solidity experiments
+may proceed against retained fixtures. Arbitrary fixture caps and component gas
+results are measurements, not product or protocol limits.

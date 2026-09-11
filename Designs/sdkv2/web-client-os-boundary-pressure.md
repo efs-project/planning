@@ -5,7 +5,7 @@
 **Depends on:** [[README]], [[architecture-candidate]], [[developer-journeys]], [[../web-client-os/README]], [[../web-client-os/type-data-abi-boundary-pressure]]
 **Inputs:** Data Explorer draft at exact local-only planning commit `08bb5f2906191f0d87624d9a6ecc6788a8b2754d` on `codex/data-explorer-pm` (`Designs/data-explorer/`)
 **Reviewers:** @web-client-os-pm (2026-08-22)
-**Last touched:** 2026-08-22
+**Last touched:** 2026-09-10
 
 #status/reference #kind/review #repo/planning #repo/sdk #repo/client #topic/efsv2 #topic/cypherpunk-os #topic/read-path #topic/wasm
 
@@ -54,7 +54,7 @@ trust-altitude distinction, not a bypass or permission to fork semantics.
 |---|---|---|
 | **Protocol/generated SDK** | Exact identities, raw-preserving codecs/validators, qualified Realm/Record/Occurrence/Binding/Plan reads, verification, generated Type façades | SDK PM owns ergonomics/tooling; Core owns truth/bytes/ABI |
 | **Files/artifact SDK** | One canonical route/name resolution interface, qualified directory paging, verified byte/range retrieval, and mutation-plan construction over the selected Files candidate | Files semantics and product behavior remain with Core/Web Client work; SDK PM owns reusable interface/tooling only after that contract is supplied |
-| **Common lossless semantic adapter and generated consumer façades** | Finite exact-Type/profile closure compiled into one raw-preserving semantic envelope, exhaustive outcomes/evidence handles, and distinct Web/Files, Explorer or application DTO façades | SDK owns generator, semantic axes and non-loss contract; each product team owns its DTO requirements, reducers and UI policy |
+| **Common lossless semantic adapter and generated consumer façades** | Finite exact-Type/profile closure compiled into operation-specific raw-preserving results with one qualification/evidence contract, exhaustive outcomes/evidence handles, and distinct Web/Files, Explorer or application DTO façades | SDK owns generator, result-family semantics and non-loss contract; each product team owns its DTO requirements, reducers and UI policy |
 | **Web Client/OS direct Files/shell product** | Direct guest and write-capable Files experience over the Web/Files façade | Web Client/OS owns product state, navigation and presentation; it does not own a second resolver/verifier/result law |
 | **Data Explorer general typed-data product** | Independent workspace, table/graph/raw/provenance views and Inspector over the Explorer façade; Files/artifact services are optional for Files resources | Data Explorer owns product state, navigation, projections and presentation; it does not own a second resolver/verifier/result law |
 | **OS App SDK** | Thin capability client over scoped semantic operations, streams/progress, cancellation, receipts, and typed faults/results | Web Client/OS owns App/Kernel capability policy; SDK owns shared binding/codegen quality where delegated |
@@ -218,8 +218,11 @@ safety.
   semantic contract therefore needs capability-scoped outcome recovery by an
   invocation/plan commitment, with retention, audience, idempotency, privacy
   and basis rules. If recovery cannot establish the effect, it returns
-  `EFFECT_UNKNOWN`; retries use the same durable idempotency/plan commitment
-  across an explicitly authorized provider switch.
+  `EFFECT_UNKNOWN`. Recovery may select another read transport only when it
+  independently establishes the same accepted execution/authority tuple and
+  requested basis. Any provider/profile change that alters or cannot prove that
+  tuple invalidates the pending plan; a retry requires a fresh plan and
+  authorization and is never automatic.
 - A progress or result frame from a stale epoch, unknown request, wrong
   operation schema, exceeded size/depth limit, or duplicate terminal sequence
   is rejected rather than coerced.
@@ -296,9 +299,9 @@ permission to leak private SPI.
 4. Kill and restart the Kernel/provider; reject stale epochs/ports and attempt
    cursor-qualified resume without duplicate effects.
 5. Run the same hostile fixture through an independent Web Files/shell consumer
-   and an independent Data Explorer consumer. Allow distinct product DTOs and
-   navigation, but require the common outer outcome discriminant and every
-   semantic axis unchanged; identical retained raw bytes and identity; the
+   and an independent Data Explorer consumer. Allow distinct product DTOs,
+   operation-specific result families and navigation, but require every
+   applicable qualification fact unchanged; identical retained raw bytes and identity; the
    same authority/basis/currentness/coverage; the same attempted byte
    locator/range, commitment, verification result and byte-state discriminant;
    and the same exact plan commitment, roles, authorization basis, receipt and

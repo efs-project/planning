@@ -4,7 +4,7 @@
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[README]], [[ethereum-standards-census]], [[../efsv2/system-constitution]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/type-data-abi-boundary-pressure]]
 **Reviewers:** @local-authority (2026-08-22)
-**Last touched:** 2026-08-25
+**Last touched:** 2026-09-10
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/read-path #topic/onchain
 
@@ -18,9 +18,10 @@ state is not a successful developer experience.
 
 This document specifies journeys and invariants, not frozen method names. Terms
 such as `TypeRevision`, `PreparedRecord`, `ReadContext`, `ActionPlan`, and
-`ResourceOutcome` are illustrative candidate vocabulary. In the disposable
-`EXP-C0` lane, every such convenience view is carried inside the literal shared
-`ResultV0` outer envelope recorded in [[exp-c0-mvp-packet]].
+`ResourceOutcome` are illustrative candidate vocabulary. The current direction
+uses operation-specific result families with one non-loss qualification and
+evidence contract. The literal shared `ResultV0` in [[exp-c0-mvp-packet]] is a
+retained August comparison fixture, not the presumed production wrapper.
 
 ## Cross-cutting experience contract
 
@@ -32,8 +33,10 @@ Every supported journey follows five rules:
 2. **Preserve evidence.** Retain canonical bytes and commitments beside any
    decoded view. A caller can inspect, export, and forward an unknown object
    without pretending to understand it.
-3. **Qualify results.** Return data, authority, basis, completeness,
-   currentness, validation, and byte availability as separate facts.
+3. **Qualify results.** Return operation-appropriate data, authority, basis,
+   completeness, currentness, validation, byte availability and effect facts
+   separately; generated claim checks never collapse them to one `verified`
+   boolean.
 4. **Plan before authority.** Reads are wallet-free. Writes produce an
    inspectable deterministic plan before requesting signatures, funds,
    admission, or network submission.
@@ -59,13 +62,17 @@ Every supported journey follows five rules:
 | Query by Type/field/reference | Execute an exact QueryProfile or named bounded query against Core, an indexer, or a reconstructed local source; page under a pinned basis and coverage claim. | An indexer/cache is acceleration evidence only. A missing or incomplete page cannot become `ABSENT_PROVEN` or `COMPLETE`. |
 | Work with Bindings | Enumerate or point-read a declared Binding scope; preserve history/currentness basis, compare-and-swap state, withdrawals, conflicts, and completeness. | “No current binding” requires a proved complete scope/basis; it is not inferred from a timeout or cache miss. |
 | Resolve through a Lens | Supply the exact Lens/ResolutionPlan, risk-bearer policy, bounded Principal set, purpose, Type/View requirements, conflict rule, and basis; inspect all candidate evidence and the chosen result. | The Lens is explicit policy over evidence, not hidden universal truth. Unsupported policy and incomplete candidates remain visible. |
+| List and filter Files | Enumerate qualified candidates, apply the exact Lens, then evaluate subject-qualified tags/filters over the selected File, mask or issue; retain positive items and independent enumeration coverage. | Filtering never reveals a lower tagged File hidden by an untagged, masked, malformed, conflicting or unknown winner. Physical scope, Binding-key and admission ordinals never cross as generic numbers. |
+| Open File bytes | Carry the selected-File evidence into a bounded byte/range read; retain locator, requested range, commitment, acquisition attempts and verification result beside the metadata. | Selected metadata can remain useful when bytes are unavailable, unsupported, policy-blocked or tampered, but no unverified bytes become usable content. |
 | Preserve unknown data | Parse only the closed envelope/header needed to identify and bound evidence; retain the full original bytes and unknown sections; permit export/relay without semantic success. | Unknown is neither invalid nor empty. Re-encoding a partial decoded object never substitutes for original bytes. |
+| Cross a runtime/cache boundary | Export a bounded portable evidence record and restore it through the matching checked importer after JSON, structured clone, storage, plugin or process transport. | A TypeScript brand or plain object does not preserve assurance. Stripped qualifiers, mixed bases, unknown versions and malformed empty collections never revive trusted success. |
 | Reconstruct offline | Load a retained closure containing protocol/profile descriptors, Types, Records, Occurrences, admissions, Bindings/Lens evidence, locators, vectors, and observation/finality basis; replay deterministically. | Reconstruction makes zero mutable network requests and names any unavailable bytes or incomplete history instead of inventing them. |
 | Build a guest browser reader | Inject a public read source and pinned link context; fetch only route-required Core/Files bytes; lazy-load generated views; offer raw/unsupported outcomes. | Useful reading does not require wallet detection, account/profile hydration, Commons, hosted EFS indexer, package manager, or OS boot. |
 | Build the independent general typed-data Explorer | Consume the common lossless semantic adapter for explicit EFS locations, exact IDs and bounded queries; generate Explorer-specific DTOs/evidence handles for workspace, table, graph, provenance and raw views; use Files/artifact services only when the selected resource needs them. | Data Explorer owns navigation, views, selection, Inspector and local product policy; Web Client/OS separately owns direct Files/shell. Neither product imports Type/Data-ABI machinery, recomputes identity, selects hidden providers, or forks the SDK's raw/outcome/basis law. |
 | Build a confined OS app | Consume generated semantic capabilities for scoped read/action/storage/network/picker/agent operations with budgets, progress, cancellation and receipts. | The app receives no raw signer, secret, effective-grant graph, Kernel object, ambient service, or hidden provider-selection authority. |
 | Build a server/indexer | Stream bounded pages, verify and retain raw evidence, materialize derived projections, record source/basis/coverage, expose exact operations, and reconcile with direct Core reads. | Derived storage is replaceable and never becomes EFS authority. Reorg, omission, and stale coverage are explicit. |
 | Build an agent tool | Expose structured capabilities, plans, costs, risks, receipts, and outcomes; require the same operation-bound authority as a human path; support deterministic dry-run and replay. | An agent receives no ambient signer, wallet, filesystem, network, or policy authority, and never gets a second less-honest result model. |
+| Recover an ambiguous write | Persist the exact plan and attempt before authority, restore them after process/browser loss, reconcile every intended effect at a fresh explicit basis, then decide whether a new plan is required. | A lost wallet/RPC response remains unknown; it is never converted to failure or retried automatically. Account, chain, profile, calldata, precondition, cost, nonce, expiry or effect drift requires re-planning and new consent. |
 | Consume from Solidity | Pin protocol/result ABI, Type/descriptor, limits and required features; import a generated `internal` leaf library; call a bounded Core interface/probe; locally validate typed bytes/result evidence. | A capability probe, helper, registry, revert payload, or successful call cannot by itself prove semantic validity, completeness, or authority. |
 | Write from Solidity | Build or accept exact bounded inputs; validate locally; call the selected Core write ABI; verify role/domain/replay conditions; consume explicit results/events under the selected basis. | Generated code does not hide `msg.sender`, author/controller, payer, admitter, or external-call effects. V1 compile-in assumptions do not automatically apply. |
 | Deploy or verify a helper | Build from exact compiler inputs; recompute initcode/address; verify factory, runtime code, dependencies and basis; retain a local generated fallback. | CREATE2 address, registry entry, code presence or proxy slot is not helper identity or authority. Removing the helper cannot change correctness or reconstruction. |
@@ -160,7 +167,34 @@ The plan names every intended Core/Realm call, exact calldata or commitment, exp
 
 The wallet/account adapter is selected only after the plan exists. C0 retains three separately inspectable linked records: plan-signature verification; account authorization/submission; and canonical per-effect read-back. EIP-5792, ERC-4337/bundler/paymaster, or an audited wallet-owned EIP-7702 flow may carry the transaction, but their acceptance does not replace either EFS signature verification or canonical effect. Account, provider, chain, delegate code, EntryPoint, calldata, cost, nonce, deadline, basis or clear-signing presentation drift invalidates the authorization and restarts at planning. Verification APIs permit only explicitly non-persistent `eth_call` or revert-based counterfactual simulation. They prohibit a persistent ERC-6492 prepare/deploy mode. Any persistent factory, preparation or deployment step is a separate inspected plan with its own authorization, submission and effect recovery.
 
-### 5. Solidity consumption
+### 5. Files selection, portable evidence and recovery
+
+The direct Files journey composes operations rather than passing an unqualified
+DTO down the stack:
+
+```text
+qualified page -> exact Lens selection -> subject-qualified tag/filter
+               -> selected File evidence -> verified bounded bytes
+```
+
+An application may display useful selected Files while enumeration coverage is
+partial. It asks a generated requirement when behavior needs stronger
+assurance—for example complete enumeration, proved absence or verified exact
+bytes. The requirement returns its own basis-qualified evidence rather than a
+generic boolean. Destructive behavior cannot infer absence from an empty page.
+
+Before a write invokes a wallet or account, the SDK persists the exact plan and
+attempt. If the channel disappears, the submission result stays ambiguous.
+After restart, a checked importer restores the retained evidence; fresh,
+independently qualified state/effect evidence at an explicit basis reconciles
+each intended effect before any retry. `COMMITTED` appears only when the named
+canonical-effect verifier succeeds. Multi-item jobs preserve each item's
+submission/effect state. If Core supplies a single contract-enforced atomic
+move plan/effect, the SDK preserves it unsplit; otherwise the experiment refuses
+to claim or emulate atomic move. These semantics and the smallest Fable adapter
+handoff are detailed in [[files-integration-pressure]].
+
+### 6. Solidity consumption
 
 The default contract experience is:
 
@@ -178,7 +212,7 @@ capability tuple match. A verified mismatch/forged response is `INVALID`, a
 known unsupported tuple is `UNSUPPORTED`, and genuinely unobservable state is
 `UNKNOWN`; the caller then applies an explicit local fallback policy.
 
-### 6. Ethereum signature and account authorization
+### 7. Ethereum signature and account authorization
 
 The experience has two linked operations rather than one permanent account
 class. First, EOA recovery, deployed ERC-1271, non-persistent ERC-6492,
@@ -196,7 +230,7 @@ unobservable are not invalid; a valid signature or accepted account submission
 is not admission, an OS grant, proof of semantic authorship or canonical effect
 success.
 
-### 7. Reproducible helper deployment
+### 8. Reproducible helper deployment
 
 The tool retains exact Solidity standard JSON, compiler/settings/`evmVersion`,
 sources/remappings/linking, constructor and immutable inputs, creation
@@ -224,7 +258,11 @@ A journey is not SDK-ready until its fixture demonstrates all applicable
 properties:
 
 - exact source/profile/Realm/Type/basis is inspectable;
+- each operation-specific result retains all applicable qualification/evidence,
+  and a generated claim assessment cannot detach its answer from that basis;
 - raw bytes survive decode, cache, worker/storage transfer, export, and relay;
+- checked restore, not a plain object or erased language brand, is required
+  after serialization, storage, plugin or process boundaries;
 - unknown, partial, absent, invalid, unsupported, tampered, unavailable, and
   conflict cases remain distinguishable;
 - expected results do not require exception parsing;
@@ -233,7 +271,9 @@ properties:
   submission/finality/read-back receipt remain separately inspectable;
 - no read path touches a wallet or mutable registry unexpectedly;
 - a dishonest or incomplete indexer can be removed without changing truth;
-- offline regeneration and reconstruction succeed from retained closure; and
+- offline regeneration and reconstruction succeed from retained closure;
+- a lost submission response reconciles from the exact retained attempt before
+  any retry or new wallet prompt; and
 - Solidity work is bounded before any attacker-controlled allocation, loop,
   or external call.
 

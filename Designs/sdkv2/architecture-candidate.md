@@ -4,7 +4,7 @@
 **Target repos:** planning, sdk, contracts, client
 **Depends on:** [[README]], [[research-precedents]], [[ethereum-standards-census]], [[developer-journeys]], [[../efsv2/layered-type-system-and-data-abi]], [[../web-client-os/type-data-abi-boundary-pressure]]
 **Reviewers:** @offchain-precedents (2026-08-22), @onchain-precedents (2026-08-22), @local-authority (2026-08-22)
-**Last touched:** 2026-08-25
+**Last touched:** 2026-09-10
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/onchain #topic/read-path
 
@@ -69,12 +69,12 @@ Names below describe responsibilities, not frozen npm packages.
 
 | Logical module | Owns | Must not own |
 |---|---|---|
-| **model** | Opaque exact identifiers, commitments, descriptor references, Realm/basis/currentness/coverage values, result axes, capability contracts | RPC, wallet, cache, codec implementation, “latest” resolution |
+| **model** | Opaque exact identifiers, commitments, descriptor references, Realm/basis/currentness/coverage values, operation-specific result families, shared qualification/evidence facts, capability contracts | RPC, wallet, cache, codec implementation, “latest” resolution, one mandatory universal result wrapper |
 | **codec** | Pure byte primitives, canonical profile dispatch, raw-preserving decoded envelopes, strict limits, deterministic diagnostics | Network fetch, Type catalogs, mutable registry, application DTO policy |
 | **type compiler** | Normalize exact input closure; generate TS/Solidity/docs/vectors/manifests; cost/bound and compatibility reports | Online authority, implicit dependency resolution, permanent ID allocation under an unfrozen profile |
 | **validation** | Portable deterministic validation grades and diagnostics; exact validator capability negotiation | Arbitrary callbacks, hidden network reads, admission policy |
-| **client/reconstruct** | Exact reads, bounded pages, reconciliation, offline replay, qualified caches, export/import | Wallet authority, product UI, hosted infrastructure, indexer truth |
-| **consumer adapter/codegen** | Compile a finite exact-Type/profile closure into the common lossless semantic envelope, exhaustive outcomes, evidence handles and consumer-specific generated DTO façades for Web Client/OS, Data Explorer and other products | Product navigation/view state, UI policy, a universal lowest-common-denominator DTO, or reinterpretation of raw evidence |
+| **client/reconstruct** | Exact reads, bounded pages, reconciliation, offline replay, qualified caches, checked portable evidence export/restore | Wallet authority, product UI, hosted infrastructure, indexer truth, reviving trusted status from a plain object or TypeScript brand |
+| **consumer adapter/codegen** | Compile a finite exact-Type/profile closure into operation-specific results that retain the common non-loss qualification/evidence contract, exhaustive outcomes, evidence handles and consumer-specific generated DTO façades for Web Client/OS, Data Explorer and other products | Product navigation/view state, UI policy, a universal lowest-common-denominator DTO, a second result law, or reinterpretation of raw evidence |
 | **actions** | Deterministic plans, role-separated authorization, simulation, submission evidence, observation and canonical read-back | Ambient signer, silent retries across changed plans, admission/authorship conflation |
 | **transport adapters** | Core/EVM RPC, retained archive, HTTP gateway, local state, optional indexer, optional EAS carrier | Semantic truth, default policy, absence inference |
 | **ethereum adapter** | Literal ABI inference, explicit provider selection, accepted/observed EVM and RPC profiles, block-hash-pinned calls/logs, wallet/signing strategies, receipts and reorg/finality observation | EFS Type meaning, global chain selection, provider metadata as trust, mandatory viem runtime |
@@ -82,7 +82,7 @@ Names below describe responsibilities, not frozen npm packages.
 | **account authorization/submission** | Separately bind wallet calls, transactions, ERC-4337 `userOpHash`, EIP-7702 authorization tuple and their receipts to one exact EFS plan/effect commitment | Presenting account/delegation/bundler/wallet acceptance as verification of the EFS EIP-712 digest, EFS authority, admission or canonical effect |
 | **deployment tooling** | Reproducible compiler/initcode/runtime/factory/dependency manifests, address and code-hash verification, local inline fallback | Helper authority, proxy/delegatecall default, registry-selected code, assumed factory availability |
 | **Solidity source set** | Generated internal libraries, narrow interfaces, result structs, constants, fixtures, reproducible compiler packet | Deployed mutable registry, upgrade authority, generic schema VM |
-| **testkit/conformance** | Golden/adversarial vectors, independent implementations, fake sources, mutation/property/fuzz harnesses, workload measurements | A substitute for an adopted conformance specification |
+| **testkit/conformance** | Golden/adversarial vectors, independent implementations, fake sources, mutation/property/fuzz harnesses, workload measurements, parameterized adapter suites for real product paths | A substitute for an adopted conformance specification or a second product/runtime demo |
 
 Infrastructure—keys, RPC fleets, relayers, pinning, indexer operation, servers,
 databases, monitoring, and gateways—uses SDK capabilities but does not live
@@ -105,11 +105,13 @@ first-party products and the confined-app surface:
   provider SPI and never receive raw signers, secrets, effective grants,
   provider selection, or a Kernel object.
 
-Product façades and reducers may differ; the common outer outcome discriminant,
-raw bytes, identity, authority, basis, currentness, coverage, byte
+Product façades, operation-specific result families and reducers may differ;
+their applicable qualification facts and raw bytes, identity, authority, basis,
+currentness, coverage, byte
 locator/range/commitment and verification outcome, exact action-plan
 commitment/roles/authorization basis, effect receipt and qualified effect
-outcome may not. The exact point-in-time Data Explorer input is local-only
+outcome may not be dropped, merged or reinterpreted. The exact point-in-time
+Data Explorer input is local-only
 planning commit
 `08bb5f2906191f0d87624d9a6ecc6788a8b2754d` on
 `codex/data-explorer-pm`. The focused cross-product pressure review,
@@ -243,76 +245,106 @@ The SDK never folds these clocks into one semver:
 
 ## Result and error model
 
-### `EXP-C0` shared outer envelope
+### Operation-specific results, one non-loss contract
 
-The independently sealed semantic packet at planning commit `a68b00a` and the
-exact disposable serialized packet at Core commit
-`b9088d6a24f4d40bcca6ba300523b25cc7c608d2` are inputs to this draft, not an
+The independently sealed August semantic packet at planning commit `a68b00a`
+and the exact disposable serialized packet at Core commit
+`b9088d6a24f4d40bcca6ba300523b25cc7c608d2` remain inputs to this draft, not an
 adopted ABI. The SDK clean-room checker consumes five serialized artifacts from
-that exact commit without importing Core implementation code. For the
-disposable C0 lane, the cross-language contract is nevertheless literal: every
-Core, Solidity, SDK, and product result starts as the same retained `ResultV0`
-outer envelope. A generated or product-specific resource DTO is payload inside
-that envelope, not an alternate result law.
+that exact commit without importing Core implementation code. Its literal
+`ResultV0` is retained as a comparison fixture for raw preservation and
+cross-language exactness; it is not the presumed production SDK result API.
+
+The current candidate uses operation-specific result families—for example an
+exact read, scoped page, verified byte range, planned or prepared write,
+submission attempt and canonical read-back. Every family carries the applicable
+parts of one non-loss qualification/evidence contract:
 
 ```text
-ResultV0 {
-  kind + exact subject or declared finite domain
-  RealmId + RealmRevision + execution coordinate + admission high-water
-  optional observer block hash/number/state-root/source/finality/freshness
-  complete result profile { presence, coverage, support, validation, authority,
-    lifecycle, selection, bytes, effect, projection integrity }
-  raw envelope plus optional value/page/byte-range/receipt/projection payload
-  exact policy/profile/code/provenance/limits commitments and bounded diagnostics
+qualification {
+  exact subject or declared finite scope
+  Realm + execution/profile + observation identity and basis
+  applicable presence, coverage, support, validation, authority, lifecycle,
+    selection, byte, effect and projection-integrity facts
+  exact raw evidence and value/page/range/receipt/plan commitments when obtained
+  policy, implementation, provenance and limits commitments
+  bounded diagnostics and retained attempts
 }
 ```
 
-Core supplies only the execution/Realm state facts it can establish. An
-offchain observer adds a block-hash-qualified source, finality, canonicality,
-proof and history-availability evidence without claiming that provider output
-is Core truth. The envelope must retain raw bytes when obtained and must be
-serializable as a fixture/export record without converting a decoded DTO back
-into identity or signature bytes.
+Not every operation invents a meaningless value for every axis, and no shared
+wrapper is required merely for visual uniformity. But an operation-specific
+result cannot drop, merge or reinterpret a fact that is applicable to its
+claim. Core supplies only the execution/Realm state facts it can establish. An
+offchain observer adds block-hash-qualified source, finality, canonicality,
+proof and history-availability evidence without claiming provider output is
+Core truth. Exact raw bytes, when obtained, remain the identity/signature source
+and survive every projection and portable boundary.
 
 ### Expected evidence states are values
 
-The cross-language model has exhaustive expected outcomes. The exact syntax is
-not frozen; the required distinctions are:
+The cross-language model has exhaustive expected outcomes. Exact syntax is not
+frozen. An exact-resource result still distinguishes `FOUND`,
+`ABSENT_PROVEN`, `UNKNOWN`, `CONFLICT`, `OPAQUE`, `MASKED` and
+`NOT_APPLICABLE` where relevant. A scoped page independently reports useful
+positive items and finite-domain coverage. A verified-byte result separately
+reports located/present, unavailable, commitment mismatch/tampered,
+unsupported locator, policy-blocked or unknown. Plan and submission results do
+not pretend to be canonical-effect results.
 
-```text
-ResourceOutcome<T> = ResultV0 where `profile.presence` is
-  FOUND | ABSENT_PROVEN | UNKNOWN | CONFLICT | OPAQUE | MASKED | NOT_APPLICABLE
-```
+`UNKNOWN` with no raw evidence means the subject could not be observed under
+the attempted basis. Located but opaque/unrecognized evidence remains raw and
+relayable with `UNSUPPORTED`; partial or invalid evidence retains every byte
+actually obtained. A convenience discriminant may be derived by a façade, but
+it cannot replace the operation result's qualification/evidence exit.
 
-`UNKNOWN` with no raw evidence means the subject could not be observed under the
-attempted basis. Located but opaque/unrecognized evidence has
-`support=UNSUPPORTED` and its immutable raw envelope; partial or invalid
-evidence retains raw bytes whenever they were actually obtained. All
-evidence-bearing outcomes remain byte-for-byte relayable without semantic
-success. A convenience discriminant may be derived for a language façade, but
-it is never the stored, exported, cross-language, or product boundary.
+Effect completion has its own per-effect algebra: `COMMITTED`,
+`NOT_COMMITTED_PROVEN`, `UNKNOWN`, or `NOT_APPLICABLE`. A locally rejected
+plan, simulation, signature, wallet, or submission belongs to its own result
+family and is not an `EFFECT_REJECTED` canonical state.
+`NOT_COMMITTED_PROVEN` requires an exact pre/post basis that proves equality.
+A multi-effect action carries one entry per effect; transport loss,
+cancellation or revocation races never coerce `UNKNOWN` into committed or
+proved-not-committed.
 
-Byte availability is a separate outcome such as verified present,
-unavailable, commitment mismatch/tampered, unsupported locator, policy-blocked,
-or unknown. A resource may be present while its payload bytes are unavailable.
-Plan generation similarly distinguishes ready, needs authority, needs funds,
-needs bytes, conflict, unsupported, invalid, and unknown.
+Only a complete exact negative basis permits `ABSENT_PROVEN`. A protocol
+negative cache may contain that exact absence or a `MASKED` result backed by a
+retained selected whiteout/policy and scope. `UNKNOWN`, `PARTIAL`, timeout,
+revert, RPC error, cache miss, indexer omission, unsupported profile, missing
+helper or unavailable bytes never feed a negative cache.
 
-Effect completion has its own per-effect receipt algebra inside
-`ResultV0.profile.effect`: `COMMITTED`, `NOT_COMMITTED_PROVEN`, `UNKNOWN`, or
-`NOT_APPLICABLE`. A locally rejected plan, simulation, signature, wallet, or
-submission is a bounded diagnostic or planning/submission outcome—not an
-`EFFECT_REJECTED` canonical-effect state. `NOT_COMMITTED_PROVEN` requires the
-exact pre/post state basis to prove equality. A multi-effect action carries one
-entry per effect; transport loss, cancellation or revocation races never coerce
-`UNKNOWN` into committed or proved-not-committed.
+### Claim-specific assurance without an algebra lesson
 
-Only a complete exact negative basis permits `ABSENT_PROVEN`. A protocol negative
-cache may contain that exact absence or a `MASKED` result backed by a retained
-selected whiteout/policy and scope; it preserves the discriminant and never
-turns a local presentation mask into protocol absence. `UNKNOWN`, `PARTIAL`,
-timeout, revert, RPC error, cache miss, indexer omission, unsupported profile,
-missing helper, or unavailable bytes never feed a negative cache.
+Generated adapters may expose a finite requirement token and one assessment
+operation over any qualifying result. It asks a named question—such as
+selected File, complete enumeration, proved absence, verified exact bytes,
+authenticated authority or canonical effect—and returns evidence shaped like
+`SATISFIED`, `VIOLATED`, `UNKNOWN` or `UNSUPPORTED`. Names remain illustrative.
+
+This assessment is a checked projection, not a new wrapper or a generic
+`verified` boolean. Positive values survive partial coverage: four qualified
+Files can remain usable while complete enumeration is unknown. A destructive
+action that depends on absence asks for proved absence and cannot proceed on an
+empty page, partial coverage, a cache miss or an unsupported verifier.
+
+### Portable evidence, caches and version skew
+
+JSON, structured clone, IndexedDB, plugin and process boundaries erase language
+brands. Plain transport data therefore never revives checked status. A portable
+export commits the result family, raw evidence, exact observation, basis,
+coverage, profile/implementation, bounds and retained unknown extensions; a
+checked restore validates all of them before returning an evidence-bearing
+result. Stripped qualifiers, mixed bases, unsafe integer narrowing, malformed
+empty collections and forged or stale cursors become qualified
+invalid/unknown/unsupported states, not empty success.
+
+A cached complete result is complete only for its exact observation. A stale
+positive may remain valid historical evidence but does not become current.
+Cache keys bind Realm/profile/execution, observation, Lens and query/order/
+coverage commitments plus result/assurance implementation. Old clients retain
+unknown raw extensions byte-for-byte. If a canonical edit would discard future
+meaning, the SDK permits read/relay or refuses the lossless edit rather than
+normalizing into the older shape.
 
 ### Exceptions are faults
 
@@ -362,11 +394,39 @@ Negotiation is positive and operation-specific:
 
 ### C0 page, receipt, and reconstruction commitments
 
-`ResultV0` page payloads carry an opaque resumable cursor. Its candidate preimage commits query identity, exact Type and QueryProfile identity, activation generation, Realm revision, ordering, admission high-water, exact basis, limits, and coverage state. A cursor from another generation, ordering, high-water, Realm revision or basis is rejected; a product opens a new stream or presents an explicit comparison rather than merging pages.
+The retained C0 page fixture and any operation-specific successor carry an
+opaque resumable cursor. Its candidate preimage commits query identity, exact
+Type and QueryProfile identity, activation generation, Realm revision,
+ordering, admission high-water, exact basis, limits and coverage state. A
+cursor from another generation, ordering, high-water, Realm revision or basis
+is rejected; a product opens a new stream or presents an explicit comparison
+rather than merging pages.
 
 The action payload links three receipts without flattening their digests: (1) **plan-signature verification** records exact EFS plan/message digest, verifier strategy, signer/account, historical code/dependency and chain/Realm basis, result, availability and diagnostics; (2) **account authorization/submission** records its own transaction/call, user-operation, delegation, or wallet-call commitment plus transport receipts, bound back to the unchanged plan/effect commitment; and (3) **canonical effect recovery** records exact per-effect read-back basis, matching state evidence and C0 effect outcome. Only the third is the upgrade path after a lost channel.
 
 Reconstruction imports a finite raw state-projection closure from bootstrap and an authenticated exact basis. The closure names member order, count/root/digest and availability. Missing, substituted, duplicate or reordered members are qualified projection-integrity outcomes; logs, indexers, caches, wallet state, Commons and a manual module list are never required inputs.
+
+### Files, physical indexes and recovery
+
+The exact K10/storage/Fable disposition is in
+[[files-integration-pressure]]. Its architectural consequences are:
+
+- physical scope positions, Binding-key ordinals, admission ordinals and cursor
+  modes remain separate runtime-checked implementation domains behind the
+  page port; equal integers are not evidence of interchangeability;
+- missing or mismatched source/layout expectations fail even for an empty
+  snapshot, and a component lookup benchmark cannot select a lifetime layout;
+- qualified Lens selection precedes tag filtering, so an untagged, masked,
+  malformed, conflicting or unknown winner never exposes a lower tagged File;
+- the exact plan and attempt are retained before invoking authority; a lost
+  response stays ambiguous, is restored through the checked import path and is
+  reconciled against fresh independently qualified state/effect evidence at an
+  explicit basis before any retry; `COMMITTED` appears only when the named
+  canonical-effect verifier succeeds; and
+- the first SDK integration is a declaration-only Files adapter plus
+  parameterized conformance suite attached to the one Files path Fable will
+  integrate, using the pinned Files-screen prototype as starting evidence. The
+  SDK does not copy the fixture reader into a second semantic implementation.
 
 ## Onchain shape
 
@@ -463,7 +523,8 @@ provide enough exact contract for:
   unsupported and conflict where those states are possible;
 - page/basis/coverage evidence adequate to support honest completeness;
 - execution coordinate, Realm revision, admission high-water and enough bounded
-  commitments to populate the Core-owned portion of `ResultV0`;
+  commitments to populate the Core-owned qualification of each applicable
+  operation-specific result;
 - cursor/Profile-generation/ordering/high-water/basis commitments sufficient to
   reject mixed page streams;
 - historical authority and implementation basis without retroactive

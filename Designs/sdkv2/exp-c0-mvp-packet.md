@@ -6,21 +6,23 @@
 **Inputs:** sealed semantic source `a68b00a` / `Reviews/2026-08-23-efs2-exp-c0-semantic-seal`; exact disposable serialized Core source commit `b9088d6a24f4d40bcca6ba300523b25cc7c608d2`, handoff SHA-256 `2e8d191e4dd7c2130378e09f3cbc5b71441906cbaa6c448c30139aafe9ec203d`; neither source is merged protocol authority
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-08-25
+**Last touched:** 2026-09-10
 
 #status/draft #kind/design #repo/planning #repo/sdk #repo/contracts #repo/client #topic/efsv2 #topic/read-path #topic/onchain
 
 ## Read this on a phone
 
-**Purpose:** turn the sealed `EXP-C0` semantic result law into the smallest buildable, disposable SDK slice. It gives one raw-preserving TypeScript runtime, one generated exact-Type facade lane, and one Solidity-consumer lane the same outer `ResultV0` contract. It does **not** choose final names, encodings, selectors, package publication, deployment, or a production API.
+**Purpose:** retain and exercise the sealed August `EXP-C0` semantic packet as an exact, disposable comparison fixture. Its raw-preserving TypeScript, generated exact-Type and Solidity-consumer lanes use the same literal outer `ResultV0` only inside this fixture. The current design direction uses operation-specific result families with one non-loss qualification/evidence contract; this packet does **not** choose its production wrapper, names, encodings, selectors, package publication, deployment or API.
 
-**The first serialized Core-consumer packet is now source-locked and consumed.** Five exact committed artifacts carry the consumer contract, handoff, HELLO trace, Result vectors, and Type-envelope vectors. An independent SDK checker imports none of Core's implementation or test code and passes exact hash, decode/re-encode/recommit, pointer, raw-retention, `uint64`, codec-1, and mutation checks. This clears the input blocker for the next disposable SDK implementation; it does not claim Core conformance or make any candidate byte durable.
+**The first serialized Core-consumer packet is now source-locked and consumed.** Five exact committed artifacts carry the consumer contract, handoff, HELLO trace, Result vectors, and Type-envelope vectors. An independent SDK checker imports none of Core's implementation or test code and passes exact hash, decode/re-encode/recommit, pointer, raw-retention, `uint64`, codec-1, and mutation checks. This proves a bounded preservation technique; it does not claim Core conformance, make any candidate byte durable, or require later SDK work to retain one universal wrapper.
 
 ## C0 source lock and authority boundary
 
-The source packet seals the following semantic constraints for the next experiment:
+The source packet seals the following semantic constraints for its exact
+August experiment:
 
-- all Core, Solidity, SDK, and Explorer projections begin with one retained `ResultV0` envelope;
+- all Core, Solidity, SDK, and Explorer projections in this retained fixture
+  begin with one `ResultV0` envelope;
 - result axes are independent; `UNKNOWN`, partial coverage, unavailable or corrupted bytes, and an unobserved effect are never coerced to a negative or success;
 - a query cursor binds exact Type/Profile, activation generation, Realm revision, ordering, high-water, and read basis;
 - plan-signature verification, account authorization/submission, and canonical semantic effect are distinct receipts; and
@@ -28,9 +30,11 @@ The source packet seals the following semantic constraints for the next experime
 
 The source explicitly leaves production codec, ID, ABI, error number, rejection precedence, cap, Realm, and final signature suite open. The structures below are therefore named only as disposable field groups. A candidate implementation must pin an exact versioned encoding/vector packet before signing, hashing, serializing, or invoking Solidity.
 
-## Shared outer contract
+## Retained shared-envelope fixture
 
-Every SDK-facing operation has this conceptual outer shape before a generated or product-specific projection:
+Every operation in this exact fixture has the following outer shape before a
+generated or product-specific projection. This is not the presumed universal
+shape of current or production SDK operations:
 
 ```text
 ResultV0 {
@@ -68,7 +72,7 @@ packages/exp-c0-runtime/          # future disposable implementation location
   generated/                      # fixture-only exact-Type facade imports
 ```
 
-The runtime has no ambient RPC provider, wallet, indexer, cache, `latest`, catalog, package registry, or mutable Type resolver. All sources are injected; read capability is wallet-free. A product can add cancellation, batching, streaming and qualified cache policy around the runtime only if every returned item keeps the same `ResultV0` field groups.
+The runtime has no ambient RPC provider, wallet, indexer, cache, `latest`, catalog, package registry, or mutable Type resolver. All sources are injected; read capability is wallet-free. A product can add cancellation, batching, streaming and qualified cache policy around this retained fixture only if every returned item keeps its `ResultV0` field groups. A successor may instead use operation-specific families, provided every applicable qualification and evidence fact survives.
 
 | Operation family | Runtime obligation |
 |---|---|
@@ -83,12 +87,14 @@ The runtime has no ambient RPC provider, wallet, indexer, cache, `latest`, catal
 
 ## Generated exact-Type facade boundary
 
-For the first two C0 fixture Types, the generator may emit a local TypeScript facade containing DTOs, builders, canonical codec wrappers, validators, reference extractors, query builders, vectors, and compatibility/bound reports. It sits inside `generated/` and accepts/returns `ResultV0`; it may add a selected `value` projection only when exact Type/profile/limits match.
+For the first two C0 fixture Types, the generator may emit a local TypeScript facade containing DTOs, builders, canonical codec wrappers, validators, reference extractors, query builders, vectors, and compatibility/bound reports. Inside this experiment it sits in `generated/` and accepts/returns `ResultV0`; it may add a selected `value` projection only when exact Type/profile/limits match.
 
 - The facade receives retained raw bytes and a selected exact Type closure. It never fetches descriptors, resolves a catalog, chooses a provider, or upgrades an unknown Type to understood.
 - An unknown or unaccepted Type remains raw relayable evidence with `support=UNSUPPORTED`; a partial/invalid decode retains raw bytes when available.
 - Generated output binds source closure, generator/compiler/settings, output hashes, and vectors. Runtime/API semver is a separate clock from protocol, Type, query-coverage, Realm, and generator identities.
-- The facade does not construct its own outer result law. Data Explorer and Web Client facades may use different domain DTOs but must retain the same `ResultV0` outer fields and raw/evidence exit.
+- The fixture facade does not construct its own result law. Data Explorer and
+  Web Client facades may use different operation-specific families and domain
+  DTOs; every applicable qualification fact and raw/evidence exit must survive.
 
 ## Contract-developer and helper boundary
 
