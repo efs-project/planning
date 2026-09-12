@@ -1,6 +1,6 @@
 # Can the cheaper Files kernel use real EFS Types?
 
-2026-09-12 · source preflight, not implemented or adopted
+2026-09-12 · source preflight, not implemented or adopted. The [[2026-09-12-efs21-canonical-native-types-plan|two-stage implementation plan]] is independently reviewed; it preserves exact frozen controls and the narrower native authority/profile boundary.
 
 **Yes, a meaningful bridge appears feasible:** reuse the actual structural parser/validator in a fresh native typed-byte profile, with canonical EFS Type/Record IDs. This would not automatically acquire full-C0 admission, portable authorship, Binding effects, arbitrary developer callbacks or declared-index completeness. Its complete transaction costs remain unmeasured.
 
