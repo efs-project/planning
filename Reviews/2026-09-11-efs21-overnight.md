@@ -6,11 +6,11 @@ James authorized an overnight implementation pass: make ordinary contract and br
 
 ## Latest in plain English
 
-- **A real same-behavior saving:** the full seven-record create now costs 6.77M gas including its separate content staging, down from 7.77M in the matched run. The same data and indexes survive. Still too expensive to declare victory.
+- **Fuller-model writes are cheaper:** the seven-record create now costs 5.90M gas including content staging, versus 7.77M before two measured journal optimizations. Successful paired data/index/Lens results match. Direct application changes late-failure cost and callback visibility; this is not universal behavioral equivalence or an adoption ruling. Still too expensive to declare victory.
 - **A cheaper, narrower alternative works:** the native Files prototype has separate required navigation and configurable discovery contracts; a contract can publish `/swaps/eth-usdc` and another can read it. Its latest measured no-search-profile update costs 245,563 gas. It does not yet implement the full v2 identity, validation or Lens model.
 - **The browser is running:** [separate native candidate](http://127.0.0.1:54154), source `c088363`, launched September 11 evening with an 18-hour watchdog. Actual local-contract create/read/edit/rename/unlink/history/reload tests run in Chromium. Fable's existing 60731 world remains untouched. Local URLs work only while this laptop/process remains running.
 - **Encoding savings are now measured:** raw bytes instead of inner ABI framing save 47,192 gas on a fresh 41-byte create/edit in a matched native build. Fresh edit is still 264,011 gas; large inline bodies remain expensive.
-- **Next full-profile experiment:** replace the separate write journal/replay with direct ordered writes plus EVM rollback. Preserve stored facts and test failure order/callback visibility explicitly; [[2026-09-11-efs21-direct-apply-plan|bounded implementation plan]]. No final feature sacrifice or protocol freeze has been decided for James.
+- **Next storage experiment:** compare slot-backed versus code-backed immutable bytes, with the same exact Type/Record IDs and a separately priced read-integrity guard; [[2026-09-11-efs21-body-storage-plan|bounded implementation plan]]. No final feature sacrifice or protocol freeze has been decided for James.
 
 ## What we are comparing
 
@@ -125,6 +125,30 @@ The SDK/browser knows the exact Type when interpreting current and historical by
 Root reproduced **74 Forge and 23 serial Node tests**, including actual Chromium actions and all earlier ambiguity/navigation regressions. Independent review checked all 150 retained receipts, pairings, runtime/source pins and cleanup and found no functional defect. It raised duplicated registry logic constrained by frozen validator metadata. Controller accepts that maintenance exception **only for this disposable comparison**; production needs one maintained implementation with deliberately specified validator identity. This is not an unqualified production-quality approval. [Exact evidence and limitations](https://github.com/efs-project/planning/blob/a9a064e/Reviews/2026-09-11-efs21-pragmatic/evidence/raw-representation.md).
 
 The local host snapshots its closed assets/config before listening, so subsequent code work cannot silently change a running world's client. Candidate [localhost:54154](http://127.0.0.1:54154) is running from `c088363`; root checked its HTML/config responses and exact raw/canonical Type IDs after launch. The independent review's minor import-diagnostic finding is fixed in `aae54ea`; its scoped re-review accepted the documented disposable-only maintenance exception. Fable's 60731 world is unchanged. Direct application is isolated in sibling `planning-efs21-direct`, branch `codex/efs21-direct-apply`, beginning from the retained lazy-journal control `e605fc9`.
+
+### Full-C0 direct application, reviewed
+
+`67f11f7`: the fuller kernel now applies ordered assignments immediately and relies on EVM rollback, replacing the separate in-memory journal/replay. It preserves the current pinned preparation helper, stored facts, packed rows, ordered postings and successful selection behavior. This is a separate experimental code branch, not a change to either live browser. [Implementation and detailed boundary report](https://github.com/efs-project/planning/blob/67f11f7/Reviews/2026-09-11-efs21-pragmatic/evidence/direct-apply.md).
+
+| Same fuller-model workload | Lazy journal control | Direct candidate |
+|---|---:|---:|
+| Seven-record 41-byte create admission | 6,622,789 | **5,753,318** |
+| Complete create including content staging | 6,772,158 | **5,902,687** |
+| Complete three-record edit including staging | 3,462,914 | **3,106,949** |
+| Steady two-record tag | 2,324,104 | **2,080,617** |
+| Binding rebind | 2,062,226 | **1,839,258** |
+| Late-reference rejection | 684,146 | **1,367,166** |
+| Oversized cache followed by invalid reference | 8,749,191 | **12,081,802** |
+
+The create admission saves another **869,471 gas (13.1%)**. Its staging and calldata intrinsic gas are unchanged. The steady tag has a 12-gas intrinsic difference, retained in the detailed evidence. The admission library shrinks from 24,481 to **19,921 bytes**, giving 4,655 bytes of ordinary code-size headroom. That room is useful for later decomposition but is not itself a new feature.
+
+Fresh paired worlds retain identical complete inventories—82 records, 64 envelopes, 22 Types, 87 admissions, 65 batches, 259 posting keys and 22 bindings—after only revision-specific authority implementation hashes are qualified separately. Per-operation receipt-basis Binding/Lens results, cache bytes, helper creation order and nonce agree. Independent review checked all 190 raw transactions and current source/support pins. A review finding hardened the comparator to reject a helper hash or the wrong revision's Core hash before normalization.
+
+Root reproduced **206 candidate Forge tests and nine offline evidence checks**. This is not 209 unchanged tests: 15 old journal-allocation/strategy tests remain untouched but excluded in this branch; 14 existing consumers use a narrowly adapted rejection helper; other existing assertions remain; new boundary cases and inherited executions are enumerated in the report. Final rollback and ordinary single-fault selectors stay checked. Pre-existing compiler warnings and the legal large-Type cache failure remain named rather than hidden.
+
+**The tradeoff matters:** later invalid inputs can cost more because attempted writes precede rollback, and compound faults can change which error wins. Earlier provisional rows become observable during test-injected preparation. The existing journal also exposes an applied prefix during its cache-deployment replay; neither strategy proves universal callback isolation. Current production preparation is pure/argument-driven and cache creation returns inert code. A future state-reading developer validator or external index hook requires an explicit prior-state/staged-state policy and separate tests. Full-state, authorization-nonce and new-cache rollback passed, including the named nested-call counterexample; this is not a general reentrancy proof.
+
+Both finite benchmark nodes stopped and their owned caches/build directories were removed. The code branch is pushed; no normative design, migration or live-world replacement was made. The next byte-storage arm stays isolated from this fuller-model branch so its effects can be measured independently.
 
 ## How to interpret a cheaper result
 
