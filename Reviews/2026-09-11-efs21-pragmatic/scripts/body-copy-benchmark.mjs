@@ -446,6 +446,25 @@ try {
     const early=await compiled([small('MetadataEarlierType/1')]);
     const late=await compiled([refDescriptor('MetadataLaterType/1',1,early.ids[0].slice(2))]);
     rejected=(await retained('same-carriage-Type-dependency',await submitPlan({publication:publication([groupLeaf(lab.inputs.meta,early.raw),groupLeaf(lab.inputs.meta,late.raw)],salt++,{principal})},true))).receipt;
+    // Withdrawal re-prepares the retained target body through the actual helper.
+    // These are direct-author Core operations, not a new Files-router method.
+    const withdrawalType=(await receiptCall(rejected,lab.iface,'bootstrap'))[0].withdrawalType;
+    for(const [name,targetName,leafIndex]of [['tiny','fresh-Record-tiny',0],['near8192','fresh-Record-near8192',0],['current-Binding','binding-rebind',1]]) {
+      const target=operations.find(x=>x.name===targetName).plan.publication;
+      const beforeOccurrence=await receiptCall(rejected,lab.readIface,'getOccurrence',[target.envelopeId,leafIndex]);
+      const beforeRecord=await receiptCall(rejected,lab.readIface,'getRecord',[target.recordIds[leafIndex]]);
+      assert.equal(beforeOccurrence[0],1n);
+      const key=name==='current-Binding'?bindingKey(principal,FIXTURE.tagPurpose,f.fileA,tagId('journal-first')):null;
+      const beforeBinding=key?(await receiptCall(rejected,lab.readIface,'getBindingHead',[key]))[0]:null;
+      const p=publication([{typeId:withdrawalType,body:target.envelopeId+toBeHex(leafIndex,2).slice(2)}],salt++,{principal});
+      rejected=(await retained('withdraw-'+name,await submitPlan({publication:p},true),[],'direct-author-withdrawal')).receipt;
+      const afterOccurrence=await receiptCall(rejected,lab.readIface,'getOccurrence',[target.envelopeId,leafIndex]);
+      const afterRecord=await receiptCall(rejected,lab.readIface,'getRecord',[target.recordIds[leafIndex]]);
+      assert.equal(afterOccurrence[0],2n);assert.deepEqual(plain(afterRecord),plain(beforeRecord),'withdrawal retains immutable Record');
+      const afterBinding=key?(await receiptCall(rejected,lab.readIface,'getBindingHead',[key]))[0]:null;
+      if(key){assert.equal(afterBinding[0],2n);assert.equal(afterBinding[3],beforeBinding[3]+1n);assert.equal(afterBinding[5],ZeroHash);}
+      operations.at(-1).withdrawal=plain({targetEnvelope:target.envelopeId,leafIndex,beforeOccurrence,afterOccurrence,beforeRecord,afterRecord,beforeBinding,afterBinding});
+    }
     const beforeCache = await cacheInventory(rejected);
     const beforeState = await observe(rejected);
     for (const fault of ['late-reference','late-CAS','cache-then-reference','cache-then-CAS']) {

@@ -128,6 +128,17 @@ test('per-receipt logical records, occurrences, counts, bindings, history and Le
     assert.deepEqual(logicalObserved(candidate,candidate.operations[i]),logicalObserved(control,control.operations[i]),control.operations[i].name);
   }
 });
+test('paid direct-Core withdrawals retain target Records and tombstone the current Binding',()=>{
+  for(const name of ['withdraw-tiny','withdraw-near8192','withdraw-current-Binding']){
+    const a=control.operations.find(x=>x.name===name),b=candidate.operations.find(x=>x.name===name);
+    assert.deepEqual(b.withdrawal,a.withdrawal,name+' complete target read-back');
+    for(const [report,op]of [[control,a],[candidate,b]]){
+      assert.equal(txFor(report,op).receipt.status,'0x1');assert.equal(op.category,'direct-author-withdrawal');
+      assert.equal(op.withdrawal.beforeOccurrence[0],'1');assert.equal(op.withdrawal.afterOccurrence[0],'2');
+      assert.deepEqual(op.withdrawal.afterRecord,op.withdrawal.beforeRecord);
+    }
+  }
+});
 test('actual pointer/code inventory is chronological, with an explicitly unowned public helper child',()=>{
   for(const report of reports)for(const op of report.operations){
     const c=op.observed.cacheState;
