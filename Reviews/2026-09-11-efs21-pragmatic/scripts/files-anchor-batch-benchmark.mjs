@@ -19,13 +19,14 @@ const build=mkdtempSync(join(tmpdir(),'efs21-files-anchor-build-'));process.env.
 const {compileUpgrade,withUpgrade,mountedFixture,A,B}=await import('../../2026-09-09-files-reader/test/fixture.mjs');
 const {scalar,scalarRevision,scalarSha256,ready,project,selectors}=await import('../../2026-09-09-files-reader/test/anchor-batch-fixture.mjs');
 const {openDirectory}=await import('../../2026-09-09-files-reader/files-reader.mjs');
+const {DEFAULT_LIMITS}=await import('../../2026-09-09-files-reader/reader-scope.mjs');
 const {oracle,comparable}=await import('../../2026-09-09-files-reader/test/oracle.mjs');
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 const stringify=v=>JSON.stringify(v,(_,x)=>typeof x==='bigint'?String(x):x);
 const sha=v=>createHash('sha256').update(v).digest('hex');
 const sourcePaths=['Reviews/2026-09-09-files-reader/files-reader.mjs','Reviews/2026-09-09-files-reader/reader-scope.mjs','Reviews/2026-09-09-files-reader/files-profile.mjs','Reviews/2026-09-09-files-reader/index.d.mts','Reviews/2026-09-09-files-reader/test/anchor-batch-fixture.mjs','Reviews/2026-09-09-files-reader/test/fixture.mjs','Reviews/2026-09-09-files-reader/test/oracle.mjs','Reviews/2026-09-08-upgradeable-foundation/scripts/local-upgrade.mjs','Reviews/2026-09-09-files-browser-mvp/test/authority-fixture.mjs','Reviews/2026-09-11-efs21-pragmatic/scripts/files-anchor-batch-benchmark.mjs'];
 const ordered=rows=>rows.map(comparable).sort((a,b)=>a.fieldRole.localeCompare(b.fieldRole));
-const comparisonLimits={maxRequests:512,maxInFlight:4};
+const comparisonLimits=DEFAULT_LIMITS;
 let cleanup,report;
 try{
   compileUpgrade({fullBuild:true});free();
@@ -35,7 +36,7 @@ try{
       sourcePins:Object.fromEntries(sourcePaths.map(p=>[p,sha(readFileSync(join(VAULT,p)))])),runtime:{node:process.version,platform:process.platform,arch:process.arch},
       resources:lab.resources,expected:lab.expected,workloads:[],samples:[],
       methodology:'Frozen scalar and candidate Files modules import the same reviewed reader-scope singleton. Fresh scopes, identical manifest and exact block; three alternating paired samples at0/50ms, pages4/8, eight/17 names. Qualification and all real sealed continuation pages retained separately. Same-scope full rebrowse is reuse, never called a continuation. Publication and independent oracle are excluded from read timers. Actual transport/evidence count, bytes and digest equality is asserted.',
-      comparisonLimits,limits:'Both arms explicitly use the historical512-request/four-wide comparison bounds, below current defaults; other scope ceilings unchanged. Qualification36 requests and every seal4. Eight-ID acquisition only; occurrence, historical Binding, selected entry, real Lens/charter and final seal still required. No paid gas, onchain listing, public C0, browserUI, protocol promotion or one-call-directory claim.'};
+      comparisonLimits,limits:'Primary comparison: both arms use actual current DEFAULT_LIMITS (4096 requests,16 concurrent). Frozen Files imports the same current scope; no historical scope compatibility limit is needed. Qualification36 requests and every seal4. Eight-ID acquisition only; occurrence, historical Binding, selected entry, real Lens/charter and final seal still required. No paid gas, onchain listing, public C0, browserUI, protocol promotion or one-call-directory claim.'};
     const setupStarted=performance.now(),f=await mountedFixture(lab),names=['note.txt'];
     await f.claim(B,'note.txt',f.fileA,{target:f.entryA});
     let setupMs=performance.now()-setupStarted;
@@ -55,7 +56,7 @@ try{
           async function phase(name,action){
             const before=scope?.stats()??{requests:0,bytes:0,cacheHits:0},offset=actual.length;peak=0;
             const start=performance.now(),result=await action(),elapsedMs=performance.now()-start,after=scope.stats(),attempts=actual.slice(offset),evidence=scope.evidence().slice(before.requests);
-            assert.equal(active,0);assert(peak<=4);assert.equal(after.requests-before.requests,attempts.length);
+            assert.equal(active,0);assert(peak<=comparisonLimits.maxInFlight);assert.equal(after.requests-before.requests,attempts.length);
             assert.equal(after.bytes-before.bytes,attempts.reduce((n,e)=>n+e.bytes,0));assert(evidence.every(e=>e.endedMs!==null&&!e.error));
             const digests=xs=>xs.map(e=>sha(stringify({method:e.method,params:e.params,result:e.result}))).sort();
             assert.deepEqual(digests(evidence),digests(attempts));
