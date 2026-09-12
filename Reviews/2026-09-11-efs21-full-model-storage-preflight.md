@@ -14,7 +14,25 @@ After the reviewed native packing/hybrid and real Files read-batching tasks, alo
 2. Extend that comparison to one shared immutable byte block for an envelope and its new Record bodies. The [[2026-09-11-efs21-shared-slab-plan|staged slice/ordering plan]] now records the source-reviewed mechanism; it still requires the completed Envelope-only base before dispatch.
 3. Extract full-C0 posting storage without dropping any query family, establishing a separate-contract control. Then measure coarser calls and configurable families separately.
 
-These are proposed follow-ons, not authority for silent feature removal or evidence that all three improve gas. The [[2026-09-11-efs21-envelope-storage-plan|first envelope-only implementation plan]] is now independently reviewed and implementing from cleanab13. The native experiment now has actual separate Record storage/mandatory inventory/Files/navigation/configurable discovery, but remains a narrower profile, not full-v2 parity.
+These are follow-ons, not authority for silent feature removal or evidence that all three improve gas. The [[2026-09-11-efs21-envelope-storage-plan|first Envelope-only task]] passed its independent/root gate at`ed49a6c`, saving164,303gas on the paired full create. The native experiment has actual separate Record storage/mandatory inventory/Files/navigation/configurable discovery, but remains a narrower profile, not full-v2 parity.
+
+### Why a new file currently has seven facts
+
+A further independent reader and root checked exact`ed49a6c` SDK/router construction. These are **seven independently addressable facts**, not seven deployed contracts or seven newly deployed schemas. They are this Files profile's representation, not an inherent lower bound for a filesystem.
+
+| Fact | What it represents | When reused or changed |
+|---|---|---|
+| ObjectGenesis | File identity independent of its name/content; publisher and meaning. | Once per new file; retained through edits/moves. |
+| Charter BindingSet | Publisher's explicit maintenance witness, **not an ACL**. | Initial per-file state, independently changeable later. |
+| ChunkTree | Shared content commitment and retrieval geometry. | Reusable across files/revisions; COPY already omits this new leaf. |
+| FileRevision | Immutable file→content association, media metadata and parents. | Each content revision. |
+| Head BindingSet | This principal's current revision choice, with CAS/history/Lens selection. | Each current-head change; not simply latest-timestamp-wins. |
+| DirectoryEntry | Immutable parent/name→child placement description. | Each placement; separate from child identity. |
+| Name BindingSet | This principal's current entry/whiteout choice, with CAS/history/Lens selection. | Each selected name change. |
+
+[Exact SDK construction](https://github.com/efs-project/planning/blob/ed49a6c/Reviews/2026-09-09-files-browser-mvp/sdk/files-actions.mjs#L144) and [routed seven-leaf checks](https://github.com/efs-project/planning/blob/ed49a6c/Reviews/2026-09-09-files-browser-mvp/contracts/src/FilesRouterV2.sol#L412). Reusable setup includes Types, deployed modules, parent, principal claim and Lens/mount configuration. Existing Records deduplicate bytes, but a fresh authored occurrence still pays admission/lifecycle/posting costs; the three Bindings also retain separate current/history state. The5.74M receipt is the whole operation, not a measured per-fact allocation.
+
+If byte-level work is insufficient, a higher-leverage next experiment is **compound Files state over the shared Record kernel**, keeping stable file identity, independently changeable heads/names, history and atomic CAS without necessarily giving every relationship a separate generic Record admission. This must explicitly preserve or replace independently referenceable facts, authored occurrences, charter maintenance, plural Lens selection and generic query obligations. The current native facade does not already do so: it uses caller ownership/per-file CAS, one placement and its own history/navigation. An implicit birth charter or compound state is a proposed semantic/profile change, not free lossless compression. No saving or owner choice is claimed for it yet.
 
 ## Shared immutable bytes: a concrete bounded opportunity
 
@@ -46,7 +64,7 @@ Current full-C0 scalar `getRecord` validates metadata/bounds but does **not** re
 
 A smaller independent read optimization is metadata-only access for dedup/reference checks that currently ABI-copy complete bodies merely to inspect ordinal/TypeId. A subsequent source pass at `ab13d89` localized these to `StateKernel` Record dedup (264–266), Record/Object references (364–371), and Type dependency existence (400–403), which also copies a whole compiled cache to test one ordinal. Actual preparation, active Withdrawal parsing, public body reads and existing-group cache equality still need their bytes. This changes no retained storage; magnitude is unmeasured.
 
-This now has a [[2026-09-12-efs21-metadata-only-admission-plan|reviewed, not-dispatched three-site plan]]. Keep the existing nonzero-cache/no-code refusal; Record metadata checks retain malformed-header rejection and add an explicit8192 bound before avoiding payload copies. That new fail-fast handling is not falsely attributed to the old implementation. Source review confirms all-ACTIVE retry bypasses the three sites, so it is a no-improvement control. No saving is claimed before actual complete-operation pairs.
+This now has a [[2026-09-12-efs21-metadata-only-admission-plan|reviewed three-site plan, implementing from ed49a6c]]. Keep the existing nonzero-cache/no-code refusal; Record metadata checks retain malformed-header rejection and add an explicit8192 bound before avoiding payload copies. That new fail-fast handling is not falsely attributed to the old implementation. Source review confirms all-ACTIVE retry bypasses the three sites, so it is a no-improvement control. No saving is claimed before actual complete-operation pairs.
 
 ## Packed liveness counter: source-viable, not yet implemented
 
