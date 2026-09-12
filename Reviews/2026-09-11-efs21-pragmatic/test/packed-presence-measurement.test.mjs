@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 const runner=await import('../scripts/packed-presence-benchmark.mjs').catch(()=>({}));
 test('fresh packed-presence pair retains exact action calldata, semantic reads and cleanup',{timeout:300000},async()=>{
   assert.equal(typeof runner.comparePackedPresence,'function');
-  const r=await runner.comparePackedPresence();
-  assert.deepEqual(r.arms.map(a=>a.selection),['baseline-58e61c4','current']);
+  const r=await runner.comparePackedPresence({frozenReplay:true});
+  assert.deepEqual(r.arms.map(a=>a.selection),['baseline-58e61c4','baseline-f43501a']);
   for(const arm of r.arms){
     assert(arm.cleanup.stopped&&arm.cleanup.cacheRemoved);
     assert(arm.actions.length>150);

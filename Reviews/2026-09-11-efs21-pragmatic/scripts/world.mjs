@@ -9,15 +9,18 @@ import {createClient,GAS_LIMIT} from '../sdk/client.mjs';
 export {E};
 export const ROOT = fileURLToPath(new URL('../',import.meta.url));
 export const KERNEL_PROFILES=Object.freeze({
-  current:{registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true},
-  'baseline-58e61c4':{fixture:'58e61c4',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true},
+  current:{registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true,bodyBackend:'hybrid'},
+  'forced-code':{artifact:'ForcedCodeKernel',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true,bodyBackend:'code'},
+  'forced-words':{artifact:'ForcedWordsKernel',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true,bodyBackend:'words'},
+  'baseline-f43501a':{fixture:'f43501a',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true,bodyBackend:'code'},
+  'baseline-58e61c4':{fixture:'58e61c4',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true,bodyBackend:'code'},
   'baseline-aa6b1b6':{fixture:'aa6b1b6',registry:'ExactTypeRegistry',raw:false,discovery:false,bodyWriter:false},
   'baseline-bf566dc':{fixture:'bf566dc',registry:'ExactTypeRegistry',raw:false,discovery:false,bodyWriter:false},
-  'baseline-c088363':{fixture:'c088363',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:false},
-  'integrity-c088363':{fixture:'c088363-read-integrity',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:false},
+  'baseline-c088363':{fixture:'c088363',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:false,bodyBackend:'dynamic'},
+  'integrity-c088363':{fixture:'c088363-read-integrity',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:false,bodyBackend:'dynamic'},
 });
 export function artifact(name) {
-  const source = ['QuoteProducer','QuoteReader','PlainQuoteMapping'].includes(name)?'Examples':['BytesValidator','Uint256Validator'].includes(name)?'ExactTypeRegistry':name;
+  const source = ['ForcedCodeKernel','ForcedWordsKernel'].includes(name)?'ForcedBodyKernel':['QuoteProducer','QuoteReader','PlainQuoteMapping'].includes(name)?'Examples':['BytesValidator','Uint256Validator'].includes(name)?'ExactTypeRegistry':name;
   return JSON.parse(readFileSync(`${ROOT}contracts/out/${source}.sol/${name}.json`));
 }
 export function build() {
@@ -33,10 +36,10 @@ export async function withWorld(action,{watchdogMs=300000,buildFirst=true,kernel
   assert(Object.hasOwn(KERNEL_PROFILES,kernelArtifact),'explicit supported kernel artifact');
   const capabilities=KERNEL_PROFILES[kernelArtifact];
   const fixturePath=capabilities.fixture&&`contracts/test/fixtures/native-kernel-${capabilities.fixture}.json`;
-  const selectedKernel=kernelArtifact==='current'?artifact('NativeKernel'):JSON.parse(readFileSync(ROOT+fixturePath));
+  const selectedKernel=fixturePath?JSON.parse(readFileSync(ROOT+fixturePath)):artifact(capabilities.artifact??'NativeKernel');
   for(const fragment of selectedKernel.abi) assert(artifact('NativeKernel').abi.some(current=>JSON.stringify(current)===JSON.stringify(fragment)),'historical ABI fragment preserved exactly');
   const kernelPin={selection:kernelArtifact,capabilities,creationBytecodeHash:E.keccak256(selectedKernel.bytecode.object),sourcePins:selectedKernel.metadata.sources,compiler:selectedKernel.metadata.compiler,settings:selectedKernel.metadata.settings};
-  if(kernelArtifact!=='current') {
+  if(fixturePath) {
     assert.equal(kernelPin.creationBytecodeHash,selectedKernel.creationBytecodeHash,'pinned baseline bytecode');
     kernelPin.sourceCommit=selectedKernel.sourceCommit;kernelPin.fixturePath=fixturePath;kernelPin.fixtureHash=E.keccak256(readFileSync(ROOT+fixturePath));
     for(const [path,pin] of Object.entries(selectedKernel.metadata.sources)) {
@@ -52,6 +55,7 @@ export async function withWorld(action,{watchdogMs=300000,buildFirst=true,kernel
     }
     if(selectedKernel.sourceDelta)kernelPin.sourceDelta=selectedKernel.sourceDelta;
   }
+  else for(const [path,pin] of Object.entries(selectedKernel.metadata.sources))assert.equal(E.keccak256(readFileSync(`${ROOT}contracts/${path}`)),pin.keccak256,'selected artifact matches current source '+path);
   const port=await freePort();
   return withManagedAnvil(['--host','127.0.0.1','--port',String(port),'--chain-id','31337','--hardfork','cancun','--gas-limit',String(GAS_LIMIT),'--accounts','0','--silent'],async node=>{
     const rpcURL=`http://127.0.0.1:${port}`;

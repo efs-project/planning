@@ -1,11 +1,14 @@
 import assert from 'node:assert/strict';
 import {writeFileSync} from 'node:fs';
 import {pathToFileURL} from 'node:url';
-import {ROOT,build,withWorld} from './world.mjs';
+import {ROOT,build,withWorld,KERNEL_PROFILES} from './world.mjs';
 import {workload} from './body-storage-benchmark.mjs';
 
 export function compareMatchedArms(arms){
-  assert.deepEqual(arms.map(a=>a.selection),['baseline-58e61c4','current']);
+  assert.equal(arms[0].selection,'baseline-58e61c4');
+  assert(['current','baseline-f43501a'].includes(arms[1].selection),'historical packed label or explicit exact frozen replay');
+  const backend=arms[1].provenance.kernelArtifact.capabilities.bodyBackend;
+  assert(backend===undefined||backend==='code','historical comparator cannot label hybrid as always-code');
   const [before,after]=arms;
   assert.deepEqual(after.types,before.types);
   assert.deepEqual(after.memberships,before.memberships);
@@ -37,10 +40,12 @@ export function compareMatchedArms(arms){
   return {comparison,readComparison,setupComparison};
 }
 
-export async function comparePackedPresence(){
+export async function comparePackedPresence({frozenReplay=false}={}){
+  const candidate=frozenReplay?'baseline-f43501a':'current';
+  assert.equal(KERNEL_PROFILES[candidate].bodyBackend,'code','current is hybrid; use explicit frozenReplay / --frozen-replay for exact f43501a packed candidate');
   build();const arms=[];
-  for(const kernelArtifact of ['baseline-58e61c4','current'])arms.push(await withWorld(workload,{kernelArtifact,buildFirst:false}));
-  return {createdAt:new Date().toISOString(),standing:'Fresh-genesis native always-code packed-presence comparison only; frozen reviewed 58e61c4 versus current',arms,...compareMatchedArms(arms),limits:{runtime:24576,initcode:49152,body:4096,transactionAndBlockGas:16777216},limitations:[
+  for(const kernelArtifact of ['baseline-58e61c4',candidate])arms.push(await withWorld(workload,{kernelArtifact,buildFirst:false}));
+  return {createdAt:new Date().toISOString(),standing:`Fresh-genesis native always-code replay only; baseline-58e61c4 versus ${candidate}, current support-source pins retained`,arms,...compareMatchedArms(arms),limits:{runtime:24576,initcode:49152,body:4096,transactionAndBlockGas:16777216},limitations:[
     'No hybrid, full-v2 saving, adoption, migration, production deployment or live browser replacement',
     'Exact public ABI, Type/Record IDs, validators, helper and index runtimes are unchanged; only private Record metadata/presence differs',
     'Whole-operation receipt costs include setup and paid reads separately; eth_estimateGas is not a paid receipt',
@@ -53,7 +58,7 @@ export async function comparePackedPresence(){
 }
 
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
-  const result=await comparePackedPresence();
-  writeFileSync(ROOT+'evidence/packed-presence.json',JSON.stringify(result,(_,v)=>typeof v==='bigint'?v.toString():v,2)+'\n',{flag:'wx'});
+  const result=await comparePackedPresence({frozenReplay:process.argv.includes('--frozen-replay')});
+  writeFileSync(ROOT+'evidence/packed-presence-frozen-replay.json',JSON.stringify(result,(_,v)=>typeof v==='bigint'?v.toString():v,2)+'\n',{flag:'wx'});
   console.log(JSON.stringify({sources:result.arms.map(a=>a.provenance.kernelArtifact.sourceCommit),transactions:result.arms.map(a=>a.setup.length+a.actions.length),cleanup:result.arms.map(a=>a.cleanup),selected:result.comparison.filter(r=>/file raw-(41|256|4032) (create fresh|edit fresh)|quote |refuse/.test(r.label)).map(({label,costs,savedGas})=>({label,gas:costs.map(c=>c.gas),savedGas}))},null,2));
 }

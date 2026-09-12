@@ -4,7 +4,7 @@ import {E,withWorld} from '../scripts/world.mjs';
 
 test('both frozen expanded controls keep raw and discovery; candidate has pinned helper and exact inert child',{timeout:180000},async()=>{
   const identities=[];
-  for(const selection of ['baseline-c088363','integrity-c088363','current']){
+  for(const selection of ['baseline-c088363','integrity-c088363','forced-code','current']){
     const result=await withWorld(async w=>{
       const c=w.client;
       assert(w.config.rawType,'expanded control must not be treated as legacy registry');
@@ -16,7 +16,7 @@ test('both frozen expanded controls keep raw and discovery; candidate has pinned
       const a=await c.write('storeRecord',[w.config.rawType,body]);
       const id=E.keccak256(E.AbiCoder.defaultAbiCoder().encode(['bytes32','bytes32','bytes'],[E.id('EFS21_RECORD_V1'),w.config.rawType,body]));
       assert.equal((await c.record(id,await c.observe(a.receipt.blockNumber))).value.body,body);
-      if(selection==='current'){
+      if(selection==='forced-code'){
         const pin=w.provenance.runtimes.BodyWriter;assert.equal(pin.address.toLowerCase(),helper.toLowerCase());
         assert.equal(pin.codeHash,E.keccak256(await c.rpc('eth_getCode',[helper,'latest'])));
         const child=E.getCreateAddress({from:helper,nonce});
@@ -26,9 +26,15 @@ test('both frozen expanded controls keep raw and discovery; candidate has pinned
         await c.rpc('anvil_setCode',[child,'0x00ef0080fe00']);
         await assert.rejects(()=>c.record(id),/CorruptRecord|revert/i);
       }
+      if(selection==='current'){
+        assert.equal(BigInt(await c.rpc('eth_getTransactionCount',[helper,'latest'])),nonce,'tiny hybrid is words');
+        const slot=E.keccak256(E.AbiCoder.defaultAbiCoder().encode(['bytes32','uint256'],[id,6]));
+        await c.rpc('anvil_setStorageAt',[w.config.kernel,slot,E.ZeroHash]);
+        await assert.rejects(()=>c.record(id),/CorruptRecord|revert/i);
+      }
       return {};
     },{kernelArtifact:selection});
     assert(result.cleanup.stopped&&result.cleanup.cacheRemoved);
   }
-  assert.deepEqual(identities[0],identities[1]);assert.deepEqual(identities[1],identities[2]);
+  for(const identity of identities.slice(1))assert.deepEqual(identity,identities[0]);
 });

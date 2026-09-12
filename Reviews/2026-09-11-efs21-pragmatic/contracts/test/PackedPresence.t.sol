@@ -19,6 +19,7 @@ contract PackedPresenceTest is BodyStorageTest {
 
     // Catches a separate existence SSTORE, and helper/inventory growth on dedup.
     function testPackedAdmissionLeavesLegacyEmptyAndDuplicateUnchanged() public {
+        forceCode(); // Exact tag-zero encoding is the preserved code backend, not the selector.
         uint64 nonce = bvm.getNonce(writer);
         bytes32 id = kernel.storeRecord(rawType, hex"123456");
         require(hvm.load(address(kernel), legacy(id)) == 0, "legacy presence must remain zero");

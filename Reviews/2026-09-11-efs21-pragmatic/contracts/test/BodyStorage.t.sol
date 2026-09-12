@@ -5,6 +5,7 @@ import {NativeKernel} from "../src/NativeKernel.sol";
 import {HistoryVm} from "./History.t.sol";
 import {NavigationIndex} from "../src/NavigationIndex.sol";
 import {BytesValidator} from "../src/ExactTypeRegistry.sol";
+import {ForcedCodeKernel} from "./fixtures/ForcedBodyKernel.sol";
 
 interface BodyVm {
     function getNonce(address) external view returns (uint64);
@@ -38,8 +39,20 @@ contract BodyStorageTest is TestBase {
         writer = bvm.computeCreateAddress(address(kernel), 4);
     }
 
+    // Only code-object fault tests opt in; ordinary setup and semantic tests use real hybrid.
+    function forceCode() internal {
+        address validator = kernel.types().typeInfo(rawType).validator;
+        bytes memory creation = vm.getCode("ForcedBodyKernel.sol:ForcedCodeKernel");
+        address deployed;
+        assembly ("memory-safe") { deployed := create(0, add(creation, 32), mload(creation)) }
+        kernel = NativeKernel(deployed);
+        eq(kernel.types().register("EFS21 exact raw bytes v1", validator), rawType);
+        writer = bvm.computeCreateAddress(address(kernel), 4);
+    }
+
     // Catches storage-only admission or helper creation on a dedup hit.
     function testUniqueCreatesOneHelperObjectDuplicateCreatesNone() public {
+        forceCode();
         uint64 beforeNonce = bvm.getNonce(writer);
         uint64 kernelNonce = bvm.getNonce(address(kernel));
         address pointer = bvm.computeCreateAddress(writer, beforeNonce);
@@ -54,6 +67,7 @@ contract BodyStorageTest is TestBase {
 
     // A same-sized STOP-prefixed replacement must fail the exact RecordId check.
     function testWrongSameLengthCodeIsCorruptNotReturned() public {
+        forceCode();
         address pointer = bvm.computeCreateAddress(writer, bvm.getNonce(writer));
         bytes32 id = kernel.storeRecord(rawType, hex"ef0080ff");
         vm.etch(pointer, hex"00ef0080fe");
@@ -62,6 +76,7 @@ contract BodyStorageTest is TestBase {
     }
 
     function testMalformedCodeAndMetadataRefuseBeforeCopy() public {
+        forceCode();
         address pointer = bvm.computeCreateAddress(writer, bvm.getNonce(writer));
         bytes32 id = kernel.storeRecord(rawType, hex"ef0080ff");
         bytes[6] memory corrupt =
@@ -95,7 +110,7 @@ contract BodyStorageTest is TestBase {
         address pointer = bvm.computeCreateAddress(writer, bvm.getNonce(writer));
         hvm.recordLogs();
         bytes32 id = kernel.storeRecord(rawType, "");
-        eq(pointer.code, hex"00");
+        eq(pointer.code, bytes("")); // Real hybrid empty body has presence, not a code child.
         eq(kernel.readRecord(id).body, bytes(""));
         eq(kernel.readRecord(id).typeId, rawType);
         eq(kernel.storeRecord(rawType, ""), id);
@@ -113,6 +128,7 @@ contract BodyStorageTest is TestBase {
     }
 
     function testSameBytesDifferentTypesNeverShareBodyObjects() public {
+        forceCode();
         bytes32 canonicalType = kernel.types().register("EFS21 canonical ABI bytes v1", address(new BytesValidator()));
         bytes memory body = abi.encode(hex"ef0000ff00");
         uint64 nonce = bvm.getNonce(writer);
@@ -155,6 +171,7 @@ contract BodyStorageTest is TestBase {
     }
 
     function testHelperAuthorityBoundsPinAndInertOpcodes() public {
+        forceCode();
         vm.expectRevert(bytes4(keccak256("Unauthorized()")));
         Writer(writer).write(hex"ff");
         bytes memory tooLarge = new bytes(4097);
@@ -181,6 +198,7 @@ contract BodyStorageTest is TestBase {
     }
 
     function testCreateCollisionAndLowGasRollback() public {
+        forceCode();
         uint64 nonce = bvm.getNonce(writer);
         address pointer = bvm.computeCreateAddress(writer, nonce);
         vm.etch(pointer, hex"00");

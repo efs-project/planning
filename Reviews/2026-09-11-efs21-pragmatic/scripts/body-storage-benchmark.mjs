@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {pathToFileURL} from 'node:url';
-import {E,ROOT,artifact,build,withWorld} from './world.mjs';
+import {E,ROOT,artifact,build,withWorld,KERNEL_PROFILES} from './world.mjs';
 
 const abi=E.AbiCoder.defaultAbiCoder();
 const payload=(size,pattern)=>Uint8Array.from({length:size},(_,i)=>pattern==='zero'?0:pattern==='nonzero'?239:i%256);
@@ -9,13 +9,31 @@ const recordId=(typeId,body)=>E.keccak256(abi.encode(['bytes32','bytes32','bytes
 const composition=data=>{const bytes=E.getBytes(data),zero=bytes.filter(b=>b===0).length;return {zeroBytes:zero,nonzeroBytes:bytes.length-zero};};
 const json=value=>JSON.parse(JSON.stringify(value,(_,v)=>typeof v==='bigint'?v.toString():v));
 
-export async function workload(w){
-  const c=w.client,seen=new Set(),children=[],reads=[],retention=[];
+export async function workload(w,{allowHybrid=false,sweep=true}={}){
+  const capabilities=w.provenance.kernelArtifact.capabilities;
+  assert(allowHybrid||['code','dynamic'].includes(capabilities.bodyBackend),'code-only workload requires explicit frozen replay; current is hybrid');
+  const observeBody=allowHybrid?(await import('./hybrid-body-benchmark.mjs')).observeBody:null;
+  const c=w.client,seen=new Set(),children=[],reads=[],retention=[],bodyObservations=[];
   const ni=new E.Interface(artifact('NavigationIndex').abi),nav=w.provenance.runtimes.NavigationIndex.address;
   const helper=w.provenance.runtimes.BodyWriter?.address;
   const kernelNonce=await c.rpc('eth_getTransactionCount',[w.config.kernel,'latest']);
   const types={raw:w.config.rawType,canonical:w.config.bytesType,uint256:w.config.quoteType};
   const bodyOf=(representation,bytes)=>representation==='uint256'?E.hexlify(bytes):c.encodePayload(types[representation],bytes);
+  async function captureBody(d,basis,before){
+    const observation=observeBody?await observeBody(w,d.recordId,d.body,basis):null;
+    if(observation)bodyObservations.push(observation);
+    const codeBacked=observation?observation.backend===0:!!helper;
+    if(helper){
+      const after=BigInt(await c.rpc('eth_getTransactionCount',[helper,basis.blockNumber]));
+      assert.equal(after,before+(!d.dedup&&codeBacked?1n:0n));
+      if(!d.dedup&&codeBacked){
+        const pointer=E.getCreateAddress({from:helper,nonce:before}),code=await c.rpc('eth_getCode',[pointer,basis.blockNumber]);
+        assert.equal(code,'0x00'+d.body.slice(2));
+        const child={recordId:d.recordId,pointer,helper,creationNonce:before.toString(),code,codeHash:E.keccak256(code),runtimeBytes:E.getBytes(code).length,basis};
+        children.push(child);return child;
+      }
+    }
+  }
   function details(representation,bytes,pattern){
     const typeId=types[representation],body=bodyOf(representation,bytes),id=recordId(typeId,body);
     return {representation,typeId,body,payloadBytes:bytes.length,bodyBytes:E.getBytes(body).length,payloadHash:E.keccak256(bytes),bodyHash:E.keccak256(body),pattern,bodyComposition:composition(body),recordId:id,dedup:seen.has(id)};
@@ -32,16 +50,7 @@ export async function workload(w){
       a.independentEffect=await exact(d,basis);
       const events=a.receipt.logs.filter(log=>log.topics[0]===E.id('RecordStored(bytes32,bytes32)'));
       assert.equal(events.length,d.dedup?0:1,'exact membership determines admission, never workload name');
-      if(helper){
-        const after=BigInt(await c.rpc('eth_getTransactionCount',[helper,basis.blockNumber]));
-        assert.equal(after,before+(d.dedup?0n:1n));
-        if(!d.dedup){
-          const pointer=E.getCreateAddress({from:helper,nonce:before}),code=await c.rpc('eth_getCode',[pointer,basis.blockNumber]);
-          assert.equal(code,'0x00'+d.body.slice(2));
-          const child={recordId:d.recordId,pointer,helper,creationNonce:before.toString(),code,codeHash:E.keccak256(code),runtimeBytes:E.getBytes(code).length,basis};
-          children.push(child);a.bodyObject=child;
-        }
-      }
+      a.bodyObject=await captureBody(d,basis,before);
       seen.add(d.recordId);
       if(method==='storeRecord')a.status='COMMITTED_RECORD';
     }
@@ -105,15 +114,12 @@ export async function workload(w){
   const qi=new E.Interface(artifact('QuoteProducer').abi),ri=new E.Interface(artifact('QuoteReader').abi);
   for(const [value,expected] of [[3000,0],[3100,1]]){
     const d=details('uint256',E.getBytes(abi.encode(['uint256'],[value])),'scalar');
+    const before=helper?BigInt(await c.rpc('eth_getTransactionCount',[helper,'latest'])):null;
     const a=await c.sendData(`quote ${expected===0?'first publish':'fresh update'}`,qi.encodeFunctionData('publish',[value,expected]),w.producer);
     const basis=await c.observe(a.receipt.blockNumber),q=(await c.call('read',[w.config.kernel,w.producer,types.uint256],basis,w.consumer,ri)).value;
     assert.equal(q[0],BigInt(value));assert.equal(q[2],BigInt(expected+1));
     a.workload=d;a.independentEffect={status:'VERIFIED_QUOTE',value,revision:expected+1,record:await exact(d,basis)};seen.add(d.recordId);
-    if(helper){
-      const nonce=BigInt(await c.rpc('eth_getTransactionCount',[helper,basis.blockNumber]))-1n,pointer=E.getCreateAddress({from:helper,nonce});
-      const code=await c.rpc('eth_getCode',[pointer,basis.blockNumber]);assert.equal(code,'0x00'+d.body.slice(2));
-      children.push({recordId:d.recordId,pointer,helper,creationNonce:String(nonce),code,codeHash:E.keccak256(code),runtimeBytes:E.getBytes(code).length,basis});
-    }
+    a.bodyObject=await captureBody(d,basis,before);
   }
   const quoteArgs=[w.config.kernel,w.producer,types.uint256];
   const qa=await c.sendData('quote independent reader paid',ri.encodeFunctionData('read',quoteArgs),w.consumer);
@@ -121,11 +127,11 @@ export async function workload(w){
   assert.equal(q[0],3100n);qa.independentEffect={status:'VERIFIED_QUOTE_READ',value:'3100',revision:String(q[2]),basis:qb};
   qa.workload={...details('uint256',E.getBytes(abi.encode(['uint256'],[3100])),'scalar'),dedup:null,admission:'not-applicable: read'};
   // Caller-independent admission sweeps retain empty/zero collisions honestly.
-  for(const representation of ['raw','canonical'])for(const size of [0,1,31,32,33,41,256,4032])for(const pattern of ['zero','nonzero','mixed'])for(const occurrence of ['first','duplicate']){
+  for(const representation of sweep?['raw','canonical']:[])for(const size of [0,1,31,32,33,41,256,4032])for(const pattern of ['zero','nonzero','mixed'])for(const occurrence of ['first','duplicate']){
     const d=details(representation,payload(size,pattern),pattern);
     await send('storeRecord',[d.typeId,d.body],`admit ${representation} ${size} ${pattern} ${occurrence}`,d);
   }
-  for(const pattern of ['zero','nonzero'])for(const occurrence of ['first','duplicate']){
+  for(const pattern of sweep?['zero','nonzero']:[])for(const occurrence of ['first','duplicate']){
     const d=details('raw',payload(4096,pattern),pattern);
     await send('storeRecord',[d.typeId,d.body],`boundary raw4096 ${pattern} ${occurrence}`,d);
   }
@@ -160,7 +166,8 @@ export async function workload(w){
     for(const id of page.ids)assert(seen.has(id));
   }
   assert.equal(Object.values(memberships).flat().length,seen.size);
-  if(helper)assert.equal(children.length,seen.size,'one retained object per exact RecordId');
+  if(helper&&capabilities.bodyBackend==='code')assert.equal(children.length,seen.size,'one retained object per exact RecordId for explicit always-code');
+  if(observeBody)assert.equal(new Set(bodyObservations.filter(r=>r.backend===0).map(r=>r.recordId)).size,children.length,'one child per distinct code-backed Record, not per Record');
   for(const a of [...w.setup,...w.actions]){
     const tx=await c.rpc('eth_getTransactionByHash',[a.hash]);
     assert.equal(E.keccak256(tx.input),a.calldataHash);a.transaction=tx;a.calldata=tx.input;
@@ -171,12 +178,14 @@ export async function workload(w){
   }
   const old=JSON.parse(readFileSync(ROOT+'evidence/raw-representation.json')).raw;
   for(const name of ['RawBytesValidator','BytesValidator','Uint256Validator'])assert.equal(w.provenance.runtimes[name].codeHash,old.provenance.runtimes[name].codeHash);
-  return {selection:w.provenance.kernelArtifact.selection,types,setup:w.setup,actions:w.actions,reads,retention,memberships,children,provenance:w.provenance};
+  return {selection:w.provenance.kernelArtifact.selection,types,setup:w.setup,actions:w.actions,reads,retention,memberships,children,bodyObservations,provenance:w.provenance};
 }
 
-export async function compareBodyStorage(){
+export async function compareBodyStorage({frozenReplay=false}={}){
+  const candidate=frozenReplay?'baseline-58e61c4':'current';
+  assert.equal(KERNEL_PROFILES[candidate].bodyBackend,'code','current is hybrid; use explicit frozenReplay / --frozen-replay for exact 58e61c4 body candidate');
   build();const arms=[];
-  for(const kernelArtifact of ['baseline-c088363','integrity-c088363','current'])arms.push(await withWorld(workload,{kernelArtifact,buildFirst:false}));
+  for(const kernelArtifact of ['baseline-c088363','integrity-c088363',candidate])arms.push(await withWorld(workload,{kernelArtifact,buildFirst:false}));
   for(const arm of arms.slice(1)){
     assert.deepEqual(arm.types,arms[0].types);assert.deepEqual(arm.memberships,arms[0].memberships);
     for(const name of ['RawBytesValidator','BytesValidator','Uint256Validator','ExpandedTypeRegistry','DiscoveryIndex','NavigationIndex'])assert.deepEqual(arm.provenance.runtimes[name],arms[0].provenance.runtimes[name]);
@@ -198,7 +207,7 @@ export async function compareBodyStorage(){
   return {createdAt:new Date().toISOString(),standing:'Fresh-genesis native body experiment; storage plus integrity versus code plus identical RecordId integrity is the primary comparison',arms,comparison,readComparison,limits:{runtime:24576,initcode:49152,body:4096,transactionAndBlockGas:16777216},limitations:['No full-C0 parity, adoption, migration, production deployment, hybrid or cross-Type sharing','Exact selected artifacts differ in kernel body storage/read defense only; current support consumers are common to all arms','Read estimates are separate from paid receipts; all paid counts start with fresh empty consumer effect slots','Mandatory discovery outage uses local anvil_setCode fault injection and restoration; not an optional attached scalar-profile failure','No traces or inferred slot-count savings; cold access sets reset every transaction','Setup includes helper creation inside kernel receipt; helper-specific deployment gas is not separately observable as a receipt','Matched action calldata is identical, so action intrinsic-calldata deltas are zero; deployment calldata/setup differ','Bodies are public permanent code objects; STOP prefix plus exact-size and RecordId read defenses are priced']};
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
-  const result=await compareBodyStorage();
-  writeFileSync(ROOT+'evidence/body-storage.json',JSON.stringify(result,(_,v)=>typeof v==='bigint'?v.toString():v,2)+'\n',{flag:'wx'});
+  const result=await compareBodyStorage({frozenReplay:process.argv.includes('--frozen-replay')});
+  writeFileSync(ROOT+'evidence/body-storage-frozen-replay.json',JSON.stringify(result,(_,v)=>typeof v==='bigint'?v.toString():v,2)+'\n',{flag:'wx'});
   console.log(JSON.stringify(result.comparison.filter(r=>/file .* (create fresh|edit fresh)|quote |refuse/.test(r.label)).map(({label,costs,primarySavedGas})=>({label,gas:costs.map(c=>c.gas),primarySavedGas})),null,2));
 }
