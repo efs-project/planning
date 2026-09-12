@@ -438,6 +438,70 @@ contract CanonicalDiscoveryTest is TestBase {
         eq(d.probe(address(this), 1, 1, a), 1);
     }
 
+    function testConstrainedUintAndNonscalarRefuseWithoutChangingAttachment() public {
+        discovery();
+        // Derived with the unchanged encoder/parser/body oracle: UINT32 range [0,7].
+        bytes memory constrained =
+            hex"000100b600010011436f6e73747261696e656455696e742f310028446973706f7361626c652063616e6f6e6963616c206e61746976652046696c657320627269646765000000000000000000000000000000000000000000000000000000000000000000000100066e756d62657202200000000000000001010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007";
+        (, bytes32[] memory rangeIds) = k.types().registerGroup(constrained);
+        eq(rangeIds[0], 0x9da46e40e583b72115b02f495cf8d9a73f039bd97aa37d427afddfb5cc1b40c8);
+        k.storeRecord(rangeIds[0], abi.encode(uint256(7)));
+        vm.expectRevert();
+        k.storeRecord(rangeIds[0], abi.encode(uint256(8)));
+        (, bytes32[] memory arrayIds) = k.types().registerGroup(CanonicalFixtures.group_array());
+        k.storeRecord(arrayIds[0], hex"00020102");
+        d.attach(t, true);
+        d.detach();
+        bytes memory beforeStatus = abi.encode(d.status(address(this)));
+        vm.expectRevert(DiscoveryIndex.UnsupportedType.selector);
+        d.attach(rangeIds[0], false);
+        eq(abi.encode(d.status(address(this))), beforeStatus);
+        vm.expectRevert(DiscoveryIndex.UnsupportedType.selector);
+        d.attach(arrayIds[0], false);
+        eq(abi.encode(d.status(address(this))), beforeStatus);
+    }
+
+    function testDifferentExactUintAttachmentSelectsOnlyItsLiveFiles() public {
+        bytes32 oldTypeFile = make("old type", 42);
+        bytes32 other = registerOtherUint();
+        bytes32 selected = k.createFile(root, "selected type", other, abi.encode(uint256(42)));
+        k.createFile(root, "other value", other, abi.encode(uint256(43)));
+        k.storeRecord(other, abi.encode(uint256(99))); // No File, never this population.
+        discovery();
+        d.attach(other, true);
+        CanonicalDiscoveryAPI.Profile memory p = d.status(address(this));
+        eq(p.typeId, other);
+        d.backfill(address(this), p.epoch, 0, 64);
+        CanonicalDiscoveryAPI.Page memory found =
+            d.page(address(this), p.epoch, 42, CanonicalDiscoveryAPI.Cursor(0, 0, 0), 64);
+        yes(found.complete);
+        eq(found.ids.length, 1);
+        eq(found.ids[0], selected);
+        yes(found.ids[0] != oldTypeFile);
+        found = d.page(address(this), p.epoch, 99, CanonicalDiscoveryAPI.Cursor(0, 0, 0), 64);
+        yes(found.complete);
+        eq(found.ids.length, 0);
+    }
+
+    function testCorruptSelectedPhysicalCacheRefusesAttachmentAtomically() public {
+        bytes32 other = registerOtherUint();
+        discovery();
+        d.attach(t, false);
+        d.detach();
+        bytes memory beforeStatus = abi.encode(d.status(address(this)));
+        ExactTypeRegistry.TypeInfo memory info = k.types().typeInfo(other);
+        bytes memory original = info.cacheCode.code;
+        bytes memory corrupted = bytes.concat(original);
+        corrupted[corrupted.length - 1] = bytes1(uint8(corrupted[corrupted.length - 1]) ^ 1);
+        vm.etch(info.cacheCode, corrupted);
+        vm.expectRevert(ExactTypeRegistry.CorruptCache.selector);
+        d.attach(other, true);
+        eq(abi.encode(d.status(address(this))), beforeStatus);
+        vm.etch(info.cacheCode, original);
+        d.attach(other, true);
+        eq(d.status(address(this)).typeId, other);
+    }
+
     // An outer revert/code substitution/starvation is never a tolerated maintenance failure.
     function testOuterFailureCodeIdentityAndInsufficientGasRollBack() public {
         bytes32 a = make("a", 1);
@@ -532,4 +596,3 @@ contract CanonicalDiscoveryTest is TestBase {
         d.probe(address(this), 1, 1, a);
     }
 }
-
