@@ -2,6 +2,8 @@
 
 September 12, 2026 · independent source preflight and root verification · **not implemented or priced**.
 
+Subsequent implementation-plan review is captured in [[2026-09-12-efs21-known-record-consumer-plan]]. It adds explicit returned-Type equality, exact ABI framing and the distinction between invalid metadata and internally consistent fabricated metadata. Raw and qualified checks are not strictly ordered; compare total acquisition cost, not isolated qualification overhead. That refined plan governs any dispatch.
+
 The user wants contracts to use EFS as practical shared storage. The fuller prototype's qualified point read repeatedly verifies execution/dependency context. An ordinary contract reading a known content commitment from an already trusted deployment may need a different, explicitly narrower read surface than a browser accepting answers from an untrusted RPC.
 
 ## Smallest useful experiment: no Core change
