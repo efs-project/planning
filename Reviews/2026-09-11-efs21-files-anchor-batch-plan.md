@@ -1,0 +1,51 @@
+# Files anchor batching implementation plan
+
+> **For agentic workers:** use `superpowers:subagent-driven-development` with independent review. This is measured prototype integration, not a protocol/read-ABI freeze.
+
+**Goal:** use the checked Record batch in a real Files directory browse, reducing repeated anchor acquisition while retaining the existing occurrence, Binding, Lens, charter and completeness checks.
+
+**Architecture:** add an explicit capability to the exact source-manifest implementation. After independently validating a posting page and each occurrence, prefetch its unique uncached anchor Records in groups of at most eight through the qualified scope. Existing Record assessment and downstream selection consume the same scope-local cache. Legacy manifests remain scalar-compatible.
+
+**Tech Stack:** existing Node/ethers static-reader modules, actual local C0/upgrade fixture and source manifests; no new dependency or scheduler.
+
+**Spec:** [[2026-09-11-efs21-overnight]] and [[2026-09-11-efs21-checked-record-batch-plan]]. Source-only expert preflight located `openDirectory().step()` after `checkedPage`, and before anchor Record assessment. Hydrated posting rows are first-mutation evidence, not selected Files rows.
+
+## Global constraints
+
+- Dispatch only after the checked-Record task is committed, independently reviewed and root-verified. Root records that exact base in the task ledger. Code stays in `planning-efs21-direct` / `codex/efs21-direct-apply`; main-visible documentation stays on main.
+- One implementation/build/new finite-world owner. Preserve native54154, Fable60731, other worktrees and all historical evidence. No public deployment/funds, production repository, migration, raised ceilings, traces or protocol promotion. Stop heavy work below20GiB; serial managed worlds and exact owned-cache cleanup.
+- No contract, write, Type, record representation, Lens/history or browser UI changes. Do not optimize `openRemoved`, tags, content reads or selected-entry resolution in this task. No generic microtask batching and no fallback guessed from RPC errors.
+- Preserve checked ABI/source qualification, block-hash pinning, cumulative transport budgets, cancellation and final sealing. A successful RPC return is not a state proof.
+- Exact-path commits through message files with `chore:`/`docs:`, actual model, `Agent: v2-pm`, `Harness: codex`; root reviews/verifies/pushes.
+
+### Task 1: Source-qualified anchor prefetch and real browse evidence
+
+**Files:**
+
+- Modify `Reviews/2026-09-09-files-reader/files-reader.mjs`: shared Record assessment/cache acquisition metadata and the directory anchor seam only.
+- Modify `reader-scope.mjs`: explicit optional manifest capability validation/exposure only; preserve the reviewed batch API and transport behavior.
+- Modify `index.d.mts`: capability declarations; preserve the preceding task's reviewed readonly batch API.
+- Modify `Reviews/2026-09-08-upgradeable-foundation/scripts/local-upgrade.mjs` and actual Files fixture manifest reconstruction (notably `files-browser-mvp/test/authority-fixture.mjs`) only to attach source-backed capability metadata.
+- Create focused `files-reader/test/anchor-batch.test.mjs`, `efs21-pragmatic/scripts/files-anchor-batch-benchmark.mjs`, and exclusive `evidence/files-anchor-batch.json` / `.md`. Preserve old runners and receipt JSONs; minimal fixture helper reuse is allowed.
+
+- [ ] **Step 1: Freeze the scalar consumer and write RED.** Freeze the exact pre-integration Files reader source/hash through its Git revision, using only necessary resolved import wiring in the comparison harness. Frozen and candidate Files modules must import the same reviewed `reader-scope.mjs` singleton: duplicate module instances have different private qualification WeakMaps and would invalidate continuation comparisons. Compare against a genuinely deployed batch-capable Core. Require fewer real anchor `getRecord` calls, a real `getRecordsChecked` acquisition and identical assessed directory outcomes/qualifications. Add a legacy manifest case that must make no batch probe. Capture behavioral RED before changes, not only missing properties.
+
+- [ ] **Step 2: Explicit capability.** Optional metadata belongs to each exact implementation entry, e.g. `readCapabilities.checkedRecords = "v1"`, with the reviewed ABI/eight-item contract. Validate recognized values and select from the qualified active implementation at the pinned block. Expose immutable `scope.capabilities.checkedRecords`. The source builder attaches it only when its actual known source/artifact implements that API; not through selector scanning, `typeof` checks or an RPC probe. Missing metadata means scalar compatibility. Malformed/unsupported metadata refuses configuration. Claimed support plus failed batch becomes unavailable, with no silent scalar retry. Bind metadata into the same accepted manifest/context used for continuation, without claiming the source's declaration independently proves implementation correctness.
+
+- [ ] **Step 3: Shared assessment and evidence-preserving cache.** Keep `WeakMap<scope,...>` ownership; no cache crosses a resumed scope. Both scalar and batch acquisitions require `0 < firstAdmitOrdinal <= scope.basis.admissionHigh`, then unchanged `assessRecord(id,Type,body)` and error vocabulary. Preserve each caller's expected-Type check. Internally retain `{assessment, acquisition:{evidenceId,evidenceIndex,method}}`, while keeping `record()`'s existing assessment result for callers. Scalar uses its real acquisition ID; batch siblings share one real ID and distinct indexes. Full raw evidence remains in the scope; do not invent per-item RPC attempts.
+
+Populate only after the batch's count/order/ID/basis/canonical-ABI checks pass. Assess siblings individually; never cache a malformed item as successful. Hold rejected prefetch outcomes for the current owned attempt so later anchor assessment cannot silently trigger scalar fallback, then release failed in-flight entries after their consumers settle to permit a later explicit retry. Test this lifecycle rather than treating a rejected promise as a permanent cached value.
+
+- [ ] **Step 4: Small directory seam.** Keep mount, subject, Plan, posting-page and `checkedPage` behavior. Split the current anchor loop into existing `getOccurrenceByOrdinal` source comparison, bounded prefetch of source-checked `row[3]`, then unchanged Record/anchor assessment. Collect unique uncached IDs in stable page/row order. Chunk at eight; empty sets make no call. Pages permit32 per principal, so handle multiple groups without changing page policy. Do not trust a posting's RecordId before its occurrence matches. All anchor Type/scope/first-mutation/target/duplicate-role checks, real Lens resolution, child/mount and historical charter checks remain.
+
+Dispatch groups deliberately rather than queueing every group across all principals. Check stream closure before each new group; use the scope's existing queue/budgets. On terminal acquisition failure stop new groups, settle owned work and run the existing aggregate seal. Only successful sealing commits positions/roles/cursors. Failure retains prior sealed rows and existing UNKNOWN/PARTIAL/PRIOR_SEALED/continuation semantics. `stream.close()` must not close its caller-owned scope. No extra data fetch is licensed solely by a failed batch.
+
+- [ ] **Step 5: Falsifiers and actual browse benchmark.** Test scalar/batch equivalence, absent capability/no probe, false capability/no fallback, duplicate/cached IDs,1/8/9/32 anchors, malformed eighth result, absent/unknown Type, occurrence disagreement, cancellation/source switch, request/byte exhaustion, close mid-group, reorg at seal, retry and sealed-frontier resume. Explicitly test the same ordered batch IDs after a failed acquisition and transport recovery, respecting terminal-scope rules; rejected/invalid results must not poison a later licensed attempt. Escalate any defect in the preceding reviewed scope implementation rather than silently broadening transport scope. Retain all prior Lens/conflict/whiteout/charter/history regressions. Use unchanged limits for comparisons, explicitly setting historical limits when a frozen comparison requires them.
+
+Reuse the existing eight-name, two-author, two-child-node mounted directory. Frozen scalar and candidate read the **same batch-capable deployment and exact block**, with fresh scopes and alternating order at0/50ms injected latency. Measure cold qualification, first sealed page and same-scope reuse for page sizes4/8; add17 names for multiple continuations. Eight names/pageSize8 finishes immediately: a subsequent seal-only call is not a continuation measurement. Retain oracle-equivalent rows/progress, actual request/evidence counts and selector breakdown, serialized bytes, peak concurrency and timing. Exclude fixture publication and oracle construction from browse timing. Save source/compiler/runtime/manifest/block pins and node cleanup with exclusive evidence creation. No paid-gas saving or one-call-directory claim from this offchain acquisition measurement.
+
+- [ ] **Step 6: Verify, self-review and hand off.** Run focused TDD while iterating, then affected full reader/upgrade and browser-consumer tests serially. Type-check the public declarations with a small real consumer of the new capability/batch result. Preserve prior evidence and contract/write source hashes. Record any genuinely pre-existing fixture defects separately; do not weaken their substantive assertions. Commit exact paths and report counts/commands, real reduction/remaining calls, explicit limitations and cleaned owned paths. Root performs proportional fresh verification and commissions independent source/evidence review before publishing.
+
+## Later, not included
+
+Anchor batching alone leaves occurrence, historical Binding, selected-entry, Lens/charter and seal calls. Wider hydration rounds, grouped Lens execution and onchain listing aggregation need separate work budgets and measurements. This task must establish a real browse gain without silently skipping those obligations.

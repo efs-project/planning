@@ -26,6 +26,7 @@
 - Modify `Reviews/2026-09-05-c0-core/src/PointReadLibrary.sol`: result struct and bounded loop through unchanged `StatePointReads.getRecord`.
 - Modify `Reviews/2026-09-08-upgradeable-foundation/src/UpgradeableReadFixtureCore.sol`: current/checked entries and shared captured-basis logic.
 - Modify `Reviews/2026-09-09-files-reader/reader-scope.mjs`: explicit `scope.getRecords(ids)` with the same qualification, accounting, cancellation and seal lifecycle as scalar calls.
+- Modify `Reviews/2026-09-09-files-reader/index.d.mts`: readonly discriminated batch result and method declarations; add a strict narrowing consumer test. This is public API completeness, not a second SDK framework.
 - Create focused `Reviews/2026-09-08-upgradeable-foundation/test/CheckedRecordBatch.t.sol`, `Reviews/2026-09-09-files-reader/test/checked-record-batch.test.mjs`, and a small test-only consumer/multicall fixture if needed for mined read costs.
 - Create `Reviews/2026-09-11-efs21-pragmatic/scripts/checked-record-batch-benchmark.mjs` and new exclusive `evidence/checked-record-batch.json` / `evidence/checked-record-batch.md`. Use existing fresh-deployment builders/manifests; only minimal owned test/runner wiring to discover the new APIs. Preserve previous runners/evidence.
 
@@ -91,6 +92,8 @@ Retain full actual transactions/calldata/receipts, source/compiler/runtime/deplo
 ## Follow-on directory hydration integration — not in this plan
 
 This follow-on is **not dispatched by this plan yet**. Its deliverable is a measured real directory browse using the new acquisition rather than a standalone SDK demo. Use an explicit source/manifest capability, bounded per-page Record hydration and retained scalar compatibility. Preserve per-item assessment, all anchor/charter/Lens checks, unresolved rows, sealed-frontier continuation and honest COMPLETE/PARTIAL results. No automatic microtask batching or generic call scheduler is assumed. Once Task 1 evidence lands, define the smallest exact `files-reader.mjs` cache/prefetch seam and its failure semantics before implementation.
+
+Controller scope clarification during full regressions: the exact base already has25 private read-codec functions and5 carrier methods while `abi-shapes.test.mjs` still expects22/2; update closed fixture expectations for those existing methods plus the one new checked batch, preserving all compiled ABI/width checks. Two historical `reader-scheduling.test.mjs` cases assert a four-call ceiling but omit explicit limits despite the base's changed default16. Set `maxInFlight:4` explicitly in those comparison/seal tests, not in production defaults. Keep their concurrency, evidence and outcome assertions. Record the actual failures and focused correction separately from new batch results; no unrelated test weakening is authorized.
 
 ## Later, separate questions
 
