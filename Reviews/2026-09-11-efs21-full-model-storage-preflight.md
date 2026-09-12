@@ -46,6 +46,8 @@ Current full-C0 scalar `getRecord` validates metadata/bounds but does **not** re
 
 A smaller independent read optimization is metadata-only access for dedup/reference checks that currently ABI-copy complete bodies merely to inspect ordinal/TypeId. A subsequent source pass at `ab13d89` localized these to `StateKernel` Record dedup (264–266), Record/Object references (364–371), and Type dependency existence (400–403), which also copies a whole compiled cache to test one ordinal. Actual preparation, active Withdrawal parsing, public body reads and existing-group cache equality still need their bytes. This changes no retained storage; magnitude is unmeasured.
 
+This now has a [[2026-09-12-efs21-metadata-only-admission-plan|reviewed, not-dispatched three-site plan]]. Keep the existing nonzero-cache/no-code refusal; Record metadata checks retain malformed-header rejection and add an explicit8192 bound before avoiding payload copies. That new fail-fast handling is not falsely attributed to the old implementation. Source review confirms all-ACTIVE retry bypasses the three sites, so it is a no-improvement control. No saving is claimed before actual complete-operation pairs.
+
 ## Packed liveness counter: source-viable, not yet implemented
 
 An independent source pass at `ab13d89` found 128 unused bits beside the two uint64 Record ordinals. A physical RecordCell could keep the logical/public four-field RecordRow ABI while adding a uint64 live-occurrence count in bits128–191 of that same metadata word; bits192–255 stay reserved. No new storage slot is structurally required. Compiler layout, actual update cost and read/write accessors still need tests. Logical-row assignment must preserve counter bits, and a counter update must not rewrite the immutable body.
