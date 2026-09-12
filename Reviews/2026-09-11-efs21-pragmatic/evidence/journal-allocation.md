@@ -45,7 +45,7 @@ Observed original/candidate free-memory deltas: fresh **0: 32/32; 1: 82,944/41,1
 - Candidate **UpgradeAdmissionLibrary** runtime: **24,481 bytes**, hash **`0x35e1e056826837de699988bb10202467ab8941b7fb1ab56f353bc6faecce9327`**.
 - EIP-170 headroom **11 → 95 bytes**. No code-size override; all actual receipts stay within the unchanged **16,777,216** transaction gas ceiling.
 
-Every operation's independent ID derivation, record/occurrence, exact binding revision/target/history and Lens target are checked at the **receipt block and verified hash**, not latest. Full inventories agree: **80 records, 62 envelopes, 19 Types, 1 principal, 84 admissions/occurrences, 63 batches, 257 posting keys and all packed words, 22 bindings**. Only independently pinned execution-set/authority-codehash provenance is excluded across builds. Lens observation block is separately checked against each receipt. No Type/Record/Binding semantics are normalized away.
+Independent IDs and each admitted leaf's record/occurrence are checked at the **receipt block and verified hash**, not latest. Selected tag/head/name bindings also receive exact revision/target/history and Lens checks there. Creation's third (charter) binding is covered by the final full-inventory comparison, not an additional per-operation Lens/history assertion. Full inventories agree: **80 records, 62 envelopes, 19 Types, 1 principal, 84 admissions/occurrences, 63 batches, 257 posting keys and all packed words, 22 bindings**. Only independently pinned execution-set/authority-codehash provenance is excluded across builds. Lens observation block is separately checked against each receipt. No Type/Record/Binding semantics are normalized away.
 
 ## Verification and reproduction
 
@@ -53,7 +53,7 @@ Final verification: **209/209 full-C0 Solidity**, **19/19 foundation Solidity**,
 
 The exact skipped test is `type-cache-boundary.test.mjs` → **“chain RED target: parser-valid 64-field Type remains admissible despite compiled representation size”**, disabled unless `EFS_TYPE_CACHE_CHAIN=1`. Its pure characterization passed. The known large-Type compiled-cache limitation is **still open**; the skip must not be counted as a passing admission test. The Node gate included all C0/foundation Node suites and Files authority, routed operations, independent effect read-back, byte-commitment matrix and reader extensions. The byte-commitment test rewrote its old evidence file; only that generated change was restored exactly, leaving its historical evidence unchanged.
 
-The new Solidity test is formatted and its eight tests passed again afterward. A pre-existing `StateKernel.sol` formatting difference at the `writeType` call is left untouched so the measured production source remains exact; it is not an allocator formatting change. `git diff --check` and JavaScript syntax checks pass.
+The new Solidity test is formatted and its eight tests passed again afterward. A pre-existing `StateKernel.sol` formatting difference at the `writeType` call is left untouched so the measured production source remains exact; it is not an allocator formatting change. The existing `C0Request.prepare` compiler mutability warning also remains: the successful build output is not entirely warning-free. `git diff --check` and JavaScript syntax checks pass.
 
 From the vault root, the retained offline comparison is:
 

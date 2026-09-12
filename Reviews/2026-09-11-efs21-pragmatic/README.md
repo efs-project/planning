@@ -8,12 +8,10 @@ From this experiment directory, with Forge/Anvil and Solidity 0.8.30 available:
 
 ```sh
 node --test --test-concurrency=1 test/*.test.mjs
-node scripts/benchmark.mjs
-node scripts/history-benchmark.mjs
 node scripts/demo.mjs
 ```
 
-The canonical full-suite command uses `--test-concurrency=1`: only one new managed world / Forge build runs at a time. The benchmark command runs the same finite workload twice on separate owned nodes, saves compact [run 1](evidence/benchmark-1.json) and [run 2](evidence/benchmark-2.json), then closes each node and removes its exact cache directory. No full traces are retained. The demo prints a separate loopback URL; Ctrl-C/SIGTERM closes its server and managed node. An 18-hour watchdog keeps an evening launch available through the morning checkpoint, then terminates it. Finite benchmark/test nodes retain their five-minute watchdog. No periodic mining is enabled: history grows only with local actions. The old Files demo/port is untouched. The demo process stays foreground; do not treat it as production hosting.
+The canonical full-suite command uses `--test-concurrency=1`: only one new managed world / Forge build runs at a time. The original benchmark ran the same finite workload twice on separate owned nodes, saving compact [run 1](evidence/benchmark-1.json) and [run 2](evidence/benchmark-2.json), then closing each node and removing its exact cache directory. Historical benchmark scripts overwrite their named outputs; do not casually rerun them on a later checkpoint and replace the retained evidence. No full traces are retained. The demo prints a separate loopback URL; Ctrl-C/SIGTERM closes its server and managed node. An 18-hour watchdog keeps an evening launch available through the morning checkpoint, then terminates it. Finite native benchmark/test nodes retain their five-minute watchdog. No periodic mining is enabled: history grows only with local actions. The old Files demo/port is untouched. The demo process stays foreground; do not treat it as production hosting.
 
 Dependencies reuse the installed pinned ethers 6.15.0 / Playwright bundle in `../2026-09-04-mvp-rehearsal/node_modules`; no new framework or installation. Forge builds this candidate's own project with ordinary EIP-170 size checks and 16,777,216 per-transaction/block gas ceiling. `NativeKernel` deploys its own navigation and registry internally; their costs are included in its setup receipt, not separately fabricated receipts.
 
@@ -65,7 +63,7 @@ The history-only checkpoint shares immutable location snapshots between edits/un
 
 Paired receipts: contract-produced uint256 updates **284,631 → 237,597 gas**, short-name 41-byte fresh-content edits **350,271 → 303,237**, same-content edits **163,536 → 116,496**. The separate consumer transaction remains **77,277**. Creation increases by 301 gas; the measured historical read estimates increase by 157 gas. The uint256 example meets the provisional 250k update ambition; the ABI-framed 41-byte file edit still does not. [Complete matched inputs, receipts, provenance, differential checks and tradeoffs](evidence/history-storage.md).
 
-The original `benchmark-1/2.json` files above have not been overwritten. Running `scripts/benchmark.mjs` again would replace those outputs with the current source's workload; use `scripts/history-benchmark.mjs` for the explicit original-versus-current comparison.
+The original `benchmark-1/2.json` files above have not been overwritten. Running `scripts/benchmark.mjs` again would replace those outputs with the current source's workload. The history script also replaces its comparison output; reproduce it only with deliberately separated output/source provenance, not as an ordinary demo startup step.
 
 ## Optional scalar discovery checkpoint
 
@@ -78,6 +76,16 @@ Required-index failure rolls back the file operation. Tolerated maintenance fail
 The prior `history-comparison.json` remains its pure-history source checkpoint. Re-running the history script now compares the original kernel against the current history-plus-discovery source; do not label that rerun a pure history ablation.
 
 ## Verification / limitations
+
+### Separate full-C0 allocation experiment
+
+This worktree also contains a narrowly changed **fuller C0/Files control**, not used by the native browser above. It avoids eagerly allocating unused journal structs; all existing records, validation, indexes and history stay in place. Independent review approved; root reproduced 209 C0 Solidity tests and six paired-evidence checks. The measured production source matches the retained candidate source hash.
+
+Matched seven-record 41-byte creation is **7,620,832 → 6,622,789 gas**, plus unchanged 149,369 staging (**7,770,201 → 6,772,158 total**). Three-record edit is **3,610,796 → 3,313,533**, plus separate staging. Exact ACTIVE retry has a 12-gas receipt regression; it is not presented as a saving. Admission-library runtime is 24,481 bytes, only 95 bytes below EIP-170. [Exact results, source/runtime pins, verification coverage and limits](evidence/journal-allocation.md).
+
+This is a same-semantics implementation saving, unlike comparing the reduced native profile wholesale with full v2. It does not resolve expensive retained storage, the known legal-large-Type cache limitation, or full protocol readiness.
+
+### Native browser scope
 
 The Node suite exercises actual contracts and a real Chromium browser, including create → open → edit → rename → full page reload → historical bytes, nested binary upload → unlink, and forced RPC failure. It checks independent record-ID derivation, retained history, wrong identity, malformed IDs, stale block observation/cursor, bounded pages, transaction ceiling and owned-cache cleanup. Review regressions cover committed transactions with dropped submission/poll responses, read-only reconciliation without nonce increase/resend, persisted write holds, failed-navigation write attempts, manual hash navigation and a hash change during a paused read. [Test-first record](evidence/tdd.md), [prior-checkpoint browser](evidence/browser.png), [prior-checkpoint gas drawer](evidence/gas-drawer.png). Screenshots are refreshed only with `EFS21_CAPTURE_SCREENSHOTS=1`; routine tests preserve the existing evidence files.
 
