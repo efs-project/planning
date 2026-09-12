@@ -1,6 +1,9 @@
 # Canonical Types in the cheaper filesystem: registry gate
 
-**Standing:** September 12 disposable prototype result; independently reviewed
+**Latest result:** the canonical native Files integration is independently reviewed
+and root-reproduced; see the dated integration closure below. No protocol adoption.
+
+**Initial registry-gate standing:** September 12 disposable prototype result; independently reviewed
 and root-reproduced. The direct registry works. Native Files/SDK integration
 and its whole-operation price are the next task, not an earned result yet.
 
@@ -86,3 +89,113 @@ The full model's [[2026-09-12-efs21-typed-read-facet-plan|typed read-facet split
 is separate. It addresses code placement without changing storage semantics;
 it must not be confused with reducing write amplification or with this narrower
 filesystem's measured price.
+
+## Targeted follow-up: validate the schema once, each new body every time
+
+A source-only independent review identified a smaller potential cost reduction:
+ordinary member reads currently copy/hash the whole stored group and walk every
+member span, although successful registration already established those links
+and this exact registry has no setter, proxy or delegatecall path to change them.
+The first experiment should reuse only that registration-time origin check.
+Keep unknown/reserved-Type checks, inexpensive association checks, exact cache
+bytes/hash/header checks, helper identity and bounds, and actual body validation.
+Keep the full registration/repeat path. This changes neither Type IDs nor the
+meaning or validation rules of new data. No savings are measured yet.
+
+The safety premise is the actual immutable registry/helper/cache lifecycle, not
+"Cancun makes contracts immutable." Storage can still change through code, and
+same-transaction SELFDESTRUCT remains a special case under
+[EIP-6780](https://eips.ethereum.org/EIPS/eip-6780). The pinned cache constructor
+only returns STOP-prefixed data and has no callback or destruction path.
+
+This would deliberately weaken one diagnostic: a test that forcibly corrupts
+only stored raw-group bytes could stop being detected by an otherwise valid
+member lookup. Preserve and report that changed fault outcome; do not delete
+the test or call it identical behavior. Any reachable attacker operation that
+changes a trusted association, or any changed valid/invalid-body result, rejects
+the candidate. SDK raw-group/cache and chain/basis qualification is separate;
+neither repeated local consistency checks nor cached code prove an RPC truthful.
+
+After the current integration is frozen, a small separate A/B can price the
+default group and a longer-description group with the same field shapes. Use
+identical declarations/bodies within each pair, full registration/lookup/valid
+and invalid-body receipts, and explicit cold versus twice-in-one-transaction
+reads. This is a staged hypothesis, not permission to alter the active Task 2
+control or an adopted reduction in EFS validation guarantees.
+
+## September 12, 13:14 UTC — integrated Files checkpoint
+
+Task 2 now has actual canonical Records through native Files, the browser/SDK,
+contract producers/consumers and optional Discovery. Source/support is
+`b2eae00589b1f174b29df0f18e9a8aa97330f918`; local evidence-only closure is
+`e10ad67cc4936adf005c046f59b8e434fcc2e716`. **Independent review is still open;
+these commits are not yet published.** This supersedes the earlier next-task
+status above, not its narrower semantic scope.
+
+Root reproduced 159 native Forge tests, 214 shared Core tests, 56 Node tests
+(including actual canonical and historical browser workflows), and 8 shared
+body-reader tests: zero failures or skips. The worker initially reported 234
+Core tests; the reviewer and root independently summed the retained table and
+corrected that arithmetic to 214. The suite and assertions did not change.
+
+The complete deployment fits ordinary limits: Files runtime 10,724 bytes,
+Record kernel 2,946, Type registry 8,058 and interpreter 19,032. Index modules
+are separate contracts. The final pair contains 193 signed transactions and
+54 matched primary operations. Root's fresh pair reproduced every signed
+transaction, gas/status/calldata and deployment inventory exactly. Both finite
+worlds and their caches were cleaned; existing browser demos remain frozen.
+
+| Same application operation | Old simple-validator profile | Canonical-Type profile |
+|---|---:|---:|
+| Create quote File | 560,868 | 627,672 |
+| Edit quote File | 228,331 | 295,135 |
+| Contract updates its quote File | 131,941 | 198,745 |
+| Unrelated contract reads quote path/Type/value | 80,769 | 80,613 |
+| Create tiny binary File | 525,938 | 593,592 |
+| Rename | 246,691 | 246,508 |
+
+Gas is complete local transaction gas, not dollars. The canonical interpreter
+adds roughly 67,000 gas to these scalar writes; this integration is a capability
+gain, **not another gas reduction**. Paid Files/history/directory/Discovery
+reads were effectively unchanged in the measured small workload. Setup costs
+and raw-versus-length-framed byte boundaries remain separate in the full pair.
+Neither arm includes the full model's portable authored publication and plural
+Lenses, so neither prices those guarantees away.
+
+The reviewer has requested focused evidence for candidate-only Discovery
+attachment edge cases and saved-journal File create/edit recovery. No product
+bug is established by those coverage gaps. Review closure remains required
+before treating Task 2 as complete. Large legal caches/aggregate groups still
+hit the explicitly measured representation/gas limits; those were not fixed.
+
+## September 12, 13:28 UTC — integration closed for prototype publication
+
+The two requested coverage gaps are closed by tests only: candidate Discovery
+checks constrained/nonscalar rejection, another exact UINT population and cache
+corruption; saved canonical create/edit journals recover after lost submission
+or verification responses, without resending. No implementation workaround was
+needed. Scoped re-review and fresh whole-bridge review approved the disposable
+integration with no remaining actionable finding. This is not production approval.
+
+Final source/support is `b8c27754314c97ab48c5b2454f9be05653e6b393`;
+[published evidence](https://github.com/efs-project/planning/blob/d269e5560d23af169e386f8ad92d9a5f60a9c382/Reviews/2026-09-11-efs21-pragmatic/evidence/canonical-types-review1.json)
+and its bounded gzip inventory are at `d269e5560d23af169e386f8ad92d9a5f60a9c382`.
+Root reran 162 native Forge and 58 Node tests: zero failures or skips; shared
+Core214/body-reader8 remain verified against unchanged source. Root's fresh
+193-transaction pair exactly matches final signed calldata, gas/status and
+deployment inventory. All54 primary comparisons remain the table's original
+economics. The added test file also supplies the benchmark fault driver: only
+its compiler metadata changed, lowering two test-only deployment receipts by12gas
+each. That is disclosed separately, not called a product saving.
+
+The three demos are still their old frozen snapshots; this closure does not
+silently upgrade them. Final test worlds and owned caches were stopped/removed.
+The code remains on the authorized prototype branch, not merged into planning/main.
+
+**Next engineering priorities:** implement the already reviewed typed read-facet
+split in the fuller Core, then resume its index-store comparison; separately
+price the immutable-registry reuse hypothesis and adapt the staged live-file
+experiment to the new canonical profile. Code modularity, schema-cache capacity
+and repeated storage/validation costs are three different jobs. No large legal
+Type support, reference support or full portable-authored/Lens parity was added
+by this integration, and none is silently waived.
