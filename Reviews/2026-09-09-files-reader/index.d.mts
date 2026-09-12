@@ -5,8 +5,11 @@ export interface ReaderSource {identity:string;epoch:number;request(method:strin
 export interface ReaderContext {expected:Readonly<Record<string,unknown>>;limits?:Partial<Limits>}
 export interface Basis {readonly source:string;readonly epoch:number;readonly chainId:bigint;readonly core:string;readonly blockNumber:bigint;readonly blockHash:string;readonly stateRoot:string;readonly executionSetId:string;readonly revision:bigint;readonly admissionHigh:bigint}
 export interface Evidence {readonly id:number;readonly sequence:number;readonly method:string;readonly params:readonly unknown[];readonly purpose:string;readonly bytes:number;readonly startedMs:number;readonly endedMs:number|null;readonly result?:unknown;readonly error?:Readonly<Record<string,unknown>>}
+/** Experimental acquisition only: independently assess each Record and seal before publishing. */
+export type RecordBatchResult={readonly status:'OK';readonly basis:Basis;readonly evidenceId:number;readonly records:readonly {readonly recordId:string;readonly typeSchemaId:string;readonly canonicalBody:string;readonly firstAdmitOrdinal:bigint;readonly evidenceIndex:number}[]}|{readonly status:'UNAVAILABLE';readonly reason:string;readonly evidenceId:number|null};
 export interface Scope {
   readonly basis:Basis;
+  getRecords(ids:readonly string[]):Promise<RecordBatchResult>;
   call(name:'getRecord'|'getOccurrence'|'getOccurrenceByOrdinal'|'getBindingHead'|'getBindingAtBasis'|'readHistory'|'pagePostingsHydrated'|'resolve'|'validatePlan',args?:readonly unknown[]):Promise<{status:'OK';values:readonly unknown[];evidenceId:number}|{status:'UNAVAILABLE';reason:string;evidenceId:number|null}>;
   carrierCall(name:'hasFixtureBytes'|'readFixtureBytes',args?:readonly unknown[]):Promise<{status:'OK';values:readonly unknown[];evidenceId:number}|{status:'UNAVAILABLE';reason:string;evidenceId:number|null}>;
   seal():Promise<{status:'SEALED';basis:Basis;evidence:readonly Evidence[]}|{status:'UNAVAILABLE';reason:string;evidence:readonly Evidence[]}>;

@@ -29,6 +29,8 @@ const CARRIER_APPLICATION = Object.freeze({
   readChunk:'function readChunk(bytes32 treeId,uint32 index) view returns (bytes)',
 });
 const codec = new Interface([...Object.values(APPLICATION),...Object.values(CARRIER_APPLICATION),
+  // Explicit experimental method, not part of the baseline application inventory.
+  'function getRecordsChecked((bytes32 executionSetId,uint32 revision,uint64 blockNumber,uint64 admissionHigh) expected,bytes32[] ids) view returns ((bytes32 executionSetId,uint32 revision,uint64 blockNumber,uint64 admissionHigh) actual,(bytes32 recordId,bytes32 typeSchemaId,bytes canonicalBody,uint64 firstAdmitOrdinal)[] records)',
   'function bootstrap() view returns ((bytes32 realmId,bytes32 initialRevisionId,bytes intrinsicGroupBytes,bytes32 objectGroup1Hash,bytes32 kernelGroup2Hash,bytes32 metaTypeId,bytes32 objectGenesisType,bytes32 bindingSetType,bytes32 bindingTombstoneType,bytes32 withdrawalType))',
   'function configuration() view returns (bytes32)',
   'function currentRevision() view returns (uint32)',
@@ -316,6 +318,35 @@ function createScope(source,expected,caps,signal) {
   const unavailable = error => ({status:'UNAVAILABLE',reason:error.message,evidenceId:error.evidenceId??null});
   const scope=Object.freeze({
     get basis(){return basis;},
+    // Qualification is acquisition evidence, not independent body/ID assessment.
+    // Callers must still assess each Record and seal before publishing an observation.
+    getRecords(ids) {
+      const work=(async()=>{
+        let evidenceId;
+        try {
+          live();check(!sealing,'scope sealing');
+          check(Array.isArray(ids)&&ids.length>=1&&ids.length<=8,'Record batch size');
+          check(ids.every(id=>hex(id,32)),'Record batch IDs');
+          const requested=ids.map(id=>id.toLowerCase());
+          const fields=['executionSetId','revision','blockNumber','admissionHigh'];
+          beginWindow();
+          // Each explicit batch is a fresh acquisition: generic ABI caching must
+          // not retain a response whose semantic basis/count/ID checks then fail.
+          const r=await call(expected.core,'getRecordsChecked',[fields.map(k=>basis[k]),requested],'data',true);
+          evidenceId=r.evidenceId;live();
+          const [actual,rows]=r.values;
+          fields.forEach((key,i)=>equal(actual[i],basis[key],'Record batch basis '+key));
+          check(rows.length===requested.length,'Record batch count');
+          for(let i=0;i<rows.length;i++) {
+            equal(rows[i][0],requested[i],'Record batch order/ID');
+            check(rows[i][2].length<=2+8192*2,'Record batch body bound');
+          }
+          return freeze({status:'OK',basis,records:rows.map((row,i)=>({recordId:row[0],typeSchemaId:row[1],canonicalBody:row[2],firstAdmitOrdinal:row[3],evidenceIndex:i})),evidenceId});
+        }catch(error){return unavailable(Object.assign(error,{evidenceId:error.evidenceId??evidenceId}));}
+      })();
+      dataWork.add(work);work.then(()=>dataWork.delete(work));
+      return work;
+    },
     call(name,args=[]) {
       const work=(async()=>{
         try {

@@ -27,7 +27,7 @@ test('four real pinned seal controls overlap and every reply gates SEALED',{time
       finally {active--;completed.resolve();}
     };
     try {
-      scope=await ready(make(lab,request));holding=true;
+      scope=await ready(make(lab,request,{maxInFlight:4}));holding=true;
       sealed=scope.seal();sealed.then(()=>{settled=true;});
       // The baseline is released on a bounded test-only timer, then fails 1 !== 4.
       await Promise.race([four.promise,new Promise(resolve=>{timer=setTimeout(()=>{calls[0]?.gate.resolve();resolve();},200);})]);
@@ -173,7 +173,7 @@ test('exact eb14059 baseline and candidate preserve every live Files phase reque
         try {
           await phase('cold-open',async()=>{
             const factory=arm==='baseline'?baseline.createFixtureReader:createFixtureReader;
-            scope=await ready(factory({source:{identity:lab.expected.source,epoch:1,request},context:{expected:lab.expected}}));return {status:'READY',basis:scope.basis};
+            scope=await ready(factory({source:{identity:lab.expected.source,epoch:1,request},context:{expected:lab.expected,limits:{maxInFlight:4}}}));return {status:'READY',basis:scope.basis};
           });
           assert(scope.evidence().every(e=>e.purpose==='qualification'));
           assert.deepEqual({realmRevisionId:scope.basis.executionSetId,blockNumber:scope.basis.blockNumber,admissionHigh:scope.basis.admissionHigh,basisKind:0},truth.basis);

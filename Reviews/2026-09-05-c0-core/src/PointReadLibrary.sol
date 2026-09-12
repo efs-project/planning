@@ -5,6 +5,36 @@ import {StatePointReads} from "./StatePointReads.sol";
 import {StateStore} from "./StateStore.sol";
 
 library PointReadLibrary {
+    struct ReadBasis {
+        bytes32 executionSetId;
+        uint32 revision;
+        uint64 blockNumber;
+        uint64 admissionHigh;
+    }
+
+    struct RecordResult {
+        bytes32 recordId;
+        bytes32 typeSchemaId;
+        bytes canonicalBody;
+        uint64 firstAdmitOrdinal;
+    }
+
+    error ErrRecordBatchSize(uint256 count);
+
+    function getRecords(StateStore.Store storage s, bytes32[] calldata ids)
+        external
+        view
+        returns (RecordResult[] memory records)
+    {
+        // Defensive bound at the allocation boundary, including duplicate IDs.
+        if (ids.length == 0 || ids.length > 8) revert ErrRecordBatchSize(ids.length);
+        records = new RecordResult[](ids.length);
+        for (uint256 i; i < ids.length; ++i) {
+            (bytes32 typeId, bytes memory body, uint64 ordinal) = StatePointReads.getRecord(s, ids[i]);
+            records[i] = RecordResult(ids[i], typeId, body, ordinal);
+        }
+    }
+
     function getTypeSchema(StateStore.Store storage s, bytes32 typeId)
         external
         view

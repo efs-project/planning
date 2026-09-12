@@ -18,6 +18,8 @@ contract UpgradeableReadFixtureCore is UpgradeableFixtureCore {
     address public immutable queryReadLibrary;
     bytes32 public immutable queryReadCodehash;
     error ReadCodeMismatch(uint8 role);
+    error ErrRecordBatchBasis();
+    error ErrRecordBatchSize(uint256 count);
     error PlanUnavailable(bytes32 planRecordId);
     error PlanMalformed(bytes32 planRecordId, uint8 rejectCode);
     error ResolveNotAccepted(uint8 presence, uint8 reasonCode);
@@ -85,6 +87,48 @@ contract UpgradeableReadFixtureCore is UpgradeableFixtureCore {
     function getRecord(bytes32 recordId) external view returns (bytes32, bytes memory, uint64) {
         _readBasis();
         return PointReadLibrary.getRecord(UpgradeStorage.efs(), recordId);
+    }
+
+    /// @notice Current EVM-state read, with no preliminary context call required.
+    function getRecordsCurrent(bytes32[] calldata ids)
+        external
+        view
+        returns (PointReadLibrary.ReadBasis memory actual, PointReadLibrary.RecordResult[] memory records)
+    {
+        actual = _recordBatchBasis(ids.length);
+        return _recordsAtBasis(actual, ids);
+    }
+
+    /// @notice Experimental optimistic read; every expected field must match.
+    function getRecordsChecked(PointReadLibrary.ReadBasis calldata expected, bytes32[] calldata ids)
+        external
+        view
+        returns (PointReadLibrary.ReadBasis memory actual, PointReadLibrary.RecordResult[] memory records)
+    {
+        actual = _recordBatchBasis(ids.length);
+        if (
+            expected.executionSetId != actual.executionSetId || expected.revision != actual.revision
+                || expected.blockNumber != actual.blockNumber || expected.admissionHigh != actual.admissionHigh
+        ) revert ErrRecordBatchBasis();
+        return _recordsAtBasis(actual, ids);
+    }
+
+    function _recordBatchBasis(uint256 count) private view returns (PointReadLibrary.ReadBasis memory) {
+        if (count == 0 || count > 8) revert ErrRecordBatchSize(count);
+        UpgradeStorage.ExecutionSet memory e = _readBasis();
+        if (block.number > type(uint64).max) revert StorageByteView.ErrReadState(e.id);
+        // Executing block checked immediately before narrowing.
+        // forge-lint: disable-next-line(unsafe-typecast)
+        return PointReadLibrary.ReadBasis(e.id, e.ordinal, uint64(block.number), UpgradeStorage.efs().count.admissions);
+    }
+
+    function _recordsAtBasis(PointReadLibrary.ReadBasis memory actual, bytes32[] calldata ids)
+        private
+        view
+        returns (PointReadLibrary.ReadBasis memory, PointReadLibrary.RecordResult[] memory)
+    {
+        // Captured and (for checked entry) compared before body reads/allocation.
+        return (actual, PointReadLibrary.getRecords(UpgradeStorage.efs(), ids));
     }
 
     function getEnvelope(bytes32 envelopeId) external view returns (bytes memory, uint48, uint16, bytes32, uint64) {

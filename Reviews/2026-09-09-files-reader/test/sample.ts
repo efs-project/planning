@@ -6,6 +6,26 @@ async function guest(source:ReaderSource,context:ReaderContext,mountId:string){
   void invalidSourceEpoch;
   const opened=await createFixtureReader({source,context}).open();
   if(opened.status!=='READY')return opened.reason;
+  const batch=await opened.scope.getRecords(['0x'+'00'.repeat(32)]);
+  if(batch.status==='OK') {
+    const block:bigint=batch.basis.blockNumber;
+    const evidence:number=batch.evidenceId;
+    const row=batch.records[0];
+    const id:string=row.recordId, typeId:string=row.typeSchemaId, body:string=row.canonicalBody;
+    const ordinal:bigint=row.firstAdmitOrdinal, index:number=row.evidenceIndex;
+    // @ts-expect-error Acquired Records remain readonly and coupled to their basis/evidence.
+    row.recordId='forged';
+    // @ts-expect-error Callers cannot silently append an unacquired row.
+    batch.records.push(row);
+    void [block,evidence,id,typeId,body,ordinal,index];
+  } else {
+    const evidence:number|null=batch.evidenceId;
+    // @ts-expect-error UNAVAILABLE never exposes a successful prefix.
+    batch.records;
+    // @ts-expect-error UNAVAILABLE never exposes a success basis.
+    batch.basis;
+    void evidence;
+  }
   const basisEpoch:number=opened.scope.basis.epoch;
   void basisEpoch;
   for(const evidence of opened.scope.evidence()){
