@@ -107,6 +107,8 @@ Keep the 21-word/672-byte execution-set shape. A Core-configuration domain wrapp
 
 Fresh ordinary runtime/initcode size checks are an early gate. Retained direct-apply headroom is not evidence that the extraction fits. If it does not, stop for a narrowly scoped module-decomposition proposal rather than raising limits.
 
+The Envelope candidate made this concrete: its first actual CoreU3 deployment refused at24852bytes. Reusing an already validated Envelope cell for the copy, without dropping checks, brought the rehearsal to24536bytes—only40bytes of headroom. A [[2026-09-12-efs21-initialization-outline-plan|separate initialization-outlining plan]] is now staged: move the one-time initializer into the already pinned admission library before adding another module or recurring raw-read call. Source preflight favors this narrower boundary, but no compiled size saving is established. Candidate generations must share the candidate library from genesis; the existing controller does not migrate library identity during populated upgrades.
+
 ### Failure, observers and cost
 
 The direct arm applies rows before committing counts/bootstrap. An external raw Store getter could expose a provisional posting prefix during a callback; that is not a qualified COMPLETE query. A production-candidate Store should be fixed callback-free code. Core-only mutation alone is not a general reentrancy proof.
