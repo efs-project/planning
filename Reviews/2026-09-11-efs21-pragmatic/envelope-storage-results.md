@@ -2,6 +2,8 @@
 
 Measured local experiment, not adoption or a populated-state migration. Source/support frozen at `a51633671b45071eb13adf9cbbbf17ab2501a33d` before both exclusive reports. The slot-backed Solidity control is exact `ab13d89e4e6111efc5eea6fc61c3ac56181c9a70`; the candidate changes only Envelope physical storage plus its consumers. Both use the same current runner, compiler settings, installed dependencies and workload. See [profile and reproduction](envelope-storage.md), [control receipts](evidence/envelope-storage-control.json) and [candidate receipts](evidence/envelope-storage-candidate.json).
 
+**Measurement gap:** paid scalar/repeated receipt-library gas is unmeasured and deferred. Existing receipt-library correctness tests remain covered, but receipt-library cost regressions are not economically bounded by this gate. The paid Core reads below are distinct measurements, not substitutes or full paid-read coverage.
+
 ## Actual transaction gas
 
 | Workload | Slot control | Envelope code | Difference |
@@ -37,7 +39,7 @@ Create including its chunk is5,902,827→5,738,524gas. These are whole-workflow 
 
 These mined consumer receipts exclude consumer deployment/setup. The actual consumer artifacts are retained and authenticated: executable constructor/runtime prefixes, encoded CBOR boundaries, lengths and compiler settings agree; metadata hashes differ because imported source changed. The consumer does not inspect its own code/hash. This limited exception does **not** apply to PreparationHelper: its entire creation bytes and runtime are byte-identical.
 
-No public routed-Core getReceipt/batch-receipt API exists. The approved substitution prices the existing Core Envelope/Occurrence/Record APIs; no ABI was added, and no unauthenticated receipt-library harness is claimed as routed-Core evidence.
+No public routed-Core getReceipt/batch-receipt API exists. Root's explicit scope ruling retains the existing Core Envelope/Occurrence/Record measurements and receipt-library correctness tests while deferring paid scalar/repeated receipt-library measurements. No ABI was added. A new unauthenticated receipt harness would price a different context; it is not claimed as routed-Core evidence. Cost if this deferral matters: receipt-library regressions remain economically unbounded here.
 
 Both final directories are qualified and complete through the actual checked Record-batch Files consumer. Both make104requests; observed result bytes rise407,901→414,937, including larger authenticated runtime material. Single-run elapsed observations are retained, not a latency improvement claim. All-family logical inventories match after authenticating each actual revision Core hash before the one authority-hash normalization:82Records,65Envelopes,22Types,1principal,88admissions,66batches,259postingkeys,22Bindingkeys. Every admitted occurrence, posting word, Binding/history and per-operation Lens result is checked.
 

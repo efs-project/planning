@@ -14,6 +14,8 @@ The paired runner exercises actual routed seven-record Files create, edit, tags,
 
 Paid reads are actual `UpgradeableFixtureCoreU3` getEnvelope/getOccurrence/getRecordsCurrent calls through the existing static consumer, with mined receipts and same-block return verification. Its executable creation/runtime instructions are identical; imported-source Solidity CBOR metadata differs and each actual artifact is retained, not relabelled as byte-identical. There is no public Core getReceipt/batch-receipt API; no product ABI was added to manufacture that measurement. Receipt-library harness testing is distinct from routed-Core receipt cost.
 
+Paid scalar/repeated receipt-library gas remains **unmeasured and deferred** under the explicit root scope ruling. Existing receipt-library correctness tests remain covered, but the actual Core measurements do not substitute for those missing costs. Receipt-library regressions are not economically bounded by this gate; no full paid-read coverage is claimed.
+
 `test/envelope-storage-comparison.test.mjs` checks final receipts offline, including compiler/support pins, byte-exact helper creation/runtime, all-family logical inventory, authority hashes before normalization, actual physical children, rollback, paid outputs and ordinary ceilings. A scratch-only `EFS_ENVELOPE_PREFLIGHT_ROOT` opt-in is explicitly labelled.
 
 ## Known limits
