@@ -28,6 +28,8 @@ Root and independent review authorize one narrower follow-up: replace **only the
 
 ## Constraints and explicit choices
 
+**Bounded attempt stopped, September12 11:05UTC:** the shared-selector variant is24,761runtime bytes,185over; Admission22,861, Store1,440. All five exact compiler-input/artifact probes are retained. Actual admitted-state ownership went RED→GREEN, but dispatcher regressions, full integration,150k peer configuration, deployed worlds and economics remain unrun. Preserve the incomplete experiment separately from reviewed`ebc7d54`. A deliberate module decomposition is needed before resuming this implementation; the result is not evidence that separate index contracts are fundamentally infeasible. The native arm already demonstrates a smaller separate-contract boundary under a different semantic profile.
+
 - Code only in authorized full-C0 experiment worktree/branch; plans/results visible on main. One implementation/build/new finite-world owner. Preserve all three demos and Fable's workspace; no production repo, migration, public chain/funds or protocol freeze.
 - Keep ordinary runtime24,576/initcode49,152/transaction16,777,216/block33,554,432 limits. No Type-language reduction, cache compression, Files-profile change, raw-reader redesign or global allocator. Stop heavy work below20GiB; managed watchdogs, exclusive outputs and exact owned cleanup, no traces.
 - Keep all ten posting families, including already Type-selected7/9, and the posting-key mirror. Family3/counter replacement and family-removal economics are later tasks. Existing checked audit pages support8/10; do not claim every family has that API.
