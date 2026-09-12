@@ -5,7 +5,7 @@
 **Depends on:** [[system-constitution]], [[core-architecture-candidate]], [[hierarchical-files-and-folders]], [[../web-client-os/README]]
 **Supersedes:** —
 **Reviewers:** —
-**Last touched:** 2026-09-10
+**Last touched:** 2026-09-12 — live-result qualification pressure; exact Record semantics unchanged
 
 #status/draft #kind/design #repo/planning #repo/contracts #repo/sdk #repo/client #topic/efsv2 #topic/onchain #topic/graph-queries #topic/app-model
 
@@ -1216,6 +1216,18 @@ SemanticSpec, supplies a structurally valid `exactConstant` mapping, and
 self-authors the Record; it may decode but must not gain issuer/producer/current
 authority. Test `LENS_CURATED_VIEW` as a basis-qualified read or explicitly mark
 that fourth mode deferred. Fail if Core follows an open graph or callback.
+
+#### Live contract-backed results are a separate comparison
+
+The owner-requested [[../../Reviews/2026-09-12-efs21-live-contract-files|live-files experiment]]
+can reuse exact descriptors and return Types without republishing each app
+update. Keep a typed immutable read descriptor distinct from its changing
+output: per-read structural/provider/basis validation is not Realm admission,
+authorship or immutable content identity. Explicit capture may create ordinary
+immutable snapshot evidence. Test caller/context-sensitive output and provider
+upgrades; descriptor membership completeness must not license a complete
+filter over unknown live values. This profile cannot bypass mandatory
+programmable acceptance by calling arbitrary returns admitted Records.
 
 ### T4 — query-profile evolution
 

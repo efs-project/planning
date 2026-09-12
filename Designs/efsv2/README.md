@@ -10,6 +10,14 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
+**2026-09-12:** [[../../Reviews/2026-09-11-efs21-overnight|EFS2.1 cost experiments]]
+compare physical reductions in the fuller model with a narrower working native
+Files/kernel/index split; these are not a protocol rename or freeze.
+James also requested [[../../Reviews/2026-09-12-efs21-live-contract-files|live contract-backed files]]:
+register a path once and read existing app state instead of duplicating every
+update. Files/Type designs now carry that explicit, unimplemented comparison,
+including live-result, snapshot, indexing and provider-authority boundaries.
+
 **2026-09-11:** [[../../Reviews/2026-09-11-pragmatic-browser-pass|Pragmatic browser pass]] is the approved execution map: one clickable prototype, complete action gas/USD accounting, safe recovery and independent Files-effect read-back, followed by measured scale and foundation gates. Progress and remaining gaps live there; this is not a protocol freeze.
 
 **2026-09-10: [[data-model-readiness|Capability and build-readiness map]]** is

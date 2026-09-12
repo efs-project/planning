@@ -8,7 +8,7 @@
 **Authority:** [[owner-rulings]] — especially the 2026-08-12 greenfield boundary and the adopted Linux/macOS/Windows read-only outcome
 **Supersedes:** the July path-derived TAGDEF, redirect/moved-to, global whiteout-object, and DATA/file-hybrid mechanisms in [[fs-pass-synthesis]] and related historical files; it does not supersede [[mountable-filesystem-semantics]]'s adopted three-host outcome or acceptance tests
 **Reviewers:** @files-core-exact-review, @files-requirement-matrix, and @files-schema-redteam (2026-08-14)
-**Last touched:** 2026-09-03
+**Last touched:** 2026-09-12 — live-contract Files exploration added; existing profile bytes unchanged
 
 #status/review #kind/design #repo/planning #repo/sdk #topic/efsv2 #topic/content #topic/read-path #topic/lenses
 
@@ -86,6 +86,24 @@ filesystem-level mutation preconditions across a plural Plan.
     `BindingScope`, state-readable small-byte carrier, three same-Principal
     writes, and one composite `WritePlan` approval. That overlay is disposable
     evidence, not an amendment to the permanent Files candidate.
+
+### Live contract files — September12 exploration
+
+James wants to investigate a path exposing an application's existing contract
+state, alongside ordinary retained bytes and external content. The
+[[../../Reviews/2026-09-12-efs21-live-contract-files|source-backed virtual-files note]]
+proposes a separately versioned, read-only Files backing/profile: retain the
+descriptor once, then evaluate a bounded typed contract read. It does not
+reinterpret `FileRevision/1` or `ChunkTree/1`, add arbitrary Core callbacks, or
+make descriptor identity equal to live content identity.
+
+Returned values need per-read shape and provider/basis qualification. Their
+changes are not automatically EFS revisions or indexed admissions. A complete
+directory of descriptors is not a complete filter over unevaluated live values.
+The first experiment should prove browser and paid-contract reads, failure
+semantics and optional explicit snapshots, with no second publication per app
+update. This is owner-directed exploration, not adopted bytes or implemented
+functionality; the existing Files/1 commitments remain unchanged.
 
 ## 1. Layer boundary
 
