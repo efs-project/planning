@@ -5,6 +5,12 @@ import {StateKernel} from "C0Core/StateKernel.sol";
 import {Preparation} from "C0Core/Preparation.sol";
 
 library UpgradeAdmissionLibrary {
+    function initialize(StateStore.Store storage s, StateKernel.Init memory init, Preparation.Config memory prep)
+        external
+    {
+        StateKernel.initialize(s, init, prep);
+    }
+
     function admit(
         StateStore.Store storage s,
         StateKernel.VerifiedContext memory v,

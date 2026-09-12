@@ -22,7 +22,13 @@ contract UpgradeableFixtureCore is FixtureEndpoint {
         StateKernel.Init calldata init
     ) external {
         _initialize(controller, peer, admin, operator, treeType);
-        StateKernel.initialize(UpgradeStorage.efs(), init, Preparation.Config(preparationHelper, preparationCodehash));
+        if (
+            address(UpgradeAdmissionLibrary) != admissionLibrary || admissionLibrary.code.length == 0
+                || admissionLibrary.codehash != admissionCodehash
+        ) revert FixtureConfiguration();
+        UpgradeAdmissionLibrary.initialize(
+            UpgradeStorage.efs(), init, Preparation.Config(preparationHelper, preparationCodehash)
+        );
     }
 
     function executeFixture(

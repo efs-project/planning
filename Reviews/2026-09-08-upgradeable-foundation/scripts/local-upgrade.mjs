@@ -28,7 +28,9 @@ export function upgradeBuildArgs({ fullBuild = process.env.EFS_TEST_FULL_BUILD =
   const isolated = process.env.EFS_TEST_BUILD_ROOT ? ['--out',OUT,'--cache-path',join(BUILD_ROOT,'cache'),'--build-info-path',join(OUT,'build-info')] : [];
   // Opt-in only: incremental builds can leave unchanged artifacts carrying old
   // AST IDs. A full build regenerates one coherent compiler/artifact bundle.
-  return ['build','--ast','--build-info','--offline','--use',SOLC,...isolated,...(fullBuild ? ['--force'] : [])];
+  // Actual browser-U3 outline tests require test-only cross-profile remappings.
+  // Run them with the full foundation test gate, not in this canonical artifact bundle.
+  return ['build','--skip','InitializationOutline.t.sol','--ast','--build-info','--offline','--use',SOLC,...isolated,...(fullBuild ? ['--force'] : [])];
 }
 export function compileUpgrade(options) {
   const r = spawnSync('forge',upgradeBuildArgs(options),{cwd:SOURCE_ROOT,encoding:'utf8',timeout:240000,maxBuffer:4*1024*1024});
