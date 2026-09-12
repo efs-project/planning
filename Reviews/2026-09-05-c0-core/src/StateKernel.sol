@@ -606,7 +606,15 @@ library StateKernel {
     // Memory-only index; persisted rows and journal replay ordering are unchanged.
     // Admission bounds capacity to 64 * 256 + 5, so the table is at most 65536.
     function allocateJournal(Plan memory p, uint256 capacity) internal pure {
-        p.changes = new StateStore.Change[](capacity);
+        uint256[] memory pointers = new uint256[](capacity);
+        StateStore.Change[] memory changes;
+        // Solidity owns/zeros this pointer backing and advances free memory.
+        // Only entries below p.length may be read: put installs a complete
+        // Change before publishing its nonzero table row. Unused zero pointers
+        // are NOT default structs; never copy, encode or expose the whole array.
+        // This cast accesses no memory and does not touch the zero/free slots.
+        assembly ("memory-safe") { changes := pointers }
+        p.changes = changes;
         if (capacity == 0) return;
         uint256 size = 1;
         while (size < capacity * 2) size <<= 1;
