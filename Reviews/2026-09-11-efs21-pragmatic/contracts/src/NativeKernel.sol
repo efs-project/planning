@@ -4,6 +4,7 @@ import {ExactTypeRegistry} from "./ExactTypeRegistry.sol";
 import {ExpandedTypeRegistry} from "./ExpandedTypeRegistry.sol";
 import {NavigationIndex} from "./NavigationIndex.sol";
 import {DiscoveryIndex} from "./DiscoveryIndex.sol";
+import {BodyWriter} from "./BodyWriter.sol";
 
 /// @notice Fresh-genesis filesystem-profile cost experiment, NOT the generic EFS v2 Core.
 /// Native caller authority, one placement per object, no directory moves or upgrades.
@@ -41,6 +42,12 @@ contract NativeKernel {
         bytes body;
     }
 
+    struct StoredRecord {
+        bytes32 typeId;
+        address pointer;
+        uint16 bodyLength;
+    }
+
     struct Entry {
         bytes32 id;
         FileInfo file;
@@ -56,6 +63,8 @@ contract NativeKernel {
     ExactTypeRegistry public immutable types;
     DiscoveryIndex public immutable discovery;
     bytes32 private immutable discoveryCodeHash;
+    BodyWriter private immutable bodyWriter;
+    bytes32 private immutable bodyWriterCodeHash;
     uint256 public constant DISCOVERY_GAS = 600_000;
     uint256 public constant MAX_BODY = 4096;
     uint256 public constant MAX_NAME = 64;
@@ -64,12 +73,14 @@ contract NativeKernel {
     mapping(address => uint256) public fileNonce;
     mapping(bytes32 => FileInfo) private files;
     mapping(bytes32 => StoredRevision[]) private history;
-    mapping(bytes32 => Record) private records;
+    mapping(bytes32 => StoredRecord) private records;
     mapping(bytes32 => bool) private hasRecord;
     mapping(bytes32 => mapping(uint64 => HistoricalLocation)) private locations;
 
     error MissingFile();
     error MissingRecord();
+    error CorruptRecord();
+    error BodyWriterUnavailable();
     error Unauthorized();
     error NotLive();
     error StaleRevision();
@@ -91,6 +102,8 @@ contract NativeKernel {
         types = ExactTypeRegistry(address(new ExpandedTypeRegistry()));
         discovery = new DiscoveryIndex(navigation, types);
         discoveryCodeHash = address(discovery).codehash;
+        bodyWriter = new BodyWriter();
+        bodyWriterCodeHash = address(bodyWriter).codehash;
     }
 
     /// @notice One-call coherent bounded metadata hydration. Bodies require readRecord separately.
@@ -136,7 +149,22 @@ contract NativeKernel {
 
     function readRecord(bytes32 id) external view returns (Record memory) {
         if (!hasRecord[id]) revert MissingRecord();
-        return records[id];
+        StoredRecord storage stored = records[id];
+        address pointer = stored.pointer;
+        uint256 length = stored.bodyLength;
+        if (length > MAX_BODY || pointer == address(0) || pointer.code.length != length + 1) revert CorruptRecord();
+        uint256 prefix;
+        assembly ("memory-safe") {
+            let scratch := mload(0x40)
+            extcodecopy(pointer, scratch, 0, 1)
+            prefix := byte(0, mload(scratch))
+        }
+        if (prefix != 0) revert CorruptRecord();
+        bytes memory body = new bytes(stored.bodyLength);
+        assembly ("memory-safe") { extcodecopy(pointer, add(body, 32), 1, mload(body)) }
+        Record memory result = Record(stored.typeId, body);
+        if (recordId(result.typeId, result.body) != id) revert CorruptRecord();
+        return result;
     }
 
     function createDirectory(bytes32 parent, bytes calldata name) external returns (bytes32) {
@@ -236,8 +264,12 @@ contract NativeKernel {
         types.validate(typeId, body);
         id = recordId(typeId, body);
         if (!hasRecord[id]) {
+            if (address(bodyWriter).codehash != bodyWriterCodeHash) revert BodyWriterUnavailable();
+            address pointer = bodyWriter.write(body);
             hasRecord[id] = true;
-            records[id] = Record(typeId, body);
+            // MAX_BODY is checked above, before the narrowing conversion.
+            // forge-lint: disable-next-line(unsafe-typecast)
+            records[id] = StoredRecord(typeId, pointer, uint16(body.length));
             navigation.noteRecord(typeId, id);
             emit RecordStored(id, typeId);
         }
