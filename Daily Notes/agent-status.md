@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-12
 
+- @v2-pm (harness codex, session efs-warroom-20260912): Activated the [[Reviews/2026-09-12-efs-path-decision/README|engineering war room]] at James's request; his existing Claude **EFS v2 Dev** acknowledged the direct kickoff. Dispatched fuller-model analysis plus SDK and Files fixture work, with lane-owned reports, one heavy-run queue and an hourly follow-up ending at the 48-hour handoff. No new chain world or production code launched. / next: reconcile independent proposals and select the decisive matched experiments.
+
 - @v2-pm (harness codex, session efs-overhead-convergence-20260912): Began source preflight for the [[Reviews/2026-09-12-efs-path-decision/README|foundation decision sprint]] after James excluded EAS and requested stronger convergence. Added matched marginal/interacting-cost tests, one finalist integration gate and a separate permanence gate; MUD source/access/index review is evidence, not a gas winner. No new chain world or prototype code changed. / next: freeze the executable shared fixture with Claude and measure the most decision-changing representations.
 
 - @v2-pm (harness codex, session efs-path-decision-20260912): Prepared the [[Reviews/2026-09-12-efs-path-decision/README|24–48 hour Codex / Claude decision sprint]] with three independent planning reviews: three architecture roads, at most two prototype extensions, matched guarantees/costs, two Claude launch prompts and bounded disk/run ownership. Planning only; no new experiments or requirement waivers. / next: James launches the Claude lanes; Codex records T0, reconciles shared fixtures and coordinates the comparison.

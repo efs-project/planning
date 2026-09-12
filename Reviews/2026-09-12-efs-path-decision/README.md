@@ -4,7 +4,7 @@
 
 **Coordinator:** @v2-pm, Codex
 
-**Standing:** decision sprint; Codex's source/research phase started following James's September 12 direction to do the necessary work. Claude participation is not yet confirmed. No permanent requirements or protocol bytes are frozen; production repositories/deployment remain out of scope.
+**Standing:** active engineering war room, launched by James on September 12. Codex coordinates its agents; James's existing Claude **EFS v2 Dev** task has received and acknowledged the kickoff and is asked to coordinate the Claude lanes. No permanent requirements or protocol bytes are frozen; production repositories/deployment remain out of scope.
 
 **Outcome:** recommend an architecture we can begin building, with its costs, actual sacrifices and remaining gates plainly visible. Not a claim that a 50-year foundation can be proved in two days.
 
@@ -14,7 +14,7 @@
 
 Compare three roads: improve the fuller EFS model, build a smaller implementation of the important EFS promises, or reuse MUD underneath a thinner EFS layer. Any road may win; a hybrid must explain precisely what it borrows and stores.
 
-Use **two Claude conversations initially**, alongside Codex and bounded internal reviewers. Develop three architecture proposals, then extend **at most two** into comparable disposable proofs. Deliver a provisional recommendation after 24 hours; spend the second day on the strongest unresolved alternative and the integrated finalist. Finish with **one primary implementation direction**, not three indefinitely maintained products. If no candidate is eligible, name the specific blocking result instead of forcing a winner.
+Use **two Claude lanes initially**, managed from the existing EFS v2 Dev task, alongside Codex and bounded internal specialists. James authorized the leads to create and coordinate useful agents; he need not launch each conversation or relay routine messages. Develop three architecture proposals, then extend **at most two** into comparable disposable proofs. Deliver a provisional recommendation after 24 hours; spend the second day on the strongest unresolved alternative and the integrated finalist. Finish with **one primary implementation direction**, not three indefinitely maintained products. If no candidate is eligible, name the specific blocking result instead of forcing a winner.
 
 The crucial missing measurement is the cost of **the same useful guarantees**, not another comparison between the richer model and a cheap implementation that leaves some guarantees out. No feature is waived merely because the existing prototype omits it.
 
@@ -108,16 +108,26 @@ Use the **Coordinator checkpoint** below as the single coordination surface, wri
 
 Codex is the default heavy-run operator. Before anyone builds or starts a chain, explicitly hand off the run slot and record the owning process, scratch paths and watchdog. Use finite, bounded-history Anvil runs; no unrestricted state dumps, persistent background benchmark nodes or full storage traces. Proposed budget: 15 GB total scratch and 50 GB free-disk reserve. Stop before crossing it, retain compact evidence, and clean only verified run-owned paths. Preserve existing user demos and other agents' processes.
 
-Publish consolidated owner checkpoints at the first shortlist, 24-hour recommendation and final handoff—not every cross-agent message. This plan installs no automation; unattended follow-up scheduling is separate from a running task.
+Publish consolidated owner checkpoints at the first shortlist, 24-hour recommendation and final handoff—not every cross-agent message. The Codex thread heartbeat `coordinate-efs-engineering-war-room` checks hourly through September 14 at 23:10 UTC to resume useful work and coordinate returned results. It stays quiet on unchanged state and stops at the final handoff/deadline. This is a follow-up mechanism, not evidence that every worker or laptop process runs continuously.
 
 ### Coordinator checkpoint
 
-- Phase / T0: **source preflight / 2026-09-12 23:10 UTC**; no chain experiment has run in this phase.
-- Participants: Codex plus three bounded internal reviews (MUD source, cost attribution, freeze/portability); two Claude lanes not yet confirmed and no invitation/acknowledgement deadline recorded.
-- Baselines: planning `7f6b330`; native source/evidence pins in section 5 remain present and the native checkout is clean. Fable's existing untracked brainstorm is preserved. The similarly named direct worktree is the stopped `f873890` size probe, not the fuller control.
+- Phase / T0: **independent proposals and shared-fixture preparation / 2026-09-12 23:10 UTC**. War-room delegation is active; no new chain experiment has run. Provisional recommendation due September 13 at 23:10 UTC; final handoff due September 14 at 23:10 UTC.
+- Participants: Codex Road A analyst, existing SDK PM and Data Explorer PM dispatched; Claude **EFS v2 Dev** kickoff sent and acknowledged by 23:41 UTC. Its [[claude-pm|acknowledgement]] records an independent in-session MUD specialist and evidence extractor; a persistent extra Claude conversation is unnecessary. Earlier MUD source, cost and portability reviews are completed inputs, not new active seats.
+- Baselines: kickoff published at planning `2552962`; native source/evidence pins in section 5 remain the named comparison pins. Fable's existing untracked brainstorm is preserved. The similarly named direct worktree is the stopped `f873890` size probe, not the fuller control.
 - Frozen fixture / shortlisted roads / actual probes: guarantee and measurement protocol revised; final executable fixture still to be agreed. MUD source preflight is linked below; no performance winner selected.
 - Heavy-run slot: **not granted**; no new run started by this plan.
-- Next handoff: Claude acknowledgements/independent proposals; pin the shared capsule, expected outcomes and smallest matched experiments. Read [[mud-source-preflight|Codex's MUD source preflight]] only after recording an independent Road C proposal.
+- Next handoff: collect independent Road A/B/C proposals and SDK/Files fixtures; pin the shared capsule, expected outcomes and smallest matched experiments. Read [[mud-source-preflight|Codex's MUD source preflight]] only after recording an independent Road C proposal. Existing typed-read-facet work is an enabling option, not automatically the next experiment or a demonstrated economic win.
+
+| Current owner / contact | Exclusive write scope and next result |
+|---|---|
+| Codex v2 PM, task `019fe3e5-c8ed-7e72-9d8e-9a0ea79ff5ea` | This checkpoint, serialized publication, common comparison and run handoffs. |
+| Claude **EFS v2 Dev**, task `local_3ff543b6-2646-4fa5-b113-2eddc7dd3cf1` | `claude-pm.md`: acknowledge actual child agents, worktrees and capacity; assign `road-b.md` and `road-c.md`. This replaces the proposed old Claude Project Manager contact. |
+| Codex internal `/root/warroom_road_a` | `road-a.md`: independently identify the largest safe persistence savings and one paired experiment; source inspection only initially. |
+| **EFS v2 SDK PM**, task `01a02a24-01b3-7f12-9f2e-887aea66e9e8` | `sdk-fixture.md`: shared joined semantics, caller API examples and expected outcomes, not protocol bytes. |
+| **EFS Data Explorer PM**, task `01a02a24-0348-7c50-81fd-2a4ac43c62af` | `files-journey.md`: smallest observable lifecycle/discovery journey that could falsify a cheaper model. |
+
+**Publication owner: Codex v2 PM until explicit handoff.** All workers, including Claude, write only their named reports and hand them back uncommitted for review and exact-path publication. Claude's initial acknowledgement is already published at `6219a98`; the shared-index rule was then sent directly to EFS v2 Dev. Do not pull/rebase or commit concurrently from this shared checkout: “pull before commit” alone does not serialize its index. New code ownership and the heavy-run lease must be recorded before implementation/runs. Worker IDs are current contact hints, not durable architectural ownership.
 
 ## 7. What James receives
 
@@ -134,7 +144,7 @@ Example of a useful question: “Keeping independently selected community histor
 
 ## Launch prompts
 
-These join the coordinated sprint when James sends them; Codex has begun source preflight. Paths below are relative to the shared planning repository; on another machine, use the corresponding synced checkout. Read current repository instructions first. A task without shared filesystem access must say so and return a self-contained report through James; never assume chat history or unsynced files are shared.
+The leads may dispatch these prompts directly under James's war-room authorization. They are reusable lane briefs, not a request for James to launch duplicate tasks. Paths below are relative to the shared planning repository; on another machine, use the corresponding synced checkout. Read current repository instructions first. A task without shared filesystem access must say so and return a self-contained report to its lead; never assume chat history or unsynced files are shared.
 
 ### Claude conversation 1 — compact EFS challenger
 
@@ -188,7 +198,7 @@ Follow the shared timebox, evidence rules and single heavy-run queue.
 ```text
 Engage the EFS path decision sprint in
 planning/Reviews/2026-09-12-efs-path-decision/README.md.
-Coordinate with the two Claude lanes James has launched. Recheck source and
+Coordinate with the Claude lanes managed by EFS v2 Dev. Recheck source and
 ownership, record T0 and freeze the outcome/fixture comparison. Lead Road A
 without privileging the current design; use bounded internal reviewers and
 the SDK, Data Explorer and Contracts roles for focused integration feedback.
