@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-const benchmark=await import('../scripts/raw-benchmark.mjs').catch(()=>({}));
+import * as benchmark from '../scripts/raw-benchmark.mjs';
 test('canonical/raw matched receipts keep build/profile/effects equal and capacity refusals separate',{timeout:240000},async()=>{
   assert.equal(typeof benchmark.pairedRaw,'function');
   const result=await benchmark.pairedRaw();
