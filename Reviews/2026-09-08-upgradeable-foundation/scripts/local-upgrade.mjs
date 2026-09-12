@@ -270,6 +270,8 @@ export async function withUpgrade(action, { profile = 'base', watchdogMs = 30000
     const core2=await deploy(selected.core+'U2',coreArgs,values,links);
     const carrier2=await deploy('UpgradeableFixtureCarrierU2',[factory.address,helper.address],values,links);
     for(const d of [core1,carrier1,core2,carrier2])implementations[d.address]={code:d.code};
+    // Exact read-profile source/artifacts implement the checked eight-Record API.
+    if(profile==='reads')for(const d of [core1,core2])implementations[d.address].readCapabilities={checkedRecords:'v1'};
     const inputs=fixtureInputs(),m=Object.fromEntries(inputs.candidates.groups.flatMap(g=>g.members.map(m=>[m.descriptor.name,m.temporaryTypeSchemaId]))),treeType=m['ChunkTree/1'];
     const core=lower(getCreateAddress({from:factory.address,nonce:1})),carrier=lower(getCreateAddress({from:factory.address,nonce:2}));
     const coreAdmin=lower(getCreateAddress({from:core,nonce:1})),carrierAdmin=lower(getCreateAddress({from:carrier,nonce:1}));

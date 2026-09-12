@@ -106,7 +106,11 @@ function manifest(input) {
     equal(e.components[name].address,e.execution[field],'manifest component '+name);
   }
   for(const name of ['PointReadLibrary','UpgradeQueryReadLibrary'])check(e.components[name],'manifest missing component '+name);
-  for(const [key,value] of Object.entries(e.implementations))equal(byAddress.get(key.toLowerCase()),value.code,'manifest implementation runtime');
+  for(const [key,value] of Object.entries(e.implementations)){
+    equal(byAddress.get(key.toLowerCase()),value.code,'manifest implementation runtime');
+    const c=value.readCapabilities;
+    if(c!==undefined)check(c&&typeof c==='object'&&!Array.isArray(c)&&Object.keys(c).every(k=>k==='checkedRecords')&&(c.checkedRecords===undefined||c.checkedRecords==='v1'),'manifest read capabilities');
+  }
   e.implementations=Object.fromEntries(Object.entries(e.implementations).map(([k,v])=>[k.toLowerCase(),v]));
   for(const [getter,field] of [['preparationHelper','helper'],['preparationCodehash','helperCodehash'],['admissionLibrary','admissionLibrary'],['admissionCodehash','admissionCodehash']])equal(e.getters[getter],e.execution[field],'manifest dependency '+getter);
   equal(keccak256(e.components.PreparationHelper.code),e.execution.helperCodehash,'manifest helper hash');
@@ -137,7 +141,7 @@ function createScope(source,expected,caps,signal) {
   const identity=source.identity,epoch=source.epoch,request=source.request;
   const controller=new AbortController(),started=performance.now();
   const records=[],queue=[],running=new Set(),cache=new Map(),dataWork=new Set();
-  let stopped=null,pin,basis,requests=0,bytes=0,cacheHits=0,peak=0,sealFlight,sealing=false,timer,windowDeadline;
+  let stopped=null,pin,basis,capabilities=freeze({checkedRecords:false}),requests=0,bytes=0,cacheHits=0,peak=0,sealFlight,sealing=false,timer,windowDeadline;
   function beginWindow() {
     live();
     if(windowDeadline!==undefined)return;
@@ -282,6 +286,7 @@ function createScope(source,expected,caps,signal) {
       history.push(e);
     }
     const active=history.at(-1);
+    capabilities=freeze({checkedRecords:expected.implementations[active.coreImplementation.toLowerCase()].readCapabilities?.checkedRecords==='v1'});
     basis=freeze({source:identity,epoch,chainId:BigInt(chain),core:expected.core,blockNumber:BigInt(h.number),blockHash:h.hash,stateRoot:h.stateRoot,executionSetId:active.id,revision:current,admissionHigh:guarded[3]});
     await Promise.all([
       context('qualification'),
@@ -318,6 +323,7 @@ function createScope(source,expected,caps,signal) {
   const unavailable = error => ({status:'UNAVAILABLE',reason:error.message,evidenceId:error.evidenceId??null});
   const scope=Object.freeze({
     get basis(){return basis;},
+    get capabilities(){return capabilities;},
     // Qualification is acquisition evidence, not independent body/ID assessment.
     // Callers must still assess each Record and seal before publishing an observation.
     getRecords(ids) {

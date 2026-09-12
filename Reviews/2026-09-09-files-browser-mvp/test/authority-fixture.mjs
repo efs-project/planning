@@ -171,7 +171,7 @@ export async function authorityFixture(lab) {
     },
     implementations: {
       ...lab.expected.implementations,
-      [core3.address.toLowerCase()]: { code: core3Code },
+      [core3.address.toLowerCase()]: { code: core3Code, readCapabilities: { checkedRecords: 'v1' } },
       [carrier3.address.toLowerCase()]: { code: carrier3Code },
     },
   };

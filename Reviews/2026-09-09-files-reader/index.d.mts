@@ -9,6 +9,8 @@ export interface Evidence {readonly id:number;readonly sequence:number;readonly 
 export type RecordBatchResult={readonly status:'OK';readonly basis:Basis;readonly evidenceId:number;readonly records:readonly {readonly recordId:string;readonly typeSchemaId:string;readonly canonicalBody:string;readonly firstAdmitOrdinal:bigint;readonly evidenceIndex:number}[]}|{readonly status:'UNAVAILABLE';readonly reason:string;readonly evidenceId:number|null};
 export interface Scope {
   readonly basis:Basis;
+  /** Explicit source-manifest declaration of the qualified active implementation. */
+  readonly capabilities:Readonly<{checkedRecords:boolean}>;
   getRecords(ids:readonly string[]):Promise<RecordBatchResult>;
   call(name:'getRecord'|'getOccurrence'|'getOccurrenceByOrdinal'|'getBindingHead'|'getBindingAtBasis'|'readHistory'|'pagePostingsHydrated'|'resolve'|'validatePlan',args?:readonly unknown[]):Promise<{status:'OK';values:readonly unknown[];evidenceId:number}|{status:'UNAVAILABLE';reason:string;evidenceId:number|null}>;
   carrierCall(name:'hasFixtureBytes'|'readFixtureBytes',args?:readonly unknown[]):Promise<{status:'OK';values:readonly unknown[];evidenceId:number}|{status:'UNAVAILABLE';reason:string;evidenceId:number|null}>;

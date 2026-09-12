@@ -125,7 +125,7 @@ const multiset=attempts=>attempts.map(({method,params,raw})=>JSON.stringify({met
 const ordered=rows=>rows.map(comparable).sort((a,b)=>a.fieldRole.localeCompare(b.fieldRole));
 
 // Break: speedup drops a request/check, changes selected rows/qualification, or exceeds the pool.
-test('exact eb14059 baseline and candidate preserve every live Files phase request and outcome',{timeout:300000},async t=>{
+test('legacy scalar scheduling: exact eb14059 baseline and candidate preserve every live Files phase request and outcome',{timeout:300000},async t=>{
   const baselineCommit='eb14059fbd7fa105d80979a30a806b5660ddabd9';
   const sourcePath='Reviews/2026-09-09-files-reader/reader-scope.mjs';
   const baselineSource=execFileSync('git',['show',baselineCommit+':'+sourcePath],{cwd:fileURLToPath(new URL('../../../',import.meta.url)),encoding:'utf8'});
@@ -141,11 +141,15 @@ test('exact eb14059 baseline and candidate preserve every live Files phase reque
     }
     const setupMs=performance.now()-setupStarted,oracleStarted=performance.now(),truth=await oracle(lab),inventory=truth.inventory(f.mounts.aFirst),oracleMs=performance.now()-oracleStarted;
     assert.equal(inventory.roles.length,8);
+    // This historical experiment isolates scope scheduling, not anchor batching.
+    // Both arms consume the same explicit legacy manifest; do not mutate the lab.
+    const expected=structuredClone(lab.expected);
+    for(const implementation of Object.values(expected.implementations))delete implementation.readCapabilities;
     const report={kind:'MATCHED_FIXTURE_FILES_SCHEDULING_NOT_PUBLIC_C0',baselineCommit,
       sourcePins:{algorithm:'sha256',baseline:sha256(baselineSource),baselineImported:sha256(importedSource),
         ...Object.fromEntries(['reader-scope.mjs','files-reader.mjs','files-profile.mjs','test/fixture.mjs','test/oracle.mjs','test/reader-scheduling.test.mjs'].map(p=>[p,sha256(readFileSync(new URL('../'+p,import.meta.url)))])),
-        ethersBundle:sha256(readFileSync(bundleURL))},source:lab.resources,expected:lab.expected,
-      workload:{names,authors:[A,B],childNodes:[f.fileA,f.fileB],charters:'two maintained File nodes shared across placements',root:f.root,mountId:f.mounts.aFirst,planId:f.plans.aFirst,pageSize:4,requestedBlock:'latest'},
+        ethersBundle:sha256(readFileSync(bundleURL))},source:lab.resources,expected,
+      workload:{capability:'legacy scalar scheduling; checkedRecords metadata absent for both arms',names,authors:[A,B],childNodes:[f.fileA,f.fileB],charters:'two maintained File nodes shared across placements',root:f.root,mountId:f.mounts.aFirst,planId:f.plans.aFirst,pageSize:4,requestedBlock:'latest'},
       exclusions:{setup:{elapsedMs:setupMs,includes:'mounted fixture publications; managed deployment also outside all phase timers'},oracle:{elapsedMs:oracleMs,includes:'one full retained-state acquisition and verification'},ui:'not implemented or measured',bytes:'FileRevision and content retrieval excluded; JSON RPC result bytes measured, not wire framing or module download bytes'},
       oracle:{snapshot:truth.snapshot,inventory,basis:truth.basis},samples:[]};
     for(const delayMs of [0,50])for(let sample=0;sample<3;sample++) {
@@ -173,7 +177,7 @@ test('exact eb14059 baseline and candidate preserve every live Files phase reque
         try {
           await phase('cold-open',async()=>{
             const factory=arm==='baseline'?baseline.createFixtureReader:createFixtureReader;
-            scope=await ready(factory({source:{identity:lab.expected.source,epoch:1,request},context:{expected:lab.expected,limits:{maxInFlight:4}}}));return {status:'READY',basis:scope.basis};
+            scope=await ready(factory({source:{identity:expected.source,epoch:1,request},context:{expected,limits:{maxInFlight:4}}}));return {status:'READY',basis:scope.basis};
           });
           assert(scope.evidence().every(e=>e.purpose==='qualification'));
           assert.deepEqual({realmRevisionId:scope.basis.executionSetId,blockNumber:scope.basis.blockNumber,admissionHigh:scope.basis.admissionHigh,basisKind:0},truth.basis);
@@ -193,6 +197,7 @@ test('exact eb14059 baseline and candidate preserve every live Files phase reque
           for(const result of [first,final,reuse])assert.deepEqual(result.basis,scope.basis);
           for(const e of scope.evidence())if(['eth_call','eth_getCode','eth_getStorageAt'].includes(e.method))assert.deepEqual(e.params.at(-1),{blockHash:scope.basis.blockHash,requireCanonical:true});
           arms[arm]={basis:scope.basis,phases,evidence:scope.evidence(),stats:scope.stats()};
+          assert(!scope.evidence().some(e=>e.method==='eth_call'&&e.params[0].data.startsWith(lab.readIface.getFunction('getRecordsChecked').selector)),'legacy scheduling makes no batch probe');
         } finally {scope?.close();}
       }
       assert.deepEqual(arms.baseline.basis,arms.candidate.basis);

@@ -6,6 +6,10 @@ async function guest(source:ReaderSource,context:ReaderContext,mountId:string){
   void invalidSourceEpoch;
   const opened=await createFixtureReader({source,context}).open();
   if(opened.status!=='READY')return opened.reason;
+  const checkedRecords:boolean=opened.scope.capabilities.checkedRecords;
+  // @ts-expect-error Qualified capability metadata is immutable.
+  opened.scope.capabilities.checkedRecords=false;
+  void checkedRecords;
   const batch=await opened.scope.getRecords(['0x'+'00'.repeat(32)]);
   if(batch.status==='OK') {
     const block:bigint=batch.basis.blockNumber;

@@ -12,15 +12,38 @@ async function memo(map,key,read){if(map.has(key))return map.get(key);const p=re
 async function together(work){const done=await Promise.allSettled(work),failed=done.find(r=>r.status==='rejected');if(failed)throw failed.reason;return done.map(r=>r.value);}
 async function call(scope,name,args){const r=await scope.call(name,args);if(r.status!=='OK')throw new Failure('EVIDENCE_UNAVAILABLE',r.reason);return r.values;}
 function readBasis(scope,basis,H){require(equal(basis,scope.basis.executionSetId)&&H===scope.basis.admissionHigh,'BASIS_MISMATCH');}
+function assessed(scope,id,T,body,ordinal,acquisition){
+  require(ordinal>0n&&ordinal<=scope.basis.admissionHigh,'RECORD_UNAVAILABLE');
+  const assessment=assessRecord(id,T,body);
+  if(assessment.status!=='ACCEPTED')throw new Failure(assessment.status==='UNSUPPORTED'?'UNSUPPORTED_TYPE':'MALFORMED_SELECTED',assessment.reason);
+  return freeze({assessment,acquisition});
+}
 async function record(scope,id,type){
-  const r=await memo(cache(scope).records,id,async()=>{
-    const [T,body,ordinal]=await call(scope,'getRecord',[id]);
-    require(ordinal>0n&&ordinal<=scope.basis.admissionHigh,'RECORD_UNAVAILABLE');
-    const a=assessRecord(id,T,body);
-    if(a.status!=='ACCEPTED')throw new Failure(a.status==='UNSUPPORTED'?'UNSUPPORTED_TYPE':'MALFORMED_SELECTED',a.reason);
-    return a;
+  const {assessment:r}=await memo(cache(scope).records,id,async()=>{
+    const result=await scope.call('getRecord',[id]);
+    if(result.status!=='OK')throw new Failure('EVIDENCE_UNAVAILABLE',result.reason);
+    return assessed(scope,id,...result.values,{evidenceId:result.evidenceId,evidenceIndex:0,method:'getRecord'});
   });
   require(!type||r.type===type);return r;
+}
+async function prefetchAnchors(scope,ids,closed,failed){
+  const records=cache(scope).records,uncached=[...new Set(ids)].filter(id=>!records.has(id));
+  for(let offset=0;offset<uncached.length;offset+=8){
+    require(!closed(),'STREAM_CLOSED');
+    const group=uncached.slice(offset,offset+8),result=await scope.getRecords(group);
+    let rejection;
+    for(const [i,id] of group.entries()){
+      let entry;
+      try{
+        if(result.status!=='OK')throw new Failure('EVIDENCE_UNAVAILABLE',result.reason);
+        const row=result.records[i];
+        entry=Promise.resolve(assessed(scope,id,row.typeSchemaId,row.canonicalBody,row.firstAdmitOrdinal,{evidenceId:result.evidenceId,evidenceIndex:row.evidenceIndex,method:'getRecordsChecked'}));
+      }catch(e){rejection??=e;entry=Promise.reject(e);entry.catch(()=>{});failed.set(id,entry);}
+      records.set(id,entry);
+    }
+    // Never dispatch another group or use scalar data solely to recover this attempt.
+    if(rejection)throw rejection;
+  }
 }
 const isCharter=(head,id)=>head[0]===1n&&head[1]===1n&&head[5]===id&&head[6]===0n;
 async function node(scope,id){return memo(cache(scope).nodes,id,async()=>{
@@ -266,6 +289,7 @@ export function openDirectory(scope,{mountId,subject,pageSize=8}){
   function snapshot(rowsMap,ss,coverage){const all=[...rowsMap.values()];return {coverage,rows:all.filter(r=>r.outcome==='FOUND').sort((a,b)=>a.value.name<b.value.name?-1:a.value.name>b.value.name?1:0),unresolved:all.filter(r=>r.outcome==='UNKNOWN'||r.outcome==='CONFLICT'),masked:all.filter(r=>r.outcome==='MASKED'),absent:all.filter(r=>r.outcome==='ABSENT'),progress:progress(ss),continuation:!(ss?.every(s=>s.complete)??false)};}
   async function step(){
     let ss=sources?.map(s=>({...s,roles:[...s.roles]})),next=new Map(positions),failure,context;
+    const failedPrefetch=new Map();
     try{
       require(!closed,'STREAM_CLOSED');const m=await mount(scope,mountId);
       const listed=await directorySubject(scope,m,subject);listDomain=domainFor(m,listed);
@@ -275,11 +299,26 @@ export function openDirectory(scope,{mountId,subject,pageSize=8}){
         try{const [page,rows]=await call(scope,'pagePostingsHydrated',[ZERO,10,0,bindingScopeKey(s.principal,FIXTURE.namePurpose,listed),[s.cursor,pageSize,scope.basis.admissionHigh]]);checkedPage(scope,s,page,rows,pageSize);return {s,rows};}catch(e){return {s,error:e};}
       }));
       const roles=new Set([...positions].filter(([,v])=>v.outcome==='UNKNOWN').map(([r])=>r));
-      await Promise.all(pages.map(async ({s,rows,error})=>{
-        if(error){failure??=error;return;}
-        try{const checked=await Promise.allSettled(rows.map(async row=>{
+      // A posting RecordId is not trusted until its independent occurrence matches.
+      const sourced=await Promise.all(pages.map(async ({s,rows,error})=>{
+        if(error)return {s,error};
+        const results=await Promise.allSettled(rows.map(async row=>{
           const occurrence=await call(scope,'getOccurrenceByOrdinal',[row[0]]);
           require(occurrence[0]===row[1]&&occurrence[1]===row[2]&&occurrence[2]===row[3]&&occurrence[4]===row[4]&&occurrence[5]===row[5]&&occurrence[6]===row[6],'ANCHOR_SOURCE');
+          return {row,occurrence};
+        }));
+        return {s,checked:results.filter(r=>r.status==='fulfilled').map(r=>r.value),error:results.find(r=>r.status==='rejected')?.reason};
+      }));
+      if(scope.capabilities?.checkedRecords){
+        for(const page of sourced){
+          if(page.error)throw page.error;
+          await prefetchAnchors(scope,page.checked.map(({row})=>row[3]),()=>closed,failedPrefetch);
+        }
+      }
+      require(!closed,'STREAM_CLOSED');
+      await Promise.all(sourced.map(async ({s,checked:rows,error})=>{
+        if(error){failure??=error;return;}
+        try{const checked=await Promise.allSettled(rows.map(async ({row,occurrence})=>{
           const a=await record(scope,row[3]);require(a.type==='BindingSet/1'||a.type==='BindingTombstone/1','ANCHOR_TYPE');const f=a.fields;
           require(occurrence[3]===a.raw.typeId,'ANCHOR_SOURCE');
           require(f.purpose===FIXTURE.namePurpose&&f.subject===listed,'ANCHOR_SCOPE');
@@ -294,6 +333,12 @@ export function openDirectory(scope,{mountId,subject,pageSize=8}){
       const resolved=await Promise.all([...roles].map(async r=>[r,await resolveRole(scope,m,listed,r)]));for(const [r,v] of resolved)next.set(r,v);
       require(!closed,'STREAM_CLOSED');
     }catch(e){failure=e;}
+    finally{
+      // Failed entries belong only to this drained attempt; an explicit later
+      // loadMore can reacquire them (unless the underlying scope is terminal).
+      const records=cache(scope).records;
+      for(const [id,entry] of failedPrefetch)if(records.get(id)===entry)records.delete(id);
+    }
     // Drain all internally owned row work before the one aggregate seal.
     const seal=await scope.seal();
     if(seal.status!=='SEALED'||closed)failure??=new Failure(closed?'STREAM_CLOSED':'SEAL_FAILED',seal.reason);
