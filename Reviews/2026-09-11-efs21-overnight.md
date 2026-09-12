@@ -7,12 +7,12 @@ James authorized an overnight implementation pass: make ordinary contract and br
 ## Latest in plain English
 
 - **The fuller model is cheaper, but still expensive:** the seven-record create is 5.90M gas including content staging, down from 7.77M. Successful paired data/index/Lens results match; direct application changes callback visibility and late-failure costs. This is not an adoption ruling or universal equivalence.
-- **Useful contract filesystem operations work in a narrower model:** a producer publishes `/swaps/eth-usdc`; an unrelated contract reads it. The latest native retained update costs 226,667 gas and its paid reader 76,060. Required navigation and configurable discovery are real separate contracts, but generic Record storage is still being separated from Files. Richer full-v2 identity, acceptance and Lenses are not silently included in that price.
+- **Useful contract filesystem operations work in a narrower model:** a producer publishes `/swaps/eth-usdc`; an unrelated contract reads it. After the reviewed actual Record/Files extraction, the update costs 232,664 gas and its paid reader 80,769. Generic Record storage, mandatory by-Type inventory, Files, required navigation and configurable discovery have actual separate contract boundaries. This separation slightly increases Files costs; richer full-v2 identity, acceptance and Lenses are not silently included in the price.
 - **Storage tradeoffs are measured, not assumed:** the reviewed hybrid reduces a 4,096-byte zero Record admission from 990,892 to 200,375 gas, but its paid read rises from 85,373 to 396,952. A 41-byte file edit slightly regresses from 241,339 to 242,500. Different representations preserve exact bytes/IDs while having different economics; no 100-year write-policy choice has been made.
 - **Reads need further work:** full-model batching lowers eight small paid Record reads from 453,212 to 283,890 gas. Actual Files anchor batching cuts RPCs by 6.5–8.7%, but delayed browsing becomes 1.2–1.5% slower and sends more bytes. It is not yet a UX-speedup recommendation.
-- **Try the preserved browser:** [native candidate](http://127.0.0.1:54154), frozen source `c088363`, has real local-contract create/read/edit/rename/unlink/history/reload tests in Chromium. It does not silently inherit later storage experiments. Fable's port 60731 stays untouched. Both need this laptop/process running; native has an 18-hour watchdog from its September 11 evening launch.
+- **Try the latest browser:** [split native candidate](http://127.0.0.1:49966), snapshotted at reviewed `4cb0042`, has real local-contract create/read/edit/rename/unlink/history/reload tests in Chromium. The older [native snapshot](http://127.0.0.1:54154) remains `c088363`; Fable's port60731 stays untouched. These need this laptop/process running. The new demo has an 18-hour watchdog from September12 05:58UTC; later source changes cannot silently alter its assets or contracts.
 
-**Next engineering gate:** extract actual Record ingestion and mandatory by-Type inventory into separate contracts, keep Files/navigation/configurable discovery usable, and price the extra calls. Full-model Envelope byte storage has a separately reviewed plan. No feature sacrifice, production deployment or protocol freeze is implied by either experiment.
+**Next engineering gate:** full-model Envelope byte storage is now being implemented from its separately reviewed plan. It keeps all seven Files facts and every index while testing a cheaper physical representation. Shared Record/Envelope bytes and compact Type-cache integration have separate staged analyses; no saving from those unbuilt stages is claimed. No feature sacrifice, production deployment or protocol freeze is implied.
 
 ## What we are comparing
 
@@ -170,7 +170,7 @@ A read-only engineering review found a concentrated full-C0 extraction seam: sto
 
 Native authority does not mean EOA-only: the demonstrated producer contract owns its namespace, not the EOA invoking it. A smart account could similarly own a namespace and manage its own keys/permissions; that wallet integration and recovery workflow have not been tested here. This still does not supply EFS's portable Principal/authorship evidence or cross-deployment identity model.
 
-The smaller candidate should also be read as a **Files profile**, not a filesystem-shaped replacement for every kind of EFS data. The [[2026-09-11-efs21-native-kernel-extraction-preflight|native boundary preflight]] proposes a generic Record kernel plus mandatory Record inventory, with Files ownership/history/path state in the existing facade and Navigation/Discovery separately stored. A forwarding shim can preserve the browser API while exact constructor/runtime/dependency pins change. This is not implemented or a claimed gas saving. Full structural Type validation and compact portable authored admission need distinct measured arms; neither is established by today's three-runtime native profile.
+The smaller candidate should also be read as a **Files profile**, not a filesystem-shaped replacement for every kind of EFS data. The [[2026-09-11-efs21-native-kernel-extraction-plan|native boundary extraction]] is now implemented and reviewed: generic Record kernel plus mandatory Record inventory, with Files ownership/history/path state in the facade and Navigation/Discovery separately stored. Forwarding preserves the browser API while exact constructor/runtime/dependency pins change. This is a real boundary, not a blanket gas saving. Full structural Type validation and compact portable authored admission still need distinct measured arms; neither is established by today's three-validator native profile.
 
 ## Why a file currently has seven records
 
@@ -288,7 +288,28 @@ These are not blanket savings:80of143 final operation rows regress against packe
 
 Root reproduced117Forge/33serialNode (77.654s), formatter/diff and ordinary sizes. Independent review checked736 signed transactions,324 body observations,5707 word-slot checks and218 source/support pins. Native runtime/initcode11592/26112 remain ordinary. Final CLI succeeded; its earlier module-cycle failure and a repaired derived-label bug remain disclosed, with initial receipts retained rather than rewritten. The fixture's permissive scan-elimination comment is a nonblocking wording follow-up; the actual retained scan is explicit in the report. Existing demos remain unchanged.
 
-Generic ingestion extraction now has this reviewed base and a [[2026-09-11-efs21-native-kernel-extraction-plan|concrete reviewed implementation plan]]: Record storage plus mandatory inventory, Files facade plus required Navigation/configurable Discovery, qualified as an actual dependency graph. Separation itself may cost more; measure it. Full-model [[2026-09-11-efs21-envelope-storage-plan|Envelope byte storage]] is separately planned and not yet measured.
+Generic ingestion extraction has now completed that reviewed plan; measured results follow. Full-model [[2026-09-11-efs21-envelope-storage-plan|Envelope byte storage]] is now implementing separately and is not yet measured.
+
+### Actual native Record / mandatory index / Files extraction, reviewed
+
+Source `62651ca`, evidence `4cb0042`, both pushed. The Record kernel owns exact immutable typed bytes and its unchanged helper; a separate mandatory index owns unique-by-Type inventory. Direct Record publication creates no file or namespace authority. Files retains original caller authority, FileId domain, CAS, history and navigation, forwarding Record access. Configurable discovery retains required/tolerated failure policy and qualified coverage.
+
+| Matched native operation | Monolithic hybrid | Split hybrid |
+|---|---:|---:|
+| Direct new one-byte Record | 155,332 | 154,794 |
+| Files fresh one-byte edit | 222,512 | 228,509 |
+| Files fresh dense4,096-byte edit | 1,167,449 | 1,169,377 |
+| Contract quote update | 226,667 | 232,664 |
+| Separate paid quote reader | 76,060 | 80,769 |
+| Main deployment including dependencies | 5,657,401 | 6,542,822 |
+
+All182 signed setup/action receipts and source/runtime pins independently reviewed; root reproduced **123 Forge /37 serial Node/browser tests**, zero failure/skip, Node106.112s, touched formatting and ordinary sizes. Record events now come only from the Record kernel; inventory cursors name that actual separate source. These declared changes are not normalized away as identical deployments.
+
+Every new Record must reach the pinned mandatory inventory or roll back. Valid dedup creates no new Record/index obligation; an inventory outage does not make already-stored bytes need another append. New full-C0 Occurrences of existing bytes are a different operation. Actual code/words rollback, required/tolerated discovery, namespace isolation, malformed replies and browser unknown-submission/navigation regressions remain tested.
+
+Both arms use the stronger current graph-aware SDK: sampled qualification costs24→33 RPC/HTTP requests and roughly84→91KB per observation. This is not a comparison against the old facade-only client, and it is not a state proof. Paid forwarding reads also regress. Separating accounts is useful architecture, **not a way to make their required writes disappear**. [Exact costs, regressions, controls and limitations](https://github.com/efs-project/planning/blob/4cb0042/Reviews/2026-09-11-efs21-pragmatic/evidence/kernel-boundary.md).
+
+Root launched the reviewed separate static demo on HTTP49966/RPC49941 after the gate, with snapshotted assets/config and no periodic mining. All test worlds exited; this new demo and both earlier demos are explicitly preserved. The full-C0 Envelope-only worker is the sole new finite-world/build owner next.
 
 **Legal Type-cache support:** an additional source-only preflight found two separate expansion limits. A conservative bound for one current parser-legal Type's compiled ABI is 35,104 bytes, so two raw code segments would cover its size; that does not establish an attainable maximum or affordable admission. Independently, sixteen 64-field members can fit the canonical group-byte budget while their compiled ABI caches alone exceed the current 131,072-byte helper-output ceiling. This group case is a source-derived falsifier, not a reproduced receipt: compilation may hit gas first. Splitting the storage blobs alone does not fix it. [Current helper budgets](https://github.com/efs-project/planning/blob/67f11f7/Reviews/2026-09-05-c0-core/src/Preparation.sol).
 
