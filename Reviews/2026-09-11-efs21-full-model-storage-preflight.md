@@ -56,6 +56,16 @@ Removing family3 is a later, **differently qualified** arm. Current checked audi
 
 A replacement would need a bounded origin-contiguous admission scan at one pinned block/high-water, joining Envelope membership, Record identity and lifecycle to recover ordered occurrences/first anchor/liveness. It must return PARTIAL when coverage is incomplete and cannot silently use today's counter for an old-H answer. Preserve the old logical family3 reconstruction as oracle evidence while clearly labelling its physically absent storage. No counter-removal saving or design adoption is claimed yet.
 
+### Exact-Type dictionary compression is a different physical option
+
+A further source-only check found that full-C0 already has the local Type ordinal and reverse `typeIds` table needed to avoid repeating a full bytes32 TypeId in every physical Record. Keep global Type/Record identity and the logical four-field RecordRow ABI unchanged; decode the stored local ordinal through that exact dictionary. This is compression, **not making Type identity local**.
+
+With a slot-backed body, two fixed words could hold its dynamic-bytes head and four uint64 fields: Record ordinal, first-admission ordinal, local Type ordinal, and optional live count (otherwise reserved). With shared code bytes, a pointer/range word plus that metadata word also uses two fixed words. These are source-level packing candidates, not compiler-confirmed layouts or cost results. The three-slot uncompressed shared-body control should remain a separate earlier experiment.
+
+Ordering is plausible: MetaType's dictionary entry exists at initialization; a TypeGroup Record uses MetaType and installs its member entries before later selected leaves. Admission-internal lookup must use staged Type high-water, not persisted entry counts. A present Record requires a valid nonzero ordinal, dictionary entry and reverse Type-row association. Occurrence hydration should compare its admission Type ordinal to the Record cell ordinal, preserving an independent association check rather than comparing two copies of the same dictionary lookup.
+
+The tradeoff is explicit: `typeIds` becomes a **physical decoding dependency**, not an optional enumeration mirror. A later mirror-removal proposal cannot simply delete it or replace bounded scalar decoding with an admission-history scan. Corrupted or aliased dictionary entries affect many Records; existing scalar reads do not universally rehash RecordIds, so bounds/reverse checks are not a new hash-integrity proof. Test alias/swapping/absent entries and price the cold/warm lookup and reverse-check paths. Some hydration paths already resolve the TypeId, so a net extra SLOAD on every read must not be assumed either. Native has no equivalent existing dictionary, and cannot inherit these cost assumptions.
+
 ## Separate full-C0 posting storage
 
 The first extraction should hold all posting heads, five-u48 packed words and posting-key mirrors in one callback-free, mandatory, Core-owned `PostingStore` account. Use ordinary CALL/STATICCALL and separate storage. Retain all ten families, key derivation, ordering, live counts, first-ever anchors, history and query/refusal behavior.

@@ -59,3 +59,7 @@ Record actual backend metadata using a separately checked source-layout observat
 The old`c088363-read-integrity` fixture adds a post-copy hash but does not prebound a corrupted dynamic-bytes length. It is historical hash-integrity evidence, not a bounded-reader safety control for this task. Use the reviewed **packed always-code** source as the old control; forced words and final hybrid must share the new bounded metadata/range/hash discipline. Do not relabel the older three-arm result.
 
 No saving, policy adoption or full-v2 capability is established by this plan.
+
+## Follow-up, not scope for this implementation
+
+Separate the permanent **ability to decode either physical representation** from today's write-cost heuristic. Different fork/chain prices can make fixed gas weights suboptimal without changing data validity. Before adopting a long-lived writer API, compare a deterministic default with an explicitly bounded caller storage preference or replaceable preparation policy; neither may change exact bytes/identity, skip required validation/indexing or relocate existing Records silently. This task deliberately has no public selector or mutable threshold. Do not mistake its calibrated constants for a100-year economic policy.

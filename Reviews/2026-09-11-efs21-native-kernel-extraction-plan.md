@@ -8,7 +8,7 @@
 
 **Technology:** existing Solidity0.8.30/optimizer200/via-IR/Cancun, Foundry, ethers and static local browser. No new dependency or repository.
 
-**Spec:** [[2026-09-11-efs21-overnight]], [[2026-09-11-efs21-native-kernel-extraction-preflight]]. The source preflight was reviewed at the packed always-code baseline. This plan is **not dispatched**: first finish and review [[2026-09-11-efs21-hybrid-body-plan]], then pin its exact clean source/evidence base in the task ledger. Do not combine backend-policy tuning with this extraction.
+**Spec:** [[2026-09-11-efs21-overnight]], [[2026-09-11-efs21-native-kernel-extraction-preflight]]. The source preflight was reviewed at the packed always-code baseline. The [[2026-09-11-efs21-hybrid-body-plan|hybrid gate]] is now complete at exact clean`7db38cd75292c86df6b6e4c2748fd78a26dd71b5`: independent Approved plus root117Forge/33serialNode, formatter/sizes/diff checks. This is the extraction base; worker ownership and dispatch are recorded in the task ledger. Do not combine backend-policy tuning with this extraction.
 
 Independent read-only implementation-plan review approved this gate and the actual source seams at`03f0160`: constructor authority, facade ABI, inventory cursor identity, cross-contract rollback, same-basis dependency graph and frozen control runtime templates. No extraction build or gas result exists yet.
 
