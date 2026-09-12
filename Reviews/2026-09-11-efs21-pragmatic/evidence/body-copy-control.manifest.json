@@ -1,0 +1,11 @@
+{
+  "format": "EFS21_BODY_COPY_RECEIPTS_GZIP_JSON_V1",
+  "canonical": {
+    "bytes": 29104092,
+    "keccak256": "0x496427f162239017bd889d6930139a9ff5ecb1d769f0e7ee3ae5d46d908f4724"
+  },
+  "compressed": {
+    "bytes": 2801501,
+    "keccak256": "0x86f0510e0efcfc5f435609da7f1862b72b564b265ffa9a250f919008058a0789"
+  }
+}
