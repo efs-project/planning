@@ -85,13 +85,21 @@ Root reproduced **74 Forge and 23 serial Node tests**, including real browser co
 
 The always-code body experiment is measured at `5632fee`: original storage, storage plus exact read integrity, and code-backed storage plus the same integrity hash. The primary comparison is the latter two, so read defenses are priced. Raw 41-byte fresh-content edit is **264,011 → 263,457 gas**; canonical 41-byte edit is **311,203 → 283,690**. Raw 4,032-byte nonzero fresh edit improves **3,083,783 → 1,132,496**, but raw 4,032-byte **zero** admission regresses **443,713 → 999,848**. The quote update regresses **245,563 → 265,367**, losing its earlier sub-250k result. Empty/tiny bodies also regress; no hybrid is hidden in the candidate.
 
-The kernel creates one pinned `BodyWriter` after navigation/registry/discovery. Each new exact RecordId gets one STOP-prefixed code object; duplicates still validate but allocate none. Public Types/Record ABI, IDs, authority, CAS, navigation and history remain unchanged. This is fresh-genesis internal storage, not migration or a refresh of the running snapshotted browser. Kernel runtime/initcode is 10,909/25,429 bytes; setup adds 420,269 gas over integrity-control. [Full three-arm receipts, read/retention results, failures, exact pins and limitations](evidence/body-storage.md).
+At that historical checkpoint, the kernel creates one pinned `BodyWriter` after navigation/registry/discovery. Each new exact RecordId gets one STOP-prefixed code object; duplicates still validate but allocate none. Public Types/Record ABI, IDs, authority, CAS, navigation and history remain unchanged. This is fresh-genesis internal storage, not migration or a refresh of the running snapshotted browser. Kernel runtime/initcode is 10,909/25,429 bytes; setup adds 420,269 gas over integrity-control. [Full three-arm receipts, read/retention results, failures, exact pins and limitations](evidence/body-storage.md).
 
 ## Packed-presence checkpoint
 
 The separate metadata-only pair at source `f43501a` keeps both arms always-code. Packing explicit presence with pointer/length saves22,117–22,121 gas per fresh Record: raw41 fresh edit263,457 → **241,339**, quote update265,367 → **243,249**. Every dedup action regresses12 gas; rename/unlink are unchanged. Exact action calldata/ABI/IDs and helper/validator/index runtimes match. Kernel deployment saves852 gas, runtime/initcode is10905/25425. [394 signed setup/action transactions, dense/zero boundaries, paid versus estimated reads and limitations](evidence/packed-presence.md). This is neither a hybrid nor a full-v2 saving, migration or live-demo refresh; earlier body-storage evidence remains historical and unchanged.
 
 ## Verification / limitations
+
+### Bounded hybrid-body checkpoint
+
+Current experimental source chooses code or fixed-capacity sparse words using exact body length and masked nonzero-word occupancy. Its policy was calibrated before the final source freeze; public ABI/IDs, validation, indexes and Files semantics stay unchanged. [Four-arm final evidence at source/support `310c8b83`](evidence/hybrid-body.md) includes 736 signed transactions and keeps the earlier packed control frozen.
+
+The result is mixed: quote update **243,249 → 226,667 gas** and zero-filled raw4096 admission **990,892 → 200,375** improve. Dense raw4032 edit **1,110,375 → 1,152,848** and raw41 edit **241,339 → 242,500** regress because code winners still pay the scan. One paid read of the word-backed zero-filled4096 body rises **85,373 → 396,952**. All regressions and the 5-gas physical-path misselection at the exact policy tie remain visible; no lifetime read-count assumption or universal saving is claimed.
+
+`current` now means the actual hybrid, not always-code. Legacy body/packed scripts refuse their default selection before starting worlds; `--frozen-replay` explicitly chooses their original exact code artifacts and uses new exclusive output paths. The live native browser remains its snapshotted `c088363` source; neither it nor Fable was refreshed. This is fresh-genesis prototype evidence, not an adopted layout, migration or generic ingestion kernel.
 
 ### Separate full-C0 allocation experiment
 

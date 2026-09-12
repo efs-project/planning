@@ -24,9 +24,17 @@ contract HybridBodyTest is BodyStorageTest {
         bytes32 other = control.createFile(otherRoot, "same", rawType, "");
         for (uint64 revision = 1; revision <= 4; ++revision) {
             bytes memory body = new bytes(256);
-            if (revision >= 3) for (uint256 i; i < 256; ++i) {
-                body[i] = bytes1(uint8(uint256(seed) % 254 + 1));
-            } else body[255] = bytes1(uint8(uint256(seed) % 254 + 1));
+            if (revision >= 3) {
+                for (uint256 i; i < 256; ++i) {
+                    // Modulo plus one bounds this value to 1..254 before narrowing.
+                    // forge-lint: disable-next-line(unsafe-typecast)
+                    body[i] = bytes1(uint8(uint256(seed) % 254 + 1));
+                }
+            } else {
+                // Modulo plus one bounds this value to 1..254 before narrowing.
+                // forge-lint: disable-next-line(unsafe-typecast)
+                body[255] = bytes1(uint8(uint256(seed) % 254 + 1));
+            }
             kernel.editFile(file, revision, rawType, body);
             control.editFile(other, revision, rawType, body);
             eq(abi.encode(kernel.fileInfo(file)), abi.encode(control.fileInfo(other)));
@@ -142,9 +150,13 @@ contract HybridBodyTest is BodyStorageTest {
         bytes32 beforeState = snapshot(root, file);
         for (uint256 backend; backend < 2; ++backend) {
             bytes memory body = new bytes(256);
-            if (backend == 0) for (uint256 i; i < body.length; ++i) {
-                body[i] = 0xef;
-            } else body[255] = 0x01;
+            if (backend == 0) {
+                for (uint256 i; i < body.length; ++i) {
+                    body[i] = 0xef;
+                }
+            } else {
+                body[255] = 0x01;
+            }
             bytes32 id = kernel.recordId(rawType, body);
             for (uint256 failure; failure < 2; ++failure) {
                 address discovery = address(kernel.discovery());

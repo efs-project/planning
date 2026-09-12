@@ -6,7 +6,9 @@ import {compareFinalArms} from '../scripts/hybrid-body-benchmark.mjs';
 
 test('source-pinned retained four-arm hybrid receipts disclose writes, paid reads, regressions and cleanup',()=>{
   const r=JSON.parse(readFileSync(new URL('../evidence/hybrid-body-final.json',import.meta.url)));
-  assert.deepEqual(compareFinalArms(r.arms),r.comparison);
+  // Evidence is JSON: optional undefined fields disappear during serialization.
+  // Compare its exact serialized derivation without dumping multi-MB bodies on failure.
+  assert.equal(E.keccak256(E.toUtf8Bytes(JSON.stringify(compareFinalArms(r.arms)))),E.keccak256(E.toUtf8Bytes(JSON.stringify(r.comparison))));
   assert.equal(r.arms.length,4);
   for(const arm of r.arms){
     assert(arm.cleanup.stopped&&arm.cleanup.cacheRemoved);
