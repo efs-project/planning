@@ -4,6 +4,13 @@
 
 James authorized an overnight implementation pass: make ordinary contract and browser filesystem operations feasible; separate kernel from indexing contracts; measure actual operations; disclose sacrificed guarantees. Existing normative v2 designs remain the reference, not silently superseded.
 
+## Latest in plain English
+
+- **A real same-behavior saving:** the full seven-record create now costs 6.77M gas including its separate content staging, down from 7.77M in the matched run. The same data and indexes survive. Still too expensive to declare victory.
+- **A cheaper, narrower alternative works:** the native Files prototype has separate required navigation and configurable discovery contracts; a contract can publish `/swaps/eth-usdc` and another can read it. Its latest measured no-search-profile update costs 245,563 gas. It does not yet implement the full v2 identity, validation or Lens model.
+- **The browser is exercised, not merely drawn:** actual local-contract create/read/edit/rename/unlink/history/reload tests run in Chromium. The new persistent candidate URL will follow a stable reviewed checkpoint; Fable's existing 60731 world remains untouched.
+- **Now working:** raw file-content representation with explicit Type-aware SDK/browser behavior. Bigger index/storage cuts remain separately measured experiments. No final feature sacrifice or protocol freeze has been decided for James.
+
 ## What we are comparing
 
 1. **Fuller C0/Files control:** the preserved Files prototype at `e38b5e3c1e8f8a32080458174d321d6a43b2ac5b`. Its seven-record create costs 7,688,694 gas in the retained matched type-cache run. This is a named measured workload, not a universal lower bound or proof that every v2 design requirement is implemented.
