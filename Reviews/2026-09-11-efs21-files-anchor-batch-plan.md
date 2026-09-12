@@ -46,6 +46,8 @@ Reuse the existing eight-name, two-author, two-child-node mounted directory. Fro
 
 - [ ] **Step 6: Verify, self-review and hand off.** Run focused TDD while iterating, then affected full reader/upgrade and browser-consumer tests serially. Type-check the public declarations with a small real consumer of the new capability/batch result. Preserve prior evidence and contract/write source hashes. Record any genuinely pre-existing fixture defects separately; do not weaken their substantive assertions. Commit exact paths and report counts/commands, real reduction/remaining calls, explicit limitations and cleaned owned paths. Root performs proportional fresh verification and commissions independent source/evidence review before publishing.
 
+Controller-approved scheduling-test maintenance: the older `eb14059` scheduling comparison requires identical request multisets and is not a batching comparison. Clone its expected manifest and omit `readCapabilities` for both arms, without mutating shared fixture state; use that same manifest in the retained report. Keep every request/outcome/budget/fairness assertion and its explicit four-wide limit, and label the workload legacy scalar scheduling. The new anchor suite/evidence retains real batch-capable metadata. No production transport/scheduler behavior changes are authorized by this clarification.
+
 ## Later, not included
 
 Anchor batching alone leaves occurrence, historical Binding, selected-entry, Lens/charter and seal calls. Wider hydration rounds, grouped Lens execution and onchain listing aggregation need separate work budgets and measurements. This task must establish a real browse gain without silently skipping those obligations.
