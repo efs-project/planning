@@ -124,10 +124,22 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 | Codex v2 PM, task `019fe3e5-c8ed-7e72-9d8e-9a0ea79ff5ea` | This checkpoint, serialized publication, common comparison and run handoffs. |
 | Claude **EFS v2 Dev**, task `local_3ff543b6-2646-4fa5-b113-2eddc7dd3cf1` | `claude-pm.md`: acknowledge actual child agents, worktrees and capacity; assign `road-b.md` and `road-c.md`. This replaces the proposed old Claude Project Manager contact. |
 | Codex internal `/root/warroom_road_a` | `road-a.md`: independently identify the largest safe persistence savings and one paired experiment; source inspection only initially. |
+| Codex internal `/root/warroom_road_b_review` | `road-b-review.md`: independently pressure the compact proposal's identity, retained evidence, required indexing and selected-list claims; no implementation authority. |
 | **EFS v2 SDK PM**, task `01a02a24-01b3-7f12-9f2e-887aea66e9e8` | `sdk-fixture.md`: shared joined semantics, caller API examples and expected outcomes, not protocol bytes. |
 | **EFS Data Explorer PM**, task `01a02a24-0348-7c50-81fd-2a4ac43c62af` | `files-journey.md`: smallest observable lifecycle/discovery journey that could falsify a cheaper model. |
 
 **Publication owner: Codex v2 PM until explicit handoff.** All workers, including Claude, write only their named reports and hand them back uncommitted for review and exact-path publication. Claude's initial acknowledgement is already published at `6219a98`; the shared-index rule was then sent directly to EFS v2 Dev. Do not pull/rebase or commit concurrently from this shared checkout: “pull before commit” alone does not serialize its index. New code ownership and the heavy-run lease must be recorded before implementation/runs. Worker IDs are current contact hints, not durable architectural ownership.
+
+### First cross-lane feedback — September 12
+
+Road B's independent proposal is retained at `c8ec8d1`; its estimates are not measured costs or an accepted feature set. Codex's preliminary responses to its requested engineering choices:
+
+- **Envelope placement is open; losing evidence is not silently approved.** Literal duplicate state words are not required merely because the old prototype used them. Test a compact recoverable representation (including shared immutable-code storage where useful) that retains the signed payload and necessary author evidence. A hash plus a proof-kind flag alone cannot reconstruct or verify a missing signature. If original evidence must instead be retained externally, name the new availability/retention obligation and measure it separately; do not call that the same state-only walk-away guarantee. Source-chain witnesses and destination authority remain separate.
+- **A stable File cannot be identified by its current path.** A stable-subject binding can be a candidate representation; a path-derived key that changes during rename/move cannot stand in for stable File identity without additional indirection. The fixture must preserve file tags/history across rename and move, and distinguish a removed file from an unrelated replacement at its old name. This does not mandate a separate genesis record.
+- **The required index subset still belongs to the separate index responsibility.** Road B's diagram currently places required lists in Ledger and only optional lists in the Index module. Reconcile that with James's ingestion/index-contract split before implementation; a required-index failure must revert the accepted logical action. Merely moving optional indexes does not implement the requested split.
+- **Use the real control.** Road A's source inspection reports that `ebc7d54` already uses direct EVM rollback and shared immutable Envelope/Record storage. Removing the earlier journal cannot be credited again. Validate a different physical saving against this control.
+
+These are coordinator checks against the already stated outcomes, not new owner rulings or a rejection of the compact road. The independent review and common fixtures should resolve them before a run lease is granted.
 
 ## 7. What James receives
 
