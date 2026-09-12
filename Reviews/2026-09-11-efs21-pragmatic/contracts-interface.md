@@ -4,9 +4,9 @@
 
 ## Deployment and exact types
 
-1. Deploy `NativeKernel()`; it deploys immutable `navigation()` and `types()` addresses. Navigation has separate deployed runtime **and storage**; no delegatecall, setters, upgrade switch or bypass.
-2. Deploy `Uint256Validator()` and `BytesValidator()` from `ExactTypeRegistry.sol`.
-3. Call `types.register(bytes descriptor,address validator) -> bytes32 typeId`. Descriptor is an immutable opaque specification, 1–1024 bytes, recoverable with `descriptorOf(typeId)`. It is **not** a full-v2 Type grammar. Registration only permits the two compiled validator runtime hashes; arbitrary custom developer programs, proxies, mutable configuration and dependency calls are not supported.
+1. Deploy `NativeKernel()`; it deploys immutable navigation, discovery and expanded-registry contracts. Indexes have separate deployed runtime **and storage**; no delegatecall or bypass of required navigation. The `types()` external seam remains compatible with `ExactTypeRegistry`.
+2. Deploy `Uint256Validator()` and `BytesValidator()` from the unchanged `ExactTypeRegistry.sol`, plus `RawBytesValidator()` from its separate source file.
+3. Call `types.register(bytes descriptor,address validator) -> bytes32 typeId`. Descriptor is an immutable opaque specification, 1–1024 bytes, recoverable with `descriptorOf(typeId)`. It is **not** a full-v2 Type grammar. Registration permits exactly these three compiled stateless runtime hashes; arbitrary custom developer programs, proxies, mutable configuration and dependency calls are not supported.
 
 Identity formulas use ordinary ABI encoding, **not packed encoding**:
 
@@ -18,7 +18,7 @@ FileId   = keccak256(abi.encode(keccak256("EFS21_FILE_V1"), chainId, kernelAddre
 
 Type and record identities exclude chain/deployment/local validator address. The validator hash is compiler/source-build-specific, including compiler metadata. Re-registering equivalent descriptor+runtime at a different validator address returns the same TypeId without replacing the original execution address. `typeInfo(id)` returns `(schemaHash,validator,codeHash)`. Every acceptance checks pinned runtime hash, then a 50,000-gas STATICCALL; exactly 32 return bytes encoding `true` are required. Only 32 return bytes are copied. Existing record dedup still validates. Missing/changed validators reject; there is no operator-controlled repair/reinterpretation.
 
-`Uint256Validator`: body exactly `abi.encode(uint256)`, 32 bytes. `BytesValidator`: canonical `abi.encode(bytes)` (also ABI string representation), offset 32, exact padded length, zero padding. It accepts arbitrary bytes, **not guaranteed UTF-8**. Text clients explicitly decode UTF-8 and report failures. `MAX_BODY=4096` is an experiment limit including ABI framing; largest bytes payload is 4032 bytes.
+`Uint256Validator`: body exactly `abi.encode(uint256)`, 32 bytes. `BytesValidator`: canonical `abi.encode(bytes)` (also ABI string representation), offset 32, exact padded length, zero padding. `RawBytesValidator`: body is the payload itself, including empty bytes. Neither bytes Type guarantees UTF-8. Text clients explicitly decode UTF-8 and report failures. `MAX_BODY=4096` is an experiment limit: canonical payload maximum4032, raw maximum4096. Raw is a distinct Type/Record identity, not reinterpretation. Explicit `hasRecord` distinguishes a present empty record from absence. See [representation evidence and the frozen-registry maintenance exception](README.md#raw-representation-checkpoint).
 
 ## Writes and point reads
 
@@ -67,4 +67,6 @@ Names: 1–64 printable ASCII bytes (`0x20..0x7e`), excluding `/`, `.` and `..`.
 
 Run `forge test -v`, `forge test --match-contract GasOperationsTest --gas-report`, and `forge build --sizes` from `contracts/`. Named gas operations are reproducible Forge execution measurements, not transaction receipts or final network fees. Task 2 must measure fresh-world receipts and cold/steady costs separately; see `contracts/evidence/`.
 
-No upgrades/populated-state migration, portable envelopes/Principals, independently detachable authorship, plural Lenses, generic bindings/occurrences, mandatory full-v2 graph/backlink/equality indexes, tags/discovery coverage, arbitrary validator programming, restoration, multi-placement, directory moves, chunking, external carriers, Unicode names, gas sponsorship or access delegation. Names and historic bytes are public and permanent in this experiment. Two supplied reviewed validators are a material Type-system restriction; separate-storage native Files costs must not be sold as unchanged full-v2 costs.
+The separate discovery contract additionally supports one namespace-owner-selected exact uint256 equality profile, required/tolerated maintenance policy, bounded late backfill and qualified coverage. Its universe is current linked regular files, not full-v2 occurrences; [discovery evidence](evidence/discovery.md) defines the boundary. It is not yet exposed as browser search/tag controls.
+
+No upgrades/populated-state migration, portable envelopes/Principals, independently detachable authorship, plural Lenses, generic bindings/occurrences, mandatory full-v2 graph/backlink/equality indexes, relational tags, arbitrary validator programming, restoration, multi-placement, directory moves, chunking, external carriers, Unicode names, gas sponsorship or access delegation. Names and historic bytes are public and permanent in this experiment. Three supplied reviewed validator runtimes are a material Type-system restriction; separate-storage native Files costs must not be sold as unchanged full-v2 costs.
