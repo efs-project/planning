@@ -2,7 +2,7 @@
 
 Complete 41-byte file create is **5,257,364 gas including 149,369 staging**, versus 5,716,814 for the matched control: 459,450 lower (8.04%). Metadata alone is 5,107,995 versus 5,567,445. All seven Files facts remain. This is a physical-storage experiment, not protocol adoption, migration compatibility or full-model simplification.
 
-Source/support freeze: `987a7bfa986f8e38b27cfa90c99b0af4a7640c04`. Exact control: `8688d5299eac8d9f83264806c32de471f427bbb2`; both arms include the preceding metadata-only and initializer changes. Runner keccak: `0x1058c2e93fe90d48e3d91e548c2ce8ed0b84ffd1fd80e97d2398265cb9528c2b`. Source review approved; final evidence review/root reproduction remain separate gates.
+Source/support freeze: `987a7bfa986f8e38b27cfa90c99b0af4a7640c04`; retained evidence `9499df70dac5f81f8695b782fe976853c565e767`. Exact control: `8688d5299eac8d9f83264806c32de471f427bbb2`; both arms include the preceding metadata-only and initializer changes. Runner keccak: `0x1058c2e93fe90d48e3d91e548c2ce8ed0b84ffd1fd80e97d2398265cb9528c2b`. Independent source/evidence reviews and fresh root reproduction are complete.
 
 ## Complete operations and negative results
 
@@ -91,6 +91,8 @@ Real sharing RED failed the exact-block assertion after successful admission, th
 
 [Control receipt manifest](evidence/shared-byte-block-control.manifest.json) · [Candidate receipt manifest](evidence/shared-byte-block-candidate.manifest.json) · [Bounded paired runner](scripts/shared-byte-block-benchmark.mjs) · [Offline checks](test/shared-byte-block-comparison.test.mjs).
 
+Independent final review approved source, specification and evidence with no material remaining finding. It checked258 signed transactions,340 source/support entries,30 actual runtimes,10 historical execution observations,72 publications against signed calldata,3,556 physical slice observations and every39-operation/nine-paid-read comparison. Root separately rebuilt the canonical foundation/router and reproduced245Core tests,38foundation tests and291Node/browser/offline passes with one existing Type skip and zero failures. The combined serial Node gate took234.370seconds. Strict TypeScript, exact-path Forge formatting and whitespace checks passed; actual module sizes above were independently reproduced. The existing compiler mutability warning remains. This is a reviewed disposable prototype result, not protocol adoption.
+
 Both final managed Anvils exited0 (PIDs1016 and1634), their exact caches and final build directories were removed, and only the three preserved demo nodes remain. Other stopped task builds were moved recoverably to the local Trash folder `efs21-shared-block-cleanup.ux2uzn`; scratch ledgers/preflight evidence remain. Free disk remained281GiB. HTTP49966/54154/60731 and RPC49941/54148/60726 retain their original processes. No public deployments, source migration or demo reset occurred.
 
 Normal reproduction uses the full Core Forge suite; full foundation suite with both separate test-only remapping flags `--remappings Foundation/=src/ --remappings Browser/=../2026-09-09-files-browser-mvp/contracts/src/`; and the same explicit bounded Node/browser list from the initializer gate. Canonical compileUpgrade excludes only InitializationOutline.t.sol from artifacts; the full Forge gate includes it. Use isolated build outputs. Run retained offline validation with:
@@ -99,4 +101,6 @@ Normal reproduction uses the full Core Forge suite; full foundation suite with b
 node --test --test-concurrency=1 Reviews/2026-09-11-efs21-pragmatic/test/{envelope-storage-comparison,metadata-admission-comparison,initialization-outline-comparison,shared-block-control,shared-byte-block-comparison}.test.mjs
 ```
 
-Do not overwrite/re-run final receipt outputs; the runner refuses. The ignored task report contains the exact full command list and RED/GREEN chronology. This experiment does not solve the full model's multi-million write floor or the Type-cache output/runtime bound; posting extraction, compact caches, authority alternatives and smaller Files profiles remain separate owner-gated work.
+Root's fresh finite test worlds also closed: at09:44UTC only the three preserved demo Anvils remained, with280GiB free. Root's isolated compiler outputs are retained as scratch reproduction evidence, not live chain state.
+
+Do not overwrite/re-run final receipt outputs; the runner refuses. The ignored task report contains the exact full command list and RED/GREEN chronology. This experiment does not solve the full model's multi-million write floor or the Type-cache output/runtime bound. Further bounded experiments are already authorized; posting extraction, compact caches, authority alternatives and smaller Files profiles stay separately scoped, and protocol adoption remains owner-gated.
