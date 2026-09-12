@@ -87,6 +87,10 @@ The always-code body experiment is measured at `5632fee`: original storage, stor
 
 The kernel creates one pinned `BodyWriter` after navigation/registry/discovery. Each new exact RecordId gets one STOP-prefixed code object; duplicates still validate but allocate none. Public Types/Record ABI, IDs, authority, CAS, navigation and history remain unchanged. This is fresh-genesis internal storage, not migration or a refresh of the running snapshotted browser. Kernel runtime/initcode is 10,909/25,429 bytes; setup adds 420,269 gas over integrity-control. [Full three-arm receipts, read/retention results, failures, exact pins and limitations](evidence/body-storage.md).
 
+## Packed-presence checkpoint
+
+The separate metadata-only pair at source `f43501a` keeps both arms always-code. Packing explicit presence with pointer/length saves22,117–22,121 gas per fresh Record: raw41 fresh edit263,457 → **241,339**, quote update265,367 → **243,249**. Every dedup action regresses12 gas; rename/unlink are unchanged. Exact action calldata/ABI/IDs and helper/validator/index runtimes match. Kernel deployment saves852 gas, runtime/initcode is10905/25425. [394 signed setup/action transactions, dense/zero boundaries, paid versus estimated reads and limitations](evidence/packed-presence.md). This is neither a hybrid nor a full-v2 saving, migration or live-demo refresh; earlier body-storage evidence remains historical and unchanged.
+
 ## Verification / limitations
 
 ### Separate full-C0 allocation experiment
