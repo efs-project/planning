@@ -202,6 +202,8 @@ Before implementation, add a pinned deployment/configuration plan and exact sour
 
 Optional configuration comes later: define query universe/basis, epochs, bounded backfill, concurrent withdrawal/rebind behavior, first-ever versus revival anchors, coverage and recovery. An undeclared or failed index is not an empty result. Required navigation must not become optional accidentally. Full-C0 family10 is first-Binding-admission anchors; native indexes and the separate index lab have different populations and cannot be substituted by name alone.
 
+**September12 integration follow-up:** [[2026-09-12-efs21-posting-store-plan|the mandatory PostingStore implementation plan]] now pins the fresh-genesis writer/deployment/configuration mechanics, an appended write-once routing handle, preserved obsolete roots/enum positions, both inherited execution/migration checks, bounded raw reads and paid history/Lens falsifiers. Independent plan review approved against`8688d52`; it is staged after shared-byte storage, not implemented. Initialization outlining itself is now reviewed/root-reproduced at that source: actual U3 runtime23,619,957bytes margin, with small recurring gas regressions. Earlier no-size-result language above records the preflight stage, not the latest gate.
+
 ## Evidence/source map
 
 - Full-C0 `StateStore.sol`, `StateKernel.sol`, `StateReadPrimitives.sol`, `StatePointReads.sol`, `StateBindingReads.sol`, `Preparation.sol` at `8f101f1`.

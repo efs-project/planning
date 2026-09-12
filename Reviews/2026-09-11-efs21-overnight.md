@@ -16,6 +16,8 @@ James authorized an overnight implementation pass: make ordinary contract and br
 
 **Next engineering gate:** metadata reads and the [[2026-09-12-efs21-initialization-outline-plan|initialization-size experiment]] are complete at`8688d52`, independently reviewed, root-reproduced and pushed. Initialization outlining recovered917bytes of Core runtime (957margin) but costs330moregas per complete create. The [[2026-09-11-efs21-shared-slab-plan|shared Record/Envelope storage experiment]] is now being dispatched against that exact base; compact Type caches remain separate. No unbuilt saving, feature sacrifice, production deployment or protocol freeze is implied.
 
+The [[2026-09-12-efs21-posting-store-plan|full-model mandatory index-contract extraction plan]] is also independently reviewed and staged: one immutable Core-writer Store, all ten families retained first, explicit configuration binding and whole-write/paid-read comparisons. It is not yet the configurable-family redesign or a claimed gas win.
+
 ### Metadata-only admission reads, reviewed
 
 Source `137fa252`, control `ed49a6c`, final evidence/test review `4e7150c`, root closure `1cb402a`. Two internal accessors avoid copying payloads at exactly three metadata-only sites: existing Record deduplication, Record/Object references, and Type dependency existence. Stored layouts, incoming validation, complete public reads, all indexes and same-carriage visibility remain. [Paired receipts and limits](https://github.com/efs-project/planning/blob/1cb402a/Reviews/2026-09-11-efs21-pragmatic/metadata-admission-results.md).
