@@ -29,6 +29,11 @@ reviewed full-model control remains `ebc7d54`. See the
 
 ## Proposed next experiment
 
+The [[2026-09-12-efs21-typed-read-facet-plan|reviewed two-stage implementation plan]]
+names the exact selector/storage/configuration boundary, tests actual complete
+deployment first, then qualifies and prices unchanged-storage operations. It is
+staged separately from the active canonical-Type bridge; no facet result yet.
+
 Use a **typed read facet**: one separately deployed contract containing the
 existing read adapters, behind a fixed, explicitly enumerated Core selector
 router. Applications continue making normal typed calls to the Core address.
