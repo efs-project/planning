@@ -12,7 +12,7 @@
 
 ## Global constraints
 
-- Not dispatched. Root pins the final reviewed packed base in the task ledger, after the preceding actual Files anchor-batch task releases the sole implementation/build/new finite-world slot. Code stays `planning-efs21` / `codex/efs21-pragmatic`; plans/status remain on main.
+- Dispatched after the actual Files anchor-batch independent/root gate (68reader/27targeted browser tests, strict TS/syntax/diff). Exact clean base`03f0160a85469e1a37c019f364417a875fbc890b` is pinned in the task ledger. The hybrid worker owns the sole implementation/build/new finite-world slot. Code stays `planning-efs21` / `codex/efs21-pragmatic`; plans/status remain on main.
 - Preserve native54154/RPC54148, Fable60731/RPC60726, all historical sources/evidence and other worktrees. No demo replacement, migration, production repository, public deployment/funds, raised limits or protocol promotion.
 - Ordinary24576 runtime/49152 initcode/4096 body/16777216 transaction-and-block gas ceilings. Finite serial managed worlds; no traces; stop heavy work below20GiB. Clean only exact owned paths after exit.
 - No new validator, Type grammar, identity, indexing, Files semantics, SDK/browser API, carrier or third inline backend. Keep BodyWriter deployed in the same constructor position and unchanged runtime. Reserve the old presence root.
