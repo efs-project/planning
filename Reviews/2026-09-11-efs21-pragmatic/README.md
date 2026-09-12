@@ -59,16 +59,26 @@ Hydrated listing of 1 / 16 / 32 entries returns 544 / 5344 / 10464 ABI bytes and
 
 The plain mapping deliberately lacks Types, stable FileIds, paths, inventories, retained revision history and existence semantics: **not semantic parity**. The old full-v2 receipts in [measurement.md](measurement.md) remain historical context, not a newly matched comparison or percentage saving claim.
 
-## Current same-profile history optimization
+## History-sharing checkpoint
 
-The kernel now shares immutable location snapshots between edits/unlinks instead of storing the same parent/name in every revision. Public revision values and ABI, exact Types/Records, validation, authority, CAS, required indexes and history remain unchanged. This is a fresh-genesis internal storage change, not migration of either existing demo.
+The history-only checkpoint shares immutable location snapshots between edits/unlinks instead of storing the same parent/name in every revision. At that checkpoint, public revision values and ABI, exact Types/Records, validation, authority, CAS, required indexes and history stayed unchanged. This is a fresh-genesis internal storage change, not migration of either existing demo. Subsequent discovery adds an API/hook and its separately measured cost below.
 
 Paired receipts: contract-produced uint256 updates **284,631 → 237,597 gas**, short-name 41-byte fresh-content edits **350,271 → 303,237**, same-content edits **163,536 → 116,496**. The separate consumer transaction remains **77,277**. Creation increases by 301 gas; the measured historical read estimates increase by 157 gas. The uint256 example meets the provisional 250k update ambition; the ABI-framed 41-byte file edit still does not. [Complete matched inputs, receipts, provenance, differential checks and tradeoffs](evidence/history-storage.md).
 
 The original `benchmark-1/2.json` files above have not been overwritten. Running `scripts/benchmark.mjs` again would replace those outputs with the current source's workload; use `scripts/history-benchmark.mjs` for the explicit original-versus-current comparison.
 
+## Optional scalar discovery checkpoint
+
+The current kernel also deploys a separate `DiscoveryIndex`. Namespace owners can attach one exact uint256 equality profile, choose required or tolerated maintenance, backfill old files in bounded chunks, restart or detach. Basic navigation remains mandatory. This is a contract/test surface; the Files page does not yet expose search controls.
+
+Compared with the history-only checkpoint, no-profile producer updates cost **237,597 → 245,563 gas**. An attached profile costs more: the direct fresh scalar edit is **241,218 without a profile / 344,661 with one**. In the 37-position source fixture, a qualified eight-match query needs **one eth_call instead of 72** for the straightforward uncached source scan; results are FileIds, not hydrated bodies. It is not a comparison against an optimized batched reader or a single onchain scan transaction. [Actual receipts, read qualification, failure isolation and limits](evidence/discovery.md).
+
+Required-index failure rolls back the file operation. Tolerated maintenance failure preserves the file operation but marks the profile DIRTY; its queries cannot claim stale positives or complete empty results. BUILDING remains partial until the pinned source prefix is covered and concurrent changes have been maintained. These are bounded current-file semantics, not full-C0 occurrence coverage or an image-tag relationship implementation.
+
+The prior `history-comparison.json` remains its pure-history source checkpoint. Re-running the history script now compares the original kernel against the current history-plus-discovery source; do not label that rerun a pure history ablation.
+
 ## Verification / limitations
 
 The Node suite exercises actual contracts and a real Chromium browser, including create → open → edit → rename → full page reload → historical bytes, nested binary upload → unlink, and forced RPC failure. It checks independent record-ID derivation, retained history, wrong identity, malformed IDs, stale block observation/cursor, bounded pages, transaction ceiling and owned-cache cleanup. Review regressions cover committed transactions with dropped submission/poll responses, read-only reconciliation without nonce increase/resend, persisted write holds, failed-navigation write attempts, manual hash navigation and a hash change during a paused read. [Test-first record](evidence/tdd.md), [prior-checkpoint browser](evidence/browser.png), [prior-checkpoint gas drawer](evidence/gas-drawer.png). Screenshots are refreshed only with `EFS21_CAPTURE_SCREENSHOTS=1`; routine tests preserve the existing evidence files.
 
-Missing full-v2 semantics remain missing: portable signed authorship/Principals, plural Lenses, tags/discovery, generic binding/occurrence families, arbitrary validator programs, delegation, restore/multi-placement, mounts, Unicode names, external carriers/chunking, encryption and upgrades. All names/bytes are public and permanent. This is a native filesystem profile, not unchanged full-v2 functionality at lower gas.
+Missing full-v2 semantics remain missing: portable signed authorship/Principals, plural Lenses, relational tags/general discovery, generic binding/occurrence families, arbitrary validator programs, delegation, restore/multi-placement, mounts, Unicode names, external carriers/chunking, encryption and upgrades. All names/bytes are public and permanent. This is a native filesystem profile, not unchanged full-v2 functionality at lower gas.
