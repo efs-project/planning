@@ -1,6 +1,6 @@
 # Full-C0 mandatory PostingStore extraction
 
-> Staged, not dispatched. Use `superpowers:subagent-driven-development` for one bounded implementation, independent review and root reproduction. Freeze the control only after the intervening shared-byte and body-copy tasks are reviewed. This is separation **plus per-key coalescing**, not optional-family removal or a measured saving.
+> Dispatched September12 10:31UTC against reviewed/root-reproduced/pushed `ebc7d540570827c5f5052af83d2cbd80f54092a7`. Use `superpowers:subagent-driven-development` for one bounded implementation, independent review and root reproduction. Shared-byte and body-copy gates are complete. This is separation **plus per-key coalescing**, not optional-family removal or a measured saving.
 
 **Goal:** put full-model posting storage and its mutation mechanics in a separate contract while retaining all ten existing families, logical inventories and Binding/Lens semantics. Measure whether the separation makes writes, reads or deployment worse before deciding which families can become configurable.
 
@@ -11,6 +11,8 @@
 Independent implementation-plan review against frozen`8688d52`: **Approved**, no blocking defects. Its source-specific dispatch/migration and raw-getter clarifications are incorporated below. This approves the staged experiment, not a completed implementation or economic result.
 
 Post-shared-storage read-only review at`24d7407` found no semantic blocker. Actual U3 is24,141bytes (435margin), admission22,392, Point15,092 and Query20,558. Extracted append/liveDelta already execute in the admission library and therefore do not directly recover U3 space. Root checked the initializer/configuration/factory seams; the narrow placement constraints below avoid assuming otherwise. Rebuild post-body-copy helper/runtime profiles at dispatch rather than reusing these historical artifacts.
+
+Dispatch control includes body-copy source67576fa/support30296a/evidenced735e06. Root freshly reproduced250Core/38foundation/306Node passes+1existingType skip, strictTS/fmt, and U324141/admission22392/helper19032/Point15092/Query20558 bytes. Historical shared-layout3 checks remain in exact24d source context. All root finite worlds closed before handing the sole heavy slot to the index implementer;279GiBfree, three demos preserved. Control still costs5,064,132gas per complete create. No index saving yet.
 
 ## Constraints and explicit choices
 

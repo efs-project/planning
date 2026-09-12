@@ -6,7 +6,7 @@ James authorized an overnight implementation pass: make ordinary contract and br
 
 ## Latest in plain English
 
-- **The fuller model is cheaper, but still expensive:** the seven-record create is now **5.26M gas including content staging**, down from the earlier 7.77M workload. The latest isolated shared-byte-block pair is5,716,814→5,257,364gas with all seven facts and all index families retained. This step saves459,450gas (8.04%), not an order of magnitude. Earlier direct application changes callback visibility and late-failure costs; this is not an adoption ruling or universal equivalence.
+- **The fuller model is cheaper, but still expensive:** the seven-record create is now **5.06M gas including content staging**, down from the earlier 7.77M workload. The latest isolated validation-copy pair is5,257,364→5,064,132gas with all seven facts and all index families retained. This step saves193,232gas (3.68%); its larger win is an8KB Record admission,4,864,176→2,546,769gas. Earlier direct application changes callback visibility and late-failure costs; this is not an adoption ruling or universal equivalence.
 - **Useful contract filesystem operations work in a narrower model:** a producer publishes `/swaps/eth-usdc`; an unrelated contract reads it. After the reviewed actual Record/Files extraction, the update costs 232,664 gas and its paid reader 80,769. Generic Record storage, mandatory by-Type inventory, Files, required navigation and configurable discovery have actual separate contract boundaries. This separation slightly increases Files costs; richer full-v2 identity, acceptance and Lenses are not silently included in the price.
 - **The cheap prototype need not stay limited to three simple validators:** a reviewed [[2026-09-12-efs21-canonical-native-types-preflight|canonical EFS Types bridge]] identifies how to reuse the actual structural interpreter in its Files path. IDs, encodings and qualification need explicit changes; full admission, reference support and arbitrary developer validation are not implied. This bridge is not implemented or priced yet.
 - **Storage tradeoffs are measured, not assumed:** the reviewed hybrid reduces a 4,096-byte zero Record admission from 990,892 to 200,375 gas, but its paid read rises from 85,373 to 396,952. A 41-byte file edit slightly regresses from 241,339 to 242,500. Different representations preserve exact bytes/IDs while having different economics; no 100-year write-policy choice has been made.
@@ -17,11 +17,27 @@ James authorized an overnight implementation pass: make ordinary contract and br
 - **Some app values may need no duplicate EFS write:** James supports the [[2026-09-12-efs21-live-contract-files|live contract-backed file]] direction. Register a descriptor once and read existing contract state through a bounded typed interface. The independently reviewed design separates live observations from immutable revisions and warns that EFS indexes cannot automatically track changes that do not pass through EFS. Not implemented or priced yet; current cost work continues.
 - **Try the latest browser:** [split native candidate](http://127.0.0.1:49966), snapshotted at reviewed `4cb0042`, has real local-contract create/read/edit/rename/unlink/history/reload tests in Chromium. The older [native snapshot](http://127.0.0.1:54154) remains `c088363`; Fable's port60731 stays untouched. These need this laptop/process running. The new demo has an 18-hour watchdog from September12 05:58UTC; later source changes cannot silently alter its assets or contracts.
 
-**Next engineering gate:** the [[2026-09-11-efs21-shared-slab-plan|shared Record/Envelope storage experiment]] is complete at`24d7407`, independently reviewed, root-reproduced and pushed. The independently reviewed [[2026-09-12-efs21-body-copy-plan|bounded validation-copy experiment]] is now dispatched against that exact base: price an avoidable implementation loop before sacrificing features. It changes authenticated helper runtime identity, not the Type language or storage profile. Compact Type caches remain separate. No unbuilt saving, feature sacrifice, production deployment or protocol freeze is implied.
+**Next engineering gate:** the [[2026-09-12-efs21-body-copy-plan|bounded validation-copy experiment]] is complete at`ebc7d54`, independently reviewed, root-reproduced and pushed. The [[2026-09-12-efs21-posting-store-plan|full-model mandatory index-contract extraction]] now starts against that exact base. It retains all ten families first and measures the physical boundary plus per-key coalescing, including paid reads. Removing/configuring families comes separately; no unbuilt saving, feature sacrifice, production deployment or protocol freeze is implied.
 
-The [[2026-09-12-efs21-posting-store-plan|full-model mandatory index-contract extraction plan]] is also independently reviewed and staged: one immutable Core-writer Store, all ten families retained first, explicit configuration binding and whole-write/paid-read comparisons. It is not yet the configurable-family redesign or a claimed gas win.
+The index experiment uses one immutable Core-writer Store with explicit configuration binding. It is not yet the configurable-family redesign or a claimed gas win. A separate reviewed [[2026-09-12-efs21-live-files-plan|live-file adapter plan]] can use existing native Record/Files contracts unchanged; it remains staged, not implemented.
 
 The [[2026-09-12-efs21-known-record-consumer-plan|paid known-Record consumer plan]] is independently reviewed and staged separately. It changes no Core API and explicitly compares two trusted-deployment read profiles, not interchangeable admission proofs.
+
+### Bounded validation copying, reviewed
+
+Source`67576fa`, final support`30296a0`, retained evidence`d735e06`, root closure`ebc7d54`; exact control`24d7407`. One internal byte-copy loop becomes bounded MCOPY. Type grammar, storage layouts, logical APIs and every index family remain. The changed helper runtime is explicitly qualified. [Full paired results and regressions](https://github.com/efs-project/planning/blob/ebc7d54/Reviews/2026-09-11-efs21-pragmatic/body-copy-results.md).
+
+| Same-input operation | Prior helper | Bounded copy |
+|---|---:|---:|
+| Complete seven-record create, including staging |5,257,364|5,064,132|
+| Complete three-record edit, including staging |2,758,979|2,667,640|
+| Steady tag |1,868,793|1,814,915|
+| Binding rebind |1,623,022|1,559,525|
+| Dense8,192-byte Record admission |4,864,176|2,546,769|
+| Existing8,192-byte Record, new occurrence |3,064,342|746,935|
+| Direct-author withdrawal of8,192-byte Record |3,325,439|998,576|
+
+Nine paid reads have unchanged cost; actual Files still needs114requests and sends158more response bytes. Helper deployment increases17,048gas and runtime79bytes. Both64-unique workloads still refuse under the ordinary transaction cap. The legal large-Type cache/output gap and paid receipt-library costs remain open. Independent review authenticated the exact pair and root separately reproduced250Core/38foundation/306Node passes, one existing Type skip and zero failures. All finite worlds closed; three demos preserved,279GiBfree at10:27UTC. Small-file creation remains above5M: this is useful implementation cleanup, not the final economic answer.
 
 ### Shared Record/Envelope byte blocks, reviewed
 
