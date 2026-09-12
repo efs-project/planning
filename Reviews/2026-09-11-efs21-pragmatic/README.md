@@ -81,6 +81,12 @@ The prior `history-comparison.json` remains its pure-history source checkpoint. 
 
 Root reproduced **74 Forge and 23 serial Node tests**, including real browser conversions/downloads and all earlier navigation/reconciliation guards. Independent review found no functional defect in this task or retained receipt/pin inconsistency. It raised a maintenance finding: `ExpandedTypeRegistry` duplicates registry logic from the frozen original source. Controller disposition: accepted **only for this disposable comparison**, because editing that shared original file changes metadata-sensitive validator hashes, while routing through multiple registries changes the measured architecture. Only the expanded registry is deployed by the current kernel; the old implementation remains an identity/control artifact. A production registry must have a single maintained implementation and deliberately specified validator identity. This exception is not production approval, and the source/evidence have not been silently refactored or remeasured to hide it.
 
+## Immutable-body storage checkpoint
+
+The always-code body experiment is measured at `5632fee`: original storage, storage plus exact read integrity, and code-backed storage plus the same integrity hash. The primary comparison is the latter two, so read defenses are priced. Raw 41-byte fresh-content edit is **264,011 → 263,457 gas**; canonical 41-byte edit is **311,203 → 283,690**. Raw 4,032-byte nonzero fresh edit improves **3,083,783 → 1,132,496**, but raw 4,032-byte **zero** admission regresses **443,713 → 999,848**. The quote update regresses **245,563 → 265,367**, losing its earlier sub-250k result. Empty/tiny bodies also regress; no hybrid is hidden in the candidate.
+
+The kernel creates one pinned `BodyWriter` after navigation/registry/discovery. Each new exact RecordId gets one STOP-prefixed code object; duplicates still validate but allocate none. Public Types/Record ABI, IDs, authority, CAS, navigation and history remain unchanged. This is fresh-genesis internal storage, not migration or a refresh of the running snapshotted browser. Kernel runtime/initcode is 10,909/25,429 bytes; setup adds 420,269 gas over integrity-control. [Full three-arm receipts, read/retention results, failures, exact pins and limitations](evidence/body-storage.md).
+
 ## Verification / limitations
 
 ### Separate full-C0 allocation experiment

@@ -4,7 +4,7 @@
 
 ## Deployment and exact types
 
-1. Deploy `NativeKernel()`; it deploys immutable navigation, discovery and expanded-registry contracts. Indexes have separate deployed runtime **and storage**; no delegatecall or bypass of required navigation. The `types()` external seam remains compatible with `ExactTypeRegistry`.
+1. Deploy `NativeKernel()`; it deploys navigation, expanded registry, discovery, then its private immutable `BodyWriter`. Indexes have separate deployed runtime **and storage**; no delegatecall or bypass of required navigation. The `types()` external seam remains compatible with `ExactTypeRegistry`.
 2. Deploy `Uint256Validator()` and `BytesValidator()` from the unchanged `ExactTypeRegistry.sol`, plus `RawBytesValidator()` from its separate source file.
 3. Call `types.register(bytes descriptor,address validator) -> bytes32 typeId`. Descriptor is an immutable opaque specification, 1–1024 bytes, recoverable with `descriptorOf(typeId)`. It is **not** a full-v2 Type grammar. Registration permits exactly these three compiled stateless runtime hashes; arbitrary custom developer programs, proxies, mutable configuration and dependency calls are not supported.
 
@@ -21,6 +21,8 @@ Type and record identities exclude chain/deployment/local validator address. The
 `Uint256Validator`: body exactly `abi.encode(uint256)`, 32 bytes. `BytesValidator`: canonical `abi.encode(bytes)` (also ABI string representation), offset 32, exact padded length, zero padding. `RawBytesValidator`: body is the payload itself, including empty bytes. Neither bytes Type guarantees UTF-8. Text clients explicitly decode UTF-8 and report failures. `MAX_BODY=4096` is an experiment limit: canonical payload maximum4032, raw maximum4096. Raw is a distinct Type/Record identity, not reinterpretation. Explicit `hasRecord` distinguishes a present empty record from absence. See [representation evidence and the frozen-registry maintenance exception](README.md#raw-representation-checkpoint).
 
 ## Writes and point reads
+
+The [measured body-storage candidate](evidence/body-storage.md) preserves the public `Record(typeId,body)` shape and admission APIs. Internally it stores `(typeId,pointer,uint16 bodyLength)` plus explicit presence. Its pinned kernel-only helper creates exactly `STOP || body` with zero value for each new validated RecordId; duplicates allocate nothing and still run Type validation. Helper creation is after all existing constructor deployments, so their addresses and kernel CREATE nonce behavior are preserved. No public pointer/helper/initcode input or helper getter is added. Empty raw is present with a one-byte STOP object. `readRecord` distinguishes `MissingRecord` from `CorruptRecord`, checks bounded length, pointer/code size/prefix, then recomputes the exact RecordId before returning bytes. These integrity costs are included in the three-arm evidence. This changes fresh-genesis private layout only; no populated-state migration is supported or implied.
 
 All writes authenticate `msg.sender`; there is no author parameter, tx.origin or delegated signature surface. `rootId(address)` is deterministic, nonce zero; `ensureRoot()` initializes the caller's root once. Non-root files/directories use monotonically increasing `fileNonce(address)`, beginning at one.
 
