@@ -8,8 +8,9 @@ James authorized an overnight implementation pass: make ordinary contract and br
 
 - **A real same-behavior saving:** the full seven-record create now costs 6.77M gas including its separate content staging, down from 7.77M in the matched run. The same data and indexes survive. Still too expensive to declare victory.
 - **A cheaper, narrower alternative works:** the native Files prototype has separate required navigation and configurable discovery contracts; a contract can publish `/swaps/eth-usdc` and another can read it. Its latest measured no-search-profile update costs 245,563 gas. It does not yet implement the full v2 identity, validation or Lens model.
-- **The browser is exercised, not merely drawn:** actual local-contract create/read/edit/rename/unlink/history/reload tests run in Chromium. The new persistent candidate URL will follow a stable reviewed checkpoint; Fable's existing 60731 world remains untouched.
-- **Now working:** raw file-content representation with explicit Type-aware SDK/browser behavior. Bigger index/storage cuts remain separately measured experiments. No final feature sacrifice or protocol freeze has been decided for James.
+- **The browser is running:** [separate native candidate](http://127.0.0.1:54154), source `c088363`, launched September 11 evening with an 18-hour watchdog. Actual local-contract create/read/edit/rename/unlink/history/reload tests run in Chromium. Fable's existing 60731 world remains untouched. Local URLs work only while this laptop/process remains running.
+- **Encoding savings are now measured:** raw bytes instead of inner ABI framing save 47,192 gas on a fresh 41-byte create/edit in a matched native build. Fresh edit is still 264,011 gas; large inline bodies remain expensive.
+- **Next full-profile experiment:** replace the separate write journal/replay with direct ordered writes plus EVM rollback. Preserve stored facts and test failure order/callback visibility explicitly; [[2026-09-11-efs21-direct-apply-plan|bounded implementation plan]]. No final feature sacrifice or protocol freeze has been decided for James.
 
 ## What we are comparing
 
@@ -105,7 +106,25 @@ This saves **998,043 gas on the create admission (13.1%)** without dropping thos
 
 The admission library shrank from 24,565 to **24,481 bytes**, leaving only 95 bytes of code-size headroom. The implementer also ran 19 foundation Solidity tests and 140 Node tests in an explicitly documented aggregate after resolving a missing locked dependency. The known large-Type chain target remained skipped/unfixed; local RPC observations are not state proofs. [Exact evidence, source/runtime pins, failure-path coverage and limitations](https://github.com/efs-project/planning/blob/e605fc9/Reviews/2026-09-11-efs21-pragmatic/evidence/journal-allocation.md).
 
-Full-profile writes are still too expensive to call this finished. Next: the raw-payload encoding experiment is active, with explicit per-Type browser/SDK decoding; physical full-v2 separation and further storage reductions follow as separately measured changes. Broader acceptance/authorship remain distinct experiments, not implied by native savings. Existing Fable world remains untouched; final candidate launch follows a stable reviewed checkpoint.
+Full-profile writes are still too expensive to call this finished. Raw-payload results follow below; physical full-v2 separation and further storage reductions remain separately measured changes. Broader acceptance/authorship remain distinct experiments, not implied by native savings. Existing Fable world remains untouched.
+
+### Explicit raw-byte representation
+
+Implementation `1254c22`, evidence `a9a064e`: both fresh worlds use the same expanded registry/build, original exact validator identities and discovery settings. A new raw-byte Type stores exactly the payload; the existing canonical bytes Type still stores its ABI framing. No old record is reinterpreted.
+
+| Matched native workload | Canonical bytes | Raw bytes |
+|---|---:|---:|
+| Fresh 41-byte file create | 645,501 | **598,309** |
+| Fresh-content 41-byte edit | 311,203 | **264,011** |
+| Same-content edit, still a new revision | 124,461 | 121,672 |
+| Separate payload consumer transaction | 158,325 | 153,410 |
+| uint256 producer update | 245,563 | 245,563 |
+
+The SDK/browser knows the exact Type when interpreting current and historical bytes. Creation offers the representation explicitly; editing preserves it unless deliberately converted. Empty and binary files round-trip; unknown Types remain exact-byte downloads without a guessed text editor. Raw 4096 versus canonical rejection is a capacity difference, not a savings pair. A new nonzero 4032-byte raw record still costs roughly 3M gas before file placement: encoding alone is not the large-content answer.
+
+Root reproduced **74 Forge and 23 serial Node tests**, including actual Chromium actions and all earlier ambiguity/navigation regressions. Independent review checked all 150 retained receipts, pairings, runtime/source pins and cleanup and found no functional defect. It raised duplicated registry logic constrained by frozen validator metadata. Controller accepts that maintenance exception **only for this disposable comparison**; production needs one maintained implementation with deliberately specified validator identity. This is not an unqualified production-quality approval. [Exact evidence and limitations](https://github.com/efs-project/planning/blob/a9a064e/Reviews/2026-09-11-efs21-pragmatic/evidence/raw-representation.md).
+
+The local host snapshots its closed assets/config before listening, so subsequent code work cannot silently change a running world's client. Candidate [localhost:54154](http://127.0.0.1:54154) is running from `c088363`; root checked its HTML/config responses and exact raw/canonical Type IDs after launch. The independent review's minor import-diagnostic finding is fixed in `aae54ea`; its scoped re-review accepted the documented disposable-only maintenance exception. Fable's 60731 world is unchanged. Direct application is isolated in sibling `planning-efs21-direct`, branch `codex/efs21-direct-apply`, beginning from the retained lazy-journal control `e605fc9`.
 
 ## How to interpret a cheaper result
 
