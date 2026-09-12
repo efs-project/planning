@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {pathToFileURL} from 'node:url';
-import {E,ROOT,artifact,build,withWorld,KERNEL_PROFILES} from './world.mjs';
+import {E,ROOT,artifact,build,withWorld,KERNEL_PROFILES,observeBody as observeHybridBody} from './world.mjs';
 
 const abi=E.AbiCoder.defaultAbiCoder();
 const payload=(size,pattern)=>Uint8Array.from({length:size},(_,i)=>pattern==='zero'?0:pattern==='nonzero'?239:i%256);
@@ -12,7 +12,7 @@ const json=value=>JSON.parse(JSON.stringify(value,(_,v)=>typeof v==='bigint'?v.t
 export async function workload(w,{allowHybrid=false,sweep=true}={}){
   const capabilities=w.provenance.kernelArtifact.capabilities;
   assert(allowHybrid||['code','dynamic'].includes(capabilities.bodyBackend),'code-only workload requires explicit frozen replay; current is hybrid');
-  const observeBody=allowHybrid?(await import('./hybrid-body-benchmark.mjs')).observeBody:null;
+  const observeBody=allowHybrid?observeHybridBody:null;
   const c=w.client,seen=new Set(),children=[],reads=[],retention=[],bodyObservations=[];
   const ni=new E.Interface(artifact('NavigationIndex').abi),nav=w.provenance.runtimes.NavigationIndex.address;
   const helper=w.provenance.runtimes.BodyWriter?.address;

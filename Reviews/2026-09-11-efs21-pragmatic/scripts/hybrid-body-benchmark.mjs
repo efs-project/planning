@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import {existsSync,writeFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {E,ROOT,artifact,build,withWorld} from './world.mjs';
+import {E,ROOT,artifact,build,withWorld,observeBody} from './world.mjs';
+export {observeBody} from './world.mjs';
 import {workload} from './body-storage-benchmark.mjs';
 
 const abi=E.AbiCoder.defaultAbiCoder();
@@ -32,26 +33,6 @@ export function matrix({final=false}={}){
   return rows;
 }
 
-export async function observeBody(w,id,body,basis){
-  const c=w.client,kernel=w.config.kernel;
-  const read=async slot=>E.toBeHex(BigInt(await c.rpc('eth_getStorageAt',[kernel,E.toBeHex(slot,32),basis.blockNumber])),32);
-  const root=BigInt(E.keccak256(abi.encode(['bytes32','uint256'],[id,3]))),metadata=await read(root+1n),value=BigInt(metadata);
-  const backend=Number(value>>184n&255n),length=Number(value>>160n&65535n),present=Number(value>>176n&255n),pointer=E.getAddress(E.toBeHex(value&((1n<<160n)-1n),20));
-  assert.equal(present,1);assert.equal(length,E.getBytes(body).length);assert([0,1].includes(backend));
-  assert.equal(await read(BigInt(E.keccak256(abi.encode(['bytes32','uint256'],[id,4])))),E.ZeroHash,'reserved presence root');
-  const words=[];let code;
-  if(backend===0){code=await c.rpc('eth_getCode',[pointer,basis.blockNumber]);assert.equal(code,'0x00'+body.slice(2));}
-  else{
-    assert.equal(pointer,E.ZeroAddress);
-    const base=BigInt(E.keccak256(abi.encode(['bytes32','uint256'],[id,6])));
-    for(let i=0;i<Math.ceil(length/32);i++){
-      const actual=await read(base+BigInt(i));
-      assert.equal(actual,'0x'+body.slice(2+i*64,2+(i+1)*64).padEnd(64,'0'));
-      words.push({slot:E.toBeHex(base+BigInt(i),32),value:actual});
-    }
-  }
-  return {recordId:id,typeWord:await read(root),metadata,backend,length,present,pointer,words,...(code?{code}:{}),basis};
-}
 
 async function receipts(w){
   for(const a of [...w.setup,...w.actions]){
