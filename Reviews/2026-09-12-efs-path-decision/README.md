@@ -4,17 +4,21 @@
 
 **Coordinator:** @v2-pm, Codex
 
-**Standing:** proposed execution plan, reviewed by three independent planning agents. Planning is authorized; this note does not start experiments, change requirements, freeze a protocol, or authorize production repositories/deployment.
+**Standing:** decision sprint; Codex's source/research phase started following James's September 12 direction to do the necessary work. Claude participation is not yet confirmed. No permanent requirements or protocol bytes are frozen; production repositories/deployment remain out of scope.
 
 **Outcome:** recommend an architecture we can begin building, with its costs, actual sacrifices and remaining gates plainly visible. Not a claim that a 50-year foundation can be proved in two days.
 
 ## The proposal in one minute
 
-Compare three roads: improve the fuller EFS model, build a smaller implementation of the important EFS promises, or reuse EAS/MUD underneath a thinner EFS layer. Any road may win; a hybrid must explain precisely what it borrows and stores.
+**Scope correction, James, September 12:** do not build another EAS implementation; that is the v1 route. The reuse candidate is **MUD**. Earlier launch wording that offered EAS as Road C is superseded for this sprint.
 
-Use **two Claude conversations initially**, alongside Codex and bounded internal reviewers. Develop three architecture proposals, then extend **at most two** into comparable disposable proofs. Deliver a provisional recommendation after 24 hours; use the second day only for a named uncertainty that could change it.
+Compare three roads: improve the fuller EFS model, build a smaller implementation of the important EFS promises, or reuse MUD underneath a thinner EFS layer. Any road may win; a hybrid must explain precisely what it borrows and stores.
+
+Use **two Claude conversations initially**, alongside Codex and bounded internal reviewers. Develop three architecture proposals, then extend **at most two** into comparable disposable proofs. Deliver a provisional recommendation after 24 hours; spend the second day on the strongest unresolved alternative and the integrated finalist. Finish with **one primary implementation direction**, not three indefinitely maintained products. If no candidate is eligible, name the specific blocking result instead of forcing a winner.
 
 The crucial missing measurement is the cost of **the same useful guarantees**, not another comparison between the richer model and a cheap implementation that leaves some guarantees out. No feature is waived merely because the existing prototype omits it.
+
+The strengthened [[overhead-and-selection|overhead and selection protocol]] is part of this mission: classify actual feature costs versus implementation waste, test shared-cost interactions, charge reads/reconstruction as well as writes, and pass one joined finalist gate. It supports a decision-grade price for named workloads—not a proof of the cheapest possible design or a guarantee of future gas prices.
 
 ## 1. Start from outcomes, not today's machinery
 
@@ -42,7 +46,7 @@ Privacy, account recovery, carrier diversity and long-term reconstruction need c
 |---|---|---|
 | A — improve the fuller model | Codex, with internal implementation/review help | How much cost and complexity can physical restructuring remove while retaining the important semantics? Explain every persisted fact and index. Test a decision-changing saving, not merely another tiny optimization. |
 | B — compact EFS foundation | Claude conversation 1, preferably Fable | What is the smallest coherent design for the same outcomes? Price portable authored data, references, mandatory acceptance and multi-author selection rather than extrapolating from the native quote demo. Reuse or replace that demo where justified. |
-| C — reuse instead of rebuild | Claude conversation 2 | Independently examine EAS and MUD primary source/code. Map what is reused, what EFS still needs to build, and the trust/read/write implications. Nominate the stronger reuse route before building an adapter. |
+| C — MUD reuse instead of rebuild | Claude conversation 2 | Independently examine MUD primary source/code. Compare a dedicated World + Store to Store-only; map reused versus EFS-specific work and the trust/read/write implications. Build at most one matched MUD-backed adapter, not an EAS alternative. |
 
 Codex coordinates the common fixture, comparison ledger and heavy-run queue. A reviewer who did not author the candidate checks its promises and evidence. At shortlist time, request one bounded review each from SDK PM, Data Explorer PM and Contracts Dev: show them the proposed API and an actual workflow, not the whole design corpus.
 
@@ -65,19 +69,19 @@ All three roads map these workloads on paper. At the hour-8 gate select the smal
 
 Start measurements with the existing matched 32-byte quote and 41-byte binary fixtures. Add a small note and a dense/zero 4 KiB pair when storage policy affects the choice. Pin scale dimensions at launch—e.g. 1,000 live entries, a separate 10,000-lifetime-name churn case, and 1/8/32/64-source read plans where supported. Report unsupported cases; do not raise limits to obtain a green result. These are experimental workloads, not proposed protocol caps.
 
-The first joined proof should connect **authored typed publication → required validation/indexing → selected read → independent consumer**. Isolated passing libraries do not substitute for that connection. Stage the remaining adversarial cases by which unresolved risk could change the decision.
+The first joined proof should connect **authored typed publication → required validation/indexing → selected read → independent consumer**. The selected finalist extends that same deployed graph through export/import and historical interpretation after rule/account/Core changes. Include genuine contract authorship, references, two-author selection and failed mandatory-index rollback. Isolated passing libraries do not substitute for that connection. Stage the remaining adversarial cases by which unresolved risk could change the decision; label any missing joined obligation as an open gate.
 
 ## 4. Clock and decision gates
 
-T0 is when Codex starts coordinating the launched sprint and records the shared baseline below. Give invited lanes one hour to acknowledge; proceed with available participants after that, marking missing evidence or using a bounded internal substitute. Late arrivals use the same clock. The clock does not run from this document's creation or an old overnight mission.
+T0 is when Codex begins the requested decision work and records the shared baseline below; this round includes the source preflight started at 23:10 UTC. A Claude lane's one-hour acknowledgement window begins only after its prompt is actually sent, not at preflight T0. Unlaunched lanes are not late or disqualified. Continue with available participants and bounded internal substitutes, marking missing independent evidence; late arrivals use the remaining mission window. The clock does not run from the original document's creation or an old overnight mission.
 
 | Elapsed time | Deliverable and gate |
 |---|---|
 | 0–3 hours | Independently restate each road before reading the others' recommendations. Reconcile one page of requirements, exact source pins and test expectations. Do not block on another abstract requirements questionnaire; flag any material uncertainty. |
 | 3–8 hours | Each road produces a maximum two-page architecture/cost-center note with a diagram, API example, reused/custom components, weaknesses and one decisive experiment. Select at most two for targeted code; explicitly list the cases that will run and those remaining designed/unknown. Missing implementation is not proof of architectural impossibility. |
-| 8–20 hours | Run up to three decision-changing probes across the shortlisted roads, including a matched joined workflow. Record actual receipt/read costs and failures. One implementation/review repair cycle per probe; a repeated failure becomes evidence, not an unlimited debugging mission. |
+| 8–20 hours | Begin with three decision-changing probes across the shortlisted roads, including a matched joined workflow. Record receipt/read costs, growth and failures. After one repair cycle, triage: resolve a candidate-blocking defect within the remaining time, or report it explicitly. A probe-count target is never grounds to hide a missing obligation. |
 | 20–24 hours | Cross-review and issue a provisional recommendation, feature ledger and cost table. Say what finding would reverse the recommendation. If one road clearly wins, finish early. |
-| 24–40 hours, only if needed | Resolve one named uncertainty capable of changing the choice; perform the corresponding integration/attack check. No new fourth architecture or broad feature tour. |
+| 24–40 hours | Challenge the provisional winner with the strongest remaining cost/semantic counterexample, then complete the finalist's joined gate. Stop early if both are already satisfied. No new fourth architecture or broad feature tour. |
 | 40–48 hours | Deliver the owner brief and build handoff. If an important uncertainty remains, recommend conditionally with that explicit gate; do not claim certainty or silently extend the sprint. |
 
 Eliminate a route only for a demonstrated conflict with an unwaived requirement, an unacceptable trust dependency, or measured resource/complexity costs that make a better route preferable. A novel idea may be promising but unready; label that distinction instead of declaring it impossible. Correctness failures cannot be averaged away by a weighted performance score.
@@ -89,7 +93,7 @@ Use identical semantic work and payloads, named compiler/fork/configuration, nor
 - Include setup/deployment, first write, repeated edit, native contract update, required indexes, failed transactions, paid point/history/list reads and optional-index premiums. Keep setup amortization explicit; count relayer/sponsor costs too.
 - Measure storage growth and browser RPC calls, batches, bytes and latency separately from gas. Inspect contract reads with a real consuming contract; an `eth_call` succeeding is not a paid-read budget.
 - Date any ETH/USD and chain-fee assumptions. Show execution, data-availability and other fees separately, with a range; local receipts are not live Ethereum/OP/Base/Arbitrum fee quotes. Current-dollar affordability is not a 50-year promise.
-- Compare EAS/MUD plus the necessary EFS adapters and queries—not a raw attestation/table write against a complete EFS file lifecycle. A bare mapping remains a useful lower bound, not a feature-equivalent rival.
+- Compare MUD plus the necessary EFS adapters and queries—not a raw table write against a complete EFS file lifecycle. A bare mapping is a limited diagnostic control, not a feature-equivalent rival or a proved theoretical lower bound.
 - Record source/evidence pins and independent expected outcomes. Receipt inclusion, matching hashes and retained RPC transcripts are not independently authenticated chain-state proofs. Report the proof level actually checked.
 
 The fuller seven-fact create is currently about **5.06M gas**. The native canonical quote create is **627,672**, with a matched contract quote update at **198,745**. These measure different promises; their ratio is **not** the price of portability. See the retained [[../2026-09-11-efs21-overnight|comparison and qualifications]] and [[../2026-09-12-efs21-canonical-native-types-results|canonical native results]]. This planning pass did not rerun those benchmarks.
@@ -108,12 +112,12 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
-- Phase / T0: **not launched / unset**.
-- Participants: Codex coordinating; two Claude lanes proposed, not yet confirmed.
-- Baselines: retained pins in section 5; live ownership verification pending launch.
-- Frozen fixture / shortlisted roads / actual probes: not yet selected.
+- Phase / T0: **source preflight / 2026-09-12 23:10 UTC**; no chain experiment has run in this phase.
+- Participants: Codex plus three bounded internal reviews (MUD source, cost attribution, freeze/portability); two Claude lanes not yet confirmed and no invitation/acknowledgement deadline recorded.
+- Baselines: planning `7f6b330`; native source/evidence pins in section 5 remain present and the native checkout is clean. Fable's existing untracked brainstorm is preserved. The similarly named direct worktree is the stopped `f873890` size probe, not the fuller control.
+- Frozen fixture / shortlisted roads / actual probes: guarantee and measurement protocol revised; final executable fixture still to be agreed. MUD source preflight is linked below; no performance winner selected.
 - Heavy-run slot: **not granted**; no new run started by this plan.
-- Next handoff: launch, acknowledgements and independent short proposals.
+- Next handoff: Claude acknowledgements/independent proposals; pin the shared capsule, expected outcomes and smallest matched experiments. Read [[mud-source-preflight|Codex's MUD source preflight]] only after recording an independent Road C proposal.
 
 ## 7. What James receives
 
@@ -121,7 +125,7 @@ One short decision memo, with supporting evidence linked rather than embedded:
 
 1. Recommended road, strongest alternative and why the recommendation wins.
 2. Features retained, explicitly proposed sacrifices, deferred implementation and unknowns—four separate lists.
-3. Matched cost/scale table, including ordinary contract use and browser work.
+3. Matched cost/scale table and overhead ledger: conditional lower bounds, best demonstrated costs, marginal feature prices, external obligations and still-unpriced work. Include ordinary contract use, browser work, state growth and representative read/write/rebuild mixes.
 4. A one-page architecture and illustrative SDK/Solidity calls. Can an app author create, publish, select and read a file without learning the internal record choreography?
 5. A first implementation sequence for contracts, TypeScript/on-chain SDK and the static Files SPA; a small Arcade consumer is a later integration exercise, not a fourth platform to build in this sprint.
 6. No more than three owner decisions, each with a plain-English example, measured consequence and recommendation. Separate blockers to starting reversible testnet code from blockers to a permanent release.
@@ -130,7 +134,7 @@ Example of a useful question: “Keeping independently selected community histor
 
 ## Launch prompts
 
-These start the coordinated sprint when James chooses to send them. Paths below are relative to the shared planning repository; on another machine, use the corresponding synced checkout. Read current repository instructions first. A task without shared filesystem access must say so and return a self-contained report through James; never assume chat history or unsynced files are shared.
+These join the coordinated sprint when James sends them; Codex has begun source preflight. Paths below are relative to the shared planning repository; on another machine, use the corresponding synced checkout. Read current repository instructions first. A task without shared filesystem access must say so and return a self-contained report through James; never assume chat history or unsynced files are shared.
 
 ### Claude conversation 1 — compact EFS challenger
 
@@ -142,7 +146,8 @@ promises. This is not permission to silently discard portability, typed
 references, required developer validation, Lenses or required discovery.
 You may challenge any requirement, but make its consequences explicit.
 
-First independently produce your short architecture, expected cost centers,
+Read the linked overhead-and-selection protocol. First independently produce
+your short architecture, expected cost centers,
 strongest objection and one discriminating experiment. Do not just defend
 either existing prototype or rebuild the full system. Then coordinate the
 shared fixture and shortlist with Codex before implementation. Use the plan's
@@ -154,19 +159,21 @@ Begin by reporting your checkout/HEAD, dirty state, available coordination
 method and proposed isolated code area. The shared brief owns the timebox.
 ```
 
-### Claude conversation 2 — strongest reuse alternative
+### Claude conversation 2 — MUD reuse alternative
 
 ```text
 Work with Codex on the EFS path decision sprint. Read planning/AGENTS.md and
 planning/Reviews/2026-09-12-efs-path-decision/README.md in the EFS workspace.
-You lead Road C: determine whether EAS or MUD plus a thin EFS layer is a better
-foundation than a custom kernel. Research primary documentation and actual
-source. You are allowed to recommend reuse; this is not a defense of EFS.
+You lead Road C: determine whether MUD plus a thin EFS layer is a better
+foundation than a custom kernel. EAS implementation is excluded by James.
+Research primary documentation and actual source. Compare World + Store with
+Store-only before choosing one adapter. Reuse is allowed to win.
 
 Map the important EFS outcomes to reused code, custom code, costs and trust
 dependencies. Consider contract writes AND paid reads, portable authored
 data, required queries, independent browser reconstruction and developer UX.
-Do not compare a raw table/attestation write to a feature-rich EFS operation.
+Read the linked overhead-and-selection protocol. Do not compare a raw table
+write to a feature-rich EFS operation.
 Nominate the strongest reuse route and one decision-changing uncertainty;
 do not build two substitute filesystems. Give your independent short proposal
 before reading the other roads. Prototype only after the shared shortlist.
@@ -187,8 +194,8 @@ without privileging the current design; use bounded internal reviewers and
 the SDK, Data Explorer and Contracts roles for focused integration feedback.
 Retain the independently written proposals before cross-review. Shortlist at
 most two implementation roads, operate the shared finite-run queue and return
-a provisional recommendation within 24 hours. Use day two only for a named
-uncertainty that can change the choice. Preserve requirements unless James
+a provisional recommendation within 24 hours. Use day two to challenge the
+winner and complete its joined integration gate. Preserve requirements unless James
 explicitly accepts a sacrifice. Deliver the readable decision and build
 handoff, not another indefinite validation cycle or production implementation.
 ```
