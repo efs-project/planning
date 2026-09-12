@@ -75,10 +75,14 @@ contract BodyStorageTest is TestBase {
         bytes32 packedSlot = bytes32(uint256(keccak256(abi.encode(id, uint256(3)))) + 1);
         bytes32 original = hvm.load(address(kernel), packedSlot);
         // Absent pointer; boundedness violation before allocation; wrong stored Type.
-        hvm.store(address(kernel), packedSlot, bytes32(uint256(4) << 160));
+        hvm.store(address(kernel), packedSlot, bytes32((uint256(4) << 160) | (uint256(1) << 176)));
         vm.expectRevert(bytes4(keccak256("CorruptRecord()")));
         kernel.readRecord(id);
-        hvm.store(address(kernel), packedSlot, bytes32(uint256(uint160(pointer)) | (uint256(65535) << 160)));
+        hvm.store(
+            address(kernel),
+            packedSlot,
+            bytes32(uint256(uint160(pointer)) | (uint256(65535) << 160) | (uint256(1) << 176))
+        );
         vm.expectRevert(bytes4(keccak256("CorruptRecord()")));
         kernel.readRecord(id);
         hvm.store(address(kernel), packedSlot, original);

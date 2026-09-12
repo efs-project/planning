@@ -46,6 +46,7 @@ contract NativeKernel {
         bytes32 typeId;
         address pointer;
         uint16 bodyLength;
+        bool present;
     }
 
     struct Entry {
@@ -74,7 +75,8 @@ contract NativeKernel {
     mapping(bytes32 => FileInfo) private files;
     mapping(bytes32 => StoredRevision[]) private history;
     mapping(bytes32 => StoredRecord) private records;
-    mapping(bytes32 => bool) private hasRecord;
+    // Reserved legacy existence root: keep subsequent location/history layout unchanged.
+    mapping(bytes32 => bool) private reservedLegacyPresence;
     mapping(bytes32 => mapping(uint64 => HistoricalLocation)) private locations;
 
     error MissingFile();
@@ -148,8 +150,8 @@ contract NativeKernel {
     }
 
     function readRecord(bytes32 id) external view returns (Record memory) {
-        if (!hasRecord[id]) revert MissingRecord();
         StoredRecord storage stored = records[id];
+        if (!stored.present) revert MissingRecord();
         address pointer = stored.pointer;
         uint256 length = stored.bodyLength;
         if (length > MAX_BODY || pointer == address(0) || pointer.code.length != length + 1) revert CorruptRecord();
@@ -263,13 +265,12 @@ contract NativeKernel {
         if (body.length > MAX_BODY) revert BodyTooLarge();
         types.validate(typeId, body);
         id = recordId(typeId, body);
-        if (!hasRecord[id]) {
+        if (!records[id].present) {
             if (address(bodyWriter).codehash != bodyWriterCodeHash) revert BodyWriterUnavailable();
             address pointer = bodyWriter.write(body);
-            hasRecord[id] = true;
             // MAX_BODY is checked above, before the narrowing conversion.
             // forge-lint: disable-next-line(unsafe-typecast)
-            records[id] = StoredRecord(typeId, pointer, uint16(body.length));
+            records[id] = StoredRecord(typeId, pointer, uint16(body.length), true);
             navigation.noteRecord(typeId, id);
             emit RecordStored(id, typeId);
         }

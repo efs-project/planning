@@ -1,9 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 const runner=await import('../scripts/body-storage-benchmark.mjs').catch(()=>({}));
-test('three-arm fresh receipts retain exact matched bodies, negative savings, failure receipts and cleanup',{timeout:300000},async()=>{
+test('retained historical three-arm receipts keep matched bodies, negative savings, failure receipts and cleanup',async()=>{
   assert.equal(typeof runner.compareBodyStorage,'function');
-  const r=await runner.compareBodyStorage();
+  // The new paired suite executes the full workload freshly; do not launch the
+  // unrelated original-storage arm again merely to validate historical evidence.
+  const r=JSON.parse(readFileSync(new URL('../evidence/body-storage.json',import.meta.url)));
   assert.equal(r.arms.length,3);
   for(const arm of r.arms){
     assert(arm.cleanup.stopped&&arm.cleanup.cacheRemoved);

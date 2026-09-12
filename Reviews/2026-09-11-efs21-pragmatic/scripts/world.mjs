@@ -10,6 +10,7 @@ export {E};
 export const ROOT = fileURLToPath(new URL('../',import.meta.url));
 export const KERNEL_PROFILES=Object.freeze({
   current:{registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true},
+  'baseline-58e61c4':{fixture:'58e61c4',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true},
   'baseline-aa6b1b6':{fixture:'aa6b1b6',registry:'ExactTypeRegistry',raw:false,discovery:false,bodyWriter:false},
   'baseline-bf566dc':{fixture:'bf566dc',registry:'ExactTypeRegistry',raw:false,discovery:false,bodyWriter:false},
   'baseline-c088363':{fixture:'c088363',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:false},

@@ -9,7 +9,7 @@ const recordId=(typeId,body)=>E.keccak256(abi.encode(['bytes32','bytes32','bytes
 const composition=data=>{const bytes=E.getBytes(data),zero=bytes.filter(b=>b===0).length;return {zeroBytes:zero,nonzeroBytes:bytes.length-zero};};
 const json=value=>JSON.parse(JSON.stringify(value,(_,v)=>typeof v==='bigint'?v.toString():v));
 
-async function workload(w){
+export async function workload(w){
   const c=w.client,seen=new Set(),children=[],reads=[],retention=[];
   const ni=new E.Interface(artifact('NavigationIndex').abi),nav=w.provenance.runtimes.NavigationIndex.address;
   const helper=w.provenance.runtimes.BodyWriter?.address;
