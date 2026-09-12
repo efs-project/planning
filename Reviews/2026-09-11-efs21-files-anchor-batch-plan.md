@@ -12,7 +12,7 @@
 
 ## Global constraints
 
-- Dispatch only after the checked-Record task is committed, independently reviewed and root-verified. Root records that exact base in the task ledger. Code stays in `planning-efs21-direct` / `codex/efs21-direct-apply`; main-visible documentation stays on main.
+- The checked-Record gate is complete at`8f101f1f94fe46a6ac90b6287443929427fa9b23` (source`945ed6b`): independent Approved, root235Forge/42readerNode plus strict TypeScript/format/ordinary sizes. Dispatch after native packed-presence releases the single builder slot, rechecking that exact code base in the task ledger. Code stays in `planning-efs21-direct` / `codex/efs21-direct-apply`; main-visible documentation stays on main.
 - One implementation/build/new finite-world owner. Preserve native54154, Fable60731, other worktrees and all historical evidence. No public deployment/funds, production repository, migration, raised ceilings, traces or protocol promotion. Stop heavy work below20GiB; serial managed worlds and exact owned-cache cleanup.
 - No contract, write, Type, record representation, Lens/history or browser UI changes. Do not optimize `openRemoved`, tags, content reads or selected-entry resolution in this task. No generic microtask batching and no fallback guessed from RPC errors.
 - Preserve checked ABI/source qualification, block-hash pinning, cumulative transport budgets, cancellation and final sealing. A successful RPC return is not a state proof.
