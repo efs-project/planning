@@ -8,7 +8,7 @@
 
 **Tech Stack:** existing Solidity0.8.30, optimizer200, via-IR, Cancun, Foundry and full-C0 paired runner.
 
-**Spec:** [[2026-09-11-efs21-full-model-storage-preflight]], [[2026-09-11-efs21-overnight]]. Source-only preflight checked exact`ab13d89` and the Envelope candidate. **Not dispatched.** Complete the active Envelope gate first and pin its reviewed head; metadata-only reads may precede this task if their ordinary sizes fit. The Envelope rehearsal's actual CoreU3 runtime is24536bytes, only40 below EIP-170. That number must be rechecked at dispatch, not silently treated as the next baseline.
+**Spec:** [[2026-09-11-efs21-full-model-storage-preflight]], [[2026-09-11-efs21-overnight]]. Source-only preflight checked exact`ab13d89` and the Envelope candidate. **Dispatched September12 07:48UTC** after the Envelope and metadata-read gates, against exact reviewed/root-reproduced/pushed control `1cb402a19c9b6f1ddf4137dfa2597f85bc50dd82`. Fresh actual CoreU3 runtime remains24536bytes, only40 below EIP-170; admission library20317 and PreparationHelper18953. One implementation/build/new finite-world worker owns this task; root owns review/publication. No shared-slab or Type-codec change is bundled.
 
 Independent read-only plan review approved the bootstrap order, exact dependency check, fresh-genesis linkage restriction and actual U3/paired-cost gates. No compiled saving is established by source review.
 

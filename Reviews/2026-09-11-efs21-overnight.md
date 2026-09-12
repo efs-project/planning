@@ -6,13 +6,29 @@ James authorized an overnight implementation pass: make ordinary contract and br
 
 ## Latest in plain English
 
-- **The fuller model is cheaper, but still expensive:** the seven-record create is now 5.74M gas including content staging, down from the earlier7.77M workload. The latest isolated Envelope-storage pair is5,902,827→5,738,524gas with all data/index/Lens results retained. Earlier direct application changes callback visibility and late-failure costs; this is not an adoption ruling or universal equivalence.
+- **The fuller model is cheaper, but still expensive:** the seven-record create is now **5.72M gas including content staging**, down from the earlier 7.77M workload. The latest isolated metadata-read pair is 5,738,536 → 5,716,508 gas with all data/index/Lens results retained. It saves far more when referencing an existing large Record: 566,522 gas for the measured 8,192-byte target. Earlier direct application changes callback visibility and late-failure costs; this is not an adoption ruling or universal equivalence.
 - **Useful contract filesystem operations work in a narrower model:** a producer publishes `/swaps/eth-usdc`; an unrelated contract reads it. After the reviewed actual Record/Files extraction, the update costs 232,664 gas and its paid reader 80,769. Generic Record storage, mandatory by-Type inventory, Files, required navigation and configurable discovery have actual separate contract boundaries. This separation slightly increases Files costs; richer full-v2 identity, acceptance and Lenses are not silently included in the price.
 - **Storage tradeoffs are measured, not assumed:** the reviewed hybrid reduces a 4,096-byte zero Record admission from 990,892 to 200,375 gas, but its paid read rises from 85,373 to 396,952. A 41-byte file edit slightly regresses from 241,339 to 242,500. Different representations preserve exact bytes/IDs while having different economics; no 100-year write-policy choice has been made.
 - **Reads need further work:** full-model batching lowers eight small paid Record reads from 453,212 to 283,890 gas. Actual Files anchor batching cuts RPCs by 6.5–8.7%, but delayed browsing becomes 1.2–1.5% slower and sends more bytes. It is not yet a UX-speedup recommendation.
 - **Try the latest browser:** [split native candidate](http://127.0.0.1:49966), snapshotted at reviewed `4cb0042`, has real local-contract create/read/edit/rename/unlink/history/reload tests in Chromium. The older [native snapshot](http://127.0.0.1:54154) remains `c088363`; Fable's port60731 stays untouched. These need this laptop/process running. The new demo has an 18-hour watchdog from September12 05:58UTC; later source changes cannot silently alter its assets or contracts.
 
-**Next engineering gate:** the reviewed [[2026-09-12-efs21-metadata-only-admission-plan|three-site metadata-read task]] avoids copying existing Record bodies/Type caches when admission only needs their identifiers. It keeps all stored facts and indexes. The separately reviewed [[2026-09-12-efs21-initialization-outline-plan|initialization-size experiment]] precedes larger additions if needed; actual CoreU3 has only40bytes runtime headroom. Shared Record/Envelope storage and compact Type caches remain separately staged, with no unbuilt saving claimed. No feature sacrifice, production deployment or protocol freeze is implied.
+**Next engineering gate:** the [[2026-09-12-efs21-metadata-only-admission-plan|three-site metadata-read task]] is complete, independently reviewed, root-reproduced and pushed at `1cb402a`. The separately reviewed [[2026-09-12-efs21-initialization-outline-plan|initialization-size experiment]] is now dispatched against that exact base; actual CoreU3 has only 40 bytes of runtime headroom. Shared Record/Envelope storage and compact Type caches remain separately staged, with no unbuilt saving claimed. No feature sacrifice, production deployment or protocol freeze is implied.
+
+### Metadata-only admission reads, reviewed
+
+Source `137fa252`, control `ed49a6c`, final evidence/test review `4e7150c`, root closure `1cb402a`. Two internal accessors avoid copying payloads at exactly three metadata-only sites: existing Record deduplication, Record/Object references, and Type dependency existence. Stored layouts, incoming validation, complete public reads, all indexes and same-carriage visibility remain. [Paired receipts and limits](https://github.com/efs-project/planning/blob/1cb402a/Reviews/2026-09-11-efs21-pragmatic/metadata-admission-results.md).
+
+| Same-input full-profile operation | Full-row reads | Metadata reads |
+|---|---:|---:|
+| Complete seven-record create, including staging | 5,738,536 | 5,716,508 |
+| Complete three-record edit, including staging | 2,976,780 | 2,960,272 |
+| Fresh occurrence of an existing 8,192-byte Record | 3,624,780 | 3,058,453 |
+| New Record referencing that existing large Record | 1,523,295 | 956,773 |
+| All-ACTIVE retry, unchanged control | 643,851 | 643,851 |
+
+No persistent publication/index slots were removed. All six paid public reads and all complete logical inventories agree. Files still uses 104 requests, with 56 additional response bytes from the library's 28 added runtime bytes. Admission-library deployment increases 6,096 gas. Actual U3 remains 24,536 bytes; this step creates no code-size headroom.
+
+Independent review checked all 238 signed transactions and source/runtime/ABI/inventory evidence. Root separately reproduced **233 Core tests, 29 foundation tests and 265 passing Node/browser checks**, with one existing legal-large-Type skip and a pre-existing compiler mutability warning. A paid Binding evidence check was strengthened after review exposed a wrong-field normalization loophole; an actual forged regression went RED then GREEN, with no receipt or Solidity change. A new fail-fast refusal of an impossible stored Record length over 8,192 is an explicit corruption-boundary difference, not universal fault equivalence. The deferred paid receipt-library cost remains unmeasured. All finite test worlds closed; the three demos remain untouched.
 
 ### Full-model Envelope storage, reviewed
 
