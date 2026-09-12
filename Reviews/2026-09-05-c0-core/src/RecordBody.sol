@@ -264,10 +264,20 @@ library RecordBody {
         }
     }
 
-    function slice(bytes memory b, uint256 start, uint256 n) private pure returns (bytes memory out) {
+    function slice(bytes memory b, uint256 start, uint256 n) internal pure returns (bytes memory out) {
         out = new bytes(n);
-        for (uint256 i; i < n; ++i) {
-            out[i] = b[start + i];
+        // Preserve the loop's allocation-first and empty-span behavior.
+        if (n == 0) return out;
+        if (start >= b.length || n > b.length - start) {
+            // Solidity's array-bounds panic, as in the former byte loop.
+            assembly ("memory-safe") {
+                mstore(0, shl(224, 0x4e487b71))
+                mstore(4, 0x32)
+                revert(0, 36)
+            }
+        }
+        assembly ("memory-safe") {
+            mcopy(add(out, 32), add(add(b, 32), start), n)
         }
     }
 }
