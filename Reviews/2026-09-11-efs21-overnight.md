@@ -6,7 +6,7 @@ James authorized an overnight implementation pass: make ordinary contract and br
 
 ## Latest in plain English
 
-- **The fuller model is cheaper, but still expensive:** the seven-record create is now **5.72M gas including content staging**, down from the earlier 7.77M workload. The latest isolated metadata-read pair is 5,738,536 → 5,716,508 gas with all data/index/Lens results retained. It saves far more when referencing an existing large Record: 566,522 gas for the measured 8,192-byte target. Earlier direct application changes callback visibility and late-failure costs; this is not an adoption ruling or universal equivalence.
+- **The fuller model is cheaper, but still expensive:** the seven-record create is now **5.26M gas including content staging**, down from the earlier 7.77M workload. The latest isolated shared-byte-block pair is5,716,814→5,257,364gas with all seven facts and all index families retained. This step saves459,450gas (8.04%), not an order of magnitude. Earlier direct application changes callback visibility and late-failure costs; this is not an adoption ruling or universal equivalence.
 - **Useful contract filesystem operations work in a narrower model:** a producer publishes `/swaps/eth-usdc`; an unrelated contract reads it. After the reviewed actual Record/Files extraction, the update costs 232,664 gas and its paid reader 80,769. Generic Record storage, mandatory by-Type inventory, Files, required navigation and configurable discovery have actual separate contract boundaries. This separation slightly increases Files costs; richer full-v2 identity, acceptance and Lenses are not silently included in the price.
 - **The cheap prototype need not stay limited to three simple validators:** a reviewed [[2026-09-12-efs21-canonical-native-types-preflight|canonical EFS Types bridge]] identifies how to reuse the actual structural interpreter in its Files path. IDs, encodings and qualification need explicit changes; full admission, reference support and arbitrary developer validation are not implied. This bridge is not implemented or priced yet.
 - **Storage tradeoffs are measured, not assumed:** the reviewed hybrid reduces a 4,096-byte zero Record admission from 990,892 to 200,375 gas, but its paid read rises from 85,373 to 396,952. A 41-byte file edit slightly regresses from 241,339 to 242,500. Different representations preserve exact bytes/IDs while having different economics; no 100-year write-policy choice has been made.
@@ -16,11 +16,30 @@ James authorized an overnight implementation pass: make ordinary contract and br
 - **Seven Records is a profile recipe, not a universal minimum:** the [[2026-09-12-efs21-smaller-files-profile-preflight|smaller-Files preflight]] identifies an inline-small-value revision experiment and its exact loss of independent ChunkTree reuse/carrier support. It also makes the unimplemented version/location-tag boundaries explicit. No smaller-profile saving is measured yet.
 - **Try the latest browser:** [split native candidate](http://127.0.0.1:49966), snapshotted at reviewed `4cb0042`, has real local-contract create/read/edit/rename/unlink/history/reload tests in Chromium. The older [native snapshot](http://127.0.0.1:54154) remains `c088363`; Fable's port60731 stays untouched. These need this laptop/process running. The new demo has an 18-hour watchdog from September12 05:58UTC; later source changes cannot silently alter its assets or contracts.
 
-**Next engineering gate:** metadata reads and the [[2026-09-12-efs21-initialization-outline-plan|initialization-size experiment]] are complete at`8688d52`, independently reviewed, root-reproduced and pushed. Initialization outlining recovered917bytes of Core runtime (957margin) but costs330moregas per complete create. The [[2026-09-11-efs21-shared-slab-plan|shared Record/Envelope storage experiment]] is running against that exact base; compact Type caches remain separate. No unbuilt saving, feature sacrifice, production deployment or protocol freeze is implied.
+**Next engineering gate:** the [[2026-09-11-efs21-shared-slab-plan|shared Record/Envelope storage experiment]] is complete at`24d7407`, independently reviewed, root-reproduced and pushed. The independently reviewed [[2026-09-12-efs21-body-copy-plan|bounded validation-copy experiment]] is now dispatched against that exact base: price an avoidable implementation loop before sacrificing features. It changes authenticated helper runtime identity, not the Type language or storage profile. Compact Type caches remain separate. No unbuilt saving, feature sacrifice, production deployment or protocol freeze is implied.
 
 The [[2026-09-12-efs21-posting-store-plan|full-model mandatory index-contract extraction plan]] is also independently reviewed and staged: one immutable Core-writer Store, all ten families retained first, explicit configuration binding and whole-write/paid-read comparisons. It is not yet the configurable-family redesign or a claimed gas win.
 
 The [[2026-09-12-efs21-known-record-consumer-plan|paid known-Record consumer plan]] is independently reviewed and staged separately. It changes no Core API and explicitly compares two trusted-deployment read profiles, not interchangeable admission proofs.
+
+### Shared Record/Envelope byte blocks, reviewed
+
+Source`987a7bf`, retained evidence`9499df7`, root closure`24d7407`; exact control`8688d52`. One immutable helper byte block holds a publication Envelope and newly selected Record bodies. Logical IDs, all seven Files facts, all ten posting families and existing qualification remain. The physical storage format changes only in a fresh-genesis disposable prototype; no migration compatibility is claimed. [Full paired results, regressions and evidence](https://github.com/efs-project/planning/blob/24d7407/Reviews/2026-09-11-efs21-pragmatic/shared-byte-block-results.md).
+
+| Same-input full-profile operation | Prior storage | Shared blocks |
+|---|---:|---:|
+| Complete seven-record create, including staging |5,716,814|5,257,364|
+| Complete three-record edit, including staging |2,960,445|2,758,979|
+| Steady tag |1,989,824|1,868,793|
+| Binding rebind |1,725,844|1,623,022|
+| Dense8,192-byte Record admission |8,900,547|4,864,176|
+| Zero-heavy8,192-byte Record admission |3,744,867|4,782,996|
+| Paid8,192-byte Record read |824,285|194,042|
+| Paid eight-current-Record read |343,737|293,455|
+
+Zero-heavy writes regress by1,038,129gas; tiny/existing-Record writes and Envelope/occurrence/tiny paid reads also regress. Top-level deployment rises741,492gas. Both64-unique selected-leaf workloads still refuse under the unchanged transaction cap; they are not successful throughput. Qualified Files browsing still takes114requests, with6,854more JSON bytes, so this is not a browsing-speed claim. The known large-Type cache/output bound and unmeasured paid receipt-library cost remain.
+
+Independent review checked258signed transactions and source/runtime/physical/logical evidence. Root separately reproduced **245Core,38foundation and291Node/browser/offline passes, with one existing Type skip and zero failures**, strictTS/formatting and actual module sizes. U3 is24,141bytes (435margin), admission22,392; helper remains byte-exact18,953. All finite worlds closed; three demos untouched,280GiBfree at09:44UTC. Experimental authorization continues; protocol adoption and permanent feature tradeoffs remain owner decisions.
 
 ### Metadata-only admission reads, reviewed
 
