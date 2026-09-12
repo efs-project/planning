@@ -126,6 +126,15 @@ contract NavigationIndex {
         return _page(createdFiles[owner], scope, high, high, cursor, limit);
     }
 
+    /// @notice Stable all-created ordinal source, including roots/directories/unlinked files.
+    function fileCount(address owner) external view returns (uint256) {
+        return createdFiles[owner].length;
+    }
+
+    function fileAt(address owner, uint256 ordinal) external view returns (bytes32) {
+        return createdFiles[owner][ordinal];
+    }
+
     /// @notice Unique records ever admitted by this kernel for exactly this TypeId.
     function typeInventory(bytes32 typeId, Cursor calldata cursor, uint256 limit) external view returns (Page memory) {
         bytes32 scope = keccak256(abi.encode("EFS21_RECORDS", address(this), typeId));

@@ -22,10 +22,10 @@ export async function freePort() {
 }
 export async function withWorld(action,{watchdogMs=300000,buildFirst=true,kernelArtifact='current'}={}) {
   if (buildFirst) build();
-  assert(['current','baseline-aa6b1b6'].includes(kernelArtifact),'explicit supported kernel artifact');
-  const fixturePath='contracts/test/fixtures/native-kernel-aa6b1b6.json';
+  assert(['current','baseline-aa6b1b6','baseline-bf566dc'].includes(kernelArtifact),'explicit supported kernel artifact');
+  const fixturePath=`contracts/test/fixtures/native-kernel-${kernelArtifact==='baseline-bf566dc'?'bf566dc':'aa6b1b6'}.json`;
   const selectedKernel=kernelArtifact==='current'?artifact('NativeKernel'):JSON.parse(readFileSync(ROOT+fixturePath));
-  assert.deepEqual(selectedKernel.abi,artifact('NativeKernel').abi,'identical public ABI across history arms');
+  for(const fragment of selectedKernel.abi) assert(artifact('NativeKernel').abi.some(current=>JSON.stringify(current)===JSON.stringify(fragment)),'historical ABI fragment preserved exactly');
   const kernelPin={selection:kernelArtifact,creationBytecodeHash:E.keccak256(selectedKernel.bytecode.object),sourcePins:selectedKernel.metadata.sources};
   if(kernelArtifact!=='current') {
     assert.equal(kernelPin.creationBytecodeHash,selectedKernel.creationBytecodeHash,'pinned baseline bytecode');
@@ -55,6 +55,7 @@ export async function withWorld(action,{watchdogMs=300000,buildFirst=true,kernel
     const kernel=await deploy('NativeKernel'),ki=new E.Interface(artifact('NativeKernel').abi);
     const point=async (method)=>ki.decodeFunctionResult(method,await rpc('eth_call',[{to:kernel,data:ki.encodeFunctionData(method)},'latest']))[0];
     const registry=await pin('ExactTypeRegistry',await point('types'));await pin('NavigationIndex',await point('navigation'));
+    if(kernelArtifact==='current') await pin('DiscoveryIndex',await point('discovery'));
     const bytesValidator=await deploy('BytesValidator'),uintValidator=await deploy('Uint256Validator');
     const ti=new E.Interface(artifact('ExactTypeRegistry').abi),abi=E.AbiCoder.defaultAbiCoder();
     async function register(label,validator) {const descriptor=E.toUtf8Bytes(label),codeHash=E.keccak256(await rpc('eth_getCode',[validator,'latest']));await rawSend('register '+label,ti.encodeFunctionData('register',[descriptor,validator]),registry);return E.keccak256(abi.encode(['bytes32','bytes32','bytes32'],[E.id('EFS21_TYPE_V1'),E.keccak256(descriptor),codeHash]));}
@@ -65,7 +66,7 @@ export async function withWorld(action,{watchdogMs=300000,buildFirst=true,kernel
     const actions=[],client=createClient(E,config,{onAction:a=>{const i=actions.findIndex(x=>x.hash===a.hash);if(i<0)actions.push(a);else actions[i]=a;}});
     const git=spawnSync('git',['rev-parse','HEAD'],{cwd:ROOT,encoding:'utf8'}).stdout.trim();
     const sourcePins=Object.fromEntries(readdirSync(`${ROOT}contracts/src`).filter(p=>p.endsWith('.sol')).map(p=>[p,E.keccak256(readFileSync(`${ROOT}contracts/src/${p}`))]));
-    for(const name of ['NativeKernel','NavigationIndex','ExactTypeRegistry','BytesValidator','Uint256Validator','QuoteProducer','QuoteReader','PlainQuoteMapping']){
+    for(const name of ['NativeKernel','NavigationIndex','DiscoveryIndex','ExactTypeRegistry','BytesValidator','Uint256Validator','QuoteProducer','QuoteReader','PlainQuoteMapping']){
       for(const [path,pin] of Object.entries(artifact(name).metadata.sources))assert.equal(E.keccak256(readFileSync(`${ROOT}contracts/${path}`)),pin.keccak256,'artifact matches source '+path);
     }
     const supportPins=Object.fromEntries(['scripts','sdk','web','test'].flatMap(dir=>readdirSync(ROOT+dir).map(p=>[dir+'/'+p,E.keccak256(readFileSync(ROOT+dir+'/'+p))])));

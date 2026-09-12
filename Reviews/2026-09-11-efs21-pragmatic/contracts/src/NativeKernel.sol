@@ -2,6 +2,7 @@
 pragma solidity 0.8.30;
 import {ExactTypeRegistry} from "./ExactTypeRegistry.sol";
 import {NavigationIndex} from "./NavigationIndex.sol";
+import {DiscoveryIndex} from "./DiscoveryIndex.sol";
 
 /// @notice Fresh-genesis filesystem-profile cost experiment, NOT the generic EFS v2 Core.
 /// Native caller authority, one placement per object, no directory moves or upgrades.
@@ -52,6 +53,9 @@ contract NativeKernel {
     }
     NavigationIndex public immutable navigation;
     ExactTypeRegistry public immutable types;
+    DiscoveryIndex public immutable discovery;
+    bytes32 private immutable discoveryCodeHash;
+    uint256 public constant DISCOVERY_GAS = 600_000;
     uint256 public constant MAX_BODY = 4096;
     uint256 public constant MAX_NAME = 64;
     uint256 public constant MAX_PATH_DEPTH = 32;
@@ -76,12 +80,15 @@ contract NativeKernel {
     error RootRemovalUnsupported();
     error BodyTooLarge();
     error PathTooDeep();
+    error DiscoveryUnavailable();
     event FileChanged(bytes32 indexed fileId, address indexed owner, uint64 revision);
     event RecordStored(bytes32 indexed recordId, bytes32 indexed typeId);
 
     constructor() {
         navigation = new NavigationIndex();
         types = new ExactTypeRegistry();
+        discovery = new DiscoveryIndex(navigation, types);
+        discoveryCodeHash = address(discovery).codehash;
     }
 
     /// @notice One-call coherent bounded metadata hydration. Bodies require readRecord separately.
@@ -112,6 +119,7 @@ contract NativeKernel {
         locations[id][1] = HistoricalLocation(bytes32(0), "");
         history[id].push(StoredRevision(bytes32(0), 1, true));
         navigation.addNode(msg.sender, id, bytes32(0), "", true);
+        _notify(id);
         emit FileChanged(id, msg.sender, 1);
     }
 
@@ -149,6 +157,7 @@ contract NativeKernel {
         uint64 locationRevision = history[id][file.revision - 1].locationRevision;
         _revise(id, file, rid, locationRevision, true);
         navigation.touchNode(id);
+        _notify(id);
     }
 
     function moveFile(bytes32 id, uint64 expected, bytes32 parent, bytes calldata name) external {
@@ -160,6 +169,7 @@ contract NativeKernel {
         locations[id][locationRevision] = HistoricalLocation(parent, name);
         _revise(id, file, file.recordId, locationRevision, true);
         navigation.moveNode(id, parent, name);
+        _notify(id);
     }
 
     function unlink(bytes32 id, uint64 expected) external {
@@ -168,6 +178,7 @@ contract NativeKernel {
         uint64 locationRevision = history[id][file.revision - 1].locationRevision;
         _revise(id, file, file.recordId, locationRevision, false);
         navigation.removeNode(id);
+        _notify(id);
     }
 
     function fileInfo(bytes32 id) external view returns (FileInfo memory file) {
@@ -214,6 +225,7 @@ contract NativeKernel {
         locations[id][1] = HistoricalLocation(parent, name);
         history[id].push(StoredRevision(rid, 1, true));
         navigation.addNode(msg.sender, id, parent, name, directory);
+        _notify(id);
         emit FileChanged(id, msg.sender, 1);
     }
 
@@ -227,6 +239,23 @@ contract NativeKernel {
             navigation.noteRecord(typeId, id);
             emit RecordStored(id, typeId);
         }
+    }
+
+    function _notify(bytes32 id) private {
+        address target = address(discovery);
+        if (target.codehash != discoveryCodeHash) revert DiscoveryUnavailable();
+        bytes memory input = abi.encodeCall(discovery.onFileChanged, (msg.sender, id));
+        uint256 budget = DISCOVERY_GAS;
+        bytes32 marker = keccak256("EFS21_DISCOVERY_OK");
+        bool ok;
+        // Fixed return copy: neither short/long data nor a dishonest marker is success.
+        assembly ("memory-safe") {
+            let out := mload(0x40)
+            mstore(out, 0)
+            ok := call(budget, target, 0, add(input, 32), mload(input), out, 32)
+            ok := and(and(ok, eq(returndatasize(), 32)), eq(mload(out), marker))
+        }
+        if (!ok) revert DiscoveryUnavailable();
     }
 
     function _revise(bytes32 id, FileInfo storage file, bytes32 rid, uint64 locationRevision, bool live) private {
