@@ -23,6 +23,11 @@ library StateStore {
         uint64 firstAdmissionOrdinal;
     }
 
+    struct RecordAdmissionMeta {
+        bytes32 typeId;
+        uint64 recordOrdinal;
+    }
+
     struct EnvelopeRow {
         bytes canonicalUnsignedEnvelope;
         uint64 envelopeOrdinal;
@@ -143,6 +148,32 @@ library StateStore {
         PrincipalId,
         PostingKey,
         BindingKey
+    }
+
+    /// Admission existence/type evidence only; no body authentication or copying.
+    function recordAdmissionMeta(Store storage s, bytes32 id)
+        internal
+        view
+        returns (RecordAdmissionMeta memory result)
+    {
+        RecordRow storage row = s.records[id];
+        uint256 length = row.body.length;
+        if (length > 8192) revert StorageByteView.ErrReadState(id);
+        result = RecordAdmissionMeta(row.typeId, row.recordOrdinal);
+    }
+
+    /// Preserve the old eager cache load's missing-code panic, without copying.
+    function typeDependencyOrdinal(Store storage s, bytes32 id) internal view returns (uint64 ordinal) {
+        TypeCell storage cell = s.types[id];
+        address pointer = cell.cacheCode;
+        if (pointer != address(0) && pointer.code.length == 0) {
+            assembly ("memory-safe") {
+                mstore(0, shl(224, 0x4e487b71))
+                mstore(4, 0x11)
+                revert(0, 36)
+            }
+        }
+        ordinal = cell.typeOrdinal;
     }
 
     // TypeCell layout (asserted by the read tests through the Solidity accessors):

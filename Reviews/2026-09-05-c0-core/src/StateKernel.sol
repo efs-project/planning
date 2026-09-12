@@ -261,10 +261,10 @@ library StateKernel {
         result.admissionOrdinal = ord;
         bytes32 recordId = p.recordIds[leaf.leafIndex];
         {
-            StateStore.RecordRow memory rr =
-                abi.decode(get(s, plan, StateStore.Kind.Record, recordId, 0), (StateStore.RecordRow));
-            if (rr.recordOrdinal == 0) {
-                rr = StateStore.RecordRow(leaf.typeId, leaf.body, next(plan.count.records), ord);
+            StateStore.RecordAdmissionMeta memory observed = StateStore.recordAdmissionMeta(s, recordId);
+            if (observed.recordOrdinal == 0) {
+                StateStore.RecordRow memory rr =
+                    StateStore.RecordRow(leaf.typeId, leaf.body, next(plan.count.records), ord);
                 plan.count.records = rr.recordOrdinal;
                 put(s, plan, StateStore.Kind.Record, recordId, 0, abi.encode(rr));
                 put(s, plan, StateStore.Kind.RecordId, 0, rr.recordOrdinal, abi.encode(recordId));
@@ -361,8 +361,7 @@ library StateKernel {
         for (uint256 i; i < refs.length; ++i) {
             Preparation.PreparedRef memory ref = refs[i];
             if (ref.targetClass == 1 || ref.targetClass == 5) {
-                StateStore.RecordRow memory target =
-                    abi.decode(get(s, p, StateStore.Kind.Record, ref.targetId, 0), (StateStore.RecordRow));
+                StateStore.RecordAdmissionMeta memory target = StateStore.recordAdmissionMeta(s, ref.targetId);
                 if (target.recordOrdinal == 0) revert ReferenceUnproved(leaf, ref.roleIndex);
                 if (
                     (ref.targetClass == 5
@@ -398,7 +397,7 @@ library StateKernel {
         Preparation.CompiledType[] memory ss = compiled.types;
         bytes32[] memory deps = compiled.dependencies;
         for (uint256 i; i < deps.length; ++i) {
-            if (abi.decode(get(s, p, StateStore.Kind.Type, deps[i], 0), (StateStore.TypeRow)).typeOrdinal == 0) {
+            if (StateStore.typeDependencyOrdinal(s, deps[i]) == 0) {
                 revert MissingTypeDependency(deps[i]);
             }
         }

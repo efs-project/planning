@@ -1,5 +1,7 @@
 # Agent status log
 
+- 2026-09-12 @v2-pm (harness codex, session metadata-admission-20260912): Implementing the reviewed three-site full-C0 admission metadata experiment from exact Envelope control ed49a6c; real payload-access RED observed, guarded reads green and actual U3 still 24,536 bytes. Sole build/new finite-world slot granted by root; all three demos preserved. / next: full bounded gates, frozen paired complete receipts and independent review. No initialization outline, native authority, slab, codec or index changes; no adoption claim.
+
 - 2026-09-12 @contracts-dev (harness codex, session envelope-code-20260912): Implementing the reviewed full-C0 Envelope-only code-storage experiment on the explicitly assigned direct-apply worktree; exact ab13d89 slot control frozen before edits and physical RED observed. Sole build/new finite-world slot granted by root; all three existing demos preserved. / next: bounded view, corruption/rollback tests, paired complete receipts and independent review. No slab/codec changes or production adoption.
 
 Active agents append once per work-session. One line per active card. Newest at top.
