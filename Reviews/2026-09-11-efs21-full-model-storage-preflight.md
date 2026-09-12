@@ -14,7 +14,7 @@ After the reviewed native packing/hybrid and real Files read-batching tasks, alo
 2. Extend that comparison to one shared immutable byte block for an envelope and its new Record bodies. The [[2026-09-11-efs21-shared-slab-plan|staged slice/ordering plan]] now records the source-reviewed mechanism; it still requires the completed Envelope-only base before dispatch.
 3. Extract full-C0 posting storage without dropping any query family, establishing a separate-contract control. Then measure coarser calls and configurable families separately.
 
-These are proposed follow-ons, not authority for silent feature removal or evidence that all three improve gas. The [[2026-09-11-efs21-envelope-storage-plan|first envelope-only implementation plan]] is now independently reviewed and staged, not dispatched. The native experiment already has separate required navigation/configurable discovery, but it is a narrower Files profile, not full-v2 parity.
+These are proposed follow-ons, not authority for silent feature removal or evidence that all three improve gas. The [[2026-09-11-efs21-envelope-storage-plan|first envelope-only implementation plan]] is now independently reviewed and implementing from cleanab13. The native experiment now has actual separate Record storage/mandatory inventory/Files/navigation/configurable discovery, but remains a narrower profile, not full-v2 parity.
 
 ## Shared immutable bytes: a concrete bounded opportunity
 
@@ -67,6 +67,22 @@ Ordering is plausible: MetaType's dictionary entry exists at initialization; a T
 The tradeoff is explicit: `typeIds` becomes a **physical decoding dependency**, not an optional enumeration mirror. A later mirror-removal proposal cannot simply delete it or replace bounded scalar decoding with an admission-history scan. Corrupted or aliased dictionary entries affect many Records; existing scalar reads do not universally rehash RecordIds, so bounds/reverse checks are not a new hash-integrity proof. Test alias/swapping/absent entries and price the cold/warm lookup and reverse-check paths. Some hydration paths already resolve the TypeId, so a net extra SLOAD on every read must not be assumed either. Native has no equivalent existing dictionary, and cannot inherit these cost assumptions.
 
 ## Separate full-C0 posting storage
+
+### Additional dictionary option: one word per Admission
+
+A separate source reviewer inspected pinned`ab13d89`, and root checked the actual admission construction: every fresh occurrence writes a two-slot AdmissionRow, including an occurrence of already-stored Record bytes. The packed word uses112 bits: leaf16, local Type48 and local Principal48. A local Envelope ordinal fits in the unused bits; the existing `envelopeIds` dictionary can reconstruct the unchanged logical envelopeId. This is a potential **one-slot-per-occurrence physical reduction**, not a measured gas saving or a new local identity scheme.
+
+Actual consumers include `StateStore.read/applyRow`, three direct `StatePointReads` admission accesses, raw `admissionAt`, and admission-time Binding predecessor reads. Preserve the logical AdmissionRow and packed112-bit output. Validate staged Envelope high-water during admission, populated ordinal bounds and forward/reverse dictionary association; test aliases/swaps/absent rows, partial envelopes, duplicate Record leaves, retries and reached late rollback. Price occurrence/receipt/Binding hydration cold and warm. Admission/lifecycle, Batch authority evidence, all postings and all Files facts remain intact.
+
+As with the Type dictionary, this makes `envelopeIds` a **physical decoding dependency**. It cannot then be deleted as a redundant mirror without another replacement design. This should be a separate paired experiment after the byte-storage baseline, not bundled with Record packing or index removal.
+
+### A smaller deliberate query tradeoff
+
+If physical reductions remain insufficient, `postingKeys` alone is a narrower first removal candidate than F3 plus several mirrors at once. Every first-seen key stores a full mirror slot; normal keyed reads/admission do not consume it, but the independent inventory reader does. A candidate would preserve keyed Files/Lens behavior while replacing immediate global enumeration—including old emptied key histories—with bounded, basis-qualified reconstruction. It must show that reconstruction and explicitly report incomplete coverage. No such removal or saving has been implemented.
+
+A native-caller path through the fuller model is also useful for contract-owned publishers: its current U3 authorization uses ecrecover, so an ordinary producer contract cannot supply that signature. This is a capability experiment, not the leading explanation for the multimillion-gas floor: it would not eliminate Admission/lifecycle/posting or Batch rows. Detached intent/relaying/executor consent are different guarantees and must stay explicit. Keep this separate from the already working narrower native Files producer.
+
+### Physical posting extraction remains separate
 
 The first extraction should hold all posting heads, five-u48 packed words and posting-key mirrors in one callback-free, mandatory, Core-owned `PostingStore` account. Use ordinary CALL/STATICCALL and separate storage. Retain all ten families, key derivation, ordering, live counts, first-ever anchors, history and query/refusal behavior.
 

@@ -8,6 +8,8 @@ There is a plausible way to repair two current implementation limits **without r
 
 The existing standalone codec has differential evidence, including a parser-produced64-field cache of24960 logical bytes becoming5536 physical bytes. It is not on the actual admission path. Its synthetic12110-byte representation envelope is not a measured largest legal Type. [Codec-only evidence](https://github.com/efs-project/planning/blob/ab13d89/Reviews/2026-09-11-type-cache-codec-lab/README.md).
 
+A further independent read-only review of the actual codec and corpus found no concrete lossless/framing defect and approved it **as an integration candidate only**. The source hash matches retained evidence`0x68ac331e2d5ed6450e52914c43d61753800056ba6f7582a6ea133c4db9c079ac`. Counts, descriptor totals, exact framing and signed256 values are retained; this is not a security audit or an actual admission result.
+
 Two independent constraints must be addressed:
 
 1. A single raw cache can exceed the24575-byte payload ceiling of one STOP-prefixed code contract.
@@ -41,6 +43,13 @@ Source: `Reviews/2026-09-05-c0-admission/src/TypeGroupParser.sol` parseGroup/fie
 - Every return boundary checks size before copy, with separate physical-payload, ABI-envelope, logical-output, failure-data and call-gas bounds. A12110-byte payload is not the entire ABI response. Unknown/malformed physical formats fail closed.
 
 An **all-compact** first arm has one transport/storage interpretation to validate. Mixed raw-small/compact-large storage can follow, but all schemas still need bounded compact transport if that is what fixes the aggregate response. Mixed storage requires explicit per-cell format dispatch and its own corruption/threshold tests; do not infer it is cheaper without whole-operation measurements.
+
+### Wrapper falsifiers from the actual codec review
+
+- A maximum12110-byte `pack` payload has a **12192-byte external ABI bytes-return envelope**; `readHeader` returns exactly256 bytes. Bound the actual response, not just its decoded payload.
+- The existing synthetic maximum stores all8190 descriptor bytes in one field. Distributing them as63 one-byte descriptors plus one8127-byte descriptor retains12110 physical bytes but reconstructs **35104 logical ABI bytes**, or35168 including the bytes-return envelope. Per-descriptor padding is the difference from the existing33152-byte synthetic case. Add this exact fixture before tightening an unpack cap; it is codec-valid synthetic data, not a legal parser Type claim.
+- Direct lab calls use16777216 gas and only small/boundary receipts were measured. Neither maximum-case codec gas nor bounded nested helper calls have been established. Measure these before pinning a smaller internal call budget.
+- `abi.decode` precedes count/canonicality checks in `pack`. Hostile offsets, aliasing and lengths may exhaust bounded gas before producing `InvalidCache`. Integration needs bounded refusal/rollback tests, oversized success/revert return data and child OOG; do not require one selector for every malformed ABI.
 
 ## Configuration, replay and actual consumers
 
