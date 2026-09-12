@@ -6,13 +6,32 @@ James authorized an overnight implementation pass: make ordinary contract and br
 
 ## Latest in plain English
 
-- **The fuller model is cheaper, but still expensive:** the seven-record create is 5.90M gas including content staging, down from 7.77M. Successful paired data/index/Lens results match; direct application changes callback visibility and late-failure costs. This is not an adoption ruling or universal equivalence.
+- **The fuller model is cheaper, but still expensive:** the seven-record create is now 5.74M gas including content staging, down from the earlier7.77M workload. The latest isolated Envelope-storage pair is5,902,827→5,738,524gas with all data/index/Lens results retained. Earlier direct application changes callback visibility and late-failure costs; this is not an adoption ruling or universal equivalence.
 - **Useful contract filesystem operations work in a narrower model:** a producer publishes `/swaps/eth-usdc`; an unrelated contract reads it. After the reviewed actual Record/Files extraction, the update costs 232,664 gas and its paid reader 80,769. Generic Record storage, mandatory by-Type inventory, Files, required navigation and configurable discovery have actual separate contract boundaries. This separation slightly increases Files costs; richer full-v2 identity, acceptance and Lenses are not silently included in the price.
 - **Storage tradeoffs are measured, not assumed:** the reviewed hybrid reduces a 4,096-byte zero Record admission from 990,892 to 200,375 gas, but its paid read rises from 85,373 to 396,952. A 41-byte file edit slightly regresses from 241,339 to 242,500. Different representations preserve exact bytes/IDs while having different economics; no 100-year write-policy choice has been made.
 - **Reads need further work:** full-model batching lowers eight small paid Record reads from 453,212 to 283,890 gas. Actual Files anchor batching cuts RPCs by 6.5–8.7%, but delayed browsing becomes 1.2–1.5% slower and sends more bytes. It is not yet a UX-speedup recommendation.
 - **Try the latest browser:** [split native candidate](http://127.0.0.1:49966), snapshotted at reviewed `4cb0042`, has real local-contract create/read/edit/rename/unlink/history/reload tests in Chromium. The older [native snapshot](http://127.0.0.1:54154) remains `c088363`; Fable's port60731 stays untouched. These need this laptop/process running. The new demo has an 18-hour watchdog from September12 05:58UTC; later source changes cannot silently alter its assets or contracts.
 
-**Next engineering gate:** full-model Envelope byte storage is now being implemented from its separately reviewed plan. It keeps all seven Files facts and every index while testing a cheaper physical representation. Shared Record/Envelope bytes and compact Type-cache integration have separate staged analyses; no saving from those unbuilt stages is claimed. No feature sacrifice, production deployment or protocol freeze is implied.
+**Next engineering gate:** the reviewed [[2026-09-12-efs21-metadata-only-admission-plan|three-site metadata-read task]] avoids copying existing Record bodies/Type caches when admission only needs their identifiers. It keeps all stored facts and indexes. The separately reviewed [[2026-09-12-efs21-initialization-outline-plan|initialization-size experiment]] precedes larger additions if needed; actual CoreU3 has only40bytes runtime headroom. Shared Record/Envelope storage and compact Type caches remain separately staged, with no unbuilt saving claimed. No feature sacrifice, production deployment or protocol freeze is implied.
+
+### Full-model Envelope storage, reviewed
+
+Source`a516336`, exact slot control`ab13d89`, evidence`f4d6762`, final qualifiers`ed49a6c`; code/results pushed on the existing full-C0 experiment branch. Each publication Envelope now uses one metadata word pointing to its exact immutable code bytes; all seven Files facts, Record storage, all indexes and logical APIs remain. [Paired receipts, code sizes, failed probes and limits](https://github.com/efs-project/planning/blob/ed49a6c/Reviews/2026-09-11-efs21-pragmatic/envelope-storage-results.md).
+
+| Same-input full-profile operation | Slot control | Envelope code |
+|---|---:|---:|
+| Seven-record create including content staging |5,902,827|5,738,524|
+| Three-record edit metadata |2,957,700|2,827,399|
+| Steady tag |2,080,727|1,995,217|
+| Binding rebind |1,839,368|1,735,729|
+| Paid create-Envelope read |209,137|179,627|
+| Paid occurrence read |220,593|212,367|
+
+This saves164,303gas on the complete create, about2.8% in this pair—not an order-of-magnitude solution. Paid eight-Record current reads are unchanged. Qualified Files takes104requests in both arms; response material increases407,901→414,937bytes. No browsing-speed claim. Maximum2304-byte Envelope saving is larger but its fixture selects **one** existing Record out of64vector entries, not64new leaves.
+
+Independent review authenticated124 source/support pins,204 signed transactions,17 operation pairs, all-family inventories and four paid reads. Root reproduced **217 Core/29 foundation Forge**, **256 Node/browser/differential passes with one existing legal-Type skip**, strictTS, formatting and ordinary actual module sizes. Combined serial Node gate took232.599seconds. Old evidence remains byte-exact; every owned test node exited, while all three demos remain untouched.
+
+The actual derived Core first failed deployment at24,852bytes. Removing duplicate validation/copy setup without dropping checks brought it to24,536—only40bytes below the limit. A real Chromium gate also exposed a pre-existing relay omission of the two checked/current Record read methods; the narrowly allowlisted existing view methods now pass real browser journeys. No public receipt API was added. **Paid receipt-library scalar/repeated gas is explicitly unmeasured/deferred**, not substituted by Core read costs; existing receipt correctness tests remain. Legal large-Type cache/output limits remain unresolved. Helper identity is checked before the new early allocation, and reached late failure rolls back created code, rows, indexes and author nonce.
 
 ## What we are comparing
 
@@ -288,7 +307,7 @@ These are not blanket savings:80of143 final operation rows regress against packe
 
 Root reproduced117Forge/33serialNode (77.654s), formatter/diff and ordinary sizes. Independent review checked736 signed transactions,324 body observations,5707 word-slot checks and218 source/support pins. Native runtime/initcode11592/26112 remain ordinary. Final CLI succeeded; its earlier module-cycle failure and a repaired derived-label bug remain disclosed, with initial receipts retained rather than rewritten. The fixture's permissive scan-elimination comment is a nonblocking wording follow-up; the actual retained scan is explicit in the report. Existing demos remain unchanged.
 
-Generic ingestion extraction has now completed that reviewed plan; measured results follow. Full-model [[2026-09-11-efs21-envelope-storage-plan|Envelope byte storage]] is now implementing separately and is not yet measured.
+Generic ingestion extraction has now completed that reviewed plan; measured results follow. Full-model [[2026-09-11-efs21-envelope-storage-plan|Envelope byte storage]] subsequently passed its separate measured gate; see the latest result above.
 
 ### Actual native Record / mandatory index / Files extraction, reviewed
 
