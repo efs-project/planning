@@ -82,7 +82,23 @@ Actual costs: the producer's no-profile update is now **245,563 gas**, including
 
 Required failure rolls back the whole file operation. Tolerated child failure rolls back index maintenance, persists DIRTY and suppresses stale/complete-result claims until a fresh rebuild. Failure of the trusted outer coordinator itself still rejects the file operation. This is a scalar current-file experiment, not yet image tags, full-v2 occurrence indexing, or a browser search UI.
 
-Next: test full-v2 journal allocation without removing any existing facts or indexes, then the raw-payload encoding and physical full-v2 separation arms. Broader acceptance/authorship remain distinct experiments, not implied by native savings. Existing Fable world remains untouched; final candidate launch follows a stable reviewed checkpoint.
+### Full-C0 journal allocation, reviewed
+
+`e6c1c96` / documentation qualification `e605fc9`: the full seven-record Files implementation now allocates only its journal's pointer backing upfront, rather than also constructing thousands of unused default structs. The pinned compiler test confirmed **287,520 fewer temporary bytes** for seven fresh leaves. All storage rows, indexes, Types, before/after values, journal ordering and validation remain unchanged. Independent review approved; root reproduced **209 C0 Solidity tests and six paired-evidence checks**, and independently rehashed the current production source against the retained measured source pin.
+
+| Same full-profile workload | Control receipt gas | Candidate receipt gas |
+|---|---:|---:|
+| Seven-record 41-byte create | 7,620,832 | **6,622,789** |
+| Complete create including separate chunk staging | 7,770,201 | **6,772,158** |
+| Three-record 41-byte edit, excluding staging | 3,610,796 | **3,313,533** |
+| Steady two-record tag | 2,503,157 | **2,324,116** |
+| Same-label Binding rebind | 2,240,814 | **2,062,226** |
+
+This saves **998,043 gas on the create admission (13.1%)** without dropping those semantics. Final inventories match across the fresh pair: 80 records, 84 occurrences, 22 bindings and all 257 posting keys/words; only explicit executable provenance differs. Selected binding/Lens reads are also checked at receipt-block bases; the create's charter binding is covered by final inventory rather than an extra per-operation Lens assertion. Exact ACTIVE retry regresses by 12 receipt gas (36 after accounting for its calldata difference), reported rather than hidden.
+
+The admission library shrank from 24,565 to **24,481 bytes**, leaving only 95 bytes of code-size headroom. The implementer also ran 19 foundation Solidity tests and 140 Node tests in an explicitly documented aggregate after resolving a missing locked dependency. The known large-Type chain target remained skipped/unfixed; local RPC observations are not state proofs. [Exact evidence, source/runtime pins, failure-path coverage and limitations](https://github.com/efs-project/planning/blob/e605fc9/Reviews/2026-09-11-efs21-pragmatic/evidence/journal-allocation.md).
+
+Full-profile writes are still too expensive to call this finished. Next: the raw-payload encoding experiment is active, with explicit per-Type browser/SDK decoding; physical full-v2 separation and further storage reductions follow as separately measured changes. Broader acceptance/authorship remain distinct experiments, not implied by native savings. Existing Fable world remains untouched; final candidate launch follows a stable reviewed checkpoint.
 
 ## How to interpret a cheaper result
 
@@ -142,7 +158,7 @@ For tonight, basic contract operations and browsing remain state-readable with n
 - **Native history snapshots:** implemented and independently reviewed above; same historical values, lower edit/unlink receipts, slightly higher creation and historical-read cost. Still experimental, not adopted storage layout.
 - **Raw payload representation:** distinguish external-call ABI from the typed content being stored. A separate raw-byte Type can avoid persisting the inner offset/length/padding for file bodies. It has different exact Type/Record IDs and cannot reinterpret old records; measure it separately from storage compression. Empty raw bodies also mean a nonempty-body presence shortcut would be invalid.
 - **Stateless priority reader:** a small ordered-namespace, whole-path Lens can add useful contract composition without adding writes. It is not yet full per-segment/whiteout/threshold Lens parity.
-- **Full-v2 planning allocation:** a focused source review found the journal reserves `fresh * 256 + 5` Change entries and appears to eagerly initialize five-word structs which subsequent writes replace. Seven fresh leaves imply 287,520 bytes of potentially unnecessary default-struct allocation. This is compiler-source inference, not measured savings. A narrowly scoped lazy pointer-array experiment can keep every journal value/order/prestate check and every v2 feature; first verify actual allocation behavior, then compare trace-free routed receipts. This is prioritized before physical full-v2 index extraction.
+- **Full-v2 planning allocation:** implemented, measured and independently reviewed above. The unchanged `fresh * 256 + 5` capacity now avoids eagerly constructing unused five-word structs; seven-leaf creation saves 998,043 receipt gas in the matched run. This improves the fuller control before physical index extraction; it does not remove the journal or its semantics.
 - **Full-profile byte placement:** the retained full create-file census has 48 Record slots: 21 row/header slots and 27 body-data words. Its unsigned envelope adds a further payload. The prior Type-cache optimization already demonstrated immutable code-backed storage. A later experiment can compare batch-packed immutable record/envelope bytes against individual storage words while preserving logical rows and exact IDs. It must include contract creation/pointer/read costs and support legal sizes without repeating the cache ceiling failure. [Retained slot census at the prototype checkpoint](https://github.com/efs-project/planning/blob/aa6b1b62b733209aa5879743e81fd1f3a9143f8a/Reviews/2026-09-09-files-browser-mvp/gas-baseline-2026-09-10.md#33-slots-by-family--createdir-createdir-1-and-createfile-createfile-1).
 
 The code-as-data idea is established prior art, not an EFS invention: Solady's SSTORE2 writes bytes into a STOP-prefixed contract and reads them with EXTCODECOPY. It does not prove savings for our exact workload; individual tiny deployments can be wasteful, and our Core proxy must not accidentally consume deployment nonces. [Solady SSTORE2 source](https://github.com/Vectorized/solady/blob/main/src/utils/SSTORE2.sol).
