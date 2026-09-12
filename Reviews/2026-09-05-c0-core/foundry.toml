@@ -1,6 +1,9 @@
 [profile.default]
 src = "src"
 test = "test"
+# These two unchanged suites test the retired journal's private machinery.
+# The pinned control compiles/runs them; this candidate removes that machinery.
+skip = ["test/StateJournal.t.sol", "test/JournalAllocation.t.sol"]
 out = "out"
 libs = []
 allow_paths = [".."]

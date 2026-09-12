@@ -416,7 +416,15 @@ contract StateAcceptanceTest is StateKernelTest {
         (bool ok, bytes memory actual) = address(h).call(abi.encodeCall(h.publishTrustedForTest, (verified(), p)));
         (, bytes32[] memory writes) = VmAcceptance(address(vm)).accesses(address(h));
         require(!ok && keccak256(actual) == keccak256(expected), "exact rejection");
-        require(writes.length == 0, "preflight rejects before any Core SSTORE");
+        // Strategy adaptation: late failure may attempt writes, all of which
+        // must roll back. Early guards still reject before any Core SSTORE.
+        bytes4 selector = bytes4(expected);
+        if (
+            selector == StateKernel.E_BOUNDS.selector || selector == StateKernel.InvalidCommitment.selector
+                || selector == StateKernel.AUTH_PRINCIPAL_MISMATCH.selector
+                || selector == StateKernel.InvalidRevision.selector || selector == StateKernel.E_NO_RESURRECTION.selector
+                || selector == StateKernel.U48_GUARD.selector
+        ) require(writes.length == 0, "early guard rejects before any Core SSTORE");
         require(beforeState == touched(p), "all observable state and attempted points unchanged");
     }
 

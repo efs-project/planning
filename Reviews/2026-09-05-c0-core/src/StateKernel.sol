@@ -87,13 +87,10 @@ library StateKernel {
     /// keccak256("PublicationEnvelope(uint16 profile,bytes32 principalId,bytes32 authorityRef,uint64 authEpoch,bytes32 pubNonce,uint64 notAfter,bytes32[] recordIds)")
     bytes32 private constant ENVELOPE_TYPEHASH = 0x41cb229615379fa5d2f5213653ed99aedca39e150a8add884383d1c269d1b921;
 
-    struct Plan {
+    struct AdmissionContext {
         Preparation.Config config;
-        StateStore.Change[] changes;
-        uint256 length;
         StateStore.Counts count;
         StateStore.Bootstrap init;
-        uint256[] slots;
     }
 
     function initialize(StateStore.Store storage s, Init memory init, Preparation.Config memory config) internal {
@@ -119,7 +116,10 @@ library StateKernel {
             0
         );
         StateStore.writeType(
-            s, meta.typeId, StateStore.TypeRow(0, 0, 1, 0, meta.cacheBytes), Preparation.deployCache(config, meta.cacheBytes)
+            s,
+            meta.typeId,
+            StateStore.TypeRow(0, 0, 1, 0, meta.cacheBytes),
+            Preparation.deployCache(config, meta.cacheBytes)
         );
         s.typeIds[1] = meta.typeId;
         s.count.types = 1;
@@ -166,13 +166,10 @@ library StateKernel {
             r.leaves[i] = LeafResult(leaf.leafIndex, status == 1 ? 2 : 1, ord);
             if (status == 0) ++fresh;
         }
-        Plan memory plan;
+        AdmissionContext memory plan;
         plan.config = config;
         plan.count = s.count;
         plan.init = s.init;
-        // ACTIVE leaves stage nothing. Each fresh leaf has a conservative
-        // 256-change allowance; Envelope/Principal pairs and Batch add five.
-        allocateJournal(plan, fresh == 0 ? 0 : fresh * 256 + 5);
         if (fresh == 0) {
             for (uint256 i; i < p.leaves.length; ++i) {
                 checked(
@@ -182,6 +179,11 @@ library StateKernel {
             return r;
         }
         if (fresh >= GUARD - plan.count.admissions || block.number >= GUARD) revert U48_GUARD();
+        // Rows are applied in order while persisted counts/bootstrap stay at
+        // their entry values. Only the pinned argument-driven helper is in scope;
+        // arbitrary callbacks can observe this provisional prefix.
+        bytes32 countBefore = keccak256(abi.encode(s.count));
+        bytes32 initBefore = keccak256(abi.encode(s.init));
         r.acceptingBatchId = next(plan.count.batches);
         plan.count.batches = r.acceptingBatchId;
         if (r.envelopeOrdinal == 0) {
@@ -225,13 +227,8 @@ library StateKernel {
                 )
             )
         );
-        // No semantic decisions below this boundary. All journal prestates are
-        // checked against storage immediately before the recorded write.
-        bytes32 countBefore = keccak256(abi.encode(s.count));
-        bytes32 initBefore = keccak256(abi.encode(s.init));
-        for (uint256 i; i < plan.length; ++i) {
-            StateStore.replay(s, plan.changes[i], config);
-        }
+        // A callback must not silently change staged count/init prestate.
+        // Any failure reverts the entire prefix, including helper CREATEs.
         assert(countBefore == keccak256(abi.encode(s.count)) && initBefore == keccak256(abi.encode(s.init)));
         s.count = plan.count;
         s.init = plan.init;
@@ -239,13 +236,13 @@ library StateKernel {
 
     function planLeaf(
         StateStore.Store storage s,
-        Plan memory plan,
+        AdmissionContext memory plan,
         Publication memory p,
         LeafResult memory result,
         uint256 i,
         uint64 principalOrdinal,
         uint256 casIndex
-    ) private view returns (uint256) {
+    ) private returns (uint256) {
         SelectedLeaf memory leaf = p.leaves[i];
         (Preparation.PreparedRecord memory prepared, uint64 typeOrdinal) =
             checked(s, plan, leaf, p.envelopeId, p.recordIds[leaf.leafIndex], p.header.principalId, false);
@@ -336,7 +333,7 @@ library StateKernel {
 
     function checked(
         StateStore.Store storage s,
-        Plan memory p,
+        AdmissionContext memory p,
         SelectedLeaf memory leaf,
         bytes32 envelopeId,
         bytes32 recordId,
@@ -355,10 +352,12 @@ library StateKernel {
         }
     }
 
-    function references(StateStore.Store storage s, Plan memory p, Preparation.PreparedRef[] memory refs, uint16 leaf)
-        private
-        view
-    {
+    function references(
+        StateStore.Store storage s,
+        AdmissionContext memory p,
+        Preparation.PreparedRef[] memory refs,
+        uint16 leaf
+    ) private view {
         for (uint256 i; i < refs.length; ++i) {
             Preparation.PreparedRef memory ref = refs[i];
             if (ref.targetClass == 1 || ref.targetClass == 5) {
@@ -381,10 +380,13 @@ library StateKernel {
         }
     }
 
-    function group(StateStore.Store storage s, Plan memory p, bytes memory body, bytes32 recordId, uint64 ord)
-        private
-        view
-    {
+    function group(
+        StateStore.Store storage s,
+        AdmissionContext memory p,
+        bytes memory body,
+        bytes32 recordId,
+        uint64 ord
+    ) private {
         bytes memory raw = new bytes(body.length - 2);
         for (uint256 i; i < raw.length; ++i) {
             raw[i] = body[i + 2];
@@ -435,12 +437,12 @@ library StateKernel {
 
     function occurrencePostings(
         StateStore.Store storage s,
-        Plan memory p,
+        AdmissionContext memory p,
         bytes32 typeId,
         bytes32[] memory keys,
         uint64 ord,
         bool add
-    ) private view {
+    ) private {
         uint256 beforeHead = head(s, p, keys[0]);
         uint64 live = uint64(beforeHead >> 64);
         for (uint256 i; i < keys.length; ++i) {
@@ -460,12 +462,12 @@ library StateKernel {
 
     function bindingEffect(
         StateStore.Store storage s,
-        Plan memory p,
+        AdmissionContext memory p,
         BindingFold.Effect memory effect,
         bytes32 principal,
         uint32 expected,
         uint64 ord
-    ) private view {
+    ) private {
         bytes32 key = BindingFold.bindingKey(principal, BindingFold.positionKey(effect));
         StateStore.BindingRow memory row =
             abi.decode(get(s, p, StateStore.Kind.Binding, key, 0), (StateStore.BindingRow));
@@ -488,10 +490,13 @@ library StateKernel {
         saveBinding(s, p, key, afterHead, ord);
     }
 
-    function saveBinding(StateStore.Store storage s, Plan memory p, bytes32 key, BindingFold.Head memory h, uint64 ord)
-        private
-        view
-    {
+    function saveBinding(
+        StateStore.Store storage s,
+        AdmissionContext memory p,
+        bytes32 key,
+        BindingFold.Head memory h,
+        uint64 ord
+    ) private {
         (uint256 meta, bytes32 target) = BindingFold.pack(h);
         put(s, p, StateStore.Kind.Binding, key, 0, abi.encode(StateStore.BindingRow(meta, target)));
         append(s, p, IndexKeys.posting(0, 8, 0, key), ord, true);
@@ -499,12 +504,12 @@ library StateKernel {
 
     function withdrawal(
         StateStore.Store storage s,
-        Plan memory p,
+        AdmissionContext memory p,
         BindingFold.Effect memory e,
         bytes32 author,
         uint16 sourceLeaf,
         uint64 ord
-    ) private view {
+    ) private {
         bytes32 key = occKey(e.targetA, e.targetLeaf);
         uint256 life = abi.decode(get(s, p, StateStore.Kind.Lifecycle, key, 0), (StateStore.LifecycleRow)).packed;
         if (uint8(life) == 0 || uint8(life) == 3) revert E_TARGET_EVIDENCE(sourceLeaf);
@@ -546,11 +551,13 @@ library StateKernel {
         }
     }
 
-    function head(StateStore.Store storage s, Plan memory p, bytes32 key) private view returns (uint256) {
+    function head(StateStore.Store storage s, AdmissionContext memory p, bytes32 key) private view returns (uint256) {
         return abi.decode(get(s, p, StateStore.Kind.Posting, key, 0), (StateStore.PostingRow)).head;
     }
 
-    function append(StateStore.Store storage s, Plan memory p, bytes32 key, uint64 ord, bool audit) private view {
+    function append(StateStore.Store storage s, AdmissionContext memory p, bytes32 key, uint64 ord, bool audit)
+        private
+    {
         uint256 beforeHead = head(s, p, key);
         uint64 count = uint64(beforeHead);
         uint64 live = uint64(beforeHead >> 64);
@@ -582,7 +589,7 @@ library StateKernel {
         );
     }
 
-    function liveDelta(StateStore.Store storage s, Plan memory p, bytes32 key, bool increase) private view {
+    function liveDelta(StateStore.Store storage s, AdmissionContext memory p, bytes32 key, bool increase) private {
         uint256 h = head(s, p, key);
         uint64 live = uint64(h >> 64);
         assert(uint16(h >> 176) == 0);
@@ -603,84 +610,23 @@ library StateKernel {
         );
     }
 
-    // Memory-only index; persisted rows and journal replay ordering are unchanged.
-    // Admission bounds capacity to 64 * 256 + 5, so the table is at most 65536.
-    function allocateJournal(Plan memory p, uint256 capacity) internal pure {
-        uint256[] memory pointers = new uint256[](capacity);
-        StateStore.Change[] memory changes;
-        // Solidity owns/zeros this pointer backing and advances free memory.
-        // Only entries below p.length may be read: put installs a complete
-        // Change before publishing its nonzero table row. Unused zero pointers
-        // are NOT default structs; never copy, encode or expose the whole array.
-        // This cast accesses no memory and does not touch the zero/free slots.
-        assembly ("memory-safe") { changes := pointers }
-        p.changes = changes;
-        if (capacity == 0) return;
-        uint256 size = 1;
-        while (size < capacity * 2) size <<= 1;
-        p.slots = new uint256[](size);
-    }
-
-    function journalSlot(Plan memory p, StateStore.Kind kind, bytes32 key, uint64 index)
-        private
-        pure
-        returns (uint256 slot)
-    {
-        uint256 size = p.slots.length;
-        // Three canonical ABI words in temporary free memory. Do not advance
-        // the allocator or overwrite Solidity's zero slot; no value escapes.
-        bytes32 hash;
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            mstore(ptr, and(kind, 0xff))
-            mstore(add(ptr, 0x20), key)
-            mstore(add(ptr, 0x40), and(index, 0xffffffffffffffff))
-            hash := keccak256(ptr, 0x60)
-        }
-        slot = uint256(hash) & (size - 1);
-        for (uint256 probes; probes < size; ++probes) {
-            uint256 row = p.slots[slot];
-            if (row == 0) return slot;
-            StateStore.Change memory c = p.changes[row - 1];
-            if (c.kind == kind && c.key == key && c.index == index) return slot;
-            slot = (slot + 1) & (size - 1);
-        }
-        assert(false);
-    }
-
-    function get(StateStore.Store storage s, Plan memory p, StateStore.Kind kind, bytes32 key, uint64 index)
+    function get(StateStore.Store storage s, AdmissionContext memory, StateStore.Kind kind, bytes32 key, uint64 index)
         internal
         view
-        returns (bytes memory value)
+        returns (bytes memory)
     {
-        (value,) = journalRead(s, p, kind, key, index);
-    }
-
-    function journalRead(StateStore.Store storage s, Plan memory p, StateStore.Kind kind, bytes32 key, uint64 index)
-        private
-        view
-        returns (bytes memory value, uint256 slot)
-    {
-        if (p.slots.length != 0) {
-            slot = journalSlot(p, kind, key, index);
-            uint256 row = p.slots[slot];
-            if (row != 0) return (p.changes[row - 1].afterValue, slot);
-        }
-        return (StateStore.read(s, kind, key, index), slot);
+        return StateStore.read(s, kind, key, index);
     }
 
     function put(
         StateStore.Store storage s,
-        Plan memory p,
+        AdmissionContext memory p,
         StateStore.Kind kind,
         bytes32 key,
         uint64 index,
         bytes memory value
-    ) internal view {
-        assert(p.length < p.changes.length);
-        (bytes memory beforeValue, uint256 slot) = journalRead(s, p, kind, key, index);
-        p.changes[p.length++] = StateStore.Change(kind, key, index, beforeValue, value);
-        p.slots[slot] = p.length;
+    ) internal {
+        StateStore.applyRow(s, kind, key, index, value, p.config);
     }
 
     function next(uint64 n) private pure returns (uint64) {
@@ -692,7 +638,7 @@ library StateKernel {
         return keccak256(abi.encode(keccak256("efs2/occurrence/1"), envelopeId, uint256(leaf)));
     }
 
-    function ids(Plan memory p) private pure returns (BindingFold.KernelIds memory) {
+    function ids(AdmissionContext memory p) private pure returns (BindingFold.KernelIds memory) {
         return BindingFold.KernelIds(p.init.bindingSetType, p.init.bindingTombstoneType, p.init.withdrawalType);
     }
 }

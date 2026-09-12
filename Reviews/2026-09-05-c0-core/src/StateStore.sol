@@ -27,8 +27,8 @@ library StateStore {
         uint64 envelopeOrdinal;
     }
 
-    /// @notice The logical type row: what admission plans against, what the
-    /// journal encodes, what `typeRow` views return. `cacheBytes` is the compiled
+    /// @notice The logical type row: what admission applies and
+    /// what `typeRow` views return. `cacheBytes` is the compiled
     /// schema cache exactly as the preparation helper produced it.
     struct TypeRow {
         bytes32 groupRecordId;
@@ -115,8 +115,7 @@ library StateStore {
         mapping(uint64 => bytes32) bindingKeys;
     }
 
-    // The write-free planner journals only rows touched by the bounded selected
-    // carriage. Every replay entry retains its exact prestate and after-value.
+    // Ordered row dispatcher shared by direct admission reads and writes.
     enum Kind {
         Record,
         Envelope,
@@ -134,14 +133,6 @@ library StateStore {
         PrincipalId,
         PostingKey,
         BindingKey
-    }
-
-    struct Change {
-        Kind kind;
-        bytes32 key;
-        uint64 index;
-        bytes beforeValue;
-        bytes afterValue;
     }
 
     // TypeCell layout (asserted by the read tests through the Solidity accessors):
@@ -200,7 +191,6 @@ library StateStore {
         }
     }
 
-
     function read(Store storage s, Kind k, bytes32 key, uint64 i) internal view returns (bytes memory) {
         if (k == Kind.Record) return abi.encode(s.records[key]);
         if (k == Kind.Envelope) return abi.encode(s.envelopes[key]);
@@ -220,17 +210,17 @@ library StateStore {
         return abi.encode(s.bindingKeys[i]);
     }
 
-    /// A Kind.Type change deploys its cache through the pinned helper as it lands.
-    function replay(Store storage s, Change memory c, Preparation.Config memory config) internal {
-        assert(keccak256(read(s, c.kind, c.key, c.index)) == keccak256(c.beforeValue));
-        bytes memory v = c.afterValue;
-        bytes32 key = c.key;
-        uint64 i = c.index;
-        Kind k = c.kind;
-        if (k == Kind.Record) s.records[key] = abi.decode(v, (RecordRow));
-        else if (k == Kind.Envelope) s.envelopes[key] = abi.decode(v, (EnvelopeRow));
-        else if (k == Kind.Type) {
-            // v = abi.encode(TypeRow), produced by this kernel's own planner:
+    /// Applies one ordered row immediately. Type cache creation is part of the
+    /// same reverting transaction, before any later leaf's validation.
+    function applyRow(Store storage s, Kind k, bytes32 key, uint64 i, bytes memory v, Preparation.Config memory config)
+        internal
+    {
+        if (k == Kind.Record) {
+            s.records[key] = abi.decode(v, (RecordRow));
+        } else if (k == Kind.Envelope) {
+            s.envelopes[key] = abi.decode(v, (EnvelopeRow));
+        } else if (k == Kind.Type) {
+            // v = abi.encode(TypeRow), produced by this kernel:
             // [0x20][groupRecordId][memberIndex][typeOrdinal][admittedAtOrdinal][0xa0][length][cache…];
             // the cache is read in place as a bytes value, without a copy.
             bytes32 group;
@@ -242,19 +232,32 @@ library StateStore {
                 cache := add(v, 224)
             }
             writeCell(s, key, group, packed, Preparation.deployCache(config, cache));
+        } else if (k == Kind.Principal) {
+            s.principals[key] = abi.decode(v, (PrincipalRow));
+        } else if (k == Kind.Admission) {
+            s.admissions[i] = abi.decode(v, (AdmissionRow));
+        } else if (k == Kind.Lifecycle) {
+            s.occurrences[key] = abi.decode(v, (LifecycleRow));
+        } else if (k == Kind.Binding) {
+            s.bindings[key] = abi.decode(v, (BindingRow));
+        } else if (k == Kind.Posting) {
+            s.postings[key] = abi.decode(v, (PostingRow));
+        } else if (k == Kind.Word) {
+            s.postingWords[key][i] = abi.decode(v, (uint256));
+        } else if (k == Kind.Batch) {
+            s.batches[i] = abi.decode(v, (BatchRow));
+        } else if (k == Kind.RecordId) {
+            s.recordIds[i] = abi.decode(v, (bytes32));
+        } else if (k == Kind.EnvelopeId) {
+            s.envelopeIds[i] = abi.decode(v, (bytes32));
+        } else if (k == Kind.TypeId) {
+            s.typeIds[i] = abi.decode(v, (bytes32));
+        } else if (k == Kind.PrincipalId) {
+            s.principalIds[i] = abi.decode(v, (bytes32));
+        } else if (k == Kind.PostingKey) {
+            s.postingKeys[i] = abi.decode(v, (bytes32));
+        } else {
+            s.bindingKeys[i] = abi.decode(v, (bytes32));
         }
-        else if (k == Kind.Principal) s.principals[key] = abi.decode(v, (PrincipalRow));
-        else if (k == Kind.Admission) s.admissions[i] = abi.decode(v, (AdmissionRow));
-        else if (k == Kind.Lifecycle) s.occurrences[key] = abi.decode(v, (LifecycleRow));
-        else if (k == Kind.Binding) s.bindings[key] = abi.decode(v, (BindingRow));
-        else if (k == Kind.Posting) s.postings[key] = abi.decode(v, (PostingRow));
-        else if (k == Kind.Word) s.postingWords[key][i] = abi.decode(v, (uint256));
-        else if (k == Kind.Batch) s.batches[i] = abi.decode(v, (BatchRow));
-        else if (k == Kind.RecordId) s.recordIds[i] = abi.decode(v, (bytes32));
-        else if (k == Kind.EnvelopeId) s.envelopeIds[i] = abi.decode(v, (bytes32));
-        else if (k == Kind.TypeId) s.typeIds[i] = abi.decode(v, (bytes32));
-        else if (k == Kind.PrincipalId) s.principalIds[i] = abi.decode(v, (bytes32));
-        else if (k == Kind.PostingKey) s.postingKeys[i] = abi.decode(v, (bytes32));
-        else s.bindingKeys[i] = abi.decode(v, (bytes32));
     }
 }
