@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {TestBase} from "./TestBase.sol";
-import {NativeKernel} from "../src/NativeKernel.sol";
-import {ExactTypeRegistry, Uint256Validator, BytesValidator} from "../src/ExactTypeRegistry.sol";
-import {NavigationIndex} from "../src/NavigationIndex.sol";
-import {ExpandedTypeRegistry} from "../src/ExpandedTypeRegistry.sol";
+import {LegacyNativeKernel as NativeKernel} from "./fixtures/legacy4cb/LegacyNativeKernel.sol";
+import {LegacyExactTypeRegistry as ExactTypeRegistry, LegacyUint256Validator as Uint256Validator, LegacyBytesValidator as BytesValidator} from "./fixtures/legacy4cb/LegacyExactTypeRegistry.sol";
+import {LegacyNavigationIndex as NavigationIndex} from "./fixtures/legacy4cb/LegacyNavigationIndex.sol";
+import {LegacyExpandedTypeRegistry as ExpandedTypeRegistry} from "./fixtures/legacy4cb/LegacyExpandedTypeRegistry.sol";
 import {HostileValidator} from "./Types.t.sol";
-import {DiscoveryIndex} from "../src/DiscoveryIndex.sol";
+import {LegacyDiscoveryIndex as DiscoveryIndex} from "./fixtures/legacy4cb/LegacyDiscoveryIndex.sol";
 
 contract ExpandedHarness is ExpandedTypeRegistry {
     function probe(address validator, bytes memory body) external view returns (bool) {
@@ -23,7 +23,7 @@ contract RawTest is TestBase {
     function setUp() public {
         kernel = new NativeKernel();
         // Load the candidate runtime as an artifact, leaving original validator sources untouched.
-        bytes memory creation = vm.getCode("RawBytesValidator.sol:RawBytesValidator");
+        bytes memory creation = vm.getCode("LegacyRawBytesValidator.sol:LegacyRawBytesValidator");
         assembly { sstore(rawValidator.slot, create(0, add(creation, 32), mload(creation))) }
         rawType = kernel.types().register("EFS21 exact raw bytes v1", rawValidator);
         canonicalType = kernel.types().register("EFS21 canonical ABI bytes v1", address(new BytesValidator()));

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {TestBase} from "./TestBase.sol";
-import {ExactTypeRegistry, Uint256Validator, BytesValidator} from "../src/ExactTypeRegistry.sol";
+import {LegacyExactTypeRegistry as ExactTypeRegistry, LegacyUint256Validator as Uint256Validator, LegacyBytesValidator as BytesValidator} from "./fixtures/legacy4cb/LegacyExactTypeRegistry.sol";
 
 contract RegistryHarness is ExactTypeRegistry {
     function probe(address validator, bytes memory body) external view returns (bool) {

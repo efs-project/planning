@@ -1,12 +1,17 @@
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {pathToFileURL} from 'node:url';
+import {spawnSync} from 'node:child_process';
 import {E,ROOT,withWorld,artifact} from './world.mjs';
 
 // Test-only driver/coordinator subclass. Never substitutes the kernel's immutable coordinator.
 export async function failureReceipts(w) {
-  const c=w.client,fixture=JSON.parse(readFileSync(ROOT+'contracts/out/Discovery.t.sol/DiscoveryFaultDriver.json'));
-  const fi=new E.Interface(fixture.abi),faultArtifact=JSON.parse(readFileSync(ROOT+'contracts/out/Discovery.t.sol/FaultDiscovery.json'));
+  const c=w.client,canonical=w.config.dependencyProfile==='canonical-ref-free-v1';
+  const replayBytes=readFileSync(ROOT+'contracts/test/fixtures/discovery-replay-4cb0042.json');
+  assert.equal(E.keccak256(replayBytes),'0xbcd0643f73ba5995b0b5fc91f45d4918275fad3c652d1dfdea40c912371a366c');
+  const replay=JSON.parse(replayBytes);
+  const fixture=canonical?JSON.parse(readFileSync(ROOT+'contracts/out/CanonicalDiscovery.t.sol/CanonicalDiscoveryFaultDriver.json')):replay.artifacts.DiscoveryFaultDriver;
+  const fi=new E.Interface(fixture.abi),faultArtifact=canonical?JSON.parse(readFileSync(ROOT+'contracts/out/CanonicalDiscovery.t.sol/CanonicalFaultDiscovery.json')):replay.artifacts.FaultDiscovery;
   const di=new E.Interface(faultArtifact.abi),ni=new E.Interface(artifact('NavigationIndex').abi),cases=[];
   for(const required of [true,false]) {
     const deployed=await w.rawSend('deploy test-only fault driver '+required,fixture.bytecode.object+fi.encodeDeploy([w.config.kernel]).slice(2));
@@ -56,7 +61,10 @@ export async function failureReceipts(w) {
     cases.push({required,driver,index,file,indexRuntimeHash:E.keccak256(runtime),actions:rows});
   }
   const sourcePins={...fixture.metadata.sources,...faultArtifact.metadata.sources};
-  for(const [path,pin] of Object.entries(sourcePins)) assert.equal(E.keccak256(readFileSync(ROOT+'contracts/'+path)),pin.keccak256,'test fixture source pinned');
+  for(const [path,pin] of Object.entries(sourcePins)){
+    const content=canonical?readFileSync(ROOT+'contracts/'+path):spawnSync('git',['show',replay.sourceCommit+':Reviews/2026-09-11-efs21-pragmatic/contracts/'+path],{cwd:ROOT}).stdout;
+    assert.equal(E.keccak256(content),pin.keccak256,'test fixture source pinned');
+  }
   return {standing:'Test-only source driver plus DiscoveryIndex subclass; actual EVM receipt fault isolation evidence, not production-kernel hook premium',
     setup:w.setup,cases,provenance:w.provenance,testFixture:{sourcePins,driverCreationHash:E.keccak256(fixture.bytecode.object),indexCreationHash:E.keccak256(faultArtifact.bytecode.object)},
     limitations:['Fault toggles exist only in contracts/test/Discovery.t.sol, never in production contracts','Production NativeKernel required/tolerated and malformed-return guards are separately tested with Foundry call interception','Outer OOG receipt exercises explicit 1000-gas fail-closed driver call; production kernel call guard is separately tested at low supplied gas']};

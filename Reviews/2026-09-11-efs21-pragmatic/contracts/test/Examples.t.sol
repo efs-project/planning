@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {TestBase} from "./TestBase.sol";
-import {NativeKernel} from "../src/NativeKernel.sol";
-import {Uint256Validator, ExactTypeRegistry} from "../src/ExactTypeRegistry.sol";
-import {NavigationIndex} from "../src/NavigationIndex.sol";
-import {QuoteProducer, QuoteReader, PlainQuoteMapping} from "../src/Examples.sol";
+import {LegacyNativeKernel as NativeKernel} from "./fixtures/legacy4cb/LegacyNativeKernel.sol";
+import {LegacyUint256Validator as Uint256Validator, LegacyExactTypeRegistry as ExactTypeRegistry} from "./fixtures/legacy4cb/LegacyExactTypeRegistry.sol";
+import {LegacyNavigationIndex as NavigationIndex} from "./fixtures/legacy4cb/LegacyNavigationIndex.sol";
+import {LegacyQuoteProducer as QuoteProducer, LegacyQuoteReader as QuoteReader, LegacyPlainQuoteMapping as PlainQuoteMapping} from "./fixtures/legacy4cb/LegacyExamples.sol";
 import {RegistryHarness} from "./Types.t.sol";
 
 contract CallbackValidator {

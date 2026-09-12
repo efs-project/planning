@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {TestBase} from "./TestBase.sol";
-import {NativeKernel} from "../src/NativeKernel.sol";
-import {Uint256Validator, BytesValidator, ExactTypeRegistry} from "../src/ExactTypeRegistry.sol";
-import {DiscoveryIndex, DiscoverySource} from "../src/DiscoveryIndex.sol";
-import {NavigationIndex} from "../src/NavigationIndex.sol";
+import {LegacyNativeKernel as NativeKernel} from "./fixtures/legacy4cb/LegacyNativeKernel.sol";
+import {LegacyUint256Validator as Uint256Validator, LegacyBytesValidator as BytesValidator, LegacyExactTypeRegistry as ExactTypeRegistry} from "./fixtures/legacy4cb/LegacyExactTypeRegistry.sol";
+import {LegacyDiscoveryIndex as DiscoveryIndex, LegacyDiscoverySource as DiscoverySource} from "./fixtures/legacy4cb/LegacyDiscoveryIndex.sol";
+import {LegacyNavigationIndex as NavigationIndex} from "./fixtures/legacy4cb/LegacyNavigationIndex.sol";
 
 interface FaultVM {
     function mockCallRevert(address, bytes calldata, bytes calldata) external;

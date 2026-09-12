@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {BodyStorageTest} from "./BodyStorage.t.sol";
-import {NativeKernel} from "../src/NativeKernel.sol";
-import {NavigationIndex} from "../src/NavigationIndex.sol";
+import {LegacyNativeKernel as NativeKernel} from "./fixtures/legacy4cb/LegacyNativeKernel.sol";
+import {LegacyNavigationIndex as NavigationIndex} from "./fixtures/legacy4cb/LegacyNavigationIndex.sol";
 
 contract PackedPresenceTest is BodyStorageTest {
     // NativeRecordKernel records root 0: address (20) + uint16 (2) puts presence at byte 22.

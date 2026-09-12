@@ -1,5 +1,5 @@
 // Small profile-specific client. RPC observations are not cryptographic state proofs.
-import {graphIdentity,qualifyGraph} from './qualification.mjs';
+import {graphIdentity,qualifyGraph,sourceProfile} from './qualification.mjs';
 export const ZERO = '0x' + '0'.repeat(64);
 export const START = [ZERO, 0, 0];
 export const GAS_LIMIT = 16777216n;
@@ -22,6 +22,7 @@ export function validateConfig(config) {
 export function createClient(E, config, {onAction = () => {}, initialActions = []} = {}) {
   validateConfig(config);
   const graphId=graphIdentity(E,config);
+  const canonical=sourceProfile(config.dependencyProfile).canonical;
   const observedBases=new Set();
   const abi = E.AbiCoder.defaultAbiCoder(), iface = new E.Interface(config.abi);
   const metrics = {httpRequests:0, logicalRpcCalls:0, responseBytes:0};
@@ -81,20 +82,22 @@ export function createClient(E, config, {onAction = () => {}, initialActions = [
     return {status:'OBSERVED', value:decoded.length === 1 ? decoded[0] : decoded, basis, returnBytes:(raw.length-2)/2};
   }
   const body = bytes => {
+    if(canonical){const payload=E.getBytes(bytes);if(payload.length>4094)throw Error('Payload exceeds 4094-byte canonical profile');return E.hexlify(E.concat([E.toBeHex(payload.length,2),payload]));}
     if (E.getBytes(bytes).length > 4032) throw Error('Payload exceeds 4032-byte inline profile');
     return abi.encode(['bytes'],[bytes]);
   };
   // Exact Types choose representation; unknown Types retain record() byte access only.
   const representation = typeId => {
     validateId(typeId);
-    if(typeId.toLowerCase()===config.bytesType?.toLowerCase())return 'canonical';
+    if(typeId.toLowerCase()===config.bytesType?.toLowerCase())return canonical?'canonical-u16-bytes':'canonical';
+    if(canonical)return null;
     if(typeId.toLowerCase()===config.rawType?.toLowerCase())return 'raw';
     return null;
   };
   const payloadLimit = typeId => {
     const kind=representation(typeId);
     if(!kind)throw Error('Unknown Type payload codec; exact record bytes only');
-    return kind==='raw'?4096:4032;
+    return kind==='canonical-u16-bytes'?4094:kind==='raw'?4096:4032;
   };
   const encodePayload = (typeId,bytes) => {
     const limit=payloadLimit(typeId);
@@ -106,13 +109,20 @@ export function createClient(E, config, {onAction = () => {}, initialActions = [
     if(!kind)throw Error('Unknown Type payload codec; exact record bytes only');
     if(E.getBytes(exact).length>4096)throw Error('Body exceeds 4096-byte inline profile');
     if(kind==='raw')return E.getBytes(exact);
+    if(kind==='canonical-u16-bytes'){
+      const b=E.getBytes(exact),length=b.length>=2?b[0]*256+b[1]:-1;
+      if(length<0||length>4094||length!==b.length-2)throw Error('Invalid canonical u16 bytes body');
+      return b.slice(2);
+    }
     try{
       const payload=abi.decode(['bytes'],exact)[0];
       if(body(payload)!==E.hexlify(exact))throw Error('noncanonical framing');
       return E.getBytes(payload);
     }catch{throw Error('Invalid canonical ABI bytes body');}
   };
-  const recordId = (typeId, exactBody) => E.keccak256(abi.encode(['bytes32','bytes32','bytes'],[E.id('EFS21_RECORD_V1'),validateId(typeId),exactBody]));
+  const recordId = (typeId, exactBody) => canonical
+    ? E.keccak256(abi.encode(['bytes32','bytes32','bytes32'],[E.id('efs2/record/1'),validateId(typeId),E.keccak256(exactBody)]))
+    : E.keccak256(abi.encode(['bytes32','bytes32','bytes'],[E.id('EFS21_RECORD_V1'),validateId(typeId),exactBody]));
   async function record(id,basis) {
     validateId(id); const result = await call('readRecord',[id],basis);
     if (recordId(result.value.typeId,result.value.body) !== id) throw Error('Record identity verification failed');

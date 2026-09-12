@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
-import {ExactTypeRegistry, Uint256Validator} from "./ExactTypeRegistry.sol";
+import {CanonicalTypeRegistry} from "./CanonicalTypeRegistry.sol";
 import {NavigationIndex} from "./NavigationIndex.sol";
 
 interface DiscoverySource {
@@ -62,7 +62,7 @@ contract DiscoveryIndex {
     }
     address public immutable kernel;
     NavigationIndex public immutable navigation;
-    ExactTypeRegistry public immutable types;
+    CanonicalTypeRegistry public immutable types;
     bytes32 public constant SUCCESS = keccak256("EFS21_DISCOVERY_OK");
     uint256 public constant MAX_PAGE = 64;
     uint256 public constant MAINTENANCE_GAS = 350_000;
@@ -91,7 +91,7 @@ contract DiscoveryIndex {
         _;
     }
 
-    constructor(NavigationIndex nav, ExactTypeRegistry registry) {
+    constructor(NavigationIndex nav, CanonicalTypeRegistry registry) {
         kernel = msg.sender;
         navigation = nav;
         types = registry;
@@ -100,11 +100,7 @@ contract DiscoveryIndex {
     function attach(bytes32 exactType, bool required) external idle {
         Profile storage p = profiles[msg.sender];
         if (p.health != Health.UNSUPPORTED) revert AlreadyAttached();
-        ExactTypeRegistry.TypeInfo memory info = types.typeInfo(exactType);
-        if (info.codeHash != keccak256(type(Uint256Validator).runtimeCode) || info.validator.codehash != info.codeHash)
-        {
-            revert UnsupportedType();
-        }
+        if (!types.isUint256(exactType)) revert UnsupportedType();
         p.typeId = exactType;
         p.required = required;
         _restart(msg.sender, p);

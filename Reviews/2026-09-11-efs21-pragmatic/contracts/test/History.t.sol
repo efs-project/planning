@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {TestBase} from "./TestBase.sol";
-import {NativeKernel} from "../src/NativeKernel.sol";
-import {NavigationIndex} from "../src/NavigationIndex.sol";
-import {ExactTypeRegistry, Uint256Validator, BytesValidator} from "../src/ExactTypeRegistry.sol";
+import {LegacyNativeKernel as NativeKernel} from "./fixtures/legacy4cb/LegacyNativeKernel.sol";
+import {LegacyNavigationIndex as NavigationIndex} from "./fixtures/legacy4cb/LegacyNavigationIndex.sol";
+import {LegacyExactTypeRegistry as ExactTypeRegistry, LegacyUint256Validator as Uint256Validator, LegacyBytesValidator as BytesValidator} from "./fixtures/legacy4cb/LegacyExactTypeRegistry.sol";
 
 interface HistoryVm {
     struct Log {
@@ -38,9 +38,16 @@ contract HistoryTest is TestBase {
         assembly ("memory-safe") { baseline := create(0, add(code, 32), mload(code)) }
         require(baseline != address(0), "baseline deployment");
         kernels[0] = NativeKernel(baseline);
-        kernels[1] = new NativeKernel();
-        address u = address(new Uint256Validator());
-        address b = address(new BytesValidator());
+        code = vm.getCode("test/fixtures/native-kernel-4cb0042.json");
+        address replay;
+        assembly ("memory-safe") { replay := create(0, add(code, 32), mload(code)) }
+        kernels[1] = NativeKernel(replay);
+        code = vm.getCode("test/fixtures/uint-validator-4cb0042.json");
+        address u;
+        assembly ("memory-safe") { u := create(0, add(code, 32), mload(code)) }
+        code = vm.getCode("test/fixtures/bytes-validator-4cb0042.json");
+        address b;
+        assembly ("memory-safe") { b := create(0, add(code, 32), mload(code)) }
         for (uint256 arm; arm < 2; ++arm) {
             bytes32 ut = kernels[arm].types().register("history:uint256", u);
             bytes32 bt = kernels[arm].types().register("history:bytes", b);

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {TestBase} from "./TestBase.sol";
-import {NativeKernel} from "../src/NativeKernel.sol";
-import {NavigationIndex} from "../src/NavigationIndex.sol";
-import {Uint256Validator} from "../src/ExactTypeRegistry.sol";
-import {QuoteProducer, QuoteReader, PlainQuoteMapping} from "../src/Examples.sol";
+import {LegacyNativeKernel as NativeKernel} from "./fixtures/legacy4cb/LegacyNativeKernel.sol";
+import {LegacyNavigationIndex as NavigationIndex} from "./fixtures/legacy4cb/LegacyNavigationIndex.sol";
+import {LegacyUint256Validator as Uint256Validator} from "./fixtures/legacy4cb/LegacyExactTypeRegistry.sol";
+import {LegacyQuoteProducer as QuoteProducer, LegacyQuoteReader as QuoteReader, LegacyPlainQuoteMapping as PlainQuoteMapping} from "./fixtures/legacy4cb/LegacyExamples.sol";
 
 /// @notice Named complete operation measurements. Forge test gas is NOT receipt gas.
 /// Setup creates prior state; each test is one public call and its necessary input construction.

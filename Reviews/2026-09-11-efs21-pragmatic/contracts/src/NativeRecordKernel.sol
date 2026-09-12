@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
-import {ExactTypeRegistry} from "./ExactTypeRegistry.sol";
-import {ExpandedTypeRegistry} from "./ExpandedTypeRegistry.sol";
+import {CanonicalTypeRegistry} from "./CanonicalTypeRegistry.sol";
 import {BodyWriter} from "./BodyWriter.sol";
 import {RecordInventoryIndex} from "./RecordInventoryIndex.sol";
 
@@ -20,13 +19,13 @@ contract NativeRecordKernel {
         uint8 backend;
     }
 
-    ExactTypeRegistry public immutable types;
+    CanonicalTypeRegistry public immutable types;
     RecordInventoryIndex public immutable recordInventory;
     BodyWriter public immutable bodyWriter;
     bytes32 private immutable bodyWriterCodeHash;
     bytes32 private immutable inventoryCodeHash;
     uint256 public constant MAX_BODY = 4096;
-    bytes32 public constant RECORD_DOMAIN = keccak256("EFS21_RECORD_V1");
+    bytes32 public constant RECORD_DOMAIN = keccak256("efs2/record/1");
     mapping(bytes32 => StoredRecord) private records;
     mapping(bytes32 => bytes32[128]) private sparseBodyWords;
     error MissingRecord();
@@ -36,8 +35,8 @@ contract NativeRecordKernel {
     error BodyTooLarge();
     event RecordStored(bytes32 indexed recordId, bytes32 indexed typeId);
 
-    constructor() {
-        types = ExactTypeRegistry(address(new ExpandedTypeRegistry()));
+    constructor(address helper) {
+        types = new CanonicalTypeRegistry(helper);
         recordInventory = new RecordInventoryIndex();
         inventoryCodeHash = address(recordInventory).codehash;
         bodyWriter = new BodyWriter();
@@ -49,7 +48,7 @@ contract NativeRecordKernel {
     }
 
     function recordId(bytes32 typeId, bytes memory body) public pure returns (bytes32) {
-        return keccak256(abi.encode(RECORD_DOMAIN, typeId, body));
+        return keccak256(abi.encode(RECORD_DOMAIN, typeId, keccak256(body)));
     }
 
     function readRecord(bytes32 id) external view returns (Record memory) {

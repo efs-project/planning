@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {TestBase} from "./TestBase.sol";
-import {NativeKernel} from "../src/NativeKernel.sol";
-import {NavigationIndex} from "../src/NavigationIndex.sol";
-import {RecordInventoryIndex} from "../src/RecordInventoryIndex.sol";
-import {Uint256Validator, BytesValidator} from "../src/ExactTypeRegistry.sol";
+import {LegacyNativeKernel as NativeKernel} from "./fixtures/legacy4cb/LegacyNativeKernel.sol";
+import {LegacyNavigationIndex as NavigationIndex} from "./fixtures/legacy4cb/LegacyNavigationIndex.sol";
+import {LegacyRecordInventoryIndex as RecordInventoryIndex} from "./fixtures/legacy4cb/LegacyRecordInventoryIndex.sol";
+import {LegacyUint256Validator as Uint256Validator, LegacyBytesValidator as BytesValidator} from "./fixtures/legacy4cb/LegacyExactTypeRegistry.sol";
 
 contract FailIndex {
     fallback() external {

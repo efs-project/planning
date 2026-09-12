@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {TestBase} from "./TestBase.sol";
-import {NativeKernel} from "../src/NativeKernel.sol";
+import {LegacyNativeKernel as NativeKernel} from "./fixtures/legacy4cb/LegacyNativeKernel.sol";
 import {HistoryVm} from "./History.t.sol";
-import {NavigationIndex} from "../src/NavigationIndex.sol";
-import {BytesValidator} from "../src/ExactTypeRegistry.sol";
+import {LegacyNavigationIndex as NavigationIndex} from "./fixtures/legacy4cb/LegacyNavigationIndex.sol";
+import {LegacyBytesValidator as BytesValidator} from "./fixtures/legacy4cb/LegacyExactTypeRegistry.sol";
 
 interface BodyVm {
     function getNonce(address) external view returns (uint64);
@@ -23,6 +23,10 @@ interface ReadConsumer {
 }
 
 contract BodyStorageTest is TestBase {
+    function frozenBytesValidator() internal returns (address deployed) {
+        bytes memory code = vm.getCode("test/fixtures/bytes-validator-4cb0042.json");
+        assembly { deployed := create(0, add(code, 32), mload(code)) }
+    }
     BodyVm constant bvm = BodyVm(address(uint160(uint256(keccak256("hevm cheat code")))));
     HistoryVm constant hvm = HistoryVm(address(uint160(uint256(keccak256("hevm cheat code")))));
     NativeKernel kernel;
@@ -30,8 +34,11 @@ contract BodyStorageTest is TestBase {
     address writer;
 
     function setUp() public {
-        kernel = new NativeKernel();
-        bytes memory creation = vm.getCode("RawBytesValidator.sol:RawBytesValidator");
+        bytes memory creation = vm.getCode("test/fixtures/native-kernel-4cb0042.json");
+        address deployed;
+        assembly { deployed := create(0, add(creation, 32), mload(creation)) }
+        kernel = NativeKernel(deployed);
+        creation = vm.getCode("test/fixtures/raw-validator-4cb0042.json");
         address validator;
         assembly ("memory-safe") { validator := create(0, add(creation, 32), mload(creation)) }
         rawType = kernel.types().register("EFS21 exact raw bytes v1", validator);
@@ -151,7 +158,7 @@ contract BodyStorageTest is TestBase {
     }
 
     function testSameBytesDifferentTypesNeverShareBodyObjects() public {
-        bytes32 canonicalType = kernel.types().register("EFS21 canonical ABI bytes v1", address(new BytesValidator()));
+        bytes32 canonicalType = kernel.types().register("EFS21 canonical ABI bytes v1", frozenBytesValidator());
         bytes memory body = abi.encode(hex"ef0000ff00");
         uint64 nonce = bvm.getNonce(writer);
         address first = bvm.computeCreateAddress(writer, nonce);
@@ -174,7 +181,7 @@ contract BodyStorageTest is TestBase {
             address target;
             assembly ("memory-safe") { target := create(0, add(creation, 32), mload(creation)) }
             NativeKernel control = NativeKernel(target);
-            bytes memory validatorCode = vm.getCode("RawBytesValidator.sol:RawBytesValidator");
+            bytes memory validatorCode = vm.getCode("test/fixtures/raw-validator-4cb0042.json");
             address validator;
             assembly ("memory-safe") { validator := create(0, add(validatorCode, 32), mload(validatorCode)) }
             bytes32 exactType = control.types().register("EFS21 exact raw bytes v1", validator);
@@ -289,7 +296,7 @@ contract BodyStorageTest is TestBase {
     }
 
     function testPaidConsumerSingleRepeatedAndBoundedReads() public {
-        bytes memory creation = vm.getCode("BodyReadConsumer.sol:BodyReadConsumer");
+        bytes memory creation = vm.getCode("LegacyBodyReadConsumer.sol:LegacyBodyReadConsumer");
         address consumer;
         assembly ("memory-safe") { consumer := create(0, add(creation, 32), mload(creation)) }
         bytes32 id = kernel.storeRecord(

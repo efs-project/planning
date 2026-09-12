@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {TestBase} from "./TestBase.sol";
-import {NativeKernel} from "../src/NativeKernel.sol";
-import {NavigationIndex} from "../src/NavigationIndex.sol";
-import {Uint256Validator} from "../src/ExactTypeRegistry.sol";
-import {NativeRecordKernel} from "../src/NativeRecordKernel.sol";
-import {RecordInventoryIndex} from "../src/RecordInventoryIndex.sol";
+import {LegacyNativeKernel as NativeKernel} from "./fixtures/legacy4cb/LegacyNativeKernel.sol";
+import {LegacyNavigationIndex as NavigationIndex} from "./fixtures/legacy4cb/LegacyNavigationIndex.sol";
+import {LegacyUint256Validator as Uint256Validator} from "./fixtures/legacy4cb/LegacyExactTypeRegistry.sol";
+import {LegacyNativeRecordKernel as NativeRecordKernel} from "./fixtures/legacy4cb/LegacyNativeRecordKernel.sol";
+import {LegacyRecordInventoryIndex as RecordInventoryIndex} from "./fixtures/legacy4cb/LegacyRecordInventoryIndex.sol";
 import {RecordProducer, GenericRecords} from "./fixtures/RecordProducer.sol";
 
 interface BoundaryVm {

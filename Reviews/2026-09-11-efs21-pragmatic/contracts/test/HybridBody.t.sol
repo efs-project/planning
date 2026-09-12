@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {BodyStorageTest} from "./BodyStorage.t.sol";
-import {NativeKernel} from "../src/NativeKernel.sol";
-import {NativeRecordKernel} from "../src/NativeRecordKernel.sol";
-import {BytesValidator} from "../src/ExactTypeRegistry.sol";
+import {LegacyNativeKernel as NativeKernel} from "./fixtures/legacy4cb/LegacyNativeKernel.sol";
+import {LegacyNativeRecordKernel as NativeRecordKernel} from "./fixtures/legacy4cb/LegacyNativeRecordKernel.sol";
+import {LegacyBytesValidator as BytesValidator} from "./fixtures/legacy4cb/LegacyExactTypeRegistry.sol";
 
 contract PolicyProbe is NativeRecordKernel {
     function select(uint256 length, uint256 occupied) external pure returns (uint8) {
@@ -132,7 +132,7 @@ contract HybridBodyTest is BodyStorageTest {
     }
 
     function testIdenticalWordBodiesUnderDifferentTypesHaveIndependentStorage() public {
-        bytes32 canonicalType = kernel.types().register("EFS21 canonical ABI bytes v1", address(new BytesValidator()));
+        bytes32 canonicalType = kernel.types().register("EFS21 canonical ABI bytes v1", frozenBytesValidator());
         bytes memory body = abi.encode(bytes(""));
         bytes32 raw = kernel.storeRecord(rawType, body);
         bytes32 canonical = kernel.storeRecord(canonicalType, body);

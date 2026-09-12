@@ -3,6 +3,8 @@ import {spawnSync} from 'node:child_process';
 import {readFileSync,readdirSync} from 'node:fs';
 import {createServer} from 'node:net';
 import {fileURLToPath} from 'node:url';
+import {resolve} from 'node:path';
+import {isDeepStrictEqual} from 'node:util';
 import * as E from '../../2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js';
 import {withManagedAnvil} from '../../2026-09-08-upgradeable-foundation/scripts/local-upgrade.mjs';
 import {createClient,GAS_LIMIT} from '../sdk/client.mjs';
@@ -30,7 +32,9 @@ export async function observeBody(w,id,body,basis){
 }
 export const ROOT = fileURLToPath(new URL('../',import.meta.url));
 export const KERNEL_PROFILES=Object.freeze({
-  current:{registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true,bodyBackend:'hybrid',split:true},
+  current:{fixture:'4cb0042',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true,bodyBackend:'hybrid',split:true},
+  'baseline-4cb0042':{fixture:'4cb0042',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true,bodyBackend:'hybrid',split:true},
+  'canonical-ref-free-v1':{registry:'CanonicalTypeRegistry',canonical:true,raw:false,discovery:true,bodyWriter:true,bodyBackend:'hybrid',split:true},
   'baseline-7db38cd':{fixture:'7db38cd',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true,bodyBackend:'hybrid'},
   'forced-code':{fixture:'7db38cd-forced-code',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true,bodyBackend:'code'},
   'forced-words':{fixture:'7db38cd-forced-words',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:true,bodyBackend:'words'},
@@ -41,10 +45,31 @@ export const KERNEL_PROFILES=Object.freeze({
   'baseline-c088363':{fixture:'c088363',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:false,bodyBackend:'dynamic'},
   'integrity-c088363':{fixture:'c088363-read-integrity',registry:'ExpandedTypeRegistry',raw:true,discovery:true,bodyWriter:false,bodyBackend:'dynamic'},
 });
-export function artifact(name) {
+export function artifactFor(profile,name) {
+  if(name==='PaidReadProbe'){
+    const a=JSON.parse(readFileSync(ROOT+'contracts/out/PaidReadProbe.sol/PaidReadProbe.json'));
+    for(const [path,pin]of Object.entries(a.metadata.sources))assert.equal(E.keccak256(readFileSync(ROOT+'contracts/'+path)),pin.keccak256,'identical benchmark-only probe source');
+    return a;
+  }
+  if(profile!=='canonical-ref-free-v1'){
+    const bytes=readFileSync(ROOT+'contracts/test/fixtures/native-replay-4cb0042.json');
+    assert.equal(E.keccak256(bytes),'0xee1642da4c16b7afb8104967c6eb86075d8f83654bc66d78bb1e9f9ac227a5e0','frozen complete replay artifact');
+    const frozen=JSON.parse(bytes);
+    assert.equal(frozen.sourceCommit,'4cb004273982411d4699fa15d388750638cd1358');
+    const a=frozen.artifacts[name];assert(a,'complete frozen artifact '+name);return a;
+  }
+  if(name==='PreparationHelper'){
+    const a=JSON.parse(readFileSync(ROOT+'contracts/test/fixtures/canonical-preparation-helper.json'));
+    assert.equal(E.keccak256(a.deployedBytecode.object),sourceProfile(profile).helper.runtimeHash);
+    assert.equal(E.keccak256(readFileSync(ROOT+'contracts/test/fixtures/'+a.compilerOutput.file)),a.compilerOutput.keccak256);
+    for(const pin of Object.values(a.sourceManifest))assert.equal(E.keccak256(readFileSync(resolve(ROOT,'../..',pin.path))),pin.keccak256,'standalone helper source '+pin.path);
+    return a;
+  }
   const source = ['ForcedCodeKernel','ForcedWordsKernel'].includes(name)?'ForcedBodyKernel':['QuoteProducer','QuoteReader','PlainQuoteMapping'].includes(name)?'Examples':['BytesValidator','Uint256Validator'].includes(name)?'ExactTypeRegistry':name;
   return JSON.parse(readFileSync(`${ROOT}contracts/out/${source}.sol/${name}.json`));
 }
+// Explicitly historical convenience API. Candidate callers must select their profile.
+export const artifact=name=>artifactFor('baseline-4cb0042',name);
 export function build() {
   const r = spawnSync('forge',['build','--sizes'],{cwd:`${ROOT}contracts`,encoding:'utf8',timeout:180000});
   assert.equal(r.status,0,r.stdout+r.stderr);
@@ -57,9 +82,10 @@ export async function withWorld(action,{watchdogMs=300000,buildFirst=true,kernel
   if (buildFirst) build();
   assert(Object.hasOwn(KERNEL_PROFILES,kernelArtifact),'explicit supported kernel artifact');
   const capabilities=KERNEL_PROFILES[kernelArtifact];
+  const getArtifact=name=>artifactFor(kernelArtifact,name);
   const fixturePath=capabilities.fixture&&`contracts/test/fixtures/native-kernel-${capabilities.fixture}.json`;
-  const selectedKernel=fixturePath?JSON.parse(readFileSync(ROOT+fixturePath)):artifact(capabilities.artifact??'NativeKernel');
-  for(const fragment of selectedKernel.abi) assert(artifact('NativeKernel').abi.some(current=>JSON.stringify(current)===JSON.stringify(fragment)),'historical ABI fragment preserved exactly');
+  const selectedKernel=fixturePath?JSON.parse(readFileSync(ROOT+fixturePath)):getArtifact(capabilities.artifact??'NativeKernel');
+  for(const fragment of artifact('NativeKernel').abi.filter(f=>(f.type==='function'||f.type==='event')&&f.name!=='types')) assert(selectedKernel.abi.some(current=>isDeepStrictEqual(current,fragment))||!capabilities.split,'Files function/tuple/event surface preserved exactly');
   const kernelPin={selection:kernelArtifact,capabilities,creationBytecodeHash:E.keccak256(selectedKernel.bytecode.object),sourcePins:selectedKernel.metadata.sources,compiler:selectedKernel.metadata.compiler,settings:selectedKernel.metadata.settings};
   if(fixturePath) {
     assert.equal(kernelPin.creationBytecodeHash,selectedKernel.creationBytecodeHash,'pinned baseline bytecode');
@@ -97,8 +123,10 @@ export async function withWorld(action,{watchdogMs=300000,buildFirst=true,kernel
       return receipt;
     }
     async function pin(name,address) {const code=await rpc('eth_getCode',[address,'latest']);assert((code.length-2)/2<=24576,'ordinary runtime ceiling');runtimes[name]={address,codeHash:E.keccak256(code),runtimeBytes:(code.length-2)/2};return address;}
-    async function deploy(name,args=[]) {const a=name==='NativeKernel'?selectedKernel:artifact(name),i=new E.Interface(a.abi),data=a.bytecode.object+i.encodeDeploy(args).slice(2);assert((data.length-2)/2<=49152);return pin(name,(await rawSend('deploy '+name,data)).contractAddress);}
-    const kernel=await deploy('NativeKernel'),ki=new E.Interface(artifact('NativeKernel').abi);
+    async function deploy(name,args=[]) {const a=name==='NativeKernel'?selectedKernel:getArtifact(name),i=new E.Interface(a.abi),data=a.bytecode.object+i.encodeDeploy(args).slice(2);assert((data.length-2)/2<=49152);return pin(name,(await rawSend('deploy '+name,data)).contractAddress);}
+    const preparationHelper=capabilities.canonical?await deploy('PreparationHelper'):undefined;
+    const kernel=await deploy('NativeKernel',preparationHelper?[preparationHelper]:[]),ki=new E.Interface(selectedKernel.abi);
+    const kernelDeployment=setup.at(-1).receipt;
     const point=async (method)=>ki.decodeFunctionResult(method,await rpc('eth_call',[{to:kernel,data:ki.encodeFunctionData(method)},'latest']))[0];
     const registry=await pin(capabilities.registry,await point('types'));await pin('NavigationIndex',await point('navigation'));
     if(capabilities.discovery) await pin('DiscoveryIndex',await point('discovery'));
@@ -110,7 +138,7 @@ export async function withWorld(action,{watchdogMs=300000,buildFirst=true,kernel
     if(capabilities.bodyWriter){
       const ri=new E.Interface(['function bodyWriter() view returns(address)']);
       const helper=capabilities.split?ri.decodeFunctionResult('bodyWriter',await rpc('eth_call',[{to:recordKernel,data:ri.encodeFunctionData('bodyWriter')},'latest']))[0]:E.getCreateAddress({from:kernel,nonce:4});
-      const deployed=artifact('BodyWriter').deployedBytecode;
+      const deployed=getArtifact('BodyWriter').deployedBytecode;
       let expected=deployed.object;
       for(const refs of Object.values(deployed.immutableReferences))for(const ref of refs){
         assert.equal(ref.length,32);const start=2+ref.start*2;
@@ -119,20 +147,30 @@ export async function withWorld(action,{watchdogMs=300000,buildFirst=true,kernel
       assert.equal(await rpc('eth_getCode',[helper,'latest']),expected,'derived helper must match actual compiler runtime plus kernel immutable');
       await pin('BodyWriter',helper);
     }
-    const bytesValidator=await deploy('BytesValidator'),uintValidator=await deploy('Uint256Validator');
-    const ti=new E.Interface(artifact('ExactTypeRegistry').abi),abi=E.AbiCoder.defaultAbiCoder();
+    const bytesValidator=capabilities.canonical?undefined:await deploy('BytesValidator'),uintValidator=capabilities.canonical?undefined:await deploy('Uint256Validator');
+    const ti=new E.Interface(getArtifact(capabilities.registry).abi),abi=E.AbiCoder.defaultAbiCoder();
     async function register(label,validator) {const descriptor=E.toUtf8Bytes(label),codeHash=E.keccak256(await rpc('eth_getCode',[validator,'latest']));await rawSend('register '+label,ti.encodeFunctionData('register',[descriptor,validator]),registry);return E.keccak256(abi.encode(['bytes32','bytes32','bytes32'],[E.id('EFS21_TYPE_V1'),E.keccak256(descriptor),codeHash]));}
-    const bytesType=await register('EFS21 canonical ABI bytes v1',bytesValidator),quoteType=await register('EFS21 exact ABI uint256 v1',uintValidator);
+    let bytesType,quoteType;
+    if(capabilities.canonical){
+      const defaults=JSON.parse(readFileSync(ROOT+'contracts/test/fixtures/canonical-types-golden.json')).groups.defaults;
+      assert.deepEqual(defaults.ids,sourceProfile(kernelArtifact).canonical.defaultGroup.ids);
+      await rawSend('register canonical defaults',ti.encodeFunctionData('registerGroup',[defaults.raw]),registry);
+      const groupId=E.keccak256(abi.encode(['bytes32','bytes32'],[E.id('efs2/typeschema-group/1'),E.keccak256(defaults.raw)]));
+      assert.equal(groupId,defaults.groupHash);
+      const ids=[0,1].map(i=>E.keccak256(abi.encode(['bytes32','bytes32','uint256'],[E.id('efs2/typeschema/1'),groupId,i])));assert.deepEqual(ids,defaults.ids);
+      [quoteType,bytesType]=ids;
+    }else{bytesType=await register('EFS21 canonical ABI bytes v1',bytesValidator);quoteType=await register('EFS21 exact ABI uint256 v1',uintValidator);}
     const producer=await deploy('QuoteProducer',[kernel,quoteType]),consumer=await deploy('QuoteReader'),mapping=await deploy('PlainQuoteMapping');
     // Append new setup after old deployments so historical producer identities remain comparable.
     const rawType=capabilities.raw?await register('EFS21 exact raw bytes v1',await deploy('RawBytesValidator')):undefined;
-    const config={rpc:rpcURL,chainId:'31337',genesisHash:(await rpc('eth_getBlockByNumber',['0x0',false])).hash,kernel,codeHash:runtimes.NativeKernel.codeHash,devPrivateKey:key,namespace:wallet.address,bytesType,quoteType,producer,consumer,abi:artifact('NativeKernel').abi,consumerAbi:artifact('QuoteReader').abi};
+    const config={rpc:rpcURL,chainId:'31337',genesisHash:(await rpc('eth_getBlockByNumber',['0x0',false])).hash,kernel,codeHash:runtimes.NativeKernel.codeHash,devPrivateKey:key,namespace:wallet.address,bytesType,quoteType,producer,consumer,abi:selectedKernel.abi,consumerAbi:getArtifact('QuoteReader').abi};
+    if(capabilities.canonical){const p=sourceProfile(kernelArtifact);config.representation=p.canonical.representation;config.defaultGroupId=p.canonical.defaultGroup.groupHash;config.registryAbi=p.canonical.registryAbi;config.errorAbi=p.errorAbi;}
     if(rawType)config.rawType=rawType;
     config.dependencyProfile=kernelArtifact;
     config.profileId=sourceProfile(kernelArtifact).id;
-    const graphRoles=['NativeKernel','NavigationIndex','BytesValidator','Uint256Validator',...(capabilities.discovery?['DiscoveryIndex']:[]),...(capabilities.bodyWriter?['BodyWriter']:[]),...(rawType?['RawBytesValidator']:[]),...(capabilities.split?['NativeRecordKernel','RecordInventoryIndex']:[])];
+    const graphRoles=['NativeKernel','NavigationIndex',...(capabilities.canonical?['PreparationHelper']:['BytesValidator','Uint256Validator']),...(capabilities.discovery?['DiscoveryIndex']:[]),...(capabilities.bodyWriter?['BodyWriter']:[]),...(rawType?['RawBytesValidator']:[]),...(capabilities.split?['NativeRecordKernel','RecordInventoryIndex']:[])];
     config.graph={...Object.fromEntries(graphRoles.map(role=>[role,runtimes[role].address])),types:registry};
-    config.deploymentBlockNumber=setup[0].receipt.blockNumber;config.deploymentBlockHash=setup[0].receipt.blockHash;
+    config.deploymentBlockNumber=kernelDeployment.blockNumber;config.deploymentBlockHash=kernelDeployment.blockHash;
     const client=createClient(E,config,{onAction:a=>{const i=actions.findIndex(x=>x.hash===a.hash);if(i<0)actions.push(a);else actions[i]=a;}});
     async function faultWrite(method,args,label,{expectedStatus='0x0'}={}){
       await rawSend(label,ki.encodeFunctionData(method,args),kernel,{phase:'injected-fault',expectedStatus});
@@ -140,16 +178,16 @@ export async function withWorld(action,{watchdogMs=300000,buildFirst=true,kernel
     }
     const git=spawnSync('git',['rev-parse','HEAD'],{cwd:ROOT,encoding:'utf8'}).stdout.trim();
     const sourcePins=Object.fromEntries(readdirSync(`${ROOT}contracts/src`).filter(p=>p.endsWith('.sol')).map(p=>[p,E.keccak256(readFileSync(`${ROOT}contracts/src/${p}`))]));
-    for(const name of ['NativeKernel','NavigationIndex','DiscoveryIndex','ExactTypeRegistry','ExpandedTypeRegistry','RawBytesValidator','PayloadConsumer','BytesValidator','Uint256Validator','QuoteProducer','QuoteReader','PlainQuoteMapping','BodyWriter','BodyReadConsumer']){
-      for(const [path,pin] of Object.entries(artifact(name).metadata.sources))assert.equal(E.keccak256(readFileSync(`${ROOT}contracts/${path}`)),pin.keccak256,'artifact matches source '+path);
+    if(capabilities.canonical)for(const name of ['NativeKernel','NativeRecordKernel','CanonicalTypeRegistry','NavigationIndex','DiscoveryIndex','CanonicalPayloadConsumer','QuoteProducer','QuoteReader','PlainQuoteMapping','BodyWriter','BodyReadConsumer']){
+      for(const [path,pin] of Object.entries(getArtifact(name).metadata.sources))assert.equal(E.keccak256(readFileSync(`${ROOT}contracts/${path}`)),pin.keccak256,'artifact matches source '+path);
     }
     const supportPins=Object.fromEntries(['scripts','sdk','web','test'].flatMap(dir=>readdirSync(ROOT+dir).map(p=>[dir+'/'+p,E.keccak256(readFileSync(ROOT+dir+'/'+p))])));
-    const provenance={sourceCommit:git,sourcePins,runtimes,compiler:artifact('NativeKernel').metadata.compiler,settings:artifact('NativeKernel').metadata.settings,node:process.version,ethers:E.version,anvil:spawnSync('anvil',['--version'],{encoding:'utf8'}).stdout.trim(),gasLimit:String(GAS_LIMIT),hardfork:'cancun',dependencyLockHash:E.keccak256(readFileSync(`${ROOT}../2026-09-04-mvp-rehearsal/package-lock.json`))};
+    const provenance={sourceCommit:git,sourcePins,runtimes,compiler:selectedKernel.metadata.compiler,settings:selectedKernel.metadata.settings,node:process.version,ethers:E.version,anvil:spawnSync('anvil',['--version'],{encoding:'utf8'}).stdout.trim(),gasLimit:String(GAS_LIMIT),hardfork:'cancun',dependencyLockHash:E.keccak256(readFileSync(`${ROOT}../2026-09-04-mvp-rehearsal/package-lock.json`))};
     provenance.kernelArtifact={...kernelPin,sourceCommit:kernelPin.sourceCommit??git};
     provenance.sourceProfile={selection:kernelArtifact,id:config.profileId,graph:config.graph};
     provenance.supportPins=supportPins;
     provenance.sharedSupportPins=Object.fromEntries(['../2026-09-08-upgradeable-foundation/scripts/local-upgrade.mjs','../2026-09-09-files-browser-mvp/web/cost-ledger.mjs','../2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.min.js'].map(p=>[p,E.keccak256(readFileSync(ROOT+p))]));
-    const result=await action({client,config,setup,actions,provenance,producer,consumer,mapping,deploy,rawSend,faultWrite,node});
+    const result=await action({client,config,setup,actions,provenance,producer,consumer,mapping,deploy,rawSend,faultWrite,node,artifact:getArtifact});
     await node.stop(); return {...result,cleanup:node.cleanup};
   },{watchdogMs});
 }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
-import {ExactTypeRegistry} from "./ExactTypeRegistry.sol";
+import {CanonicalTypeRegistry} from "./CanonicalTypeRegistry.sol";
 import {NativeRecordKernel} from "./NativeRecordKernel.sol";
 import {RecordInventoryIndex} from "./RecordInventoryIndex.sol";
 import {NavigationIndex} from "./NavigationIndex.sol";
@@ -54,7 +54,7 @@ contract NativeKernel {
         bool complete;
     }
     NavigationIndex public immutable navigation;
-    ExactTypeRegistry public immutable types;
+    CanonicalTypeRegistry public immutable types;
     DiscoveryIndex public immutable discovery;
     bytes32 private immutable discoveryCodeHash;
     NativeRecordKernel public immutable recordKernel;
@@ -65,7 +65,7 @@ contract NativeKernel {
     uint256 public constant MAX_BODY = 4096;
     uint256 public constant MAX_NAME = 64;
     uint256 public constant MAX_PATH_DEPTH = 32;
-    bytes32 public constant RECORD_DOMAIN = keccak256("EFS21_RECORD_V1");
+    bytes32 public constant RECORD_DOMAIN = keccak256("efs2/record/1");
     mapping(address => uint256) public fileNonce;
     mapping(bytes32 => FileInfo) private files;
     mapping(bytes32 => StoredRevision[]) private history;
@@ -94,8 +94,8 @@ contract NativeKernel {
     // ABI compatibility only: RecordStored is emitted once by recordKernel, never this facade.
     event RecordStored(bytes32 indexed recordId, bytes32 indexed typeId);
 
-    constructor() {
-        recordKernel = new NativeRecordKernel();
+    constructor(address helper) {
+        recordKernel = new NativeRecordKernel(helper);
         recordKernelCodeHash = address(recordKernel).codehash;
         types = recordKernel.types();
         recordInventory = recordKernel.recordInventory();
@@ -144,7 +144,7 @@ contract NativeKernel {
     }
 
     function recordId(bytes32 typeId, bytes memory body) public pure returns (bytes32) {
-        return keccak256(abi.encode(RECORD_DOMAIN, typeId, body));
+        return keccak256(abi.encode(RECORD_DOMAIN, typeId, keccak256(body)));
     }
 
     function readRecord(bytes32 id) external view returns (Record memory) {
