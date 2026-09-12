@@ -578,6 +578,12 @@ contract BindingReadsTest {
         f.h.replaceBodyForTest(f.first.recordIds[0], bad[0]);
         historyError(f, "Record hash mismatch");
         require(vm.revertToState(baseline));
+        baseline = vm.snapshotState();
+        bytes memory sameSize = f.h.record(f.first.recordIds[0]).body;
+        sameSize[0] = bytes1(uint8(sameSize[0]) ^ uint8(1));
+        f.h.replaceBodyForTest(f.first.recordIds[0], sameSize);
+        historyError(f, "same-sized code pointer replacement still fails Record hash");
+        require(vm.revertToState(baseline));
         f.h
             .replaceMutationForTest(
                 f.second.envelopeId,

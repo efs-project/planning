@@ -6,6 +6,7 @@ import {UpgradeStorage} from "../src/UpgradeStorage.sol";
 import {StateStore} from "C0Core/StateStore.sol";
 import {PointReadLibrary} from "C0Core/PointReadLibrary.sol";
 import {UpgradeQueryReadLibrary} from "../src/UpgradeQueryReadLibrary.sol";
+import {CacheCodeForTest} from "C0Core/../test/CacheCodeForTest.sol";
 
 // Independent ABI lets the absent API fail as a runtime assertion during RED.
 interface RecordBatchPort {
@@ -36,13 +37,37 @@ contract RecordBatchSeed {
         s.count.records = 8;
         s.count.admissions = 8;
         for (uint64 i = 1; i <= 8; ++i) {
-            s.records[bytes32(uint256(i))] = StateStore.RecordRow(s.init.metaTypeId, new bytes(length), i, i);
+            s.records[bytes32(uint256(i))] =
+                StateStore.RecordCell(s.init.metaTypeId, CacheCodeForTest.recordReference(new bytes(length)), i, i);
         }
         if (malformedLast) s.records[bytes32(uint256(8))].firstAdmissionOrdinal = 9;
+    }
+
+    function corruptLast(uint8 fault) external {
+        StateStore.RecordCell storage row = UpgradeStorage.efs().records[bytes32(uint256(8))];
+        if (fault == 0) row.byteRef |= uint256(1) << 208;
+        if (fault == 1) row.byteRef &= ~uint256(type(uint160).max);
+        if (fault == 2) row.byteRef |= uint256(32) << 160;
+        if (fault == 3) row.byteRef += uint256(1) << 192;
+        if (fault == 4) row.recordOrdinal = 0;
     }
 }
 
 contract CheckedRecordBatchTest is UpgradeReadGuardsTest {
+    function testEighthPhysicalReferenceFaultRefusesEntireCheckedBatch() public {
+        for (uint8 fault; fault < 5; ++fault) {
+            seed(31, false);
+            bytes memory original = address(host).code;
+            RecordBatchSeed helper = new RecordBatchSeed();
+            rv.etch(address(host), address(helper).code);
+            RecordBatchSeed(address(host)).corruptLast(fault);
+            rv.etch(address(host), original);
+            bytes memory error = abi.encodeWithSignature("ErrReadState(bytes32)", bytes32(uint256(8)));
+            refuses(abi.encodeCall(RecordBatchPort.getRecordsCurrent, (ids(8))), error);
+            refuses(abi.encodeCall(RecordBatchPort.getRecordsChecked, (basis(), ids(8))), error);
+        }
+    }
+
     function ids(uint256 n) private pure returns (bytes32[] memory result) {
         result = new bytes32[](n);
         for (uint256 i; i < n; ++i) {

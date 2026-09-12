@@ -169,7 +169,7 @@ contract SyntheticBindingReadHarness is BindingReadHarness {
     }
 
     function replaceBodyForTest(bytes32 id, bytes calldata body) external {
-        s.records[id].body = body;
+        s.records[id].byteRef = CacheCodeForTest.recordReference(body);
     }
 
     /// Synthetic corruption: retain all hydration joins and a self-consistent Record ID.
@@ -180,9 +180,9 @@ contract SyntheticBindingReadHarness is BindingReadHarness {
         (StateKernel.EnvelopeHeader memory header, bytes32[] memory ids) = abi.decode(
             StateStore.envelopeRow(s, envelopeId).canonicalUnsignedEnvelope, (StateKernel.EnvelopeHeader, bytes32[])
         );
-        StateStore.RecordRow memory old = s.records[ids[0]];
+        StateStore.RecordCell memory old = s.records[ids[0]];
         id = keccak256(abi.encode(keccak256("efs2/record/1"), typeId, keccak256(body)));
-        s.records[id] = StateStore.RecordRow(typeId, body, old.recordOrdinal, old.firstAdmissionOrdinal);
+        s.records[id] = CacheCodeForTest.recordCell(typeId, body, old.recordOrdinal, old.firstAdmissionOrdinal);
         s.recordIds[old.recordOrdinal] = id;
         ids[0] = id;
         replaceEnvelopeForTest(envelopeId, abi.encode(header, ids));
@@ -222,13 +222,13 @@ contract SyntheticBindingReadHarness is BindingReadHarness {
 
     function replaceEnvelopeForTest(bytes32 id, bytes memory raw) internal {
         s.envelopes[id] = StateStore.EnvelopeCell(
-            CacheCodeForTest.deploy(raw), 0, uint16(raw.length), s.envelopes[id].envelopeOrdinal
+            CacheCodeForTest.deploy(raw), 0, uint16(raw.length), uint16(raw.length), s.envelopes[id].envelopeOrdinal
         );
     }
 
     function recordBodySlotForTest(bytes32 id) external view returns (bytes32 slot) {
-        bytes storage body = s.records[id].body;
-        assembly ("memory-safe") { slot := body.slot }
+        StateStore.RecordCell storage cell = s.records[id];
+        assembly ("memory-safe") { slot := add(cell.slot, 1) }
     }
 
     function postingWordSlotForTest(bytes32 key, uint64 position) external view returns (bytes32) {

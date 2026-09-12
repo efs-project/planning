@@ -7,6 +7,7 @@ import {StateStore} from "../src/StateStore.sol";
 import {BindingFold} from "../src/BindingFold.sol";
 import {LensPlan} from "../src/LensPlan.sol";
 import {QueryReadLibrary} from "../src/QueryReadLibrary.sol";
+import {CacheCodeForTest} from "./CacheCodeForTest.sol";
 
 contract LensReadHarness is AuditPageReadHarness {
     // External-library errors do not automatically enter the host artifact ABI.
@@ -63,7 +64,7 @@ contract SyntheticLensReadHarness is LensReadHarness {
         s.count.types = 2;
         s.types[typeId].typeOrdinal = 2;
         ++s.count.records;
-        s.records[id] = StateStore.RecordRow(typeId, body, s.count.records, 1);
+        s.records[id] = CacheCodeForTest.recordCell(typeId, body, s.count.records, 1);
         s.recordIds[s.count.records] = id;
     }
 
@@ -77,6 +78,8 @@ contract SyntheticLensReadHarness is LensReadHarness {
     }
 
     function corruptBodyForTest(bytes32 id) external {
-        s.records[id].body[34] = 0xff;
+        bytes memory body = StateStore.recordRow(s, id).body;
+        body[34] = 0xff;
+        s.records[id].byteRef = CacheCodeForTest.recordReference(body);
     }
 }

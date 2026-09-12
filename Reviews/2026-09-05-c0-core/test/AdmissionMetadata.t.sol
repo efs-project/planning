@@ -5,8 +5,10 @@ import {StateKernelTest} from "./StateKernel.t.sol";
 import {StateKernel} from "../src/StateKernel.sol";
 import {StateStore} from "../src/StateStore.sol";
 import {StorageByteView} from "../src/StorageByteView.sol";
+import {CacheCodeForTest} from "./CacheCodeForTest.sol";
 
 interface VmAdmissionMetadata {
+    function load(address, bytes32) external view returns (bytes32);
     function record() external;
     function accesses(address) external returns (bytes32[] memory reads, bytes32[] memory writes);
     function store(address, bytes32, bytes32) external;
@@ -18,7 +20,7 @@ contract AdmissionMetadataViewHarness {
     StateStore.Store private s;
 
     function seedRecord(bytes32 id, bytes memory body, uint64 ordinal) external {
-        s.records[id] = StateStore.RecordRow(bytes32(uint256(7)), body, ordinal, 9);
+        s.records[id] = CacheCodeForTest.recordCell(bytes32(uint256(7)), body, ordinal, 9);
     }
 
     function seedType(bytes32 id, address pointer, uint64 ordinal) external {
@@ -29,7 +31,7 @@ contract AdmissionMetadataViewHarness {
         return StateStore.recordAdmissionMeta(s, id);
     }
 
-    function oldRecordMeta(bytes32 id) external view returns (StateStore.RecordAdmissionMeta memory) {
+    function fullRecordMeta(bytes32 id) external view returns (StateStore.RecordAdmissionMeta memory) {
         StateStore.RecordRow memory row =
             abi.decode(StateStore.read(s, StateStore.Kind.Record, id, 0), (StateStore.RecordRow));
         return StateStore.RecordAdmissionMeta(row.typeId, row.recordOrdinal);
@@ -72,26 +74,29 @@ contract AdmissionMetadataViewTest {
         for (uint256 i; i < sizes.length; ++i) {
             v.seedRecord(ID, new bytes(sizes[i]), 5);
             require(
-                keccak256(abi.encode(v.recordMeta(ID))) == keccak256(abi.encode(v.oldRecordMeta(ID))),
+                keccak256(abi.encode(v.recordMeta(ID))) == keccak256(abi.encode(v.fullRecordMeta(ID))),
                 "logical metadata exact"
             );
         }
     }
 
-    function testMalformedShortAndLongHeadersPanicBeforeMetadata() public {
-        uint256[2] memory malformed = [uint256(64), 63];
+    function testMalformedReferencesRefuseBeforeMetadata() public {
+        // These words are now invalid physical references, not Solidity bytes headers.
+        uint256[2] memory malformed = [uint256(64), uint256(1) << 208];
         for (uint256 i; i < malformed.length; ++i) {
             bodyHeader(malformed[i]);
             sameCall(
                 abi.encodeCall(v.recordMeta, (ID)),
-                abi.encodeCall(v.oldRecordMeta, (ID)),
-                abi.encodeWithSignature("Panic(uint256)", 0x22)
+                abi.encodeCall(v.fullRecordMeta, (ID)),
+                abi.encodeWithSelector(StorageByteView.ErrReadState.selector, ID)
             );
         }
     }
 
-    function test8193AndHugeLengthsRefuseWithoutPayloadReads() public {
-        uint256[2] memory words = [uint256(8193 * 2 + 1), type(uint256).max];
+    function testMalformedReferenceLengthsRefuseWithoutAbandonedSlotReads() public {
+        v.seedRecord(ID, new bytes(8193), 5);
+        bytes32 cellSlot = bytes32(uint256(keccak256(abi.encode(ID, uint256(12)))) + 1);
+        uint256[2] memory words = [uint256(vmMeta.load(address(v), cellSlot)), type(uint256).max];
         uint256 payload = uint256(keccak256(abi.encode(uint256(keccak256(abi.encode(ID, uint256(12)))) + 1)));
         for (uint256 i; i < words.length; ++i) {
             bodyHeader(words[i]);
@@ -103,29 +108,38 @@ contract AdmissionMetadataViewTest {
                 "bounded impossible length"
             );
             for (uint256 j; j < reads.length; ++j) {
-                require(uint256(reads[j]) != payload, "must not begin payload copy");
+                require(uint256(reads[j]) != payload, "must not read abandoned payload slot");
             }
         }
-        // Deliberate difference: old full-row copy accepted 8193 fabricated bytes.
-        bodyHeader(8193 * 2 + 1);
-        (bool oldOk, bytes memory oldRaw) = address(v).staticcall{gas: 100_000}(abi.encodeCall(v.oldRecordMeta, (ID)));
-        require(!oldOk && oldRaw.length == 0, "old copy exhausts the bounded probe");
-        (bool newOk, bytes memory newRaw) = address(v).staticcall{gas: 100_000}(abi.encodeCall(v.recordMeta, (ID)));
-        require(
-            !newOk && keccak256(newRaw) == keccak256(abi.encodeWithSelector(StorageByteView.ErrReadState.selector, ID)),
-            "new refusal fits same bounded probe"
+        // Both current logical/full-row and metadata paths reject actual physical faults.
+        sameCall(
+            abi.encodeCall(v.recordMeta, (ID)),
+            abi.encodeCall(v.fullRecordMeta, (ID)),
+            abi.encodeWithSelector(StorageByteView.ErrReadState.selector, ID)
         );
-        require(v.oldRecordMeta(ID).recordOrdinal == 0, "old overlength was not bounded here");
     }
 
     function testValidLengthFabricatedPayloadIsNotAuthenticatedByMetadata() public {
         v.seedRecord(ID, new bytes(32), 5);
-        bytes32 payload = keccak256(abi.encode(uint256(keccak256(abi.encode(ID, uint256(12)))) + 1));
-        vmMeta.store(address(v), payload, bytes32(type(uint256).max));
+        bytes32 slot = bytes32(uint256(keccak256(abi.encode(ID, uint256(12)))) + 1);
+        address pointer = address(uint160(uint256(vmMeta.load(address(v), slot))));
+        vmMeta.etch(pointer, bytes.concat(hex"00", abi.encode(bytes32(type(uint256).max))));
         require(
-            v.recordMeta(ID).recordOrdinal == 5 && v.oldRecordMeta(ID).recordOrdinal == 5,
+            v.recordMeta(ID).recordOrdinal == 5 && v.fullRecordMeta(ID).recordOrdinal == 5,
             "no body authentication claim"
         );
+    }
+
+    function testRecordMetadataCostDoesNotScaleWithCodePayload() public {
+        v.seedRecord(ID, new bytes(31), 5);
+        uint256 before = gasleft();
+        require(v.recordMeta(ID).recordOrdinal == 5, "tiny metadata");
+        uint256 tiny = before - gasleft();
+        v.seedRecord(ID, new bytes(8192), 5);
+        before = gasleft();
+        require(v.recordMeta(ID).recordOrdinal == 5, "large metadata");
+        uint256 large = before - gasleft();
+        require(large < tiny + 500, "metadata must not allocate/copy the large payload");
     }
 
     function testTypeNullStopSmallLargeCodeAndMissingOrdinalMatch() public {
@@ -207,11 +221,13 @@ contract AdmissionMetadataTest is StateKernelTest {
         h.publishTrustedForTest(verified(), p);
         (bytes32[] memory reads,) = vmMeta.accesses(address(h));
         for (uint256 i; i < reads.length; ++i) {
-            require(uint256(reads[i]) < payload || uint256(reads[i]) >= payload + 256, "stored Record payload read");
+            require(
+                uint256(reads[i]) < payload || uint256(reads[i]) >= payload + 256, "abandoned Record payload slot read"
+            );
         }
     }
 
-    function testReferenceAdmissionDoesNotReadExistingTinyOrNearLimitPayload() public {
+    function testReferenceAdmissionNeverReadsAbandonedPayloadSlots() public {
         install();
         bytes32 t = bytesType();
         bytes32 tiny = publishBytes(t, 0, 101);
@@ -221,7 +237,7 @@ contract AdmissionMetadataTest is StateKernelTest {
         require(h.record(large).body.length == 8192, "legal near-limit target");
     }
 
-    function testNewOccurrenceOfExistingLargeRecordDoesNotReadStoredPayload() public {
+    function testNewOccurrenceNeverReadsAbandonedPayloadSlots() public {
         bytes32 t = bytesType();
         bytes32 large = publishBytes(t, 8190, 105);
         uint64 firstOrdinal = h.record(large).recordOrdinal;
@@ -231,7 +247,7 @@ contract AdmissionMetadataTest is StateKernelTest {
         require(firstOrdinal != 0 && h.record(large).recordOrdinal == firstOrdinal, "dedup keeps first ordinal");
     }
 
-    function testHeaderRefusalPrecedesMissingReferenceAndRollsBack() public {
+    function testReferenceWordRefusalPrecedesMissingReferenceAndRollsBack() public {
         install();
         bytes32 missing = bytes32(uint256(0xBAD00));
         StateKernel.Publication memory p = referencePlan(missing, 110);

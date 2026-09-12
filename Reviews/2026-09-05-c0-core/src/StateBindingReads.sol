@@ -280,10 +280,10 @@ library StateBindingReads {
             occurrence.typeSchemaId != s.init.bindingSetType && occurrence.typeSchemaId != s.init.bindingTombstoneType
                 && occurrence.typeSchemaId != s.init.withdrawalType
         ) revert StorageByteView.ErrReadState(key);
-        StateStore.RecordRow storage record = s.records[occurrence.recordId];
-        uint256 length = record.body.length;
+        StateStore.RecordCell memory record = s.records[occurrence.recordId];
+        uint256 length = StateStore.recordLength(record, key);
         if (length > 167) revert StorageByteView.ErrReadState(key);
-        bytes memory body = StorageByteView.slice(record.body, 0, length, key);
+        bytes memory body = StateStore.recordSlice(s, occurrence.recordId, 0, length, key);
         bytes32 actual = keccak256(abi.encode(DOM_RECORD, occurrence.typeSchemaId, keccak256(body)));
         if (actual != occurrence.recordId) revert StorageByteView.ErrReadState(key);
         Cursor memory cursor = Cursor(body, 0);

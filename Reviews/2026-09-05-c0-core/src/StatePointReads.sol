@@ -216,7 +216,7 @@ library StatePointReads {
             canonicalBody = _intrinsicBlob(s, typeId);
         } else {
             (uint256 start, uint256 length) = _ordinaryMemberRange(s, row, typeId);
-            canonicalBody = StorageByteView.slice(s.records[row.groupRecordId].body, start, length, typeId);
+            canonicalBody = StateStore.recordSlice(s, row.groupRecordId, start, length, typeId);
         }
         (refRoleCount, indexSpecCount) = _cacheCounts(row.cacheCode, typeId, canonicalBody);
         // The ordinal was checked against the u48 exhaustion boundary before narrowing.
@@ -268,9 +268,10 @@ library StatePointReads {
         returns (bytes32 typeSchemaId, bytes memory canonicalBody, uint64 firstAdmitOrdinal)
     {
         _requireInitialized(s, recordId);
-        StateStore.RecordRow storage row = s.records[recordId];
+        StateStore.RecordCell memory row = s.records[recordId];
+        uint256 n = StateStore.recordLength(row, recordId);
         if (row.recordOrdinal == 0) {
-            if (row.typeId != 0 || row.firstAdmissionOrdinal != 0 || row.body.length != 0) {
+            if (row.typeId != 0 || row.firstAdmissionOrdinal != 0 || row.byteRef != 0) {
                 revert StorageByteView.ErrReadState(recordId);
             }
             return (0, new bytes(0), 0);
@@ -280,9 +281,7 @@ library StatePointReads {
         StateStore.TypeCell storage typeRow = s.types[row.typeId];
         if (typeRow.typeOrdinal == 0) revert StorageByteView.ErrReadState(recordId);
         _validOrdinal(typeRow.typeOrdinal, s.count.types, recordId);
-        uint256 n = row.body.length;
-        if (n > 8192) revert StorageByteView.ErrReadState(recordId);
-        return (row.typeId, StorageByteView.slice(row.body, 0, n, recordId), row.firstAdmissionOrdinal);
+        return (row.typeId, StateStore.recordSlice(s, recordId, 0, n, recordId), row.firstAdmissionOrdinal);
     }
 
     function getEnvelope(StateStore.Store storage s, bytes32 envelopeId)
@@ -356,7 +355,7 @@ library StatePointReads {
             revert StorageByteView.ErrReadState(subject);
         }
         bytes32 recordId = bytes32(StateStore.envelopeWord(s, envelopeId, 256 + 32 * leafIndex, subject));
-        StateStore.RecordRow storage record = s.records[recordId];
+        StateStore.RecordCell storage record = s.records[recordId];
         _validOrdinal(record.recordOrdinal, s.count.records, subject);
         _validAdmissionAt(record.firstAdmissionOrdinal, ordinal, s.count.admissions, subject);
         if (record.typeId == 0 || s.recordIds[record.recordOrdinal] != recordId) {
@@ -582,24 +581,23 @@ library StatePointReads {
             revert StorageByteView.ErrReadState(subject);
         }
         _validAdmission(row.admittedAtOrdinal, s.count.admissions, subject);
-        StateStore.RecordRow storage groupRecord = s.records[row.groupRecordId];
+        StateStore.RecordCell memory groupRecord = s.records[row.groupRecordId];
         _validOrdinal(groupRecord.recordOrdinal, s.count.records, subject);
         if (groupRecord.typeId != s.init.metaTypeId || groupRecord.firstAdmissionOrdinal != row.admittedAtOrdinal) {
             revert StorageByteView.ErrReadState(subject);
         }
-        bytes storage body = groupRecord.body;
-        uint256 n = body.length;
-        if (n < 4 || n > 8192 || _u16(body, 0, subject) != n - 2) {
+        uint256 n = StateStore.recordLength(groupRecord, subject);
+        if (n < 4 || n > 8192 || StateStore.recordShort(s, row.groupRecordId, 0, subject) != n - 2) {
             revert StorageByteView.ErrReadState(subject);
         }
-        uint256 memberCount = _u16(body, 2, subject);
+        uint256 memberCount = StateStore.recordShort(s, row.groupRecordId, 2, subject);
         if (memberCount == 0 || memberCount > 16 || row.memberIndex >= memberCount) {
             revert StorageByteView.ErrReadState(subject);
         }
         uint256 pos = 4;
         for (uint256 i; i < memberCount; ++i) {
             if (pos > n || 2 > n - pos) revert StorageByteView.ErrReadState(subject);
-            uint256 memberLength = _u16(body, pos, subject);
+            uint256 memberLength = StateStore.recordShort(s, row.groupRecordId, pos, subject);
             pos += 2;
             if (memberLength == 0 || memberLength > n - pos) revert StorageByteView.ErrReadState(subject);
             if (i == row.memberIndex) {

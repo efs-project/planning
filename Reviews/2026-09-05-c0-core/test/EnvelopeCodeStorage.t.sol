@@ -19,7 +19,7 @@ contract EnvelopeViewHarness {
     StateStore.Store internal s;
 
     function seed(bytes32 id, address pointer, uint16 offset, uint16 length, uint64 ordinal) external {
-        s.envelopes[id] = StateStore.EnvelopeCell(pointer, offset, length, ordinal);
+        s.envelopes[id] = StateStore.EnvelopeCell(pointer, offset, length, length, uint48(ordinal));
     }
 
     function read(bytes32 id) external view returns (StateStore.EnvelopeRow memory) {
@@ -49,10 +49,17 @@ contract EnvelopeCodeStorageTest is StateKernelTest {
         bytes32 cell = keccak256(abi.encode(p.envelopeId, uint256(13)));
         uint256 packed = uint256(codeVm.load(address(h), cell));
         address pointer = address(uint160(packed));
-        require(pointer.code.length == expected.length + 1, "Envelope must point to immutable bytes");
-        require(keccak256(pointer.code) == keccak256(bytes.concat(hex"00", expected)), "exact STOP payload");
+        require(
+            pointer.code.length == expected.length + leaves[0].body.length + 1,
+            "Envelope points to shared immutable bytes"
+        );
+        require(
+            keccak256(pointer.code) == keccak256(bytes.concat(hex"00", expected, leaves[0].body)),
+            "exact shared STOP payload"
+        );
         require(uint16(packed >> 160) == 0 && uint16(packed >> 176) == expected.length, "offset and length");
-        require(uint64(packed >> 192) == 1, "packed Envelope ordinal");
+        require(uint16(packed >> 192) == expected.length + leaves[0].body.length, "whole shared extent");
+        require(uint48(packed >> 208) == 1, "packed Envelope ordinal");
         require(codeVm.load(address(h), bytes32(uint256(cell) + 1)) == 0, "no second metadata word");
         require(codeVm.load(address(h), keccak256(abi.encode(cell))) == 0, "no dynamic payload slot");
         StateStore.EnvelopeRow memory logical = h.envelope(p.envelopeId);

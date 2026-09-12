@@ -243,6 +243,21 @@ contract PointReadsTest {
         require(groupRecordId == p.recordIds[0] && member == 4 && !intrinsicFlag, "ordinary origin");
     }
 
+    function testOrdinaryTypeMembersReadUnalignedContainedRecordSlices() public {
+        (SyntheticPointReadHarness h,,, bytes32 typeId,,) = ordinaryFixture();
+        (bytes32 id,,) = h.getTypeOrigin(typeId);
+        (bytes memory expected, uint48 ordinal, uint64 admitted, uint8 roles, uint8 indexes) = h.getTypeSchema(typeId);
+        for (uint16 offset = 1; offset <= 33; offset += 16) {
+            h.moveRecordSliceForTest(id, offset);
+            require(uint16(h.recordReferenceForTest(id) >> 160) == offset, "actual unaligned reference");
+            (bytes memory body, uint48 o, uint64 a, uint8 r, uint8 x) = h.getTypeSchema(typeId);
+            require(
+                keccak256(body) == keccak256(expected) && o == ordinal && a == admitted && r == roles && x == indexes,
+                "exact Type member and metadata"
+            );
+        }
+    }
+
     function testReadsExactRecordAndEnvelopePointValues() public {
         (PointReadHarness h, bytes32 metaId,) = deployHost();
         bytes memory raw = candidateGroup(0);

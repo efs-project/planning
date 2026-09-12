@@ -77,11 +77,25 @@ contract SyntheticPointReadHarness is PointReadHarness {
         uint64 recordOrdinal,
         uint64 firstAdmissionOrdinal
     ) external {
-        s.records[id] = StateStore.RecordRow(typeId, body, recordOrdinal, firstAdmissionOrdinal);
+        s.records[id] = CacheCodeForTest.recordCell(typeId, body, recordOrdinal, firstAdmissionOrdinal);
     }
 
     function seedEnvelopeForTest(bytes32 id, bytes memory raw, uint64 envelopeOrdinal) external {
-        s.envelopes[id] = StateStore.EnvelopeCell(CacheCodeForTest.deploy(raw), 0, uint16(raw.length), envelopeOrdinal);
+        s.envelopes[id] = StateStore.EnvelopeCell(
+            CacheCodeForTest.deploy(raw), 0, uint16(raw.length), uint16(raw.length), uint48(envelopeOrdinal)
+        );
+    }
+
+    function moveRecordSliceForTest(bytes32 id, uint16 offset) external {
+        StateStore.RecordCell storage row = s.records[id];
+        bytes memory body = StateStore.recordRow(s, id).body;
+        bytes memory blockBytes = bytes.concat(new bytes(offset), body, hex"ab");
+        row.byteRef = uint256(uint160(CacheCodeForTest.deployBlock(blockBytes))) | (uint256(offset) << 160)
+            | (body.length << 176) | (blockBytes.length << 192);
+    }
+
+    function recordReferenceForTest(bytes32 id) external view returns (uint256) {
+        return s.records[id].byteRef;
     }
 
     function corruptCacheWordForTest(bytes32 id, uint256 offset, uint256 next) external {

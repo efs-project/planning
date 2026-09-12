@@ -50,7 +50,7 @@ contract StatefulHarness {
     }
 
     function record(bytes32 id) external view returns (StateStore.RecordRow memory) {
-        return s.records[id];
+        return StateStore.recordRow(s, id);
     }
 
     function typeRow(bytes32 id) external view returns (StateStore.TypeRow memory) {

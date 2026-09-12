@@ -3,6 +3,7 @@ pragma solidity ^0.8.30;
 
 import {Preparation} from "./Preparation.sol";
 import {StorageByteView} from "./StorageByteView.sol";
+import {ImmutableByteView} from "./ImmutableByteView.sol";
 
 library StateStore {
     struct Counts {
@@ -28,18 +29,27 @@ library StateStore {
         uint64 recordOrdinal;
     }
 
+    /// Three words: exact TypeId, shared byte reference, unchanged uint64 ordinals.
+    struct RecordCell {
+        bytes32 typeId;
+        uint256 byteRef;
+        uint64 recordOrdinal;
+        uint64 firstAdmissionOrdinal;
+    }
+
     struct EnvelopeRow {
         bytes canonicalUnsignedEnvelope;
         uint64 envelopeOrdinal;
     }
 
     /// One word; fresh-state experiment only, not a populated-state migration.
-    /// Payload offset is deliberately zero in this envelope-only profile.
+    /// Envelope starts at zero; its extent includes any coallocated Record bodies.
     struct EnvelopeCell {
         address pointer;
         uint16 offset;
         uint16 length;
-        uint64 envelopeOrdinal;
+        uint16 extent;
+        uint48 envelopeOrdinal;
     }
 
     /// @notice The logical type row: what admission applies and
@@ -112,7 +122,7 @@ library StateStore {
     struct Store {
         Counts count;
         Bootstrap init;
-        mapping(bytes32 => RecordRow) records;
+        mapping(bytes32 => RecordCell) records;
         mapping(bytes32 => EnvelopeCell) envelopes;
         mapping(bytes32 => TypeCell) types;
         mapping(bytes32 => PrincipalRow) principals;
@@ -156,10 +166,48 @@ library StateStore {
         view
         returns (RecordAdmissionMeta memory result)
     {
-        RecordRow storage row = s.records[id];
-        uint256 length = row.body.length;
-        if (length > 8192) revert StorageByteView.ErrReadState(id);
+        RecordCell memory row = s.records[id];
+        recordLength(row, id);
         result = RecordAdmissionMeta(row.typeId, row.recordOrdinal);
+    }
+
+    function recordLength(RecordCell memory row, bytes32 subject) internal view returns (uint256 n) {
+        if (row.recordOrdinal == 0) {
+            if (row.typeId != 0 || row.byteRef != 0 || row.firstAdmissionOrdinal != 0) {
+                revert StorageByteView.ErrReadState(subject);
+            }
+            return 0;
+        }
+        n = ImmutableByteView.length(row.byteRef, subject);
+        if (n > 8192) revert StorageByteView.ErrReadState(subject);
+    }
+
+    function recordRow(Store storage s, bytes32 id) internal view returns (RecordRow memory row) {
+        RecordCell memory c = s.records[id];
+        uint256 n = recordLength(c, id);
+        return
+            RecordRow(
+                c.typeId, ImmutableByteView.copyChecked(c.byteRef, 0, n), c.recordOrdinal, c.firstAdmissionOrdinal
+            );
+    }
+
+    function recordSlice(Store storage s, bytes32 id, uint256 start, uint256 n, bytes32 subject)
+        internal
+        view
+        returns (bytes memory)
+    {
+        RecordCell memory c = s.records[id];
+        uint256 size = recordLength(c, subject);
+        if (start > size || n > size - start) revert StorageByteView.ErrReadState(subject);
+        return ImmutableByteView.copyChecked(c.byteRef, start, n);
+    }
+
+    function recordShort(Store storage s, bytes32 id, uint256 start, bytes32 subject) internal view returns (uint16) {
+        RecordCell memory c = s.records[id];
+        uint256 n = recordLength(c, subject);
+        if (start > n || 2 > n - start) revert StorageByteView.ErrReadState(subject);
+        // Only the leading two bytes are selected; bytes beyond the logical slice cannot influence them.
+        return uint16(ImmutableByteView.wordChecked(c.byteRef, start) >> 240);
     }
 
     /// Preserve the old eager cache load's missing-code panic, without copying.
@@ -239,19 +287,20 @@ library StateStore {
     function envelopeLength(EnvelopeCell memory c, bytes32 subject) internal view returns (uint256 n) {
         n = c.length;
         if (c.envelopeOrdinal == 0) {
-            if (c.pointer != address(0) || c.offset != 0 || n != 0) revert StorageByteView.ErrReadState(subject);
+            if (c.pointer != address(0) || c.offset != 0 || n != 0 || c.extent != 0) {
+                revert StorageByteView.ErrReadState(subject);
+            }
             return 0;
         }
-        if (n < 288 || n > 2304 || c.offset != 0 || c.pointer == address(0) || c.pointer.code.length != n + 1) {
+        if (n < 288 || n > 2304 || c.offset != 0 || c.envelopeOrdinal == type(uint48).max) {
             revert StorageByteView.ErrReadState(subject);
         }
-        address pointer = c.pointer;
-        uint256 first;
-        assembly ("memory-safe") {
-            extcodecopy(pointer, 0, 0, 1)
-            first := byte(0, mload(0))
-        }
-        if (first != 0) revert StorageByteView.ErrReadState(subject);
+        ImmutableByteView.length(envelopeReference(c), subject);
+    }
+
+    function envelopeReference(EnvelopeCell memory c) private pure returns (uint256) {
+        return uint256(uint160(c.pointer)) | (uint256(c.offset) << 160) | (uint256(c.length) << 176)
+            | (uint256(c.extent) << 192);
     }
 
     function envelopeWord(Store storage s, bytes32 id, uint256 offset, bytes32 subject)
@@ -277,9 +326,7 @@ library StateStore {
         EnvelopeCell memory c = s.envelopes[id];
         uint256 n = envelopeLength(c, subject);
         if (start > n || length > n - start) revert StorageByteView.ErrReadState(subject);
-        out = new bytes(length);
-        address pointer = c.pointer;
-        assembly ("memory-safe") { extcodecopy(pointer, add(out, 32), add(start, 1), length) }
+        out = ImmutableByteView.copyChecked(envelopeReference(c), start, length);
     }
 
     function envelopeRow(Store storage s, bytes32 id) internal view returns (EnvelopeRow memory row) {
@@ -288,17 +335,16 @@ library StateStore {
         row.envelopeOrdinal = c.envelopeOrdinal;
         // The checked whole-row path already has the cell and exact extent;
         // do not reload and revalidate it through the general slice accessor.
-        bytes memory out = new bytes(n);
-        address pointer = c.pointer;
-        assembly ("memory-safe") { extcodecopy(pointer, add(out, 32), 1, n) }
-        row.canonicalUnsignedEnvelope = out;
+        row.canonicalUnsignedEnvelope = ImmutableByteView.copyChecked(envelopeReference(c), 0, n);
     }
 
     function writeEnvelope(Store storage s, bytes32 id, EnvelopeRow memory row, Preparation.Config memory config)
         internal
     {
         uint256 n = row.canonicalUnsignedEnvelope.length;
-        if (row.envelopeOrdinal == 0 || n < 288 || n > 2304) revert StorageByteView.ErrReadState(id);
+        if (row.envelopeOrdinal == 0 || row.envelopeOrdinal >= type(uint48).max || n < 288 || n > 2304) {
+            revert StorageByteView.ErrReadState(id);
+        }
         // Envelope creation precedes the first preparation invoke: explicitly
         // satisfy deployCache's identity precondition without changing helper code.
         if (config.helper.code.length == 0 || config.helper.codehash != config.codehash) {
@@ -307,13 +353,13 @@ library StateStore {
         address pointer = Preparation.deployCache(config, row.canonicalUnsignedEnvelope);
         // n was bounded before narrowing. Validate returned code before installing the cell.
         // forge-lint: disable-next-line(unsafe-typecast)
-        EnvelopeCell memory c = EnvelopeCell(pointer, 0, uint16(n), row.envelopeOrdinal);
+        EnvelopeCell memory c = EnvelopeCell(pointer, 0, uint16(n), uint16(n), uint48(row.envelopeOrdinal));
         envelopeLength(c, id);
         s.envelopes[id] = c;
     }
 
     function read(Store storage s, Kind k, bytes32 key, uint64 i) internal view returns (bytes memory) {
-        if (k == Kind.Record) return abi.encode(s.records[key]);
+        if (k == Kind.Record) return abi.encode(recordRow(s, key));
         if (k == Kind.Envelope) return abi.encode(envelopeRow(s, key));
         if (k == Kind.Type) return abi.encode(typeRow(s, key));
         if (k == Kind.Principal) return abi.encode(s.principals[key]);
@@ -337,7 +383,7 @@ library StateStore {
         internal
     {
         if (k == Kind.Record) {
-            s.records[key] = abi.decode(v, (RecordRow));
+            s.records[key] = abi.decode(v, (RecordCell));
         } else if (k == Kind.Envelope) {
             writeEnvelope(s, key, abi.decode(v, (EnvelopeRow)), config);
         } else if (k == Kind.Type) {

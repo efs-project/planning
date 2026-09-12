@@ -78,7 +78,7 @@ contract UpgradeableFixtureCore is FixtureEndpoint {
     }
 
     function record(bytes32 id) external view returns (StateStore.RecordRow memory) {
-        return UpgradeStorage.efs().records[id];
+        return StateStore.recordRow(UpgradeStorage.efs(), id);
     }
 
     function typeRow(bytes32 id) external view returns (StateStore.TypeRow memory) {

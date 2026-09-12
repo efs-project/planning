@@ -4,6 +4,7 @@ import {StateStore} from "./StateStore.sol";
 import {Preparation} from "./Preparation.sol";
 import {BindingFold} from "./BindingFold.sol";
 import {IndexKeys} from "./IndexKeys.sol";
+import {ImmutableByteView} from "./ImmutableByteView.sol";
 
 library StateKernel {
     struct EnvelopeHeader {
@@ -91,6 +92,7 @@ library StateKernel {
         Preparation.Config config;
         StateStore.Counts count;
         StateStore.Bootstrap init;
+        uint256[] recordRefs;
     }
 
     function initialize(StateStore.Store storage s, Init memory init, Preparation.Config memory config) internal {
@@ -184,18 +186,20 @@ library StateKernel {
         // arbitrary callbacks can observe this provisional prefix.
         bytes32 countBefore = keccak256(abi.encode(s.count));
         bytes32 initBefore = keccak256(abi.encode(s.init));
+        uint256 envelopeRef;
+        (plan.recordRefs, envelopeRef) = planBytes(s, p, r, config);
         r.acceptingBatchId = next(plan.count.batches);
         plan.count.batches = r.acceptingBatchId;
         if (r.envelopeOrdinal == 0) {
             r.envelopeOrdinal = next(plan.count.envelopes);
             plan.count.envelopes = r.envelopeOrdinal;
-            put(
-                s,
-                plan,
-                StateStore.Kind.Envelope,
-                p.envelopeId,
+            // next() enforces the physical u48 ordinal domain before narrowing.
+            s.envelopes[p.envelopeId] = StateStore.EnvelopeCell(
+                address(uint160(envelopeRef)),
                 0,
-                abi.encode(StateStore.EnvelopeRow(abi.encode(p.header, p.recordIds), r.envelopeOrdinal))
+                uint16(envelopeRef >> 176),
+                uint16(envelopeRef >> 192),
+                uint48(r.envelopeOrdinal)
             );
             put(s, plan, StateStore.Kind.EnvelopeId, 0, r.envelopeOrdinal, abi.encode(p.envelopeId));
         }
@@ -234,6 +238,62 @@ library StateKernel {
         s.init = plan.init;
     }
 
+    /// First-seen bounded scan: at most 2016 RecordId comparisons for 64 leaves.
+    /// Only bytes are planned here; Type/Record existence is installed later in original order.
+    function planBytes(
+        StateStore.Store storage s,
+        Publication memory p,
+        AdmitResult memory r,
+        Preparation.Config memory config
+    ) private returns (uint256[] memory refs, uint256 envelopeRef) {
+        uint256 count = p.leaves.length;
+        refs = new uint256[](count);
+        bool[] memory copyBody = new bool[](count);
+        bytes memory envelope = r.envelopeOrdinal == 0 ? abi.encode(p.header, p.recordIds) : new bytes(0);
+        uint256 extent = envelope.length;
+        bool allocate = extent != 0;
+        for (uint256 i; i < count; ++i) {
+            if (r.leaves[i].outcome == 2) continue;
+            bytes32 id = p.recordIds[p.leaves[i].leafIndex];
+            bool seen;
+            for (uint256 j; j < i; ++j) {
+                if (r.leaves[j].outcome != 2 && p.recordIds[p.leaves[j].leafIndex] == id) {
+                    refs[i] = refs[j];
+                    seen = true;
+                    break;
+                }
+            }
+            if (seen || StateStore.recordAdmissionMeta(s, id).recordOrdinal != 0) continue;
+            // Low-bit marker distinguishes an absent empty Record from no allocation.
+            refs[i] = 1 | (extent << 160) | (p.leaves[i].body.length << 176);
+            copyBody[i] = true;
+            allocate = true;
+            extent += p.leaves[i].body.length;
+        }
+        if (!allocate) return (refs, 0);
+        assert(extent <= 10496);
+        // This is before leaf preparation, including records-only partial admission.
+        if (config.helper.code.length == 0 || config.helper.codehash != config.codehash) {
+            revert Preparation.HelperIdentity();
+        }
+        bytes memory payload = new bytes(extent);
+        assembly ("memory-safe") { mcopy(add(payload, 32), add(envelope, 32), mload(envelope)) }
+        for (uint256 i; i < count; ++i) {
+            if (!copyBody[i]) continue;
+            bytes memory body = p.leaves[i].body;
+            uint256 offset = uint16(refs[i] >> 160);
+            assembly ("memory-safe") { mcopy(add(add(payload, 32), offset), add(body, 32), mload(body)) }
+        }
+        address pointer = Preparation.deployCache(config, payload);
+        uint256 common = uint256(uint160(pointer)) | (extent << 192);
+        // Validate the returned whole block even when no Envelope slice is new.
+        ImmutableByteView.length(common | (extent << 176), p.envelopeId);
+        if (envelope.length != 0) envelopeRef = common | (envelope.length << 176);
+        for (uint256 i; i < count; ++i) {
+            if (refs[i] != 0) refs[i] = (refs[i] & ~uint256(1)) | common;
+        }
+    }
+
     function planLeaf(
         StateStore.Store storage s,
         AdmissionContext memory plan,
@@ -263,8 +323,8 @@ library StateKernel {
         {
             StateStore.RecordAdmissionMeta memory observed = StateStore.recordAdmissionMeta(s, recordId);
             if (observed.recordOrdinal == 0) {
-                StateStore.RecordRow memory rr =
-                    StateStore.RecordRow(leaf.typeId, leaf.body, next(plan.count.records), ord);
+                StateStore.RecordCell memory rr =
+                    StateStore.RecordCell(leaf.typeId, plan.recordRefs[i], next(plan.count.records), ord);
                 plan.count.records = rr.recordOrdinal;
                 put(s, plan, StateStore.Kind.Record, recordId, 0, abi.encode(rr));
                 put(s, plan, StateStore.Kind.RecordId, 0, rr.recordOrdinal, abi.encode(recordId));
@@ -515,7 +575,7 @@ library StateKernel {
         (EnvelopeHeader memory eh, bytes32[] memory vector) =
             abi.decode(StateStore.envelopeRow(s, e.targetA).canonicalUnsignedEnvelope, (EnvelopeHeader, bytes32[]));
         if (eh.principalId != author) revert ErrWithdrawNotAuthor(e.targetA, e.targetLeaf, author, eh.principalId);
-        StateStore.RecordRow memory rr = s.records[vector[e.targetLeaf]];
+        StateStore.RecordRow memory rr = StateStore.recordRow(s, vector[e.targetLeaf]);
         if (rr.typeId == p.init.withdrawalType) revert E_TARGET_EVIDENCE(sourceLeaf);
         if (uint8(life) == 2) return;
         uint64 targetOrd = uint64((life >> 8) & GUARD);
