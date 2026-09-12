@@ -45,6 +45,7 @@ export async function discoveryWorkload(w,policy) {
   const ni=new E.Interface(artifact('NavigationIndex').abi),nav=w.provenance.runtimes.NavigationIndex.address;
   const before={...c.metrics};
   const inventory=await c.call('fileInventory',[n,zero,64],basis,nav,ni);
+  assert.equal(inventory.value.complete,true,'source inventory page is incomplete; cannot label this a complete source scan');
   let scanCalls=1,scanBytes=inventory.returnBytes,scanEstimate=BigInt(await c.rpc('eth_estimateGas',[{from:n,to:nav,data:ni.encodeFunctionData('fileInventory',[n,zero,64])},basis.blockNumber]));
   for(const id of inventory.value.ids) {
     const file=await c.call('fileInfo',[id],basis); scanBytes+=file.returnBytes; ++scanCalls;
