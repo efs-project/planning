@@ -6,11 +6,13 @@ James authorized an overnight implementation pass: make ordinary contract and br
 
 ## What we are comparing
 
-1. **Full v2 control:** the preserved Files prototype at `e38b5e3c1e8f8a32080458174d321d6a43b2ac5b`. Its seven-record create costs 7,688,694 gas in the retained matched type-cache run. This is a named measured workload, not a universal lower bound.
+1. **Fuller C0/Files control:** the preserved Files prototype at `e38b5e3c1e8f8a32080458174d321d6a43b2ac5b`. Its seven-record create costs 7,688,694 gas in the retained matched type-cache run. This is a named measured workload, not a universal lower bound or proof that every v2 design requirement is implemented.
 2. **Compact native candidate:** separate-storage kernel and mandatory navigation index; immutable typed bytes, stable file identity, revisions, authenticated namespace writes, CAS, paths, rename/remove, and bounded same-call listing. A producer contract writes `/swaps/eth-usdc`; another reads it. This tests physical encoding and native caller admission, not full v2 semantic parity.
 3. **Configurable discovery:** subsequently pressure late index declaration/backfill, withdrawals/edits during coverage, and mandatory-versus-optional failure policy. No COMPLETE assertion until its actual universe is covered at the queried basis.
 
 Code lives in the disposable `codex/efs21-pragmatic` worktree, sibling `planning-efs21`. Preserve the existing Fable worktree, its untracked brainstorm, and the live browser on port 60731. No migration, production repository, public deployment, paid transaction, or frozen ABI.
+
+“Full-v2 arm” below means the existing fuller prototype, not a completed 50-year protocol. It has richer Types/Bindings/Lenses and routed author verification; its current author intents are bound to a chain/execution context. Independently portable authorship proofs, recovery and all design-level acceptance requirements must not be assumed proven in either arm merely because its bytes and exact IDs can be exported.
 
 ## Non-negotiable experimental checks
 
@@ -72,7 +74,15 @@ These are native-profile receipts, not Forge test gas or full-v2 parity savings.
 
 The contract-produced small update meets the provisional 250k ambition; the ABI-framed file edit still misses it. Historical `revisionAt` read estimates increase by 157 gas. These are real same-profile savings, unlike comparing this reduced profile wholesale to full v2. Creation is slightly more expensive; names and history were not removed. [Paired receipts, exact source pins and semantic checks](https://github.com/efs-project/planning/blob/bf566dc/Reviews/2026-09-11-efs21-pragmatic/evidence/history-storage.md). A minor review clarification distinguishes Forge's inventory/event differential checks from Node's 50 selected-file/history/listing snapshots.
 
-Next: configurable discovery with owner-controlled cost, bounded late backfill and explicit required/tolerated maintenance policy. Full-v2 physical index separation and broader acceptance/authorship remain distinct experiments, not implied by these results.
+### Configurable discovery, reviewed
+
+`f78a42a` / `84cc198`: the native kernel now has a separate immutable optional-discovery contract in addition to required navigation. A namespace owner chooses one exact uint256 equality index and whether maintenance failure must reject the write or may instead make search unavailable. Late attachment/backfill, edits/unlinks during coverage, fresh-epoch recovery and qualified pagination are implemented. Independent review approved; root reproduced **68 Solidity and ten serial Node/browser tests**, then the added 64/65-position boundary regression. A benchmark guard now explicitly refuses an incomplete source scan; retained 37-position receipts remain unchanged and qualified.
+
+Actual costs: the producer's no-profile update is now **245,563 gas**, including **7,966** for the notification seam. A direct scalar update is **241,218 without a profile / 344,661 with the optional index**. The 103,443 premium buys maintained lookup; it is not imposed by unrelated callers. In a source of 37 created positions (33 currently eligible files), the eight-match query returns FileIds with one eth_call instead of 72 for the straightforward uncached source scan. It is not a hydrated query or a comparison against an optimized batched scan; summed independent estimates are not one onchain transaction's gas. [Full paired costs, coverage and failure evidence](https://github.com/efs-project/planning/blob/f78a42a/Reviews/2026-09-11-efs21-pragmatic/evidence/discovery.md).
+
+Required failure rolls back the whole file operation. Tolerated child failure rolls back index maintenance, persists DIRTY and suppresses stale/complete-result claims until a fresh rebuild. Failure of the trusted outer coordinator itself still rejects the file operation. This is a scalar current-file experiment, not yet image tags, full-v2 occurrence indexing, or a browser search UI.
+
+Next: test full-v2 journal allocation without removing any existing facts or indexes, then the raw-payload encoding and physical full-v2 separation arms. Broader acceptance/authorship remain distinct experiments, not implied by native savings. Existing Fable world remains untouched; final candidate launch follows a stable reviewed checkpoint.
 
 ## How to interpret a cheaper result
 
@@ -143,6 +153,6 @@ Two product questions stay visible for James, but need not block tonight's engin
 
 ## Optional index safety boundary
 
-The current next-step design keeps configuration, coverage and membership in an immutable trusted discovery coordinator. Its bounded maintenance call executes in a child frame; a tolerated failure rolls that child back and records DIRTY in the outer frame. Failure of the outer coordinator itself must still revert the entire file operation. A second callback to an already failing index does not reliably invalidate stale results.
+The implemented scalar experiment keeps configuration, coverage and membership in an immutable trusted discovery coordinator. Its bounded maintenance call executes in a child frame; a tolerated failure rolls that child back and records DIRTY in the outer frame. Failure of the outer coordinator itself must still revert the entire file operation. A second callback to an already failing index does not reliably invalidate stale results.
 
 This costs calls and health bookkeeping, but preserves an important distinction: optional search can become unavailable without preventing an otherwise valid file write; it cannot quietly continue claiming stale positives or complete empty results. Namespace owners choose the additional write cost. The initial equality-index experiment uses current linked files, not full-v2 admission-occurrence semantics. No arbitrary third-party worker is treated as honest merely because it returns success.
