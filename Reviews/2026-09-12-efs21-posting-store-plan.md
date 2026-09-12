@@ -14,6 +14,12 @@ Post-shared-storage read-only review at`24d7407` found no semantic blocker. Actu
 
 Dispatch control includes body-copy source67576fa/support30296a/evidenced735e06. Root freshly reproduced250Core/38foundation/306Node passes+1existingType skip, strictTS/fmt, and U324141/admission22392/helper19032/Point15092/Query20558 bytes. Historical shared-layout3 checks remain in exact24d source context. All root finite worlds closed before handing the sole heavy slot to the index implementer;279GiBfree, three demos preserved. Control still costs5,064,132gas per complete create. No index saving yet.
 
+### Narrow size-gate ruling, September12
+
+Actual admitted-state ownership test went RED→GREEN. First extraction U3 is24,863 bytes; the pre-reviewed new configuration outline produces24,778, still202 over the unchanged cap. Admission is22,454, Store1,440, Point15,092 and Query20,705. The implementer stopped before broad integration or worlds; no deployment success is claimed.
+
+Root and independent review authorize one narrower follow-up: replace **only the new PostingAccess read-scalar ABI allocation** with exact4/36/68-byte temporary calldata for head/word/keyAt/writer. Preserve public APIs, raw getter bounds/checked arithmetic/call order,32-byte maximum copy/exact return size, PostingUnavailable and canonical writer address. No mutation-transport changes, extra code check, error bubbling or old configuration/getter rewrite. Explicitly handle selector alignment and mask uint64 arguments; test actual wire bytes against abi.encodeCall, including dirty high bits via an internal seam. A STATICCALL target cannot log/store captured calldata: use a pure/view echo or preconfigured responder. Check allocated canaries, free pointer/zero slot and malformed/failing/oversized returns; temporary unallocated scratch need not be preserved and must not escape. Retain failed size probes and remeasure actual modules/initcode. Approval does not assert the missing202 bytes will be recovered; stop again if caps still fail.
+
 ## Constraints and explicit choices
 
 - Code only in authorized full-C0 experiment worktree/branch; plans/results visible on main. One implementation/build/new finite-world owner. Preserve all three demos and Fable's workspace; no production repo, migration, public chain/funds or protocol freeze.
