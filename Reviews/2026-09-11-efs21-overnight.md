@@ -23,6 +23,24 @@ The index experiment uses one immutable Core-writer Store with explicit configur
 
 The [[2026-09-12-efs21-known-record-consumer-plan|paid known-Record consumer plan]] is independently reviewed and staged separately. It changes no Core API and explicitly compares two trusted-deployment read profiles, not interchangeable admission proofs.
 
+### What the price gap does—and does not—tell us
+
+The native232,664-gas result writes a fresh32-byte quote, revises a stable File, retains history and updates navigation. Its namespace has no attached optional Discovery profile. The full1,559,525-gas **tag rebind** republishes an existing tag assertion and a new BindingSet selecting that same assertion: it is not a quote-value update. The full2,667,640-gas edit stages41content bytes and admits a ChunkTree, FileRevision and Head BindingSet. These are real receipts, but not an apples-to-apples price for identical promises.
+
+| What an app gets | Native arm today | Fuller arm today |
+|---|---|---|
+| Useful stored filesystem | Exact typed bytes, stable File, paths, CAS, retained readable history and mandatory navigation | These through the richer qualification/model; history alone does not explain the price gap |
+| Type language | Three approved validator runtimes and native-specific IDs | Canonical structural Types/IDs, constraints and checked references, with known large-cache failures |
+| Control/authorship | Actual calling account controls its namespace; ordinary producer contracts work | Claimed Principal plus signed AuthorIntent and retained publication/occurrence/lifecycle evidence |
+| Collaborative selection | One owner, one placement, one combined revision counter | Independent charter/head/name Bindings, per-principal choices, plural Lenses and masks |
+| Discovery population | Unique Record inventory/navigation; optional covered current-File numeric index | Generic occurrence/Binding inventories and reference/field postings |
+
+Not every native limitation is a required sacrifice. Canonical structural Types are a missing integration that the reviewed bridge proposal can test. Full-profile autonomous contract authorship is also an ingress gap in the compared prototype: even its direct authorized path currently requires an EOA signature. Neither compared arm includes arbitrary developer-programmed acceptance; separate designs/experiments are not automatically part of these prices. Account-native authority, reusable publication evidence and independent collaborative selections are meaningful profile choices, not synonyms.
+
+**Current recommendation, not an owner ruling:** keep the richer publication model available, but do not assume every contract-owned value must pay for it. After the mandatory index boundary, the most useful discriminator is a canonical-Type bridge into the cheaper native stored-Files path. That tests whether strong structural typing and inexpensive ordinary contract writes can coexist before choosing the default. Its cost is unmeasured. Live files solve a different problem—avoiding a duplicate app-state write—and do not eliminate the cost of genuinely authored stored content.
+
+This interpretation was independently checked against the actual native producer transaction, full tag/edit runner and current authority entrypoints, not inferred from operation labels or slot counts. It changes no default, normative design or implementation scope of the active PostingStore task.
+
 ### Bounded validation copying, reviewed
 
 Source`67576fa`, final support`30296a0`, retained evidence`d735e06`, root closure`ebc7d54`; exact control`24d7407`. One internal byte-copy loop becomes bounded MCOPY. Type grammar, storage layouts, logical APIs and every index family remain. The changed helper runtime is explicitly qualified. [Full paired results and regressions](https://github.com/efs-project/planning/blob/ebc7d54/Reviews/2026-09-11-efs21-pragmatic/body-copy-results.md).
