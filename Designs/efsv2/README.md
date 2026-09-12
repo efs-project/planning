@@ -10,6 +10,12 @@ without passing the greenfield requirements and product traces.
 
 ## Read this on a phone
 
+**Next decision:** [[../../Reviews/2026-09-12-efs-path-decision/README|The proposed 24–48 hour Codex / Claude comparison]]
+evaluates fuller-model optimization, a compact EFS foundation and EAS/MUD reuse
+against the same important outcomes. Two Claude conversations are recommended;
+at most two roads get targeted prototype work. This is a launch plan, not a
+feature waiver, protocol freeze or already-running experiment.
+
 **2026-09-12:** [[../../Reviews/2026-09-11-efs21-overnight|EFS2.1 cost experiments]]
 compare physical reductions in the fuller model with a narrower working native
 Files/kernel/index split; these are not a protocol rename or freeze.

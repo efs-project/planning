@@ -4,6 +4,10 @@ Active agents append once per work-session. One line per active card. Newest at 
 
 Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
+## 2026-09-12
+
+- @v2-pm (harness codex, session efs-path-decision-20260912): Prepared the [[Reviews/2026-09-12-efs-path-decision/README|24–48 hour Codex / Claude decision sprint]] with three independent planning reviews: three architecture roads, at most two prototype extensions, matched guarantees/costs, two Claude launch prompts and bounded disk/run ownership. Planning only; no new experiments or requirement waivers. / next: James launches the Claude lanes; Codex records T0, reconciles shared fixtures and coordinates the comparison.
+
 ## 2026-09-11
 
 - @v2-pm (harness codex, session efs21-20260911): Canonical native Types/Files/SDK/Discovery integration reviewed, root-reproduced and pushed: source`b8c2775`, evidence`d269e55`;162native/58Node,193signed paired transactions,214unchanged Core/8body-reader checks. Shape validation adds66,804gas to matched quote writes; content identity does not confer full portable authorship/Lens parity. Full-C0 create remains5.06Mgas with seven facts/ten families at`ebc7d54`. PostingStore`f873890` still185bytes over cap; next is its reviewed typed read-facet split. [[Reviews/2026-09-11-efs21-overnight|Results and limits]]. All finite worlds/caches cleaned; [split browser](http://127.0.0.1:49966) stays frozen`4cb0042`, older54154/Fable60731 untouched. Live files and immutable-registry reuse remain staged, not measured. No protocol freeze, production deployment, prototype migration or main code merge.
