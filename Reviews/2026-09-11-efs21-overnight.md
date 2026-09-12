@@ -56,6 +56,24 @@ Isolated worktree created; implementation is underway. Unchanged control: 29 tar
 
 These are native-profile receipts, not Forge test gas or full-v2 parity savings. A 41-byte payload currently becomes a 128-byte ABI-framed typed body. The under-1M short-create ambition is met; the under-250k fresh-edit ambition is **not**. Same-content dedup is not substituted for that edit workload. Kernel deployment including its required index/registry costs 3,723,287 gas, separately from user operations. [Detailed workload, read costs, exact evidence and limits](https://github.com/efs-project/planning/blob/df82bbc/Reviews/2026-09-11-efs21-pragmatic/README.md).
 
+### Same-profile history optimization, reviewed
+
+`3dac3b5` / `d757d5c` / `bf566dc`: immutable location snapshots replace duplicated parent/name data in every edit/unlink revision. The public ABI, historical values, IDs, validation, authority, CAS, required indexes and events stay the same. Independent review approved the change; root reproduced all **56 Forge tests and seven serial Node/browser tests**, with ordinary bytecode/gas ceilings. The earlier cursor-test strengthening is included. Existing Fable server on 60731 remains running and untouched.
+
+| Same-input paired workload | Original native | History-sharing native |
+|---|---:|---:|
+| Producer contract's fresh uint256 update | 284,631 | **237,597** |
+| Separate consumer transaction | 77,277 | 77,277 |
+| 41-byte fresh-content edit, short name | 350,271 | **303,237** |
+| 41-byte fresh-content edit, 64-byte name | 399,136 | **303,237** |
+| Same-content edit, short name | 163,536 | 116,496 |
+| Unlink, one-byte name | 134,942 | 107,781 |
+| Create 41-byte file, one-byte name | 597,694 | 597,995 |
+
+The contract-produced small update meets the provisional 250k ambition; the ABI-framed file edit still misses it. Historical `revisionAt` read estimates increase by 157 gas. These are real same-profile savings, unlike comparing this reduced profile wholesale to full v2. Creation is slightly more expensive; names and history were not removed. [Paired receipts, exact source pins and semantic checks](https://github.com/efs-project/planning/blob/bf566dc/Reviews/2026-09-11-efs21-pragmatic/evidence/history-storage.md). A minor review clarification distinguishes Forge's inventory/event differential checks from Node's 50 selected-file/history/listing snapshots.
+
+Next: configurable discovery with owner-controlled cost, bounded late backfill and explicit required/tolerated maintenance policy. Full-v2 physical index separation and broader acceptance/authorship remain distinct experiments, not implied by these results.
+
 ## How to interpret a cheaper result
 
 Some differences are deliberate profile choices; others are merely unimplemented features. Do not confuse them:
@@ -85,7 +103,7 @@ For tonight, basic contract operations and browsing remain state-readable with n
 
 ## Cost levers to investigate without dropping meaning
 
-- **Native history snapshots:** keep the same public historical Revision bytes, but store unchanged location metadata once. This targets repeated edits without dropping history or names; compare receipts before proposing adoption.
+- **Native history snapshots:** implemented and independently reviewed above; same historical values, lower edit/unlink receipts, slightly higher creation and historical-read cost. Still experimental, not adopted storage layout.
 - **Raw payload representation:** distinguish external-call ABI from the typed content being stored. A separate raw-byte Type can avoid persisting the inner offset/length/padding for file bodies. It has different exact Type/Record IDs and cannot reinterpret old records; measure it separately from storage compression. Empty raw bodies also mean a nonempty-body presence shortcut would be invalid.
 - **Stateless priority reader:** a small ordered-namespace, whole-path Lens can add useful contract composition without adding writes. It is not yet full per-segment/whiteout/threshold Lens parity.
 - **Full-profile byte placement:** the retained full create-file census has 48 Record slots: 21 row/header slots and 27 body-data words. Its unsigned envelope adds a further payload. The prior Type-cache optimization already demonstrated immutable code-backed storage. A later experiment can compare batch-packed immutable record/envelope bytes against individual storage words while preserving logical rows and exact IDs. It must include contract creation/pointer/read costs and support legal sizes without repeating the cache ceiling failure. [Retained slot census at the prototype checkpoint](https://github.com/efs-project/planning/blob/aa6b1b62b733209aa5879743e81fd1f3a9143f8a/Reviews/2026-09-09-files-browser-mvp/gas-baseline-2026-09-10.md#33-slots-by-family--createdir-createdir-1-and-createfile-createfile-1).
