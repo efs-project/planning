@@ -1,0 +1,11 @@
+{
+  "format": "EFS21_SHARED_BLOCK_RECEIPTS_GZIP_JSON_V1",
+  "canonical": {
+    "bytes": 27195921,
+    "keccak256": "0x6e5cedd698662e420e757000b015fdae003f14b0277bbcf10472c3de090bfe67"
+  },
+  "compressed": {
+    "bytes": 2681328,
+    "keccak256": "0x2a8b47e54ffca1e78bbe54ed02f0a797cadc1d6f31ddb47a3d1373f523cd41b4"
+  }
+}
