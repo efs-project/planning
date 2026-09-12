@@ -1,0 +1,11 @@
+{
+  "format": "EFS21_INITIALIZATION_RECEIPTS_GZIP_JSON_V1",
+  "canonical": {
+    "bytes": 19491417,
+    "keccak256": "0x071aac8069419d178961daac22d0d12240ccdaacf512ea81cc8de3c8093bc122"
+  },
+  "compressed": {
+    "bytes": 1839128,
+    "keccak256": "0x2839b5270689f7c79451cf69f000ef905cfac28fe63ee539270bc97d290cd1ed"
+  }
+}
