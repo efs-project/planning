@@ -5,7 +5,7 @@ import {E} from '../scripts/world.mjs';
 import {compareFinalArms} from '../scripts/hybrid-body-benchmark.mjs';
 
 test('source-pinned retained four-arm hybrid receipts disclose writes, paid reads, regressions and cleanup',()=>{
-  const r=JSON.parse(readFileSync(new URL('../evidence/hybrid-body.json',import.meta.url)));
+  const r=JSON.parse(readFileSync(new URL('../evidence/hybrid-body-final.json',import.meta.url)));
   assert.deepEqual(compareFinalArms(r.arms),r.comparison);
   assert.equal(r.arms.length,4);
   for(const arm of r.arms){
@@ -22,6 +22,7 @@ test('source-pinned retained four-arm hybrid receipts disclose writes, paid read
   }
   assert(r.comparison.some(r=>BigInt(r.savedVsFrozen)<0n),'do not hide regressions');
   assert(r.comparison.some(r=>BigInt(r.savedVsFrozen)>0n));
+  assert(r.comparison.some(r=>r.label==='matrix paid read raw 4096 0 first dispersed 1'),'paid comparison labels cannot be overwritten by body labels');
   assert.equal(r.comparison.find(r=>r.label==='raw 637 7 first dispersed').selectedBackend,0);
   assert.equal(r.comparison.find(r=>r.label==='raw 638 7 first dispersed').selectedBackend,1);
   const bad=structuredClone(r.arms);bad[3].actions[0].calldata='0x00';assert.throws(()=>compareFinalArms(bad));

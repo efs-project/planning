@@ -112,7 +112,7 @@ export function compareFinalArms(arms){
     for(const b of rows.slice(1)){assert.equal(b.label,a.label);assert.equal(b.calldata,a.calldata);assert.equal(b.status,a.status);assert.deepEqual(b.workload,a.workload);assert.equal(b.intrinsicGas,a.intrinsicGas);}
     const costs=rows.map((r,j)=>({arm:arms[j].selection,gas:r.gasUsed,intrinsicGas:r.intrinsicGas,hash:r.hash,blockNumber:r.receipt.blockNumber,blockHash:r.receipt.blockHash,backend:r.observation?.backend}));
     const backend=rows[3].observation?.backend;
-    return {label:a.label,...a.workload,status:a.status,costs,savedVsFrozen:String(BigInt(costs[0].gas)-BigInt(costs[3].gas)),regretVsBestForced:String(BigInt(costs[3].gas)-(BigInt(costs[1].gas)<BigInt(costs[2].gas)?BigInt(costs[1].gas):BigInt(costs[2].gas))),...(backend===undefined?{}:{selectedBackend:backend,selectedPhysicalMisselection:BigInt(costs[backend===0?1:2].gas)>BigInt(costs[backend===0?2:1].gas)})};
+    return {...a.workload,label:a.label,status:a.status,costs,savedVsFrozen:String(BigInt(costs[0].gas)-BigInt(costs[3].gas)),regretVsBestForced:String(BigInt(costs[3].gas)-(BigInt(costs[1].gas)<BigInt(costs[2].gas)?BigInt(costs[1].gas):BigInt(costs[2].gas))),...(backend===undefined?{}:{selectedBackend:backend,selectedPhysicalMisselection:BigInt(costs[backend===0?1:2].gas)>BigInt(costs[backend===0?2:1].gas)})};
   });
   for(const arm of arms.slice(1)){
     assert.deepEqual(arm.types,arms[0].types);assert.deepEqual(arm.memberships,arms[0].memberships);
@@ -147,10 +147,15 @@ export async function calibrate(){
 }
 
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
+  if(process.argv.includes('--probe')){
+    // Real CLI/TLA regression, one namespace action only, no evidence output.
+    console.log(JSON.stringify(await withWorld(w=>workload(w,{allowHybrid:true,namespaceOnly:true}))));
+  }else{
   const calibration=process.argv.includes('--calibrate');
   assert(calibration||process.argv.includes('--final'),'choose explicit --calibrate or --final');
-  assert(!existsSync(ROOT+`evidence/${calibration?'hybrid-calibration':'hybrid-body'}.json`),'exclusive evidence path already exists; refuse before building/worlds');
+  assert(!existsSync(ROOT+`evidence/${calibration?'hybrid-calibration':'hybrid-body-final'}.json`),'exclusive evidence path already exists; refuse before building/worlds');
   const result=await (calibration?calibrate():benchmarkHybrid());
-  writeFileSync(ROOT+`evidence/${calibration?'hybrid-calibration':'hybrid-body'}.json`,JSON.stringify(json(result),null,2)+'\n',{flag:'wx'});
+  writeFileSync(ROOT+`evidence/${calibration?'hybrid-calibration':'hybrid-body-final'}.json`,JSON.stringify(json(result),null,2)+'\n',{flag:'wx'});
   console.log(JSON.stringify({rows:result.comparison.length,cleanup:result.arms.map(a=>a.cleanup),comparison:result.comparison.filter(r=>calibration||/quote |file raw-(41|4032) edit fresh|matrix paid read raw 4096|raw 63[678] /.test(r.label)).map(({label,costs})=>({label,gas:costs.map(c=>c.gas)}))},null,2));
+  }
 }

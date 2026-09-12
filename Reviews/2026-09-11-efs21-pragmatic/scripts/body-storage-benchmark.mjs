@@ -9,7 +9,7 @@ const recordId=(typeId,body)=>E.keccak256(abi.encode(['bytes32','bytes32','bytes
 const composition=data=>{const bytes=E.getBytes(data),zero=bytes.filter(b=>b===0).length;return {zeroBytes:zero,nonzeroBytes:bytes.length-zero};};
 const json=value=>JSON.parse(JSON.stringify(value,(_,v)=>typeof v==='bigint'?v.toString():v));
 
-export async function workload(w,{allowHybrid=false,sweep=true}={}){
+export async function workload(w,{allowHybrid=false,sweep=true,namespaceOnly=false}={}){
   const capabilities=w.provenance.kernelArtifact.capabilities;
   assert(allowHybrid||['code','dynamic'].includes(capabilities.bodyBackend),'code-only workload requires explicit frozen replay; current is hybrid');
   const observeBody=allowHybrid?observeHybridBody:null;
@@ -59,6 +59,8 @@ export async function workload(w,{allowHybrid=false,sweep=true}={}){
   }
   await c.write('ensureRoot',[],'namespace setup');w.actions.at(-1).phase='namespace-setup';
   const root=(await c.call('rootId',[w.config.namespace])).value;
+  // Bounded CLI smoke mode crosses the same module-loading/admission seam, then stops.
+  if(namespaceOnly)return {selection:w.provenance.kernelArtifact.selection,root,actionCount:w.actions.length};
   const files=[];
   // Complete Files precede admission sweeps: all labeled fresh creates/edits are genuinely new.
   for(const representation of ['raw','canonical'])for(const size of representation==='raw'?[41,256,4032,4096]:[41,256,4032]){

@@ -11,6 +11,13 @@ test('legacy default runners refuse hybrid before creating a world or building',
   await assert.rejects(()=>comparePackedPresence(),/explicit frozenReplay/);
 });
 
+test('real benchmark CLI finishes the shared workload namespace seam without top-level-await deadlock',{timeout:60000},()=>{
+  const r=spawnSync(process.execPath,['scripts/hybrid-body-benchmark.mjs','--probe'],{cwd:ROOT,encoding:'utf8',timeout:55000});
+  assert.equal(r.status,0,r.stderr||r.error?.message);
+  const probe=JSON.parse(r.stdout);assert.equal(probe.actionCount,1);assert.notEqual(probe.root,E.ZeroHash);
+  assert(probe.cleanup.stopped&&probe.cleanup.cacheRemoved);
+});
+
 test('compiler storage layout preserves old roots and bounds the new fixed word array',()=>{
   const r=spawnSync('forge',['inspect','--force','NativeKernel','storage-layout','--json'],{cwd:ROOT+'contracts',encoding:'utf8',timeout:180000});
   assert.equal(r.status,0,r.stderr);
