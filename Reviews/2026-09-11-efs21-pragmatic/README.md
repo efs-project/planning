@@ -1,6 +1,6 @@
 # EFS 2.1 native Files experiment
 
-**Standing:** isolated candidate / cost experiment, not adopted EFS v2 architecture or a production client. See [contract interface](contracts-interface.md) and [measurement boundaries](measurement.md). No Solidity optimization or full-v2/control implementation is included in this browser/benchmark arm.
+**Standing:** isolated candidate / cost experiment, not adopted EFS v2 architecture or a production client. See [contract interface](contracts-interface.md) and [measurement boundaries](measurement.md). The original native-profile baseline below is retained separately from the [same-profile history-storage optimization](evidence/history-storage.md). A full-v2/control implementation is not included in this native browser arm.
 
 ## Run locally
 
@@ -9,6 +9,7 @@ From this experiment directory, with Forge/Anvil and Solidity 0.8.30 available:
 ```sh
 node --test --test-concurrency=1 test/*.test.mjs
 node scripts/benchmark.mjs
+node scripts/history-benchmark.mjs
 node scripts/demo.mjs
 ```
 
@@ -28,7 +29,7 @@ The floating gas drawer shows actual local receipt gas and **dated execution-pri
 
 Before submission, the client computes and journals the signed transaction hash. Lost submission or polling responses retain `SUBMISSION_UNKNOWN`; receipt-confirmed but unverified effects retain `VERIFICATION_UNKNOWN`. Either state blocks all new writes, even after page reload. **Reconcile unresolved action** only reads the same transaction's receipt and canonical receipt-block state; it never resends. An absent receipt keeps the hold because absence is not proof of non-submission. Failed path/list reads discard the writable folder; hash changes, Back/Forward and in-flight navigation cannot reuse an old target. Only a successful identity-qualified path/list read enables folder mutations.
 
-## Observed receipt results
+## Original native baseline: observed receipt results
 
 Both retained fresh-world runs returned the same gas numbers (different block/transaction identities are retained). Compiler/source/runtime and exact supporting-file hashes are in each JSON. The actual retained `sourceCommit` is **03e4696b1ecbcafc8cf3499c5477481bd2a7b83e**, with contract logic unchanged from reviewed **aa6b1b6**; support hashes pin the Task 2 working files used for that measurement. Those JSONs are the prior benchmark checkpoint, not a rerun of the later reconciliation/navigation fixes. No code-level slot-count trace was collected.
 
@@ -57,6 +58,14 @@ Payload creation gas: 0 bytes 537,742; 32 bytes 581,308; 41 bytes 605,814; 256 b
 Hydrated listing of 1 / 16 / 32 entries returns 544 / 5344 / 10464 ABI bytes and estimates 61,441 / 359,076 / 678,413 execution gas. Each page uses **one hydration eth_call**; the reported four HTTP/logical RPC calls include two block-hash checks and a separate estimateGas request. Acquiring the reusable identity-qualified basis happens before that per-page measurement. These reads are not paid transactions. Full same-basis 16+16 continuation is checked independently.
 
 The plain mapping deliberately lacks Types, stable FileIds, paths, inventories, retained revision history and existence semantics: **not semantic parity**. The old full-v2 receipts in [measurement.md](measurement.md) remain historical context, not a newly matched comparison or percentage saving claim.
+
+## Current same-profile history optimization
+
+The kernel now shares immutable location snapshots between edits/unlinks instead of storing the same parent/name in every revision. Public revision values and ABI, exact Types/Records, validation, authority, CAS, required indexes and history remain unchanged. This is a fresh-genesis internal storage change, not migration of either existing demo.
+
+Paired receipts: contract-produced uint256 updates **284,631 → 237,597 gas**, short-name 41-byte fresh-content edits **350,271 → 303,237**, same-content edits **163,536 → 116,496**. The separate consumer transaction remains **77,277**. Creation increases by 301 gas; the measured historical read estimates increase by 157 gas. The uint256 example meets the provisional 250k update ambition; the ABI-framed 41-byte file edit still does not. [Complete matched inputs, receipts, provenance, differential checks and tradeoffs](evidence/history-storage.md).
+
+The original `benchmark-1/2.json` files above have not been overwritten. Running `scripts/benchmark.mjs` again would replace those outputs with the current source's workload; use `scripts/history-benchmark.mjs` for the explicit original-versus-current comparison.
 
 ## Verification / limitations
 
