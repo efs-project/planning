@@ -34,6 +34,33 @@ A further independent reader and root checked exact`ed49a6c` SDK/router construc
 
 If byte-level work is insufficient, a higher-leverage next experiment is **compound Files state over the shared Record kernel**, keeping stable file identity, independently changeable heads/names, history and atomic CAS without necessarily giving every relationship a separate generic Record admission. This must explicitly preserve or replace independently referenceable facts, authored occurrences, charter maintenance, plural Lens selection and generic query obligations. The current native facade does not already do so: it uses caller ownership/per-file CAS, one placement and its own history/navigation. An implicit birth charter or compound state is a proposed semantic/profile change, not free lossless compression. No saving or owner choice is claimed for it yet.
 
+### Compound Files: keep the relationships, test a different representation
+
+A read-only expert pass against native `4cb0042` and full `ed49a6c`, followed by root source checks, recommends a **separately named Files profile**, not pretending that fewer rows are the same seven generic admissions:
+
+| Candidate | Shape | Main tradeoff |
+|---|---|---|
+| Operation capsules | Shared typed content plus one validated compound operation Record; effects identified by operation and index. | Fewer repeated contexts, but a new codec, checked projections and reconstruction machinery. |
+| Normalized Files tables — preferred experiment | Shared Record kernel stores content; Files stores immutable identity/revision/placement rows and per-source choice histories. | Simpler explicit relationships, but these domain rows are not full-C0 metadata Records or Occurrences. |
+
+The smallest proposed slice has native account sources, regular files in fixed fixture directories, explicit charter/head/name choices, multiple placements, and atomic compare-and-swap of up to three distinct choices. Each source controls its own claims; it does not gain authority to edit another source's choice. A bounded tiered-agreement Lens reads the selected sources, including conflicts, masks and retractions. Mandatory navigation and optional discovery remain separate contracts; discovery indexes `(source,file)` choices rather than inventing one global head.
+
+This would preserve stable identity and relationship history **within the new profile**, while replacing generic occurrence/predecessor references with Files operation references. Full-C0 metadata IDs/ABIs, generic query families, all Lens combiners, mounts, portable signed Principal authorization, upgrades and the existing export format are not automatically preserved. A new explicit export/profile is required. No implementation, new gas measurement, permanent encoding or owner adoption is claimed here.
+
+#### Current Files should not scan all historical names
+
+The expert's first append-only directory-wide candidate union repeated the known lifetime-name cost and allowed unselected authors to inflate work. Root challenged it. The refined proposal uses dense current inventories per `(source,parent)`, with swap-pop removal and source-local generations. A further root proposal removes **MASK-only** names from ordinary Files enumeration without deleting their keyed suppression state:
+
+- The named query universe is names with at least one **VALUE** choice in the selected sources. Enumerate each name only from its earliest selected **VALUE** source, then resolve all selected sources, including MASK and retracted choices. An earlier mask is not an earlier emitter.
+- A value masked by another source is still examined. A name whose file head is masked/missing remains a placed file with qualified content status; do not confuse name selection with content selection.
+- Budget counts inspected candidates, not visible rows. Empty intermediate pages remain PARTIAL; completion requires the full same-basis continuation chain. The first slice can bound eight sources and 64 inspected candidates per page without declaring those permanent protocol limits.
+- Pure masks remain available through exact-name/history or a separately named audit query. The profile requires one canonical mask meaning per name-position: if distinct mask-only conflicts must be enumerated, this Files query is not that audit.
+- Use one pinned RPC block for all pages/hydration. Contracts check expected block number and operation state; the client authenticates the canonical header hash. `BLOCKHASH` cannot authenticate the EVM's own current block. Cross-transaction moving-current aggregation and cheap arbitrary-old-high-water directory enumeration are not promised.
+
+The expert found no counterexample under those conditions. Root also ran an ephemeral independent truth-table check over **1,562,500** combinations: eight sources, five states (absent, retracted, canonical mask, two file targets), and four tier arrangements. Every visible value or mask/value conflict had a VALUE candidate; the earliest VALUE emitter was unique. This is a fixed-snapshot model check, **not Solidity, pagination, gas or general Lens evidence**.
+
+Decisive contract falsifiers remain: add retracted-name churn, mask-only rename history and unselected-source spam while holding selected current VALUE names fixed; current candidate visits should not increase. Then add selected VALUE names, including suppressed ones, and report the genuine increase. Also test duplicate names across pages, mask/retraction fallback, multiple placements, concurrent rename, stale second guards, mandatory-index rollback and DIRTY optional discovery. Price whole create/edit/rename plus paid point/history/list/consumer reads; native and full-C0 reference costs remain different-guarantee comparisons until a matched authority/semantic control exists.
+
 ### Repricing is a separate stress model, not today's receipts
 
 Root re-read the primary [EIP-8037 specification](https://eips.ethereum.org/EIPS/eip-8037#parameter-changes) and [EIP-8038 specification](https://eips.ethereum.org/EIPS/eip-8038#parameters) on September 12. Both pages remain in Review. Their current proposal uses 1,530 gas per state byte, 64 state bytes per fresh slot, 120 per new account; cold storage access remains 2,100, cold account access becomes 3,000, and changed-slot write surcharge becomes 10,000. This agrees with the retained September 10 research constants, not a newly measured deployed-chain schedule.
@@ -156,4 +183,4 @@ Optional configuration comes later: define query universe/basis, epochs, bounded
 - Retained census: `Reviews/2026-09-09-files-browser-mvp/evidence/type-cache-2026-09-11/candidate/tables.md`.
 - Native dense/zero counterexamples: [[2026-09-11-efs21-overnight#Narrowed followups after expert review]].
 
-No new cost number, code-size result, migration guarantee or implementation completion is asserted by this preflight.
+Unimplemented options here remain proposals, not measured savings or migration guarantees. Named completed experiments retain their linked source/evidence boundaries; neither those results nor this preflight adopts an EFS protocol.
