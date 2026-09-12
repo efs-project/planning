@@ -12,6 +12,8 @@
 
 **Standing:** Independently reviewed implementation plan, with the metadata-sensitive control clarification incorporated below. Source feasibility is approved subject to actual size/deployment gates; this is not adoption or a price claim. The coordinator owns main/status and explicit task dispatch. The PostingStore attempt is preserved separately and has released the heavy slot. No product source, build or world was changed to produce this plan.
 
+Task1 dispatched September12 approximately11:20UTC against exact native4cb0042, with one build/new-finite-world owner. Registry/helper/golden/deployment evidence receives independent review before Task2. Files/SDK integration and economic savings remain unproven.
+
 ## Global constraints
 
 - Fresh-genesis disposable profile. No migration, relabelling old IDs, bulk merge of the full branch, production/public-chain deployment, public funds, arbitrary acceptance callbacks or protocol freeze.

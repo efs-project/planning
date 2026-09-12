@@ -63,6 +63,14 @@ a fallback if measured size or independent-module update needs justify them.
 The [research and safety plan](https://github.com/efs-project/planning/blob/aae282df72f214d791963aeac1cf3c38d162c56e/Reviews/2026-09-08-testnet-upgrades.md) explains
 this recommendation and its tradeoffs.
 
+**September 12:** measured implementation-size failures now justify the
+[[../../Reviews/2026-09-12-efs21-modular-deployment|typed read-facet experiment]].
+Proxy upgradeability and code partitioning solve different problems; the former
+is not an argument against the latter. Test ordinary typed calls at the same
+Core address through fixed selector routing before imposing a new public wire
+or cutting functionality. This is a fresh-genesis prototype comparison, not an
+adopted full-diamond management surface or a measured cost reduction.
+
 The stable address is not the whole identity of executing code. Each upgrade
 must record a new execution revision, preserve old record/receipt interpretation,
 and invalidate stale write plans. A revision covers the whole coupled set:

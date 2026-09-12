@@ -91,8 +91,8 @@ The first permanent Type layer does not:
 
 ### Does modular contract design remove the code-size concern?
 
-It changes the concern from a likely hard blocker into a design and measurement
-constraint. EIP-170 limits each deployed runtime, not the total logic reachable
+Yes: code size is a deployment-engineering constraint, not an overall ceiling
+on EFS functionality. EIP-170 limits each deployed runtime, not the total logic reachable
 through calls. External libraries, separate modules, and EIP-2535 facets can
 distribute logic across deployed runtimes. ERC-7201-style namespaced storage
 can make shared storage layouts explicit. ERC-1167 minimal proxies are only a
@@ -117,6 +117,20 @@ The design therefore does not assume a monolith. It compares a monolith, an
 immutable facet router, and narrow state-owning modules using identical semantics
 and state projections. Logical module count and physical contract count remain
 separate questions.
+
+**September 12 prototype correction:** the full-model index extraction exceeded
+one inherited implementation's runtime limit; it did not establish that the
+data model cannot be deployed modularly. Preserving that implementation's
+packaging through repeated small outlines was too restrictive. The next
+comparison should move a coherent typed read surface into a source-pinned
+contract facet, retaining ordinary typed calls at the Core address. Inheritance
+and internal library functions do not create separately deployed code. A fixed
+read-selector router can test this boundary without adopting an unrestricted
+plugin system or claiming full ERC-2535 compliance. First compare identical
+storage and semantics; then price the separate index store. No Type feature
+must be removed merely to avoid this refactoring. Code partitioning itself
+does not remove storage writes or prove cheaper complete operations. See
+[[../../Reviews/2026-09-12-efs21-modular-deployment|modular-deployment review]].
 
 Primary precedents: [EIP-170](https://eips.ethereum.org/EIPS/eip-170),
 [ERC-2535](https://eips.ethereum.org/EIPS/eip-2535),

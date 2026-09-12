@@ -23,6 +23,8 @@ The index experiment uses one immutable Core-writer Store with explicit configur
 
 The [[2026-09-12-efs21-known-record-consumer-plan|paid known-Record consumer plan]] is independently reviewed and staged separately. It changes no Core API and explicitly compares two trusted-deployment read profiles, not interchangeable admission proofs.
 
+**Contract-size correction after James's question:** the [[2026-09-12-efs21-modular-deployment|independently reviewed typed read-facet direction]] preserves normal calls at the Core address while moving read adapters/codecs into a separate deployment. A proxy alone did not split the inherited implementation. This is an ordinary modularity problem, not a reason to cut EFS features; actual fit and routing cost remain unmeasured. Compare unchanged storage first, then resume the index-store comparison against the same module-shaped control.
+
 ### What the price gap does—and does not—tell us
 
 The native232,664-gas result writes a fresh32-byte quote, revises a stable File, retains history and updates navigation. Its namespace has no attached optional Discovery profile. The full1,559,525-gas **tag rebind** republishes an existing tag assertion and a new BindingSet selecting that same assertion: it is not a quote-value update. The full2,667,640-gas edit stages41content bytes and admits a ChunkTree, FileRevision and Head BindingSet. These are real receipts, but not an apples-to-apples price for identical promises.
