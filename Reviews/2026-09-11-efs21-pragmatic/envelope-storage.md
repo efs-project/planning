@@ -1,0 +1,21 @@
+# Full-C0 Envelope-only physical storage experiment
+
+Fresh-state lab profile `envelope-code-v1`; not a populated slot-backed state migration, adoption decision, or protocol freeze. Logical `EnvelopeRow`, Record and Type identities, admission ordering, posting/history semantics and authenticated read ABIs remain unchanged. Exact deployed runtime manifests distinguish this physical profile; no caller-controlled physical dispatch or new product read capability is introduced.
+
+Each new Envelope stores one word: address20, offset2, length2, ordinal8. Offset must be zero. The actual pinned PreparationHelper returns the immutable `STOP || canonicalUnsignedEnvelope` object pointer. The writer explicitly checks helper identity before this new early call; Preparation and helper source/runtime remain unchanged. Reads bound the payload to288..2304 before copying, require exact code extent and STOP, and retain existing semantic header/vector and ordinal/mirror checks. This is not universal content-hash validation: same-length fabricated bytes are detected only by the applicable existing semantic checks.
+
+An existing Envelope is reused for partial admission and all-ACTIVE retries. The helper is public: its nonce is not an EFS allocator or Type ordinal. The new benchmark observes actual Type/Envelope cells and chronological helper children, including an explicitly unrelated public helper deployment. Late failures retain EVM rollback of helper nonce/code, provisional Core rows/indexes and authorization state. Early helper refusal can change failure precedence and gas.
+
+## Reproduction boundary
+
+`scripts/envelope-storage-benchmark.mjs control|candidate` compiles exact frozen Solidity/TOML control `ab13d89e4e6111efc5eea6fc61c3ac56181c9a70` or current committed candidate in separate owned builds, using the same current JS runner and pinned installed dependencies. It requires clean committed source before writing exclusive `evidence/envelope-storage-{control,candidate}.json`. It uses one finite ordinary-limit Anvil world and confirms owned teardown. `--preflight` writes separately labelled scratch evidence, never final receipts. Historical journal/direct benchmark entrypoints refuse this changed Store before starting a build/world; old evidence is unchanged.
+
+The paired runner exercises actual routed seven-record Files create, edit, tags, rebind, partial/ACTIVE reuse, Type groups, new Envelope/all-existing Records, minimum288 and maximum2304 Envelopes, reached late reference failure and the retained legal large-Type failures. The maximum has64 vector entries and **one selected existing Record**; it does not prove64-new-leaf transaction feasibility. It finishes through the actual checked Record-batch Files consumer with qualified complete directory output.
+
+Paid reads are actual `UpgradeableFixtureCoreU3` getEnvelope/getOccurrence/getRecordsCurrent calls through the existing static consumer, with mined receipts and same-block return verification. Its executable creation/runtime instructions are identical; imported-source Solidity CBOR metadata differs and each actual artifact is retained, not relabelled as byte-identical. There is no public Core getReceipt/batch-receipt API; no product ABI was added to manufacture that measurement. Receipt-library harness testing is distinct from routed-Core receipt cost.
+
+`test/envelope-storage-comparison.test.mjs` checks final receipts offline, including compiler/support pins, byte-exact helper creation/runtime, all-family logical inventory, authority hashes before normalization, actual physical children, rollback, paid outputs and ordinary ceilings. A scratch-only `EFS_ENVELOPE_PREFLIGHT_ROOT` opt-in is explicitly labelled.
+
+## Known limits
+
+The legal64-field24960-byte Type cache exceeds the helper's24575-byte payload ceiling; bounded group output131072 is also unchanged. No grammar/limit change, compact Type codec, Record slab or posting optimization is part of this experiment. The real derived authority Core is particularly close to EIP-170: final receipt evidence must report its exact size, not infer margin from a smaller admission library. Savings, paid-read regressions and late-failure costs must come from the paired receipts, not a storage-slot census.

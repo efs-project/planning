@@ -9,7 +9,7 @@ import { WRITE_SUPPORT_SELECTORS, router2Interface, core3Interface, carrier3Inte
 import { startBrowserServer } from './server.mjs';
 
 const READ_CONTROLS = ['bootstrap', 'configuration', 'currentRevision', 'revisionAt', 'fixtureReadContext', 'counts', 'preparationHelper', 'preparationCodehash', 'admissionLibrary', 'admissionCodehash', 'owner',
-  'getRecord', 'getOccurrence', 'getOccurrenceByOrdinal', 'getBindingHead', 'getBindingAtBasis', 'readHistory', 'pagePostingsHydrated', 'resolve', 'validatePlan', 'hasFixtureBytes', 'readFixtureBytes',
+  'getRecord', 'getRecordsChecked', 'getRecordsCurrent', 'getOccurrence', 'getOccurrenceByOrdinal', 'getBindingHead', 'getBindingAtBasis', 'readHistory', 'pagePostingsHydrated', 'resolve', 'validatePlan', 'hasFixtureBytes', 'readFixtureBytes',
   'chunkStatus', 'hasChunk', 'readChunk'];
 
 export async function startEnvironment(lab, { write = true, relay = true, sponsor = true } = {}) {

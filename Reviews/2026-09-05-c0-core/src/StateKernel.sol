@@ -149,7 +149,7 @@ library StateKernel {
         if (activeRevision == 0 || v.revisionOrdinal != activeRevision) revert InvalidRevision(v.revisionOrdinal);
         carriage(p);
         r.envelopeId = p.envelopeId;
-        r.envelopeOrdinal = s.envelopes[p.envelopeId].envelopeOrdinal;
+        r.envelopeOrdinal = StateStore.envelopeOrdinal(s, p.envelopeId);
         r.leaves = new LeafResult[](p.leaves.length);
         uint256 fresh;
         for (uint256 i; i < p.leaves.length; ++i) {
@@ -370,7 +370,7 @@ library StateKernel {
                         || (ref.expectedType != 0 && ref.expectedType != target.typeId)
                 ) revert E_REF_UNSATISFIED(leaf, ref.roleIndex);
             } else if (ref.targetClass == 4) {
-                bytes memory raw = s.envelopes[ref.targetId].canonicalUnsignedEnvelope;
+                bytes memory raw = StateStore.envelopeRow(s, ref.targetId).canonicalUnsignedEnvelope;
                 if (raw.length == 0) revert ReferenceUnproved(leaf, ref.roleIndex);
                 (, bytes32[] memory vector) = abi.decode(raw, (EnvelopeHeader, bytes32[]));
                 if (ref.leafIndex >= vector.length) revert E_REF_UNSATISFIED(leaf, ref.roleIndex);
@@ -514,7 +514,7 @@ library StateKernel {
         uint256 life = abi.decode(get(s, p, StateStore.Kind.Lifecycle, key, 0), (StateStore.LifecycleRow)).packed;
         if (uint8(life) == 0 || uint8(life) == 3) revert E_TARGET_EVIDENCE(sourceLeaf);
         (EnvelopeHeader memory eh, bytes32[] memory vector) =
-            abi.decode(s.envelopes[e.targetA].canonicalUnsignedEnvelope, (EnvelopeHeader, bytes32[]));
+            abi.decode(StateStore.envelopeRow(s, e.targetA).canonicalUnsignedEnvelope, (EnvelopeHeader, bytes32[]));
         if (eh.principalId != author) revert ErrWithdrawNotAuthor(e.targetA, e.targetLeaf, author, eh.principalId);
         StateStore.RecordRow memory rr = s.records[vector[e.targetLeaf]];
         if (rr.typeId == p.init.withdrawalType) revert E_TARGET_EVIDENCE(sourceLeaf);

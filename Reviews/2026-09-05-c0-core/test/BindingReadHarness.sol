@@ -10,6 +10,7 @@ import {StatePointReads} from "../src/StatePointReads.sol";
 import {StateReadPrimitives} from "../src/StateReadPrimitives.sol";
 import {StateStore} from "../src/StateStore.sol";
 import {StatefulHarness} from "./StatefulHarness.sol";
+import {CacheCodeForTest} from "./CacheCodeForTest.sol";
 
 contract BindingReadHarness is StatefulHarness {
     address public immutable pointReadLibrary;
@@ -177,14 +178,14 @@ contract SyntheticBindingReadHarness is BindingReadHarness {
         returns (bytes32 id)
     {
         (StateKernel.EnvelopeHeader memory header, bytes32[] memory ids) = abi.decode(
-            s.envelopes[envelopeId].canonicalUnsignedEnvelope, (StateKernel.EnvelopeHeader, bytes32[])
+            StateStore.envelopeRow(s, envelopeId).canonicalUnsignedEnvelope, (StateKernel.EnvelopeHeader, bytes32[])
         );
         StateStore.RecordRow memory old = s.records[ids[0]];
         id = keccak256(abi.encode(keccak256("efs2/record/1"), typeId, keccak256(body)));
         s.records[id] = StateStore.RecordRow(typeId, body, old.recordOrdinal, old.firstAdmissionOrdinal);
         s.recordIds[old.recordOrdinal] = id;
         ids[0] = id;
-        s.envelopes[envelopeId].canonicalUnsignedEnvelope = abi.encode(header, ids);
+        replaceEnvelopeForTest(envelopeId, abi.encode(header, ids));
         uint64 ordinal = uint64(
             (s.occurrences[keccak256(abi.encode(keccak256("efs2/occurrence/1"), envelopeId, uint256(0)))].packed >> 8)
                 & ((uint256(1) << 48) - 1)
@@ -207,15 +208,22 @@ contract SyntheticBindingReadHarness is BindingReadHarness {
     }
 
     function replacePrincipalForTest(bytes32 envelopeId, bytes32 principal) external {
-        (StateKernel.EnvelopeHeader memory header, bytes32[] memory ids) =
-            abi.decode(s.envelopes[envelopeId].canonicalUnsignedEnvelope, (StateKernel.EnvelopeHeader, bytes32[]));
+        (StateKernel.EnvelopeHeader memory header, bytes32[] memory ids) = abi.decode(
+            StateStore.envelopeRow(s, envelopeId).canonicalUnsignedEnvelope, (StateKernel.EnvelopeHeader, bytes32[])
+        );
         header.principalId = principal;
-        s.envelopes[envelopeId].canonicalUnsignedEnvelope = abi.encode(header, ids);
+        replaceEnvelopeForTest(envelopeId, abi.encode(header, ids));
         uint256 life =
             s.occurrences[keccak256(abi.encode(keccak256("efs2/occurrence/1"), envelopeId, uint256(0)))].packed;
         uint64 ordinal = uint64((life >> 8) & ((uint256(1) << 48) - 1));
         s.admissions[ordinal].packed = (s.admissions[ordinal].packed & ((uint256(1) << 64) - 1))
             | (uint256(s.principals[principal].principalOrdinal) << 64);
+    }
+
+    function replaceEnvelopeForTest(bytes32 id, bytes memory raw) internal {
+        s.envelopes[id] = StateStore.EnvelopeCell(
+            CacheCodeForTest.deploy(raw), 0, uint16(raw.length), s.envelopes[id].envelopeOrdinal
+        );
     }
 
     function recordBodySlotForTest(bytes32 id) external view returns (bytes32 slot) {

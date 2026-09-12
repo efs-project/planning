@@ -72,7 +72,7 @@ contract SyntheticOccurrenceReadHarness is OccurrenceReadHarness {
     }
 
     function seedEnvelopeForTest(bytes32 envelopeId, bytes memory raw, uint64 ordinal) external {
-        s.envelopes[envelopeId] = StateStore.EnvelopeRow(raw, ordinal);
+        s.envelopes[envelopeId] = StateStore.EnvelopeCell(CacheCodeForTest.deploy(raw), 0, uint16(raw.length), ordinal);
     }
 
     function seedRecordForTest(
@@ -94,7 +94,10 @@ contract SyntheticOccurrenceReadHarness is OccurrenceReadHarness {
         bytes memory cache
     ) external {
         StateStore.writeType(
-            s, typeId, StateStore.TypeRow(groupRecordId, memberIndex, ordinal, firstAdmission, cache), CacheCodeForTest.deploy(cache)
+            s,
+            typeId,
+            StateStore.TypeRow(groupRecordId, memberIndex, ordinal, firstAdmission, cache),
+            CacheCodeForTest.deploy(cache)
         );
     }
 

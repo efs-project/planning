@@ -81,7 +81,7 @@ contract SyntheticPointReadHarness is PointReadHarness {
     }
 
     function seedEnvelopeForTest(bytes32 id, bytes memory raw, uint64 envelopeOrdinal) external {
-        s.envelopes[id] = StateStore.EnvelopeRow(raw, envelopeOrdinal);
+        s.envelopes[id] = StateStore.EnvelopeCell(CacheCodeForTest.deploy(raw), 0, uint16(raw.length), envelopeOrdinal);
     }
 
     function corruptCacheWordForTest(bytes32 id, uint256 offset, uint256 next) external {

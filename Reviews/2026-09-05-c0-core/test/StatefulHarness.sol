@@ -101,7 +101,7 @@ contract StatefulHarness {
     }
 
     function envelope(bytes32 id) external view returns (StateStore.EnvelopeRow memory) {
-        return s.envelopes[id];
+        return StateStore.envelopeRow(s, id);
     }
 
     function principal(bytes32 id) external view returns (StateStore.PrincipalRow memory) {

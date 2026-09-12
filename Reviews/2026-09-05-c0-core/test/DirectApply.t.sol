@@ -86,8 +86,11 @@ contract ObservingPreparation is IPreparation {
     }
 
     function deployCache(bytes calldata cache) external returns (address) {
-        if (mode == 2) revert InjectedCacheFailure();
-        if (mode >= 3 && !entered) {
+        // Keep this counterexample at the Type-cache boundary, not the new
+        // earlier Envelope boundary (whose first ABI word is profile1).
+        bool compiledCache = cache.length >= 32 && bytes32(cache[:32]) == bytes32(uint256(32));
+        if (mode == 2 && compiledCache) revert InjectedCacheFailure();
+        if (mode >= 3 && !entered && compiledCache) {
             sawProvisionalCacheCallback =
                 host.record(watchedRecord).recordOrdinal != 0 && host.counts().records == oldRecords;
             require(sawProvisionalCacheCallback, "replay also exposes provisional rows at cache callback");
@@ -166,8 +169,8 @@ contract DirectApplyTest is StateKernelTest {
             require(h.occurrence(p.envelopeId, uint16(i)).packed == 0, "new occurrence rollback");
         }
         require(vd.getNonce(helper) == nonce, "helper CREATE nonce rollback");
-        for (uint256 i; i < 2; i++) {
-            require(vd.computeCreateAddress(helper, nonce + i).code.length == 0, "new cache code rollback");
+        for (uint256 i; i < 3; i++) {
+            require(vd.computeCreateAddress(helper, nonce + i).code.length == 0, "new Envelope/cache code rollback");
         }
         emit log_named_bytes("exact rejection", err);
         emit log_named_uint("attempted Core write slots", writes.length);
@@ -198,9 +201,11 @@ contract DirectApplyTest is StateKernelTest {
         );
         require(host.authorizationNonce() == 0 && beforeState == snapshot(), "Core and authorization rollback");
         require(vd.getNonce(h.preparationHelper()) == helperNonce, "helper nonce rollback");
+        require(vd.computeCreateAddress(h.preparationHelper(), helperNonce).code.length == 0, "Envelope code absent");
         for (uint256 i; i < 2; i++) {
             require(
-                vd.computeCreateAddress(h.preparationHelper(), helperNonce + i).code.length == 0, "cache code absent"
+                vd.computeCreateAddress(h.preparationHelper(), helperNonce + 1 + i).code.length == 0,
+                "cache code absent"
             );
             require(host.cachePointer(typeFor(uint8(i + 1))) == address(0), "cache pointer absent");
         }
@@ -216,7 +221,10 @@ contract DirectApplyTest is StateKernelTest {
         for (uint8 i; i < 2; i++) {
             bytes32 t = typeFor(i + 1);
             address pointer = host.cachePointer(t);
-            require(pointer == vd.computeCreateAddress(h.preparationHelper(), nonce + i), "exact helper CREATE order");
+            require(
+                pointer == vd.computeCreateAddress(h.preparationHelper(), nonce + 1 + i),
+                "Envelope before exact Type CREATE order"
+            );
             Preparation.CompiledGroup memory g = PreparationHelper(h.preparationHelper()).compileGroup(tiny(i + 1));
             require(
                 keccak256(pointer.code) == keccak256(bytes.concat(hex"00", g.types[0].cacheBytes)),
@@ -224,9 +232,9 @@ contract DirectApplyTest is StateKernelTest {
             );
             require(h.typeRow(t).typeOrdinal == uint64(i + 2), "Type inventory order");
         }
-        require(vd.getNonce(h.preparationHelper()) == nonce + 2, "exact successful helper nonce");
+        require(vd.getNonce(h.preparationHelper()) == nonce + 3, "Envelope and two Type caches");
         h.publishTrustedForTest(verified(), request(a, 702));
-        require(vd.getNonce(h.preparationHelper()) == nonce + 2, "existing Types do not redeploy");
+        require(vd.getNonce(h.preparationHelper()) == nonce + 4, "new Envelope only; existing Types do not redeploy");
     }
 
     function testCompoundCacheFailureVersusLaterUnknownTypeIsAllowlisted() public {

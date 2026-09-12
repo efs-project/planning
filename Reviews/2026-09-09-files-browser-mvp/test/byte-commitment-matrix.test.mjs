@@ -18,6 +18,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { compileUpgrade, withUpgrade } from '../../2026-09-08-upgradeable-foundation/scripts/local-upgrade.mjs';
 import { nestedFixture } from './nested-fixture.mjs';
 import { compileRouter, routerFixture } from './router-fixture.mjs';
@@ -257,8 +258,12 @@ test('byteCommitment classification matrix: every FilesRouterV2 op kind', { time
         'ErrTemplate(3,8) / ErrTemplate(1,8) (revision.content != own tree leaf) fire BEFORE the byte-commitment comparison, so a mismatched link never reaches the commitment check.',
       ],
     };
-    writeFileSync(new URL('../evidence/byte-commitment-matrix.json', import.meta.url), JSON.stringify(out, null, 1));
-    console.log('evidence/byte-commitment-matrix.json written; rows=' + matrix.length + ' findings=' + findings.length);
+    // Isolated regression runs must not overwrite the retained historical matrix.
+    const output=process.env.EFS_TEST_BUILD_ROOT
+      ? resolve(process.env.EFS_TEST_BUILD_ROOT,'byte-commitment-matrix.json')
+      : new URL('../evidence/byte-commitment-matrix.json', import.meta.url);
+    writeFileSync(output, JSON.stringify(out, null, 1));
+    console.log('byte-commitment matrix written to '+output+'; rows=' + matrix.length + ' findings=' + findings.length);
     assert.deepEqual(findings, [], 'every op kind behaves as classified; findings: ' + JSON.stringify(findings, null, 1));
   }, { profile: 'reads', watchdogMs: 900000 });
 });

@@ -5,6 +5,11 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
+import { createHash } from 'node:crypto';
+
+// This retired runner must not silently price a new physical Envelope backend.
+assert.equal(createHash('sha256').update(readFileSync(new URL('../../2026-09-05-c0-core/src/StateStore.sol',import.meta.url))).digest('hex'),
+  'c3fcf208325bbad5c13c8a49381c60e1a071d9db8e7f487b0a0b48c7352145fd','historical journal replay requires a separately frozen slot-backed Store');
 
 assert.notEqual(process.env.EFS_LAB_ANVIL_STEPS, '1', 'steps tracing forbidden');
 assert(!process.env.EFS_TEST_BUILD_ROOT, 'runner owns its isolated build directory');

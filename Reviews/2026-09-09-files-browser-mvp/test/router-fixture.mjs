@@ -14,6 +14,8 @@ import { EXTENDED_TYPES, planOperation, authorizeAuthor, routerInterface, decode
 
 const abi = AbiCoder.defaultAbiCoder();
 const ROOT = fileURLToPath(new URL('../contracts', import.meta.url));
+export const routerSourceRoot = process.env.EFS_TEST_SOLIDITY_ROOT
+  ? resolve(process.env.EFS_TEST_SOLIDITY_ROOT, 'Reviews/2026-09-09-files-browser-mvp/contracts') : ROOT;
 const BUILD_ROOT = process.env.EFS_TEST_BUILD_ROOT ? resolve(process.env.EFS_TEST_BUILD_ROOT, 'router') : ROOT;
 const OUT = join(BUILD_ROOT, 'out');
 export const routerArtifact = name => JSON.parse(readFileSync(join(OUT, name + '.json'), 'utf8'));
@@ -27,7 +29,7 @@ export const NEW_GROUP_DESCRIPTORS = [
 
 export function compileRouter() {
   const isolated = process.env.EFS_TEST_BUILD_ROOT ? ['--out', OUT, '--cache-path', join(BUILD_ROOT, 'cache'), '--build-info', '--build-info-path', join(OUT, 'build-info')] : [];
-  const r = spawnSync('forge', ['build', '--offline', '--use', SOLC, ...isolated], { cwd: ROOT, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024, timeout: 240000 });
+  const r = spawnSync('forge', ['build', '--offline', '--use', SOLC, ...isolated], { cwd: routerSourceRoot, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024, timeout: 240000 });
   assert.equal(r.status, 0, r.stdout + r.stderr);
 }
 

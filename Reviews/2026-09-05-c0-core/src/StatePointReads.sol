@@ -300,9 +300,7 @@ library StatePointReads {
         if (metadata.ordinal == 0) {
             return (new bytes(0), 0, 0, 0, 0);
         }
-        canonicalUnsignedEnvelope = StorageByteView.slice(
-            s.envelopes[envelopeId].canonicalUnsignedEnvelope, 0, metadata.byteLength, envelopeId
-        );
+        canonicalUnsignedEnvelope = StateStore.envelopeSlice(s, envelopeId, 0, metadata.byteLength, envelopeId);
         // Values are bounded before both narrowings.
         // forge-lint: disable-next-line(unsafe-typecast)
         envelopeOrdinal = uint48(metadata.ordinal);
@@ -357,9 +355,7 @@ library StatePointReads {
         if (leafIndex >= envelope.leafCount || s.envelopeIds[envelope.ordinal] != envelopeId) {
             revert StorageByteView.ErrReadState(subject);
         }
-        bytes32 recordId = bytes32(
-            StorageByteView.word(s.envelopes[envelopeId].canonicalUnsignedEnvelope, 256 + 32 * leafIndex, subject)
-        );
+        bytes32 recordId = bytes32(StateStore.envelopeWord(s, envelopeId, 256 + 32 * leafIndex, subject));
         StateStore.RecordRow storage record = s.records[recordId];
         _validOrdinal(record.recordOrdinal, s.count.records, subject);
         _validAdmissionAt(record.firstAdmissionOrdinal, ordinal, s.count.admissions, subject);
@@ -495,22 +491,21 @@ library StatePointReads {
         view
         returns (EnvelopeMetadata memory metadata)
     {
-        StateStore.EnvelopeRow storage row = s.envelopes[envelopeId];
-        uint256 n = row.canonicalUnsignedEnvelope.length;
+        StateStore.EnvelopeCell memory row = s.envelopes[envelopeId];
+        uint256 n = StateStore.envelopeLength(row, subject);
         if (row.envelopeOrdinal == 0) {
             if (n != 0) revert StorageByteView.ErrReadState(subject);
             return metadata;
         }
         _validOrdinal(row.envelopeOrdinal, s.count.envelopes, subject);
-        bytes storage raw = row.canonicalUnsignedEnvelope;
         if (n < 288 || n > 2304) revert StorageByteView.ErrReadState(subject);
-        uint256 profile = StorageByteView.word(raw, 0, subject);
-        bytes32 principalId = bytes32(StorageByteView.word(raw, 32, subject));
-        uint256 authorityRef = StorageByteView.word(raw, 64, subject);
-        uint256 epoch = StorageByteView.word(raw, 96, subject);
-        uint256 notAfter = StorageByteView.word(raw, 160, subject);
-        uint256 arrayOffset = StorageByteView.word(raw, 192, subject);
-        uint256 count = StorageByteView.word(raw, 224, subject);
+        uint256 profile = StateStore.envelopeWord(s, envelopeId, 0, subject);
+        bytes32 principalId = bytes32(StateStore.envelopeWord(s, envelopeId, 32, subject));
+        uint256 authorityRef = StateStore.envelopeWord(s, envelopeId, 64, subject);
+        uint256 epoch = StateStore.envelopeWord(s, envelopeId, 96, subject);
+        uint256 notAfter = StateStore.envelopeWord(s, envelopeId, 160, subject);
+        uint256 arrayOffset = StateStore.envelopeWord(s, envelopeId, 192, subject);
+        uint256 count = StateStore.envelopeWord(s, envelopeId, 224, subject);
         if (
             profile != 1 || authorityRef != 0 || epoch != 0 || notAfter > type(uint64).max || arrayOffset != 224
                 || count == 0 || count > 64 || n != 256 + 32 * count
@@ -626,7 +621,8 @@ library StatePointReads {
         n -= 1;
         if (n > CACHE_MAX || n < 320) revert StorageByteView.ErrReadState(typeId);
         if (
-            StorageByteView.codeWord(cache, 0, typeId) != 32 || bytes32(StorageByteView.codeWord(cache, 32, typeId)) != typeId
+            StorageByteView.codeWord(cache, 0, typeId) != 32
+                || bytes32(StorageByteView.codeWord(cache, 32, typeId)) != typeId
                 || bytes32(StorageByteView.codeWord(cache, 64, typeId)) != keccak256(blob)
                 || StorageByteView.codeWord(cache, 96, typeId) > 8192
         ) revert StorageByteView.ErrReadState(typeId);

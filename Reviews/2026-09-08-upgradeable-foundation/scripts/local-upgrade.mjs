@@ -1,7 +1,7 @@
 // Managed disposable node ONLY. No RPC URL input, public network or real keys.
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
@@ -13,6 +13,10 @@ import { fixtureInputs, SOLC, TX_GAS, word } from '../../2026-09-05-c0-core/scri
 import { HISTORY_LIMIT, executionObject } from '../reference/upgrade-reader.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url)), abi = AbiCoder.defaultAbiCoder();
+// Explicit paired storage experiments compile a frozen Solidity tree while
+// retaining this exact runner/support revision. Never redirect JS imports.
+const SOURCE_ROOT = process.env.EFS_TEST_SOLIDITY_ROOT
+  ? realpathSync(resolve(process.env.EFS_TEST_SOLIDITY_ROOT, 'Reviews/2026-09-08-upgradeable-foundation')) : ROOT;
 const BUILD_ROOT = process.env.EFS_TEST_BUILD_ROOT ? resolve(process.env.EFS_TEST_BUILD_ROOT, 'foundation') : ROOT;
 const OUT = join(BUILD_ROOT, 'out');
 const IMPLEMENTATION_SLOT = '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc';
@@ -27,7 +31,7 @@ export function upgradeBuildArgs({ fullBuild = process.env.EFS_TEST_FULL_BUILD =
   return ['build','--ast','--build-info','--offline','--use',SOLC,...isolated,...(fullBuild ? ['--force'] : [])];
 }
 export function compileUpgrade(options) {
-  const r = spawnSync('forge',upgradeBuildArgs(options),{cwd:ROOT,encoding:'utf8',timeout:240000,maxBuffer:4*1024*1024});
+  const r = spawnSync('forge',upgradeBuildArgs(options),{cwd:SOURCE_ROOT,encoding:'utf8',timeout:240000,maxBuffer:4*1024*1024});
   assert.equal(r.status,0,r.stdout+r.stderr);
 }
 function artifact(name) {
@@ -98,7 +102,7 @@ function assertCompilerEvidence(info, artifacts, currentSources) {
     }
   }
   for (const [name,value] of Object.entries(metadataSources)) {
-    const input = (info.input?.sources?.[name] ?? info.input?.sources?.[resolve(ROOT,name)])?.content; assert.equal(typeof input,'string','source content '+name);
+    const input = (info.input?.sources?.[name] ?? info.input?.sources?.[resolve(SOURCE_ROOT,name)])?.content; assert.equal(typeof input,'string','source content '+name);
     assert.equal(keccak256(Buffer.from(input)),value.keccak256,'compiler source hash '+name);
     assert(info.output.sources?.[name]?.ast, 'compiler source AST '+name);
     assert(currentSources[name] !== undefined, 'current disk source '+name);
@@ -124,7 +128,7 @@ function compilerEvidence(profile) {
   const artifacts = Object.fromEntries([coreName,coreName+'U2',...(profile === 'reads' ? ['UpgradeableFixtureCore','UpgradeableFixtureCoreU2','PointReadLibrary','UpgradeQueryReadLibrary','UpgradeStaticConsumer'] : []),'UpgradeableFixtureCarrier','UpgradeableFixtureCarrierU2','FixtureDeployment','PreparationHelper','UpgradeAdmissionLibrary','TransparentUpgradeableProxy','ProxyAdmin'].map(name => [name,artifact(name)]));
   const a = artifacts[coreName];
   const sourcePaths = new Set(Object.values(artifacts).flatMap(a => Object.keys(a.metadata.sources)));
-  const currentSources = Object.fromEntries([...sourcePaths].map(path => [path,readFileSync(resolve(ROOT,path))]));
+  const currentSources = Object.fromEntries([...sourcePaths].map(path => [path,readFileSync(resolve(SOURCE_ROOT,path))]));
   const candidates = readdirSync(join(OUT,'build-info')).map(n => JSON.parse(readFileSync(join(OUT,'build-info',n),'utf8')));
   const info = selectCompilerEvidence(candidates, artifacts, currentSources);
   const names = compilerImmutableNames(info);

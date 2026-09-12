@@ -1,30 +1,40 @@
-// Full-C0 direct-apply experiment, derived from the journal workload. No native-profile imports, tracing or server.
+// Full-C0 Envelope-only slot/code comparison. Same runner, exact isolated source selections; no tracing or server.
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, mkdtempSync, rmSync, statfsSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, mkdtempSync, rmSync, statfsSync, existsSync, cpSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, relative, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { createHash } from 'node:crypto';
-
-// Historical runner: never reinterpret the newer Envelope-code layout as its
-// original Type-only helper inventory. Use its frozen source for a replay.
-assert.equal(createHash('sha256').update(readFileSync(new URL('../../2026-09-05-c0-core/src/StateStore.sol',import.meta.url))).digest('hex'),
-  'c3fcf208325bbad5c13c8a49381c60e1a071d9db8e7f487b0a0b48c7352145fd','historical direct-apply replay requires the frozen slot-backed Store');
 
 assert.notEqual(process.env.EFS_LAB_ANVIL_STEPS, '1', 'steps tracing forbidden');
 assert(!process.env.EFS_TEST_BUILD_ROOT, 'runner owns its isolated build directory');
 const arm = process.argv[2];
-assert(['control', 'candidate'].includes(arm), 'usage: node scripts/direct-apply-benchmark.mjs control|candidate');
+assert(['control', 'candidate'].includes(arm), 'usage: node scripts/envelope-storage-benchmark.mjs control|candidate');
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const VAULT = resolve(ROOT, '../..');
-const output = join(ROOT, 'evidence/direct-apply-' + arm + '.json');
-assert(!readdirSync(join(ROOT, 'evidence')).includes('direct-apply-' + arm + '.json'), 'do not overwrite retained receipt evidence');
+const preliminary=process.argv.includes('--preflight');
+const output = preliminary ? join(VAULT,'.superpowers/sdd/2026-09-11-efs21-envelope-storage-plan/preflight-'+arm+'.json') : join(ROOT, 'evidence/envelope-storage-' + arm + '.json');
+assert(!existsSync(output), 'do not overwrite retained receipt evidence');
 const free = statfsSync(VAULT); assert(free.bavail * free.bsize > 20 * 1024 ** 3, 'stop heavy work below 20 GiB');
 const started = Date.now();
 let managedCleanup;
-const build = mkdtempSync(join(tmpdir(), 'efs21-direct-build-'));
+const build = mkdtempSync(join(tmpdir(), 'efs21-envelope-build-'));
 process.env.EFS_TEST_BUILD_ROOT = build;
+const CONTROL_COMMIT = 'ab13d89e4e6111efc5eea6fc61c3ac56181c9a70';
+let solidityRoot = VAULT;
+if (arm === 'control') {
+  solidityRoot = join(build, 'control-source'); mkdirSync(solidityRoot);
+  const scopes = ['2026-09-05-c0-core','2026-09-05-c0-admission','2026-09-04-mvp-c0-foundation','2026-09-08-upgradeable-foundation','2026-09-09-files-browser-mvp/contracts'].map(p=>'Reviews/'+p);
+  const listed = spawnSync('git',['ls-tree','-r','--name-only',CONTROL_COMMIT,'--',...scopes],{cwd:VAULT,encoding:'utf8'});
+  assert.equal(listed.status,0);
+  const paths=listed.stdout.trim().split('\n').filter(p=>/\.(sol|toml)$/.test(p));
+  const archive=spawnSync('git',['archive',CONTROL_COMMIT,...paths],{cwd:VAULT,maxBuffer:64*1024*1024});assert.equal(archive.status,0);
+  const extracted=spawnSync('tar',['-x','-C',solidityRoot],{input:archive.stdout});assert.equal(extracted.status,0);
+  // Copy the exact installed Solidity dependency tree: an external symlink
+  // escapes solc's unchanged allowed source directories for the router build.
+  cpSync(resolve(VAULT,'Reviews/2026-09-08-upgradeable-foundation/node_modules/@openzeppelin/contracts'),join(solidityRoot,'Reviews/2026-09-08-upgradeable-foundation/node_modules/@openzeppelin/contracts'),{recursive:true});
+}
+process.env.EFS_TEST_SOLIDITY_ROOT = solidityRoot;
 const { compileUpgrade, withUpgrade } = await import('../../2026-09-08-upgradeable-foundation/scripts/local-upgrade.mjs');
 const { startEnvironment, compileRouter } = await import('../../2026-09-09-files-browser-mvp/scripts/environment.mjs');
 const { planOperation, authorizeIntentV3, encodeExecuteV2, core3Interface, carrier3Interface,
@@ -34,6 +44,8 @@ const { ordinaryRecord, ordinaryEnvelope } = await import('../../2026-09-05-c0-c
 const { AbiCoder, Interface, getCreateAddress, keccak256, ZeroAddress, ZeroHash, toBeHex } = await import('../../2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js');
 const { TX_GAS, publication, groupLeaf } = await import('../../2026-09-05-c0-core/scripts/local-stateful.mjs');
 const { encodeGroup, derive } = await import('../../2026-09-05-mvp-build-start/type-inputs/encoder.mjs');
+const { createFixtureReader } = await import('../../2026-09-09-files-reader/reader-scope.mjs');
+const { openDirectory } = await import('../../2026-09-09-files-reader/files-reader.mjs');
 const abi = AbiCoder.defaultAbiCoder();
 const prepIface = new Interface(['function compileGroup(bytes) view returns (tuple(bytes32 groupHash,bytes32 rawHash,tuple(bytes32 typeId,bytes cacheBytes)[] types,bytes32[] dependencies))', 'error HelperDeploy()', 'error ReferenceUnproved(uint16,uint8)', 'error ErrCasRevision(bytes32,uint32,uint32)']);
 const EFS_SLOT = BigInt(keccak256(abi.encode(['uint256'], [BigInt(keccak256(Buffer.from('efs.fixture.store'))) - 1n]))) & ~255n;
@@ -48,8 +60,12 @@ function stateOnly(observed, { ignoreNonce = false } = {}) {
   return result;
 }
 const git = args => { const r = spawnSync('git', args, { cwd: VAULT, encoding: 'utf8' }); assert.equal(r.status, 0); return r.stdout.trim(); };
+if(!preliminary) {
+  const remaining=git(['status','--porcelain']).split('\n').filter(Boolean).filter(line=>!/^\?\? Reviews\/2026-09-11-efs21-pragmatic\/evidence\/envelope-storage-(control|candidate)\.json$/.test(line));
+  assert.deepEqual(remaining,[],'commit/freeze all source before final paired receipts');
+}
 const hashFile = path => keccak256(readFileSync(path));
-const supportPaths = ['scripts/direct-apply-benchmark.mjs', '../2026-09-09-files-browser-mvp/scripts/environment.mjs',
+const supportPaths = ['scripts/envelope-storage-benchmark.mjs', '../2026-09-09-files-browser-mvp/scripts/environment.mjs',
   '../2026-09-09-files-browser-mvp/test/authority-fixture.mjs', '../2026-09-09-files-browser-mvp/test/router-fixture.mjs',
   '../2026-09-09-files-browser-mvp/test/nested-fixture.mjs', '../2026-09-09-files-browser-mvp/sdk/files-actions.mjs'];
 const supportPins = Object.fromEntries(supportPaths.map(p => [p, hashFile(resolve(ROOT, p))]));
@@ -59,15 +75,18 @@ function routerPins() {
     const path = join(build, 'router/out', folder, name + '.json');
     const a = JSON.parse(readFileSync(path));
     for (const [source, meta] of Object.entries(a.metadata.sources)) {
-      assert.equal(hashFile(resolve(ROOT, '../2026-09-09-files-browser-mvp/contracts', source)), meta.keccak256, 'router artifact source pin');
+      assert.equal(hashFile(resolve(solidityRoot, 'Reviews/2026-09-09-files-browser-mvp/contracts', source)), meta.keccak256, 'router artifact source pin');
     }
+    const runtimeTemplateBytes=(a.deployedBytecode.object.length-2)/2,initcodeTemplateBytes=(a.bytecode.object.length-2)/2;
+    assert(runtimeTemplateBytes<=24576,name+' EIP-170 before deployment');
+    assert(initcodeTemplateBytes+128<=49152,name+' EIP-3860 including largest constructor');
     pins[name] = { artifactHash: hashFile(path), compiler: a.metadata.compiler, settings: a.metadata.settings,
-      sourcePins: a.metadata.sources, runtimeTemplateBytes: (a.deployedBytecode.object.length - 2) / 2 };
+      sourcePins: a.metadata.sources, runtimeTemplateBytes,initcodeTemplateBytes };
   }
   return pins;
 }
 try {
-  console.log('Compiling isolated full-C0 foundation and Files router:', arm);
+  console.log('Compiling isolated Envelope storage foundation and Files router:', arm);
   compileUpgrade({ fullBuild: true });
   compileRouter();
   const artifacts = routerPins();
@@ -77,6 +96,10 @@ try {
     const { f, auth } = await startEnvironment(lab, { write: true, relay: false, sponsor: false });
     const mountId = f.mounts.aFirst, principal = auth.A, operations = [], cacheCases = [];
     const helper = lab.expected.execution.helper;
+    // The public helper nonce is not reserved: both arms include an unrelated child.
+    const externalHelperIface=new Interface(['function deployCache(bytes) returns(address)']);
+    const externalHelperReceipt=await lab.receipt(await lab.send(externalHelperIface.encodeFunctionData('deployCache',['0x65787465726e616c']),helper),'external public helper CREATE');
+    assert.equal(externalHelperReceipt.status,'0x1');
     const receiptCall = async (receipt, iface, name, args = [], to = lab.core) => {
       const before = await lab.rpc('eth_getBlockByNumber', [receipt.blockNumber, false]);
       assert.equal(before.hash, receipt.blockHash, 'receipt basis hash before read');
@@ -95,13 +118,34 @@ try {
         const address = '0x' + word.slice(-40);
         const code = await lab.rpc('eth_getCode', [address,receipt.blockNumber]);
         assert.equal(code, '0x00' + row.cacheBytes.slice(2), 'stored pointer opens exact Type cache');
-        assert.equal(address, getCreateAddress({from:helper,nonce:i}).toLowerCase(), 'helper CREATE order');
+        assert.notEqual(address, ZeroAddress, 'actual Type pointer');
         caches.push({id,address,code,cacheBytes:row.cacheBytes});
       }
       assert.equal((await lab.rpc('eth_getBlockByNumber',[receipt.blockNumber,false])).hash,receipt.blockHash);
       const helperNonce = await lab.rpc('eth_getTransactionCount',[helper,receipt.blockNumber]);
-      assert.equal(BigInt(helperNonce),count+1n,'one creation per admitted Type');
-      return {helper,helperNonce,caches};
+      const envelopeCount=Number((await receiptCall(receipt,lab.iface,'counts'))[0][1]),envelopes=[];
+      for(let i=1;i<=envelopeCount;i++) {
+        const id=(await receiptCall(receipt,lab.iface,'envelopeIdAt',[i]))[0];
+        const row=(await receiptCall(receipt,lab.iface,'envelope',[id]))[0];
+        if(arm==='candidate') {
+          const slot=keccak256(abi.encode(['bytes32','uint256'],[id,EFS_SLOT+13n]));
+          const packed=BigInt(await lab.rpc('eth_getStorageAt',[lab.core,slot,receipt.blockNumber]));
+          const address=toBeHex(packed & ((1n<<160n)-1n),20),offset=Number((packed>>160n)&65535n),length=Number((packed>>176n)&65535n),ordinal=packed>>192n;
+          assert.equal(offset,0);assert.equal(length,(row.canonicalUnsignedEnvelope.length-2)/2);assert.equal(ordinal,row.envelopeOrdinal);
+          const code=await lab.rpc('eth_getCode',[address,receipt.blockNumber]);assert.equal(code,'0x00'+row.canonicalUnsignedEnvelope.slice(2));
+          envelopes.push({id,address,code,offset,length,ordinal:String(ordinal)});
+        }
+      }
+      const byAddress=new Map([...caches.map(x=>[x.address,{kind:'Type',id:x.id}]),...envelopes.map(x=>[x.address,{kind:'Envelope',id:x.id}])]);
+      const children=[];
+      for(let nonce=1n;nonce<BigInt(helperNonce);nonce++) {
+        const address=getCreateAddress({from:helper,nonce}).toLowerCase(),code=await lab.rpc('eth_getCode',[address,receipt.blockNumber]);
+        assert.notEqual(code,'0x','actual helper child present');
+        children.push({nonce:String(nonce),address,code,...(byAddress.get(address)??{kind:'external-unowned'})});
+      }
+      assert.equal(children.filter(x=>x.kind==='Type').length,Number(count));
+      assert.equal(children.filter(x=>x.kind==='Envelope').length,arm==='candidate'?envelopeCount:0);
+      return {helper,helperNonce,caches,envelopes,children};
     }
     async function observe(receipt, plan, bindings = []) {
       const counts = (await receiptCall(receipt, lab.iface, 'counts'))[0];
@@ -206,6 +250,32 @@ try {
     const rejectedRead = await observe(rejected, full, [tagBinding('journal-mixed', full.predicted.assertionId)]);
     assert.deepEqual(stateOnly(rejectedRead), stateOnly(retryRead));
     operations.push({ name: 'old-signature-rejected', category: 'intended-rejection', hash: rejected.transactionHash, error: 'ErrIntentNonce', observed: rejectedRead });
+    // Paid consumers use real transactions, not estimates. Pin actual artifacts;
+    // imported source metadata can differ even when executable instructions do not.
+    const consumerArtifact=JSON.parse(readFileSync(join(build,'foundation/out/UpgradeReads.t.sol/UpgradeStaticConsumer.json')));
+    const consumerReceipt=await lab.receipt(await lab.send(consumerArtifact.bytecode.object),'paid read consumer');
+    assert.equal(consumerReceipt.status,'0x1');
+    const consumerAddress=consumerReceipt.contractAddress,consumerIface=new Interface(consumerArtifact.abi),paidReads=[];
+    assert.equal(await lab.rpc('eth_getCode',[consumerAddress,consumerReceipt.blockNumber]),consumerArtifact.deployedBytecode.object);
+    const paidConsumer={address:consumerAddress,creation:consumerArtifact.bytecode.object,runtime:consumerArtifact.deployedBytecode.object,
+      compiler:consumerArtifact.metadata.compiler,settings:consumerArtifact.metadata.settings,sourcePins:consumerArtifact.metadata.sources,
+      artifactHash:hashFile(join(build,'foundation/out/UpgradeReads.t.sol/UpgradeStaticConsumer.json'))};
+    const paidCases=[
+      ['Envelope-create','getEnvelope',[create.plan.publication.envelopeId]],
+      ['Occurrence-create','getOccurrence',[create.plan.publication.envelopeId,0]],
+      ['Record-current-eight','getRecordsCurrent',[[...create.plan.publication.recordIds,create.plan.publication.recordIds[0]]]],
+    ];
+    for(const [name,method,args] of paidCases) {
+      if(!lab.readIface.hasFunction(method)) throw new Error('required paid consumer method missing: '+method);
+      const data=lab.readIface.encodeFunctionData(method,args);
+      const tx=await lab.receipt(await lab.send(consumerIface.encodeFunctionData('read',[lab.core,data]),consumerAddress),'paid '+name);
+      assert.equal(tx.status,'0x1');
+      const observed=await receiptCall(tx,consumerIface,'read',[lab.core,data],consumerAddress);
+      assert.equal(observed[0],await receiptCallRaw(tx,lab.core,data));
+      paidReads.push({name,method,args,hash:tx.transactionHash,gasUsed:String(BigInt(tx.gasUsed)),returnBytes:(observed[0].length-2)/2,raw:observed[0],work:String(observed[1])});
+      rejected=tx;
+    }
+    async function receiptCallRaw(receipt,to,data) {return lab.rpc('eth_call',[{to,data,gas:toBeHex(TX_GAS)},receipt.blockNumber]);}
     // New full-C0 cache cases use the pinned helper, not native-profile substitutions.
     const descriptor = (name, fields) => ({name,meaning:'',specDigest:null,qualifier:'00'.repeat(32),fields,roles:[],indexes:[],constraints:[]});
     const small = name => descriptor(name,[{name:'flag',kind:'BOOL'}]);
@@ -225,12 +295,24 @@ try {
     for (const c of [groupA,groupB]) for (let i=0;i<c.ids.length;i++) assert.equal((await receiptCall(rejected,lab.iface,'typeRow',[c.ids[i]]))[0].cacheBytes,c.caches[i]);
     const reuse = await retained('existing-Types-fresh-envelope',await submitPlan({publication:publication([groupLeaf(lab.inputs.meta,groupA.raw)],salt++,{principal})},true));
     rejected = reuse.receipt;
+    assert.equal((await receiptCall(rejected,lab.readIface,'getEnvelope',[reuse.plan.publication.envelopeId]))[0].length,578,'288-byte minimum Envelope');
+    const maximum=publication([groupLeaf(lab.inputs.meta,groupA.raw)],salt++,{principal});
+    maximum.recordIds=Array(64).fill(maximum.recordIds[0]);
+    maximum.envelopeId=ordinaryEnvelope(maximum.header,maximum.recordIds);
+    const maxResult=await retained('maximum-Envelope-one-selected-existing-Record',await submitPlan({publication:maximum},true));
+    rejected=maxResult.receipt;
+    assert.equal((await receiptCall(rejected,lab.readIface,'getEnvelope',[maximum.envelopeId]))[0].length,4610,'2304-byte maximum Envelope');
+    const maxData=lab.readIface.encodeFunctionData('getEnvelope',[maximum.envelopeId]);
+    const maxRead=await lab.receipt(await lab.send(consumerIface.encodeFunctionData('read',[lab.core,maxData]),consumerAddress),'paid maximum Envelope');
+    assert.equal(maxRead.status,'0x1');
+    paidReads.push({name:'Envelope-maximum',method:'getEnvelope',args:[maximum.envelopeId],hash:maxRead.transactionHash,gasUsed:String(BigInt(maxRead.gasUsed)),raw:await receiptCallRaw(maxRead,lab.core,maxData)});
+    rejected=maxRead;
     const beforeCache = await cacheInventory(rejected);
     const beforeState = await observe(rejected);
     for (const fault of ['late-reference','cache-then-reference','cache-then-CAS']) {
       const c = await compiled(fault === 'late-reference' ? [small('DirectRollback/1')] : [small('DirectPrefix/'+fault),boundary]);
       const cacheStart = BigInt(beforeCache.helperNonce);
-      const predicted = c.ids.map((_,i)=>getCreateAddress({from:helper,nonce:cacheStart+BigInt(i)}));
+      const predicted = Array.from({length:c.ids.length+(arm==='candidate'?1:0)},(_,i)=>getCreateAddress({from:helper,nonce:cacheStart+BigInt(i)}));
       const codeBefore = await Promise.all(predicted.map(address=>lab.rpc('eth_getCode',[address,rejected.blockNumber])));
       assert(codeBefore.every(code=>code==='0x'));
       const target = fault === 'cache-then-CAS' ? f.fileA : toBeHex(0xd1ec7,32);
@@ -239,7 +321,7 @@ try {
       const laterError = fault==='cache-then-CAS'
         ? prepIface.encodeErrorResult('ErrCasRevision',[bindingKey(principal,FIXTURE.tagPurpose,f.fileA,tagId('direct-fault')),99,0])
         : prepIface.encodeErrorResult('ReferenceUnproved',[1,0]);
-      const expected = arm==='candidate' && fault!=='late-reference' ? prepIface.encodeErrorResult('HelperDeploy',[]) : laterError;
+      const expected = fault!=='late-reference' ? prepIface.encodeErrorResult('HelperDeploy',[]) : laterError;
       const result = await submitPlan({publication:p},true,expected);
       assert.equal(result.receipt.status,'0x0'); rejected = result.receipt;
       const after = await observe(rejected);
@@ -253,6 +335,19 @@ try {
       cacheCases.push(plain({fault,compiled:c,predicted,codeBefore,codeAfter,error:result.error,expectedLaterError:laterError,before:beforeState,after}));
       operations.push(plain({name:fault,category:'compound-rejection',hash:rejected.transactionHash,plan:result.plan,prepared:result.prepared,error:result.error,observed:after}));
     }
+    // Actual checked/batched Files anchor consumer and final sealing.
+    const opened=await createFixtureReader({source:{identity:auth.expected.source,epoch:1,request:lab.rpc},context:{expected:auth.expected}}).open({blockTag:rejected.blockNumber});
+    assert.equal(opened.status,'READY');
+    const directory=openDirectory(opened.scope,{mountId:f.mounts.aFirst,subject:f.root,pageSize:8}),filesPages=[];
+    for(let i=0;i<32;i++) {
+      const page=await directory.loadMore();filesPages.push(page);
+      assert.equal(page.qualification.status,'QUALIFIED',page.detail);
+      if(!page.continuation)break;
+    }
+    assert.equal(filesPages.at(-1).coverage,'COMPLETE');
+    assert(filesPages.at(-1).rows.some(row=>row.value.name==='journal.txt'),'created file in qualified actual directory');
+    const filesRead={pages:filesPages,stats:opened.scope.stats(),evidence:opened.scope.evidence()};
+    directory.close();opened.scope.close();
     // Full canonical kernel inventory, including all postings, at final receipt.
     const call = (name, args = []) => receiptCall(rejected, lab.iface, name, args);
     const counts = (await call('counts'))[0], inventory = { counts, bootstrap: (await call('bootstrap'))[0] };
@@ -289,10 +384,11 @@ try {
       assert((code.length - 2) / 2 <= 24576, name + ' EIP-170');
       runtimes[name] = { address: value.address, bytes: (code.length - 2) / 2, hash: keccak256(code) };
     }
-    return plain({ arm, generatedAt: new Date().toISOString(), sourceCommit: git(['rev-parse','HEAD']),
+    return plain({ arm, preliminary, generatedAt: new Date().toISOString(), sourceCommit: git(['rev-parse','HEAD']),
       sourceDiff: git(['diff','--','Reviews/2026-09-05-c0-core/src/StateKernel.sol','Reviews/2026-09-05-c0-core/src/StateStore.sol']), supportPins, artifacts,
       resources: lab.resources, identity: { genesis: await lab.rpc('eth_getBlockByNumber',['0x0',false]), core: lab.core, router: auth.router, execution: await auth.execution() },
-      runtimes, operations, cacheCases, inventory, inventoryBasis: { number: rejected.blockNumber, hash: rejected.blockHash }, transactions, cleanup: lab.cleanup });
+      storageProfile:arm==='control'?'envelope-slot-ab13':'envelope-code-v1',soliditySourceCommit:arm==='control'?CONTROL_COMMIT:git(['rev-parse','HEAD']),
+      runtimes, operations, paidReads, paidConsumer, filesRead, externalHelperReceipt, cacheCases, inventory, inventoryBasis: { number: rejected.blockNumber, hash: rejected.blockHash }, transactions, cleanup: lab.cleanup });
   }, { profile: 'reads', watchdogMs: 900000 });
   // withUpgrade returns only after its owned Anvil and cache have closed.
   report.cleanup = plain(managedCleanup);
@@ -302,4 +398,7 @@ try {
   report.buildCleanup = {path:build,removed:!existsSync(build)};
   mkdirSync(dirname(output), { recursive: true }); writeFileSync(output, JSON.stringify(report, null, 2) + '\n');
   console.log(relative(VAULT, output));
-} finally { rmSync(build, { recursive: true, force: true }); }
+} finally {
+  if(preliminary && existsSync(build)) console.log('Preflight build retained:',build);
+  else rmSync(build, { recursive: true, force: true });
+}
