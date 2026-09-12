@@ -12,6 +12,8 @@
 
 Independent read-only plan review approved the bootstrap order, exact dependency check, fresh-genesis linkage restriction and actual U3/paired-cost gates. No compiled saving is established by source review.
 
+**Completed September12 08:33UTC:** source/support`b6ffadea`, evidence`d0a908de`, independent review/root closure`8688d5299eac8d9f83264806c32de471f427bbb2`. Root reproduced233 Core/37 foundation tests,276 passing Node/browser/offline checks plus one existing Type skip, strict TypeScript, formatting and actual module sizes. U3 runtime is23,619bytes (917 recovered,957 margin); library runtime21,635. Bootstrap+3,029gas, complete create+330gas and paid reads+4–22 are reported, not called savings. Six compiler-generated Core error declarations move to the library ABI with unchanged revert tuples and tested union decoding. [Exact results and retained limitations](https://github.com/efs-project/planning/blob/8688d5299eac8d9f83264806c32de471f427bbb2/Reviews/2026-09-11-efs21-pragmatic/initialization-outline-results.md). All owned worlds stopped; three demos preserved. The unchecked original task list below is the historical assignment, not an open queue.
+
 ## Global constraints
 
 - Code only in authorized `planning-efs21-direct` / `codex/efs21-direct-apply`; main-visible plans on planning/main. One implementation/build/new finite-world owner. Preserve native49966/RPC49941, old54154/RPC54148, Fable60731/RPC60726 and all Fable work.

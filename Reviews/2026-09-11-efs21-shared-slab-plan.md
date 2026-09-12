@@ -1,12 +1,14 @@
 # Full-C0 shared immutable byte-block experiment
 
-> Staged plan, **not dispatched**. Use `superpowers:subagent-driven-development` for a later bounded implementation, fresh independent review and root verification. First finish the separate [[2026-09-11-efs21-envelope-storage-plan|Envelope-only experiment]] and pin its reviewed source/evidence. No gas saving or protocol choice is established here.
+> **Dispatch September12 08:34UTC:** use `superpowers:subagent-driven-development` for the bounded implementation below, independent review and root verification. The separate Envelope, metadata and initialization tasks are complete. Exact reviewed/root-reproduced control for both source arms is`8688d5299eac8d9f83264806c32de471f427bbb2`. No shared-storage gas saving or protocol choice is established yet.
 
 **Goal:** reduce the fuller model's physical byte-storage cost without deleting its seven Files facts, exact identities, validation, authority, history or posting families. Compare the reviewed Envelope-only arm to one shared immutable byte block containing a new Envelope and the unique new Record bodies of that admission call.
 
 **Architecture:** a transaction-local slice plan, one pinned-helper CREATE when new bytes need storage, and unchanged ordered installation of logical rows. Record cells retain three metadata words; Envelope cells retain one by using the existing u48 ordinal domain physically. No global allocator, slab index, pointer migration, counter/index deletion or Type dictionary compression.
 
 **Evidence basis:** initial root and independent read-only source review at full-C0 `ab13d89e4e6111efc5eea6fc61c3ac56181c9a70`. Envelope-only passed its gate at`ed49a6c`; metadata-only admission reads are complete at`1cb402a`, and initialization outlining is now a separate active task. Recheck this plan against the resulting reviewed source, especially Record metadata accessors, cell/view methods, helper inventory and execution-profile qualification. The pre-outline actual CoreU3 has only40bytes runtime headroom. See [[2026-09-11-efs21-full-model-storage-preflight]].
+
+Dispatch delta: initialization is now complete at`8688d52`; actual U3 is23,619bytes (957margin), admission library21,635, helper18,953 unchanged. Both future paid arms retain metadata-only reads and initialization outlining. Current gates are233 Core/37 foundation and276 passing Node/browser/offline checks plus one existing legal-large-Type skip. No worker edits main; one shared-slab worker owns code/build/new finite worlds and root owns publication. The original pre-outline limits above explain the sequencing, not the current runtime.
 
 A fresh implementation-plan reviewer approved after explicit records-only early-helper checks and checked Envelope offset-zero/unaligned Record tests were added. This is conditional plan approval, not implementation or measured savings.
 
