@@ -1,0 +1,89 @@
+# Full-model storage and index preflight
+
+2026-09-11 overnight · source analysis, not measured savings or a protocol ruling.
+
+Two independent expert readers inspected the reviewed full-C0 direct-apply/read-batch source at `8f101f1f94fe46a6ac90b6287443929427fa9b23`. Neither ran builds, tests or nodes. The controller checked the principal storage/application and envelope-read seams. This replaces the **journal-era extraction assumptions**, not the v2 design. Current work/results: [[2026-09-11-efs21-overnight]].
+
+## Recommendation in plain English
+
+Keep separating **what the system promises** from **how much storage it uses**. The seven Files facts need not become seven separately deployed storage objects, and an index's separate contract does not make its writes free.
+
+After the active native packing and real Files read-batching tasks:
+
+1. Measure storing the full model's unsigned publication envelope in immutable code, preserving exact bytes and logical reads.
+2. Extend that comparison to one shared immutable byte block for an envelope and its new Record bodies.
+3. Extract full-C0 posting storage without dropping any query family, establishing a separate-contract control. Then measure coarser calls and configurable families separately.
+
+These are proposed follow-ons requiring bounded implementation plans. They do not authorize silent feature removal or establish that all three will improve gas. The native experiment already has separate required navigation/configurable discovery, but it is a narrower Files profile, not full-v2 parity.
+
+## Shared immutable bytes: a concrete bounded opportunity
+
+Current carriage limits selected bodies to **8,192 aggregate bytes**, while a canonical envelope is at most **2,304 bytes**. Thus the combined payload is at most **10,496 bytes**, or **10,497 runtime bytes** including STOP, within the existing 24,575-byte payload / 24,576-byte runtime ceilings. No segmentation, Type language reduction, changed RecordId, or changed envelope bytes is needed for this particular bound. The separate Type-cache/group-output problem remains unresolved.
+
+The retained older-layout seven-record create census attributes 48 Record slots / 1,017,400 SSTORE gas and 17 Envelope slots / 311,800 SSTORE gas to those families. These are **not new direct-apply receipt totals**. The seven-leaf envelope is exactly 480 bytes, with 14 nonzero stored slots in that census. Replacing many fresh slots with one pointer plus CREATE/code deposit is a plausible saving; only paired complete receipts can price it.
+
+### Smallest first arm: envelope only
+
+Preserve the logical `EnvelopeRow(canonicalUnsignedEnvelope, envelopeOrdinal)` ABI while storing a physical cell. An address, uint16 offset, uint16 length and uint64 ordinal fit one word. Ordinal, not nonempty payload, remains the presence signal. For the envelope-only arm the offset can remain zero; do not add a general allocator yet.
+
+The actual seams are `StateStore.read/applyRow`, `StateKernel` envelope existence/reference access, `StatePointReads` envelope metadata/word/slice reads, raw fixture accessors, and corruption tests. Every direct mapping access must use the new logical accessor; changing only `getEnvelope` is incomplete. Keep Record/Type storage and every posting family unchanged.
+
+The pinned `PreparationHelper.deployCache(bytes)` already creates inert STOP-prefixed bytes from its **own account**, so its runtime can remain unchanged. However, `Preparation.deployCache` currently assumes an earlier `invoke()` verified helper identity. An envelope is written before the first leaf's preparation: a new early deployment must explicitly check the helper address/codehash first. Never copy that assumption blindly.
+
+The helper factory is public; its nonce is not reserved. Use its returned pointer and inspect actual code. Body creation changes subsequent Type-cache child addresses, so retained source/runtime manifests and CREATE-order evidence must be regenerated rather than normalized away. Do not CREATE in the Core/proxy or deployment factory's context.
+
+Compare seven-record create, edit, tag, partial admission under an existing envelope, all-ACTIVE retry, paid envelope/occurrence/receipt reads and a reached late failure. Preserve complete logical inventories, checked Record batches, Type caches and Lens outcomes. New physical-corruption tests must target actual cells/code rather than obsolete dynamic-bytes slots.
+
+### Shared bodies follow separately
+
+Initially keep physical Record cells at three metadata slots: TypeId, pointer/range metadata, and existing packed ordinals. Preserve the logical RecordRow ABI and RecordId-based dedup, including duplicate selections in the same publication. A fresh empty body is not an absent record; same bytes under different Types are not interchangeable.
+
+Do not postpone all Record installation until the end. Later leaves consume earlier provisional rows; reference and withdrawal paths must retain their existing logical access and ordering. This does not relax the current self-envelope occurrence-reference rejection. A candidate can precreate inert bytes and retain ordered row installation, but must explicitly characterize changed allocation/late-failure timing. An all-ACTIVE retry should still validate and allocate nothing; an existing envelope with only existing selected Records needs no new slab.
+
+Bound metadata before allocation and validate pointer, STOP prefix and range containment. `code.length == body.length + 1` is wrong for a shared slab. Decide how slab extent is represented/checked; do not pretend individual-object checks still apply. Retain late-failure rollback across rows, counts, authorization nonce, indexes, helper nonce and created bytecode.
+
+Current full-C0 scalar `getRecord` validates metadata/bounds but does **not** rehash body/RecordId; Binding reads do. If the new backend adds universal content-hash verification, measure a slot-backed integrity control too. Comparing stronger code reads against weaker slot reads without qualification would misattribute cost. Dense, tiny, empty and zero-heavy cases must all remain in the experiment.
+
+A smaller independent read optimization is metadata-only access for dedup/reference checks that currently ABI-copy complete bodies merely to inspect ordinal/TypeId. This changes no retained storage; magnitude is unmeasured.
+
+## Separate full-C0 posting storage
+
+The first extraction should hold all posting heads, five-u48 packed words and posting-key mirrors in one callback-free, mandatory, Core-owned `PostingStore` account. Use ordinary CALL/STATICCALL and separate storage. Retain all ten families, key derivation, ordering, live counts, first-ever anchors, history and query/refusal behavior.
+
+This is **physical storage separation**, not yet a pure generic ingestion kernel: `StateKernel` still interprets Bindings and derives mandatory indexes. Moving those responsibilities into a profile/index policy is another explicit change.
+
+Current source seams:
+
+- Redirect `StateStore.read/applyRow` only for `Posting`, `Word` and `PostingKey`.
+- Keep `StateKernel.append/liveDelta` and ordered `get/put` initially; `StateStore.replay` and expected-before row journals no longer exist.
+- Redirect direct posting head/word reads in `StateReadPrimitives` and raw upgradeable fixture getters.
+- `StatePointReads` has no direct posting storage dependency; retain its occurrence/Record/Envelope/Type consistency checks in Core.
+- Keep staged `Counts.postingKeys` in Core; move mirror contents, not its admission count semantics. Reserve obsolete mapping roots without claiming populated-state migration.
+- Port actual-state corruption harnesses and inventory readers. Mutating abandoned Core mappings does not exercise the new Store.
+
+### Deployment and authority are part of the experiment
+
+The external runner can deploy `PostingStore(predictedCore)` after the fixture factory but before implementations. Preserve factory Core-nonce1/Carrier-nonce2 and proxy admin-nonce1 assumptions. Initialization verifies Store owner equals the Core proxy; implementations pin the same Store address/runtime, and upgrades to a different binding must refuse.
+
+Keep the 21-word/672-byte execution-set shape. A Core-configuration domain wrapper can bind Store address/hash/owner while preserving Carrier configuration and execution-ID formulas; the resulting execution ID changes through the new configuration commitment. Update both independent configuration readers, actual constructor arguments, source manifests and runtime inventories. Old readers must refuse an unknown profile, not silently qualify it. Preserve the new checked/current Record APIs.
+
+Fresh ordinary runtime/initcode size checks are an early gate. Retained direct-apply headroom is not evidence that the extraction fits. If it does not, stop for a narrowly scoped module-decomposition proposal rather than raising limits.
+
+### Failure, observers and cost
+
+The direct arm applies rows before committing counts/bootstrap. An external raw Store getter could expose a provisional posting prefix during a callback; that is not a qualified COMPLETE query. A production-candidate Store should be fixed callback-free code. Core-only mutation alone is not a general reentrancy proof.
+
+Require reached-stage tests: successful external mutation followed by later invalid reference/CAS/cache failure; later injected Store failure; wrong owner/code/hash; pair isolation; upgrade mismatch; and explicit test-only observer/reentry characterization. Both accounts, authority nonce, counters and created code must roll back. Preserve all-family snapshots, repeated keys, last-live crossing/revival, tombstones, audit paging and Binding/Lens checks.
+
+A literal adapter adds roughly four Store calls per append (head read, word read, word write, head write), plus first-key mirror maintenance; a live delta adds two. `occurrencePostings` also reads its leading family-3 head before the loop, so four is not the complete occurrence-maintenance count. This is source operation counting, **not a gas estimate**. It may initially cost more. Coalescing/batching operations can then be measured separately against that control without hiding changed intra-admission visibility or failure order.
+
+Optional configuration comes later: define query universe/basis, epochs, bounded backfill, concurrent withdrawal/rebind behavior, first-ever versus revival anchors, coverage and recovery. An undeclared or failed index is not an empty result. Required navigation must not become optional accidentally. Full-C0 family10 is first-Binding-admission anchors; native indexes and the separate index lab have different populations and cannot be substituted by name alone.
+
+## Evidence/source map
+
+- Full-C0 `StateStore.sol`, `StateKernel.sol`, `StateReadPrimitives.sol`, `StatePointReads.sol`, `StateBindingReads.sol`, `Preparation.sol` at `8f101f1`.
+- Upgrade fixture `FixtureDeployment.sol`, `UpgradeableFixtureCore.sol`, `UpgradeStorage.sol`, `scripts/local-upgrade.mjs` at the same revision.
+- Retained census: `Reviews/2026-09-09-files-browser-mvp/evidence/type-cache-2026-09-11/candidate/tables.md`.
+- Native dense/zero counterexamples: [[2026-09-11-efs21-overnight#Narrowed followups after expert review]].
+
+No new cost number, code-size result, migration guarantee or implementation completion is asserted by this preflight.
