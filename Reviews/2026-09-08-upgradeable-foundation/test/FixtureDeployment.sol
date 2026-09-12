@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 import {StateKernel} from "C0Core/StateKernel.sol";
+import {PostingAccess} from "C0Core/PostingAccess.sol";
 import {UpgradeStorage, FixtureEndpoint} from "../src/UpgradeStorage.sol";
 import {UpgradeableFixtureCore} from "../src/UpgradeableFixtureCore.sol";
 import {UpgradeableFixtureCarrier} from "../src/UpgradeableFixtureCarrier.sol";
@@ -17,6 +18,8 @@ contract FixtureDeployment {
     address public carrier;
     address public coreAdmin;
     address public carrierAdmin;
+    address public postingStore;
+    bytes32 public postingStoreCodehash;
     uint32 public currentRevision;
     mapping(uint32 => UpgradeStorage.ExecutionSet) private revisions;
     error FixtureOwner();
@@ -41,6 +44,10 @@ contract FixtureDeployment {
         carrier = address(uint160(uint256(keccak256(abi.encodePacked(hex"d694", address(this), hex"02")))));
         coreAdmin = proxyAdminCreatedFirst(core);
         carrierAdmin = proxyAdminCreatedFirst(carrier);
+        postingStore = UpgradeableFixtureCore(coreImplementation).postingStore();
+        postingStoreCodehash = UpgradeableFixtureCore(coreImplementation).postingStoreCodehash();
+        if (postingStore.code.length == 0 || postingStore.codehash != postingStoreCodehash
+            || PostingAccess.writer(postingStore) != core) revert FixtureDeploymentState();
         address actualCore = address(
             new TransparentUpgradeableProxy(
                 coreImplementation,
@@ -110,7 +117,12 @@ contract FixtureDeployment {
         e.carrierImplementation = nextCarrier;
         e.coreCodehash = nextCore.codehash;
         e.carrierCodehash = nextCarrier.codehash;
-        e.coreConfiguration = UpgradeStorage.expectedConfiguration(e, true);
+        if (UpgradeableFixtureCore(core).postingStore() != postingStore
+            || UpgradeableFixtureCore(core).postingStoreCodehash() != postingStoreCodehash
+            || postingStore.codehash != postingStoreCodehash || PostingAccess.writer(postingStore) != core)
+            revert FixtureDeploymentState();
+        e.coreConfiguration = UpgradeStorage.postingConfiguration(
+            UpgradeStorage.expectedConfiguration(e, true), postingStore, postingStoreCodehash);
         e.carrierConfiguration = UpgradeStorage.expectedConfiguration(e, false);
         if (
             FixtureEndpoint(core).configuration() != e.coreConfiguration

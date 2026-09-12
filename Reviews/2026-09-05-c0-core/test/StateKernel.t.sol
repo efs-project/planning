@@ -34,6 +34,17 @@ interface VmState {
     function toString(uint256) external pure returns (string memory);
 }
 
+interface VmPostingOwnership {
+    function load(address, bytes32) external view returns (bytes32);
+}
+
+interface PostingOwnershipView {
+    function writer() external view returns (address);
+    function head(bytes32) external view returns (uint256);
+    function word(bytes32, uint64) external view returns (uint256);
+    function keyAt(uint64) external view returns (bytes32);
+}
+
 contract WordSafetyTest {
     function testMalformedShortWordAndOptionReject() public {
         KernelValuesHarness k = new KernelValuesHarness();
@@ -105,6 +116,25 @@ contract StateKernelTest {
             address(helper).codehash,
             address(AdmissionLibrary).codehash
         );
+    }
+
+    // A real admission must mutate the authorized Store, never retired Core roots.
+    function testAdmittedPostingsOwnedBySeparateProxyWriterStore() public {
+        install();
+        StateKernel.SelectedLeaf[] memory leaves = new StateKernel.SelectedLeaf[](1);
+        leaves[0] = objectLeaf(0);
+        h.publishTrustedForTest(verified(), request(leaves, 94001));
+        bytes32 key = h.postingKeyAt(1);
+        uint256 logicalHead = h.postingHead(key);
+        require(logicalHead != 0, "real admitted posting");
+        VmPostingOwnership ownerVm = VmPostingOwnership(address(uint160(uint256(keccak256("hevm cheat code")))));
+        require(ownerVm.load(address(h), keccak256(abi.encode(key, uint256(19)))) == 0, "retired Core head must be empty");
+        address store = address(uint160(uint256(ownerVm.load(address(h), bytes32(uint256(28))))));
+        require(store != address(0) && store != address(h), "separate routed Store");
+        PostingOwnershipView index = PostingOwnershipView(store);
+        require(index.writer() == address(h), "only actual state owner writes");
+        require(index.head(key) == logicalHead && index.keyAt(1) == key, "Store owns exact logical state");
+        require(index.word(key, 0) == h.postingWord(key, 0), "Store owns packed occurrences");
     }
 
     function verified() internal pure returns (StateKernel.VerifiedContext memory) {

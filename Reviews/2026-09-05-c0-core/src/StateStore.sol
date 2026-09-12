@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
+import {PostingAccess} from "./PostingAccess.sol";
 
 import {Preparation} from "./Preparation.sol";
 import {StorageByteView} from "./StorageByteView.sol";
@@ -138,6 +139,8 @@ library StateStore {
         mapping(uint64 => bytes32) principalIds;
         mapping(uint64 => bytes32) postingKeys;
         mapping(uint64 => bytes32) bindingKeys;
+        // Fresh-genesis write-once routing. Retired roots above remain reserved.
+        address postingStore;
     }
 
     // Ordered row dispatcher shared by direct admission reads and writes.
@@ -366,14 +369,14 @@ library StateStore {
         if (k == Kind.Admission) return abi.encode(s.admissions[i]);
         if (k == Kind.Lifecycle) return abi.encode(s.occurrences[key]);
         if (k == Kind.Binding) return abi.encode(s.bindings[key]);
-        if (k == Kind.Posting) return abi.encode(s.postings[key]);
-        if (k == Kind.Word) return abi.encode(s.postingWords[key][i]);
+        if (k == Kind.Posting) return abi.encode(PostingRow(PostingAccess.head(s.postingStore, key)));
+        if (k == Kind.Word) return abi.encode(PostingAccess.word(s.postingStore, key, i));
         if (k == Kind.Batch) return abi.encode(s.batches[i]);
         if (k == Kind.RecordId) return abi.encode(s.recordIds[i]);
         if (k == Kind.EnvelopeId) return abi.encode(s.envelopeIds[i]);
         if (k == Kind.TypeId) return abi.encode(s.typeIds[i]);
         if (k == Kind.PrincipalId) return abi.encode(s.principalIds[i]);
-        if (k == Kind.PostingKey) return abi.encode(s.postingKeys[i]);
+        if (k == Kind.PostingKey) return abi.encode(PostingAccess.keyAt(s.postingStore, i));
         return abi.encode(s.bindingKeys[i]);
     }
 
@@ -407,10 +410,8 @@ library StateStore {
             s.occurrences[key] = abi.decode(v, (LifecycleRow));
         } else if (k == Kind.Binding) {
             s.bindings[key] = abi.decode(v, (BindingRow));
-        } else if (k == Kind.Posting) {
-            s.postings[key] = abi.decode(v, (PostingRow));
-        } else if (k == Kind.Word) {
-            s.postingWords[key][i] = abi.decode(v, (uint256));
+        } else if (k == Kind.Posting || k == Kind.Word || k == Kind.PostingKey) {
+            revert PostingAccess.PostingUnavailable();
         } else if (k == Kind.Batch) {
             s.batches[i] = abi.decode(v, (BatchRow));
         } else if (k == Kind.RecordId) {
@@ -421,8 +422,6 @@ library StateStore {
             s.typeIds[i] = abi.decode(v, (bytes32));
         } else if (k == Kind.PrincipalId) {
             s.principalIds[i] = abi.decode(v, (bytes32));
-        } else if (k == Kind.PostingKey) {
-            s.postingKeys[i] = abi.decode(v, (bytes32));
         } else {
             s.bindingKeys[i] = abi.decode(v, (bytes32));
         }

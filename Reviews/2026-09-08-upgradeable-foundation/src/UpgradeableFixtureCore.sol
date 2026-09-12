@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 import {StateStore} from "C0Core/StateStore.sol";
+import {PostingAccess} from "C0Core/PostingAccess.sol";
 import {StateKernel} from "C0Core/StateKernel.sol";
 import {Preparation} from "C0Core/Preparation.sol";
 import {UpgradeStorage, FixtureEndpoint} from "./UpgradeStorage.sol";
@@ -8,10 +9,22 @@ import {UpgradeAdmissionLibrary} from "./UpgradeAdmissionLibrary.sol";
 
 /// @notice Operator-signed synthetic-author adapter, NOT full C0 authority.
 contract UpgradeableFixtureCore is FixtureEndpoint {
+    address public immutable postingStore;
+    bytes32 public immutable postingStoreCodehash;
     event FixtureAdmissionResult(
         bytes32 indexed envelopeId, uint64 envelopeOrdinal, uint64 acceptingBatchId, StateKernel.LeafResult[] leaves
     );
-    constructor(address factory, address helper) FixtureEndpoint(factory, helper) {}
+    constructor(address factory, address helper, address store) FixtureEndpoint(factory, helper) {
+        if (store.code.length == 0) revert FixtureConfiguration();
+        postingStore = store;
+        postingStoreCodehash = store.codehash;
+    }
+
+    function configuration() public view override returns (bytes32) {
+        bytes32 base = super.configuration();
+        return UpgradeAdmissionLibrary.postingConfiguration(
+            UpgradeStorage.efs(), base, postingStore, postingStoreCodehash);
+    }
 
     function initialize(
         address controller,
@@ -27,7 +40,8 @@ contract UpgradeableFixtureCore is FixtureEndpoint {
                 || admissionLibrary.codehash != admissionCodehash
         ) revert FixtureConfiguration();
         UpgradeAdmissionLibrary.initialize(
-            UpgradeStorage.efs(), init, Preparation.Config(preparationHelper, preparationCodehash)
+            UpgradeStorage.efs(), init, Preparation.Config(preparationHelper, preparationCodehash),
+            postingStore, postingStoreCodehash
         );
     }
 
@@ -90,7 +104,7 @@ contract UpgradeableFixtureCore is FixtureEndpoint {
     }
 
     function postingHead(bytes32 id) external view returns (uint256) {
-        return UpgradeStorage.efs().postings[id].head;
+        return UpgradeAdmissionLibrary.rawPostingRead(UpgradeStorage.efs(), 0, id, 0);
     }
     error InventoryBounds();
 
@@ -120,7 +134,7 @@ contract UpgradeableFixtureCore is FixtureEndpoint {
 
     function postingKeyAt(uint64 i) external view returns (bytes32) {
         bound(i, UpgradeStorage.efs().count.postingKeys);
-        return UpgradeStorage.efs().postingKeys[i];
+        return bytes32(UpgradeAdmissionLibrary.rawPostingRead(UpgradeStorage.efs(), 2, bytes32(0), i));
     }
 
     function bindingKeyAt(uint64 i) external view returns (bytes32) {
@@ -151,13 +165,12 @@ contract UpgradeableFixtureCore is FixtureEndpoint {
     }
 
     function postingWord(bytes32 id, uint64 i) external view returns (uint256) {
-        if (i >= (uint64(UpgradeStorage.efs().postings[id].head) + 4) / 5) revert InventoryBounds();
-        return UpgradeStorage.efs().postingWords[id][i];
+        return UpgradeAdmissionLibrary.rawPostingRead(UpgradeStorage.efs(), 1, id, i);
     }
 }
 
 contract UpgradeableFixtureCoreU2 is UpgradeableFixtureCore {
-    constructor(address factory, address helper) UpgradeableFixtureCore(factory, helper) {}
+    constructor(address factory, address helper, address store) UpgradeableFixtureCore(factory, helper, store) {}
 
     function migratePresentation(string calldata label, bool fail) external {
         _migrate(label, fail);

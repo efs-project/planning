@@ -101,6 +101,10 @@ library UpgradeStorage {
         e.id = 0;
         return keccak256(abi.encode(keccak256("efs.fixture.execution-set/1"), e));
     }
+
+    function postingConfiguration(bytes32 base, address store, bytes32 codehash) internal pure returns (bytes32) {
+        return keccak256(abi.encode(keccak256("efs.fixture.core-posting-store/1"), base, store, codehash));
+    }
 }
 
 interface IFixtureEndpoint {
@@ -164,7 +168,7 @@ abstract contract FixtureEndpoint {
         return (UpgradeStorage.EFS_SLOT, UpgradeStorage.CONTROL_SLOT, UpgradeStorage.PRESENTATION_SLOT);
     }
 
-    function configuration() public view returns (bytes32) {
+    function configuration() public view virtual returns (bytes32) {
         UpgradeStorage.Control storage c = UpgradeStorage.control();
         if (
             !c.initialized || address(this) == implementationSelf

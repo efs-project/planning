@@ -95,8 +95,8 @@ contract UpgradeableFixtureCoreU3 is UpgradeableReadFixtureCoreU2 {
         "AuthorIntent(bytes32 publicationHash,bytes32 executionSetId,bytes32 opCommitment,bytes32 byteCommitment,address executor,bytes32 executorCodehash,uint64 nonce,uint64 deadline)"
     );
 
-    constructor(address factory, address helper, bytes32 pointReadHash, bytes32 queryReadHash)
-        UpgradeableReadFixtureCoreU2(factory, helper, pointReadHash, queryReadHash)
+    constructor(address factory, address helper, address store, bytes32 pointReadHash, bytes32 queryReadHash)
+        UpgradeableReadFixtureCoreU2(factory, helper, store, pointReadHash, queryReadHash)
     {}
 
     /// One-time, first-come binding of a fixture principal to a signer account.

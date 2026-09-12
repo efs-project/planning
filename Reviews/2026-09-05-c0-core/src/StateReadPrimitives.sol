@@ -2,6 +2,7 @@
 pragma solidity ^0.8.30;
 
 import {StateStore} from "./StateStore.sol";
+import {PostingAccess} from "./PostingAccess.sol";
 import {StatePointReads} from "./StatePointReads.sol";
 import {StorageByteView} from "./StorageByteView.sol";
 
@@ -33,7 +34,7 @@ library StateReadPrimitives {
         view
         returns (PostingHead memory result)
     {
-        uint256 packed = s.postings[key].head;
+        uint256 packed = PostingAccess.head(s.postingStore, key);
         if (packed >> 192 != 0) revert StorageByteView.ErrReadState(subject);
         uint64 count = uint64(packed);
         uint64 live = uint64(packed >> 64);
@@ -58,7 +59,7 @@ library StateReadPrimitives {
         bytes32 subject
     ) internal view returns (uint64 ordinal) {
         if (position >= head.count) revert StorageByteView.ErrReadState(subject);
-        uint256 packed = s.postingWords[key][position / 5];
+        uint256 packed = PostingAccess.word(s.postingStore, key, position / 5);
         if (packed >> 240 != 0) revert StorageByteView.ErrReadState(subject);
         ordinal = uint64((packed >> (48 * (position % 5))) & ORDINAL_GUARD);
         if (ordinal == 0 || ordinal >= ORDINAL_GUARD || ordinal > head.last) {

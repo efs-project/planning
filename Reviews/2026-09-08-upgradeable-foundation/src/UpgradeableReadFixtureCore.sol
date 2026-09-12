@@ -30,8 +30,8 @@ contract UpgradeableReadFixtureCore is UpgradeableFixtureCore {
     error ErrPageBasis(uint64 requestedBasis, uint64 currentHighWater);
     error ErrIndexQueryUnsupported(bytes32 typeSchemaId, uint8 indexKind, uint8 indexOrdinal, bytes32 valueKey);
 
-    constructor(address factory, address helper, bytes32 pointReadHash, bytes32 queryReadHash)
-        UpgradeableFixtureCore(factory, helper)
+    constructor(address factory, address helper, address store, bytes32 pointReadHash, bytes32 queryReadHash)
+        UpgradeableFixtureCore(factory, helper, store)
     {
         if (address(PointReadLibrary).code.length == 0 || address(PointReadLibrary).codehash != pointReadHash) {
             revert ReadCodeMismatch(1);
@@ -239,8 +239,8 @@ contract UpgradeableReadFixtureCore is UpgradeableFixtureCore {
 }
 
 contract UpgradeableReadFixtureCoreU2 is UpgradeableReadFixtureCore {
-    constructor(address factory, address helper, bytes32 pointReadHash, bytes32 queryReadHash)
-        UpgradeableReadFixtureCore(factory, helper, pointReadHash, queryReadHash)
+    constructor(address factory, address helper, address store, bytes32 pointReadHash, bytes32 queryReadHash)
+        UpgradeableReadFixtureCore(factory, helper, store, pointReadHash, queryReadHash)
     {}
 
     function migratePresentation(string calldata label, bool fail) external {

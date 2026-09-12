@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
+import {PostingAccess} from "./PostingAccess.sol";
 import {StateStore} from "./StateStore.sol";
 import {Preparation} from "./Preparation.sol";
 import {BindingFold} from "./BindingFold.sol";
@@ -502,12 +503,14 @@ library StateKernel {
         uint64 ord,
         bool add
     ) private {
-        uint256 beforeHead = head(s, p, keys[0]);
-        uint64 live = uint64(beforeHead >> 64);
+        uint256 beforeHead;
         for (uint256 i; i < keys.length; ++i) {
-            if (add) append(s, p, keys[i], ord, false);
-            else liveDelta(s, p, keys[i], false);
+            uint256 old;
+            if (add) old = append(s, p, keys[i], ord, false);
+            else old = liveDelta(s, p, keys[i], false);
+            if (i == 0) beforeHead = old;
         }
+        uint64 live = uint64(beforeHead >> 64);
         bytes32 unique = IndexKeys.posting(typeId, 2, 0, 0);
         if (add && live == 0) {
             if (uint64(beforeHead) == 0) {
@@ -610,63 +613,16 @@ library StateKernel {
         }
     }
 
-    function head(StateStore.Store storage s, AdmissionContext memory p, bytes32 key) private view returns (uint256) {
-        return abi.decode(get(s, p, StateStore.Kind.Posting, key, 0), (StateStore.PostingRow)).head;
-    }
-
     function append(StateStore.Store storage s, AdmissionContext memory p, bytes32 key, uint64 ord, bool audit)
-        private
+        private returns (uint256 beforeHead)
     {
-        uint256 beforeHead = head(s, p, key);
-        uint64 count = uint64(beforeHead);
-        uint64 live = uint64(beforeHead >> 64);
-        uint64 last = uint64((beforeHead >> 128) & GUARD);
-        uint16 flags = uint16(beforeHead >> 176);
-        assert(ord > last && (count == 0 || flags == (audit ? 1 : 0)));
-        if (count >= GUARD - 1 || live >= GUARD - 1) revert U48_GUARD();
-        if (count == 0) {
-            p.count.postingKeys = next(p.count.postingKeys);
-            put(s, p, StateStore.Kind.PostingKey, 0, p.count.postingKeys, abi.encode(key));
-        }
-        uint64 wordIndex = count / 5;
-        uint256 word = abi.decode(get(s, p, StateStore.Kind.Word, key, wordIndex), (uint256));
-        uint256 shift = 48 * (count % 5);
-        assert((word >> shift) == 0);
-        put(s, p, StateStore.Kind.Word, key, wordIndex, abi.encode(word | (uint256(ord) << shift)));
-        put(
-            s,
-            p,
-            StateStore.Kind.Posting,
-            key,
-            0,
-            abi.encode(
-                StateStore.PostingRow(
-                    uint256(count + 1) | (uint256(live + 1) << 64) | (uint256(ord) << 128)
-                        | (uint256(audit ? 1 : 0) << 176)
-                )
-            )
-        );
+        (beforeHead, p.count.postingKeys) = PostingAccess.append(s.postingStore, key, ord, audit, p.count.postingKeys);
     }
 
-    function liveDelta(StateStore.Store storage s, AdmissionContext memory p, bytes32 key, bool increase) private {
-        uint256 h = head(s, p, key);
-        uint64 live = uint64(h >> 64);
-        assert(uint16(h >> 176) == 0);
-        if (increase) {
-            if (live >= GUARD - 1) revert U48_GUARD();
-            ++live;
-        } else {
-            assert(live > 0);
-            --live;
-        }
-        put(
-            s,
-            p,
-            StateStore.Kind.Posting,
-            key,
-            0,
-            abi.encode(StateStore.PostingRow((h & ~(uint256(type(uint64).max) << 64)) | (uint256(live) << 64)))
-        );
+    function liveDelta(StateStore.Store storage s, AdmissionContext memory, bytes32 key, bool increase)
+        private returns (uint256)
+    {
+        return PostingAccess.liveDelta(s.postingStore, key, increase);
     }
 
     function get(StateStore.Store storage s, AdmissionContext memory, StateStore.Kind kind, bytes32 key, uint64 index)

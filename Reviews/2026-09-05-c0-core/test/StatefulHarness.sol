@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 import {StateStore} from "../src/StateStore.sol";
+import {PostingStore} from "../src/PostingStore.sol";
+import {PostingAccess} from "../src/PostingAccess.sol";
 import {Preparation} from "../src/Preparation.sol";
 import {StateKernel} from "../src/StateKernel.sol";
 import {AdmissionLibrary} from "../src/AdmissionLibrary.sol";
@@ -26,6 +28,7 @@ contract StatefulHarness {
         admissionCodehash = libraryHash;
         preparationHelper = helper;
         preparationCodehash = codehash;
+        s.postingStore = address(new PostingStore(address(this)));
         StateKernel.initialize(s, init, Preparation.Config(helper, codehash));
     }
 
@@ -62,7 +65,7 @@ contract StatefulHarness {
     }
 
     function postingHead(bytes32 id) external view returns (uint256) {
-        return s.postings[id].head;
+        return PostingAccess.head(s.postingStore, id);
     }
     error InventoryBounds();
 
@@ -92,7 +95,7 @@ contract StatefulHarness {
 
     function postingKeyAt(uint64 i) external view returns (bytes32) {
         bound(i, s.count.postingKeys);
-        return s.postingKeys[i];
+        return PostingAccess.keyAt(s.postingStore, i);
     }
 
     function bindingKeyAt(uint64 i) external view returns (bytes32) {
@@ -123,8 +126,8 @@ contract StatefulHarness {
     }
 
     function postingWord(bytes32 id, uint64 i) external view returns (uint256) {
-        if (i >= (uint64(s.postings[id].head) + 4) / 5) revert InventoryBounds();
-        return s.postingWords[id][i];
+        if (i >= (uint64(PostingAccess.head(s.postingStore, id)) + 4) / 5) revert InventoryBounds();
+        return PostingAccess.word(s.postingStore, id, i);
     }
 }
 
