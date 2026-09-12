@@ -1,0 +1,11 @@
+{
+  "format": "EFS21_METADATA_RECEIPTS_GZIP_JSON_V1",
+  "canonical": {
+    "bytes": 19480259,
+    "keccak256": "0x40d74156dab9822112f82c0de28896d5f7037dd5f143807918c75b676dce953e"
+  },
+  "compressed": {
+    "bytes": 1837564,
+    "keccak256": "0x38730f8267ba26a4e466d269b863e1992973826e99ebf89e62fc5a365407f97a"
+  }
+}

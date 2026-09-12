@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { gunzipSync } from 'node:zlib';
-import { keccak256, Transaction, getCreateAddress } from '../../2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js';
+import { keccak256, Transaction, getCreateAddress, Interface, ZeroHash } from '../../2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js';
 const read=arm=>{
   const base=process.env.EFS_METADATA_PREFLIGHT_ROOT
     ? resolve(process.env.EFS_METADATA_PREFLIGHT_ROOT,`preflight-${arm}`)
@@ -20,6 +20,28 @@ const read=arm=>{
 };
 const control=read('control'),candidate=read('candidate'),reports=[control,candidate];
 const txFor=(r,op)=>r.transactions.find(t=>t.hash===op.hash);
+function normalizedPaidBinding(report,raw) {
+  const iface=new Interface(report.contractSurface.surfaces.UpgradeableFixtureCoreU3.abi);
+  const decoded=iface.decodeFunctionResult('getBindingHead',raw);
+  assert.equal(iface.encodeFunctionResult('getBindingHead',decoded),raw,'canonical paid Binding tuple');
+  assert.equal(decoded[1],report.identity.execution.executionSetId,'paid Binding execution field');
+  return [Array.from(decoded[0]),'VERIFIED_EXECUTION_SET',decoded[2]];
+}
+
+test('paid Binding identity cannot be supplied in the wrong return field',()=>{
+  for(const report of reports) {
+    const iface=new Interface(report.contractSurface.surfaces.UpgradeableFixtureCoreU3.abi);
+    const actual=report.paidReads.find(x=>x.method==='getBindingHead');
+    const decoded=iface.decodeFunctionResult('getBindingHead',actual.raw),head=Array.from(decoded[0]);
+    head[5]=report.identity.execution.executionSetId;
+    const forged=iface.encodeFunctionResult('getBindingHead',[head,ZeroHash,decoded[2]]);
+    assert.throws(()=>normalizedPaidBinding(report,forged),/paid Binding execution field/);
+    const matchingTarget=iface.encodeFunctionResult('getBindingHead',[head,decoded[1],decoded[2]]);
+    const normalized=normalizedPaidBinding(report,matchingTarget);
+    assert.equal(normalized[0][5],report.identity.execution.executionSetId,'target bytes remain untouched');
+    assert.equal(normalized[1],'VERIFIED_EXECUTION_SET');
+  }
+});
 function executable(hex){
   const metadataBytes=parseInt(hex.slice(-4),16);
   assert.equal(metadataBytes,51,'known Solidity0.8.30 IPFS+solc CBOR extent');
@@ -141,8 +163,7 @@ test('actual paid Core reads agree; maximum Envelope is64-vector with only one s
   const logicalReads=report=>report.paidReads.map(x=>{
     let raw=x.raw;
     if(x.method==='getBindingHead'){
-      const execution=report.identity.execution.executionSetId.slice(2);
-      assert(raw.includes(execution)); raw=raw.replace(execution,'VERIFIED_EXECUTION_SET');
+      raw=normalizedPaidBinding(report,raw);
     }
     if(x.method==='getRecordsCurrent'){
       // Its checked-current ABI starts with the authenticated execution-set ID.
