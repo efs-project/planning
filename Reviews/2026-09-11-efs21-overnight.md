@@ -93,6 +93,32 @@ Native authority does not mean EOA-only: the demonstrated producer contract owns
 
 The smaller candidate should also be read as a **Files profile**, not a filesystem-shaped replacement for every kind of EFS data. Its author-neutral typed-record storage/validation can be extracted into a generic ingestion contract, with Files ownership/history/path state in a profile facade and required indexes separately stored. An extraction-only experiment can preserve the same browser API and measure the extra call cost. Full structural Type validation and compact portable authored admission then need distinct measured arms; neither is established by today's two-validator native profile.
 
+## Why a file currently has seven records
+
+Seven is the existing Files profile's publication template, **not an Ethereum requirement and not seven copies of the payload**. The current SDK emits:
+
+| Logical fact | Why it exists in the full profile |
+|---|---|
+| ObjectGenesis | Stable File identity independent of a name or content revision. |
+| Charter BindingSet | This author's selected charter for that Object. |
+| ChunkTree | Exact content size/chunk commitments, separate from where bytes are obtained. |
+| FileRevision | This File's immutable revision, content reference and media metadata. |
+| Head BindingSet | This author's choice of the current revision. |
+| DirectoryEntry | The immutable assertion that a parent/name refers to this File. |
+| Name BindingSet | This author's selected entry at that parent/name position. |
+
+[Exact create/edit templates](https://github.com/efs-project/planning/blob/e38b5e3/Reviews/2026-09-09-files-browser-mvp/sdk/files-actions.mjs#L144). Edit creates three metadata records, not all seven again; rename/move has a different four-record template. Actual content staging is separate.
+
+The purpose of those separations is real: names can change without changing file identity; content can change without rewriting history; different authors can publish different selections; the same bytes can have different placements and storage providers. **That does not prove each fact needs its own expensive row, envelope bookkeeping and every index.** The cost census shows 48 Record slots for the seven records, while the complete create also writes admission, lifecycle, binding, envelope and posting state. [Retained census](https://github.com/efs-project/planning/blob/e38b5e3/Reviews/2026-09-09-files-browser-mvp/gas-baseline-2026-09-10.md#33-slots-by-family--createdir-createdir-1-and-createfile-createfile-1).
+
+Our next choices should separate three questions:
+
+1. **Meaning:** which independent facts must survive? Removing per-author selection, independent placement or retained revisions changes what apps can express.
+2. **Representation:** can the same facts share immutable storage, use compact encodings, or avoid allocating a worst-case planning buffer? These are candidates for same-behavior savings.
+3. **Discovery:** which collections must every writer maintain, and which should the paying namespace/profile opt into? Moving a collection to another contract does not itself remove its writes.
+
+The native prototype collapses several of these into dedicated filesystem state and accepts the authenticated calling account instead of portable authored publications. Its much lower cost is evidence that practical contract filesystem operations are possible, **not evidence that full-v2 portability and plural selection are free or unnecessary**. History-sharing has now separately demonstrated a representation-only saving. We need similarly explicit tests for broader validation, portable authored admission and optional discovery before recommending a replacement foundation.
+
 ## Logs are useful, but a different read surface
 
 One premise in the discussion needs narrowing: light-client verification of logs is not fundamentally impossible. Ethereum commits receipts into the block's receipt trie, and receipts contain logs; receipt inclusion can therefore be checked against an authenticated header with the required proof data. This is distinct from trusting an `eth_getLogs` response. [EIP-2718 receipt commitment](https://eips.ethereum.org/EIPS/eip-2718#receipts).
@@ -106,11 +132,14 @@ For tonight, basic contract operations and browsing remain state-readable with n
 - **Native history snapshots:** implemented and independently reviewed above; same historical values, lower edit/unlink receipts, slightly higher creation and historical-read cost. Still experimental, not adopted storage layout.
 - **Raw payload representation:** distinguish external-call ABI from the typed content being stored. A separate raw-byte Type can avoid persisting the inner offset/length/padding for file bodies. It has different exact Type/Record IDs and cannot reinterpret old records; measure it separately from storage compression. Empty raw bodies also mean a nonempty-body presence shortcut would be invalid.
 - **Stateless priority reader:** a small ordered-namespace, whole-path Lens can add useful contract composition without adding writes. It is not yet full per-segment/whiteout/threshold Lens parity.
+- **Full-v2 planning allocation:** a focused source review found the journal reserves `fresh * 256 + 5` Change entries and appears to eagerly initialize five-word structs which subsequent writes replace. Seven fresh leaves imply 287,520 bytes of potentially unnecessary default-struct allocation. This is compiler-source inference, not measured savings. A narrowly scoped lazy pointer-array experiment can keep every journal value/order/prestate check and every v2 feature; first verify actual allocation behavior, then compare trace-free routed receipts. This is prioritized before physical full-v2 index extraction.
 - **Full-profile byte placement:** the retained full create-file census has 48 Record slots: 21 row/header slots and 27 body-data words. Its unsigned envelope adds a further payload. The prior Type-cache optimization already demonstrated immutable code-backed storage. A later experiment can compare batch-packed immutable record/envelope bytes against individual storage words while preserving logical rows and exact IDs. It must include contract creation/pointer/read costs and support legal sizes without repeating the cache ceiling failure. [Retained slot census at the prototype checkpoint](https://github.com/efs-project/planning/blob/aa6b1b62b733209aa5879743e81fd1f3a9143f8a/Reviews/2026-09-09-files-browser-mvp/gas-baseline-2026-09-10.md#33-slots-by-family--createdir-createdir-1-and-createfile-createfile-1).
 
 The code-as-data idea is established prior art, not an EFS invention: Solady's SSTORE2 writes bytes into a STOP-prefixed contract and reads them with EXTCODECOPY. It does not prove savings for our exact workload; individual tiny deployments can be wasteful, and our Core proxy must not accidentally consume deployment nonces. [Solady SSTORE2 source](https://github.com/Vectorized/solady/blob/main/src/utils/SSTORE2.sol).
 
 These are experiments, not adopted storage layouts. No projected gas figure here is a measured result.
+
+Two product questions stay visible for James, but need not block tonight's engineering: must every high-frequency contract value become a permanently retained EFS revision, or may a separately labelled live/computed view expose current contract state? And which advanced discovery queries should every writer subsidize, rather than the namespace/profile selecting them? Neither a cheaper live view nor an optional search index may be presented as an immutable retained record or a complete query when it is not. No such requirement change has been adopted.
 
 ## Optional index safety boundary
 
