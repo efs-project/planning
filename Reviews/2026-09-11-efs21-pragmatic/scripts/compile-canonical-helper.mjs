@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {gzipSync} from 'node:zlib';
 import * as E from '../../2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const ref='ebc7d540570827c5f5052af83d2cbd80f54092a7';
@@ -25,10 +26,15 @@ const out=JSON.parse(r.stdout);assert(!(out.errors??[]).some(e=>e.severity==='er
 const a=out.contracts['C0Core/PreparationHelper.sol'].PreparationHelper;
 const bytecode={...a.evm.bytecode,object:'0x'+a.evm.bytecode.object},deployedBytecode={...a.evm.deployedBytecode,object:'0x'+a.evm.deployedBytecode.object};
 const runtimeHash=E.keccak256(deployedBytecode.object);
-const artifact={format:'efs21-canonical-preparation-helper/1',sourceManifest,compiler:'0.8.30+commit.73712a01',input,abi:a.abi,metadata:JSON.parse(a.metadata),bytecode,deployedBytecode,methodIdentifiers:a.evm.methodIdentifiers,creationHash:E.keccak256(bytecode.object),runtimeHash};
+const outputText=JSON.stringify(out);assert(Buffer.byteLength(outputText)<16*1024*1024,'bounded complete compiler output');
+const outputGzip=gzipSync(outputText);assert(outputGzip.length<4*1024*1024);
+const compilerOutput={file:'canonical-preparation-output.json.gz',keccak256:E.keccak256(outputGzip),uncompressedBytes:Buffer.byteLength(outputText),compressedBytes:outputGzip.length};
+const artifact={format:'efs21-canonical-preparation-helper/1',sourceManifest,compiler:'0.8.30+commit.73712a01',input,compilerOutput,abi:a.abi,metadata:JSON.parse(a.metadata),bytecode,deployedBytecode,methodIdentifiers:a.evm.methodIdentifiers,creationHash:E.keccak256(bytecode.object),runtimeHash};
 const files={
  [root+'contracts/test/fixtures/canonical-preparation-helper.json']:JSON.stringify(artifact,null,2)+'\n',
  [root+'contracts/src/CanonicalHelperIdentity.sol']:'// SPDX-License-Identifier: MIT\npragma solidity 0.8.30;\n// Generated from the exact standalone six-file compiler input; no helper code embedded.\nlibrary CanonicalHelperIdentity {\n    bytes32 internal constant EXPECTED_RUNTIME_HASH = '+runtimeHash+';\n}\n'
 };
 for(const [p,value]of Object.entries(files)){if(process.argv.includes('--check'))assert.equal(readFileSync(p,'utf8'),value,p);else writeFileSync(p,value);}
+const outputPath=root+'contracts/test/fixtures/'+compilerOutput.file;
+if(process.argv.includes('--check'))assert.deepEqual(readFileSync(outputPath),outputGzip);else writeFileSync(outputPath,outputGzip);
 console.log(JSON.stringify({runtimeHash,creationHash:artifact.creationHash,runtimeBytes:E.getBytes(deployedBytecode.object).length,initcodeBytes:E.getBytes(bytecode.object).length,inputHash:E.keccak256(E.toUtf8Bytes(JSON.stringify(input)))}));

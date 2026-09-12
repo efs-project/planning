@@ -27,6 +27,9 @@ export async function probe({small=false,finalSource=null}={}){
  const helperArtifact=JSON.parse(readFileSync(root+'contracts/test/fixtures/canonical-preparation-helper.json'));
  const registryArtifact=JSON.parse(readFileSync(root+'contracts/out/CanonicalTypeRegistry.sol/CanonicalTypeRegistry.json'));
  const golden=JSON.parse(readFileSync(root+'contracts/test/fixtures/canonical-types-golden.json'));
+ const supplement=JSON.parse(readFileSync(root+'contracts/test/fixtures/canonical-types-supplement.json'));
+ const compilerOutput=readFileSync(root+'contracts/test/fixtures/'+helperArtifact.compilerOutput.file);
+ assert.equal(E.keccak256(compilerOutput),helperArtifact.compilerOutput.keccak256,'complete compiler output artifact');
  const source=git(['rev-parse','HEAD']);
  const sourceStatus=git(['status','--porcelain','--untracked-files=all']);
  const sourceManifest={};
@@ -127,6 +130,8 @@ export async function probe({small=false,finalSource=null}={}){
    for(const name of ['ref','self','external','occref','optionalRef','zeroArrayRef','sibling','secondUnsupported','index','digestIndex','boundary','aggregate']){
     const g=golden.groups[name],before=await rpc('eth_getTransactionCount',[helper,'latest']);
     let error;try{await call(ri,registry,'registerGroup',[g.raw]);assert.fail('must refuse '+name);}catch(e){error=e.data;assert(error,'actual EVM refusal '+name);}
+    const expectedError=name==='aggregate'?'0x':E.id(name==='boundary'?'HelperDeploy()':['index','digestIndex'].includes(name)?'UnsupportedIndexes()':'UnsupportedReferences()').slice(0,10);
+    assert.equal(error,expectedError,'exact profile/resource refusal '+name);
     await send('refuse-'+name,registry,ri.encodeFunctionData('registerGroup',[g.raw]),'0x0');
     assert.equal(await rpc('eth_getTransactionCount',[helper,'latest']),before);
     let missing=false;try{await call(ri,registry,'groupBytes',[g.groupHash]);}catch{missing=true;}assert(missing);
@@ -136,9 +141,56 @@ export async function probe({small=false,finalSource=null}={}){
    await send('paid-cache-read',registry,ri.encodeFunctionData('cacheBytes',[g.ids[0]]));
    await send('paid-type-read',registry,ri.encodeFunctionData('typeInfo',[g.ids[0]]));
    await send('paid-group-read',registry,ri.encodeFunctionData('groupBytes',[g.groupHash]));
+   report.supplement={groups:[],validations:[]};
+   const caches=new Map();
+   async function exactError(iface,target,name,args,error){
+    let actual;try{await call(iface,target,name,args);assert.fail('required refusal '+name);}catch(e){actual=e.data;}
+    assert.equal(actual,error,'exact supplemental '+name+' error');return actual;
+   }
+   for(const g of supplement.groups){
+    const before=await rpc('eth_getTransactionCount',[helper,'latest']);
+    if(!g.valid){
+     const next=E.getCreateAddress({from:helper,nonce:BigInt(before)}),priorCode=await rpc('eth_getCode',[next,'latest']);
+     const expected=E.id('InvalidSchema()').slice(0,10);
+     const helperError=await exactError(hi,helper,'compileGroup',[g.raw],expected);
+     const registryError=await exactError(ri,registry,'registerGroup',[g.raw],expected);
+     const receipt=await send('supplement-refuse-'+g.name,registry,ri.encodeFunctionData('registerGroup',[g.raw]),'0x0');
+     const after=await rpc('eth_getTransactionCount',[helper,'latest']);assert.equal(after,before);
+     const afterCode=await rpc('eth_getCode',[next,'latest']);assert.equal(afterCode,priorCode);
+     await assert.rejects(call(ri,registry,'groupBytes',[g.groupHash]));
+     for(const id of g.ids)await assert.rejects(call(ri,registry,'typeInfo',[id]));
+     report.supplement.groups.push({...g,helperError,registryError,helperNonceBefore:before,helperNonceAfter:after,nextCache:next,codeBefore:priorCode,codeAfter:afterCode,groupAndTypesAbsent:true,blockNumber:receipt.blockNumber});
+     continue;
+    }
+    const compiled=(await call(hi,helper,'compileGroup',[g.raw]))[0];assert.equal(compiled.groupHash,g.groupHash);assert.equal(compiled.rawHash,E.keccak256(g.raw));
+    const cache=compiled.types[0].cacheBytes;
+    verifyCache({ordinal:1,cacheBytes:cache},parseGroup(E.getBytes(g.raw)).members[0],g.ids[0],g.ids,Buffer.from(g.blobs[0].slice(2),'hex'));
+    const receipt=await send('supplement-register-'+g.name,registry,ri.encodeFunctionData('registerGroup',[g.raw]));
+    assert.equal(BigInt(await rpc('eth_getTransactionCount',[helper,'latest'])),BigInt(before)+1n);
+    const info=(await call(ri,registry,'typeInfo',[g.ids[0]]))[0],code=await rpc('eth_getCode',[info.cacheCode,receipt.blockNumber]);
+    assert.equal((await call(ri,registry,'groupBytes',[g.groupHash]))[0],g.raw);
+    assert.equal((await call(ri,registry,'cacheBytes',[g.ids[0]]))[0],cache);assert.equal(code,'0x00'+cache.slice(2));
+    report.supplement.groups.push(plain({...g,compiled,infos:[info],codes:[{address:info.cacheCode,code,codehash:E.keccak256(code)}],blockNumber:receipt.blockNumber}));
+    caches.set(g.name,cache);
+   }
+   for(const outcome of supplement.outcomes){
+    const g=supplement.groups.find(g=>g.name===outcome.group),id=g.ids[0];
+    const args=[caches.get(g.name),id,outcome.body,outcome.recordId,E.ZeroHash,[E.ZeroHash,E.ZeroHash,E.ZeroHash],true];
+    let helperError=null,registryError=null;
+    if(outcome.valid){
+     const prepared=(await call(hi,helper,'prepareRecord',args))[0];assert.equal(prepared.references.length,0);assert.equal(prepared.occurrenceKeys.length,0);assert.equal(prepared.effect.kind,0n);
+     await call(ri,registry,'validate',[id,outcome.body]);
+    }else{
+     const error=E.concat([E.id('InvalidBody(uint16)').slice(0,10),E.zeroPadValue(E.toBeHex(outcome.error),32)]);
+     helperError=await exactError(hi,helper,'prepareRecord',args,error);registryError=await exactError(ri,registry,'validate',[id,outcome.body],error);
+    }
+    await send('supplement-validate-'+outcome.name,registry,ri.encodeFunctionData('validate',[id,outcome.body]),outcome.valid?'0x1':'0x0');
+    report.supplement.validations.push({...outcome,typeId:id,helperError,registryError});
+   }
   }
   report.helperArtifactHash=E.keccak256(readFileSync(root+'contracts/test/fixtures/canonical-preparation-helper.json'));
   report.helperInputHash=E.keccak256(E.toUtf8Bytes(JSON.stringify(helperArtifact.input)));
+  report.compilerOutput=helperArtifact.compilerOutput;
   report.registryArtifact={abi:registryArtifact.abi,metadata:registryArtifact.metadata,bytecode:registryArtifact.bytecode,deployedBytecode:registryArtifact.deployedBytecode};
   if(finalSource)assertFinalSource(finalSource);
   await node.stop();return plain(report);
@@ -151,12 +203,13 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const codePath=dest+'.code.json.gz';if(!small)assert(!existsSync(codePath));
  const report=await probe({small,finalSource});
  if(!small){
-  const codes={format:'efs21-canonical-registry-code/1',sourceCommit:report.sourceCommit,deployments:report.deployments,registryArtifact:report.registryArtifact,groups:report.groups.filter(g=>!g.refused)};
+  const codes={format:'efs21-canonical-registry-code/1',sourceCommit:report.sourceCommit,deployments:report.deployments,registryArtifact:report.registryArtifact,groups:report.groups.filter(g=>!g.refused),supplement:report.supplement};
   const payload=JSON.stringify(codes);assert(Buffer.byteLength(payload)<16*1024*1024);
   const compressed=gzipSync(payload);assert(compressed.length<4*1024*1024);
   report.codeInventory={file:basename(codePath),keccak256:E.keccak256(compressed),uncompressedBytes:Buffer.byteLength(payload),compressedBytes:compressed.length};
   report.deployments=report.deployments.map(({code,...row})=>row);delete report.registryArtifact;
   report.groups=report.groups.map(({compiled,codes,...row})=>({...row,...(codes?{codes:codes.map(({code,...c})=>c)}:{})}));
+  if(report.supplement)report.supplement.groups=report.supplement.groups.map(({compiled,codes,...row})=>({...row,...(codes?{codes:codes.map(({code,...c})=>c)}:{})}));
   const encoded=JSON.stringify(report,null,2)+'\n';assert(Buffer.byteLength(encoded)<8*1024*1024);
   writeFileSync(codePath,compressed,{flag:'wx'});writeFileSync(dest,encoded,{flag:'wx'});
  }

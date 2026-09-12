@@ -84,6 +84,12 @@
       }
     }
   },
+  "compilerOutput": {
+    "file": "canonical-preparation-output.json.gz",
+    "keccak256": "0xe273a046ce871943a90f187c7d551ed0cc99082ee4d0150d43257dd3f0f24c60",
+    "uncompressedBytes": 2052833,
+    "compressedBytes": 206405
+  },
   "abi": [
     {
       "inputs": [],
