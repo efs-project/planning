@@ -53,4 +53,6 @@ Attack wrong Type/length, empty/zero success, large returndata, revert/budget ex
 
 This experiment is a high-leverage follow-up to the active [[2026-09-11-efs21-overnight|cost work]]. It does not interrupt the currently owned compiler/receipt gate or select permanent bytes. Candidate implementation belongs in the existing disposable profile/adapter layer; its result will determine whether any generic Core extension is actually needed.
 
+The source-grounded [[2026-09-12-efs21-live-files-plan|implementation plan]] uses existing native Record/Files contracts unchanged, with a distinct descriptor Type and separate read adapter. It is independently reviewed and staged, not dispatched; raw-byte admission alone does not validate descriptor semantics.
+
 Independent design/source review approved after clarifying that URL resolution is not an onchain forwarding caller. Root checked the original Plan9 paper, sysfs/9P references, primary ERC status/text, actual ERC5219 interface, and EVM static-call/block-basis specifications. No virtual-file implementation, savings measurement, protocol adoption or production deployment is claimed.
