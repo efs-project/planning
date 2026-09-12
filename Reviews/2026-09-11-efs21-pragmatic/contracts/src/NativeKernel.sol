@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {ExactTypeRegistry} from "./ExactTypeRegistry.sol";
+import {ExpandedTypeRegistry} from "./ExpandedTypeRegistry.sol";
 import {NavigationIndex} from "./NavigationIndex.sol";
 import {DiscoveryIndex} from "./DiscoveryIndex.sol";
 
@@ -86,7 +87,8 @@ contract NativeKernel {
 
     constructor() {
         navigation = new NavigationIndex();
-        types = new ExactTypeRegistry();
+        // Preserve the immutable DiscoveryIndex's typed external seam.
+        types = ExactTypeRegistry(address(new ExpandedTypeRegistry()));
         discovery = new DiscoveryIndex(navigation, types);
         discoveryCodeHash = address(discovery).codehash;
     }

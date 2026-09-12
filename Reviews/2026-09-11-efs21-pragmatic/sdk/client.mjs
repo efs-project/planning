@@ -71,6 +71,34 @@ export function createClient(E, config, {onAction = () => {}, initialActions = [
     if (E.getBytes(bytes).length > 4032) throw Error('Payload exceeds 4032-byte inline profile');
     return abi.encode(['bytes'],[bytes]);
   };
+  // Exact Types choose representation; unknown Types retain record() byte access only.
+  const representation = typeId => {
+    validateId(typeId);
+    if(typeId.toLowerCase()===config.bytesType?.toLowerCase())return 'canonical';
+    if(typeId.toLowerCase()===config.rawType?.toLowerCase())return 'raw';
+    return null;
+  };
+  const payloadLimit = typeId => {
+    const kind=representation(typeId);
+    if(!kind)throw Error('Unknown Type payload codec; exact record bytes only');
+    return kind==='raw'?4096:4032;
+  };
+  const encodePayload = (typeId,bytes) => {
+    const limit=payloadLimit(typeId);
+    if(E.getBytes(bytes).length>limit)throw Error(`Payload exceeds ${limit}-byte inline profile`);
+    return representation(typeId)==='raw'?E.hexlify(bytes):body(bytes);
+  };
+  const decodePayload = (typeId,exact) => {
+    const kind=representation(typeId);
+    if(!kind)throw Error('Unknown Type payload codec; exact record bytes only');
+    if(E.getBytes(exact).length>4096)throw Error('Body exceeds 4096-byte inline profile');
+    if(kind==='raw')return E.getBytes(exact);
+    try{
+      const payload=abi.decode(['bytes'],exact)[0];
+      if(body(payload)!==E.hexlify(exact))throw Error('noncanonical framing');
+      return E.getBytes(payload);
+    }catch{throw Error('Invalid canonical ABI bytes body');}
+  };
   const recordId = (typeId, exactBody) => E.keccak256(abi.encode(['bytes32','bytes32','bytes'],[E.id('EFS21_RECORD_V1'),validateId(typeId),exactBody]));
   async function record(id,basis) {
     validateId(id); const result = await call('readRecord',[id],basis);
@@ -159,5 +187,5 @@ export function createClient(E, config, {onAction = () => {}, initialActions = [
     }else return action;
     action.status='COMMITTED';action.basis=basis;return action;
   }
-  return {rpc,observe,checkBasis,call,list,record,recordId,body,write,sendData,reconcile,unresolved,metrics,iface,config};
+  return {rpc,observe,checkBasis,call,list,record,recordId,body,representation,payloadLimit,encodePayload,decodePayload,write,sendData,reconcile,unresolved,metrics,iface,config};
 }

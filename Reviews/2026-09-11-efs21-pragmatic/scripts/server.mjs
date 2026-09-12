@@ -10,14 +10,18 @@ const routes={
   '/ethers.js':['../2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.min.js','text/javascript'],
   '/cost-ledger.mjs':['../2026-09-09-files-browser-mvp/web/cost-ledger.mjs','text/javascript'],
 };
-export async function withServer(config,action,{port=0}={}) {
-  const server=createServer(async(req,res)=>{
+export async function withServer(config,action,{port=0,loadAsset=path=>readFile(ROOT+path)}={}) {
+  // Freeze this world's closed assets and serialized config before opening a socket.
+  // Copy loader buffers too: later source/config mutations cannot alter a live demo.
+  const configSnapshot=JSON.stringify(config);
+  const assets=new Map(await Promise.all(Object.entries(routes).map(async([url,[path,type]])=>[url,{type,body:Buffer.from(await loadAsset(path))}])));
+  const server=createServer((req,res)=>{
     res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
     if(req.headers.host!==`127.0.0.1:${server.address().port}`){res.writeHead(403);res.end('Loopback host required');return;}
     if(req.method!=='GET'){res.writeHead(405);res.end('Static GET only');return;}
-    if(req.url==='/config.json'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify(config));return;}
-    const route=routes[req.url];if(!route){res.writeHead(404);res.end('Not found');return;}
-    try{res.setHeader('Content-Type',route[1]);res.end(await readFile(ROOT+route[0]));}catch{res.writeHead(500);res.end('Static asset unavailable');}
+    if(req.url==='/config.json'){res.setHeader('Content-Type','application/json');res.end(configSnapshot);return;}
+    const asset=assets.get(req.url);if(!asset){res.writeHead(404);res.end('Not found');return;}
+    res.setHeader('Content-Type',asset.type);res.end(asset.body);
   });
   await new Promise((ok,no)=>{server.once('error',no);server.listen(port,'127.0.0.1',ok);});
   try{return await action(`http://127.0.0.1:${server.address().port}`);}finally{server.closeAllConnections();await new Promise(ok=>server.close(ok));}

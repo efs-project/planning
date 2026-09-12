@@ -54,19 +54,22 @@ export async function withWorld(action,{watchdogMs=300000,buildFirst=true,kernel
     async function deploy(name,args=[]) {const a=name==='NativeKernel'?selectedKernel:artifact(name),i=new E.Interface(a.abi),data=a.bytecode.object+i.encodeDeploy(args).slice(2);assert((data.length-2)/2<=49152);return pin(name,(await rawSend('deploy '+name,data)).contractAddress);}
     const kernel=await deploy('NativeKernel'),ki=new E.Interface(artifact('NativeKernel').abi);
     const point=async (method)=>ki.decodeFunctionResult(method,await rpc('eth_call',[{to:kernel,data:ki.encodeFunctionData(method)},'latest']))[0];
-    const registry=await pin('ExactTypeRegistry',await point('types'));await pin('NavigationIndex',await point('navigation'));
+    const registry=await pin(kernelArtifact==='current'?'ExpandedTypeRegistry':'ExactTypeRegistry',await point('types'));await pin('NavigationIndex',await point('navigation'));
     if(kernelArtifact==='current') await pin('DiscoveryIndex',await point('discovery'));
     const bytesValidator=await deploy('BytesValidator'),uintValidator=await deploy('Uint256Validator');
     const ti=new E.Interface(artifact('ExactTypeRegistry').abi),abi=E.AbiCoder.defaultAbiCoder();
     async function register(label,validator) {const descriptor=E.toUtf8Bytes(label),codeHash=E.keccak256(await rpc('eth_getCode',[validator,'latest']));await rawSend('register '+label,ti.encodeFunctionData('register',[descriptor,validator]),registry);return E.keccak256(abi.encode(['bytes32','bytes32','bytes32'],[E.id('EFS21_TYPE_V1'),E.keccak256(descriptor),codeHash]));}
     const bytesType=await register('EFS21 canonical ABI bytes v1',bytesValidator),quoteType=await register('EFS21 exact ABI uint256 v1',uintValidator);
     const producer=await deploy('QuoteProducer',[kernel,quoteType]),consumer=await deploy('QuoteReader'),mapping=await deploy('PlainQuoteMapping');
+    // Append new setup after old deployments so historical producer identities remain comparable.
+    const rawType=kernelArtifact==='current'?await register('EFS21 exact raw bytes v1',await deploy('RawBytesValidator')):undefined;
     const config={rpc:rpcURL,chainId:'31337',genesisHash:(await rpc('eth_getBlockByNumber',['0x0',false])).hash,kernel,codeHash:runtimes.NativeKernel.codeHash,devPrivateKey:key,namespace:wallet.address,bytesType,quoteType,producer,consumer,abi:artifact('NativeKernel').abi,consumerAbi:artifact('QuoteReader').abi};
+    if(rawType)config.rawType=rawType;
     config.deploymentBlockNumber=setup[0].receipt.blockNumber;config.deploymentBlockHash=setup[0].receipt.blockHash;
     const actions=[],client=createClient(E,config,{onAction:a=>{const i=actions.findIndex(x=>x.hash===a.hash);if(i<0)actions.push(a);else actions[i]=a;}});
     const git=spawnSync('git',['rev-parse','HEAD'],{cwd:ROOT,encoding:'utf8'}).stdout.trim();
     const sourcePins=Object.fromEntries(readdirSync(`${ROOT}contracts/src`).filter(p=>p.endsWith('.sol')).map(p=>[p,E.keccak256(readFileSync(`${ROOT}contracts/src/${p}`))]));
-    for(const name of ['NativeKernel','NavigationIndex','DiscoveryIndex','ExactTypeRegistry','BytesValidator','Uint256Validator','QuoteProducer','QuoteReader','PlainQuoteMapping']){
+    for(const name of ['NativeKernel','NavigationIndex','DiscoveryIndex','ExactTypeRegistry','ExpandedTypeRegistry','RawBytesValidator','PayloadConsumer','BytesValidator','Uint256Validator','QuoteProducer','QuoteReader','PlainQuoteMapping']){
       for(const [path,pin] of Object.entries(artifact(name).metadata.sources))assert.equal(E.keccak256(readFileSync(`${ROOT}contracts/${path}`)),pin.keccak256,'artifact matches source '+path);
     }
     const supportPins=Object.fromEntries(['scripts','sdk','web','test'].flatMap(dir=>readdirSync(ROOT+dir).map(p=>[dir+'/'+p,E.keccak256(readFileSync(ROOT+dir+'/'+p))])));
