@@ -14,7 +14,7 @@ After the active native packing and real Files read-batching tasks:
 2. Extend that comparison to one shared immutable byte block for an envelope and its new Record bodies.
 3. Extract full-C0 posting storage without dropping any query family, establishing a separate-contract control. Then measure coarser calls and configurable families separately.
 
-These are proposed follow-ons requiring bounded implementation plans. They do not authorize silent feature removal or establish that all three will improve gas. The native experiment already has separate required navigation/configurable discovery, but it is a narrower Files profile, not full-v2 parity.
+These are proposed follow-ons, not authority for silent feature removal or evidence that all three improve gas. The [[2026-09-11-efs21-envelope-storage-plan|first envelope-only implementation plan]] is now independently reviewed and staged, not dispatched. The native experiment already has separate required navigation/configurable discovery, but it is a narrower Files profile, not full-v2 parity.
 
 ## Shared immutable bytes: a concrete bounded opportunity
 
@@ -44,7 +44,17 @@ Bound metadata before allocation and validate pointer, STOP prefix and range con
 
 Current full-C0 scalar `getRecord` validates metadata/bounds but does **not** rehash body/RecordId; Binding reads do. If the new backend adds universal content-hash verification, measure a slot-backed integrity control too. Comparing stronger code reads against weaker slot reads without qualification would misattribute cost. Dense, tiny, empty and zero-heavy cases must all remain in the experiment.
 
-A smaller independent read optimization is metadata-only access for dedup/reference checks that currently ABI-copy complete bodies merely to inspect ordinal/TypeId. This changes no retained storage; magnitude is unmeasured.
+A smaller independent read optimization is metadata-only access for dedup/reference checks that currently ABI-copy complete bodies merely to inspect ordinal/TypeId. A subsequent source pass at `ab13d89` localized these to `StateKernel` Record dedup (264–266), Record/Object references (364–371), and Type dependency existence (400–403), which also copies a whole compiled cache to test one ordinal. Actual preparation, active Withdrawal parsing, public body reads and existing-group cache equality still need their bytes. This changes no retained storage; magnitude is unmeasured.
+
+## Packed liveness counter: source-viable, not yet implemented
+
+An independent source pass at `ab13d89` found 128 unused bits beside the two uint64 Record ordinals. A physical RecordCell could keep the logical/public four-field RecordRow ABI while adding a uint64 live-occurrence count in bits128–191 of that same metadata word; bits192–255 stay reserved. No new storage slot is structurally required. Compiler layout, actual update cost and read/write accessors still need tests. Logical-row assignment must preserve counter bits, and a counter update must not rewrite the immutable body.
+
+The smallest safe experiment retains family3 as an oracle: first maintain a shadow counter alongside its existing head, then let counter plus first-ever Record metadata drive family2 while asserting agreement after every transition. The existing first-admission ordinal distinguishes first creation from revival; zero liveness alone cannot. Apply updates once per new occurrence, not per new Record, including duplicate RecordIds in different selected leaves, partial envelopes and mixed add/withdraw carriages. All-ACTIVE retries write nothing. The valid ordinal/liveness ceiling is `2^48−2`, not uint64.max, and the direct arm must use staged admission high-water while persisted counts are still uncommitted. Zero underflow and false-zero corruption must refuse in the shadow arm; no wrapping/clamping or old-state zero-field assumption.
+
+Removing family3 is a later, **differently qualified** arm. Current checked audit paging already supports only families8/10; family3 is nevertheless physically retained, raw-enumerable and required by the independent full-inventory reconstructor and selected future ordered by-Record query semantics. A current counter cannot provide historical liveness, ordered occurrence history or their continuation guarantees. Removal therefore changes raw inventories and the reconstruction/query profile, even though checked family3 paging was already UNSUPPORTED.
+
+A replacement would need a bounded origin-contiguous admission scan at one pinned block/high-water, joining Envelope membership, Record identity and lifecycle to recover ordered occurrences/first anchor/liveness. It must return PARTIAL when coverage is incomplete and cannot silently use today's counter for an old-H answer. Preserve the old logical family3 reconstruction as oracle evidence while clearly labelling its physically absent storage. No counter-removal saving or design adoption is claimed yet.
 
 ## Separate full-C0 posting storage
 
