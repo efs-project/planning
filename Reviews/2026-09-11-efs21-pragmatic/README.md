@@ -2,6 +2,14 @@
 
 **Standing:** isolated candidate / cost experiment, not adopted EFS v2 architecture or a production client. See [contract interface](contracts-interface.md) and [measurement boundaries](measurement.md). The original native-profile baseline below is retained separately from the [same-profile history-storage optimization](evidence/history-storage.md). A full-v2/control implementation is not included in this native browser arm.
 
+## Native Record boundary checkpoint
+
+Current source `62651ca9` separates an author-neutral `NativeRecordKernel` and mandatory unique-Record inventory from the native-caller Files facade. Direct ingestion creates no File, namespace, history or authorship claim. Existing Files tuples, IDs and operations remain; `RecordStored` now originates only from the Record kernel, and Record-inventory cursors name the new source. The hybrid body policy is unchanged. The SDK qualifies the complete selected source-backed runtime/link/writer/validator graph at one checked block, not just the facade hash; this remains an RPC observation, not a chain-state proof.
+
+The fresh two-world pair records 60 matched actions and 31 setup transactions per arm. Tiny/dense-max/sparse-max fresh Files edits regress by **5,997 / 1,928 / 6,783 gas**; direct new Record admissions save **538 / 5,412 / 536**. Main deployment adds **885,421 gas**. Qualification uses **24 control / 33 candidate RPC requests** with the stronger current SDK in both arms; it is not an old-client speed comparison. [Exact costs, full graph provenance, rollback evidence, RED/GREEN and limits](evidence/kernel-boundary.md). Final pre-freeze gates: **123 Forge / 37 serial Node/browser tests**.
+
+Historical checkpoint sections below retain their original source-specific results. `--frozen-replay` explicitly selects historical artifacts; no older monolith is silently replaced with current split code. Neither running native nor Fable demo was refreshed or migrated. This is a prototype boundary extraction, not full-v2 parity or protocol adoption.
+
 ## Run locally
 
 From this experiment directory, with Forge/Anvil and Solidity 0.8.30 available:
@@ -13,7 +21,7 @@ node scripts/demo.mjs
 
 The canonical full-suite command uses `--test-concurrency=1`: only one new managed world / Forge build runs at a time. The original benchmark ran the same finite workload twice on separate owned nodes, saving compact [run 1](evidence/benchmark-1.json) and [run 2](evidence/benchmark-2.json), then closing each node and removing its exact cache directory. Historical benchmark scripts overwrite their named outputs; do not casually rerun them on a later checkpoint and replace the retained evidence. No full traces are retained. The demo prints a separate loopback URL; Ctrl-C/SIGTERM closes its server and managed node. An 18-hour watchdog keeps an evening launch available through the morning checkpoint, then terminates it. Finite native benchmark/test nodes retain their five-minute watchdog. No periodic mining is enabled: history grows only with local actions. The old Files demo/port is untouched. The demo process stays foreground; do not treat it as production hosting.
 
-Dependencies reuse the installed pinned ethers 6.15.0 / Playwright bundle in `../2026-09-04-mvp-rehearsal/node_modules`; no new framework or installation. Forge builds this candidate's own project with ordinary EIP-170 size checks and 16,777,216 per-transaction/block gas ceiling. `NativeKernel` deploys its own navigation and registry internally; their costs are included in its setup receipt, not separately fabricated receipts.
+Dependencies reuse the installed pinned ethers 6.15.0 / Playwright bundle in `../2026-09-04-mvp-rehearsal/node_modules`; no new framework or installation. Forge builds this candidate's own project with ordinary EIP-170 size checks and 16,777,216 per-transaction/block gas ceiling. `NativeKernel` deploys the Record kernel (which creates registry, inventory and helper), then navigation and discovery; all internal deployments are included in its setup receipt, not separately fabricated receipts.
 
 ## What the page does
 
@@ -95,11 +103,11 @@ The separate metadata-only pair at source `f43501a` keeps both arms always-code.
 
 ### Bounded hybrid-body checkpoint
 
-Current experimental source chooses code or fixed-capacity sparse words using exact body length and masked nonzero-word occupancy. Its policy was calibrated before the final source freeze; public ABI/IDs, validation, indexes and Files semantics stay unchanged. [Four-arm final evidence at source/support `310c8b83`](evidence/hybrid-body.md) includes 736 signed transactions and keeps the earlier packed control frozen.
+The pre-extraction hybrid checkpoint chooses code or fixed-capacity sparse words using exact body length and masked nonzero-word occupancy. Its policy was calibrated before that final source freeze; public ABI/IDs, validation, indexes and Files semantics stayed unchanged. [Four-arm final evidence at source/support `310c8b83`](evidence/hybrid-body.md) includes 736 signed transactions and keeps the earlier packed control frozen.
 
 The result is mixed: quote update **243,249 → 226,667 gas** and zero-filled raw4096 admission **990,892 → 200,375** improve. Dense raw4032 edit **1,110,375 → 1,152,848** and raw41 edit **241,339 → 242,500** regress because code winners still pay the scan. One paid read of the word-backed zero-filled4096 body rises **85,373 → 396,952**. All regressions and the 5-gas physical-path misselection at the exact policy tie remain visible; no lifetime read-count assumption or universal saving is claimed.
 
-`current` now means the actual hybrid, not always-code. Legacy body/packed scripts refuse their default selection before starting worlds; `--frozen-replay` explicitly chooses their original exact code artifacts and uses new exclusive output paths. The live native browser remains its snapshotted `c088363` source; neither it nor Fable was refreshed. This is fresh-genesis prototype evidence, not an adopted layout, migration or generic ingestion kernel.
+At that checkpoint, `current` meant the monolithic hybrid, not always-code; it now means the split hybrid described above. Legacy body/packed/hybrid scripts refuse their default selection before starting worlds; `--frozen-replay` explicitly chooses their original exact artifacts and uses new exclusive output paths. The live native browser remains its snapshotted `c088363` source; neither it nor Fable was refreshed. The historical hybrid result alone was not a generic ingestion kernel.
 
 ### Separate full-C0 allocation experiment
 
