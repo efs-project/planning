@@ -48,6 +48,8 @@ Reuse the existing eight-name, two-author, two-child-node mounted directory. Fro
 
 Controller-approved scheduling-test maintenance: the older `eb14059` scheduling comparison requires identical request multisets and is not a batching comparison. Clone its expected manifest and omit `readCapabilities` for both arms, without mutating shared fixture state; use that same manifest in the retained report. Keep every request/outcome/budget/fairness assertion and its explicit four-wide limit, and label the workload legacy scalar scheduling. The new anchor suite/evidence retains real batch-capable metadata. No production transport/scheduler behavior changes are authorized by this clarification.
 
+**Bounded regression selection:** inspect each selected test and its helper path before execution; do not run broad upgrade/browser globs. Exclude `files-browser-mvp/test/tag-joins.test.mjs` (large diagnostic with debug_traceCall), plus upgrade `tag-current.test.mjs` and `validation-frontier.test.mjs` (debug_traceTransaction). A first overly broad worker run launched these; it was stopped, finite caches cleaned and rewritten historical JSON restored. Do not use its trace-derived output as task evidence or count interrupted diagnostics as successful tests. The report must enumerate actual bounded rerun files/counts and exclusions. No test is weakened or production behavior changed by keeping diagnostics out of this gate.
+
 ## Later, not included
 
 Anchor batching alone leaves occurrence, historical Binding, selected-entry, Lens/charter and seal calls. Wider hydration rounds, grouped Lens execution and onchain listing aggregation need separate work budgets and measurements. This task must establish a real browse gain without silently skipping those obligations.

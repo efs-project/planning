@@ -8,7 +8,7 @@
 
 **Tech Stack:** existing Solidity0.8.30/optimizer200/via-IR/Cancun, Foundry and serial ethers/Chromium harness; no new dependency.
 
-**Spec:** [[2026-09-11-efs21-overnight]], [[2026-09-11-efs21-packed-presence-plan]]. Read-only expert preflight checked packed source`f43501a`; root checked metadata/admission seams. Dense-code versus zero-heavy counterexamples are retained at`58e61c4`. Packing source/evidence`f43501a`/`b8896a7` completed independent Approved/root99Forge27Node/format/sizes gates; root must recheck the exact clean base before dispatch.
+**Spec:** [[2026-09-11-efs21-overnight]], [[2026-09-11-efs21-packed-presence-plan]]. Read-only expert preflight checked packed source`f43501a`; root checked metadata/admission seams. Dense-code versus zero-heavy counterexamples are retained at`58e61c4`. Packing source/evidence`f43501a`/`b8896a7` completed independent Approved/root99Forge27Node/format/sizes gates. Later`03f0160` changes only the historical report's integrity-comparison wording, not code/evidence; root must recheck the exact clean base before dispatch.
 
 ## Global constraints
 
