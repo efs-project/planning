@@ -71,6 +71,10 @@ Some differences are deliberate profile choices; others are merely unimplemented
 
 A read-only engineering review found a concentrated full-C0 extraction seam: journal storage access plus two posting read primitives. That offers a later **same-semantics, separate-storage control**. It should preserve every family first and measure the extra call overhead before dropping mirrors/counters or changing coverage claims. Bytecode size and deployment/qualification changes are its early gates.
 
+Native authority does not mean EOA-only: the demonstrated producer contract owns its namespace, not the EOA invoking it. A smart account could similarly own a namespace and manage its own keys/permissions; that wallet integration and recovery workflow have not been tested here. This still does not supply EFS's portable Principal/authorship evidence or cross-deployment identity model.
+
+The smaller candidate should also be read as a **Files profile**, not a filesystem-shaped replacement for every kind of EFS data. Its author-neutral typed-record storage/validation can be extracted into a generic ingestion contract, with Files ownership/history/path state in a profile facade and required indexes separately stored. An extraction-only experiment can preserve the same browser API and measure the extra call cost. Full structural Type validation and compact portable authored admission then need distinct measured arms; neither is established by today's two-validator native profile.
+
 ## Logs are useful, but a different read surface
 
 One premise in the discussion needs narrowing: light-client verification of logs is not fundamentally impossible. Ethereum commits receipts into the block's receipt trie, and receipts contain logs; receipt inclusion can therefore be checked against an authenticated header with the required proof data. This is distinct from trusting an `eth_getLogs` response. [EIP-2718 receipt commitment](https://eips.ethereum.org/EIPS/eip-2718#receipts).
