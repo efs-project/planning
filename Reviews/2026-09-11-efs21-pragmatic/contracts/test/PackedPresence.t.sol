@@ -5,28 +5,30 @@ import {NativeKernel} from "../src/NativeKernel.sol";
 import {NavigationIndex} from "../src/NavigationIndex.sol";
 
 contract PackedPresenceTest is BodyStorageTest {
-    // forge inspect NativeKernel storage-layout: records root 3, reserved root 4,
-    // locations root 5. address (20) + uint16 (2) puts explicit presence at byte 22.
+    // NativeRecordKernel records root 0: address (20) + uint16 (2) puts presence at byte 22.
     uint256 constant PRESENT = uint256(1) << 176;
 
     function metadata(bytes32 id) internal pure returns (bytes32) {
-        return bytes32(uint256(keccak256(abi.encode(id, uint256(3)))) + 1);
-    }
-
-    function legacy(bytes32 id) internal pure returns (bytes32) {
-        return keccak256(abi.encode(id, uint256(4)));
+        return bytes32(uint256(keccak256(abi.encode(id, uint256(0)))) + 1);
     }
 
     // Catches a separate existence SSTORE, and helper/inventory growth on dedup.
-    function testPackedAdmissionLeavesLegacyEmptyAndDuplicateUnchanged() public {
-        forceCode(); // Exact tag-zero encoding is the preserved code backend, not the selector.
+    function testPackedAdmissionAndDuplicateUnchanged() public {
         uint64 nonce = bvm.getNonce(writer);
-        bytes32 id = kernel.storeRecord(rawType, hex"123456");
-        require(hvm.load(address(kernel), legacy(id)) == 0, "legacy presence must remain zero");
-        uint256 word = uint256(hvm.load(address(kernel), metadata(id)));
-        eq(word, uint256(uint160(bvm.computeCreateAddress(writer, nonce))) | (uint256(3) << 160) | PRESENT);
-        eq(kernel.storeRecord(rawType, hex"123456"), id);
-        eq(uint256(hvm.load(address(kernel), metadata(id))), word);
+        bytes32 id = kernel.storeRecord(
+            rawType,
+            hex"123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456"
+        );
+        uint256 word = uint256(hvm.load(address(kernel.recordKernel()), metadata(id)));
+        eq(word, uint256(uint160(bvm.computeCreateAddress(writer, nonce))) | (uint256(192) << 160) | PRESENT);
+        eq(
+            kernel.storeRecord(
+                rawType,
+                hex"123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456123456"
+            ),
+            id
+        );
+        eq(uint256(hvm.load(address(kernel.recordKernel()), metadata(id))), word);
         eq(bvm.getNonce(writer), nonce + 1);
         eq(kernel.navigation().typeInventory(rawType, NavigationIndex.Cursor(0, 0, 0), 64).ids.length, 1);
     }
@@ -35,14 +37,14 @@ contract PackedPresenceTest is BodyStorageTest {
     function testClearedPresenceIsMissingBeforeMalformedMetadata() public {
         bytes32 id = kernel.storeRecord(rawType, hex"abcd");
         bytes32 slot = metadata(id);
-        bytes32 original = hvm.load(address(kernel), slot);
-        hvm.store(address(kernel), slot, bytes32(uint256(original) & ~PRESENT));
+        bytes32 original = hvm.load(address(kernel.recordKernel()), slot);
+        hvm.store(address(kernel.recordKernel()), slot, bytes32(uint256(original) & ~PRESENT));
         vm.expectRevert(NativeKernel.MissingRecord.selector);
         kernel.readRecord(id);
-        hvm.store(address(kernel), slot, bytes32(uint256(65535) << 160));
+        hvm.store(address(kernel.recordKernel()), slot, bytes32(uint256(65535) << 160));
         vm.expectRevert(NativeKernel.MissingRecord.selector);
         kernel.readRecord(id);
-        hvm.store(address(kernel), slot, original);
+        hvm.store(address(kernel.recordKernel()), slot, original);
         eq(kernel.readRecord(id).body, hex"abcd");
     }
 
@@ -50,15 +52,14 @@ contract PackedPresenceTest is BodyStorageTest {
         bytes32 id = bytes32(uint256(1234));
         vm.expectRevert(NativeKernel.MissingRecord.selector);
         kernel.readRecord(id);
-        hvm.store(address(kernel), metadata(id), bytes32(PRESENT));
+        hvm.store(address(kernel.recordKernel()), metadata(id), bytes32(PRESENT));
         vm.expectRevert(NativeKernel.CorruptRecord.selector);
         kernel.readRecord(id);
     }
 
     function testEmptyPackedPresenceAndLateFailureRestoreAllState() public {
         bytes32 empty = kernel.storeRecord(rawType, "");
-        yes((uint256(hvm.load(address(kernel), metadata(empty))) & PRESENT) != 0);
-        eq(hvm.load(address(kernel), legacy(empty)), bytes32(0));
+        yes((uint256(hvm.load(address(kernel.recordKernel()), metadata(empty))) & PRESENT) != 0);
         eq(kernel.readRecord(empty).body, bytes(""));
         bytes32 root = kernel.ensureRoot();
         bytes32 file = kernel.createFile(root, "kept", rawType, hex"01");
@@ -72,9 +73,8 @@ contract PackedPresenceTest is BodyStorageTest {
         kernel.editFile(file, 1, rawType, hex"02");
         vm.etch(discovery, code);
         eq(snapshot(root, file), beforeState);
-        eq(hvm.load(address(kernel), metadata(id)), bytes32(0));
-        eq(hvm.load(address(kernel), legacy(id)), bytes32(0));
-        eq(hvm.load(address(kernel), keccak256(abi.encode(id, uint256(3)))), bytes32(0));
+        eq(hvm.load(address(kernel.recordKernel()), metadata(id)), bytes32(0));
+        eq(hvm.load(address(kernel.recordKernel()), keccak256(abi.encode(id, uint256(0)))), bytes32(0));
         eq(next.code.length, 0);
         vm.expectRevert(NativeKernel.MissingRecord.selector);
         kernel.readRecord(id);

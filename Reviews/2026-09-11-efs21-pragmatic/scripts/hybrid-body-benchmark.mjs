@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {existsSync,writeFileSync} from 'node:fs';
+import {existsSync,readFileSync,writeFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {E,ROOT,artifact,build,withWorld,observeBody} from './world.mjs';
@@ -90,7 +90,10 @@ async function lateFailures(w){
     const before=await state(),discovery=w.provenance.runtimes.DiscoveryIndex.address,original=await c.rpc('eth_getCode',[discovery,'latest']);
     if(fault==='discovery')await c.rpc('anvil_setCode',[discovery,'0x00']);
     try{
-      await assert.rejects(()=>fault==='name'?c.write('createFile',[root,E.toUtf8Bytes('raw-41-duplicate'),w.config.rawType,body],`hybrid refuse ${pattern} ${fault}`):c.write('editFile',[file,1,w.config.rawType,body],`hybrid refuse ${pattern} ${fault}`),/reverted/i);
+      if(fault==='discovery'){
+        await assert.rejects(()=>c.write('editFile',[file,1,w.config.rawType,body]),/identity mismatch/);
+        await w.faultWrite('editFile',[file,1,w.config.rawType,body],`hybrid refuse ${pattern} ${fault}`);
+      }else await assert.rejects(()=>c.write('createFile',[root,E.toUtf8Bytes('raw-41-duplicate'),w.config.rawType,body],`hybrid refuse ${pattern} ${fault}`),/reverted/i);
     }finally{if(fault==='discovery')await c.rpc('anvil_setCode',[discovery,original]);}
     const a=w.actions.at(-1),after=await state();assert.deepEqual(after,before);await assert.rejects(()=>c.record(id));
     a.workload={body,pattern,fault,id};a.independentEffect={status:'VERIFIED_LATE_ROLLBACK',before,after};
@@ -98,6 +101,7 @@ async function lateFailures(w){
 }
 
 export async function finalWorkload(w){
+  assert(!w.provenance.kernelArtifact.capabilities.split,'historical hybrid workload requires an explicit monolithic profile');
   const whole=await workload(w,{allowHybrid:true,sweep:false});
   const matrixResult=await matrixWorkload(w,{final:true});
   await lateFailures(w);await receipts(w);
@@ -105,7 +109,9 @@ export async function finalWorkload(w){
 }
 
 export function compareFinalArms(arms){
-  assert.deepEqual(arms.map(a=>a.selection),['baseline-f43501a','forced-code','forced-words','current']);
+  assert(['current','baseline-7db38cd'].includes(arms[3]?.selection));
+  assert(!arms[3].provenance.kernelArtifact.capabilities.split,'historical hybrid comparison cannot select split current');
+  assert.deepEqual(arms.map(a=>a.selection),['baseline-f43501a','forced-code','forced-words',arms[3].selection]);
   for(const arm of arms)assert.equal(arm.actions.length,arms[0].actions.length,'same finite action count');
   const comparison=arms[0].actions.map((a,i)=>{
     const rows=arms.map(arm=>arm.actions[i]);
@@ -124,15 +130,14 @@ export function compareFinalArms(arms){
   return comparison;
 }
 
-export async function benchmarkHybrid(){
+export async function benchmarkHybrid({frozenReplay=false}={}){
+  assert(frozenReplay,'current is split; use explicit frozenReplay / --frozen-replay for the reviewed monolithic hybrid');
   const status=spawnSync('git',['status','--porcelain','--','contracts/src','contracts/test','scripts','sdk','web','test'],{cwd:ROOT,encoding:'utf8'});
   assert.equal(status.status,0);assert.equal(status.stdout.trim(),'','final receipts require committed source/support freeze');
-  const inspection=spawnSync('forge',['inspect','--force','NativeKernel','storage-layout','--json'],{cwd:ROOT+'contracts',encoding:'utf8',timeout:180000});
-  assert.equal(inspection.status,0,inspection.stderr);
-  const storageLayout=JSON.parse(inspection.stdout);
+  const storageLayout=JSON.parse(readFileSync(ROOT+'contracts/test/fixtures/native-kernel-7db38cd.json')).storageLayout;
   assert.equal(storageLayout.storage.find(s=>s.label==='sparseBodyWords').slot,'6');
   build();const arms=[];
-  for(const kernelArtifact of ['baseline-f43501a','forced-code','forced-words','current'])arms.push(await withWorld(finalWorkload,{kernelArtifact,buildFirst:false,watchdogMs:300000}));
+  for(const kernelArtifact of ['baseline-f43501a','forced-code','forced-words','baseline-7db38cd'])arms.push(await withWorld(finalWorkload,{kernelArtifact,buildFirst:false,watchdogMs:300000}));
   return {createdAt:new Date().toISOString(),standing:'Fresh-genesis four-arm native hybrid experiment; no adoption or lifetime optimum',storageLayout,policy:{wordsNonzero:22300,wordsLoop:240,codeFixed:33500,codeByte:200,tie:'code',scan:'full masked word scan on new records only; forced overrides keep the loop in observed compiled receipts, not an isolated selector-cost control'},limits:{runtime:24576,initcode:49152,body:4096,transactionAndBlockGas:16777216},arms,comparison:compareFinalArms(arms)};
 }
 
@@ -153,9 +158,9 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
   }else{
   const calibration=process.argv.includes('--calibrate');
   assert(calibration||process.argv.includes('--final'),'choose explicit --calibrate or --final');
-  assert(!existsSync(ROOT+`evidence/${calibration?'hybrid-calibration':'hybrid-body-final'}.json`),'exclusive evidence path already exists; refuse before building/worlds');
-  const result=await (calibration?calibrate():benchmarkHybrid());
-  writeFileSync(ROOT+`evidence/${calibration?'hybrid-calibration':'hybrid-body-final'}.json`,JSON.stringify(json(result),null,2)+'\n',{flag:'wx'});
+  assert(!existsSync(ROOT+`evidence/${calibration?'hybrid-calibration':'hybrid-body-frozen-replay'}.json`),'exclusive evidence path already exists; refuse before building/worlds');
+  const result=await (calibration?calibrate():benchmarkHybrid({frozenReplay:process.argv.includes('--frozen-replay')}));
+  writeFileSync(ROOT+`evidence/${calibration?'hybrid-calibration':'hybrid-body-frozen-replay'}.json`,JSON.stringify(json(result),null,2)+'\n',{flag:'wx'});
   console.log(JSON.stringify({rows:result.comparison.length,cleanup:result.arms.map(a=>a.cleanup),comparison:result.comparison.filter(r=>calibration||/quote |file raw-(41|4032) edit fresh|matrix paid read raw 4096|raw 63[678] /.test(r.label)).map(({label,costs})=>({label,gas:costs.map(c=>c.gas)}))},null,2));
   }
 }

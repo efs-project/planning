@@ -6,22 +6,22 @@ test('dropped submission and polling responses retain local hash, block writes a
   await withWorld(async w=>{
     await w.client.write('ensureRoot',[]);
     const root=(await w.client.call('rootId',[w.config.namespace])).value;
-    const original=globalThis.fetch, journal=[];let mode='submit',sends=0,expectedHash;
+    const original=globalThis.fetch, journal=[];let mode='submit',sends=0,expectedHash,submitted=false;
     globalThis.fetch=async(url,options)=>{
       const request=JSON.parse(options.body);
       if(request.method==='eth_sendRawTransaction'){
-        sends++;expectedHash=E.keccak256(request.params[0]);const response=await original(url,options);
+        sends++;expectedHash=E.keccak256(request.params[0]);const response=await original(url,options);submitted=true;
         if(mode==='submit'){await response.text();throw Error('injected lost submission response after node accepted');}return response;
       }
       if(request.method==='eth_getTransactionReceipt'&&mode==='poll')throw Error('injected interrupted polling');
-      if(request.method==='eth_call'&&mode==='verify')throw Error('injected interrupted canonical verification');
+      if(request.method==='eth_call'&&mode==='verify'&&submitted)throw Error('injected interrupted canonical verification');
       return original(url,options);
     };
     try{
       const onAction=a=>{const i=journal.findIndex(x=>x.hash===a.hash);if(i<0)journal.push(a);else journal[i]=a;};
       let c=createClient(E,w.config,{onAction});
       for(const [name,failure] of [['lost-submit','submit'],['lost-poll','poll'],['lost-verification','verify']]){
-        mode=failure;const before=sends;
+        mode=failure;submitted=false;const before=sends;
         const expectedStatus=failure==='verify'?'VERIFICATION_UNKNOWN':'SUBMISSION_UNKNOWN';
         await assert.rejects(()=>c.write('createDirectory',[root,E.toUtf8Bytes(name)]),e=>e.status===expectedStatus&&e.hash===expectedHash);
         const pending=journal.at(-1);assert.equal(pending.hash,expectedHash);if(failure==='verify')assert(BigInt(pending.gasUsed)>0n);else assert.equal(pending.gasUsed,null);assert.equal(pending.status,expectedStatus);

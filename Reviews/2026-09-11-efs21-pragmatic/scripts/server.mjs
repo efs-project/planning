@@ -7,6 +7,8 @@ const routes={
   '/app.mjs':['web/app.mjs','text/javascript'],
   '/style.css':['web/style.css','text/css'],
   '/client.mjs':['sdk/client.mjs','text/javascript'],
+  '/qualification.mjs':['sdk/qualification.mjs','text/javascript'],
+  '/source-graphs.mjs':['sdk/source-graphs.mjs','text/javascript'],
   '/ethers.js':['../2026-09-04-mvp-rehearsal/node_modules/ethers/dist/ethers.min.js','text/javascript'],
   '/cost-ledger.mjs':['../2026-09-09-files-browser-mvp/web/cost-ledger.mjs','text/javascript'],
 };

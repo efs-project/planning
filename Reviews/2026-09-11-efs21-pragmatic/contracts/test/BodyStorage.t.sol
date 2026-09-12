@@ -5,7 +5,6 @@ import {NativeKernel} from "../src/NativeKernel.sol";
 import {HistoryVm} from "./History.t.sol";
 import {NavigationIndex} from "../src/NavigationIndex.sol";
 import {BytesValidator} from "../src/ExactTypeRegistry.sol";
-import {ForcedCodeKernel} from "./fixtures/ForcedBodyKernel.sol";
 
 interface BodyVm {
     function getNonce(address) external view returns (uint64);
@@ -36,72 +35,93 @@ contract BodyStorageTest is TestBase {
         address validator;
         assembly ("memory-safe") { validator := create(0, add(creation, 32), mload(creation)) }
         rawType = kernel.types().register("EFS21 exact raw bytes v1", validator);
-        writer = bvm.computeCreateAddress(address(kernel), 4);
+        writer = address(kernel.recordKernel().bodyWriter());
     }
 
-    // Only code-object fault tests opt in; ordinary setup and semantic tests use real hybrid.
-    function forceCode() internal {
-        address validator = kernel.types().typeInfo(rawType).validator;
-        bytes memory creation = vm.getCode("ForcedBodyKernel.sol:ForcedCodeKernel");
-        address deployed;
-        assembly ("memory-safe") { deployed := create(0, add(creation, 32), mload(creation)) }
-        kernel = NativeKernel(deployed);
-        eq(kernel.types().register("EFS21 exact raw bytes v1", validator), rawType);
-        writer = bvm.computeCreateAddress(address(kernel), 4);
-    }
+    // Code faults use naturally code-selected dense payloads on the actual split facade.
 
     // Catches storage-only admission or helper creation on a dedup hit.
     function testUniqueCreatesOneHelperObjectDuplicateCreatesNone() public {
-        forceCode();
         uint64 beforeNonce = bvm.getNonce(writer);
         uint64 kernelNonce = bvm.getNonce(address(kernel));
         address pointer = bvm.computeCreateAddress(writer, beforeNonce);
-        bytes32 id = kernel.storeRecord(rawType, hex"ef0080ff");
+        bytes32 id = kernel.storeRecord(
+            rawType,
+            hex"ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ff"
+        );
         eq(bvm.getNonce(writer), beforeNonce + 1);
-        eq(pointer.code, hex"00ef0080ff");
-        eq(kernel.readRecord(id).body, hex"ef0080ff");
-        eq(kernel.storeRecord(rawType, hex"ef0080ff"), id);
+        eq(
+            pointer.code,
+            hex"00ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ff"
+        );
+        eq(
+            kernel.readRecord(id).body,
+            hex"ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ff"
+        );
+        eq(
+            kernel.storeRecord(
+                rawType,
+                hex"ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ff"
+            ),
+            id
+        );
         eq(bvm.getNonce(writer), beforeNonce + 1);
         eq(bvm.getNonce(address(kernel)), kernelNonce);
     }
 
     // A same-sized STOP-prefixed replacement must fail the exact RecordId check.
     function testWrongSameLengthCodeIsCorruptNotReturned() public {
-        forceCode();
         address pointer = bvm.computeCreateAddress(writer, bvm.getNonce(writer));
-        bytes32 id = kernel.storeRecord(rawType, hex"ef0080ff");
-        vm.etch(pointer, hex"00ef0080fe");
+        bytes32 id = kernel.storeRecord(
+            rawType,
+            hex"ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ff"
+        );
+        vm.etch(
+            pointer,
+            hex"00ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080fe"
+        );
         vm.expectRevert(bytes4(keccak256("CorruptRecord()")));
         kernel.readRecord(id);
     }
 
     function testMalformedCodeAndMetadataRefuseBeforeCopy() public {
-        forceCode();
         address pointer = bvm.computeCreateAddress(writer, bvm.getNonce(writer));
-        bytes32 id = kernel.storeRecord(rawType, hex"ef0080ff");
-        bytes[6] memory corrupt =
-            [bytes(""), hex"00", hex"00ef0080", hex"00ef0080ff00", hex"01ef0080ff", hex"00ef0080fe"];
+        bytes32 id = kernel.storeRecord(
+            rawType,
+            hex"ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ff"
+        );
+        bytes[6] memory corrupt = [
+            bytes(""),
+            hex"00",
+            hex"00ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080",
+            hex"00ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ff00",
+            hex"01ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ff",
+            hex"00ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080fe"
+        ];
         for (uint256 i; i < corrupt.length; ++i) {
             vm.etch(pointer, corrupt[i]);
             vm.expectRevert(bytes4(keccak256("CorruptRecord()")));
             kernel.readRecord(id);
         }
-        vm.etch(pointer, hex"00ef0080ff");
-        bytes32 packedSlot = bytes32(uint256(keccak256(abi.encode(id, uint256(3)))) + 1);
-        bytes32 original = hvm.load(address(kernel), packedSlot);
+        vm.etch(
+            pointer,
+            hex"00ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ff"
+        );
+        bytes32 packedSlot = bytes32(uint256(keccak256(abi.encode(id, uint256(0)))) + 1);
+        bytes32 original = hvm.load(address(kernel.recordKernel()), packedSlot);
         // Absent pointer; boundedness violation before allocation; wrong stored Type.
-        hvm.store(address(kernel), packedSlot, bytes32((uint256(4) << 160) | (uint256(1) << 176)));
+        hvm.store(address(kernel.recordKernel()), packedSlot, bytes32((uint256(128) << 160) | (uint256(1) << 176)));
         vm.expectRevert(bytes4(keccak256("CorruptRecord()")));
         kernel.readRecord(id);
         hvm.store(
-            address(kernel),
+            address(kernel.recordKernel()),
             packedSlot,
             bytes32(uint256(uint160(pointer)) | (uint256(65535) << 160) | (uint256(1) << 176))
         );
         vm.expectRevert(bytes4(keccak256("CorruptRecord()")));
         kernel.readRecord(id);
-        hvm.store(address(kernel), packedSlot, original);
-        hvm.store(address(kernel), keccak256(abi.encode(id, uint256(3))), bytes32(uint256(123)));
+        hvm.store(address(kernel.recordKernel()), packedSlot, original);
+        hvm.store(address(kernel.recordKernel()), keccak256(abi.encode(id, uint256(0))), bytes32(uint256(123)));
         vm.expectRevert(bytes4(keccak256("CorruptRecord()")));
         kernel.readRecord(id);
     }
@@ -117,7 +137,10 @@ contract BodyStorageTest is TestBase {
         HistoryVm.Log[] memory logs = hvm.getRecordedLogs();
         uint256 events;
         for (uint256 i; i < logs.length; ++i) {
-            if (logs[i].emitter == address(kernel) && logs[i].topics[0] == keccak256("RecordStored(bytes32,bytes32)")) {
+            if (
+                logs[i].emitter == address(kernel.recordKernel())
+                    && logs[i].topics[0] == keccak256("RecordStored(bytes32,bytes32)")
+            ) {
                 ++events;
             }
         }
@@ -128,7 +151,6 @@ contract BodyStorageTest is TestBase {
     }
 
     function testSameBytesDifferentTypesNeverShareBodyObjects() public {
-        forceCode();
         bytes32 canonicalType = kernel.types().register("EFS21 canonical ABI bytes v1", address(new BytesValidator()));
         bytes memory body = abi.encode(hex"ef0000ff00");
         uint64 nonce = bvm.getNonce(writer);
@@ -171,39 +193,52 @@ contract BodyStorageTest is TestBase {
     }
 
     function testHelperAuthorityBoundsPinAndInertOpcodes() public {
-        forceCode();
         vm.expectRevert(bytes4(keccak256("Unauthorized()")));
         Writer(writer).write(hex"ff");
         bytes memory tooLarge = new bytes(4097);
-        vm.prank(address(kernel));
+        vm.prank(address(kernel.recordKernel()));
         vm.expectRevert(bytes4(keccak256("BodyTooLarge()")));
         Writer(writer).write(tooLarge);
         address pointer = bvm.computeCreateAddress(writer, bvm.getNonce(writer));
-        bytes32 id = kernel.storeRecord(rawType, hex"efff6000ff00");
+        bytes32 id = kernel.storeRecord(
+            rawType,
+            hex"efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00"
+        );
         bytes memory code = pointer.code;
         (bool ok, bytes memory output) = pointer.call(hex"ffffffff");
         yes(ok);
         eq(output.length, 0);
         eq(pointer.code, code);
-        eq(kernel.readRecord(id).body, hex"efff6000ff00");
+        eq(
+            kernel.readRecord(id).body,
+            hex"efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00"
+        );
         bytes memory writerCode = writer.code;
         for (uint256 i; i < 2; ++i) {
             vm.etch(writer, i == 0 ? bytes("") : bytes(hex"00"));
             vm.expectRevert(bytes4(keccak256("BodyWriterUnavailable()")));
             kernel.storeRecord(rawType, hex"1122");
             // Dedup still validates Type, but needs no helper write.
-            eq(kernel.storeRecord(rawType, hex"efff6000ff00"), id);
+            eq(
+                kernel.storeRecord(
+                    rawType,
+                    hex"efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00efff6000ff00"
+                ),
+                id
+            );
         }
         vm.etch(writer, writerCode);
     }
 
     function testCreateCollisionAndLowGasRollback() public {
-        forceCode();
         uint64 nonce = bvm.getNonce(writer);
         address pointer = bvm.computeCreateAddress(writer, nonce);
         vm.etch(pointer, hex"00");
         vm.expectRevert(bytes4(keccak256("DeploymentFailed()")));
-        kernel.storeRecord{gas: 1000000}(rawType, hex"abcd");
+        kernel.storeRecord{gas: 1000000}(
+            rawType,
+            hex"abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd"
+        );
         eq(bvm.getNonce(writer), nonce);
         vm.etch(pointer, "");
         bytes memory body = new bytes(4096);
@@ -257,12 +292,25 @@ contract BodyStorageTest is TestBase {
         bytes memory creation = vm.getCode("BodyReadConsumer.sol:BodyReadConsumer");
         address consumer;
         assembly ("memory-safe") { consumer := create(0, add(creation, 32), mload(creation)) }
-        bytes32 id = kernel.storeRecord(rawType, hex"ef0080ff");
+        bytes32 id = kernel.storeRecord(
+            rawType,
+            hex"ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ff"
+        );
         ReadConsumer(consumer).capture(kernel, id, 1);
-        eq(ReadConsumer(consumer).lastDigest(), keccak256(hex"ef0080ff"));
+        eq(
+            ReadConsumer(consumer).lastDigest(),
+            keccak256(
+                hex"ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ff"
+            )
+        );
         eq(ReadConsumer(consumer).lastReads(), 1);
         ReadConsumer(consumer).capture(kernel, id, 2);
-        eq(ReadConsumer(consumer).lastDigest(), keccak256(hex"ef0080ff"));
+        eq(
+            ReadConsumer(consumer).lastDigest(),
+            keccak256(
+                hex"ef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ffef0080ff"
+            )
+        );
         eq(ReadConsumer(consumer).lastReads(), 2);
         vm.expectRevert();
         ReadConsumer(consumer).capture(kernel, id, 0);

@@ -156,7 +156,12 @@ export async function workload(w,{allowHybrid=false,sweep=true,namespaceOnly=fal
     const discovery=w.provenance.runtimes.DiscoveryIndex.address,original=await c.rpc('eth_getCode',[discovery,'latest']);
     if(mode==='mandatory discovery unavailable')await c.rpc('anvil_setCode',[discovery,'0x60006000fd']);
     const run=mode==='duplicate name'?()=>c.write('createFile',[root,E.toUtf8Bytes(files[0].name+'-duplicate'),d.typeId,d.body],'refuse '+mode):()=>c.write('editFile',[live,mode==='stale CAS'?0:1,d.typeId,d.body],'refuse '+mode);
-    try {await assert.rejects(run,/Transaction reverted/);} finally {if(mode==='mandatory discovery unavailable')await c.rpc('anvil_setCode',[discovery,original]);}
+    try {
+      if(mode==='mandatory discovery unavailable'){
+        await assert.rejects(run,/identity mismatch/);
+        await w.faultWrite('editFile',[live,1,d.typeId,d.body],'refuse '+mode);
+      }else await assert.rejects(run,/Transaction reverted/);
+    } finally {if(mode==='mandatory discovery unavailable')await c.rpc('anvil_setCode',[discovery,original]);}
     const a=w.actions.at(-1);a.workload=d;
     const after=await state(live);assert.deepEqual(after,before);await assert.rejects(()=>c.record(d.recordId));
     a.independentEffect={status:'VERIFIED_ATOMIC_ROLLBACK',before,after,fault:mode==='mandatory discovery unavailable'?{method:'anvil_setCode',target:discovery,originalCodeHash:E.keccak256(original),faultCode:'0x60006000fd',restoredCodeHash:E.keccak256(await c.rpc('eth_getCode',[discovery,'latest']))}:undefined};

@@ -1,4 +1,5 @@
 // Small profile-specific client. RPC observations are not cryptographic state proofs.
+import {graphIdentity,qualifyGraph} from './qualification.mjs';
 export const ZERO = '0x' + '0'.repeat(64);
 export const START = [ZERO, 0, 0];
 export const GAS_LIMIT = 16777216n;
@@ -20,6 +21,8 @@ export function validateConfig(config) {
 }
 export function createClient(E, config, {onAction = () => {}, initialActions = []} = {}) {
   validateConfig(config);
+  const graphId=graphIdentity(E,config);
+  const observedBases=new Set();
   const abi = E.AbiCoder.defaultAbiCoder(), iface = new E.Interface(config.abi);
   const metrics = {httpRequests:0, logicalRpcCalls:0, responseBytes:0};
   let requestId = 0;
@@ -52,10 +55,20 @@ export function createClient(E, config, {onAction = () => {}, initialActions = [
     if (deployment?.hash !== config.deploymentBlockHash) throw Error('Deployment block identity mismatch');
     const codeHash = E.keccak256(await rpc('eth_getCode',[config.kernel,block.number]));
     if (codeHash !== config.codeHash) throw Error('Kernel code identity mismatch');
-    return {chainId:String(BigInt(chain)),genesisHash:genesis.hash,kernel:config.kernel,codeHash,deploymentBlockHash:config.deploymentBlockHash,blockNumber:block.number,blockHash:block.hash,qualification:'RPC-observed; not a state proof'};
+    const graph=await qualifyGraph(E,config,rpc,block.number);
+    if(graph.graphId!==graphId)throw Error('Observation graph identity mismatch');
+    const closing=await rpc('eth_getBlockByNumber',[block.number,false]);
+    if(closing?.hash!==block.hash)throw Error('Stale observation block hash');
+    observedBases.add(block.number+':'+block.hash);
+    return {chainId:String(BigInt(chain)),genesisHash:genesis.hash,kernel:config.kernel,codeHash,deploymentBlockHash:config.deploymentBlockHash,blockNumber:block.number,blockHash:block.hash,...graph,qualification:'Source-pinned dependency graph RPC-observed; not a state proof'};
   }
   async function checkBasis(basis) {
     if (!basis || basis.chainId !== String(config.chainId) || basis.genesisHash !== config.genesisHash || basis.kernel !== config.kernel || basis.codeHash !== config.codeHash || basis.deploymentBlockHash !== config.deploymentBlockHash) throw Error('Observation identity mismatch');
+    if(basis.graphId!==graphId||graphIdentity(E,config)!==graphId||basis.profileId!==config.profileId||basis.dependencyProfile!==config.dependencyProfile)throw Error('Observation graph identity mismatch');
+    if(!observedBases.has(basis.blockNumber+':'+basis.blockHash)){
+      const actual=await observe(basis.blockNumber);
+      if(actual.blockHash!==basis.blockHash)throw Error('Stale observation block hash');
+    }
     const block = await rpc('eth_getBlockByNumber',[basis.blockNumber,false]);
     if (block?.hash !== basis.blockHash) throw Error('Stale observation block hash');
   }

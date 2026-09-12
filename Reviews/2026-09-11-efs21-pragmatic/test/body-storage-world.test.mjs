@@ -10,7 +10,7 @@ test('both frozen expanded controls keep raw and discovery; candidate has pinned
       assert(w.config.rawType,'expanded control must not be treated as legacy registry');
       assert(w.provenance.runtimes.DiscoveryIndex);
       identities.push([w.config.rawType,w.config.bytesType,w.config.quoteType,...['RawBytesValidator','BytesValidator','Uint256Validator'].map(k=>w.provenance.runtimes[k].codeHash)]);
-      const helper=E.getCreateAddress({from:w.config.kernel,nonce:4});
+      const helper=w.provenance.runtimes.BodyWriter?.address??E.getCreateAddress({from:w.config.kernel,nonce:4});
       const nonce=BigInt(await c.rpc('eth_getTransactionCount',[helper,'latest']));
       const body='0xef0080ff00';
       const a=await c.write('storeRecord',[w.config.rawType,body]);
@@ -28,8 +28,8 @@ test('both frozen expanded controls keep raw and discovery; candidate has pinned
       }
       if(selection==='current'){
         assert.equal(BigInt(await c.rpc('eth_getTransactionCount',[helper,'latest'])),nonce,'tiny hybrid is words');
-        const slot=E.keccak256(E.AbiCoder.defaultAbiCoder().encode(['bytes32','uint256'],[id,6]));
-        await c.rpc('anvil_setStorageAt',[w.config.kernel,slot,E.ZeroHash]);
+        const slot=E.keccak256(E.AbiCoder.defaultAbiCoder().encode(['bytes32','uint256'],[id,1]));
+        await c.rpc('anvil_setStorageAt',[w.config.graph.NativeRecordKernel,slot,E.ZeroHash]);
         await assert.rejects(()=>c.record(id),/CorruptRecord|revert/i);
       }
       return {};

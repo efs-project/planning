@@ -3,6 +3,7 @@ pragma solidity 0.8.30;
 import {TestBase} from "./TestBase.sol";
 import {NativeKernel} from "../src/NativeKernel.sol";
 import {NavigationIndex} from "../src/NavigationIndex.sol";
+import {RecordInventoryIndex} from "../src/RecordInventoryIndex.sol";
 import {Uint256Validator, BytesValidator} from "../src/ExactTypeRegistry.sol";
 
 contract FailIndex {
@@ -304,8 +305,9 @@ contract NativeTest is TestBase {
         nav.removeNode(f);
         vm.expectRevert(NavigationIndex.OnlyKernel.selector);
         nav.touchNode(f);
-        vm.expectRevert(NavigationIndex.OnlyKernel.selector);
-        nav.noteRecord(uintType, bytes32(uint256(1)));
+        RecordInventoryIndex inventory = k.recordInventory();
+        vm.expectRevert(bytes4(keccak256("OnlyKernel()")));
+        inventory.noteRecord(uintType, bytes32(uint256(1)));
         eq(k.lookup(address(this), root, "a"), f);
     }
 

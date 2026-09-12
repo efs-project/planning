@@ -18,11 +18,12 @@ test('real benchmark CLI finishes the shared workload namespace seam without top
   assert(probe.cleanup.stopped&&probe.cleanup.cacheRemoved);
 });
 
-test('compiler storage layout preserves old roots and bounds the new fixed word array',()=>{
-  const r=spawnSync('forge',['inspect','--force','NativeKernel','storage-layout','--json'],{cwd:ROOT+'contracts',encoding:'utf8',timeout:180000});
+test('actual Record owner packs metadata and bounds the fixed word array',()=>{
+  const r=spawnSync('forge',['inspect','--force','NativeRecordKernel','storage-layout','--json'],{cwd:ROOT+'contracts',encoding:'utf8',timeout:180000});
   assert.equal(r.status,0,r.stderr);
   const layout=JSON.parse(r.stdout),slots=Object.fromEntries(layout.storage.map(x=>[x.label,x]));
-  assert.equal(slots.records.slot,'3');assert.equal(slots.reservedLegacyPresence.slot,'4');assert.equal(slots.locations.slot,'5');assert.equal(slots.sparseBodyWords.slot,'6');
+  assert.equal(slots.records.slot,'0');assert.equal(slots.sparseBodyWords.slot,'1');
+  assert.equal(slots.locations,undefined);assert.equal(slots.reservedLegacyPresence,undefined);
   const record=layout.types[layout.types[slots.records.type].value];
   assert.equal(record.numberOfBytes,'64');
   assert.deepEqual(record.members.map(({label,slot,offset})=>({label,slot,offset})),[
@@ -42,9 +43,11 @@ test('fresh hybrid and both forced paths keep exact bytes and helper outage beha
       const original=await c.rpc('eth_getCode',[helper,'latest']);
       await c.rpc('anvil_setCode',[helper,'0x00']);
       try{
-        await c.write('storeRecord',[w.config.rawType,body]);
-        await assert.rejects(()=>c.write('storeRecord',[w.config.rawType,'0x02']),/reverted/i);
-        assert.equal((await c.record(id)).value.body,body);
+        await assert.rejects(()=>c.write('storeRecord',[w.config.rawType,body]),/identity mismatch/i);
+        await w.faultWrite('storeRecord',[w.config.rawType,body],'direct dedup during helper outage',{expectedStatus:'0x1'});
+        await w.faultWrite('storeRecord',[w.config.rawType,'0x02'],'new admission during helper outage');
+        const raw=await c.rpc('eth_call',[{to:w.config.kernel,data:c.iface.encodeFunctionData('readRecord',[id])},'latest']);
+        assert.equal(c.iface.decodeFunctionResult('readRecord',raw)[0].body,body,'unqualified point bytes remain independently readable');
       }finally{await c.rpc('anvil_setCode',[helper,original]);}
       return {};
     },{kernelArtifact:selection});

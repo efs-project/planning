@@ -153,7 +153,12 @@ contract HistoryTest is TestBase {
             HistoryVm.Log memory x = logs[0][i];
             HistoryVm.Log memory y = logs[1][i];
             eq(x.emitter, address(kernels[0]));
-            eq(y.emitter, address(kernels[1]));
+            eq(
+                y.emitter,
+                y.topics[0] == keccak256("RecordStored(bytes32,bytes32)")
+                    ? address(kernels[1].recordKernel())
+                    : address(kernels[1])
+            );
             if (x.topics[0] == keccak256("FileChanged(bytes32,address,uint64)")) {
                 x.topics[1] = logical(0, x.topics[1]);
                 y.topics[1] = logical(1, y.topics[1]);

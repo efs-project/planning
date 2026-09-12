@@ -21,5 +21,7 @@ test('frozen always-code control and packed current preserve helper and exact id
     },{kernelArtifact:selection});
     assert(result.cleanup.stopped&&result.cleanup.cacheRemoved);
   }
-  for(const identity of identities.slice(1))assert.deepEqual(identity,identities[0]);
+  assert.deepEqual(identities[1],identities[0],'frozen helper owner/runtime unchanged');
+  assert.deepEqual(identities[2].slice(0,3),identities[0].slice(0,3),'split preserves exact Types');
+  assert.notEqual(identities[2][3],identities[0][3],'split helper immutable now binds the distinct Record owner');
 });

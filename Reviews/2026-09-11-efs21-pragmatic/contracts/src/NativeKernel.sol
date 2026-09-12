@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 import {ExactTypeRegistry} from "./ExactTypeRegistry.sol";
-import {ExpandedTypeRegistry} from "./ExpandedTypeRegistry.sol";
+import {NativeRecordKernel} from "./NativeRecordKernel.sol";
+import {RecordInventoryIndex} from "./RecordInventoryIndex.sol";
 import {NavigationIndex} from "./NavigationIndex.sol";
 import {DiscoveryIndex} from "./DiscoveryIndex.sol";
-import {BodyWriter} from "./BodyWriter.sol";
 
 /// @notice Fresh-genesis filesystem-profile cost experiment, NOT the generic EFS v2 Core.
 /// Native caller authority, one placement per object, no directory moves or upgrades.
@@ -42,14 +42,6 @@ contract NativeKernel {
         bytes body;
     }
 
-    struct StoredRecord {
-        bytes32 typeId;
-        address pointer;
-        uint16 bodyLength;
-        bool present;
-        uint8 backend;
-    }
-
     struct Entry {
         bytes32 id;
         FileInfo file;
@@ -65,8 +57,10 @@ contract NativeKernel {
     ExactTypeRegistry public immutable types;
     DiscoveryIndex public immutable discovery;
     bytes32 private immutable discoveryCodeHash;
-    BodyWriter private immutable bodyWriter;
-    bytes32 private immutable bodyWriterCodeHash;
+    NativeRecordKernel public immutable recordKernel;
+    RecordInventoryIndex public immutable recordInventory;
+    bytes32 private immutable recordKernelCodeHash;
+    bytes32 private immutable navigationCodeHash;
     uint256 public constant DISCOVERY_GAS = 600_000;
     uint256 public constant MAX_BODY = 4096;
     uint256 public constant MAX_NAME = 64;
@@ -75,12 +69,11 @@ contract NativeKernel {
     mapping(address => uint256) public fileNonce;
     mapping(bytes32 => FileInfo) private files;
     mapping(bytes32 => StoredRevision[]) private history;
-    mapping(bytes32 => StoredRecord) private records;
-    // Reserved legacy existence root: keep subsequent location/history layout unchanged.
-    mapping(bytes32 => bool) private reservedLegacyPresence;
     mapping(bytes32 => mapping(uint64 => HistoricalLocation)) private locations;
-    mapping(bytes32 => bytes32[128]) private sparseBodyWords;
 
+    error RecordKernelUnavailable();
+    error NavigationUnavailable();
+    error RecordInventoryUnavailable();
     error MissingFile();
     error MissingRecord();
     error CorruptRecord();
@@ -98,16 +91,18 @@ contract NativeKernel {
     error PathTooDeep();
     error DiscoveryUnavailable();
     event FileChanged(bytes32 indexed fileId, address indexed owner, uint64 revision);
+    // ABI compatibility only: RecordStored is emitted once by recordKernel, never this facade.
     event RecordStored(bytes32 indexed recordId, bytes32 indexed typeId);
 
     constructor() {
-        navigation = new NavigationIndex();
-        // Preserve the immutable DiscoveryIndex's typed external seam.
-        types = ExactTypeRegistry(address(new ExpandedTypeRegistry()));
+        recordKernel = new NativeRecordKernel();
+        recordKernelCodeHash = address(recordKernel).codehash;
+        types = recordKernel.types();
+        recordInventory = recordKernel.recordInventory();
+        navigation = new NavigationIndex(recordInventory);
+        navigationCodeHash = address(navigation).codehash;
         discovery = new DiscoveryIndex(navigation, types);
         discoveryCodeHash = address(discovery).codehash;
-        bodyWriter = new BodyWriter();
-        bodyWriterCodeHash = address(bodyWriter).codehash;
     }
 
     /// @notice One-call coherent bounded metadata hydration. Bodies require readRecord separately.
@@ -137,6 +132,7 @@ contract NativeKernel {
         files[id] = FileInfo(msg.sender, true, true, 1, bytes32(0));
         locations[id][1] = HistoricalLocation(bytes32(0), "");
         history[id].push(StoredRevision(bytes32(0), 1, true));
+        _checkNavigation();
         navigation.addNode(msg.sender, id, bytes32(0), "", true);
         _notify(id);
         emit FileChanged(id, msg.sender, 1);
@@ -152,36 +148,9 @@ contract NativeKernel {
     }
 
     function readRecord(bytes32 id) external view returns (Record memory) {
-        StoredRecord storage stored = records[id];
-        if (!stored.present) revert MissingRecord();
-        address pointer = stored.pointer;
-        uint256 length = stored.bodyLength;
-        uint8 backend = stored.backend;
-        if (length > MAX_BODY || backend > 1) revert CorruptRecord();
-        bytes memory body = new bytes(length);
-        if (backend == 0) {
-            if (pointer == address(0) || pointer.code.length != length + 1) revert CorruptRecord();
-            uint256 prefix;
-            assembly ("memory-safe") {
-                let scratch := mload(0x40)
-                extcodecopy(pointer, scratch, 0, 1)
-                prefix := byte(0, mload(scratch))
-            }
-            if (prefix != 0) revert CorruptRecord();
-            assembly ("memory-safe") { extcodecopy(pointer, add(body, 32), 1, length) }
-        } else {
-            if (pointer != address(0)) revert CorruptRecord();
-            uint256 count = (length + 31) / 32;
-            for (uint256 i; i < count; ++i) {
-                bytes32 word = sparseBodyWords[id][i];
-                uint256 remaining = length - i * 32;
-                if (remaining < 32 && uint256(word) << (remaining * 8) != 0) revert CorruptRecord();
-                assembly ("memory-safe") { mstore(add(add(body, 32), mul(i, 32)), word) }
-            }
-        }
-        Record memory result = Record(stored.typeId, body);
-        if (recordId(result.typeId, result.body) != id) revert CorruptRecord();
-        return result;
+        _checkRecordKernel();
+        NativeRecordKernel.Record memory value = recordKernel.readRecord(id);
+        return Record(value.typeId, value.body);
     }
 
     function createDirectory(bytes32 parent, bytes calldata name) external returns (bytes32) {
@@ -203,6 +172,7 @@ contract NativeKernel {
         bytes32 rid = _store(typeId, body);
         uint64 locationRevision = history[id][file.revision - 1].locationRevision;
         _revise(id, file, rid, locationRevision, true);
+        _checkNavigation();
         navigation.touchNode(id);
         _notify(id);
     }
@@ -215,6 +185,7 @@ contract NativeKernel {
         uint64 locationRevision = file.revision + 1;
         locations[id][locationRevision] = HistoricalLocation(parent, name);
         _revise(id, file, file.recordId, locationRevision, true);
+        _checkNavigation();
         navigation.moveNode(id, parent, name);
         _notify(id);
     }
@@ -224,6 +195,7 @@ contract NativeKernel {
         if (id == rootId(msg.sender)) revert RootRemovalUnsupported();
         uint64 locationRevision = history[id][file.revision - 1].locationRevision;
         _revise(id, file, file.recordId, locationRevision, false);
+        _checkNavigation();
         navigation.removeNode(id);
         _notify(id);
     }
@@ -271,55 +243,23 @@ contract NativeKernel {
         files[id] = FileInfo(msg.sender, directory, true, 1, rid);
         locations[id][1] = HistoricalLocation(parent, name);
         history[id].push(StoredRevision(rid, 1, true));
+        _checkNavigation();
         navigation.addNode(msg.sender, id, parent, name, directory);
         _notify(id);
         emit FileChanged(id, msg.sender, 1);
     }
 
-    function _store(bytes32 typeId, bytes calldata body) private returns (bytes32 id) {
-        if (body.length > MAX_BODY) revert BodyTooLarge();
-        types.validate(typeId, body);
-        id = recordId(typeId, body);
-        if (!records[id].present) {
-            if (address(bodyWriter).codehash != bodyWriterCodeHash) revert BodyWriterUnavailable();
-            uint256 count = (body.length + 31) / 32;
-            uint256 nonzero;
-            for (uint256 i; i < count; ++i) {
-                if (_bodyWord(body, i) != 0) ++nonzero;
-            }
-            uint8 backend = _selectBodyBackend(body.length, nonzero);
-            address pointer;
-            if (backend == 0) {
-                pointer = bodyWriter.write(body);
-            } else {
-                for (uint256 i; i < count; ++i) {
-                    bytes32 word = _bodyWord(body, i);
-                    if (word != 0) sparseBodyWords[id][i] = word;
-                }
-            }
-            // MAX_BODY is checked above, before the narrowing conversion.
-            // forge-lint: disable-next-line(unsafe-typecast)
-            records[id] = StoredRecord(typeId, pointer, uint16(body.length), true, backend);
-            navigation.noteRecord(typeId, id);
-            emit RecordStored(id, typeId);
-        }
+    function _store(bytes32 typeId, bytes calldata body) private returns (bytes32) {
+        _checkRecordKernel();
+        return recordKernel.storeRecord(typeId, body);
     }
 
-    function _bodyWord(bytes calldata body, uint256 index) private pure returns (bytes32 word) {
-        uint256 offset = index * 32;
-        assembly ("memory-safe") { word := calldataload(add(body.offset, offset)) }
-        uint256 remaining = body.length - offset;
-        if (remaining < 32) word &= bytes32(type(uint256).max << ((32 - remaining) * 8));
+    function _checkRecordKernel() private view {
+        if (address(recordKernel).codehash != recordKernelCodeHash) revert RecordKernelUnavailable();
     }
 
-    // Experimental write-oriented proxy fitted to the retained 48-case forced-path calibration.
-    // Nonzero fresh slots ~22.3k each; bounded words-loop premium ~240 per word;
-    // code creation/helper fixed ~33.5k plus 200 per deposited byte. Not an opcode
-    // oracle or a lifetime optimum: paid reads are reported separately. Exact ties use code.
-    function _selectBodyBackend(uint256 length, uint256 nonzero) internal pure virtual returns (uint8) {
-        uint256 wordsCost = 22_300 * nonzero + 240 * ((length + 31) / 32);
-        uint256 codeCost = 33_500 + 200 * length;
-        return wordsCost < codeCost ? 1 : 0;
+    function _checkNavigation() private view {
+        if (address(navigation).codehash != navigationCodeHash) revert NavigationUnavailable();
     }
 
     function _notify(bytes32 id) private {

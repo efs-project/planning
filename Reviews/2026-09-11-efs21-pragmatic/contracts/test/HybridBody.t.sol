@@ -2,9 +2,10 @@
 pragma solidity 0.8.30;
 import {BodyStorageTest} from "./BodyStorage.t.sol";
 import {NativeKernel} from "../src/NativeKernel.sol";
+import {NativeRecordKernel} from "../src/NativeRecordKernel.sol";
 import {BytesValidator} from "../src/ExactTypeRegistry.sol";
 
-contract PolicyProbe is NativeKernel {
+contract PolicyProbe is NativeRecordKernel {
     function select(uint256 length, uint256 occupied) external pure returns (uint8) {
         return _selectBodyBackend(length, occupied);
     }
@@ -51,11 +52,11 @@ contract HybridBodyTest is BodyStorageTest {
     }
 
     function meta(bytes32 id) internal pure returns (bytes32) {
-        return bytes32(uint256(keccak256(abi.encode(id, uint256(3)))) + 1);
+        return bytes32(uint256(keccak256(abi.encode(id, uint256(0)))) + 1);
     }
 
     function wordSlot(bytes32 id, uint256 i) internal pure returns (bytes32) {
-        return bytes32(uint256(keccak256(abi.encode(id, uint256(6)))) + i);
+        return bytes32(uint256(keccak256(abi.encode(id, uint256(1)))) + i);
     }
 
     function testWordsMetadataAndHashCorruptionRefuseBoundedly() public {
@@ -63,39 +64,39 @@ contract HybridBodyTest is BodyStorageTest {
         body[64] = 0x01;
         bytes32 id = kernel.storeRecord(rawType, body);
         bytes32 slot = meta(id);
-        bytes32 original = hvm.load(address(kernel), slot);
+        bytes32 original = hvm.load(address(kernel.recordKernel()), slot);
         uint256[3] memory bad = [
             uint256(original) | (uint256(2) << 184),
             (uint256(original) & ~(uint256(65535) << 160)) | (uint256(65535) << 160),
             uint256(original) | uint256(123)
         ];
         for (uint256 i; i < bad.length; ++i) {
-            hvm.store(address(kernel), slot, bytes32(bad[i]));
+            hvm.store(address(kernel.recordKernel()), slot, bytes32(bad[i]));
             vm.expectRevert(NativeKernel.CorruptRecord.selector);
             kernel.readRecord{gas: 100000}(id);
         }
-        hvm.store(address(kernel), slot, original);
+        hvm.store(address(kernel.recordKernel()), slot, original);
         bytes32 tail = wordSlot(id, 2);
-        bytes32 word = hvm.load(address(kernel), tail);
-        hvm.store(address(kernel), tail, bytes32(uint256(word) | 1));
+        bytes32 word = hvm.load(address(kernel.recordKernel()), tail);
+        hvm.store(address(kernel.recordKernel()), tail, bytes32(uint256(word) | 1));
         vm.expectRevert(NativeKernel.CorruptRecord.selector);
         kernel.readRecord(id);
-        hvm.store(address(kernel), tail, bytes32(0));
+        hvm.store(address(kernel.recordKernel()), tail, bytes32(0));
         vm.expectRevert(NativeKernel.CorruptRecord.selector);
         kernel.readRecord(id);
-        hvm.store(address(kernel), tail, bytes32(uint256(2) << 248));
+        hvm.store(address(kernel.recordKernel()), tail, bytes32(uint256(2) << 248));
         vm.expectRevert(NativeKernel.CorruptRecord.selector);
         kernel.readRecord(id);
-        hvm.store(address(kernel), tail, word);
-        bytes32 typeSlot = keccak256(abi.encode(id, uint256(3)));
-        hvm.store(address(kernel), typeSlot, bytes32(uint256(123)));
+        hvm.store(address(kernel.recordKernel()), tail, word);
+        bytes32 typeSlot = keccak256(abi.encode(id, uint256(0)));
+        hvm.store(address(kernel.recordKernel()), typeSlot, bytes32(uint256(123)));
         vm.expectRevert(NativeKernel.CorruptRecord.selector);
         kernel.readRecord(id);
-        hvm.store(address(kernel), typeSlot, rawType);
+        hvm.store(address(kernel.recordKernel()), typeSlot, rawType);
         // Beyond authoritative range is deliberately not read or claimed detectable.
-        hvm.store(address(kernel), wordSlot(id, 3), bytes32(uint256(123)));
+        hvm.store(address(kernel.recordKernel()), wordSlot(id, 3), bytes32(uint256(123)));
         eq(kernel.readRecord(id).body, body);
-        hvm.store(address(kernel), slot, bytes32(uint256(original) & ~(uint256(1) << 176)));
+        hvm.store(address(kernel.recordKernel()), slot, bytes32(uint256(original) & ~(uint256(1) << 176)));
         vm.expectRevert(NativeKernel.MissingRecord.selector);
         kernel.readRecord(id);
     }
@@ -107,14 +108,14 @@ contract HybridBodyTest is BodyStorageTest {
         yes(ok);
         bytes32 id = abi.decode(output, (bytes32));
         eq(id, kernel.recordId(rawType, hex"01"));
-        eq(hvm.load(address(kernel), wordSlot(id, 0)), bytes32(uint256(1) << 248));
+        eq(hvm.load(address(kernel.recordKernel()), wordSlot(id, 0)), bytes32(uint256(1) << 248));
         eq(kernel.readRecord(id).body, hex"01");
         eq(kernel.storeRecord(rawType, hex"01"), id);
     }
 
     function testWordDuplicatesValidateAndRequireHelperOnlyOnNewAdmission() public {
         bytes32 id = kernel.storeRecord(rawType, hex"01");
-        bytes32 metadata = hvm.load(address(kernel), meta(id));
+        bytes32 metadata = hvm.load(address(kernel.recordKernel()), meta(id));
         uint64 nonce = bvm.getNonce(writer);
         bytes memory code = writer.code;
         vm.etch(writer, hex"00");
@@ -122,7 +123,7 @@ contract HybridBodyTest is BodyStorageTest {
         vm.expectRevert(NativeKernel.BodyWriterUnavailable.selector);
         kernel.storeRecord(rawType, hex"02");
         eq(bvm.getNonce(writer), nonce);
-        eq(hvm.load(address(kernel), meta(id)), metadata);
+        eq(hvm.load(address(kernel.recordKernel()), meta(id)), metadata);
         vm.etch(writer, code);
         address validator = kernel.types().typeInfo(rawType).validator;
         vm.etch(validator, hex"00");
@@ -136,9 +137,9 @@ contract HybridBodyTest is BodyStorageTest {
         bytes32 raw = kernel.storeRecord(rawType, body);
         bytes32 canonical = kernel.storeRecord(canonicalType, body);
         yes(raw != canonical);
-        eq(uint256(hvm.load(address(kernel), meta(raw))) >> 184, 1);
-        eq(uint256(hvm.load(address(kernel), meta(canonical))) >> 184, 1);
-        hvm.store(address(kernel), wordSlot(raw, 0), bytes32(0));
+        eq(uint256(hvm.load(address(kernel.recordKernel()), meta(raw))) >> 184, 1);
+        eq(uint256(hvm.load(address(kernel.recordKernel()), meta(canonical))) >> 184, 1);
+        hvm.store(address(kernel.recordKernel()), wordSlot(raw, 0), bytes32(0));
         vm.expectRevert(NativeKernel.CorruptRecord.selector);
         kernel.readRecord(raw);
         eq(kernel.readRecord(canonical).body, body);
@@ -167,10 +168,10 @@ contract HybridBodyTest is BodyStorageTest {
                 else kernel.editFile(file, 1, rawType, body);
                 vm.etch(discovery, code);
                 eq(snapshot(root, file), beforeState);
-                eq(hvm.load(address(kernel), meta(id)), bytes32(0));
-                eq(hvm.load(address(kernel), keccak256(abi.encode(id, uint256(3)))), bytes32(0));
+                eq(hvm.load(address(kernel.recordKernel()), meta(id)), bytes32(0));
+                eq(hvm.load(address(kernel.recordKernel()), keccak256(abi.encode(id, uint256(0)))), bytes32(0));
                 for (uint256 i; i < 8; ++i) {
-                    eq(hvm.load(address(kernel), wordSlot(id, i)), bytes32(0));
+                    eq(hvm.load(address(kernel.recordKernel()), wordSlot(id, i)), bytes32(0));
                 }
                 eq(bvm.computeCreateAddress(writer, bvm.getNonce(writer)).code.length, 0);
                 vm.expectRevert(NativeKernel.MissingRecord.selector);
@@ -202,9 +203,12 @@ contract HybridBodyTest is BodyStorageTest {
         eq(kernel.readRecord(empty).body, bytes(""));
         eq(kernel.readRecord(tiny).body, hex"01");
         eq(kernel.readRecord(zero).body, new bytes(4096));
-        eq(hvm.load(address(kernel), keccak256(abi.encode(tiny, uint256(6)))), bytes32(uint256(1) << 248));
-        eq(hvm.load(address(kernel), keccak256(abi.encode(zero, uint256(6)))), bytes32(0));
-        bytes32 metadataSlot = bytes32(uint256(keccak256(abi.encode(empty, uint256(3)))) + 1);
-        eq(uint256(hvm.load(address(kernel), metadataSlot)), (uint256(1) << 176) | (uint256(1) << 184));
+        eq(
+            hvm.load(address(kernel.recordKernel()), keccak256(abi.encode(tiny, uint256(1)))),
+            bytes32(uint256(1) << 248)
+        );
+        eq(hvm.load(address(kernel.recordKernel()), keccak256(abi.encode(zero, uint256(1)))), bytes32(0));
+        bytes32 metadataSlot = bytes32(uint256(keccak256(abi.encode(empty, uint256(0)))) + 1);
+        eq(uint256(hvm.load(address(kernel.recordKernel()), metadataSlot)), (uint256(1) << 176) | (uint256(1) << 184));
     }
 }

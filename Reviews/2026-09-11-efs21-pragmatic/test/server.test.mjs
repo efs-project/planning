@@ -13,7 +13,7 @@ test('static server snapshots closed assets and config before listening', async 
     assert.equal(await (await fetch(url+'/app.mjs')).text(),before);
     assert.equal(before,'private fixture');
     assert.equal((await (await fetch(url+'/config.json')).json()).nested.value,1);
-    assert.equal(reads,6);
+    assert.equal(reads,8);
     assert.equal((await fetch(url+'/app.mjs',{method:'POST'})).status,405);
     assert.equal((await fetch(url+'/not-a-route')).status,404);
     assert.equal(await new Promise((resolve,reject)=>get(url,{headers:{host:'evil.example'}},res=>{res.resume();resolve(res.statusCode);}).on('error',reject)),403);

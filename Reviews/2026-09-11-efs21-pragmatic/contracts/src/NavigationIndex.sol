@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
+import {RecordInventoryIndex} from "./RecordInventoryIndex.sol";
 
 contract NavigationIndex {
     struct Cursor {
@@ -29,7 +30,7 @@ contract NavigationIndex {
     mapping(bytes32 => uint256) private position;
     mapping(bytes32 => uint256) private generation;
     mapping(address => bytes32[]) private createdFiles;
-    mapping(bytes32 => bytes32[]) private admittedRecords;
+    RecordInventoryIndex public immutable recordInventory;
 
     error OnlyKernel();
     error InvalidNode();
@@ -44,8 +45,9 @@ contract NavigationIndex {
         _;
     }
 
-    constructor() {
+    constructor(RecordInventoryIndex inventory) {
         kernel = msg.sender;
+        recordInventory = inventory;
     }
 
     function addNode(address owner, bytes32 id, bytes32 parent, bytes calldata name, bool directory)
@@ -81,11 +83,6 @@ contract NavigationIndex {
         Location storage node = locations[id];
         if (!node.live || node.parent == 0) revert InvalidNode();
         ++generation[node.parent];
-    }
-
-    /// @dev Kernel calls once per unique record; immutable append-only universe, not live files.
-    function noteRecord(bytes32 typeId, bytes32 id) external onlyKernel {
-        admittedRecords[typeId].push(id);
     }
 
     function location(bytes32 id) external view returns (Location memory node) {
@@ -135,12 +132,12 @@ contract NavigationIndex {
         return createdFiles[owner][ordinal];
     }
 
-    /// @notice Unique records ever admitted by this kernel for exactly this TypeId.
+    /// @notice Read-only compatibility; cursor scope names the actual Record inventory.
     function typeInventory(bytes32 typeId, Cursor calldata cursor, uint256 limit) external view returns (Page memory) {
-        bytes32 scope = keccak256(abi.encode("EFS21_RECORDS", address(this), typeId));
-        uint256 high = cursor.scope == 0 ? admittedRecords[typeId].length : cursor.revision;
-        if (high > admittedRecords[typeId].length) revert InvalidCursor();
-        return _page(admittedRecords[typeId], scope, high, high, cursor, limit);
+        RecordInventoryIndex.Page memory page = recordInventory.typeInventory(
+            typeId, RecordInventoryIndex.Cursor(cursor.scope, cursor.revision, cursor.offset), limit
+        );
+        return Page(page.ids, Cursor(page.next.scope, page.next.revision, page.next.offset), page.complete);
     }
 
     function _directory(address owner, bytes32 id) private view {
