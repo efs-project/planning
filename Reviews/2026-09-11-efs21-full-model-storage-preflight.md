@@ -8,10 +8,10 @@ Two independent expert readers inspected the reviewed full-C0 direct-apply/read-
 
 Keep separating **what the system promises** from **how much storage it uses**. The seven Files facts need not become seven separately deployed storage objects, and an index's separate contract does not make its writes free.
 
-After the active native packing and real Files read-batching tasks:
+After the reviewed native packing/hybrid and real Files read-batching tasks, alongside the separately staged generic-kernel boundary:
 
 1. Measure storing the full model's unsigned publication envelope in immutable code, preserving exact bytes and logical reads.
-2. Extend that comparison to one shared immutable byte block for an envelope and its new Record bodies.
+2. Extend that comparison to one shared immutable byte block for an envelope and its new Record bodies. The [[2026-09-11-efs21-shared-slab-plan|staged slice/ordering plan]] now records the source-reviewed mechanism; it still requires the completed Envelope-only base before dispatch.
 3. Extract full-C0 posting storage without dropping any query family, establishing a separate-contract control. Then measure coarser calls and configurable families separately.
 
 These are proposed follow-ons, not authority for silent feature removal or evidence that all three improve gas. The [[2026-09-11-efs21-envelope-storage-plan|first envelope-only implementation plan]] is now independently reviewed and staged, not dispatched. The native experiment already has separate required navigation/configurable discovery, but it is a narrower Files profile, not full-v2 parity.

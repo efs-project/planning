@@ -255,7 +255,7 @@ An initial overly broad worker regression invoked legacy tracing diagnostics; it
 
 That three-arm experiment is complete and independently reviewed: implementation `5632fee`, evidence `58e61c4`. It compares original slot storage, slot storage with the same read-integrity hash, and always-code storage. Public Record bytes and exact IDs, validation-before-dedup, history/navigation/discovery, explicit empty presence and failed-write rollback remain. A pinned kernel-only helper creates inert STOP-prefixed bodies in its own account; reads reject malformed or substituted code. [Source-pinned receipts and boundaries](https://github.com/efs-project/planning/blob/58e61c4/Reviews/2026-09-11-efs21-pragmatic/evidence/body-storage.md).
 
-| Safety-matched native workload | Slots + read integrity | Code + read integrity |
+| Returned-hash-matched native workload | Slots + read integrity | Code + read integrity |
 |---|---:|---:|
 | Fresh raw 41-byte file edit | 264,011 | **263,457** |
 | Fresh raw 256-byte dense file edit | 400,719 | **310,118** |
