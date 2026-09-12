@@ -1,6 +1,6 @@
 # Full-C0 metadata-only admission: paired results
 
-September12,2026. Measured fresh-genesis prototype; independent source review approved, root reproduction/push still separate. No protocol adoption, native authority, initialization outlining, shared slab, Type codec or index change.
+September12,2026. Measured fresh-genesis prototype; independent source/evidence review and root reproduction complete. No protocol adoption, native authority, initialization outlining, shared slab, Type codec or index change.
 
 ## Result
 
@@ -116,6 +116,10 @@ node --test Reviews/2026-09-11-efs21-pragmatic/test/envelope-storage-comparison.
 node Reviews/2026-09-04-mvp-rehearsal/node_modules/typescript/bin/tsc --strict --noEmit --module NodeNext --moduleResolution NodeNext --target ES2022 Reviews/2026-09-09-files-reader/test/sample.ts
 ```
 
-The exact source-freeze runner is [metadata-admission-benchmark.mjs](scripts/metadata-admission-benchmark.mjs). Full bounded gate commands and diagnosis are retained in the task's scratch implementer report. Independent source review approved; the root still owns final reproduction and push.
+The exact source-freeze runner is [metadata-admission-benchmark.mjs](scripts/metadata-admission-benchmark.mjs). Full bounded gate commands and diagnosis are retained in the task's scratch implementer report.
+
+Independent review approved final source/evidence at `4e7150cfffb8f77488a08eb1d4f00c844f55b495`:238 signed transactions,254 source/support pins, compiler identity,30 actual runtime artifacts,7 ABI surfaces, full inventories,32 operation rows and6 paid reads were rechecked, including the post-measurement Binding comparison hardening.
+
+Root reproduction used a separate fresh build directory and independently passed233 Core tests and29 foundation tests, with no skipped Forge tests. The explicit serial Node/Chromium gate including both offline suites completed in239.394s:266 total,265 passed,0 failed,1 existing legal-large-Type skip. Strict TypeScript, touched Solidity formatting and diff checks passed. A pre-existing `C0Request.prepare` mutability warning remains; this is not a warning-free compilation claim. Fresh actual artifacts reproduce U3 runtime24,536/init template25,365(+128 constructor), admission library20,317/20,349 and preparation helper18,953/18,979. No historical evidence changed. All root test worlds closed; only the three preserved demos remained.
 
 Both final Anvils exited normally (50702/51002), and their exact owned cache/build directories were removed and checked. The separately owned70MiB candidate gate build was removed; it is regenerable. Earlier default Forge output was a pre-existing build location, not broadly deleted. Only preserved Anvils9947/RPC49941,91971/RPC54148,65638/RPC60726 remain listening; HTTP49966/54154/60731 and their original PIDs remain alive. About282GiB free. No tracing, public chain, broad cleanup, production-repository change, demo migration or source change after final receipt freeze.
