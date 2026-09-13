@@ -1,0 +1,39 @@
+{
+  "kind": "EFS_DISPOSABLE_ORACLE_HAND_VECTORS",
+  "version": 1,
+  "standing": "independently constructed synthetic vectors for public Road B declarations",
+  "profileSourceCommit": "727291aac717f4c4e38e9049e8c9328da94389b8",
+  "recordQuote3000": {
+    "domain": "0xa9b8140bd3398d14fe72a4e868ca64b6bb119c3ee51354b50457d56da12552e3",
+    "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+    "body": "0x0000000000000000000000000000000000000000000000000000000000000bb8",
+    "bodyHash": "0xe76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552",
+    "preimage": "0xa9b8140bd3398d14fe72a4e868ca64b6bb119c3ee51354b50457d56da12552e3cde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068e76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552",
+    "recordId": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95"
+  },
+  "recordQuote3001Mutation": {
+    "body": "0x0000000000000000000000000000000000000000000000000000000000000bb9",
+    "bodyHash": "0x6ea11cabec8da7a641c6b6c70407d1b66dc977f2268bf945d75790c38f6a11ce",
+    "preimage": "0xa9b8140bd3398d14fe72a4e868ca64b6bb119c3ee51354b50457d56da12552e3cde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f850686ea11cabec8da7a641c6b6c70407d1b66dc977f2268bf945d75790c38f6a11ce",
+    "recordId": "0xa33e6b7b4139df47b74ea83fdfe4ec23147eac4fcf024b64489309e1a4da1fd6"
+  },
+  "subjectSynthetic": {
+    "domain": "0xc0c0cdafc7b89f00f1f976e698195cb28121446967001f8bd7840204218bcb20",
+    "principalId": "0x1111111111111111111111111111111111111111111111111111111111111111",
+    "salt": "0x2222222222222222222222222222222222222222222222222222222222222222",
+    "preimage": "0xc0c0cdafc7b89f00f1f976e698195cb28121446967001f8bd7840204218bcb2011111111111111111111111111111111111111111111111111111111111111112222222222222222222222222222222222222222222222222222222222222222",
+    "subjectId": "0xe2e7cbe8d4f28887b106d285429b2ae05f14b94fc2151909cbc3c0eed5fb6c0c"
+  },
+  "signaturePrimitive": {
+    "scope": "generic supplied-digest recovery control; not candidate PublicationIntent evidence",
+    "expectedAuthor": "0x1a642f0E3c3aF545E7AcBD38b07251B3990914F1",
+    "digest": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+    "mutatedDigest": "0xa33e6b7b4139df47b74ea83fdfe4ec23147eac4fcf024b64489309e1a4da1fd6",
+    "signature": "0x93a3911016f97c38eb9f1c1a9be97e6d8e3704c966f06250dac4af3ca95a3c39448b52e7dfc0ac05f32604fc7eaee7e0b7a33a79ffe11a566e8a597b481bae151c"
+  },
+  "unsupported": {
+    "actionCommitment": "UNSUPPORTED",
+    "signedDigest": "UNSUPPORTED",
+    "signedPlanBinding": "UNSUPPORTED"
+  }
+}

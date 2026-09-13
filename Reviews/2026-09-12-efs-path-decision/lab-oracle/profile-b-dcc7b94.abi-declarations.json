@@ -1,0 +1,52 @@
+{
+  "kind": "EFS_DISPOSABLE_ORACLE_DIAGNOSTIC_ABI_DECLARATIONS",
+  "version": 1,
+  "standing": "separate diagnostic profile; does not amend or substitute for candidate source 727291a",
+  "candidateSourceCommit": "dcc7b946d2ac8dfcf22103069127a9d1809df974",
+  "sourceBlobs": {
+    "Ledger.sol": "c454e2699b9335c0a23bbfb6ed72e1ba0e5c7a14",
+    "Interfaces.sol": "3155357f6d3e58c910828df2eb798ecb53ea24f9"
+  },
+  "compiledAbiArtifact": {
+    "runLocalPath": "/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/out/Ledger.sol/Ledger.json",
+    "sha256": "a027636bf7638e25c9304bb1e1a6a870164e23b6cc43ff3b1f29cf6068bae69f",
+    "inspectedSection": "abi only",
+    "notInspected": ["bytecode", "source", "AST", "metadata source map"]
+  },
+  "actionTuple": [
+    ["kind", "uint8"],
+    ["typeId", "bytes32"],
+    ["bodyHashOrRecordId", "bytes32"],
+    ["purpose", "bytes32"],
+    ["subject", "bytes32"],
+    ["role", "bytes32"],
+    ["target", "bytes32"],
+    ["expectedRevision", "uint32"],
+    ["salt", "bytes32"]
+  ],
+  "intentTuple": [
+    ["realmId", "bytes32"],
+    ["coreCodeCommitment", "bytes32"],
+    ["author", "address"],
+    ["nonce", "uint64"],
+    ["deadline", "uint64"],
+    ["acceptanceProfile", "bytes32"],
+    ["indexObligations", "bytes32"]
+  ],
+  "intentTypeLiteral": "PublicationIntent(bytes32 realmId,bytes32 coreCodeCommitment,address author,uint64 nonce,uint64 deadline,bytes32 acceptanceProfile,bytes32 indexObligations,bytes32 actionsHash)",
+  "selectors": {
+    "executeSigned": "0x8846f57e",
+    "intentDigest": "0xeab130be",
+    "record": "0xb5c645bd",
+    "domainSeparator": "0xf698da25"
+  },
+  "stillUnsupported": {
+    "actionArrayCommitmentFraming": "not declared",
+    "bodyArrayCommitmentFraming": "not declared",
+    "eip712DomainSchemaAndValues": "not declared",
+    "deploymentReplayBinding": "pending a later candidate pin",
+    "nativePrincipalDerivation": "pending a later candidate pin",
+    "candidateSignatureVector": "not declared"
+  },
+  "oracleConsequence": "does not upgrade actionCommitment, signedDigest, or signedPlanBinding for profile 727291a"
+}

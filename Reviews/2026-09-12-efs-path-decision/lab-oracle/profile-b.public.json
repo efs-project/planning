@@ -1,0 +1,59 @@
+{
+  "kind": "EFS_DISPOSABLE_ORACLE_PUBLIC_PROFILE",
+  "version": 1,
+  "standing": "transcription of candidate-public declarations; not protocol adoption",
+  "candidate": {
+    "road": "B",
+    "profile": "road-b-lab/1",
+    "sourceCommit": "727291aac717f4c4e38e9049e8c9328da94389b8",
+    "manifestPath": "Reviews/2026-09-12-efs-path-decision/lab-b/MANIFEST.draft.json",
+    "manifestBlob": "46efa03d08408230d198c87000f396ee2fb24e12",
+    "interfacesPath": "Reviews/2026-09-12-efs-path-decision/lab-b/src/Interfaces.sol",
+    "interfacesBlob": "3155357f6d3e58c910828df2eb798ecb53ea24f9"
+  },
+  "inspectionBoundary": {
+    "read": [
+      "MANIFEST.draft.json",
+      "src/Interfaces.sol"
+    ],
+    "notRead": [
+      "Reconstructor implementation",
+      "intentDigest implementation",
+      "measurement script",
+      "SDK or helper implementation",
+      "candidate verifier tests"
+    ]
+  },
+  "recordIdentity": {
+    "support": "SUPPORTED",
+    "domainText": "efs2/record/1",
+    "preimage": "abi.encode(bytes32 domain, bytes32 typeId, bytes32 bodyHash)",
+    "bodyHash": "keccak256(rawBody)",
+    "result": "keccak256(preimage)"
+  },
+  "typeIdentity": {
+    "support": "SUPPORTED",
+    "quoteDomainText": "lab/type/quote/1",
+    "result": "keccak256(utf8(domainText))"
+  },
+  "subjectIdentity": {
+    "support": "SUPPORTED",
+    "domainText": "efs2/subject/1",
+    "preimage": "abi.encode(bytes32 domain, bytes32 principalId, bytes32 salt)",
+    "result": "keccak256(preimage)",
+    "limitation": "principalId must be supplied as raw bytes32; address-to-principal derivation is not declared"
+  },
+  "actionCommitment": {
+    "support": "UNSUPPORTED",
+    "reason": "public manifest does not declare ordered Action fields, ABI types, array framing, or action type string"
+  },
+  "signedDigest": {
+    "support": "UNSUPPORTED",
+    "reason": "public manifest names EIP-712 PublicationIntent and domain name/version but omits the complete domain field set, ordered intent fields, types, and action/body commitment framing"
+  },
+  "signatureRecovery": {
+    "support": "SUPPORTED",
+    "scope": "ECDSA recovery for a supplied bytes32 digest and signature only; this does not establish candidate signed-plan binding"
+  },
+  "candidateEvidenceState": "DESIGNED_BUT_UNTESTED"
+}
