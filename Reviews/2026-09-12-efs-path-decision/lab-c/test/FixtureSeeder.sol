@@ -62,20 +62,20 @@ contract FixtureSeeder {
   // ---- bodies ----------------------------------------------------------------
 
   function itemTypeBody() public view returns (bytes memory) {
-    return b.typeBody(keccak256("Item"), new bytes32[](0));
+    return b.typeBody(keccak256("Item"), new bytes32[](0), address(actors.passAcceptor()).codehash);
   }
 
   function pairTypeBody() public view returns (bytes memory) {
     bytes32[] memory two = new bytes32[](2);
     two[0] = ITEM_T;
     two[1] = ITEM_T;
-    return b.typeBody(keccak256("Pair"), two);
+    return b.typeBody(keccak256("Pair"), two, address(actors.passAcceptor()).codehash);
   }
 
   function quoteTypeBody() public view returns (bytes memory) {
     bytes32[] memory one = new bytes32[](1);
     one[0] = PAIR_T;
-    return b.typeBody(keccak256("Quote"), one);
+    return b.typeBody(keccak256("Quote"), one, address(actors.quoteAcceptor()).codehash);
   }
 
   function ethBody() public view returns (bytes memory) {
@@ -93,7 +93,8 @@ contract FixtureSeeder {
     return b.recordBody(refs, bytes(""));
   }
 
-  /// Content-derived fixture ids (the acceptor address is not part of typeId).
+  /// Content-derived fixture ids commit each default actor's immutable runtime,
+  /// not its local address. A different selected rule must not silently change these bodies.
   function computeFixtureIds() public {
     ITEM_T = EfsIds.recordId(TYPE_META, keccak256(itemTypeBody()));
     PAIR_T = EfsIds.recordId(TYPE_META, keccak256(pairTypeBody()));
@@ -117,7 +118,7 @@ contract FixtureSeeder {
     acts[0] = b.declareTypeAction(bodies[0], pass);
     bodies[1] = pairTypeBody();
     acts[1] = b.declareTypeAction(bodies[1], pass);
-    bodies[2] = quoteTypeBody();
+    bodies[2] = quoteTypeBody(); // Always commits the default V1 rule, even when probing a substituted target.
     acts[2] = b.declareTypeAction(bodies[2], quoteAcceptorAddr);
     bodies[3] = ethBody();
     acts[3] = b.recordAction(ITEM_T, bodies[3]);

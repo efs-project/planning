@@ -31,7 +31,7 @@ import {
 interface ILedgerDecode {
   function decodeBody(bytes calldata body) external pure returns (bytes32[] memory refs, bytes memory payload);
 
-  function decodeTypeBody(bytes calldata body) external pure returns (bytes32 shape, bytes32[] memory refTypes);
+  function decodeTypeBody(bytes calldata body) external pure returns (bytes32 shape, bytes32[] memory refTypes, bytes32 mandatoryRuleId);
 }
 
 library ActionLib {
@@ -106,7 +106,7 @@ library ActionLib {
   }
 
   function checkProfile(Intent calldata intent, IIndexModule index) internal view {
-    if (intent.acceptanceProfile != ACCEPTANCE_PROFILE_V1) revert BadProfile(intent.acceptanceProfile);
+    if (intent.acceptanceProfile != ACCEPTANCE_PROFILE_V2) revert BadProfile(intent.acceptanceProfile);
     if (intent.indexObligations != index.obligationsId()) revert BadObligations(intent.indexObligations);
   }
 
@@ -258,11 +258,13 @@ library ActionLib {
     if (body.length == 0 || keccak256(body) != a.digest) revert BodyHashMismatch(i);
     typeId = EfsIds.recordId(TYPE_META, a.digest);
     if (Types._getAdmission(typeId) != 0) revert TypeExists(typeId);
-    bytes32[] memory refTypes = structuralType(i, body);
+    (bytes32[] memory refTypes, bytes32 mandatoryRuleId) = structuralType(i, body);
     address acceptor = address(uint160(uint256(a.target)));
     if (acceptor.code.length == 0) revert AcceptorHasNoCode(acceptor);
+    bytes32 runtimeHash = acceptor.codehash;
+    if (runtimeHash != mandatoryRuleId) revert AcceptorRuleMismatch(typeId, mandatoryRuleId, runtimeHash);
     Records._set(typeId, TYPE_META, ordinal, body);
-    Types._set(typeId, acceptor, acceptor.codehash, ordinal, refTypes);
+    Types._set(typeId, acceptor, runtimeHash, ordinal, refTypes);
   }
 
   function loadType(bytes32 typeId) internal view returns (TypeRow memory t) {
@@ -341,9 +343,9 @@ library ActionLib {
     }
   }
 
-  function structuralType(uint256 i, bytes calldata body) internal view returns (bytes32[] memory refTypes) {
-    try ILedgerDecode(address(this)).decodeTypeBody(body) returns (bytes32, bytes32[] memory r_) {
-      return r_;
+  function structuralType(uint256 i, bytes calldata body) internal view returns (bytes32[] memory refTypes, bytes32 mandatoryRuleId) {
+    try ILedgerDecode(address(this)).decodeTypeBody(body) returns (bytes32, bytes32[] memory r_, bytes32 rule_) {
+      return (r_, rule_);
     } catch {
       revert StructuralInvalid(i);
     }

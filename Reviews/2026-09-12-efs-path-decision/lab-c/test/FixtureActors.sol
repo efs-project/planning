@@ -29,7 +29,8 @@ contract QuoteAcceptorV1 is IAcceptor {
   }
 }
 
-/// Fixture rule v2 (sdk-fixture step 10 / destination rule): rejects mantissas above 2_500_000_000.
+/// Different mandatory rule: rejects mantissas above 2_500_000_000. It is a different exact Type,
+/// not an additive destination policy that may replace V1 under the same Type identity.
 contract QuoteAcceptorV2 is IAcceptor {
   uint256 public constant MAX_MANTISSA = 2_500_000_000;
 

@@ -156,7 +156,7 @@
       "delegation": "none (World is not used)",
       "testLevers": [
         "IndexModule.poisonConcept (immutable; zero = disabled, used for the measured deployment)",
-        "QuoteAcceptorV2 (destination rule)"
+        "QuoteAcceptorV2 (different mandatory rule; cannot replace V1 under the same TypeId)"
       ]
     },
     "setupReceipts": {
@@ -167,12 +167,13 @@
   },
   "fixtures": {
     "typeClosures": {
-      "TYPE_META": "keccak('efs2/lab-c/type-meta/1')",
-      "Item": "typeId = keccak(TYPE_META, keccak(abi.encode(keccak('Item'), [])))",
-      "Pair": "typeId = keccak(TYPE_META, keccak(abi.encode(keccak('Pair'), [ITEM_T, ITEM_T])))",
-      "Quote": "typeId = keccak(TYPE_META, keccak(abi.encode(keccak('Quote'), [PAIR_T])))",
-      "Bytes (controls)": "typeId = keccak(TYPE_META, keccak(abi.encode(keccak('Bytes'), [])))",
-      "note": "acceptor address is a Realm-local binding (Action.target), NOT part of typeId"
+      "TYPE_META": "keccak('efs2/lab-c/type-meta/2')",
+      "acceptanceProfile": "keccak('efs2/lab-c/acceptance/2')",
+      "Item": "typeId = keccak(TYPE_META, keccak(abi.encode(keccak('Item'), [], passRuntimeHash)))",
+      "Pair": "typeId = keccak(TYPE_META, keccak(abi.encode(keccak('Pair'), [ITEM_T, ITEM_T], passRuntimeHash)))",
+      "Quote": "typeId = keccak(TYPE_META, keccak(abi.encode(keccak('Quote'), [PAIR_T], quoteV1RuntimeHash)))",
+      "Bytes (controls)": "typeId = keccak(TYPE_META, keccak(abi.encode(keccak('Bytes'), [], passRuntimeHash)))",
+      "note": "Action.target is Realm-local; its runtime hash must match the mandatory rule committed in the Type body. Runtime hash alone does not prove mutable dependency semantics. Fresh-genesis experiment; retained old evidence uses profile /1."
     },
     "bodies": {
       "framing": "body = abi.encode(bytes32[] refs, bytes payload); recordId = keccak(typeId, keccak(body))",

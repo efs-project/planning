@@ -83,9 +83,9 @@ contract Ledger is EfsStoreCore {
     (refs, payload) = abi.decode(body, (bytes32[], bytes));
   }
 
-  /// Structural decode of a Type declaration body (shape commitment, refTypes); same wrapping.
-  function decodeTypeBody(bytes calldata body) external pure returns (bytes32 shape, bytes32[] memory refTypes) {
-    (shape, refTypes) = abi.decode(body, (bytes32, bytes32[]));
+  /// Exact Type body commits shape, reference Types, and the mandatory rule runtime.
+  function decodeTypeBody(bytes calldata body) external pure returns (bytes32 shape, bytes32[] memory refTypes, bytes32 mandatoryRuleId) {
+    (shape, refTypes, mandatoryRuleId) = abi.decode(body, (bytes32, bytes32[], bytes32));
   }
 
   function _refs() internal view returns (ActionLib.LedgerRefs memory r) {

@@ -20,8 +20,8 @@ const ZERO = ethers.ZeroHash;
 const id = (s) => ethers.keccak256(ethers.toUtf8Bytes(s));
 const K = { DECLARE_TYPE: 1, RECORD: 2, SUBJECT: 3, BIND: 4 };
 const D = { BODY_HASH: 1, RECORD_ID: 2 };
-const TYPE_META = id("efs2/lab-c/type-meta/1");
-const PROFILE = id("efs2/lab-c/acceptance/1");
+const TYPE_META = id("efs2/lab-c/type-meta/2");
+const PROFILE = id("efs2/lab-c/acceptance/2");
 const OBLIGATIONS = id("efs2/lab-c/index-obligations/1");
 const TAG_SUBJECT = id("efs2/subject/1");
 const TAG_REALM = id("efs2/realm/1");
@@ -47,7 +47,7 @@ for (const k of Object.keys(C32)) if (ethers.keccak256(C32[k]) !== C32_HASH[k]) 
 const action = (o) => ({ kind: 0, typeId: ZERO, digestKind: 0, digest: ZERO, purpose: ZERO, subject: ZERO, role: ZERO, target: ZERO, expectedRevision: 0, salt: ZERO, ...o });
 const recordId = (typeId, bodyHash) => ethers.keccak256(coder.encode(["bytes32", "bytes32"], [typeId, bodyHash]));
 const recordBody = (refs, payload) => coder.encode(["bytes32[]", "bytes"], [refs, payload]);
-const typeBody = (shape, refs) => coder.encode(["bytes32", "bytes32[]"], [shape, refs]);
+const typeBody = (shape, refs, mandatoryRuleId) => coder.encode(["bytes32", "bytes32[]", "bytes32"], [shape, refs, mandatoryRuleId]);
 const quotePayload = (n) => coder.encode(["uint256", "uint8", "uint64", "bytes32"], [n, 6, 1_800_000_000n, id("reference quote")]);
 const subjectId = (principal, salt) => ethers.keccak256(coder.encode(["bytes32", "bytes32", "bytes32"], [TAG_SUBJECT, principal, salt]));
 const bindingKey = (author, purpose, subject, role = ZERO) => ethers.keccak256(coder.encode(["bytes32", "bytes32", "bytes32", "bytes32"], [author, purpose, subject, role]));
@@ -151,24 +151,25 @@ async function exactTransaction(hash, source, knownReceipt) {
   return { transaction, receipt, header };
 }
 function expectedImmutables(name, address, args, chainId) {
+  // Fresh /2 compiler AST identities, cross-checked by name and artifact-range tests.
   const wordAddress = (value) => ethers.zeroPadValue(value, 32);
   if (name === "ImportLib") return { library_deploy_address: { name: "self library address", value: wordAddress(address) } };
   if (name === "IndexModule") return {
-    "3811": { name: "deployer", value: wordAddress(wallet.address) },
-    "3813": { name: "poisonConcept", value: args[0] },
+    "3835": { name: "deployer", value: wordAddress(wallet.address) },
+    "3837": { name: "poisonConcept", value: args[0] },
   };
   if (name === "Ledger") {
     const indexArtifact = evidence.artifacts.find((item) => item.operation === "deploy:IndexModule");
     if (!indexArtifact) throw new Error("Ledger immutable check requires verified IndexModule");
     return {
-      "4405": { name: "index", value: wordAddress(args[0]) },
-      "4407": { name: "indexCodehash", value: indexArtifact.runtimeHash },
-      "4409": { name: "realmId", value: ethers.keccak256(coder.encode(["bytes32", "uint256", "address"], [TAG_REALM, chainId, address])) },
+      "4429": { name: "index", value: wordAddress(args[0]) },
+      "4431": { name: "indexCodehash", value: indexArtifact.runtimeHash },
+      "4433": { name: "realmId", value: ethers.keccak256(coder.encode(["bytes32", "uint256", "address"], [TAG_REALM, chainId, address])) },
     };
   }
   if (name === "LensReader") return {
-    "5053": { name: "ledger", value: wordAddress(args[0]) },
-    "5056": { name: "index", value: wordAddress(args[1]) },
+    "5090": { name: "ledger", value: wordAddress(args[0]) },
+    "5093": { name: "index", value: wordAddress(args[1]) },
   };
   return {};
 }
@@ -287,10 +288,15 @@ async function main() {
   const SELF = contractPrincipal(domain.realmOrigin, wallet.address);
   const A = eoaPrincipal(walletA.address);
   const B = contractPrincipal(domain.realmOrigin, await producer.getAddress());
-  const itemBody = typeBody(id("Item"), []), ITEM_T = recordId(TYPE_META, ethers.keccak256(itemBody));
-  const pairTypeBody = typeBody(id("Pair"), [ITEM_T, ITEM_T]), PAIR_T = recordId(TYPE_META, ethers.keccak256(pairTypeBody));
-  const quoteTypeBody = typeBody(id("Quote"), [PAIR_T]), QUOTE_T = recordId(TYPE_META, ethers.keccak256(quoteTypeBody));
-  const bytesTypeBody = typeBody(id("Bytes"), []), BYTES_T = recordId(TYPE_META, ethers.keccak256(bytesTypeBody));
+  // Candidate declaration inputs, derived from retained runtime-verified deployments;
+  // these are not the independent comparison oracle's expectations.
+  const passRuleId = evidence.artifacts.find((row) => row.operation === "deploy:PassAcceptor")?.runtimeHash;
+  const quoteRuleId = evidence.artifacts.find((row) => row.operation === "deploy:QuoteAcceptorV1")?.runtimeHash;
+  if (!passRuleId || !quoteRuleId) throw new Error("missing retained mandatory-rule runtime commitments");
+  const itemBody = typeBody(id("Item"), [], passRuleId), ITEM_T = recordId(TYPE_META, ethers.keccak256(itemBody));
+  const pairTypeBody = typeBody(id("Pair"), [ITEM_T, ITEM_T], passRuleId), PAIR_T = recordId(TYPE_META, ethers.keccak256(pairTypeBody));
+  const quoteTypeBody = typeBody(id("Quote"), [PAIR_T], quoteRuleId), QUOTE_T = recordId(TYPE_META, ethers.keccak256(quoteTypeBody));
+  const bytesTypeBody = typeBody(id("Bytes"), [], passRuleId), BYTES_T = recordId(TYPE_META, ethers.keccak256(bytesTypeBody));
   const ethBody = recordBody([], ethers.toUtf8Bytes("ETH")), usdcBody = recordBody([], ethers.toUtf8Bytes("USDC"));
   const ITEM_ETH = recordId(ITEM_T, ethers.keccak256(ethBody)), ITEM_USDC = recordId(ITEM_T, ethers.keccak256(usdcBody));
   const pairBody = recordBody([ITEM_ETH, ITEM_USDC], "0x"), PAIR = recordId(PAIR_T, ethers.keccak256(pairBody));

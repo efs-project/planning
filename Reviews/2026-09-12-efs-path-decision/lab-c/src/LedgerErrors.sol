@@ -22,6 +22,7 @@ error UnknownKind(uint256 i, uint8 kind);
 error UnknownType(bytes32 typeId);
 error TypeExists(bytes32 typeId);
 error AcceptorHasNoCode(address acceptor);
+error AcceptorRuleMismatch(bytes32 typeId, bytes32 expected, bytes32 actual);
 error AcceptorDrift(bytes32 typeId);
 error StructuralInvalid(uint256 i);
 error RefCountMismatch(uint256 i, uint256 expected, uint256 given);

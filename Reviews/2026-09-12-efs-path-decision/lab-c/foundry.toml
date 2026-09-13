@@ -1,5 +1,5 @@
 # Disposable Road C lab (Store-only MUD probe). Not a protocol artifact.
-# Nothing here has been compiled yet: no compiler lease has been granted (see TODO.md for the lease request).
+# Compiler/chain runs require the coordinator's current finite slot; retained evidence is source-pinned.
 [profile.default]
 src = "src"
 test = "test"

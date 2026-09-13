@@ -37,8 +37,8 @@ uint8 constant GRADE_SIGNATURE_VERIFIED = 1; // imported EOA evidence re-verifie
 bytes32 constant TAG_SUBJECT = keccak256("efs2/subject/1");
 bytes32 constant TAG_REALM = keccak256("efs2/realm/1");
 bytes32 constant TAG_ORIGIN = keccak256("efs2/origin/1");
-bytes32 constant TYPE_META = keccak256("efs2/lab-c/type-meta/1");
-bytes32 constant ACCEPTANCE_PROFILE_V1 = keccak256("efs2/lab-c/acceptance/1");
+bytes32 constant TYPE_META = keccak256("efs2/lab-c/type-meta/2");
+bytes32 constant ACCEPTANCE_PROFILE_V2 = keccak256("efs2/lab-c/acceptance/2");
 bytes32 constant INDEX_OBLIGATIONS_V1 = keccak256("efs2/lab-c/index-obligations/1");
 bytes32 constant PURPOSE_FOLDER = keccak256("efs2/lab-c/purpose/folder");
 bytes32 constant PURPOSE_HEAD = keccak256("efs2/lab-c/purpose/head");
@@ -59,8 +59,10 @@ bytes32 constant INTENT_TYPEHASH =
 // ---- structs -----------------------------------------------------------------
 
 /// One action of a publication. The full tuple is inside the signed actionsHash.
-///  kind=DECLARE_TYPE: typeId=TYPE_META, digestKind=BODY_HASH, digest=keccak(abi.encode(bytes32 shape, bytes32[] refTypes)),
-///                     target=bytes32(uint160(acceptor)) (Realm-local binding, NOT part of typeId); other fields 0.
+///  kind=DECLARE_TYPE: typeId=TYPE_META, digestKind=BODY_HASH,
+///                     digest=keccak(abi.encode(bytes32 shape, bytes32[] refTypes, bytes32 mandatoryRuleId)),
+///                     target=bytes32(uint160(acceptor)); its runtime codehash must equal mandatoryRuleId.
+///                     The local address is not Type identity; the mandatory rule commitment is. Other fields 0.
 ///  kind=RECORD:       typeId; digestKind=BODY_HASH (digest=keccak(body)) or RECORD_ID (digest=existing recordId);
 ///                     body=abi.encode(bytes32[] refs, bytes payload); other fields 0.
 ///  kind=SUBJECT:      subject = keccak(TAG_SUBJECT, author principal, salt); other fields 0.

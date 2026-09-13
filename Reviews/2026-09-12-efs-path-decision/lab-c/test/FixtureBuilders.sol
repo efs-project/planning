@@ -60,7 +60,7 @@ contract FixtureBuilders {
   function intentOf(bytes32 author, uint64 nonce, Action[] memory actions) public pure returns (Intent memory it) {
     it.author = author;
     it.nonce = nonce;
-    it.acceptanceProfile = ACCEPTANCE_PROFILE_V1;
+    it.acceptanceProfile = ACCEPTANCE_PROFILE_V2;
     it.indexObligations = INDEX_OBLIGATIONS_V1;
     it.actions = actions;
   }
@@ -82,8 +82,8 @@ contract FixtureBuilders {
     (s.v, s.r, s.s) = vm.sign(pk, digestOf(lg, it));
   }
 
-  function typeBody(bytes32 shape, bytes32[] memory refTypes) public pure returns (bytes memory) {
-    return abi.encode(shape, refTypes);
+  function typeBody(bytes32 shape, bytes32[] memory refTypes, bytes32 mandatoryRuleId) public pure returns (bytes memory) {
+    return abi.encode(shape, refTypes, mandatoryRuleId);
   }
 
   function recordBody(bytes32[] memory refs, bytes memory payload) public pure returns (bytes memory) {

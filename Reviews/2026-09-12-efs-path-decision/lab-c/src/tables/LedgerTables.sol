@@ -405,7 +405,7 @@ library Subjects {
 
 // ---------------------------------------------------------------------------
 // Types: typeId -> (acceptor, acceptorCodehash, admission, refTypes[])   (EFS Types are rows;
-// the acceptor is a Realm-local binding recorded here, not part of the portable typeId)
+// the acceptor address is Realm-local; its codehash must match the rule committed in the Type body)
 // ---------------------------------------------------------------------------
 library Types {
   ResourceId constant _tableId = ResourceId.wrap(0x7462656673000000000000000000000054797065730000000000000000000000);

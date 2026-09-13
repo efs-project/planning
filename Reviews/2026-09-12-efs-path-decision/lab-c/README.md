@@ -1,6 +1,38 @@
 # lab-c — Store-only MUD probe (DISPOSABLE LAB, NO PROTOCOL CLAIM)
 
-**Standing:** disposable comparison plumbing for the [[../road-c|Road C]] arm of the [[../README|EFS path-decision sprint]]. Nothing here proposes EFS protocol bytes, names, ABIs or a deployment. **Nothing has been compiled or run**: no compiler lease has been granted (see `TODO.md` for the exact lease request). Every gas number anywhere in this folder is ESTIMATED or UNKNOWN until `script/measure.mjs` prints receipts.
+**Standing:** disposable comparison plumbing for the [[../road-c|Road C]] arm of the [[../README|EFS path-decision sprint]]. Nothing here proposes EFS protocol bytes, names, ABIs or a deployment. Retained profile-1 build/receipt evidence belongs to its recorded source pins; the fresh-genesis mandatory-rule repair below has no new receipt measurement. Original uncompiled/estimated descriptions farther down are historical, not current build status.
+
+## September 13 mandatory-rule identity repair
+
+Before editing Core, the new three-test fixture against `324e7c4` passed its
+two identity controls and failed `strict rule commitment accepted a permissive
+runtime`: the old decoder ignored the body's rule field. The first attempt
+failed only because an artifact dependency import was missing; it was not
+semantic failure evidence. The corrected red fixture SHA256 is
+`c68310f87e41c8c20cb60291a4b89cfa4c2f351061474b183d394916e1e94d97`;
+the retained red log SHA256 is
+`fcba39fa2e753bdab6045117795f026398a67729a6d95b1ca6fcdf9bda978122`.
+
+Fresh experimental Type-meta and acceptance tags now use `/2`. A Type body is
+`abi.encode(shape, refTypes, mandatoryRuleId)`; declaration must bind a local
+acceptor whose runtime codehash equals that commitment. The existing admission
+drift check remains. Types table layout, Record-ID formula and index obligations
+are unchanged. Different mandatory rules yield different exact Types; the same
+immutable fixture runtime at different addresses can yield the same Type.
+
+Limits: this does not prove arbitrary validators' mutable dependencies, add
+Realm policy activation, normalize every ABI-equivalent Type encoding, or
+rewrite signed imported declarations' source addresses. Relocation uses explicit
+destination Type predeclaration. Extra destination policy is still a separate
+missing capability, not implemented by substituting the mandatory Type rule.
+The runner Type bodies and immutable map are updated from the new compiler AST
+(cross-checked by variable name). The stale-range test was observed failing
+against the fresh artifacts before its pins were refreshed. Repaired validation:
+47/47 Forge tests, 6/6 Node helper checks using the fresh artifact directory,
+and all 99 artifacts within normal runtime/initcode limits. Ledger runtime is
+23,204 B; ImportLib 19,909 B; IndexModule 10,303 B; LensReader 10,585 B.
+This is unit/build evidence, not a fresh receipt run or matched B/C result.
+Old cost packets are not silently relabelled as the repaired profile.
 
 **Author:** road-c-mud-specialist (Claude Fable 5.1) · **Date:** 2026-09-13 · **Branch:** `fable/2026-09-13-road-c-lab`, uncommitted by instruction.
 
