@@ -38,7 +38,7 @@ Everything below is honest state as of writing. No `forge`, `solc`, `anvil`, `no
 - Do tag bindings target a stance record or the subject itself? The lab binds `TAG → subject` (untyped target); the fixture's `market` tag may want a typed stance record.
 - Should `withdraw` also tombstone the author's heads set by that admission (fuller semantics)?
 
-## D. Lease request (exact)
+## D. Lease request (exact) — SUPERSEDED by §G (2026-09-13: 32 tests, ~170 transactions across 18 cells, 25-minute script watchdog, measure.json 5–10 MB); the commands and scratch rules below still apply, the counts and durations do not
 
 - **What to run**, in order, from `Reviews/2026-09-12-efs-path-decision/lab-b`:
   1. `FOUNDRY_OUT=/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/out forge build --use 0.8.30 --offline` — expected 1–3 min; fix compile errors from §A first (one repair cycle).
@@ -86,6 +86,8 @@ Written under another worker's compiler lease: no `forge`, `solc`, `anvil`, `nod
 10. `script/measure.mjs`: ethers v6 exports used — `HDNodeWallet`, `Interface`, `AbiCoder`, `keccak256`, `hexlify`, `toBeHex`, `zeroPadValue`, `toUtf8Bytes`, `concat`, `getCreateAddress`, `getAddress`; `wallet.signTransaction({type: 0, gasPrice, chainId, to: null|address})` and `keccak256(rawTransaction)` as the tx hash (legacy tx). Anvil's `eth_call` revert shape is assumed `{error: {code, message, data: "0x…"}}`; the static-call selector is read from `error.data` (fallback: `error.data.data`). `eth_gasPrice` ×2+1 is used as a legacy `gasPrice`; if Anvil's base fee exceeds it mid-cell the send fails loudly (raise the multiplier). Fixed `gasLimit` 8,000,000 (calls) / 15,000,000 (deploys) / 3,000,000 (expected failures) — the Ledger's `E_GAS` guards need ≥ ~0.5M headroom, satisfied.
 11. `report.json` size: ~18 cells × (60–150 raw envelopes + 5–20 transactions with four envelopes each) — expect 5–10 MB and one rewrite per transaction; if the run is too slow, persist per row group instead (the guarantee needed is "on disk before the next revert").
 12. The registry epoch after setup is 6 (one more registration than the retained run's 5), so `vectors/profile-b.json` acceptance profiles will not match a new run's — expected, not a bug.
-13. `StatelessConsumer` method selectors (`commitQuote` …) are distinct from `Consumer.readQuote` on purpose; the existing checker profile pins `Consumer` selectors and would otherwise classify the twin's transactions as conflicting `readQuote`/`readList` calls.
+13. `consumerCheck` mines one empty block (`evm_mine`) after every STORING `readQuote`/`readList` row so only the checker's frozen selectors sit at the receipt block; with `--rpc` against a node without `evm_mine` the run fails loudly there (by design; the checker owner has been asked about the split).
+14. `JoinedConsumer.readLabel(position, labelRecordId)` takes the record id as an argument (review MAJOR: no candidate library in the consumer); the script and tests derive it themselves.
+15. `StatelessConsumer` method selectors (`commitQuote` …) are distinct from `Consumer.readQuote` on purpose; the existing checker profile pins `Consumer` selectors and would otherwise classify the twin's transactions as conflicting `readQuote`/`readList` calls.
 
 **Still not done (explicit).** sdk-fixture steps 8–10 (offline clean reader, import into a fresh destination, rule v2 / account drift); files-journey J4–J6 beyond what step 6 covers; the capability ablation; any independent oracle vectors for the new commitments; storage tracing; the candidate (a) dictionary probe in `LABELS.md`.

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 
-import {Keys} from "./Keys.sol";
 import {Ledger} from "./Ledger.sol";
 import {LensReader} from "./LensReader.sol";
 
@@ -23,7 +22,8 @@ import {LensReader} from "./LensReader.sol";
 
 /// The joined QUOTE/Pair consumer (sdk-fixture steps 5–7): point read under an ordered lens or
 /// under the no-tiebreak policy, a complete folder page, a tag-filtered page, an as-of history
-/// read at an explicit basis, and the label-retention retrieval. The point read verifies the
+/// read at an explicit basis, and the label-retention retrieval. It imports no candidate library
+/// (no Keys): every id it needs is a call argument or a public getter result. The point read verifies the
 /// selected record's Type and 160-byte shape, that its Pair reference is a PAIR record whose two
 /// leading words are ITEM records, and that the head admission's publication evidence names the
 /// lens principal that was selected with a known proof kind (1 native, 2 signed).
@@ -201,18 +201,21 @@ contract JoinedConsumer {
     /// the position's role (role == keccak256(bytes)). HEAD positions (role 0) carry no label; tag
     /// concepts and folder ids are NOT resolved here. Missing bytes revert LabelUnavailable — never
     /// an empty name. The bytes are self-certifying (keccak256(bytes) == role).
+    /// `labelRecordId` is supplied by the caller (a cold reader derives it from the role with its own
+    /// formula); this consumer imports no candidate library and does not derive it. The supplied id
+    /// cannot substitute bytes: the record must carry the LABEL Type and its bytes must hash to the
+    /// position's role, else LabelUnavailable / LabelIntegrity.
     /// commitment = keccak256(abi.encode(position, role, bytes))
-    /// evidence   = keccak256(abi.encode(folderId, recordId, firstAdmission, occurrences, length))
-    function readLabel(bytes32 position) external returns (bytes32 commitment, bytes32 evidenceCommitment) {
+    /// evidence   = keccak256(abi.encode(folderId, labelRecordId, firstAdmission, occurrences, length))
+    function readLabel(bytes32 position, bytes32 labelRecordId) external returns (bytes32 commitment, bytes32 evidenceCommitment) {
         (bytes32 purpose, bytes32 folderId, bytes32 role) = ledger.positionCell(position);
         if (purpose != FOLDER || role == bytes32(0)) revert LabelUnavailable(position, role);
-        bytes32 id = Keys.recordFromHash(labelType, role);
-        (bytes32 typeId, uint64 firstAdmission, uint32 occurrences, bytes memory data) = ledger.record(id);
+        (bytes32 typeId, uint64 firstAdmission, uint32 occurrences, bytes memory data) = ledger.record(labelRecordId);
         if (typeId != labelType) revert LabelUnavailable(position, role);
         bytes32 h = keccak256(data);
         if (h != role) revert LabelIntegrity(role, h);
         commitment = keccak256(abi.encode(position, role, data));
-        evidenceCommitment = keccak256(abi.encode(folderId, id, firstAdmission, occurrences, data.length));
+        evidenceCommitment = keccak256(abi.encode(folderId, labelRecordId, firstAdmission, occurrences, data.length));
         emit ResultCommitment(KIND_LABEL, commitment, evidenceCommitment);
     }
 

@@ -151,11 +151,6 @@ const FAIL_GAS = 3_000_000n;
 const T0 = Date.now();
 const log = (line) => { process.stdout.write(`[${((Date.now() - T0) / 1000).toFixed(1).padStart(7)}s] ${line}\n`); };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-async function withTimeout(promise, ms, label) {
-  let timer;
-  const bomb = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`${label}: no response after ${ms} ms`)), ms); });
-  try { return await Promise.race([promise, bomb]); } finally { clearTimeout(timer); }
-}
 
 // ---------------------------------------------------------------- artifacts and interfaces
 const ART_SOURCE = {
@@ -227,11 +222,10 @@ async function startAnvil() {
   Object.assign(anvilInfo, { spawned: true, pid: anvil.pid, port, cachePath, startedAt: new Date().toISOString(), args: argv.filter((a) => a !== MNEMONIC) });
   process.once('exit', stopAnvil);
   process.once('SIGINT', () => { stopAnvil(); process.exit(130); });
-  setTimeout(() => { console.error('watchdog: 25 minutes elapsed, killing anvil'); stopAnvil(); process.exit(124); }, WATCHDOG_MS).unref();
   const url = `http://127.0.0.1:${port}`;
   for (let i = 0; i < 100; i++) {
     if (anvil.exitCode !== null) throw new Error(`anvil exited early (code ${anvil.exitCode}); check --cache-path support`);
-    try { const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_chainId', params: [] }), signal: AbortSignal.timeout(500) }); if ((await r.json()).result === '0x7a69') return url; } catch {}
+    try { const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 0, method: 'eth_chainId', params: [] }), signal: AbortSignal.timeout(500) }); if ((await r.json()).result === '0x7a69') return url; } catch {} // id 0: never collides with the counted requests (which start at 1)
     await sleep(100);
   }
   throw new Error('anvil did not start');
@@ -335,6 +329,8 @@ async function send(ctx, build, label, { expectFail = false, gasLimit = CALL_GAS
   const { receipt, env: receiptEnv, polls } = await waitReceipt(ctx, hash, label, from);
   const blockNumber = Number(receipt.blockNumber);
   const blockEnv = await ctx.rpc('eth_getBlockByHash', [receipt.blockHash, false], { label });
+  assert.equal(blockEnv.response.result?.hash, receipt.blockHash, `${label}: eth_getBlockByHash(${receipt.blockHash}) did not return that header (stale receipt after a revert, or a re-sent byte-identical transaction)`);
+  assert.equal(Number(blockEnv.response.result.number), blockNumber, `${label}: header number disagrees with the receipt`);
   ctx.blocks.push({ ...envOf(blockEnv), source: ctx.source, blockNumber, blockHash: receipt.blockHash });
   ctx.blockCache.set(blockNumber, blockEnv.response.result);
   const txEnv = await ctx.rpc('eth_getTransactionByHash', [hash], { label });
@@ -533,15 +529,30 @@ function persist(report) {
 }
 
 // ---------------------------------------------------------------- checks (candidate-side self-checks; never independent)
+// The independent checker's frozen stage call sets expect EXACTLY these Consumer selectors at the paid
+// transaction's receipt block (paid-quote-read: lastTarget/lastRevision/lastValue; listing: lastCount).
+// The remaining slots are read ONE EMPTY BLOCK LATER (evm_mine) so the receipt block carries only the
+// frozen set; other storing reads (readHead, readHistory) have no frozen set and read all seven at the receipt block.
+const CHECKER_STAGE_SLOTS = { readQuote: ['lastTarget', 'lastRevision', 'lastValue'], readList: ['lastCount'] };
 async function consumerCheck(ctx, row, expected) {
+  const fn = ctx.txs[row.txIndex].candidateInputs.fn;
+  const atReceipt = CHECKER_STAGE_SLOTS[fn] ?? CONSUMER_SLOTS;
+  const later = CONSUMER_SLOTS.filter((s) => !atReceipt.includes(s));
   const actual = {};
-  for (const s of CONSUMER_SLOTS) actual[s] = str((await observe(ctx, ctx.raw, `readback:${row.label}`, 'Consumer', 'consumer', s, [], row.block))[0]);
+  for (const s of atReceipt) actual[s] = str((await observe(ctx, ctx.raw, `readback:${row.label}`, 'Consumer', 'consumer', s, [], row.block))[0]);
+  let laterBlock = null;
+  if (later.length) {
+    await ctx.other('evm_mine', [], { label: `readback-later:${row.label}: one empty block (Anvil); an external RPC without evm_mine fails loudly here` });
+    laterBlock = await ctx.latestBlock();
+    assert.equal(laterBlock, row.block + 1, `${row.label}: expected exactly one empty block after the receipt block`);
+    for (const s of later) actual[s] = str((await observe(ctx, ctx.raw, `readback-later:${row.label}`, 'Consumer', 'consumer', s, [], laterBlock))[0]);
+  }
   const compared = {};
   let match = true;
   const norm = (v) => (typeof v === 'string' ? v.toLowerCase() : String(v));
   for (const [k, v] of Object.entries(expected)) { const equal = norm(v) === norm(actual[k]); compared[k] = { expected: norm(v), actual: norm(actual[k]), equal }; if (!equal) match = false; }
   if (!match) ctx.mismatches++;
-  const check = { label: `${row.label}/readback`, kind: 'stored-slots', standing: CAVEAT_EXPECTED, block: row.block, expected: Object.fromEntries(Object.entries(expected).map(([k, v]) => [k, norm(v)])), actual, compared, match };
+  const check = { label: `${row.label}/readback`, kind: 'stored-slots', standing: CAVEAT_EXPECTED, block: row.block, slotsAtReceiptBlock: atReceipt, slotsOneBlockLater: later, laterBlock, expected: Object.fromEntries(Object.entries(expected).map(([k, v]) => [k, norm(v)])), actual, compared, match };
   ctx.consumerChecks.push(check);
   log(`  chk  ${check.label}: ${match ? 'match' : 'MISMATCH ' + JSON.stringify(compared)}`);
   return check;
@@ -585,6 +596,8 @@ async function failureRow(ctx, label, c, expectedError, probe) {
   const unchanged = JSON.stringify(stripBlock(pre)) === JSON.stringify(stripBlock(post));
   return { ...row, expectedError: `${errContract}.${errName}`, expectedSelector, observedSelector, observedRevertData: observedData, selectorMatch: observedSelector === expectedSelector, stateUnchanged: unchanged, standing: 'selector from a retained static eth_call; the mined receipt establishes reversion, not the selector', pre, post };
 }
+const baseCount = (ctx, k) => { assert(ctx.baselineCounts && ctx.baselineCounts[k] !== undefined, `${ctx.cellLabel}: baseline counts missing (${k}); the sealed baseline harvest must precede the body`); return Number(ctx.baselineCounts[k]); };
+const baseNonce = (ctx, addr) => { assert(ctx.baselineNonces && ctx.baselineNonces[addr] !== undefined, `${ctx.cellLabel}: baseline nonce missing for ${addr}`); return Number(ctx.baselineNonces[addr]); };
 const STORING = 'includes Consumer SSTOREs (first read of a slot: fresh; later reads: rewrites); not pure Lens overhead';
 const STATELESS = 'stateless consumer: no storage writes; one LOG2 (ESTIMATED ~1.5–1.9k gas) is the only overhead beyond the read';
 const pubsNow = async (ctx, stage) => Number((await observe(ctx, ctx.raw, stage, 'Ledger', 'ledger', 'counts', [], await ctx.latestBlock()))[3]);
@@ -625,7 +638,7 @@ async function matrixPlan(ctx, cellName, fixture, primary, secondary, block, opt
 async function runCell(ctx, plan, opts = {}) {
   const { cellName, fixture, primary, secondary, typeId, f1, f2, salt, subj, folder, nameHash, r1, r2, headPos, touched } = plan;
   const rows = [];
-  const adm0 = Number(ctx.baselineCounts?.admissions ?? 0); // set below from the baseline decode
+  const adm0 = baseCount(ctx, 'admissions'); // from the retained baseline decode
   const tag = `${cellName}/${fixture}`;
   // create = one logical action: subject + record + head + placement
   rows.push(await send(ctx, () => primary.build([aCreate(salt), aPublish(typeId, f1.bytes), aBind(P.HEAD, subj, ZERO, r1, 0), aBind(P.FOLDER, folder, nameHash, subj, 0)], ['0x', f1.bytes, '0x', '0x']), `${tag}/create`, { extra: { standing: 'hash-placement diagnostic create (4 actions); name is a hash' } }));
@@ -721,8 +734,8 @@ async function freshBody(ctx, a, plan) {
   const rows = [];
   const actions = [aPublish(T.QUOTE, body)];
   const probe = [[a.nativeA], T.QUOTE, name('/none')];
-  const nonceA = Number(ctx.baselineNonces?.[a.nativeA.address] ?? 0);
-  const preAbsence = { label: `fresh/${variant}/pre-absence`, recordId: id, standing: 'established by the retained baseline raw reply of Ledger.record(id) at the after-revert block (baselineRaw), not by this row', firstAdmission: ctx.baselineRecords?.[id]?.firstAdmission ?? null, occurrences: ctx.baselineRecords?.[id]?.occurrences ?? null };
+  const nonceA = baseNonce(ctx, a.nativeA.address);
+  const preAbsence = { label: `fresh/${variant}/pre-absence`, recordId: id, standing: 'established by the retained baseline raw reply of Ledger.record(id) at the after-revert block (baselineRaw), not by this row', firstAdmission: ctx.baselineRecords[id].firstAdmission, occurrences: ctx.baselineRecords[id].occurrences };
   rows.push(preAbsence);
   if (variant === 'contract-fresh-body') {
     rows.push(await send(ctx, () => a.nativeA.buildWithNonce(actions, [body], nonceA), 'fresh/contract-fresh-body (producer contract publishes quote3000; Record absent at the sealed baseline)', { extra: { regime: 'cold access set; by-Type QUOTE list and the producer by-author list are EMPTY (sealed state)' } }));
@@ -744,7 +757,7 @@ async function freshBody(ctx, a, plan) {
   }
   return rows;
 }
-function touchedPubs(ctx, plan) { plan.touched.publications.push(Number(ctx.baselineCounts?.publications ?? 0) + plan.touched.publications.length + 1); }
+function touchedPubs(ctx, plan) { plan.touched.publications.push(baseCount(ctx, 'publications') + plan.touched.publications.length + 1); }
 
 // ---------------------------------------------------------------- failure rows (sealed cell)
 const failureCell = {
@@ -826,7 +839,7 @@ const joinedCell = {
   body: async (ctx, a, plan) => {
     const { iA, iB, itemA, itemB, pairBody, pairId, salt, saltG, subj, subjG, gBody, rg, q1, q2, q3, a1, a2, b1, swaps, markets, nameHash, market, headPos, swapsPos, marketsPos, touched } = plan;
     const rows = [];
-    const adm0 = Number(ctx.baselineCounts?.admissions ?? 0); const pub0 = Number(ctx.baselineCounts?.publications ?? 0);
+    const adm0 = baseCount(ctx, 'admissions'); const pub0 = baseCount(ctx, 'publications');
     const A = a.signedA.address, B = a.nativeB.address;
     const ab = [A, B], ba = [B, A];
     const jc = (fn, fnArgs) => () => call(ctx, 'JoinedConsumer', 'joinedConsumer', fn, fnArgs);
@@ -914,9 +927,9 @@ function labelCell(variant) {
     body: async (ctx, a, plan) => {
       const { withPublish, preExisting, f1, salt, subj, folder, role, labelId, r1, placePos } = plan;
       const rows = [];
-      const adm0 = Number(ctx.baselineCounts?.admissions ?? 0); const pub0 = Number(ctx.baselineCounts?.publications ?? 0);
+      const adm0 = baseCount(ctx, 'admissions'); const pub0 = baseCount(ctx, 'publications');
       const tag = `label/${variant}`;
-      rows.push({ label: `${tag}/pre-absence`, recordId: labelId, standing: 'label Record absent at the sealed baseline: retained baseline raw reply of Ledger.record(labelId)', firstAdmission: ctx.baselineRecords?.[labelId]?.firstAdmission ?? null });
+      rows.push({ label: `${tag}/pre-absence`, recordId: labelId, standing: 'label Record absent at the sealed baseline: retained baseline raw reply of Ledger.record(labelId)', firstAdmission: ctx.baselineRecords[labelId].firstAdmission });
       let labelFirst = adm0 + 5; let occurrences = 1;
       if (preExisting) {
         rows.push(await send(ctx, () => a.nativeB.build([aPublish(T.LABEL, LABEL_ENTRY)], [LABEL_ENTRY]), `${tag}/setup: AUTHOR_B admits LABEL "entry" first (its cost is NOT part of the create row)`));
@@ -934,9 +947,9 @@ function labelCell(variant) {
       const post = await observe(ctx, ctx.raw, 'post-presence', 'Ledger', 'ledger', 'record', [labelId], await ctx.latestBlock());
       rows.push({ label: `${tag}/post-presence`, recordId: labelId, firstAdmission: str(post[1]), occurrences: str(post[2]), present: post[1] !== 0n });
       if (variant === 'hash-only-create') {
-        rows.push(await failureRow(ctx, `${tag}/consumer/readLabel (LABEL_UNAVAILABLE: the name is not retrievable from state)`, call(ctx, 'JoinedConsumer', 'joinedConsumer', 'readLabel', [placePos]), ['JoinedConsumer', 'LabelUnavailable'], [[a.nativeA], T.QUOTE, folder]));
+        rows.push(await failureRow(ctx, `${tag}/consumer/readLabel (LABEL_UNAVAILABLE: the name is not retrievable from state)`, call(ctx, 'JoinedConsumer', 'joinedConsumer', 'readLabel', [placePos, labelId]), ['JoinedConsumer', 'LabelUnavailable'], [[a.nativeA], T.QUOTE, folder]));
       } else {
-        const row = await send(ctx, () => call(ctx, 'JoinedConsumer', 'joinedConsumer', 'readLabel', [placePos]), `${tag}/consumer/readLabel (paid, stateless; hash-checked exact bytes)`, { extra: { consumer: 'JoinedConsumer (stateless; one LOG2 ESTIMATED ~1.9k gas)' } });
+        const row = await send(ctx, () => call(ctx, 'JoinedConsumer', 'joinedConsumer', 'readLabel', [placePos, labelId]), `${tag}/consumer/readLabel (paid, stateless; hash-checked exact bytes; the label record id is a call argument derived by this script, not by the consumer)`, { extra: { consumer: 'JoinedConsumer (stateless; one LOG2 ESTIMATED ~1.9k gas)' } });
         await commitmentCheck(ctx, row, 'JoinedConsumer', 'joinedConsumer', { commitment: labelCommitment(placePos, role, LABEL_ENTRY), evidence: labelEvidence(folder, labelId, labelFirst, occurrences, 5) });
         rows.push(row);
       }
@@ -1008,6 +1021,7 @@ async function deployAll(run) {
 
 async function main() {
   const t0 = Date.now();
+  setTimeout(() => { console.error('watchdog: 25 minutes elapsed, stopping the run'); stopAnvil(); process.exit(124); }, WATCHDOG_MS).unref(); // applies with and without --anvil
   const rpcUrl = args.anvil ? await startAnvil() : args.rpc || 'http://127.0.0.1:8545';
   const source = `RPC_OBSERVED:${args.anvil ? `anvil-local pid ${anvilInfo.pid}` : 'external-rpc'}:${rpcUrl}`;
   log(`rpc ${rpcUrl}; artifacts ${OUT_DIR}; scratch ${SCRATCH_ROOT}; report ${OUT_JSON}`);
@@ -1015,7 +1029,7 @@ async function main() {
   const chainIdEnv = await rpc0('eth_chainId', []);
   const chainId = Number(chainIdEnv.response.result);
   const report = {
-    profile: 'road-b-lab/2', claim: 'disposable lab, no protocol claim', unrun: 'this script version has not been executed; delete this field only from a real run',
+    profile: 'road-b-lab/2', claim: 'disposable lab, no protocol claim',
     honesty: 'This run reports receipt diagnostics with explicit remaining gates. It is not a same-guarantee comparison and not the capability ablation.',
     experiment: 'ingress x multiplicity (hash-placement diagnostics) + separate freshness cells + failure rows + the typed joined journey (steps 1–6) + the label-retention probe. NOT the protocol capability ablation (neither/authorship/selection/both), which is a later gate.',
     remainingGates: [CAVEAT_JOINED, CAVEAT_RECON, CAVEAT_MATCHED, CAVEAT_EXPECTED],
@@ -1065,7 +1079,7 @@ async function main() {
     report.sealedInitialState = { snapshot: run.sealed, blockNumber: Number(sealedHeader.number), blockHash: sealedHeader.hash, rpc: envOf(sealEnv), rule: 'evm_revert to the sealed snapshot, then re-snapshot, before every cell through a fresh context; baseline raw harvest at the after-revert block before the first transaction; post harvest recorded per cell before the next revert' };
     persist(report);
     // decode-once helpers the cell bodies use for relative ordinals (from the retained baseline)
-    const wrap = (cell) => ({ ...cell, body: async (ctx, a, plan) => { const b = ctx.baselineFrom = run.report.cells[ctx.cellLabel]?.candidateDecoded?.baseline; ctx.baselineCounts = b?.counts; ctx.baselineRecords = b?.records; ctx.baselineNonces = b?.nonces; return cell.body(ctx, a, plan); } });
+    const wrap = (cell) => ({ ...cell, body: async (ctx, a, plan) => { const b = run.report.cells[ctx.cellLabel]?.candidateDecoded?.baseline; assert(b && b.counts && b.records && b.nonces, `${ctx.cellLabel}: baseline harvest missing before the body`); ctx.baselineCounts = b.counts; ctx.baselineRecords = b.records; ctx.baselineNonces = b.nonces; return cell.body(ctx, a, plan); } });
     const runCellNamed = async (label, cell) => { const c = wrap(cell); const orig = c.plan; c.plan = async (ctx, a, block) => { ctx.cellLabel = label; return orig(ctx, a, block); }; const r = await sealedCell(run, label, c); if (r) report.cellOrder.push(label); };
     const cells = { 'native-one': (a) => [a.nativeA, null], 'signed-one': (a) => [a.signedA, null], 'native-two': (a) => [a.nativeA, a.nativeB], 'signed-two': (a) => [a.signedA, a.signedB] };
     for (const fixture of ['quote', 'binary']) {

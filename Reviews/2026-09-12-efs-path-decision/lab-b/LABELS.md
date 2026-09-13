@@ -28,7 +28,7 @@ In the lab a placement is the binding `(author, FOLDER, folderId, role = keccak2
 
 **Durable facts added.** `labels[hash] → bytes` (framed like record bodies). No Admission row, no evidence change, no list. **[review]** The existing Record body-storage helper (`_storeBody/_loadBody`) is not automatically a safe dictionary namespace: it is keyed by record id inside the Record table; a label map needs its own key domain and its own bounds.
 
-**Slots (ESTIMATED, unpriced).** Fresh label ≤ 32 B: 2 fresh slots; 33–64 B: 3. Reused label: 0 slots, one cold SLOAD plus the hash. No repricing estimate is adopted here.
+**Slots (ESTIMATED, unpriced).** Fresh label ≤ 32 B: 2 fresh slots; 33–64 B: 3. Reused label: no new storage write on reuse (mechanism only; unpriced). No repricing estimate is adopted here.
 
 **Browser resolution.** `list()` → `items[i].position` → `positionCell(position)` → `(purpose, subject, role)` → `labels(role)` for a FOLDER position. One extra `eth_call` per distinct hash; no index, no logs, no archive node. Verifier: `keccak256(bytes) == role`.
 
@@ -46,7 +46,7 @@ In the lab a placement is the binding `(author, FOLDER, folderId, role = keccak2
 
 **Ledger changes.** **None.** `IndexModule`: none. `LensReader`: none (the consumer resolves the label itself).
 
-**Measurement rows (scripted, unrun).** Four sealed cells from the same post-setup snapshot, all native author `actorA`, all on the `quote3000` fixture so the create batch matches `native-one/quote/create` exactly:
+**Measurement rows (scripted, unrun).** Four sealed cells from the same post-setup snapshot, all native author `actorA`, all on the `quote3000` fixture so the create batch matches `native-one/quote/create` in action shape and body sizes:
 
 | cell | create batch | consumer row |
 |---|---|---|

@@ -98,7 +98,7 @@ contract LabelTypeTest is LabBase {
         alice.bind(HEAD, f0, NO_ROLE, r0, 0);
         alice.bind(FOLDER, DRAFTS, name("note"), f0, 0);
         bytes32 posNote = Keys.position(FOLDER, DRAFTS, name("note"));
-        try joined.readLabel(posNote) {
+        try joined.readLabel(posNote, rid(LABEL, bytes("note"))) {
             require(false, "x");
         } catch (bytes memory err) {
             expectSel(err, JoinedConsumer.LabelUnavailable.selector, "hash-only: LABEL_UNAVAILABLE, never an empty name");
@@ -123,7 +123,7 @@ contract LabelTypeTest is LabBase {
         require(purpose == FOLDER && folderId == DRAFTS && cellRole == role, "a cold reader derives the role from the position cell");
         (bytes32 t1, uint64 first1, uint32 occ1, bytes memory data1) = ledger.record(Keys.recordFromHash(LABEL, cellRole));
         require(t1 == LABEL && first1 == 9 && occ1 == 1 && data1.length == 5 && keccak256(data1) == role, "exact bytes, self-certifying, direct lookup (no by-Type scan)");
-        (bytes32 c, bytes32 e) = joined.readLabel(pos1);
+        (bytes32 c, bytes32 e) = joined.readLabel(pos1, labelId);
         require(c == keccak256(abi.encode(pos1, role, entry)), "paid retrieval commits to position, role and exact bytes");
         require(e == keccak256(abi.encode(DRAFTS, labelId, uint64(9), uint32(1), uint256(5))), "retrieval evidence");
         // existing label republished by ANOTHER author: the same Record, a second occurrence, bob's own admission
@@ -138,7 +138,7 @@ contract LabelTypeTest is LabBase {
         (address au14,,,,,,,,,,,,) = ledger.evidence(pub14);
         require(au14 == address(bob), "bob's republication is bob's own evidence, not alice's");
         bytes32 pos2 = Keys.position(FOLDER, PUBLISHED, role);
-        (c, e) = joined.readLabel(pos2);
+        (c, e) = joined.readLabel(pos2, labelId);
         require(c == keccak256(abi.encode(pos2, role, entry)), "retrievable from the second placement");
         require(e == keccak256(abi.encode(PUBLISHED, labelId, uint64(9), uint32(2), uint256(5))), "same Record, first admission unchanged, two occurrences");
         // existing label omitted: the client relies on the retained Record (reuse-by-existence)
@@ -147,7 +147,7 @@ contract LabelTypeTest is LabBase {
         bytes32 pos3 = Keys.position(FOLDER, SWAPS, role);
         (,, uint32 occ3,) = ledger.record(labelId);
         require(occ3 == 2, "omitted: no new occurrence, nothing asserted by this author");
-        (c,) = joined.readLabel(pos3);
+        (c,) = joined.readLabel(pos3, labelId);
         require(c == keccak256(abi.encode(pos3, role, entry)), "retrievable by existence — retained bytes, not this author's acceptance");
         // occurrence withdrawal does not erase the retained Record
         Ledger.Action[] memory w = one(aWithdraw(9));
@@ -155,19 +155,25 @@ contract LabelTypeTest is LabBase {
         alice.execute(w, wb);
         (,, uint32 occ4,) = ledger.record(labelId);
         require(occ4 == 1, "alice's occurrence withdrawn");
-        (c,) = joined.readLabel(pos1);
+        (c,) = joined.readLabel(pos1, labelId);
         require(c == keccak256(abi.encode(pos1, role, entry)), "the bytes remain readable after the withdrawal");
         // explicit display-label mapping: HEAD positions carry no label
-        try joined.readLabel(Keys.position(HEAD, f1, NO_ROLE)) {
+        try joined.readLabel(Keys.position(HEAD, f1, NO_ROLE), labelId) {
             require(false, "x");
         } catch (bytes memory err) {
             expectSel(err, JoinedConsumer.LabelUnavailable.selector, "HEAD bodies stay empty: no display label at a HEAD position");
         }
         // a placement whose role has no retained preimage stays unavailable even though other labels exist
-        try joined.readLabel(posNote) {
+        try joined.readLabel(posNote, rid(LABEL, bytes("note"))) {
             require(false, "x");
         } catch (bytes memory err) {
             expectSel(err, JoinedConsumer.LabelUnavailable.selector, "an unrelated retained label does not name this placement");
+        }
+        // the supplied record id cannot substitute bytes: a retained LABEL whose bytes do not hash to this role is refused
+        try joined.readLabel(posNote, labelId) {
+            require(false, "x");
+        } catch (bytes memory err) {
+            expectSel(err, JoinedConsumer.LabelIntegrity.selector, "a wrong label id fails the self-certification, never renames the placement");
         }
     }
 }

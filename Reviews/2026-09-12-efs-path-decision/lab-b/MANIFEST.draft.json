@@ -266,7 +266,7 @@
         "JoinedConsumer.readList": "keccak256(abi.encode(keccak256(abi.encode(Entry[] items)), uint64 selectedSoFar, lensId, uint64 basisAdmission)); reverts PageNotComplete unless status COMPLETE and !mutated",
         "JoinedConsumer.readListTagged": "keccak256(abi.encode(keccak256(abi.encode(bytes32[] taggedTargets)), uint256 count, concept, lensId, basisAdmission))",
         "JoinedConsumer.readHistoryAsOf": "keccak256(abi.encode(bool live, target, uint32 revision, uint64 admission, uint64 asOf, address author, uint64 basis)); evidence for a live HEAD = keccak256(abi.encode(pairId, mantissa, scale, itemA, itemB))",
-        "JoinedConsumer.readLabel": "keccak256(abi.encode(position, role, bytes)); evidence = keccak256(abi.encode(folderId, recordId, uint64 firstAdmission, uint32 occurrences, uint256 length)); reverts LabelUnavailable when absent",
+        "JoinedConsumer.readLabel": "readLabel(position, labelRecordId): the label record id is a CALL ARGUMENT derived by the script (recordId(LABEL, bytes)); the consumer imports no candidate library and derives nothing — it checks record(labelRecordId).typeId == LABEL and keccak256(bytes) == position role (self-certifying), else LabelUnavailable / LabelIntegrity. commitment = keccak256(abi.encode(position, role, bytes)); evidence = keccak256(abi.encode(folderId, labelRecordId, uint64 firstAdmission, uint32 occurrences, uint256 length))",
         "StatelessConsumer.commit*": "keccak256 of exactly the tuple LabHarness.Consumer stores: quote (uint8 status, bytes32 target, uint32 revision, uint64 admission, uint256 value); head (status, target, revision, admission); list (uint8 status, uint64 selectedSoFar, uint64 scanned); history (uint8 live?1:0, target, revision, admission)",
         "standing": "expected values recomputed by script/measure.mjs from the fixture: candidate-side self-checks, not the independent oracle; the receipt log AND an eth_call replay at the receipt block are both retained and compared"
       }
@@ -721,7 +721,7 @@
     },
     "consumerReadback": {
       "preState": "the Consumer's last* slots are part of every pre/post probe",
-      "postTransaction": "after each consumer transaction the stored slots are read back at the receipt block and compared field by field to the expected target/revision/value/count; both are recorded; mismatches are counted per cell and in consumerMismatches",
+      "postTransaction": "after each STORING consumer transaction the checker's frozen stage selectors are read at the receipt block — readQuote: {lastTarget, lastRevision, lastValue}; readList: {lastCount} — and the remaining Consumer slots are read ONE EMPTY BLOCK LATER (Anvil evm_mine, envelope retained in rpcOther; recorded per check as slotsAtReceiptBlock / slotsOneBlockLater / laterBlock), so the receipt block carries exactly the frozen call set. readHead / readHistory rows (no frozen set) read all seven at the receipt block. All values are compared field by field to the expected ones; mismatches are counted per cell and in consumerMismatches. An external RPC without evm_mine fails loudly at the first STORING readQuote/readList check (checker owner consulted on this split)",
       "status": {
         "unknown": "not run",
         "consequence": "no stored consumer value has been observed"
@@ -758,7 +758,7 @@
       "cells": {
         "label/hash-only-create": {
           "create": "4-action create (today's create)",
-          "consumer": "JoinedConsumer.readLabel(position) reverts LabelUnavailable (failure row; selector retained)"
+          "consumer": "JoinedConsumer.readLabel(position, recordId(LABEL, 'entry')) reverts LabelUnavailable (failure row; selector retained)"
         },
         "label/create+label-fresh": {
           "create": "4-action create + PUBLISH LABEL 'entry' (5 actions)",
@@ -793,7 +793,7 @@
       "unknown": "the coordinator's oracle vectors for this arm are not yet produced",
       "consequence": "results are self-consistent (tests) but not independently checked"
     },
-    "paidConsumerSource": "src/LabHarness.sol Consumer (storing; rows labelled STORING), src/JoinedConsumer.sol JoinedConsumer + StatelessConsumer (stateless; rows labelled STATELESS); hashes recorded at run time in report.build.sourceHashes",
+    "paidConsumerSource": "src/LabHarness.sol Consumer (storing; rows labelled STORING), src/JoinedConsumer.sol JoinedConsumer + StatelessConsumer (stateless; rows labelled STATELESS; import no candidate library — only the Ledger/LensReader public ABI types); hashes recorded at run time in report.build.sourceHashes",
     "offlineReaderSource": "src/LabHarness.sol Reconstructor (state-only re-encoding; hash unknown until published)",
     "rpcAccounting": {
       "retained": "every JSON-RPC request/response envelope of a cell is retained with its id (raw[], transactions[].rpc, blocks[], rpcOther[]); eth_estimateGas rows are browser-shaped estimates",
@@ -836,7 +836,7 @@
     },
     "status": "designed-but-untested for everything in this pass; the retained 322b320 run covers only the earlier 11-cell script and NOT the cells added here",
     "stateProbes": "per cell: pre-state and post-state probes (control Record presence, nonces, counters, list heads) written to measure.json; unrun",
-    "persistedPerCell": "baselineRaw[], raw[] (with stages baseline / plan / sign-inputs / progress / reconstruct / readback / consumer-replay / pre-presence / post-presence / failure-static / failure-pre / failure-post / browser / post), transactions[] (with rpc envelopes and rawTransaction), blocks[], rpcOther[], candidateDecoded.{baseline,post}, rows, rowLog, consumerChecks[] (kinds stored-slots and commitment), mismatches; written before the next evm_revert",
+    "persistedPerCell": "baselineRaw[], raw[] (with stages baseline / plan / sign-inputs / progress / reconstruct / readback / readback-later / consumer-replay / pre-presence / post-presence / failure-static / failure-pre / failure-post / browser / post), transactions[] (with rpc envelopes and rawTransaction), blocks[], rpcOther[], candidateDecoded.{baseline,post}, rows, rowLog, consumerChecks[] (kinds stored-slots and commitment), mismatches; written before the next evm_revert",
     "sections": "raw observations (baselineRaw, raw, transactions, blocks, rpcOther) are kept apart from candidate claims (candidateDecoded, rows, consumerChecks, plan); the checker treats raw inputs, raw observations, candidate claims and evaluated results as separate sections"
   },
   "resources": {
