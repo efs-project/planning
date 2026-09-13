@@ -393,3 +393,120 @@ These are run-manifest inputs or later owner/Core decisions, not blanks an
 implementer may fill silently. Before permanent freeze, the separate authority,
 replay, recovery, cross-language vector, reconstruction, coexistence and
 century-preservation gates in [[overhead-and-selection]] still apply.
+
+## Appendix — criteria for the next sealed paid point/list slice
+
+This is the disposable comparison specification for the next Road B/Road C cost
+rows only. `A1`, `A2` and `B1` below are author/revision labels, not architecture
+roads. Run-specific expectations must be sealed before either candidate is
+connected to the read harness; this document is not itself an executed seal.
+Physical Type/body/ID/signature/packing encodings remain in each arm's fixture
+map. The earlier diagnostic packets are not retroactively qualified by this
+appendix. Preserve the input evidence grade (`RPC_OBSERVED` for the local
+transcript unless stronger authentication is independently supplied); a
+bounded semantic comparison does not require a new state-proof system or
+establish authenticated chain state. See [[oracle-boundary]].
+
+At each arm's sealed post-`B1` basis there is exactly one current placement: the A flow
+placed `FILE_QUOTE` at parent `/swaps`, name `eth-usdc`. Its provenance remains
+`sourceStep=A1`, `actor=AUTHOR_A`, with experiment-local evidence category
+`EOA_SIGNED_PUBLICATION_EFFECT`. `QUOTE_B1` adds a competing content head for
+the same File; it does not create, replace or pay for a second B placement.
+Both Lenses therefore discover the same placement and File. Only the selected
+content head changes. Placement provenance and selected-content authorship are
+always separate observations.
+
+| Row | Independently expected abstract outcome |
+|---|---|
+| `A1` setup | Admit `QUOTE_A1` for `FILE_QUOTE`, establish the one A placement and make A's current head/revision `QUOTE_A1` / `A1`. Charge the placement once and disclose it separately from publication, admission and indexing even if one transaction combines them. |
+| `A2` setup | CAS A's head from `QUOTE_A1` to `QUOTE_A2`; retain A1 in history; keep exactly the same placement. A2's author/evidence is `AUTHOR_A` / `EOA_SIGNED_PUBLICATION`. |
+| `B1` setup | Admit `QUOTE_B1` as B's competing current head/revision `QUOTE_B1` / `B1`; keep exactly the same placement. B1's author/evidence is `AUTHOR_B` / `CONTRACT_ORIGINATED_PUBLICATION`, with no fabricated EOA signature. |
+| paid point, A-first | Select File/head/revision `FILE_QUOTE` / `QUOTE_A2` / `A2`, value `2_502_000_000 @ scale 6`, and content author/evidence `AUTHOR_A` / `EOA_SIGNED_PUBLICATION`. Placement provenance remains the A1 effect. |
+| paid list, A-first | Return one `/swaps` row, `eth-usdc -> FILE_QUOTE`, hydrated and checked to the same A2 selection as the point row. The bounded page is complete and has no duplicate or B placement. |
+| paid point, B-first | Select File/head/revision `FILE_QUOTE` / `QUOTE_B1` / `B1`, value `2_501_000_000 @ scale 6`, and content author/evidence `AUTHOR_B` / `CONTRACT_ORIGINATED_PUBLICATION`. Placement provenance remains the A1 effect. |
+| paid list, B-first | Return that same single placement row, hydrated and checked to the same B1 selection as the point row. The bounded page is complete and has no duplicate or B placement. |
+
+Each paid row is one transaction from a pinned unrelated caller through that
+arm's pinned consumer, with no privileged cache or seeded answer. Consumer
+implementations and addresses may differ across arms; the caller role and
+observable checks must match. Within each arm, start each paid row as the first
+transaction from a clone/revert of its sealed post-B1 snapshot. Across arms,
+require equivalent logical state and matched block/time and cold-transaction
+controls, not identical physical snapshots, deployments or block hashes.
+Record each execution block separately from that arm's semantic observation basis.
+Report point and list gas separately; also report setup, deployment, code and
+storage, including the single placement's once-only cost.
+
+### Common comparison row
+
+The following are arm-neutral evidence fields, not a proposed SDK result type:
+
+| Field | Required content |
+|---|---|
+| `operation`, `lens` | `PAID_POINT` or `PAID_LIST`; `LENS_A_FIRST` or `LENS_B_FIRST`. |
+| `realm`, `execution`, `profile` | Exact chain/deployment and arm profile commitments, without treating one as authority for another. |
+| `observationBasis`, `executionBasis` | Exact arm-local post-B1 semantic basis plus the paid transaction's block; never an unqualified `latest`. Point/list checks within an arm use that same semantic basis. |
+| `queryCoordinate` | Point: `FILE_QUOTE`. List: parent `/swaps`, name `eth-usdc`, the pinned page/window and end condition. Exact arm-local coordinate bytes stay in raw evidence. |
+| `presence`, `support`, `admission`, `selection` | Separate qualified outcomes. Every successful row is found, supported, admitted and uniquely selected; a receipt cannot fill these fields. |
+| `selectedFile`, `selectedHead`, `selectedRevision` | The exact labels from the table. `selectedRevision` is the fixture label `A2` or `B1`, not an assumed cross-arm ordinal; retain physical IDs/ordinals separately. |
+| `selectedAuthor`, `selectedAuthorEvidenceCategory` | A-first: `AUTHOR_A` / `EOA_SIGNED_PUBLICATION`. B-first: `AUTHOR_B` / `CONTRACT_ORIGINATED_PUBLICATION`. |
+| `placementCoordinate`, `placementProvenance` | PAID_LIST checks the one A placement and its source step, actor, evidence category and basis. It does not change when B-first wins content selection. A File-keyed PAID_POINT need not look up a directory; the comparison separately retains and joins the A1 placement evidence without charging that unrelated lookup to point-read gas. |
+| `quoteCheck`, `pairCheck`, `itemChecks` | Independently check the selected Quote's exact fixture fields; resolve its `PAIR_ETH_USDC` reference; check the Pair Type and its ordered `ITEM_ETH` and `ITEM_USDC` references; resolve and check both Item Types at the same basis. Point and list perform the same closure checks. |
+| `candidateCoverage`, `pageCoverage` | Point and list qualify the same content-selection candidate universe at the same arm-local basis; their physical witnesses and representations may differ. The list additionally establishes that its one-row placement window is `COMPLETE` with an end condition; `PARTIAL` or `UNKNOWN` is not empty or passing. This is fixture/profile-scoped coverage, not authenticated global completeness. |
+| `rawEvidence`, `paidExecution` | Lossless candidate bytes/proofs and arm-local IDs, plus caller, consumer, target/code commitments, transaction, receipt status, return/revert data and gas used. |
+
+Expected negatives are deliberately small. Fail the row if B creates a second
+placement or the list duplicates the A placement; point and list select
+different File/head/revision; the selected author/evidence category is laundered
+into placement provenance; either read skips the Quote -> Pair -> two Items
+checks; the Pair or an Item is wrong-Type, missing or unavailable but is reported
+as valid; checks within an arm mix semantic bases or candidate universes; or incomplete coverage
+is reported as an empty complete page. Preserve `INVALID`, `ABSENT_PROVEN`,
+`UNSUPPORTED`, `PARTIAL` and `UNKNOWN` rather than fabricating a selected value.
+A status-1 receipt without the abstract checks is not a pass.
+
+Keep the small matched acceptance/index-failure rollback control required by
+[[matched-cost-scope-review]]; do not import the entire finalist test suite
+into this cost slice. Logical inputs and useful guarantees match across arms,
+while physical body sizes, action encodings and paid implementation work are
+measured and disclosed rather than forced equal. This does not alter the older
+oracle profiles or their already-frozen call sets.
+
+### Practical pre-run pins
+
+1. Independently author and hash an expectation manifest containing the rows
+   above. It contains semantic labels and outcomes only and is retained before
+   opening either new rerun result packet. The already-inspected diagnostic
+   packets may inform the experiment design, but cannot supply its expected
+   answers or be relabelled as independently pre-sealed evidence.
+2. Before fixture publication or harness integration, seal one arm-input
+   manifest per candidate: clean source commit and recorded empty dirty diff; dependency,
+   compiler, fork and configuration identifiers; ABI/init-code/runtime-code and
+   adapter/consumer artifact hashes; profile/Type/Lens commitments; and the
+   independent semantic-to-physical fixture vectors. Copy no expected answer
+   or coordinate from candidate results; independently obtained deployment
+   facts are handled by step 3, before semantic calls.
+3. Allocate public caller roles from fixed ephemeral test accounts and record
+   their addresses and derivation indices without retaining secrets. Prefer
+   precomputed producer, consumer, adapter/helper and candidate target addresses
+   from pinned `CREATE` nonce allocations or `CREATE2` inputs. Independently
+   recorded deployment receipts plus verified runtime code are also acceptable
+   if sealed before fixture publication/semantic calls, with their evidence
+   grade stated. For proxies/factories pin each relevant hop and runtime code
+   commitment. Deployment evidence must come from the independent run controller,
+   not be extracted retrospectively from the candidate's answer packet.
+4. Compute point/list coordinates from the sealed arm-local fixture map with an
+   independently authored vector implementation. Pin the exact File, parent,
+   name, Lens and page/window bytes before calls; do not ask a deployed candidate
+   what coordinate the oracle should expect.
+5. After A1/A2/B1 setup but before any paid read, seal the exact post-B1 block
+   number/hash and state/snapshot identifier. Fork or revert that checkpoint for
+   each paid row. Hash and timestamp the expectation, arm-input and basis seals;
+   the packet may echo their hashes but may not define or repair them.
+
+These are test-run requirements, not a new general SDK or protocol mandate.
+Each arm still needs a reviewed physical fixture map, consumer implementation
+and deployment/pinning procedure, and must report its real deployment cost.
+No owner/protocol choice is required for this disposable slice. Missing
+concrete pins remain `UNKNOWN`: a raw diagnostic may still be retained as such,
+but cannot be promoted retrospectively into this pre-sealed comparison.

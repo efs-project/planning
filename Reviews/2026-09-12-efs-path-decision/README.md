@@ -112,6 +112,66 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**08:56 compile accepted / bounded receipt handoff:** Claude acknowledged the
+shared 08:48 grant and released it at 08:51:18. Root read the retained launch,
+build and test logs: clean `ca1a228`, successful build at 08:50:24–08:50:39,
+**43 Forge tests passed**, Ledger runtime **17,280 B**, no remaining heavy
+process. Root's independent Core and runner source reviews are GO for a
+bounded diagnostic, not an architecture choice. The Mac lock prevented a
+direct app message; the shared-file acknowledgement confirms this handoff
+route is working. No fallback/duplicate build is needed.
+
+**New heavy slot: Claude, 09:00–09:20 UTC, receipt diagnostic only.** Use the
+clean `ca1a228` detached source and its already-built artifacts; no rebuild.
+The exact six-cell allowlist is
+`native-one/quote,signed-one/quote,failure-rows,policy/activate,failure/refused-re-registration,failure/unsupported-native-import`.
+This includes Claude's four requested refusal/policy cells plus the two small
+native/signed controls so the repaired profile has directly measured costs.
+One loopback Anvil, normal limits, bounded history and run-owned cache;
+deadline-bounded watchdog, <100 MB new scratch, <15 GB total, 50 GB free
+reserve. Record raw caller-qualified probes, expected error arguments,
+receipt/state joins, exact selection, UTC/PIDs, source/artifact/runtime pins,
+and verified process cleanup. Stop by 09:20; retain failures too. Root stays
+light-only until release. This is not the full 21-cell replay or a matched
+B/C run. Runtime/tool versions must be observed, not copied from prior runs.
+
+**Two qualifications to carry forward:** `acceptanceBasis.epoch` is the
+policy activation-row epoch, whereas the signed acceptance profile folds the
+admission-context global registry epoch. The current reconstructor reuses
+the retained profile hash; it does not independently regenerate that profile
+from its dependencies. This is a reconstruction gap, not a newly found
+acceptance bypass, and does not block the diagnostic. Mutable mandatory
+validators likewise remain an explicit dependency-semantics limitation,
+not fixed merely by pinning codehash. Do not call a vector extracted from
+this packet an independently pre-sealed expectation. Root will publish the
+SDK's comparison criteria separately from actual run-specific seals.
+
+**After the diagnostic:** Claude should retain/push its evidence and reply in
+`claude-pm.md`, then prepare source-only B mapping/consumer changes for the
+common A1/A2/B1 point/list slice in `sdk-fixture.md` and
+`matched-cost-scope-review.md`. Do not change Core solely to force equal
+encodings, introduce a second B placement, rebuild the independent checker,
+or start another heavy run. Root coordinates the C counterpart and reviews
+new source before the next measurement.
+
+**08:48 reviewed repair / next compile handoff:** the `3c6947d` compile
+failed on via-IR stack depth at 08:00:11 UTC; no tests or chain ran, and its
+slot was released. Fable delivered the mandatory-rule/additional-policy fix,
+stack refactor and runner corrections at `3a30fe2`, then reviewed hardening
+at **`ca1a228`**. These remain uncompiled source claims. Root is cross-reviewing
+the bounded Core/runner delta and the SDK's proposed comparison appendix;
+earlier diagnostic packets retain their original profiles.
+
+**Heavy slot granted: Claude, 08:50–09:10 UTC, compile/tests only at
+`ca1a228`.** Use the requested clean detached pin and run-owned
+`build/lab-b-pin-ca1a228` scratch, pinned offline solc 0.8.30, two workers,
+normal compiler/EVM limits and deadline-bounded watchdogs. Record actual UTC
+launch/end, exact commands, owned PIDs and resulting logs/sizes/tests.
+No Anvil or receipt run; <1 GB new scratch, <15 GB total, 50 GB free reserve;
+root remains light-only. Stop by 09:10 and return the actual result. A source
+repair or later receipt run needs its own reviewed pin/handoff, not reuse of
+an expired slot. Fable retains B code ownership and root publishes main.
+
 **07:49 repair review / compile-only handoff:** Claude delivered falsification
 `71e689b`, Core repair `aaecfed` and adapted runner `3c6947d`; all are source
 evidence, not a new passing build or receipt run. Root resumed the existing

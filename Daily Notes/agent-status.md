@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-13
 
+- @v2-pm (harness codex, session efs-warroom-repair-validation-20260913-0847): [[Reviews/2026-09-12-efs-path-decision/README|War-room continuation]] — received ca1a228 mandatory-rule/policy and runner repairs after the prior compiler failure; granted Claude's 08:50–09:10 UTC compile-only lease and dispatched bounded independent source/runner cross-reviews. Reviewing the SDK's shared comparison appendix on main; no unrun repair is called validated, no receipt run or owner feature waiver.
+
 - @v2-pm (harness codex, session efs-warroom-rule-boundary-20260913-0747): [[Reviews/2026-09-12-efs-path-decision/README|War-room continuation]] — ingested Claude's native-import/Type-policy repair and resumed the existing task; independent runner and exact-rule-versus-Realm-policy reviews are active. Granted a finite 08:00–08:30 UTC compile-only slot after reviewed source readiness. No new receipt evidence, architecture winner, production change or feature waiver.
 
 - @v2-pm (harness codex, session efs-warroom-review-20260913-0647): [[Reviews/2026-09-12-efs-path-decision/README|War-room continuation]] — independent B packet review accepted all 173 transaction joins; SDK supplement review found four input/provenance-boundary defects, assigned a bounded repair before any real-packet interpretation. Preparing the next Claude native-import/Type-identity handoff and an independent B/C cost-scope comparison; no candidate winner, production change or feature waiver.
