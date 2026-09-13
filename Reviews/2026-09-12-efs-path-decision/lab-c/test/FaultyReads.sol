@@ -34,6 +34,13 @@ contract FaultyReads is ILensReads, ITableReads, ILedgerViews {
   uint8 public constant MALFORMED_FRAME = 12; // getRecord(Records, target) -> the body gains a trailing byte: it decodes but no longer re-encodes to itself
   uint8 public constant SHORT_RECORD = 13; // getRecord(Records, target) -> a 32-byte static region
   uint8 public constant LEDGER_MISMATCH = 14; // ledger() names the real Ledger instead of this reader
+  uint8 public constant HEAD_BASIS_MISMATCH = 15; // only HEAD resolveAt.basis changes; admission stays faithful
+  uint8 public constant PLACEMENT_BASIS_MISMATCH = 16; // only FOLDER resolveAt.basis changes
+  uint8 public constant CURSOR_GENERATION_MISMATCH = 17;
+  uint8 public constant CURSOR_RULES_EPOCH_MISMATCH = 18;
+  uint8 public constant CURSOR_CORE_MISMATCH = 19;
+  uint8 public constant CURSOR_SCOPE_MISMATCH = 20;
+  uint8 public constant CURSOR_LENS_MISMATCH = 21;
 
   bytes32 internal constant RECORDS_TABLE = 0x746265667300000000000000000000005265636f726473000000000000000000;
   bytes32 internal constant ADMISSIONS_TABLE = 0x7462656673000000000000000000000041646d697373696f6e73000000000000;
@@ -127,6 +134,8 @@ contract FaultyReads is ILensReads, ITableReads, ILedgerViews {
     r = realReader.resolveAt(lens, purpose, subject, role, basis);
     if (mode == LAUNDERED_SELECTED_BY && r.status == 1) r.selectedBy = target;
     if (mode == NOT_AT_BASIS && r.status == 1) r.admission = type(uint64).max;
+    if (mode == HEAD_BASIS_MISMATCH && purpose == keccak256("efs2/lab-c/purpose/head")) r.basis ^= uint64(1);
+    if (mode == PLACEMENT_BASIS_MISMATCH && purpose == keccak256("efs2/lab-c/purpose/folder")) r.basis ^= uint64(1);
   }
 
   function list(
@@ -137,6 +146,11 @@ contract FaultyReads is ILensReads, ITableReads, ILedgerViews {
     uint32 budget
   ) external view returns (LensReader.Page memory page) {
     page = realReader.list(lens, purpose, scope, cursor, budget);
+    if (mode == CURSOR_GENERATION_MISMATCH) page.next.indexGeneration ^= uint32(1);
+    if (mode == CURSOR_RULES_EPOCH_MISMATCH) page.next.rulesEpoch ^= uint32(1);
+    if (mode == CURSOR_CORE_MISMATCH) page.next.coreCodeCommitment ^= bytes32(uint256(1));
+    if (mode == CURSOR_SCOPE_MISMATCH) page.next.scopeKey ^= bytes32(uint256(1));
+    if (mode == CURSOR_LENS_MISMATCH) page.next.lensHash ^= bytes32(uint256(1));
     if (mode == PARTIAL_CLAIMS_COMPLETE) {
       page.status = 1; // C_COMPLETE claimed ...
       page.next.position = 0; // ... while the cursor says the scan consumed nothing (items and scanned kept intact)

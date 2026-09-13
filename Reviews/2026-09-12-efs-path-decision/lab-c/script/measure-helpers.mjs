@@ -209,10 +209,23 @@ export function compareObservation(observed, expected) {
   return { ok, fields };
 }
 
-// The candidate self-check of one paid row (pure): exactly one PaidObserved log whose kind is the row's expected kind
-// and whose commitment equals keccak256(abi.encode(kind, Selection, Placement)) RECOMPUTED from the decoded log fields
-// (`recompute` is the caller's ABI encoder), the eth_call replay decoded with the same commitment, and log and replay
-// equal to the runner's candidate-side expectation field by field. Any failure is named in `reason`.
+const ZERO_PLACEMENT = Object.fromEntries(PLACEMENT_FIELDS.map((k) => [k,
+  k === "ended" ? false : /^(folder|name|target|actor|bindingKey|publicationId)$/.test(k) ? `0x${"00".repeat(32)}` : 0,
+]));
+
+function compareCompleteObservation(observed, reference, names) {
+  const fields = {};
+  for (const k of names) {
+    const expected = reference?.[k] == null ? null : norm(reference[k]);
+    const actual = observed?.[k] == null ? null : norm(observed[k]);
+    fields[k] = { expected, actual, equal: expected !== null && actual !== null && expected === actual };
+  }
+  return { ok: Object.values(fields).every((field) => field.equal), fields };
+}
+
+// Both decoded tuples must independently reproduce their commitments and agree on EVERY field, including physical
+// witnesses the runner does not pin (hydrated). The runner's expectations remain a separate subset check.
+// paidPoint returns no Placement: its commitment uses the canonical zero tuple, never placement copied from the log.
 export function paidObservationMatch({ logCount, fromLog, fromReplay, operation, expectedKind, expectedSelection, expectedPlacement, recompute }) {
   const lower = (v) => String(v).toLowerCase();
   const logPresent = logCount === 1 && !!fromLog;
@@ -226,7 +239,20 @@ export function paidObservationMatch({ logCount, fromLog, fromReplay, operation,
   const selectionFromLog = compareObservation(fromLog ? fromLog.selection : null, expectedSelection);
   const placementFromLog = compareObservation(fromLog ? fromLog.placement : null, expectedPlacement);
   const replayDecoded = !!fromReplay && !fromReplay.error;
-  const replayOk = replayDecoded && compareObservation(fromReplay.selection, expectedSelection).ok && (fromReplay.placement === null || fromReplay.placement === undefined ? operation === "PAID_POINT" : compareObservation(fromReplay.placement, expectedPlacement).ok);
+  const replayPlacement = operation === "PAID_POINT" ? ZERO_PLACEMENT : fromReplay?.placement;
+  const replayPlacementOk = operation === "PAID_POINT"
+    ? fromReplay?.placement == null || compareCompleteObservation(fromReplay.placement, ZERO_PLACEMENT, PLACEMENT_FIELDS).ok
+    : fromReplay?.placement != null;
+  const replayExpectationOk = replayDecoded && replayPlacementOk && compareObservation(fromReplay.selection, expectedSelection).ok && compareObservation(replayPlacement, expectedPlacement).ok;
+  const selectionLogReplay = compareCompleteObservation(fromReplay?.selection, fromLog?.selection, SELECTION_FIELDS);
+  const placementLogReplay = compareCompleteObservation(replayPlacement, fromLog?.placement, PLACEMENT_FIELDS);
+  let replayRecomputedCommitment = null;
+  let replayRecomputeError = null;
+  if (replayDecoded && replayPlacementOk) {
+    try { replayRecomputedCommitment = recompute(expectedKind, fromReplay.selection, replayPlacement); } catch (error) { replayRecomputeError = String(error?.message ?? error); }
+  }
+  const replayCommitmentRecomputedOk = replayDecoded && !!replayRecomputedCommitment && lower(replayRecomputedCommitment) === lower(fromReplay.commitment);
+  const replayOk = replayExpectationOk && replayCommitmentRecomputedOk && selectionLogReplay.ok && placementLogReplay.ok;
   const commitmentsAgree = logPresent && replayDecoded && lower(fromLog.commitment) === lower(fromReplay.commitment);
   const match = logPresent && kindOk && commitmentRecomputedOk && selectionFromLog.ok && placementFromLog.ok && replayOk && commitmentsAgree;
   const reason = match ? null
@@ -235,9 +261,11 @@ export function paidObservationMatch({ logCount, fromLog, fromReplay, operation,
     : !commitmentRecomputedOk ? `recomputed commitment ${recomputedCommitment} != logged ${fromLog.commitment}${recomputeError ? ` (${recomputeError})` : ""}`
     : !replayDecoded ? "the eth_call replay did not decode"
     : !commitmentsAgree ? "the replay commitment differs from the log commitment"
-    : !replayOk ? "the replay observation differs from the runner expectation"
-    : "the log observation differs from the runner expectation";
-  return { logCount, kindOk, expectedKind, recomputedCommitment, recomputeError, commitmentRecomputedOk, selectionFromLog, placementFromLog, replayOk, commitmentsAgree, match, reason };
+    : !replayExpectationOk ? "the replay observation differs from the runner expectation"
+    : !selectionFromLog.ok || !placementFromLog.ok ? "the log observation differs from the runner expectation"
+    : !replayCommitmentRecomputedOk ? `recomputed replay commitment ${replayRecomputedCommitment} != returned ${fromReplay.commitment}${replayRecomputeError ? ` (${replayRecomputeError})` : ""}`
+    : "the complete log and replay observations differ or have missing fields";
+  return { logCount, kindOk, expectedKind, recomputedCommitment, recomputeError, commitmentRecomputedOk, selectionFromLog, placementFromLog, replayRecomputedCommitment, replayRecomputeError, replayCommitmentRecomputedOk, selectionLogReplay, placementLogReplay, replayOk, commitmentsAgree, match, reason };
 }
 
 // Build one abstract comparison row from retained observations only. A missing or unknown field throws, so an absent

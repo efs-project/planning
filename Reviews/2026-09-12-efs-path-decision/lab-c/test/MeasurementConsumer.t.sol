@@ -516,6 +516,59 @@ contract MeasurementFaultyReadsTest is MeasurementBase {
     _refusesPoint(_fr(), _ft(), _lensA(), _expectA(basis), MeasurementConsumer.NotAtBasis.selector, "a head admission past the pinned basis is refused");
   }
 
+  function test_faulty_actual_reply_headResolutionBasis_refused() public {
+    uint64 basis = _sealed();
+    faulty.fault(faulty.HEAD_BASIS_MISMATCH(), bytes32(0));
+    _refusesPoint(_fr(), _ft(), _lensA(), _expectA(basis), MeasurementConsumer.BasisMismatch.selector, "a faithful head admission with a foreign resolution basis is refused");
+    _refusesList(_fr(), _ft(), _lensA(), _expectA(basis), _placement(), MeasurementConsumer.BasisMismatch.selector, "list shares the HEAD basis check");
+  }
+
+  function test_faulty_actual_reply_placementResolutionBasis_refused() public {
+    uint64 basis = _sealed();
+    faulty.fault(faulty.PLACEMENT_BASIS_MISMATCH(), bytes32(0));
+    consumer.paidPoint(_fr(), _ft(), _lensA(), _expectA(basis)); // no folder resolution on the point path
+    _refusesList(_fr(), _ft(), _lensA(), _expectA(basis), _placement(), MeasurementConsumer.BasisMismatch.selector, "a faithful placement admission with a foreign resolution basis is refused");
+  }
+
+  function _refusesCursorField(uint8 mode, uint8 field) internal {
+    uint64 basis = _sealed();
+    LensReader.Lens memory lens = _lensA();
+    LensReader.Cursor memory fresh;
+    LensReader.Page memory honest = reader.list(lens, PURPOSE_FOLDER, SWAPS, fresh, 10);
+    bytes32 expected = field == 7 ? bytes32(uint256(honest.next.indexGeneration))
+      : field == 8 ? bytes32(uint256(honest.next.rulesEpoch))
+      : field == 9 ? honest.next.coreCodeCommitment
+      : field == 10 ? honest.next.scopeKey : honest.next.lensHash;
+    faulty.fault(mode, bytes32(0));
+    try consumer.paidList(_fr(), _ft(), lens, _expectA(basis), _placement()) {
+      revert("the mutated cursor field must be refused");
+    } catch (bytes memory err) {
+      require(keccak256(err) == keccak256(abi.encodeWithSelector(
+        MeasurementConsumer.PlacementMismatch.selector, field, expected, expected ^ bytes32(uint256(1))
+      )), "the exact cursor-field mismatch must be reported");
+    }
+  }
+
+  function test_faulty_actual_reply_cursorGeneration_refused() public {
+    _refusesCursorField(faulty.CURSOR_GENERATION_MISMATCH(), 7);
+  }
+
+  function test_faulty_actual_reply_cursorRulesEpoch_refused() public {
+    _refusesCursorField(faulty.CURSOR_RULES_EPOCH_MISMATCH(), 8);
+  }
+
+  function test_faulty_actual_reply_cursorCoreCommitment_refused() public {
+    _refusesCursorField(faulty.CURSOR_CORE_MISMATCH(), 9);
+  }
+
+  function test_faulty_actual_reply_cursorScopeKey_refused() public {
+    _refusesCursorField(faulty.CURSOR_SCOPE_MISMATCH(), 10);
+  }
+
+  function test_faulty_actual_reply_cursorLensHash_refused() public {
+    _refusesCursorField(faulty.CURSOR_LENS_MISMATCH(), 11);
+  }
+
   function test_faulty_actual_reply_malformedFrame_refused() public {
     uint64 basis = _sealed();
     faulty.fault(faulty.MALFORMED_FRAME(), PAIR);

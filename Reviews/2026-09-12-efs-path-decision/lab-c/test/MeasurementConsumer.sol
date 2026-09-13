@@ -9,7 +9,7 @@ pragma solidity 0.8.30;
  *  - the SEALED PAID POINT/LIST SLICE (sdk-fixture appendix; matched-cost-scope-review "Bounded C follow-through"):
  *    `paidPoint` / `paidList` are the arm-neutral checks in C's native representation. The caller supplies every
  *    expectation (`Expect`, `PlacementExpect`) from the sealed expectation manifest and the arm-local fixture map;
- *    this contract derives no id (no EfsTypes/EfsIds import, no candidate table library), reads no seeded answer and
+ *    this contract derives no record id (no EfsTypes/EfsIds import, no candidate table library), reads no seeded answer and
  *    reverts on every outcome that is not found, supported, admitted and uniquely selected at the pinned basis.
  *    Placement provenance (the one A placement: sourceStep A1, AUTHOR_A, EOA_SIGNED_PUBLICATION_EFFECT) is checked
  *    and reported SEPARATELY from selected-content authorship — no equality between the two is required or implied,
@@ -276,7 +276,7 @@ contract MeasurementConsumer {
   error ProofShape(uint8 proofKind, uint8 v, bytes32 r, bytes32 s);
   error RealmMismatch(uint8 field, bytes32 expected, bytes32 observed); // 1 realmId, 2 coreCodeCommitment
   error PlacementWindow(uint8 reason, uint8 status, uint32 rawTotal, uint32 scanned, uint256 items, uint32 selected, uint32 endPosition); // reason = WINDOW_*
-  error PlacementMismatch(uint8 field, bytes32 expected, bytes32 observed); // 1 name/status, 2 target, 3 actor, 4 revision, 5 resolution, 6 publication
+  error PlacementMismatch(uint8 field, bytes32 expected, bytes32 observed); // 1 name/status, 2 target, 3 actor, 4 revision, 5 resolution, 6 publication; cursor: 7 generation, 8 epoch, 9 Core, 10 scope, 11 Lens
   error IncompleteCoverage(uint8 status, uint64 through, uint64 basis);
   error ShortReply(uint256 length, uint256 needed);
 
@@ -322,6 +322,7 @@ contract MeasurementConsumer {
     s.lensHash = keccak256(abi.encode(lens.principals, lens.mode));
     s.subject = e.subject;
     LensReader.Resolution memory r = reader.resolveAt(lens, PURPOSE_HEAD, e.subject, bytes32(0), s.basisAdmission);
+    if (r.basis != s.basisAdmission) revert BasisMismatch(s.basisAdmission, r.basis);
     if (r.status != P_FOUND) revert NotSelected(r.status);
     if (r.selectedBy != e.selectedAuthor) revert SelectionMismatch(1, e.selectedAuthor, r.selectedBy);
     if (r.target != e.expectedHead) revert SelectionMismatch(2, e.expectedHead, r.target);
@@ -448,7 +449,7 @@ contract MeasurementConsumer {
     Selection memory s,
     PlacementExpect calldata p
   ) internal view returns (Placement memory pl) {
-    _window(reader, lens, s.subject, s.basisAdmission, p, pl);
+    _window(reader, lens, s, p, pl);
     _coverage(reader, s.basisAdmission, pl);
     _provenance(reader, ledger, lens, s, p, pl);
   }
@@ -456,8 +457,7 @@ contract MeasurementConsumer {
   function _window(
     ILensReads reader,
     LensReader.Lens calldata lens,
-    bytes32 subject,
-    uint64 basis,
+    Selection memory s,
     PlacementExpect calldata p,
     Placement memory pl
   ) internal view {
@@ -471,7 +471,13 @@ contract MeasurementConsumer {
     pl.selected = page.selected;
     pl.endPosition = page.next.position;
     pl.ended = page.next.position == page.rawTotal && page.scanned == page.rawTotal; // the end condition, independent of the status byte
-    if (page.next.basisAdmission != basis) revert BasisMismatch(basis, page.next.basisAdmission);
+    if (page.next.basisAdmission != s.basisAdmission) revert BasisMismatch(s.basisAdmission, page.next.basisAdmission);
+    if (page.next.indexGeneration != s.indexGeneration) revert PlacementMismatch(7, bytes32(uint256(s.indexGeneration)), bytes32(uint256(page.next.indexGeneration)));
+    if (page.next.rulesEpoch != s.rulesEpoch) revert PlacementMismatch(8, bytes32(uint256(s.rulesEpoch)), bytes32(uint256(page.next.rulesEpoch)));
+    if (page.next.coreCodeCommitment != s.coreCodeCommitment) revert PlacementMismatch(9, s.coreCodeCommitment, page.next.coreCodeCommitment);
+    bytes32 scopeKey = keccak256(abi.encode(PURPOSE_FOLDER, p.folder)); // public cursor coordinate, not a record identity
+    if (page.next.scopeKey != scopeKey) revert PlacementMismatch(10, scopeKey, page.next.scopeKey);
+    if (page.next.lensHash != s.lensHash) revert PlacementMismatch(11, s.lensHash, page.next.lensHash);
     uint8 reason = page.status != C_COMPLETE
       ? WINDOW_NOT_COMPLETE
       : !pl.ended
@@ -488,7 +494,7 @@ contract MeasurementConsumer {
     }
     LensReader.Item memory it = page.items[0];
     if (it.status != P_FOUND || it.name != p.name) revert PlacementMismatch(1, p.name, it.name);
-    if (it.target != subject) revert PlacementMismatch(2, subject, it.target);
+    if (it.target != s.subject) revert PlacementMismatch(2, s.subject, it.target);
     if (it.selectedBy != p.actor) revert PlacementMismatch(3, p.actor, it.selectedBy);
     if (it.revision != p.revision) revert PlacementMismatch(4, bytes32(uint256(p.revision)), bytes32(uint256(it.revision)));
     pl.folder = p.folder;
@@ -514,6 +520,7 @@ contract MeasurementConsumer {
     Placement memory pl
   ) internal view {
     LensReader.Resolution memory r = reader.resolveAt(lens, PURPOSE_FOLDER, p.folder, p.name, s.basisAdmission);
+    if (r.basis != s.basisAdmission) revert BasisMismatch(s.basisAdmission, r.basis);
     if (r.status != P_FOUND || r.target != pl.target || r.selectedBy != pl.actor || r.revision != pl.revision) {
       revert PlacementMismatch(5, pl.target, r.target);
     }
@@ -668,7 +675,7 @@ contract MeasurementConsumer {
 
   // ---- consumer-local decoders over the public table-read ABI (README "Fixture coordinates") --------------------
 
-  /// Records row: static (typeId @0, firstAdmission uint64 @32; 40 bytes) + dynamic body. An absent row is all zeros.
+  /// Records row: static (typeId offset 0, firstAdmission uint64 offset 32; 40 bytes) + dynamic body. An absent row is all zeros.
   function _record(ITableReads ledger, bytes32 id) internal view returns (RecordView memory rec) {
     (bytes memory st, , bytes memory dyn) = ledger.getRecord(RECORDS_TABLE, _key(id), RECORDS_LAYOUT);
     if (st.length != 40) revert MalformedRecord(id, st.length);
@@ -683,8 +690,8 @@ contract MeasurementConsumer {
     if (rec.firstAdmission > basis) revert NotAtBasis(2, rec.firstAdmission, basis);
   }
 
-  /// Admissions row (262 packed bytes): publicationId @0, kind @32, typeId @33, digestKind @65, digest @66, purpose @98,
-  /// subject @130, role @162, target @194, expectedRevision uint32 @226, salt @230.
+  /// Admissions row (262 packed bytes): publicationId offset 0, kind offset 32, typeId offset 33, digestKind offset 65, digest offset 66, purpose offset 98,
+  /// subject offset 130, role offset 162, target offset 194, expectedRevision uint32 offset 226, salt offset 230.
   function _admission(ITableReads ledger, uint64 ordinal) internal view returns (AdmissionView memory a) {
     (bytes memory st, , ) = ledger.getRecord(ADMISSIONS_TABLE, _key(bytes32(uint256(ordinal))), ADMISSIONS_LAYOUT);
     if (st.length != 262) revert MalformedAdmission(ordinal, st.length);
@@ -697,9 +704,9 @@ contract MeasurementConsumer {
     a.expectedRevision = uint32(_uintAt(st, 226, 4));
   }
 
-  /// Evidence row (325 packed bytes): author @0, proofKind @32, r @33, s @65, v @97, nonce @98, deadline @106,
-  /// acceptanceProfile @114, indexObligations @146, actionsHash @178, firstAdmission @210, leafCount uint16 @218,
-  /// basis @220, realmId @228, coreCodeCommitment @260, importOf @292, sourceGrade @324.
+  /// Evidence row (325 packed bytes): author offset 0, proofKind offset 32, r offset 33, s offset 65, v offset 97, nonce offset 98, deadline offset 106,
+  /// acceptanceProfile offset 114, indexObligations offset 146, actionsHash offset 178, firstAdmission offset 210, leafCount uint16 offset 218,
+  /// basis offset 220, realmId offset 228, coreCodeCommitment offset 260, importOf offset 292, sourceGrade offset 324.
   function _evidence(ITableReads ledger, bytes32 publicationId) internal view returns (EvidenceView memory e) {
     (bytes memory st, , ) = ledger.getRecord(EVIDENCE_TABLE, _key(publicationId), EVIDENCE_LAYOUT);
     if (st.length != 325) revert MalformedEvidence(publicationId, st.length);

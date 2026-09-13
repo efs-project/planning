@@ -416,13 +416,74 @@ test("paidObservationMatch requires the expected kind, a recomputed commitment e
   assert.match(noLog.reason, /no single PaidObserved log \(logCount 0\)/);
   const undecodable = paidObservationMatch({ ...base, fromReplay: { error: "could not decode" } });
   assert.match(undecodable.reason, /replay did not decode/);
-  const pointNoPlacement = paidObservationMatch({ ...base, operation: "PAID_POINT", fromReplay: { commitment: logged, selection: selectionA, placement: null } });
+  const pointCommitment = recompute(KIND, selectionA, placementNone);
+  const pointNoPlacement = paidObservationMatch({ ...base, operation: "PAID_POINT", expectedPlacement: placementNone, fromLog: { ...base.fromLog, commitment: pointCommitment, placement: placementNone }, fromReplay: { commitment: pointCommitment, selection: selectionA, placement: null } });
   assert.equal(pointNoPlacement.match, true);
   const listNoPlacement = paidObservationMatch({ ...base, fromReplay: { commitment: logged, selection: selectionA, placement: null } });
   assert.equal(listNoPlacement.match, false);
   const throwing = paidObservationMatch({ ...base, recompute: () => { throw new Error("bad tuple"); } });
   assert.equal(throwing.commitmentRecomputedOk, false);
   assert.match(throwing.reason, /bad tuple/);
+});
+
+// Like the actual runner, the expectation omits hydrated; the observed tuple does not.
+// This deterministic encoder covers every tuple field without adding an ABI/keccak dependency to these pure tests.
+const encodeObservation = (kind, selection, placement) => JSON.stringify([
+  kind, SELECTION_FIELDS.map((k) => String(selection[k]).toLowerCase()),
+  PLACEMENT_FIELDS.map((k) => String(placement[k]).toLowerCase()),
+]);
+function completeObservationCheck() {
+  const { hydrated, ...expectedPlacement } = placementOne;
+  const kind = `0x${"ab".repeat(32)}`;
+  const commitment = encodeObservation(kind, selectionA, placementOne);
+  return {
+    logCount: 1, operation: "PAID_LIST", expectedKind: kind,
+    expectedSelection: { ...selectionA }, expectedPlacement,
+    fromLog: { kind, commitment, selection: { ...selectionA }, placement: { ...placementOne } },
+    fromReplay: { commitment, selection: { ...selectionA }, placement: { ...placementOne } },
+    recompute: encodeObservation,
+  };
+}
+
+test("paidObservationMatch accepts complete log/replay tuples when the runner does not pin hydrated", () => {
+  const result = paidObservationMatch(completeObservationCheck());
+  assert.equal(result.match, true);
+  assert.equal(result.replayCommitmentRecomputedOk, true);
+});
+
+for (const [tuple, fields] of [["selection", SELECTION_FIELDS], ["placement", PLACEMENT_FIELDS]]) {
+  for (const field of fields) {
+    test(`paidObservationMatch rejects replay-only ${tuple}.${field} mutation with unchanged commitment`, () => {
+      const input = completeObservationCheck();
+      // Omit the mutated field from the candidate expectation to exercise full observation agreement.
+      delete input[tuple === "selection" ? "expectedSelection" : "expectedPlacement"][field];
+      input.fromReplay[tuple][field] = field === "ended" ? "false" : "999";
+      const result = paidObservationMatch(input);
+      assert.equal(result.match, false);
+      assert.equal(result.replayCommitmentRecomputedOk, false);
+      assert.equal(result[tuple === "selection" ? "selectionLogReplay" : "placementLogReplay"].fields[field].equal, false);
+    });
+  }
+}
+
+test("paidObservationMatch refuses missing hydrated even when both tuples and the expectation omit it", () => {
+  const input = completeObservationCheck();
+  delete input.fromLog.placement.hydrated;
+  delete input.fromReplay.placement.hydrated;
+  input.fromLog.commitment = input.fromReplay.commitment = encodeObservation(input.expectedKind, input.fromLog.selection, input.fromLog.placement);
+  const result = paidObservationMatch(input);
+  assert.equal(result.match, false);
+  assert.equal(result.placementLogReplay.fields.hydrated.equal, false);
+});
+
+test("paidObservationMatch recomputes point replay with canonical zero Placement, never the log placement", () => {
+  const input = completeObservationCheck();
+  input.operation = "PAID_POINT";
+  input.expectedPlacement = {};
+  input.fromReplay.placement = null;
+  const result = paidObservationMatch(input);
+  assert.equal(result.match, false, "a nonzero point log placement cannot supply the replay tuple");
+  assert.equal(result.replayCommitmentRecomputedOk, false);
 });
 
 test("deriveAbstractResult refuses an unlabelled selected head or author rather than guessing a label", () => {
