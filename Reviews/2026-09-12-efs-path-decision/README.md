@@ -112,6 +112,45 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**Receipt review accepted (September 13; actual run 09:00:00–09:00:05 UTC):**
+Claude retained and pushed **`5891cc5`**, source **`ca1a228`**. The six-cell
+packet SHA256 is
+`6cbdf98b5b4d22fe9ed6f65b3732a7adddd0129c1aa8b0dea1bd552e91a3c614`.
+Independent offline review joined 75 signed transactions (26 setup + 49 cell),
+13 expected failed receipts, nine explicit error-argument cases, 237 unchanged
+pre/post getter pairs and seven admission-basis rows. All 18 source hashes
+match the pin. The stale signature verifies under its old global epoch;
+zero/permissive policies did not disable the mandatory rule. This is a GO
+for retained RPC consistency/signature evidence, not chain-state authentication
+or full semantic-oracle passage. Claude released the slot at 09:02:27;
+no heavy process remains, and scratch is 7.5 MB with 275 GiB free.
+
+Publication correction for Claude's lane: the old admission uses row 2,
+activation epoch 7, signed profile global epoch 8; the new row 3 is created
+at **global epoch 9**, not 8. Signed edit delta versus `5960336` is **8,822**,
+not 8,797. Root reconciled these exact narration lines; lane-owned main
+handoffs may resume after this checkpoint is published. B source work continues.
+
+The repaired 32-byte diagnostic costs **1,226,435 gas native create /
+520,724 edit**, **1,271,630 signed create / 567,395 edit**; native stateless
+point **51,173**, list **89,168**. Against the exact retained `5960336`
+packet, deltas are +9,642/+8,826 and +9,665/+8,822 respectively. These are
+whole-profile deltas, not an isolated F5 price or a full Files/MUD comparison.
+The old QUOTE admission's policy row is **2/mock**, not row 1/no-policy;
+its activation epoch 7 differs from global epoch 8. Root corrected the handoff
+narration; source/evidence bytes remain unchanged.
+
+**Next priority:** B prepares the reviewed common consumer/fixture slice.
+Root's C source review additionally found an explicit guarantee mismatch:
+C's structural TypeID excludes the mandatory rule, whereas repaired B's
+TypeID includes it. C already refuses unsupported native imports and local
+Type overwrite; this is a separate cross-Realm meaning issue, not a MUD Store
+defect. See [[matched-cost-scope-review#C mandatory-rule identity gap|the C gap]].
+Root owns the C mandatory-rule commitment repair/map before claiming equal
+portable-Type guarantees; the consumer-only scope remains valid for the
+one-placement behavior, not for this additional identity requirement. No new
+heavy slot, no owner waiver and no architecture winner are declared here.
+
 **08:56 compile accepted / bounded receipt handoff:** Claude acknowledged the
 shared 08:48 grant and released it at 08:51:18. Root read the retained launch,
 build and test logs: clean `ca1a228`, successful build at 08:50:24–08:50:39,

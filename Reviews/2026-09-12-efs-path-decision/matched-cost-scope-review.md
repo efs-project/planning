@@ -80,6 +80,36 @@ including independently retained deployment facts; no retrospective sealing.
 
 ## MUD Store reuse versus EFS-owned maintenance (C)
 
+### C mandatory-rule identity gap
+
+Source review of `324e7c4` found a declared model difference that the earlier
+consumer map does not fix. `EfsTypes.sol:62–63` and
+`MANIFEST.draft.json:167–175` explicitly exclude the Realm-local acceptor from
+the structural TypeID. `ActionLib.declareType` hashes only the Type body
+(shape/reference Types), then separately stores the action's acceptor address
+and codehash. Repaired B instead binds the mandatory rule into Type identity.
+
+Two C Realms can therefore register the same structural Type with different
+mandatory validators and admit different valid-value sets under the same ID.
+Local re-registration refusal does not prevent this cross-Realm divergence
+or first-declaration capture. C's import test intentionally demonstrates
+"stricter destination rule, same typeId"; every import/reuse still reruns the
+destination's rule, so the issue is meaning identity, not a reuse bypass.
+This is custom EFS integration behavior, **not a MUD Store defect**.
+
+Small proposed parity repair: include a mandatory-rule commitment in C's Type
+body; decode and verify it against the chosen implementation's codehash at
+declaration; keep the existing Types table and per-admission rule enforcement;
+regenerate dependent fixtures/vectors. Additional Realm constraints, if
+retained, must be separate and additive, not a replacement mandatory rule.
+Codehash alone still does not specify mutable dependencies. No MUD packing or
+record-frame redesign is implied, and no repair is claimed implemented here.
+
+This blocks a **same-guarantee portable exact-Type** comparison until repaired.
+Existing receipts and a narrowly labelled single-Realm read diagnostic remain
+useful with their local rule context pinned; they cannot silently stand in for
+the stronger guarantee. Root owns the C follow-through; Claude remains on B.
+
 - **Reused from pinned MUD Store 2.2.23 / `062bd8de...`:** `StoreRead`'s generic public table-read ABI; `StoreCore` initialization, internal-table registration, generic table registration/read/write/dynamic-field operations and Store events; ResourceId, FieldLayout, Schema, EncodedLengths, Bytes/Slice/tight codecs. C composes `StoreRead + StoreCore` and exposes no raw Store write/registration API (`Csrc/vendor/PIN.md:1-5`; `Csrc/vendor/@latticexyz/store/src/StoreRead.sol:11-16,44-74,110-139,177-209`; `Csrc/src/EfsStoreCore.sol:5-45`).
 - **Still EFS-owned:** EFS table schemas/IDs and hand-written table libraries; action/ID/principal/signature rules; Ledger publication, replay, acceptance, CAS, import/evidence; mandatory index families/coverage/atomic dispatch; Lens selection/history/cursors; acceptors, adapters/consumers, deployment/linking, Store-version compatibility and migrations (`Csrc/src/tables/LedgerTables.sol:4-18,40-188`; `Csrc/src/ActionLib.sol:5-12,120-192,198-378`; `Csrc/src/IndexModule.sol:5-19,101-141`; `Csrc/src/LensReader.sol:5-19`).
 - Not reused: World, world-modules, store-sync, protocol-parser or TS codegen; this probe is Store-only and its table libraries are hand-written (`Csrc/vendor/PIN.md:1-5`). This supports only a qualitative maintenance-boundary claim—no LOC ratio, engineering-hours estimate, or assertion about MUD's maintenance status.

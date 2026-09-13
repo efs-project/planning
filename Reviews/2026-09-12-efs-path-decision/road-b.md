@@ -123,11 +123,11 @@ Demonstrated (elsewhere, reused): identities, type cache as code, index coverage
 
 **What v1 costs relative to v0 (ESTIMATED, unmeasured):** +1 subject mint per create (0 slots: derived id), +1 Evidence cell per publication (~6–7 words, replacing the per-record envelope bytes it removes), +2 mandatory lists (by-Type, by-author: shared, append-priced) and +1 counter per record. The v0 "10–14 fresh slots per small create" becomes roughly **16–20 fresh slots plus two shared appends** for a signed create with acceptance and all mandatory queries; a native rebind stays ~3–4 fresh slots plus appends. Against 5.06M for the fuller matched create and 627,672 for the native quote, that is the range the shared fixture must now test.
 
-## 9. v1.2 — authority and Type identity (second falsifier round; lab `ca1a228`, COMPILED AND TESTED, UNMEASURED)
+## 9. v1.2 — authority and Type identity (second falsifier round; lab `ca1a228`, compiled, tested, and receipt-diagnosed on six allowlisted cells)
 
-The coordinator's second review asked whether Road B's source-origin authority and exact Type identity hold, separately from any later Realm acceptance policy. Falsifying tests were written and desk-checked against the earlier Core; an observed red run against every earlier version is not established. The repaired suite subsequently passed at `ca1a228`; the record is the lab's `FALSIFY.md`/`REPAIR.md` (branch `fable/2026-09-12-road-b-lab`). Nothing below is measured on chain: the repaired Core compiled and passed its 43-test Forge suite at `ca1a228` in the 08:50 UTC slot (after the 08:00 build of the previous pin failed on via-IR stack depth and was restructured), but no receipt run has executed against it, so §2's numbers stand and the deltas here are slot-count claims only. Runtime sizes at `ca1a228`: Ledger 17,280 B (was 16,699 B before the authority repair), TypeRegistry 3,270 B, IndexModule 4,127 B, LensReader 9,445 B.
+The coordinator's second review asked whether Road B's source-origin authority and exact Type identity hold, separately from later Realm acceptance policy. Falsifying tests were written and desk-checked against the earlier Core; an observed red run against every earlier version is not established. The repaired `ca1a228` Core built and passed 43 Forge tests in the 08:50 UTC slot after restructuring the previous pin's stack-depth failure. A six-cell receipt diagnostic then ran at 09:00 UTC, retained at `5891cc5`; costs below belong to that repaired profile, not a rewrite of §2's earlier evidence. The lab's `FALSIFY.md`/`REPAIR.md` records the source history. Runtime sizes: Ledger 17,280 B (previously 16,699), TypeRegistry 3,270 B, IndexModule 4,127 B, LensReader 9,445 B.
 
-| Falsifier | Source-review outcome on the old Core | Repair (compiled/tested; receipts pending) |
+| Falsifier | Source-review outcome on the old Core | Repair (compiled/tested; selected receipt checks below) |
 |---|---|---|
 | F1 native-source import (`v == 0` packet) | **unsafe by construction**: a bare claim of another principal could mint and control that principal's Subject at the destination | fail closed: `E_SOURCE_UNSUPPORTED`; this import route rejects and stores nothing. Attributed claim retention would be a separate feature, not implemented by this refusal. A temporary prototype limit, not a waiver of portability or an invented source proof |
 | F2 signed-source import | **safe**: foreign principal, relabelled realm, unrelated sender and cross-entrypoint replay all refuse; nothing written | none. The `(name, version)`-only EIP-712 domain remains a separate FUTURE replay-domain item |
@@ -137,7 +137,33 @@ The coordinator's second review asked whether Road B's source-origin authority a
 
 **What a codehash pins, stated not waived.** Pinning an acceptor's codehash pins its code, not its dependencies or storage: the lab's `MockAcceptor` changes behaviour under one codehash, so it is demoted to a documented mutable double installable only as additional policy, and the fixture Types use acceptors whose thresholds are immutables (part of the code, hence of the id). A test (`F5d`) demonstrates that a mutable mandatory rule keeps the same id while changing meaning. Road B does not claim production requires pure callbacks; stateful rules remain allowed when their dependency and basis semantics are declared, which is the programmable-acceptance boundary of §8.5, not a property of this slice.
 
-**Cost claims (ESTIMATED; compiled, not run).** Registration and activation slot counts are unchanged by F5; an admission pays one more bounded STATICCALL only while an additional policy row is active; no new storage slot per Type or per admission. These are the claims the next compiled pin must confirm or replace.
+**Costs observed (receipts at `ca1a228`, 2026-09-13 09:00 UTC; evidence
+`measure3-ca1a228.json`).** This is a six-cell diagnostic, not a matched B/C
+run or Files parity. Native/signed quote creates cost 1,226,435/1,271,630 gas;
+edits 520,724/567,395. Against exact retained packet `5960336`, the respective
+deltas are +9,642/+9,665 and +8,826/+8,822. These are whole-profile differences,
+not a paired isolation of F5: mandatory/additional-policy calls, descriptor
+reads and other source changes differ. Native storing resolve/list cost
+137,909/97,725; stateless resolve/list 51,173/89,168. Adding a policy row costs
+82,530; `activate(0)` 59,661; in-cell Type registration 131,287.
+
+Selected refusal checks retain caller-qualified probes, decoded arguments,
+failed receipts and unchanged getter probes: mandatory-rule rejection before
+activation, after zero policy and under permissive policy (220,307 each);
+additional-policy refusal; stale-signature rejection; unchanged-Type
+re-registration refusal; unsupported native imports on both destination
+paths. The old QUOTE admission names **row 2/mock, activation epoch 7**, while
+its profile uses global epoch **8**; the new admission names **row 3/StrictQuote,
+activation/global epoch 9**. Codex corrected the earlier row/epoch narration
+against raw evidence; packet bytes are unchanged.
+
+Independent offline review joined 75 signed transactions, 13 expected failed
+receipts, nine explicit argument cases, 237 unchanged pre/post getter pairs,
+seven basis rows and all 18 source hashes: GO for retained RPC consistency
+and signature evidence, not chain-state authentication or full semantic-oracle
+passage. The state-only reconstructor still reuses the profile hash. The
+offline reviewer regenerated the stale profile using the separately retained
+RPC epoch; that does not close state-only reconstruction after transcript loss.
 
 **Independent review qualification (Codex, 2026-09-13 08:56 UTC).** The
 mandatory-first dispatch and runner repairs are source-ready for a bounded
