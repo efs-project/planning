@@ -1,0 +1,203 @@
+{
+  "kind": "EFS_INDEPENDENT_SIGNATURE_BINDING_PROFILE",
+  "version": 1,
+  "standing": "candidate-specific disposable interpretation profile; not an adopted EFS ABI, authenticated deployment, authorization result, or production SDK contract",
+  "source": {
+    "candidateSourceCommit": "dcc7b946d2ac8dfcf22103069127a9d1809df974",
+    "publicProfile": {
+      "publishedCommit": "885d9f9",
+      "path": "Reviews/2026-09-12-efs-path-decision/lab-b/PROFILE.md",
+      "gitBlob": "ca39c29416ffa79231e48a52bef1e5403f563198"
+    },
+    "publicVector": {
+      "publishedCommit": "885d9f9",
+      "path": "Reviews/2026-09-12-efs-path-decision/lab-b/vectors/profile-b.json",
+      "gitBlob": "8d92f5806911d50427901cda12441f65c74bc309",
+      "schema": "efs2-road-b-public-profile-vector/1"
+    },
+    "retainedPacket": {
+      "commit": "322b3204a743cb2806e114cd4b0ec544076e3c48",
+      "sha256": "7bd5409a4b306d8e0705187094fa482b31efcad471260ae93f57eebd0b22fcce",
+      "gitBlob": "1a38f6493510760ae1b97f6188d2548c795350a8"
+    }
+  },
+  "independence": {
+    "derivationInputs": [
+      "author",
+      "actionTuple",
+      "inputs.body",
+      "inputs.bodies",
+      "actions",
+      "intent",
+      "eip712.domainType",
+      "eip712.domain.name",
+      "eip712.domain.version",
+      "eip712.intentType",
+      "signature.serialized"
+    ],
+    "comparisonOnly": [
+      "inputs.bodyHash",
+      "inputs.recordId",
+      "actionCommitment.actionsEncoded",
+      "actionCommitment.actionsHash",
+      "eip712.domainTypehash",
+      "eip712.domainSeparator",
+      "eip712.intentTypehash",
+      "eip712.structEncoded",
+      "eip712.structHash",
+      "eip712.digestPreimage",
+      "eip712.digest",
+      "signature.r",
+      "signature.s",
+      "signature.v",
+      "signature.recovered",
+      "mutationExpectation.mutatedNameHash",
+      "mutationExpectation.mutatedActionsHash",
+      "mutationExpectation.mutatedStructHash",
+      "mutationExpectation.mutatedDigest",
+      "mutationExpectation.recoveredWithOriginalSignature"
+    ],
+    "ignored": [
+      "publicThrowawayKey.privateKey",
+      "signature.signedViaWallet",
+      "signature.recoveredMatchesAuthor",
+      "mutationExpectation.recoveredMatchesAuthor",
+      "mutationExpectation.candidateExpectedResult",
+      "mutationExpectation.errorSelector"
+    ]
+  },
+  "encoding": {
+    "actionTuple": "tuple(uint8 kind,bytes32 typeId,bytes32 bodyHashOrRecordId,bytes32 purpose,bytes32 subject,bytes32 role,bytes32 target,uint32 expectedRevision,bytes32 salt)[]",
+    "actionFields": [
+      { "name": "kind", "type": "uint8" },
+      { "name": "typeId", "type": "bytes32" },
+      { "name": "bodyHashOrRecordId", "type": "bytes32" },
+      { "name": "purpose", "type": "bytes32" },
+      { "name": "subject", "type": "bytes32" },
+      { "name": "role", "type": "bytes32" },
+      { "name": "target", "type": "bytes32" },
+      { "name": "expectedRevision", "type": "uint32" },
+      { "name": "salt", "type": "bytes32" }
+    ],
+    "intentType": "PublicationIntent(bytes32 realmId,bytes32 coreCodeCommitment,address author,uint64 nonce,uint64 deadline,bytes32 acceptanceProfile,bytes32 indexObligations,bytes32 actionsHash)",
+    "intentFields": [
+      { "name": "realmId", "type": "bytes32" },
+      { "name": "coreCodeCommitment", "type": "bytes32" },
+      { "name": "author", "type": "address" },
+      { "name": "nonce", "type": "uint64" },
+      { "name": "deadline", "type": "uint64" },
+      { "name": "acceptanceProfile", "type": "bytes32" },
+      { "name": "indexObligations", "type": "bytes32" },
+      { "name": "actionsHash", "type": "bytes32" }
+    ],
+    "domainType": "EIP712Domain(string name,string version)",
+    "domainFields": [
+      { "name": "name", "type": "string" },
+      { "name": "version", "type": "string" }
+    ],
+    "domain": {
+      "name": "EFS2-RoadB-Lab",
+      "version": "1"
+    }
+  },
+  "limits": {
+    "actionsMin": 1,
+    "actionsMax": 64,
+    "publishBodyMaxBytes": 8192,
+    "signatureBytes": 65,
+    "allowedV": [27, 28],
+    "lowSMax": "0x7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0"
+  },
+  "actionKinds": {
+    "PUBLISH": 1,
+    "REUSE": 2,
+    "BIND": 3,
+    "UNBIND": 4,
+    "CREATE": 5,
+    "WITHDRAW": 6
+  },
+  "actionRules": {
+    "1": {
+      "name": "PUBLISH",
+      "zeroFields": ["purpose", "subject", "role", "target", "expectedRevision", "salt"],
+      "bodyRule": "HASH_EQUALS_BODY_HASH_OR_RECORD_ID"
+    },
+    "2": {
+      "name": "REUSE",
+      "zeroFields": ["purpose", "subject", "role", "target", "expectedRevision", "salt"],
+      "bodyRule": "EMPTY"
+    },
+    "3": {
+      "name": "BIND",
+      "zeroFields": ["typeId", "bodyHashOrRecordId", "salt"],
+      "nonzeroFields": ["purpose", "target"],
+      "bodyRule": "EMPTY"
+    },
+    "4": {
+      "name": "UNBIND",
+      "zeroFields": ["typeId", "bodyHashOrRecordId", "target", "salt"],
+      "nonzeroFields": ["purpose"],
+      "bodyRule": "EMPTY"
+    },
+    "5": {
+      "name": "CREATE",
+      "zeroFields": ["typeId", "bodyHashOrRecordId", "purpose", "subject", "role", "target", "expectedRevision"],
+      "bodyRule": "EMPTY"
+    },
+    "6": {
+      "name": "WITHDRAW",
+      "zeroFields": ["typeId", "bodyHashOrRecordId", "purpose", "subject", "role", "expectedRevision", "salt"],
+      "bodyRule": "EMPTY"
+    }
+  },
+  "mutationExpectations": {
+    "positive": {
+      "bodyCommitment": "MATCH",
+      "declaredActionShape": "MATCH",
+      "signatureBinding": "VALID",
+      "runtimeAcceptance": "UNKNOWN"
+    },
+    "changedBodyUnchangedActions": {
+      "bodyCommitment": "MISMATCH",
+      "declaredActionShape": "MISMATCH",
+      "signatureBinding": "VALID",
+      "runtimeAcceptance": "UNKNOWN"
+    },
+    "changedOrReorderedActions": {
+      "signatureBinding": "INVALID",
+      "runtimeAcceptance": "UNKNOWN"
+    },
+    "changedIntent": {
+      "signatureBinding": "INVALID",
+      "runtimeAcceptance": "UNKNOWN"
+    },
+    "wrongSigner": {
+      "signatureBinding": "INVALID",
+      "runtimeAcceptance": "UNKNOWN"
+    },
+    "malformedWidthOrRange": {
+      "input": "MALFORMED",
+      "runtimeAcceptance": "NOT_EVALUATED"
+    },
+    "signatureMutationHighSOrInvalidV": {
+      "signatureBinding": "INVALID_OR_MALFORMED",
+      "runtimeAcceptance": "NOT_EVALUATED"
+    }
+  },
+  "replayDomain": {
+    "present": ["name", "version"],
+    "absent": ["chainId", "verifyingContract"],
+    "status": "PARTIAL",
+    "reason": "CURRENT_DIAGNOSTIC_DOMAIN_DOES_NOT_BIND_CHAIN_OR_LEDGER_DEPLOYMENT"
+  },
+  "unproven": [
+    "authenticated packet or chain provenance",
+    "target deployment or runtime authority",
+    "nonce availability or replay safety",
+    "current author permission",
+    "Realm admission or acceptance",
+    "wallet, bundler, or runtime acceptance",
+    "chain inclusion or canonical semantic effect",
+    "Type semantics or query completeness"
+  ]
+}
