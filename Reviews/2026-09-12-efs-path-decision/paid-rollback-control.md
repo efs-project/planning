@@ -233,3 +233,23 @@ trace of every internal storage write. No C equivalence, portable import,
 historical contract proof, full Files workflow or permanent adoption follows.
 The next bounded work is C's same logical controls, then the already specified
 required reverse-query cost-reversal experiment.
+
+### C preparation follow-through, not a run
+
+Read-only preparation at successor `c6fce9d` found no Solidity change needed;
+relevant sources still match compiled pin `2ca7349`. Prefer six existing
+deployments including Producer, attachment and one native six-action
+Types/Items/Pair prefix, then signed A1: nine transactions per fresh arm.
+Proposed pre/post blocks are8/9,17/18,26/27. C starts at admission6 and reaches11
+on calibration; its Evidence basis is prior admission high-water, not block
+number. Intent nonce1 is distinct from pre-attempt A nonce0.
+
+Retain the real Producer rather than replacing the prefix with an EOA native
+call. Rebind linked-library/runtime identities for the poisoned Index and
+dependent Ledger; old signatures cannot be reused. C's literal required-rule
+and Index errors are100/36 bytes, not B's68/132-byte wrappers. Its Store getters
+can conceal backing data beyond declared dynamic length, so seal read-only
+`eth_getStorageAt` checks for the touched backing words as well as logical
+rows. Slot derivation was checked against the pinned StoreCore source; the
+complete physical expectation map and candidate runner still need independent
+review before any root-owned run. This preparation closes no C execution gate.
