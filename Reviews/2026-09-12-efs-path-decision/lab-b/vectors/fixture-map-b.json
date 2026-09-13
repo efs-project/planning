@@ -1,0 +1,959 @@
+{
+  "standing": "CANDIDATE-AUTHORED. B's arm-local semantic->physical fixture map for the sealed paid point/list slice (sdk-fixture.md appendix), as formulas + raw inputs + worked values. The independent run controller must re-derive every value with its own implementation (appendix pre-run pins 2 and 4) and must not copy expected answers from this file, from FIXTURE-MAP.md or from any result packet. Worked values were filled by `vectors/verify-fixture-map-b.mjs --emit` and re-checked by its default mode: a self-consistency check only. Values marked derivable=false need the controller's build of the pin (runtime codehashes) and stay null here.",
+  "sourceCommit": "9c19164",
+  "sourceHashes": {
+    "src/Keys.sol": "ebb6b95b4eb689c01020670e1a2ae003433c7f1500d2e32510432e384fea02b6",
+    "src/Ledger.sol": "7576874b52a81ebc0f7b64640332b345096e0c09000ed4f09811bdc21dd6c3d5",
+    "src/TypeRegistry.sol": "ef2bd89de58298977058ba98a4ac2c03416a3fde991d74cc52fdc00634c09459",
+    "src/LensReader.sol": "7d0a167b684d700642fd1510bb237bc4ae59b630696603e94f08dd7c3dda0d2e",
+    "src/IndexModule.sol": "e384475c12379208dbdf31eb66972ccbf9895e951494b236e5e9ab6cab539cce",
+    "src/LabAcceptors.sol": "898021c4fe41ea02acb9cb5184097b5e6f6ca0cfc2fdf1fc86e320dc66bfe898",
+    "src/LabHarness.sol": "0f09edfd71c8bc8cd133d102f56803e1de2ef40b5c1e5bb2b22c7d590a1deeb5",
+    "src/JoinedConsumer.sol": "106775bea982634190e72f94ddfcbeafbf0a0da54f261b8d3daf96d68b64be74",
+    "script/measure.mjs": "19f066d8c6655708566a33c3f8c314bba663e873b64133b238c72718760314ac"
+  },
+  "inputs": {
+    "chainId": 31337,
+    "mnemonic": "test test test test test test test test test test test junk",
+    "mnemonicStanding": "the runner's default (public Anvil mnemonic, script/measure.mjs:86); if the controller pins another mnemonic every wallet-derived value must be re-derived",
+    "derivationPath": "m/44'/60'/0'/0/<index>",
+    "walletIndices": {
+      "deployer": 0,
+      "AUTHOR_A": 1,
+      "wallet2_signedB": 2,
+      "paidCaller": 3
+    },
+    "deployerNonceAtStart": 0,
+    "deploymentsStanding": "CREATE addresses = getCreateAddress(deployer, nonce) with the deployer's nonce counting from 0 on a fresh chain in the exact deployAll order (script/measure.mjs:1807-1822, then setIndexModule = nonce 16, six register = 17-22, two activate = 23-24, JoinedConsumer = 25 at :1854)",
+    "deployments": [
+      {
+        "key": "registry",
+        "contract": "TypeRegistry",
+        "nonce": 0
+      },
+      {
+        "key": "acceptor",
+        "contract": "MockAcceptor",
+        "nonce": 1
+      },
+      {
+        "key": "quoteAcceptor",
+        "contract": "QuoteAcceptor",
+        "nonce": 2
+      },
+      {
+        "key": "labelAcceptor",
+        "contract": "LabelAcceptor",
+        "nonce": 3
+      },
+      {
+        "key": "ledger",
+        "contract": "Ledger(registry, REALM_ID)",
+        "nonce": 4
+      },
+      {
+        "key": "index",
+        "contract": "IndexModule(ledger)",
+        "nonce": 5
+      },
+      {
+        "key": "failingIndex",
+        "contract": "FailingIndexModule",
+        "nonce": 6
+      },
+      {
+        "key": "lens",
+        "contract": "LensReader(ledger, index)",
+        "nonce": 7
+      },
+      {
+        "key": "actorA",
+        "contract": "Actor(ledger) — the operator of step 1",
+        "nonce": 8
+      },
+      {
+        "key": "actorB",
+        "contract": "Actor(ledger) — AUTHOR_B, the producer contract",
+        "nonce": 9
+      },
+      {
+        "key": "consumer",
+        "contract": "Consumer(lens)",
+        "nonce": 10
+      },
+      {
+        "key": "recon",
+        "contract": "Reconstructor",
+        "nonce": 11
+      },
+      {
+        "key": "strictAcceptor",
+        "contract": "StrictQuoteAcceptor",
+        "nonce": 12
+      },
+      {
+        "key": "quoteRule",
+        "contract": "MinBodyAcceptor(32)",
+        "nonce": 13
+      },
+      {
+        "key": "pairRule",
+        "contract": "MinBodyAcceptor(96)",
+        "nonce": 14
+      },
+      {
+        "key": "statelessConsumer",
+        "contract": "StatelessConsumer(lens)",
+        "nonce": 15
+      },
+      {
+        "key": "joinedConsumer",
+        "contract": "JoinedConsumer(ledger, lens, QUOTE_J, PAIR, ITEM, LABEL)",
+        "nonce": 25
+      }
+    ],
+    "tags": {
+      "DOM_RECORD": "efs2/record/1",
+      "DOM_POSITION": "efs2/position/1",
+      "DOM_BINDING": "efs2/binding/1",
+      "DOM_SCOPE": "efs2/vk/binding-scope/1",
+      "DOM_POSTING": "efs2/pk/1",
+      "DOM_SUBJECT": "efs2/subject/1",
+      "DOM_PRINCIPAL": "efs2/principal/1",
+      "DOM_TYPE": "efs2/type/1"
+    },
+    "purposes": {
+      "HEAD": "efs2/purpose/head/1",
+      "FOLDER": "efs2/purpose/folder/1",
+      "TAG": "efs2/purpose/tag/1"
+    },
+    "realm": "lab/realm/1",
+    "shapes": {
+      "ITEM": "lab/type/item/1",
+      "PAIR": "lab/type/pair/1",
+      "QUOTE_J": "lab/type/quote-joined/1"
+    },
+    "strings": {
+      "FOLDER_SWAPS": "/swaps",
+      "NAME_ETH_USDC": "eth-usdc",
+      "CONCEPT_MARKET": "market",
+      "SALT_FILE_QUOTE": "joined/FILE_QUOTE",
+      "NOTE_BYTES_UTF8": "reference quote"
+    },
+    "quote": {
+      "scale": 6,
+      "observedAt": "1800000000",
+      "mantissaA1": "2500000000",
+      "mantissaA2": "2502000000",
+      "mantissaB1": "2501000000",
+      "source": "script/measure.mjs:109-114 (J.*), src/LabAcceptors.sol:19-30 (QuoteAcceptor: 160-byte body, scale 6, 0 < mantissa <= uint128 max, observedAt != 0, note != 0, pairId == refs[0])"
+    },
+    "items": {
+      "ITEM_ETH": "1",
+      "ITEM_USDC": "2",
+      "pairPayload": "1",
+      "source": "script/measure.mjs:890-892"
+    }
+  },
+  "constants": {
+    "DOM_RECORD": {
+      "formula": "keccak256(utf8('efs2/record/1'))",
+      "source": "src/Keys.sol:15",
+      "derivable": true,
+      "worked": "0xa9b8140bd3398d14fe72a4e868ca64b6bb119c3ee51354b50457d56da12552e3"
+    },
+    "DOM_POSITION": {
+      "formula": "keccak256(utf8('efs2/position/1'))",
+      "source": "src/Keys.sol:17",
+      "derivable": true,
+      "worked": "0x8d799c7b7064c52f591ec7dd83328143cf1489beb1af2c305d90cf2cde7407e3"
+    },
+    "DOM_BINDING": {
+      "formula": "keccak256(utf8('efs2/binding/1'))",
+      "source": "src/Keys.sol:19",
+      "derivable": true,
+      "worked": "0xfbc7067cf7411d9b4b89871c89041dd259dadaba90b115026f41239cbbf53c06"
+    },
+    "DOM_SCOPE": {
+      "formula": "keccak256(utf8('efs2/vk/binding-scope/1'))",
+      "source": "src/Keys.sol:21",
+      "derivable": true,
+      "worked": "0x92daa38d3049c86476ecdbfb3e06a74ab958d8ed37d583b3c0d9173128f840f3"
+    },
+    "DOM_POSTING": {
+      "formula": "keccak256(utf8('efs2/pk/1'))",
+      "source": "src/Keys.sol:23",
+      "derivable": true,
+      "worked": "0x15362da6306364a58a4c0a713b93f4a9bbdeb993c835d3435f5c97c8d5a0afd2"
+    },
+    "DOM_SUBJECT": {
+      "formula": "keccak256(utf8('efs2/subject/1'))",
+      "source": "src/Keys.sol:25",
+      "derivable": true,
+      "worked": "0xc0c0cdafc7b89f00f1f976e698195cb28121446967001f8bd7840204218bcb20"
+    },
+    "DOM_PRINCIPAL": {
+      "formula": "keccak256(utf8('efs2/principal/1'))",
+      "source": "src/Keys.sol:29",
+      "derivable": true,
+      "worked": "0x7f4ebbf8f6e4cdd030c23f45748ab93cbccd84be9aa2ac2b542059e0052e46cb"
+    },
+    "DOM_TYPE": {
+      "formula": "keccak256(utf8('efs2/type/1'))",
+      "source": "src/Keys.sol:37",
+      "derivable": true,
+      "worked": "0x44ac7bc1be9e89e7c6fc3842810f6c4a263682285ecc7f254d0a7fe7b2af799e"
+    },
+    "PURPOSE_HEAD": {
+      "formula": "keccak256(utf8('efs2/purpose/head/1'))",
+      "source": "src/JoinedConsumer.sol:112 (HEAD), script/measure.mjs:154",
+      "derivable": true,
+      "worked": "0x07167a05890e9fcaccbdf11abbb65a3aa14bccfe41825ce441803003862ce5df"
+    },
+    "PURPOSE_FOLDER": {
+      "formula": "keccak256(utf8('efs2/purpose/folder/1'))",
+      "source": "src/JoinedConsumer.sol:113, script/measure.mjs:154",
+      "derivable": true,
+      "worked": "0x58de23804076d1b785b7479ab38fe6ada246e62164776702f51a1c48ef98cf99"
+    },
+    "PURPOSE_TAG": {
+      "formula": "keccak256(utf8('efs2/purpose/tag/1'))",
+      "source": "src/JoinedConsumer.sol:114, script/measure.mjs:154",
+      "derivable": true,
+      "worked": "0x073e0a1a729959d841354dbb760bf57802acc034630defb75862e5dda0f72c18"
+    },
+    "REALM_ID": {
+      "formula": "keccak256(utf8('lab/realm/1')) — Ledger constructor arg",
+      "source": "script/measure.mjs:156, :1811",
+      "derivable": true,
+      "worked": "0x684016e05741dc9d511ff3520a16e1da90a35be14b76f9e12ef0287b9beae39f"
+    },
+    "NOTE_COMMITMENT": {
+      "formula": "keccak256(utf8('reference quote')) == keccak256(0x7265666572656e63652071756f7465)",
+      "source": "script/measure.mjs:111-114",
+      "derivable": true,
+      "worked": "0xea51e8c38c6dcf2d50a91e3db4784be38aeaf3728d1ef153b525df484e652345"
+    },
+    "FOLDER_SWAPS": {
+      "formula": "keccak256(utf8('/swaps')) — the folder subject key",
+      "source": "script/measure.mjs:155, :902",
+      "derivable": true,
+      "worked": "0x6b8f0ae148ccfbd232f2f5088f5758ca8158d5a69aaabdc7fd072cbf75be2dc9"
+    },
+    "NAME_ETH_USDC": {
+      "formula": "keccak256(utf8('eth-usdc')) — the placement role (entry name hash)",
+      "source": "script/measure.mjs:155, :902",
+      "derivable": true,
+      "worked": "0xc7c63b8bafc33aa5221fea52672881776f7b9d1aa8eebc29f8c758178230dd1a"
+    },
+    "CONCEPT_MARKET": {
+      "formula": "keccak256(utf8('market')) — the TAG role",
+      "source": "script/measure.mjs:902",
+      "derivable": true,
+      "worked": "0x8b30951df380b6b10da747e1167dd8e40bf8604c88c75b245dc172767f3b7320"
+    },
+    "SALT_FILE_QUOTE": {
+      "formula": "keccak256(utf8('joined/FILE_QUOTE')) — the CREATE salt of FILE_QUOTE",
+      "source": "script/measure.mjs:897",
+      "derivable": true,
+      "worked": "0xcf07b0d8ffc6bbc434847a26612314f5d16dff5e83f165d7e460c7fc0e3a008a"
+    },
+    "WORD_ONE": {
+      "formula": "abi.encode(uint256(1)) — the Pair payload word",
+      "source": "script/measure.mjs:892",
+      "derivable": true,
+      "worked": "0x0000000000000000000000000000000000000000000000000000000000000001"
+    }
+  },
+  "types": {
+    "standing": "typeId = keccak256(abi.encode(DOM_TYPE, shape, keccak256(abi.encode(bytes32[] refTypes)), ruleId)); ruleId = the mandatory acceptor's runtime codehash (0 without a rule) — src/Keys.sol:69-70, src/TypeRegistry.sol:88-99 (register), :122-126 (_codehashOf), :137-138 (typeIdOf); registration plan script/measure.mjs:142-149",
+    "ITEM": {
+      "descriptor": {
+        "shape": "lab/type/item/1",
+        "refTypes": [],
+        "mandatoryRule": null
+      },
+      "shape": {
+        "formula": "keccak256(utf8('lab/type/item/1'))",
+        "source": "script/measure.mjs:136",
+        "derivable": true,
+        "worked": "0x089e89ac79be382b5051ee54411ad06893426d15b1eb67458c48d95d3c8dd7ef"
+      },
+      "refsHash": {
+        "formula": "keccak256(abi.encode(bytes32[] []))",
+        "source": "src/Keys.sol:70",
+        "derivable": true,
+        "worked": "0x569e75fc77c1a856f6daaf9e69d8a9566ca34aa47f9133711ce065a571af0cfd"
+      },
+      "ruleId": {
+        "formula": "bytes32(0): no mandatory rule",
+        "source": "src/TypeRegistry.sol:122-126",
+        "derivable": true,
+        "worked": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "typeId": {
+        "formula": "keccak256(abi.encode(DOM_TYPE, shape, refsHash, 0x0))",
+        "source": "src/Keys.sol:69-70",
+        "derivable": true,
+        "worked": "0x589d5624cb9167094eb8ee549683bdadc765c77ed4f894308dd376bbebc30019"
+      }
+    },
+    "PAIR": {
+      "descriptor": {
+        "shape": "lab/type/pair/1",
+        "refTypes": [
+          "ITEM",
+          "ITEM"
+        ],
+        "mandatoryRule": {
+          "contract": "MinBodyAcceptor",
+          "immutable": {
+            "minBody": 96
+          },
+          "deploymentNonce": 14,
+          "source": "src/LabAcceptors.sol:41-51"
+        }
+      },
+      "shape": {
+        "formula": "keccak256(utf8('lab/type/pair/1'))",
+        "source": "script/measure.mjs:136",
+        "derivable": true,
+        "worked": "0x20bd50a4112086884183185adad5624590d31448d53976ac022d55bb46de0e98"
+      },
+      "refsHash": {
+        "formula": "keccak256(abi.encode(bytes32[] [typeId(ITEM), typeId(ITEM)]))",
+        "source": "src/Keys.sol:70, script/measure.mjs:146",
+        "derivable": true,
+        "worked": "0x1d4f32778deb35d60040b469f15ca2ad98e7781921849f27f4aec24d47c6829c"
+      },
+      "ruleId": {
+        "formula": "keccak256(runtime code of the deployed MinBodyAcceptor(96)) == address.codehash",
+        "source": "src/TypeRegistry.sol:122-126",
+        "derivable": false,
+        "worked": null,
+        "requires": "the controller's own build of the pin (runtime codehash embeds the immutable / the Ledger code)"
+      },
+      "typeId": {
+        "formula": "keccak256(abi.encode(DOM_TYPE, shape, refsHash, ruleId))",
+        "source": "src/Keys.sol:69-70",
+        "derivable": false,
+        "worked": null,
+        "requires": "the controller's own build of the pin (runtime codehash embeds the immutable / the Ledger code)"
+      }
+    },
+    "QUOTE_J": {
+      "descriptor": {
+        "shape": "lab/type/quote-joined/1",
+        "refTypes": [
+          "PAIR"
+        ],
+        "mandatoryRule": {
+          "contract": "QuoteAcceptor",
+          "immutable": null,
+          "constants": {
+            "BODY_LENGTH": 160,
+            "SCALE": 6,
+            "MAX_MANTISSA": "uint128 max"
+          },
+          "deploymentNonce": 2,
+          "source": "src/LabAcceptors.sol:18-33"
+        }
+      },
+      "shape": {
+        "formula": "keccak256(utf8('lab/type/quote-joined/1'))",
+        "source": "script/measure.mjs:136",
+        "derivable": true,
+        "worked": "0x4c7a4ec879e0f6bf18fb87b4dfe081dc3efec6a4c1096b49e5d74082703f2213"
+      },
+      "refsHash": {
+        "formula": "keccak256(abi.encode(bytes32[] [typeId(PAIR)]))",
+        "source": "src/Keys.sol:70, script/measure.mjs:147",
+        "derivable": false,
+        "worked": null,
+        "requires": "typeId(PAIR) (build-dependent)"
+      },
+      "ruleId": {
+        "formula": "keccak256(runtime code of the deployed QuoteAcceptor) == address.codehash",
+        "source": "src/TypeRegistry.sol:122-126",
+        "derivable": false,
+        "worked": null,
+        "requires": "the controller's own build of the pin (runtime codehash embeds the immutable / the Ledger code)"
+      },
+      "typeId": {
+        "formula": "keccak256(abi.encode(DOM_TYPE, shape, refsHash, ruleId))",
+        "source": "src/Keys.sol:69-70",
+        "derivable": false,
+        "worked": null,
+        "requires": "the controller's own build of the pin (runtime codehash embeds the immutable / the Ledger code)"
+      }
+    }
+  },
+  "records": {
+    "standing": "recordId = keccak256(abi.encode(DOM_RECORD, typeId, keccak256(body))) — src/Keys.sol:73-79; bodies script/measure.mjs:165, :890-900",
+    "ITEM_ETH": {
+      "body": {
+        "formula": "abi.encode(uint256(1))",
+        "source": "script/measure.mjs:890",
+        "derivable": true,
+        "worked": "0x0000000000000000000000000000000000000000000000000000000000000001"
+      },
+      "id": {
+        "formula": "keccak256(abi.encode(DOM_RECORD, typeId(ITEM), keccak256(body)))",
+        "source": "src/Keys.sol:73-74",
+        "derivable": true,
+        "worked": "0xdcee1a18e773c4e23c675382b23918d0771ae6ff0a7f2c22d3e7298744331825"
+      }
+    },
+    "ITEM_USDC": {
+      "body": {
+        "formula": "abi.encode(uint256(2))",
+        "source": "script/measure.mjs:890",
+        "derivable": true,
+        "worked": "0x0000000000000000000000000000000000000000000000000000000000000002"
+      },
+      "id": {
+        "formula": "keccak256(abi.encode(DOM_RECORD, typeId(ITEM), keccak256(body)))",
+        "source": "src/Keys.sol:73-74",
+        "derivable": true,
+        "worked": "0x22ad273e9b5cb707fadf826bf174c50a895a558924cc7ff0cca702bffbc6c4a2"
+      }
+    },
+    "PAIR_ETH_USDC": {
+      "body": {
+        "formula": "abi.encode(bytes32 ITEM_ETH.id, bytes32 ITEM_USDC.id, uint256 1) — 96 bytes; the two leading words are the checked, ORDERED references",
+        "source": "script/measure.mjs:892, src/LabAcceptors.sol:41-51 (>= 96 bytes)",
+        "derivable": true,
+        "worked": "0xdcee1a18e773c4e23c675382b23918d0771ae6ff0a7f2c22d3e729874433182522ad273e9b5cb707fadf826bf174c50a895a558924cc7ff0cca702bffbc6c4a20000000000000000000000000000000000000000000000000000000000000001"
+      },
+      "id": {
+        "formula": "keccak256(abi.encode(DOM_RECORD, typeId(PAIR), keccak256(body)))",
+        "source": "src/Keys.sol:73-74",
+        "derivable": false,
+        "worked": null,
+        "requires": "typeId(PAIR)"
+      }
+    },
+    "QUOTE_A1": {
+      "fields": {
+        "pairId": "PAIR_ETH_USDC.id",
+        "mantissa": "2500000000",
+        "scale": 6,
+        "observedAt": "1800000000",
+        "noteCommitment": "NOTE_COMMITMENT"
+      },
+      "body": {
+        "formula": "abi.encode(bytes32 pairId, uint256 2500000000, uint8 6, uint64 1800000000, bytes32 NOTE_COMMITMENT) — 160 bytes",
+        "source": "script/measure.mjs:165, :900",
+        "derivable": false,
+        "worked": null,
+        "requires": "PAIR_ETH_USDC.id"
+      },
+      "id": {
+        "formula": "keccak256(abi.encode(DOM_RECORD, typeId(QUOTE_J), keccak256(body)))",
+        "source": "src/Keys.sol:73-74",
+        "derivable": false,
+        "worked": null,
+        "requires": "typeId(QUOTE_J), body"
+      }
+    },
+    "QUOTE_A2": {
+      "fields": {
+        "pairId": "PAIR_ETH_USDC.id",
+        "mantissa": "2502000000",
+        "scale": 6,
+        "observedAt": "1800000000",
+        "noteCommitment": "NOTE_COMMITMENT"
+      },
+      "body": {
+        "formula": "abi.encode(bytes32 pairId, uint256 2502000000, uint8 6, uint64 1800000000, bytes32 NOTE_COMMITMENT)",
+        "source": "script/measure.mjs:165, :900",
+        "derivable": false,
+        "worked": null,
+        "requires": "PAIR_ETH_USDC.id"
+      },
+      "id": {
+        "formula": "keccak256(abi.encode(DOM_RECORD, typeId(QUOTE_J), keccak256(body)))",
+        "source": "src/Keys.sol:73-74",
+        "derivable": false,
+        "worked": null,
+        "requires": "typeId(QUOTE_J), body"
+      }
+    },
+    "QUOTE_B1": {
+      "fields": {
+        "pairId": "PAIR_ETH_USDC.id",
+        "mantissa": "2501000000",
+        "scale": 6,
+        "observedAt": "1800000000",
+        "noteCommitment": "NOTE_COMMITMENT"
+      },
+      "body": {
+        "formula": "abi.encode(bytes32 pairId, uint256 2501000000, uint8 6, uint64 1800000000, bytes32 NOTE_COMMITMENT)",
+        "source": "script/measure.mjs:165, :900",
+        "derivable": false,
+        "worked": null,
+        "requires": "PAIR_ETH_USDC.id"
+      },
+      "id": {
+        "formula": "keccak256(abi.encode(DOM_RECORD, typeId(QUOTE_J), keccak256(body)))",
+        "source": "src/Keys.sol:73-74",
+        "derivable": false,
+        "worked": null,
+        "requires": "typeId(QUOTE_J), body"
+      }
+    }
+  },
+  "wallets": {
+    "standing": "fixed ephemeral test accounts of the run mnemonic, m/44'/60'/0'/0/<index> (script/measure.mjs:275); addresses recorded, no secrets",
+    "deployer": {
+      "index": 0,
+      "role": "deployer; relays every signed publication and every Actor call (setup only)",
+      "address": {
+        "formula": "HDNodeWallet.fromPhrase(mnemonic, path index 0).address",
+        "source": "script/measure.mjs:275-277",
+        "derivable": true,
+        "worked": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      }
+    },
+    "AUTHOR_A": {
+      "index": 1,
+      "role": "AUTHOR_A (EOA; signs A1 and A2 via executeSigned)",
+      "address": {
+        "formula": "HDNodeWallet.fromPhrase(mnemonic, path index 1).address",
+        "source": "script/measure.mjs:275, :428",
+        "derivable": true,
+        "worked": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+      }
+    },
+    "wallet2_signedB": {
+      "index": 2,
+      "role": "unused by the paid slice (signedB in other cells)",
+      "address": {
+        "formula": "HDNodeWallet.fromPhrase(mnemonic, path index 2).address",
+        "source": "script/measure.mjs:275, :428",
+        "derivable": true,
+        "worked": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+      }
+    },
+    "paidCaller": {
+      "index": 3,
+      "role": "the pinned unrelated paid caller of the four paid rows",
+      "address": {
+        "formula": "HDNodeWallet.fromPhrase(mnemonic, path index 3).address",
+        "source": "script/measure.mjs:1268-1269",
+        "derivable": true,
+        "worked": "0x90F79bf6EB2c4f870365E785982E1f101E93b906"
+      }
+    }
+  },
+  "deployment": {
+    "registry": {
+      "contract": "TypeRegistry",
+      "nonce": 0,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 0)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      }
+    },
+    "acceptor": {
+      "contract": "MockAcceptor",
+      "nonce": 1,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 1)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+      }
+    },
+    "quoteAcceptor": {
+      "contract": "QuoteAcceptor",
+      "nonce": 2,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 2)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+      }
+    },
+    "labelAcceptor": {
+      "contract": "LabelAcceptor",
+      "nonce": 3,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 3)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+      }
+    },
+    "ledger": {
+      "contract": "Ledger(registry, REALM_ID)",
+      "nonce": 4,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 4)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
+      }
+    },
+    "index": {
+      "contract": "IndexModule(ledger)",
+      "nonce": 5,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 5)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
+      }
+    },
+    "failingIndex": {
+      "contract": "FailingIndexModule",
+      "nonce": 6,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 6)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0x0165878A594ca255338adfa4d48449f69242Eb8F"
+      }
+    },
+    "lens": {
+      "contract": "LensReader(ledger, index)",
+      "nonce": 7,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 7)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853"
+      }
+    },
+    "actorA": {
+      "contract": "Actor(ledger) — the operator of step 1",
+      "nonce": 8,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 8)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6"
+      }
+    },
+    "actorB": {
+      "contract": "Actor(ledger) — AUTHOR_B, the producer contract",
+      "nonce": 9,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 9)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318"
+      }
+    },
+    "consumer": {
+      "contract": "Consumer(lens)",
+      "nonce": 10,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 10)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788"
+      }
+    },
+    "recon": {
+      "contract": "Reconstructor",
+      "nonce": 11,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 11)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e"
+      }
+    },
+    "strictAcceptor": {
+      "contract": "StrictQuoteAcceptor",
+      "nonce": 12,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 12)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0"
+      }
+    },
+    "quoteRule": {
+      "contract": "MinBodyAcceptor(32)",
+      "nonce": 13,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 13)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82"
+      }
+    },
+    "pairRule": {
+      "contract": "MinBodyAcceptor(96)",
+      "nonce": 14,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 14)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0x9A676e781A523b5d0C0e43731313A708CB607508"
+      }
+    },
+    "statelessConsumer": {
+      "contract": "StatelessConsumer(lens)",
+      "nonce": 15,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 15)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0x0B306BF915C4d645ff596e518fAf3F9669b97016"
+      }
+    },
+    "joinedConsumer": {
+      "contract": "JoinedConsumer(ledger, lens, QUOTE_J, PAIR, ITEM, LABEL)",
+      "nonce": 25,
+      "address": {
+        "formula": "getCreateAddress(deployer, nonce 25)",
+        "source": "script/measure.mjs:1788-1806 (dep), :1807-1822 / :1854 (order)",
+        "derivable": true,
+        "worked": "0x4A679253410272dd5232B3Ff7cF5dbB88f295319"
+      }
+    }
+  },
+  "principals": {
+    "standing": "EOA principal = bytes32(uint256(uint160(address))) (src/Keys.sol:53-55; src/Ledger.sol:241 for signed ingress); contract principal = keccak256(abi.encode(DOM_PRINCIPAL, uint256(2), realmOrigin, address)) (src/Keys.sol:58-65; src/Ledger.sol:219, :821-823); realmOrigin = keccak256(abi.encode(uint256 block.chainid, Ledger.codehash)) (src/Ledger.sol:815-817)",
+    "AUTHOR_A": {
+      "kind": "EOA (wallet index 1)",
+      "principal": {
+        "formula": "bytes32(uint256(uint160(AUTHOR_A.address)))",
+        "source": "src/Keys.sol:53-55, src/Ledger.sol:241",
+        "derivable": true,
+        "worked": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8"
+      }
+    },
+    "AUTHOR_B": {
+      "kind": "contract (Actor actorB, CREATE nonce 9)",
+      "realmOrigin": {
+        "formula": "keccak256(abi.encode(uint256(31337), keccak256(Ledger runtime code)))",
+        "source": "src/Ledger.sol:815-817",
+        "derivable": false,
+        "worked": null,
+        "requires": "the Ledger runtime codehash from the controller's build"
+      },
+      "principal": {
+        "formula": "keccak256(abi.encode(DOM_PRINCIPAL, uint256(2), realmOrigin, actorB.address))",
+        "source": "src/Keys.sol:58-65, src/Ledger.sol:821-823",
+        "derivable": false,
+        "worked": null,
+        "requires": "realmOrigin"
+      }
+    }
+  },
+  "subjects": {
+    "FILE_QUOTE": {
+      "creator": "AUTHOR_A.principal (signed CREATE inside A1: p.creator = Keys.principal(intent.author))",
+      "salt": "SALT_FILE_QUOTE",
+      "id": {
+        "formula": "keccak256(abi.encode(DOM_SUBJECT, AUTHOR_A.principal, SALT_FILE_QUOTE))",
+        "source": "src/Keys.sol:82-83, src/Ledger.sol:241-242, :673-680, script/measure.mjs:123, :898",
+        "derivable": true,
+        "worked": "0x976c920188c61969cee3d77dc43128f58bc31006bcf4d201023eda31a20e1d1e"
+      }
+    }
+  },
+  "positions": {
+    "standing": "position = keccak256(abi.encode(DOM_POSITION, purpose, subject, role)) — src/Keys.sol:86-87, script/measure.mjs:124, :903",
+    "HEAD_FILE_QUOTE": {
+      "formula": "position(PURPOSE_HEAD, FILE_QUOTE.id, bytes32(0))",
+      "source": "src/Keys.sol:86-87",
+      "derivable": true,
+      "worked": "0x46c9457ea8495d166749377981953b626521c3bf09a3aab681801ed83eabaa2d"
+    },
+    "PLACEMENT_SWAPS_ETH_USDC": {
+      "formula": "position(PURPOSE_FOLDER, FOLDER_SWAPS, NAME_ETH_USDC) — the one placement",
+      "source": "src/Keys.sol:86-87",
+      "derivable": true,
+      "worked": "0x0ab270965ac71109062250c3555b016b9d24fd1adb8b8396802562de872bca1b"
+    },
+    "TAG_MARKET": {
+      "formula": "position(PURPOSE_TAG, FILE_QUOTE.id, CONCEPT_MARKET) — bound inside A1 (target = FILE_QUOTE.id)",
+      "source": "src/Keys.sol:86-87, script/measure.mjs:933",
+      "derivable": true,
+      "worked": "0x90318c3b7a1b2df43635aab75f52e867501cc6dfb77db49c129527a87dda66aa"
+    }
+  },
+  "bindings": {
+    "standing": "binding key = keccak256(abi.encode(DOM_BINDING, principal, position)) — src/Keys.sol:90-91; head rows are read by Ledger.head(key) (src/Ledger.sol:905)",
+    "A_HEAD": {
+      "formula": "binding(AUTHOR_A.principal, HEAD_FILE_QUOTE)",
+      "source": "src/Keys.sol:90-91",
+      "derivable": true,
+      "worked": "0x27b46e4d452fea4e1e0d8bef9cc734cbfca677a94e756c6d801795a238ad222b"
+    },
+    "A_PLACEMENT": {
+      "formula": "binding(AUTHOR_A.principal, PLACEMENT_SWAPS_ETH_USDC)",
+      "source": "src/Keys.sol:90-91",
+      "derivable": true,
+      "worked": "0xb23f09599ce3413bacd659d6bb3ea1e51a1040a430d2691baf19aed281dfccf4"
+    },
+    "A_TAG": {
+      "formula": "binding(AUTHOR_A.principal, TAG_MARKET)",
+      "source": "src/Keys.sol:90-91",
+      "derivable": true,
+      "worked": "0xcb0f6b48fb4450f00a3eccbcb2dca29c3d52a060950c5837cc858304307da938"
+    },
+    "B_HEAD": {
+      "formula": "binding(AUTHOR_B.principal, HEAD_FILE_QUOTE)",
+      "source": "src/Keys.sol:90-91",
+      "derivable": false,
+      "worked": null,
+      "requires": "AUTHOR_B.principal"
+    },
+    "B_PLACEMENT": {
+      "statement": "does not exist: B1 binds no FOLDER placement (script/measure.mjs paidA2B1: two actions); proven at the seal by head(binding(B, PLACEMENT)) state 0"
+    }
+  },
+  "scopes": {
+    "standing": "scope key = keccak256(abi.encode(DOM_SCOPE, principal, purpose, subject)) (src/Keys.sol:94-95); its posting list key = keccak256(abi.encode(DOM_POSTING, 0x0, uint256(10), uint256(0), scopeKey)) (src/Keys.sol:98-99, :114-116)",
+    "A_FOLDER_SWAPS": {
+      "scopeKey": {
+        "formula": "scope(AUTHOR_A.principal, PURPOSE_FOLDER, FOLDER_SWAPS)",
+        "source": "src/Keys.sol:94-95",
+        "derivable": true,
+        "worked": "0x7f0a83b679ef50bf2e9e356e8357f7defc18f606e56f6b5536c068abc535cc98"
+      },
+      "scopeList": {
+        "formula": "posting(0x0, 10, 0, scopeKey)",
+        "source": "src/Keys.sol:98-99, :114-116",
+        "derivable": true,
+        "worked": "0xa452f1767b586ee61c51c3ec891c15877fda53318249a03b5ac0dd569d053f66"
+      }
+    },
+    "B_FOLDER_SWAPS": {
+      "scopeKey": {
+        "formula": "scope(AUTHOR_B.principal, PURPOSE_FOLDER, FOLDER_SWAPS)",
+        "source": "src/Keys.sol:94-95",
+        "derivable": false,
+        "worked": null,
+        "requires": "AUTHOR_B.principal"
+      },
+      "scopeList": {
+        "formula": "posting(0x0, 10, 0, scopeKey) — expected count 0 at the seal",
+        "source": "src/Keys.sol:98-99, :114-116",
+        "derivable": false,
+        "worked": null,
+        "requires": "AUTHOR_B.principal"
+      }
+    }
+  },
+  "lenses": {
+    "standing": "lens id = keccak256(abi.encode(address[] orderedPrincipals)) (src/JoinedConsumer.sol:565-567 _lensId, script/measure.mjs:166); NOTE LensReader's cursor lensHash uses abi.encodePacked (src/LensReader.sol:142) — a different value, not the appendix's lens id",
+    "LENS_A_FIRST": {
+      "principals": [
+        "AUTHOR_A.address",
+        "actorB.address"
+      ],
+      "id": {
+        "formula": "keccak256(abi.encode(address[] [AUTHOR_A, actorB]))",
+        "source": "src/JoinedConsumer.sol:565-567",
+        "derivable": true,
+        "worked": "0x5c839af09e1e7f37f5e1c5c17041d8fc6113dc53af25b15d433f2edc4a8edb04"
+      }
+    },
+    "LENS_B_FIRST": {
+      "principals": [
+        "actorB.address",
+        "AUTHOR_A.address"
+      ],
+      "id": {
+        "formula": "keccak256(abi.encode(address[] [actorB, AUTHOR_A]))",
+        "source": "src/JoinedConsumer.sol:565-567",
+        "derivable": true,
+        "worked": "0xaa9401e70338c6c79e7705da9b6d4e1ff54f83bd375f6e1716336733fce8f56f"
+      }
+    }
+  },
+  "ordinals": {
+    "standing": "EXPECTED UNDER THIS RUNNER from a fresh deployment: the sealed post-setup snapshot holds 0 admissions / 0 publications (setup only registers Types); cell joined/paid-slice then runs step1, A1, A2, B1 in that order (script/measure.mjs paidStep1 / paidA1 / paidA2B1). Ordinals are 1-based, one admission per action, one publication per transaction (src/Ledger.sol:406-446 _run).",
+    "publications": {
+      "1": "step1 (actorA native: PUBLISH ITEM_ETH, ITEM_USDC, PAIR_ETH_USDC)",
+      "2": "A1 (AUTHOR_A signed, 5 actions)",
+      "3": "A2 (AUTHOR_A signed, 2 actions)",
+      "4": "B1 (actorB native, 2 actions)"
+    },
+    "admissions": {
+      "1": "ITEM_ETH",
+      "2": "ITEM_USDC",
+      "3": "PAIR_ETH_USDC",
+      "4": "CREATE FILE_QUOTE",
+      "5": "PUBLISH QUOTE_A1",
+      "6": "BIND A HEAD -> QUOTE_A1 (revision 1)",
+      "7": "BIND A FOLDER /swaps eth-usdc -> FILE_QUOTE (revision 1) = the one placement",
+      "8": "BIND A TAG market -> FILE_QUOTE (revision 1)",
+      "9": "PUBLISH QUOTE_A2",
+      "10": "BIND A HEAD -> QUOTE_A2 (revision 2, CAS expected 1)",
+      "11": "PUBLISH QUOTE_B1",
+      "12": "BIND B HEAD -> QUOTE_B1 (revision 1)"
+    },
+    "revisionLabels": {
+      "A1": {
+        "head": "QUOTE_A1",
+        "physicalRevision": 1,
+        "admission": 6,
+        "publication": 2
+      },
+      "A2": {
+        "head": "QUOTE_A2",
+        "physicalRevision": 2,
+        "admission": 10,
+        "publication": 3
+      },
+      "B1": {
+        "head": "QUOTE_B1",
+        "physicalRevision": 1,
+        "admission": 12,
+        "publication": 4
+      },
+      "placement": {
+        "physicalRevision": 1,
+        "admission": 7,
+        "publication": 2,
+        "sourceStep": "A1"
+      }
+    },
+    "postB1Basis": {
+      "admissionFrontier": 12,
+      "records": 6,
+      "bindings": 4,
+      "publications": 4,
+      "indexGeneration": 0,
+      "registryEpoch": 8,
+      "registryEpochDerivation": "6 register (each calls _activate: ++epoch, src/TypeRegistry.sol:88-100, :112-120) + 2 activate (QUOTE, PAIR; script/measure.mjs:1845) = 8; expected under this runner",
+      "ledgerNonces": {
+        "actorA": 1,
+        "AUTHOR_A": 2,
+        "actorB": 1
+      }
+    }
+  },
+  "evidenceCategories": {
+    "standing": "Ledger proof kinds src/Ledger.sol:131-132; evidence cell written at src/Ledger.sol:465-476 (r, s only for PROOF_SIGNED; v packed from p.v); consumer mapping src/JoinedConsumer.sol:301-302, checks :455-465; placement effect category = the placement admission's publication category + '_EFFECT' (script/measure.mjs evidenceCategoryOf)",
+    "EOA_SIGNED_PUBLICATION": {
+      "proofKind": 2,
+      "shape": "v in {27, 28}, r != 0, s != 0 (ecrecover of the PublicationIntent, src/Ledger.sol:232-255); author = intent.author",
+      "rows": [
+        "A1",
+        "A2"
+      ]
+    },
+    "CONTRACT_ORIGINATED_PUBLICATION": {
+      "proofKind": 1,
+      "shape": "v == 0, r == 0, s == 0 (nothing fabricated; src/Ledger.sol:213-221, :465-472); author = msg.sender (the Actor contract)",
+      "rows": [
+        "step1 (actorA)",
+        "B1 (actorB)"
+      ]
+    },
+    "EOA_SIGNED_PUBLICATION_EFFECT": {
+      "meaning": "the placement's admission (7) belongs to publication 2, an EOA_SIGNED_PUBLICATION by AUTHOR_A; placement provenance is reported separately from selected-content authorship"
+    }
+  }
+}
