@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-13
 
+- @v2-pm (harness codex, session efs-warroom-provisional-20260913-2254): Issuing the provisional compact-B direction with frozen cost qualifications and completed B mined controls; coordinating a C-only runner and independently derived Store/raw-storage expectations. No heavy lease or feature waiver. / next: exact required-query cost reversal and joined portability/Files gates; final or conditional handoff September14 at23:10 UTC.
+
 - @v2-pm (harness codex, session efs-warroom-controls-20260913-2154): Continuing the reviewed matched-rollback supplement with isolated B runner preparation and independent exact-runtime/raw-state expectations. Correcting inherited immutable resolution in the oracle, not changing Core semantics. / next: bounded mined controls if prepared and reviewed; frozen provisional cost table and 23:10 recommendation remain unchanged.
 
 - @v2-pm (harness codex, session efs-warroom-cutoff-20260913-1954): Recorded the 19:10 provisional cost snapshot and integrated the SDK's actual-API review, preserving browser-versus-contract historical-read distinctions. / next: execute the already-reviewed late-index control in the isolated B successor and challenge the provisional primary hypothesis; no cost-parity, full-Files, portable-proof or final architecture claim.

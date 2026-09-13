@@ -1,7 +1,8 @@
 # Provisional direction: compact EFS, with one cost-reversal challenge
 
-**Standing:** working recommendation for the September 13, 23:10 UTC owner
-checkpoint. Based on the 19:10 evidence cutoff; not a final selection, waived
+**Standing:** provisional recommendation issued September 13 ahead of the
+23:10 UTC owner checkpoint. Based on the 19:10 evidence cutoff plus separately
+labelled validation supplements; not a final selection, waived
 requirement, production authorization or permanent protocol decision.
 
 ## The recommendation in plain English
@@ -19,6 +20,13 @@ contract author, two-author selection and checked consuming-contract reads.
 It is cheaper than our current MUD-backed implementation for that joined
 slice. Both still have important missing integration, so “B first” is a work
 priority, not “B already meets every requirement.”
+
+**Build posture:** choose B as the next engineering target, but do not call its
+current prototype the finished foundation. No sacrifice of portability,
+mandatory validation, Lenses or required discovery is approved. Today we have
+a substantially cheaper useful implementation to pursue, not the unavoidable
+price of the complete EFS promise. The next day is for the named comparison
+and integration gates below, not another open-ended architecture search.
 
 ## What users would pay in the measured slice
 
@@ -102,3 +110,11 @@ pre/post-state evidence, with a successful same-shape calibration. Matching C
 controls and the required-query comparison remain open. This strengthens B's
 bounded atomicity evidence, not the frozen cost table, proof level or final
 feature eligibility. Exact packet and limits: [[paid-rollback-control]].
+
+Independent owner-checkpoint review confirmed all five published cost rows and
+ranges against the retained table, with no blocking overclaim. The concise
+takeaway must say required reverse discovery and stronger portable evidence
+still need **implementation and pricing**, not merely a price estimate. B's
+current author-liveness dependency is a portability limitation to repair, not
+an accepted sacrifice. The final/conditional checkpoint is September 14,
+23:10 UTC (6:10pm Chicago).

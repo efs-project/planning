@@ -112,6 +112,25 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**September 13 provisional recommendation issued before the 23:10 deadline.**
+[[provisional-recommendation|Compact B is the primary engineering hypothesis]];
+C remains the focused required-query challenger, and A the semantic reference,
+not a third product. The frozen small-workflow costs favour B, but required
+reverse-query maintenance and stronger portability are not fully priced.
+No feature is waived, no permanent choice is frozen and no production repo
+is authorized by this recommendation. Final or conditional handoff remains
+September 14 at23:10 UTC.
+
+The B mined rollback supplement is complete. C's dedicated runner and
+independent physical/raw-storage expectations are now being prepared in
+separate owned scopes; existing83 Node tests pass with retained real artifacts.
+No compiler/chain lease exists. The fresh control will use a genuine Producer
+prefix and5M identical static/mined attempt caps under normal30M blocks; these
+are test bounds, not product affordability concessions. A scratch-only strict
+linked-runtime adapter is allowed, never byte masking or shared-source changes.
+Claude UI was checked again: Mac locked, so Fable execution remains unverified.
+Codex continues without waiting for him or changing quota/model settings.
+
 **22:39 B mined controls verified and published; heavy lease released.**
 The two complete-A1 refusals and zero-poison calibration ran successfully on
 the prescribed fresh graphs. Independent verification checked 528 raw state
