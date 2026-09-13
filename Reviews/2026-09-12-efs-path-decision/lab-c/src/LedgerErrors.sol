@@ -42,7 +42,7 @@ error NotAnImport();
 error BadSourceEvidence();
 error BadAttachment(address given);
 error IndexNotAttached(address index, address attachedTo);
-error IndexCodeChanged(bytes32 sealed, bytes32 current);
+error IndexCodeChanged(bytes32 sealedCodehash, bytes32 current);
 error UnsupportedSourceProof(uint8 proofKind);
 
 event Published(

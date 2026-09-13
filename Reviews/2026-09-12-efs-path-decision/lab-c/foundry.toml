@@ -15,6 +15,7 @@ bytecode_hash = "none"
 cbor_metadata = false
 ffi = false
 fuzz = { runs = 16 }
+fs_permissions = [{ access = "read", path = "./out" }]
 remappings = [
   "@latticexyz/=vendor/@latticexyz/",
 ]

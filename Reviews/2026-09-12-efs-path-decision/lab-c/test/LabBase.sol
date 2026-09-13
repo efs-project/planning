@@ -2,9 +2,10 @@
 pragma solidity 0.8.30;
 
 /*
- * Thin base for the test contracts (EIP-3860: keep each test contract's initcode small). All heavy
- * helpers live in the separately deployed Fixture (test/Fixture.sol); the wrappers below are
- * one-line external calls so test bodies keep their original names.
+ * Thin base for the test contracts (EIP-170 / EIP-3860 on the test side). Every helper is deployed
+ * from artifact bytecode (test/Deploy.sol) so no creation code is embedded in any test contract, and
+ * heavy logic lives in the five deployed helpers; the wrappers below are one-line external calls so
+ * test bodies keep their original names.
  */
 
 import { IStoreRead } from "@latticexyz/store/src/IStoreRead.sol";
@@ -13,7 +14,12 @@ import { Ledger } from "../src/Ledger.sol";
 import { IndexModule } from "../src/IndexModule.sol";
 import { LensReader } from "../src/LensReader.sol";
 import { Vm, VM_ADDRESS } from "./Vm.sol";
-import { Fixture, Producer, QuoteAcceptorV1 } from "./Fixture.sol";
+import { Deploy } from "./Deploy.sol";
+import { FixtureActors, Producer, QuoteAcceptorV1 } from "./FixtureActors.sol";
+import { FixtureBuilders } from "./FixtureBuilders.sol";
+import { FixtureRealm } from "./FixtureRealm.sol";
+import { FixtureSeeder } from "./FixtureSeeder.sol";
+import { FixtureExport } from "./FixtureExport.sol";
 
 abstract contract LabBase {
   Vm internal constant vm = Vm(VM_ADDRESS);
@@ -29,7 +35,12 @@ abstract contract LabBase {
   bytes32 internal constant NAME2 = keccak256("eth-usdt");
   bytes32 internal constant MARKET = keccak256("market");
 
-  Fixture internal fx;
+  FixtureActors internal actors;
+  FixtureBuilders internal builders;
+  FixtureRealm internal realm;
+  FixtureSeeder internal seeder;
+  FixtureExport internal export;
+
   IndexModule internal index;
   Ledger internal ledger;
   LensReader internal reader;
@@ -51,26 +62,32 @@ abstract contract LabBase {
   bytes32 internal QUOTE_B1;
 
   function _boot(bool seed) internal {
-    fx = new Fixture();
-    index = fx.index();
-    ledger = fx.ledger();
-    reader = fx.reader();
-    producer = fx.producer();
-    quoteAcceptor = fx.quoteAcceptor();
-    aAddr = fx.aAddr();
-    A = fx.A();
-    B = fx.B();
-    ITEM_T = fx.ITEM_T();
-    PAIR_T = fx.PAIR_T();
-    QUOTE_T = fx.QUOTE_T();
-    ITEM_ETH = fx.ITEM_ETH();
-    ITEM_USDC = fx.ITEM_USDC();
-    PAIR = fx.PAIR();
-    FILE = fx.FILE();
-    QUOTE_A1 = fx.QUOTE_A1();
-    QUOTE_A2 = fx.QUOTE_A2();
-    QUOTE_B1 = fx.QUOTE_B1();
-    if (seed) fx.seed();
+    actors = FixtureActors(Deploy.deployArtifact("FixtureActors.sol:FixtureActors", ""));
+    builders = FixtureBuilders(Deploy.deployArtifact("FixtureBuilders.sol:FixtureBuilders", ""));
+    realm = FixtureRealm(Deploy.deployArtifact("FixtureRealm.sol:FixtureRealm", ""));
+    (index, ledger, reader) = realm.deployRealm(POISON);
+    aAddr = vm.addr(PK_A);
+    A = EfsIds.eoaPrincipal(aAddr);
+    seeder = FixtureSeeder(
+      Deploy.deployArtifact("FixtureSeeder.sol:FixtureSeeder", abi.encode(address(builders), address(actors), address(ledger), A))
+    );
+    export = FixtureExport(
+      Deploy.deployArtifact("FixtureExport.sol:FixtureExport", abi.encode(address(builders), address(seeder), address(ledger)))
+    );
+    producer = actors.producer();
+    quoteAcceptor = actors.quoteAcceptor();
+    B = seeder.B();
+    ITEM_T = seeder.ITEM_T();
+    PAIR_T = seeder.PAIR_T();
+    QUOTE_T = seeder.QUOTE_T();
+    ITEM_ETH = seeder.ITEM_ETH();
+    ITEM_USDC = seeder.ITEM_USDC();
+    PAIR = seeder.PAIR();
+    FILE = seeder.FILE();
+    QUOTE_A1 = seeder.QUOTE_A1();
+    QUOTE_A2 = seeder.QUOTE_A2();
+    QUOTE_B1 = seeder.QUOTE_B1();
+    if (seed) seeder.seed();
   }
 
   function L() internal view returns (IStoreRead) {
@@ -81,70 +98,70 @@ abstract contract LabBase {
     return IStoreRead(address(index));
   }
 
-  // ---- wrappers (external calls into the Fixture; nothing heavy is inlined here) ----
+  // ---- wrappers (external calls into the helpers; nothing heavy is inlined here) ----
 
   function _deployRealmWith(bytes32 poison) internal returns (IndexModule, Ledger, LensReader) {
-    return fx.deployRealmWith(poison);
+    return realm.deployRealm(poison);
   }
 
   function _seedInto(Ledger lg, address acceptor) internal {
-    fx.seedInto(lg, acceptor);
+    seeder.seedInto(lg, acceptor);
   }
 
   function _a1() internal returns (bytes32) {
-    return fx.a1();
+    return seeder.a1();
   }
 
   function _a2() internal returns (bytes32) {
-    return fx.a2();
+    return seeder.a2();
   }
 
   function _b1() internal returns (bytes32) {
-    return fx.b1();
+    return seeder.b1();
   }
 
   function _publishA(Action[] memory acts, bytes[] memory bodies) internal returns (bytes32) {
-    return fx.publishA(acts, bodies);
+    return seeder.publishA(acts, bodies);
   }
 
   function _a1Intent() internal view returns (Intent memory, bytes[] memory) {
-    return fx.a1Intent();
+    return seeder.a1Intent();
   }
 
   function _a2Intent() internal view returns (Intent memory, bytes[] memory) {
-    return fx.a2Intent();
+    return seeder.a2Intent();
   }
 
   function _pubIdA1() internal view returns (bytes32) {
-    return fx.pubIdA1();
+    return seeder.pubIdA1();
   }
 
   function _packetOf(Ledger src, bytes32 pubId) internal view returns (ImportPacket memory) {
-    return fx.packetOf(src, pubId);
+    return export.packetOf(src, pubId);
   }
 
   function _authFor(bytes32 importer, uint64 nonce, ImportPacket memory pkt) internal view returns (Intent memory) {
-    return fx.authFor(importer, nonce, pkt);
+    return builders.authFor(importer, nonce, pkt);
   }
 
   function _importA1Into(Ledger dst, bytes32 importer, uint64 nonce) internal returns (bytes32, bytes32) {
-    return fx.importA1Into(dst, importer, nonce);
+    return export.importA1Into(dst, importer, nonce);
   }
 
   function declareTypeAction(bytes memory body, address acceptor) internal view returns (Action memory) {
-    return fx.declareTypeAction(body, acceptor);
+    return builders.declareTypeAction(body, acceptor);
   }
 
   function recordAction(bytes32 typeId, bytes memory body) internal view returns (Action memory) {
-    return fx.recordAction(typeId, body);
+    return builders.recordAction(typeId, body);
   }
 
   function reuseAction(bytes32 typeId, bytes32 recordId) internal view returns (Action memory) {
-    return fx.reuseAction(typeId, recordId);
+    return builders.reuseAction(typeId, recordId);
   }
 
   function subjectAction(bytes32 author, bytes32 salt) internal view returns (Action memory) {
-    return fx.subjectAction(author, salt);
+    return builders.subjectAction(author, salt);
   }
 
   function bindAction(
@@ -154,31 +171,31 @@ abstract contract LabBase {
     bytes32 target,
     uint32 expectedRevision
   ) internal view returns (Action memory) {
-    return fx.bindAction(purpose, subject, role, target, expectedRevision);
+    return builders.bindAction(purpose, subject, role, target, expectedRevision);
   }
 
   function intentOf(bytes32 author, uint64 nonce, Action[] memory actions) internal view returns (Intent memory) {
-    return fx.intentOf(author, nonce, actions);
+    return builders.intentOf(author, nonce, actions);
   }
 
   function digestOf(Ledger lg, Intent memory it) internal view returns (bytes32) {
-    return fx.digestOf(lg, it);
+    return builders.digestOf(lg, it);
   }
 
   function signWith(uint256 pk, Ledger lg, Intent memory it) internal view returns (Sig memory) {
-    return fx.signWith(pk, lg, it);
+    return builders.signWith(pk, lg, it);
   }
 
   function recordBody(bytes32[] memory refs, bytes memory payload) internal view returns (bytes memory) {
-    return fx.recordBody(refs, payload);
+    return builders.recordBody(refs, payload);
   }
 
   function quotePayload(uint256 mantissa) internal view returns (bytes memory) {
-    return fx.quotePayload(mantissa);
+    return builders.quotePayload(mantissa);
   }
 
   function quoteBody(bytes32 pair, uint256 mantissa) internal view returns (bytes memory) {
-    return fx.quoteBody(pair, mantissa);
+    return builders.quoteBody(pair, mantissa);
   }
 
   // ---- tiny pure helpers -------------------------------------------------------

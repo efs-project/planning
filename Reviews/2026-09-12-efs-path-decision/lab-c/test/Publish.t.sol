@@ -11,7 +11,7 @@ import { QuoteConsumer } from "../src/Consumer.sol";
 import { Records, Admissions, AdmissionData, Evidence, EvidenceData, Bindings, Subjects } from "../src/tables/LedgerTables.sol";
 import { Occurrences, ByType, Backlinks } from "../src/tables/IndexTables.sol";
 import { LabBase } from "./LabBase.sol";
-import { QuoteAcceptorV2, EvidenceReconstructor } from "./Fixture.sol";
+import { EvidenceReconstructor } from "./FixtureExport.sol";
 
 /*
  * sdk-fixture steps 1–4 and the rejection/authorship-closure rows (split from Fixture.t.sol for EIP-3860). Unrun.
@@ -168,6 +168,13 @@ contract PublishTest is LabBase {
     require(Occurrences.get(X(), EfsIds.recordId(QUOTE_T, keccak256(b))) == 0, "no partial index");
     require(Evidence.get(L(), EfsIds.publicationId(A, 2, keccak256(abi.encode(acts)))).firstAdmission == 0, "no evidence cell");
   }
+}
+
+contract PublishAuthTest is LabBase {
+  function setUp() public {
+    _boot(true);
+  }
+
   function test_signature_mutations_rejected_then_original_admitted() public {
     (Intent memory it, bytes[] memory bodies) = _a1Intent();
     Sig memory sig = signWith(PK_A, ledger, it);
@@ -212,7 +219,18 @@ contract PublishTest is LabBase {
     c.acceptanceProfile = it.acceptanceProfile;
     c.indexObligations = it.indexObligations;
     c.actions = new Action[](it.actions.length);
-    for (uint256 i = 0; i < it.actions.length; i++) c.actions[i] = it.actions[i];
+    for (uint256 i = 0; i < it.actions.length; i++) {
+      c.actions[i].kind = it.actions[i].kind;
+      c.actions[i].typeId = it.actions[i].typeId;
+      c.actions[i].digestKind = it.actions[i].digestKind;
+      c.actions[i].digest = it.actions[i].digest;
+      c.actions[i].purpose = it.actions[i].purpose;
+      c.actions[i].subject = it.actions[i].subject;
+      c.actions[i].role = it.actions[i].role;
+      c.actions[i].target = it.actions[i].target;
+      c.actions[i].expectedRevision = it.actions[i].expectedRevision;
+      c.actions[i].salt = it.actions[i].salt;
+    }
   }
   function _mustRejectSigned(Intent memory m, bytes[] memory bodies, Sig memory sig, string memory what) internal {
     try ledger.publishSigned(m, bodies, sig) {
@@ -241,18 +259,18 @@ contract PublishTest is LabBase {
     acts[0] = recordAction(QUOTE_T, quoteBody(PAIR, 2_500_000_000));
     bytes[] memory bodies = new bytes[](1);
     bodies[0] = quoteBody(PAIR, 2_500_000_000);
-    (bytes32 pubB, uint64 admB) = producer.publish(ledger, intentOf(B, fx.nextNonceB(), acts), bodies);
+    (bytes32 pubB, uint64 admB) = producer.publish(ledger, intentOf(B, seeder.nextNonceB(), acts), bodies);
     (, uint64 firstAfter, ) = Records.get(L(), QUOTE_A1);
     require(firstAfter == first, "firstAdmission unchanged (content reused)");
     require(Occurrences.get(X(), QUOTE_A1) == 2, "second occurrence counted");
     require(Evidence.get(L(), pubB).author == B && Admissions.get(L(), admB).publicationId == pubB, "new admission under B");
     // reuse by recordId with an empty body (digestKind = RECORD_ID)
     acts[0] = reuseAction(QUOTE_T, QUOTE_A1);
-    producer.publish(ledger, intentOf(B, fx.nextNonceB(), acts), noBodies(1));
+    producer.publish(ledger, intentOf(B, seeder.nextNonceB(), acts), noBodies(1));
     require(Occurrences.get(X(), QUOTE_A1) == 3, "recordId reuse is a third occurrence");
     // reuse with the wrong Type is rejected
     acts[0] = reuseAction(PAIR_T, QUOTE_A1);
-    try producer.publish(ledger, intentOf(B, fx.nonceB() + 1, acts), noBodies(1)) {
+    try producer.publish(ledger, intentOf(B, seeder.nonceB() + 1, acts), noBodies(1)) {
       revert("must reject");
     } catch (bytes memory err) {
       expectSel(err, RefWrongType.selector, "reuse under a wrong Type");

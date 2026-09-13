@@ -14,6 +14,21 @@ interface Vm {
   function warp(uint256 newTimestamp) external;
 
   function label(address account, string calldata newLabel) external;
+
+  /// Creation bytecode of a compiled artifact ("File.sol:Contract"); fails for unlinked artifacts.
+  function getCode(string calldata artifactPath) external view returns (bytes memory creationBytecode);
+
+  function envOr(string calldata name, string calldata defaultValue) external view returns (string memory value);
+
+  function readFile(string calldata path) external view returns (string memory data);
+
+  function parseJsonKeys(string calldata json, string calldata key) external pure returns (string[] memory keys);
+
+  function parseJsonString(string calldata json, string calldata key) external pure returns (string memory);
+
+  function parseJsonUint(string calldata json, string calldata key) external pure returns (uint256);
+
+  function parseBytes(string calldata stringifiedValue) external pure returns (bytes memory parsedValue);
 }
 
 address constant VM_ADDRESS = address(uint160(uint256(keccak256("hevm cheat code"))));

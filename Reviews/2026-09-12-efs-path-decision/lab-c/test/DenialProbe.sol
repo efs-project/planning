@@ -46,7 +46,7 @@ contract DenialProbe {
   }
 
   /// Records-shaped inputs (2 static fields = 40 bytes, 1 dynamic `body`), against an existing row.
-  function recordsCalls(bytes32 row) public pure returns (bytes[] memory c) {
+  function recordsCalls(bytes32 row) public view returns (bytes[] memory c) {
     bytes32[] memory k = key(row);
     bytes memory staticData = abi.encodePacked(bytes32(uint256(1)), uint64(1));
     string[] memory keyNames = Records.getKeyNames();
@@ -76,7 +76,7 @@ contract DenialProbe {
   }
 
   /// Index-shaped inputs: static ops against Occurrences (uint32), dynamic ops against ByType (bytes32[]).
-  function indexCalls(bytes32 staticRow, bytes32 dynRow) public pure returns (bytes[] memory c) {
+  function indexCalls(bytes32 staticRow, bytes32 dynRow) public view returns (bytes[] memory c) {
     bytes32[] memory skey = key(staticRow);
     bytes32[] memory dkey = key(dynRow);
     string[] memory keyNames = Occurrences.getKeyNames();

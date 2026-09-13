@@ -22,24 +22,26 @@ import { Occurrences, ByType } from "../src/tables/IndexTables.sol";
 import { LabBase } from "./LabBase.sol";
 import { OpenStore } from "./OpenStore.sol";
 import { DenialProbe } from "./DenialProbe.sol";
+import { Deploy } from "./Deploy.sol";
+import { EncodedLengths } from "@latticexyz/store/src/EncodedLengths.sol";
 
 contract RawWriteDenialTest is LabBase {
   DenialProbe internal probe;
 
   function setUp() public {
     _boot(true); // Records[PAIR] and ByType[ITEM_T]/Occurrences[ITEM_ETH] are non-empty rows to splice/pop against
-    probe = new DenialProbe();
+    probe = DenialProbe(Deploy.deployArtifact("DenialProbe.sol:DenialProbe", ""));
   }
 
   // ---- positive control --------------------------------------------------------
 
   function test_control_openStore_acceptsTheSameInputs() public {
-    OpenStore open = new OpenStore();
+    OpenStore open = OpenStore(Deploy.deployArtifact("OpenStore.sol:OpenStore", ""));
     bytes32 row = keccak256("seeded");
-    open.setRecord(ResourceId.wrap(probe.RECORDS()), probe.key(row), abi.encodePacked(bytes32(uint256(1)), uint64(1)), probe.lengths(3), bytes("abc"));
+    open.setRecord(ResourceId.wrap(probe.RECORDS()), probe.key(row), abi.encodePacked(bytes32(uint256(1)), uint64(1)), EncodedLengths.wrap(probe.lengths(3)), bytes("abc"));
     uint256 f = probe.controlAll(address(open), probe.recordsCalls(row), 99);
     require(f == 99, "every Records-shaped control call must succeed");
-    open.setRecord(ResourceId.wrap(probe.OCCURRENCES()), probe.key(row), abi.encodePacked(uint32(1)), bytes32(0), bytes(""));
+    open.setRecord(ResourceId.wrap(probe.OCCURRENCES()), probe.key(row), abi.encodePacked(uint32(1)), EncodedLengths.wrap(bytes32(0)), bytes(""));
     open.pushToDynamicField(ResourceId.wrap(probe.BYTYPE()), probe.key(row), 0, abi.encodePacked(bytes32(uint256(1))));
     f = probe.controlAll(address(open), probe.indexCalls(row, row), 10); // PROBE_TABLE already registered above
     require(f == 99, "every index-shaped control call must succeed");
@@ -78,7 +80,7 @@ contract RawWriteDenialTest is LabBase {
   function test_attachIsOneShot_andSealsCodehash() public {
     require(index.ledger() == address(ledger) && index.ledgerCodehash() == address(ledger).codehash, "sealed at attach");
     require(ledger.indexCodehash() == address(index).codehash, "ledger sealed the index codehash");
-    try index.attach(address(ledger)) {
+    try realm.attachAs(index, address(ledger)) {
       revert("second attach must revert");
     } catch (bytes memory err) {
       expectSel(err, IndexModule.AlreadyAttached.selector, "AlreadyAttached expected");
@@ -86,13 +88,13 @@ contract RawWriteDenialTest is LabBase {
   }
 
   function test_attachRejectsZeroAndNoCode() public {
-    IndexModule fresh = new IndexModule(POISON);
-    try fresh.attach(address(0)) {
+    IndexModule fresh = realm.newIndex(POISON);
+    try realm.attachAs(fresh, address(0)) {
       revert("zero address must revert");
     } catch (bytes memory err) {
       expectSel(err, IndexModule.BadAttachment.selector, "zero attachment");
     }
-    try fresh.attach(vm.addr(0xEEEE)) {
+    try realm.attachAs(fresh, vm.addr(0xEEEE)) {
       revert("no-code address must revert");
     } catch (bytes memory err) {
       expectSel(err, IndexModule.BadAttachment.selector, "no-code attachment");
@@ -103,8 +105,8 @@ contract RawWriteDenialTest is LabBase {
   }
 
   function test_attachRequiresReciprocity() public {
-    IndexModule fresh = new IndexModule(POISON);
-    try fresh.attach(address(ledger)) {
+    IndexModule fresh = realm.newIndex(POISON);
+    try realm.attachAs(fresh, address(ledger)) {
       revert("ledger names another module: must revert");
     } catch (bytes memory err) {
       expectSel(err, IndexModule.NotReciprocal.selector, "NotReciprocal expected");
@@ -112,12 +114,12 @@ contract RawWriteDenialTest is LabBase {
   }
 
   function test_ledgerRejectsZeroOrNoCodeIndex() public {
-    try new Ledger(IIndexModule(address(0))) {
+    try realm.newLedger(address(0)) {
       revert("zero index must revert");
     } catch (bytes memory err) {
       expectSel(err, BadAttachment.selector, "zero index");
     }
-    try new Ledger(IIndexModule(vm.addr(0xEEEE))) {
+    try realm.newLedger(vm.addr(0xEEEE)) {
       revert("no-code index must revert");
     } catch (bytes memory err) {
       expectSel(err, BadAttachment.selector, "no-code index");
@@ -125,8 +127,8 @@ contract RawWriteDenialTest is LabBase {
   }
 
   function test_ledgerRefusesUnattachedOrForeignModule() public {
-    IndexModule loose = new IndexModule(POISON);
-    Ledger orphan = new Ledger(loose); // the module never attached to it
+    IndexModule loose = realm.newIndex(POISON);
+    Ledger orphan = realm.newLedger(address(loose)); // the module never attached to it
     bytes32 self = EfsIds.contractPrincipal(orphan.realmOrigin(), address(this));
     Action[] memory acts = new Action[](1);
     acts[0] = subjectAction(self, keccak256("s"));
@@ -137,10 +139,10 @@ contract RawWriteDenialTest is LabBase {
     }
     require(orphan.highWater() == 0, "nothing admitted");
     // a module sealed to a DIFFERENT Ledger is refused too (Y names the module, the module names X)
-    IndexModule shared = new IndexModule(POISON);
-    Ledger x = new Ledger(shared);
-    shared.attach(address(x));
-    Ledger y = new Ledger(shared);
+    IndexModule shared = realm.newIndex(POISON);
+    Ledger x = realm.newLedger(address(shared));
+    realm.attachAs(shared, address(x));
+    Ledger y = realm.newLedger(address(shared));
     bytes32 selfY = EfsIds.contractPrincipal(y.realmOrigin(), address(this));
     acts[0] = subjectAction(selfY, keccak256("s"));
     try y.publishNative(intentOf(selfY, 1, acts), noBodies(1)) {

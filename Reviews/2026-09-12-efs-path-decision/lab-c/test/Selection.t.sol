@@ -11,7 +11,7 @@ import { QuoteConsumer } from "../src/Consumer.sol";
 import { Records, Admissions, AdmissionData, Evidence, EvidenceData, Bindings, Subjects } from "../src/tables/LedgerTables.sol";
 import { Occurrences, ByType, Backlinks } from "../src/tables/IndexTables.sol";
 import { LabBase } from "./LabBase.sol";
-import { QuoteAcceptorV2, EvidenceReconstructor } from "./Fixture.sol";
+import { EvidenceReconstructor } from "./FixtureExport.sol";
 
 /*
  * sdk-fixture steps 5–6, the cursor/dedupe/coverage law and the unrelated paid consumer (split for EIP-3860). Unrun.

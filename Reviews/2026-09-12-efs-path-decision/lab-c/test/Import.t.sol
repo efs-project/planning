@@ -11,7 +11,7 @@ import { QuoteConsumer } from "../src/Consumer.sol";
 import { Records, Admissions, AdmissionData, Evidence, EvidenceData, Bindings, Subjects } from "../src/tables/LedgerTables.sol";
 import { Occurrences, ByType, Backlinks } from "../src/tables/IndexTables.sol";
 import { LabBase } from "./LabBase.sol";
-import { QuoteAcceptorV2, EvidenceReconstructor } from "./Fixture.sol";
+import { EvidenceReconstructor } from "./FixtureExport.sol";
 
 /*
  * Pre-seal checks 1–3: SELF-CHECK reconstruction, import, deployment-bound identity, spoof-via-import (split for EIP-3860). Unrun.
@@ -37,7 +37,7 @@ contract ImportTest is LabBase {
   function test_selfcheck_reconstruct_signature_from_state() public {
     bytes32 pubId = _a1();
     (Intent memory it, ) = _a1Intent();
-    EvidenceReconstructor rec = new EvidenceReconstructor();
+    EvidenceReconstructor rec = export.newReconstructor();
     (bytes32 digest, address signer, bytes32 ah, EvidenceData memory ev) = rec.reconstruct(L(), pubId);
     require(digest == digestOf(ledger, it), "self-check: digest from Admission rows + Evidence cell");
     require(signer == aAddr, "self-check: signer recovered from state");
@@ -47,7 +47,7 @@ contract ImportTest is LabBase {
   }
   function test_selfcheck_reconstruct_flippedDiscriminator_changesDigest() public {
     bytes32 pubId = _a1();
-    EvidenceReconstructor rec = new EvidenceReconstructor();
+    EvidenceReconstructor rec = export.newReconstructor();
     (bytes32 digest, , , ) = rec.reconstruct(L(), pubId);
     bytes32 flipped = rec.reconstructFlipped(L(), pubId, 1);
     require(flipped != digest, "the bodyHash-vs-recordId discriminator is inside the signature");
@@ -121,7 +121,7 @@ contract ImportTest is LabBase {
     _a1();
     bytes32 pub2 = _a2();
     (, Ledger dst, ) = _deployRealmWith(POISON);
-    _seedInto(dst, address(new QuoteAcceptorV2())); // stricter destination rule, same typeId
+    _seedInto(dst, actors.newQuoteAcceptorV2()); // stricter destination rule, same typeId
     bytes32 importer = EfsIds.eoaPrincipal(vm.addr(PK_I));
     ImportPacket memory p1 = _packetOf(ledger, _pubIdA1());
     Intent memory auth1 = _authFor(importer, 1, p1);
@@ -141,7 +141,7 @@ contract ImportTest is LabBase {
     bytes32 salt = keccak256("S");
     Action[] memory acts = new Action[](1);
     acts[0] = subjectAction(B, salt);
-    (bytes32 pubB, ) = producer.publish(ledger, intentOf(B, fx.nextNonceB(), acts), noBodies(1));
+    (bytes32 pubB, ) = producer.publish(ledger, intentOf(B, seeder.nextNonceB(), acts), noBodies(1));
     bytes32 s1 = EfsIds.subjectId(B, salt);
 
     (, Ledger r3, ) = _deployRealmWith(POISON);
