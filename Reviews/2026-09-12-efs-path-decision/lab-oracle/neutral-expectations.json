@@ -1,0 +1,159 @@
+{
+  "kind": "EFS_DISPOSABLE_ORACLE_NEUTRAL_EXPECTATIONS",
+  "version": 1,
+  "standing": "experiment-only; not Core, SDK, ABI, or protocol adoption",
+  "frozenBeforeCandidateInspection": true,
+  "source": {
+    "planningCommit": "32ed292af887455e690991d2fd642bebd4f47fef",
+    "oracleBoundaryBlob": "035aa6d9cb0dcd96517234a7ef1a160b45481abf",
+    "sdkFixtureBlob": "4a2864fc4670cf548f1efa7340041df0fec2b803",
+    "filesJourneyBlob": "0c2aecc059e05e2251f06343c351ec3653b09ace",
+    "runManifestBlob": "0994c7125c5488d408a2519fdad45b91cd656ac0"
+  },
+  "semanticFixture": {
+    "noteBytes": "0x7265666572656e63652071756f7465",
+    "quoteA1": {
+      "priceMantissa": "2500000000",
+      "scale": 6,
+      "observationTime": "1800000000"
+    },
+    "quoteA2": {
+      "priceMantissa": "2502000000",
+      "scale": 6,
+      "observationTime": "1800000000"
+    },
+    "quoteB1": {
+      "priceMantissa": "2501000000",
+      "scale": 6,
+      "observationTime": "1800000000",
+      "authorEvidenceKind": "CONTRACT_ORIGIN"
+    },
+    "selection": {
+      "LENS_A_FIRST": "QUOTE_A2",
+      "LENS_B_FIRST": "QUOTE_B1",
+      "LENS_NO_TIEBREAK": "CONFLICT"
+    }
+  },
+  "axes": [
+    "recordIdentity",
+    "subjectIdentity",
+    "actionCommitment",
+    "signedDigest",
+    "signatureValidity",
+    "referenceValidation",
+    "sourceAcceptance",
+    "destinationAdmission",
+    "submission",
+    "receipt",
+    "canonicalEffect",
+    "queryCoverage",
+    "costState"
+  ],
+  "cases": [
+    {
+      "id": "body-byte-flip-retains-claimed-id",
+      "expected": {
+        "recordIdentity": "MISMATCH",
+        "bodyIntegrity": "INVALID",
+        "signatureValidity": "EVALUATE_INDEPENDENTLY",
+        "referenceValidation": "EVALUATE_INDEPENDENTLY"
+      }
+    },
+    {
+      "id": "signed-action-field-mutated",
+      "expected": {
+        "actionCommitment": "MISMATCH",
+        "signedDigest": "MISMATCH",
+        "signatureValidity": "INVALID"
+      }
+    },
+    {
+      "id": "required-evidence-missing",
+      "expected": {
+        "affectedAxis": "UNKNOWN",
+        "successMayBeManufactured": false
+      }
+    },
+    {
+      "id": "rpc-responses-reordered",
+      "expected": {
+        "correlateBy": "id",
+        "semanticResult": "UNCHANGED"
+      }
+    },
+    {
+      "id": "rpc-response-id-missing-or-duplicated",
+      "expected": {
+        "transport": "INVALID",
+        "semanticResult": "UNKNOWN"
+      }
+    },
+    {
+      "id": "source-accepted-destination-evidence-missing",
+      "expected": {
+        "sourceAcceptance": "ACCEPTED",
+        "destinationAdmission": "UNKNOWN"
+      }
+    },
+    {
+      "id": "receipt-success-required-effect-missing",
+      "expected": {
+        "receipt": "SUCCESS",
+        "canonicalEffect": "NOT_COMMITTED_PROVEN"
+      }
+    },
+    {
+      "id": "broadcast-response-lost-effect-proven",
+      "expected": {
+        "submission": "UNKNOWN",
+        "canonicalEffect": "COMMITTED",
+        "retryAllowed": false
+      }
+    },
+    {
+      "id": "fresh-content",
+      "input": {
+        "recordPresentBefore": false,
+        "recordPresentAfter": true,
+        "sameOperationAlreadyPresentBefore": false
+      },
+      "expected": {
+        "costState": "FRESH"
+      }
+    },
+    {
+      "id": "existing-content-new-action",
+      "input": {
+        "recordPresentBefore": true,
+        "recordPresentAfter": true,
+        "sameOperationAlreadyPresentBefore": false
+      },
+      "expected": {
+        "costState": "EXISTING"
+      }
+    },
+    {
+      "id": "exact-retry",
+      "input": {
+        "recordPresentBefore": true,
+        "recordPresentAfter": true,
+        "sameOperationAlreadyPresentBefore": true,
+        "stateDelta": "0"
+      },
+      "expected": {
+        "costState": "RETRY"
+      }
+    },
+    {
+      "id": "contradictory-cost-state",
+      "input": {
+        "recordPresentBefore": false,
+        "recordPresentAfter": false,
+        "sameOperationAlreadyPresentBefore": true
+      },
+      "expected": {
+        "costState": "INCONSISTENT"
+      }
+    }
+  ]
+}
