@@ -12,8 +12,11 @@ against the named block: chain/client, runtime bytes and explicit predeclared
 state calls. Before each ACK it exclusively creates an observation/ack file in
 the independent operator's directory, separate from the runner's files. It
 checks the observation block again after the reads. A mismatch throws; no ACK
-is returned. Runner timeout/no-downstream-send enforcement belongs to the
-separately reviewed candidate integration.
+is returned. Runtime/state/RPC failures also retain an exclusive refusal file
+containing partial observations, without an ACK; malformed parsed RPC envelopes
+retain the request/response. Failures before trusted arm-file loading do not
+use an unverified retention path. Runner timeout/no-downstream-send enforcement
+belongs to the separately reviewed candidate integration.
 
 ## Operator arm-file shape
 
