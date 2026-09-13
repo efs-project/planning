@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Independent-of-candidate helper: standard ethers ABI/EIP-712 primitives only.
+// Candidate-side self-check using standard ethers ABI/EIP-712 primitives; imports no candidate contract/helper.
 // Usage: NODE_PATH=<ethers-parent> node vectors/verify-profile-b.mjs [profile-b.json]
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
