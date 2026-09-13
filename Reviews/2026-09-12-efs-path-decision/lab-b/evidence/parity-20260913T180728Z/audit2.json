@@ -1,0 +1,331 @@
+{
+  "grade": "RPC_OBSERVED",
+  "source": "c5561e2b27c48ca2938695cce7784f1e78564116",
+  "inputSha256": "31dbc9e1ad5580fa5b5b119ffba1d209299529227feb82bfedeedd9e4caca3d0",
+  "transactions": 34,
+  "deployedTargets": 17,
+  "paidRows": [
+    {
+      "row": "POINT_A_FIRST",
+      "label": "paid/point-a-first",
+      "gas": "167281",
+      "hash": "0x59c8d2973ac5ab0489625a6391932bfd53cbaec2874fb71ba487651d8e76291c",
+      "calldataMatches": true,
+      "returnMatches": true,
+      "eventMatches": true,
+      "commitment": "0x88f5be3b21a4468b72c65c8d8368ae41d1cffa5452e645ead0166f182c99eda9"
+    },
+    {
+      "row": "LIST_A_FIRST",
+      "label": "paid/list-a-first",
+      "gas": "269617",
+      "hash": "0xa7fa3f3137ede437e1e3bcd1a8ad8267732c229b38b09f6cd686e90205a60959",
+      "calldataMatches": true,
+      "returnMatches": true,
+      "eventMatches": true,
+      "commitment": "0xa0b2ce1623ab443dd54857b78a9ae942b7afdce828e7df31b0ab4973f4964eb3"
+    },
+    {
+      "row": "POINT_B_FIRST",
+      "label": "paid/point-b-first",
+      "gas": "167513",
+      "hash": "0xba899c4edad525bd9b0d41bd61c1d276daf95d73b0ec07313d531adec4a46f04",
+      "calldataMatches": true,
+      "returnMatches": true,
+      "eventMatches": true,
+      "commitment": "0x8f43468ca25a264c372cc89e7805e3b4b3859c30e8d50337e793c675c3b45243"
+    },
+    {
+      "row": "LIST_B_FIRST",
+      "label": "paid/list-b-first",
+      "gas": "277278",
+      "hash": "0xf46b1a5c738be3721b24abb09e43dda7f9e67caa6dbbadd01255147d3b8fd4b4",
+      "calldataMatches": true,
+      "returnMatches": true,
+      "eventMatches": true,
+      "commitment": "0x4b7b3ba0a468be2963c803f33fc8fc25cd577670cc9f05e0a4e4b24c3b3b8ece"
+    }
+  ],
+  "operations": [
+    {
+      "label": "paid/setup/step1 (operator: ITEM_ETH, ITEM_USDC, PAIR_ETH_USDC in one native batch; identical to joined/step1)",
+      "gas": "921085"
+    },
+    {
+      "label": "paid/setup/A1 (AUTHOR_A signed: create FILE_QUOTE + publish QUOTE_A1 + head + the ONE /swaps placement + market tag; one combined receipt)",
+      "gas": "1614408"
+    },
+    {
+      "label": "paid/setup/A2 (AUTHOR_A signed: publish QUOTE_A2 + CAS head rev 1 -> 2; A1 retained in history; the placement is untouched)",
+      "gas": "658950"
+    },
+    {
+      "label": "paid/setup/B1 (AUTHOR_B, the producer contract: publish QUOTE_B1 + B head rev 1; NO FOLDER bind — a competing content head only, never a second placement)",
+      "gas": "796542"
+    },
+    {
+      "label": "paid/point-a-first",
+      "gas": "167281"
+    },
+    {
+      "label": "paid/list-a-first",
+      "gas": "269617"
+    },
+    {
+      "label": "paid/point-b-first",
+      "gas": "167513"
+    },
+    {
+      "label": "paid/list-b-first",
+      "gas": "277278"
+    }
+  ],
+  "signedTransactions": [
+    {
+      "label": "deploy TypeRegistry",
+      "hash": "0xb5cc22a7bd3cbd098cb582541113c47e814ee7126f3560335948a087d832fdf5",
+      "gas": "758965",
+      "status": 1,
+      "block": "0x1"
+    },
+    {
+      "label": "deploy MockAcceptor",
+      "hash": "0x2f9e63cb5bb6fe9c21f364d48d34ed3da0e717ab13667771f991766e5564b8de",
+      "gas": "186188",
+      "status": 1,
+      "block": "0x2"
+    },
+    {
+      "label": "deploy QuoteAcceptor",
+      "hash": "0x723ba61b669d4a6f6a946d12e06f029f1406be52e0915ea73ae1f0853b3f460a",
+      "gas": "189620",
+      "status": 1,
+      "block": "0x3"
+    },
+    {
+      "label": "deploy LabelAcceptor",
+      "hash": "0x06b7eb22968604601f674dfd754da5fd45150b920c559c975f686f0ada965dde",
+      "gas": "274605",
+      "status": 1,
+      "block": "0x4"
+    },
+    {
+      "label": "deploy Ledger",
+      "hash": "0x81eb0c8f1cc0eb8ae56ac4cb1e1cbb0499d15321c320f3965f1eb623e408c1f2",
+      "gas": "3792016",
+      "status": 1,
+      "block": "0x5"
+    },
+    {
+      "label": "deploy IndexModule",
+      "hash": "0xec64808bcb8c10ca339189b6c39cb530dd5af14448fac8cc63790ccd25b71754",
+      "gas": "1094744",
+      "status": 1,
+      "block": "0x6"
+    },
+    {
+      "label": "deploy FailingIndexModule",
+      "hash": "0x769ad03aff22a96964bd27a9609672b1247d8c777b9998ab577b79364588c7d6",
+      "gas": "104895",
+      "status": 1,
+      "block": "0x7"
+    },
+    {
+      "label": "deploy LensReader",
+      "hash": "0xd7f039d9a4a6a099dd0e673ba33389e64403040d5bacde8097cdce9d2a217da8",
+      "gas": "2092476",
+      "status": 1,
+      "block": "0x8"
+    },
+    {
+      "label": "deploy Actor",
+      "hash": "0xc55225707e2819878211b980df6e68fa791c3d87435562ce89fa121bb4943437",
+      "gas": "520548",
+      "status": 1,
+      "block": "0x9"
+    },
+    {
+      "label": "deploy Actor",
+      "hash": "0x48afb78eb3a2c18b3afed530b10cbfc5bcd32b8ab8b591d55f391a422ab1f41d",
+      "gas": "520548",
+      "status": 1,
+      "block": "0xa"
+    },
+    {
+      "label": "deploy Consumer",
+      "hash": "0xc357797ded38a9d207bfd96596ed3864ec7bf07d67c8ea9c641f2612e6b64a8b",
+      "gas": "766587",
+      "status": 1,
+      "block": "0xb"
+    },
+    {
+      "label": "deploy Reconstructor",
+      "hash": "0xbc59d62c5d9498310a2e23336ea15671a0531ed92e2c61773c2dba304195383f",
+      "gas": "849309",
+      "status": 1,
+      "block": "0xc"
+    },
+    {
+      "label": "deploy StrictQuoteAcceptor",
+      "hash": "0xff013780dcdd0a77da432ae8b9d215fdb651d379c439ac8fb94a14d0f4e0df02",
+      "gas": "127375",
+      "status": 1,
+      "block": "0xd"
+    },
+    {
+      "label": "deploy MinBodyAcceptor",
+      "hash": "0xc8d1ecdf70b0c8fcbd27926a0ee16b4bba5dcaa15e9004780bb56015248f3bd8",
+      "gas": "130859",
+      "status": 1,
+      "block": "0xe"
+    },
+    {
+      "label": "deploy MinBodyAcceptor",
+      "hash": "0x110ecda341acaa7081124e8832f103cbfbcc10b79d5a671f76795e2d01d56696",
+      "gas": "130859",
+      "status": 1,
+      "block": "0xf"
+    },
+    {
+      "label": "deploy StatelessConsumer",
+      "hash": "0xd8937d4176a0c9b092af8436f6f5d4802fbcb26761d42304d1b6383a15bc89e6",
+      "gas": "820862",
+      "status": 1,
+      "block": "0x10"
+    },
+    {
+      "label": "setup: attach index module",
+      "hash": "0x0c5b46c48df84db9a89f37a7def7cd16210d0995e7b991f4aee0780715cb90ee",
+      "gas": "45139",
+      "status": 1,
+      "block": "0x11"
+    },
+    {
+      "label": "setup: register QUOTE (mandatory MinBodyAcceptor(32): immutable threshold, part of the id; id derived by the registry)",
+      "hash": "0xa549883f2000103233fffe579edc70e73aab541176f958d62355446a1b008375",
+      "gas": "148387",
+      "status": 1,
+      "block": "0x12"
+    },
+    {
+      "label": "setup: register BINARY (no acceptor; id derived by the registry)",
+      "hash": "0x0c44bce94675a1ff91e2413b3492f43f2bc0095b73f74c2a95b1677db8904f47",
+      "gas": "108418",
+      "status": 1,
+      "block": "0x13"
+    },
+    {
+      "label": "setup: register ITEM (no acceptor; id derived by the registry)",
+      "hash": "0xc522589a6b5f6279d4c784870930a0a2f85cc7b830feab2b8c24d91b85094e93",
+      "gas": "108418",
+      "status": 1,
+      "block": "0x14"
+    },
+    {
+      "label": "setup: register PAIR (mandatory MinBodyAcceptor(96); refs [ITEM, ITEM]; id derived by the registry)",
+      "hash": "0x870a1069e712c31862b611f75cc081c733f5c1fbdb2f927f6ee12b58afbf8e07",
+      "gas": "196856",
+      "status": 1,
+      "block": "0x15"
+    },
+    {
+      "label": "setup: register QUOTE_J (QuoteAcceptor: 160-byte shape, scale 6, bounds; refs [PAIR]; id derived by the registry)",
+      "hash": "0xad17f126bb5d58bc9aefb28322c8efe8303f44198928bc1181bb9f84163574a6",
+      "gas": "174039",
+      "status": 1,
+      "block": "0x16"
+    },
+    {
+      "label": "setup: register LABEL (LabelAcceptor: exact UTF-8, 1..255 bytes; no refs; id derived by the registry)",
+      "hash": "0x6e6f666caa81270e334a2fcdac286f73bee9899eda7d3ccd20e93a0319b4d151",
+      "gas": "131287",
+      "status": 1,
+      "block": "0x17"
+    },
+    {
+      "label": "setup: activate MockAcceptor (mode 0) as QUOTE ADDITIONAL policy row 2 (mutable test double; its refusal is E_POLICY_REJECTED)",
+      "hash": "0x3d20fa58d44d8f8fb2a43c0948dd842a486f9de184a90b614dab0da8fd7b2cf7",
+      "gas": "82530",
+      "status": 1,
+      "block": "0x18"
+    },
+    {
+      "label": "setup: activate MockAcceptor (mode 0) as PAIR ADDITIONAL policy row 2 (mutable test double; its refusal is E_POLICY_REJECTED)",
+      "hash": "0x58fdda5859cebfa21ebd85354922fc4fd5056e4f4985a5dce0c331ecdcf5d89a",
+      "gas": "82530",
+      "status": 1,
+      "block": "0x19"
+    },
+    {
+      "label": "deploy JoinedConsumer",
+      "hash": "0xccdb448c653400fc8af8710888b086a428abb0829bff3bbbe3f2e4efd990b1f5",
+      "gas": "3895792",
+      "status": 1,
+      "block": "0x1a"
+    },
+    {
+      "label": "paid/setup/step1 (operator: ITEM_ETH, ITEM_USDC, PAIR_ETH_USDC in one native batch; identical to joined/step1)",
+      "hash": "0x7cc534eae70e7221b8f7f263f2a7706ae6ec3915d2918f99173835f7ca963673",
+      "gas": "921085",
+      "status": 1,
+      "block": "0x1b"
+    },
+    {
+      "label": "paid/setup/A1 (AUTHOR_A signed: create FILE_QUOTE + publish QUOTE_A1 + head + the ONE /swaps placement + market tag; one combined receipt)",
+      "hash": "0xad7111ca802dceaca2473b73814dcd61118e7f2912b085ae98d29d063e17a2c5",
+      "gas": "1614408",
+      "status": 1,
+      "block": "0x1c"
+    },
+    {
+      "label": "paid/setup/A2 (AUTHOR_A signed: publish QUOTE_A2 + CAS head rev 1 -> 2; A1 retained in history; the placement is untouched)",
+      "hash": "0xf3b43225cec08701051ca18c5f0bd63f1ddb5deeacfb8d36cc949f0cdc65c645",
+      "gas": "658950",
+      "status": 1,
+      "block": "0x1d"
+    },
+    {
+      "label": "paid/setup/B1 (AUTHOR_B, the producer contract: publish QUOTE_B1 + B head rev 1; NO FOLDER bind — a competing content head only, never a second placement)",
+      "hash": "0x51a52b15466f8b94b82656284ae347821c104daaa900a7b5a476aab65fa04e1e",
+      "gas": "796542",
+      "status": 1,
+      "block": "0x1e"
+    },
+    {
+      "label": "paid/point-a-first",
+      "hash": "0x59c8d2973ac5ab0489625a6391932bfd53cbaec2874fb71ba487651d8e76291c",
+      "gas": "167281",
+      "status": 1,
+      "block": "0x1f"
+    },
+    {
+      "label": "paid/list-a-first",
+      "hash": "0xa7fa3f3137ede437e1e3bcd1a8ad8267732c229b38b09f6cd686e90205a60959",
+      "gas": "269617",
+      "status": 1,
+      "block": "0x1f"
+    },
+    {
+      "label": "paid/point-b-first",
+      "hash": "0xba899c4edad525bd9b0d41bd61c1d276daf95d73b0ec07313d531adec4a46f04",
+      "gas": "167513",
+      "status": 1,
+      "block": "0x1f"
+    },
+    {
+      "label": "paid/list-b-first",
+      "hash": "0xf46b1a5c738be3721b24abb09e43dda7f9e67caa6dbbadd01255147d3b8fd4b4",
+      "gas": "277278",
+      "status": 1,
+      "block": "0x1f"
+    }
+  ],
+  "setupGas": "17333852",
+  "qualification": "Offline signature/receipt/header and exact independently prepared paid-output consistency. No authenticated header/state proof, matched rollback, portable import or complete Files qualification. Restored paid branches are alternatives, not one canonical bill.",
+  "mutationChecks": [
+    "unbound setup transaction metadata rejected",
+    "wrong raw return rejected",
+    "wrong receipt log rejected",
+    "wrong displayed gas rejected"
+  ]
+}

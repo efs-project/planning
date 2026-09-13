@@ -1,0 +1,585 @@
+diff --git a/Reviews/2026-09-12-efs-path-decision/lab-b/script/controller-gate.mjs b/Reviews/2026-09-12-efs-path-decision/lab-b/script/controller-gate.mjs
+index 42d20a5..ae090e2 100644
+--- a/Reviews/2026-09-12-efs-path-decision/lab-b/script/controller-gate.mjs
++++ b/Reviews/2026-09-12-efs-path-decision/lab-b/script/controller-gate.mjs
+@@ -9,7 +9,7 @@ const PIN_NAMES = ['controller', 'expectations', 'armInput'];
+ const TYPE_NAMES = ['QUOTE', 'BINARY', 'ITEM', 'PAIR', 'QUOTE_J', 'LABEL'];
+ const FIXTURE_NAMES = ['ITEM_ETH', 'ITEM_USDC', 'PAIR_ETH_USDC', 'QUOTE_A1', 'QUOTE_A2', 'QUOTE_B1'];
+ const EXPECT_NAMES = ['A_FIRST', 'B_FIRST'];
+-const EXPECT_FIELDS = ['subject', 'expectedHead', 'selectedAuthor', 'selectedProofKind', 'pairId', 'itemA', 'itemB', 'mantissa', 'scale', 'observedAt', 'noteCommitment', 'basisAdmission'];
++const EXPECT_FIELDS = ['subject', 'expectedHead', 'selectedAuthor', 'selectedProofKind', 'pairId', 'itemA', 'itemB', 'mantissa', 'scale', 'observedAt', 'noteCommitment', 'basisAdmission', 'expectedRevision'];
+ const ORDINAL_FIELDS = ['placementAdmission', 'placementPublication', 'placementRevision', 'aHeadAdmission', 'aHeadRevision', 'bHeadAdmission', 'bHeadRevision', 'postB1Frontier', 'registryEpoch', 'indexGeneration'];
+ const CHECKPOINT_FIELDS = ['blockNumber', 'blockHash', 'timestamp', 'snapshot', 'frontier', 'indexGeneration', 'registryEpoch', 'coreCodeCommitment', 'realmId'];
+ const FRONTIER_FIELDS = ['admissions', 'records', 'bindings', 'publications'];
+@@ -22,6 +22,7 @@ const isBytes32 = (value) => typeof value === 'string' && /^0x[0-9a-f]{64}$/.tes
+ const isAddress = (value) => typeof value === 'string' && /^0x[0-9a-f]{40}$/.test(value);
+ const isBytes = (value) => typeof value === 'string' && /^0x(?:[0-9a-f]{2})*$/.test(value);
+ const isDecimal = (value) => typeof value === 'string' && /^(0|[1-9][0-9]*)$/.test(value);
++const isNonzeroUint32 = (value) => isDecimal(value) && BigInt(value) > 0n && BigInt(value) <= 4_294_967_295n;
+ const isIndex = (value) => Number.isSafeInteger(value) && value >= 0;
+ 
+ export function canonical(value) {
+@@ -105,6 +106,8 @@ function validateInputs(inputs) {
+     for (const key of ['subject', 'expectedHead', 'pairId', 'itemA', 'itemB', 'noteCommitment']) typed(isBytes32(inputs.expect[name][key]), `${path}.${key}`);
+     typed(isAddress(inputs.expect[name].selectedAuthor), `${path}.selectedAuthor`);
+     for (const key of ['selectedProofKind', 'mantissa', 'scale', 'observedAt', 'basisAdmission']) typed(isDecimal(inputs.expect[name][key]), `${path}.${key}`);
++    typed(isNonzeroUint32(inputs.expect[name].expectedRevision), `${path}.expectedRevision`);
++    typed(inputs.expect[name].expectedRevision === (name === 'A_FIRST' ? '2' : '1'), `${path}.expectedRevision`);
+   }
+ 
+   exactKeys(inputs.placementExpect, ['folder', 'nameRole', 'actor', 'proofKind', 'publication', 'budget'], 'inputs.placementExpect');
+@@ -255,6 +258,8 @@ export async function createControllerGate({
+         compareTree(comparisons, ack.inputs.roles, context.roles, 'inputs.roles', 'CONTROLLER_INPUT_MISMATCH');
+         compareValue(comparisons, ack.inputs.ordinals.postB1Frontier, ack.inputs.expect.A_FIRST.basisAdmission, 'inputs.expect.A_FIRST.basisAdmission', 'CONTROLLER_INPUT_MISMATCH');
+         compareValue(comparisons, ack.inputs.ordinals.postB1Frontier, ack.inputs.expect.B_FIRST.basisAdmission, 'inputs.expect.B_FIRST.basisAdmission', 'CONTROLLER_INPUT_MISMATCH');
++        compareValue(comparisons, ack.inputs.ordinals.aHeadRevision, ack.inputs.expect.A_FIRST.expectedRevision, 'inputs.expect.A_FIRST.expectedRevision', 'CONTROLLER_INPUT_MISMATCH');
++        compareValue(comparisons, ack.inputs.ordinals.bHeadRevision, ack.inputs.expect.B_FIRST.expectedRevision, 'inputs.expect.B_FIRST.expectedRevision', 'CONTROLLER_INPUT_MISMATCH');
+         state.beforeInputs = clone(ack.inputs);
+         state.inputsSha256 = ack.inputsSha256;
+       } else {
+diff --git a/Reviews/2026-09-12-efs-path-decision/lab-b/script/controller-gate.test.mjs b/Reviews/2026-09-12-efs-path-decision/lab-b/script/controller-gate.test.mjs
+index 87fe98a..8dd177e 100644
+--- a/Reviews/2026-09-12-efs-path-decision/lab-b/script/controller-gate.test.mjs
++++ b/Reviews/2026-09-12-efs-path-decision/lab-b/script/controller-gate.test.mjs
+@@ -37,8 +37,8 @@ function fixture() {
+     roles,
+     lenses: { LENS_A_FIRST: [roles.AUTHOR_A.address, roles.actorB.address], LENS_B_FIRST: [roles.actorB.address, roles.AUTHOR_A.address] },
+     expect: {
+-      A_FIRST: { subject: h32('21'), expectedHead: h32('31'), selectedAuthor: roles.AUTHOR_A.address, selectedProofKind: '2', pairId: h32('32'), itemA: h32('33'), itemB: h32('34'), mantissa: '2502000000', scale: '6', observedAt: '1800000000', noteCommitment: h32('35'), basisAdmission: '12' },
+-      B_FIRST: { subject: h32('21'), expectedHead: h32('36'), selectedAuthor: roles.actorB.address, selectedProofKind: '1', pairId: h32('32'), itemA: h32('33'), itemB: h32('34'), mantissa: '2501000000', scale: '6', observedAt: '1800000000', noteCommitment: h32('35'), basisAdmission: '12' },
++      A_FIRST: { subject: h32('21'), expectedHead: h32('31'), selectedAuthor: roles.AUTHOR_A.address, selectedProofKind: '2', pairId: h32('32'), itemA: h32('33'), itemB: h32('34'), mantissa: '2502000000', scale: '6', observedAt: '1800000000', noteCommitment: h32('35'), basisAdmission: '12', expectedRevision: '2' },
++      B_FIRST: { subject: h32('21'), expectedHead: h32('36'), selectedAuthor: roles.actorB.address, selectedProofKind: '1', pairId: h32('32'), itemA: h32('33'), itemB: h32('34'), mantissa: '2501000000', scale: '6', observedAt: '1800000000', noteCommitment: h32('35'), basisAdmission: '12', expectedRevision: '1' },
+     },
+     placementExpect: { folder: h32('41'), nameRole: h32('42'), actor: roles.AUTHOR_A.address, proofKind: '2', publication: '2', budget: '16' },
+     ordinals: { placementAdmission: '7', placementPublication: '2', placementRevision: '1', aHeadAdmission: '10', aHeadRevision: '2', bHeadAdmission: '12', bHeadRevision: '1', postB1Frontier: '12', registryEpoch: '8', indexGeneration: '0' },
+@@ -160,6 +160,31 @@ test('beforeFixture rejects missing, extra, wrongly typed and mutated input fiel
+   } finally { f.cleanup(); }
+ });
+ 
++test('beforeFixture requires exact nonzero uint32 expectedRevision strings A_FIRST=2 and B_FIRST=1', async () => {
++  const f = fixture();
++  try {
++    for (const mutate of [
++      (ack) => { delete ack.inputs.expect.A_FIRST.expectedRevision; },
++      (ack) => { ack.inputs.expect.A_FIRST.expectedRevision = 2; },
++      (ack) => { ack.inputs.expect.A_FIRST.expectedRevision = '0'; },
++      (ack) => { ack.inputs.expect.A_FIRST.expectedRevision = '4294967296'; },
++      (ack) => { ack.inputs.expect.A_FIRST.expectedRevision = '1'; },
++      (ack) => { ack.inputs.expect.B_FIRST.expectedRevision = '2'; },
++    ]) {
++      const gate = await openGate(f, {
++        beforeFixture: async (context) => {
++          const ack = f.ackFor(context);
++          mutate(ack);
++          ack.inputsSha256 = sha(canonical(ack.inputs));
++          return ack;
++        },
++        afterB1: async () => ({}),
++      });
++      await assert.rejects(() => gate.invoke('beforeFixture', f.beforeContext), /CONTROLLER_ACK_MALFORMED:inputs.expect.(A_FIRST|B_FIRST).expectedRevision/);
++    }
++  } finally { f.cleanup(); }
++});
++
+ test('REFUSE and rejected hooks stop the guarded continuation and retain failure status', async () => {
+   const f = fixture();
+   let sends = 0;
+diff --git a/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure.mjs b/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure.mjs
+index 9c3b575..82f0b9e 100644
+--- a/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure.mjs
++++ b/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure.mjs
+@@ -1640,8 +1640,8 @@ const paidSliceCell = {
+     keep({ label: 'paid/seal/no-b-placement', standing: 'raw replies (stage seal-no-b-placement) at the seal block: Ledger.head(binding(B, /swaps/eth-usdc)) state 0, IndexModule.postingHead(B\'s /swaps scope list) count 0, LensReader.resolve([B], FOLDER, /swaps, eth-usdc) ABSENT; B1 bound no FOLDER placement (see the paid/setup/B1 calldata: two actions)', bHeadState: str(bHead[0]), bScopeCount: str(bScope[0]), bOnlyLensStatus: str(bOnly[0]), bBindingKey: binding(pidB, swapsPos) });
+     // ---- the four paid rows
+     const ordering = [{ kind: 'seal', block: seal.block, hash: seal.hash, timestamp: seal.timestamp }];
+-    const expectA = { subject: subj, expectedHead: a2, selectedAuthor: A, selectedProofKind: 2, pairId, itemA, itemB, mantissa: J.mantissaA2, scale: J.scale, observedAt: J.observedAt, noteCommitment: NOTE_COMMITMENT, basisAdmission: basis }; // expectedHead = the fixture record id of QUOTE_A2; observedAt / noteCommitment = the sealed fixture values J.* (this runner's candidate-side mirror)
+-    const expectB = { ...expectA, expectedHead: b1, selectedAuthor: B, selectedProofKind: 1, mantissa: J.mantissaB1 }; // QUOTE_B1
++    const expectA = { subject: subj, expectedHead: a2, selectedAuthor: A, selectedProofKind: 2, pairId, itemA, itemB, mantissa: J.mantissaA2, scale: J.scale, observedAt: J.observedAt, noteCommitment: NOTE_COMMITMENT, basisAdmission: basis, expectedRevision: 2 }; // expectedHead / expectedRevision are sealed fixture inputs for QUOTE_A2 / A2; observedAt / noteCommitment are J.* (this runner's candidate-side mirror)
++    const expectB = { ...expectA, expectedHead: b1, selectedAuthor: B, selectedProofKind: 1, mantissa: J.mantissaB1, expectedRevision: 1 }; // QUOTE_B1 / B1
+     const placementExpect = { folder: swaps, nameRole: nameHash, actor: A, proofKind: 2, publication: pub0 + 2, budget: 16 };
+     const commonSelection = { basisAdmission: basis, indexGeneration: str(generation), rulesEpoch: str(epoch), coreCodeCommitment: core, subject: subj, pairId, itemA, itemB, scale: J.scale, observedAt: J.observedAt, note: NOTE_COMMITMENT };
+     const selA = { ...commonSelection, selectedHead: a2, selectedRevision: 2, selectedAdmission: adm0 + 10, selectedPublication: pub0 + 3, selectedAuthor: A, selectedProofKind: 2, mantissa: J.mantissaA2 };
+@@ -2072,8 +2072,8 @@ async function main() {
+         roles,
+         lenses: { LENS_A_FIRST: [A, B], LENS_B_FIRST: [B, A] },
+         expect: {
+-          A_FIRST: { subject: prepPlan.subj.toLowerCase(), expectedHead: prepPlan.a2.toLowerCase(), selectedAuthor: A, selectedProofKind: '2', pairId: prepPlan.pairId.toLowerCase(), itemA: prepPlan.itemA.toLowerCase(), itemB: prepPlan.itemB.toLowerCase(), mantissa: String(J.mantissaA2), scale: String(J.scale), observedAt: String(J.observedAt), noteCommitment: NOTE_COMMITMENT.toLowerCase(), basisAdmission: basis },
+-          B_FIRST: { subject: prepPlan.subj.toLowerCase(), expectedHead: prepPlan.b1.toLowerCase(), selectedAuthor: B, selectedProofKind: '1', pairId: prepPlan.pairId.toLowerCase(), itemA: prepPlan.itemA.toLowerCase(), itemB: prepPlan.itemB.toLowerCase(), mantissa: String(J.mantissaB1), scale: String(J.scale), observedAt: String(J.observedAt), noteCommitment: NOTE_COMMITMENT.toLowerCase(), basisAdmission: basis },
++          A_FIRST: { subject: prepPlan.subj.toLowerCase(), expectedHead: prepPlan.a2.toLowerCase(), selectedAuthor: A, selectedProofKind: '2', pairId: prepPlan.pairId.toLowerCase(), itemA: prepPlan.itemA.toLowerCase(), itemB: prepPlan.itemB.toLowerCase(), mantissa: String(J.mantissaA2), scale: String(J.scale), observedAt: String(J.observedAt), noteCommitment: NOTE_COMMITMENT.toLowerCase(), basisAdmission: basis, expectedRevision: '2' },
++          B_FIRST: { subject: prepPlan.subj.toLowerCase(), expectedHead: prepPlan.b1.toLowerCase(), selectedAuthor: B, selectedProofKind: '1', pairId: prepPlan.pairId.toLowerCase(), itemA: prepPlan.itemA.toLowerCase(), itemB: prepPlan.itemB.toLowerCase(), mantissa: String(J.mantissaB1), scale: String(J.scale), observedAt: String(J.observedAt), noteCommitment: NOTE_COMMITMENT.toLowerCase(), basisAdmission: basis, expectedRevision: '1' },
+         },
+         placementExpect: { folder: prepPlan.swaps.toLowerCase(), nameRole: prepPlan.nameHash.toLowerCase(), actor: A, proofKind: '2', publication: '2', budget: '16' },
+         ordinals: { placementAdmission: '7', placementPublication: '2', placementRevision: '1', aHeadAdmission: '10', aHeadRevision: '2', bHeadAdmission: '12', bHeadRevision: '1', postB1Frontier: basis, registryEpoch: String(report.registryEpoch), indexGeneration: '0' },
+diff --git a/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure.test.mjs b/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure.test.mjs
+index ab3bdfe..ad86167 100644
+--- a/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure.test.mjs
++++ b/Reviews/2026-09-12-efs-path-decision/lab-b/script/measure.test.mjs
+@@ -500,15 +500,15 @@ test('buildPaidCalls consumes controller-supplied lenses, Expect and PlacementEx
+   const { buildPaidCalls } = loadPaidHelpers();
+   const inputs = {
+     lenses: { LENS_A_FIRST: ['0xa', '0xb'], LENS_B_FIRST: ['0xb', '0xa'] },
+-    expect: { A_FIRST: { expectedHead: '0xa2' }, B_FIRST: { expectedHead: '0xb1' } },
++    expect: { A_FIRST: { expectedHead: '0xa2', expectedRevision: '2' }, B_FIRST: { expectedHead: '0xb1', expectedRevision: '1' } },
+     placementExpect: { folder: '0xf', publication: '2' },
+   };
+   const calls = buildPaidCalls(inputs);
+   assert.deepEqual(JSON.parse(JSON.stringify(calls.map(({ key, lensArr, fn, fnArgs }) => ({ key, lensArr, fn, fnArgs })))), [
+-    { key: 'point-a-first', lensArr: ['0xa', '0xb'], fn: 'paidPoint', fnArgs: [['0xa', '0xb'], { expectedHead: '0xa2' }] },
+-    { key: 'list-a-first', lensArr: ['0xa', '0xb'], fn: 'paidList', fnArgs: [['0xa', '0xb'], { expectedHead: '0xa2' }, { folder: '0xf', publication: '2' }] },
+-    { key: 'point-b-first', lensArr: ['0xb', '0xa'], fn: 'paidPoint', fnArgs: [['0xb', '0xa'], { expectedHead: '0xb1' }] },
+-    { key: 'list-b-first', lensArr: ['0xb', '0xa'], fn: 'paidList', fnArgs: [['0xb', '0xa'], { expectedHead: '0xb1' }, { folder: '0xf', publication: '2' }] },
++    { key: 'point-a-first', lensArr: ['0xa', '0xb'], fn: 'paidPoint', fnArgs: [['0xa', '0xb'], { expectedHead: '0xa2', expectedRevision: '2' }] },
++    { key: 'list-a-first', lensArr: ['0xa', '0xb'], fn: 'paidList', fnArgs: [['0xa', '0xb'], { expectedHead: '0xa2', expectedRevision: '2' }, { folder: '0xf', publication: '2' }] },
++    { key: 'point-b-first', lensArr: ['0xb', '0xa'], fn: 'paidPoint', fnArgs: [['0xb', '0xa'], { expectedHead: '0xb1', expectedRevision: '1' }] },
++    { key: 'list-b-first', lensArr: ['0xb', '0xa'], fn: 'paidList', fnArgs: [['0xb', '0xa'], { expectedHead: '0xb1', expectedRevision: '1' }, { folder: '0xf', publication: '2' }] },
+   ]);
+   assert.notEqual(calls[0].fnArgs[1], inputs.expect.A_FIRST, 'calldata input is an isolated copy');
+ });
+diff --git a/Reviews/2026-09-12-efs-path-decision/lab-b/src/JoinedConsumer.sol b/Reviews/2026-09-12-efs-path-decision/lab-b/src/JoinedConsumer.sol
+index c7f9472..84e572d 100644
+--- a/Reviews/2026-09-12-efs-path-decision/lab-b/src/JoinedConsumer.sol
++++ b/Reviews/2026-09-12-efs-path-decision/lab-b/src/JoinedConsumer.sol
+@@ -33,6 +33,9 @@ interface ILedgerReads {
+             bytes32 actionsHash
+         );
+     function counts() external view returns (uint64 admissions, uint64 records, uint64 bindings, uint64 publications);
++    function coreCodeCommitment() external view returns (bytes32);
++    function isImported(uint64 publication) external view returns (bool);
++    function bindingPosition(uint64 ordinal) external view returns (bytes32);
+     function positionCell(bytes32 position) external view returns (bytes32 purpose, bytes32 subject, bytes32 role);
+     function registry() external view returns (address);
+ }
+@@ -317,6 +320,7 @@ contract JoinedConsumer {
+         uint64 observedAt; // the selected Quote's exact observation time from the sealed fixture (an INPUT, compared on chain)
+         bytes32 noteCommitment; // keccak256 of the sealed NOTE_BYTES (an INPUT, compared on chain)
+         uint64 basisAdmission; // the admission frontier at the post-B1 seal
++        uint32 expectedRevision; // 2 for A-first / 1 for B-first, sealed independently and never derived from the reply
+     }
+ 
+     /// Expectations of the one placement a list row must find (list rows only).
+@@ -376,6 +380,21 @@ contract JoinedConsumer {
+     event PaidResult(bytes32 indexed kind, bytes32 commitment, Selection selection, Placement placement);
+ 
+     error BasisMismatch(uint64 expected, uint64 observed);
++    error RevisionMismatch(uint32 expected, uint32 observed);
++    error RecordAdmissionBounds(bytes32 recordId, uint64 firstAdmission, uint64 basis);
++    error AdmissionBounds(uint64 admission, uint64 basis);
++    error AdmissionCoordinate(
++        uint64 admission,
++        bytes32 expectedPurpose,
++        bytes32 expectedSubject,
++        bytes32 expectedRole,
++        bytes32 observedPurpose,
++        bytes32 observedSubject,
++        bytes32 observedRole
++    );
++    error AdmissionRevision(uint64 admission, uint32 expectedRevision, uint32 observedRevision);
++    error ImportedPublication(uint64 publication);
++    error CursorContext(uint8 field, bytes32 expected, bytes32 observed);
+     error SelectionMismatch(uint8 field, bytes32 expected, bytes32 observed); // field 1 = selected author, 2 = selected head id, 3 = observedAt, 4 = note commitment
+     error AdmissionShape(uint64 admission, uint8 kind, bool withdrawn, bytes32 target);
+     error EvidenceBounds(uint64 admission, uint64 publication, uint64 firstAdmission, uint16 leafCount);
+@@ -403,7 +422,7 @@ contract JoinedConsumer {
+         external
+         returns (bytes32 commitment, Selection memory selection, Placement memory placement)
+     {
+-        placement = _placement(lensPrincipals, e.subject, p);
++        placement = _placement(lensPrincipals, e, p);
+         selection = _select(lensPrincipals, e);
+         if (placement.basisAdmission != selection.basisAdmission) revert BasisMismatch(selection.basisAdmission, placement.basisAdmission);
+         commitment = keccak256(abi.encode(KIND_PAID_LIST, selection, placement));
+@@ -419,13 +438,15 @@ contract JoinedConsumer {
+         if (status != FOUND) revert NoSelection(status);
+         if (author != e.selectedAuthor) revert SelectionMismatch(1, bytes32(uint256(uint160(e.selectedAuthor))), bytes32(uint256(uint160(author))));
+         if (target != e.expectedHead) revert SelectionMismatch(2, e.expectedHead, target);
++        if (revision != e.expectedRevision) revert RevisionMismatch(e.expectedRevision, revision);
+         s.lensId = _lensId(lensPrincipals);
+         s.subject = e.subject;
+         s.selectedHead = target;
+         s.selectedRevision = revision;
+         s.selectedAdmission = admission;
+         s.selectedAuthor = author;
+-        (s.selectedPublication, s.selectedProofKind) = _admittedBy(admission, target, author, e.selectedProofKind);
++        (s.selectedPublication, s.selectedProofKind) =
++            _admittedBy(admission, target, author, e.selectedProofKind, e.basisAdmission, HEAD, e.subject, bytes32(0), revision);
+         _closure(s, e);
+     }
+ 
+@@ -437,20 +458,40 @@ contract JoinedConsumer {
+         s.basisAdmission = admissions;
+         s.indexGeneration = IIndexGeneration(lens.index()).generation();
+         s.rulesEpoch = IRulesEpoch(ledger.registry()).epoch();
+-        s.coreCodeCommitment = address(ledger).codehash;
++        s.coreCodeCommitment = ledger.coreCodeCommitment();
+     }
+ 
+     /// The admission that set the observed head or placement must be a live BIND of exactly that target, inside
+     /// the admission range of its publication, whose retained evidence names `author` under the expected proof
+     /// category: a contract-originated publication carries no signature at all (nothing fabricated), a signed one
+     /// carries (v, r, s).
+-    function _admittedBy(uint64 admission, bytes32 target, address author, uint8 expectedProofKind)
++    function _admittedBy(
++        uint64 admission,
++        bytes32 target,
++        address author,
++        uint8 expectedProofKind,
++        uint64 basis,
++        bytes32 expectedPurpose,
++        bytes32 expectedSubject,
++        bytes32 expectedRole,
++        uint32 observedRevision
++    )
+         private
+         view
+         returns (uint64 publication, uint8 proofKind)
+     {
+-        (uint8 kind,, uint64 pub,,, bool withdrawn, bytes32 a,) = ledger.admission(admission);
++        if (admission == 0 || admission > basis) revert AdmissionBounds(admission, basis);
++        (uint8 kind,, uint64 pub, uint64 bindingOrdinal, uint32 expectedRevision, bool withdrawn, bytes32 a,) = ledger.admission(admission);
+         if (kind != ACTION_BIND || withdrawn || a != target) revert AdmissionShape(admission, kind, withdrawn, a);
++        bytes32 position = ledger.bindingPosition(bindingOrdinal);
++        (bytes32 purpose, bytes32 subject, bytes32 role) = ledger.positionCell(position);
++        if (purpose != expectedPurpose || subject != expectedSubject || role != expectedRole) {
++            revert AdmissionCoordinate(admission, expectedPurpose, expectedSubject, expectedRole, purpose, subject, role);
++        }
++        if (uint64(expectedRevision) + 1 != uint64(observedRevision)) {
++            revert AdmissionRevision(admission, expectedRevision, observedRevision);
++        }
++        if (ledger.isImported(pub)) revert ImportedPublication(pub);
+         (address evidenceAuthor, uint8 pk, uint8 v, uint16 leafCount, uint64 first, bytes32 r, bytes32 sg,,,,,,) = ledger.evidence(pub);
+         if (admission < first || admission >= first + leafCount) revert EvidenceBounds(admission, pub, first, leafCount);
+         if (evidenceAuthor != author) revert AuthorMismatch(author, evidenceAuthor, pk);
+@@ -469,7 +510,7 @@ contract JoinedConsumer {
+     /// (pair, ordered items, mantissa, scale, observedAt, note commitment) against the caller's expectation. Item
+     /// checks are Type checks only (no Item payload semantics in this slice).
+     function _closure(Selection memory s, Expect calldata e) private view {
+-        Quote memory q = _quote(s.selectedHead);
++        Quote memory q = _quote(s.selectedHead, s.basisAdmission);
+         if (q.pairId != e.pairId) revert ClosureMismatch(1, e.pairId, q.pairId);
+         if (q.itemA != e.itemA) revert ClosureMismatch(2, e.itemA, q.itemA);
+         if (q.itemB != e.itemB) revert ClosureMismatch(3, e.itemB, q.itemB);
+@@ -493,13 +534,28 @@ contract JoinedConsumer {
+     /// second name, a duplicate, a tombstone) is refused too. That is correct for the sealed fixture, where the
+     /// folder holds exactly the single A placement. The row must be the expected (folder, name) -> subject
+     /// placement held by the expected actor and admitted by the expected publication under the expected category.
+-    function _placement(address[] calldata lensPrincipals, bytes32 subject, PlacementExpect calldata p)
++    function _placement(address[] calldata lensPrincipals, Expect calldata e, PlacementExpect calldata p)
+         private
+         view
+         returns (Placement memory pl)
+     {
+         LensReader.Cursor memory fresh;
+         LensReader.Page memory page = lens.list(lensPrincipals, FOLDER, p.folder, fresh, p.budget);
++        if (page.next.basisAdmission != e.basisAdmission) revert BasisMismatch(e.basisAdmission, page.next.basisAdmission);
++        uint64 generation = IIndexGeneration(lens.index()).generation();
++        if (page.next.indexGeneration != generation) {
++            revert CursorContext(1, bytes32(uint256(generation)), bytes32(uint256(page.next.indexGeneration)));
++        }
++        uint64 epoch = IRulesEpoch(ledger.registry()).epoch();
++        if (page.next.rulesEpoch != epoch) {
++            revert CursorContext(2, bytes32(uint256(epoch)), bytes32(uint256(page.next.rulesEpoch)));
++        }
++        bytes32 core = ledger.coreCodeCommitment();
++        if (page.next.coreCodeCommitment != core) revert CursorContext(3, core, page.next.coreCodeCommitment);
++        bytes32 scope = keccak256(abi.encode(FOLDER, p.folder));
++        if (page.next.scopeKey != scope) revert CursorContext(4, scope, page.next.scopeKey);
++        bytes32 packedLens = keccak256(abi.encodePacked(lensPrincipals));
++        if (page.next.lensHash != packedLens) revert CursorContext(5, packedLens, page.next.lensHash);
+         bool ended = page.next.lensIndex == lensPrincipals.length && page.next.rawIndex == 0;
+         pl.pageStatus = page.status;
+         pl.rawTotal = page.rawTotal;
+@@ -516,9 +572,10 @@ contract JoinedConsumer {
+         (bytes32 purpose, bytes32 folder, bytes32 role) = ledger.positionCell(it.position);
+         if (purpose != FOLDER || folder != p.folder) revert PlacementMismatch(1, p.folder, folder);
+         if (role != p.nameRole) revert PlacementMismatch(2, p.nameRole, role);
+-        if (it.target != subject) revert PlacementMismatch(3, subject, it.target);
++        if (it.target != e.subject) revert PlacementMismatch(3, e.subject, it.target);
+         if (it.author != p.actor) revert PlacementMismatch(4, bytes32(uint256(uint160(p.actor))), bytes32(uint256(uint160(it.author))));
+-        (uint64 publication, uint8 proofKind) = _admittedBy(it.admission, it.target, it.author, p.proofKind);
++        (uint64 publication, uint8 proofKind) =
++            _admittedBy(it.admission, it.target, it.author, p.proofKind, e.basisAdmission, FOLDER, p.folder, p.nameRole, it.revision);
+         if (publication != p.publication) revert PlacementMismatch(5, bytes32(uint256(p.publication)), bytes32(uint256(publication)));
+         pl.position = it.position;
+         pl.actor = it.author;
+@@ -529,6 +586,8 @@ contract JoinedConsumer {
+     }
+ 
+     // ------------------------------------------------------------------ verification helpers (public interfaces only)
++    /// Legacy joined reads retain their original current-frontier behavior; only the paid slice applies the
++    /// independently sealed first-admission bounds below.
+     function _quote(bytes32 target) private view returns (Quote memory q) {
+         (bytes32 typeId,,, bytes memory data) = ledger.record(target);
+         if (typeId != quoteType || data.length != QUOTE_BODY) revert QuoteShape(target, typeId, data.length);
+@@ -549,6 +608,32 @@ contract JoinedConsumer {
+         q.itemB = b;
+     }
+ 
++    function _quote(bytes32 target, uint64 basis) private view returns (Quote memory q) {
++        (bytes32 typeId, bytes memory data) = _boundedRecord(target, basis);
++        if (typeId != quoteType || data.length != QUOTE_BODY) revert QuoteShape(target, typeId, data.length);
++        (q.pairId, q.mantissa, q.scale, q.observedAt, q.note) = abi.decode(data, (bytes32, uint256, uint8, uint64, bytes32));
++        (bytes32 pairTypeId, bytes memory pair) = _boundedRecord(q.pairId, basis);
++        if (pairTypeId != pairType || pair.length < 64) revert PairShape(q.pairId, pairTypeId, pair.length);
++        bytes32 a;
++        bytes32 b;
++        assembly ("memory-safe") {
++            a := mload(add(pair, 32))
++            b := mload(add(pair, 64))
++        }
++        (bytes32 ta,) = _boundedRecord(a, basis);
++        if (ta != itemType) revert ItemShape(a, ta);
++        (bytes32 tb,) = _boundedRecord(b, basis);
++        if (tb != itemType) revert ItemShape(b, tb);
++        q.itemA = a;
++        q.itemB = b;
++    }
++
++    function _boundedRecord(bytes32 id, uint64 basis) private view returns (bytes32 typeId, bytes memory data) {
++        uint64 firstAdmission;
++        (typeId, firstAdmission,, data) = ledger.record(id);
++        if (firstAdmission == 0 || firstAdmission > basis) revert RecordAdmissionBounds(id, firstAdmission, basis);
++    }
++
+     /// The publication that admitted `admission`, and its retained author and proof kind.
+     function _authorOf(uint64 admission) private view returns (uint8 proofKind, address author, uint64 publication) {
+         (,, publication,,,,,) = ledger.admission(admission);
+diff --git a/Reviews/2026-09-12-efs-path-decision/lab-b/test/FaultyReads.sol b/Reviews/2026-09-12-efs-path-decision/lab-b/test/FaultyReads.sol
+index b8beb2a..4f6ead7 100644
+--- a/Reviews/2026-09-12-efs-path-decision/lab-b/test/FaultyReads.sol
++++ b/Reviews/2026-09-12-efs-path-decision/lab-b/test/FaultyReads.sol
+@@ -18,6 +18,22 @@ contract FaultyReads is ILedgerReads, ILensReads {
+     uint8 public constant ADMISSION_OUT_OF_RANGE = 4; // admission(*) -> publication 1, whose admission range never covers a head admission
+     uint8 public constant SHORT_EVIDENCE = 5; // evidence(*) -> a one-word reply (ABI decoding in the consumer must fail closed)
+     uint8 public constant PARTIAL_CLAIMS_ENDED = 6; // list(*) -> status PARTIAL while the cursor still says every list was exhausted
++    uint8 public constant WRONG_SELECTED_REVISION = 7; // resolve(*) -> right head/author/admission, wrong revision
++    uint8 public constant ZERO_RECORD_FIRST_ADMISSION = 8; // record(target) -> firstAdmission 0
++    uint8 public constant FUTURE_RECORD_FIRST_ADMISSION = 9; // record(target) -> firstAdmission after the current basis
++    uint8 public constant ZERO_SELECTED_ADMISSION = 10; // resolve(*) -> admission 0
++    uint8 public constant FUTURE_SELECTED_ADMISSION = 11; // resolve(*) -> admission after the current basis
++    uint8 public constant ZERO_PLACEMENT_ADMISSION = 12; // list(*) -> item admission 0
++    uint8 public constant FUTURE_PLACEMENT_ADMISSION = 13; // list(*) -> item admission after the current basis
++    uint8 public constant WRONG_BINDING_POSITION = 14; // bindingPosition(*) -> `target`, a real but wrong coordinate
++    uint8 public constant WRONG_ADMISSION_REVISION = 15; // admission(*) -> expectedRevision does not precede the observed revision
++    uint8 public constant MAX_ADMISSION_REVISION = 16; // admission(*) -> uint32 max (must not wrap to revision 0)
++    uint8 public constant IMPORTED_PUBLICATION = 17; // isImported(*) -> true
++    uint8 public constant CURSOR_GENERATION_MISMATCH = 18;
++    uint8 public constant CURSOR_EPOCH_MISMATCH = 19;
++    uint8 public constant CURSOR_CORE_MISMATCH = 20;
++    uint8 public constant CURSOR_SCOPE_MISMATCH = 21;
++    uint8 public constant CURSOR_LENS_MISMATCH = 22;
+ 
+     Ledger public immutable real;
+     LensReader public immutable realLens;
+@@ -40,6 +56,11 @@ contract FaultyReads is ILedgerReads, ILensReads {
+         if (id == target) {
+             if (mode == MISSING_PAIR) return (bytes32(0), 0, 0, new bytes(0));
+             if (mode == WRONG_TYPE_ITEM) typeId = keccak256("faulty/not-an-item");
++            if (mode == ZERO_RECORD_FIRST_ADMISSION) firstAdmission = 0;
++            if (mode == FUTURE_RECORD_FIRST_ADMISSION) {
++                (uint64 basis,,,) = real.counts();
++                firstAdmission = basis + 1;
++            }
+         }
+     }
+ 
+@@ -51,6 +72,8 @@ contract FaultyReads is ILedgerReads, ILensReads {
+         (kind, leaf, publication, bindingOrdinal, expectedRevision, withdrawn, a, b) = real.admission(ordinal);
+         if (mode == ADMISSION_NOT_BIND) kind = 1;
+         if (mode == ADMISSION_OUT_OF_RANGE) publication = 1;
++        if (mode == WRONG_ADMISSION_REVISION) expectedRevision += 1;
++        if (mode == MAX_ADMISSION_REVISION) expectedRevision = type(uint32).max;
+     }
+ 
+     /// Raw forwarding (no 13-way destructuring): the faithful reply bytes, or a one-word truncation of them.
+@@ -71,6 +94,18 @@ contract FaultyReads is ILedgerReads, ILensReads {
+         return real.counts();
+     }
+ 
++    function coreCodeCommitment() external view returns (bytes32) {
++        return real.coreCodeCommitment();
++    }
++
++    function isImported(uint64 publication) external view returns (bool) {
++        return mode == IMPORTED_PUBLICATION || real.isImported(publication);
++    }
++
++    function bindingPosition(uint64 ordinal) external view returns (bytes32) {
++        return mode == WRONG_BINDING_POSITION ? target : real.bindingPosition(ordinal);
++    }
++
+     function positionCell(bytes32 position) external view returns (bytes32, bytes32, bytes32) {
+         return real.positionCell(position);
+     }
+@@ -83,9 +118,15 @@ contract FaultyReads is ILedgerReads, ILensReads {
+     function resolve(address[] calldata lens, bytes32 purpose, bytes32 subject, bytes32 role)
+         external
+         view
+-        returns (uint8, bytes32, uint32, address, uint64)
++        returns (uint8 status, bytes32 selected, uint32 revision, address author, uint64 admission)
+     {
+-        return realLens.resolve(lens, purpose, subject, role);
++        (status, selected, revision, author, admission) = realLens.resolve(lens, purpose, subject, role);
++        if (mode == WRONG_SELECTED_REVISION) revision += 1;
++        if (mode == ZERO_SELECTED_ADMISSION) admission = 0;
++        if (mode == FUTURE_SELECTED_ADMISSION) {
++            (uint64 basis,,,) = real.counts();
++            admission = basis + 1;
++        }
+     }
+ 
+     function resolveNoTiebreak(address[] calldata lens, bytes32 purpose, bytes32 subject, bytes32 role)
+@@ -103,6 +144,13 @@ contract FaultyReads is ILedgerReads, ILensReads {
+     {
+         page = realLens.list(lens, purpose, subject, cursor, budget);
+         if (mode == PARTIAL_CLAIMS_ENDED) page.status = 1; // PARTIAL, while page.next still says every list was exhausted
++        if (mode == ZERO_PLACEMENT_ADMISSION && page.items.length != 0) page.items[0].admission = 0;
++        if (mode == FUTURE_PLACEMENT_ADMISSION && page.items.length != 0) page.items[0].admission = page.next.basisAdmission + 1;
++        if (mode == CURSOR_GENERATION_MISMATCH) page.next.indexGeneration += 1;
++        if (mode == CURSOR_EPOCH_MISMATCH) page.next.rulesEpoch += 1;
++        if (mode == CURSOR_CORE_MISMATCH) page.next.coreCodeCommitment = keccak256("faulty/core");
++        if (mode == CURSOR_SCOPE_MISMATCH) page.next.scopeKey = keccak256("faulty/scope");
++        if (mode == CURSOR_LENS_MISMATCH) page.next.lensHash = keccak256("faulty/lens");
+     }
+ 
+     function historyByRole(address author, bytes32 purpose, bytes32 subject, bytes32 role, uint64 asOf)
+diff --git a/Reviews/2026-09-12-efs-path-decision/lab-b/test/JoinedConsumer.t.sol b/Reviews/2026-09-12-efs-path-decision/lab-b/test/JoinedConsumer.t.sol
+index 5762593..79b9502 100644
+--- a/Reviews/2026-09-12-efs-path-decision/lab-b/test/JoinedConsumer.t.sol
++++ b/Reviews/2026-09-12-efs-path-decision/lab-b/test/JoinedConsumer.t.sol
+@@ -324,10 +324,25 @@ contract JoinedConsumerTest is LabBase {
+ 
+     function expectFor(Ids memory id, bytes32 head, address author, uint8 proofKind, uint256 mantissa, uint64 basis)
+         internal
+-        pure
++        view
+         returns (JoinedConsumer.Expect memory e)
+     {
+-        e = JoinedConsumer.Expect(id.subj, head, author, proofKind, id.pairId, id.itemA, id.itemB, mantissa, SCALE, OBSERVED_AT, keccak256(NOTE_BYTES), basis);
++        uint32 expectedRevision = author == address(bob) ? 1 : 2;
++        e = JoinedConsumer.Expect(
++            id.subj,
++            head,
++            author,
++            proofKind,
++            id.pairId,
++            id.itemA,
++            id.itemB,
++            mantissa,
++            SCALE,
++            OBSERVED_AT,
++            keccak256(NOTE_BYTES),
++            basis,
++            expectedRevision
++        );
+     }
+ 
+     function placementFor() internal view returns (JoinedConsumer.PlacementExpect memory p) {
+@@ -422,6 +437,9 @@ contract JoinedConsumerTest is LabBase {
+         // wrong expected head id for the right author (the retained older QUOTE_A1 / the competing QUOTE_B1 are not the selection)
+         expectPointFail(ab, expectFor(id, id.a1, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1), JoinedConsumer.SelectionMismatch.selector, "A-first point: expecting the older head QUOTE_A1 is refused");
+         expectListFail(ab, expectFor(id, id.b1, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1), p, JoinedConsumer.SelectionMismatch.selector, "A-first list: expecting B's head under A's authorship is refused");
++        JoinedConsumer.Expect memory wrongRevision = expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1);
++        wrongRevision.expectedRevision = 1;
++        expectPointFail(ab, wrongRevision, JoinedConsumer.RevisionMismatch.selector, "A-first: the sealed expected revision is exact, not inferred from the reply");
+         // wrong proof category for the right author
+         expectPointFail(ab, expectFor(id, id.a2, eoaA,KIND_NATIVE, M_A2, BASIS_POST_B1), JoinedConsumer.ProofCategory.selector, "A-first: AUTHOR_A is EOA-signed, not contract-originated");
+         expectPointFail(ba, expectFor(id, id.b1, address(bob),KIND_SIGNED, M_B1, BASIS_POST_B1), JoinedConsumer.ProofCategory.selector, "B-first: AUTHOR_B is contract-originated, not EOA-signed");
+@@ -448,6 +466,7 @@ contract JoinedConsumerTest is LabBase {
+         alice.bind(HEAD, other, NO_ROLE, rq, 0); // admission 15
+         JoinedConsumer.Expect memory eo = expectFor(id, rq, address(alice), KIND_NATIVE, 3000, 15);
+         eo.subject = other;
++        eo.expectedRevision = 1;
+         expectPointFail(lensOf(address(alice)), eo, JoinedConsumer.QuoteShape.selector, "a non-joined head is refused, not decoded");
+     }
+ 
+@@ -510,6 +529,90 @@ contract JoinedConsumerTest is LabBase {
+         }
+     }
+ 
++    function expectFaultyListFail(Ids memory id, bytes4 expected, string memory label) internal {
++        try faultyJoined.paidList(
++            lensOf(eoaA, address(bob)),
++            expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1),
++            placementFor()
++        ) {
++            require(false, label);
++        } catch (bytes memory err) {
++            expectSel(err, expected, label);
++        }
++    }
++
++    function test_faulty_actual_reply_wrong_selected_revision_is_refused() public {
++        Ids memory id = runSteps1to4();
++        faulty.fault(faulty.WRONG_SELECTED_REVISION(), bytes32(0));
++        expectFaultyPointFail(id, bytes4(keccak256("RevisionMismatch(uint32,uint32)")), "the exact sealed A2 revision is required");
++    }
++
++    function test_faulty_actual_reply_zero_or_future_record_first_admission_is_refused_for_quote_pair_and_both_items() public {
++        Ids memory id = runSteps1to4();
++        bytes32[4] memory records = [id.a2, id.pairId, id.itemA, id.itemB];
++        for (uint256 i; i < records.length; ++i) {
++            faulty.fault(faulty.ZERO_RECORD_FIRST_ADMISSION(), records[i]);
++            expectFaultyPointFail(id, bytes4(keccak256("RecordAdmissionBounds(bytes32,uint64,uint64)")), "a zero record firstAdmission is refused");
++            faulty.fault(faulty.FUTURE_RECORD_FIRST_ADMISSION(), records[i]);
++            expectFaultyPointFail(id, bytes4(keccak256("RecordAdmissionBounds(bytes32,uint64,uint64)")), "a record firstAdmission after the sealed basis is refused");
++        }
++    }
++
++    function test_faulty_actual_reply_zero_or_future_selected_and_placement_admissions_are_refused() public {
++        Ids memory id = runSteps1to4();
++        faulty.fault(faulty.ZERO_SELECTED_ADMISSION(), bytes32(0));
++        expectFaultyPointFail(id, bytes4(keccak256("AdmissionBounds(uint64,uint64)")), "a zero selected admission is refused");
++        faulty.fault(faulty.FUTURE_SELECTED_ADMISSION(), bytes32(0));
++        expectFaultyPointFail(id, bytes4(keccak256("AdmissionBounds(uint64,uint64)")), "a selected admission after the sealed basis is refused");
++        faulty.fault(faulty.ZERO_PLACEMENT_ADMISSION(), bytes32(0));
++        expectFaultyListFail(id, bytes4(keccak256("AdmissionBounds(uint64,uint64)")), "a zero placement admission is refused");
++        faulty.fault(faulty.FUTURE_PLACEMENT_ADMISSION(), bytes32(0));
++        expectFaultyListFail(id, bytes4(keccak256("AdmissionBounds(uint64,uint64)")), "a placement admission after the sealed basis is refused");
++    }
++
++    function test_faulty_actual_reply_same_author_and_target_at_wrong_head_or_folder_coordinate_is_refused() public {
++        Ids memory id = runSteps1to4();
++        faulty.fault(faulty.WRONG_BINDING_POSITION(), id.swapsPos);
++        expectFaultyPointFail(id, bytes4(keccak256("AdmissionCoordinate(uint64,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)")), "selected evidence at the FOLDER coordinate cannot prove the HEAD coordinate");
++        faulty.fault(faulty.WRONG_BINDING_POSITION(), id.headPos);
++        expectFaultyListFail(id, bytes4(keccak256("AdmissionCoordinate(uint64,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)")), "placement evidence at the HEAD coordinate cannot prove the FOLDER coordinate");
++    }
++
++    function test_faulty_actual_reply_mismatched_or_wrapping_admission_revision_is_refused() public {
++        Ids memory id = runSteps1to4();
++        faulty.fault(faulty.WRONG_ADMISSION_REVISION(), bytes32(0));
++        expectFaultyPointFail(id, bytes4(keccak256("AdmissionRevision(uint64,uint32,uint32)")), "selected admission CAS revision must precede the selected revision");
++        expectFaultyListFail(id, bytes4(keccak256("AdmissionRevision(uint64,uint32,uint32)")), "placement admission CAS revision must precede the placement revision");
++        faulty.fault(faulty.MAX_ADMISSION_REVISION(), bytes32(0));
++        expectFaultyPointFail(id, bytes4(keccak256("AdmissionRevision(uint64,uint32,uint32)")), "uint32 max expectedRevision cannot wrap into an accepted revision");
++    }
++
++    function test_faulty_actual_reply_imported_signed_and_native_publications_are_refused_as_local_fixture_evidence() public {
++        Ids memory id = runSteps1to4();
++        faulty.fault(faulty.IMPORTED_PUBLICATION(), bytes32(0));
++        expectFaultyPointFail(id, bytes4(keccak256("ImportedPublication(uint64)")), "A-first signed fixture evidence must be non-imported");
++        expectFaultyListFail(id, bytes4(keccak256("ImportedPublication(uint64)")), "the A1 signed placement effect must also be non-imported");
++        try faultyJoined.paidPoint(
++            lensOf(address(bob), eoaA), expectFor(id, id.b1, address(bob), KIND_NATIVE, M_B1, BASIS_POST_B1)
++        ) {
++            require(false, "B-first imported publication accepted");
++        } catch (bytes memory err) {
++            expectSel(err, bytes4(keccak256("ImportedPublication(uint64)")), "B-first native fixture evidence must be non-imported");
++        }
++    }
++
++    function test_faulty_actual_reply_cursor_generation_epoch_core_scope_and_packed_lens_context_are_refused() public {
++        Ids memory id = runSteps1to4();
++        uint8[5] memory modes = [
++            faulty.CURSOR_GENERATION_MISMATCH(), faulty.CURSOR_EPOCH_MISMATCH(), faulty.CURSOR_CORE_MISMATCH(),
++            faulty.CURSOR_SCOPE_MISMATCH(), faulty.CURSOR_LENS_MISMATCH()
++        ];
++        for (uint256 i; i < modes.length; ++i) {
++            faulty.fault(modes[i], bytes32(0));
++            expectFaultyListFail(id, bytes4(keccak256("CursorContext(uint8,bytes32,bytes32)")), "list cursor context mismatch is refused");
++        }
++    }
++
+     function test_faulty_actual_reply_missing_pair_is_refused() public {
+         Ids memory id = runSteps1to4();
+         (, JoinedConsumer.Selection memory s) = faultyJoined.paidPoint(lensOf(eoaA, address(bob)), expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1));

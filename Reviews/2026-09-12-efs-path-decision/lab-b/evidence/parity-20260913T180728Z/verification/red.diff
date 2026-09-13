@@ -1,0 +1,189 @@
+diff --git a/Reviews/2026-09-12-efs-path-decision/lab-b/test/FaultyReads.sol b/Reviews/2026-09-12-efs-path-decision/lab-b/test/FaultyReads.sol
+index b8beb2a..0f51dfe 100644
+--- a/Reviews/2026-09-12-efs-path-decision/lab-b/test/FaultyReads.sol
++++ b/Reviews/2026-09-12-efs-path-decision/lab-b/test/FaultyReads.sol
+@@ -18,6 +18,22 @@ contract FaultyReads is ILedgerReads, ILensReads {
+     uint8 public constant ADMISSION_OUT_OF_RANGE = 4; // admission(*) -> publication 1, whose admission range never covers a head admission
+     uint8 public constant SHORT_EVIDENCE = 5; // evidence(*) -> a one-word reply (ABI decoding in the consumer must fail closed)
+     uint8 public constant PARTIAL_CLAIMS_ENDED = 6; // list(*) -> status PARTIAL while the cursor still says every list was exhausted
++    uint8 public constant WRONG_SELECTED_REVISION = 7; // resolve(*) -> right head/author/admission, wrong revision
++    uint8 public constant ZERO_RECORD_FIRST_ADMISSION = 8; // record(target) -> firstAdmission 0
++    uint8 public constant FUTURE_RECORD_FIRST_ADMISSION = 9; // record(target) -> firstAdmission after the current basis
++    uint8 public constant ZERO_SELECTED_ADMISSION = 10; // resolve(*) -> admission 0
++    uint8 public constant FUTURE_SELECTED_ADMISSION = 11; // resolve(*) -> admission after the current basis
++    uint8 public constant ZERO_PLACEMENT_ADMISSION = 12; // list(*) -> item admission 0
++    uint8 public constant FUTURE_PLACEMENT_ADMISSION = 13; // list(*) -> item admission after the current basis
++    uint8 public constant WRONG_BINDING_POSITION = 14; // bindingPosition(*) -> `target`, a real but wrong coordinate
++    uint8 public constant WRONG_ADMISSION_REVISION = 15; // admission(*) -> expectedRevision does not precede the observed revision
++    uint8 public constant MAX_ADMISSION_REVISION = 16; // admission(*) -> uint32 max (must not wrap to revision 0)
++    uint8 public constant IMPORTED_PUBLICATION = 17; // isImported(*) -> true
++    uint8 public constant CURSOR_GENERATION_MISMATCH = 18;
++    uint8 public constant CURSOR_EPOCH_MISMATCH = 19;
++    uint8 public constant CURSOR_CORE_MISMATCH = 20;
++    uint8 public constant CURSOR_SCOPE_MISMATCH = 21;
++    uint8 public constant CURSOR_LENS_MISMATCH = 22;
+ 
+     Ledger public immutable real;
+     LensReader public immutable realLens;
+@@ -40,6 +56,11 @@ contract FaultyReads is ILedgerReads, ILensReads {
+         if (id == target) {
+             if (mode == MISSING_PAIR) return (bytes32(0), 0, 0, new bytes(0));
+             if (mode == WRONG_TYPE_ITEM) typeId = keccak256("faulty/not-an-item");
++            if (mode == ZERO_RECORD_FIRST_ADMISSION) firstAdmission = 0;
++            if (mode == FUTURE_RECORD_FIRST_ADMISSION) {
++                (uint64 basis,,,) = real.counts();
++                firstAdmission = basis + 1;
++            }
+         }
+     }
+ 
+@@ -51,6 +72,8 @@ contract FaultyReads is ILedgerReads, ILensReads {
+         (kind, leaf, publication, bindingOrdinal, expectedRevision, withdrawn, a, b) = real.admission(ordinal);
+         if (mode == ADMISSION_NOT_BIND) kind = 1;
+         if (mode == ADMISSION_OUT_OF_RANGE) publication = 1;
++        if (mode == WRONG_ADMISSION_REVISION) expectedRevision += 1;
++        if (mode == MAX_ADMISSION_REVISION) expectedRevision = type(uint32).max;
+     }
+ 
+     /// Raw forwarding (no 13-way destructuring): the faithful reply bytes, or a one-word truncation of them.
+@@ -71,6 +94,14 @@ contract FaultyReads is ILedgerReads, ILensReads {
+         return real.counts();
+     }
+ 
++    function isImported(uint64 publication) external view returns (bool) {
++        return mode == IMPORTED_PUBLICATION || real.isImported(publication);
++    }
++
++    function bindingPosition(uint64 ordinal) external view returns (bytes32) {
++        return mode == WRONG_BINDING_POSITION ? target : real.bindingPosition(ordinal);
++    }
++
+     function positionCell(bytes32 position) external view returns (bytes32, bytes32, bytes32) {
+         return real.positionCell(position);
+     }
+@@ -83,9 +114,15 @@ contract FaultyReads is ILedgerReads, ILensReads {
+     function resolve(address[] calldata lens, bytes32 purpose, bytes32 subject, bytes32 role)
+         external
+         view
+-        returns (uint8, bytes32, uint32, address, uint64)
++        returns (uint8 status, bytes32 selected, uint32 revision, address author, uint64 admission)
+     {
+-        return realLens.resolve(lens, purpose, subject, role);
++        (status, selected, revision, author, admission) = realLens.resolve(lens, purpose, subject, role);
++        if (mode == WRONG_SELECTED_REVISION) revision += 1;
++        if (mode == ZERO_SELECTED_ADMISSION) admission = 0;
++        if (mode == FUTURE_SELECTED_ADMISSION) {
++            (uint64 basis,,,) = real.counts();
++            admission = basis + 1;
++        }
+     }
+ 
+     function resolveNoTiebreak(address[] calldata lens, bytes32 purpose, bytes32 subject, bytes32 role)
+@@ -103,6 +140,13 @@ contract FaultyReads is ILedgerReads, ILensReads {
+     {
+         page = realLens.list(lens, purpose, subject, cursor, budget);
+         if (mode == PARTIAL_CLAIMS_ENDED) page.status = 1; // PARTIAL, while page.next still says every list was exhausted
++        if (mode == ZERO_PLACEMENT_ADMISSION && page.items.length != 0) page.items[0].admission = 0;
++        if (mode == FUTURE_PLACEMENT_ADMISSION && page.items.length != 0) page.items[0].admission = page.next.basisAdmission + 1;
++        if (mode == CURSOR_GENERATION_MISMATCH) page.next.indexGeneration += 1;
++        if (mode == CURSOR_EPOCH_MISMATCH) page.next.rulesEpoch += 1;
++        if (mode == CURSOR_CORE_MISMATCH) page.next.coreCodeCommitment = keccak256("faulty/core");
++        if (mode == CURSOR_SCOPE_MISMATCH) page.next.scopeKey = keccak256("faulty/scope");
++        if (mode == CURSOR_LENS_MISMATCH) page.next.lensHash = keccak256("faulty/lens");
+     }
+ 
+     function historyByRole(address author, bytes32 purpose, bytes32 subject, bytes32 role, uint64 asOf)
+diff --git a/Reviews/2026-09-12-efs-path-decision/lab-b/test/JoinedConsumer.t.sol b/Reviews/2026-09-12-efs-path-decision/lab-b/test/JoinedConsumer.t.sol
+index 5762593..82aa6e9 100644
+--- a/Reviews/2026-09-12-efs-path-decision/lab-b/test/JoinedConsumer.t.sol
++++ b/Reviews/2026-09-12-efs-path-decision/lab-b/test/JoinedConsumer.t.sol
+@@ -510,6 +510,89 @@ contract JoinedConsumerTest is LabBase {
+         }
+     }
+ 
++    function expectFaultyListFail(Ids memory id, bytes4 expected, string memory label) internal {
++        try faultyJoined.paidList(
++            lensOf(eoaA, address(bob)),
++            expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1),
++            placementFor()
++        ) {
++            require(false, label);
++        } catch (bytes memory err) {
++            expectSel(err, expected, label);
++        }
++    }
++
++    function test_faulty_actual_reply_wrong_selected_revision_is_refused() public {
++        Ids memory id = runSteps1to4();
++        faulty.fault(faulty.WRONG_SELECTED_REVISION(), bytes32(0));
++        expectFaultyPointFail(id, bytes4(keccak256("RevisionMismatch(uint32,uint32)")), "the exact sealed A2 revision is required");
++    }
++
++    function test_faulty_actual_reply_zero_or_future_record_first_admission_is_refused_for_quote_pair_and_both_items() public {
++        Ids memory id = runSteps1to4();
++        bytes32[4] memory records = [id.a2, id.pairId, id.itemA, id.itemB];
++        for (uint256 i; i < records.length; ++i) {
++            faulty.fault(faulty.ZERO_RECORD_FIRST_ADMISSION(), records[i]);
++            expectFaultyPointFail(id, bytes4(keccak256("RecordAdmissionBounds(bytes32,uint64,uint64)")), "a zero record firstAdmission is refused");
++            faulty.fault(faulty.FUTURE_RECORD_FIRST_ADMISSION(), records[i]);
++            expectFaultyPointFail(id, bytes4(keccak256("RecordAdmissionBounds(bytes32,uint64,uint64)")), "a record firstAdmission after the sealed basis is refused");
++        }
++    }
++
++    function test_faulty_actual_reply_zero_or_future_selected_and_placement_admissions_are_refused() public {
++        Ids memory id = runSteps1to4();
++        faulty.fault(faulty.ZERO_SELECTED_ADMISSION(), bytes32(0));
++        expectFaultyPointFail(id, bytes4(keccak256("AdmissionBounds(uint64,uint64)")), "a zero selected admission is refused");
++        faulty.fault(faulty.FUTURE_SELECTED_ADMISSION(), bytes32(0));
++        expectFaultyPointFail(id, bytes4(keccak256("AdmissionBounds(uint64,uint64)")), "a selected admission after the sealed basis is refused");
++        faulty.fault(faulty.ZERO_PLACEMENT_ADMISSION(), bytes32(0));
++        expectFaultyListFail(id, bytes4(keccak256("AdmissionBounds(uint64,uint64)")), "a zero placement admission is refused");
++        faulty.fault(faulty.FUTURE_PLACEMENT_ADMISSION(), bytes32(0));
++        expectFaultyListFail(id, bytes4(keccak256("AdmissionBounds(uint64,uint64)")), "a placement admission after the sealed basis is refused");
++    }
++
++    function test_faulty_actual_reply_same_author_and_target_at_wrong_head_or_folder_coordinate_is_refused() public {
++        Ids memory id = runSteps1to4();
++        faulty.fault(faulty.WRONG_BINDING_POSITION(), id.swapsPos);
++        expectFaultyPointFail(id, bytes4(keccak256("AdmissionCoordinate(uint64,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)")), "selected evidence at the FOLDER coordinate cannot prove the HEAD coordinate");
++        faulty.fault(faulty.WRONG_BINDING_POSITION(), id.headPos);
++        expectFaultyListFail(id, bytes4(keccak256("AdmissionCoordinate(uint64,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)")), "placement evidence at the HEAD coordinate cannot prove the FOLDER coordinate");
++    }
++
++    function test_faulty_actual_reply_mismatched_or_wrapping_admission_revision_is_refused() public {
++        Ids memory id = runSteps1to4();
++        faulty.fault(faulty.WRONG_ADMISSION_REVISION(), bytes32(0));
++        expectFaultyPointFail(id, bytes4(keccak256("AdmissionRevision(uint64,uint32,uint32)")), "selected admission CAS revision must precede the selected revision");
++        expectFaultyListFail(id, bytes4(keccak256("AdmissionRevision(uint64,uint32,uint32)")), "placement admission CAS revision must precede the placement revision");
++        faulty.fault(faulty.MAX_ADMISSION_REVISION(), bytes32(0));
++        expectFaultyPointFail(id, bytes4(keccak256("AdmissionRevision(uint64,uint32,uint32)")), "uint32 max expectedRevision cannot wrap into an accepted revision");
++    }
++
++    function test_faulty_actual_reply_imported_signed_and_native_publications_are_refused_as_local_fixture_evidence() public {
++        Ids memory id = runSteps1to4();
++        faulty.fault(faulty.IMPORTED_PUBLICATION(), bytes32(0));
++        expectFaultyPointFail(id, bytes4(keccak256("ImportedPublication(uint64)")), "A-first signed fixture evidence must be non-imported");
++        try faultyJoined.paidPoint(
++            lensOf(address(bob), eoaA), expectFor(id, id.b1, address(bob), KIND_NATIVE, M_B1, BASIS_POST_B1)
++        ) {
++            require(false, "B-first imported publication accepted");
++        } catch (bytes memory err) {
++            expectSel(err, bytes4(keccak256("ImportedPublication(uint64)")), "B-first native fixture evidence must be non-imported");
++        }
++    }
++
++    function test_faulty_actual_reply_cursor_generation_epoch_core_scope_and_packed_lens_context_are_refused() public {
++        Ids memory id = runSteps1to4();
++        uint8[5] memory modes = [
++            faulty.CURSOR_GENERATION_MISMATCH(), faulty.CURSOR_EPOCH_MISMATCH(), faulty.CURSOR_CORE_MISMATCH(),
++            faulty.CURSOR_SCOPE_MISMATCH(), faulty.CURSOR_LENS_MISMATCH()
++        ];
++        for (uint256 i; i < modes.length; ++i) {
++            faulty.fault(modes[i], bytes32(0));
++            expectFaultyListFail(id, bytes4(keccak256("CursorContext(uint8,bytes32,bytes32)")), "list cursor context mismatch is refused");
++        }
++    }
++
+     function test_faulty_actual_reply_missing_pair_is_refused() public {
+         Ids memory id = runSteps1to4();
+         (, JoinedConsumer.Selection memory s) = faultyJoined.paidPoint(lensOf(eoaA, address(bob)), expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1));

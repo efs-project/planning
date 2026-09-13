@@ -1,0 +1,36 @@
+import assert from 'node:assert/strict';
+import { spawn, execFileSync } from 'node:child_process';
+import { openSync, closeSync, writeFileSync, readFileSync, readdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+const run = '/tmp/efs-b-parity-build-20260913.lcAzU1';
+const repo = '/Users/james/Code/EFS/planning-warroom-b-run';
+const prefix = 'Reviews/2026-09-12-efs-path-decision/lab-b';
+const lab = `${repo}/${prefix}`;
+const commit = 'ac37e91f880e9905713863a568b922a3b73130af';
+const solc = '/Users/james/Library/Application Support/svm/0.8.30/solc-0.8.30';
+const git = args => execFileSync('git', args, { cwd: repo, encoding: 'utf8' });
+const sha = data => createHash('sha256').update(data).digest('hex');
+assert.equal(git(['rev-parse', 'HEAD']).trim(), commit);
+const changed = git(['diff', 'HEAD', '--name-only']).trim().split('\n').sort();
+assert.deepEqual(changed, [`${prefix}/test/FaultyReads.sol`, `${prefix}/test/JoinedConsumer.t.sol`]);
+assert(Date.now() >= Date.parse('2026-09-13T17:03:00Z') && Date.now() <= Date.parse('2026-09-13T17:09:00Z'), 'outside lease start window');
+const sourceHashes = () => Object.fromEntries(['src', 'test'].flatMap(dir => readdirSync(`${lab}/${dir}`).filter(n => n.endsWith('.sol')).map(n => [`${dir}/${n}`, sha(readFileSync(`${lab}/${dir}/${n}`))])).concat([['foundry.toml', sha(readFileSync(`${lab}/foundry.toml`))]]));
+const result = { phase: 'RED', baseCommit: commit, startedAt: new Date().toISOString(), compilerSha256: sha(readFileSync(solc)), dirtyDiffSha256: sha(git(['diff', 'HEAD', '--binary'])), sourceHashes: sourceHashes() };
+assert.equal(result.compilerSha256, '738dcdc6afddeb505ee4e4ef24f1c1fdba2b8c924e614cbbf5801a5b062dd683');
+writeFileSync(`${run}/red.diff`, git(['diff', 'HEAD', '--binary']), { flag: 'wx' });
+const save = () => writeFileSync(`${run}/red.json`, `${JSON.stringify(result, null, 2)}\n`);
+const match = 'test_faulty_actual_reply_(wrong_selected_revision_is_refused|zero_or_future_record_first_admission_is_refused_for_quote_pair_and_both_items|zero_or_future_selected_and_placement_admissions_are_refused|same_author_and_target_at_wrong_head_or_folder_coordinate_is_refused|mismatched_or_wrapping_admission_revision_is_refused|imported_signed_and_native_publications_are_refused_as_local_fixture_evidence|cursor_generation_epoch_core_scope_and_packed_lens_context_are_refused)';
+const args = ['test', '--root', lab, '--offline', '--use', solc, '--threads', '2', '--ast', '--out', `${run}/out`, '--cache-path', `${run}/cache`, '--match-contract', 'JoinedConsumerTest', '--match-test', match, '-vvv'];
+result.args = args;
+const fd = openSync(`${run}/red.log`, 'wx');
+const child = spawn('forge', args, { cwd: lab, env: { ...process.env, FOUNDRY_OUT: `${run}/out` }, detached: true, stdio: ['ignore', fd, fd] });
+result.pid = child.pid; save();
+const timer = setTimeout(() => { result.timeout = true; save(); try { process.kill(-child.pid, 'SIGKILL'); } catch {} }, Math.min(15 * 60 * 1000, Date.parse('2026-09-13T17:24:00Z') - Date.now()));
+try {
+  await new Promise((resolve, reject) => { child.once('error', reject); child.once('exit', (code, signal) => { result.exitCode = code; result.signal = signal; resolve(); }); });
+  result.finishedAt = new Date().toISOString();
+  result.sourceUnchangedDuringRun = JSON.stringify(sourceHashes()) === JSON.stringify(result.sourceHashes);
+  result.diffUnchangedDuringRun = sha(git(['diff', 'HEAD', '--binary'])) === result.dirtyDiffSha256;
+  save();
+  console.log(JSON.stringify(result, null, 2));
+} finally { clearTimeout(timer); closeSync(fd); }

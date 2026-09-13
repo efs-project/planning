@@ -1,0 +1,145 @@
+{
+  "stage": "afterB1",
+  "comparisons": [
+    {
+      "path": "runId",
+      "expected": "b-parity-paid-20260913-KJ23qU",
+      "actual": "b-parity-paid-20260913-KJ23qU",
+      "equal": true
+    },
+    {
+      "path": "stage",
+      "expected": "afterB1",
+      "actual": "afterB1",
+      "equal": true
+    },
+    {
+      "path": "pins.controller",
+      "expected": "4b61055bfbe9c47c8d40bcb73690920582c5472ceed427f36f0d750eab83d7fa",
+      "actual": "4b61055bfbe9c47c8d40bcb73690920582c5472ceed427f36f0d750eab83d7fa",
+      "equal": true
+    },
+    {
+      "path": "pins.expectations",
+      "expected": "ff7c4fc735504c9871e8241c7cc461293b7ffc37f3d5e9dd50840e005cc37795",
+      "actual": "ff7c4fc735504c9871e8241c7cc461293b7ffc37f3d5e9dd50840e005cc37795",
+      "equal": true
+    },
+    {
+      "path": "pins.armInput",
+      "expected": "b28c779bba360ecae19ba7beb68610cae9ce27ba33245c66d88e3415f023b83f",
+      "actual": "b28c779bba360ecae19ba7beb68610cae9ce27ba33245c66d88e3415f023b83f",
+      "equal": true
+    },
+    {
+      "path": "contextSha256",
+      "expected": "c9d219f90c9215f364b1e54993ee3892c43741057c90ee0d2b24c91658ed482e",
+      "actual": "c9d219f90c9215f364b1e54993ee3892c43741057c90ee0d2b24c91658ed482e",
+      "equal": true
+    },
+    {
+      "path": "inputsSha256",
+      "expected": "d213d3ce6752f7fd7d224ae34b31f6961cdabe1f12130109e7456aa98ed37a6b",
+      "actual": "d213d3ce6752f7fd7d224ae34b31f6961cdabe1f12130109e7456aa98ed37a6b",
+      "equal": true
+    },
+    {
+      "path": "inputsSha256",
+      "expected": "d213d3ce6752f7fd7d224ae34b31f6961cdabe1f12130109e7456aa98ed37a6b",
+      "actual": "d213d3ce6752f7fd7d224ae34b31f6961cdabe1f12130109e7456aa98ed37a6b",
+      "equal": true
+    },
+    {
+      "path": "ordinals.postB1Frontier",
+      "expected": "12",
+      "actual": "12",
+      "equal": true
+    },
+    {
+      "path": "ordinals.registryEpoch",
+      "expected": "8",
+      "actual": "8",
+      "equal": true
+    },
+    {
+      "path": "ordinals.indexGeneration",
+      "expected": "0",
+      "actual": "0",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.blockNumber",
+      "expected": "30",
+      "actual": "30",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.blockHash",
+      "expected": "0x69dc9fce8124f6c71e6c6f67ebdeac55b9689a02cbc74715538d8bcdac815e7b",
+      "actual": "0x69dc9fce8124f6c71e6c6f67ebdeac55b9689a02cbc74715538d8bcdac815e7b",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.timestamp",
+      "expected": "1789322849",
+      "actual": "1789322849",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.snapshot",
+      "expected": "0x2",
+      "actual": "0x2",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.frontier.admissions",
+      "expected": "12",
+      "actual": "12",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.frontier.records",
+      "expected": "6",
+      "actual": "6",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.frontier.bindings",
+      "expected": "4",
+      "actual": "4",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.frontier.publications",
+      "expected": "4",
+      "actual": "4",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.indexGeneration",
+      "expected": "0",
+      "actual": "0",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.registryEpoch",
+      "expected": "8",
+      "actual": "8",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.coreCodeCommitment",
+      "expected": "0x6da961bcc79e20dd057d460b73b72555c6a42bc55bf0f55f47680e55c456b104",
+      "actual": "0x6da961bcc79e20dd057d460b73b72555c6a42bc55bf0f55f47680e55c456b104",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.realmId",
+      "expected": "0x684016e05741dc9d511ff3520a16e1da90a35be14b76f9e12ef0287b9beae39f",
+      "actual": "0x684016e05741dc9d511ff3520a16e1da90a35be14b76f9e12ef0287b9beae39f",
+      "equal": true
+    }
+  ],
+  "comparisonOk": true,
+  "failureCode": null
+}

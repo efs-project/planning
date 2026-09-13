@@ -1,0 +1,76 @@
+Compiling 2 files with Solc 0.8.30
+Solc 0.8.30 finished in 7.04s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:73:21:
+   |
+73 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:69:5:
+   |
+69 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:78:29:
+   |
+78 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:69:5:
+   |
+69 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:98:22:
+   |
+98 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+   |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:69:5:
+   |
+69 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:102:25:
+    |
+102 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:69:5:
+   |
+69 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (8760): This declaration has the same name as another declaration.
+   --> test/FaultyReads.sol:121:83:
+    |
+121 |         returns (uint8 status, bytes32 selected, uint32 revision, address author, uint64 admission)
+    |                                                                                   ^^^^^^^^^^^^^^^^
+Note: The other declaration is here:
+  --> test/FaultyReads.sol:67:5:
+   |
+67 |     function admission(uint64 ordinal)
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 140072 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/JoinedConsumer.t.sol:15:1:
+   |
+15 | contract JoinedConsumerTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 7 tests for test/JoinedConsumer.t.sol:JoinedConsumerTest
+[PASS] test_faulty_actual_reply_cursor_generation_epoch_core_scope_and_packed_lens_context_are_refused() (gas: 4182290)
+[PASS] test_faulty_actual_reply_imported_signed_and_native_publications_are_refused_as_local_fixture_evidence() (gas: 4006932)
+[PASS] test_faulty_actual_reply_mismatched_or_wrapping_admission_revision_is_refused() (gas: 4085100)
+[PASS] test_faulty_actual_reply_same_author_and_target_at_wrong_head_or_folder_coordinate_is_refused() (gas: 3985800)
+[PASS] test_faulty_actual_reply_wrong_selected_revision_is_refused() (gas: 3872914)
+[PASS] test_faulty_actual_reply_zero_or_future_record_first_admission_is_refused_for_quote_pair_and_both_items() (gas: 4383739)
+[PASS] test_faulty_actual_reply_zero_or_future_selected_and_placement_admissions_are_refused() (gas: 4051093)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 16.69ms (16.60ms CPU time)
+
+Ran 1 test suite in 29.33ms (16.69ms CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)
