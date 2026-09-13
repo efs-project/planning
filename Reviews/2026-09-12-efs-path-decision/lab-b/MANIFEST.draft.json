@@ -957,11 +957,11 @@
     "request": {
       "commands": [
         "cd Reviews/2026-09-12-efs-path-decision/lab-b",
-        "export FOUNDRY_OUT=/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/out",
+        "export FOUNDRY_OUT=<scratch>/build/lab-b-pin-<sha>/out   # artifacts of the compiled pin (ca1a228 built 2026-09-13 08:50 UTC; includes test/ artifacts such as StrictQuoteAcceptor)",
         "forge build --use 0.8.30 --offline",
-        "forge test --use 0.8.30 --offline -vv   # 39 tests expected: 32 previous (one replaced) + 7 in test/Falsify.t.sol",
+        "forge test --use 0.8.30 --offline -vv   # 43 tests expected (observed 43/43 at ca1a228 on 2026-09-13 08:50 UTC)",
         "forge inspect Ledger storage-layout",
-        "EFS_ETHERS_PATH=<node_modules/ethers> node script/measure.mjs --anvil [--cells policy/activate,failure/refused-re-registration,failure/unsupported-native-import]    # writes <scratch>/measure.json and <scratch>/lab-addresses.json; artifacts read from FOUNDRY_OUT",
+        "EFS_ETHERS_PATH=<node_modules/ethers> node script/measure.mjs --anvil [--cells failure-rows,policy/activate,failure/refused-re-registration,failure/unsupported-native-import]    # writes <scratch>/measure.json and <scratch>/lab-addresses.json; artifacts read from FOUNDRY_OUT",
         "# the script deploys StrictQuoteAcceptor from out/Falsify.t.sol/StrictQuoteAcceptor.json (a test-file artifact): forge build must include test/"
       ],
       "anvil": "started by the script on a free loopback port: --hardfork cancun --chain-id 31337 --gas-limit 30000000 --accounts 4 --prune-history 256 --cache-path <scratchRoot>/anvil-cache (created by the script) --no-cors --quiet; no --steps-tracing; PID, port, argv, start and stop times are written to measure.json (anvil section); killed by the script",

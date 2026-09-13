@@ -1,6 +1,6 @@
 # Phase 2 — minimal authority repair (lab-b-authority, 2026-09-13)
 
-**Standing.** UNRUN. Written under the no-compile rule (no `forge`, `solc`, `anvil`, `node`, `npm`); everything below is desk-checked. Pre-repair pin: branch head `e77f36d`, Core blobs identical to the `dcc7b94` profile pin. Post-repair pins: the working-tree blob hashes in the last section (uncommitted by rule; the coordinator publishes). Scope is exactly the 06:50 checkpoint: native-import/source-origin authority and exact Type identity versus separate Realm acceptance policy. No permanent bytes, no protocol choice, no third architecture, no owner ruling is claimed.
+**Standing.** Source COMPILED AND TESTED at `ca1a228` (2026-09-13 08:50 UTC slot: build exit 0, 43/43 Forge tests incl. F1–F5); the runner remains UNRUN. Originally written under the no-compile rule (no `forge`, `solc`, `anvil`, `node`, `npm`); everything below is desk-checked. Pre-repair pin: branch head `e77f36d`, Core blobs identical to the `dcc7b94` profile pin. Post-repair pins: the working-tree blob hashes in the last section (uncommitted by rule; the coordinator publishes). Scope is exactly the 06:50 checkpoint: native-import/source-origin authority and exact Type identity versus separate Realm acceptance policy. No permanent bytes, no protocol choice, no third architecture, no owner ruling is claimed.
 
 Findings that drove it: [FALSIFY.md](FALSIFY.md) (F1 unsafe, F2 safe, F3 unsafe, F4 unsafe).
 
@@ -87,7 +87,7 @@ Binding-role target Types (`setBindingRefType`) are Realm placement policy, not 
 | grade-0 import | full publication + 9 slots | early revert | negative |
 | `acceptanceBasis` (view) | — | 1 admission SLOAD (+1 record SLOAD for reuse) + registry `activation` (2 SLOADs) | read-only |
 
-Ledger runtime was 16,699 bytes at `df23bbb`; the additions (one view, one packed OR, two errors) are a few hundred bytes — well under EIP-170.
+Ledger runtime was 16,699 bytes at `df23bbb`; measured 17,280 bytes at `ca1a228` (+581 B for the descriptor registry views, policy rows, basis view and the mandatory/policy acceptance split) — well under EIP-170.
 
 ## F5 — the mandatory Type predicate vs additional Realm policy (coordinator 07:50 + review addendum)
 

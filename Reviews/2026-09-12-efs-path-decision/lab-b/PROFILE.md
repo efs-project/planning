@@ -145,7 +145,7 @@ The declaration covers the `Action`/`Intent` ABI, action commitment, EIP-712 dig
 
 It does not establish authenticated chain provenance, contract deployment authenticity, runtime equivalence beyond the supplied pins, correctness of candidate reconstruction helpers, complete rollback, export/import completeness, label-byte retention, a stable Type-description profile, ERC-1271 support, or a permanent SDK ABI. The vector is a literal positive cryptographic case with one explicit mutation expectation; the independent SDK checker remains responsible for interpreting supplied raw RPC bytes without candidate helpers.
 
-## Changed after `dcc7b94` — authority repair (2026-09-13, lab-b-authority; UNRUN, uncommitted)
+## Changed after `dcc7b94` — authority repair (2026-09-13; COMPILED AND TESTED at `ca1a228`: 43/43, no via-IR stack error; runner UNRUN; the declared vector for this profile is produced from the receipt run's retained packet, as the `dcc7b94` vector was)
 
 Everything above this heading describes the pinned `dcc7b94` diagnostic and is left as written. The working tree after the authority repair (REPAIR.md; source pins there) differs from that profile in exactly the following ways. An independent checker must NOT apply these to the retained `322b320`/`5960336` packets or to `vectors/profile-b.json`; a new declared vector is owed after a build.
 
