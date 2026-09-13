@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   assertAttemptLink, assertExactError, classifyReceipt, createGateState, finalizeGateState,
+  validateRpcEnvelope,
 } from './rollback-control.mjs';
 
 const FROM = '0x00000000000000000000000000000000000000a1';
@@ -66,4 +67,26 @@ test('a failed or incomplete run cannot publish green evaluated gates', () => {
   assert.equal(complete.independentExpectations, true);
   assert.equal(complete.exactRawReplies, true);
   assert.equal(complete.staticMinedLinked, true);
+});
+
+test('validateRpcEnvelope fails closed on malformed transport and JSON-RPC envelopes', () => {
+  const resultEnvelope = {
+    httpStatus: 200, request: { id: 7 }, response: { jsonrpc: '2.0', id: 7, result: null },
+  };
+  assert.equal(validateRpcEnvelope(resultEnvelope), resultEnvelope.response);
+  const errorEnvelope = {
+    httpStatus: 200, request: { id: 8 }, response: { jsonrpc: '2.0', id: 8, error: { code: -32000, message: 'reverted', data: '0xdead' } },
+  };
+  assert.equal(validateRpcEnvelope(errorEnvelope, { allowError: true }), errorEnvelope.response);
+
+  const response = (value, overrides = {}) => ({ ...resultEnvelope, response: { jsonrpc: '2.0', id: 7, ...value }, ...overrides });
+  assert.throws(() => validateRpcEnvelope(response({ result: '0x1' }, { httpStatus: 500 })), /HTTP status/);
+  assert.throws(() => validateRpcEnvelope(response({ result: '0x1', jsonrpc: '1.0' })), /JSON-RPC version/);
+  assert.throws(() => validateRpcEnvelope(response({ result: '0x1', id: 9 })), /response ID/);
+  assert.throws(() => validateRpcEnvelope(response({})), /exactly one own result or error/);
+  assert.throws(() => validateRpcEnvelope(response({ result: '0x1', error: { code: -1, message: 'bad' } })), /exactly one own result or error/);
+  assert.throws(() => validateRpcEnvelope({ ...resultEnvelope, response: Object.create({ result: '0x1' }, { jsonrpc: { value: '2.0', enumerable: true }, id: { value: 7, enumerable: true } }) }), /exactly one own result or error/);
+  assert.throws(() => validateRpcEnvelope(errorEnvelope), /RPC error not allowed/);
+  assert.throws(() => validateRpcEnvelope({ ...errorEnvelope, response: { ...errorEnvelope.response, error: { code: '-32000', message: 'bad' } } }, { allowError: true }), /error code/);
+  assert.throws(() => validateRpcEnvelope({ ...errorEnvelope, response: { ...errorEnvelope.response, error: { code: -32000, message: 'bad', stack: 'leak' } } }, { allowError: true }), /error fields/);
 });

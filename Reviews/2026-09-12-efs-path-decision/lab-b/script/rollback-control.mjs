@@ -148,6 +148,29 @@ function verifyArtifactPins(artifactRoot, pins) {
   }
 }
 
+export function validateRpcEnvelope(envelope, { allowError = false } = {}) {
+  assert.equal(envelope?.httpStatus, 200, 'RPC HTTP status must be 200');
+  const { request, response } = envelope;
+  assert(response && typeof response === 'object' && !Array.isArray(response), 'RPC response must be an object');
+  assert(Object.hasOwn(response, 'jsonrpc'), 'RPC JSON-RPC version missing');
+  assert.equal(response.jsonrpc, '2.0', 'RPC JSON-RPC version');
+  assert(Object.hasOwn(response, 'id'), 'RPC response ID missing');
+  assert.equal(response.id, request?.id, 'RPC response ID mismatch');
+  const hasResult = Object.hasOwn(response, 'result');
+  const hasError = Object.hasOwn(response, 'error');
+  assert.notEqual(hasResult, hasError, 'RPC response must contain exactly one own result or error field');
+  if (hasError) {
+    const error = response.error;
+    assert(error && typeof error === 'object' && !Array.isArray(error), 'RPC error must be an object');
+    const allowed = new Set(['code', 'message', 'data']);
+    assert(Object.keys(error).every((key) => allowed.has(key)), 'RPC error fields');
+    assert(Number.isInteger(error.code), 'RPC error code must be an integer');
+    assert.equal(typeof error.message, 'string', 'RPC error message must be a string');
+    assert(allowError, 'RPC error not allowed');
+  }
+  return response;
+}
+
 function makeRawRpc(url, raw) {
   let serial = 0;
   let bytes = 0;
@@ -157,15 +180,13 @@ function makeRawRpc(url, raw) {
     const fetched = await fetch(url, {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request), signal: AbortSignal.timeout(RPC_TIMEOUT_MS),
     }).then(async (response) => ({ body: JSON.parse(await response.text()), httpStatus: response.status }));
-    assert.equal(fetched.body.id, request.id, `${label}: RPC id mismatch`);
     const envelope = { label, ms: Date.now() - started, httpStatus: fetched.httpStatus, request, response: fetched.body };
     const size = Buffer.byteLength(JSON.stringify(envelope));
     assert(raw.length < MAX_RAW_ENVELOPES, `raw envelope bound exceeded (${MAX_RAW_ENVELOPES})`);
     assert(bytes + size <= MAX_RAW_BYTES, `raw byte bound exceeded (${MAX_RAW_BYTES})`);
     bytes += size;
     raw.push(envelope);
-    if (fetched.body.error && !allowError) throw new Error(`${label}: RPC error ${JSON.stringify(fetched.body.error)}`);
-    if (!fetched.body.error && fetched.body.result === undefined) throw new Error(`${label}: RPC result missing`);
+    validateRpcEnvelope(envelope, { allowError });
     return envelope;
   };
   rpc.stats = () => ({ envelopes: raw.length, bytes, maxEnvelopes: MAX_RAW_ENVELOPES, maxBytes: MAX_RAW_BYTES });
