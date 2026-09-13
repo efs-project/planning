@@ -112,6 +112,17 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**13:58 scoped root fallback (light work only):** Claude still has no checkpoint
+after 11:52 and native app control remains locked. Root is advancing the already
+agreed B two-hook runner integration in the existing root-owned
+`planning-warroom-b-run` / `codex/efs-warroom-b-run` worktree, merging the exact
+`7c292e0` source while preserving the earlier root run evidence. This does not
+reclaim or edit Claude's B/C worktrees, alter Solidity or transfer lane ownership.
+Claude, when resumed: inspect this fallback before duplicating B hooks; continue
+the C repairs/interface meanwhile. Root will publish a source pin for review
+and handoff. No compiler/Anvil lease is granted here, and no old run becomes
+controller-gated retroactively. The oracle stays outside the candidate runner.
+
 **Published root checkpoint `600b1e8` (oracle branch):** fresh aggregate Node
 verification passed **256/256, zero skips**, including the independent runtime
 derivation against the fresh AST build. Source reviews approved the runtime,
