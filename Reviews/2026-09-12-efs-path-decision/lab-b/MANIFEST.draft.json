@@ -1,0 +1,155 @@
+{
+  "$schema": "../run-manifest.md",
+  "claim": "DISPOSABLE LAB, NO PROTOCOL CLAIM. Draft manifest committed before any compile, chain or measurement. Every gas value is ESTIMATED or unknown.",
+  "identity": {
+    "runId": "road-b-lab-2026-09-12-draft-0",
+    "road": "B",
+    "profile": "road-b-lab/1 (compact ingestion kernel + separate IndexModule + LensReader)",
+    "sourcePath": "Reviews/2026-09-12-efs-path-decision/lab-b",
+    "sourceCommit": {"unknown": "worktree fable/2026-09-12-road-b-lab is uncommitted by instruction (base edb7fe4)", "consequence": "no source pin can be cited until the coordinator publishes this directory; the dirty diff hash must be recorded at that time"},
+    "fixtureCommits": {"runManifest": "planning main, run-manifest.md as read 2026-09-12 19:00 local", "sdkFixture": "sdk-fixture.md as read 2026-09-12", "filesJourney": "files-journey.md as read 2026-09-12", "roadB": "road-b.md v1.1", "review": "road-b-review.md"},
+    "startUtc": {"unknown": "no run has started", "consequence": "no timing claim"},
+    "endUtc": {"unknown": "no run has started", "consequence": "no timing claim"}
+  },
+  "build": {
+    "compiler": "solc 0.8.30 (foundry.toml `solc = \"0.8.30\"`; exact commit hash to be read from out/ metadata)",
+    "optimizer": {"enabled": true, "runs": 200},
+    "viaIR": true,
+    "evmVersion": "cancun",
+    "dependencies": "none (no forge-std, no remappings); ethers v6.15.0 for script/measure.mjs from a sibling worktree node_modules (MIT)",
+    "sourceHashes": {"unknown": "not computed before the coordinator's publication commit", "consequence": "cannot prove which bytes were built"},
+    "artifactHashes": {"unknown": "no build has run", "consequence": "no bytecode identity"},
+    "runtimeBytes": {"Ledger": {"unknown": "not built; ~870 source lines with via_ir may approach EIP-170", "consequence": "deployment may fail; see TODO.md A.10"}, "IndexModule": {"unknown": "not built"}, "LensReader": {"unknown": "not built"}, "TypeRegistry": {"unknown": "not built"}, "LabHarness/*": {"unknown": "not built"}},
+    "linkedLibraries": "none (Keys is internal-only)",
+    "proxies": "none"
+  },
+  "deployment": {
+    "chain": "fresh Anvil, chainId 31337, hardfork cancun, gas limit 30,000,000, 4 accounts, --prune-history 256, loopback only, spawned and killed by script/measure.mjs",
+    "genesis": "Anvil default; mnemonic `test test ... junk` unless --mnemonic",
+    "contracts": {
+      "TypeRegistry": {"ctor": [], "address": {"unknown": "not deployed"}},
+      "MockAcceptor": {"ctor": [], "address": {"unknown": "not deployed"}},
+      "Ledger": {"ctor": ["registry", "realmId = keccak256('lab/realm/1')"], "address": {"unknown": "not deployed"}, "codehash": {"unknown": "not deployed", "consequence": "coreCodeCommitment for signatures unknown until deployment"}},
+      "IndexModule": {"ctor": ["ledger"], "address": {"unknown": "not deployed"}},
+      "LensReader": {"ctor": ["ledger", "index"], "address": {"unknown": "not deployed"}},
+      "Actor x2 (AUTHOR_B, second native author)": {"ctor": ["ledger"], "address": {"unknown": "not deployed"}},
+      "Consumer": {"ctor": ["lens"], "address": {"unknown": "not deployed"}},
+      "Reconstructor": {"ctor": [], "address": {"unknown": "not deployed"}}
+    },
+    "authorityGraph": "Ledger.admin = deployer (setIndexModule only); IndexModule.admin = deployer (declareOptional, bumpGeneration); TypeRegistry.admin = deployer (register, setBindingRefType). No other privileged surface; no upgrade path.",
+    "setupReceipts": ["setIndexModule(index)", "register QUOTE (acceptor, no refs)", "register BINARY (no acceptor)", "register ITEM (no acceptor)", "register PAIR (acceptor, refs [ITEM, ITEM])", "register QUOTE_J (acceptor, refs [PAIR])"],
+    "setupGas": {"unknown": "not run", "consequence": "setup amortization cannot be stated"}
+  },
+  "fixtures": {
+    "payloadControls": {
+      "quote3000": {"construction": "big-endian uint256 3000 zero-padded to 32 bytes", "bytes": "0x0000000000000000000000000000000000000000000000000000000000000bb8", "length": 32, "keccak256": "0xe76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552"},
+      "quote3100": {"construction": "big-endian uint256 3100 zero-padded to 32 bytes", "bytes": "0x0000000000000000000000000000000000000000000000000000000000000c1c", "length": 32, "keccak256": "0x5a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb3"},
+      "file41a": {"construction": "exactly 41 bytes of 0x61", "bytes": "0x6161616161616161616161616161616161616161616161616161616161616161616161616161616161", "length": 41, "keccak256": "0xe27c263ce61bca70e9ff7d3182fc124c8dcfee2a4656e5c746ceb433a2558911"},
+      "file41b": {"construction": "exactly 41 bytes of 0x62", "bytes": "0x6262626262626262626262626262626262626262626262626262626262626262626262626262626262", "length": 41, "keccak256": "0x1882de08a178ebf3827d787e4086d8b2e14a81a8cf3b7b42f2e1458831646f3a"},
+      "independentCheck": "script/measure.mjs asserts keccak256(bytes) == value for all four before any chain call; not yet executed"
+    },
+    "framing": "this arm stores the raw payload bytes as the record body (no inner ABI framing): quote3000 is one 32-byte body word; file41a is two body words (tail masked). Record id = keccak256(abi.encode(keccak256('efs2/record/1'), typeId, keccak256(body))).",
+    "typeClosure": {
+      "QUOTE": "keccak256(utf8 'lab/type/quote/1'); acceptor MockAcceptor (mode 0); 0 refs",
+      "BINARY": "keccak256(utf8 'lab/type/binary/1'); no acceptor; 0 refs",
+      "ITEM": "keccak256(utf8 'lab/type/item/1'); no acceptor",
+      "PAIR": "keccak256(utf8 'lab/type/pair/1'); acceptor; refs [ITEM, ITEM] = first two body words",
+      "QUOTE_J": "keccak256(utf8 'lab/type/quote-joined/1'); acceptor; refs [PAIR]; body = abi.encode(pairId, mantissa, scale, observation, keccak(NOTE_BYTES)) = 160 bytes",
+      "values": {"unknown": "keccak values not computed without a build/node run", "consequence": "ids are symbolic until the script prints them"}
+    },
+    "semanticMap": {
+      "ITEM_ETH / ITEM_USDC": "ITEM bodies abi.encode(1) / abi.encode(2)",
+      "PAIR_ETH_USDC": "PAIR body abi.encode(ITEM_ETH id, ITEM_USDC id, 1)",
+      "FILE_QUOTE": "subject keccak256(abi.encode(keccak('efs2/subject/1'), principal(AUTHOR_A), salt)); salt is inside the signed create action",
+      "FILE_REPLACEMENT": "a second subject with a different salt, placed at the vacated name",
+      "QUOTE_A1 / QUOTE_A2 / QUOTE_B1": "QUOTE_J bodies with mantissas 2_500_000_000 / 2_502_000_000 / 2_501_000_000, scale 6, observation 1_800_000_000, note commitment keccak(0x7265666572656e63652071756f7465)",
+      "AUTHOR_A": "EOA (Anvil account 1) via executeSigned (EIP-712 PublicationIntent, domain name 'EFS2-RoadB-Lab' version '1'); signer = author; submitter/payer = Anvil account 0 (relayer)",
+      "AUTHOR_B": "Actor contract (genuine contract author) via Actor.execute; no EOA signature exists; proof kind native = chain-state witness",
+      "TAG_MARKET": "binding (AUTHOR_A, TAG, FILE_QUOTE, keccak('market')) -> FILE_QUOTE (untyped stance target in this lab)",
+      "lenses": {"LENS_A_FIRST": "[AUTHOR_A, AUTHOR_B]", "LENS_B_FIRST": "[AUTHOR_B, AUTHOR_A]", "LENS_NO_TIEBREAK": "resolveNoTiebreak([A, B]) -> CONFLICT with both candidates"},
+      "CAS": "expectedRevision on bind/unbind: head revision must equal it",
+      "requiredQueries": "scope (folder/tag) lists, history per key, backlinks, by-Type, by-author in IndexModule; occurrence count in the Record row",
+      "contentCommitments": "record id (typeId + body hash); NOTE_BYTES committed by hash inside QUOTE_J bodies (bytes themselves not stored: external carrier obligation, unpriced here)"
+    }
+  },
+  "operations": {
+    "note": "one row per LOGICAL action; physical transactions listed; expected results are the tests' assertions; gas unknown until run",
+    "matrix": [
+      {"cell": "neither (native x single)", "fixture": "quote | binary", "logical": "create", "physical": ["Actor.execute([create, publish, bind HEAD, bind FOLDER])"], "payer": "account 0 via Actor", "expected": "head resolves rev 1; placement resolves to subject; coverage COMPLETE", "gas": {"unknown": "not run"}},
+      {"cell": "neither", "logical": "edit", "physical": ["Actor.execute([publish body2, bind HEAD rev 1])"], "expected": "head rev 2; as-of rev 1 still readable", "gas": {"unknown": "not run"}},
+      {"cell": "authorship (signed x single)", "logical": "create / edit", "physical": ["relayer -> executeSigned(intent, actions, bodies, sig)"], "payer": "account 0 (relayer), signer = account 1", "expected": "evidence proofKind 2 with (r,s,v); nonce consumed", "gas": {"unknown": "not run"}},
+      {"cell": "selection (native x two under a lens)", "logical": "create-competing", "physical": ["ActorB.execute([publish, bind HEAD (own key), bind FOLDER (own key)])"], "expected": "lens [A,B] selects A; [B,A] selects B; listing has one entry for the shared name", "gas": {"unknown": "not run"}},
+      {"cell": "both (signed x two)", "logical": "create / create-competing / edit", "physical": ["executeSigned x3"], "expected": "as selection, with evidence for both EOAs", "gas": {"unknown": "not run"}},
+      {"cell": "all", "logical": "paid reads", "physical": ["Consumer.readQuote / readHead / readList / readHistory transactions"], "expected": "stored values equal the eth_call results; receipt gas recorded separately from eth_call estimate", "gas": {"unknown": "not run"}},
+      {"cell": "neither-noindex", "logical": "create / edit without the IndexModule", "physical": ["setIndexModule(0)", "Actor.execute x2", "setIndexModule(index)"], "expected": "writes succeed; list/history UNKNOWN; coverage PARTIAL (gapped) afterwards", "gas": {"unknown": "not run"}},
+      {"cell": "interaction", "formula": "both - authorship - selection + neither per operation", "value": {"unknown": "not run", "consequence": "no representation-vs-feature attribution yet"}}
+    ],
+    "freshnessControls": [
+      {"logical": "contract-fresh-body", "preAbsence": "eth_call Ledger.record(id).firstAdmission == 0 at the block before the write (recorded in the report)", "physical": ["Actor.publish(QUOTE, uint256 424242)"], "regime": "cold transaction access set; QUOTE by-Type list already initialized by the matrix", "expected": "new Record, occurrences 1", "gas": {"unknown": "not run"}},
+      {"logical": "contract-existing-body", "physical": ["Actor.publish(QUOTE, same bytes)"], "expected": "no new Record; occurrences 2; new Admission; acceptor re-run", "gas": {"unknown": "not run"}},
+      {"logical": "exact-operation retry", "physical": ["Actor.executeWithNonce(actions, bodies, n) twice; second with explicit gasLimit"], "expected": "second reverts AlreadyAdmitted, status 0, no new admissions", "gas": {"unknown": "not run"}}
+    ],
+    "sdkFixtureSteps": [
+      {"step": 1, "logical": "admit ITEM_ETH, ITEM_USDC, PAIR_ETH_USDC", "physical": ["Actor.publish x3 (or one Actor.execute batch)"], "expected": "record() finds all three; PAIR refs checked at admission; coverage COMPLETE", "gas": {"unknown": "not run"}},
+      {"step": 2, "logical": "AUTHOR_A publishes QUOTE_A1 (signed)", "physical": ["executeSigned([create FILE_QUOTE, publish QUOTE_A1 (QUOTE_J, ref PAIR), bind HEAD, bind FOLDER /swaps 'eth-usdc', bind TAG market])"], "expected": "signature, admission, index effects and read-back observable separately (evidence cell, Admitted events, lens reads)", "gas": {"unknown": "not run"}},
+      {"step": 3, "logical": "QUOTE_A2 with CAS against A1", "physical": ["executeSigned([publish QUOTE_A2, bind HEAD rev 1])"], "expected": "A1 readable via history(asOf); A2 is A's head exactly once; folder/tag lists unchanged in count", "gas": {"unknown": "not run"}},
+      {"step": 4, "logical": "AUTHOR_B publishes QUOTE_B1 from the producer contract", "physical": ["ActorB.execute([publish QUOTE_B1, bind HEAD (B key) rev 0])"], "expected": "evidence proofKind 1, author = Actor address (origin-qualified principal); same acceptor and index obligations", "gas": {"unknown": "not run"}},
+      {"step": 5, "logical": "read three lenses at one basis", "physical": ["eth_call resolve [A,B], [B,A], resolveNoTiebreak", "Consumer.readQuote x2 (paid)"], "expected": "A-first A2; B-first B1; no-tiebreak CONFLICT with both; list agrees with point reads", "gas": {"unknown": "not run"}},
+      {"step": 6, "logical": "move, replacement, remove, restore", "physical": ["executeSigned([unbind /swaps name rev 1, bind /markets name rev 0])", "executeSigned([create FILE_REPLACEMENT, publish, bind HEAD, bind /swaps name rev 2])", "executeSigned([unbind /markets name rev 1])", "executeSigned([bind /markets name rev 2 -> FILE_QUOTE])"], "expected": "FILE_QUOTE head/history/tag unchanged; replacement has none of them; each transition atomic with its index effects", "gas": {"unknown": "not run"}},
+      {"steps": "7-9", "status": {"unknown": "consumer paid reads exist (Consumer.readQuote); export/import is covered by test_import_* on a second in-test Ledger, not by a clean offline reader", "consequence": "steps 8-9 remain an open joined obligation"}}
+    ],
+    "filesJourney": [
+      {"J1": "create F at /drafts/note.txt with R0", "physical": ["execute([create F, publish R0 (BINARY file41a), bind HEAD, bind FOLDER /drafts 'note.txt'])"], "expected": "path open, direct open and listing agree; identity/revision/placement/bytes are four facts", "gas": {"unknown": "not run"}},
+      {"J1": "File tag project_efs about F", "physical": ["execute([bind TAG F 'project_efs' -> F])"], "expected": "tag resolves under F regardless of placement", "gas": {"unknown": "not run"}},
+      {"J1": "revision tag draft about R0", "physical": ["execute([bind TAG R0 'draft' -> R0])"], "expected": "tag keyed by the record, not the File", "gas": {"unknown": "not run"}},
+      {"J2": "Alice RA", "physical": ["execute([publish RA, bind HEAD rev 1])"], "expected": "L-A opens F@RA", "gas": {"unknown": "not run"}},
+      {"J2": "Bob RB (contract)", "physical": ["ActorB.execute([publish RB, bind HEAD (Bob key) rev 0])"], "expected": "L-B opens F@RB; L-EQ CONFLICT; contract authorship shown as such", "gas": {"unknown": "not run"}},
+      {"J2": "tag approved about RA", "physical": ["execute([bind TAG RA 'approved' -> RA])"], "expected": "selected-revision filter differs under L-A and L-B (filtering after selection: reader-side in this lab)", "gas": {"unknown": "not run"}},
+      {"J3": "rename", "physical": ["execute([unbind /drafts 'note.txt' rev 1, bind /drafts 'brief.txt' rev 0 -> F])"], "expected": "id(F) unchanged; old name MASKED (explicit removal), no ghost", "gas": {"unknown": "not run"}},
+      {"J3": "move", "physical": ["execute([unbind /drafts 'brief.txt' rev 1, bind /published 'brief.txt' rev 0 -> F])"], "expected": "F at /published; tags follow F", "gas": {"unknown": "not run"}},
+      {"J3": "Bob lower-priority placement", "physical": ["ActorB.execute([bind /published 'brief.txt' (Bob key) rev 0 -> F])"], "expected": "one selected F under [Alice, Bob]; Bob's masked by Alice's live entry", "gas": {"unknown": "not run"}},
+      {"J3": "create G at /drafts/note.txt", "physical": ["execute([create G, publish, bind HEAD, bind /drafts 'note.txt' rev 2 -> G])"], "expected": "/drafts lists exactly G; project_efs does not transfer to G", "gas": {"unknown": "not run"}},
+      {"J4-J6": {"unknown": "not scripted (mask-on-remove semantics are implemented and tested in resolve/list; restore-as-new-revision and the churn probe are not run)", "consequence": "J4-J6 remain designed-but-untested"}}
+    ]
+  },
+  "reads": {
+    "basis": "each consumer read pins the receipt block; eth_call reads pin blockTag = latest at call time (to be replaced by an explicit block hash in the run)",
+    "executionIdentity": "Ledger codehash + IndexModule (address, codehash) + TypeRegistry epoch; cursors bind indexGeneration/rulesEpoch/coreCodeCommitment",
+    "publicDecoder": "Ledger raw getters (record, admission, evidence, head, bindingPosition, positionCell, counts, extsload); IndexModule postingHead/postingWord/postingAt/coverage; LensReader resolve/resolveNoTiebreak/list/history",
+    "cursorSemantics": "Cursor{basisAdmission, indexGeneration, rulesEpoch, coreCodeCommitment, scopeKey, lensHash, position, lensIndex, rawIndex, selectedSoFar}; Page{items, scanned, hydrations, rawTotal, selectedSoFar, status UNKNOWN|PARTIAL|COMPLETE, mutated, next}",
+    "independentExpected": {"unknown": "the coordinator's oracle vectors for this arm are not yet produced", "consequence": "results are self-consistent (tests) but not independently checked"},
+    "paidConsumerSource": "src/LabHarness.sol Consumer (hash unknown until published)",
+    "offlineReaderSource": "src/LabHarness.sol Reconstructor (state-only re-encoding; hash unknown until published)",
+    "rpcAccounting": {"unknown": "not run", "consequence": "no browser cost claim"}
+  },
+  "evidence": {
+    "receipts": {"unknown": "not run"},
+    "rawObservations": {"unknown": "not run"},
+    "storageGrowth": {"unknown": "no storage tracing planned; fresh slots are ESTIMATED from the design table", "consequence": "state-growth claims are estimates"},
+    "reconstruction": "Reconstructor.reconstruct recomputes actionsHash + PublicationIntent digest from Admission rows and ecrecovers the author; reconstructSource does the same over the source domain for imports; tests only, unrun",
+    "mutationSeeds": "test_signature_binds_every_field (name, target, subject, expectedRevision, order, salt, realm, code, profile, obligations, nonce, deadline); test_fresh_reader_reconstructs_identical_digest_with_negatives (discriminator, typeId)",
+    "proofGrade": {"signedIngress": "signature verified on-chain and re-verifiable from state (designed, untested)", "nativeIngress": "chain-state witness only; grade 0; not verified by this lab", "import": "source signature verified over the source domain; destination authorization separate (designed, untested)"},
+    "status": "designed-but-untested for everything; nothing demonstrated"
+  },
+  "resources": {
+    "leaseOwner": {"unknown": "no heavy-run lease granted (README coordinator checkpoint)", "consequence": "nothing may be compiled or run"},
+    "request": {
+      "commands": [
+        "cd Reviews/2026-09-12-efs-path-decision/lab-b",
+        "export FOUNDRY_OUT=/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/out",
+        "forge build --use 0.8.30 --offline",
+        "forge test --use 0.8.30 --offline -vv",
+        "forge inspect Ledger storage-layout",
+        "EFS_ETHERS_PATH=<node_modules/ethers> node script/measure.mjs --anvil --out $FOUNDRY_OUT/../measure.json"
+      ],
+      "anvil": "started by the script on a free loopback port: --hardfork cancun --chain-id 31337 --gas-limit 30000000 --accounts 4 --prune-history 256 --no-cors --quiet; no --steps-tracing; killed by the script",
+      "expectedDuration": "15-25 minutes including one compile-repair cycle (build 1-3 min, tests < 2 min, measure 2-4 min)",
+      "scratchPath": "/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b",
+      "scratchBudget": "< 2 GB (out/, cache/, measure.json)",
+      "watchdog": "script kills its Anvil after 20 minutes; operator kills the run at 30 minutes",
+      "diskReserve": "stop if free disk < 50 GB",
+      "processIds": {"unknown": "assigned at run time", "consequence": "recorded by the operator in the coordinator checkpoint"},
+      "cleanup": "delete only the scratchPath above; keep measure.json as compact evidence"
+    }
+  }
+}

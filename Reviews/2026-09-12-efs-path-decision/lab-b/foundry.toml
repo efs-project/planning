@@ -1,0 +1,16 @@
+# Disposable lab, no protocol claim. Road B ledger experiment (2026-09-12).
+# No dependencies: no forge-std, no remappings. Tests use a hand-declared Vm.
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+libs = []
+solc = "0.8.30"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = true
+fuzz.runs = 32
+# Keep the compiler quiet about the deliberate infinite loop in MockAcceptor (mode 3).
+ignored_error_codes = [5740]
