@@ -1,0 +1,39 @@
+{
+  "kind": "EFS_INDEPENDENT_SIGNATURE_BINDING_RETAINED_EXPECTATIONS",
+  "version": 1,
+  "standing": "packet-specific disposable regression expectations; not an adopted EFS nonce, ordering, replay, authorization, or evidence contract",
+  "source": {
+    "retainedPacket": {
+      "commit": "322b3204a743cb2806e114cd4b0ec544076e3c48",
+      "path": "Reviews/2026-09-12-efs-path-decision/lab-b/evidence/measure2-a16d7d4.json",
+      "sha256": "7bd5409a4b306d8e0705187094fa482b31efcad471260ae93f57eebd0b22fcce",
+      "gitBlob": "1a38f6493510760ae1b97f6188d2548c795350a8"
+    },
+    "authorizedAbiProfile": {
+      "path": "Reviews/2026-09-12-efs-path-decision/lab-oracle/rpc-observed-profile-dcc7b94.json",
+      "gitBlob": "6345c2246e287e9676f714491ce8aebf673f754a"
+    }
+  },
+  "cell": "signed-one/quote",
+  "function": "executeSigned",
+  "expectedCount": 2,
+  "orderedNonces": ["0", "1"],
+  "orderingBasis": "retained packet transaction-array order only; not authenticated chain order",
+  "containerRules": {
+    "absentCells": "UNKNOWN",
+    "presentCells": "OBJECT_REQUIRED",
+    "absentCell": "UNKNOWN",
+    "presentCell": "OBJECT_REQUIRED",
+    "absentTransactions": "UNKNOWN",
+    "presentTransactions": "ARRAY_REQUIRED",
+    "everyTransaction": "OBJECT_WITH_PRESENT_HEX_DATA_REQUIRED_BEFORE_SELECTOR_FILTER",
+    "exactPairMatch": "ALL_TRANSACTION_ENTRIES_VALID_AND_EXPECTED_EXECUTE_SIGNED_PAIR_PRESENT_IN_ORDER"
+  },
+  "unproven": [
+    "nonce availability or replay safety",
+    "authenticated packet or chain provenance",
+    "transaction inclusion or canonical ordering",
+    "account permission or Realm admission",
+    "runtime acceptance or canonical semantic effect"
+  ]
+}
