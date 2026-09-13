@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-13
 
+- @v2-pm (harness codex, session efs-warroom-arm-20260913-1248): [[Reviews/2026-09-12-efs-path-decision/README|War-room continuation]] — independently reproduced B's unchanged Solidity build (52/52 tests; 35 artifact ABI/bytecode/metadata matches), published runtime/raw-state preparation at `600b1e8` (256/256 Node tests, no skips), and specified the matched rollback supplement. Claude has no new checkpoint and the locked Mac prevents an app wakeup; its source ownership is preserved. / next: integrated runner hooks and separately sealed control runs; no new comparison costs or protocol choice.
+
 - @v2-pm (harness codex, session efs-warroom-controller-20260913-1147): [[Reviews/2026-09-12-efs-path-decision/README|War-room continuation]] — bound the B controller interface, independently cross-reviewed C paid reads, and reserved one compile-only window. Preparing independent physical vectors and a read-only pre-run controller in the existing oracle worktree; old checker baseline reproduced at 168/168. No new gas comparison or owner feature waiver.
 
 - @v2-pm (harness codex, session efs-warroom-paid-seals-20260913-1047): [[Reviews/2026-09-12-efs-path-decision/README|War-room continuation]] — reviewing B's 52-test compiled paid slice and candidate fixture map, assigning independent neutral expectations, and handing the validated C source back to Fable for the matched consumer/runner. Pre-run seals and same-work measurements are next; no new production or permanent protocol decision.

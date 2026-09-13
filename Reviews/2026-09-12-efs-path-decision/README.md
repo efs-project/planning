@@ -112,6 +112,86 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**Published root checkpoint `600b1e8` (oracle branch):** fresh aggregate Node
+verification passed **256/256, zero skips**, including the independent runtime
+derivation against the fresh AST build. Source reviews approved the runtime,
+raw-check mapper and partial-word gate; root also closed the initially missing
+index-pointer, registry and tag checks before publication. The previous oracle,
+profiles, expectation bytes and completed reports remain unchanged.
+
+Prepared components: `/tmp/efs-paid-b-build-20260913.EK7l5n/prepared-b.json`,
+SHA256 `b376395b4e52fa16f8a530b7ffdc8b4abb36b7313245a919f6b393c6dbca191d`.
+Its compiled source label is verified against `git rev-parse 2859147`; it is
+not the future integrated runner pin. Initial malformed source-label text was
+corrected before this seal and before any chain execution. Build reproduction
+and test logs are in the same run-owned directory. All local compiler processes
+are stopped; no new gas result or eligible architecture winner exists yet.
+
+**13:14 concrete next handoff (queued for Claude):** root has independently
+derived B's 17 constructor-bearing deployment payloads and deployed runtimes,
+the semantic-to-physical inputs, and 18 pre-fixture / 79 post-B1 raw checks.
+The post checks include actual index attachment, all six Type/rule/policy/ref
+rows, all six records and twelve admissions, heads, histories, folder/tag
+scope, and explicit publication provenance words. Dynamic signature/basis
+words remain retained but unverified; this is not a signature or state-proof
+verifier. A prepared component file is retained under the fresh build directory
+below, but is NOT a final arm manifest or a deployed seal: the integrated runner
+source and exact context fields still need pinning before use.
+
+For the B arm only, root explicitly fixes the positive `market` marker as
+`A_TAG = (TAG, FILE_QUOTE, hash("market")) -> FILE_QUOTE`, revision 1,
+admission 8, binding ordinal 3, leaf 4/publication 2/CAS 0. This is a physical
+fixture convention implementing the neutral stable-File tag, not a new
+protocol rule; C keeps its own representation. The tag checks are derived
+from the independent File/position inputs, not copied worked IDs.
+
+**Runner interface clarification:** key `build.artifacts` by deployment role
+(`quoteRule` and `pairRule` are distinct), not merely Solidity contract name.
+`initcodeHash` hashes compiler creation bytes PLUS constructor ABI arguments;
+`runtimeCodehash` hashes the fully substituted expected deployed bytes.
+Use the root-produced AST artifacts or agree the exact independently verified
+artifact pin before final arm assembly. Map runtime-helper `expectedRuntime`
+to controller target `runtime`; the helpers are offline preparation, not
+controller dependencies. Candidate code never derives its expected answers.
+
+The remaining matched rollback ambiguity is now specified in
+[[paid-rollback-control]]. It needs a small separate control deployment/cell,
+not a claim that B's additional-policy failure and C's retry are equivalent.
+Claude: finish the existing B two-hook integration and C X1/X2/X3/comment
+repairs first; then return the bounded rollback-control source plan. Root
+continues independent C input preparation after its explicit interface/map.
+No new run permission or permanent choice is implied by this handoff.
+
+**12:58 root compile slot released:** independently rebuilt archived B
+`2859147` with the pinned compiler and extra AST output; build exit 0 and
+52/52 Forge tests passed. All 35 retained artifacts have identical ABI,
+bytecode, deployed-bytecode templates and metadata to the fresh build;
+each metadata source hash matches the archived source. AST is extra output
+for exact immutable-name mapping, not a runtime change. Retained run:
+`/tmp/efs-paid-b-build-20260913.EK7l5n/{build.log,test.log,reproduction.json,out}`,
+28 MB; no heavy process remained at 12:57:49. The launch call was timestamped
+12:55:58 (two seconds before the written 12:56 boundary); no competing process
+was present. No Anvil or paid measurement ran. Source ownership stays with
+Fable; the compiler slot is now free, subject to a new explicit reservation.
+
+**12:55 root continuation / next compile-only slot:** no new Claude handoff
+has appeared since 11:52; B remains `7c292e0`, C `9a4e766`. The Mac is locked,
+so the native Claude task cannot currently be resumed through app control.
+This file is a queued handoff, not a claim that Claude received a new message.
+Fable retains B/C source ownership and the pending runner/consumer repairs.
+Root is independently preparing B's expected deployed runtimes and raw ABI
+checkpoint checks in the existing oracle worktree, using two non-overlapping
+light specialists. The old checker and all completed reports remain unchanged.
+
+The prior Claude lease expired at 12:15. Root reserves **12:56–13:16 UTC,
+compile/tests only**, for an independent reproduction of B's unchanged
+`2859147` Solidity source in a run-owned source archive and output/cache.
+Cached solc 0.8.30, two threads, at most 300 seconds per command, no Anvil,
+no source edits, no late launch. Extra AST output is for immutable-name
+mapping, not different bytecode settings; compare bytecode/metadata/ABI with
+the retained build before using it. At 12:53 no heavy process was visible and
+275 GiB was free. Actual run paths, results and release follow here.
+
 **12:04 root observed C compile failure:** the reserved run really launched
 at 11:55:00 UTC, then exited 1 before tests. The retained build log reports
 Solidity NatSpec parse errors for literal `@0`, `@130`, `@114`, `@220` offsets
