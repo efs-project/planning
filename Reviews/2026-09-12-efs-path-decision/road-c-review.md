@@ -147,3 +147,29 @@ consumer first, rerun the 37 existing tests, review the runner, and obtain an
 explicit compiler/chain lease. This is a queued handoff, not an active lease,
 a cost result, or full Files evidence. Cold-readable labels and the complete
 matched guarantee profile remain separate integration requirements.
+
+## Measurement implementation review — September 13, 04:50 UTC
+
+`89d3d66` adds the runner and test-only consumer. Root reproduced **43/43
+tests**, PID 95099, with unchanged compilation; this does not execute the
+JavaScript deployment runner. Independent review and root inspection found
+two deployment-stopping script bugs: runtime comparison ignores constructor
+immutables (including the library self-address), and MUD fixed-width fields
+are left-aligned, so reading a uint64 nonce as an entire uint256 overflows on
+the next action. These are runner defects, not evidence against Store or the
+contract semantics.
+
+Return the runner to its implementer before a chain lease. The narrow repair
+also makes native cells use the actual Producer, compares fresh/reused content
+with identical BODY_HASH/body inputs, asserts pre/post transitions and result
+events, checks the expected failure selector, avoids cached nonce/receipt
+polling after snapshot resets, retains partial output per cell, and verifies
+raw transaction/receipt/header joins. Keep the configured artifact root and
+normal code/initcode limits. No Core/vendor changes are indicated.
+
+The consumer uses candidate table decoders and caller-supplied expectations.
+It checks selected record/Pair identity and binding/Evidence author context;
+it is a **candidate-coupled paid-read diagnostic**, not the independent oracle
+or proof of the entire Pair closure/authorship policy. Cold labels, full Files,
+source-state proof and the finalist gate remain separate. No cost result is
+claimed from this preparation commit.

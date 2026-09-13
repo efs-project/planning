@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-12
 
+- @v2-pm (harness codex, session efs-warroom-run-preflight-20260913): [[Reviews/2026-09-12-efs-path-decision/README|War-room measurement intake]] — Fable's 04:23 UTC shared-file handoff confirms resumed B source work with C ownership respected. C preparation 89d3d66 returned 43 tests; review caught its unpatched immutable runtime check before a chain run. SDK's 139-test signature handoff has two reproduced retained-input gaps. / next: bounded source repairs in parallel, root tests and then the reviewed C receipt run; no owner decision or feature waiver.
+
 - @v2-pm (harness codex, session efs-warroom-measurement-20260913): [[Reviews/2026-09-12-efs-path-decision/README|War-room continuation]] — confirmed active hourly follow-up; Claude app access is blocked by the locked Mac, so its scheduled 04:21 UTC resume is not claimed as running. Assigned C's measurement runner/test-only consumer with a compiler-only lease and independent review of SDK signature-binding handoff 0e6e682. / next: reviewed matched cost measurements; no chain permission, Core edits or feature waiver.
 
 - @v2-pm (harness codex, session efs-warroom-sdk-intake-20260913): [[Reviews/2026-09-12-efs-path-decision/oracle-implementation-plan|SDK oracle intake]] — found and reproduced a malformed-as-omitted input bug, sent one bounded regression repair, independently reviewed/reran 112/112 tests and pushed 52dae42 with unchanged strict/report evidence. / next: SDK independently checks the now-public B signature framing in a 40-minute light scope; C measurement implementation remains queued, no active heavy lease or new chain.

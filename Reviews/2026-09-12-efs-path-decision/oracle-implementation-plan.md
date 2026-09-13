@@ -190,3 +190,24 @@ declaration is an interpretation input, not proof of deployment or authority.
 Only this light extension is assigned; it grants no heavy-run lease and no
 other worker may alter its files. Root supplies the independent task review,
 so the SDK implementation does not launch duplicate reviewer tasks.
+
+### Signature handoff review and bounded repair — September 13
+
+SDK returned `0e6e682` with expectations frozen at `469f0a0` / `d7e4199`.
+Root reproduced **139/139 tests**; the positive report hashes to
+`9471daecee08991c328ff95c76df3e928e3a612836c7202b23f8bb9c965e8e25`.
+Independent review found and root reproduced two retained-input defects:
+present malformed transaction containers/entries are treated as missing or
+filtered out, and `[nonce 0, nonce 0]` or `[nonce 1, nonce 0]` satisfy a check
+intended for the retained `[0, 1]` pair. The public vector and original pinned
+packet's reported signature results are not invalidated by these mutations;
+publication of the checker as reviewed waits for the repair.
+
+SDK owns a source-only regression repair through **05:12 UTC** in the same
+`lab-oracle/` worktree. Freeze additional malformed/ordered-pair expectations
+separately, preserve existing strict/RPC fixtures and the positive report,
+reject malformed-present data before filtering, and enforce the named
+retained pair. Missing data cannot establish exact-pair agreement. This is
+packet-input consistency, not chain nonce availability or runtime authority.
+No new oracle capabilities, candidate implementation inputs, network, build,
+Anvil, main edits, push or extra subagents are authorized by this repair.
