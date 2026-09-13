@@ -112,12 +112,12 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
-- Phase / T0: **B/C source preparation and independent fixture sealing / 2026-09-12 23:10 UTC**. Independent proposals and shared semantic expectations are published; no new chain experiment has run. Provisional recommendation due September 13 at 23:10 UTC; final handoff due September 14 at 23:10 UTC.
+- Phase / T0: **B/C build/diagnostic probes and independent checker implementation / 2026-09-12 23:10 UTC**. B's first build and 24 candidate tests passed; C's first compiler failure is in repair. No matched operation-cost result yet. Provisional recommendation due September 13 at 23:10 UTC; final handoff due September 14 at 23:10 UTC.
 - Participants: Codex Road A analyst, existing SDK PM and Data Explorer PM dispatched; Claude **EFS v2 Dev** kickoff sent and acknowledged by 23:41 UTC. Its [[claude-pm|acknowledgement]] records an independent in-session MUD specialist and evidence extractor; a persistent extra Claude conversation is unnecessary. Earlier MUD source, cost and portability reviews are completed inputs, not new active seats.
 - Baselines: kickoff published at planning `2552962`; native source/evidence pins in section 5 remain the named comparison pins. Fable's existing untracked brainstorm is preserved. The similarly named direct worktree is the stopped `f873890` size probe, not the fuller control.
-- Shared fixture / shortlisted roads / actual probes: [[sdk-fixture|SDK joined semantics]] and [[files-journey|Files lifecycle/selection journey]] received and reviewed as the common comparison requirements. They are test expectations, not executable evidence or permanent API bytes. Use [[run-manifest]] for exact source, encoding, payload and freshness inputs. **Provisional implementation shortlist: B (compact custom) and C (one corrected Store-only adapter).** Retain fuller control A and its packing proposal as the fallback/reference, not a third concurrent rebuild. No performance winner or heavy-run lease selected.
-- Heavy-run slot: **not granted**; no new run started by this plan.
-- Next handoff: Claude returns B/C owned source paths and the first source/manifest-ready candidate; Codex reviews it and grants one bounded compiler/Anvil lease. The SDK's [[oracle-boundary|independent oracle boundary]] is sealed at blob `035aa6d9cb0dcd96517234a7ef1a160b45481abf`: freeze neutral expectations before candidate verifier code, then write separately hashed profile decoders against pinned public encodings. No additional broad design round is needed before source preparation. Existing typed-read-facet work remains an enabling option, not the default next experiment.
+- Shared fixture / shortlisted roads / actual probes: [[sdk-fixture|SDK joined semantics]] and [[files-journey|Files lifecycle/selection journey]] received and reviewed as the common comparison requirements. They are test expectations, not executable evidence or permanent API bytes. Use [[run-manifest]] for exact source, encoding, payload and freshness inputs. **Provisional implementation shortlist: B (compact custom) and C (one corrected Store-only adapter).** Retain fuller control A and its packing proposal as the fallback/reference, not a third concurrent rebuild. No performance winner; the bounded run lease is below.
+- Heavy-run slot: **Claude EFS v2 Dev owns one SERIAL C-build → B-diagnostic-run queue, September 13 00:55–01:25 UTC**, releasing earlier when finished. B's first compiler lease was released at 00:50: Codex inspected the log (24/24 candidate tests) and artifact (Ledger 16,699 runtime bytes, solc 0.8.30, optimizer 200), not a complete semantic or gas pass. C starts at `f2e4051`; B measurement controls are at `369b770` over compiled `dcc7b94`. Pin subsequent repairs separately. Use at most two compiler workers; normal runtime/initcode/block limits, no concurrent A/B/C heavy runs. The only scratch roots are `/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b` and sibling `lab-c`, <2 GB each and <15 GB overall; preserve 50 GB free, record PIDs, enforce expiry. Codex checked 266 GiB free, 1.7 MB B scratch and no matching compiler/Anvil process at 00:53 UTC. **B Anvil is diagnostic only**: finite history 256, run-owned cache, free loopback port, 30M gas limit, no traces/dumps; capture transaction/receipt/raw pre/post evidence before reverting each snapshot, persist partial failures, and stop its exact process before C or another run. No C Anvil is authorized by this lease; its source run instructions need equivalent resource controls first.
+- Next handoff: Claude acknowledged the serial queue at 00:57:47 UTC and the experiment answers below by 01:00. C's initial Store composition fails via-IR stack depth in the import path; repair EFS-owned code without silently annotating the pinned vendor. B's measurement repair retains raw evidence before snapshot reverts. SDK PM sealed neutral expectations at `f060524` (blob `a9d6c9afb5f51d0f786e006b7b5df667ae69710e`) before candidate inspection, and is implementing in `planning-warroom-oracle`, branch `codex/efs-warroom-oracle`, owned `lab-oracle/` only. Missing declared encodings remain unsupported: Claude should publish a pinned public Action/PublicationIntent, EIP-712 domain/framing and signature-vector supplement, not point the checker at candidate helper code. Codex reviews declaration-only metadata and raw evidence. No additional broad design round is needed.
 
 | Current owner / contact | Exclusive write scope and next result |
 |---|---|
@@ -173,6 +173,41 @@ publication, checked reference/acceptance, mandatory indexing, two-author
 selection and a paid unrelated consumer; a storage microbenchmark may diagnose
 cost but cannot replace this gate. Complete the remaining export/import,
 history/upgrade and Files failure obligations before finalist eligibility.
+
+### Implementation handoff — September 13, 00:55 UTC
+
+These are temporary experiment choices, not new owner rulings. They unblock
+the C-build → B-diagnostic queue above:
+
+- **Replay:** bind execution authorization to the source chain and Ledger
+  deployment as well as the declared Realm/code/rule context. Retain that
+  source domain for verification elsewhere; import needs separate destination
+  authorization. Portable evidence is not permission to replay an execution.
+- **Native identity:** qualify it by its original chain/Realm deployment and
+  account, not codehash alone. An upgrade's codehash is execution evidence, not
+  a new person's identity. Keep the original identity on verified imports;
+  `code.length` today does not prove historical account kind.
+- **Unverified native import:** grade-zero source claims may be retained as
+  attributed evidence, but must not authorize minting another principal's
+  subject or writing as that principal. Until a source witness is verified,
+  report that native-import authorization as unsupported. No feature waiver.
+- **Measurement:** snapshot/reset Consumer storage too; retain full transaction,
+  receipt/block hash and raw pre/post getter evidence before `evm_revert`, plus
+  partial failure output. Validate Consumer read-back. Seed a present wrong-Type
+  target before labeling a failure “wrong Type.” Joined Pair/Quote consumption
+  and an independent reconstructor remain separate gates.
+- **C regressions:** raw-denial inputs must first succeed against a permissive
+  control. Current registration field-name mismatch and empty dynamic-field
+  pop would revert even with a raw writer. Use table-correct inputs, check
+  registry/hook metadata, reject zero/no-code attachment and verify reciprocal
+  Ledger/Index addresses and code hashes.
+- **Exact Types:** B's mutable symbolic Type registry is not yet an immutable,
+  reconstructible Type description. Its missing descriptor/shape and separate
+  rule-activation profile are an explicit finalist gap, not measured savings.
+
+The SDK PM is implementing the independent checker in owned
+`planning-warroom-oracle` / `lab-oracle/`; candidate verifier code is excluded
+from its inputs. Claude owns candidate fixes, Codex owns integration/review.
 
 ## 7. What James receives
 
