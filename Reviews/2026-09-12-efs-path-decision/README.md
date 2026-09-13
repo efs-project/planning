@@ -112,6 +112,21 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**18:06–18:26 UTC root-only B parity paid-run lease.** Source `c5561e2`,
+59 Forge / 42 Node tests, independently reviewed complete runtime and exact
+paid-answer preparation. Input SHA256
+`31dbc9e1ad5580fa5b5b119ffba1d209299529227feb82bfedeedd9e4caca3d0`;
+assembled arm SHA256
+`b28c779bba360ecae19ba7beb68610cae9ce27ba33245c66d88e3415f023b83f`.
+One fresh loopback Anvil via the run-owned launcher, Node 26, chain31337/Cancun,
+30M block gas, prune256, run-owned cache; latest start18:11, absolute stop18:26,
+process-group watchdog and 14GB run/50GB free-disk guards. Scratch
+`/tmp/efs-b-parity-paid-20260913.KJ23qU`; no compiler or other lane launch.
+Preflight18:06 found no competing heavy process, 274GiB free and ~113MB across
+the six listed owned compiler/paid runs. Root must compare actual four paid
+calldata/returns/events and signed receipt/header joins before publishing costs;
+launcher/controller ACKs alone are not semantic output verification.
+
 **18:01 B parity source verified; compile slot released.** Reviewed and pushed
 `c5561e2` passes 7 focused / 59 full Forge tests and 42 Node tests (also repeated
 on Node 26). Two test-isolation regressions were repaired without weakening
