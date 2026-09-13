@@ -176,17 +176,26 @@
           "unknown": "not deployed"
         },
         "role": "stateless twin of Consumer for the 32-byte/41-byte cells: commitQuote / commitHead / commitList / commitHistory (distinct selectors from Consumer)"
+      },
+      "StrictQuoteAcceptor": {
+        "ctor": [],
+        "address": {
+          "unknown": "not deployed"
+        },
+        "source": "test/Falsify.t.sol (artifact out/Falsify.t.sol/StrictQuoteAcceptor.json)",
+        "role": "fixture rule v2 (32-byte uint256 quote, mantissa <= 2_500_000_000): the second QUOTE acceptor activated as policy row 2 in cell policy/activate; deployed at setup so its code identity is retained like the others"
       }
     },
     "authorityGraph": "Ledger.admin = deployer (setIndexModule only); IndexModule.admin = deployer (declareOptional, bumpGeneration); TypeRegistry.admin = deployer (register — refuses an existing derived id; activate — appends a policy row; setBindingRefType). No other privileged surface; no upgrade path.",
     "setupReceipts": [
       "setIndexModule(index)",
-      "register QUOTE (MockAcceptor, no refs)",
-      "register BINARY (no acceptor)",
-      "register ITEM (no acceptor)",
-      "register PAIR (MockAcceptor, refs [ITEM, ITEM])",
-      "register QUOTE_J (QuoteAcceptor, refs [PAIR])",
-      "register LABEL (LabelAcceptor, no refs)"
+      "register QUOTE (MockAcceptor mode 0; id derived by the registry)",
+      "register BINARY (no acceptor; id derived by the registry)",
+      "register ITEM (no acceptor; id derived by the registry)",
+      "register PAIR (MockAcceptor; refs [ITEM, ITEM]; id derived by the registry)",
+      "register QUOTE_J (QuoteAcceptor: 160-byte shape, scale 6, bounds; refs [PAIR]; id derived by the registry)",
+      "register LABEL (LabelAcceptor: exact UTF-8, 1..255 bytes; no refs; id derived by the registry)",
+      "deploy JoinedConsumer(ledger, lens, QUOTE_J, PAIR, ITEM, LABEL) with the derived ids (after registration)"
     ],
     "setupGas": {
       "unknown": "not run",
@@ -200,7 +209,7 @@
       }
     },
     "setupEvidence": "every setup transaction carries the literal eth_sendRawTransaction / eth_getTransactionReceipt / eth_getBlockByHash / eth_getTransactionByHash envelopes (report.setupTransactions); registry epoch and principals are retained eth_call replies (report.setupRaw)",
-    "registrationNote": "authority repair 2026-09-13 (REPAIR.md R2): register(shape, acceptor, refs) RETURNS a derived id (Keys.typeId); the symbolic names below are shape commitments, not ids. script/measure.mjs is NOT yet patched to read the returned ids (TODO.md §H), so this manifest's registration rows describe the intended, unrun setup."
+    "registrationNote": "authority repair 2026-09-13 (REPAIR.md R2): register(shape, acceptor, refs) RETURNS a derived id (Keys.typeId); the symbolic names below are shape commitments, not ids. script/measure.mjs (adapted after commit aaecfed) takes every id from the TypeRegistered receipt log and asserts it equal to the typeIdOf raw reply (setupRaw stage type-resolution) and to a local Keys.typeId derivation before the next registration references it; JoinedConsumer is deployed AFTER registration with the derived ids; report.types retains the evidence. In --addresses mode the ids are resolved from the chain (typeIdOf + eth_getCode)."
   },
   "fixtures": {
     "payloadControls": {
@@ -239,10 +248,11 @@
       "QUOTE_J": "keccak256(utf8 'lab/type/quote-joined/1'); acceptor QuoteAcceptor; refs [PAIR]; body = abi.encode(bytes32 pairId, uint256 mantissa, uint8 scale, uint64 observedAt, bytes32 noteCommitment) = 160 bytes",
       "values": {
         "unknown": "keccak values not computed without a build/node run",
-        "consequence": "ids are symbolic until the script prints them"
+        "consequence": "ids are symbolic until the script prints them; at run time report.types[key] carries the derived id with three-way evidence (TypeRegistered log, typeIdOf raw reply, local derivation)"
       },
       "LABEL": "keccak256(utf8 'lab/type/label/1'); acceptor LabelAcceptor; 0 refs; body = exact UTF-8 bytes 1..255; record id = keccak256(abi.encode(DOM_RECORD, LABEL, keccak256(bytes))) - derivable from a FOLDER position's role",
-      "idDerivation": "typeId = keccak256(abi.encode(keccak256('efs2/type/1'), shape, keccak256(abi.encode(refTypes)), ruleId)); shape = the keccak256(utf8 name) listed per Type; ruleId = acceptor runtime codehash at registration (0 for no acceptor); refTypes are the derived ids of the listed reference Types (ITEM before PAIR before QUOTE_J). Registration of an existing id reverts E_TYPE_EXISTS; a later policy activation (TypeRegistry.activate) changes the enforcing acceptor without changing the id."
+      "idDerivation": "typeId = keccak256(abi.encode(keccak256('efs2/type/1'), shape, keccak256(abi.encode(refTypes)), ruleId)); shape = the keccak256(utf8 name) listed per Type; ruleId = acceptor runtime codehash at registration (0 for no acceptor); refTypes are the derived ids of the listed reference Types (ITEM before PAIR before QUOTE_J). Registration of an existing id reverts E_TYPE_EXISTS; a later policy activation (TypeRegistry.activate) changes the enforcing acceptor without changing the id.",
+      "vectorNote": "vectors/profile-b.json remains the dcc7b94 vector: its Type ids are name hashes under the pinned profile and its actionsEncoded / acceptanceProfile / digest do NOT apply to the repaired source (derived ids). A new declared vector is owed after a build; do not retrofit the old one."
     },
     "semanticMap": {
       "ITEM_ETH / ITEM_USDC": "ITEM bodies abi.encode(uint256 1) / abi.encode(uint256 2), admitted with PAIR_ETH_USDC in ONE native batch by actorA (operator) in step 1",
@@ -382,12 +392,16 @@
         }
       },
       {
-        "cell": "policy-activation",
+        "cell": "policy/activate",
         "fixture": "quote",
         "logical": "activate fixture rule v2 (StrictQuoteAcceptor, cap 2_500_000_000) for QUOTE after a v1 admission of 3_000_000_000",
         "physical": [
-          "TypeRegistry.activate(QUOTE, StrictQuoteAcceptor) -> activation 2",
-          "then: Actor.publish(QUOTE, 3_000_000_001) -> E_REJECTED; Actor.execute([reuse QUOTE r_high]) -> E_REJECTED; Ledger.acceptanceBasis(v1 admission) -> row 1 (MockAcceptor codehash, epoch at registration); Ledger.acceptanceBasis(new compliant publish) -> row 2"
+          "signedA: executeSigned([PUBLISH QUOTE quote3000]) under policy row 1 (epoch N)",
+          "sign [PUBLISH QUOTE quote3100] at epoch N and HOLD it (sign-inputs raw replies retained)",
+          "TypeRegistry.activate(QUOTE, StrictQuoteAcceptor) -> row 2 (raw: typeInfo, descriptor, epoch, activation(1), activation(2) at stage policy)",
+          "failure row: send the held signature -> E_INTENT (static selector + status-0 receipt + unchanged probe)",
+          "signedA: re-sign and executeSigned([PUBLISH QUOTE quote3100]) under epoch N+1 -> admitted under row 2",
+          "raw: Ledger.acceptanceBasis(old admission) -> row 1; acceptanceBasis(new admission) -> row 2 (stage basis)"
         ],
         "payer": "account 0 (registry admin)",
         "expected": "registry epoch +1; typeInfo(QUOTE) reports row 2; descriptor(QUOTE) unchanged; the v1-era record retained with occurrences 1; earlier admission basis row 1; a signature made before the activation is refused E_INTENT",
@@ -395,7 +409,7 @@
           "unknown": "not run; ESTIMATED 2 fresh slots + 2 rewrites + 1 event for activate (REPAIR.md cost table)"
         },
         "status": {
-          "unknown": "not scripted (script/measure.mjs untouched; TODO.md §H)",
+          "unknown": "scripted as cell policy/activate; UNRUN",
           "consequence": "no receipt for the activation row yet"
         }
       }
@@ -694,6 +708,11 @@
         "gate": "Native-source (contract-author) import is UNSUPPORTED after the authority repair: importPublication reverts E_SOURCE_UNSUPPORTED for src.v == 0. A verifiable source witness (chain id + Realm deployment + account + finalized-state proof) is required to lift it; none is designed here.",
         "unknown": "no witness format exists; contract-author portability cannot be priced",
         "consequence": "sdk-fixture step 9 for AUTHOR_B reports UNSUPPORTED, not success; this is a limit, not a waiver"
+      },
+      {
+        "gate": "vectors/profile-b.json remains the dcc7b94 vector (name-hash Type ids). The repaired source derives ids, so the vector's action commitment, profile and digest do not describe this run; report.types is the run-time evidence.",
+        "unknown": "no new declared vector exists until a build",
+        "consequence": "the independent checker must interpret the old vector only against dcc7b94 packets; a new vector is owed after a build"
       }
     ],
     "failureRows": {
@@ -742,13 +761,19 @@
           "row": "refused re-registration",
           "setup": "TypeRegistry.register(QUOTE_SHAPE, MockAcceptor, []) a second time (identical descriptor => identical derived id)",
           "expectedError": "TypeRegistry.E_TYPE_EXISTS",
-          "status": "not scripted (TODO.md §H)"
+          "status": "scripted as cell failure/refused-re-registration (own sealed cell): baseline raw typeIdOf(QUOTE descriptor) == QUOTE id; failure row; descriptor/epoch raw replies unchanged (stage registry-post); plus a STATEMENT row (not a transaction): a different descriptor under a colliding id is impossible by construction"
         },
         {
           "row": "unsupported native-source import",
           "setup": "Ledger.importPublication with src.v == 0 (any claimed sourcePrincipal), with or without a destination signature",
           "expectedError": "E_SOURCE_UNSUPPORTED",
-          "status": "not scripted (TODO.md §H); test/Falsify.t.sol F1a/F1b and test/LedgerImport.t.sol cover it"
+          "status": "scripted as cell failure/unsupported-native-import (own sealed cell): two failure rows — signed-destination path (v == 0 packet claiming AUTHOR_A's principal, destination signature by AUTHOR_B) and msg.sender path (relaying EOA as claimed author, empty destination signature); subjectCreatedAt(claimed subject) and sourceEvidence(next ordinal) raw replies (stage squat-probe) show nothing minted"
+        },
+        {
+          "row": "stale signature after policy activation",
+          "setup": "cell policy/activate: a PublicationIntent signed at epoch N (before activate) is sent after activation N+1",
+          "expectedError": "E_INTENT",
+          "status": "scripted in cell policy/activate (selector from the static call; receipt status 0; probe unchanged)"
         }
       ],
       "status": {
@@ -786,6 +811,9 @@
         "label/create+label-fresh",
         "label/create+label-existing-republished",
         "label/create+label-existing-omitted",
+        "policy/activate",
+        "failure/refused-re-registration",
+        "failure/unsupported-native-import",
         "native-one-noindex/quote"
       ]
     },
@@ -886,9 +914,10 @@
         "cd Reviews/2026-09-12-efs-path-decision/lab-b",
         "export FOUNDRY_OUT=/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/out",
         "forge build --use 0.8.30 --offline",
-        "forge test --use 0.8.30 --offline -vv   # 24 existing + 8 new tests (JoinedConsumer.t.sol x5, LabelType.t.sol x3)",
+        "forge test --use 0.8.30 --offline -vv   # 39 tests expected: 32 previous (one replaced) + 7 in test/Falsify.t.sol",
         "forge inspect Ledger storage-layout",
-        "EFS_ETHERS_PATH=<node_modules/ethers> node script/measure.mjs --anvil    # writes <scratch>/measure.json and <scratch>/lab-addresses.json; artifacts read from FOUNDRY_OUT"
+        "EFS_ETHERS_PATH=<node_modules/ethers> node script/measure.mjs --anvil    # writes <scratch>/measure.json and <scratch>/lab-addresses.json; artifacts read from FOUNDRY_OUT",
+        "# the script deploys StrictQuoteAcceptor from out/Falsify.t.sol/StrictQuoteAcceptor.json (a test-file artifact): forge build must include test/"
       ],
       "anvil": "started by the script on a free loopback port: --hardfork cancun --chain-id 31337 --gas-limit 30000000 --accounts 4 --prune-history 256 --cache-path <scratchRoot>/anvil-cache (created by the script) --no-cors --quiet; no --steps-tracing; PID, port, argv, start and stop times are written to measure.json (anvil section); killed by the script",
       "expectedDuration": "20-30 minutes including one compile-repair cycle (build 1-3 min, tests < 2 min, measure 4-8 min for 18 cells / ~170 transactions with per-transaction persistence)",

@@ -3,6 +3,14 @@
 // UNRUN: written under another worker's compiler lease (only `node --check` has been run on it).
 // DO NOT RUN without the coordinator's heavy-run lease (README.md, TODO.md).
 //
+// AUTHORITY-REPAIR PASS (2026-09-13, source aaecfed; REPAIR.md): Type ids are DERIVED by the registry from
+// (shape, refTypes, declared-rule codehash) and resolved here three ways (receipt log, typeIdOf raw reply, local
+// Keys.typeId derivation) before any cell runs — the name hashes are shape commitments, never ids. JoinedConsumer is
+// deployed after registration with the derived ids. Three cells were added, each its own sealed cell from the same
+// snapshot: policy/activate, failure/refused-re-registration, failure/unsupported-native-import (new raw stages:
+// type-resolution, policy, basis, registry-post, squat-probe). vectors/profile-b.json remains the dcc7b94 vector
+// (name-hash ids); a new declared vector is owed after a build. Payload controls and fixture bodies are unchanged.
+//
 // HONESTY: this run reports receipt diagnostics with explicit remaining gates. It is not a
 // same-guarantee comparison and not the protocol's capability ablation. No row here is a matched
 // substitute for the fuller Files control: the 32-byte/41-byte cells are hash-placement diagnostics
@@ -79,6 +87,8 @@ const CAVEAT_JOINED = 'The joined QUOTE/Pair journey (sdk-fixture steps 1–6 wi
 const CAVEAT_RECON = 'The Reconstructor is a candidate self-check calling ledger.intentDigest, not independent.';
 const CAVEAT_MATCHED = 'No row is a matched substitute for the fuller Files control: hash-placement diagnostics (names are hashes) until labels and the joined journey are integrated into one matched guarantee profile.';
 const CAVEAT_EXPECTED = 'Expected values, commitments and read-back comparisons are computed by this script from the fixture (candidate-side self-checks); they are not the independent oracle.';
+const CAVEAT_NATIVE_IMPORT = 'Native-source (contract-author) import is UNSUPPORTED after the authority repair (Ledger.importPublication reverts E_SOURCE_UNSUPPORTED for src.v == 0): sdk-fixture step 9 for AUTHOR_B reports UNSUPPORTED, not success. A limit until a verifiable source witness exists, not a waiver.';
+const CAVEAT_VECTOR = 'vectors/profile-b.json remains the dcc7b94 vector (name-hash Type ids). Type ids in this run are DERIVED (report.types: receipt log, typeIdOf raw reply and local Keys.typeId derivation agree); actionsHash / acceptanceProfile / digest for the same fixture therefore differ from that vector, and a new declared vector is owed after a build.';
 
 // ---------------------------------------------------------------- exact payload controls (run-manifest.md)
 const FIX = {
@@ -114,7 +124,24 @@ const byAuthorList = (principal) => posting(ZERO, 4, 0, principal);
 const backlinkList = (target) => posting(ZERO, 5, 0, target);
 const historyList = (key) => posting(ZERO, 8, 0, key);
 const scopeList = (key) => posting(ZERO, 10, 0, key);
-const T = { QUOTE: DOM('lab/type/quote/1'), BINARY: DOM('lab/type/binary/1'), ITEM: DOM('lab/type/item/1'), PAIR: DOM('lab/type/pair/1'), QUOTE_J: DOM('lab/type/quote-joined/1'), LABEL: DOM('lab/type/label/1') };
+// Type SHAPES = the lab's Type name hashes. Since the authority repair (REPAIR.md R2) the registry DERIVES a Type id from
+// (shape, refTypes, declared-rule codehash); T is filled by resolveType() from the register receipt / typeIdOf reply and
+// throws if read before that, so no cell can silently run against a name hash.
+const SHAPE = { QUOTE: DOM('lab/type/quote/1'), BINARY: DOM('lab/type/binary/1'), ITEM: DOM('lab/type/item/1'), PAIR: DOM('lab/type/pair/1'), QUOTE_J: DOM('lab/type/quote-joined/1'), LABEL: DOM('lab/type/label/1') };
+const TYPE_KEYS = Object.keys(SHAPE);
+const T = new Proxy({}, { get(o, k) { if (TYPE_KEYS.includes(k) && !(k in o)) throw new Error(`Type id T.${k} read before registration/resolution`); return o[k]; } });
+// registration plan, in order (a reference Type must be resolved before the Type that references it): [key, acceptor deployment key, ref keys, note]
+const TYPE_PLAN = [
+  ['QUOTE', 'acceptor', [], 'MockAcceptor mode 0'],
+  ['BINARY', null, [], 'no acceptor'],
+  ['ITEM', null, [], 'no acceptor'],
+  ['PAIR', 'acceptor', ['ITEM', 'ITEM'], 'MockAcceptor; refs [ITEM, ITEM]'],
+  ['QUOTE_J', 'quoteAcceptor', ['PAIR'], 'QuoteAcceptor: 160-byte shape, scale 6, bounds; refs [PAIR]'],
+  ['LABEL', 'labelAcceptor', [], 'LabelAcceptor: exact UTF-8, 1..255 bytes; no refs'],
+];
+// byte-for-byte Keys.typeId: keccak256(abi.encode(DOM_TYPE, shape, keccak256(abi.encode(refTypes)), ruleId)); ruleId = acceptor runtime codehash (0 = none)
+const DOM_TYPE = DOM('efs2/type/1');
+const typeIdLocal = (shape, refTypeIds, ruleId) => keccak256(coder.encode(['bytes32', 'bytes32', 'bytes32', 'bytes32'], [DOM_TYPE, shape, keccak256(coder.encode(['bytes32[]'], [refTypeIds])), ruleId]));
 const P = { HEAD: DOM('efs2/purpose/head/1'), FOLDER: DOM('efs2/purpose/folder/1'), TAG: DOM('efs2/purpose/tag/1') };
 const name = (s) => keccak256(toUtf8Bytes(s));
 const REALM = DOM('lab/realm/1');
@@ -157,6 +184,7 @@ const ART_SOURCE = {
   Ledger: 'Ledger', IndexModule: 'IndexModule', LensReader: 'LensReader', TypeRegistry: 'TypeRegistry',
   MockAcceptor: 'LabHarness', FailingIndexModule: 'LabHarness', Actor: 'LabHarness', Consumer: 'LabHarness', Reconstructor: 'LabHarness',
   QuoteAcceptor: 'LabAcceptors', LabelAcceptor: 'LabAcceptors', JoinedConsumer: 'JoinedConsumer', StatelessConsumer: 'JoinedConsumer',
+  StrictQuoteAcceptor: 'Falsify.t', // fixture rule v2 (32-byte quote, mantissa <= 2_500_000_000) from test/Falsify.t.sol: the second QUOTE acceptor of cell policy/activate
 };
 const ART = {};
 const IFACES = {};
@@ -360,7 +388,9 @@ async function estimateRow(ctx, label, c, extra = {}) {
 
 // ---------------------------------------------------------------- authors: native (Actor contract) and signed (EOA wallet, relayed by the deployer)
 const INTENT_TYPES = { PublicationIntent: ['realmId:bytes32', 'coreCodeCommitment:bytes32', 'author:address', 'nonce:uint64', 'deadline:uint64', 'acceptanceProfile:bytes32', 'indexObligations:bytes32', 'actionsHash:bytes32'].map((f) => { const [n, t] = f.split(':'); return { name: n, type: t }; }) };
-async function signedCall(ctx, wallet, actions, bodies) {
+// A PublicationIntent signed by `wallet` over `actions` under THIS Ledger's context at the latest block (sign-inputs
+// raw replies retained). Used for executeSigned (signedCall) and as the destination authorization of importPublication.
+async function signIntent(ctx, wallet, actions) {
   const block = await ctx.latestBlock();
   const header = await ctx.blockHeader(block);
   const stage = 'sign-inputs';
@@ -371,7 +401,11 @@ async function signedCall(ctx, wallet, actions, bodies) {
   const [obligations] = await observe(ctx, ctx.raw, stage, 'Ledger', 'ledger', 'indexObligations', [], block);
   const intent = { realmId, coreCodeCommitment: core, author: wallet.address, nonce, deadline: BigInt(header.timestamp) + 3600n, acceptanceProfile: profile, indexObligations: obligations };
   const sig = await wallet.signTypedData({ name: 'EFS2-RoadB-Lab', version: '1' }, INTENT_TYPES, { ...intent, actionsHash: actionsHash(actions) });
-  return { ...call(ctx, 'Ledger', 'ledger', 'executeSigned', [intent, actions, bodies, sig]), intent: Object.fromEntries(Object.entries(intent).map(([k, v]) => [k, str(v)])), sig, signInputsBlock: block };
+  return { intent, sig, intentStr: Object.fromEntries(Object.entries(intent).map(([k, v]) => [k, str(v)])), signInputsBlock: block };
+}
+async function signedCall(ctx, wallet, actions, bodies) {
+  const s = await signIntent(ctx, wallet, actions);
+  return { ...call(ctx, 'Ledger', 'ledger', 'executeSigned', [s.intent, actions, bodies, s.sig]), intent: s.intentStr, sig: s.sig, signInputsBlock: s.signInputsBlock };
 }
 function authorsFor(ctx) {
   const native = (key) => ({ address: ctx.addrs[key], key, kind: 'native', build: (actions, bodies) => call(ctx, 'Actor', key, 'execute', [actions, bodies]), buildWithNonce: (actions, bodies, nonce) => call(ctx, 'Actor', key, 'executeWithNonce', [actions, bodies, nonce]) });
@@ -969,6 +1003,174 @@ function labelCell(variant) {
   };
 }
 
+// ---------------------------------------------------------------- authority-repair cells (REPAIR.md), each its own sealed cell from the same snapshot
+const lc = (v) => String(v).toLowerCase();
+const NO_PROBE_FOLDER = name('/none');
+// policy/activate: activate a second acceptor (fixture rule v2) for QUOTE after an admission; a signature made under the
+// old epoch is refused (status 0, selector recorded); a re-signed new-epoch publish succeeds; acceptanceBasis of both admissions retained
+const policyCell = {
+  standing: 'policy activation (REPAIR.md R2): Type identity untouched, registry policy row appended; receipt-bound rule activation (E.B.4) with the admitting basis recorded per admission',
+  plan: async (ctx, a, block) => {
+    const rOld = recordId(T.QUOTE, FIX.quote3000.bytes); const rNew = recordId(T.QUOTE, FIX.quote3100.bytes);
+    const pidA = await principalOf(ctx, a.signedA.address, block, true);
+    const touched = emptyTouched();
+    touched.records.push(rOld, rNew); touched.lists.push(byTypeList(T.QUOTE), byAuthorList(pidA));
+    touched.plannedPublications = 2; touched.plannedAdmissions = 2;
+    // registry state at the sealed baseline (baselineRaw, stage baseline)
+    const info0 = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'typeInfo', [T.QUOTE], block);
+    const desc0 = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], block);
+    const [epoch0] = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'epoch', [], block);
+    const registry0 = { activeAcceptor: info0[1], activeCodehash: info0[2], refCount: str(info0[3]), activation: str(info0[4]), shape: desc0[0], ruleId: desc0[1], activations: str(desc0[3]), epoch: str(epoch0) };
+    return { authors: [a.signedA, null], touched, rOld, rNew, registry0, summary: { typeId: T.QUOTE, oldAcceptor: ctx.addrs.acceptor, newAcceptor: ctx.addrs.strictAcceptor, rOld, rNew, registryAtBaseline: registry0, shape: 'signed publish quote3000 (row 1) -> sign quote3100 at epoch N and hold -> activate(QUOTE, StrictQuoteAcceptor) -> send the held signature (E_INTENT) -> re-sign and publish quote3100 (row 2) -> acceptanceBasis of both admissions' } };
+  },
+  body: async (ctx, a, plan) => {
+    const { rOld, rNew, registry0 } = plan;
+    const rows = [];
+    const adm0 = baseCount(ctx, 'admissions'); const pub0 = baseCount(ctx, 'publications');
+    assert.equal(lc(registry0.activeAcceptor), lc(ctx.addrs.acceptor), 'policy/activate: QUOTE must start under MockAcceptor (row 1)');
+    assert.equal(registry0.activation, '1', 'policy/activate: QUOTE must start at activation 1');
+    rows.push(await send(ctx, () => a.signedA.build([aPublish(T.QUOTE, FIX.quote3000.bytes)], [FIX.quote3000.bytes]), 'policy/activate/setup: signed publish quote3000 under policy row 1 (epoch N)'));
+    plan.touched.publications.push(pub0 + 1);
+    const held = await signedCall(ctx, ctx.wallets[1], [aPublish(T.QUOTE, FIX.quote3100.bytes)], [FIX.quote3100.bytes]); // signed at epoch N, deliberately held back
+    rows.push({ label: 'policy/activate/held-signature (signed at epoch N, not yet sent)', status: 'signed-not-sent', intent: held.intent, signInputsBlock: held.signInputsBlock, standing: 'sign-inputs raw replies retained at signInputsBlock; the signature is sent only after the activation below' });
+    rows.push(await send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'activate', [T.QUOTE, ctx.addrs.strictAcceptor]), 'policy/activate/activate (StrictQuoteAcceptor becomes QUOTE policy row 2; the Type id and descriptor are untouched)', { extra: { standing: 'ESTIMATED 2 fresh slots (activation row) + 1 rewrite (activations) + epoch rewrite; see REPAIR.md cost table' } }));
+    const after = await ctx.latestBlock();
+    const info1 = await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'typeInfo', [T.QUOTE], after);
+    const desc1 = await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], after);
+    const [epoch1] = await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'epoch', [], after);
+    const row1 = await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'activation', [T.QUOTE, 1], after);
+    const row2 = await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'activation', [T.QUOTE, 2], after);
+    assert.equal(lc(info1[1]), lc(ctx.addrs.strictAcceptor), 'policy/activate: StrictQuoteAcceptor must be the active policy');
+    assert.equal(str(info1[4]), '2', 'policy/activate: activation index must be 2');
+    assert.equal(desc1[0], registry0.shape, 'policy/activate: shape must be untouched');
+    assert.equal(desc1[1], registry0.ruleId, 'policy/activate: declared rule id must be untouched');
+    assert.equal(str(epoch1), String(BigInt(registry0.epoch) + 1n), 'policy/activate: epoch must move by exactly one');
+    assert.equal(lc(row1[0]), lc(ctx.addrs.acceptor), 'policy/activate: row 1 must still name MockAcceptor');
+    assert.equal(lc(row2[0]), lc(ctx.addrs.strictAcceptor), 'policy/activate: row 2 must name StrictQuoteAcceptor');
+    rows.push({ label: 'policy/activate/registry-after', standing: 'retained raw replies (stage policy) at the block of the activation', typeInfo: { activeAcceptor: info1[1], activeCodehash: info1[2], activation: str(info1[4]) }, descriptor: { shape: desc1[0], ruleId: desc1[1], refCount: str(desc1[2]), activations: str(desc1[3]) }, epoch: str(epoch1), activationRows: { 1: { acceptor: row1[0], codehash: row1[1], epoch: str(row1[2]) }, 2: { acceptor: row2[0], codehash: row2[1], epoch: str(row2[2]) } }, identityUnchanged: true });
+    rows.push(await failureRow(ctx, 'policy/activate/stale-signature (signed under epoch N, sent after activation N+1: E_INTENT, no write)', held, 'E_INTENT', [[a.signedA], T.QUOTE, NO_PROBE_FOLDER]));
+    rows.push(await send(ctx, () => a.signedA.build([aPublish(T.QUOTE, FIX.quote3100.bytes)], [FIX.quote3100.bytes]), 'policy/activate/new-epoch-publish (re-signed under epoch N+1; admitted under policy row 2)'));
+    plan.touched.publications.push(pub0 + 2);
+    const last = await ctx.latestBlock();
+    const bOld = await observe(ctx, ctx.raw, 'basis', 'Ledger', 'ledger', 'acceptanceBasis', [adm0 + 1], last);
+    const bNew = await observe(ctx, ctx.raw, 'basis', 'Ledger', 'ledger', 'acceptanceBasis', [adm0 + 2], last);
+    assert.equal(lc(bOld[0]), lc(T.QUOTE), 'basis old: typeId');
+    assert.equal(str(bOld[1]), '1', 'basis old: the epoch-N admission must report policy row 1, not today\'s row');
+    assert.equal(lc(bOld[2]), lc(ctx.addrs.acceptor), 'basis old: MockAcceptor');
+    assert.equal(lc(bOld[3]), lc(registry0.activeCodehash), 'basis old: MockAcceptor codehash');
+    assert.equal(str(bNew[1]), '2', 'basis new: the epoch-N+1 admission must report policy row 2');
+    assert.equal(lc(bNew[2]), lc(ctx.addrs.strictAcceptor), 'basis new: StrictQuoteAcceptor');
+    const basisOf = (b) => ({ typeId: b[0], activation: str(b[1]), acceptor: b[2], acceptorCodehash: b[3], epoch: str(b[4]), activatedAt: str(b[5]) });
+    rows.push({ label: 'policy/activate/acceptance-basis', standing: 'retained raw replies (stage basis) of Ledger.acceptanceBasis for both admissions at the last block: the old admission keeps row 1 while today\'s policy is row 2', oldAdmission: { ordinal: adm0 + 1, recordId: rOld, basis: basisOf(bOld) }, newAdmission: { ordinal: adm0 + 2, recordId: rNew, basis: basisOf(bNew) } });
+    return rows;
+  },
+};
+// failure/refused-re-registration: the identical descriptor cannot be registered twice; a different descriptor under a
+// colliding id is impossible by construction (statement, not a row)
+const refusedRegistrationCell = {
+  standing: 'exact Type identity (REPAIR.md R2): E_TYPE_EXISTS for an identical descriptor; registry state unchanged across the revert',
+  plan: async (ctx, a, block) => {
+    const touched = emptyTouched();
+    const [derived] = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'typeIdOf', [SHAPE.QUOTE, ctx.addrs.acceptor, []], block);
+    const desc0 = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], block);
+    const [epoch0] = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'epoch', [], block);
+    assert.equal(lc(derived), lc(T.QUOTE), 'refused-re-registration: typeIdOf(QUOTE descriptor) must equal the registered QUOTE id');
+    const registry0 = { shape: desc0[0], ruleId: desc0[1], refCount: str(desc0[2]), activations: str(desc0[3]), registeredAt: str(desc0[4]), epoch: str(epoch0) };
+    return { authors: [a.nativeA, null], touched, derived, registry0, summary: { typeId: T.QUOTE, descriptor: { shape: SHAPE.QUOTE, acceptor: ctx.addrs.acceptor, refs: [] }, collisionId: derived, registryAtBaseline: registry0 } };
+  },
+  body: async (ctx, a, plan) => {
+    const { derived, registry0 } = plan;
+    const rows = [];
+    rows.push({ label: 'failure/refused-re-registration/collision-id', typeIdOf: derived, equalsRegisteredQuote: true, standing: 'retained baseline raw reply of TypeRegistry.typeIdOf(QUOTE_SHAPE, MockAcceptor, []): the second registration targets exactly the existing id' });
+    rows.push(await failureRow(ctx, 'failure/refused-re-registration (identical descriptor => the same derived id: E_TYPE_EXISTS; nothing rewritten)', call(ctx, 'TypeRegistry', 'registry', 'register', [SHAPE.QUOTE, ctx.addrs.acceptor, []]), ['TypeRegistry', 'E_TYPE_EXISTS'], [[a.nativeA], T.QUOTE, NO_PROBE_FOLDER]));
+    const last = await ctx.latestBlock();
+    const desc1 = await observe(ctx, ctx.raw, 'registry-post', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], last);
+    const [epoch1] = await observe(ctx, ctx.raw, 'registry-post', 'TypeRegistry', 'registry', 'epoch', [], last);
+    const registry1 = { shape: desc1[0], ruleId: desc1[1], refCount: str(desc1[2]), activations: str(desc1[3]), registeredAt: str(desc1[4]), epoch: str(epoch1) };
+    assert.deepEqual(registry1, registry0, 'refused-re-registration: descriptor and epoch must be unchanged across the refused registration');
+    rows.push({ label: 'failure/refused-re-registration/registry-unchanged', standing: 'retained raw replies (stage registry-post) equal the baseline replies: descriptor, activations and epoch unchanged', registry: registry1 });
+    rows.push({ label: 'failure/refused-re-registration/different-descriptor', status: 'statement', standing: 'NOT a transaction row. A different descriptor (shape, refTypes or declared rule) under the SAME id is impossible by construction: typeId = keccak256(abi.encode(DOM_TYPE, shape, keccak256(abi.encode(refTypes)), ruleId)), so a changed descriptor is a different id and an existing id is never rewritten (test/Falsify.t.sol test_F3_type_identity_is_exact_and_immutable registers changed descriptors and checks QUOTE is untouched).' });
+    return rows;
+  },
+};
+// failure/unsupported-native-import: a v == 0 packet claiming another principal is refused before any write (both destination paths)
+const unsupportedImportCell = {
+  standing: 'fail-closed native-source import (REPAIR.md R1): E_SOURCE_UNSUPPORTED, status 0, state unchanged; a temporary prototype limit (no verifiable source witness exists), not a portability waiver',
+  plan: async (ctx, a, block) => {
+    const salt = keccak256(toUtf8Bytes('failure/unsupported-native-import'));
+    const pidA = await principalOf(ctx, a.signedA.address, block, true);
+    const pidB = await principalOf(ctx, a.signedB.address, block, true);
+    const pidOp = await principalOf(ctx, ctx.deployer.address, block, true);
+    const victim = subjectId(pidA, salt); // the CLAIMED source principal's subject: must never be minted here
+    const r1 = recordId(T.QUOTE, FIX.quote3000.bytes);
+    const [realm] = await observeBoth(ctx, 'baseline', 'Ledger', 'ledger', 'realmId', [], block);
+    const [core] = await observeBoth(ctx, 'baseline', 'Ledger', 'ledger', 'coreCodeCommitment', [], block);
+    const touched = emptyTouched();
+    touched.records.push(r1); touched.subjects.push(victim);
+    touched.bindingKeys.push(binding(pidB, position(P.HEAD, victim, ZERO)), binding(pidOp, position(P.HEAD, victim, ZERO)));
+    touched.lists.push(byTypeList(T.QUOTE), byAuthorList(pidA), byAuthorList(pidB), byAuthorList(pidOp));
+    return { authors: [a.signedA, a.signedB], touched, salt, victim, r1, pidA, realm, core, summary: { claimedSourcePrincipal: pidA, claimedSourceRealm: realm, claimedSourceCode: core, victimSubject: victim, recordId: r1, packet: 'SourceEvidence with v == 0, r == s == 0, grade 0: every field is a bare claim', paths: ['signed destination authorization by AUTHOR_B (wallet 2)', 'msg.sender == claimed author (the relaying deployer EOA), empty destination signature'] } };
+  },
+  body: async (ctx, a, plan) => {
+    const { salt, victim, r1, pidA, realm, core } = plan;
+    const rows = [];
+    const actions = [aCreate(salt), aPublish(T.QUOTE, FIX.quote3000.bytes), aBind(P.HEAD, victim, ZERO, r1, 0)];
+    const bodies = ['0x', FIX.quote3000.bytes, '0x'];
+    const header = await ctx.blockHeader(await ctx.latestBlock());
+    const packet = (author) => ({ realmId: realm, coreCodeCommitment: core, acceptanceProfile: ZERO, indexObligations: ZERO, r: ZERO, s: ZERO, sourcePrincipal: pidA, author, nonce: 0, deadline: BigInt(header.timestamp) + 3600n, v: 0, grade: 0 });
+    const probe = [[a.signedA, a.signedB], T.QUOTE, NO_PROBE_FOLDER];
+    const pre = await observe(ctx, ctx.raw, 'squat-probe', 'Ledger', 'ledger', 'subjectCreatedAt', [victim], await ctx.latestBlock());
+    assert.equal(pre[0], 0n, 'unsupported-native-import: the claimed subject must be absent at the start');
+    // (a) signed destination path: AUTHOR_B authorizes itself at this Realm while the v == 0 packet claims AUTHOR_A's principal
+    const dst = await signIntent(ctx, ctx.wallets[2], actions);
+    rows.push(await failureRow(ctx, 'failure/unsupported-native-import/signed-destination (v == 0 packet claiming AUTHOR_A\'s principal, destination signature by AUTHOR_B: E_SOURCE_UNSUPPORTED)', { ...call(ctx, 'Ledger', 'ledger', 'importPublication', [packet(ctx.wallets[2].address), actions, bodies, dst.intent, dst.sig]), intent: dst.intentStr, sig: dst.sig }, 'E_SOURCE_UNSUPPORTED', probe));
+    // (b) msg.sender path: the relaying deployer EOA presents itself as the source author with an empty destination signature
+    const none = { realmId: ZERO, coreCodeCommitment: ZERO, author: ZERO_ADDR, nonce: 0, deadline: 0, acceptanceProfile: ZERO, indexObligations: ZERO };
+    rows.push(await failureRow(ctx, 'failure/unsupported-native-import/msg-sender (v == 0 packet, msg.sender == claimed author, empty destination signature: E_SOURCE_UNSUPPORTED)', call(ctx, 'Ledger', 'ledger', 'importPublication', [packet(ctx.deployer.address), actions, bodies, none, '0x']), 'E_SOURCE_UNSUPPORTED', probe));
+    const last = await ctx.latestBlock();
+    const post = await observe(ctx, ctx.raw, 'squat-probe', 'Ledger', 'ledger', 'subjectCreatedAt', [victim], last);
+    const src = await observe(ctx, ctx.raw, 'squat-probe', 'Ledger', 'ledger', 'sourceEvidence', [baseCount(ctx, 'publications') + 1], last);
+    assert.equal(post[0], 0n, 'unsupported-native-import: the claimed subject must still be absent');
+    assert.equal(lc(src[0].author), lc(ZERO_ADDR), 'unsupported-native-import: no source-evidence row may exist');
+    rows.push({ label: 'failure/unsupported-native-import/nothing-minted', standing: 'retained raw replies (stage squat-probe): the claimed subject is absent before and after both refusals and no SourceEvidence row exists for the next publication ordinal', victimSubject: victim, subjectCreatedAtBefore: str(pre[0]), subjectCreatedAtAfter: str(post[0]), sourceEvidenceAuthor: src[0].author, sourceEvidenceGrade: str(src[0].grade) });
+    rows.push({ label: 'failure/unsupported-native-import/limit-not-waiver', status: 'statement', standing: CAVEAT_NATIVE_IMPORT });
+    return rows;
+  },
+};
+
+// ---------------------------------------------------------------- Type id resolution (derived ids; three-way agreement)
+// typeIdOf + typeInfo raw replies at `block` (stage type-resolution), checked against the local Keys.typeId derivation and,
+// when given, the TypeRegistered receipt log; fills T[key]. The refs must already be resolved (TYPE_PLAN order).
+async function resolveType(ctx, key, acceptorKey, refKeys, acceptorCodehash, block, evidence = {}) {
+  const acceptor = acceptorKey ? ctx.addrs[acceptorKey] : ZERO_ADDR;
+  const refs = refKeys.map((k) => T[k]);
+  const [fromView] = await observe(ctx, ctx.raw, 'type-resolution', 'TypeRegistry', 'registry', 'typeIdOf', [SHAPE[key], acceptor, refs], block);
+  const local = typeIdLocal(SHAPE[key], refs, acceptorCodehash);
+  assert.equal(lc(fromView), lc(local), `${key}: typeIdOf disagrees with the local Keys.typeId derivation`);
+  if (evidence.fromLog) assert.equal(lc(evidence.fromLog), lc(local), `${key}: the TypeRegistered log disagrees with the derivation`);
+  const info = await observe(ctx, ctx.raw, 'type-resolution', 'TypeRegistry', 'registry', 'typeInfo', [fromView], block);
+  assert.equal(info[0], true, `${key}: not registered at block ${block}`);
+  assert.equal(lc(info[1]), lc(acceptor), `${key}: active acceptor mismatch`);
+  assert.equal(str(info[3]), String(refs.length), `${key}: refCount mismatch`);
+  T[key] = fromView;
+  return { typeId: fromView, shape: SHAPE[key], acceptor, acceptorKey, acceptorCodehash, refKeys, refTypeIds: refs, activeActivation: str(info[4]), localDerivation: local, ...evidence, standing: 'id = keccak256(abi.encode(DOM_TYPE, shape, keccak256(abi.encode(refTypeIds)), acceptorCodehash)); typeIdOf/typeInfo raw replies at stage type-resolution; agreement of log (when deployed here), view and local derivation asserted' };
+}
+// --addresses mode: no registration receipts; acceptor codehashes from eth_getCode (envelopes in rpcOther)
+async function resolveTypesFromChain(ctx) {
+  const block = await ctx.latestBlock();
+  const types = {};
+  for (const [key, acceptorKey, refKeys] of TYPE_PLAN) {
+    let codehash = ZERO;
+    if (acceptorKey) {
+      const e = await ctx.rpc('eth_getCode', [ctx.addrs[acceptorKey], qty(block)], { label: `code ${acceptorKey}` });
+      ctx.rpcOther.push(envOf(e));
+      codehash = keccak256(e.response.result);
+    }
+    types[key] = await resolveType(ctx, key, acceptorKey, refKeys, codehash, block);
+  }
+  return types;
+}
+
 // ---------------------------------------------------------------- deployment (once; code identity retained)
 async function deployAll(run) {
   const ctx = makeCtx(run);
@@ -1008,24 +1210,38 @@ async function deployAll(run) {
   d.actorB = await dep('Actor', [d.ledger.address]);
   d.consumer = await dep('Consumer', [d.lens.address]);
   d.recon = await dep('Reconstructor');
-  d.joinedConsumer = await dep('JoinedConsumer', [d.ledger.address, d.lens.address, T.QUOTE_J, T.PAIR, T.ITEM, T.LABEL]);
+  d.strictAcceptor = await dep('StrictQuoteAcceptor'); // fixture rule v2: the second QUOTE acceptor activated in cell policy/activate (artifact from test/Falsify.t.sol)
   d.statelessConsumer = await dep('StatelessConsumer', [d.lens.address]);
-  const addrs = Object.fromEntries(Object.entries(d).map(([k, v]) => [k, v.address]));
-  ctx.addrs = addrs;
-  const reg = (typeId, acceptorKey, refs, label) => send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'register', [typeId, acceptorKey ? addrs[acceptorKey] : ZERO_ADDR, refs]), label);
-  setup.push(await send(ctx, () => call(ctx, 'Ledger', 'ledger', 'setIndexModule', [addrs.index]), 'setup: attach index module'));
-  setup.push(await reg(T.QUOTE, 'acceptor', [], 'setup: register QUOTE (MockAcceptor mode 0)'));
-  setup.push(await reg(T.BINARY, null, [], 'setup: register BINARY (no acceptor)'));
-  setup.push(await reg(T.ITEM, null, [], 'setup: register ITEM (no acceptor)'));
-  setup.push(await reg(T.PAIR, 'acceptor', [T.ITEM, T.ITEM], 'setup: register PAIR (MockAcceptor; refs [ITEM, ITEM])'));
-  setup.push(await reg(T.QUOTE_J, 'quoteAcceptor', [T.PAIR], 'setup: register QUOTE_J (QuoteAcceptor: 160-byte shape, scale 6, bounds; refs [PAIR])'));
-  setup.push(await reg(T.LABEL, 'labelAcceptor', [], 'setup: register LABEL (LabelAcceptor: exact UTF-8, 1..255 bytes; no refs)'));
+  const addrsOf = () => Object.fromEntries(Object.entries(d).map(([k, v]) => [k, v.address]));
+  ctx.addrs = addrsOf();
+  setup.push(await send(ctx, () => call(ctx, 'Ledger', 'ledger', 'setIndexModule', [ctx.addrs.index]), 'setup: attach index module'));
+  // registration: register(shape, acceptor, refs) RETURNS the derived id. Each id is taken from the TypeRegistered receipt
+  // log and cross-checked against typeIdOf (raw reply) and the local Keys.typeId derivation before the next registration
+  // can reference it (PAIR needs ITEM, QUOTE_J needs PAIR). The name hashes are shapes, never ids.
+  const types = {};
+  for (const [key, acceptorKey, refKeys, note] of TYPE_PLAN) {
+    const acceptor = acceptorKey ? ctx.addrs[acceptorKey] : ZERO_ADDR;
+    const refs = refKeys.map((k) => T[k]);
+    const row = await send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'register', [SHAPE[key], acceptor, refs]), `setup: register ${key} (${note}; id derived by the registry)`);
+    setup.push(row);
+    const tx = ctx.txs[row.txIndex];
+    const registered = tx.receipt.logs
+      .filter((l) => l.address.toLowerCase() === ctx.addrs.registry.toLowerCase())
+      .map((l) => { try { return iface('TypeRegistry').parseLog({ topics: l.topics, data: l.data }); } catch { return null; } })
+      .filter((p) => p && p.name === 'TypeRegistered');
+    assert.equal(registered.length, 1, `register ${key}: expected exactly one TypeRegistered log`);
+    types[key] = await resolveType(ctx, key, acceptorKey, refKeys, acceptorKey ? d[acceptorKey].runtimeCodehash : ZERO, row.block, { fromLog: registered[0].args.typeId, registerTx: row.hash, registerBlock: row.block, logIndex: tx.receipt.logs.findIndex((l) => l.address.toLowerCase() === ctx.addrs.registry.toLowerCase()) });
+    log(`  type ${key}: ${T[key]} (log == typeIdOf == local derivation)`);
+  }
+  d.joinedConsumer = await dep('JoinedConsumer', [d.ledger.address, d.lens.address, T.QUOTE_J, T.PAIR, T.ITEM, T.LABEL]); // after registration: constructed with the DERIVED ids
+  ctx.addrs = addrsOf();
+  const addrs = ctx.addrs;
   const latest = await ctx.latestBlock();
   const epoch = str((await observe(ctx, ctx.raw, 'setup', 'TypeRegistry', 'registry', 'epoch', [], latest))[0]);
   const principals = {};
   for (const k of ['actorA', 'actorB']) principals[k] = (await observe(ctx, ctx.raw, 'setup', 'Ledger', 'ledger', 'principalOf', [addrs[k]], latest))[0];
   for (const w of ctx.wallets.slice(1, 3)) principals[w.address] = (await observe(ctx, ctx.raw, 'setup', 'Ledger', 'ledger', 'principalOf', [w.address], latest))[0];
-  return { addrs, deployment: d, setup, setupTransactions: ctx.txs, setupRaw: ctx.raw, setupBlocks: ctx.blocks, setupRpcOther: ctx.rpcOther, registryEpoch: epoch, principals };
+  return { addrs, deployment: d, setup, setupTransactions: ctx.txs, setupRaw: ctx.raw, setupBlocks: ctx.blocks, setupRpcOther: ctx.rpcOther, registryEpoch: epoch, principals, types };
 }
 
 async function main() {
@@ -1043,7 +1259,8 @@ async function main() {
     profile: 'road-b-lab/2', claim: 'disposable lab, no protocol claim',
     honesty: 'This run reports receipt diagnostics with explicit remaining gates. It is not a same-guarantee comparison and not the capability ablation.',
     experiment: 'ingress x multiplicity (hash-placement diagnostics) + separate freshness cells + failure rows + the typed joined journey (steps 1–6) + the label-retention probe. NOT the protocol capability ablation (neither/authorship/selection/both), which is a later gate.',
-    remainingGates: [CAVEAT_JOINED, CAVEAT_RECON, CAVEAT_MATCHED, CAVEAT_EXPECTED],
+    remainingGates: [CAVEAT_JOINED, CAVEAT_RECON, CAVEAT_MATCHED, CAVEAT_EXPECTED, CAVEAT_NATIVE_IMPORT, CAVEAT_VECTOR],
+    sourceProfile: 'post-authority-repair source (REPAIR.md; PROFILE.md "Changed after dcc7b94"): derived Type ids, registry policy rows, per-admission acceptance basis, fail-closed native import. NOT the dcc7b94 profile of vectors/profile-b.json.',
     capabilityAblation: { unknown: 'not run: the neither/authorship/selection/both counterfactuals need same-guarantee arms that remove one capability each; this lab has one arm', consequence: 'no representation-vs-feature attribution and no interaction term can be claimed from this run' },
     evidenceShape: {
       rawObservations: 'cells[*].baselineRaw[] (sealed-state getters before the first transaction; also in raw[] with stage "baseline"), cells[*].raw[] (every eth_call: literal JSON-RPC request/response, rpcId, method, source, stage, to, calldata, returnData, blockTag, blockHash), cells[*].transactions[] (rawTransaction + literal envelopes of eth_sendRawTransaction / eth_getTransactionReceipt / eth_getBlockByHash / eth_getTransactionByHash + the receipt), cells[*].blocks[] (block-header envelopes), cells[*].rpcOther[] (evm_revert, evm_snapshot, eth_gasPrice, eth_blockNumber, eth_getTransactionCount, eth_estimateGas, anvil_getAutomine)',
@@ -1051,12 +1268,14 @@ async function main() {
       correlation: 'every observation carries the JSON-RPC id of its request; ids are unique across the run; request.params[0] is exactly {to, data}; params[1] is the hex block number; blockHash is the retained header hash at that number (blocks[]), never inferred from a receipt at the same number',
       freshness: 'pre-absence / pre-presence are retained bytes: baselineRaw Ledger.record(id) replies at the after-revert block, and stage "pre-presence" replies taken after an in-cell setup transaction',
       storage: 'rows carry `storage`: STATELESS (JoinedConsumer / StatelessConsumer: no SSTORE, one LOG2) or STORING (LabHarness.Consumer: receipt includes its own SSTOREs)',
+      typeIds: 'report.types[key] = { typeId, shape, acceptor, acceptorCodehash, refTypeIds, localDerivation, fromLog, registerTx } — the id from the TypeRegistered receipt log, the typeIdOf/typeInfo raw replies (setupRaw stage type-resolution) and the local Keys.typeId derivation are asserted equal; every Action.typeId in every cell is one of these',
+      authorityRepairCells: 'policy/activate (stages policy, basis; failure row E_INTENT), failure/refused-re-registration (stage registry-post; failure row TypeRegistry.E_TYPE_EXISTS; one statement row), failure/unsupported-native-import (stage squat-probe; two failure rows E_SOURCE_UNSUPPORTED)',
     },
     rpc: rpcUrl, chainId, source, node: process.version, evm: 'cancun', compiler: 'read from out/ artifact metadata per contract (deployment[*].artifact.compiler)', optimizerRuns: 200, viaIR: true,
     paths: { artifacts: OUT_DIR, scratchRoot: SCRATCH_ROOT, outJson: OUT_JSON, ethers: ethersPath },
     build: { sourceHashes: sourceHashes(), note: 'sha256 of every file under src/, test/, script/ at run time; artifact hashes per contract under deployment' },
     providerPolicy: 'no ethers provider: literal JSON-RPC over fetch, one request per call, unique ids, no result cache; every eth_call passes an explicit hex block number',
-    startedAt: new Date(t0).toISOString(), anvil: anvilInfo, chainIdRpc: envOf(chainIdEnv), deployment: null, setup: [], setupTransactions: [], setupRaw: [], setupBlocks: [], setupRpcOther: [], registryEpoch: null, principals: null,
+    startedAt: new Date(t0).toISOString(), anvil: anvilInfo, chainIdRpc: envOf(chainIdEnv), deployment: null, setup: [], setupTransactions: [], setupRaw: [], setupBlocks: [], setupRpcOther: [], registryEpoch: null, principals: null, types: null,
     sealedInitialState: null, cells: {}, cellOrder: [], skippedCells: [], estimatedFreshSlots: {}, failure: null,
     caveats: [
       'Local Anvil receipts under the lab profile; not an L2 fee quote and not an equivalent-guarantee comparison until the coordinator\'s fixture map is applied.',
@@ -1069,6 +1288,9 @@ async function main() {
       'read-history-asof rows test the latest retained revision; read-history-asof-older rows read a strictly older basis and must return revision 1.',
       'A listing page with mutated == true is a mixed-basis page and must not be treated as COMPLETE by any caller.',
       'Label cells are a client-convention filename-retention baseline (FOLDER-role bodies name entries; HEAD bodies stay empty), not mandatory Files semantics; the registry epoch differs from the retained vectors/profile-b.json run (one more Type registered).',
+      CAVEAT_NATIVE_IMPORT, CAVEAT_VECTOR,
+      'policy/activate activates StrictQuoteAcceptor (test/Falsify.t.sol artifact; fixture rule v2) as QUOTE policy row 2: the Type id and descriptor are untouched, unsent epoch-N signatures are refused (E_INTENT), and acceptanceBasis reports row 1 for the earlier admission. A policy activation is a Realm fact, not a Type change.',
+      'failure/refused-re-registration covers the identical-descriptor case only; a different descriptor under a colliding id is impossible by construction (derived ids) and is recorded as a statement row, not a transaction.',
     ],
   };
   activeReport = report;
@@ -1076,10 +1298,14 @@ async function main() {
   try {
     if (args.addresses) {
       run.addrs = JSON.parse(readFileSync(args.addresses, 'utf8'));
+      assert(run.addrs.strictAcceptor && run.addrs.registry, '--addresses: the address file must come from this script version (needs registry and strictAcceptor)');
+      const rctx = makeCtx(run); // derived ids must be resolved from the chain before any cell (T throws otherwise)
+      report.types = await resolveTypesFromChain(rctx);
+      Object.assign(report, { typeResolutionRaw: rctx.raw, typeResolutionBlocks: rctx.blocks, typeResolutionRpcOther: rctx.rpcOther });
     } else {
       const d = await deployAll(run);
       run.addrs = d.addrs;
-      Object.assign(report, { deployment: d.deployment, setup: d.setup, setupTransactions: d.setupTransactions, setupRaw: d.setupRaw, setupBlocks: d.setupBlocks, setupRpcOther: d.setupRpcOther, registryEpoch: d.registryEpoch, principals: d.principals });
+      Object.assign(report, { deployment: d.deployment, setup: d.setup, setupTransactions: d.setupTransactions, setupRaw: d.setupRaw, setupBlocks: d.setupBlocks, setupRpcOther: d.setupRpcOther, registryEpoch: d.registryEpoch, principals: d.principals, types: d.types });
       const addressesPath = join(SCRATCH_ROOT, 'lab-addresses.json'); // run-owned, never inside the lab directory
       writeFileSync(addressesPath, JSON.stringify(run.addrs, null, 2));
       report.paths.addresses = addressesPath;
@@ -1101,6 +1327,10 @@ async function main() {
     await runCellNamed('failure-rows', failureCell);
     await runCellNamed('joined/steps-1-6', joinedCell);
     for (const variant of ['hash-only-create', 'create+label-fresh', 'create+label-existing-republished', 'create+label-existing-omitted']) await runCellNamed(`label/${variant}`, labelCell(variant));
+    // authority-repair cells (REPAIR.md): each its own sealed cell from the same snapshot
+    await runCellNamed('policy/activate', policyCell);
+    await runCellNamed('failure/refused-re-registration', refusedRegistrationCell);
+    await runCellNamed('failure/unsupported-native-import', unsupportedImportCell);
     if (!args['skip-without-index']) {
       await runCellNamed('native-one-noindex/quote', {
         standing: 'NOT EQUIVALENT: the mandatory index is detached (a named guarantee omitted); diagnostic only',
@@ -1114,7 +1344,7 @@ async function main() {
     }
     const finalEnv = await rpc0('evm_revert', [run.sealed]);
     assert.equal(finalEnv.response.result, true, 'final evm_revert');
-    report.estimatedFreshSlots = { label: 'ESTIMATED from the design table, not traced', 'create (native, 4 actions)': '5 evidence + 1 pubId + 2..3 record + 1 subject + 4..6 admission + 2x(2 head + 1 bindingPosition + 3 positionCell) + index appends', 'create (signed)': 'as native + 2 (r, s)', 'edit': '3 record + 2..3 admission + head rewrite + index appends', 'create + label fresh': 'create + 3 record (typeId, meta, one word) + 2 admission + by-Type/by-author appends', 'create + label existing republished': 'create + 1 occurrence rewrite + 2 admission + appends', 'create + label existing omitted': 'create + 0' };
+    report.estimatedFreshSlots = { label: 'ESTIMATED from the design table, not traced', 'create (native, 4 actions)': '5 evidence + 1 pubId + 2..3 record + 1 subject + 4..6 admission + 2x(2 head + 1 bindingPosition + 3 positionCell) + index appends', 'create (signed)': 'as native + 2 (r, s)', 'edit': '3 record + 2..3 admission + head rewrite + index appends', 'create + label fresh': 'create + 3 record (typeId, meta, one word) + 2 admission + by-Type/by-author appends', 'create + label existing republished': 'create + 1 occurrence rewrite + 2 admission + appends', 'create + label existing omitted': 'create + 0', 'register (per Type)': '3 descriptor + (1 + refs) refTypes + 2 policy row + epoch rewrite', 'policy activate': '2 policy row + 1 rewrite (activations) + epoch rewrite', 'admission basis': '0 (packed into the existing AdmissionRow.meta word)' };
     report.consumerMismatches = Object.values(report.cells).reduce((n, c) => n + (c.mismatches || 0), 0);
     assert.equal(report.consumerMismatches, 0, `consumer/commitment self-check mismatches: ${report.consumerMismatches}`);
     report.finishedAt = new Date().toISOString();
