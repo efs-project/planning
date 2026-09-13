@@ -1,0 +1,129 @@
+Compiling 71 files with Solc 0.8.30
+Solc 0.8.30 finished in 14.83s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/EfsTypes.sol:208:36:
+    |
+208 |   function principalId(uint8 kind, bytes32 realmOrigin, address account) internal pure returns (bytes32) {
+    |                                    ^^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> src/EfsTypes.sol:217:3:
+    |
+217 |   function realmOrigin(uint256 chainId, address ledger) internal pure returns (bytes32) {
+    |   ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 2 tests for test/MeasurementConsumer.t.sol:MeasurementSealedTest
+[PASS] test_sealed_aFirst_pointAndListAgreeOnA2_overTheOnePlacement() (gas: 5174318)
+[PASS] test_sealed_bFirst_selectsB1_whilePlacementProvenanceStaysA1() (gas: 5156202)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 46.06ms (5.98ms CPU time)
+
+Ran 2 tests for test/Import.t.sol:ImportRuleCommitmentTest
+[PASS] test_import_destinationTypeSubstitutionRefused_thenSameRuleAcceptsA1A2() (gas: 66044564)
+[PASS] test_import_validSignatureNeverSourceAdmitted_revalidatesMandatoryRule() (gas: 62636308)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 107.70ms (67.70ms CPU time)
+
+Ran 4 tests for test/Publish.t.sol:PublishAuthTest
+[PASS] test_exactRetry_alreadyAdmitted() (gas: 2532125)
+[PASS] test_existingBody_byOtherAuthor_and_recordIdReuse() (gas: 3446757)
+[PASS] test_signature_mutations_rejected_then_original_admitted() (gas: 56218489)
+[PASS] test_spoofAuthorB_rejected() (gas: 2492827)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 64.69ms (33.44ms CPU time)
+
+Ran 9 tests for test/Publish.t.sol:PublishTest
+[PASS] test_reject_failedAcceptance_rollback() (gas: 2544106)
+[PASS] test_reject_failedIndex_rollback() (gas: 3547913)
+[PASS] test_reject_missingPair_noEffects() (gas: 371703)
+[PASS] test_reject_staleCas() (gas: 2939241)
+[PASS] test_reject_wrongTypePair() (gas: 141145)
+[PASS] test_step1_itemsPairAdmitted_refsChecked() (gas: 85592)
+[PASS] test_step2_a1_signed_freshBody_preAbsence() (gas: 2590551)
+[PASS] test_step3_a2_cas_history() (gas: 3556893)
+[PASS] test_step4_b1_contractAuthor() (gas: 5074394)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 36.54ms (5.81ms CPU time)
+
+Ran 6 tests for test/Import.t.sol:ImportTest
+[PASS] test_import_preservesSubject_separatesAuthority() (gas: 62378783)
+[PASS] test_import_requiresDestinationAuthorization() (gas: 59500616)
+[PASS] test_selfcheck_reconstruct_flippedDiscriminator_changesDigest() (gas: 3587279)
+[PASS] test_selfcheck_reconstruct_signature_from_state() (gas: 3596183)
+[PASS] test_spoofViaImport_nativeSourceClaimingB_rejected_stateUnchanged() (gas: 63943276)
+[PASS] test_twoRealms_sameContractAndSalt_differentSubject_nativeImportUnsupported() (gas: 54879955)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 158.25ms (127.19ms CPU time)
+
+Ran 11 tests for test/RawWriteDenial.t.sol:RawWriteDenialTest
+[PASS] test_attachIsOneShot_andSealsCodehash() (gas: 23980)
+[PASS] test_attachRejectsZeroAndNoCode() (gas: 6467886)
+[PASS] test_attachRequiresReciprocity() (gas: 6458838)
+[PASS] test_control_openStore_acceptsTheSameInputs() (gas: 7399225)
+[PASS] test_indexWriterIsOnlyTheSealedLedger() (gas: 9343)
+[PASS] test_index_rawWritersDenied_rowAndMetadataUnchanged() (gas: 359577)
+[PASS] test_ledgerRefusesUnattachedOrForeignModule() (gas: 146727919)
+[PASS] test_ledgerRejectsZeroOrNoCodeIndex() (gas: 61159198)
+[PASS] test_ledger_rawWritersDenied_rowAndMetadataUnchanged() (gas: 402764)
+[PASS] test_noFallbackNoReceive() (gas: 11886)
+[PASS] test_readSurfaceWorks() (gas: 43247)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 176.13ms (144.89ms CPU time)
+
+Ran 22 tests for test/MeasurementConsumer.t.sol:MeasurementFaultyReadsTest
+[PASS] test_faultyReads_faithfulForwardingMatchesTheRealReaders() (gas: 5530364)
+[PASS] test_faultyReads_malformedAdmissionReplyRefused() (gas: 4853391)
+[PASS] test_faultyReads_malformedEvidenceReplyRefused() (gas: 4966373)
+[PASS] test_faultyReads_missingPairRecordRefused() (gas: 5049689)
+[PASS] test_faultyReads_partialPageClaimingCompleteRefused() (gas: 5097869)
+[PASS] test_faultyReads_wrongTypeItemRefused() (gas: 5184298)
+[PASS] test_faulty_actual_reply_admissionWrongTarget_refused() (gas: 4855149)
+[PASS] test_faulty_actual_reply_cursorCoreCommitment_refused() (gas: 5078630)
+[PASS] test_faulty_actual_reply_cursorGeneration_refused() (gas: 5078432)
+[PASS] test_faulty_actual_reply_cursorLensHash_refused() (gas: 5079169)
+[PASS] test_faulty_actual_reply_cursorRulesEpoch_refused() (gas: 5078327)
+[PASS] test_faulty_actual_reply_cursorScopeKey_refused() (gas: 5078626)
+[PASS] test_faulty_actual_reply_evidenceOutOfRange_refused() (gas: 4855621)
+[PASS] test_faulty_actual_reply_headResolutionBasis_refused() (gas: 4904226)
+[PASS] test_faulty_actual_reply_launderedSelectedBy_refusedAsAuthorMismatch() (gas: 4875799)
+[PASS] test_faulty_actual_reply_ledgerMismatch_refused() (gas: 4804918)
+[PASS] test_faulty_actual_reply_malformedFrame_refused() (gas: 4917759)
+[PASS] test_faulty_actual_reply_notAtBasis_refused() (gas: 4832982)
+[PASS] test_faulty_actual_reply_placementResolutionBasis_refused() (gas: 5186509)
+[PASS] test_faulty_actual_reply_proofShape_refused() (gas: 4939746)
+[PASS] test_faulty_actual_reply_realmMismatch_refused() (gas: 4867293)
+[PASS] test_faulty_actual_reply_shortRecord_refused() (gas: 4898380)
+Suite result: ok. 22 passed; 0 failed; 0 skipped; finished in 61.82ms (30.52ms CPU time)
+
+Ran 6 tests for test/Selection.t.sol:SelectionTest
+[PASS] test_consumer_paidRead() (gas: 5427231)
+[PASS] test_coverage_families() (gas: 35525)
+[PASS] test_cursor_basisPinned_and_stale() (gas: 4866981)
+[PASS] test_dedupe_sameName_acrossAuthors() (gas: 4137996)
+[PASS] test_step5_threeLenses_agree_point_list_tag() (gas: 5352461)
+[PASS] test_step6_move_replace_remove_restore() (gas: 8191212)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 39.12ms (8.20ms CPU time)
+
+Ran 6 tests for test/MeasurementConsumer.t.sol:MeasurementFramedTest
+[PASS] test_framed_rejectsIncompleteListSelection() (gas: 4085352)
+[PASS] test_framed_rejectsWrongAuthorEvidenceContext() (gas: 2479494)
+[PASS] test_framed_rejectsWrongPayloadLengthAndHash() (gas: 2552541)
+[PASS] test_framed_rejectsWrongReference() (gas: 2505629)
+[PASS] test_paidListFramed_checksCompleteSelectionAndCursorBasis() (gas: 5169267)
+[PASS] test_paidPointFramed_checksJoinedQuoteAndEvidence() (gas: 3526715)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 35.89ms (4.95ms CPU time)
+
+Ran 9 tests for test/MeasurementConsumer.t.sol:MeasurementSealedNegativesTest
+[PASS] test_sealed_refusesMixedBases() (gas: 5576510)
+[PASS] test_sealed_refusesPartialWindow() (gas: 5016112)
+[PASS] test_sealed_refusesPointListDisagreement() (gas: 5007322)
+[PASS] test_sealed_refusesSecondPlacement_pointUnaffected() (gas: 5670750)
+[PASS] test_sealed_refusesWrongAuthorOrProofCategory() (gas: 5388823)
+[PASS] test_sealed_refusesWrongHeadRevisionOrQuoteFields() (gas: 5142001)
+[PASS] test_sealed_refusesWrongOrMissingItem() (gas: 5074585)
+[PASS] test_sealed_refusesWrongOrMissingPair() (gas: 4938462)
+[PASS] test_sealed_refusesWrongPlacementCoordinateRevisionOrPublication() (gas: 5622302)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 46.06ms (15.06ms CPU time)
+
+Ran 3 tests for test/TypeRuleCommitment.t.sol:TypeRuleCommitmentTest
+[PASS] test_differentMandatoryRuleCommitment_changesExactType() (gas: 1458535)
+[PASS] test_reject_strictRuleCommitmentBoundToPermissiveRuntime_noEffects() (gas: 1897513)
+[PASS] test_sameImmutableRuntimeAtDifferentAddresses_preservesTypeAcrossRealms() (gas: 55384340)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 60.67ms (30.62ms CPU time)
+
+Ran 11 test suites in 432.71ms (832.94ms CPU time): 80 tests passed, 0 failed, 0 skipped (80 total tests)

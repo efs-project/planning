@@ -1,0 +1,21 @@
+{
+  "base": "9a4e7667e285f1da865da559bf767ce664ec0fda",
+  "normalization": "numeric NatSpec tags in comments only; ABI top-level entry ordering only",
+  "normalized": {
+    "beforeSha256": "58b3eaf43aa8be07e0385c8736af94708e524aacc3e8b58e75f825f2871b8b0d",
+    "afterSha256": "1f552905a0e1cb7afd2b7c786d53b8b20f3da80b080569d5c6e530ea747c7505"
+  },
+  "sources": 72,
+  "abiEntries": 46,
+  "methods": 13,
+  "compiledAbiEqual": true,
+  "compiledMethodIdentifiersEqual": true,
+  "baselineBytecodeBuilt": false,
+  "warnings": [
+    {
+      "code": "2519",
+      "severity": "warning",
+      "message": "This declaration shadows an existing declaration."
+    }
+  ]
+}

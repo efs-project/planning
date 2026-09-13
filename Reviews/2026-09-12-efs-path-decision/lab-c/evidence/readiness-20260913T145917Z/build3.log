@@ -1,0 +1,547 @@
+Compiling 71 files with Solc 0.8.30
+Solc 0.8.30 finished in 14.76s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/EfsTypes.sol:208:36:
+    |
+208 |   function principalId(uint8 kind, bytes32 realmOrigin, address account) internal pure returns (bytes32) {
+    |                                    ^^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> src/EfsTypes.sol:217:3:
+    |
+217 |   function realmOrigin(uint256 chainId, address ledger) internal pure returns (bytes32) {
+    |   ^ (Relevant source part starts here and spans across multiple lines).
+
+
+╭------------------------+------------------+-------------------+--------------------+---------------------╮
+| Contract               | Runtime Size (B) | Initcode Size (B) | Runtime Margin (B) | Initcode Margin (B) |
++==========================================================================================================+
+| ActionLib              | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Admissions             | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Backlinks              | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| BindingHistory         | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Bindings               | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| ByAuthor               | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| ByType                 | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Bytes                  | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Bytes32List            | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Counters               | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Coverage               | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| DecodeSlice            | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| DenialProbe            | 7,560            | 7,586             | 17,016             | 41,566              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Deploy                 | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| EfsIds                 | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| EncodeArray            | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| EncodedLengthsInstance | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| EncodedLengthsLib      | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Evidence               | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| EvidenceReconstructor  | 4,962            | 4,988             | 19,614             | 44,164              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| FaultyReads            | 6,808            | 7,056             | 17,768             | 42,096              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| FieldLayoutInstance    | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| FieldLayoutLib         | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| FixtureActors          | 938              | 4,749             | 23,638             | 44,403              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| FixtureBuilders        | 4,668            | 4,694             | 19,908             | 44,458              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| FixtureExport          | 11,507           | 11,727            | 13,069             | 37,425              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| FixtureRealm           | 4,703            | 4,729             | 19,873             | 44,423              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| FixtureSeeder          | 12,502           | 15,416            | 12,074             | 33,736              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| HookInstance           | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| HookLib                | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Hooks                  | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| ImportLib              | 19,909           | 19,941            | 4,667              | 29,211              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| IndexModule            | 10,303           | 22,790            | 14,273             | 26,362              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| LayoutOffsets          | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Ledger                 | 23,204           | 37,951            | 1,372              | 11,201              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| LensReader             | 10,585           | 10,843            | 13,991             | 38,309              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| MeasurementConsumer    | 15,445           | 15,471            | 9,131              | 33,681              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| MeasurementFixture     | 3,004            | 3,136             | 21,572             | 46,016              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Memory                 | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Nonces                 | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Occurrences            | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| OpenStore              | 15,757           | 25,292            | 8,819              | 23,860              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| PassAcceptor           | 186              | 210               | 24,390             | 48,942              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Producer               | 2,644            | 2,681             | 21,932             | 46,471              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| QuoteAcceptorV1        | 610              | 636               | 23,966             | 48,516              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| QuoteAcceptorV2        | 608              | 634               | 23,968             | 48,518              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| QuoteConsumer          | 1,386            | 1,412             | 23,190             | 47,740              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Records                | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| ResourceIdInstance     | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| ResourceIdLib          | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| ResourceIds            | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| SchemaInstance         | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| SchemaLib              | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Scopes                 | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| SliceInstance          | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| SliceLib               | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Storage                | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| StoreCore              | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| StoreCoreInternal      | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| StoreHooks             | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| StoreRead              | 3,542            | 3,568             | 21,034             | 45,584              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| StoreSwitch            | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Subjects               | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Tables                 | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| TightCoder             | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Types                  | 3                | 31                | 24,573             | 49,121              |
+|------------------------+------------------+-------------------+--------------------+---------------------|
+| Uint64List             | 3                | 31                | 24,573             | 49,121              |
+╰------------------------+------------------+-------------------+--------------------+---------------------╯
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+   ╭▸ src/ActionLib.sol:94:33
+   │
+94 │     if (intent.deadline != 0 && block.timestamp > intent.deadline) revert Expired(intent.deadline);
+   │                                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ src/tables/IndexTables.sol:87:19
+   │
+87 │     return uint64(bytes8(blob));
+   │                   ━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'bytes8' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ src/ActionLib.sol:155:102
+    │
+155 │       effects[i] = applyAction(i, actions[i], bodies[i], author, publicationId, basis + 1 + offset + uint64(i));
+    │                                                                                                      ━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ src/LensReader.sol:208:22
+    │
+208 │         h.revision = uint32(j);
+    │                      ━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint32' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ test/MeasurementConsumer.t.sol:135:41
+    │
+135 │     require(err.length == 4 + 7 * 32 && bytes4(err) == MeasurementConsumer.PlacementWindow.selector, "PlacementWindow expected");
+    │                                         ━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'bytes4' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ test/LabBase.sol:222:32
+    │
+222 │     require(err.length >= 4 && bytes4(err) == sel, what);
+    │                                ━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'bytes4' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ test/Publish.t.sol:208:15
+    │
+208 │       require(bytes4(err) == AuthorMismatch.selector || bytes4(err) == BadSignature.selector, "realm mutation");
+    │               ━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'bytes4' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ test/Publish.t.sol:208:57
+    │
+208 │       require(bytes4(err) == AuthorMismatch.selector || bytes4(err) == BadSignature.selector, "realm mutation");
+    │                                                         ━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'bytes4' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ test/Import.t.sol:65:15
+   │
+65 │       require(bytes4(err) == AuthorMismatch.selector || bytes4(err) == BadSignature.selector, "realm-bound");
+   │               ━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'bytes4' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ test/Import.t.sol:65:57
+   │
+65 │       require(bytes4(err) == AuthorMismatch.selector || bytes4(err) == BadSignature.selector, "realm-bound");
+   │                                                         ━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'bytes4' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ src/LensReader.sol:327:21
+    │
+327 │     page.selected = uint32(c);
+    │                     ━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint32' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ src/LensReader.sol:340:13
+    │
+340 │     total = uint32(n);
+    │             ━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint32' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+   ╭▸ src/ImportLib.sol:79:33
+   │
+79 │       if (auth.deadline != 0 && block.timestamp > auth.deadline) revert Expired(auth.deadline);
+   │                                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#block-timestamp
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ test/Publish.t.sol:239:15
+    │
+239 │       require(bytes4(err) == AuthorMismatch.selector || bytes4(err) == BadSignature.selector, what);
+    │               ━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'bytes4' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ test/Deploy.sol:79:21
+   │
+79 │     require(address(bytes20(linked)) == lib, "wrong deployed ImportLib identity");
+   │                     ━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'bytes20' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ test/RawWriteDenial.t.sol:64:38
+   │
+64 │     require(ledger.storeVersion() == bytes32("2.0.2"), "vendored STORE_VERSION");
+   │                                      ━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'bytes32' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ test/TypeRuleCommitment.t.sol:37:28
+   │
+37 │     bodies[0] = abi.encode(bytes32("pair-shape"), new bytes32[](0), permissiveRule.codehash);
+   │                            ━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'bytes32' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ test/TypeRuleCommitment.t.sol:41:28
+   │
+41 │     bodies[1] = abi.encode(bytes32("quote-shape"), refTypes, strictRule.codehash);
+   │                            ━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'bytes32' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ test/Deploy.sol:110:25
+    │
+110 │       s[2 * i] = digits[uint8(v >> (8 * (19 - i)) >> 4) & 0xf];
+    │                         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint8' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ src/ImportLib.sol:126:14
+    │
+126 │     c.rows = uint16(n + 1);
+    │              ━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint16' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ test/FixtureExport.sol:38:76
+   │
+38 │       AdmissionData memory ad = Admissions.get(ledger, ev.firstAdmission + uint64(i));
+   │                                                                            ━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+   ╭▸ test/TypeRuleCommitment.t.sol:87:28
+   │
+87 │     bodies[0] = abi.encode(bytes32("quote-shape"), new bytes32[](0), strictRule.codehash);
+   │                            ━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'bytes32' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ test/Publish.t.sol:239:57
+    │
+239 │       require(bytes4(err) == AuthorMismatch.selector || bytes4(err) == BadSignature.selector, what);
+    │                                                         ━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'bytes4' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ src/ImportLib.sol:127:53
+    │
+127 │     Counters._set(COUNTER_ADMISSIONS, c.basis + 1 + uint64(n));
+    │                                                     ━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ test/Import.t.sol:229:37
+    │
+229 │       require(Admissions.get(store, uint64(i + 1)).publicationId == bytes32(0), "substitution retained a prefix admission");
+    │                                     ━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ test/FixtureExport.sol:131:71
+    │
+131 │       AdmissionData memory ad = Admissions.get(s, ev.firstAdmission + uint64(i));
+    │                                                                       ━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ test/Deploy.sol:111:29
+    │
+111 │       s[2 * i + 1] = digits[uint8(v >> (8 * (19 - i))) & 0xf];
+    │                             ━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint8' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ test/TypeRuleCommitment.t.sol:109:28
+    │
+109 │     bodies[0] = abi.encode(bytes32("quote-shape"), new bytes32[](0), strictRule.codehash);
+    │                            ━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'bytes32' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+
+warning[unsafe-typecast]: typecasts that can truncate values should be checked
+    ╭▸ test/TypeRuleCommitment.t.sol:110:28
+    │
+110 │     bodies[1] = abi.encode(bytes32("quote-shape"), new bytes32[](0), stricterRule.codehash);
+    │                            ━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'bytes32' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://book.getfoundry.sh/reference/forge/forge-lint#unsafe-typecast
+

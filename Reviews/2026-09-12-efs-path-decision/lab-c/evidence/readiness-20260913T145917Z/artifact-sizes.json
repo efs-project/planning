@@ -1,0 +1,565 @@
+{
+  "standing": "compiled artifact lengths, not deployment receipts; constructor arguments excluded",
+  "sizes": [
+    {
+      "artifact": "ActionLib.sol/ActionLib.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "ActionLib.sol/ILedgerDecode.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "Bytes.sol/Bytes.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "Consumer.sol/QuoteConsumer.json",
+      "creation": 1412,
+      "runtime": 1386
+    },
+    {
+      "artifact": "DecodeSlice.sol/DecodeSlice.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "DenialProbe.sol/DenialProbe.json",
+      "creation": 7586,
+      "runtime": 7560
+    },
+    {
+      "artifact": "Deploy.sol/Deploy.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "EfsStoreCore.sol/EfsStoreCore.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "EfsTypes.sol/EfsIds.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "EfsTypes.sol/IAcceptor.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "EfsTypes.sol/IIndexModule.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "EfsTypes.sol/ILedgerView.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "EncodeArray.sol/EncodeArray.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "EncodedLengths.sol/EncodedLengthsInstance.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "EncodedLengths.sol/EncodedLengthsLib.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "FaultyReads.sol/FaultyReads.json",
+      "creation": 7056,
+      "runtime": 6808
+    },
+    {
+      "artifact": "FieldLayout.sol/FieldLayoutInstance.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "FieldLayout.sol/FieldLayoutLib.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "FixtureActors.sol/FixtureActors.json",
+      "creation": 4749,
+      "runtime": 938
+    },
+    {
+      "artifact": "FixtureActors.sol/PassAcceptor.json",
+      "creation": 210,
+      "runtime": 186
+    },
+    {
+      "artifact": "FixtureActors.sol/Producer.json",
+      "creation": 2681,
+      "runtime": 2644
+    },
+    {
+      "artifact": "FixtureActors.sol/QuoteAcceptorV1.json",
+      "creation": 636,
+      "runtime": 610
+    },
+    {
+      "artifact": "FixtureActors.sol/QuoteAcceptorV2.json",
+      "creation": 634,
+      "runtime": 608
+    },
+    {
+      "artifact": "FixtureBuilders.sol/FixtureBuilders.json",
+      "creation": 4694,
+      "runtime": 4668
+    },
+    {
+      "artifact": "FixtureExport.sol/EvidenceReconstructor.json",
+      "creation": 4988,
+      "runtime": 4962
+    },
+    {
+      "artifact": "FixtureExport.sol/FixtureExport.json",
+      "creation": 11727,
+      "runtime": 11507
+    },
+    {
+      "artifact": "FixtureRealm.sol/FixtureRealm.json",
+      "creation": 4729,
+      "runtime": 4703
+    },
+    {
+      "artifact": "FixtureSeeder.sol/FixtureSeeder.json",
+      "creation": 15416,
+      "runtime": 12502
+    },
+    {
+      "artifact": "Hook.sol/HookInstance.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "Hook.sol/HookLib.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "Hooks.sol/Hooks.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "IERC165.sol/IERC165.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "IEncodedLengthsErrors.sol/IEncodedLengthsErrors.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "IFieldLayoutErrors.sol/IFieldLayoutErrors.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "ISchemaErrors.sol/ISchemaErrors.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "ISliceErrors.sol/ISliceErrors.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "IStore.sol/IStore.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "IStoreErrors.sol/IStoreErrors.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "IStoreEvents.sol/IStoreEvents.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "IStoreHook.sol/IStoreHook.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "IStoreKernel.sol/IStoreKernel.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "IStoreRead.sol/IStoreRead.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "IStoreRegistration.sol/IStoreRegistration.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "IStoreWrite.sol/IStoreWrite.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "Import.t.sol/ImportRuleCommitmentTest.json",
+      "creation": 16912,
+      "runtime": 16886
+    },
+    {
+      "artifact": "Import.t.sol/ImportTest.json",
+      "creation": 18092,
+      "runtime": 18066
+    },
+    {
+      "artifact": "ImportLib.sol/ImportLib.json",
+      "creation": 19941,
+      "runtime": 19909
+    },
+    {
+      "artifact": "IndexModule.sol/IndexModule.json",
+      "creation": 22790,
+      "runtime": 10303
+    },
+    {
+      "artifact": "IndexTables.sol/Backlinks.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "IndexTables.sol/BindingHistory.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "IndexTables.sol/ByAuthor.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "IndexTables.sol/ByType.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "IndexTables.sol/Bytes32List.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "IndexTables.sol/Coverage.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "IndexTables.sol/Occurrences.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "IndexTables.sol/Scopes.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "IndexTables.sol/Uint64List.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "LabBase.sol/LabBase.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "Ledger.sol/Ledger.json",
+      "creation": 37951,
+      "runtime": 23204
+    },
+    {
+      "artifact": "LedgerErrors.sol/LedgerErrors.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "LedgerTables.sol/Admissions.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "LedgerTables.sol/Bindings.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "LedgerTables.sol/Counters.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "LedgerTables.sol/Evidence.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "LedgerTables.sol/Nonces.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "LedgerTables.sol/Records.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "LedgerTables.sol/Subjects.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "LedgerTables.sol/Types.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "LensReader.sol/LensReader.json",
+      "creation": 10843,
+      "runtime": 10585
+    },
+    {
+      "artifact": "MeasurementConsumer.sol/IIndexReads.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "MeasurementConsumer.sol/ILedgerViews.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "MeasurementConsumer.sol/ILensReads.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "MeasurementConsumer.sol/ITableReads.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "MeasurementConsumer.sol/MeasurementConsumer.json",
+      "creation": 15471,
+      "runtime": 15445
+    },
+    {
+      "artifact": "MeasurementConsumer.t.sol/MeasurementBase.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "MeasurementConsumer.t.sol/MeasurementFaultyReadsTest.json",
+      "creation": 23464,
+      "runtime": 23438
+    },
+    {
+      "artifact": "MeasurementConsumer.t.sol/MeasurementFramedTest.json",
+      "creation": 7310,
+      "runtime": 7284
+    },
+    {
+      "artifact": "MeasurementConsumer.t.sol/MeasurementSealedNegativesTest.json",
+      "creation": 14518,
+      "runtime": 14492
+    },
+    {
+      "artifact": "MeasurementConsumer.t.sol/MeasurementSealedTest.json",
+      "creation": 9519,
+      "runtime": 9493
+    },
+    {
+      "artifact": "MeasurementFixture.sol/MeasurementFixture.json",
+      "creation": 3136,
+      "runtime": 3004
+    },
+    {
+      "artifact": "Memory.sol/Memory.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "OpenStore.sol/OpenStore.json",
+      "creation": 25292,
+      "runtime": 15757
+    },
+    {
+      "artifact": "Publish.t.sol/PublishAuthTest.json",
+      "creation": 13928,
+      "runtime": 13902
+    },
+    {
+      "artifact": "Publish.t.sol/PublishTest.json",
+      "creation": 19100,
+      "runtime": 19074
+    },
+    {
+      "artifact": "RawWriteDenial.t.sol/RawWriteDenialTest.json",
+      "creation": 16943,
+      "runtime": 16917
+    },
+    {
+      "artifact": "ResourceId.sol/ResourceIdInstance.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "ResourceId.sol/ResourceIdLib.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "ResourceIds.sol/ResourceIds.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "Schema.sol/SchemaInstance.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "Schema.sol/SchemaLib.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "SchemaType.sol/SchemaType.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "Selection.t.sol/SelectionTest.json",
+      "creation": 18053,
+      "runtime": 18027
+    },
+    {
+      "artifact": "Slice.sol/SliceInstance.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "Slice.sol/SliceLib.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "Storage.sol/Storage.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "Store.sol/Store.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "StoreCore.sol/StoreCore.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "StoreCore.sol/StoreCoreInternal.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "StoreHooks.sol/StoreHooks.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "StoreKernel.sol/StoreKernel.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "StoreRead.sol/StoreRead.json",
+      "creation": 3568,
+      "runtime": 3542
+    },
+    {
+      "artifact": "StoreSwitch.sol/StoreSwitch.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "Tables.sol/Tables.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "TightCoder.sol/TightCoder.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "TypeRuleCommitment.t.sol/TypeRuleCommitmentTest.json",
+      "creation": 11535,
+      "runtime": 11509
+    },
+    {
+      "artifact": "Vm.sol/Vm.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "constants.sol/LayoutOffsets.json",
+      "creation": 31,
+      "runtime": 3
+    },
+    {
+      "artifact": "index.sol/index.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "rightMask.sol/rightMask.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "storeHookTypes.sol/storeHookTypes.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "storeResourceTypes.sol/storeResourceTypes.json",
+      "creation": 0,
+      "runtime": 0
+    },
+    {
+      "artifact": "version.sol/version.json",
+      "creation": 0,
+      "runtime": 0
+    }
+  ]
+}

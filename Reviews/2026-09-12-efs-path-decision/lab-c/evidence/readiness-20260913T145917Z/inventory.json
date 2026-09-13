@@ -1,0 +1,33 @@
+{
+  "source": "2ca7349e5d683c3ff10651c0fc106c10da946145",
+  "files": {
+    "run3.json": {
+      "bytes": 14053,
+      "sha256": "3be180dc4e9ab1874e2ba49c6ff3f50c4c0559e49439484f60bf7d4723adccf6"
+    },
+    "build3.log": {
+      "bytes": 33966,
+      "sha256": "6a40aeab6cd9c713e171287f4fef801e413f31764e44715f0a9b11a7308bcbf1"
+    },
+    "test3.log": {
+      "bytes": 7950,
+      "sha256": "086e0c38f9aebefe41ce8cd94856a67e8368dfe2dca31cea023d55a679818a84"
+    },
+    "node-tests.log": {
+      "bytes": 8354,
+      "sha256": "5d21c47a30e951cf21e6f1ae045e72b96dfe528e3ae8372ac159d45088880f1a"
+    },
+    "baseline-abi-check.json": {
+      "bytes": 660,
+      "sha256": "684ce09017ad3ca51c67fa281769bea1ee389a3de8dbe6820b50abbb8cf55248"
+    },
+    "check-baseline-abi.mjs": {
+      "bytes": 3612,
+      "sha256": "5846ca6c0752643e2ed62acd3c0d4bd0c51848e0b48edbdc37f72e3a87600528"
+    },
+    "artifact-sizes.json": {
+      "bytes": 12478,
+      "sha256": "1f89edc39ed1e0cccf8d057b59dca39328b5da8383bb982887375fc656a4109e"
+    }
+  }
+}
