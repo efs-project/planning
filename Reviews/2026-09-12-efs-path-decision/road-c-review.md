@@ -44,3 +44,38 @@ Reject only demonstrated unwaived semantic/trust conflict or measured complete c
 First resolve the two authority/ABI sketches on paper, then choose **one** adapter with a written reason—no second filesystem or EAS arm. Use the custom contender's exact fixture/oracle: 32-byte quote, 41-byte binary, two authors, genuine contract author, checked reference, folder/tag queries and two Lens selections. Join typed publication → acceptance → separate mandatory index → unrelated paid consumer and clean state-only reader. Force wrong/missing references, stale CAS, every raw writer, direct System calls, import/reuse and late-index rollback to fail correctly.
 
 Measure setup, create/edit/native update, paid selected point/list reads, storage growth, per-contract runtime/initcode, and clean-reader RPC bytes/calls with logs disabled; report optional log-sync benefit separately. Record maintained component inventory and normal decomposition costs, not a LOC pass mark. Carry export/import historical-authority and populated-upgrade tests as explicit finalist gates if absent; this small probe alone cannot close them. No heavy run has been requested or performed by this review.
+
+## Test-harness handoff — September 13, 02:16 UTC
+
+Fable's session limit interrupted the helper repair at `731200d` plus dirty
+files. Live inspection confirms the partial split exists and retains all 37
+tests (13 Publish, 7 Import, 6 Selection, 11 raw-denial). The current tested
+Core modules fit normal limits; no C semantic test has executed yet.
+
+**Bounded repair requirements:** preserve the interrupted work and all existing
+semantic assertions; change test utilities/configuration only. Record a failing
+normal-limit build/test first, repair the causes below, then run all 37 tests
+and the full helper/deployable size report under normal limits. Keep the pinned
+vendor and Core semantics unchanged. Any new Core failure is a finding, not
+permission to weaken a test. One root-reviewed repair cycle, no Anvil.
+
+1. `Deploy.sol` hardcodes `out/Ledger.sol/Ledger.json`, whereas approved Forge
+   artifacts live in the run-owned scratch output. Use one explicit artifact
+   root for Forge, `getCode`, linked JSON and narrowly scoped read permission;
+   no stale duplicate artifact tree. Verify the effective configuration.
+2. `RawWriteDenial` still uses `new DenialProbe()` and `new OpenStore()`;
+   OpenStore's 25,292-byte creation code alone overfills its creator. Use the
+   existing artifact deployer for both. Include every helper/test in size checks.
+3. The interrupted linker replaces every placeholder, not `linkReferences`.
+   Reject unexpected/missing/multiple library references rather than replacing
+   arbitrary placeholders with ImportLib. Check constructor failure propagation
+   and deployed library identity. Preserve the corrected FixtureRealm attach
+   context, `EncodedLengths.wrap`, and `view` declarations.
+
+Root verified cached compiler SHA-256
+`738dcdc6afddeb505ee4e4ef24f1c1fdba2b8c924e614cbbf5801a5b062dd683`
+(Solidity 0.8.30+73712a01). The [[README#Coordinator checkpoint|shared checkpoint]]
+owns the temporary operator and exact run lease. Record commands, start/end,
+exits, red/green results, artifact/source hashes and any remaining failures in
+`lab-c/test-harness-repair.md`; return the code-branch pin for independent review.
+No build success, semantic pass or cost result is inferred from this repair plan.

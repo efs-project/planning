@@ -116,8 +116,8 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 - Participants: Codex Road A analyst, existing SDK PM and Data Explorer PM dispatched; Claude **EFS v2 Dev** kickoff sent and acknowledged by 23:41 UTC. Its [[claude-pm|acknowledgement]] records an independent in-session MUD specialist and evidence extractor; a persistent extra Claude conversation is unnecessary. Earlier MUD source, cost and portability reviews are completed inputs, not new active seats.
 - Baselines: kickoff published at planning `2552962`; native source/evidence pins in section 5 remain the named comparison pins. Fable's existing untracked brainstorm is preserved. The similarly named direct worktree is the stopped `f873890` size probe, not the fuller control.
 - Shared fixture / shortlisted roads / actual probes: [[sdk-fixture|SDK joined semantics]] and [[files-journey|Files lifecycle/selection journey]] received and reviewed as the common comparison requirements. They are test expectations, not executable evidence or permanent API bytes. Use [[run-manifest]] for exact source, encoding, payload and freshness inputs. **Provisional implementation shortlist: B (compact custom) and C (one corrected Store-only adapter).** Retain fuller control A and its packing proposal as the fallback/reference, not a third concurrent rebuild. No performance winner; the bounded run lease is below.
-- Heavy-run slot: **Released by Claude at September 13 02:00 UTC; Codex owns scheduling, no new heavy run is authorized.** The 01:45–02:15 serial queue finished early: C build #3 produced deployable-size modules but an oversized test helper; B completed its diagnostic at `a16d7d4` over contracts `dcc7b94` (evidence `322b320`). Source-only C helper repair and B public-profile/label design remain Claude-owned. Next build requires a pinned handback and explicit lease; do not build over the active source specialist. Retain the same run-owned scratch roots `/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b` and sibling `lab-c`, <2 GB each / <15 GB overall, 50 GB free reserve. At most two compiler workers, normal runtime/initcode/block limits, watchdogs 480 s build / 300 s tests; any later private Anvil run needs history 256, owned cache, free loopback port, 30M gas limit, 900 s outer watchdog, no traces/dumps and raw evidence before snapshot reverts. The earlier test-only raised limit is not a valid passing result or standing permission. No C Anvil yet; preserve the partial first B run too.
-- Next handoff: Claude should finish and pin its two already-running source-only tasks: C deployable test-helper split/attach-context fix, and B public profile/signature vector plus label-retention design. Hand back exact paths/status before Codex takes over a build; no duplicate specialists. SDK PM sealed neutral expectations at `f060524` (blob `a9d6c9afb5f51d0f786e006b7b5df667ae69710e`) before candidate inspection; its first strict checker is complete at `0e19d27`, and the separate `RPC_OBSERVED` extension now receives the full B diagnostic packet. It owns only `lab-oracle/` in `planning-warroom-oracle`, branch `codex/efs-warroom-oracle`. Missing declared encodings remain unsupported: provide a pinned public Action/PublicationIntent, EIP-712 domain/framing and signature-vector supplement, not candidate helper code. Claude's UI showed its five-hour quota at 100% at 02:04 UTC, reset displayed for 23:20 Chicago (04:20 UTC); Codex continues independent work and checks actual completion rather than assuming uninterrupted Claude execution.
+- Heavy-run slot: **Codex bounded worker `/root/c_harness_repair` owns C test-helper repair and one serial red/green build/test cycle, September 13 02:17–02:45 UTC**, releasing early when finished. This explicitly takes over the interrupted C test/config files after Claude's 02:06 quota handover; preserve all returned work and do not change Core/vendor semantics. Follow [[road-c-review#Test-harness handoff — September 13, 02:16 UTC|the reviewed repair brief]]. Existing C scratch is `/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-c`; retain old logs/artifacts as evidence and use distinct repair output/cache subdirectories there. <2 GB C scratch / <15 GB overall / 50 GB free reserve (265 GiB checked at 02:15); at most two compiler workers, normal runtime/initcode/block limits, watchdogs 480 s per build / 300 s tests. Record PIDs, start/end and exact source/artifact hashes; no trace dumps, no Anvil, no concurrent compiler, no implicit extension. B/SDK work remains light and separate. The earlier raised test limit is not standing permission or passing evidence.
+- Next handoff: Claude's two source workers hit the account limit at 02:06 UTC and handed back partial files. Codex is reviewing C's test-helper split and B's returned `LABELS.md`; the B public profile/signature-vector supplement is still absent. The C handoff says the split was not written, but helper files and test rewrites are present: inspect actual bytes, preserve them, and pin the completed repair before another build. No duplicate specialist or implicit takeover by a resuming Claude task. SDK PM sealed neutral expectations at `f060524` (blob `a9d6c9afb5f51d0f786e006b7b5df667ae69710e`) before candidate inspection; its first strict checker is complete at `0e19d27`, and the separate `RPC_OBSERVED` extension now receives the full B packet. It owns only `lab-oracle/` in `planning-warroom-oracle`, branch `codex/efs-warroom-oracle`. Missing encodings remain unsupported: provide a pinned public Action/PublicationIntent, EIP-712 domain/framing and signature vector, not candidate helper code. Claude shows auto-resume at 23:21 Chicago (04:21 UTC), following the 04:20 reset; Codex continues useful work and checks actual state on resumption.
 
 | Current owner / contact | Exclusive write scope and next result |
 |---|---|
@@ -130,6 +130,16 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 | **EFS Data Explorer PM**, task `01a02a24-0348-7c50-81fd-2a4ac43c62af` | `files-journey.md`: smallest observable lifecycle/discovery journey that could falsify a cheaper model. |
 
 **Publication owner: Codex v2 PM until explicit handoff.** All workers, including Claude, write only their named reports and hand them back uncommitted for review and exact-path publication. Claude's initial acknowledgement is already published at `6219a98`; the shared-index rule was then sent directly to EFS v2 Dev. Do not pull/rebase or commit concurrently from this shared checkout: “pull before commit” alone does not serialize its index. New code ownership and the heavy-run lease must be recorded before implementation/runs. Worker IDs are current contact hints, not durable architectural ownership.
+
+**Quota handover scope, 02:17 UTC:** Codex worker `c_harness_repair` now owns
+the interrupted C test/config repair and its bounded build above. A separate
+Codex worker `b_profile_finish` owns only B's missing `PROFILE.md`,
+`vectors/profile-b.json` and profile-validation note: document the pinned
+`dcc7b94` behavior and check the returned scratch vector, without changing
+contracts or the measurement. It authors candidate declarations, not the
+independent oracle. Existing `LABELS.md` remains preserved as an unadopted
+proposal. The SDK worker's `lab-oracle/` scope is separate. Resuming Claude
+must check this ownership before touching either area; no duplicate writers.
 
 ### First cross-lane feedback — September 12
 
@@ -261,7 +271,18 @@ requests/replies too. The 496,049 fresh-body / 314,527 existing-body updates
 also occur sequentially with different initialized state, so their difference
 is not an isolated deduplication premium. C's build #3 confirms Ledger 23,145 B
 and ImportLib 19,861 B runtime; the 88,623 B test Fixture still blocks execution.
-No C semantic test pass or B/C cost winner is claimed.
+No C semantic test pass or B/C cost winner is claimed. Paid-read receipts also
+include Consumer storage writes; the later reverse-Lens read has an initialized
+Consumer and cannot be compared to the first read as pure Lens overhead. The
+history row uses cutoff 1,000,000, so it tests the latest retained revision,
+not recovery of an older revision. Failure selectors came from separate static
+calls; the mined failure receipts establish reversion, not that exact selector.
+
+The returned label-design note was reviewed, not adopted. See
+[[road-b-review#Label-retention review — September 13]]: first price exact Label
+Records through existing operations, then compare any versioned dictionary
+optimization with equivalent mandatory readability/import semantics. No gas
+estimate or future-fork repricing in the draft is a measured result.
 
 **Cold-name gap (independent B/C review, September 13):** B `dcc7b94` and C
 `731200d` retain hashed folder/name/tag coordinates, not the original user text.

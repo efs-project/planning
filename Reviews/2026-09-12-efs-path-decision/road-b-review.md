@@ -42,3 +42,40 @@ The native producer example is **genuine local contract authorship** when the pr
 ## Comparison correction
 
 The matched fuller control `ebc7d54` already removed its in-memory journal: Road B earns **no journal-removal saving** against it. Its 10–14 slots and gas ranges remain **estimates**, excluding any newly specified evidence/query obligations until measured. Native/signed × one/two authors is a useful ingress/multiplicity test, not the protocol's neither/authorship/selection/both capability ablation. Keep both distinctions explicit; report complete write/read/reconstruction costs before using the proposed 20% kill threshold to favor Road A.
+
+## Label-retention review — September 13
+
+Codex's bounded reviewer checked the returned, uncommitted `lab-b/LABELS.md`
+against contract source `dcc7b94`. It is a useful experiment proposal, not an
+adopted layout or measured saving. Five corrections:
+
+- A dictionary can retain the Action/EIP-712 **formats**, but changing Ledger
+  changes its checked code commitment and currently its native identity
+  derivation. Do not call the signature/profile semantics unchanged.
+- A body checked against a FOLDER role supplies the entry name, not its folder
+  subject's preimage. Generic HEAD roles, subject IDs and tag concepts are not
+  interchangeable text-label coordinates. Keep HEAD bodies empty and specify
+  each display-label mapping explicitly.
+- Optional preimages do not ensure readable accepted Files. Required names
+  must be supplied or already retained at the admission basis, validated and
+  exported/imported atomically. A relayer must not omit them while retaining
+  an otherwise valid signature. Exact retries cannot backfill missing labels.
+- An ordinary Label Record is per `(Type, exact bytes)`, not per placement. Its
+  deterministic ID allows direct lookup without a full by-Type scan. Zero
+  references/no acceptor does not enforce UTF-8 or a 255-byte cap; existence
+  reuse establishes retained bytes, not a new author's acceptance. Occurrence
+  withdrawal does not erase the retained Record.
+- Price equivalent exact names, freshness, mandatory validation, imports and
+  paid retrieval before asserting a slot ratio or reused-name premium. The
+  existing Record body-storage helper is not an automatically safe dictionary
+  namespace. No speculative gas-repricing estimate was adopted.
+
+**Smallest conservative next probe:** leave Ledger unchanged, register one
+fixed lab Label Type in common setup, and compare hash-only create with the
+same batch plus a Label PUBLISH for exact ASCII `entry`. Include fresh label,
+existing label republished, and existing label omitted; independently retrieve
+and hash-check bytes through a paid consumer. This is a client-convention
+filename-retention baseline, **not mandatory Files semantics**. A separately
+versioned dictionary probe must earn the same readability/import guarantees
+before its lower storage cost can win. Folder and tag display semantics remain
+part of the joined Files gate.
