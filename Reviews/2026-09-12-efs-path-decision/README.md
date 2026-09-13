@@ -112,6 +112,19 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**06:10 verified execution checkpoint:** the isolated B copy is now
+`df23bbb` (same candidate Core, runner fixes through `155df3a`, and one
+Unicode-prefix correction to an existing test assertion message). Root's
+offline build and all **32/32 Forge tests** pass; **11/11 Node runner tests**
+pass. Deployable Ledger runtime is 16,699 bytes; the build's oversized
+contracts are test harnesses, not deployed candidate modules. Independent
+runner re-review is pending before the bounded receipt run in the existing
+06:00–06:35 root slot. No new cost result is claimed yet. Fable's original
+worktree remains clean at `e77f36d`; current Claude execution is unconfirmed,
+not inferred from the task's earlier acknowledgement. The hourly heartbeat
+is verified active through the mission deadline; it does not bypass a
+locked Claude interface or promise continuous execution while offline.
+
 **05:52 continuation / next run owner:** B remains clean at `e77f36d`, with
 no new handoff or heavy process since the 05:24 request. Direct Claude access
 is blocked by the locked Mac at 05:47; current execution is unconfirmed.

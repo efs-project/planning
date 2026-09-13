@@ -97,3 +97,29 @@ not a replay-domain repair or independent SDK validation. Runtime/code context
 reconstruction is retained-input consistency, not authenticated deployment
 proof. Supply the public profile/vector to the SDK reviewer; keep this
 candidate-side verifier out of its implementation inputs.
+
+## Isolated runner verification — September 13, 06:10 UTC
+
+Fable's `e77f36d` source was copied to the explicitly owned
+`codex/efs-warroom-b-run` worktree after its reserved heavy slot ended.
+The original worktree is unchanged. No candidate Core or workload change
+was made: `f58fc72`, `d600d37` and `155df3a` repair same-receipt-basis
+readback, false-success gates and partial-run evidence retention;
+`df23bbb` adds the required Solidity `unicode` prefix to one existing test
+assertion message. The initial build's parser failure was in that message,
+not in deployed contract logic.
+
+Root reproduced **11/11 behavioral Node tests**, then built with pinned
+offline solc 0.8.30 / Cancun / optimizer 200 / via-IR / two workers and ran
+**32/32 Forge tests**, no failures or skips. Candidate deployables fit
+ordinary size limits (Ledger runtime 16,699 bytes); oversized Forge test
+contracts are not the deployment path. Build/test logs remain in the
+run-owned `efs-road-b-run-20260913.9xQRrd` scratch directory.
+
+The runner preflight found and required six concrete fixes: same-basis
+declaration alignment, mismatches rejecting successful finalization,
+expected failure selectors/state being asserted, atomic report replacement,
+failure-marked watchdog/signals and early deployment evidence attachment.
+Independent re-review precedes the actual chain run. These tests do not
+close source-origin/import authority, exact Type identity, replay scope,
+full Files parity or independent proof gates, and supply no new gas result.
