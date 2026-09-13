@@ -151,6 +151,7 @@ for (const [name, mutate, match] of [
   ['linearized unrelated contract', x => { x.sourceAst.nodes[0].linearizedBaseContracts.push(30); }, /ANCESTRY/],
   ['omitted reachable base', x => { x.sourceAst.nodes[0].linearizedBaseContracts = [10]; }, /ANCESTRY/],
   ['malformed base declaration', x => { x.sourceAst.nodes[0].baseContracts[0].baseName.referencedDeclaration = '20'; }, /ANCESTRY/],
+  ['duplicate direct base declaration', x => { x.sourceAst.nodes[0].baseContracts.push(structuredClone(x.sourceAst.nodes[0].baseContracts[0])); }, /ANCESTRY/],
   ['cycle in base graph', x => { x.sourceAsts['src/Base.sol'].nodes[0].baseContracts = [{ baseName: { referencedDeclaration: 10 } }]; }, /ANCESTRY/],
   ['ambiguous inherited immutable name', x => { x.sourceAsts['src/Base.sol'].nodes[0].nodes[0].name = 'size'; }, /IMMUTABLE/],
   ['inherited reference omitted', x => { delete x.artifact.deployedBytecode.immutableReferences[8]; }, /IMMUTABLE/],

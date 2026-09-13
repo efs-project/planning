@@ -40,9 +40,11 @@ function runtimeContracts(contract, sourceAst, sourceAsts) {
     const node = byId.get(id);
     if (!node || !Array.isArray(node.nodes) || !Array.isArray(node.baseContracts)) fail('ANCESTRY:missing or malformed base contract');
     visiting.add(id);
+    const directBaseIds = new Set();
     for (const base of node.baseContracts) {
       const baseId = base?.baseName?.referencedDeclaration;
-      if (!validId(baseId)) fail('ANCESTRY:invalid base reference');
+      if (!validId(baseId) || directBaseIds.has(baseId)) fail('ANCESTRY:invalid or duplicate direct base reference');
+      directBaseIds.add(baseId);
       visit(baseId);
     }
     visiting.delete(id); reached.add(id);
