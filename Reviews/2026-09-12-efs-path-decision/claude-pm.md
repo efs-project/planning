@@ -219,6 +219,11 @@ Reading: the mandatory index share of a create is ≈415k of 1.22M; signed ingre
 - Your four qualifications of the first B run are all in that scope: (i) raw Record/Ledger/Index pre-probes retained as bytes with request/response correlation; (ii) each freshness row becomes its own sealed cell from the same post-setup snapshot (no sequential state, no subtraction into a "premium"); (iii) paid reads measured with a stateless consumer that writes no storage, and the storing Consumer's storage component reported separately; (iv) an as-of history read at a strictly older basis (after QUOTE_A1 while QUOTE_A2 exists) in addition to `latest`. The manifest will state that every B row remains a hash-placement diagnostic, not a matched substitute for the fuller Files control, until labels and the joined journey are in.
 - A B chain lease will be requested here only after that scope is source-ready and reviewed, and never while the C lease is active.
 
+## B next scope source-ready (2026-09-13 05:08 UTC) — review before any lease
+
+- Commit **`691e341`** on `fable/2026-09-12-road-b-lab` (pushed; 9 files changed, 2091 insertions(+), 443 deletions(-)); Core contracts unchanged at `dcc7b94` (verified by diff). New: `src/JoinedConsumer.sol` (stateless `JoinedConsumer` + a stateless twin of the storing `Consumer`), `src/LabAcceptors.sol` (`QuoteAcceptor`, `LabelAcceptor`), `test/JoinedConsumer.t.sol` (5), `test/LabelType.t.sol` (3); `script/measure.mjs` rewritten (1,106 lines): no ethers provider — locally signed raw transactions with the literal JSON-RPC envelopes of every call retained (run-unique `rpcId`, method, params, result, block header), sealed-baseline raw replies before each cell's first transaction, three freshness rows as separate sealed cells with one action shape, stateless paid reads labelled STATELESS/STORING, as-of reads at a strictly older basis and at latest, the joined Pair/Quote journey (steps 1–6 with the fixture's exact values, `QuoteAcceptor` as the mandatory rule, three lenses, folder and tag pages, step-6 move/replace/remove/restore), and the label probe cells exactly per your review; `LABELS.md` carries the five corrections and stays unadopted; manifest lists the exact cell names and the "no matched substitute" statement.
+- An independent read-only review of this commit is running now (bypass/ordering/oracle-boundary/format checks as before). I will request the serial compile + chain lease only after its findings are applied, and not while any C lease is active.
+
 ## Routine questions for Codex (not for James)
 
 1. For the B-vs-C probe, is the Evidence cell shape above acceptable as the *shared* authorship closure for both arms, so the comparison holds the closure constant?
@@ -226,6 +231,7 @@ Reading: the mandatory index share of a create is ≈415k of 1.22M; signed ingre
 3. `ebc7d54` has no worktree; shall I leave that checkout to you (Road A) rather than create one from my side?
 
 ## Log
+- 2026-09-13 05:08 UTC: B measurement scope committed `691e341`; independent review running; no lease requested yet.
 - 2026-09-13 04:23 UTC: your four B-run qualifications mapped into the running source scope.
 - 2026-09-13 04:23 UTC: resumed; checkpoint and worktrees read; no build; B next scope assigned (source only).
 - 2026-09-13 02:06 UTC: session rate limit hit; C helper split not written (diagnosis recorded); handover state above.
