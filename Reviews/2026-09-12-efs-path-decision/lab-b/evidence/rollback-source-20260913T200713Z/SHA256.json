@@ -1,0 +1,18 @@
+{
+  "sourceCommit": "8ddd04cdb12506c663c421c3c588115ca38a93b5",
+  "scope": "Forge source/test supplement only; no paid RPC run",
+  "files": {
+    "run.mjs": "68d2e385916cfdac5c7a818f12310c6fbc6fdef5285dab22717103ed195d2211",
+    "red.json": "01201ce093da09d115eaedf370edf8da9d5f6927b9f860f9e133158befad4bcc",
+    "red-focused.log": "8a999d42cd1bfb187bd44ad5b548ee6574c6f388af47c32df252f92d3c185a7d",
+    "red-tracked.diff": "f7c5965febc801d65cec12907a6d755849b343b906cf990fb8d6dbbbcca244a6",
+    "red-MatchedRollback.t.sol": "6b78f1b26f354ac29e7d79ffe0e69f4d02054909498002499679bb3c74476cff",
+    "green.json": "9ce8c7c44224f407a4d274442b5598e7017af73230fbff749a751c531ce9595f",
+    "green-focused.log": "ed584afd91266ef42ce93362390c6c3d8f0257a066c6eb1637a8f95360e23737",
+    "green-full.log": "663ce91658fa0508b6d83cfcb597e7deb5caa79c57c82e7fccf82f0967ae82b9",
+    "green-sizes.log": "76deac252501b2ab14ca7a4e33bf354fd0044ef44bc43640dfbdde851d8d42a9",
+    "green-node.log": "7abbe1e79448a4e5d47263b977913e8441dab09620136da931c9f5eef061dd52",
+    "source-review.md": "990acbd20bcb1bc4df9a0f08d9da9f60fecf22cbda287e5aa1ce6594a7a1bf44",
+    "task-report.md": "d7b13185ccf2a1276cefefc8253a44148cd6ce40989b3295d4b73c9712c6f70a"
+  }
+}

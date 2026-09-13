@@ -1,0 +1,192 @@
+Compiling 18 files with Solc 0.8.30
+Solc 0.8.30 finished in 19.93s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:73:21:
+   |
+73 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:69:5:
+   |
+69 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:78:29:
+   |
+78 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:69:5:
+   |
+69 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:98:22:
+   |
+98 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+   |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:69:5:
+   |
+69 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:102:25:
+    |
+102 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:69:5:
+   |
+69 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (8760): This declaration has the same name as another declaration.
+   --> test/FaultyReads.sol:121:83:
+    |
+121 |         returns (uint8 status, bytes32 selected, uint32 revision, address author, uint64 admission)
+    |                                                                                   ^^^^^^^^^^^^^^^^
+Note: The other declaration is here:
+  --> test/FaultyReads.sol:67:5:
+   |
+67 |     function admission(uint64 ordinal)
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2072): Unused local variable.
+  --> test/LedgerImport.t.sol:46:42:
+   |
+46 |         (Ledger.Action[] memory rebuilt, bytes32 h, bytes32 digest, address recovered, bool ok) = fresh.reconstruct(ledger, pub);
+   |                                          ^^^^^^^^^
+
+Warning (3860): Contract initcode size is 90410 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/Falsify.t.sol:61:1:
+   |
+61 | contract FalsifyTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 140072 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/JoinedConsumer.t.sol:15:1:
+   |
+15 | contract JoinedConsumerTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 81872 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/LabelType.t.sol:16:1:
+   |
+16 | contract LabelTypeTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 72000 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/LedgerEvidence.t.sol:13:1:
+   |
+13 | contract LedgerEvidenceTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 70082 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/LedgerImport.t.sol:14:1:
+   |
+14 | contract LedgerImportTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 90270 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/LedgerMatrix.t.sol:14:1:
+   |
+14 | contract LedgerMatrixTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 88185 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/MatchedRollback.t.sol:35:1:
+   |
+35 | contract MatchedRollbackTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 7 tests for test/LedgerEvidence.t.sol:LedgerEvidenceTest
+[PASS] test_exact_native_retry_is_noop() (gas: 529727)
+[PASS] test_page_across_mutation_cursor_law() (gas: 3838175)
+[PASS] test_reconstruction_from_state_only_all_kinds() (gas: 1837114)
+[PASS] test_rename_move_recreate_old_path_keeps_identity() (gas: 4430646)
+[PASS] test_same_batch_typed_reference_and_wrong_type() (gas: 1412265)
+[PASS] test_signature_binds_every_field() (gas: 1613839)
+[PASS] test_subject_id_portable_across_fresh_deployment() (gas: 4833098)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 6.20ms (4.79ms CPU time)
+
+Ran 11 tests for test/Falsify.t.sol:FalsifyTest
+[PASS] test_F1a_grade0_import_is_unsupported_and_mints_nothing() (gas: 445735)
+[PASS] test_F1b_grade0_import_by_contract_is_unsupported_and_mints_nothing() (gas: 424992)
+[PASS] test_F2_signed_source_packet_authorizes_nothing_at_the_destination() (gas: 2151769)
+[PASS] test_F3_type_identity_is_exact_and_immutable() (gas: 2342459)
+[PASS] test_F4_policy_activation_is_separate_from_identity_and_basis_is_recorded() (gas: 1542791)
+[PASS] test_F5a_activate_zero_keeps_the_mandatory_rule() (gas: 1085558)
+[PASS] test_F5b_permissive_policy_keeps_the_mandatory_rule() (gas: 1186386)
+[PASS] test_F5c_policy_adds_constraints_but_cannot_remove_them() (gas: 1636490)
+[PASS] test_F5d_mutable_mandatory_acceptor_is_a_documented_gap_not_detected() (gas: 1035753)
+[PASS] test_R3_import_reruns_destination_policy_and_retains_source_basis() (gas: 7419005)
+[PASS] test_R3_signature_under_epoch_N_rejected_after_activation_old_evidence_reconstructs() (gas: 1153588)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 8.09ms (6.51ms CPU time)
+
+Ran 5 tests for test/LedgerImport.t.sol:LedgerImportTest
+[PASS] test_contract_principal_is_origin_qualified() (gas: 4021278)
+[PASS] test_cursor_rejects_stale_basis_and_dedupes_names() (gas: 2847590)
+[PASS] test_fresh_reader_reconstructs_identical_digest_with_negatives() (gas: 1871466)
+[PASS] test_import_of_native_source_is_unsupported_and_fails_closed() (gas: 4062054)
+[PASS] test_import_requires_destination_authorization_and_keeps_identity() (gas: 9230547)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 3.41ms (2.79ms CPU time)
+
+Ran 12 tests for test/LedgerMatrix.t.sol:LedgerMatrixTest
+[PASS] test_binding_role_demands_target_type() (gas: 2330392)
+[PASS] test_checked_references_direct_batch_dedup_reuse() (gas: 3314462)
+[PASS] test_failed_acceptance_rolls_back_publication() (gas: 2383987)
+[PASS] test_failed_index_module_reverts_and_coverage_is_honest() (gas: 1258065)
+[PASS] test_folder_listing_mask_count_and_paging() (gas: 3752032)
+[PASS] test_history_as_of_tombstone_and_rebind() (gas: 2199753)
+[PASS] test_native_single_author_lifecycle() (gas: 2049768)
+[PASS] test_native_two_authors_lens_mask_fallthrough() (gas: 1836768)
+[PASS] test_signed_single_author() (gas: 1426176)
+[PASS] test_signed_two_authors_and_reconstruction() (gas: 1732858)
+[PASS] test_stale_cas_and_not_live() (gas: 1858085)
+[PASS] test_two_authors_identical_record_and_withdraw() (gas: 1270420)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 6.98ms (6.27ms CPU time)
+
+Ran 4 tests for test/MatchedRollback.t.sol:MatchedRollbackTest
+[PASS] test_direct_late_index_call_remains_ledger_only() (gas: 1093701)
+[PASS] test_scale_seven_complete_a1_reverts_with_full_mandatory_error_and_s0() (gas: 2791543)
+[PASS] test_scale_six_complete_a1_late_tag_refusal_rolls_back_full_prefix() (gas: 3923932)
+[PASS] test_scale_six_complete_a1_zero_poison_calibrates_full_state() (gas: 3921862)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 3.46ms (2.78ms CPU time)
+
+Ran 3 tests for test/LabelType.t.sol:LabelTypeTest
+[PASS] test_label_acceptor_is_a_lab_convention_utf8_1_to_255() (gas: 149167)
+[PASS] test_label_admission_rejects_non_utf8_empty_and_over_255() (gas: 1106670)
+[PASS] test_label_fresh_republished_omitted_and_hash_only_retrieval() (gas: 4775458)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.95ms (1.23ms CPU time)
+
+Ran 21 tests for test/JoinedConsumer.t.sol:JoinedConsumerTest
+[PASS] test_consumer_exposes_no_quote_on_absent_masked_wrong_type_or_unknown_page() (gas: 1628672)
+[PASS] test_faulty_actual_reply_admission_not_a_bind_is_refused() (gas: 3880852)
+[PASS] test_faulty_actual_reply_admission_outside_its_publication_range_is_refused() (gas: 3896030)
+[PASS] test_faulty_actual_reply_cursor_generation_epoch_core_scope_and_packed_lens_context_are_refused() (gas: 4182315)
+[PASS] test_faulty_actual_reply_imported_signed_and_native_publications_are_refused_as_local_fixture_evidence() (gas: 4006957)
+[PASS] test_faulty_actual_reply_mismatched_or_wrapping_admission_revision_is_refused() (gas: 4085125)
+[PASS] test_faulty_actual_reply_missing_pair_is_refused() (gas: 4005553)
+[PASS] test_faulty_actual_reply_partial_page_claiming_ended_is_refused() (gas: 3914393)
+[PASS] test_faulty_actual_reply_same_author_and_target_at_wrong_head_or_folder_coordinate_is_refused() (gas: 3985825)
+[PASS] test_faulty_actual_reply_short_evidence_fails_closed() (gas: 3890489)
+[PASS] test_faulty_actual_reply_wrong_selected_revision_is_refused() (gas: 3872939)
+[PASS] test_faulty_actual_reply_wrong_type_item_is_refused() (gas: 3937008)
+[PASS] test_faulty_actual_reply_zero_or_future_record_first_admission_is_refused_for_quote_pair_and_both_items() (gas: 4383764)
+[PASS] test_faulty_actual_reply_zero_or_future_selected_and_placement_admissions_are_refused() (gas: 4051118)
+[PASS] test_joined_step_6_move_replace_remove_restore_keeps_identity() (gas: 6083586)
+[PASS] test_joined_steps_1_to_5_point_list_tag_history() (gas: 4310439)
+[PASS] test_paid_slice_point_and_list_agree_under_both_lenses_with_A_placement_provenance() (gas: 4230055)
+[PASS] test_paid_slice_refuses_extra_placement_wrong_provenance_and_incomplete_coverage() (gas: 5793746)
+[PASS] test_paid_slice_refuses_wrong_author_proof_category_pair_items_and_mantissa() (gas: 5570219)
+[PASS] test_quote_acceptor_pins_shape_scale_bounds_and_pair_reference() (gas: 3123710)
+[PASS] test_stateless_twin_commits_exactly_what_the_storing_consumer_stores() (gas: 1935077)
+Suite result: ok. 21 passed; 0 failed; 0 skipped; finished in 19.64ms (23.80ms CPU time)
+
+Ran 7 test suites in 28.47ms (49.73ms CPU time): 63 tests passed, 0 failed, 0 skipped (63 total tests)

@@ -1,0 +1,62 @@
+Compiling 11 files with Solc 0.8.30
+Solc 0.8.30 finished in 5.48s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:73:21:
+   |
+73 |     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {
+   |                     ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:69:5:
+   |
+69 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:78:29:
+   |
+78 |     function recordFromHash(bytes32 typeId, bytes32 bodyHash) internal pure returns (bytes32) {
+   |                             ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:69:5:
+   |
+69 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> src/Keys.sol:98:22:
+   |
+98 |     function posting(bytes32 typeId, uint8 kind, uint8 ordinal, bytes32 valueKey) internal pure returns (bytes32) {
+   |                      ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:69:5:
+   |
+69 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> src/Keys.sol:102:25:
+    |
+102 |     function byTypeList(bytes32 typeId) internal pure returns (bytes32) {
+    |                         ^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> src/Keys.sol:69:5:
+   |
+69 |     function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (3860): Contract initcode size is 88185 bytes and exceeds 49152 bytes (a limit introduced in Shanghai). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+  --> test/MatchedRollback.t.sol:35:1:
+   |
+35 | contract MatchedRollbackTest is LabBase {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 4 tests for test/MatchedRollback.t.sol:MatchedRollbackTest
+[PASS] test_direct_late_index_call_remains_ledger_only() (gas: 1093701)
+[PASS] test_scale_seven_complete_a1_reverts_with_full_mandatory_error_and_s0() (gas: 2791543)
+[PASS] test_scale_six_complete_a1_late_tag_refusal_rolls_back_full_prefix() (gas: 3923932)
+[PASS] test_scale_six_complete_a1_zero_poison_calibrates_full_state() (gas: 3921862)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 13.55ms (10.16ms CPU time)
+
+Ran 1 test suite in 24.77ms (13.55ms CPU time): 4 tests passed, 0 failed, 0 skipped (4 total tests)

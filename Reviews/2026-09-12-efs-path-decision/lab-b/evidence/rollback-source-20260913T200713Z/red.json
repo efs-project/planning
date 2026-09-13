@@ -1,0 +1,70 @@
+{
+  "phase": "red",
+  "base": "cbadc00e3a96cdcd76a988fbd07f94cce4ad8f85",
+  "startedAt": "2026-09-13T20:05:44.631Z",
+  "compilerSha256": "738dcdc6afddeb505ee4e4ef24f1c1fdba2b8c924e614cbbf5801a5b062dd683",
+  "resources": {
+    "freeBytes": 293233872896,
+    "scratchBytes": 89411584
+  },
+  "sourceHashes": {
+    "src/IndexModule.sol": "d062d3ab0d6632b983a651ebad5746f2a1bc7bcd8821130ad6dd900aafd4e818",
+    "src/Interfaces.sol": "5c8c5cf858c48fa814bf212b8922def0ca05e98b9c11248bc149a5f8f44af4b7",
+    "src/JoinedConsumer.sol": "7dd7fef48dec63e63e057ea31e385c5b7a24626e74f69ed94ebef9c133a6c013",
+    "src/Keys.sol": "ebb6b95b4eb689c01020670e1a2ae003433c7f1500d2e32510432e384fea02b6",
+    "src/LabAcceptors.sol": "898021c4fe41ea02acb9cb5184097b5e6f6ca0cfc2fdf1fc86e320dc66bfe898",
+    "src/LabHarness.sol": "0f09edfd71c8bc8cd133d102f56803e1de2ef40b5c1e5bb2b22c7d590a1deeb5",
+    "src/Ledger.sol": "7576874b52a81ebc0f7b64640332b345096e0c09000ed4f09811bdc21dd6c3d5",
+    "src/LensReader.sol": "7d0a167b684d700642fd1510bb237bc4ae59b630696603e94f08dd7c3dda0d2e",
+    "src/TypeRegistry.sol": "ef2bd89de58298977058ba98a4ac2c03416a3fde991d74cc52fdc00634c09459",
+    "test/Falsify.t.sol": "4042b0f205f3045abf895e637a8aacd1a451d052aca327871e092090f1501022",
+    "test/FaultyReads.sol": "445140ef1b2a85a8e90c7eead75060b28fbb1554d07087981f61e46a4fcdb7e3",
+    "test/JoinedConsumer.t.sol": "29ecdbfd8a6ba0000281fb4834636952850930f74ed58d16859c088763d4d32a",
+    "test/LabBase.sol": "1fd5dfff2bd298370ef00dbb0a67a8fcaf1ed8560ec84d968ddfdea3bd0bc64d",
+    "test/LabelType.t.sol": "1fc5b030aa8a5ba854e059285671c682c34e9eb0e6f928025f377def8fcad905",
+    "test/LedgerEvidence.t.sol": "8858987f336af756794b6b5bf320687116b447ef209cee12dd343cee866ffbab",
+    "test/LedgerImport.t.sol": "11f9a82888270e356094c46a9287a62a5e0bb46870c8ae6ba5a0b1474399aca3",
+    "test/LedgerMatrix.t.sol": "0d7ad3fb2182b537483376b535291a19c94df738ef73e32c5838e3176d2210bc",
+    "test/MatchedRollback.t.sol": "6b78f1b26f354ac29e7d79ffe0e69f4d02054909498002499679bb3c74476cff",
+    "script/controller-gate.mjs": "41e84fc421e729214fdbceddc2c82202ef27b246fcb551e94d46b2b4e073d402",
+    "script/controller-gate.test.mjs": "8e05b474dede7d3e009c5f812d563d7fce96feb99f6475a11f730f496388098b",
+    "script/measure.mjs": "4e15f4cb58568682735a6aff61a056a7067a93e6052065121f7439fd38dbc57e",
+    "script/measure.test.mjs": "06dfe4f47f02efa6fa38620cf80b58c6a0f26e8c16bcffff81198f009203f326",
+    "foundry.toml": "6ea7c7198bc697f74b6286ec830edbefc20e7c549eafda2343c863702055bf2c"
+  },
+  "stages": [
+    {
+      "name": "focused",
+      "exe": "forge",
+      "args": [
+        "test",
+        "--root",
+        "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b",
+        "--offline",
+        "--use",
+        "/Users/james/Library/Application Support/svm/0.8.30/solc-0.8.30",
+        "--threads",
+        "2",
+        "--ast",
+        "--out",
+        "/tmp/efs-b-rollback-build-20260913.Ps480X/red-out",
+        "--cache-path",
+        "/tmp/efs-b-rollback-build-20260913.Ps480X/red-cache",
+        "--match-path",
+        "test/MatchedRollback.t.sol",
+        "-vvv"
+      ],
+      "startedAt": "2026-09-13T20:05:44.711Z",
+      "pid": 95835,
+      "exitCode": 1,
+      "signal": null,
+      "finishedAt": "2026-09-13T20:05:50.605Z"
+    }
+  ],
+  "sourceUnchangedDuringRun": true,
+  "finishedAt": "2026-09-13T20:05:50.607Z",
+  "resourcesAfter": {
+    "freeBytes": 293219528704,
+    "scratchBytes": 101502976
+  }
+}

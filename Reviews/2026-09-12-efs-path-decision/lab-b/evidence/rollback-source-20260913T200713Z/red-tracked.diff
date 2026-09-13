@@ -1,0 +1,13 @@
+diff --git a/Reviews/2026-09-12-efs-path-decision/lab-b/src/IndexModule.sol b/Reviews/2026-09-12-efs-path-decision/lab-b/src/IndexModule.sol
+index 3c624e7..bbf2900 100644
+--- a/Reviews/2026-09-12-efs-path-decision/lab-b/src/IndexModule.sol
++++ b/Reviews/2026-09-12-efs-path-decision/lab-b/src/IndexModule.sol
+@@ -92,7 +92,7 @@ contract IndexModule is IIndexModule {
+     }
+ 
+     // ---------------------------------------------------------------- maintenance
+-    function onAdmission(uint64 publication, Effect[] calldata effects) external {
++    function onAdmission(uint64 publication, Effect[] calldata effects) public virtual {
+         if (msg.sender != ledger) revert E_LEDGER();
+         uint256 n = effects.length;
+         if (n == 0) return;
