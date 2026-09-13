@@ -1,0 +1,184 @@
+{
+  "kind": "EFS_RPC_OBSERVED_ABI_PROFILE",
+  "version": 1,
+  "standing": "experiment-only selected ABI declarations; not source, deployment, runtime, proxy, semantic, or protocol authority",
+  "candidateSourceAssociation": "dcc7b946d2ac8dfcf22103069127a9d1809df974",
+  "artifactEvidence": [
+    {
+      "artifact": "Ledger.sol/Ledger.json",
+      "sha256": "a027636bf7638e25c9304bb1e1a6a870164e23b6cc43ff3b1f29cf6068bae69f",
+      "gitBlob": "237564b618a5b4c2f572ce9da725c37d482a069e"
+    },
+    {
+      "artifact": "LabHarness.sol/Consumer.json",
+      "sha256": "8ca34dfebaa4c6b8c7c71d724f04af59589d3f38326eddfb1f4dcb4d8df25449",
+      "gitBlob": "02ebe49ee2641671de2290724e09cd7f857fafdf"
+    },
+    {
+      "artifact": "LensReader.sol/LensReader.json",
+      "sha256": "15085d20f803cfaa5f1823b838793daa2ec7d85ef9e7987fc7ac10292d6561b8",
+      "gitBlob": "0b23b44fce2e41fdcb1a9bbe7b487ad6f9501f92"
+    },
+    {
+      "artifact": "IndexModule.sol/IndexModule.json",
+      "sha256": "18f66ecad3ea2e12ae27670c59436428d6ef4ce8172f74bcb31beb1c11f7b4f0",
+      "gitBlob": "7a6f2d2e7ba475baad73a1a90f7a5a07aa6ddbef"
+    }
+  ],
+  "targetPolicy": "derive only internal surface-target consistency from repeated raw selectors; no address is deployment-authoritative",
+  "bodyCodec": {
+    "support": "UNSUPPORTED",
+    "reason": "the authorized ABI fields type Record data as bytes and do not declare quote-body semantics"
+  },
+  "artifacts": {
+    "Ledger": {
+      "abi": [
+        {
+          "type": "function",
+          "name": "executeSigned",
+          "stateMutability": "nonpayable",
+          "inputs": [
+            {
+              "name": "intent",
+              "type": "tuple",
+              "internalType": "struct Ledger.Intent",
+              "components": [
+                { "name": "realmId", "type": "bytes32", "internalType": "bytes32" },
+                { "name": "coreCodeCommitment", "type": "bytes32", "internalType": "bytes32" },
+                { "name": "author", "type": "address", "internalType": "address" },
+                { "name": "nonce", "type": "uint64", "internalType": "uint64" },
+                { "name": "deadline", "type": "uint64", "internalType": "uint64" },
+                { "name": "acceptanceProfile", "type": "bytes32", "internalType": "bytes32" },
+                { "name": "indexObligations", "type": "bytes32", "internalType": "bytes32" }
+              ]
+            },
+            {
+              "name": "actions",
+              "type": "tuple[]",
+              "internalType": "struct Ledger.Action[]",
+              "components": [
+                { "name": "kind", "type": "uint8", "internalType": "uint8" },
+                { "name": "typeId", "type": "bytes32", "internalType": "bytes32" },
+                { "name": "bodyHashOrRecordId", "type": "bytes32", "internalType": "bytes32" },
+                { "name": "purpose", "type": "bytes32", "internalType": "bytes32" },
+                { "name": "subject", "type": "bytes32", "internalType": "bytes32" },
+                { "name": "role", "type": "bytes32", "internalType": "bytes32" },
+                { "name": "target", "type": "bytes32", "internalType": "bytes32" },
+                { "name": "expectedRevision", "type": "uint32", "internalType": "uint32" },
+                { "name": "salt", "type": "bytes32", "internalType": "bytes32" }
+              ]
+            },
+            { "name": "bodies", "type": "bytes[]", "internalType": "bytes[]" },
+            { "name": "sig", "type": "bytes", "internalType": "bytes" }
+          ],
+          "outputs": [
+            { "name": "publication", "type": "uint64", "internalType": "uint64" },
+            { "name": "firstAdmission", "type": "uint64", "internalType": "uint64" }
+          ],
+          "selector": "0x8846f57e"
+        },
+        {
+          "type": "function",
+          "name": "record",
+          "stateMutability": "view",
+          "inputs": [{ "name": "id", "type": "bytes32", "internalType": "bytes32" }],
+          "outputs": [
+            { "name": "typeId", "type": "bytes32", "internalType": "bytes32" },
+            { "name": "firstAdmission", "type": "uint64", "internalType": "uint64" },
+            { "name": "occurrences", "type": "uint32", "internalType": "uint32" },
+            { "name": "data", "type": "bytes", "internalType": "bytes" }
+          ],
+          "selector": "0xb5c645bd"
+        }
+      ]
+    },
+    "Consumer": {
+      "abi": [
+        { "type": "function", "name": "lastAdmission", "stateMutability": "view", "inputs": [], "outputs": [{ "name": "", "type": "uint64", "internalType": "uint64" }], "selector": "0x519ef1f8" },
+        { "type": "function", "name": "lastCount", "stateMutability": "view", "inputs": [], "outputs": [{ "name": "", "type": "uint64", "internalType": "uint64" }], "selector": "0x6b16ad67" },
+        { "type": "function", "name": "lastRevision", "stateMutability": "view", "inputs": [], "outputs": [{ "name": "", "type": "uint32", "internalType": "uint32" }], "selector": "0xe08871ca" },
+        { "type": "function", "name": "lastScanned", "stateMutability": "view", "inputs": [], "outputs": [{ "name": "", "type": "uint64", "internalType": "uint64" }], "selector": "0x336d5392" },
+        { "type": "function", "name": "lastStatus", "stateMutability": "view", "inputs": [], "outputs": [{ "name": "", "type": "uint8", "internalType": "uint8" }], "selector": "0xd6d86712" },
+        { "type": "function", "name": "lastTarget", "stateMutability": "view", "inputs": [], "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }], "selector": "0x36abbd1d" },
+        { "type": "function", "name": "lastValue", "stateMutability": "view", "inputs": [], "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }], "selector": "0x43183834" },
+        {
+          "type": "function",
+          "name": "readQuote",
+          "stateMutability": "nonpayable",
+          "inputs": [
+            { "name": "lensPrincipals", "type": "address[]", "internalType": "address[]" },
+            { "name": "purpose", "type": "bytes32", "internalType": "bytes32" },
+            { "name": "subject", "type": "bytes32", "internalType": "bytes32" },
+            { "name": "role", "type": "bytes32", "internalType": "bytes32" }
+          ],
+          "outputs": [],
+          "selector": "0x6a59728b"
+        },
+        {
+          "type": "function",
+          "name": "readList",
+          "stateMutability": "nonpayable",
+          "inputs": [
+            { "name": "lensPrincipals", "type": "address[]", "internalType": "address[]" },
+            { "name": "purpose", "type": "bytes32", "internalType": "bytes32" },
+            { "name": "subject", "type": "bytes32", "internalType": "bytes32" },
+            { "name": "budget", "type": "uint256", "internalType": "uint256" }
+          ],
+          "outputs": [],
+          "selector": "0xd67f2355"
+        }
+      ]
+    },
+    "LensReader": {
+      "abi": [
+        {
+          "type": "function",
+          "name": "resolve",
+          "stateMutability": "view",
+          "inputs": [
+            { "name": "lens", "type": "address[]", "internalType": "address[]" },
+            { "name": "purpose", "type": "bytes32", "internalType": "bytes32" },
+            { "name": "subject", "type": "bytes32", "internalType": "bytes32" },
+            { "name": "role", "type": "bytes32", "internalType": "bytes32" }
+          ],
+          "outputs": [
+            { "name": "status", "type": "uint8", "internalType": "uint8" },
+            { "name": "target", "type": "bytes32", "internalType": "bytes32" },
+            { "name": "revision", "type": "uint32", "internalType": "uint32" },
+            { "name": "author", "type": "address", "internalType": "address" },
+            { "name": "admissionOrdinal", "type": "uint64", "internalType": "uint64" }
+          ],
+          "selector": "0x1c8028d3"
+        }
+      ]
+    },
+    "IndexModule": {
+      "abi": [
+        {
+          "type": "function",
+          "name": "postingHead",
+          "stateMutability": "view",
+          "inputs": [{ "name": "key", "type": "bytes32", "internalType": "bytes32" }],
+          "outputs": [
+            { "name": "count", "type": "uint64", "internalType": "uint64" },
+            { "name": "live", "type": "uint64", "internalType": "uint64" },
+            { "name": "last", "type": "uint64", "internalType": "uint64" },
+            { "name": "flags", "type": "uint16", "internalType": "uint16" }
+          ],
+          "selector": "0x5cdd4bb0"
+        },
+        {
+          "type": "function",
+          "name": "postingWord",
+          "stateMutability": "view",
+          "inputs": [
+            { "name": "key", "type": "bytes32", "internalType": "bytes32" },
+            { "name": "index", "type": "uint64", "internalType": "uint64" }
+          ],
+          "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+          "selector": "0x68830b72"
+        }
+      ]
+    }
+  }
+}

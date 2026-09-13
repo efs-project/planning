@@ -1,0 +1,1722 @@
+{
+  "kind": "EFS_RPC_OBSERVED_REPORT",
+  "version": 1,
+  "assumption": "RPC_OBSERVED",
+  "standing": "raw-byte consistency under supplied observations; not authenticated chain truth or a candidate verdict",
+  "sourceLabel": "measure2-a16d7d4.json",
+  "input": {
+    "byteLength": 971697,
+    "sha256": "7bd5409a4b306d8e0705187094fa482b31efcad471260ae93f57eebd0b22fcce",
+    "gitBlob": "1a38f6493510760ae1b97f6188d2548c795350a8",
+    "profileGitBlob": "6345c2246e287e9676f714491ce8aebf673f754a",
+    "expectationsGitBlob": "1fbe87f6b2bf1d095bb0979997573439a6c2bd88",
+    "registryStanding": "candidate-designated current packet; incomplete for the frozen oracle and not authenticated chain truth"
+  },
+  "independentPins": {
+    "standing": "UNAVAILABLE",
+    "targets": "UNAVAILABLE",
+    "consumerControl": "UNAVAILABLE",
+    "queryCoordinates": "UNAVAILABLE"
+  },
+  "profile": {
+    "kind": "EFS_RPC_OBSERVED_ABI_PROFILE",
+    "candidateSourceAssociation": "dcc7b946d2ac8dfcf22103069127a9d1809df974",
+    "artifactEvidence": [
+      {
+        "artifact": "Ledger.sol/Ledger.json",
+        "sha256": "a027636bf7638e25c9304bb1e1a6a870164e23b6cc43ff3b1f29cf6068bae69f",
+        "gitBlob": "237564b618a5b4c2f572ce9da725c37d482a069e"
+      },
+      {
+        "artifact": "LabHarness.sol/Consumer.json",
+        "sha256": "8ca34dfebaa4c6b8c7c71d724f04af59589d3f38326eddfb1f4dcb4d8df25449",
+        "gitBlob": "02ebe49ee2641671de2290724e09cd7f857fafdf"
+      },
+      {
+        "artifact": "LensReader.sol/LensReader.json",
+        "sha256": "15085d20f803cfaa5f1823b838793daa2ec7d85ef9e7987fc7ac10292d6561b8",
+        "gitBlob": "0b23b44fce2e41fdcb1a9bbe7b487ad6f9501f92"
+      },
+      {
+        "artifact": "IndexModule.sol/IndexModule.json",
+        "sha256": "18f66ecad3ea2e12ae27670c59436428d6ef4ce8172f74bcb31beb1c11f7b4f0",
+        "gitBlob": "7a6f2d2e7ba475baad73a1a90f7a5a07aa6ddbef"
+      }
+    ]
+  },
+  "cells": [
+    {
+      "cellId": "native-one",
+      "packetKey": "native-one/quote",
+      "rawTupleCount": 77,
+      "transactionCount": 5,
+      "axes": {
+        "transportCorrelation": {
+          "status": "UNKNOWN",
+          "reason": "RPC_REQUEST_RESPONSE_CORRELATION_INCOMPLETE_OR_UNMODELED",
+          "rawTupleCount": 77,
+          "missing": [
+            {
+              "rawIndex": 0,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 1,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 2,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 3,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 4,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 5,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 6,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 7,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 8,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 9,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 10,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 11,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 12,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 13,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 14,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 15,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 16,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 17,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 18,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 19,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 20,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 21,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 22,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 23,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 24,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 25,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 26,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 27,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 28,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 29,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 30,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 31,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 32,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 33,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 34,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 35,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 36,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 37,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 38,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 39,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 40,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 41,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 42,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 43,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 44,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 45,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 46,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 47,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 48,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 49,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 50,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 51,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 52,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 53,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 54,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 55,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 56,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 57,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 58,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 59,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 60,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 61,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 62,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 63,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 64,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 65,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 66,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 67,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 68,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 69,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 70,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 71,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 72,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 73,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 74,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 75,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 76,
+              "field": "request/response"
+            }
+          ]
+        },
+        "targetConsistency": {
+          "status": "UNKNOWN",
+          "reason": "TARGET_AUTHORITY_UNPINNED",
+          "bySurface": {
+            "Consumer": [
+              "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6"
+            ],
+            "IndexModule": [
+              "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9"
+            ],
+            "Ledger": [
+              "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+            ]
+          },
+          "internalConsistency": "ONE_TARGET_PER_OBSERVED_ABI_SURFACE",
+          "pinStanding": "UNAVAILABLE"
+        },
+        "writeSequence": {
+          "status": "UNSUPPORTED",
+          "reason": "NATIVE_WRITE_CALLDATA_SELECTOR_NOT_DECLARED_BY_AUTHORIZED_ABIS",
+          "selectors": [
+            "0x70f8b526"
+          ],
+          "scope": "pre-read transaction ordering only; candidate labels and decoded summaries are ignored"
+        },
+        "bodyScalarSemantics": {
+          "status": "UNSUPPORTED",
+          "reason": "the authorized ABI fields type Record data as bytes and do not declare quote-body semantics"
+        },
+        "controlRecords": {
+          "status": "UNKNOWN",
+          "reason": "CONTROL_RECORD_ABSENCE_NOT_OBSERVED_WITH_CORRELATABLE_RAW_CALLS",
+          "blocker": "write selector lacks an authorized ABI, so its Record identities cannot be selected without candidate summaries"
+        },
+        "controlConsumer": {
+          "status": "UNKNOWN",
+          "reason": "CONTROL_CONSUMER:AT_LEAST_ONE_COMPONENT_UNKNOWN",
+          "components": [
+            {
+              "status": "UNKNOWN",
+              "reason": "TARGET_AUTHORITY_UNPINNED",
+              "bySurface": {
+                "Consumer": [
+                  "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6"
+                ],
+                "IndexModule": [
+                  "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9"
+                ],
+                "Ledger": [
+                  "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+                ]
+              },
+              "internalConsistency": "ONE_TARGET_PER_OBSERVED_ABI_SURFACE",
+              "pinStanding": "UNAVAILABLE"
+            },
+            {
+              "status": "OBSERVED_MATCH",
+              "reason": "CONTROL_BLOCK_NUMBER_FORMAT_VALID",
+              "observed": "16"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "FULL_CONSUMER_CONTROL_VECTOR_UNPINNED",
+              "missingFields": [
+                "lastAdmission",
+                "lastCount",
+                "lastRevision",
+                "lastScanned",
+                "lastStatus",
+                "lastTarget",
+                "lastValue"
+              ],
+              "pinStanding": "UNAVAILABLE"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "STAGE_CALL_SET_UNPINNED:native-one.control"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastAdmission:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastAdmission",
+                "observed": "0",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "16",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastCount:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastCount",
+                "observed": "0",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "16",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastRevision:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastRevision",
+                "observed": "0",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "16",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastScanned:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastScanned",
+                "observed": "0",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "16",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastStatus:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastStatus",
+                "observed": "0",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "16",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastTarget:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastTarget",
+                "observed": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "16",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastValue:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastValue",
+                "observed": "0",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "16",
+                "blockHash": "UNAVAILABLE"
+              }
+            }
+          ],
+          "scope": "all seven authorized Consumer getters; three values also come from the frozen matrix",
+          "basis": {
+            "status": "UNKNOWN",
+            "reason": "BLOCK_HASH_UNAVAILABLE",
+            "blockNumber": "16",
+            "blockHash": "UNAVAILABLE"
+          }
+        },
+        "paidQuoteRead": {
+          "status": "UNSUPPORTED",
+          "reason": "PAID_QUOTE_READ:AT_LEAST_ONE_COMPONENT_UNSUPPORTED",
+          "components": [
+            {
+              "status": "UNKNOWN",
+              "reason": "TARGET_AUTHORITY_UNPINNED",
+              "bySurface": {
+                "Consumer": [
+                  "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6"
+                ],
+                "IndexModule": [
+                  "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9"
+                ],
+                "Ledger": [
+                  "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+                ]
+              },
+              "internalConsistency": "ONE_TARGET_PER_OBSERVED_ABI_SURFACE",
+              "pinStanding": "UNAVAILABLE"
+            },
+            {
+              "status": "OBSERVED_MATCH",
+              "reason": "TRANSACTION:Consumer.readQuote:ALL_COMPONENTS_MATCH",
+              "components": [
+                {
+                  "status": "OBSERVED_MATCH",
+                  "reason": "TRANSACTION_RECEIPT_REPORTS_SUCCESS",
+                  "observedStatus": "1"
+                },
+                {
+                  "status": "OBSERVED_MATCH",
+                  "reason": "EXACT_BLOCK_HASH_PRESENT_ON_OBSERVATION",
+                  "blockNumber": "19",
+                  "blockHash": "0xda97dc4171d3fe28effdfd36016b72df55f94458a4871656f8482d95152d45f2",
+                  "observationIndexes": [
+                    0
+                  ]
+                }
+              ],
+              "item": {
+                "transactionIndex": 2,
+                "to": "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6",
+                "selector": "0x6a59728b",
+                "block": "19",
+                "blockHash": "0xda97dc4171d3fe28effdfd36016b72df55f94458a4871656f8482d95152d45f2"
+              },
+              "args": [
+                [
+                  "0x0165878a594ca255338adfa4d48449f69242eb8f"
+                ],
+                "0x07167a05890e9fcaccbdf11abbb65a3aa14bccfe41825ce441803003862ce5df",
+                "0x0e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd",
+                "0x0000000000000000000000000000000000000000000000000000000000000000"
+              ],
+              "basis": {
+                "status": "OBSERVED_MATCH",
+                "reason": "EXACT_BLOCK_HASH_PRESENT_ON_OBSERVATION",
+                "blockNumber": "19",
+                "blockHash": "0xda97dc4171d3fe28effdfd36016b72df55f94458a4871656f8482d95152d45f2",
+                "observationIndexes": [
+                  0
+                ]
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "QUERY_COORDINATES_UNPINNED:native-one.readQuote",
+              "observed": [
+                [
+                  "0x0165878a594ca255338adfa4d48449f69242eb8f"
+                ],
+                "0x07167a05890e9fcaccbdf11abbb65a3aa14bccfe41825ce441803003862ce5df",
+                "0x0e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd",
+                "0x0000000000000000000000000000000000000000000000000000000000000000"
+              ],
+              "pinStanding": "UNAVAILABLE"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "STAGE_CALL_SET_UNPINNED:native-one.paid-quote-read"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastTarget:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastTarget",
+                "observed": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "19",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastRevision:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastRevision",
+                "observed": "2",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "19",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastValue:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastValue",
+                "observed": "3100",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "19",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNSUPPORTED",
+              "reason": "EDIT_RECORD_ID_UNAVAILABLE"
+            }
+          ],
+          "selectedTargetExpectation": "UNAVAILABLE",
+          "basis": {
+            "status": "UNKNOWN",
+            "reason": "BLOCK_HASH_UNAVAILABLE",
+            "blockNumber": "19",
+            "blockHash": "UNAVAILABLE"
+          }
+        },
+        "listing": {
+          "status": "UNKNOWN",
+          "reason": "LISTING:AT_LEAST_ONE_COMPONENT_UNKNOWN",
+          "components": [
+            {
+              "status": "UNKNOWN",
+              "reason": "TARGET_AUTHORITY_UNPINNED",
+              "bySurface": {
+                "Consumer": [
+                  "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6"
+                ],
+                "IndexModule": [
+                  "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9"
+                ],
+                "Ledger": [
+                  "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+                ]
+              },
+              "internalConsistency": "ONE_TARGET_PER_OBSERVED_ABI_SURFACE",
+              "pinStanding": "UNAVAILABLE"
+            },
+            {
+              "status": "OBSERVED_MATCH",
+              "reason": "TRANSACTION:Consumer.readList:ALL_COMPONENTS_MATCH",
+              "components": [
+                {
+                  "status": "OBSERVED_MATCH",
+                  "reason": "TRANSACTION_RECEIPT_REPORTS_SUCCESS",
+                  "observedStatus": "1"
+                },
+                {
+                  "status": "OBSERVED_MATCH",
+                  "reason": "EXACT_BLOCK_HASH_PRESENT_ON_OBSERVATION",
+                  "blockNumber": "20",
+                  "blockHash": "0x7b55d37b0d499588707f8b204b141b42a87356e577f9bcbd66b212dbf4f4efb5",
+                  "observationIndexes": [
+                    0
+                  ]
+                }
+              ],
+              "item": {
+                "transactionIndex": 3,
+                "to": "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6",
+                "selector": "0xd67f2355",
+                "block": "20",
+                "blockHash": "0x7b55d37b0d499588707f8b204b141b42a87356e577f9bcbd66b212dbf4f4efb5"
+              },
+              "args": [
+                [
+                  "0x0165878a594ca255338adfa4d48449f69242eb8f"
+                ],
+                "0x58de23804076d1b785b7479ab38fe6ada246e62164776702f51a1c48ef98cf99",
+                "0x4652c39b1ce3e19080eb789fbde64997a51319815bacfe4e79d96acbff7e0766",
+                "16"
+              ],
+              "basis": {
+                "status": "OBSERVED_MATCH",
+                "reason": "EXACT_BLOCK_HASH_PRESENT_ON_OBSERVATION",
+                "blockNumber": "20",
+                "blockHash": "0x7b55d37b0d499588707f8b204b141b42a87356e577f9bcbd66b212dbf4f4efb5",
+                "observationIndexes": [
+                  0
+                ]
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "QUERY_COORDINATES_UNPINNED:native-one.readList",
+              "observed": [
+                [
+                  "0x0165878a594ca255338adfa4d48449f69242eb8f"
+                ],
+                "0x58de23804076d1b785b7479ab38fe6ada246e62164776702f51a1c48ef98cf99",
+                "0x4652c39b1ce3e19080eb789fbde64997a51319815bacfe4e79d96acbff7e0766",
+                "16"
+              ],
+              "pinStanding": "UNAVAILABLE"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "STAGE_CALL_SET_UNPINNED:native-one.listing"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastCount:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastCount",
+                "observed": "1",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "20",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "OBSERVED_MATCH",
+              "reason": "TRANSACTION_STAGE_ORDER_MATCH:paid-quote-before-listing",
+              "earlier": "19",
+              "later": "20"
+            }
+          ],
+          "scope": "selected-name count plus independently pinned query coordinates when such a test-only pin is supplied",
+          "basis": {
+            "status": "UNKNOWN",
+            "reason": "BLOCK_HASH_UNAVAILABLE",
+            "blockNumber": "20",
+            "blockHash": "UNAVAILABLE"
+          }
+        }
+      }
+    },
+    {
+      "cellId": "signed-one",
+      "packetKey": "signed-one/quote",
+      "rawTupleCount": 77,
+      "transactionCount": 5,
+      "axes": {
+        "transportCorrelation": {
+          "status": "UNKNOWN",
+          "reason": "RPC_REQUEST_RESPONSE_CORRELATION_INCOMPLETE_OR_UNMODELED",
+          "rawTupleCount": 77,
+          "missing": [
+            {
+              "rawIndex": 0,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 1,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 2,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 3,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 4,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 5,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 6,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 7,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 8,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 9,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 10,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 11,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 12,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 13,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 14,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 15,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 16,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 17,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 18,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 19,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 20,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 21,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 22,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 23,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 24,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 25,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 26,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 27,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 28,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 29,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 30,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 31,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 32,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 33,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 34,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 35,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 36,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 37,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 38,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 39,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 40,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 41,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 42,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 43,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 44,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 45,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 46,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 47,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 48,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 49,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 50,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 51,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 52,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 53,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 54,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 55,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 56,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 57,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 58,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 59,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 60,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 61,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 62,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 63,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 64,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 65,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 66,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 67,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 68,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 69,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 70,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 71,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 72,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 73,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 74,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 75,
+              "field": "request/response"
+            },
+            {
+              "rawIndex": 76,
+              "field": "request/response"
+            }
+          ]
+        },
+        "targetConsistency": {
+          "status": "UNKNOWN",
+          "reason": "TARGET_AUTHORITY_UNPINNED",
+          "bySurface": {
+            "Consumer": [
+              "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6"
+            ],
+            "IndexModule": [
+              "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9"
+            ],
+            "Ledger": [
+              "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+            ]
+          },
+          "internalConsistency": "ONE_TARGET_PER_OBSERVED_ABI_SURFACE",
+          "pinStanding": "UNAVAILABLE"
+        },
+        "writeSequence": {
+          "status": "OBSERVED_MATCH",
+          "reason": "RAW_ACTION_ARRAYS_CONTAIN_BODY_COMMITMENTS_AND_RECORD_TARGET_BINDINGS",
+          "scope": "separate actions in each canonical array carry the body-hash commitment and Record-target/subject/revision binding; action-kind and cross-action semantics are not asserted",
+          "create": {
+            "transactionIndex": 0,
+            "blockNumber": "17",
+            "basis": {
+              "status": "OBSERVED_MATCH",
+              "reason": "EXACT_BLOCK_HASH_PRESENT_ON_OBSERVATION",
+              "blockNumber": "17",
+              "blockHash": "0xe3b1b0354967e64f2313cac19b9c83e00be284ad3cca84121e317756033c38bf",
+              "observationIndexes": [
+                0
+              ]
+            },
+            "rawBody": "0x0000000000000000000000000000000000000000000000000000000000000bb8",
+            "bodyCommitmentActionIndex": 1,
+            "recordTargetBindingActionIndex": 2,
+            "bodyHash": "0xe76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552",
+            "recordId": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "subject": "0x7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de1",
+            "expectedRevision": "0"
+          },
+          "edit": {
+            "transactionIndex": 1,
+            "blockNumber": "18",
+            "basis": {
+              "status": "OBSERVED_MATCH",
+              "reason": "EXACT_BLOCK_HASH_PRESENT_ON_OBSERVATION",
+              "blockNumber": "18",
+              "blockHash": "0xaeaf22f62f22e35080aa0616916bccc36d6751e13ef3779402de7a302bbf5fad",
+              "observationIndexes": [
+                0
+              ]
+            },
+            "rawBody": "0x0000000000000000000000000000000000000000000000000000000000000c1c",
+            "bodyCommitmentActionIndex": 0,
+            "recordTargetBindingActionIndex": 1,
+            "bodyHash": "0x5a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb3",
+            "recordId": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "subject": "0x7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de1",
+            "expectedRevision": "1"
+          }
+        },
+        "bodyScalarSemantics": {
+          "status": "UNSUPPORTED",
+          "reason": "the authorized ABI fields type Record data as bytes and do not declare quote-body semantics"
+        },
+        "controlRecords": {
+          "status": "UNKNOWN",
+          "reason": "CONTROL_RECORDS:AT_LEAST_ONE_COMPONENT_UNKNOWN",
+          "components": [
+            {
+              "status": "UNKNOWN",
+              "reason": "TARGET_AUTHORITY_UNPINNED",
+              "bySurface": {
+                "Consumer": [
+                  "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6"
+                ],
+                "IndexModule": [
+                  "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9"
+                ],
+                "Ledger": [
+                  "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+                ]
+              },
+              "internalConsistency": "ONE_TARGET_PER_OBSERVED_ABI_SURFACE",
+              "pinStanding": "UNAVAILABLE"
+            },
+            {
+              "status": "OBSERVED_MATCH",
+              "reason": "CONTROL_BLOCK_NUMBER_FORMAT_VALID",
+              "observed": "16"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "CONTROL_RECORD_RAW_CALL_OMITTED",
+              "recordId": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+              "blockNumber": "16",
+              "otherObservedRecordIds": []
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "CONTROL_RECORD_RAW_CALL_OMITTED",
+              "recordId": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+              "blockNumber": "16",
+              "otherObservedRecordIds": []
+            }
+          ]
+        },
+        "controlConsumer": {
+          "status": "UNKNOWN",
+          "reason": "CONTROL_CONSUMER:AT_LEAST_ONE_COMPONENT_UNKNOWN",
+          "components": [
+            {
+              "status": "UNKNOWN",
+              "reason": "TARGET_AUTHORITY_UNPINNED",
+              "bySurface": {
+                "Consumer": [
+                  "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6"
+                ],
+                "IndexModule": [
+                  "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9"
+                ],
+                "Ledger": [
+                  "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+                ]
+              },
+              "internalConsistency": "ONE_TARGET_PER_OBSERVED_ABI_SURFACE",
+              "pinStanding": "UNAVAILABLE"
+            },
+            {
+              "status": "OBSERVED_MATCH",
+              "reason": "CONTROL_BLOCK_NUMBER_FORMAT_VALID",
+              "observed": "16"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "FULL_CONSUMER_CONTROL_VECTOR_UNPINNED",
+              "missingFields": [
+                "lastAdmission",
+                "lastCount",
+                "lastRevision",
+                "lastScanned",
+                "lastStatus",
+                "lastTarget",
+                "lastValue"
+              ],
+              "pinStanding": "UNAVAILABLE"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "STAGE_CALL_SET_UNPINNED:signed-one.control"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastAdmission:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastAdmission",
+                "observed": "0",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "16",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastCount:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastCount",
+                "observed": "0",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "16",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastRevision:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastRevision",
+                "observed": "0",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "16",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastScanned:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastScanned",
+                "observed": "0",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "16",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastStatus:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastStatus",
+                "observed": "0",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "16",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastTarget:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastTarget",
+                "observed": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "16",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastValue:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastValue",
+                "observed": "0",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "16",
+                "blockHash": "UNAVAILABLE"
+              }
+            }
+          ],
+          "scope": "all seven authorized Consumer getters; three values also come from the frozen matrix",
+          "basis": {
+            "status": "UNKNOWN",
+            "reason": "BLOCK_HASH_UNAVAILABLE",
+            "blockNumber": "16",
+            "blockHash": "UNAVAILABLE"
+          }
+        },
+        "paidQuoteRead": {
+          "status": "UNKNOWN",
+          "reason": "PAID_QUOTE_READ:AT_LEAST_ONE_COMPONENT_UNKNOWN",
+          "components": [
+            {
+              "status": "UNKNOWN",
+              "reason": "TARGET_AUTHORITY_UNPINNED",
+              "bySurface": {
+                "Consumer": [
+                  "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6"
+                ],
+                "IndexModule": [
+                  "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9"
+                ],
+                "Ledger": [
+                  "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+                ]
+              },
+              "internalConsistency": "ONE_TARGET_PER_OBSERVED_ABI_SURFACE",
+              "pinStanding": "UNAVAILABLE"
+            },
+            {
+              "status": "OBSERVED_MATCH",
+              "reason": "TRANSACTION:Consumer.readQuote:ALL_COMPONENTS_MATCH",
+              "components": [
+                {
+                  "status": "OBSERVED_MATCH",
+                  "reason": "TRANSACTION_RECEIPT_REPORTS_SUCCESS",
+                  "observedStatus": "1"
+                },
+                {
+                  "status": "OBSERVED_MATCH",
+                  "reason": "EXACT_BLOCK_HASH_PRESENT_ON_OBSERVATION",
+                  "blockNumber": "19",
+                  "blockHash": "0x16b3238668e47441c4d8cbcc8bcb2ec742de900163511c6ecc98529d99c13ba7",
+                  "observationIndexes": [
+                    0
+                  ]
+                }
+              ],
+              "item": {
+                "transactionIndex": 2,
+                "to": "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6",
+                "selector": "0x6a59728b",
+                "block": "19",
+                "blockHash": "0x16b3238668e47441c4d8cbcc8bcb2ec742de900163511c6ecc98529d99c13ba7"
+              },
+              "args": [
+                [
+                  "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
+                ],
+                "0x07167a05890e9fcaccbdf11abbb65a3aa14bccfe41825ce441803003862ce5df",
+                "0x7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de1",
+                "0x0000000000000000000000000000000000000000000000000000000000000000"
+              ],
+              "basis": {
+                "status": "OBSERVED_MATCH",
+                "reason": "EXACT_BLOCK_HASH_PRESENT_ON_OBSERVATION",
+                "blockNumber": "19",
+                "blockHash": "0x16b3238668e47441c4d8cbcc8bcb2ec742de900163511c6ecc98529d99c13ba7",
+                "observationIndexes": [
+                  0
+                ]
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "QUERY_COORDINATES_UNPINNED:signed-one.readQuote",
+              "observed": [
+                [
+                  "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
+                ],
+                "0x07167a05890e9fcaccbdf11abbb65a3aa14bccfe41825ce441803003862ce5df",
+                "0x7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de1",
+                "0x0000000000000000000000000000000000000000000000000000000000000000"
+              ],
+              "pinStanding": "UNAVAILABLE"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "STAGE_CALL_SET_UNPINNED:signed-one.paid-quote-read"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastTarget:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastTarget",
+                "observed": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "19",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastRevision:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastRevision",
+                "observed": "2",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "19",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastValue:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastValue",
+                "observed": "3100",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "19",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "OBSERVED_MATCH",
+              "reason": "TRANSACTION_STAGE_ORDER_MATCH:edit-before-paid-quote",
+              "earlier": "18",
+              "later": "19"
+            },
+            {
+              "status": "OBSERVED_MATCH",
+              "reason": "READ_QUOTE_SUBJECT_MATCHES_EDIT_SUBJECT",
+              "observedSubject": "0x7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de1"
+            }
+          ],
+          "selectedTargetExpectation": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+          "basis": {
+            "status": "UNKNOWN",
+            "reason": "BLOCK_HASH_UNAVAILABLE",
+            "blockNumber": "19",
+            "blockHash": "UNAVAILABLE"
+          }
+        },
+        "listing": {
+          "status": "UNKNOWN",
+          "reason": "LISTING:AT_LEAST_ONE_COMPONENT_UNKNOWN",
+          "components": [
+            {
+              "status": "UNKNOWN",
+              "reason": "TARGET_AUTHORITY_UNPINNED",
+              "bySurface": {
+                "Consumer": [
+                  "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6"
+                ],
+                "IndexModule": [
+                  "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9"
+                ],
+                "Ledger": [
+                  "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"
+                ]
+              },
+              "internalConsistency": "ONE_TARGET_PER_OBSERVED_ABI_SURFACE",
+              "pinStanding": "UNAVAILABLE"
+            },
+            {
+              "status": "OBSERVED_MATCH",
+              "reason": "TRANSACTION:Consumer.readList:ALL_COMPONENTS_MATCH",
+              "components": [
+                {
+                  "status": "OBSERVED_MATCH",
+                  "reason": "TRANSACTION_RECEIPT_REPORTS_SUCCESS",
+                  "observedStatus": "1"
+                },
+                {
+                  "status": "OBSERVED_MATCH",
+                  "reason": "EXACT_BLOCK_HASH_PRESENT_ON_OBSERVATION",
+                  "blockNumber": "20",
+                  "blockHash": "0x47d8b502ff3522d261b6ad8c84a4a9642d442d2caad2e597c3bbed3174b734f4",
+                  "observationIndexes": [
+                    0
+                  ]
+                }
+              ],
+              "item": {
+                "transactionIndex": 3,
+                "to": "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6",
+                "selector": "0xd67f2355",
+                "block": "20",
+                "blockHash": "0x47d8b502ff3522d261b6ad8c84a4a9642d442d2caad2e597c3bbed3174b734f4"
+              },
+              "args": [
+                [
+                  "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
+                ],
+                "0x58de23804076d1b785b7479ab38fe6ada246e62164776702f51a1c48ef98cf99",
+                "0xe306d2c37b193cbef2767a029de2280549d79ca3de60ef96aafbf791bb13c2a1",
+                "16"
+              ],
+              "basis": {
+                "status": "OBSERVED_MATCH",
+                "reason": "EXACT_BLOCK_HASH_PRESENT_ON_OBSERVATION",
+                "blockNumber": "20",
+                "blockHash": "0x47d8b502ff3522d261b6ad8c84a4a9642d442d2caad2e597c3bbed3174b734f4",
+                "observationIndexes": [
+                  0
+                ]
+              }
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "QUERY_COORDINATES_UNPINNED:signed-one.readList",
+              "observed": [
+                [
+                  "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
+                ],
+                "0x58de23804076d1b785b7479ab38fe6ada246e62164776702f51a1c48ef98cf99",
+                "0xe306d2c37b193cbef2767a029de2280549d79ca3de60ef96aafbf791bb13c2a1",
+                "16"
+              ],
+              "pinStanding": "UNAVAILABLE"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "STAGE_CALL_SET_UNPINNED:signed-one.listing"
+            },
+            {
+              "status": "UNKNOWN",
+              "reason": "Consumer.lastCount:VALUE_OR_BASIS_UNKNOWN",
+              "value": {
+                "status": "OBSERVED_MATCH",
+                "reason": "RAW_RETURN_DECODES_AS_EXPECTED:Consumer.lastCount",
+                "observed": "1",
+                "observationCount": 1
+              },
+              "basis": {
+                "status": "UNKNOWN",
+                "reason": "BLOCK_HASH_UNAVAILABLE",
+                "blockNumber": "20",
+                "blockHash": "UNAVAILABLE"
+              }
+            },
+            {
+              "status": "OBSERVED_MATCH",
+              "reason": "TRANSACTION_STAGE_ORDER_MATCH:paid-quote-before-listing",
+              "earlier": "19",
+              "later": "20"
+            }
+          ],
+          "scope": "selected-name count plus independently pinned query coordinates when such a test-only pin is supplied",
+          "basis": {
+            "status": "UNKNOWN",
+            "reason": "BLOCK_HASH_UNAVAILABLE",
+            "blockNumber": "20",
+            "blockHash": "UNAVAILABLE"
+          }
+        }
+      }
+    }
+  ],
+  "unexaminedCellKeys": [
+    "failure-rows",
+    "freshness-controls",
+    "native-one-noindex/quote",
+    "native-one/binary",
+    "native-two/binary",
+    "native-two/quote",
+    "signed-one/binary",
+    "signed-two/binary",
+    "signed-two/quote"
+  ],
+  "summary": {
+    "OBSERVED_MATCH": 1,
+    "OBSERVED_MISMATCH": 0,
+    "UNKNOWN": 11,
+    "UNSUPPORTED": 4
+  },
+  "chainTruth": {
+    "status": "UNKNOWN",
+    "reason": "NO_AUTHENTICATED_STATE_PROOF_OR_INDEPENDENT_CHAIN_OBSERVATION"
+  },
+  "sourceAuthority": {
+    "status": "UNKNOWN",
+    "reason": "ABI_AND_RETAINED_BYTES_DO_NOT_PROVE_SOURCE_OR_RUNTIME_AUTHORITY"
+  },
+  "exactTypeSemantics": {
+    "status": "UNSUPPORTED",
+    "reason": "the authorized ABI fields type Record data as bytes and do not declare quote-body semantics"
+  },
+  "completeWorkflow": {
+    "status": "UNKNOWN",
+    "reason": "ONLY_FROZEN_MATRIX_AXES_AND_RETAINED_FIELDS_WERE_EXAMINED"
+  },
+  "candidatePass": "NOT_EVALUATED"
+}

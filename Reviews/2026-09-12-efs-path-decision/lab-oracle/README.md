@@ -144,12 +144,16 @@ runtime or storage truth, source authority, exact Type meaning, complete
 workflow execution, semantic `COMMITTED`, or a candidate pass.
 
 The frozen two-cell matrix requires both `native-one` and `signed-one` to begin
-with the quote3000 and quote3100 control Records observed absent and a zeroed
-Consumer; create quote3000; edit the same subject HEAD to a distinct quote3100
-Record at revision 2; return that Record/revision/scalar 3100 from the paid quote
-read; and list exactly one selected name. Candidate decoded summaries,
-`pre`/`post`, `consumerChecks`, labels, and pass flags are inert retained data,
-never expected answers.
+with the quote3000 and quote3100 control Records observed absent and the three
+specified Consumer fields (`lastTarget`, `lastRevision`, and `lastValue`) at
+zero; create quote3000; edit the same subject HEAD to a distinct quote3100
+Record at revision 2; return that Record/revision/scalar 3100 from the paid
+quote read; and list exactly one selected name. It did not freeze the other
+four Consumer getters, target addresses, or query coordinates. Only synthetic
+tests may supply those as a separately marked, caller-provided independent
+vector; the retained candidate packet receives no such pins. Candidate decoded
+summaries, `pre`/`post`, `consumerChecks`, labels, and pass flags are inert
+retained data, never expected answers.
 
 Implementation plan:
 
@@ -161,6 +165,101 @@ Implementation plan:
    target, basis, omission, conflict, and fake-summary mutations.
 4. Implement a new `rpc-observed` module and CLI without importing, modifying,
    or weakening `oracle.mjs` or `check.mjs`.
-5. Run the checker on the incomplete two-cell packet, store candidate-packet
-   results separately from synthetic test totals, verify strict-file hashes,
-   obtain independent review, and commit only `lab-oracle/` files.
+5. Run the checker on the current retained packet (keeping the superseded
+   partial input only as omission pressure), store candidate-packet results
+   separately from synthetic test totals, verify strict-file hashes, obtain
+   independent review, and commit only `lab-oracle/` files.
+
+The authorized ABI-only transcription is
+`rpc-observed-profile-dcc7b94.json` blob
+`6345c2246e287e9676f714491ce8aebf673f754a`. It contains selected declarations
+needed by this matrix from four artifacts and pins each whole artifact by
+SHA-256 and Git blob. No metadata, bytecode, AST, source, measurement helper,
+or candidate verifier was used. The ABI can describe byte layouts; it cannot
+prove that an address ran that code or supply missing enum, Type, body-codec,
+proxy, or deployment authority.
+
+The initial partial packet remains registered only as incomplete-input
+pressure:
+
+- `measure1-partial.json`: 162,855 bytes; SHA-256
+  `0a46b75442b30aec9401e6341d5a5ca3ed6a3413f308da21732bb97a9db445e8`;
+  Git blob `f6d25f3f6dec11dd4ffabf5407dd53114383eda5`.
+- It retains 77 call tuples per frozen cell, but no literal JSON-RPC envelope,
+  method, or request/response ID. It is superseded as the current measurement
+  input.
+
+The candidate-designated current packet is `measure2-a16d7d4.json` at local evidence commit
+`322b3204a743cb2806e114cd4b0ec544076e3c48`: 971,697 bytes; SHA-256
+`7bd5409a4b306d8e0705187094fa482b31efcad471260ae93f57eebd0b22fcce`;
+Git blob `1a38f6493510760ae1b97f6188d2548c795350a8`. It is still incomplete for the
+frozen oracle requirements. The committed independent result is
+`measure2-a16d7d4.rpc-observed.report.json`; it is deliberately separate from
+the synthetic test runner.
+
+### Current packet result — not a pass
+
+| Cell / axis | `native-one/quote` | `signed-one/quote` |
+|---|---|---|
+| transport correlation | `UNKNOWN` | `UNKNOWN` |
+| ABI surface-target consistency | `UNKNOWN` | `UNKNOWN` |
+| write tuple/Record consistency | `UNSUPPORTED` | `OBSERVED_MATCH` |
+| quote body scalar semantics | `UNSUPPORTED` | `UNSUPPORTED` |
+| baseline Record absence | `UNKNOWN` | `UNKNOWN` |
+| seven-getter Consumer control | `UNKNOWN` | `UNKNOWN` |
+| paid quote target/revision/value | `UNSUPPORTED` | `UNKNOWN` |
+| listing count and coordinates | `UNKNOWN` | `UNKNOWN` |
+
+Across those 16 axes the packet result is 1 `OBSERVED_MATCH`, 0
+`OBSERVED_MISMATCH`, 11 `UNKNOWN`, and 4 `UNSUPPORTED`. The sole match is
+signed write tuple consistency: each canonical calldata action array contains
+one action committing a recomputed Record body hash and a separate action
+targeting that Record for one shared subject, with raw expected revision fields
+0 then 1, in successful-receipt order. Action kinds and cross-action semantics
+remain unsupported. Receipt status and its supplied block hash remain
+unauthenticated observations, not inclusion or semantic effect.
+The body ABI remains opaque `bytes`, so the checker does not infer that either
+raw body *means* quote 3000 or 3100.
+
+The packet itself is the only source of its Ledger/Consumer addresses and
+`readQuote`/`readList` coordinates. Those values are reported but cannot serve
+as their own expectations, so both target-consistency axes and the supported
+Consumer read/control/list axes remain `UNKNOWN`. The raw Consumer getter bytes
+also omit a per-call block hash; a receipt or sealed-state hash sharing the
+same block number is never joined in to manufacture one. Internally agreeing
+decoded getter values therefore do not upgrade an axis.
+
+The native writer selector `0x70f8b526` is absent from every authorized ABI;
+that path is therefore not reverse-engineered from labels. Baseline block 16
+has raw Consumer getters but no correlatable raw `Ledger.record` returns, so
+Record absence is `UNKNOWN` in both cells even where later signed Record IDs
+are computable. The raw call tuples omit literal JSON-RPC request/response
+envelopes, IDs, methods, and per-call sources, leaving transport correlation
+`UNKNOWN`. The checker rejects duplicate JSON object keys,
+ABI-decodable trailing bytes, request/response disagreement, failed receipts, target or coordinate
+substitution against test-only independent pins, and stage-order violations.
+Its 52 synthetic tests are mutation controls, not candidate evidence. All
+authenticated chain truth, source/runtime authority, exact Type semantics, and
+complete workflow effect remain `UNKNOWN` or `UNSUPPORTED`; `candidatePass` is
+always `NOT_EVALUATED`.
+
+### RPC_OBSERVED commands
+
+```sh
+NODE_PATH=/Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules \
+  node --test Reviews/2026-09-12-efs-path-decision/lab-oracle/rpc-observed.test.mjs
+
+NODE_PATH=/Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules \
+  node Reviews/2026-09-12-efs-path-decision/lab-oracle/check-rpc-observed.mjs \
+  PACKET.json \
+  Reviews/2026-09-12-efs-path-decision/lab-oracle/rpc-observed-profile-dcc7b94.json \
+  Reviews/2026-09-12-efs-path-decision/lab-oracle/rpc-observed-expectations.json
+```
+
+The new CLI seals its profile and expectation blobs before decoding. It exits
+`0` when no supported raw-byte check disagrees, `1` when at least one observed
+byte check disagrees, and `2` for malformed or substituted sealed inputs.
+`UNKNOWN` and `UNSUPPORTED` are honest non-success states and do not by
+themselves make the tool process fail. Exit `0`, synthetic test success, and
+zero observed mismatches are none of: authenticated RPC, inclusion, canonical
+effect, exact Type meaning, complete workflow evidence, or candidate pass.
