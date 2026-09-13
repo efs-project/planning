@@ -23,7 +23,7 @@ interface ILedgerCounts {
 /// Optional families are declared with a start admission; this lab maintains no optional data.
 ///
 /// Posting-list representation is the fuller model's (StateKernel.append): head word =
-/// count u64@0 | live u64@64 | last u48@128 | flags u16@176 (1 = audit list); data words hold
+/// count u64 at bit 0 | live u64 at 64 | last u48 at 128 | flags u16 at 176 (1 = audit list); data words hold
 /// five 48-bit ordinals each at shift 48*(index%5). ESTIMATED per append: ~5k head rewrite +
 /// 22.1k/5 amortized fresh word (fresh list: ~44k).
 contract IndexModule is IIndexModule {
@@ -160,7 +160,7 @@ contract IndexModule is IIndexModule {
         uint64 live = uint64(hw >> 64);
         uint64 last = uint64((hw >> 128) & GUARD);
         if (ordinal <= last) revert E_ORDER(key, last, ordinal);
-        if (count >= GUARD - 1) revert E_GUARD();
+        if (ordinal >= GUARD || count >= GUARD - 1) revert E_GUARD();
         _postingWord[key][count / 5] |= uint256(ordinal) << (48 * (count % 5));
         _postingHead[key] = uint256(count + 1) | (uint256(live + 1) << 64) | (uint256(ordinal) << 128)
             | (audit ? (uint256(1) << 176) : 0);

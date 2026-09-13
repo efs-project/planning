@@ -21,6 +21,7 @@ import {IndexModule} from "./IndexModule.sol";
 /// coverage from the index module the page is UNKNOWN.
 contract LensReader {
     // point statuses
+    uint256 internal constant MAX_BUDGET = 256; // reviewer MINOR: cap caller budget
     uint8 public constant ABSENT = 0;
     uint8 public constant FOUND = 1;
     uint8 public constant MASKED = 2;
@@ -157,13 +158,14 @@ contract LensReader {
             revert E_CURSOR();
         }
         bytes32 origin = _origin();
+        if (budget > MAX_BUDGET) budget = MAX_BUDGET; // paid reads: bound memory expansion
         page.items = new Entry[](budget);
         page.next = c;
         if (address(index) == address(0)) return _finish(page, c, 0, UNKNOWN);
         (uint8 cov,,) = index.coverage(index.FAMILY_SCOPE(), scopeKey);
         if (cov != COMPLETE) return _finish(page, c, 0, UNKNOWN);
-        for (uint256 k; k < lens.length; ++k) {
-            (uint64 n,,,) = index.postingHead(Keys.scopeList(Keys.scope(Keys.principalFor(lens[k], origin), purpose, subject)));
+        for (uint256 i; i < lens.length; ++i) {
+            (uint64 n,,,) = index.postingHead(Keys.scopeList(Keys.scope(Keys.principalFor(lens[i], origin), purpose, subject)));
             page.rawTotal += n;
         }
         uint256 filled;

@@ -264,7 +264,11 @@ contract Ledger {
             if (src.sourcePrincipal != Keys.principal(src.author)) revert E_SOURCE_SIGNATURE();
             src.grade = 1;
         } else {
-            src.grade = 0; // contract-author source: a chain-state witness this Realm cannot check
+            // Contract-author source: a chain-state witness this Realm cannot check. REVIEW MAJOR-1
+            // (deferred to the post-measurement repair): derive sourcePrincipal from a retained
+            // sourceChainId + coreCodeCommitment + author instead of accepting it as claimed, so a
+            // squatter can only namespace subjects under its own address.
+            src.grade = 0;
         }
         Pub memory p;
         p.author = src.author;
@@ -649,13 +653,15 @@ contract Ledger {
     }
 
     // ------------------------------------------------------------------------ commitments a signer computes
-    /// Running hash over (typeId, pinned acceptor codehash) of every publish/reuse action, in order.
+    /// Running hash over (typeId, pinned acceptor codehash, registry epoch) of every publish/reuse
+    /// action, in order (ruling E.B.4: a rule change invalidates unsent signatures).
     function acceptanceProfileOf(Action[] memory actions) public view returns (bytes32 profile) {
+        uint64 epoch = registry.epoch();
         for (uint256 i; i < actions.length; ++i) {
             uint8 k = actions[i].kind;
             if (k != PUBLISH && k != REUSE) continue;
             (,, bytes32 codehash,) = registry.typeInfo(actions[i].typeId);
-            profile = keccak256(abi.encode(profile, actions[i].typeId, codehash));
+            profile = keccak256(abi.encode(profile, actions[i].typeId, codehash, epoch));
         }
     }
 
@@ -815,6 +821,8 @@ contract Ledger {
         }
     }
 
+    /// Admin ablation path. Rows produced with module == 0 are NOT EQUIVALENT (a named
+    /// guarantee is omitted); they are diagnostic only and must be labelled so everywhere.
     function setIndexModule(address module) external {
         if (msg.sender != admin) revert E_ADMIN();
         indexModule = module;

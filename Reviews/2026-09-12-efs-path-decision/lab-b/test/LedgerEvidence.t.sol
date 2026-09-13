@@ -74,7 +74,7 @@ contract LedgerEvidenceTest is LabBase {
         expectSignedFail(bad, a, b, sig, Ledger.E_INTENT.selector, "index obligations");
         bad = cloneIntent(intent);
         bad.nonce = 1;
-        expectSignedFail(bad, a, b, sig, Ledger.E_NONCE.selector, "nonce (digest differs and sequence breaks)");
+        expectSignedFail(bad, a, b, sig, Ledger.E_SIGNATURE.selector, "nonce (digest differs before the sequence check)");
         bad = cloneIntent(intent);
         bad.deadline = intent.deadline + 1;
         expectSignedFail(bad, a, b, sig, Ledger.E_SIGNATURE.selector, "deadline");
@@ -102,8 +102,8 @@ contract LedgerEvidenceTest is LabBase {
         (,,,,,,,,,,,, bytes32 h1) = ledger.evidence(p1);
         (,,,,,,,,,,,, bytes32 h2) = ledger2.evidence(p2);
         require(h1 == h2 && h1 == keccak256(abi.encode(a)), "same actions hash");
-        bytes32 pid = keccak256(abi.encode(eoaA, uint64(0), h1));
-        require(ledger.publicationOf(pid) == p1 && ledger2.publicationOf(pid) == p2, "same publication id");
+        bytes32 pubId = keccak256(abi.encode(eoaA, uint64(0), h1));
+        require(ledger.publicationOf(pubId) == p1 && ledger2.publicationOf(pubId) == p2, "same publication id");
         (,,, address rec, bool ok) = recon.reconstruct(ledger2, p2);
         require(ok && rec == eoaA, "destination re-verifies the source signature itself");
     }

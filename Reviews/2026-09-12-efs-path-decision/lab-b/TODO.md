@@ -59,3 +59,8 @@ Everything below is honest state as of writing. No `forge`, `solc`, `anvil`, `no
 - C.2 Evidence cell: **uniform 5–7 words for both ingress kinds** in this probe (matched comparison); the 2-word native cell is a later counterfactual, not part of this run.
 - C.3 tags: `TAG → subjectId` for File tags and `TAG → recordId` for revision tags, both supported, target untyped for the probe.
 - A.10 EIP-170: if the runtime exceeds 24,576 bytes at first compile, the external-library split (`Apply.sol`) is authorized as ordinary modularization and its call overhead is charged in the manifest.
+
+## F. Independent review (before first compile) — applied / deferred
+
+Applied in the repair cycle: NatSpec tag error in IndexModule; ordinal guard in `_append`; `MAX_BUDGET` cap and loop-variable shadowing in LensReader; registry `epoch` folded into `acceptanceProfileOf`; test expectation nonce→`E_SIGNATURE`; `pid` shadow renamed; Reconstructor labelled as a candidate self-check; `setIndexModule` labelled as a non-equivalent ablation path.
+Deferred to the post-measurement repair (reviewer: ruling-level, not probe-blocking): MAJOR-1 grade-0 import must derive `sourcePrincipal` from a retained `sourceChainId` + code commitment + author; MAJOR-2 replay domain — for this probe the domain is realm-bound `(name, version)` with realmId and coreCodeCommitment inside the intent, pinned in the manifest as "same (realm, code) = same authority domain"; chain-binding plus routing the portability test through `importPublication` is the alternative awaiting the coordinator's ruling. Also noted: EIP-7702-delegated EOAs classify by `code.length` (Cancun lab: dormant); contract-author import retry has no `AlreadyAdmitted` identity (implicit nonce).

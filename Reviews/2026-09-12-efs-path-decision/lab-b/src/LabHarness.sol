@@ -136,7 +136,9 @@ contract Consumer {
     }
 }
 
-/// Clean reader (delta C): rebuilds a publication's Action tuples from Admission rows
+/// CANDIDATE SELF-CHECK, not the independent oracle: it calls the candidate's own intentDigest
+/// and Action ABI (oracle-boundary forbids that for the oracle; independent vectors pending).
+/// Rebuilds a publication's Action tuples from Admission rows
 /// firstAdmission..+leafCount using public getters only, recomputes actionsHash and the
 /// PublicationIntent digest, and (for signed ingress) ecrecovers the author from the
 /// retained (r, s, v). No calldata, logs or original client involved.
