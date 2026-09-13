@@ -92,7 +92,7 @@ contract IndexModule is IIndexModule {
     }
 
     // ---------------------------------------------------------------- maintenance
-    function onAdmission(uint64 publication, Effect[] calldata effects) external {
+    function onAdmission(uint64 publication, Effect[] calldata effects) public virtual {
         if (msg.sender != ledger) revert E_LEDGER();
         uint256 n = effects.length;
         if (n == 0) return;
