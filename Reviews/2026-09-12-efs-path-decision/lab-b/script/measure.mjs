@@ -1091,6 +1091,7 @@ async function main() {
     assert.equal(finalEnv.response.result, true, 'final evm_revert');
     report.estimatedFreshSlots = { label: 'ESTIMATED from the design table, not traced', 'create (native, 4 actions)': '5 evidence + 1 pubId + 2..3 record + 1 subject + 4..6 admission + 2x(2 head + 1 bindingPosition + 3 positionCell) + index appends', 'create (signed)': 'as native + 2 (r, s)', 'edit': '3 record + 2..3 admission + head rewrite + index appends', 'create + label fresh': 'create + 3 record (typeId, meta, one word) + 2 admission + by-Type/by-author appends', 'create + label existing republished': 'create + 1 occurrence rewrite + 2 admission + appends', 'create + label existing omitted': 'create + 0' };
     report.consumerMismatches = Object.values(report.cells).reduce((n, c) => n + (c.mismatches || 0), 0);
+    assert.equal(report.consumerMismatches, 0, `consumer/commitment self-check mismatches: ${report.consumerMismatches}`);
     report.finishedAt = new Date().toISOString();
   } catch (e) {
     log(`FAILED: ${e.message}`);
