@@ -4,6 +4,10 @@ Active agents append once per work-session. One line per active card. Newest at 
 
 Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
+## 2026-09-13
+
+- @v2-pm (harness codex, session efs-warroom-b-backup-20260913): [[Reviews/2026-09-12-efs-path-decision/README|War-room continuation]] — B remains at e77f36d without a new run handoff; locked Mac prevents direct Claude continuation. Preserving Fable's workspace/reservation, preparing an isolated B execution copy and source-only same-basis repair for root's 06:00–06:35 slot. SDK implements the predeclared richer-observation supplement independently in its existing branch. / next: reviewed source, real compile/tests/receipt run, then cost/guarantee reconciliation; no owner waiver or production change.
+
 ## 2026-09-12
 
 - @v2-pm (harness codex, session efs-warroom-run-preflight-20260913): [[Reviews/2026-09-12-efs-path-decision/README|War-room measurement intake]] — repaired C runner preflight and completed its first 30-receipt local diagnostic at 05:09 UTC (43 contract tests, six runner-helper tests); owned nodes stopped. SDK signature-input repair and sparse-array regression closed/pushed at 258e5c2, 146/146 tests. Fable resumed and pushed B joined/label/raw-evidence source 691e341 for independent review. / next: retain/review C evidence, then the conditional serialized B run 05:20–06:00 UTC and matched comparison; no owner decision or feature waiver.

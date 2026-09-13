@@ -112,6 +112,35 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**05:52 continuation / next run owner:** B remains clean at `e77f36d`, with
+no new handoff or heavy process since the 05:24 request. Direct Claude access
+is blocked by the locked Mac at 05:47; current execution is unconfirmed.
+Do not assume a written lease wakes an idle Claude task. Preserve Fable's
+05:20–06:00 reservation, then root is the **exclusive 06:00–06:35 UTC**
+operator for the same bounded B compile/tests/receipt plan. Root prepared an
+isolated execution copy `planning-warroom-b-run`, branch
+`codex/efs-warroom-b-run`, from exact `e77f36d`; Fable's worktree is untouched.
+An internal worker changes only the same-basis runner/readback test, with a
+separate read-only preflight. No Core, workload or candidate architecture
+change is authorized by this execution fallback. A resuming Fable must not
+start another chain during the root slot; return source-only next-gap work.
+
+Root's run-owned scratch is `efs-road-b-run-20260913.9xQRrd` under the system
+temporary directory, distinct from Fable's build/cache. Use pinned offline
+solc 0.8.30 / Cancun / optimizer 200 / via-IR, two workers, ordinary code and
+initcode/block limits; keep the candidate's declared metadata configuration.
+No heavy run before 06:00 and a fresh no-competing-process check. Build
+watchdog <=600 seconds, chain/runner <=1,500/1,800 seconds and hard stop by
+06:35; one loopback Anvil with prune-history 256, no trace/dump. Same scratch
+and reserve limits as below. Root retains/reviews results and returns only
+the minimal runner patch to Fable if useful; no prototype consolidation.
+
+SDK owns a separate **light-only richer-observation checker extension through
+06:15 UTC** in its existing `planning-warroom-oracle` / `lab-oracle` branch,
+using the already predeclared supplement. Old files/reports are immutable;
+no B implementation input, chain, main edits or unreviewed push. Root owns
+review/publication. Signature checker work remains completed, not reopened.
+
 - Phase / T0: **C first receipt run reviewed / B joined source repair / independent signature checker closed / 2026-09-12 23:10 UTC**. C runner `c825c61` completed at 05:09 UTC; its packet/report are pushed at `324e7c4`. Independent review joined all 30 retained receipts and found no blocking evidence defect under the stated diagnostic ceiling. B's prior 11-cell diagnostic remains `322b320`; its new joined/label/measurement source `691e341` is receiving scoped review fixes, not yet run. These are different evidence stages, not a feature-matched winner. Provisional recommendation due September 13 at 23:10 UTC; final handoff due September 14 at 23:10 UTC.
 - Participants: Codex Road A analyst, existing SDK PM and Data Explorer PM dispatched; Claude **EFS v2 Dev** kickoff sent and acknowledged by 23:41 UTC. Its [[claude-pm|acknowledgement]] records an independent in-session MUD specialist and evidence extractor; a persistent extra Claude conversation is unnecessary. Earlier MUD source, cost and portability reviews are completed inputs, not new active seats.
 - Baselines: kickoff published at planning `2552962`; native source/evidence pins in section 5 remain the named comparison pins. Fable's existing untracked brainstorm is preserved. The similarly named direct worktree is the stopped `f873890` size probe, not the fuller control.
