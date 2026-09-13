@@ -53,3 +53,27 @@ plus missing qualification. It does not itself prove every typed-reference
 profile, and it is not a fourth architecture or permission for an unscheduled
 heavy run. Keep the current measured ordering qualified; do not extend the
 19:10 evidence cutoff or 23:10 provisional recommendation to chase perfection.
+
+## Post-cutoff source seam: B need not hardcode Quote
+
+Independent source inspection found a small generic route **within B's current
+positional-reference profile**, not an arbitrary nested schema language.
+The index already receives Record/Type/admission coordinates. Existing Ledger
+`record` and registry `typeInfo`/`refTypes` getters expose the retained body,
+first admission and declared leading reference words. A target index can key
+postings by `(sourceType, referenceOrdinal, targetRecord)` and append only on
+the Record's first admission, avoiding reuse duplicates. No new Ledger storage
+or authority mechanism is needed for this bounded experiment.
+
+Semantic role names and arbitrary nested reference locations are not exposed;
+pin the positional role as part of the comparison. Retain all current mandatory
+families, price extra getter/decoding/storage work and the existing callback
+gas budget, then regenerate index-obligation signatures. C already receives
+checked `refs`/freshness, but drops reference ordinal from its target postings.
+Both still need basis, coverage and consumer qualification. This is a feasible
+implementation seam, not a measured saving or a closed index gap.
+
+Checked source: B `src/Interfaces.sol:22–38`, `src/Ledger.sol:526–543,834–840`,
+`src/TypeRegistry.sol:85–100,143–185`; C `src/IndexModule.sol:110–118` at the
+pins above. Raw references outside the registered profile are not indexed by
+this proposal and must not be advertised as covered.

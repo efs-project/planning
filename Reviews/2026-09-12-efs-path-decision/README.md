@@ -112,6 +112,17 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**20:05–20:25 UTC root-only B rollback fixture compile/test lease.**
+Staged source at base `cbadc00` changes only the Index callback visibility and
+adds `test/MatchedRollback.t.sol`. First run must show the intended runtime
+RED before enabling the test-only poison refusal. Root alone runs offline
+Solc 0.8.30/Cancun/via-IR/200, two threads, no Anvil; normal code limits remain.
+Owned scratch `/tmp/efs-b-rollback-build-20260913.Ps480X`, separate RED/GREEN
+outputs and caches, process-group watchdog, 15GB owned-scratch/50GB free guards.
+Latest start20:12, absolute stop20:25; no competing heavy process and 274GiB
+free observed before staging. Source tests are not mined rollback, new paid
+costs, a matched C run or a closed finalist gate. All other lanes stay light.
+
 **19:57 cutoff recorded; SDK advisory integrated; finalist controls continue.**
 The provisional cost snapshot closed at **19:10 UTC** with B source `c5561e2`
 / evidence `cbadc00` and C source `2ca7349` / runner `58dd3d7` / evidence
