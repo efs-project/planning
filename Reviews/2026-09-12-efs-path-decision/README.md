@@ -241,6 +241,19 @@ supplied raw RPC bytes, retaining the separate unauthenticated provenance
 qualification described in [[oracle-boundary#Execution clarification — September 13]].
 No full workflow or authenticated-chain pass is inferred from these tests.
 
+**Cold-name gap (independent B/C review, September 13):** B `dcc7b94` and C
+`731200d` retain hashed folder/name/tag coordinates, not the original user text.
+The position tuple's preimage is not the filename hash's UTF-8 preimage. Known
+path lookup can work, but generic cold listing cannot display arbitrary names;
+MUD table-name metadata does not fill this gap. Current costs are therefore
+“subject + content + hashed placement,” not usable cold-reconstructible Files.
+The joined slice must retain exact label bytes and verify their identifier
+mapping. A narrow experiment may publish ordinary deduplicated Label Records
+through existing by-Type discovery, or compare a direct hash-to-bytes table;
+price first labels, reused labels, rename, and cold reconstruction. Missing or
+corrupt labels stay unresolved, never hardcoded from fixtures. This is a shared
+missing capability to implement/price, not a sacrifice or a reason to reject C.
+
 ## 7. What James receives
 
 One short decision memo, with supporting evidence linked rather than embedded:
