@@ -1,0 +1,278 @@
+{
+  "schema": "efs-lab-b/independent-rollback-audit/1",
+  "standing": "RPC_OBSERVED; not authenticated state proof",
+  "checks": {
+    "rawEnvelopes": 781,
+    "readReplies": 528,
+    "signedTransactions": 36,
+    "deployments": 18,
+    "staticMinedLinks": 3,
+    "headers": 37
+  },
+  "limitations": [
+    "Raw reads use block numbers, not EIP-1898 requireCanonical block hashes. This audit joins their fixed numbers to mutually consistent retained headers and mined receipt hashes; it cannot supply an authenticated state proof or exclude a dishonest RPC.",
+    "Artifact hashes/runtime observations are checked against frozen preparation. Compiler/source provenance and correctness of the reviewed late-refusal fixture remain prior review inputs, not established by RPC or this audit.",
+    "Static refusal plus mined status 0 and identical signed transaction envelope establishes the scoped RPC-observed linkage; it is not an execution trace of internal writes."
+  ],
+  "status": "PASS_RPC_OBSERVED",
+  "inputSha256": {
+    "expectations": "0b26e6d2a0037de6f89089eece41cbb1174a76eb87e8de945d9c599bf8b28622",
+    "raw": "64a3131ca58d0f3aadcb8ed47a3afbffcc87dff9f9983433e9be7cb03e576db7",
+    "report": "258613d9581e768e422572f0e4d619c7a9cac22ffa5d8381642d3d02b5d13031",
+    "audit": "cfd6420a3af3ef31b34edfca866417bf65869d6293df05b08677f0fb27c228e1"
+  },
+  "transactions": [
+    {
+      "block": 1,
+      "hash": "0xa0c258de29004f94b3894d7b544da3dc8d2f77b40bb546590ea64da3b25daa37",
+      "gasUsed": "758965",
+      "sendId": 11,
+      "receiptId": 13
+    },
+    {
+      "block": 2,
+      "hash": "0x743977a3b4a83900e559384b2f387b91c8f42d70f154ca2a13af9f3d79b7be5e",
+      "gasUsed": "189620",
+      "sendId": 18,
+      "receiptId": 19
+    },
+    {
+      "block": 3,
+      "hash": "0x24f2312690458f734a52845526679dbbd7f17ceae5fe8fdcaf433b147d403ed8",
+      "gasUsed": "130859",
+      "sendId": 24,
+      "receiptId": 26
+    },
+    {
+      "block": 4,
+      "hash": "0x6a8d3c973bc5a1faf0d38b9d5158907994b7a9039ba076ef09e5df2d0a6ba6dc",
+      "gasUsed": "3792016",
+      "sendId": 31,
+      "receiptId": 33
+    },
+    {
+      "block": 5,
+      "hash": "0x4ae902670c99284c330e60aee6ba4db9b36e69ee2977d8cbf6801b5da1575be0",
+      "gasUsed": "1160239",
+      "sendId": 38,
+      "receiptId": 40
+    },
+    {
+      "block": 6,
+      "hash": "0x6c4b0a4a05d671e9b8c88ee6ad64c99fa2cd12df27525b8d1555195cc17261a9",
+      "gasUsed": "520560",
+      "sendId": 45,
+      "receiptId": 46
+    },
+    {
+      "block": 7,
+      "hash": "0x31611961ca208534e109ffb05224d922eb8c09083ea7ec4073676345494c5b5b",
+      "gasUsed": "125518",
+      "sendId": 51,
+      "receiptId": 53
+    },
+    {
+      "block": 8,
+      "hash": "0x1338dacdddd9966c8fec77c8d38d015f44a6601d2ac50304b3ea53074854c533",
+      "gasUsed": "196856",
+      "sendId": 58,
+      "receiptId": 59
+    },
+    {
+      "block": 9,
+      "hash": "0xf1768ade04da82437b82c388bfd56a2299fade4b8de0349dff5c50d83e47b130",
+      "gasUsed": "174039",
+      "sendId": 64,
+      "receiptId": 65
+    },
+    {
+      "block": 10,
+      "hash": "0xadcd082b4f563904289a6e291d9c0c37c5bf4a961b855aa735178305d59900e6",
+      "gasUsed": "45139",
+      "sendId": 70,
+      "receiptId": 71
+    },
+    {
+      "block": 11,
+      "hash": "0x4eee972127bd778ac3c27c6c338835bc8e710063f25d136080f9732fb3155fcc",
+      "gasUsed": "912524",
+      "sendId": 75,
+      "receiptId": 77
+    },
+    {
+      "block": 12,
+      "hash": "0xd8c34ce38782401cec2d00be949464d2b750570041ffc51ca45a5e84c460a27e",
+      "gasUsed": "371952",
+      "sendId": 177,
+      "receiptId": 178
+    },
+    {
+      "block": 13,
+      "hash": "0x453478ff04a1b663f95e380b5f18ae06d08bdb5a214bd9d98db7bcf62804c68b",
+      "gasUsed": "758965",
+      "sendId": 271,
+      "receiptId": 272
+    },
+    {
+      "block": 14,
+      "hash": "0x3727e6ca451d8e88bff02203a938fbfcfc54e4b96de375de893df429f68ac9fb",
+      "gasUsed": "189620",
+      "sendId": 277,
+      "receiptId": 278
+    },
+    {
+      "block": 15,
+      "hash": "0xdc2106555ed233d8bc2e24f6b704e875c0fad8d4945f8c5fd282391df5c10b9b",
+      "gasUsed": "130859",
+      "sendId": 283,
+      "receiptId": 284
+    },
+    {
+      "block": 16,
+      "hash": "0xd43c58ec7e00aeab3af6fdf1486e3873a468ff0355676004908c96b656a41b5b",
+      "gasUsed": "3792004",
+      "sendId": 289,
+      "receiptId": 290
+    },
+    {
+      "block": 17,
+      "hash": "0xba69c49ceaaca2b4cc0ab0a4a9a4cf52fff782191cf1beff9ebd3a616ea580f4",
+      "gasUsed": "1160623",
+      "sendId": 295,
+      "receiptId": 296
+    },
+    {
+      "block": 18,
+      "hash": "0xa36f695e17973a63815f0b714c985f223a3f4f3b444772009f1413881a60739b",
+      "gasUsed": "520560",
+      "sendId": 301,
+      "receiptId": 302
+    },
+    {
+      "block": 19,
+      "hash": "0x733b67f48a3b6aa1361d8e8279ca83d2b39fb63d0147b7e0db28db3ba2f971fe",
+      "gasUsed": "125518",
+      "sendId": 307,
+      "receiptId": 308
+    },
+    {
+      "block": 20,
+      "hash": "0xd771d09e619306d4bd9a025e82e4153a6487862ca5ea72b96feec6f2d7e88596",
+      "gasUsed": "196856",
+      "sendId": 313,
+      "receiptId": 314
+    },
+    {
+      "block": 21,
+      "hash": "0x6d6ce4dbe639b6521f5ede5e6c9c8dc4c5fd4e80b6b4bb36fe61e7f074f65f7e",
+      "gasUsed": "174039",
+      "sendId": 319,
+      "receiptId": 320
+    },
+    {
+      "block": 22,
+      "hash": "0x5bb4f787b5a1def92f5659f0de25593aaa1339e1ae687797d5d8ff02189f6d57",
+      "gasUsed": "45139",
+      "sendId": 325,
+      "receiptId": 326
+    },
+    {
+      "block": 23,
+      "hash": "0x9eb4ba12a7a0860a137f4933cbd1049e4826847c68ac50990a140ee76db0c221",
+      "gasUsed": "912722",
+      "sendId": 330,
+      "receiptId": 331
+    },
+    {
+      "block": 24,
+      "hash": "0xe1955a50d69d34f8d4c89d262ff41a96c0b5b10bd56403bac1129a23d3cfb3a0",
+      "gasUsed": "1612461",
+      "sendId": 431,
+      "receiptId": 432
+    },
+    {
+      "block": 25,
+      "hash": "0xc779934725eed9ceae41a8d3d2ae8cc218a2bd4087e10a564ba0d4ff4aeaaf7d",
+      "gasUsed": "758965",
+      "sendId": 525,
+      "receiptId": 526
+    },
+    {
+      "block": 26,
+      "hash": "0xc0a36ed0d4e66c46cfbce3ba51e0cd766ce554116045733d14d211d30343945c",
+      "gasUsed": "189620",
+      "sendId": 531,
+      "receiptId": 532
+    },
+    {
+      "block": 27,
+      "hash": "0xf1d0628b19faeb05c6a34bc686a73bc3d5a1b163672ad1729032ded8f97c1edc",
+      "gasUsed": "130859",
+      "sendId": 537,
+      "receiptId": 538
+    },
+    {
+      "block": 28,
+      "hash": "0x6798ff83dcc9a839b616488983a10fbf665c481e4e155387e90e88008cad3b7d",
+      "gasUsed": "3792016",
+      "sendId": 543,
+      "receiptId": 544
+    },
+    {
+      "block": 29,
+      "hash": "0xd087c1c41a6376d8b7fe85a38400a61c041d785a9ea333268b5a1929933e7785",
+      "gasUsed": "1160239",
+      "sendId": 549,
+      "receiptId": 551
+    },
+    {
+      "block": 30,
+      "hash": "0xd7f45c3dee7992b390bee0f36dc738b120b899dedda1cac180f6c538e967e659",
+      "gasUsed": "520560",
+      "sendId": 556,
+      "receiptId": 557
+    },
+    {
+      "block": 31,
+      "hash": "0xb3842d5c78a1f96a1b1983f3f83d92cbdb2e8a526f949fb443ad55086fa94286",
+      "gasUsed": "125518",
+      "sendId": 562,
+      "receiptId": 564
+    },
+    {
+      "block": 32,
+      "hash": "0xe8439245732b06b0981a2278720e6be59416e1942066843946a6d1a144813758",
+      "gasUsed": "196856",
+      "sendId": 569,
+      "receiptId": 570
+    },
+    {
+      "block": 33,
+      "hash": "0xb1f841c26b15f148cf87459fd218670bfe95ed287e23cd7710b939c1aaa4018b",
+      "gasUsed": "174039",
+      "sendId": 575,
+      "receiptId": 576
+    },
+    {
+      "block": 34,
+      "hash": "0x45d882f01f317f13b9405a35491ccc0fa0d2b493424b04489508d359ef306ccf",
+      "gasUsed": "45139",
+      "sendId": 581,
+      "receiptId": 582
+    },
+    {
+      "block": 35,
+      "hash": "0x88792b38e060a5aaf91b73e41534242fa78afea28bc3a4232305ac3bfc6b94a5",
+      "gasUsed": "912524",
+      "sendId": 586,
+      "receiptId": 588
+    },
+    {
+      "block": 36,
+      "hash": "0xe16768a42e181a73ed33f5da2c0ccd723be6114ac1ea5cccd435244a41f4bab9",
+      "gasUsed": "1614558",
+      "sendId": 688,
+      "receiptId": 690
+    }
+  ]
+}

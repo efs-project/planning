@@ -1,0 +1,122 @@
+{
+  "startedAt": "2026-09-13T22:27:46.830Z",
+  "source": "4345992ac4898aa23822f14900c25921db194b9c",
+  "oracle": "3dfd9758fd7be860faa2ebab178521965bd3b67e",
+  "lease": {
+    "start": 1789338420000,
+    "latest": 1789338780000,
+    "end": 1789339620000
+  },
+  "pins": {
+    "source": "4345992ac4898aa23822f14900c25921db194b9c",
+    "oracle": "3dfd9758fd7be860faa2ebab178521965bd3b67e",
+    "artifacts": "/tmp/efs-b-rollback-build-20260913.Ps480X/green-out",
+    "expectations": "/tmp/efs-b-controls-paid-20260913.00DzB4/expectations-node26.json",
+    "files": {
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/src/IndexModule.sol": "d062d3ab0d6632b983a651ebad5746f2a1bc7bcd8821130ad6dd900aafd4e818",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/src/Interfaces.sol": "5c8c5cf858c48fa814bf212b8922def0ca05e98b9c11248bc149a5f8f44af4b7",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/src/JoinedConsumer.sol": "7dd7fef48dec63e63e057ea31e385c5b7a24626e74f69ed94ebef9c133a6c013",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/src/Keys.sol": "ebb6b95b4eb689c01020670e1a2ae003433c7f1500d2e32510432e384fea02b6",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/src/LabAcceptors.sol": "898021c4fe41ea02acb9cb5184097b5e6f6ca0cfc2fdf1fc86e320dc66bfe898",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/src/LabHarness.sol": "0f09edfd71c8bc8cd133d102f56803e1de2ef40b5c1e5bb2b22c7d590a1deeb5",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/src/Ledger.sol": "7576874b52a81ebc0f7b64640332b345096e0c09000ed4f09811bdc21dd6c3d5",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/src/LensReader.sol": "7d0a167b684d700642fd1510bb237bc4ae59b630696603e94f08dd7c3dda0d2e",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/src/TypeRegistry.sol": "ef2bd89de58298977058ba98a4ac2c03416a3fde991d74cc52fdc00634c09459",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/test/Falsify.t.sol": "4042b0f205f3045abf895e637a8aacd1a451d052aca327871e092090f1501022",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/test/FaultyReads.sol": "445140ef1b2a85a8e90c7eead75060b28fbb1554d07087981f61e46a4fcdb7e3",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/test/JoinedConsumer.t.sol": "29ecdbfd8a6ba0000281fb4834636952850930f74ed58d16859c088763d4d32a",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/test/LabBase.sol": "1fd5dfff2bd298370ef00dbb0a67a8fcaf1ed8560ec84d968ddfdea3bd0bc64d",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/test/LabelType.t.sol": "1fc5b030aa8a5ba854e059285671c682c34e9eb0e6f928025f377def8fcad905",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/test/LedgerEvidence.t.sol": "8858987f336af756794b6b5bf320687116b447ef209cee12dd343cee866ffbab",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/test/LedgerImport.t.sol": "11f9a82888270e356094c46a9287a62a5e0bb46870c8ae6ba5a0b1474399aca3",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/test/LedgerMatrix.t.sol": "0d7ad3fb2182b537483376b535291a19c94df738ef73e32c5838e3176d2210bc",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/test/MatchedRollback.t.sol": "8e56eb8591cf6d90cf192e8ba9bf1ee3977cc6013890d99e2efa8ce9cd7df918",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/foundry.toml": "6ea7c7198bc697f74b6286ec830edbefc20e7c549eafda2343c863702055bf2c",
+      "/tmp/efs-b-rollback-build-20260913.Ps480X/green-out/TypeRegistry.sol/TypeRegistry.json": "939af8aa747ff099b74b559c7aa9eccb33e86cb21ebcd13528ffc87603132d48",
+      "/tmp/efs-b-rollback-build-20260913.Ps480X/green-out/LabAcceptors.sol/QuoteAcceptor.json": "f058d04cdbdc26a7fe28e9851cde08a5d03b5c083fc4069b6d628992fda97e79",
+      "/tmp/efs-b-rollback-build-20260913.Ps480X/green-out/LabAcceptors.sol/MinBodyAcceptor.json": "9f81e8d38cdbfe2d64c6ad75b58bfb103a31094dbafe6e0a56a2f263bb66f27d",
+      "/tmp/efs-b-rollback-build-20260913.Ps480X/green-out/Ledger.sol/Ledger.json": "233ff4dec4bb6a1b9b558f4640448054d4bc4a19e0ea76f1c34b5370c3bc4836",
+      "/tmp/efs-b-rollback-build-20260913.Ps480X/green-out/MatchedRollback.t.sol/LateRefusingIndexModule.json": "6e009cd2dd0ee1125b1c82465698ba204a8124ec6013431df7021f369cbfc47d",
+      "/tmp/efs-b-rollback-build-20260913.Ps480X/green-out/LabHarness.sol/Actor.json": "80d72b3829463d0a8aff0f2ed5a78869a2341ac85773b6c2a87e6c10b5fefd9a",
+      "/tmp/efs-b-rollback-build-20260913.Ps480X/green-out/IndexModule.sol/IndexModule.json": "29e21ca70ec902333636ca35249e2310b7cddffb99ee6fb6873a84d614c5bbf1",
+      "/tmp/efs-b-rollback-build-20260913.Ps480X/green-out/Interfaces.sol/IIndexModule.json": "3c6345b57cf36a352e82ce0854eeb2689ce011addadbbc1bfa477d631e9b4737",
+      "/tmp/efs-b-controls-paid-20260913.00DzB4/expectations-node26.json": "0b26e6d2a0037de6f89089eece41cbb1174a76eb87e8de945d9c599bf8b28622",
+      "/tmp/efs-b-controls-paid-20260913.00DzB4/launch.mjs": "3f15957fc6656d4de4cf70424cac574f451f699f5dae4ec2c73682f3954ca6a5",
+      "/tmp/efs-b-controls-paid-20260913.00DzB4/reproduce-inputs.mjs": "09e55fc394106f9a312a5b81b2f9df8ac520ce3f32789366a44162a876180ff0",
+      "/tmp/efs-b-controls-paid-20260913.00DzB4/seal-pins.mjs": "c10bbcf29cd6055c045b08221287a921b13d73ee36cea0818e7e99cfe9ade8d8",
+      "/tmp/efs-b-control-independent-prep-20260913.i4vLAa/prepare.mjs": "35582d47420c74fad827c55791edd7a4528d0a954f1f692f12cdd312163da0d6",
+      "/tmp/efs-b-control-independent-prep-20260913.i4vLAa/audit.mjs": "cfd6420a3af3ef31b34edfca866417bf65869d6293df05b08677f0fb27c228e1",
+      "/tmp/efs-b-control-independent-prep-20260913.i4vLAa/audit-assumptions.md": "27191e2f39741d53b4f70852213dc9010f01aee8f232bb2b9c0d3402698bc8be",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/rollback-control.mjs": "e7313372ab3d39b351c19c9cdeb6c808e26488f70d8ea5a70f616c0c57919296",
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/rollback-control.test.mjs": "c47ef57ff26237a324a26c6dfc977daa1e1c5ac3c8029df005982b3639d9f44a",
+      "/Users/james/Code/EFS/planning-warroom-oracle/Reviews/2026-09-12-efs-path-decision/lab-oracle/paid-runtime-b.mjs": "6b8405cb729d5d0f0e140345950ed1a59085e31f644e3c92b6c354ccda69662a",
+      "/tmp/efs-b-controls-launch-review-20260913.md": "35361d62e9c596413ea2319966c754c04911809e93837359fd921ad98baf2f4a",
+      "/tmp/efs-b-control-prep-review-20260913.md": "e3b724bbac5932acfd48e9b0f3a118f98419c90bec066cf6270026e39bf0959f",
+      "/tmp/efs-b-control-runner-review-20260913.md": "fec6cd65d121adfe96b6b18d6630f8b19e750528a4b941c2faf2da88fa1c7d16",
+      "/tmp/efs-b-control-audit-review-20260913.md": "f86b41fad95aaae3b4aa3405f2ff04df983c64c4ea1fdbf9221b47d8aa737e8b"
+    },
+    "scratchRoots": [
+      "/tmp/efs-b-controls-paid-20260913.00DzB4",
+      "/tmp/efs-b-rollback-build-20260913.Ps480X",
+      "/tmp/efs-b-parity-build-20260913.lcAzU1",
+      "/tmp/efs-b-parity-paid-20260913.KJ23qU",
+      "/tmp/efs-c-readiness-build-20260913.NoPDle",
+      "/tmp/efs-paid-c-run-20260913.YxKavf",
+      "/tmp/efs-b-parity-inputs-20260913.AHqH23",
+      "/tmp/efs-b-control-independent-prep-20260913.i4vLAa"
+    ]
+  },
+  "resources": {
+    "freeBytes": 292883296256,
+    "scratchBytes": 124546908
+  },
+  "anvilVersion": "anvil Version: 1.7.1\nCommit SHA: 4072e48705af9d93e3c0f6e29e93b5e9a40caed8\nBuild Timestamp: 2026-05-08T07:54:31.470926000Z (1778226871)\nBuild Profile: dist",
+  "rpc": "http://127.0.0.1:51749",
+  "anvil": {
+    "pid": 14700,
+    "args": [
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "51749",
+      "--chain-id",
+      "31337",
+      "--hardfork",
+      "cancun",
+      "--gas-limit",
+      "30000000",
+      "--timestamp",
+      "1800000000",
+      "--prune-history",
+      "256",
+      "--cache-path",
+      "/tmp/efs-b-controls-paid-20260913.00DzB4/anvil-cache",
+      "--silent"
+    ]
+  },
+  "runner": {
+    "pid": 14701,
+    "args": [
+      "/Users/james/Code/EFS/planning-warroom-b-run/Reviews/2026-09-12-efs-path-decision/lab-b/script/rollback-control.mjs",
+      "--rpc",
+      "http://127.0.0.1:51749",
+      "--artifacts",
+      "/tmp/efs-b-rollback-build-20260913.Ps480X/green-out",
+      "--expectations",
+      "/tmp/efs-b-controls-paid-20260913.00DzB4/expectations-node26.json",
+      "--run-dir",
+      "/tmp/efs-b-controls-paid-20260913.00DzB4/result"
+    ],
+    "outcome": {
+      "code": 0,
+      "signal": null
+    }
+  },
+  "runnerSucceeded": true,
+  "finishedAt": "2026-09-13T22:27:48.589Z",
+  "resourcesAfter": {
+    "freeBytes": 292881747968,
+    "scratchBytes": 126034630
+  },
+  "ownedProcessesStopped": true
+}

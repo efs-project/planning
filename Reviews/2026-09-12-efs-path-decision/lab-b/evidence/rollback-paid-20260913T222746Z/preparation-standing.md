@@ -1,0 +1,23 @@
+# Independent B rollback physical preparation
+
+Prepared input, not execution evidence. No compiler, RPC, Anvil, candidate runner/test source or candidate results were used to derive answers. Production base is `8ddd04cdb12506c663c421c3c588115ca38a93b5`, evidence HEAD `4487d7bdc43be5749e340ccd36cd2d7e70689e4b` in `/Users/james/Code/EFS/planning-warroom-b-run`.
+
+Executable pure generator: `/tmp/efs-b-control-independent-prep-20260913.i4vLAa/prepare.mjs`; generated input: same directory, `expectations.json`. JSON schema `efs-lab-b/rollback-expectations/1` carries each arm's six CREATE addresses, exact initcode/runtime hashes and lengths, five postdeployment transaction inputs, independently encoded A1 tuple/signature/calldata, exact refusal bytes, 69 required raw getter return values at each basis, and 19 auxiliary prefix/body/activation/evidence getters. `readCalls` and `auxiliaryReadCalls` give their exact target/calldata maps. Auxiliary answers are not silently counted as runner-verified.
+
+## Sealed derivation
+
+Root's minimal three-Type schedule uses deployer mnemonic accounts 2/3/4 and author/sender account 1. Per-deployer nonces 0–5 create registry, QuoteAcceptor, immutable MinBody(96), Ledger, inherited index, Actor. Nonces 6–8 register ITEM/PAIR/QUOTE_J, 9 attaches index, 10 publishes the native Items/Pair prefix through Actor. Required rules are absent/MinBody96/QuoteAcceptor, with no additional policy, dummy Types or binding-role policy. Epoch is 3 and every activation index is 1.
+
+Literal bodies and coordinates follow the coordinator seal and neutral fixture: Items `abi.encode(1)`/`abi.encode(2)`; ordered Pair `(itemA,itemB,1)`; A1 `(pair,2500000000,scale,1800000000,keccak256("reference quote"))`; salt `keccak256("joined/FILE_QUOTE")`, `/swaps`, `eth-usdc`, `market`; deadline 2000000000. Scale is 7 only in the mandatory-rule arm. Tag target is the stable File. Only lateIndex has nonzero poison, equal to A's TAG binding key.
+
+S0 is `(3,3,0,1)`, author nonce 0, unchanged prefix records/occurrences, no attempted File/Quote/admissions 4–8/bindings/publication 2, frontier/publication `3/1`, generation 0, no gap, all five coverage tuples `(2,1,3)`. Prefix lists are ITEM `[1,2]`, PAIR `[3]`, Actor-author `[1,2,3]`; touched new list heads **and first words** are zero. Both refusal poststates remain S0. Errors are independently encoded `E_REJECTED(1,QUOTE_J)` (68 bytes) and nested `E_INDEX(E_LATE_INDEX(poison))` (132 bytes).
+
+Calibration is `(8,4,3,2)`, nonce 1, File/Quote admissions 4/5, HEAD/FOLDER/TAG 6/7/8 and binding ordinals 1/2/3, revision 1. New scope/history/backlink lists follow those ordinals; File backlink word contains `[7,8]`. Its evidence basis is block **36**, not the admission frontier. Pre/post blocks are 11/12, 23/24, 35/36; native-prefix evidence bases are 11/23/35. Author transaction nonces are 0/1/2, independent of protocol nonce.
+
+## Source and physical boundaries
+
+Production references, relative to `Reviews/2026-09-12-efs-path-decision/lab-b/src/`: `Keys.sol:20`–119 fixes identity/posting domains; `Ledger.sol:153`–165 declares exact no-inheritance storage order: index 0, counters 1, record 2, body words 3, subject 4, admission 5, evidence 6, publication lookup 7, head 8, binding position 9, position cell 10, nonces 11, source evidence 12. Mapping element slots use `keccak256(abi.encode(key,slot))`; nested body words hash the outer slot again with the word index. `Ledger.sol:465` packs evidence, `:834`–942 exposes the raw getter ABI. `IndexModule.sol:49`–56 fixes packed frontier slot 0 and family/head/word mappings 1/2/3; `:143`–167 defines getter and 48-bit posting packing. `TypeRegistry.sol:45`–68 and `:88`–120 define descriptor/activation storage and epoch transitions.
+
+Runtime derivation uses only `instantiateBRuntime` from reviewed oracle helper `3dfd975`, resolving target and inherited immutable declarations, not runtime masks. JSON pins SHA-256 of all eight compiler artifacts and this preparation script, plus ethers 6.15.0 and actual Node v24.11.0. Root may reproducibly regenerate with `/opt/homebrew/bin/node` (v26.0.0); Node-version metadata will differ. No unsettled fixture literal remains. Genesis timestamp must be 1800000000 and attempt timestamps below deadline.
+
+Boundary disclosure: one targeted search of the allowed one-line index artifact incidentally emitted truncated unrelated test AST nodes; no test expectation was interpreted or used. All subsequent reads parsed only compiler artifact fields through the runtime helper. This preparation still needs the independent review and root's execution seal; it proves neither rollback nor a paid-cost result.

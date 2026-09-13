@@ -1,0 +1,18 @@
+# Independent B control preparation review — 2026-09-13
+
+**Verdict: source/spec PASS; preparation quality PASS. No blocking mismatch found.** Ready for the separately reviewed runner to consume the sealed inputs, subject to root's current source/input pins and finite run authorization. This is not a mined rollback result.
+
+Reviewed the complete independent `prepare.mjs` and `expectations.json` in `/tmp/efs-b-control-independent-prep-20260913.i4vLAa`, the specification's 22:05 seal, and relevant primary B constructors, identities, signed/native ingress, raw getters, registry and index maintenance. No candidate runner or test answers were used. Only lightweight read-only Node checks were performed; no RPC, compiler, chain or repository edits.
+
+The Node26 copy `/tmp/efs-b-controls-paid-20260913.00DzB4/expectations-node26.json` is structurally identical to the original except its explicitly reported `source.nodeVersion`. SHA256: `0b26e6d2a0037de6f89089eece41cbb1174a76eb87e8de945d9c599bf8b28622`.
+
+## Checked
+
+- Three separate deployers are mnemonic accounts 2/3/4; six CREATE nonces 0–5 and setup nonces 6–10 match the sealed order. Account 1 submits transaction nonces 0/1/2, while each fresh Ledger's signed protocol nonce is correctly 0. Fixed pre/post blocks are 11/12, 23/24 and 35/36. Index construction and attachment precede the native prefix, so attachedFrom is 1.
+- All 18 deployment initcode hashes/lengths and full runtime hashes/lengths were independently recomputed from the pinned artifact templates and explicit constructor values. Inherited ledger/admin/attachedFrom/poison substitutions use the reviewed helper; no masks. Artifact and preparation-script SHA256 pins match current files. Late-index poison is the exact A/TAG/File/market binding, with zero poison in the other arms.
+- Type descriptors use the mandatory Pair MinBody96 and QuoteAcceptor codehashes, with no additional policy and epoch 3. Item, Pair, Quote, stable subject, positions and binding derivations match Keys. Scale 7 changes the exact Quote body/ID and dependent HEAD/action/signature; other fixture values remain sealed. No FILE registration is required by the updated specification.
+- All three signatures recover fixture A under the production name/version-only EIP-712 domain, exact action tuple and uint32 CAS field, current acceptance profile, and deployment-specific Ledger/index commitments. Complete error decoding confirms 68-byte `E_REJECTED(1,QUOTE_J)` and 132-byte `E_INDEX(E_LATE_INDEX(poison))`.
+- Independently ABI-decoded and canonical-round-tripped all **528** raw expected result encodings: 88 reads × two states × three arms. Refusal S1 equals S0: counts `(3,3,0,1)`, A nonce 0, absent admissions 4–8, attempted subject/record/bindings/evidence absent, and complete coverage through 3. Retained prefix bodies, occurrences, evidence, admissions and postings are present.
+- Calibration establishes `(8,4,3,2)`, nonce 1, File/Quote admissions 4/5, revision-1 heads at 6/7/8, scope ordinals 1/2/3, histories 6/7/8, Quote backlink 6 and File backlinks 7/8. All thirteen posting lists include exact word0 expectations, including zero words behind empty heads. Registry activation/registration blocks and evidence bases match the schedule.
+
+The manifest separates 69 primary and 19 auxiliary reads; **all 88 must be executed per state**. Root has explicitly required this, so the separation is not an outstanding preparation blocker. Static/mined input-and-gas linkage, receipts, block joins and actual observations remain execution/packet-review duties. Any eventual successful claim remains **RPC_OBSERVED**, not authenticated state proof, import evidence, C parity or full Files coverage.

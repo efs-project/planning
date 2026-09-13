@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+const prep = '/tmp/efs-b-control-independent-prep-20260913.i4vLAa';
+const bytes = execFileSync('/opt/homebrew/bin/node', [`${prep}/prepare.mjs`], { env: { ...process.env, NODE_PATH: '/Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules' }, maxBuffer: 8 * 1024 * 1024 });
+const previous = JSON.parse(readFileSync(`${prep}/expectations.json`));
+const reproduced = JSON.parse(bytes);
+const versions = { previous: previous.source.nodeVersion, reproduced: reproduced.source.nodeVersion };
+assert.equal(versions.reproduced, 'v26.0.0');
+delete previous.source.nodeVersion; delete reproduced.source.nodeVersion;
+assert.deepEqual(reproduced, previous, 'all non-Node-version preparation bytes must reproduce');
+const output = '/tmp/efs-b-controls-paid-20260913.00DzB4/expectations-node26.json';
+writeFileSync(output, bytes, { flag: 'wx' });
+const report = { versions, bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex'), arms: Object.fromEntries(Object.entries(reproduced.arms).map(([name, arm]) => [name, { deployments: arm.deployment.length, setupTransactions: arm.setupTransactions.length, readsPerState: Object.keys(arm.pre.reads).length, auxiliaryReadsPerState: Object.keys(arm.pre.auxiliaryReads).length, expectedStatus: arm.attempt.expectedStatus, preBlock: arm.pre.blockNumber, postBlock: arm.post.blockNumber }])) };
+writeFileSync('/tmp/efs-b-controls-paid-20260913.00DzB4/reproduction.json', JSON.stringify(report, null, 2) + '\n', { flag: 'wx' });
+console.log(JSON.stringify(report));

@@ -1,0 +1,37 @@
+{
+  "versions": {
+    "previous": "v24.11.0",
+    "reproduced": "v26.0.0"
+  },
+  "bytes": 284251,
+  "sha256": "0b26e6d2a0037de6f89089eece41cbb1174a76eb87e8de945d9c599bf8b28622",
+  "arms": {
+    "scale7": {
+      "deployments": 6,
+      "setupTransactions": 5,
+      "readsPerState": 69,
+      "auxiliaryReadsPerState": 19,
+      "expectedStatus": 0,
+      "preBlock": "11",
+      "postBlock": "12"
+    },
+    "lateIndex": {
+      "deployments": 6,
+      "setupTransactions": 5,
+      "readsPerState": 69,
+      "auxiliaryReadsPerState": 19,
+      "expectedStatus": 0,
+      "preBlock": "23",
+      "postBlock": "24"
+    },
+    "calibration": {
+      "deployments": 6,
+      "setupTransactions": 5,
+      "readsPerState": 69,
+      "auxiliaryReadsPerState": 19,
+      "expectedStatus": 1,
+      "preBlock": "35",
+      "postBlock": "36"
+    }
+  }
+}

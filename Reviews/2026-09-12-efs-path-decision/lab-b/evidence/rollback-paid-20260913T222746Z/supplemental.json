@@ -1,0 +1,19 @@
+{
+  "status": "PASS_RPC_OBSERVED_SUPPLEMENT",
+  "checks": {
+    "distinctHeaders": 37,
+    "headerReplies": 43,
+    "blockGasLimit": 30000000,
+    "exactArtifactRoles": 6,
+    "unchangedSealedFiles": 41,
+    "negativeChecks": 3
+  },
+  "inputSha256": {
+    "expectations-node26.json": "0b26e6d2a0037de6f89089eece41cbb1174a76eb87e8de945d9c599bf8b28622",
+    "result/raw.jsonl": "64a3131ca58d0f3aadcb8ed47a3afbffcc87dff9f9983433e9be7cb03e576db7",
+    "result/report.json": "258613d9581e768e422572f0e4d619c7a9cac22ffa5d8381642d3d02b5d13031",
+    "pins.json": "89b038b1c0b1da72b96f515bb5663c602326bcaa7b0c9317b0a850ba9489559d",
+    "launch-record.json": "5f0b6ec3804ec5e6af562cd4f42b93622924e4409d16c01e8d5310fa3497bcc4"
+  },
+  "scope": "Closes the two inventory/gas-limit qualifications in the prior auditor review; not authenticated state proof or a chain rerun."
+}
