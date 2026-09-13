@@ -112,6 +112,20 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**18:18 B stronger-consumer paid result published; heavy slot released.**
+The 18:07:28–30 run at `c5561e2` passed both independently prepared gates,
+four exact paid-output comparisons and separate packet review. Evidence-only
+`cbadc00` is pushed. [[b-parity-paid-results-20260913]] reports B A1 1.61M,
+edit 659k, native B1 797k; paid point 167k and one-entry joined list 270–277k.
+The stronger checks cost about 9% versus previous B; C's current paid reads
+remain 45–51% higher. This is not a feature-normalized MUD tax or winner.
+Required [[required-index-gap-20260913|typed reverse discovery and current reverse membership]]
+are unequal and not waived; price the actual query/maintenance, then the
+specified rollback and portable-evidence gates. No new compiler/chain lease.
+Anvil PID 76613 stopped; root confirmed no heavy process and 274 GiB free.
+Claude remains quota-blocked as directly observed below; Codex continues from
+saved successors. Preserve 19:10 evidence cutoff and 23:10 provisional report.
+
 **18:06–18:26 UTC root-only B parity paid-run lease.** Source `c5561e2`,
 59 Forge / 42 Node tests, independently reviewed complete runtime and exact
 paid-answer preparation. Input SHA256

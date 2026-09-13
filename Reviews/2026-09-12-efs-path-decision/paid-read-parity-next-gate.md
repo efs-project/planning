@@ -2,6 +2,13 @@
 
 September 13, 2026 · source-derived experiment scope, not a protocol decision
 
+**18:18 completion note:** this bounded consumer patch, negative tests,
+independent preparation and fresh paid run are complete at source `c5561e2`;
+see [[b-parity-paid-results-20260913]]. The original scope below is retained.
+This closes these consumer-check gaps, not all B/C feature equivalence.
+[[required-index-gap-20260913]] identifies remaining mandatory discovery
+differences; rollback and portable-evidence gates remain open.
+
 The next useful step is a **B consumer-only parity patch**, targeted negative
 tests, then a newly pinned paid-read run. Its successful current answers have
 not been shown wrong. The issue is that some qualification checks are weaker
