@@ -721,7 +721,7 @@
     },
     "consumerReadback": {
       "preState": "the Consumer's last* slots are part of every pre/post probe",
-      "postTransaction": "after each STORING consumer transaction the checker's frozen stage selectors are read at the receipt block — readQuote: {lastTarget, lastRevision, lastValue}; readList: {lastCount} — and the remaining Consumer slots are read ONE EMPTY BLOCK LATER (Anvil evm_mine, envelope retained in rpcOther; recorded per check as slotsAtReceiptBlock / slotsOneBlockLater / laterBlock), so the receipt block carries exactly the frozen call set. readHead / readHistory rows (no frozen set) read all seven at the receipt block. All values are compared field by field to the expected ones; mismatches are counted per cell and in consumerMismatches. An external RPC without evm_mine fails loudly at the first STORING readQuote/readList check (checker owner consulted on this split)",
+      "postTransaction": "after each STORING consumer transaction, all seven Consumer slots are read exactly once at that transaction's receipt block for readQuote, readHead, readList and readHistory. No empty block is mined and no later height is queried for readback. All supplied expected values are compared field by field; mismatches are counted per cell and in consumerMismatches, and any nonzero final count fails the run before finishedAt",
       "status": {
         "unknown": "not run",
         "consequence": "no stored consumer value has been observed"
@@ -836,7 +836,7 @@
     },
     "status": "designed-but-untested for everything in this pass; the retained 322b320 run covers only the earlier 11-cell script and NOT the cells added here",
     "stateProbes": "per cell: pre-state and post-state probes (control Record presence, nonces, counters, list heads) written to measure.json; unrun",
-    "persistedPerCell": "baselineRaw[], raw[] (with stages baseline / plan / sign-inputs / progress / reconstruct / readback / readback-later / consumer-replay / pre-presence / post-presence / failure-static / failure-pre / failure-post / browser / post), transactions[] (with rpc envelopes and rawTransaction), blocks[], rpcOther[], candidateDecoded.{baseline,post}, rows, rowLog, consumerChecks[] (kinds stored-slots and commitment), mismatches; written before the next evm_revert",
+    "persistedPerCell": "baselineRaw[], raw[] (with stages baseline / plan / sign-inputs / progress / reconstruct / readback / consumer-replay / pre-presence / post-presence / failure-static / failure-pre / failure-post / browser / post), transactions[] (with rpc envelopes and rawTransaction), blocks[], rpcOther[], candidateDecoded.{baseline,post}, rows, rowLog, consumerChecks[] (kinds stored-slots and commitment), mismatches; written before the next evm_revert",
     "sections": "raw observations (baselineRaw, raw, transactions, blocks, rpcOther) are kept apart from candidate claims (candidateDecoded, rows, consumerChecks, plan); the checker treats raw inputs, raw observations, candidate claims and evaluated results as separate sections"
   },
   "resources": {

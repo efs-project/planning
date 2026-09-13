@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import test from 'node:test';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import vm from 'node:vm';
 
 const runnerPath = new URL('./measure.mjs', import.meta.url);
@@ -62,6 +64,55 @@ function loadReportFinalizer() {
   return vm.runInNewContext(`(report) => { ${finalizer}\nreturn report; }`, { assert, Date });
 }
 
+function runnerDeclaration(startText, endText) {
+  const source = readFileSync(runnerPath, 'utf8');
+  const start = source.indexOf(startText);
+  const end = source.indexOf(endText, start);
+  assert.notEqual(start, -1, `${startText} exists`);
+  assert.notEqual(end, -1, `${startText} boundary exists`);
+  return source.slice(start, end);
+}
+
+function loadFailureRow({ expectedSelector, observedSelector, before = { value: 1 }, after = before }) {
+  const stripBlock = runnerDeclaration('const stripBlock =', '// ---------------------------------------------------------------- sealed cells');
+  const failureRow = runnerDeclaration('async function failureRow(', 'const baseCount =');
+  const probes = [before, after];
+  return vm.runInNewContext(`${stripBlock}\n${failureRow}\nfailureRow`, {
+    FAIL_GAS: 1n,
+    assert,
+    errorSelector: () => expectedSelector,
+    log() {},
+    observeRaw: async () => ({ error: { data: observedSelector } }),
+    send: async () => ({ block: 12, status: 0 }),
+    stateProbe: async () => probes.shift(),
+  });
+}
+
+function loadPersist(outJson, write = writeFileSync) {
+  const declaration = runnerDeclaration('function persist(report) {', '// ---------------------------------------------------------------- checks');
+  return vm.runInNewContext(`${declaration}\npersist`, {
+    OUT_JSON: outJson,
+    anvilInfo: {},
+    process: { pid: 123 },
+    renameSync,
+    writeFileSync: write,
+  });
+}
+
+function loadRunFailureMarker(persisted, errors) {
+  const declaration = runnerDeclaration('function markRunFailure(', 'function terminateRun(');
+  return vm.runInNewContext(`${declaration}\nmarkRunFailure`, {
+    Date,
+    console: { error: (message) => errors.push(message) },
+    persist: (report) => persisted.push(report),
+  });
+}
+
+function loadDeployAll(ctx) {
+  const declaration = runnerDeclaration('async function deployAll(', 'async function main()');
+  return vm.runInNewContext(`${declaration}\ndeployAll`, { makeCtx: () => ctx });
+}
+
 test('consumerCheck catches a receipt-basis regression for every storing-consumer readback stage', async () => {
   for (const fn of ['readQuote', 'readList', 'readHead', 'readHistory']) {
     const { CONSUMER_SLOTS, consumerCheck, calls, values } = loadConsumerCheck();
@@ -116,4 +167,71 @@ test('report finalizer catches rejecting a zero-mismatch run before successful f
   finalize(report);
   assert.equal(report.consumerMismatches, 0);
   assert.match(report.finishedAt, /^\d{4}-\d{2}-\d{2}T/);
+});
+
+test('failureRow catches accepting an unavailable expected selector', async () => {
+  const failureRow = loadFailureRow({ expectedSelector: null, observedSelector: '0x12345678' });
+  await assert.rejects(() => failureRow({ latestBlock: async () => 11, raw: [] }, 'missing-selector', {}, 'MissingError', []), /expected selector unavailable/);
+});
+
+test('failureRow catches accepting a wrong revert selector', async () => {
+  const failureRow = loadFailureRow({ expectedSelector: '0x12345678', observedSelector: '0x87654321' });
+  await assert.rejects(() => failureRow({ latestBlock: async () => 11, raw: [] }, 'wrong-selector', {}, 'WrongError', []), /revert selector mismatch/);
+});
+
+test('failureRow catches accepting changed state after the reverted transaction', async () => {
+  const failureRow = loadFailureRow({ expectedSelector: '0x12345678', observedSelector: '0x12345678', before: { value: 1 }, after: { value: 2 } });
+  await assert.rejects(() => failureRow({ latestBlock: async () => 11, raw: [] }, 'changed-state', {}, 'StateError', []), /state changed across expected revert/);
+});
+
+test('persist catches overwriting prior evidence when the replacement write fails', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'efs-measure-test-'));
+  const outJson = join(dir, 'measure.json');
+  writeFileSync(outJson, 'prior evidence\n');
+  const partialWrite = (path) => { writeFileSync(path, 'partial evidence\n'); throw new Error('simulated write failure'); };
+  try {
+    const persist = loadPersist(outJson, partialWrite);
+    assert.throws(() => persist({ cells: {} }), /simulated write failure/);
+    assert.equal(readFileSync(outJson, 'utf8'), 'prior evidence\n');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('watchdog failure marker catches exiting with initialized evidence still looking successful', () => {
+  const persisted = [];
+  const errors = [];
+  const markRunFailure = loadRunFailureMarker(persisted, errors);
+  const report = { failure: null };
+
+  assert.equal(markRunFailure(report, 'watchdog limit elapsed'), true);
+  assert.equal(report.failure.message, 'watchdog limit elapsed');
+  assert.equal(persisted.length, 1);
+  assert.equal(errors.length, 0);
+});
+
+test('watchdog failure marker catches pretending evidence exists before report initialization', () => {
+  const persisted = [];
+  const errors = [];
+  const markRunFailure = loadRunFailureMarker(persisted, errors);
+
+  assert.equal(markRunFailure(null, 'watchdog limit elapsed'), false);
+  assert.equal(persisted.length, 0);
+  assert.match(errors[0], /report not initialized/);
+});
+
+test('deployAll catches attaching evidence sinks only after a deployment failure', async () => {
+  const ctx = {
+    txs: [], raw: [], blocks: [], rpcOther: [],
+    async setGasPrice() { throw new Error('controlled pre-deploy failure'); },
+  };
+  const deployAll = loadDeployAll(ctx);
+  const run = { report: {} };
+
+  await assert.rejects(() => deployAll(run), /controlled pre-deploy failure/);
+  assert.deepEqual({ ...run.report.deployment }, {});
+  assert.equal(run.report.setupTransactions, ctx.txs);
+  assert.equal(run.report.setupRaw, ctx.raw);
+  assert.equal(run.report.setupBlocks, ctx.blocks);
+  assert.equal(run.report.setupRpcOther, ctx.rpcOther);
 });

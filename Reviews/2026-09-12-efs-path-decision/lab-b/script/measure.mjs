@@ -40,7 +40,7 @@
 //          --only <substring> (run only cells whose name contains it; for repair cycles)
 // Env: FOUNDRY_OUT (artifacts; fallback ./out, read-only), EFS_LAB_SCRATCH (run-owned root; default: parent
 // of FOUNDRY_OUT, else the manifest's scratch path), EFS_ETHERS_PATH.
-import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, renameSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -204,6 +204,7 @@ async function freePort() {
   return port;
 }
 let anvil;
+let activeReport = null;
 const anvilInfo = { spawned: false, pid: null, port: null, cachePath: null, startedAt: null, stoppedAt: null, args: null };
 function stopAnvil() {
   if (anvil && anvil.exitCode === null && !anvilInfo.stoppedAt) {
@@ -221,7 +222,6 @@ async function startAnvil() {
   anvil = spawn('anvil', argv, { stdio: 'ignore' });
   Object.assign(anvilInfo, { spawned: true, pid: anvil.pid, port, cachePath, startedAt: new Date().toISOString(), args: argv.filter((a) => a !== MNEMONIC) });
   process.once('exit', stopAnvil);
-  process.once('SIGINT', () => { stopAnvil(); process.exit(130); });
   const url = `http://127.0.0.1:${port}`;
   for (let i = 0; i < 100; i++) {
     if (anvil.exitCode !== null) throw new Error(`anvil exited early (code ${anvil.exitCode}); check --cache-path support`);
@@ -525,7 +525,24 @@ async function sealedCell(run, label, cell) {
 function persist(report) {
   report.persistedAt = new Date().toISOString();
   report.anvil = { ...anvilInfo };
-  writeFileSync(OUT_JSON, JSON.stringify(report, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2) + '\n');
+  const temp = `${OUT_JSON}.tmp-${process.pid}`;
+  writeFileSync(temp, JSON.stringify(report, (k, v) => (typeof v === 'bigint' ? v.toString() : v), 2) + '\n');
+  renameSync(temp, OUT_JSON);
+}
+function markRunFailure(report, message) {
+  if (!report) {
+    console.error(`${message}; report not initialized, so no evidence packet is available`);
+    return false;
+  }
+  report.failure = { message, at: new Date().toISOString() };
+  persist(report);
+  return true;
+}
+function terminateRun(message, exitCode) {
+  console.error(message);
+  try { markRunFailure(activeReport, message); } catch (e) { console.error(`${message}; failed to persist failure evidence: ${e.message}`); }
+  stopAnvil();
+  process.exit(exitCode);
 }
 
 // ---------------------------------------------------------------- checks (candidate-side self-checks; never independent)
@@ -581,7 +598,10 @@ async function failureRow(ctx, label, c, expectedError, probe) {
   const row = await send(ctx, () => c, label, { expectFail: true, gasLimit: FAIL_GAS });
   const post = await stateProbe(ctx, `failure-post:${label}`, probe, row.block);
   const unchanged = JSON.stringify(stripBlock(pre)) === JSON.stringify(stripBlock(post));
-  return { ...row, expectedError: `${errContract}.${errName}`, expectedSelector, observedSelector, observedRevertData: observedData, selectorMatch: observedSelector === expectedSelector, stateUnchanged: unchanged, standing: 'selector from a retained static eth_call; the mined receipt establishes reversion, not the selector', pre, post };
+  assert(expectedSelector, `${label}: expected selector unavailable for ${errContract}.${errName}`);
+  assert.equal(observedSelector, expectedSelector, `${label}: revert selector mismatch for ${errContract}.${errName}`);
+  assert.equal(unchanged, true, `${label}: state changed across expected revert`);
+  return { ...row, expectedError: `${errContract}.${errName}`, expectedSelector, observedSelector, observedRevertData: observedData, selectorMatch: true, stateUnchanged: true, standing: 'selector from a retained static eth_call; the mined receipt establishes reversion, not the selector', pre, post };
 }
 const baseCount = (ctx, k) => { assert(ctx.baselineCounts && ctx.baselineCounts[k] !== undefined, `${ctx.cellLabel}: baseline counts missing (${k}); the sealed baseline harvest must precede the body`); return Number(ctx.baselineCounts[k]); };
 const baseNonce = (ctx, addr) => { assert(ctx.baselineNonces && ctx.baselineNonces[addr] !== undefined, `${ctx.cellLabel}: baseline nonce missing for ${addr}`); return Number(ctx.baselineNonces[addr]); };
@@ -952,8 +972,11 @@ function labelCell(variant) {
 // ---------------------------------------------------------------- deployment (once; code identity retained)
 async function deployAll(run) {
   const ctx = makeCtx(run);
-  await ctx.setGasPrice();
   const d = {};
+  const setup = [];
+  Object.assign(run.report, { deployment: d, setup, setupTransactions: ctx.txs, setupRaw: ctx.raw, setupBlocks: ctx.blocks, setupRpcOther: ctx.rpcOther });
+  ctx.persist = () => persist(run.report);
+  await ctx.setGasPrice();
   const dep = async (nameOf, ctorArgs = []) => {
     const a = artifact(nameOf);
     const data = concat([a.bytecode.object, iface(nameOf).encodeDeploy(ctorArgs)]);
@@ -989,7 +1012,6 @@ async function deployAll(run) {
   d.statelessConsumer = await dep('StatelessConsumer', [d.lens.address]);
   const addrs = Object.fromEntries(Object.entries(d).map(([k, v]) => [k, v.address]));
   ctx.addrs = addrs;
-  const setup = [];
   const reg = (typeId, acceptorKey, refs, label) => send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'register', [typeId, acceptorKey ? addrs[acceptorKey] : ZERO_ADDR, refs]), label);
   setup.push(await send(ctx, () => call(ctx, 'Ledger', 'ledger', 'setIndexModule', [addrs.index]), 'setup: attach index module'));
   setup.push(await reg(T.QUOTE, 'acceptor', [], 'setup: register QUOTE (MockAcceptor mode 0)'));
@@ -1008,7 +1030,9 @@ async function deployAll(run) {
 
 async function main() {
   const t0 = Date.now();
-  setTimeout(() => { console.error('watchdog: 25 minutes elapsed, stopping the run'); stopAnvil(); process.exit(124); }, WATCHDOG_MS).unref(); // applies with and without --anvil
+  setTimeout(() => terminateRun('watchdog: 25 minutes elapsed, stopping the run', 124), WATCHDOG_MS).unref(); // applies with and without --anvil
+  process.once('SIGINT', () => terminateRun('SIGINT: interrupted run', 130));
+  process.once('SIGTERM', () => terminateRun('SIGTERM: terminated run', 143));
   const rpcUrl = args.anvil ? await startAnvil() : args.rpc || 'http://127.0.0.1:8545';
   const source = `RPC_OBSERVED:${args.anvil ? `anvil-local pid ${anvilInfo.pid}` : 'external-rpc'}:${rpcUrl}`;
   log(`rpc ${rpcUrl}; artifacts ${OUT_DIR}; scratch ${SCRATCH_ROOT}; report ${OUT_JSON}`);
@@ -1047,6 +1071,7 @@ async function main() {
       'Label cells are a client-convention filename-retention baseline (FOLDER-role bodies name entries; HEAD bodies stay empty), not mandatory Files semantics; the registry epoch differs from the retained vectors/profile-b.json run (one more Type registered).',
     ],
   };
+  activeReport = report;
   const run = { rpc: rpcUrl, chainId, source, addrs: null, sealed: null, report };
   try {
     if (args.addresses) {
