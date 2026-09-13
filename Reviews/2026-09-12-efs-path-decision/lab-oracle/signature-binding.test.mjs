@@ -424,6 +424,17 @@ test('every retained transaction is validated before selector filtering', () => 
   }
 });
 
+test('sparse retained transaction arrays cannot hide an unvalidated entry', () => {
+  const abiProfile = parsePinnedAbiProfile(abiProfileBytes, profile);
+  const packet = parsePinnedRetainedPacket(retainedPacketBytes, profile);
+  packet.cells['signed-one/quote'].transactions.unshift(null);
+  delete packet.cells['signed-one/quote'].transactions[0];
+  assert.throws(
+    () => analyzeRetainedSignedTransactions(packet, abiProfile, profile, retainedExpectations),
+    /MALFORMED_RETAINED_TRANSACTION_0_CONTAINER/,
+  );
+});
+
 test('the packet-specific executeSigned pair must have ordered nonces zero then one', () => {
   const abiProfile = parsePinnedAbiProfile(abiProfileBytes, profile);
   const packet = parsePinnedRetainedPacket(retainedPacketBytes, profile);

@@ -623,7 +623,7 @@ export function analyzeRetainedSignedTransactions(packet, abiProfile, profile, e
   }
   const ledger = new Interface(abiDeclarations(abiProfile, 'Ledger'));
   const selector = ledger.getFunction(expectations.function).selector.toLowerCase();
-  const validated = transactions.map((transaction, transactionIndex) => {
+  const validated = Array.from(transactions, (transaction, transactionIndex) => {
     if (!isObjectContainer(transaction)) {
       throw new TypeError(`MALFORMED_RETAINED_TRANSACTION_${transactionIndex}_CONTAINER`);
     }
