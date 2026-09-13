@@ -194,3 +194,42 @@ signatures, constructors/runtime bytes and raw getter answers from these
 inputs and pinned production source/artifacts, not candidate runner output.
 All-byte comparisons remain mandatory. This is source/input preparation:
 no chain lease or successful mined control is yet claimed.
+
+## September 13, 22:39: B mined controls verified
+
+**B supplement complete; matching C controls remain open.** The fresh three-arm
+run completed at22:27:46.830–22:27:48.589 UTC. Both static refusals were linked to
+separately mined status-0 transactions; the positive calibration mined status1.
+Independent packet review found no blocking mismatch.
+
+| B control | Pre/post blocks | Receipt gas | Observed effect |
+| --- | --- | ---: | --- |
+| Mandatory Quote scale7 | 11 → 12 | 371,952 | Exact 68-byte required-rule error; prescribed S0 unchanged |
+| Final market-tag index refusal | 23 → 24 | 1,612,461 | Exact 132-byte nested late-index error; prescribed S0 unchanged |
+| Zero-poison calibration | 35 → 36 | 1,614,558 | Exact prepared S1, including required index maintenance |
+
+The independent offline audit checked 781 raw RPC envelopes, 528 literal
+fixed-block state replies, 36 signed transaction/receipt/header joins, 18 full
+initcode/runtime pins and three static/mined links. All37 contiguous headers
+were retained. A separate supplement verified all43 header replies have the
+normal30M block gas limit, the exact six-role artifact inventory and all41
+unchanged sealed files; missing-role, swapped-role and wrong-gas-limit negative
+checks reject. The post-run reviewer independently corroborated these checks.
+
+Compiled Solidity is `8ddd04c`; the actual runner/checkout is `4345992`, and
+the inherited-immutable helper is `3dfd975`. The sealed build/source hash joins
+are retained; the runner was not present in the earlier Solidity commit.
+Evidence-only commit `acbfaf70339b73cd03e937158dd015eb37491b21` is pushed on the
+existing B exception branch:
+[exact mined-control packet](https://github.com/efs-project/planning/tree/acbfaf70339b73cd03e937158dd015eb37491b21/Reviews/2026-09-12-efs-path-decision/lab-b/evidence/rollback-paid-20260913T222746Z).
+Both offline verifier outputs reproduce byte-for-byte from the retained copy;
+25 files have a SHA256 inventory, with README/inventory alongside them. Raw
+Anvil log whitespace remains unchanged; no compiler cache or chain state is
+published. The run's owned processes were stopped and the lease released.
+
+These control prices do **not** replace the normal product rows frozen at19:10.
+The result is **RPC_OBSERVED**, not an authenticated source-state proof or a
+trace of every internal storage write. No C equivalence, portable import,
+historical contract proof, full Files workflow or permanent adoption follows.
+The next bounded work is C's same logical controls, then the already specified
+required reverse-query cost-reversal experiment.

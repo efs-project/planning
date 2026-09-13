@@ -95,3 +95,10 @@ Inputs: [[sdk-shortlist-review-20260913]], [[files-shortlist-review-20260913]],
 [[paid-rollback-control]], [[portable-evidence-next-gate]], [[road-a]] and
 [[overhead-and-selection]]. An independent challenge checked the cutoff
 arithmetic and identified the reverse-query cost as the strongest reversal.
+
+**Post-cutoff validation supplement, September 13, 22:39:** B's full-A1
+mandatory-rule and late-index refusals now have independently checked mined
+pre/post-state evidence, with a successful same-shape calibration. Matching C
+controls and the required-query comparison remain open. This strengthens B's
+bounded atomicity evidence, not the frozen cost table, proof level or final
+feature eligibility. Exact packet and limits: [[paid-rollback-control]].

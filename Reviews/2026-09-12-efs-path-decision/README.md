@@ -112,6 +112,21 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**22:39 B mined controls verified and published; heavy lease released.**
+The two complete-A1 refusals and zero-poison calibration ran successfully on
+the prescribed fresh graphs. Independent verification checked 528 raw state
+replies, 36 signed transactions and 18 deployments; post-run review found no
+blocking mismatch. Source checkout `4345992`, oracle `3dfd975`, evidence
+`acbfaf7`: [[paid-rollback-control#September 13, 22:39: B mined controls verified|result and limits]].
+Both rejection cases preserve the prescribed EFS state; successful calibration
+matches the separately prepared state. This is RPC-observed evidence, not a
+source-state proof, C parity or full Files integration. The 19:10 product-price
+cutoff and 23:10 owner recommendation remain unchanged.
+The Anvil run finished at22:27:48; owned groups are stopped, no heavy process
+remains, run scratch is about1.8MiB and total owned scratch about121MiB. The
+22:27–22:47 lease is released early and cannot be replayed. C control preparation
+is light/read-only; no other lane has a compiler or chain lease.
+
 **22:27–22:47 UTC root-only B mined-controls lease.**
 Reviewed/pushed source `4345992` passes47 Node tests; oracle `3dfd975` passes275.
 Preparation, runner and finite launcher reviews pass. Three fresh control
