@@ -173,3 +173,61 @@ it is a **candidate-coupled paid-read diagnostic**, not the independent oracle
 or proof of the entire Pair closure/authorship policy. Cold labels, full Files,
 source-state proof and the finalist gate remain separate. No cost result is
 claimed from this preparation commit.
+
+## First receipt run retained and reviewed — September 13, 05:22 UTC
+
+Runner `c825c619f72dfad3acd6f1f0584cf8d1845fa539` completed on a fresh bounded
+Anvil at 05:09:20–05:09:22 UTC, exit 0. Evidence/report are pushed on the
+authorized `fable/2026-09-13-road-c-lab` branch at
+`324e7c4ea3cad0ed294b0cf143743313ba405dbd`, under
+`lab-c/measurement-results.md` and
+`lab-c/evidence/measurement-20260913T050920Z.json` in this review directory.
+Packet SHA-256 is
+`d62866ae15734861ad67a0291e32865f71d8841569864387e6084656c0b02600`.
+Prototype code/evidence remains on its branch; this main note carries the
+human-readable result into Obsidian.
+
+| Diagnostic | Actual receipt gas |
+|---|---:|
+| Five-action typed signed Pair/Quote create | 2,400,475 |
+| Typed signed edit / real Producer B create | 1,112,418 / 1,653,816 |
+| Typed paid point / list, per selected author | 144,341 / 238,579 |
+| Framed c32 native Producer create / edit | 1,790,002 / 950,873 |
+| Framed c32 signed create / edit | 1,807,968 / 970,431 |
+| Isolated fresh / reused Record publication | 697,812 / 489,539 |
+| Exact retry, mined status 0 | 63,018 |
+| Eight deployments, including test instrumentation | 27,814,466 |
+| Index attach + Types/items/Pair setup | 3,645,104 |
+
+The thirty receipts sum to 46,366,032 gas across setup and independently
+reset cells, **not one transaction**. Largest deployment is 11,960,128 gas;
+largest runtime/initcode are 23,145/37,924 bytes. Cancun, chain 31337, 30M
+block gas, ordinary code/initcode limits, no traces/dumps or code injection.
+Root reproduced six Node helper tests after the run; the unchanged contract
+sources had previously passed 43/43. Root explicitly stopped the successful
+Anvil 7546 and previous failed-preflight Anvil 6935; no heavy process remained
+at 05:15. Successful-run scratch 8.1 MiB, retained C build 11 MiB; 265 GiB free.
+
+Independent read-only review recomputed all eight artifact/runtime/initcode
+hashes, constructor/link/immutable values, all thirty transaction/receipt/
+header joins, 1,057 unique RPC IDs, twelve Published and eight Point/List
+contexts, and the fresh/reuse transitions. It found **no blocking evidence
+defect for this limited report**. Fresh/reuse measured calldata and recipient
+are identical, with occurrence 0→1 versus 1→2 after isolated same-sized seeds.
+The difference is 208,273 gas for this branch of this implementation, not a
+universal feature tax. Source/configuration/process provenance is external
+coordinator evidence, not self-authenticating JSON metadata.
+
+The first attempted runner exposed ethers' local `attach` name collision;
+the explicit ABI method fixed it before a fresh-chain restart. The partial
+preflight is retained separately and is not silently added to successful
+setup. This was not a Core failure.
+
+**Decision impact:** C is now executable and measured, so it is no longer an
+untested promise. It is not a winner: C's c32 value has 160-byte ABI framing,
+and the old B consumer stores answers and checks different context. The
+1,057 instrumented loopback RPC calls are not browser scale evidence. Cold
+labels, full Files, export/import, populated upgrades, independent authored
+reconstruction and source-state proofs remain open. Wait for B's new joined/
+stateless/label results and reconcile the guarantee ledger before attributing
+any difference to MUD versus custom engineering.
