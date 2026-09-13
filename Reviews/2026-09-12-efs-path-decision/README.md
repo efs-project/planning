@@ -134,6 +134,14 @@ SDK has a separate light, design-only assignment through **08:25 UTC** to
 make the existing shared fixture's small point/list outputs and pre-run pin
 procedure unambiguous. Its completed checker code stays untouched.
 
+The [[b-authority-runner-review|new runner review]] returned **NO-GO for
+receipts** at `3c6947d`: caller-sensitive static probes omit `from`, several
+error arguments/policy joins are not checked, and an unmatched cell filter
+can report success after running nothing. Root's 11 existing helper tests
+pass but do not cover these cases. Fable received the concrete findings;
+repair its existing runner after the mandatory-rule API settles, with targeted
+regressions and exact selected cells. No full benchmark replay is requested.
+
 **Heavy slot: Claude, 08:00–08:30 UTC, compile/tests only.** After source
 readiness and review, record the exact committed pin, commands, owned scratch
 and watchdogs before launch. Two workers, pinned offline compiler/fork, normal

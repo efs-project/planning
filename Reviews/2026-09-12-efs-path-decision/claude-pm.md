@@ -271,6 +271,11 @@ Reading: the mandatory index share of a create is ≈415k of 1.22M; signed ingre
 - **MockAcceptor regression (from the independent review) folded into the F5 repair:** `LabHarness.MockAcceptor` carries mutable `mode`/`minBody` under an unchanged codehash, so it is not a pure intrinsic validator; mandatory fixture rules become stateless or immutable-configured acceptors, the mutable mock is only installable as explicit additional Realm policy via `activate`, a regression test covers it, and the docs will say stateful developer rules remain allowed when their declared dependency/basis semantics are explicit — no claim that production requires pure callbacks.
 - **Clock:** actual `date -u` is used everywhere in this note; the slot job is gated on the real clock (it sleeps until 08:00:00 UTC before invoking forge) and records the actual launch and end times, not the slot label. Compile-only, no Anvil.
 
+## Runner review NO-GO acknowledged (2026-09-13 07:56:14 UTC)
+
+- No receipt run will be requested for `3c6947d`. The runner fixes are queued in my lane behind the F5 repair (the runner must follow the final API): actual transaction sender passed and retained as `from` in every static probe (the `register` probe currently observes `E_ADMIN` instead of `E_TYPE_EXISTS`; the native caller-author probe uses the wrong caller) with regression tests; error-argument assertions (`E_INTENT(3)`, `E_TYPE_EXISTS(typeId)`); Type ↔ active policy row ↔ acceptor codehash ↔ epoch joins retained as raw replies; exact selected-cell list printed and zero/unknown filters rejected before chain startup; manifest text corrected (mantissas vs the `quote3000` payload control; 21 cells, not 18); runner tests extended. No broad reimplementation and no full replay.
+- Compile-only lease 08:00–08:30 unchanged; the job for `3c6947d` launches at the actual 08:00 UTC and reports real times. SDK's candidate-neutral outputs and pre-run pin procedure noted; not read or adapted to.
+
 ## Routine questions for Codex (not for James)
 4. For the checker owner: the B script reads all seven storing-Consumer slots at the paid-read receipt block, while `rpc-observed-expectations` freeze exactly {lastTarget, lastRevision, lastValue} for `paid-quote-read` and {lastCount} for `listing`. I am changing the script to read only those at the receipt block (the rest one block later). Confirm that is the intended frozen call set, or relax it, before pinning targets.
 
@@ -280,6 +285,7 @@ Reading: the mandatory index share of a create is ≈415k of 1.22M; signed ingre
 3. `ebc7d54` has no worktree; shall I leave that checkout to you (Road A) rather than create one from my side?
 
 ## Log
+- 2026-09-13 07:56:14 UTC: runner NO-GO acknowledged; fixes queued behind F5.
 - 2026-09-13 07:49 UTC: 07:50 instructions acknowledged; F5 confirmed by construction, repair assigned; 08:00–08:30 compile slot accepted.
 - 2026-09-13 07:31 UTC: runner patch `3c6947d` committed and pushed; tidy-ups in progress.
 - 2026-09-13 07:31 UTC: review of `aaecfed` READY-FOR-COMPILE; tidy-ups and runner patch in progress; slot request to follow.
