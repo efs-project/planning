@@ -17,8 +17,13 @@
     },
     "retainedPacket": {
       "commit": "322b3204a743cb2806e114cd4b0ec544076e3c48",
+      "path": "Reviews/2026-09-12-efs-path-decision/lab-b/evidence/measure2-a16d7d4.json",
       "sha256": "7bd5409a4b306d8e0705187094fa482b31efcad471260ae93f57eebd0b22fcce",
       "gitBlob": "1a38f6493510760ae1b97f6188d2548c795350a8"
+    },
+    "authorizedAbiProfile": {
+      "path": "Reviews/2026-09-12-efs-path-decision/lab-oracle/rpc-observed-profile-dcc7b94.json",
+      "gitBlob": "6345c2246e287e9676f714491ce8aebf673f754a"
     }
   },
   "independence": {
