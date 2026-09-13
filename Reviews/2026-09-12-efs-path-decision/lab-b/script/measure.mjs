@@ -96,6 +96,44 @@ const aBind = (purpose, subject, role, target, rev) => act({ kind: 3, purpose, s
 const actionsHash = (actions) => keccak256(coder.encode([ACTION_T], [actions]));
 const str = (v) => (typeof v === 'bigint' ? v.toString() : v);
 const u256 = (body) => BigInt(body);
+const RPC_TIMEOUT_MS = 30_000; // any single RPC await, and any receipt wait, fails loudly after this
+const T0 = Date.now();
+// Unbuffered progress lines: a hang must be visible in the log at the row it stopped on.
+const log = (line) => { process.stdout.write(`[${((Date.now() - T0) / 1000).toFixed(1).padStart(7)}s] ${line}\n`); };
+async function withTimeout(promise, ms, label) {
+  let timer;
+  const bomb = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`${label}: no response after ${ms} ms`)), ms); });
+  try { return await Promise.race([promise, bomb]); } finally { clearTimeout(timer); }
+}
+// Poll the receipt ourselves. ethers' waitForTransaction subscribes to "block" events after a first
+// receipt check; on an automining node the block can be mined between that check and the
+// subscriber's baseline, and the wait then never resolves (the observed hang). On timeout, throw
+// with the pending hash, the sender's latest/pending nonces and the node's txpool contents.
+async function waitReceipt(provider, hash, label, from) {
+  const started = Date.now();
+  while (Date.now() - started < RPC_TIMEOUT_MS) {
+    const rc = await withTimeout(provider.getTransactionReceipt(hash), RPC_TIMEOUT_MS, `${label}: getTransactionReceipt`);
+    if (rc) return rc;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  const diag = { hash, from };
+  try { diag.latestNonce = await provider.getTransactionCount(from, 'latest'); diag.pendingNonce = await provider.getTransactionCount(from, 'pending'); } catch (e) { diag.nonceError = String(e.message); }
+  try { diag.txpool = await withTimeout(provider.send('txpool_content', []), 5_000, 'txpool_content'); } catch (e) { diag.txpoolError = String(e.message); }
+  try { diag.blockNumber = await provider.getBlockNumber(); } catch {}
+  throw new Error(`${label}: receipt for ${hash} not found within ${RPC_TIMEOUT_MS} ms; diagnostics ${JSON.stringify(diag, (k, v) => (typeof v === 'bigint' ? v.toString() : v))}`);
+}
+// Explicit nonces per sender, re-read from the node ("latest") on first use after every revert
+// (each cell has a fresh tracker), so no cached or "pending" nonce can outrun the reverted chain.
+function nonceTracker(provider) {
+  const cache = new Map();
+  return {
+    async next(addr) {
+      if (!cache.has(addr)) cache.set(addr, await withTimeout(provider.getTransactionCount(addr, 'latest'), RPC_TIMEOUT_MS, 'getTransactionCount'));
+      const n = cache.get(addr); cache.set(addr, n + 1); return n;
+    },
+    forget(addr) { cache.delete(addr); },
+  };
+}
 
 // ---------------------------------------------------------------- artifacts and interfaces
 const ART_SOURCE = { Ledger: 'Ledger', IndexModule: 'IndexModule', LensReader: 'LensReader', TypeRegistry: 'TypeRegistry', MockAcceptor: 'LabHarness', FailingIndexModule: 'LabHarness', Actor: 'LabHarness', Consumer: 'LabHarness', Reconstructor: 'LabHarness' };
@@ -151,7 +189,7 @@ function makeCtx(rpc, chainId, addrs) {
   const wallets = [0, 1, 2, 3].map((i) => HDNodeWallet.fromPhrase(MNEMONIC, undefined, `m/44'/60'/0'/0/${i}`).connect(provider));
   const deployer = wallets[0];
   const at = (nameOf, addr) => new Contract(addr, artifact(nameOf).abi, deployer);
-  const ctx = { rpc, chainId, provider, wallets, deployer, addrs, txs: [], raw: [], consumerChecks: [], mismatches: 0 };
+  const ctx = { rpc, chainId, provider, wallets, deployer, addrs, txs: [], raw: [], rowLog: [], consumerChecks: [], mismatches: 0, nonces: nonceTracker(provider), persist: null };
   for (const [key, nameOf] of Object.entries({ ledger: 'Ledger', index: 'IndexModule', lens: 'LensReader', registry: 'TypeRegistry', acceptor: 'MockAcceptor', failingIndex: 'FailingIndexModule', actorA: 'Actor', actorB: 'Actor', consumer: 'Consumer', recon: 'Reconstructor' })) {
     ctx[key] = at(nameOf, addrs[key]);
   }
@@ -159,19 +197,32 @@ function makeCtx(rpc, chainId, addrs) {
 }
 
 // ---------------------------------------------------------------- transactions: full evidence per tx
-async function send(ctx, txPromise, label, expectFail = false) {
-  const tx = await txPromise;
-  const rc = await ctx.provider.waitForTransaction(tx.hash);
-  const full = await ctx.provider.getTransaction(tx.hash);
+async function send(ctx, txFactory, label, expectFail = false) {
+  const from = ctx.deployer.address;
+  const nonce = await ctx.nonces.next(from);
+  log(`  tx   ${label} (nonce ${nonce}) sending`);
+  let tx;
+  try {
+    tx = await withTimeout(txFactory({ nonce }), RPC_TIMEOUT_MS, `${label}: sendTransaction`);
+  } catch (e) {
+    ctx.nonces.forget(from); // nothing reached the chain; re-read the nonce on the next use
+    throw e;
+  }
+  const rc = await waitReceipt(ctx.provider, tx.hash, label, from);
+  const full = await withTimeout(ctx.provider.getTransaction(tx.hash), RPC_TIMEOUT_MS, `${label}: getTransaction`);
   const record = {
     label, hash: tx.hash, from: full.from, to: full.to, nonce: full.nonce, data: full.data, gasLimit: str(full.gasLimit),
     receipt: { status: rc.status, gasUsed: str(rc.gasUsed), blockHash: rc.blockHash, blockNumber: rc.blockNumber, transactionIndex: rc.index,
       logs: rc.logs.map((l) => ({ address: l.address, topics: [...l.topics], data: l.data, index: l.index })) },
   };
   ctx.txs.push(record);
+  const row = { label, gas: str(rc.gasUsed), status: rc.status, hash: tx.hash, block: rc.blockNumber, txIndex: ctx.txs.length - 1 };
+  ctx.rowLog.push(row);
+  log(`  tx   ${label}: block ${rc.blockNumber} gas ${rc.gasUsed} status ${rc.status}`);
+  if (ctx.persist) ctx.persist();
   if (!expectFail) assert.equal(rc.status, 1, `${label}: reverted`);
   else assert.equal(rc.status, 0, `${label}: expected a revert`);
-  return { label, gas: str(rc.gasUsed), status: rc.status, hash: tx.hash, block: rc.blockNumber, txIndex: ctx.txs.length - 1 };
+  return row;
 }
 const FAIL_GAS = { gasLimit: 3_000_000n };
 
@@ -231,7 +282,7 @@ async function harvest(ctx, touched, blockTag) {
 }
 
 // ---------------------------------------------------------------- authors: native (Actor contract) and signed (EOA wallet)
-async function signedCall(ctx, wallet, actions, bodies, overrides = {}) {
+async function signedCall(ctx, wallet, actions, bodies, txOverrides = {}, overrides = {}) {
   const block = await ctx.provider.getBlock('latest');
   const ledger = ctx.ledger;
   const intent = {
@@ -241,10 +292,10 @@ async function signedCall(ctx, wallet, actions, bodies, overrides = {}) {
   };
   const types = { PublicationIntent: ['realmId:bytes32', 'coreCodeCommitment:bytes32', 'author:address', 'nonce:uint64', 'deadline:uint64', 'acceptanceProfile:bytes32', 'indexObligations:bytes32', 'actionsHash:bytes32'].map((f) => { const [n, t] = f.split(':'); return { name: n, type: t }; }) };
   const sig = await wallet.signTypedData({ name: 'EFS2-RoadB-Lab', version: '1' }, types, { ...intent, actionsHash: actionsHash(actions) });
-  return ledger.executeSigned(intent, actions, bodies, sig);
+  return ledger.executeSigned(intent, actions, bodies, sig, txOverrides);
 }
 function authorsFor(ctx) {
-  const native = (actor, address) => ({ address, kind: 'native', run: (actions, bodies, o = {}) => (o.nonce !== undefined ? actor.executeWithNonce(actions, bodies, o.nonce, o.tx ?? {}) : actor.execute(actions, bodies, o.tx ?? {})) });
+  const native = (actor, address) => ({ address, kind: 'native', run: (actions, bodies, o = {}) => actor.execute(actions, bodies, o) });
   const signed = (wallet) => ({ address: wallet.address, kind: 'signed', run: (actions, bodies, o = {}) => signedCall(ctx, wallet, actions, bodies, o) });
   return { nativeA: native(ctx.actorA, ctx.addrs.actorA), nativeB: native(ctx.actorB, ctx.addrs.actorB), signedA: signed(ctx.wallets[1]), signedB: signed(ctx.wallets[2]) };
 }
@@ -280,22 +331,36 @@ function assertSealed(probe, label) {
 async function sealedCell(run, label, typeId, folder, fn) {
   // fresh provider per cell so no cached read survives the revert
   const ctx = makeCtx(run.rpc, run.chainId, run.addrs);
-  assert.equal(await ctx.provider.send('evm_revert', [run.sealed]), true, `${label}: evm_revert failed`);
-  run.sealed = await ctx.provider.send('evm_snapshot', []); // anvil snapshots are single-use: re-seal
-  const afterRevert = await ctx.provider.getBlock('latest');
+  log(`cell ${label}: evm_revert to ${run.sealed}`);
+  assert.equal(await withTimeout(ctx.provider.send('evm_revert', [run.sealed]), RPC_TIMEOUT_MS, `${label}: evm_revert`), true, `${label}: evm_revert failed`);
+  run.sealed = await withTimeout(ctx.provider.send('evm_snapshot', []), RPC_TIMEOUT_MS, `${label}: evm_snapshot`); // single-use: re-seal
+  const afterRevert = await withTimeout(ctx.provider.getBlock('latest'), RPC_TIMEOUT_MS, `${label}: getBlock`);
+  const nonceLatest = await ctx.provider.getTransactionCount(ctx.deployer.address, 'latest');
+  const noncePending = await ctx.provider.getTransactionCount(ctx.deployer.address, 'pending');
+  let automine = null;
+  try { automine = await withTimeout(ctx.provider.send('anvil_getAutomine', []), 5_000, 'anvil_getAutomine'); } catch (e) { automine = `unavailable: ${e.message}`; }
+  if (automine === false) { await ctx.provider.send('evm_setAutomine', [true]); automine = 're-enabled'; }
+  log(`cell ${label}: after revert block ${afterRevert.number} ${afterRevert.hash} nonce latest ${nonceLatest} pending ${noncePending} automine ${automine}; re-sealed as ${run.sealed}`);
+  assert.equal(nonceLatest, noncePending, `${label}: pending pool is not empty after revert`);
   const authors = authorsFor(ctx);
   const cellAuthors = fn.authors(authors);
   const pre = await stateProbe(ctx, cellAuthors, typeId, folder, afterRevert.number);
   assertSealed(pre, label);
   const touched = { records: [], publications: [], subjects: [], bindingKeys: [], lists: [byTypeList(typeId)], authors: cellAuthors.filter(Boolean).map((a) => a.address) };
-  const cell = { label, sealedSnapshot: run.sealed, afterRevert: { blockNumber: afterRevert.number, blockHash: afterRevert.hash }, pre, rows: null, post: null, harvest: null, transactions: null, raw: null, consumerChecks: null, mismatches: 0, error: null };
+  const cell = { label, sealedSnapshot: run.sealed, afterRevert: { blockNumber: afterRevert.number, blockHash: afterRevert.hash, nonceLatest, noncePending, automine }, pre, rows: null, rowLog: ctx.rowLog, post: null, harvest: null, transactions: ctx.txs, raw: ctx.raw, consumerChecks: ctx.consumerChecks, mismatches: 0, error: null };
   run.report.cells[label] = cell;
+  ctx.persist = () => persist(run.report); // every mined transaction lands on disk before the next step
+  persist(run.report);
   try {
+    log(`cell ${label}: body`);
     cell.rows = await fn.body(ctx, authors, touched);
-    const last = await ctx.provider.getBlock('latest');
+    const last = await withTimeout(ctx.provider.getBlock('latest'), RPC_TIMEOUT_MS, `${label}: getBlock`);
+    log(`cell ${label}: post probe + raw harvest at block ${last.number}`);
     cell.post = await stateProbe(ctx, cellAuthors, typeId, folder, last.number);
     cell.harvest = await harvest(ctx, touched, last.number); // persisted BEFORE the next cell's evm_revert
+    log(`cell ${label}: done (${ctx.txs.length} txs, ${ctx.raw.length} raw reads, ${ctx.mismatches} read-back mismatches)`);
   } catch (e) {
+    log(`cell ${label}: FAILED ${e.message}`);
     cell.error = { message: String(e.message), stack: String(e.stack).split('\n').slice(0, 6) };
     throw e;
   } finally {
@@ -318,10 +383,12 @@ async function consumerCheck(ctx, row, expected) {
   const actual = await consumerSlots(ctx, row.block);
   const compared = {};
   let match = true;
-  for (const [k, v] of Object.entries(expected)) { compared[k] = { expected: str(v), actual: actual[k], equal: str(v) === actual[k] }; if (str(v) !== actual[k]) match = false; }
+  const norm = (v) => (typeof v === 'string' ? v.toLowerCase() : String(v));
+  for (const [k, v] of Object.entries(expected)) { const equal = norm(v) === norm(actual[k]); compared[k] = { expected: norm(v), actual: norm(actual[k]), equal }; if (!equal) match = false; }
   if (!match) ctx.mismatches++;
-  const check = { label: `${row.label}/readback`, block: row.block, expected: Object.fromEntries(Object.entries(expected).map(([k, v]) => [k, str(v)])), actual, compared, match };
+  const check = { label: `${row.label}/readback`, block: row.block, expected: Object.fromEntries(Object.entries(expected).map(([k, v]) => [k, norm(v)])), actual, compared, match };
   ctx.consumerChecks.push(check);
+  log(`  chk  ${check.label}: ${match ? 'match' : 'MISMATCH ' + JSON.stringify(compared)}`);
   return check;
 }
 
@@ -357,43 +424,43 @@ async function runCell(ctx, cellName, fixture, primary, secondary, touched, opts
   await track(primary);
   touched.lists.push(backlinkList(r1), backlinkList(r2), backlinkList(subj));
   // create = one logical action: subject + record + head + placement
-  rows.push(await send(ctx, primary.run([aCreate(salt), aPublish(typeId, f1.bytes), aBind(P.HEAD, subj, ZERO, r1, 0), aBind(P.FOLDER, folder, nameHash, subj, 0)], ['0x', f1.bytes, '0x', '0x']), `${cellName}/${fixture}/create`));
+  rows.push(await send(ctx, (o) => primary.run([aCreate(salt), aPublish(typeId, f1.bytes), aBind(P.HEAD, subj, ZERO, r1, 0), aBind(P.FOLDER, folder, nameHash, subj, 0)], ['0x', f1.bytes, '0x', '0x'], o), `${cellName}/${fixture}/create`));
   const pub = (await ledger.counts())[3];
   touched.publications.push(pub);
   const rec = await recon.reconstruct(ctx.addrs.ledger, pub);
   rows.push({ label: `${cellName}/${fixture}/reconstruct-create`, publication: str(pub), matches: rec[4], recovered: rec[3], status: 'eth_call', note: CAVEAT_RECON });
   // edit = fresh body + CAS head rebind
-  rows.push(await send(ctx, primary.run([aPublish(typeId, f2.bytes), aBind(P.HEAD, subj, ZERO, r2, 1)], [f2.bytes, '0x']), `${cellName}/${fixture}/edit`));
+  rows.push(await send(ctx, (o) => primary.run([aPublish(typeId, f2.bytes), aBind(P.HEAD, subj, ZERO, r2, 1)], [f2.bytes, '0x'], o), `${cellName}/${fixture}/edit`));
   touched.publications.push((await ledger.counts())[3]);
   let lensArr = [primary.address];
   if (secondary) {
     await track(secondary);
-    rows.push(await send(ctx, secondary.run([aPublish(typeId, f1.bytes), aBind(P.HEAD, subj, ZERO, r1, 0), aBind(P.FOLDER, folder, nameHash, subj, 0)], [f1.bytes, '0x', '0x']), `${cellName}/${fixture}/create-competing`));
+    rows.push(await send(ctx, (o) => secondary.run([aPublish(typeId, f1.bytes), aBind(P.HEAD, subj, ZERO, r1, 0), aBind(P.FOLDER, folder, nameHash, subj, 0)], [f1.bytes, '0x', '0x'], o), `${cellName}/${fixture}/create-competing`));
     touched.publications.push((await ledger.counts())[3]);
     lensArr = [primary.address, secondary.address];
   }
   // paid consumer reads (receipt gas, not eth_call), each read back and compared
   let row;
   if (fixture === 'quote') {
-    row = await send(ctx, consumer.readQuote(lensArr, P.HEAD, subj, ZERO), `${cellName}/${fixture}/read-resolve`);
+    row = await send(ctx, (o) => consumer.readQuote(lensArr, P.HEAD, subj, ZERO, o), `${cellName}/${fixture}/read-resolve`);
     await consumerCheck(ctx, row, { lastStatus: 1, lastTarget: r2, lastRevision: 2, lastValue: f2.value });
   } else {
-    row = await send(ctx, consumer.readHead(lensArr, P.HEAD, subj, ZERO), `${cellName}/${fixture}/read-resolve`);
+    row = await send(ctx, (o) => consumer.readHead(lensArr, P.HEAD, subj, ZERO, o), `${cellName}/${fixture}/read-resolve`);
     await consumerCheck(ctx, row, { lastStatus: 1, lastTarget: r2, lastRevision: 2 });
   }
   rows.push(row);
   if (secondary) {
-    row = await send(ctx, consumer.readHead([secondary.address, primary.address], P.HEAD, subj, ZERO), `${cellName}/${fixture}/read-resolve-second-first`);
+    row = await send(ctx, (o) => consumer.readHead([secondary.address, primary.address], P.HEAD, subj, ZERO, o), `${cellName}/${fixture}/read-resolve-second-first`);
     await consumerCheck(ctx, row, { lastStatus: 1, lastTarget: r1, lastRevision: 1 });
     rows.push(row);
   }
   const est = await lens.resolve.estimateGas(lensArr, P.HEAD, subj, ZERO);
   rows.push({ label: `${cellName}/${fixture}/eth_call-resolve-estimate`, gas: est.toString(), status: 'estimate' });
   if (opts.noIndex) return rows; // without the module, list/history are UNKNOWN by construction (not measured as reads)
-  row = await send(ctx, consumer.readList(lensArr, P.FOLDER, folder, 16), `${cellName}/${fixture}/read-list`);
+  row = await send(ctx, (o) => consumer.readList(lensArr, P.FOLDER, folder, 16, o), `${cellName}/${fixture}/read-list`);
   await consumerCheck(ctx, row, { lastStatus: 2, lastCount: 1, lastScanned: secondary ? 2 : 1 }); // the shared name is ONE selected entry
   rows.push(row);
-  row = await send(ctx, consumer.readHistory(primary.address, headPos, 1_000_000), `${cellName}/${fixture}/read-history-asof`);
+  row = await send(ctx, (o) => consumer.readHistory(primary.address, headPos, 1_000_000, o), `${cellName}/${fixture}/read-history-asof`);
   await consumerCheck(ctx, row, { lastStatus: 1, lastTarget: r2, lastRevision: 2 });
   rows.push(row);
   return rows;
@@ -413,12 +480,12 @@ const freshnessCell = {
     const before = await ledger.record(id);
     assert.equal(before[1], 0n, 'pre-absence: the exact Record must not exist yet');
     rows.push({ label: 'pre-absence proof', recordId: id, firstAdmission: str(before[1]), occurrences: str(before[2]), block: await ctx.provider.getBlockNumber(), proof: 'eth_call record(id).firstAdmission == 0 at the block before the write' });
-    rows.push(await send(ctx, actorA.publish(T.QUOTE, body), 'contract-fresh-body (Actor.publish quote3000, proved absent just before)'));
+    rows.push(await send(ctx, (o) => actorA.publish(T.QUOTE, body, o), 'contract-fresh-body (Actor.publish quote3000, proved absent just before)'));
     touched.publications.push((await ledger.counts())[3]);
     const mid = await ledger.record(id);
     assert.notEqual(mid[1], 0n, 'pre-presence: the exact Record must exist now');
     rows.push({ label: 'pre-presence proof', recordId: id, firstAdmission: str(mid[1]), occurrences: str(mid[2]), block: await ctx.provider.getBlockNumber(), proof: 'eth_call record(id).firstAdmission != 0 and occurrences == 1 at the block before the write' });
-    rows.push(await send(ctx, actorA.publish(T.QUOTE, body), 'contract-existing-body (same bytes: new occurrence, no new Record)'));
+    rows.push(await send(ctx, (o) => actorA.publish(T.QUOTE, body, o), 'contract-existing-body (same bytes: new occurrence, no new Record)'));
     touched.publications.push((await ledger.counts())[3]);
     const after = await ledger.record(id);
     rows.push({ label: 'post-presence', recordId: id, firstAdmission: str(after[1]), occurrences: str(after[2]) });
@@ -426,7 +493,7 @@ const freshnessCell = {
     touched.records.push(recordId(T.QUOTE, b777));
     const actions = [aPublish(T.QUOTE, b777)];
     const nonce = await ledger.nonces(a.nativeA.address);
-    rows.push(await send(ctx, actorA.executeWithNonce(actions, [b777], nonce), 'batch under explicit nonce'));
+    rows.push(await send(ctx, (o) => actorA.executeWithNonce(actions, [b777], nonce, o), 'batch under explicit nonce'));
     touched.publications.push((await ledger.counts())[3]);
     rows.push(await failureRow(ctx, 'exact-operation retry (reverts AlreadyAdmitted)', actorA, 'executeWithNonce', [actions, [b777], nonce], 'AlreadyAdmitted', [[a.nativeA], T.QUOTE, name('/none')]));
     return rows;
@@ -442,14 +509,15 @@ async function failureRow(ctx, label, contract, fn, fnArgs, expectedErrorName, p
   const expectedSelector = errorSelector(expectedErrorName);
   let observedSelector = null;
   let observedData = null;
+  log(`  row  ${label}: static call for the revert selector`);
   try {
-    await contract[fn].staticCall(...fnArgs);
+    await withTimeout(contract[fn].staticCall(...fnArgs), RPC_TIMEOUT_MS, `${label}: staticCall`);
     observedSelector = 'no-revert';
   } catch (e) {
     observedData = e.data ?? e.info?.error?.data ?? null;
     observedSelector = typeof observedData === 'string' ? observedData.slice(0, 10) : String(observedData);
   }
-  const row = await send(ctx, contract[fn](...fnArgs, FAIL_GAS), label, true);
+  const row = await send(ctx, (o) => contract[fn](...fnArgs, { ...o, ...FAIL_GAS }), label, true);
   const post = await stateProbe(ctx, authors, typeId, folder, row.block);
   const unchanged = JSON.stringify(stripBlock(pre)) === JSON.stringify(stripBlock(post));
   return { ...row, expectedError: expectedErrorName, expectedSelector, observedSelector, observedRevertData: observedData, selectorMatch: observedSelector === expectedSelector, stateUnchanged: unchanged, pre, post };
@@ -463,17 +531,17 @@ const failureCell = {
     const probe = [[a.nativeA], T.PAIR, name('/none')];
     const rows = [];
     const items = [zeroPadValue(toBeHex(1n), 32), zeroPadValue(toBeHex(2n), 32)];
-    rows.push(await send(ctx, actorA.publish(T.ITEM, items[0]), 'ITEM_ETH'));
-    rows.push(await send(ctx, actorA.publish(T.ITEM, items[1]), 'ITEM_USDC'));
+    rows.push(await send(ctx, (o) => actorA.publish(T.ITEM, items[0], o), 'ITEM_ETH'));
+    rows.push(await send(ctx, (o) => actorA.publish(T.ITEM, items[1], o), 'ITEM_USDC'));
     const ids = items.map((b) => recordId(T.ITEM, b));
     touched.records.push(...ids);
     const pair = coder.encode(['bytes32', 'bytes32', 'uint256'], [ids[0], ids[1], 1n]);
-    rows.push(await send(ctx, actorA.publish(T.PAIR, pair), 'PAIR_ETH_USDC (two checked refs)'));
+    rows.push(await send(ctx, (o) => actorA.publish(T.PAIR, pair, o), 'PAIR_ETH_USDC (two checked refs)'));
     touched.records.push(recordId(T.PAIR, pair));
     // a PRESENT wrong-Type target: admit a QUOTE record first and assert it exists
     const q99 = zeroPadValue(toBeHex(99n), 32);
     const wrongId = recordId(T.QUOTE, q99);
-    rows.push(await send(ctx, actorA.publish(T.QUOTE, q99), 'setup: admit a QUOTE record as the present wrong-Type target'));
+    rows.push(await send(ctx, (o) => actorA.publish(T.QUOTE, q99, o), 'setup: admit a QUOTE record as the present wrong-Type target'));
     const present = await ledger.record(wrongId);
     assert.notEqual(present[1], 0n, 'wrong-Type target must be present');
     rows.push({ label: 'wrong-Type target presence', recordId: wrongId, typeId: T.QUOTE, firstAdmission: str(present[1]) });
@@ -485,14 +553,14 @@ const failureCell = {
     const pid = await ledger.principalOf(a.nativeA.address);
     const key = binding(pid, position(P.HEAD, name('x'), ZERO));
     touched.bindingKeys.push(key); touched.lists.push(historyList(key), backlinkList(ids[0]));
-    rows.push(await send(ctx, actorA.bind(P.HEAD, name('x'), ZERO, ids[0], 0), 'setup: bind (revision becomes 1)'));
+    rows.push(await send(ctx, (o) => actorA.bind(P.HEAD, name('x'), ZERO, ids[0], 0, o), 'setup: bind (revision becomes 1)'));
     rows.push(await failureRow(ctx, 'stale CAS (expected 0, head is 1)', actorA, 'bind', [P.HEAD, name('x'), ZERO, ids[0], 0], 'E_CAS', probe));
-    rows.push(await send(ctx, acceptor.set(1, 0), 'setup: acceptor rejects'));
+    rows.push(await send(ctx, (o) => acceptor.set(1, 0, o), 'setup: acceptor rejects'));
     rows.push(await failureRow(ctx, 'failed acceptance (whole publication reverts)', actorA, 'publish', [T.QUOTE, zeroPadValue(toBeHex(5n), 32)], 'E_REJECTED', probe));
-    rows.push(await send(ctx, acceptor.set(0, 0), 'setup: acceptor accepts'));
-    rows.push(await send(ctx, ledger.setIndexModule(ctx.addrs.failingIndex), 'setup: attach the always-refusing index module'));
+    rows.push(await send(ctx, (o) => acceptor.set(0, 0, o), 'setup: acceptor accepts'));
+    rows.push(await send(ctx, (o) => ledger.setIndexModule(ctx.addrs.failingIndex, o), 'setup: attach the always-refusing index module'));
     rows.push(await failureRow(ctx, 'failed mandatory index (whole publication reverts)', actorA, 'publish', [T.QUOTE, zeroPadValue(toBeHex(6n), 32)], 'E_INDEX', probe));
-    rows.push(await send(ctx, ledger.setIndexModule(ctx.addrs.index), 'setup: re-attach the index module'));
+    rows.push(await send(ctx, (o) => ledger.setIndexModule(ctx.addrs.index, o), 'setup: re-attach the index module'));
     for (const pubN of [1, 2, 3, 4, 5]) touched.publications.push(pubN);
     return rows;
   },
@@ -501,11 +569,15 @@ const failureCell = {
 // ---------------------------------------------------------------- deployment (once, then addresses only)
 async function deployAll(ctx0) {
   const { provider, deployer } = ctx0;
+  const nonces = nonceTracker(provider);
   const dep = async (nameOf, ...ctor) => {
     const a = artifact(nameOf);
-    const c = await new ContractFactory(a.abi, a.bytecode.object, deployer).deploy(...ctor);
-    await c.waitForDeployment();
-    const rc = await provider.getTransactionReceipt(c.deploymentTransaction().hash);
+    const nonce = await nonces.next(deployer.address);
+    log(`deploy ${nameOf} (nonce ${nonce})`);
+    const c = await withTimeout(new ContractFactory(a.abi, a.bytecode.object, deployer).deploy(...ctor, { nonce }), RPC_TIMEOUT_MS, `deploy ${nameOf}`);
+    const rc = await waitReceipt(provider, c.deploymentTransaction().hash, `deploy ${nameOf}`, deployer.address);
+    assert.equal(rc.status, 1, `deploy ${nameOf}: reverted`);
+    log(`deploy ${nameOf}: ${await c.getAddress()} block ${rc.blockNumber} gas ${rc.gasUsed}`);
     return { c, address: await c.getAddress(), gas: str(rc.gasUsed), runtimeBytes: ((await provider.getCode(await c.getAddress())).length - 2) / 2 };
   };
   const d = {};
@@ -522,18 +594,19 @@ async function deployAll(ctx0) {
   const addrs = Object.fromEntries(Object.entries(d).map(([k, v]) => [k, v.address]));
   const ctx = makeCtx(ctx0.rpc, ctx0.chainId, addrs);
   const setup = [];
-  setup.push(await send(ctx, ctx.ledger.setIndexModule(addrs.index), 'setup: attach index module'));
-  setup.push(await send(ctx, ctx.registry.register(T.QUOTE, addrs.acceptor, []), 'setup: register QUOTE'));
-  setup.push(await send(ctx, ctx.registry.register(T.BINARY, ZERO_ADDR, []), 'setup: register BINARY'));
-  setup.push(await send(ctx, ctx.registry.register(T.ITEM, ZERO_ADDR, []), 'setup: register ITEM'));
-  setup.push(await send(ctx, ctx.registry.register(T.PAIR, addrs.acceptor, [T.ITEM, T.ITEM]), 'setup: register PAIR'));
-  setup.push(await send(ctx, ctx.registry.register(T.QUOTE_J, addrs.acceptor, [T.PAIR]), 'setup: register QUOTE_J (one checked Pair ref)'));
+  setup.push(await send(ctx, (o) => ctx.ledger.setIndexModule(addrs.index, o), 'setup: attach index module'));
+  setup.push(await send(ctx, (o) => ctx.registry.register(T.QUOTE, addrs.acceptor, [], o), 'setup: register QUOTE'));
+  setup.push(await send(ctx, (o) => ctx.registry.register(T.BINARY, ZERO_ADDR, [], o), 'setup: register BINARY'));
+  setup.push(await send(ctx, (o) => ctx.registry.register(T.ITEM, ZERO_ADDR, [], o), 'setup: register ITEM'));
+  setup.push(await send(ctx, (o) => ctx.registry.register(T.PAIR, addrs.acceptor, [T.ITEM, T.ITEM], o), 'setup: register PAIR'));
+  setup.push(await send(ctx, (o) => ctx.registry.register(T.QUOTE_J, addrs.acceptor, [T.PAIR], o), 'setup: register QUOTE_J (one checked Pair ref)'));
   return { addrs, deployment: Object.fromEntries(Object.entries(d).map(([k, v]) => [k, { address: v.address, gas: v.gas, runtimeBytes: v.runtimeBytes }])), setup, setupTransactions: ctx.txs };
 }
 
 async function main() {
   const t0 = Date.now();
   const rpc = args.anvil ? await startAnvil() : args.rpc || 'http://127.0.0.1:8545';
+  log(`rpc ${rpc}; artifacts ${OUT_DIR}; scratch ${SCRATCH_ROOT}; report ${OUT_JSON}`);
   const probeProvider = new JsonRpcProvider(rpc, undefined, { staticNetwork: true, cacheTimeout: -1 });
   const chainId = Number((await probeProvider.getNetwork()).chainId);
   const report = {
@@ -571,8 +644,9 @@ async function main() {
       writeFileSync(addressesPath, JSON.stringify(run.addrs, null, 2));
       report.paths.addresses = addressesPath;
     }
-    run.sealed = await probeProvider.send('evm_snapshot', []);
+    run.sealed = await withTimeout(probeProvider.send('evm_snapshot', []), RPC_TIMEOUT_MS, 'evm_snapshot');
     const sealedBlock = await probeProvider.getBlock('latest');
+    log(`sealed initial state: snapshot ${run.sealed} at block ${sealedBlock.number} ${sealedBlock.hash}`);
     report.sealedInitialState = { snapshot: run.sealed, blockNumber: sealedBlock.number, blockHash: sealedBlock.hash, rule: 'evm_revert to the sealed snapshot, then re-snapshot, before every cell through a fresh provider; pre/post probes and raw harvests recorded per cell before the next revert' };
     persist(report);
     const cells = { 'native-one': (a) => [a.nativeA, null], 'signed-one': (a) => [a.signedA, null], 'native-two': (a) => [a.nativeA, a.nativeB], 'signed-two': (a) => [a.signedA, a.signedB] };
@@ -588,7 +662,7 @@ async function main() {
       await sealedCell(run, 'native-one-noindex/quote', T.QUOTE, name('/native-one-noindex/quote'), {
         authors: (a) => [a.nativeA, null],
         body: async (ctx, a, touched) => {
-          const rows = [await send(ctx, ctx.ledger.setIndexModule(ZERO_ADDR), 'setup: detach index module')];
+          const rows = [await send(ctx, (o) => ctx.ledger.setIndexModule(ZERO_ADDR, o), 'setup: detach index module')];
           rows.push(...(await runCell(ctx, 'native-one-noindex', 'quote', a.nativeA, null, touched, { noIndex: true })));
           return rows;
         },
@@ -600,14 +674,15 @@ async function main() {
     report.consumerMismatches = Object.values(report.cells).reduce((n, c) => n + (c.mismatches || 0), 0);
     report.finishedAt = new Date().toISOString();
   } catch (e) {
+    log(`FAILED: ${e.message}`);
     report.failure = { message: String(e.message), stack: String(e.stack).split('\n').slice(0, 12), at: new Date().toISOString() };
     throw e;
   } finally {
     stopAnvil();
     persist(report);
     const text = Object.entries(report.cells).flatMap(([cell, c]) => (c.rows || []).map((r) => `${cell.padEnd(26)} ${String(r.label).padEnd(64)} ${String(r.gas ?? '').padStart(10)} ${r.status ?? ''}`)).join('\n');
-    console.log(text);
-    console.log(`wrote ${OUT_JSON}`);
+    process.stdout.write(text + '\n');
+    log(`wrote ${OUT_JSON}${report.failure ? ' (FAILED: ' + report.failure.message + ')' : ''}`);
   }
 }
 main().catch((e) => { console.error(e); process.exit(1); });
