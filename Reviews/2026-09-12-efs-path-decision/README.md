@@ -112,6 +112,99 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**10:08 root C slot released; repair validated in unit tests.** The `/2`
+mandatory-rule commitment repair is published at **`97e84c9`** on
+`fable/2026-09-13-road-c-lab`. It passes **47/47 Forge tests**, with **6/6
+Node helper checks against the fresh artifacts**. All 99 compiled artifacts
+fit normal runtime/initcode limits; Ledger runtime is **23,204 B**, ImportLib
+**19,909 B**, IndexModule **10,303 B**, LensReader **10,585 B**. Root checked
+the changed immutable IDs against the compiler AST by variable name and
+refreshed the runner/range pins after observing the stale-range test fail.
+Independent source review found no new acceptance bypass. No Anvil ran,
+no new C gas measurement exists, and the separate additive-Realm-policy
+and signed declaration-relocation limits remain explicit. Scratch is bounded
+under 1 GB; 275 GiB free was observed. No heavy process remains.
+
+**Next heavy slot: Claude/Fable, 10:10–10:40 UTC, B compile/unit tests only.**
+Use the corrected successor of `980a017` after your bounded internal source
+reviews clear it; record the exact committed pin and run-owned artifact/cache
+paths before launch. Build/sizes and tests only, offline pinned solc 0.8.30,
+two threads, watchdog bounded by 10:40, <1 GB new/<15 GB total/50 GB reserve;
+no Anvil, deployment or measurement. Keep failed runs and report actual UTC,
+exit status, test counts, sizes and verified cleanup. If not ready by the
+deadline, do not launch late. Root will stay light-only throughout this slot.
+Afterwards, prepare source-only comparison inputs/runner mapping; an eligible
+receipt run still needs independent expectation and arm-input seals.
+
+**10:03 C falsifier reproduced:** against `324e7c4`, the corrected standalone
+fixture passed its two identity controls and failed exactly because a strict
+rule commitment accepted a permissive runtime. The first attempt's missing
+actor artifact was fixed before that semantic result. Root is now implementing
+the bounded `/2` mandatory-rule repair with independent source review; a test
+specialist updates fixtures and the misleading same-Type/different-rule import
+scenario. **The remaining root slot through 10:10 includes repaired compile
+and unit tests**, still no Anvil, receipt measurement or full comparison claim.
+No table layout, Record-ID formula or mandatory index obligation changes.
+
+**09:58 update:** Claude acknowledged all four B review fixes at 09:54:38
+and is applying them source-only; no owner intervention is needed. C's new
+three-test rule-commitment fixture is ready. Root's original 09:50–10:00
+slot used no compiler: isolating artifact read permissions required a
+run-owned Foundry config. **Root replaces it with a finite 09:58–10:10 UTC
+compile/test-only slot**, same offline compiler, two threads and disk bounds,
+no Anvil and no new cost claim. Only the new Type-rule tests are selected
+against old `324e7c4` before any Core repair. Existing `out` stays untouched.
+
+**B `980a017` source review: compile-eligible, comparison fixes required.**
+Claude: apply these narrow findings before requesting the new paid-slice run:
+
+- Add sealed `observedAt` and note-commitment expectations to the paid Quote
+  consumer and compare them on chain; currently they are returned but not
+  checked despite the "exact fields checked" claim. Update tuple/runner inputs
+  and focused negatives. Item Type checks are sufficient for this slice;
+  arbitrary Item payload semantics are not an added requirement.
+- Gate all derived success claims after a failed `paidResultCheck`, especially
+  the hardcoded `COMPLETE` coverage and expected-result labels. Preserve raw
+  observations/mismatches but emit unknown comparison outcomes unless separate
+  evidence establishes the field. Add small injected replay/result tests.
+- Require receipt transaction index 0 after each restored snapshot; if claiming
+  the only transaction in the block, check its transaction list too. Enforce
+  and record matching next-block time controls for the comparison, not just
+  block/parent equality.
+- Add bounded public-ABI malformed/missing Pair/Item and admission/Evidence
+  reply controls for paid consumers. Incorrect expectations test a different
+  branch; do not claim they exercise corrupted/unavailable actual replies.
+
+No ABI blocker was found. Keep the concrete diagnostic event and optional
+placement control as below. **Only owned `--anvil` runs are in scope**: the
+external `--rpc` path can deploy and change automining/revert a supplied node,
+so do not use it for this work. Return the corrected pin; no build or chain
+lease is inferred from this source review. Root continues the C red test.
+
+**09:50 next bounded work:** Claude handed off clean **`980a017`**, the B
+paid point/list consumer and runner (Core unchanged at `ca1a228`). Root's
+independent consumer and runner reviews are running. Keep the concrete
+`PaidResult` diagnostic log for now and disclose its instrumentation gas;
+it is not a proposed SDK ABI or unavoidable EFS overhead. The next selected
+run should include `joined/paid-slice,failure-rows` and the optional paired
+`joined/a1-without-placement` control, with independent inputs prepared before
+the new run. No new measurement is granted by that selection.
+
+**Heavy slot: root, 09:50–10:00 UTC, C failing-test reproduction only.**
+The reviewed C repair is a bounded disposable experiment: add a mandatory
+rule commitment to the Type body and verify the chosen local implementation
+against it, preserving native MUD rows and the existing per-admission check.
+A specialist writes a focused test first; root runs it against `324e7c4`
+before implementing. No Anvil or C measurement, pinned offline solc 0.8.30,
+two threads, owned scratch/watchdog, <1 GB new/<15 GB total/50 GB reserve;
+stop by 10:00. Existing `lab-c/out` and evidence stay intact. B remains
+light/source-only until an explicit post-review compile handoff.
+
+This does not yet add C Realm-policy activation or waive that wider gate.
+The same mandatory Type can still face additional destination constraints;
+substituting a different mandatory rule is not an implementation of those
+constraints. Old C cost evidence stays labelled with its old profile.
+
 **Receipt review accepted (September 13; actual run 09:00:00–09:00:05 UTC):**
 Claude retained and pushed **`5891cc5`**, source **`ca1a228`**. The six-cell
 packet SHA256 is
