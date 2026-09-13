@@ -1,8 +1,70 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 
-import {Ledger} from "./Ledger.sol";
 import {LensReader} from "./LensReader.sol";
+
+/// The exact public read ABI `JoinedConsumer` uses, declared consumer-locally (NOT a Core interface; no Core change).
+/// The Ledger and LensReader satisfy it by their public getters (same selectors and return shapes), and a test can
+/// substitute a faulty reader (`test/FaultyReads.sol`) that returns corrupted or missing ACTUAL replies, so the
+/// consumer's refusals are tested against bad replies and not only against wrong expectations. `registry()` /
+/// `index()` return the ABI address of the Ledger's `ITypeRegistry` / the LensReader's `IndexModule`.
+interface ILedgerReads {
+    function record(bytes32 id) external view returns (bytes32 typeId, uint64 firstAdmission, uint32 occurrences, bytes memory data);
+    function admission(uint64 ordinal)
+        external
+        view
+        returns (uint8 kind, uint16 leaf, uint64 publication, uint64 bindingOrdinal, uint32 expectedRevision, bool withdrawn, bytes32 a, bytes32 b);
+    function evidence(uint64 publication)
+        external
+        view
+        returns (
+            address author,
+            uint8 proofKind,
+            uint8 v,
+            uint16 leafCount,
+            uint64 firstAdmission,
+            bytes32 r,
+            bytes32 s,
+            uint64 nonce,
+            uint64 deadline,
+            uint64 basis,
+            bytes32 acceptanceProfile,
+            bytes32 indexObligations,
+            bytes32 actionsHash
+        );
+    function counts() external view returns (uint64 admissions, uint64 records, uint64 bindings, uint64 publications);
+    function positionCell(bytes32 position) external view returns (bytes32 purpose, bytes32 subject, bytes32 role);
+    function registry() external view returns (address);
+}
+
+interface ILensReads {
+    function resolve(address[] calldata lens, bytes32 purpose, bytes32 subject, bytes32 role)
+        external
+        view
+        returns (uint8 status, bytes32 target, uint32 revision, address author, uint64 admissionOrdinal);
+    function resolveNoTiebreak(address[] calldata lens, bytes32 purpose, bytes32 subject, bytes32 role)
+        external
+        view
+        returns (uint8 status, LensReader.Entry[] memory candidates);
+    function list(address[] calldata lens, bytes32 purpose, bytes32 subject, LensReader.Cursor calldata cursor, uint256 budget)
+        external
+        view
+        returns (LensReader.Page memory page);
+    function historyByRole(address author, bytes32 purpose, bytes32 subject, bytes32 role, uint64 asOf)
+        external
+        view
+        returns (uint8 status, bool live, bytes32 target, uint32 revision, uint64 admissionOrdinal);
+    function index() external view returns (address);
+}
+
+/// Basis getters reached through the read interfaces' `registry()` / `index()` addresses.
+interface IRulesEpoch {
+    function epoch() external view returns (uint64);
+}
+
+interface IIndexGeneration {
+    function generation() external view returns (uint64);
+}
 
 /// TEST-ONLY MEASUREMENT CONSUMERS. DISPOSABLE LAB, NO PROTOCOL CLAIM. UNRUN (written under
 /// another worker's compiler lease).
@@ -56,8 +118,8 @@ contract JoinedConsumer {
     uint8 private constant COMPLETE = 2;
     uint8 private constant H_FOUND = 2;
 
-    Ledger public immutable ledger;
-    LensReader public immutable lens;
+    ILedgerReads public immutable ledger; // the Ledger's public read ABI (consumer-local interface; a test may substitute a faulty reader)
+    ILensReads public immutable lens; // the LensReader's public read ABI (same)
     bytes32 public immutable quoteType; // QUOTE_J
     bytes32 public immutable pairType; // PAIR
     bytes32 public immutable itemType; // ITEM
@@ -86,7 +148,7 @@ contract JoinedConsumer {
         bytes32 itemB;
     }
 
-    constructor(Ledger ledger_, LensReader lens_, bytes32 quoteType_, bytes32 pairType_, bytes32 itemType_, bytes32 labelType_) {
+    constructor(ILedgerReads ledger_, ILensReads lens_, bytes32 quoteType_, bytes32 pairType_, bytes32 itemType_, bytes32 labelType_) {
         ledger = ledger_;
         lens = lens_;
         quoteType = quoteType_;
@@ -252,6 +314,8 @@ contract JoinedConsumer {
         bytes32 itemB; // ITEM_USDC: the second
         uint256 mantissa; // the selected Quote's exact fixture mantissa
         uint8 scale; // 6
+        uint64 observedAt; // the selected Quote's exact observation time from the sealed fixture (an INPUT, compared on chain)
+        bytes32 noteCommitment; // keccak256 of the sealed NOTE_BYTES (an INPUT, compared on chain)
         uint64 basisAdmission; // the admission frontier at the post-B1 seal
     }
 
@@ -312,7 +376,7 @@ contract JoinedConsumer {
     event PaidResult(bytes32 indexed kind, bytes32 commitment, Selection selection, Placement placement);
 
     error BasisMismatch(uint64 expected, uint64 observed);
-    error SelectionMismatch(uint8 field, bytes32 expected, bytes32 observed); // field 1 = selected author, 2 = selected head id
+    error SelectionMismatch(uint8 field, bytes32 expected, bytes32 observed); // field 1 = selected author, 2 = selected head id, 3 = observedAt, 4 = note commitment
     error AdmissionShape(uint64 admission, uint8 kind, bool withdrawn, bytes32 target);
     error EvidenceBounds(uint64 admission, uint64 publication, uint64 firstAdmission, uint16 leafCount);
     error ProofCategory(uint8 expected, uint8 observed);
@@ -371,8 +435,8 @@ contract JoinedConsumer {
         (uint64 admissions,,,) = ledger.counts();
         if (admissions != expected) revert BasisMismatch(expected, admissions);
         s.basisAdmission = admissions;
-        s.indexGeneration = lens.index().generation();
-        s.rulesEpoch = ledger.registry().epoch();
+        s.indexGeneration = IIndexGeneration(lens.index()).generation();
+        s.rulesEpoch = IRulesEpoch(ledger.registry()).epoch();
         s.coreCodeCommitment = address(ledger).codehash;
     }
 
@@ -401,8 +465,9 @@ contract JoinedConsumer {
         return (pub, pk);
     }
 
-    /// Quote -> Pair -> two Items with exact Types and ordered references (`_quote`), then the selected Quote's
-    /// exact fixture fields against the caller's expectation.
+    /// Quote -> Pair -> two Items with exact Types and ordered references (`_quote`), then EVERY sealed Quote field
+    /// (pair, ordered items, mantissa, scale, observedAt, note commitment) against the caller's expectation. Item
+    /// checks are Type checks only (no Item payload semantics in this slice).
     function _closure(Selection memory s, Expect calldata e) private view {
         Quote memory q = _quote(s.selectedHead);
         if (q.pairId != e.pairId) revert ClosureMismatch(1, e.pairId, q.pairId);
@@ -410,6 +475,8 @@ contract JoinedConsumer {
         if (q.itemB != e.itemB) revert ClosureMismatch(3, e.itemB, q.itemB);
         if (q.mantissa != e.mantissa) revert ClosureMismatch(4, bytes32(e.mantissa), bytes32(q.mantissa));
         if (q.scale != e.scale) revert ClosureMismatch(5, bytes32(uint256(e.scale)), bytes32(uint256(q.scale)));
+        if (q.observedAt != e.observedAt) revert SelectionMismatch(3, bytes32(uint256(e.observedAt)), bytes32(uint256(q.observedAt)));
+        if (q.note != e.noteCommitment) revert SelectionMismatch(4, e.noteCommitment, q.note);
         s.pairId = q.pairId;
         s.itemA = q.itemA;
         s.itemB = q.itemB;

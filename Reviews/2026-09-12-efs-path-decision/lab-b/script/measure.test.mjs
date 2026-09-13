@@ -306,12 +306,48 @@ test('watchdog failure marker catches pretending evidence exists before report i
 // ---------------------------------------------------------------- the sealed paid point/list slice: pure helpers
 function loadPaidHelpers() {
   const declaration = runnerDeclaration('// ---- paid-slice pure helpers', '// ---- paid-slice cells');
-  return vm.runInNewContext(`${declaration}\n({ evidenceCategoryOf, assertUnrelatedCaller, abstractRow, checkPaidRowOrdering, ABSTRACT_FIELDS, SELECTION_FIELDS, PLACEMENT_FIELDS, PAID_CALLER_INDEX, PAID_CALLER_PATH })`, {});
+  return vm.runInNewContext(`${declaration}\n({ evidenceCategoryOf, assertUnrelatedCaller, abstractRow, checkPaidRowOrdering, deriveAbstractResult, assertAnvilOnlyCells, ANVIL_ONLY_CELLS, ABSTRACT_FIELDS, SELECTION_FIELDS, PLACEMENT_FIELDS, PAID_CALLER_INDEX, PAID_CALLER_PATH })`, {});
 }
-const SEAL = { kind: 'seal', block: 40, hash: '0xseal' };
-const revertOk = { kind: 'revert', block: 40, hash: '0xseal' };
-const txAt = (label) => ({ kind: 'tx', label, block: 41, parentHash: '0xseal' });
+const SEAL = { kind: 'seal', block: 40, hash: '0xseal', timestamp: 1000 };
+const revertOk = { kind: 'revert', block: 40, hash: '0xseal', nextTimestamp: 1001 };
+const txAt = (label, over = {}) => ({ kind: 'tx', label, block: 41, parentHash: '0xseal', timestamp: 1001, txIndex: 0, txCount: 1, onlyTx: true, ...over });
 const retained = (label) => ({ kind: 'retained', label });
+// fixtures of the pure abstract-row derivation
+const SELECTION = { basisAdmission: '12', indexGeneration: '0', rulesEpoch: '6', coreCodeCommitment: '0xcore', lensId: '0xlens', subject: '0xsubj', selectedHead: '0xA2', selectedRevision: '2', selectedAdmission: '10', selectedPublication: '3', selectedAuthor: '0xA1', selectedProofKind: '2', pairId: '0xp1', itemA: '0xi1', itemB: '0xi2', mantissa: '2502000000', scale: '6', observedAt: '1800000000', note: '0xnote' };
+const PLACEMENT = { position: '0xpos', actor: '0xA1', proofKind: '2', revision: '1', admission: '7', publication: '2', basisAdmission: '12', pageStatus: '2', rawTotal: '1', scanned: '1', hydrations: '1', selectedSoFar: '1', mutated: false, ended: true };
+const goodCheck = () => ({ label: 'paid/list-a-first/paid-result', logCount: 1, fromLog: { commitment: '0xc', selection: { ...SELECTION }, placement: { ...PLACEMENT } }, fromReplay: { commitment: '0xc', selection: { ...SELECTION }, placement: { ...PLACEMENT } }, commitmentsAgree: true, replayOk: true, match: true });
+const REPLAY = { rpcId: 77, from: '0xc3', stage: 'paid-replay:paid/list-a-first', blockTag: 41, returnData: '0xret', error: null };
+function evidenceFixture(operation = 'PAID_LIST') {
+  return {
+    operation, lens: 'LENS_A_FIRST', lensArr: ['0xA1', '0xB2'], label: `paid/${operation}`,
+    row: { txIndex: 4, hash: '0xtx', block: 41, blockHash: '0xb41', status: 1, gas: '123' },
+    executed: { txIndex: 0, txCount: 1, txHashes: ['0xtx'], onlyTx: true, timestamp: 1001, parentHash: '0xseal', hash: '0xb41' },
+    seal: { block: 40, hash: '0xseal', timestamp: 1000 },
+    sealBasis: { admissionFrontier: 12, indexGeneration: '0', rulesEpoch: '6', coreCodeCommitment: '0xcore', realmId: '0xrealm' },
+    chainId: 31337, addrs: { ledger: '0xl', lensReader: '0xr', indexModule: '0xi', registry: '0xg', consumer: '0xc' }, consumerCodehash: '0xcc',
+    coordinates: { subject: '0xsubj', folder: '0xswaps', nameRole: '0xname', position: '0xpos' },
+    placementAtSeal: { author: '0xA1', proofKind: '2', publication: '2', admission: '7', revision: '1' },
+    types: { QUOTE_J: '0xq', PAIR: '0xp', ITEM: '0xi' },
+    headLabels: { '0xa2': ['QUOTE_A2', 'A2'] }, authorLabels: { '0xa1': ['AUTHOR_A', 'EOA (wallet 1)'] },
+    caller: { address: '0xc3', derivationPath: "m/44'/60'/0'/0/3" },
+  };
+}
+const DERIVED = ['presence', 'support', 'admission', 'selection'];
+function assertAllUnknown(row, reasonPattern) {
+  for (const k of DERIVED) assert.equal(row[k].outcome, 'UNKNOWN', `${k} UNKNOWN`);
+  for (const k of ['selectedFile', 'selectedHead', 'selectedRevision', 'selectedAuthorEvidenceCategory']) assert.equal(row[k], 'UNKNOWN', `${k} UNKNOWN`);
+  for (const k of ['selectedPhysical', 'selectedAuthor', 'quoteCheck', 'pairCheck']) assert.equal(row[k].outcome, 'UNKNOWN', `${k} UNKNOWN`);
+  assert.equal(row.itemChecks[0].outcome, 'UNKNOWN');
+  assert.equal(row.candidateCoverage.status, 'UNKNOWN');
+  assert.equal(row.rawEvidence.selfCheck.match, false);
+  assert.match(row.rawEvidence.selfCheck.reason, reasonPattern);
+  // separately retained observations survive, each naming its source
+  assert.equal(row.executionBasis.block, 41);
+  assert.equal(row.executionBasis.timestamp, 1001);
+  assert.equal(row.rawEvidence.replay.returnData, '0xret');
+  assert.match(row.placementProvenance.establishedBy, /seal raw replies|raw replies at the seal/); // list wording / point wording; both name the separate seal observation
+  assert.equal(row.placementProvenance.actorAddress, '0xA1');
+}
 function validAbstract(overrides = {}) {
   return {
     operation: 'PAID_LIST', lens: 'LENS_B_FIRST',
@@ -324,8 +360,8 @@ function validAbstract(overrides = {}) {
     selectedAuthor: { label: 'AUTHOR_B' }, selectedAuthorEvidenceCategory: 'CONTRACT_ORIGINATED_PUBLICATION',
     placementCoordinate: { lookedUpByThisRow: true }, placementProvenance: { sourceStep: 'A1', actor: 'AUTHOR_A', evidenceCategory: 'EOA_SIGNED_PUBLICATION_EFFECT' },
     quoteCheck: { mantissa: '2501000000' }, pairCheck: { pairId: '0xp' }, itemChecks: [{ id: '0xa' }, { id: '0xb' }],
-    candidateCoverage: { basis: '12' }, pageCoverage: { status: 'COMPLETE' },
-    rawEvidence: { transaction: { hash: '0xt' } }, paidExecution: { gasUsed: '1' },
+    candidateCoverage: { status: 'COMPLETE', basis: '12' }, pageCoverage: { status: 'COMPLETE' },
+    rawEvidence: { transaction: { hash: '0xt' }, selfCheck: { match: true } }, paidExecution: { gasUsed: '1' },
     ...overrides,
   };
 }
@@ -375,6 +411,77 @@ test('checkPaidRowOrdering catches a second transaction on the same revert, a re
   assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, retained('a')]), /retained a without that row open/);
   assert.throws(() => checkPaidRowOrdering([revertOk, txAt('a'), retained('a')]), /first event must be the seal/);
   assert.throws(() => checkPaidRowOrdering([SEAL]), /no paid row/);
+});
+
+test('checkPaidRowOrdering catches a wrong timestamp, a wrong next-block timestamp, a non-zero transaction index and an extra transaction in the block', () => {
+  const { checkPaidRowOrdering } = loadPaidHelpers();
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, txAt('a', { timestamp: 1002 }), retained('a')]), /executed at timestamp 1002, expected 1001/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, { ...revertOk, nextTimestamp: 1005 }, txAt('a'), retained('a')]), /next block timestamp set to 1005/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, txAt('a', { txIndex: 1 }), retained('a')]), /transactionIndex 1, not 0/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, txAt('a', { txCount: 2 }), retained('a')]), /not the only transaction in its block \(2 transactions\)/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, txAt('a', { onlyTx: false }), retained('a')]), /not the only transaction/);
+  assert.throws(() => checkPaidRowOrdering([{ kind: 'seal', block: 40, hash: '0xseal' }, revertOk, txAt('a'), retained('a')]), /carries no timestamp/);
+  const rows = checkPaidRowOrdering([SEAL, revertOk, txAt('a'), retained('a'), revertOk, txAt('b'), retained('b')]);
+  assert.deepEqual(Array.from(rows, (r) => [r.timestamp, r.txIndex, r.txCount]), [[1001, 0, 1], [1001, 0, 1]]);
+});
+
+test('deriveAbstractResult keeps the labels and outcomes only for a fully passing self-check', () => {
+  const { deriveAbstractResult } = loadPaidHelpers();
+  const row = deriveAbstractResult({ check: goodCheck(), replay: REPLAY, evidenceFor: evidenceFixture() });
+  assert.equal(row.inputEvidenceGrade, 'RPC_OBSERVED');
+  assert.deepEqual([row.selectedFile, row.selectedHead, row.selectedRevision], ['FILE_QUOTE', 'QUOTE_A2', 'A2']);
+  assert.equal(row.selectedAuthor.label, 'AUTHOR_A');
+  assert.equal(row.selectedAuthorEvidenceCategory, 'EOA_SIGNED_PUBLICATION');
+  for (const k of DERIVED) assert.notEqual(row[k].outcome, 'UNKNOWN', k);
+  assert.equal(row.candidateCoverage.status, 'COMPLETE');
+  assert.equal(row.pageCoverage.status, 'COMPLETE');
+  assert.equal(row.placementProvenance.evidenceCategory, 'EOA_SIGNED_PUBLICATION_EFFECT');
+  assert.match(row.placementProvenance.establishedBy, /passing self-check/);
+  assert.equal(row.quoteCheck.observedAt, '1800000000');
+  assert.equal(row.executionBasis.timestamp, 1001);
+  assert.equal(row.executionBasis.txIndex, 0);
+  assert.equal(row.rawEvidence.selfCheck.match, true);
+  assert.equal(row.paidExecution.returnData.decoded.commitment, '0xc');
+});
+
+test('deriveAbstractResult catches a replay that differs from the log: every derived field UNKNOWN, raw log and replay retained', () => {
+  const { deriveAbstractResult } = loadPaidHelpers();
+  const check = goodCheck();
+  check.fromReplay = { commitment: '0xd', selection: { ...SELECTION, mantissa: '1' }, placement: { ...PLACEMENT } };
+  check.commitmentsAgree = false;
+  check.replayOk = false;
+  check.match = false;
+  const row = deriveAbstractResult({ check, replay: REPLAY, evidenceFor: evidenceFixture() });
+  assertAllUnknown(row, /replay commitment differs from the log/);
+  assert.equal(row.pageCoverage.status, 'UNKNOWN');
+  assert.equal(row.rawEvidence.paidResultLog.commitment, '0xc');
+  assert.equal(row.rawEvidence.paidResultLog.selection.mantissa, '2502000000');
+  assert.equal(row.paidExecution.returnData.decoded.outcome, 'UNKNOWN');
+  assert.match(row.placementProvenance.establishedBy, /SEPARATE seal raw replies/);
+  // a POINT row with the same failure keeps its structural NOT_APPLICABLE page coverage and the seal-derived provenance
+  const point = deriveAbstractResult({ check, replay: REPLAY, evidenceFor: evidenceFixture('PAID_POINT') });
+  assertAllUnknown(point, /replay commitment differs/);
+  assert.equal(point.pageCoverage.status, 'NOT_APPLICABLE');
+  assert.equal(point.placementCoordinate.lookedUpByThisRow, false);
+});
+
+test('deriveAbstractResult catches a missing PaidResult log: UNKNOWN throughout, no log to cite, replay retained', () => {
+  const { deriveAbstractResult } = loadPaidHelpers();
+  const check = { ...goodCheck(), logCount: 0, fromLog: null, commitmentsAgree: false, match: false };
+  const row = deriveAbstractResult({ check, replay: REPLAY, evidenceFor: evidenceFixture() });
+  assertAllUnknown(row, /no single PaidResult log/);
+  assert.equal(row.rawEvidence.paidResultLog, null);
+  assert.equal(row.rawEvidence.selfCheck.logCount, 0);
+  assert.equal(row.rawEvidence.replay.rpcId, 77);
+});
+
+test('assertAnvilOnlyCells refuses the sealing cells without --anvil before any chain call and leaves the other cells alone', () => {
+  const { assertAnvilOnlyCells, ANVIL_ONLY_CELLS } = loadPaidHelpers();
+  assert.deepEqual([...ANVIL_ONLY_CELLS], ['joined/paid-slice', 'joined/a1-without-placement']);
+  assert.deepEqual([...assertAnvilOnlyCells(['failure-rows', 'joined/steps-1-6'], false)], []);
+  assert.deepEqual([...assertAnvilOnlyCells(['joined/paid-slice'], true)], ['joined/paid-slice']);
+  assert.throws(() => assertAnvilOnlyCells(['joined/paid-slice', 'failure-rows'], false), /owned --anvil chain/);
+  assert.throws(() => assertAnvilOnlyCells(['joined/a1-without-placement'], false), /joined\/a1-without-placement/);
 });
 
 test('assertUnrelatedCaller catches a caller that is the deployer, an author or a lab contract (case-insensitive) and pins wallet index 3', () => {

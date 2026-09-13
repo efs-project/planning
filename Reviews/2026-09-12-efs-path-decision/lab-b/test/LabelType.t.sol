@@ -4,7 +4,7 @@ pragma solidity 0.8.30;
 import {Keys} from "../src/Keys.sol";
 import {Ledger} from "../src/Ledger.sol";
 import {LabelAcceptor} from "../src/LabAcceptors.sol";
-import {JoinedConsumer} from "../src/JoinedConsumer.sol";
+import {JoinedConsumer, ILedgerReads, ILensReads} from "../src/JoinedConsumer.sol";
 import {LabBase} from "./LabBase.sol";
 
 /// DISPOSABLE LAB, NO PROTOCOL CLAIM. UNRUN (written under another worker's compiler lease).
@@ -27,7 +27,7 @@ contract LabelTypeTest is LabBase {
         LABEL = registry.register(LABEL_SHAPE, address(labelAcceptor), new bytes32[](0));
         // QUOTE_J is not registered in this probe; the consumer's quote Type is never read here,
         // so the shape commitment stands in for the (unregistered) id.
-        joined = new JoinedConsumer(ledger, lens, QUOTE_J_SHAPE, PAIR, ITEM, LABEL);
+        joined = new JoinedConsumer(ILedgerReads(address(ledger)), ILensReads(address(lens)), QUOTE_J_SHAPE, PAIR, ITEM, LABEL);
     }
 
     function ok(bytes memory s) internal view returns (bool) {

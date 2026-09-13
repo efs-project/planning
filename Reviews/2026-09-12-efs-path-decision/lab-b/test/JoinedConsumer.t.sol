@@ -5,7 +5,8 @@ import {Keys} from "../src/Keys.sol";
 import {Ledger} from "../src/Ledger.sol";
 import {LensReader} from "../src/LensReader.sol";
 import {QuoteAcceptor, LabelAcceptor} from "../src/LabAcceptors.sol";
-import {JoinedConsumer, StatelessConsumer} from "../src/JoinedConsumer.sol";
+import {JoinedConsumer, StatelessConsumer, ILedgerReads, ILensReads} from "../src/JoinedConsumer.sol";
+import {FaultyReads} from "./FaultyReads.sol";
 import {LabBase} from "./LabBase.sol";
 
 /// DISPOSABLE LAB, NO PROTOCOL CLAIM. UNRUN (written under another worker's compiler lease).
@@ -28,6 +29,8 @@ contract JoinedConsumerTest is LabBase {
     LabelAcceptor internal labelAcceptor;
     JoinedConsumer internal joined;
     StatelessConsumer internal stateless;
+    FaultyReads internal faulty; // forwarding reader with one armable fault (test/FaultyReads.sol)
+    JoinedConsumer internal faultyJoined; // the same consumer code reading through `faulty`
 
     struct Ids {
         bytes32 itemA;
@@ -49,8 +52,10 @@ contract JoinedConsumerTest is LabBase {
         pairRef[0] = PAIR;
         QUOTE_J = registry.register(QUOTE_J_SHAPE, address(quoteAcceptor), pairRef);
         LABEL = registry.register(LABEL_SHAPE, address(labelAcceptor), new bytes32[](0));
-        joined = new JoinedConsumer(ledger, lens, QUOTE_J, PAIR, ITEM, LABEL);
+        joined = new JoinedConsumer(ILedgerReads(address(ledger)), ILensReads(address(lens)), QUOTE_J, PAIR, ITEM, LABEL);
         stateless = new StatelessConsumer(lens);
+        faulty = new FaultyReads(ledger, lens);
+        faultyJoined = new JoinedConsumer(ILedgerReads(address(faulty)), ILensReads(address(faulty)), QUOTE_J, PAIR, ITEM, LABEL);
     }
 
     function quoteBody(bytes32 pairId, uint256 mantissa) internal pure returns (bytes memory) {
@@ -322,7 +327,7 @@ contract JoinedConsumerTest is LabBase {
         pure
         returns (JoinedConsumer.Expect memory e)
     {
-        e = JoinedConsumer.Expect(id.subj, head, author, proofKind, id.pairId, id.itemA, id.itemB, mantissa, SCALE, basis);
+        e = JoinedConsumer.Expect(id.subj, head, author, proofKind, id.pairId, id.itemA, id.itemB, mantissa, SCALE, OBSERVED_AT, keccak256(NOTE_BYTES), basis);
     }
 
     function placementFor() internal view returns (JoinedConsumer.PlacementExpect memory p) {
@@ -430,6 +435,13 @@ contract JoinedConsumerTest is LabBase {
         expectPointFail(ab, e, JoinedConsumer.ClosureMismatch.selector, "swapped Item order is refused (references are ordered)");
         expectListFail(ab, e, p, JoinedConsumer.ClosureMismatch.selector, "the list runs the same closure and refuses the same graph");
         expectPointFail(ab, expectFor(id, id.a2, eoaA,KIND_SIGNED, M_A1, BASIS_POST_B1), JoinedConsumer.ClosureMismatch.selector, "the retained older mantissa is not the selected one");
+        // wrong sealed observedAt / note commitment (compared on chain, not only returned)
+        e = expectFor(id, id.a2, eoaA,KIND_SIGNED, M_A2, BASIS_POST_B1);
+        e.observedAt = OBSERVED_AT + 1;
+        expectPointFail(ab, e, JoinedConsumer.SelectionMismatch.selector, "a wrong observedAt is refused");
+        e = expectFor(id, id.a2, eoaA,KIND_SIGNED, M_A2, BASIS_POST_B1);
+        e.noteCommitment = name("another note");
+        expectListFail(ab, e, p, JoinedConsumer.SelectionMismatch.selector, "a wrong note commitment is refused (the list runs the same field checks)");
         // a head that is not a joined quote at all (32-byte QUOTE): refused by shape before any field is exposed
         bytes32 other = alice.create(bytes32(uint256(9))); // admission 13
         bytes32 rq = alice.publish(QUOTE, q(3000)); // admission 14
@@ -483,6 +495,65 @@ contract JoinedConsumerTest is LabBase {
         ledger.setIndexModule(address(0));
         alice.publish(QUOTE, q(6)); // admission 17, not indexed
         expectListFail(ab, expectFor(id, id.a2, eoaA,KIND_SIGNED, M_A2, 17), p, JoinedConsumer.PlacementWindow.selector, "UNKNOWN coverage is refused, never reported complete");
+    }
+
+    // ------------------------------------------------------------------ corrupted / unavailable ACTUAL replies (test/FaultyReads.sol)
+    // The `test_paid_slice_refuses_*` negatives above feed WRONG EXPECTATIONS to a consumer reading the real Ledger and
+    // LensReader (one branch). The tests below keep the sealed expectations and corrupt the ACTUAL public-ABI replies
+    // through `FaultyReads`, a forwarding reader deployed in place of the Ledger/LensReader (the other branch): the
+    // consumer must refuse every one of them and never expose a value.
+    function expectFaultyPointFail(Ids memory id, bytes4 expected, string memory label) internal {
+        try faultyJoined.paidPoint(lensOf(eoaA, address(bob)), expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1)) {
+            require(false, label);
+        } catch (bytes memory err) {
+            expectSel(err, expected, label);
+        }
+    }
+
+    function test_faulty_actual_reply_missing_pair_is_refused() public {
+        Ids memory id = runSteps1to4();
+        (, JoinedConsumer.Selection memory s) = faultyJoined.paidPoint(lensOf(eoaA, address(bob)), expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1));
+        require(s.selectedHead == id.a2 && s.pairId == id.pairId, "control: the forwarding reader is faithful with no fault armed");
+        faulty.fault(faulty.MISSING_PAIR(), id.pairId);
+        expectFaultyPointFail(id, JoinedConsumer.PairShape.selector, "an absent Pair record (zero Type, empty body) is refused, not decoded");
+    }
+
+    function test_faulty_actual_reply_wrong_type_item_is_refused() public {
+        Ids memory id = runSteps1to4();
+        faulty.fault(faulty.WRONG_TYPE_ITEM(), id.itemB);
+        expectFaultyPointFail(id, JoinedConsumer.ItemShape.selector, "an Item record of a foreign Type is refused");
+    }
+
+    function test_faulty_actual_reply_admission_not_a_bind_is_refused() public {
+        Ids memory id = runSteps1to4();
+        faulty.fault(faulty.ADMISSION_NOT_BIND(), bytes32(0));
+        expectFaultyPointFail(id, JoinedConsumer.AdmissionShape.selector, "a head admission that is not a live BIND of the target is refused");
+    }
+
+    function test_faulty_actual_reply_admission_outside_its_publication_range_is_refused() public {
+        Ids memory id = runSteps1to4();
+        faulty.fault(faulty.ADMISSION_OUT_OF_RANGE(), bytes32(0));
+        expectFaultyPointFail(id, JoinedConsumer.EvidenceBounds.selector, "an admission outside its publication's admission range is refused");
+    }
+
+    function test_faulty_actual_reply_short_evidence_fails_closed() public {
+        Ids memory id = runSteps1to4();
+        faulty.fault(faulty.SHORT_EVIDENCE(), bytes32(0));
+        try faultyJoined.paidPoint(lensOf(eoaA, address(bob)), expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1)) {
+            require(false, "a one-word evidence reply must not decode into an author and proof kind");
+        } catch (bytes memory err) {
+            require(err.length == 0, "a short evidence reply fails the consumer's ABI decoding: empty revert, no value exposed");
+        }
+    }
+
+    function test_faulty_actual_reply_partial_page_claiming_ended_is_refused() public {
+        Ids memory id = runSteps1to4();
+        faulty.fault(faulty.PARTIAL_CLAIMS_ENDED(), bytes32(0));
+        try faultyJoined.paidList(lensOf(eoaA, address(bob)), expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1), placementFor()) {
+            require(false, "x");
+        } catch (bytes memory err) {
+            expectSel(err, JoinedConsumer.PlacementWindow.selector, "a PARTIAL page is refused even when its cursor claims every list was exhausted");
+        }
     }
 
     function test_stateless_twin_commits_exactly_what_the_storing_consumer_stores() public {
