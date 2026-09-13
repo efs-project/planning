@@ -1,0 +1,129 @@
+{
+  "kind": "EFS_RICH_CONSUMER_OBSERVATION_PROFILE",
+  "version": 1,
+  "standing": "predeclared disposable richer-observation interpretation; not Core, SDK, ABI, deployment, Type, proof, or candidate adoption",
+  "frozenBeforeNewPacket": true,
+  "source": {
+    "implementationPlan": {
+      "commit": "1efcfec",
+      "path": "Reviews/2026-09-12-efs-path-decision/oracle-implementation-plan.md",
+      "section": "Predeclared richer-observation supplement — September 13, 05:25 UTC",
+      "gitBlob": "b318d8f781855128e2e0b642a9acadb9ac404cd3"
+    },
+    "measurementSourceAssociation": {
+      "commit": "e77f36dd7a0352a09a5198207fd1c3a56b2e0a63",
+      "standing": "coordinator-supplied reviewed pre-run association; source not inspected by this oracle"
+    },
+    "coreSourceAssociation": "dcc7b946d2ac8dfcf22103069127a9d1809df974",
+    "inheritedExpectations": {
+      "path": "Reviews/2026-09-12-efs-path-decision/lab-oracle/rpc-observed-expectations.json",
+      "gitBlob": "1fbe87f6b2bf1d095bb0979997573439a6c2bd88"
+    },
+    "publicAbiProfile": {
+      "path": "Reviews/2026-09-12-efs-path-decision/lab-oracle/rpc-observed-profile-dcc7b94.json",
+      "gitBlob": "6345c2246e287e9676f714491ce8aebf673f754a"
+    },
+    "oldChecker": {
+      "path": "Reviews/2026-09-12-efs-path-decision/lab-oracle/rpc-observed.mjs",
+      "gitBlob": "a25dcb7077c152137da476b748f052f784ad38a8"
+    },
+    "oldRetainedReport": {
+      "path": "Reviews/2026-09-12-efs-path-decision/lab-oracle/measure2-a16d7d4.rpc-observed.report.json",
+      "gitBlob": "16cc9718c91802f811a55dbca481c2014ab16ff4"
+    },
+    "consumerArtifact": {
+      "artifact": "LabHarness.sol/Consumer.json",
+      "sha256": "8ca34dfebaa4c6b8c7c71d724f04af59589d3f38326eddfb1f4dcb4d8df25449",
+      "gitBlob": "02ebe49ee2641671de2290724e09cd7f857fafdf"
+    }
+  },
+  "scope": {
+    "consumer": "storing Consumer only",
+    "cells": ["native-one/quote", "signed-one/quote"],
+    "stages": ["paid-quote-read", "listing"],
+    "basis": "actual paid transaction receipt block-end",
+    "excluded": ["JoinedConsumer", "stateless Consumer", "label cells"]
+  },
+  "resultStatuses": ["OBSERVED_MATCH", "OBSERVED_MISMATCH", "UNKNOWN", "UNSUPPORTED"],
+  "pinContract": {
+    "standing": "INDEPENDENT_PREDECLARED_RUN_PINS",
+    "requiredPerCell": [
+      "consumerTarget",
+      "paid-quote-read.coordinates",
+      "paid-quote-read.source",
+      "listing.coordinates",
+      "listing.source"
+    ],
+    "packetFieldsNeverSupplyPins": true,
+    "missingPinResult": "UNKNOWN"
+  },
+  "recordIdentity": {
+    "standing": "old retained fixture bytes used only for experiment identity derivation; not a body-codec or Type adoption",
+    "recordDomainText": "efs2/record/1",
+    "typeDomainText": "lab/type/quote/1",
+    "quote3100RawBody": "0x0000000000000000000000000000000000000000000000000000000000000c1c",
+    "comparisonOnly": {
+      "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+      "bodyHash": "0x5a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb3",
+      "recordId": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+    }
+  },
+  "getters": [
+    { "name": "lastAdmission", "selector": "0x519ef1f8", "returnType": "uint64" },
+    { "name": "lastCount", "selector": "0x6b16ad67", "returnType": "uint64" },
+    { "name": "lastRevision", "selector": "0xe08871ca", "returnType": "uint32" },
+    { "name": "lastScanned", "selector": "0x336d5392", "returnType": "uint64" },
+    { "name": "lastStatus", "selector": "0xd6d86712", "returnType": "uint8" },
+    { "name": "lastTarget", "selector": "0x36abbd1d", "returnType": "bytes32" },
+    { "name": "lastValue", "selector": "0x43183834", "returnType": "uint256" }
+  ],
+  "stages": {
+    "paid-quote-read": {
+      "transaction": { "name": "readQuote", "selector": "0x6a59728b" },
+      "requiredGetterMultiplicity": "EXACTLY_ONE_EACH",
+      "semanticComparisons": {
+        "lastTarget": "DERIVE_QUOTE_3100_RECORD",
+        "lastRevision": "2",
+        "lastValue": "3100"
+      },
+      "unknownMeanings": ["lastAdmission", "lastCount", "lastScanned", "lastStatus"]
+    },
+    "listing": {
+      "transaction": { "name": "readList", "selector": "0xd67f2355" },
+      "requiredGetterMultiplicity": "EXACTLY_ONE_EACH",
+      "semanticComparisons": {
+        "lastCount": "1"
+      },
+      "unknownMeanings": ["lastAdmission", "lastRevision", "lastScanned", "lastStatus", "lastTarget", "lastValue"]
+    }
+  },
+  "rawRequirements": [
+    "validate every raw observation before stage selection",
+    "exact Consumer target",
+    "canonical no-argument getter calldata",
+    "canonical ABI return bytes",
+    "unique JSON-RPC id and exact request/reply correlation",
+    "eth_call method",
+    "flat tuple equals request and response bytes",
+    "exact receipt block parameter",
+    "separately retained receipt-matching block hash",
+    "independently pinned non-empty source label",
+    "duplicates, conflicts and substitutions remain visible mismatches"
+  ],
+  "outcomeSeparation": {
+    "rawCollectionConsistency": "presence, multiplicity, target, calldata, return ABI, transport, source and basis only",
+    "inheritedSemanticComparisons": "only the four predeclared field/stage comparisons",
+    "otherSemanticMeanings": "UNKNOWN",
+    "candidatePass": "NOT_EVALUATED"
+  },
+  "doesNotProve": [
+    "RPC provenance or honesty",
+    "block inclusion or canonicality",
+    "transaction-index-local state",
+    "contract runtime or storage proof",
+    "historical source authority",
+    "immutable Type or body meaning",
+    "semantic COMMITTED",
+    "candidate PASS"
+  ]
+}
