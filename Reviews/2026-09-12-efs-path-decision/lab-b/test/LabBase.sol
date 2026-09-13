@@ -7,6 +7,7 @@ import {IndexModule} from "../src/IndexModule.sol";
 import {LensReader} from "../src/LensReader.sol";
 import {TypeRegistry} from "../src/TypeRegistry.sol";
 import {MockAcceptor, FailingIndexModule, Actor, Consumer, Reconstructor} from "../src/LabHarness.sol";
+import {MinBodyAcceptor} from "../src/LabAcceptors.sol";
 
 /// Minimal cheat-code surface, declared by hand (no forge-std). Same pattern as
 /// Reviews/2026-09-05-c0-core/test/PointReads.t.sol.
@@ -21,10 +22,17 @@ abstract contract LabBase {
     Vm internal constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     bytes32 internal constant REALM = keccak256("lab/realm/1");
-    bytes32 internal constant QUOTE = keccak256("lab/type/quote/1"); // 32-byte uint256 body, acceptor-gated
-    bytes32 internal constant BINARY = keccak256("lab/type/binary/1"); // raw bytes, no acceptor
-    bytes32 internal constant ITEM = keccak256("lab/type/item/1");
-    bytes32 internal constant PAIR = keccak256("lab/type/pair/1"); // two leading checked refs to ITEM
+    // Shape commitments (the lab has no schema language: the Type's name hash stands in). Since the
+    // authority repair (REPAIR.md R2) a Type id is DERIVED from (shape, refTypes, declared rule
+    // codehash) by the registry, so the ids below are assigned in setUp, not constants.
+    bytes32 internal constant QUOTE_SHAPE = keccak256("lab/type/quote/1"); // 32-byte uint256 body, acceptor-gated
+    bytes32 internal constant BINARY_SHAPE = keccak256("lab/type/binary/1"); // raw bytes, no acceptor
+    bytes32 internal constant ITEM_SHAPE = keccak256("lab/type/item/1");
+    bytes32 internal constant PAIR_SHAPE = keccak256("lab/type/pair/1"); // two leading checked refs to ITEM
+    bytes32 internal QUOTE;
+    bytes32 internal BINARY;
+    bytes32 internal ITEM;
+    bytes32 internal PAIR;
     bytes32 internal constant HEAD = keccak256("efs2/purpose/head/1"); // (author, HEAD, subjectId) -> record
     bytes32 internal constant FOLDER = keccak256("efs2/purpose/folder/1"); // (author, FOLDER, folderId, nameHash) -> subject
     bytes32 internal constant TAG = keccak256("efs2/purpose/tag/1"); // (author, TAG, subject|record, concept) -> stance
@@ -36,7 +44,9 @@ abstract contract LabBase {
     uint256 internal constant PK_B = 0xB0B;
 
     TypeRegistry internal registry;
-    MockAcceptor internal acceptor;
+    MockAcceptor internal acceptor; // MUTABLE test double: installed only as the ADDITIONAL policy of QUOTE and PAIR (activate), never a mandatory rule
+    MinBodyAcceptor internal quoteRule; // QUOTE's mandatory rule: >= 32 bytes (immutable threshold => part of the id)
+    MinBodyAcceptor internal pairRule; // PAIR's mandatory rule: >= 96 bytes (two checked refs + one payload word)
     Ledger internal ledger;
     IndexModule internal index;
     LensReader internal lens;
@@ -61,14 +71,20 @@ abstract contract LabBase {
         recon = new Reconstructor();
         eoaA = vm.addr(PK_A);
         eoaB = vm.addr(PK_B);
+        quoteRule = new MinBodyAcceptor(32);
+        pairRule = new MinBodyAcceptor(96);
         bytes32[] memory none;
-        registry.register(QUOTE, address(acceptor), none);
-        registry.register(BINARY, address(0), none);
-        registry.register(ITEM, address(0), none);
+        QUOTE = registry.register(QUOTE_SHAPE, address(quoteRule), none); // mandatory rule: stateless, immutable-configured
+        BINARY = registry.register(BINARY_SHAPE, address(0), none);
+        ITEM = registry.register(ITEM_SHAPE, address(0), none);
         bytes32[] memory twoItems = new bytes32[](2);
         twoItems[0] = ITEM;
         twoItems[1] = ITEM;
-        registry.register(PAIR, address(acceptor), twoItems);
+        PAIR = registry.register(PAIR_SHAPE, address(pairRule), twoItems);
+        require(QUOTE == Keys.typeId(QUOTE_SHAPE, none, address(quoteRule).codehash) && PAIR == Keys.typeId(PAIR_SHAPE, twoItems, address(pairRule).codehash), "exact ids reconstructible");
+        require(address(quoteRule).codehash != address(pairRule).codehash, "an immutable threshold is part of the code identity");
+        // the mutable mock is an ADDITIONAL Realm policy (row 2) on QUOTE and PAIR; its refusals are E_POLICY_REJECTED
+        require(registry.activate(QUOTE, address(acceptor)) == 2 && registry.activate(PAIR, address(acceptor)) == 2, "mock installed as policy row 2");
     }
 
     // ---- fixtures

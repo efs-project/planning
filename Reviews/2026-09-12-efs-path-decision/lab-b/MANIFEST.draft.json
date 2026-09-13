@@ -8,7 +8,7 @@
     "profile": "road-b-lab/1 (compact ingestion kernel + separate IndexModule + LensReader)",
     "sourcePath": "Reviews/2026-09-12-efs-path-decision/lab-b",
     "sourceCommit": {
-      "unknown": "worktree fable/2026-09-12-road-b-lab at 2824297 plus uncommitted second-pass files (script/measure.mjs, src/LabAcceptors.sol, src/JoinedConsumer.sol, test/JoinedConsumer.t.sol, test/LabelType.t.sol, LABELS.md, this manifest, README.md, TODO.md); Core pinned at dcc7b94 (Ledger, IndexModule, LensReader, TypeRegistry, Keys, Interfaces untouched)",
+      "unknown": "DRAFT: re-pinned at publish to the exact lab commit the run used (the run records it as report.build.sourceCommit together with sha256 of every src/test/script file); the F5 Core (mandatory rule + additional policy) and the runner-review fixes are on branch fable/2026-09-12-road-b-lab after 3a30fe2",
       "consequence": "the script records sha256 of every src/test/script file at run time (report.build.sourceHashes); the dirty diff hash is recorded when the coordinator publishes"
     },
     "fixtureCommits": {
@@ -45,27 +45,17 @@
       "consequence": "no bytecode identity"
     },
     "runtimeBytes": {
-      "Ledger": {
-        "unknown": "not built; ~870 source lines with via_ir may approach EIP-170",
-        "consequence": "deployment may fail; see TODO.md A.10"
-      },
-      "IndexModule": {
-        "unknown": "not built"
-      },
-      "LensReader": {
-        "unknown": "not built"
-      },
-      "TypeRegistry": {
-        "unknown": "not built"
-      },
-      "LabHarness/*": {
-        "unknown": "not built"
-      },
-      "LabAcceptors/QuoteAcceptor, LabelAcceptor": {
-        "unknown": "not built"
-      },
-      "JoinedConsumer/JoinedConsumer, StatelessConsumer": {
-        "unknown": "not built; JoinedConsumer decodes Page/Entry[] and 13-return evidence tuples - see TODO.md G"
+      "standing": "measured by the coordinator's build of pin 2859147 (2026-09-13 10:10 slot, solc 0.8.30 via-IR optimizer 200); all under EIP-170. The runner records report.deployment[*].runtimeBytes / runtimeCodehash at run time from eth_getCode; those, not this table, are the run's evidence",
+      "Ledger": 17280,
+      "TypeRegistry": 3270,
+      "IndexModule": 4127,
+      "LensReader": 9445,
+      "JoinedConsumer": 13852,
+      "MinBodyAcceptor": 354,
+      "FaultyReads (test-only)": 5587,
+      "LabHarness/*, LabAcceptors/QuoteAcceptor, LabelAcceptor, StatelessConsumer": {
+        "unknown": "not reported by the coordinator for this pin",
+        "consequence": "taken from report.deployment at run time"
       }
     },
     "linkedLibraries": "none (Keys is internal-only)",
@@ -86,7 +76,8 @@
         "ctor": [],
         "address": {
           "unknown": "not deployed"
-        }
+        },
+        "role": "MUTABLE test double (mode / minBody change its behaviour with an unchanged codehash): NEVER a mandatory rule since F5; installed as the ADDITIONAL policy row 2 of QUOTE and PAIR at setup through TypeRegistry.activate; its refusals are E_POLICY_REJECTED (failure rows), set(0,0) restores accept-all"
       },
       "Ledger": {
         "ctor": [
@@ -176,30 +167,62 @@
           "unknown": "not deployed"
         },
         "role": "stateless twin of Consumer for the 32-byte/41-byte cells: commitQuote / commitHead / commitList / commitHistory (distinct selectors from Consumer)"
+      },
+      "StrictQuoteAcceptor": {
+        "ctor": [],
+        "address": {
+          "unknown": "not deployed"
+        },
+        "source": "test/Falsify.t.sol (artifact out/Falsify.t.sol/StrictQuoteAcceptor.json)",
+        "role": "fixture rule v2 (32-byte uint256 quote, value <= 2_500_000_000; pure): in cell policy/activate it is ADDED as QUOTE policy row 3 (row 2 is the accept-all mock) and it is the MANDATORY rule of the in-cell strict Type; deployed at setup so its code identity is retained like the others"
+      },
+      "MinBodyAcceptor(32) = quoteRule": {
+        "ctor": [
+          "32"
+        ],
+        "address": {
+          "unknown": "not deployed"
+        },
+        "source": "src/LabAcceptors.sol",
+        "role": "QUOTE's MANDATORY rule (F5): accepts a body of at least 32 bytes; the threshold is a constructor immutable embedded in the runtime code, so it is part of the codehash the Type id commits to. Stateless."
+      },
+      "MinBodyAcceptor(96) = pairRule": {
+        "ctor": [
+          "96"
+        ],
+        "address": {
+          "unknown": "not deployed"
+        },
+        "source": "src/LabAcceptors.sol",
+        "role": "PAIR's MANDATORY rule (F5): at least 96 bytes (two checked refs + one payload word). Stateless; a different threshold is a different codehash and therefore a different Type id."
       }
     },
-    "authorityGraph": "Ledger.admin = deployer (setIndexModule only); IndexModule.admin = deployer (declareOptional, bumpGeneration); TypeRegistry.admin = deployer (register, setBindingRefType). No other privileged surface; no upgrade path.",
+    "authorityGraph": "Ledger.admin = deployer (setIndexModule only); IndexModule.admin = deployer (declareOptional, bumpGeneration); TypeRegistry.admin = deployer (register — refuses an existing derived id; activate — appends a policy row; setBindingRefType). No other privileged surface; no upgrade path.",
     "setupReceipts": [
       "setIndexModule(index)",
-      "register QUOTE (MockAcceptor, no refs)",
-      "register BINARY (no acceptor)",
-      "register ITEM (no acceptor)",
-      "register PAIR (MockAcceptor, refs [ITEM, ITEM])",
-      "register QUOTE_J (QuoteAcceptor, refs [PAIR])",
-      "register LABEL (LabelAcceptor, no refs)"
+      "register QUOTE (mandatory MinBodyAcceptor(32); id derived by the registry; policy row 1 = none)",
+      "register BINARY (no acceptor; id derived)",
+      "register ITEM (no acceptor; id derived)",
+      "register PAIR (mandatory MinBodyAcceptor(96); refs [ITEM, ITEM]; id derived)",
+      "register QUOTE_J (mandatory QuoteAcceptor: 160-byte shape, scale 6, bounds; refs [PAIR]; id derived)",
+      "register LABEL (mandatory LabelAcceptor: exact UTF-8, 1..255 bytes; no refs; id derived)",
+      "activate(QUOTE, MockAcceptor) -> ADDITIONAL policy row 2 (typeInfo raw reply retained)",
+      "activate(PAIR, MockAcceptor) -> ADDITIONAL policy row 2 (typeInfo raw reply retained)",
+      "deploy JoinedConsumer(ledger, lens, QUOTE_J, PAIR, ITEM, LABEL) with the derived ids (after registration)"
     ],
     "setupGas": {
       "unknown": "not run",
       "consequence": "setup amortization cannot be stated"
     },
     "registryEpochAfterSetup": {
-      "expected": "6 registrations => epoch 6 (the retained vectors/profile-b.json run had epoch 5); acceptance profiles therefore differ from the retained vector",
+      "expected": "6 registrations + 2 activations => epoch 8 (the retained vectors/profile-b.json run had epoch 5; the earlier repair pass expected 6); acceptance profiles therefore differ from the retained vector",
       "status": {
         "unknown": "not run",
         "consequence": "no receipt observed"
       }
     },
-    "setupEvidence": "every setup transaction carries the literal eth_sendRawTransaction / eth_getTransactionReceipt / eth_getBlockByHash / eth_getTransactionByHash envelopes (report.setupTransactions); registry epoch and principals are retained eth_call replies (report.setupRaw)"
+    "setupEvidence": "every setup transaction carries the literal eth_sendRawTransaction / eth_getTransactionReceipt / eth_getBlockByHash / eth_getTransactionByHash envelopes (report.setupTransactions); registry epoch and principals are retained eth_call replies (report.setupRaw)",
+    "registrationNote": "authority repair 2026-09-13 (REPAIR.md R2): register(shape, acceptor, refs) RETURNS a derived id (Keys.typeId); the symbolic names below are shape commitments, not ids. script/measure.mjs (adapted after commit aaecfed) takes every id from the TypeRegistered receipt log and asserts it equal to the typeIdOf raw reply (setupRaw stage type-resolution) and to a local Keys.typeId derivation before the next registration references it; JoinedConsumer is deployed AFTER registration with the derived ids; report.types retains the evidence. In --addresses mode the ids are resolved from the chain (typeIdOf + eth_getCode)."
   },
   "fixtures": {
     "payloadControls": {
@@ -231,16 +254,20 @@
     },
     "framing": "this arm stores the raw payload bytes as the record body (no inner ABI framing): quote3000 is one 32-byte body word; file41a is two body words (tail masked). Record id = keccak256(abi.encode(keccak256('efs2/record/1'), typeId, keccak256(body))).",
     "typeClosure": {
-      "QUOTE": "keccak256(utf8 'lab/type/quote/1'); acceptor MockAcceptor (mode 0); 0 refs",
+      "QUOTE": "shape keccak256(utf8 'lab/type/quote/1'); MANDATORY rule MinBodyAcceptor(32) (immutable threshold; its runtime codehash is the ruleId the id commits to); 0 refs; ADDITIONAL policy row 2 = MockAcceptor (mode 0) installed at setup",
       "BINARY": "keccak256(utf8 'lab/type/binary/1'); no acceptor; 0 refs",
       "ITEM": "keccak256(utf8 'lab/type/item/1'); no acceptor",
-      "PAIR": "keccak256(utf8 'lab/type/pair/1'); acceptor; refs [ITEM, ITEM] = first two body words",
+      "PAIR": "shape keccak256(utf8 'lab/type/pair/1'); MANDATORY rule MinBodyAcceptor(96); refs [ITEM, ITEM] = first two body words; ADDITIONAL policy row 2 = MockAcceptor (mode 0) installed at setup",
       "QUOTE_J": "keccak256(utf8 'lab/type/quote-joined/1'); acceptor QuoteAcceptor; refs [PAIR]; body = abi.encode(bytes32 pairId, uint256 mantissa, uint8 scale, uint64 observedAt, bytes32 noteCommitment) = 160 bytes",
       "values": {
         "unknown": "keccak values not computed without a build/node run",
-        "consequence": "ids are symbolic until the script prints them"
+        "consequence": "ids are symbolic until the script prints them; at run time report.types[key] carries the derived id with three-way evidence (TypeRegistered log, typeIdOf raw reply, local derivation)"
       },
-      "LABEL": "keccak256(utf8 'lab/type/label/1'); acceptor LabelAcceptor; 0 refs; body = exact UTF-8 bytes 1..255; record id = keccak256(abi.encode(DOM_RECORD, LABEL, keccak256(bytes))) - derivable from a FOLDER position's role"
+      "LABEL": "keccak256(utf8 'lab/type/label/1'); acceptor LabelAcceptor; 0 refs; body = exact UTF-8 bytes 1..255; record id = keccak256(abi.encode(DOM_RECORD, LABEL, keccak256(bytes))) - derivable from a FOLDER position's role",
+      "idDerivation": "typeId = keccak256(abi.encode(keccak256('efs2/type/1'), shape, keccak256(abi.encode(refTypes)), ruleId)); shape = the keccak256(utf8 name) listed per Type; ruleId = the MANDATORY (registration-time) acceptor's runtime codehash (0 for no acceptor); the additional policy acceptor is NOT part of the id; refTypes are the derived ids of the listed reference Types (ITEM before PAIR before QUOTE_J). Registration of an existing id reverts E_TYPE_EXISTS; a later policy activation (TypeRegistry.activate) changes the enforcing acceptor without changing the id.",
+      "vectorNote": "vectors/profile-b.json remains the dcc7b94 vector: its Type ids are name hashes under the pinned profile and its actionsEncoded / acceptanceProfile / digest do NOT apply to the repaired source (derived ids). A new declared vector is owed after a build; do not retrofit the old one.",
+      "mandatoryVsPolicy": "F5 (REPAIR.md): the registration-time acceptor is the Type's MANDATORY rule — it runs on every publish/reuse (codehash re-verified: E_ACCEPTOR_CODE) and its refusal E_REJECTED is final; TypeRegistry.activate installs an ADDITIONAL policy acceptor that must also accept (E_POLICY_REJECTED); activate(address(0)) = no additional policy, never no validation. Mandatory fixture rules are stateless or immutable-configured; the mutable MockAcceptor is policy-only. A codehash pins code, not mutable dependencies; stateful developer rules remain allowed in production when their dependency/basis semantics are explicit (no purity requirement is claimed).",
+      "payloadControlsVsMantissas": "quote3000 / quote3100 are the 32-byte PAYLOAD CONTROLS (uint256 3000 / 3100), not mantissas. The joined fixture mantissas are 2_500_000_000 (QUOTE_A1) / 2_502_000_000 (QUOTE_A2) / 2_501_000_000 (QUOTE_B1) inside 160-byte QUOTE_J bodies. StrictQuoteAcceptor's cap (2_500_000_000) applies to the 32-byte uint256 value of a QUOTE body: both payload controls are below it; the explicit above-cap body of cell policy/activate is uint256 3_000_000_000 and is NOT a payload control."
     },
     "semanticMap": {
       "ITEM_ETH / ITEM_USDC": "ITEM bodies abi.encode(uint256 1) / abi.encode(uint256 2), admitted with PAIR_ETH_USDC in ONE native batch by actorA (operator) in step 1",
@@ -377,6 +404,34 @@
         "status": {
           "unknown": "later gate: requires same-guarantee arms that each remove one capability; this lab has one arm and does not compute an interaction term",
           "consequence": "no representation-vs-feature attribution can be claimed from this run"
+        }
+      },
+      {
+        "cell": "policy/activate",
+        "fixture": "quote (payload controls quote3000 / quote3100, both below the cap) + one explicit above-cap body uint256 3_000_000_000 (not a control)",
+        "logical": "ADD fixture rule v2 (StrictQuoteAcceptor, cap 2_500_000_000) as QUOTE policy row 3 after an admission under row 2 (accept-all mock); then an in-cell strict Type with StrictQuoteAcceptor as its MANDATORY rule",
+        "physical": [
+          "signedA: executeSigned([PUBLISH QUOTE quote3000]) under mandatory MinBodyAcceptor(32) + policy row 2 (epoch N) -> admitted",
+          "sign [PUBLISH QUOTE quote3100] at epoch N and HOLD it (sign-inputs raw replies retained)",
+          "TypeRegistry.activate(QUOTE, StrictQuoteAcceptor) -> policy row 3 (raw at stage policy: typeInfo, descriptor, epoch, activation(1..3); asserted: mandatory rule/ruleId untouched, complete immutable descriptor deep-equal, typeInfo.policyCodehash == activation(3).codehash == deployed runtime codehash, epoch +1)",
+          "failure row: send the held signature -> E_INTENT (static selector + status-0 receipt + unchanged probe)",
+          "failure row: Actor.publish(QUOTE, uint256 3_000_000_000) -> E_POLICY_REJECTED (the mandatory rule accepts, the ADDED policy refuses)",
+          "signedA: re-sign and executeSigned([PUBLISH QUOTE quote3100]) under epoch N+1 -> admitted under row 3",
+          "raw (stage basis): acceptanceBasis(old admission) joined to activation row 2 and acceptanceBasis(new admission) joined to activation row 3 / active typeInfo, by Type, mandatory rule, policy acceptor, codehash and epoch",
+          "in-cell strict Type: register(SHAPE_STRICT, StrictQuoteAcceptor, []) resolved three ways (log, typeIdOf, local derivation)",
+          "failure row: publish(STRICT, uint256 3_000_000_000) -> E_REJECTED (mandatory rule)",
+          "activate(STRICT, address(0)) -> row 2; failure row: same body -> E_REJECTED (activate(0) never means no validation)",
+          "activate(STRICT, MockAcceptor accept-all) -> row 3; failure row: same body -> E_REJECTED (a policy cannot remove the mandatory rule)",
+          "publish(STRICT, quote3000) -> admitted; raw: acceptanceBasis -> mandatory StrictQuoteAcceptor + policy row 3 (mock), joined by codehash and epoch"
+        ],
+        "payer": "account 0 (registry admin)",
+        "expected": "registry epoch +1 per activation; typeInfo(QUOTE) reports row 3 with the mandatory rule untouched; complete immutable descriptor unchanged; the row-2-era admission keeps basis row 2; the held epoch-N signature is refused; the above-cap body is refused by the added policy under QUOTE and by the mandatory rule under STRICT before, after activate(0) and under the permissive mock; the compliant body is admitted with both bases recorded",
+        "gas": {
+          "unknown": "not run; ESTIMATED: activate = 2 fresh slots + 2 rewrites + event; each admission with an active policy pays one extra bounded STATICCALL (REPAIR.md cost table)"
+        },
+        "status": {
+          "unknown": "scripted as cell policy/activate; UNRUN",
+          "consequence": "no receipt for the activation row yet"
         }
       }
     ],
@@ -669,10 +724,20 @@
         "gate": "No row is a matched substitute for the fuller Files control (hash-placement diagnostics) until labels and the joined journey are in one matched guarantee profile.",
         "unknown": "labels are a client convention here; folder/tag display semantics and mandatory names are open",
         "consequence": "no Files-create parity claim"
+      },
+      {
+        "gate": "Native-source (contract-author) import is UNSUPPORTED after the authority repair: importPublication reverts E_SOURCE_UNSUPPORTED for src.v == 0. A verifiable source witness (chain id + Realm deployment + account + finalized-state proof) is required to lift it; none is designed here.",
+        "unknown": "no witness format exists; contract-author portability cannot be priced",
+        "consequence": "sdk-fixture step 9 for AUTHOR_B reports UNSUPPORTED, not success; this is a limit, not a waiver"
+      },
+      {
+        "gate": "vectors/profile-b.json remains the dcc7b94 vector (name-hash Type ids). The repaired source derives ids, so the vector's action commitment, profile and digest do not describe this run; report.types is the run-time evidence.",
+        "unknown": "no new declared vector exists until a build",
+        "consequence": "the independent checker must interpret the old vector only against dcc7b94 packets; a new vector is owed after a build"
       }
     ],
     "failureRows": {
-      "contract": "each failure row records the expected custom error name and selector (from the named contract's ABI), the selector observed by a retained static eth_call with the same calldata (response.error.data), the mined reverting transaction (status 0, retained envelopes) and a pre/post state probe that must be equal (stateUnchanged); the receipt establishes reversion, not the selector",
+      "contract": "each failure row records the expected custom error name and selector (from the named contract's ABI), the selector observed by a retained static eth_call with the same calldata (response.error.data), the mined reverting transaction (status 0, retained envelopes) and a pre/post state probe that must be equal (stateUnchanged); the receipt establishes reversion, not the selector Since the runner review: the static eth_call is simulated FROM the actual sender (retained as from) and, where expectedArgs is set, the decoded revert arguments are asserted, not only the selector.",
       "rows": [
         {
           "row": "checked ref: wrong Type",
@@ -690,8 +755,8 @@
         },
         {
           "row": "failed acceptance",
-          "setup": "MockAcceptor.set(1, 0) before, set(0, 0) after",
-          "expectedError": "E_REJECTED"
+          "setup": "MockAcceptor.set(1, 0) before, set(0, 0) after — the mock is QUOTE's ADDITIONAL policy (row 2) since F5",
+          "expectedError": "E_POLICY_REJECTED"
         },
         {
           "row": "failed mandatory index",
@@ -712,6 +777,36 @@
           "row": "label hash-only retrieval",
           "setup": "JoinedConsumer.readLabel(position) after a hash-only create",
           "expectedError": "JoinedConsumer.LabelUnavailable"
+        },
+        {
+          "row": "refused re-registration",
+          "setup": "TypeRegistry.register(QUOTE_SHAPE, MockAcceptor, []) a second time (identical descriptor => identical derived id)",
+          "expectedError": "TypeRegistry.E_TYPE_EXISTS",
+          "status": "scripted as cell failure/refused-re-registration (own sealed cell): baseline raw typeIdOf(QUOTE descriptor) == QUOTE id; failure row; descriptor/epoch raw replies unchanged (stage registry-post); plus a STATEMENT row (not a transaction): a different descriptor under a colliding id is impossible by construction"
+        },
+        {
+          "row": "unsupported native-source import",
+          "setup": "Ledger.importPublication with src.v == 0 (any claimed sourcePrincipal), with or without a destination signature",
+          "expectedError": "E_SOURCE_UNSUPPORTED",
+          "status": "scripted as cell failure/unsupported-native-import (own sealed cell): two failure rows — signed-destination path (v == 0 packet claiming AUTHOR_A's principal, destination signature by AUTHOR_B) and msg.sender path (relaying EOA as claimed author, empty destination signature); subjectCreatedAt(claimed subject) and sourceEvidence(next ordinal) raw replies (stage squat-probe) show nothing minted"
+        },
+        {
+          "row": "stale signature after policy activation",
+          "setup": "cell policy/activate: a PublicationIntent signed at epoch N (before activate) is sent after activation N+1 (policy row 3)",
+          "expectedError": "E_INTENT",
+          "status": "scripted in cell policy/activate (selector from the static call; receipt status 0; probe unchanged)"
+        },
+        {
+          "row": "policy adds a constraint",
+          "setup": "cell policy/activate after activate(QUOTE, StrictQuoteAcceptor): Actor.publish(QUOTE, uint256 3_000_000_000) — the mandatory MinBodyAcceptor(32) accepts, the ADDED policy refuses",
+          "expectedError": "E_POLICY_REJECTED",
+          "status": "scripted in cell policy/activate"
+        },
+        {
+          "row": "mandatory rule refuses (in-cell strict Type)",
+          "setup": "cell policy/activate: register(SHAPE_STRICT, StrictQuoteAcceptor, []) then publish uint256 3_000_000_000 — before any activation, after activate(STRICT, address(0)), and after activate(STRICT, MockAcceptor accept-all): three failure rows",
+          "expectedError": "E_REJECTED",
+          "status": "scripted in cell policy/activate (three rows); the compliant quote3000 is then admitted with acceptanceBasis naming the mandatory rule and policy row 3"
         }
       ],
       "status": {
@@ -730,7 +825,7 @@
       "commitments": "for JoinedConsumer / StatelessConsumer rows the commitment is read from the receipt log (ResultCommitment) and from an eth_call replay of the same calldata at the receipt block (stage consumer-replay); both are compared to the script's recomputed expectation and recorded (consumerChecks kind 'commitment')"
     },
     "cellNames": {
-      "standing": "exact cell keys of report.cells, each its own sealed cell from the same post-setup snapshot, in run order",
+      "standing": "exact cell keys of report.cells (23 keys: 22 default cells + 1 optional paired control), each its own sealed cell from the same post-setup snapshot, in run order. OPTIONAL: joined/a1-without-placement is non-default — excluded from the default selection and from --only; it runs only when --cells names it exactly",
       "cells": [
         "native-one/quote",
         "signed-one/quote",
@@ -745,11 +840,19 @@
         "fresh/exact-retry",
         "failure-rows",
         "joined/steps-1-6",
+        "joined/paid-slice",
+        "joined/a1-without-placement",
         "label/hash-only-create",
         "label/create+label-fresh",
         "label/create+label-existing-republished",
         "label/create+label-existing-omitted",
+        "policy/activate",
+        "failure/refused-re-registration",
+        "failure/unsupported-native-import",
         "native-one-noindex/quote"
+      ],
+      "optionalCells": [
+        "joined/a1-without-placement"
       ]
     },
     "labelProbe": {
@@ -782,18 +885,87 @@
       "gas": {
         "unknown": "not run"
       }
+    },
+    "paidSlice": {
+      "standing": "the sealed paid point/list slice (sdk-fixture appendix 'criteria for the next sealed paid point/list slice'; matched-cost-scope-review 'Bounded C follow-through', B counterpart). Source-only, desk-checked, UNRUN: no forge/solc/anvil/node beyond `node --check` and `node --test script/measure.test.mjs`. B's runner RECORDS observations; the expectation manifest, the arm-input manifest and the basis seal are authored and hashed by the independent run controller before this packet is opened. This packet may echo their hashes but never defines or repairs them.",
+      "cell": "joined/paid-slice",
+      "consumer": "src/JoinedConsumer.sol JoinedConsumer.paidPoint(lens, Expect) / paidList(lens, Expect, PlacementExpect): stateless, one PaidResult(kind, commitment, Selection, Placement) log of ~34 data words carrying the concrete observations (ESTIMATED ~9-10k gas: the paid rows' consumer overhead, disclosed separately, never subtracted); Expect has 12 input fields (subject, expectedHead, selectedAuthor, selectedProofKind, pairId, itemA, itemB, mantissa, scale, observedAt, noteCommitment, basisAdmission) — observedAt and noteCommitment are sealed inputs COMPARED on chain (SelectionMismatch fields 3 / 4), not merely returned; Item checks are Type checks only; the consumer reads the Ledger/LensReader through consumer-local read interfaces (ILedgerReads / ILensReads in src/JoinedConsumer.sol, not a Core change) so test/FaultyReads.sol can substitute corrupted or missing ACTUAL replies; imports no candidate library (every id is a call argument; consumer-local abi.decode of the public 160-byte Quote body and the Pair's two leading words); reverts on ABSENT/MASKED/CONFLICT (NoSelection), wrong author / selected head id / observedAt / note commitment (SelectionMismatch: field 1 author, 2 head, 3 observedAt, 4 note), wrong proof category / fabricated or missing signature (ProofCategory, ProofShape), admission outside its publication's range or not a live BIND of the target (EvidenceBounds, AdmissionShape), wrong Type/shape (QuoteShape, PairShape, ItemShape), wrong Pair / ordered Items / mantissa / scale (ClosureMismatch), moved admission frontier (BasisMismatch), PARTIAL/UNKNOWN/mutated/not-ended/duplicate/second-placement window (PlacementWindow), wrong placement folder/name/target/actor/source publication (PlacementMismatch)",
+      "rows": {
+        "paid/setup/step1": "operator native batch ITEM_ETH, ITEM_USDC, PAIR_ETH_USDC (setup cost class)",
+        "paid/setup/A1": "AUTHOR_A signed: create FILE_QUOTE + publish QUOTE_A1 + head + the ONE /swaps 'eth-usdc' placement + market tag; one combined receipt. The placement's once-only cost is an ESTIMATE from this receipt alone",
+        "paid/setup/A2": "AUTHOR_A signed: publish QUOTE_A2 + CAS head rev 1 -> 2; A1 retained in history; placement untouched",
+        "paid/setup/B1": "AUTHOR_B (Actor contract, native): publish QUOTE_B1 + B head rev 1; NO FOLDER bind (confirmed in the calldata: two actions)",
+        "paid/seal": "evm_snapshot after B1 + the sealed block number/hash/timestamp + admission frontier / index generation / rules epoch / Core code commitment / realmId from raw replies at that block (stage seal). The snapshot id is single-use and re-sealed after every revert. The seal rows (paid/seal, paid/seal/a-placement-provenance, paid/seal/no-b-placement, paid/caller-funding) are pushed into rowLog and persisted when created, so a crash mid-cell keeps them",
+        "paid/seal/a-placement-provenance": "raw replies at the seal (stage seal-placement): LensReader.resolve(FOLDER, /swaps, eth-usdc) under LENS_A_FIRST AND under LENS_B_FIRST (both retained, identical placement: placementAtSeal.byLens) -> Ledger.admission -> Ledger.evidence: actor AUTHOR_A, publication = the A1 ordinal, proofKind 2 => EOA_SIGNED_PUBLICATION_EFFECT; joined into each point row's abstractResult from the reply of ITS lens without charging a directory lookup to the point transaction",
+        "paid/seal/no-b-placement": "raw replies at the seal (stage seal-no-b-placement): Ledger.head(binding(B, /swaps/eth-usdc)) state 0, IndexModule.postingHead(B's /swaps scope list) count 0, LensReader.resolve([B], FOLDER, /swaps, eth-usdc) ABSENT",
+        "paid/point-a-first": "PAID_POINT / LENS_A_FIRST: JoinedConsumer.paidPoint([A, B], Expect{FILE_QUOTE, expectedHead QUOTE_A2, AUTHOR_A, proofKind 2, PAIR, ITEM_ETH, ITEM_USDC, 2_502_000_000, 6, observedAt 1_800_000_000, noteCommitment keccak256('reference quote'), basis}) from wallet index 3; expected selection QUOTE_A2 / A2",
+        "paid/list-a-first": "PAID_LIST / LENS_A_FIRST: paidList([A, B], the same Expect, PlacementExpect{/swaps, eth-usdc, AUTHOR_A, proofKind 2, A1 publication, budget 16}); one COMPLETE, ended, unmixed window over exactly one raw candidate; the same closure and selection as the point",
+        "paid/point-b-first": "PAID_POINT / LENS_B_FIRST: paidPoint([B, A], Expect{..., expectedHead QUOTE_B1, AUTHOR_B, proofKind 1, 2_501_000_000, ...}); expected selection QUOTE_B1 / B1; the placement provenance stays the A1 effect (joined from the seal reply under LENS_B_FIRST, not charged)",
+        "paid/list-b-first": "PAID_LIST / LENS_B_FIRST (the previously missing paid row): paidList([B, A], ...): the same single A placement, hydrated and checked to the B1 selection; placement actor (AUTHOR_A) != selected author (AUTHOR_B) by design",
+        "paid/ordering": "the recorded seal -> revert -> evm_setNextBlockTimestamp(seal timestamp + 1) -> the ONLY transaction of block seal + 1 (transactionIndex 0; eth_getBlockByNumber(block, false) transaction list retained in blocks[]) -> retained ledger, asserted by checkPaidRowOrdering, which also requires the four paid rows' timestamps to be equal; abstractResult.executionBasis carries block, parentHash, timestamp, txIndex, txCount",
+        "paid/agreement": "point and list under the same lens observe the identical Selection (from the PaidResult logs)",
+        "paid/cost-disclosure": "deployment, code, setup, once-only placement (ESTIMATE unless the paired control is pinned), storage (ESTIMATED slots) and paid rows reported as separate classes; the matched acceptance/index-failure rollback control is cell failure-rows (referenced, not duplicated)",
+        "paid/caller-funding": "eth_getBalance(paid caller, explicit after-revert block) > 0 asserted before any setup or paid row; envelope retained in rpcOther (on --anvil --accounts 4 funds index 3; an external --rpc node must fund it)"
+      },
+      "perRowRetention": "each paid row is the FIRST transaction after evm_revert to the seal; before the next revert the runner retains the receipt (transactions[]), the PaidResult log, an eth_call replay of the same calldata FROM the same caller (params[0].from = transactions[i].from, the wallet-3 address that sent the row; recorded as consumerChecks[].replayFrom) at the receipt block (stage paid-replay; return data), consumerChecks kind paid-result (field-by-field self-check against this runner's recomputed expectation), and rows[].abstractResult, then persists measure.json. abstractResult is derived by the PURE deriveAbstractResult({check, replay, evidenceFor}) (unit-tested): on a failed self-check — missing/undecodable log, replay commitment != log, any pinned field mismatch — every derived label (selectedFile/Head/Revision/Author/EvidenceCategory), outcome (presence/support/admission/selection) and coverage (candidateCoverage, pageCoverage) is UNKNOWN with the reason; the raw log (when present), the replay return data and the mismatch record stay retained; only separately retained observations keep values (the seal raw replies for placement provenance and basis, the receipt/block for executionBasis), each naming its source",
+      "paidCaller": "wallets[3] of the run mnemonic (m/44'/60'/0'/0/3): recorded address + derivation index, no secret; asserted unrelated to the deployer (0), AUTHOR_A (1), wallet 2, both Actor contracts and every deployed lab contract (assertUnrelatedCaller) before the first paid row; funded balance asserted at the explicit after-revert block (row paid/caller-funding)",
+      "abstractResultFields": [
+        "inputEvidenceGrade = RPC_OBSERVED",
+        "standing",
+        "operation (PAID_POINT | PAID_LIST)",
+        "lens (LENS_A_FIRST | LENS_B_FIRST)",
+        "realm {chainId, realmId, ledger, coreCodeCommitment}",
+        "execution {consumer, consumerCodeCommitment, lensReader, indexModule, registry, deploymentEvidence}",
+        "profile",
+        "observationBasis {admissionFrontier, indexGeneration, rulesEpoch, coreCodeCommitment, sealBlock, sealBlockHash}",
+        "executionBasis {block, blockHash, parentHash, timestamp, transaction, txIndex, txCount, establishedBy}",
+        "queryCoordinate {labels, physical, exactBytes -> transactions[i].data}",
+        "presence / support / admission / selection ({outcome, establishedBy}; a status-1 receipt cannot fill them)",
+        "selectedFile / selectedHead / selectedRevision (fixture LABELS: FILE_QUOTE, QUOTE_A2 | QUOTE_B1, A2 | B1)",
+        "selectedPhysical {subject, head, revisionOrdinal, admission, publication} (physical ids, separately)",
+        "selectedAuthor {label, address, principalKind}",
+        "selectedAuthorEvidenceCategory (EOA_SIGNED_PUBLICATION | CONTRACT_ORIGINATED_PUBLICATION)",
+        "placementCoordinate {lookedUpByThisRow, parent, name, physical}",
+        "placementProvenance {sourceStep A1, actor AUTHOR_A, actorAddress, evidenceCategory EOA_SIGNED_PUBLICATION_EFFECT, publication, admission, revision, basis, independentOfContentSelection, establishedBy}",
+        "quoteCheck / pairCheck / itemChecks",
+        "candidateCoverage {status COMPLETE, universe, lens, basis, endCondition (ordered lens of N principals; the first principal with a HEAD binding decides — by construction of LensReader.resolve), sameForPointAndList} / pageCoverage",
+        "rawEvidence {transaction, paidResultLog, replay {rpcId, from, stage}, selfCheck {match, ref -> consumerChecks kind paid-result}, seal, bodiesAndIds}; when selfCheck.match is false the row still exists but presence / support / admission / selection are UNKNOWN, never the success outcomes",
+        "paidExecution {caller, callerDerivation, consumer, targets, codeCommitments, transaction, receiptStatus, gasUsed, returnData, revertData}"
+      ],
+      "pairedControl": {
+        "cell": "joined/a1-without-placement (OPTIONAL, non-default)",
+        "rows": "paid/setup/step1 (identical), joined/a1-without-placement/A1-minus-placement (the same A1 batch minus the FOLDER bind: create + publish + head + tag), joined/a1-without-placement/pairing (statement) + stage no-placement raw replies proving no /swaps placement exists",
+        "standing": "from the same run snapshot as joined/paid-slice with the identical step 1, so both A1 receipts start from the same pre-A1 state; signature and deadline calldata bytes differ per run (ESTIMATED tens of gas). If the coordinator pins this cell, the marginal placement cost is the coordinator's difference of the two receipts; this runner never subtracts"
+      },
+      "matchedRollbackControl": "cell failure-rows: failure/failed-acceptance (E_POLICY_REJECTED) and failure/failed-mandatory-index (E_INDEX) prove whole-publication rollback with an unchanged probe; referenced by paid/cost-disclosure, not duplicated",
+      "operatorChecklist": {
+        "standing": "the appendix's practical pre-run pins 1-5, restated as the operator checklist for this arm; every item belongs to the independent run controller, not to this packet",
+        "steps": [
+          "1. Independently author and hash the expectation manifest (semantic labels and outcomes of the seven rows: A1/A2/B1 setup, paid point/list x A-first/B-first) and retain it BEFORE opening this arm's result packet; the retained diagnostic packets (5960336) may inform the design but cannot supply expected answers.",
+          "2. Before fixture publication or harness integration, seal the B arm-input manifest: clean source commit + recorded empty dirty diff (report.build.sourceHashes covers src/test/script at run time), solc 0.8.30 / via-IR / optimizer 200 / cancun, ethers path, Anvil argv; ABI/init-code/runtime-code hashes of Ledger, TypeRegistry, IndexModule, LensReader, the fixture rules (MinBodyAcceptor x2, QuoteAcceptor, LabelAcceptor) and JoinedConsumer (report.deployment[*].artifact + runtimeCodehash); profile/Type/Lens commitments (PROFILE.md, report.types, LENS_A_FIRST = [A, B], LENS_B_FIRST = [B, A]); the independent semantic-to-physical fixture vectors (bodies, record ids, subject id, positions). Copy no coordinate from candidate results.",
+          "3. Allocate the public caller roles from fixed ephemeral accounts: deployer = mnemonic index 0, AUTHOR_A = index 1, paid caller = index 3 (record addresses and indices, no secrets); precompute the CREATE addresses of the 16 deployments from the deployer nonce sequence (deployAll order) or retain the deployment receipts + verified runtime code independently, before fixture publication; this run's report.deployment is the candidate's record, not the independent one.",
+          "4. Compute the point/list coordinates from the sealed fixture map with the independently authored vector implementation: FILE_QUOTE subject id, /swaps folder hash, keccak256('eth-usdc') role, the lens address arrays, budget 16, fresh cursor, and the Expect / PlacementExpect struct bytes; do not take them from the deployed candidate (this runner's local Keys mirror is candidate-side and is replaced by the independent vectors).",
+          "5. After A1/A2/B1 but before any paid read, seal the exact post-B1 block number/hash and evm_snapshot id (row paid/seal); revert to that checkpoint for each paid row (row paid/ordering); hash and timestamp the expectation, arm-input and basis seals outside this packet."
+        ]
+      },
+      "status": {
+        "unknown": "not run",
+        "consequence": "no paid-slice receipt, log, replay or abstractResult exists; every gas figure for these rows is unknown"
+      },
+      "scope": "ONLY owned --anvil runs are in scope for joined/paid-slice and joined/a1-without-placement: they snapshot, revert, set block timestamps and touch automining. The runner refuses them without --anvil before any chain call (assertAnvilOnlyCells); the other cells keep their --rpc behaviour unchanged",
+      "faultyReplies": "test/FaultyReads.sol (test-only forwarding reader implementing ILedgerReads + ILensReads) arms one corrupted or missing ACTUAL reply per test: missing Pair record -> PairShape; wrong-Type Item -> ItemShape; admission kind != BIND -> AdmissionShape; admission outside its publication range -> EvidenceBounds; one-word evidence reply -> the consumer's ABI decoding reverts (empty revert data, no value); PARTIAL page claiming ended -> PlacementWindow. These test bad replies; the test_paid_slice_refuses_* negatives test wrong expectations (a different branch)"
     }
   },
   "reads": {
     "basis": "each consumer read pins the receipt block; every probe and raw harvest passes an explicit block number (no 'latest' reads in evidence)",
-    "executionIdentity": "Ledger codehash + IndexModule (address, codehash) + TypeRegistry epoch; cursors bind indexGeneration/rulesEpoch/coreCodeCommitment",
+    "executionIdentity": "Ledger codehash + IndexModule (address, codehash) + TypeRegistry epoch; cursors bind indexGeneration/rulesEpoch/coreCodeCommitment; Type ids are derived from descriptors (Keys.typeId) and each publish/reuse admission records the policy row that admitted it (Ledger.acceptanceBasis)",
     "publicDecoder": "Ledger raw getters (record, admission, evidence, head, bindingPosition, positionCell, counts, extsload); IndexModule postingHead/postingWord/postingAt/coverage; LensReader resolve/resolveNoTiebreak/list/history",
     "cursorSemantics": "Cursor{basisAdmission, indexGeneration, rulesEpoch, coreCodeCommitment, scopeKey, lensHash, position, lensIndex, rawIndex, selectedSoFar}; Page{items, scanned, hydrations, rawTotal, selectedSoFar, status UNKNOWN|PARTIAL|COMPLETE, mutated, next}; mutated == true marks a mixed-basis page which must not be treated as COMPLETE by any caller",
     "independentExpected": {
       "unknown": "the coordinator's oracle vectors for this arm are not yet produced",
       "consequence": "results are self-consistent (tests) but not independently checked"
     },
-    "paidConsumerSource": "src/LabHarness.sol Consumer (storing; rows labelled STORING), src/JoinedConsumer.sol JoinedConsumer + StatelessConsumer (stateless; rows labelled STATELESS; import no candidate library — only the Ledger/LensReader public ABI types); hashes recorded at run time in report.build.sourceHashes",
+    "paidConsumerSource": "src/LabHarness.sol Consumer (storing; rows labelled STORING), src/JoinedConsumer.sol JoinedConsumer + StatelessConsumer (stateless; rows labelled STATELESS; import no candidate library — the Ledger/LensReader public read ABI through consumer-local interfaces ILedgerReads / ILensReads plus LensReader's struct types); hashes recorded at run time in report.build.sourceHashes; the sealed paid slice uses JoinedConsumer.paidPoint / paidList (stateless; one PaidResult log with concrete Selection/Placement observations; expectations are call arguments)",
     "offlineReaderSource": "src/LabHarness.sol Reconstructor (state-only re-encoding; hash unknown until published)",
     "rpcAccounting": {
       "retained": "every JSON-RPC request/response envelope of a cell is retained with its id (raw[], transactions[].rpc, blocks[], rpcOther[]); eth_estimateGas rows are browser-shaped estimates",
@@ -827,8 +999,8 @@
     "mutationSeeds": "test_signature_binds_every_field (name, target, subject, expectedRevision, order, salt, realm, code, profile, obligations, nonce, deadline); test_fresh_reader_reconstructs_identical_digest_with_negatives (discriminator, typeId)",
     "proofGrade": {
       "signedIngress": "signature verified on-chain and re-verifiable from state (designed, untested)",
-      "nativeIngress": "chain-state witness only; grade 0; not verified by this lab",
-      "import": "source signature verified over the source domain; destination authorization separate (designed, untested)",
+      "nativeIngress": "local native ingress: chain-state witness only; not verified by this lab. Native-source IMPORT is refused (E_SOURCE_UNSUPPORTED), so no grade-0 SourceEvidence row can exist",
+      "import": "source signature verified over the source domain; destination authorization separate; destination acceptance re-run under the destination registry's CURRENT policy row while the source basis (profile, grade, realm) is retained verbatim (designed, untested)",
       "listingAcrossMutation": "diagnostic only (see operations.diagnostics)",
       "reconstruction": "candidate self-check, not independent",
       "statelessConsumer": "commitments logged and replayed; verification of Pair -> ITEMs and author kind happens on-chain in the consumer (designed, untested)",
@@ -836,8 +1008,10 @@
     },
     "status": "designed-but-untested for everything in this pass; the retained 322b320 run covers only the earlier 11-cell script and NOT the cells added here",
     "stateProbes": "per cell: pre-state and post-state probes (control Record presence, nonces, counters, list heads) written to measure.json; unrun",
-    "persistedPerCell": "baselineRaw[], raw[] (with stages baseline / plan / sign-inputs / progress / reconstruct / readback / consumer-replay / pre-presence / post-presence / failure-static / failure-pre / failure-post / browser / post), transactions[] (with rpc envelopes and rawTransaction), blocks[], rpcOther[], candidateDecoded.{baseline,post}, rows, rowLog, consumerChecks[] (kinds stored-slots and commitment), mismatches; written before the next evm_revert",
-    "sections": "raw observations (baselineRaw, raw, transactions, blocks, rpcOther) are kept apart from candidate claims (candidateDecoded, rows, consumerChecks, plan); the checker treats raw inputs, raw observations, candidate claims and evaluated results as separate sections"
+    "persistedPerCell": "baselineRaw[], raw[] (with stages baseline / plan / sign-inputs / progress / reconstruct / readback / consumer-replay / pre-presence / post-presence / failure-static (simulated FROM the actual sender: params[0] = {from, to, data}) / failure-pre / failure-post / browser / post / type-resolution / policy / basis / registry-post / squat-probe / seal / seal-placement / seal-no-b-placement / paid-replay / no-placement), transactions[] (with rpc envelopes and rawTransaction), blocks[], rpcOther[], candidateDecoded.{baseline,post}, rows, rowLog, consumerChecks[] (kinds stored-slots, commitment and paid-result), mismatches; written before the next evm_revert",
+    "sections": "raw observations (baselineRaw, raw, transactions, blocks, rpcOther) are kept apart from candidate claims (candidateDecoded, rows, consumerChecks, plan); the checker treats raw inputs, raw observations, candidate claims and evaluated results as separate sections",
+    "failureRowContract": "each failure row retains the static-call revert data simulated from the account that then sends the reverting transaction (obs.from), the expected/observed selector, and — where expectedArgs is set — the decoded revert arguments asserted equal (E_INTENT(3), E_TYPE_EXISTS(typeId), E_POLICY_REJECTED(leaf, typeId), E_REJECTED(leaf, typeId), E_SOURCE_UNSUPPORTED()); the mined receipt establishes reversion, not the selector",
+    "admissionJoins": "candidateDecoded.{baseline,post}.admissions[ord] of every present publish/reuse admission carries basis (Ledger.acceptanceBasis raw reply) and policyRow (TypeRegistry.activation(typeId, activation) raw reply) plus join {acceptorEqual, codehashEqual, epochEqual, ok} asserted true: Type id <-> policy row <-> acceptor codehash <-> epoch are joinable from the raw replies without trusting the script"
   },
   "resources": {
     "leaseOwner": {
@@ -847,14 +1021,17 @@
     "request": {
       "commands": [
         "cd Reviews/2026-09-12-efs-path-decision/lab-b",
-        "export FOUNDRY_OUT=/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/out",
+        "export FOUNDRY_OUT=<scratch>/build/lab-b-pin-<sha>/out   # artifacts of the compiled pin (ca1a228 built 2026-09-13 08:50 UTC; includes test/ artifacts such as StrictQuoteAcceptor)",
         "forge build --use 0.8.30 --offline",
-        "forge test --use 0.8.30 --offline -vv   # 24 existing + 8 new tests (JoinedConsumer.t.sol x5, LabelType.t.sol x3)",
+        "forge test --use 0.8.30 --offline -vv   # 43 tests expected (observed 43/43 at ca1a228 on 2026-09-13 08:50 UTC)",
         "forge inspect Ledger storage-layout",
-        "EFS_ETHERS_PATH=<node_modules/ethers> node script/measure.mjs --anvil    # writes <scratch>/measure.json and <scratch>/lab-addresses.json; artifacts read from FOUNDRY_OUT"
+        "EFS_ETHERS_PATH=<node_modules/ethers> node script/measure.mjs --anvil [--cells failure-rows,policy/activate,failure/refused-re-registration,failure/unsupported-native-import]    # writes <scratch>/measure.json and <scratch>/lab-addresses.json; artifacts read from FOUNDRY_OUT",
+        "EFS_ETHERS_PATH=<node_modules/ethers> node script/measure.mjs --anvil --cells joined/paid-slice,failure-rows    # the bounded paid slice + its matched rollback control; add joined/a1-without-placement ONLY if the coordinator pins the paired placement-cost control",
+        "# the script deploys StrictQuoteAcceptor from out/Falsify.t.sol/StrictQuoteAcceptor.json (a test-file artifact): forge build must include test/",
+        "# joined/paid-slice and joined/a1-without-placement REQUIRE --anvil (owned chain): with --rpc the runner refuses them before any chain call"
       ],
       "anvil": "started by the script on a free loopback port: --hardfork cancun --chain-id 31337 --gas-limit 30000000 --accounts 4 --prune-history 256 --cache-path <scratchRoot>/anvil-cache (created by the script) --no-cors --quiet; no --steps-tracing; PID, port, argv, start and stop times are written to measure.json (anvil section); killed by the script",
-      "expectedDuration": "20-30 minutes including one compile-repair cycle (build 1-3 min, tests < 2 min, measure 4-8 min for 18 cells / ~170 transactions with per-transaction persistence)",
+      "expectedDuration": "20-30 minutes including one compile-repair cycle (build 1-3 min, tests < 2 min, measure 4-8 min for 21 cells / ~200 transactions with per-transaction persistence)",
       "scratchPath": "/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b",
       "scratchBudget": "< 2 GB (out/, cache/, measure.json ~5-10 MB with literal envelopes)",
       "watchdog": "script kills its Anvil after 25 minutes; operator kills the run at 35 minutes",
@@ -864,7 +1041,8 @@
         "consequence": "recorded by the operator in the coordinator checkpoint"
       },
       "cleanup": "delete only the scratchPath above; keep measure.json as compact evidence",
-      "runOwnedOutputs": "<scratchRoot>/out (forge artifacts), <scratchRoot>/cache, <scratchRoot>/anvil-cache, <scratchRoot>/lab-addresses.json, <scratchRoot>/measure.json; the script refuses a scratch root inside the lab directory; measure.json is rewritten after every cell and on failure so a crash keeps the evidence gathered so far"
+      "runOwnedOutputs": "<scratchRoot>/out (forge artifacts), <scratchRoot>/cache, <scratchRoot>/anvil-cache, <scratchRoot>/lab-addresses.json, <scratchRoot>/measure.json; the script refuses a scratch root inside the lab directory; measure.json is rewritten after every cell and on failure so a crash keeps the evidence gathered so far",
+      "selection": "bounded runs name their cells exactly: `--cells <comma-separated exact cell keys>` (unknown keys or an empty selection abort BEFORE any chain starts); the legacy `--only <substring>` resolves against the same 23-key plan (the optional joined/a1-without-placement is never selected by --only) with the same validation; report.cellPlan / plannedCells / executedCells (asserted equal) / skippedCells identify the actual subset; the sealing cells joined/paid-slice and joined/a1-without-placement are refused without --anvil (owned chain only)"
     }
   },
   "matchedControl": {

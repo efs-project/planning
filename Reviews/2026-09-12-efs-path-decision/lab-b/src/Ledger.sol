@@ -76,11 +76,25 @@ contract Ledger {
         uint64 ord; // running admission ordinal
         uint64 records;
         uint64 bindings;
+        bytes32 publicationId; // set by _beginPublication (kept off the batch loop's stack)
+        uint64 first; // first admission ordinal of this publication (idem)
+    }
+
+    // What one admission reads from the registry (memory struct: one pointer on the stack; the
+    // publish path is split into small helpers to stay within the via-IR stack, see _applyPublish).
+    struct TypeView {
+        bytes32 typeId;
+        address mandatory; // the Type's declared rule (pinned instance); 0 = no rule
+        bytes32 ruleId; // its codehash (part of the Type id)
+        address policy; // the Realm's additional policy acceptor; 0 = none
+        bytes32 policyCodehash;
+        uint8 refCount;
+        uint16 activation; // active policy row index (recorded per admission)
     }
 
     // ---- durable rows (slot counts are ESTIMATED fresh slots per row)
     struct RecordCell { bytes32 typeId; uint256 meta; } // meta: firstAdmission u48@0 | length u32@48 | occurrences u32@80   (2 + body words)
-    struct AdmissionRow { uint256 meta; bytes32 a; bytes32 b; } // meta: kind u4@0 | leaf u16@4 | publication u48@20 | bindingOrd u48@68 | expectedRevision u32@116 | withdrawn u1@148
+    struct AdmissionRow { uint256 meta; bytes32 a; bytes32 b; } // meta: kind u4@0 | leaf u16@4 | publication u48@20 | bindingOrd u48@68 | expectedRevision u32@116 | withdrawn u1@148 | activation u16@152 (publish/reuse: registry policy row that admitted it)
     //   a: publish=bodyHash, reuse=recordId, bind=target, create=salt, withdraw=bytes32(admission); b: publish=typeId   (2, or 3 for publish, 1 for unbind)
     struct HeadRow { uint256 meta; bytes32 target; } // meta: state u8@0 | revision u32@8 | admission u48@40 | targetKind u8@88 | tombstoneCause u8@96 | leaf u16@104 (0) | prev u48@120 | bindingOrd u48@168   (2)
     struct PositionCell { bytes32 purpose; bytes32 subject; bytes32 role; } // (3, once per position, shared by all authors)
@@ -103,8 +117,8 @@ contract Ledger {
         address author;
         uint64 nonce;
         uint64 deadline;
-        uint8 v; // 0 = no signature (contract-author source: chain-state witness)
-        uint8 grade; // 1 = source signature verified here; 0 = unverified witness, retained as claimed
+        uint8 v; // 0 = no signature (contract-author source: chain-state witness) — UNSUPPORTED at import, see importPublication
+        uint8 grade; // 1 = source signature verified here. 0 is never retained: an unverified witness is refused (E_SOURCE_UNSUPPORTED)
     }
 
     // ------------------------------------------------------------------------ constants
@@ -164,7 +178,8 @@ contract Ledger {
     error E_REF_MISSING(uint256 leaf, uint256 slot, bytes32 id);
     error E_REF_TYPE(uint256 leaf, uint256 slot, bytes32 expected, bytes32 have);
     error E_ACCEPTOR_CODE(bytes32 typeId);
-    error E_REJECTED(uint256 leaf, bytes32 typeId);
+    error E_REJECTED(uint256 leaf, bytes32 typeId); // the Type's MANDATORY (declared) rule refused: final
+    error E_POLICY_REJECTED(uint256 leaf, bytes32 typeId); // the Realm's ADDITIONAL policy acceptor refused
     error E_TARGET_MISSING(uint256 leaf, bytes32 target);
     error E_TARGET_TYPE(uint256 leaf, bytes32 expected, bytes32 have);
     error E_CAS(bytes32 key, uint32 expected, uint32 have);
@@ -180,6 +195,8 @@ contract Ledger {
     error E_INTENT(uint256 field);
     error E_SOURCE_SIGNATURE();
     error E_DESTINATION_AUTH();
+    error E_SOURCE_UNSUPPORTED(); // native (contract-author) source packet: no verifiable witness here — fail closed
+    error E_NO_BASIS(uint64 ordinal); // acceptanceBasis asked for a row that is not a publish/reuse admission
 
     constructor(ITypeRegistry registry_, bytes32 realmId_) {
         registry = registry_;
@@ -243,9 +260,18 @@ contract Ledger {
     /// Import (pre-seal check 3). The source signature is verified over the SOURCE context
     /// and retained as evidence; it authorizes nothing here. Destination authority is a
     /// separate signature by the same EOA under THIS Realm's context, or the destination's
-    /// contract-author path (msg.sender == author, empty dstSig). Destination acceptance, CAS
-    /// and index effects then run exactly as for a local publication. Subject ids minted by
-    /// the imported actions keep the origin-qualified SOURCE principal.
+    /// native path (msg.sender == author, empty dstSig). Destination acceptance (under THIS
+    /// Realm's current policy), CAS and index effects then run exactly as for a local
+    /// publication. Subject ids minted by the imported actions keep the verified SOURCE principal.
+    ///
+    /// Native-source packets (src.v == 0: a contract author at the source, whose only proof is a
+    /// chain-state witness) are UNSUPPORTED here and fail closed with E_SOURCE_UNSUPPORTED: this
+    /// Realm cannot verify such a witness, and an unverified claim must not mint or control a
+    /// subject under the claimed principal (REPAIR.md R1). This is a temporary prototype limit —
+    /// not a waiver of portability and not an invented source proof. Lifting it needs a declared,
+    /// verifiable source-witness format (chain id + Realm deployment + account + finalized-state
+    /// proof of the historical admission), which this lab does not build. Local native
+    /// publication (execute / the convenience entrypoints) is unchanged.
     function importPublication(
         SourceEvidence memory src,
         Action[] memory actions,
@@ -264,11 +290,10 @@ contract Ledger {
             if (src.sourcePrincipal != Keys.principal(src.author)) revert E_SOURCE_SIGNATURE();
             src.grade = 1;
         } else {
-            // Contract-author source: a chain-state witness this Realm cannot check. REVIEW MAJOR-1
-            // (deferred to the post-measurement repair): derive sourcePrincipal from a retained
-            // sourceChainId + coreCodeCommitment + author instead of accepting it as claimed, so a
-            // squatter can only namespace subjects under its own address.
-            src.grade = 0;
+            // Contract-author source: a chain-state witness this Realm cannot verify (REVIEW
+            // MAJOR-1). Fail closed before any write: nothing retained, minted or bound under a
+            // bare claim. See the NatSpec above for why this is a limit, not a waiver.
+            revert E_SOURCE_UNSUPPORTED();
         }
         Pub memory p;
         p.author = src.author;
@@ -376,14 +401,27 @@ contract Ledger {
     }
 
     // ------------------------------------------------------------------------ the single pass
+    // The batch loop holds no per-item temporaries (via-IR stack discipline, 08:00 compile finding):
+    // the prologue and epilogue are helpers and each item is applied through _applyOne.
     function _run(Pub memory p, Action[] memory actions, bytes[] memory bodies)
         private
-        returns (uint64 publication, uint64 first)
+        returns (uint64, uint64)
     {
         uint256 n = actions.length;
         if (n == 0 || n > MAX_ACTIONS || bodies.length != n) revert E_BOUNDS(0);
-        bytes32 publicationId = keccak256(abi.encode(p.author, p.nonce, p.actionsHash));
-        uint64 prior = _publicationOrdinal[publicationId];
+        IIndexModule.Effect[] memory effects = _beginPublication(p, n);
+        for (uint256 i; i < n; ++i) {
+            ++p.ord;
+            effects[i] = _applyOne(p, actions[i], bodies[i], i);
+        }
+        _endPublication(p, effects);
+        return (p.publication, p.first);
+    }
+
+    /// Retry/nonce/counter checks, then the first writes (nonce, retry key, evidence cell).
+    function _beginPublication(Pub memory p, uint256 n) private returns (IIndexModule.Effect[] memory effects) {
+        p.publicationId = keccak256(abi.encode(p.author, p.nonce, p.actionsHash));
+        uint64 prior = _publicationOrdinal[p.publicationId];
         if (prior != 0) revert AlreadyAdmitted(prior);
         if (p.nonce != nonces[p.author]) revert E_NONCE(p.author, nonces[p.author], p.nonce);
         uint256 c = _counters;
@@ -393,32 +431,35 @@ contract Ledger {
         uint64 publications = uint64(c >> 192);
         if (p.ord + uint64(n) >= GUARD || publications >= GUARD - 1) revert E_BOUNDS(1);
         p.publication = publications + 1;
-        first = p.ord + 1;
+        p.first = p.ord + 1;
         // ---- writes begin; any later failure reverts every one of them (EVM rollback, no journal)
         nonces[p.author] = p.nonce + 1;
-        _publicationOrdinal[publicationId] = p.publication;
-        _writeEvidence(p, first, uint16(n));
-        IIndexModule.Effect[] memory effects = new IIndexModule.Effect[](n);
-        for (uint256 i; i < n; ++i) {
-            ++p.ord;
-            Action memory x = actions[i];
-            uint8 k = x.kind;
-            if (k == PUBLISH || k == REUSE) {
-                effects[i] = _applyPublish(p, x, bodies[i], i);
-                continue;
-            }
-            if (bodies[i].length != 0) revert E_SHAPE(i);
-            if (k == BIND) effects[i] = _applyBind(p, x, i);
-            else if (k == UNBIND) effects[i] = _applyUnbind(p, x, i);
-            else if (k == CREATE) effects[i] = _applyCreate(p, x, i);
-            else if (k == WITHDRAW) effects[i] = _applyWithdraw(p, x, i);
-            else revert E_BOUNDS(2);
-        }
+        _publicationOrdinal[p.publicationId] = p.publication;
+        _writeEvidence(p, p.first, uint16(n));
+        effects = new IIndexModule.Effect[](n);
+    }
+
+    function _endPublication(Pub memory p, IIndexModule.Effect[] memory effects) private {
         _counters = uint256(p.ord) | (uint256(p.records) << 64) | (uint256(p.bindings) << 128)
             | (uint256(p.publication) << 192);
         _notifyIndex(p.publication, effects);
-        emit Published(p.publication, publicationId, p.author, p.proofKind, first, uint16(n));
-        publication = p.publication;
+        emit Published(p.publication, p.publicationId, p.author, p.proofKind, p.first, uint16(effects.length));
+    }
+
+    /// One action of the ordered prefix. Kept out of the loop body so its callees' locals never
+    /// join the loop's live set.
+    function _applyOne(Pub memory p, Action memory x, bytes memory data, uint256 i)
+        private
+        returns (IIndexModule.Effect memory)
+    {
+        uint8 k = x.kind;
+        if (k == PUBLISH || k == REUSE) return _applyPublish(p, x, data, i);
+        if (data.length != 0) revert E_SHAPE(i);
+        if (k == BIND) return _applyBind(p, x, i);
+        if (k == UNBIND) return _applyUnbind(p, x, i);
+        if (k == CREATE) return _applyCreate(p, x, i);
+        if (k == WITHDRAW) return _applyWithdraw(p, x, i);
+        revert E_BOUNDS(2);
     }
 
     function _writeEvidence(Pub memory p, uint64 first, uint16 leafCount) private {
@@ -436,8 +477,11 @@ contract Ledger {
     }
 
     /// PUBLISH (bytes supplied) or REUSE (existing id, bytes loaded). Checked references and
-    /// the acceptance hook run on EVERY admission, dedup and reuse included. Earlier actions of
+    /// the acceptance rules run on EVERY admission, dedup and reuse included. Earlier actions of
     /// the same publication are already written, so a reference to them resolves (delta 5).
+    /// Split into helpers (Type view, body, reference check, acceptance, record writes) so no
+    /// more than ~8 locals are live here and `expected` never coexists with the Effect struct
+    /// (via-IR stack discipline, 08:00 compile finding).
     function _applyPublish(Pub memory p, Action memory x, bytes memory data, uint256 leaf)
         private
         returns (IIndexModule.Effect memory ef)
@@ -445,37 +489,72 @@ contract Ledger {
         if (x.purpose != 0 || x.subject != 0 || x.role != 0 || x.target != 0 || x.expectedRevision != 0 || x.salt != 0) {
             revert E_SHAPE(leaf);
         }
-        (bool registered, address acceptor, bytes32 codehash, uint8 refCount) = registry.typeInfo(x.typeId);
-        if (!registered) revert E_UNKNOWN_TYPE(x.typeId);
-        bytes32 id;
-        bytes memory bodyBytes;
+        TypeView memory t = _typeOf(x.typeId);
+        (bytes32 id, bytes memory bodyBytes) = _bodyOf(x, data, leaf);
+        _acceptAll(t, x.typeId, bodyBytes, _checkRefs(t, bodyBytes, leaf), leaf);
+        _admitRecord(p, x, id, bodyBytes, t.activation, leaf);
+        ef.kind = x.kind;
+        ef.admission = p.ord;
+        ef.author = p.author32;
+        ef.recordId = id;
+        ef.typeId = x.typeId;
+        emit Admitted(p.author32, x.typeId, id, p.ord);
+    }
+
+    function _typeOf(bytes32 typeId) private view returns (TypeView memory t) {
+        t.typeId = typeId;
+        bool registered;
+        (registered, t.mandatory, t.ruleId, t.policy, t.policyCodehash, t.refCount, t.activation) = registry.typeInfo(typeId);
+        if (!registered) revert E_UNKNOWN_TYPE(typeId);
+    }
+
+    /// Record id and body bytes of a publish (supplied, hash-checked) or reuse (loaded from state).
+    function _bodyOf(Action memory x, bytes memory data, uint256 leaf) private view returns (bytes32 id, bytes memory bodyBytes) {
         if (x.kind == PUBLISH) {
             if (data.length > MAX_BODY) revert E_BOUNDS(3);
             if (keccak256(data) != x.bodyHashOrRecordId) revert E_BODY_HASH(leaf);
-            id = Keys.recordFromHash(x.typeId, x.bodyHashOrRecordId);
-            bodyBytes = data;
-        } else {
-            if (data.length != 0) revert E_SHAPE(leaf);
-            id = x.bodyHashOrRecordId;
-            RecordCell storage existing = _record[id];
-            if (existing.typeId == bytes32(0)) revert E_MISSING_RECORD(leaf, id);
-            if (existing.typeId != x.typeId) revert E_TYPE_MISMATCH(leaf, x.typeId, existing.typeId);
-            bodyBytes = _loadBody(id, uint32(existing.meta >> 48));
+            return (Keys.recordFromHash(x.typeId, x.bodyHashOrRecordId), data);
         }
-        bytes32[] memory refs = new bytes32[](refCount);
-        if (refCount != 0) {
-            if (bodyBytes.length < 32 * uint256(refCount)) revert E_SHAPE(leaf);
-            bytes32[] memory expected = registry.refTypes(x.typeId);
-            if (expected.length < refCount) revert E_BOUNDS(4);
-            for (uint256 i; i < refCount; ++i) {
-                bytes32 ref = _word(bodyBytes, i);
-                bytes32 have = _record[ref].typeId;
-                if (have == bytes32(0)) revert E_REF_MISSING(leaf, i, ref);
-                if (expected[i] != bytes32(0) && expected[i] != have) revert E_REF_TYPE(leaf, i, expected[i], have);
-                refs[i] = ref;
-            }
+        if (data.length != 0) revert E_SHAPE(leaf);
+        id = x.bodyHashOrRecordId;
+        RecordCell storage existing = _record[id];
+        if (existing.typeId == bytes32(0)) revert E_MISSING_RECORD(leaf, id);
+        if (existing.typeId != x.typeId) revert E_TYPE_MISMATCH(leaf, x.typeId, existing.typeId);
+        bodyBytes = _loadBody(id, uint32(existing.meta >> 48));
+    }
+
+    /// The leading `refCount` body words must be existing records of the registry's expected Types.
+    function _checkRefs(TypeView memory t, bytes memory bodyBytes, uint256 leaf)
+        private
+        view
+        returns (bytes32[] memory refs)
+    {
+        refs = new bytes32[](t.refCount);
+        if (t.refCount == 0) return refs;
+        if (bodyBytes.length < 32 * uint256(t.refCount)) revert E_SHAPE(leaf);
+        bytes32[] memory expected = registry.refTypes(t.typeId);
+        if (expected.length < t.refCount) revert E_BOUNDS(4);
+        for (uint256 i; i < t.refCount; ++i) {
+            bytes32 ref = _word(bodyBytes, i);
+            bytes32 have = _record[ref].typeId;
+            if (have == bytes32(0)) revert E_REF_MISSING(leaf, i, ref);
+            if (expected[i] != bytes32(0) && expected[i] != have) revert E_REF_TYPE(leaf, i, expected[i], have);
+            refs[i] = ref;
         }
-        if (acceptor != address(0)) _accept(acceptor, codehash, x.typeId, bodyBytes, refs, leaf);
+    }
+
+    /// The Type's declared (mandatory) rule ALWAYS runs and its refusal is final (F5): no policy
+    /// activation can remove or replace it. The Realm's additional policy acceptor, if any, runs
+    /// after it and may only add constraints — both must accept.
+    function _acceptAll(TypeView memory t, bytes32 typeId, bytes memory bodyBytes, bytes32[] memory refs, uint256 leaf) private view {
+        if (t.mandatory != address(0)) _accept(t.mandatory, t.ruleId, typeId, bodyBytes, refs, leaf, false);
+        if (t.policy != address(0)) _accept(t.policy, t.policyCodehash, typeId, bodyBytes, refs, leaf, true);
+    }
+
+    /// Record cell (fresh or one more occurrence) and the admission row. The policy row that
+    /// admitted this action is packed into the row (no extra slot): historical reads report it
+    /// instead of today's policy (acceptanceBasis).
+    function _admitRecord(Pub memory p, Action memory x, bytes32 id, bytes memory bodyBytes, uint16 activation, uint256 leaf) private {
         RecordCell storage cell = _record[id];
         uint256 meta = cell.meta;
         if (meta == 0) {
@@ -487,18 +566,16 @@ contract Ledger {
             cell.meta = meta + (uint256(1) << 80); // one more occurrence; Record row unchanged otherwise
         }
         AdmissionRow storage ar = _admission[p.ord];
-        ar.meta = uint256(x.kind) | (leaf << 4) | (uint256(p.publication) << 20);
+        ar.meta = uint256(x.kind) | (leaf << 4) | (uint256(p.publication) << 20) | (uint256(activation) << 152);
         ar.a = x.bodyHashOrRecordId;
         if (x.kind == PUBLISH) ar.b = x.typeId;
-        ef.kind = x.kind;
-        ef.admission = p.ord;
-        ef.author = p.author32;
-        ef.recordId = id;
-        ef.typeId = x.typeId;
-        emit Admitted(p.author32, x.typeId, id, p.ord);
     }
 
-    function _accept(address acceptor, bytes32 codehash, bytes32 typeId, bytes memory data, bytes32[] memory refs, uint256 leaf)
+    /// One bounded STATICCALL to an acceptance rule. The codehash is re-verified at every call
+    /// (E_ACCEPTOR_CODE): it pins the rule's CODE, not its mutable dependencies (see TypeRegistry).
+    /// `policyRule` selects the error: the mandatory rule's refusal is E_REJECTED (final), the
+    /// additional policy's is E_POLICY_REJECTED.
+    function _accept(address acceptor, bytes32 codehash, bytes32 typeId, bytes memory data, bytes32[] memory refs, uint256 leaf, bool policyRule)
         private
         view
     {
@@ -508,7 +585,10 @@ contract Ledger {
         if (gasleft() < ACCEPT_GAS + ACCEPT_GAS / 63 + 20_000) revert E_GAS();
         (bool ok, bytes memory ret) =
             acceptor.staticcall{gas: ACCEPT_GAS}(abi.encodeWithSelector(IAcceptor.accept.selector, typeId, data, refs));
-        if (!ok || ret.length != 32 || bytes32(ret) != bytes32(uint256(1))) revert E_REJECTED(leaf, typeId);
+        if (!ok || ret.length != 32 || bytes32(ret) != bytes32(uint256(1))) {
+            if (policyRule) revert E_POLICY_REJECTED(leaf, typeId);
+            revert E_REJECTED(leaf, typeId);
+        }
     }
 
     function _applyBind(Pub memory p, Action memory x, uint256 leaf) private returns (IIndexModule.Effect memory ef) {
@@ -653,16 +733,56 @@ contract Ledger {
     }
 
     // ------------------------------------------------------------------------ commitments a signer computes
-    /// Running hash over (typeId, pinned acceptor codehash, registry epoch) of every publish/reuse
-    /// action, in order (ruling E.B.4: a rule change invalidates unsent signatures).
+    /// Running hash over (typeId, mandatory ruleId, ACTIVE policy codehash, registry epoch) of every
+    /// publish/reuse action, in order (ruling E.B.4: a rule change invalidates unsent signatures).
+    /// The ruleId is the Type's declared rule (part of its identity); the policy codehash is the
+    /// Realm's current additional acceptor (0 = none): a policy activation changes the profile
+    /// (and moves the epoch) without changing the Type id.
     function acceptanceProfileOf(Action[] memory actions) public view returns (bytes32 profile) {
         uint64 epoch = registry.epoch();
         for (uint256 i; i < actions.length; ++i) {
             uint8 k = actions[i].kind;
             if (k != PUBLISH && k != REUSE) continue;
-            (,, bytes32 codehash,) = registry.typeInfo(actions[i].typeId);
-            profile = keccak256(abi.encode(profile, actions[i].typeId, codehash, epoch));
+            (,, bytes32 ruleId,, bytes32 policyCodehash,,) = registry.typeInfo(actions[i].typeId);
+            profile = keccak256(abi.encode(profile, actions[i].typeId, ruleId, policyCodehash, epoch));
         }
+    }
+
+    /// The acceptance basis that admitted a publish/reuse admission: its Type, the Type's mandatory
+    /// rule (pinned instance + ruleId; immutable, so today's registry value IS the historical one)
+    /// and the registry policy row (index, acceptor, codehash, epoch, block) in force at that
+    /// admission. Read from the admission row, never re-derived from today's policy. Reverts for
+    /// other kinds.
+    function acceptanceBasis(uint64 ordinal)
+        external
+        view
+        returns (
+            bytes32 typeId,
+            uint16 activation,
+            address mandatoryAcceptor,
+            bytes32 ruleId,
+            address policyAcceptor,
+            bytes32 policyCodehash,
+            uint64 epoch,
+            uint64 activatedAt
+        )
+    {
+        (typeId, activation) = _basisKey(ordinal);
+        TypeView memory t = _typeOf(typeId);
+        mandatoryAcceptor = t.mandatory;
+        ruleId = t.ruleId;
+        (policyAcceptor, policyCodehash, epoch, activatedAt) = registry.activation(typeId, activation);
+    }
+
+    /// The (Type, policy row) an admission was accepted under; reverts for non-publish kinds.
+    function _basisKey(uint64 ordinal) private view returns (bytes32 typeId, uint16 activation) {
+        AdmissionRow storage ar = _admission[ordinal];
+        uint256 m = ar.meta;
+        uint8 kind = uint8(m & 0xF);
+        if (kind == PUBLISH) typeId = ar.b;
+        else if (kind == REUSE) typeId = _record[ar.a].typeId;
+        else revert E_NO_BASIS(ordinal);
+        activation = uint16(m >> 152);
     }
 
     function indexObligations() public view returns (bytes32) {

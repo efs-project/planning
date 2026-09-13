@@ -11,6 +11,12 @@ import {IAcceptor, IIndexModule} from "./Interfaces.sol";
 
 /// Acceptance rule with failure modes. mode 0 = accept when body >= minBody; 1 = return
 /// false; 2 = revert; 3 = burn all bounded gas (proves the STATICCALL bound rejects it).
+/// MUTABLE TEST DOUBLE (authority repair F5 addendum): `mode`/`minBody` change its behaviour with
+/// an UNCHANGED runtime codehash, so pinning its codehash pins nothing about what it accepts. It
+/// is therefore never a Type's MANDATORY rule in the fixtures; it is installed only as an
+/// ADDITIONAL Realm policy acceptor through TypeRegistry.activate (its refusal is
+/// E_POLICY_REJECTED). Mandatory fixture rules are stateless or immutable-configured
+/// (LabAcceptors.sol: QuoteAcceptor, LabelAcceptor, MinBodyAcceptor).
 contract MockAcceptor is IAcceptor {
     uint8 public mode;
     uint256 public minBody;

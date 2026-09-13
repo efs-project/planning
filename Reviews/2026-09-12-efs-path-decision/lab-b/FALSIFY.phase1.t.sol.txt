@@ -1,0 +1,346 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.30;
+
+import {Keys} from "../src/Keys.sol";
+import {Ledger} from "../src/Ledger.sol";
+import {IndexModule} from "../src/IndexModule.sol";
+import {LensReader} from "../src/LensReader.sol";
+import {IAcceptor} from "../src/Interfaces.sol";
+import {QuoteAcceptor} from "../src/LabAcceptors.sol";
+import {LabBase} from "./LabBase.sol";
+
+/// DISPOSABLE LAB, NO PROTOCOL CLAIM. PHASE 1 FALSIFIERS against the CURRENT source
+/// (branch head e77f36d; Core blobs identical to the dcc7b94 profile pin). Written under a
+/// no-compile rule: desk-checked only. Each F-test asserts the SAFE behaviour and is EXPECTED
+/// TO FAIL on this source; the `probe:` requires before the final assertion pin down the
+/// exact unsafe outcome so a failure cannot be mistaken for an unrelated revert. F2 is the
+/// negative case and is expected to PASS. Evidence lines are cited in FALSIFY.md.
+///
+/// Read the failing message as the finding:
+///   F1  a grade-0 (src.v == 0) import packet whose sourcePrincipal CLAIMS another principal
+///       mints and controls a subject under the claimed principal at the destination.
+///   F3  re-registering a Type id with different refTypes/acceptor changes what every record
+///       already admitted under that id means (shape/ref drift under one Type id).
+///   F4  there is no acceptance-policy layer separate from Type identity: the only way to
+///       change WHICH rule enforces T is to overwrite T, and no retained state says which
+///       rule admitted an old record.
+
+/// Fixture rule v2 of sdk-fixture step 10: a 32-byte uint256 quote whose mantissa is at most
+/// 2_500_000_000. A different codehash from MockAcceptor, so a "rule change" is observable
+/// through the registry's pinned codehash rather than through a mode flag.
+contract StrictQuoteAcceptor is IAcceptor {
+    uint256 public constant CAP = 2_500_000_000;
+
+    function accept(bytes32, bytes calldata data, bytes32[] calldata) external pure returns (bool) {
+        if (data.length != 32) return false;
+        return abi.decode(data, (uint256)) <= CAP;
+    }
+}
+
+/// An unrelated contract importing on its own behalf (msg.sender == src.author path).
+contract Importer {
+    function run(Ledger dest, Ledger.SourceEvidence memory src, Ledger.Action[] memory a, bytes[] memory b)
+        external
+        returns (uint64 publication)
+    {
+        Ledger.Intent memory none;
+        (publication,) = dest.importPublication(src, a, b, none, "");
+    }
+}
+
+contract FalsifyTest is LabBase {
+    bytes32 internal constant REALM2 = keccak256("lab/realm/2");
+
+    Ledger internal dest;
+    IndexModule internal destIndex;
+    LensReader internal destLens;
+
+    function setUp() public override {
+        super.setUp();
+        dest = new Ledger(registry, REALM2);
+        destIndex = new IndexModule(address(dest));
+        dest.setIndexModule(address(destIndex));
+        destLens = new LensReader(dest, destIndex);
+    }
+
+    function publications(Ledger l) internal view returns (uint64 n) {
+        (,,, n) = l.counts();
+    }
+
+    /// A grade-0 packet as the current importPublication accepts it: nothing in it is checked
+    /// when v == 0 (Ledger.sol:266-272), so every field is a bare claim.
+    function claimedPacket(address author, bytes32 claimedPrincipal) internal view returns (Ledger.SourceEvidence memory src) {
+        src.realmId = REALM; // claims the source Realm
+        src.coreCodeCommitment = address(ledger).codehash; // claims the source code
+        src.author = author;
+        src.sourcePrincipal = claimedPrincipal; // the claim under test
+        src.nonce = 0;
+        src.deadline = uint64(block.timestamp + 3600);
+        // v == 0, r == s == 0: "contract-author source, chain-state witness"; grade left to the callee
+    }
+
+    // ------------------------------------------------------------------------ F1
+
+    /// F1a. eoaB (an EOA, not even a contract) presents a v == 0 packet claiming eoaA's principal,
+    /// signs destination authorization for itself, and the destination mints
+    /// subject(principal(eoaA), salt) and binds eoaB's head to it.
+    /// EXPECTED TO FAIL on e77f36d: Ledger.sol:266-272 (no check when v == 0), :276
+    /// (p.creator = src.sourcePrincipal as claimed), :598 (subject minted under p.creator).
+    function test_F1a_grade0_import_mints_subject_under_claimed_eoa_principal() public {
+        bytes32 salt = bytes32(uint256(41));
+        bytes32 victimSubject = Keys.subject(Keys.principal(eoaA), salt); // eoaA never signed anything
+        bytes32 r1 = rid(QUOTE, q(3000));
+        Ledger.Action[] memory a = new Ledger.Action[](3);
+        a[0] = aCreate(salt);
+        a[1] = aPublish(QUOTE, q(3000));
+        a[2] = aBind(HEAD, victimSubject, NO_ROLE, r1, 0);
+        bytes[] memory b = new bytes[](3);
+        b[1] = q(3000);
+        Ledger.SourceEvidence memory src = claimedPacket(eoaB, Keys.principal(eoaA));
+        (Ledger.Intent memory dst, bytes memory dstSig) = signed(PK_B, dest, 0, a); // eoaB authorizes itself at the destination
+        require(dest.subjectCreatedAt(victimSubject) == 0 && publications(dest) == 0, "clean destination");
+        bool reverted;
+        try dest.importPublication(src, a, b, dst, dstSig) returns (uint64 pub, uint64) {
+            // ---- observed unsafe outcome on the current source (probes)
+            require(dest.subjectCreatedAt(victimSubject) != 0, "probe: subject minted under the CLAIMED principal (eoaA)");
+            (uint8 st, bytes32 t,, address au,) = destLens.resolve(lensOf(eoaB), HEAD, victimSubject, NO_ROLE);
+            require(st == 1 && t == r1 && au == eoaB, "probe: eoaB's head on eoaA's subject resolves FOUND");
+            Ledger.SourceEvidence memory kept = dest.sourceEvidence(pub);
+            require(kept.grade == 0 && kept.sourcePrincipal == Keys.principal(eoaA) && kept.realmId == REALM, "probe: the bare claim is retained as source evidence");
+            require(dest.isImported(pub) && dest.nonces(eoaB) == 1, "probe: a full publication was admitted");
+            // the genuine holder can no longer mint it: the id is squatted
+            (Ledger.Intent memory own, bytes memory ownSig) = signed(PK_A, dest, 0, one(aCreate(salt)));
+            bytes[] memory nb = new bytes[](1);
+            try dest.executeSigned(own, one(aCreate(salt)), nb, ownSig) {
+                require(false, "probe: the genuine create should collide");
+            } catch (bytes memory err) {
+                expectSel(err, Ledger.E_SUBJECT_EXISTS.selector, "probe: eoaA's own create of its subject is refused (squatted)");
+            }
+        } catch (bytes memory) {
+            reverted = true;
+        }
+        require(
+            reverted && dest.subjectCreatedAt(victimSubject) == 0 && publications(dest) == 0,
+            "F1a UNSAFE: an unverified v==0 source claim minted and controls another principal's subject (Ledger.sol:266-276,598)"
+        );
+    }
+
+    /// F1b. An unrelated contract (Importer) presents a v == 0 packet claiming the producer
+    /// contract's origin-qualified SOURCE principal (alice on REALM) through the msg.sender path;
+    /// the destination mints alice's source subject id for the importer's head.
+    /// EXPECTED TO FAIL on e77f36d: Ledger.sol:280-284 (only msg.sender == src.author is checked,
+    /// never the principal), :276, :598.
+    function test_F1b_grade0_import_mints_subject_under_claimed_contract_origin_principal() public {
+        Importer mallory = new Importer();
+        bytes32 salt = bytes32(uint256(42));
+        bytes32 aliceSourcePrincipal = ledger.principalOf(address(alice)); // (kind 2, REALM origin, alice)
+        bytes32 victimSubject = Keys.subject(aliceSourcePrincipal, salt);
+        bytes32 r1 = rid(QUOTE, q(3000));
+        Ledger.Action[] memory a = new Ledger.Action[](3);
+        a[0] = aCreate(salt);
+        a[1] = aPublish(QUOTE, q(3000));
+        a[2] = aBind(HEAD, victimSubject, NO_ROLE, r1, 0);
+        bytes[] memory b = new bytes[](3);
+        b[1] = q(3000);
+        Ledger.SourceEvidence memory src = claimedPacket(address(mallory), aliceSourcePrincipal);
+        bool reverted;
+        try mallory.run(dest, src, a, b) returns (uint64 pub) {
+            require(dest.subjectCreatedAt(victimSubject) != 0, "probe: alice's SOURCE subject id minted by an unrelated importer");
+            require(dest.subjectCreatedAt(Keys.subject(dest.principalOf(address(mallory)), salt)) == 0, "probe: not under the importer's own principal");
+            (uint8 st, bytes32 t,, address au,) = destLens.resolve(lensOf(address(mallory)), HEAD, victimSubject, NO_ROLE);
+            require(st == 1 && t == r1 && au == address(mallory), "probe: importer's head on the claimed subject resolves FOUND");
+            require(dest.sourceEvidence(pub).grade == 0, "probe: retained as an unverified witness");
+            // a second claimant of the same (principal, salt) is now refused: first claim wins the id
+            Importer second = new Importer();
+            Ledger.SourceEvidence memory src2 = claimedPacket(address(second), aliceSourcePrincipal);
+            try second.run(dest, src2, a, b) {
+                require(false, "probe: second claim should collide");
+            } catch (bytes memory err) {
+                expectSel(err, Ledger.E_SUBJECT_EXISTS.selector, "probe: the id is squatted by whoever claimed first");
+            }
+        } catch (bytes memory) {
+            reverted = true;
+        }
+        require(
+            reverted && dest.subjectCreatedAt(victimSubject) == 0,
+            "F1b UNSAFE: an unrelated importer minted a subject under a claimed contract-origin principal (Ledger.sol:280-284,276,598)"
+        );
+    }
+
+    // ------------------------------------------------------------------------ F2 (negative, expected to PASS)
+
+    function sourceOf(Ledger l, uint64 pub) internal view returns (Ledger.SourceEvidence memory src) {
+        (address author,, uint8 v,,, bytes32 r, bytes32 s, uint64 nonce, uint64 deadline,, bytes32 prof, bytes32 obl,) = l.evidence(pub);
+        src.realmId = l.realmId();
+        src.coreCodeCommitment = address(l).codehash;
+        src.author = author;
+        src.nonce = nonce;
+        src.deadline = deadline;
+        src.acceptanceProfile = prof;
+        src.indexObligations = obl;
+        src.v = v;
+        src.r = r;
+        src.s = s;
+        src.sourcePrincipal = l.principalOf(author);
+    }
+
+    /// F2. The EOA-signed import path: a source signature over another domain/realm never
+    /// authorizes destination effects, and a signed packet cannot claim another principal.
+    /// EXPECTED TO PASS on e77f36d (Ledger.sol:257-265, :281, :286-293, :219). The one KNOWN
+    /// gap is not asserted here: the name/version-only EIP-712 domain lets the same signature
+    /// execute on a second deployment with the same (realm, code) — PROFILE.md "FUTURE
+    /// replay-domain repair", out of this scope.
+    function test_F2_signed_source_packet_authorizes_nothing_at_the_destination() public {
+        bytes32 salt = bytes32(uint256(43));
+        bytes32 subj = subjectOf(eoaA, 43);
+        bytes32 r1 = rid(QUOTE, q(3000));
+        Ledger.Action[] memory a = new Ledger.Action[](3);
+        a[0] = aCreate(salt);
+        a[1] = aPublish(QUOTE, q(3000));
+        a[2] = aBind(HEAD, subj, NO_ROLE, r1, 0);
+        bytes[] memory b = new bytes[](3);
+        b[1] = q(3000);
+        (Ledger.Intent memory intent, bytes memory sig) = signed(PK_A, ledger, 0, a);
+        (uint64 srcPub,) = ledger.executeSigned(intent, a, b, sig);
+        Ledger.SourceEvidence memory src = sourceOf(ledger, srcPub);
+        Ledger.Intent memory none;
+        // (a) a signed packet claiming another principal is refused before any write
+        Ledger.SourceEvidence memory claimB = sourceOf(ledger, srcPub);
+        claimB.sourcePrincipal = Keys.principal(eoaB);
+        (Ledger.Intent memory dst, bytes memory dstSig) = signed(PK_A, dest, 0, a);
+        try dest.importPublication(claimB, a, b, dst, dstSig) {
+            require(false, "x");
+        } catch (bytes memory err) {
+            expectSel(err, Ledger.E_SOURCE_SIGNATURE.selector, "F2a: signed packet cannot claim another principal (Ledger.sol:264)");
+        }
+        // (b) re-labelling the source domain (realm) breaks the source signature
+        Ledger.SourceEvidence memory relabelled = sourceOf(ledger, srcPub);
+        relabelled.realmId = REALM2;
+        try dest.importPublication(relabelled, a, b, dst, dstSig) {
+            require(false, "x");
+        } catch (bytes memory err) {
+            expectSel(err, Ledger.E_SOURCE_SIGNATURE.selector, "F2b: a source signature is bound to its claimed domain (Ledger.sol:262-263)");
+        }
+        // (c) the source signature is not destination authority for an unrelated msg.sender
+        try dest.importPublication(src, a, b, none, "") {
+            require(false, "x");
+        } catch (bytes memory err) {
+            expectSel(err, Ledger.E_DESTINATION_AUTH.selector, "F2c: no destination authorization, no effect (Ledger.sol:281)");
+        }
+        // (d) the source intent itself is refused by the destination's signed ingress
+        try dest.executeSigned(intent, a, b, sig) {
+            require(false, "x");
+        } catch (bytes memory err) {
+            expectSel(err, Ledger.E_INTENT.selector, "F2d: source intent is bound to the source Realm (Ledger.sol:219)");
+        }
+        require(dest.subjectCreatedAt(subj) == 0 && publications(dest) == 0 && dest.nonces(eoaA) == 0, "F2: nothing was written");
+        // (e) the legitimate path still works and keeps the verified principal
+        (uint64 dstPub,) = dest.importPublication(src, a, b, dst, dstSig);
+        require(dest.sourceEvidence(dstPub).grade == 1 && dest.subjectCreatedAt(subj) != 0, "F2e: verified EOA source, id preserved");
+    }
+
+    // ------------------------------------------------------------------------ F3
+
+    /// F3. Type identity drift: after a record is admitted under QUOTE (0 refs, MockAcceptor),
+    /// re-registering QUOTE with refTypes [ITEM] and a different acceptor changes what the SAME
+    /// typeId means: the old record's first body word is now a checked ITEM reference, the
+    /// old acceptor codehash is gone from state, and a signature over the same actions has a
+    /// different acceptance profile.
+    /// EXPECTED TO FAIL on e77f36d: TypeRegistry.sol:42-55 (no registered check; :51-52
+    /// overwrite TypeInfo and _refTypes in place); Ledger.sol:448,468 read the CURRENT rule.
+    function test_F3_type_identity_drifts_under_reregistration() public {
+        (bool reg0, address acc0, bytes32 ch0, uint8 rc0) = registry.typeInfo(QUOTE);
+        require(reg0 && acc0 == address(acceptor) && rc0 == 0 && registry.refTypes(QUOTE).length == 0, "QUOTE as registered");
+        uint64 epoch0 = registry.epoch();
+        bytes32 r1 = alice.publish(QUOTE, q(3000)); // admitted under QUOTE's rule as registered
+        (,,,,,,,,,, bytes32 profile1,,) = ledger.evidence(1);
+        require(profile1 == keccak256(abi.encode(bytes32(0), QUOTE, ch0, epoch0)), "the admission's profile commits to (QUOTE, ch0, epoch0)");
+        Ledger.Action[] memory same = one(aPublish(QUOTE, q(4000)));
+        (Ledger.Intent memory intent, bytes memory sig) = signed(PK_A, ledger, 0, same); // signed under the rule as registered
+        // ---- the "same" Type id registered again with different shape/refs/rule
+        QuoteAcceptor other = new QuoteAcceptor();
+        require(address(other).codehash != ch0, "a different rule implementation");
+        bytes32[] memory oneItem = new bytes32[](1);
+        oneItem[0] = ITEM;
+        bool refused;
+        try registry.register(QUOTE, address(other), oneItem) {
+            // ---- observed unsafe outcome on the current source (probes)
+            (, address acc1, bytes32 ch1, uint8 rc1) = registry.typeInfo(QUOTE);
+            require(acc1 == address(other) && ch1 != ch0 && rc1 == 1 && registry.refTypes(QUOTE)[0] == ITEM, "probe: QUOTE now names another rule and shape");
+            (bytes32 tt,, uint32 occ,) = ledger.record(r1);
+            require(tt == QUOTE && occ == 1, "probe: the old record still says it is a QUOTE");
+            bytes[] memory nb = new bytes[](1);
+            try bob.execute(one(aReuse(QUOTE, r1)), nb) {
+                require(false, "probe: reuse should now fail");
+            } catch (bytes memory err) {
+                expectSel(err, Ledger.E_REF_MISSING.selector, "probe: the old body's first word is now read as a checked ITEM reference");
+            }
+            require(ledger.acceptanceProfileOf(same) != intent.acceptanceProfile, "probe: the unsent signature's profile no longer matches");
+            try ledger.executeSigned(intent, same, _bodies1(q(4000)), sig) {
+                require(false, "probe: stale signature should fail");
+            } catch (bytes memory err) {
+                expectSel(err, Ledger.E_INTENT.selector, "probe: receipt-bound activation rejects it (this half is SAFE)");
+            }
+            // the historical basis of admission 1 is no longer derivable from registry state:
+            // profile1 commits to ch0, and ch0 is nowhere in state (only in a past event)
+            require(profile1 != keccak256(abi.encode(bytes32(0), QUOTE, ch1, epoch0)) && profile1 != keccak256(abi.encode(bytes32(0), QUOTE, ch1, registry.epoch())), "probe: today's registry cannot re-derive the old admission's profile");
+        } catch (bytes memory) {
+            refused = true;
+        }
+        (, address accF, bytes32 chF, uint8 rcF) = registry.typeInfo(QUOTE);
+        require(
+            refused && accF == acc0 && chF == ch0 && rcF == rc0,
+            "F3 UNSAFE: the same typeId now has a different shape/ref/rule identity (TypeRegistry.sol:42-55 overwrite in place)"
+        );
+    }
+
+    function _bodies1(bytes memory body) internal pure returns (bytes[] memory b) {
+        b = new bytes[](1);
+        b[0] = body;
+    }
+
+    // ------------------------------------------------------------------------ F4
+
+    /// F4. No separation between Type identity and Realm acceptance policy: activating fixture
+    /// rule v2 for QUOTE (StrictQuoteAcceptor) can only be expressed as overwriting QUOTE.
+    /// After it, the registry reports v2 as QUOTE's rule, retains no v1, and no retained state
+    /// names the rule that admitted the v1-era record; a historical read can only guess.
+    /// EXPECTED TO FAIL on e77f36d: TypeRegistry.sol:16-22 (one TypeInfo per id, no policy
+    /// table, no history), :51 (overwrite); Ledger.sol:87-88,424-436 (the evidence cell keeps an
+    /// opaque running hash, no per-admission acceptor basis); :731-746 (admission row has none).
+    function test_F4_policy_activation_rewrites_identity_and_loses_historical_basis() public {
+        (,, bytes32 chV1,) = registry.typeInfo(QUOTE);
+        uint64 epochV1 = registry.epoch();
+        bytes memory high = q(3_000_000_000); // above the v2 cap: admitted under v1
+        bytes32 rHigh = alice.publish(QUOTE, high);
+        (,,,,,,,,,, bytes32 profileV1,,) = ledger.evidence(1);
+        // ---- "activate rule v2" — the only lever the current source offers is register()
+        StrictQuoteAcceptor v2 = new StrictQuoteAcceptor();
+        bytes32[] memory none;
+        bool refused;
+        try registry.register(QUOTE, address(v2), none) {
+            (, address accNow, bytes32 chNow,) = registry.typeInfo(QUOTE);
+            require(accNow == address(v2) && chNow == address(v2).codehash && chNow != chV1, "probe: QUOTE's rule is now v2");
+            require(registry.epoch() == epochV1 + 1, "probe: the global epoch moved (SAFE half: unsent signatures go stale)");
+            (bytes32 tt,, uint32 occ,) = ledger.record(rHigh);
+            require(tt == QUOTE && occ == 1, "probe: the v1-era record is retained");
+            bytes[] memory nb = new bytes[](1);
+            try bob.execute(one(aReuse(QUOTE, rHigh)), nb) {
+                require(false, "probe: reuse under v2 should fail");
+            } catch (bytes memory err) {
+                expectSel(err, Ledger.E_REJECTED.selector, "probe: re-admission runs today's policy (correct) ...");
+            }
+            // ... but the v1 admission's basis is not stated anywhere: the evidence profile is an
+            // opaque hash of (QUOTE, ch, epoch) and the registry no longer holds chV1.
+            require(profileV1 == keccak256(abi.encode(bytes32(0), QUOTE, chV1, epochV1)), "probe: only a reader who already knows chV1 can confirm the basis");
+            require(profileV1 != keccak256(abi.encode(bytes32(0), QUOTE, chNow, epochV1)), "probe: today's rule does not explain the old admission");
+        } catch (bytes memory) {
+            refused = true;
+        }
+        (,, bytes32 chIdentity,) = registry.typeInfo(QUOTE);
+        require(
+            refused && chIdentity == chV1,
+            "F4 UNSAFE: rule activation = identity overwrite; no policy table, no activation history, no per-admission basis (TypeRegistry.sol:16-27,51)"
+        );
+    }
+}

@@ -1,0 +1,58 @@
+2026-09-13T08:29:33Z preflight sha=ca1a228 start=08:50 deadline=09:10 dry=--dry-run
+2026-09-13T08:29:33Z solc cache: /Users/james/Library/Application Support/svm/0.8.30/solc-0.8.30
+2026-09-13T08:29:33Z heavy at preflight: 0
+2026-09-13T08:29:33Z free: 274Gi
+2026-09-13T08:29:33Z dry-run complete
+2026-09-13T08:50:01Z preflight sha=ca1a228 start=08:50 deadline=09:10 dry=no
+2026-09-13T08:50:01Z solc cache: /Users/james/Library/Application Support/svm/0.8.30/solc-0.8.30
+2026-09-13T08:50:01Z heavy at preflight: 0
+2026-09-13T08:50:01Z free: 275Gi
+2026-09-13T08:50:01Z worktree /Users/james/Code/EFS/planning-road-b-pin at ca1a2283ae3f19352d90c0ada734b1bd98e03659
+2026-09-13T08:50:01Z worker flags: build='--threads 2' test='--threads 2'
+2026-09-13T08:50:01Z heavy before launch: 0
+2026-09-13T08:50:01Z LAUNCH build (alarm 300s) pid=71273: forge --root /Users/james/Code/EFS/planning-road-b-pin/Reviews/2026-09-12-efs-path-decision/lab-b --out /private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b-pin-ca1a228/out --cache-path /private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b-pin-ca1a228/cache build --sizes --threads 2
+2026-09-13T08:50:01Z build exit=2 end=2026-09-13T08:50:01Z
+2026-09-13T08:50:01Z heavy after: 0
+2026-09-13T08:50:01Z scratch: 8.0K
+2026-09-13T08:50:01Z done
+2026-09-13T08:50:24Z preflight sha=ca1a228 start=08:50 deadline=09:10 dry=no
+2026-09-13T08:50:24Z solc cache: /Users/james/Library/Application Support/svm/0.8.30/solc-0.8.30
+2026-09-13T08:50:24Z heavy at preflight: 0
+2026-09-13T08:50:24Z free: 275Gi
+2026-09-13T08:50:24Z worktree /Users/james/Code/EFS/planning-road-b-pin at ca1a2283ae3f19352d90c0ada734b1bd98e03659
+2026-09-13T08:50:24Z worker flags: build='--threads 2' test='--threads 2'
+2026-09-13T08:50:24Z heavy before launch: 0
+2026-09-13T08:50:24Z LAUNCH build (alarm 300s) pid=71589: forge build --sizes --root /Users/james/Code/EFS/planning-road-b-pin/Reviews/2026-09-12-efs-path-decision/lab-b --out /private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b-pin-ca1a228/out --cache-path /private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b-pin-ca1a228/cache --threads 2
+2026-09-13T08:50:39Z build exit=0 end=2026-09-13T08:50:39Z
+2026-09-13T08:50:39Z LAUNCH test (alarm 600s) pid=71589: forge test -vv --root /Users/james/Code/EFS/planning-road-b-pin/Reviews/2026-09-12-efs-path-decision/lab-b --out /private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b-pin-ca1a228/out --cache-path /private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b-pin-ca1a228/cache --threads 2
+2026-09-13T08:50:39Z test exit=0 end=2026-09-13T08:50:39Z
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 13.28ms (6.36ms CPU time)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 15.00ms (7.96ms CPU time)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 3.40ms (2.78ms CPU time)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 5.99ms (5.20ms CPU time)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.88ms (1.22ms CPU time)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 7.05ms (6.32ms CPU time)
+Ran 6 test suites in 32.09ms (46.59ms CPU time): 43 tests passed, 0 failed, 0 skipped (43 total tests)
+2026-09-13T08:50:39Z heavy after: 0
+2026-09-13T08:50:39Z scratch: 3.2M
+2026-09-13T08:50:39Z done
+2026-09-13T08:53:48Z receipts preflight sha=ca1a228 start=09:30 deadline=09:50 cells=failure-rows,policy/activate,failure/refused-re-registration,failure/unsupported-native-import dry=--dry-run
+2026-09-13T08:53:48Z anvil: anvil Version: 1.7.1; ethers 6.13.7; node v24.11.0
+2026-09-13T08:53:48Z heavy at preflight: 0
+2026-09-13T08:53:48Z free: 275Gi
+2026-09-13T08:53:48Z scratch now: 3.2M
+2026-09-13T08:53:48Z dry-run complete (no node/anvil started)
+2026-09-13T08:56:21Z receipts preflight sha=ca1a228 start=09:00 deadline=09:20 cells=native-one/quote,signed-one/quote,failure-rows,policy/activate,failure/refused-re-registration,failure/unsupported-native-import dry=no
+2026-09-13T08:56:21Z anvil: anvil Version: 1.7.1; ethers 6.13.7; node v24.11.0
+2026-09-13T08:56:21Z heavy at preflight: 0
+2026-09-13T08:56:21Z free: 275Gi
+2026-09-13T08:56:21Z scratch now: 3.2M
+2026-09-13T08:56:21Z worktree /Users/james/Code/EFS/planning-road-b-pin at ca1a2283ae3f19352d90c0ada734b1bd98e03659
+2026-09-13T08:56:21Z sleeping 219s until 09:00 UTC
+2026-09-13T09:00:00Z heavy before launch: 0
+2026-09-13T09:00:00Z LAUNCH receipts (alarm 1170s) launcher pid=73336: (cd /Users/james/Code/EFS/planning-road-b-pin/Reviews/2026-09-12-efs-path-decision/lab-b && node script/measure.mjs --anvil --cells native-one/quote,signed-one/quote,failure-rows,policy/activate,failure/refused-re-registration,failure/unsupported-native-import)  FOUNDRY_OUT=/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b-pin-ca1a228/out EFS_LAB_SCRATCH=/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b-pin-ca1a228
+2026-09-13T09:00:05Z receipts exit=0 end=2026-09-13T09:00:05Z
+2026-09-13T09:00:05Z heavy after: 0
+2026-09-13T09:00:05Z scratch: 7.5M
+2026-09-13T09:00:05Z measure.json: 4.2M; anvil pid/port: 79548 58056 2026-09-13T09:00:00.778Z 2026-09-13T09:00:05.173Z
+2026-09-13T09:00:05Z done

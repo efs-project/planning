@@ -73,19 +73,38 @@ function runnerDeclaration(startText, endText) {
   return source.slice(start, end);
 }
 
-function loadFailureRow({ expectedSelector, observedSelector, before = { value: 1 }, after = before }) {
+const SENDER = { address: '0x00000000000000000000000000000000000000a1' };
+const ADMIN_ERROR = '0x11111111';
+const EXISTS_ERROR = '0x22222222';
+
+// `observeRaw` / `send` / `iface` are injectable so the caller (`from`) and revert-argument plumbing can be observed
+function loadFailureRow({ expectedSelector, observedSelector, before = { value: 1 }, after = before, observeRaw = null, send = null, iface = null, captured = {} }) {
   const stripBlock = runnerDeclaration('const stripBlock =', '// ---------------------------------------------------------------- sealed cells');
   const failureRow = runnerDeclaration('async function failureRow(', 'const baseCount =');
   const probes = [before, after];
+  let probeCalls = 0; // pre/post alternate per failureRow call; a second call on the same loader must not exhaust the pair
   return vm.runInNewContext(`${stripBlock}\n${failureRow}\nfailureRow`, {
     FAIL_GAS: 1n,
     assert,
     errorSelector: () => expectedSelector,
+    iface: iface ?? (() => { throw new Error('iface must not be needed without expected arguments'); }),
     log() {},
-    observeRaw: async () => ({ error: { data: observedSelector } }),
-    send: async () => ({ block: 12, status: 0 }),
-    stateProbe: async () => probes.shift(),
+    observeRaw: observeRaw ?? (async (_ctx, _sink, _stage, _meta, _to, _data, _block, opts) => { captured.from = opts?.from ?? null; return { error: { data: observedSelector } }; }),
+    send: send ?? (async (_ctx, _build, _label, opts) => { captured.sendWallet = opts?.wallet ?? null; return { block: 12, status: 0 }; }),
+    stateProbe: async () => probes[probeCalls++ % probes.length],
+    Array, // the extracted function builds arrays through the outer realm so deep-equality against test literals holds
   });
+}
+const failureCtx = () => ({ latestBlock: async () => 11, raw: [], deployer: SENDER });
+
+function loadSelectCells() {
+  const declaration = runnerDeclaration('function selectCells(', '// ---------------------------------------------------------------- deployment');
+  return vm.runInNewContext(`${declaration}\nselectCells`, {});
+}
+
+function loadJoinBasis() {
+  const declaration = runnerDeclaration('function joinBasis(', 'const QUOTE_HIGH =');
+  return vm.runInNewContext(`${declaration}\njoinBasis`, {});
 }
 
 function loadPersist(outJson, write = writeFileSync) {
@@ -171,17 +190,81 @@ test('report finalizer catches rejecting a zero-mismatch run before successful f
 
 test('failureRow catches accepting an unavailable expected selector', async () => {
   const failureRow = loadFailureRow({ expectedSelector: null, observedSelector: '0x12345678' });
-  await assert.rejects(() => failureRow({ latestBlock: async () => 11, raw: [] }, 'missing-selector', {}, 'MissingError', []), /expected selector unavailable/);
+  await assert.rejects(() => failureRow(failureCtx(), 'missing-selector', {}, 'MissingError', []), /expected selector unavailable/);
 });
 
 test('failureRow catches accepting a wrong revert selector', async () => {
   const failureRow = loadFailureRow({ expectedSelector: '0x12345678', observedSelector: '0x87654321' });
-  await assert.rejects(() => failureRow({ latestBlock: async () => 11, raw: [] }, 'wrong-selector', {}, 'WrongError', []), /revert selector mismatch/);
+  await assert.rejects(() => failureRow(failureCtx(), 'wrong-selector', {}, 'WrongError', []), /revert selector mismatch/);
 });
 
 test('failureRow catches accepting changed state after the reverted transaction', async () => {
   const failureRow = loadFailureRow({ expectedSelector: '0x12345678', observedSelector: '0x12345678', before: { value: 1 }, after: { value: 2 } });
-  await assert.rejects(() => failureRow({ latestBlock: async () => 11, raw: [] }, 'changed-state', {}, 'StateError', []), /state changed across expected revert/);
+  await assert.rejects(() => failureRow(failureCtx(), 'changed-state', {}, 'StateError', []), /state changed across expected revert/);
+});
+
+test('failureRow simulates the static probe FROM the actual sender and sends from that same wallet', async () => {
+  const captured = {};
+  const failureRow = loadFailureRow({ expectedSelector: '0x12345678', observedSelector: '0x12345678', captured });
+  const row = await failureRow(failureCtx(), 'sender-plumbing', {}, 'SomeError', []);
+  assert.equal(captured.from, SENDER.address);
+  assert.equal(captured.sendWallet, SENDER);
+  assert.equal(row.from, SENDER.address);
+  const other = { address: '0x00000000000000000000000000000000000000b2' };
+  await failureRow(failureCtx(), 'explicit-wallet', {}, 'SomeError', [], { wallet: other });
+  assert.equal(captured.from, other.address);
+  assert.equal(captured.sendWallet, other);
+});
+
+test('failureRow catches a caller-insensitive probe: E_ADMIN would be observed instead of E_TYPE_EXISTS without from', async () => {
+  // a registry whose admin-only call reverts E_ADMIN unless simulated from the admin
+  const callerSensitive = async (_ctx, _sink, _stage, _meta, _to, _data, _block, opts) => ({ error: { data: opts?.from === SENDER.address ? EXISTS_ERROR : ADMIN_ERROR } });
+  const withFrom = loadFailureRow({ expectedSelector: EXISTS_ERROR, observedSelector: null, observeRaw: callerSensitive });
+  const row = await withFrom(failureCtx(), 'refused-re-registration', {}, ['TypeRegistry', 'E_TYPE_EXISTS'], []);
+  assert.equal(row.observedSelector, EXISTS_ERROR);
+  // the pre-review probe (no from) reaches the admin check first and the selector assertion must fail loudly
+  const withoutFrom = loadFailureRow({ expectedSelector: EXISTS_ERROR, observedSelector: null, observeRaw: async () => ({ error: { data: ADMIN_ERROR } }) });
+  await assert.rejects(() => withoutFrom(failureCtx(), 'refused-re-registration-no-from', {}, ['TypeRegistry', 'E_TYPE_EXISTS'], []), /revert selector mismatch/);
+});
+
+test('failureRow asserts the decoded revert ARGUMENTS when expected arguments are given', async () => {
+  const selector = '0x33333333';
+  const data = `${selector}00`;
+  const parsed = { name: 'E_INTENT', args: [3n] };
+  const iface = () => ({ parseError: (d) => (d === data ? parsed : null) });
+  const ok = loadFailureRow({ expectedSelector: selector, observedSelector: data, iface });
+  const row = await ok(failureCtx(), 'stale-signature', {}, 'E_INTENT', [], { args: [3] });
+  assert.deepEqual([...row.decodedArgs], ['3']);
+  assert.deepEqual([...row.expectedArgs], ['3']);
+  assert.equal(row.argsMatch, true);
+  const wrong = loadFailureRow({ expectedSelector: selector, observedSelector: data, iface });
+  await assert.rejects(() => wrong(failureCtx(), 'stale-signature-wrong-field', {}, 'E_INTENT', [], { args: [2] }), /revert arguments mismatch/);
+  const wrongName = loadFailureRow({ expectedSelector: selector, observedSelector: data, iface: () => ({ parseError: () => ({ name: 'E_OTHER', args: [3n] }) }) });
+  await assert.rejects(() => wrongName(failureCtx(), 'stale-signature-wrong-error', {}, 'E_INTENT', [], { args: [3] }), /does not decode as/);
+  // typeId arguments compare case-insensitively as hex strings
+  const typed = loadFailureRow({ expectedSelector: selector, observedSelector: data, iface: () => ({ parseError: () => ({ name: 'E_TYPE_EXISTS', args: ['0xABCDEF'] }) }) });
+  const typedRow = await typed(failureCtx(), 'refused', {}, ['TypeRegistry', 'E_TYPE_EXISTS'], [], { args: ['0xabcdef'] });
+  assert.deepEqual([...typedRow.decodedArgs], ['0xabcdef']);
+});
+
+test('selectCells rejects unknown keys and empty selections before any chain starts, and keeps plan order', () => {
+  const selectCells = loadSelectCells();
+  const plan = ['native-one/quote', 'failure-rows', 'policy/activate', 'failure/refused-re-registration'];
+  assert.deepEqual([...selectCells(plan, {})], plan);
+  assert.deepEqual([...selectCells(plan, { cells: 'failure/refused-re-registration, policy/activate' })], ['policy/activate', 'failure/refused-re-registration']);
+  assert.deepEqual([...selectCells(plan, { only: 'failure' })], ['failure-rows', 'failure/refused-re-registration']);
+  assert.throws(() => selectCells(plan, { cells: 'policy/activate,does-not-exist' }), /unknown cell\(s\) does-not-exist/);
+  assert.throws(() => selectCells(plan, { cells: '' }), /selected zero cells/);
+  assert.throws(() => selectCells(plan, { only: 'nothing-matches' }), /selected zero cells/);
+});
+
+test('joinBasis flags a basis whose policy row, codehash or epoch disagree with the registry row', () => {
+  const joinBasis = loadJoinBasis();
+  const basis = { typeId: '0xT', activation: '3', policyAcceptor: '0xAA', policyCodehash: '0xCC', epoch: '9' };
+  assert.equal(joinBasis(basis, { acceptor: '0xaa', codehash: '0xcc', epoch: '9' }).ok, true);
+  assert.equal(joinBasis(basis, { acceptor: '0xaa', codehash: '0xdd', epoch: '9' }).codehashEqual, false);
+  assert.equal(joinBasis(basis, { acceptor: '0xaa', codehash: '0xcc', epoch: '8' }).ok, false);
+  assert.equal(joinBasis(basis, { acceptor: '0xbb', codehash: '0xcc', epoch: '9' }).acceptorEqual, false);
 });
 
 test('persist catches overwriting prior evidence when the replacement write fails', () => {
@@ -218,6 +301,219 @@ test('watchdog failure marker catches pretending evidence exists before report i
   assert.equal(markRunFailure(null, 'watchdog limit elapsed'), false);
   assert.equal(persisted.length, 0);
   assert.match(errors[0], /report not initialized/);
+});
+
+// ---------------------------------------------------------------- the sealed paid point/list slice: pure helpers
+function loadPaidHelpers() {
+  const declaration = runnerDeclaration('// ---- paid-slice pure helpers', '// ---- paid-slice cells');
+  return vm.runInNewContext(`${declaration}\n({ evidenceCategoryOf, assertUnrelatedCaller, abstractRow, checkPaidRowOrdering, deriveAbstractResult, assertAnvilOnlyCells, ANVIL_ONLY_CELLS, ABSTRACT_FIELDS, SELECTION_FIELDS, PLACEMENT_FIELDS, PAID_CALLER_INDEX, PAID_CALLER_PATH })`, {});
+}
+const SEAL = { kind: 'seal', block: 40, hash: '0xseal', timestamp: 1000 };
+const revertOk = { kind: 'revert', block: 40, hash: '0xseal', nextTimestamp: 1001 };
+const txAt = (label, over = {}) => ({ kind: 'tx', label, block: 41, parentHash: '0xseal', timestamp: 1001, txIndex: 0, txCount: 1, onlyTx: true, ...over });
+const retained = (label) => ({ kind: 'retained', label });
+// fixtures of the pure abstract-row derivation
+const SELECTION = { basisAdmission: '12', indexGeneration: '0', rulesEpoch: '6', coreCodeCommitment: '0xcore', lensId: '0xlens', subject: '0xsubj', selectedHead: '0xA2', selectedRevision: '2', selectedAdmission: '10', selectedPublication: '3', selectedAuthor: '0xA1', selectedProofKind: '2', pairId: '0xp1', itemA: '0xi1', itemB: '0xi2', mantissa: '2502000000', scale: '6', observedAt: '1800000000', note: '0xnote' };
+const PLACEMENT = { position: '0xpos', actor: '0xA1', proofKind: '2', revision: '1', admission: '7', publication: '2', basisAdmission: '12', pageStatus: '2', rawTotal: '1', scanned: '1', hydrations: '1', selectedSoFar: '1', mutated: false, ended: true };
+const goodCheck = () => ({ label: 'paid/list-a-first/paid-result', logCount: 1, fromLog: { commitment: '0xc', selection: { ...SELECTION }, placement: { ...PLACEMENT } }, fromReplay: { commitment: '0xc', selection: { ...SELECTION }, placement: { ...PLACEMENT } }, commitmentsAgree: true, replayOk: true, match: true });
+const REPLAY = { rpcId: 77, from: '0xc3', stage: 'paid-replay:paid/list-a-first', blockTag: 41, returnData: '0xret', error: null };
+function evidenceFixture(operation = 'PAID_LIST') {
+  return {
+    operation, lens: 'LENS_A_FIRST', lensArr: ['0xA1', '0xB2'], label: `paid/${operation}`,
+    row: { txIndex: 4, hash: '0xtx', block: 41, blockHash: '0xb41', status: 1, gas: '123' },
+    executed: { txIndex: 0, txCount: 1, txHashes: ['0xtx'], onlyTx: true, timestamp: 1001, parentHash: '0xseal', hash: '0xb41' },
+    seal: { block: 40, hash: '0xseal', timestamp: 1000 },
+    sealBasis: { admissionFrontier: 12, indexGeneration: '0', rulesEpoch: '6', coreCodeCommitment: '0xcore', realmId: '0xrealm' },
+    chainId: 31337, addrs: { ledger: '0xl', lensReader: '0xr', indexModule: '0xi', registry: '0xg', consumer: '0xc' }, consumerCodehash: '0xcc',
+    coordinates: { subject: '0xsubj', folder: '0xswaps', nameRole: '0xname', position: '0xpos' },
+    placementAtSeal: { author: '0xA1', proofKind: '2', publication: '2', admission: '7', revision: '1' },
+    types: { QUOTE_J: '0xq', PAIR: '0xp', ITEM: '0xi' },
+    headLabels: { '0xa2': ['QUOTE_A2', 'A2'] }, authorLabels: { '0xa1': ['AUTHOR_A', 'EOA (wallet 1)'] },
+    caller: { address: '0xc3', derivationPath: "m/44'/60'/0'/0/3" },
+  };
+}
+const DERIVED = ['presence', 'support', 'admission', 'selection'];
+function assertAllUnknown(row, reasonPattern) {
+  for (const k of DERIVED) assert.equal(row[k].outcome, 'UNKNOWN', `${k} UNKNOWN`);
+  for (const k of ['selectedFile', 'selectedHead', 'selectedRevision', 'selectedAuthorEvidenceCategory']) assert.equal(row[k], 'UNKNOWN', `${k} UNKNOWN`);
+  for (const k of ['selectedPhysical', 'selectedAuthor', 'quoteCheck', 'pairCheck']) assert.equal(row[k].outcome, 'UNKNOWN', `${k} UNKNOWN`);
+  assert.equal(row.itemChecks[0].outcome, 'UNKNOWN');
+  assert.equal(row.candidateCoverage.status, 'UNKNOWN');
+  assert.equal(row.rawEvidence.selfCheck.match, false);
+  assert.match(row.rawEvidence.selfCheck.reason, reasonPattern);
+  // separately retained observations survive, each naming its source
+  assert.equal(row.executionBasis.block, 41);
+  assert.equal(row.executionBasis.timestamp, 1001);
+  assert.equal(row.rawEvidence.replay.returnData, '0xret');
+  assert.match(row.placementProvenance.establishedBy, /seal raw replies|raw replies at the seal/); // list wording / point wording; both name the separate seal observation
+  assert.equal(row.placementProvenance.actorAddress, '0xA1');
+}
+function validAbstract(overrides = {}) {
+  return {
+    operation: 'PAID_LIST', lens: 'LENS_B_FIRST',
+    realm: { chainId: 31337 }, execution: { consumer: '0xc' }, profile: 'road-b-lab/2',
+    observationBasis: { admissionFrontier: '12' }, executionBasis: { block: 41 },
+    queryCoordinate: { labels: { parent: '/swaps', name: 'eth-usdc' } },
+    presence: { outcome: 'FOUND' }, support: { outcome: 'SUPPORTED' }, admission: { outcome: 'ADMITTED' }, selection: { outcome: 'SELECTED' },
+    selectedFile: 'FILE_QUOTE', selectedHead: 'QUOTE_B1', selectedRevision: 'B1',
+    selectedPhysical: { head: '0xb1', revisionOrdinal: '1' },
+    selectedAuthor: { label: 'AUTHOR_B' }, selectedAuthorEvidenceCategory: 'CONTRACT_ORIGINATED_PUBLICATION',
+    placementCoordinate: { lookedUpByThisRow: true }, placementProvenance: { sourceStep: 'A1', actor: 'AUTHOR_A', evidenceCategory: 'EOA_SIGNED_PUBLICATION_EFFECT' },
+    quoteCheck: { mantissa: '2501000000' }, pairCheck: { pairId: '0xp' }, itemChecks: [{ id: '0xa' }, { id: '0xb' }],
+    candidateCoverage: { status: 'COMPLETE', basis: '12' }, pageCoverage: { status: 'COMPLETE' },
+    rawEvidence: { transaction: { hash: '0xt' }, selfCheck: { match: true } }, paidExecution: { gasUsed: '1' },
+    ...overrides,
+  };
+}
+
+test('abstractRow builds the arm-neutral comparison row with the RPC_OBSERVED grade and every required field', () => {
+  const { abstractRow, ABSTRACT_FIELDS } = loadPaidHelpers();
+  const row = abstractRow(validAbstract());
+  assert.equal(row.inputEvidenceGrade, 'RPC_OBSERVED');
+  assert.match(row.standing, /never expected answers/);
+  for (const k of ABSTRACT_FIELDS) assert.notEqual(row[k], undefined, `${k} present`);
+  assert.equal(ABSTRACT_FIELDS.length, 27);
+  assert.equal(row.selectedRevision, 'B1');
+  assert.equal(row.selectedPhysical.revisionOrdinal, '1');
+});
+
+test('abstractRow catches a missing, unknown, ordinal-labelled or point-charged-lookup row instead of defaulting it', () => {
+  const { abstractRow } = loadPaidHelpers();
+  const { pageCoverage, ...withoutCoverage } = validAbstract();
+  assert.throws(() => abstractRow(withoutCoverage), /missing field\(s\) pageCoverage/);
+  assert.throws(() => abstractRow(validAbstract({ placementProvenance: null })), /missing field\(s\) placementProvenance/);
+  assert.throws(() => abstractRow(validAbstract({ extraneous: 1 })), /unknown field\(s\) extraneous/);
+  assert.throws(() => abstractRow(validAbstract({ selectedRevision: '1' })), /fixture label/);
+  assert.throws(() => abstractRow(validAbstract({ selectedRevision: 2 })), /fixture label/);
+  assert.throws(() => abstractRow(validAbstract({ operation: 'PAID_POINT', placementCoordinate: { lookedUpByThisRow: true } })), /must not charge a directory lookup/);
+  assert.throws(() => abstractRow(validAbstract({ pageCoverage: { status: 'PARTIAL' } })), /pageCoverage PARTIAL is not a pass/);
+  assert.throws(() => abstractRow(validAbstract({ lens: 'LENS_NO_TIEBREAK' })), /lens LENS_NO_TIEBREAK/);
+  assert.doesNotThrow(() => abstractRow(validAbstract({ operation: 'PAID_POINT', placementCoordinate: { lookedUpByThisRow: false }, pageCoverage: { status: 'NOT_APPLICABLE' } })));
+});
+
+test('checkPaidRowOrdering accepts seal -> (revert -> first tx -> retained) x 4 and returns the rows in order', () => {
+  const { checkPaidRowOrdering } = loadPaidHelpers();
+  const events = [SEAL];
+  for (const label of ['point-a-first', 'list-a-first', 'point-b-first', 'list-b-first']) events.push(revertOk, txAt(label), retained(label));
+  const rows = checkPaidRowOrdering(events);
+  // Array.from materializes the vm-realm array in this realm (strict deepEqual compares prototypes)
+  assert.deepEqual(Array.from(rows, (r) => [r.label, r.block, r.retained]), [['point-a-first', 41, true], ['list-a-first', 41, true], ['point-b-first', 41, true], ['list-b-first', 41, true]]);
+});
+
+test('checkPaidRowOrdering catches a second transaction on the same revert, a revert before retention, a wrong head, a wrong parent and an unretained row', () => {
+  const { checkPaidRowOrdering } = loadPaidHelpers();
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, txAt('a'), retained('a'), txAt('b'), retained('b')]), /row b is not the first transaction after a revert/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, txAt('a'), revertOk, retained('a')]), /revert before row a was retained/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, { kind: 'revert', block: 41, hash: '0xother' }, txAt('a'), retained('a')]), /not the seal/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, { kind: 'tx', label: 'a', block: 42, parentHash: '0xseal' }, retained('a')]), /mined at 42/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, { kind: 'tx', label: 'a', block: 41, parentHash: '0xstale' }, retained('a')]), /on 0xstale/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, txAt('a')]), /row a was never retained/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, retained('a')]), /retained a without that row open/);
+  assert.throws(() => checkPaidRowOrdering([revertOk, txAt('a'), retained('a')]), /first event must be the seal/);
+  assert.throws(() => checkPaidRowOrdering([SEAL]), /no paid row/);
+});
+
+test('checkPaidRowOrdering catches a wrong timestamp, a wrong next-block timestamp, a non-zero transaction index and an extra transaction in the block', () => {
+  const { checkPaidRowOrdering } = loadPaidHelpers();
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, txAt('a', { timestamp: 1002 }), retained('a')]), /executed at timestamp 1002, expected 1001/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, { ...revertOk, nextTimestamp: 1005 }, txAt('a'), retained('a')]), /next block timestamp set to 1005/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, txAt('a', { txIndex: 1 }), retained('a')]), /transactionIndex 1, not 0/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, txAt('a', { txCount: 2 }), retained('a')]), /not the only transaction in its block \(2 transactions\)/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, txAt('a', { onlyTx: false }), retained('a')]), /not the only transaction/);
+  assert.throws(() => checkPaidRowOrdering([{ kind: 'seal', block: 40, hash: '0xseal' }, revertOk, txAt('a'), retained('a')]), /carries no timestamp/);
+  const rows = checkPaidRowOrdering([SEAL, revertOk, txAt('a'), retained('a'), revertOk, txAt('b'), retained('b')]);
+  assert.deepEqual(Array.from(rows, (r) => [r.timestamp, r.txIndex, r.txCount]), [[1001, 0, 1], [1001, 0, 1]]);
+});
+
+test('deriveAbstractResult keeps the labels and outcomes only for a fully passing self-check', () => {
+  const { deriveAbstractResult } = loadPaidHelpers();
+  const row = deriveAbstractResult({ check: goodCheck(), replay: REPLAY, evidenceFor: evidenceFixture() });
+  assert.equal(row.inputEvidenceGrade, 'RPC_OBSERVED');
+  assert.deepEqual([row.selectedFile, row.selectedHead, row.selectedRevision], ['FILE_QUOTE', 'QUOTE_A2', 'A2']);
+  assert.equal(row.selectedAuthor.label, 'AUTHOR_A');
+  assert.equal(row.selectedAuthorEvidenceCategory, 'EOA_SIGNED_PUBLICATION');
+  for (const k of DERIVED) assert.notEqual(row[k].outcome, 'UNKNOWN', k);
+  assert.equal(row.candidateCoverage.status, 'COMPLETE');
+  assert.equal(row.pageCoverage.status, 'COMPLETE');
+  assert.equal(row.placementProvenance.evidenceCategory, 'EOA_SIGNED_PUBLICATION_EFFECT');
+  assert.match(row.placementProvenance.establishedBy, /passing self-check/);
+  assert.equal(row.quoteCheck.observedAt, '1800000000');
+  assert.equal(row.executionBasis.timestamp, 1001);
+  assert.equal(row.executionBasis.txIndex, 0);
+  assert.equal(row.rawEvidence.selfCheck.match, true);
+  assert.equal(row.paidExecution.returnData.decoded.commitment, '0xc');
+});
+
+test('deriveAbstractResult catches a replay that differs from the log: every derived field UNKNOWN, raw log and replay retained', () => {
+  const { deriveAbstractResult } = loadPaidHelpers();
+  const check = goodCheck();
+  check.fromReplay = { commitment: '0xd', selection: { ...SELECTION, mantissa: '1' }, placement: { ...PLACEMENT } };
+  check.commitmentsAgree = false;
+  check.replayOk = false;
+  check.match = false;
+  const row = deriveAbstractResult({ check, replay: REPLAY, evidenceFor: evidenceFixture() });
+  assertAllUnknown(row, /replay commitment differs from the log/);
+  assert.equal(row.pageCoverage.status, 'UNKNOWN');
+  assert.equal(row.rawEvidence.paidResultLog.commitment, '0xc');
+  assert.equal(row.rawEvidence.paidResultLog.selection.mantissa, '2502000000');
+  assert.equal(row.paidExecution.returnData.decoded.outcome, 'UNKNOWN');
+  assert.match(row.placementProvenance.establishedBy, /SEPARATE seal raw replies/);
+  // a POINT row with the same failure keeps its structural NOT_APPLICABLE page coverage and the seal-derived provenance
+  const point = deriveAbstractResult({ check, replay: REPLAY, evidenceFor: evidenceFixture('PAID_POINT') });
+  assertAllUnknown(point, /replay commitment differs/);
+  assert.equal(point.pageCoverage.status, 'NOT_APPLICABLE');
+  assert.equal(point.placementCoordinate.lookedUpByThisRow, false);
+});
+
+test('deriveAbstractResult catches a missing PaidResult log: UNKNOWN throughout, no log to cite, replay retained', () => {
+  const { deriveAbstractResult } = loadPaidHelpers();
+  const check = { ...goodCheck(), logCount: 0, fromLog: null, commitmentsAgree: false, match: false };
+  const row = deriveAbstractResult({ check, replay: REPLAY, evidenceFor: evidenceFixture() });
+  assertAllUnknown(row, /no single PaidResult log/);
+  assert.equal(row.rawEvidence.paidResultLog, null);
+  assert.equal(row.rawEvidence.selfCheck.logCount, 0);
+  assert.equal(row.rawEvidence.replay.rpcId, 77);
+});
+
+test('assertAnvilOnlyCells refuses the sealing cells without --anvil before any chain call and leaves the other cells alone', () => {
+  const { assertAnvilOnlyCells, ANVIL_ONLY_CELLS } = loadPaidHelpers();
+  assert.deepEqual([...ANVIL_ONLY_CELLS], ['joined/paid-slice', 'joined/a1-without-placement']);
+  assert.deepEqual([...assertAnvilOnlyCells(['failure-rows', 'joined/steps-1-6'], false)], []);
+  assert.deepEqual([...assertAnvilOnlyCells(['joined/paid-slice'], true)], ['joined/paid-slice']);
+  assert.throws(() => assertAnvilOnlyCells(['joined/paid-slice', 'failure-rows'], false), /owned --anvil chain/);
+  assert.throws(() => assertAnvilOnlyCells(['joined/a1-without-placement'], false), /joined\/a1-without-placement/);
+});
+
+test('assertUnrelatedCaller catches a caller that is the deployer, an author or a lab contract (case-insensitive) and pins wallet index 3', () => {
+  const { assertUnrelatedCaller, PAID_CALLER_INDEX, PAID_CALLER_PATH } = loadPaidHelpers();
+  const related = { deployer: '0x00000000000000000000000000000000000000d0', AUTHOR_A: '0x00000000000000000000000000000000000000a1', 'contract actorB': '0x00000000000000000000000000000000000000B2' };
+  assert.equal(assertUnrelatedCaller('0x00000000000000000000000000000000000000c3', related), true);
+  assert.throws(() => assertUnrelatedCaller('0x00000000000000000000000000000000000000d0', related), /it is the deployer/);
+  assert.throws(() => assertUnrelatedCaller('0x00000000000000000000000000000000000000A1', related), /it is the AUTHOR_A/);
+  assert.throws(() => assertUnrelatedCaller('0x00000000000000000000000000000000000000b2', related), /it is the contract actorB/);
+  assert.throws(() => assertUnrelatedCaller(null, related), /not an address/);
+  assert.equal(PAID_CALLER_INDEX, 3);
+  assert.equal(PAID_CALLER_PATH, "m/44'/60'/0'/0/3");
+});
+
+test('evidenceCategoryOf maps the two proof kinds and refuses an unknown kind instead of defaulting', () => {
+  const { evidenceCategoryOf } = loadPaidHelpers();
+  assert.equal(evidenceCategoryOf(1), 'CONTRACT_ORIGINATED_PUBLICATION');
+  assert.equal(evidenceCategoryOf('2'), 'EOA_SIGNED_PUBLICATION');
+  assert.equal(evidenceCategoryOf(2, true), 'EOA_SIGNED_PUBLICATION_EFFECT');
+  assert.throws(() => evidenceCategoryOf(0), /unknown proof kind 0/);
+  assert.throws(() => evidenceCategoryOf(3), /unknown proof kind 3/);
+});
+
+test('selectCells keeps an optional cell out of the default and substring selections and admits it only by exact name', () => {
+  const selectCells = loadSelectCells();
+  const plan = ['failure-rows', 'joined/steps-1-6', 'joined/paid-slice', 'joined/a1-without-placement', 'policy/activate'];
+  const optional = ['joined/a1-without-placement'];
+  assert.deepEqual([...selectCells(plan, {}, optional)], ['failure-rows', 'joined/steps-1-6', 'joined/paid-slice', 'policy/activate']);
+  assert.deepEqual([...selectCells(plan, { only: 'joined' }, optional)], ['joined/steps-1-6', 'joined/paid-slice']);
+  assert.deepEqual([...selectCells(plan, { cells: 'joined/a1-without-placement,joined/paid-slice' }, optional)], ['joined/paid-slice', 'joined/a1-without-placement']);
+  assert.throws(() => selectCells(plan, {}, ['not-in-plan']), /optional cell\(s\) not in the plan/);
+  assert.throws(() => selectCells(plan, { only: 'a1-without' }, optional), /selected zero cells/);
 });
 
 test('deployAll catches attaching evidence sinks only after a deployment failure', async () => {

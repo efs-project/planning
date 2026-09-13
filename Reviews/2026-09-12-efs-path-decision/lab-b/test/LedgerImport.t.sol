@@ -127,16 +127,18 @@ contract LedgerImportTest is LabBase {
         (Ledger.Intent memory i2, bytes memory s2) = signed(PK_A, ledger, 1, a2);
         (uint64 p2,) = ledger.executeSigned(i2, a2, b2, s2); // accepted at the source under the current rule
         (Ledger.Intent memory d2, bytes memory ds2) = signed(PK_A, dest, 1, a2);
-        acceptor.set(1, 0); // the destination's acceptor now refuses (the pinned codehash is unchanged: same profile)
+        acceptor.set(1, 0); // the destination's POLICY acceptor (the mutable mock, row 2) now refuses (its codehash is unchanged: same profile)
         try dest.importPublication(sourceOf(ledger, p2), a2, b2, d2, ds2) {
             require(false, "x");
         } catch (bytes memory err) {
-            expectSel(err, Ledger.E_REJECTED.selector, "destination acceptance re-runs on import");
+            expectSel(err, Ledger.E_POLICY_REJECTED.selector, "destination acceptance (mandatory + policy) re-runs on import");
         }
         acceptor.set(0, 0);
     }
 
-    function test_import_by_contract_author_keeps_source_subject() public {
+    /// Authority repair R1 (replaces test_import_by_contract_author_keeps_source_subject, which
+    /// asserted the unsafe grade-0 path): a native-source packet is UNSUPPORTED and fails closed.
+    function test_import_of_native_source_is_unsupported_and_fails_closed() public {
         Ledger dest = new Ledger(registry, REALM2);
         bytes32 salt = bytes32(uint256(8));
         Ledger.Action[] memory a = one(aCreate(salt));
@@ -146,12 +148,17 @@ contract LedgerImportTest is LabBase {
         require(ledger.subjectCreatedAt(subj) != 0, "source subject");
         Ledger.SourceEvidence memory src = sourceOf(ledger, srcPub); // v == 0: chain-state witness only
         Ledger.Intent memory none;
-        (uint64 dstPub,) = dest.importPublication(src, a, b, none, ""); // destination contract-author path: msg.sender == author
-        require(dest.subjectCreatedAt(subj) != 0, "origin-qualified id preserved, not re-derived at the destination");
-        require(dest.subjectCreatedAt(Keys.subject(dest.principalOf(address(this)), salt)) == 0, "the destination-derived id was NOT minted");
-        require(dest.sourceEvidence(dstPub).grade == 0, "unverified witness, retained as claimed");
-        (,,, address rec, bool ok) = recon.reconstruct(dest, dstPub);
-        require(ok && rec == address(0), "native destination authority: hash matches, no signature");
+        try dest.importPublication(src, a, b, none, "") {
+            require(false, "x");
+        } catch (bytes memory err) {
+            expectSel(err, Ledger.E_SOURCE_UNSUPPORTED.selector, "native-source import: unsupported, fail closed");
+        }
+        require(dest.subjectCreatedAt(subj) == 0 && dest.subjectCreatedAt(Keys.subject(dest.principalOf(address(this)), salt)) == 0, "nothing minted under either derivation");
+        (,,, uint64 pubs) = dest.counts();
+        require(pubs == 0 && dest.nonces(address(this)) == 0 && dest.sourceEvidence(1).author == address(0), "nothing retained");
+        // local native authorship at the destination is unchanged: a destination-qualified subject
+        (uint64 p,) = dest.execute(a, b, 0);
+        require(p == 1 && dest.subjectCreatedAt(Keys.subject(dest.principalOf(address(this)), salt)) != 0, "native local publication still supported");
     }
 
     function test_cursor_rejects_stale_basis_and_dedupes_names() public {

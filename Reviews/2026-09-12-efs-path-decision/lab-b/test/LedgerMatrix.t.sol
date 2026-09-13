@@ -4,7 +4,7 @@ pragma solidity 0.8.30;
 import {Keys} from "../src/Keys.sol";
 import {Ledger} from "../src/Ledger.sol";
 import {LensReader} from "../src/LensReader.sol";
-import {FailingIndexModule} from "../src/LabHarness.sol";
+import {FailingIndexModule, MockAcceptor} from "../src/LabHarness.sol";
 import {LabBase} from "./LabBase.sol";
 
 /// DISPOSABLE LAB, NO PROTOCOL CLAIM. road-b.md §6 matrix: {native, signed} x {single, two under a
@@ -200,29 +200,40 @@ contract LedgerMatrixTest is LabBase {
             expectSel(err, Ledger.E_REF_MISSING.selector, "batch: missing ref");
         }
         // rule change after acceptance: dedup (bytes again) and reuse (id only) are both re-checked
+        // against the Realm's CURRENT policy. Since the authority repair (REPAIR.md R2) the ref
+        // layout is part of PAIR's identity: registering tighter refs is a DIFFERENT Type and PAIR is
+        // untouched, so the re-check lever is a policy activation (a refusing acceptor), not a rewrite.
         bytes32[] memory tighter = new bytes32[](2);
         tighter[0] = QUOTE;
         tighter[1] = ITEM;
-        registry.register(PAIR, address(acceptor), tighter);
+        bytes32 pairStrict = registry.register(PAIR_SHAPE, address(pairRule), tighter);
+        require(pairStrict != PAIR && registry.refTypes(PAIR)[0] == ITEM && registry.refTypes(pairStrict)[0] == QUOTE, "tighter refs are a new exact Type; PAIR unchanged");
+        MockAcceptor refuser = new MockAcceptor();
+        refuser.set(1, 0);
+        require(registry.activate(PAIR, address(refuser)) == 3, "policy activation 3 for PAIR (row 2 is the setUp mock)");
         try alice.publish(PAIR, good) {
             require(false, "x");
         } catch (bytes memory err) {
-            expectSel(err, Ledger.E_REF_TYPE.selector, "dedup re-checks refs");
+            expectSel(err, Ledger.E_POLICY_REJECTED.selector, "dedup re-checks the current policy");
         }
         a = one(aReuse(PAIR, pairId));
         b[0] = "";
         try bob.execute(a, b) {
             require(false, "x");
         } catch (bytes memory err) {
-            expectSel(err, Ledger.E_REF_TYPE.selector, "reuse re-checks refs");
+            expectSel(err, Ledger.E_POLICY_REJECTED.selector, "reuse re-checks the current policy");
         }
-        tighter[0] = ITEM;
-        registry.register(PAIR, address(acceptor), tighter);
+        require(registry.activate(PAIR, address(acceptor)) == 4, "policy activation 4 (the accepting mock again)");
         (, uint64 first) = bob.execute(a, b); // reuse by another author: new admission and occurrence, same record
         (uint8 kind,,,,,, bytes32 ra,) = ledger.admission(first);
         require(kind == 2 && ra == pairId, "reuse admission row");
         (,, uint32 occ,) = ledger.record(pairId);
         require(occ == 2, "two occurrences of one record");
+        (bytes32 bt, uint16 act, address bman,, address bpol,,,) = ledger.acceptanceBasis(first);
+        require(bt == PAIR && act == 4 && bman == address(pairRule) && bpol == address(acceptor), "the reuse records the mandatory rule and the policy row that admitted it");
+        (,, uint32 occ0,) = ledger.record(pairId);
+        (bytes32 bt0, uint16 act0, address bman0,, address bpol0,,,) = ledger.acceptanceBasis(4); // alice's original PAIR publish: admission 4
+        require(occ0 == 2 && bt0 == PAIR && act0 == 2 && bman0 == address(pairRule) && bpol0 == address(acceptor), "the original admission keeps policy row 2 as its basis");
     }
 
     function test_binding_role_demands_target_type() public {
@@ -286,11 +297,11 @@ contract LedgerMatrixTest is LabBase {
         b[2] = q(3000);
         (uint64 adm0, uint64 rec0,, uint64 pub0) = ledger.counts();
         for (uint8 mode = 1; mode <= 3; ++mode) {
-            acceptor.set(mode, 0); // return false / revert / burn the bounded gas
+            acceptor.set(mode, 0); // return false / revert / burn the bounded gas (the mock is QUOTE's ADDITIONAL policy, row 2)
             try alice.execute(a, b) {
                 require(false, "x");
             } catch (bytes memory err) {
-                expectSel(err, Ledger.E_REJECTED.selector, "rejected by acceptor");
+                expectSel(err, Ledger.E_POLICY_REJECTED.selector, "rejected by the policy acceptor");
             }
             (uint64 adm1, uint64 rec1,, uint64 pub1) = ledger.counts();
             require(adm1 == adm0 && rec1 == rec0 && pub1 == pub0, "nothing admitted");

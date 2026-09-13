@@ -3,6 +3,17 @@
 // UNRUN: written under another worker's compiler lease (only `node --check` has been run on it).
 // DO NOT RUN without the coordinator's heavy-run lease (README.md, TODO.md).
 //
+// AUTHORITY-REPAIR PASS (2026-09-13, source aaecfed; REPAIR.md): Type ids are DERIVED by the registry from
+// (shape, refTypes, declared-rule codehash) and resolved here three ways (receipt log, typeIdOf raw reply, local
+// Keys.typeId derivation) before any cell runs — the name hashes are shape commitments, never ids. JoinedConsumer is
+// deployed after registration with the derived ids. Three cells were added, each its own sealed cell from the same
+// snapshot: policy/activate, failure/refused-re-registration, failure/unsupported-native-import (new raw stages:
+// type-resolution, policy, basis, registry-post, squat-probe). vectors/profile-b.json remains the dcc7b94 vector
+// (name-hash ids); a new declared vector is owed after a build. Payload controls and fixture bodies are unchanged.
+// F5 (mandatory rule vs additional policy): the fixtures' mandatory rules are MinBodyAcceptor(32)/(96) (immutable
+// thresholds); the mutable MockAcceptor is installed as QUOTE's/PAIR's ADDITIONAL policy (row 2) at setup, so its
+// refusals are E_POLICY_REJECTED; policy/activate also carries the in-cell strict Type and an above-cap body.
+//
 // HONESTY: this run reports receipt diagnostics with explicit remaining gates. It is not a
 // same-guarantee comparison and not the protocol's capability ablation. No row here is a matched
 // substitute for the fuller Files control: the 32-byte/41-byte cells are hash-placement diagnostics
@@ -37,7 +48,8 @@
 //   FOUNDRY_OUT=<scratch>/out node script/measure.mjs --rpc URL --deploy
 //   FOUNDRY_OUT=<scratch>/out node script/measure.mjs --rpc URL --addresses <scratch>/lab-addresses.json
 // Options: --out <file.json> (default <scratch>/measure.json)  --mnemonic "<12 words>"  --skip-without-index
-//          --only <substring> (run only cells whose name contains it; for repair cycles)
+//          --cells <exact,comma,separated,cell,keys> (bounded run; unknown keys or an empty selection FAIL before any chain starts)
+//          --only <substring> (legacy filter; resolved against the same plan and validated the same way)
 // Env: FOUNDRY_OUT (artifacts; fallback ./out, read-only), EFS_LAB_SCRATCH (run-owned root; default: parent
 // of FOUNDRY_OUT, else the manifest's scratch path), EFS_ETHERS_PATH.
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, renameSync } from 'node:fs';
@@ -73,12 +85,16 @@ mkdirSync(SCRATCH_ROOT, { recursive: true });
 const args = Object.fromEntries(process.argv.slice(2).map((a, i, all) => (a.startsWith('--') ? [a.slice(2), all[i + 1]?.startsWith('--') || all[i + 1] === undefined ? true : all[i + 1]] : [])).filter((x) => x.length));
 const MNEMONIC = args.mnemonic || process.env.EFS_LAB_MNEMONIC || 'test test test test test test test test test test test junk';
 const OUT_JSON = args.out && args.out !== true ? resolve(args.out) : join(SCRATCH_ROOT, 'measure.json');
+if (args.cells === true || args.only === true) throw new Error('--cells and --only require a value (an exact comma-separated cell list, or a substring); a bare flag would silently select every cell');
 const ONLY = typeof args.only === 'string' ? args.only : null;
 const WATCHDOG_MS = 25 * 60 * 1000;
 const CAVEAT_JOINED = 'The joined QUOTE/Pair journey (sdk-fixture steps 1–6 with ITEM/PAIR/QUOTE_J) is scripted as cell joined/steps-1-6; steps 7 (partly: paid consumer), 8, 9 and 10 are NOT in this script.';
 const CAVEAT_RECON = 'The Reconstructor is a candidate self-check calling ledger.intentDigest, not independent.';
 const CAVEAT_MATCHED = 'No row is a matched substitute for the fuller Files control: hash-placement diagnostics (names are hashes) until labels and the joined journey are integrated into one matched guarantee profile.';
 const CAVEAT_EXPECTED = 'Expected values, commitments and read-back comparisons are computed by this script from the fixture (candidate-side self-checks); they are not the independent oracle.';
+const CAVEAT_NATIVE_IMPORT = 'Native-source (contract-author) import is UNSUPPORTED after the authority repair (Ledger.importPublication reverts E_SOURCE_UNSUPPORTED for src.v == 0): sdk-fixture step 9 for AUTHOR_B reports UNSUPPORTED, not success. A limit until a verifiable source witness exists, not a waiver.';
+const CAVEAT_VECTOR = 'vectors/profile-b.json remains the dcc7b94 vector (name-hash Type ids). Type ids in this run are DERIVED (report.types: receipt log, typeIdOf raw reply and local Keys.typeId derivation agree); actionsHash / acceptanceProfile / digest for the same fixture therefore differ from that vector, and a new declared vector is owed after a build.';
+const CAVEAT_MANDATORY = 'F5 (REPAIR.md): a Type\'s registration-time acceptor is its MANDATORY rule — it runs on every publish/reuse, its refusal (E_REJECTED) is final, and no activation can remove or replace it; activate() installs an ADDITIONAL policy acceptor (E_POLICY_REJECTED), activate(0) = no additional policy. A codehash pins the rule\'s CODE, not its mutable dependencies: every mandatory fixture rule is stateless or immutable-configured (MinBodyAcceptor, QuoteAcceptor, LabelAcceptor, StrictQuoteAcceptor); the mutable MockAcceptor is only ever an additional policy here. Stateful developer rules remain allowed in production when their dependency/basis semantics are explicit; nothing here proves statelessness.';
 
 // ---------------------------------------------------------------- exact payload controls (run-manifest.md)
 const FIX = {
@@ -114,7 +130,27 @@ const byAuthorList = (principal) => posting(ZERO, 4, 0, principal);
 const backlinkList = (target) => posting(ZERO, 5, 0, target);
 const historyList = (key) => posting(ZERO, 8, 0, key);
 const scopeList = (key) => posting(ZERO, 10, 0, key);
-const T = { QUOTE: DOM('lab/type/quote/1'), BINARY: DOM('lab/type/binary/1'), ITEM: DOM('lab/type/item/1'), PAIR: DOM('lab/type/pair/1'), QUOTE_J: DOM('lab/type/quote-joined/1'), LABEL: DOM('lab/type/label/1') };
+// Type SHAPES = the lab's Type name hashes. Since the authority repair (REPAIR.md R2) the registry DERIVES a Type id from
+// (shape, refTypes, declared-rule codehash); T is filled by resolveType() from the register receipt / typeIdOf reply and
+// throws if read before that, so no cell can silently run against a name hash.
+const SHAPE = { QUOTE: DOM('lab/type/quote/1'), BINARY: DOM('lab/type/binary/1'), ITEM: DOM('lab/type/item/1'), PAIR: DOM('lab/type/pair/1'), QUOTE_J: DOM('lab/type/quote-joined/1'), LABEL: DOM('lab/type/label/1') };
+const TYPE_KEYS = Object.keys(SHAPE);
+const T = new Proxy({}, { get(o, k) { if (TYPE_KEYS.includes(k) && !(k in o)) throw new Error(`Type id T.${k} read before registration/resolution`); return o[k]; } });
+// registration plan, in order (a reference Type must be resolved before the Type that references it): [key, acceptor deployment key, ref keys, note]
+// The acceptor here is the Type's MANDATORY rule (F5): stateless or immutable-configured only. The mutable MockAcceptor is
+// installed afterwards as the ADDITIONAL policy (row 2) of QUOTE and PAIR through TypeRegistry.activate (see deployAll).
+const TYPE_PLAN = [
+  ['QUOTE', 'quoteRule', [], 'mandatory MinBodyAcceptor(32): immutable threshold, part of the id'],
+  ['BINARY', null, [], 'no acceptor'],
+  ['ITEM', null, [], 'no acceptor'],
+  ['PAIR', 'pairRule', ['ITEM', 'ITEM'], 'mandatory MinBodyAcceptor(96); refs [ITEM, ITEM]'],
+  ['QUOTE_J', 'quoteAcceptor', ['PAIR'], 'QuoteAcceptor: 160-byte shape, scale 6, bounds; refs [PAIR]'],
+  ['LABEL', 'labelAcceptor', [], 'LabelAcceptor: exact UTF-8, 1..255 bytes; no refs'],
+];
+const SHAPE_STRICT = DOM('lab/type/quote-strict/1'); // in-cell Type of policy/activate: StrictQuoteAcceptor as its MANDATORY rule
+// byte-for-byte Keys.typeId: keccak256(abi.encode(DOM_TYPE, shape, keccak256(abi.encode(refTypes)), ruleId)); ruleId = acceptor runtime codehash (0 = none)
+const DOM_TYPE = DOM('efs2/type/1');
+const typeIdLocal = (shape, refTypeIds, ruleId) => keccak256(coder.encode(['bytes32', 'bytes32', 'bytes32', 'bytes32'], [DOM_TYPE, shape, keccak256(coder.encode(['bytes32[]'], [refTypeIds])), ruleId]));
 const P = { HEAD: DOM('efs2/purpose/head/1'), FOLDER: DOM('efs2/purpose/folder/1'), TAG: DOM('efs2/purpose/tag/1') };
 const name = (s) => keccak256(toUtf8Bytes(s));
 const REALM = DOM('lab/realm/1');
@@ -157,6 +193,8 @@ const ART_SOURCE = {
   Ledger: 'Ledger', IndexModule: 'IndexModule', LensReader: 'LensReader', TypeRegistry: 'TypeRegistry',
   MockAcceptor: 'LabHarness', FailingIndexModule: 'LabHarness', Actor: 'LabHarness', Consumer: 'LabHarness', Reconstructor: 'LabHarness',
   QuoteAcceptor: 'LabAcceptors', LabelAcceptor: 'LabAcceptors', JoinedConsumer: 'JoinedConsumer', StatelessConsumer: 'JoinedConsumer',
+  StrictQuoteAcceptor: 'Falsify.t', // fixture rule v2 (32-byte quote, value <= 2_500_000_000) from test/Falsify.t.sol: the ADDITIONAL QUOTE policy of cell policy/activate, and the MANDATORY rule of that cell's in-cell strict Type
+  MinBodyAcceptor: 'LabAcceptors', // immutable-configuration mandatory rules of the fixtures: MinBodyAcceptor(32) for QUOTE, MinBodyAcceptor(96) for PAIR (F5 addendum: the mutable MockAcceptor is never a mandatory rule)
 };
 const ART = {};
 const IFACES = {};
@@ -239,6 +277,8 @@ function makeCtx(run) {
     rpc, url: run.rpc, chainId: run.chainId, source: run.source, wallets, deployer: wallets[0], addrs: run.addrs ?? {},
     txs: [], raw: [], baselineRaw: [], blocks: [], rpcOther: [], rowLog: [], consumerChecks: [], mismatches: 0,
     persist: null, gasPrice: null, blockCache: new Map(), nonceCache: new Map(),
+    // runtime codehashes of the contracts deployed by this run (null in --addresses mode): lets a cell compare a registry-reported codehash with the deployment record
+    codehashes: run.report?.deployment ? Object.fromEntries(Object.entries(run.report.deployment).map(([k, v]) => [k, v.runtimeCodehash])) : null,
   };
   ctx.other = async (method, params, opts) => { const e = await rpc(method, params, opts); ctx.rpcOther.push(envOf(e)); return e; };
   ctx.blockHeader = async (n) => {
@@ -270,11 +310,14 @@ function makeCtx(run) {
 const call = (ctx, nameOf, key, fn, fnArgs) => ({ to: ctx.addrs[key], data: iface(nameOf).encodeFunctionData(fn, fnArgs), contract: nameOf, fn, args: fnArgs });
 
 // ---------------------------------------------------------------- raw observations: literal eth_call envelopes
-async function observeRaw(ctx, sink, stage, meta, to, data, blockNumber, { allowError = false } = {}) {
+// `from` (runner review 1): a static probe of a caller-sensitive call (registry admin, msg.sender == author) must be simulated
+// FROM the account that will actually send the transaction; it is retained in the envelope (params[0] = {from, to, data}).
+async function observeRaw(ctx, sink, stage, meta, to, data, blockNumber, { allowError = false, from = null } = {}) {
   const blockHash = await ctx.blockHash(blockNumber);
-  const e = await ctx.rpc('eth_call', [{ to, data }, qty(blockNumber)], { label: `${stage}:${meta.contract}.${meta.fn}`, allowError });
+  const callObject = from ? { from, to, data } : { to, data };
+  const e = await ctx.rpc('eth_call', [callObject, qty(blockNumber)], { label: `${stage}:${meta.contract}.${meta.fn}`, allowError });
   const obs = {
-    rpcId: e.request.id, method: 'eth_call', source: ctx.source, stage, contract: meta.contract, to, fn: meta.fn, args: meta.args ?? [],
+    rpcId: e.request.id, method: 'eth_call', source: ctx.source, stage, contract: meta.contract, from, to, fn: meta.fn, args: meta.args ?? [],
     blockTag: Number(blockNumber), blockHash, calldata: data, returnData: e.response.result ?? null, error: e.response.error ?? null,
     request: e.request, response: e.response, ms: e.ms,
   };
@@ -360,7 +403,9 @@ async function estimateRow(ctx, label, c, extra = {}) {
 
 // ---------------------------------------------------------------- authors: native (Actor contract) and signed (EOA wallet, relayed by the deployer)
 const INTENT_TYPES = { PublicationIntent: ['realmId:bytes32', 'coreCodeCommitment:bytes32', 'author:address', 'nonce:uint64', 'deadline:uint64', 'acceptanceProfile:bytes32', 'indexObligations:bytes32', 'actionsHash:bytes32'].map((f) => { const [n, t] = f.split(':'); return { name: n, type: t }; }) };
-async function signedCall(ctx, wallet, actions, bodies) {
+// A PublicationIntent signed by `wallet` over `actions` under THIS Ledger's context at the latest block (sign-inputs
+// raw replies retained). Used for executeSigned (signedCall) and as the destination authorization of importPublication.
+async function signIntent(ctx, wallet, actions) {
   const block = await ctx.latestBlock();
   const header = await ctx.blockHeader(block);
   const stage = 'sign-inputs';
@@ -371,7 +416,11 @@ async function signedCall(ctx, wallet, actions, bodies) {
   const [obligations] = await observe(ctx, ctx.raw, stage, 'Ledger', 'ledger', 'indexObligations', [], block);
   const intent = { realmId, coreCodeCommitment: core, author: wallet.address, nonce, deadline: BigInt(header.timestamp) + 3600n, acceptanceProfile: profile, indexObligations: obligations };
   const sig = await wallet.signTypedData({ name: 'EFS2-RoadB-Lab', version: '1' }, INTENT_TYPES, { ...intent, actionsHash: actionsHash(actions) });
-  return { ...call(ctx, 'Ledger', 'ledger', 'executeSigned', [intent, actions, bodies, sig]), intent: Object.fromEntries(Object.entries(intent).map(([k, v]) => [k, str(v)])), sig, signInputsBlock: block };
+  return { intent, sig, intentStr: Object.fromEntries(Object.entries(intent).map(([k, v]) => [k, str(v)])), signInputsBlock: block };
+}
+async function signedCall(ctx, wallet, actions, bodies) {
+  const s = await signIntent(ctx, wallet, actions);
+  return { ...call(ctx, 'Ledger', 'ledger', 'executeSigned', [s.intent, actions, bodies, s.sig]), intent: s.intentStr, sig: s.sig, signInputsBlock: s.signInputsBlock };
 }
 function authorsFor(ctx) {
   const native = (key) => ({ address: ctx.addrs[key], key, kind: 'native', build: (actions, bodies) => call(ctx, 'Actor', key, 'execute', [actions, bodies]), buildWithNonce: (actions, bodies, nonce) => call(ctx, 'Actor', key, 'executeWithNonce', [actions, bodies, nonce]) });
@@ -416,7 +465,16 @@ async function harvest(ctx, stage, touched, blockNumber) {
   }
   for (const ord of [...adms].sort((a, b) => a - b)) {
     const a = await ob('Ledger', 'ledger', 'admission', [ord]);
-    h.admissions[ord] = { kind: str(a[0]), leaf: str(a[1]), publication: str(a[2]), bindingOrdinal: str(a[3]), expectedRevision: str(a[4]), withdrawn: a[5], a: a[6], b: a[7], present: a[0] !== 0n };
+    const row = { kind: str(a[0]), leaf: str(a[1]), publication: str(a[2]), bindingOrdinal: str(a[3]), expectedRevision: str(a[4]), withdrawn: a[5], a: a[6], b: a[7], present: a[0] !== 0n };
+    // runner review 3: for every present publish/reuse admission retain Type id <-> policy row <-> codehash <-> epoch as
+    // raw replies (acceptanceBasis and the registry's activation row it names) so a checker can join them without trusting us
+    if (row.present && (a[0] === 1n || a[0] === 2n)) {
+      row.basis = basisOf(await ob('Ledger', 'ledger', 'acceptanceBasis', [ord]));
+      row.policyRow = activationOf(await ob('TypeRegistry', 'registry', 'activation', [row.basis.typeId, Number(row.basis.activation)]));
+      row.join = joinBasis(row.basis, row.policyRow);
+      assert.equal(row.join.ok, true, `${stage}: admission ${ord} basis does not join its policy row: ${JSON.stringify(row.join)}`);
+    }
+    h.admissions[ord] = row;
   }
   for (const s of new Set(touched.subjects)) h.subjects[s] = str((await ob('Ledger', 'ledger', 'subjectCreatedAt', [s]))[0]);
   for (const k of new Set(touched.bindingKeys)) {
@@ -472,7 +530,7 @@ const stripBlock = (probe) => { const { blockTag, ...rest } = probe; return rest
 
 // ---------------------------------------------------------------- sealed cells
 async function sealedCell(run, label, cell) {
-  if (ONLY && !label.includes(ONLY)) { log(`cell ${label}: skipped (--only ${ONLY})`); run.report.skippedCells.push(label); return null; }
+  // selection is decided by selectCells() before the chain starts; a cell reaching here is planned
   const ctx = makeCtx(run);
   log(`cell ${label}: evm_revert to ${run.sealed}`);
   const rev = await ctx.other('evm_revert', [run.sealed], { label: `${label}: evm_revert` });
@@ -580,28 +638,40 @@ async function commitmentCheck(ctx, row, nameOf, key, expected) {
   log(`  chk  ${check.label}: ${match ? 'match' : 'MISMATCH ' + JSON.stringify({ exp, fromLog, fromReplay })}`);
   return check;
 }
-// A failure row: capture the revert selector with a static eth_call (retained), mine the reverting
-// transaction, and prove the state probe is unchanged across it.
-async function failureRow(ctx, label, c, expectedError, probe) {
+// A failure row: capture the revert selector (and, when `args` is given, the decoded revert ARGUMENTS) with a static
+// eth_call simulated FROM the actual transaction sender (retained), mine the reverting transaction from that same
+// sender, and prove the state probe is unchanged across it. (runner review 1 and 2)
+async function failureRow(ctx, label, c, expectedError, probe, { wallet = ctx.deployer, args = null } = {}) {
   const [errContract, errName] = Array.isArray(expectedError) ? expectedError : ['Ledger', expectedError];
+  const from = wallet.address;
   const preBlock = await ctx.latestBlock();
   const pre = await stateProbe(ctx, `failure-pre:${label}`, probe, preBlock);
   const expectedSelector = errorSelector(errContract, errName);
-  log(`  row  ${label}: static call for the revert selector`);
-  const st = await observeRaw(ctx, ctx.raw, `failure-static:${label}`, c, c.to, c.data, preBlock, { allowError: true });
+  log(`  row  ${label}: static call for the revert selector (from ${from})`);
+  const st = await observeRaw(ctx, ctx.raw, `failure-static:${label}`, c, c.to, c.data, preBlock, { allowError: true, from });
   let observedSelector = 'no-revert';
   let observedData = null;
   if (st.error) {
     observedData = typeof st.error.data === 'string' ? st.error.data : (st.error.data?.data ?? JSON.stringify(st.error.data ?? null));
     observedSelector = typeof observedData === 'string' && observedData.startsWith('0x') ? observedData.slice(0, 10) : String(observedData);
   }
-  const row = await send(ctx, () => c, label, { expectFail: true, gasLimit: FAIL_GAS });
+  assert(expectedSelector, `${label}: expected selector unavailable for ${errContract}.${errName}`);
+  const row = await send(ctx, () => c, label, { expectFail: true, gasLimit: FAIL_GAS, wallet });
   const post = await stateProbe(ctx, `failure-post:${label}`, probe, row.block);
   const unchanged = JSON.stringify(stripBlock(pre)) === JSON.stringify(stripBlock(post));
-  assert(expectedSelector, `${label}: expected selector unavailable for ${errContract}.${errName}`);
   assert.equal(observedSelector, expectedSelector, `${label}: revert selector mismatch for ${errContract}.${errName}`);
   assert.equal(unchanged, true, `${label}: state changed across expected revert`);
-  return { ...row, expectedError: `${errContract}.${errName}`, expectedSelector, observedSelector, observedRevertData: observedData, selectorMatch: true, stateUnchanged: true, standing: 'selector from a retained static eth_call; the mined receipt establishes reversion, not the selector', pre, post };
+  const normArg = (v) => (typeof v === 'bigint' ? v.toString() : typeof v === 'number' ? String(v) : String(v).toLowerCase());
+  let decodedArgs = null;
+  let expectedArgs = null;
+  if (args) {
+    expectedArgs = Array.from(args, normArg);
+    const parsed = typeof observedData === 'string' && observedData.startsWith('0x') ? iface(errContract).parseError(observedData) : null;
+    assert(parsed && parsed.name === errName, `${label}: revert data does not decode as ${errContract}.${errName}`);
+    decodedArgs = Array.from(parsed.args, normArg);
+    assert.deepEqual(decodedArgs, expectedArgs, `${label}: revert arguments mismatch for ${errContract}.${errName}`);
+  }
+  return { ...row, from, expectedError: `${errContract}.${errName}`, expectedSelector, observedSelector, observedRevertData: observedData, expectedArgs, decodedArgs, selectorMatch: true, argsMatch: args ? true : null, stateUnchanged: true, standing: 'selector (and arguments when expectedArgs is set) from a retained static eth_call simulated from the actual transaction sender; the mined receipt establishes reversion, not the selector', pre, post };
 }
 const baseCount = (ctx, k) => { assert(ctx.baselineCounts && ctx.baselineCounts[k] !== undefined, `${ctx.cellLabel}: baseline counts missing (${k}); the sealed baseline harvest must precede the body`); return Number(ctx.baselineCounts[k]); };
 const baseNonce = (ctx, addr) => { assert(ctx.baselineNonces && ctx.baselineNonces[addr] !== undefined, `${ctx.cellLabel}: baseline nonce missing for ${addr}`); return Number(ctx.baselineNonces[addr]); };
@@ -804,7 +874,7 @@ const failureCell = {
     rows.push(await send(ctx, pubA('bind', [P.HEAD, name('x'), ZERO, ids[0], 0]), 'failure/setup: bind (revision becomes 1)'));
     rows.push(await failureRow(ctx, 'failure/stale-CAS (expected 0, head is 1)', call(ctx, 'Actor', 'actorA', 'bind', [P.HEAD, name('x'), ZERO, ids[0], 0]), 'E_CAS', probe));
     rows.push(await send(ctx, () => call(ctx, 'MockAcceptor', 'acceptor', 'set', [1, 0]), 'failure/setup: acceptor rejects'));
-    rows.push(await failureRow(ctx, 'failure/failed-acceptance (whole publication reverts)', call(ctx, 'Actor', 'actorA', 'publish', [T.QUOTE, zeroPadValue(toBeHex(5n), 32)]), 'E_REJECTED', probe));
+    rows.push(await failureRow(ctx, 'failure/failed-acceptance (the mock is QUOTE\'s ADDITIONAL policy, row 2: E_POLICY_REJECTED; whole publication reverts)', call(ctx, 'Actor', 'actorA', 'publish', [T.QUOTE, zeroPadValue(toBeHex(5n), 32)]), 'E_POLICY_REJECTED', probe, { args: [0, T.QUOTE] }));
     rows.push(await send(ctx, () => call(ctx, 'MockAcceptor', 'acceptor', 'set', [0, 0]), 'failure/setup: acceptor accepts'));
     rows.push(await send(ctx, () => call(ctx, 'Ledger', 'ledger', 'setIndexModule', [ctx.addrs.failingIndex]), 'failure/setup: attach the always-refusing index module'));
     rows.push(await failureRow(ctx, 'failure/failed-mandatory-index (whole publication reverts)', call(ctx, 'Actor', 'actorA', 'publish', [T.QUOTE, zeroPadValue(toBeHex(6n), 32)]), 'E_INDEX', probe));
@@ -969,6 +1039,744 @@ function labelCell(variant) {
   };
 }
 
+// ---------------------------------------------------------------- authority-repair cells (REPAIR.md), each its own sealed cell from the same snapshot
+const lc = (v) => String(v).toLowerCase();
+const NO_PROBE_FOLDER = name('/none');
+// decoders of the F5-shaped registry/ledger views (candidate-side; the raw replies are what the checker interprets)
+const typeInfoOf = (i) => ({ registered: i[0], mandatoryAcceptor: i[1], ruleId: i[2], policyAcceptor: i[3], policyCodehash: i[4], refCount: str(i[5]), activation: str(i[6]) });
+const descriptorOf = (d) => ({ shape: d[0], ruleId: d[1], mandatoryAcceptor: d[2], refCount: str(d[3]), activations: str(d[4]), registeredAt: str(d[5]) });
+const immutableOf = (desc) => { const { activations, ...rest } = desc; return rest; }; // the complete immutable descriptor (everything but the policy-row count)
+const activationOf = (r) => ({ acceptor: r[0], codehash: r[1], epoch: str(r[2]), activatedAt: str(r[3]) });
+const basisOf = (b) => ({ typeId: b[0], activation: str(b[1]), mandatoryAcceptor: b[2], ruleId: b[3], policyAcceptor: b[4], policyCodehash: b[5], epoch: str(b[6]), activatedAt: str(b[7]) });
+// join an admission's acceptanceBasis with the registry activation row it names (key: typeId + activation index):
+// the policy acceptor, its codehash and the epoch must agree — the checker can redo this from the raw replies
+function joinBasis(basis, policyRow) {
+  const lower = (v) => String(v).toLowerCase();
+  const acceptorEqual = lower(basis.policyAcceptor) === lower(policyRow.acceptor);
+  const codehashEqual = lower(basis.policyCodehash) === lower(policyRow.codehash);
+  const epochEqual = String(basis.epoch) === String(policyRow.epoch);
+  return { typeId: basis.typeId, activation: String(basis.activation), acceptorEqual, codehashEqual, epochEqual, ok: acceptorEqual && codehashEqual && epochEqual };
+}
+const QUOTE_HIGH = zeroPadValue(toBeHex(3_000_000_000n), 32); // uint256 3_000_000_000: ABOVE StrictQuoteAcceptor's cap. NOT a payload control (those are quote3000 = uint256 3000 and quote3100 = uint256 3100, both below the cap); published only to show a rejected body
+// policy/activate (F5 shape): QUOTE's MANDATORY rule is MinBodyAcceptor(32) and its policy row 2 is the accept-all mock.
+// StrictQuoteAcceptor is ADDED as policy row 3 after an admission; a signature made under the old epoch is refused; an
+// above-cap body is refused by the added policy (E_POLICY_REJECTED) while the re-signed below-cap control succeeds;
+// acceptanceBasis is joined with typeInfo and the activation rows by Type, codehash and epoch. Then an in-cell strict
+// Type (StrictQuoteAcceptor as its MANDATORY rule) shows the rejected body stays rejected after activate(0) and under a
+// permissive policy, and a compliant body is admitted with both bases recorded.
+const policyCell = {
+  standing: 'policy activation (REPAIR.md R2 + F5): mandatory rule always runs; policy rows only add constraints; receipt-bound activation (E.B.4); bases joined to the registry rows by Type, codehash and epoch',
+  plan: async (ctx, a, block) => {
+    const rOld = recordId(T.QUOTE, FIX.quote3000.bytes); const rNew = recordId(T.QUOTE, FIX.quote3100.bytes);
+    const pidA = await principalOf(ctx, a.signedA.address, block, true);
+    const pidOp = await principalOf(ctx, a.nativeA.address, block, true);
+    const touched = emptyTouched();
+    touched.records.push(rOld, rNew); touched.lists.push(byTypeList(T.QUOTE), byAuthorList(pidA), byAuthorList(pidOp));
+    touched.plannedPublications = 3; touched.plannedAdmissions = 3;
+    // registry state at the sealed baseline (baselineRaw, stage baseline)
+    const info0 = typeInfoOf(await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'typeInfo', [T.QUOTE], block));
+    const desc0 = descriptorOf(await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], block));
+    const [epoch0] = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'epoch', [], block);
+    const registry0 = { typeInfo: info0, descriptor: desc0, epoch: str(epoch0) };
+    return {
+      authors: [a.signedA, a.nativeA], touched, rOld, rNew, registry0,
+      summary: {
+        typeId: T.QUOTE, mandatoryRule: ctx.addrs.quoteRule, policyBefore: ctx.addrs.acceptor, policyAfter: ctx.addrs.strictAcceptor, rOld, rNew, registryAtBaseline: registry0,
+        payloadControls: { quote3000: 'uint256 3000 (below StrictQuoteAcceptor\'s cap 2_500_000_000): admitted under policy row 2 before the activation', quote3100: 'uint256 3100 (below the cap): admitted under policy row 3 after re-signing' },
+        aboveCapBody: { bytes: QUOTE_HIGH, value: '3000000000', standing: 'NOT a payload control; published only to show E_POLICY_REJECTED under QUOTE (mandatory rule accepts, added policy refuses) and E_REJECTED under the in-cell strict Type (mandatory rule refuses; activate(0) and a permissive policy change nothing)' },
+        shape: 'signed publish quote3000 (row 2) -> sign quote3100 at epoch N and hold -> activate(QUOTE, StrictQuoteAcceptor) = row 3 -> held signature: E_INTENT -> above-cap body: E_POLICY_REJECTED -> re-signed quote3100 admitted (row 3) -> acceptanceBasis joins -> in-cell strict Type: E_REJECTED before, after activate(0), and under the permissive mock; compliant quote3000 admitted with both bases',
+      },
+    };
+  },
+  body: async (ctx, a, plan) => {
+    const { rOld, rNew, registry0: R } = plan;
+    const rows = [];
+    const adm0 = baseCount(ctx, 'admissions'); const pub0 = baseCount(ctx, 'publications');
+    const probe = [[a.signedA, a.nativeA], T.QUOTE, NO_PROBE_FOLDER];
+    assert.equal(lc(R.typeInfo.mandatoryAcceptor), lc(ctx.addrs.quoteRule), 'policy/activate: QUOTE mandatory rule must be MinBodyAcceptor(32)');
+    assert.equal(lc(R.typeInfo.policyAcceptor), lc(ctx.addrs.acceptor), 'policy/activate: QUOTE policy row 2 must be the mock');
+    assert.equal(R.typeInfo.activation, '2', 'policy/activate: QUOTE must start at activation 2');
+    assert.equal(lc(R.descriptor.ruleId), lc(R.typeInfo.ruleId), 'policy/activate: descriptor.ruleId == typeInfo.ruleId');
+    assert.equal(lc(R.descriptor.mandatoryAcceptor), lc(R.typeInfo.mandatoryAcceptor), 'policy/activate: descriptor.mandatoryAcceptor == typeInfo.mandatoryAcceptor');
+    if (ctx.codehashes) assert.equal(lc(R.typeInfo.ruleId), lc(ctx.codehashes.quoteRule), 'policy/activate: ruleId == deployed MinBodyAcceptor(32) runtime codehash');
+    rows.push(await send(ctx, () => a.signedA.build([aPublish(T.QUOTE, FIX.quote3000.bytes)], [FIX.quote3000.bytes]), 'policy/activate/setup: signed publish quote3000 (payload control, uint256 3000, below the cap) under mandatory rule + policy row 2 (epoch N)'));
+    plan.touched.publications.push(pub0 + 1);
+    const held = await signedCall(ctx, ctx.wallets[1], [aPublish(T.QUOTE, FIX.quote3100.bytes)], [FIX.quote3100.bytes]); // signed at epoch N, deliberately held back
+    rows.push({ label: 'policy/activate/held-signature (signed at epoch N, not yet sent)', status: 'signed-not-sent', intent: held.intent, signInputsBlock: held.signInputsBlock, standing: 'sign-inputs raw replies retained at signInputsBlock; the signature is sent only after the activation below' });
+    rows.push(await send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'activate', [T.QUOTE, ctx.addrs.strictAcceptor]), 'policy/activate/activate (StrictQuoteAcceptor ADDED as QUOTE policy row 3; the mandatory rule, id and descriptor are untouched)', { extra: { standing: 'ESTIMATED 2 fresh slots (activation row) + 1 rewrite (activations) + epoch rewrite; every later QUOTE admission pays one extra bounded STATICCALL for the policy (ESTIMATED); see REPAIR.md cost table' } }));
+    const after = await ctx.latestBlock();
+    const info1 = typeInfoOf(await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'typeInfo', [T.QUOTE], after));
+    const desc1 = descriptorOf(await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], after));
+    const [epoch1] = await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'epoch', [], after);
+    const act = {};
+    for (const i of [1, 2, 3]) act[i] = activationOf(await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'activation', [T.QUOTE, i], after));
+    // joins: active typeInfo <-> activation row 3 <-> deployment codehash; complete immutable descriptor unchanged
+    assert.equal(lc(info1.mandatoryAcceptor), lc(ctx.addrs.quoteRule), 'policy/activate: the mandatory rule is untouched');
+    assert.equal(lc(info1.ruleId), lc(R.typeInfo.ruleId), 'policy/activate: ruleId is untouched');
+    assert.equal(lc(info1.policyAcceptor), lc(ctx.addrs.strictAcceptor), 'policy/activate: StrictQuoteAcceptor must be the active policy');
+    assert.equal(info1.activation, '3', 'policy/activate: activation index must be 3');
+    assert.equal(lc(info1.policyCodehash), lc(act[3].codehash), 'policy/activate: active policy codehash == activation row 3 codehash');
+    if (ctx.codehashes) assert.equal(lc(info1.policyCodehash), lc(ctx.codehashes.strictAcceptor), 'policy/activate: policy codehash == deployed StrictQuoteAcceptor runtime codehash');
+    assert.deepEqual(immutableOf(desc1), immutableOf(R.descriptor), 'policy/activate: the complete immutable descriptor (shape, ruleId, mandatoryAcceptor, refCount, registeredAt) must be unchanged');
+    assert.equal(desc1.activations, '3', 'policy/activate: descriptor.activations == 3');
+    assert.equal(str(epoch1), String(BigInt(R.epoch) + 1n), 'policy/activate: epoch must move by exactly one');
+    assert.equal(act[3].epoch, str(epoch1), 'policy/activate: row 3 records the new epoch');
+    assert.equal(lc(act[1].acceptor), lc(ZERO_ADDR), 'policy/activate: row 1 = no additional policy');
+    assert.equal(lc(act[2].acceptor), lc(ctx.addrs.acceptor), 'policy/activate: row 2 = the mock');
+    assert.equal(lc(act[2].codehash), lc(R.typeInfo.policyCodehash), 'policy/activate: row 2 codehash == baseline active policy codehash');
+    rows.push({ label: 'policy/activate/registry-after', standing: 'retained raw replies (stage policy) at the block of the activation; joins asserted: typeInfo.policyCodehash == activation(3).codehash (== deployed runtime codehash when deployed here); immutable descriptor deep-equal to the baseline', typeInfo: info1, descriptor: desc1, epoch: str(epoch1), activationRows: act, immutableDescriptorUnchanged: true });
+    rows.push(await failureRow(ctx, 'policy/activate/stale-signature (signed under epoch N, sent after activation N+1: E_INTENT(3), no write)', held, 'E_INTENT', probe, { args: [3] }));
+    rows.push(await failureRow(ctx, 'policy/activate/policy-adds-a-constraint (above-cap body uint256 3_000_000_000: the mandatory rule accepts, the ADDED policy refuses: E_POLICY_REJECTED(0, QUOTE))', call(ctx, 'Actor', 'actorA', 'publish', [T.QUOTE, QUOTE_HIGH]), 'E_POLICY_REJECTED', probe, { args: [0, T.QUOTE] }));
+    rows.push(await send(ctx, () => a.signedA.build([aPublish(T.QUOTE, FIX.quote3100.bytes)], [FIX.quote3100.bytes]), 'policy/activate/new-epoch-publish (quote3100, payload control, below the cap; re-signed under epoch N+1; admitted under mandatory rule + policy row 3)'));
+    plan.touched.publications.push(pub0 + 2);
+    const last = await ctx.latestBlock();
+    const bOld = basisOf(await observe(ctx, ctx.raw, 'basis', 'Ledger', 'ledger', 'acceptanceBasis', [adm0 + 1], last));
+    const bNew = basisOf(await observe(ctx, ctx.raw, 'basis', 'Ledger', 'ledger', 'acceptanceBasis', [adm0 + 2], last));
+    // joins: each admission's basis <-> the registry rows, by Type, codehash and epoch
+    assert.equal(lc(bOld.typeId), lc(T.QUOTE), 'basis old: typeId');
+    assert.equal(bOld.activation, '2', 'basis old: the epoch-N admission must report policy row 2, not today\'s row');
+    assert.equal(lc(bOld.mandatoryAcceptor), lc(ctx.addrs.quoteRule), 'basis old: mandatory rule');
+    assert.equal(lc(bOld.ruleId), lc(desc1.ruleId), 'basis old: ruleId == descriptor.ruleId');
+    assert.equal(lc(bOld.policyAcceptor), lc(act[2].acceptor), 'basis old: policy acceptor == row 2');
+    assert.equal(lc(bOld.policyCodehash), lc(act[2].codehash), 'basis old: policy codehash == row 2');
+    assert.equal(bOld.epoch, act[2].epoch, 'basis old: epoch == row 2 epoch');
+    assert.equal(lc(bNew.typeId), lc(T.QUOTE), 'basis new: typeId');
+    assert.equal(bNew.activation, '3', 'basis new: the epoch-N+1 admission must report policy row 3');
+    assert.equal(lc(bNew.mandatoryAcceptor), lc(ctx.addrs.quoteRule), 'basis new: the same mandatory rule');
+    assert.equal(lc(bNew.ruleId), lc(info1.ruleId), 'basis new: ruleId == typeInfo.ruleId');
+    assert.equal(lc(bNew.policyAcceptor), lc(info1.policyAcceptor), 'basis new: policy acceptor == active typeInfo');
+    assert.equal(lc(bNew.policyCodehash), lc(info1.policyCodehash), 'basis new: policy codehash == active typeInfo');
+    assert.equal(lc(bNew.policyCodehash), lc(act[3].codehash), 'basis new: policy codehash == row 3');
+    assert.equal(bNew.epoch, act[3].epoch, 'basis new: epoch == row 3 epoch');
+    assert.equal(bNew.epoch, str(epoch1), 'basis new: epoch == registry epoch after the activation');
+    rows.push({ label: 'policy/activate/acceptance-basis', standing: 'retained raw replies (stage basis) of Ledger.acceptanceBasis for both admissions; joins asserted by Type, mandatory rule, policy row, codehash and epoch against the stage-policy registry replies', oldAdmission: { ordinal: adm0 + 1, recordId: rOld, basis: bOld, joinedTo: 'activation row 2' }, newAdmission: { ordinal: adm0 + 2, recordId: rNew, basis: bNew, joinedTo: 'activation row 3 == active typeInfo' } });
+    // ---- F5: an in-cell strict Type whose MANDATORY rule is StrictQuoteAcceptor: the rejected body stays rejected
+    const strict = await registerInCell(ctx, 'STRICT', SHAPE_STRICT, 'strictAcceptor', [], 'policy/activate/strict/register (StrictQuoteAcceptor as the MANDATORY rule of an in-cell Type; id from log == typeIdOf == local derivation)');
+    rows.push(strict.row);
+    const probeS = [[a.nativeA], strict.typeId, NO_PROBE_FOLDER];
+    const publishHigh = () => call(ctx, 'Actor', 'actorA', 'publish', [strict.typeId, QUOTE_HIGH]);
+    const rejectedArgs = { args: [0, strict.typeId] }; // E_REJECTED(leaf 0, STRICT)
+    rows.push(await failureRow(ctx, 'policy/activate/strict/rejected-before (above-cap body: E_REJECTED(0, STRICT) by the mandatory rule, no activation yet)', publishHigh(), 'E_REJECTED', probeS, rejectedArgs));
+    rows.push(await send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'activate', [strict.typeId, ZERO_ADDR]), 'policy/activate/strict/activate-zero (row 2: no additional policy)'));
+    rows.push(await failureRow(ctx, 'policy/activate/strict/still-rejected-after-activate-zero (E_REJECTED(0, STRICT): activate(0) never means no validation)', publishHigh(), 'E_REJECTED', probeS, rejectedArgs));
+    rows.push(await send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'activate', [strict.typeId, ctx.addrs.acceptor]), 'policy/activate/strict/activate-permissive (row 3: the accept-all mock as ADDITIONAL policy)'));
+    rows.push(await failureRow(ctx, 'policy/activate/strict/still-rejected-under-permissive-policy (E_REJECTED(0, STRICT): a policy cannot remove the mandatory rule)', publishHigh(), 'E_REJECTED', probeS, rejectedArgs));
+    const rStrict = recordId(strict.typeId, FIX.quote3000.bytes);
+    plan.touched.records.push(rStrict);
+    rows.push(await send(ctx, () => call(ctx, 'Actor', 'actorA', 'publish', [strict.typeId, FIX.quote3000.bytes]), 'policy/activate/strict/compliant-publish (quote3000, below the cap: mandatory rule + policy accept; admitted under row 3)'));
+    plan.touched.publications.push(pub0 + 3);
+    const last2 = await ctx.latestBlock();
+    const bS = basisOf(await observe(ctx, ctx.raw, 'basis', 'Ledger', 'ledger', 'acceptanceBasis', [adm0 + 3], last2));
+    const infoS = typeInfoOf(await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'typeInfo', [strict.typeId], last2));
+    const actS3 = activationOf(await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'activation', [strict.typeId, 3], last2));
+    assert.equal(lc(bS.typeId), lc(strict.typeId), 'strict basis: typeId');
+    assert.equal(lc(bS.mandatoryAcceptor), lc(ctx.addrs.strictAcceptor), 'strict basis: mandatory rule');
+    assert.equal(lc(bS.ruleId), lc(infoS.ruleId), 'strict basis: ruleId == typeInfo.ruleId');
+    assert.equal(bS.activation, '3', 'strict basis: policy row 3');
+    assert.equal(lc(bS.policyAcceptor), lc(ctx.addrs.acceptor), 'strict basis: the mock policy');
+    assert.equal(lc(bS.policyCodehash), lc(actS3.codehash), 'strict basis: policy codehash == row 3');
+    assert.equal(bS.epoch, actS3.epoch, 'strict basis: epoch == row 3 epoch');
+    rows.push({ label: 'policy/activate/strict/acceptance-basis', standing: 'retained raw replies (stages basis, policy): the compliant admission records the mandatory rule (StrictQuoteAcceptor) AND the additional policy row 3 (mock), joined by codehash and epoch', ordinal: adm0 + 3, recordId: rStrict, basis: bS, typeInfo: infoS, activationRow3: actS3 });
+    return rows;
+  },
+};
+// failure/refused-re-registration: the identical descriptor cannot be registered twice; a different descriptor under a
+// colliding id is impossible by construction (statement, not a row)
+const refusedRegistrationCell = {
+  standing: 'exact Type identity (REPAIR.md R2): E_TYPE_EXISTS for an identical descriptor; registry state unchanged across the revert',
+  plan: async (ctx, a, block) => {
+    const touched = emptyTouched();
+    const [derived] = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'typeIdOf', [SHAPE.QUOTE, ctx.addrs.quoteRule, []], block);
+    const desc0 = descriptorOf(await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], block));
+    const [epoch0] = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'epoch', [], block);
+    assert.equal(lc(derived), lc(T.QUOTE), 'refused-re-registration: typeIdOf(QUOTE descriptor) must equal the registered QUOTE id');
+    const registry0 = { descriptor: desc0, epoch: str(epoch0) };
+    return { authors: [a.nativeA, null], touched, derived, registry0, summary: { typeId: T.QUOTE, descriptor: { shape: SHAPE.QUOTE, mandatoryAcceptor: ctx.addrs.quoteRule, refs: [] }, collisionId: derived, registryAtBaseline: registry0 } };
+  },
+  body: async (ctx, a, plan) => {
+    const { derived, registry0 } = plan;
+    const rows = [];
+    rows.push({ label: 'failure/refused-re-registration/collision-id', typeIdOf: derived, equalsRegisteredQuote: true, standing: 'retained baseline raw reply of TypeRegistry.typeIdOf(QUOTE_SHAPE, MinBodyAcceptor(32), []): the second registration targets exactly the existing id' });
+    // simulated and sent FROM the deployer (the registry admin): without `from` the static probe would observe E_ADMIN (runner review 1)
+    rows.push(await failureRow(ctx, 'failure/refused-re-registration (identical descriptor => the same derived id: E_TYPE_EXISTS(QUOTE); nothing rewritten)', call(ctx, 'TypeRegistry', 'registry', 'register', [SHAPE.QUOTE, ctx.addrs.quoteRule, []]), ['TypeRegistry', 'E_TYPE_EXISTS'], [[a.nativeA], T.QUOTE, NO_PROBE_FOLDER], { wallet: ctx.deployer, args: [T.QUOTE] }));
+    const last = await ctx.latestBlock();
+    const desc1 = descriptorOf(await observe(ctx, ctx.raw, 'registry-post', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], last));
+    const [epoch1] = await observe(ctx, ctx.raw, 'registry-post', 'TypeRegistry', 'registry', 'epoch', [], last);
+    const registry1 = { descriptor: desc1, epoch: str(epoch1) };
+    assert.deepEqual(registry1, registry0, 'refused-re-registration: the complete descriptor and the epoch must be unchanged across the refused registration');
+    rows.push({ label: 'failure/refused-re-registration/registry-unchanged', standing: 'retained raw replies (stage registry-post) equal the baseline replies: descriptor, activations and epoch unchanged', registry: registry1 });
+    rows.push({ label: 'failure/refused-re-registration/different-descriptor', status: 'statement', standing: 'NOT a transaction row. A different descriptor (shape, refTypes or declared rule) under the SAME id is impossible by construction: typeId = keccak256(abi.encode(DOM_TYPE, shape, keccak256(abi.encode(refTypes)), ruleId)), so a changed descriptor is a different id and an existing id is never rewritten (test/Falsify.t.sol test_F3_type_identity_is_exact_and_immutable registers changed descriptors and checks QUOTE is untouched).' });
+    return rows;
+  },
+};
+// failure/unsupported-native-import: a v == 0 packet claiming another principal is refused before any write (both destination paths)
+const unsupportedImportCell = {
+  standing: 'fail-closed native-source import (REPAIR.md R1): E_SOURCE_UNSUPPORTED, status 0, state unchanged; a temporary prototype limit (no verifiable source witness exists), not a portability waiver',
+  plan: async (ctx, a, block) => {
+    const salt = keccak256(toUtf8Bytes('failure/unsupported-native-import'));
+    const pidA = await principalOf(ctx, a.signedA.address, block, true);
+    const pidB = await principalOf(ctx, a.signedB.address, block, true);
+    const pidOp = await principalOf(ctx, ctx.deployer.address, block, true);
+    const victim = subjectId(pidA, salt); // the CLAIMED source principal's subject: must never be minted here
+    const r1 = recordId(T.QUOTE, FIX.quote3000.bytes);
+    const [realm] = await observeBoth(ctx, 'baseline', 'Ledger', 'ledger', 'realmId', [], block);
+    const [core] = await observeBoth(ctx, 'baseline', 'Ledger', 'ledger', 'coreCodeCommitment', [], block);
+    const touched = emptyTouched();
+    touched.records.push(r1); touched.subjects.push(victim);
+    touched.bindingKeys.push(binding(pidB, position(P.HEAD, victim, ZERO)), binding(pidOp, position(P.HEAD, victim, ZERO)));
+    touched.lists.push(byTypeList(T.QUOTE), byAuthorList(pidA), byAuthorList(pidB), byAuthorList(pidOp));
+    return { authors: [a.signedA, a.signedB], touched, salt, victim, r1, pidA, realm, core, summary: { claimedSourcePrincipal: pidA, claimedSourceRealm: realm, claimedSourceCode: core, victimSubject: victim, recordId: r1, packet: 'SourceEvidence with v == 0, r == s == 0, grade 0: every field is a bare claim', paths: ['signed destination authorization by AUTHOR_B (wallet 2)', 'msg.sender == claimed author (the relaying deployer EOA), empty destination signature'] } };
+  },
+  body: async (ctx, a, plan) => {
+    const { salt, victim, r1, pidA, realm, core } = plan;
+    const rows = [];
+    const actions = [aCreate(salt), aPublish(T.QUOTE, FIX.quote3000.bytes), aBind(P.HEAD, victim, ZERO, r1, 0)];
+    const bodies = ['0x', FIX.quote3000.bytes, '0x'];
+    const header = await ctx.blockHeader(await ctx.latestBlock());
+    const packet = (author) => ({ realmId: realm, coreCodeCommitment: core, acceptanceProfile: ZERO, indexObligations: ZERO, r: ZERO, s: ZERO, sourcePrincipal: pidA, author, nonce: 0, deadline: BigInt(header.timestamp) + 3600n, v: 0, grade: 0 });
+    const probe = [[a.signedA, a.signedB], T.QUOTE, NO_PROBE_FOLDER];
+    const pre = await observe(ctx, ctx.raw, 'squat-probe', 'Ledger', 'ledger', 'subjectCreatedAt', [victim], await ctx.latestBlock());
+    assert.equal(pre[0], 0n, 'unsupported-native-import: the claimed subject must be absent at the start');
+    // (a) signed destination path: AUTHOR_B authorizes itself at this Realm while the v == 0 packet claims AUTHOR_A's principal
+    const dst = await signIntent(ctx, ctx.wallets[2], actions);
+    rows.push(await failureRow(ctx, 'failure/unsupported-native-import/signed-destination (v == 0 packet claiming AUTHOR_A\'s principal, destination signature by AUTHOR_B: E_SOURCE_UNSUPPORTED)', { ...call(ctx, 'Ledger', 'ledger', 'importPublication', [packet(ctx.wallets[2].address), actions, bodies, dst.intent, dst.sig]), intent: dst.intentStr, sig: dst.sig }, 'E_SOURCE_UNSUPPORTED', probe, { args: [] }));
+    // (b) msg.sender path: the relaying deployer EOA presents itself as the source author with an empty destination signature;
+    // the static probe is simulated FROM the deployer so msg.sender == src.author holds in the simulation too (runner review 1)
+    const none = { realmId: ZERO, coreCodeCommitment: ZERO, author: ZERO_ADDR, nonce: 0, deadline: 0, acceptanceProfile: ZERO, indexObligations: ZERO };
+    rows.push(await failureRow(ctx, 'failure/unsupported-native-import/msg-sender (v == 0 packet, msg.sender == claimed author, empty destination signature: E_SOURCE_UNSUPPORTED)', call(ctx, 'Ledger', 'ledger', 'importPublication', [packet(ctx.deployer.address), actions, bodies, none, '0x']), 'E_SOURCE_UNSUPPORTED', probe, { wallet: ctx.deployer, args: [] }));
+    const last = await ctx.latestBlock();
+    const post = await observe(ctx, ctx.raw, 'squat-probe', 'Ledger', 'ledger', 'subjectCreatedAt', [victim], last);
+    const src = await observe(ctx, ctx.raw, 'squat-probe', 'Ledger', 'ledger', 'sourceEvidence', [baseCount(ctx, 'publications') + 1], last);
+    assert.equal(post[0], 0n, 'unsupported-native-import: the claimed subject must still be absent');
+    assert.equal(lc(src[0].author), lc(ZERO_ADDR), 'unsupported-native-import: no source-evidence row may exist');
+    rows.push({ label: 'failure/unsupported-native-import/nothing-minted', standing: 'retained raw replies (stage squat-probe): the claimed subject is absent before and after both refusals and no SourceEvidence row exists for the next publication ordinal', victimSubject: victim, subjectCreatedAtBefore: str(pre[0]), subjectCreatedAtAfter: str(post[0]), sourceEvidenceAuthor: src[0].author, sourceEvidenceGrade: str(src[0].grade) });
+    rows.push({ label: 'failure/unsupported-native-import/limit-not-waiver', status: 'statement', standing: CAVEAT_NATIVE_IMPORT });
+    return rows;
+  },
+};
+
+// ---------------------------------------------------------------- the sealed paid point/list slice (sdk-fixture appendix; matched-cost-scope-review "Bounded C follow-through", B counterpart)
+// Four paid rows (point A-first, list A-first, point B-first, list B-first) through JoinedConsumer.paidPoint / paidList,
+// each the FIRST transaction after an evm_revert to the exact post-B1 seal, from a pinned unrelated caller, retained
+// (receipt, PaidResult log, eth_call replay, abstractResult, persisted) BEFORE the next revert. B1 binds NO FOLDER
+// placement; "no B placement" is proven by raw replies at the seal. This runner RECORDS observations (input evidence
+// grade RPC_OBSERVED); the expectation, arm-input and basis seals are authored and hashed by the independent run
+// controller (appendix "Practical pre-run pins" 1-5), never by this script. The expectations passed to the consumer
+// here are this runner's local mirror of the fixture map (candidate-side); the sealed run replaces them with the
+// independently authored vectors (pin 4).
+// ---- paid-slice pure helpers (unit-tested in measure.test.mjs; self-contained: no module-scope references)
+const PAID_CALLER_INDEX = 3; // wallets[3]: a fixed ephemeral account of the run mnemonic — not the deployer (0), not AUTHOR_A (1), not wallet 2 (signedB), not a producer contract
+const PAID_CALLER_PATH = "m/44'/60'/0'/0/3";
+const SELECTION_FIELDS = ['basisAdmission', 'indexGeneration', 'rulesEpoch', 'coreCodeCommitment', 'lensId', 'subject', 'selectedHead', 'selectedRevision', 'selectedAdmission', 'selectedPublication', 'selectedAuthor', 'selectedProofKind', 'pairId', 'itemA', 'itemB', 'mantissa', 'scale', 'observedAt', 'note'];
+const PLACEMENT_FIELDS = ['position', 'actor', 'proofKind', 'revision', 'admission', 'publication', 'basisAdmission', 'pageStatus', 'rawTotal', 'scanned', 'hydrations', 'selectedSoFar', 'mutated', 'ended'];
+// the arm-neutral "Common comparison row" (sdk-fixture appendix): every field required, none defaulted
+const ABSTRACT_FIELDS = ['operation', 'lens', 'realm', 'execution', 'profile', 'observationBasis', 'executionBasis', 'queryCoordinate', 'presence', 'support', 'admission', 'selection', 'selectedFile', 'selectedHead', 'selectedRevision', 'selectedPhysical', 'selectedAuthor', 'selectedAuthorEvidenceCategory', 'placementCoordinate', 'placementProvenance', 'quoteCheck', 'pairCheck', 'itemChecks', 'candidateCoverage', 'pageCoverage', 'rawEvidence', 'paidExecution'];
+// Ledger proof kinds -> experiment-local evidence categories; an unknown kind throws (never a default category)
+function evidenceCategoryOf(proofKind, effect = false) {
+  const categories = { 1: 'CONTRACT_ORIGINATED_PUBLICATION', 2: 'EOA_SIGNED_PUBLICATION' };
+  const category = categories[String(proofKind)];
+  if (!category) throw new Error(`unknown proof kind ${proofKind}: no evidence category (1 = contract-originated, 2 = EOA-signed)`);
+  return effect ? `${category}_EFFECT` : category;
+}
+// The paid caller must be unrelated to every fixture role: not an author, not a producer contract, not the deployer, not a lab contract.
+function assertUnrelatedCaller(caller, related) {
+  const lower = (v) => String(v).toLowerCase();
+  if (!caller || !/^0x[0-9a-fA-F]{40}$/.test(String(caller))) throw new Error(`paid caller ${caller} is not an address`);
+  for (const [role, address] of Object.entries(related)) {
+    if (address && lower(address) === lower(caller)) throw new Error(`paid caller ${caller} is not unrelated: it is the ${role}`);
+  }
+  return true;
+}
+// Build one abstract comparison row from retained observations only. A missing or unknown field throws, so an absent
+// observation can never read as a passing row; selectedRevision must be the fixture LABEL (A2 / B1), never an ordinal;
+// a PAID_POINT row must state that it charged no directory lookup.
+function abstractRow(fields) {
+  const missing = ABSTRACT_FIELDS.filter((k) => fields[k] === undefined || fields[k] === null);
+  if (missing.length) throw new Error(`abstractResult: missing field(s) ${missing.join(', ')}`);
+  const extra = Object.keys(fields).filter((k) => !ABSTRACT_FIELDS.includes(k));
+  if (extra.length) throw new Error(`abstractResult: unknown field(s) ${extra.join(', ')}`);
+  if (!['PAID_POINT', 'PAID_LIST'].includes(fields.operation)) throw new Error(`abstractResult: operation ${fields.operation} is not PAID_POINT | PAID_LIST`);
+  if (!['LENS_A_FIRST', 'LENS_B_FIRST'].includes(fields.lens)) throw new Error(`abstractResult: lens ${fields.lens} is not LENS_A_FIRST | LENS_B_FIRST`);
+  const selfCheck = fields.rawEvidence && fields.rawEvidence.selfCheck;
+  if (!selfCheck || typeof selfCheck.match !== 'boolean') throw new Error('abstractResult: rawEvidence.selfCheck.match (boolean) is required');
+  const isLabel = typeof fields.selectedRevision === 'string' && /^[A-Z][0-9]$/.test(fields.selectedRevision);
+  if (!isLabel && fields.selectedRevision !== 'UNKNOWN') throw new Error(`abstractResult: selectedRevision ${fields.selectedRevision} must be the fixture label (A2 / B1) or UNKNOWN, not an ordinal`);
+  if (fields.operation === 'PAID_POINT' && fields.placementCoordinate.lookedUpByThisRow !== false) throw new Error('abstractResult: a PAID_POINT row must not charge a directory lookup');
+  if (fields.operation === 'PAID_LIST' && !['COMPLETE', 'UNKNOWN'].includes(fields.pageCoverage.status)) throw new Error(`abstractResult: a PAID_LIST row with pageCoverage ${fields.pageCoverage.status} is not a pass`);
+  const outcomes = ['presence', 'support', 'admission', 'selection'].map((k) => fields[k].outcome);
+  if (selfCheck.match) {
+    if (outcomes.includes('UNKNOWN') || !isLabel || fields.candidateCoverage.status !== 'COMPLETE') throw new Error('abstractResult: a passing self-check must carry the established outcomes, labels and coverage');
+  } else if (outcomes.some((o) => o !== 'UNKNOWN') || isLabel || fields.selectedHead !== 'UNKNOWN' || fields.selectedFile !== 'UNKNOWN' || fields.candidateCoverage.status !== 'UNKNOWN' || (fields.operation === 'PAID_LIST' && fields.pageCoverage.status !== 'UNKNOWN')) {
+    throw new Error('abstractResult: a failed self-check may not carry a derived success claim');
+  }
+  const row = { inputEvidenceGrade: 'RPC_OBSERVED', standing: 'candidate-side observations retained by this runner, never expected answers; the expectation, arm-input and basis seals are authored and hashed by the independent run controller' };
+  for (const k of ABSTRACT_FIELDS) row[k] = fields[k];
+  return row;
+}
+// Seal/revert ordering of the paid rows. `events` is the ordered ledger the cell records:
+//   {kind:'seal', block, hash} | {kind:'revert', block, hash} | {kind:'tx', label, block, parentHash} | {kind:'retained', label}
+// Each paid row must be the FIRST transaction after a revert whose observed head IS the seal, mined at seal.block + 1 on
+// seal.hash, and retained before the next revert. Returns the rows in order; any violation throws.
+function checkPaidRowOrdering(events) {
+  const seal = events[0];
+  if (!seal || seal.kind !== 'seal') throw new Error('paid-row ordering: the first event must be the seal');
+  if (typeof seal.timestamp !== 'number') throw new Error('paid-row ordering: the seal carries no timestamp');
+  const expectedTimestamp = seal.timestamp + 1;
+  const rows = [];
+  let open = null;
+  let armed = false;
+  for (const ev of events.slice(1)) {
+    if (ev.kind === 'seal') throw new Error('paid-row ordering: a second seal');
+    if (ev.kind === 'revert') {
+      if (open) throw new Error(`paid-row ordering: revert before row ${open.label} was retained`);
+      if (ev.block !== seal.block || ev.hash !== seal.hash) throw new Error(`paid-row ordering: after the revert the head is ${ev.block} ${ev.hash}, not the seal ${seal.block} ${seal.hash}`);
+      if (ev.nextTimestamp !== expectedTimestamp) throw new Error(`paid-row ordering: next block timestamp set to ${ev.nextTimestamp}, expected ${expectedTimestamp}`);
+      armed = true;
+    } else if (ev.kind === 'tx') {
+      if (!armed) throw new Error(`paid-row ordering: row ${ev.label} is not the first transaction after a revert to the seal`);
+      if (ev.block !== seal.block + 1 || ev.parentHash !== seal.hash) throw new Error(`paid-row ordering: row ${ev.label} mined at ${ev.block} on ${ev.parentHash}, expected ${seal.block + 1} on ${seal.hash}`);
+      if (ev.timestamp !== expectedTimestamp) throw new Error(`paid-row ordering: row ${ev.label} executed at timestamp ${ev.timestamp}, expected ${expectedTimestamp}`);
+      if (ev.txIndex !== 0) throw new Error(`paid-row ordering: row ${ev.label} has transactionIndex ${ev.txIndex}, not 0`);
+      if (ev.txCount !== 1 || ev.onlyTx !== true) throw new Error(`paid-row ordering: row ${ev.label} is not the only transaction in its block (${ev.txCount} transactions)`);
+      armed = false;
+      open = { label: ev.label, block: ev.block, timestamp: ev.timestamp, txIndex: ev.txIndex, txCount: ev.txCount };
+    } else if (ev.kind === 'retained') {
+      if (!open || open.label !== ev.label) throw new Error(`paid-row ordering: retained ${ev.label} without that row open`);
+      rows.push({ ...open, retained: true });
+      open = null;
+    } else {
+      throw new Error(`paid-row ordering: unknown event kind ${ev.kind}`);
+    }
+  }
+  if (open) throw new Error(`paid-row ordering: row ${open.label} was never retained`);
+  if (rows.length === 0) throw new Error('paid-row ordering: no paid row');
+  const timestamps = new Set(rows.map((r) => r.timestamp));
+  if (timestamps.size !== 1) throw new Error(`paid-row ordering: the paid rows executed at different timestamps ${[...timestamps].join(', ')}`);
+  return rows;
+}
+// Only an OWNED --anvil chain may run the sealing cells: they snapshot, revert, set block timestamps and touch automining,
+// which must never be done to a supplied --rpc node. Checked before any chain call; the other cells keep their --rpc path.
+const ANVIL_ONLY_CELLS = ['joined/paid-slice', 'joined/a1-without-placement'];
+function assertAnvilOnlyCells(selected, anvil, anvilOnly = ANVIL_ONLY_CELLS) {
+  const blocked = selected.filter((k) => anvilOnly.includes(k));
+  if (blocked.length && !anvil) throw new Error(`cell(s) ${blocked.join(', ')} run only on an owned --anvil chain (they seal, revert, set block timestamps and change automining); refusing before any chain call — pass --anvil or deselect them`);
+  return blocked;
+}
+// Derive one abstract comparison row from a paid-result check, its replay observation and the row's retained context.
+// PURE (unit-tested). No field derived from the PaidResult log may claim success unless the check passed entirely (one
+// log, decodable replay, replay commitment == log commitment, every pinned field equal to the runner expectation).
+// Otherwise every derived label, outcome and coverage is UNKNOWN with the reason, while the raw observations and the
+// mismatch record stay retained; only fields a SEPARATE retained observation establishes keep values, each naming it.
+function deriveAbstractResult({ check, replay, evidenceFor: ev }) {
+  const lower = (v) => String(v).toLowerCase();
+  const isList = ev.operation === 'PAID_LIST';
+  const logPresent = !!check && check.logCount === 1 && !!check.fromLog;
+  const replayDecoded = !!check && !!check.fromReplay && !check.fromReplay.error;
+  const ok = logPresent && replayDecoded && check.commitmentsAgree === true && check.replayOk === true && check.match === true;
+  const reason = ok ? null
+    : !logPresent ? `no single PaidResult log in the receipt (logCount ${check ? check.logCount : 'unknown'})`
+    : !replayDecoded ? 'the eth_call replay at the receipt block did not decode'
+    : check.commitmentsAgree !== true ? 'the replay commitment differs from the log commitment'
+    : check.replayOk !== true ? 'the replay observation differs from the runner expectation'
+    : 'the log observation differs from the runner expectation';
+  const consequence = 'row is not a pass; the mismatch is counted and fails the run; raw observations retained';
+  const unknown = () => ({ outcome: 'UNKNOWN', reason, consequence });
+  const s = ok ? check.fromLog.selection : null;
+  const p = ok && isList ? check.fromLog.placement : null;
+  const labelOf = (map, key, what) => { const v = map[lower(key)]; if (!v) throw new Error(`abstractResult: no fixture label for ${what} ${key}`); return v; };
+  const [headLabel, revisionLabel] = ok ? labelOf(ev.headLabels, s.selectedHead, 'selected head') : ['UNKNOWN', 'UNKNOWN'];
+  const [authorLabel, authorKind] = ok ? labelOf(ev.authorLabels, s.selectedAuthor, 'selected author') : ['UNKNOWN', 'UNKNOWN'];
+  const sealPl = ev.placementAtSeal; // a SEPARATE retained observation (stage seal-placement raw replies), independent of this row's log
+  const fromSeal = (why) => ({ sourceStep: 'A1', actor: 'AUTHOR_A', actorAddress: sealPl.author, evidenceCategory: evidenceCategoryOf(Number(sealPl.proofKind), true), publication: sealPl.publication, admission: sealPl.admission, revision: sealPl.revision, basis: ev.sealBasis.admissionFrontier, independentOfContentSelection: true, establishedBy: why });
+  const outcome = (name, how) => (ok ? { outcome: name, establishedBy: `${how} AND a passing self-check (rawEvidence.selfCheck)` } : unknown());
+  return abstractRow({
+    operation: ev.operation, lens: ev.lens,
+    realm: { chainId: ev.chainId, realmId: ev.sealBasis.realmId, ledger: ev.addrs.ledger, coreCodeCommitment: ev.sealBasis.coreCodeCommitment, establishedBy: 'raw replies at the seal (stage seal), a separate observation' },
+    execution: { consumer: ev.addrs.consumer, consumerCodeCommitment: ev.consumerCodehash, lensReader: ev.addrs.lensReader, indexModule: ev.addrs.indexModule, registry: ev.addrs.registry, deploymentEvidence: 'report.deployment of this run; the sealed run uses the independently retained deployment facts (appendix pin 3)' },
+    profile: 'road-b-lab/2 (PROFILE.md; F5 Core pinned at ca1a228); no commitment is treated as authority for another',
+    observationBasis: { admissionFrontier: ev.sealBasis.admissionFrontier, indexGeneration: ev.sealBasis.indexGeneration, rulesEpoch: ev.sealBasis.rulesEpoch, coreCodeCommitment: ev.sealBasis.coreCodeCommitment, sealBlock: ev.seal.block, sealBlockHash: ev.seal.hash, sealTimestamp: ev.seal.timestamp, consumerObserved: ok ? { basisAdmission: s.basisAdmission, indexGeneration: s.indexGeneration, rulesEpoch: s.rulesEpoch, coreCodeCommitment: s.coreCodeCommitment } : unknown(), establishedBy: 'the seal raw replies (stage seal), a separate observation; consumerObserved is the log\'s view of the same basis (pinned by BasisMismatch); never an unqualified latest' },
+    executionBasis: { block: ev.row.block, blockHash: ev.row.blockHash, parentHash: ev.executed.parentHash, timestamp: ev.executed.timestamp, transaction: ev.row.hash, txIndex: ev.executed.txIndex, txCount: ev.executed.txCount, establishedBy: 'the receipt and eth_getBlockByNumber(block, false) retained in transactions[] / blocks[]; separate from the observation basis; seal + 1 with the matched parent hash and timestamp across the four rows' },
+    queryCoordinate: isList
+      ? { labels: { parent: '/swaps', name: 'eth-usdc', page: 'one bounded page, budget 16, fresh cursor', endCondition: 'every lens principal\'s raw scope list exhausted (next.lensIndex == lens.length, rawIndex == 0)' }, physical: { folder: ev.coordinates.folder, nameRole: ev.coordinates.nameRole, subject: ev.coordinates.subject }, exactBytes: `transactions[${ev.row.txIndex}].data` }
+      : { labels: { file: 'FILE_QUOTE' }, physical: { subject: ev.coordinates.subject }, exactBytes: `transactions[${ev.row.txIndex}].data` },
+    presence: outcome('FOUND', 'LensReader.resolve status 1 inside the consumer (NoSelection otherwise)'),
+    support: outcome('SUPPORTED', 'exact Types and shapes of Quote, Pair and both Items inside the consumer (QuoteShape / PairShape / ItemShape otherwise)'),
+    admission: outcome('ADMITTED', 'live BIND admission inside its publication\'s range, author and proof category of the retained evidence (AdmissionShape / EvidenceBounds / AuthorMismatch / ProofCategory / ProofShape otherwise)'),
+    selection: outcome('SELECTED', 'ordered-lens selection (the first principal with a binding decides) equal to the expected author and head id, with the sealed Quote fields equal (SelectionMismatch otherwise); a status-1 receipt cannot fill this field'),
+    selectedFile: ok ? 'FILE_QUOTE' : 'UNKNOWN', selectedHead: headLabel, selectedRevision: revisionLabel,
+    selectedPhysical: ok ? { subject: s.subject, head: s.selectedHead, revisionOrdinal: s.selectedRevision, admission: s.selectedAdmission, publication: s.selectedPublication, standing: 'physical ids/ordinals retained separately from the labels; the revision ordinal is arm-local, not a cross-arm ordinal' } : unknown(),
+    selectedAuthor: ok ? { label: authorLabel, address: s.selectedAuthor, principalKind: authorKind } : unknown(),
+    selectedAuthorEvidenceCategory: ok ? evidenceCategoryOf(Number(s.selectedProofKind)) : 'UNKNOWN',
+    placementCoordinate: isList
+      ? { lookedUpByThisRow: true, parent: '/swaps', name: 'eth-usdc', physical: ok ? { position: p.position, folder: ev.coordinates.folder, nameRole: ev.coordinates.nameRole } : unknown() }
+      : { lookedUpByThisRow: false, parent: '/swaps', name: 'eth-usdc', physical: { position: ev.coordinates.position }, standing: 'not charged to the point transaction; retained and joined from the seal raw replies (row paid/seal/a-placement-provenance)' },
+    placementProvenance: isList && ok
+      ? { sourceStep: 'A1', actor: 'AUTHOR_A', actorAddress: p.actor, evidenceCategory: evidenceCategoryOf(Number(p.proofKind), true), publication: p.publication, admission: p.admission, revision: p.revision, basis: s.basisAdmission, independentOfContentSelection: true, establishedBy: 'paid: JoinedConsumer._placement (PlacementMismatch / ProofCategory / EvidenceBounds otherwise) AND a passing self-check' }
+      : fromSeal(isList ? `this row's log failed its self-check (${reason}); these values are the SEPARATE seal raw replies (stage seal-placement, placementAtSeal.byLens.${ev.lens}), not this transaction` : `raw replies at the seal (stage seal-placement): LensReader.resolve under ${ev.lens} (placementAtSeal.byLens.${ev.lens}) + admission + evidence; not this transaction`),
+    quoteCheck: ok ? { typeId: ev.types.QUOTE_J, bodyLength: 160, head: s.selectedHead, mantissa: s.mantissa, scale: s.scale, observedAt: s.observedAt, noteCommitment: s.note, establishedBy: 'exact Type + 160-byte shape + the sealed fixture fields (pair, ordered items, mantissa, scale, observedAt, note commitment) compared inside the consumer (QuoteShape / ClosureMismatch / SelectionMismatch otherwise)' } : unknown(),
+    pairCheck: ok ? { typeId: ev.types.PAIR, pairId: s.pairId, orderedRefs: [s.itemA, s.itemB], establishedBy: 'PAIR Type and >= 64-byte body; the two leading words are the ordered references (PairShape / ClosureMismatch otherwise)' } : unknown(),
+    itemChecks: ok ? [{ label: 'ITEM_ETH', typeId: ev.types.ITEM, id: s.itemA }, { label: 'ITEM_USDC', typeId: ev.types.ITEM, id: s.itemB }] : [unknown()],
+    candidateCoverage: { status: ok ? 'COMPLETE' : 'UNKNOWN', ...(ok ? {} : { reason, consequence }), universe: 'HEAD bindings of the lens principals at (HEAD, FILE_QUOTE) at the observation basis; ordered-lens selection', lens: ev.lensArr, basis: ev.sealBasis.admissionFrontier, endCondition: `ordered lens of ${ev.lensArr.length} principals; the first principal with a HEAD binding decides (live -> FOUND, tombstone -> MASKED, never fall-through), so every candidate up to the deciding principal is visited by construction of LensReader.resolve`, sameForPointAndList: true, standing: 'point and list qualify the same candidate universe at the same basis; physical witnesses (hydrations, page bytes) may differ' },
+    pageCoverage: isList
+      ? (ok ? { status: 'COMPLETE', rawTotal: p.rawTotal, scanned: p.scanned, hydrations: p.hydrations, selectedSoFar: p.selectedSoFar, mutated: p.mutated, ended: p.ended, rows: 1, standing: 'fixture/profile-scoped coverage (IndexModule FAMILY_SCOPE COMPLETE + every raw list exhausted), not authenticated global completeness; PARTIAL / UNKNOWN revert (PlacementWindow)' } : { status: 'UNKNOWN', reason, consequence })
+      : { status: 'NOT_APPLICABLE', standing: 'a File-keyed point read performs no directory lookup' },
+    rawEvidence: { transaction: { txIndex: ev.row.txIndex, hash: ev.row.hash, rawTransaction: `transactions[${ev.row.txIndex}].rawTransaction`, calldata: `transactions[${ev.row.txIndex}].data`, receiptLogs: `transactions[${ev.row.txIndex}].receipt.logs`, blockTransactions: ev.executed.txHashes }, paidResultLog: logPresent ? check.fromLog : null, replay: { rpcId: replay.rpcId, from: replay.from, stage: replay.stage, blockTag: replay.blockTag, returnData: replay.returnData, error: replay.error }, selfCheck: { match: ok, ref: check ? check.label : null, reason, logCount: check ? check.logCount : null }, seal: { rows: ['paid/seal', 'paid/seal/a-placement-provenance', 'paid/seal/no-b-placement'], stages: ['seal', 'seal-placement', 'seal-no-b-placement'] }, bodiesAndIds: 'plan (fixture map: exact bodies, ids, positions, binding keys)' },
+    paidExecution: { caller: ev.caller.address, callerDerivation: ev.caller.derivationPath, consumer: ev.addrs.consumer, targets: { ledger: ev.addrs.ledger, lensReader: ev.addrs.lensReader, indexModule: ev.addrs.indexModule, registry: ev.addrs.registry }, codeCommitments: { ledger: ev.sealBasis.coreCodeCommitment, consumer: ev.consumerCodehash }, transaction: ev.row.hash, receiptStatus: ev.row.status, gasUsed: ev.row.gas, returnData: { raw: replay.returnData, source: `eth_call replay at block ${replay.blockTag} (rpcId ${replay.rpcId})`, decoded: ok ? { commitment: check.fromReplay.commitment } : unknown() }, revertData: replay.error ? replay.error : null },
+  });
+}
+// ---- paid-slice cells
+const pickFields = (result, fields) => Object.fromEntries(fields.map((k) => [k, str(result[k])]));
+// The fixture map of the paid slice is the joined cell's (same bodies, ids, positions, lenses); only the planned counts
+// differ (no step 6 here) and the pinned paid caller is recorded with its derivation index (no secret retained).
+function paidSlicePlan(plannedPublications, plannedAdmissions) {
+  return async (ctx, a, block) => {
+    const plan = await joinedCell.plan(ctx, a, block);
+    plan.touched.plannedPublications = plannedPublications;
+    plan.touched.plannedAdmissions = plannedAdmissions;
+    const caller = ctx.wallets[PAID_CALLER_INDEX];
+    plan.summary = { ...plan.summary, paidCaller: { address: caller.address, derivationPath: PAID_CALLER_PATH, mnemonicIndex: PAID_CALLER_INDEX, standing: 'fixed ephemeral account of the run mnemonic; unrelated to every fixture role (asserted before the first paid row); no secret retained' } };
+    return plan;
+  };
+}
+// step 1 and the A1 / A2 / B1 author steps as separate setup rows (their receipts are setup cost, never paid-read cost)
+async function paidStep1(ctx, a, plan, rows) {
+  const { iA, iB, pairBody } = plan;
+  rows.push(await send(ctx, () => a.nativeA.build([aPublish(T.ITEM, iA), aPublish(T.ITEM, iB), aPublish(T.PAIR, pairBody)], [iA, iB, pairBody]), 'paid/setup/step1 (operator: ITEM_ETH, ITEM_USDC, PAIR_ETH_USDC in one native batch; identical to joined/step1)', { extra: { costClass: 'setup: fixture prerequisites, reported separately from the paid rows' } }));
+  touchedPubs(ctx, plan);
+}
+async function paidA1(ctx, a, plan, rows, { placement }) {
+  const { salt, subj, q1, a1, swaps, nameHash, market } = plan;
+  const actions = [aCreate(salt), aPublish(T.QUOTE_J, q1), aBind(P.HEAD, subj, ZERO, a1, 0)];
+  const bodies = ['0x', q1, '0x'];
+  if (placement) { actions.push(aBind(P.FOLDER, swaps, nameHash, subj, 0)); bodies.push('0x'); }
+  actions.push(aBind(P.TAG, subj, market, subj, 0));
+  bodies.push('0x');
+  const label = placement
+    ? 'paid/setup/A1 (AUTHOR_A signed: create FILE_QUOTE + publish QUOTE_A1 + head + the ONE /swaps placement + market tag; one combined receipt)'
+    : 'joined/a1-without-placement/A1-minus-placement (AUTHOR_A signed: the identical A1 batch minus the FOLDER bind; paired control)';
+  const extra = placement
+    ? { costClass: 'setup', actions: actions.length, placementCost: 'ESTIMATE: the single A placement is one of five actions in this combined receipt and is NOT separable from it; pin the optional paired control joined/a1-without-placement to measure it' }
+    : { costClass: 'paired control', actions: actions.length, pairing: 'same sealed pre-A1 state (run snapshot + identical step 1), same author, nonce and bodies as paid/setup/A1; the only action difference is the absent FOLDER bind (signature/deadline calldata bytes differ per run: ESTIMATED tens of gas of noise)' };
+  rows.push(await send(ctx, () => a.signedA.build(actions, bodies), label, { extra }));
+  touchedPubs(ctx, plan);
+}
+async function paidA2B1(ctx, a, plan, rows) {
+  const { subj, q2, q3, a2, b1 } = plan;
+  rows.push(await send(ctx, () => a.signedA.build([aPublish(T.QUOTE_J, q2), aBind(P.HEAD, subj, ZERO, a2, 1)], [q2, '0x']), 'paid/setup/A2 (AUTHOR_A signed: publish QUOTE_A2 + CAS head rev 1 -> 2; A1 retained in history; the placement is untouched)', { extra: { costClass: 'setup', actions: 2 } }));
+  touchedPubs(ctx, plan);
+  rows.push(await send(ctx, () => a.nativeB.build([aPublish(T.QUOTE_J, q3), aBind(P.HEAD, subj, ZERO, b1, 0)], [q3, '0x']), 'paid/setup/B1 (AUTHOR_B, the producer contract: publish QUOTE_B1 + B head rev 1; NO FOLDER bind — a competing content head only, never a second placement)', { extra: { costClass: 'setup', actions: 2, folderBind: false } }));
+  touchedPubs(ctx, plan);
+}
+// Seal the exact post-B1 state: snapshot id + block number / hash / timestamp (the header envelope is retained in blocks[]).
+async function sealState(ctx, label) {
+  const snap = await ctx.other('evm_snapshot', [], { label: `${label}: evm_snapshot` });
+  const block = await ctx.latestBlock();
+  const header = await ctx.blockHeader(block);
+  return { snapshot: snap.response.result, block, hash: header.hash, parentHash: header.parentHash, timestamp: Number(header.timestamp), snapshotRpcId: snap.request.id };
+}
+// Restore the seal before a paid row: evm_revert (single-use id, so re-seal), drop cached headers above the seal and every
+// cached nonce, re-read the head EXPLICITLY (not from the cache) and assert it is the sealed header with an empty pool.
+async function restoreSeal(ctx, seal, label, ordering) {
+  const reverted = seal.snapshot;
+  const rev = await ctx.other('evm_revert', [reverted], { label: `${label}: evm_revert` });
+  assert.equal(rev.response.result, true, `${label}: evm_revert(${reverted}) failed`);
+  seal.snapshot = (await ctx.other('evm_snapshot', [], { label: `${label}: re-seal` })).response.result;
+  const nextTimestamp = seal.timestamp + 1; // matched next-block TIME control: every paid row executes at seal + 1 with the same timestamp
+  const tsEnv = await ctx.other('evm_setNextBlockTimestamp', [nextTimestamp], { label: `${label}: evm_setNextBlockTimestamp ${nextTimestamp}` });
+  for (const k of [...ctx.blockCache.keys()]) if (k > seal.block) ctx.blockCache.delete(k);
+  for (const w of ctx.wallets) ctx.nonces.forget(w.address);
+  const latest = await ctx.latestBlock();
+  const e = await ctx.rpc('eth_getBlockByNumber', [qty(latest), false], { label: `${label}: after-revert header` });
+  ctx.blocks.push({ ...envOf(e), source: ctx.source, blockNumber: latest, blockHash: e.response.result.hash });
+  const caller = ctx.wallets[PAID_CALLER_INDEX].address;
+  const nonceLatest = Number((await ctx.other('eth_getTransactionCount', [caller, 'latest'], { label: `${label}: caller nonce latest` })).response.result);
+  const noncePending = Number((await ctx.other('eth_getTransactionCount', [caller, 'pending'], { label: `${label}: caller nonce pending` })).response.result);
+  assert.equal(latest, seal.block, `${label}: after the revert the head is block ${latest}, not the seal ${seal.block}`);
+  assert.equal(e.response.result.hash, seal.hash, `${label}: after the revert the head hash ${e.response.result.hash} is not the sealed ${seal.hash}`);
+  assert.equal(nonceLatest, noncePending, `${label}: pending pool is not empty after the revert`);
+  ordering.push({ kind: 'revert', block: latest, hash: e.response.result.hash, snapshot: reverted, resealed: seal.snapshot, nextTimestamp, setTimestampRpcId: tsEnv.request.id });
+  log(`  seal ${label}: evm_revert(${reverted}) -> block ${latest} ${seal.hash}; re-sealed as ${seal.snapshot}`);
+}
+// The PaidResult log of a paid row (parsed from the receipt) and an eth_call replay of the same calldata FROM the same
+// caller at the receipt block, both compared field by field with this runner's recomputed expectation (candidate-side
+// self-check). A log-count, decode, commitment or field mismatch counts as a cell mismatch, which fails the run at the end.
+async function paidResultCheck(ctx, row, expectedSelection, expectedPlacement) {
+  const tx = ctx.txs[row.txIndex];
+  const ifc = iface('JoinedConsumer');
+  const logs = tx.receipt.logs.filter((l) => l.address.toLowerCase() === ctx.addrs.joinedConsumer.toLowerCase()).map((l) => { try { return ifc.parseLog({ topics: l.topics, data: l.data }); } catch { return null; } }).filter((p) => p && p.name === 'PaidResult');
+  const fromLog = logs.length === 1 ? { kind: logs[0].args.kind, commitment: logs[0].args.commitment, selection: pickFields(logs[0].args.selection, SELECTION_FIELDS), placement: pickFields(logs[0].args.placement, PLACEMENT_FIELDS) } : null;
+  const replay = await observeRaw(ctx, ctx.raw, `paid-replay:${row.label}`, { contract: 'JoinedConsumer', fn: tx.candidateInputs.fn, args: tx.candidateInputs.args }, tx.to, tx.data, row.block, { from: tx.from }); // tx.from = the paid caller that sent the row (send() records it); retained in the envelope as params[0].from
+  let fromReplay;
+  try {
+    const d = ifc.decodeFunctionResult(tx.candidateInputs.fn, replay.returnData);
+    fromReplay = { commitment: d[0], selection: pickFields(d[1], SELECTION_FIELDS), placement: d.length > 2 ? pickFields(d[2], PLACEMENT_FIELDS) : null };
+  } catch (e) {
+    fromReplay = { error: String(e.message) };
+  }
+  const norm = (v) => (typeof v === 'boolean' ? String(v) : String(v).toLowerCase());
+  const compare = (observed, expected) => {
+    const fields = {};
+    let ok = !!observed;
+    for (const [k, v] of Object.entries(expected)) {
+      const equal = !!observed && norm(observed[k]) === norm(v);
+      fields[k] = { expected: norm(v), actual: observed ? norm(observed[k]) : null, equal };
+      if (!equal) ok = false;
+    }
+    return { ok, fields };
+  };
+  const selectionFromLog = compare(fromLog ? fromLog.selection : null, expectedSelection);
+  const placementFromLog = compare(fromLog ? fromLog.placement : null, expectedPlacement);
+  const replayOk = !!fromReplay && !fromReplay.error && compare(fromReplay.selection, expectedSelection).ok && (fromReplay.placement === null || compare(fromReplay.placement, expectedPlacement).ok);
+  const commitmentsAgree = !!fromLog && !!fromReplay && !fromReplay.error && norm(fromLog.commitment) === norm(fromReplay.commitment);
+  const match = logs.length === 1 && selectionFromLog.ok && placementFromLog.ok && replayOk && commitmentsAgree;
+  if (!match) ctx.mismatches++;
+  const check = { label: `${row.label}/paid-result`, kind: 'paid-result', standing: CAVEAT_EXPECTED, block: row.block, logCount: logs.length, fromLog, fromReplay, replayRpcId: replay.rpcId, replayFrom: tx.from, replayObs: { rpcId: replay.rpcId, from: tx.from, stage: `paid-replay:${row.label}`, blockTag: replay.blockTag, returnData: replay.returnData, error: replay.error }, selectionFromLog, placementFromLog, replayOk, commitmentsAgree, match };
+  ctx.consumerChecks.push(check);
+  log(`  chk  ${check.label}: ${match ? 'match' : 'MISMATCH ' + JSON.stringify({ logCount: logs.length, selectionFromLog, placementFromLog, commitmentsAgree, replayError: fromReplay && fromReplay.error })}`);
+  return check;
+}
+const paidSliceCell = {
+  standing: 'the sealed paid point/list slice (sdk-fixture appendix): A1/A2/B1 setup rows, the exact post-B1 seal, four paid rows (point/list x A-first/B-first) each the first transaction after a revert to that seal from the pinned unrelated caller, with abstractResult rows (RPC_OBSERVED observations, never expected answers)',
+  plan: paidSlicePlan(4, 12),
+  body: async (ctx, a, plan) => {
+    const { itemA, itemB, pairId, subj, a1, a2, b1, swaps, nameHash, swapsPos, pidB } = plan;
+    const rows = [];
+    const adm0 = baseCount(ctx, 'admissions'); const pub0 = baseCount(ctx, 'publications');
+    const A = a.signedA.address, B = a.nativeB.address;
+    const ab = [A, B], ba = [B, A];
+    const caller = ctx.wallets[PAID_CALLER_INDEX];
+    assertUnrelatedCaller(caller.address, { deployer: ctx.deployer.address, AUTHOR_A: A, AUTHOR_B: B, 'wallet 2 (signedB)': a.signedB.address, ...Object.fromEntries(Object.entries(ctx.addrs).map(([k, v]) => [`contract ${k}`, v])) });
+    const keep = (r) => { ctx.rowLog.push(r); rows.push(r); if (ctx.persist) ctx.persist(); return r; }; // statement/seal rows land in rowLog (persisted) when created, not only when the body returns
+    // funding pre-check of the paid caller at the current (after-revert) block, never 'latest'; on --anvil --accounts 4 funds index 3
+    const fundingBlock = await ctx.latestBlock();
+    const balanceEnv = await ctx.other('eth_getBalance', [caller.address, qty(fundingBlock)], { label: 'paid: caller balance' });
+    const callerBalance = BigInt(balanceEnv.response.result);
+    assert(callerBalance > 0n, `paid: the pinned caller ${caller.address} has no balance at block ${fundingBlock}; fund mnemonic index ${PAID_CALLER_INDEX} before the run`);
+    keep({ label: 'paid/caller-funding', status: 'eth_getBalance', standing: 'retained rpcOther envelope: the pinned unrelated caller is funded at the explicit after-revert block (asserted > 0 before any setup or paid row)', caller: caller.address, derivationPath: PAID_CALLER_PATH, blockTag: fundingBlock, balanceWei: callerBalance.toString(), rpcId: balanceEnv.request.id });
+    // ---- setup (four separate receipts; the A1 combined receipt is NOT a marginal placement cost)
+    await paidStep1(ctx, a, plan, rows);
+    await paidA1(ctx, a, plan, rows, { placement: true });
+    await paidA2B1(ctx, a, plan, rows);
+    // ---- the exact post-B1 seal, and the raw joins every paid row shares (retained BEFORE any paid row)
+    const seal = await sealState(ctx, 'paid/seal');
+    const basis = adm0 + 12;
+    const at = seal.block;
+    const [admissionsAtSeal] = await observe(ctx, ctx.raw, 'seal', 'Ledger', 'ledger', 'counts', [], at);
+    assert.equal(Number(admissionsAtSeal), basis, `paid/seal: admission frontier ${admissionsAtSeal} != expected ${basis}`);
+    const [generation] = await observe(ctx, ctx.raw, 'seal', 'IndexModule', 'index', 'generation', [], at);
+    const [epoch] = await observe(ctx, ctx.raw, 'seal', 'TypeRegistry', 'registry', 'epoch', [], at);
+    const [core] = await observe(ctx, ctx.raw, 'seal', 'Ledger', 'ledger', 'coreCodeCommitment', [], at);
+    const [realmId] = await observe(ctx, ctx.raw, 'seal', 'Ledger', 'ledger', 'realmId', [], at);
+    keep({ label: 'paid/seal', standing: 'the exact post-B1 basis: evm_snapshot id (single-use; re-sealed after every revert), block number/hash/timestamp from the retained header, admission frontier / index generation / rules epoch / Core code commitment from raw replies (stage seal) at that block', snapshot: seal.snapshot, snapshotRpcId: seal.snapshotRpcId, blockNumber: seal.block, blockHash: seal.hash, timestamp: seal.timestamp, observationBasis: { admissionFrontier: basis, indexGeneration: str(generation), rulesEpoch: str(epoch), coreCodeCommitment: core, realmId } });
+    // A placement provenance at the seal (joined here for the point rows, which do not look the directory up)
+    const pl = await observe(ctx, ctx.raw, 'seal-placement', 'LensReader', 'lens', 'resolve', [ab, P.FOLDER, swaps, nameHash], at);
+    assert.equal(str(pl[0]), '1', 'paid/seal: the A placement must be FOUND under LENS_A_FIRST');
+    const plB = await observe(ctx, ctx.raw, 'seal-placement', 'LensReader', 'lens', 'resolve', [ba, P.FOLDER, swaps, nameHash], at); // the lens-matching reply for the B-first rows
+    assert.equal(str(plB[0]), '1', 'paid/seal: the A placement must be FOUND under LENS_B_FIRST too (B has none, so the lens falls through to A)');
+    assert.deepEqual([lc(plB[1]), str(plB[2]), lc(plB[3]), str(plB[4])], [lc(pl[1]), str(pl[2]), lc(pl[3]), str(pl[4])], 'paid/seal: both lenses discover the identical placement (target, revision, author, admission)');
+    const plAdm = await observe(ctx, ctx.raw, 'seal-placement', 'Ledger', 'ledger', 'admission', [pl[4]], at);
+    const plEv = await observe(ctx, ctx.raw, 'seal-placement', 'Ledger', 'ledger', 'evidence', [plAdm[2]], at);
+    const placementAtSeal = { status: str(pl[0]), target: pl[1], revision: str(pl[2]), author: pl[3], admission: str(pl[4]), publication: str(plAdm[2]), admissionKind: str(plAdm[0]), evidenceAuthor: plEv[0], proofKind: str(plEv[1]), v: str(plEv[2]), firstAdmission: str(plEv[4]), leafCount: str(plEv[3]) };
+    assert.equal(lc(placementAtSeal.author), lc(A), 'paid/seal: the placement is held by AUTHOR_A');
+    assert.equal(lc(placementAtSeal.target), lc(subj), 'paid/seal: the placement targets FILE_QUOTE');
+    assert.equal(placementAtSeal.publication, String(pub0 + 2), 'paid/seal: the placement was admitted by the A1 publication');
+    assert.equal(placementAtSeal.proofKind, '2', 'paid/seal: the A1 publication is EOA-signed');
+    placementAtSeal.byLens = { LENS_A_FIRST: { status: str(pl[0]), target: pl[1], revision: str(pl[2]), author: pl[3], admission: str(pl[4]) }, LENS_B_FIRST: { status: str(plB[0]), target: plB[1], revision: str(plB[2]), author: plB[3], admission: str(plB[4]) } };
+    keep({ label: 'paid/seal/a-placement-provenance', standing: 'raw replies (stage seal-placement) at the seal block: LensReader.resolve(FOLDER, /swaps, eth-usdc) under LENS_A_FIRST and under LENS_B_FIRST (both retained; identical placement) + Ledger.admission + Ledger.evidence; sourceStep A1 = publication pub0+2; NOT charged to any paid row', sourceStep: 'A1', actor: 'AUTHOR_A', evidenceCategory: evidenceCategoryOf(Number(placementAtSeal.proofKind), true), basis, observed: placementAtSeal, position: swapsPos });
+    // no B placement: B's binding at the position, B's /swaps scope list, and the B-only lens are all empty/absent
+    const bHead = await observe(ctx, ctx.raw, 'seal-no-b-placement', 'Ledger', 'ledger', 'head', [binding(pidB, swapsPos)], at);
+    const bScope = await observe(ctx, ctx.raw, 'seal-no-b-placement', 'IndexModule', 'index', 'postingHead', [scopeList(scopeKey(pidB, P.FOLDER, swaps))], at);
+    const bOnly = await observe(ctx, ctx.raw, 'seal-no-b-placement', 'LensReader', 'lens', 'resolve', [[B], P.FOLDER, swaps, nameHash], at);
+    assert.equal(str(bHead[0]), '0', 'paid/seal: B has no binding at /swaps/eth-usdc');
+    assert.equal(str(bScope[0]), '0', 'paid/seal: B\'s /swaps scope list is empty');
+    assert.equal(str(bOnly[0]), '0', 'paid/seal: the B-only lens finds no /swaps/eth-usdc placement');
+    keep({ label: 'paid/seal/no-b-placement', standing: 'raw replies (stage seal-no-b-placement) at the seal block: Ledger.head(binding(B, /swaps/eth-usdc)) state 0, IndexModule.postingHead(B\'s /swaps scope list) count 0, LensReader.resolve([B], FOLDER, /swaps, eth-usdc) ABSENT; B1 bound no FOLDER placement (see the paid/setup/B1 calldata: two actions)', bHeadState: str(bHead[0]), bScopeCount: str(bScope[0]), bOnlyLensStatus: str(bOnly[0]), bBindingKey: binding(pidB, swapsPos) });
+    // ---- the four paid rows
+    const ordering = [{ kind: 'seal', block: seal.block, hash: seal.hash, timestamp: seal.timestamp }];
+    const expectA = { subject: subj, expectedHead: a2, selectedAuthor: A, selectedProofKind: 2, pairId, itemA, itemB, mantissa: J.mantissaA2, scale: J.scale, observedAt: J.observedAt, noteCommitment: NOTE_COMMITMENT, basisAdmission: basis }; // expectedHead = the fixture record id of QUOTE_A2; observedAt / noteCommitment = the sealed fixture values J.* (this runner's candidate-side mirror)
+    const expectB = { ...expectA, expectedHead: b1, selectedAuthor: B, selectedProofKind: 1, mantissa: J.mantissaB1 }; // QUOTE_B1
+    const placementExpect = { folder: swaps, nameRole: nameHash, actor: A, proofKind: 2, publication: pub0 + 2, budget: 16 };
+    const commonSelection = { basisAdmission: basis, indexGeneration: str(generation), rulesEpoch: str(epoch), coreCodeCommitment: core, subject: subj, pairId, itemA, itemB, scale: J.scale, observedAt: J.observedAt, note: NOTE_COMMITMENT };
+    const selA = { ...commonSelection, selectedHead: a2, selectedRevision: 2, selectedAdmission: adm0 + 10, selectedPublication: pub0 + 3, selectedAuthor: A, selectedProofKind: 2, mantissa: J.mantissaA2 };
+    const selB = { ...commonSelection, selectedHead: b1, selectedRevision: 1, selectedAdmission: adm0 + 12, selectedPublication: pub0 + 4, selectedAuthor: B, selectedProofKind: 1, mantissa: J.mantissaB1 };
+    const placementNone = { position: ZERO, actor: ZERO_ADDR, proofKind: 0, revision: 0, admission: 0, publication: 0, basisAdmission: 0, pageStatus: 0, rawTotal: 0, scanned: 0, selectedSoFar: 0, mutated: false, ended: false };
+    const placementOne = { position: swapsPos, actor: A, proofKind: 2, revision: 1, admission: adm0 + 7, publication: pub0 + 2, basisAdmission: basis, pageStatus: 2, rawTotal: 1, scanned: 1, selectedSoFar: 1, mutated: false, ended: true }; // hydrations are a physical witness (lens-order dependent), not pinned
+    const headLabels = { [lc(a1)]: ['QUOTE_A1', 'A1'], [lc(a2)]: ['QUOTE_A2', 'A2'], [lc(b1)]: ['QUOTE_B1', 'B1'] };
+    const authorLabels = { [lc(A)]: ['AUTHOR_A', 'EOA (wallet 1)'], [lc(B)]: ['AUTHOR_B', 'contract (Actor actorB)'] };
+    const paidRows = [
+      { key: 'point-a-first', operation: 'PAID_POINT', lens: 'LENS_A_FIRST', lensArr: ab, fn: 'paidPoint', fnArgs: [ab, expectA], selection: { ...selA, lensId: lensId(ab) }, placement: placementNone },
+      { key: 'list-a-first', operation: 'PAID_LIST', lens: 'LENS_A_FIRST', lensArr: ab, fn: 'paidList', fnArgs: [ab, expectA, placementExpect], selection: { ...selA, lensId: lensId(ab) }, placement: placementOne },
+      { key: 'point-b-first', operation: 'PAID_POINT', lens: 'LENS_B_FIRST', lensArr: ba, fn: 'paidPoint', fnArgs: [ba, expectB], selection: { ...selB, lensId: lensId(ba) }, placement: placementNone },
+      { key: 'list-b-first', operation: 'PAID_LIST', lens: 'LENS_B_FIRST', lensArr: ba, fn: 'paidList', fnArgs: [ba, expectB, placementExpect], selection: { ...selB, lensId: lensId(ba) }, placement: placementOne },
+    ];
+    const consumerCodehash = ctx.codehashes ? ctx.codehashes.joinedConsumer : { unknown: '--addresses mode: no deployment record in this run', consequence: 'consumer code commitment must come from the independently retained deployment facts' };
+    for (const pr of paidRows) {
+      const label = `paid/${pr.key}`;
+      await restoreSeal(ctx, seal, label, ordering);
+      const row = await send(ctx, () => call(ctx, 'JoinedConsumer', 'joinedConsumer', pr.fn, pr.fnArgs), label, { wallet: caller, extra: { operation: pr.operation, lens: pr.lens, storage: STATELESS, consumer: `JoinedConsumer.${pr.fn} (stateless; one PaidResult log of ~34 data words carrying the concrete observations — ESTIMATED ~9-10k gas: the paid rows' consumer overhead, disclosed separately, never subtracted)`, armInputs: { standing: 'this runner\'s local mirror of the fixture map (candidate-side), including the expected head record ids of QUOTE_A2 / QUOTE_B1 passed as Expect.expectedHead; the sealed run supplies the independently authored vectors (appendix pin 4)', expect: pr.fnArgs[1], placementExpect: pr.fnArgs.length > 2 ? pr.fnArgs[2] : null } } });
+      // F3: the row must be the ONLY transaction of its block (index 0) at the matched timestamp; the block's transaction list is retained
+      const tx = ctx.txs[row.txIndex];
+      const blockEnv = await ctx.rpc('eth_getBlockByNumber', [qty(row.block), false], { label: `${label}: block transaction list` });
+      const blk = blockEnv.response.result;
+      assert(blk && lc(blk.hash) === lc(row.blockHash), `${label}: eth_getBlockByNumber(${row.block}) does not return the receipt's block`);
+      ctx.blocks.push({ ...envOf(blockEnv), source: ctx.source, blockNumber: row.block, blockHash: blk.hash });
+      const executed = { txIndex: tx.receipt.transactionIndex, txCount: blk.transactions.length, txHashes: [...blk.transactions], onlyTx: blk.transactions.length === 1 && lc(blk.transactions[0]) === lc(row.hash), timestamp: Number(blk.timestamp), parentHash: blk.parentHash, hash: blk.hash, blockRpcId: blockEnv.request.id };
+      ordering.push({ kind: 'tx', label, block: row.block, parentHash: executed.parentHash, timestamp: executed.timestamp, txIndex: executed.txIndex, txCount: executed.txCount, onlyTx: executed.onlyTx });
+      const check = await paidResultCheck(ctx, row, pr.selection, pr.placement);
+      const evidenceFor = {
+        operation: pr.operation, lens: pr.lens, lensArr: pr.lensArr, label,
+        row: { txIndex: row.txIndex, hash: row.hash, block: row.block, blockHash: row.blockHash, status: row.status, gas: row.gas },
+        executed, seal: { block: seal.block, hash: seal.hash, timestamp: seal.timestamp },
+        sealBasis: { admissionFrontier: basis, indexGeneration: str(generation), rulesEpoch: str(epoch), coreCodeCommitment: core, realmId },
+        chainId: ctx.chainId, addrs: { ledger: ctx.addrs.ledger, lensReader: ctx.addrs.lens, indexModule: ctx.addrs.index, registry: ctx.addrs.registry, consumer: ctx.addrs.joinedConsumer }, consumerCodehash,
+        coordinates: { subject: subj, folder: swaps, nameRole: nameHash, position: swapsPos },
+        placementAtSeal, types: { QUOTE_J: T.QUOTE_J, PAIR: T.PAIR, ITEM: T.ITEM }, headLabels, authorLabels,
+        caller: { address: caller.address, derivationPath: PAID_CALLER_PATH },
+      };
+      row.abstractResult = deriveAbstractResult({ check, replay: check.replayObs, evidenceFor }); // pure; UNKNOWN throughout on a failed self-check
+      rows.push(row);
+      ctx.persist();
+      ordering.push({ kind: 'retained', label });
+      log(`  paid ${label}: retained (abstractResult ${row.abstractResult.rawEvidence.selfCheck.match ? 'built' : 'UNKNOWN: ' + row.abstractResult.rawEvidence.selfCheck.reason}) before the next revert`);
+    }
+    const orderedRows = checkPaidRowOrdering(ordering);
+    rows.push({ label: 'paid/ordering', standing: 'each paid row is the first and ONLY transaction (index 0; block transaction list retained) after an evm_revert whose observed head is the seal, mined at seal + 1 on the sealed hash at the deterministic timestamp seal + 1 (evm_setNextBlockTimestamp after every revert, envelope in rpcOther), and retained (checked, abstractResult built, persisted) before the next revert; asserted by checkPaidRowOrdering', events: ordering, rows: orderedRows, timestamps: orderedRows.map((r) => r.timestamp), timestampsEqual: new Set(orderedRows.map((r) => r.timestamp)).size === 1, expectedTimestamp: seal.timestamp + 1 });
+    rows.push({ label: 'paid/agreement', standing: 'point and list under the same lens observe the identical Selection (compared from the PaidResult logs); the placement provenance is identical across lenses', aFirst: agreement(rows, 'paid/point-a-first', 'paid/list-a-first'), bFirst: agreement(rows, 'paid/point-b-first', 'paid/list-b-first') });
+    rows.push({
+      label: 'paid/cost-disclosure', status: 'statement', standing: 'costs are reported in separate classes; this runner never subtracts, amortizes or normalizes them',
+      classes: {
+        deployment: 'report.deployment[*].gas per contract with runtime/initcode bytes — includes diagnostic/test consumers (Consumer, StatelessConsumer, Reconstructor, FailingIndexModule, MockAcceptor, StrictQuoteAcceptor) that these rows do not exercise; keep them apart from production prerequisites (TypeRegistry, Ledger, IndexModule, LensReader, the fixture rules)',
+        code: 'report.deployment[*].runtimeBytes / initcodeBytes / runtimeCodehash; JoinedConsumer is the measurement consumer, not a production component',
+        setup: 'rows paid/setup/step1, paid/setup/A1, paid/setup/A2, paid/setup/B1 (receipts of the fixture prerequisites and the three author steps)',
+        placementOnceOnly: { standing: 'ESTIMATE unless the paired control is pinned: the single A placement is one of five actions inside the paid/setup/A1 combined receipt (create + publish + head + FOLDER bind + tag) and is not separable from that receipt alone', pairedControl: 'cell joined/a1-without-placement (optional, non-default: identical batch minus the FOLDER bind from the same sealed pre-A1 state); when the coordinator pins it the two receipts sit side by side and any difference is the coordinator\'s computation' },
+        storage: 'ESTIMATED fresh slots only (report.estimatedFreshSlots); no storage tracing was run',
+        paid: 'rows paid/point-a-first, paid/list-a-first, paid/point-b-first, paid/list-b-first: receipt gas of one transaction each from the pinned unrelated caller (STATELESS consumer: no SSTORE; one PaidResult log with the concrete observations)',
+        matchedRollbackControl: 'cell failure-rows (failure/failed-acceptance = E_POLICY_REJECTED, failure/failed-mandatory-index = E_INDEX; whole-publication rollback with an unchanged probe) is the small matched acceptance/index-failure control required by matched-cost-scope-review — referenced here, not duplicated',
+      },
+    });
+    return rows;
+  },
+};
+// point/list agreement from the retained PaidResult logs (a missing log is reported as unknown, never as agreement)
+function agreement(rows, pointLabel, listLabel) {
+  const find = (label) => rows.find((r) => r.label === label);
+  const pt = find(pointLabel), ls = find(listLabel);
+  const passed = (r) => !!(r && r.abstractResult && r.abstractResult.rawEvidence && r.abstractResult.rawEvidence.selfCheck && r.abstractResult.rawEvidence.selfCheck.match === true);
+  const sel = (r) => (passed(r) && r.abstractResult.rawEvidence.paidResultLog ? r.abstractResult.rawEvidence.paidResultLog.selection : null);
+  const sp = sel(pt), sl = sel(ls);
+  if (!sp || !sl) return { unknown: 'a PaidResult log is missing or its self-check failed', consequence: 'no agreement claim' };
+  const differing = SELECTION_FIELDS.filter((k) => k !== 'lensId' && String(sp[k]).toLowerCase() !== String(sl[k]).toLowerCase());
+  return { identicalSelection: differing.length === 0, differingFields: differing, selectedHead: sp.selectedHead, selectedAuthor: sp.selectedAuthor };
+}
+// OPTIONAL paired control (non-default; selected only by its exact --cells key): the identical A1 batch minus the
+// FOLDER bind, from the same sealed pre-A1 state, so the marginal placement cost can be a paired measurement instead of
+// an estimate. Reported beside paid/setup/A1; nothing is subtracted here.
+const a1WithoutPlacementCell = {
+  standing: 'OPTIONAL paired control of the once-only placement cost: step 1 then the A1 batch WITHOUT the FOLDER bind, from the same run snapshot as joined/paid-slice (same pre-A1 state); the coordinator pins it explicitly; this runner subtracts nothing',
+  plan: paidSlicePlan(2, 7),
+  body: async (ctx, a, plan) => {
+    const { subj, swaps, nameHash } = plan;
+    const rows = [];
+    const A = a.signedA.address;
+    await paidStep1(ctx, a, plan, rows);
+    await paidA1(ctx, a, plan, rows, { placement: false });
+    const at = await ctx.latestBlock();
+    const none = await observe(ctx, ctx.raw, 'no-placement', 'LensReader', 'lens', 'resolve', [[A], P.FOLDER, swaps, nameHash], at);
+    assert.equal(str(none[0]), '0', 'a1-without-placement: no /swaps/eth-usdc placement may exist');
+    const head = await observe(ctx, ctx.raw, 'no-placement', 'LensReader', 'lens', 'resolve', [[A], P.HEAD, subj, ZERO], at);
+    assert.equal(str(head[0]), '1', 'a1-without-placement: the A head must exist');
+    rows.push({ label: 'joined/a1-without-placement/pairing', status: 'statement', standing: 'pair with cell joined/paid-slice row paid/setup/A1: same run snapshot, identical step 1, same author/nonce/bodies; the only action difference is the absent FOLDER bind (signature and deadline calldata bytes differ per run: ESTIMATED tens of gas). The difference, if the coordinator computes it, is the once-only placement cost; this runner reports both receipts and subtracts nothing', placementAbsent: { lensStatus: str(none[0]), headStatus: str(head[0]), stage: 'no-placement' } });
+    return rows;
+  },
+};
+
+// ---------------------------------------------------------------- Type id resolution (derived ids; three-way agreement)
+// typeIdOf + typeInfo + descriptor raw replies at `block` (stage type-resolution), checked against the local Keys.typeId
+// derivation and, when given, the TypeRegistered receipt log; fills T[key] for the six fixture Types. The acceptor is the
+// Type's MANDATORY rule: the registry must report it (address + ruleId == the derivation codehash); at the registration
+// block (deploy mode, `evidence.fromLog` given) the initial activation row must be 1 with no additional policy.
+async function resolveType(ctx, key, acceptorKey, refKeys, acceptorCodehash, block, evidence = {}, shape = SHAPE[key]) {
+  const acceptor = acceptorKey ? ctx.addrs[acceptorKey] : ZERO_ADDR;
+  const refs = refKeys.map((k) => T[k]);
+  const [fromView] = await observe(ctx, ctx.raw, 'type-resolution', 'TypeRegistry', 'registry', 'typeIdOf', [shape, acceptor, refs], block);
+  const local = typeIdLocal(shape, refs, acceptorCodehash);
+  assert.equal(lc(fromView), lc(local), `${key}: typeIdOf disagrees with the local Keys.typeId derivation`);
+  if (evidence.fromLog) assert.equal(lc(evidence.fromLog), lc(local), `${key}: the TypeRegistered log disagrees with the derivation`);
+  const info = typeInfoOf(await observe(ctx, ctx.raw, 'type-resolution', 'TypeRegistry', 'registry', 'typeInfo', [fromView], block));
+  const desc = descriptorOf(await observe(ctx, ctx.raw, 'type-resolution', 'TypeRegistry', 'registry', 'descriptor', [fromView], block));
+  assert.equal(info.registered, true, `${key}: not registered at block ${block}`);
+  assert.equal(lc(info.mandatoryAcceptor), lc(acceptor), `${key}: mandatory acceptor mismatch`);
+  assert.equal(lc(info.ruleId), lc(acceptorCodehash), `${key}: ruleId must equal the derivation codehash`);
+  assert.equal(lc(desc.ruleId), lc(acceptorCodehash), `${key}: descriptor.ruleId must equal the derivation codehash`);
+  assert.equal(lc(desc.mandatoryAcceptor), lc(acceptor), `${key}: descriptor.mandatoryAcceptor mismatch`);
+  assert.equal(desc.shape, shape, `${key}: descriptor.shape mismatch`);
+  assert.equal(info.refCount, String(refs.length), `${key}: refCount mismatch`);
+  if (evidence.fromLog) {
+    assert.equal(info.activation, '1', `${key}: the initial activation row must be 1 at the registration block`);
+    assert.equal(lc(info.policyAcceptor), lc(ZERO_ADDR), `${key}: no additional policy at registration`);
+    assert.equal(lc(info.policyCodehash), lc(ZERO), `${key}: no additional policy codehash at registration`);
+  }
+  if (TYPE_KEYS.includes(key)) T[key] = fromView;
+  return { typeId: fromView, shape, mandatoryAcceptor: acceptor, acceptorKey, ruleId: acceptorCodehash, refKeys, refTypeIds: refs, typeInfoAtResolution: info, descriptor: desc, localDerivation: local, ...evidence, standing: 'id = keccak256(abi.encode(DOM_TYPE, shape, keccak256(abi.encode(refTypeIds)), ruleId)); ruleId = the MANDATORY rule\'s runtime codehash; typeIdOf/typeInfo/descriptor raw replies at stage type-resolution; agreement of log (when deployed here), view, descriptor and local derivation asserted' };
+}
+// register a Type inside a sealed cell (reverted with the cell) and resolve it the same three ways; T is not touched
+async function registerInCell(ctx, key, shape, acceptorKey, refKeys, label) {
+  const acceptor = acceptorKey ? ctx.addrs[acceptorKey] : ZERO_ADDR;
+  const refs = refKeys.map((k) => T[k]);
+  const row = await send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'register', [shape, acceptor, refs]), label);
+  const tx = ctx.txs[row.txIndex];
+  const registered = tx.receipt.logs
+    .filter((l) => l.address.toLowerCase() === ctx.addrs.registry.toLowerCase())
+    .map((l) => { try { return iface('TypeRegistry').parseLog({ topics: l.topics, data: l.data }); } catch { return null; } })
+    .filter((p) => p && p.name === 'TypeRegistered');
+  assert.equal(registered.length, 1, `${label}: expected exactly one TypeRegistered log`);
+  let codehash = ZERO;
+  if (acceptorKey) {
+    if (ctx.codehashes?.[acceptorKey]) codehash = ctx.codehashes[acceptorKey];
+    else { const e = await ctx.rpc('eth_getCode', [acceptor, qty(row.block)], { label: `code ${acceptorKey}` }); ctx.rpcOther.push(envOf(e)); codehash = keccak256(e.response.result); }
+  }
+  const resolved = await resolveType(ctx, key, acceptorKey, refKeys, codehash, row.block, { fromLog: registered[0].args.typeId, registerTx: row.hash, registerBlock: row.block }, shape);
+  return { typeId: resolved.typeId, row: { ...row, resolved }, resolved };
+}
+// --addresses mode: no registration receipts; acceptor codehashes from eth_getCode (envelopes in rpcOther)
+async function resolveTypesFromChain(ctx) {
+  const block = await ctx.latestBlock();
+  const types = {};
+  for (const [key, acceptorKey, refKeys] of TYPE_PLAN) {
+    let codehash = ZERO;
+    if (acceptorKey) {
+      const e = await ctx.rpc('eth_getCode', [ctx.addrs[acceptorKey], qty(block)], { label: `code ${acceptorKey}` });
+      ctx.rpcOther.push(envOf(e));
+      codehash = keccak256(e.response.result);
+    }
+    types[key] = await resolveType(ctx, key, acceptorKey, refKeys, codehash, block);
+  }
+  return types;
+}
+
+// ---------------------------------------------------------------- cell selection (runner review 4): explicit, validated BEFORE any chain starts
+// `planKeys` is the static ordered cell plan; `cells` an exact comma-separated list, `only` the legacy substring filter.
+// Unknown keys or a zero selection throw (the run must not start a chain and exit 0 having done nothing).
+// `optionalKeys` (non-default cells such as the paired control joined/a1-without-placement) are excluded from the default
+// selection and from the legacy substring filter; only an exact `--cells` name selects them.
+function selectCells(planKeys, { cells = null, only = null } = {}, optionalKeys = []) {
+  const unknownOptional = optionalKeys.filter((k) => !planKeys.includes(k));
+  if (unknownOptional.length) throw new Error(`optional cell(s) not in the plan: ${unknownOptional.join(', ')}`);
+  const defaults = planKeys.filter((k) => !optionalKeys.includes(k));
+  if (cells === null && only === null) return [...defaults];
+  let selected;
+  if (cells !== null) {
+    const wanted = String(cells).split(',').map((s) => s.trim()).filter(Boolean);
+    const unknown = wanted.filter((k) => !planKeys.includes(k));
+    if (unknown.length) throw new Error(`--cells: unknown cell(s) ${unknown.join(', ')}; known cells: ${planKeys.join(', ')}`);
+    selected = planKeys.filter((k) => wanted.includes(k)); // exact names may select an optional cell
+  } else {
+    selected = defaults.filter((k) => k.includes(String(only))); // the legacy substring filter never selects an optional cell
+  }
+  if (selected.length === 0) throw new Error(`cell filter selected zero cells (cells=${cells}, only=${only}); known cells: ${planKeys.join(', ')}`);
+  return selected;
+}
+
 // ---------------------------------------------------------------- deployment (once; code identity retained)
 async function deployAll(run) {
   const ctx = makeCtx(run);
@@ -1008,28 +1816,95 @@ async function deployAll(run) {
   d.actorB = await dep('Actor', [d.ledger.address]);
   d.consumer = await dep('Consumer', [d.lens.address]);
   d.recon = await dep('Reconstructor');
-  d.joinedConsumer = await dep('JoinedConsumer', [d.ledger.address, d.lens.address, T.QUOTE_J, T.PAIR, T.ITEM, T.LABEL]);
+  d.strictAcceptor = await dep('StrictQuoteAcceptor'); // fixture rule v2 (artifact from test/Falsify.t.sol): QUOTE's added policy and the in-cell strict Type's mandatory rule in cell policy/activate
+  d.quoteRule = await dep('MinBodyAcceptor', [32]); // QUOTE's MANDATORY rule: immutable threshold, part of the runtime code and therefore of the id
+  d.pairRule = await dep('MinBodyAcceptor', [96]); // PAIR's MANDATORY rule (two checked refs + one payload word)
   d.statelessConsumer = await dep('StatelessConsumer', [d.lens.address]);
-  const addrs = Object.fromEntries(Object.entries(d).map(([k, v]) => [k, v.address]));
-  ctx.addrs = addrs;
-  const reg = (typeId, acceptorKey, refs, label) => send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'register', [typeId, acceptorKey ? addrs[acceptorKey] : ZERO_ADDR, refs]), label);
-  setup.push(await send(ctx, () => call(ctx, 'Ledger', 'ledger', 'setIndexModule', [addrs.index]), 'setup: attach index module'));
-  setup.push(await reg(T.QUOTE, 'acceptor', [], 'setup: register QUOTE (MockAcceptor mode 0)'));
-  setup.push(await reg(T.BINARY, null, [], 'setup: register BINARY (no acceptor)'));
-  setup.push(await reg(T.ITEM, null, [], 'setup: register ITEM (no acceptor)'));
-  setup.push(await reg(T.PAIR, 'acceptor', [T.ITEM, T.ITEM], 'setup: register PAIR (MockAcceptor; refs [ITEM, ITEM])'));
-  setup.push(await reg(T.QUOTE_J, 'quoteAcceptor', [T.PAIR], 'setup: register QUOTE_J (QuoteAcceptor: 160-byte shape, scale 6, bounds; refs [PAIR])'));
-  setup.push(await reg(T.LABEL, 'labelAcceptor', [], 'setup: register LABEL (LabelAcceptor: exact UTF-8, 1..255 bytes; no refs)'));
+  const addrsOf = () => Object.fromEntries(Object.entries(d).map(([k, v]) => [k, v.address]));
+  ctx.addrs = addrsOf();
+  setup.push(await send(ctx, () => call(ctx, 'Ledger', 'ledger', 'setIndexModule', [ctx.addrs.index]), 'setup: attach index module'));
+  // registration: register(shape, acceptor, refs) RETURNS the derived id. Each id is taken from the TypeRegistered receipt
+  // log and cross-checked against typeIdOf (raw reply) and the local Keys.typeId derivation before the next registration
+  // can reference it (PAIR needs ITEM, QUOTE_J needs PAIR). The name hashes are shapes, never ids.
+  const types = {};
+  for (const [key, acceptorKey, refKeys, note] of TYPE_PLAN) {
+    const acceptor = acceptorKey ? ctx.addrs[acceptorKey] : ZERO_ADDR;
+    const refs = refKeys.map((k) => T[k]);
+    const row = await send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'register', [SHAPE[key], acceptor, refs]), `setup: register ${key} (${note}; id derived by the registry)`);
+    setup.push(row);
+    const tx = ctx.txs[row.txIndex];
+    const registered = tx.receipt.logs
+      .filter((l) => l.address.toLowerCase() === ctx.addrs.registry.toLowerCase())
+      .map((l) => { try { return iface('TypeRegistry').parseLog({ topics: l.topics, data: l.data }); } catch { return null; } })
+      .filter((p) => p && p.name === 'TypeRegistered');
+    assert.equal(registered.length, 1, `register ${key}: expected exactly one TypeRegistered log`);
+    types[key] = await resolveType(ctx, key, acceptorKey, refKeys, acceptorKey ? d[acceptorKey].runtimeCodehash : ZERO, row.block, { fromLog: registered[0].args.typeId, registerTx: row.hash, registerBlock: row.block, logIndex: tx.receipt.logs.findIndex((l) => l.address.toLowerCase() === ctx.addrs.registry.toLowerCase()) });
+    log(`  type ${key}: ${T[key]} (log == typeIdOf == local derivation)`);
+  }
+  // the mutable MockAcceptor is installed as the ADDITIONAL policy (row 2) of QUOTE and PAIR — never a mandatory rule (F5 addendum)
+  for (const key of ['QUOTE', 'PAIR']) {
+    const row = await send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'activate', [T[key], ctx.addrs.acceptor]), `setup: activate MockAcceptor (mode 0) as ${key} ADDITIONAL policy row 2 (mutable test double; its refusal is E_POLICY_REJECTED)`);
+    setup.push(row);
+    const info = typeInfoOf(await observe(ctx, ctx.raw, 'setup', 'TypeRegistry', 'registry', 'typeInfo', [T[key]], row.block));
+    assert.equal(lc(info.policyAcceptor), lc(ctx.addrs.acceptor), `${key}: mock must be the active policy after setup`);
+    assert.equal(info.activation, '2', `${key}: activation row 2 after setup`);
+    assert.equal(lc(info.mandatoryAcceptor), lc(types[key].mandatoryAcceptor), `${key}: the mandatory rule is untouched by the activation`);
+    types[key].policyAfterSetup = { acceptor: info.policyAcceptor, codehash: info.policyCodehash, activation: info.activation, activateTx: row.hash };
+  }
+  d.joinedConsumer = await dep('JoinedConsumer', [d.ledger.address, d.lens.address, T.QUOTE_J, T.PAIR, T.ITEM, T.LABEL]); // after registration: constructed with the DERIVED ids
+  ctx.addrs = addrsOf();
+  const addrs = ctx.addrs;
   const latest = await ctx.latestBlock();
   const epoch = str((await observe(ctx, ctx.raw, 'setup', 'TypeRegistry', 'registry', 'epoch', [], latest))[0]);
   const principals = {};
   for (const k of ['actorA', 'actorB']) principals[k] = (await observe(ctx, ctx.raw, 'setup', 'Ledger', 'ledger', 'principalOf', [addrs[k]], latest))[0];
   for (const w of ctx.wallets.slice(1, 3)) principals[w.address] = (await observe(ctx, ctx.raw, 'setup', 'Ledger', 'ledger', 'principalOf', [w.address], latest))[0];
-  return { addrs, deployment: d, setup, setupTransactions: ctx.txs, setupRaw: ctx.raw, setupBlocks: ctx.blocks, setupRpcOther: ctx.rpcOther, registryEpoch: epoch, principals };
+  return { addrs, deployment: d, setup, setupTransactions: ctx.txs, setupRaw: ctx.raw, setupBlocks: ctx.blocks, setupRpcOther: ctx.rpcOther, registryEpoch: epoch, principals, types };
+}
+
+// the static, ordered cell plan (23 keys: 22 default cells + the optional paired control; the no-index diagnostic is
+// dropped by --skip-without-index; `optional: true` cells run only when named exactly by --cells)
+function buildCellPlan() {
+  const plan = [];
+  const picks = { 'native-one': (a) => [a.nativeA, null], 'signed-one': (a) => [a.signedA, null], 'native-two': (a) => [a.nativeA, a.nativeB], 'signed-two': (a) => [a.signedA, a.signedB] };
+  for (const fixture of ['quote', 'binary']) {
+    for (const [cell, pick] of Object.entries(picks)) plan.push({ key: `${cell}/${fixture}`, cell: matrixCell(cell, fixture, pick) });
+  }
+  for (const variant of ['contract-fresh-body', 'contract-existing-body', 'exact-retry']) plan.push({ key: `fresh/${variant}`, cell: { standing: 'freshness control: its own sealed cell from the same post-setup snapshot; report side by side, never subtract', plan: freshPlan(variant), body: freshBody } });
+  plan.push({ key: 'failure-rows', cell: failureCell });
+  plan.push({ key: 'joined/steps-1-6', cell: joinedCell });
+  plan.push({ key: 'joined/paid-slice', cell: paidSliceCell });
+  plan.push({ key: 'joined/a1-without-placement', cell: a1WithoutPlacementCell, optional: true });
+  for (const variant of ['hash-only-create', 'create+label-fresh', 'create+label-existing-republished', 'create+label-existing-omitted']) plan.push({ key: `label/${variant}`, cell: labelCell(variant) });
+  plan.push({ key: 'policy/activate', cell: policyCell });
+  plan.push({ key: 'failure/refused-re-registration', cell: refusedRegistrationCell });
+  plan.push({ key: 'failure/unsupported-native-import', cell: unsupportedImportCell });
+  if (!args['skip-without-index']) {
+    plan.push({
+      key: 'native-one-noindex/quote',
+      cell: {
+        standing: 'NOT EQUIVALENT: the mandatory index is detached (a named guarantee omitted); diagnostic only',
+        plan: async (ctx, a, block) => matrixPlan(ctx, 'native-one-noindex', 'quote', a.nativeA, null, block, { noIndex: true }),
+        body: async (ctx, a, plan) => {
+          const rows = [await send(ctx, () => call(ctx, 'Ledger', 'ledger', 'setIndexModule', [ZERO_ADDR]), 'setup: detach index module')];
+          rows.push(...(await runCell(ctx, plan, { noIndex: true })));
+          return rows;
+        },
+      },
+    });
+  }
+  return plan;
 }
 
 async function main() {
   const t0 = Date.now();
+  // ---- cell selection is computed and validated BEFORE any chain starts (runner review 4)
+  const cellPlan = buildCellPlan();
+  const planKeys = cellPlan.map((c) => c.key);
+  const optionalCells = cellPlan.filter((c) => c.optional).map((c) => c.key);
+  const selectedCells = selectCells(planKeys, { cells: typeof args.cells === 'string' ? args.cells : null, only: ONLY }, optionalCells);
+  assertAnvilOnlyCells(selectedCells, !!args.anvil); // the sealing cells run only on an owned --anvil chain; refused before any chain call
+  log(`cell plan: ${planKeys.length} keys (${optionalCells.length} optional: ${optionalCells.join(', ')}); selected ${selectedCells.length}: ${selectedCells.join(', ')}`);
   setTimeout(() => terminateRun('watchdog: 25 minutes elapsed, stopping the run', 124), WATCHDOG_MS).unref(); // applies with and without --anvil
   process.once('SIGINT', () => terminateRun('SIGINT: interrupted run', 130));
   process.once('SIGTERM', () => terminateRun('SIGTERM: terminated run', 143));
@@ -1043,21 +1918,29 @@ async function main() {
     profile: 'road-b-lab/2', claim: 'disposable lab, no protocol claim',
     honesty: 'This run reports receipt diagnostics with explicit remaining gates. It is not a same-guarantee comparison and not the capability ablation.',
     experiment: 'ingress x multiplicity (hash-placement diagnostics) + separate freshness cells + failure rows + the typed joined journey (steps 1–6) + the label-retention probe. NOT the protocol capability ablation (neither/authorship/selection/both), which is a later gate.',
-    remainingGates: [CAVEAT_JOINED, CAVEAT_RECON, CAVEAT_MATCHED, CAVEAT_EXPECTED],
+    remainingGates: [CAVEAT_JOINED, CAVEAT_RECON, CAVEAT_MATCHED, CAVEAT_EXPECTED, CAVEAT_NATIVE_IMPORT, CAVEAT_VECTOR, CAVEAT_MANDATORY],
+    sourceProfile: 'post-authority-repair source (REPAIR.md; PROFILE.md "Changed after dcc7b94"): derived Type ids, registry policy rows, per-admission acceptance basis, fail-closed native import. NOT the dcc7b94 profile of vectors/profile-b.json.',
     capabilityAblation: { unknown: 'not run: the neither/authorship/selection/both counterfactuals need same-guarantee arms that remove one capability each; this lab has one arm', consequence: 'no representation-vs-feature attribution and no interaction term can be claimed from this run' },
     evidenceShape: {
       rawObservations: 'cells[*].baselineRaw[] (sealed-state getters before the first transaction; also in raw[] with stage "baseline"), cells[*].raw[] (every eth_call: literal JSON-RPC request/response, rpcId, method, source, stage, to, calldata, returnData, blockTag, blockHash), cells[*].transactions[] (rawTransaction + literal envelopes of eth_sendRawTransaction / eth_getTransactionReceipt / eth_getBlockByHash / eth_getTransactionByHash + the receipt), cells[*].blocks[] (block-header envelopes), cells[*].rpcOther[] (evm_revert, evm_snapshot, eth_gasPrice, eth_blockNumber, eth_getTransactionCount, eth_estimateGas, anvil_getAutomine)',
       candidateClaims: 'cells[*].candidateDecoded.{baseline,post} (this script decoding the retained bytes), cells[*].rows, rowLog, consumerChecks, plan — candidate-native summaries, never expected answers',
-      correlation: 'every observation carries the JSON-RPC id of its request; ids are unique across the run; request.params[0] is exactly {to, data}; params[1] is the hex block number; blockHash is the retained header hash at that number (blocks[]), never inferred from a receipt at the same number',
+      correlation: 'every observation carries the JSON-RPC id of its request; ids are unique across the run; request.params[0] is exactly {to, data} for reads and exactly {from, to, data} for failure-static probes (from = the account that then sends the reverting transaction; retained as obs.from); params[1] is the hex block number; blockHash is the retained header hash at that number (blocks[]), never inferred from a receipt at the same number',
+      failureRows: 'rows carry expectedSelector/observedSelector/observedRevertData and, where expectedArgs is set, the decoded revert arguments (decodedArgs) asserted equal — e.g. E_INTENT(3), E_TYPE_EXISTS(typeId), E_POLICY_REJECTED(leaf, typeId), E_REJECTED(leaf, typeId)',
+      admissionJoins: 'candidateDecoded.{baseline,post}.admissions[ord] of every present publish/reuse admission carries basis (Ledger.acceptanceBasis raw reply) and policyRow (TypeRegistry.activation(typeId, activation) raw reply) plus join {acceptorEqual, codehashEqual, epochEqual, ok}: Type id <-> policy row <-> codehash <-> epoch are joinable from the raw replies alone',
+      selection: 'report.cellPlan (all keys, in order), optionalCells (non-default keys: run only when named exactly by --cells), plannedCells (validated before chain startup: unknown or zero selection aborts) and executedCells (asserted equal to plannedCells at the end); skippedCells lists unselected keys',
+      paidSlice: 'cell joined/paid-slice: rows paid/setup/{step1,A1,A2,B1} (setup receipts), paid/seal (+ /a-placement-provenance, /no-b-placement: raw replies at the seal block, stages seal / seal-placement / seal-no-b-placement), the four paid rows paid/{point,list}-{a,b}-first (each: receipt from wallet index 3, PaidResult log parsed from the receipt, eth_call replay at the receipt block from the same caller (stage paid-replay), consumerChecks kind paid-result, abstractResult = the arm-neutral Common comparison row with inputEvidenceGrade RPC_OBSERVED), paid/ordering (seal -> revert -> evm_setNextBlockTimestamp(seal + 1) -> the only tx of block seal + 1 at index 0 -> retained, asserted incl. equal timestamps; each row\'s block transaction list retained in blocks[]), paid/agreement, paid/cost-disclosure; abstractResult is derived by the pure deriveAbstractResult: on a failed self-check (missing/undecodable log, replay != log, field mismatch) every derived label/outcome/coverage is UNKNOWN with the reason and only separately retained observations (seal replies, receipt/block) keep values; optional cell joined/a1-without-placement = the paired control of the once-only placement cost. Both cells run only on an owned --anvil chain (assertAnvilOnlyCells, before any chain call)',
       freshness: 'pre-absence / pre-presence are retained bytes: baselineRaw Ledger.record(id) replies at the after-revert block, and stage "pre-presence" replies taken after an in-cell setup transaction',
       storage: 'rows carry `storage`: STATELESS (JoinedConsumer / StatelessConsumer: no SSTORE, one LOG2) or STORING (LabHarness.Consumer: receipt includes its own SSTOREs)',
+      typeIds: 'report.types[key] = { typeId, shape, mandatoryAcceptor, ruleId, refTypeIds, typeInfoAtResolution, descriptor, localDerivation, fromLog, registerTx, policyAfterSetup } — the id from the TypeRegistered receipt log, the typeIdOf/typeInfo/descriptor raw replies (setupRaw stage type-resolution) and the local Keys.typeId derivation are asserted equal; ruleId == the mandatory rule\'s runtime codehash; every Action.typeId in every cell is one of these',
+      acceptance: 'F5 shape: typeInfo = (registered, mandatoryAcceptor, ruleId, policyAcceptor, policyCodehash, refCount, activation); descriptor = (shape, ruleId, mandatoryAcceptor, refCount, activations, registeredAt); acceptanceBasis = (typeId, activation, mandatoryAcceptor, ruleId, policyAcceptor, policyCodehash, epoch, activatedAt); E_REJECTED = mandatory rule refused (final), E_POLICY_REJECTED = additional policy refused',
+      authorityRepairCells: 'policy/activate (stages policy, basis; failure rows E_INTENT, E_POLICY_REJECTED, E_REJECTED x3; in-cell strict Type registered and resolved three ways), failure/refused-re-registration (stage registry-post; failure row TypeRegistry.E_TYPE_EXISTS; one statement row), failure/unsupported-native-import (stage squat-probe; two failure rows E_SOURCE_UNSUPPORTED)',
     },
     rpc: rpcUrl, chainId, source, node: process.version, evm: 'cancun', compiler: 'read from out/ artifact metadata per contract (deployment[*].artifact.compiler)', optimizerRuns: 200, viaIR: true,
     paths: { artifacts: OUT_DIR, scratchRoot: SCRATCH_ROOT, outJson: OUT_JSON, ethers: ethersPath },
     build: { sourceHashes: sourceHashes(), note: 'sha256 of every file under src/, test/, script/ at run time; artifact hashes per contract under deployment' },
     providerPolicy: 'no ethers provider: literal JSON-RPC over fetch, one request per call, unique ids, no result cache; every eth_call passes an explicit hex block number',
-    startedAt: new Date(t0).toISOString(), anvil: anvilInfo, chainIdRpc: envOf(chainIdEnv), deployment: null, setup: [], setupTransactions: [], setupRaw: [], setupBlocks: [], setupRpcOther: [], registryEpoch: null, principals: null,
-    sealedInitialState: null, cells: {}, cellOrder: [], skippedCells: [], estimatedFreshSlots: {}, failure: null,
+    startedAt: new Date(t0).toISOString(), anvil: anvilInfo, chainIdRpc: envOf(chainIdEnv), deployment: null, setup: [], setupTransactions: [], setupRaw: [], setupBlocks: [], setupRpcOther: [], registryEpoch: null, principals: null, types: null,
+    sealedInitialState: null, cellPlan: planKeys, optionalCells, anvilOnlyCells: ANVIL_ONLY_CELLS, plannedCells: selectedCells, executedCells: null, cells: {}, cellOrder: [], skippedCells: [], estimatedFreshSlots: {}, failure: null,
     caveats: [
       'Local Anvil receipts under the lab profile; not an L2 fee quote and not an equivalent-guarantee comparison until the coordinator\'s fixture map is applied.',
       'Ingress x multiplicity only; no capability ablation and no interaction term are claimed.',
@@ -1069,6 +1952,11 @@ async function main() {
       'read-history-asof rows test the latest retained revision; read-history-asof-older rows read a strictly older basis and must return revision 1.',
       'A listing page with mutated == true is a mixed-basis page and must not be treated as COMPLETE by any caller.',
       'Label cells are a client-convention filename-retention baseline (FOLDER-role bodies name entries; HEAD bodies stay empty), not mandatory Files semantics; the registry epoch differs from the retained vectors/profile-b.json run (one more Type registered).',
+      CAVEAT_NATIVE_IMPORT, CAVEAT_VECTOR,
+      'policy/activate ADDS StrictQuoteAcceptor (test/Falsify.t.sol artifact; fixture rule v2) as QUOTE policy row 3 on top of the mandatory MinBodyAcceptor(32) (row 2 is the accept-all mock): the Type id and descriptor are untouched, unsent epoch-N signatures are refused (E_INTENT), an above-cap body (uint256 3_000_000_000, not a payload control) is refused by the added policy (E_POLICY_REJECTED), and acceptanceBasis reports row 2 for the earlier admission. Its in-cell strict Type shows a rejected body stays rejected after activate(0) and under a permissive policy (E_REJECTED). A policy activation is a Realm fact, not a Type change.',
+      CAVEAT_MANDATORY,
+      'failure/refused-re-registration covers the identical-descriptor case only; a different descriptor under a colliding id is impossible by construction (derived ids) and is recorded as a statement row, not a transaction.',
+      'joined/paid-slice records observations only (inputEvidenceGrade RPC_OBSERVED). The expectations passed to JoinedConsumer.paidPoint/paidList are this runner\'s local mirror of the fixture map (candidate-side); the expectation manifest, the arm-input manifest and the basis seal of the pre-sealed comparison are authored and hashed by the independent run controller before this packet is opened, and this packet may echo but never define or repair them. The A1 combined receipt is not a marginal placement cost (ESTIMATE) unless the optional paired control joined/a1-without-placement is pinned; even then this runner subtracts nothing.',
     ],
   };
   activeReport = report;
@@ -1076,10 +1964,14 @@ async function main() {
   try {
     if (args.addresses) {
       run.addrs = JSON.parse(readFileSync(args.addresses, 'utf8'));
+      assert(run.addrs.strictAcceptor && run.addrs.registry && run.addrs.quoteRule && run.addrs.pairRule, '--addresses: the address file must come from this script version (needs registry, strictAcceptor, quoteRule, pairRule)');
+      const rctx = makeCtx(run); // derived ids must be resolved from the chain before any cell (T throws otherwise)
+      report.types = await resolveTypesFromChain(rctx);
+      Object.assign(report, { typeResolutionRaw: rctx.raw, typeResolutionBlocks: rctx.blocks, typeResolutionRpcOther: rctx.rpcOther });
     } else {
       const d = await deployAll(run);
       run.addrs = d.addrs;
-      Object.assign(report, { deployment: d.deployment, setup: d.setup, setupTransactions: d.setupTransactions, setupRaw: d.setupRaw, setupBlocks: d.setupBlocks, setupRpcOther: d.setupRpcOther, registryEpoch: d.registryEpoch, principals: d.principals });
+      Object.assign(report, { deployment: d.deployment, setup: d.setup, setupTransactions: d.setupTransactions, setupRaw: d.setupRaw, setupBlocks: d.setupBlocks, setupRpcOther: d.setupRpcOther, registryEpoch: d.registryEpoch, principals: d.principals, types: d.types });
       const addressesPath = join(SCRATCH_ROOT, 'lab-addresses.json'); // run-owned, never inside the lab directory
       writeFileSync(addressesPath, JSON.stringify(run.addrs, null, 2));
       report.paths.addresses = addressesPath;
@@ -1093,28 +1985,16 @@ async function main() {
     // decode-once helpers the cell bodies use for relative ordinals (from the retained baseline)
     const wrap = (cell) => ({ ...cell, body: async (ctx, a, plan) => { const b = run.report.cells[ctx.cellLabel]?.candidateDecoded?.baseline; assert(b && b.counts && b.records && b.nonces, `${ctx.cellLabel}: baseline harvest missing before the body`); ctx.baselineCounts = b.counts; ctx.baselineRecords = b.records; ctx.baselineNonces = b.nonces; return cell.body(ctx, a, plan); } });
     const runCellNamed = async (label, cell) => { const c = wrap(cell); const orig = c.plan; c.plan = async (ctx, a, block) => { ctx.cellLabel = label; return orig(ctx, a, block); }; const r = await sealedCell(run, label, c); if (r) report.cellOrder.push(label); };
-    const cells = { 'native-one': (a) => [a.nativeA, null], 'signed-one': (a) => [a.signedA, null], 'native-two': (a) => [a.nativeA, a.nativeB], 'signed-two': (a) => [a.signedA, a.signedB] };
-    for (const fixture of ['quote', 'binary']) {
-      for (const [cell, pick] of Object.entries(cells)) await runCellNamed(`${cell}/${fixture}`, matrixCell(cell, fixture, pick));
+    // execute exactly the validated selection, in plan order; unselected cells are recorded as skipped
+    for (const { key, cell } of cellPlan) {
+      if (!selectedCells.includes(key)) { log(`cell ${key}: skipped (not selected)`); report.skippedCells.push(key); continue; }
+      await runCellNamed(key, cell);
     }
-    for (const variant of ['contract-fresh-body', 'contract-existing-body', 'exact-retry']) await runCellNamed(`fresh/${variant}`, { standing: 'freshness control: its own sealed cell from the same post-setup snapshot; report side by side, never subtract', plan: freshPlan(variant), body: freshBody });
-    await runCellNamed('failure-rows', failureCell);
-    await runCellNamed('joined/steps-1-6', joinedCell);
-    for (const variant of ['hash-only-create', 'create+label-fresh', 'create+label-existing-republished', 'create+label-existing-omitted']) await runCellNamed(`label/${variant}`, labelCell(variant));
-    if (!args['skip-without-index']) {
-      await runCellNamed('native-one-noindex/quote', {
-        standing: 'NOT EQUIVALENT: the mandatory index is detached (a named guarantee omitted); diagnostic only',
-        plan: async (ctx, a, block) => matrixPlan(ctx, 'native-one-noindex', 'quote', a.nativeA, null, block, { noIndex: true }),
-        body: async (ctx, a, plan) => {
-          const rows = [await send(ctx, () => call(ctx, 'Ledger', 'ledger', 'setIndexModule', [ZERO_ADDR]), 'setup: detach index module')];
-          rows.push(...(await runCell(ctx, plan, { noIndex: true })));
-          return rows;
-        },
-      });
-    }
+    report.executedCells = [...report.cellOrder];
+    assert.deepEqual(report.executedCells, selectedCells, `planned cells != executed cells: planned ${JSON.stringify(selectedCells)} executed ${JSON.stringify(report.executedCells)}`);
     const finalEnv = await rpc0('evm_revert', [run.sealed]);
     assert.equal(finalEnv.response.result, true, 'final evm_revert');
-    report.estimatedFreshSlots = { label: 'ESTIMATED from the design table, not traced', 'create (native, 4 actions)': '5 evidence + 1 pubId + 2..3 record + 1 subject + 4..6 admission + 2x(2 head + 1 bindingPosition + 3 positionCell) + index appends', 'create (signed)': 'as native + 2 (r, s)', 'edit': '3 record + 2..3 admission + head rewrite + index appends', 'create + label fresh': 'create + 3 record (typeId, meta, one word) + 2 admission + by-Type/by-author appends', 'create + label existing republished': 'create + 1 occurrence rewrite + 2 admission + appends', 'create + label existing omitted': 'create + 0' };
+    report.estimatedFreshSlots = { label: 'ESTIMATED from the design table, not traced', 'create (native, 4 actions)': '5 evidence + 1 pubId + 2..3 record + 1 subject + 4..6 admission + 2x(2 head + 1 bindingPosition + 3 positionCell) + index appends', 'create (signed)': 'as native + 2 (r, s)', 'edit': '3 record + 2..3 admission + head rewrite + index appends', 'create + label fresh': 'create + 3 record (typeId, meta, one word) + 2 admission + by-Type/by-author appends', 'create + label existing republished': 'create + 1 occurrence rewrite + 2 admission + appends', 'create + label existing omitted': 'create + 0', 'register (per Type)': '3 descriptor (incl. the pinned mandatory acceptor in the header slot) + (1 + refs) refTypes + 2 policy row + epoch rewrite', 'policy activate': '2 policy row + 1 rewrite (activations) + epoch rewrite', 'admission basis': '0 (packed into the existing AdmissionRow.meta word)', 'admission with an active policy': '0 slots; +1 bounded STATICCALL to the policy acceptor after the mandatory rule (ESTIMATED)' };
     report.consumerMismatches = Object.values(report.cells).reduce((n, c) => n + (c.mismatches || 0), 0);
     assert.equal(report.consumerMismatches, 0, `consumer/commitment self-check mismatches: ${report.consumerMismatches}`);
     report.finishedAt = new Date().toISOString();

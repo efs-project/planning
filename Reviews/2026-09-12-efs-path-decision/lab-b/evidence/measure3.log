@@ -1,0 +1,321 @@
+[    0.0s] cell plan: 21 cells; selected 6: native-one/quote, signed-one/quote, failure-rows, policy/activate, failure/refused-re-registration, failure/unsupported-native-import
+[    0.2s] rpc http://127.0.0.1:58056; artifacts /private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b-pin-ca1a228/out; scratch /private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b-pin-ca1a228; report /private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b-pin-ca1a228/measure.json
+[    0.2s]   tx   deploy TypeRegistry (nonce 0) sending 0xb5cc22a7bd3cbd098cb582541113c47e814ee7126f3560335948a087d832fdf5
+[    0.3s]   tx   deploy TypeRegistry: block 1 gas 758965 status 1
+[    0.3s] deploy TypeRegistry: 0x5FbDB2315678afecb367f032d93F642f64180aa3 block 1 gas 758965 runtime 3270 B
+[    0.3s]   tx   deploy MockAcceptor (nonce 1) sending 0x2f9e63cb5bb6fe9c21f364d48d34ed3da0e717ab13667771f991766e5564b8de
+[    0.3s]   tx   deploy MockAcceptor: block 2 gas 186188 status 1
+[    0.3s] deploy MockAcceptor: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 block 2 gas 186188 runtime 615 B
+[    0.3s]   tx   deploy QuoteAcceptor (nonce 2) sending 0x723ba61b669d4a6f6a946d12e06f029f1406be52e0915ea73ae1f0853b3f460a
+[    0.3s]   tx   deploy QuoteAcceptor: block 3 gas 189620 status 1
+[    0.3s] deploy QuoteAcceptor: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 block 3 gas 189620 runtime 631 B
+[    0.3s]   tx   deploy LabelAcceptor (nonce 3) sending 0x06b7eb22968604601f674dfd754da5fd45150b920c559c975f686f0ada965dde
+[    0.3s]   tx   deploy LabelAcceptor: block 4 gas 274605 status 1
+[    0.3s] deploy LabelAcceptor: 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9 block 4 gas 274605 runtime 1024 B
+[    0.3s]   tx   deploy Ledger (nonce 4) sending 0x81eb0c8f1cc0eb8ae56ac4cb1e1cbb0499d15321c320f3965f1eb623e408c1f2
+[    0.4s]   tx   deploy Ledger: block 5 gas 3792016 status 1
+[    0.4s] deploy Ledger: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9 block 5 gas 3792016 runtime 17280 B
+[    0.5s]   tx   deploy IndexModule (nonce 5) sending 0xec64808bcb8c10ca339189b6c39cb530dd5af14448fac8cc63790ccd25b71754
+[    0.6s]   tx   deploy IndexModule: block 6 gas 1094744 status 1
+[    0.6s] deploy IndexModule: 0x5FC8d32690cc91D4c39d9d3abcBD16989F875707 block 6 gas 1094744 runtime 4127 B
+[    0.6s]   tx   deploy FailingIndexModule (nonce 6) sending 0x769ad03aff22a96964bd27a9609672b1247d8c777b9998ab577b79364588c7d6
+[    0.6s]   tx   deploy FailingIndexModule: block 7 gas 104895 status 1
+[    0.6s] deploy FailingIndexModule: 0x0165878A594ca255338adfa4d48449f69242Eb8F block 7 gas 104895 runtime 238 B
+[    0.6s]   tx   deploy LensReader (nonce 7) sending 0xd7f039d9a4a6a099dd0e673ba33389e64403040d5bacde8097cdce9d2a217da8
+[    0.6s]   tx   deploy LensReader: block 8 gas 2092476 status 1
+[    0.6s] deploy LensReader: 0xa513E6E4b8f2a923D98304ec87F64353C4D5C853 block 8 gas 2092476 runtime 9445 B
+[    0.6s]   tx   deploy Actor (nonce 8) sending 0xc55225707e2819878211b980df6e68fa791c3d87435562ce89fa121bb4943437
+[    0.6s]   tx   deploy Actor: block 9 gas 520548 status 1
+[    0.6s] deploy Actor: 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6 block 9 gas 520548 runtime 2159 B
+[    0.6s]   tx   deploy Actor (nonce 9) sending 0x48afb78eb3a2c18b3afed530b10cbfc5bcd32b8ab8b591d55f391a422ab1f41d
+[    0.6s]   tx   deploy Actor: block 10 gas 520548 status 1
+[    0.6s] deploy Actor: 0x8A791620dd6260079BF849Dc5567aDC3F2FdC318 block 10 gas 520548 runtime 2159 B
+[    0.6s]   tx   deploy Consumer (nonce 10) sending 0xc357797ded38a9d207bfd96596ed3864ec7bf07d67c8ea9c641f2612e6b64a8b
+[    0.6s]   tx   deploy Consumer: block 11 gas 766587 status 1
+[    0.6s] deploy Consumer: 0x610178dA211FEF7D417bC0e6FeD39F05609AD788 block 11 gas 766587 runtime 3298 B
+[    0.6s]   tx   deploy Reconstructor (nonce 11) sending 0xbc59d62c5d9498310a2e23336ea15671a0531ed92e2c61773c2dba304195383f
+[    0.6s]   tx   deploy Reconstructor: block 12 gas 849309 status 1
+[    0.6s] deploy Reconstructor: 0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e block 12 gas 849309 runtime 3683 B
+[    0.6s]   tx   deploy StrictQuoteAcceptor (nonce 12) sending 0xff013780dcdd0a77da432ae8b9d215fdb651d379c439ac8fb94a14d0f4e0df02
+[    0.6s]   tx   deploy StrictQuoteAcceptor: block 13 gas 127375 status 1
+[    0.6s] deploy StrictQuoteAcceptor: 0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0 block 13 gas 127375 runtime 343 B
+[    0.6s]   tx   deploy MinBodyAcceptor (nonce 13) sending 0xc8d1ecdf70b0c8fcbd27926a0ee16b4bba5dcaa15e9004780bb56015248f3bd8
+[    0.6s]   tx   deploy MinBodyAcceptor: block 14 gas 130859 status 1
+[    0.6s] deploy MinBodyAcceptor: 0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82 block 14 gas 130859 runtime 354 B
+[    0.6s]   tx   deploy MinBodyAcceptor (nonce 14) sending 0x110ecda341acaa7081124e8832f103cbfbcc10b79d5a671f76795e2d01d56696
+[    0.6s]   tx   deploy MinBodyAcceptor: block 15 gas 130859 status 1
+[    0.6s] deploy MinBodyAcceptor: 0x9A676e781A523b5d0C0e43731313A708CB607508 block 15 gas 130859 runtime 354 B
+[    0.6s]   tx   deploy StatelessConsumer (nonce 15) sending 0x5e8e10f5001d76205b1abcc019ba9b71867060fbda385902e55b0be18d7117fc
+[    0.6s]   tx   deploy StatelessConsumer: block 16 gas 820862 status 1
+[    0.6s] deploy StatelessConsumer: 0x0B306BF915C4d645ff596e518fAf3F9669b97016 block 16 gas 820862 runtime 3548 B
+[    0.6s]   tx   setup: attach index module (nonce 16) sending 0x0c5b46c48df84db9a89f37a7def7cd16210d0995e7b991f4aee0780715cb90ee
+[    0.6s]   tx   setup: attach index module: block 17 gas 45139 status 1
+[    0.6s]   tx   setup: register QUOTE (mandatory MinBodyAcceptor(32): immutable threshold, part of the id; id derived by the registry) (nonce 17) sending 0xa549883f2000103233fffe579edc70e73aab541176f958d62355446a1b008375
+[    0.6s]   tx   setup: register QUOTE (mandatory MinBodyAcceptor(32): immutable threshold, part of the id; id derived by the registry): block 18 gas 148387 status 1
+[    0.6s]   type QUOTE: 0xd0d50396827db3463e745e32cd3d94939c3ae87487dafd7b39042a2910b84142 (log == typeIdOf == local derivation)
+[    0.6s]   tx   setup: register BINARY (no acceptor; id derived by the registry) (nonce 18) sending 0x0c44bce94675a1ff91e2413b3492f43f2bc0095b73f74c2a95b1677db8904f47
+[    0.6s]   tx   setup: register BINARY (no acceptor; id derived by the registry): block 19 gas 108418 status 1
+[    0.6s]   type BINARY: 0xd8ca3e1560afcaeb12756b15399dad59f78e70e49ea9c4415501fe8bcd8f3bf2 (log == typeIdOf == local derivation)
+[    0.6s]   tx   setup: register ITEM (no acceptor; id derived by the registry) (nonce 19) sending 0xc522589a6b5f6279d4c784870930a0a2f85cc7b830feab2b8c24d91b85094e93
+[    0.6s]   tx   setup: register ITEM (no acceptor; id derived by the registry): block 20 gas 108418 status 1
+[    0.6s]   type ITEM: 0x589d5624cb9167094eb8ee549683bdadc765c77ed4f894308dd376bbebc30019 (log == typeIdOf == local derivation)
+[    0.6s]   tx   setup: register PAIR (mandatory MinBodyAcceptor(96); refs [ITEM, ITEM]; id derived by the registry) (nonce 20) sending 0x870a1069e712c31862b611f75cc081c733f5c1fbdb2f927f6ee12b58afbf8e07
+[    0.6s]   tx   setup: register PAIR (mandatory MinBodyAcceptor(96); refs [ITEM, ITEM]; id derived by the registry): block 21 gas 196856 status 1
+[    0.6s]   type PAIR: 0x98f15a281c3cdd9d4aabe4708ae98ab46688ebb588db2876ee56d2c9413ed691 (log == typeIdOf == local derivation)
+[    0.6s]   tx   setup: register QUOTE_J (QuoteAcceptor: 160-byte shape, scale 6, bounds; refs [PAIR]; id derived by the registry) (nonce 21) sending 0xad17f126bb5d58bc9aefb28322c8efe8303f44198928bc1181bb9f84163574a6
+[    0.6s]   tx   setup: register QUOTE_J (QuoteAcceptor: 160-byte shape, scale 6, bounds; refs [PAIR]; id derived by the registry): block 22 gas 174039 status 1
+[    0.7s]   type QUOTE_J: 0x2db40fc5c9f87fff9029aba18f5e7a0bf1ffaee89f584eb521b7395c0d57ea21 (log == typeIdOf == local derivation)
+[    0.7s]   tx   setup: register LABEL (LabelAcceptor: exact UTF-8, 1..255 bytes; no refs; id derived by the registry) (nonce 22) sending 0x6e6f666caa81270e334a2fcdac286f73bee9899eda7d3ccd20e93a0319b4d151
+[    0.7s]   tx   setup: register LABEL (LabelAcceptor: exact UTF-8, 1..255 bytes; no refs; id derived by the registry): block 23 gas 131287 status 1
+[    0.7s]   type LABEL: 0x71b905d7ca9fb16dc4857596667c1b17b929fe5cbe26244fcc7fab4c7ac90308 (log == typeIdOf == local derivation)
+[    0.7s]   tx   setup: activate MockAcceptor (mode 0) as QUOTE ADDITIONAL policy row 2 (mutable test double; its refusal is E_POLICY_REJECTED) (nonce 23) sending 0x3d20fa58d44d8f8fb2a43c0948dd842a486f9de184a90b614dab0da8fd7b2cf7
+[    0.7s]   tx   setup: activate MockAcceptor (mode 0) as QUOTE ADDITIONAL policy row 2 (mutable test double; its refusal is E_POLICY_REJECTED): block 24 gas 82530 status 1
+[    0.7s]   tx   setup: activate MockAcceptor (mode 0) as PAIR ADDITIONAL policy row 2 (mutable test double; its refusal is E_POLICY_REJECTED) (nonce 24) sending 0x58fdda5859cebfa21ebd85354922fc4fd5056e4f4985a5dce0c331ecdcf5d89a
+[    0.7s]   tx   setup: activate MockAcceptor (mode 0) as PAIR ADDITIONAL policy row 2 (mutable test double; its refusal is E_POLICY_REJECTED): block 25 gas 82530 status 1
+[    0.7s]   tx   deploy JoinedConsumer (nonce 25) sending 0xd6eca851b1e45a73506dbb6595939fecb0ab7fbfafd19b42bad8649046e421a2
+[    0.7s]   tx   deploy JoinedConsumer: block 26 gas 1781198 status 1
+[    0.7s] deploy JoinedConsumer: 0x4A679253410272dd5232B3Ff7cF5dbB88f295319 block 26 gas 1781198 runtime 7985 B
+[    0.7s] sealed initial state: snapshot 0x0 at block 26 0xb7312263fc6d0ace3d32cb3753d096c97747903d2e8e50cf4b03595494da78d0
+[    0.7s] cell native-one/quote: evm_revert to 0x0
+[    0.7s] cell native-one/quote: after revert block 26 0xb7312263fc6d0ace3d32cb3753d096c97747903d2e8e50cf4b03595494da78d0 nonce latest 26 pending 26 automine true gasPrice 7991120863; re-sealed as 0x1
+[    0.7s] cell native-one/quote: baseline raw harvest at block 26 (before the first transaction)
+[    0.7s] cell native-one/quote: body
+[    0.7s]   tx   native-one/quote/create (nonce 26) sending 0x1870d6c3032ffeef0b82cd9bab46297e53a746800a29f3d2204b8a2eaf6addb0
+[    0.8s]   tx   native-one/quote/create: block 27 gas 1226435 status 1
+[    0.8s]   tx   native-one/quote/edit (nonce 27) sending 0x14a2933b095841c06eb70eaa56a0502c3440cc729645ae4f276f3421d53a4e72
+[    0.9s]   tx   native-one/quote/edit: block 28 gas 520724 status 1
+[    0.9s]   tx   native-one/quote/read-resolve-stateless (nonce 28) sending 0xa14b1e75a7b108123ac56e129554e6deacd5b047e420ece6b0bad875ab34cd96
+[    0.9s]   tx   native-one/quote/read-resolve-stateless: block 29 gas 51173 status 1
+[    0.9s]   chk  native-one/quote/read-resolve-stateless/commitment: match
+[    0.9s]   tx   native-one/quote/read-list-stateless (nonce 29) sending 0xeee90fa93710a54f6c01f1556ea059bc895a877fb1fc3ae1c14b32f84e7fd44f
+[    0.9s]   tx   native-one/quote/read-list-stateless: block 30 gas 89168 status 1
+[    1.0s]   chk  native-one/quote/read-list-stateless/commitment: match
+[    1.0s]   tx   native-one/quote/read-history-asof-older-stateless (nonce 30) sending 0x90e5b1f49fffaff9f52adae5100c4722d9d42b67c2287c21fa481f1f94034e9a
+[    1.0s]   tx   native-one/quote/read-history-asof-older-stateless: block 31 gas 66094 status 1
+[    1.0s]   chk  native-one/quote/read-history-asof-older-stateless/commitment: match
+[    1.0s]   tx   native-one/quote/read-history-asof-latest-stateless (nonce 31) sending 0xc488e9fefbd533e68173b05057398b5f8860acc9c4b154bc33167847ce9cd8be
+[    1.0s]   tx   native-one/quote/read-history-asof-latest-stateless: block 32 gas 64287 status 1
+[    1.0s]   chk  native-one/quote/read-history-asof-latest-stateless/commitment: match
+[    1.0s]   tx   native-one/quote/read-resolve (nonce 32) sending 0x0ca1212d1ea72577cb7e57c9e8a489fc1d4d62841e63b262aceb9cfeed6d42a9
+[    1.0s]   tx   native-one/quote/read-resolve: block 33 gas 137909 status 1
+[    1.0s]   chk  native-one/quote/read-resolve/readback: match
+[    1.0s]   tx   native-one/quote/read-list (nonce 33) sending 0x4953043cd2bd408c1fc45eb92d5c7ccb1758cd5f26986fb27fa13996eb61435a
+[    1.1s]   tx   native-one/quote/read-list: block 34 gas 97725 status 1
+[    1.1s]   chk  native-one/quote/read-list/readback: match
+[    1.1s]   tx   native-one/quote/read-history-asof-older (nonce 34) sending 0x8f38ab817542ab9175eb06fcab9f76f49f1b5430779cf2831a1bb9c68eb20e14
+[    1.1s]   tx   native-one/quote/read-history-asof-older: block 35 gas 79294 status 1
+[    1.1s]   chk  native-one/quote/read-history-asof-older/readback: match
+[    1.1s]   tx   native-one/quote/read-history-asof (nonce 35) sending 0xa8151be800ff387122a13bbfa1524dae262874685cdf740732a99d44df4329e3
+[    1.2s]   tx   native-one/quote/read-history-asof: block 36 gas 74687 status 1
+[    1.2s]   chk  native-one/quote/read-history-asof/readback: match
+[    1.2s] cell native-one/quote: post raw harvest at block 36
+[    1.2s] cell native-one/quote: done (10 txs, 138 raw reads incl. 46 baseline, 0 check mismatches)
+[    1.2s] cell signed-one/quote: evm_revert to 0x1
+[    1.2s] cell signed-one/quote: after revert block 26 0xb7312263fc6d0ace3d32cb3753d096c97747903d2e8e50cf4b03595494da78d0 nonce latest 26 pending 26 automine true gasPrice 7938700629; re-sealed as 0x2
+[    1.2s] cell signed-one/quote: baseline raw harvest at block 26 (before the first transaction)
+[    1.3s] cell signed-one/quote: body
+[    1.3s]   tx   signed-one/quote/create (nonce 26) sending 0x1d7e842a2a9b6618e5ff876049bb61bef48586104b947f856d3f03fdbc023ddd
+[    1.4s]   tx   signed-one/quote/create: block 27 gas 1271630 status 1
+[    1.4s]   tx   signed-one/quote/edit (nonce 27) sending 0xfeedbc3b6b3858ec46fcde731544987e0d5e469cdd28ef8947460bc33cf83bb9
+[    1.5s]   tx   signed-one/quote/edit: block 28 gas 567395 status 1
+[    1.5s]   tx   signed-one/quote/read-resolve-stateless (nonce 28) sending 0x83753982c5a6fb037b044b7e75c3449d59bc8401f13a145503016d3f96167a11
+[    1.5s]   tx   signed-one/quote/read-resolve-stateless: block 29 gas 50916 status 1
+[    1.5s]   chk  signed-one/quote/read-resolve-stateless/commitment: match
+[    1.5s]   tx   signed-one/quote/read-list-stateless (nonce 29) sending 0xf2292b6323c1b16c407e747237976e0317174a157cc2a5449db1a163eb6a6310
+[    1.6s]   tx   signed-one/quote/read-list-stateless: block 30 gas 88646 status 1
+[    1.6s]   chk  signed-one/quote/read-list-stateless/commitment: match
+[    1.6s]   tx   signed-one/quote/read-history-asof-older-stateless (nonce 30) sending 0x5b144ec42eef4da118434eb3bc4493686f1c90db23e3bc72d9b3d3f641c820b7
+[    1.6s]   tx   signed-one/quote/read-history-asof-older-stateless: block 31 gas 65825 status 1
+[    1.6s]   chk  signed-one/quote/read-history-asof-older-stateless/commitment: match
+[    1.6s]   tx   signed-one/quote/read-history-asof-latest-stateless (nonce 31) sending 0x7e4865d520001161c8e9174932e5206c6d5c4079aecc1b3d369a1bc6eb3ce1da
+[    1.7s]   tx   signed-one/quote/read-history-asof-latest-stateless: block 32 gas 64018 status 1
+[    1.8s]   chk  signed-one/quote/read-history-asof-latest-stateless/commitment: match
+[    1.8s]   tx   signed-one/quote/read-resolve (nonce 32) sending 0xb60ee6f9964175854ccbb502d0368683e05da294be15f186183dba676d8e5e79
+[    1.9s]   tx   signed-one/quote/read-resolve: block 33 gas 137652 status 1
+[    1.9s]   chk  signed-one/quote/read-resolve/readback: match
+[    1.9s]   tx   signed-one/quote/read-list (nonce 33) sending 0xf7716d4456c72a1846bdf6820cc127c85d4d54df046e5c23bcbeb703ad0938d2
+[    2.0s]   tx   signed-one/quote/read-list: block 34 gas 97203 status 1
+[    2.0s]   chk  signed-one/quote/read-list/readback: match
+[    2.0s]   tx   signed-one/quote/read-history-asof-older (nonce 34) sending 0xfd9c92bf11b5885f7fa24e2095a8f00bb5751055e73260390b5429c8223f3cad
+[    2.1s]   tx   signed-one/quote/read-history-asof-older: block 35 gas 79025 status 1
+[    2.1s]   chk  signed-one/quote/read-history-asof-older/readback: match
+[    2.1s]   tx   signed-one/quote/read-history-asof (nonce 35) sending 0xce5c145323e044a53a6270423a3f2cefec1f07751a0000d465121cef2d7aeff9
+[    2.2s]   tx   signed-one/quote/read-history-asof: block 36 gas 74418 status 1
+[    2.3s]   chk  signed-one/quote/read-history-asof/readback: match
+[    2.3s] cell signed-one/quote: post raw harvest at block 36
+[    2.3s] cell signed-one/quote: done (10 txs, 148 raw reads incl. 46 baseline, 0 check mismatches)
+[    2.3s] cell native-two/quote: skipped (not selected)
+[    2.3s] cell signed-two/quote: skipped (not selected)
+[    2.3s] cell native-one/binary: skipped (not selected)
+[    2.3s] cell signed-one/binary: skipped (not selected)
+[    2.3s] cell native-two/binary: skipped (not selected)
+[    2.3s] cell signed-two/binary: skipped (not selected)
+[    2.3s] cell fresh/contract-fresh-body: skipped (not selected)
+[    2.3s] cell fresh/contract-existing-body: skipped (not selected)
+[    2.3s] cell fresh/exact-retry: skipped (not selected)
+[    2.3s] cell failure-rows: evm_revert to 0x2
+[    2.3s] cell failure-rows: after revert block 26 0xb7312263fc6d0ace3d32cb3753d096c97747903d2e8e50cf4b03595494da78d0 nonce latest 26 pending 26 automine true gasPrice 7924595843; re-sealed as 0x3
+[    2.3s] cell failure-rows: baseline raw harvest at block 26 (before the first transaction)
+[    2.3s] cell failure-rows: body
+[    2.3s]   tx   failure/setup: ITEM_ETH (nonce 26) sending 0xb53662c4317f31a6f6ebdaa4d146ab6d9f3bfb04f122bd65787078633b182275
+[    2.4s]   tx   failure/setup: ITEM_ETH: block 27 gas 491820 status 1
+[    2.4s]   tx   failure/setup: ITEM_USDC (nonce 27) sending 0x92c50f52d745caa130c742bb0dec0cf1687272efeef86cc83a745f2e11dd79c3
+[    2.4s]   tx   failure/setup: ITEM_USDC: block 28 gas 372120 status 1
+[    2.4s]   tx   failure/setup: PAIR_ETH_USDC (two checked refs) (nonce 28) sending 0xa1f6c183c08bbc29a6207fbf0d030d919ca1b82121b8682c74654b784ff4624c
+[    2.5s]   tx   failure/setup: PAIR_ETH_USDC (two checked refs): block 29 gas 478654 status 1
+[    2.5s]   tx   failure/setup: admit a QUOTE record as the present wrong-Type target (nonce 29) sending 0xebe7700ffd2cae33271cc06ad0f0b74dee7c41e27f51c32c006064dd6e608f59
+[    2.5s]   tx   failure/setup: admit a QUOTE record as the present wrong-Type target: block 30 gas 418982 status 1
+[    2.6s]   row  failure/checked-ref-wrong-Type (present target of another Type): static call for the revert selector (from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+[    2.6s]   tx   failure/checked-ref-wrong-Type (present target of another Type) (nonce 30) sending 0x24c5cd0bec1eb85d2b988a26ee6658dbb4fc2a32a242f624924f2605c8874d84
+[    2.7s]   tx   failure/checked-ref-wrong-Type (present target of another Type): block 31 gas 213554 status 0
+[    2.7s]   row  failure/checked-ref-missing-target: static call for the revert selector (from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+[    2.7s]   tx   failure/checked-ref-missing-target (nonce 31) sending 0xc00f2549d76c0c33e2a5cc9eebf4fd4a7b3b9a6d321e99b31e51447f1caf94d6
+[    2.8s]   tx   failure/checked-ref-missing-target: block 32 gas 213186 status 0
+[    2.8s]   tx   failure/setup: bind (revision becomes 1) (nonce 32) sending 0x91ec227e13b6739c67842cb5118919fb1d741d9f6cbcf827fe3b5aa9a5f7c209
+[    2.9s]   tx   failure/setup: bind (revision becomes 1): block 33 gas 484081 status 1
+[    2.9s]   row  failure/stale-CAS (expected 0, head is 1): static call for the revert selector (from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+[    2.9s]   tx   failure/stale-CAS (expected 0, head is 1) (nonce 33) sending 0x8f276b4fd55f364d9c5b458e24975f10f6833496b864eb5eb3d414054f2705b1
+[    3.0s]   tx   failure/stale-CAS (expected 0, head is 1): block 34 gas 168749 status 0
+[    3.1s]   tx   failure/setup: acceptor rejects (nonce 34) sending 0x105f5b0700446670f391b4d0545ec9459086252dfd66c3d57ceec8ca85e93635
+[    3.2s]   tx   failure/setup: acceptor rejects: block 35 gas 45851 status 1
+[    3.2s]   row  failure/failed-acceptance (the mock is QUOTE's ADDITIONAL policy, row 2: E_POLICY_REJECTED; whole publication reverts): static call for the revert selector (from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+[    3.2s]   tx   failure/failed-acceptance (the mock is QUOTE's ADDITIONAL policy, row 2: E_POLICY_REJECTED; whole publication reverts) (nonce 35) sending 0x9c1f7f01d7e8f9c6be2649ee300a856d0a8f6bb08520d124f55d0777a1725979
+[    3.3s]   tx   failure/failed-acceptance (the mock is QUOTE's ADDITIONAL policy, row 2: E_POLICY_REJECTED; whole publication reverts): block 36 gas 209510 status 0
+[    3.3s]   tx   failure/setup: acceptor accepts (nonce 36) sending 0x772b7841b0cc9536e8b78f1e3542bb30a169b5bf0c688822460cea1a5ba1ee42
+[    3.3s]   tx   failure/setup: acceptor accepts: block 37 gas 23939 status 1
+[    3.3s]   tx   failure/setup: attach the always-refusing index module (nonce 37) sending 0x142d6d27ad790862cd5690eea3012451f3081bb5d73f4c5f95dda01fe54fb356
+[    3.3s]   tx   failure/setup: attach the always-refusing index module: block 38 gas 28039 status 1
+[    3.3s]   row  failure/failed-mandatory-index (whole publication reverts): static call for the revert selector (from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+[    3.3s]   tx   failure/failed-mandatory-index (whole publication reverts) (nonce 38) sending 0xfb32f7a2e3eb828a8af35117b975b31b4975cee3849b68e112e7266e3f87ce68
+[    3.4s]   tx   failure/failed-mandatory-index (whole publication reverts): block 39 gas 352858 status 0
+[    3.5s]   tx   failure/setup: re-attach the index module (nonce 39) sending 0x71f0f2f83d472d52314b1a9877080b55b5ffecbcb1150a2a0e71eaa4ffe91d06
+[    3.6s]   tx   failure/setup: re-attach the index module: block 40 gas 28039 status 1
+[    3.6s] cell failure-rows: post raw harvest at block 40
+[    3.6s] cell failure-rows: done (14 txs, 259 raw reads incl. 42 baseline, 0 check mismatches)
+[    3.6s] cell joined/steps-1-6: skipped (not selected)
+[    3.6s] cell label/hash-only-create: skipped (not selected)
+[    3.6s] cell label/create+label-fresh: skipped (not selected)
+[    3.6s] cell label/create+label-existing-republished: skipped (not selected)
+[    3.6s] cell label/create+label-existing-omitted: skipped (not selected)
+[    3.6s] cell policy/activate: evm_revert to 0x3
+[    3.6s] cell policy/activate: after revert block 26 0xb7312263fc6d0ace3d32cb3753d096c97747903d2e8e50cf4b03595494da78d0 nonce latest 26 pending 26 automine true gasPrice 7920224685; re-sealed as 0x4
+[    3.6s] cell policy/activate: baseline raw harvest at block 26 (before the first transaction)
+[    3.6s] cell policy/activate: body
+[    3.6s]   tx   policy/activate/setup: signed publish quote3000 (payload control, uint256 3000, below the cap) under mandatory rule + policy row 2 (epoch N) (nonce 26) sending 0x617150086a2cfcee1184e49ab12109e49c066f8536bb578e89f08889eca360d8
+[    3.7s]   tx   policy/activate/setup: signed publish quote3000 (payload control, uint256 3000, below the cap) under mandatory rule + policy row 2 (epoch N): block 27 gas 555742 status 1
+[    3.7s]   tx   policy/activate/activate (StrictQuoteAcceptor ADDED as QUOTE policy row 3; the mandatory rule, id and descriptor are untouched) (nonce 27) sending 0xd311e16faaa0e9bd38e13c0a20f76e71bbfb0501a9438bd3195dcf3f1fa862bd
+[    3.7s]   tx   policy/activate/activate (StrictQuoteAcceptor ADDED as QUOTE policy row 3; the mandatory rule, id and descriptor are untouched): block 28 gas 82530 status 1
+[    3.8s]   row  policy/activate/stale-signature (signed under epoch N, sent after activation N+1: E_INTENT(3), no write): static call for the revert selector (from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+[    3.8s]   tx   policy/activate/stale-signature (signed under epoch N, sent after activation N+1: E_INTENT(3), no write) (nonce 28) sending 0x75dad05915779620d59ea87bc2f913e520a7f0b2d2315764ca93bb21d6029b7f
+[    3.8s]   tx   policy/activate/stale-signature (signed under epoch N, sent after activation N+1: E_INTENT(3), no write): block 29 gas 48585 status 0
+[    3.8s]   row  policy/activate/policy-adds-a-constraint (above-cap body uint256 3_000_000_000: the mandatory rule accepts, the ADDED policy refuses: E_POLICY_REJECTED(0, QUOTE)): static call for the revert selector (from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+[    3.8s]   tx   policy/activate/policy-adds-a-constraint (above-cap body uint256 3_000_000_000: the mandatory rule accepts, the ADDED policy refuses: E_POLICY_REJECTED(0, QUOTE)) (nonce 29) sending 0xb5e309cd4ad0231e4b0cce3f7ef5f03da649e0cf8ced090cd2d641659a5375a6
+[    3.8s]   tx   policy/activate/policy-adds-a-constraint (above-cap body uint256 3_000_000_000: the mandatory rule accepts, the ADDED policy refuses: E_POLICY_REJECTED(0, QUOTE)): block 30 gas 224498 status 0
+[    3.8s]   tx   policy/activate/new-epoch-publish (quote3100, payload control, below the cap; re-signed under epoch N+1; admitted under mandatory rule + policy row 3) (nonce 30) sending 0x86d425a290f777aa1ce7583195c1ce3654485e47271e6498118205ac55b6c2a0
+[    3.9s]   tx   policy/activate/new-epoch-publish (quote3100, payload control, below the cap; re-signed under epoch N+1; admitted under mandatory rule + policy row 3): block 31 gas 431775 status 1
+[    3.9s]   tx   policy/activate/strict/register (StrictQuoteAcceptor as the MANDATORY rule of an in-cell Type; id from log == typeIdOf == local derivation) (nonce 31) sending 0x969a44641b4e15490ae279b5c3573a2118b7aea3e1c0c667821a8cdc36e92423
+[    3.9s]   tx   policy/activate/strict/register (StrictQuoteAcceptor as the MANDATORY rule of an in-cell Type; id from log == typeIdOf == local derivation): block 32 gas 131287 status 1
+[    3.9s]   row  policy/activate/strict/rejected-before (above-cap body: E_REJECTED(0, STRICT) by the mandatory rule, no activation yet): static call for the revert selector (from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+[    3.9s]   tx   policy/activate/strict/rejected-before (above-cap body: E_REJECTED(0, STRICT) by the mandatory rule, no activation yet) (nonce 32) sending 0x31e84f8d58cb30c256ba27acb82649516194deb4a616f3da93a896f8da143c89
+[    4.0s]   tx   policy/activate/strict/rejected-before (above-cap body: E_REJECTED(0, STRICT) by the mandatory rule, no activation yet): block 33 gas 220307 status 0
+[    4.1s]   tx   policy/activate/strict/activate-zero (row 2: no additional policy) (nonce 33) sending 0x526fcaed823b5317f84292cc7487b4c6dff628b916c8679b81d3419e0356eb25
+[    4.1s]   tx   policy/activate/strict/activate-zero (row 2: no additional policy): block 34 gas 59661 status 1
+[    4.1s]   row  policy/activate/strict/still-rejected-after-activate-zero (E_REJECTED(0, STRICT): activate(0) never means no validation): static call for the revert selector (from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+[    4.1s]   tx   policy/activate/strict/still-rejected-after-activate-zero (E_REJECTED(0, STRICT): activate(0) never means no validation) (nonce 34) sending 0xe70c624dc11d399f16d872d1c79f2a1f1269a9fba5ceff289c9eac949722cd7a
+[    4.1s]   tx   policy/activate/strict/still-rejected-after-activate-zero (E_REJECTED(0, STRICT): activate(0) never means no validation): block 35 gas 220307 status 0
+[    4.1s]   tx   policy/activate/strict/activate-permissive (row 3: the accept-all mock as ADDITIONAL policy) (nonce 35) sending 0x98be2f8867d80d1e199a0cd74c6691e4a2b405a2397c04882c721d1353c79473
+[    4.1s]   tx   policy/activate/strict/activate-permissive (row 3: the accept-all mock as ADDITIONAL policy): block 36 gas 82530 status 1
+[    4.1s]   row  policy/activate/strict/still-rejected-under-permissive-policy (E_REJECTED(0, STRICT): a policy cannot remove the mandatory rule): static call for the revert selector (from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+[    4.1s]   tx   policy/activate/strict/still-rejected-under-permissive-policy (E_REJECTED(0, STRICT): a policy cannot remove the mandatory rule) (nonce 36) sending 0xa6fb89a257ead32e6caba076cf22b14d633295179cfa4516f1b1ddf98a99bf12
+[    4.1s]   tx   policy/activate/strict/still-rejected-under-permissive-policy (E_REJECTED(0, STRICT): a policy cannot remove the mandatory rule): block 37 gas 220307 status 0
+[    4.1s]   tx   policy/activate/strict/compliant-publish (quote3000, below the cap: mandatory rule + policy accept; admitted under row 3) (nonce 37) sending 0x48c8eab4f3155bef6f68af69cef43ea7b88f6629edc48964f8015762d16463a2
+[    4.2s]   tx   policy/activate/strict/compliant-publish (quote3000, below the cap: mandatory rule + policy accept; admitted under row 3): block 38 gas 470374 status 1
+[    4.2s] cell policy/activate: post raw harvest at block 38
+[    4.2s] cell policy/activate: done (12 txs, 298 raw reads incl. 35 baseline, 0 check mismatches)
+[    4.3s] cell failure/refused-re-registration: evm_revert to 0x4
+[    4.3s] cell failure/refused-re-registration: after revert block 26 0xb7312263fc6d0ace3d32cb3753d096c97747903d2e8e50cf4b03595494da78d0 nonce latest 26 pending 26 automine true gasPrice 7919566817; re-sealed as 0x5
+[    4.3s] cell failure/refused-re-registration: baseline raw harvest at block 26 (before the first transaction)
+[    4.3s] cell failure/refused-re-registration: body
+[    4.3s]   row  failure/refused-re-registration (identical descriptor => the same derived id: E_TYPE_EXISTS(QUOTE); nothing rewritten): static call for the revert selector (from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+[    4.3s]   tx   failure/refused-re-registration (identical descriptor => the same derived id: E_TYPE_EXISTS(QUOTE); nothing rewritten) (nonce 26) sending 0x4bc736840a6c029eb59f80e3cd9bd29f071bd7cc41ca90ca04b05906a9ef70ec
+[    4.3s]   tx   failure/refused-re-registration (identical descriptor => the same derived id: E_TYPE_EXISTS(QUOTE); nothing rewritten): block 27 gas 28730 status 0
+[    4.3s] cell failure/refused-re-registration: post raw harvest at block 27
+[    4.3s] cell failure/refused-re-registration: done (1 txs, 68 raw reads incl. 17 baseline, 0 check mismatches)
+[    4.3s] cell failure/unsupported-native-import: evm_revert to 0x5
+[    4.3s] cell failure/unsupported-native-import: after revert block 26 0xb7312263fc6d0ace3d32cb3753d096c97747903d2e8e50cf4b03595494da78d0 nonce latest 26 pending 26 automine true gasPrice 7919545425; re-sealed as 0x6
+[    4.3s] cell failure/unsupported-native-import: baseline raw harvest at block 26 (before the first transaction)
+[    4.3s] cell failure/unsupported-native-import: body
+[    4.3s]   row  failure/unsupported-native-import/signed-destination (v == 0 packet claiming AUTHOR_A's principal, destination signature by AUTHOR_B: E_SOURCE_UNSUPPORTED): static call for the revert selector (from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+[    4.3s]   tx   failure/unsupported-native-import/signed-destination (v == 0 packet claiming AUTHOR_A's principal, destination signature by AUTHOR_B: E_SOURCE_UNSUPPORTED) (nonce 26) sending 0x90f8ea0e1bdd5a42b8883a10769a209c86ddd719240f4e3e91475e267c38d34f
+[    4.3s]   tx   failure/unsupported-native-import/signed-destination (v == 0 packet claiming AUTHOR_A's principal, destination signature by AUTHOR_B: E_SOURCE_UNSUPPORTED): block 27 gas 42605 status 0
+[    4.4s]   row  failure/unsupported-native-import/msg-sender (v == 0 packet, msg.sender == claimed author, empty destination signature: E_SOURCE_UNSUPPORTED): static call for the revert selector (from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+[    4.4s]   tx   failure/unsupported-native-import/msg-sender (v == 0 packet, msg.sender == claimed author, empty destination signature: E_SOURCE_UNSUPPORTED) (nonce 27) sending 0x2bbadb92e8cebac20d318746e206a4cb4976179b6576777d15ae222f3a7cb22a
+[    4.4s]   tx   failure/unsupported-native-import/msg-sender (v == 0 packet, msg.sender == claimed author, empty destination signature: E_SOURCE_UNSUPPORTED): block 28 gas 39633 status 0
+[    4.4s] cell failure/unsupported-native-import: post raw harvest at block 28
+[    4.4s] cell failure/unsupported-native-import: done (2 txs, 155 raw reads incl. 33 baseline, 0 check mismatches)
+[    4.4s] cell native-one-noindex/quote: skipped (not selected)
+native-one/quote                         native-one/quote/create                                                                             1226435 1 
+native-one/quote                         native-one/quote/reconstruct-create                                                                         eth_call 
+native-one/quote                         native-one/quote/edit                                                                                520724 1 
+native-one/quote                         native-one/quote/read-resolve-stateless                                                               51173 1 [stateless consumer]
+native-one/quote                         native-one/quote/read-list-stateless                                                                  89168 1 [stateless consumer]
+native-one/quote                         native-one/quote/read-history-asof-older-stateless                                                    66094 1 [stateless consumer]
+native-one/quote                         native-one/quote/read-history-asof-latest-stateless                                                   64287 1 [stateless consumer]
+native-one/quote                         native-one/quote/read-resolve                                                                        137909 1 [includes Consumer SSTOREs (first read of a slot]
+native-one/quote                         native-one/quote/eth_call-resolve-estimate                                                            36705 estimate 
+native-one/quote                         native-one/quote/read-list                                                                            97725 1 [includes Consumer SSTOREs (first read of a slot]
+native-one/quote                         native-one/quote/read-history-asof-older                                                              79294 1 [includes Consumer SSTOREs (first read of a slot]
+native-one/quote                         native-one/quote/read-history-asof                                                                    74687 1 [includes Consumer SSTOREs (first read of a slot]
+signed-one/quote                         signed-one/quote/create                                                                             1271630 1 
+signed-one/quote                         signed-one/quote/reconstruct-create                                                                         eth_call 
+signed-one/quote                         signed-one/quote/edit                                                                                567395 1 
+signed-one/quote                         signed-one/quote/read-resolve-stateless                                                               50916 1 [stateless consumer]
+signed-one/quote                         signed-one/quote/read-list-stateless                                                                  88646 1 [stateless consumer]
+signed-one/quote                         signed-one/quote/read-history-asof-older-stateless                                                    65825 1 [stateless consumer]
+signed-one/quote                         signed-one/quote/read-history-asof-latest-stateless                                                   64018 1 [stateless consumer]
+signed-one/quote                         signed-one/quote/read-resolve                                                                        137652 1 [includes Consumer SSTOREs (first read of a slot]
+signed-one/quote                         signed-one/quote/eth_call-resolve-estimate                                                            36448 estimate 
+signed-one/quote                         signed-one/quote/read-list                                                                            97203 1 [includes Consumer SSTOREs (first read of a slot]
+signed-one/quote                         signed-one/quote/read-history-asof-older                                                              79025 1 [includes Consumer SSTOREs (first read of a slot]
+signed-one/quote                         signed-one/quote/read-history-asof                                                                    74418 1 [includes Consumer SSTOREs (first read of a slot]
+failure-rows                             failure/setup: ITEM_ETH                                                                              491820 1 
+failure-rows                             failure/setup: ITEM_USDC                                                                             372120 1 
+failure-rows                             failure/setup: PAIR_ETH_USDC (two checked refs)                                                      478654 1 
+failure-rows                             failure/setup: admit a QUOTE record as the present wrong-Type target                                 418982 1 
+failure-rows                             failure/wrong-Type target presence                                                                           
+failure-rows                             failure/checked-ref-wrong-Type (present target of another Type)                                      213554 0 
+failure-rows                             failure/checked-ref-missing-target                                                                   213186 0 
+failure-rows                             failure/setup: bind (revision becomes 1)                                                             484081 1 
+failure-rows                             failure/stale-CAS (expected 0, head is 1)                                                            168749 0 
+failure-rows                             failure/setup: acceptor rejects                                                                       45851 1 
+failure-rows                             failure/failed-acceptance (the mock is QUOTE's ADDITIONAL policy, row 2: E_POLICY_REJECTED; whole publication reverts)     209510 0 
+failure-rows                             failure/setup: acceptor accepts                                                                       23939 1 
+failure-rows                             failure/setup: attach the always-refusing index module                                                28039 1 
+failure-rows                             failure/failed-mandatory-index (whole publication reverts)                                           352858 0 
+failure-rows                             failure/setup: re-attach the index module                                                             28039 1 
+policy/activate                          policy/activate/setup: signed publish quote3000 (payload control, uint256 3000, below the cap) under mandatory rule + policy row 2 (epoch N)     555742 1 
+policy/activate                          policy/activate/held-signature (signed at epoch N, not yet sent)                                            signed-not-sent 
+policy/activate                          policy/activate/activate (StrictQuoteAcceptor ADDED as QUOTE policy row 3; the mandatory rule, id and descriptor are untouched)      82530 1 
+policy/activate                          policy/activate/registry-after                                                                               
+policy/activate                          policy/activate/stale-signature (signed under epoch N, sent after activation N+1: E_INTENT(3), no write)      48585 0 
+policy/activate                          policy/activate/policy-adds-a-constraint (above-cap body uint256 3_000_000_000: the mandatory rule accepts, the ADDED policy refuses: E_POLICY_REJECTED(0, QUOTE))     224498 0 
+policy/activate                          policy/activate/new-epoch-publish (quote3100, payload control, below the cap; re-signed under epoch N+1; admitted under mandatory rule + policy row 3)     431775 1 
+policy/activate                          policy/activate/acceptance-basis                                                                             
+policy/activate                          policy/activate/strict/register (StrictQuoteAcceptor as the MANDATORY rule of an in-cell Type; id from log == typeIdOf == local derivation)     131287 1 
+policy/activate                          policy/activate/strict/rejected-before (above-cap body: E_REJECTED(0, STRICT) by the mandatory rule, no activation yet)     220307 0 
+policy/activate                          policy/activate/strict/activate-zero (row 2: no additional policy)                                    59661 1 
+policy/activate                          policy/activate/strict/still-rejected-after-activate-zero (E_REJECTED(0, STRICT): activate(0) never means no validation)     220307 0 
+policy/activate                          policy/activate/strict/activate-permissive (row 3: the accept-all mock as ADDITIONAL policy)          82530 1 
+policy/activate                          policy/activate/strict/still-rejected-under-permissive-policy (E_REJECTED(0, STRICT): a policy cannot remove the mandatory rule)     220307 0 
+policy/activate                          policy/activate/strict/compliant-publish (quote3000, below the cap: mandatory rule + policy accept; admitted under row 3)     470374 1 
+policy/activate                          policy/activate/strict/acceptance-basis                                                                      
+failure/refused-re-registration          failure/refused-re-registration/collision-id                                                                 
+failure/refused-re-registration          failure/refused-re-registration (identical descriptor => the same derived id: E_TYPE_EXISTS(QUOTE); nothing rewritten)      28730 0 
+failure/refused-re-registration          failure/refused-re-registration/registry-unchanged                                                           
+failure/refused-re-registration          failure/refused-re-registration/different-descriptor                                                        statement 
+failure/unsupported-native-import        failure/unsupported-native-import/signed-destination (v == 0 packet claiming AUTHOR_A's principal, destination signature by AUTHOR_B: E_SOURCE_UNSUPPORTED)      42605 0 
+failure/unsupported-native-import        failure/unsupported-native-import/msg-sender (v == 0 packet, msg.sender == claimed author, empty destination signature: E_SOURCE_UNSUPPORTED)      39633 0 
+failure/unsupported-native-import        failure/unsupported-native-import/nothing-minted                                                             
+failure/unsupported-native-import        failure/unsupported-native-import/limit-not-waiver                                                          statement 
+[    4.4s] wrote /private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b-pin-ca1a228/measure.json
+receipts exit=0
