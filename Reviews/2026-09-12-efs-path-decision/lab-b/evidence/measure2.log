@@ -1,0 +1,358 @@
+[    0.2s] rpc http://127.0.0.1:50752; artifacts /private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/out; scratch /private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b; report /private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/measure.json
+[    0.3s] deploy TypeRegistry (nonce 0)
+[    0.4s] deploy TypeRegistry: 0x5FbDB2315678afecb367f032d93F642f64180aa3 block 1 gas 377573
+[    0.4s] deploy MockAcceptor (nonce 1)
+[    0.5s] deploy MockAcceptor: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 block 2 gas 186188
+[    0.5s] deploy Ledger (nonce 2)
+[    0.7s] deploy Ledger: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 block 3 gas 3666922
+[    0.7s] deploy IndexModule (nonce 3)
+[    0.8s] deploy IndexModule: 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9 block 4 gas 1094765
+[    0.8s] deploy FailingIndexModule (nonce 4)
+[    0.9s] deploy FailingIndexModule: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9 block 5 gas 104871
+[    0.9s] deploy LensReader (nonce 5)
+[    1.0s] deploy LensReader: 0x5FC8d32690cc91D4c39d9d3abcBD16989F875707 block 6 gas 2092488
+[    1.0s] deploy Actor (nonce 6)
+[    1.0s] deploy Actor: 0x0165878A594ca255338adfa4d48449f69242Eb8F block 7 gas 520560
+[    1.1s] deploy Actor (nonce 7)
+[    1.1s] deploy Actor: 0xa513E6E4b8f2a923D98304ec87F64353C4D5C853 block 8 gas 520560
+[    1.1s] deploy Consumer (nonce 8)
+[    1.2s] deploy Consumer: 0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6 block 9 gas 766587
+[    1.2s] deploy Reconstructor (nonce 9)
+[    1.3s] deploy Reconstructor: 0x8A791620dd6260079BF849Dc5567aDC3F2FdC318 block 10 gas 849309
+[    1.4s]   tx   setup: attach index module (nonce 10) sending
+[    1.4s]   tx   setup: attach index module: block 11 gas 45148 status 1
+[    1.4s]   tx   setup: register QUOTE (nonce 11) sending
+[    1.4s]   tx   setup: register QUOTE: block 12 gas 118706 status 1
+[    1.4s]   tx   setup: register BINARY (nonce 12) sending
+[    1.5s]   tx   setup: register BINARY: block 13 gas 78721 status 1
+[    1.5s]   tx   setup: register ITEM (nonce 13) sending
+[    1.5s]   tx   setup: register ITEM: block 14 gas 78721 status 1
+[    1.5s]   tx   setup: register PAIR (nonce 14) sending
+[    1.5s]   tx   setup: register PAIR: block 15 gas 166884 status 1
+[    1.5s]   tx   setup: register QUOTE_J (one checked Pair ref) (nonce 15) sending
+[    1.5s]   tx   setup: register QUOTE_J (one checked Pair ref): block 16 gas 144201 status 1
+[    1.6s] sealed initial state: snapshot 0x0 at block 16 0x82f1b3157065b0a867f5458823c8d15ad957c341985fdfaaaeeaf2175e6a84e5
+[    1.6s] cell native-one/quote: evm_revert to 0x0
+[    1.6s] cell native-one/quote: after revert block 16 0x82f1b3157065b0a867f5458823c8d15ad957c341985fdfaaaeeaf2175e6a84e5 nonce latest 16 pending 16 automine true; re-sealed as 0x1
+[    1.7s] cell native-one/quote: body
+[    1.7s]   tx   native-one/quote/create (nonce 16) sending
+[    1.7s]   tx   native-one/quote/create: block 17 gas 1216793 status 1
+[    1.7s]   tx   native-one/quote/edit (nonce 17) sending
+[    1.8s]   tx   native-one/quote/edit: block 18 gas 511898 status 1
+[    1.8s]   tx   native-one/quote/read-resolve (nonce 18) sending
+[    1.8s]   tx   native-one/quote/read-resolve: block 19 gas 137883 status 1
+[    1.8s]   chk  native-one/quote/read-resolve/readback: match
+[    1.8s]   tx   native-one/quote/read-list (nonce 19) sending
+[    1.8s]   tx   native-one/quote/read-list: block 20 gas 97678 status 1
+[    1.9s]   chk  native-one/quote/read-list/readback: match
+[    1.9s]   tx   native-one/quote/read-history-asof (nonce 20) sending
+[    1.9s]   tx   native-one/quote/read-history-asof: block 21 gas 71905 status 1
+[    1.9s]   chk  native-one/quote/read-history-asof/readback: match
+[    1.9s] cell native-one/quote: post probe + raw harvest at block 21
+[    2.1s] cell native-one/quote: done (5 txs, 77 raw reads, 0 read-back mismatches)
+[    2.1s] cell signed-one/quote: evm_revert to 0x1
+[    2.2s] cell signed-one/quote: after revert block 16 0x82f1b3157065b0a867f5458823c8d15ad957c341985fdfaaaeeaf2175e6a84e5 nonce latest 16 pending 16 automine true; re-sealed as 0x2
+[    2.2s] cell signed-one/quote: body
+[    2.2s]   tx   signed-one/quote/create (nonce 16) sending
+[    2.3s]   tx   signed-one/quote/create: block 17 gas 1261965 status 1
+[    2.3s]   tx   signed-one/quote/edit (nonce 17) sending
+[    2.4s]   tx   signed-one/quote/edit: block 18 gas 558598 status 1
+[    2.4s]   tx   signed-one/quote/read-resolve (nonce 18) sending
+[    2.4s]   tx   signed-one/quote/read-resolve: block 19 gas 137626 status 1
+[    2.4s]   chk  signed-one/quote/read-resolve/readback: match
+[    2.4s]   tx   signed-one/quote/read-list (nonce 19) sending
+[    2.4s]   tx   signed-one/quote/read-list: block 20 gas 97156 status 1
+[    2.5s]   chk  signed-one/quote/read-list/readback: match
+[    2.5s]   tx   signed-one/quote/read-history-asof (nonce 20) sending
+[    2.5s]   tx   signed-one/quote/read-history-asof: block 21 gas 71636 status 1
+[    2.5s]   chk  signed-one/quote/read-history-asof/readback: match
+[    2.5s] cell signed-one/quote: post probe + raw harvest at block 21
+[    2.7s] cell signed-one/quote: done (5 txs, 77 raw reads, 0 read-back mismatches)
+[    2.7s] cell native-two/quote: evm_revert to 0x2
+[    2.8s] cell native-two/quote: after revert block 16 0x82f1b3157065b0a867f5458823c8d15ad957c341985fdfaaaeeaf2175e6a84e5 nonce latest 16 pending 16 automine true; re-sealed as 0x3
+[    2.8s] cell native-two/quote: body
+[    2.8s]   tx   native-two/quote/create (nonce 16) sending
+[    2.9s]   tx   native-two/quote/create: block 17 gas 1216793 status 1
+[    2.9s]   tx   native-two/quote/edit (nonce 17) sending
+[    2.9s]   tx   native-two/quote/edit: block 18 gas 511898 status 1
+[    2.9s]   tx   native-two/quote/create-competing (nonce 18) sending
+[    3.0s]   tx   native-two/quote/create-competing: block 19 gas 837107 status 1
+[    3.0s]   tx   native-two/quote/read-resolve (nonce 19) sending
+[    3.0s]   tx   native-two/quote/read-resolve: block 20 gas 138386 status 1
+[    3.0s]   chk  native-two/quote/read-resolve/readback: match
+[    3.0s]   tx   native-two/quote/read-resolve-second-first (nonce 20) sending
+[    3.1s]   tx   native-two/quote/read-resolve-second-first: block 21 gas 53712 status 1
+[    3.1s]   chk  native-two/quote/read-resolve-second-first/readback: match
+[    3.1s]   tx   native-two/quote/read-list (nonce 21) sending
+[    3.1s]   tx   native-two/quote/read-list: block 22 gas 125950 status 1
+[    3.1s]   chk  native-two/quote/read-list/readback: match
+[    3.1s]   tx   native-two/quote/read-history-asof (nonce 22) sending
+[    3.2s]   tx   native-two/quote/read-history-asof: block 23 gas 77505 status 1
+[    3.2s]   chk  native-two/quote/read-history-asof/readback: match
+[    3.2s] cell native-two/quote: post probe + raw harvest at block 23
+[    3.4s] cell native-two/quote: done (7 txs, 99 raw reads, 0 read-back mismatches)
+[    3.5s] cell signed-two/quote: evm_revert to 0x3
+[    3.5s] cell signed-two/quote: after revert block 16 0x82f1b3157065b0a867f5458823c8d15ad957c341985fdfaaaeeaf2175e6a84e5 nonce latest 16 pending 16 automine true; re-sealed as 0x4
+[    3.6s] cell signed-two/quote: body
+[    3.6s]   tx   signed-two/quote/create (nonce 16) sending
+[    3.7s]   tx   signed-two/quote/create: block 17 gas 1261941 status 1
+[    3.7s]   tx   signed-two/quote/edit (nonce 17) sending
+[    3.7s]   tx   signed-two/quote/edit: block 18 gas 558586 status 1
+[    3.7s]   tx   signed-two/quote/create-competing (nonce 18) sending
+[    3.8s]   tx   signed-two/quote/create-competing: block 19 gas 882989 status 1
+[    3.8s]   tx   signed-two/quote/read-resolve (nonce 19) sending
+[    3.8s]   tx   signed-two/quote/read-resolve: block 20 gas 138105 status 1
+[    3.8s]   chk  signed-two/quote/read-resolve/readback: match
+[    3.8s]   tx   signed-two/quote/read-resolve-second-first (nonce 20) sending
+[    3.9s]   tx   signed-two/quote/read-resolve-second-first: block 21 gas 53431 status 1
+[    3.9s]   chk  signed-two/quote/read-resolve-second-first/readback: match
+[    3.9s]   tx   signed-two/quote/read-list (nonce 21) sending
+[    3.9s]   tx   signed-two/quote/read-list: block 22 gas 124628 status 1
+[    3.9s]   chk  signed-two/quote/read-list/readback: match
+[    3.9s]   tx   signed-two/quote/read-history-asof (nonce 22) sending
+[    4.0s]   tx   signed-two/quote/read-history-asof: block 23 gas 77248 status 1
+[    4.0s]   chk  signed-two/quote/read-history-asof/readback: match
+[    4.0s] cell signed-two/quote: post probe + raw harvest at block 23
+[    4.2s] cell signed-two/quote: done (7 txs, 99 raw reads, 0 read-back mismatches)
+[    4.3s] cell native-one/binary: evm_revert to 0x4
+[    4.3s] cell native-one/binary: after revert block 16 0x82f1b3157065b0a867f5458823c8d15ad957c341985fdfaaaeeaf2175e6a84e5 nonce latest 16 pending 16 automine true; re-sealed as 0x5
+[    4.3s] cell native-one/binary: body
+[    4.3s]   tx   native-one/binary/create (nonce 16) sending
+[    4.4s]   tx   native-one/binary/create: block 17 gas 1231495 status 1
+[    4.4s]   tx   native-one/binary/edit (nonce 17) sending
+[    4.4s]   tx   native-one/binary/edit: block 18 gas 526593 status 1
+[    4.4s]   tx   native-one/binary/read-resolve (nonce 18) sending
+[    4.5s]   tx   native-one/binary/read-resolve: block 19 gas 107306 status 1
+[    4.5s]   chk  native-one/binary/read-resolve/readback: match
+[    4.5s]   tx   native-one/binary/read-list (nonce 19) sending
+[    4.5s]   tx   native-one/binary/read-list: block 20 gas 97678 status 1
+[    4.5s]   chk  native-one/binary/read-list/readback: match
+[    4.5s]   tx   native-one/binary/read-history-asof (nonce 20) sending
+[    4.6s]   tx   native-one/binary/read-history-asof: block 21 gas 71905 status 1
+[    4.6s]   chk  native-one/binary/read-history-asof/readback: match
+[    4.6s] cell native-one/binary: post probe + raw harvest at block 21
+[    4.8s] cell native-one/binary: done (5 txs, 77 raw reads, 0 read-back mismatches)
+[    4.8s] cell signed-one/binary: evm_revert to 0x5
+[    4.9s] cell signed-one/binary: after revert block 16 0x82f1b3157065b0a867f5458823c8d15ad957c341985fdfaaaeeaf2175e6a84e5 nonce latest 16 pending 16 automine true; re-sealed as 0x6
+[    4.9s] cell signed-one/binary: body
+[    4.9s]   tx   signed-one/binary/create (nonce 16) sending
+[    5.0s]   tx   signed-one/binary/create: block 17 gas 1276673 status 1
+[    5.0s]   tx   signed-one/binary/edit (nonce 17) sending
+[    5.1s]   tx   signed-one/binary/edit: block 18 gas 573261 status 1
+[    5.1s]   tx   signed-one/binary/read-resolve (nonce 18) sending
+[    5.1s]   tx   signed-one/binary/read-resolve: block 19 gas 107049 status 1
+[    5.1s]   chk  signed-one/binary/read-resolve/readback: match
+[    5.2s]   tx   signed-one/binary/read-list (nonce 19) sending
+[    5.2s]   tx   signed-one/binary/read-list: block 20 gas 97144 status 1
+[    5.2s]   chk  signed-one/binary/read-list/readback: match
+[    5.2s]   tx   signed-one/binary/read-history-asof (nonce 20) sending
+[    5.3s]   tx   signed-one/binary/read-history-asof: block 21 gas 71648 status 1
+[    5.3s]   chk  signed-one/binary/read-history-asof/readback: match
+[    5.3s] cell signed-one/binary: post probe + raw harvest at block 21
+[    5.5s] cell signed-one/binary: done (5 txs, 77 raw reads, 0 read-back mismatches)
+[    5.5s] cell native-two/binary: evm_revert to 0x6
+[    5.6s] cell native-two/binary: after revert block 16 0x82f1b3157065b0a867f5458823c8d15ad957c341985fdfaaaeeaf2175e6a84e5 nonce latest 16 pending 16 automine true; re-sealed as 0x7
+[    5.6s] cell native-two/binary: body
+[    5.6s]   tx   native-two/binary/create (nonce 16) sending
+[    5.7s]   tx   native-two/binary/create: block 17 gas 1231507 status 1
+[    5.7s]   tx   native-two/binary/edit (nonce 17) sending
+[    5.7s]   tx   native-two/binary/edit: block 18 gas 526593 status 1
+[    5.7s]   tx   native-two/binary/create-competing (nonce 18) sending
+[    5.8s]   tx   native-two/binary/create-competing: block 19 gas 829169 status 1
+[    5.8s]   tx   native-two/binary/read-resolve (nonce 19) sending
+[    5.8s]   tx   native-two/binary/read-resolve: block 20 gas 107812 status 1
+[    5.8s]   chk  native-two/binary/read-resolve/readback: match
+[    5.8s]   tx   native-two/binary/read-resolve-second-first (nonce 20) sending
+[    5.8s]   tx   native-two/binary/read-resolve-second-first: block 21 gas 53712 status 1
+[    5.9s]   chk  native-two/binary/read-resolve-second-first/readback: match
+[    5.9s]   tx   native-two/binary/read-list (nonce 21) sending
+[    5.9s]   tx   native-two/binary/read-list: block 22 gas 125950 status 1
+[    5.9s]   chk  native-two/binary/read-list/readback: match
+[    5.9s]   tx   native-two/binary/read-history-asof (nonce 22) sending
+[    5.9s]   tx   native-two/binary/read-history-asof: block 23 gas 77505 status 1
+[    6.0s]   chk  native-two/binary/read-history-asof/readback: match
+[    6.0s] cell native-two/binary: post probe + raw harvest at block 23
+[    6.2s] cell native-two/binary: done (7 txs, 99 raw reads, 0 read-back mismatches)
+[    6.2s] cell signed-two/binary: evm_revert to 0x7
+[    6.3s] cell signed-two/binary: after revert block 16 0x82f1b3157065b0a867f5458823c8d15ad957c341985fdfaaaeeaf2175e6a84e5 nonce latest 16 pending 16 automine true; re-sealed as 0x8
+[    6.3s] cell signed-two/binary: body
+[    6.3s]   tx   signed-two/binary/create (nonce 16) sending
+[    6.4s]   tx   signed-two/binary/create: block 17 gas 1276685 status 1
+[    6.4s]   tx   signed-two/binary/edit (nonce 17) sending
+[    6.5s]   tx   signed-two/binary/edit: block 18 gas 573261 status 1
+[    6.5s]   tx   signed-two/binary/create-competing (nonce 18) sending
+[    6.6s]   tx   signed-two/binary/create-competing: block 19 gas 875044 status 1
+[    6.6s]   tx   signed-two/binary/read-resolve (nonce 19) sending
+[    6.6s]   tx   signed-two/binary/read-resolve: block 20 gas 107543 status 1
+[    6.7s]   chk  signed-two/binary/read-resolve/readback: match
+[    6.7s]   tx   signed-two/binary/read-resolve-second-first (nonce 20) sending
+[    6.7s]   tx   signed-two/binary/read-resolve-second-first: block 21 gas 53443 status 1
+[    6.7s]   chk  signed-two/binary/read-resolve-second-first/readback: match
+[    6.7s]   tx   signed-two/binary/read-list (nonce 21) sending
+[    6.8s]   tx   signed-two/binary/read-list: block 22 gas 124628 status 1
+[    6.8s]   chk  signed-two/binary/read-list/readback: match
+[    6.8s]   tx   signed-two/binary/read-history-asof (nonce 22) sending
+[    6.8s]   tx   signed-two/binary/read-history-asof: block 23 gas 77248 status 1
+[    6.9s]   chk  signed-two/binary/read-history-asof/readback: match
+[    6.9s] cell signed-two/binary: post probe + raw harvest at block 23
+[    7.1s] cell signed-two/binary: done (7 txs, 99 raw reads, 0 read-back mismatches)
+[    7.2s] cell freshness-controls: evm_revert to 0x8
+[    7.2s] cell freshness-controls: after revert block 16 0x82f1b3157065b0a867f5458823c8d15ad957c341985fdfaaaeeaf2175e6a84e5 nonce latest 16 pending 16 automine true; re-sealed as 0x9
+[    7.3s] cell freshness-controls: body
+[    7.3s]   tx   contract-fresh-body (Actor.publish quote3000, proved absent just before) (nonce 16) sending
+[    7.4s]   tx   contract-fresh-body (Actor.publish quote3000, proved absent just before): block 17 gas 496049 status 1
+[    7.4s]   tx   contract-existing-body (same bytes: new occurrence, no new Record) (nonce 17) sending
+[    7.4s]   tx   contract-existing-body (same bytes: new occurrence, no new Record): block 18 gas 314527 status 1
+[    7.4s]   tx   batch under explicit nonce (nonce 18) sending
+[    7.5s]   tx   batch under explicit nonce: block 19 gas 378955 status 1
+[    7.5s]   row  exact-operation retry (reverts AlreadyAdmitted): static call for the revert selector
+[    7.6s]   tx   exact-operation retry (reverts AlreadyAdmitted) (nonce 19) sending
+[    7.6s]   tx   exact-operation retry (reverts AlreadyAdmitted): block 20 gas 53756 status 0
+[    7.8s] cell freshness-controls: post probe + raw harvest at block 20
+[    8.1s] cell freshness-controls: done (4 txs, 53 raw reads, 0 read-back mismatches)
+[    8.1s] cell failure-rows: evm_revert to 0x9
+[    8.2s] cell failure-rows: after revert block 16 0x82f1b3157065b0a867f5458823c8d15ad957c341985fdfaaaeeaf2175e6a84e5 nonce latest 16 pending 16 automine true; re-sealed as 0xa
+[    8.2s] cell failure-rows: body
+[    8.2s]   tx   ITEM_ETH (nonce 16) sending
+[    8.3s]   tx   ITEM_ETH: block 17 gas 487489 status 1
+[    8.3s]   tx   ITEM_USDC (nonce 17) sending
+[    8.3s]   tx   ITEM_USDC: block 18 gas 367789 status 1
+[    8.3s]   tx   PAIR_ETH_USDC (two checked refs) (nonce 18) sending
+[    8.5s]   tx   PAIR_ETH_USDC (two checked refs): block 19 gas 469989 status 1
+[    8.6s]   tx   setup: admit a QUOTE record as the present wrong-Type target (nonce 19) sending
+[    8.7s]   tx   setup: admit a QUOTE record as the present wrong-Type target: block 20 gas 410537 status 1
+[    8.8s]   row  checked ref: wrong Type (present target of another Type): static call for the revert selector
+[    8.8s]   tx   checked ref: wrong Type (present target of another Type) (nonce 20) sending
+[    8.8s]   tx   checked ref: wrong Type (present target of another Type): block 21 gas 209028 status 0
+[    8.9s]   row  checked ref: missing target: static call for the revert selector
+[    9.0s]   tx   checked ref: missing target (nonce 21) sending
+[    9.0s]   tx   checked ref: missing target: block 22 gas 208668 status 0
+[    9.0s]   tx   setup: bind (revision becomes 1) (nonce 22) sending
+[    9.1s]   tx   setup: bind (revision becomes 1): block 23 gas 483540 status 1
+[    9.1s]   row  stale CAS (expected 0, head is 1): static call for the revert selector
+[    9.1s]   tx   stale CAS (expected 0, head is 1) (nonce 23) sending
+[    9.2s]   tx   stale CAS (expected 0, head is 1): block 24 gas 168250 status 0
+[    9.2s]   tx   setup: acceptor rejects (nonce 24) sending
+[    9.2s]   tx   setup: acceptor rejects: block 25 gas 45851 status 1
+[    9.3s]   row  failed acceptance (whole publication reverts): static call for the revert selector
+[    9.3s]   tx   failed acceptance (whole publication reverts) (nonce 25) sending
+[    9.3s]   tx   failed acceptance (whole publication reverts): block 26 gas 200930 status 0
+[    9.4s]   tx   setup: acceptor accepts (nonce 26) sending
+[    9.4s]   tx   setup: acceptor accepts: block 27 gas 23939 status 1
+[    9.4s]   tx   setup: attach the always-refusing index module (nonce 27) sending
+[    9.4s]   tx   setup: attach the always-refusing index module: block 28 gas 28036 status 1
+[    9.5s]   row  failed mandatory index (whole publication reverts): static call for the revert selector
+[    9.5s]   tx   failed mandatory index (whole publication reverts) (nonce 28) sending
+[    9.5s]   tx   failed mandatory index (whole publication reverts): block 29 gas 344372 status 0
+[    9.6s]   tx   setup: re-attach the index module (nonce 29) sending
+[    9.6s]   tx   setup: re-attach the index module: block 30 gas 28048 status 1
+[    9.6s] cell failure-rows: post probe + raw harvest at block 30
+[    9.9s] cell failure-rows: done (14 txs, 118 raw reads, 0 read-back mismatches)
+[   10.0s] cell native-one-noindex/quote: evm_revert to 0xa
+[   10.0s] cell native-one-noindex/quote: after revert block 16 0x82f1b3157065b0a867f5458823c8d15ad957c341985fdfaaaeeaf2175e6a84e5 nonce latest 16 pending 16 automine true; re-sealed as 0xb
+[   10.1s] cell native-one-noindex/quote: body
+[   10.1s]   tx   setup: detach index module (nonce 16) sending
+[   10.1s]   tx   setup: detach index module: block 17 gas 23008 status 1
+[   10.1s]   tx   native-one-noindex/quote/create (nonce 17) sending
+[   10.2s]   tx   native-one-noindex/quote/create: block 18 gas 801359 status 1
+[   10.3s]   tx   native-one-noindex/quote/edit (nonce 18) sending
+[   10.3s]   tx   native-one-noindex/quote/edit: block 19 gas 394897 status 1
+[   10.3s]   tx   native-one-noindex/quote/read-resolve (nonce 19) sending
+[   10.4s]   tx   native-one-noindex/quote/read-resolve: block 20 gas 137883 status 1
+[   10.7s]   chk  native-one-noindex/quote/read-resolve/readback: match
+[   10.8s] cell native-one-noindex/quote: post probe + raw harvest at block 20
+[   11.0s] cell native-one-noindex/quote: done (4 txs, 55 raw reads, 0 read-back mismatches)
+native-one/quote           native-one/quote/create                                             1216793 1
+native-one/quote           native-one/quote/reconstruct-create                                         eth_call
+native-one/quote           native-one/quote/edit                                                511898 1
+native-one/quote           native-one/quote/read-resolve                                        137883 1
+native-one/quote           native-one/quote/eth_call-resolve-estimate                            36692 estimate
+native-one/quote           native-one/quote/read-list                                            97678 1
+native-one/quote           native-one/quote/read-history-asof                                    71905 1
+signed-one/quote           signed-one/quote/create                                             1261965 1
+signed-one/quote           signed-one/quote/reconstruct-create                                         eth_call
+signed-one/quote           signed-one/quote/edit                                                558598 1
+signed-one/quote           signed-one/quote/read-resolve                                        137626 1
+signed-one/quote           signed-one/quote/eth_call-resolve-estimate                            36435 estimate
+signed-one/quote           signed-one/quote/read-list                                            97156 1
+signed-one/quote           signed-one/quote/read-history-asof                                    71636 1
+native-two/quote           native-two/quote/create                                             1216793 1
+native-two/quote           native-two/quote/reconstruct-create                                         eth_call
+native-two/quote           native-two/quote/edit                                                511898 1
+native-two/quote           native-two/quote/create-competing                                    837107 1
+native-two/quote           native-two/quote/read-resolve                                        138386 1
+native-two/quote           native-two/quote/read-resolve-second-first                            53712 1
+native-two/quote           native-two/quote/eth_call-resolve-estimate                            37060 estimate
+native-two/quote           native-two/quote/read-list                                           125950 1
+native-two/quote           native-two/quote/read-history-asof                                    77505 1
+signed-two/quote           signed-two/quote/create                                             1261941 1
+signed-two/quote           signed-two/quote/reconstruct-create                                         eth_call
+signed-two/quote           signed-two/quote/edit                                                558586 1
+signed-two/quote           signed-two/quote/create-competing                                    882989 1
+signed-two/quote           signed-two/quote/read-resolve                                        138105 1
+signed-two/quote           signed-two/quote/read-resolve-second-first                            53431 1
+signed-two/quote           signed-two/quote/eth_call-resolve-estimate                            36779 estimate
+signed-two/quote           signed-two/quote/read-list                                           124628 1
+signed-two/quote           signed-two/quote/read-history-asof                                    77248 1
+native-one/binary          native-one/binary/create                                            1231495 1
+native-one/binary          native-one/binary/reconstruct-create                                        eth_call
+native-one/binary          native-one/binary/edit                                               526593 1
+native-one/binary          native-one/binary/read-resolve                                       107306 1
+native-one/binary          native-one/binary/eth_call-resolve-estimate                           36692 estimate
+native-one/binary          native-one/binary/read-list                                           97678 1
+native-one/binary          native-one/binary/read-history-asof                                   71905 1
+signed-one/binary          signed-one/binary/create                                            1276673 1
+signed-one/binary          signed-one/binary/reconstruct-create                                        eth_call
+signed-one/binary          signed-one/binary/edit                                               573261 1
+signed-one/binary          signed-one/binary/read-resolve                                       107049 1
+signed-one/binary          signed-one/binary/eth_call-resolve-estimate                           36435 estimate
+signed-one/binary          signed-one/binary/read-list                                           97144 1
+signed-one/binary          signed-one/binary/read-history-asof                                   71648 1
+native-two/binary          native-two/binary/create                                            1231507 1
+native-two/binary          native-two/binary/reconstruct-create                                        eth_call
+native-two/binary          native-two/binary/edit                                               526593 1
+native-two/binary          native-two/binary/create-competing                                   829169 1
+native-two/binary          native-two/binary/read-resolve                                       107812 1
+native-two/binary          native-two/binary/read-resolve-second-first                           53712 1
+native-two/binary          native-two/binary/eth_call-resolve-estimate                           37060 estimate
+native-two/binary          native-two/binary/read-list                                          125950 1
+native-two/binary          native-two/binary/read-history-asof                                   77505 1
+signed-two/binary          signed-two/binary/create                                            1276685 1
+signed-two/binary          signed-two/binary/reconstruct-create                                        eth_call
+signed-two/binary          signed-two/binary/edit                                               573261 1
+signed-two/binary          signed-two/binary/create-competing                                   875044 1
+signed-two/binary          signed-two/binary/read-resolve                                       107543 1
+signed-two/binary          signed-two/binary/read-resolve-second-first                           53443 1
+signed-two/binary          signed-two/binary/eth_call-resolve-estimate                           36791 estimate
+signed-two/binary          signed-two/binary/read-list                                          124628 1
+signed-two/binary          signed-two/binary/read-history-asof                                   77248 1
+freshness-controls         pre-absence proof                                                           
+freshness-controls         contract-fresh-body (Actor.publish quote3000, proved absent just before)     496049 1
+freshness-controls         pre-presence proof                                                          
+freshness-controls         contract-existing-body (same bytes: new occurrence, no new Record)     314527 1
+freshness-controls         post-presence                                                               
+freshness-controls         batch under explicit nonce                                           378955 1
+freshness-controls         exact-operation retry (reverts AlreadyAdmitted)                       53756 0
+failure-rows               ITEM_ETH                                                             487489 1
+failure-rows               ITEM_USDC                                                            367789 1
+failure-rows               PAIR_ETH_USDC (two checked refs)                                     469989 1
+failure-rows               setup: admit a QUOTE record as the present wrong-Type target         410537 1
+failure-rows               wrong-Type target presence                                                  
+failure-rows               checked ref: wrong Type (present target of another Type)             209028 0
+failure-rows               checked ref: missing target                                          208668 0
+failure-rows               setup: bind (revision becomes 1)                                     483540 1
+failure-rows               stale CAS (expected 0, head is 1)                                    168250 0
+failure-rows               setup: acceptor rejects                                               45851 1
+failure-rows               failed acceptance (whole publication reverts)                        200930 0
+failure-rows               setup: acceptor accepts                                               23939 1
+failure-rows               setup: attach the always-refusing index module                        28036 1
+failure-rows               failed mandatory index (whole publication reverts)                   344372 0
+failure-rows               setup: re-attach the index module                                     28048 1
+native-one-noindex/quote   setup: detach index module                                            23008 1
+native-one-noindex/quote   native-one-noindex/quote/create                                      801359 1
+native-one-noindex/quote   native-one-noindex/quote/reconstruct-create                                 eth_call
+native-one-noindex/quote   native-one-noindex/quote/edit                                        394897 1
+native-one-noindex/quote   native-one-noindex/quote/read-resolve                                137883 1
+native-one-noindex/quote   native-one-noindex/quote/eth_call-resolve-estimate                    36692 estimate
+[   11.1s] wrote /private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/measure.json
+exit=0

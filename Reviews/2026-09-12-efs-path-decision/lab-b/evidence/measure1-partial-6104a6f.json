@@ -1,0 +1,3401 @@
+{
+  "profile": "road-b-lab/1",
+  "claim": "disposable lab, no protocol claim",
+  "honesty": "This run reports receipt diagnostics with explicit remaining gates. It is not a same-guarantee comparison and not the capability ablation.",
+  "experiment": "ingress x multiplicity: {native, signed} x {one, two authors under a lens}. NOT the protocol capability ablation (neither/authorship/selection/both), which is a later gate.",
+  "remainingGates": [
+    "The joined QUOTE/Pair consumption (sdk-fixture steps 1–6 with ITEM/PAIR/QUOTE) is NOT in this script yet.",
+    "The Reconstructor is a candidate self-check calling ledger.intentDigest, not independent."
+  ],
+  "capabilityAblation": {
+    "unknown": "not run: the neither/authorship/selection/both counterfactuals need same-guarantee arms that remove one capability each; this lab has one arm",
+    "consequence": "no representation-vs-feature attribution and no interaction term can be claimed from this run"
+  },
+  "rpc": "http://127.0.0.1:49780",
+  "chainId": 31337,
+  "node": "v24.11.0",
+  "evm": "cancun",
+  "compiler": "0.8.30 (verify from out/ metadata)",
+  "optimizerRuns": 200,
+  "viaIR": true,
+  "paths": {
+    "artifacts": "/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/out",
+    "scratchRoot": "/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b",
+    "outJson": "/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/measure.json",
+    "addresses": "/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/lab-addresses.json"
+  },
+  "providerPolicy": "fresh JsonRpcProvider per cell (cacheTimeout -1, staticNetwork, batchMaxCount 1); probes and raw harvests pass explicit block tags",
+  "startedAt": "2026-09-13T01:05:44.877Z",
+  "anvil": {
+    "spawned": true,
+    "pid": 25989,
+    "port": 49780,
+    "cachePath": "/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/anvil-cache",
+    "startedAt": "2026-09-13T01:05:44.898Z",
+    "stoppedAt": null,
+    "args": [
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "49780",
+      "--hardfork",
+      "cancun",
+      "--chain-id",
+      "31337",
+      "--gas-limit",
+      "30000000",
+      "--accounts",
+      "4",
+      "--prune-history",
+      "256",
+      "--cache-path",
+      "/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/anvil-cache",
+      "--no-cors",
+      "--quiet",
+      "--mnemonic"
+    ]
+  },
+  "deployment": {
+    "registry": {
+      "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "gas": "377573",
+      "runtimeBytes": 1504
+    },
+    "acceptor": {
+      "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      "gas": "186188",
+      "runtimeBytes": 615
+    },
+    "ledger": {
+      "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      "gas": "3666922",
+      "runtimeBytes": 16699
+    },
+    "index": {
+      "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+      "gas": "1094765",
+      "runtimeBytes": 4127
+    },
+    "failingIndex": {
+      "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+      "gas": "104871",
+      "runtimeBytes": 238
+    },
+    "lens": {
+      "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+      "gas": "2092488",
+      "runtimeBytes": 9445
+    },
+    "actorA": {
+      "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+      "gas": "520560",
+      "runtimeBytes": 2159
+    },
+    "actorB": {
+      "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+      "gas": "520560",
+      "runtimeBytes": 2159
+    },
+    "consumer": {
+      "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+      "gas": "766587",
+      "runtimeBytes": 3298
+    },
+    "recon": {
+      "address": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
+      "gas": "849309",
+      "runtimeBytes": 3683
+    }
+  },
+  "setup": [
+    {
+      "label": "setup: attach index module",
+      "gas": "45148",
+      "status": 1,
+      "hash": "0x19df0e75575241fdb8c5746d1a5aefcf08d0b6d96005559e36615419241e24e5",
+      "block": 11,
+      "txIndex": 0
+    },
+    {
+      "label": "setup: register QUOTE",
+      "gas": "118706",
+      "status": 1,
+      "hash": "0x87b6a8eece28a8a23328a14260df95669996e53b308279ac9698ccaaed5e38ef",
+      "block": 12,
+      "txIndex": 1
+    },
+    {
+      "label": "setup: register BINARY",
+      "gas": "78721",
+      "status": 1,
+      "hash": "0x70d0fed47b3f489d790f4c7eca626ef62608e52f05405dcf5657a4233989a9a8",
+      "block": 13,
+      "txIndex": 2
+    },
+    {
+      "label": "setup: register ITEM",
+      "gas": "78721",
+      "status": 1,
+      "hash": "0x97a3788519ec0851c441bae5bd2ac078946ddc11bb203ce356dc1fdf7d2a1d9e",
+      "block": 14,
+      "txIndex": 3
+    },
+    {
+      "label": "setup: register PAIR",
+      "gas": "166884",
+      "status": 1,
+      "hash": "0xf8a9c919484ca4689cd035467737d4a88ebed812b79277e66309f15fe4ac341a",
+      "block": 15,
+      "txIndex": 4
+    },
+    {
+      "label": "setup: register QUOTE_J (one checked Pair ref)",
+      "gas": "144201",
+      "status": 1,
+      "hash": "0xe11f93e6cf2309bff571da28cd490e9299606cee7968ec06caa07c1e102e5c70",
+      "block": 16,
+      "txIndex": 5
+    }
+  ],
+  "setupTransactions": [
+    {
+      "label": "setup: attach index module",
+      "hash": "0x19df0e75575241fdb8c5746d1a5aefcf08d0b6d96005559e36615419241e24e5",
+      "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      "nonce": 10,
+      "data": "0x4ad25e6d000000000000000000000000cf7ed3acca5a467e9e704c703e8d87f634fb0fc9",
+      "gasLimit": "45148",
+      "receipt": {
+        "status": 1,
+        "gasUsed": "45148",
+        "blockHash": "0x7db6cf4bdfadf8cb9e006affa4fd1d3de331f8f1404d4d1fe4993b31cc147e58",
+        "blockNumber": 11,
+        "transactionIndex": 0,
+        "logs": [
+          {
+            "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+            "topics": [
+              "0x987486ac6c204bdd58235c44de4766d2e1f40d5ce43aeb1729ac1f1336332d6f"
+            ],
+            "data": "0x000000000000000000000000cf7ed3acca5a467e9e704c703e8d87f634fb0fc9",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "label": "setup: register QUOTE",
+      "hash": "0x87b6a8eece28a8a23328a14260df95669996e53b308279ac9698ccaaed5e38ef",
+      "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "nonce": 11,
+      "data": "0x861b7d3dcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068000000000000000000000000e7f1725e7734ce288f8367e1bb143e90bb3f051200000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
+      "gasLimit": "118706",
+      "receipt": {
+        "status": 1,
+        "gasUsed": "118706",
+        "blockHash": "0xc79c62cab0735f938b086b36566de3b924345fe3ffe750e4221ac1656fac177d",
+        "blockNumber": 12,
+        "transactionIndex": 0,
+        "logs": [
+          {
+            "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+            "topics": [
+              "0x806fdf7f56210b3c3249c2cdd202ba14b23502e5b5f6277e6bdd0d3ae4ff8277",
+              "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068"
+            ],
+            "data": "0x000000000000000000000000e7f1725e7734ce288f8367e1bb143e90bb3f05121a61860433c036adda04e35df85a7b9ce063f5a575653a4483c30705c3a2cca70000000000000000000000000000000000000000000000000000000000000000",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "label": "setup: register BINARY",
+      "hash": "0x70d0fed47b3f489d790f4c7eca626ef62608e52f05405dcf5657a4233989a9a8",
+      "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "nonce": 12,
+      "data": "0x861b7d3db803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
+      "gasLimit": "78721",
+      "receipt": {
+        "status": 1,
+        "gasUsed": "78721",
+        "blockHash": "0x963f7f7538b0ff21a27b649aee0ff844c04db6af85dd69e2642fe749c19afc20",
+        "blockNumber": 13,
+        "transactionIndex": 0,
+        "logs": [
+          {
+            "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+            "topics": [
+              "0x806fdf7f56210b3c3249c2cdd202ba14b23502e5b5f6277e6bdd0d3ae4ff8277",
+              "0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7"
+            ],
+            "data": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "label": "setup: register ITEM",
+      "hash": "0x97a3788519ec0851c441bae5bd2ac078946ddc11bb203ce356dc1fdf7d2a1d9e",
+      "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "nonce": 13,
+      "data": "0x861b7d3d089e89ac79be382b5051ee54411ad06893426d15b1eb67458c48d95d3c8dd7ef000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000",
+      "gasLimit": "78721",
+      "receipt": {
+        "status": 1,
+        "gasUsed": "78721",
+        "blockHash": "0x36ad94fb0d1c0a0465c64247173aad317d3b0bf839b3b84ab58ad0a970c78378",
+        "blockNumber": 14,
+        "transactionIndex": 0,
+        "logs": [
+          {
+            "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+            "topics": [
+              "0x806fdf7f56210b3c3249c2cdd202ba14b23502e5b5f6277e6bdd0d3ae4ff8277",
+              "0x089e89ac79be382b5051ee54411ad06893426d15b1eb67458c48d95d3c8dd7ef"
+            ],
+            "data": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "label": "setup: register PAIR",
+      "hash": "0xf8a9c919484ca4689cd035467737d4a88ebed812b79277e66309f15fe4ac341a",
+      "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "nonce": 14,
+      "data": "0x861b7d3d20bd50a4112086884183185adad5624590d31448d53976ac022d55bb46de0e98000000000000000000000000e7f1725e7734ce288f8367e1bb143e90bb3f051200000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000002089e89ac79be382b5051ee54411ad06893426d15b1eb67458c48d95d3c8dd7ef089e89ac79be382b5051ee54411ad06893426d15b1eb67458c48d95d3c8dd7ef",
+      "gasLimit": "166884",
+      "receipt": {
+        "status": 1,
+        "gasUsed": "166884",
+        "blockHash": "0x8b1aa33130d4258c75dcbfb4460be60a6964bb133e5cbfb520721e6191676d11",
+        "blockNumber": 15,
+        "transactionIndex": 0,
+        "logs": [
+          {
+            "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+            "topics": [
+              "0x806fdf7f56210b3c3249c2cdd202ba14b23502e5b5f6277e6bdd0d3ae4ff8277",
+              "0x20bd50a4112086884183185adad5624590d31448d53976ac022d55bb46de0e98"
+            ],
+            "data": "0x000000000000000000000000e7f1725e7734ce288f8367e1bb143e90bb3f05121a61860433c036adda04e35df85a7b9ce063f5a575653a4483c30705c3a2cca70000000000000000000000000000000000000000000000000000000000000002",
+            "index": 0
+          }
+        ]
+      }
+    },
+    {
+      "label": "setup: register QUOTE_J (one checked Pair ref)",
+      "hash": "0xe11f93e6cf2309bff571da28cd490e9299606cee7968ec06caa07c1e102e5c70",
+      "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "to": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "nonce": 15,
+      "data": "0x861b7d3d4c7a4ec879e0f6bf18fb87b4dfe081dc3efec6a4c1096b49e5d74082703f2213000000000000000000000000e7f1725e7734ce288f8367e1bb143e90bb3f05120000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000120bd50a4112086884183185adad5624590d31448d53976ac022d55bb46de0e98",
+      "gasLimit": "144201",
+      "receipt": {
+        "status": 1,
+        "gasUsed": "144201",
+        "blockHash": "0x404fa89b43e936aaec71df03d72db00b93917863f8cfa2c736552a98472e5439",
+        "blockNumber": 16,
+        "transactionIndex": 0,
+        "logs": [
+          {
+            "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+            "topics": [
+              "0x806fdf7f56210b3c3249c2cdd202ba14b23502e5b5f6277e6bdd0d3ae4ff8277",
+              "0x4c7a4ec879e0f6bf18fb87b4dfe081dc3efec6a4c1096b49e5d74082703f2213"
+            ],
+            "data": "0x000000000000000000000000e7f1725e7734ce288f8367e1bb143e90bb3f05121a61860433c036adda04e35df85a7b9ce063f5a575653a4483c30705c3a2cca70000000000000000000000000000000000000000000000000000000000000001",
+            "index": 0
+          }
+        ]
+      }
+    }
+  ],
+  "sealedInitialState": {
+    "snapshot": "0x0",
+    "blockNumber": 16,
+    "blockHash": "0x404fa89b43e936aaec71df03d72db00b93917863f8cfa2c736552a98472e5439",
+    "rule": "evm_revert to the sealed snapshot, then re-snapshot, before every cell through a fresh provider; pre/post probes and raw harvests recorded per cell before the next revert"
+  },
+  "cells": {
+    "native-one/quote": {
+      "label": "native-one/quote",
+      "sealedSnapshot": "0x1",
+      "afterRevert": {
+        "blockNumber": 16,
+        "blockHash": "0x404fa89b43e936aaec71df03d72db00b93917863f8cfa2c736552a98472e5439"
+      },
+      "pre": {
+        "blockTag": 16,
+        "controls": {
+          "quote3000": {
+            "recordId": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "present": false
+          },
+          "quote3100": {
+            "recordId": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "present": false
+          },
+          "file41a": {
+            "recordId": "0xd70aeed415e61235b8c4d5494e4ba4b8ca0d1a3c17a4212aaacbaafb9f69e176",
+            "typeId": "0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "present": false
+          },
+          "file41b": {
+            "recordId": "0x1c2d42caaad07ceb468f2ea157d863f8f2cb4d92bc4765728b00e33215555af9",
+            "typeId": "0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "present": false
+          }
+        },
+        "counts": {
+          "admissions": "0",
+          "records": "0",
+          "bindings": "0",
+          "publications": "0"
+        },
+        "nonces": {
+          "0x0165878A594ca255338adfa4d48449f69242Eb8F": "0"
+        },
+        "scopeHeads": {
+          "0x0165878A594ca255338adfa4d48449f69242Eb8F": {
+            "count": "0",
+            "live": "0",
+            "last": "0",
+            "flags": "0"
+          }
+        },
+        "byAuthorHeads": {
+          "0x0165878A594ca255338adfa4d48449f69242Eb8F": {
+            "count": "0",
+            "live": "0",
+            "last": "0",
+            "flags": "0"
+          }
+        },
+        "byTypeHead": {
+          "count": "0",
+          "live": "0",
+          "last": "0",
+          "flags": "0"
+        },
+        "consumer": {
+          "lastStatus": "0",
+          "lastTarget": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "lastRevision": "0",
+          "lastAdmission": "0",
+          "lastCount": "0",
+          "lastScanned": "0",
+          "lastValue": "0"
+        }
+      },
+      "rows": [
+        {
+          "label": "native-one/quote/create",
+          "gas": "1216793",
+          "status": 1,
+          "hash": "0xaccd27a8b8441bf35ab2e19474d0681894e42e810af8594a7f0637668bc5acb4",
+          "block": 17,
+          "txIndex": 0
+        },
+        {
+          "label": "native-one/quote/reconstruct-create",
+          "publication": "1",
+          "matches": true,
+          "recovered": "0x0000000000000000000000000000000000000000",
+          "status": "eth_call",
+          "note": "The Reconstructor is a candidate self-check calling ledger.intentDigest, not independent."
+        },
+        {
+          "label": "native-one/quote/edit",
+          "gas": "511898",
+          "status": 1,
+          "hash": "0xa253bb744ab956da8bb1c726183ea43f4e5debe471587eb331384c857db6fbed",
+          "block": 18,
+          "txIndex": 1
+        },
+        {
+          "label": "native-one/quote/read-resolve",
+          "gas": "137883",
+          "status": 1,
+          "hash": "0x8dddf9225cca44293005167dbe421f770a817c91df9587187c3a2fad5bc1113c",
+          "block": 19,
+          "txIndex": 2
+        },
+        {
+          "label": "native-one/quote/eth_call-resolve-estimate",
+          "gas": "36692",
+          "status": "estimate"
+        },
+        {
+          "label": "native-one/quote/read-list",
+          "gas": "97678",
+          "status": 1,
+          "hash": "0x9c6642416afc52a7834f73fa8d9a33e029979ec168201dd919ee7beba7f822ac",
+          "block": 20,
+          "txIndex": 3
+        },
+        {
+          "label": "native-one/quote/read-history-asof",
+          "gas": "71905",
+          "status": 1,
+          "hash": "0x7d766fcfe1a9e898865523fa6977317fff6a10ced0c6a37b814b46e20cdff1c2",
+          "block": 21,
+          "txIndex": 4
+        }
+      ],
+      "post": {
+        "blockTag": 21,
+        "controls": {
+          "quote3000": {
+            "recordId": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "2",
+            "occurrences": "1",
+            "present": true
+          },
+          "quote3100": {
+            "recordId": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "5",
+            "occurrences": "1",
+            "present": true
+          },
+          "file41a": {
+            "recordId": "0xd70aeed415e61235b8c4d5494e4ba4b8ca0d1a3c17a4212aaacbaafb9f69e176",
+            "typeId": "0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "present": false
+          },
+          "file41b": {
+            "recordId": "0x1c2d42caaad07ceb468f2ea157d863f8f2cb4d92bc4765728b00e33215555af9",
+            "typeId": "0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "present": false
+          }
+        },
+        "counts": {
+          "admissions": "6",
+          "records": "2",
+          "bindings": "2",
+          "publications": "2"
+        },
+        "nonces": {
+          "0x0165878A594ca255338adfa4d48449f69242Eb8F": "2"
+        },
+        "scopeHeads": {
+          "0x0165878A594ca255338adfa4d48449f69242Eb8F": {
+            "count": "1",
+            "live": "1",
+            "last": "2",
+            "flags": "1"
+          }
+        },
+        "byAuthorHeads": {
+          "0x0165878A594ca255338adfa4d48449f69242Eb8F": {
+            "count": "2",
+            "live": "2",
+            "last": "5",
+            "flags": "0"
+          }
+        },
+        "byTypeHead": {
+          "count": "2",
+          "live": "2",
+          "last": "5",
+          "flags": "0"
+        },
+        "consumer": {
+          "lastStatus": "1",
+          "lastTarget": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+          "lastRevision": "2",
+          "lastAdmission": "6",
+          "lastCount": "1",
+          "lastScanned": "1",
+          "lastValue": "3100"
+        }
+      },
+      "harvest": {
+        "blockTag": 21,
+        "controls": {
+          "quote3000": {
+            "recordId": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "2",
+            "occurrences": "1",
+            "bodyLength": 32
+          },
+          "quote3100": {
+            "recordId": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "5",
+            "occurrences": "1",
+            "bodyLength": 32
+          },
+          "file41a": {
+            "recordId": "0xd70aeed415e61235b8c4d5494e4ba4b8ca0d1a3c17a4212aaacbaafb9f69e176",
+            "typeId": "0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "bodyLength": 0
+          },
+          "file41b": {
+            "recordId": "0x1c2d42caaad07ceb468f2ea157d863f8f2cb4d92bc4765728b00e33215555af9",
+            "typeId": "0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "bodyLength": 0
+          }
+        },
+        "records": {
+          "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95": {
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "2",
+            "occurrences": "1"
+          },
+          "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c": {
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "5",
+            "occurrences": "1"
+          }
+        },
+        "publications": {
+          "1": {
+            "author": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+            "proofKind": "1",
+            "v": "0",
+            "leafCount": 4,
+            "firstAdmission": 1,
+            "r": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "s": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "nonce": "0",
+            "deadline": "0",
+            "basis": "17",
+            "acceptanceProfile": "0x78cd688361e28884caa52d836072ca40405f892f7043df1604c22e7fc47a1788",
+            "indexObligations": "0xdc27cb459ba876c3519801545173e56b4d7cd46068219d0bb1d62863fc772ebe",
+            "actionsHash": "0xf716a7a655ed76bf01858ec850e51715344d63b41a5bdbba1f7b2b968becf1f1",
+            "admissions": [
+              {
+                "ordinal": 1,
+                "kind": "5",
+                "leaf": "0",
+                "publication": "1",
+                "bindingOrdinal": "0",
+                "expectedRevision": "0",
+                "withdrawn": false,
+                "a": "0xc98693c5ef51358ef35362db76ee75ec49bd4d6288fafc2c6bc3e757014ef91b",
+                "b": "0x0000000000000000000000000000000000000000000000000000000000000000"
+              },
+              {
+                "ordinal": 2,
+                "kind": "1",
+                "leaf": "1",
+                "publication": "1",
+                "bindingOrdinal": "0",
+                "expectedRevision": "0",
+                "withdrawn": false,
+                "a": "0xe76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552",
+                "b": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068"
+              },
+              {
+                "ordinal": 3,
+                "kind": "3",
+                "leaf": "2",
+                "publication": "1",
+                "bindingOrdinal": "1",
+                "expectedRevision": "0",
+                "withdrawn": false,
+                "a": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+                "b": "0x0000000000000000000000000000000000000000000000000000000000000000"
+              },
+              {
+                "ordinal": 4,
+                "kind": "3",
+                "leaf": "3",
+                "publication": "1",
+                "bindingOrdinal": "2",
+                "expectedRevision": "0",
+                "withdrawn": false,
+                "a": "0x0e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd",
+                "b": "0x0000000000000000000000000000000000000000000000000000000000000000"
+              }
+            ]
+          },
+          "2": {
+            "author": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+            "proofKind": "1",
+            "v": "0",
+            "leafCount": 2,
+            "firstAdmission": 5,
+            "r": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "s": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "nonce": "1",
+            "deadline": "0",
+            "basis": "18",
+            "acceptanceProfile": "0x78cd688361e28884caa52d836072ca40405f892f7043df1604c22e7fc47a1788",
+            "indexObligations": "0xdc27cb459ba876c3519801545173e56b4d7cd46068219d0bb1d62863fc772ebe",
+            "actionsHash": "0x568b309c0e64aae31a8c4172b1d5382139dfe114046d4cc100d1320a189459b9",
+            "admissions": [
+              {
+                "ordinal": 5,
+                "kind": "1",
+                "leaf": "0",
+                "publication": "2",
+                "bindingOrdinal": "0",
+                "expectedRevision": "0",
+                "withdrawn": false,
+                "a": "0x5a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb3",
+                "b": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068"
+              },
+              {
+                "ordinal": 6,
+                "kind": "3",
+                "leaf": "1",
+                "publication": "2",
+                "bindingOrdinal": "1",
+                "expectedRevision": "1",
+                "withdrawn": false,
+                "a": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+                "b": "0x0000000000000000000000000000000000000000000000000000000000000000"
+              }
+            ]
+          }
+        },
+        "subjects": {
+          "0x0e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd": "1"
+        },
+        "heads": {
+          "0x6726cebee2d17ebc295ef7f2bfac97f60ac4afbe261ab2e2e934f5f1641dbedc": {
+            "state": "1",
+            "revision": "2",
+            "admission": "6",
+            "previous": "3",
+            "bindingOrdinal": "1",
+            "target": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+          },
+          "0x33f3c3a1a78adee2033c59ab8d8743c10987b6e4341513f21a88207f308e20a3": {
+            "state": "1",
+            "revision": "1",
+            "admission": "4",
+            "previous": "0",
+            "bindingOrdinal": "2",
+            "target": "0x0e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd"
+          }
+        },
+        "lists": {
+          "0x123ac4324d5aa2108f574146a694748403c5f8b643c3078d03753191f8666550": {
+            "count": 2,
+            "live": "2",
+            "last": "5",
+            "flags": "0",
+            "words": [
+              "1407374883553282"
+            ]
+          },
+          "0x0ac95ac4764c2f91b9810063e9fe5678da2ce25604179f8ebbb772bfc8657c1e": {
+            "count": 2,
+            "live": "2",
+            "last": "6",
+            "flags": "1",
+            "words": [
+              "1688849860263939"
+            ]
+          },
+          "0x8a4d6898c5c46ada63f5e64a8d57b654693ebee5c52b44d2593be2a51144a25a": {
+            "count": 1,
+            "live": "1",
+            "last": "4",
+            "flags": "1",
+            "words": [
+              "4"
+            ]
+          },
+          "0x5d0ba0046e8c546c436882fe82d2abb6df60c6db5fb51df1a60173cbda1cd734": {
+            "count": 1,
+            "live": "1",
+            "last": "2",
+            "flags": "1",
+            "words": [
+              "2"
+            ]
+          },
+          "0xb8d78132d715ab11e2f41cf2e24c4e37248d5db7084e25fd1b87624b1d35a070": {
+            "count": 2,
+            "live": "2",
+            "last": "5",
+            "flags": "0",
+            "words": [
+              "1407374883553282"
+            ]
+          },
+          "0xc1dd0f5326cacf23f8bb7e64272c8df8e914003d10d146546dbbf77a64df4da6": {
+            "count": 1,
+            "live": "0",
+            "last": "3",
+            "flags": "0",
+            "words": [
+              "3"
+            ]
+          },
+          "0xf68d521441ef5211ba9aae4ad886f53d849176bc3749106bf72c1c494bd744a6": {
+            "count": 1,
+            "live": "1",
+            "last": "6",
+            "flags": "0",
+            "words": [
+              "6"
+            ]
+          },
+          "0x4e4231dfa0454da08031c5c844074044b31df7a676c389eb621b4a7f429aea3d": {
+            "count": 1,
+            "live": "1",
+            "last": "4",
+            "flags": "0",
+            "words": [
+              "4"
+            ]
+          }
+        },
+        "consumer": {
+          "lastStatus": "1",
+          "lastTarget": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+          "lastRevision": "2",
+          "lastAdmission": "6",
+          "lastCount": "1",
+          "lastScanned": "1",
+          "lastValue": "3100"
+        },
+        "counts": {
+          "admissions": "6",
+          "records": "2",
+          "bindings": "2",
+          "publications": "2"
+        },
+        "nonces": {
+          "0x0165878A594ca255338adfa4d48449f69242Eb8F": "2"
+        }
+      },
+      "transactions": [
+        {
+          "label": "native-one/quote/create",
+          "hash": "0xaccd27a8b8441bf35ab2e19474d0681894e42e810af8594a7f0637668bc5acb4",
+          "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "to": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+          "nonce": 16,
+          "data": "0x70f8b526000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000004e0000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c98693c5ef51358ef35362db76ee75ec49bd4d6288fafc2c6bc3e757014ef91b0000000000000000000000000000000000000000000000000000000000000001cde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068e76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe55200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007167a05890e9fcaccbdf11abbb65a3aa14bccfe41825ce441803003862ce5df0e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd0000000000000000000000000000000000000000000000000000000000000000b450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a950000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000058de23804076d1b785b7479ab38fe6ada246e62164776702f51a1c48ef98cf994652c39b1ce3e19080eb789fbde64997a51319815bacfe4e79d96acbff7e076684f3db82fb6cd291ed32c6f64f7f5eda656bda516d17c6bc146631a1f05a18330e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000bb800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "gasLimit": "1679029",
+          "receipt": {
+            "status": 1,
+            "gasUsed": "1216793",
+            "blockHash": "0x157806d48739debd909490305f1e7df68b9c8a3c97ee9525768a0825413921c3",
+            "blockNumber": 17,
+            "transactionIndex": 0,
+            "logs": [
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xd29c57887d415d99f169f14abaaaeb2d5122576b6a18e1b044d9eb427834f4da",
+                  "0xf5b72b589ab1e4815b22d1db7f7e265e5ecf97142197b96608f3323e9923031a",
+                  "0x0e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd"
+                ],
+                "data": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
+                "index": 0
+              },
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xd29c57887d415d99f169f14abaaaeb2d5122576b6a18e1b044d9eb427834f4da",
+                  "0xf5b72b589ab1e4815b22d1db7f7e265e5ecf97142197b96608f3323e9923031a",
+                  "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068"
+                ],
+                "data": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a950000000000000000000000000000000000000000000000000000000000000002",
+                "index": 1
+              },
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xd29c57887d415d99f169f14abaaaeb2d5122576b6a18e1b044d9eb427834f4da",
+                  "0xf5b72b589ab1e4815b22d1db7f7e265e5ecf97142197b96608f3323e9923031a",
+                  "0x5c56189454bd62d36ea8066b4021cdf15fd2ead08f9b066c63b348bfd528b702"
+                ],
+                "data": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a950000000000000000000000000000000000000000000000000000000000000003",
+                "index": 2
+              },
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xd29c57887d415d99f169f14abaaaeb2d5122576b6a18e1b044d9eb427834f4da",
+                  "0xf5b72b589ab1e4815b22d1db7f7e265e5ecf97142197b96608f3323e9923031a",
+                  "0x2c94bace6c9fef12ca237f3f70d9656c4c1c4bb3f886d04ca84c5b67ee3a16c9"
+                ],
+                "data": "0x0e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd0000000000000000000000000000000000000000000000000000000000000004",
+                "index": 3
+              },
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xb615f47f84e1853fa27c54457840f2a1a7bcb83aec19a2aa0ff6c6a226449da1",
+                  "0x0000000000000000000000000000000000000000000000000000000000000001",
+                  "0x67e775f62f83fa9a533b7d371bd6d065448364ab6d88f26e4fff5ce6abb76f80",
+                  "0x0000000000000000000000000165878a594ca255338adfa4d48449f69242eb8f"
+                ],
+                "data": "0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000004",
+                "index": 4
+              }
+            ]
+          }
+        },
+        {
+          "label": "native-one/quote/edit",
+          "hash": "0xa253bb744ab956da8bb1c726183ea43f4e5debe471587eb331384c857db6fbed",
+          "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "to": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+          "nonce": 17,
+          "data": "0x70f8b526000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000002a000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001cde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f850685a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007167a05890e9fcaccbdf11abbb65a3aa14bccfe41825ce441803003862ce5df0e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd0000000000000000000000000000000000000000000000000000000000000000f3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000c1c0000000000000000000000000000000000000000000000000000000000000000",
+          "gasLimit": "956603",
+          "receipt": {
+            "status": 1,
+            "gasUsed": "511898",
+            "blockHash": "0x606d7f33d3968b5cbbced111d56fb6dbf7153c86d018ca67e85372e7714ca737",
+            "blockNumber": 18,
+            "transactionIndex": 0,
+            "logs": [
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xd29c57887d415d99f169f14abaaaeb2d5122576b6a18e1b044d9eb427834f4da",
+                  "0xf5b72b589ab1e4815b22d1db7f7e265e5ecf97142197b96608f3323e9923031a",
+                  "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068"
+                ],
+                "data": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c0000000000000000000000000000000000000000000000000000000000000005",
+                "index": 0
+              },
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xd29c57887d415d99f169f14abaaaeb2d5122576b6a18e1b044d9eb427834f4da",
+                  "0xf5b72b589ab1e4815b22d1db7f7e265e5ecf97142197b96608f3323e9923031a",
+                  "0x5c56189454bd62d36ea8066b4021cdf15fd2ead08f9b066c63b348bfd528b702"
+                ],
+                "data": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c0000000000000000000000000000000000000000000000000000000000000006",
+                "index": 1
+              },
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xb615f47f84e1853fa27c54457840f2a1a7bcb83aec19a2aa0ff6c6a226449da1",
+                  "0x0000000000000000000000000000000000000000000000000000000000000002",
+                  "0xf6691f1ab21e7dec8cfd6d2d711937b4690e152d3fe004ceada9bc9ce4a5e3c2",
+                  "0x0000000000000000000000000165878a594ca255338adfa4d48449f69242eb8f"
+                ],
+                "data": "0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000002",
+                "index": 2
+              }
+            ]
+          }
+        },
+        {
+          "label": "native-one/quote/read-resolve",
+          "hash": "0x8dddf9225cca44293005167dbe421f770a817c91df9587187c3a2fad5bc1113c",
+          "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "nonce": 18,
+          "data": "0x6a59728b000000000000000000000000000000000000000000000000000000000000008007167a05890e9fcaccbdf11abbb65a3aa14bccfe41825ce441803003862ce5df0e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000165878a594ca255338adfa4d48449f69242eb8f",
+          "gasLimit": "137883",
+          "receipt": {
+            "status": 1,
+            "gasUsed": "137883",
+            "blockHash": "0x838d227b8f4668a43b8d0bfdc822e58532316e9463cff04273cdb4728ff2c45b",
+            "blockNumber": 19,
+            "transactionIndex": 0,
+            "logs": []
+          }
+        },
+        {
+          "label": "native-one/quote/read-list",
+          "hash": "0x9c6642416afc52a7834f73fa8d9a33e029979ec168201dd919ee7beba7f822ac",
+          "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "nonce": 19,
+          "data": "0xd67f2355000000000000000000000000000000000000000000000000000000000000008058de23804076d1b785b7479ab38fe6ada246e62164776702f51a1c48ef98cf994652c39b1ce3e19080eb789fbde64997a51319815bacfe4e79d96acbff7e0766000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000165878a594ca255338adfa4d48449f69242eb8f",
+          "gasLimit": "97678",
+          "receipt": {
+            "status": 1,
+            "gasUsed": "97678",
+            "blockHash": "0x1c3d8fa20d435981c7ad493469b40d78ce022142ca958a01ecc19f48d0e8b1b5",
+            "blockNumber": 20,
+            "transactionIndex": 0,
+            "logs": []
+          }
+        },
+        {
+          "label": "native-one/quote/read-history-asof",
+          "hash": "0x7d766fcfe1a9e898865523fa6977317fff6a10ced0c6a37b814b46e20cdff1c2",
+          "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "nonce": 20,
+          "data": "0x0876690e0000000000000000000000000165878a594ca255338adfa4d48449f69242eb8f86c431714c64dc0f224b44e8985c2e0db07d1d7feb858fba26c7e2b51953df3600000000000000000000000000000000000000000000000000000000000f4240",
+          "gasLimit": "74101",
+          "receipt": {
+            "status": 1,
+            "gasUsed": "71905",
+            "blockHash": "0xb4c4c8d3baef44669c96d08bb3fdcc8bdd23397fec77816baceba5197b493ac7",
+            "blockNumber": 21,
+            "transactionIndex": 0,
+            "logs": []
+          }
+        }
+      ],
+      "raw": [
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastStatus",
+          "args": [],
+          "blockTag": 16,
+          "calldata": "0xd6d86712",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastTarget",
+          "args": [],
+          "blockTag": 16,
+          "calldata": "0x36abbd1d",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastRevision",
+          "args": [],
+          "blockTag": 16,
+          "calldata": "0xe08871ca",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastAdmission",
+          "args": [],
+          "blockTag": 16,
+          "calldata": "0x519ef1f8",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastCount",
+          "args": [],
+          "blockTag": 16,
+          "calldata": "0x6b16ad67",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastScanned",
+          "args": [],
+          "blockTag": 16,
+          "calldata": "0x336d5392",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastValue",
+          "args": [],
+          "blockTag": 16,
+          "calldata": "0x43183834",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastStatus",
+          "args": [],
+          "blockTag": 19,
+          "calldata": "0xd6d86712",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastTarget",
+          "args": [],
+          "blockTag": 19,
+          "calldata": "0x36abbd1d",
+          "returnData": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastRevision",
+          "args": [],
+          "blockTag": 19,
+          "calldata": "0xe08871ca",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastAdmission",
+          "args": [],
+          "blockTag": 19,
+          "calldata": "0x519ef1f8",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000006"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastCount",
+          "args": [],
+          "blockTag": 19,
+          "calldata": "0x6b16ad67",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastScanned",
+          "args": [],
+          "blockTag": 19,
+          "calldata": "0x336d5392",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastValue",
+          "args": [],
+          "blockTag": 19,
+          "calldata": "0x43183834",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000c1c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastStatus",
+          "args": [],
+          "blockTag": 20,
+          "calldata": "0xd6d86712",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastTarget",
+          "args": [],
+          "blockTag": 20,
+          "calldata": "0x36abbd1d",
+          "returnData": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastRevision",
+          "args": [],
+          "blockTag": 20,
+          "calldata": "0xe08871ca",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastAdmission",
+          "args": [],
+          "blockTag": 20,
+          "calldata": "0x519ef1f8",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000006"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastCount",
+          "args": [],
+          "blockTag": 20,
+          "calldata": "0x6b16ad67",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastScanned",
+          "args": [],
+          "blockTag": 20,
+          "calldata": "0x336d5392",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastValue",
+          "args": [],
+          "blockTag": 20,
+          "calldata": "0x43183834",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000c1c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastStatus",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0xd6d86712",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastTarget",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x36abbd1d",
+          "returnData": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastRevision",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0xe08871ca",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastAdmission",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x519ef1f8",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000006"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastCount",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x6b16ad67",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastScanned",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x336d5392",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastValue",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x43183834",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000c1c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastStatus",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0xd6d86712",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastTarget",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x36abbd1d",
+          "returnData": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastRevision",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0xe08871ca",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastAdmission",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x519ef1f8",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000006"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastCount",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x6b16ad67",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastScanned",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x336d5392",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastValue",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x43183834",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000c1c"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "record",
+          "args": [
+            "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95"
+          ],
+          "blockTag": 21,
+          "calldata": "0xb5c645bdb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+          "returnData": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f8506800000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000bb8"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "record",
+          "args": [
+            "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+          ],
+          "blockTag": 21,
+          "calldata": "0xb5c645bdf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+          "returnData": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f8506800000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000c1c"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "record",
+          "args": [
+            "0xd70aeed415e61235b8c4d5494e4ba4b8ca0d1a3c17a4212aaacbaafb9f69e176"
+          ],
+          "blockTag": 21,
+          "calldata": "0xb5c645bdd70aeed415e61235b8c4d5494e4ba4b8ca0d1a3c17a4212aaacbaafb9f69e176",
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "record",
+          "args": [
+            "0x1c2d42caaad07ceb468f2ea157d863f8f2cb4d92bc4765728b00e33215555af9"
+          ],
+          "blockTag": 21,
+          "calldata": "0xb5c645bd1c2d42caaad07ceb468f2ea157d863f8f2cb4d92bc4765728b00e33215555af9",
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "record",
+          "args": [
+            "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95"
+          ],
+          "blockTag": 21,
+          "calldata": "0xb5c645bdb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+          "returnData": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f8506800000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000bb8"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "record",
+          "args": [
+            "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+          ],
+          "blockTag": 21,
+          "calldata": "0xb5c645bdf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+          "returnData": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f8506800000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000c1c"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "evidence",
+          "args": [
+            "1"
+          ],
+          "blockTag": 21,
+          "calldata": "0x03e623e70000000000000000000000000000000000000000000000000000000000000001",
+          "returnData": "0x0000000000000000000000000165878a594ca255338adfa4d48449f69242eb8f00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001178cd688361e28884caa52d836072ca40405f892f7043df1604c22e7fc47a1788dc27cb459ba876c3519801545173e56b4d7cd46068219d0bb1d62863fc772ebef716a7a655ed76bf01858ec850e51715344d63b41a5bdbba1f7b2b968becf1f1"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "admission",
+          "args": [
+            1
+          ],
+          "blockTag": 21,
+          "calldata": "0x7c7e99500000000000000000000000000000000000000000000000000000000000000001",
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c98693c5ef51358ef35362db76ee75ec49bd4d6288fafc2c6bc3e757014ef91b0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "admission",
+          "args": [
+            2
+          ],
+          "blockTag": 21,
+          "calldata": "0x7c7e99500000000000000000000000000000000000000000000000000000000000000002",
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552cde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "admission",
+          "args": [
+            3
+          ],
+          "blockTag": 21,
+          "calldata": "0x7c7e99500000000000000000000000000000000000000000000000000000000000000003",
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a950000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "admission",
+          "args": [
+            4
+          ],
+          "blockTag": 21,
+          "calldata": "0x7c7e99500000000000000000000000000000000000000000000000000000000000000004",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "evidence",
+          "args": [
+            "2"
+          ],
+          "blockTag": 21,
+          "calldata": "0x03e623e70000000000000000000000000000000000000000000000000000000000000002",
+          "returnData": "0x0000000000000000000000000165878a594ca255338adfa4d48449f69242eb8f00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001278cd688361e28884caa52d836072ca40405f892f7043df1604c22e7fc47a1788dc27cb459ba876c3519801545173e56b4d7cd46068219d0bb1d62863fc772ebe568b309c0e64aae31a8c4172b1d5382139dfe114046d4cc100d1320a189459b9"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "admission",
+          "args": [
+            5
+          ],
+          "blockTag": 21,
+          "calldata": "0x7c7e99500000000000000000000000000000000000000000000000000000000000000005",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb3cde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "admission",
+          "args": [
+            6
+          ],
+          "blockTag": 21,
+          "calldata": "0x7c7e99500000000000000000000000000000000000000000000000000000000000000006",
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000f3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "subjectCreatedAt",
+          "args": [
+            "0x0e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd"
+          ],
+          "blockTag": 21,
+          "calldata": "0xdc81edda0e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "head",
+          "args": [
+            "0x6726cebee2d17ebc295ef7f2bfac97f60ac4afbe261ab2e2e934f5f1641dbedc"
+          ],
+          "blockTag": 21,
+          "calldata": "0xf339e3b26726cebee2d17ebc295ef7f2bfac97f60ac4afbe261ab2e2e934f5f1641dbedc",
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000001f3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "head",
+          "args": [
+            "0x33f3c3a1a78adee2033c59ab8d8743c10987b6e4341513f21a88207f308e20a3"
+          ],
+          "blockTag": 21,
+          "calldata": "0xf339e3b233f3c3a1a78adee2033c59ab8d8743c10987b6e4341513f21a88207f308e20a3",
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020e6b0e836f6f030fea058b93a262451aa20857b40de36fa649ee75037387abfd"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0x123ac4324d5aa2108f574146a694748403c5f8b643c3078d03753191f8666550"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb0123ac4324d5aa2108f574146a694748403c5f8b643c3078d03753191f8666550",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0x123ac4324d5aa2108f574146a694748403c5f8b643c3078d03753191f8666550",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b72123ac4324d5aa2108f574146a694748403c5f8b643c3078d03753191f86665500000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000005000000000002"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0x0ac95ac4764c2f91b9810063e9fe5678da2ce25604179f8ebbb772bfc8657c1e"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb00ac95ac4764c2f91b9810063e9fe5678da2ce25604179f8ebbb772bfc8657c1e",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0x0ac95ac4764c2f91b9810063e9fe5678da2ce25604179f8ebbb772bfc8657c1e",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b720ac95ac4764c2f91b9810063e9fe5678da2ce25604179f8ebbb772bfc8657c1e0000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000006000000000003"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0x8a4d6898c5c46ada63f5e64a8d57b654693ebee5c52b44d2593be2a51144a25a"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb08a4d6898c5c46ada63f5e64a8d57b654693ebee5c52b44d2593be2a51144a25a",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0x8a4d6898c5c46ada63f5e64a8d57b654693ebee5c52b44d2593be2a51144a25a",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b728a4d6898c5c46ada63f5e64a8d57b654693ebee5c52b44d2593be2a51144a25a0000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000004"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0x5d0ba0046e8c546c436882fe82d2abb6df60c6db5fb51df1a60173cbda1cd734"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb05d0ba0046e8c546c436882fe82d2abb6df60c6db5fb51df1a60173cbda1cd734",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0x5d0ba0046e8c546c436882fe82d2abb6df60c6db5fb51df1a60173cbda1cd734",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b725d0ba0046e8c546c436882fe82d2abb6df60c6db5fb51df1a60173cbda1cd7340000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0xb8d78132d715ab11e2f41cf2e24c4e37248d5db7084e25fd1b87624b1d35a070"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb0b8d78132d715ab11e2f41cf2e24c4e37248d5db7084e25fd1b87624b1d35a070",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0xb8d78132d715ab11e2f41cf2e24c4e37248d5db7084e25fd1b87624b1d35a070",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b72b8d78132d715ab11e2f41cf2e24c4e37248d5db7084e25fd1b87624b1d35a0700000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000005000000000002"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0xc1dd0f5326cacf23f8bb7e64272c8df8e914003d10d146546dbbf77a64df4da6"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb0c1dd0f5326cacf23f8bb7e64272c8df8e914003d10d146546dbbf77a64df4da6",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0xc1dd0f5326cacf23f8bb7e64272c8df8e914003d10d146546dbbf77a64df4da6",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b72c1dd0f5326cacf23f8bb7e64272c8df8e914003d10d146546dbbf77a64df4da60000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000003"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0xf68d521441ef5211ba9aae4ad886f53d849176bc3749106bf72c1c494bd744a6"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb0f68d521441ef5211ba9aae4ad886f53d849176bc3749106bf72c1c494bd744a6",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0xf68d521441ef5211ba9aae4ad886f53d849176bc3749106bf72c1c494bd744a6",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b72f68d521441ef5211ba9aae4ad886f53d849176bc3749106bf72c1c494bd744a60000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000006"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0x4e4231dfa0454da08031c5c844074044b31df7a676c389eb621b4a7f429aea3d"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb04e4231dfa0454da08031c5c844074044b31df7a676c389eb621b4a7f429aea3d",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0x4e4231dfa0454da08031c5c844074044b31df7a676c389eb621b4a7f429aea3d",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b724e4231dfa0454da08031c5c844074044b31df7a676c389eb621b4a7f429aea3d0000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000004"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "counts",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x817cc1ea",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "nonces",
+          "args": [
+            "0x0165878A594ca255338adfa4d48449f69242Eb8F"
+          ],
+          "blockTag": 21,
+          "calldata": "0x7ecebe000000000000000000000000000165878a594ca255338adfa4d48449f69242eb8f",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastStatus",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0xd6d86712",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastTarget",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x36abbd1d",
+          "returnData": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastRevision",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0xe08871ca",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastAdmission",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x519ef1f8",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000006"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastCount",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x6b16ad67",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastScanned",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x336d5392",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastValue",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x43183834",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000c1c"
+        }
+      ],
+      "consumerChecks": [
+        {
+          "label": "native-one/quote/read-resolve/readback",
+          "block": 19,
+          "expected": {
+            "lastStatus": 1,
+            "lastTarget": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "lastRevision": 2,
+            "lastValue": "3100"
+          },
+          "actual": {
+            "lastStatus": "1",
+            "lastTarget": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "lastRevision": "2",
+            "lastAdmission": "6",
+            "lastCount": "0",
+            "lastScanned": "0",
+            "lastValue": "3100"
+          },
+          "compared": {
+            "lastStatus": {
+              "expected": 1,
+              "actual": "1",
+              "equal": false
+            },
+            "lastTarget": {
+              "expected": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+              "actual": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+              "equal": true
+            },
+            "lastRevision": {
+              "expected": 2,
+              "actual": "2",
+              "equal": false
+            },
+            "lastValue": {
+              "expected": "3100",
+              "actual": "3100",
+              "equal": true
+            }
+          },
+          "match": false
+        },
+        {
+          "label": "native-one/quote/read-list/readback",
+          "block": 20,
+          "expected": {
+            "lastStatus": 2,
+            "lastCount": 1,
+            "lastScanned": 1
+          },
+          "actual": {
+            "lastStatus": "2",
+            "lastTarget": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "lastRevision": "2",
+            "lastAdmission": "6",
+            "lastCount": "1",
+            "lastScanned": "1",
+            "lastValue": "3100"
+          },
+          "compared": {
+            "lastStatus": {
+              "expected": 2,
+              "actual": "2",
+              "equal": false
+            },
+            "lastCount": {
+              "expected": 1,
+              "actual": "1",
+              "equal": false
+            },
+            "lastScanned": {
+              "expected": 1,
+              "actual": "1",
+              "equal": false
+            }
+          },
+          "match": false
+        },
+        {
+          "label": "native-one/quote/read-history-asof/readback",
+          "block": 21,
+          "expected": {
+            "lastStatus": 1,
+            "lastTarget": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "lastRevision": 2
+          },
+          "actual": {
+            "lastStatus": "1",
+            "lastTarget": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "lastRevision": "2",
+            "lastAdmission": "6",
+            "lastCount": "1",
+            "lastScanned": "1",
+            "lastValue": "3100"
+          },
+          "compared": {
+            "lastStatus": {
+              "expected": 1,
+              "actual": "1",
+              "equal": false
+            },
+            "lastTarget": {
+              "expected": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+              "actual": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+              "equal": true
+            },
+            "lastRevision": {
+              "expected": 2,
+              "actual": "2",
+              "equal": false
+            }
+          },
+          "match": false
+        }
+      ],
+      "mismatches": 3,
+      "error": null
+    },
+    "signed-one/quote": {
+      "label": "signed-one/quote",
+      "sealedSnapshot": "0x2",
+      "afterRevert": {
+        "blockNumber": 16,
+        "blockHash": "0x404fa89b43e936aaec71df03d72db00b93917863f8cfa2c736552a98472e5439"
+      },
+      "pre": {
+        "blockTag": 16,
+        "controls": {
+          "quote3000": {
+            "recordId": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "present": false
+          },
+          "quote3100": {
+            "recordId": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "present": false
+          },
+          "file41a": {
+            "recordId": "0xd70aeed415e61235b8c4d5494e4ba4b8ca0d1a3c17a4212aaacbaafb9f69e176",
+            "typeId": "0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "present": false
+          },
+          "file41b": {
+            "recordId": "0x1c2d42caaad07ceb468f2ea157d863f8f2cb4d92bc4765728b00e33215555af9",
+            "typeId": "0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "present": false
+          }
+        },
+        "counts": {
+          "admissions": "0",
+          "records": "0",
+          "bindings": "0",
+          "publications": "0"
+        },
+        "nonces": {
+          "0x70997970C51812dc3A010C7d01b50e0d17dc79C8": "0"
+        },
+        "scopeHeads": {
+          "0x70997970C51812dc3A010C7d01b50e0d17dc79C8": {
+            "count": "0",
+            "live": "0",
+            "last": "0",
+            "flags": "0"
+          }
+        },
+        "byAuthorHeads": {
+          "0x70997970C51812dc3A010C7d01b50e0d17dc79C8": {
+            "count": "0",
+            "live": "0",
+            "last": "0",
+            "flags": "0"
+          }
+        },
+        "byTypeHead": {
+          "count": "0",
+          "live": "0",
+          "last": "0",
+          "flags": "0"
+        },
+        "consumer": {
+          "lastStatus": "0",
+          "lastTarget": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "lastRevision": "0",
+          "lastAdmission": "0",
+          "lastCount": "0",
+          "lastScanned": "0",
+          "lastValue": "0"
+        }
+      },
+      "rows": [
+        {
+          "label": "signed-one/quote/create",
+          "gas": "1261965",
+          "status": 1,
+          "hash": "0x5e2df6374f7fcf8cb935d030902468d4b24541b0082a68914123c040adfaf6fb",
+          "block": 17,
+          "txIndex": 0
+        },
+        {
+          "label": "signed-one/quote/reconstruct-create",
+          "publication": "1",
+          "matches": true,
+          "recovered": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "status": "eth_call",
+          "note": "The Reconstructor is a candidate self-check calling ledger.intentDigest, not independent."
+        },
+        {
+          "label": "signed-one/quote/edit",
+          "gas": "558586",
+          "status": 1,
+          "hash": "0x812d4f35e434493c24232e10cbb718e5fe24d6e119db9a7e0892fb33515a8ce9",
+          "block": 18,
+          "txIndex": 1
+        },
+        {
+          "label": "signed-one/quote/read-resolve",
+          "gas": "137626",
+          "status": 1,
+          "hash": "0x2455ea77320cf782387f2c0037b19f5acfb763d65aeb85081bb274e5879db26a",
+          "block": 19,
+          "txIndex": 2
+        },
+        {
+          "label": "signed-one/quote/eth_call-resolve-estimate",
+          "gas": "36435",
+          "status": "estimate"
+        },
+        {
+          "label": "signed-one/quote/read-list",
+          "gas": "97156",
+          "status": 1,
+          "hash": "0xad8040e06183ebc34216c65477c3de8082b775afb42e63cb095baa3c908d4700",
+          "block": 20,
+          "txIndex": 3
+        },
+        {
+          "label": "signed-one/quote/read-history-asof",
+          "gas": "71636",
+          "status": 1,
+          "hash": "0x0772505286450ba0e44487a57bb56f3a7e970c83759582ac0082e65f3d74058b",
+          "block": 21,
+          "txIndex": 4
+        }
+      ],
+      "post": {
+        "blockTag": 21,
+        "controls": {
+          "quote3000": {
+            "recordId": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "2",
+            "occurrences": "1",
+            "present": true
+          },
+          "quote3100": {
+            "recordId": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "5",
+            "occurrences": "1",
+            "present": true
+          },
+          "file41a": {
+            "recordId": "0xd70aeed415e61235b8c4d5494e4ba4b8ca0d1a3c17a4212aaacbaafb9f69e176",
+            "typeId": "0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "present": false
+          },
+          "file41b": {
+            "recordId": "0x1c2d42caaad07ceb468f2ea157d863f8f2cb4d92bc4765728b00e33215555af9",
+            "typeId": "0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "present": false
+          }
+        },
+        "counts": {
+          "admissions": "6",
+          "records": "2",
+          "bindings": "2",
+          "publications": "2"
+        },
+        "nonces": {
+          "0x70997970C51812dc3A010C7d01b50e0d17dc79C8": "2"
+        },
+        "scopeHeads": {
+          "0x70997970C51812dc3A010C7d01b50e0d17dc79C8": {
+            "count": "1",
+            "live": "1",
+            "last": "2",
+            "flags": "1"
+          }
+        },
+        "byAuthorHeads": {
+          "0x70997970C51812dc3A010C7d01b50e0d17dc79C8": {
+            "count": "2",
+            "live": "2",
+            "last": "5",
+            "flags": "0"
+          }
+        },
+        "byTypeHead": {
+          "count": "2",
+          "live": "2",
+          "last": "5",
+          "flags": "0"
+        },
+        "consumer": {
+          "lastStatus": "1",
+          "lastTarget": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+          "lastRevision": "2",
+          "lastAdmission": "6",
+          "lastCount": "1",
+          "lastScanned": "1",
+          "lastValue": "3100"
+        }
+      },
+      "harvest": {
+        "blockTag": 21,
+        "controls": {
+          "quote3000": {
+            "recordId": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "2",
+            "occurrences": "1",
+            "bodyLength": 32
+          },
+          "quote3100": {
+            "recordId": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "5",
+            "occurrences": "1",
+            "bodyLength": 32
+          },
+          "file41a": {
+            "recordId": "0xd70aeed415e61235b8c4d5494e4ba4b8ca0d1a3c17a4212aaacbaafb9f69e176",
+            "typeId": "0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "bodyLength": 0
+          },
+          "file41b": {
+            "recordId": "0x1c2d42caaad07ceb468f2ea157d863f8f2cb4d92bc4765728b00e33215555af9",
+            "typeId": "0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7",
+            "firstAdmission": "0",
+            "occurrences": "0",
+            "bodyLength": 0
+          }
+        },
+        "records": {
+          "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95": {
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "2",
+            "occurrences": "1"
+          },
+          "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c": {
+            "typeId": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068",
+            "firstAdmission": "5",
+            "occurrences": "1"
+          }
+        },
+        "publications": {
+          "1": {
+            "author": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "proofKind": "2",
+            "v": "27",
+            "leafCount": 4,
+            "firstAdmission": 1,
+            "r": "0xccb7a0e22b33191a6263e7dc05f9c52f39091f109fa96de6e02a2a086e4e9802",
+            "s": "0x4aaef7889e0c1c3f4098d2fc7da9f9297348041102827705b0bec8f47c65d6d4",
+            "nonce": "0",
+            "deadline": "1789265148",
+            "basis": "17",
+            "acceptanceProfile": "0x78cd688361e28884caa52d836072ca40405f892f7043df1604c22e7fc47a1788",
+            "indexObligations": "0xdc27cb459ba876c3519801545173e56b4d7cd46068219d0bb1d62863fc772ebe",
+            "actionsHash": "0xdf13d8bbd036074b4ee75be3baf21802b3cfad7e8c4e5ed22b6f9dfdc066b796",
+            "admissions": [
+              {
+                "ordinal": 1,
+                "kind": "5",
+                "leaf": "0",
+                "publication": "1",
+                "bindingOrdinal": "0",
+                "expectedRevision": "0",
+                "withdrawn": false,
+                "a": "0x08bce57d89b9b04305cee330711f7e7aaafcb52a59637e4cf73dae6b1110939f",
+                "b": "0x0000000000000000000000000000000000000000000000000000000000000000"
+              },
+              {
+                "ordinal": 2,
+                "kind": "1",
+                "leaf": "1",
+                "publication": "1",
+                "bindingOrdinal": "0",
+                "expectedRevision": "0",
+                "withdrawn": false,
+                "a": "0xe76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552",
+                "b": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068"
+              },
+              {
+                "ordinal": 3,
+                "kind": "3",
+                "leaf": "2",
+                "publication": "1",
+                "bindingOrdinal": "1",
+                "expectedRevision": "0",
+                "withdrawn": false,
+                "a": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+                "b": "0x0000000000000000000000000000000000000000000000000000000000000000"
+              },
+              {
+                "ordinal": 4,
+                "kind": "3",
+                "leaf": "3",
+                "publication": "1",
+                "bindingOrdinal": "2",
+                "expectedRevision": "0",
+                "withdrawn": false,
+                "a": "0x7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de1",
+                "b": "0x0000000000000000000000000000000000000000000000000000000000000000"
+              }
+            ]
+          },
+          "2": {
+            "author": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            "proofKind": "2",
+            "v": "28",
+            "leafCount": 2,
+            "firstAdmission": 5,
+            "r": "0x726cb2aff65534976da80f05083dda35f44d89691218031e858c7ccbff5d6831",
+            "s": "0x2983b6cfeaabaf007f51f133e8e1373322e395fd9417ea405432cdcc5f708be0",
+            "nonce": "1",
+            "deadline": "1789265148",
+            "basis": "18",
+            "acceptanceProfile": "0x78cd688361e28884caa52d836072ca40405f892f7043df1604c22e7fc47a1788",
+            "indexObligations": "0xdc27cb459ba876c3519801545173e56b4d7cd46068219d0bb1d62863fc772ebe",
+            "actionsHash": "0xbdb7614d00f6f8546135d6ff6f0127ca940a891d47543442d39bce5d84cd85a2",
+            "admissions": [
+              {
+                "ordinal": 5,
+                "kind": "1",
+                "leaf": "0",
+                "publication": "2",
+                "bindingOrdinal": "0",
+                "expectedRevision": "0",
+                "withdrawn": false,
+                "a": "0x5a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb3",
+                "b": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068"
+              },
+              {
+                "ordinal": 6,
+                "kind": "3",
+                "leaf": "1",
+                "publication": "2",
+                "bindingOrdinal": "1",
+                "expectedRevision": "1",
+                "withdrawn": false,
+                "a": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+                "b": "0x0000000000000000000000000000000000000000000000000000000000000000"
+              }
+            ]
+          }
+        },
+        "subjects": {
+          "0x7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de1": "1"
+        },
+        "heads": {
+          "0x5c8eedb029b8653bccb483b731f255f75a6ae6773a345aeae07e61f73b6efe77": {
+            "state": "1",
+            "revision": "2",
+            "admission": "6",
+            "previous": "3",
+            "bindingOrdinal": "1",
+            "target": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+          },
+          "0x20dd401bc777cb2f7dc11277e40398e2a22ea63bf9ba5c15d51e50880304b7d4": {
+            "state": "1",
+            "revision": "1",
+            "admission": "4",
+            "previous": "0",
+            "bindingOrdinal": "2",
+            "target": "0x7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de1"
+          }
+        },
+        "lists": {
+          "0x123ac4324d5aa2108f574146a694748403c5f8b643c3078d03753191f8666550": {
+            "count": 2,
+            "live": "2",
+            "last": "5",
+            "flags": "0",
+            "words": [
+              "1407374883553282"
+            ]
+          },
+          "0xea9e76b615573978fc2afa4d422c94b2fbd5dad251b1236d1a00a8df58b6e826": {
+            "count": 2,
+            "live": "2",
+            "last": "6",
+            "flags": "1",
+            "words": [
+              "1688849860263939"
+            ]
+          },
+          "0x84a78b02ae427795080ff051b3df732f529350aaa12cc2b55535f09305b61891": {
+            "count": 1,
+            "live": "1",
+            "last": "4",
+            "flags": "1",
+            "words": [
+              "4"
+            ]
+          },
+          "0xd6314f0596c20fdc5edfddfb0fce73f99db26648e303bf0786ddf8007838465c": {
+            "count": 1,
+            "live": "1",
+            "last": "2",
+            "flags": "1",
+            "words": [
+              "2"
+            ]
+          },
+          "0xf2e344d978d4a5d277d8cc97ce7f541c5adb3d9870952347ff1c5a665b5082bb": {
+            "count": 2,
+            "live": "2",
+            "last": "5",
+            "flags": "0",
+            "words": [
+              "1407374883553282"
+            ]
+          },
+          "0xc1dd0f5326cacf23f8bb7e64272c8df8e914003d10d146546dbbf77a64df4da6": {
+            "count": 1,
+            "live": "0",
+            "last": "3",
+            "flags": "0",
+            "words": [
+              "3"
+            ]
+          },
+          "0xf68d521441ef5211ba9aae4ad886f53d849176bc3749106bf72c1c494bd744a6": {
+            "count": 1,
+            "live": "1",
+            "last": "6",
+            "flags": "0",
+            "words": [
+              "6"
+            ]
+          },
+          "0x4a65921532e3912c36140edd95afdc5abeef2600cce16589932bff6530bf6c7b": {
+            "count": 1,
+            "live": "1",
+            "last": "4",
+            "flags": "0",
+            "words": [
+              "4"
+            ]
+          }
+        },
+        "consumer": {
+          "lastStatus": "1",
+          "lastTarget": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+          "lastRevision": "2",
+          "lastAdmission": "6",
+          "lastCount": "1",
+          "lastScanned": "1",
+          "lastValue": "3100"
+        },
+        "counts": {
+          "admissions": "6",
+          "records": "2",
+          "bindings": "2",
+          "publications": "2"
+        },
+        "nonces": {
+          "0x70997970C51812dc3A010C7d01b50e0d17dc79C8": "2"
+        }
+      },
+      "transactions": [
+        {
+          "label": "signed-one/quote/create",
+          "hash": "0x5e2df6374f7fcf8cb935d030902468d4b24541b0082a68914123c040adfaf6fb",
+          "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "nonce": 16,
+          "data": "0x8846f57e684016e05741dc9d511ff3520a16e1da90a35be14b76f9e12ef0287b9beae39fb2bbbd7b94f6398de8c783f7a3d2e6accc8e651d3302c404db1cd66e1319546500000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006aa604fc78cd688361e28884caa52d836072ca40405f892f7043df1604c22e7fc47a1788dc27cb459ba876c3519801545173e56b4d7cd46068219d0bb1d62863fc772ebe000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000005e0000000000000000000000000000000000000000000000000000000000000072000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008bce57d89b9b04305cee330711f7e7aaafcb52a59637e4cf73dae6b1110939f0000000000000000000000000000000000000000000000000000000000000001cde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068e76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe55200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007167a05890e9fcaccbdf11abbb65a3aa14bccfe41825ce441803003862ce5df7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de10000000000000000000000000000000000000000000000000000000000000000b450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a950000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000058de23804076d1b785b7479ab38fe6ada246e62164776702f51a1c48ef98cf99e306d2c37b193cbef2767a029de2280549d79ca3de60ef96aafbf791bb13c2a184f3db82fb6cd291ed32c6f64f7f5eda656bda516d17c6bc146631a1f05a18337db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000bb8000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000041ccb7a0e22b33191a6263e7dc05f9c52f39091f109fa96de6e02a2a086e4e98024aaef7889e0c1c3f4098d2fc7da9f9297348041102827705b0bec8f47c65d6d41b00000000000000000000000000000000000000000000000000000000000000",
+          "gasLimit": "1699108",
+          "receipt": {
+            "status": 1,
+            "gasUsed": "1261965",
+            "blockHash": "0xcd98dff02afae4546c8b7caea83c72a560e63397e22cf5124c33b02217771459",
+            "blockNumber": 17,
+            "transactionIndex": 0,
+            "logs": [
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xd29c57887d415d99f169f14abaaaeb2d5122576b6a18e1b044d9eb427834f4da",
+                  "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+                  "0x7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de1"
+                ],
+                "data": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
+                "index": 0
+              },
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xd29c57887d415d99f169f14abaaaeb2d5122576b6a18e1b044d9eb427834f4da",
+                  "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+                  "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068"
+                ],
+                "data": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a950000000000000000000000000000000000000000000000000000000000000002",
+                "index": 1
+              },
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xd29c57887d415d99f169f14abaaaeb2d5122576b6a18e1b044d9eb427834f4da",
+                  "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+                  "0x1b1f83414b432d6f0c31d14ddc9a789aacf423d0d7e53eb95587c317b0e450bf"
+                ],
+                "data": "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a950000000000000000000000000000000000000000000000000000000000000003",
+                "index": 2
+              },
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xd29c57887d415d99f169f14abaaaeb2d5122576b6a18e1b044d9eb427834f4da",
+                  "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+                  "0x91c678b46020458f48412fa1f96cfb754a6e5dca7e60c6b6b5aa22bfe30d2abf"
+                ],
+                "data": "0x7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de10000000000000000000000000000000000000000000000000000000000000004",
+                "index": 3
+              },
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xb615f47f84e1853fa27c54457840f2a1a7bcb83aec19a2aa0ff6c6a226449da1",
+                  "0x0000000000000000000000000000000000000000000000000000000000000001",
+                  "0x88b65e4171f8f7de37318387f5569e128d850d018ac10b2324a4c58a0c4d9224",
+                  "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8"
+                ],
+                "data": "0x000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000004",
+                "index": 4
+              }
+            ]
+          }
+        },
+        {
+          "label": "signed-one/quote/edit",
+          "hash": "0x812d4f35e434493c24232e10cbb718e5fe24d6e119db9a7e0892fb33515a8ce9",
+          "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "nonce": 17,
+          "data": "0x8846f57e684016e05741dc9d511ff3520a16e1da90a35be14b76f9e12ef0287b9beae39fb2bbbd7b94f6398de8c783f7a3d2e6accc8e651d3302c404db1cd66e1319546500000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c80000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000006aa604fc78cd688361e28884caa52d836072ca40405f892f7043df1604c22e7fc47a1788dc27cb459ba876c3519801545173e56b4d7cd46068219d0bb1d62863fc772ebe000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000003a0000000000000000000000000000000000000000000000000000000000000046000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001cde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f850685a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007167a05890e9fcaccbdf11abbb65a3aa14bccfe41825ce441803003862ce5df7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de10000000000000000000000000000000000000000000000000000000000000000f3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000c1c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000041726cb2aff65534976da80f05083dda35f44d89691218031e858c7ccbff5d68312983b6cfeaabaf007f51f133e8e1373322e395fd9417ea405432cdcc5f708be01c00000000000000000000000000000000000000000000000000000000000000",
+          "gasLimit": "989388",
+          "receipt": {
+            "status": 1,
+            "gasUsed": "558586",
+            "blockHash": "0xb345b560226d1bb3beb4f29826c2446f7566b076413d3060608f77fa0ef7bd95",
+            "blockNumber": 18,
+            "transactionIndex": 0,
+            "logs": [
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xd29c57887d415d99f169f14abaaaeb2d5122576b6a18e1b044d9eb427834f4da",
+                  "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+                  "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068"
+                ],
+                "data": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c0000000000000000000000000000000000000000000000000000000000000005",
+                "index": 0
+              },
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xd29c57887d415d99f169f14abaaaeb2d5122576b6a18e1b044d9eb427834f4da",
+                  "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+                  "0x1b1f83414b432d6f0c31d14ddc9a789aacf423d0d7e53eb95587c317b0e450bf"
+                ],
+                "data": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c0000000000000000000000000000000000000000000000000000000000000006",
+                "index": 1
+              },
+              {
+                "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+                "topics": [
+                  "0xb615f47f84e1853fa27c54457840f2a1a7bcb83aec19a2aa0ff6c6a226449da1",
+                  "0x0000000000000000000000000000000000000000000000000000000000000002",
+                  "0xab468a93ebeecfaeec8091bf88610e725e470ad44b49a65d4dbf42dab9080856",
+                  "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8"
+                ],
+                "data": "0x000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000002",
+                "index": 2
+              }
+            ]
+          }
+        },
+        {
+          "label": "signed-one/quote/read-resolve",
+          "hash": "0x2455ea77320cf782387f2c0037b19f5acfb763d65aeb85081bb274e5879db26a",
+          "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "nonce": 18,
+          "data": "0x6a59728b000000000000000000000000000000000000000000000000000000000000008007167a05890e9fcaccbdf11abbb65a3aa14bccfe41825ce441803003862ce5df7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "gasLimit": "137626",
+          "receipt": {
+            "status": 1,
+            "gasUsed": "137626",
+            "blockHash": "0x7ffdc42b19b03ce0cbae71bd57b1e07e5be876375c4909380bd65a5ac331e662",
+            "blockNumber": 19,
+            "transactionIndex": 0,
+            "logs": []
+          }
+        },
+        {
+          "label": "signed-one/quote/read-list",
+          "hash": "0xad8040e06183ebc34216c65477c3de8082b775afb42e63cb095baa3c908d4700",
+          "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "nonce": 19,
+          "data": "0xd67f2355000000000000000000000000000000000000000000000000000000000000008058de23804076d1b785b7479ab38fe6ada246e62164776702f51a1c48ef98cf99e306d2c37b193cbef2767a029de2280549d79ca3de60ef96aafbf791bb13c2a10000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000100000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "gasLimit": "97156",
+          "receipt": {
+            "status": 1,
+            "gasUsed": "97156",
+            "blockHash": "0xebfde1dd8a9a108010d80706f03f195ee21813033157f8e748186816c303d9c7",
+            "blockNumber": 20,
+            "transactionIndex": 0,
+            "logs": []
+          }
+        },
+        {
+          "label": "signed-one/quote/read-history-asof",
+          "hash": "0x0772505286450ba0e44487a57bb56f3a7e970c83759582ac0082e65f3d74058b",
+          "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "nonce": 20,
+          "data": "0x0876690e00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8774db93c01e5a84317b1fda0385a423d2e334600d536d9163c7f939c2b2df2b700000000000000000000000000000000000000000000000000000000000f4240",
+          "gasLimit": "73832",
+          "receipt": {
+            "status": 1,
+            "gasUsed": "71636",
+            "blockHash": "0x4732bcebf4af449c8528613a96136420411f63ff2ddab754b2aadeef7e99608e",
+            "blockNumber": 21,
+            "transactionIndex": 0,
+            "logs": []
+          }
+        }
+      ],
+      "raw": [
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastStatus",
+          "args": [],
+          "blockTag": 16,
+          "calldata": "0xd6d86712",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastTarget",
+          "args": [],
+          "blockTag": 16,
+          "calldata": "0x36abbd1d",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastRevision",
+          "args": [],
+          "blockTag": 16,
+          "calldata": "0xe08871ca",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastAdmission",
+          "args": [],
+          "blockTag": 16,
+          "calldata": "0x519ef1f8",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastCount",
+          "args": [],
+          "blockTag": 16,
+          "calldata": "0x6b16ad67",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastScanned",
+          "args": [],
+          "blockTag": 16,
+          "calldata": "0x336d5392",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastValue",
+          "args": [],
+          "blockTag": 16,
+          "calldata": "0x43183834",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastStatus",
+          "args": [],
+          "blockTag": 19,
+          "calldata": "0xd6d86712",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastTarget",
+          "args": [],
+          "blockTag": 19,
+          "calldata": "0x36abbd1d",
+          "returnData": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastRevision",
+          "args": [],
+          "blockTag": 19,
+          "calldata": "0xe08871ca",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastAdmission",
+          "args": [],
+          "blockTag": 19,
+          "calldata": "0x519ef1f8",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000006"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastCount",
+          "args": [],
+          "blockTag": 19,
+          "calldata": "0x6b16ad67",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastScanned",
+          "args": [],
+          "blockTag": 19,
+          "calldata": "0x336d5392",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastValue",
+          "args": [],
+          "blockTag": 19,
+          "calldata": "0x43183834",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000c1c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastStatus",
+          "args": [],
+          "blockTag": 20,
+          "calldata": "0xd6d86712",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastTarget",
+          "args": [],
+          "blockTag": 20,
+          "calldata": "0x36abbd1d",
+          "returnData": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastRevision",
+          "args": [],
+          "blockTag": 20,
+          "calldata": "0xe08871ca",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastAdmission",
+          "args": [],
+          "blockTag": 20,
+          "calldata": "0x519ef1f8",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000006"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastCount",
+          "args": [],
+          "blockTag": 20,
+          "calldata": "0x6b16ad67",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastScanned",
+          "args": [],
+          "blockTag": 20,
+          "calldata": "0x336d5392",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastValue",
+          "args": [],
+          "blockTag": 20,
+          "calldata": "0x43183834",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000c1c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastStatus",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0xd6d86712",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastTarget",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x36abbd1d",
+          "returnData": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastRevision",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0xe08871ca",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastAdmission",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x519ef1f8",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000006"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastCount",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x6b16ad67",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastScanned",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x336d5392",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastValue",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x43183834",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000c1c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastStatus",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0xd6d86712",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastTarget",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x36abbd1d",
+          "returnData": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastRevision",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0xe08871ca",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastAdmission",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x519ef1f8",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000006"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastCount",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x6b16ad67",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastScanned",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x336d5392",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastValue",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x43183834",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000c1c"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "record",
+          "args": [
+            "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95"
+          ],
+          "blockTag": 21,
+          "calldata": "0xb5c645bdb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+          "returnData": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f8506800000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000bb8"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "record",
+          "args": [
+            "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+          ],
+          "blockTag": 21,
+          "calldata": "0xb5c645bdf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+          "returnData": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f8506800000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000c1c"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "record",
+          "args": [
+            "0xd70aeed415e61235b8c4d5494e4ba4b8ca0d1a3c17a4212aaacbaafb9f69e176"
+          ],
+          "blockTag": 21,
+          "calldata": "0xb5c645bdd70aeed415e61235b8c4d5494e4ba4b8ca0d1a3c17a4212aaacbaafb9f69e176",
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "record",
+          "args": [
+            "0x1c2d42caaad07ceb468f2ea157d863f8f2cb4d92bc4765728b00e33215555af9"
+          ],
+          "blockTag": 21,
+          "calldata": "0xb5c645bd1c2d42caaad07ceb468f2ea157d863f8f2cb4d92bc4765728b00e33215555af9",
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "record",
+          "args": [
+            "0xb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95"
+          ],
+          "blockTag": 21,
+          "calldata": "0xb5c645bdb450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a95",
+          "returnData": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f8506800000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000bb8"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "record",
+          "args": [
+            "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+          ],
+          "blockTag": 21,
+          "calldata": "0xb5c645bdf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+          "returnData": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f8506800000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000c1c"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "evidence",
+          "args": [
+            "1"
+          ],
+          "blockTag": 21,
+          "calldata": "0x03e623e70000000000000000000000000000000000000000000000000000000000000001",
+          "returnData": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c80000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001b00000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000001ccb7a0e22b33191a6263e7dc05f9c52f39091f109fa96de6e02a2a086e4e98024aaef7889e0c1c3f4098d2fc7da9f9297348041102827705b0bec8f47c65d6d40000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006aa604fc000000000000000000000000000000000000000000000000000000000000001178cd688361e28884caa52d836072ca40405f892f7043df1604c22e7fc47a1788dc27cb459ba876c3519801545173e56b4d7cd46068219d0bb1d62863fc772ebedf13d8bbd036074b4ee75be3baf21802b3cfad7e8c4e5ed22b6f9dfdc066b796"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "admission",
+          "args": [
+            1
+          ],
+          "blockTag": 21,
+          "calldata": "0x7c7e99500000000000000000000000000000000000000000000000000000000000000001",
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008bce57d89b9b04305cee330711f7e7aaafcb52a59637e4cf73dae6b1110939f0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "admission",
+          "args": [
+            2
+          ],
+          "blockTag": 21,
+          "calldata": "0x7c7e99500000000000000000000000000000000000000000000000000000000000000002",
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552cde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "admission",
+          "args": [
+            3
+          ],
+          "blockTag": 21,
+          "calldata": "0x7c7e99500000000000000000000000000000000000000000000000000000000000000003",
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b450bbac098c4101ea9b6a23a7fff9d13f7bdd99f0f3eb6c0d680393571f6a950000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "admission",
+          "args": [
+            4
+          ],
+          "blockTag": 21,
+          "calldata": "0x7c7e99500000000000000000000000000000000000000000000000000000000000000004",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de10000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "evidence",
+          "args": [
+            "2"
+          ],
+          "blockTag": 21,
+          "calldata": "0x03e623e70000000000000000000000000000000000000000000000000000000000000002",
+          "returnData": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c80000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001c00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000005726cb2aff65534976da80f05083dda35f44d89691218031e858c7ccbff5d68312983b6cfeaabaf007f51f133e8e1373322e395fd9417ea405432cdcc5f708be00000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000006aa604fc000000000000000000000000000000000000000000000000000000000000001278cd688361e28884caa52d836072ca40405f892f7043df1604c22e7fc47a1788dc27cb459ba876c3519801545173e56b4d7cd46068219d0bb1d62863fc772ebebdb7614d00f6f8546135d6ff6f0127ca940a891d47543442d39bce5d84cd85a2"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "admission",
+          "args": [
+            5
+          ],
+          "blockTag": 21,
+          "calldata": "0x7c7e99500000000000000000000000000000000000000000000000000000000000000005",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb3cde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "admission",
+          "args": [
+            6
+          ],
+          "blockTag": 21,
+          "calldata": "0x7c7e99500000000000000000000000000000000000000000000000000000000000000006",
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000f3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "subjectCreatedAt",
+          "args": [
+            "0x7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de1"
+          ],
+          "blockTag": 21,
+          "calldata": "0xdc81edda7db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de1",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "head",
+          "args": [
+            "0x5c8eedb029b8653bccb483b731f255f75a6ae6773a345aeae07e61f73b6efe77"
+          ],
+          "blockTag": 21,
+          "calldata": "0xf339e3b25c8eedb029b8653bccb483b731f255f75a6ae6773a345aeae07e61f73b6efe77",
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000001f3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "head",
+          "args": [
+            "0x20dd401bc777cb2f7dc11277e40398e2a22ea63bf9ba5c15d51e50880304b7d4"
+          ],
+          "blockTag": 21,
+          "calldata": "0xf339e3b220dd401bc777cb2f7dc11277e40398e2a22ea63bf9ba5c15d51e50880304b7d4",
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000027db95c53c8eb36e12db73209fca8f1c92b19082989fcbbbb4ddd82802ad71de1"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0x123ac4324d5aa2108f574146a694748403c5f8b643c3078d03753191f8666550"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb0123ac4324d5aa2108f574146a694748403c5f8b643c3078d03753191f8666550",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0x123ac4324d5aa2108f574146a694748403c5f8b643c3078d03753191f8666550",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b72123ac4324d5aa2108f574146a694748403c5f8b643c3078d03753191f86665500000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000005000000000002"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0xea9e76b615573978fc2afa4d422c94b2fbd5dad251b1236d1a00a8df58b6e826"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb0ea9e76b615573978fc2afa4d422c94b2fbd5dad251b1236d1a00a8df58b6e826",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0xea9e76b615573978fc2afa4d422c94b2fbd5dad251b1236d1a00a8df58b6e826",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b72ea9e76b615573978fc2afa4d422c94b2fbd5dad251b1236d1a00a8df58b6e8260000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000006000000000003"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0x84a78b02ae427795080ff051b3df732f529350aaa12cc2b55535f09305b61891"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb084a78b02ae427795080ff051b3df732f529350aaa12cc2b55535f09305b61891",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0x84a78b02ae427795080ff051b3df732f529350aaa12cc2b55535f09305b61891",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b7284a78b02ae427795080ff051b3df732f529350aaa12cc2b55535f09305b618910000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000004"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0xd6314f0596c20fdc5edfddfb0fce73f99db26648e303bf0786ddf8007838465c"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb0d6314f0596c20fdc5edfddfb0fce73f99db26648e303bf0786ddf8007838465c",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0xd6314f0596c20fdc5edfddfb0fce73f99db26648e303bf0786ddf8007838465c",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b72d6314f0596c20fdc5edfddfb0fce73f99db26648e303bf0786ddf8007838465c0000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0xf2e344d978d4a5d277d8cc97ce7f541c5adb3d9870952347ff1c5a665b5082bb"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb0f2e344d978d4a5d277d8cc97ce7f541c5adb3d9870952347ff1c5a665b5082bb",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0xf2e344d978d4a5d277d8cc97ce7f541c5adb3d9870952347ff1c5a665b5082bb",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b72f2e344d978d4a5d277d8cc97ce7f541c5adb3d9870952347ff1c5a665b5082bb0000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000005000000000002"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0xc1dd0f5326cacf23f8bb7e64272c8df8e914003d10d146546dbbf77a64df4da6"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb0c1dd0f5326cacf23f8bb7e64272c8df8e914003d10d146546dbbf77a64df4da6",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0xc1dd0f5326cacf23f8bb7e64272c8df8e914003d10d146546dbbf77a64df4da6",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b72c1dd0f5326cacf23f8bb7e64272c8df8e914003d10d146546dbbf77a64df4da60000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000003"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0xf68d521441ef5211ba9aae4ad886f53d849176bc3749106bf72c1c494bd744a6"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb0f68d521441ef5211ba9aae4ad886f53d849176bc3749106bf72c1c494bd744a6",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0xf68d521441ef5211ba9aae4ad886f53d849176bc3749106bf72c1c494bd744a6",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b72f68d521441ef5211ba9aae4ad886f53d849176bc3749106bf72c1c494bd744a60000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000006"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingHead",
+          "args": [
+            "0x4a65921532e3912c36140edd95afdc5abeef2600cce16589932bff6530bf6c7b"
+          ],
+          "blockTag": 21,
+          "calldata": "0x5cdd4bb04a65921532e3912c36140edd95afdc5abeef2600cce16589932bff6530bf6c7b",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "contract": "IndexModule",
+          "to": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+          "fn": "postingWord",
+          "args": [
+            "0x4a65921532e3912c36140edd95afdc5abeef2600cce16589932bff6530bf6c7b",
+            0
+          ],
+          "blockTag": 21,
+          "calldata": "0x68830b724a65921532e3912c36140edd95afdc5abeef2600cce16589932bff6530bf6c7b0000000000000000000000000000000000000000000000000000000000000000",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000004"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "counts",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x817cc1ea",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Ledger",
+          "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "fn": "nonces",
+          "args": [
+            "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+          ],
+          "blockTag": 21,
+          "calldata": "0x7ecebe0000000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastStatus",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0xd6d86712",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastTarget",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x36abbd1d",
+          "returnData": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastRevision",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0xe08871ca",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastAdmission",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x519ef1f8",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000006"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastCount",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x6b16ad67",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastScanned",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x336d5392",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+          "contract": "Consumer",
+          "to": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+          "fn": "lastValue",
+          "args": [],
+          "blockTag": 21,
+          "calldata": "0x43183834",
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000c1c"
+        }
+      ],
+      "consumerChecks": [
+        {
+          "label": "signed-one/quote/read-resolve/readback",
+          "block": 19,
+          "expected": {
+            "lastStatus": 1,
+            "lastTarget": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "lastRevision": 2,
+            "lastValue": "3100"
+          },
+          "actual": {
+            "lastStatus": "1",
+            "lastTarget": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "lastRevision": "2",
+            "lastAdmission": "6",
+            "lastCount": "0",
+            "lastScanned": "0",
+            "lastValue": "3100"
+          },
+          "compared": {
+            "lastStatus": {
+              "expected": 1,
+              "actual": "1",
+              "equal": false
+            },
+            "lastTarget": {
+              "expected": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+              "actual": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+              "equal": true
+            },
+            "lastRevision": {
+              "expected": 2,
+              "actual": "2",
+              "equal": false
+            },
+            "lastValue": {
+              "expected": "3100",
+              "actual": "3100",
+              "equal": true
+            }
+          },
+          "match": false
+        },
+        {
+          "label": "signed-one/quote/read-list/readback",
+          "block": 20,
+          "expected": {
+            "lastStatus": 2,
+            "lastCount": 1,
+            "lastScanned": 1
+          },
+          "actual": {
+            "lastStatus": "2",
+            "lastTarget": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "lastRevision": "2",
+            "lastAdmission": "6",
+            "lastCount": "1",
+            "lastScanned": "1",
+            "lastValue": "3100"
+          },
+          "compared": {
+            "lastStatus": {
+              "expected": 2,
+              "actual": "2",
+              "equal": false
+            },
+            "lastCount": {
+              "expected": 1,
+              "actual": "1",
+              "equal": false
+            },
+            "lastScanned": {
+              "expected": 1,
+              "actual": "1",
+              "equal": false
+            }
+          },
+          "match": false
+        },
+        {
+          "label": "signed-one/quote/read-history-asof/readback",
+          "block": 21,
+          "expected": {
+            "lastStatus": 1,
+            "lastTarget": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "lastRevision": 2
+          },
+          "actual": {
+            "lastStatus": "1",
+            "lastTarget": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+            "lastRevision": "2",
+            "lastAdmission": "6",
+            "lastCount": "1",
+            "lastScanned": "1",
+            "lastValue": "3100"
+          },
+          "compared": {
+            "lastStatus": {
+              "expected": 1,
+              "actual": "1",
+              "equal": false
+            },
+            "lastTarget": {
+              "expected": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+              "actual": "0xf3057b44e5c1d41b301b8f0cfeb9b6b48c9c3b0db9ddc88a4eb63243781b6d2c",
+              "equal": true
+            },
+            "lastRevision": {
+              "expected": 2,
+              "actual": "2",
+              "equal": false
+            }
+          },
+          "match": false
+        }
+      ],
+      "mismatches": 3,
+      "error": null
+    }
+  },
+  "estimatedFreshSlots": {},
+  "failure": null,
+  "caveats": [
+    "Local Anvil receipts under the lab profile; not an L2 fee quote and not an equivalent-guarantee comparison until the coordinator's fixture map is applied.",
+    "Ingress x multiplicity only; no capability ablation and no interaction term are claimed.",
+    "The joined QUOTE/Pair consumption (sdk-fixture steps 1–6 with ITEM/PAIR/QUOTE) is NOT in this script yet.",
+    "The Reconstructor is a candidate self-check calling ledger.intentDigest, not independent.",
+    "Fresh-slot counts are estimates; no storage tracing was run.",
+    "Every cell starts from the sealed post-setup state (cold transaction access sets; lists empty except setup); \"steady\" list regimes are not measured here.",
+    "A listing page with mutated == true is a mixed-basis page and must not be treated as COMPLETE by any caller."
+  ],
+  "persistedAt": "2026-09-13T01:05:49.938Z"
+}
