@@ -72,9 +72,26 @@ const artifact = (name) => JSON.parse(readFileSync(path.join(OUT, `${name}.sol`,
 const rows = [];
 const unknown = [];
 
+// External-library linking: forge artifacts carry `__$<hash>$__` placeholders + bytecode.linkReferences.
+const linked = {}; // "src/ImportLib.sol:ImportLib" -> address
+function link(a) {
+  let code = a.bytecode.object;
+  for (const [file, libs] of Object.entries(a.bytecode.linkReferences ?? {})) {
+    for (const [lib, refs] of Object.entries(libs)) {
+      const addr = linked[`${file}:${lib}`];
+      if (!addr) throw new Error(`unlinked library ${file}:${lib}`);
+      for (const { start } of refs) {
+        const pos = 2 + start * 2;
+        code = code.slice(0, pos) + addr.slice(2).toLowerCase() + code.slice(pos + 40);
+      }
+    }
+  }
+  return code;
+}
+
 async function deploy(name, ...args) {
   const a = artifact(name);
-  const f = new ethers.ContractFactory(a.abi, a.bytecode.object, wallet);
+  const f = new ethers.ContractFactory(a.abi, link(a), wallet);
   const c = await f.deploy(...args);
   const rc = await c.deploymentTransaction().wait();
   const addr = await c.getAddress();
@@ -100,6 +117,9 @@ async function send(op, promise, expectRevert = false) {
 async function main() {
   const net = await provider.getNetwork();
   // ---- setup -------------------------------------------------------------------------------
+  const importLib = await deploy("ImportLib"); // external library: delegatecalled by Ledger.importPublication, no storage
+  linked["src/ImportLib.sol:ImportLib"] = await importLib.getAddress();
+  rows.push({ op: "identity:ImportLib", address: linked["src/ImportLib.sol:ImportLib"], codehash: ethers.keccak256(await provider.getCode(linked["src/ImportLib.sol:ImportLib"])) });
   const index = await deploy("IndexModule", ZERO); // poison lever disabled for the measured deployment
   const ledger = await deploy("Ledger", await index.getAddress());
   await send("setup:attach", index.attach(await ledger.getAddress()));

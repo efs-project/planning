@@ -18,4 +18,3 @@ fuzz = { runs = 16 }
 remappings = [
   "@latticexyz/=vendor/@latticexyz/",
 ]
-extra_output = ["evm.deployedBytecode.object", "evm.bytecode.object"]
