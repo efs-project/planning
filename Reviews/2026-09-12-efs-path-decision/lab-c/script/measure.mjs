@@ -9,6 +9,7 @@ import {
   decodeAdmissionStatic, decodeBindingStatic, decodeEvidenceStatic, deriveAbstractResult, evidenceCategoryOf,
   paidObservationMatch, parseRunArgs, readLeftUint, selectCells, verifyPatchedRuntime,
 } from "./measure-helpers.mjs";
+import { assertManifestCall, assertPaidManifestOutcome, createControllerGate } from "./controller-gate.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export function resolveArtifactRoot(env, fallback) { return path.resolve(env.OUT_DIR ?? env.FOUNDRY_OUT ?? fallback); }
@@ -16,7 +17,6 @@ const ETHERS = process.env.ETHERS_PATH ?? "/Users/james/Code/EFS/planning-efs21/
 const ethers = await import(pathToFileURL(ETHERS).href);
 const RPC_URL = process.env.RPC_URL ?? "http://127.0.0.1:8545";
 const PK = process.env.PRIVATE_KEY ?? "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-const PK_A = process.env.PK_A ?? "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
 const OUT = resolveArtifactRoot(process.env, path.resolve(here, "../out"));
 const EVIDENCE_PATH = process.env.EVIDENCE_PATH;
 const RECEIPT_TIMEOUT_MS = Number(process.env.RECEIPT_TIMEOUT_MS ?? 120_000);
@@ -24,6 +24,7 @@ const RECEIPT_TIMEOUT_MS = Number(process.env.RECEIPT_TIMEOUT_MS ?? 120_000);
 const RUN_ARGS = parseRunArgs(process.argv.slice(2));
 const SELECTED_CELLS = selectCells(RUN_ARGS.cells, { defaults: DEFAULT_CELLS, optional: OPTIONAL_CELLS });
 assertAnvilOnlyCells(SELECTED_CELLS, RUN_ARGS.anvil); // refuses BEFORE any chain call (the provider below is lazy)
+const controllerGate = await createControllerGate({ env: process.env, selectedCells: SELECTED_CELLS, anvil: RUN_ARGS.anvil });
 // The pinned unrelated paid caller: a fixed ephemeral account of the run mnemonic at a derivation index that is not the
 // deployer (0), not AUTHOR_A (1) and not a producer/contract; only its address and derivation path are retained.
 const RUN_MNEMONIC = process.env.RUN_MNEMONIC ?? "test test test test test test test test test test test junk";
@@ -107,7 +108,7 @@ class EvidenceProvider extends ethers.JsonRpcProvider {
 }
 const provider = new EvidenceProvider(RPC_URL, undefined, { cacheTimeout: -1, batchMaxCount: 1 });
 const wallet = new ethers.Wallet(PK, provider);
-const walletA = new ethers.Wallet(PK_A, provider);
+const walletA = controllerGate.enabled ? null : new ethers.Wallet(process.env.PK_A ?? "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d", provider);
 const paidCaller = ethers.HDNodeWallet.fromPhrase(RUN_MNEMONIC, undefined, PAID_CALLER_PATH).connect(provider);
 const evidence = { metadata: {}, artifacts: [], operations: [], observations: [], resets: [], slices: {}, rpc };
 const decoders = new Map();
@@ -297,7 +298,7 @@ async function main() {
   const clientVersion = await raw("web3_clientVersion", [], "run:client-version");
   assertAnvilClient(clientVersion, assertAnvilOnlyCells(SELECTED_CELLS, RUN_ARGS.anvil));
   const network = await provider.getNetwork();
-  evidence.metadata = { startedAt: new Date().toISOString(), chainId: network.chainId.toString(), rpcUrl: RPC_URL, artifactRootConfigured: OUT, artifactRootReal: realpathSync(OUT), evidencePath: EVIDENCE_PATH, ethersPath: ETHERS, provider: { cacheTimeout: -1, batchMaxCount: 1, receiptTimeoutMs: RECEIPT_TIMEOUT_MS }, framing: "supplemental c32 values are abi.encode(bytes32[],bytes), never bare bytes32", run: { anvil: RUN_ARGS.anvil, cells: SELECTED_CELLS, anvilOnlyCells: assertAnvilOnlyCells(SELECTED_CELLS, RUN_ARGS.anvil), clientVersion }, paidCaller: { address: paidCaller.address, derivationPath: PAID_CALLER_PATH, index: PAID_CALLER_INDEX, mnemonicSource: process.env.RUN_MNEMONIC ? "RUN_MNEMONIC (env)" : "anvil default mnemonic", standing: "fixed ephemeral account of the run mnemonic; unrelated to every fixture role, asserted after the global deployment and the shared setup:types-items-pair publication and before the sealed slice's A1/A2/B1 rows; no secret retained" } };
+  evidence.metadata = { startedAt: new Date().toISOString(), chainId: network.chainId.toString(), rpcUrl: RPC_URL, artifactRootConfigured: OUT, artifactRootReal: realpathSync(OUT), evidencePath: EVIDENCE_PATH, ethersPath: ETHERS, provider: { cacheTimeout: -1, batchMaxCount: 1, receiptTimeoutMs: RECEIPT_TIMEOUT_MS }, framing: "supplemental c32 values are abi.encode(bytes32[],bytes), never bare bytes32", run: { anvil: RUN_ARGS.anvil, cells: SELECTED_CELLS, anvilOnlyCells: assertAnvilOnlyCells(SELECTED_CELLS, RUN_ARGS.anvil), clientVersion, controllerGate: controllerGate.report }, paidCaller: { address: paidCaller.address, derivationPath: PAID_CALLER_PATH, index: PAID_CALLER_INDEX, mnemonicSource: process.env.RUN_MNEMONIC ? "RUN_MNEMONIC (env)" : "anvil default mnemonic", standing: "fixed ephemeral account of the run mnemonic; unrelated to every fixture role, asserted after the global deployment and the shared setup:types-items-pair publication and before the sealed slice's A1/A2/B1 rows; no secret retained" } };
   const importLib = await deploy("ImportLib");
   links.set("src/ImportLib.sol:ImportLib", await importLib.getAddress());
   const index = await deploy("IndexModule", ["bytes32"], [ZERO]);
@@ -320,7 +321,9 @@ async function main() {
   };
   const domain = evidence.metadata.ledgerDomain;
   const SELF = contractPrincipal(domain.realmOrigin, wallet.address);
-  const A = eoaPrincipal(walletA.address);
+  const authorAAddress = controllerGate.enabled ? controllerGate.input.accounts?.authorA?.address : walletA.address;
+  if (!authorAAddress) throw new Error("gated input has no accounts.authorA.address");
+  const A = eoaPrincipal(authorAAddress);
   const B = contractPrincipal(domain.realmOrigin, await producer.getAddress());
   // Candidate declaration inputs, derived from retained runtime-verified deployments;
   // these are not the independent comparison oracle's expectations.
@@ -338,14 +341,31 @@ async function main() {
 
   async function nonceOf(author, label) { return readLeftUint(await observe(label, (b) => ledger["getStaticField(bytes32,bytes32[],uint8,bytes32)"](TABLE.NONCES, key1(author), 0, LAYOUT.NONCES, { blockTag: b })), 8); }
   async function intent(author, actions, label) { return { author, nonce: await nonceOf(author, `${label}:nonce`) + 1n, deadline: 0, acceptanceProfile: PROFILE, indexObligations: OBLIGATIONS, actions }; }
-  async function signIntent(value, label) {
+  async function signIntent(value, label, manifestKey) {
     const digest = await observe(`${label}:intent-digest`, (b) => ledger.intentDigest(value, { blockTag: b }));
-    const signature = walletA.signingKey.sign(digest);
-    if (ethers.recoverAddress(digest, signature) !== walletA.address) throw new Error(`${label} signer mismatch`);
+    const signature = controllerGate.enabled ? controllerGate.input.publications[manifestKey]?.signature : walletA.signingKey.sign(digest);
+    if (!signature || ethers.recoverAddress(digest, signature) !== authorAAddress) throw new Error(`${label} signer mismatch`);
     return { v: signature.v, r: signature.r, s: signature.s };
   }
-  async function publishSigned(cell, label, actions, bodies) { const value = await intent(A, actions, label); const sig = await signIntent(value, label); const row = await send(cell, label, async () => ledger.publishSigned(value, bodies, sig)); assertPublished(row, A, 2, actions.length); return { value, sig, row }; }
-  async function publishNative(cell, label, author, actions, bodies, viaProducer = false) { const value = await intent(author, actions, label); const row = await send(cell, label, async () => viaProducer ? producer.publish(await ledger.getAddress(), value, bodies) : ledger.publishNative(value, bodies)); assertPublished(row, author, 1, actions.length); return { value, row }; }
+  async function manifestSend(cell, label, manifestKey, caller, target, calldata, fallback) {
+    if (!controllerGate.enabled) return send(cell, label, fallback);
+    const pinned = controllerGate.input.publications[manifestKey];
+    assertManifestCall(manifestKey, { caller, target, calldata }, pinned);
+    return send(cell, label, () => wallet.sendTransaction({ to: pinned.target, data: pinned.calldata }));
+  }
+  async function publishSigned(cell, label, actions, bodies, manifestKey) {
+    const value = await intent(A, actions, label); const sig = await signIntent(value, label, manifestKey);
+    const target = await ledger.getAddress(); const calldata = ledger.interface.encodeFunctionData("publishSigned", [value, bodies, sig]);
+    const row = await manifestSend(cell, label, manifestKey, wallet.address, target, calldata, () => ledger.publishSigned(value, bodies, sig));
+    assertPublished(row, A, 2, actions.length); return { value, sig, row };
+  }
+  async function publishNative(cell, label, author, actions, bodies, viaProducer = false, manifestKey) {
+    const value = await intent(author, actions, label); const ledgerAddress = await ledger.getAddress();
+    const target = viaProducer ? await producer.getAddress() : ledgerAddress;
+    const calldata = viaProducer ? producer.interface.encodeFunctionData("publish", [ledgerAddress, value, bodies]) : ledger.interface.encodeFunctionData("publishNative", [value, bodies]);
+    const row = await manifestSend(cell, label, manifestKey, wallet.address, target, calldata, () => viaProducer ? producer.publish(ledgerAddress, value, bodies) : ledger.publishNative(value, bodies));
+    assertPublished(row, author, 1, actions.length); return { value, row };
+  }
 
   const setupActions = [
     action({ kind: K.DECLARE_TYPE, typeId: TYPE_META, digestKind: D.BODY_HASH, digest: ethers.keccak256(itemBody), target: acceptorTarget(await pass.getAddress()) }),
@@ -354,7 +374,14 @@ async function main() {
     action({ kind: K.DECLARE_TYPE, typeId: TYPE_META, digestKind: D.BODY_HASH, digest: ethers.keccak256(bytesTypeBody), target: acceptorTarget(await pass.getAddress()) }),
     action({ kind: K.RECORD, typeId: ITEM_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(ethBody) }), action({ kind: K.RECORD, typeId: ITEM_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(usdcBody) }), action({ kind: K.RECORD, typeId: PAIR_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(pairBody) }),
   ];
-  await publishNative("setup", "types-items-pair", SELF, setupActions, [itemBody, pairTypeBody, quoteTypeBody, bytesTypeBody, ethBody, usdcBody, pairBody]);
+  if (controllerGate.enabled) {
+    const beforeFixtureSnapshot = await raw("evm_snapshot", [], "controller:beforeFixture:snapshot");
+    const beforeFixtureBlock = await fixedBlock("controller:beforeFixture");
+    await controllerGate.guard("beforeFixture", { rpcUrl: RPC_URL, block: { number: beforeFixtureBlock.number, hash: beforeFixtureBlock.hash }, snapshot: beforeFixtureSnapshot }, () =>
+      publishNative("setup", "types-items-pair", SELF, setupActions, [itemBody, pairTypeBody, quoteTypeBody, bytesTypeBody, ethBody, usdcBody, pairBody], false, "BOOTSTRAP"));
+  } else {
+    await publishNative("setup", "types-items-pair", SELF, setupActions, [itemBody, pairTypeBody, quoteTypeBody, bytesTypeBody, ethBody, usdcBody, pairBody]);
+  }
   const baselineProof = {
     walletPendingNonce: await raw("eth_getTransactionCount", [wallet.address, "pending"], "setup:baseline-wallet-nonce"),
     highWater: (await observe("setup:baseline-high-water", (b) => ledger.highWater({ blockTag: b }))).toString(),
@@ -432,27 +459,27 @@ async function main() {
     const slice = { cell, standing: "the sealed paid point/list slice: A1/A2/B1 setup rows, the exact post-B1 seal, four paid rows each the first transaction after a revert to that seal from the pinned unrelated caller, with abstractResult rows (RPC_OBSERVED observations, never expected answers)", mismatches: 0 };
     evidence.slices[cell] = slice;
     // ---- the pinned unrelated caller: unrelated to every fixture role (asserted BEFORE setup), funded at a pinned block
-    assertUnrelatedCaller(paidCaller.address, { deployer: wallet.address, "AUTHOR_A wallet": walletA.address, ...Object.fromEntries(Object.entries(evidence.metadata.addresses).map(([k, v]) => [`contract ${k}`, v])) });
+    assertUnrelatedCaller(paidCaller.address, { deployer: wallet.address, "AUTHOR_A wallet": authorAAddress, ...Object.fromEntries(Object.entries(evidence.metadata.addresses).map(([k, v]) => [`contract ${k}`, v])) });
     const fundingBlock = await fixedBlock(`${cell}:caller-funding`);
     const balanceWei = BigInt(await raw("eth_getBalance", [paidCaller.address, fundingBlock.number], `${cell}:caller-funding:balance`));
     if (balanceWei === 0n) throw new Error(`${cell}: the pinned paid caller ${paidCaller.address} has no balance at block ${fundingBlock.number}; fund mnemonic index ${PAID_CALLER_INDEX} before the run`);
     slice.caller = { address: paidCaller.address, derivationPath: PAID_CALLER_PATH, index: PAID_CALLER_INDEX, unrelatedTo: ["deployer", "AUTHOR_A wallet", ...Object.keys(evidence.metadata.addresses).map((k) => `contract ${k}`)], funding: { block: fundingBlock.number, blockHash: fundingBlock.hash, balanceWei: balanceWei.toString() } };
     // ---- setup rows (setup cost class; the A1 combined receipt is NOT a marginal placement cost)
     const preA1 = await capture(cell, "pre-A1", { record: t.A1, author: A, subject: file });
-    const signedA1 = await publishSigned(cell, "A1-create", a1ActionsOf(t, true), a1BodiesOf(t, true));
+    const signedA1 = await publishSigned(cell, "A1-create", a1ActionsOf(t, true), a1BodiesOf(t, true), "A1");
     const a1Event = oneDecoded(signedA1.row, "Ledger", "Published");
     signedA1.row.costClass = "setup"; signedA1.row.placementCost = "ESTIMATE: the single A placement is one of five actions (subject + record + head + FOLDER bind + tag) in this combined receipt and is NOT separable from it; pin the optional paired control typed-joined/a1-without-placement to measure it";
     const postA1 = await capture(cell, "post-A1", { record: t.A1, author: A, subject: file });
     assertRecordTransition(`${cell}:A1`, preA1, postA1, "fresh");
     const preA2 = await capture(cell, "pre-A2", { record: t.A2, author: A, subject: file });
-    const signedA2 = await publishSigned(cell, "A2-edit", [action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(t.a2Body) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: file, target: t.A2, expectedRevision: 1 })], [t.a2Body, "0x"]);
+    const signedA2 = await publishSigned(cell, "A2-edit", [action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(t.a2Body) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: file, target: t.A2, expectedRevision: 1 })], [t.a2Body, "0x"], "A2");
     const a2Event = oneDecoded(signedA2.row, "Ledger", "Published");
     signedA2.row.costClass = "setup";
     const postA2 = await capture(cell, "post-A2", { record: t.A2, author: A, subject: file });
     assertRecordTransition(`${cell}:A2`, preA2, postA2, "fresh");
     const preB1 = await capture(cell, "pre-B1", { record: t.B1, author: B, subject: file });
     // B1: record + B's own HEAD. NO FOLDER bind: a competing content head only, never a second placement.
-    const nativeB1 = await publishNative(cell, "B1-create", B, [action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(t.b1Body) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: file, target: t.B1 })], [t.b1Body, "0x"], true);
+    const nativeB1 = await publishNative(cell, "B1-create", B, [action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(t.b1Body) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: file, target: t.B1 })], [t.b1Body, "0x"], true, "B1");
     const b1Event = oneDecoded(nativeB1.row, "Ledger", "Published");
     nativeB1.row.costClass = "setup"; nativeB1.row.folderBind = false;
     const postB1 = await capture(cell, "post-B1", { record: t.B1, author: B, subject: file });
@@ -464,6 +491,7 @@ async function main() {
     const snapshot = await raw("evm_snapshot", [], `${cell}:seal:snapshot`);
     const sealBlock = await fixedBlock(`${cell}:seal`);
     const seal = { snapshot, number: Number(sealBlock.number), numberHex: sealBlock.number, hash: sealBlock.hash, parentHash: sealBlock.header.parentHash, timestamp: Number(sealBlock.header.timestamp) };
+    await controllerGate.invoke("afterB1", { rpcUrl: RPC_URL, block: { number: seal.numberHex, hash: seal.hash }, snapshot });
     const basis = (await observeAt(`${cell}:seal:high-water`, sealBlock, (b) => ledger.highWater({ blockTag: b }))).toString();
     const hw0 = BigInt(baselineProof.highWater);
     if (BigInt(basis) !== hw0 + 9n) throw new Error(`${cell}: post-B1 admission frontier ${basis} != baseline ${hw0} + 9`);
@@ -540,10 +568,10 @@ async function main() {
     slice.fixtureMirror = { standing: "candidate-side mirror of the fixture map (this runner's inputs to the consumer), never the independent expectation manifest", ids: { file, folder, name, A1: t.A1, A2: t.A2, B1: t.B1, PAIR, ITEM_ETH, ITEM_USDC, QUOTE_T, PAIR_T, ITEM_T, aPlacementKey, aHeadKey: bindingKey(A, PURPOSE.HEAD, file), bHeadKey: bindingKey(B, PURPOSE.HEAD, file) }, bodies: { a1Body: t.a1Body, a2Body: t.a2Body, b1Body: t.b1Body }, publications: { A1: a1Event.publicationId, A2: a2Event.publicationId, B1: b1Event.publicationId }, expect: serialize({ expectA, expectB, placementExpect }), expectedObservations: serialize({ selA, selB, placementOne, placementNone }) };
     const ab = lens(A, B), ba = lens(B, A);
     const paidRows = [
-      { key: "paid-point-A", operation: "PAID_POINT", lens: "LENS_A_FIRST", lensObj: ab, fn: "paidPoint", args: [readerAddr, ledgerAddr, ab, expectA], selection: { ...selA, lensHash: lensHashOf(ab) }, placement: placementNone },
-      { key: "paid-list-A", operation: "PAID_LIST", lens: "LENS_A_FIRST", lensObj: ab, fn: "paidList", args: [readerAddr, ledgerAddr, ab, expectA, placementExpect], selection: { ...selA, lensHash: lensHashOf(ab) }, placement: placementOne },
-      { key: "paid-point-B", operation: "PAID_POINT", lens: "LENS_B_FIRST", lensObj: ba, fn: "paidPoint", args: [readerAddr, ledgerAddr, ba, expectB], selection: { ...selB, lensHash: lensHashOf(ba) }, placement: placementNone },
-      { key: "paid-list-B", operation: "PAID_LIST", lens: "LENS_B_FIRST", lensObj: ba, fn: "paidList", args: [readerAddr, ledgerAddr, ba, expectB, placementExpect], selection: { ...selB, lensHash: lensHashOf(ba) }, placement: placementOne },
+      { key: "paid-point-A", manifestRow: "POINT_A_FIRST", operation: "PAID_POINT", lens: "LENS_A_FIRST", lensObj: ab, fn: "paidPoint", args: [readerAddr, ledgerAddr, ab, expectA], selection: { ...selA, lensHash: lensHashOf(ab) }, placement: placementNone },
+      { key: "paid-list-A", manifestRow: "LIST_A_FIRST", operation: "PAID_LIST", lens: "LENS_A_FIRST", lensObj: ab, fn: "paidList", args: [readerAddr, ledgerAddr, ab, expectA, placementExpect], selection: { ...selA, lensHash: lensHashOf(ab) }, placement: placementOne },
+      { key: "paid-point-B", manifestRow: "POINT_B_FIRST", operation: "PAID_POINT", lens: "LENS_B_FIRST", lensObj: ba, fn: "paidPoint", args: [readerAddr, ledgerAddr, ba, expectB], selection: { ...selB, lensHash: lensHashOf(ba) }, placement: placementNone },
+      { key: "paid-list-B", manifestRow: "LIST_B_FIRST", operation: "PAID_LIST", lens: "LENS_B_FIRST", lensObj: ba, fn: "paidList", args: [readerAddr, ledgerAddr, ba, expectB, placementExpect], selection: { ...selB, lensHash: lensHashOf(ba) }, placement: placementOne },
     ];
     const consumerArtifact = evidence.artifacts.find((row) => row.operation === "deploy:MeasurementConsumer");
     const ledgerArtifact = evidence.artifacts.find((row) => row.operation === "deploy:Ledger");
@@ -551,13 +579,26 @@ async function main() {
     for (const pr of paidRows) {
       const label = `${cell}:${pr.key}`;
       await restoreSeal(label);
-      const row = await send(cell, pr.key, () => consumer.connect(paidCaller)[pr.fn](...pr.args));
+      const localCalldata = consumer.interface.encodeFunctionData(pr.fn, pr.args);
+      const paidPin = controllerGate.enabled ? controllerGate.input.paid.find((candidate) => candidate.row === pr.manifestRow) : null;
+      if (paidPin) assertManifestCall(pr.manifestRow, { caller: paidCaller.address, target: consumerAddr, calldata: localCalldata }, paidPin);
+      const row = await send(cell, pr.key, () => paidPin ? paidCaller.sendTransaction({ to: paidPin.target, data: paidPin.calldata }) : consumer.connect(paidCaller)[pr.fn](...pr.args));
       const receipt = row.exact.receipt;
       const block = await raw("eth_getBlockByNumber", [receipt.blockNumber, false], `${label}:block-transactions`);
       if (!block || lc(block.hash) !== lc(receipt.blockHash)) throw new Error(`${label}: eth_getBlockByNumber(${receipt.blockNumber}) does not return the receipt's block`);
       const executed = { number: Number(block.number), hash: block.hash, parentHash: block.parentHash, timestamp: Number(block.timestamp), txIndex: Number(receipt.transactionIndex), txCount: block.transactions.length, txHashes: [...block.transactions], onlyTx: block.transactions.length === 1 && lc(block.transactions[0]) === lc(row.exact.transaction.hash) };
       ordering.push({ kind: "tx", label: pr.key, block: executed.number, parentHash: executed.parentHash, timestamp: executed.timestamp, txIndex: executed.txIndex, txCount: executed.txCount, onlyTx: executed.onlyTx });
       const check = await paidObservationCheck(cell, pr, row, consumerAddr);
+      if (paidPin) {
+        try {
+          assertPaidManifestOutcome(pr.manifestRow, { returnData: check.replayObs.returnData, logs: receipt.logs }, paidPin);
+          row.independentManifestCheck = { inputsSha256: controllerGate.report.inputsSha256, row: pr.manifestRow, match: true };
+        } catch (error) {
+          row.independentManifestCheck = { inputsSha256: controllerGate.report.inputsSha256, row: pr.manifestRow, match: false, error: error.message };
+          persist(`${label}:independent-manifest-mismatch`);
+          throw error;
+        }
+      }
       if (!check.match) slice.mismatches++;
       const evidenceFor = {
         operation: pr.operation, lens: pr.lens, lensArr: pr.lensObj.principals, label, budget: placementExpect.budget,
