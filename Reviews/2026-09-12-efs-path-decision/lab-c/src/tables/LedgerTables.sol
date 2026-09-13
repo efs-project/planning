@@ -283,6 +283,11 @@ library Evidence {
     return uint64(bytes8(StoreCore.getStaticField(_tableId, key1(publicationId), 10, _fieldLayout)));
   }
 
+  /// Existence = a non-zero author (a retained grade-zero import has firstAdmission == 0 but an author).
+  function _exists(bytes32 publicationId) internal view returns (bool) {
+    return StoreCore.getStaticField(_tableId, key1(publicationId), 0, _fieldLayout) != bytes32(0);
+  }
+
   function get(IStoreRead store, bytes32 publicationId) internal view returns (EvidenceData memory) {
     (bytes memory s, , ) = store.getRecord(_tableId, key1(publicationId), _fieldLayout);
     return decodeStatic(s);

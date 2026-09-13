@@ -94,7 +94,7 @@ contract FixtureTest is LabBase {
     bytes32 pubId = _b1();
     EvidenceData memory ev = Evidence.get(L(), pubId);
     require(ev.author == B && ev.proofKind == PROOF_NATIVE && ev.r == bytes32(0) && ev.v == 0, "native evidence, no fabricated signature");
-    require(ev.author == EfsIds.contractPrincipal(ledger.realmOrigin(), address(producer)), "origin-qualified contract principal");
+    require(ev.author == EfsIds.contractPrincipal(ledger.realmOrigin(), address(producer)), "deployment-qualified contract principal");
     require(producer.probeApproves(), "the mutable account probe is captured separately");
     LensReader.Resolution memory r = reader.resolve(lensOne(B), PURPOSE_HEAD, FILE, bytes32(0));
     require(r.target == QUOTE_B1, "B's own head");
@@ -392,22 +392,25 @@ contract FixtureTest is LabBase {
   }
 
   // ---------------------------------------------------------------------------
-  // pre-seal check 2: byte-identical reconstruction from public state
+  // pre-seal check 2: SELF-CHECK reconstruction from public state. The reader decodes with
+  // the candidate's table libraries and hashes with EfsIds.intentDigest, and the expected
+  // digest uses the same encoder: this proves internal consistency of what is retained, not
+  // independence. Oracle re-derivation from raw IStoreRead.getRecord bytes is owed.
   // ---------------------------------------------------------------------------
 
-  function test_reconstruct_signature_from_state() public {
+  function test_selfcheck_reconstruct_signature_from_state() public {
     bytes32 pubId = _a1();
     (Intent memory it, ) = _a1Intent();
     EvidenceReconstructor rec = new EvidenceReconstructor();
     (bytes32 digest, address signer, bytes32 ah, EvidenceData memory ev) = rec.reconstruct(L(), pubId);
-    require(digest == digestOf(ledger, it), "byte-identical digest from Admission rows + Evidence cell");
-    require(signer == aAddr, "signer recovered from state alone");
-    require(ah == keccak256(abi.encode(it.actions)), "actionsHash identical despite MUD's packed row layout");
-    require(ev.realmId == ledger.realmId() && ev.coreCodeCommitment == address(ledger).codehash, "realm/code recovered from the cell");
+    require(digest == digestOf(ledger, it), "self-check: digest from Admission rows + Evidence cell");
+    require(signer == aAddr, "self-check: signer recovered from state");
+    require(ah == keccak256(abi.encode(it.actions)), "self-check: actionsHash identical despite MUD's packed row layout");
+    require(ev.realmId == ledger.realmId() && ev.coreCodeCommitment == address(ledger).codehash, "realm/code retained in the cell");
     require(ev.r != bytes32(0) && ev.s != bytes32(0), "signature bytes retained");
   }
 
-  function test_reconstruct_flippedDiscriminator_changesDigest() public {
+  function test_selfcheck_reconstruct_flippedDiscriminator_changesDigest() public {
     bytes32 pubId = _a1();
     EvidenceReconstructor rec = new EvidenceReconstructor();
     (bytes32 digest, , , ) = rec.reconstruct(L(), pubId);
@@ -450,33 +453,50 @@ contract FixtureTest is LabBase {
     require(subjAdm == 0 && dst.highWater() == 6, "nothing imported");
   }
 
+  function _importA1Into(Ledger dst, bytes32 importer, uint64 nonce) internal returns (bytes32 srcId, bytes32 authId) {
+    ImportPacket memory pkt = _packetOf(ledger, _pubIdA1());
+    Intent memory auth = _authFor(importer, nonce, pkt);
+    (srcId, authId) = dst.importPublication(pkt, auth, signWith(PK_I, dst, auth));
+  }
+
+  function _assertImportedSubject(Ledger dst, LensReader rd2) internal view {
+    (bytes32 creator, , uint64 subjAdm) = Subjects.get(IStoreRead(address(dst)), FILE);
+    require(subjAdm != 0 && creator == A, "id(F) preserved with its original creator");
+    LensReader.Resolution memory r = rd2.resolve(lensOne(A), PURPOSE_HEAD, FILE, bytes32(0));
+    require(r.status == 1 && r.target == QUOTE_A1, "A's head selectable on the destination under A");
+  }
+
+  function _assertImportEvidence(Ledger dst, bytes32 srcId, bytes32 authId, bytes32 importer) internal view {
+    EvidenceData memory src = Evidence.get(IStoreRead(address(dst)), srcId);
+    require(src.author == A && src.proofKind == PROOF_EOA_SIG && src.sourceGrade == GRADE_SIGNATURE_VERIFIED, "source evidence retained and graded");
+    require(src.realmId == ledger.realmId() && src.realmId != dst.realmId(), "source realm recorded, not relabelled");
+    EvidenceData memory au = Evidence.get(IStoreRead(address(dst)), authId);
+    require(au.author == importer && au.importOf == srcId && au.realmId == dst.realmId(), "destination authority is the importer");
+    require(au.leafCount == 1, "authorization cell counts its own row only");
+  }
+
   function test_import_preservesSubject_separatesAuthority() public {
     bytes32 pubId = _a1();
     (IndexModule ix2, Ledger dst, LensReader rd2) = _deployRealmWith(POISON);
     _seedInto(dst, address(quoteAcceptor));
-    ImportPacket memory pkt = _packetOf(ledger, pubId);
     bytes32 importer = EfsIds.eoaPrincipal(vm.addr(PK_I));
-    Intent memory auth = _authFor(importer, 1, pkt);
-    (bytes32 srcId, bytes32 authId) = dst.importPublication(pkt, auth, signWith(PK_I, dst, auth));
+    (bytes32 srcId, bytes32 authId) = _importA1Into(dst, importer, 1);
     require(srcId == pubId, "source publication id preserved");
-    IStoreRead D = IStoreRead(address(dst));
-    (bytes32 creator, , uint64 subjAdm) = Subjects.get(D, FILE);
-    require(subjAdm != 0 && creator == A, "id(F) preserved with its original creator");
-    LensReader.Resolution memory r = rd2.resolve(lensOne(A), PURPOSE_HEAD, FILE, bytes32(0));
-    require(r.status == 1 && r.target == QUOTE_A1, "A's head selectable on the destination under A");
-    EvidenceData memory src = Evidence.get(D, srcId);
-    require(src.author == A && src.proofKind == PROOF_EOA_SIG && src.sourceGrade == GRADE_SIGNATURE_VERIFIED, "source evidence retained and graded");
-    require(src.realmId == ledger.realmId() && src.realmId != dst.realmId(), "source realm recorded, not relabelled");
-    EvidenceData memory au = Evidence.get(D, authId);
-    require(au.author == importer && au.importOf == srcId && au.realmId == dst.realmId(), "destination authority is the importer");
+    _assertImportedSubject(dst, rd2);
+    _assertImportEvidence(dst, srcId, authId, importer);
     require(Occurrences.get(IStoreRead(address(ix2)), QUOTE_A1) == 1, "destination index effects are new");
     // re-import of the same source publication is refused
-    Intent memory auth2 = _authFor(importer, 2, pkt);
-    try dst.importPublication(pkt, auth2, signWith(PK_I, dst, auth2)) {
+    try this.reimport(dst, importer) {
       revert("must reject");
     } catch (bytes memory err) {
       expectSel(err, Ledger.AlreadyAdmitted.selector, "duplicate import");
     }
+  }
+
+  /// external so the duplicate import can be caught; only callable by this test contract.
+  function reimport(Ledger dst, bytes32 importer) external {
+    require(msg.sender == address(this), "self only");
+    _importA1Into(dst, importer, 2);
   }
 
   function test_import_destinationRuleRejects_A2() public {
@@ -505,28 +525,70 @@ contract FixtureTest is LabBase {
     return EfsIds.publicationId(A, 1, keccak256(abi.encode(it.actions)));
   }
 
-  function test_twoRealms_sameContractAndSalt_differentSubject_importPreservesOrigin() public {
+  /// Deployment-bound identity (by design): the same contract + salt on two Ledger deployments — here on the
+  /// same chain — yields two principals and two subject ids; a verified import keeps the original principal
+  /// (test_import_preservesSubject_separatesAuthority); a NATIVE source cannot be imported at all.
+  function test_twoRealms_sameContractAndSalt_differentSubject_nativeImportUnsupported() public {
     bytes32 salt = keccak256("S");
     Action[] memory acts = new Action[](1);
     acts[0] = subjectAction(B, salt);
     (bytes32 pubB, ) = producer.publish(ledger, intentOf(B, ++nonceB, acts), noBodies(1));
     bytes32 s1 = EfsIds.subjectId(B, salt);
 
-    vm.chainId(31338);
     (, Ledger r3, ) = _deployRealmWith(POISON);
     bytes32 B3 = producer.principal(r3);
-    require(B3 != B, "same address, different Realm origin -> different principal");
+    require(B3 != B, "same address, different Ledger deployment -> different principal");
     acts[0] = subjectAction(B3, salt);
     producer.publish(r3, intentOf(B3, 1, acts), noBodies(1));
     require(EfsIds.subjectId(B3, salt) != s1, "same contract + salt on two Realms -> different subjectIds");
 
-    // import the realm-1 publication into realm 3 (native importer = the producer itself)
+    // a native (grade-zero) source publication is not importable: no witness, no attributed cell, no writes
     ImportPacket memory pkt = _packetOf(ledger, pubB);
     Intent memory auth = _authFor(B3, 2, pkt);
-    (bytes32 srcId, ) = producer.importInto(r3, pkt, auth);
-    (bytes32 creator, , uint64 adm) = Subjects.get(IStoreRead(address(r3)), s1);
-    require(adm != 0 && creator == B, "imported subject keeps its origin-qualified creator id");
-    require(Evidence.get(IStoreRead(address(r3)), srcId).sourceGrade == GRADE_UNVERIFIED_NATIVE, "native source evidence is unverified here");
+    try producer.importInto(r3, pkt, auth) {
+      revert("native source import must be unsupported");
+    } catch (bytes memory err) {
+      expectSel(err, Ledger.UnsupportedSourceProof.selector, "UnsupportedSourceProof expected");
+    }
+    (, , uint64 adm) = Subjects.get(IStoreRead(address(r3)), s1);
+    require(adm == 0, "no subject minted under the source principal");
+    require(!_evidenceExists(r3, pubB), "no attributed evidence cell either");
+  }
+
+  function _evidenceExists(Ledger lg, bytes32 pubId) internal view returns (bool) {
+    return Evidence.get(IStoreRead(address(lg)), pubId).author != bytes32(0);
+  }
+
+  /// BLOCKER regression: an importer forging a native-source packet that claims AUTHOR_B and rebinds B's head
+  /// must be rejected before any write; B's head and every index row stay unchanged.
+  function test_spoofViaImport_nativeSourceClaimingB_rejected_stateUnchanged() public {
+    _a1();
+    _b1();
+    (, Ledger dst, LensReader rd2) = _deployRealmWith(POISON);
+    _seedInto(dst, address(quoteAcceptor));
+    // legitimately move A's publication over so FILE exists on the destination, then B's real head
+    bytes32 importer = EfsIds.eoaPrincipal(vm.addr(PK_I));
+    _importA1Into(dst, importer, 1);
+    ImportPacket memory pkt = _packetOf(ledger, _pubIdA1());
+    // forge: claim B (native proof, no signature) and rebind B's head to QUOTE_A1 at the destination
+    pkt.source.author = B;
+    pkt.source.proofKind = PROOF_NATIVE;
+    pkt.source.nonce = 99;
+    pkt.actions = new Action[](1);
+    pkt.actions[0] = bindAction(PURPOSE_HEAD, FILE, bytes32(0), QUOTE_A1, 0);
+    pkt.bodies = new bytes[](1);
+    Intent memory auth = _authFor(importer, 2, pkt);
+    uint64 hw = dst.highWater();
+    try dst.importPublication(pkt, auth, signWith(PK_I, dst, auth)) {
+      revert("spoof via import must revert");
+    } catch (bytes memory err) {
+      expectSel(err, Ledger.UnsupportedSourceProof.selector, "UnsupportedSourceProof expected");
+    }
+    require(dst.highWater() == hw, "no admission");
+    LensReader.Resolution memory r = rd2.resolve(lensOne(B), PURPOSE_HEAD, FILE, bytes32(0));
+    require(r.status == 2, "B has no head on the destination (absent proven), nothing was selected as FOUND");
+    (, uint32 rev, ) = Bindings.get(IStoreRead(address(dst)), EfsIds.bindingKey(B, PURPOSE_HEAD, FILE, bytes32(0)));
+    require(rev == 0, "B's binding untouched");
   }
 
   // ---------------------------------------------------------------------------
@@ -537,7 +599,7 @@ contract FixtureTest is LabBase {
     _a1();
     _b1();
     LensReader.Page memory p1 = reader.list(_lensA(), PURPOSE_FOLDER, SWAPS, zeroCursor(), 1);
-    require(p1.items.length == 1 && p1.status == 2 && p1.next.position == 1 && p1.rawTotal == 2, "page one partial");
+    require(p1.items.length == 1 && p1.status == 2 && p1.next.position == 1 && p1.rawTotal == 2 && p1.selected == 1, "page one partial");
     uint64 basis = p1.next.basisAdmission;
     Action[] memory acts = new Action[](1);
     acts[0] = bindAction(PURPOSE_FOLDER, SWAPS, NAME2, FILE, 0); // admitted after the cursor's basis

@@ -3,9 +3,10 @@ pragma solidity 0.8.30;
 
 /*
  * Test helpers for the disposable Road C lab: fixture acceptors, the genuine producer
- * contract (AUTHOR_B), a fresh reader contract that reconstructs signatures from public
- * state, and a base contract with action/intent builders. Plain Solidity, `require`
- * assertions, no forge-std.
+ * contract (AUTHOR_B), a SELF-CHECK reader contract that re-derives signatures through the
+ * candidate's own table decoders, and a base contract with action/intent builders. Plain
+ * Solidity, `require` assertions, no forge-std. Stack discipline: builders assign struct
+ * fields (no 10-argument positional constructors), seeding is split into small helpers.
  */
 
 import { IStoreRead } from "@latticexyz/store/src/IStoreRead.sol";
@@ -89,45 +90,49 @@ contract Producer {
 }
 
 // ---------------------------------------------------------------------------
-// Fresh reader contract: reconstructs the signed digest from PUBLIC reads only
-// (Evidence cell + Admission rows) and recovers the signer. Realm/code come from
-// the retained cell, not from the Ledger being read.
+// SELF-CHECK reader: re-derives the signed digest from public reads (Evidence cell + Admission
+// rows) and recovers the signer. It decodes through the candidate's own table libraries and
+// hashes with EfsIds.intentDigest, so it is a consistency self-check of the candidate, NOT the
+// independent oracle: re-derivation from raw IStoreRead.getRecord bytes with an independent
+// encoder is owed by the oracle (oracle-boundary.md).
 // ---------------------------------------------------------------------------
 
 contract EvidenceReconstructor {
+  function actionFrom(AdmissionData memory ad) public pure returns (Action memory a) {
+    a.kind = ad.kind;
+    a.typeId = ad.typeId;
+    a.digestKind = ad.digestKind;
+    a.digest = ad.digest;
+    a.purpose = ad.purpose;
+    a.subject = ad.subject;
+    a.role = ad.role;
+    a.target = ad.target;
+    a.expectedRevision = ad.expectedRevision;
+    a.salt = ad.salt;
+  }
+
   function actionsOf(IStoreRead ledger, bytes32 publicationId) public view returns (Action[] memory acts, EvidenceData memory ev) {
     ev = Evidence.get(ledger, publicationId);
     acts = new Action[](ev.leafCount);
     for (uint256 i = 0; i < ev.leafCount; i++) {
       AdmissionData memory ad = Admissions.get(ledger, ev.firstAdmission + uint64(i));
       require(ad.publicationId == publicationId, "row belongs to another publication");
-      acts[i] = Action(
-        ad.kind,
-        ad.typeId,
-        ad.digestKind,
-        ad.digest,
-        ad.purpose,
-        ad.subject,
-        ad.role,
-        ad.target,
-        ad.expectedRevision,
-        ad.salt
-      );
+      acts[i] = actionFrom(ad);
     }
   }
 
   function digestOf(Action[] memory acts, EvidenceData memory ev) public pure returns (bytes32 actionsHash, bytes32 digest) {
     actionsHash = keccak256(abi.encode(acts));
-    digest = EfsIds.intentDigest(
-      ev.realmId,
-      ev.coreCodeCommitment,
-      ev.author,
-      ev.nonce,
-      ev.deadline,
-      ev.acceptanceProfile,
-      ev.indexObligations,
-      actionsHash
-    );
+    DigestInput memory d;
+    d.realmId = ev.realmId;
+    d.coreCodeCommitment = ev.coreCodeCommitment;
+    d.author = ev.author;
+    d.nonce = ev.nonce;
+    d.deadline = ev.deadline;
+    d.acceptanceProfile = ev.acceptanceProfile;
+    d.indexObligations = ev.indexObligations;
+    d.actionsHash = actionsHash;
+    digest = EfsIds.intentDigest(d);
   }
 
   function reconstruct(
@@ -177,7 +182,7 @@ abstract contract LabBase {
 
   address internal aAddr;
   bytes32 internal A; // AUTHOR_A principal (EOA, chain-independent)
-  bytes32 internal B; // AUTHOR_B principal (producer contract, origin-qualified)
+  bytes32 internal B; // AUTHOR_B principal (producer contract, deployment-qualified)
   bytes32 internal SELF; // this test contract's native principal
   uint64 internal nonceSelf;
   uint64 internal nonceA;
@@ -222,59 +227,34 @@ abstract contract LabBase {
     return IStoreRead(address(index));
   }
 
-  // ---- builders ------------------------------------------------------------
+  // ---- builders (field assignment keeps the stack shallow) --------------------
 
-  function declareTypeAction(bytes memory body, address acceptor) internal pure returns (Action memory) {
-    return
-      Action(
-        KIND_DECLARE_TYPE,
-        TYPE_META,
-        DIGEST_BODY_HASH,
-        keccak256(body),
-        bytes32(0),
-        bytes32(0),
-        bytes32(0),
-        bytes32(uint256(uint160(acceptor))),
-        0,
-        bytes32(0)
-      );
+  function declareTypeAction(bytes memory body, address acceptor) internal pure returns (Action memory a) {
+    a.kind = KIND_DECLARE_TYPE;
+    a.typeId = TYPE_META;
+    a.digestKind = DIGEST_BODY_HASH;
+    a.digest = keccak256(body);
+    a.target = bytes32(uint256(uint160(acceptor)));
   }
 
-  function recordAction(bytes32 typeId, bytes memory body) internal pure returns (Action memory) {
-    return
-      Action(
-        KIND_RECORD,
-        typeId,
-        DIGEST_BODY_HASH,
-        keccak256(body),
-        bytes32(0),
-        bytes32(0),
-        bytes32(0),
-        bytes32(0),
-        0,
-        bytes32(0)
-      );
+  function recordAction(bytes32 typeId, bytes memory body) internal pure returns (Action memory a) {
+    a.kind = KIND_RECORD;
+    a.typeId = typeId;
+    a.digestKind = DIGEST_BODY_HASH;
+    a.digest = keccak256(body);
   }
 
-  function reuseAction(bytes32 typeId, bytes32 recordId) internal pure returns (Action memory) {
-    return
-      Action(KIND_RECORD, typeId, DIGEST_RECORD_ID, recordId, bytes32(0), bytes32(0), bytes32(0), bytes32(0), 0, bytes32(0));
+  function reuseAction(bytes32 typeId, bytes32 recordId) internal pure returns (Action memory a) {
+    a.kind = KIND_RECORD;
+    a.typeId = typeId;
+    a.digestKind = DIGEST_RECORD_ID;
+    a.digest = recordId;
   }
 
-  function subjectAction(bytes32 author, bytes32 salt) internal pure returns (Action memory) {
-    return
-      Action(
-        KIND_SUBJECT,
-        bytes32(0),
-        0,
-        bytes32(0),
-        bytes32(0),
-        EfsIds.subjectId(author, salt),
-        bytes32(0),
-        bytes32(0),
-        0,
-        salt
-      );
+  function subjectAction(bytes32 author, bytes32 salt) internal pure returns (Action memory a) {
+    a.kind = KIND_SUBJECT;
+    a.subject = EfsIds.subjectId(author, salt);
+    a.salt = salt;
   }
 
   function bindAction(
@@ -283,31 +263,34 @@ abstract contract LabBase {
     bytes32 role,
     bytes32 target,
     uint32 expectedRevision
-  ) internal pure returns (Action memory) {
-    return Action(KIND_BIND, bytes32(0), 0, bytes32(0), purpose, subject, role, target, expectedRevision, bytes32(0));
+  ) internal pure returns (Action memory a) {
+    a.kind = KIND_BIND;
+    a.purpose = purpose;
+    a.subject = subject;
+    a.role = role;
+    a.target = target;
+    a.expectedRevision = expectedRevision;
   }
 
   function intentOf(bytes32 author, uint64 nonce, Action[] memory actions) internal pure returns (Intent memory it) {
     it.author = author;
     it.nonce = nonce;
-    it.deadline = 0;
     it.acceptanceProfile = ACCEPTANCE_PROFILE_V1;
     it.indexObligations = INDEX_OBLIGATIONS_V1;
     it.actions = actions;
   }
 
   function digestOf(Ledger lg, Intent memory it) internal view returns (bytes32) {
-    return
-      EfsIds.intentDigest(
-        lg.realmId(),
-        address(lg).codehash,
-        it.author,
-        it.nonce,
-        it.deadline,
-        it.acceptanceProfile,
-        it.indexObligations,
-        keccak256(abi.encode(it.actions))
-      );
+    DigestInput memory d;
+    d.realmId = lg.realmId();
+    d.coreCodeCommitment = address(lg).codehash;
+    d.author = it.author;
+    d.nonce = it.nonce;
+    d.deadline = it.deadline;
+    d.acceptanceProfile = it.acceptanceProfile;
+    d.indexObligations = it.indexObligations;
+    d.actionsHash = keccak256(abi.encode(it.actions));
+    return EfsIds.intentDigest(d);
   }
 
   function signWith(uint256 pk, Ledger lg, Intent memory it) internal view returns (Sig memory s) {
@@ -348,7 +331,6 @@ abstract contract LabBase {
   function lensOne(bytes32 p0) internal pure returns (LensReader.Lens memory l) {
     l.principals = new bytes32[](1);
     l.principals[0] = p0;
-    l.mode = 0;
   }
 
   function expectSel(bytes memory err, bytes4 sel, string memory what) internal pure {
@@ -357,45 +339,69 @@ abstract contract LabBase {
 
   // ---- fixture step 1: types, items, pair (native, from this contract) -----
 
-  function _seedInto(Ledger lg, address quoteAcceptorAddr) internal {
-    bytes32 self = EfsIds.contractPrincipal(lg.realmOrigin(), address(this));
-    bytes32[] memory none = new bytes32[](0);
-    bytes memory itemT = typeBody(keccak256("Item"), none);
-    ITEM_T = EfsIds.recordId(TYPE_META, keccak256(itemT));
+  function _itemTypeBody() internal pure returns (bytes memory) {
+    return typeBody(keccak256("Item"), new bytes32[](0));
+  }
+
+  function _pairTypeBody() internal view returns (bytes memory) {
     bytes32[] memory two = new bytes32[](2);
     two[0] = ITEM_T;
     two[1] = ITEM_T;
-    bytes memory pairT = typeBody(keccak256("Pair"), two);
-    PAIR_T = EfsIds.recordId(TYPE_META, keccak256(pairT));
+    return typeBody(keccak256("Pair"), two);
+  }
+
+  function _quoteTypeBody() internal view returns (bytes memory) {
     bytes32[] memory one = new bytes32[](1);
     one[0] = PAIR_T;
-    bytes memory quoteT = typeBody(keccak256("Quote"), one);
-    QUOTE_T = EfsIds.recordId(TYPE_META, keccak256(quoteT));
+    return typeBody(keccak256("Quote"), one);
+  }
 
-    bytes memory eth = recordBody(none, bytes("ETH"));
-    bytes memory usdc = recordBody(none, bytes("USDC"));
-    ITEM_ETH = EfsIds.recordId(ITEM_T, keccak256(eth));
-    ITEM_USDC = EfsIds.recordId(ITEM_T, keccak256(usdc));
+  function _ethBody() internal pure returns (bytes memory) {
+    return recordBody(new bytes32[](0), bytes("ETH"));
+  }
+
+  function _usdcBody() internal pure returns (bytes memory) {
+    return recordBody(new bytes32[](0), bytes("USDC"));
+  }
+
+  function _pairBody() internal view returns (bytes memory) {
     bytes32[] memory refs = new bytes32[](2);
     refs[0] = ITEM_ETH;
     refs[1] = ITEM_USDC;
-    bytes memory pairB = recordBody(refs, bytes(""));
-    PAIR = EfsIds.recordId(PAIR_T, keccak256(pairB));
+    return recordBody(refs, bytes(""));
+  }
 
-    Action[] memory acts = new Action[](6);
-    bytes[] memory bodies = new bytes[](6);
-    acts[0] = declareTypeAction(itemT, address(passAcceptor));
-    bodies[0] = itemT;
-    acts[1] = declareTypeAction(pairT, address(passAcceptor));
-    bodies[1] = pairT;
-    acts[2] = declareTypeAction(quoteT, quoteAcceptorAddr);
-    bodies[2] = quoteT;
-    acts[3] = recordAction(ITEM_T, eth);
-    bodies[3] = eth;
-    acts[4] = recordAction(ITEM_T, usdc);
-    bodies[4] = usdc;
-    acts[5] = recordAction(PAIR_T, pairB); // ordered-prefix: sees the two Items admitted just before
-    bodies[5] = pairB;
+  /// Computes the fixture ids (Types are content-derived; the acceptor address is not part of typeId).
+  function _computeFixtureIds() internal {
+    ITEM_T = EfsIds.recordId(TYPE_META, keccak256(_itemTypeBody()));
+    PAIR_T = EfsIds.recordId(TYPE_META, keccak256(_pairTypeBody()));
+    QUOTE_T = EfsIds.recordId(TYPE_META, keccak256(_quoteTypeBody()));
+    ITEM_ETH = EfsIds.recordId(ITEM_T, keccak256(_ethBody()));
+    ITEM_USDC = EfsIds.recordId(ITEM_T, keccak256(_usdcBody()));
+    PAIR = EfsIds.recordId(PAIR_T, keccak256(_pairBody()));
+  }
+
+  function _seedActions(address quoteAcceptorAddr) internal view returns (Action[] memory acts, bytes[] memory bodies) {
+    acts = new Action[](6);
+    bodies = new bytes[](6);
+    bodies[0] = _itemTypeBody();
+    acts[0] = declareTypeAction(bodies[0], address(passAcceptor));
+    bodies[1] = _pairTypeBody();
+    acts[1] = declareTypeAction(bodies[1], address(passAcceptor));
+    bodies[2] = _quoteTypeBody();
+    acts[2] = declareTypeAction(bodies[2], quoteAcceptorAddr);
+    bodies[3] = _ethBody();
+    acts[3] = recordAction(ITEM_T, bodies[3]);
+    bodies[4] = _usdcBody();
+    acts[4] = recordAction(ITEM_T, bodies[4]);
+    bodies[5] = _pairBody();
+    acts[5] = recordAction(PAIR_T, bodies[5]); // ordered-prefix: sees the two Items admitted just before
+  }
+
+  function _seedInto(Ledger lg, address quoteAcceptorAddr) internal {
+    _computeFixtureIds();
+    (Action[] memory acts, bytes[] memory bodies) = _seedActions(quoteAcceptorAddr);
+    bytes32 self = EfsIds.contractPrincipal(lg.realmOrigin(), address(this));
     lg.publishNative(intentOf(self, ++nonceSelf, acts), bodies);
   }
 
@@ -406,15 +412,15 @@ abstract contract LabBase {
   // ---- fixture steps 2–4 ---------------------------------------------------
 
   function _a1Intent() internal view returns (Intent memory it, bytes[] memory bodies) {
-    bytes memory b = quoteBody(PAIR, 2_500_000_000);
+    bytes32 file = EfsIds.subjectId(A, SALT_F);
     Action[] memory acts = new Action[](5);
     bodies = new bytes[](5);
+    bodies[1] = quoteBody(PAIR, 2_500_000_000);
     acts[0] = subjectAction(A, SALT_F);
-    acts[1] = recordAction(QUOTE_T, b);
-    bodies[1] = b;
-    acts[2] = bindAction(PURPOSE_HEAD, EfsIds.subjectId(A, SALT_F), bytes32(0), EfsIds.recordId(QUOTE_T, keccak256(b)), 0);
-    acts[3] = bindAction(PURPOSE_FOLDER, SWAPS, NAME, EfsIds.subjectId(A, SALT_F), 0);
-    acts[4] = bindAction(PURPOSE_TAG, EfsIds.subjectId(A, SALT_F), MARKET, TAG_ASSERT, 0);
+    acts[1] = recordAction(QUOTE_T, bodies[1]);
+    acts[2] = bindAction(PURPOSE_HEAD, file, bytes32(0), EfsIds.recordId(QUOTE_T, keccak256(bodies[1])), 0);
+    acts[3] = bindAction(PURPOSE_FOLDER, SWAPS, NAME, file, 0);
+    acts[4] = bindAction(PURPOSE_TAG, file, MARKET, TAG_ASSERT, 0);
     it = intentOf(A, 1, acts);
   }
 
@@ -428,12 +434,11 @@ abstract contract LabBase {
   }
 
   function _a2Intent() internal view returns (Intent memory it, bytes[] memory bodies) {
-    bytes memory b = quoteBody(PAIR, 2_502_000_000);
     Action[] memory acts = new Action[](2);
     bodies = new bytes[](2);
-    acts[0] = recordAction(QUOTE_T, b);
-    bodies[0] = b;
-    acts[1] = bindAction(PURPOSE_HEAD, FILE, bytes32(0), EfsIds.recordId(QUOTE_T, keccak256(b)), 1); // CAS against A1
+    bodies[0] = quoteBody(PAIR, 2_502_000_000);
+    acts[0] = recordAction(QUOTE_T, bodies[0]);
+    acts[1] = bindAction(PURPOSE_HEAD, FILE, bytes32(0), EfsIds.recordId(QUOTE_T, keccak256(bodies[0])), 1); // CAS against A1
     it = intentOf(A, 2, acts);
   }
 
@@ -447,12 +452,11 @@ abstract contract LabBase {
 
   /// step 4: AUTHOR_B (the producer contract) publishes QUOTE_B1 natively: record + its own head + its own placement
   function _b1() internal returns (bytes32 pubId) {
-    bytes memory b = quoteBody(PAIR, 2_501_000_000);
-    QUOTE_B1 = EfsIds.recordId(QUOTE_T, keccak256(b));
     Action[] memory acts = new Action[](3);
     bytes[] memory bodies = new bytes[](3);
-    acts[0] = recordAction(QUOTE_T, b);
-    bodies[0] = b;
+    bodies[0] = quoteBody(PAIR, 2_501_000_000);
+    QUOTE_B1 = EfsIds.recordId(QUOTE_T, keccak256(bodies[0]));
+    acts[0] = recordAction(QUOTE_T, bodies[0]);
     acts[1] = bindAction(PURPOSE_HEAD, FILE, bytes32(0), QUOTE_B1, 0);
     acts[2] = bindAction(PURPOSE_FOLDER, SWAPS, NAME, FILE, 0);
     (pubId, ) = producer.publish(ledger, intentOf(B, ++nonceB, acts), bodies);
@@ -464,47 +468,50 @@ abstract contract LabBase {
     (pubId, ) = ledger.publishSigned(it, bodies, signWith(PK_A, ledger, it));
   }
 
-  // ---- export helpers (public reads only) ----------------------------------
+  // ---- export helpers (public reads only; candidate decoders => self-check grade) ----
+
+  function _sourceOf(EvidenceData memory ev) internal pure returns (SourceEvidence memory s) {
+    s.realmId = ev.realmId;
+    s.coreCodeCommitment = ev.coreCodeCommitment;
+    s.author = ev.author;
+    s.proofKind = ev.proofKind;
+    s.v = ev.v;
+    s.r = ev.r;
+    s.s = ev.s;
+    s.nonce = ev.nonce;
+    s.deadline = ev.deadline;
+    s.acceptanceProfile = ev.acceptanceProfile;
+    s.indexObligations = ev.indexObligations;
+    s.firstAdmission = ev.firstAdmission;
+    s.leafCount = ev.leafCount;
+    s.basis = ev.basis;
+  }
+
+  function _actionFrom(AdmissionData memory ad) internal pure returns (Action memory a) {
+    a.kind = ad.kind;
+    a.typeId = ad.typeId;
+    a.digestKind = ad.digestKind;
+    a.digest = ad.digest;
+    a.purpose = ad.purpose;
+    a.subject = ad.subject;
+    a.role = ad.role;
+    a.target = ad.target;
+    a.expectedRevision = ad.expectedRevision;
+    a.salt = ad.salt;
+  }
 
   function _packetOf(Ledger src, bytes32 pubId) internal view returns (ImportPacket memory pkt) {
     IStoreRead s = IStoreRead(address(src));
     EvidenceData memory ev = Evidence.get(s, pubId);
-    pkt.source = SourceEvidence(
-      ev.realmId,
-      ev.coreCodeCommitment,
-      ev.author,
-      ev.proofKind,
-      ev.v,
-      ev.r,
-      ev.s,
-      ev.nonce,
-      ev.deadline,
-      ev.acceptanceProfile,
-      ev.indexObligations,
-      ev.firstAdmission,
-      ev.leafCount,
-      ev.basis
-    );
+    pkt.source = _sourceOf(ev);
     pkt.actions = new Action[](ev.leafCount);
     pkt.bodies = new bytes[](ev.leafCount);
     for (uint256 i = 0; i < ev.leafCount; i++) {
       AdmissionData memory ad = Admissions.get(s, ev.firstAdmission + uint64(i));
-      pkt.actions[i] = Action(
-        ad.kind,
-        ad.typeId,
-        ad.digestKind,
-        ad.digest,
-        ad.purpose,
-        ad.subject,
-        ad.role,
-        ad.target,
-        ad.expectedRevision,
-        ad.salt
-      );
+      pkt.actions[i] = _actionFrom(ad);
       if (ad.kind == KIND_RECORD && ad.digestKind == DIGEST_BODY_HASH) {
         (, , pkt.bodies[i]) = Records.get(s, EfsIds.recordId(ad.typeId, ad.digest));
-      }
-      if (ad.kind == KIND_DECLARE_TYPE) {
+      } else if (ad.kind == KIND_DECLARE_TYPE) {
         (, , pkt.bodies[i]) = Records.get(s, EfsIds.recordId(TYPE_META, ad.digest));
       }
     }
@@ -512,18 +519,9 @@ abstract contract LabBase {
 
   function _authFor(bytes32 importer, uint64 nonce, ImportPacket memory pkt) internal pure returns (Intent memory) {
     Action[] memory acts = new Action[](1);
-    acts[0] = Action(
-      KIND_IMPORT,
-      bytes32(0),
-      DIGEST_PACKET,
-      keccak256(abi.encode(pkt.source, pkt.actions)),
-      bytes32(0),
-      bytes32(0),
-      bytes32(0),
-      bytes32(0),
-      0,
-      bytes32(0)
-    );
+    acts[0].kind = KIND_IMPORT;
+    acts[0].digestKind = DIGEST_PACKET;
+    acts[0].digest = keccak256(abi.encode(pkt.source, pkt.actions));
     return intentOf(importer, nonce, acts);
   }
 }

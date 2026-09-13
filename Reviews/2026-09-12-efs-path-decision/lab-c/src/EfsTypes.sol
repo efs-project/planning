@@ -26,13 +26,17 @@ uint8 constant PROOF_EOA_SIG = 2; // author = EOA principal recovered from the E
 uint8 constant PRINCIPAL_EOA = 1; // realmOrigin = 0 (chain-independent)
 uint8 constant PRINCIPAL_CONTRACT = 2; // realmOrigin = keccak(chainId, coreCodeCommitment)
 
-uint8 constant GRADE_NONE = 0;
+// Source-evidence grade of an Evidence cell. Grade zero = no verified source witness (native admissions at
+// their own Realm). Coordinator handoff: a native (grade-zero) SOURCE can never authorise writes as that
+// principal at a destination; this probe REJECTS such imports (`UnsupportedSourceProof`) — no attributed
+// cell is minted either — until a chain-state witness profile exists.
+uint8 constant GRADE_UNVERIFIED = 0;
 uint8 constant GRADE_SIGNATURE_VERIFIED = 1; // imported EOA evidence re-verified at the destination
-uint8 constant GRADE_UNVERIFIED_NATIVE = 2; // imported native evidence: no chain-state witness in this lab
 
 // ---- domain tags -------------------------------------------------------------
 bytes32 constant TAG_SUBJECT = keccak256("efs2/subject/1");
 bytes32 constant TAG_REALM = keccak256("efs2/realm/1");
+bytes32 constant TAG_ORIGIN = keccak256("efs2/origin/1");
 bytes32 constant TYPE_META = keccak256("efs2/lab-c/type-meta/1");
 bytes32 constant ACCEPTANCE_PROFILE_V1 = keccak256("efs2/lab-c/acceptance/1");
 bytes32 constant INDEX_OBLIGATIONS_V1 = keccak256("efs2/lab-c/index-obligations/1");
@@ -152,6 +156,8 @@ interface IIndexModule {
   function obligationsId() external view returns (bytes32);
 
   function generation() external view returns (uint32);
+
+  function ledger() external view returns (address);
 }
 
 interface ILedgerView {
@@ -160,6 +166,21 @@ interface ILedgerView {
   function rulesEpoch() external view returns (uint32);
 
   function coreCodeCommitment() external view returns (bytes32);
+
+  function index() external view returns (address);
+}
+
+/// Inputs of the EIP-712 digest, passed as one memory struct so no function needs nine live stack slots
+/// (the vendored Store's non-memory-safe assembly disables via-IR's stack-to-memory mover).
+struct DigestInput {
+  bytes32 realmId;
+  bytes32 coreCodeCommitment;
+  bytes32 author;
+  uint64 nonce;
+  uint64 deadline;
+  bytes32 acceptanceProfile;
+  bytes32 indexObligations;
+  bytes32 actionsHash;
 }
 
 // ---- id formulas -------------------------------------------------------------
@@ -186,9 +207,13 @@ library EfsIds {
     return keccak256(abi.encode(kind, realmOrigin, account));
   }
 
-  /// realmOrigin = keccak(chainId, coreCodeCommitment) for contracts; zero for EOAs.
-  function realmOrigin(uint256 chainId, bytes32 coreCodeCommitment) internal pure returns (bytes32) {
-    return keccak256(abi.encode(chainId, coreCodeCommitment));
+  /// Deployment-bound identity (coordinator handoff): native identity is qualified by the ORIGINAL CHAIN +
+  /// LEDGER DEPLOYMENT + account, never by code hash alone. Two Ledger deployments on one chain are two
+  /// Realms with two origins BY DESIGN; a verified import keeps the original principal; the code hash is
+  /// recorded in the Evidence cell as execution evidence only.
+  /// realmOrigin = keccak("efs2/origin/1", chainId, ledgerAddress) for contracts; zero for EOAs.
+  function realmOrigin(uint256 chainId, address ledger) internal pure returns (bytes32) {
+    return keccak256(abi.encode(TAG_ORIGIN, chainId, ledger));
   }
 
   function eoaPrincipal(address account) internal pure returns (bytes32) {
@@ -203,30 +228,22 @@ library EfsIds {
     return keccak256(abi.encode(author, nonce, actionsHash));
   }
 
-  /// EIP-712 digest of a PublicationIntent; pure so a destination can recompute a source digest
-  /// from retained (realmId, coreCodeCommitment) alone.
-  function intentDigest(
-    bytes32 realmId,
-    bytes32 coreCodeCommitment,
-    bytes32 author,
-    uint64 nonce,
-    uint64 deadline,
-    bytes32 acceptanceProfile,
-    bytes32 indexObligations,
-    bytes32 actionsHash
-  ) internal pure returns (bytes32) {
+  /// EIP-712 digest of a PublicationIntent; pure so a destination can recompute a source digest from the
+  /// retained cell alone. Replay is bound to the source CHAIN + LEDGER DEPLOYMENT (realmId) as well as the
+  /// code (coreCodeCommitment) and rule context (acceptanceProfile, indexObligations) — coordinator handoff.
+  function intentDigest(DigestInput memory d) internal pure returns (bytes32) {
     bytes32 domain = keccak256(abi.encode(EIP712_DOMAIN_TYPEHASH, keccak256("EFS Lab C"), keccak256("1")));
     bytes32 structHash = keccak256(
       abi.encode(
         INTENT_TYPEHASH,
-        realmId,
-        coreCodeCommitment,
-        author,
-        nonce,
-        deadline,
-        acceptanceProfile,
-        indexObligations,
-        actionsHash
+        d.realmId,
+        d.coreCodeCommitment,
+        d.author,
+        d.nonce,
+        d.deadline,
+        d.acceptanceProfile,
+        d.indexObligations,
+        d.actionsHash
       )
     );
     return keccak256(abi.encodePacked("\x19\x01", domain, structHash));

@@ -37,10 +37,10 @@ One matched MUD-backed adapter (the coordinator's shortlist slot), built on the 
 `src/EfsStoreCore.sol` uses **`StoreRead` + `StoreCore` composition**, not `is Store`:
 
 - `Store` is `IStore` = `IStoreKernel` (`IStoreRead` + `IStoreWrite` + error interfaces) + `IStoreRegistration`. Inheriting it obliges the contract to implement 10 raw write selectors and 3 registration selectors (as reverts) and to advertise them in its ABI.
-- Composition inherits only `StoreRead` (12 view selectors) and calls the `StoreCore` library internally; initialization mirrors `StoreKernel`'s constructor (`StoreCore.initialize()`) and World's `InitModule` (`StoreCore.registerInternalTables()`), then registers the EFS tables. `HelloStore` is emitted and `storeVersion()` kept so log-driven MUD indexers can still decode the tables (ERC-7813 events are emitted unchanged by `StoreCore`).
-- No `registerStoreHook` path exists, so no hook can ever be attached or removed; the acceptance gate is the Ledger's entrypoint code, not a hook.
+- Composition inherits only `StoreRead` (13 view selectors) and calls the `StoreCore` library internally; initialization mirrors `StoreKernel`'s constructor (`StoreCore.initialize()`) and World's `InitModule` (`StoreCore.registerInternalTables()`), then registers the EFS tables. `HelloStore` is emitted and `storeVersion()` kept so log-driven MUD indexers can still decode the tables (ERC-7813 events are emitted unchanged by `StoreCore`).
+- No `registerStoreHook` path exists, so no hook can ever be attached or removed; the acceptance gate is the Ledger's entrypoint code, not a hook. The per-write `StoreHooks` lookup in `StoreCore.setRecord` is one cold SLOAD per (transaction, table), warm afterwards.
 
-**Denying raw writes is necessary, not sufficient** (the review's words). `test/RawWriteDenial.t.sol` calls all 13 inherited-but-absent selectors with *valid* arguments on both Stores and proves post-state absence; the semantic bypass tests (direct/batch/import/reuse, spoofed author, stale CAS, failed acceptance, failed index) are in `test/Fixture.t.sol`.
+**Denying raw writes is necessary, not sufficient** (the review's words). `test/RawWriteDenial.t.sol` feeds all 13 inherited-but-absent selectors table-correct inputs — validated by a PERMISSIVE `is Store` control (`test/OpenStore.sol`) on which the same inputs must succeed — to both Stores, checks that each call reverts and that row bytes, registry metadata (`Tables` layout/schemas, `ResourceIds`) and hook metadata (`StoreHooks`) are unchanged after every call, and covers attachment (zero/no-code rejected, one-shot, reciprocal, codehash-sealed), foreign writers and the missing fallback/receive on both contracts. These tests show the selectors are denied under valid inputs; they are not a proof that no write path exists. The semantic bypass tests (direct/batch/import/reuse, spoofed author, spoof-via-import, stale CAS, failed acceptance, failed index) are in `test/Fixture.t.sol`.
 
 ## External selector inventory (every reachable selector, both Stores)
 
@@ -68,14 +68,14 @@ Computed offline with a validated keccak; MUD user-defined value types encode as
 | Ledger | `0x44a8bd16` | `intentDigest(Intent)` | view |
 | Ledger | `0xa4469431` | `packetCommitment(ImportPacket)` | pure |
 | Ledger | `0x8f742b34` | `decodeBody(bytes)` | pure (self-called inside try/catch) |
-| Ledger | `0xf698da25` `0x490423a3` `0xd5bfc2c4` `0x0134956e` `0x2986c0e5` `0xb09e8797` `0xc28e1de8` | `domainSeparator() realmId() realmOrigin() coreCodeCommitment() index() highWater() rulesEpoch()` | view/pure |
+| Ledger | `0xf698da25` `0x490423a3` `0xd5bfc2c4` `0x0134956e` `0x2986c0e5` `0xb09e8797` `0xc28e1de8` + `decodeTypeBody(bytes)` `indexCodehash()` | `domainSeparator() realmId() realmOrigin() coreCodeCommitment() index() highWater() rulesEpoch()` | view/pure |
 | IndexModule | `0x7c749fe1` | `onPublication(bytes32,uint64,Effect[])` | **write, `msg.sender == ledger` only** |
 | IndexModule | `0x7a0ca1e2` | `attach(address)` | **write, deployer, one-shot** |
-| IndexModule | `0x88ee4687` `0x56397c35` `0xd5f39488` `0x9f68ad04` `0xe8f1e32e` `0x17219522` | `coverage(bytes32,bytes32) ledger() deployer() obligationsId() poisonConcept() generation()` + `COV_*`/`FAMILY_*` constant getters | view/pure |
+| IndexModule | `0x88ee4687` `0x56397c35` `0xd5f39488` `0x9f68ad04` `0xe8f1e32e` `0x17219522` + `ledgerCodehash()` | `coverage(bytes32,bytes32) ledger() deployer() obligationsId() poisonConcept() generation()` + `COV_*`/`FAMILY_*` constant getters | view/pure |
 | LensReader | `0xc4740258` `0xf9ab1c25` `0xdb506d77` `0x23eb41f8` `0xe4890acf` `0xdde9e782` `0xb09e8797` `0x56397c35` `0x2986c0e5` | `lensHash resolve resolveAt list listTagged history highWater ledger index` + constant getters | all view/pure |
 | QuoteConsumer | `0x0a879567` | `consume(address,address,Lens,bytes32)` | write (test consumer) |
 
-**Inherited but absent (must revert, no fallback/receive):** `setRecord 0x298314fb`, `spliceStaticData 0xb047c1eb`, `spliceDynamicData 0xc0a2895a`, `setField 0x114a7266`, `setField(+layout) 0x3708196e`, `setStaticField 0x390baae0`, `setDynamicField 0xef6ea862`, `pushToDynamicField 0x150f3262`, `popFromDynamicField 0xd9c03a04`, `deleteRecord 0x505a181d`, `registerTable 0x0ba51f49`, `registerStoreHook 0x530f4b60`, `unregisterStoreHook 0x05609129`. Neither contract declares `fallback` or `receive`. No proxy, no delegatecall, no callback into the Ledger from acceptance (acceptors are called with STATICCALL and a 300k gas cap); `IndexModule.onPublication` is a trusted-code CALL that could re-enter `publish*` — there is no reentrancy guard (documented in `TODO.md`).
+**Inherited but absent (must revert, no fallback/receive):** `setRecord 0x298314fb`, `spliceStaticData 0xb047c1eb`, `spliceDynamicData 0xc0a2895a`, `setField 0x114a7266`, `setField(+layout) 0x3708196e`, `setStaticField 0x390baae0`, `setDynamicField 0xef6ea862`, `pushToDynamicField 0x150f3262`, `popFromDynamicField 0xd9c03a04`, `deleteRecord 0x505a181d`, `registerTable 0x0ba51f49`, `registerStoreHook 0x530f4b60`, `unregisterStoreHook 0x05609129`. Neither contract declares `fallback` or `receive`. No proxy, no delegatecall, no callback into the Ledger from acceptance (acceptors are called with STATICCALL and a 300k gas cap); `IndexModule.onPublication` is a trusted-code CALL that could re-enter `publish*` — there is no reentrancy guard (documented in `TODO.md`). Every `ecrecover` is behind a `v ∈ {27,28}` and low-s guard.
 
 ## Authority manifest
 
@@ -83,9 +83,9 @@ Computed offline with a validated keccak; MUD user-defined value types encode as
 |---|---|---|
 | Publish (native/signed/import) | anyone; acceptance mandatory | permanent |
 | Write index tables | Ledger only | permanent |
-| `attach(ledger)` | deployer | until first call |
+| `attach(ledger)` | deployer; rejects zero/no-code and non-reciprocal Ledgers; seals address + codehash both ways | until first call |
 | Register a hook / raw write / upgrade / delegate | nobody (no path) | — |
-| Force an index failure | `poisonConcept` immutable (test lever; deploy with an unguessable value or zero to disable) | permanent |
+| Force an index failure | `poisonConcept` immutable (test lever; zero = disabled, which the measured deployment uses) | permanent |
 
 ## Fixture coordinates (for an independent oracle)
 
@@ -109,8 +109,8 @@ Full 64-hex words are in `src/tables/*.sol`; the encoder used to produce them wa
 
 ## Tests (plain Solidity, `require` assertions, hand-declared `Vm`, unrun)
 
-`test/RawWriteDenial.t.sol`: 13 raw selectors unreachable on both Stores with valid args + post-state absence; read surface works; index writer = Ledger only; attach one-shot; no fallback/receive.
-`test/Fixture.t.sol`: steps 1–6 (items/pair with checked refs; A1 signed fresh body with pre-absence; A2 CAS + history; B1 genuine producer contract; three Lenses agree across point/list/tag; move → path reuse → remove → restore with stable subject, tag and history), rejections with pre/post read-back (wrong-Type pair, missing pair rolls back the earlier subject mint, stale CAS, failed acceptance, failed mandatory index), signature mutations (name/target/subject/expectedRevision/order/typeId/digestKind/realm) then the original admits, exact retry, existing-body by another author and `digestKind=RECORD_ID` reuse (wrong Type rejected), spoofed AUTHOR_B from an EOA and an unrelated contract, **pre-seal 2** byte-identical digest + signer recovery from public state through a fresh reader contract and the flipped-discriminator negative, **pre-seal 3** import (source signature alone rejected; authorization must be held; wrong packet rejected; id(F) and source evidence preserved with grade; importer ≠ author is the destination authority; duplicate import refused; destination rule v2 rejects A2 that the source accepted), **pre-seal 1** same contract + salt on two Realms (via `vm.chainId`) → different subject ids and an import that keeps the origin-qualified creator, **pre-seal 4** basis-pinned continuation, stale generation, wrong scope, dedupe across authors, coverage COMPLETE/PARTIAL/UNKNOWN, and the unrelated paid consumer under all three Lenses.
+`test/RawWriteDenial.t.sol`: permissive `OpenStore` control accepts the inputs; 13 raw selectors denied on both Stores with row/registry/hook metadata unchanged after each call; read surface works; index writer = the sealed Ledger only; attach rejects zero/no-code/non-reciprocal and is one-shot; Ledger rejects zero/no-code modules and refuses an unattached/foreign module; no fallback/receive on either contract.
+`test/Fixture.t.sol`: steps 1–6 (items/pair with checked refs; A1 signed fresh body with pre-absence; A2 CAS + history; B1 genuine producer contract; three Lenses agree across point/list/tag; move → path reuse → remove → restore with stable subject, tag and history), rejections with pre/post read-back (wrong-Type pair, missing pair rolls back the earlier subject mint, stale CAS, failed acceptance, failed mandatory index), signature mutations (name/target/subject/expectedRevision/order/typeId/digestKind/realm) then the original admits, exact retry, existing-body by another author and `digestKind=RECORD_ID` reuse (wrong Type rejected), spoofed AUTHOR_B from an EOA and an unrelated contract, **pre-seal 2 (SELF-CHECK)** digest + signer recovery from public state through a reader contract that uses the candidate's own decoders and encoder — a consistency self-check, not the independent oracle re-derivation from raw `IStoreRead.getRecord` bytes, which is owed — plus the flipped-discriminator negative, **pre-seal 3** import (source signature alone rejected; authorization must be held; wrong packet rejected; id(F) and source evidence preserved with grade; importer ≠ author is the destination authority; duplicate import refused; destination rule v2 rejects A2 that the source accepted; a native-source packet claiming AUTHOR_B is rejected `UnsupportedSourceProof` with state unchanged), **pre-seal 1** deployment-bound identity: same contract + salt on two Ledger deployments → different principals and subject ids by design, native sources not importable, **pre-seal 4** basis-pinned continuation, stale generation, wrong scope, dedupe across authors, coverage COMPLETE/PARTIAL/UNKNOWN, and the unrelated paid consumer under all three Lenses.
 
 ## How the lease holder runs it (not run here)
 
@@ -121,6 +121,10 @@ forge test -vvv                # expect first-compile fixes; see TODO.md "compil
 anvil --chain-id 31337 --block-time 0 &   # finite, run-owned; kill afterwards
 RPC_URL=http://127.0.0.1:8545 ETHERS_PATH=/Users/james/Code/EFS/client/node_modules/ethers/lib.esm/index.js node script/measure.mjs > receipts.json
 ```
+
+## Identity (deployment-bound, by design)
+
+`realmOrigin = keccak("efs2/origin/1", chainId, ledgerAddress)`; contract principal = `(kind, realmOrigin, account)`; EOA principal = `(kind, 0, account)`. A signed intent replays only on its chain + Ledger deployment (`realmId`) with the same code (`coreCodeCommitment`) and rule context. A verified import keeps the original principal; the code hash is retained in the Evidence cell as execution evidence only.
 
 ## Classification
 

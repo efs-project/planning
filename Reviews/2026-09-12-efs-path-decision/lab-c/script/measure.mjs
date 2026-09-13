@@ -49,7 +49,7 @@ const action = (o) => ({ kind: 0, typeId: ZERO, digestKind: 0, digest: ZERO, pur
 const recordId = (typeId, bodyHash) => ethers.keccak256(coder.encode(["bytes32", "bytes32"], [typeId, bodyHash]));
 const subjectId = (principal, salt) => ethers.keccak256(coder.encode(["bytes32", "bytes32", "bytes32"], [TAG_SUBJECT, principal, salt]));
 const eoaPrincipal = (addr) => ethers.keccak256(coder.encode(["uint8", "bytes32", "address"], [1, ZERO, addr]));
-const contractPrincipal = (origin, addr) => ethers.keccak256(coder.encode(["uint8", "bytes32", "address"], [2, origin, addr]));
+const contractPrincipal = (origin, addr) => ethers.keccak256(coder.encode(["uint8", "bytes32", "address"], [2, origin, addr])); // origin = keccak("efs2/origin/1", chainId, ledger) as returned by ledger.realmOrigin()
 const actionsHash = (actions) => ethers.keccak256(coder.encode([`${ACTION_T}[]`], [actions]));
 const typeBody = (shape, refTypes) => coder.encode(["bytes32", "bytes32[]"], [shape, refTypes]);
 const recordBody = (refs, payload) => coder.encode(["bytes32[]", "bytes"], [refs, payload]);
@@ -100,7 +100,7 @@ async function send(op, promise, expectRevert = false) {
 async function main() {
   const net = await provider.getNetwork();
   // ---- setup -------------------------------------------------------------------------------
-  const index = await deploy("IndexModule", id("poison"));
+  const index = await deploy("IndexModule", ZERO); // poison lever disabled for the measured deployment
   const ledger = await deploy("Ledger", await index.getAddress());
   await send("setup:attach", index.attach(await ledger.getAddress()));
   const reader = await deploy("LensReader", await ledger.getAddress(), await index.getAddress());
@@ -200,6 +200,12 @@ async function main() {
     action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: FILE, target: QUOTE_B1 }),
     action({ kind: K.BIND, purpose: PURPOSE.FOLDER, subject: id("/swaps"), role: id("eth-usdc"), target: FILE }),
   ]), [b1Body, "0x", "0x"]));
+  // shape-matched 1-action fresh row (record only), so fresh vs existing compare like for like
+  const b2Body = recordBody([PAIR], quotePayload(2_503_000_000n));
+  rows.push({ op: "pre:QUOTE_B2 absent", value: !(await recordPresent(recordId(QUOTE_T, ethers.keccak256(b2Body)))) });
+  await send("contract-fresh-body-1action (B2 record only)", producer.publish(await ledger.getAddress(), bIntent([
+    action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(b2Body) }),
+  ]), [b2Body]));
   rows.push({ op: "pre:QUOTE_A1 present (for existing-body)", value: await recordPresent(QUOTE_A1) });
   await send("contract-existing-body (B republishes A1 bytes; new occurrence, reused content)", producer.publish(await ledger.getAddress(), bIntent([
     action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(a1Body) }),
@@ -214,7 +220,9 @@ async function main() {
   await send("stale-cas -> StaleCas", ledger.publishSigned(intent, ["0x"], sig), true);
   nonceA--; // the rejected nonce was not consumed
   ({ intent, sig } = await signedA([action({ kind: K.BIND, purpose: PURPOSE.TAG, subject: FILE, role: id("poison"), target: TAG_ASSERT })]));
-  await send("failed-mandatory-index -> IndexPoisoned (whole publication reverts)", ledger.publishSigned(intent, ["0x"], sig), true);
+  // the poison lever is disabled (zero) in the measured deployment; the late-index rollback row is covered by
+  // test/Fixture.t.sol (test_reject_failedIndex_rollback) and is reported as designed-but-unmeasured
+  unknown.push({ field: "operations.failed-mandatory-index", reason: "poisonConcept=0 in the measured deployment", consequence: "rollback gas unmeasured; semantics covered by the unit test" });
   nonceA--;
 
   // ---- supplemental controls (32-byte quotes, 41-byte binaries) under the Bytes type -----------
@@ -234,7 +242,7 @@ async function main() {
   reads.resolve_A_first = await reader.resolve(lensA, PURPOSE.HEAD, FILE, ZERO);
   reads.resolve_B_first = await reader.resolve(lensB, PURPOSE.HEAD, FILE, ZERO);
   reads.resolve_no_tiebreak = await reader.resolve(lensEq, PURPOSE.HEAD, FILE, ZERO);
-  const zeroCursor = { basisAdmission: 0, indexGeneration: 0, rulesEpoch: 0, coreCodeCommitment: ZERO, scopeKey: ZERO, lensHash: ZERO, position: 0, selectedSoFar: 0 };
+  const zeroCursor = { basisAdmission: 0, indexGeneration: 0, rulesEpoch: 0, coreCodeCommitment: ZERO, scopeKey: ZERO, lensHash: ZERO, position: 0 };
   reads.list_swaps_A_first = await reader.list(lensA, PURPOSE.FOLDER, id("/swaps"), zeroCursor, 10);
   reads.listTagged_swaps_market_A_first = await reader.listTagged(lensA, id("/swaps"), id("market"), zeroCursor, 10);
   reads.eth_call_gas_resolve = (await reader.resolve.estimateGas(lensA, PURPOSE.HEAD, FILE, ZERO)).toString();

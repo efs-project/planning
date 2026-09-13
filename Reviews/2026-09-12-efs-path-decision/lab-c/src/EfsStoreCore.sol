@@ -8,7 +8,7 @@ pragma solidity 0.8.30;
  *   - `Store` is `IStore` = IStoreKernel (IStoreRead + IStoreWrite + …) + IStoreRegistration.
  *     Inheriting it would force this contract to implement 10 raw write selectors and
  *     3 registration selectors (as reverts) and to advertise them in its ABI.
- *   - Composition inherits only `StoreRead` (12 IStoreRead view selectors) and calls the
+ *   - Composition inherits only `StoreRead` (13 IStoreRead view selectors) and calls the
  *     `StoreCore` library internally. The vendored Store therefore contributes NO external
  *     write or registration path; the only state-changing selectors are the ones the
  *     derived contract declares (Ledger: publishNative/publishSigned; IndexModule:

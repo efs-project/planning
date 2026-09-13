@@ -32,9 +32,9 @@
   "deployment": {
     "chain": { "chainId": { "value": null, "unknown_reason": "fresh Anvil at lease time (expected 31337)", "consequence": "realmId and contract principals depend on it" }, "genesis": "anvil default", "blockGasLimit": "anvil default (30M)" },
     "contracts": {
-      "IndexModule": { "constructor": ["poison = keccak('poison') (TEST LEVER, immutable)"], "address": null, "codehash": null },
+      "IndexModule": { "constructor": ["poison = 0 in the measured deployment (TEST LEVER disabled); keccak('poison') only in unit tests"], "address": null, "codehash": null },
       "Ledger": { "constructor": ["index address"], "address": null, "codehash": null },
-      "attach": "index.attach(ledger) by the deployer, one-shot; afterwards no privileged function exists",
+      "attach": "index.attach(ledger) by the deployer, one-shot, rejects zero/no-code/non-reciprocal, seals ledger address + codehash; the Ledger seals the module codehash at construction and checks address+codehash+reciprocity before every dispatch; afterwards no privileged function exists",
       "LensReader": { "constructor": ["ledger", "index"], "address": null },
       "PassAcceptor / QuoteAcceptorV1 / Producer / QuoteConsumer": { "address": null }
     },
@@ -45,7 +45,7 @@
       "rawStoreWrites": "unreachable on both contracts (13 inherited-but-absent selectors, test/RawWriteDenial.t.sol)",
       "upgrade": "none",
       "delegation": "none (World is not used)",
-      "testLevers": ["IndexModule.poisonConcept (immutable)", "QuoteAcceptorV2 (destination rule)"]
+      "testLevers": ["IndexModule.poisonConcept (immutable; zero = disabled, used for the measured deployment)", "QuoteAcceptorV2 (destination rule)"]
     },
     "setupReceipts": { "value": null, "unknown_reason": "not run; script/measure.mjs rows deploy:* and setup:*", "consequence": "setup amortization unpriced" }
   },
@@ -73,7 +73,7 @@
       "verified": "all four recomputed offline with a pure-Python keccak and by ethers in script/measure.mjs before any deploy"
     },
     "ids": {
-      "principal": "keccak(abi.encode(uint8 kind, bytes32 realmOrigin, address)); EOA kind=1 origin=0; contract kind=2 origin=keccak(abi.encode(chainId, ledger.codehash))",
+      "principal": "keccak(abi.encode(uint8 kind, bytes32 realmOrigin, address)); EOA kind=1 origin=0; contract kind=2 origin=keccak(abi.encode(keccak('efs2/origin/1'), chainId, ledgerAddress)) — deployment-bound by design; codehash is execution evidence only",
       "subjectId": "keccak(abi.encode(keccak('efs2/subject/1'), principalId, creatorSalt))",
       "bindingKey": "keccak(abi.encode(author, purpose, subject, role))",
       "publicationId": "keccak(abi.encode(author, nonce, keccak(abi.encode(actions))))",
@@ -90,11 +90,12 @@
     { "row": "signed-fresh-body-create", "logical": "A1 subject+record+head+placement+tag (5 actions, 1 tx, 1 signature)", "kind": "fresh Record", "preCheck": "QUOTE_A1 absent via getStaticField(Records, firstAdmission)==0", "gas": { "label": "ESTIMATED", "value": "≈ 9 fresh-slot writes for Evidence(11 slots)… see TODO.md; unmeasured" } },
     { "row": "signed-edit", "logical": "A2 record + head CAS(1)", "kind": "fresh Record + rebind", "gas": { "label": "UNKNOWN", "value": null } },
     { "row": "contract-fresh-body", "logical": "B1 from Producer: record + own head + own placement", "kind": "fresh Record, native author", "preCheck": "QUOTE_B1 absent", "gas": { "label": "UNKNOWN", "value": null } },
+    { "row": "contract-fresh-body-1action", "logical": "B2 from Producer: record only (shape-matched to the existing-body rows)", "kind": "fresh Record, native author", "preCheck": "QUOTE_B2 absent", "gas": { "label": "UNKNOWN", "value": null } },
     { "row": "contract-existing-body", "logical": "B republishes A1 bytes", "kind": "existing Record / new occurrence", "preCheck": "QUOTE_A1 present", "gas": { "label": "UNKNOWN", "value": null } },
     { "row": "contract-existing-body-by-recordId", "logical": "digestKind=RECORD_ID reuse, empty body", "kind": "existing Record / new occurrence", "gas": { "label": "UNKNOWN", "value": null } },
     { "row": "exact-retry", "logical": "A1 resubmitted with the same signature", "expected": "revert AlreadyAdmitted; receipt gas of the failed tx recorded", "gas": { "label": "UNKNOWN", "value": null } },
     { "row": "stale-cas", "expected": "revert StaleCas", "gas": { "label": "UNKNOWN", "value": null } },
-    { "row": "failed-mandatory-index", "expected": "revert IndexPoisoned from the separate IndexModule; no Record/Evidence/index row", "gas": { "label": "UNKNOWN", "value": null } },
+    { "row": "failed-mandatory-index", "expected": "revert IndexPoisoned from the separate IndexModule; no Record/Evidence/index row", "gas": { "label": "UNKNOWN", "value": null, "unknown_reason": "poison lever is zero (disabled) in the measured deployment; covered by the unit test only" } },
     { "row": "control-quote3000/3100/file41a/file41b", "logical": "one Bytes record each, signed", "gas": { "label": "UNKNOWN", "value": null } },
     { "row": "paid-consumer-read", "logical": "QuoteConsumer.consume under A-first, B-first, no-tiebreak(revert)", "gas": { "label": "UNKNOWN", "value": null } },
     { "row": "omitted joined obligations", "list": ["export/import against a second real chain (only same-chain second Realm and vm.chainId in tests)", "byte carrier availability/integrity", "fixture step 10 rule activation (only a destination-side stricter acceptor is tested)", "encrypted content", "populated testnet upgrade", "cold static browser"] }
@@ -102,7 +103,7 @@
   "reads": {
     "basis": "block hash + Ledger highWater admission ordinal; LensReader cursors pin (basisAdmission, indexGeneration, rulesEpoch, coreCodeCommitment, scopeKey, lensHash, position)",
     "decoder": "hand-written MUD-style table libraries (src/tables/*.sol) — candidate code; an independent oracle must re-derive from IStoreRead bytes + the FieldLayout/Schema words in README",
-    "cursorSemantics": "continuation at an older basis is answered via BindingHistory; stale generation/epoch/code reverts StaleCursor; wrong scope/lens reverts CursorMismatch",
+    "cursorSemantics": "cursor = (basisAdmission, indexGeneration, rulesEpoch, coreCodeCommitment, scopeKey, lensHash, position); continuation at an older basis is answered via BindingHistory; stale generation/epoch/code reverts StaleCursor; wrong scope/lens reverts CursorMismatch; Page.selected counts this page only",
     "expectedResults": { "LENS_A_FIRST": "QUOTE_A2", "LENS_B_FIRST": "QUOTE_B1", "LENS_NO_TIEBREAK": "CONFLICT (status 3, no target)", "folder /swaps": "one selected entry (dedupe across A's and B's placements)", "tag market in /swaps": "FILE under both ordered lenses" },
     "consumer": { "source": "src/Consumer.sol", "hash": null, "privileges": "none; uses LensReader public ABI + IStoreRead; Records table coordinate pinned as a literal" },
     "rpcAccounting": { "value": null, "unknown_reason": "script counts its own JSON-RPC calls/bytes/latency only; no browser", "consequence": "browser rows stay UNKNOWN" }
@@ -110,7 +111,7 @@
   "evidence": {
     "receipts": { "value": null, "unknown_reason": "not run", "consequence": "no cost claim" },
     "storageGrowth": { "value": null, "unknown_reason": "no slot diff in script", "consequence": "persistent words per op UNKNOWN; ESTIMATED slot counts in TODO.md" },
-    "reconstruction": "test_reconstruct_signature_from_state: digest and signer recovered from Evidence + Admission rows through a fresh reader contract; negative: flipped discriminator changes the digest",
+    "reconstruction": "SELF-CHECK only: test_selfcheck_reconstruct_signature_from_state recovers digest and signer from Evidence + Admission rows through a reader contract that uses the candidate's table decoders and EfsIds.intentDigest; the expected digest uses the same encoder. Independent oracle re-derivation from raw IStoreRead.getRecord bytes with an independent encoder is OWED (oracle-boundary.md). Negative: flipped discriminator changes the digest.",
     "proofGrade": "receipts + read-back only; no state proofs; transcripts are not proofs",
     "mutationSeeds": "test/Fixture.t.sol (name/target/subject/expectedRevision/order/typeId/digestKind/realm)"
   },
@@ -120,9 +121,9 @@
     "processIds": null, "ports": null, "buildDirs": ["lab-c/out", "lab-c/cache"], "cleanup": "rm -rf lab-c/out lab-c/cache only"
   },
   "preSealChecks": {
-    "1_originQualifiedIdentity": { "status": "designed, tests written, unrun", "open": "realmOrigin = keccak(chainId, coreCodeCommitment) makes two same-code Realms on ONE chain share contract principals (and therefore subject ids); tests therefore use vm.chainId for the two-Realm case. Ask: should realmOrigin also bind the Ledger address (as realmId does)?" },
+    "1_originQualifiedIdentity": { "status": "designed, tests written, unrun; adopted the coordinator handoff", "decision": "deployment-bound identity: realmOrigin = keccak('efs2/origin/1', chainId, ledgerAddress); two Ledger deployments on one chain are two Realms by design; verified imports keep the original principal; codehash recorded as execution evidence only", "open": "none for this probe" },
     "2_evidenceReconstruction": { "status": "designed, tests written, unrun", "note": "MUD packs the 11 Admission fields into a 262-byte static region (9 slots) and the 17 Evidence fields into 325 bytes (11 slots); values are re-encoded with abi.encode for the digest so the packed layout never enters the signature." },
-    "3_import": { "status": "designed, tests written, unrun", "open": ["native-source evidence is graded UNVERIFIED_NATIVE (no chain-state witness in this lab)", "CAS on import uses the source action's expectedRevision against destination state (no override field)", "imported DECLARE_TYPE rows bind the source acceptor ADDRESS, which may not exist on the destination — tests avoid importing Type declarations"] },
-    "4_cursor": { "status": "designed, tests written, unrun", "open": "rawTotal is reported at current state, not at the cursor's basis (computing the basis-time count would require a scan)" }
+    "3_import": { "status": "designed, tests written, unrun; blocker repaired", "decision": "only EOA-signed (grade 1) sources are importable and are re-verified with the v/low-s guard; native (grade-zero) sources revert UnsupportedSourceProof — no attributed cell, no writes as that principal — until a chain-state witness profile exists (test_spoofViaImport_… covers the forgery path)", "open": ["CAS on import uses the source action's expectedRevision against destination state (no override field)", "imported DECLARE_TYPE rows bind the source acceptor ADDRESS, which may not exist on the destination — tests avoid importing Type declarations"] },
+    "4_cursor": { "status": "designed, tests written, unrun", "decision": "seven-field cursor; no caller-supplied running total is echoed (Page.selected counts this page only)", "open": "rawTotal is reported at current state, not at the cursor's basis (computing the basis-time count would require a scan)" }
   }
 }

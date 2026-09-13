@@ -10,6 +10,7 @@ evm_version = "cancun"
 optimizer = true
 optimizer_runs = 200
 via_ir = true
+gas_reports = ["*"]
 bytecode_hash = "none"
 cbor_metadata = false
 ffi = false
@@ -18,6 +19,3 @@ remappings = [
   "@latticexyz/=vendor/@latticexyz/",
 ]
 extra_output = ["evm.deployedBytecode.object", "evm.bytecode.object"]
-
-[profile.default.gas_reports]
-# forge test --gas-report is informational only; receipts in script/measure.mjs are the manifest source.
