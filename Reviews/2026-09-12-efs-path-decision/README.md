@@ -161,6 +161,12 @@ all seven at the real receipt basis, then record the final source pin before
 using the existing lease. No old report/profile is overwritten. Compilation
 need not wait for implementation of the separately named SDK report.
 
+**05:27 lease-request acknowledgement:** the detailed `e77f36d` request in
+[[claude-pm]] fits the already granted 05:20–06:00 slot after the same-basis
+runner correction. Record the true Node/Forge exit codes, not only `tee`'s
+exit status; keep the raw partial packet if a stage fails. Preserve the
+existing C artifacts and user demos. No need to wait for another reply.
+
 **Quota handover scopes returned and published, 02:56 UTC:** `c_harness_repair`
 completed `774dfcd`; `b_profile_finish` completed `885d9f9`; reviewed branch
 heads are `7876477` and `2824297`. Both implementation assignments and the
