@@ -112,6 +112,16 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**17:54–18:14 UTC root-only B GREEN/build lease.** Seven scoped files are
+paused for independent review and focused/full Solidity tests after observed
+RED. Base remains `ac37e91`; record the dirty diff/source hashes, not a false
+clean-commit claim. No Anvil. Same Solidity 0.8.30/Cancun/via-IR/200 profile,
+two threads, normal code limits, exclusive `green-out`/`green-cache` beneath
+`/tmp/efs-b-parity-build-20260913.lcAzU1`; process-group watchdog 15 minutes,
+absolute stop 18:14 and latest start 17:59. No competing heavy process found;
+274 GiB free. Fresh independent input preparation awaits reviewed source and
+complete new artifacts. Old B/C cost reports remain unchanged.
+
 **17:05 B RED observed; heavy slot released.** The 17:04:20–27 root run
 compiled successfully and all seven new regressions failed at their intended
 missing-check assertions against unchanged production. Exact source/diff hashes
