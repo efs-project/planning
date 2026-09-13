@@ -186,3 +186,68 @@ test('real HTTP transport rejects malformed JSON-RPC envelopes and write methods
     await assert.rejects(rpcRead(url, 'eth_sendTransaction', []), /WRITE_FORBIDDEN/);
   } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 });
+
+function wordsFixture() {
+  const f = fixture();
+  const row = { label: 'evidence:publication2', to: address, data: '0xabcdef01',
+    expectedWords: { byteLength: 96, equals: { '0': hex32(1), '2': hex32(5) } } };
+  f.arm.checks.afterB1.push(row);
+  const repin = () => {
+    writeFileSync(f.armPath, JSON.stringify(f.arm));
+    f.pins.armInput.sha256 = sha(readFileSync(f.armPath));
+  };
+  repin();
+  f.mutate.response = (value, method, params) => method === 'eth_call' && params[0].data === row.data
+    ? `${hex32(1)}${hex32(999).slice(2)}${hex32(5).slice(2)}` : value;
+  return { ...f, row, repin };
+}
+
+test('predeclared raw-word assertions retain unchecked words without claiming to verify them', async () => {
+  const f = wordsFixture();
+  const first = await f.controller.beforeFixture(f.context);
+  assert.equal((await f.controller.afterB1(f.after(first))).decision, 'ACK');
+  const retained = JSON.parse(readFileSync(join(f.dir, 'independent', 'synthetic-run-afterB1.json')));
+  const raw = retained.observations.find(x => x.label === f.row.label).result;
+  assert.equal(raw.slice(66, 130), hex32(999).slice(2));
+  assert.equal(raw.length, 2 + 96 * 2);
+});
+
+test('changed asserted word or wrong raw byte length refuses the checkpoint and retains the actual reply', async () => {
+  for (const bad of [
+    `${hex32(2)}${hex32(999).slice(2)}${hex32(5).slice(2)}`,
+    `${hex32(1)}${hex32(999).slice(2)}${hex32(6).slice(2)}`,
+    `${hex32(1)}${hex32(999).slice(2)}`,
+    `${hex32(1)}${hex32(999).slice(2)}${hex32(5).slice(2)}00`,
+    '0xzz', null,
+  ]) {
+    const f = wordsFixture();
+    const first = await f.controller.beforeFixture(f.context);
+    f.mutate.response = (value, method, params) => method === 'eth_call' && params[0].data === f.row.data ? bad : value;
+    await assert.rejects(f.controller.afterB1(f.after(first)), /STATE_MISMATCH/);
+    const retained = JSON.parse(readFileSync(join(f.dir, 'independent', 'synthetic-run-afterB1.json')));
+    assert.equal(retained.decision, 'REFUSE');
+    assert.equal(retained.observations.find(x => x.label === f.row.label).result, bad);
+    assert.equal(retained.ack, undefined);
+  }
+});
+
+test('malformed or ambiguous word declarations refuse before any RPC', async () => {
+  for (const change of [
+    row => { row.expected = '0x'; },
+    row => { row.expectedWords.byteLength = 0; },
+    row => { row.expectedWords.byteLength = 95; },
+    row => { row.expectedWords.byteLength = '96'; },
+    row => { row.expectedWords.equals = {}; },
+    row => { row.expectedWords.equals = []; },
+    row => { row.expectedWords.equals = { '3': hex32(1) }; },
+    row => { row.expectedWords.equals = { '01': hex32(1) }; },
+    row => { row.expectedWords.equals = { '-1': hex32(1) }; },
+    row => { row.expectedWords.equals = { '0': '0x01' }; },
+    row => { row.expectedWords.equals = { '0': `0x${'AA'.repeat(32)}` }; },
+    row => { row.expectedWords.unrecognized = true; },
+  ]) {
+    const f = wordsFixture(); change(f.row); f.repin();
+    await assert.rejects(f.controller.beforeFixture(f.context), /CHECK_MALFORMED/);
+    assert.equal(f.calls.length, 0);
+  }
+});

@@ -37,6 +37,18 @@ All contract calls use a fixed numeric block tag, with the matching block hash
 checked before and after. This is an RPC-observed consistency check, **not**
 an authenticated Ethereum state proof.
 
+A fixed-length evidence getter also supports the explicitly partial alternative
+`{label, to, data, expectedWords: {byteLength: 416, equals: {"0": "0x…"}}}`.
+The declared byte length must be a positive multiple of 32; each canonical
+decimal word index must be in range, and each expected word is exactly 32
+bytes. Empty assertions, unknown expectation fields, and simultaneous exact
+and word expectations are rejected. The controller compares the full returned
+length and every declared word, then retains the entire raw reply. Unasserted
+words are **not verified**. This permits predeclared author/proof-kind/range
+checks without pretending that run-dependent signatures or execution bases
+were independently predicted. A proof-kind word is not independent signature
+recovery. The arm mapping must name every such limitation explicitly.
+
 The before-fixture checks require `counts`. The post-B1 checks require the
 labels `counts`, `registryEpoch`, `indexGeneration`, `coreCodeCommitment`,
 `realmId`, `aPlacement`, `bPlacementAbsent`, `aHead`, `bHead`, `scopeA`, and

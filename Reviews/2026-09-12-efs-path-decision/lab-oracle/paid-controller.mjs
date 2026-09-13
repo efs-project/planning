@@ -31,6 +31,37 @@ function equal(actual, expected, path, code = 'INPUT_MISMATCH') {
   check(canonical(actual) === canonical(expected), code, path);
 }
 
+function validateReturnExpectation(row) {
+  const exact = Object.hasOwn(row, 'expected');
+  const partial = Object.hasOwn(row, 'expectedWords');
+  check(exact !== partial, 'CHECK_MALFORMED', row.label);
+  if (exact) {
+    check(bytes(row.expected), 'CHECK_MALFORMED', row.label);
+    return;
+  }
+  const spec = row.expectedWords;
+  check(spec && Object.keys(spec).sort().join(',') === 'byteLength,equals' &&
+    Number.isSafeInteger(spec.byteLength) && spec.byteLength > 0 && spec.byteLength % 32 === 0 &&
+    spec.equals && typeof spec.equals === 'object' && !Array.isArray(spec.equals) &&
+    Object.keys(spec.equals).length > 0, 'CHECK_MALFORMED', row.label);
+  for (const [index, value] of Object.entries(spec.equals)) {
+    check(decimal(index) && BigInt(index) < BigInt(spec.byteLength / 32) &&
+      typeof value === 'string' && /^0x[0-9a-f]{64}$/.test(value), 'CHECK_MALFORMED', row.label);
+  }
+}
+
+function compareReturn(result, row) {
+  if (Object.hasOwn(row, 'expected')) return equal(result, row.expected, row.label, 'STATE_MISMATCH');
+  const spec = row.expectedWords;
+  check(bytes(result) && (result.length - 2) / 2 === spec.byteLength, 'STATE_MISMATCH', `${row.label}.byteLength`);
+  for (const [index, expected] of Object.entries(spec.equals)) {
+    const start = 2 + Number(index) * 64;
+    equal(`0x${result.slice(start, start + 64)}`, expected, `${row.label}.word${index}`, 'STATE_MISMATCH');
+  }
+  // Unasserted words are retained raw, not independently verified. In particular,
+  // comparing an onchain proof-kind field is not signature recovery or a state proof.
+}
+
 // Exposed solely as a testable transport boundary. Only read methods can pass.
 export async function rpcRead(url, method, params) {
   check(READS.has(method), 'WRITE_FORBIDDEN', method);
@@ -85,7 +116,8 @@ function load(context, expectedNeutralHash) {
     for (const row of rows) {
       check(typeof row.label === 'string' && !labels.has(row.label), 'CHECKS_DUPLICATE', stage);
       labels.add(row.label);
-      check(targets.some(t => t.address === row.to) && bytes(row.data) && row.data.length >= 10 && bytes(row.expected), 'CHECK_MALFORMED', row.label);
+      check(targets.some(t => t.address === row.to) && bytes(row.data) && row.data.length >= 10, 'CHECK_MALFORMED', row.label);
+      validateReturnExpectation(row);
     }
     if (stage === 'afterB1') check(REQUIRED.every(x => labels.has(x)), 'CHECKS_INCOMPLETE', stage);
     else check(labels.has('counts'), 'CHECKS_INCOMPLETE', stage);
@@ -153,7 +185,7 @@ export function createController({ request = rpcRead, expectedNeutralHash = NEUT
     }
     for (const row of arm.checks[stage]) {
       const result = await read('eth_call', [{ to: row.to, data: row.data }, blockTag], row.label);
-      equal(result, row.expected, row.label, 'STATE_MISMATCH');
+      compareReturn(result, row);
     }
     // Detect replacement of the numbered block while collecting independent reads.
     const after = await read('eth_getBlockByNumber', [blockTag, false], 'observationBlockRecheck');
