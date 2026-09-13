@@ -2,7 +2,7 @@
 
 **Standing:** implementation checkpoint for a disposable engineering experiment. No Anvil or network run occurred, no gas result is claimed, and no protocol/production/freeze choice is implied.
 
-**Scope and pins:** work began from branch `fable/2026-09-13-road-c-lab` at `7876477`; source/test semantics were pinned at `774dfcd`. Only `script/measure.mjs`, the new test-only `test/MeasurementConsumer.sol`, its test, and this report changed. `src/Consumer.sol` remains byte-for-byte unchanged at SHA-256 `5f34e9ca9471f767d90f8f6149843ece97bdc99b036ab2005559fc3478048adb`; no Core or vendor file changed.
+**Scope and pins:** work began from branch `fable/2026-09-13-road-c-lab` at `7876477`; source/test semantics were pinned at `774dfcd`. The first preparation commit changed only `script/measure.mjs`, the new test-only `test/MeasurementConsumer.sol`, its test, and this report. A later pre-run correction adds only the runner's Node helper/test and updates this report. `src/Consumer.sol` remains byte-for-byte unchanged at SHA-256 `5f34e9ca9471f767d90f8f6149843ece97bdc99b036ab2005559fc3478048adb`; no Core or vendor file changed.
 
 ## Implemented boundary
 
@@ -15,6 +15,23 @@
 - RPC capture overrides the ethers transport boundary and retains the full raw JSON-RPC request/reply or error, including request ID, method, params and a source label. Every explicit getter is executed at its own retained block number/hash. Every transaction row retains the exact transaction, receipt and matching block header. Deployment rows also retain constructor arguments, constructor-inclusive linked initcode, runtime bytes, hashes and checked link references. Decoding happens only after the raw receipt is retained.
 - Expected failure evidence is split: a block-pinned `eth_call` retains the revert data/selector, while a separately sent transaction must produce a receipt with mined status `0`. No selector is inferred from the receipt.
 - The runner contains no trace, state-dump, Anvil-launch or network-install API.
+
+### Pre-run correction after independent review — 04:48–05:12 UTC
+
+No compiler or Anvil lease was active for this source-only repair.
+
+- Runtime verification now reads each pinned artifact's `immutableReferences`, requires the exact reviewed identifier/range set, patches only those ranges with deterministic expected values, and compares every other byte exactly. The whitelist covers ImportLib's self library address; IndexModule's deployer and poison value; Ledger's index, index codehash and chain/deployment-derived Realm ID; and LensReader's Ledger/Index addresses. Constructor-inclusive initcode and the hash of actual deployed runtime remain retained separately.
+- A Node helper regression was written failing-first and now covers accepted immutable patching, wrong immutable values, non-immutable drift, malformed/overlapping/unexpected ranges, MUD left-aligned uint64/uint32 decoding, and the exact immutable ranges in the pinned Forge artifacts.
+- Record first-admission and occurrence counters now decode the high 8/high 4 bytes of MUD's left-aligned fixed-width return values; malformed field widths fail. The prior whole-`bytes32` conversion would have overflowed the second signed nonce and misreported state.
+- The provider disables caching and batching. Every reset proves both the wallet's raw pending transaction nonce and Ledger admission high-water returned to the post-setup baseline before taking a new snapshot.
+- Receipt handling uses bounded raw polling with every null/result retained. Transaction, receipt and header hashes/numbers are cross-joined explicitly; ethers `tx.wait()` is no longer in the runner.
+- The expected failure path cannot catch its own unexpected-success exception: the block-pinned static call must actually revert with the exact `AlreadyAdmitted` selector before a separately mined status-0 receipt is accepted.
+- Each successful publication asserts its decoded `Published` author, proof kind and leaf count. Paid point/list calls assert nonzero commitment events, subject/record/selected-author values and equal point/list basis; list coverage must reach that basis. The typed cell includes both A-first and B-first paid point/list calls.
+- The framed c32 native cell now uses the real Producer/contract principal B; the signed cell retains the identical four-action create and two-action edit shapes. Each captures and asserts distinct pre/post create and edit transitions.
+- The matched fresh/existing-body cells now both submit the exact same `BODY_HASH` action and body. Their isolated seed state differs only by same-sized dummy versus target content; assertions require `0→1` occurrence and new first-admission for fresh, versus `1→2` occurrence with preserved first-admission for existing-body. The different `RECORD_ID`/empty-body action is not used as the matched deduplication tax.
+- Partial raw evidence is atomically persisted after setup and every reset/cell to the explicit absolute run-owned `EVIDENCE_PATH`, including on fatal exit. The runner will not choose or create an implicit workspace result path.
+
+The measurement consumer is candidate-coupled test instrumentation, not an independent oracle or full joined-proof verifier: it imports the candidate's table decoders and receives expected values from the caller. It validates the exact Pair ID and retained Evidence author, but it does not independently reconstruct proof kind, signature/domain/profile or the complete evidence closure. Any future result must retain that ceiling.
 
 ## Test-first and compiler evidence
 
@@ -65,7 +82,9 @@ A separate read-only scan covered 94 compiled artifacts and found zero EIP-170/E
 
 Current SHA-256 values:
 
-- `script/measure.mjs`: `d3e5c1d2ec9a1a785fa3358d01ce834c3671396e9be1d9c9973620d7b510b981`
+- `script/measure.mjs`: `b9764bfb5ff9ec1af451904ef7145fbe02bb3cd682c3e8bfe119d95bd11ecd36`
+- `script/measure-helpers.mjs`: `99ea48521d131447d053825f406b31e6e7263a1bdc72491b0f2b820a1eaa1e27`
+- `script/measure-helpers.test.mjs`: `797ba39fd16defdb6eafb4e3578c6af5869318b4e5ce03702af211bfb6b97b68`
 - `test/MeasurementConsumer.sol`: `7928a49650598b8d5da5a5de9c617eec0481d4f6bc5e71075d2003a5ab28bb4f`
 - `test/MeasurementConsumer.t.sol`: `0e2722b0630f48c4e3be29c927594bd0b3ed268406bdfbac688a3ace760a5e80`
 
