@@ -127,3 +127,66 @@ strict files and the valid retained report, and return a new commit. No main
 write, push, network, chain or compiler run is authorized by that fix. After
 review/rerun, root publishes the branch. Public B profile `885d9f9` is now
 available for a later bounded signature-binding extension, not this repair.
+
+### Repair closed — source `52dae42`, September 13
+
+The scoped re-review found the input-shape issue fixed with no material
+regression. Root reran the original malformed-container/entry reproductions:
+all now reject explicitly. Combined tests pass 112/112 (79 extension, 33
+strict). The retained report is byte-identical and its conclusions remain
+unchanged; frozen profile/expectations and the original strict files are
+unchanged. Branch `codex/efs-warroom-oracle` is pushed at
+`52dae42d239e135f3d4ff04642908b23eb01a720`. Publication hold is closed.
+An unexplained untracked `.codex-commit-message` is preserved, not committed
+or deleted. No prototype code was merged into planning/main.
+
+## Next bounded task: independent signature binding
+
+**Purpose:** complete the previously unsupported commitment/signature part of
+Task 2 against the now-published diagnostic declaration. This is a separate
+candidate-specific extension, not a rewrite of either existing checker or an
+adoption of B's known-incomplete replay domain.
+
+**Owner / base:** existing SDK PM, existing isolated `planning-warroom-oracle`
+branch at `52dae42`; 40 minutes from dispatch. Node/ethers only; no network,
+compiler, chain, package install, main edits or push. Root reviews/publishes.
+Use this section as the brief and the existing handoff as the progress record;
+do not create another agent framework or worktree.
+
+**Allowed new inputs:** B `PROFILE.md` and `vectors/profile-b.json` at
+`885d9f9`, blobs `ca39c29416ffa79231e48a52bef1e5403f563198` and
+`8d92f5806911d50427901cda12441f65c74bc309`. They describe source `dcc7b94`.
+Retained measurement packet and ABI-only declarations already authorized for
+the RPC probe remain allowed. Do not open/import B's verification script,
+Reconstructor, contract implementations, measurement code or tests. A public
+declaration is an interpretation input, not proof of deployment or authority.
+
+1. Freeze the input blobs and new mutation expectations **before** coding.
+   Keep the original strict/RPC profiles, expectations, implementations and
+   retained reports byte-identical. Use a separately named module/test/profile
+   and a short report under the owned `lab-oracle/` directory; avoid a new CLI
+   framework. Extend its README with the source, command and actual limits.
+2. Write RED tests, then independently encode Action-array ABI bytes, compute
+   its commitment, EIP-712 domain/struct/digest, and recover the expected EOA
+   under exact 65-byte/low-s/v rules. Derive values from literal input fields,
+   not the vector's supplied digest/encoded-output fields. Standard ethers
+   primitives are allowed; compare computed results to the public vector.
+3. Test changed body under unchanged actions, changed/reordered action fields,
+   changed Intent fields, wrong signer, malformed widths/ranges, signature
+   mutation, high-s and invalid v. Keep body commitment, signature binding and
+   runtime acceptance as separate outcomes: a signature can bind an action
+   that runtime rules reject. No Type/schema/authority success is inferred.
+4. If time permits, decode the retained `signed-one/quote` create/edit calldata
+   through the authorized public ABI and recompute those signatures too.
+   Report missing bytes as unsupported/unknown; do not borrow the candidate's
+   digest, pass flag or decoded summary as the answer. A cryptographic match
+   does not authenticate the packet, target deployment, source state, nonce,
+   current permission, admission, selected effect or query completeness.
+5. Preserve and expose the current domain's absent chain/deployment fields;
+   do **not** silently substitute the future replay fix. Rerun existing 112
+   tests and the focused new tests, self-review, commit exact owned files and
+   return the concise report. Stop at the bound with explicit remaining gaps.
+
+Only this light extension is assigned; it grants no heavy-run lease and no
+other worker may alter its files. Root supplies the independent task review,
+so the SDK implementation does not launch duplicate reviewer tasks.
