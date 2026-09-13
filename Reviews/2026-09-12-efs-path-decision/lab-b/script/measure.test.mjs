@@ -306,7 +306,7 @@ test('watchdog failure marker catches pretending evidence exists before report i
 // ---------------------------------------------------------------- the sealed paid point/list slice: pure helpers
 function loadPaidHelpers() {
   const declaration = runnerDeclaration('// ---- paid-slice pure helpers', '// ---- paid-slice cells');
-  return vm.runInNewContext(`${declaration}\n({ evidenceCategoryOf, assertUnrelatedCaller, abstractRow, checkPaidRowOrdering, deriveAbstractResult, assertAnvilOnlyCells, ANVIL_ONLY_CELLS, ABSTRACT_FIELDS, SELECTION_FIELDS, PLACEMENT_FIELDS, PAID_CALLER_INDEX, PAID_CALLER_PATH })`, {});
+  return vm.runInNewContext(`${declaration}\n({ evidenceCategoryOf, assertUnrelatedCaller, abstractRow, checkPaidRowOrdering, deriveAbstractResult, assertAnvilOnlyCells, buildPaidCalls, controllerFailureRow, ANVIL_ONLY_CELLS, ABSTRACT_FIELDS, SELECTION_FIELDS, PLACEMENT_FIELDS, PAID_CALLER_INDEX, PAID_CALLER_PATH })`, {});
 }
 const SEAL = { kind: 'seal', block: 40, hash: '0xseal', timestamp: 1000 };
 const revertOk = { kind: 'revert', block: 40, hash: '0xseal', nextTimestamp: 1001 };
@@ -494,6 +494,31 @@ test('assertUnrelatedCaller catches a caller that is the deployer, an author or 
   assert.throws(() => assertUnrelatedCaller(null, related), /not an address/);
   assert.equal(PAID_CALLER_INDEX, 3);
   assert.equal(PAID_CALLER_PATH, "m/44'/60'/0'/0/3");
+});
+
+test('buildPaidCalls consumes controller-supplied lenses, Expect and PlacementExpect values verbatim', () => {
+  const { buildPaidCalls } = loadPaidHelpers();
+  const inputs = {
+    lenses: { LENS_A_FIRST: ['0xa', '0xb'], LENS_B_FIRST: ['0xb', '0xa'] },
+    expect: { A_FIRST: { expectedHead: '0xa2' }, B_FIRST: { expectedHead: '0xb1' } },
+    placementExpect: { folder: '0xf', publication: '2' },
+  };
+  const calls = buildPaidCalls(inputs);
+  assert.deepEqual(JSON.parse(JSON.stringify(calls.map(({ key, lensArr, fn, fnArgs }) => ({ key, lensArr, fn, fnArgs })))), [
+    { key: 'point-a-first', lensArr: ['0xa', '0xb'], fn: 'paidPoint', fnArgs: [['0xa', '0xb'], { expectedHead: '0xa2' }] },
+    { key: 'list-a-first', lensArr: ['0xa', '0xb'], fn: 'paidList', fnArgs: [['0xa', '0xb'], { expectedHead: '0xa2' }, { folder: '0xf', publication: '2' }] },
+    { key: 'point-b-first', lensArr: ['0xb', '0xa'], fn: 'paidPoint', fnArgs: [['0xb', '0xa'], { expectedHead: '0xb1' }] },
+    { key: 'list-b-first', lensArr: ['0xb', '0xa'], fn: 'paidList', fnArgs: [['0xb', '0xa'], { expectedHead: '0xb1' }, { folder: '0xf', publication: '2' }] },
+  ]);
+  assert.notEqual(calls[0].fnArgs[1], inputs.expect.A_FIRST, 'calldata input is an isolated copy');
+});
+
+test('controllerFailureRow maps timeout separately and records every other gate refusal without inventing a send', () => {
+  const { controllerFailureRow } = loadPaidHelpers();
+  assert.deepEqual(JSON.parse(JSON.stringify(controllerFailureRow('joined/paid-slice', { code: 'CONTROLLER_TIMEOUT', message: 'CONTROLLER_TIMEOUT' }))), {
+    label: 'joined/paid-slice', status: 'CONTROLLER_TIMEOUT', failureCode: 'CONTROLLER_TIMEOUT', error: 'CONTROLLER_TIMEOUT', transactions: [],
+  });
+  assert.equal(controllerFailureRow('failure-rows', { code: 'CONTROLLER_ACK_MISMATCH', message: 'CONTROLLER_ACK_MISMATCH:stage' }).status, 'CONTROLLER_REFUSED');
 });
 
 test('evidenceCategoryOf maps the two proof kinds and refuses an unknown kind instead of defaulting', () => {

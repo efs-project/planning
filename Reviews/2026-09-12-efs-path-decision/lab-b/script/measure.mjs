@@ -50,6 +50,8 @@
 // Options: --out <file.json> (default <scratch>/measure.json)  --mnemonic "<12 words>"  --skip-without-index
 //          --cells <exact,comma,separated,cell,keys> (bounded run; unknown keys or an empty selection FAIL before any chain starts)
 //          --only <substring> (legacy filter; resolved against the same plan and validated the same way)
+//          --controller <path>:<sha256> --expectations <path>:<sha256> --arm-input <path>:<sha256> [--run-id <id>]
+//          (all three pins together enable the disposable two-stage controller gate; otherwise the run is diagnostic)
 // Env: FOUNDRY_OUT (artifacts; fallback ./out, read-only), EFS_LAB_SCRATCH (run-owned root; default: parent
 // of FOUNDRY_OUT, else the manifest's scratch path), EFS_ETHERS_PATH.
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, renameSync } from 'node:fs';
@@ -57,9 +59,10 @@ import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { createServer } from 'node:net';
 import assert from 'node:assert/strict';
+import { createControllerGate } from './controller-gate.mjs';
 
 const require = createRequire(import.meta.url);
 const ETHERS_CANDIDATES = [
@@ -275,6 +278,7 @@ function makeCtx(run) {
   const wallets = [0, 1, 2, 3].map((i) => HDNodeWallet.fromPhrase(MNEMONIC, undefined, `m/44'/60'/0'/0/${i}`));
   const ctx = {
     rpc, url: run.rpc, chainId: run.chainId, source: run.source, wallets, deployer: wallets[0], addrs: run.addrs ?? {},
+    controllerGate: run.controllerGate, controllerInputs: run.controllerInputs,
     txs: [], raw: [], baselineRaw: [], blocks: [], rpcOther: [], rowLog: [], consumerChecks: [], mismatches: 0,
     persist: null, gasPrice: null, blockCache: new Map(), nonceCache: new Map(),
     // runtime codehashes of the contracts deployed by this run (null in --addresses mode): lets a cell compare a registry-reported codehash with the deployment record
@@ -1362,6 +1366,20 @@ function assertAnvilOnlyCells(selected, anvil, anvilOnly = ANVIL_ONLY_CELLS) {
   if (blocked.length && !anvil) throw new Error(`cell(s) ${blocked.join(', ')} run only on an owned --anvil chain (they seal, revert, set block timestamps and change automining); refusing before any chain call — pass --anvil or deselect them`);
   return blocked;
 }
+function buildPaidCalls(inputs) {
+  const isolated = JSON.parse(JSON.stringify(inputs));
+  const { lenses, expect, placementExpect } = isolated;
+  return [
+    { key: 'point-a-first', operation: 'PAID_POINT', lens: 'LENS_A_FIRST', lensArr: lenses.LENS_A_FIRST, fn: 'paidPoint', fnArgs: [lenses.LENS_A_FIRST, expect.A_FIRST] },
+    { key: 'list-a-first', operation: 'PAID_LIST', lens: 'LENS_A_FIRST', lensArr: lenses.LENS_A_FIRST, fn: 'paidList', fnArgs: [lenses.LENS_A_FIRST, expect.A_FIRST, placementExpect] },
+    { key: 'point-b-first', operation: 'PAID_POINT', lens: 'LENS_B_FIRST', lensArr: lenses.LENS_B_FIRST, fn: 'paidPoint', fnArgs: [lenses.LENS_B_FIRST, expect.B_FIRST] },
+    { key: 'list-b-first', operation: 'PAID_LIST', lens: 'LENS_B_FIRST', lensArr: lenses.LENS_B_FIRST, fn: 'paidList', fnArgs: [lenses.LENS_B_FIRST, expect.B_FIRST, placementExpect] },
+  ];
+}
+function controllerFailureRow(label, error) {
+  const failureCode = error?.code ?? 'CONTROLLER_ERROR';
+  return { label, status: failureCode === 'CONTROLLER_TIMEOUT' ? 'CONTROLLER_TIMEOUT' : 'CONTROLLER_REFUSED', failureCode, error: error?.message ?? String(error), transactions: [] };
+}
 // Derive one abstract comparison row from a paid-result check, its replay observation and the row's retained context.
 // PURE (unit-tested). No field derived from the PaidResult log may claim success unless the check passed entirely (one
 // log, decodable replay, replay commitment == log commitment, every pinned field equal to the runner expectation).
@@ -1530,7 +1548,8 @@ async function paidResultCheck(ctx, row, expectedSelection, expectedPlacement) {
   const commitmentsAgree = !!fromLog && !!fromReplay && !fromReplay.error && norm(fromLog.commitment) === norm(fromReplay.commitment);
   const match = logs.length === 1 && selectionFromLog.ok && placementFromLog.ok && replayOk && commitmentsAgree;
   if (!match) ctx.mismatches++;
-  const check = { label: `${row.label}/paid-result`, kind: 'paid-result', standing: CAVEAT_EXPECTED, block: row.block, logCount: logs.length, fromLog, fromReplay, replayRpcId: replay.rpcId, replayFrom: tx.from, replayObs: { rpcId: replay.rpcId, from: tx.from, stage: `paid-replay:${row.label}`, blockTag: replay.blockTag, returnData: replay.returnData, error: replay.error }, selectionFromLog, placementFromLog, replayOk, commitmentsAgree, match };
+  const inputStanding = ctx.controllerGate.enabled ? `controller-supplied paid inputs (ack-beforeFixture inputsSha256 ${ctx.controllerGate.inputsSha256})` : CAVEAT_EXPECTED;
+  const check = { label: `${row.label}/paid-result`, kind: 'paid-result', standing: inputStanding, block: row.block, logCount: logs.length, fromLog, fromReplay, replayRpcId: replay.rpcId, replayFrom: tx.from, replayObs: { rpcId: replay.rpcId, from: tx.from, stage: `paid-replay:${row.label}`, blockTag: replay.blockTag, returnData: replay.returnData, error: replay.error }, selectionFromLog, placementFromLog, replayOk, commitmentsAgree, match };
   ctx.consumerChecks.push(check);
   log(`  chk  ${check.label}: ${match ? 'match' : 'MISMATCH ' + JSON.stringify({ logCount: logs.length, selectionFromLog, placementFromLog, commitmentsAgree, replayError: fromReplay && fromReplay.error })}`);
   return check;
@@ -1561,13 +1580,41 @@ const paidSliceCell = {
     const seal = await sealState(ctx, 'paid/seal');
     const basis = adm0 + 12;
     const at = seal.block;
-    const [admissionsAtSeal] = await observe(ctx, ctx.raw, 'seal', 'Ledger', 'ledger', 'counts', [], at);
+    const countsAtSeal = await observe(ctx, ctx.raw, 'seal', 'Ledger', 'ledger', 'counts', [], at);
+    const [admissionsAtSeal] = countsAtSeal;
     assert.equal(Number(admissionsAtSeal), basis, `paid/seal: admission frontier ${admissionsAtSeal} != expected ${basis}`);
     const [generation] = await observe(ctx, ctx.raw, 'seal', 'IndexModule', 'index', 'generation', [], at);
     const [epoch] = await observe(ctx, ctx.raw, 'seal', 'TypeRegistry', 'registry', 'epoch', [], at);
     const [core] = await observe(ctx, ctx.raw, 'seal', 'Ledger', 'ledger', 'coreCodeCommitment', [], at);
     const [realmId] = await observe(ctx, ctx.raw, 'seal', 'Ledger', 'ledger', 'realmId', [], at);
     keep({ label: 'paid/seal', standing: 'the exact post-B1 basis: evm_snapshot id (single-use; re-sealed after every revert), block number/hash/timestamp from the retained header, admission frontier / index generation / rules epoch / Core code commitment from raw replies (stage seal) at that block', snapshot: seal.snapshot, snapshotRpcId: seal.snapshotRpcId, blockNumber: seal.block, blockHash: seal.hash, timestamp: seal.timestamp, observationBasis: { admissionFrontier: basis, indexGeneration: str(generation), rulesEpoch: str(epoch), coreCodeCommitment: core, realmId } });
+    if (ctx.controllerGate.enabled) {
+      const [step1Tx, A1Tx, A2Tx, B1Tx] = ctx.txs;
+      const receipt = (tx, publication, extra = {}) => ({ txHash: tx.hash.toLowerCase(), block: String(tx.receipt.blockNumber), status: tx.receipt.status, gasUsed: String(tx.receipt.gasUsed), publication: String(publication), ...extra });
+      const checkpoint = {
+        blockNumber: String(seal.block), blockHash: seal.hash.toLowerCase(), timestamp: String(seal.timestamp), snapshot: String(seal.snapshot),
+        frontier: { admissions: str(countsAtSeal[0]), records: str(countsAtSeal[1]), bindings: str(countsAtSeal[2]), publications: str(countsAtSeal[3]) },
+        indexGeneration: str(generation), registryEpoch: str(epoch), coreCodeCommitment: core.toLowerCase(), realmId: realmId.toLowerCase(),
+      };
+      const afterContext = {
+        schema: 'efs-lab-b/controller-context/1', runId: ctx.controllerGate.runId, stage: 'afterB1', sentAtUtc: new Date().toISOString(), pins: ctx.controllerGate.pins,
+        inputsSha256: ctx.controllerGate.inputsSha256,
+        checkpoint,
+        setupReceipts: {
+          step1: receipt(step1Tx, pub0 + 1), A1: receipt(A1Tx, pub0 + 2), A2: receipt(A2Tx, pub0 + 3),
+          B1: receipt(B1Tx, pub0 + 4, { actions: 2, folderBind: false }),
+        },
+        ackPath: join(SCRATCH_ROOT, 'controller', 'ack-afterB1.json'),
+      };
+      // Controller owns its independent raw reads here. Candidate placement/no-B diagnostics begin only after ACK.
+      try {
+        await ctx.controllerGate.invoke('afterB1', afterContext);
+        if (ctx.persist) ctx.persist();
+      } catch (error) {
+        keep(controllerFailureRow('paid/controller-afterB1', error));
+        throw error;
+      }
+    }
     // A placement provenance at the seal (joined here for the point rows, which do not look the directory up)
     const pl = await observe(ctx, ctx.raw, 'seal-placement', 'LensReader', 'lens', 'resolve', [ab, P.FOLDER, swaps, nameHash], at);
     assert.equal(str(pl[0]), '1', 'paid/seal: the A placement must be FOUND under LENS_A_FIRST');
@@ -1603,17 +1650,20 @@ const paidSliceCell = {
     const placementOne = { position: swapsPos, actor: A, proofKind: 2, revision: 1, admission: adm0 + 7, publication: pub0 + 2, basisAdmission: basis, pageStatus: 2, rawTotal: 1, scanned: 1, selectedSoFar: 1, mutated: false, ended: true }; // hydrations are a physical witness (lens-order dependent), not pinned
     const headLabels = { [lc(a1)]: ['QUOTE_A1', 'A1'], [lc(a2)]: ['QUOTE_A2', 'A2'], [lc(b1)]: ['QUOTE_B1', 'B1'] };
     const authorLabels = { [lc(A)]: ['AUTHOR_A', 'EOA (wallet 1)'], [lc(B)]: ['AUTHOR_B', 'contract (Actor actorB)'] };
-    const paidRows = [
-      { key: 'point-a-first', operation: 'PAID_POINT', lens: 'LENS_A_FIRST', lensArr: ab, fn: 'paidPoint', fnArgs: [ab, expectA], selection: { ...selA, lensId: lensId(ab) }, placement: placementNone },
-      { key: 'list-a-first', operation: 'PAID_LIST', lens: 'LENS_A_FIRST', lensArr: ab, fn: 'paidList', fnArgs: [ab, expectA, placementExpect], selection: { ...selA, lensId: lensId(ab) }, placement: placementOne },
-      { key: 'point-b-first', operation: 'PAID_POINT', lens: 'LENS_B_FIRST', lensArr: ba, fn: 'paidPoint', fnArgs: [ba, expectB], selection: { ...selB, lensId: lensId(ba) }, placement: placementNone },
-      { key: 'list-b-first', operation: 'PAID_LIST', lens: 'LENS_B_FIRST', lensArr: ba, fn: 'paidList', fnArgs: [ba, expectB, placementExpect], selection: { ...selB, lensId: lensId(ba) }, placement: placementOne },
-    ];
+    const paidInputs = ctx.controllerInputs ?? { lenses: { LENS_A_FIRST: ab, LENS_B_FIRST: ba }, expect: { A_FIRST: expectA, B_FIRST: expectB }, placementExpect };
+    const paidRows = buildPaidCalls(paidInputs).map((pr) => ({
+      ...pr,
+      selection: { ...(pr.lens === 'LENS_A_FIRST' ? selA : selB), lensId: lensId(pr.lensArr) },
+      placement: pr.operation === 'PAID_LIST' ? placementOne : placementNone,
+    }));
     const consumerCodehash = ctx.codehashes ? ctx.codehashes.joinedConsumer : { unknown: '--addresses mode: no deployment record in this run', consequence: 'consumer code commitment must come from the independently retained deployment facts' };
     for (const pr of paidRows) {
       const label = `paid/${pr.key}`;
       await restoreSeal(ctx, seal, label, ordering);
-      const row = await send(ctx, () => call(ctx, 'JoinedConsumer', 'joinedConsumer', pr.fn, pr.fnArgs), label, { wallet: caller, extra: { operation: pr.operation, lens: pr.lens, storage: STATELESS, consumer: `JoinedConsumer.${pr.fn} (stateless; one PaidResult log of ~34 data words carrying the concrete observations — ESTIMATED ~9-10k gas: the paid rows' consumer overhead, disclosed separately, never subtracted)`, armInputs: { standing: 'this runner\'s local mirror of the fixture map (candidate-side), including the expected head record ids of QUOTE_A2 / QUOTE_B1 passed as Expect.expectedHead; the sealed run supplies the independently authored vectors (appendix pin 4)', expect: pr.fnArgs[1], placementExpect: pr.fnArgs.length > 2 ? pr.fnArgs[2] : null } } });
+      const armStanding = ctx.controllerGate.enabled
+        ? `controller-supplied (ack-beforeFixture inputsSha256 ${ctx.controllerGate.inputsSha256})`
+        : 'diagnostic: this runner\'s local mirror of the fixture map (candidate-side); no controller gate was used';
+      const row = await send(ctx, () => call(ctx, 'JoinedConsumer', 'joinedConsumer', pr.fn, pr.fnArgs), label, { wallet: caller, extra: { operation: pr.operation, lens: pr.lens, storage: STATELESS, consumer: `JoinedConsumer.${pr.fn} (stateless; one PaidResult log of ~34 data words carrying the concrete observations — ESTIMATED ~9-10k gas: the paid rows' consumer overhead, disclosed separately, never subtracted)`, armInputs: { standing: armStanding, expect: pr.fnArgs[1], placementExpect: pr.fnArgs.length > 2 ? pr.fnArgs[2] : null } } });
       // F3: the row must be the ONLY transaction of its block (index 0) at the matched timestamp; the block's transaction list is retained
       const tx = ctx.txs[row.txIndex];
       const blockEnv = await ctx.rpc('eth_getBlockByNumber', [qty(row.block), false], { label: `${label}: block transaction list` });
@@ -1798,7 +1848,7 @@ async function deployAll(run) {
     const code = codeEnv.response.result;
     log(`deploy ${nameOf}: ${address} block ${row.block} gas ${row.gas} runtime ${(code.length - 2) / 2} B`);
     return {
-      address, gas: row.gas, txHash: row.hash, block: row.block, blockHash: row.blockHash, constructorArgs: ctorArgs.map(str),
+      address, nonce, gas: row.gas, txHash: row.hash, block: row.block, blockHash: row.blockHash, constructorArgs: ctorArgs.map(str),
       runtimeBytes: (code.length - 2) / 2, runtimeCodehash: keccak256(code), initcodeBytes: (data.length - 2) / 2, initcodeHash: keccak256(data),
       artifact: { path: artifactPath(nameOf), sha256: sha256File(artifactPath(nameOf)), deployedBytecodeHash: keccak256(a.deployedBytecode.object), immutableReferences: Object.keys(a.deployedBytecode.immutableReferences ?? {}).length, compiler: a.metadata?.compiler?.version ?? null, note: 'runtimeCodehash == deployedBytecodeHash only when immutableReferences == 0; otherwise the deployed code embeds immutable values' },
       getCodeRpcId: codeEnv.request.id,
@@ -1904,6 +1954,14 @@ async function main() {
   const optionalCells = cellPlan.filter((c) => c.optional).map((c) => c.key);
   const selectedCells = selectCells(planKeys, { cells: typeof args.cells === 'string' ? args.cells : null, only: ONLY }, optionalCells);
   assertAnvilOnlyCells(selectedCells, !!args.anvil); // the sealing cells run only on an owned --anvil chain; refused before any chain call
+  // Read and hash all three operator-pinned files, then load the already-hashed module, before Anvil or any RPC starts.
+  // The expectation and arm-input bytes are never parsed by this runner.
+  const controllerGate = await createControllerGate({ args, scratchRoot: SCRATCH_ROOT });
+  if (controllerGate.enabled && args.addresses) {
+    const error = new Error('CONTROLLER_REQUIRES_DEPLOY: a gated run must deploy and retain all role-keyed initcode/runtime facts');
+    error.exitCode = 2;
+    throw error;
+  }
   log(`cell plan: ${planKeys.length} keys (${optionalCells.length} optional: ${optionalCells.join(', ')}); selected ${selectedCells.length}: ${selectedCells.join(', ')}`);
   setTimeout(() => terminateRun('watchdog: 25 minutes elapsed, stopping the run', 124), WATCHDOG_MS).unref(); // applies with and without --anvil
   process.once('SIGINT', () => terminateRun('SIGINT: interrupted run', 130));
@@ -1914,11 +1972,14 @@ async function main() {
   const rpc0 = makeRpc(rpcUrl);
   const chainIdEnv = await rpc0('eth_chainId', []);
   const chainId = Number(chainIdEnv.response.result);
+  const inputCaveat = controllerGate.enabled
+    ? 'The gated paid slice consumes only the controller-supplied lenses, Expect and PlacementExpect after strict field comparison with the candidate mirror; the separate controller retention binds inputsSha256.'
+    : CAVEAT_EXPECTED;
   const report = {
-    profile: 'road-b-lab/2', claim: 'disposable lab, no protocol claim',
+    profile: 'road-b-lab/2', claim: 'disposable lab, no protocol claim', gating: controllerGate.gating, controller: controllerGate.report,
     honesty: 'This run reports receipt diagnostics with explicit remaining gates. It is not a same-guarantee comparison and not the capability ablation.',
     experiment: 'ingress x multiplicity (hash-placement diagnostics) + separate freshness cells + failure rows + the typed joined journey (steps 1–6) + the label-retention probe. NOT the protocol capability ablation (neither/authorship/selection/both), which is a later gate.',
-    remainingGates: [CAVEAT_JOINED, CAVEAT_RECON, CAVEAT_MATCHED, CAVEAT_EXPECTED, CAVEAT_NATIVE_IMPORT, CAVEAT_VECTOR, CAVEAT_MANDATORY],
+    remainingGates: [CAVEAT_JOINED, CAVEAT_RECON, CAVEAT_MATCHED, ...(controllerGate.enabled ? [] : [CAVEAT_EXPECTED]), CAVEAT_NATIVE_IMPORT, CAVEAT_VECTOR, CAVEAT_MANDATORY],
     sourceProfile: 'post-authority-repair source (REPAIR.md; PROFILE.md "Changed after dcc7b94"): derived Type ids, registry policy rows, per-admission acceptance basis, fail-closed native import. NOT the dcc7b94 profile of vectors/profile-b.json.',
     capabilityAblation: { unknown: 'not run: the neither/authorship/selection/both counterfactuals need same-guarantee arms that remove one capability each; this lab has one arm', consequence: 'no representation-vs-feature attribution and no interaction term can be claimed from this run' },
     evidenceShape: {
@@ -1944,7 +2005,7 @@ async function main() {
     caveats: [
       'Local Anvil receipts under the lab profile; not an L2 fee quote and not an equivalent-guarantee comparison until the coordinator\'s fixture map is applied.',
       'Ingress x multiplicity only; no capability ablation and no interaction term are claimed.',
-      CAVEAT_JOINED, CAVEAT_RECON, CAVEAT_MATCHED, CAVEAT_EXPECTED,
+      CAVEAT_JOINED, CAVEAT_RECON, CAVEAT_MATCHED, inputCaveat,
       'Fresh-slot counts are estimates; no storage tracing was run.',
       'Every cell starts from the sealed post-setup state (cold transaction access sets; lists empty except setup); "steady" list regimes are not measured here.',
       'The three fresh/* cells run from the SAME sealed snapshot with the same action shape (one PUBLISH under an explicit nonce) but contract-existing-body has a different initialized state (one prior EOA admission); their figures are reported side by side and must never be subtracted into a "deduplication premium".',
@@ -1956,11 +2017,11 @@ async function main() {
       'policy/activate ADDS StrictQuoteAcceptor (test/Falsify.t.sol artifact; fixture rule v2) as QUOTE policy row 3 on top of the mandatory MinBodyAcceptor(32) (row 2 is the accept-all mock): the Type id and descriptor are untouched, unsent epoch-N signatures are refused (E_INTENT), an above-cap body (uint256 3_000_000_000, not a payload control) is refused by the added policy (E_POLICY_REJECTED), and acceptanceBasis reports row 2 for the earlier admission. Its in-cell strict Type shows a rejected body stays rejected after activate(0) and under a permissive policy (E_REJECTED). A policy activation is a Realm fact, not a Type change.',
       CAVEAT_MANDATORY,
       'failure/refused-re-registration covers the identical-descriptor case only; a different descriptor under a colliding id is impossible by construction (derived ids) and is recorded as a statement row, not a transaction.',
-      'joined/paid-slice records observations only (inputEvidenceGrade RPC_OBSERVED). The expectations passed to JoinedConsumer.paidPoint/paidList are this runner\'s local mirror of the fixture map (candidate-side); the expectation manifest, the arm-input manifest and the basis seal of the pre-sealed comparison are authored and hashed by the independent run controller before this packet is opened, and this packet may echo but never define or repair them. The A1 combined receipt is not a marginal placement cost (ESTIMATE) unless the optional paired control joined/a1-without-placement is pinned; even then this runner subtracts nothing.',
+      `joined/paid-slice records observations only (inputEvidenceGrade RPC_OBSERVED). ${inputCaveat} The expectation manifest, arm-input manifest and basis seal are authored and hashed independently before this packet is opened; this packet cannot define or repair them. The A1 combined receipt is not a marginal placement cost (ESTIMATE) unless the optional paired control joined/a1-without-placement is pinned; even then this runner subtracts nothing.`,
     ],
   };
   activeReport = report;
-  const run = { rpc: rpcUrl, chainId, source, addrs: null, sealed: null, report };
+  const run = { rpc: rpcUrl, chainId, source, addrs: null, sealed: null, report, controllerGate, controllerInputs: null };
   try {
     if (args.addresses) {
       run.addrs = JSON.parse(readFileSync(args.addresses, 'utf8'));
@@ -1982,6 +2043,71 @@ async function main() {
     log(`sealed initial state: snapshot ${run.sealed} at block ${Number(sealedHeader.number)} ${sealedHeader.hash}`);
     report.sealedInitialState = { snapshot: run.sealed, blockNumber: Number(sealedHeader.number), blockHash: sealedHeader.hash, rpc: envOf(sealEnv), rule: 'evm_revert to the sealed snapshot, then re-snapshot, before every cell through a fresh context; baseline raw harvest at the after-revert block before the first transaction; post harvest recorded per cell before the next revert' };
     persist(report);
+    if (controllerGate.enabled) {
+      // Derive the candidate mirror through the same fixture-plan code as the paid cell. Its preparatory reads are
+      // read-only; the mirror is sent only to the controller and is never used as independent evidence.
+      const prepCtx = makeCtx(run);
+      const prepPlan = await paidSliceCell.plan(prepCtx, authorsFor(prepCtx), Number(sealedHeader.number));
+      const A = prepCtx.wallets[1].address.toLowerCase();
+      const B = run.addrs.actorB.toLowerCase();
+      const paidCaller = prepCtx.wallets[PAID_CALLER_INDEX].address.toLowerCase();
+      const roles = {
+        deployer: { address: prepCtx.deployer.address.toLowerCase(), derivationIndex: 0 },
+        AUTHOR_A: { address: A, derivationIndex: 1 },
+        actorB: { address: B, deploymentNonce: report.deployment.actorB.nonce },
+        paidCaller: { address: paidCaller, derivationIndex: PAID_CALLER_INDEX },
+      };
+      const basis = '12';
+      const mirror = {
+        types: Object.fromEntries(TYPE_KEYS.map((key) => [key, T[key].toLowerCase()])),
+        fixture: {
+          ITEM_ETH: { typeId: T.ITEM.toLowerCase(), body: prepPlan.iA.toLowerCase(), id: prepPlan.itemA.toLowerCase() },
+          ITEM_USDC: { typeId: T.ITEM.toLowerCase(), body: prepPlan.iB.toLowerCase(), id: prepPlan.itemB.toLowerCase() },
+          PAIR_ETH_USDC: { typeId: T.PAIR.toLowerCase(), body: prepPlan.pairBody.toLowerCase(), id: prepPlan.pairId.toLowerCase() },
+          QUOTE_A1: { typeId: T.QUOTE_J.toLowerCase(), body: prepPlan.q1.toLowerCase(), id: prepPlan.a1.toLowerCase() },
+          QUOTE_A2: { typeId: T.QUOTE_J.toLowerCase(), body: prepPlan.q2.toLowerCase(), id: prepPlan.a2.toLowerCase() },
+          QUOTE_B1: { typeId: T.QUOTE_J.toLowerCase(), body: prepPlan.q3.toLowerCase(), id: prepPlan.b1.toLowerCase() },
+        },
+        subject: { FILE_QUOTE: prepPlan.subj.toLowerCase(), salt: prepPlan.salt.toLowerCase(), creatorPrincipal: prepPlan.pidA.toLowerCase() },
+        roles,
+        lenses: { LENS_A_FIRST: [A, B], LENS_B_FIRST: [B, A] },
+        expect: {
+          A_FIRST: { subject: prepPlan.subj.toLowerCase(), expectedHead: prepPlan.a2.toLowerCase(), selectedAuthor: A, selectedProofKind: '2', pairId: prepPlan.pairId.toLowerCase(), itemA: prepPlan.itemA.toLowerCase(), itemB: prepPlan.itemB.toLowerCase(), mantissa: String(J.mantissaA2), scale: String(J.scale), observedAt: String(J.observedAt), noteCommitment: NOTE_COMMITMENT.toLowerCase(), basisAdmission: basis },
+          B_FIRST: { subject: prepPlan.subj.toLowerCase(), expectedHead: prepPlan.b1.toLowerCase(), selectedAuthor: B, selectedProofKind: '1', pairId: prepPlan.pairId.toLowerCase(), itemA: prepPlan.itemA.toLowerCase(), itemB: prepPlan.itemB.toLowerCase(), mantissa: String(J.mantissaB1), scale: String(J.scale), observedAt: String(J.observedAt), noteCommitment: NOTE_COMMITMENT.toLowerCase(), basisAdmission: basis },
+        },
+        placementExpect: { folder: prepPlan.swaps.toLowerCase(), nameRole: prepPlan.nameHash.toLowerCase(), actor: A, proofKind: '2', publication: '2', budget: '16' },
+        ordinals: { placementAdmission: '7', placementPublication: '2', placementRevision: '1', aHeadAdmission: '10', aHeadRevision: '2', bHeadAdmission: '12', bHeadRevision: '1', postB1Frontier: basis, registryEpoch: String(report.registryEpoch), indexGeneration: '0' },
+      };
+      const repoRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd: root, encoding: 'utf8' }).trim();
+      const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repoRoot, encoding: 'utf8' }).trim();
+      const dirtyDiff = execFileSync('git', ['diff', '--binary', 'HEAD', '--', '.'], { cwd: repoRoot });
+      const sourcePin = { commit, dirtyDiffSha256: createHash('sha256').update(dirtyDiff).digest('hex'), sourceHashes: sourceHashes() };
+      const artifacts = Object.fromEntries(Object.entries(report.deployment).map(([role, deployed]) => [role, {
+        artifactSha256: deployed.artifact.sha256,
+        initcodeHash: deployed.initcodeHash.toLowerCase(),
+        runtimeCodehash: deployed.runtimeCodehash.toLowerCase(),
+        runtimeBytes: deployed.runtimeBytes,
+      }]));
+      const build = { solc: report.deployment.registry.artifact.compiler, viaIR: true, optimizerRuns: 200, evm: 'cancun', artifacts };
+      const deployment = Object.fromEntries(Object.entries(report.deployment).map(([role, deployed]) => [role, { address: deployed.address.toLowerCase(), nonce: deployed.nonce, runtimeCodehash: deployed.runtimeCodehash.toLowerCase() }]));
+      const beforeContext = {
+        schema: 'efs-lab-b/controller-context/1', runId: controllerGate.runId, stage: 'beforeFixture', sentAtUtc: new Date().toISOString(), pins: controllerGate.pins,
+        chain: { chainId, rpc: rpcUrl, source: run.source, anvilArgv: [...(anvilInfo.args ?? [])] }, source: sourcePin, build, roles, deployment,
+        typesObserved: mirror.types, registry: { epochAfterSetup: String(report.registryEpoch) },
+        sealedInitialState: { blockNumber: String(Number(sealedHeader.number)), blockHash: sealedHeader.hash.toLowerCase(), snapshot: String(run.sealed) },
+        plannedCells: [...selectedCells], firstCell: selectedCells[0], mirror,
+        ackPath: join(SCRATCH_ROOT, 'controller', 'ack-beforeFixture.json'),
+      };
+      try {
+        run.controllerInputs = await controllerGate.invoke('beforeFixture', beforeContext);
+        persist(report); // summary is durable before the first selected cell can send
+      } catch (error) {
+        report.cells[selectedCells[0]] = controllerFailureRow(selectedCells[0], error);
+        report.cellOrder.push(selectedCells[0]);
+        persist(report);
+        throw error;
+      }
+    }
     // decode-once helpers the cell bodies use for relative ordinals (from the retained baseline)
     const wrap = (cell) => ({ ...cell, body: async (ctx, a, plan) => { const b = run.report.cells[ctx.cellLabel]?.candidateDecoded?.baseline; assert(b && b.counts && b.records && b.nonces, `${ctx.cellLabel}: baseline harvest missing before the body`); ctx.baselineCounts = b.counts; ctx.baselineRecords = b.records; ctx.baselineNonces = b.nonces; return cell.body(ctx, a, plan); } });
     const runCellNamed = async (label, cell) => { const c = wrap(cell); const orig = c.plan; c.plan = async (ctx, a, block) => { ctx.cellLabel = label; return orig(ctx, a, block); }; const r = await sealedCell(run, label, c); if (r) report.cellOrder.push(label); };
@@ -2010,4 +2136,4 @@ async function main() {
     log(`wrote ${OUT_JSON}${report.failure ? ' (FAILED: ' + report.failure.message + ')' : ''}`);
   }
 }
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => { console.error(e); process.exit(e?.exitCode ?? 1); });
