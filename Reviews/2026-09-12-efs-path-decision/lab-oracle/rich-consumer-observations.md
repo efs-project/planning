@@ -29,13 +29,24 @@ two actual transaction receipt block-end bases:
   `lastScanned`, `lastStatus`, `lastTarget`, and `lastValue`
 - `readList`: the same seven getters
 
-The caller must supply an independent Consumer address, exact query
-coordinates, and a non-empty value-source label for each stage. Packet fields
-never become those pins. Every retained raw entry is validated before stage
-selection. Missing evidence is `UNKNOWN`; malformed fields, duplicates,
+The caller must supply an independent Consumer address **for each cell**, plus
+exact query coordinates and a non-empty value-source label for each stage.
+A global target and packet fields never become those pins. Every retained raw
+entry is validated before stage selection. Missing evidence is `UNKNOWN`;
+malformed fields, duplicates,
 undeclared selectors, substituted calls, coordinate/target/source differences,
 off-basis calls, request/reply disagreement, and conflicting block hashes are
 `OBSERVED_MISMATCH`. No conflicting input is filtered away.
+
+The public analyzer accepts the exact frozen profile bytes and ABI-profile
+bytes, hashes and parses them internally, and only then reads untrusted packet
+evidence. Caller-supplied parsed profile objects or hash strings cannot attest
+to those inputs; altered trusted bytes fail the pinned-input boundary. In
+contrast, malformed untrusted packet, cell, raw, transaction, request, or
+response containers produce qualified mismatch reports rather than throwing.
+Absent containers or fields remain `UNKNOWN`. Duplicate IDs are detected from
+correlated request/response envelopes even if the redundant flat ID is absent,
+while one request/response pair is counted only once.
 
 Raw collection consistency and semantic interpretation are separate. Only four
 semantic comparisons were frozen:
@@ -72,8 +83,10 @@ NODE_PATH=../contracts/node_modules \
   Reviews/2026-09-12-efs-path-decision/lab-oracle/rich-consumer-observations.test.mjs
 ```
 
-The tests cover the positive seven-getter matrix; explicit unknown semantics;
-body-derived identity drift; missing and wrong independent pins; altered
+The tests cover the positive seven-getter matrix; exact byte-boundary sealing;
+explicit unknown semantics; altered pinned body rejection; missing and wrong
+per-cell independent pins; altered
 inherited and uninterpreted values; omitted, duplicated, substituted, and
 off-basis getters; block-hash conflict; malformed containers and entries;
-JSON-RPC disagreement and duplicate IDs; and duplicate paid transactions.
+missing-versus-conflicting nested JSON-RPC fields; envelope and flat duplicate
+IDs; and duplicate paid transactions.

@@ -15,10 +15,11 @@ const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 const HASH = /^0x[0-9a-fA-F]{64}$/;
 const STATUSES = new Set(['OBSERVED_MATCH', 'OBSERVED_MISMATCH', 'UNKNOWN', 'UNSUPPORTED']);
 
-function bytes(value) {
+function bytes(value, requiredError = 'RICH_CONSUMER_BYTES_REQUIRED') {
   if (Buffer.isBuffer(value)) return value;
   if (value instanceof Uint8Array) return Buffer.from(value);
-  return Buffer.from(value);
+  if (typeof value === 'string') return Buffer.from(value);
+  throw new TypeError(requiredError);
 }
 
 export function gitBlobHash(value) {
@@ -39,10 +40,11 @@ function parseJson(value, label) {
 }
 
 export function parsePinnedRichConsumerProfile(profileBytes) {
-  if (gitBlobHash(profileBytes) !== PROFILE_GIT_BLOB) {
+  const exactBytes = bytes(profileBytes, 'RICH_CONSUMER_PROFILE_BYTES_REQUIRED');
+  if (gitBlobHash(exactBytes) !== PROFILE_GIT_BLOB) {
     throw new TypeError('RICH_CONSUMER_PROFILE_BLOB_MISMATCH');
   }
-  const profile = parseJson(profileBytes, 'RICH_CONSUMER_PROFILE');
+  const profile = parseJson(exactBytes, 'RICH_CONSUMER_PROFILE');
   if (profile?.kind !== 'EFS_RICH_CONSUMER_OBSERVATION_PROFILE'
     || profile.version !== 1
     || profile.frozenBeforeNewPacket !== true
@@ -54,10 +56,11 @@ export function parsePinnedRichConsumerProfile(profileBytes) {
 }
 
 export function parsePinnedRpcAbiProfile(abiProfileBytes, profile) {
-  if (gitBlobHash(abiProfileBytes) !== profile?.source?.publicAbiProfile?.gitBlob) {
+  const exactBytes = bytes(abiProfileBytes, 'RICH_CONSUMER_ABI_PROFILE_BYTES_REQUIRED');
+  if (gitBlobHash(exactBytes) !== profile?.source?.publicAbiProfile?.gitBlob) {
     throw new TypeError('RICH_CONSUMER_ABI_PROFILE_BLOB_MISMATCH');
   }
-  const abiProfile = parseJson(abiProfileBytes, 'RICH_CONSUMER_ABI_PROFILE');
+  const abiProfile = parseJson(exactBytes, 'RICH_CONSUMER_ABI_PROFILE');
   const consumerEvidence = abiProfile?.artifactEvidence?.find(
     ({ artifact }) => artifact === profile.source.consumerArtifact.artifact,
   );
@@ -211,11 +214,37 @@ function present(object, key) {
   return Object.prototype.hasOwnProperty.call(object, key);
 }
 
+function prepared(items, boundaryIssues) {
+  Object.defineProperty(items, 'boundaryIssues', { value: boundaryIssues });
+  return items;
+}
+
 function prepareTransactions(value, cellId) {
-  if (value === undefined) return [];
-  if (!Array.isArray(value)) throw new TypeError(`MALFORMED_RICH_TRANSACTIONS_CONTAINER:${cellId}`);
-  return value.map((raw, index) => {
-    if (!isObject(raw)) throw new TypeError(`MALFORMED_RICH_TRANSACTION_ENTRY:${cellId}:${index}`);
+  if (value === undefined) {
+    return prepared([], [issue('UNKNOWN', 'TRANSACTIONS_CONTAINER_MISSING', { cellId })]);
+  }
+  if (!Array.isArray(value)) {
+    return prepared([], [issue('OBSERVED_MISMATCH', 'TRANSACTIONS_CONTAINER_MALFORMED', {
+      cellId,
+      observedType: value === null ? 'null' : typeof value,
+    })]);
+  }
+  const items = [];
+  for (let index = 0; index < value.length; index += 1) {
+    const raw = value[index];
+    if (!present(value, index) || !isObject(raw)) {
+      items.push({
+        index,
+        raw,
+        to: null,
+        data: null,
+        selector: null,
+        block: null,
+        blockHash: null,
+        issues: [issue('OBSERVED_MISMATCH', 'TRANSACTION_ENTRY_MALFORMED', { cellId })],
+      });
+      continue;
+    }
     const issues = [];
     let to = null;
     if (!present(raw, 'to')) {
@@ -267,8 +296,9 @@ function prepareTransactions(value, cellId) {
         }));
       }
     }
-    return { index, raw, to, data, selector, block, blockHash, issues };
-  });
+    items.push({ index, raw, to, data, selector, block, blockHash, issues });
+  }
+  return prepared(items, []);
 }
 
 function validRpcId(value) {
@@ -276,10 +306,32 @@ function validRpcId(value) {
 }
 
 function prepareRaw(value, cellId) {
-  if (value === undefined) return [];
-  if (!Array.isArray(value)) throw new TypeError(`MALFORMED_RICH_RAW_CONTAINER:${cellId}`);
-  return value.map((raw, index) => {
-    if (!isObject(raw)) throw new TypeError(`MALFORMED_RICH_RAW_ENTRY:${cellId}:${index}`);
+  if (value === undefined) {
+    return prepared([], [issue('UNKNOWN', 'RAW_CONTAINER_MISSING', { cellId })]);
+  }
+  if (!Array.isArray(value)) {
+    return prepared([], [issue('OBSERVED_MISMATCH', 'RAW_CONTAINER_MALFORMED', {
+      cellId,
+      observedType: value === null ? 'null' : typeof value,
+    })]);
+  }
+  const items = [];
+  for (let index = 0; index < value.length; index += 1) {
+    const raw = value[index];
+    if (!present(value, index) || !isObject(raw)) {
+      items.push({
+        index,
+        raw,
+        to: null,
+        calldata: null,
+        selector: null,
+        returnData: null,
+        block: null,
+        blockHash: null,
+        issues: [issue('OBSERVED_MISMATCH', 'RAW_ENTRY_MALFORMED', { cellId })],
+      });
+      continue;
+    }
     const issues = [];
     let to = null;
     if (!present(raw, 'to')) {
@@ -342,61 +394,95 @@ function prepareRaw(value, cellId) {
 
     const request = raw.request;
     const response = raw.response;
-    if (!present(raw, 'request') || !present(raw, 'response')) {
+    const hasRequest = present(raw, 'request');
+    const hasResponse = present(raw, 'response');
+    if (!hasRequest || !hasResponse) {
       issues.push(issue('UNKNOWN', 'RPC_REQUEST_OR_RESPONSE_MISSING'));
     } else if (!isObject(request) || !isObject(response)) {
       issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_OR_RESPONSE_MALFORMED'));
     } else {
-      if (request.jsonrpc !== '2.0' || response.jsonrpc !== '2.0') {
+      if (!present(request, 'jsonrpc') || !present(response, 'jsonrpc')) {
+        issues.push(issue('UNKNOWN', 'RPC_JSON_VERSION_MISSING'));
+      } else if (request.jsonrpc !== '2.0' || response.jsonrpc !== '2.0') {
         issues.push(issue('OBSERVED_MISMATCH', 'RPC_JSON_VERSION_MISMATCH'));
       }
-      if (!validRpcId(request.id) || !validRpcId(response.id)) {
+      if (!present(request, 'id') || !present(response, 'id')) {
+        issues.push(issue('UNKNOWN', 'RPC_ID_MISSING'));
+      } else if (!validRpcId(request.id) || !validRpcId(response.id)) {
         issues.push(issue('OBSERVED_MISMATCH', 'RPC_ID_MALFORMED'));
       } else if (request.id !== response.id) {
         issues.push(issue('OBSERVED_MISMATCH', 'RPC_ID_DISAGREEMENT'));
       } else if (present(raw, 'rpcId') && validRpcId(raw.rpcId) && request.id !== raw.rpcId) {
         issues.push(issue('OBSERVED_MISMATCH', 'RPC_FLAT_ID_DISAGREEMENT'));
       }
-      if (request.method !== 'eth_call') {
+      if (!present(request, 'method')) {
+        issues.push(issue('UNKNOWN', 'RPC_REQUEST_METHOD_MISSING'));
+      } else if (request.method !== 'eth_call') {
         issues.push(issue('OBSERVED_MISMATCH', 'RPC_METHOD_DISAGREEMENT'));
       } else if (present(raw, 'method') && request.method !== raw.method) {
         issues.push(issue('OBSERVED_MISMATCH', 'RPC_FLAT_METHOD_DISAGREEMENT'));
       }
-      if (!Array.isArray(request.params) || request.params.length !== 2
-        || !isObject(request.params[0])) {
+      if (!present(request, 'params')) {
+        issues.push(issue('UNKNOWN', 'RPC_PARAMS_MISSING'));
+      } else if (!Array.isArray(request.params)) {
         issues.push(issue('OBSERVED_MISMATCH', 'RPC_PARAMS_MALFORMED'));
       } else {
-        const callKeys = Object.keys(request.params[0]).sort();
-        if (JSON.stringify(callKeys) !== JSON.stringify(['data', 'to'])) {
-          issues.push(issue('OBSERVED_MISMATCH', 'RPC_CALL_OBJECT_FIELDS_SUBSTITUTED', {
-            observedKeys: callKeys,
-          }));
+        if (request.params.length > 2) {
+          issues.push(issue('OBSERVED_MISMATCH', 'RPC_PARAMS_CONTAIN_UNDECLARED_VALUES'));
         }
-        const requestTo = normalizeAddress(request.params[0].to);
-        let requestData = null;
-        try {
-          requestData = normalizeHex(request.params[0].data, 'RICH_RPC_REQUEST_CALLDATA');
-        } catch (error) {
-          issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_CALLDATA_MALFORMED', {
-            error: error.message,
-          }));
+        if (!present(request.params, 0)) {
+          issues.push(issue('UNKNOWN', 'RPC_CALL_OBJECT_MISSING'));
+        } else if (!isObject(request.params[0])) {
+          issues.push(issue('OBSERVED_MISMATCH', 'RPC_CALL_OBJECT_MALFORMED'));
+        } else {
+          const call = request.params[0];
+          const extraKeys = Object.keys(call).filter((key) => !['data', 'to'].includes(key)).sort();
+          if (extraKeys.length > 0) {
+            issues.push(issue('OBSERVED_MISMATCH', 'RPC_CALL_OBJECT_FIELDS_SUBSTITUTED', {
+              extraKeys,
+            }));
+          }
+          if (!present(call, 'to')) {
+            issues.push(issue('UNKNOWN', 'RPC_REQUEST_TARGET_MISSING'));
+          } else {
+            const requestTo = normalizeAddress(call.to);
+            if (requestTo === null) {
+              issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_TARGET_MALFORMED'));
+            } else if (to !== null && requestTo !== to) {
+              issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_FLAT_TARGET_DISAGREEMENT'));
+            }
+          }
+          if (!present(call, 'data')) {
+            issues.push(issue('UNKNOWN', 'RPC_REQUEST_CALLDATA_MISSING'));
+          } else {
+            try {
+              const requestData = normalizeHex(call.data, 'RICH_RPC_REQUEST_CALLDATA');
+              if (calldata !== null && requestData !== calldata) {
+                issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_FLAT_CALLDATA_DISAGREEMENT'));
+              }
+            } catch (error) {
+              issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_CALLDATA_MALFORMED', {
+                error: error.message,
+              }));
+            }
+          }
         }
-        const requestBlock = blockKey(request.params[1]);
-        if (requestTo === null || requestData === null) {
-          issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_CALL_MALFORMED'));
-        } else if (to !== null && calldata !== null
-          && (requestTo !== to || requestData !== calldata)) {
-          issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_FLAT_CALL_DISAGREEMENT'));
-        }
-        if (requestBlock === null) {
-          issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_BASIS_MALFORMED'));
-        } else if (block !== null && requestBlock !== block) {
-          issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_FLAT_BASIS_DISAGREEMENT'));
+        if (!present(request.params, 1)) {
+          issues.push(issue('UNKNOWN', 'RPC_REQUEST_BASIS_MISSING'));
+        } else {
+          const requestBlock = blockKey(request.params[1]);
+          if (requestBlock === null) {
+            issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_BASIS_MALFORMED'));
+          } else if (block !== null && requestBlock !== block) {
+            issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_FLAT_BASIS_DISAGREEMENT'));
+          }
         }
       }
       const hasResult = present(response, 'result');
       const hasError = present(response, 'error');
-      if (hasResult === hasError) {
+      if (!hasResult && !hasError) {
+        issues.push(issue('UNKNOWN', 'RPC_RESPONSE_RESULT_OR_ERROR_MISSING'));
+      } else if (hasResult && hasError) {
         issues.push(issue('OBSERVED_MISMATCH', 'RPC_RESPONSE_RESULT_ERROR_EXCLUSIVITY'));
       } else if (hasResult) {
         let result = null;
@@ -410,8 +496,11 @@ function prepareRaw(value, cellId) {
         if (result !== null && returnData !== null && result !== returnData) {
           issues.push(issue('OBSERVED_MISMATCH', 'RPC_RESPONSE_FLAT_RETURN_DISAGREEMENT'));
         }
-      } else if (!isObject(response.error)
-        || !Number.isSafeInteger(response.error.code)
+      } else if (!isObject(response.error)) {
+        issues.push(issue('OBSERVED_MISMATCH', 'RPC_RESPONSE_ERROR_MALFORMED'));
+      } else if (!present(response.error, 'code') || !present(response.error, 'message')) {
+        issues.push(issue('UNKNOWN', 'RPC_RESPONSE_ERROR_INCOMPLETE'));
+      } else if (!Number.isSafeInteger(response.error.code)
         || typeof response.error.message !== 'string') {
         issues.push(issue('OBSERVED_MISMATCH', 'RPC_RESPONSE_ERROR_MALFORMED'));
       } else if (returnData !== null) {
@@ -420,7 +509,7 @@ function prepareRaw(value, cellId) {
         issues.push(issue('UNKNOWN', 'RPC_RESPONSE_EXPLICIT_ERROR'));
       }
     }
-    return {
+    items.push({
       index,
       raw,
       to,
@@ -430,24 +519,42 @@ function prepareRaw(value, cellId) {
       block,
       blockHash,
       issues,
-    };
-  });
+    });
+  }
+  return prepared(items, []);
 }
 
-function integrityOutcome(raw, transactions) {
+function integrityOutcome(raw, transactions, boundary = []) {
   const entries = [
+    ...boundary,
+    ...(raw.boundaryIssues ?? []),
+    ...(transactions.boundaryIssues ?? []),
     ...raw.flatMap((item) => item.issues.map((entry) => ({ ...entry, source: 'raw', index: item.index }))),
     ...transactions.flatMap((item) => item.issues
       .map((entry) => ({ ...entry, source: 'transaction', index: item.index }))),
   ];
   const ids = new Map();
   for (const item of raw) {
-    if (!validRpcId(item.raw.rpcId)) continue;
-    const indexes = ids.get(item.raw.rpcId) ?? [];
-    indexes.push(item.index);
-    ids.set(item.raw.rpcId, indexes);
+    if (!isObject(item.raw)) continue;
+    const itemIds = new Map();
+    const retainId = (id) => {
+      if (!validRpcId(id)) return;
+      itemIds.set(JSON.stringify([typeof id, id]), id);
+    };
+    retainId(item.raw.rpcId);
+    if (isObject(item.raw.request) && isObject(item.raw.response)
+      && validRpcId(item.raw.request.id)
+      && validRpcId(item.raw.response.id)
+      && item.raw.request.id === item.raw.response.id) {
+      retainId(item.raw.request.id);
+    }
+    for (const [key, id] of itemIds) {
+      const retained = ids.get(key) ?? { id, indexes: [] };
+      retained.indexes.push(item.index);
+      ids.set(key, retained);
+    }
   }
-  for (const [rpcId, indexes] of ids) {
+  for (const { id: rpcId, indexes } of ids.values()) {
     if (indexes.length > 1) {
       entries.push(issue('OBSERVED_MISMATCH', 'DUPLICATE_RPC_ID', { rpcId, indexes }));
     }
@@ -473,7 +580,7 @@ function exactPin(observed, expected, label) {
   return outcome('OBSERVED_MATCH', `${label}_PIN_MATCH`, { expected, observed });
 }
 
-function provenanceOutcome(profile, pins, input) {
+function provenanceOutcome(profile, pins, profileGitBlob, abiProfileGitBlob) {
   return combine('RICH_PROVENANCE', [
     exactPin(pins?.standing, profile.pinContract.standing, 'PIN_STANDING'),
     exactPin(
@@ -486,26 +593,31 @@ function provenanceOutcome(profile, pins, input) {
       profile.source.coreSourceAssociation,
       'CORE_SOURCE_ASSOCIATION',
     ),
-    exactPin(input?.profileGitBlob, PROFILE_GIT_BLOB, 'RICH_PROFILE_GIT_BLOB'),
+    exactPin(profileGitBlob, PROFILE_GIT_BLOB, 'RICH_PROFILE_GIT_BLOB'),
     exactPin(
-      input?.abiProfileGitBlob,
+      abiProfileGitBlob,
       profile.source.publicAbiProfile.gitBlob,
       'PUBLIC_ABI_PROFILE_GIT_BLOB',
     ),
   ]);
 }
 
-function targetPinOutcome(pins) {
-  if (pins?.consumerTarget === undefined || pins.consumerTarget === null) {
+function targetPinOutcome(pins, cellId) {
+  const supplied = pins?.cells?.[cellId]?.consumerTarget;
+  if (supplied === undefined || supplied === null) {
     return outcome('UNKNOWN', 'INDEPENDENT_CONSUMER_TARGET_PIN_MISSING');
   }
-  const target = normalizeAddress(pins.consumerTarget);
+  const target = normalizeAddress(supplied);
   if (target === null) {
     return outcome('OBSERVED_MISMATCH', 'INDEPENDENT_CONSUMER_TARGET_PIN_MALFORMED', {
-      observed: pins.consumerTarget,
+      cellId,
+      observed: supplied,
     });
   }
-  return outcome('OBSERVED_MATCH', 'INDEPENDENT_CONSUMER_TARGET_PIN_WELL_FORMED', { target });
+  return outcome('OBSERVED_MATCH', 'INDEPENDENT_CONSUMER_TARGET_PIN_WELL_FORMED', {
+    cellId,
+    target,
+  });
 }
 
 function entryIssuesOutcome(issues, label) {
@@ -567,7 +679,7 @@ function transactionForStage({ transactions, profile, iface, pins, cellId, stage
 
   const [item] = matching;
   const parts = [entryIssuesOutcome(item.issues, `TRANSACTION_${stage.transaction.name}`)];
-  const targetPin = targetPinOutcome(pins);
+  const targetPin = targetPinOutcome(pins, cellId);
   if (targetPin.status !== 'OBSERVED_MATCH') {
     parts.push(targetPin);
   } else if (item.to === null) {
@@ -781,7 +893,7 @@ function rawGetterObservation({
 
   const [item] = matching;
   const parts = [entryIssuesOutcome(item.issues, `RAW_${getter.name}`)];
-  const targetPin = targetPinOutcome(pins);
+  const targetPin = targetPinOutcome(pins, cellId);
   if (targetPin.status !== 'OBSERVED_MATCH') {
     parts.push(targetPin);
   } else if (item.to === null) {
@@ -1012,25 +1124,61 @@ function analyzeStage({
   };
 }
 
-export function analyzeRichConsumerObservations(packet, abiProfile, profile, pins, input = {}) {
-  if (!isObject(packet)) throw new TypeError('MALFORMED_RICH_PACKET');
-  if (packet.cells !== undefined && !isObject(packet.cells)) {
-    throw new TypeError('MALFORMED_RICH_CELLS_CONTAINER');
+function scopedPacketCell(packet, cellId) {
+  if (packet === undefined) {
+    return { cell: undefined, issues: [issue('UNKNOWN', 'PACKET_MISSING')] };
   }
+  if (!isObject(packet)) {
+    return {
+      cell: undefined,
+      issues: [issue('OBSERVED_MISMATCH', 'PACKET_MALFORMED', {
+        observedType: packet === null ? 'null' : typeof packet,
+      })],
+    };
+  }
+  if (!present(packet, 'cells')) {
+    return { cell: undefined, issues: [issue('UNKNOWN', 'CELLS_CONTAINER_MISSING')] };
+  }
+  if (!isObject(packet.cells)) {
+    return {
+      cell: undefined,
+      issues: [issue('OBSERVED_MISMATCH', 'CELLS_CONTAINER_MALFORMED', {
+        observedType: packet.cells === null ? 'null' : typeof packet.cells,
+      })],
+    };
+  }
+  if (!present(packet.cells, cellId)) {
+    return { cell: undefined, issues: [issue('UNKNOWN', 'EXPECTED_CELL_MISSING', { cellId })] };
+  }
+  if (!isObject(packet.cells[cellId])) {
+    return {
+      cell: undefined,
+      issues: [issue('OBSERVED_MISMATCH', 'EXPECTED_CELL_MALFORMED', {
+        cellId,
+        observedType: packet.cells[cellId] === null ? 'null' : typeof packet.cells[cellId],
+      })],
+    };
+  }
+  return { cell: packet.cells[cellId], issues: [] };
+}
+
+export function analyzeRichConsumerObservations(packet, profileBytes, abiProfileBytes, pins) {
+  const profile = parsePinnedRichConsumerProfile(profileBytes);
+  const abiProfile = parsePinnedRpcAbiProfile(abiProfileBytes, profile);
+  const profileGitBlob = gitBlobHash(profileBytes);
+  const abiProfileGitBlob = gitBlobHash(abiProfileBytes);
   const iface = consumerInterface(abiProfile, profile);
   const identity = deriveIdentity(profile);
-  const provenance = provenanceOutcome(profile, pins, input);
-  const targetPin = targetPinOutcome(pins);
+  const provenance = provenanceOutcome(profile, pins, profileGitBlob, abiProfileGitBlob);
   const cells = [];
 
   for (const cellId of profile.scope.cells) {
-    const packetCell = packet.cells?.[cellId];
-    if (packetCell !== undefined && !isObject(packetCell)) {
-      throw new TypeError(`MALFORMED_RICH_CELL:${cellId}`);
-    }
+    const targetPin = targetPinOutcome(pins, cellId);
+    const scoped = scopedPacketCell(packet, cellId);
+    const packetCell = scoped.cell;
     const transactions = prepareTransactions(packetCell?.transactions, cellId);
     const raw = prepareRaw(packetCell?.raw, cellId);
-    const inputIntegrity = integrityOutcome(raw, transactions);
+    const inputIntegrity = integrityOutcome(raw, transactions, scoped.issues);
     const transactionCallSet = transactionCallSetOutcome(transactions, profile);
     const selections = Object.fromEntries(profile.scope.stages.map((stageId) => [
       stageId,
@@ -1074,7 +1222,8 @@ export function analyzeRichConsumerObservations(packet, abiProfile, profile, pin
     evidenceCeiling: 'RPC_OBSERVED',
     standing: profile.standing,
     profile: {
-      gitBlob: input.profileGitBlob ?? 'UNAVAILABLE',
+      gitBlob: profileGitBlob,
+      abiGitBlob: abiProfileGitBlob,
       frozenBeforeNewPacket: profile.frozenBeforeNewPacket,
     },
     sourceAssociations: {

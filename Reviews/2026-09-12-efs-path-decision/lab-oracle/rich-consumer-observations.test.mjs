@@ -126,6 +126,7 @@ function makeCell(cellIndex) {
   return {
     packetCell: { transactions, raw },
     pins: {
+      consumerTarget: TARGET,
       'paid-quote-read': { coordinates: readQuoteCoordinates, source: quoteSource },
       listing: { coordinates: readListCoordinates, source: listSource },
     },
@@ -149,13 +150,12 @@ function fixture() {
   return { packet, pins };
 }
 
-function analyze(value = fixture(), selectedProfile = profile) {
+function analyze(value = fixture(), selectedProfileBytes = profileBytes) {
   return analyzeRichConsumerObservations(
     value.packet,
-    abiProfile,
-    selectedProfile,
+    selectedProfileBytes,
+    abiBytes,
     value.pins,
-    { profileGitBlob: gitBlobHash(profileBytes), abiProfileGitBlob: gitBlobHash(abiBytes) },
   );
 }
 
@@ -191,6 +191,26 @@ test('seals the richer profile and inherited ABI profile before interpretation',
   assert.throws(
     () => parsePinnedRichConsumerProfile(changed),
     /RICH_CONSUMER_PROFILE_BLOB_MISMATCH/,
+  );
+});
+
+test('public analysis accepts exact pinned bytes and rejects caller-supplied parsed objects', () => {
+  const value = fixture();
+  const report = analyzeRichConsumerObservations(
+    value.packet,
+    profileBytes,
+    abiBytes,
+    value.pins,
+  );
+  assert.equal(report.provenance.status, 'OBSERVED_MATCH');
+  assert.equal(report.profile.gitBlob, '367c836d1952c19c16b3bdf6738675e3ea91233d');
+  assert.throws(
+    () => analyzeRichConsumerObservations(value.packet, profile, abiProfile, value.pins),
+    /RICH_CONSUMER_PROFILE_BYTES_REQUIRED/,
+  );
+  assert.throws(
+    () => analyzeRichConsumerObservations(value.packet, profileBytes, abiProfile, value.pins),
+    /RICH_CONSUMER_ABI_PROFILE_BYTES_REQUIRED/,
   );
 });
 
@@ -238,26 +258,29 @@ test('changing an inherited semantic return is a mismatch despite valid raw enco
   assert.equal(observed.getters.lastValue.semantic.status, 'OBSERVED_MISMATCH');
 });
 
-test('changing the predeclared quote body changes the independently derived target expectation', () => {
-  const changedProfile = structuredClone(profile);
-  changedProfile.recordIdentity.quote3100RawBody = `${
-    changedProfile.recordIdentity.quote3100RawBody.slice(0, -2)
-  }1d`;
-  const report = analyze(fixture(), changedProfile);
-
-  assert.equal(report.identity.comparisons.bodyHash, 'MISMATCH');
-  assert.equal(report.identity.comparisons.recordId, 'MISMATCH');
-  for (const cellId of profile.scope.cells) {
-    assert.equal(
-      stage(report, cellId, 'paid-quote-read').inheritedSemanticComparisons.status,
-      'OBSERVED_MISMATCH',
-    );
-  }
+test('changed predeclared body bytes cannot enter public analysis under supplied hash claims', () => {
+  const changedProfileBytes = Buffer.from(profileBytes.toString().replace(
+    profile.recordIdentity.quote3100RawBody,
+    `${profile.recordIdentity.quote3100RawBody.slice(0, -2)}1d`,
+  ));
+  assert.throws(
+    () => analyzeRichConsumerObservations(
+      fixture().packet,
+      changedProfileBytes,
+      abiBytes,
+      fixture().pins,
+      {
+        profileGitBlob: gitBlobHash(profileBytes),
+        abiProfileGitBlob: gitBlobHash(abiBytes),
+      },
+    ),
+    /RICH_CONSUMER_PROFILE_BLOB_MISMATCH/,
+  );
 });
 
 test('missing independent target, coordinate, or source pins cannot produce raw agreement', () => {
   const cases = [
-    (value) => { delete value.pins.consumerTarget; },
+    (value) => { delete value.pins.cells['native-one/quote'].consumerTarget; },
     (value) => { delete value.pins.cells['native-one/quote']['paid-quote-read'].coordinates; },
     (value) => { delete value.pins.cells['native-one/quote']['paid-quote-read'].source; },
   ];
@@ -272,7 +295,10 @@ test('missing independent target, coordinate, or source pins cannot produce raw 
 
 test('wrong independent target, coordinates, source, or source association is a mismatch', () => {
   const cases = [
-    (value) => { value.pins.consumerTarget = '0x9999999999999999999999999999999999999999'; },
+    (value) => {
+      value.pins.cells['native-one/quote'].consumerTarget =
+        '0x9999999999999999999999999999999999999999';
+    },
     (value) => { value.pins.cells['native-one/quote']['paid-quote-read'].coordinates[2] = word('9'); },
     (value) => { value.pins.cells['native-one/quote']['paid-quote-read'].source = 'wrong-source'; },
     (value) => { value.pins.measurementSourceAssociation = '0'.repeat(40); },
@@ -283,6 +309,33 @@ test('wrong independent target, coordinates, source, or source association is a 
     const observed = stage(analyze(value), 'native-one/quote', 'paid-quote-read');
     assert.equal(observed.rawCollection.status, 'OBSERVED_MISMATCH');
   }
+});
+
+test('Consumer target authority is independent per cell and global target pins are inert', () => {
+  const missing = fixture();
+  delete missing.pins.cells['native-one/quote'].consumerTarget;
+  missing.pins.consumerTarget = TARGET;
+  assert.equal(
+    stage(analyze(missing), 'native-one/quote', 'paid-quote-read').rawCollection.status,
+    'UNKNOWN',
+  );
+  assert.equal(
+    stage(analyze(missing), 'signed-one/quote', 'paid-quote-read').rawCollection.status,
+    'OBSERVED_MATCH',
+  );
+
+  const wrong = fixture();
+  wrong.pins.cells['native-one/quote'].consumerTarget =
+    '0x9999999999999999999999999999999999999999';
+  wrong.pins.consumerTarget = TARGET;
+  assert.equal(
+    stage(analyze(wrong), 'native-one/quote', 'paid-quote-read').rawCollection.status,
+    'OBSERVED_MISMATCH',
+  );
+  assert.equal(
+    stage(analyze(wrong), 'signed-one/quote', 'paid-quote-read').rawCollection.status,
+    'OBSERVED_MATCH',
+  );
 });
 
 test('a missing required getter remains UNKNOWN rather than agreement', () => {
@@ -336,16 +389,39 @@ test('basis drift or a conflicting block hash is a mismatch', () => {
 
 test('malformed raw and transaction containers or entries fail closed before filtering', () => {
   const cases = [
-    [(value) => { value.packet.cells['native-one/quote'].raw = {}; }, /MALFORMED_RICH_RAW_CONTAINER/],
-    [(value) => { value.packet.cells['native-one/quote'].raw.unshift(null); }, /MALFORMED_RICH_RAW_ENTRY/],
-    [(value) => { value.packet.cells['native-one/quote'].transactions = {}; }, /MALFORMED_RICH_TRANSACTIONS_CONTAINER/],
-    [(value) => { value.packet.cells['native-one/quote'].transactions.unshift(null); }, /MALFORMED_RICH_TRANSACTION_ENTRY/],
+    (value) => { value.packet.cells['native-one/quote'].raw = {}; },
+    (value) => { value.packet.cells['native-one/quote'].raw.unshift(null); },
+    (value) => { value.packet.cells['native-one/quote'].raw.length += 1; },
+    (value) => { value.packet.cells['native-one/quote'].transactions = {}; },
+    (value) => { value.packet.cells['native-one/quote'].transactions.unshift(null); },
+    (value) => { value.packet.cells['native-one/quote'] = null; },
+    (value) => { value.packet.cells = null; },
   ];
-  for (const [mutate, expected] of cases) {
+  for (const mutate of cases) {
     const value = fixture();
     mutate(value);
-    assert.throws(() => analyze(value), expected);
+    assert.equal(
+      stage(analyze(value), 'native-one/quote', 'paid-quote-read').rawCollection.status,
+      'OBSERVED_MISMATCH',
+    );
   }
+});
+
+test('malformed public packet values produce mismatch reports while absent packet evidence is unknown', () => {
+  const value = fixture();
+  for (const packet of [null, [], 7]) {
+    const report = analyzeRichConsumerObservations(packet, profileBytes, abiBytes, value.pins);
+    assert.equal(
+      stage(report, 'native-one/quote', 'paid-quote-read').rawCollection.status,
+      'OBSERVED_MISMATCH',
+    );
+  }
+  const missing = fixture();
+  delete missing.packet.cells;
+  assert.equal(
+    stage(analyze(missing), 'native-one/quote', 'paid-quote-read').rawCollection.status,
+    'UNKNOWN',
+  );
 });
 
 test('request/reply disagreement and duplicate JSON-RPC ids are mismatches', () => {
@@ -368,6 +444,19 @@ test('request/reply disagreement and duplicate JSON-RPC ids are mismatches', () 
   );
 });
 
+test('duplicate correlated envelope ids mismatch even when flat rpc ids are absent', () => {
+  const value = fixture();
+  const cell = value.packet.cells['native-one/quote'];
+  delete cell.raw[0].rpcId;
+  delete cell.raw[1].rpcId;
+  cell.raw[1].request.id = cell.raw[0].request.id;
+  cell.raw[1].response.id = cell.raw[0].response.id;
+  assert.equal(
+    stage(analyze(value), 'native-one/quote', 'paid-quote-read').rawCollection.status,
+    'OBSERVED_MISMATCH',
+  );
+});
+
 test('missing required raw transport evidence remains UNKNOWN rather than conflict', () => {
   const cases = [
     (item) => { delete item.rpcId; },
@@ -381,6 +470,49 @@ test('missing required raw transport evidence remains UNKNOWN rather than confli
     assert.equal(
       stage(analyze(value), 'native-one/quote', 'listing').rawCollection.status,
       'UNKNOWN',
+    );
+  }
+});
+
+test('missing nested RPC evidence remains UNKNOWN', () => {
+  const cases = [
+    (item) => { delete item.request.jsonrpc; },
+    (item) => { delete item.response.jsonrpc; },
+    (item) => { delete item.request.id; },
+    (item) => { delete item.response.id; },
+    (item) => { delete item.request.method; },
+    (item) => { delete item.request.params; },
+    (item) => { delete item.request.params[0].to; },
+    (item) => { delete item.request.params[0].data; },
+    (item) => { delete item.request.params[1]; },
+    (item) => { delete item.response.result; },
+  ];
+  for (const mutate of cases) {
+    const value = fixture();
+    mutate(rawAt(value, 'native-one/quote', 'listing', 'lastScanned'));
+    assert.equal(
+      stage(analyze(value), 'native-one/quote', 'listing').rawCollection.status,
+      'UNKNOWN',
+    );
+  }
+});
+
+test('present contradictory nested RPC evidence remains OBSERVED_MISMATCH', () => {
+  const cases = [
+    (item) => { item.request.jsonrpc = '1.0'; },
+    (item) => { item.request.id += 1; },
+    (item) => { item.request.method = 'eth_getBalance'; },
+    (item) => { item.request.params[0].to = '0x9999999999999999999999999999999999999999'; },
+    (item) => { item.request.params[1] = quantity(999); },
+    (item) => { item.response.result = word('f'); },
+    (item) => { item.response.error = { code: -32000, message: 'conflict' }; },
+  ];
+  for (const mutate of cases) {
+    const value = fixture();
+    mutate(rawAt(value, 'native-one/quote', 'listing', 'lastScanned'));
+    assert.equal(
+      stage(analyze(value), 'native-one/quote', 'listing').rawCollection.status,
+      'OBSERVED_MISMATCH',
     );
   }
 });
