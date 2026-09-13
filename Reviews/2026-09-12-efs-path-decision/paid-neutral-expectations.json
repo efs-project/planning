@@ -1,0 +1,125 @@
+{
+  "manifest": "EFS disposable paid point/list neutral expectations",
+  "authoredAt": "2026-09-13T10:50:55Z",
+  "sourceRevision": "8dfe27a4e611a5d0cf9e3a599edde9e2b70724b8",
+  "sources": [
+    {"path": "AGENTS.md", "gitBlob": "4d6ed6960b0af27f80d8a9a6e42d563697f4a9ac", "sha256": "87516b8ff9f6a3671a99b4793b9e73056157b58c122cda7ec5f2bf4aaefc6657", "role": "workspace constraints"},
+    {"path": "Reviews/2026-09-12-efs-path-decision/sdk-fixture.md", "gitBlob": "b2a7046b3ab4f747b9fd4b37b2f2269ea8bdc08e", "sha256": "b6a2d489f3552b15610ee148b1384c4248b3f9b825e43cc2ee43ecdccdba8885", "role": "semantic values and paid slice requirements"},
+    {"path": "Reviews/2026-09-12-efs-path-decision/overhead-and-selection.md", "gitBlob": "fe9c3353a38f14ab8503a233c2e3ea8ddea340a4", "sha256": "29f5b49ee0eecc57a998178009d94f209f6c7f7720b9a30d7fc53063d7742ca1", "role": "equivalent guarantees and complete cost accounting"},
+    {"path": "Reviews/2026-09-12-efs-path-decision/oracle-boundary.md", "gitBlob": "bf4aa1b90b6f7559f66a0fadb13059c95dd2bd57", "sha256": "97ba43dfe74a880573bb6268a082c94d521422c02798442a9398dd866e4d3c29", "role": "independence and evidence ceiling"}
+  ],
+  "sourceRequirements": {
+    "semanticValues": "sdk-fixture.md:51-75",
+    "acceptanceAndRollback": "sdk-fixture.md:82-104,468-473",
+    "oneAPlacementAndSevenRows": "sdk-fixture.md:410-427",
+    "paidControls": "sdk-fixture.md:429-438",
+    "qualifiedChecksAndScope": "sdk-fixture.md:440-466",
+    "preRunPins": "sdk-fixture.md:475-512",
+    "evidenceCeiling": "oracle-boundary.md:106-117"
+  },
+  "newTestConditions": [],
+  "evidence": {
+    "ceiling": "RPC_OBSERVED",
+    "positiveConclusion": "Observed semantic agreement under the declared RPC assumption only",
+    "negativeConclusion": "Observed disagreement, or an explicitly unsupported or inconclusive check",
+    "authenticatedChainState": "NOT_ESTABLISHED",
+    "portableNativeAuthorship": "NOT_ESTABLISHED",
+    "unconditionalCompleteness": "NOT_ESTABLISHED",
+    "nativeStatusFlagsAreEvidenceNotExpectations": true,
+    "receiptAlonePasses": false
+  },
+  "fixtures": {
+    "subject": "FILE_QUOTE",
+    "quoteCommon": {"type": "Quote", "pair": "PAIR_ETH_USDC", "scale": 6, "observedAt": 1800000000, "noteBytesHex": "0x7265666572656e63652071756f7465", "noteUtf8": "reference quote", "noteCommitment": "Independently matches NOTE_BYTES under the sealed arm-local commitment rule"},
+    "quotes": {
+      "QUOTE_A1": {"revision": "A1", "mantissa": 2500000000, "author": "AUTHOR_A", "authorEvidenceCategory": "EOA_SIGNED_PUBLICATION"},
+      "QUOTE_A2": {"revision": "A2", "mantissa": 2502000000, "author": "AUTHOR_A", "authorEvidenceCategory": "EOA_SIGNED_PUBLICATION"},
+      "QUOTE_B1": {"revision": "B1", "mantissa": 2501000000, "author": "AUTHOR_B", "authorEvidenceCategory": "CONTRACT_ORIGINATED_PUBLICATION"}
+    },
+    "pair": {"label": "PAIR_ETH_USDC", "type": "Pair", "orderedItems": ["ITEM_ETH", "ITEM_USDC"]},
+    "items": [{"label": "ITEM_ETH", "type": "Item"}, {"label": "ITEM_USDC", "type": "Item"}],
+    "oneAPlacement": {
+      "count": 1,
+      "coordinate": {"parent": "/swaps", "name": "eth-usdc", "file": "FILE_QUOTE"},
+      "provenance": {"sourceStep": "A1", "actor": "AUTHOR_A", "evidenceCategory": "EOA_SIGNED_PUBLICATION_EFFECT", "sourceBasis": "A1_SOURCE_ACCEPTANCE_BASIS"},
+      "unchangedBy": ["A2", "B1", "LENS_A_FIRST", "LENS_B_FIRST"]
+    },
+    "tag": {"label": "TAG_MARKET", "value": "market", "subject": "FILE_QUOTE"},
+    "authorRoles": {"AUTHOR_A": "Genuine EOA with retained signed-publication evidence", "AUTHOR_B": "Actual originating deployed producer contract; no invented EOA signature"}
+  },
+  "setupCommon": {
+    "admission": "ADMITTED",
+    "acceptance": "Required Type, structure, bounds, reference, author and CAS checks satisfied",
+    "mandatoryEffects": ["admission", "head", "history", "directory", "tag"],
+    "mandatoryEffectsAtomic": true,
+    "placementCost": "Charge exactly once at A1; disclose separately from publication, admission and indexing",
+    "effectEvidence": "Independent qualified pre/post read-back; not receipt status alone"
+  },
+  "paidCommon": {
+    "presence": "FOUND",
+    "support": "SUPPORTED",
+    "admission": "ADMITTED",
+    "selection": "SELECTED",
+    "selectedFile": "FILE_QUOTE",
+    "observationBasis": "ARM_LOCAL_SEALED_POST_B1_BASIS",
+    "candidateCoverage": {"scope": "All qualified current content heads of FILE_QUOTE at the arm-local sealed post-B1 basis", "expectedHeads": ["QUOTE_A2", "QUOTE_B1"], "sameForPointAndList": true, "historicalOnly": ["QUOTE_A1"]},
+    "closureChecks": ["Decode and independently check every selected Quote fixture field", "Resolve PAIR_ETH_USDC and check Pair Type", "Check ordered references ITEM_ETH then ITEM_USDC", "Resolve both Items and independently check each Item Type"],
+    "allClosureChecksAtObservationBasis": true,
+    "pointPlacementEvidence": "Join independently retained A1 provenance; no directory lookup is required in paid point execution",
+    "listPlacementEvidence": "Read and check exactly oneAPlacement with its unchanged A1 provenance",
+    "listPageCoverage": {"status": "COMPLETE", "scope": "Sealed /swaps page/window containing the sole eth-usdc -> FILE_QUOTE placement", "rowCount": 1, "endCondition": "Reached and independently checked against the pre-sealed arm-local page/window", "globalCompletenessClaim": false}
+  },
+  "rows": [
+    {"row": "A1_SETUP", "operation": "SETUP", "quote": "QUOTE_A1", "revision": "A1", "currentHeads": ["QUOTE_A1"], "retainedHistory": ["QUOTE_A1"], "placementChange": "CREATE_ONE_A_PLACEMENT"},
+    {"row": "A2_SETUP", "operation": "SETUP", "quote": "QUOTE_A2", "revision": "A2", "casPreviousHead": "QUOTE_A1", "currentHeads": ["QUOTE_A2"], "retainedHistory": ["QUOTE_A1", "QUOTE_A2"], "placementChange": "UNCHANGED"},
+    {"row": "B1_SETUP", "operation": "SETUP", "quote": "QUOTE_B1", "revision": "B1", "currentHeads": ["QUOTE_A2", "QUOTE_B1"], "retainedHistory": ["QUOTE_A1", "QUOTE_A2", "QUOTE_B1"], "placementChange": "UNCHANGED"},
+    {"row": "POINT_A_FIRST", "operation": "PAID_POINT", "lens": "LENS_A_FIRST", "queryCoordinate": {"file": "FILE_QUOTE"}, "selectedHead": "QUOTE_A2", "selectedRevision": "A2", "selectedAuthor": "AUTHOR_A", "selectedAuthorEvidenceCategory": "EOA_SIGNED_PUBLICATION"},
+    {"row": "LIST_A_FIRST", "operation": "PAID_LIST", "lens": "LENS_A_FIRST", "queryCoordinate": {"parent": "/swaps", "name": "eth-usdc"}, "selectedHead": "QUOTE_A2", "selectedRevision": "A2", "selectedAuthor": "AUTHOR_A", "selectedAuthorEvidenceCategory": "EOA_SIGNED_PUBLICATION", "matchesPointRow": "POINT_A_FIRST"},
+    {"row": "POINT_B_FIRST", "operation": "PAID_POINT", "lens": "LENS_B_FIRST", "queryCoordinate": {"file": "FILE_QUOTE"}, "selectedHead": "QUOTE_B1", "selectedRevision": "B1", "selectedAuthor": "AUTHOR_B", "selectedAuthorEvidenceCategory": "CONTRACT_ORIGINATED_PUBLICATION"},
+    {"row": "LIST_B_FIRST", "operation": "PAID_LIST", "lens": "LENS_B_FIRST", "queryCoordinate": {"parent": "/swaps", "name": "eth-usdc"}, "selectedHead": "QUOTE_B1", "selectedRevision": "B1", "selectedAuthor": "AUTHOR_B", "selectedAuthorEvidenceCategory": "CONTRACT_ORIGINATED_PUBLICATION", "matchesPointRow": "POINT_B_FIRST"}
+  ],
+  "paidControls": {
+    "transactionsPerRow": 1,
+    "callerRole": "PINNED_UNRELATED_CALLER",
+    "consumerRole": "PINNED_UNRELATED_CONSUMER",
+    "publicInterfacesOnly": true,
+    "independentConsumerDecoder": true,
+    "candidateImplementationImportsAllowed": false,
+    "privilegedCacheOrSeededAnswersAllowed": false,
+    "rowStart": "First transaction from a clone/revert of that arm's sealed post-B1 snapshot",
+    "withinArm": "Same semantic observation basis and qualified candidate universe for all four paid rows; execution block retained separately for each row",
+    "acrossArms": "Equivalent logical setup, caller roles, block/time and cold-transaction controls; not equal physical snapshots, deployments, block hashes or representations",
+    "pointListCostsSeparate": true,
+    "setupDeploymentCodeStorageAndPlacementCostsSeparate": true
+  },
+  "requiredEvidenceFields": ["realm", "execution", "profile", "observationBasis", "executionBasis", "queryCoordinate", "presence", "support", "admission", "selection", "selectedFile", "selectedHead", "selectedRevision", "selectedAuthor", "selectedAuthorEvidenceCategory", "placementCoordinate", "placementProvenance", "quoteCheck", "pairCheck", "itemChecks", "candidateCoverage", "pageCoverage where applicable", "rawEvidence", "paidExecution"],
+  "expectedNegatives": [
+    {"case": "B creates or replaces a placement; list duplicates A placement", "outcome": "FAIL_ROW"},
+    {"case": "Point/list differ in selected File, head or revision under the same Lens", "outcome": "FAIL_ROW"},
+    {"case": "Selected-content author/evidence replaces A1 placement provenance", "outcome": "FAIL_ROW"},
+    {"case": "Either read omits a Quote, Pair or Item closure check; Pair order is reversed", "outcome": "FAIL_ROW"},
+    {"case": "Pair or Item is wrong-Type, missing or unavailable but reported valid", "outcome": "FAIL_ROW; preserve supported INVALID, ABSENT_PROVEN or UNKNOWN outcome without a fabricated selection"},
+    {"case": "Checks mix semantic bases or candidate universes", "outcome": "FAIL_ROW or explicit UNKNOWN; never PASS"},
+    {"case": "Coverage incomplete, duplicated, wrong-window or missing end evidence", "outcome": "PARTIAL or UNKNOWN; never empty COMPLETE or PASS"},
+    {"case": "Unsupported check or Type", "outcome": "UNSUPPORTED; never guessed typed success"},
+    {"case": "Receipt status indicates success but abstract checks are missing", "outcome": "INCONCLUSIVE; never PASS"},
+    {"case": "Missing pre-run input or basis seal; expected answer repaired from results", "outcome": "INCONCLUSIVE or INVALID COMPARISON; never a retroactive pre-sealed PASS"}
+  ],
+  "matchedRollbackControl": {
+    "sourceRequired": true,
+    "scope": "Small matched acceptance/index-failure rollback control, outside the seven success rows",
+    "expected": "Rejected acceptance or required-index failure leaves prior admission/head/history/directory/tag facts unchanged; no intended new effect partly visible",
+    "evidence": "Independent same-basis qualified pre/post observations, retaining the RPC_OBSERVED ceiling",
+    "triggerPin": "Exact matched operation, pre-state and failure trigger must be independently sealed before use; not specified here"
+  },
+  "unresolvedArmInputPins": [
+    "Exact reviewed Type/body/ID/signature/packing/commitment rules, Item bodies, bounds and independently derived fixture vectors",
+    "Exact public read ABI and independently authored point/list consumer and decoder artifacts",
+    "Clean candidate source/diff, dependencies, compiler, fork, configuration, profile and Lens commitments",
+    "Independently obtained caller/deployment/code facts sealed before fixture publication and semantic calls",
+    "Exact independently derived File/parent/name/Lens/page-window coordinates and end condition",
+    "Exact post-B1 semantic basis and snapshot; per-row execution basis and matched time/cold controls",
+    "Exact matched acceptance/index-failure rollback operation, pre-state and failure trigger"
+  ],
+  "excludedClaimsAndWork": ["Physical cross-arm identity or ordinal equality", "Authenticated chain proof", "Portable native-author proof", "Global completeness", "Full finalist eligibility", "Gas winner or affordability threshold", "New production API or protocol choice", "Full move/reuse/removal/restore, import, account/rule drift or other finalist suite"]
+}

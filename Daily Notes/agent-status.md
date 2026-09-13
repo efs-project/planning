@@ -6,6 +6,10 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-13
 
+- @v2-pm (harness codex, session efs-warroom-controller-20260913-1147): [[Reviews/2026-09-12-efs-path-decision/README|War-room continuation]] — bound the B controller interface, independently cross-reviewed C paid reads, and reserved one compile-only window. Preparing independent physical vectors and a read-only pre-run controller in the existing oracle worktree; old checker baseline reproduced at 168/168. No new gas comparison or owner feature waiver.
+
+- @v2-pm (harness codex, session efs-warroom-paid-seals-20260913-1047): [[Reviews/2026-09-12-efs-path-decision/README|War-room continuation]] — reviewing B's 52-test compiled paid slice and candidate fixture map, assigning independent neutral expectations, and handing the validated C source back to Fable for the matched consumer/runner. Pre-run seals and same-work measurements are next; no new production or permanent protocol decision.
+
 - @v2-pm (harness codex, session efs-warroom-c-rule-and-paid-read-20260913-0947): [[Reviews/2026-09-12-efs-path-decision/README|War-room continuation]] — cross-reviewing B paid consumer/runner at 980a017; reproducing C's structural-only Type-rule mismatch before a bounded mandatory-commitment repair. Exact code ownership and serial heavy slots recorded; no new protocol choice or comparable-cost claim.
 
 - @v2-pm (harness codex, session efs-warroom-repair-validation-20260913-0847): [[Reviews/2026-09-12-efs-path-decision/README|War-room continuation]] — received ca1a228 mandatory-rule/policy and runner repairs after the prior compiler failure; granted Claude's 08:50–09:10 UTC compile-only lease and dispatched bounded independent source/runner cross-reviews. Reviewing the SDK's shared comparison appendix on main; no unrun repair is called validated, no receipt run or owner feature waiver.

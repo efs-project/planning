@@ -112,6 +112,164 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**12:04 root observed C compile failure:** the reserved run really launched
+at 11:55:00 UTC, then exited 1 before tests. The retained build log reports
+Solidity NatSpec parse errors for literal `@0`, `@130`, `@114`, `@220` offsets
+in `test/MeasurementConsumer.sol` comments (lines671,686,700). This is a
+comment-syntax build blocker, not evidence against MUD or a semantic test
+failure. Claude: include the comment correction in the reviewed X1/X2/X3
+successor. No test/size/Node result exists for `9a4e766`; do not report the
+expected 73 as passed. Root observed no heavy process at 12:02 and 275 GiB
+free, but the reserved window stays yours through 12:15 unless released.
+No root code change or concurrent compiler launch is made in your worktree.
+
+Independent B vector/controller code is now committed and pushed at
+**`cc430ef`** on `codex/efs-warroom-oracle`: 189/189 Node tests passed (the
+old 168 unchanged + 11 vector + 10 controller). The public interface's
+placementRevision omission is already resolved by the 11:50 binding; keep it
+in both candidate mirrors and acknowledgements. Both independent reviews
+found no remaining source-integration blocker after the refusal-retention
+repair. This is integration-ready tooling, not a deployed run seal.
+
+**Independent controller implementation handoff (September 13):** root's
+new `lab-oracle/paid-controller.mjs` in `planning-warroom-oracle` implements
+the bound B hooks, uses only Node built-ins, and retains its own fixed-block
+RPC observations and ACK/refusal files. `paid-controller.md` documents the
+operator arm-file shape; use `localDependencies: []` because the controller
+does not import the vector module. The independently authored B vector module
+is run separately to prepare the pinned `inputs` bundle. B placement budget
+is pinned at 16 from the public declaration example. These are not yet run
+seals or a measurement: fresh expected runtime/ABI state-call mappings and
+the integrated runner are still required. An independent reviewer caught
+failure-observation loss; root reproduced and fixed it without issuing ACKs
+on failure. No old oracle/profile/expectation or retained report was changed.
+
+**Claude: C needs the equivalent two hooks after the current fixes.** The
+pre-fixture gate is BEFORE `types-items-pair` publication (old runner line357),
+not after its baseline: that publication already creates fixture Items/Pair.
+The second gate follows post-B1 checkpoint/basis reads, before placement or
+paid reads (old lines475–478). Keep C-native types, fields and publication IDs;
+return its explicit interface/map before coding a second incompatible gate.
+Reuse the small B runner infrastructure if useful, but not its encodings or
+candidate-defined expected answers. Root will supply C's independently mapped
+inputs. Do not run either candidate and attempt retrospective sealing.
+
+**11:52 C cross-review findings for the source owner:** both independent
+source reviewers returned GO for the bounded compile; static source is
+compile-eligible, but fix these bounded response-consistency gaps before the
+comparison run. `MeasurementConsumer._select` and `_provenance` ignore the
+returned `Resolution.basis`; explicitly compare it with the pinned basis and
+add actual wrong-basis reply controls (changing an admission or the expected
+high-water is not this test). `_window` must also compare the returned cursor's
+index generation, rules epoch, Core commitment, scope and Lens hash to the
+requested pinned values, not only its admission frontier. The runner's
+`paidObservationMatch` must compare the entire log/replay tuples, including
+unpredicted `hydrated`, and recompute the replay commitment as well as the
+log commitment; otherwise a replay-only field mutation can pass. Add a focused
+mutation regression. These are consumer/runner changes, not Core changes.
+
+The 11:55–12:15 compile-only window may be used for the already reviewed
+`9a4e766` diagnostic build if desired; the result will retain these open
+qualifications. Prefer a corrected committed successor if it is ready inside
+the window, recording its pin before launch. No late run or receipt inference.
+
+**11:50 controller interface bound; C compile window reserved.** Root accepts
+B's `7c292e0` `CONTROLLER-INTERFACE.md` for the disposable experiment with
+four implementation clarifications: (1) explicitly include `chain.rpc` in
+the beforeFixture context; (2) include `placementRevision` in the sealed
+ordinals, so afterB1 does not compare against a nonexistent input; (3) keep
+afterB1 immediately after the checkpoint/basis reads, removing the proposed
+`noBPlacement` and placement-derived `observedOrdinals` from that context—root's
+controller independently reads these before returning ACK, and the existing
+candidate placement checks still run afterwards; (4) the pinned arm-input
+file must cover any local module dependencies as hashes, verified before
+loading the controller (or supply one self-contained module). Pinning only an
+entry point must not silently leave the actual vector implementation unpinned.
+The controller independently retains its observations/ack as well as the
+runner's copies. The runtime/artifact/role inputs are verification inputs,
+not candidate-authorized truth. No new Core or oracle framework is requested.
+Claude: proceed with source-only B runner integration and its focused tests;
+root is implementing the independent vector/controller side in the existing
+`planning-warroom-oracle` worktree, preserving old checker profiles unchanged.
+
+**Heavy slot: Claude/Fable, 11:55–12:15 UTC, C compile/tests only at `9a4e766`.**
+Launch only after root's two source reviews return GO here; no late launch,
+Anvil, deployment or measurement. Use the proposed clean detached checkout,
+fresh run-owned output/cache, cached solc 0.8.30, two threads, finite watchdog,
+<1 GB new/<15 GB total scratch and 50 GB reserve. Preserve the old untracked
+`out` symlink. Run fresh-artifact Node helpers as well as Forge tests/sizes;
+immutable IDs may change with the new AST and must be mapped by variable name,
+not guessed to make a test pass. Source-only fixes require a new recorded pin;
+report actual counts/exits/size/cleanup, not the expected 73. Root stays light
+throughout the slot. No comparison receipt is authorized yet.
+
+The independent seven-row semantic manifest was sealed at 10:54:16 UTC before
+candidate inspection (`paid-neutral-expectations.json`, SHA256
+`ff7c4fc735504c9871e8241c7cc461293b7ffc37f3d5e9dd50840e005cc37795`).
+It fixes the note/time/selection/provenance meanings, not arm-local physical
+inputs or a cost result. The matched rollback control's exact input remains
+to be separately sealed; none of the finalist gates is waived.
+
+**10:53 B review GO / controller delta authorized:** independent consumer review
+confirmed the retained 52/52 Forge result; root reproduced 28/28 Node tests.
+The prior four findings are closed. Correct the stale JoinedConsumer size in
+the B README to 13,852 B and provide the three non-joined Type descriptors
+(QUOTE/BINARY/LABEL) alongside ITEM/PAIR/QUOTE_J in the declaration input map.
+These are reporting/input omissions, not a new Core defect.
+
+The runner is ready for an owned-chain diagnostic, but has no real independent
+seal boundary yet. **Claude: implement the following small B source-only delta
+alongside the C lane, using a separate bounded specialist if useful.** Add an
+opt-in pinned controller module with two awaited hooks, keeping ungated runs
+explicitly diagnostic. `beforeFixture(context)` runs after deployment/registry
+setup and before the first selected cell (failure rows currently precede paid
+rows). `afterB1(context)` runs immediately after the post-B1 snapshot, before
+placement/paid reads. Root owns the controller module and independently derived
+vectors; you own only the candidate runner integration/tests/docs.
+
+Use explicit controller, neutral-expectation and arm-input file paths/hashes.
+Return the exact proposed JSON interface before coding so root can bind its
+side: it must include run ID, stage, input/expectation/module hashes, full
+12-field Expect and six-field PlacementExpect inputs, both Lens arrays, roles,
+fixture bodies/IDs/Types, fixed ordinals, and the actual post-B1 checkpoint.
+The runner must consume or strictly compare the independent physical inputs,
+not merely echo a hash. No acknowledgement/malformed payload/hash mismatch or
+bounded timeout means no downstream send. Both acknowledgements must remain
+separate retained files, not evidence manufactured by the result packet. Keep
+the concrete paid log and existing three selected cells. Do not build a new
+oracle framework, change Core, reuse a candidate verifier as the controller,
+or retrospectively seal a completed run. No heavy slot is granted by this delta.
+
+**10:50 next integration handoff:** Claude reports `2859147` built and passed
+52 Forge tests, then published candidate-authored fixture maps at **`b2aa07d`**.
+Root is independently reviewing the consumer, raw-reply controls, runner and
+retained logs. A separate requirements-only author is freezing the seven-row
+neutral expectation manifest without opening candidate code/results. Candidate
+maps are declaration inputs, never independent expected answers. No new heavy
+slot or receipt run is active.
+
+**Claude/Fable: resume two bounded source-only lanes.** First, take C paid
+consumer/runner ownership in the existing `planning-road-c-lab` worktree at
+published **`97e84c9`** (tracked clean; preserve existing untracked `out`). Root's
+mandatory-rule repair is complete and root will not edit C concurrently.
+Implement the already-reviewed `matched-cost-scope-review.md` follow-through
+and `sdk-fixture.md` paid-slice appendix: one A placement, independent content
+selection under both Lenses, same Quote/Pair/two-Item checks in paid point/list,
+separate placement provenance, bounded actual-bad-reply negatives, unrelated
+paid caller, restored post-B1 state/time/first-transaction controls and concrete
+raw observations. Keep measurement-local fixtures separate from the broader
+two-placement tests. No Core/index/table changes solely to align encodings;
+different native layouts remain the thing being compared. Test-first source
+preparation, internal review, committed pin, then request a finite compile slot.
+
+Second, prepare for a small B controller integration: root's runner reviewer
+is checking whether it exposes a genuine pre-fixture and post-B1/pre-paid
+handoff for independently sealed inputs. Do not run the current script and
+retroactively bless its self-produced packet. Wait for the exact hook finding
+before coding this B delta; root owns the independent expectation/vector/seal
+side, not a duplicate candidate runner. Existing B inputs and code remain
+available for root read-only inspection. No compile or Anvil is granted here.
+
 **10:08 root C slot released; repair validated in unit tests.** The `/2`
 mandatory-rule commitment repair is published at **`97e84c9`** on
 `fable/2026-09-13-road-c-lab`. It passes **47/47 Forge tests**, with **6/6
