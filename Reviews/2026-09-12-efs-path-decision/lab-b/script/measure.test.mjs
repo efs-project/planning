@@ -303,6 +303,112 @@ test('watchdog failure marker catches pretending evidence exists before report i
   assert.match(errors[0], /report not initialized/);
 });
 
+// ---------------------------------------------------------------- the sealed paid point/list slice: pure helpers
+function loadPaidHelpers() {
+  const declaration = runnerDeclaration('// ---- paid-slice pure helpers', '// ---- paid-slice cells');
+  return vm.runInNewContext(`${declaration}\n({ evidenceCategoryOf, assertUnrelatedCaller, abstractRow, checkPaidRowOrdering, ABSTRACT_FIELDS, SELECTION_FIELDS, PLACEMENT_FIELDS, PAID_CALLER_INDEX, PAID_CALLER_PATH })`, {});
+}
+const SEAL = { kind: 'seal', block: 40, hash: '0xseal' };
+const revertOk = { kind: 'revert', block: 40, hash: '0xseal' };
+const txAt = (label) => ({ kind: 'tx', label, block: 41, parentHash: '0xseal' });
+const retained = (label) => ({ kind: 'retained', label });
+function validAbstract(overrides = {}) {
+  return {
+    operation: 'PAID_LIST', lens: 'LENS_B_FIRST',
+    realm: { chainId: 31337 }, execution: { consumer: '0xc' }, profile: 'road-b-lab/2',
+    observationBasis: { admissionFrontier: '12' }, executionBasis: { block: 41 },
+    queryCoordinate: { labels: { parent: '/swaps', name: 'eth-usdc' } },
+    presence: { outcome: 'FOUND' }, support: { outcome: 'SUPPORTED' }, admission: { outcome: 'ADMITTED' }, selection: { outcome: 'SELECTED' },
+    selectedFile: 'FILE_QUOTE', selectedHead: 'QUOTE_B1', selectedRevision: 'B1',
+    selectedPhysical: { head: '0xb1', revisionOrdinal: '1' },
+    selectedAuthor: { label: 'AUTHOR_B' }, selectedAuthorEvidenceCategory: 'CONTRACT_ORIGINATED_PUBLICATION',
+    placementCoordinate: { lookedUpByThisRow: true }, placementProvenance: { sourceStep: 'A1', actor: 'AUTHOR_A', evidenceCategory: 'EOA_SIGNED_PUBLICATION_EFFECT' },
+    quoteCheck: { mantissa: '2501000000' }, pairCheck: { pairId: '0xp' }, itemChecks: [{ id: '0xa' }, { id: '0xb' }],
+    candidateCoverage: { basis: '12' }, pageCoverage: { status: 'COMPLETE' },
+    rawEvidence: { transaction: { hash: '0xt' } }, paidExecution: { gasUsed: '1' },
+    ...overrides,
+  };
+}
+
+test('abstractRow builds the arm-neutral comparison row with the RPC_OBSERVED grade and every required field', () => {
+  const { abstractRow, ABSTRACT_FIELDS } = loadPaidHelpers();
+  const row = abstractRow(validAbstract());
+  assert.equal(row.inputEvidenceGrade, 'RPC_OBSERVED');
+  assert.match(row.standing, /never expected answers/);
+  for (const k of ABSTRACT_FIELDS) assert.notEqual(row[k], undefined, `${k} present`);
+  assert.equal(ABSTRACT_FIELDS.length, 27);
+  assert.equal(row.selectedRevision, 'B1');
+  assert.equal(row.selectedPhysical.revisionOrdinal, '1');
+});
+
+test('abstractRow catches a missing, unknown, ordinal-labelled or point-charged-lookup row instead of defaulting it', () => {
+  const { abstractRow } = loadPaidHelpers();
+  const { pageCoverage, ...withoutCoverage } = validAbstract();
+  assert.throws(() => abstractRow(withoutCoverage), /missing field\(s\) pageCoverage/);
+  assert.throws(() => abstractRow(validAbstract({ placementProvenance: null })), /missing field\(s\) placementProvenance/);
+  assert.throws(() => abstractRow(validAbstract({ extraneous: 1 })), /unknown field\(s\) extraneous/);
+  assert.throws(() => abstractRow(validAbstract({ selectedRevision: '1' })), /fixture label/);
+  assert.throws(() => abstractRow(validAbstract({ selectedRevision: 2 })), /fixture label/);
+  assert.throws(() => abstractRow(validAbstract({ operation: 'PAID_POINT', placementCoordinate: { lookedUpByThisRow: true } })), /must not charge a directory lookup/);
+  assert.throws(() => abstractRow(validAbstract({ pageCoverage: { status: 'PARTIAL' } })), /pageCoverage PARTIAL is not a pass/);
+  assert.throws(() => abstractRow(validAbstract({ lens: 'LENS_NO_TIEBREAK' })), /lens LENS_NO_TIEBREAK/);
+  assert.doesNotThrow(() => abstractRow(validAbstract({ operation: 'PAID_POINT', placementCoordinate: { lookedUpByThisRow: false }, pageCoverage: { status: 'NOT_APPLICABLE' } })));
+});
+
+test('checkPaidRowOrdering accepts seal -> (revert -> first tx -> retained) x 4 and returns the rows in order', () => {
+  const { checkPaidRowOrdering } = loadPaidHelpers();
+  const events = [SEAL];
+  for (const label of ['point-a-first', 'list-a-first', 'point-b-first', 'list-b-first']) events.push(revertOk, txAt(label), retained(label));
+  const rows = checkPaidRowOrdering(events);
+  // Array.from materializes the vm-realm array in this realm (strict deepEqual compares prototypes)
+  assert.deepEqual(Array.from(rows, (r) => [r.label, r.block, r.retained]), [['point-a-first', 41, true], ['list-a-first', 41, true], ['point-b-first', 41, true], ['list-b-first', 41, true]]);
+});
+
+test('checkPaidRowOrdering catches a second transaction on the same revert, a revert before retention, a wrong head, a wrong parent and an unretained row', () => {
+  const { checkPaidRowOrdering } = loadPaidHelpers();
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, txAt('a'), retained('a'), txAt('b'), retained('b')]), /row b is not the first transaction after a revert/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, txAt('a'), revertOk, retained('a')]), /revert before row a was retained/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, { kind: 'revert', block: 41, hash: '0xother' }, txAt('a'), retained('a')]), /not the seal/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, { kind: 'tx', label: 'a', block: 42, parentHash: '0xseal' }, retained('a')]), /mined at 42/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, { kind: 'tx', label: 'a', block: 41, parentHash: '0xstale' }, retained('a')]), /on 0xstale/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, txAt('a')]), /row a was never retained/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, retained('a')]), /retained a without that row open/);
+  assert.throws(() => checkPaidRowOrdering([revertOk, txAt('a'), retained('a')]), /first event must be the seal/);
+  assert.throws(() => checkPaidRowOrdering([SEAL]), /no paid row/);
+});
+
+test('assertUnrelatedCaller catches a caller that is the deployer, an author or a lab contract (case-insensitive) and pins wallet index 3', () => {
+  const { assertUnrelatedCaller, PAID_CALLER_INDEX, PAID_CALLER_PATH } = loadPaidHelpers();
+  const related = { deployer: '0x00000000000000000000000000000000000000d0', AUTHOR_A: '0x00000000000000000000000000000000000000a1', 'contract actorB': '0x00000000000000000000000000000000000000B2' };
+  assert.equal(assertUnrelatedCaller('0x00000000000000000000000000000000000000c3', related), true);
+  assert.throws(() => assertUnrelatedCaller('0x00000000000000000000000000000000000000d0', related), /it is the deployer/);
+  assert.throws(() => assertUnrelatedCaller('0x00000000000000000000000000000000000000A1', related), /it is the AUTHOR_A/);
+  assert.throws(() => assertUnrelatedCaller('0x00000000000000000000000000000000000000b2', related), /it is the contract actorB/);
+  assert.throws(() => assertUnrelatedCaller(null, related), /not an address/);
+  assert.equal(PAID_CALLER_INDEX, 3);
+  assert.equal(PAID_CALLER_PATH, "m/44'/60'/0'/0/3");
+});
+
+test('evidenceCategoryOf maps the two proof kinds and refuses an unknown kind instead of defaulting', () => {
+  const { evidenceCategoryOf } = loadPaidHelpers();
+  assert.equal(evidenceCategoryOf(1), 'CONTRACT_ORIGINATED_PUBLICATION');
+  assert.equal(evidenceCategoryOf('2'), 'EOA_SIGNED_PUBLICATION');
+  assert.equal(evidenceCategoryOf(2, true), 'EOA_SIGNED_PUBLICATION_EFFECT');
+  assert.throws(() => evidenceCategoryOf(0), /unknown proof kind 0/);
+  assert.throws(() => evidenceCategoryOf(3), /unknown proof kind 3/);
+});
+
+test('selectCells keeps an optional cell out of the default and substring selections and admits it only by exact name', () => {
+  const selectCells = loadSelectCells();
+  const plan = ['failure-rows', 'joined/steps-1-6', 'joined/paid-slice', 'joined/a1-without-placement', 'policy/activate'];
+  const optional = ['joined/a1-without-placement'];
+  assert.deepEqual([...selectCells(plan, {}, optional)], ['failure-rows', 'joined/steps-1-6', 'joined/paid-slice', 'policy/activate']);
+  assert.deepEqual([...selectCells(plan, { only: 'joined' }, optional)], ['joined/steps-1-6', 'joined/paid-slice']);
+  assert.deepEqual([...selectCells(plan, { cells: 'joined/a1-without-placement,joined/paid-slice' }, optional)], ['joined/paid-slice', 'joined/a1-without-placement']);
+  assert.throws(() => selectCells(plan, {}, ['not-in-plan']), /optional cell\(s\) not in the plan/);
+  assert.throws(() => selectCells(plan, { only: 'a1-without' }, optional), /selected zero cells/);
+});
+
 test('deployAll catches attaching evidence sinks only after a deployment failure', async () => {
   const ctx = {
     txs: [], raw: [], blocks: [], rpcOther: [],
