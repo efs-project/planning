@@ -6,12 +6,13 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { readLeftUint, verifyPatchedRuntime } from "./measure-helpers.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+export function resolveArtifactRoot(env, fallback) { return path.resolve(env.OUT_DIR ?? env.FOUNDRY_OUT ?? fallback); }
 const ETHERS = process.env.ETHERS_PATH ?? "/Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js";
 const ethers = await import(pathToFileURL(ETHERS).href);
 const RPC_URL = process.env.RPC_URL ?? "http://127.0.0.1:8545";
 const PK = process.env.PRIVATE_KEY ?? "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 const PK_A = process.env.PK_A ?? "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
-const OUT = path.resolve(process.env.OUT_DIR ?? path.resolve(here, "../out"));
+const OUT = resolveArtifactRoot(process.env, path.resolve(here, "../out"));
 const EVIDENCE_PATH = process.env.EVIDENCE_PATH;
 const RECEIPT_TIMEOUT_MS = Number(process.env.RECEIPT_TIMEOUT_MS ?? 120_000);
 const coder = ethers.AbiCoder.defaultAbiCoder();
@@ -59,6 +60,10 @@ const decodeBinding = (packed) => ({
   admission: BigInt(`0x${packed.slice(74, 90) || "0"}`).toString(),
 });
 const serialize = (v) => JSON.parse(JSON.stringify(v, (_, x) => typeof x === "bigint" ? x.toString() : x));
+
+export function freshReusePlan({ author, dummyBody, targetBody, reuse }) {
+  return { author, viaProducer: true, seedBody: reuse ? targetBody : dummyBody, targetBody };
+}
 
 const rpc = [];
 let rpcSource = "bootstrap";
@@ -406,15 +411,16 @@ async function main() {
 
   async function freshReuseCell(cell, reuse) {
     const dummyBody = recordBody([], C32.create), targetBody = recordBody([], C32.edit);
-    const dummyId = recordId(BYTES_T, ethers.keccak256(dummyBody)), targetId = recordId(BYTES_T, ethers.keccak256(targetBody));
-    const seedBody = reuse ? targetBody : dummyBody, seedId = reuse ? targetId : dummyId;
-    await publishNative(cell, "matched-seed", SELF, [action({ kind: K.RECORD, typeId: BYTES_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(seedBody) })], [seedBody]);
-    const pre = await capture(cell, "pre", { record: targetId, author: SELF, subject: ZERO });
-    const measured = action({ kind: K.RECORD, typeId: BYTES_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(targetBody) });
-    await publishNative(cell, "measured-record", SELF, [measured], [targetBody]);
-    const post = await capture(cell, "post", { record: targetId, author: SELF, subject: ZERO });
+    const plan = freshReusePlan({ author: B, dummyBody, targetBody, reuse });
+    const targetId = recordId(BYTES_T, ethers.keccak256(plan.targetBody));
+    const seedId = recordId(BYTES_T, ethers.keccak256(plan.seedBody));
+    await publishNative(cell, "matched-seed", plan.author, [action({ kind: K.RECORD, typeId: BYTES_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(plan.seedBody) })], [plan.seedBody], plan.viaProducer);
+    const pre = await capture(cell, "pre", { record: targetId, author: plan.author, subject: ZERO });
+    const measured = action({ kind: K.RECORD, typeId: BYTES_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(plan.targetBody) });
+    await publishNative(cell, "measured-record", plan.author, [measured], [plan.targetBody], plan.viaProducer);
+    const post = await capture(cell, "post", { record: targetId, author: plan.author, subject: ZERO });
     assertRecordTransition(`${cell}:measured-record`, pre, post, reuse ? "existing" : "fresh");
-    evidence.observations.push({ source: `${cell}:matched-seeding`, decoded: { seedId, targetId, seedBodyBytes: ethers.getBytes(seedBody).length, measuredDigestKind: D.BODY_HASH, measuredActionCount: 1, measuredBodyBytes: ethers.getBytes(targetBody).length } });
+    evidence.observations.push({ source: `${cell}:matched-seeding`, decoded: { author: plan.author, viaProducer: plan.viaProducer, seedId, targetId, seedBodyBytes: ethers.getBytes(plan.seedBody).length, measuredDigestKind: D.BODY_HASH, measuredActionCount: 1, measuredBodyBytes: ethers.getBytes(plan.targetBody).length } });
   }
   await freshReuseCell("record-fresh-isolated", false);
   await reset("after-record-fresh");
@@ -424,7 +430,7 @@ async function main() {
   process.stdout.write(`${JSON.stringify(serialize(evidence), null, 2)}\n`);
 }
 
-main().catch((error) => {
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) main().catch((error) => {
   try {
     if (EVIDENCE_PATH && path.isAbsolute(EVIDENCE_PATH)) persist("fatal");
   } catch (persistError) {
