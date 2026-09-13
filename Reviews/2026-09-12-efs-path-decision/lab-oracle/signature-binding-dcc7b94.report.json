@@ -1,0 +1,250 @@
+{
+  "kind": "EFS_INDEPENDENT_SIGNATURE_BINDING_REPORT",
+  "version": 1,
+  "standing": "candidate-specific byte and signature interpretation; not authenticated state or a candidate verdict",
+  "input": {
+    "publicProfile": {
+      "publishedCommit": "885d9f9",
+      "path": "Reviews/2026-09-12-efs-path-decision/lab-b/PROFILE.md",
+      "expectedGitBlob": "ca39c29416ffa79231e48a52bef1e5403f563198",
+      "observedGitBlob": "ca39c29416ffa79231e48a52bef1e5403f563198"
+    },
+    "publicVector": {
+      "publishedCommit": "885d9f9",
+      "path": "Reviews/2026-09-12-efs-path-decision/lab-b/vectors/profile-b.json",
+      "expectedGitBlob": "8d92f5806911d50427901cda12441f65c74bc309",
+      "observedGitBlob": "8d92f5806911d50427901cda12441f65c74bc309"
+    },
+    "interpretationProfileGitBlob": "4ca8bb1262992028238505d9c5071a14b189179f",
+    "candidateSourceAssociation": "dcc7b946d2ac8dfcf22103069127a9d1809df974",
+    "vectorStanding": "candidate-authored deterministic positive signature vector; not an observed transaction or independent system proof",
+    "authorizedAbiProfile": {
+      "path": "Reviews/2026-09-12-efs-path-decision/lab-oracle/rpc-observed-profile-dcc7b94.json",
+      "expectedGitBlob": "6345c2246e287e9676f714491ce8aebf673f754a",
+      "observedGitBlob": "6345c2246e287e9676f714491ce8aebf673f754a"
+    },
+    "retainedPacket": {
+      "commit": "322b3204a743cb2806e114cd4b0ec544076e3c48",
+      "path": "Reviews/2026-09-12-efs-path-decision/lab-b/evidence/measure2-a16d7d4.json",
+      "expectedGitBlob": "1a38f6493510760ae1b97f6188d2548c795350a8",
+      "observedGitBlob": "1a38f6493510760ae1b97f6188d2548c795350a8",
+      "expectedSha256": "7bd5409a4b306d8e0705187094fa482b31efcad471260ae93f57eebd0b22fcce",
+      "observedSha256": "7bd5409a4b306d8e0705187094fa482b31efcad471260ae93f57eebd0b22fcce"
+    }
+  },
+  "positiveVector": {
+    "derived": {
+      "bodyHash": "0xe76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552",
+      "actionsEncodedBytes": 1216,
+      "actionsHash": "0x0f628f9a893f7e1c18c893db7be2c701ad5c1745c9cf1a0dc0c96dc253c529de",
+      "domainTypehash": "0xb03948446334eb9b2196d5eb166f69b9d49403eb4a12f36de8d3f9f3cb8e15c3",
+      "domainSeparator": "0x503f99d3d2b2f5d98e7138a8b0ad41e58527b4f9e3a1974f485b238cf1f58f09",
+      "intentTypehash": "0xa1f677df361c0235b1979e7c31d89bcad72b78744ae472963d3bc9f12b384374",
+      "structHash": "0x895ee745c4030ae3839bb735a40f9a1da8fe0b9bff4d2c6e329cbfb2b879e37a",
+      "digestPreimage": "0x1901503f99d3d2b2f5d98e7138a8b0ad41e58527b4f9e3a1974f485b238cf1f58f09895ee745c4030ae3839bb735a40f9a1da8fe0b9bff4d2c6e329cbfb2b879e37a",
+      "digest": "0x777011441f54fdfbd21f90bb78ba40929169222a87982644a5b713fa50ac3074"
+    },
+    "comparisons": {
+      "bodyHash": "MATCH",
+      "actionsEncoded": "MATCH",
+      "actionsHash": "MATCH",
+      "domainTypehash": "MATCH",
+      "domainSeparator": "MATCH",
+      "intentTypehash": "MATCH",
+      "structEncoded": "MATCH",
+      "structHash": "MATCH",
+      "digestPreimage": "MATCH",
+      "digest": "MATCH",
+      "signatureR": "MATCH",
+      "signatureS": "MATCH",
+      "signatureV": "MATCH",
+      "recovered": "MATCH"
+    },
+    "comparisonCounts": {
+      "MATCH": 14,
+      "MISMATCH": 0
+    },
+    "bodyCommitment": {
+      "status": "MATCH",
+      "reason": "EVERY_BODY_MATCHES_ITS_SIGNED_ACTION_RULE",
+      "mismatches": []
+    },
+    "declaredActionShape": {
+      "status": "MATCH",
+      "reason": "DECLARED_STATIC_ACTION_AND_BODY_SHAPES_MATCH",
+      "mismatches": []
+    },
+    "signatureBinding": {
+      "status": "VALID",
+      "reason": "RECOVERED_SIGNER_MATCHES_INTENT_AUTHOR",
+      "r": "0xf429d9b2af2ede750c7f6ad061258fc7a2b8dc06afc49a95bb4bbd95f4aa9a81",
+      "s": "0x42d405b5c768c3d7ee670b28b5649e5a6d6c276286740e516f50bcf2536363d9",
+      "v": 28,
+      "recovered": "0x67A11b0cE658b60Ea07BA75d010fD4FA29A89550",
+      "expectedAuthor": "0x67a11b0ce658b60ea07ba75d010fd4fa29a89550",
+      "scope": "cryptographic digest binding only"
+    }
+  },
+  "replayDomain": {
+    "present": [
+      "name",
+      "version"
+    ],
+    "absent": [
+      "chainId",
+      "verifyingContract"
+    ],
+    "status": "PARTIAL",
+    "reason": "CURRENT_DIAGNOSTIC_DOMAIN_DOES_NOT_BIND_CHAIN_OR_LEDGER_DEPLOYMENT"
+  },
+  "retainedSignedTransactions": {
+    "status": "OBSERVED_MATCH",
+    "reason": "TWO_RETAINED_CALLDATA_VALUES_CANONICALLY_DECODE_AND_BIND_TO_THEIR_AUTHORS",
+    "expectedCount": 2,
+    "observedCount": 2,
+    "selector": "0x8846f57e",
+    "transactions": [
+      {
+        "transactionIndex": 0,
+        "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+        "nonce": "0",
+        "actionCount": 4,
+        "bodyCount": 4,
+        "calldata": {
+          "status": "MATCH",
+          "encodedBytes": 1956
+        },
+        "actionsHash": "0xdf13d8bbd036074b4ee75be3baf21802b3cfad7e8c4e5ed22b6f9dfdc066b796",
+        "digest": "0x9211a68aed51d80c310171f30407182d0e1774e4290e4092aa1c51b53e7fb0a1",
+        "bodyCommitment": {
+          "status": "MATCH",
+          "reason": "EVERY_BODY_MATCHES_ITS_SIGNED_ACTION_RULE",
+          "mismatches": []
+        },
+        "declaredActionShape": {
+          "status": "MATCH",
+          "reason": "DECLARED_STATIC_ACTION_AND_BODY_SHAPES_MATCH",
+          "mismatches": []
+        },
+        "signatureBinding": {
+          "status": "VALID",
+          "reason": "RECOVERED_SIGNER_MATCHES_INTENT_AUTHOR",
+          "r": "0x5297d897b707d3bdc67f5c651439837d37a75f532b09849bf4d442f77ea41ae0",
+          "s": "0x463be3419a861e77b57a2e9df393cbf36092b3e0ec7c780ad23d6676702d9812",
+          "v": 27,
+          "recovered": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "expectedAuthor": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "scope": "cryptographic digest binding only"
+        },
+        "receiptReference": {
+          "standing": "retained candidate packet field; not independently authenticated",
+          "blockNumber": 17,
+          "blockHash": "0xe3b1b0354967e64f2313cac19b9c83e00be284ad3cca84121e317756033c38bf",
+          "status": 1
+        },
+        "runtimeAcceptance": {
+          "status": "UNKNOWN",
+          "reason": "NO_RUNTIME_EXECUTION_OR_STATE_OBSERVATION"
+        },
+        "stateAuthorization": {
+          "status": "UNKNOWN",
+          "reason": "SIGNATURE_VALIDITY_DOES_NOT_ESTABLISH_NONCE_PERMISSION_ADMISSION_OR_CURRENT_STATE"
+        },
+        "canonicalSemanticEffect": {
+          "status": "UNKNOWN",
+          "reason": "NO_PINNED_CANONICAL_READ_BACK"
+        }
+      },
+      {
+        "transactionIndex": 1,
+        "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+        "nonce": "1",
+        "actionCount": 2,
+        "bodyCount": 2,
+        "calldata": {
+          "status": "MATCH",
+          "encodedBytes": 1252
+        },
+        "actionsHash": "0xbdb7614d00f6f8546135d6ff6f0127ca940a891d47543442d39bce5d84cd85a2",
+        "digest": "0x34d9e2e54a654f3812dce2b633e1ec69ae73f3e25c4e4a8bb595cce40b7ff8c2",
+        "bodyCommitment": {
+          "status": "MATCH",
+          "reason": "EVERY_BODY_MATCHES_ITS_SIGNED_ACTION_RULE",
+          "mismatches": []
+        },
+        "declaredActionShape": {
+          "status": "MATCH",
+          "reason": "DECLARED_STATIC_ACTION_AND_BODY_SHAPES_MATCH",
+          "mismatches": []
+        },
+        "signatureBinding": {
+          "status": "VALID",
+          "reason": "RECOVERED_SIGNER_MATCHES_INTENT_AUTHOR",
+          "r": "0xe2b79879ef170c43327da1f2379d739514e433df901f8fa8e2697ca18a03b549",
+          "s": "0x29dc88b5616cabf9a9fd0b879cd84ca7f6b3998f31b550e51a8137b5fbbf34f3",
+          "v": 28,
+          "recovered": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "expectedAuthor": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "scope": "cryptographic digest binding only"
+        },
+        "receiptReference": {
+          "standing": "retained candidate packet field; not independently authenticated",
+          "blockNumber": 18,
+          "blockHash": "0xaeaf22f62f22e35080aa0616916bccc36d6751e13ef3779402de7a302bbf5fad",
+          "status": 1
+        },
+        "runtimeAcceptance": {
+          "status": "UNKNOWN",
+          "reason": "NO_RUNTIME_EXECUTION_OR_STATE_OBSERVATION"
+        },
+        "stateAuthorization": {
+          "status": "UNKNOWN",
+          "reason": "SIGNATURE_VALIDITY_DOES_NOT_ESTABLISH_NONCE_PERMISSION_ADMISSION_OR_CURRENT_STATE"
+        },
+        "canonicalSemanticEffect": {
+          "status": "UNKNOWN",
+          "reason": "NO_PINNED_CANONICAL_READ_BACK"
+        }
+      }
+    ],
+    "authenticatedPacketProvenance": {
+      "status": "UNKNOWN",
+      "reason": "RETAINED_PACKET_HASH_IS_NOT_AN_AUTHENTICATED_CHAIN_OBSERVATION"
+    },
+    "runtimeAcceptance": {
+      "status": "UNKNOWN",
+      "reason": "RECEIPT_FIELDS_DO_NOT_PROVE_CURRENT_OR_CANONICAL_RUNTIME_ACCEPTANCE"
+    },
+    "canonicalSemanticEffect": {
+      "status": "UNKNOWN",
+      "reason": "NO_INDEPENDENT_PINNED_STATE_READ_BACK_FOR_RETAINED_CALLDATA"
+    }
+  },
+  "runtimeAcceptance": {
+    "status": "UNKNOWN",
+    "reason": "NO_RUNTIME_EXECUTION_OR_STATE_OBSERVATION"
+  },
+  "stateAuthorization": {
+    "status": "UNKNOWN",
+    "reason": "SIGNATURE_VALIDITY_DOES_NOT_ESTABLISH_NONCE_PERMISSION_ADMISSION_OR_CURRENT_STATE"
+  },
+  "authenticatedProvenance": {
+    "status": "UNKNOWN",
+    "reason": "PINNED_PUBLIC_BYTES_ARE_NOT_AUTHENTICATED_CHAIN_OR_DEPLOYMENT_EVIDENCE"
+  },
+  "canonicalSemanticEffect": {
+    "status": "UNKNOWN",
+    "reason": "NO_PINNED_CANONICAL_READ_BACK"
+  },
+  "unproven": [
+    "authenticated packet or chain provenance",
+    "target deployment or runtime authority",
+    "nonce availability or replay safety",
+    "current author permission",
+    "Realm admission or acceptance",
+    "wallet, bundler, or runtime acceptance",
+    "chain inclusion or canonical semantic effect",
+    "Type semantics or query completeness"
+  ],
+  "candidatePass": "NOT_EVALUATED"
+}

@@ -266,3 +266,65 @@ byte check disagrees, and `2` for malformed or substituted sealed inputs.
 themselves make the tool process fail. Exit `0`, synthetic test success, and
 zero observed mismatches are none of: authenticated RPC, inclusion, canonical
 effect, exact Type meaning, complete workflow evidence, or candidate pass.
+
+## Independent signature binding
+
+This third, separately named light probe independently encodes the public Road
+B `Action[]` ABI, derives its actions hash, derives the declared EIP-712 domain
+separator and `Intent` digest, and recovers an exact 65-byte, low-`s`, 27/28 EOA
+signature. Candidate-published hashes, encodings, and recovered-address fields
+are comparison targets only. The probe does not import or execute candidate
+code.
+
+The interpretation profile was frozen in
+`signature-binding-profile-dcc7b94.json` at Git blob
+`4ca8bb1262992028238505d9c5071a14b189179f`. It pins only these public inputs:
+
+- Road B `PROFILE.md` at published commit `885d9f9`, Git blob
+  `ca39c29416ffa79231e48a52bef1e5403f563198`;
+- Road B `vectors/profile-b.json` at the same commit, Git blob
+  `8d92f5806911d50427901cda12441f65c74bc309`;
+- candidate source association
+  `dcc7b946d2ac8dfcf22103069127a9d1809df974`.
+
+The positive vector has 14 independent comparisons, all `MATCH`, and recovers
+the declared author as `VALID` cryptographic binding. The 27-test suite changes
+and reorders actions, changes every Intent field, substitutes a wrong signer,
+mutates the signature, exercises malformed widths and integer ranges, rejects
+high-`s` and invalid-`v` forms, and keeps body/action shape checks distinct from
+signature recovery. In particular, changing a body without changing its signed
+action leaves the EOA signature valid while body commitment and declared static
+shape fail.
+
+The optional retained-call check canonically decodes and re-encodes only the
+two `executeSigned` calldata values in the pinned `signed-one` packet, then
+recomputes their action hashes, digests, and recovered authors. Both byte
+bindings match and both EOA recoveries are valid. Its only ABI input is the
+existing ABI-only profile at Git blob
+`6345c2246e287e9676f714491ce8aebf673f754a`; its packet is commit
+`322b3204a743cb2806e114cd4b0ec544076e3c48`, Git blob
+`1a38f6493510760ae1b97f6188d2548c795350a8`, and SHA-256
+`7bd5409a4b306d8e0705187094fa482b31efcad471260ae93f57eebd0b22fcce`.
+This does not authenticate the packet or its receipt fields, identify deployed
+runtime code, prove nonce or account authority, establish Realm admission, or
+establish inclusion or canonical semantic effect; those outcomes remain
+explicitly `UNKNOWN`.
+
+The current declared EIP-712 domain binds only `name` and `version`. It omits
+`chainId` and `verifyingContract`, so replay-domain completeness is `PARTIAL`.
+The experiment records that missing binding without redesigning the candidate.
+Valid cryptography is not runtime/state authorization, and this result neither
+adopts the candidate's Type semantics nor yields a candidate pass.
+
+```sh
+NODE_PATH=/Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules \
+  node --test Reviews/2026-09-12-efs-path-decision/lab-oracle/signature-binding.test.mjs
+
+NODE_PATH=/Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules \
+  node Reviews/2026-09-12-efs-path-decision/lab-oracle/signature-binding.mjs \
+  Reviews/2026-09-12-efs-path-decision/lab-oracle/signature-binding-profile-dcc7b94.json
+```
+
+The deterministic short output is retained as
+`signature-binding-dcc7b94.report.json`; a test requires it to equal direct CLI
+output byte for byte. Its `candidatePass` remains `NOT_EVALUATED`.
