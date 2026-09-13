@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { isDeepStrictEqual } from 'node:util';
 
@@ -10,6 +11,21 @@ const {
 } = require('ethers');
 
 const HEX = /^0x[0-9a-fA-F]*$/;
+const FROZEN_INPUT_BLOBS = Object.freeze({
+  profile: '06106fe3bc717ed4638612f2ef8b90d502c705b8',
+  expectations: 'a9d6c9afb5f51d0f786e006b7b5df667ae69710e',
+});
+
+export function gitBlobHash(raw) {
+  if (typeof raw !== 'string' && !Buffer.isBuffer(raw)) {
+    throw new TypeError('MALFORMED_FROZEN_INPUT_BYTES');
+  }
+  const bytes = Buffer.isBuffer(raw) ? raw : Buffer.from(raw, 'utf8');
+  return createHash('sha1')
+    .update(Buffer.from(`blob ${bytes.length}\0`))
+    .update(bytes)
+    .digest('hex');
+}
 
 function exactHex(value, bytes, label) {
   if (typeof value !== 'string' || !HEX.test(value) || value.length !== 2 + (bytes * 2)) {
@@ -41,13 +57,22 @@ export function reconstructCommitments(profile, input) {
   const body = dynamicHex(input.body, 'BODY');
   const bodyHash = keccak256(body);
 
-  const typeIdentity = profile.typeIdentity?.support === 'SUPPORTED'
-    ? {
-      status: profile.typeIdentity.support,
-      value: keccak256(toUtf8Bytes(String(input.typeDomainText))),
-      evidence: [{ kind: 'UTF8_LITERAL', value: String(input.typeDomainText) }],
+  let typeIdentity;
+  if (profile.typeIdentity?.support === 'SUPPORTED') {
+    if (typeof input.typeDomainText !== 'string') {
+      throw new TypeError('MALFORMED_TYPE_DOMAIN');
     }
-    : unsupported(profile.typeIdentity);
+    if (input.typeDomainText !== profile.typeIdentity.quoteDomainText) {
+      throw new TypeError('TYPE_DOMAIN_MISMATCH');
+    }
+    typeIdentity = {
+      status: profile.typeIdentity.support,
+      value: keccak256(toUtf8Bytes(profile.typeIdentity.quoteDomainText)),
+      evidence: [{ kind: 'UTF8_LITERAL', value: profile.typeIdentity.quoteDomainText }],
+    };
+  } else {
+    typeIdentity = unsupported(profile.typeIdentity);
+  }
   const bodyCommitment = {
       status: 'SUPPORTED',
       value: bodyHash,
@@ -146,99 +171,32 @@ function evaluateObservedAxis(observations, name) {
       evidence: [],
     };
   }
-
-  if (name === 'referenceValidation') {
-    if (copied.targetFound === true && copied.targetTypeMatches === true) {
-      return { status: 'VALID', proofGrade: copied.proofGrade, evidence: copied.evidence };
-    }
-    if (copied.targetFound === true && copied.targetTypeMatches === false) {
-      return { status: 'INVALID', proofGrade: copied.proofGrade, evidence: copied.evidence };
-    }
-    if (copied.targetFound === false && copied.absenceProven === true) {
-      return { status: 'ABSENT_PROVEN', proofGrade: copied.proofGrade, evidence: copied.evidence };
-    }
-  }
-
-  if (name === 'sourceAcceptance' || name === 'destinationAdmission') {
-    if (copied.rowPresent === true && copied.acceptanceProfileMatches === true) {
-      return {
-        status: name === 'sourceAcceptance' ? 'ACCEPTED' : 'ADMITTED',
-        proofGrade: copied.proofGrade,
-        evidence: copied.evidence,
-      };
-    }
-    if (copied.rowPresent === true && copied.acceptanceProfileMatches === false) {
-      return { status: 'REJECTED', proofGrade: copied.proofGrade, evidence: copied.evidence };
-    }
-    if (copied.rowPresent === false && copied.absenceProven === true) {
-      return {
-        status: name === 'sourceAcceptance' ? 'NOT_ACCEPTED_PROVEN' : 'NOT_ADMITTED_PROVEN',
-        proofGrade: copied.proofGrade,
-        evidence: copied.evidence,
-      };
-    }
-  }
-
-  if (name === 'submission' && typeof copied.transactionHash === 'string') {
-    return {
-      status: 'OBSERVED',
-      transactionHash: exactHex(copied.transactionHash, 32, 'TRANSACTION_HASH'),
-      proofGrade: copied.proofGrade,
-      evidence: copied.evidence,
-    };
-  }
-
-  if (name === 'receipt') {
-    if (copied.statusHex === '0x1') {
-      return { status: 'SUCCESS', proofGrade: copied.proofGrade, evidence: copied.evidence };
-    }
-    if (copied.statusHex === '0x0') {
-      return { status: 'REVERTED', proofGrade: copied.proofGrade, evidence: copied.evidence };
-    }
-  }
-
   return {
     status: 'UNKNOWN',
-    reason: `INSUFFICIENT_RAW_EVIDENCE:${name}`,
-    evidence: copied.evidence,
+    reason: `UNAUTHENTICATED_OBSERVATION:${name}`,
+    evidence: [],
+    retainedEvidenceItems: copied.evidence.length,
   };
 }
 
 function evaluateCanonicalEffect(observations) {
   const effects = observations.requiredEffects;
-  if (!Array.isArray(effects) || effects.length === 0) {
-    return unknownAxis('requiredEffects');
-  }
-
-  const checked = effects.map((effect) => {
-    if (!effect || typeof effect.name !== 'string') {
-      throw new TypeError('MALFORMED_REQUIRED_EFFECT');
+  if (Array.isArray(effects)) {
+    for (const effect of effects) {
+      if (!effect || typeof effect.name !== 'string') {
+        throw new TypeError('MALFORMED_REQUIRED_EFFECT');
+      }
+      if (Object.hasOwn(effect, 'expected')) {
+        throw new TypeError(`CANDIDATE_EXPECTATION_FORBIDDEN:${effect.name}`);
+      }
     }
-    if (!Array.isArray(effect.evidence) || effect.evidence.length === 0) {
-      return { ...structuredClone(effect), status: 'UNKNOWN', evidence: [] };
-    }
-    if (effect.absenceProven === true && effect.observed === null) {
-      return { ...structuredClone(effect), status: 'NOT_COMMITTED_PROVEN' };
-    }
-    if (!Object.hasOwn(effect, 'expected') || !Object.hasOwn(effect, 'observed')) {
-      return { ...structuredClone(effect), status: 'UNKNOWN' };
-    }
-    return {
-      ...structuredClone(effect),
-      status: isDeepStrictEqual(effect.expected, effect.observed) ? 'COMMITTED' : 'VIOLATED',
-    };
-  });
-
-  if (checked.some(({ status }) => status === 'VIOLATED')) {
-    return { status: 'VIOLATED', effects: checked };
   }
-  if (checked.some(({ status }) => status === 'NOT_COMMITTED_PROVEN')) {
-    return { status: 'NOT_COMMITTED_PROVEN', effects: checked };
-  }
-  if (checked.every(({ status }) => status === 'COMMITTED')) {
-    return { status: 'COMMITTED', effects: checked };
-  }
-  return { status: 'UNKNOWN', reason: 'INCOMPLETE_EFFECT_EVIDENCE', effects: checked };
+  return {
+    status: 'UNSUPPORTED',
+    reason: 'REQUIRED_EFFECT_CLOSURE_UNPINNED',
+    evidence: [],
+    retainedEffectCount: Array.isArray(effects) ? effects.length : 0,
+  };
 }
 
 export function correlateRpcResponses(requests, responses) {
@@ -268,20 +226,190 @@ export function correlateRpcResponses(requests, responses) {
 }
 
 export function classifyCostState(input) {
-  const before = input?.recordPresentBefore;
-  const after = input?.recordPresentAfter;
-  const retried = input?.sameOperationAlreadyPresentBefore;
   const evidence = structuredClone(input ?? {});
+  const required = [
+    ['control.actor', input?.control?.actor],
+    ['control.actionShape', input?.control?.actionShape],
+    ['control.bodySizeBytes', input?.control?.bodySizeBytes],
+    ['control.initialStateRegime', input?.control?.initialStateRegime],
+    ['basis.beforeBlockHash', input?.basis?.beforeBlockHash],
+    ['basis.afterBlockHash', input?.basis?.afterBlockHash],
+    ['provenance.kind', input?.provenance?.kind],
+    ['provenance.source', input?.provenance?.source],
+    ['recordPresentBefore', input?.recordPresentBefore],
+    ['recordPresentAfter', input?.recordPresentAfter],
+    ['sameOperationAlreadyPresentBefore', input?.sameOperationAlreadyPresentBefore],
+    ['occurrenceCountBefore', input?.occurrenceCountBefore],
+    ['occurrenceCountAfter', input?.occurrenceCountAfter],
+    ['effectCommitmentBefore', input?.effectCommitmentBefore],
+    ['effectCommitmentAfter', input?.effectCommitmentAfter],
+    ['stateDelta', input?.stateDelta],
+  ];
+  const missing = required.find(([, value]) => value === undefined || value === null);
+  if (missing) {
+    return {
+      status: 'UNKNOWN',
+      reason: `MISSING_COST_EVIDENCE:${missing[0]}`,
+      evidence,
+    };
+  }
 
-  if (![before, after, retried].every((value) => typeof value === 'boolean')) {
-    return { status: 'CLASSIFIED', value: 'INCONSISTENT', reason: 'MISSING_PRE_POST_FACTS', evidence };
+  let normalized;
+  try {
+    if (typeof input.control.actionShape !== 'string' || input.control.actionShape.length === 0) {
+      throw new TypeError('control.actionShape');
+    }
+    if (typeof input.control.initialStateRegime !== 'string'
+      || input.control.initialStateRegime.length === 0) {
+      throw new TypeError('control.initialStateRegime');
+    }
+    if (typeof input.provenance.kind !== 'string' || input.provenance.kind.length === 0
+      || typeof input.provenance.source !== 'string' || input.provenance.source.length === 0) {
+      throw new TypeError('provenance');
+    }
+    if (![input.recordPresentBefore, input.recordPresentAfter, input.sameOperationAlreadyPresentBefore]
+      .every((value) => typeof value === 'boolean')) {
+      throw new TypeError('prePostBooleans');
+    }
+    const bodySizeBytes = BigInt(input.control.bodySizeBytes);
+    const occurrenceCountBefore = BigInt(input.occurrenceCountBefore);
+    const occurrenceCountAfter = BigInt(input.occurrenceCountAfter);
+    const stateDelta = BigInt(input.stateDelta);
+    if ([bodySizeBytes, occurrenceCountBefore, occurrenceCountAfter, stateDelta]
+      .some((value) => value < 0n)) {
+      throw new TypeError('negativeInteger');
+    }
+    normalized = {
+      actor: getAddress(input.control.actor),
+      actionShape: input.control.actionShape,
+      bodySizeBytes: bodySizeBytes.toString(),
+      initialStateRegime: input.control.initialStateRegime,
+      beforeBlockHash: exactHex(input.basis.beforeBlockHash, 32, 'BEFORE_BLOCK_HASH'),
+      afterBlockHash: exactHex(input.basis.afterBlockHash, 32, 'AFTER_BLOCK_HASH'),
+      occurrenceCountBefore,
+      occurrenceCountAfter,
+      stateDelta,
+      effectCommitmentBefore: exactHex(input.effectCommitmentBefore, 32, 'EFFECT_COMMITMENT_BEFORE'),
+      effectCommitmentAfter: exactHex(input.effectCommitmentAfter, 32, 'EFFECT_COMMITMENT_AFTER'),
+    };
+  } catch (error) {
+    return {
+      status: 'UNKNOWN',
+      reason: `MALFORMED_COST_EVIDENCE:${error instanceof Error ? error.message : String(error)}`,
+      evidence,
+    };
   }
-  if (!before && after && !retried) return { status: 'CLASSIFIED', value: 'FRESH', evidence };
-  if (before && after && !retried) return { status: 'CLASSIFIED', value: 'EXISTING', evidence };
-  if (before && after && retried && input.stateDelta === '0') {
-    return { status: 'CLASSIFIED', value: 'RETRY', evidence };
+
+  const controlKey = keccak256(toUtf8Bytes(JSON.stringify([
+    normalized.actor,
+    normalized.actionShape,
+    normalized.bodySizeBytes,
+    normalized.initialStateRegime,
+  ])));
+  const occurrenceDelta = normalized.occurrenceCountAfter - normalized.occurrenceCountBefore;
+  const effectChanged = normalized.effectCommitmentBefore !== normalized.effectCommitmentAfter;
+  const before = input.recordPresentBefore;
+  const after = input.recordPresentAfter;
+  const retried = input.sameOperationAlreadyPresentBefore;
+
+  let value = 'INCONSISTENT';
+  if (!before && after && !retried && occurrenceDelta === 1n
+    && effectChanged && normalized.stateDelta > 0n) {
+    value = 'FRESH';
+  } else if (before && after && !retried && occurrenceDelta === 1n
+    && effectChanged && normalized.stateDelta > 0n) {
+    value = 'EXISTING';
+  } else if (before && after && retried && occurrenceDelta === 0n
+    && !effectChanged && normalized.stateDelta === 0n) {
+    value = 'RETRY';
   }
-  return { status: 'CLASSIFIED', value: 'INCONSISTENT', reason: 'CONTRADICTORY_PRE_POST_FACTS', evidence };
+
+  return {
+    status: 'CLASSIFIED_FROM_SUPPLIED_FACTS',
+    value,
+    ...(value === 'INCONSISTENT' ? { reason: 'CONTRADICTORY_PRE_POST_FACTS' } : {}),
+    controlKey,
+    evidenceGrade: 'UNAUTHENTICATED_INPUT',
+    evidence,
+  };
+}
+
+function evaluateCostState(input) {
+  const classification = classifyCostState(input);
+  if (classification.status === 'UNKNOWN') return classification;
+  return {
+    status: 'UNKNOWN',
+    reason: 'UNAUTHENTICATED_COST_EVIDENCE',
+    evidence: [],
+    provisionalClassification: classification.value,
+    controlKey: classification.controlKey,
+  };
+}
+
+function requireBasisArtifact(anchor, role, name) {
+  const artifact = anchor?.[name];
+  if (!artifact || typeof artifact !== 'object') {
+    throw new TypeError(`MISSING_BASIS_ARTIFACT:${role}.${name}`);
+  }
+  if (artifact.availability === 'UNAVAILABLE') {
+    if (typeof artifact.reason !== 'string' || artifact.reason.length === 0) {
+      throw new TypeError(`MALFORMED_BASIS_ARTIFACT:${role}.${name}`);
+    }
+    return;
+  }
+  if (artifact.availability === 'AVAILABLE') {
+    const raw = dynamicHex(artifact.raw, `${role.toUpperCase()}_${name.toUpperCase()}_RAW`);
+    const commitment = exactHex(
+      artifact.commitment,
+      32,
+      `${role.toUpperCase()}_${name.toUpperCase()}_COMMITMENT`,
+    );
+    if (keccak256(raw) !== commitment) {
+      throw new TypeError(`BASIS_ARTIFACT_COMMITMENT_MISMATCH:${role}.${name}`);
+    }
+    return;
+  }
+  throw new TypeError(`MALFORMED_BASIS_ARTIFACT:${role}.${name}`);
+}
+
+function verifyBasisAnchor(anchor, role) {
+  if (!anchor || typeof anchor !== 'object') {
+    throw new TypeError(`MISSING_OBSERVATION_BASIS:${role}`);
+  }
+  if (typeof anchor.chainId !== 'string' || !/^(0|[1-9][0-9]*)$/.test(anchor.chainId)
+    || typeof anchor.blockNumber !== 'string' || !/^(0|[1-9][0-9]*)$/.test(anchor.blockNumber)
+    || typeof anchor.provenance !== 'string' || anchor.provenance.length === 0) {
+    throw new TypeError(`MALFORMED_OBSERVATION_BASIS:${role}`);
+  }
+  let blockHash;
+  let realmAddress;
+  try {
+    blockHash = exactHex(anchor.blockHash, 32, `${role.toUpperCase()}_BLOCK_HASH`);
+    realmAddress = getAddress(anchor.realmAddress);
+  } catch {
+    throw new TypeError(`MALFORMED_OBSERVATION_BASIS:${role}`);
+  }
+  for (const name of ['header', 'runtime', 'accountProof', 'storageProof']) {
+    requireBasisArtifact(anchor, role, name);
+  }
+  return {
+    chainId: anchor.chainId,
+    blockNumber: anchor.blockNumber,
+    blockHash,
+    realmAddress,
+    provenance: anchor.provenance,
+  };
+}
+
+function verifyObservationBinding(observation, label, role, anchor) {
+  if (!observation) return;
+  if (observation.basisRole !== role || observation.blockHash !== anchor.blockHash) {
+    throw new TypeError(`MIXED_OBSERVATION_BASIS:${label}`);
+  }
+  if (typeof observation.source !== 'string' || observation.source.length === 0
+    || typeof observation.proofGrade !== 'string' || observation.proofGrade.length === 0) {
+    throw new TypeError(`MISSING_OBSERVATION_PROVENANCE:${label}`);
+  }
 }
 
 function verifySeal(packet, profile, expectations) {
@@ -293,52 +421,86 @@ function verifySeal(packet, profile, expectations) {
       throw new TypeError(`NEUTRAL_SOURCE_MISMATCH:${name}`);
     }
   }
-  const blockHash = packet?.seal?.observationBasis?.blockHash;
-  if (typeof blockHash !== 'string') {
-    throw new TypeError('MISSING_OBSERVATION_BASIS');
+  const source = verifyBasisAnchor(packet?.seal?.observationBasis?.source, 'source');
+  const destination = verifyBasisAnchor(packet?.seal?.observationBasis?.destination, 'destination');
+  const observations = packet.observations ?? {};
+  for (const [name, role] of [
+    ['referenceValidation', 'source'],
+    ['sourceAcceptance', 'source'],
+    ['destinationAdmission', 'destination'],
+    ['submission', 'destination'],
+    ['receipt', 'destination'],
+  ]) {
+    verifyObservationBinding(observations[name], name, role, role === 'source' ? source : destination);
   }
-  try {
-    exactHex(blockHash, 32, 'BLOCK_HASH');
-  } catch {
-    throw new TypeError('MALFORMED_OBSERVATION_BASIS');
+  if (Array.isArray(observations.requiredEffects)) {
+    observations.requiredEffects.forEach((effect, index) => {
+      verifyObservationBinding(effect, `requiredEffects[${index}]`, 'destination', destination);
+    });
   }
+  return {
+    status: 'STRUCTURALLY_BOUND_UNAUTHENTICATED',
+    reason: 'NO_INDEPENDENT_HEADER_ACCOUNT_STORAGE_PROOF_VERIFIER',
+    source,
+    destination,
+  };
 }
 
-function evaluateSignature(observations, commitments) {
-  const observation = observations.signature;
-  if (!observation) return unknownAxis('signature');
-  if (!Array.isArray(observation.evidence) || observation.evidence.length === 0) {
-    return unknownAxis('signature');
+export function compareCommitmentClaim(commitment, claimed) {
+  if (commitment.status !== 'SUPPORTED') {
+    return { ...commitment, claimed };
   }
-  if (observation.bindsAxis !== 'recordIdentity') {
-    return { status: 'UNSUPPORTED', reason: 'UNSUPPORTED_SIGNATURE_BINDING_AXIS', evidence: observation.evidence };
-  }
-
-  const suppliedDigest = exactHex(observation.digest, 32, 'DIGEST');
-  const expectedDigest = commitments.recordIdentity.value;
-  if (suppliedDigest !== expectedDigest) {
-    return {
-      status: 'INVALID',
-      reason: 'DIGEST_BINDING_MISMATCH',
-      suppliedDigest,
-      expectedDigest,
-      evidence: structuredClone(observation.evidence),
-      authorizesCandidatePlan: false,
-    };
-  }
-  return verifyEoaSignature(expectedDigest, observation.signature, observation.expectedAuthor);
+  return {
+    ...commitment,
+    status: claimed === commitment.value ? 'MATCH' : 'MISMATCH',
+    claimed,
+  };
 }
 
 function comparisonValue(axis, evaluated) {
-  if (!Object.hasOwn(evaluated, axis)) return undefined;
+  if (!Object.hasOwn(evaluated, axis)) return 'UNSUPPORTED_CLAIM_AXIS';
   if (axis === 'recordIdentity' || axis === 'subjectIdentity' || axis === 'costState') {
-    return evaluated[axis].value;
+    return Object.hasOwn(evaluated[axis], 'value')
+      ? evaluated[axis].value
+      : evaluated[axis].status;
   }
   return evaluated[axis].status;
 }
 
-export function checkSealedPacket(packet, profile, expectations) {
-  verifySeal(packet, profile, expectations);
+function verifyFrozenInputs(profile, expectations, inputBytes) {
+  if (!inputBytes || !Object.hasOwn(inputBytes, 'profileRaw')
+    || !Object.hasOwn(inputBytes, 'expectationsRaw')) {
+    throw new TypeError('MISSING_FROZEN_INPUT_BYTES');
+  }
+  const profileBlob = gitBlobHash(inputBytes.profileRaw);
+  const expectationsBlob = gitBlobHash(inputBytes.expectationsRaw);
+  if (profileBlob !== FROZEN_INPUT_BLOBS.profile) throw new TypeError('PROFILE_BLOB_MISMATCH');
+  if (expectationsBlob !== FROZEN_INPUT_BLOBS.expectations) {
+    throw new TypeError('EXPECTATIONS_BLOB_MISMATCH');
+  }
+
+  let parsedProfile;
+  let parsedExpectations;
+  try {
+    parsedProfile = JSON.parse(inputBytes.profileRaw.toString());
+    parsedExpectations = JSON.parse(inputBytes.expectationsRaw.toString());
+  } catch {
+    throw new TypeError('MALFORMED_FROZEN_INPUT_JSON');
+  }
+  if (!isDeepStrictEqual(profile, parsedProfile)) throw new TypeError('PROFILE_OBJECT_MISMATCH');
+  if (!isDeepStrictEqual(expectations, parsedExpectations)) {
+    throw new TypeError('EXPECTATIONS_OBJECT_MISMATCH');
+  }
+  return {
+    status: 'VERIFIED_FROZEN_FILES',
+    profileBlob,
+    expectationsBlob,
+  };
+}
+
+export function checkSealedPacket(packet, profile, expectations, inputBytes) {
+  const inputIntegrity = verifyFrozenInputs(profile, expectations, inputBytes);
+  const observationIntegrity = verifySeal(packet, profile, expectations);
   const rawObservations = structuredClone(packet.observations ?? {});
   const claims = structuredClone(packet.claims ?? {});
   const commitments = reconstructCommitments(profile, packet.inputs ?? {});
@@ -346,38 +508,47 @@ export function checkSealedPacket(packet, profile, expectations) {
   const claimedRecord = claims.recordIdentity;
   const claimedSubject = claims.subjectIdentity;
   const evaluated = {
-    recordIdentity: {
-      ...commitments.recordIdentity,
-      status: claimedRecord === commitments.recordIdentity.value ? 'MATCH' : 'MISMATCH',
-      claimed: claimedRecord,
-    },
-    subjectIdentity: {
-      ...commitments.subjectIdentity,
-      status: claimedSubject === commitments.subjectIdentity.value ? 'MATCH' : 'MISMATCH',
-      claimed: claimedSubject,
-    },
+    recordIdentity: compareCommitmentClaim(commitments.recordIdentity, claimedRecord),
+    subjectIdentity: compareCommitmentClaim(commitments.subjectIdentity, claimedSubject),
     actionCommitment: commitments.actionCommitment,
     signedDigest: commitments.signedDigest,
-    signatureValidity: evaluateSignature(rawObservations, commitments),
+    signatureValidity: {
+      ...unsupported(profile.signedDigest),
+      reason: profile.signedDigest?.reason
+        ?? 'candidate signed-plan digest is not reconstructable from the public profile',
+      authorizesCandidatePlan: false,
+    },
     referenceValidation: evaluateObservedAxis(rawObservations, 'referenceValidation'),
     sourceAcceptance: evaluateObservedAxis(rawObservations, 'sourceAcceptance'),
     destinationAdmission: evaluateObservedAxis(rawObservations, 'destinationAdmission'),
     submission: evaluateObservedAxis(rawObservations, 'submission'),
     receipt: evaluateObservedAxis(rawObservations, 'receipt'),
     canonicalEffect: evaluateCanonicalEffect(rawObservations),
-    costState: classifyCostState(rawObservations.costState),
+    queryCoverage: {
+      status: 'UNSUPPORTED',
+      reason: 'QUERY_PROFILE_AND_COVERAGE_PROOF_UNPINNED',
+      evidence: [],
+    },
+    destinationSelection: {
+      status: 'UNSUPPORTED',
+      reason: 'DESTINATION_SELECTION_RULE_UNPINNED',
+      evidence: [],
+    },
+    costState: evaluateCostState(rawObservations.costState),
   };
   evaluated.retryAllowed = evaluated.submission.status === 'UNKNOWN' ? false : null;
 
   const discrepancies = [];
   for (const [axis, claimed] of Object.entries(claims)) {
     const value = comparisonValue(axis, evaluated);
-    if (value !== undefined && claimed !== value) {
+    if (claimed !== value) {
       discrepancies.push({ axis, claimed, evaluated: value });
     }
   }
 
   return {
+    inputIntegrity,
+    observationIntegrity,
     profileSourceCommit: profile.candidate.sourceCommit,
     observationBasis: structuredClone(packet.seal.observationBasis),
     rawObservations,

@@ -17,6 +17,13 @@ manifest, ABI, structs, or verifier implementation.
 - neutral-expectations blob: `a9d6c9afb5f51d0f786e006b7b5df667ae69710e`
 - frozen-before-candidate-inspection: `true`
 
+The CLI recomputes and enforces the last two Git blob identities before any
+comparison. It also checks that the parsed objects are exactly the objects from
+those bytes. Supplying a mutually consistent replacement profile and
+expectations file is therefore rejected rather than becoming a new oracle.
+This local input seal does not prove that the candidate source commit was
+deployed or that any observation packet is genuine.
+
 The oracle may later transcribe candidate B's public manifest and ABI/struct
 declarations. It must not read, copy, import, or execute the candidate's
 Reconstructor, intent-digest implementation, measurement script, SDK/helper,
@@ -52,6 +59,37 @@ authenticated state proof. Source acceptance is not destination admission;
 receipt success is not canonical semantic effect; and an unknown submission is
 never permission for a blind retry.
 
+Every present proof-shaped observation must name its source, claimed proof
+grade, basis role, and exact block hash. Source and destination anchors are
+separate and each must state chain, block, Realm, provenance, and the
+availability or explicit unavailability of header, runtime, account-proof, and
+storage-proof material. The checker rejects cross-basis observations. It does
+not yet verify headers or Ethereum state proofs, so a structurally bound packet
+is still reported as `STRUCTURALLY_BOUND_UNAUTHENTICATED`; packet-supplied
+booleans, rows, receipts, evidence arrays, and proof-grade strings cannot yield
+`VALID`, `ACCEPTED`, `ADMITTED`, `SUCCESS`, or `COMMITTED`.
+
+The implemented boundary is intentionally narrow:
+
+- Record and subject identities are independently recomputed from pinned
+  public framing and can be `MATCH` or `MISMATCH`.
+- Generic EOA recovery is a standalone cryptographic control. Candidate action
+  commitment, typed digest, and signed-plan authorization remain `UNSUPPORTED`.
+- Reference validation, source acceptance, destination admission, submission,
+  and receipt observations are retained raw but evaluate to `UNKNOWN` until an
+  independent proof verifier and proof-bearing packet profile are pinned.
+- Canonical effect, query coverage, and destination selection remain
+  `UNSUPPORTED` because their required-effect/query/selection closure is not
+  pinned. Candidate-supplied matching rows cannot complete that closure.
+- The cost helper requires matched actor, action shape, body size, state regime,
+  before/after bases, provenance, occurrence deltas, effect commitments, and
+  state delta. It can classify supplied controls as fresh, existing, retry, or
+  inconsistent, but labels them `UNAUTHENTICATED_INPUT`; the sealed report keeps
+  cost truth `UNKNOWN`.
+
+Claims for unsupported or unknown axes are compared explicitly. An unfamiliar
+claim axis becomes `UNSUPPORTED_CLAIM_AXIS`; it is never silently skipped.
+
 The checker uses Node built-ins and ethers 6.15.0 only for cryptographic
 primitives. It performs no RPC, network, chain, build, or package-install work.
 The current tests use synthetic raw observations; they are not evidence that a
@@ -72,4 +110,6 @@ The absolute `NODE_PATH` is run-local evidence for this machine, not a portable
 project dependency path. The CLI emits deterministic JSON, exits `0` when all
 claims match the independently evaluated axes (including honest
 `UNSUPPORTED`), and exits `1` for a malformed packet or discrepancy. Its packet
-shape and status vocabulary are lab-local.
+shape and status vocabulary are lab-local. Exit `0` means only that the claims
+honestly match this deliberately limited oracle; it is not a candidate pass,
+deployment proof, semantic-effect proof, or production-readiness result.

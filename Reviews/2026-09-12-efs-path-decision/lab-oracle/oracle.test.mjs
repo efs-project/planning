@@ -6,33 +6,95 @@ import { join } from 'node:path';
 import test from 'node:test';
 
 import {
-  checkSealedPacket,
+  checkSealedPacket as checkPacket,
   classifyCostState,
+  compareCommitmentClaim,
   correlateRpcResponses,
   reconstructCommitments,
   verifyEoaSignature,
 } from './oracle.mjs';
 
-const loadJson = async (name) => JSON.parse(
-  await readFile(new URL(name, import.meta.url), 'utf8'),
-);
-
-const profile = await loadJson('profile-b.public.json');
-const vectors = await loadJson('hand-vectors.json');
-const expectations = await loadJson('neutral-expectations.json');
+const profileRaw = await readFile(new URL('profile-b.public.json', import.meta.url), 'utf8');
+const expectationsRaw = await readFile(new URL('neutral-expectations.json', import.meta.url), 'utf8');
+const profile = JSON.parse(profileRaw);
+const vectors = JSON.parse(await readFile(new URL('hand-vectors.json', import.meta.url), 'utf8'));
+const expectations = JSON.parse(expectationsRaw);
+const frozenInputBytes = { profileRaw, expectationsRaw };
+const checkSealedPacket = (
+  packet,
+  selectedProfile = profile,
+  selectedExpectations = expectations,
+  inputBytes = frozenInputBytes,
+) => checkPacket(packet, selectedProfile, selectedExpectations, inputBytes);
 
 const evidence = (kind, value = '0x01') => [{ kind, value }];
+const costBlockBefore = `0x${'31'.repeat(32)}`;
+const costBlockAfter = `0x${'32'.repeat(32)}`;
+const costControl = {
+  actor: `0x${'41'.repeat(20)}`,
+  actionShape: 'PUBLISH_RECORD_WITH_ONE_OCCURRENCE',
+  bodySizeBytes: '96',
+  initialStateRegime: 'MATCHED_BASELINE_EXCEPT_CONTENT_PRESENCE',
+};
+
+function fullCostInput(overrides = {}) {
+  return {
+    control: costControl,
+    basis: { beforeBlockHash: costBlockBefore, afterBlockHash: costBlockAfter },
+    provenance: { kind: 'SYNTHETIC_CONTROL', source: 'oracle.test.mjs' },
+    recordPresentBefore: false,
+    recordPresentAfter: true,
+    sameOperationAlreadyPresentBefore: false,
+    occurrenceCountBefore: '0',
+    occurrenceCountAfter: '1',
+    effectCommitmentBefore: `0x${'00'.repeat(32)}`,
+    effectCommitmentAfter: `0x${'51'.repeat(32)}`,
+    stateDelta: '1',
+    ...overrides,
+  };
+}
 
 function basePacket() {
   const record = vectors.recordQuote3000;
   const subject = vectors.subjectSynthetic;
+  const sourceBlockHash = `0x${'ab'.repeat(32)}`;
+  const destinationBlockHash = `0x${'ac'.repeat(32)}`;
+  const unavailable = (reason) => ({ availability: 'UNAVAILABLE', reason });
+  const sourceBasis = {
+    basisRole: 'source',
+    blockHash: sourceBlockHash,
+  };
+  const destinationBasis = {
+    basisRole: 'destination',
+    blockHash: destinationBlockHash,
+  };
   return {
     seal: {
       candidateSourceCommit: profile.candidate.sourceCommit,
       neutralSource: expectations.source,
       observationBasis: {
-        blockHash: `0x${'ab'.repeat(32)}`,
-        proofGrade: 'RETAINED_RPC_ONLY',
+        source: {
+          chainId: '31337',
+          blockNumber: '100',
+          blockHash: sourceBlockHash,
+          realmAddress: `0x${'61'.repeat(20)}`,
+          provenance: 'synthetic oracle control',
+          header: unavailable('synthetic control does not retain a block header'),
+          runtime: unavailable('synthetic control does not retain runtime bytes'),
+          accountProof: unavailable('synthetic control does not retain an account proof'),
+          storageProof: unavailable('synthetic control does not retain a storage proof'),
+        },
+        destination: {
+          chainId: '31337',
+          blockNumber: '101',
+          blockHash: destinationBlockHash,
+          realmAddress: `0x${'62'.repeat(20)}`,
+          provenance: 'synthetic oracle control',
+          header: unavailable('synthetic control does not retain a block header'),
+          runtime: unavailable('synthetic control does not retain runtime bytes'),
+          accountProof: unavailable('synthetic control does not retain an account proof'),
+          storageProof: unavailable('synthetic control does not retain a storage proof'),
+        },
       },
     },
     inputs: {
@@ -42,61 +104,74 @@ function basePacket() {
       salt: subject.salt,
     },
     observations: {
-      signature: {
-        digest: vectors.signaturePrimitive.digest,
-        signature: vectors.signaturePrimitive.signature,
-        expectedAuthor: vectors.signaturePrimitive.expectedAuthor,
-        bindsAxis: 'recordIdentity',
-        evidence: evidence('RAW_SIGNATURE', vectors.signaturePrimitive.signature),
-      },
       referenceValidation: {
+        ...sourceBasis,
+        source: 'candidate packet fixture',
         targetFound: true,
         targetTypeMatches: true,
         proofGrade: 'RETAINED_RPC_ONLY',
         evidence: evidence('RAW_REFERENCE_WORD'),
       },
       sourceAcceptance: {
+        ...sourceBasis,
+        source: 'candidate packet fixture',
         rowPresent: true,
         acceptanceProfileMatches: true,
         proofGrade: 'RETAINED_RPC_ONLY',
         evidence: evidence('SOURCE_ADMISSION_ROW'),
       },
       destinationAdmission: {
+        ...destinationBasis,
+        source: 'candidate packet fixture',
         rowPresent: true,
         acceptanceProfileMatches: true,
         proofGrade: 'RETAINED_RPC_ONLY',
         evidence: evidence('DESTINATION_ADMISSION_ROW'),
       },
       submission: {
+        ...destinationBasis,
+        source: 'candidate packet fixture',
         transactionHash: `0x${'cd'.repeat(32)}`,
         proofGrade: 'RETAINED_RPC_ONLY',
         evidence: evidence('TRANSACTION_HASH'),
       },
       receipt: {
+        ...destinationBasis,
+        source: 'candidate packet fixture',
         statusHex: '0x1',
         proofGrade: 'RETAINED_RPC_ONLY',
         evidence: evidence('RECEIPT_BYTES'),
       },
       requiredEffects: [
-        { name: 'head', expected: '0x01', observed: '0x01', evidence: evidence('HEAD_ROW') },
-        { name: 'requiredIndex', expected: '0x01', observed: '0x01', evidence: evidence('INDEX_ROW') },
+        {
+          ...destinationBasis,
+          source: 'candidate packet fixture',
+          proofGrade: 'RETAINED_RPC_ONLY',
+          name: 'head',
+          observed: record.recordId,
+          evidence: evidence('HEAD_ROW'),
+        },
+        {
+          ...destinationBasis,
+          source: 'candidate packet fixture',
+          proofGrade: 'RETAINED_RPC_ONLY',
+          name: 'requiredIndex',
+          observed: record.recordId,
+          evidence: evidence('INDEX_ROW'),
+        },
       ],
-      costState: {
-        recordPresentBefore: false,
-        recordPresentAfter: true,
-        sameOperationAlreadyPresentBefore: false,
-      },
     },
     claims: {
       recordIdentity: record.recordId,
       subjectIdentity: subject.subjectId,
-      signatureValidity: 'VALID',
-      referenceValidation: 'VALID',
-      sourceAcceptance: 'ACCEPTED',
-      destinationAdmission: 'ADMITTED',
-      receipt: 'SUCCESS',
-      canonicalEffect: 'COMMITTED',
-      costState: 'FRESH',
+      signatureValidity: 'UNSUPPORTED',
+      referenceValidation: 'UNKNOWN',
+      sourceAcceptance: 'UNKNOWN',
+      destinationAdmission: 'UNKNOWN',
+      receipt: 'UNKNOWN',
+      canonicalEffect: 'UNSUPPORTED',
+      queryCoverage: 'UNSUPPORTED',
+      costState: 'UNKNOWN',
     },
   };
 }
@@ -186,7 +261,40 @@ test('an incomplete public profile disables only the missing reconstruction axis
   });
 });
 
-test('body mutation cannot retain identity or its bound signature while references stay independent', () => {
+test('unsupported identity framing cannot be overwritten as a matching claim or signature', () => {
+  const incomplete = structuredClone(profile);
+  incomplete.recordIdentity = {
+    support: 'UNSUPPORTED',
+    reason: 'public profile omitted Record framing',
+  };
+  const commitment = reconstructCommitments(incomplete, {
+    typeDomainText: profile.typeIdentity.quoteDomainText,
+    body: vectors.recordQuote3000.body,
+    principalId: vectors.subjectSynthetic.principalId,
+    salt: vectors.subjectSynthetic.salt,
+  }).recordIdentity;
+  const comparison = compareCommitmentClaim(commitment, vectors.recordQuote3000.recordId);
+
+  assert.equal(comparison.status, 'UNSUPPORTED');
+  assert.equal(comparison.reason, 'public profile omitted Record framing');
+  const report = checkSealedPacket(basePacket());
+  assert.equal(report.evaluated.signatureValidity.status, 'UNSUPPORTED');
+  assert.equal(report.evaluated.signatureValidity.authorizesCandidatePlan, false);
+});
+
+test('a packet cannot substitute an undeclared Type domain under the same profile pin', () => {
+  assert.throws(
+    () => reconstructCommitments(profile, {
+      typeDomainText: 'lab/type/other/1',
+      body: vectors.recordQuote3000.body,
+      principalId: vectors.subjectSynthetic.principalId,
+      salt: vectors.subjectSynthetic.salt,
+    }),
+    /TYPE_DOMAIN_MISMATCH/,
+  );
+});
+
+test('body mutation cannot retain identity while candidate signature binding stays unsupported', () => {
   const packet = basePacket();
   packet.inputs.body = vectors.recordQuote3001Mutation.body;
 
@@ -194,9 +302,9 @@ test('body mutation cannot retain identity or its bound signature while referenc
 
   assert.equal(report.evaluated.recordIdentity.status, 'MISMATCH');
   assert.equal(report.evaluated.recordIdentity.value, vectors.recordQuote3001Mutation.recordId);
-  assert.equal(report.evaluated.signatureValidity.status, 'INVALID');
-  assert.equal(report.evaluated.signatureValidity.reason, 'DIGEST_BINDING_MISMATCH');
-  assert.equal(report.evaluated.referenceValidation.status, 'VALID');
+  assert.equal(report.evaluated.signatureValidity.status, 'UNSUPPORTED');
+  assert.equal(report.evaluated.signatureValidity.authorizesCandidatePlan, false);
+  assert.equal(report.evaluated.referenceValidation.status, 'UNKNOWN');
   assert.equal(report.evaluated.actionCommitment.status, 'UNSUPPORTED');
   assert.equal(report.evaluated.signedDigest.status, 'UNSUPPORTED');
 });
@@ -204,6 +312,7 @@ test('body mutation cannot retain identity or its bound signature while referenc
 test('missing evidence remains unknown and cannot satisfy a success claim', () => {
   const packet = basePacket();
   delete packet.observations.referenceValidation;
+  packet.claims.referenceValidation = 'VALID';
 
   const report = checkSealedPacket(packet, profile, expectations);
 
@@ -222,6 +331,7 @@ test('missing evidence remains unknown and cannot satisfy a success claim', () =
 test('a status label plus opaque evidence cannot manufacture an evaluated result', () => {
   const packet = basePacket();
   packet.observations.referenceValidation = {
+    ...packet.observations.referenceValidation,
     status: 'VALID',
     proofGrade: 'RETAINED_RPC_ONLY',
     evidence: evidence('OPAQUE_CANDIDATE_OUTPUT'),
@@ -232,9 +342,27 @@ test('a status label plus opaque evidence cannot manufacture an evaluated result
   assert.equal(report.evaluated.referenceValidation.status, 'UNKNOWN');
   assert.equal(
     report.evaluated.referenceValidation.reason,
-    'INSUFFICIENT_RAW_EVIDENCE:referenceValidation',
+    'UNAUTHENTICATED_OBSERVATION:referenceValidation',
   );
   assert.equal(report.rawObservations.referenceValidation.status, 'VALID');
+});
+
+test('candidate booleans plus opaque evidence cannot manufacture validation or proof grade', () => {
+  const packet = basePacket();
+  packet.observations.referenceValidation = {
+    ...packet.observations.referenceValidation,
+    targetFound: true,
+    targetTypeMatches: true,
+    proofGrade: 'AUTHENTICATED_STATE_PROOF',
+    evidence: [{}],
+  };
+
+  const report = checkSealedPacket(packet, profile, expectations);
+
+  assert.equal(report.evaluated.referenceValidation.status, 'UNKNOWN');
+  assert.equal(report.evaluated.referenceValidation.reason, 'UNAUTHENTICATED_OBSERVATION:referenceValidation');
+  assert.equal(Object.hasOwn(report.evaluated.referenceValidation, 'proofGrade'), false);
+  assert.equal(report.rawObservations.referenceValidation.proofGrade, 'AUTHENTICATED_STATE_PROOF');
 });
 
 test('reordered RPC responses correlate by exact ID rather than position', () => {
@@ -274,16 +402,18 @@ test('source acceptance never manufactures missing destination admission', () =>
 
   const report = checkSealedPacket(packet, profile, expectations);
 
-  assert.equal(report.evaluated.sourceAcceptance.status, 'ACCEPTED');
+  assert.equal(report.evaluated.sourceAcceptance.status, 'UNKNOWN');
   assert.equal(report.evaluated.destinationAdmission.status, 'UNKNOWN');
   assert.equal(report.evaluated.destinationAdmission.reason, 'MISSING_EVIDENCE:destinationAdmission');
 });
 
 test('receipt success and canonical effects remain independent', () => {
   const packet = basePacket();
+  packet.claims.receipt = 'SUCCESS';
+  packet.claims.canonicalEffect = 'COMMITTED';
   packet.observations.requiredEffects[1] = {
+    ...packet.observations.requiredEffects[1],
     name: 'requiredIndex',
-    expected: '0x01',
     observed: null,
     absenceProven: true,
     evidence: evidence('INDEX_ABSENCE_PROOF'),
@@ -291,31 +421,111 @@ test('receipt success and canonical effects remain independent', () => {
 
   const report = checkSealedPacket(packet, profile, expectations);
 
-  assert.equal(report.evaluated.receipt.status, 'SUCCESS');
-  assert.equal(report.evaluated.canonicalEffect.status, 'NOT_COMMITTED_PROVEN');
+  assert.equal(report.evaluated.receipt.status, 'UNKNOWN');
+  assert.equal(report.evaluated.canonicalEffect.status, 'UNSUPPORTED');
+  assert.equal(report.discrepancies.some(({ axis }) => axis === 'receipt'), true);
   assert.equal(report.discrepancies.some(({ axis }) => axis === 'canonicalEffect'), true);
 });
 
-test('lost submission evidence does not erase a separately proven effect or permit retry', () => {
+test('candidate-supplied expected effect values cannot manufacture commitment', () => {
+  const packet = basePacket();
+  packet.observations.requiredEffects[0] = {
+    ...packet.observations.requiredEffects[0],
+    name: 'head',
+    expected: '0x99',
+    observed: '0x99',
+    evidence: evidence('HEAD_ROW'),
+  };
+
+  assert.throws(
+    () => checkSealedPacket(packet, profile, expectations),
+    /CANDIDATE_EXPECTATION_FORBIDDEN:head/,
+  );
+});
+
+test('matching candidate-supplied rows cannot manufacture a canonical effect', () => {
+  const packet = basePacket();
+  packet.observations.requiredEffects = [
+    {
+      ...packet.observations.requiredEffects[0],
+      name: 'head',
+      observed: vectors.recordQuote3000.recordId,
+      evidence: [{}],
+    },
+  ];
+
+  const report = checkSealedPacket(packet, profile, expectations);
+
+  assert.equal(report.evaluated.canonicalEffect.status, 'UNSUPPORTED');
+  assert.equal(report.evaluated.canonicalEffect.reason, 'REQUIRED_EFFECT_CLOSURE_UNPINNED');
+  assert.equal(report.rawObservations.requiredEffects[0].observed, vectors.recordQuote3000.recordId);
+});
+
+test('lost submission evidence cannot make an effect provable or permit retry', () => {
   const packet = basePacket();
   delete packet.observations.submission;
 
   const report = checkSealedPacket(packet, profile, expectations);
 
   assert.equal(report.evaluated.submission.status, 'UNKNOWN');
-  assert.equal(report.evaluated.canonicalEffect.status, 'COMMITTED');
+  assert.equal(report.evaluated.canonicalEffect.status, 'UNSUPPORTED');
   assert.equal(report.evaluated.retryAllowed, false);
 });
 
-test('classifies fresh, existing, retry and contradictory cost states from pre/post facts', () => {
+test('underspecified cost observations stay unknown rather than becoming classifications', () => {
   const cases = new Map(expectations.cases
     .filter(({ input }) => input)
     .map((entry) => [entry.id, entry]));
 
   for (const id of ['fresh-content', 'existing-content-new-action', 'exact-retry', 'contradictory-cost-state']) {
     const entry = cases.get(id);
-    assert.equal(classifyCostState(entry.input).value, entry.expected.costState, id);
+    assert.equal(classifyCostState(entry.input).status, 'UNKNOWN', id);
+    assert.match(classifyCostState(entry.input).reason, /^MISSING_COST_EVIDENCE:/, id);
   }
+});
+
+test('classifies fresh, existing, retry and inconsistent controls without calling them proof', () => {
+  const cases = [
+    ['FRESH', fullCostInput()],
+    ['EXISTING', fullCostInput({
+      recordPresentBefore: true,
+      occurrenceCountBefore: '2',
+      occurrenceCountAfter: '3',
+      effectCommitmentBefore: `0x${'52'.repeat(32)}`,
+    })],
+    ['RETRY', fullCostInput({
+      recordPresentBefore: true,
+      sameOperationAlreadyPresentBefore: true,
+      occurrenceCountBefore: '3',
+      occurrenceCountAfter: '3',
+      effectCommitmentBefore: `0x${'53'.repeat(32)}`,
+      effectCommitmentAfter: `0x${'53'.repeat(32)}`,
+      stateDelta: '0',
+    })],
+    ['INCONSISTENT', fullCostInput({ recordPresentAfter: false })],
+  ];
+
+  const results = cases.map(([expected, input]) => {
+    const result = classifyCostState(input);
+    assert.equal(result.status, 'CLASSIFIED_FROM_SUPPLIED_FACTS');
+    assert.equal(result.value, expected);
+    assert.equal(result.evidenceGrade, 'UNAUTHENTICATED_INPUT');
+    return result;
+  });
+  assert.equal(results[0].controlKey, results[1].controlKey);
+  assert.equal(results[1].controlKey, results[2].controlKey);
+});
+
+test('a provisional cost classification cannot satisfy a candidate truth claim', () => {
+  const packet = basePacket();
+  packet.observations.costState = fullCostInput();
+  packet.claims.costState = 'FRESH';
+
+  const report = checkSealedPacket(packet, profile, expectations);
+
+  assert.equal(report.evaluated.costState.status, 'UNKNOWN');
+  assert.equal(report.evaluated.costState.provisionalClassification, 'FRESH');
+  assert.equal(report.discrepancies.some(({ axis }) => axis === 'costState'), true);
 });
 
 test('raw observations and candidate claims survive comparison as separate values', () => {
@@ -326,22 +536,113 @@ test('raw observations and candidate claims survive comparison as separate value
 
   assert.deepEqual(report.rawObservations, packet.observations);
   assert.deepEqual(report.claims, packet.claims);
-  assert.equal(report.evaluated.destinationAdmission.status, 'ADMITTED');
+  assert.equal(report.evaluated.destinationAdmission.status, 'UNKNOWN');
   assert.deepEqual(report.discrepancies.find(({ axis }) => axis === 'destinationAdmission'), {
     axis: 'destinationAdmission',
     claimed: 'SELECTED',
-    evaluated: 'ADMITTED',
+    evaluated: 'UNKNOWN',
   });
+});
+
+test('frozen and unknown claim axes never disappear from discrepancy checking', () => {
+  const packet = basePacket();
+  packet.claims.queryCoverage = 'COMPLETE';
+  packet.claims.destinationSelection = 'SELECTED';
+  packet.claims.inventedAxis = 'SUCCESS';
+
+  const report = checkSealedPacket(packet, profile, expectations);
+
+  assert.equal(report.evaluated.queryCoverage.status, 'UNSUPPORTED');
+  assert.equal(report.evaluated.destinationSelection.status, 'UNSUPPORTED');
+  assert.deepEqual(
+    report.discrepancies.filter(({ axis }) => ['queryCoverage', 'destinationSelection', 'inventedAxis'].includes(axis)),
+    [
+      { axis: 'queryCoverage', claimed: 'COMPLETE', evaluated: 'UNSUPPORTED' },
+      { axis: 'destinationSelection', claimed: 'SELECTED', evaluated: 'UNSUPPORTED' },
+      { axis: 'inventedAxis', claimed: 'SUCCESS', evaluated: 'UNSUPPORTED_CLAIM_AXIS' },
+    ],
+  );
 });
 
 test('a moving-tag or malformed observation basis cannot enter the sealed checker', () => {
   const packet = basePacket();
-  packet.seal.observationBasis.blockHash = 'latest';
+  packet.seal.observationBasis.source.blockHash = 'latest';
 
   assert.throws(
     () => checkSealedPacket(packet, profile, expectations),
     /MALFORMED_OBSERVATION_BASIS/,
   );
+});
+
+test('each observation is bound to its declared source or destination block', () => {
+  const packet = basePacket();
+  packet.observations.requiredEffects[1].blockHash = packet.seal.observationBasis.source.blockHash;
+
+  assert.throws(
+    () => checkSealedPacket(packet),
+    /MIXED_OBSERVATION_BASIS:requiredEffects\[1\]/,
+  );
+});
+
+test('basis anchors must state chain, realm, provenance, and unavailable proof inputs', () => {
+  const packet = basePacket();
+  delete packet.seal.observationBasis.destination.runtime;
+
+  assert.throws(
+    () => checkSealedPacket(packet),
+    /MISSING_BASIS_ARTIFACT:destination.runtime/,
+  );
+});
+
+test('available basis artifacts must match their declared byte commitment', () => {
+  const packet = basePacket();
+  packet.seal.observationBasis.source.header = {
+    availability: 'AVAILABLE',
+    raw: '0x01',
+    commitment: `0x${'00'.repeat(32)}`,
+  };
+
+  assert.throws(
+    () => checkSealedPacket(packet),
+    /BASIS_ARTIFACT_COMMITMENT_MISMATCH:source.header/,
+  );
+});
+
+test('the checker binds parsed profile and expectations to the frozen file blobs', () => {
+  const substitutedProfile = structuredClone(profile);
+  substitutedProfile.recordIdentity.domainText = 'attacker/record/1';
+  assert.throws(
+    () => checkSealedPacket(basePacket(), substitutedProfile),
+    /PROFILE_OBJECT_MISMATCH/,
+  );
+
+  const substitutedExpectations = structuredClone(expectations);
+  substitutedExpectations.source.planningCommit = 'f'.repeat(40);
+  assert.throws(
+    () => checkSealedPacket(basePacket(), profile, substitutedExpectations),
+    /EXPECTATIONS_OBJECT_MISMATCH/,
+  );
+
+  assert.throws(
+    () => checkSealedPacket(basePacket(), profile, expectations, {
+      profileRaw: profileRaw.replace('efs2\/record\/1', 'evil\/record\/1'),
+      expectationsRaw,
+    }),
+    /PROFILE_BLOB_MISMATCH/,
+  );
+});
+
+test('a matching control packet reports frozen inputs but unauthenticated observations', () => {
+  const report = checkSealedPacket(basePacket());
+
+  assert.deepEqual(report.inputIntegrity, {
+    status: 'VERIFIED_FROZEN_FILES',
+    profileBlob: '06106fe3bc717ed4638612f2ef8b90d502c705b8',
+    expectationsBlob: 'a9d6c9afb5f51d0f786e006b7b5df667ae69710e',
+  });
+  assert.equal(report.observationIntegrity.status, 'STRUCTURALLY_BOUND_UNAUTHENTICATED');
+  assert.equal(report.evaluated.canonicalEffect.status, 'UNSUPPORTED');
+  assert.deepEqual(report.discrepancies, []);
 });
 
 test('CLI checks sealed files and exits nonzero when a claim upgrades evidence', async (t) => {
@@ -354,8 +655,8 @@ test('CLI checks sealed files and exits nonzero when a claim upgrades evidence',
 
   await Promise.all([
     writeFile(packetPath, `${JSON.stringify(basePacket(), null, 2)}\n`),
-    writeFile(profilePath, `${JSON.stringify(profile, null, 2)}\n`),
-    writeFile(expectationsPath, `${JSON.stringify(expectations, null, 2)}\n`),
+    writeFile(profilePath, profileRaw),
+    writeFile(expectationsPath, expectationsRaw),
   ]);
 
   const matching = spawnSync(process.execPath, [cliPath.pathname, packetPath, profilePath, expectationsPath], {
@@ -367,6 +668,7 @@ test('CLI checks sealed files and exits nonzero when a claim upgrades evidence',
 
   const upgraded = basePacket();
   delete upgraded.observations.destinationAdmission;
+  upgraded.claims.destinationAdmission = 'ADMITTED';
   await writeFile(packetPath, `${JSON.stringify(upgraded, null, 2)}\n`);
   const rejected = spawnSync(process.execPath, [cliPath.pathname, packetPath, profilePath, expectationsPath], {
     encoding: 'utf8',
@@ -377,4 +679,15 @@ test('CLI checks sealed files and exits nonzero when a claim upgrades evidence',
     JSON.parse(rejected.stdout).discrepancies.find(({ axis }) => axis === 'destinationAdmission'),
     { axis: 'destinationAdmission', claimed: 'ADMITTED', evaluated: 'UNKNOWN' },
   );
+
+  const substitutedProfile = structuredClone(profile);
+  substitutedProfile.candidate.sourceCommit = 'f'.repeat(40);
+  await writeFile(profilePath, `${JSON.stringify(substitutedProfile, null, 2)}\n`);
+  const rejectedSubstitution = spawnSync(
+    process.execPath,
+    [cliPath.pathname, packetPath, profilePath, expectationsPath],
+    { encoding: 'utf8', env: process.env },
+  );
+  assert.equal(rejectedSubstitution.status, 1);
+  assert.match(rejectedSubstitution.stderr, /PROFILE_BLOB_MISMATCH/);
 });
