@@ -288,7 +288,7 @@ The interpretation profile was frozen in
   `dcc7b946d2ac8dfcf22103069127a9d1809df974`.
 
 The positive vector has 14 independent comparisons, all `MATCH`, and recovers
-the declared author as `VALID` cryptographic binding. The 27-test suite changes
+the declared author as `VALID` cryptographic binding. The 33-test suite changes
 and reorders actions, changes every Intent field, substitutes a wrong signer,
 mutates the signature, exercises malformed widths and integer ranges, rejects
 high-`s` and invalid-`v` forms, and keeps body/action shape checks distinct from
@@ -309,6 +309,16 @@ This does not authenticate the packet or its receipt fields, identify deployed
 runtime code, prove nonce or account authority, establish Realm admission, or
 establish inclusion or canonical semantic effect; those outcomes remain
 explicitly `UNKNOWN`.
+
+Packet-specific retained expectations are frozen separately in
+`signature-binding-retained-expectations-dcc7b94.json` at Git blob
+`12870aa95b8dd3b2b9f146f92c24034f12bbfea3`. They require the two retained
+`executeSigned` calls to decode with nonces `0`, then `1`, in packet-array order.
+That is a byte-fixture consistency rule, not proof of nonce availability,
+replay safety, transaction inclusion, or chain order. Absent retained
+containers remain `UNKNOWN`; present malformed containers, malformed entries,
+and missing calldata are rejected before selector filtering, so none can be
+dropped to manufacture the expected pair.
 
 The current declared EIP-712 domain binds only `name` and `version`. It omits
 `chainId` and `verifyingContract`, so replay-domain completeness is `PARTIAL`.

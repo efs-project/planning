@@ -10,6 +10,7 @@ import {
   analyzeSignatureBinding,
   gitBlobHash,
   parsePinnedAbiProfile,
+  parsePinnedRetainedExpectations,
   parsePinnedRetainedPacket,
   parsePinnedVector,
   verifyPinnedPublicProfile,
@@ -33,6 +34,13 @@ const publicProfileBytes = gitBytes(profile.source.publicProfile);
 const publicVectorBytes = gitBytes(profile.source.publicVector);
 const vector = parsePinnedVector(publicVectorBytes, profile);
 const abiProfileBytes = await readFile(new URL('rpc-observed-profile-dcc7b94.json', import.meta.url));
+const retainedExpectationsBytes = await readFile(
+  new URL('signature-binding-retained-expectations-dcc7b94.json', import.meta.url),
+);
+const retainedExpectations = parsePinnedRetainedExpectations(
+  retainedExpectationsBytes,
+  profile,
+);
 const retainedPacketBytes = execFileSync('git', [
   'show',
   `${profile.source.retainedPacket.commit}:${profile.source.retainedPacket.path}`,
@@ -287,7 +295,12 @@ test('stored short report is the exact direct output', async () => {
 test('recomputes both retained signed-one signatures from canonical calldata only', () => {
   const abiProfile = parsePinnedAbiProfile(abiProfileBytes, profile);
   const packet = parsePinnedRetainedPacket(retainedPacketBytes, profile);
-  const retained = analyzeRetainedSignedTransactions(packet, abiProfile, profile);
+  const retained = analyzeRetainedSignedTransactions(
+    packet,
+    abiProfile,
+    profile,
+    retainedExpectations,
+  );
 
   assert.equal(retained.status, 'OBSERVED_MATCH');
   assert.equal(retained.transactions.length, 2);
@@ -304,4 +317,133 @@ test('recomputes both retained signed-one signatures from canonical calldata onl
   assert.equal(retained.authenticatedPacketProvenance.status, 'UNKNOWN');
   assert.equal(retained.runtimeAcceptance.status, 'UNKNOWN');
   assert.equal(retained.canonicalSemanticEffect.status, 'UNKNOWN');
+});
+
+test('pins the packet-specific retained expectations supplement before use', () => {
+  const parsed = parsePinnedRetainedExpectations(
+    retainedExpectationsBytes,
+    profile,
+  );
+  assert.equal(
+    gitBlobHash(retainedExpectationsBytes),
+    '12870aa95b8dd3b2b9f146f92c24034f12bbfea3',
+  );
+  assert.deepEqual(parsed.orderedNonces, ['0', '1']);
+
+  const changed = Buffer.from(retainedExpectationsBytes);
+  changed[changed.indexOf(Buffer.from('"orderedNonces"'))] ^= 1;
+  assert.throws(
+    () => parsePinnedRetainedExpectations(changed, profile),
+    /RETAINED_SIGNATURE_EXPECTATIONS_BLOB_MISMATCH/,
+  );
+});
+
+test('the analyzer rejects caller-substituted retained nonce expectations', () => {
+  const abiProfile = parsePinnedAbiProfile(abiProfileBytes, profile);
+  const packet = parsePinnedRetainedPacket(retainedPacketBytes, profile);
+  const forged = structuredClone(retainedExpectations);
+  forged.orderedNonces = ['0', '0'];
+  packet.cells['signed-one/quote'].transactions = [
+    packet.cells['signed-one/quote'].transactions[0],
+    packet.cells['signed-one/quote'].transactions[0],
+  ];
+
+  assert.throws(
+    () => analyzeRetainedSignedTransactions(packet, abiProfile, profile, forged),
+    /MALFORMED_RETAINED_SIGNATURE_EXPECTATIONS/,
+  );
+});
+
+test('absent retained containers remain UNKNOWN', () => {
+  const abiProfile = parsePinnedAbiProfile(abiProfileBytes, profile);
+  const packet = parsePinnedRetainedPacket(retainedPacketBytes, profile);
+  const cases = [
+    (value) => { delete value.cells; },
+    (value) => { delete value.cells['signed-one/quote']; },
+    (value) => { delete value.cells['signed-one/quote'].transactions; },
+  ];
+
+  for (const mutate of cases) {
+    const changed = structuredClone(packet);
+    mutate(changed);
+    const retained = analyzeRetainedSignedTransactions(
+      changed,
+      abiProfile,
+      profile,
+      retainedExpectations,
+    );
+    assert.equal(retained.status, 'UNKNOWN');
+  }
+});
+
+test('present malformed retained containers are rejected rather than treated as absent', () => {
+  const abiProfile = parsePinnedAbiProfile(abiProfileBytes, profile);
+  const packet = parsePinnedRetainedPacket(retainedPacketBytes, profile);
+  const cases = [
+    [(value) => { value.cells = 'malformed'; }, /MALFORMED_RETAINED_SIGNATURE_CELLS_CONTAINER/],
+    [(value) => { value.cells['signed-one/quote'] = []; }, /MALFORMED_RETAINED_SIGNATURE_CELL_CONTAINER/],
+    [(value) => { value.cells['signed-one/quote'].transactions = {}; }, /MALFORMED_RETAINED_SIGNATURE_TRANSACTIONS_CONTAINER/],
+  ];
+
+  for (const [mutate, expected] of cases) {
+    const changed = structuredClone(packet);
+    mutate(changed);
+    assert.throws(
+      () => analyzeRetainedSignedTransactions(
+        changed,
+        abiProfile,
+        profile,
+        retainedExpectations,
+      ),
+      expected,
+    );
+  }
+});
+
+test('every retained transaction is validated before selector filtering', () => {
+  const abiProfile = parsePinnedAbiProfile(abiProfileBytes, profile);
+  const packet = parsePinnedRetainedPacket(retainedPacketBytes, profile);
+  const cases = [
+    [null, /MALFORMED_RETAINED_TRANSACTION_0_CONTAINER/],
+    [{ data: {} }, /MALFORMED_RETAINED_TRANSACTION_0_CALLDATA/],
+    [{}, /MISSING_RETAINED_TRANSACTION_0_CALLDATA/],
+  ];
+
+  for (const [entry, expected] of cases) {
+    const changed = structuredClone(packet);
+    changed.cells['signed-one/quote'].transactions.unshift(entry);
+    assert.throws(
+      () => analyzeRetainedSignedTransactions(
+        changed,
+        abiProfile,
+        profile,
+        retainedExpectations,
+      ),
+      expected,
+    );
+  }
+});
+
+test('the packet-specific executeSigned pair must have ordered nonces zero then one', () => {
+  const abiProfile = parsePinnedAbiProfile(abiProfileBytes, profile);
+  const packet = parsePinnedRetainedPacket(retainedPacketBytes, profile);
+  const transactions = packet.cells['signed-one/quote'].transactions;
+  const cases = [
+    [transactions[0], transactions[0]],
+    [transactions[1], transactions[0]],
+  ];
+
+  for (const pair of cases) {
+    const changed = structuredClone(packet);
+    changed.cells['signed-one/quote'].transactions = structuredClone(pair);
+    const retained = analyzeRetainedSignedTransactions(
+      changed,
+      abiProfile,
+      profile,
+      retainedExpectations,
+    );
+    assert.equal(retained.status, 'OBSERVED_MISMATCH');
+    assert.equal(retained.runtimeAcceptance.status, 'UNKNOWN');
+    assert.equal(retained.canonicalSemanticEffect.status, 'UNKNOWN');
+  }
 });

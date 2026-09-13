@@ -21,6 +21,7 @@ const {
 const HEX = /^0x[0-9a-fA-F]*$/;
 const WORD = /^0x[0-9a-fA-F]{64}$/;
 const ZERO_WORD = `0x${'00'.repeat(32)}`;
+const RETAINED_EXPECTATIONS_GIT_BLOB = '12870aa95b8dd3b2b9f146f92c24034f12bbfea3';
 
 function bytes(value) {
   if (Buffer.isBuffer(value)) return value;
@@ -87,6 +88,42 @@ export function parsePinnedRetainedPacket(retainedPacketBytes, profile) {
   } catch (error) {
     throw new TypeError(`MALFORMED_RETAINED_SIGNATURE_PACKET:${error.message}`);
   }
+}
+
+export function parsePinnedRetainedExpectations(retainedExpectationsBytes, profile) {
+  if (gitBlobHash(retainedExpectationsBytes) !== RETAINED_EXPECTATIONS_GIT_BLOB) {
+    throw new TypeError('RETAINED_SIGNATURE_EXPECTATIONS_BLOB_MISMATCH');
+  }
+  let parsed;
+  try {
+    const text = new TextDecoder('utf-8', { fatal: true })
+      .decode(bytes(retainedExpectationsBytes));
+    parsed = JSON.parse(text);
+  } catch (error) {
+    throw new TypeError(`MALFORMED_RETAINED_SIGNATURE_EXPECTATIONS:${error.message}`);
+  }
+  const packetSource = parsed?.source?.retainedPacket;
+  const abiSource = parsed?.source?.authorizedAbiProfile;
+  if (parsed?.kind !== 'EFS_INDEPENDENT_SIGNATURE_BINDING_RETAINED_EXPECTATIONS'
+    || parsed.version !== 1
+    || parsed.cell !== 'signed-one/quote'
+    || parsed.function !== 'executeSigned'
+    || parsed.expectedCount !== 2
+    || !Array.isArray(parsed.orderedNonces)
+    || parsed.orderedNonces.length !== 2
+    || parsed.orderedNonces[0] !== '0'
+    || parsed.orderedNonces[1] !== '1') {
+    throw new TypeError('MALFORMED_RETAINED_SIGNATURE_EXPECTATIONS');
+  }
+  if (packetSource?.commit !== profile?.source?.retainedPacket?.commit
+    || packetSource?.path !== profile?.source?.retainedPacket?.path
+    || packetSource?.sha256 !== profile?.source?.retainedPacket?.sha256
+    || packetSource?.gitBlob !== profile?.source?.retainedPacket?.gitBlob
+    || abiSource?.path !== profile?.source?.authorizedAbiProfile?.path
+    || abiSource?.gitBlob !== profile?.source?.authorizedAbiProfile?.gitBlob) {
+    throw new TypeError('RETAINED_SIGNATURE_EXPECTATIONS_SOURCE_MISMATCH');
+  }
+  return parsed;
 }
 
 function normalizeHex(value, label, exactBytes) {
@@ -533,24 +570,73 @@ function decodedVector(decoded, profile) {
   };
 }
 
-export function analyzeRetainedSignedTransactions(packet, abiProfile, profile) {
+function isObjectContainer(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+export function analyzeRetainedSignedTransactions(packet, abiProfile, profile, expectations) {
   if (!packet || typeof packet !== 'object' || Array.isArray(packet)) {
     throw new TypeError('MALFORMED_RETAINED_SIGNATURE_PACKET_CONTAINER');
   }
-  const transactions = packet?.cells?.['signed-one/quote']?.transactions;
-  if (!Array.isArray(transactions)) {
+  if (expectations?.kind !== 'EFS_INDEPENDENT_SIGNATURE_BINDING_RETAINED_EXPECTATIONS'
+    || expectations.version !== 1
+    || expectations.cell !== 'signed-one/quote'
+    || expectations.function !== 'executeSigned'
+    || expectations.expectedCount !== 2
+    || !Array.isArray(expectations.orderedNonces)
+    || expectations.orderedNonces.length !== 2
+    || expectations.orderedNonces[0] !== '0'
+    || expectations.orderedNonces[1] !== '1') {
+    throw new TypeError('MALFORMED_RETAINED_SIGNATURE_EXPECTATIONS');
+  }
+  if (!Object.hasOwn(packet, 'cells')) {
     return {
       status: 'UNKNOWN',
       reason: 'RETAINED_SIGNED_CELL_OR_TRANSACTIONS_UNAVAILABLE',
       transactions: [],
     };
   }
+  if (!isObjectContainer(packet.cells)) {
+    throw new TypeError('MALFORMED_RETAINED_SIGNATURE_CELLS_CONTAINER');
+  }
+  if (!Object.hasOwn(packet.cells, expectations.cell)) {
+    return {
+      status: 'UNKNOWN',
+      reason: 'RETAINED_SIGNED_CELL_OR_TRANSACTIONS_UNAVAILABLE',
+      transactions: [],
+    };
+  }
+  const cell = packet.cells[expectations.cell];
+  if (!isObjectContainer(cell)) {
+    throw new TypeError('MALFORMED_RETAINED_SIGNATURE_CELL_CONTAINER');
+  }
+  if (!Object.hasOwn(cell, 'transactions')) {
+    return {
+      status: 'UNKNOWN',
+      reason: 'RETAINED_SIGNED_CELL_OR_TRANSACTIONS_UNAVAILABLE',
+      transactions: [],
+    };
+  }
+  const transactions = cell.transactions;
+  if (!Array.isArray(transactions)) {
+    throw new TypeError('MALFORMED_RETAINED_SIGNATURE_TRANSACTIONS_CONTAINER');
+  }
   const ledger = new Interface(abiDeclarations(abiProfile, 'Ledger'));
-  const selector = ledger.getFunction('executeSigned').selector.toLowerCase();
-  const selected = transactions
-    .map((transaction, transactionIndex) => ({ transaction, transactionIndex }))
-    .filter(({ transaction }) => typeof transaction?.data === 'string'
-      && transaction.data.slice(0, 10).toLowerCase() === selector);
+  const selector = ledger.getFunction(expectations.function).selector.toLowerCase();
+  const validated = transactions.map((transaction, transactionIndex) => {
+    if (!isObjectContainer(transaction)) {
+      throw new TypeError(`MALFORMED_RETAINED_TRANSACTION_${transactionIndex}_CONTAINER`);
+    }
+    if (!Object.hasOwn(transaction, 'data')) {
+      throw new TypeError(`MISSING_RETAINED_TRANSACTION_${transactionIndex}_CALLDATA`);
+    }
+    const supplied = normalizeHex(
+      transaction.data,
+      `RETAINED_TRANSACTION_${transactionIndex}_CALLDATA`,
+    );
+    return { transaction, transactionIndex, supplied };
+  });
+  const selected = validated.filter(({ supplied }) => supplied.slice(0, 10) === selector);
   if (selected.length === 0) {
     return {
       status: 'UNKNOWN',
@@ -559,8 +645,7 @@ export function analyzeRetainedSignedTransactions(packet, abiProfile, profile) {
     };
   }
 
-  const examined = selected.map(({ transaction, transactionIndex }) => {
-    const supplied = normalizeHex(transaction.data, `RETAINED_TRANSACTION_${transactionIndex}_CALLDATA`);
+  const examined = selected.map(({ transaction, transactionIndex, supplied }) => {
     let decoded;
     let canonical;
     try {
@@ -598,7 +683,11 @@ export function analyzeRetainedSignedTransactions(packet, abiProfile, profile) {
       canonicalSemanticEffect: analyzed.canonicalSemanticEffect,
     };
   });
-  const mismatch = selected.length !== 2 || examined.some((item) => (
+  const nonceOrderMatches = examined.length === expectations.orderedNonces.length
+    && examined.every((item, index) => item.nonce === expectations.orderedNonces[index]);
+  const mismatch = selected.length !== expectations.expectedCount
+    || !nonceOrderMatches
+    || examined.some((item) => (
     item.calldata.status === 'MISMATCH'
     || item.bodyCommitment?.status === 'MISMATCH'
     || item.declaredActionShape?.status === 'MISMATCH'
@@ -609,9 +698,9 @@ export function analyzeRetainedSignedTransactions(packet, abiProfile, profile) {
   return {
     status: mismatch ? 'OBSERVED_MISMATCH' : 'OBSERVED_MATCH',
     reason: mismatch
-      ? 'RETAINED_SIGNED_CALLDATA_COUNT_OR_BINDING_MISMATCH'
+      ? 'RETAINED_SIGNED_CALLDATA_COUNT_NONCE_ORDER_OR_BINDING_MISMATCH'
       : 'TWO_RETAINED_CALLDATA_VALUES_CANONICALLY_DECODE_AND_BIND_TO_THEIR_AUTHORS',
-    expectedCount: 2,
+    expectedCount: expectations.expectedCount,
     observedCount: selected.length,
     selector,
     transactions: examined,
@@ -722,12 +811,21 @@ async function main() {
   });
   const abiProfileBytes = await readFile(profile.source.authorizedAbiProfile.path);
   const abiProfile = parsePinnedAbiProfile(abiProfileBytes, profile);
+  const retainedExpectationsBytes = await readFile(new URL(
+    'signature-binding-retained-expectations-dcc7b94.json',
+    import.meta.url,
+  ));
+  const retainedExpectations = parsePinnedRetainedExpectations(
+    retainedExpectationsBytes,
+    profile,
+  );
   const retainedPacketBytes = gitObjectBytes(profile.source.retainedPacket);
   const retainedPacket = parsePinnedRetainedPacket(retainedPacketBytes, profile);
   report.retainedSignedTransactions = analyzeRetainedSignedTransactions(
     retainedPacket,
     abiProfile,
     profile,
+    retainedExpectations,
   );
   report.input.authorizedAbiProfile = {
     path: profile.source.authorizedAbiProfile.path,
