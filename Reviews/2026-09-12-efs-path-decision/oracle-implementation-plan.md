@@ -1,0 +1,100 @@
+# Independent Lab Oracle Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Build the first disposable, independent offchain checker for Road B's sealed public profile and raw observation packet.
+
+**Architecture:** A pure Node ESM module reconstructs candidate-profile commitments from raw bytes, then compares independently derived axes with candidate-native claims without merging them. Candidate-neutral expectations and hand vectors live outside implementation code; a thin CLI binds the exact profile/expectation file bytes to frozen Git blobs and emits JSON without RPC, filesystem discovery, or candidate executable dependencies. Packet-supplied RPC rows and proof grades remain raw observations, not authenticated conclusions.
+
+**Tech Stack:** Node.js built-ins (`node:test`, `node:assert`, `node:fs`) and ethers 6.15.0 only for audited cryptographic primitives, resolved from the existing `planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules` tree without installing packages.
+
+**Spec:** [[oracle-boundary]], [[sdk-fixture]], [[files-journey]], and [[run-manifest]].
+
+## Global constraints
+
+- Start branch `codex/efs-warroom-oracle` in sibling worktree `planning-warroom-oracle` from planning `32ed292af887455e690991d2fd642bebd4f47fef`; own only `Reviews/2026-09-12-efs-path-decision/lab-oracle/` there.
+- Keep this plan on planning `main`, uncommitted for the coordinator; touch no other main file.
+- Freeze neutral expectations from blobs `035aa6d9cb0dcd96517234a7ef1a160b45481abf`, `4a2864fc4670cf548f1efa7340041df0fec2b803`, `0c2aecc059e05e2251f06343c351ec3653b09ace`, and `0994c7125c5488d408a2519fdad45b91cd656ac0` before reading candidate details.
+- Candidate B source is `727291aac717f4c4e38e9049e8c9328da94389b8`. Read only `lab-b/MANIFEST.draft.json`, public ABI metadata, and struct/interface declarations. Never read or import its Reconstructor, digest implementation, measurement script, SDK/helper, or verifier tests.
+- Treat compiled ABI declarations from `dcc7b946d2ac8dfcf22103069127a9d1809df974` only as a separate diagnostic profile; they cannot silently complete or replace the `727291a` profile.
+- No Forge, Solc, Anvil, RPC/network call, package installation, generated bindings, or shared build cache. Missing or changed public profile data yields an axis-local `UNSUPPORTED`, never a guessed formula.
+- The packet format, names, encodings, and outcomes are lab-local evidence only; they freeze no Core or SDK API.
+
+---
+
+### Task 1: Seal neutral expectations and the public Road B profile
+
+**Files:**
+- Create: `Reviews/2026-09-12-efs-path-decision/lab-oracle/neutral-expectations.json`
+- Create: `Reviews/2026-09-12-efs-path-decision/lab-oracle/profile-b.public.json`
+- Create: `Reviews/2026-09-12-efs-path-decision/lab-oracle/hand-vectors.json`
+- Create: `Reviews/2026-09-12-efs-path-decision/lab-oracle/README.md`
+
+**Interfaces:**
+- Consumes: the four neutral blobs above, then only the pinned candidate's public declarations.
+- Produces: immutable JSON inputs for `reconstructCommitments(profile, input)` and `checkSealedPacket(packet, profile, expectations, inputBytes)`.
+
+- [ ] **Step 1: Freeze neutral cases before candidate inspection.** Record literal semantic expectations for body mutation, committed-action mutation, missing evidence, response-ID reorder, separate source/destination authority, receipt/effect separation, and `FRESH | EXISTING | RETRY | INCONSISTENT` cost-state classification. Include source blob hashes and `frozenBeforeCandidateInspection: true`.
+- [ ] **Step 2: Hash the neutral file.** Run `git hash-object Reviews/2026-09-12-efs-path-decision/lab-oracle/neutral-expectations.json` and retain the hash in the README before opening Road B files.
+- [ ] **Step 3: Transcribe only public declarations.** Record the candidate source commit, manifest hash, inspected paths, domain fields, ordered struct fields, ABI types, and an explicit support/reason pair for record, subject, action, digest, and EOA recovery. Do not infer omitted fields.
+- [ ] **Step 4: Construct independent literals.** Write exact input hex, manually concatenated/ABI-framed expected bytes, expected Keccak digests, deterministic signer/address/signature, and must-fail variants in `hand-vectors.json`. Compute only cryptographic primitives with ethers; do not call candidate code.
+- [ ] **Step 5: Document trust boundaries.** State that retained RPC is not a state proof, native claims remain separate, public-profile omissions are `UNSUPPORTED`, and this checker is disposable.
+
+### Task 2: Reconstruct commitments and verify the signature
+
+**Files:**
+- Create: `Reviews/2026-09-12-efs-path-decision/lab-oracle/oracle.test.mjs`
+- Create: `Reviews/2026-09-12-efs-path-decision/lab-oracle/oracle.mjs`
+
+**Interfaces:**
+- Consumes: `profile-b.public.json` and `hand-vectors.json`.
+- Produces: `reconstructCommitments(profile, input)` returning independent axis objects `{ status, value?, reason?, evidence }`; `verifyEoaSignature(digest, signature, expectedAuthor)` returning `VALID | INVALID | UNSUPPORTED` without authorizing an action.
+
+- [ ] **Step 1: Write failing literal-vector tests.** Import the not-yet-created module and assert exact Record and subject values from `hand-vectors.json`, explicit `UNSUPPORTED` results for undeclared action/digest framing, and deterministic recovery of the literal expected author for the standalone supplied-digest control.
+- [ ] **Step 2: Verify RED.** Run `NODE_PATH=/Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules node --test Reviews/2026-09-12-efs-path-decision/lab-oracle/oracle.test.mjs`; expect `ERR_MODULE_NOT_FOUND` for `oracle.mjs`.
+- [ ] **Step 3: Implement minimal reconstruction.** Strictly validate fixed-length hex and numeric bounds, encode only the ordered public profile, hash with ethers Keccak/typed-data primitives, and return axis-local `UNSUPPORTED` when profile material is absent.
+- [ ] **Step 4: Verify GREEN.** Run the focused test; expect all literal commitment and recovery assertions to pass.
+- [ ] **Step 5: Add RED mutations, then GREEN.** Flip a body byte while retaining the claimed identity and assert a mismatch. Mutate the standalone digest and, separately, one literal signature byte; assert generic recovery fails while candidate action/digest/signature binding remains `UNSUPPORTED` rather than borrowing the generic control.
+
+### Task 3: Compare raw observations without manufacturing success
+
+**Files:**
+- Modify: `Reviews/2026-09-12-efs-path-decision/lab-oracle/oracle.test.mjs`
+- Modify: `Reviews/2026-09-12-efs-path-decision/lab-oracle/oracle.mjs`
+
+**Interfaces:**
+- Consumes: a lab packet with separate `inputs`, `observations`, and `claims` sections.
+- Produces: `checkSealedPacket(...)`, `correlateRpcResponses(...)`, and `classifyCostState(...)`; the report retains derived, claimed, evidence-grade, and discrepancy fields separately.
+
+- [ ] **Step 1: Write failing behavior tests.** Assert: missing evidence remains `UNKNOWN`; reordered JSON-RPC replies correlate by ID; duplicate/missing IDs fail; source acceptance never creates destination admission; candidate booleans/opaque evidence cannot manufacture proof grade; receipt-shaped input cannot create `SUCCESS` or `COMMITTED`; and unsupported or unfamiliar claim axes cannot disappear from comparison.
+- [ ] **Step 2: Verify RED.** Run the focused suite and confirm failures name the missing comparison functions.
+- [ ] **Step 3: Implement minimal comparisons.** Bind exact profile/expectation bytes to their frozen blobs; reject malformed or mixed source/destination bases and identical authority in this fresh-destination fixture; preserve raw inputs, observations, claims, and results separately; cap unauthenticated observations at `UNKNOWN`; leave unpinned effect/query/selection closure `UNSUPPORTED`; require an explicit claim for every frozen axis; and report every omitted, unfamiliar, or mismatching claim without overwriting either side.
+- [ ] **Step 4: Add cost-state tests and implementation.** From explicit actor, action shape, body size, state regime, exact current/before/after operation commitments, pre/post bases, provenance, identity presence, occurrence/effect deltas, and retry identity, provisionally classify supplied controls as `FRESH`, `EXISTING`, `RETRY`, or `INCONSISTENT`. Mark the classification `UNAUTHENTICATED_INPUT` and keep sealed cost truth `UNKNOWN`; never infer it from gas, a candidate label, or a caller-supplied retry boolean.
+- [ ] **Step 5: Verify GREEN.** Run the full test file; expect every neutral mutation and honest-unknown branch to pass.
+
+### Task 4: Add the file-boundary checker and evidence handoff
+
+**Files:**
+- Create: `Reviews/2026-09-12-efs-path-decision/lab-oracle/check.mjs`
+- Modify: `Reviews/2026-09-12-efs-path-decision/lab-oracle/oracle.test.mjs`
+- Modify: `Reviews/2026-09-12-efs-path-decision/lab-oracle/README.md`
+
+**Interfaces:**
+- Consumes: `node check.mjs <packet.json> <profile.json> <expectations.json>`.
+- Produces: deterministic JSON on stdout; exit `0` for a fully evaluated honest result (including declared `UNSUPPORTED`), exit `1` for malformed evidence or expectation mismatch, and no network or writes.
+
+- [ ] **Step 1: Write a failing CLI test.** Spawn `process.execPath` against temporary JSON files and assert exact stdout/exit code for a matching packet, an empty/omitted required-claims packet, a claim-upgrade mutation, and a substituted profile/expectations input.
+- [ ] **Step 2: Verify RED, implement the thin CLI, then verify GREEN.** The CLI performs only parsing, delegates to `checkSealedPacket`, and emits the returned report.
+- [ ] **Step 3: Run final checks.** Run the full `node --test` command, `node --check` on both modules, `git diff --check`, and `./scripts/open-decisions.sh --check`; inspect `git status --short` to prove only `lab-oracle/` changed in the branch.
+- [ ] **Step 4: Independent review.** Give reviewers the base/head commits, this plan, the public-profile read restrictions, and the full test output. Fix every critical/important finding through a new failing test, including circular input seals, manufactured proof grades/effects, silently skipped claims, incomplete cost controls, and mixed observation bases.
+- [ ] **Step 5: Commit exact owned files.** Use a message file with subject `chore: add disposable independent Road B oracle` and `Agent: sdk-pm`, `Co-authored-by: GPT-5 <noreply@openai.com>`, `Harness: codex`; report commit, tree/blob hashes, command results, and every exact profile input still required.
+
+## Completed handoff
+
+- **Source:** branch `codex/efs-warroom-oracle`, base `32ed292af887455e690991d2fd642bebd4f47fef`, final commit `0e19d2746acffd1a6686301e494542d1fffada57`, tree `48ecb647544bd52ec1c0dc2f0a72d4678a88f943`.
+- **Pins:** candidate B `727291aac717f4c4e38e9049e8c9328da94389b8`; neutral freeze commit `f060524edb189adf976645c64b8d2c3a52b2c410`; expectations blob `a9d6c9afb5f51d0f786e006b7b5df667ae69710e`; public-profile blob `06106fe3bc717ed4638612f2ef8b90d502c705b8`; hand-vectors blob `c58df6c533509109bd33c2e8ad44a15a609304aa`.
+- **Coverage:** independently recomputes Record/subject identities; exercises generic digest and signature-byte mutations; preserves raw inputs/observations/claims/results; checks required claims, response IDs, distinct source/destination authority, structural bases, and provisional cost controls. Candidate action/digest/signature binding remains `UNSUPPORTED`; unauthenticated RPC-shaped semantic observations remain `UNKNOWN`; effect/query/selection closure remains `UNSUPPORTED`. Exit `0` is only agreement with this limited oracle, never a candidate pass.
+- **Verification:** root and reviewers reproduced 33/33 tests; syntax, JSON, diff, and open-decision checks passed; three independent final reviews returned GO; implementation worktree was clean.
+- **Remaining inputs:** ordered Action and PublicationIntent schema/framing, complete EIP-712 domain, replay/nonce and principal derivation rules, candidate signature vector, exact effect/query/selection closure, and a real proof-bearing raw packet.
+- **Ownership:** implementation and this handoff are complete; ownership is explicitly returned to root for publication. No push, merge, or promotion was performed.
+- **Not started:** a future `RPC_OBSERVED` layer may independently decode and compare supplied raw RPC bytes under an explicit observation assumption while leaving the existing strict proof-result layer unchanged; it must not imply chain inclusion or state-proof validity.

@@ -94,3 +94,24 @@ Show `eth_call` separately; amortize only after setup and break-even.
 
 No code starts until manifests, ABIs, encodings and expected vectors are
 pinned.
+
+## Execution clarification — September 13
+
+The first checker at `0e19d27` implements only the separately pinned axes in
+[[oracle-implementation-plan#Completed handoff]]. Root reproduced 33/33 tests;
+these synthetic controls are not a passing B/C workflow. Missing action,
+selection and effect profiles remain unsupported, and the original frozen
+expectations keep their original blob identity.
+
+For the next bounded probe, keep **two separate conclusions**: independent
+consistency/semantic checks of supplied raw bytes under an explicit
+`RPC_OBSERVED` assumption, and authenticated claims about actual chain state.
+A decoder can detect a wrong target, malformed ABI return, changed body or
+incorrect Lens result in a retained RPC packet without proving that the packet
+came from Ethereum. Report such checks as observed agreement/disagreement,
+with exact input/ABI/expectation hashes and basis; never promote them into
+state-proof validity, portable native authorship or unconditional completeness.
+This allows useful prototype falsification before a state-proof verifier
+exists. Conversely, a well-formed packet with all conclusions unknown is not
+evidence that its Files workflow works. Candidate-native decoded values and
+status flags must not become the independent expected answers.

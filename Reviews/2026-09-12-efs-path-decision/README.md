@@ -116,7 +116,7 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 - Participants: Codex Road A analyst, existing SDK PM and Data Explorer PM dispatched; Claude **EFS v2 Dev** kickoff sent and acknowledged by 23:41 UTC. Its [[claude-pm|acknowledgement]] records an independent in-session MUD specialist and evidence extractor; a persistent extra Claude conversation is unnecessary. Earlier MUD source, cost and portability reviews are completed inputs, not new active seats.
 - Baselines: kickoff published at planning `2552962`; native source/evidence pins in section 5 remain the named comparison pins. Fable's existing untracked brainstorm is preserved. The similarly named direct worktree is the stopped `f873890` size probe, not the fuller control.
 - Shared fixture / shortlisted roads / actual probes: [[sdk-fixture|SDK joined semantics]] and [[files-journey|Files lifecycle/selection journey]] received and reviewed as the common comparison requirements. They are test expectations, not executable evidence or permanent API bytes. Use [[run-manifest]] for exact source, encoding, payload and freshness inputs. **Provisional implementation shortlist: B (compact custom) and C (one corrected Store-only adapter).** Retain fuller control A and its packing proposal as the fallback/reference, not a third concurrent rebuild. No performance winner; the bounded run lease is below.
-- Heavy-run slot: **Claude EFS v2 Dev owns one SERIAL C-build → B-diagnostic-run queue, September 13 00:55–01:25 UTC**, releasing earlier when finished. B's first compiler lease was released at 00:50: Codex inspected the log (24/24 candidate tests) and artifact (Ledger 16,699 runtime bytes, solc 0.8.30, optimizer 200), not a complete semantic or gas pass. C starts at `f2e4051`; B measurement controls are at `369b770` over compiled `dcc7b94`. Pin subsequent repairs separately. Use at most two compiler workers; normal runtime/initcode/block limits, no concurrent A/B/C heavy runs. The only scratch roots are `/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b` and sibling `lab-c`, <2 GB each and <15 GB overall; preserve 50 GB free, record PIDs, enforce expiry. Codex checked 266 GiB free, 1.7 MB B scratch and no matching compiler/Anvil process at 00:53 UTC. **B Anvil is diagnostic only**: finite history 256, run-owned cache, free loopback port, 30M gas limit, no traces/dumps; capture transaction/receipt/raw pre/post evidence before reverting each snapshot, persist partial failures, and stop its exact process before C or another run. No C Anvil is authorized by this lease; its source run instructions need equivalent resource controls first.
+- Heavy-run slot: **Claude EFS v2 Dev owns one SERIAL C-build → B-diagnostic-run queue, September 13 01:45–02:15 UTC**, releasing earlier when finished. The previous queue was released at 01:18: C compiled but exceeded normal runtime size, and oversized test deployment executed zero semantic tests; B stalled and retained partial evidence. C now starts from decomposition `731200d`; B uses receipt-polling repair `a16d7d4` over compiled contracts `dcc7b94`. One separately pinned repair cycle is allowed. Use at most two compiler workers and normal runtime/initcode/block limits: the previous test-only raised limit is NOT authorized for this queue and gave no passing evidence. No concurrent A/B/C heavy runs; B may run first if C source repair is pending and no compiler remains. Use the same run-owned scratch roots `/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b` and sibling `lab-c`, <2 GB each / <15 GB overall, 50 GB free reserve. Codex checked 265 GiB free and no matching compiler/Anvil process at 01:44 UTC. Record actual PIDs and stop by expiry; watchdogs: 480 s build, 300 s tests, 900 s B script maximum (receipt polling 30 s). B Anvil remains diagnostic: history 256, owned cache, free loopback port, 30M gas limit, no traces/dumps, raw evidence before snapshot revert, partial failures retained. No C Anvil yet. Do not overwrite retained `measure1-partial.json`.
 - Next handoff: Claude acknowledged the serial queue at 00:57:47 UTC and the experiment answers below by 01:00. C's initial Store composition fails via-IR stack depth in the import path; repair EFS-owned code without silently annotating the pinned vendor. B's measurement repair retains raw evidence before snapshot reverts. SDK PM sealed neutral expectations at `f060524` (blob `a9d6c9afb5f51d0f786e006b7b5df667ae69710e`) before candidate inspection, and is implementing in `planning-warroom-oracle`, branch `codex/efs-warroom-oracle`, owned `lab-oracle/` only. Missing declared encodings remain unsupported: Claude should publish a pinned public Action/PublicationIntent, EIP-712 domain/framing and signature-vector supplement, not point the checker at candidate helper code. Codex reviews declaration-only metadata and raw evidence. No additional broad design round is needed.
 
 | Current owner / contact | Exclusive write scope and next result |
@@ -208,6 +208,38 @@ the C-build → B-diagnostic queue above:
 The SDK PM is implementing the independent checker in owned
 `planning-warroom-oracle` / `lab-oracle/`; candidate verifier code is excluded
 from its inputs. Claude owns candidate fixes, Codex owns integration/review.
+
+**01:45 follow-up:** the source-ready C decomposition and B receipt-polling
+repair have the renewed queue above; root's independent reviews run in
+parallel and do not hold first compilation. Publish the missing public
+profile supplement before asking the independent checker to interpret action
+commitments. Keep old replay-domain diagnostics distinct from later fixed
+profiles. Earlier questions about shared Evidence shape, mandatory by-Type /
+by-author lists, and A ownership were already answered at 00:08: shared closure
+for the probe, both lists included, A retained by Codex. No James ruling is
+needed to proceed. After this queue, hand back exact compact results and
+source pins; source-only repairs/declared profile work can continue without
+opening another chain.
+
+**Independent review return:** C `731200d` has three test-split defects:
+restore `EncodedLengths.wrap` in the permissive controls, mark the two probe
+builders `view` rather than `pure`, and perform the second-attach check from
+the actual Fixture deployer (test an unauthorized caller separately). The
+library extraction revealed no new authority/storage bypass in static review;
+normal-limit compilation/execution and linked-library identity are still owed.
+B `a16d7d4` is eligible for the leased private diagnostic run, but its 30-second
+timeout is not universal: external watchdog and actual process-exit checks
+remain required. Inspect every mismatch, error selector and unchanged-state
+flag; exit zero alone does not assert those fields.
+
+**Checker handoff:** SDK's first checker `0e19d27` is retained on
+`codex/efs-warroom-oracle`; root reproduced 33/33 synthetic tests and published
+the code branch without merging it into main. Its narrow scope and remaining
+gaps are in [[oracle-implementation-plan#Completed handoff]]. SDK now owns a
+bounded extension in the same `lab-oracle/` path to independently decode
+supplied raw RPC bytes, retaining the separate unauthenticated provenance
+qualification described in [[oracle-boundary#Execution clarification — September 13]].
+No full workflow or authenticated-chain pass is inferred from these tests.
 
 ## 7. What James receives
 
