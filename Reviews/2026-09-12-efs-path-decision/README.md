@@ -112,6 +112,31 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**06:15 completed receipt run / light review handoff:** root ran exact B
+source `df23bbb` at 06:11:30–06:11:45 UTC: **18/18 cells, 173 transactions,
+exit 0, no candidate mismatches or reported failure**. The reviewed runner
+retains intentional reverts separately. Packet and bounded result report
+are pushed on `codex/efs-warroom-b-run` at `5960336`, under
+`lab-b/evidence/measurement-20260913T061130Z.json` and
+`lab-b/measurement-results-20260913.md`. SHA-256 is
+`b2229f3dcef88649125e12fa9946ddfad034e8b3499eaf6b71e58e065957fd07`.
+Anvil 34087 and runner 34086 are confirmed gone; scratch is 13 MiB.
+The root heavy slot is released early. Any next build/chain needs a new
+explicit handoff; do not replay the expired Fable reservation below.
+
+Independent packet review is active; do not treat self-check success as a
+candidate verdict. SDK returned its separately frozen seven-getter
+supplement at local `802ffe8` (profile frozen first at `6ab1d80`), with root
+reproduction of **160/160 Node tests** using the existing ethers dependency.
+Its independent code review is active; no real B interpretation report exists
+yet, and the supplement is not pushed/adopted pending review. The next
+continuation integrates those two reviews, runs the independently pinned
+interpretation if eligible, and addresses B's already named source-origin /
+native-import and exact Type identity gaps. C's reviewed receipt packet and
+the earlier signature checker are completed inputs, not tasks to restart.
+No architecture winner, feature waiver, production readiness or proof claim
+follows from this run. See [[road-b-review]] for the scoped result.
+
 **06:10 verified execution checkpoint:** the isolated B copy is now
 `df23bbb` (same candidate Core, runner fixes through `155df3a`, and one
 Unicode-prefix correction to an existing test assertion message). Root's

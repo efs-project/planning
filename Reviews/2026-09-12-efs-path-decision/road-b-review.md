@@ -123,3 +123,31 @@ failure-marked watchdog/signals and early deployment evidence attachment.
 Independent re-review precedes the actual chain run. These tests do not
 close source-origin/import authority, exact Type identity, replay scope,
 full Files parity or independent proof gates, and supply no new gas result.
+
+## Joined receipt run completed — September 13, 06:15 UTC
+
+The approved isolated runner at `df23bbb` completed its full 18-cell plan
+at 06:11:30–06:11:45 UTC (exit 0, 173 retained transactions, no skipped
+cells, no reported failure, zero candidate comparison mismatches).
+`codex/efs-warroom-b-run` commit `5960336` retains the raw packet and
+`lab-b/measurement-results-20260913.md`; packet SHA-256 is
+`b2229f3dcef88649125e12fa9946ddfad034e8b3499eaf6b71e58e065957fd07`.
+Root independently checked both runner and Anvil PIDs gone. The heavy
+slot is released; independent packet consistency review is still pending.
+
+Useful new separation: the simple quote paid stateless point read costs
+51,147 gas; the former 137,883 figure includes the test consumer's own
+storage writes. The deeper joined typed Pair/Quote reader costs 123,047
+for A-first selection, so neither figure is a universal file-read price.
+Joined signed A1 creation is 1,608,502 gas; A2 edit is 654,289. The joined
+move/remove/restore and folder-plus-tag selection run against that same
+graph. Fresh printable-label creation costs 1,422,724 versus the 1,216,793
+hash-only diagnostic; existing-label variants have separately charged setup
+and different author assertions. These are measured rows, not matched
+fuller-EFS/MUD premiums or proof that every file operation is now complete.
+
+The SDK richer-observation extension was frozen before implementation and
+returned separately at `802ffe8`; root reproduced all 160 tests. Its review
+is pending, old oracle files are unchanged, and no real-packet interpretation
+has been issued. Candidate self-checks, independent input consistency and
+authenticated chain-state proof remain three different evidential levels.
