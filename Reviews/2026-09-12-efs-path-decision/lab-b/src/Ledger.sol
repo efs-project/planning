@@ -80,7 +80,7 @@ contract Ledger {
 
     // ---- durable rows (slot counts are ESTIMATED fresh slots per row)
     struct RecordCell { bytes32 typeId; uint256 meta; } // meta: firstAdmission u48@0 | length u32@48 | occurrences u32@80   (2 + body words)
-    struct AdmissionRow { uint256 meta; bytes32 a; bytes32 b; } // meta: kind u4@0 | leaf u16@4 | publication u48@20 | bindingOrd u48@68 | expectedRevision u32@116 | withdrawn u1@148
+    struct AdmissionRow { uint256 meta; bytes32 a; bytes32 b; } // meta: kind u4@0 | leaf u16@4 | publication u48@20 | bindingOrd u48@68 | expectedRevision u32@116 | withdrawn u1@148 | activation u16@152 (publish/reuse: registry policy row that admitted it)
     //   a: publish=bodyHash, reuse=recordId, bind=target, create=salt, withdraw=bytes32(admission); b: publish=typeId   (2, or 3 for publish, 1 for unbind)
     struct HeadRow { uint256 meta; bytes32 target; } // meta: state u8@0 | revision u32@8 | admission u48@40 | targetKind u8@88 | tombstoneCause u8@96 | leaf u16@104 (0) | prev u48@120 | bindingOrd u48@168   (2)
     struct PositionCell { bytes32 purpose; bytes32 subject; bytes32 role; } // (3, once per position, shared by all authors)
@@ -103,8 +103,8 @@ contract Ledger {
         address author;
         uint64 nonce;
         uint64 deadline;
-        uint8 v; // 0 = no signature (contract-author source: chain-state witness)
-        uint8 grade; // 1 = source signature verified here; 0 = unverified witness, retained as claimed
+        uint8 v; // 0 = no signature (contract-author source: chain-state witness) — UNSUPPORTED at import, see importPublication
+        uint8 grade; // 1 = source signature verified here. 0 is never retained: an unverified witness is refused (E_SOURCE_UNSUPPORTED)
     }
 
     // ------------------------------------------------------------------------ constants
@@ -180,6 +180,8 @@ contract Ledger {
     error E_INTENT(uint256 field);
     error E_SOURCE_SIGNATURE();
     error E_DESTINATION_AUTH();
+    error E_SOURCE_UNSUPPORTED(); // native (contract-author) source packet: no verifiable witness here — fail closed
+    error E_NO_BASIS(uint64 ordinal); // acceptanceBasis asked for a row that is not a publish/reuse admission
 
     constructor(ITypeRegistry registry_, bytes32 realmId_) {
         registry = registry_;
@@ -243,9 +245,18 @@ contract Ledger {
     /// Import (pre-seal check 3). The source signature is verified over the SOURCE context
     /// and retained as evidence; it authorizes nothing here. Destination authority is a
     /// separate signature by the same EOA under THIS Realm's context, or the destination's
-    /// contract-author path (msg.sender == author, empty dstSig). Destination acceptance, CAS
-    /// and index effects then run exactly as for a local publication. Subject ids minted by
-    /// the imported actions keep the origin-qualified SOURCE principal.
+    /// native path (msg.sender == author, empty dstSig). Destination acceptance (under THIS
+    /// Realm's current policy), CAS and index effects then run exactly as for a local
+    /// publication. Subject ids minted by the imported actions keep the verified SOURCE principal.
+    ///
+    /// Native-source packets (src.v == 0: a contract author at the source, whose only proof is a
+    /// chain-state witness) are UNSUPPORTED here and fail closed with E_SOURCE_UNSUPPORTED: this
+    /// Realm cannot verify such a witness, and an unverified claim must not mint or control a
+    /// subject under the claimed principal (REPAIR.md R1). This is a temporary prototype limit —
+    /// not a waiver of portability and not an invented source proof. Lifting it needs a declared,
+    /// verifiable source-witness format (chain id + Realm deployment + account + finalized-state
+    /// proof of the historical admission), which this lab does not build. Local native
+    /// publication (execute / the convenience entrypoints) is unchanged.
     function importPublication(
         SourceEvidence memory src,
         Action[] memory actions,
@@ -264,11 +275,10 @@ contract Ledger {
             if (src.sourcePrincipal != Keys.principal(src.author)) revert E_SOURCE_SIGNATURE();
             src.grade = 1;
         } else {
-            // Contract-author source: a chain-state witness this Realm cannot check. REVIEW MAJOR-1
-            // (deferred to the post-measurement repair): derive sourcePrincipal from a retained
-            // sourceChainId + coreCodeCommitment + author instead of accepting it as claimed, so a
-            // squatter can only namespace subjects under its own address.
-            src.grade = 0;
+            // Contract-author source: a chain-state witness this Realm cannot verify (REVIEW
+            // MAJOR-1). Fail closed before any write: nothing retained, minted or bound under a
+            // bare claim. See the NatSpec above for why this is a limit, not a waiver.
+            revert E_SOURCE_UNSUPPORTED();
         }
         Pub memory p;
         p.author = src.author;
@@ -445,7 +455,7 @@ contract Ledger {
         if (x.purpose != 0 || x.subject != 0 || x.role != 0 || x.target != 0 || x.expectedRevision != 0 || x.salt != 0) {
             revert E_SHAPE(leaf);
         }
-        (bool registered, address acceptor, bytes32 codehash, uint8 refCount) = registry.typeInfo(x.typeId);
+        (bool registered, address acceptor, bytes32 codehash, uint8 refCount, uint16 activation) = registry.typeInfo(x.typeId);
         if (!registered) revert E_UNKNOWN_TYPE(x.typeId);
         bytes32 id;
         bytes memory bodyBytes;
@@ -487,7 +497,9 @@ contract Ledger {
             cell.meta = meta + (uint256(1) << 80); // one more occurrence; Record row unchanged otherwise
         }
         AdmissionRow storage ar = _admission[p.ord];
-        ar.meta = uint256(x.kind) | (leaf << 4) | (uint256(p.publication) << 20);
+        // the policy row that admitted this action is recorded per admission (no extra slot):
+        // historical reads report it instead of today's policy (acceptanceBasis)
+        ar.meta = uint256(x.kind) | (leaf << 4) | (uint256(p.publication) << 20) | (uint256(activation) << 152);
         ar.a = x.bodyHashOrRecordId;
         if (x.kind == PUBLISH) ar.b = x.typeId;
         ef.kind = x.kind;
@@ -653,16 +665,36 @@ contract Ledger {
     }
 
     // ------------------------------------------------------------------------ commitments a signer computes
-    /// Running hash over (typeId, pinned acceptor codehash, registry epoch) of every publish/reuse
-    /// action, in order (ruling E.B.4: a rule change invalidates unsent signatures).
+    /// Running hash over (typeId, ACTIVE acceptor codehash, registry epoch) of every publish/reuse
+    /// action, in order (ruling E.B.4: a rule change invalidates unsent signatures). The codehash
+    /// is the Realm's current policy for the Type, not the Type's declared rule: a policy
+    /// activation changes the profile (and moves the epoch) without changing the Type id.
     function acceptanceProfileOf(Action[] memory actions) public view returns (bytes32 profile) {
         uint64 epoch = registry.epoch();
         for (uint256 i; i < actions.length; ++i) {
             uint8 k = actions[i].kind;
             if (k != PUBLISH && k != REUSE) continue;
-            (,, bytes32 codehash,) = registry.typeInfo(actions[i].typeId);
+            (,, bytes32 codehash,,) = registry.typeInfo(actions[i].typeId);
             profile = keccak256(abi.encode(profile, actions[i].typeId, codehash, epoch));
         }
+    }
+
+    /// The acceptance basis that admitted a publish/reuse admission: its Type and the registry
+    /// policy row (activation index, acceptor, codehash, epoch, block) in force at that admission.
+    /// Read from the admission row, never re-derived from today's policy. Reverts for other kinds.
+    function acceptanceBasis(uint64 ordinal)
+        external
+        view
+        returns (bytes32 typeId, uint16 activation, address acceptor, bytes32 acceptorCodehash, uint64 epoch, uint64 activatedAt)
+    {
+        AdmissionRow storage ar = _admission[ordinal];
+        uint256 m = ar.meta;
+        uint8 kind = uint8(m & 0xF);
+        if (kind == PUBLISH) typeId = ar.b;
+        else if (kind == REUSE) typeId = _record[ar.a].typeId;
+        else revert E_NO_BASIS(ordinal);
+        activation = uint16(m >> 152);
+        (acceptor, acceptorCodehash, epoch, activatedAt) = registry.activation(typeId, activation);
     }
 
     function indexObligations() public view returns (bytes32) {

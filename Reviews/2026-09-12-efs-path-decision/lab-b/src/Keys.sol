@@ -27,6 +27,14 @@ library Keys {
     // where realmOrigin = keccak256(abi.encode(chainId, coreCodeCommitment)). A contract address is
     // not unique across Realms; an EOA key is, so EOA principals stay the padded address (c0 form).
     bytes32 internal constant DOM_PRINCIPAL = keccak256("efs2/principal/1");
+    // Exact Type id (lab-new, authority repair 2026-09-13): keccak256(abi.encode(DOM_TYPE, shape,
+    // keccak256(abi.encode(refTypes)), ruleId)). The id commits to the Type's descriptor — an opaque
+    // shape commitment, the checked-reference Types in order, and the declared rule identity (the
+    // acceptor codehash at registration; 0 = no rule) — so the same descriptor yields the same id on
+    // every Realm and a changed descriptor is a different Type, never a re-registration. The lab has
+    // no schema language: `shape` is whatever the registrant commits to (the lab uses the Type's
+    // name hash). No permanent bytes are claimed for the tag or the encoding.
+    bytes32 internal constant DOM_TYPE = keccak256("efs2/type/1");
 
     // Posting-list kinds reused from the fuller model (IndexKeys.occurrenceKeys / StateKernel):
     //   1  = by-Type list                                                   typeId = T, valueKey = 0
@@ -54,6 +62,12 @@ library Keys {
     /// The principal an account presents at native ingress on the Realm with `realmOrigin`.
     function principalFor(address account, bytes32 realmOrigin) internal view returns (bytes32) {
         return account.code.length != 0 ? contractPrincipal(realmOrigin, account) : principal(account);
+    }
+
+    /// Exact Type id from its descriptor (see DOM_TYPE). A clean reader recomputes it from the
+    /// registry's retained descriptor; the registry refuses any registration whose id exists.
+    function typeId(bytes32 shape, bytes32[] memory refTypes, bytes32 ruleId) internal pure returns (bytes32) {
+        return keccak256(abi.encode(DOM_TYPE, shape, keccak256(abi.encode(refTypes)), ruleId));
     }
 
     function record(bytes32 typeId, bytes memory data) internal pure returns (bytes32) {

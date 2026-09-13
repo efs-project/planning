@@ -178,7 +178,7 @@
         "role": "stateless twin of Consumer for the 32-byte/41-byte cells: commitQuote / commitHead / commitList / commitHistory (distinct selectors from Consumer)"
       }
     },
-    "authorityGraph": "Ledger.admin = deployer (setIndexModule only); IndexModule.admin = deployer (declareOptional, bumpGeneration); TypeRegistry.admin = deployer (register, setBindingRefType). No other privileged surface; no upgrade path.",
+    "authorityGraph": "Ledger.admin = deployer (setIndexModule only); IndexModule.admin = deployer (declareOptional, bumpGeneration); TypeRegistry.admin = deployer (register — refuses an existing derived id; activate — appends a policy row; setBindingRefType). No other privileged surface; no upgrade path.",
     "setupReceipts": [
       "setIndexModule(index)",
       "register QUOTE (MockAcceptor, no refs)",
@@ -199,7 +199,8 @@
         "consequence": "no receipt observed"
       }
     },
-    "setupEvidence": "every setup transaction carries the literal eth_sendRawTransaction / eth_getTransactionReceipt / eth_getBlockByHash / eth_getTransactionByHash envelopes (report.setupTransactions); registry epoch and principals are retained eth_call replies (report.setupRaw)"
+    "setupEvidence": "every setup transaction carries the literal eth_sendRawTransaction / eth_getTransactionReceipt / eth_getBlockByHash / eth_getTransactionByHash envelopes (report.setupTransactions); registry epoch and principals are retained eth_call replies (report.setupRaw)",
+    "registrationNote": "authority repair 2026-09-13 (REPAIR.md R2): register(shape, acceptor, refs) RETURNS a derived id (Keys.typeId); the symbolic names below are shape commitments, not ids. script/measure.mjs is NOT yet patched to read the returned ids (TODO.md §H), so this manifest's registration rows describe the intended, unrun setup."
   },
   "fixtures": {
     "payloadControls": {
@@ -240,7 +241,8 @@
         "unknown": "keccak values not computed without a build/node run",
         "consequence": "ids are symbolic until the script prints them"
       },
-      "LABEL": "keccak256(utf8 'lab/type/label/1'); acceptor LabelAcceptor; 0 refs; body = exact UTF-8 bytes 1..255; record id = keccak256(abi.encode(DOM_RECORD, LABEL, keccak256(bytes))) - derivable from a FOLDER position's role"
+      "LABEL": "keccak256(utf8 'lab/type/label/1'); acceptor LabelAcceptor; 0 refs; body = exact UTF-8 bytes 1..255; record id = keccak256(abi.encode(DOM_RECORD, LABEL, keccak256(bytes))) - derivable from a FOLDER position's role",
+      "idDerivation": "typeId = keccak256(abi.encode(keccak256('efs2/type/1'), shape, keccak256(abi.encode(refTypes)), ruleId)); shape = the keccak256(utf8 name) listed per Type; ruleId = acceptor runtime codehash at registration (0 for no acceptor); refTypes are the derived ids of the listed reference Types (ITEM before PAIR before QUOTE_J). Registration of an existing id reverts E_TYPE_EXISTS; a later policy activation (TypeRegistry.activate) changes the enforcing acceptor without changing the id."
     },
     "semanticMap": {
       "ITEM_ETH / ITEM_USDC": "ITEM bodies abi.encode(uint256 1) / abi.encode(uint256 2), admitted with PAIR_ETH_USDC in ONE native batch by actorA (operator) in step 1",
@@ -377,6 +379,24 @@
         "status": {
           "unknown": "later gate: requires same-guarantee arms that each remove one capability; this lab has one arm and does not compute an interaction term",
           "consequence": "no representation-vs-feature attribution can be claimed from this run"
+        }
+      },
+      {
+        "cell": "policy-activation",
+        "fixture": "quote",
+        "logical": "activate fixture rule v2 (StrictQuoteAcceptor, cap 2_500_000_000) for QUOTE after a v1 admission of 3_000_000_000",
+        "physical": [
+          "TypeRegistry.activate(QUOTE, StrictQuoteAcceptor) -> activation 2",
+          "then: Actor.publish(QUOTE, 3_000_000_001) -> E_REJECTED; Actor.execute([reuse QUOTE r_high]) -> E_REJECTED; Ledger.acceptanceBasis(v1 admission) -> row 1 (MockAcceptor codehash, epoch at registration); Ledger.acceptanceBasis(new compliant publish) -> row 2"
+        ],
+        "payer": "account 0 (registry admin)",
+        "expected": "registry epoch +1; typeInfo(QUOTE) reports row 2; descriptor(QUOTE) unchanged; the v1-era record retained with occurrences 1; earlier admission basis row 1; a signature made before the activation is refused E_INTENT",
+        "gas": {
+          "unknown": "not run; ESTIMATED 2 fresh slots + 2 rewrites + 1 event for activate (REPAIR.md cost table)"
+        },
+        "status": {
+          "unknown": "not scripted (script/measure.mjs untouched; TODO.md §H)",
+          "consequence": "no receipt for the activation row yet"
         }
       }
     ],
@@ -669,6 +689,11 @@
         "gate": "No row is a matched substitute for the fuller Files control (hash-placement diagnostics) until labels and the joined journey are in one matched guarantee profile.",
         "unknown": "labels are a client convention here; folder/tag display semantics and mandatory names are open",
         "consequence": "no Files-create parity claim"
+      },
+      {
+        "gate": "Native-source (contract-author) import is UNSUPPORTED after the authority repair: importPublication reverts E_SOURCE_UNSUPPORTED for src.v == 0. A verifiable source witness (chain id + Realm deployment + account + finalized-state proof) is required to lift it; none is designed here.",
+        "unknown": "no witness format exists; contract-author portability cannot be priced",
+        "consequence": "sdk-fixture step 9 for AUTHOR_B reports UNSUPPORTED, not success; this is a limit, not a waiver"
       }
     ],
     "failureRows": {
@@ -712,6 +737,18 @@
           "row": "label hash-only retrieval",
           "setup": "JoinedConsumer.readLabel(position) after a hash-only create",
           "expectedError": "JoinedConsumer.LabelUnavailable"
+        },
+        {
+          "row": "refused re-registration",
+          "setup": "TypeRegistry.register(QUOTE_SHAPE, MockAcceptor, []) a second time (identical descriptor => identical derived id)",
+          "expectedError": "TypeRegistry.E_TYPE_EXISTS",
+          "status": "not scripted (TODO.md §H)"
+        },
+        {
+          "row": "unsupported native-source import",
+          "setup": "Ledger.importPublication with src.v == 0 (any claimed sourcePrincipal), with or without a destination signature",
+          "expectedError": "E_SOURCE_UNSUPPORTED",
+          "status": "not scripted (TODO.md §H); test/Falsify.t.sol F1a/F1b and test/LedgerImport.t.sol cover it"
         }
       ],
       "status": {
@@ -786,7 +823,7 @@
   },
   "reads": {
     "basis": "each consumer read pins the receipt block; every probe and raw harvest passes an explicit block number (no 'latest' reads in evidence)",
-    "executionIdentity": "Ledger codehash + IndexModule (address, codehash) + TypeRegistry epoch; cursors bind indexGeneration/rulesEpoch/coreCodeCommitment",
+    "executionIdentity": "Ledger codehash + IndexModule (address, codehash) + TypeRegistry epoch; cursors bind indexGeneration/rulesEpoch/coreCodeCommitment; Type ids are derived from descriptors (Keys.typeId) and each publish/reuse admission records the policy row that admitted it (Ledger.acceptanceBasis)",
     "publicDecoder": "Ledger raw getters (record, admission, evidence, head, bindingPosition, positionCell, counts, extsload); IndexModule postingHead/postingWord/postingAt/coverage; LensReader resolve/resolveNoTiebreak/list/history",
     "cursorSemantics": "Cursor{basisAdmission, indexGeneration, rulesEpoch, coreCodeCommitment, scopeKey, lensHash, position, lensIndex, rawIndex, selectedSoFar}; Page{items, scanned, hydrations, rawTotal, selectedSoFar, status UNKNOWN|PARTIAL|COMPLETE, mutated, next}; mutated == true marks a mixed-basis page which must not be treated as COMPLETE by any caller",
     "independentExpected": {
@@ -827,8 +864,8 @@
     "mutationSeeds": "test_signature_binds_every_field (name, target, subject, expectedRevision, order, salt, realm, code, profile, obligations, nonce, deadline); test_fresh_reader_reconstructs_identical_digest_with_negatives (discriminator, typeId)",
     "proofGrade": {
       "signedIngress": "signature verified on-chain and re-verifiable from state (designed, untested)",
-      "nativeIngress": "chain-state witness only; grade 0; not verified by this lab",
-      "import": "source signature verified over the source domain; destination authorization separate (designed, untested)",
+      "nativeIngress": "local native ingress: chain-state witness only; not verified by this lab. Native-source IMPORT is refused (E_SOURCE_UNSUPPORTED), so no grade-0 SourceEvidence row can exist",
+      "import": "source signature verified over the source domain; destination authorization separate; destination acceptance re-run under the destination registry's CURRENT policy row while the source basis (profile, grade, realm) is retained verbatim (designed, untested)",
       "listingAcrossMutation": "diagnostic only (see operations.diagnostics)",
       "reconstruction": "candidate self-check, not independent",
       "statelessConsumer": "commitments logged and replayed; verification of Pair -> ITEMs and author kind happens on-chain in the consumer (designed, untested)",

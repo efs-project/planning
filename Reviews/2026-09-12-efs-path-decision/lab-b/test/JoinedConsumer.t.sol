@@ -12,8 +12,10 @@ import {LabBase} from "./LabBase.sol";
 /// sdk-fixture steps 1–6 with the exact fixture values, read through the stateless test-only
 /// measurement consumer; the stateless twin of the storing Consumer; the joined acceptor.
 contract JoinedConsumerTest is LabBase {
-    bytes32 internal constant QUOTE_J = keccak256("lab/type/quote-joined/1");
-    bytes32 internal constant LABEL = keccak256("lab/type/label/1");
+    bytes32 internal constant QUOTE_J_SHAPE = keccak256("lab/type/quote-joined/1");
+    bytes32 internal constant LABEL_SHAPE = keccak256("lab/type/label/1");
+    bytes32 internal QUOTE_J; // exact ids, derived by the registry (REPAIR.md R2)
+    bytes32 internal LABEL;
     bytes32 internal constant MARKETS = keccak256("/markets");
     bytes internal constant NOTE_BYTES = hex"7265666572656e63652071756f7465"; // UTF-8 "reference quote"
     uint256 internal constant M_A1 = 2_500_000_000;
@@ -45,8 +47,8 @@ contract JoinedConsumerTest is LabBase {
         labelAcceptor = new LabelAcceptor();
         bytes32[] memory pairRef = new bytes32[](1);
         pairRef[0] = PAIR;
-        registry.register(QUOTE_J, address(quoteAcceptor), pairRef);
-        registry.register(LABEL, address(labelAcceptor), new bytes32[](0));
+        QUOTE_J = registry.register(QUOTE_J_SHAPE, address(quoteAcceptor), pairRef);
+        LABEL = registry.register(LABEL_SHAPE, address(labelAcceptor), new bytes32[](0));
         joined = new JoinedConsumer(ledger, lens, QUOTE_J, PAIR, ITEM, LABEL);
         stateless = new StatelessConsumer(lens);
     }

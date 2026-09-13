@@ -14,8 +14,9 @@ import {LabBase} from "./LabBase.sol";
 /// republished, existing omitted; paid retrieval with a hash check. A client-convention
 /// filename-retention baseline, NOT mandatory Files semantics.
 contract LabelTypeTest is LabBase {
-    bytes32 internal constant LABEL = keccak256("lab/type/label/1");
-    bytes32 internal constant QUOTE_J = keccak256("lab/type/quote-joined/1");
+    bytes32 internal constant LABEL_SHAPE = keccak256("lab/type/label/1");
+    bytes32 internal constant QUOTE_J_SHAPE = keccak256("lab/type/quote-joined/1");
+    bytes32 internal LABEL; // exact id, derived by the registry (REPAIR.md R2)
 
     LabelAcceptor internal labelAcceptor;
     JoinedConsumer internal joined;
@@ -23,8 +24,10 @@ contract LabelTypeTest is LabBase {
     function setUp() public override {
         super.setUp();
         labelAcceptor = new LabelAcceptor();
-        registry.register(LABEL, address(labelAcceptor), new bytes32[](0));
-        joined = new JoinedConsumer(ledger, lens, QUOTE_J, PAIR, ITEM, LABEL);
+        LABEL = registry.register(LABEL_SHAPE, address(labelAcceptor), new bytes32[](0));
+        // QUOTE_J is not registered in this probe; the consumer's quote Type is never read here,
+        // so the shape commitment stands in for the (unregistered) id.
+        joined = new JoinedConsumer(ledger, lens, QUOTE_J_SHAPE, PAIR, ITEM, LABEL);
     }
 
     function ok(bytes memory s) internal view returns (bool) {

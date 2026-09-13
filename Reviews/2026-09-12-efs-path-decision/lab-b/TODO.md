@@ -91,3 +91,15 @@ Written under another worker's compiler lease: no `forge`, `solc`, `anvil`, `nod
 15. `StatelessConsumer` method selectors (`commitQuote` …) are distinct from `Consumer.readQuote` on purpose; the existing checker profile pins `Consumer` selectors and would otherwise classify the twin's transactions as conflicting `readQuote`/`readList` calls.
 
 **Still not done (explicit).** sdk-fixture steps 8–10 (offline clean reader, import into a fresh destination, rule v2 / account drift); files-journey J4–J6 beyond what step 6 covers; the capability ablation; any independent oracle vectors for the new commitments; storage tracing; the candidate (a) dictionary probe in `LABELS.md`.
+
+## H. Authority repair (2026-09-13, lab-b-authority) — UNRUN
+
+Scope: the 06:50 checkpoint (native-import/source-origin authority; exact Type identity vs. separate Realm acceptance policy). Findings in `FALSIFY.md` (F1 unsafe, F2 safe, F3 unsafe, F4 unsafe); repair in `REPAIR.md`; profile deltas in `PROFILE.md` "Changed after dcc7b94". No `forge`/`solc`/`anvil`/`node`/`npm` was run; nothing committed.
+
+**Changed:** `src/Keys.sol` (+`DOM_TYPE`, `typeId`), `src/Interfaces.sol` (`typeInfo` 5-way, `activation`), `src/TypeRegistry.sol` (rewritten: derived ids, refused re-registration, append-only policy rows, `descriptor`/`activation`/`typeIdOf`), `src/Ledger.sol` (`E_SOURCE_UNSUPPORTED` fail-closed for `src.v == 0`; policy row index in `AdmissionRow.meta` bit 152; `acceptanceBasis`; `E_NO_BASIS`), `test/LabBase.sol` (ids derived in `setUp`), `test/LedgerMatrix.t.sol` (re-registration → new Type + `activate`), `test/LedgerImport.t.sol` (grade-0 test replaced by fail-closed), `test/LabelType.t.sol`, `test/JoinedConsumer.t.sol` (derived `LABEL`/`QUOTE_J`). New: `test/Falsify.t.sol` (7 tests), `FALSIFY.md`, `FALSIFY.phase1.t.sol.txt` (the Phase 1 text; compiles against `e77f36d` only), `REPAIR.md`. Expected suite: 39 tests.
+
+**Superseded here:** §B.6 (grade-0 retained as claimed → now refused), §F MAJOR-1 (applied as fail-closed, not as a derived principal — no source proof is invented), the TypeRegistry "re-registration is allowed on purpose" note. §F MAJOR-2 (replay domain) stays FUTURE.
+
+**Not done on purpose:** `script/measure.mjs` untouched. It passes name hashes as Type ids (line 117; 48 uses) and ignores `register`'s returned derived ids (lines 1015–1022), so it would fail with `E_UNKNOWN_TYPE` against this source; the runner patch (read ids back via `typeIdOf`/the `register` return, deploy `JoinedConsumer` after registration) and the two new receipt rows (policy activation, refused re-registration; described in `MANIFEST.draft.json`) are owed to whoever runs it. `vectors/profile-b.json` remains the `dcc7b94` vector.
+
+**Compile risks (desk-checked):** see `REPAIR.md` "Compile risks" — calldata→memory array copy in `register`; `try` without `returns` on value-returning externals; return-name shadowing avoided (`activation_`, `epoch_`); `LabBase` ids as storage (no `pure` reader); struct-literal field order; new destructuring arities (5/6/5/4); `LedgerMatrix` imports `MockAcceptor`.

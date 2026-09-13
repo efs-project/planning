@@ -38,12 +38,23 @@ interface IIndexModule {
     function onAdmission(uint64 publication, Effect[] calldata effects) external;
 }
 
-/// @notice What the Ledger needs from the Type registry.
+/// @notice What the Ledger needs from the Type registry. Two layers (authority repair
+///         2026-09-13): the Type's IDENTITY (descriptor: shape, refTypes, declared rule) is
+///         immutable and the id is derived from it; the Realm's ACCEPTANCE POLICY (which
+///         acceptor enforces the Type now) is an append-only activation history per Type.
 interface ITypeRegistry {
+    /// Current policy for a Type plus the identity's refCount: `acceptor`/`acceptorCodehash` are
+    /// the ACTIVE activation (may differ from the declared rule), `activation` its 1-based index.
     function typeInfo(bytes32 typeId)
         external
         view
-        returns (bool registered, address acceptor, bytes32 acceptorCodehash, uint8 refCount);
+        returns (bool registered, address acceptor, bytes32 acceptorCodehash, uint8 refCount, uint16 activation);
+
+    /// One row of the append-only policy history of a Type (1-based; reverts when absent).
+    function activation(bytes32 typeId, uint16 index)
+        external
+        view
+        returns (address acceptor, bytes32 acceptorCodehash, uint64 epoch, uint64 activatedAt);
 
     /// Expected typeId per body reference slot (0 = any registered type).
     function refTypes(bytes32 typeId) external view returns (bytes32[] memory);

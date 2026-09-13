@@ -21,10 +21,17 @@ abstract contract LabBase {
     Vm internal constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     bytes32 internal constant REALM = keccak256("lab/realm/1");
-    bytes32 internal constant QUOTE = keccak256("lab/type/quote/1"); // 32-byte uint256 body, acceptor-gated
-    bytes32 internal constant BINARY = keccak256("lab/type/binary/1"); // raw bytes, no acceptor
-    bytes32 internal constant ITEM = keccak256("lab/type/item/1");
-    bytes32 internal constant PAIR = keccak256("lab/type/pair/1"); // two leading checked refs to ITEM
+    // Shape commitments (the lab has no schema language: the Type's name hash stands in). Since the
+    // authority repair (REPAIR.md R2) a Type id is DERIVED from (shape, refTypes, declared rule
+    // codehash) by the registry, so the ids below are assigned in setUp, not constants.
+    bytes32 internal constant QUOTE_SHAPE = keccak256("lab/type/quote/1"); // 32-byte uint256 body, acceptor-gated
+    bytes32 internal constant BINARY_SHAPE = keccak256("lab/type/binary/1"); // raw bytes, no acceptor
+    bytes32 internal constant ITEM_SHAPE = keccak256("lab/type/item/1");
+    bytes32 internal constant PAIR_SHAPE = keccak256("lab/type/pair/1"); // two leading checked refs to ITEM
+    bytes32 internal QUOTE;
+    bytes32 internal BINARY;
+    bytes32 internal ITEM;
+    bytes32 internal PAIR;
     bytes32 internal constant HEAD = keccak256("efs2/purpose/head/1"); // (author, HEAD, subjectId) -> record
     bytes32 internal constant FOLDER = keccak256("efs2/purpose/folder/1"); // (author, FOLDER, folderId, nameHash) -> subject
     bytes32 internal constant TAG = keccak256("efs2/purpose/tag/1"); // (author, TAG, subject|record, concept) -> stance
@@ -62,13 +69,14 @@ abstract contract LabBase {
         eoaA = vm.addr(PK_A);
         eoaB = vm.addr(PK_B);
         bytes32[] memory none;
-        registry.register(QUOTE, address(acceptor), none);
-        registry.register(BINARY, address(0), none);
-        registry.register(ITEM, address(0), none);
+        QUOTE = registry.register(QUOTE_SHAPE, address(acceptor), none);
+        BINARY = registry.register(BINARY_SHAPE, address(0), none);
+        ITEM = registry.register(ITEM_SHAPE, address(0), none);
         bytes32[] memory twoItems = new bytes32[](2);
         twoItems[0] = ITEM;
         twoItems[1] = ITEM;
-        registry.register(PAIR, address(acceptor), twoItems);
+        PAIR = registry.register(PAIR_SHAPE, address(acceptor), twoItems);
+        require(QUOTE == Keys.typeId(QUOTE_SHAPE, none, address(acceptor).codehash) && PAIR == Keys.typeId(PAIR_SHAPE, twoItems, address(acceptor).codehash), "exact ids reconstructible");
     }
 
     // ---- fixtures
