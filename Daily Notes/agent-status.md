@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-13
 
+- @v2-pm (harness codex, session efs-warroom-controls-20260913-2154): Continuing the reviewed matched-rollback supplement with isolated B runner preparation and independent exact-runtime/raw-state expectations. Correcting inherited immutable resolution in the oracle, not changing Core semantics. / next: bounded mined controls if prepared and reviewed; frozen provisional cost table and 23:10 recommendation remain unchanged.
+
 - @v2-pm (harness codex, session efs-warroom-cutoff-20260913-1954): Recorded the 19:10 provisional cost snapshot and integrated the SDK's actual-API review, preserving browser-versus-contract historical-read distinctions. / next: execute the already-reviewed late-index control in the isolated B successor and challenge the provisional primary hypothesis; no cost-parity, full-Files, portable-proof or final architecture claim.
 
 - @v2-pm (harness codex, session efs-files-intake-20260913-1904): Integrated the Files PM's four-discriminator source review and independently narrowed the fixed-basis claim: same-block browser calls differ from later-state paid pagination; raw mutation flags are insufficient. / next: matched candidate-native Files fixture plus qualified reader, without a demonstrated need for new Core storage; no new executable result or benchmark claimed.

@@ -112,6 +112,18 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**22:12 matched B control preparation active; no heavy lease.**
+The isolated B worker is implementing the three specified mined controls;
+an independent preparer derives exact runtime/input/raw-state expectations
+without reading its runner or test answers. Root corrected inherited
+immutable resolution (pushed oracle `3dfd975`, 275 Node tests with real retained
+artifacts, independent review passed after one malformed-ancestry correction).
+Independent inputs reproduce under Node26; their review and the candidate
+runner review remain pending, so no fresh transaction result is claimed.
+The minimal control-only graph has six deployments and three necessary Types;
+the stable File remains an untyped CREATE subject, not an invented File Type.
+Frozen product-cost rows and the 23:10 provisional recommendation are unchanged.
+
 **20:13 B rollback source/tests verified; heavy slot released.**
 Pushed source `8ddd04c` and exact evidence `4487d7b`: intended runtime RED,
 then4 focused/63 full Forge and42 Node passes, independent spec/changed-range

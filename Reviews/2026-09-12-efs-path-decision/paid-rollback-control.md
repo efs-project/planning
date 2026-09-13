@@ -155,3 +155,42 @@ the matching C controls. This source/test result is not a mined matched pair,
 new transaction-price row, source-state proof or full-Files result. Before
 broader fixture reuse, the reviewer suggests one nonblocking calibration with
 a nonzero earlier HEAD-key poison to protect future final-key selectivity.
+
+## September 13, 22:05: minimal mined-control inputs sealed
+
+This supplement is a **new control setup**, not a replacement for the normal
+paid workload's deployment prices. Root selected three fresh graphs on one
+fresh chain (31337, genesis block0/timestamp1800000000): scale7, late-index,
+then zero-poison calibration. Deterministic Anvil mnemonic accounts2/3/4 are
+their separate deployers; account1 is A and submits its three attempts at
+transaction nonces0/1/2. These are local public test keys only.
+
+Each graph uses deployer nonces0–5 for TypeRegistry, QuoteAcceptor,
+MinBodyAcceptor(96), Ledger(registry, `keccak256("lab/realm/1")`),
+LateRefusingIndexModule(ledger, poison), and Actor(ledger). Transactions6/7/8
+register ITEM/PAIR/QUOTE_J; transaction9 attaches the index, and transaction10
+calls Actor's one native Items/Pair prefix. Thus independent pre-blocks are
+11/23/35, and the attempt/post blocks12/24/36. No prefatory mining or snapshot
+restoration is permitted. Any schedule drift requires new inputs, not an
+after-the-fact expected block.
+
+The three shapes are `lab/type/item/1` (no rule), `lab/type/pair/1` (two ITEM
+references, required MinBody96), and `lab/type/quote-joined/1` (one PAIR
+reference, required QuoteAcceptor). There are no additional policies or
+binding-reference restrictions. **No FILE/BINARY registration is needed:**
+the stable File is the existing untyped CREATE subject. This avoids an unused
+control artifact, not a feature sacrifice.
+
+Retain the shared fixture: Item ABI uint2561/2; Pair ABI (Item1ID, Item2ID,
+uint2561); A1 mantissa2500000000, scale6 or7, time1800000000, UTF8
+`reference quote`; subject salt `keccak256("joined/FILE_QUOTE")`; scope/name/
+concept hashes of `/swaps`, `eth-usdc`, `market`; purpose hashes of
+`efs2/purpose/head/1`, `efs2/purpose/folder/1`, `efs2/purpose/tag/1`.
+Intent deadline2000000000 exceeds every run timestamp. The late-index arm
+poisons A's final TAG binding key; other arms use zero poison.
+
+The independent preparer derives exact IDs, source/index obligations,
+signatures, constructors/runtime bytes and raw getter answers from these
+inputs and pinned production source/artifacts, not candidate runner output.
+All-byte comparisons remain mandatory. This is source/input preparation:
+no chain lease or successful mined control is yet claimed.
