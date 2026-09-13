@@ -1,0 +1,23 @@
+# Disposable Road C lab (Store-only MUD probe). Not a protocol artifact.
+# Nothing here has been compiled yet: no compiler lease has been granted (see TODO.md for the lease request).
+[profile.default]
+src = "src"
+test = "test"
+out = "out"
+libs = []
+solc_version = "0.8.30"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = true
+bytecode_hash = "none"
+cbor_metadata = false
+ffi = false
+fuzz = { runs = 16 }
+remappings = [
+  "@latticexyz/=vendor/@latticexyz/",
+]
+extra_output = ["evm.deployedBytecode.object", "evm.bytecode.object"]
+
+[profile.default.gas_reports]
+# forge test --gas-report is informational only; receipts in script/measure.mjs are the manifest source.

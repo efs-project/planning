@@ -1,0 +1,128 @@
+{
+  "$comment": "Run manifest DRAFT for the Road C Store-only MUD probe (lab-c). Follows run-manifest.md sections. Nothing has been compiled, deployed or measured: every gas value is ESTIMATED or UNKNOWN; receipts are produced by script/measure.mjs only after a lease. Unknown fields are explicit objects {value:null, unknown_reason, consequence}.",
+  "identity": {
+    "runId": "lab-c-store-only-DRAFT-2026-09-13",
+    "road": "C",
+    "profile": "Store-only MUD (StoreRead + StoreCore composition), fresh-genesis disposable",
+    "sourceCommit": { "value": null, "unknown_reason": "lab-c is uncommitted on branch fable/2026-09-13-road-c-lab (coordinator: do not commit)", "consequence": "pin by tree hash of lab-c/ at seal time" },
+    "dirtyDiffHash": { "value": null, "unknown_reason": "same as sourceCommit", "consequence": "same" },
+    "fixtureCommits": { "sdk-fixture": "planning main eedbab0d77ed99199356051351fbab999364a62a (packet basis named inside the file)", "files-journey": "as read 2026-09-12", "oracle-boundary": "planning b2cd79aa093374bf0d21426a76a794381c9dbc59", "road-c-review": "reviewed road-c sha256 0c560f4d868826c5949dcbe5c1bf3a5468ebd543473e2488d07f26a62db15734" },
+    "startUtc": { "value": null, "unknown_reason": "not run", "consequence": "filled by the lease holder" },
+    "endUtc": { "value": null, "unknown_reason": "not run", "consequence": "filled by the lease holder" }
+  },
+  "build": {
+    "compiler": "solc 0.8.30 (foundry.toml solc_version)",
+    "optimizer": { "enabled": true, "runs": 200, "via_ir": true },
+    "evmVersion": "cancun",
+    "dependencies": [
+      { "name": "@latticexyz/store", "version": "2.2.23", "commit": "062bd8de4b8fa0f0ba609ec241b8aa9be5393499", "license": "MIT (vendor/LICENSE)", "pin": "vendor/PIN.md (sha256 per file, 43 files)" },
+      { "name": "@latticexyz/schema-type (SchemaType.sol only)", "version": "2.2.23", "commit": "062bd8de4b8fa0f0ba609ec241b8aa9be5393499", "license": "MIT", "pin": "vendor/PIN.md" }
+    ],
+    "sourceHashes": { "value": null, "unknown_reason": "compute with `find src test -name '*.sol' | sort | xargs shasum -a 256` at seal", "consequence": "none before seal" },
+    "artifactHashes": { "value": null, "unknown_reason": "no build", "consequence": "none" },
+    "perContractBytes": {
+      "Ledger": { "runtime": null, "initcode": null, "unknown_reason": "not compiled; StoreCore inlined + 12 StoreRead externals + 13 EFS externals — EIP-170 risk flagged in TODO.md" },
+      "IndexModule": { "runtime": null, "initcode": null, "unknown_reason": "not compiled" },
+      "LensReader": { "runtime": null, "initcode": null, "unknown_reason": "not compiled" },
+      "QuoteConsumer": { "runtime": null, "initcode": null, "unknown_reason": "not compiled" }
+    },
+    "linkedLibraries": "none (all libraries internal)",
+    "proxies": "none (no upgradeability in this probe; testnet-continuity story is out of scope and listed in TODO.md)"
+  },
+  "deployment": {
+    "chain": { "chainId": { "value": null, "unknown_reason": "fresh Anvil at lease time (expected 31337)", "consequence": "realmId and contract principals depend on it" }, "genesis": "anvil default", "blockGasLimit": "anvil default (30M)" },
+    "contracts": {
+      "IndexModule": { "constructor": ["poison = keccak('poison') (TEST LEVER, immutable)"], "address": null, "codehash": null },
+      "Ledger": { "constructor": ["index address"], "address": null, "codehash": null },
+      "attach": "index.attach(ledger) by the deployer, one-shot; afterwards no privileged function exists",
+      "LensReader": { "constructor": ["ledger", "index"], "address": null },
+      "PassAcceptor / QuoteAcceptorV1 / Producer / QuoteConsumer": { "address": null }
+    },
+    "authorityGraph": {
+      "ledgerWriters": "anyone via publishNative/publishSigned/importPublication (permissionless ingestion, mandatory acceptance)",
+      "indexWriter": "Ledger only (onPublication onlyLedger)",
+      "hooks": "none registered; no registerStoreHook path exists",
+      "rawStoreWrites": "unreachable on both contracts (13 inherited-but-absent selectors, test/RawWriteDenial.t.sol)",
+      "upgrade": "none",
+      "delegation": "none (World is not used)",
+      "testLevers": ["IndexModule.poisonConcept (immutable)", "QuoteAcceptorV2 (destination rule)"]
+    },
+    "setupReceipts": { "value": null, "unknown_reason": "not run; script/measure.mjs rows deploy:* and setup:*", "consequence": "setup amortization unpriced" }
+  },
+  "fixtures": {
+    "typeClosures": {
+      "TYPE_META": "keccak('efs2/lab-c/type-meta/1')",
+      "Item": "typeId = keccak(TYPE_META, keccak(abi.encode(keccak('Item'), [])))",
+      "Pair": "typeId = keccak(TYPE_META, keccak(abi.encode(keccak('Pair'), [ITEM_T, ITEM_T])))",
+      "Quote": "typeId = keccak(TYPE_META, keccak(abi.encode(keccak('Quote'), [PAIR_T])))",
+      "Bytes (controls)": "typeId = keccak(TYPE_META, keccak(abi.encode(keccak('Bytes'), [])))",
+      "note": "acceptor address is a Realm-local binding (Action.target), NOT part of typeId"
+    },
+    "bodies": {
+      "framing": "body = abi.encode(bytes32[] refs, bytes payload); recordId = keccak(typeId, keccak(body))",
+      "ITEM_ETH": "refs=[], payload='ETH'", "ITEM_USDC": "refs=[], payload='USDC'", "PAIR_ETH_USDC": "refs=[ITEM_ETH, ITEM_USDC], payload=''",
+      "QUOTE_A1": "refs=[PAIR], payload=abi.encode(2500000000, 6, 1800000000, keccak(NOTE_BYTES))",
+      "QUOTE_A2": "mantissa 2502000000", "QUOTE_B1": "mantissa 2501000000",
+      "NOTE_BYTES": "0x7265666572656e63652071756f7465 (commitment only; carrier not exercised)"
+    },
+    "controls": {
+      "quote3000": { "bytes": "uint256(3000) big-endian 32 bytes", "keccak": "0xe76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552", "framing": "payload of a Bytes record; the stored body is abi.encode([], bytes) = 32 + 32 + 32 + 32 bytes" },
+      "quote3100": { "keccak": "0x5a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb3" },
+      "file41a": { "keccak": "0xe27c263ce61bca70e9ff7d3182fc124c8dcfee2a4656e5c746ceb433a2558911" },
+      "file41b": { "keccak": "0x1882de08a178ebf3827d787e4086d8b2e14a81a8cf3b7b42f2e1458831646f3a" },
+      "verified": "all four recomputed offline with a pure-Python keccak and by ethers in script/measure.mjs before any deploy"
+    },
+    "ids": {
+      "principal": "keccak(abi.encode(uint8 kind, bytes32 realmOrigin, address)); EOA kind=1 origin=0; contract kind=2 origin=keccak(abi.encode(chainId, ledger.codehash))",
+      "subjectId": "keccak(abi.encode(keccak('efs2/subject/1'), principalId, creatorSalt))",
+      "bindingKey": "keccak(abi.encode(author, purpose, subject, role))",
+      "publicationId": "keccak(abi.encode(author, nonce, keccak(abi.encode(actions))))",
+      "realmId": "keccak(abi.encode(keccak('efs2/realm/1'), chainId, ledger))"
+    },
+    "signatures": { "scheme": "EIP-712, domain {name:'EFS Lab C', version:'1'} (no chainId/verifyingContract; realmId + coreCodeCommitment inside the struct)", "typehash": "PublicationIntent(bytes32 realmId,bytes32 coreCodeCommitment,bytes32 author,uint64 nonce,uint64 deadline,bytes32 acceptanceProfile,bytes32 indexObligations,bytes32 actionsHash)", "AUTHOR_A": "EOA (anvil #1 in the script; PK 0xA11CE in tests)", "AUTHOR_B": "Producer contract, native ingress, no signature bytes" },
+    "cas": "strict: expectedRevision must equal the current revision (0 = unbound)",
+    "requiredQueries": ["folder listing (Scopes FOLDER)", "tag listing in folder (Scopes TAG after selection)", "head history", "backlinks", "by-Type", "by-author", "occurrence count"],
+    "lenses": { "LENS_A_FIRST": "[A,B] ordered", "LENS_B_FIRST": "[B,A] ordered", "LENS_NO_TIEBREAK": "[A,B] no-tiebreak" },
+    "carriers": { "value": null, "unknown_reason": "no byte carrier is exercised; note is a commitment only", "consequence": "availability/integrity rows UNSUPPORTED in this probe" }
+  },
+  "operations": [
+    { "row": "setup", "physicalTxs": "deploy IndexModule, Ledger, attach, LensReader, acceptors, Producer, Consumer, 1 native publication (4 types + 2 items + pair)", "payer": "deployer", "expected": "all succeed", "gas": { "label": "UNKNOWN", "value": null } },
+    { "row": "signed-fresh-body-create", "logical": "A1 subject+record+head+placement+tag (5 actions, 1 tx, 1 signature)", "kind": "fresh Record", "preCheck": "QUOTE_A1 absent via getStaticField(Records, firstAdmission)==0", "gas": { "label": "ESTIMATED", "value": "≈ 9 fresh-slot writes for Evidence(11 slots)… see TODO.md; unmeasured" } },
+    { "row": "signed-edit", "logical": "A2 record + head CAS(1)", "kind": "fresh Record + rebind", "gas": { "label": "UNKNOWN", "value": null } },
+    { "row": "contract-fresh-body", "logical": "B1 from Producer: record + own head + own placement", "kind": "fresh Record, native author", "preCheck": "QUOTE_B1 absent", "gas": { "label": "UNKNOWN", "value": null } },
+    { "row": "contract-existing-body", "logical": "B republishes A1 bytes", "kind": "existing Record / new occurrence", "preCheck": "QUOTE_A1 present", "gas": { "label": "UNKNOWN", "value": null } },
+    { "row": "contract-existing-body-by-recordId", "logical": "digestKind=RECORD_ID reuse, empty body", "kind": "existing Record / new occurrence", "gas": { "label": "UNKNOWN", "value": null } },
+    { "row": "exact-retry", "logical": "A1 resubmitted with the same signature", "expected": "revert AlreadyAdmitted; receipt gas of the failed tx recorded", "gas": { "label": "UNKNOWN", "value": null } },
+    { "row": "stale-cas", "expected": "revert StaleCas", "gas": { "label": "UNKNOWN", "value": null } },
+    { "row": "failed-mandatory-index", "expected": "revert IndexPoisoned from the separate IndexModule; no Record/Evidence/index row", "gas": { "label": "UNKNOWN", "value": null } },
+    { "row": "control-quote3000/3100/file41a/file41b", "logical": "one Bytes record each, signed", "gas": { "label": "UNKNOWN", "value": null } },
+    { "row": "paid-consumer-read", "logical": "QuoteConsumer.consume under A-first, B-first, no-tiebreak(revert)", "gas": { "label": "UNKNOWN", "value": null } },
+    { "row": "omitted joined obligations", "list": ["export/import against a second real chain (only same-chain second Realm and vm.chainId in tests)", "byte carrier availability/integrity", "fixture step 10 rule activation (only a destination-side stricter acceptor is tested)", "encrypted content", "populated testnet upgrade", "cold static browser"] }
+  ],
+  "reads": {
+    "basis": "block hash + Ledger highWater admission ordinal; LensReader cursors pin (basisAdmission, indexGeneration, rulesEpoch, coreCodeCommitment, scopeKey, lensHash, position)",
+    "decoder": "hand-written MUD-style table libraries (src/tables/*.sol) — candidate code; an independent oracle must re-derive from IStoreRead bytes + the FieldLayout/Schema words in README",
+    "cursorSemantics": "continuation at an older basis is answered via BindingHistory; stale generation/epoch/code reverts StaleCursor; wrong scope/lens reverts CursorMismatch",
+    "expectedResults": { "LENS_A_FIRST": "QUOTE_A2", "LENS_B_FIRST": "QUOTE_B1", "LENS_NO_TIEBREAK": "CONFLICT (status 3, no target)", "folder /swaps": "one selected entry (dedupe across A's and B's placements)", "tag market in /swaps": "FILE under both ordered lenses" },
+    "consumer": { "source": "src/Consumer.sol", "hash": null, "privileges": "none; uses LensReader public ABI + IStoreRead; Records table coordinate pinned as a literal" },
+    "rpcAccounting": { "value": null, "unknown_reason": "script counts its own JSON-RPC calls/bytes/latency only; no browser", "consequence": "browser rows stay UNKNOWN" }
+  },
+  "evidence": {
+    "receipts": { "value": null, "unknown_reason": "not run", "consequence": "no cost claim" },
+    "storageGrowth": { "value": null, "unknown_reason": "no slot diff in script", "consequence": "persistent words per op UNKNOWN; ESTIMATED slot counts in TODO.md" },
+    "reconstruction": "test_reconstruct_signature_from_state: digest and signer recovered from Evidence + Admission rows through a fresh reader contract; negative: flipped discriminator changes the digest",
+    "proofGrade": "receipts + read-back only; no state proofs; transcripts are not proofs",
+    "mutationSeeds": "test/Fixture.t.sol (name/target/subject/expectedRevision/order/typeId/digestKind/realm)"
+  },
+  "resources": {
+    "leaseOwner": { "value": null, "unknown_reason": "no lease granted", "consequence": "nothing runs" },
+    "request": "see TODO.md (forge build/test + one Anvil + node script; < 2 GB scratch; watchdog 20 min)",
+    "processIds": null, "ports": null, "buildDirs": ["lab-c/out", "lab-c/cache"], "cleanup": "rm -rf lab-c/out lab-c/cache only"
+  },
+  "preSealChecks": {
+    "1_originQualifiedIdentity": { "status": "designed, tests written, unrun", "open": "realmOrigin = keccak(chainId, coreCodeCommitment) makes two same-code Realms on ONE chain share contract principals (and therefore subject ids); tests therefore use vm.chainId for the two-Realm case. Ask: should realmOrigin also bind the Ledger address (as realmId does)?" },
+    "2_evidenceReconstruction": { "status": "designed, tests written, unrun", "note": "MUD packs the 11 Admission fields into a 262-byte static region (9 slots) and the 17 Evidence fields into 325 bytes (11 slots); values are re-encoded with abi.encode for the digest so the packed layout never enters the signature." },
+    "3_import": { "status": "designed, tests written, unrun", "open": ["native-source evidence is graded UNVERIFIED_NATIVE (no chain-state witness in this lab)", "CAS on import uses the source action's expectedRevision against destination state (no override field)", "imported DECLARE_TYPE rows bind the source acceptor ADDRESS, which may not exist on the destination — tests avoid importing Type declarations"] },
+    "4_cursor": { "status": "designed, tests written, unrun", "open": "rawTotal is reported at current state, not at the cursor's basis (computing the basis-time count would require a scan)" }
+  }
+}
