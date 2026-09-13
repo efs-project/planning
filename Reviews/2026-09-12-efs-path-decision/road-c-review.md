@@ -1,0 +1,46 @@
+# Road C review — keep both MUD boundaries eligible until fairly tested
+
+**Date:** 2026-09-12 · **Reviewer:** Codex internal `warroom_mud_review` · **Standing:** independent source/design review; no compiler, Anvil, implementation or adoption result.
+
+Reviewed [[road-c]] against [[README]] and [[overhead-and-selection]]. Planning was shared `main` at `eedbab0d77ed99199356051351fbab999364a62a`, with concurrent authorized dirty reports preserved. Reviewed Road C SHA-256: `0c560f4d868826c5949dcbe5c1bf3a5468ebd543473e2488d07f26a62db15734`. MUD source inspected in a clean existing research clone; remote `main` independently matched `0e49b51ba934438e49c7f098e78d6e3ddf7567fb` (commit date 2025-09-30).
+
+**Verdict:** Store-only is plausible, but its stated inheritance boundary is incomplete and its rejection of World is premature. Retain the useful generic-table, explicit-existence and state-walk analysis; repair the five findings below before choosing the one MUD adapter.
+
+## 1. Store-only does not yet prove the promised write boundary
+
+`Store` omits write *implementations*, not write *interface obligations*: it inherits `IStore`; `IStoreKernel` inherits `IStoreWrite`. Therefore the proposed concrete `EFSCore is Store` cannot simply omit all raw writers and registration methods. It needs denied/gated implementations, or a narrower `StoreRead` + `StoreCore` composition with correct initialization/internal-table registration. This is a source-level interface defect, not a compiler-tested failure. [Store](https://github.com/latticexyz/mud/blob/0e49b51ba934438e49c7f098e78d6e3ddf7567fb/packages/store/src/Store.sol), [IStoreKernel](https://github.com/latticexyz/mud/blob/0e49b51ba934438e49c7f098e78d6e3ddf7567fb/packages/store/src/IStoreKernel.sol), [IStore](https://github.com/latticexyz/mud/blob/0e49b51ba934438e49c7f098e78d6e3ddf7567fb/packages/store/src/IStore.sol).
+
+Replace “bypass is impossible by construction” with an untested invariant. Inventory every external selector, inherited writer, registration method, batch/import/reuse path, callback and upgrade route. Internal generated setters still carry no EFS acceptance semantics; an incorrect authorized EFS entrypoint can bypass acceptance in either architecture. Denying raw writes is necessary, not sufficient.
+
+## 2. World authority is restrictable; permissionless publication need not mean permissionless table mutation
+
+`World.setRecord` checks table-or-namespace `ResourceAccess`; a public System call is a separate permission. A dedicated World can expose permissionless EFS ingestion while granting table writes only to the validating kernel/index Systems. Namespace ownership can be transferred or renounced; notably, renunciation removes the previous owner's namespace grant, **not every existing grantee**. [World](https://github.com/latticexyz/mud/blob/0e49b51ba934438e49c7f098e78d6e3ddf7567fb/packages/world/src/World.sol#L137), [SystemCall](https://github.com/latticexyz/mud/blob/0e49b51ba934438e49c7f098e78d6e3ddf7567fb/packages/world/src/SystemCall.sol#L43), [AccessManagementSystem](https://github.com/latticexyz/mud/blob/0e49b51ba934438e49c7f098e78d6e3ddf7567fb/packages/world/src/modules/init/implementations/AccessManagementSystem.sol#L54).
+
+Require a complete authority manifest: root/EFS/index namespaces, all ACL grants, root delegatecall Systems/modules, hooks, delegations and proxy rights. Compare equivalent testnet-upgrade and eventual freeze profiles. A non-upgradeable bounded controller or renunciation is a candidate restriction, not proof of safety; root authority and surviving grants must also be constrained. Non-root Systems avoid direct delegatecall into World storage, but must reject direct caller/context spoofing: `_msgSender()` decodes appended calldata. [WorldContext](https://github.com/latticexyz/mud/blob/0e49b51ba934438e49c7f098e78d6e3ddf7567fb/packages/world/src/WorldContext.sol#L69). Do not kill World merely because an unrestricted administrator *could* remove a hook; do not pronounce it safe merely because one namespace was renounced.
+
+## 3. Mandatory indexing still violates the requested responsibility split
+
+Road C puts mandatory indexes inside the Core kernel and writes Postings directly. The mission explicitly separates kernel ingestion from indexing **including mandatory queries**, not only optional indexes. Revise the diagram/interface so kernel acceptance synchronously invokes a separate required-index responsibility; index failure rolls back the entire action. This can be a separate contract in Store-only or a separately authorized System/index namespace in World.
+
+Freeze folder/tag query obligations, Lens basis, coverage and supported churn before measuring. Classify any additional by-Type/by-Principal/backlink index rather than silently declaring every useful index mandatory. Compare equivalent state-reconstructible queries; log replication remains an optional acceleration path, not the completeness authority.
+
+## 4. The kill rule tests incidental representation, not architectural value
+
+Delete the ~25% linked-code threshold and “needs an EFS key index” kill premise. Maintained components, review surfaces, integration obligations and actual reader/developer work matter; source-line share does not establish their value. Required state enumeration does not make events valueless for incremental browser sync.
+
+An oversized inlined kernel falsifies that layout, not every Store-only or modular World layout. Allow the same bounded decomposition/repair opportunity as other roads. The quoted 39,980 gas is a bracketed private-System `msgSender()` test, not a measured universal surcharge; public-System routing and complete EFS calls need their own comparison. [Pinned test](https://github.com/latticexyz/mud/blob/0e49b51ba934438e49c7f098e78d6e3ddf7567fb/packages/world/test/World.t.sol#L923), [quoted gas](https://github.com/latticexyz/mud/blob/0e49b51ba934438e49c7f098e78d6e3ddf7567fb/packages/world/gas-report.json).
+
+Reject only demonstrated unwaived semantic/trust conflict or measured complete costs favoring another feasible road. EIP-8037/8038 sensitivity must be labeled as a repricing scenario: their current proposal pages are not evidence of the experiment's active gas schedule. [8037](https://eips.ethereum.org/EIPS/eip-8037), [8038](https://eips.ethereum.org/EIPS/eip-8038).
+
+## 5. Tighten provenance; do not turn missing evidence into categorical absence
+
+- **Release:** Store 2.2.23 resolves to `062bd8de4b8fa0f0ba609ec241b8aa9be5393499`; release HTML records `2025-08-26T01:05:18Z`. The current release listing remains 2.2.23. Main's four named package manifests also say 2.2.23, but main is not the release pin. Pin actual vendored bytes, not the manifest alone. [Release](https://github.com/latticexyz/mud/releases/tag/%40latticexyz%2Fstore%402.2.23), [release listing](https://github.com/latticexyz/mud/releases).
+- **Maintenance:** Lattice's own April 2026 announcement confirms winding down, calls MUD feature-complete/audited/open-source, and says team members continue DUST/autonomous-world work through 0xPARC. These are first-party claims, not proof that MUD has zero maintainers. The supplied X ID decodes to April 14, 17:20:53 UTC; direct X content was unavailable, so distinguish that derived timestamp from the fetched announcement. Replace “no maintainer/unmaintained” with “future maintenance/support not established.” [Announcement](https://lattice.xyz/winding-down).
+- **Audit:** two February 11, 2024 reports cover Solidity at `12a9eb1afb18a7f7cb43d774cabb2d5af7c74e6b` and codegen at `f6133591a86eb169a7b1b2b8d342733a887af610`. They establish scoped historical review, not current-version certification. “No later audit listed in inspected MUD docs” is supportable; “no later audit exists” is not. [Contracts report](https://www.openzeppelin.com/news/mud-audit), [codegen report](https://www.openzeppelin.com/news/mud-code-generation-audit).
+- **ERC-7813:** independently confirmed Last Call, deadline June 16, 2026. It is not Final; that does not establish abandonment or absence of a standards process. [Current ERC](https://eips.ethereum.org/EIPS/eip-7813).
+
+## Smallest fair matched MUD probe
+
+First resolve the two authority/ABI sketches on paper, then choose **one** adapter with a written reason—no second filesystem or EAS arm. Use the custom contender's exact fixture/oracle: 32-byte quote, 41-byte binary, two authors, genuine contract author, checked reference, folder/tag queries and two Lens selections. Join typed publication → acceptance → separate mandatory index → unrelated paid consumer and clean state-only reader. Force wrong/missing references, stale CAS, every raw writer, direct System calls, import/reuse and late-index rollback to fail correctly.
+
+Measure setup, create/edit/native update, paid selected point/list reads, storage growth, per-contract runtime/initcode, and clean-reader RPC bytes/calls with logs disabled; report optional log-sync benefit separately. Record maintained component inventory and normal decomposition costs, not a LOC pass mark. Carry export/import historical-authority and populated-upgrade tests as explicit finalist gates if absent; this small probe alone cannot close them. No heavy run has been requested or performed by this review.

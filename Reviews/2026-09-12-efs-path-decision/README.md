@@ -96,7 +96,7 @@ Use identical semantic work and payloads, named compiler/fork/configuration, nor
 - Compare MUD plus the necessary EFS adapters and queries—not a raw table write against a complete EFS file lifecycle. A bare mapping is a limited diagnostic control, not a feature-equivalent rival or a proved theoretical lower bound.
 - Record source/evidence pins and independent expected outcomes. Receipt inclusion, matching hashes and retained RPC transcripts are not independently authenticated chain-state proofs. Report the proof level actually checked.
 
-The fuller seven-fact create is currently about **5.06M gas**. The native canonical quote create is **627,672**, with a matched contract quote update at **198,745**. These measure different promises; their ratio is **not** the price of portability. See the retained [[../2026-09-11-efs21-overnight|comparison and qualifications]] and [[../2026-09-12-efs21-canonical-native-types-results|canonical native results]]. This planning pass did not rerun those benchmarks.
+The fuller seven-fact create is currently about **5.06M gas**. The native canonical quote create is **627,672**, with a matched contract quote update at **198,745**. That contract update reuses a Record created earlier in the run; it is not a fresh-body update floor. These measure different promises; their ratio is **not** the price of portability. See the retained [[../2026-09-11-efs21-overnight|comparison and qualifications]], [[../2026-09-12-efs21-canonical-native-types-results|canonical native results]] and the [[run-manifest|exact controls and freshness rule]]. This planning pass did not rerun those benchmarks.
 
 Baseline pins: fuller control `ebc7d540570827c5f5052af83d2cbd80f54092a7`; native source `b8c27754314c97ab48c5b2454f9be05653e6b393`, retained evidence `d269e5560d23af169e386f8ad92d9a5f60a9c382`. Verify worktree HEAD/dirty state at launch; a directory called `planning-efs21-direct` is not proof it holds the fuller control. Preserve Fable's existing uncommitted work.
 
@@ -115,7 +115,7 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 - Phase / T0: **independent proposals and shared-fixture preparation / 2026-09-12 23:10 UTC**. War-room delegation is active; no new chain experiment has run. Provisional recommendation due September 13 at 23:10 UTC; final handoff due September 14 at 23:10 UTC.
 - Participants: Codex Road A analyst, existing SDK PM and Data Explorer PM dispatched; Claude **EFS v2 Dev** kickoff sent and acknowledged by 23:41 UTC. Its [[claude-pm|acknowledgement]] records an independent in-session MUD specialist and evidence extractor; a persistent extra Claude conversation is unnecessary. Earlier MUD source, cost and portability reviews are completed inputs, not new active seats.
 - Baselines: kickoff published at planning `2552962`; native source/evidence pins in section 5 remain the named comparison pins. Fable's existing untracked brainstorm is preserved. The similarly named direct worktree is the stopped `f873890` size probe, not the fuller control.
-- Shared fixture / shortlisted roads / actual probes: [[sdk-fixture|SDK joined semantics]] and [[files-journey|Files lifecycle/selection journey]] received and reviewed as the common comparison requirements. They are test expectations, not executable evidence or permanent API bytes. Each candidate still needs its exact run manifest/encoding map. [[road-a|Road A]] and [[road-b-review|independent compact review]] are ready; Road B revisions and Road C are under cross-review. No performance winner or heavy-run lease selected.
+- Shared fixture / shortlisted roads / actual probes: [[sdk-fixture|SDK joined semantics]] and [[files-journey|Files lifecycle/selection journey]] received and reviewed as the common comparison requirements. They are test expectations, not executable evidence or permanent API bytes. Use [[run-manifest]] for exact source, encoding, payload and freshness inputs. **Provisional implementation shortlist: B (compact custom) and C (one corrected Store-only adapter).** Retain fuller control A and its packing proposal as the fallback/reference, not a third concurrent rebuild. No performance winner or heavy-run lease selected.
 - Heavy-run slot: **not granted**; no new run started by this plan.
 - Next handoff: collect independent Road A/B/C proposals and SDK/Files fixtures; pin the shared capsule, expected outcomes and smallest matched experiments. Read [[mud-source-preflight|Codex's MUD source preflight]] only after recording an independent Road C proposal. Existing typed-read-facet work is an enabling option, not automatically the next experiment or a demonstrated economic win.
 
@@ -143,6 +143,36 @@ Road B's independent proposal is retained at `c8ec8d1`; its estimates are not me
 These are coordinator checks against the already stated outcomes, not new owner rulings or a rejection of the compact road. The independent review and common fixtures should resolve them before a run lease is granted.
 
 **Next-stage checks sent to Claude:** Road B v1's signed preimage must commit all authorized placement/head/tag/CAS actions and applicable execution/rule context, not only a Record-ID vector unless that vector provably commits those effects. Hashing actions into an unsigned publication ID is insufficient. Its subject mint must use a portable logical claim, not a local admission ordinal. A paged listing may report an unknown total instead of scanning the entire selected set just to serve its first page. For Road C, an arbitrary percentage of reused lines or the size of Store added to an unchanged monolith is not a fair kill test; measure a replacement and allow ordinary module decomposition. Store-only and World-plus-restricted-authority both require source-level scrutiny. No owner decision is needed merely to test a pinned dependency.
+
+### Provisional shortlist — coordinator, September 13 at 00:01 UTC
+
+This is experiment prioritization, not an architecture adoption or feature waiver.
+Use **B and one Store-only C implementation** for the first matched joined
+slice. A's 36-word saving is a useful source-derived packing hypothesis, but
+the larger open question is whether a compact preserved-meaning foundation can
+be cheap, and whether MUD can supply it with less bespoke machinery. Reuse A's
+retained controls; do not spend the first run repairing an unrelated stopped
+module extraction. Reopen A's packed experiment if the compact candidates fail
+an unwaived requirement or its saving could change the recommendation.
+
+C's initial `is Store` sketch requires correction: inheritance carries raw-write
+interface obligations. A narrower StoreRead/StoreCore composition or explicitly
+denied/gated raw writers must be compiled and adversarially checked. Keep
+required indexing in a separate contract responsibility. The
+[[road-c-review|independent source review]] does **not** establish that a
+dedicated World is unsafe or impossible; World is deferred from this first
+adapter to isolate storage/tooling reuse and avoid building two MUD variants.
+Reconsider it if a concrete dispatch/authority/tooling advantage changes the
+comparison. Dependency source/license verification permits a disposable probe,
+not an Etched dependency decision.
+
+Claude leads B/C source preparation in distinct agreed paths and hands over a
+source/manifest pin for the single heavy-run queue. Codex owns the independent
+comparison/oracle and source review. The first run must join actual typed
+publication, checked reference/acceptance, mandatory indexing, two-author
+selection and a paid unrelated consumer; a storage microbenchmark may diagnose
+cost but cannot replace this gate. Complete the remaining export/import,
+history/upgrade and Files failure obligations before finalist eligibility.
 
 ## 7. What James receives
 
