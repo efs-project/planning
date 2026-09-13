@@ -10,14 +10,14 @@ import { MeasurementFixture } from "./MeasurementFixture.sol";
 import { FaultyReads } from "./FaultyReads.sol";
 
 /*
- * Three suites (split for EIP-170/EIP-3860 on the test side):
+ * Four suites (pre-split for EIP-170/EIP-3860 on the test side):
  *  - MeasurementFramedTest: the framed c32 diagnostic surface (paidPointFramed / paidListFramed), unchanged checks.
- *  - MeasurementSealedTest: the sealed paid point/list slice (sdk-fixture appendix) against the measurement-local
- *    one-placement fixture (A1 with placement, A2 CAS, B1 head-only), plus the negatives that refuse the corresponding
- *    successful result as WRONG EXPECTATIONS; the broader FixtureSeeder.b1() (second placement) is the extra-placement
- *    negative and is not altered.
- *  - MeasurementFaultyReadsTest: bounded public-ABI controls where the ACTUAL replies are malformed or missing
- *    (test/FaultyReads.sol), named distinctly from the wrong-expectation negatives.
+ *  - MeasurementSealedTest: the sealed paid point/list slice (sdk-fixture appendix) positives against the
+ *    measurement-local one-placement fixture (A1 with placement, A2 CAS, B1 head-only).
+ *  - MeasurementSealedNegativesTest: the negatives that refuse the corresponding successful result as WRONG
+ *    EXPECTATIONS; the broader FixtureSeeder.b1() (second placement) is the extra-placement negative and is not altered.
+ *  - MeasurementFaultyReadsTest: bounded public-ABI controls where the ACTUAL replies are malformed, missing or
+ *    laundered (test/FaultyReads.sol), named distinctly from the wrong-expectation negatives.
  */
 
 abstract contract MeasurementBase is LabBase {
@@ -128,6 +128,30 @@ abstract contract MeasurementBase is LabBase {
 
   function _same(MeasurementConsumer.Selection memory x, MeasurementConsumer.Selection memory y) internal pure returns (bool) {
     return keccak256(abi.encode(x)) == keccak256(abi.encode(y));
+  }
+
+  /// The `reason` of a PlacementWindow revert (its full 7-word payload is decoded, so a different error cannot pass).
+  function _windowReason(bytes memory err) internal pure returns (uint8 reason) {
+    require(err.length == 4 + 7 * 32 && bytes4(err) == MeasurementConsumer.PlacementWindow.selector, "PlacementWindow expected");
+    bytes memory params = new bytes(err.length - 4);
+    for (uint256 i = 0; i < params.length; i++) params[i] = err[i + 4];
+    (reason, , , , , , ) = abi.decode(params, (uint8, uint8, uint32, uint32, uint256, uint32, uint32));
+  }
+
+  function _refusesListWindow(
+    ILensReads rd,
+    ITableReads lg,
+    LensReader.Lens memory lens,
+    MeasurementConsumer.Expect memory e,
+    MeasurementConsumer.PlacementExpect memory p,
+    uint8 reason,
+    string memory what
+  ) internal {
+    try consumer.paidList(rd, lg, lens, e, p) {
+      revert(what);
+    } catch (bytes memory err) {
+      require(_windowReason(err) == reason, what);
+    }
   }
 }
 
@@ -253,6 +277,13 @@ contract MeasurementSealedTest is MeasurementBase {
     require(pl.rawTotal == 1 && pl.scanned == 1 && pl.selected == 1 && pl.ended && pl.pageStatus == 1 && pl.target == FILE && pl.revision == 1, "one complete window");
   }
 
+}
+
+contract MeasurementSealedNegativesTest is MeasurementBase {
+  function setUp() public {
+    _bootMeasurement();
+  }
+
   // ---- negatives: wrong EXPECTATIONS refuse the corresponding successful result --------------------------------
 
   function test_sealed_refusesWrongOrMissingPair() public {
@@ -348,11 +379,14 @@ contract MeasurementSealedTest is MeasurementBase {
     _refusesList(_rd(), _lg(), _lensA(), _expectA(basis), _placement(), MeasurementConsumer.BasisMismatch.selector, "list after the frontier moved");
   }
 
-  function test_sealed_refusesIncompleteCoverage() public {
+  /// A PARTIAL page (budget 0) hits PlacementWindow(NOT_COMPLETE). `IncompleteCoverage` itself is unreachable on C
+  /// with the honest IndexModule: FAMILY_SCOPES is a mandatory family, maintained since genesis, so `coverage` always
+  /// reports COMPLETE through the current high-water mark.
+  function test_sealed_refusesPartialWindow() public {
     uint64 basis = _sealed();
     MeasurementConsumer.PlacementExpect memory p = _placement();
     p.budget = 0; // PARTIAL page: the scan never reaches rawTotal
-    _refusesList(_rd(), _lg(), _lensA(), _expectA(basis), p, MeasurementConsumer.PlacementWindow.selector, "a partial window is not an empty complete page");
+    _refusesListWindow(_rd(), _lg(), _lensA(), _expectA(basis), p, consumer.WINDOW_NOT_COMPLETE(), "a partial window is not an empty complete page");
   }
 
   function test_sealed_refusesPointListDisagreement() public {
@@ -433,11 +467,72 @@ contract MeasurementFaultyReadsTest is MeasurementBase {
     _refusesList(_fr(), _ft(), _lensA(), _expectA(basis), _placement(), MeasurementConsumer.MalformedEvidence.selector, "list too");
   }
 
+  /// An otherwise well-formed page (one item, rawTotal 1, scanned 1, status COMPLETE) whose cursor says the scan never
+  /// reached rawTotal is refused by the END CONDITION alone (reason NOT_ENDED), not by an item/selected-count check.
   function test_faultyReads_partialPageClaimingCompleteRefused() public {
     uint64 basis = _sealed();
     faulty.fault(faulty.PARTIAL_CLAIMS_COMPLETE(), bytes32(0));
-    MeasurementConsumer.PlacementExpect memory p = _placement();
-    p.budget = 0; // the page says COMPLETE, but its end condition (position == rawTotal == scanned) is false
-    _refusesList(_fr(), _ft(), _lensA(), _expectA(basis), p, MeasurementConsumer.PlacementWindow.selector, "a PARTIAL page claiming COMPLETE is refused by the end condition");
+    _refusesListWindow(_fr(), _ft(), _lensA(), _expectA(basis), _placement(), consumer.WINDOW_NOT_ENDED(), "a page claiming COMPLETE without reaching rawTotal is refused by the end condition");
+  }
+
+  // ---- one fault each: states the honest Ledger/LensReader can never produce -----------------------------------
+
+  function test_faulty_actual_reply_launderedSelectedBy_refusedAsAuthorMismatch() public {
+    uint64 basis = _sealed();
+    faulty.fault(faulty.LAUNDERED_SELECTED_BY(), B); // the reader claims B decided, while the binding and its evidence are A's
+    MeasurementConsumer.Expect memory e = _expectA(basis);
+    e.selectedAuthor = B; // the laundered claim as the expectation: the retained Evidence still names A
+    _refusesPoint(_fr(), _ft(), _lensA(), e, MeasurementConsumer.AuthorMismatch.selector, "the evidence author, not the reader's claim, decides");
+  }
+
+  function test_faulty_actual_reply_evidenceOutOfRange_refused() public {
+    uint64 basis = _sealed();
+    faulty.fault(faulty.EVIDENCE_OUT_OF_RANGE(), bytes32(0));
+    _refusesPoint(_fr(), _ft(), _lensA(), _expectA(basis), MeasurementConsumer.EvidenceBounds.selector, "an admission outside its publication's range is refused");
+  }
+
+  function test_faulty_actual_reply_admissionWrongTarget_refused() public {
+    uint64 basis = _sealed();
+    faulty.fault(faulty.ADMISSION_WRONG_TARGET(), bytes32(0));
+    _refusesPoint(_fr(), _ft(), _lensA(), _expectA(basis), MeasurementConsumer.AdmissionShape.selector, "an admission that did not bind the selected head is refused");
+  }
+
+  function test_faulty_actual_reply_proofShape_refused() public {
+    uint64 basis = _sealed();
+    faulty.fault(faulty.PROOF_SHAPE(), bytes32(0));
+    _refusesPoint(_fr(), _ft(), _lensA(), _expectA(basis), MeasurementConsumer.ProofShape.selector, "an EOA-signed cell with v = 0 is refused");
+    _refusesPoint(_fr(), _ft(), _lensB(), _expectB(basis), MeasurementConsumer.ProofShape.selector, "a native cell carrying signature words is refused");
+  }
+
+  function test_faulty_actual_reply_realmMismatch_refused() public {
+    uint64 basis = _sealed();
+    faulty.fault(faulty.REALM_MISMATCH(), bytes32(0));
+    _refusesPoint(_fr(), _ft(), _lensA(), _expectA(basis), MeasurementConsumer.RealmMismatch.selector, "evidence bound to another Realm is refused");
+  }
+
+  function test_faulty_actual_reply_notAtBasis_refused() public {
+    uint64 basis = _sealed();
+    faulty.fault(faulty.NOT_AT_BASIS(), bytes32(0));
+    _refusesPoint(_fr(), _ft(), _lensA(), _expectA(basis), MeasurementConsumer.NotAtBasis.selector, "a head admission past the pinned basis is refused");
+  }
+
+  function test_faulty_actual_reply_malformedFrame_refused() public {
+    uint64 basis = _sealed();
+    faulty.fault(faulty.MALFORMED_FRAME(), PAIR);
+    _refusesPoint(_fr(), _ft(), _lensA(), _expectA(basis), MeasurementConsumer.MalformedFrame.selector, "a non-canonical frame is refused");
+  }
+
+  /// `ShortReply` (the `_word` / `_uintAt` guard) is unreachable behind the exact static-length checks; the reachable
+  /// short-reply refusal for a Records row is `MalformedRecord`.
+  function test_faulty_actual_reply_shortRecord_refused() public {
+    uint64 basis = _sealed();
+    faulty.fault(faulty.SHORT_RECORD(), QUOTE_A2);
+    _refusesPoint(_fr(), _ft(), _lensA(), _expectA(basis), MeasurementConsumer.MalformedRecord.selector, "a short Records region fails closed");
+  }
+
+  function test_faulty_actual_reply_ledgerMismatch_refused() public {
+    uint64 basis = _sealed();
+    faulty.fault(faulty.LEDGER_MISMATCH(), bytes32(0));
+    _refusesPoint(_fr(), _ft(), _lensA(), _expectA(basis), MeasurementConsumer.ReaderLedgerMismatch.selector, "a reader that names another Ledger than the one decoded is refused");
   }
 }

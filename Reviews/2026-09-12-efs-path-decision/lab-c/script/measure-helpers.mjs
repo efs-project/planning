@@ -114,6 +114,14 @@ export function assertAnvilOnlyCells(selected, anvil, anvilOnly = ANVIL_ONLY_CEL
   return blocked;
 }
 
+// With any sealing cell selected the chain must identify as Anvil (web3_clientVersion "anvil/..."), checked before any STATE call.
+export function assertAnvilClient(clientVersion, blockedCells) {
+  if (blockedCells.length && !/^anvil\//.test(String(clientVersion ?? ""))) {
+    throw new Error(`cell(s) ${blockedCells.join(", ")} require an owned Anvil chain; web3_clientVersion is ${clientVersion}: refusing before any state call`);
+  }
+  return clientVersion;
+}
+
 // The paid caller must be unrelated to every fixture role: not the deployer, not AUTHOR_A's wallet, not the producer or any lab contract.
 export function assertUnrelatedCaller(caller, related) {
   const lower = (v) => String(v).toLowerCase();
@@ -201,6 +209,37 @@ export function compareObservation(observed, expected) {
   return { ok, fields };
 }
 
+// The candidate self-check of one paid row (pure): exactly one PaidObserved log whose kind is the row's expected kind
+// and whose commitment equals keccak256(abi.encode(kind, Selection, Placement)) RECOMPUTED from the decoded log fields
+// (`recompute` is the caller's ABI encoder), the eth_call replay decoded with the same commitment, and log and replay
+// equal to the runner's candidate-side expectation field by field. Any failure is named in `reason`.
+export function paidObservationMatch({ logCount, fromLog, fromReplay, operation, expectedKind, expectedSelection, expectedPlacement, recompute }) {
+  const lower = (v) => String(v).toLowerCase();
+  const logPresent = logCount === 1 && !!fromLog;
+  const kindOk = logPresent && lower(fromLog.kind) === lower(expectedKind);
+  let recomputedCommitment = null;
+  let recomputeError = null;
+  if (logPresent) {
+    try { recomputedCommitment = recompute(fromLog.kind, fromLog.selection, fromLog.placement); } catch (error) { recomputeError = String(error?.message ?? error); }
+  }
+  const commitmentRecomputedOk = logPresent && !!recomputedCommitment && lower(recomputedCommitment) === lower(fromLog.commitment);
+  const selectionFromLog = compareObservation(fromLog ? fromLog.selection : null, expectedSelection);
+  const placementFromLog = compareObservation(fromLog ? fromLog.placement : null, expectedPlacement);
+  const replayDecoded = !!fromReplay && !fromReplay.error;
+  const replayOk = replayDecoded && compareObservation(fromReplay.selection, expectedSelection).ok && (fromReplay.placement === null || fromReplay.placement === undefined ? operation === "PAID_POINT" : compareObservation(fromReplay.placement, expectedPlacement).ok);
+  const commitmentsAgree = logPresent && replayDecoded && lower(fromLog.commitment) === lower(fromReplay.commitment);
+  const match = logPresent && kindOk && commitmentRecomputedOk && selectionFromLog.ok && placementFromLog.ok && replayOk && commitmentsAgree;
+  const reason = match ? null
+    : !logPresent ? `no single PaidObserved log (logCount ${logCount})`
+    : !kindOk ? `log kind ${fromLog.kind} != expected ${expectedKind} for ${operation}`
+    : !commitmentRecomputedOk ? `recomputed commitment ${recomputedCommitment} != logged ${fromLog.commitment}${recomputeError ? ` (${recomputeError})` : ""}`
+    : !replayDecoded ? "the eth_call replay did not decode"
+    : !commitmentsAgree ? "the replay commitment differs from the log commitment"
+    : !replayOk ? "the replay observation differs from the runner expectation"
+    : "the log observation differs from the runner expectation";
+  return { logCount, kindOk, expectedKind, recomputedCommitment, recomputeError, commitmentRecomputedOk, selectionFromLog, placementFromLog, replayOk, commitmentsAgree, match, reason };
+}
+
 // Build one abstract comparison row from retained observations only. A missing or unknown field throws, so an absent
 // observation can never read as a passing row; selectedRevision must be the fixture LABEL (A2 / B1), never an ordinal;
 // a PAID_POINT row must state that it charged no directory lookup; a PAID_LIST page that is not COMPLETE is not a pass.
@@ -229,7 +268,7 @@ export function abstractRow(fields) {
 }
 
 // Seal/revert ordering of the paid rows. `events` is the ordered ledger the cell records:
-//   {kind:'seal', block, hash, timestamp} | {kind:'revert', block, hash, nextTimestamp} |
+//   {kind:'seal', block, hash, timestamp} | {kind:'revert', block, hash, nextTimestamp, pool:{pending, queued}} |
 //   {kind:'tx', label, block, parentHash, timestamp, txIndex, txCount, onlyTx} | {kind:'retained', label}
 // Each paid row must be the FIRST and ONLY transaction after a revert whose observed head IS the seal, mined at
 // seal.block + 1 on seal.hash at timestamp seal.timestamp + 1, and retained before the next revert. Any violation throws.
@@ -247,6 +286,8 @@ export function checkPaidRowOrdering(events) {
       if (open) throw new Error(`paid-row ordering: revert before row ${open.label} was retained`);
       if (ev.block !== seal.block || ev.hash !== seal.hash) throw new Error(`paid-row ordering: after the revert the head is ${ev.block} ${ev.hash}, not the seal ${seal.block} ${seal.hash}`);
       if (ev.nextTimestamp !== expectedTimestamp) throw new Error(`paid-row ordering: next block timestamp set to ${ev.nextTimestamp}, expected ${expectedTimestamp}`);
+      if (!ev.pool || ev.pool.pending === undefined || ev.pool.queued === undefined) throw new Error("paid-row ordering: the revert carries no txpool_status proof");
+      if (Number(ev.pool.pending) !== 0 || Number(ev.pool.queued) !== 0) throw new Error(`paid-row ordering: the transaction pool is not empty after the revert (pending ${Number(ev.pool.pending)}, queued ${Number(ev.pool.queued)})`);
       armed = true;
     } else if (ev.kind === "tx") {
       if (!armed) throw new Error(`paid-row ordering: row ${ev.label} is not the first transaction after a revert to the seal`);
@@ -290,6 +331,7 @@ export function deriveAbstractResult({ check, replay, evidenceFor: ev }) {
   const replayDecoded = !!check && !!check.fromReplay && !check.fromReplay.error;
   const ok = logPresent && replayDecoded && check.commitmentsAgree === true && check.replayOk === true && check.match === true;
   const reason = ok ? null
+    : check && typeof check.reason === "string" ? check.reason
     : !logPresent ? `no single PaidObserved log in the receipt (logCount ${check ? check.logCount : "unknown"})`
     : !replayDecoded ? "the eth_call replay at the receipt block did not decode"
     : check.commitmentsAgree !== true ? "the replay commitment differs from the log commitment"
@@ -303,7 +345,9 @@ export function deriveAbstractResult({ check, replay, evidenceFor: ev }) {
   const [headLabel, revisionLabel] = ok ? labelOf(ev.headLabels, s.selectedHead, "selected head") : ["UNKNOWN", "UNKNOWN"];
   const [authorLabel, authorKind] = ok ? labelOf(ev.authorLabels, s.selectedAuthor, "selected author") : ["UNKNOWN", "UNKNOWN"];
   const sealPl = ev.placementAtSeal; // a SEPARATE retained observation (seal raw replies), independent of this row's log
-  const fromSeal = (why) => ({ sourceStep: "A1", actor: "AUTHOR_A", actorPrincipal: sealPl.author, evidenceCategory: evidenceCategoryOf(sealPl.proofKind, true), publicationId: sealPl.publicationId, admission: sealPl.admission, revision: sealPl.revision, bindingKey: sealPl.bindingKey, basis: ev.sealBasis.admissionFrontier, independentOfContentSelection: true, establishedBy: why });
+  // placement labels are DERIVED from the observed actor / publication through the fixture maps (never constants); an unknown value throws
+  const placementLabels = (actor, publicationId) => ({ sourceStep: labelOf(ev.publicationLabels, publicationId, "placement publication"), actor: labelOf(ev.authorLabels, actor, "placement actor")[0], labelledBy: "authorLabels[actor] / publicationLabels[publicationId] of the fixture map" });
+  const fromSeal = (why) => ({ ...placementLabels(sealPl.author, sealPl.publicationId), actorPrincipal: sealPl.author, evidenceCategory: evidenceCategoryOf(sealPl.proofKind, true), publicationId: sealPl.publicationId, admission: sealPl.admission, revision: sealPl.revision, bindingKey: sealPl.bindingKey, basis: ev.sealBasis.admissionFrontier, independentOfContentSelection: true, establishedBy: why });
   const outcome = (name, how) => (ok ? { outcome: name, establishedBy: `${how} AND a passing self-check (rawEvidence.selfCheck)` } : unknown());
   const txRef = `operations[cell typed-joined, operation ${ev.row.operation}]`;
   return abstractRow({
@@ -328,7 +372,7 @@ export function deriveAbstractResult({ check, replay, evidenceFor: ev }) {
       ? { lookedUpByThisRow: true, parent: "/swaps", name: "eth-usdc", physical: ok ? { folder: p.folder, name: p.name, bindingKey: p.bindingKey } : unknown() }
       : { lookedUpByThisRow: false, parent: "/swaps", name: "eth-usdc", physical: { folder: ev.coordinates.folder, name: ev.coordinates.name, bindingKey: ev.coordinates.placementBindingKey }, standing: "not charged to the point transaction; retained and joined from the seal raw replies (observations typed-joined:seal:placement-*)" },
     placementProvenance: isList && ok
-      ? { sourceStep: "A1", actor: "AUTHOR_A", actorPrincipal: p.actor, evidenceCategory: evidenceCategoryOf(p.proofKind, true), publicationId: p.publicationId, admission: p.admission, revision: p.revision, bindingKey: p.bindingKey, basis: s.basisAdmission, independentOfContentSelection: true, establishedBy: "paid: MeasurementConsumer placement window + provenance checks (PlacementWindow / PlacementMismatch / ProofCategory / EvidenceBounds otherwise) AND a passing self-check" }
+      ? { ...placementLabels(p.actor, p.publicationId), actorPrincipal: p.actor, evidenceCategory: evidenceCategoryOf(p.proofKind, true), publicationId: p.publicationId, admission: p.admission, revision: p.revision, bindingKey: p.bindingKey, basis: s.basisAdmission, independentOfContentSelection: true, establishedBy: "paid: MeasurementConsumer placement window + provenance checks (PlacementWindow / PlacementMismatch / ProofCategory / EvidenceBounds otherwise) AND a passing self-check" }
       : fromSeal(isList ? `this row's log failed its self-check (${reason}); these values are the SEPARATE seal raw replies (placementAtSeal.byLens.${ev.lens}), not this transaction` : `raw replies at the seal block: LensReader.resolveAt under ${ev.lens} (placementAtSeal.byLens.${ev.lens}) + Admissions + Evidence rows; not this transaction`),
     quoteCheck: ok ? { typeId: ev.types.QUOTE_T, head: s.selectedHead, firstAdmission: s.quoteFirstAdmission, refs: [s.pairId], mantissa: s.mantissa, scale: s.scale, observedAt: s.observedAt, noteCommitment: s.note, establishedBy: "exact Quote Type + canonical frame with exactly one reference + the sealed fixture fields (mantissa, scale, observedAt, note commitment) compared inside the consumer against the caller's inputs (WrongType / MalformedFrame / ClosureMismatch otherwise)" } : unknown(),
     pairCheck: ok ? { typeId: ev.types.PAIR_T, pairId: s.pairId, orderedRefs: [s.itemA, s.itemB], establishedBy: "exact Pair Type + canonical frame with exactly two ordered references equal to the expected Items (WrongType / ClosureMismatch otherwise)" } : unknown(),

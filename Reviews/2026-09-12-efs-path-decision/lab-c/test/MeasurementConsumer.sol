@@ -106,6 +106,12 @@ contract MeasurementConsumer {
   uint256 internal constant QUOTE_PAYLOAD = 128; // abi.encode(uint256 mantissa, uint8 scale, uint64 observedAt, bytes32 note)
   bytes32 public constant KIND_PAID_POINT = keccak256("road-c/measurement/paid-point/2");
   bytes32 public constant KIND_PAID_LIST = keccak256("road-c/measurement/paid-list/2");
+  // PlacementWindow reasons, one per disjunct of the one-row window rule, in check order
+  uint8 public constant WINDOW_NOT_COMPLETE = 1; // page.status != C_COMPLETE
+  uint8 public constant WINDOW_NOT_ENDED = 2; // the end condition failed: next.position != rawTotal or scanned != rawTotal
+  uint8 public constant WINDOW_RAW_TOTAL = 3; // rawTotal != 1 (a second placement, a duplicate or a tombstone in the scope)
+  uint8 public constant WINDOW_ITEM_COUNT = 4; // items.length != 1
+  uint8 public constant WINDOW_SELECTED_COUNT = 5; // selected != 1
 
   // ---- decoded public rows (consumer-local views) ----
   struct RecordView {
@@ -162,7 +168,11 @@ contract MeasurementConsumer {
     uint64 basisAdmission; // the admission frontier at the post-B1 seal
   }
 
-  /// Expectations of the one placement a list row must find (list rows only).
+  /// Expectations of the one placement a list row must find (list rows only). The window rule the list enforces with
+  /// these inputs asserts `rawTotal == 1`: exactly ONE raw entry in the whole (FOLDER, folder) scope summed over every
+  /// author the IndexModule ever registered there, over the lens principals — stricter than "no duplicate for this
+  /// name": any other entry under the folder (a second name, a second author's placement, a tombstone) is refused too.
+  /// That is correct for the sealed fixture, where /swaps holds exactly the single A placement.
   struct PlacementExpect {
     bytes32 folder; // /swaps
     bytes32 name; // keccak256("eth-usdc")
@@ -265,7 +275,7 @@ contract MeasurementConsumer {
   error ProofCategory(uint8 expected, uint8 observed, bytes32 importOf, uint8 sourceGrade);
   error ProofShape(uint8 proofKind, uint8 v, bytes32 r, bytes32 s);
   error RealmMismatch(uint8 field, bytes32 expected, bytes32 observed); // 1 realmId, 2 coreCodeCommitment
-  error PlacementWindow(uint8 status, uint32 rawTotal, uint32 scanned, uint256 items, uint32 selected, uint32 endPosition);
+  error PlacementWindow(uint8 reason, uint8 status, uint32 rawTotal, uint32 scanned, uint256 items, uint32 selected, uint32 endPosition); // reason = WINDOW_*
   error PlacementMismatch(uint8 field, bytes32 expected, bytes32 observed); // 1 name/status, 2 target, 3 actor, 4 revision, 5 resolution, 6 publication
   error IncompleteCoverage(uint8 status, uint64 through, uint64 basis);
   error ShortReply(uint256 length, uint256 needed);
@@ -462,8 +472,19 @@ contract MeasurementConsumer {
     pl.endPosition = page.next.position;
     pl.ended = page.next.position == page.rawTotal && page.scanned == page.rawTotal; // the end condition, independent of the status byte
     if (page.next.basisAdmission != basis) revert BasisMismatch(basis, page.next.basisAdmission);
-    if (page.status != C_COMPLETE || !pl.ended || page.rawTotal != 1 || page.items.length != 1 || page.selected != 1) {
-      revert PlacementWindow(page.status, page.rawTotal, page.scanned, page.items.length, page.selected, page.next.position);
+    uint8 reason = page.status != C_COMPLETE
+      ? WINDOW_NOT_COMPLETE
+      : !pl.ended
+        ? WINDOW_NOT_ENDED
+        : page.rawTotal != 1
+          ? WINDOW_RAW_TOTAL
+          : page.items.length != 1
+            ? WINDOW_ITEM_COUNT
+            : page.selected != 1
+              ? WINDOW_SELECTED_COUNT
+              : 0;
+    if (reason != 0) {
+      revert PlacementWindow(reason, page.status, page.rawTotal, page.scanned, page.items.length, page.selected, page.next.position);
     }
     LensReader.Item memory it = page.items[0];
     if (it.status != P_FOUND || it.name != p.name) revert PlacementMismatch(1, p.name, it.name);

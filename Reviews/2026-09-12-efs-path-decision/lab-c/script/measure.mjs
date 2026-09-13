@@ -5,9 +5,9 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   DEFAULT_CELLS, OPTIONAL_CELLS, PLACEMENT_FIELDS, SELECTION_FIELDS,
-  assertAnvilOnlyCells, assertUnrelatedCaller, checkAgreement, checkPaidRowOrdering, compareObservation,
+  assertAnvilClient, assertAnvilOnlyCells, assertUnrelatedCaller, checkAgreement, checkPaidRowOrdering,
   decodeAdmissionStatic, decodeBindingStatic, decodeEvidenceStatic, deriveAbstractResult, evidenceCategoryOf,
-  parseRunArgs, readLeftUint, selectCells, verifyPatchedRuntime,
+  paidObservationMatch, parseRunArgs, readLeftUint, selectCells, verifyPatchedRuntime,
 } from "./measure-helpers.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -293,8 +293,11 @@ async function minedFailure(cell, operation, contract, functionName, args, expec
 
 async function main() {
   if (!EVIDENCE_PATH || !path.isAbsolute(EVIDENCE_PATH)) throw new Error("EVIDENCE_PATH must be an explicit absolute run-owned path");
+  // With any sealing cell selected the chain must identify as Anvil BEFORE any state call (a non-Anvil chain fails here, not at the first evm_snapshot).
+  const clientVersion = await raw("web3_clientVersion", [], "run:client-version");
+  assertAnvilClient(clientVersion, assertAnvilOnlyCells(SELECTED_CELLS, RUN_ARGS.anvil));
   const network = await provider.getNetwork();
-  evidence.metadata = { startedAt: new Date().toISOString(), chainId: network.chainId.toString(), rpcUrl: RPC_URL, artifactRootConfigured: OUT, artifactRootReal: realpathSync(OUT), evidencePath: EVIDENCE_PATH, ethersPath: ETHERS, provider: { cacheTimeout: -1, batchMaxCount: 1, receiptTimeoutMs: RECEIPT_TIMEOUT_MS }, framing: "supplemental c32 values are abi.encode(bytes32[],bytes), never bare bytes32", run: { anvil: RUN_ARGS.anvil, cells: SELECTED_CELLS, anvilOnlyCells: assertAnvilOnlyCells(SELECTED_CELLS, RUN_ARGS.anvil) }, paidCaller: { address: paidCaller.address, derivationPath: PAID_CALLER_PATH, index: PAID_CALLER_INDEX, mnemonicSource: process.env.RUN_MNEMONIC ? "RUN_MNEMONIC (env)" : "anvil default mnemonic", standing: "fixed ephemeral account of the run mnemonic; unrelated to every fixture role (asserted before the sealed slice's setup); no secret retained" } };
+  evidence.metadata = { startedAt: new Date().toISOString(), chainId: network.chainId.toString(), rpcUrl: RPC_URL, artifactRootConfigured: OUT, artifactRootReal: realpathSync(OUT), evidencePath: EVIDENCE_PATH, ethersPath: ETHERS, provider: { cacheTimeout: -1, batchMaxCount: 1, receiptTimeoutMs: RECEIPT_TIMEOUT_MS }, framing: "supplemental c32 values are abi.encode(bytes32[],bytes), never bare bytes32", run: { anvil: RUN_ARGS.anvil, cells: SELECTED_CELLS, anvilOnlyCells: assertAnvilOnlyCells(SELECTED_CELLS, RUN_ARGS.anvil), clientVersion }, paidCaller: { address: paidCaller.address, derivationPath: PAID_CALLER_PATH, index: PAID_CALLER_INDEX, mnemonicSource: process.env.RUN_MNEMONIC ? "RUN_MNEMONIC (env)" : "anvil default mnemonic", standing: "fixed ephemeral account of the run mnemonic; unrelated to every fixture role, asserted after the global deployment and the shared setup:types-items-pair publication and before the sealed slice's A1/A2/B1 rows; no secret retained" } };
   const importLib = await deploy("ImportLib");
   links.set("src/ImportLib.sol:ImportLib", await importLib.getAddress());
   const index = await deploy("IndexModule", ["bytes32"], [ZERO]);
@@ -514,8 +517,12 @@ async function main() {
       const nonceLatest = await raw("eth_getTransactionCount", [paidCaller.address, "latest"], `${label}:caller-nonce-latest`);
       const noncePending = await raw("eth_getTransactionCount", [paidCaller.address, "pending"], `${label}:caller-nonce-pending`);
       if (nonceLatest !== noncePending) throw new Error(`${label}: the pending pool is not empty after the revert`);
-      ordering.push({ kind: "revert", block: Number(head.number), hash: head.hash, nextTimestamp, snapshot: consumed, resealed: seal.snapshot });
-      evidence.resets.push({ label, kind: "seal-restore", reverted, snapshot: consumed, newSnapshot: seal.snapshot, head: head.number, hash: head.hash, nextTimestamp, callerNonce: nonceLatest });
+      const txpool = await raw("txpool_status", [], `${label}:txpool-status`); // retained pool proof, beside the caller-nonce check
+      if (!txpool || txpool.pending === undefined || txpool.queued === undefined) throw new Error(`${label}: txpool_status returned no pending/queued counts`);
+      const pool = { pending: Number(BigInt(txpool.pending)), queued: Number(BigInt(txpool.queued)) };
+      if (pool.pending !== 0 || pool.queued !== 0) throw new Error(`${label}: the transaction pool is not empty after the revert (pending ${pool.pending}, queued ${pool.queued})`);
+      ordering.push({ kind: "revert", block: Number(head.number), hash: head.hash, nextTimestamp, snapshot: consumed, resealed: seal.snapshot, pool });
+      evidence.resets.push({ label, kind: "seal-restore", reverted, snapshot: consumed, newSnapshot: seal.snapshot, head: head.number, hash: head.hash, nextTimestamp, callerNonce: nonceLatest, txpool, pool });
     }
     const noteCommitment = id("reference quote");
     // candidate-side fixture mirror (labelled): the expectations passed to the consumer; the sealed run supplies the controller's vectors
@@ -529,6 +536,7 @@ async function main() {
     const placementOne = { folder, name, target: file, actor: A, revision: 1, admission: hw0 + 4n, bindingKey: aPlacementKey, publicationId: a1Event.publicationId, proofKind: 2, sourceGrade: 0, basisAdmission: basis, pageStatus: 1, rawTotal: 1, scanned: 1, selected: 1, endPosition: 1, ended: true, coverageStatus: 1, coverageThrough: basis }; // hydrated: a physical witness, not pinned
     const headLabels = { [lc(t.A1)]: ["QUOTE_A1", "A1"], [lc(t.A2)]: ["QUOTE_A2", "A2"], [lc(t.B1)]: ["QUOTE_B1", "B1"] };
     const authorLabels = { [lc(A)]: ["AUTHOR_A", "EOA principal (mnemonic index 1)"], [lc(B)]: ["AUTHOR_B", "contract principal (Producer)"] };
+    const publicationLabels = { [lc(a1Event.publicationId)]: "A1", [lc(a2Event.publicationId)]: "A2", [lc(b1Event.publicationId)]: "B1" }; // sourceStep labels are derived from the observed publicationId, never assumed
     slice.fixtureMirror = { standing: "candidate-side mirror of the fixture map (this runner's inputs to the consumer), never the independent expectation manifest", ids: { file, folder, name, A1: t.A1, A2: t.A2, B1: t.B1, PAIR, ITEM_ETH, ITEM_USDC, QUOTE_T, PAIR_T, ITEM_T, aPlacementKey, aHeadKey: bindingKey(A, PURPOSE.HEAD, file), bHeadKey: bindingKey(B, PURPOSE.HEAD, file) }, bodies: { a1Body: t.a1Body, a2Body: t.a2Body, b1Body: t.b1Body }, publications: { A1: a1Event.publicationId, A2: a2Event.publicationId, B1: b1Event.publicationId }, expect: serialize({ expectA, expectB, placementExpect }), expectedObservations: serialize({ selA, selB, placementOne, placementNone }) };
     const ab = lens(A, B), ba = lens(B, A);
     const paidRows = [
@@ -557,7 +565,7 @@ async function main() {
         executed, seal: { number: seal.number, hash: seal.hash, timestamp: seal.timestamp, snapshot: seal.snapshot }, sealBasis,
         chainId: evidence.metadata.chainId, addrs: { ledger: ledgerAddr, reader: readerAddr, index: await index.getAddress(), importLib: await importLib.getAddress(), consumer: consumerAddr },
         consumerCodehash: consumerArtifact ? consumerArtifact.runtimeHash : "UNKNOWN", ledgerCodehash: ledgerArtifact ? ledgerArtifact.runtimeHash : "UNKNOWN",
-        coordinates: { subject: file, folder, name, placementBindingKey: aPlacementKey }, placementAtSeal, types: { QUOTE_T, PAIR_T, ITEM_T }, headLabels, authorLabels,
+        coordinates: { subject: file, folder, name, placementBindingKey: aPlacementKey }, placementAtSeal, types: { QUOTE_T, PAIR_T, ITEM_T }, headLabels, authorLabels, publicationLabels,
         caller: { address: paidCaller.address, derivationPath: PAID_CALLER_PATH, index: PAID_CALLER_INDEX }, profile: PROFILE_LABEL,
       };
       row.paidRow = { operation: pr.operation, lens: pr.lens, caller: paidCaller.address, consumer: `MeasurementConsumer.${pr.fn} (stateless; one PaidObserved log with the concrete observations: the paid rows' instrumentation overhead, disclosed, never subtracted)`, armInputs: { standing: "this runner's candidate-side mirror of the fixture map, including the expected head record ids passed as Expect.expectedHead; the sealed run supplies the independently authored vectors (appendix pin 4)", expect: serialize(pr.args[3]), placementExpect: pr.args.length > 4 ? serialize(pr.args[4]) : null } };
@@ -590,12 +598,20 @@ async function main() {
     if (slice.mismatches) throw new Error(`${cell}: ${slice.mismatches} paid row(s) failed the candidate self-check; their abstractResult rows are UNKNOWN and retained`);
   }
 
-  // The PaidObserved log of a paid row (parsed from the raw receipt) and an eth_call replay of the same calldata FROM the
-  // same caller at the receipt block, both compared field by field with this runner's candidate-side expectation.
+  // The PaidObserved log of a paid row (parsed from the raw receipt; parse errors retained) and an eth_call replay of the
+  // same calldata FROM the same caller at the receipt block. The pure verdict (paidObservationMatch) requires the row's
+  // expected kind, a commitment RECOMPUTED as keccak256(abi.encode(kind, Selection, Placement)) from the decoded log fields
+  // equal to the logged one, log == replay, and both equal to this runner's candidate-side expectation field by field.
+  const PAID_KINDS = { PAID_POINT: id("road-c/measurement/paid-point/2"), PAID_LIST: id("road-c/measurement/paid-list/2") }; // MeasurementConsumer.KIND_PAID_POINT / KIND_PAID_LIST
+  const paidObservedEvent = consumer.interface.getEvent("PaidObserved");
+  if (!paidObservedEvent || paidObservedEvent.inputs.length !== 4) throw new Error("MeasurementConsumer artifact has no PaidObserved(kind, commitment, selection, placement) event");
+  const coerceForAbi = (param, value) => (param.baseType === "tuple" ? param.components.map((c) => coerceForAbi(c, value[c.name])) : param.baseType === "bool" ? value === true || value === "true" : value);
+  const recomputeCommitment = (kind, selection, placement) => ethers.keccak256(coder.encode(["bytes32", paidObservedEvent.inputs[2], paidObservedEvent.inputs[3]], [kind, coerceForAbi(paidObservedEvent.inputs[2], selection), coerceForAbi(paidObservedEvent.inputs[3], placement)]));
   async function paidObservationCheck(cell, pr, row, consumerAddr) {
     const label = `${cell}:${pr.key}`;
     const ifc = consumer.interface;
-    const parsed = (row.exact.receipt.logs ?? []).filter((l) => lc(l.address) === lc(consumerAddr)).map((l) => { try { return ifc.parseLog({ topics: l.topics, data: l.data }); } catch { return null; } }).filter((p) => p && p.name === "PaidObserved");
+    const parseErrors = [];
+    const parsed = (row.exact.receipt.logs ?? []).filter((l) => lc(l.address) === lc(consumerAddr)).map((l) => { try { return ifc.parseLog({ topics: l.topics, data: l.data }); } catch (error) { parseErrors.push(String(error?.message ?? error)); return null; } }).filter((p) => p && p.name === "PaidObserved");
     const fromLog = parsed.length === 1 ? { kind: parsed[0].args.kind, commitment: parsed[0].args.commitment, selection: pickFields(parsed[0].args.selection, SELECTION_FIELDS), placement: pickFields(parsed[0].args.placement, PLACEMENT_FIELDS) } : null;
     const replayObs = { rpcId: null, from: paidCaller.address, blockTag: row.exact.receipt.blockNumber, returnData: null, error: null, stage: `${label}:replay` };
     try {
@@ -612,12 +628,8 @@ async function main() {
     } catch (error) {
       fromReplay = { error: String(error?.message ?? error) };
     }
-    const selectionFromLog = compareObservation(fromLog ? fromLog.selection : null, pr.selection);
-    const placementFromLog = compareObservation(fromLog ? fromLog.placement : null, pr.placement);
-    const replayOk = !!fromReplay && !fromReplay.error && compareObservation(fromReplay.selection, pr.selection).ok && (fromReplay.placement === null ? pr.operation === "PAID_POINT" : compareObservation(fromReplay.placement, pr.placement).ok);
-    const commitmentsAgree = !!fromLog && !!fromReplay && !fromReplay.error && lc(fromLog.commitment) === lc(fromReplay.commitment);
-    const match = parsed.length === 1 && selectionFromLog.ok && placementFromLog.ok && replayOk && commitmentsAgree;
-    return { label: `${label}/paid-observed`, kind: "paid-observed", standing: "candidate self-check: the log and the replay against this runner's candidate-side expectation; never the independent oracle", block: row.exact.receipt.blockNumber, logCount: parsed.length, fromLog, fromReplay, replayObs, selectionFromLog, placementFromLog, replayOk, commitmentsAgree, match };
+    const verdict = paidObservationMatch({ logCount: parsed.length, fromLog, fromReplay, operation: pr.operation, expectedKind: PAID_KINDS[pr.operation], expectedSelection: pr.selection, expectedPlacement: pr.placement, recompute: recomputeCommitment });
+    return { label: `${label}/paid-observed`, kind: "paid-observed", standing: "candidate self-check: expected kind, recomputed commitment == logged commitment, log == replay, both == this runner's candidate-side expectation; never the independent oracle", block: row.exact.receipt.blockNumber, fromLog, fromReplay, replayObs, parseErrors, ...verdict };
   }
 
   // OPTIONAL paired control (non-default; selected only by its exact --cells key): the identical A1 batch minus the FOLDER

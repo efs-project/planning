@@ -11,6 +11,7 @@ import {
   PLACEMENT_FIELDS,
   SELECTION_FIELDS,
   abstractRow,
+  assertAnvilClient,
   assertAnvilOnlyCells,
   assertUnrelatedCaller,
   checkAgreement,
@@ -22,6 +23,7 @@ import {
   decodeRecordStatic,
   deriveAbstractResult,
   evidenceCategoryOf,
+  paidObservationMatch,
   parseRunArgs,
   readLeftUint,
   selectCells,
@@ -174,6 +176,13 @@ test("assertAnvilOnlyCells refuses the sealing cells without --anvil and leaves 
   assert.deepEqual(ANVIL_ONLY_CELLS, ["typed-joined", "typed-joined/a1-without-placement"]);
 });
 
+test("assertAnvilClient requires an anvil/ client version whenever a sealing cell is selected, before any state call", () => {
+  assert.equal(assertAnvilClient("anvil/v1.7.1", ["typed-joined"]), "anvil/v1.7.1");
+  assert.equal(assertAnvilClient("Geth/v1.14.0", []), "Geth/v1.14.0");
+  assert.throws(() => assertAnvilClient("Geth/v1.14.0", ["typed-joined"]), /typed-joined require an owned Anvil chain; web3_clientVersion is Geth\/v1.14.0/);
+  assert.throws(() => assertAnvilClient(undefined, ["typed-joined/a1-without-placement"]), /web3_clientVersion is undefined/);
+});
+
 test("assertUnrelatedCaller catches the deployer, an author, the producer or any lab contract (case-insensitive) and a non-address", () => {
   const caller = "0x90F79bf6EB2c4f870365E785982E1f101E93b906";
   const related = { deployer: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", "AUTHOR_A wallet": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "contract producer": "0x5FbDB2315678afecb367f032d93F642f64180aa3" };
@@ -194,7 +203,7 @@ test("compareObservation compares every expected field after normalisation and r
 });
 
 const SEAL = { kind: "seal", block: 40, hash: "0xseal", timestamp: 1000 };
-const revertOk = { kind: "revert", block: 40, hash: "0xseal", nextTimestamp: 1001 };
+const revertOk = { kind: "revert", block: 40, hash: "0xseal", nextTimestamp: 1001, pool: { pending: 0, queued: 0 } };
 const txAt = (label, o = {}) => ({ kind: "tx", label, block: 41, parentHash: "0xseal", timestamp: 1001, txIndex: 0, txCount: 1, onlyTx: true, ...o });
 const retained = (label) => ({ kind: "retained", label });
 
@@ -223,6 +232,9 @@ test("checkPaidRowOrdering catches every ordering violation", () => {
   assert.throws(() => checkPaidRowOrdering([{ kind: "seal", block: 40, hash: "0xseal" }, revertOk, txAt("a"), retained("a")]), /carries no timestamp/);
   assert.throws(() => checkPaidRowOrdering([SEAL]), /no paid row/);
   assert.throws(() => checkPaidRowOrdering([SEAL, revertOk, { kind: "what", label: "a" }]), /unknown event kind what/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, { ...revertOk, pool: { pending: 1, queued: 0 } }, txAt("a"), retained("a")]), /transaction pool is not empty after the revert \(pending 1, queued 0\)/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, { ...revertOk, pool: { pending: 0, queued: 2 } }, txAt("a"), retained("a")]), /pending 0, queued 2/);
+  assert.throws(() => checkPaidRowOrdering([SEAL, { kind: "revert", block: 40, hash: "0xseal", nextTimestamp: 1001 }, txAt("a"), retained("a")]), /carries no txpool_status proof/);
 });
 
 const ZERO32 = `0x${"00".repeat(32)}`;
@@ -247,6 +259,7 @@ function evidenceFixture(o = {}) {
     types: { QUOTE_T: `0x${"51".repeat(32)}`, PAIR_T: `0x${"52".repeat(32)}`, ITEM_T: `0x${"53".repeat(32)}` },
     headLabels: { [A2]: ["QUOTE_A2", "A2"], [B1]: ["QUOTE_B1", "B1"] },
     authorLabels: { [A]: ["AUTHOR_A", "EOA principal (mnemonic index 1)"], [B]: ["AUTHOR_B", "contract principal (Producer)"] },
+    publicationLabels: { [`0x${"71".repeat(32)}`]: "A1", [`0x${"70".repeat(32)}`]: "A2", [`0x${"72".repeat(32)}`]: "B1" },
     caller: { address: REPLAY.from, derivationPath: "m/44'/60'/0'/0/3", index: 3 },
     profile: "road-c-lab Store-only MUD probe",
     ...o,
@@ -354,6 +367,62 @@ test("deriveAbstractResult collapses every derived field to UNKNOWN with the rea
   assert.match(disagree.support.reason, /replay commitment differs from the log commitment/);
   const fieldMismatch = deriveAbstractResult({ check: goodCheck({ match: false }), replay: REPLAY, evidenceFor: evidenceFixture() });
   assert.match(fieldMismatch.selection.reason, /log observation differs from the runner expectation/);
+});
+
+test("deriveAbstractResult derives the placement provenance labels from the observed actor and publication, never from constants", () => {
+  const row = deriveAbstractResult({ check: goodCheck(), replay: REPLAY, evidenceFor: evidenceFixture() });
+  assert.equal(row.placementProvenance.sourceStep, "A1");
+  assert.equal(row.placementProvenance.actor, "AUTHOR_A");
+  assert.match(row.placementProvenance.labelledBy, /publicationLabels/);
+  const strayPub = { ...placementOne, publicationId: `0x${"ee".repeat(32)}` };
+  assert.throws(() => deriveAbstractResult({ check: goodCheck({ fromLog: { kind: "0xk", commitment: "0xc0", selection: selectionA, placement: strayPub }, fromReplay: { commitment: "0xc0", selection: selectionA, placement: strayPub } }), replay: REPLAY, evidenceFor: evidenceFixture() }), /no fixture label for placement publication/);
+  const strayActor = { ...placementOne, actor: `0x${"ee".repeat(32)}` };
+  assert.throws(() => deriveAbstractResult({ check: goodCheck({ fromLog: { kind: "0xk", commitment: "0xc0", selection: selectionA, placement: strayActor }, fromReplay: { commitment: "0xc0", selection: selectionA, placement: strayActor } }), replay: REPLAY, evidenceFor: evidenceFixture() }), /no fixture label for placement actor/);
+  const sealFromB = evidenceFixture({ operation: "PAID_POINT", placementAtSeal: { ...evidenceFixture().placementAtSeal, publicationId: `0x${"72".repeat(32)}`, author: B } });
+  const pointRow = deriveAbstractResult({ check: goodCheck({ fromLog: { kind: "0xk", commitment: "0xc0", selection: selectionA, placement: placementNone }, fromReplay: { commitment: "0xc0", selection: selectionA, placement: placementNone } }), replay: REPLAY, evidenceFor: sealFromB });
+  assert.equal(pointRow.placementProvenance.sourceStep, "B1");
+  assert.equal(pointRow.placementProvenance.actor, "AUTHOR_B");
+  assert.throws(() => deriveAbstractResult({ check: goodCheck({ fromLog: { kind: "0xk", commitment: "0xc0", selection: selectionA, placement: placementNone }, fromReplay: { commitment: "0xc0", selection: selectionA, placement: placementNone } }), replay: REPLAY, evidenceFor: evidenceFixture({ operation: "PAID_POINT", placementAtSeal: { ...evidenceFixture().placementAtSeal, publicationId: `0x${"ee".repeat(32)}` } }) }), /no fixture label for placement publication/);
+  const withReason = deriveAbstractResult({ check: goodCheck({ match: false, reason: "log kind 0xbad != expected 0xgood for PAID_LIST" }), replay: REPLAY, evidenceFor: evidenceFixture() });
+  assert.equal(withReason.selection.reason, "log kind 0xbad != expected 0xgood for PAID_LIST");
+});
+
+test("paidObservationMatch requires the expected kind, a recomputed commitment equal to the logged one, log == replay == expectation, and reports each failure", () => {
+  const KIND = `0x${"ab".repeat(32)}`;
+  const recompute = (kind, selection, placement) => `0x${kind.slice(2, 6)}${selection.selectedHead.slice(2, 6)}${placement.ended === "true" ? "01" : "00"}`;
+  const logged = recompute(KIND, selectionA, placementOne);
+  const base = { logCount: 1, fromLog: { kind: KIND, commitment: logged, selection: selectionA, placement: placementOne }, fromReplay: { commitment: logged, selection: selectionA, placement: placementOne }, operation: "PAID_LIST", expectedKind: KIND, expectedSelection: selectionA, expectedPlacement: placementOne, recompute };
+  const good = paidObservationMatch(base);
+  assert.equal(good.match, true);
+  assert.equal(good.kindOk, true);
+  assert.equal(good.commitmentRecomputedOk, true);
+  assert.equal(good.recomputedCommitment, logged);
+  assert.equal(good.reason, null);
+  const wrongKind = paidObservationMatch({ ...base, expectedKind: `0x${"cd".repeat(32)}` });
+  assert.equal(wrongKind.match, false);
+  assert.match(wrongKind.reason, /log kind .* != expected .* for PAID_LIST/);
+  const forged = paidObservationMatch({ ...base, fromLog: { ...base.fromLog, commitment: "0x1234" }, fromReplay: { ...base.fromReplay, commitment: "0x1234" } });
+  assert.equal(forged.match, false);
+  assert.equal(forged.commitmentRecomputedOk, false);
+  assert.match(forged.reason, /recomputed commitment .* != logged 0x1234/);
+  const replayDiffers = paidObservationMatch({ ...base, fromReplay: { ...base.fromReplay, selection: { ...selectionA, mantissa: "1" } } });
+  assert.equal(replayDiffers.match, false);
+  assert.match(replayDiffers.reason, /replay observation differs from the runner expectation/);
+  const replayCommitment = paidObservationMatch({ ...base, fromReplay: { ...base.fromReplay, commitment: "0x9999" } });
+  assert.match(replayCommitment.reason, /replay commitment differs from the log commitment/);
+  const logDiffers = paidObservationMatch({ ...base, expectedSelection: { ...selectionA, scale: "7" }, fromReplay: { ...base.fromReplay, selection: { ...selectionA, scale: "7" } } });
+  assert.match(logDiffers.reason, /log observation differs from the runner expectation/);
+  const noLog = paidObservationMatch({ ...base, logCount: 0, fromLog: null });
+  assert.match(noLog.reason, /no single PaidObserved log \(logCount 0\)/);
+  const undecodable = paidObservationMatch({ ...base, fromReplay: { error: "could not decode" } });
+  assert.match(undecodable.reason, /replay did not decode/);
+  const pointNoPlacement = paidObservationMatch({ ...base, operation: "PAID_POINT", fromReplay: { commitment: logged, selection: selectionA, placement: null } });
+  assert.equal(pointNoPlacement.match, true);
+  const listNoPlacement = paidObservationMatch({ ...base, fromReplay: { commitment: logged, selection: selectionA, placement: null } });
+  assert.equal(listNoPlacement.match, false);
+  const throwing = paidObservationMatch({ ...base, recompute: () => { throw new Error("bad tuple"); } });
+  assert.equal(throwing.commitmentRecomputedOk, false);
+  assert.match(throwing.reason, /bad tuple/);
 });
 
 test("deriveAbstractResult refuses an unlabelled selected head or author rather than guessing a label", () => {
