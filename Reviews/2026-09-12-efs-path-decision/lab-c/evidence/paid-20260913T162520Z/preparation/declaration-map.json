@@ -1,0 +1,1842 @@
+{
+  "kind": "C_NATIVE_PREPARATION_DECLARATION_MAP",
+  "sourceRevision": "2ca7349e5d683c3ff10651c0fc106c10da946145",
+  "status": "DRAFT_NOT_AN_INPUT_SEAL",
+  "evidenceCeiling": "RPC_OBSERVED",
+  "chainCalls": 0,
+  "independence": "Only the neutral expectation manifest, shared paid appendix, allowlisted contract source declarations and fresh compiler artifacts. No script/measure.mjs, fixture implementations, candidate result packets, or run outputs.",
+  "deploymentOrder": "AWAITING_ROOT_CONFIRMATION; roles order below is NOT an allocation",
+  "artifacts": [
+    {
+      "role": "ImportLib",
+      "sourcePath": "src/ImportLib.sol",
+      "sourceSha256": "f6adaba1ef83d74d6cc1fef3378f119f7b7563b97e4620cab3b3011405b29ad1",
+      "artifactPath": "/tmp/efs-c-readiness-build-20260913.NoPDle/out/ImportLib.sol/ImportLib.json",
+      "artifactSha256": "470e6a809823545366ea09020bc146ba1e8f0daa518f8ada2617bba99cbfcc03",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "constructor": {
+        "inputs": []
+      },
+      "abiCanonicalJsonSha256": "4afd68e9c6191f330071bf765ab032c7b56c71b72ebdd0c0e278fc6a0e0dd76f",
+      "creationBytes": 19941,
+      "runtimeBytes": 19909,
+      "creationLinkReferences": {},
+      "runtimeLinkReferences": {},
+      "immutables": [
+        {
+          "id": "library_deploy_address",
+          "declaration": {
+            "name": "library_deploy_address"
+          },
+          "offsets": [
+            {
+              "start": 39,
+              "length": 32
+            }
+          ]
+        }
+      ],
+      "abiEntries": [
+        {
+          "type": "event",
+          "name": "Imported"
+        },
+        {
+          "type": "event",
+          "name": "Published"
+        },
+        {
+          "type": "event",
+          "name": "Store_SetRecord"
+        },
+        {
+          "type": "event",
+          "name": "Store_SpliceStaticData"
+        },
+        {
+          "type": "error",
+          "name": "AcceptorDrift"
+        },
+        {
+          "type": "error",
+          "name": "AcceptorHasNoCode"
+        },
+        {
+          "type": "error",
+          "name": "AcceptorRuleMismatch"
+        },
+        {
+          "type": "error",
+          "name": "AlreadyAdmitted"
+        },
+        {
+          "type": "error",
+          "name": "AuthorMismatch"
+        },
+        {
+          "type": "error",
+          "name": "BadActionCount"
+        },
+        {
+          "type": "error",
+          "name": "BadAuthorization"
+        },
+        {
+          "type": "error",
+          "name": "BadDigestKind"
+        },
+        {
+          "type": "error",
+          "name": "BadObligations"
+        },
+        {
+          "type": "error",
+          "name": "BadProfile"
+        },
+        {
+          "type": "error",
+          "name": "BadSignature"
+        },
+        {
+          "type": "error",
+          "name": "BadSourceEvidence"
+        },
+        {
+          "type": "error",
+          "name": "BadTagStance"
+        },
+        {
+          "type": "error",
+          "name": "BodiesLengthMismatch"
+        },
+        {
+          "type": "error",
+          "name": "BodyHashMismatch"
+        },
+        {
+          "type": "error",
+          "name": "Expired"
+        },
+        {
+          "type": "error",
+          "name": "ImportOnlyViaImportPublication"
+        },
+        {
+          "type": "error",
+          "name": "IndexCodeChanged"
+        },
+        {
+          "type": "error",
+          "name": "IndexNotAttached"
+        },
+        {
+          "type": "error",
+          "name": "MissingRecord"
+        },
+        {
+          "type": "error",
+          "name": "MissingSubject"
+        },
+        {
+          "type": "error",
+          "name": "NonceNotIncreasing"
+        },
+        {
+          "type": "error",
+          "name": "NotAnImport"
+        },
+        {
+          "type": "error",
+          "name": "RecordBodyRequired"
+        },
+        {
+          "type": "error",
+          "name": "RefCountMismatch"
+        },
+        {
+          "type": "error",
+          "name": "RefMissing"
+        },
+        {
+          "type": "error",
+          "name": "RefWrongType"
+        },
+        {
+          "type": "error",
+          "name": "Rejected"
+        },
+        {
+          "type": "error",
+          "name": "Slice_OutOfBounds"
+        },
+        {
+          "type": "error",
+          "name": "StaleCas"
+        },
+        {
+          "type": "error",
+          "name": "StructuralInvalid"
+        },
+        {
+          "type": "error",
+          "name": "SubjectExists"
+        },
+        {
+          "type": "error",
+          "name": "SubjectMismatch"
+        },
+        {
+          "type": "error",
+          "name": "TypeExists"
+        },
+        {
+          "type": "error",
+          "name": "UnknownKind"
+        },
+        {
+          "type": "error",
+          "name": "UnknownPurpose"
+        },
+        {
+          "type": "error",
+          "name": "UnknownType"
+        },
+        {
+          "type": "error",
+          "name": "UnsupportedSourceProof"
+        }
+      ]
+    },
+    {
+      "role": "IndexModule",
+      "sourcePath": "src/IndexModule.sol",
+      "sourceSha256": "699f10a1ebd00d62b227df5e630fa543dfd09777a0d7a8c033ec002b7a29494b",
+      "artifactPath": "/tmp/efs-c-readiness-build-20260913.NoPDle/out/IndexModule.sol/IndexModule.json",
+      "artifactSha256": "4d2090c071f6c9f2b5dc2e363cc063100c341320c828212f6f238ed899d061aa",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "constructor": {
+        "type": "constructor",
+        "inputs": [
+          {
+            "name": "poison",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ],
+        "stateMutability": "nonpayable"
+      },
+      "abiCanonicalJsonSha256": "4136995926591b1d34093899fd9c7d0aba4b253fa42ab1d9335506c626b89e81",
+      "creationBytes": 22790,
+      "runtimeBytes": 10303,
+      "creationLinkReferences": {},
+      "runtimeLinkReferences": {},
+      "immutables": [
+        {
+          "id": "3835",
+          "declaration": {
+            "name": "deployer",
+            "type": "address"
+          },
+          "offsets": [
+            {
+              "start": 2097,
+              "length": 32
+            },
+            {
+              "start": 3414,
+              "length": 32
+            }
+          ]
+        },
+        {
+          "id": "3837",
+          "declaration": {
+            "name": "poisonConcept",
+            "type": "bytes32"
+          },
+          "offsets": [
+            {
+              "start": 3593,
+              "length": 32
+            },
+            {
+              "start": 4865,
+              "length": 32
+            }
+          ]
+        }
+      ],
+      "abiEntries": [
+        {
+          "type": "constructor"
+        },
+        {
+          "type": "function",
+          "name": "COV_COMPLETE"
+        },
+        {
+          "type": "function",
+          "name": "COV_PARTIAL"
+        },
+        {
+          "type": "function",
+          "name": "COV_UNKNOWN"
+        },
+        {
+          "type": "function",
+          "name": "FAMILY_BACKLINKS"
+        },
+        {
+          "type": "function",
+          "name": "FAMILY_BY_AUTHOR"
+        },
+        {
+          "type": "function",
+          "name": "FAMILY_BY_TYPE"
+        },
+        {
+          "type": "function",
+          "name": "FAMILY_HISTORY"
+        },
+        {
+          "type": "function",
+          "name": "FAMILY_OCCURRENCES"
+        },
+        {
+          "type": "function",
+          "name": "FAMILY_OPTIONAL_DIGEST"
+        },
+        {
+          "type": "function",
+          "name": "FAMILY_SCOPES"
+        },
+        {
+          "type": "function",
+          "name": "attach"
+        },
+        {
+          "type": "function",
+          "name": "coverage"
+        },
+        {
+          "type": "function",
+          "name": "deployer"
+        },
+        {
+          "type": "function",
+          "name": "generation"
+        },
+        {
+          "type": "function",
+          "name": "getDynamicField"
+        },
+        {
+          "type": "function",
+          "name": "getDynamicFieldLength"
+        },
+        {
+          "type": "function",
+          "name": "getDynamicFieldSlice"
+        },
+        {
+          "type": "function",
+          "name": "getField"
+        },
+        {
+          "type": "function",
+          "name": "getField"
+        },
+        {
+          "type": "function",
+          "name": "getFieldLayout"
+        },
+        {
+          "type": "function",
+          "name": "getFieldLength"
+        },
+        {
+          "type": "function",
+          "name": "getFieldLength"
+        },
+        {
+          "type": "function",
+          "name": "getKeySchema"
+        },
+        {
+          "type": "function",
+          "name": "getRecord"
+        },
+        {
+          "type": "function",
+          "name": "getRecord"
+        },
+        {
+          "type": "function",
+          "name": "getStaticField"
+        },
+        {
+          "type": "function",
+          "name": "getValueSchema"
+        },
+        {
+          "type": "function",
+          "name": "ledger"
+        },
+        {
+          "type": "function",
+          "name": "ledgerCodehash"
+        },
+        {
+          "type": "function",
+          "name": "obligationsId"
+        },
+        {
+          "type": "function",
+          "name": "onPublication"
+        },
+        {
+          "type": "function",
+          "name": "poisonConcept"
+        },
+        {
+          "type": "function",
+          "name": "storeVersion"
+        },
+        {
+          "type": "event",
+          "name": "HelloStore"
+        },
+        {
+          "type": "event",
+          "name": "Store_DeleteRecord"
+        },
+        {
+          "type": "event",
+          "name": "Store_SetRecord"
+        },
+        {
+          "type": "event",
+          "name": "Store_SpliceDynamicData"
+        },
+        {
+          "type": "event",
+          "name": "Store_SpliceStaticData"
+        },
+        {
+          "type": "error",
+          "name": "AlreadyAttached"
+        },
+        {
+          "type": "error",
+          "name": "BadAttachment"
+        },
+        {
+          "type": "error",
+          "name": "EncodedLengths_InvalidLength"
+        },
+        {
+          "type": "error",
+          "name": "FieldLayout_Empty"
+        },
+        {
+          "type": "error",
+          "name": "FieldLayout_InvalidStaticDataLength"
+        },
+        {
+          "type": "error",
+          "name": "FieldLayout_StaticLengthDoesNotFitInAWord"
+        },
+        {
+          "type": "error",
+          "name": "FieldLayout_StaticLengthIsNotZero"
+        },
+        {
+          "type": "error",
+          "name": "FieldLayout_StaticLengthIsZero"
+        },
+        {
+          "type": "error",
+          "name": "FieldLayout_TooManyDynamicFields"
+        },
+        {
+          "type": "error",
+          "name": "FieldLayout_TooManyFields"
+        },
+        {
+          "type": "error",
+          "name": "IndexPoisoned"
+        },
+        {
+          "type": "error",
+          "name": "NotDeployer"
+        },
+        {
+          "type": "error",
+          "name": "NotLedger"
+        },
+        {
+          "type": "error",
+          "name": "NotReciprocal"
+        },
+        {
+          "type": "error",
+          "name": "Schema_InvalidLength"
+        },
+        {
+          "type": "error",
+          "name": "Schema_StaticTypeAfterDynamicType"
+        },
+        {
+          "type": "error",
+          "name": "Slice_OutOfBounds"
+        },
+        {
+          "type": "error",
+          "name": "Store_IndexOutOfBounds"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidBounds"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidFieldNamesLength"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidKeyNamesLength"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidResourceType"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidSplice"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidStaticDataLength"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidValueSchemaDynamicLength"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidValueSchemaLength"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidValueSchemaStaticLength"
+        },
+        {
+          "type": "error",
+          "name": "Store_TableAlreadyExists"
+        },
+        {
+          "type": "error",
+          "name": "Store_TableNotFound"
+        }
+      ]
+    },
+    {
+      "role": "Ledger",
+      "sourcePath": "src/Ledger.sol",
+      "sourceSha256": "186e4a6542af1807435675985d48ba7665f65f064c537d937e5822f033a42b13",
+      "artifactPath": "/tmp/efs-c-readiness-build-20260913.NoPDle/out/Ledger.sol/Ledger.json",
+      "artifactSha256": "b8867e9df4031b4f5d8c809ff668c09b0217c4cfb8bfe7ff3509bda17f4a78dc",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "constructor": {
+        "type": "constructor",
+        "inputs": [
+          {
+            "name": "index_",
+            "type": "address",
+            "internalType": "contract IIndexModule"
+          }
+        ],
+        "stateMutability": "nonpayable"
+      },
+      "abiCanonicalJsonSha256": "0a42a99ae3aeef4a06fd4ce3d90e61690b8c30d05afd97d248b9442ca269bf38",
+      "creationBytes": 37951,
+      "runtimeBytes": 23204,
+      "creationLinkReferences": {
+        "src/ImportLib.sol": {
+          "ImportLib": [
+            {
+              "start": 16876,
+              "length": 20
+            }
+          ]
+        }
+      },
+      "runtimeLinkReferences": {
+        "src/ImportLib.sol": {
+          "ImportLib": [
+            {
+              "start": 2385,
+              "length": 20
+            }
+          ]
+        }
+      },
+      "immutables": [
+        {
+          "id": "4429",
+          "declaration": {
+            "name": "index",
+            "type": "contract IIndexModule"
+          },
+          "offsets": [
+            {
+              "start": 945,
+              "length": 32
+            },
+            {
+              "start": 6539,
+              "length": 32
+            }
+          ]
+        },
+        {
+          "id": "4431",
+          "declaration": {
+            "name": "indexCodehash",
+            "type": "bytes32"
+          },
+          "offsets": [
+            {
+              "start": 3682,
+              "length": 32
+            },
+            {
+              "start": 6586,
+              "length": 32
+            }
+          ]
+        },
+        {
+          "id": "4433",
+          "declaration": {
+            "name": "realmId",
+            "type": "bytes32"
+          },
+          "offsets": [
+            {
+              "start": 1235,
+              "length": 32
+            },
+            {
+              "start": 1295,
+              "length": 32
+            },
+            {
+              "start": 2865,
+              "length": 32
+            },
+            {
+              "start": 6504,
+              "length": 32
+            }
+          ]
+        }
+      ],
+      "abiEntries": [
+        {
+          "type": "constructor"
+        },
+        {
+          "type": "function",
+          "name": "coreCodeCommitment"
+        },
+        {
+          "type": "function",
+          "name": "decodeBody"
+        },
+        {
+          "type": "function",
+          "name": "decodeTypeBody"
+        },
+        {
+          "type": "function",
+          "name": "domainSeparator"
+        },
+        {
+          "type": "function",
+          "name": "getDynamicField"
+        },
+        {
+          "type": "function",
+          "name": "getDynamicFieldLength"
+        },
+        {
+          "type": "function",
+          "name": "getDynamicFieldSlice"
+        },
+        {
+          "type": "function",
+          "name": "getField"
+        },
+        {
+          "type": "function",
+          "name": "getField"
+        },
+        {
+          "type": "function",
+          "name": "getFieldLayout"
+        },
+        {
+          "type": "function",
+          "name": "getFieldLength"
+        },
+        {
+          "type": "function",
+          "name": "getFieldLength"
+        },
+        {
+          "type": "function",
+          "name": "getKeySchema"
+        },
+        {
+          "type": "function",
+          "name": "getRecord"
+        },
+        {
+          "type": "function",
+          "name": "getRecord"
+        },
+        {
+          "type": "function",
+          "name": "getStaticField"
+        },
+        {
+          "type": "function",
+          "name": "getValueSchema"
+        },
+        {
+          "type": "function",
+          "name": "highWater"
+        },
+        {
+          "type": "function",
+          "name": "importPublication"
+        },
+        {
+          "type": "function",
+          "name": "index"
+        },
+        {
+          "type": "function",
+          "name": "indexCodehash"
+        },
+        {
+          "type": "function",
+          "name": "intentDigest"
+        },
+        {
+          "type": "function",
+          "name": "publishNative"
+        },
+        {
+          "type": "function",
+          "name": "publishSigned"
+        },
+        {
+          "type": "function",
+          "name": "realmId"
+        },
+        {
+          "type": "function",
+          "name": "realmOrigin"
+        },
+        {
+          "type": "function",
+          "name": "rulesEpoch"
+        },
+        {
+          "type": "function",
+          "name": "storeVersion"
+        },
+        {
+          "type": "event",
+          "name": "HelloStore"
+        },
+        {
+          "type": "event",
+          "name": "Published"
+        },
+        {
+          "type": "event",
+          "name": "Store_DeleteRecord"
+        },
+        {
+          "type": "event",
+          "name": "Store_SetRecord"
+        },
+        {
+          "type": "event",
+          "name": "Store_SpliceDynamicData"
+        },
+        {
+          "type": "event",
+          "name": "Store_SpliceStaticData"
+        },
+        {
+          "type": "error",
+          "name": "AcceptorDrift"
+        },
+        {
+          "type": "error",
+          "name": "AcceptorHasNoCode"
+        },
+        {
+          "type": "error",
+          "name": "AcceptorRuleMismatch"
+        },
+        {
+          "type": "error",
+          "name": "AlreadyAdmitted"
+        },
+        {
+          "type": "error",
+          "name": "AuthorMismatch"
+        },
+        {
+          "type": "error",
+          "name": "BadActionCount"
+        },
+        {
+          "type": "error",
+          "name": "BadAttachment"
+        },
+        {
+          "type": "error",
+          "name": "BadDigestKind"
+        },
+        {
+          "type": "error",
+          "name": "BadObligations"
+        },
+        {
+          "type": "error",
+          "name": "BadProfile"
+        },
+        {
+          "type": "error",
+          "name": "BadSignature"
+        },
+        {
+          "type": "error",
+          "name": "BadTagStance"
+        },
+        {
+          "type": "error",
+          "name": "BodiesLengthMismatch"
+        },
+        {
+          "type": "error",
+          "name": "BodyHashMismatch"
+        },
+        {
+          "type": "error",
+          "name": "Expired"
+        },
+        {
+          "type": "error",
+          "name": "FieldLayout_Empty"
+        },
+        {
+          "type": "error",
+          "name": "FieldLayout_InvalidStaticDataLength"
+        },
+        {
+          "type": "error",
+          "name": "FieldLayout_StaticLengthDoesNotFitInAWord"
+        },
+        {
+          "type": "error",
+          "name": "FieldLayout_StaticLengthIsNotZero"
+        },
+        {
+          "type": "error",
+          "name": "FieldLayout_StaticLengthIsZero"
+        },
+        {
+          "type": "error",
+          "name": "FieldLayout_TooManyDynamicFields"
+        },
+        {
+          "type": "error",
+          "name": "FieldLayout_TooManyFields"
+        },
+        {
+          "type": "error",
+          "name": "ImportOnlyViaImportPublication"
+        },
+        {
+          "type": "error",
+          "name": "IndexCodeChanged"
+        },
+        {
+          "type": "error",
+          "name": "IndexNotAttached"
+        },
+        {
+          "type": "error",
+          "name": "MissingRecord"
+        },
+        {
+          "type": "error",
+          "name": "MissingSubject"
+        },
+        {
+          "type": "error",
+          "name": "NonceNotIncreasing"
+        },
+        {
+          "type": "error",
+          "name": "RecordBodyRequired"
+        },
+        {
+          "type": "error",
+          "name": "RefCountMismatch"
+        },
+        {
+          "type": "error",
+          "name": "RefMissing"
+        },
+        {
+          "type": "error",
+          "name": "RefWrongType"
+        },
+        {
+          "type": "error",
+          "name": "Rejected"
+        },
+        {
+          "type": "error",
+          "name": "Schema_InvalidLength"
+        },
+        {
+          "type": "error",
+          "name": "Schema_StaticTypeAfterDynamicType"
+        },
+        {
+          "type": "error",
+          "name": "Slice_OutOfBounds"
+        },
+        {
+          "type": "error",
+          "name": "StaleCas"
+        },
+        {
+          "type": "error",
+          "name": "Store_IndexOutOfBounds"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidBounds"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidFieldNamesLength"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidKeyNamesLength"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidResourceType"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidStaticDataLength"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidValueSchemaDynamicLength"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidValueSchemaLength"
+        },
+        {
+          "type": "error",
+          "name": "Store_InvalidValueSchemaStaticLength"
+        },
+        {
+          "type": "error",
+          "name": "Store_TableAlreadyExists"
+        },
+        {
+          "type": "error",
+          "name": "Store_TableNotFound"
+        },
+        {
+          "type": "error",
+          "name": "StructuralInvalid"
+        },
+        {
+          "type": "error",
+          "name": "SubjectExists"
+        },
+        {
+          "type": "error",
+          "name": "SubjectMismatch"
+        },
+        {
+          "type": "error",
+          "name": "TypeExists"
+        },
+        {
+          "type": "error",
+          "name": "UnknownKind"
+        },
+        {
+          "type": "error",
+          "name": "UnknownPurpose"
+        },
+        {
+          "type": "error",
+          "name": "UnknownType"
+        }
+      ]
+    },
+    {
+      "role": "LensReader",
+      "sourcePath": "src/LensReader.sol",
+      "sourceSha256": "457b0ba8810fa6847cecaaa835c0479742a4c5fa8f8533fbcd308b623624f9c9",
+      "artifactPath": "/tmp/efs-c-readiness-build-20260913.NoPDle/out/LensReader.sol/LensReader.json",
+      "artifactSha256": "081227a5322f3b282a0064800bd7657fd971447c24b36072a8ba3af5dc7c4a3c",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "constructor": {
+        "type": "constructor",
+        "inputs": [
+          {
+            "name": "ledger_",
+            "type": "address",
+            "internalType": "contract IStoreRead"
+          },
+          {
+            "name": "index_",
+            "type": "address",
+            "internalType": "contract IStoreRead"
+          }
+        ],
+        "stateMutability": "nonpayable"
+      },
+      "abiCanonicalJsonSha256": "ee9fb0b0e4b365673c57301b6f6e848527f15320beca9eff256884fbf56cb554",
+      "creationBytes": 10843,
+      "runtimeBytes": 10585,
+      "creationLinkReferences": {},
+      "runtimeLinkReferences": {},
+      "immutables": [
+        {
+          "id": "5090",
+          "declaration": {
+            "name": "ledger",
+            "type": "contract IStoreRead"
+          },
+          "offsets": [
+            {
+              "start": 2445,
+              "length": 32
+            },
+            {
+              "start": 3147,
+              "length": 32
+            },
+            {
+              "start": 4844,
+              "length": 32
+            },
+            {
+              "start": 6288,
+              "length": 32
+            },
+            {
+              "start": 6426,
+              "length": 32
+            },
+            {
+              "start": 6754,
+              "length": 32
+            },
+            {
+              "start": 7784,
+              "length": 32
+            }
+          ]
+        },
+        {
+          "id": "5093",
+          "declaration": {
+            "name": "index",
+            "type": "contract IStoreRead"
+          },
+          "offsets": [
+            {
+              "start": 1294,
+              "length": 32
+            },
+            {
+              "start": 1960,
+              "length": 32
+            },
+            {
+              "start": 3056,
+              "length": 32
+            },
+            {
+              "start": 4157,
+              "length": 32
+            },
+            {
+              "start": 6094,
+              "length": 32
+            },
+            {
+              "start": 6666,
+              "length": 32
+            },
+            {
+              "start": 7268,
+              "length": 32
+            },
+            {
+              "start": 7881,
+              "length": 32
+            }
+          ]
+        }
+      ],
+      "abiEntries": [
+        {
+          "type": "constructor"
+        },
+        {
+          "type": "function",
+          "name": "C_COMPLETE"
+        },
+        {
+          "type": "function",
+          "name": "C_PARTIAL"
+        },
+        {
+          "type": "function",
+          "name": "C_UNKNOWN"
+        },
+        {
+          "type": "function",
+          "name": "MODE_NO_TIEBREAK"
+        },
+        {
+          "type": "function",
+          "name": "MODE_ORDERED"
+        },
+        {
+          "type": "function",
+          "name": "P_ABSENT_PROVEN"
+        },
+        {
+          "type": "function",
+          "name": "P_CONFLICT"
+        },
+        {
+          "type": "function",
+          "name": "P_FOUND"
+        },
+        {
+          "type": "function",
+          "name": "P_UNKNOWN"
+        },
+        {
+          "type": "function",
+          "name": "highWater"
+        },
+        {
+          "type": "function",
+          "name": "history"
+        },
+        {
+          "type": "function",
+          "name": "index"
+        },
+        {
+          "type": "function",
+          "name": "ledger"
+        },
+        {
+          "type": "function",
+          "name": "lensHash"
+        },
+        {
+          "type": "function",
+          "name": "list"
+        },
+        {
+          "type": "function",
+          "name": "listTagged"
+        },
+        {
+          "type": "function",
+          "name": "resolve"
+        },
+        {
+          "type": "function",
+          "name": "resolveAt"
+        },
+        {
+          "type": "error",
+          "name": "CursorMismatch"
+        },
+        {
+          "type": "error",
+          "name": "EmptyLens"
+        },
+        {
+          "type": "error",
+          "name": "Slice_OutOfBounds"
+        },
+        {
+          "type": "error",
+          "name": "StaleCursor"
+        }
+      ]
+    },
+    {
+      "role": "PassAcceptor",
+      "sourcePath": "test/FixtureActors.sol",
+      "sourceSha256": "282a9ee920a012a38588db6e05bba45f8fc193e4509ba3f6adcf73f7f8c40bc7",
+      "artifactPath": "/tmp/efs-c-readiness-build-20260913.NoPDle/out/FixtureActors.sol/PassAcceptor.json",
+      "artifactSha256": "71debddc5d1f95be87a954704acdad37c50747c9de2d0d6ee602b889012ff5aa",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "constructor": {
+        "inputs": []
+      },
+      "abiCanonicalJsonSha256": "ac1c7f6ed81edee3bf257b8a157b31151ea152710ac423385eb7a57a1e5619ba",
+      "creationBytes": 210,
+      "runtimeBytes": 186,
+      "creationLinkReferences": {},
+      "runtimeLinkReferences": {},
+      "immutables": [],
+      "abiEntries": [
+        {
+          "type": "function",
+          "name": "accept"
+        }
+      ]
+    },
+    {
+      "role": "QuoteAcceptorV1",
+      "sourcePath": "test/FixtureActors.sol",
+      "sourceSha256": "282a9ee920a012a38588db6e05bba45f8fc193e4509ba3f6adcf73f7f8c40bc7",
+      "artifactPath": "/tmp/efs-c-readiness-build-20260913.NoPDle/out/FixtureActors.sol/QuoteAcceptorV1.json",
+      "artifactSha256": "9e63546044a7d065976fb6b2fca583d7ea98badf0fa71d6691b49722d5685266",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "constructor": {
+        "inputs": []
+      },
+      "abiCanonicalJsonSha256": "2f7d091efa5ead2d0d183953ff11cfc479fcc1b1d2df8cca97b30f3218a652c1",
+      "creationBytes": 636,
+      "runtimeBytes": 610,
+      "creationLinkReferences": {},
+      "runtimeLinkReferences": {},
+      "immutables": [],
+      "abiEntries": [
+        {
+          "type": "function",
+          "name": "MAX_MANTISSA"
+        },
+        {
+          "type": "function",
+          "name": "accept"
+        }
+      ]
+    },
+    {
+      "role": "Producer",
+      "sourcePath": "test/FixtureActors.sol",
+      "sourceSha256": "282a9ee920a012a38588db6e05bba45f8fc193e4509ba3f6adcf73f7f8c40bc7",
+      "artifactPath": "/tmp/efs-c-readiness-build-20260913.NoPDle/out/FixtureActors.sol/Producer.json",
+      "artifactSha256": "9f7a20e6ef3d46a2bb1ca9aea905598780a1a9722400d362ce6835ce6f254096",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "constructor": {
+        "inputs": []
+      },
+      "abiCanonicalJsonSha256": "819eda2d6fd99022c83b0a89e81bd27ea722aa2a2bb8eb5e4cf1827900474848",
+      "creationBytes": 2681,
+      "runtimeBytes": 2644,
+      "creationLinkReferences": {},
+      "runtimeLinkReferences": {},
+      "immutables": [],
+      "abiEntries": [
+        {
+          "type": "function",
+          "name": "flipProbe"
+        },
+        {
+          "type": "function",
+          "name": "importInto"
+        },
+        {
+          "type": "function",
+          "name": "principal"
+        },
+        {
+          "type": "function",
+          "name": "probeApproves"
+        },
+        {
+          "type": "function",
+          "name": "publish"
+        }
+      ]
+    },
+    {
+      "role": "MeasurementConsumer",
+      "sourcePath": "test/MeasurementConsumer.sol",
+      "sourceSha256": "26053a88a087eebdcdab43085d84bacbcb95b9d2fc6908d39a28bbffef6c32af",
+      "artifactPath": "/tmp/efs-c-readiness-build-20260913.NoPDle/out/MeasurementConsumer.sol/MeasurementConsumer.json",
+      "artifactSha256": "1170a3011d58a519415749e1d36b71a84000c505e134098f3006b24d46291ec4",
+      "compiler": {
+        "version": "0.8.30+commit.73712a01"
+      },
+      "constructor": {
+        "inputs": []
+      },
+      "abiCanonicalJsonSha256": "35132c29f5ea97d6a5c4092ec2f0e6c0ddf765398040b54d808190a031e7b231",
+      "creationBytes": 15471,
+      "runtimeBytes": 15445,
+      "creationLinkReferences": {},
+      "runtimeLinkReferences": {},
+      "immutables": [],
+      "abiEntries": [
+        {
+          "type": "function",
+          "name": "KIND_PAID_LIST"
+        },
+        {
+          "type": "function",
+          "name": "KIND_PAID_POINT"
+        },
+        {
+          "type": "function",
+          "name": "PROOF_EOA_SIG"
+        },
+        {
+          "type": "function",
+          "name": "PROOF_NATIVE"
+        },
+        {
+          "type": "function",
+          "name": "WINDOW_ITEM_COUNT"
+        },
+        {
+          "type": "function",
+          "name": "WINDOW_NOT_COMPLETE"
+        },
+        {
+          "type": "function",
+          "name": "WINDOW_NOT_ENDED"
+        },
+        {
+          "type": "function",
+          "name": "WINDOW_RAW_TOTAL"
+        },
+        {
+          "type": "function",
+          "name": "WINDOW_SELECTED_COUNT"
+        },
+        {
+          "type": "function",
+          "name": "paidList"
+        },
+        {
+          "type": "function",
+          "name": "paidListFramed"
+        },
+        {
+          "type": "function",
+          "name": "paidPoint"
+        },
+        {
+          "type": "function",
+          "name": "paidPointFramed"
+        },
+        {
+          "type": "event",
+          "name": "ListCommitted"
+        },
+        {
+          "type": "event",
+          "name": "PaidObserved"
+        },
+        {
+          "type": "event",
+          "name": "PointCommitted"
+        },
+        {
+          "type": "error",
+          "name": "AdmissionShape"
+        },
+        {
+          "type": "error",
+          "name": "AuthorMismatch"
+        },
+        {
+          "type": "error",
+          "name": "BasisMismatch"
+        },
+        {
+          "type": "error",
+          "name": "ClosureMismatch"
+        },
+        {
+          "type": "error",
+          "name": "EvidenceBounds"
+        },
+        {
+          "type": "error",
+          "name": "IncompleteCoverage"
+        },
+        {
+          "type": "error",
+          "name": "IncompleteSelection"
+        },
+        {
+          "type": "error",
+          "name": "MalformedAdmission"
+        },
+        {
+          "type": "error",
+          "name": "MalformedEvidence"
+        },
+        {
+          "type": "error",
+          "name": "MalformedFrame"
+        },
+        {
+          "type": "error",
+          "name": "MalformedRecord"
+        },
+        {
+          "type": "error",
+          "name": "NotAtBasis"
+        },
+        {
+          "type": "error",
+          "name": "NotSelected"
+        },
+        {
+          "type": "error",
+          "name": "PlacementMismatch"
+        },
+        {
+          "type": "error",
+          "name": "PlacementWindow"
+        },
+        {
+          "type": "error",
+          "name": "ProofCategory"
+        },
+        {
+          "type": "error",
+          "name": "ProofShape"
+        },
+        {
+          "type": "error",
+          "name": "ReaderLedgerMismatch"
+        },
+        {
+          "type": "error",
+          "name": "RealmMismatch"
+        },
+        {
+          "type": "error",
+          "name": "RecordAbsent"
+        },
+        {
+          "type": "error",
+          "name": "SelectionMismatch"
+        },
+        {
+          "type": "error",
+          "name": "ShortReply"
+        },
+        {
+          "type": "error",
+          "name": "WrongAuthorContext"
+        },
+        {
+          "type": "error",
+          "name": "WrongPayloadHash"
+        },
+        {
+          "type": "error",
+          "name": "WrongPayloadLength"
+        },
+        {
+          "type": "error",
+          "name": "WrongRecordId"
+        },
+        {
+          "type": "error",
+          "name": "WrongRecordType"
+        },
+        {
+          "type": "error",
+          "name": "WrongReference"
+        },
+        {
+          "type": "error",
+          "name": "WrongSelection"
+        },
+        {
+          "type": "error",
+          "name": "WrongType"
+        }
+      ]
+    }
+  ],
+  "fieldOrder": {
+    "Lens": [
+      {
+        "name": "principals",
+        "type": "bytes32[]"
+      },
+      {
+        "name": "mode",
+        "type": "uint8"
+      }
+    ],
+    "Expect": [
+      {
+        "name": "subject",
+        "type": "bytes32"
+      },
+      {
+        "name": "expectedHead",
+        "type": "bytes32"
+      },
+      {
+        "name": "selectedRevision",
+        "type": "uint32"
+      },
+      {
+        "name": "selectedAuthor",
+        "type": "bytes32"
+      },
+      {
+        "name": "selectedProofKind",
+        "type": "uint8"
+      },
+      {
+        "name": "quoteType",
+        "type": "bytes32"
+      },
+      {
+        "name": "pairType",
+        "type": "bytes32"
+      },
+      {
+        "name": "itemType",
+        "type": "bytes32"
+      },
+      {
+        "name": "pairId",
+        "type": "bytes32"
+      },
+      {
+        "name": "itemA",
+        "type": "bytes32"
+      },
+      {
+        "name": "itemB",
+        "type": "bytes32"
+      },
+      {
+        "name": "mantissa",
+        "type": "uint256"
+      },
+      {
+        "name": "scale",
+        "type": "uint8"
+      },
+      {
+        "name": "observedAt",
+        "type": "uint64"
+      },
+      {
+        "name": "noteCommitment",
+        "type": "bytes32"
+      },
+      {
+        "name": "basisAdmission",
+        "type": "uint64"
+      }
+    ],
+    "PlacementExpect": [
+      {
+        "name": "folder",
+        "type": "bytes32"
+      },
+      {
+        "name": "name",
+        "type": "bytes32"
+      },
+      {
+        "name": "actor",
+        "type": "bytes32"
+      },
+      {
+        "name": "proofKind",
+        "type": "uint8"
+      },
+      {
+        "name": "publicationId",
+        "type": "bytes32"
+      },
+      {
+        "name": "revision",
+        "type": "uint32"
+      },
+      {
+        "name": "budget",
+        "type": "uint32"
+      }
+    ],
+    "Selection": [
+      {
+        "name": "basisAdmission",
+        "type": "uint64"
+      },
+      {
+        "name": "indexGeneration",
+        "type": "uint32"
+      },
+      {
+        "name": "rulesEpoch",
+        "type": "uint32"
+      },
+      {
+        "name": "coreCodeCommitment",
+        "type": "bytes32"
+      },
+      {
+        "name": "realmId",
+        "type": "bytes32"
+      },
+      {
+        "name": "lensHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "subject",
+        "type": "bytes32"
+      },
+      {
+        "name": "selectedHead",
+        "type": "bytes32"
+      },
+      {
+        "name": "selectedRevision",
+        "type": "uint32"
+      },
+      {
+        "name": "selectedAdmission",
+        "type": "uint64"
+      },
+      {
+        "name": "selectedBindingKey",
+        "type": "bytes32"
+      },
+      {
+        "name": "selectedPublication",
+        "type": "bytes32"
+      },
+      {
+        "name": "selectedAuthor",
+        "type": "bytes32"
+      },
+      {
+        "name": "selectedProofKind",
+        "type": "uint8"
+      },
+      {
+        "name": "selectedSourceGrade",
+        "type": "uint8"
+      },
+      {
+        "name": "quoteFirstAdmission",
+        "type": "uint64"
+      },
+      {
+        "name": "pairId",
+        "type": "bytes32"
+      },
+      {
+        "name": "itemA",
+        "type": "bytes32"
+      },
+      {
+        "name": "itemB",
+        "type": "bytes32"
+      },
+      {
+        "name": "mantissa",
+        "type": "uint256"
+      },
+      {
+        "name": "scale",
+        "type": "uint8"
+      },
+      {
+        "name": "observedAt",
+        "type": "uint64"
+      },
+      {
+        "name": "note",
+        "type": "bytes32"
+      }
+    ],
+    "Placement": [
+      {
+        "name": "folder",
+        "type": "bytes32"
+      },
+      {
+        "name": "name",
+        "type": "bytes32"
+      },
+      {
+        "name": "target",
+        "type": "bytes32"
+      },
+      {
+        "name": "actor",
+        "type": "bytes32"
+      },
+      {
+        "name": "revision",
+        "type": "uint32"
+      },
+      {
+        "name": "admission",
+        "type": "uint64"
+      },
+      {
+        "name": "bindingKey",
+        "type": "bytes32"
+      },
+      {
+        "name": "publicationId",
+        "type": "bytes32"
+      },
+      {
+        "name": "proofKind",
+        "type": "uint8"
+      },
+      {
+        "name": "sourceGrade",
+        "type": "uint8"
+      },
+      {
+        "name": "basisAdmission",
+        "type": "uint64"
+      },
+      {
+        "name": "pageStatus",
+        "type": "uint8"
+      },
+      {
+        "name": "rawTotal",
+        "type": "uint32"
+      },
+      {
+        "name": "scanned",
+        "type": "uint32"
+      },
+      {
+        "name": "hydrated",
+        "type": "uint32"
+      },
+      {
+        "name": "selected",
+        "type": "uint32"
+      },
+      {
+        "name": "endPosition",
+        "type": "uint32"
+      },
+      {
+        "name": "ended",
+        "type": "bool"
+      },
+      {
+        "name": "coverageStatus",
+        "type": "uint8"
+      },
+      {
+        "name": "coverageThrough",
+        "type": "uint64"
+      }
+    ]
+  },
+  "openInputChoices": [
+    "eight deployment roles and CREATE nonce order",
+    "Type shape bytes32 values (four declared Types requested)",
+    "Item payload bytes",
+    "File and folder salts or coordinates",
+    "Tag concept encoding",
+    "action order and publication grouping",
+    "author nonces and deadlines",
+    "list page budget",
+    "exact matched rollback operation and trigger"
+  ],
+  "expectedInitial": {
+    "admissionFrontier": 0,
+    "authorNonces": 0,
+    "fixtureTypes": "absent",
+    "fixtureRecords": "absent",
+    "fixtureSubjects": "absent",
+    "fixtureBindings": "absent",
+    "fixtureIndexEntries": "empty",
+    "rulesEpoch": 1,
+    "indexGeneration": 1
+  },
+  "expectedPostB1": {
+    "frontier": "derive from sealed successful action count; do not copy from runner",
+    "currentHeads": [
+      "QUOTE_A2",
+      "QUOTE_B1"
+    ],
+    "history": [
+      "QUOTE_A1",
+      "QUOTE_A2",
+      "QUOTE_B1"
+    ],
+    "onePlacementActor": "AUTHOR_A",
+    "onePlacementSource": "A1",
+    "placementRevision": 1,
+    "authorAHeadRevision": 2,
+    "authorBHeadRevision": 1,
+    "sourceGrade": 0
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "standing": "Evidence-only retention. Absolute paths are historical run/preparation context; source pin predates this evidence addition. No private test signing keys retained. Replication elsewhere requires remapping retained local paths and rebuilding at the named compiled-source pin.",
+  "runId": "c-paid-20260913T162520552Z",
+  "runSource": "58dd3d78e8efa8e4490b035bdde5502b75adc9e3",
+  "inputSha256": "16739ae05cb8a77c16b4c0edc9b5acd3a4b9b5074510a1d6d69c42aeed3f335c",
+  "files": [
+    {
+      "name": "measure.json",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/measure.json",
+      "bytes": 3362250,
+      "sha256": "da598a768c277cbad219d69f0e2dfb28e900cac4af1b62fc8fd7caa5676597e5"
+    },
+    {
+      "name": "inputs.json",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/inputs.json",
+      "bytes": 224784,
+      "sha256": "16739ae05cb8a77c16b4c0edc9b5acd3a4b9b5074510a1d6d69c42aeed3f335c"
+    },
+    {
+      "name": "launch.mjs",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/launch.mjs",
+      "bytes": 7797,
+      "sha256": "70d6c605213949910956345e75f7236db2d66ec4e49c58596e89a5fd23ee3379"
+    },
+    {
+      "name": "launch-guards.mjs",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/launch-guards.mjs",
+      "bytes": 1072,
+      "sha256": "6c9d5dae90f748b94ef7d774fc3226434cd5e6d272666c111cc7fb891d5338c2"
+    },
+    {
+      "name": "launch-guards.test.mjs",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/launch-guards.test.mjs",
+      "bytes": 1417,
+      "sha256": "95405a1a6b76824a804b0fc342a5504aebbddbb2889eb5c6b3d5d3df3340045a"
+    },
+    {
+      "name": "launch-record.json",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/launch-record.json",
+      "bytes": 2341,
+      "sha256": "8ec00ad647d410ad58411ad2e101856860c2ef3a69369a8502371628c027077e"
+    },
+    {
+      "name": "runner.log",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/runner.log",
+      "bytes": 3362220,
+      "sha256": "3c7ee1a1f6d115483fe178ea2fe22d80f0139d77cb1e99aa3b440a7e134b2dc9"
+    },
+    {
+      "name": "anvil.log",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/anvil.log",
+      "bytes": 61601,
+      "sha256": "dd3980c34f7574da3310565ddfd660fd5f4c30eb9c9b9b64b60882c7ec94ad39"
+    },
+    {
+      "name": "audit-signed-receipts.mjs",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/audit-signed-receipts.mjs",
+      "bytes": 3306,
+      "sha256": "b32ca2f9e594b0351d73e25c3d1ae2675dc4bf6312aa506cfc51c034765217c2"
+    },
+    {
+      "name": "signed-receipt-check.json",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/signed-receipt-check.json",
+      "bytes": 5353,
+      "sha256": "8a75703718f68f331cb4d8cca9ae41a7d94fa68042c5d9bceff624d8cf709037"
+    },
+    {
+      "name": "retain-packet.mjs",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/retain-packet.mjs",
+      "bytes": 2655,
+      "sha256": "a56096c92e221437906bec9215292f95318eb4a250df2eb7653c38f8859ed39b"
+    },
+    {
+      "name": "controller/ack-afterB1.json",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/controller/ack-afterB1.json",
+      "bytes": 84268,
+      "sha256": "2ba4343f9f51d7d4c769fbd73835e288c1265847abeb606c66ef91830fa4ebba"
+    },
+    {
+      "name": "controller/ack-beforeFixture.json",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/controller/ack-beforeFixture.json",
+      "bytes": 73906,
+      "sha256": "7a237fafc75acb87d434e54c1333be9100426f0fea62cc8daf44d90dad88074d"
+    },
+    {
+      "name": "controller/context-afterB1.json",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/controller/context-afterB1.json",
+      "bytes": 524,
+      "sha256": "280e1869dc65c308fad70cf7581d79d7fd22e8a344efc1f34d0e28f597b85813"
+    },
+    {
+      "name": "controller/context-beforeFixture.json",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/controller/context-beforeFixture.json",
+      "bytes": 536,
+      "sha256": "8bf40c2ad43db998b11837867e471353e3ebaba923c32ed9ded0941e12aef2d4"
+    },
+    {
+      "name": "controller/observations-afterB1.json",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/controller/observations-afterB1.json",
+      "bytes": 325029,
+      "sha256": "acda3ebe2749a591afeccbe42ed894fe4b55ede563263f62d0c802ddce13732c"
+    },
+    {
+      "name": "controller/observations-beforeFixture.json",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/controller/observations-beforeFixture.json",
+      "bytes": 309491,
+      "sha256": "658e0e2763049f8be8f2b2aa64b0b6efb243fb3856e9b8e41edf6fe3a5e79173"
+    },
+    {
+      "name": "controller/stderr-afterB1.log",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/controller/stderr-afterB1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "controller/stderr-beforeFixture.log",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/controller/stderr-beforeFixture.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "controller/stdout-afterB1.log",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/controller/stdout-afterB1.log",
+      "bytes": 77,
+      "sha256": "e27c8b2fb97717eafa2464a7f5827aa599502f1625cdf3a25e227b529839fec1"
+    },
+    {
+      "name": "controller/stdout-beforeFixture.log",
+      "source": "/tmp/efs-paid-c-run-20260913.YxKavf/controller/stdout-beforeFixture.log",
+      "bytes": 83,
+      "sha256": "64d36124eb46824f8b6f85d69b296a28ff41b23eb8da514da1a107b28120b491"
+    },
+    {
+      "name": "preparation/declaration-map.json",
+      "source": "/tmp/efs-c-independent-prep-20260913.DM1226/declaration-map.json",
+      "bytes": 41649,
+      "sha256": "9b24612c9cd1185c5abf3a981536f28174db12d56a540487c53a6d6c407b874d"
+    },
+    {
+      "name": "preparation/declaration-map.mjs",
+      "source": "/tmp/efs-c-independent-prep-20260913.DM1226/declaration-map.mjs",
+      "bytes": 4582,
+      "sha256": "d51c86598b1b88f2f3e8c3b938fb55dad637b47fbd200b16e1726e2eb810ca64"
+    },
+    {
+      "name": "preparation/derive-inputs.mjs",
+      "source": "/tmp/efs-c-independent-prep-20260913.DM1226/derive-inputs.mjs",
+      "bytes": 22608,
+      "sha256": "d6abc11b73e06312fbac749633edf0b8e241c26fca3392856ad8a8f0e4e9d1fb"
+    },
+    {
+      "name": "preparation/verify-inputs.mjs",
+      "source": "/tmp/efs-c-independent-prep-20260913.DM1226/verify-inputs.mjs",
+      "bytes": 4210,
+      "sha256": "b1ff5abe1f20a75a2230f10b8a4182dbb4f30440795ab2fcd9e64e88bc7ef0a3"
+    },
+    {
+      "name": "preparation/input-check-map.md",
+      "source": "/tmp/efs-c-independent-prep-20260913.DM1226/input-check-map.md",
+      "bytes": 7270,
+      "sha256": "de1ab5048897f770b703895c8762c8cb0c63504e99c28a17993359908717f953"
+    },
+    {
+      "name": "preparation/reviewed-input-handoff.md",
+      "source": "/tmp/efs-c-independent-prep-20260913.DM1226/reviewed-input-handoff.md",
+      "bytes": 1418,
+      "sha256": "9a8befa7d4df39f6cd20efc5e531e51d7724bbccbee967b2c065b3427a72e058"
+    },
+    {
+      "name": "source-review.md",
+      "source": "/tmp/efs-c-gate-source-review-20260913.md",
+      "bytes": 4169,
+      "sha256": "c66eb955e2b222b1f8d61e9252948e9ceb9d75567fd41406244a8be69805eff0"
+    },
+    {
+      "name": "packet-review.md",
+      "source": "/tmp/efs-c-paid-packet-review-20260913.md",
+      "bytes": 5865,
+      "sha256": "e6eff1b8f370398bf691140c42df257e32b14eee73de1495e9015878c517e59d"
+    },
+    {
+      "name": "cost-interpretation.md",
+      "source": "/tmp/efs-bc-cost-interpretation-20260913.md",
+      "bytes": 5445,
+      "sha256": "120386806d16917419946033e6d0737634e1851dfea2ce225a68834b58291d60"
+    }
+  ]
+}

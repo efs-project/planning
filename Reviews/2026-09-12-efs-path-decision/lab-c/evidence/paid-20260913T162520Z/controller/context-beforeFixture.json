@@ -1,0 +1,14 @@
+{
+  "schema": "efs-lab-c/controller-context/1",
+  "stage": "beforeFixture",
+  "runId": "c-paid-20260913T162520552Z",
+  "runSource": "58dd3d78e8efa8e4490b035bdde5502b75adc9e3",
+  "inputsSha256": "16739ae05cb8a77c16b4c0edc9b5acd3a4b9b5074510a1d6d69c42aeed3f335c",
+  "rpcUrl": "http://127.0.0.1:63453",
+  "block": {
+    "number": "0x9",
+    "hash": "0xe6a150c49cc1cc2a4d76b1f1934ba3f27a010271d1ea65d2c0874e7cf39c3101"
+  },
+  "snapshot": "0x0",
+  "ackPath": "/private/tmp/efs-paid-c-run-20260913.YxKavf/controller/ack-beforeFixture.json"
+}

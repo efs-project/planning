@@ -1,0 +1,156 @@
+{
+  "standing": "Offline signed-transaction and retained receipt/header consistency, not authenticated chain-state proof; aggregate gas is across restored branches, not one canonical-chain bill.",
+  "transactions": 18,
+  "deploymentGas": "29780466",
+  "allRowsGas": "39670956",
+  "rows": [
+    {
+      "operation": "deploy:ImportLib",
+      "status": 1,
+      "gas": "4356044",
+      "signedHash": "0xdd236a28c652df5aaa82d20cf351707c3b3e02fc95332952c5f64d87228e3e8b",
+      "recoveredSender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "block": "0x1"
+    },
+    {
+      "operation": "deploy:IndexModule",
+      "status": 1,
+      "gas": "6793577",
+      "signedHash": "0x104edb4071cf4a241e57f48cbe373a98292e2fa6ae1bdcff938a325c5e2b5fdf",
+      "recoveredSender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "block": "0x2"
+    },
+    {
+      "operation": "deploy:Ledger",
+      "status": 1,
+      "gas": "11972902",
+      "signedHash": "0x2cad057a4fe5c0c4b649afb472ed61f0ee50ecdf4aa738a9773ffde3f84913d0",
+      "recoveredSender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "block": "0x3"
+    },
+    {
+      "operation": "deploy:LensReader",
+      "status": 1,
+      "gas": "2340528",
+      "signedHash": "0x16ac1cb3a2970fd59e95a5afc338dcb760a11a5634972f88c5457bf2e5df95c6",
+      "recoveredSender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "block": "0x5"
+    },
+    {
+      "operation": "deploy:PassAcceptor",
+      "status": 1,
+      "gas": "93667",
+      "signedHash": "0xb10a3e381a2f299a7b653107b365dee74e2176e0550fc00c2c24c91addf07664",
+      "recoveredSender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "block": "0x6"
+    },
+    {
+      "operation": "deploy:QuoteAcceptorV1",
+      "status": 1,
+      "gas": "185034",
+      "signedHash": "0x27f0f126572a3af9c1dde9df68f006b0dd395abfe82c42ca81ec714e45dbed90",
+      "recoveredSender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "block": "0x7"
+    },
+    {
+      "operation": "deploy:Producer",
+      "status": 1,
+      "gas": "647360",
+      "signedHash": "0x045883905c04e846dfdcf4b229ed7202e0998ac9aa8d2f156234909c544e2a6e",
+      "recoveredSender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "block": "0x8"
+    },
+    {
+      "operation": "deploy:MeasurementConsumer",
+      "status": 1,
+      "gas": "3391354",
+      "signedHash": "0x49e7ac0e8a73f8bc77e48a6228067868e105ff7d2498a4da4ff32e0c062cdd25",
+      "recoveredSender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "block": "0x9"
+    },
+    {
+      "operation": "attach-index",
+      "status": 1,
+      "gas": "69974",
+      "signedHash": "0x937f2f7c73e6827ea66b96fb554f7f050d1624b8470d2dc6b993a67e1f10c2f6",
+      "recoveredSender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "block": "0x4"
+    },
+    {
+      "operation": "types-items-pair",
+      "status": 1,
+      "gas": "3667483",
+      "signedHash": "0xf03cab4b8770371ec2de523b9aef7cc6c86ba555e3b27ebc3ba19574b191bd9d",
+      "recoveredSender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "block": "0xa"
+    },
+    {
+      "operation": "A1-create",
+      "status": 1,
+      "gas": "2400503",
+      "signedHash": "0x3231710deeaed015be7cebcfee665d382758b10148e1acd53afea878937de496",
+      "recoveredSender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "block": "0xb"
+    },
+    {
+      "operation": "A2-edit",
+      "status": 1,
+      "gas": "1112430",
+      "signedHash": "0xf2dbe8c382467c0ec1c2bdfaea69b2df8f42b4222f7db6193f8841bd4c7647f0",
+      "recoveredSender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "block": "0xc"
+    },
+    {
+      "operation": "B1-create",
+      "status": 1,
+      "gas": "1275405",
+      "signedHash": "0xa3d948656ae1a794ecd2eb26a843694d4cae23ee7474ce81d673ba15573ea50d",
+      "recoveredSender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "block": "0xd"
+    },
+    {
+      "operation": "paid-point-A",
+      "status": 1,
+      "gas": "252517",
+      "signedHash": "0x00497e794ceec8c78433de324ac687dbe6f6c431e2d0a148813c0d278dfd2820",
+      "recoveredSender": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+      "block": "0xe"
+    },
+    {
+      "operation": "paid-list-A",
+      "status": 1,
+      "gas": "391043",
+      "signedHash": "0xe7ae52d0e1bce8001c27c54f23cd69baa7e0040092e5fe2f4cdb2cc3e97e095e",
+      "recoveredSender": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+      "block": "0xe"
+    },
+    {
+      "operation": "paid-point-B",
+      "status": 1,
+      "gas": "252457",
+      "signedHash": "0x6a6f8faec09cf8c3cb2e712b00236214c3703794749e2152e1786341f7143d36",
+      "recoveredSender": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+      "block": "0xe"
+    },
+    {
+      "operation": "paid-list-B",
+      "status": 1,
+      "gas": "405632",
+      "signedHash": "0x976f67bcf04a33833a0b86c2702c5a9cf21c39416370bd1cc25d6378a367d270",
+      "recoveredSender": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+      "block": "0xe"
+    },
+    {
+      "operation": "exact-retry-A1",
+      "status": 0,
+      "gas": "63046",
+      "signedHash": "0x7504ec1280dec635392c8b3f570fd8df2760e6e9845a3c5b71f177309a2b7e2c",
+      "recoveredSender": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "block": "0xf"
+    }
+  ],
+  "mutationChecks": [
+    "changed receipt transaction hash rejected",
+    "changed reported gas rejected"
+  ]
+}

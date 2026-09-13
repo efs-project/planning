@@ -1,0 +1,84 @@
+{
+  "runId": "c-paid-20260913T162520552Z",
+  "source": "58dd3d78e8efa8e4490b035bdde5502b75adc9e3",
+  "compiledSource": "2ca7349e5d683c3ff10651c0fc106c10da946145",
+  "buildManifestHash": "3be180dc4e9ab1874e2ba49c6ff3f50c4c0559e49439484f60bf7d4723adccf6",
+  "artifactCount": 113,
+  "inputHash": "16739ae05cb8a77c16b4c0edc9b5acd3a4b9b5074510a1d6d69c42aeed3f335c",
+  "controllerHash": "9338e35288adc11b0a310f50244fb5295e48c64d482f1174bc1c4cfdba598a53",
+  "rpcUrl": "http://127.0.0.1:63453",
+  "artifacts": "/tmp/efs-c-readiness-build-20260913.NoPDle/out",
+  "lease": {
+    "start": 1789316700000,
+    "latest": 1789317000000,
+    "end": 1789318200000
+  },
+  "anvilArgs": [
+    "--silent",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "63453",
+    "--accounts",
+    "4",
+    "--chain-id",
+    "31337",
+    "--hardfork",
+    "cancun",
+    "--gas-limit",
+    "30000000",
+    "--prune-history",
+    "256",
+    "--cache-path",
+    "/private/tmp/efs-paid-c-run-20260913.YxKavf/anvil-cache"
+  ],
+  "nodeVersion": "v26.0.0",
+  "anvilVersion": "anvil Version: 1.7.1\nCommit SHA: 4072e48705af9d93e3c0f6e29e93b5e9a40caed8\nBuild Timestamp: 2026-05-08T07:54:31.470926000Z (1778226871)\nBuild Profile: dist",
+  "startedAt": "2026-09-13T16:25:20.582Z",
+  "stages": [
+    {
+      "name": "anvil",
+      "args": [
+        "--silent",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "63453",
+        "--accounts",
+        "4",
+        "--chain-id",
+        "31337",
+        "--hardfork",
+        "cancun",
+        "--gas-limit",
+        "30000000",
+        "--prune-history",
+        "256",
+        "--cache-path",
+        "/private/tmp/efs-paid-c-run-20260913.YxKavf/anvil-cache"
+      ],
+      "pid": 59382,
+      "startedAt": "2026-09-13T16:25:20.584Z",
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-09-13T16:25:22.528Z"
+    },
+    {
+      "name": "runner",
+      "args": [
+        "/Users/james/Code/EFS/planning-warroom-c-run/Reviews/2026-09-12-efs-path-decision/lab-c/script/measure.mjs",
+        "--anvil",
+        "--cells",
+        "typed-joined"
+      ],
+      "pid": 59385,
+      "startedAt": "2026-09-13T16:25:20.898Z",
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-09-13T16:25:22.524Z"
+    }
+  ],
+  "stopReason": "completed",
+  "finishedAt": "2026-09-13T16:25:22.529Z",
+  "success": true
+}
