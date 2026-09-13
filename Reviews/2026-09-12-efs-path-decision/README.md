@@ -112,6 +112,37 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**07:49 repair review / compile-only handoff:** Claude delivered falsification
+`71e689b`, Core repair `aaecfed` and adapted runner `3c6947d`; all are source
+evidence, not a new passing build or receipt run. Root resumed the existing
+Claude task directly and is independently reviewing the runner and one
+load-bearing Type-rule question: `activate(typeId, address(0))` or a permissive
+replacement must not bypass a mandatory rule that defines that exact Type.
+Retaining a historical policy row is necessary but does not establish that
+future records satisfy the same Type meaning. See
+[[../../Designs/efsv2/programmable-type-acceptance|the existing acceptance draft]];
+no owner requirement is reopened or waived by the lab repair.
+
+Fable and an independent source reviewer confirmed that bypass by construction
+at `aaecfed`; the zero/permissive-activation regression and always-enforced
+mandatory-rule repair are assigned to Fable's existing specialist. The review
+also found `MockAcceptor.mode/minBody` mutable behind one runtime codehash:
+the lab must not present it as a pure intrinsic rule or claim codehash alone
+pins its behavior. Declared stateful rules remain possible; this is not a
+production ban on arbitrary developer validation or changing game conditions.
+SDK has a separate light, design-only assignment through **08:25 UTC** to
+make the existing shared fixture's small point/list outputs and pre-run pin
+procedure unambiguous. Its completed checker code stays untouched.
+
+**Heavy slot: Claude, 08:00–08:30 UTC, compile/tests only.** After source
+readiness and review, record the exact committed pin, commands, owned scratch
+and watchdogs before launch. Two workers, pinned offline compiler/fork, normal
+limits, <2 GB B / <15 GB total scratch and 50 GB free reserve; hard stop at
+08:30. No Anvil/receipt run in this slot; its runner remains under review.
+Root remains light-only. If not ready, continue source work and request a new
+finite slot, never start late on an expired reservation. Main publication
+remains root-owned; B Core remains Claude-owned.
+
 **07:12 coordinated source repair / comparison scope:** Fable's existing
 **EFS v2 Dev** task acknowledged the 06:50 handoff in the Claude app and
 started one bounded specialist. Its B source/test changes are active;
