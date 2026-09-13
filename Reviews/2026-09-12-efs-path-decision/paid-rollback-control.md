@@ -123,3 +123,35 @@ runtime/constructor and raw-state expectations; then one owned fresh control
 per row with receipt/pre-post comparison and packet review. Preserve the normal
 paid packets and their prices. Do not expand this into an oracle framework or
 claim source proofs, portable import or the complete Files lifecycle from it.
+
+## September 13, 20:13: B source/test stage verified
+
+B source `8ddd04cdb12506c663c421c3c588115ca38a93b5` is pushed on the existing
+isolated `codex/efs-warroom-b-run` branch. Only production delta is the reviewed
+callback visibility seam; `test/MatchedRollback.t.sol` contains the derived
+late-refusing fixture and real complete-A1 controls.
+
+Root observed the intended runtime RED (3 passes, 1 missing-refusal failure
+after actual normal index maintenance), then **4/4 focused, 63/63 full Forge
+and 42/42 Node tests** passing. Both source/spec and full changed-range quality
+review passed. Tests check complete error bytes, nonce/counters/coverage,
+retained prefix data, absent attempted effects, packed posting word0 and a
+positive literal-state calibration. They do not merely assert a reverted call.
+
+The derived fixture's runtime is 4,433 bytes; artifact creation is 5,837 plus
+64 constructor bytes. The Foundry test class's 88,185-byte initcode is not a
+deployable application. Existing lint/test-harness warnings remain. No compiler
+or Anvil process remained after the20:07:39 completion; the lease is released.
+
+Evidence-only `4487d7bdc43be5749e340ccd36cd2d7e70689e4b` retains twelve exact
+logs/reviews plus a SHA256 inventory and README (about172KB):
+[retained source/test packet](https://github.com/efs-project/planning/tree/4487d7bdc43be5749e340ccd36cd2d7e70689e4b/Reviews/2026-09-12-efs-path-decision/lab-b/evidence/rollback-source-20260913T200713Z).
+Two raw whitespace-bearing evidence files are preserved, not reformatted;
+the remaining whitespace check passed. No compiled caches were published.
+
+**Still next:** independent inherited-immutable runtime/constructor pins,
+static-to-mined input linkage and fixed-block raw pre/post observations, then
+the matching C controls. This source/test result is not a mined matched pair,
+new transaction-price row, source-state proof or full-Files result. Before
+broader fixture reuse, the reviewer suggests one nonblocking calibration with
+a nonzero earlier HEAD-key poison to protect future final-key selectivity.

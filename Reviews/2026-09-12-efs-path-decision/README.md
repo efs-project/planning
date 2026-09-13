@@ -112,6 +112,18 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**20:13 B rollback source/tests verified; heavy slot released.**
+Pushed source `8ddd04c` and exact evidence `4487d7b`: intended runtime RED,
+then4 focused/63 full Forge and42 Node passes, independent spec/changed-range
+review. [[paid-rollback-control#September 13, 20:13: B source/test stage verified|Source-stage result]]
+is not the mined matched pair; inherited-immutable pins and static/mined/raw
+state controls remain next. No compiler/Anvil running; roughly121MiB across
+the six named scratch roots and274GiB free. The expired20:25 lease is released
+early and cannot be replayed. [[provisional-recommendation]] is now a reviewed
+working brief: B first as a hypothesis, C retained against the specific
+required-reverse-query cost challenge, no feature waiver. The SDK and Files
+intakes and the 19:10 cost snapshot remain the decision inputs for23:10.
+
 **20:05–20:25 UTC root-only B rollback fixture compile/test lease.**
 Staged source at base `cbadc00` changes only the Index callback visibility and
 adds `test/MatchedRollback.t.sol`. First run must show the intended runtime
