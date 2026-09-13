@@ -112,6 +112,24 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**17:04–17:24 UTC root-only B regression-test lease.** No Anvil or other
+lane run is authorized. Source is `ac37e91` plus only the two uncommitted
+forwarding/regression test files; production is paused unchanged. Root records
+the exact dirty diff and source hashes, then runs the seven new runtime negatives
+with Solidity 0.8.30, Cancun, via-IR, optimizer 200 and two compiler threads.
+Exclusive output/cache: `/tmp/efs-b-parity-build-20260913.lcAzU1`;
+process-group watchdog 15 minutes, absolute stop 17:24, latest start 17:09.
+Preflight found no Forge/Solc/Anvil process and 274 GiB free. This is expected
+RED evidence before repair, not new passing tests or a paid cost measurement.
+
+**17:00 B consumer parity in progress, no chain lease.** Root is implementing
+the already specified [[paid-read-parity-next-gate]] in the existing isolated
+`planning-warroom-b-run` successor from `ac37e91`; Node baseline 41/41 passes.
+Scope is consumer-local getters/checks, forwarding faults and exact runner/input
+schema adaptation. Ledger, indexes and current measured source remain unchanged.
+Compiler runs will have a separate root lease; old paid packets stay retained.
+Claude app is still locked; original worktrees are preserved without a fresh ACK.
+
 **16:32 C positive paid slice completed; heavy slot released.**
 The 16:25:20–22 run at `58dd3d7` passed both independent deployment/state gates,
 all four paid exact-answer checks and separate packet review. Anvil PID 59382
