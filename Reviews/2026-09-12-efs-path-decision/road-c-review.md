@@ -79,3 +79,30 @@ owns the temporary operator and exact run lease. Record commands, start/end,
 exits, red/green results, artifact/source hashes and any remaining failures in
 `lab-c/test-harness-repair.md`; return the code-branch pin for independent review.
 No build success, semantic pass or cost result is inferred from this repair plan.
+
+## Repair verified — September 13, 02:51 UTC
+
+Independent review of `731200d..774dfcd` found no blocking code regression.
+All 37 tests and their assertions remain; the test-intent clone now copies all
+ten Action fields. Artifact linking validates the expected ImportLib and its
+deployed address. No code-size override, code injection or Core semantic edit
+was introduced; the sole `src/` change renames an error parameter.
+
+Root reran `forge build --sizes` and `forge test -vv` with the pinned offline
+compiler, two workers and the documented single artifact root: exit 0, 37/37
+tests. Compilation was correctly skipped for unchanged sources. A separate
+91-artifact scan includes every helper/test and found no runtime/initcode limit
+violation. Ledger remains 23,145/37,892 bytes. Build/test PIDs 68430/68514 exited;
+no Anvil or cost measurement ran. Tests that deploy several fixtures in one
+test function are not individual transaction gas measurements.
+
+The retained source/artifact manifests and original final log hashes also
+verified. One report abbreviation was wrong; the follow-up records the full
+`Vm.sol` SHA-256 rather than another abbreviated suffix. Source/test pin remains
+`774dfcd`; reviewed branch head including that documentation repair is
+`7876477`. Arbitrary `--out` paths are not interchangeable with the documented
+`FOUNDRY_OUT=out` plus `./out` symlink/read-permission setup.
+
+Next: a bounded measurement-script preflight, then receipt-backed comparison
+under normal chain limits. Local Forge success is not a matched-cost winner,
+full Files, independent reconstruction or authenticated-chain evidence.

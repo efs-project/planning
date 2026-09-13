@@ -79,3 +79,21 @@ filename-retention baseline, **not mandatory Files semantics**. A separately
 versioned dictionary probe must earn the same readability/import guarantees
 before its lower storage cost can win. Folder and tag display semantics remain
 part of the joined Files gate.
+
+## Public profile verified — September 13
+
+The declaration/vector supplement at `885d9f9` was reviewed against exact
+compiled source `dcc7b94`, not assumed to describe a future corrected profile.
+ABI order/shapes, action commitment, domain/typehash/signature framing, derived
+IDs, source/packet pins and literal context reconcile. The scratch vector's
+registry epoch 6 was corrected to the retained setup's 5. Root reran the ethers
+6.15.0 recomputation, including the mutation check: exit 0, digest
+`0x777011441f54fdfbd21f90bb78ba40929169222a87982644a5b713fa50ac3074`.
+
+Review corrected the verifier header to call it a candidate-side self-check,
+not an independent helper; branch head `2824297` includes that comment-only
+repair. This declares the existing name/version-only domain and other limits,
+not a replay-domain repair or independent SDK validation. Runtime/code context
+reconstruction is retained-input consistency, not authenticated deployment
+proof. Supply the public profile/vector to the SDK reviewer; keep this
+candidate-side verifier out of its implementation inputs.
