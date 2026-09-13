@@ -148,7 +148,7 @@ contract LabelTypeTest is LabBase {
         (,, uint32 occ3,) = ledger.record(labelId);
         require(occ3 == 2, "omitted: no new occurrence, nothing asserted by this author");
         (c,) = joined.readLabel(pos3, labelId);
-        require(c == keccak256(abi.encode(pos3, role, entry)), "retrievable by existence — retained bytes, not this author's acceptance");
+        require(c == keccak256(abi.encode(pos3, role, entry)), unicode"retrievable by existence — retained bytes, not this author's acceptance");
         // occurrence withdrawal does not erase the retained Record
         Ledger.Action[] memory w = one(aWithdraw(9));
         bytes[] memory wb = new bytes[](1);
