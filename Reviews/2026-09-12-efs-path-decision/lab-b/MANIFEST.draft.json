@@ -1,22 +1,22 @@
 {
   "$schema": "../run-manifest.md",
-  "claim": "DISPOSABLE LAB, NO PROTOCOL CLAIM. Draft manifest committed before any compile, chain or measurement. Every gas value is ESTIMATED or unknown.",
+  "claim": "DISPOSABLE LAB, NO PROTOCOL CLAIM. Draft manifest (second source pass, 2026-09-13) committed before any compile, chain or measurement of this version. Every gas value is ESTIMATED or unknown. NOTHING IN THIS PASS WAS RUN: not forge, not solc, not anvil, not node (only `node --check script/measure.mjs`).",
   "honesty": "This run reports receipt diagnostics with explicit remaining gates. It is not a same-guarantee comparison and not the capability ablation.",
   "identity": {
-    "runId": "road-b-lab-2026-09-12-draft-0",
+    "runId": "road-b-lab-2026-09-13-draft-1 (second source pass; unrun)",
     "road": "B",
     "profile": "road-b-lab/1 (compact ingestion kernel + separate IndexModule + LensReader)",
     "sourcePath": "Reviews/2026-09-12-efs-path-decision/lab-b",
     "sourceCommit": {
-      "unknown": "worktree fable/2026-09-12-road-b-lab is uncommitted by instruction (base edb7fe4)",
-      "consequence": "no source pin can be cited until the coordinator publishes this directory; the dirty diff hash must be recorded at that time"
+      "unknown": "worktree fable/2026-09-12-road-b-lab at 2824297 plus uncommitted second-pass files (script/measure.mjs, src/LabAcceptors.sol, src/JoinedConsumer.sol, test/JoinedConsumer.t.sol, test/LabelType.t.sol, LABELS.md, this manifest, README.md, TODO.md); Core pinned at dcc7b94 (Ledger, IndexModule, LensReader, TypeRegistry, Keys, Interfaces untouched)",
+      "consequence": "the script records sha256 of every src/test/script file at run time (report.build.sourceHashes); the dirty diff hash is recorded when the coordinator publishes"
     },
     "fixtureCommits": {
       "runManifest": "planning main, run-manifest.md as read 2026-09-12 19:00 local",
       "sdkFixture": "sdk-fixture.md as read 2026-09-12",
       "filesJourney": "files-journey.md as read 2026-09-12",
       "roadB": "road-b.md v1.1",
-      "review": "road-b-review.md"
+      "review": "road-b-review.md incl. 'Label-retention review - September 13'; road-c-review.md 'Measurement preflight - September 13'; coordinator corrections (a) separate freshness cells, (b) stateless consumer, (c) older as-of basis; checker shape from lab-oracle (0e6e682, read-only)"
     },
     "startUtc": {
       "unknown": "no run has started",
@@ -37,8 +37,8 @@
     "evmVersion": "cancun",
     "dependencies": "none (no forge-std, no remappings); ethers v6.15.0 for script/measure.mjs from a sibling worktree node_modules (MIT)",
     "sourceHashes": {
-      "unknown": "not computed before the coordinator's publication commit",
-      "consequence": "cannot prove which bytes were built"
+      "unknown": "computed by the script at run time (sha256 of src/, test/, script/) into report.build.sourceHashes; not computed before the publication commit",
+      "consequence": "cannot prove which bytes were built until a run exists"
     },
     "artifactHashes": {
       "unknown": "no build has run",
@@ -60,10 +60,17 @@
       },
       "LabHarness/*": {
         "unknown": "not built"
+      },
+      "LabAcceptors/QuoteAcceptor, LabelAcceptor": {
+        "unknown": "not built"
+      },
+      "JoinedConsumer/JoinedConsumer, StatelessConsumer": {
+        "unknown": "not built; JoinedConsumer decodes Page/Entry[] and 13-return evidence tuples - see TODO.md G"
       }
     },
     "linkedLibraries": "none (Keys is internal-only)",
-    "proxies": "none"
+    "proxies": "none",
+    "codeIdentity": "script/measure.mjs retains per deployed contract: artifact path + sha256, initcode hash, constructor args, eth_getCode at the receipt block, runtime codehash, the artifact's deployedBytecode hash and its immutableReferences count (runtime == artifact only when 0 immutables), plus the literal deploy transaction envelopes"
   },
   "deployment": {
     "chain": "fresh Anvil, chainId 31337, hardfork cancun, gas limit 30,000,000, 4 accounts, --prune-history 256, loopback only, spawned and killed by script/measure.mjs",
@@ -132,21 +139,67 @@
         "address": {
           "unknown": "not deployed"
         }
+      },
+      "QuoteAcceptor": {
+        "ctor": [],
+        "address": {
+          "unknown": "not deployed"
+        },
+        "role": "QUOTE_J structural rule: 160-byte body, scale 6, mantissa in (0, 2^128), observedAt != 0, note != 0, refs == [pairId]"
+      },
+      "LabelAcceptor": {
+        "ctor": [],
+        "address": {
+          "unknown": "not deployed"
+        },
+        "role": "LABEL lab convention: exact UTF-8 (well-formed), 1..255 bytes, no refs"
+      },
+      "JoinedConsumer": {
+        "ctor": [
+          "ledger",
+          "lens",
+          "QUOTE_J",
+          "PAIR",
+          "ITEM",
+          "LABEL"
+        ],
+        "address": {
+          "unknown": "not deployed"
+        },
+        "role": "stateless test-only measurement consumer: readPoint / readPointNoTiebreak / readList / readListTagged / readHistoryAsOf / readLabel; returns and logs explicit commitments; no SSTORE"
+      },
+      "StatelessConsumer": {
+        "ctor": [
+          "lens"
+        ],
+        "address": {
+          "unknown": "not deployed"
+        },
+        "role": "stateless twin of Consumer for the 32-byte/41-byte cells: commitQuote / commitHead / commitList / commitHistory (distinct selectors from Consumer)"
       }
     },
     "authorityGraph": "Ledger.admin = deployer (setIndexModule only); IndexModule.admin = deployer (declareOptional, bumpGeneration); TypeRegistry.admin = deployer (register, setBindingRefType). No other privileged surface; no upgrade path.",
     "setupReceipts": [
       "setIndexModule(index)",
-      "register QUOTE (acceptor, no refs)",
+      "register QUOTE (MockAcceptor, no refs)",
       "register BINARY (no acceptor)",
       "register ITEM (no acceptor)",
-      "register PAIR (acceptor, refs [ITEM, ITEM])",
-      "register QUOTE_J (acceptor, refs [PAIR])"
+      "register PAIR (MockAcceptor, refs [ITEM, ITEM])",
+      "register QUOTE_J (QuoteAcceptor, refs [PAIR])",
+      "register LABEL (LabelAcceptor, no refs)"
     ],
     "setupGas": {
       "unknown": "not run",
       "consequence": "setup amortization cannot be stated"
-    }
+    },
+    "registryEpochAfterSetup": {
+      "expected": "6 registrations => epoch 6 (the retained vectors/profile-b.json run had epoch 5); acceptance profiles therefore differ from the retained vector",
+      "status": {
+        "unknown": "not run",
+        "consequence": "no receipt observed"
+      }
+    },
+    "setupEvidence": "every setup transaction carries the literal eth_sendRawTransaction / eth_getTransactionReceipt / eth_getBlockByHash / eth_getTransactionByHash envelopes (report.setupTransactions); registry epoch and principals are retained eth_call replies (report.setupRaw)"
   },
   "fixtures": {
     "payloadControls": {
@@ -182,29 +235,41 @@
       "BINARY": "keccak256(utf8 'lab/type/binary/1'); no acceptor; 0 refs",
       "ITEM": "keccak256(utf8 'lab/type/item/1'); no acceptor",
       "PAIR": "keccak256(utf8 'lab/type/pair/1'); acceptor; refs [ITEM, ITEM] = first two body words",
-      "QUOTE_J": "keccak256(utf8 'lab/type/quote-joined/1'); acceptor; refs [PAIR]; body = abi.encode(pairId, mantissa, scale, observation, keccak(NOTE_BYTES)) = 160 bytes",
+      "QUOTE_J": "keccak256(utf8 'lab/type/quote-joined/1'); acceptor QuoteAcceptor; refs [PAIR]; body = abi.encode(bytes32 pairId, uint256 mantissa, uint8 scale, uint64 observedAt, bytes32 noteCommitment) = 160 bytes",
       "values": {
         "unknown": "keccak values not computed without a build/node run",
         "consequence": "ids are symbolic until the script prints them"
-      }
+      },
+      "LABEL": "keccak256(utf8 'lab/type/label/1'); acceptor LabelAcceptor; 0 refs; body = exact UTF-8 bytes 1..255; record id = keccak256(abi.encode(DOM_RECORD, LABEL, keccak256(bytes))) - derivable from a FOLDER position's role"
     },
     "semanticMap": {
-      "ITEM_ETH / ITEM_USDC": "ITEM bodies abi.encode(1) / abi.encode(2)",
+      "ITEM_ETH / ITEM_USDC": "ITEM bodies abi.encode(uint256 1) / abi.encode(uint256 2), admitted with PAIR_ETH_USDC in ONE native batch by actorA (operator) in step 1",
       "PAIR_ETH_USDC": "PAIR body abi.encode(ITEM_ETH id, ITEM_USDC id, 1)",
-      "FILE_QUOTE": "subject keccak256(abi.encode(keccak('efs2/subject/1'), principal(AUTHOR_A), salt)); salt is inside the signed create action",
-      "FILE_REPLACEMENT": "a second subject with a different salt, placed at the vacated name",
-      "QUOTE_A1 / QUOTE_A2 / QUOTE_B1": "QUOTE_J bodies with mantissas 2_500_000_000 / 2_502_000_000 / 2_501_000_000, scale 6, observation 1_800_000_000, note commitment keccak(0x7265666572656e63652071756f7465)",
+      "FILE_QUOTE": "subject keccak256(abi.encode(DOM_SUBJECT, principal(AUTHOR_A), keccak256(utf8 'joined/FILE_QUOTE'))); placed at (FOLDER, keccak256('/swaps'), keccak256('eth-usdc')); moved to keccak256('/markets') in step 6",
+      "FILE_REPLACEMENT": "subject with salt keccak256(utf8 'joined/FILE_REPLACEMENT'); head = BINARY record of utf8 'replacement' (11 bytes; not one of the 41-byte controls); placed at the vacated /swaps 'eth-usdc' (revision 3 of A's binding)",
+      "QUOTE_A1 / QUOTE_A2 / QUOTE_B1": "QUOTE_J bodies with mantissas 2_500_000_000 / 2_502_000_000 / 2_501_000_000, scale 6, observedAt 1_800_000_000, note commitment keccak256(0x7265666572656e63652071756f7465); the script asserts NOTE_BYTES == utf8('reference quote')",
       "AUTHOR_A": "EOA (Anvil account 1) via executeSigned (EIP-712 PublicationIntent, domain name 'EFS2-RoadB-Lab' version '1'); signer = author; submitter/payer = Anvil account 0 (relayer)",
       "AUTHOR_B": "Actor contract (genuine contract author) via Actor.execute; no EOA signature exists; proof kind native = chain-state witness",
-      "TAG_MARKET": "binding (AUTHOR_A, TAG, FILE_QUOTE, keccak('market')) -> FILE_QUOTE (untyped stance target in this lab)",
+      "TAG_MARKET": "binding (AUTHOR_A, TAG, FILE_QUOTE, keccak256('market')) -> FILE_QUOTE (untyped stance target); tag filtering happens AFTER lens selection in JoinedConsumer.readListTagged",
       "lenses": {
         "LENS_A_FIRST": "[AUTHOR_A, AUTHOR_B]",
         "LENS_B_FIRST": "[AUTHOR_B, AUTHOR_A]",
-        "LENS_NO_TIEBREAK": "resolveNoTiebreak([A, B]) -> CONFLICT with both candidates"
+        "LENS_NO_TIEBREAK": "resolveNoTiebreak([A, B]) -> CONFLICT with both candidates; JoinedConsumer.readPointNoTiebreak reverts Conflict",
+        "lensId": "keccak256(abi.encode(address[])) - standard ABI encoding (not packed)"
       },
       "CAS": "expectedRevision on bind/unbind: head revision must equal it",
       "requiredQueries": "scope (folder/tag) lists, history per key, backlinks, by-Type, by-author in IndexModule; occurrence count in the Record row",
-      "contentCommitments": "record id (typeId + body hash); NOTE_BYTES committed by hash inside QUOTE_J bodies (bytes themselves not stored: external carrier obligation, unpriced here)"
+      "contentCommitments": "record id (typeId + body hash); NOTE_BYTES committed by hash inside QUOTE_J bodies (bytes themselves not stored: external carrier obligation, unpriced here)",
+      "LABEL_ENTRY": "LABEL body 0x656e747279 (exact ASCII 'entry'); placement role keccak256('entry') == keccak256(body); display mapping: FOLDER-role body supplies the entry name; HEAD bodies stay empty; tag concepts and folder ids are not labelled in this probe",
+      "commitments": {
+        "JoinedConsumer.readPoint": "commitment = keccak256(abi.encode(pairId, mantissa, uint8 scale, uint8 authorKind, lensId, uint64 basis)); evidence = keccak256(abi.encode(itemA, itemB, uint64 observedAt, note, address author, uint64 publication, uint64 admission, uint32 revision, target)); authorKind 1 = native (contract), 2 = signed; basis = Ledger.counts().admissions at execution",
+        "JoinedConsumer.readList": "keccak256(abi.encode(keccak256(abi.encode(Entry[] items)), uint64 selectedSoFar, lensId, uint64 basisAdmission)); reverts PageNotComplete unless status COMPLETE and !mutated",
+        "JoinedConsumer.readListTagged": "keccak256(abi.encode(keccak256(abi.encode(bytes32[] taggedTargets)), uint256 count, concept, lensId, basisAdmission))",
+        "JoinedConsumer.readHistoryAsOf": "keccak256(abi.encode(bool live, target, uint32 revision, uint64 admission, uint64 asOf, address author, uint64 basis)); evidence for a live HEAD = keccak256(abi.encode(pairId, mantissa, scale, itemA, itemB))",
+        "JoinedConsumer.readLabel": "keccak256(abi.encode(position, role, bytes)); evidence = keccak256(abi.encode(folderId, recordId, uint64 firstAdmission, uint32 occurrences, uint256 length)); reverts LabelUnavailable when absent",
+        "StatelessConsumer.commit*": "keccak256 of exactly the tuple LabHarness.Consumer stores: quote (uint8 status, bytes32 target, uint32 revision, uint64 admission, uint256 value); head (status, target, revision, admission); list (uint8 status, uint64 selectedSoFar, uint64 scanned); history (uint8 live?1:0, target, revision, admission)",
+        "standing": "expected values recomputed by script/measure.mjs from the fixture: candidate-side self-checks, not the independent oracle; the receipt log AND an eth_call replay at the receipt block are both retained and compared"
+      }
     }
   },
   "operations": {
@@ -269,12 +334,27 @@
         }
       },
       {
+        "cell": "all matrix cells",
+        "logical": "paid reads, STATELESS twin (StatelessConsumer)",
+        "physical": [
+          "commitQuote|commitHead (read-resolve-stateless)",
+          "commitHead second-first (two-author cells)",
+          "commitList (read-list-stateless)",
+          "commitHistory at the FIRST head-bind ordinal (read-history-asof-older-stateless)",
+          "commitHistory at 1_000_000 (read-history-asof-latest-stateless)"
+        ],
+        "expected": "commitment in the receipt log == eth_call replay at the receipt block == script-recomputed expectation; no SSTORE in the receipt; run BEFORE the storing reads so no state is touched",
+        "gas": {
+          "unknown": "not run"
+        }
+      },
+      {
         "cell": "all cells",
         "logical": "paid reads",
         "physical": [
-          "Consumer.readQuote / readHead / readList / readHistory transactions, each followed by a read-back of the Consumer's stored slots at the receipt block"
+          "Consumer.readQuote / readHead / readList / readHistory(older basis) / readHistory(latest) transactions, each followed by a read-back of the Consumer's stored slots at the receipt block"
         ],
-        "expected": "read-back values (status, target, revision, count, scanned, value) equal the expected ones and are recorded as expected/actual/equal; receipt gas recorded separately from the eth_call estimate",
+        "expected": "as before; rows carry storage = STORING: receipt gas INCLUDES the Consumer's own SSTOREs (first read: fresh slots; later reads: rewrites) and is NOT comparable to the STATELESS rows as pure Lens overhead",
         "gas": {
           "unknown": "not run"
         }
@@ -302,39 +382,44 @@
     ],
     "freshnessControls": [
       {
-        "logical": "contract-fresh-body",
-        "preAbsence": "asserted and written per cell: eth_call record(id).firstAdmission == 0 (and the sealed-state probe shows all four controls absent) immediately before the write",
+        "cell": "fresh/contract-fresh-body",
         "physical": [
-          "Actor.publish(QUOTE, uint256 424242)"
+          "Actor(actorA).executeWithNonce([PUBLISH QUOTE quote3000], [body], nonce)"
         ],
-        "regime": "cold transaction access set; QUOTE by-Type list already initialized by the matrix",
+        "preAbsence": "retained baseline raw reply of Ledger.record(id) at the after-revert block (baselineRaw, stage baseline) shows firstAdmission == 0; also the four controls absent",
+        "regime": "cold access set; by-Type QUOTE list and the producer by-author list EMPTY (sealed state)",
         "expected": "new Record, occurrences 1",
         "gas": {
           "unknown": "not run"
-        },
-        "fixture": "quote3000 under Type QUOTE"
+        }
       },
       {
-        "logical": "contract-existing-body",
+        "cell": "fresh/contract-existing-body",
         "physical": [
-          "Actor.publish(QUOTE, same bytes)"
+          "setup: relayer -> executeSigned by AUTHOR_A (EOA) [PUBLISH QUOTE quote3000] (separate row, NOT the measured one)",
+          "retained raw reply of Ledger.record(id) (stage pre-presence): occurrences == 1",
+          "Actor(actorA).executeWithNonce([PUBLISH QUOTE quote3000], [body], nonce)  <- the measured row"
         ],
+        "regime": "cold access set; by-Type QUOTE list has ONE entry (the EOA admission); producer by-author list EMPTY. Different initialized state from contract-fresh-body by construction",
         "expected": "no new Record; occurrences 2; new Admission; acceptor re-run",
         "gas": {
           "unknown": "not run"
         },
-        "prePresence": "asserted and written per cell: eth_call record(id).firstAdmission != 0 and occurrences == 1 immediately before the write",
-        "postPresence": "occurrences == 2 written after the write"
+        "rule": "report beside fresh; NEVER subtract into a deduplication premium"
       },
       {
-        "logical": "exact-operation retry",
+        "cell": "fresh/exact-retry",
         "physical": [
-          "Actor.executeWithNonce(actions, bodies, n) twice; second with explicit gasLimit"
+          "setup: Actor(actorA).executeWithNonce([PUBLISH QUOTE quote3000], [body], nonce)",
+          "same call again with explicit gasLimit (failure row)"
         ],
-        "expected": "second reverts AlreadyAdmitted, status 0, no new admissions",
+        "expected": "second reverts AlreadyAdmitted (selector from a retained static eth_call), status 0, probe unchanged",
         "gas": {
           "unknown": "not run"
         }
+      },
+      {
+        "note": "the previous single 'freshness-controls' cell ran these SEQUENTIALLY with different initialized state; it is replaced by three sealed cells sharing the action shape (executeWithNonce, one PUBLISH)"
       }
     ],
     "sdkFixtureSteps": [
@@ -342,23 +427,26 @@
         "step": 1,
         "logical": "admit ITEM_ETH, ITEM_USDC, PAIR_ETH_USDC",
         "physical": [
-          "Actor.publish x3 (or one Actor.execute batch)"
+          "Actor(actorA).execute([PUBLISH ITEM_ETH, PUBLISH ITEM_USDC, PUBLISH PAIR]) - one native batch, I -> O"
         ],
         "expected": "record() finds all three; PAIR refs checked at admission; coverage COMPLETE",
         "gas": {
           "unknown": "not run"
-        }
+        },
+        "cell": "joined/steps-1-6",
+        "row": "joined/step1/admit-items-and-pair"
       },
       {
         "step": 2,
         "logical": "AUTHOR_A publishes QUOTE_A1 (signed)",
         "physical": [
-          "executeSigned([create FILE_QUOTE, publish QUOTE_A1 (QUOTE_J, ref PAIR), bind HEAD, bind FOLDER /swaps 'eth-usdc', bind TAG market])"
+          "relayer -> executeSigned([create FILE_QUOTE, publish QUOTE_A1 (QUOTE_J, ref PAIR), bind HEAD, bind FOLDER /swaps 'eth-usdc', bind TAG market -> FILE_QUOTE])"
         ],
         "expected": "signature, admission, index effects and read-back observable separately (evidence cell, Admitted events, lens reads)",
         "gas": {
           "unknown": "not run"
-        }
+        },
+        "row": "joined/step2/QUOTE_A1 (+ reconstruct-A1 self-check)"
       },
       {
         "step": 3,
@@ -369,7 +457,8 @@
         "expected": "A1 readable via history(asOf); A2 is A's head exactly once; folder/tag lists unchanged in count",
         "gas": {
           "unknown": "not run"
-        }
+        },
+        "row": "joined/step3/QUOTE_A2"
       },
       {
         "step": 4,
@@ -380,16 +469,24 @@
         "expected": "evidence proofKind 1, author = Actor address (origin-qualified principal); same acceptor and index obligations",
         "gas": {
           "unknown": "not run"
-        }
+        },
+        "row": "joined/step4/QUOTE_B1"
       },
       {
         "step": 5,
         "logical": "read three lenses at one basis",
         "physical": [
-          "eth_call resolve [A,B], [B,A], resolveNoTiebreak",
-          "Consumer.readQuote x2 (paid)"
+          "JoinedConsumer.readPoint A-first (paid) -> QUOTE_A2 kind 2",
+          "JoinedConsumer.readPoint B-first (paid) -> QUOTE_B1 kind 1",
+          "JoinedConsumer.readPointNoTiebreak (paid, expected revert Conflict; failure row)",
+          "eth_call LensReader.resolveNoTiebreak retained (status 3, 2 candidates)",
+          "eth_estimateGas LensReader.resolve A-first (lens-only figure, reported beside the consumer receipt)",
+          "JoinedConsumer.readList /swaps (paid) -> 1 entry",
+          "JoinedConsumer.readListTagged /swaps market (paid) -> [FILE_QUOTE]",
+          "JoinedConsumer.readHistoryAsOf(A, HEAD, asOf = A1 head-bind ordinal) (paid) -> QUOTE_A1 rev 1 (STRICTLY OLDER basis)",
+          "JoinedConsumer.readHistoryAsOf(A, HEAD, 1_000_000) (paid) -> QUOTE_A2 rev 2"
         ],
-        "expected": "A-first A2; B-first B1; no-tiebreak CONFLICT with both; list agrees with point reads",
+        "expected": "A-first A2; B-first B1; no-tiebreak CONFLICT with both; directory page and tag-filtered page agree with the point read at the same basis (counts().admissions == 12 relative to the sealed frontier); consumer commitments match from the receipt log and the eth_call replay",
         "gas": {
           "unknown": "not run"
         }
@@ -398,10 +495,11 @@
         "step": 6,
         "logical": "move, replacement, remove, restore",
         "physical": [
-          "executeSigned([unbind /swaps name rev 1, bind /markets name rev 0])",
-          "executeSigned([create FILE_REPLACEMENT, publish, bind HEAD, bind /swaps name rev 2])",
-          "executeSigned([unbind /markets name rev 1])",
-          "executeSigned([bind /markets name rev 2 -> FILE_QUOTE])"
+          "executeSigned([unbind /swaps 'eth-usdc' rev 1, bind /markets 'eth-usdc' rev 0])",
+          "executeSigned([create FILE_REPLACEMENT, publish BINARY 'replacement', bind HEAD, bind /swaps 'eth-usdc' rev 2])",
+          "executeSigned([unbind /markets 'eth-usdc' rev 1])",
+          "executeSigned([bind /markets 'eth-usdc' rev 2 -> FILE_QUOTE])",
+          "then paid: readPoint A-first (A2 unchanged), readList /markets (FILE_QUOTE rev 3), readList /swaps (FILE_REPLACEMENT rev 3), readListTagged /markets market ([FILE_QUOTE]), readListTagged /swaps market ([]), readHistoryAsOf(A, FOLDER /markets, asOf = unbind ordinal) (removed, rev 2), readHistoryAsOf(A, HEAD, asOf = A1) (A1 survives)"
         ],
         "expected": "FILE_QUOTE head/history/tag unchanged; replacement has none of them; each transition atomic with its index effects",
         "gas": {
@@ -409,10 +507,10 @@
         }
       },
       {
-        "steps": "7-9",
+        "steps": "7-10",
         "status": {
-          "unknown": "consumer paid reads exist (Consumer.readQuote); export/import is covered by test_import_* on a second in-test Ledger, not by a clean offline reader",
-          "consequence": "steps 8-9 remain an open joined obligation"
+          "unknown": "step 7 is covered ONLY by the stateless paid consumer rows above (receipt gas separate from eth_call); steps 8 (offline reconstruction with a clean reader), 9 (import into a fresh destination) and 10 (rule v2 / account drift) are NOT scripted; export/import is covered semantically by test_import_* on a second in-test Ledger only",
+          "consequence": "steps 8-10 remain an open joined obligation"
         }
       }
     ],
@@ -526,15 +624,15 @@
     ],
     "sealedInitialState": {
       "rule": "after setup (deploy, Type registration, acceptor, index module) the script takes evm_snapshot; before EVERY cell it evm_reverts to that snapshot and re-snapshots (Anvil snapshots are single-use)",
-      "preStateProbe": "recorded per cell before its first transaction and asserted: the exact Record ids of quote3000/quote3100 (Type QUOTE) and file41a/file41b (Type BINARY) are ABSENT (record().firstAdmission == 0); author nonces; counters (admissions, records, bindings, publications); scope-list heads for the cell's folder per author, by-Type head for the fixture Type, by-author heads",
+      "preStateProbe": "BASELINE RAW HARVEST recorded per cell at the after-revert block before its first transaction (cell.baselineRaw[], also in raw[] with stage 'baseline'): Record rows of the four payload controls and every record the cell will touch; evidence() of the publication ordinals the cell will mint and admission() of the ordinals it will use; head() of every binding key it will touch; subjectCreatedAt of its subjects; nonces and principalOf of its authors; counts; IndexModule postingHead and word 0.. of every list it will touch; the seven Consumer slots. The script's assertSealed then asserts absence FROM the decoded bytes; the bytes themselves are the evidence",
       "postStateProbe": "the same fields recorded after the cell's last transaction",
       "regime": "cold transaction access sets; all lists empty except setup. 'Already-initialized list' regimes are not measured by this script",
       "status": {
         "unknown": "not run",
         "consequence": "no pre/post state has been observed"
       },
-      "evidencePersistence": "before the next evm_revert the cell record persists every transaction (hash, from, to, nonce, calldata, gasLimit), its receipt (status, gasUsed, blockHash, blockNumber, logs) and the raw eth_call return bytes at an explicit block tag for: evidence(pub) and every Admission row of each publication of the cell, the binding heads touched, subjectCreatedAt, the four control Record rows and the cell's records, IndexModule postingHead and posting words of the touched lists, ledger counts and author nonces, and the Consumer's last* slots; measure.json is rewritten after every cell and on any failure",
-      "providerPolicy": "a fresh JsonRpcProvider per cell (cacheTimeout -1, staticNetwork, batchMaxCount 1); after the revert the block number and hash read from the node are recorded (afterRevert); probes and raw harvests pass explicit block tags"
+      "evidencePersistence": "before the next evm_revert the cell record persists: baselineRaw[] and raw[] observations (each: rpcId, method, source, stage, contract, fn, args, to, calldata, returnData, blockTag, blockHash, literal request/response), transactions[] (rawTransaction, from, to, nonce, data, receipt with logs, and the literal envelopes of eth_sendRawTransaction / eth_getTransactionReceipt / eth_getBlockByHash / eth_getTransactionByHash), blocks[] (eth_getBlockByNumber/ByHash envelopes), rpcOther[] (evm_revert, evm_snapshot, eth_gasPrice, eth_blockNumber, eth_getTransactionCount, eth_estimateGas, anvil_getAutomine), and candidateDecoded.{baseline,post}; measure.json is rewritten after every transaction and on any failure",
+      "providerPolicy": "no ethers provider: literal JSON-RPC over fetch with one unique id per request for the whole run; request.params[0] is exactly {to, data}; params[1] is the hex block number; blockHash per observation is the retained header hash (blocks[]), never inferred from a receipt"
     },
     "diagnostics": [
       {
@@ -548,22 +646,33 @@
         "diagnostic": true,
         "unknown": "withdraw drops the author's occurrence and releases by-Type/by-author live counts but does not tombstone heads set by the withdrawn admission, so it is unmatched against the control's withdrawal",
         "consequence": "a mixed-basis page must not be treated as COMPLETE by any caller; not a passing same-guarantee row"
+      },
+      {
+        "row": "read-history-asof (latest)",
+        "diagnostic": true,
+        "unknown": "asOf = 1_000_000 tests the latest retained revision; the strictly-older basis is a separate row (read-history-asof-older / -older-stateless / joined history-a-older) that must return revision 1",
+        "consequence": "do not cite the latest row as an older-revision recovery"
       }
     ],
     "remainingGates": [
       {
-        "gate": "The joined QUOTE/Pair consumption (sdk-fixture steps 1–6 with ITEM/PAIR/QUOTE) is NOT in this script yet.",
-        "unknown": "script/measure.mjs runs the ingress x multiplicity cells, freshness controls and failure rows only; ITEM/PAIR/QUOTE_J are registered but the joined authored-publication -> validation/indexing -> selected read -> independent consumer trace is not executed",
-        "consequence": "the first joined proof is not demonstrated by this run; sdk-fixture steps 1-6 stay designed-but-untested"
+        "gate": "The joined QUOTE/Pair journey (sdk-fixture steps 1-6) is scripted as cell joined/steps-1-6 but UNRUN; steps 8, 9 and 10 are NOT in this script.",
+        "unknown": "no receipt, commitment or read-back has been observed",
+        "consequence": "the first joined proof is still not demonstrated"
       },
       {
         "gate": "The Reconstructor is a candidate self-check calling ledger.intentDigest, not independent.",
         "unknown": "the reconstruction rows call the candidate's own intentDigest and getters; no independent oracle re-derives the typed-data digest",
         "consequence": "authorship-closure claims are self-consistent only until an oracle that does not call the candidate reproduces the digest and recovers the author"
+      },
+      {
+        "gate": "No row is a matched substitute for the fuller Files control (hash-placement diagnostics) until labels and the joined journey are in one matched guarantee profile.",
+        "unknown": "labels are a client convention here; folder/tag display semantics and mandatory names are open",
+        "consequence": "no Files-create parity claim"
       }
     ],
     "failureRows": {
-      "contract": "each failure row records the expected custom error name and selector (from the Ledger ABI), the selector observed by a static call with the same calldata, the mined reverting transaction (status 0) and a pre/post state probe that must be equal (stateUnchanged)",
+      "contract": "each failure row records the expected custom error name and selector (from the named contract's ABI), the selector observed by a retained static eth_call with the same calldata (response.error.data), the mined reverting transaction (status 0, retained envelopes) and a pre/post state probe that must be equal (stateUnchanged); the receipt establishes reversion, not the selector",
       "rows": [
         {
           "row": "checked ref: wrong Type",
@@ -593,6 +702,16 @@
           "row": "exact-operation retry",
           "setup": "same actions under the same explicit nonce",
           "expectedError": "AlreadyAdmitted"
+        },
+        {
+          "row": "joined no-tiebreak conflict",
+          "setup": "JoinedConsumer.readPointNoTiebreak([A,B], FILE_QUOTE) after A2 and B1 exist",
+          "expectedError": "JoinedConsumer.Conflict"
+        },
+        {
+          "row": "label hash-only retrieval",
+          "setup": "JoinedConsumer.readLabel(position) after a hash-only create",
+          "expectedError": "JoinedConsumer.LabelUnavailable"
         }
       ],
       "status": {
@@ -606,6 +725,62 @@
       "status": {
         "unknown": "not run",
         "consequence": "no stored consumer value has been observed"
+      },
+      "standing": "candidate-side self-checks, never expected answers",
+      "commitments": "for JoinedConsumer / StatelessConsumer rows the commitment is read from the receipt log (ResultCommitment) and from an eth_call replay of the same calldata at the receipt block (stage consumer-replay); both are compared to the script's recomputed expectation and recorded (consumerChecks kind 'commitment')"
+    },
+    "cellNames": {
+      "standing": "exact cell keys of report.cells, each its own sealed cell from the same post-setup snapshot, in run order",
+      "cells": [
+        "native-one/quote",
+        "signed-one/quote",
+        "native-two/quote",
+        "signed-two/quote",
+        "native-one/binary",
+        "signed-one/binary",
+        "native-two/binary",
+        "signed-two/binary",
+        "fresh/contract-fresh-body",
+        "fresh/contract-existing-body",
+        "fresh/exact-retry",
+        "failure-rows",
+        "joined/steps-1-6",
+        "label/hash-only-create",
+        "label/create+label-fresh",
+        "label/create+label-existing-republished",
+        "label/create+label-existing-omitted",
+        "native-one-noindex/quote"
+      ]
+    },
+    "labelProbe": {
+      "standing": "client-convention filename-retention baseline; NOT mandatory Files semantics (LABELS.md, review corrections applied)",
+      "author": "actorA (native) on the quote3000 fixture so the create batch matches native-one/quote/create; AUTHOR_B admits the pre-existing label in the existing-* variants (separate setup row)",
+      "cells": {
+        "label/hash-only-create": {
+          "create": "4-action create (today's create)",
+          "consumer": "JoinedConsumer.readLabel(position) reverts LabelUnavailable (failure row; selector retained)"
+        },
+        "label/create+label-fresh": {
+          "create": "4-action create + PUBLISH LABEL 'entry' (5 actions)",
+          "preAbsence": "baselineRaw Ledger.record(labelId).firstAdmission == 0",
+          "consumer": "readLabel commits (position, role, bytes); evidence occurrences 1"
+        },
+        "label/create+label-existing-republished": {
+          "setup": "actorB.execute([PUBLISH LABEL 'entry'])",
+          "prePresence": "retained raw reply (stage pre-presence): occurrences 1",
+          "create": "5-action batch (occurrence 2)",
+          "consumer": "readLabel; evidence occurrences 2, firstAdmission = B's"
+        },
+        "label/create+label-existing-omitted": {
+          "setup": "as above",
+          "create": "4-action batch (no PUBLISH; reuse-by-existence)",
+          "consumer": "readLabel; evidence occurrences 1 (nothing asserted by A)"
+        }
+      },
+      "displayMapping": "FOLDER-role body supplies the entry name (role == keccak256(bytes)); HEAD bodies stay empty; tag concepts and folder ids not labelled",
+      "reporting": "fresh vs reused label cost are separate rows; no premium is computed",
+      "gas": {
+        "unknown": "not run"
       }
     }
   },
@@ -618,13 +793,24 @@
       "unknown": "the coordinator's oracle vectors for this arm are not yet produced",
       "consequence": "results are self-consistent (tests) but not independently checked"
     },
-    "paidConsumerSource": "src/LabHarness.sol Consumer (hash unknown until published)",
+    "paidConsumerSource": "src/LabHarness.sol Consumer (storing; rows labelled STORING), src/JoinedConsumer.sol JoinedConsumer + StatelessConsumer (stateless; rows labelled STATELESS); hashes recorded at run time in report.build.sourceHashes",
     "offlineReaderSource": "src/LabHarness.sol Reconstructor (state-only re-encoding; hash unknown until published)",
     "rpcAccounting": {
-      "unknown": "not run",
+      "retained": "every JSON-RPC request/response envelope of a cell is retained with its id (raw[], transactions[].rpc, blocks[], rpcOther[]); eth_estimateGas rows are browser-shaped estimates",
+      "unknown": "byte/latency totals are not aggregated; no browser was run",
       "consequence": "no browser cost claim"
     },
-    "providerPolicy": "fresh provider per cell, no result cache, explicit block tags for every probe and raw getter; afterRevert block number/hash recorded per cell"
+    "providerPolicy": "literal JSON-RPC, unique ids, explicit hex block numbers, block hashes from retained headers",
+    "rawObservationFields": [
+      "cell key and stage",
+      "JSON-RPC request id (rpcId) and the literal request/response",
+      "method",
+      "to address",
+      "raw calldata",
+      "raw returnData or the literal error object",
+      "explicit block number (blockTag) and separately supplied blockHash",
+      "source/provenance label (RPC_OBSERVED:anvil-local pid <pid>:<url>)"
+    ]
   },
   "evidence": {
     "receipts": {
@@ -644,11 +830,14 @@
       "nativeIngress": "chain-state witness only; grade 0; not verified by this lab",
       "import": "source signature verified over the source domain; destination authorization separate (designed, untested)",
       "listingAcrossMutation": "diagnostic only (see operations.diagnostics)",
-      "reconstruction": "candidate self-check, not independent"
+      "reconstruction": "candidate self-check, not independent",
+      "statelessConsumer": "commitments logged and replayed; verification of Pair -> ITEMs and author kind happens on-chain in the consumer (designed, untested)",
+      "labels": "client-convention retention; self-certifying bytes (keccak == role); not mandatory"
     },
-    "status": "designed-but-untested for everything; nothing demonstrated",
+    "status": "designed-but-untested for everything in this pass; the retained 322b320 run covers only the earlier 11-cell script and NOT the cells added here",
     "stateProbes": "per cell: pre-state and post-state probes (control Record presence, nonces, counters, list heads) written to measure.json; unrun",
-    "persistedPerCell": "transactions[], raw[] (contract, to, fn, args, blockTag, calldata, returnData), pre/post probes, harvest (decoded from the raw bytes), consumerChecks[], mismatches; written before the next evm_revert"
+    "persistedPerCell": "baselineRaw[], raw[] (with stages baseline / plan / sign-inputs / progress / reconstruct / readback / consumer-replay / pre-presence / post-presence / failure-static / failure-pre / failure-post / browser / post), transactions[] (with rpc envelopes and rawTransaction), blocks[], rpcOther[], candidateDecoded.{baseline,post}, rows, rowLog, consumerChecks[] (kinds stored-slots and commitment), mismatches; written before the next evm_revert",
+    "sections": "raw observations (baselineRaw, raw, transactions, blocks, rpcOther) are kept apart from candidate claims (candidateDecoded, rows, consumerChecks, plan); the checker treats raw inputs, raw observations, candidate claims and evaluated results as separate sections"
   },
   "resources": {
     "leaseOwner": {
@@ -660,15 +849,15 @@
         "cd Reviews/2026-09-12-efs-path-decision/lab-b",
         "export FOUNDRY_OUT=/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b/out",
         "forge build --use 0.8.30 --offline",
-        "forge test --use 0.8.30 --offline -vv",
+        "forge test --use 0.8.30 --offline -vv   # 24 existing + 8 new tests (JoinedConsumer.t.sol x5, LabelType.t.sol x3)",
         "forge inspect Ledger storage-layout",
         "EFS_ETHERS_PATH=<node_modules/ethers> node script/measure.mjs --anvil    # writes <scratch>/measure.json and <scratch>/lab-addresses.json; artifacts read from FOUNDRY_OUT"
       ],
       "anvil": "started by the script on a free loopback port: --hardfork cancun --chain-id 31337 --gas-limit 30000000 --accounts 4 --prune-history 256 --cache-path <scratchRoot>/anvil-cache (created by the script) --no-cors --quiet; no --steps-tracing; PID, port, argv, start and stop times are written to measure.json (anvil section); killed by the script",
-      "expectedDuration": "15-25 minutes including one compile-repair cycle (build 1-3 min, tests < 2 min, measure 2-4 min)",
+      "expectedDuration": "20-30 minutes including one compile-repair cycle (build 1-3 min, tests < 2 min, measure 4-8 min for 18 cells / ~170 transactions with per-transaction persistence)",
       "scratchPath": "/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b",
-      "scratchBudget": "< 2 GB (out/, cache/, measure.json)",
-      "watchdog": "script kills its Anvil after 20 minutes; operator kills the run at 30 minutes",
+      "scratchBudget": "< 2 GB (out/, cache/, measure.json ~5-10 MB with literal envelopes)",
+      "watchdog": "script kills its Anvil after 25 minutes; operator kills the run at 35 minutes",
       "diskReserve": "stop if free disk < 50 GB",
       "processIds": {
         "unknown": "assigned at run time; the script records the Anvil PID and port in measure.json",
@@ -677,5 +866,9 @@
       "cleanup": "delete only the scratchPath above; keep measure.json as compact evidence",
       "runOwnedOutputs": "<scratchRoot>/out (forge artifacts), <scratchRoot>/cache, <scratchRoot>/anvil-cache, <scratchRoot>/lab-addresses.json, <scratchRoot>/measure.json; the script refuses a scratch root inside the lab directory; measure.json is rewritten after every cell and on failure so a crash keeps the evidence gathered so far"
     }
+  },
+  "matchedControl": {
+    "statement": "No measurement in this lab is a matched substitute for the fuller Files control (ebc7d54). The 32-byte/41-byte cells are hash-placement diagnostics (names are hashes), the label cells are a client-convention filename-retention baseline, and the joined cell covers sdk-fixture steps 1-6 only. A matched comparison requires labels (mandatory, exported/imported) and the joined journey integrated into one guarantee profile, which does not exist yet.",
+    "consequence": "no B/C cost winner and no Files-create parity can be claimed from any row here"
   }
 }
