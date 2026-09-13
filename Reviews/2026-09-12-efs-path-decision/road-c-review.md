@@ -106,3 +106,44 @@ verified. One report abbreviation was wrong; the follow-up records the full
 Next: a bounded measurement-script preflight, then receipt-backed comparison
 under normal chain limits. Local Forge success is not a matched-cost winner,
 full Files, independent reconstruction or authenticated-chain evidence.
+
+## Measurement preflight — September 13
+
+Read-only script review applies to code `774dfcd` (current branch `7876477`
+changes only its report). Root checked unchanged script SHA-256
+`087d6ffc134960c1fbf714ebce7d1aab493321d4a0bf1dc75400673620f8e2a5`
+and Consumer SHA-256
+`5f34e9ca9471f767d90f8f6149843ece97bdc99b036ab2005559fc3478048adb`.
+The worker's incidental checkout-status snapshot was stale; it is not the
+current ownership or publication record.
+
+- Preserve the typed Pair/Quote journey in `script/measure.mjs:139–235`.
+  A supplemental 32-byte-value diagnostic must be separately named: C's body
+  is framed as `abi.encode(bytes32[],bytes)`, not the bare 32-byte B body.
+  Equal payload value does not establish equal features or identical bytes.
+- Current RPC accounting drops request/response payloads; send/deployment
+  helpers omit raw transaction/receipt/block and code-identity evidence.
+  Native and signed paths use different action shapes and sequential states.
+  Existing fresh/reuse controls and view/estimated list reads are not the
+  required matched receipt-backed cases.
+- Add a stateless **test-only measurement consumer**, with paid public point
+  and list methods and explicit result commitments. Joined consumption must
+  check the Pair reference and author/evidence context, not just the mantissa.
+  Keep every consumer call/receipt cost visible; do not hide its overhead.
+- Before a chain lease, seal setup, typed joined A1/A2/B1, supplemental native
+  and signed create/edit/point/list, and separate fresh/reused Record cells.
+  Reset comparison cells to the same post-setup snapshot. Retain raw
+  pre/post Record presence, occurrence counts, heads/nonces/index basis and
+  exact transaction/request/response correlation; do not infer reuse from gas.
+- Link ImportLib normally, verify artifact/final-initcode/deployed-code hashes
+  and constructor inputs, preserve both standard size limits, and use the
+  explicitly configured artifact root. Store every result with its block
+  hash/number and source, never manufacture a missing call basis from a
+  same-number receipt. Decode after retaining raw evidence.
+
+**Next bounded implementation scope:** measurement script, new test-only
+consumer/tests, and its report only; no Core/vendor/main edits. Test the
+consumer first, rerun the 37 existing tests, review the runner, and obtain an
+explicit compiler/chain lease. This is a queued handoff, not an active lease,
+a cost result, or full Files evidence. Cold-readable labels and the complete
+matched guarantee profile remain separate integration requirements.

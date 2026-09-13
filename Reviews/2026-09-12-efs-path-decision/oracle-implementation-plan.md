@@ -98,3 +98,32 @@
 - **Remaining inputs:** ordered Action and PublicationIntent schema/framing, complete EIP-712 domain, replay/nonce and principal derivation rules, candidate signature vector, exact effect/query/selection closure, and a real proof-bearing raw packet.
 - **Ownership:** implementation and this handoff are complete; ownership is explicitly returned to root for publication. No push, merge, or promotion was performed.
 - **Not started:** a future `RPC_OBSERVED` layer may independently decode and compare supplied raw RPC bytes under an explicit observation assumption while leaving the existing strict proof-result layer unchanged; it must not imply chain inclusion or state-proof validity.
+
+## RPC_OBSERVED handoff intake — September 13, 03:09 UTC
+
+The separate extension returned local commit `0b9fbaff3d503f542b21e2ff42a60a98dbaf3725`
+after expectation freeze `6c4ef635dde7a9cd90d80d006a817648cd5ecbff`.
+Root reran 33 strict plus 52 extension tests: 85/85 pass. The strict source,
+CLI and neutral expectations are unchanged. A fresh extension CLI invocation
+produced byte-identical output to its retained report: 1 `OBSERVED_MATCH`,
+0 `OBSERVED_MISMATCH`, 11 `UNKNOWN`, 4 `UNSUPPORTED`, and
+`candidatePass: NOT_EVALUATED`. The sole match concerns signed-write raw
+tuple/body-hash/Record-target/revision/order consistency, not authorization,
+Type meaning, inclusion or semantic effect.
+
+**Publication is held for one confirmed checker-input bug.** Independent
+review identified malformed containers/entries being mistaken for omission.
+Root reproduced `raw = {}`, `raw = [5]`, and `raw = [[]]`: zero mismatches and
+process exit 0 despite malformed evidence structure. `transactions = [5]`
+or `[[]]` also silently loses the malformed entries. In contrast,
+`transactions = {}` already throws during basis-map construction and produces
+exit 2; the review's broader wording was corrected rather than treating it as
+another demonstrated bypass. None of these results asserts a candidate pass.
+
+SDK PM has a 20-minute regression-first fix in its existing `lab-oracle/`
+scope: distinguish genuinely missing observations from present malformed
+cells/containers/entries, add API and CLI regressions, preserve sealed inputs,
+strict files and the valid retained report, and return a new commit. No main
+write, push, network, chain or compiler run is authorized by that fix. After
+review/rerun, root publishes the branch. Public B profile `885d9f9` is now
+available for a later bounded signature-binding extension, not this repair.
