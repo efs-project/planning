@@ -222,3 +222,61 @@ GO; final branch `258e5c2` is pushed. The positive report and profile remain
 byte-identical, including report SHA-256 `9471daec…8e25`. This closes the
 bounded signature-binding checker work, not candidate eligibility or the
 runtime/authority/provenance/effect gates.
+
+### Predeclared richer-observation supplement — September 13, 05:25 UTC
+
+**Standing:** independently specified interpretation plan, before receiving
+the new B run's values; not implemented or a passing report. This responds
+to Fable's seven-getter collection question and SDK's read-only advisory.
+Keep the old checker, expectations and report unchanged. Do not move raw
+observations to a later block to make an old exact-call-set gate pass.
+
+Scope is the **storing Consumer** in `native-one/quote` and
+`signed-one/quote`, at the actual paid `readQuote` and `readList` receipt
+block-end basis. It does not interpret JoinedConsumer/stateless/label cells.
+Associate the final measurement source before launch (currently reviewed
+repair `e77f36dd7a0352a09a5198207fd1c3a56b2e0a63`, requiring the same-basis
+collection correction); Core association remains
+`dcc7b946d2ac8dfcf22103069127a9d1809df974` unless explicitly changed. This
+association is coordinator evidence, not an authenticated chain claim.
+
+Inherited semantic expectations blob:
+`1fbe87f6b2bf1d095bb0979997573439a6c2bd88`; public ABI profile blob:
+`6345c2246e287e9676f714491ce8aebf673f754a`. The SDK-only read checked old
+checker blob `a25dcb7077c152137da476b748f052f784ad38a8`: its exact stage
+call-set gate rejects extra same-target/same-block selectors. That report
+describes its old packet; it is not the appropriate predicate for this
+predeclared richer collection.
+
+At **each** named receipt basis require exactly one of every getter below,
+with exact target, calldata, declared return type, JSON-RPC ID/method,
+request/reply correlation, block parameter, separately retained block hash
+and source label. Reject malformed, conflicting or substituted observations;
+missing required evidence is UNKNOWN, not agreement. If the actual runner
+collects duplicates, retain them and declare that mismatch rather than
+filtering to a convenient winner.
+
+| Getter | Selector | Return |
+|---|---|---|
+| lastAdmission | `0x519ef1f8` | uint64 |
+| lastCount | `0x6b16ad67` | uint64 |
+| lastRevision | `0xe08871ca` | uint32 |
+| lastScanned | `0x336d5392` | uint64 |
+| lastStatus | `0xd6d86712` | uint8 |
+| lastTarget | `0x36abbd1d` | bytes32 |
+| lastValue | `0x43183834` | uint256 |
+
+Only the inherited independent semantic comparisons apply: at paid quote,
+lastTarget is the independently recomputed QUOTE_3100 Record, lastRevision
+is 2 and lastValue is 3100; at listing, lastCount is 1. Every other getter/
+stage pairing is **interpretation UNKNOWN** unless separately frozen before
+viewing its result. ABI decoding/presence does not earn semantic agreement.
+Addresses, query coordinates and value-source provenance must still be
+independently pinned; missing pins retain the existing UNKNOWN behavior.
+
+Any later implementation emits a separately named report. Ceiling remains
+RPC_OBSERVED, not RPC honesty, inclusion/canonicality, runtime/storage proof,
+historical source authority, immutable Type meaning, COMMITTED or candidate
+PASS. Block-end state is not transaction-index-local state proof. Preserve
+all raw evidence now; this light interpretation task does not hold B's build
+or require another candidate oracle.

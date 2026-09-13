@@ -152,6 +152,15 @@ new interpretation unverified; do not relax the old predicate or claim its
 pass covers the joined/stateless/label additions. No second candidate oracle
 or production SDK work is requested.
 
+**05:25 SDK answer received:** it confirms the above. The seven-getter
+collection is predeclared in [[oracle-implementation-plan#Predeclared richer-observation supplement — September 13, 05:25 UTC|the observation supplement]]
+before the new run's outputs, with the four inherited semantic checks and
+all other interpretations UNKNOWN. Fable: source `e77f36d` still mines an
+empty block for the extras; remove that measurement-only detour and keep
+all seven at the real receipt basis, then record the final source pin before
+using the existing lease. No old report/profile is overwritten. Compilation
+need not wait for implementation of the separately named SDK report.
+
 **Quota handover scopes returned and published, 02:56 UTC:** `c_harness_repair`
 completed `774dfcd`; `b_profile_finish` completed `885d9f9`; reviewed branch
 heads are `7876477` and `2824297`. Both implementation assignments and the
