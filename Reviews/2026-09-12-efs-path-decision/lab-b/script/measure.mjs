@@ -2,25 +2,27 @@
 // Road B lab — INGRESS x MULTIPLICITY measurement. DISPOSABLE LAB, NO PROTOCOL CLAIM.
 // DO NOT RUN without the coordinator's heavy-run lease (README.md, TODO.md).
 //
-// What this measures: {native, signed} ingress x {one, two} authors under a lens, on the
-// matched 32-byte quote and 41-byte binary controls, each cell from the SAME sealed initial
-// state (evm_snapshot after setup; evm_revert + re-snapshot before every cell), with the
-// pre-state and post-state recorded per cell (exact control Record ids absent, author nonces,
-// counters, relevant list heads). Plus the freshness controls (contract-fresh-body with a
-// proved pre-absence, contract-existing-body with a proved pre-presence, exact-operation
-// retry), the failure rows, the without-index-module pass and paid consumer reads.
-// It is NOT the protocol's capability ablation (neither/authorship/selection/both); no such
-// "interaction term" is computed here — that ablation is a later gate (MANIFEST.draft.json).
-// Fresh-slot counts are NOT derived (no storage tracing): the JSON carries the design's
-// ESTIMATED counts, labelled as such.
+// HONESTY: this run reports receipt diagnostics with explicit remaining gates. It is not a
+// same-guarantee comparison and not the protocol's capability ablation. The joined QUOTE/Pair
+// consumption (sdk-fixture steps 1–6 with ITEM/PAIR/QUOTE) is NOT in this script yet. The
+// Reconstructor is a candidate self-check calling ledger.intentDigest, not independent.
+//
+// What it does: {native, signed} ingress x {one, two} authors under a lens, on the matched
+// 32-byte quote and 41-byte binary controls. Every cell starts from the SAME sealed initial
+// state (evm_snapshot after setup; evm_revert + re-snapshot before each cell) through a FRESH
+// JsonRpcProvider with caching disabled and explicit block tags. Before any revert, the cell
+// record persists every transaction (hash, from, to, nonce, calldata), its receipt (status,
+// gasUsed, blockHash, blockNumber, logs) and the raw eth_call return bytes an independent
+// checker needs (evidence, admission rows, heads, subjects, control records, posting heads
+// and words, Consumer slots). measure.json is written after every cell and on failure.
 //
 // Usage (after `forge build` into a run-owned FOUNDRY_OUT):
-//   FOUNDRY_OUT=<scratch>/out node script/measure.mjs --anvil          # spawns a finite-history Cancun Anvil, deploys, runs, kills it
+//   FOUNDRY_OUT=<scratch>/out node script/measure.mjs --anvil
 //   FOUNDRY_OUT=<scratch>/out node script/measure.mjs --rpc URL --deploy
 //   FOUNDRY_OUT=<scratch>/out node script/measure.mjs --rpc URL --addresses <scratch>/lab-addresses.json
 // Options: --out <file.json> (default <scratch>/measure.json)  --mnemonic "<12 words>"  --skip-without-index
-// Env: FOUNDRY_OUT (artifacts; fallback ./out for reading only), EFS_LAB_SCRATCH (run-owned root;
-// default: parent of FOUNDRY_OUT, else the manifest's scratch path), EFS_ETHERS_PATH.
+// Env: FOUNDRY_OUT (artifacts; fallback ./out, read-only), EFS_LAB_SCRATCH (run-owned root; default: parent
+// of FOUNDRY_OUT, else the manifest's scratch path), EFS_ETHERS_PATH.
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -37,7 +39,7 @@ const ETHERS_CANDIDATES = [
 ].filter(Boolean);
 const ethersPath = ETHERS_CANDIDATES.find((p) => existsSync(p));
 if (!ethersPath) throw new Error('ethers v6 not found; set EFS_ETHERS_PATH to a node_modules/ethers directory');
-const { JsonRpcProvider, HDNodeWallet, ContractFactory, Contract, AbiCoder, keccak256, hexlify, toBeHex, zeroPadValue, toUtf8Bytes } =
+const { JsonRpcProvider, HDNodeWallet, ContractFactory, Contract, Interface, AbiCoder, keccak256, hexlify, toBeHex, zeroPadValue, toUtf8Bytes } =
   require(ethersPath);
 
 // ---------------------------------------------------------------- run-owned paths
@@ -54,11 +56,13 @@ const args = Object.fromEntries(process.argv.slice(2).map((a, i, all) => (a.star
 const MNEMONIC = args.mnemonic || process.env.EFS_LAB_MNEMONIC || 'test test test test test test test test test test test junk';
 const OUT_JSON = args.out && args.out !== true ? resolve(args.out) : join(SCRATCH_ROOT, 'measure.json');
 const WATCHDOG_MS = 20 * 60 * 1000;
+const CAVEAT_JOINED = 'The joined QUOTE/Pair consumption (sdk-fixture steps 1–6 with ITEM/PAIR/QUOTE) is NOT in this script yet.';
+const CAVEAT_RECON = 'The Reconstructor is a candidate self-check calling ledger.intentDigest, not independent.';
 
 // ---------------------------------------------------------------- exact payload controls (run-manifest.md)
 const FIX = {
-  quote3000: { bytes: zeroPadValue(toBeHex(3000n), 32), keccak: '0xe76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552', fixture: 'quote' },
-  quote3100: { bytes: zeroPadValue(toBeHex(3100n), 32), keccak: '0x5a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb3', fixture: 'quote' },
+  quote3000: { bytes: zeroPadValue(toBeHex(3000n), 32), keccak: '0xe76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552', fixture: 'quote', value: 3000n },
+  quote3100: { bytes: zeroPadValue(toBeHex(3100n), 32), keccak: '0x5a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb3', fixture: 'quote', value: 3100n },
   file41a: { bytes: hexlify(new Uint8Array(41).fill(0x61)), keccak: '0xe27c263ce61bca70e9ff7d3182fc124c8dcfee2a4656e5c746ceb433a2558911', fixture: 'binary' },
   file41b: { bytes: hexlify(new Uint8Array(41).fill(0x62)), keccak: '0x1882de08a178ebf3827d787e4086d8b2e14a81a8cf3b7b42f2e1458831646f3a', fixture: 'binary' },
 };
@@ -72,10 +76,13 @@ const ZERO_ADDR = ZERO.slice(0, 42);
 const recordId = (typeId, body) => keccak256(coder.encode(['bytes32', 'bytes32', 'bytes32'], [DOM('efs2/record/1'), typeId, keccak256(body)]));
 const subjectId = (creatorPrincipal, salt) => keccak256(coder.encode(['bytes32', 'bytes32', 'bytes32'], [DOM('efs2/subject/1'), creatorPrincipal, salt]));
 const position = (p, s, r) => keccak256(coder.encode(['bytes32', 'bytes32', 'bytes32', 'bytes32'], [DOM('efs2/position/1'), p, s, r]));
+const binding = (principal, pos) => keccak256(coder.encode(['bytes32', 'bytes32', 'bytes32'], [DOM('efs2/binding/1'), principal, pos]));
 const scopeKey = (principal, purpose, subject) => keccak256(coder.encode(['bytes32', 'bytes32', 'bytes32', 'bytes32'], [DOM('efs2/vk/binding-scope/1'), principal, purpose, subject]));
 const posting = (typeId, kind, ordinal, valueKey) => keccak256(coder.encode(['bytes32', 'bytes32', 'uint256', 'uint256', 'bytes32'], [DOM('efs2/pk/1'), typeId, kind, ordinal, valueKey]));
 const byTypeList = (typeId) => posting(typeId, 1, 0, ZERO);
 const byAuthorList = (principal) => posting(ZERO, 4, 0, principal);
+const backlinkList = (target) => posting(ZERO, 5, 0, target);
+const historyList = (key) => posting(ZERO, 8, 0, key);
 const scopeList = (key) => posting(ZERO, 10, 0, key);
 const T = { QUOTE: DOM('lab/type/quote/1'), BINARY: DOM('lab/type/binary/1'), ITEM: DOM('lab/type/item/1'), PAIR: DOM('lab/type/pair/1'), QUOTE_J: DOM('lab/type/quote-joined/1') };
 const P = { HEAD: DOM('efs2/purpose/head/1'), FOLDER: DOM('efs2/purpose/folder/1'), TAG: DOM('efs2/purpose/tag/1') };
@@ -88,6 +95,15 @@ const aPublish = (typeId, body) => act({ kind: 1, typeId, bodyHashOrRecordId: ke
 const aBind = (purpose, subject, role, target, rev) => act({ kind: 3, purpose, subject, role, target, expectedRevision: rev });
 const actionsHash = (actions) => keccak256(coder.encode([ACTION_T], [actions]));
 const str = (v) => (typeof v === 'bigint' ? v.toString() : v);
+const u256 = (body) => BigInt(body);
+
+// ---------------------------------------------------------------- artifacts and interfaces
+const ART_SOURCE = { Ledger: 'Ledger', IndexModule: 'IndexModule', LensReader: 'LensReader', TypeRegistry: 'TypeRegistry', MockAcceptor: 'LabHarness', FailingIndexModule: 'LabHarness', Actor: 'LabHarness', Consumer: 'LabHarness', Reconstructor: 'LabHarness' };
+const ART = {};
+const IFACES = {};
+const artifact = (nameOf) => (ART[nameOf] ??= JSON.parse(readFileSync(join(OUT_DIR, `${ART_SOURCE[nameOf]}.sol`, `${nameOf}.json`), 'utf8')));
+const iface = (nameOf) => (IFACES[nameOf] ??= new Interface(artifact(nameOf).abi));
+const errorSelector = (errName) => iface('Ledger').getError(errName)?.selector ?? null;
 
 // ---------------------------------------------------------------- chain
 async function freePort() {
@@ -109,7 +125,6 @@ async function startAnvil() {
   const port = await freePort();
   const cachePath = join(SCRATCH_ROOT, 'anvil-cache'); // run-owned; if the installed anvil rejects --cache-path, record that and drop the flag
   mkdirSync(cachePath, { recursive: true });
-  // finite history, no steps tracing, loopback only, run-owned cache
   const argv = ['--host', '127.0.0.1', '--port', String(port), '--hardfork', 'cancun', '--chain-id', '31337',
     '--gas-limit', '30000000', '--accounts', '4', '--prune-history', '256', '--cache-path', cachePath, '--no-cors', '--quiet',
     '--mnemonic', MNEMONIC];
@@ -126,45 +141,99 @@ async function startAnvil() {
   }
   throw new Error('anvil did not start');
 }
-const artifact = (file, nameOf) => JSON.parse(readFileSync(join(OUT_DIR, `${file}.sol`, `${nameOf}.json`), 'utf8'));
-async function send(provider, txPromise, label, expectFail = false) {
+
+// A fresh provider per cell: no result cache (cacheTimeout -1), static network, one request per call.
+function newProvider(rpc, chainId) {
+  return new JsonRpcProvider(rpc, chainId, { staticNetwork: true, cacheTimeout: -1, batchMaxCount: 1 });
+}
+function makeCtx(rpc, chainId, addrs) {
+  const provider = newProvider(rpc, chainId);
+  const wallets = [0, 1, 2, 3].map((i) => HDNodeWallet.fromPhrase(MNEMONIC, undefined, `m/44'/60'/0'/0/${i}`).connect(provider));
+  const deployer = wallets[0];
+  const at = (nameOf, addr) => new Contract(addr, artifact(nameOf).abi, deployer);
+  const ctx = { rpc, chainId, provider, wallets, deployer, addrs, txs: [], raw: [], consumerChecks: [], mismatches: 0 };
+  for (const [key, nameOf] of Object.entries({ ledger: 'Ledger', index: 'IndexModule', lens: 'LensReader', registry: 'TypeRegistry', acceptor: 'MockAcceptor', failingIndex: 'FailingIndexModule', actorA: 'Actor', actorB: 'Actor', consumer: 'Consumer', recon: 'Reconstructor' })) {
+    ctx[key] = at(nameOf, addrs[key]);
+  }
+  return ctx;
+}
+
+// ---------------------------------------------------------------- transactions: full evidence per tx
+async function send(ctx, txPromise, label, expectFail = false) {
   const tx = await txPromise;
-  const rc = await provider.waitForTransaction(tx.hash);
+  const rc = await ctx.provider.waitForTransaction(tx.hash);
+  const full = await ctx.provider.getTransaction(tx.hash);
+  const record = {
+    label, hash: tx.hash, from: full.from, to: full.to, nonce: full.nonce, data: full.data, gasLimit: str(full.gasLimit),
+    receipt: { status: rc.status, gasUsed: str(rc.gasUsed), blockHash: rc.blockHash, blockNumber: rc.blockNumber, transactionIndex: rc.index,
+      logs: rc.logs.map((l) => ({ address: l.address, topics: [...l.topics], data: l.data, index: l.index })) },
+  };
+  ctx.txs.push(record);
   if (!expectFail) assert.equal(rc.status, 1, `${label}: reverted`);
   else assert.equal(rc.status, 0, `${label}: expected a revert`);
-  return { label, gas: rc.gasUsed.toString(), status: rc.status, hash: tx.hash, block: rc.blockNumber };
+  return { label, gas: str(rc.gasUsed), status: rc.status, hash: tx.hash, block: rc.blockNumber, txIndex: ctx.txs.length - 1 };
 }
 const FAIL_GAS = { gasLimit: 3_000_000n };
-async function deployAll(provider, deployer) {
-  const dep = async (file, nameOf, ...ctor) => {
-    const a = artifact(file, nameOf);
-    const c = await new ContractFactory(a.abi, a.bytecode.object, deployer).deploy(...ctor);
-    await c.waitForDeployment();
-    const rc = await provider.getTransactionReceipt(c.deploymentTransaction().hash);
-    return { c, gas: rc.gasUsed, runtimeBytes: ((await provider.getCode(await c.getAddress())).length - 2) / 2 };
-  };
-  const registry = await dep('TypeRegistry', 'TypeRegistry');
-  const acceptor = await dep('LabHarness', 'MockAcceptor');
-  const ledger = await dep('Ledger', 'Ledger', await registry.c.getAddress(), REALM);
-  const index = await dep('IndexModule', 'IndexModule', await ledger.c.getAddress());
-  const lens = await dep('LensReader', 'LensReader', await ledger.c.getAddress(), await index.c.getAddress());
-  const actorA = await dep('LabHarness', 'Actor', await ledger.c.getAddress());
-  const actorB = await dep('LabHarness', 'Actor', await ledger.c.getAddress());
-  const consumer = await dep('LabHarness', 'Consumer', await lens.c.getAddress());
-  const recon = await dep('LabHarness', 'Reconstructor');
-  const setup = [];
-  setup.push(await send(provider, ledger.c.setIndexModule(await index.c.getAddress()), 'setup: attach index module'));
-  setup.push(await send(provider, registry.c.register(T.QUOTE, await acceptor.c.getAddress(), []), 'setup: register QUOTE'));
-  setup.push(await send(provider, registry.c.register(T.BINARY, ZERO_ADDR, []), 'setup: register BINARY'));
-  setup.push(await send(provider, registry.c.register(T.ITEM, ZERO_ADDR, []), 'setup: register ITEM'));
-  setup.push(await send(provider, registry.c.register(T.PAIR, await acceptor.c.getAddress(), [T.ITEM, T.ITEM]), 'setup: register PAIR'));
-  setup.push(await send(provider, registry.c.register(T.QUOTE_J, await acceptor.c.getAddress(), [T.PAIR]), 'setup: register QUOTE_J (one checked Pair ref)'));
-  return { registry, acceptor, ledger, index, lens, actorA, actorB, consumer, recon, setup };
+
+// ---------------------------------------------------------------- raw getter bytes (what an independent checker replays)
+async function raw(ctx, nameOf, key, fn, fnArgs, blockTag) {
+  const to = ctx.addrs[key];
+  const data = iface(nameOf).encodeFunctionData(fn, fnArgs);
+  const returnData = await ctx.provider.call({ to, data, blockTag });
+  ctx.raw.push({ contract: nameOf, to, fn, args: fnArgs.map(str), blockTag, calldata: data, returnData });
+  return iface(nameOf).decodeFunctionResult(fn, returnData);
+}
+const CONSUMER_SLOTS = ['lastStatus', 'lastTarget', 'lastRevision', 'lastAdmission', 'lastCount', 'lastScanned', 'lastValue'];
+async function consumerSlots(ctx, blockTag) {
+  const out = {};
+  for (const s of CONSUMER_SLOTS) out[s] = str((await raw(ctx, 'Consumer', 'consumer', s, [], blockTag))[0]);
+  return out;
+}
+async function harvest(ctx, touched, blockTag) {
+  const h = { blockTag, controls: {}, records: {}, publications: {}, subjects: {}, heads: {}, lists: {}, consumer: null, counts: null, nonces: {} };
+  for (const [label, f] of Object.entries(FIX)) {
+    const t = f.fixture === 'quote' ? T.QUOTE : T.BINARY;
+    const id = recordId(t, f.bytes);
+    const r = await raw(ctx, 'Ledger', 'ledger', 'record', [id], blockTag);
+    h.controls[label] = { recordId: id, typeId: t, firstAdmission: str(r[1]), occurrences: str(r[2]), bodyLength: (r[3].length - 2) / 2 };
+  }
+  for (const id of new Set(touched.records)) {
+    const r = await raw(ctx, 'Ledger', 'ledger', 'record', [id], blockTag);
+    h.records[id] = { typeId: r[0], firstAdmission: str(r[1]), occurrences: str(r[2]) };
+  }
+  for (const pub of new Set(touched.publications.map(str))) {
+    const e = await raw(ctx, 'Ledger', 'ledger', 'evidence', [pub], blockTag);
+    const first = Number(e[4]); const leafCount = Number(e[3]);
+    const admissions = [];
+    for (let i = 0; i < leafCount; i++) {
+      const a = await raw(ctx, 'Ledger', 'ledger', 'admission', [first + i], blockTag);
+      admissions.push({ ordinal: first + i, kind: str(a[0]), leaf: str(a[1]), publication: str(a[2]), bindingOrdinal: str(a[3]), expectedRevision: str(a[4]), withdrawn: a[5], a: a[6], b: a[7] });
+    }
+    h.publications[pub] = { author: e[0], proofKind: str(e[1]), v: str(e[2]), leafCount, firstAdmission: first, r: e[5], s: e[6], nonce: str(e[7]), deadline: str(e[8]), basis: str(e[9]), acceptanceProfile: e[10], indexObligations: e[11], actionsHash: e[12], admissions };
+  }
+  for (const s of new Set(touched.subjects)) h.subjects[s] = str((await raw(ctx, 'Ledger', 'ledger', 'subjectCreatedAt', [s], blockTag))[0]);
+  for (const k of new Set(touched.bindingKeys)) {
+    const hd = await raw(ctx, 'Ledger', 'ledger', 'head', [k], blockTag);
+    h.heads[k] = { state: str(hd[0]), revision: str(hd[1]), admission: str(hd[2]), previous: str(hd[3]), bindingOrdinal: str(hd[4]), target: hd[5] };
+  }
+  for (const k of new Set(touched.lists)) {
+    const ph = await raw(ctx, 'IndexModule', 'index', 'postingHead', [k], blockTag);
+    const count = Number(ph[0]);
+    const words = [];
+    for (let i = 0; i < Math.ceil(count / 5); i++) words.push(str((await raw(ctx, 'IndexModule', 'index', 'postingWord', [k, i], blockTag))[0]));
+    h.lists[k] = { count, live: str(ph[1]), last: str(ph[2]), flags: str(ph[3]), words };
+  }
+  const c = await raw(ctx, 'Ledger', 'ledger', 'counts', [], blockTag);
+  h.counts = { admissions: str(c[0]), records: str(c[1]), bindings: str(c[2]), publications: str(c[3]) };
+  for (const a of new Set(touched.authors)) h.nonces[a] = str((await raw(ctx, 'Ledger', 'ledger', 'nonces', [a], blockTag))[0]);
+  h.consumer = await consumerSlots(ctx, blockTag);
+  return h;
 }
 
 // ---------------------------------------------------------------- authors: native (Actor contract) and signed (EOA wallet)
-async function signedCall(provider, ledger, wallet, actions, bodies, overrides = {}) {
-  const block = await provider.getBlock('latest');
+async function signedCall(ctx, wallet, actions, bodies, overrides = {}) {
+  const block = await ctx.provider.getBlock('latest');
+  const ledger = ctx.ledger;
   const intent = {
     realmId: await ledger.realmId(), coreCodeCommitment: await ledger.coreCodeCommitment(), author: wallet.address,
     nonce: await ledger.nonces(wallet.address), deadline: BigInt(block.timestamp + 3600),
@@ -174,194 +243,371 @@ async function signedCall(provider, ledger, wallet, actions, bodies, overrides =
   const sig = await wallet.signTypedData({ name: 'EFS2-RoadB-Lab', version: '1' }, types, { ...intent, actionsHash: actionsHash(actions) });
   return ledger.executeSigned(intent, actions, bodies, sig);
 }
-function author(kind, who, ctx) {
-  if (kind === 'native') return { address: null, kind, run: (actions, bodies, o = {}) => (o.nonce !== undefined ? who.executeWithNonce(actions, bodies, o.nonce, o.tx ?? {}) : who.execute(actions, bodies, o.tx ?? {})) };
-  return { address: who.address, kind, run: (actions, bodies, o = {}) => signedCall(ctx.provider, ctx.ledger, who, actions, bodies, o) };
+function authorsFor(ctx) {
+  const native = (actor, address) => ({ address, kind: 'native', run: (actions, bodies, o = {}) => (o.nonce !== undefined ? actor.executeWithNonce(actions, bodies, o.nonce, o.tx ?? {}) : actor.execute(actions, bodies, o.tx ?? {})) });
+  const signed = (wallet) => ({ address: wallet.address, kind: 'signed', run: (actions, bodies, o = {}) => signedCall(ctx, wallet, actions, bodies, o) });
+  return { nativeA: native(ctx.actorA, ctx.addrs.actorA), nativeB: native(ctx.actorB, ctx.addrs.actorB), signedA: signed(ctx.wallets[1]), signedB: signed(ctx.wallets[2]) };
 }
 
 // ---------------------------------------------------------------- sealed state: snapshot/revert and pre/post probes
 const headOf = (h) => ({ count: str(h[0]), live: str(h[1]), last: str(h[2]), flags: str(h[3]) });
-async function stateProbe(ctx, authors, typeId, folder) {
-  const { provider, ledger, index } = ctx;
-  const probe = { block: await provider.getBlockNumber(), controls: {}, counts: {}, nonces: {}, scopeHeads: {}, byAuthorHeads: {}, byTypeHead: null };
+async function stateProbe(ctx, authors, typeId, folder, blockTag) {
+  const { ledger, index } = ctx;
+  const probe = { blockTag, controls: {}, counts: {}, nonces: {}, scopeHeads: {}, byAuthorHeads: {}, byTypeHead: null, consumer: null };
   for (const [label, f] of Object.entries(FIX)) {
     const t = f.fixture === 'quote' ? T.QUOTE : T.BINARY;
     const id = recordId(t, f.bytes);
-    const r = await ledger.record(id);
+    const r = await ledger.record(id, { blockTag });
     probe.controls[label] = { recordId: id, typeId: t, firstAdmission: str(r[1]), occurrences: str(r[2]), present: r[1] !== 0n };
   }
-  const c = await ledger.counts();
+  const c = await ledger.counts({ blockTag });
   probe.counts = { admissions: str(c[0]), records: str(c[1]), bindings: str(c[2]), publications: str(c[3]) };
   for (const a of authors) {
     if (!a) continue;
-    const pid = await ledger.principalOf(a.address);
-    probe.nonces[a.address] = str(await ledger.nonces(a.address));
-    probe.scopeHeads[a.address] = headOf(await index.postingHead(scopeList(scopeKey(pid, P.FOLDER, folder))));
-    probe.byAuthorHeads[a.address] = headOf(await index.postingHead(byAuthorList(pid)));
+    const pid = await ledger.principalOf(a.address, { blockTag });
+    probe.nonces[a.address] = str(await ledger.nonces(a.address, { blockTag }));
+    probe.scopeHeads[a.address] = headOf(await index.postingHead(scopeList(scopeKey(pid, P.FOLDER, folder)), { blockTag }));
+    probe.byAuthorHeads[a.address] = headOf(await index.postingHead(byAuthorList(pid), { blockTag }));
   }
-  probe.byTypeHead = headOf(await index.postingHead(byTypeList(typeId)));
+  probe.byTypeHead = headOf(await index.postingHead(byTypeList(typeId), { blockTag }));
+  probe.consumer = await consumerSlots(ctx, blockTag);
   return probe;
 }
+const stripBlock = (probe) => { const { blockTag, ...rest } = probe; return rest; };
 function assertSealed(probe, label) {
   for (const [k, v] of Object.entries(probe.controls)) assert.equal(v.present, false, `${label}: sealed state must not contain control record ${k}`);
 }
-async function sealedCell(ctx, label, authors, typeId, folder, fn) {
-  const { provider } = ctx;
-  assert.equal(await provider.send('evm_revert', [ctx.sealed]), true, `${label}: evm_revert failed`);
-  ctx.sealed = await provider.send('evm_snapshot', []); // anvil snapshots are single-use: re-seal
-  const pre = await stateProbe(ctx, authors, typeId, folder);
+async function sealedCell(run, label, typeId, folder, fn) {
+  // fresh provider per cell so no cached read survives the revert
+  const ctx = makeCtx(run.rpc, run.chainId, run.addrs);
+  assert.equal(await ctx.provider.send('evm_revert', [run.sealed]), true, `${label}: evm_revert failed`);
+  run.sealed = await ctx.provider.send('evm_snapshot', []); // anvil snapshots are single-use: re-seal
+  const afterRevert = await ctx.provider.getBlock('latest');
+  const authors = authorsFor(ctx);
+  const cellAuthors = fn.authors(authors);
+  const pre = await stateProbe(ctx, cellAuthors, typeId, folder, afterRevert.number);
   assertSealed(pre, label);
-  const rows = await fn();
-  const post = await stateProbe(ctx, authors, typeId, folder);
-  return { label, sealedSnapshot: ctx.sealed, pre, rows, post };
+  const touched = { records: [], publications: [], subjects: [], bindingKeys: [], lists: [byTypeList(typeId)], authors: cellAuthors.filter(Boolean).map((a) => a.address) };
+  const cell = { label, sealedSnapshot: run.sealed, afterRevert: { blockNumber: afterRevert.number, blockHash: afterRevert.hash }, pre, rows: null, post: null, harvest: null, transactions: null, raw: null, consumerChecks: null, mismatches: 0, error: null };
+  run.report.cells[label] = cell;
+  try {
+    cell.rows = await fn.body(ctx, authors, touched);
+    const last = await ctx.provider.getBlock('latest');
+    cell.post = await stateProbe(ctx, cellAuthors, typeId, folder, last.number);
+    cell.harvest = await harvest(ctx, touched, last.number); // persisted BEFORE the next cell's evm_revert
+  } catch (e) {
+    cell.error = { message: String(e.message), stack: String(e.stack).split('\n').slice(0, 6) };
+    throw e;
+  } finally {
+    cell.transactions = ctx.txs;
+    cell.raw = ctx.raw;
+    cell.consumerChecks = ctx.consumerChecks;
+    cell.mismatches = ctx.mismatches;
+    persist(run.report);
+  }
+  return cell;
+}
+function persist(report) {
+  report.persistedAt = new Date().toISOString();
+  report.anvil = { ...anvilInfo };
+  writeFileSync(OUT_JSON, JSON.stringify(report, null, 2) + '\n');
+}
+
+// ---------------------------------------------------------------- consumer read-back: actual stored values vs expected
+async function consumerCheck(ctx, row, expected) {
+  const actual = await consumerSlots(ctx, row.block);
+  const compared = {};
+  let match = true;
+  for (const [k, v] of Object.entries(expected)) { compared[k] = { expected: str(v), actual: actual[k], equal: str(v) === actual[k] }; if (str(v) !== actual[k]) match = false; }
+  if (!match) ctx.mismatches++;
+  const check = { label: `${row.label}/readback`, block: row.block, expected: Object.fromEntries(Object.entries(expected).map(([k, v]) => [k, str(v)])), actual, compared, match };
+  ctx.consumerChecks.push(check);
+  return check;
 }
 
 // ---------------------------------------------------------------- the ingress x multiplicity cells
-async function runCell(ctx, cellName, fixture, primary, secondary, opts = {}) {
-  const { provider, ledger, consumer, lens, recon } = ctx;
+function matrixCell(cellName, fixture, pick) {
+  return {
+    authors: (a) => pick(a),
+    body: async (ctx, a, touched) => {
+      const [primary, secondary] = pick(a);
+      return runCell(ctx, cellName, fixture, primary, secondary, touched);
+    },
+  };
+}
+async function runCell(ctx, cellName, fixture, primary, secondary, touched, opts = {}) {
+  const { ledger, consumer, lens, recon } = ctx;
   const rows = [];
-  const body1 = fixture === 'quote' ? FIX.quote3000.bytes : FIX.file41a.bytes;
-  const body2 = fixture === 'quote' ? FIX.quote3100.bytes : FIX.file41b.bytes;
+  const f1 = fixture === 'quote' ? FIX.quote3000 : FIX.file41a;
+  const f2 = fixture === 'quote' ? FIX.quote3100 : FIX.file41b;
   const typeId = fixture === 'quote' ? T.QUOTE : T.BINARY;
   const salt = keccak256(toUtf8Bytes(`${cellName}/${fixture}`));
-  const subj = subjectId(await ledger.principalOf(primary.address), salt); // origin-qualified for contract authors
+  const pidP = await ledger.principalOf(primary.address);
+  const subj = subjectId(pidP, salt); // origin-qualified for contract authors
   const folder = name(`/${cellName}/${fixture}`);
   const nameHash = name('entry');
-  const r1 = recordId(typeId, body1); const r2 = recordId(typeId, body2);
+  const r1 = recordId(typeId, f1.bytes); const r2 = recordId(typeId, f2.bytes);
+  const headPos = position(P.HEAD, subj, ZERO); const placePos = position(P.FOLDER, folder, nameHash);
+  touched.records.push(r1, r2); touched.subjects.push(subj);
+  const track = async (a) => {
+    const pid = await ledger.principalOf(a.address);
+    touched.bindingKeys.push(binding(pid, headPos), binding(pid, placePos));
+    touched.lists.push(historyList(binding(pid, headPos)), historyList(binding(pid, placePos)), scopeList(scopeKey(pid, P.FOLDER, folder)), byAuthorList(pid));
+  };
+  await track(primary);
+  touched.lists.push(backlinkList(r1), backlinkList(r2), backlinkList(subj));
   // create = one logical action: subject + record + head + placement
-  rows.push(await send(provider, primary.run([aCreate(salt), aPublish(typeId, body1), aBind(P.HEAD, subj, ZERO, r1, 0), aBind(P.FOLDER, folder, nameHash, subj, 0)], ['0x', body1, '0x', '0x']), `${cellName}/${fixture}/create`));
+  rows.push(await send(ctx, primary.run([aCreate(salt), aPublish(typeId, f1.bytes), aBind(P.HEAD, subj, ZERO, r1, 0), aBind(P.FOLDER, folder, nameHash, subj, 0)], ['0x', f1.bytes, '0x', '0x']), `${cellName}/${fixture}/create`));
   const pub = (await ledger.counts())[3];
-  const rec = await recon.reconstruct(await ledger.getAddress(), pub);
-  rows.push({ label: `${cellName}/${fixture}/reconstruct-create`, publication: str(pub), matches: rec[4], recovered: rec[3], status: 'eth_call' });
+  touched.publications.push(pub);
+  const rec = await recon.reconstruct(ctx.addrs.ledger, pub);
+  rows.push({ label: `${cellName}/${fixture}/reconstruct-create`, publication: str(pub), matches: rec[4], recovered: rec[3], status: 'eth_call', note: CAVEAT_RECON });
   // edit = fresh body + CAS head rebind
-  rows.push(await send(provider, primary.run([aPublish(typeId, body2), aBind(P.HEAD, subj, ZERO, r2, 1)], [body2, '0x']), `${cellName}/${fixture}/edit`));
+  rows.push(await send(ctx, primary.run([aPublish(typeId, f2.bytes), aBind(P.HEAD, subj, ZERO, r2, 1)], [f2.bytes, '0x']), `${cellName}/${fixture}/edit`));
+  touched.publications.push((await ledger.counts())[3]);
   let lensArr = [primary.address];
   if (secondary) {
-    // competing author: own head on the shared subject and own placement under the same name
-    rows.push(await send(provider, secondary.run([aPublish(typeId, body1), aBind(P.HEAD, subj, ZERO, r1, 0), aBind(P.FOLDER, folder, nameHash, subj, 0)], [body1, '0x', '0x']), `${cellName}/${fixture}/create-competing`));
+    await track(secondary);
+    rows.push(await send(ctx, secondary.run([aPublish(typeId, f1.bytes), aBind(P.HEAD, subj, ZERO, r1, 0), aBind(P.FOLDER, folder, nameHash, subj, 0)], [f1.bytes, '0x', '0x']), `${cellName}/${fixture}/create-competing`));
+    touched.publications.push((await ledger.counts())[3]);
     lensArr = [primary.address, secondary.address];
   }
-  // paid consumer reads (receipt gas, not eth_call)
-  if (fixture === 'quote') rows.push(await send(provider, consumer.readQuote(lensArr, P.HEAD, subj, ZERO), `${cellName}/${fixture}/read-resolve`));
-  else rows.push(await send(provider, consumer.readHead(lensArr, P.HEAD, subj, ZERO), `${cellName}/${fixture}/read-resolve`));
-  if (secondary) rows.push(await send(provider, consumer.readHead([secondary.address, primary.address], P.HEAD, subj, ZERO), `${cellName}/${fixture}/read-resolve-second-first`));
+  // paid consumer reads (receipt gas, not eth_call), each read back and compared
+  let row;
+  if (fixture === 'quote') {
+    row = await send(ctx, consumer.readQuote(lensArr, P.HEAD, subj, ZERO), `${cellName}/${fixture}/read-resolve`);
+    await consumerCheck(ctx, row, { lastStatus: 1, lastTarget: r2, lastRevision: 2, lastValue: f2.value });
+  } else {
+    row = await send(ctx, consumer.readHead(lensArr, P.HEAD, subj, ZERO), `${cellName}/${fixture}/read-resolve`);
+    await consumerCheck(ctx, row, { lastStatus: 1, lastTarget: r2, lastRevision: 2 });
+  }
+  rows.push(row);
+  if (secondary) {
+    row = await send(ctx, consumer.readHead([secondary.address, primary.address], P.HEAD, subj, ZERO), `${cellName}/${fixture}/read-resolve-second-first`);
+    await consumerCheck(ctx, row, { lastStatus: 1, lastTarget: r1, lastRevision: 1 });
+    rows.push(row);
+  }
   const est = await lens.resolve.estimateGas(lensArr, P.HEAD, subj, ZERO);
   rows.push({ label: `${cellName}/${fixture}/eth_call-resolve-estimate`, gas: est.toString(), status: 'estimate' });
   if (opts.noIndex) return rows; // without the module, list/history are UNKNOWN by construction (not measured as reads)
-  rows.push(await send(provider, consumer.readList(lensArr, P.FOLDER, folder, 16), `${cellName}/${fixture}/read-list`));
-  rows.push(await send(provider, consumer.readHistory(primary.address, position(P.HEAD, subj, ZERO), 1_000_000), `${cellName}/${fixture}/read-history-asof`));
+  row = await send(ctx, consumer.readList(lensArr, P.FOLDER, folder, 16), `${cellName}/${fixture}/read-list`);
+  await consumerCheck(ctx, row, { lastStatus: 2, lastCount: 1, lastScanned: secondary ? 2 : 1 }); // the shared name is ONE selected entry
+  rows.push(row);
+  row = await send(ctx, consumer.readHistory(primary.address, headPos, 1_000_000), `${cellName}/${fixture}/read-history-asof`);
+  await consumerCheck(ctx, row, { lastStatus: 1, lastTarget: r2, lastRevision: 2 });
+  rows.push(row);
   return rows;
 }
 
-async function freshnessControls(ctx, actor) {
-  const { provider, ledger } = ctx;
-  const rows = [];
-  const body = FIX.quote3000.bytes;
-  const id = recordId(T.QUOTE, body);
-  const before = await ledger.record(id);
-  assert.equal(before[1], 0n, 'pre-absence: the exact Record must not exist yet');
-  rows.push({ label: 'pre-absence proof', recordId: id, firstAdmission: str(before[1]), occurrences: str(before[2]), block: await provider.getBlockNumber(), proof: 'eth_call record(id).firstAdmission == 0 at the block before the write' });
-  rows.push(await send(provider, actor.publish(T.QUOTE, body), 'contract-fresh-body (Actor.publish quote3000, proved absent just before)'));
-  const mid = await ledger.record(id);
-  assert.notEqual(mid[1], 0n, 'pre-presence: the exact Record must exist now');
-  rows.push({ label: 'pre-presence proof', recordId: id, firstAdmission: str(mid[1]), occurrences: str(mid[2]), block: await provider.getBlockNumber(), proof: 'eth_call record(id).firstAdmission != 0 and occurrences == 1 at the block before the write' });
-  rows.push(await send(provider, actor.publish(T.QUOTE, body), 'contract-existing-body (same bytes: new occurrence, no new Record)'));
-  const after = await ledger.record(id);
-  rows.push({ label: 'post-presence', recordId: id, firstAdmission: str(after[1]), occurrences: str(after[2]) });
-  const b777 = zeroPadValue(toBeHex(777n), 32);
-  const actions = [aPublish(T.QUOTE, b777)];
-  const nonce = await ledger.nonces(await actor.getAddress());
-  rows.push(await send(provider, actor.executeWithNonce(actions, [b777], nonce), 'batch under explicit nonce'));
-  rows.push(await send(provider, actor.executeWithNonce(actions, [b777], nonce, FAIL_GAS), 'exact-operation retry (reverts AlreadyAdmitted)', true));
-  return rows;
+// ---------------------------------------------------------------- freshness controls (sealed cell)
+const freshnessCell = {
+  authors: (a) => [a.nativeA, null],
+  body: async (ctx, a, touched) => {
+    const { ledger, actorA } = ctx;
+    const rows = [];
+    const body = FIX.quote3000.bytes;
+    const id = recordId(T.QUOTE, body);
+    touched.records.push(id);
+    const pid = await ledger.principalOf(a.nativeA.address);
+    touched.lists.push(byAuthorList(pid));
+    const before = await ledger.record(id);
+    assert.equal(before[1], 0n, 'pre-absence: the exact Record must not exist yet');
+    rows.push({ label: 'pre-absence proof', recordId: id, firstAdmission: str(before[1]), occurrences: str(before[2]), block: await ctx.provider.getBlockNumber(), proof: 'eth_call record(id).firstAdmission == 0 at the block before the write' });
+    rows.push(await send(ctx, actorA.publish(T.QUOTE, body), 'contract-fresh-body (Actor.publish quote3000, proved absent just before)'));
+    touched.publications.push((await ledger.counts())[3]);
+    const mid = await ledger.record(id);
+    assert.notEqual(mid[1], 0n, 'pre-presence: the exact Record must exist now');
+    rows.push({ label: 'pre-presence proof', recordId: id, firstAdmission: str(mid[1]), occurrences: str(mid[2]), block: await ctx.provider.getBlockNumber(), proof: 'eth_call record(id).firstAdmission != 0 and occurrences == 1 at the block before the write' });
+    rows.push(await send(ctx, actorA.publish(T.QUOTE, body), 'contract-existing-body (same bytes: new occurrence, no new Record)'));
+    touched.publications.push((await ledger.counts())[3]);
+    const after = await ledger.record(id);
+    rows.push({ label: 'post-presence', recordId: id, firstAdmission: str(after[1]), occurrences: str(after[2]) });
+    const b777 = zeroPadValue(toBeHex(777n), 32);
+    touched.records.push(recordId(T.QUOTE, b777));
+    const actions = [aPublish(T.QUOTE, b777)];
+    const nonce = await ledger.nonces(a.nativeA.address);
+    rows.push(await send(ctx, actorA.executeWithNonce(actions, [b777], nonce), 'batch under explicit nonce'));
+    touched.publications.push((await ledger.counts())[3]);
+    rows.push(await failureRow(ctx, 'exact-operation retry (reverts AlreadyAdmitted)', actorA, 'executeWithNonce', [actions, [b777], nonce], 'AlreadyAdmitted', [[a.nativeA], T.QUOTE, name('/none')]));
+    return rows;
+  },
+};
+
+// A failure row: capture the revert selector with a static call, mine the reverting transaction,
+// and prove the state probe is unchanged across it.
+async function failureRow(ctx, label, contract, fn, fnArgs, expectedErrorName, probeArgs) {
+  const [authors, typeId, folder] = probeArgs;
+  const preBlock = await ctx.provider.getBlockNumber();
+  const pre = await stateProbe(ctx, authors, typeId, folder, preBlock);
+  const expectedSelector = errorSelector(expectedErrorName);
+  let observedSelector = null;
+  let observedData = null;
+  try {
+    await contract[fn].staticCall(...fnArgs);
+    observedSelector = 'no-revert';
+  } catch (e) {
+    observedData = e.data ?? e.info?.error?.data ?? null;
+    observedSelector = typeof observedData === 'string' ? observedData.slice(0, 10) : String(observedData);
+  }
+  const row = await send(ctx, contract[fn](...fnArgs, FAIL_GAS), label, true);
+  const post = await stateProbe(ctx, authors, typeId, folder, row.block);
+  const unchanged = JSON.stringify(stripBlock(pre)) === JSON.stringify(stripBlock(post));
+  return { ...row, expectedError: expectedErrorName, expectedSelector, observedSelector, observedRevertData: observedData, selectorMatch: observedSelector === expectedSelector, stateUnchanged: unchanged, pre, post };
 }
 
-async function failureRows(ctx, actor) {
-  const { provider, acceptor } = ctx;
-  const rows = [];
-  const items = [zeroPadValue(toBeHex(1n), 32), zeroPadValue(toBeHex(2n), 32)];
-  rows.push(await send(provider, actor.publish(T.ITEM, items[0]), 'ITEM_ETH'));
-  rows.push(await send(provider, actor.publish(T.ITEM, items[1]), 'ITEM_USDC'));
-  const ids = items.map((b) => recordId(T.ITEM, b));
-  const pair = coder.encode(['bytes32', 'bytes32', 'uint256'], [ids[0], ids[1], 1n]);
-  rows.push(await send(provider, actor.publish(T.PAIR, pair), 'PAIR_ETH_USDC (two checked refs)'));
-  const wrong = coder.encode(['bytes32', 'bytes32', 'uint256'], [ids[0], recordId(T.QUOTE, FIX.quote3000.bytes), 1n]);
-  rows.push(await send(provider, actor.publish(T.PAIR, wrong, FAIL_GAS), 'checked ref: wrong Type (reverts)', true));
-  const missing = coder.encode(['bytes32', 'bytes32', 'uint256'], [ids[0], name('nowhere'), 1n]);
-  rows.push(await send(provider, actor.publish(T.PAIR, missing, FAIL_GAS), 'checked ref: missing target (reverts)', true));
-  rows.push(await send(provider, actor.bind(P.HEAD, name('x'), ZERO, ids[0], 7, FAIL_GAS), 'stale CAS (reverts)', true));
-  rows.push(await send(provider, acceptor.set(1, 0), 'setup: acceptor rejects'));
-  rows.push(await send(provider, actor.publish(T.QUOTE, zeroPadValue(toBeHex(5n), 32), FAIL_GAS), 'failed acceptance (whole publication reverts)', true));
-  rows.push(await send(provider, acceptor.set(0, 0), 'setup: acceptor accepts'));
-  return rows;
+// ---------------------------------------------------------------- failure rows (sealed cell)
+const failureCell = {
+  authors: (a) => [a.nativeA, null],
+  body: async (ctx, a, touched) => {
+    const { ledger, actorA, acceptor } = ctx;
+    const probe = [[a.nativeA], T.PAIR, name('/none')];
+    const rows = [];
+    const items = [zeroPadValue(toBeHex(1n), 32), zeroPadValue(toBeHex(2n), 32)];
+    rows.push(await send(ctx, actorA.publish(T.ITEM, items[0]), 'ITEM_ETH'));
+    rows.push(await send(ctx, actorA.publish(T.ITEM, items[1]), 'ITEM_USDC'));
+    const ids = items.map((b) => recordId(T.ITEM, b));
+    touched.records.push(...ids);
+    const pair = coder.encode(['bytes32', 'bytes32', 'uint256'], [ids[0], ids[1], 1n]);
+    rows.push(await send(ctx, actorA.publish(T.PAIR, pair), 'PAIR_ETH_USDC (two checked refs)'));
+    touched.records.push(recordId(T.PAIR, pair));
+    // a PRESENT wrong-Type target: admit a QUOTE record first and assert it exists
+    const q99 = zeroPadValue(toBeHex(99n), 32);
+    const wrongId = recordId(T.QUOTE, q99);
+    rows.push(await send(ctx, actorA.publish(T.QUOTE, q99), 'setup: admit a QUOTE record as the present wrong-Type target'));
+    const present = await ledger.record(wrongId);
+    assert.notEqual(present[1], 0n, 'wrong-Type target must be present');
+    rows.push({ label: 'wrong-Type target presence', recordId: wrongId, typeId: T.QUOTE, firstAdmission: str(present[1]) });
+    touched.records.push(wrongId);
+    const wrong = coder.encode(['bytes32', 'bytes32', 'uint256'], [ids[0], wrongId, 1n]);
+    rows.push(await failureRow(ctx, 'checked ref: wrong Type (present target of another Type)', actorA, 'publish', [T.PAIR, wrong], 'E_REF_TYPE', probe));
+    const missing = coder.encode(['bytes32', 'bytes32', 'uint256'], [ids[0], name('nowhere'), 1n]);
+    rows.push(await failureRow(ctx, 'checked ref: missing target', actorA, 'publish', [T.PAIR, missing], 'E_REF_MISSING', probe));
+    const pid = await ledger.principalOf(a.nativeA.address);
+    const key = binding(pid, position(P.HEAD, name('x'), ZERO));
+    touched.bindingKeys.push(key); touched.lists.push(historyList(key), backlinkList(ids[0]));
+    rows.push(await send(ctx, actorA.bind(P.HEAD, name('x'), ZERO, ids[0], 0), 'setup: bind (revision becomes 1)'));
+    rows.push(await failureRow(ctx, 'stale CAS (expected 0, head is 1)', actorA, 'bind', [P.HEAD, name('x'), ZERO, ids[0], 0], 'E_CAS', probe));
+    rows.push(await send(ctx, acceptor.set(1, 0), 'setup: acceptor rejects'));
+    rows.push(await failureRow(ctx, 'failed acceptance (whole publication reverts)', actorA, 'publish', [T.QUOTE, zeroPadValue(toBeHex(5n), 32)], 'E_REJECTED', probe));
+    rows.push(await send(ctx, acceptor.set(0, 0), 'setup: acceptor accepts'));
+    rows.push(await send(ctx, ledger.setIndexModule(ctx.addrs.failingIndex), 'setup: attach the always-refusing index module'));
+    rows.push(await failureRow(ctx, 'failed mandatory index (whole publication reverts)', actorA, 'publish', [T.QUOTE, zeroPadValue(toBeHex(6n), 32)], 'E_INDEX', probe));
+    rows.push(await send(ctx, ledger.setIndexModule(ctx.addrs.index), 'setup: re-attach the index module'));
+    for (const pubN of [1, 2, 3, 4, 5]) touched.publications.push(pubN);
+    return rows;
+  },
+};
+
+// ---------------------------------------------------------------- deployment (once, then addresses only)
+async function deployAll(ctx0) {
+  const { provider, deployer } = ctx0;
+  const dep = async (nameOf, ...ctor) => {
+    const a = artifact(nameOf);
+    const c = await new ContractFactory(a.abi, a.bytecode.object, deployer).deploy(...ctor);
+    await c.waitForDeployment();
+    const rc = await provider.getTransactionReceipt(c.deploymentTransaction().hash);
+    return { c, address: await c.getAddress(), gas: str(rc.gasUsed), runtimeBytes: ((await provider.getCode(await c.getAddress())).length - 2) / 2 };
+  };
+  const d = {};
+  d.registry = await dep('TypeRegistry');
+  d.acceptor = await dep('MockAcceptor');
+  d.ledger = await dep('Ledger', d.registry.address, REALM);
+  d.index = await dep('IndexModule', d.ledger.address);
+  d.failingIndex = await dep('FailingIndexModule');
+  d.lens = await dep('LensReader', d.ledger.address, d.index.address);
+  d.actorA = await dep('Actor', d.ledger.address);
+  d.actorB = await dep('Actor', d.ledger.address);
+  d.consumer = await dep('Consumer', d.lens.address);
+  d.recon = await dep('Reconstructor');
+  const addrs = Object.fromEntries(Object.entries(d).map(([k, v]) => [k, v.address]));
+  const ctx = makeCtx(ctx0.rpc, ctx0.chainId, addrs);
+  const setup = [];
+  setup.push(await send(ctx, ctx.ledger.setIndexModule(addrs.index), 'setup: attach index module'));
+  setup.push(await send(ctx, ctx.registry.register(T.QUOTE, addrs.acceptor, []), 'setup: register QUOTE'));
+  setup.push(await send(ctx, ctx.registry.register(T.BINARY, ZERO_ADDR, []), 'setup: register BINARY'));
+  setup.push(await send(ctx, ctx.registry.register(T.ITEM, ZERO_ADDR, []), 'setup: register ITEM'));
+  setup.push(await send(ctx, ctx.registry.register(T.PAIR, addrs.acceptor, [T.ITEM, T.ITEM]), 'setup: register PAIR'));
+  setup.push(await send(ctx, ctx.registry.register(T.QUOTE_J, addrs.acceptor, [T.PAIR]), 'setup: register QUOTE_J (one checked Pair ref)'));
+  return { addrs, deployment: Object.fromEntries(Object.entries(d).map(([k, v]) => [k, { address: v.address, gas: v.gas, runtimeBytes: v.runtimeBytes }])), setup, setupTransactions: ctx.txs };
 }
 
 async function main() {
   const t0 = Date.now();
   const rpc = args.anvil ? await startAnvil() : args.rpc || 'http://127.0.0.1:8545';
-  const provider = new JsonRpcProvider(rpc, undefined, { staticNetwork: true });
-  const wallets = [0, 1, 2, 3].map((i) => HDNodeWallet.fromPhrase(MNEMONIC, undefined, `m/44'/60'/0'/0/${i}`).connect(provider));
-  const deployer = wallets[0];
+  const probeProvider = new JsonRpcProvider(rpc, undefined, { staticNetwork: true, cacheTimeout: -1 });
+  const chainId = Number((await probeProvider.getNetwork()).chainId);
   const report = {
     profile: 'road-b-lab/1', claim: 'disposable lab, no protocol claim',
+    honesty: 'This run reports receipt diagnostics with explicit remaining gates. It is not a same-guarantee comparison and not the capability ablation.',
     experiment: 'ingress x multiplicity: {native, signed} x {one, two authors under a lens}. NOT the protocol capability ablation (neither/authorship/selection/both), which is a later gate.',
+    remainingGates: [CAVEAT_JOINED, CAVEAT_RECON],
     capabilityAblation: { unknown: 'not run: the neither/authorship/selection/both counterfactuals need same-guarantee arms that remove one capability each; this lab has one arm', consequence: 'no representation-vs-feature attribution and no interaction term can be claimed from this run' },
-    rpc, chainId: (await provider.getNetwork()).chainId.toString(), node: process.version, evm: 'cancun', compiler: '0.8.30 (verify from out/ metadata)', optimizerRuns: 200, viaIR: true,
+    rpc, chainId, node: process.version, evm: 'cancun', compiler: '0.8.30 (verify from out/ metadata)', optimizerRuns: 200, viaIR: true,
     paths: { artifacts: OUT_DIR, scratchRoot: SCRATCH_ROOT, outJson: OUT_JSON },
-    startedAt: new Date(t0).toISOString(), anvil: anvilInfo, setup: [], sealedInitialState: null, cells: {}, controls: null, failures: null, withoutIndex: null, estimatedFreshSlots: {},
+    providerPolicy: 'fresh JsonRpcProvider per cell (cacheTimeout -1, staticNetwork, batchMaxCount 1); probes and raw harvests pass explicit block tags',
+    startedAt: new Date(t0).toISOString(), anvil: anvilInfo, deployment: null, setup: [], setupTransactions: [], sealedInitialState: null, cells: {}, estimatedFreshSlots: {}, failure: null,
+    caveats: [
+      'Local Anvil receipts under the lab profile; not an L2 fee quote and not an equivalent-guarantee comparison until the coordinator\'s fixture map is applied.',
+      'Ingress x multiplicity only; no capability ablation and no interaction term are claimed.',
+      CAVEAT_JOINED,
+      CAVEAT_RECON,
+      'Fresh-slot counts are estimates; no storage tracing was run.',
+      'Every cell starts from the sealed post-setup state (cold transaction access sets; lists empty except setup); "steady" list regimes are not measured here.',
+      'A listing page with mutated == true is a mixed-basis page and must not be treated as COMPLETE by any caller.',
+    ],
   };
-  let d;
-  if (args.addresses) {
-    const addrs = JSON.parse(readFileSync(args.addresses, 'utf8'));
-    const at = (file, nameOf, addr) => ({ c: new Contract(addr, artifact(file, nameOf).abi, deployer) });
-    d = { registry: at('TypeRegistry', 'TypeRegistry', addrs.registry), acceptor: at('LabHarness', 'MockAcceptor', addrs.acceptor), ledger: at('Ledger', 'Ledger', addrs.ledger), index: at('IndexModule', 'IndexModule', addrs.index), lens: at('LensReader', 'LensReader', addrs.lens), actorA: at('LabHarness', 'Actor', addrs.actorA), actorB: at('LabHarness', 'Actor', addrs.actorB), consumer: at('LabHarness', 'Consumer', addrs.consumer), recon: at('LabHarness', 'Reconstructor', addrs.recon), setup: [] };
-  } else {
-    d = await deployAll(provider, deployer);
-    report.deployment = Object.fromEntries(await Promise.all(Object.entries(d).filter(([k]) => k !== 'setup').map(async ([k, v]) => [k, { address: await v.c.getAddress(), gas: v.gas?.toString(), runtimeBytes: v.runtimeBytes }])));
-    report.setup = d.setup;
-    const addressesPath = join(SCRATCH_ROOT, 'lab-addresses.json'); // run-owned, never inside the lab directory
-    writeFileSync(addressesPath, JSON.stringify(Object.fromEntries(Object.entries(report.deployment).map(([k, v]) => [k, v.address])), null, 2));
-    report.paths.addresses = addressesPath;
-  }
-  const ctx = { provider, ledger: d.ledger.c, acceptor: d.acceptor.c, consumer: d.consumer.c, lens: d.lens.c, index: d.index.c, recon: d.recon.c, sealed: null };
-  const nativeA = author('native', d.actorA.c); nativeA.address = await d.actorA.c.getAddress();
-  const nativeB = author('native', d.actorB.c); nativeB.address = await d.actorB.c.getAddress();
-  const signedA = author('signed', wallets[1], ctx);
-  const signedB = author('signed', wallets[2], ctx);
-  // seal the initial state after setup; every cell starts by reverting to it
-  ctx.sealed = await provider.send('evm_snapshot', []);
-  report.sealedInitialState = { snapshot: ctx.sealed, block: await provider.getBlockNumber(), rule: 'evm_revert to the sealed snapshot, then re-snapshot, before every cell; pre/post probes recorded per cell' };
-  const cells = { 'native-one': [nativeA, null], 'signed-one': [signedA, null], 'native-two': [nativeA, nativeB], 'signed-two': [signedA, signedB] };
-  for (const fixture of ['quote', 'binary']) {
-    for (const [cell, [p, s]] of Object.entries(cells)) {
-      const typeId = fixture === 'quote' ? T.QUOTE : T.BINARY;
-      report.cells[`${cell}/${fixture}`] = await sealedCell(ctx, `${cell}/${fixture}`, [p, s], typeId, name(`/${cell}/${fixture}`), () => runCell(ctx, cell, fixture, p, s));
+  const run = { rpc, chainId, addrs: null, sealed: null, report };
+  try {
+    if (args.addresses) {
+      run.addrs = JSON.parse(readFileSync(args.addresses, 'utf8'));
+    } else {
+      const wallets0 = [0].map((i) => HDNodeWallet.fromPhrase(MNEMONIC, undefined, `m/44'/60'/0'/0/${i}`).connect(probeProvider));
+      const d = await deployAll({ rpc, chainId, provider: probeProvider, deployer: wallets0[0] });
+      run.addrs = d.addrs;
+      report.deployment = d.deployment;
+      report.setup = d.setup;
+      report.setupTransactions = d.setupTransactions;
+      const addressesPath = join(SCRATCH_ROOT, 'lab-addresses.json'); // run-owned, never inside the lab directory
+      writeFileSync(addressesPath, JSON.stringify(run.addrs, null, 2));
+      report.paths.addresses = addressesPath;
     }
+    run.sealed = await probeProvider.send('evm_snapshot', []);
+    const sealedBlock = await probeProvider.getBlock('latest');
+    report.sealedInitialState = { snapshot: run.sealed, blockNumber: sealedBlock.number, blockHash: sealedBlock.hash, rule: 'evm_revert to the sealed snapshot, then re-snapshot, before every cell through a fresh provider; pre/post probes and raw harvests recorded per cell before the next revert' };
+    persist(report);
+    const cells = { 'native-one': (a) => [a.nativeA, null], 'signed-one': (a) => [a.signedA, null], 'native-two': (a) => [a.nativeA, a.nativeB], 'signed-two': (a) => [a.signedA, a.signedB] };
+    for (const fixture of ['quote', 'binary']) {
+      for (const [cell, pick] of Object.entries(cells)) {
+        const typeId = fixture === 'quote' ? T.QUOTE : T.BINARY;
+        await sealedCell(run, `${cell}/${fixture}`, typeId, name(`/${cell}/${fixture}`), matrixCell(cell, fixture, pick));
+      }
+    }
+    await sealedCell(run, 'freshness-controls', T.QUOTE, name('/none'), freshnessCell);
+    await sealedCell(run, 'failure-rows', T.PAIR, name('/none'), failureCell);
+    if (!args['skip-without-index']) {
+      await sealedCell(run, 'native-one-noindex/quote', T.QUOTE, name('/native-one-noindex/quote'), {
+        authors: (a) => [a.nativeA, null],
+        body: async (ctx, a, touched) => {
+          const rows = [await send(ctx, ctx.ledger.setIndexModule(ZERO_ADDR), 'setup: detach index module')];
+          rows.push(...(await runCell(ctx, 'native-one-noindex', 'quote', a.nativeA, null, touched, { noIndex: true })));
+          return rows;
+        },
+      });
+    }
+    const finalCtx = makeCtx(rpc, chainId, run.addrs);
+    assert.equal(await finalCtx.provider.send('evm_revert', [run.sealed]), true, 'final evm_revert');
+    report.estimatedFreshSlots = { label: 'ESTIMATED from the design table, not traced', 'create (native, 4 actions)': '5 evidence + 1 pubId + 2..3 record + 1 subject + 4..6 admission + 2x(2 head + 1 bindingPosition + 3 positionCell) + index appends', 'create (signed)': 'as native + 2 (r, s)', 'edit': '3 record + 2..3 admission + head rewrite + index appends' };
+    report.consumerMismatches = Object.values(report.cells).reduce((n, c) => n + (c.mismatches || 0), 0);
+    report.finishedAt = new Date().toISOString();
+  } catch (e) {
+    report.failure = { message: String(e.message), stack: String(e.stack).split('\n').slice(0, 12), at: new Date().toISOString() };
+    throw e;
+  } finally {
+    stopAnvil();
+    persist(report);
+    const text = Object.entries(report.cells).flatMap(([cell, c]) => (c.rows || []).map((r) => `${cell.padEnd(26)} ${String(r.label).padEnd(64)} ${String(r.gas ?? '').padStart(10)} ${r.status ?? ''}`)).join('\n');
+    console.log(text);
+    console.log(`wrote ${OUT_JSON}`);
   }
-  report.controls = await sealedCell(ctx, 'freshness-controls', [nativeA], T.QUOTE, name('/none'), () => freshnessControls(ctx, d.actorA.c));
-  report.failures = await sealedCell(ctx, 'failure-rows', [nativeA], T.PAIR, name('/none'), () => failureRows(ctx, d.actorA.c));
-  if (!args['skip-without-index']) {
-    report.withoutIndex = await sealedCell(ctx, 'native-one-noindex/quote', [nativeA], T.QUOTE, name('/native-one-noindex/quote'), async () => {
-      const rows = [await send(provider, d.ledger.c.setIndexModule(ZERO_ADDR), 'setup: detach index module')];
-      rows.push(...(await runCell(ctx, 'native-one-noindex', 'quote', nativeA, null, { noIndex: true })));
-      return rows;
-    });
-  }
-  assert.equal(await provider.send('evm_revert', [ctx.sealed]), true, 'final evm_revert');
-  report.estimatedFreshSlots = { label: 'ESTIMATED from the design table, not traced', 'create (native, 4 actions)': '5 evidence + 1 pubId + 2..3 record + 1 subject + 4..6 admission + 2x(2 head + 1 bindingPosition + 3 positionCell) + index appends', 'create (signed)': 'as native + 2 (r, s)', 'edit': '3 record + 2..3 admission + head rewrite + index appends' };
-  report.finishedAt = new Date().toISOString();
-  report.caveats = [
-    'Local Anvil receipts under the lab profile; not an L2 fee quote and not an equivalent-guarantee comparison until the coordinator\'s fixture map is applied.',
-    'Ingress x multiplicity only; no capability ablation and no interaction term are claimed.',
-    'Fresh-slot counts are estimates; no storage tracing was run.',
-    'Every cell starts from the sealed post-setup state (cold transaction access sets; lists empty except setup); "steady" list regimes are not measured here.',
-    'A listing page with mutated == true is a mixed-basis page and must not be treated as COMPLETE by any caller.',
-  ];
-  stopAnvil();
-  report.anvil = { ...anvilInfo };
-  const text = Object.entries(report.cells).flatMap(([cell, c]) => c.rows.map((r) => `${cell.padEnd(20)} ${r.label.padEnd(64)} ${String(r.gas ?? '').padStart(10)} ${r.status}`)).join('\n');
-  console.log(text);
-  writeFileSync(OUT_JSON, JSON.stringify(report, null, 2) + '\n');
-  console.log(`wrote ${OUT_JSON}`);
 }
-main().catch((e) => { console.error(e); stopAnvil(); process.exit(1); });
+main().catch((e) => { console.error(e); process.exit(1); });

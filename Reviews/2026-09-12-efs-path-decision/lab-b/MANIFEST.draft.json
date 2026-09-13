@@ -1,6 +1,7 @@
 {
   "$schema": "../run-manifest.md",
   "claim": "DISPOSABLE LAB, NO PROTOCOL CLAIM. Draft manifest committed before any compile, chain or measurement. Every gas value is ESTIMATED or unknown.",
+  "honesty": "This run reports receipt diagnostics with explicit remaining gates. It is not a same-guarantee comparison and not the capability ablation.",
   "identity": {
     "runId": "road-b-lab-2026-09-12-draft-0",
     "road": "B",
@@ -271,9 +272,9 @@
         "cell": "all cells",
         "logical": "paid reads",
         "physical": [
-          "Consumer.readQuote / readHead / readList / readHistory transactions"
+          "Consumer.readQuote / readHead / readList / readHistory transactions, each followed by a read-back of the Consumer's stored slots at the receipt block"
         ],
-        "expected": "stored values equal the eth_call results; receipt gas recorded separately from eth_call estimate",
+        "expected": "read-back values (status, target, revision, count, scanned, value) equal the expected ones and are recorded as expected/actual/equal; receipt gas recorded separately from the eth_call estimate",
         "gas": {
           "unknown": "not run"
         }
@@ -531,7 +532,9 @@
       "status": {
         "unknown": "not run",
         "consequence": "no pre/post state has been observed"
-      }
+      },
+      "evidencePersistence": "before the next evm_revert the cell record persists every transaction (hash, from, to, nonce, calldata, gasLimit), its receipt (status, gasUsed, blockHash, blockNumber, logs) and the raw eth_call return bytes at an explicit block tag for: evidence(pub) and every Admission row of each publication of the cell, the binding heads touched, subjectCreatedAt, the four control Record rows and the cell's records, IndexModule postingHead and posting words of the touched lists, ledger counts and author nonces, and the Consumer's last* slots; measure.json is rewritten after every cell and on any failure",
+      "providerPolicy": "a fresh JsonRpcProvider per cell (cacheTimeout -1, staticNetwork, batchMaxCount 1); after the revert the block number and hash read from the node are recorded (afterRevert); probes and raw harvests pass explicit block tags"
     },
     "diagnostics": [
       {
@@ -546,10 +549,68 @@
         "unknown": "withdraw drops the author's occurrence and releases by-Type/by-author live counts but does not tombstone heads set by the withdrawn admission, so it is unmatched against the control's withdrawal",
         "consequence": "a mixed-basis page must not be treated as COMPLETE by any caller; not a passing same-guarantee row"
       }
-    ]
+    ],
+    "remainingGates": [
+      {
+        "gate": "The joined QUOTE/Pair consumption (sdk-fixture steps 1–6 with ITEM/PAIR/QUOTE) is NOT in this script yet.",
+        "unknown": "script/measure.mjs runs the ingress x multiplicity cells, freshness controls and failure rows only; ITEM/PAIR/QUOTE_J are registered but the joined authored-publication -> validation/indexing -> selected read -> independent consumer trace is not executed",
+        "consequence": "the first joined proof is not demonstrated by this run; sdk-fixture steps 1-6 stay designed-but-untested"
+      },
+      {
+        "gate": "The Reconstructor is a candidate self-check calling ledger.intentDigest, not independent.",
+        "unknown": "the reconstruction rows call the candidate's own intentDigest and getters; no independent oracle re-derives the typed-data digest",
+        "consequence": "authorship-closure claims are self-consistent only until an oracle that does not call the candidate reproduces the digest and recovers the author"
+      }
+    ],
+    "failureRows": {
+      "contract": "each failure row records the expected custom error name and selector (from the Ledger ABI), the selector observed by a static call with the same calldata, the mined reverting transaction (status 0) and a pre/post state probe that must be equal (stateUnchanged)",
+      "rows": [
+        {
+          "row": "checked ref: wrong Type",
+          "setup": "within the cell, admit a QUOTE record (uint256 99) and assert record().firstAdmission != 0 so the wrong-Type target is PRESENT",
+          "expectedError": "E_REF_TYPE"
+        },
+        {
+          "row": "checked ref: missing target",
+          "expectedError": "E_REF_MISSING"
+        },
+        {
+          "row": "stale CAS",
+          "setup": "bind HEAD name('x') at revision 0 first; then bind again with expectedRevision 0 while the head is at 1",
+          "expectedError": "E_CAS"
+        },
+        {
+          "row": "failed acceptance",
+          "setup": "MockAcceptor.set(1, 0) before, set(0, 0) after",
+          "expectedError": "E_REJECTED"
+        },
+        {
+          "row": "failed mandatory index",
+          "setup": "Ledger.setIndexModule(FailingIndexModule) before, re-attach IndexModule after",
+          "expectedError": "E_INDEX"
+        },
+        {
+          "row": "exact-operation retry",
+          "setup": "same actions under the same explicit nonce",
+          "expectedError": "AlreadyAdmitted"
+        }
+      ],
+      "status": {
+        "unknown": "not run",
+        "consequence": "no selector or rollback has been observed"
+      }
+    },
+    "consumerReadback": {
+      "preState": "the Consumer's last* slots are part of every pre/post probe",
+      "postTransaction": "after each consumer transaction the stored slots are read back at the receipt block and compared field by field to the expected target/revision/value/count; both are recorded; mismatches are counted per cell and in consumerMismatches",
+      "status": {
+        "unknown": "not run",
+        "consequence": "no stored consumer value has been observed"
+      }
+    }
   },
   "reads": {
-    "basis": "each consumer read pins the receipt block; eth_call reads pin blockTag = latest at call time (to be replaced by an explicit block hash in the run)",
+    "basis": "each consumer read pins the receipt block; every probe and raw harvest passes an explicit block number (no 'latest' reads in evidence)",
     "executionIdentity": "Ledger codehash + IndexModule (address, codehash) + TypeRegistry epoch; cursors bind indexGeneration/rulesEpoch/coreCodeCommitment",
     "publicDecoder": "Ledger raw getters (record, admission, evidence, head, bindingPosition, positionCell, counts, extsload); IndexModule postingHead/postingWord/postingAt/coverage; LensReader resolve/resolveNoTiebreak/list/history",
     "cursorSemantics": "Cursor{basisAdmission, indexGeneration, rulesEpoch, coreCodeCommitment, scopeKey, lensHash, position, lensIndex, rawIndex, selectedSoFar}; Page{items, scanned, hydrations, rawTotal, selectedSoFar, status UNKNOWN|PARTIAL|COMPLETE, mutated, next}; mutated == true marks a mixed-basis page which must not be treated as COMPLETE by any caller",
@@ -562,7 +623,8 @@
     "rpcAccounting": {
       "unknown": "not run",
       "consequence": "no browser cost claim"
-    }
+    },
+    "providerPolicy": "fresh provider per cell, no result cache, explicit block tags for every probe and raw getter; afterRevert block number/hash recorded per cell"
   },
   "evidence": {
     "receipts": {
@@ -575,16 +637,18 @@
       "unknown": "no storage tracing planned; fresh slots are ESTIMATED from the design table",
       "consequence": "state-growth claims are estimates"
     },
-    "reconstruction": "Reconstructor.reconstruct recomputes actionsHash + PublicationIntent digest from Admission rows and ecrecovers the author; reconstructSource does the same over the source domain for imports; tests only, unrun",
+    "reconstruction": "Reconstructor.reconstruct rows are recorded per create with the note: The Reconstructor is a candidate self-check calling ledger.intentDigest, not independent.",
     "mutationSeeds": "test_signature_binds_every_field (name, target, subject, expectedRevision, order, salt, realm, code, profile, obligations, nonce, deadline); test_fresh_reader_reconstructs_identical_digest_with_negatives (discriminator, typeId)",
     "proofGrade": {
       "signedIngress": "signature verified on-chain and re-verifiable from state (designed, untested)",
       "nativeIngress": "chain-state witness only; grade 0; not verified by this lab",
       "import": "source signature verified over the source domain; destination authorization separate (designed, untested)",
-      "listingAcrossMutation": "diagnostic only (see operations.diagnostics)"
+      "listingAcrossMutation": "diagnostic only (see operations.diagnostics)",
+      "reconstruction": "candidate self-check, not independent"
     },
     "status": "designed-but-untested for everything; nothing demonstrated",
-    "stateProbes": "per cell: pre-state and post-state probes (control Record presence, nonces, counters, list heads) written to measure.json; unrun"
+    "stateProbes": "per cell: pre-state and post-state probes (control Record presence, nonces, counters, list heads) written to measure.json; unrun",
+    "persistedPerCell": "transactions[], raw[] (contract, to, fn, args, blockTag, calldata, returnData), pre/post probes, harvest (decoded from the raw bytes), consumerChecks[], mismatches; written before the next evm_revert"
   },
   "resources": {
     "leaseOwner": {
@@ -611,7 +675,7 @@
         "consequence": "recorded by the operator in the coordinator checkpoint"
       },
       "cleanup": "delete only the scratchPath above; keep measure.json as compact evidence",
-      "runOwnedOutputs": "<scratchRoot>/out (forge artifacts), <scratchRoot>/cache, <scratchRoot>/anvil-cache, <scratchRoot>/lab-addresses.json, <scratchRoot>/measure.json; the script refuses a scratch root inside the lab directory"
+      "runOwnedOutputs": "<scratchRoot>/out (forge artifacts), <scratchRoot>/cache, <scratchRoot>/anvil-cache, <scratchRoot>/lab-addresses.json, <scratchRoot>/measure.json; the script refuses a scratch root inside the lab directory; measure.json is rewritten after every cell and on failure so a crash keeps the evidence gathered so far"
     }
   }
 }
