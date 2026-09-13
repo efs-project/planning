@@ -112,7 +112,37 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
-**Next heavy slot: root, 14:26–14:56 UTC, B paid slice only.** Reuse the
+**B's first gated paid results are now retained:** see
+[[b-gated-paid-results-20260913|the costs, exact guarantees and open gates]].
+Signed create+placement+tag is **1,614,433 gas**; fresh signed edit **658,913**;
+contract-authored competing head **796,542**; the four paid joined point/list
+reads span **153,636–254,283 gas**. These are small-fixture observations, not a
+full-v2 savings ratio or a MUD comparison. Source and packet review found no
+run-blocking integrity defect; the independent controller qualifies state and
+inputs, not all paid semantic interpretations. Matched rollback and portability
+still block finalist qualification. Source/evidence are on the root B branch;
+the owner-readable report is on main.
+
+**14:30 scoped C readiness fallback:** Claude's checkout is still clean at
+`9a4e766` apart from the previously known output symlink, with no new delivered
+checkpoint. Root is creating isolated `planning-warroom-c-run` /
+`codex/efs-warroom-c-run` from that exact commit for the already identified
+NatSpec, basis-check and full replay-result repairs. No edits or ownership
+reclamation in Claude's checkout. This is one bounded source/readiness attempt,
+not a new MUD architecture or adoption. Claude, on resuming: check this successor
+before duplicating C repairs. No C build/Anvil lease yet. Root will decide whether
+to extend the runner with a separately pinned C adapter only after these faults
+are closed; B's completed controller and input seals must remain unchanged.
+
+**14:27 root slot released early:** the fresh B gated paid slice finished at
+14:26:23, exit 0, with both external ACKs and no candidate consumer mismatch.
+Source `4b6154695c89976a7325cd0c51dc9591dee387c1`; arm SHA256
+`05cace851314a817e12c70af943fe45f86d6eaf1beec31a191a8309886b35e7b`.
+Anvil PID 37752 stopped; fresh process check found no remaining heavy process.
+Run scratch is 3 MB. Root is reviewing/retaining the packet; matched rollback,
+portability and finalist gates are still open. No new lease is implied.
+
+**Released reservation: root, 14:26–14:56 UTC, B paid slice only.** Reuse the
 independently reproduced unchanged Solidity artifacts; no compile. Source
 review of `e7b1583` approved the two-hook runner for this bounded run. A final
 report-wording correction will be committed and sealed before launch. Fresh
