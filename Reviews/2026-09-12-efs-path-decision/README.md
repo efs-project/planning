@@ -112,6 +112,32 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**Next heavy slot: root, 16:25–16:50 UTC, one C positive paid slice.**
+Reviewed runner source `58dd3d78e8efa8e4490b035bdde5502b75adc9e3`
+passed 83/83 Node checks and independent bounded source review. Reuse unchanged
+Solidity/artifacts at `2ca7349`; no compilation. Independent input SHA256
+`16739ae05cb8a77c16b4c0edc9b5acd3a4b9b5074510a1d6d69c42aeed3f335c`;
+controller SHA256
+`9338e35288adc11b0a310f50244fb5295e48c64d482f1174bc1c4cfdba598a53`.
+Only the separately reviewed owned-loopback launcher is authorized: fresh
+Anvil, chain 31337/Cancun, 30M block gas, prune-history 256, exclusive scratch
+`/tmp/efs-paid-c-run-20260913.YxKavf`, latest start 16:30, lease/watchdog stop
+before 16:50, run-owned cache, 14 GB run cap and 50 GB free reserve. At 16:24
+no competing Forge/Solc/Anvil process was visible and 274 GiB was free.
+The launcher contains the standalone runner's late loopback-preflight risk;
+watchdog refusal may lack a partial child transcript but cannot ACK success.
+Two separately pinned checks gate setup and post-B1 paid calls. This lease
+does not authorize rollback/scale/broader cells or any other lane's run.
+
+**Next finalist challenge sharpened:** [[portable-evidence-next-gate]] separates
+retaining authored/historical data from replaying old commands. Both current
+import APIs couple them; divergent destination CAS, a now-rejected historical
+record, and one missing unrelated batch body are concrete source-derived
+follow-on cases. A selected evidence/admission route may preserve current
+signatures; source-admission proof remains distinct. This is an unpriced shared
+gate, not a new architecture, an executed failure, or a reason to delay the
+current positive paid comparison.
+
 **15:59 C readiness slot released; positive paid integration in progress.**
 The isolated C repair at `2ca7349` passed the 14:59 source-archive build,
 80/80 Forge tests and 72/72 Node tests; ABI equivalence and normal code-size
