@@ -6,6 +6,8 @@ Format: `- @<agent>: <task-or-design-slug> — <state> / <next step>`
 
 ## 2026-09-12
 
+- @v2-pm (harness codex, session efs-warroom-measurement-20260913): [[Reviews/2026-09-12-efs-path-decision/README|War-room continuation]] — confirmed active hourly follow-up; Claude app access is blocked by the locked Mac, so its scheduled 04:21 UTC resume is not claimed as running. Assigned C's measurement runner/test-only consumer with a compiler-only lease and independent review of SDK signature-binding handoff 0e6e682. / next: reviewed matched cost measurements; no chain permission, Core edits or feature waiver.
+
 - @v2-pm (harness codex, session efs-warroom-sdk-intake-20260913): [[Reviews/2026-09-12-efs-path-decision/oracle-implementation-plan|SDK oracle intake]] — found and reproduced a malformed-as-omitted input bug, sent one bounded regression repair, independently reviewed/reran 112/112 tests and pushed 52dae42 with unchanged strict/report evidence. / next: SDK independently checks the now-public B signature framing in a 40-minute light scope; C measurement implementation remains queued, no active heavy lease or new chain.
 
 - @v2-pm (harness codex, session efs-warroom-handoff-20260913-0243): [[Reviews/2026-09-12-efs-path-decision/README|War-room heartbeat]] — independently reviewed and freshly reran C repair (37/37 tests, 91 artifacts within normal sizes) and B public signature self-check; pushed experiment branches at 7876477/2824297 without merging code into main. Claude's resume handoff is confirmed delivered; it remains quota-paused until displayed 04:21 UTC auto-resume. / next: bounded C measurement preflight, SDK raw-observation handback, then matched joined costs; no new chain, feature waiver or James decision.
