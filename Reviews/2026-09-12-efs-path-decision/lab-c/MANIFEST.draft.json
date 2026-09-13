@@ -367,6 +367,52 @@
       }
     }
   ],
+  "sealedPaidSlice": {
+    "$comment": "The sealed paid point/list slice (sdk-fixture appendix; matched-cost-scope-review 'Bounded C follow-through'), in C's native representation. Source-only: no run, no number is claimed here. This packet RECORDS observations (inputEvidenceGrade RPC_OBSERVED); the expectation manifest, the arm-input manifest and the post-B1 basis seal are authored, hashed and timestamped by the INDEPENDENT run controller before this packet is opened, and this packet may echo but never define or repair them.",
+    "cell": "typed-joined",
+    "scope": "anvil-only: the cell evm_snapshots, evm_reverts and evm_setNextBlockTimestamps, so script/measure.mjs refuses it without --anvil BEFORE any chain call (assertAnvilOnlyCells); deselect it with --cells to run the other cells against a supplied RPC",
+    "rows": {
+      "A1-create": "setup: AUTHOR_A signed: subject FILE_QUOTE + QUOTE_A1 + A head (rev 1) + the ONE /swaps eth-usdc placement + market tag; one combined receipt (costClass setup). The placement is one of five actions and NOT separable: placementCost ESTIMATE unless the paired control is pinned",
+      "A2-edit": "setup: AUTHOR_A signed: QUOTE_A2 + HEAD CAS rev 1 -> 2; A1 retained in history; the placement is untouched",
+      "B1-create": "setup: AUTHOR_B (Producer, native): QUOTE_B1 + B's own HEAD rev 1; NO FOLDER bind (a competing content head only, never a second placement); calldata carries two actions",
+      "seal": "after B1, before any paid read: evm_snapshot id + block number/hash/timestamp + raw replies at that block (highWater = baseline + 9, index generation, rules epoch, Core code commitment, realmId, realmOrigin); A placement provenance (resolveAt under both lenses -> identical A placement; Admissions + Evidence rows via public getRecord: FOLDER bind of /swaps/eth-usdc -> FILE admitted by the retained A1 publicationId, AUTHOR_A, proofKind 2, native at source; one Scopes triple (A, eth-usdc, A's key)); no B placement (B's Bindings row revision 0, BindingHistory length 0, [B]-only lens ABSENT_PROVEN)",
+      "paid-point-A": "PAID_POINT / LENS_A_FIRST: MeasurementConsumer.paidPoint([A,B], Expect) from the pinned unrelated caller; first and only tx of block seal+1 at timestamp seal+1",
+      "paid-list-A": "PAID_LIST / LENS_A_FIRST: paidList([A,B], Expect, PlacementExpect{/swaps, eth-usdc, AUTHOR_A, proofKind 2, A1 publicationId, revision 1, budget 10})",
+      "paid-point-B": "PAID_POINT / LENS_B_FIRST: paidPoint([B,A], Expect for QUOTE_B1 / B1 / AUTHOR_B / proofKind 1)",
+      "paid-list-B": "PAID_LIST / LENS_B_FIRST: the same single A placement row, checked to the B1 selection; placement actor AUTHOR_A != selected author AUTHOR_B by design",
+      "ordering": "seal -> (evm_revert to the seal, observed head == seal, re-snapshot, evm_setNextBlockTimestamp(seal+1), empty pool) -> the row -> retained (receipt, PaidObserved log, eth_call replay from the same caller at the receipt block, block transaction list, abstractResult, persisted) -> next revert; asserted by checkPaidRowOrdering (txIndex 0, single tx == row hash, equal block/parent/timestamp across the four rows)",
+      "agreement": "point and list under the same lens observe the identical Selection (lensHash excluded); unknown, never agreement, when a log is missing or its self-check failed",
+      "exact-retry-A1": "matched failure control: AlreadyAdmitted (block-pinned static revert selector + separately mined status-0 receipt)"
+    },
+    "paidCaller": "fixed ephemeral account of the run mnemonic at derivation index 3 (m/44'/60'/0'/0/3; anvil default mnemonic unless RUN_MNEMONIC/PAID_CALLER_INDEX are set): not the deployer (0), not AUTHOR_A (1), not the Producer or any deployed contract; assertUnrelatedCaller before setup; balance asserted > 0 at a pinned block; no secret retained",
+    "consumer": {
+      "source": "test/MeasurementConsumer.sol (test-only, stateless; paidPoint/paidList; framed c32 surface paidPointFramed/paidListFramed kept alongside)",
+      "decoder": "consumer-local over the public read ABI only: getRecord(bytes32,bytes32[],bytes32) with the Records/Admissions/Evidence table ids, field layouts and packed offsets pinned as literals (README 'Fixture coordinates'); every static region is length-checked before any byte is read; no EfsTypes/EfsIds/table-library import; readers are called through interface types (ILensReads, ITableReads, ILedgerViews, IIndexReads) so test/FaultyReads.sol can substitute malformed ACTUAL replies",
+      "checks": "shared by point and list: basis pinned exactly (highWater == Expect.basisAdmission, else BasisMismatch), resolveAt(HEAD, FILE_QUOTE, basis) FOUND with the expected author, head id and revision; the head's admission is a BIND of that target inside its publication's admission range whose Evidence names the author under the expected proof kind (native: v=r=s=0; EOA-signed: v in {27,28}, r,s != 0), not imported (importOf 0, sourceGrade 0), at this realmId and coreCodeCommitment; Quote -> Pair -> two Items with exact Type ids, canonical frames, ordered references, each admitted at or before the basis; the selected Quote's mantissa, scale, observedAt and note commitment compared against the caller's INPUTS. List only: one bounded page from a fresh cursor at the same basis must be COMPLETE with its end condition (next.position == rawTotal == scanned), rawTotal 1, one item, selected 1; the item is (eth-usdc -> FILE_QUOTE) held by the expected actor at the expected revision; FAMILY_SCOPES coverage COMPLETE through the basis; the placement's admission/publication/evidence category checked separately from content authorship (no equality between placement actor and selected author). Point performs no directory lookup.",
+      "observations": "event PaidObserved(kind, commitment, Selection selection, Placement placement): Selection = basisAdmission, indexGeneration, rulesEpoch, coreCodeCommitment, realmId, lensHash, subject, selectedHead, selectedRevision, selectedAdmission, selectedBindingKey, selectedPublication, selectedAuthor, selectedProofKind, selectedSourceGrade, quoteFirstAdmission, pairId, itemA, itemB, mantissa, scale, observedAt, note (23 fields); Placement = folder, name, target, actor, revision, admission, bindingKey, publicationId, proofKind, sourceGrade, basisAdmission, pageStatus, rawTotal, scanned, hydrated, selected, endPosition, ended, coverageStatus, coverageThrough (20 fields; all-zero for a point row). commitment = keccak256(abi.encode(kind, selection, placement)). The log is the paid rows' instrumentation overhead: ESTIMATED ~12-14k gas, disclosed, never subtracted.",
+      "negatives": "Forge: test/MeasurementConsumer.t.sol MeasurementSealedTest (wrong EXPECTATIONS: wrong/missing Pair or Item, wrong author or proof category, second placement via the broader FixtureSeeder.b1(), mixed bases, incomplete coverage, point/list disagreement, wrong head/revision/quote fields, wrong placement coordinate/revision/publication) and MeasurementFaultyReadsTest (malformed/missing ACTUAL replies through test/FaultyReads.sol: missing Pair row, wrong-Type Item, short Admissions region, short Evidence region, PARTIAL page claiming COMPLETE; plus the unarmed forwarding control)"
+    },
+    "abstractResult": {
+      "inputEvidenceGrade": "RPC_OBSERVED",
+      "fields": ["operation", "lens", "realm", "execution", "profile", "observationBasis", "executionBasis", "queryCoordinate", "presence", "support", "admission", "selection", "selectedFile", "selectedHead", "selectedRevision", "selectedPhysical", "selectedAuthor", "selectedAuthorEvidenceCategory", "placementCoordinate", "placementProvenance", "quoteCheck", "pairCheck", "itemChecks", "candidateCoverage", "pageCoverage", "rawEvidence", "paidExecution"],
+      "labels": "selectedFile FILE_QUOTE; selectedHead QUOTE_A2 / QUOTE_B1; selectedRevision A2 / B1 (fixture labels, never ordinals: physical ids/ordinals in selectedPhysical); selectedAuthor AUTHOR_A / AUTHOR_B with the principal id; selectedAuthorEvidenceCategory EOA_SIGNED_PUBLICATION / CONTRACT_ORIGINATED_PUBLICATION; placementProvenance sourceStep A1 / AUTHOR_A / EOA_SIGNED_PUBLICATION_EFFECT, unchanged under B-first; placementCoordinate.lookedUpByThisRow false for a point row",
+      "unknownCollapse": "on any failed candidate self-check (no single PaidObserved log, undecodable replay, replay commitment != log commitment, any field != the runner's candidate-side expectation) every derived label, outcome and coverage is UNKNOWN with the reason; raw observations (log, replay, receipt, block) stay retained; only fields a SEPARATE retained observation establishes (seal replies, receipt/block) keep values, each naming its source; the run then fails after retention",
+      "builder": "script/measure-helpers.mjs deriveAbstractResult / abstractRow (pure; unit-tested in script/measure-helpers.test.mjs)"
+    },
+    "optionalControlCell": {
+      "key": "typed-joined/a1-without-placement",
+      "selection": "non-default; admitted only by its exact --cells name (selectCells); anvil-only",
+      "content": "the identical A1 batch minus the FOLDER bind (subject + record + head + tag) from the same post-setup snapshot as typed-joined (same pre-A1 state, same author/nonce/bodies); asserts no /swaps/eth-usdc placement (lens ABSENT_PROVEN, A's Bindings row revision 0) and the A head present; pairing statement retained. The two receipts sit side by side; any difference is the coordinator's computation, this runner subtracts nothing"
+    },
+    "costClasses": "reported separately, never subtracted, amortized or normalized: deployment (artifacts[] deploy:* gas, runtime/initcode bytes/hashes; production prerequisites apart from MeasurementConsumer and Producer; ImportLib linked but not called), code, setup (setup:types-items-pair + A1/A2/B1 receipts), placementOnceOnly (ESTIMATE unless the paired control is pinned), storage (UNKNOWN: no slot diff), paid (the four receipts from the pinned caller), matchedFailureControl (exact-retry-A1)",
+    "operatorChecklist": [
+      "1. The expectation manifest (the seven appendix rows as semantic labels/outcomes only), the C arm-input manifest (clean source commit + empty dirty diff, compiler/config, artifact/initcode/runtime hashes incl. MeasurementConsumer, profile/Type/Lens commitments, independently derived semantic-to-physical vectors) and the post-B1 basis seal are the INDEPENDENT run controller's: authored, hashed and timestamped before this packet is opened; never this packet's.",
+      "2. Build with the pinned solc 0.8.30 / via-IR / cancun into a run-owned OUT_DIR; run the Forge suite (expected 47 + 17 = 64 tests) before any chain run; report the fresh --sizes table.",
+      "3. Start an owned finite Anvil (see TODO.md lease recipe; --accounts >= 4 so mnemonic index 3 is funded) and run `node script/measure.mjs --anvil` (default cells) with EVIDENCE_PATH set; add `--cells typed-joined,typed-joined/a1-without-placement` to pin the paired control.",
+      "4. Verify in the packet: metadata.run, metadata.paidCaller, slices['typed-joined'].{caller, seal, placementAtSeal, noBPlacement, ordering, agreement, costDisclosure, mismatches == 0}, operations[cell typed-joined].abstractResult on the four paid rows (selfCheck.match true), the exact-retry-A1 status-0 row; re-derive every physical id from the controller's own vectors, never from slices[].fixtureMirror.",
+      "5. Any UNKNOWN abstractResult, non-zero mismatches, ordering assertion or missing raw reply keeps the row out of the comparison; the raw packet is still retained as a diagnostic."
+    ]
+  },
   "reads": {
     "basis": "block hash + Ledger highWater admission ordinal; LensReader cursors pin (basisAdmission, indexGeneration, rulesEpoch, coreCodeCommitment, scopeKey, lensHash, position)",
     "decoder": "hand-written MUD-style table libraries (src/tables/*.sol) — candidate code; an independent oracle must re-derive from IStoreRead bytes + the FieldLayout/Schema words in README",
@@ -375,13 +421,13 @@
       "LENS_A_FIRST": "QUOTE_A2",
       "LENS_B_FIRST": "QUOTE_B1",
       "LENS_NO_TIEBREAK": "CONFLICT (status 3, no target)",
-      "folder /swaps": "one selected entry (dedupe across A's and B's placements)",
+      "folder /swaps": "broader fixture (FixtureSeeder.b1 + Selection.t.sol): one selected entry (dedupe across A's and B's placements); sealed slice (typed-joined, MeasurementFixture.b1HeadOnly): exactly one raw entry, A's placement, under both lenses",
       "tag market in /swaps": "FILE under both ordered lenses"
     },
     "consumer": {
-      "source": "src/Consumer.sol",
+      "source": "src/Consumer.sol (QuoteConsumer, unit-test paid read) and test/MeasurementConsumer.sol (the sealed slice's measurement consumer; see sealedPaidSlice.consumer)",
       "hash": null,
-      "privileges": "none; uses LensReader public ABI + IStoreRead; Records table coordinate pinned as a literal"
+      "privileges": "none; uses LensReader public ABI + the Store's public getRecord; table coordinates pinned as literals"
     },
     "rpcAccounting": {
       "value": null,

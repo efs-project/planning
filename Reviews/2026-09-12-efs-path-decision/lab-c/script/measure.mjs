@@ -3,7 +3,12 @@
 import { readFileSync, realpathSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { readLeftUint, verifyPatchedRuntime } from "./measure-helpers.mjs";
+import {
+  DEFAULT_CELLS, OPTIONAL_CELLS, PLACEMENT_FIELDS, SELECTION_FIELDS,
+  assertAnvilOnlyCells, assertUnrelatedCaller, checkAgreement, checkPaidRowOrdering, compareObservation,
+  decodeAdmissionStatic, decodeBindingStatic, decodeEvidenceStatic, deriveAbstractResult, evidenceCategoryOf,
+  parseRunArgs, readLeftUint, selectCells, verifyPatchedRuntime,
+} from "./measure-helpers.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export function resolveArtifactRoot(env, fallback) { return path.resolve(env.OUT_DIR ?? env.FOUNDRY_OUT ?? fallback); }
@@ -15,6 +20,15 @@ const PK_A = process.env.PK_A ?? "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c
 const OUT = resolveArtifactRoot(process.env, path.resolve(here, "../out"));
 const EVIDENCE_PATH = process.env.EVIDENCE_PATH;
 const RECEIPT_TIMEOUT_MS = Number(process.env.RECEIPT_TIMEOUT_MS ?? 120_000);
+// Run flags: --anvil (owned chain; required by the sealing cells) and --cells a,b (exact keys; the paired control only by name).
+const RUN_ARGS = parseRunArgs(process.argv.slice(2));
+const SELECTED_CELLS = selectCells(RUN_ARGS.cells, { defaults: DEFAULT_CELLS, optional: OPTIONAL_CELLS });
+assertAnvilOnlyCells(SELECTED_CELLS, RUN_ARGS.anvil); // refuses BEFORE any chain call (the provider below is lazy)
+// The pinned unrelated paid caller: a fixed ephemeral account of the run mnemonic at a derivation index that is not the
+// deployer (0), not AUTHOR_A (1) and not a producer/contract; only its address and derivation path are retained.
+const RUN_MNEMONIC = process.env.RUN_MNEMONIC ?? "test test test test test test test test test test test junk";
+const PAID_CALLER_INDEX = Number(process.env.PAID_CALLER_INDEX ?? 3);
+const PAID_CALLER_PATH = `m/44'/60'/0'/0/${PAID_CALLER_INDEX}`;
 const coder = ethers.AbiCoder.defaultAbiCoder();
 const ZERO = ethers.ZeroHash;
 const id = (s) => ethers.keccak256(ethers.toUtf8Bytes(s));
@@ -33,12 +47,18 @@ const TABLE = {
   BINDINGS: "0x7462656673000000000000000000000042696e64696e67730000000000000000",
   NONCES: "0x746265667300000000000000000000004e6f6e63657300000000000000000000",
   OCCURRENCES: "0x746265667369647800000000000000004f6363757272656e6365730000000000",
+  ADMISSIONS: "0x7462656673000000000000000000000041646d697373696f6e73000000000000",
+  EVIDENCE: "0x7462656673000000000000000000000045766964656e63650000000000000000",
+  SCOPES: "0x7462656673696478000000000000000053636f70657300000000000000000000",
+  BINDING_HISTORY: "0x7462656673696478000000000000000042696e64696e67486973746f72790000",
 };
 const LAYOUT = {
   RECORDS: "0x0028020120080000000000000000000000000000000000000000000000000000",
   BINDINGS: "0x002c030020040800000000000000000000000000000000000000000000000000",
   NONCES: "0x0008010008000000000000000000000000000000000000000000000000000000",
   OCCURRENCES: "0x0004010004000000000000000000000000000000000000000000000000000000",
+  ADMISSIONS: "0x01060b0020012001202020202004200000000000000000000000000000000000",
+  EVIDENCE: "0x0145110020012020010808202020080208202020010000000000000000000000",
 };
 const C32 = { create: ethers.zeroPadValue(ethers.toBeHex(3000n), 32), edit: ethers.zeroPadValue(ethers.toBeHex(3100n), 32) };
 const C32_HASH = { create: "0xe76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552", edit: "0x5a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb3" };
@@ -51,6 +71,10 @@ const typeBody = (shape, refs, mandatoryRuleId) => coder.encode(["bytes32", "byt
 const quotePayload = (n) => coder.encode(["uint256", "uint8", "uint64", "bytes32"], [n, 6, 1_800_000_000n, id("reference quote")]);
 const subjectId = (principal, salt) => ethers.keccak256(coder.encode(["bytes32", "bytes32", "bytes32"], [TAG_SUBJECT, principal, salt]));
 const bindingKey = (author, purpose, subject, role = ZERO) => ethers.keccak256(coder.encode(["bytes32", "bytes32", "bytes32", "bytes32"], [author, purpose, subject, role]));
+const scopeKey = (purpose, scope) => ethers.keccak256(coder.encode(["bytes32", "bytes32"], [purpose, scope]));
+const lensHashOf = (l) => ethers.keccak256(coder.encode(["bytes32[]", "uint8"], [l.principals, l.mode]));
+const str = (v) => (typeof v === "boolean" ? String(v) : String(v));
+const pickFields = (result, fields) => Object.fromEntries(fields.map((k, i) => [k, str(result[k] ?? result[i])]));
 const eoaPrincipal = (a) => ethers.keccak256(coder.encode(["uint8", "bytes32", "address"], [1, ZERO, a]));
 const contractPrincipal = (origin, a) => ethers.keccak256(coder.encode(["uint8", "bytes32", "address"], [2, origin, a]));
 const key1 = (x) => [x];
@@ -84,7 +108,8 @@ class EvidenceProvider extends ethers.JsonRpcProvider {
 const provider = new EvidenceProvider(RPC_URL, undefined, { cacheTimeout: -1, batchMaxCount: 1 });
 const wallet = new ethers.Wallet(PK, provider);
 const walletA = new ethers.Wallet(PK_A, provider);
-const evidence = { metadata: {}, artifacts: [], operations: [], observations: [], resets: [], rpc };
+const paidCaller = ethers.HDNodeWallet.fromPhrase(RUN_MNEMONIC, undefined, PAID_CALLER_PATH).connect(provider);
+const evidence = { metadata: {}, artifacts: [], operations: [], observations: [], resets: [], slices: {}, rpc };
 const decoders = new Map();
 async function sourced(source, fn) { const prior = rpcSource; rpcSource = source; try { return await fn(); } finally { rpcSource = prior; } }
 async function raw(method, params, source) { return sourced(source, () => provider.send(method, params)); }
@@ -98,6 +123,12 @@ async function observe(source, fn) {
   const block = await fixedBlock(source);
   const rawValue = await sourced(`${source}:call`, () => fn(block.number));
   evidence.observations.push({ source, block, rawValue: serialize(rawValue) });
+  return rawValue;
+}
+/// A getter pinned to an already-retained block (the seal): the observation names that block's number and hash.
+async function observeAt(source, block, fn) {
+  const rawValue = await sourced(`${source}:call`, () => fn(block.number));
+  evidence.observations.push({ source, block: { number: block.number, hash: block.hash }, rawValue: serialize(rawValue) });
   return rawValue;
 }
 function persist(stage) {
@@ -263,7 +294,7 @@ async function minedFailure(cell, operation, contract, functionName, args, expec
 async function main() {
   if (!EVIDENCE_PATH || !path.isAbsolute(EVIDENCE_PATH)) throw new Error("EVIDENCE_PATH must be an explicit absolute run-owned path");
   const network = await provider.getNetwork();
-  evidence.metadata = { startedAt: new Date().toISOString(), chainId: network.chainId.toString(), rpcUrl: RPC_URL, artifactRootConfigured: OUT, artifactRootReal: realpathSync(OUT), evidencePath: EVIDENCE_PATH, ethersPath: ETHERS, provider: { cacheTimeout: -1, batchMaxCount: 1, receiptTimeoutMs: RECEIPT_TIMEOUT_MS }, framing: "supplemental c32 values are abi.encode(bytes32[],bytes), never bare bytes32" };
+  evidence.metadata = { startedAt: new Date().toISOString(), chainId: network.chainId.toString(), rpcUrl: RPC_URL, artifactRootConfigured: OUT, artifactRootReal: realpathSync(OUT), evidencePath: EVIDENCE_PATH, ethersPath: ETHERS, provider: { cacheTimeout: -1, batchMaxCount: 1, receiptTimeoutMs: RECEIPT_TIMEOUT_MS }, framing: "supplemental c32 values are abi.encode(bytes32[],bytes), never bare bytes32", run: { anvil: RUN_ARGS.anvil, cells: SELECTED_CELLS, anvilOnlyCells: assertAnvilOnlyCells(SELECTED_CELLS, RUN_ARGS.anvil) }, paidCaller: { address: paidCaller.address, derivationPath: PAID_CALLER_PATH, index: PAID_CALLER_INDEX, mnemonicSource: process.env.RUN_MNEMONIC ? "RUN_MNEMONIC (env)" : "anvil default mnemonic", standing: "fixed ephemeral account of the run mnemonic; unrelated to every fixture role (asserted before the sealed slice's setup); no secret retained" } };
   const importLib = await deploy("ImportLib");
   links.set("src/ImportLib.sol:ImportLib", await importLib.getAddress());
   const index = await deploy("IndexModule", ["bytes32"], [ZERO]);
@@ -360,34 +391,265 @@ async function main() {
   const expected = (author, typeId, rid, expectedRef, payload) => ({ author, typeId, recordId: rid, expectedRef, payloadLength: ethers.getBytes(payload).length, payloadHash: ethers.keccak256(payload) });
   const lens = (author, other) => ({ principals: [author, other], mode: 0 });
 
-  {
-    const cell = "typed-joined", salt = id("typed-file"), file = subjectId(A, salt), folder = id("/swaps"), name = id("eth-usdc");
+  const has = (key) => SELECTED_CELLS.includes(key);
+  const PROFILE_LABEL = "road-c-lab Store-only MUD probe (StoreRead + StoreCore composition), fresh genesis, type-meta /2, acceptance /2; MANIFEST.draft.json; no commitment is treated as authority for another";
+
+  // ---------------------------------------------------------------------------------------------------------------
+  // typed-joined: the sealed paid point/list slice (sdk-fixture appendix; matched-cost-scope-review "Bounded C
+  // follow-through"). Setup rows A1 (with the ONE /swaps placement), A2 (CAS), B1 (record + HEAD only: a competing
+  // content head, never a second placement); the exact post-B1 seal; four paid rows (point/list x A-first/B-first),
+  // each the FIRST and ONLY transaction after an evm_revert to that seal at timestamp seal + 1 from the pinned
+  // unrelated caller, retained (receipt, PaidObserved log, eth_call replay, block transaction list, abstractResult,
+  // persisted) BEFORE the next revert. This runner RECORDS observations (inputEvidenceGrade RPC_OBSERVED); the
+  // expectations it passes to the consumer are its own candidate-side mirror of the fixture map. The expectation,
+  // arm-input and basis seals are authored and hashed by the independent run controller, never by this script.
+  // ---------------------------------------------------------------------------------------------------------------
+  const typedIds = () => {
+    const salt = id("typed-file"), file = subjectId(A, salt), folder = id("/swaps"), name = id("eth-usdc");
     const a1Payload = quotePayload(2_500_000_000n), a2Payload = quotePayload(2_502_000_000n), b1Payload = quotePayload(2_501_000_000n);
     const a1Body = recordBody([PAIR], a1Payload), a2Body = recordBody([PAIR], a2Payload), b1Body = recordBody([PAIR], b1Payload);
-    const A1 = recordId(QUOTE_T, ethers.keccak256(a1Body)), A2 = recordId(QUOTE_T, ethers.keccak256(a2Body)), B1 = recordId(QUOTE_T, ethers.keccak256(b1Body));
-    const a1Actions = [action({ kind: K.SUBJECT, subject: file, salt }), action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(a1Body) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: file, target: A1 }), action({ kind: K.BIND, purpose: PURPOSE.FOLDER, subject: folder, role: name, target: file }), action({ kind: K.BIND, purpose: PURPOSE.TAG, subject: file, role: id("market"), target: TAG_ASSERT })];
-    const preA1 = await capture(cell, "pre-A1", { record: A1, author: A, subject: file });
-    const signedA1 = await publishSigned(cell, "A1-create", a1Actions, ["0x", a1Body, "0x", "0x", "0x"]);
-    const postA1 = await capture(cell, "post-A1", { record: A1, author: A, subject: file });
+    return { salt, file, folder, name, a1Payload, a2Payload, b1Payload, a1Body, a2Body, b1Body, A1: recordId(QUOTE_T, ethers.keccak256(a1Body)), A2: recordId(QUOTE_T, ethers.keccak256(a2Body)), B1: recordId(QUOTE_T, ethers.keccak256(b1Body)) };
+  };
+  const a1ActionsOf = (t, placement) => {
+    const acts = [action({ kind: K.SUBJECT, subject: t.file, salt: t.salt }), action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(t.a1Body) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: t.file, target: t.A1 })];
+    if (placement) acts.push(action({ kind: K.BIND, purpose: PURPOSE.FOLDER, subject: t.folder, role: t.name, target: t.file }));
+    acts.push(action({ kind: K.BIND, purpose: PURPOSE.TAG, subject: t.file, role: id("market"), target: TAG_ASSERT }));
+    return acts;
+  };
+  const a1BodiesOf = (t, placement) => (placement ? ["0x", t.a1Body, "0x", "0x", "0x"] : ["0x", t.a1Body, "0x", "0x"]);
+  const getRecordRaw = (contract, table, key, layout) => (b) => contract["getRecord(bytes32,bytes32[],bytes32)"](table, key1(key), layout, { blockTag: b });
+  const resolution = (r) => ({ status: str(r.status ?? r[0]), target: r.target ?? r[1], revision: str(r.revision ?? r[2]), selectedBy: r.selectedBy ?? r[3], selectedKey: r.selectedKey ?? r[4], admission: str(r.admission ?? r[5]), basis: str(r.basis ?? r[6]), reads: str(r.reads ?? r[7]) });
+  const lc = (v) => String(v).toLowerCase();
+
+  async function typedJoinedCell() {
+    const cell = "typed-joined";
+    const t = typedIds();
+    const { file, folder, name } = t;
+    const readerAddr = await reader.getAddress(), ledgerAddr = await ledger.getAddress(), consumerAddr = await consumer.getAddress();
+    const slice = { cell, standing: "the sealed paid point/list slice: A1/A2/B1 setup rows, the exact post-B1 seal, four paid rows each the first transaction after a revert to that seal from the pinned unrelated caller, with abstractResult rows (RPC_OBSERVED observations, never expected answers)", mismatches: 0 };
+    evidence.slices[cell] = slice;
+    // ---- the pinned unrelated caller: unrelated to every fixture role (asserted BEFORE setup), funded at a pinned block
+    assertUnrelatedCaller(paidCaller.address, { deployer: wallet.address, "AUTHOR_A wallet": walletA.address, ...Object.fromEntries(Object.entries(evidence.metadata.addresses).map(([k, v]) => [`contract ${k}`, v])) });
+    const fundingBlock = await fixedBlock(`${cell}:caller-funding`);
+    const balanceWei = BigInt(await raw("eth_getBalance", [paidCaller.address, fundingBlock.number], `${cell}:caller-funding:balance`));
+    if (balanceWei === 0n) throw new Error(`${cell}: the pinned paid caller ${paidCaller.address} has no balance at block ${fundingBlock.number}; fund mnemonic index ${PAID_CALLER_INDEX} before the run`);
+    slice.caller = { address: paidCaller.address, derivationPath: PAID_CALLER_PATH, index: PAID_CALLER_INDEX, unrelatedTo: ["deployer", "AUTHOR_A wallet", ...Object.keys(evidence.metadata.addresses).map((k) => `contract ${k}`)], funding: { block: fundingBlock.number, blockHash: fundingBlock.hash, balanceWei: balanceWei.toString() } };
+    // ---- setup rows (setup cost class; the A1 combined receipt is NOT a marginal placement cost)
+    const preA1 = await capture(cell, "pre-A1", { record: t.A1, author: A, subject: file });
+    const signedA1 = await publishSigned(cell, "A1-create", a1ActionsOf(t, true), a1BodiesOf(t, true));
+    const a1Event = oneDecoded(signedA1.row, "Ledger", "Published");
+    signedA1.row.costClass = "setup"; signedA1.row.placementCost = "ESTIMATE: the single A placement is one of five actions (subject + record + head + FOLDER bind + tag) in this combined receipt and is NOT separable from it; pin the optional paired control typed-joined/a1-without-placement to measure it";
+    const postA1 = await capture(cell, "post-A1", { record: t.A1, author: A, subject: file });
     assertRecordTransition(`${cell}:A1`, preA1, postA1, "fresh");
-    const preA2 = await capture(cell, "pre-A2", { record: A2, author: A, subject: file });
-    await publishSigned(cell, "A2-edit", [action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(a2Body) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: file, target: A2, expectedRevision: 1 })], [a2Body, "0x"]);
-    const postA2 = await capture(cell, "post-A2", { record: A2, author: A, subject: file });
+    const preA2 = await capture(cell, "pre-A2", { record: t.A2, author: A, subject: file });
+    const signedA2 = await publishSigned(cell, "A2-edit", [action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(t.a2Body) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: file, target: t.A2, expectedRevision: 1 })], [t.a2Body, "0x"]);
+    const a2Event = oneDecoded(signedA2.row, "Ledger", "Published");
+    signedA2.row.costClass = "setup";
+    const postA2 = await capture(cell, "post-A2", { record: t.A2, author: A, subject: file });
     assertRecordTransition(`${cell}:A2`, preA2, postA2, "fresh");
-    const preB1 = await capture(cell, "pre-B1", { record: B1, author: B, subject: file });
-    await publishNative(cell, "B1-create", B, [action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(b1Body) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: file, target: B1 }), action({ kind: K.BIND, purpose: PURPOSE.FOLDER, subject: folder, role: name, target: file })], [b1Body, "0x", "0x"], true);
-    const postB1 = await capture(cell, "post-B1", { record: B1, author: B, subject: file });
+    const preB1 = await capture(cell, "pre-B1", { record: t.B1, author: B, subject: file });
+    // B1: record + B's own HEAD. NO FOLDER bind: a competing content head only, never a second placement.
+    const nativeB1 = await publishNative(cell, "B1-create", B, [action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(t.b1Body) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: file, target: t.B1 })], [t.b1Body, "0x"], true);
+    const b1Event = oneDecoded(nativeB1.row, "Ledger", "Published");
+    nativeB1.row.costClass = "setup"; nativeB1.row.folderBind = false;
+    const postB1 = await capture(cell, "post-B1", { record: t.B1, author: B, subject: file });
     assertRecordTransition(`${cell}:B1`, preB1, postB1, "fresh");
-    const pointA = commitmentEvent(await send(cell, "paid-point-A", async () => consumer.paidPoint(await reader.getAddress(), await ledger.getAddress(), lens(A, B), PURPOSE.HEAD, file, ZERO, expected(A, QUOTE_T, A2, PAIR, a2Payload))), "PointCommitted", file, A2, A);
-    const listA = commitmentEvent(await send(cell, "paid-list-A", async () => consumer.paidList(await reader.getAddress(), await ledger.getAddress(), lens(A, B), folder, name, file, 10, expected(A, QUOTE_T, A2, PAIR, a2Payload))), "ListCommitted", file, A2, A);
-    if (pointA.basis !== listA.basis) throw new Error(`${cell} A point/list basis mismatch`);
-    const pointB = commitmentEvent(await send(cell, "paid-point-B", async () => consumer.paidPoint(await reader.getAddress(), await ledger.getAddress(), lens(B, A), PURPOSE.HEAD, file, ZERO, expected(B, QUOTE_T, B1, PAIR, b1Payload))), "PointCommitted", file, B1, B);
-    const listB = commitmentEvent(await send(cell, "paid-list-B", async () => consumer.paidList(await reader.getAddress(), await ledger.getAddress(), lens(B, A), folder, name, file, 10, expected(B, QUOTE_T, B1, PAIR, b1Payload))), "ListCommitted", file, B1, B);
-    if (pointB.basis !== listB.basis) throw new Error(`${cell} B point/list basis mismatch`);
+    const b1Calldata = producer.interface.decodeFunctionData("publish", nativeB1.row.exact.transaction.input);
+    const b1Purposes = Array.from(b1Calldata[1].actions, (a) => lc(a.purpose ?? a[4]));
+    if (b1Calldata[1].actions.length !== 2 || b1Purposes.includes(lc(PURPOSE.FOLDER))) throw new Error(`${cell}: B1 calldata must carry exactly two actions and no FOLDER bind`);
+    // ---- the exact post-B1 seal (BEFORE any paid read): snapshot id + block number/hash/timestamp + raw replies at that block
+    const snapshot = await raw("evm_snapshot", [], `${cell}:seal:snapshot`);
+    const sealBlock = await fixedBlock(`${cell}:seal`);
+    const seal = { snapshot, number: Number(sealBlock.number), numberHex: sealBlock.number, hash: sealBlock.hash, parentHash: sealBlock.header.parentHash, timestamp: Number(sealBlock.header.timestamp) };
+    const basis = (await observeAt(`${cell}:seal:high-water`, sealBlock, (b) => ledger.highWater({ blockTag: b }))).toString();
+    const hw0 = BigInt(baselineProof.highWater);
+    if (BigInt(basis) !== hw0 + 9n) throw new Error(`${cell}: post-B1 admission frontier ${basis} != baseline ${hw0} + 9`);
+    const generation = (await observeAt(`${cell}:seal:index-generation`, sealBlock, (b) => index.generation({ blockTag: b }))).toString();
+    const rulesEpoch = (await observeAt(`${cell}:seal:rules-epoch`, sealBlock, (b) => ledger.rulesEpoch({ blockTag: b }))).toString();
+    const core = await observeAt(`${cell}:seal:code-commitment`, sealBlock, (b) => ledger.coreCodeCommitment({ blockTag: b }));
+    const realmId = await observeAt(`${cell}:seal:realm-id`, sealBlock, (b) => ledger.realmId({ blockTag: b }));
+    const realmOrigin = await observeAt(`${cell}:seal:realm-origin`, sealBlock, (b) => ledger.realmOrigin({ blockTag: b }));
+    const sealBasis = { admissionFrontier: basis, indexGeneration: generation, rulesEpoch, coreCodeCommitment: core, realmId, realmOrigin };
+    slice.seal = { snapshot, block: seal.number, blockHex: seal.numberHex, blockHash: seal.hash, parentHash: seal.parentHash, timestamp: seal.timestamp, observationBasis: sealBasis, standing: "the exact post-B1 basis: evm_snapshot id (single-use; re-sealed after every revert), block number/hash/timestamp from the retained header, admission frontier / index generation / rules epoch / Core code commitment / Realm id from raw replies at that block" };
+    // A placement provenance at the seal (joined here for the point rows, which do not look the directory up)
+    const plA = resolution(await observeAt(`${cell}:seal:placement-resolve-a-first`, sealBlock, (b) => reader.resolveAt(lens(A, B), PURPOSE.FOLDER, folder, name, basis, { blockTag: b })));
+    const plB = resolution(await observeAt(`${cell}:seal:placement-resolve-b-first`, sealBlock, (b) => reader.resolveAt(lens(B, A), PURPOSE.FOLDER, folder, name, basis, { blockTag: b })));
+    if (plA.status !== "1" || lc(plA.target) !== lc(file) || lc(plA.selectedBy) !== lc(A) || plA.revision !== "1") throw new Error(`${cell}: the A placement must be FOUND under LENS_A_FIRST as A's revision 1 -> FILE`);
+    if (plB.status !== "1" || lc(plB.target) !== lc(plA.target) || lc(plB.selectedBy) !== lc(plA.selectedBy) || plB.revision !== plA.revision || plB.admission !== plA.admission || lc(plB.selectedKey) !== lc(plA.selectedKey)) throw new Error(`${cell}: LENS_B_FIRST must fall through to the identical A placement`);
+    const aPlacementKey = bindingKey(A, PURPOSE.FOLDER, folder, name);
+    if (lc(plA.selectedKey) !== lc(aPlacementKey)) throw new Error(`${cell}: the placement binding key is not A's (FOLDER, /swaps, eth-usdc)`);
+    const plAdm = decodeAdmissionStatic((await observeAt(`${cell}:seal:placement-admission`, sealBlock, getRecordRaw(ledger, TABLE.ADMISSIONS, ethers.toBeHex(BigInt(plA.admission), 32), LAYOUT.ADMISSIONS)))[0]);
+    if (plAdm.kind !== 4n || lc(plAdm.purpose) !== lc(PURPOSE.FOLDER) || lc(plAdm.subject) !== lc(folder) || lc(plAdm.role) !== lc(name) || lc(plAdm.target) !== lc(file)) throw new Error(`${cell}: the placement admission is not a FOLDER bind of /swaps/eth-usdc -> FILE`);
+    const plEv = decodeEvidenceStatic((await observeAt(`${cell}:seal:placement-evidence`, sealBlock, getRecordRaw(ledger, TABLE.EVIDENCE, plAdm.publicationId, LAYOUT.EVIDENCE)))[0]);
+    if (lc(plEv.author) !== lc(A) || plEv.proofKind !== 2n || lc(plAdm.publicationId) !== lc(a1Event.publicationId) || BigInt(plA.admission) < plEv.firstAdmission || BigInt(plA.admission) >= plEv.firstAdmission + plEv.leafCount || plEv.importOf !== ZERO || plEv.sourceGrade !== 0n) throw new Error(`${cell}: the placement was not admitted by A1 (AUTHOR_A, EOA-signed, native at source)`);
+    const sk = scopeKey(PURPOSE.FOLDER, folder);
+    const scopeBytes = BigInt(await observeAt(`${cell}:seal:scope-length`, sealBlock, (b) => index["getDynamicFieldLength(bytes32,bytes32[],uint8)"](TABLE.SCOPES, key1(sk), 0, { blockTag: b })));
+    if (scopeBytes !== 96n) throw new Error(`${cell}: the /swaps scope must hold exactly one (author, name, bindingKey) triple, got ${scopeBytes} bytes`);
+    const scopeSlice = await observeAt(`${cell}:seal:scope-entries`, sealBlock, (b) => index["getDynamicFieldSlice(bytes32,bytes32[],uint8,uint256,uint256)"](TABLE.SCOPES, key1(sk), 0, 0, 96, { blockTag: b }));
+    const triple = [0, 1, 2].map((i) => `0x${scopeSlice.slice(2 + i * 64, 2 + (i + 1) * 64)}`);
+    if (lc(triple[0]) !== lc(A) || lc(triple[1]) !== lc(name) || lc(triple[2]) !== lc(aPlacementKey)) throw new Error(`${cell}: the one scope entry is not (A, eth-usdc, A's binding key)`);
+    const placementAtSeal = { status: plA.status, target: plA.target, revision: plA.revision, author: plA.selectedBy, admission: plA.admission, bindingKey: plA.selectedKey, publicationId: plAdm.publicationId, admissionKind: plAdm.kind.toString(), proofKind: plEv.proofKind.toString(), v: plEv.v.toString(), firstAdmission: plEv.firstAdmission.toString(), leafCount: plEv.leafCount.toString(), scopeEntries: "1", scopeTriple: triple, byLens: { LENS_A_FIRST: plA, LENS_B_FIRST: plB } };
+    slice.placementAtSeal = { standing: "raw replies at the seal block: LensReader.resolveAt(FOLDER, /swaps, eth-usdc, basis) under LENS_A_FIRST and LENS_B_FIRST (identical placement) + the Admissions and Evidence rows (public getRecord) + the Scopes entry; sourceStep A1 = the retained A1-create Published publicationId; NOT charged to any paid row", sourceStep: "A1", actor: "AUTHOR_A", evidenceCategory: evidenceCategoryOf(plEv.proofKind, true), basis, observed: placementAtSeal };
+    // no B placement: B's binding row, B's binding history, the B-only lens and the single scope entry are all absent/empty
+    const bKey = bindingKey(B, PURPOSE.FOLDER, folder, name);
+    const bBinding = decodeBindingStatic((await observeAt(`${cell}:seal:no-b-placement-binding`, sealBlock, getRecordRaw(ledger, TABLE.BINDINGS, bKey, LAYOUT.BINDINGS)))[0]);
+    const bHistory = BigInt(await observeAt(`${cell}:seal:no-b-placement-history`, sealBlock, (b) => index["getDynamicFieldLength(bytes32,bytes32[],uint8)"](TABLE.BINDING_HISTORY, key1(bKey), 0, { blockTag: b })));
+    const bOnly = resolution(await observeAt(`${cell}:seal:no-b-placement-resolve`, sealBlock, (b) => reader.resolveAt({ principals: [B], mode: 0 }, PURPOSE.FOLDER, folder, name, basis, { blockTag: b })));
+    if (bBinding.revision !== 0n || bBinding.admission !== 0n || bBinding.target !== ZERO) throw new Error(`${cell}: B has a /swaps/eth-usdc binding`);
+    if (bHistory !== 0n) throw new Error(`${cell}: B's /swaps/eth-usdc binding history is not empty`);
+    if (bOnly.status !== "2") throw new Error(`${cell}: the B-only lens must prove the placement ABSENT (status 2), got ${bOnly.status}`);
+    slice.noBPlacement = { standing: "raw replies at the seal block: Bindings row of B's (FOLDER, /swaps, eth-usdc) key revision 0, BindingHistory length 0, LensReader.resolveAt([B]) ABSENT_PROVEN, the one Scopes triple is A's; B1 calldata carries two actions and no FOLDER purpose", bBindingKey: bKey, bBinding: { target: bBinding.target, revision: bBinding.revision.toString(), admission: bBinding.admission.toString() }, bHistoryLength: bHistory.toString(), bOnlyLensStatus: bOnly.status, b1Actions: b1Calldata[1].actions.length, b1Purposes };
+    persist(`${cell}:seal`);
+    // ---- the four paid rows: each the first and only transaction after a revert to the seal, from the pinned caller
+    const ordering = [{ kind: "seal", block: seal.number, hash: seal.hash, timestamp: seal.timestamp }];
+    async function restoreSeal(label) {
+      const consumed = seal.snapshot;
+      const reverted = await raw("evm_revert", [consumed], `${label}:revert`);
+      if (reverted !== true) throw new Error(`${label}: evm_revert(${consumed}) failed`);
+      seal.snapshot = await raw("evm_snapshot", [], `${label}:re-seal`); // Anvil consumes a snapshot id on revert
+      const nextTimestamp = seal.timestamp + 1; // matched next-block TIME control: every paid row executes at seal + 1
+      await raw("evm_setNextBlockTimestamp", [nextTimestamp], `${label}:next-timestamp`);
+      const head = await fixedBlock(`${label}:after-revert`);
+      if (Number(head.number) !== seal.number || head.hash !== seal.hash) throw new Error(`${label}: after the revert the head is ${head.number} ${head.hash}, not the seal ${seal.numberHex} ${seal.hash}`);
+      const nonceLatest = await raw("eth_getTransactionCount", [paidCaller.address, "latest"], `${label}:caller-nonce-latest`);
+      const noncePending = await raw("eth_getTransactionCount", [paidCaller.address, "pending"], `${label}:caller-nonce-pending`);
+      if (nonceLatest !== noncePending) throw new Error(`${label}: the pending pool is not empty after the revert`);
+      ordering.push({ kind: "revert", block: Number(head.number), hash: head.hash, nextTimestamp, snapshot: consumed, resealed: seal.snapshot });
+      evidence.resets.push({ label, kind: "seal-restore", reverted, snapshot: consumed, newSnapshot: seal.snapshot, head: head.number, hash: head.hash, nextTimestamp, callerNonce: nonceLatest });
+    }
+    const noteCommitment = id("reference quote");
+    // candidate-side fixture mirror (labelled): the expectations passed to the consumer; the sealed run supplies the controller's vectors
+    const expectA = { subject: file, expectedHead: t.A2, selectedRevision: 2, selectedAuthor: A, selectedProofKind: 2, quoteType: QUOTE_T, pairType: PAIR_T, itemType: ITEM_T, pairId: PAIR, itemA: ITEM_ETH, itemB: ITEM_USDC, mantissa: 2_502_000_000n, scale: 6, observedAt: 1_800_000_000n, noteCommitment, basisAdmission: basis };
+    const expectB = { ...expectA, expectedHead: t.B1, selectedRevision: 1, selectedAuthor: B, selectedProofKind: 1, mantissa: 2_501_000_000n };
+    const placementExpect = { folder, name, actor: A, proofKind: 2, publicationId: a1Event.publicationId, revision: 1, budget: 10 };
+    const commonSelection = { basisAdmission: basis, indexGeneration: generation, rulesEpoch, coreCodeCommitment: core, realmId, subject: file, selectedSourceGrade: 0, pairId: PAIR, itemA: ITEM_ETH, itemB: ITEM_USDC, scale: 6, observedAt: 1_800_000_000n, note: noteCommitment };
+    const selA = { ...commonSelection, selectedHead: t.A2, selectedRevision: 2, selectedAdmission: hw0 + 7n, selectedBindingKey: bindingKey(A, PURPOSE.HEAD, file), selectedPublication: a2Event.publicationId, selectedAuthor: A, selectedProofKind: 2, quoteFirstAdmission: hw0 + 6n, mantissa: 2_502_000_000n };
+    const selB = { ...commonSelection, selectedHead: t.B1, selectedRevision: 1, selectedAdmission: hw0 + 9n, selectedBindingKey: bindingKey(B, PURPOSE.HEAD, file), selectedPublication: b1Event.publicationId, selectedAuthor: B, selectedProofKind: 1, quoteFirstAdmission: hw0 + 8n, mantissa: 2_501_000_000n };
+    const placementNone = Object.fromEntries(PLACEMENT_FIELDS.map((k) => [k, k === "ended" ? false : /^(folder|name|target|actor|bindingKey|publicationId)$/.test(k) ? ZERO : 0]));
+    const placementOne = { folder, name, target: file, actor: A, revision: 1, admission: hw0 + 4n, bindingKey: aPlacementKey, publicationId: a1Event.publicationId, proofKind: 2, sourceGrade: 0, basisAdmission: basis, pageStatus: 1, rawTotal: 1, scanned: 1, selected: 1, endPosition: 1, ended: true, coverageStatus: 1, coverageThrough: basis }; // hydrated: a physical witness, not pinned
+    const headLabels = { [lc(t.A1)]: ["QUOTE_A1", "A1"], [lc(t.A2)]: ["QUOTE_A2", "A2"], [lc(t.B1)]: ["QUOTE_B1", "B1"] };
+    const authorLabels = { [lc(A)]: ["AUTHOR_A", "EOA principal (mnemonic index 1)"], [lc(B)]: ["AUTHOR_B", "contract principal (Producer)"] };
+    slice.fixtureMirror = { standing: "candidate-side mirror of the fixture map (this runner's inputs to the consumer), never the independent expectation manifest", ids: { file, folder, name, A1: t.A1, A2: t.A2, B1: t.B1, PAIR, ITEM_ETH, ITEM_USDC, QUOTE_T, PAIR_T, ITEM_T, aPlacementKey, aHeadKey: bindingKey(A, PURPOSE.HEAD, file), bHeadKey: bindingKey(B, PURPOSE.HEAD, file) }, bodies: { a1Body: t.a1Body, a2Body: t.a2Body, b1Body: t.b1Body }, publications: { A1: a1Event.publicationId, A2: a2Event.publicationId, B1: b1Event.publicationId }, expect: serialize({ expectA, expectB, placementExpect }), expectedObservations: serialize({ selA, selB, placementOne, placementNone }) };
+    const ab = lens(A, B), ba = lens(B, A);
+    const paidRows = [
+      { key: "paid-point-A", operation: "PAID_POINT", lens: "LENS_A_FIRST", lensObj: ab, fn: "paidPoint", args: [readerAddr, ledgerAddr, ab, expectA], selection: { ...selA, lensHash: lensHashOf(ab) }, placement: placementNone },
+      { key: "paid-list-A", operation: "PAID_LIST", lens: "LENS_A_FIRST", lensObj: ab, fn: "paidList", args: [readerAddr, ledgerAddr, ab, expectA, placementExpect], selection: { ...selA, lensHash: lensHashOf(ab) }, placement: placementOne },
+      { key: "paid-point-B", operation: "PAID_POINT", lens: "LENS_B_FIRST", lensObj: ba, fn: "paidPoint", args: [readerAddr, ledgerAddr, ba, expectB], selection: { ...selB, lensHash: lensHashOf(ba) }, placement: placementNone },
+      { key: "paid-list-B", operation: "PAID_LIST", lens: "LENS_B_FIRST", lensObj: ba, fn: "paidList", args: [readerAddr, ledgerAddr, ba, expectB, placementExpect], selection: { ...selB, lensHash: lensHashOf(ba) }, placement: placementOne },
+    ];
+    const consumerArtifact = evidence.artifacts.find((row) => row.operation === "deploy:MeasurementConsumer");
+    const ledgerArtifact = evidence.artifacts.find((row) => row.operation === "deploy:Ledger");
+    const rows = {};
+    for (const pr of paidRows) {
+      const label = `${cell}:${pr.key}`;
+      await restoreSeal(label);
+      const row = await send(cell, pr.key, () => consumer.connect(paidCaller)[pr.fn](...pr.args));
+      const receipt = row.exact.receipt;
+      const block = await raw("eth_getBlockByNumber", [receipt.blockNumber, false], `${label}:block-transactions`);
+      if (!block || lc(block.hash) !== lc(receipt.blockHash)) throw new Error(`${label}: eth_getBlockByNumber(${receipt.blockNumber}) does not return the receipt's block`);
+      const executed = { number: Number(block.number), hash: block.hash, parentHash: block.parentHash, timestamp: Number(block.timestamp), txIndex: Number(receipt.transactionIndex), txCount: block.transactions.length, txHashes: [...block.transactions], onlyTx: block.transactions.length === 1 && lc(block.transactions[0]) === lc(row.exact.transaction.hash) };
+      ordering.push({ kind: "tx", label: pr.key, block: executed.number, parentHash: executed.parentHash, timestamp: executed.timestamp, txIndex: executed.txIndex, txCount: executed.txCount, onlyTx: executed.onlyTx });
+      const check = await paidObservationCheck(cell, pr, row, consumerAddr);
+      if (!check.match) slice.mismatches++;
+      const evidenceFor = {
+        operation: pr.operation, lens: pr.lens, lensArr: pr.lensObj.principals, label, budget: placementExpect.budget,
+        row: { operation: pr.key, hash: row.exact.transaction.hash, block: executed.number, blockHash: receipt.blockHash, status: row.status, gas: row.gasUsed },
+        executed, seal: { number: seal.number, hash: seal.hash, timestamp: seal.timestamp, snapshot: seal.snapshot }, sealBasis,
+        chainId: evidence.metadata.chainId, addrs: { ledger: ledgerAddr, reader: readerAddr, index: await index.getAddress(), importLib: await importLib.getAddress(), consumer: consumerAddr },
+        consumerCodehash: consumerArtifact ? consumerArtifact.runtimeHash : "UNKNOWN", ledgerCodehash: ledgerArtifact ? ledgerArtifact.runtimeHash : "UNKNOWN",
+        coordinates: { subject: file, folder, name, placementBindingKey: aPlacementKey }, placementAtSeal, types: { QUOTE_T, PAIR_T, ITEM_T }, headLabels, authorLabels,
+        caller: { address: paidCaller.address, derivationPath: PAID_CALLER_PATH, index: PAID_CALLER_INDEX }, profile: PROFILE_LABEL,
+      };
+      row.paidRow = { operation: pr.operation, lens: pr.lens, caller: paidCaller.address, consumer: `MeasurementConsumer.${pr.fn} (stateless; one PaidObserved log with the concrete observations: the paid rows' instrumentation overhead, disclosed, never subtracted)`, armInputs: { standing: "this runner's candidate-side mirror of the fixture map, including the expected head record ids passed as Expect.expectedHead; the sealed run supplies the independently authored vectors (appendix pin 4)", expect: serialize(pr.args[3]), placementExpect: pr.args.length > 4 ? serialize(pr.args[4]) : null } };
+      row.executed = executed;
+      row.paidObservedCheck = check;
+      row.abstractResult = deriveAbstractResult({ check, replay: check.replayObs, evidenceFor }); // pure; UNKNOWN throughout on a failed self-check
+      rows[pr.key] = row;
+      persist(label);
+      ordering.push({ kind: "retained", label: pr.key });
+    }
+    const orderedRows = checkPaidRowOrdering(ordering);
+    slice.ordering = { standing: "each paid row is the first and ONLY transaction (index 0; block transaction list retained) after an evm_revert whose observed head is the seal, mined at seal + 1 on the sealed hash at the deterministic timestamp seal + 1 (evm_setNextBlockTimestamp after every revert), and retained (checked, abstractResult built, persisted) before the next revert; asserted by checkPaidRowOrdering", events: ordering, rows: orderedRows, timestamps: orderedRows.map((r) => r.timestamp), timestampsEqual: new Set(orderedRows.map((r) => r.timestamp)).size === 1, expectedTimestamp: seal.timestamp + 1 };
+    const selOf = (key) => (rows[key].abstractResult.rawEvidence.selfCheck.match ? rows[key].abstractResult.rawEvidence.paidObservedLog.selection : null);
+    slice.agreement = { standing: "point and list under the same lens observe the identical Selection (compared from the PaidObserved logs; lensHash excluded); the placement provenance is identical across lenses", aFirst: checkAgreement(selOf("paid-point-A"), selOf("paid-list-A")), bFirst: checkAgreement(selOf("paid-point-B"), selOf("paid-list-B")) };
+    slice.costDisclosure = {
+      standing: "costs are reported in separate classes; this runner never subtracts, amortizes or normalizes them",
+      classes: {
+        deployment: "artifacts[] rows deploy:* (gas in exact.receipt.gasUsed with runtime/initcode bytes and hashes): production prerequisites (ImportLib, IndexModule, Ledger, setup:attach-index, LensReader, PassAcceptor, QuoteAcceptorV1) apart from the measurement consumer (MeasurementConsumer) and the fixture producer (Producer); ImportLib is linked but never called by these rows",
+        code: "artifacts[].runtimeBytes / initcodeBytes / runtimeHash per contract; MeasurementConsumer is measurement instrumentation, not a production component",
+        setup: "operations rows setup:types-items-pair and typed-joined A1-create / A2-edit / B1-create (fixture prerequisites and the three author steps; costClass setup)",
+        placementOnceOnly: { standing: "ESTIMATE unless the paired control is pinned: the single A placement is one of five actions inside the A1-create combined receipt (subject + record + head + FOLDER bind + tag) and is not separable from that receipt alone", pairedControl: "cell typed-joined/a1-without-placement (optional, non-default; selected only by its exact --cells name): the identical A1 batch minus the FOLDER bind from the same post-setup snapshot; when the coordinator pins it the two receipts sit side by side and any difference is the coordinator's computation" },
+        storage: "UNKNOWN: no slot diff or storage tracing in this runner; the capture rows retain decoded row transitions only",
+        paid: "operations rows typed-joined paid-point-A / paid-list-A / paid-point-B / paid-list-B: receipt gas of one transaction each from the pinned unrelated caller (stateless consumer: no SSTORE; one PaidObserved log carrying 43 observation words plus ABI offsets, ESTIMATED ~12-14k gas of instrumentation, disclosed and never subtracted)",
+        matchedFailureControl: "operation typed-joined exact-retry-A1 (AlreadyAdmitted: block-pinned static revert selector + separately mined status-0 receipt) retained in this cell; the failed-mandatory-index rollback is covered by the Forge suite only (poison lever zero in the measured deployment)",
+      },
+    };
     const alreadyAdmitted = ledger.interface.getError("AlreadyAdmitted").selector;
-    await minedFailure(cell, "exact-retry-A1", ledger, "publishSigned", [signedA1.value, ["0x", a1Body, "0x", "0x", "0x"], signedA1.sig], alreadyAdmitted, "AlreadyAdmitted");
+    await minedFailure(cell, "exact-retry-A1", ledger, "publishSigned", [signedA1.value, a1BodiesOf(t, true), signedA1.sig], alreadyAdmitted, "AlreadyAdmitted");
+    persist(`${cell}:complete`);
+    if (slice.mismatches) throw new Error(`${cell}: ${slice.mismatches} paid row(s) failed the candidate self-check; their abstractResult rows are UNKNOWN and retained`);
   }
-  await reset("after-typed");
+
+  // The PaidObserved log of a paid row (parsed from the raw receipt) and an eth_call replay of the same calldata FROM the
+  // same caller at the receipt block, both compared field by field with this runner's candidate-side expectation.
+  async function paidObservationCheck(cell, pr, row, consumerAddr) {
+    const label = `${cell}:${pr.key}`;
+    const ifc = consumer.interface;
+    const parsed = (row.exact.receipt.logs ?? []).filter((l) => lc(l.address) === lc(consumerAddr)).map((l) => { try { return ifc.parseLog({ topics: l.topics, data: l.data }); } catch { return null; } }).filter((p) => p && p.name === "PaidObserved");
+    const fromLog = parsed.length === 1 ? { kind: parsed[0].args.kind, commitment: parsed[0].args.commitment, selection: pickFields(parsed[0].args.selection, SELECTION_FIELDS), placement: pickFields(parsed[0].args.placement, PLACEMENT_FIELDS) } : null;
+    const replayObs = { rpcId: null, from: paidCaller.address, blockTag: row.exact.receipt.blockNumber, returnData: null, error: null, stage: `${label}:replay` };
+    try {
+      replayObs.returnData = await raw("eth_call", [{ from: paidCaller.address, to: row.exact.transaction.to, data: row.exact.transaction.input }, row.exact.receipt.blockNumber], `${label}:replay`);
+    } catch (error) {
+      replayObs.error = revertData(error) ?? error.message;
+    }
+    const last = rpc[rpc.length - 1];
+    if (last && last.source === `${label}:replay`) replayObs.rpcId = last.request?.id ?? null;
+    let fromReplay;
+    try {
+      const d = ifc.decodeFunctionResult(pr.fn, replayObs.returnData);
+      fromReplay = { commitment: d[0], selection: pickFields(d[1], SELECTION_FIELDS), placement: d.length > 2 ? pickFields(d[2], PLACEMENT_FIELDS) : null };
+    } catch (error) {
+      fromReplay = { error: String(error?.message ?? error) };
+    }
+    const selectionFromLog = compareObservation(fromLog ? fromLog.selection : null, pr.selection);
+    const placementFromLog = compareObservation(fromLog ? fromLog.placement : null, pr.placement);
+    const replayOk = !!fromReplay && !fromReplay.error && compareObservation(fromReplay.selection, pr.selection).ok && (fromReplay.placement === null ? pr.operation === "PAID_POINT" : compareObservation(fromReplay.placement, pr.placement).ok);
+    const commitmentsAgree = !!fromLog && !!fromReplay && !fromReplay.error && lc(fromLog.commitment) === lc(fromReplay.commitment);
+    const match = parsed.length === 1 && selectionFromLog.ok && placementFromLog.ok && replayOk && commitmentsAgree;
+    return { label: `${label}/paid-observed`, kind: "paid-observed", standing: "candidate self-check: the log and the replay against this runner's candidate-side expectation; never the independent oracle", block: row.exact.receipt.blockNumber, logCount: parsed.length, fromLog, fromReplay, replayObs, selectionFromLog, placementFromLog, replayOk, commitmentsAgree, match };
+  }
+
+  // OPTIONAL paired control (non-default; selected only by its exact --cells key): the identical A1 batch minus the FOLDER
+  // bind from the same post-setup snapshot (the same pre-A1 state as typed-joined), so the once-only placement cost can be a
+  // paired measurement instead of an estimate. Reported beside typed-joined A1-create; nothing is subtracted here.
+  async function a1WithoutPlacementCell() {
+    const cell = "typed-joined/a1-without-placement";
+    const t = typedIds();
+    const { file, folder, name } = t;
+    const pre = await capture(cell, "pre-A1-minus-placement", { record: t.A1, author: A, subject: file });
+    const signed = await publishSigned(cell, "A1-minus-placement", a1ActionsOf(t, false), a1BodiesOf(t, false));
+    signed.row.costClass = "paired control"; signed.row.pairing = "pair with typed-joined A1-create: same post-setup snapshot (pre-A1 state), same author A, nonce 1 and bodies; the only action difference is the absent FOLDER bind (signature calldata bytes differ per run: ESTIMATED tens of gas of noise)";
+    const post = await capture(cell, "post-A1-minus-placement", { record: t.A1, author: A, subject: file });
+    assertRecordTransition(`${cell}:A1-minus-placement`, pre, post, "fresh");
+    const blk = await fixedBlock(`${cell}:no-placement`);
+    const none = resolution(await observeAt(`${cell}:no-placement:resolve`, blk, (b) => reader.resolve(lens(A, B), PURPOSE.FOLDER, folder, name, { blockTag: b })));
+    const aBinding = decodeBindingStatic((await observeAt(`${cell}:no-placement:binding`, blk, getRecordRaw(ledger, TABLE.BINDINGS, bindingKey(A, PURPOSE.FOLDER, folder, name), LAYOUT.BINDINGS)))[0]);
+    const head = resolution(await observeAt(`${cell}:no-placement:head`, blk, (b) => reader.resolve(lens(A, B), PURPOSE.HEAD, file, ZERO, { blockTag: b })));
+    if (none.status !== "2" || aBinding.revision !== 0n) throw new Error(`${cell}: no /swaps/eth-usdc placement may exist`);
+    if (head.status !== "1" || lc(head.target) !== lc(t.A1)) throw new Error(`${cell}: the A head must exist`);
+    evidence.slices[cell] = { cell, standing: "OPTIONAL paired control of the once-only placement cost: the A1 batch WITHOUT the FOLDER bind from the same post-setup snapshot as typed-joined (same pre-A1 state); the coordinator pins it explicitly; this runner subtracts nothing", pairing: signed.row.pairing, placementAbsent: { lensStatus: none.status, aBindingRevision: aBinding.revision.toString(), headStatus: head.status, headTarget: head.target, block: blk.number, blockHash: blk.hash } };
+    persist(`${cell}:complete`);
+  }
+
+  if (has("typed-joined")) {
+    await typedJoinedCell();
+    await reset("after-typed");
+  }
+  if (has("typed-joined/a1-without-placement")) {
+    await a1WithoutPlacementCell();
+    await reset("after-a1-without-placement");
+  }
 
   async function c32Cell(cell, author, signed) {
     const salt = id("c32-file"), file = subjectId(author, salt), folder = id("/c32"), name = id("quote");
@@ -406,14 +668,18 @@ async function main() {
     assertRecordTransition(`${cell}:edit`, preEdit, postEdit, "fresh");
     if (preEdit.binding.revision !== "1" || postEdit.binding.revision !== "2" || postEdit.binding.target !== editId) throw new Error(`${cell} edit binding transition mismatch`);
     const l = { principals: [author], mode: 0 }, exp = expected(author, BYTES_T, editId, ZERO, C32.edit);
-    const point = commitmentEvent(await send(cell, "paid-point", async () => consumer.paidPoint(await reader.getAddress(), await ledger.getAddress(), l, PURPOSE.HEAD, file, ZERO, exp)), "PointCommitted", file, editId, author);
-    const list = commitmentEvent(await send(cell, "paid-list", async () => consumer.paidList(await reader.getAddress(), await ledger.getAddress(), l, folder, name, file, 10, exp)), "ListCommitted", file, editId, author);
+    const point = commitmentEvent(await send(cell, "paid-point", async () => consumer.paidPointFramed(await reader.getAddress(), await ledger.getAddress(), l, PURPOSE.HEAD, file, ZERO, exp)), "PointCommitted", file, editId, author);
+    const list = commitmentEvent(await send(cell, "paid-list", async () => consumer.paidListFramed(await reader.getAddress(), await ledger.getAddress(), l, folder, name, file, 10, exp)), "ListCommitted", file, editId, author);
     if (point.basis !== list.basis) throw new Error(`${cell} point/list basis mismatch`);
   }
-  await c32Cell("c32-native-producer-framed", B, false);
-  await reset("after-c32-native");
-  await c32Cell("c32-signed-framed", A, true);
-  await reset("after-c32-signed");
+  if (has("c32-native-producer-framed")) {
+    await c32Cell("c32-native-producer-framed", B, false);
+    await reset("after-c32-native");
+  }
+  if (has("c32-signed-framed")) {
+    await c32Cell("c32-signed-framed", A, true);
+    await reset("after-c32-signed");
+  }
 
   async function freshReuseCell(cell, reuse) {
     const dummyBody = recordBody([], C32.create), targetBody = recordBody([], C32.edit);
@@ -428,9 +694,11 @@ async function main() {
     assertRecordTransition(`${cell}:measured-record`, pre, post, reuse ? "existing" : "fresh");
     evidence.observations.push({ source: `${cell}:matched-seeding`, decoded: { author: plan.author, viaProducer: plan.viaProducer, seedId, targetId, seedBodyBytes: ethers.getBytes(plan.seedBody).length, measuredDigestKind: D.BODY_HASH, measuredActionCount: 1, measuredBodyBytes: ethers.getBytes(plan.targetBody).length } });
   }
-  await freshReuseCell("record-fresh-isolated", false);
-  await reset("after-record-fresh");
-  await freshReuseCell("record-reused-isolated", true);
+  if (has("record-fresh-isolated")) {
+    await freshReuseCell("record-fresh-isolated", false);
+    await reset("after-record-fresh");
+  }
+  if (has("record-reused-isolated")) await freshReuseCell("record-reused-isolated", true);
   evidence.metadata.finishedAt = new Date().toISOString();
   persist("complete");
   process.stdout.write(`${JSON.stringify(serialize(evidence), null, 2)}\n`);
