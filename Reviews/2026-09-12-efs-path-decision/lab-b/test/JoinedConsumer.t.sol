@@ -317,12 +317,12 @@ contract JoinedConsumerTest is LabBase {
     uint8 internal constant KIND_SIGNED = 2;
     uint8 internal constant KIND_NATIVE = 1;
 
-    function expectFor(Ids memory id, address author, uint8 proofKind, uint256 mantissa, uint64 basis)
+    function expectFor(Ids memory id, bytes32 head, address author, uint8 proofKind, uint256 mantissa, uint64 basis)
         internal
         pure
         returns (JoinedConsumer.Expect memory e)
     {
-        e = JoinedConsumer.Expect(id.subj, author, proofKind, id.pairId, id.itemA, id.itemB, mantissa, SCALE, basis);
+        e = JoinedConsumer.Expect(id.subj, head, author, proofKind, id.pairId, id.itemA, id.itemB, mantissa, SCALE, basis);
     }
 
     function placementFor() internal view returns (JoinedConsumer.PlacementExpect memory p) {
@@ -362,25 +362,30 @@ contract JoinedConsumerTest is LabBase {
         require(p.basisAdmission == BASIS_POST_B1 && p.pageStatus == 2 && p.rawTotal == 1 && p.scanned == 1 && p.selectedSoFar == 1 && !p.mutated && p.ended, string.concat(label, ": one complete, ended, unmixed window over one raw candidate"));
     }
 
-    function test_paid_slice_point_and_list_agree_under_both_lenses_with_A_placement_provenance() public {
-        Ids memory id = runSteps1to4();
+    /// A-first half of the positive slice test (own frame: keeps the via-IR stack shallow). Returns the A-first
+    /// list's placement observation for the cross-lens comparison.
+    function assertAFirst(Ids memory id, JoinedConsumer.PlacementExpect memory p) internal returns (JoinedConsumer.Placement memory pL) {
         address[] memory ab = lensOf(eoaA, address(bob));
-        address[] memory ba = lensOf(address(bob), eoaA);
-        JoinedConsumer.Expect memory eA = expectFor(id, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1);
-        JoinedConsumer.Expect memory eB = expectFor(id, address(bob), KIND_NATIVE, M_B1, BASIS_POST_B1);
-        JoinedConsumer.PlacementExpect memory p = placementFor();
-        // A-first: point and list select QUOTE_A2 (revision 2, signed by AUTHOR_A)
+        JoinedConsumer.Expect memory eA = expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1);
+        // point and list select QUOTE_A2 (revision 2, signed by AUTHOR_A)
         (bytes32 cP, JoinedConsumer.Selection memory sP) = joined.paidPoint(ab, eA);
         checkSelection(sP, id, id.a2, 2, 10, 3, eoaA, KIND_SIGNED, M_A2, "A-first point");
         JoinedConsumer.Placement memory none;
         require(cP == keccak256(abi.encode(joined.KIND_PAID_POINT(), sP, none)), "A-first point commitment = keccak(kind, selection, zero placement)");
-        (bytes32 cL, JoinedConsumer.Selection memory sL, JoinedConsumer.Placement memory pL) = joined.paidList(ab, eA, p);
+        bytes32 cL;
+        JoinedConsumer.Selection memory sL;
+        (cL, sL, pL) = joined.paidList(ab, eA, p);
         checkSelection(sL, id, id.a2, 2, 10, 3, eoaA, KIND_SIGNED, M_A2, "A-first list");
         require(keccak256(abi.encode(sP)) == keccak256(abi.encode(sL)), "A-first: point and list observe the identical selection");
         checkPlacement(pL, id, "A-first list");
         require(cL == keccak256(abi.encode(joined.KIND_PAID_LIST(), sL, pL)), "A-first list commitment");
-        // B-first: point and list select QUOTE_B1 (revision 1, contract-originated, no signature) while the
-        // placement provenance stays the A1 effect: placement actor != selected author, and that is correct
+    }
+
+    /// B-first half: point and list select QUOTE_B1 (revision 1, contract-originated, no signature) while the
+    /// placement provenance stays the A1 effect: placement actor != selected author, and that is correct.
+    function assertBFirst(Ids memory id, JoinedConsumer.PlacementExpect memory p, JoinedConsumer.Placement memory pL) internal {
+        address[] memory ba = lensOf(address(bob), eoaA);
+        JoinedConsumer.Expect memory eB = expectFor(id, id.b1, address(bob), KIND_NATIVE, M_B1, BASIS_POST_B1);
         (, JoinedConsumer.Selection memory sPB) = joined.paidPoint(ba, eB);
         checkSelection(sPB, id, id.b1, 1, 12, 4, address(bob), KIND_NATIVE, M_B1, "B-first point");
         (, JoinedConsumer.Selection memory sLB, JoinedConsumer.Placement memory pLB) = joined.paidList(ba, eB, p);
@@ -389,6 +394,13 @@ contract JoinedConsumerTest is LabBase {
         checkPlacement(pLB, id, "B-first list");
         require(pLB.actor != sLB.selectedAuthor, "B-first: placement actor (AUTHOR_A) and selected author (AUTHOR_B) are different observations");
         require(pL.position == pLB.position && pL.actor == pLB.actor && pL.admission == pLB.admission && pL.publication == pLB.publication, "placement provenance does not change with the lens order (hydrations may)");
+    }
+
+    function test_paid_slice_point_and_list_agree_under_both_lenses_with_A_placement_provenance() public {
+        Ids memory id = runSteps1to4();
+        JoinedConsumer.PlacementExpect memory p = placementFor();
+        JoinedConsumer.Placement memory pL = assertAFirst(id, p);
+        assertBFirst(id, p, pL);
         (address au, uint8 kind, uint8 v,,, bytes32 r, bytes32 s,,,,,,) = ledger.evidence(4);
         require(au == address(bob) && kind == KIND_NATIVE && v == 0 && r == 0 && s == 0, "B1 evidence carries no signature: nothing fabricated");
     }
@@ -399,26 +411,30 @@ contract JoinedConsumerTest is LabBase {
         address[] memory ba = lensOf(address(bob), eoaA);
         JoinedConsumer.PlacementExpect memory p = placementFor();
         // wrong selected author (the expectation names B under an A-first lens)
-        expectPointFail(ab, expectFor(id, address(bob), KIND_NATIVE, M_B1, BASIS_POST_B1), JoinedConsumer.SelectionMismatch.selector, "A-first point: expecting AUTHOR_B is refused");
-        expectListFail(ab, expectFor(id, address(bob), KIND_NATIVE, M_B1, BASIS_POST_B1), p, JoinedConsumer.SelectionMismatch.selector, "A-first list: a selection disagreeing with the point is refused");
-        expectPointFail(ba, expectFor(id, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1), JoinedConsumer.SelectionMismatch.selector, "B-first point: expecting AUTHOR_A is refused");
+        expectPointFail(ab, expectFor(id, id.b1, address(bob),KIND_NATIVE, M_B1, BASIS_POST_B1), JoinedConsumer.SelectionMismatch.selector, "A-first point: expecting AUTHOR_B is refused");
+        expectListFail(ab, expectFor(id, id.b1, address(bob),KIND_NATIVE, M_B1, BASIS_POST_B1), p, JoinedConsumer.SelectionMismatch.selector, "A-first list: a selection disagreeing with the point is refused");
+        expectPointFail(ba, expectFor(id, id.a2, eoaA,KIND_SIGNED, M_A2, BASIS_POST_B1), JoinedConsumer.SelectionMismatch.selector, "B-first point: expecting AUTHOR_A is refused");
+        // wrong expected head id for the right author (the retained older QUOTE_A1 / the competing QUOTE_B1 are not the selection)
+        expectPointFail(ab, expectFor(id, id.a1, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1), JoinedConsumer.SelectionMismatch.selector, "A-first point: expecting the older head QUOTE_A1 is refused");
+        expectListFail(ab, expectFor(id, id.b1, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1), p, JoinedConsumer.SelectionMismatch.selector, "A-first list: expecting B's head under A's authorship is refused");
         // wrong proof category for the right author
-        expectPointFail(ab, expectFor(id, eoaA, KIND_NATIVE, M_A2, BASIS_POST_B1), JoinedConsumer.ProofCategory.selector, "A-first: AUTHOR_A is EOA-signed, not contract-originated");
-        expectPointFail(ba, expectFor(id, address(bob), KIND_SIGNED, M_B1, BASIS_POST_B1), JoinedConsumer.ProofCategory.selector, "B-first: AUTHOR_B is contract-originated, not EOA-signed");
+        expectPointFail(ab, expectFor(id, id.a2, eoaA,KIND_NATIVE, M_A2, BASIS_POST_B1), JoinedConsumer.ProofCategory.selector, "A-first: AUTHOR_A is EOA-signed, not contract-originated");
+        expectPointFail(ba, expectFor(id, id.b1, address(bob),KIND_SIGNED, M_B1, BASIS_POST_B1), JoinedConsumer.ProofCategory.selector, "B-first: AUTHOR_B is contract-originated, not EOA-signed");
         // wrong Pair, wrong ordered Items, wrong mantissa (a present, well-typed graph that is not the expected one)
-        JoinedConsumer.Expect memory e = expectFor(id, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1);
+        JoinedConsumer.Expect memory e = expectFor(id, id.a2, eoaA,KIND_SIGNED, M_A2, BASIS_POST_B1);
         e.pairId = name("other-pair");
         expectPointFail(ab, e, JoinedConsumer.ClosureMismatch.selector, "wrong Pair reference is refused");
-        e = expectFor(id, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1);
+        e = expectFor(id, id.a2, eoaA,KIND_SIGNED, M_A2, BASIS_POST_B1);
         e.itemA = id.itemB;
         e.itemB = id.itemA;
         expectPointFail(ab, e, JoinedConsumer.ClosureMismatch.selector, "swapped Item order is refused (references are ordered)");
         expectListFail(ab, e, p, JoinedConsumer.ClosureMismatch.selector, "the list runs the same closure and refuses the same graph");
-        expectPointFail(ab, expectFor(id, eoaA, KIND_SIGNED, M_A1, BASIS_POST_B1), JoinedConsumer.ClosureMismatch.selector, "the retained older mantissa is not the selected one");
+        expectPointFail(ab, expectFor(id, id.a2, eoaA,KIND_SIGNED, M_A1, BASIS_POST_B1), JoinedConsumer.ClosureMismatch.selector, "the retained older mantissa is not the selected one");
         // a head that is not a joined quote at all (32-byte QUOTE): refused by shape before any field is exposed
         bytes32 other = alice.create(bytes32(uint256(9))); // admission 13
-        alice.bind(HEAD, other, NO_ROLE, alice.publish(QUOTE, q(3000)), 0); // admissions 14 (publish), 15 (bind)
-        JoinedConsumer.Expect memory eo = expectFor(id, address(alice), KIND_NATIVE, 3000, 15);
+        bytes32 rq = alice.publish(QUOTE, q(3000)); // admission 14
+        alice.bind(HEAD, other, NO_ROLE, rq, 0); // admission 15
+        JoinedConsumer.Expect memory eo = expectFor(id, rq, address(alice), KIND_NATIVE, 3000, 15);
         eo.subject = other;
         expectPointFail(lensOf(address(alice)), eo, JoinedConsumer.QuoteShape.selector, "a non-joined head is refused, not decoded");
     }
@@ -427,8 +443,8 @@ contract JoinedConsumerTest is LabBase {
         Ids memory id = runSteps1to4();
         address[] memory ab = lensOf(eoaA, address(bob));
         address[] memory ba = lensOf(address(bob), eoaA);
-        JoinedConsumer.Expect memory eA = expectFor(id, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1);
-        JoinedConsumer.Expect memory eB = expectFor(id, address(bob), KIND_NATIVE, M_B1, BASIS_POST_B1);
+        JoinedConsumer.Expect memory eA = expectFor(id, id.a2, eoaA,KIND_SIGNED, M_A2, BASIS_POST_B1);
+        JoinedConsumer.Expect memory eB = expectFor(id, id.b1, address(bob),KIND_NATIVE, M_B1, BASIS_POST_B1);
         // wrong placement provenance: actor, proof category, source publication, name
         JoinedConsumer.PlacementExpect memory p = placementFor();
         p.actor = address(bob);
@@ -459,14 +475,14 @@ contract JoinedConsumerTest is LabBase {
         alice.publish(QUOTE, q(5)); // admission 15
         (Ledger.Intent memory i2, bytes memory s2) = signed(PK_A, ledger, 2, one(aUnbind(FOLDER, SWAPS, name("eth-usdc"), 1)));
         ledger.executeSigned(i2, one(aUnbind(FOLDER, SWAPS, name("eth-usdc"), 1)), new bytes[](1), s2); // admission 16
-        JoinedConsumer.Expect memory e16 = expectFor(id, eoaA, KIND_SIGNED, M_A2, 16);
+        JoinedConsumer.Expect memory e16 = expectFor(id, id.a2, eoaA,KIND_SIGNED, M_A2, 16);
         (, JoinedConsumer.Selection memory s16) = joined.paidPoint(ab, e16);
         require(s16.selectedHead == id.a2 && s16.basisAdmission == 16, "point selection is independent of any placement");
         expectListFail(ab, e16, p, JoinedConsumer.PlacementWindow.selector, "list: no live placement row -> refused, never an empty complete page");
         // incomplete coverage: an admission the index never saw makes the page UNKNOWN -> refused
         ledger.setIndexModule(address(0));
         alice.publish(QUOTE, q(6)); // admission 17, not indexed
-        expectListFail(ab, expectFor(id, eoaA, KIND_SIGNED, M_A2, 17), p, JoinedConsumer.PlacementWindow.selector, "UNKNOWN coverage is refused, never reported complete");
+        expectListFail(ab, expectFor(id, id.a2, eoaA,KIND_SIGNED, M_A2, 17), p, JoinedConsumer.PlacementWindow.selector, "UNKNOWN coverage is refused, never reported complete");
     }
 
     function test_stateless_twin_commits_exactly_what_the_storing_consumer_stores() public {

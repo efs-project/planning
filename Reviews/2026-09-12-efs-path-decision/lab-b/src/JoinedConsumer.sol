@@ -11,9 +11,11 @@ import {LensReader} from "./LensReader.sol";
 /// paid-read budget WITHOUT the storage-write component that `LabHarness.Consumer` carries in its
 /// `last*` slots. Each paid method returns explicit result commitments (keccak256 over the facts a
 /// consumer would act on) and emits them in one `ResultCommitment` log so the retained receipt
-/// carries what the transaction computed. That log is the only overhead beyond the read itself
-/// (one LOG2 of 32 or 64 bytes: ESTIMATED ~1.5–1.9k gas; not storage) and the measurement labels
-/// it. Nothing here is privileged, cached, seeded or read from private storage: every fact comes
+/// carries what the transaction computed. For the `read*` methods that log is the only overhead
+/// beyond the read itself (one LOG2 of 32 or 64 bytes: ESTIMATED ~1.5–1.9k gas; not storage); the
+/// paid-slice `PaidResult` log carries ~34 data words (Selection 19 + Placement 14 + digest:
+/// ESTIMATED ~9–10k gas) — the paid rows' consumer overhead, disclosed separately and never
+/// subtracted. The measurement labels both. Nothing here is privileged, cached, seeded or read from private storage: every fact comes
 /// through the LensReader / Ledger public interfaces, and every non-selected, conflicting,
 /// unknown, malformed or partial outcome REVERTS instead of exposing a fabricated value.
 ///
@@ -242,6 +244,7 @@ contract JoinedConsumer {
     /// exact arm-local observation basis. Supplied by the run controller from its sealed manifest, never derived here.
     struct Expect {
         bytes32 subject; // FILE_QUOTE (physical subject id from the sealed fixture map)
+        bytes32 expectedHead; // QUOTE_A2 (A-first) / QUOTE_B1 (B-first): the expected selected head record id — an INPUT from the sealed fixture map, never derived here
         address selectedAuthor; // the lens principal expected to hold the selected HEAD (AUTHOR_A or AUTHOR_B)
         uint8 selectedProofKind; // PROOF_EOA_SIGNED (A-first) or PROOF_CONTRACT_ORIGINATED (B-first)
         bytes32 pairId; // PAIR_ETH_USDC
@@ -309,7 +312,7 @@ contract JoinedConsumer {
     event PaidResult(bytes32 indexed kind, bytes32 commitment, Selection selection, Placement placement);
 
     error BasisMismatch(uint64 expected, uint64 observed);
-    error SelectionMismatch(address expectedAuthor, address selectedAuthor);
+    error SelectionMismatch(uint8 field, bytes32 expected, bytes32 observed); // field 1 = selected author, 2 = selected head id
     error AdmissionShape(uint64 admission, uint8 kind, bool withdrawn, bytes32 target);
     error EvidenceBounds(uint64 admission, uint64 publication, uint64 firstAdmission, uint16 leafCount);
     error ProofCategory(uint8 expected, uint8 observed);
@@ -350,7 +353,8 @@ contract JoinedConsumer {
         (uint8 status, bytes32 target, uint32 revision, address author, uint64 admission) =
             lens.resolve(lensPrincipals, HEAD, e.subject, bytes32(0));
         if (status != FOUND) revert NoSelection(status);
-        if (author != e.selectedAuthor) revert SelectionMismatch(e.selectedAuthor, author);
+        if (author != e.selectedAuthor) revert SelectionMismatch(1, bytes32(uint256(uint160(e.selectedAuthor))), bytes32(uint256(uint160(author))));
+        if (target != e.expectedHead) revert SelectionMismatch(2, e.expectedHead, target);
         s.lensId = _lensId(lensPrincipals);
         s.subject = e.subject;
         s.selectedHead = target;
@@ -416,8 +420,11 @@ contract JoinedConsumer {
     }
 
     /// The one placement window: one bounded page from a fresh cursor must be COMPLETE, unmixed, ended (every
-    /// lens principal's raw list exhausted) and hold exactly one row over exactly one raw candidate (no duplicate,
-    /// no second placement under any lens principal); that row must be the expected (folder, name) -> subject
+    /// lens principal's raw list exhausted) and hold exactly one row over exactly one raw candidate. `rawTotal == 1`
+    /// asserts exactly ONE raw entry in the whole folder scope (FOLDER, folder) summed over the lens principals —
+    /// stronger than "one placement named eth-usdc": any other entry under the folder by any lens principal (a
+    /// second name, a duplicate, a tombstone) is refused too. That is correct for the sealed fixture, where the
+    /// folder holds exactly the single A placement. The row must be the expected (folder, name) -> subject
     /// placement held by the expected actor and admitted by the expected publication under the expected category.
     function _placement(address[] calldata lensPrincipals, bytes32 subject, PlacementExpect calldata p)
         private

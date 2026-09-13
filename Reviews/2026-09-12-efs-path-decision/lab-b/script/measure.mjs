@@ -1416,7 +1416,7 @@ async function paidResultCheck(ctx, row, expectedSelection, expectedPlacement) {
   const ifc = iface('JoinedConsumer');
   const logs = tx.receipt.logs.filter((l) => l.address.toLowerCase() === ctx.addrs.joinedConsumer.toLowerCase()).map((l) => { try { return ifc.parseLog({ topics: l.topics, data: l.data }); } catch { return null; } }).filter((p) => p && p.name === 'PaidResult');
   const fromLog = logs.length === 1 ? { kind: logs[0].args.kind, commitment: logs[0].args.commitment, selection: pickFields(logs[0].args.selection, SELECTION_FIELDS), placement: pickFields(logs[0].args.placement, PLACEMENT_FIELDS) } : null;
-  const replay = await observeRaw(ctx, ctx.raw, `paid-replay:${row.label}`, { contract: 'JoinedConsumer', fn: tx.candidateInputs.fn, args: tx.candidateInputs.args }, tx.to, tx.data, row.block, { from: row.from });
+  const replay = await observeRaw(ctx, ctx.raw, `paid-replay:${row.label}`, { contract: 'JoinedConsumer', fn: tx.candidateInputs.fn, args: tx.candidateInputs.args }, tx.to, tx.data, row.block, { from: tx.from }); // tx.from = the paid caller that sent the row (send() records it); retained in the envelope as params[0].from
   let fromReplay;
   try {
     const d = ifc.decodeFunctionResult(tx.candidateInputs.fn, replay.returnData);
@@ -1441,7 +1441,7 @@ async function paidResultCheck(ctx, row, expectedSelection, expectedPlacement) {
   const commitmentsAgree = !!fromLog && !!fromReplay && !fromReplay.error && norm(fromLog.commitment) === norm(fromReplay.commitment);
   const match = logs.length === 1 && selectionFromLog.ok && placementFromLog.ok && replayOk && commitmentsAgree;
   if (!match) ctx.mismatches++;
-  const check = { label: `${row.label}/paid-result`, kind: 'paid-result', standing: CAVEAT_EXPECTED, block: row.block, logCount: logs.length, fromLog, fromReplay, replayRpcId: replay.rpcId, selectionFromLog, placementFromLog, replayOk, commitmentsAgree, match };
+  const check = { label: `${row.label}/paid-result`, kind: 'paid-result', standing: CAVEAT_EXPECTED, block: row.block, logCount: logs.length, fromLog, fromReplay, replayRpcId: replay.rpcId, replayFrom: tx.from, selectionFromLog, placementFromLog, replayOk, commitmentsAgree, match };
   ctx.consumerChecks.push(check);
   log(`  chk  ${check.label}: ${match ? 'match' : 'MISMATCH ' + JSON.stringify({ logCount: logs.length, selectionFromLog, placementFromLog, commitmentsAgree, replayError: fromReplay && fromReplay.error })}`);
   return check;
@@ -1457,6 +1457,13 @@ const paidSliceCell = {
     const ab = [A, B], ba = [B, A];
     const caller = ctx.wallets[PAID_CALLER_INDEX];
     assertUnrelatedCaller(caller.address, { deployer: ctx.deployer.address, AUTHOR_A: A, AUTHOR_B: B, 'wallet 2 (signedB)': a.signedB.address, ...Object.fromEntries(Object.entries(ctx.addrs).map(([k, v]) => [`contract ${k}`, v])) });
+    const keep = (r) => { ctx.rowLog.push(r); rows.push(r); if (ctx.persist) ctx.persist(); return r; }; // statement/seal rows land in rowLog (persisted) when created, not only when the body returns
+    // funding pre-check of the paid caller at the current (after-revert) block, never 'latest'; on --anvil --accounts 4 funds index 3
+    const fundingBlock = await ctx.latestBlock();
+    const balanceEnv = await ctx.other('eth_getBalance', [caller.address, qty(fundingBlock)], { label: 'paid: caller balance' });
+    const callerBalance = BigInt(balanceEnv.response.result);
+    assert(callerBalance > 0n, `paid: the pinned caller ${caller.address} has no balance at block ${fundingBlock}; fund mnemonic index ${PAID_CALLER_INDEX} before the run`);
+    keep({ label: 'paid/caller-funding', status: 'eth_getBalance', standing: 'retained rpcOther envelope: the pinned unrelated caller is funded at the explicit after-revert block (asserted > 0 before any setup or paid row)', caller: caller.address, derivationPath: PAID_CALLER_PATH, blockTag: fundingBlock, balanceWei: callerBalance.toString(), rpcId: balanceEnv.request.id });
     // ---- setup (four separate receipts; the A1 combined receipt is NOT a marginal placement cost)
     await paidStep1(ctx, a, plan, rows);
     await paidA1(ctx, a, plan, rows, { placement: true });
@@ -1471,10 +1478,13 @@ const paidSliceCell = {
     const [epoch] = await observe(ctx, ctx.raw, 'seal', 'TypeRegistry', 'registry', 'epoch', [], at);
     const [core] = await observe(ctx, ctx.raw, 'seal', 'Ledger', 'ledger', 'coreCodeCommitment', [], at);
     const [realmId] = await observe(ctx, ctx.raw, 'seal', 'Ledger', 'ledger', 'realmId', [], at);
-    rows.push({ label: 'paid/seal', standing: 'the exact post-B1 basis: evm_snapshot id (single-use; re-sealed after every revert), block number/hash/timestamp from the retained header, admission frontier / index generation / rules epoch / Core code commitment from raw replies (stage seal) at that block', snapshot: seal.snapshot, snapshotRpcId: seal.snapshotRpcId, blockNumber: seal.block, blockHash: seal.hash, timestamp: seal.timestamp, observationBasis: { admissionFrontier: basis, indexGeneration: str(generation), rulesEpoch: str(epoch), coreCodeCommitment: core, realmId } });
+    keep({ label: 'paid/seal', standing: 'the exact post-B1 basis: evm_snapshot id (single-use; re-sealed after every revert), block number/hash/timestamp from the retained header, admission frontier / index generation / rules epoch / Core code commitment from raw replies (stage seal) at that block', snapshot: seal.snapshot, snapshotRpcId: seal.snapshotRpcId, blockNumber: seal.block, blockHash: seal.hash, timestamp: seal.timestamp, observationBasis: { admissionFrontier: basis, indexGeneration: str(generation), rulesEpoch: str(epoch), coreCodeCommitment: core, realmId } });
     // A placement provenance at the seal (joined here for the point rows, which do not look the directory up)
     const pl = await observe(ctx, ctx.raw, 'seal-placement', 'LensReader', 'lens', 'resolve', [ab, P.FOLDER, swaps, nameHash], at);
     assert.equal(str(pl[0]), '1', 'paid/seal: the A placement must be FOUND under LENS_A_FIRST');
+    const plB = await observe(ctx, ctx.raw, 'seal-placement', 'LensReader', 'lens', 'resolve', [ba, P.FOLDER, swaps, nameHash], at); // the lens-matching reply for the B-first rows
+    assert.equal(str(plB[0]), '1', 'paid/seal: the A placement must be FOUND under LENS_B_FIRST too (B has none, so the lens falls through to A)');
+    assert.deepEqual([lc(plB[1]), str(plB[2]), lc(plB[3]), str(plB[4])], [lc(pl[1]), str(pl[2]), lc(pl[3]), str(pl[4])], 'paid/seal: both lenses discover the identical placement (target, revision, author, admission)');
     const plAdm = await observe(ctx, ctx.raw, 'seal-placement', 'Ledger', 'ledger', 'admission', [pl[4]], at);
     const plEv = await observe(ctx, ctx.raw, 'seal-placement', 'Ledger', 'ledger', 'evidence', [plAdm[2]], at);
     const placementAtSeal = { status: str(pl[0]), target: pl[1], revision: str(pl[2]), author: pl[3], admission: str(pl[4]), publication: str(plAdm[2]), admissionKind: str(plAdm[0]), evidenceAuthor: plEv[0], proofKind: str(plEv[1]), v: str(plEv[2]), firstAdmission: str(plEv[4]), leafCount: str(plEv[3]) };
@@ -1482,7 +1492,8 @@ const paidSliceCell = {
     assert.equal(lc(placementAtSeal.target), lc(subj), 'paid/seal: the placement targets FILE_QUOTE');
     assert.equal(placementAtSeal.publication, String(pub0 + 2), 'paid/seal: the placement was admitted by the A1 publication');
     assert.equal(placementAtSeal.proofKind, '2', 'paid/seal: the A1 publication is EOA-signed');
-    rows.push({ label: 'paid/seal/a-placement-provenance', standing: 'raw replies (stage seal-placement) at the seal block: LensReader.resolve(LENS_A_FIRST, FOLDER, /swaps, eth-usdc) + Ledger.admission + Ledger.evidence; sourceStep A1 = publication pub0+2; NOT charged to any paid row', sourceStep: 'A1', actor: 'AUTHOR_A', evidenceCategory: evidenceCategoryOf(Number(placementAtSeal.proofKind), true), basis, observed: placementAtSeal, position: swapsPos });
+    placementAtSeal.byLens = { LENS_A_FIRST: { status: str(pl[0]), target: pl[1], revision: str(pl[2]), author: pl[3], admission: str(pl[4]) }, LENS_B_FIRST: { status: str(plB[0]), target: plB[1], revision: str(plB[2]), author: plB[3], admission: str(plB[4]) } };
+    keep({ label: 'paid/seal/a-placement-provenance', standing: 'raw replies (stage seal-placement) at the seal block: LensReader.resolve(FOLDER, /swaps, eth-usdc) under LENS_A_FIRST and under LENS_B_FIRST (both retained; identical placement) + Ledger.admission + Ledger.evidence; sourceStep A1 = publication pub0+2; NOT charged to any paid row', sourceStep: 'A1', actor: 'AUTHOR_A', evidenceCategory: evidenceCategoryOf(Number(placementAtSeal.proofKind), true), basis, observed: placementAtSeal, position: swapsPos });
     // no B placement: B's binding at the position, B's /swaps scope list, and the B-only lens are all empty/absent
     const bHead = await observe(ctx, ctx.raw, 'seal-no-b-placement', 'Ledger', 'ledger', 'head', [binding(pidB, swapsPos)], at);
     const bScope = await observe(ctx, ctx.raw, 'seal-no-b-placement', 'IndexModule', 'index', 'postingHead', [scopeList(scopeKey(pidB, P.FOLDER, swaps))], at);
@@ -1490,11 +1501,11 @@ const paidSliceCell = {
     assert.equal(str(bHead[0]), '0', 'paid/seal: B has no binding at /swaps/eth-usdc');
     assert.equal(str(bScope[0]), '0', 'paid/seal: B\'s /swaps scope list is empty');
     assert.equal(str(bOnly[0]), '0', 'paid/seal: the B-only lens finds no /swaps/eth-usdc placement');
-    rows.push({ label: 'paid/seal/no-b-placement', standing: 'raw replies (stage seal-no-b-placement) at the seal block: Ledger.head(binding(B, /swaps/eth-usdc)) state 0, IndexModule.postingHead(B\'s /swaps scope list) count 0, LensReader.resolve([B], FOLDER, /swaps, eth-usdc) ABSENT; B1 bound no FOLDER placement (see the paid/setup/B1 calldata: two actions)', bHeadState: str(bHead[0]), bScopeCount: str(bScope[0]), bOnlyLensStatus: str(bOnly[0]), bBindingKey: binding(pidB, swapsPos) });
+    keep({ label: 'paid/seal/no-b-placement', standing: 'raw replies (stage seal-no-b-placement) at the seal block: Ledger.head(binding(B, /swaps/eth-usdc)) state 0, IndexModule.postingHead(B\'s /swaps scope list) count 0, LensReader.resolve([B], FOLDER, /swaps, eth-usdc) ABSENT; B1 bound no FOLDER placement (see the paid/setup/B1 calldata: two actions)', bHeadState: str(bHead[0]), bScopeCount: str(bScope[0]), bOnlyLensStatus: str(bOnly[0]), bBindingKey: binding(pidB, swapsPos) });
     // ---- the four paid rows
     const ordering = [{ kind: 'seal', block: seal.block, hash: seal.hash }];
-    const expectA = { subject: subj, selectedAuthor: A, selectedProofKind: 2, pairId, itemA, itemB, mantissa: J.mantissaA2, scale: J.scale, basisAdmission: basis };
-    const expectB = { ...expectA, selectedAuthor: B, selectedProofKind: 1, mantissa: J.mantissaB1 };
+    const expectA = { subject: subj, expectedHead: a2, selectedAuthor: A, selectedProofKind: 2, pairId, itemA, itemB, mantissa: J.mantissaA2, scale: J.scale, basisAdmission: basis }; // expectedHead = the fixture record id of QUOTE_A2 (this runner's candidate-side mirror)
+    const expectB = { ...expectA, expectedHead: b1, selectedAuthor: B, selectedProofKind: 1, mantissa: J.mantissaB1 }; // QUOTE_B1
     const placementExpect = { folder: swaps, nameRole: nameHash, actor: A, proofKind: 2, publication: pub0 + 2, budget: 16 };
     const commonSelection = { basisAdmission: basis, indexGeneration: str(generation), rulesEpoch: str(epoch), coreCodeCommitment: core, subject: subj, pairId, itemA, itemB, scale: J.scale, observedAt: J.observedAt, note: NOTE_COMMITMENT };
     const selA = { ...commonSelection, selectedHead: a2, selectedRevision: 2, selectedAdmission: adm0 + 10, selectedPublication: pub0 + 3, selectedAuthor: A, selectedProofKind: 2, mantissa: J.mantissaA2 };
@@ -1514,7 +1525,7 @@ const paidSliceCell = {
     for (const pr of paidRows) {
       const label = `paid/${pr.key}`;
       await restoreSeal(ctx, seal, label, ordering);
-      const row = await send(ctx, () => call(ctx, 'JoinedConsumer', 'joinedConsumer', pr.fn, pr.fnArgs), label, { wallet: caller, extra: { operation: pr.operation, lens: pr.lens, storage: STATELESS, consumer: `JoinedConsumer.${pr.fn} (stateless; one PaidResult log carrying the concrete observations — ESTIMATED several k gas of LOG data, reported, never subtracted)`, armInputs: { standing: 'this runner\'s local mirror of the fixture map (candidate-side); the sealed run supplies the independently authored vectors (appendix pin 4)', expect: pr.fnArgs[1], placementExpect: pr.fnArgs.length > 2 ? pr.fnArgs[2] : null } } });
+      const row = await send(ctx, () => call(ctx, 'JoinedConsumer', 'joinedConsumer', pr.fn, pr.fnArgs), label, { wallet: caller, extra: { operation: pr.operation, lens: pr.lens, storage: STATELESS, consumer: `JoinedConsumer.${pr.fn} (stateless; one PaidResult log of ~34 data words carrying the concrete observations — ESTIMATED ~9-10k gas: the paid rows' consumer overhead, disclosed separately, never subtracted)`, armInputs: { standing: 'this runner\'s local mirror of the fixture map (candidate-side), including the expected head record ids of QUOTE_A2 / QUOTE_B1 passed as Expect.expectedHead; the sealed run supplies the independently authored vectors (appendix pin 4)', expect: pr.fnArgs[1], placementExpect: pr.fnArgs.length > 2 ? pr.fnArgs[2] : null } } });
       const header = ctx.blockCache.get(row.block);
       ordering.push({ kind: 'tx', label, block: row.block, parentHash: header.parentHash });
       const check = await paidResultCheck(ctx, row, pr.selection, pr.placement);
@@ -1523,6 +1534,7 @@ const paidSliceCell = {
         const [headLabel, revisionLabel] = labelOf(headLabels, s.selectedHead, 'selected head');
         const [authorLabel, authorKind] = labelOf(authorLabels, s.selectedAuthor, 'selected author');
         const isList = pr.operation === 'PAID_LIST';
+        const outcome = (ok) => (check.match ? ok : 'UNKNOWN'); // a failed self-check never carries the success outcomes
         row.abstractResult = abstractRow({
           operation: pr.operation, lens: pr.lens,
           realm: { chainId: ctx.chainId, realmId, ledger: ctx.addrs.ledger, coreCodeCommitment: s.coreCodeCommitment },
@@ -1533,10 +1545,10 @@ const paidSliceCell = {
           queryCoordinate: isList
             ? { labels: { parent: '/swaps', name: 'eth-usdc', page: 'one bounded page, budget 16, fresh cursor', endCondition: 'every lens principal\'s raw scope list exhausted (next.lensIndex == lens.length, rawIndex == 0)' }, physical: { folder: swaps, nameRole: nameHash, subject: subj }, exactBytes: `transactions[${row.txIndex}].data` }
             : { labels: { file: 'FILE_QUOTE' }, physical: { subject: subj }, exactBytes: `transactions[${row.txIndex}].data` },
-          presence: { outcome: 'FOUND', establishedBy: 'LensReader.resolve status 1 inside the consumer (NoSelection otherwise)' },
-          support: { outcome: 'SUPPORTED', establishedBy: 'exact Types and shapes of Quote, Pair and both Items inside the consumer (QuoteShape / PairShape / ItemShape otherwise)' },
-          admission: { outcome: 'ADMITTED', establishedBy: 'live BIND admission inside its publication\'s range, author and proof category of the retained evidence (AdmissionShape / EvidenceBounds / AuthorMismatch / ProofCategory / ProofShape otherwise)' },
-          selection: { outcome: 'SELECTED', establishedBy: 'ordered-lens selection (the first principal with a binding decides) equal to the expected author (SelectionMismatch otherwise); a status-1 receipt cannot fill this field' },
+          presence: { outcome: outcome('FOUND'), establishedBy: 'LensReader.resolve status 1 inside the consumer (NoSelection otherwise) AND a matching self-check (rawEvidence.selfCheck)' },
+          support: { outcome: outcome('SUPPORTED'), establishedBy: 'exact Types and shapes of Quote, Pair and both Items inside the consumer (QuoteShape / PairShape / ItemShape otherwise) AND a matching self-check' },
+          admission: { outcome: outcome('ADMITTED'), establishedBy: 'live BIND admission inside its publication\'s range, author and proof category of the retained evidence (AdmissionShape / EvidenceBounds / AuthorMismatch / ProofCategory / ProofShape otherwise) AND a matching self-check' },
+          selection: { outcome: outcome('SELECTED'), establishedBy: 'ordered-lens selection (the first principal with a binding decides) equal to the expected author AND expected head id (SelectionMismatch otherwise) AND a matching self-check; a status-1 receipt cannot fill this field' },
           selectedFile: 'FILE_QUOTE', selectedHead: headLabel, selectedRevision: revisionLabel,
           selectedPhysical: { subject: s.subject, head: s.selectedHead, revisionOrdinal: s.selectedRevision, admission: s.selectedAdmission, publication: s.selectedPublication, standing: 'physical ids/ordinals retained separately from the labels; the revision ordinal is arm-local, not a cross-arm ordinal' },
           selectedAuthor: { label: authorLabel, address: s.selectedAuthor, principalKind: authorKind },
@@ -1544,15 +1556,15 @@ const paidSliceCell = {
           placementCoordinate: isList
             ? { lookedUpByThisRow: true, parent: '/swaps', name: 'eth-usdc', physical: { position: p.position, folder: swaps, nameRole: nameHash } }
             : { lookedUpByThisRow: false, parent: '/swaps', name: 'eth-usdc', physical: { position: swapsPos }, standing: 'not charged to the point transaction; retained and joined from the seal raw replies (row paid/seal/a-placement-provenance)' },
-          placementProvenance: { sourceStep: 'A1', actor: 'AUTHOR_A', actorAddress: isList ? p.actor : placementAtSeal.author, evidenceCategory: evidenceCategoryOf(Number(isList ? p.proofKind : placementAtSeal.proofKind), true), publication: isList ? p.publication : placementAtSeal.publication, admission: isList ? p.admission : placementAtSeal.admission, revision: isList ? p.revision : placementAtSeal.revision, basis: s.basisAdmission, independentOfContentSelection: true, establishedBy: isList ? 'paid: JoinedConsumer._placement (PlacementMismatch / ProofCategory / EvidenceBounds otherwise)' : 'raw replies at the seal (stage seal-placement), not this transaction' },
+          placementProvenance: { sourceStep: 'A1', actor: 'AUTHOR_A', actorAddress: isList ? p.actor : placementAtSeal.author, evidenceCategory: evidenceCategoryOf(Number(isList ? p.proofKind : placementAtSeal.proofKind), true), publication: isList ? p.publication : placementAtSeal.publication, admission: isList ? p.admission : placementAtSeal.admission, revision: isList ? p.revision : placementAtSeal.revision, basis: s.basisAdmission, independentOfContentSelection: true, establishedBy: isList ? 'paid: JoinedConsumer._placement (PlacementMismatch / ProofCategory / EvidenceBounds otherwise)' : `raw replies at the seal (stage seal-placement): LensReader.resolve under ${pr.lens} (placementAtSeal.byLens.${pr.lens}) + admission + evidence; not this transaction` },
           quoteCheck: { typeId: T.QUOTE_J, bodyLength: 160, head: s.selectedHead, mantissa: s.mantissa, scale: s.scale, observedAt: s.observedAt, noteCommitment: s.note, establishedBy: 'exact Type + 160-byte shape + exact fixture fields inside the consumer (QuoteShape / ClosureMismatch otherwise)' },
           pairCheck: { typeId: T.PAIR, pairId: s.pairId, orderedRefs: [s.itemA, s.itemB], establishedBy: 'PAIR Type and >= 64-byte body; the two leading words are the ordered references (PairShape / ClosureMismatch otherwise)' },
           itemChecks: [{ label: 'ITEM_ETH', typeId: T.ITEM, id: s.itemA }, { label: 'ITEM_USDC', typeId: T.ITEM, id: s.itemB }],
-          candidateCoverage: { universe: 'HEAD bindings of the lens principals at (HEAD, FILE_QUOTE) at the observation basis; ordered-lens selection', lens: pr.lensArr, basis: s.basisAdmission, sameForPointAndList: true, standing: 'point and list qualify the same candidate universe at the same basis; physical witnesses (hydrations, page bytes) may differ' },
+          candidateCoverage: { status: 'COMPLETE', universe: 'HEAD bindings of the lens principals at (HEAD, FILE_QUOTE) at the observation basis; ordered-lens selection', lens: pr.lensArr, basis: s.basisAdmission, endCondition: `ordered lens of ${pr.lensArr.length} principals; the first principal with a HEAD binding decides (live -> FOUND, tombstone -> MASKED, never fall-through), so every candidate up to the deciding principal is visited by construction of LensReader.resolve`, sameForPointAndList: true, standing: 'point and list qualify the same candidate universe at the same basis; physical witnesses (hydrations, page bytes) may differ' },
           pageCoverage: isList
             ? { status: 'COMPLETE', rawTotal: p.rawTotal, scanned: p.scanned, hydrations: p.hydrations, selectedSoFar: p.selectedSoFar, mutated: p.mutated, ended: p.ended, rows: 1, standing: 'fixture/profile-scoped coverage (IndexModule FAMILY_SCOPE COMPLETE + every raw list exhausted), not authenticated global completeness; PARTIAL / UNKNOWN revert (PlacementWindow)' }
             : { status: 'NOT_APPLICABLE', standing: 'a File-keyed point read performs no directory lookup' },
-          rawEvidence: { transaction: { txIndex: row.txIndex, hash: row.hash, rawTransaction: `transactions[${row.txIndex}].rawTransaction`, calldata: `transactions[${row.txIndex}].data`, receiptLogs: `transactions[${row.txIndex}].receipt.logs` }, paidResultLog: check.fromLog, replay: { rpcId: check.replayRpcId, stage: `paid-replay:${label}` }, seal: { rows: ['paid/seal', 'paid/seal/a-placement-provenance', 'paid/seal/no-b-placement'], stages: ['seal', 'seal-placement', 'seal-no-b-placement'] }, bodiesAndIds: 'plan (fixture map: exact bodies, ids, positions, binding keys)' },
+          rawEvidence: { transaction: { txIndex: row.txIndex, hash: row.hash, rawTransaction: `transactions[${row.txIndex}].rawTransaction`, calldata: `transactions[${row.txIndex}].data`, receiptLogs: `transactions[${row.txIndex}].receipt.logs` }, paidResultLog: check.fromLog, replay: { rpcId: check.replayRpcId, from: check.replayFrom, stage: `paid-replay:${label}` }, selfCheck: { match: check.match, ref: check.label }, seal: { rows: ['paid/seal', 'paid/seal/a-placement-provenance', 'paid/seal/no-b-placement'], stages: ['seal', 'seal-placement', 'seal-no-b-placement'] }, bodiesAndIds: 'plan (fixture map: exact bodies, ids, positions, binding keys)' },
           paidExecution: { caller: caller.address, callerDerivation: PAID_CALLER_PATH, consumer: ctx.addrs.joinedConsumer, targets: { ledger: ctx.addrs.ledger, lensReader: ctx.addrs.lens, indexModule: ctx.addrs.index, registry: ctx.addrs.registry }, codeCommitments: { ledger: s.coreCodeCommitment, consumer: consumerCodehash }, transaction: row.hash, receiptStatus: row.status, gasUsed: row.gas, returnData: check.fromReplay && !check.fromReplay.error ? { commitment: check.fromReplay.commitment, source: `eth_call replay at block ${row.block} (rpcId ${check.replayRpcId})` } : { unknown: 'replay did not decode', consequence: 'row is not a pass' }, revertData: null },
         });
       } else {

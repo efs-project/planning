@@ -835,7 +835,7 @@
       "commitments": "for JoinedConsumer / StatelessConsumer rows the commitment is read from the receipt log (ResultCommitment) and from an eth_call replay of the same calldata at the receipt block (stage consumer-replay); both are compared to the script's recomputed expectation and recorded (consumerChecks kind 'commitment')"
     },
     "cellNames": {
-      "standing": "exact cell keys of report.cells (23 keys: 22 default cells + 1 optional paired control), each its own sealed cell from the same post-setup snapshot, in run order; the optional cell is excluded from the default selection and from --only, and runs only when --cells names it exactly",
+      "standing": "exact cell keys of report.cells (23 keys: 22 default cells + 1 optional paired control), each its own sealed cell from the same post-setup snapshot, in run order. OPTIONAL: joined/a1-without-placement is non-default — excluded from the default selection and from --only; it runs only when --cells names it exactly",
       "cells": [
         "native-one/quote",
         "signed-one/quote",
@@ -851,7 +851,7 @@
         "failure-rows",
         "joined/steps-1-6",
         "joined/paid-slice",
-        "joined/a1-without-placement (OPTIONAL: non-default; selected only by its exact --cells key)",
+        "joined/a1-without-placement",
         "label/hash-only-create",
         "label/create+label-fresh",
         "label/create+label-existing-republished",
@@ -860,6 +860,9 @@
         "failure/refused-re-registration",
         "failure/unsupported-native-import",
         "native-one-noindex/quote"
+      ],
+      "optionalCells": [
+        "joined/a1-without-placement"
       ]
     },
     "labelProbe": {
@@ -896,25 +899,26 @@
     "paidSlice": {
       "standing": "the sealed paid point/list slice (sdk-fixture appendix 'criteria for the next sealed paid point/list slice'; matched-cost-scope-review 'Bounded C follow-through', B counterpart). Source-only, desk-checked, UNRUN: no forge/solc/anvil/node beyond `node --check` and `node --test script/measure.test.mjs`. B's runner RECORDS observations; the expectation manifest, the arm-input manifest and the basis seal are authored and hashed by the independent run controller before this packet is opened. This packet may echo their hashes but never defines or repairs them.",
       "cell": "joined/paid-slice",
-      "consumer": "src/JoinedConsumer.sol JoinedConsumer.paidPoint(lens, Expect) / paidList(lens, Expect, PlacementExpect): stateless, one PaidResult(kind, commitment, Selection, Placement) log carrying the concrete observations; imports no candidate library (every id is a call argument; consumer-local abi.decode of the public 160-byte Quote body and the Pair's two leading words); reverts on ABSENT/MASKED/CONFLICT (NoSelection), wrong author (SelectionMismatch), wrong proof category / fabricated or missing signature (ProofCategory, ProofShape), admission outside its publication's range or not a live BIND of the target (EvidenceBounds, AdmissionShape), wrong Type/shape (QuoteShape, PairShape, ItemShape), wrong Pair / ordered Items / mantissa / scale (ClosureMismatch), moved admission frontier (BasisMismatch), PARTIAL/UNKNOWN/mutated/not-ended/duplicate/second-placement window (PlacementWindow), wrong placement folder/name/target/actor/source publication (PlacementMismatch)",
+      "consumer": "src/JoinedConsumer.sol JoinedConsumer.paidPoint(lens, Expect) / paidList(lens, Expect, PlacementExpect): stateless, one PaidResult(kind, commitment, Selection, Placement) log of ~34 data words carrying the concrete observations (ESTIMATED ~9-10k gas: the paid rows' consumer overhead, disclosed separately, never subtracted); Expect has 10 input fields (subject, expectedHead, selectedAuthor, selectedProofKind, pairId, itemA, itemB, mantissa, scale, basisAdmission); imports no candidate library (every id is a call argument; consumer-local abi.decode of the public 160-byte Quote body and the Pair's two leading words); reverts on ABSENT/MASKED/CONFLICT (NoSelection), wrong author or wrong selected head id (SelectionMismatch: field 1 author, 2 head), wrong proof category / fabricated or missing signature (ProofCategory, ProofShape), admission outside its publication's range or not a live BIND of the target (EvidenceBounds, AdmissionShape), wrong Type/shape (QuoteShape, PairShape, ItemShape), wrong Pair / ordered Items / mantissa / scale (ClosureMismatch), moved admission frontier (BasisMismatch), PARTIAL/UNKNOWN/mutated/not-ended/duplicate/second-placement window (PlacementWindow), wrong placement folder/name/target/actor/source publication (PlacementMismatch)",
       "rows": {
         "paid/setup/step1": "operator native batch ITEM_ETH, ITEM_USDC, PAIR_ETH_USDC (setup cost class)",
         "paid/setup/A1": "AUTHOR_A signed: create FILE_QUOTE + publish QUOTE_A1 + head + the ONE /swaps 'eth-usdc' placement + market tag; one combined receipt. The placement's once-only cost is an ESTIMATE from this receipt alone",
         "paid/setup/A2": "AUTHOR_A signed: publish QUOTE_A2 + CAS head rev 1 -> 2; A1 retained in history; placement untouched",
         "paid/setup/B1": "AUTHOR_B (Actor contract, native): publish QUOTE_B1 + B head rev 1; NO FOLDER bind (confirmed in the calldata: two actions)",
-        "paid/seal": "evm_snapshot after B1 + the sealed block number/hash/timestamp + admission frontier / index generation / rules epoch / Core code commitment / realmId from raw replies at that block (stage seal). The snapshot id is single-use and re-sealed after every revert",
-        "paid/seal/a-placement-provenance": "raw replies at the seal (stage seal-placement): LensReader.resolve(LENS_A_FIRST, FOLDER, /swaps, eth-usdc) FOUND -> Ledger.admission -> Ledger.evidence: actor AUTHOR_A, publication = the A1 ordinal, proofKind 2 => EOA_SIGNED_PUBLICATION_EFFECT; joined into the point rows' abstractResult without charging a directory lookup to the point transaction",
+        "paid/seal": "evm_snapshot after B1 + the sealed block number/hash/timestamp + admission frontier / index generation / rules epoch / Core code commitment / realmId from raw replies at that block (stage seal). The snapshot id is single-use and re-sealed after every revert. The seal rows (paid/seal, paid/seal/a-placement-provenance, paid/seal/no-b-placement, paid/caller-funding) are pushed into rowLog and persisted when created, so a crash mid-cell keeps them",
+        "paid/seal/a-placement-provenance": "raw replies at the seal (stage seal-placement): LensReader.resolve(FOLDER, /swaps, eth-usdc) under LENS_A_FIRST AND under LENS_B_FIRST (both retained, identical placement: placementAtSeal.byLens) -> Ledger.admission -> Ledger.evidence: actor AUTHOR_A, publication = the A1 ordinal, proofKind 2 => EOA_SIGNED_PUBLICATION_EFFECT; joined into each point row's abstractResult from the reply of ITS lens without charging a directory lookup to the point transaction",
         "paid/seal/no-b-placement": "raw replies at the seal (stage seal-no-b-placement): Ledger.head(binding(B, /swaps/eth-usdc)) state 0, IndexModule.postingHead(B's /swaps scope list) count 0, LensReader.resolve([B], FOLDER, /swaps, eth-usdc) ABSENT",
-        "paid/point-a-first": "PAID_POINT / LENS_A_FIRST: JoinedConsumer.paidPoint([A, B], Expect{FILE_QUOTE, AUTHOR_A, proofKind 2, PAIR, ITEM_ETH, ITEM_USDC, 2_502_000_000, 6, basis}) from wallet index 3; expected selection QUOTE_A2 / A2",
+        "paid/point-a-first": "PAID_POINT / LENS_A_FIRST: JoinedConsumer.paidPoint([A, B], Expect{FILE_QUOTE, expectedHead QUOTE_A2, AUTHOR_A, proofKind 2, PAIR, ITEM_ETH, ITEM_USDC, 2_502_000_000, 6, basis}) from wallet index 3; expected selection QUOTE_A2 / A2",
         "paid/list-a-first": "PAID_LIST / LENS_A_FIRST: paidList([A, B], the same Expect, PlacementExpect{/swaps, eth-usdc, AUTHOR_A, proofKind 2, A1 publication, budget 16}); one COMPLETE, ended, unmixed window over exactly one raw candidate; the same closure and selection as the point",
-        "paid/point-b-first": "PAID_POINT / LENS_B_FIRST: paidPoint([B, A], Expect{..., AUTHOR_B, proofKind 1, 2_501_000_000, ...}); expected selection QUOTE_B1 / B1; the placement provenance stays the A1 effect (joined from the seal, not charged)",
+        "paid/point-b-first": "PAID_POINT / LENS_B_FIRST: paidPoint([B, A], Expect{..., expectedHead QUOTE_B1, AUTHOR_B, proofKind 1, 2_501_000_000, ...}); expected selection QUOTE_B1 / B1; the placement provenance stays the A1 effect (joined from the seal reply under LENS_B_FIRST, not charged)",
         "paid/list-b-first": "PAID_LIST / LENS_B_FIRST (the previously missing paid row): paidList([B, A], ...): the same single A placement, hydrated and checked to the B1 selection; placement actor (AUTHOR_A) != selected author (AUTHOR_B) by design",
         "paid/ordering": "the recorded seal -> revert -> first-transaction -> retained ledger, asserted by checkPaidRowOrdering (each paid row mined at seal + 1 on the sealed hash, retained before the next revert)",
         "paid/agreement": "point and list under the same lens observe the identical Selection (from the PaidResult logs)",
-        "paid/cost-disclosure": "deployment, code, setup, once-only placement (ESTIMATE unless the paired control is pinned), storage (ESTIMATED slots) and paid rows reported as separate classes; the matched acceptance/index-failure rollback control is cell failure-rows (referenced, not duplicated)"
+        "paid/cost-disclosure": "deployment, code, setup, once-only placement (ESTIMATE unless the paired control is pinned), storage (ESTIMATED slots) and paid rows reported as separate classes; the matched acceptance/index-failure rollback control is cell failure-rows (referenced, not duplicated)",
+        "paid/caller-funding": "eth_getBalance(paid caller, explicit after-revert block) > 0 asserted before any setup or paid row; envelope retained in rpcOther (on --anvil --accounts 4 funds index 3; an external --rpc node must fund it)"
       },
-      "perRowRetention": "each paid row is the FIRST transaction after evm_revert to the seal; before the next revert the runner retains the receipt (transactions[]), the PaidResult log, an eth_call replay of the same calldata FROM the same caller at the receipt block (stage paid-replay; return data), consumerChecks kind paid-result (field-by-field self-check against this runner's recomputed expectation), and rows[].abstractResult, then persists measure.json",
-      "paidCaller": "wallets[3] of the run mnemonic (m/44'/60'/0'/0/3): recorded address + derivation index, no secret; asserted unrelated to the deployer (0), AUTHOR_A (1), wallet 2, both Actor contracts and every deployed lab contract (assertUnrelatedCaller) before the first paid row",
+      "perRowRetention": "each paid row is the FIRST transaction after evm_revert to the seal; before the next revert the runner retains the receipt (transactions[]), the PaidResult log, an eth_call replay of the same calldata FROM the same caller (params[0].from = transactions[i].from, the wallet-3 address that sent the row; recorded as consumerChecks[].replayFrom) at the receipt block (stage paid-replay; return data), consumerChecks kind paid-result (field-by-field self-check against this runner's recomputed expectation), and rows[].abstractResult, then persists measure.json",
+      "paidCaller": "wallets[3] of the run mnemonic (m/44'/60'/0'/0/3): recorded address + derivation index, no secret; asserted unrelated to the deployer (0), AUTHOR_A (1), wallet 2, both Actor contracts and every deployed lab contract (assertUnrelatedCaller) before the first paid row; funded balance asserted at the explicit after-revert block (row paid/caller-funding)",
       "abstractResultFields": [
         "inputEvidenceGrade = RPC_OBSERVED",
         "standing",
@@ -934,8 +938,8 @@
         "placementCoordinate {lookedUpByThisRow, parent, name, physical}",
         "placementProvenance {sourceStep A1, actor AUTHOR_A, actorAddress, evidenceCategory EOA_SIGNED_PUBLICATION_EFFECT, publication, admission, revision, basis, independentOfContentSelection, establishedBy}",
         "quoteCheck / pairCheck / itemChecks",
-        "candidateCoverage / pageCoverage",
-        "rawEvidence {transaction, paidResultLog, replay, seal, bodiesAndIds}",
+        "candidateCoverage {status COMPLETE, universe, lens, basis, endCondition (ordered lens of N principals; the first principal with a HEAD binding decides — by construction of LensReader.resolve), sameForPointAndList} / pageCoverage",
+        "rawEvidence {transaction, paidResultLog, replay {rpcId, from, stage}, selfCheck {match, ref -> consumerChecks kind paid-result}, seal, bodiesAndIds}; when selfCheck.match is false the row still exists but presence / support / admission / selection are UNKNOWN, never the success outcomes",
         "paidExecution {caller, callerDerivation, consumer, targets, codeCommitments, transaction, receiptStatus, gasUsed, returnData, revertData}"
       ],
       "pairedControl": {
