@@ -8,7 +8,7 @@
     "profile": "road-b-lab/1 (compact ingestion kernel + separate IndexModule + LensReader)",
     "sourcePath": "Reviews/2026-09-12-efs-path-decision/lab-b",
     "sourceCommit": {
-      "unknown": "worktree fable/2026-09-12-road-b-lab at 2824297 plus uncommitted second-pass files (script/measure.mjs, src/LabAcceptors.sol, src/JoinedConsumer.sol, test/JoinedConsumer.t.sol, test/LabelType.t.sol, LABELS.md, this manifest, README.md, TODO.md); Core pinned at dcc7b94 (Ledger, IndexModule, LensReader, TypeRegistry, Keys, Interfaces untouched)",
+      "unknown": "DRAFT: re-pinned at publish to the exact lab commit the run used (the run records it as report.build.sourceCommit together with sha256 of every src/test/script file); the F5 Core (mandatory rule + additional policy) and the runner-review fixes are on branch fable/2026-09-12-road-b-lab after 3a30fe2",
       "consequence": "the script records sha256 of every src/test/script file at run time (report.build.sourceHashes); the dirty diff hash is recorded when the coordinator publishes"
     },
     "fixtureCommits": {

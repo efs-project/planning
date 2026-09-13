@@ -82,6 +82,7 @@ function loadFailureRow({ expectedSelector, observedSelector, before = { value: 
   const stripBlock = runnerDeclaration('const stripBlock =', '// ---------------------------------------------------------------- sealed cells');
   const failureRow = runnerDeclaration('async function failureRow(', 'const baseCount =');
   const probes = [before, after];
+  let probeCalls = 0; // pre/post alternate per failureRow call; a second call on the same loader must not exhaust the pair
   return vm.runInNewContext(`${stripBlock}\n${failureRow}\nfailureRow`, {
     FAIL_GAS: 1n,
     assert,
@@ -90,7 +91,8 @@ function loadFailureRow({ expectedSelector, observedSelector, before = { value: 
     log() {},
     observeRaw: observeRaw ?? (async (_ctx, _sink, _stage, _meta, _to, _data, _block, opts) => { captured.from = opts?.from ?? null; return { error: { data: observedSelector } }; }),
     send: send ?? (async (_ctx, _build, _label, opts) => { captured.sendWallet = opts?.wallet ?? null; return { block: 12, status: 0 }; }),
-    stateProbe: async () => probes.shift(),
+    stateProbe: async () => probes[probeCalls++ % probes.length],
+    Array, // the extracted function builds arrays through the outer realm so deep-equality against test literals holds
   });
 }
 const failureCtx = () => ({ latestBlock: async () => 11, raw: [], deployer: SENDER });
@@ -232,8 +234,8 @@ test('failureRow asserts the decoded revert ARGUMENTS when expected arguments ar
   const iface = () => ({ parseError: (d) => (d === data ? parsed : null) });
   const ok = loadFailureRow({ expectedSelector: selector, observedSelector: data, iface });
   const row = await ok(failureCtx(), 'stale-signature', {}, 'E_INTENT', [], { args: [3] });
-  assert.deepEqual(row.decodedArgs, ['3']);
-  assert.deepEqual(row.expectedArgs, ['3']);
+  assert.deepEqual([...row.decodedArgs], ['3']);
+  assert.deepEqual([...row.expectedArgs], ['3']);
   assert.equal(row.argsMatch, true);
   const wrong = loadFailureRow({ expectedSelector: selector, observedSelector: data, iface });
   await assert.rejects(() => wrong(failureCtx(), 'stale-signature-wrong-field', {}, 'E_INTENT', [], { args: [2] }), /revert arguments mismatch/);
@@ -242,15 +244,15 @@ test('failureRow asserts the decoded revert ARGUMENTS when expected arguments ar
   // typeId arguments compare case-insensitively as hex strings
   const typed = loadFailureRow({ expectedSelector: selector, observedSelector: data, iface: () => ({ parseError: () => ({ name: 'E_TYPE_EXISTS', args: ['0xABCDEF'] }) }) });
   const typedRow = await typed(failureCtx(), 'refused', {}, ['TypeRegistry', 'E_TYPE_EXISTS'], [], { args: ['0xabcdef'] });
-  assert.deepEqual(typedRow.decodedArgs, ['0xabcdef']);
+  assert.deepEqual([...typedRow.decodedArgs], ['0xabcdef']);
 });
 
 test('selectCells rejects unknown keys and empty selections before any chain starts, and keeps plan order', () => {
   const selectCells = loadSelectCells();
   const plan = ['native-one/quote', 'failure-rows', 'policy/activate', 'failure/refused-re-registration'];
-  assert.deepEqual(selectCells(plan, {}), plan);
-  assert.deepEqual(selectCells(plan, { cells: 'failure/refused-re-registration, policy/activate' }), ['policy/activate', 'failure/refused-re-registration']);
-  assert.deepEqual(selectCells(plan, { only: 'failure' }), ['failure-rows', 'failure/refused-re-registration']);
+  assert.deepEqual([...selectCells(plan, {})], plan);
+  assert.deepEqual([...selectCells(plan, { cells: 'failure/refused-re-registration, policy/activate' })], ['policy/activate', 'failure/refused-re-registration']);
+  assert.deepEqual([...selectCells(plan, { only: 'failure' })], ['failure-rows', 'failure/refused-re-registration']);
   assert.throws(() => selectCells(plan, { cells: 'policy/activate,does-not-exist' }), /unknown cell\(s\) does-not-exist/);
   assert.throws(() => selectCells(plan, { cells: '' }), /selected zero cells/);
   assert.throws(() => selectCells(plan, { only: 'nothing-matches' }), /selected zero cells/);

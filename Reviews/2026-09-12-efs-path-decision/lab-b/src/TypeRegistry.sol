@@ -33,8 +33,8 @@ import {ITypeRegistry} from "./Interfaces.sol";
 ///         dependencies (its own storage, contracts it reads). This registry cannot tell a
 ///         stateless rule from a stateful one, and no self-declared "stateless" flag would prove
 ///         it, so none is added. Lab convention: every MANDATORY fixture rule is stateless or
-///         immutable-configured (QuoteAcceptor, LabelAcceptor, StrictQuoteAcceptor,
-///         MinBodyAcceptor — constructor immutables are part of the runtime codehash); the
+///         immutable-configured (QuoteAcceptor, LabelAcceptor, MinBodyAcceptor in src/,
+///         StrictQuoteAcceptor in test/ — constructor immutables are part of the runtime codehash); the
 ///         mutable MockAcceptor (mode/minBody, unchanged codehash) is installed only as an
 ///         ADDITIONAL policy through `activate`. A production mandatory rule is either stateless /
 ///         immutable-configured, or stateful with its dependency and basis semantics explicitly

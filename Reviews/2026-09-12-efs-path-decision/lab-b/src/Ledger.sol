@@ -76,11 +76,14 @@ contract Ledger {
         uint64 ord; // running admission ordinal
         uint64 records;
         uint64 bindings;
+        bytes32 publicationId; // set by _beginPublication (kept off the batch loop's stack)
+        uint64 first; // first admission ordinal of this publication (idem)
     }
 
     // What one admission reads from the registry (memory struct: one pointer on the stack; the
     // publish path is split into small helpers to stay within the via-IR stack, see _applyPublish).
     struct TypeView {
+        bytes32 typeId;
         address mandatory; // the Type's declared rule (pinned instance); 0 = no rule
         bytes32 ruleId; // its codehash (part of the Type id)
         address policy; // the Realm's additional policy acceptor; 0 = none
@@ -402,25 +405,23 @@ contract Ledger {
     // the prologue and epilogue are helpers and each item is applied through _applyOne.
     function _run(Pub memory p, Action[] memory actions, bytes[] memory bodies)
         private
-        returns (uint64 publication, uint64 first)
+        returns (uint64, uint64)
     {
         uint256 n = actions.length;
         if (n == 0 || n > MAX_ACTIONS || bodies.length != n) revert E_BOUNDS(0);
-        bytes32 publicationId = _beginPublication(p, n);
-        first = p.ord + 1;
-        IIndexModule.Effect[] memory effects = new IIndexModule.Effect[](n);
+        IIndexModule.Effect[] memory effects = _beginPublication(p, n);
         for (uint256 i; i < n; ++i) {
             ++p.ord;
             effects[i] = _applyOne(p, actions[i], bodies[i], i);
         }
-        _endPublication(p, effects, publicationId, first, uint16(n));
-        publication = p.publication;
+        _endPublication(p, effects);
+        return (p.publication, p.first);
     }
 
     /// Retry/nonce/counter checks, then the first writes (nonce, retry key, evidence cell).
-    function _beginPublication(Pub memory p, uint256 n) private returns (bytes32 publicationId) {
-        publicationId = keccak256(abi.encode(p.author, p.nonce, p.actionsHash));
-        uint64 prior = _publicationOrdinal[publicationId];
+    function _beginPublication(Pub memory p, uint256 n) private returns (IIndexModule.Effect[] memory effects) {
+        p.publicationId = keccak256(abi.encode(p.author, p.nonce, p.actionsHash));
+        uint64 prior = _publicationOrdinal[p.publicationId];
         if (prior != 0) revert AlreadyAdmitted(prior);
         if (p.nonce != nonces[p.author]) revert E_NONCE(p.author, nonces[p.author], p.nonce);
         uint256 c = _counters;
@@ -430,28 +431,30 @@ contract Ledger {
         uint64 publications = uint64(c >> 192);
         if (p.ord + uint64(n) >= GUARD || publications >= GUARD - 1) revert E_BOUNDS(1);
         p.publication = publications + 1;
+        p.first = p.ord + 1;
         // ---- writes begin; any later failure reverts every one of them (EVM rollback, no journal)
         nonces[p.author] = p.nonce + 1;
-        _publicationOrdinal[publicationId] = p.publication;
-        _writeEvidence(p, p.ord + 1, uint16(n));
+        _publicationOrdinal[p.publicationId] = p.publication;
+        _writeEvidence(p, p.first, uint16(n));
+        effects = new IIndexModule.Effect[](n);
     }
 
-    function _endPublication(Pub memory p, IIndexModule.Effect[] memory effects, bytes32 publicationId, uint64 first, uint16 n) private {
+    function _endPublication(Pub memory p, IIndexModule.Effect[] memory effects) private {
         _counters = uint256(p.ord) | (uint256(p.records) << 64) | (uint256(p.bindings) << 128)
             | (uint256(p.publication) << 192);
         _notifyIndex(p.publication, effects);
-        emit Published(p.publication, publicationId, p.author, p.proofKind, first, n);
+        emit Published(p.publication, p.publicationId, p.author, p.proofKind, p.first, uint16(effects.length));
     }
 
     /// One action of the ordered prefix. Kept out of the loop body so its callees' locals never
     /// join the loop's live set.
-    function _applyOne(Pub memory p, Action memory x, bytes memory body, uint256 i)
+    function _applyOne(Pub memory p, Action memory x, bytes memory data, uint256 i)
         private
         returns (IIndexModule.Effect memory)
     {
         uint8 k = x.kind;
-        if (k == PUBLISH || k == REUSE) return _applyPublish(p, x, body, i);
-        if (body.length != 0) revert E_SHAPE(i);
+        if (k == PUBLISH || k == REUSE) return _applyPublish(p, x, data, i);
+        if (data.length != 0) revert E_SHAPE(i);
         if (k == BIND) return _applyBind(p, x, i);
         if (k == UNBIND) return _applyUnbind(p, x, i);
         if (k == CREATE) return _applyCreate(p, x, i);
@@ -488,7 +491,7 @@ contract Ledger {
         }
         TypeView memory t = _typeOf(x.typeId);
         (bytes32 id, bytes memory bodyBytes) = _bodyOf(x, data, leaf);
-        _acceptAll(t, x.typeId, bodyBytes, _checkRefs(x.typeId, t.refCount, bodyBytes, leaf), leaf);
+        _acceptAll(t, x.typeId, bodyBytes, _checkRefs(t, bodyBytes, leaf), leaf);
         _admitRecord(p, x, id, bodyBytes, t.activation, leaf);
         ef.kind = x.kind;
         ef.admission = p.ord;
@@ -499,6 +502,7 @@ contract Ledger {
     }
 
     function _typeOf(bytes32 typeId) private view returns (TypeView memory t) {
+        t.typeId = typeId;
         bool registered;
         (registered, t.mandatory, t.ruleId, t.policy, t.policyCodehash, t.refCount, t.activation) = registry.typeInfo(typeId);
         if (!registered) revert E_UNKNOWN_TYPE(typeId);
@@ -520,17 +524,17 @@ contract Ledger {
     }
 
     /// The leading `refCount` body words must be existing records of the registry's expected Types.
-    function _checkRefs(bytes32 typeId, uint8 refCount, bytes memory bodyBytes, uint256 leaf)
+    function _checkRefs(TypeView memory t, bytes memory bodyBytes, uint256 leaf)
         private
         view
         returns (bytes32[] memory refs)
     {
-        refs = new bytes32[](refCount);
-        if (refCount == 0) return refs;
-        if (bodyBytes.length < 32 * uint256(refCount)) revert E_SHAPE(leaf);
-        bytes32[] memory expected = registry.refTypes(typeId);
-        if (expected.length < refCount) revert E_BOUNDS(4);
-        for (uint256 i; i < refCount; ++i) {
+        refs = new bytes32[](t.refCount);
+        if (t.refCount == 0) return refs;
+        if (bodyBytes.length < 32 * uint256(t.refCount)) revert E_SHAPE(leaf);
+        bytes32[] memory expected = registry.refTypes(t.typeId);
+        if (expected.length < t.refCount) revert E_BOUNDS(4);
+        for (uint256 i; i < t.refCount; ++i) {
             bytes32 ref = _word(bodyBytes, i);
             bytes32 have = _record[ref].typeId;
             if (have == bytes32(0)) revert E_REF_MISSING(leaf, i, ref);
@@ -763,6 +767,15 @@ contract Ledger {
             uint64 activatedAt
         )
     {
+        (typeId, activation) = _basisKey(ordinal);
+        TypeView memory t = _typeOf(typeId);
+        mandatoryAcceptor = t.mandatory;
+        ruleId = t.ruleId;
+        (policyAcceptor, policyCodehash, epoch, activatedAt) = registry.activation(typeId, activation);
+    }
+
+    /// The (Type, policy row) an admission was accepted under; reverts for non-publish kinds.
+    function _basisKey(uint64 ordinal) private view returns (bytes32 typeId, uint16 activation) {
         AdmissionRow storage ar = _admission[ordinal];
         uint256 m = ar.meta;
         uint8 kind = uint8(m & 0xF);
@@ -770,8 +783,6 @@ contract Ledger {
         else if (kind == REUSE) typeId = _record[ar.a].typeId;
         else revert E_NO_BASIS(ordinal);
         activation = uint16(m >> 152);
-        (, mandatoryAcceptor, ruleId,,,,) = registry.typeInfo(typeId);
-        (policyAcceptor, policyCodehash, epoch, activatedAt) = registry.activation(typeId, activation);
     }
 
     function indexObligations() public view returns (bytes32) {

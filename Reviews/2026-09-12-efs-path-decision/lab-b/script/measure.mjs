@@ -85,6 +85,7 @@ mkdirSync(SCRATCH_ROOT, { recursive: true });
 const args = Object.fromEntries(process.argv.slice(2).map((a, i, all) => (a.startsWith('--') ? [a.slice(2), all[i + 1]?.startsWith('--') || all[i + 1] === undefined ? true : all[i + 1]] : [])).filter((x) => x.length));
 const MNEMONIC = args.mnemonic || process.env.EFS_LAB_MNEMONIC || 'test test test test test test test test test test test junk';
 const OUT_JSON = args.out && args.out !== true ? resolve(args.out) : join(SCRATCH_ROOT, 'measure.json');
+if (args.cells === true || args.only === true) throw new Error('--cells and --only require a value (an exact comma-separated cell list, or a substring); a bare flag would silently select every cell');
 const ONLY = typeof args.only === 'string' ? args.only : null;
 const WATCHDOG_MS = 25 * 60 * 1000;
 const CAVEAT_JOINED = 'The joined QUOTE/Pair journey (sdk-fixture steps 1–6 with ITEM/PAIR/QUOTE_J) is scripted as cell joined/steps-1-6; steps 7 (partly: paid consumer), 8, 9 and 10 are NOT in this script.';
@@ -654,17 +655,17 @@ async function failureRow(ctx, label, c, expectedError, probe, { wallet = ctx.de
     observedData = typeof st.error.data === 'string' ? st.error.data : (st.error.data?.data ?? JSON.stringify(st.error.data ?? null));
     observedSelector = typeof observedData === 'string' && observedData.startsWith('0x') ? observedData.slice(0, 10) : String(observedData);
   }
+  assert(expectedSelector, `${label}: expected selector unavailable for ${errContract}.${errName}`);
   const row = await send(ctx, () => c, label, { expectFail: true, gasLimit: FAIL_GAS, wallet });
   const post = await stateProbe(ctx, `failure-post:${label}`, probe, row.block);
   const unchanged = JSON.stringify(stripBlock(pre)) === JSON.stringify(stripBlock(post));
-  assert(expectedSelector, `${label}: expected selector unavailable for ${errContract}.${errName}`);
   assert.equal(observedSelector, expectedSelector, `${label}: revert selector mismatch for ${errContract}.${errName}`);
   assert.equal(unchanged, true, `${label}: state changed across expected revert`);
   const normArg = (v) => (typeof v === 'bigint' ? v.toString() : typeof v === 'number' ? String(v) : String(v).toLowerCase());
   let decodedArgs = null;
   let expectedArgs = null;
   if (args) {
-    expectedArgs = args.map(normArg);
+    expectedArgs = Array.from(args, normArg);
     const parsed = typeof observedData === 'string' && observedData.startsWith('0x') ? iface(errContract).parseError(observedData) : null;
     assert(parsed && parsed.name === errName, `${label}: revert data does not decode as ${errContract}.${errName}`);
     decodedArgs = Array.from(parsed.args, normArg);
@@ -873,7 +874,7 @@ const failureCell = {
     rows.push(await send(ctx, pubA('bind', [P.HEAD, name('x'), ZERO, ids[0], 0]), 'failure/setup: bind (revision becomes 1)'));
     rows.push(await failureRow(ctx, 'failure/stale-CAS (expected 0, head is 1)', call(ctx, 'Actor', 'actorA', 'bind', [P.HEAD, name('x'), ZERO, ids[0], 0]), 'E_CAS', probe));
     rows.push(await send(ctx, () => call(ctx, 'MockAcceptor', 'acceptor', 'set', [1, 0]), 'failure/setup: acceptor rejects'));
-    rows.push(await failureRow(ctx, 'failure/failed-acceptance (the mock is QUOTE\'s ADDITIONAL policy, row 2: E_POLICY_REJECTED; whole publication reverts)', call(ctx, 'Actor', 'actorA', 'publish', [T.QUOTE, zeroPadValue(toBeHex(5n), 32)]), 'E_POLICY_REJECTED', probe));
+    rows.push(await failureRow(ctx, 'failure/failed-acceptance (the mock is QUOTE\'s ADDITIONAL policy, row 2: E_POLICY_REJECTED; whole publication reverts)', call(ctx, 'Actor', 'actorA', 'publish', [T.QUOTE, zeroPadValue(toBeHex(5n), 32)]), 'E_POLICY_REJECTED', probe, { args: [0, T.QUOTE] }));
     rows.push(await send(ctx, () => call(ctx, 'MockAcceptor', 'acceptor', 'set', [0, 0]), 'failure/setup: acceptor accepts'));
     rows.push(await send(ctx, () => call(ctx, 'Ledger', 'ledger', 'setIndexModule', [ctx.addrs.failingIndex]), 'failure/setup: attach the always-refusing index module'));
     rows.push(await failureRow(ctx, 'failure/failed-mandatory-index (whole publication reverts)', call(ctx, 'Actor', 'actorA', 'publish', [T.QUOTE, zeroPadValue(toBeHex(6n), 32)]), 'E_INDEX', probe));
