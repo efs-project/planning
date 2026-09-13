@@ -112,6 +112,15 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**19:07 Files advisory integrated; no executable Files pass claimed.**
+[[files-shortlist-review-20260913]] finds both candidates can express the four
+small discriminators with a candidate-native fixture and qualified reader.
+No new Core storage need is demonstrated. Distinguish a browser querying one
+pinned block/state from a paid contract paging across later states; B's raw
+cursor/`mutated` flag does not by itself preserve historical selection. The
+existing exact-frontier paid packet remains valid within its stated scope.
+SDK advisory is still pending; no new run or architecture decision.
+
 **18:59 decision-prep handoff; no new benchmark run.** The reviewed
 [[paid-rollback-control#September 13 follow-through: reviewed B seam and execution traps|B late-index control handoff]]
 now pins attachment timing, configuration-specific signatures, full error
