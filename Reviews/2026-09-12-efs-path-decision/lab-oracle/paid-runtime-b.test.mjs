@@ -98,6 +98,67 @@ for (const [name, mutate, match] of failures) test(`fails closed: ${name}`, asyn
   assert.throws(() => instantiateBRuntime(input), match);
 });
 
+// A broken ancestry walk either misses the base word or includes unrelated
+// declarations. Literal byte positions distinguish both; no Solidity helper.
+function inheritedFixture() {
+  const x = handFixture();
+  const derived = x.sourceAst.nodes[0];
+  derived.id = 10; derived.linearizedBaseContracts = [10, 20];
+  derived.baseContracts = [{ baseName: { referencedDeclaration: 20 } }];
+  x.sourceAst.nodes[1].id = 30;
+  const base = { nodeType: 'ContractDefinition', id: 20, name: 'Base', nodes: [
+    { nodeType: 'VariableDeclaration', id: 8, name: 'baseSize', stateVariable: true, mutability: 'immutable' },
+  ], baseContracts: [], linearizedBaseContracts: [20] };
+  x.sourceAsts = { 'src/Base.sol': { nodeType: 'SourceUnit', absolutePath: 'src/Base.sol', nodes: [base] } };
+  x.immutableValues.baseSize = W96;
+  x.artifact.deployedBytecode.immutableReferences = { 7: [{ start: 1, length: 32 }], 8: [{ start: 35, length: 32 }] };
+  return x;
+}
+
+test('resolves inherited immutable IDs across supplied source units without unrelated same-name declarations', async () => {
+  const { instantiateBRuntime } = await api(); const x = inheritedFixture();
+  const before = structuredClone(x);
+  const result = instantiateBRuntime(x);
+  assert.equal(result.expectedRuntime, `0x7f${'0'.repeat(62)}20507f${'0'.repeat(62)}6000`);
+  assert.deepEqual(result.substitutions, [
+    { name: 'size', astId: 7, value: W32, offsets: [1] },
+    { name: 'baseSize', astId: 8, value: W96, offsets: [35] },
+  ]);
+  assert.deepEqual(x, before);
+});
+
+test('visits a diamond base once while retaining all exact compiler references', async () => {
+  const { instantiateBRuntime } = await api(); const x = inheritedFixture();
+  const base = x.sourceAsts['src/Base.sol'].nodes[0];
+  const left = { nodeType: 'ContractDefinition', id: 21, name: 'Left', nodes: [], baseContracts: [{ baseName: { referencedDeclaration: 20 } }], linearizedBaseContracts: [21, 20] };
+  const right = { ...structuredClone(left), id: 22, name: 'Right', linearizedBaseContracts: [22, 20] };
+  x.sourceAsts['src/Base.sol'].nodes.push(left, right);
+  x.sourceAst.nodes[0].baseContracts = [21, 22].map(id => ({ baseName: { referencedDeclaration: id } }));
+  x.sourceAst.nodes[0].linearizedBaseContracts = [10, 22, 21, 20];
+  assert.equal(instantiateBRuntime(x).expectedRuntime, `0x7f${'0'.repeat(62)}20507f${'0'.repeat(62)}6000`);
+});
+
+for (const [name, mutate, match] of [
+  ['missing base source', x => { x.sourceAsts = {}; }, /ANCESTRY/],
+  ['malformed source map', x => { x.sourceAsts = []; }, /AST/],
+  ['mismatched source map key', x => { x.sourceAsts['src/Base.sol'].absolutePath = 'wrong'; }, /AST/],
+  ['conflicting target source', x => { x.sourceAsts['src/Hand.sol'] = structuredClone(x.sourceAst); x.sourceAsts['src/Hand.sol'].nodes[0].id = 77; }, /AST/],
+  ['duplicate contract ID', x => { x.sourceAsts['src/Base.sol'].nodes.push(structuredClone(x.sourceAsts['src/Base.sol'].nodes[0])); }, /ANCESTRY/],
+  ['missing linearization', x => { delete x.sourceAst.nodes[0].linearizedBaseContracts; }, /ANCESTRY/],
+  ['malformed linearization', x => { x.sourceAst.nodes[0].linearizedBaseContracts = [10, '20']; }, /ANCESTRY/],
+  ['duplicate linearized ID', x => { x.sourceAst.nodes[0].linearizedBaseContracts = [10, 20, 20]; }, /ANCESTRY/],
+  ['root not first', x => { x.sourceAst.nodes[0].linearizedBaseContracts = [20, 10]; }, /ANCESTRY/],
+  ['linearized unrelated contract', x => { x.sourceAst.nodes[0].linearizedBaseContracts.push(30); }, /ANCESTRY/],
+  ['omitted reachable base', x => { x.sourceAst.nodes[0].linearizedBaseContracts = [10]; }, /ANCESTRY/],
+  ['malformed base declaration', x => { x.sourceAst.nodes[0].baseContracts[0].baseName.referencedDeclaration = '20'; }, /ANCESTRY/],
+  ['cycle in base graph', x => { x.sourceAsts['src/Base.sol'].nodes[0].baseContracts = [{ baseName: { referencedDeclaration: 10 } }]; }, /ANCESTRY/],
+  ['ambiguous inherited immutable name', x => { x.sourceAsts['src/Base.sol'].nodes[0].nodes[0].name = 'size'; }, /IMMUTABLE/],
+  ['inherited reference omitted', x => { delete x.artifact.deployedBytecode.immutableReferences[8]; }, /IMMUTABLE/],
+]) test(`inherited runtime fails closed: ${name}`, async () => {
+  const { instantiateBRuntime } = await api(); const x = inheritedFixture(); mutate(x);
+  assert.throws(() => instantiateBRuntime(x), match);
+});
+
 // Hand-authored source/constructor declarations; no candidate helper or worked answer.
 const contracts = [
   ['registry', 'src/TypeRegistry.sol', 'TypeRegistry', 0, { admin: 'address' }, []],
@@ -240,4 +301,24 @@ test('real compiler artifacts map all exact source-contract immutables when expl
     assert.equal(target.initcodeBytes, (target.expectedInitcode.length - 2) / 2);
     assert.ok(target.initcodeBytes > 0 && target.initcodeBytes <= 49152);
   }
+});
+
+test('real inherited Index fixture resolves only its four exact immutable values', { skip: !process.env.B_RUNTIME_ARTIFACT_DIR }, async () => {
+  const { instantiateBRuntime } = await api();
+  const read = path => JSON.parse(readFileSync(`${process.env.B_RUNTIME_ARTIFACT_DIR}/${path}`));
+  const artifact = read('MatchedRollback.t.sol/LateRefusingIndexModule.json');
+  const sourceAsts = {
+    'src/IndexModule.sol': read('IndexModule.sol/IndexModule.json').ast,
+    'src/Interfaces.sol': read('Interfaces.sol/IIndexModule.json').ast,
+  };
+  const immutableValues = { ledger: `0x${'0'.repeat(24)}${'11'.repeat(20)}`, admin: `0x${'0'.repeat(24)}${'22'.repeat(20)}`, attachedFrom: `0x${'0'.repeat(63)}1`, poisonBindingKey: `0x${'33'.repeat(32)}` };
+  const input = { artifact, sourceAst: artifact.ast, sourceAsts, sourceName: 'test/MatchedRollback.t.sol', contractName: 'LateRefusingIndexModule', immutableValues };
+  const result = instantiateBRuntime(input);
+  assert.deepEqual(result.substitutions.map(x => x.name).sort(), ['admin', 'attachedFrom', 'ledger', 'poisonBindingKey']);
+  for (const sub of result.substitutions) for (const offset of sub.offsets) {
+    assert.equal(`0x${result.expectedRuntime.slice(2 + offset * 2, 2 + (offset + 32) * 2)}`, immutableValues[sub.name]);
+  }
+  assert.ok(result.runtimeBytes > 0 && result.runtimeBytes <= 24576);
+  delete sourceAsts['src/Interfaces.sol'];
+  assert.throws(() => instantiateBRuntime(input), /ANCESTRY/);
 });

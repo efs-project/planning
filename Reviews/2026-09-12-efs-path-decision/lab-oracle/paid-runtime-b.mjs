@@ -12,19 +12,61 @@ const emptyObject = (value, reason) => {
   if (!object(value) || Object.keys(value).length) fail(reason);
 };
 
+// Full source maps opt into inherited declaration resolution. The legacy
+// exact-contract path still rejects any compiler reference it cannot resolve.
+function runtimeContracts(contract, sourceAst, sourceAsts) {
+  if (sourceAsts === undefined) return [contract];
+  if (!object(sourceAsts)) fail('AST:source map required');
+  const units = [sourceAst];
+  for (const [name, ast] of Object.entries(sourceAsts)) {
+    if (ast?.nodeType !== 'SourceUnit' || ast.absolutePath !== name || !Array.isArray(ast.nodes)) fail('AST:source map unit mismatch');
+    if (name === sourceAst.absolutePath) {
+      if (JSON.stringify(ast) !== JSON.stringify(sourceAst)) fail('AST:conflicting target source');
+    } else units.push(ast);
+  }
+  const byId = new Map();
+  const validId = id => Number.isSafeInteger(id) && id > 0;
+  for (const unit of units) for (const node of unit.nodes) {
+    if (node.nodeType !== 'ContractDefinition') continue;
+    if (!validId(node.id) || byId.has(node.id)) fail('ANCESTRY:invalid or duplicate contract ID');
+    byId.set(node.id, node);
+  }
+  const linear = contract.linearizedBaseContracts;
+  if (!Array.isArray(linear) || !linear.length || linear[0] !== contract.id || linear.some(id => !validId(id)) || new Set(linear).size !== linear.length) fail('ANCESTRY:invalid target linearization');
+  const visiting = new Set(), reached = new Set();
+  const visit = id => {
+    if (visiting.has(id)) fail('ANCESTRY:cycle');
+    if (reached.has(id)) return;
+    const node = byId.get(id);
+    if (!node || !Array.isArray(node.nodes) || !Array.isArray(node.baseContracts)) fail('ANCESTRY:missing or malformed base contract');
+    visiting.add(id);
+    for (const base of node.baseContracts) {
+      const baseId = base?.baseName?.referencedDeclaration;
+      if (!validId(baseId)) fail('ANCESTRY:invalid base reference');
+      visit(baseId);
+    }
+    visiting.delete(id); reached.add(id);
+  };
+  visit(contract.id);
+  if (reached.size !== linear.length || linear.some(id => !reached.has(id))) fail('ANCESTRY:linearization differs from reachable bases');
+  return linear.map(id => byId.get(id));
+}
+
 /**
  * Requires a source-unit AST and an artifact for precisely one source/contract.
  * immutableValues maps declaration NAME to an independently encoded bytes32 word.
  * Every expected declaration and every compiler reference must match exactly.
+ * sourceAsts optionally supplies the complete inheritance source units, keyed by
+ * compiler source name. Same-named inherited immutables are refused, not guessed.
  */
-export function instantiateBRuntime({ artifact, sourceAst, sourceName, contractName, immutableValues } = {}) {
+export function instantiateBRuntime({ artifact, sourceAst, sourceAsts, sourceName, contractName, immutableValues } = {}) {
   if (!object(artifact)) fail('ARTIFACT:missing');
   const target = artifact.metadata?.settings?.compilationTarget;
   if (!object(target) || Object.keys(target).length !== 1 || target[sourceName] !== contractName) fail('TARGET:artifact source/contract mismatch');
   if (sourceAst?.nodeType !== 'SourceUnit' || sourceAst.absolutePath !== sourceName || !Array.isArray(sourceAst.nodes)) fail('AST:source unit mismatch or missing');
   const contracts = sourceAst.nodes.filter(node => node.nodeType === 'ContractDefinition' && node.name === contractName);
   if (contracts.length !== 1 || !Array.isArray(contracts[0].nodes)) fail('CONTRACT:missing or ambiguous exact AST contract');
-  const declarations = contracts[0].nodes.filter(node => node.nodeType === 'VariableDeclaration' && node.stateVariable === true && node.mutability === 'immutable');
+  const declarations = runtimeContracts(contracts[0], sourceAst, sourceAsts).flatMap(contract => contract.nodes.filter(node => node.nodeType === 'VariableDeclaration' && node.stateVariable === true && node.mutability === 'immutable'));
   const byId = new Map(), byName = new Map();
   for (const declaration of declarations) {
     if (!Number.isSafeInteger(declaration.id) || declaration.id <= 0 || typeof declaration.name !== 'string' || !declaration.name || byId.has(String(declaration.id)) || byName.has(declaration.name)) fail('IMMUTABLE:invalid or duplicate AST declaration');
