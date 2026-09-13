@@ -150,6 +150,134 @@ function signedCell(report) {
   return report.cells.find((cell) => cell.cellId === 'signed-one');
 }
 
+for (const [shape, malformedCells] of [
+  ['null', null],
+  ['scalar', 5],
+  ['array', []],
+]) {
+  test(`rejects a present ${shape} cells container`, () => {
+    const packet = basePacket();
+    packet.cells = malformedCells;
+    assert.throws(
+      () => analyze(packet),
+      /MALFORMED_RPC_OBSERVED_CELLS_CONTAINER/,
+    );
+  });
+}
+
+test('keeps an omitted cells container unknown', () => {
+  const packet = basePacket();
+  delete packet.cells;
+  const report = analyze(packet);
+  assert.deepEqual(report.summary, {
+    OBSERVED_MATCH: 0,
+    OBSERVED_MISMATCH: 0,
+    UNKNOWN: 14,
+    UNSUPPORTED: 2,
+  });
+  assert.ok(report.cells.every((cell) => cell.packetKey === 'UNAVAILABLE'));
+});
+
+for (const [shape, malformedCell] of [
+  ['null', null],
+  ['scalar', 5],
+  ['array', []],
+]) {
+  test(`rejects a present ${shape} expected cell`, () => {
+    const packet = basePacket();
+    packet.cells['signed-one/quote'] = malformedCell;
+    assert.throws(
+      () => analyze(packet),
+      /MALFORMED_RPC_OBSERVED_CELL:signed-one/,
+    );
+  });
+}
+
+for (const field of ['raw', 'transactions']) {
+  for (const [shape, malformedContainer] of [
+    ['object', {}],
+    ['scalar', 5],
+    ['null', null],
+  ]) {
+    test(`rejects a present ${shape} ${field} container`, () => {
+      const packet = basePacket();
+      packet.cells['signed-one/quote'][field] = malformedContainer;
+      assert.throws(
+        () => analyze(packet),
+        new RegExp(`MALFORMED_RPC_OBSERVED_${field.toUpperCase()}_CONTAINER:signed-one`),
+      );
+    });
+  }
+
+  for (const [shape, malformedEntry] of [
+    ['scalar', 5],
+    ['nested', []],
+    ['null', null],
+  ]) {
+    test(`rejects a ${shape} ${field} array entry`, () => {
+      const packet = basePacket();
+      packet.cells['signed-one/quote'][field] = [malformedEntry];
+      assert.throws(
+        () => analyze(packet),
+        new RegExp(`MALFORMED_RPC_OBSERVED_${field.toUpperCase()}_ENTRY:signed-one:0`),
+      );
+    });
+  }
+
+  test(`accepts an object ${field} array entry at the structural boundary`, () => {
+    const packet = basePacket();
+    packet.cells['signed-one/quote'][field] = [{}];
+    assert.doesNotThrow(() => analyze(packet));
+  });
+
+  test(`keeps an omitted ${field} field unknown`, () => {
+    const packet = basePacket();
+    delete packet.cells['signed-one/quote'][field];
+    const cell = signedCell(analyze(packet));
+    const axis = field === 'raw' ? cell.axes.transportCorrelation : cell.axes.writeSequence;
+    assert.equal(axis.status, 'UNKNOWN');
+  });
+}
+
+test('rejects explicitly malformed calldata in an object raw entry', () => {
+  const packet = basePacket();
+  const malformed = structuredClone(packet.cells['signed-one/quote'].raw[0]);
+  malformed.calldata = [];
+  packet.cells['signed-one/quote'].raw.push(malformed);
+  assert.throws(
+    () => analyze(packet),
+    /MALFORMED_RPC_OBSERVED_RAW_CALLDATA:signed-one:13/,
+  );
+});
+
+test('rejects explicitly malformed data in an object transaction entry', () => {
+  const packet = basePacket();
+  const malformed = structuredClone(packet.cells['signed-one/quote'].transactions[0]);
+  malformed.data = [];
+  packet.cells['signed-one/quote'].transactions.push(malformed);
+  assert.throws(
+    () => analyze(packet),
+    /MALFORMED_RPC_OBSERVED_TRANSACTION_DATA:signed-one:4/,
+  );
+});
+
+test('omitted calldata on an observed Ledger transaction makes the signed write unknown', () => {
+  const packet = basePacket();
+  const incomplete = structuredClone(packet.cells['signed-one/quote'].transactions[0]);
+  delete incomplete.data;
+  packet.cells['signed-one/quote'].transactions.push(incomplete);
+  assert.equal(signedCell(analyze(packet)).axes.writeSequence.status, 'UNKNOWN');
+});
+
+test('an unattributed transaction with omitted calldata cannot preserve a signed write match', () => {
+  const packet = basePacket();
+  const incomplete = structuredClone(packet.cells['signed-one/quote'].transactions[0]);
+  delete incomplete.to;
+  delete incomplete.data;
+  packet.cells['signed-one/quote'].transactions.push(incomplete);
+  assert.equal(signedCell(analyze(packet)).axes.writeSequence.status, 'UNKNOWN');
+});
+
 test('recomputes Record identities from literal raw bodies', () => {
   assert.deepEqual(recordIdFromRawBody(Q3000_BODY, expectations), {
     typeId: '0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068',
@@ -608,6 +736,19 @@ test('separately named CLI seals profile and expectations without calling UNKNOW
     const report = JSON.parse(success.stdout);
     assert.equal(report.summary.OBSERVED_MISMATCH, 0);
     assert.equal(report.candidatePass, 'NOT_EVALUATED');
+
+    const malformedContainerPacket = basePacket();
+    malformedContainerPacket.cells['native-one/quote'].raw = {};
+    malformedContainerPacket.cells['signed-one/quote'].raw = {};
+    await writeFile(packetPath, JSON.stringify(malformedContainerPacket));
+    const malformedContainer = spawnSync(process.execPath, [
+      new URL('check-rpc-observed.mjs', import.meta.url).pathname,
+      packetPath,
+      profilePath,
+      expectationsPath,
+    ], { encoding: 'utf8', env: process.env });
+    assert.equal(malformedContainer.status, 2);
+    assert.match(malformedContainer.stderr, /MALFORMED_RPC_OBSERVED_RAW_CONTAINER:native-one/);
 
     const canonicalPacketText = JSON.stringify(basePacket());
     const duplicateKeyPacketText = canonicalPacketText.replace(

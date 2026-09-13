@@ -235,10 +235,13 @@ has raw Consumer getters but no correlatable raw `Ledger.record` returns, so
 Record absence is `UNKNOWN` in both cells even where later signed Record IDs
 are computable. The raw call tuples omit literal JSON-RPC request/response
 envelopes, IDs, methods, and per-call sources, leaving transport correlation
-`UNKNOWN`. The checker rejects duplicate JSON object keys,
-ABI-decodable trailing bytes, request/response disagreement, failed receipts, target or coordinate
-substitution against test-only independent pins, and stage-order violations.
-Its 52 synthetic tests are mutation controls, not candidate evidence. All
+`UNKNOWN`. The checker rejects malformed `cells`, expected-cell, `raw`, and
+`transactions` containers or entries; explicitly malformed call-byte fields;
+duplicate JSON object keys;
+ABI-decodable trailing bytes; request/response disagreement; failed receipts;
+target or coordinate substitution against test-only independent pins; and
+stage-order violations. Its 79 synthetic tests are mutation controls, not
+candidate evidence. All
 authenticated chain truth, source/runtime authority, exact Type semantics, and
 complete workflow effect remain `UNKNOWN` or `UNSUPPORTED`; `candidatePass` is
 always `NOT_EVALUATED`.

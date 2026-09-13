@@ -222,9 +222,19 @@ function basisResult(number, observations, basisMap) {
   });
 }
 
-function prepareRaw(raw, abiIndex) {
-  if (!Array.isArray(raw)) return [];
+function prepareRaw(raw, abiIndex, cellId) {
+  if (raw === undefined) return [];
+  if (!Array.isArray(raw)) {
+    throw new TypeError(`MALFORMED_RPC_OBSERVED_RAW_CONTAINER:${cellId}`);
+  }
   return raw.map((item, index) => {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) {
+      throw new TypeError(`MALFORMED_RPC_OBSERVED_RAW_ENTRY:${cellId}:${index}`);
+    }
+    if (item.calldata !== undefined && item.calldata !== null
+      && (typeof item.calldata !== 'string' || !HEX.test(item.calldata) || item.calldata.length % 2 !== 0)) {
+      throw new TypeError(`MALFORMED_RPC_OBSERVED_RAW_CALLDATA:${cellId}:${index}`);
+    }
     const calldata = typeof item?.calldata === 'string' && HEX.test(item.calldata) && item.calldata.length >= 10
       ? item.calldata.toLowerCase()
       : null;
@@ -246,9 +256,19 @@ function prepareRaw(raw, abiIndex) {
   });
 }
 
-function prepareTransactions(transactions, abiIndex) {
-  if (!Array.isArray(transactions)) return [];
+function prepareTransactions(transactions, abiIndex, cellId) {
+  if (transactions === undefined) return [];
+  if (!Array.isArray(transactions)) {
+    throw new TypeError(`MALFORMED_RPC_OBSERVED_TRANSACTIONS_CONTAINER:${cellId}`);
+  }
   return transactions.map((item, index) => {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) {
+      throw new TypeError(`MALFORMED_RPC_OBSERVED_TRANSACTIONS_ENTRY:${cellId}:${index}`);
+    }
+    if (item.data !== undefined && item.data !== null
+      && (typeof item.data !== 'string' || !HEX.test(item.data) || item.data.length % 2 !== 0)) {
+      throw new TypeError(`MALFORMED_RPC_OBSERVED_TRANSACTION_DATA:${cellId}:${index}`);
+    }
     const data = typeof item?.data === 'string' && HEX.test(item.data) && item.data.length >= 10
       ? item.data.toLowerCase()
       : null;
@@ -681,6 +701,14 @@ function signedWriteTupleConsistency(transactions, ledger, targets, basisMap, ex
       observedTargets: candidates.map((item) => item.to),
     });
   }
+  const missingTransactionCalldata = transactions
+    .filter((item) => item.data === null
+      && (item.raw.data === undefined || item.raw.data === null));
+  if (missingTransactionCalldata.length > 0) {
+    return outcome('UNKNOWN', 'TRANSACTION_CALLDATA_OMITTED_PREVENTS_EXACT_SIGNED_WRITE_COUNT', {
+      transactionIndexes: missingTransactionCalldata.map((item) => item.index),
+    });
+  }
 
   const transactionEvidence = candidates.map((item) => {
     let parsed;
@@ -924,8 +952,7 @@ function orderedAfter(earlier, later, label) {
 }
 
 function analyzeCell(packet, packetKey, cellId, profile, expectations, abiIndex, options) {
-  const cell = packet?.cells?.[packetKey];
-  if (!cell) {
+  if (packetKey === null) {
     const unknown = outcome('UNKNOWN', 'EXPECTED_CELL_OMITTED');
     return {
       cellId,
@@ -942,8 +969,12 @@ function analyzeCell(packet, packetKey, cellId, profile, expectations, abiIndex,
       },
     };
   }
-  const raw = prepareRaw(cell.raw, abiIndex);
-  const transactions = prepareTransactions(cell.transactions, abiIndex);
+  const cell = packet.cells[packetKey];
+  if (!cell || typeof cell !== 'object' || Array.isArray(cell)) {
+    throw new TypeError(`MALFORMED_RPC_OBSERVED_CELL:${cellId}`);
+  }
+  const raw = prepareRaw(cell.raw, abiIndex, cellId);
+  const transactions = prepareTransactions(cell.transactions, abiIndex, cellId);
   const targets = targetAnalysis(raw, transactions, options);
   const basisMap = buildBasisMap(packet, cell, raw.map((item) => item.raw));
   const consumer = abiIndex.interfaces.Consumer;
@@ -1148,6 +1179,10 @@ function statusSummary(cells) {
 
 export function analyzeRpcObserved(packet, profile, expectations, options = {}) {
   if (!packet || typeof packet !== 'object' || Array.isArray(packet)) throw new TypeError('MALFORMED_RPC_OBSERVED_PACKET');
+  if (packet.cells !== undefined
+    && (!packet.cells || typeof packet.cells !== 'object' || Array.isArray(packet.cells))) {
+    throw new TypeError('MALFORMED_RPC_OBSERVED_CELLS_CONTAINER');
+  }
   if (expectations?.assumption?.status !== 'RPC_OBSERVED') throw new TypeError('MISSING_RPC_OBSERVED_EXPECTATION');
   const abiIndex = buildAbiIndex(profile);
   const expectedCellIds = expectations.cells.map((cell) => cell.id);
