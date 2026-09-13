@@ -32,6 +32,24 @@ contract QuoteAcceptor is IAcceptor {
     }
 }
 
+/// Immutable-configuration rule (authority repair F5): accepts a body of at least `minBody` bytes.
+/// The threshold is a constructor immutable, so it is embedded in the runtime code and therefore
+/// in the codehash the Type id commits to: MinBodyAcceptor(32) and MinBodyAcceptor(96) are
+/// different rules with different ids. No storage, no external reads — a fixture-grade mandatory
+/// rule (QUOTE: 32, one uint256 word; PAIR: 96, two checked refs + one payload word). Not a
+/// proposed Type descriptor.
+contract MinBodyAcceptor is IAcceptor {
+    uint256 public immutable minBody;
+
+    constructor(uint256 minBody_) {
+        minBody = minBody_;
+    }
+
+    function accept(bytes32, bytes calldata data, bytes32[] calldata) external view returns (bool) {
+        return data.length >= minBody;
+    }
+}
+
 /// Label body = the exact UTF-8 bytes of a display name, 1..255 bytes, well-formed per the
 /// Unicode "well-formed UTF-8 byte sequences" table (no overlongs, no surrogates, max U+10FFFF).
 /// Normalization (NFC, case folding) is a client policy layered on exact bytes; it is NOT applied

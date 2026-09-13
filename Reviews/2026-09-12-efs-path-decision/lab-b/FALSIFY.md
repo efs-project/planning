@@ -49,3 +49,13 @@ Each F-test asserts the **safe** behaviour and is expected to **fail** on `e77f3
 | F2 | source authority | safe (negative holds) | none; replay-domain gap stays FUTURE |
 | F3 | Type identity | unsafe — in-place overwrite | R2 descriptor-derived `typeId`, registration refused when the id exists |
 | F4 | policy vs identity | unsafe — conflated, basis lost | R2 policy table with append-only activations; per-admission basis; `acceptanceBasis()` |
+
+## F5 — a policy activation replaces the only validator (coordinator, 07:50; found against `aaecfed`)
+
+| | |
+|---|---|
+| Tests | `test_F5a_activate_zero_must_not_remove_the_declared_rule`, `test_F5b_permissive_policy_must_not_replace_the_declared_rule` (Phase 1 text retained verbatim at [`FALSIFY.phase1-F5.t.sol.txt`](FALSIFY.phase1-F5.t.sol.txt); compiles against `aaecfed` only) |
+| Outcome on `aaecfed` | **FAIL (unsafe).** Register T with `StrictQuoteAcceptor` (cap 2.5e9); `publish(T, q(3e9))` → `E_REJECTED` (probe). `activate(T, address(0))` (F5a) or `activate(T, PermissiveAcceptor)` (F5b) → the same body is **admitted** under T: `record(id).typeId == T`, `acceptanceBasis` names row 2 and the policy acceptor; the declared rule never ran. Retaining the old admission's basis does nothing for future records: the Type's fixed meaning is not enforced. |
+| Evidence | `src/TypeRegistry.sol@aaecfed` `register` writes the declared acceptor only as policy row 1 and `activate` appends a **replacing** row; `typeInfo` returns the active row alone; `src/Ledger.sol@aaecfed` `_applyPublish` runs `if (acceptor != address(0)) _accept(...)` with that row only, so `address(0)` means "no validation". |
+| Addendum (independent review) | `LabHarness.MockAcceptor` mutates `mode`/`minBody` with an unchanged codehash — pinning its codehash pins nothing about its behaviour; at `aaecfed` it was QUOTE's and PAIR's registration-time (mandatory) rule in the fixtures and the runner. |
+| Repair | REPAIR.md "F5": mandatory rule pinned in the descriptor and always run (refusal final, `E_REJECTED`); `activate` installs an additional policy that may only add constraints (`E_POLICY_REJECTED`); `activate(0)` = no additional policy; profile folds `(typeId, ruleId, policyCodehash, epoch)`; `acceptanceBasis` records both; fixtures' mandatory rules are stateless/immutable-configured (`MinBodyAcceptor`), the mock is policy-only; the mutable-mandatory gap is demonstrated (`test_F5d_…`) and documented, not repaired. |

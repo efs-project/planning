@@ -127,11 +127,11 @@ contract LedgerImportTest is LabBase {
         (Ledger.Intent memory i2, bytes memory s2) = signed(PK_A, ledger, 1, a2);
         (uint64 p2,) = ledger.executeSigned(i2, a2, b2, s2); // accepted at the source under the current rule
         (Ledger.Intent memory d2, bytes memory ds2) = signed(PK_A, dest, 1, a2);
-        acceptor.set(1, 0); // the destination's acceptor now refuses (the pinned codehash is unchanged: same profile)
+        acceptor.set(1, 0); // the destination's POLICY acceptor (the mutable mock, row 2) now refuses (its codehash is unchanged: same profile)
         try dest.importPublication(sourceOf(ledger, p2), a2, b2, d2, ds2) {
             require(false, "x");
         } catch (bytes memory err) {
-            expectSel(err, Ledger.E_REJECTED.selector, "destination acceptance re-runs on import");
+            expectSel(err, Ledger.E_POLICY_REJECTED.selector, "destination acceptance (mandatory + policy) re-runs on import");
         }
         acceptor.set(0, 0);
     }

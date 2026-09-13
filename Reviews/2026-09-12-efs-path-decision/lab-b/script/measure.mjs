@@ -10,6 +10,9 @@
 // snapshot: policy/activate, failure/refused-re-registration, failure/unsupported-native-import (new raw stages:
 // type-resolution, policy, basis, registry-post, squat-probe). vectors/profile-b.json remains the dcc7b94 vector
 // (name-hash ids); a new declared vector is owed after a build. Payload controls and fixture bodies are unchanged.
+// F5 (mandatory rule vs additional policy): the fixtures' mandatory rules are MinBodyAcceptor(32)/(96) (immutable
+// thresholds); the mutable MockAcceptor is installed as QUOTE's/PAIR's ADDITIONAL policy (row 2) at setup, so its
+// refusals are E_POLICY_REJECTED; policy/activate also carries the in-cell strict Type and an above-cap body.
 //
 // HONESTY: this run reports receipt diagnostics with explicit remaining gates. It is not a
 // same-guarantee comparison and not the protocol's capability ablation. No row here is a matched
@@ -45,7 +48,8 @@
 //   FOUNDRY_OUT=<scratch>/out node script/measure.mjs --rpc URL --deploy
 //   FOUNDRY_OUT=<scratch>/out node script/measure.mjs --rpc URL --addresses <scratch>/lab-addresses.json
 // Options: --out <file.json> (default <scratch>/measure.json)  --mnemonic "<12 words>"  --skip-without-index
-//          --only <substring> (run only cells whose name contains it; for repair cycles)
+//          --cells <exact,comma,separated,cell,keys> (bounded run; unknown keys or an empty selection FAIL before any chain starts)
+//          --only <substring> (legacy filter; resolved against the same plan and validated the same way)
 // Env: FOUNDRY_OUT (artifacts; fallback ./out, read-only), EFS_LAB_SCRATCH (run-owned root; default: parent
 // of FOUNDRY_OUT, else the manifest's scratch path), EFS_ETHERS_PATH.
 import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, renameSync } from 'node:fs';
@@ -89,6 +93,7 @@ const CAVEAT_MATCHED = 'No row is a matched substitute for the fuller Files cont
 const CAVEAT_EXPECTED = 'Expected values, commitments and read-back comparisons are computed by this script from the fixture (candidate-side self-checks); they are not the independent oracle.';
 const CAVEAT_NATIVE_IMPORT = 'Native-source (contract-author) import is UNSUPPORTED after the authority repair (Ledger.importPublication reverts E_SOURCE_UNSUPPORTED for src.v == 0): sdk-fixture step 9 for AUTHOR_B reports UNSUPPORTED, not success. A limit until a verifiable source witness exists, not a waiver.';
 const CAVEAT_VECTOR = 'vectors/profile-b.json remains the dcc7b94 vector (name-hash Type ids). Type ids in this run are DERIVED (report.types: receipt log, typeIdOf raw reply and local Keys.typeId derivation agree); actionsHash / acceptanceProfile / digest for the same fixture therefore differ from that vector, and a new declared vector is owed after a build.';
+const CAVEAT_MANDATORY = 'F5 (REPAIR.md): a Type\'s registration-time acceptor is its MANDATORY rule — it runs on every publish/reuse, its refusal (E_REJECTED) is final, and no activation can remove or replace it; activate() installs an ADDITIONAL policy acceptor (E_POLICY_REJECTED), activate(0) = no additional policy. A codehash pins the rule\'s CODE, not its mutable dependencies: every mandatory fixture rule is stateless or immutable-configured (MinBodyAcceptor, QuoteAcceptor, LabelAcceptor, StrictQuoteAcceptor); the mutable MockAcceptor is only ever an additional policy here. Stateful developer rules remain allowed in production when their dependency/basis semantics are explicit; nothing here proves statelessness.';
 
 // ---------------------------------------------------------------- exact payload controls (run-manifest.md)
 const FIX = {
@@ -131,14 +136,17 @@ const SHAPE = { QUOTE: DOM('lab/type/quote/1'), BINARY: DOM('lab/type/binary/1')
 const TYPE_KEYS = Object.keys(SHAPE);
 const T = new Proxy({}, { get(o, k) { if (TYPE_KEYS.includes(k) && !(k in o)) throw new Error(`Type id T.${k} read before registration/resolution`); return o[k]; } });
 // registration plan, in order (a reference Type must be resolved before the Type that references it): [key, acceptor deployment key, ref keys, note]
+// The acceptor here is the Type's MANDATORY rule (F5): stateless or immutable-configured only. The mutable MockAcceptor is
+// installed afterwards as the ADDITIONAL policy (row 2) of QUOTE and PAIR through TypeRegistry.activate (see deployAll).
 const TYPE_PLAN = [
-  ['QUOTE', 'acceptor', [], 'MockAcceptor mode 0'],
+  ['QUOTE', 'quoteRule', [], 'mandatory MinBodyAcceptor(32): immutable threshold, part of the id'],
   ['BINARY', null, [], 'no acceptor'],
   ['ITEM', null, [], 'no acceptor'],
-  ['PAIR', 'acceptor', ['ITEM', 'ITEM'], 'MockAcceptor; refs [ITEM, ITEM]'],
+  ['PAIR', 'pairRule', ['ITEM', 'ITEM'], 'mandatory MinBodyAcceptor(96); refs [ITEM, ITEM]'],
   ['QUOTE_J', 'quoteAcceptor', ['PAIR'], 'QuoteAcceptor: 160-byte shape, scale 6, bounds; refs [PAIR]'],
   ['LABEL', 'labelAcceptor', [], 'LabelAcceptor: exact UTF-8, 1..255 bytes; no refs'],
 ];
+const SHAPE_STRICT = DOM('lab/type/quote-strict/1'); // in-cell Type of policy/activate: StrictQuoteAcceptor as its MANDATORY rule
 // byte-for-byte Keys.typeId: keccak256(abi.encode(DOM_TYPE, shape, keccak256(abi.encode(refTypes)), ruleId)); ruleId = acceptor runtime codehash (0 = none)
 const DOM_TYPE = DOM('efs2/type/1');
 const typeIdLocal = (shape, refTypeIds, ruleId) => keccak256(coder.encode(['bytes32', 'bytes32', 'bytes32', 'bytes32'], [DOM_TYPE, shape, keccak256(coder.encode(['bytes32[]'], [refTypeIds])), ruleId]));
@@ -184,7 +192,8 @@ const ART_SOURCE = {
   Ledger: 'Ledger', IndexModule: 'IndexModule', LensReader: 'LensReader', TypeRegistry: 'TypeRegistry',
   MockAcceptor: 'LabHarness', FailingIndexModule: 'LabHarness', Actor: 'LabHarness', Consumer: 'LabHarness', Reconstructor: 'LabHarness',
   QuoteAcceptor: 'LabAcceptors', LabelAcceptor: 'LabAcceptors', JoinedConsumer: 'JoinedConsumer', StatelessConsumer: 'JoinedConsumer',
-  StrictQuoteAcceptor: 'Falsify.t', // fixture rule v2 (32-byte quote, mantissa <= 2_500_000_000) from test/Falsify.t.sol: the second QUOTE acceptor of cell policy/activate
+  StrictQuoteAcceptor: 'Falsify.t', // fixture rule v2 (32-byte quote, value <= 2_500_000_000) from test/Falsify.t.sol: the ADDITIONAL QUOTE policy of cell policy/activate, and the MANDATORY rule of that cell's in-cell strict Type
+  MinBodyAcceptor: 'LabAcceptors', // immutable-configuration mandatory rules of the fixtures: MinBodyAcceptor(32) for QUOTE, MinBodyAcceptor(96) for PAIR (F5 addendum: the mutable MockAcceptor is never a mandatory rule)
 };
 const ART = {};
 const IFACES = {};
@@ -267,6 +276,8 @@ function makeCtx(run) {
     rpc, url: run.rpc, chainId: run.chainId, source: run.source, wallets, deployer: wallets[0], addrs: run.addrs ?? {},
     txs: [], raw: [], baselineRaw: [], blocks: [], rpcOther: [], rowLog: [], consumerChecks: [], mismatches: 0,
     persist: null, gasPrice: null, blockCache: new Map(), nonceCache: new Map(),
+    // runtime codehashes of the contracts deployed by this run (null in --addresses mode): lets a cell compare a registry-reported codehash with the deployment record
+    codehashes: run.report?.deployment ? Object.fromEntries(Object.entries(run.report.deployment).map(([k, v]) => [k, v.runtimeCodehash])) : null,
   };
   ctx.other = async (method, params, opts) => { const e = await rpc(method, params, opts); ctx.rpcOther.push(envOf(e)); return e; };
   ctx.blockHeader = async (n) => {
@@ -298,11 +309,14 @@ function makeCtx(run) {
 const call = (ctx, nameOf, key, fn, fnArgs) => ({ to: ctx.addrs[key], data: iface(nameOf).encodeFunctionData(fn, fnArgs), contract: nameOf, fn, args: fnArgs });
 
 // ---------------------------------------------------------------- raw observations: literal eth_call envelopes
-async function observeRaw(ctx, sink, stage, meta, to, data, blockNumber, { allowError = false } = {}) {
+// `from` (runner review 1): a static probe of a caller-sensitive call (registry admin, msg.sender == author) must be simulated
+// FROM the account that will actually send the transaction; it is retained in the envelope (params[0] = {from, to, data}).
+async function observeRaw(ctx, sink, stage, meta, to, data, blockNumber, { allowError = false, from = null } = {}) {
   const blockHash = await ctx.blockHash(blockNumber);
-  const e = await ctx.rpc('eth_call', [{ to, data }, qty(blockNumber)], { label: `${stage}:${meta.contract}.${meta.fn}`, allowError });
+  const callObject = from ? { from, to, data } : { to, data };
+  const e = await ctx.rpc('eth_call', [callObject, qty(blockNumber)], { label: `${stage}:${meta.contract}.${meta.fn}`, allowError });
   const obs = {
-    rpcId: e.request.id, method: 'eth_call', source: ctx.source, stage, contract: meta.contract, to, fn: meta.fn, args: meta.args ?? [],
+    rpcId: e.request.id, method: 'eth_call', source: ctx.source, stage, contract: meta.contract, from, to, fn: meta.fn, args: meta.args ?? [],
     blockTag: Number(blockNumber), blockHash, calldata: data, returnData: e.response.result ?? null, error: e.response.error ?? null,
     request: e.request, response: e.response, ms: e.ms,
   };
@@ -450,7 +464,16 @@ async function harvest(ctx, stage, touched, blockNumber) {
   }
   for (const ord of [...adms].sort((a, b) => a - b)) {
     const a = await ob('Ledger', 'ledger', 'admission', [ord]);
-    h.admissions[ord] = { kind: str(a[0]), leaf: str(a[1]), publication: str(a[2]), bindingOrdinal: str(a[3]), expectedRevision: str(a[4]), withdrawn: a[5], a: a[6], b: a[7], present: a[0] !== 0n };
+    const row = { kind: str(a[0]), leaf: str(a[1]), publication: str(a[2]), bindingOrdinal: str(a[3]), expectedRevision: str(a[4]), withdrawn: a[5], a: a[6], b: a[7], present: a[0] !== 0n };
+    // runner review 3: for every present publish/reuse admission retain Type id <-> policy row <-> codehash <-> epoch as
+    // raw replies (acceptanceBasis and the registry's activation row it names) so a checker can join them without trusting us
+    if (row.present && (a[0] === 1n || a[0] === 2n)) {
+      row.basis = basisOf(await ob('Ledger', 'ledger', 'acceptanceBasis', [ord]));
+      row.policyRow = activationOf(await ob('TypeRegistry', 'registry', 'activation', [row.basis.typeId, Number(row.basis.activation)]));
+      row.join = joinBasis(row.basis, row.policyRow);
+      assert.equal(row.join.ok, true, `${stage}: admission ${ord} basis does not join its policy row: ${JSON.stringify(row.join)}`);
+    }
+    h.admissions[ord] = row;
   }
   for (const s of new Set(touched.subjects)) h.subjects[s] = str((await ob('Ledger', 'ledger', 'subjectCreatedAt', [s]))[0]);
   for (const k of new Set(touched.bindingKeys)) {
@@ -506,7 +529,7 @@ const stripBlock = (probe) => { const { blockTag, ...rest } = probe; return rest
 
 // ---------------------------------------------------------------- sealed cells
 async function sealedCell(run, label, cell) {
-  if (ONLY && !label.includes(ONLY)) { log(`cell ${label}: skipped (--only ${ONLY})`); run.report.skippedCells.push(label); return null; }
+  // selection is decided by selectCells() before the chain starts; a cell reaching here is planned
   const ctx = makeCtx(run);
   log(`cell ${label}: evm_revert to ${run.sealed}`);
   const rev = await ctx.other('evm_revert', [run.sealed], { label: `${label}: evm_revert` });
@@ -614,28 +637,40 @@ async function commitmentCheck(ctx, row, nameOf, key, expected) {
   log(`  chk  ${check.label}: ${match ? 'match' : 'MISMATCH ' + JSON.stringify({ exp, fromLog, fromReplay })}`);
   return check;
 }
-// A failure row: capture the revert selector with a static eth_call (retained), mine the reverting
-// transaction, and prove the state probe is unchanged across it.
-async function failureRow(ctx, label, c, expectedError, probe) {
+// A failure row: capture the revert selector (and, when `args` is given, the decoded revert ARGUMENTS) with a static
+// eth_call simulated FROM the actual transaction sender (retained), mine the reverting transaction from that same
+// sender, and prove the state probe is unchanged across it. (runner review 1 and 2)
+async function failureRow(ctx, label, c, expectedError, probe, { wallet = ctx.deployer, args = null } = {}) {
   const [errContract, errName] = Array.isArray(expectedError) ? expectedError : ['Ledger', expectedError];
+  const from = wallet.address;
   const preBlock = await ctx.latestBlock();
   const pre = await stateProbe(ctx, `failure-pre:${label}`, probe, preBlock);
   const expectedSelector = errorSelector(errContract, errName);
-  log(`  row  ${label}: static call for the revert selector`);
-  const st = await observeRaw(ctx, ctx.raw, `failure-static:${label}`, c, c.to, c.data, preBlock, { allowError: true });
+  log(`  row  ${label}: static call for the revert selector (from ${from})`);
+  const st = await observeRaw(ctx, ctx.raw, `failure-static:${label}`, c, c.to, c.data, preBlock, { allowError: true, from });
   let observedSelector = 'no-revert';
   let observedData = null;
   if (st.error) {
     observedData = typeof st.error.data === 'string' ? st.error.data : (st.error.data?.data ?? JSON.stringify(st.error.data ?? null));
     observedSelector = typeof observedData === 'string' && observedData.startsWith('0x') ? observedData.slice(0, 10) : String(observedData);
   }
-  const row = await send(ctx, () => c, label, { expectFail: true, gasLimit: FAIL_GAS });
+  const row = await send(ctx, () => c, label, { expectFail: true, gasLimit: FAIL_GAS, wallet });
   const post = await stateProbe(ctx, `failure-post:${label}`, probe, row.block);
   const unchanged = JSON.stringify(stripBlock(pre)) === JSON.stringify(stripBlock(post));
   assert(expectedSelector, `${label}: expected selector unavailable for ${errContract}.${errName}`);
   assert.equal(observedSelector, expectedSelector, `${label}: revert selector mismatch for ${errContract}.${errName}`);
   assert.equal(unchanged, true, `${label}: state changed across expected revert`);
-  return { ...row, expectedError: `${errContract}.${errName}`, expectedSelector, observedSelector, observedRevertData: observedData, selectorMatch: true, stateUnchanged: true, standing: 'selector from a retained static eth_call; the mined receipt establishes reversion, not the selector', pre, post };
+  const normArg = (v) => (typeof v === 'bigint' ? v.toString() : typeof v === 'number' ? String(v) : String(v).toLowerCase());
+  let decodedArgs = null;
+  let expectedArgs = null;
+  if (args) {
+    expectedArgs = args.map(normArg);
+    const parsed = typeof observedData === 'string' && observedData.startsWith('0x') ? iface(errContract).parseError(observedData) : null;
+    assert(parsed && parsed.name === errName, `${label}: revert data does not decode as ${errContract}.${errName}`);
+    decodedArgs = Array.from(parsed.args, normArg);
+    assert.deepEqual(decodedArgs, expectedArgs, `${label}: revert arguments mismatch for ${errContract}.${errName}`);
+  }
+  return { ...row, from, expectedError: `${errContract}.${errName}`, expectedSelector, observedSelector, observedRevertData: observedData, expectedArgs, decodedArgs, selectorMatch: true, argsMatch: args ? true : null, stateUnchanged: true, standing: 'selector (and arguments when expectedArgs is set) from a retained static eth_call simulated from the actual transaction sender; the mined receipt establishes reversion, not the selector', pre, post };
 }
 const baseCount = (ctx, k) => { assert(ctx.baselineCounts && ctx.baselineCounts[k] !== undefined, `${ctx.cellLabel}: baseline counts missing (${k}); the sealed baseline harvest must precede the body`); return Number(ctx.baselineCounts[k]); };
 const baseNonce = (ctx, addr) => { assert(ctx.baselineNonces && ctx.baselineNonces[addr] !== undefined, `${ctx.cellLabel}: baseline nonce missing for ${addr}`); return Number(ctx.baselineNonces[addr]); };
@@ -838,7 +873,7 @@ const failureCell = {
     rows.push(await send(ctx, pubA('bind', [P.HEAD, name('x'), ZERO, ids[0], 0]), 'failure/setup: bind (revision becomes 1)'));
     rows.push(await failureRow(ctx, 'failure/stale-CAS (expected 0, head is 1)', call(ctx, 'Actor', 'actorA', 'bind', [P.HEAD, name('x'), ZERO, ids[0], 0]), 'E_CAS', probe));
     rows.push(await send(ctx, () => call(ctx, 'MockAcceptor', 'acceptor', 'set', [1, 0]), 'failure/setup: acceptor rejects'));
-    rows.push(await failureRow(ctx, 'failure/failed-acceptance (whole publication reverts)', call(ctx, 'Actor', 'actorA', 'publish', [T.QUOTE, zeroPadValue(toBeHex(5n), 32)]), 'E_REJECTED', probe));
+    rows.push(await failureRow(ctx, 'failure/failed-acceptance (the mock is QUOTE\'s ADDITIONAL policy, row 2: E_POLICY_REJECTED; whole publication reverts)', call(ctx, 'Actor', 'actorA', 'publish', [T.QUOTE, zeroPadValue(toBeHex(5n), 32)]), 'E_POLICY_REJECTED', probe));
     rows.push(await send(ctx, () => call(ctx, 'MockAcceptor', 'acceptor', 'set', [0, 0]), 'failure/setup: acceptor accepts'));
     rows.push(await send(ctx, () => call(ctx, 'Ledger', 'ledger', 'setIndexModule', [ctx.addrs.failingIndex]), 'failure/setup: attach the always-refusing index module'));
     rows.push(await failureRow(ctx, 'failure/failed-mandatory-index (whole publication reverts)', call(ctx, 'Actor', 'actorA', 'publish', [T.QUOTE, zeroPadValue(toBeHex(6n), 32)]), 'E_INDEX', probe));
@@ -1006,62 +1041,141 @@ function labelCell(variant) {
 // ---------------------------------------------------------------- authority-repair cells (REPAIR.md), each its own sealed cell from the same snapshot
 const lc = (v) => String(v).toLowerCase();
 const NO_PROBE_FOLDER = name('/none');
-// policy/activate: activate a second acceptor (fixture rule v2) for QUOTE after an admission; a signature made under the
-// old epoch is refused (status 0, selector recorded); a re-signed new-epoch publish succeeds; acceptanceBasis of both admissions retained
+// decoders of the F5-shaped registry/ledger views (candidate-side; the raw replies are what the checker interprets)
+const typeInfoOf = (i) => ({ registered: i[0], mandatoryAcceptor: i[1], ruleId: i[2], policyAcceptor: i[3], policyCodehash: i[4], refCount: str(i[5]), activation: str(i[6]) });
+const descriptorOf = (d) => ({ shape: d[0], ruleId: d[1], mandatoryAcceptor: d[2], refCount: str(d[3]), activations: str(d[4]), registeredAt: str(d[5]) });
+const immutableOf = (desc) => { const { activations, ...rest } = desc; return rest; }; // the complete immutable descriptor (everything but the policy-row count)
+const activationOf = (r) => ({ acceptor: r[0], codehash: r[1], epoch: str(r[2]), activatedAt: str(r[3]) });
+const basisOf = (b) => ({ typeId: b[0], activation: str(b[1]), mandatoryAcceptor: b[2], ruleId: b[3], policyAcceptor: b[4], policyCodehash: b[5], epoch: str(b[6]), activatedAt: str(b[7]) });
+// join an admission's acceptanceBasis with the registry activation row it names (key: typeId + activation index):
+// the policy acceptor, its codehash and the epoch must agree — the checker can redo this from the raw replies
+function joinBasis(basis, policyRow) {
+  const lower = (v) => String(v).toLowerCase();
+  const acceptorEqual = lower(basis.policyAcceptor) === lower(policyRow.acceptor);
+  const codehashEqual = lower(basis.policyCodehash) === lower(policyRow.codehash);
+  const epochEqual = String(basis.epoch) === String(policyRow.epoch);
+  return { typeId: basis.typeId, activation: String(basis.activation), acceptorEqual, codehashEqual, epochEqual, ok: acceptorEqual && codehashEqual && epochEqual };
+}
+const QUOTE_HIGH = zeroPadValue(toBeHex(3_000_000_000n), 32); // uint256 3_000_000_000: ABOVE StrictQuoteAcceptor's cap. NOT a payload control (those are quote3000 = uint256 3000 and quote3100 = uint256 3100, both below the cap); published only to show a rejected body
+// policy/activate (F5 shape): QUOTE's MANDATORY rule is MinBodyAcceptor(32) and its policy row 2 is the accept-all mock.
+// StrictQuoteAcceptor is ADDED as policy row 3 after an admission; a signature made under the old epoch is refused; an
+// above-cap body is refused by the added policy (E_POLICY_REJECTED) while the re-signed below-cap control succeeds;
+// acceptanceBasis is joined with typeInfo and the activation rows by Type, codehash and epoch. Then an in-cell strict
+// Type (StrictQuoteAcceptor as its MANDATORY rule) shows the rejected body stays rejected after activate(0) and under a
+// permissive policy, and a compliant body is admitted with both bases recorded.
 const policyCell = {
-  standing: 'policy activation (REPAIR.md R2): Type identity untouched, registry policy row appended; receipt-bound rule activation (E.B.4) with the admitting basis recorded per admission',
+  standing: 'policy activation (REPAIR.md R2 + F5): mandatory rule always runs; policy rows only add constraints; receipt-bound activation (E.B.4); bases joined to the registry rows by Type, codehash and epoch',
   plan: async (ctx, a, block) => {
     const rOld = recordId(T.QUOTE, FIX.quote3000.bytes); const rNew = recordId(T.QUOTE, FIX.quote3100.bytes);
     const pidA = await principalOf(ctx, a.signedA.address, block, true);
+    const pidOp = await principalOf(ctx, a.nativeA.address, block, true);
     const touched = emptyTouched();
-    touched.records.push(rOld, rNew); touched.lists.push(byTypeList(T.QUOTE), byAuthorList(pidA));
-    touched.plannedPublications = 2; touched.plannedAdmissions = 2;
+    touched.records.push(rOld, rNew); touched.lists.push(byTypeList(T.QUOTE), byAuthorList(pidA), byAuthorList(pidOp));
+    touched.plannedPublications = 3; touched.plannedAdmissions = 3;
     // registry state at the sealed baseline (baselineRaw, stage baseline)
-    const info0 = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'typeInfo', [T.QUOTE], block);
-    const desc0 = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], block);
+    const info0 = typeInfoOf(await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'typeInfo', [T.QUOTE], block));
+    const desc0 = descriptorOf(await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], block));
     const [epoch0] = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'epoch', [], block);
-    const registry0 = { activeAcceptor: info0[1], activeCodehash: info0[2], refCount: str(info0[3]), activation: str(info0[4]), shape: desc0[0], ruleId: desc0[1], activations: str(desc0[3]), epoch: str(epoch0) };
-    return { authors: [a.signedA, null], touched, rOld, rNew, registry0, summary: { typeId: T.QUOTE, oldAcceptor: ctx.addrs.acceptor, newAcceptor: ctx.addrs.strictAcceptor, rOld, rNew, registryAtBaseline: registry0, shape: 'signed publish quote3000 (row 1) -> sign quote3100 at epoch N and hold -> activate(QUOTE, StrictQuoteAcceptor) -> send the held signature (E_INTENT) -> re-sign and publish quote3100 (row 2) -> acceptanceBasis of both admissions' } };
+    const registry0 = { typeInfo: info0, descriptor: desc0, epoch: str(epoch0) };
+    return {
+      authors: [a.signedA, a.nativeA], touched, rOld, rNew, registry0,
+      summary: {
+        typeId: T.QUOTE, mandatoryRule: ctx.addrs.quoteRule, policyBefore: ctx.addrs.acceptor, policyAfter: ctx.addrs.strictAcceptor, rOld, rNew, registryAtBaseline: registry0,
+        payloadControls: { quote3000: 'uint256 3000 (below StrictQuoteAcceptor\'s cap 2_500_000_000): admitted under policy row 2 before the activation', quote3100: 'uint256 3100 (below the cap): admitted under policy row 3 after re-signing' },
+        aboveCapBody: { bytes: QUOTE_HIGH, value: '3000000000', standing: 'NOT a payload control; published only to show E_POLICY_REJECTED under QUOTE (mandatory rule accepts, added policy refuses) and E_REJECTED under the in-cell strict Type (mandatory rule refuses; activate(0) and a permissive policy change nothing)' },
+        shape: 'signed publish quote3000 (row 2) -> sign quote3100 at epoch N and hold -> activate(QUOTE, StrictQuoteAcceptor) = row 3 -> held signature: E_INTENT -> above-cap body: E_POLICY_REJECTED -> re-signed quote3100 admitted (row 3) -> acceptanceBasis joins -> in-cell strict Type: E_REJECTED before, after activate(0), and under the permissive mock; compliant quote3000 admitted with both bases',
+      },
+    };
   },
   body: async (ctx, a, plan) => {
-    const { rOld, rNew, registry0 } = plan;
+    const { rOld, rNew, registry0: R } = plan;
     const rows = [];
     const adm0 = baseCount(ctx, 'admissions'); const pub0 = baseCount(ctx, 'publications');
-    assert.equal(lc(registry0.activeAcceptor), lc(ctx.addrs.acceptor), 'policy/activate: QUOTE must start under MockAcceptor (row 1)');
-    assert.equal(registry0.activation, '1', 'policy/activate: QUOTE must start at activation 1');
-    rows.push(await send(ctx, () => a.signedA.build([aPublish(T.QUOTE, FIX.quote3000.bytes)], [FIX.quote3000.bytes]), 'policy/activate/setup: signed publish quote3000 under policy row 1 (epoch N)'));
+    const probe = [[a.signedA, a.nativeA], T.QUOTE, NO_PROBE_FOLDER];
+    assert.equal(lc(R.typeInfo.mandatoryAcceptor), lc(ctx.addrs.quoteRule), 'policy/activate: QUOTE mandatory rule must be MinBodyAcceptor(32)');
+    assert.equal(lc(R.typeInfo.policyAcceptor), lc(ctx.addrs.acceptor), 'policy/activate: QUOTE policy row 2 must be the mock');
+    assert.equal(R.typeInfo.activation, '2', 'policy/activate: QUOTE must start at activation 2');
+    assert.equal(lc(R.descriptor.ruleId), lc(R.typeInfo.ruleId), 'policy/activate: descriptor.ruleId == typeInfo.ruleId');
+    assert.equal(lc(R.descriptor.mandatoryAcceptor), lc(R.typeInfo.mandatoryAcceptor), 'policy/activate: descriptor.mandatoryAcceptor == typeInfo.mandatoryAcceptor');
+    if (ctx.codehashes) assert.equal(lc(R.typeInfo.ruleId), lc(ctx.codehashes.quoteRule), 'policy/activate: ruleId == deployed MinBodyAcceptor(32) runtime codehash');
+    rows.push(await send(ctx, () => a.signedA.build([aPublish(T.QUOTE, FIX.quote3000.bytes)], [FIX.quote3000.bytes]), 'policy/activate/setup: signed publish quote3000 (payload control, uint256 3000, below the cap) under mandatory rule + policy row 2 (epoch N)'));
     plan.touched.publications.push(pub0 + 1);
     const held = await signedCall(ctx, ctx.wallets[1], [aPublish(T.QUOTE, FIX.quote3100.bytes)], [FIX.quote3100.bytes]); // signed at epoch N, deliberately held back
     rows.push({ label: 'policy/activate/held-signature (signed at epoch N, not yet sent)', status: 'signed-not-sent', intent: held.intent, signInputsBlock: held.signInputsBlock, standing: 'sign-inputs raw replies retained at signInputsBlock; the signature is sent only after the activation below' });
-    rows.push(await send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'activate', [T.QUOTE, ctx.addrs.strictAcceptor]), 'policy/activate/activate (StrictQuoteAcceptor becomes QUOTE policy row 2; the Type id and descriptor are untouched)', { extra: { standing: 'ESTIMATED 2 fresh slots (activation row) + 1 rewrite (activations) + epoch rewrite; see REPAIR.md cost table' } }));
+    rows.push(await send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'activate', [T.QUOTE, ctx.addrs.strictAcceptor]), 'policy/activate/activate (StrictQuoteAcceptor ADDED as QUOTE policy row 3; the mandatory rule, id and descriptor are untouched)', { extra: { standing: 'ESTIMATED 2 fresh slots (activation row) + 1 rewrite (activations) + epoch rewrite; every later QUOTE admission pays one extra bounded STATICCALL for the policy (ESTIMATED); see REPAIR.md cost table' } }));
     const after = await ctx.latestBlock();
-    const info1 = await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'typeInfo', [T.QUOTE], after);
-    const desc1 = await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], after);
+    const info1 = typeInfoOf(await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'typeInfo', [T.QUOTE], after));
+    const desc1 = descriptorOf(await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], after));
     const [epoch1] = await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'epoch', [], after);
-    const row1 = await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'activation', [T.QUOTE, 1], after);
-    const row2 = await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'activation', [T.QUOTE, 2], after);
-    assert.equal(lc(info1[1]), lc(ctx.addrs.strictAcceptor), 'policy/activate: StrictQuoteAcceptor must be the active policy');
-    assert.equal(str(info1[4]), '2', 'policy/activate: activation index must be 2');
-    assert.equal(desc1[0], registry0.shape, 'policy/activate: shape must be untouched');
-    assert.equal(desc1[1], registry0.ruleId, 'policy/activate: declared rule id must be untouched');
-    assert.equal(str(epoch1), String(BigInt(registry0.epoch) + 1n), 'policy/activate: epoch must move by exactly one');
-    assert.equal(lc(row1[0]), lc(ctx.addrs.acceptor), 'policy/activate: row 1 must still name MockAcceptor');
-    assert.equal(lc(row2[0]), lc(ctx.addrs.strictAcceptor), 'policy/activate: row 2 must name StrictQuoteAcceptor');
-    rows.push({ label: 'policy/activate/registry-after', standing: 'retained raw replies (stage policy) at the block of the activation', typeInfo: { activeAcceptor: info1[1], activeCodehash: info1[2], activation: str(info1[4]) }, descriptor: { shape: desc1[0], ruleId: desc1[1], refCount: str(desc1[2]), activations: str(desc1[3]) }, epoch: str(epoch1), activationRows: { 1: { acceptor: row1[0], codehash: row1[1], epoch: str(row1[2]) }, 2: { acceptor: row2[0], codehash: row2[1], epoch: str(row2[2]) } }, identityUnchanged: true });
-    rows.push(await failureRow(ctx, 'policy/activate/stale-signature (signed under epoch N, sent after activation N+1: E_INTENT, no write)', held, 'E_INTENT', [[a.signedA], T.QUOTE, NO_PROBE_FOLDER]));
-    rows.push(await send(ctx, () => a.signedA.build([aPublish(T.QUOTE, FIX.quote3100.bytes)], [FIX.quote3100.bytes]), 'policy/activate/new-epoch-publish (re-signed under epoch N+1; admitted under policy row 2)'));
+    const act = {};
+    for (const i of [1, 2, 3]) act[i] = activationOf(await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'activation', [T.QUOTE, i], after));
+    // joins: active typeInfo <-> activation row 3 <-> deployment codehash; complete immutable descriptor unchanged
+    assert.equal(lc(info1.mandatoryAcceptor), lc(ctx.addrs.quoteRule), 'policy/activate: the mandatory rule is untouched');
+    assert.equal(lc(info1.ruleId), lc(R.typeInfo.ruleId), 'policy/activate: ruleId is untouched');
+    assert.equal(lc(info1.policyAcceptor), lc(ctx.addrs.strictAcceptor), 'policy/activate: StrictQuoteAcceptor must be the active policy');
+    assert.equal(info1.activation, '3', 'policy/activate: activation index must be 3');
+    assert.equal(lc(info1.policyCodehash), lc(act[3].codehash), 'policy/activate: active policy codehash == activation row 3 codehash');
+    if (ctx.codehashes) assert.equal(lc(info1.policyCodehash), lc(ctx.codehashes.strictAcceptor), 'policy/activate: policy codehash == deployed StrictQuoteAcceptor runtime codehash');
+    assert.deepEqual(immutableOf(desc1), immutableOf(R.descriptor), 'policy/activate: the complete immutable descriptor (shape, ruleId, mandatoryAcceptor, refCount, registeredAt) must be unchanged');
+    assert.equal(desc1.activations, '3', 'policy/activate: descriptor.activations == 3');
+    assert.equal(str(epoch1), String(BigInt(R.epoch) + 1n), 'policy/activate: epoch must move by exactly one');
+    assert.equal(act[3].epoch, str(epoch1), 'policy/activate: row 3 records the new epoch');
+    assert.equal(lc(act[1].acceptor), lc(ZERO_ADDR), 'policy/activate: row 1 = no additional policy');
+    assert.equal(lc(act[2].acceptor), lc(ctx.addrs.acceptor), 'policy/activate: row 2 = the mock');
+    assert.equal(lc(act[2].codehash), lc(R.typeInfo.policyCodehash), 'policy/activate: row 2 codehash == baseline active policy codehash');
+    rows.push({ label: 'policy/activate/registry-after', standing: 'retained raw replies (stage policy) at the block of the activation; joins asserted: typeInfo.policyCodehash == activation(3).codehash (== deployed runtime codehash when deployed here); immutable descriptor deep-equal to the baseline', typeInfo: info1, descriptor: desc1, epoch: str(epoch1), activationRows: act, immutableDescriptorUnchanged: true });
+    rows.push(await failureRow(ctx, 'policy/activate/stale-signature (signed under epoch N, sent after activation N+1: E_INTENT(3), no write)', held, 'E_INTENT', probe, { args: [3] }));
+    rows.push(await failureRow(ctx, 'policy/activate/policy-adds-a-constraint (above-cap body uint256 3_000_000_000: the mandatory rule accepts, the ADDED policy refuses: E_POLICY_REJECTED(0, QUOTE))', call(ctx, 'Actor', 'actorA', 'publish', [T.QUOTE, QUOTE_HIGH]), 'E_POLICY_REJECTED', probe, { args: [0, T.QUOTE] }));
+    rows.push(await send(ctx, () => a.signedA.build([aPublish(T.QUOTE, FIX.quote3100.bytes)], [FIX.quote3100.bytes]), 'policy/activate/new-epoch-publish (quote3100, payload control, below the cap; re-signed under epoch N+1; admitted under mandatory rule + policy row 3)'));
     plan.touched.publications.push(pub0 + 2);
     const last = await ctx.latestBlock();
-    const bOld = await observe(ctx, ctx.raw, 'basis', 'Ledger', 'ledger', 'acceptanceBasis', [adm0 + 1], last);
-    const bNew = await observe(ctx, ctx.raw, 'basis', 'Ledger', 'ledger', 'acceptanceBasis', [adm0 + 2], last);
-    assert.equal(lc(bOld[0]), lc(T.QUOTE), 'basis old: typeId');
-    assert.equal(str(bOld[1]), '1', 'basis old: the epoch-N admission must report policy row 1, not today\'s row');
-    assert.equal(lc(bOld[2]), lc(ctx.addrs.acceptor), 'basis old: MockAcceptor');
-    assert.equal(lc(bOld[3]), lc(registry0.activeCodehash), 'basis old: MockAcceptor codehash');
-    assert.equal(str(bNew[1]), '2', 'basis new: the epoch-N+1 admission must report policy row 2');
-    assert.equal(lc(bNew[2]), lc(ctx.addrs.strictAcceptor), 'basis new: StrictQuoteAcceptor');
-    const basisOf = (b) => ({ typeId: b[0], activation: str(b[1]), acceptor: b[2], acceptorCodehash: b[3], epoch: str(b[4]), activatedAt: str(b[5]) });
-    rows.push({ label: 'policy/activate/acceptance-basis', standing: 'retained raw replies (stage basis) of Ledger.acceptanceBasis for both admissions at the last block: the old admission keeps row 1 while today\'s policy is row 2', oldAdmission: { ordinal: adm0 + 1, recordId: rOld, basis: basisOf(bOld) }, newAdmission: { ordinal: adm0 + 2, recordId: rNew, basis: basisOf(bNew) } });
+    const bOld = basisOf(await observe(ctx, ctx.raw, 'basis', 'Ledger', 'ledger', 'acceptanceBasis', [adm0 + 1], last));
+    const bNew = basisOf(await observe(ctx, ctx.raw, 'basis', 'Ledger', 'ledger', 'acceptanceBasis', [adm0 + 2], last));
+    // joins: each admission's basis <-> the registry rows, by Type, codehash and epoch
+    assert.equal(lc(bOld.typeId), lc(T.QUOTE), 'basis old: typeId');
+    assert.equal(bOld.activation, '2', 'basis old: the epoch-N admission must report policy row 2, not today\'s row');
+    assert.equal(lc(bOld.mandatoryAcceptor), lc(ctx.addrs.quoteRule), 'basis old: mandatory rule');
+    assert.equal(lc(bOld.ruleId), lc(desc1.ruleId), 'basis old: ruleId == descriptor.ruleId');
+    assert.equal(lc(bOld.policyAcceptor), lc(act[2].acceptor), 'basis old: policy acceptor == row 2');
+    assert.equal(lc(bOld.policyCodehash), lc(act[2].codehash), 'basis old: policy codehash == row 2');
+    assert.equal(bOld.epoch, act[2].epoch, 'basis old: epoch == row 2 epoch');
+    assert.equal(lc(bNew.typeId), lc(T.QUOTE), 'basis new: typeId');
+    assert.equal(bNew.activation, '3', 'basis new: the epoch-N+1 admission must report policy row 3');
+    assert.equal(lc(bNew.mandatoryAcceptor), lc(ctx.addrs.quoteRule), 'basis new: the same mandatory rule');
+    assert.equal(lc(bNew.ruleId), lc(info1.ruleId), 'basis new: ruleId == typeInfo.ruleId');
+    assert.equal(lc(bNew.policyAcceptor), lc(info1.policyAcceptor), 'basis new: policy acceptor == active typeInfo');
+    assert.equal(lc(bNew.policyCodehash), lc(info1.policyCodehash), 'basis new: policy codehash == active typeInfo');
+    assert.equal(lc(bNew.policyCodehash), lc(act[3].codehash), 'basis new: policy codehash == row 3');
+    assert.equal(bNew.epoch, act[3].epoch, 'basis new: epoch == row 3 epoch');
+    assert.equal(bNew.epoch, str(epoch1), 'basis new: epoch == registry epoch after the activation');
+    rows.push({ label: 'policy/activate/acceptance-basis', standing: 'retained raw replies (stage basis) of Ledger.acceptanceBasis for both admissions; joins asserted by Type, mandatory rule, policy row, codehash and epoch against the stage-policy registry replies', oldAdmission: { ordinal: adm0 + 1, recordId: rOld, basis: bOld, joinedTo: 'activation row 2' }, newAdmission: { ordinal: adm0 + 2, recordId: rNew, basis: bNew, joinedTo: 'activation row 3 == active typeInfo' } });
+    // ---- F5: an in-cell strict Type whose MANDATORY rule is StrictQuoteAcceptor: the rejected body stays rejected
+    const strict = await registerInCell(ctx, 'STRICT', SHAPE_STRICT, 'strictAcceptor', [], 'policy/activate/strict/register (StrictQuoteAcceptor as the MANDATORY rule of an in-cell Type; id from log == typeIdOf == local derivation)');
+    rows.push(strict.row);
+    const probeS = [[a.nativeA], strict.typeId, NO_PROBE_FOLDER];
+    const publishHigh = () => call(ctx, 'Actor', 'actorA', 'publish', [strict.typeId, QUOTE_HIGH]);
+    const rejectedArgs = { args: [0, strict.typeId] }; // E_REJECTED(leaf 0, STRICT)
+    rows.push(await failureRow(ctx, 'policy/activate/strict/rejected-before (above-cap body: E_REJECTED(0, STRICT) by the mandatory rule, no activation yet)', publishHigh(), 'E_REJECTED', probeS, rejectedArgs));
+    rows.push(await send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'activate', [strict.typeId, ZERO_ADDR]), 'policy/activate/strict/activate-zero (row 2: no additional policy)'));
+    rows.push(await failureRow(ctx, 'policy/activate/strict/still-rejected-after-activate-zero (E_REJECTED(0, STRICT): activate(0) never means no validation)', publishHigh(), 'E_REJECTED', probeS, rejectedArgs));
+    rows.push(await send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'activate', [strict.typeId, ctx.addrs.acceptor]), 'policy/activate/strict/activate-permissive (row 3: the accept-all mock as ADDITIONAL policy)'));
+    rows.push(await failureRow(ctx, 'policy/activate/strict/still-rejected-under-permissive-policy (E_REJECTED(0, STRICT): a policy cannot remove the mandatory rule)', publishHigh(), 'E_REJECTED', probeS, rejectedArgs));
+    const rStrict = recordId(strict.typeId, FIX.quote3000.bytes);
+    plan.touched.records.push(rStrict);
+    rows.push(await send(ctx, () => call(ctx, 'Actor', 'actorA', 'publish', [strict.typeId, FIX.quote3000.bytes]), 'policy/activate/strict/compliant-publish (quote3000, below the cap: mandatory rule + policy accept; admitted under row 3)'));
+    plan.touched.publications.push(pub0 + 3);
+    const last2 = await ctx.latestBlock();
+    const bS = basisOf(await observe(ctx, ctx.raw, 'basis', 'Ledger', 'ledger', 'acceptanceBasis', [adm0 + 3], last2));
+    const infoS = typeInfoOf(await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'typeInfo', [strict.typeId], last2));
+    const actS3 = activationOf(await observe(ctx, ctx.raw, 'policy', 'TypeRegistry', 'registry', 'activation', [strict.typeId, 3], last2));
+    assert.equal(lc(bS.typeId), lc(strict.typeId), 'strict basis: typeId');
+    assert.equal(lc(bS.mandatoryAcceptor), lc(ctx.addrs.strictAcceptor), 'strict basis: mandatory rule');
+    assert.equal(lc(bS.ruleId), lc(infoS.ruleId), 'strict basis: ruleId == typeInfo.ruleId');
+    assert.equal(bS.activation, '3', 'strict basis: policy row 3');
+    assert.equal(lc(bS.policyAcceptor), lc(ctx.addrs.acceptor), 'strict basis: the mock policy');
+    assert.equal(lc(bS.policyCodehash), lc(actS3.codehash), 'strict basis: policy codehash == row 3');
+    assert.equal(bS.epoch, actS3.epoch, 'strict basis: epoch == row 3 epoch');
+    rows.push({ label: 'policy/activate/strict/acceptance-basis', standing: 'retained raw replies (stages basis, policy): the compliant admission records the mandatory rule (StrictQuoteAcceptor) AND the additional policy row 3 (mock), joined by codehash and epoch', ordinal: adm0 + 3, recordId: rStrict, basis: bS, typeInfo: infoS, activationRow3: actS3 });
     return rows;
   },
 };
@@ -1071,23 +1185,24 @@ const refusedRegistrationCell = {
   standing: 'exact Type identity (REPAIR.md R2): E_TYPE_EXISTS for an identical descriptor; registry state unchanged across the revert',
   plan: async (ctx, a, block) => {
     const touched = emptyTouched();
-    const [derived] = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'typeIdOf', [SHAPE.QUOTE, ctx.addrs.acceptor, []], block);
-    const desc0 = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], block);
+    const [derived] = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'typeIdOf', [SHAPE.QUOTE, ctx.addrs.quoteRule, []], block);
+    const desc0 = descriptorOf(await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], block));
     const [epoch0] = await observeBoth(ctx, 'baseline', 'TypeRegistry', 'registry', 'epoch', [], block);
     assert.equal(lc(derived), lc(T.QUOTE), 'refused-re-registration: typeIdOf(QUOTE descriptor) must equal the registered QUOTE id');
-    const registry0 = { shape: desc0[0], ruleId: desc0[1], refCount: str(desc0[2]), activations: str(desc0[3]), registeredAt: str(desc0[4]), epoch: str(epoch0) };
-    return { authors: [a.nativeA, null], touched, derived, registry0, summary: { typeId: T.QUOTE, descriptor: { shape: SHAPE.QUOTE, acceptor: ctx.addrs.acceptor, refs: [] }, collisionId: derived, registryAtBaseline: registry0 } };
+    const registry0 = { descriptor: desc0, epoch: str(epoch0) };
+    return { authors: [a.nativeA, null], touched, derived, registry0, summary: { typeId: T.QUOTE, descriptor: { shape: SHAPE.QUOTE, mandatoryAcceptor: ctx.addrs.quoteRule, refs: [] }, collisionId: derived, registryAtBaseline: registry0 } };
   },
   body: async (ctx, a, plan) => {
     const { derived, registry0 } = plan;
     const rows = [];
-    rows.push({ label: 'failure/refused-re-registration/collision-id', typeIdOf: derived, equalsRegisteredQuote: true, standing: 'retained baseline raw reply of TypeRegistry.typeIdOf(QUOTE_SHAPE, MockAcceptor, []): the second registration targets exactly the existing id' });
-    rows.push(await failureRow(ctx, 'failure/refused-re-registration (identical descriptor => the same derived id: E_TYPE_EXISTS; nothing rewritten)', call(ctx, 'TypeRegistry', 'registry', 'register', [SHAPE.QUOTE, ctx.addrs.acceptor, []]), ['TypeRegistry', 'E_TYPE_EXISTS'], [[a.nativeA], T.QUOTE, NO_PROBE_FOLDER]));
+    rows.push({ label: 'failure/refused-re-registration/collision-id', typeIdOf: derived, equalsRegisteredQuote: true, standing: 'retained baseline raw reply of TypeRegistry.typeIdOf(QUOTE_SHAPE, MinBodyAcceptor(32), []): the second registration targets exactly the existing id' });
+    // simulated and sent FROM the deployer (the registry admin): without `from` the static probe would observe E_ADMIN (runner review 1)
+    rows.push(await failureRow(ctx, 'failure/refused-re-registration (identical descriptor => the same derived id: E_TYPE_EXISTS(QUOTE); nothing rewritten)', call(ctx, 'TypeRegistry', 'registry', 'register', [SHAPE.QUOTE, ctx.addrs.quoteRule, []]), ['TypeRegistry', 'E_TYPE_EXISTS'], [[a.nativeA], T.QUOTE, NO_PROBE_FOLDER], { wallet: ctx.deployer, args: [T.QUOTE] }));
     const last = await ctx.latestBlock();
-    const desc1 = await observe(ctx, ctx.raw, 'registry-post', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], last);
+    const desc1 = descriptorOf(await observe(ctx, ctx.raw, 'registry-post', 'TypeRegistry', 'registry', 'descriptor', [T.QUOTE], last));
     const [epoch1] = await observe(ctx, ctx.raw, 'registry-post', 'TypeRegistry', 'registry', 'epoch', [], last);
-    const registry1 = { shape: desc1[0], ruleId: desc1[1], refCount: str(desc1[2]), activations: str(desc1[3]), registeredAt: str(desc1[4]), epoch: str(epoch1) };
-    assert.deepEqual(registry1, registry0, 'refused-re-registration: descriptor and epoch must be unchanged across the refused registration');
+    const registry1 = { descriptor: desc1, epoch: str(epoch1) };
+    assert.deepEqual(registry1, registry0, 'refused-re-registration: the complete descriptor and the epoch must be unchanged across the refused registration');
     rows.push({ label: 'failure/refused-re-registration/registry-unchanged', standing: 'retained raw replies (stage registry-post) equal the baseline replies: descriptor, activations and epoch unchanged', registry: registry1 });
     rows.push({ label: 'failure/refused-re-registration/different-descriptor', status: 'statement', standing: 'NOT a transaction row. A different descriptor (shape, refTypes or declared rule) under the SAME id is impossible by construction: typeId = keccak256(abi.encode(DOM_TYPE, shape, keccak256(abi.encode(refTypes)), ruleId)), so a changed descriptor is a different id and an existing id is never rewritten (test/Falsify.t.sol test_F3_type_identity_is_exact_and_immutable registers changed descriptors and checks QUOTE is untouched).' });
     return rows;
@@ -1123,10 +1238,11 @@ const unsupportedImportCell = {
     assert.equal(pre[0], 0n, 'unsupported-native-import: the claimed subject must be absent at the start');
     // (a) signed destination path: AUTHOR_B authorizes itself at this Realm while the v == 0 packet claims AUTHOR_A's principal
     const dst = await signIntent(ctx, ctx.wallets[2], actions);
-    rows.push(await failureRow(ctx, 'failure/unsupported-native-import/signed-destination (v == 0 packet claiming AUTHOR_A\'s principal, destination signature by AUTHOR_B: E_SOURCE_UNSUPPORTED)', { ...call(ctx, 'Ledger', 'ledger', 'importPublication', [packet(ctx.wallets[2].address), actions, bodies, dst.intent, dst.sig]), intent: dst.intentStr, sig: dst.sig }, 'E_SOURCE_UNSUPPORTED', probe));
-    // (b) msg.sender path: the relaying deployer EOA presents itself as the source author with an empty destination signature
+    rows.push(await failureRow(ctx, 'failure/unsupported-native-import/signed-destination (v == 0 packet claiming AUTHOR_A\'s principal, destination signature by AUTHOR_B: E_SOURCE_UNSUPPORTED)', { ...call(ctx, 'Ledger', 'ledger', 'importPublication', [packet(ctx.wallets[2].address), actions, bodies, dst.intent, dst.sig]), intent: dst.intentStr, sig: dst.sig }, 'E_SOURCE_UNSUPPORTED', probe, { args: [] }));
+    // (b) msg.sender path: the relaying deployer EOA presents itself as the source author with an empty destination signature;
+    // the static probe is simulated FROM the deployer so msg.sender == src.author holds in the simulation too (runner review 1)
     const none = { realmId: ZERO, coreCodeCommitment: ZERO, author: ZERO_ADDR, nonce: 0, deadline: 0, acceptanceProfile: ZERO, indexObligations: ZERO };
-    rows.push(await failureRow(ctx, 'failure/unsupported-native-import/msg-sender (v == 0 packet, msg.sender == claimed author, empty destination signature: E_SOURCE_UNSUPPORTED)', call(ctx, 'Ledger', 'ledger', 'importPublication', [packet(ctx.deployer.address), actions, bodies, none, '0x']), 'E_SOURCE_UNSUPPORTED', probe));
+    rows.push(await failureRow(ctx, 'failure/unsupported-native-import/msg-sender (v == 0 packet, msg.sender == claimed author, empty destination signature: E_SOURCE_UNSUPPORTED)', call(ctx, 'Ledger', 'ledger', 'importPublication', [packet(ctx.deployer.address), actions, bodies, none, '0x']), 'E_SOURCE_UNSUPPORTED', probe, { wallet: ctx.deployer, args: [] }));
     const last = await ctx.latestBlock();
     const post = await observe(ctx, ctx.raw, 'squat-probe', 'Ledger', 'ledger', 'subjectCreatedAt', [victim], last);
     const src = await observe(ctx, ctx.raw, 'squat-probe', 'Ledger', 'ledger', 'sourceEvidence', [baseCount(ctx, 'publications') + 1], last);
@@ -1139,21 +1255,52 @@ const unsupportedImportCell = {
 };
 
 // ---------------------------------------------------------------- Type id resolution (derived ids; three-way agreement)
-// typeIdOf + typeInfo raw replies at `block` (stage type-resolution), checked against the local Keys.typeId derivation and,
-// when given, the TypeRegistered receipt log; fills T[key]. The refs must already be resolved (TYPE_PLAN order).
-async function resolveType(ctx, key, acceptorKey, refKeys, acceptorCodehash, block, evidence = {}) {
+// typeIdOf + typeInfo + descriptor raw replies at `block` (stage type-resolution), checked against the local Keys.typeId
+// derivation and, when given, the TypeRegistered receipt log; fills T[key] for the six fixture Types. The acceptor is the
+// Type's MANDATORY rule: the registry must report it (address + ruleId == the derivation codehash); at the registration
+// block (deploy mode, `evidence.fromLog` given) the initial activation row must be 1 with no additional policy.
+async function resolveType(ctx, key, acceptorKey, refKeys, acceptorCodehash, block, evidence = {}, shape = SHAPE[key]) {
   const acceptor = acceptorKey ? ctx.addrs[acceptorKey] : ZERO_ADDR;
   const refs = refKeys.map((k) => T[k]);
-  const [fromView] = await observe(ctx, ctx.raw, 'type-resolution', 'TypeRegistry', 'registry', 'typeIdOf', [SHAPE[key], acceptor, refs], block);
-  const local = typeIdLocal(SHAPE[key], refs, acceptorCodehash);
+  const [fromView] = await observe(ctx, ctx.raw, 'type-resolution', 'TypeRegistry', 'registry', 'typeIdOf', [shape, acceptor, refs], block);
+  const local = typeIdLocal(shape, refs, acceptorCodehash);
   assert.equal(lc(fromView), lc(local), `${key}: typeIdOf disagrees with the local Keys.typeId derivation`);
   if (evidence.fromLog) assert.equal(lc(evidence.fromLog), lc(local), `${key}: the TypeRegistered log disagrees with the derivation`);
-  const info = await observe(ctx, ctx.raw, 'type-resolution', 'TypeRegistry', 'registry', 'typeInfo', [fromView], block);
-  assert.equal(info[0], true, `${key}: not registered at block ${block}`);
-  assert.equal(lc(info[1]), lc(acceptor), `${key}: active acceptor mismatch`);
-  assert.equal(str(info[3]), String(refs.length), `${key}: refCount mismatch`);
-  T[key] = fromView;
-  return { typeId: fromView, shape: SHAPE[key], acceptor, acceptorKey, acceptorCodehash, refKeys, refTypeIds: refs, activeActivation: str(info[4]), localDerivation: local, ...evidence, standing: 'id = keccak256(abi.encode(DOM_TYPE, shape, keccak256(abi.encode(refTypeIds)), acceptorCodehash)); typeIdOf/typeInfo raw replies at stage type-resolution; agreement of log (when deployed here), view and local derivation asserted' };
+  const info = typeInfoOf(await observe(ctx, ctx.raw, 'type-resolution', 'TypeRegistry', 'registry', 'typeInfo', [fromView], block));
+  const desc = descriptorOf(await observe(ctx, ctx.raw, 'type-resolution', 'TypeRegistry', 'registry', 'descriptor', [fromView], block));
+  assert.equal(info.registered, true, `${key}: not registered at block ${block}`);
+  assert.equal(lc(info.mandatoryAcceptor), lc(acceptor), `${key}: mandatory acceptor mismatch`);
+  assert.equal(lc(info.ruleId), lc(acceptorCodehash), `${key}: ruleId must equal the derivation codehash`);
+  assert.equal(lc(desc.ruleId), lc(acceptorCodehash), `${key}: descriptor.ruleId must equal the derivation codehash`);
+  assert.equal(lc(desc.mandatoryAcceptor), lc(acceptor), `${key}: descriptor.mandatoryAcceptor mismatch`);
+  assert.equal(desc.shape, shape, `${key}: descriptor.shape mismatch`);
+  assert.equal(info.refCount, String(refs.length), `${key}: refCount mismatch`);
+  if (evidence.fromLog) {
+    assert.equal(info.activation, '1', `${key}: the initial activation row must be 1 at the registration block`);
+    assert.equal(lc(info.policyAcceptor), lc(ZERO_ADDR), `${key}: no additional policy at registration`);
+    assert.equal(lc(info.policyCodehash), lc(ZERO), `${key}: no additional policy codehash at registration`);
+  }
+  if (TYPE_KEYS.includes(key)) T[key] = fromView;
+  return { typeId: fromView, shape, mandatoryAcceptor: acceptor, acceptorKey, ruleId: acceptorCodehash, refKeys, refTypeIds: refs, typeInfoAtResolution: info, descriptor: desc, localDerivation: local, ...evidence, standing: 'id = keccak256(abi.encode(DOM_TYPE, shape, keccak256(abi.encode(refTypeIds)), ruleId)); ruleId = the MANDATORY rule\'s runtime codehash; typeIdOf/typeInfo/descriptor raw replies at stage type-resolution; agreement of log (when deployed here), view, descriptor and local derivation asserted' };
+}
+// register a Type inside a sealed cell (reverted with the cell) and resolve it the same three ways; T is not touched
+async function registerInCell(ctx, key, shape, acceptorKey, refKeys, label) {
+  const acceptor = acceptorKey ? ctx.addrs[acceptorKey] : ZERO_ADDR;
+  const refs = refKeys.map((k) => T[k]);
+  const row = await send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'register', [shape, acceptor, refs]), label);
+  const tx = ctx.txs[row.txIndex];
+  const registered = tx.receipt.logs
+    .filter((l) => l.address.toLowerCase() === ctx.addrs.registry.toLowerCase())
+    .map((l) => { try { return iface('TypeRegistry').parseLog({ topics: l.topics, data: l.data }); } catch { return null; } })
+    .filter((p) => p && p.name === 'TypeRegistered');
+  assert.equal(registered.length, 1, `${label}: expected exactly one TypeRegistered log`);
+  let codehash = ZERO;
+  if (acceptorKey) {
+    if (ctx.codehashes?.[acceptorKey]) codehash = ctx.codehashes[acceptorKey];
+    else { const e = await ctx.rpc('eth_getCode', [acceptor, qty(row.block)], { label: `code ${acceptorKey}` }); ctx.rpcOther.push(envOf(e)); codehash = keccak256(e.response.result); }
+  }
+  const resolved = await resolveType(ctx, key, acceptorKey, refKeys, codehash, row.block, { fromLog: registered[0].args.typeId, registerTx: row.hash, registerBlock: row.block }, shape);
+  return { typeId: resolved.typeId, row: { ...row, resolved }, resolved };
 }
 // --addresses mode: no registration receipts; acceptor codehashes from eth_getCode (envelopes in rpcOther)
 async function resolveTypesFromChain(ctx) {
@@ -1169,6 +1316,24 @@ async function resolveTypesFromChain(ctx) {
     types[key] = await resolveType(ctx, key, acceptorKey, refKeys, codehash, block);
   }
   return types;
+}
+
+// ---------------------------------------------------------------- cell selection (runner review 4): explicit, validated BEFORE any chain starts
+// `planKeys` is the static ordered cell plan; `cells` an exact comma-separated list, `only` the legacy substring filter.
+// Unknown keys or a zero selection throw (the run must not start a chain and exit 0 having done nothing).
+function selectCells(planKeys, { cells = null, only = null } = {}) {
+  if (cells === null && only === null) return [...planKeys];
+  let selected;
+  if (cells !== null) {
+    const wanted = String(cells).split(',').map((s) => s.trim()).filter(Boolean);
+    const unknown = wanted.filter((k) => !planKeys.includes(k));
+    if (unknown.length) throw new Error(`--cells: unknown cell(s) ${unknown.join(', ')}; known cells: ${planKeys.join(', ')}`);
+    selected = planKeys.filter((k) => wanted.includes(k));
+  } else {
+    selected = planKeys.filter((k) => k.includes(String(only)));
+  }
+  if (selected.length === 0) throw new Error(`cell filter selected zero cells (cells=${cells}, only=${only}); known cells: ${planKeys.join(', ')}`);
+  return selected;
 }
 
 // ---------------------------------------------------------------- deployment (once; code identity retained)
@@ -1210,7 +1375,9 @@ async function deployAll(run) {
   d.actorB = await dep('Actor', [d.ledger.address]);
   d.consumer = await dep('Consumer', [d.lens.address]);
   d.recon = await dep('Reconstructor');
-  d.strictAcceptor = await dep('StrictQuoteAcceptor'); // fixture rule v2: the second QUOTE acceptor activated in cell policy/activate (artifact from test/Falsify.t.sol)
+  d.strictAcceptor = await dep('StrictQuoteAcceptor'); // fixture rule v2 (artifact from test/Falsify.t.sol): QUOTE's added policy and the in-cell strict Type's mandatory rule in cell policy/activate
+  d.quoteRule = await dep('MinBodyAcceptor', [32]); // QUOTE's MANDATORY rule: immutable threshold, part of the runtime code and therefore of the id
+  d.pairRule = await dep('MinBodyAcceptor', [96]); // PAIR's MANDATORY rule (two checked refs + one payload word)
   d.statelessConsumer = await dep('StatelessConsumer', [d.lens.address]);
   const addrsOf = () => Object.fromEntries(Object.entries(d).map(([k, v]) => [k, v.address]));
   ctx.addrs = addrsOf();
@@ -1233,6 +1400,16 @@ async function deployAll(run) {
     types[key] = await resolveType(ctx, key, acceptorKey, refKeys, acceptorKey ? d[acceptorKey].runtimeCodehash : ZERO, row.block, { fromLog: registered[0].args.typeId, registerTx: row.hash, registerBlock: row.block, logIndex: tx.receipt.logs.findIndex((l) => l.address.toLowerCase() === ctx.addrs.registry.toLowerCase()) });
     log(`  type ${key}: ${T[key]} (log == typeIdOf == local derivation)`);
   }
+  // the mutable MockAcceptor is installed as the ADDITIONAL policy (row 2) of QUOTE and PAIR — never a mandatory rule (F5 addendum)
+  for (const key of ['QUOTE', 'PAIR']) {
+    const row = await send(ctx, () => call(ctx, 'TypeRegistry', 'registry', 'activate', [T[key], ctx.addrs.acceptor]), `setup: activate MockAcceptor (mode 0) as ${key} ADDITIONAL policy row 2 (mutable test double; its refusal is E_POLICY_REJECTED)`);
+    setup.push(row);
+    const info = typeInfoOf(await observe(ctx, ctx.raw, 'setup', 'TypeRegistry', 'registry', 'typeInfo', [T[key]], row.block));
+    assert.equal(lc(info.policyAcceptor), lc(ctx.addrs.acceptor), `${key}: mock must be the active policy after setup`);
+    assert.equal(info.activation, '2', `${key}: activation row 2 after setup`);
+    assert.equal(lc(info.mandatoryAcceptor), lc(types[key].mandatoryAcceptor), `${key}: the mandatory rule is untouched by the activation`);
+    types[key].policyAfterSetup = { acceptor: info.policyAcceptor, codehash: info.policyCodehash, activation: info.activation, activateTx: row.hash };
+  }
   d.joinedConsumer = await dep('JoinedConsumer', [d.ledger.address, d.lens.address, T.QUOTE_J, T.PAIR, T.ITEM, T.LABEL]); // after registration: constructed with the DERIVED ids
   ctx.addrs = addrsOf();
   const addrs = ctx.addrs;
@@ -1244,8 +1421,44 @@ async function deployAll(run) {
   return { addrs, deployment: d, setup, setupTransactions: ctx.txs, setupRaw: ctx.raw, setupBlocks: ctx.blocks, setupRpcOther: ctx.rpcOther, registryEpoch: epoch, principals, types };
 }
 
+// the static, ordered cell plan (21 cells; the no-index diagnostic is dropped by --skip-without-index)
+function buildCellPlan() {
+  const plan = [];
+  const picks = { 'native-one': (a) => [a.nativeA, null], 'signed-one': (a) => [a.signedA, null], 'native-two': (a) => [a.nativeA, a.nativeB], 'signed-two': (a) => [a.signedA, a.signedB] };
+  for (const fixture of ['quote', 'binary']) {
+    for (const [cell, pick] of Object.entries(picks)) plan.push({ key: `${cell}/${fixture}`, cell: matrixCell(cell, fixture, pick) });
+  }
+  for (const variant of ['contract-fresh-body', 'contract-existing-body', 'exact-retry']) plan.push({ key: `fresh/${variant}`, cell: { standing: 'freshness control: its own sealed cell from the same post-setup snapshot; report side by side, never subtract', plan: freshPlan(variant), body: freshBody } });
+  plan.push({ key: 'failure-rows', cell: failureCell });
+  plan.push({ key: 'joined/steps-1-6', cell: joinedCell });
+  for (const variant of ['hash-only-create', 'create+label-fresh', 'create+label-existing-republished', 'create+label-existing-omitted']) plan.push({ key: `label/${variant}`, cell: labelCell(variant) });
+  plan.push({ key: 'policy/activate', cell: policyCell });
+  plan.push({ key: 'failure/refused-re-registration', cell: refusedRegistrationCell });
+  plan.push({ key: 'failure/unsupported-native-import', cell: unsupportedImportCell });
+  if (!args['skip-without-index']) {
+    plan.push({
+      key: 'native-one-noindex/quote',
+      cell: {
+        standing: 'NOT EQUIVALENT: the mandatory index is detached (a named guarantee omitted); diagnostic only',
+        plan: async (ctx, a, block) => matrixPlan(ctx, 'native-one-noindex', 'quote', a.nativeA, null, block, { noIndex: true }),
+        body: async (ctx, a, plan) => {
+          const rows = [await send(ctx, () => call(ctx, 'Ledger', 'ledger', 'setIndexModule', [ZERO_ADDR]), 'setup: detach index module')];
+          rows.push(...(await runCell(ctx, plan, { noIndex: true })));
+          return rows;
+        },
+      },
+    });
+  }
+  return plan;
+}
+
 async function main() {
   const t0 = Date.now();
+  // ---- cell selection is computed and validated BEFORE any chain starts (runner review 4)
+  const cellPlan = buildCellPlan();
+  const planKeys = cellPlan.map((c) => c.key);
+  const selectedCells = selectCells(planKeys, { cells: typeof args.cells === 'string' ? args.cells : null, only: ONLY });
+  log(`cell plan: ${planKeys.length} cells; selected ${selectedCells.length}: ${selectedCells.join(', ')}`);
   setTimeout(() => terminateRun('watchdog: 25 minutes elapsed, stopping the run', 124), WATCHDOG_MS).unref(); // applies with and without --anvil
   process.once('SIGINT', () => terminateRun('SIGINT: interrupted run', 130));
   process.once('SIGTERM', () => terminateRun('SIGTERM: terminated run', 143));
@@ -1259,24 +1472,28 @@ async function main() {
     profile: 'road-b-lab/2', claim: 'disposable lab, no protocol claim',
     honesty: 'This run reports receipt diagnostics with explicit remaining gates. It is not a same-guarantee comparison and not the capability ablation.',
     experiment: 'ingress x multiplicity (hash-placement diagnostics) + separate freshness cells + failure rows + the typed joined journey (steps 1–6) + the label-retention probe. NOT the protocol capability ablation (neither/authorship/selection/both), which is a later gate.',
-    remainingGates: [CAVEAT_JOINED, CAVEAT_RECON, CAVEAT_MATCHED, CAVEAT_EXPECTED, CAVEAT_NATIVE_IMPORT, CAVEAT_VECTOR],
+    remainingGates: [CAVEAT_JOINED, CAVEAT_RECON, CAVEAT_MATCHED, CAVEAT_EXPECTED, CAVEAT_NATIVE_IMPORT, CAVEAT_VECTOR, CAVEAT_MANDATORY],
     sourceProfile: 'post-authority-repair source (REPAIR.md; PROFILE.md "Changed after dcc7b94"): derived Type ids, registry policy rows, per-admission acceptance basis, fail-closed native import. NOT the dcc7b94 profile of vectors/profile-b.json.',
     capabilityAblation: { unknown: 'not run: the neither/authorship/selection/both counterfactuals need same-guarantee arms that remove one capability each; this lab has one arm', consequence: 'no representation-vs-feature attribution and no interaction term can be claimed from this run' },
     evidenceShape: {
       rawObservations: 'cells[*].baselineRaw[] (sealed-state getters before the first transaction; also in raw[] with stage "baseline"), cells[*].raw[] (every eth_call: literal JSON-RPC request/response, rpcId, method, source, stage, to, calldata, returnData, blockTag, blockHash), cells[*].transactions[] (rawTransaction + literal envelopes of eth_sendRawTransaction / eth_getTransactionReceipt / eth_getBlockByHash / eth_getTransactionByHash + the receipt), cells[*].blocks[] (block-header envelopes), cells[*].rpcOther[] (evm_revert, evm_snapshot, eth_gasPrice, eth_blockNumber, eth_getTransactionCount, eth_estimateGas, anvil_getAutomine)',
       candidateClaims: 'cells[*].candidateDecoded.{baseline,post} (this script decoding the retained bytes), cells[*].rows, rowLog, consumerChecks, plan — candidate-native summaries, never expected answers',
-      correlation: 'every observation carries the JSON-RPC id of its request; ids are unique across the run; request.params[0] is exactly {to, data}; params[1] is the hex block number; blockHash is the retained header hash at that number (blocks[]), never inferred from a receipt at the same number',
+      correlation: 'every observation carries the JSON-RPC id of its request; ids are unique across the run; request.params[0] is exactly {to, data} for reads and exactly {from, to, data} for failure-static probes (from = the account that then sends the reverting transaction; retained as obs.from); params[1] is the hex block number; blockHash is the retained header hash at that number (blocks[]), never inferred from a receipt at the same number',
+      failureRows: 'rows carry expectedSelector/observedSelector/observedRevertData and, where expectedArgs is set, the decoded revert arguments (decodedArgs) asserted equal — e.g. E_INTENT(3), E_TYPE_EXISTS(typeId), E_POLICY_REJECTED(leaf, typeId), E_REJECTED(leaf, typeId)',
+      admissionJoins: 'candidateDecoded.{baseline,post}.admissions[ord] of every present publish/reuse admission carries basis (Ledger.acceptanceBasis raw reply) and policyRow (TypeRegistry.activation(typeId, activation) raw reply) plus join {acceptorEqual, codehashEqual, epochEqual, ok}: Type id <-> policy row <-> codehash <-> epoch are joinable from the raw replies alone',
+      selection: 'report.cellPlan (all keys, in order), plannedCells (validated before chain startup: unknown or zero selection aborts) and executedCells (asserted equal to plannedCells at the end); skippedCells lists unselected keys',
       freshness: 'pre-absence / pre-presence are retained bytes: baselineRaw Ledger.record(id) replies at the after-revert block, and stage "pre-presence" replies taken after an in-cell setup transaction',
       storage: 'rows carry `storage`: STATELESS (JoinedConsumer / StatelessConsumer: no SSTORE, one LOG2) or STORING (LabHarness.Consumer: receipt includes its own SSTOREs)',
-      typeIds: 'report.types[key] = { typeId, shape, acceptor, acceptorCodehash, refTypeIds, localDerivation, fromLog, registerTx } — the id from the TypeRegistered receipt log, the typeIdOf/typeInfo raw replies (setupRaw stage type-resolution) and the local Keys.typeId derivation are asserted equal; every Action.typeId in every cell is one of these',
-      authorityRepairCells: 'policy/activate (stages policy, basis; failure row E_INTENT), failure/refused-re-registration (stage registry-post; failure row TypeRegistry.E_TYPE_EXISTS; one statement row), failure/unsupported-native-import (stage squat-probe; two failure rows E_SOURCE_UNSUPPORTED)',
+      typeIds: 'report.types[key] = { typeId, shape, mandatoryAcceptor, ruleId, refTypeIds, typeInfoAtResolution, descriptor, localDerivation, fromLog, registerTx, policyAfterSetup } — the id from the TypeRegistered receipt log, the typeIdOf/typeInfo/descriptor raw replies (setupRaw stage type-resolution) and the local Keys.typeId derivation are asserted equal; ruleId == the mandatory rule\'s runtime codehash; every Action.typeId in every cell is one of these',
+      acceptance: 'F5 shape: typeInfo = (registered, mandatoryAcceptor, ruleId, policyAcceptor, policyCodehash, refCount, activation); descriptor = (shape, ruleId, mandatoryAcceptor, refCount, activations, registeredAt); acceptanceBasis = (typeId, activation, mandatoryAcceptor, ruleId, policyAcceptor, policyCodehash, epoch, activatedAt); E_REJECTED = mandatory rule refused (final), E_POLICY_REJECTED = additional policy refused',
+      authorityRepairCells: 'policy/activate (stages policy, basis; failure rows E_INTENT, E_POLICY_REJECTED, E_REJECTED x3; in-cell strict Type registered and resolved three ways), failure/refused-re-registration (stage registry-post; failure row TypeRegistry.E_TYPE_EXISTS; one statement row), failure/unsupported-native-import (stage squat-probe; two failure rows E_SOURCE_UNSUPPORTED)',
     },
     rpc: rpcUrl, chainId, source, node: process.version, evm: 'cancun', compiler: 'read from out/ artifact metadata per contract (deployment[*].artifact.compiler)', optimizerRuns: 200, viaIR: true,
     paths: { artifacts: OUT_DIR, scratchRoot: SCRATCH_ROOT, outJson: OUT_JSON, ethers: ethersPath },
     build: { sourceHashes: sourceHashes(), note: 'sha256 of every file under src/, test/, script/ at run time; artifact hashes per contract under deployment' },
     providerPolicy: 'no ethers provider: literal JSON-RPC over fetch, one request per call, unique ids, no result cache; every eth_call passes an explicit hex block number',
     startedAt: new Date(t0).toISOString(), anvil: anvilInfo, chainIdRpc: envOf(chainIdEnv), deployment: null, setup: [], setupTransactions: [], setupRaw: [], setupBlocks: [], setupRpcOther: [], registryEpoch: null, principals: null, types: null,
-    sealedInitialState: null, cells: {}, cellOrder: [], skippedCells: [], estimatedFreshSlots: {}, failure: null,
+    sealedInitialState: null, cellPlan: planKeys, plannedCells: selectedCells, executedCells: null, cells: {}, cellOrder: [], skippedCells: [], estimatedFreshSlots: {}, failure: null,
     caveats: [
       'Local Anvil receipts under the lab profile; not an L2 fee quote and not an equivalent-guarantee comparison until the coordinator\'s fixture map is applied.',
       'Ingress x multiplicity only; no capability ablation and no interaction term are claimed.',
@@ -1289,7 +1506,8 @@ async function main() {
       'A listing page with mutated == true is a mixed-basis page and must not be treated as COMPLETE by any caller.',
       'Label cells are a client-convention filename-retention baseline (FOLDER-role bodies name entries; HEAD bodies stay empty), not mandatory Files semantics; the registry epoch differs from the retained vectors/profile-b.json run (one more Type registered).',
       CAVEAT_NATIVE_IMPORT, CAVEAT_VECTOR,
-      'policy/activate activates StrictQuoteAcceptor (test/Falsify.t.sol artifact; fixture rule v2) as QUOTE policy row 2: the Type id and descriptor are untouched, unsent epoch-N signatures are refused (E_INTENT), and acceptanceBasis reports row 1 for the earlier admission. A policy activation is a Realm fact, not a Type change.',
+      'policy/activate ADDS StrictQuoteAcceptor (test/Falsify.t.sol artifact; fixture rule v2) as QUOTE policy row 3 on top of the mandatory MinBodyAcceptor(32) (row 2 is the accept-all mock): the Type id and descriptor are untouched, unsent epoch-N signatures are refused (E_INTENT), an above-cap body (uint256 3_000_000_000, not a payload control) is refused by the added policy (E_POLICY_REJECTED), and acceptanceBasis reports row 2 for the earlier admission. Its in-cell strict Type shows a rejected body stays rejected after activate(0) and under a permissive policy (E_REJECTED). A policy activation is a Realm fact, not a Type change.',
+      CAVEAT_MANDATORY,
       'failure/refused-re-registration covers the identical-descriptor case only; a different descriptor under a colliding id is impossible by construction (derived ids) and is recorded as a statement row, not a transaction.',
     ],
   };
@@ -1298,7 +1516,7 @@ async function main() {
   try {
     if (args.addresses) {
       run.addrs = JSON.parse(readFileSync(args.addresses, 'utf8'));
-      assert(run.addrs.strictAcceptor && run.addrs.registry, '--addresses: the address file must come from this script version (needs registry and strictAcceptor)');
+      assert(run.addrs.strictAcceptor && run.addrs.registry && run.addrs.quoteRule && run.addrs.pairRule, '--addresses: the address file must come from this script version (needs registry, strictAcceptor, quoteRule, pairRule)');
       const rctx = makeCtx(run); // derived ids must be resolved from the chain before any cell (T throws otherwise)
       report.types = await resolveTypesFromChain(rctx);
       Object.assign(report, { typeResolutionRaw: rctx.raw, typeResolutionBlocks: rctx.blocks, typeResolutionRpcOther: rctx.rpcOther });
@@ -1319,32 +1537,16 @@ async function main() {
     // decode-once helpers the cell bodies use for relative ordinals (from the retained baseline)
     const wrap = (cell) => ({ ...cell, body: async (ctx, a, plan) => { const b = run.report.cells[ctx.cellLabel]?.candidateDecoded?.baseline; assert(b && b.counts && b.records && b.nonces, `${ctx.cellLabel}: baseline harvest missing before the body`); ctx.baselineCounts = b.counts; ctx.baselineRecords = b.records; ctx.baselineNonces = b.nonces; return cell.body(ctx, a, plan); } });
     const runCellNamed = async (label, cell) => { const c = wrap(cell); const orig = c.plan; c.plan = async (ctx, a, block) => { ctx.cellLabel = label; return orig(ctx, a, block); }; const r = await sealedCell(run, label, c); if (r) report.cellOrder.push(label); };
-    const cells = { 'native-one': (a) => [a.nativeA, null], 'signed-one': (a) => [a.signedA, null], 'native-two': (a) => [a.nativeA, a.nativeB], 'signed-two': (a) => [a.signedA, a.signedB] };
-    for (const fixture of ['quote', 'binary']) {
-      for (const [cell, pick] of Object.entries(cells)) await runCellNamed(`${cell}/${fixture}`, matrixCell(cell, fixture, pick));
+    // execute exactly the validated selection, in plan order; unselected cells are recorded as skipped
+    for (const { key, cell } of cellPlan) {
+      if (!selectedCells.includes(key)) { log(`cell ${key}: skipped (not selected)`); report.skippedCells.push(key); continue; }
+      await runCellNamed(key, cell);
     }
-    for (const variant of ['contract-fresh-body', 'contract-existing-body', 'exact-retry']) await runCellNamed(`fresh/${variant}`, { standing: 'freshness control: its own sealed cell from the same post-setup snapshot; report side by side, never subtract', plan: freshPlan(variant), body: freshBody });
-    await runCellNamed('failure-rows', failureCell);
-    await runCellNamed('joined/steps-1-6', joinedCell);
-    for (const variant of ['hash-only-create', 'create+label-fresh', 'create+label-existing-republished', 'create+label-existing-omitted']) await runCellNamed(`label/${variant}`, labelCell(variant));
-    // authority-repair cells (REPAIR.md): each its own sealed cell from the same snapshot
-    await runCellNamed('policy/activate', policyCell);
-    await runCellNamed('failure/refused-re-registration', refusedRegistrationCell);
-    await runCellNamed('failure/unsupported-native-import', unsupportedImportCell);
-    if (!args['skip-without-index']) {
-      await runCellNamed('native-one-noindex/quote', {
-        standing: 'NOT EQUIVALENT: the mandatory index is detached (a named guarantee omitted); diagnostic only',
-        plan: async (ctx, a, block) => matrixPlan(ctx, 'native-one-noindex', 'quote', a.nativeA, null, block, { noIndex: true }),
-        body: async (ctx, a, plan) => {
-          const rows = [await send(ctx, () => call(ctx, 'Ledger', 'ledger', 'setIndexModule', [ZERO_ADDR]), 'setup: detach index module')];
-          rows.push(...(await runCell(ctx, plan, { noIndex: true })));
-          return rows;
-        },
-      });
-    }
+    report.executedCells = [...report.cellOrder];
+    assert.deepEqual(report.executedCells, selectedCells, `planned cells != executed cells: planned ${JSON.stringify(selectedCells)} executed ${JSON.stringify(report.executedCells)}`);
     const finalEnv = await rpc0('evm_revert', [run.sealed]);
     assert.equal(finalEnv.response.result, true, 'final evm_revert');
-    report.estimatedFreshSlots = { label: 'ESTIMATED from the design table, not traced', 'create (native, 4 actions)': '5 evidence + 1 pubId + 2..3 record + 1 subject + 4..6 admission + 2x(2 head + 1 bindingPosition + 3 positionCell) + index appends', 'create (signed)': 'as native + 2 (r, s)', 'edit': '3 record + 2..3 admission + head rewrite + index appends', 'create + label fresh': 'create + 3 record (typeId, meta, one word) + 2 admission + by-Type/by-author appends', 'create + label existing republished': 'create + 1 occurrence rewrite + 2 admission + appends', 'create + label existing omitted': 'create + 0', 'register (per Type)': '3 descriptor + (1 + refs) refTypes + 2 policy row + epoch rewrite', 'policy activate': '2 policy row + 1 rewrite (activations) + epoch rewrite', 'admission basis': '0 (packed into the existing AdmissionRow.meta word)' };
+    report.estimatedFreshSlots = { label: 'ESTIMATED from the design table, not traced', 'create (native, 4 actions)': '5 evidence + 1 pubId + 2..3 record + 1 subject + 4..6 admission + 2x(2 head + 1 bindingPosition + 3 positionCell) + index appends', 'create (signed)': 'as native + 2 (r, s)', 'edit': '3 record + 2..3 admission + head rewrite + index appends', 'create + label fresh': 'create + 3 record (typeId, meta, one word) + 2 admission + by-Type/by-author appends', 'create + label existing republished': 'create + 1 occurrence rewrite + 2 admission + appends', 'create + label existing omitted': 'create + 0', 'register (per Type)': '3 descriptor (incl. the pinned mandatory acceptor in the header slot) + (1 + refs) refTypes + 2 policy row + epoch rewrite', 'policy activate': '2 policy row + 1 rewrite (activations) + epoch rewrite', 'admission basis': '0 (packed into the existing AdmissionRow.meta word)', 'admission with an active policy': '0 slots; +1 bounded STATICCALL to the policy acceptor after the mandatory rule (ESTIMATED)' };
     report.consumerMismatches = Object.values(report.cells).reduce((n, c) => n + (c.mismatches || 0), 0);
     assert.equal(report.consumerMismatches, 0, `consumer/commitment self-check mismatches: ${report.consumerMismatches}`);
     report.finishedAt = new Date().toISOString();

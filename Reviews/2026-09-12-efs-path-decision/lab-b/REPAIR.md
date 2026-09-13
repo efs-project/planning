@@ -89,6 +89,44 @@ Binding-role target Types (`setBindingRefType`) are Realm placement policy, not 
 
 Ledger runtime was 16,699 bytes at `df23bbb`; the additions (one view, one packed OR, two errors) are a few hundred bytes — well under EIP-170.
 
+## F5 — the mandatory Type predicate vs additional Realm policy (coordinator 07:50 + review addendum)
+
+**Finding (against `aaecfed`; FALSIFY.md F5).** The Type id committed to the initial `ruleId`, but `activate(T, address(0))` or a permissive acceptor REPLACED the only validator `_applyPublish` ran, so a body the declared rule rejects was admitted under the same Type id afterwards; "retaining the old basis" protected nothing for future records. Addendum: `MockAcceptor` is a mutable test double (`mode`/`minBody`, unchanged codehash) and was the fixtures' registration-time rule.
+
+**Change.**
+
+| Where | What |
+|---|---|
+| `src/TypeRegistry.sol` | `TypeInfo` gains `address mandatoryAcceptor` (packed into the existing header slot: `bool,uint8,uint16,uint64,address` = 32 bytes — **no extra slot**). `register` pins it (codehash == `ruleId`) and writes policy row 1 = `(address(0), 0)` = **no additional policy**. `activate(typeId, acceptor)` appends a policy row that must ALSO accept; `activate(0)` returns to "no additional policy", never "no validation". `typeInfo` → `(registered, mandatoryAcceptor, ruleId, policyAcceptor, policyCodehash, refCount, activation)`; `descriptor` → `(shape, ruleId, mandatoryAcceptor, refCount, activations, registeredAt)`; `TypeRegistered` carries the acceptor. NatSpec states the limit (below). |
+| `src/Interfaces.sol` | `ITypeRegistry.typeInfo` 7-way. |
+| `src/Ledger.sol` | `_acceptAll`: the mandatory rule ALWAYS runs first (`E_REJECTED`, final), then the policy acceptor if any (`E_POLICY_REJECTED(leaf, typeId)`, new error); `_accept` re-verifies the codehash at each call (`E_ACCEPTOR_CODE`) and takes a `policyRule` flag for the error. `acceptanceProfileOf` folds `(typeId, ruleId, policyCodehash, epoch)`. `acceptanceBasis` → 8 values (both bases). |
+| `src/LabAcceptors.sol` | `MinBodyAcceptor(uint256 minBody)` — immutable threshold, embedded in the runtime code and therefore in the codehash the id commits to. |
+| `src/LabHarness.sol` | `MockAcceptor` documented as a mutable test double: policy-only by lab convention. |
+| `test/LabBase.sol` | QUOTE registered with `MinBodyAcceptor(32)`, PAIR with `MinBodyAcceptor(96)` as mandatory rules; the mock is installed as policy row 2 on both through `activate`. |
+
+**Addendum decisions.** (1) Every mandatory fixture rule is stateless or immutable-configured: `QuoteAcceptor`, `LabelAcceptor`, `StrictQuoteAcceptor` (pure), `MinBodyAcceptor` (immutable). (2) The mock is only ever an additional policy; every mock refusal in tests and runner is now `E_POLICY_REJECTED`. (3) Regression: **option (b)** — `test_F5d_mutable_mandatory_acceptor_is_a_documented_gap_not_detected` registers a Type with a fresh mock as its mandatory rule, flips `set(1, 0)`, and shows the same body now refused under the same id with the same `ruleId` and no `E_ACCEPTOR_CODE`; the docs state the limit. A self-declared "stateless" descriptor flag was rejected as an unenforceable invented mechanism (the registry cannot verify it). (4) Wording: production does **not** require pure callbacks — stateful developer rules remain allowed when their declared dependency/basis semantics are explicit (programmable acceptance); a codehash alone simply declares nothing about them. The lab convention is a fixture discipline, not a protocol rule.
+
+**Effects.** Historical: every admission's basis now names the mandatory rule (immutable, so today's registry value is the historical one) and the policy row. Signatures: the profile fold gained the `ruleId` field, so profile bytes differ from the earlier repair for the same fixture (already a new profile vs `dcc7b94`); a policy activation still stales unsent signatures. Import: destination re-runs mandatory + destination policy. QUOTE's/PAIR's ids now commit to the `MinBodyAcceptor` codehashes (different from the earlier repair's, which committed to the mock's).
+
+**Cost (ESTIMATED).** Registration: unchanged slot count (the acceptor address packs into the header). Activation: unchanged. Admission: **+1 bounded STATICCALL when a policy row is active** (`ACCEPT_GAS` bound, ~3–5k call overhead plus the acceptor's own work; the 63/64 guard applies to each call); 0 when the active row is `address(0)`; the `typeInfo` read returns two more words (a few hundred gas). Profile computation: same call count.
+
+**Tests.** `test_F5a_activate_zero_keeps_the_mandatory_rule`, `test_F5b_permissive_policy_keeps_the_mandatory_rule` (both bases recorded), `test_F5c_policy_adds_constraints_but_cannot_remove_them` (strict activation rejects what the mandatory rule accepted — `E_POLICY_REJECTED`; the mandatory rule still applies underneath — `E_REJECTED`; one epoch per activation; stale signature `E_INTENT`; `activate(0)` then the mandatory rule alone decides; first admission keeps row 2; evidence reconstructs), `test_F5d_…` (gap demonstration). F3/F4/R3 updated to the 7/6/8-way views and row numbering (row 2 = mock). Phase 1 F5 text: `FALSIFY.phase1-F5.t.sol.txt` (compiles against `aaecfed` only).
+
+**Stack fix (08:00 compile, pin `3c6947d`).** `forge build` failed at `Ledger.sol:478` (`registry.refTypes`) because via-IR inlined `_applyPublish` into the batch loop. Restructured without changing ABI or state layout: `_run` → `_beginPublication` / loop of `_applyOne` / `_endPublication` (no per-item temporaries in the loop); `_applyPublish` → `_typeOf` (memory `TypeView`), `_bodyOf`, `_checkRefs`, `_acceptAll`, `_admitRecord` (~7 live locals; `expected` lives only inside `_checkRefs`). `TypeRegistry.register` has 5 locals; `importPublication` lost a branch and is otherwise as it compiled at `df23bbb`. Not compiled here.
+
+## Runner fixes (independent runner review of `3c6947d`, NO-GO → repaired; `node --check` only, tests unrun by me)
+
+| Review item | Fix in `script/measure.mjs` | Test in `script/measure.test.mjs` |
+|---|---|---|
+| 1 — static probe without `from` observed `E_ADMIN` / the wrong caller | `observeRaw` takes `from` and retains it (`params[0] = {from, to, data}` for failure-static probes; `obs.from`); `failureRow` takes `{ wallet, args }`, simulates from `wallet.address` (default `ctx.deployer`, the actual relayer) and sends from that same wallet; the refused-re-registration and msg-sender import rows pass `wallet: ctx.deployer` explicitly | `failureRow simulates the static probe FROM the actual sender…`; `failureRow catches a caller-insensitive probe: E_ADMIN…` (a caller-sensitive mock returns `E_TYPE_EXISTS` only when simulated from the sender; the no-`from` variant fails the selector assertion) |
+| 2 — assert error arguments | `failureRow` decodes the retained revert data with `iface(errContract).parseError` when `args` is given, asserts the error name and `deepEqual` of normalized arguments, retains `expectedArgs`/`decodedArgs`/`argsMatch` beside the raw data; used for `E_INTENT(3)`, `E_TYPE_EXISTS(QUOTE)`, `E_POLICY_REJECTED(0, QUOTE)`, `E_REJECTED(0, STRICT)` ×3, `E_SOURCE_UNSUPPORTED()` ×2 | `failureRow asserts the decoded revert ARGUMENTS…` (match, wrong field, wrong error name, hex case-insensitivity) |
+| 3 — close the joins | `resolveType` asserts `typeInfo.ruleId == descriptor.ruleId == derivation codehash`, `descriptor.mandatoryAcceptor`/`shape`, and at the registration block activation row 1 with no policy; `policy/activate` joins `typeInfo` ↔ activation rows 1..3 ↔ both admissions' `acceptanceBasis` by Type, mandatory rule, policy acceptor, codehash and epoch, compares the complete immutable descriptor (`immutableOf`) and, when deployed here, the deployed runtime codehashes (`ctx.codehashes`); `harvest` now retains, for EVERY present publish/reuse admission, `acceptanceBasis` and the named `activation` row as raw replies plus `join` (asserted `ok`) | `joinBasis flags a basis whose policy row, codehash or epoch disagree…` |
+| 4 — literal, fail-closed selection | `buildCellPlan()` (static ordered 21-cell plan) + `selectCells(planKeys, {cells, only})` run BEFORE `startAnvil`: `--cells a,b` exact keys; unknown keys or an empty selection throw; the legacy `--only` substring resolves against the same plan; `report.cellPlan` / `plannedCells` / `executedCells` (asserted equal at the end) / `skippedCells` | `selectCells rejects unknown keys and empty selections…` |
+| 5 — manifest text | `fixtures.typeClosure.payloadControlsVsMantissas` (quote3000/quote3100 are uint256 3000/3100 payload controls; mantissas are 2_500_000_000 / 2_502_000_000 / 2_501_000_000); the policy row now states the actual fixture (controls below the cap) AND the deliberate above-cap body uint256 3_000_000_000 (not a control); 21 cells everywhere | — |
+| 6 — tests | the three existing `failureRow` tests now pass a `deployer` in the context (behaviour change: `from` comes from the sender wallet); no other existing test changed | 11 → 16 tests |
+
+Corrections applied from the published review: (5) the cell publishes both the payload controls and the deliberate above-cap body and the manifest says exactly what each proves; (3) adapted to the F5 shape (mandatory rule + additional policy), including `typeInfo.policyCodehash == activation(3).codehash == deployed StrictQuoteAcceptor codehash` and `descriptor` deep-equality minus `activations`.
+
 ## Tests
 
 New `test/Falsify.t.sol` (Phase 2 form; the Phase 1 form that fails on `e77f36d` is retained at `FALSIFY.phase1.t.sol.txt`):
@@ -129,17 +167,19 @@ Adapted existing tests: `test/LabBase.sol` (ids derived in `setUp`, `*_SHAPE` co
 
 Working-tree Git blob hashes (`git hash-object`) after the final desk-check; nothing committed (branch `fable/2026-09-12-road-b-lab`, base `e77f36d`). Pre-repair Core blobs are the PROFILE.md `dcc7b94` pins.
 
-| File | Before (`e77f36d` = `dcc7b94` Core) | After |
-|---|---|---|
-| `src/Keys.sol` | `a291be9446ed1e4c2cb9bb14608ae7ca06a1c238` | `4386f0384b90be03d50cdfa4e109971511dd2c8f` |
-| `src/Interfaces.sol` | `3155357f6d3e58c910828df2eb798ecb53ea24f9` | `8e22a8c5cbe3095fa9930223121c96c3a2eb0359` |
-| `src/TypeRegistry.sol` | `235174fb951ba28084723448bd89ecfda340a6ec` | `d81a88ee987e8c4f5306cb7faacf2551d044de5c` |
-| `src/Ledger.sol` | `c454e2699b9335c0a23bbfb6ed72e1ba0e5c7a14` | `a60ab9a419a26f7bb6139811f706e58e7e144af9` |
-| `test/LabBase.sol` | (e77f36d) | `6a19dc46ec1b40f3c61e1ba48e09d41e3792c519` |
-| `test/LedgerMatrix.t.sol` | (e77f36d) | `e82a8b30fed8d0d4d91c011435d421eab4b22764` |
-| `test/LedgerImport.t.sol` | (e77f36d) | `3f74d63fdd623cca48c8a85dcb0b8e8f426c536e` |
-| `test/LabelType.t.sol` | (e77f36d) | `01053f4b54a0fe9f303ea7e5efd3fa768705f925` |
-| `test/JoinedConsumer.t.sol` | (e77f36d) | `8abc703279638b512273038057c3f0c7436aefed` |
-| `test/Falsify.t.sol` | — (new) | `33c4adb3e52c292eee54d27222e5d2866aba0f9d` |
+| File | Before (`e77f36d` = `dcc7b94` Core) | After R1/R2 (committed `aaecfed`) | After F5 + stack fix (working tree on `3c6947d`) |
+|---|---|---|---|
+| `src/Keys.sol` | `a291be9446ed1e4c2cb9bb14608ae7ca06a1c238` | `4386f0384b90be03d50cdfa4e109971511dd2c8f` | unchanged |
+| `src/Interfaces.sol` | `3155357f6d3e58c910828df2eb798ecb53ea24f9` | `8e22a8c5cbe3095fa9930223121c96c3a2eb0359` | `d0b7b9b21c9c728f0eb57745fb095f541d0138b6` |
+| `src/TypeRegistry.sol` | `235174fb951ba28084723448bd89ecfda340a6ec` | `d81a88ee987e8c4f5306cb7faacf2551d044de5c` | `bfcc6c1f4ee92da2c8deb379c39a34c97289a1cd` |
+| `src/Ledger.sol` | `c454e2699b9335c0a23bbfb6ed72e1ba0e5c7a14` | `a60ab9a419a26f7bb6139811f706e58e7e144af9` | `ef1813a6c954835ee471e2d5e1652f88ae181010` |
+| `src/LabAcceptors.sol` | (e77f36d) | unchanged | `b1584a1303e229edfc8c5fef960b34261accbae7` (+`MinBodyAcceptor`) |
+| `src/LabHarness.sol` | (e77f36d) | unchanged | `128e85a4dc8029482d1ce58c963f430e2df47975` (comment only) |
+| `test/LabBase.sol` | (e77f36d) | `6a19dc46ec1b40f3c61e1ba48e09d41e3792c519` | `c8456b720d7b41b8bfdab463cf446bf820ad443c` |
+| `test/LedgerMatrix.t.sol` | (e77f36d) | `e82a8b30fed8d0d4d91c011435d421eab4b22764` | `a54fdbb3ec77a57f3f88c19ea1de1cdddc35e337` |
+| `test/LedgerImport.t.sol` | (e77f36d) | `3f74d63fdd623cca48c8a85dcb0b8e8f426c536e` | `81adcd28dfaf608cc61bb8be673810971f340fa8` |
+| `test/LabelType.t.sol` | (e77f36d) | `01053f4b54a0fe9f303ea7e5efd3fa768705f925` | unchanged |
+| `test/JoinedConsumer.t.sol` | (e77f36d) | `8abc703279638b512273038057c3f0c7436aefed` | unchanged |
+| `test/Falsify.t.sol` | — (new) | `33c4adb3e52c292eee54d27222e5d2866aba0f9d` | `2a798fedabaf4bcb41eb0a8272d4dcc225da596b` |
 
-Untouched: `src/IndexModule.sol`, `src/LensReader.sol`, `src/LabHarness.sol`, `src/LabAcceptors.sol`, `src/JoinedConsumer.sol`, `test/LedgerEvidence.t.sol`, `script/measure.mjs`, `vectors/*`, `evidence/*`, `foundry.toml`.
+Untouched throughout: `src/IndexModule.sol`, `src/LensReader.sol`, `src/JoinedConsumer.sol`, `test/LedgerEvidence.t.sol`, `vectors/*`, `evidence/*`, `foundry.toml`. Phase 1 texts: `FALSIFY.phase1.t.sol.txt` (fails on `e77f36d`), `FALSIFY.phase1-F5.t.sol.txt` (fails on `aaecfed`).

@@ -73,7 +73,12 @@ function runnerDeclaration(startText, endText) {
   return source.slice(start, end);
 }
 
-function loadFailureRow({ expectedSelector, observedSelector, before = { value: 1 }, after = before }) {
+const SENDER = { address: '0x00000000000000000000000000000000000000a1' };
+const ADMIN_ERROR = '0x11111111';
+const EXISTS_ERROR = '0x22222222';
+
+// `observeRaw` / `send` / `iface` are injectable so the caller (`from`) and revert-argument plumbing can be observed
+function loadFailureRow({ expectedSelector, observedSelector, before = { value: 1 }, after = before, observeRaw = null, send = null, iface = null, captured = {} }) {
   const stripBlock = runnerDeclaration('const stripBlock =', '// ---------------------------------------------------------------- sealed cells');
   const failureRow = runnerDeclaration('async function failureRow(', 'const baseCount =');
   const probes = [before, after];
@@ -81,11 +86,23 @@ function loadFailureRow({ expectedSelector, observedSelector, before = { value: 
     FAIL_GAS: 1n,
     assert,
     errorSelector: () => expectedSelector,
+    iface: iface ?? (() => { throw new Error('iface must not be needed without expected arguments'); }),
     log() {},
-    observeRaw: async () => ({ error: { data: observedSelector } }),
-    send: async () => ({ block: 12, status: 0 }),
+    observeRaw: observeRaw ?? (async (_ctx, _sink, _stage, _meta, _to, _data, _block, opts) => { captured.from = opts?.from ?? null; return { error: { data: observedSelector } }; }),
+    send: send ?? (async (_ctx, _build, _label, opts) => { captured.sendWallet = opts?.wallet ?? null; return { block: 12, status: 0 }; }),
     stateProbe: async () => probes.shift(),
   });
+}
+const failureCtx = () => ({ latestBlock: async () => 11, raw: [], deployer: SENDER });
+
+function loadSelectCells() {
+  const declaration = runnerDeclaration('function selectCells(', '// ---------------------------------------------------------------- deployment');
+  return vm.runInNewContext(`${declaration}\nselectCells`, {});
+}
+
+function loadJoinBasis() {
+  const declaration = runnerDeclaration('function joinBasis(', 'const QUOTE_HIGH =');
+  return vm.runInNewContext(`${declaration}\njoinBasis`, {});
 }
 
 function loadPersist(outJson, write = writeFileSync) {
@@ -171,17 +188,81 @@ test('report finalizer catches rejecting a zero-mismatch run before successful f
 
 test('failureRow catches accepting an unavailable expected selector', async () => {
   const failureRow = loadFailureRow({ expectedSelector: null, observedSelector: '0x12345678' });
-  await assert.rejects(() => failureRow({ latestBlock: async () => 11, raw: [] }, 'missing-selector', {}, 'MissingError', []), /expected selector unavailable/);
+  await assert.rejects(() => failureRow(failureCtx(), 'missing-selector', {}, 'MissingError', []), /expected selector unavailable/);
 });
 
 test('failureRow catches accepting a wrong revert selector', async () => {
   const failureRow = loadFailureRow({ expectedSelector: '0x12345678', observedSelector: '0x87654321' });
-  await assert.rejects(() => failureRow({ latestBlock: async () => 11, raw: [] }, 'wrong-selector', {}, 'WrongError', []), /revert selector mismatch/);
+  await assert.rejects(() => failureRow(failureCtx(), 'wrong-selector', {}, 'WrongError', []), /revert selector mismatch/);
 });
 
 test('failureRow catches accepting changed state after the reverted transaction', async () => {
   const failureRow = loadFailureRow({ expectedSelector: '0x12345678', observedSelector: '0x12345678', before: { value: 1 }, after: { value: 2 } });
-  await assert.rejects(() => failureRow({ latestBlock: async () => 11, raw: [] }, 'changed-state', {}, 'StateError', []), /state changed across expected revert/);
+  await assert.rejects(() => failureRow(failureCtx(), 'changed-state', {}, 'StateError', []), /state changed across expected revert/);
+});
+
+test('failureRow simulates the static probe FROM the actual sender and sends from that same wallet', async () => {
+  const captured = {};
+  const failureRow = loadFailureRow({ expectedSelector: '0x12345678', observedSelector: '0x12345678', captured });
+  const row = await failureRow(failureCtx(), 'sender-plumbing', {}, 'SomeError', []);
+  assert.equal(captured.from, SENDER.address);
+  assert.equal(captured.sendWallet, SENDER);
+  assert.equal(row.from, SENDER.address);
+  const other = { address: '0x00000000000000000000000000000000000000b2' };
+  await failureRow(failureCtx(), 'explicit-wallet', {}, 'SomeError', [], { wallet: other });
+  assert.equal(captured.from, other.address);
+  assert.equal(captured.sendWallet, other);
+});
+
+test('failureRow catches a caller-insensitive probe: E_ADMIN would be observed instead of E_TYPE_EXISTS without from', async () => {
+  // a registry whose admin-only call reverts E_ADMIN unless simulated from the admin
+  const callerSensitive = async (_ctx, _sink, _stage, _meta, _to, _data, _block, opts) => ({ error: { data: opts?.from === SENDER.address ? EXISTS_ERROR : ADMIN_ERROR } });
+  const withFrom = loadFailureRow({ expectedSelector: EXISTS_ERROR, observedSelector: null, observeRaw: callerSensitive });
+  const row = await withFrom(failureCtx(), 'refused-re-registration', {}, ['TypeRegistry', 'E_TYPE_EXISTS'], []);
+  assert.equal(row.observedSelector, EXISTS_ERROR);
+  // the pre-review probe (no from) reaches the admin check first and the selector assertion must fail loudly
+  const withoutFrom = loadFailureRow({ expectedSelector: EXISTS_ERROR, observedSelector: null, observeRaw: async () => ({ error: { data: ADMIN_ERROR } }) });
+  await assert.rejects(() => withoutFrom(failureCtx(), 'refused-re-registration-no-from', {}, ['TypeRegistry', 'E_TYPE_EXISTS'], []), /revert selector mismatch/);
+});
+
+test('failureRow asserts the decoded revert ARGUMENTS when expected arguments are given', async () => {
+  const selector = '0x33333333';
+  const data = `${selector}00`;
+  const parsed = { name: 'E_INTENT', args: [3n] };
+  const iface = () => ({ parseError: (d) => (d === data ? parsed : null) });
+  const ok = loadFailureRow({ expectedSelector: selector, observedSelector: data, iface });
+  const row = await ok(failureCtx(), 'stale-signature', {}, 'E_INTENT', [], { args: [3] });
+  assert.deepEqual(row.decodedArgs, ['3']);
+  assert.deepEqual(row.expectedArgs, ['3']);
+  assert.equal(row.argsMatch, true);
+  const wrong = loadFailureRow({ expectedSelector: selector, observedSelector: data, iface });
+  await assert.rejects(() => wrong(failureCtx(), 'stale-signature-wrong-field', {}, 'E_INTENT', [], { args: [2] }), /revert arguments mismatch/);
+  const wrongName = loadFailureRow({ expectedSelector: selector, observedSelector: data, iface: () => ({ parseError: () => ({ name: 'E_OTHER', args: [3n] }) }) });
+  await assert.rejects(() => wrongName(failureCtx(), 'stale-signature-wrong-error', {}, 'E_INTENT', [], { args: [3] }), /does not decode as/);
+  // typeId arguments compare case-insensitively as hex strings
+  const typed = loadFailureRow({ expectedSelector: selector, observedSelector: data, iface: () => ({ parseError: () => ({ name: 'E_TYPE_EXISTS', args: ['0xABCDEF'] }) }) });
+  const typedRow = await typed(failureCtx(), 'refused', {}, ['TypeRegistry', 'E_TYPE_EXISTS'], [], { args: ['0xabcdef'] });
+  assert.deepEqual(typedRow.decodedArgs, ['0xabcdef']);
+});
+
+test('selectCells rejects unknown keys and empty selections before any chain starts, and keeps plan order', () => {
+  const selectCells = loadSelectCells();
+  const plan = ['native-one/quote', 'failure-rows', 'policy/activate', 'failure/refused-re-registration'];
+  assert.deepEqual(selectCells(plan, {}), plan);
+  assert.deepEqual(selectCells(plan, { cells: 'failure/refused-re-registration, policy/activate' }), ['policy/activate', 'failure/refused-re-registration']);
+  assert.deepEqual(selectCells(plan, { only: 'failure' }), ['failure-rows', 'failure/refused-re-registration']);
+  assert.throws(() => selectCells(plan, { cells: 'policy/activate,does-not-exist' }), /unknown cell\(s\) does-not-exist/);
+  assert.throws(() => selectCells(plan, { cells: '' }), /selected zero cells/);
+  assert.throws(() => selectCells(plan, { only: 'nothing-matches' }), /selected zero cells/);
+});
+
+test('joinBasis flags a basis whose policy row, codehash or epoch disagree with the registry row', () => {
+  const joinBasis = loadJoinBasis();
+  const basis = { typeId: '0xT', activation: '3', policyAcceptor: '0xAA', policyCodehash: '0xCC', epoch: '9' };
+  assert.equal(joinBasis(basis, { acceptor: '0xaa', codehash: '0xcc', epoch: '9' }).ok, true);
+  assert.equal(joinBasis(basis, { acceptor: '0xaa', codehash: '0xdd', epoch: '9' }).codehashEqual, false);
+  assert.equal(joinBasis(basis, { acceptor: '0xaa', codehash: '0xcc', epoch: '8' }).ok, false);
+  assert.equal(joinBasis(basis, { acceptor: '0xbb', codehash: '0xcc', epoch: '9' }).acceptorEqual, false);
 });
 
 test('persist catches overwriting prior evidence when the replacement write fails', () => {

@@ -7,8 +7,7 @@ import {IndexModule} from "../src/IndexModule.sol";
 import {LensReader} from "../src/LensReader.sol";
 import {TypeRegistry} from "../src/TypeRegistry.sol";
 import {IAcceptor} from "../src/Interfaces.sol";
-import {QuoteAcceptor, MinBodyAcceptor} from "../src/LabAcceptors.sol";
-import {MockAcceptor} from "../src/LabHarness.sol";
+import {QuoteAcceptor} from "../src/LabAcceptors.sol";
 import {LabBase} from "./LabBase.sol";
 
 /// DISPOSABLE LAB, NO PROTOCOL CLAIM. PHASE 2 (flipped) falsifiers + repair tests of the
@@ -22,12 +21,6 @@ import {LabBase} from "./LabBase.sol";
 ///       that admitted a record is recorded per admission and reported by acceptanceBasis.
 ///   R3  receipt-bound activation (stale signature, old evidence reconstructs) and import that
 ///       re-runs the destination's current policy while retaining the source basis.
-///   F5  the declared rule is the Type's MANDATORY predicate (always runs, refusal final);
-///       policy can only add constraints; activate(0) = no additional policy, never no
-///       validation; the mutable-mandatory gap is demonstrated and documented, not repaired.
-///       Fixture convention: mandatory rules are stateless/immutable-configured (MinBodyAcceptor);
-///       the mutable MockAcceptor is QUOTE's/PAIR's ADDITIONAL policy (row 2) from LabBase.setUp.
-///       The Phase 1 F5 text that fails on aaecfed is retained at FALSIFY.phase1-F5.t.sol.txt.
 
 /// Fixture rule v2 of sdk-fixture step 10: a 32-byte uint256 quote whose mantissa is at most
 /// 2_500_000_000. A different codehash from MockAcceptor.
@@ -220,10 +213,10 @@ contract FalsifyTest is LabBase {
     /// twice; a record admitted under QUOTE stays a well-formed QUOTE; the id is reconstructible
     /// and the same on a second registry (Realm).
     function test_F3_type_identity_is_exact_and_immutable() public {
-        (bool reg0, address man0, bytes32 ch0, address pol0, bytes32 pch0, uint8 rc0, uint16 act0) = registry.typeInfo(QUOTE);
-        require(reg0 && man0 == address(quoteRule) && ch0 == address(quoteRule).codehash && pol0 == address(acceptor) && pch0 == address(acceptor).codehash && rc0 == 0 && act0 == 2, "QUOTE as registered: mandatory rule + mock policy row 2");
-        (bytes32 shape0, bytes32 rule0, address dman0, uint8 drc0, uint16 dact0,) = registry.descriptor(QUOTE);
-        require(shape0 == QUOTE_SHAPE && rule0 == ch0 && dman0 == address(quoteRule) && drc0 == 0 && dact0 == 2, "descriptor retained");
+        (bool reg0, address acc0, bytes32 ch0, uint8 rc0, uint16 act0) = registry.typeInfo(QUOTE);
+        require(reg0 && acc0 == address(acceptor) && ch0 == address(acceptor).codehash && rc0 == 0 && act0 == 1, "QUOTE as registered");
+        (bytes32 shape0, bytes32 rule0, uint8 drc0, uint16 dact0,) = registry.descriptor(QUOTE);
+        require(shape0 == QUOTE_SHAPE && rule0 == ch0 && drc0 == 0 && dact0 == 1, "descriptor retained");
         bytes32 r1 = alice.publish(QUOTE, q(3000)); // admission 1 under activation 1
         Ledger.Action[] memory same = one(aPublish(QUOTE, q(4000)));
         (Ledger.Intent memory intent, bytes memory sig) = signed(PK_A, ledger, 0, same); // signed at this epoch
@@ -233,13 +226,13 @@ contract FalsifyTest is LabBase {
         oneItem[0] = ITEM;
         bytes32 changed = registry.register(QUOTE_SHAPE, address(other), oneItem);
         require(changed != QUOTE && changed == Keys.typeId(QUOTE_SHAPE, oneItem, address(other).codehash), "F3: changed rule/refs = new exact id, reconstructible");
-        (, address man1, bytes32 ch1, address pol1,, uint8 rc1, uint16 act1) = registry.typeInfo(QUOTE);
-        require(man1 == man0 && ch1 == ch0 && pol1 == pol0 && rc1 == rc0 && act1 == act0 && registry.refTypes(QUOTE).length == 0, "F3: QUOTE's identity, mandatory rule and policy unchanged");
+        (, address acc1, bytes32 ch1, uint8 rc1, uint16 act1) = registry.typeInfo(QUOTE);
+        require(acc1 == acc0 && ch1 == ch0 && rc1 == rc0 && act1 == act0 && registry.refTypes(QUOTE).length == 0, "F3: QUOTE's identity and policy unchanged");
         (bytes32 tt,, uint32 occ,) = ledger.record(r1);
         require(tt == QUOTE && occ == 1, "the record still says QUOTE");
         (, uint64 reuseOrd) = bob.execute(one(aReuse(QUOTE, r1)), new bytes[](1)); // still a well-formed QUOTE
-        (bytes32 bt, uint16 bact, address bman, bytes32 bch, address bpol,,,) = ledger.acceptanceBasis(reuseOrd);
-        require(bt == QUOTE && bact == 2 && bman == address(quoteRule) && bch == ch0 && bpol == address(acceptor), "F3: re-admission under the unchanged mandatory rule and policy row 2");
+        (bytes32 bt, uint16 bact, address bacc, bytes32 bch,,) = ledger.acceptanceBasis(reuseOrd);
+        require(bt == QUOTE && bact == 1 && bacc == address(acceptor) && bch == ch0, "F3: re-admission under the unchanged policy row 1");
         // the earlier signature is stale (the epoch moved: E.B.4) but nothing about QUOTE changed
         try ledger.executeSigned(intent, same, bodies1(q(4000)), sig) {
             require(false, "x");
@@ -250,20 +243,19 @@ contract FalsifyTest is LabBase {
         require(ok && rec == address(0), "F3: the old admission's evidence still reconstructs (native)");
         // ---- the same descriptor twice is refused; a different ref list is yet another id
         bytes32[] memory none;
-        try registry.register(QUOTE_SHAPE, address(quoteRule), none) {
+        try registry.register(QUOTE_SHAPE, address(acceptor), none) {
             require(false, "x");
         } catch (bytes memory err) {
             expectSel(err, TypeRegistry.E_TYPE_EXISTS.selector, "F3: identical descriptor is refused, never re-registered");
         }
-        bytes32 refsOnly = registry.register(QUOTE_SHAPE, address(quoteRule), oneItem);
+        bytes32 refsOnly = registry.register(QUOTE_SHAPE, address(acceptor), oneItem);
         require(refsOnly != QUOTE && refsOnly != changed, "F3: refs are part of identity");
         // ---- a second registry (another Realm) derives the same id from the same descriptor
         TypeRegistry reg2 = new TypeRegistry();
-        require(reg2.register(QUOTE_SHAPE, address(quoteRule), none) == QUOTE, "F3: same descriptor, same id on another Realm");
+        require(reg2.register(QUOTE_SHAPE, address(acceptor), none) == QUOTE, "F3: same descriptor, same id on another Realm");
         StrictQuoteAcceptor v2 = new StrictQuoteAcceptor();
         require(reg2.register(QUOTE_SHAPE, address(v2), none) != QUOTE, "F3: another declared rule is another Type");
-        require(registry.typeIdOf(QUOTE_SHAPE, address(quoteRule), none) == QUOTE, "F3: typeIdOf agrees");
-        require(registry.typeIdOf(QUOTE_SHAPE, address(acceptor), none) != QUOTE, "F3: the mock policy is NOT part of QUOTE's identity");
+        require(registry.typeIdOf(QUOTE_SHAPE, address(acceptor), none) == QUOTE, "F3: typeIdOf agrees");
     }
 
     // ------------------------------------------------------------------------ F4 (R2 policy)
@@ -272,40 +264,38 @@ contract FalsifyTest is LabBase {
     /// leaves the descriptor and id untouched, appends a policy row, changes future acceptance
     /// (dedup/reuse included) and every earlier admission keeps its recorded basis.
     function test_F4_policy_activation_is_separate_from_identity_and_basis_is_recorded() public {
-        (, address manV1, bytes32 chV1, address polV1,,,) = registry.typeInfo(QUOTE);
-        require(manV1 == address(quoteRule) && polV1 == address(acceptor), "baseline: mandatory rule + mock policy row 2");
+        (,, bytes32 chV1,,) = registry.typeInfo(QUOTE);
         uint64 epochV1 = registry.epoch();
-        bytes32 rHigh = alice.publish(QUOTE, q(3_000_000_000)); // admission 1, above the v2 cap, admitted under policy row 2 (mock, accept-all)
+        bytes32 rHigh = alice.publish(QUOTE, q(3_000_000_000)); // admission 1, above the v2 cap, admitted under v1
         StrictQuoteAcceptor v2 = new StrictQuoteAcceptor();
-        require(registry.activate(QUOTE, address(v2)) == 3, "F4: policy row 3");
-        (, address manNow, bytes32 chNow, address polNow, bytes32 pchNow, uint8 rcNow, uint16 actNow) = registry.typeInfo(QUOTE);
-        require(manNow == address(quoteRule) && chNow == chV1 && polNow == address(v2) && pchNow == address(v2).codehash && rcNow == 0 && actNow == 3, "F4: v2 is the active ADDITIONAL policy; the mandatory rule is untouched");
-        (bytes32 shape, bytes32 ruleId, address dman,, uint16 activations,) = registry.descriptor(QUOTE);
-        require(shape == QUOTE_SHAPE && ruleId == chV1 && dman == address(quoteRule) && activations == 3, "F4: identity untouched, history appended");
+        require(registry.activate(QUOTE, address(v2)) == 2, "F4: policy row 2");
+        (, address accNow, bytes32 chNow, uint8 rcNow, uint16 actNow) = registry.typeInfo(QUOTE);
+        require(accNow == address(v2) && chNow == address(v2).codehash && rcNow == 0 && actNow == 2, "F4: v2 is the active policy");
+        (bytes32 shape, bytes32 ruleId,, uint16 activations,) = registry.descriptor(QUOTE);
+        require(shape == QUOTE_SHAPE && ruleId == chV1 && activations == 2, "F4: identity untouched, history appended");
         require(registry.epoch() == epochV1 + 1, "F4: epoch moved");
         (bytes32 tt,, uint32 occ,) = ledger.record(rHigh);
-        require(tt == QUOTE && occ == 1, "F4: the row-2-era record is retained");
+        require(tt == QUOTE && occ == 1, "F4: the v1-era record is retained");
         try bob.execute(one(aReuse(QUOTE, rHigh)), new bytes[](1)) {
             require(false, "x");
         } catch (bytes memory err) {
-            expectSel(err, Ledger.E_POLICY_REJECTED.selector, "F4: re-admission runs today's policy on top of the mandatory rule");
+            expectSel(err, Ledger.E_REJECTED.selector, "F4: re-admission runs today's policy");
         }
         try alice.publish(QUOTE, q(3_000_000_001)) {
             require(false, "x");
         } catch (bytes memory err) {
-            expectSel(err, Ledger.E_POLICY_REJECTED.selector, "F4: new publish runs today's policy");
+            expectSel(err, Ledger.E_REJECTED.selector, "F4: new publish runs today's policy");
         }
-        (bytes32 bt, uint16 bact, address bman, bytes32 bch, address bpol, bytes32 bpch, uint64 bep,) = ledger.acceptanceBasis(1);
-        (,, uint64 epochRow2,) = registry.activation(QUOTE, 2);
-        require(bt == QUOTE && bact == 2 && bman == address(quoteRule) && bch == chV1 && bpol == address(acceptor) && bpch == address(acceptor).codehash && bep == epochRow2 && bep <= epochV1, "F4: admission 1 reports policy row 2 (mock), not today's row");
+        (bytes32 bt, uint16 bact, address bacc, bytes32 bch, uint64 bep,) = ledger.acceptanceBasis(1);
+        (,, uint64 epochRow1,) = registry.activation(QUOTE, 1);
+        require(bt == QUOTE && bact == 1 && bacc == address(acceptor) && bch == chV1 && bep == epochRow1 && bep <= epochV1, "F4: admission 1 reports the v1 basis, not today's policy");
         bytes32 rLow = alice.publish(QUOTE, q(2_000_000_000)); // admission 2 under v2
-        (, uint16 bact2, address bman2,, address bpol2, bytes32 bpch2, uint64 bep2,) = ledger.acceptanceBasis(2);
-        require(bact2 == 3 && bman2 == address(quoteRule) && bpol2 == address(v2) && bpch2 == pchNow && bep2 == epochV1 + 1 && rLow != rHigh, "F4: admission 2 reports policy row 3 (v2) with the same mandatory rule");
+        (, uint16 bact2, address bacc2, bytes32 bch2, uint64 bep2,) = ledger.acceptanceBasis(2);
+        require(bact2 == 2 && bacc2 == address(v2) && bch2 == chNow && bep2 == epochV1 + 1 && rLow != rHigh, "F4: admission 2 reports the v2 basis");
         (address a1, bytes32 c1,,) = registry.activation(QUOTE, 1);
         (address a2, bytes32 c2,,) = registry.activation(QUOTE, 2);
-        (address a3, bytes32 c3,,) = registry.activation(QUOTE, 3);
-        require(a1 == address(0) && c1 == bytes32(0) && a2 == address(acceptor) && c2 == address(acceptor).codehash && a3 == address(v2) && c3 == pchNow, "F4: rows 1..3 readable (append-only): none, mock, v2");
-        try registry.activation(QUOTE, 4) {
+        require(a1 == address(acceptor) && c1 == chV1 && a2 == address(v2) && c2 == chNow, "F4: both rows readable (append-only)");
+        try registry.activation(QUOTE, 3) {
             require(false, "x");
         } catch (bytes memory err) {
             expectSel(err, TypeRegistry.E_ACTIVATION.selector, "F4: no silent absence for a missing row");
@@ -330,7 +320,7 @@ contract FalsifyTest is LabBase {
         Ledger.Action[] memory a1 = one(aPublish(QUOTE, q(100)));
         (Ledger.Intent memory i1, bytes memory s1) = signed(PK_A, ledger, 1, a1); // signed at epoch N, unsent
         StrictQuoteAcceptor v2 = new StrictQuoteAcceptor();
-        registry.activate(QUOTE, address(v2)); // epoch N+1, policy row 3 (row 2 is the setUp mock)
+        registry.activate(QUOTE, address(v2)); // epoch N+1
         uint64 before = admissions();
         try ledger.executeSigned(i1, a1, bodies1(q(100)), s1) {
             require(false, "x");
@@ -340,13 +330,13 @@ contract FalsifyTest is LabBase {
         require(admissions() == before && ledger.nonces(eoaA) == 1, "R3: no effect");
         (,, bytes32 digest, address rec, bool ok) = recon.reconstruct(ledger, pub0);
         require(ok && rec == eoaA && digest == ledger.intentDigest(i0, keccak256(abi.encode(a0))), "R3: the epoch-N admission's evidence still reconstructs from its stored profile");
-        (, uint16 bact,,,,,,) = ledger.acceptanceBasis(1);
-        require(bact == 2, "R3: and keeps basis row 2");
+        (, uint16 bact,,,,) = ledger.acceptanceBasis(1);
+        require(bact == 1, "R3: and keeps basis row 1");
         (Ledger.Intent memory i2, bytes memory s2) = signed(PK_A, ledger, 1, a1); // re-signed under N+1
         require(i2.acceptanceProfile != i1.acceptanceProfile, "R3: the profile changed with the activation");
         (, uint64 first2) = ledger.executeSigned(i2, a1, bodies1(q(100)), s2);
-        (, uint16 bact2, address bman2,, address bpol2,,,) = ledger.acceptanceBasis(first2);
-        require(bact2 == 3 && bman2 == address(quoteRule) && bpol2 == address(v2), "R3: admitted under the new basis (mandatory rule + policy row 3)");
+        (, uint16 bact2, address bacc2,,,) = ledger.acceptanceBasis(first2);
+        require(bact2 == 2 && bacc2 == address(v2), "R3: admitted under the new basis");
     }
 
     /// Import of an EOA-signed packet re-runs destination acceptance under the DESTINATION's
@@ -354,10 +344,10 @@ contract FalsifyTest is LabBase {
     function test_R3_import_reruns_destination_policy_and_retains_source_basis() public {
         TypeRegistry reg2 = new TypeRegistry();
         bytes32[] memory none;
-        require(reg2.register(QUOTE_SHAPE, address(quoteRule), none) == QUOTE, "same descriptor => same exact id at the destination");
+        require(reg2.register(QUOTE_SHAPE, address(acceptor), none) == QUOTE, "same descriptor => same exact id at the destination");
         Ledger dest2 = new Ledger(reg2, REALM2); // no index module: obligations 0 on both sides is irrelevant, each signs its own
         StrictQuoteAcceptor v2 = new StrictQuoteAcceptor();
-        require(reg2.activate(QUOTE, address(v2)) == 2, "destination policy v2 (row 2); the source keeps the mock policy (row 2)");
+        require(reg2.activate(QUOTE, address(v2)) == 2, "destination policy v2; source stays v1");
         // source publication A (v1 admits 3e9)
         bytes32 subjA = subjectOf(eoaA, 51);
         bytes32 rA = rid(QUOTE, q(3_000_000_000));
@@ -373,7 +363,7 @@ contract FalsifyTest is LabBase {
         try dest2.importPublication(sourceOf(ledger, srcA), a, b, da, dsa) {
             require(false, "x");
         } catch (bytes memory err) {
-            expectSel(err, Ledger.E_POLICY_REJECTED.selector, "R3: the destination's ADDITIONAL policy v2 rejects what the source admitted (the mandatory rule accepts on both)");
+            expectSel(err, Ledger.E_REJECTED.selector, "R3: destination policy v2 rejects what the source admitted under v1");
         }
         require(dest2.subjectCreatedAt(subjA) == 0 && publications(dest2) == 0 && dest2.nonces(eoaA) == 0, "R3: rejected import writes nothing");
         // source publication B (compliant): imports, destination basis 2, source basis 1 retained
@@ -394,10 +384,10 @@ contract FalsifyTest is LabBase {
         (,,,,,,,,,, bytes32 dstProfile,,) = dest2.evidence(dstB);
         require(kept.grade == 1 && kept.realmId == REALM && kept.acceptanceProfile == srcProfile && srcProfile == ib.acceptanceProfile, "R3: source basis retained verbatim");
         require(dstProfile == db.acceptanceProfile && dstProfile != srcProfile, "R3: destination admission under its own profile");
-        (bytes32 st, uint16 sact, address sman,, address spol,,,) = ledger.acceptanceBasis(srcBFirst + 1);
-        (bytes32 dt, uint16 dact, address dman,, address dpol,,,) = dest2.acceptanceBasis(dstBFirst + 1);
-        require(st == QUOTE && sact == 2 && sman == address(quoteRule) && spol == address(acceptor), "R3: source admission basis: mandatory rule + policy row 2 (mock)");
-        require(dt == QUOTE && dact == 2 && dman == address(quoteRule) && dpol == address(v2), "R3: destination admission basis: the same mandatory rule + policy row 2 (v2)");
+        (bytes32 st, uint16 sact, address sacc,,,) = ledger.acceptanceBasis(srcBFirst + 1);
+        (bytes32 dt, uint16 dact, address dacc,,,) = dest2.acceptanceBasis(dstBFirst + 1);
+        require(st == QUOTE && sact == 1 && sacc == address(acceptor), "R3: source admission basis: row 1 (v1)");
+        require(dt == QUOTE && dact == 2 && dacc == address(v2), "R3: destination admission basis: row 2 (v2)");
         require(dest2.subjectCreatedAt(subjB) != 0 && dest2.subjectCreatedAt(subjB) == dstBFirst, "R3: id(F) preserved at the destination");
         (,,, address rec, bool ok) = recon.reconstruct(dest2, dstB);
         require(ok && rec == eoaA, "R3: destination authorization reconstructs");
@@ -406,102 +396,47 @@ contract FalsifyTest is LabBase {
         require(srcAFirst == 1 && srcA == 1, "fixture ordinals");
     }
 
-    // ------------------------------------------------------------------------ F5 (repaired)
+    // ------------------------------------------------------------------------ F5 (PHASE 1: expected to FAIL on aaecfed)
 
     bytes32 internal constant STRICT_SHAPE = keccak256("lab/type/quote-strict/1");
 
-    function expectRejected(bytes32 typeId, bytes memory body, bytes4 expected, string memory label) internal {
-        uint64 before = admissions();
-        try alice.publish(typeId, body) {
-            require(false, label);
-        } catch (bytes memory err) {
-            expectSel(err, expected, label);
-        }
-        require(admissions() == before, "nothing admitted");
-    }
-
-    /// F5a/b. The declared rule is the Type's MANDATORY predicate: it runs on every publish/reuse
-    /// and its refusal (E_REJECTED) is final. activate(T, address(0)) means "no additional
-    /// policy" and a permissive policy adds nothing — the rejected body stays rejected, and the
-    /// basis records the mandatory rule AND the policy row.
+    /// F5. The Type id commits to the declared rule (ruleId = StrictQuoteAcceptor's codehash), but on
+    /// aaecfed the ACTIVE policy row is the ONLY validator Ledger._applyPublish runs: activate(T,
+    /// address(0)) (F5a) or a permissive acceptor (F5b) REPLACES the declared rule, so a body the
+    /// rule rejects is admitted under the same Type id afterwards. Retaining the old admission's
+    /// basis does nothing for FUTURE records: the Type's fixed meaning is not enforced.
+    /// EXPECTED TO FAIL on aaecfed: TypeRegistry.register writes the declared acceptor only as
+    /// policy row 1 and activate() appends a REPLACING row; typeInfo returns the active row alone;
+    /// Ledger._applyPublish runs `if (acceptor != address(0)) _accept(...)` with that row only.
     function _f5(address policy, string memory label) internal {
         StrictQuoteAcceptor strict = new StrictQuoteAcceptor();
         bytes32[] memory none;
         bytes32 strictType = registry.register(STRICT_SHAPE, address(strict), none);
         bytes memory high = q(3_000_000_000); // above the declared cap
-        expectRejected(strictType, high, Ledger.E_REJECTED.selector, string.concat(label, ": declared rule rejects before any activation"));
-        require(registry.activate(strictType, policy) == 2, "policy row 2 installed");
-        expectRejected(strictType, high, Ledger.E_REJECTED.selector, string.concat("F5 ", label, ": the mandatory rule still rejects after the activation"));
-        (, address man, bytes32 ruleId, address pol,,, uint16 act) = registry.typeInfo(strictType);
-        require(man == address(strict) && ruleId == address(strict).codehash && pol == policy && act == 2, "mandatory rule pinned; policy row 2 = the activation");
-        bytes32 low = alice.publish(strictType, q(1)); // a compliant body: both accept
-        (bytes32 bt, uint16 bact, address bman, bytes32 bch, address bpol,,,) = ledger.acceptanceBasis(1);
-        require(bt == strictType && bact == 2 && bman == address(strict) && bch == ruleId && bpol == policy && low == rid(strictType, q(1)), "basis records the mandatory rule AND the policy row");
+        try alice.publish(strictType, high) {
+            require(false, "probe: the declared rule must reject the high body");
+        } catch (bytes memory err) {
+            expectSel(err, Ledger.E_REJECTED.selector, "probe: declared rule rejects before any activation");
+        }
+        require(registry.activate(strictType, policy) == 2, "probe: policy row 2 installed");
+        bool rejected;
+        try alice.publish(strictType, high) returns (bytes32 id) {
+            // ---- observed unsafe outcome on aaecfed (probes)
+            (bytes32 tt,, uint32 occ,) = ledger.record(id);
+            require(tt == strictType && occ == 1, "probe: the body the declared rule rejects is now a record of that Type");
+            (, uint16 act, address acc,,,) = ledger.acceptanceBasis(1);
+            require(act == 2 && acc == policy, "probe: admitted under policy row 2; the declared rule never ran");
+        } catch (bytes memory err) {
+            rejected = sel(err) == Ledger.E_REJECTED.selector;
+        }
+        require(rejected, string.concat("F5 UNSAFE (", label, "): a policy activation replaced the declared Type rule; a body it rejects was admitted under the same Type id (TypeRegistry.register/activate; Ledger._applyPublish runs the active row only)"));
     }
 
-    function test_F5a_activate_zero_keeps_the_mandatory_rule() public {
+    function test_F5a_activate_zero_must_not_remove_the_declared_rule() public {
         _f5(address(0), "activate(T, address(0))");
     }
 
-    function test_F5b_permissive_policy_keeps_the_mandatory_rule() public {
+    function test_F5b_permissive_policy_must_not_replace_the_declared_rule() public {
         _f5(address(new PermissiveAcceptor()), "permissive policy acceptor");
-    }
-
-    /// F5c. Policy can ADD a constraint (a strict activation rejects what the mandatory rule
-    /// alone accepted) but cannot remove one; profile/epoch behaviour is unchanged otherwise
-    /// (one epoch per activation, an unsent signature goes stale, evidence reconstructs).
-    function test_F5c_policy_adds_constraints_but_cannot_remove_them() public {
-        // QUOTE: mandatory MinBodyAcceptor(32) + the accept-all mock as policy row 2
-        bytes memory high = q(3_000_000_000);
-        bytes32 rHigh = alice.publish(QUOTE, high); // admission 1: both accept
-        Ledger.Action[] memory a1 = one(aPublish(QUOTE, q(5)));
-        (Ledger.Intent memory i1, bytes memory s1) = signed(PK_A, ledger, 0, a1); // signed under epoch N
-        uint64 e0 = registry.epoch();
-        StrictQuoteAcceptor v2 = new StrictQuoteAcceptor();
-        require(registry.activate(QUOTE, address(v2)) == 3, "row 3: the strict policy ADDS the cap");
-        require(registry.epoch() == e0 + 1, "F5c: one epoch per activation");
-        expectRejected(QUOTE, high, Ledger.E_POLICY_REJECTED.selector, "F5c: the added constraint rejects what the mandatory rule alone accepted");
-        try bob.execute(one(aReuse(QUOTE, rHigh)), new bytes[](1)) {
-            require(false, "x");
-        } catch (bytes memory err) {
-            expectSel(err, Ledger.E_POLICY_REJECTED.selector, "F5c: reuse re-runs mandatory + policy");
-        }
-        expectRejected(QUOTE, hex"00", Ledger.E_REJECTED.selector, "F5c: the mandatory rule (>= 32 bytes) still applies underneath, first");
-        try ledger.executeSigned(i1, a1, bodies1(q(5)), s1) {
-            require(false, "x");
-        } catch (bytes memory err) {
-            expectSel(err, Ledger.E_INTENT.selector, "F5c: the epoch-N signature is stale after the activation");
-        }
-        require(registry.activate(QUOTE, address(0)) == 4, "row 4: no additional policy");
-        expectRejected(QUOTE, hex"00", Ledger.E_REJECTED.selector, "F5c: activate(0) never means no validation");
-        require(alice.publish(QUOTE, high) == rHigh, "F5c: with no additional policy the mandatory rule alone decides (dedup, occurrence 2)");
-        (, uint16 bact,,, address bpol,,,) = ledger.acceptanceBasis(1);
-        require(bact == 2 && bpol == address(acceptor), "F5c: the first admission keeps policy row 2");
-        (,,, address rec, bool ok) = recon.reconstruct(ledger, 1);
-        require(ok && rec == address(0), "F5c: its evidence still reconstructs");
-    }
-
-    /// F5d. The documented LIMIT (demonstrated, not repaired; no mechanism invented): a codehash
-    /// pins CODE, not behaviour. A Type registered with the MUTABLE mock as its mandatory rule
-    /// keeps its id and passes E_ACCEPTOR_CODE while `set(1, 0)` flips the rule from accept-all
-    /// to reject-all. The registry cannot detect this and no self-declared flag would prove
-    /// statelessness, so the fixtures never use the mock as a mandatory rule (lab convention:
-    /// mandatory rules are stateless/immutable-configured) and REPAIR.md/TODO state the limit.
-    function test_F5d_mutable_mandatory_acceptor_is_a_documented_gap_not_detected() public {
-        MockAcceptor mutableRule = new MockAcceptor(); // mode 0, minBody 0: accept-all
-        bytes32[] memory none;
-        bytes32 mutableType = registry.register(keccak256("lab/type/mutable-mandatory/1"), address(mutableRule), none);
-        bytes32 codeBefore = address(mutableRule).codehash;
-        bytes32 r = alice.publish(mutableType, q(1)); // admitted under the accept-all behaviour
-        mutableRule.set(1, 0); // behaviour flips; code does not
-        require(address(mutableRule).codehash == codeBefore, "gap: unchanged codehash");
-        (,, bytes32 ruleId,,,,) = registry.typeInfo(mutableType);
-        require(ruleId == codeBefore, "gap: the Type still commits to the same rule id");
-        expectRejected(mutableType, q(1), Ledger.E_REJECTED.selector, "gap: the SAME body is now refused under the SAME Type id and E_ACCEPTOR_CODE did not fire");
-        (bytes32 tt,,,) = ledger.record(r);
-        require(tt == mutableType, "the earlier admission stands");
-        // the lab convention keeps this out of the fixtures: every mandatory fixture rule is stateless or immutable-configured
-        require(quoteRule.minBody() == 32 && pairRule.minBody() == 96, "QUOTE/PAIR mandatory rules are immutable-configured");
-        require(address(quoteRule).codehash != address(new MinBodyAcceptor(33)).codehash, "an immutable threshold is part of the code identity");
     }
 }

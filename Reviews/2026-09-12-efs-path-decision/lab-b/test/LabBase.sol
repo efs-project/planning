@@ -7,6 +7,7 @@ import {IndexModule} from "../src/IndexModule.sol";
 import {LensReader} from "../src/LensReader.sol";
 import {TypeRegistry} from "../src/TypeRegistry.sol";
 import {MockAcceptor, FailingIndexModule, Actor, Consumer, Reconstructor} from "../src/LabHarness.sol";
+import {MinBodyAcceptor} from "../src/LabAcceptors.sol";
 
 /// Minimal cheat-code surface, declared by hand (no forge-std). Same pattern as
 /// Reviews/2026-09-05-c0-core/test/PointReads.t.sol.
@@ -43,7 +44,9 @@ abstract contract LabBase {
     uint256 internal constant PK_B = 0xB0B;
 
     TypeRegistry internal registry;
-    MockAcceptor internal acceptor;
+    MockAcceptor internal acceptor; // MUTABLE test double: installed only as the ADDITIONAL policy of QUOTE and PAIR (activate), never a mandatory rule
+    MinBodyAcceptor internal quoteRule; // QUOTE's mandatory rule: >= 32 bytes (immutable threshold => part of the id)
+    MinBodyAcceptor internal pairRule; // PAIR's mandatory rule: >= 96 bytes (two checked refs + one payload word)
     Ledger internal ledger;
     IndexModule internal index;
     LensReader internal lens;
@@ -68,15 +71,20 @@ abstract contract LabBase {
         recon = new Reconstructor();
         eoaA = vm.addr(PK_A);
         eoaB = vm.addr(PK_B);
+        quoteRule = new MinBodyAcceptor(32);
+        pairRule = new MinBodyAcceptor(96);
         bytes32[] memory none;
-        QUOTE = registry.register(QUOTE_SHAPE, address(acceptor), none);
+        QUOTE = registry.register(QUOTE_SHAPE, address(quoteRule), none); // mandatory rule: stateless, immutable-configured
         BINARY = registry.register(BINARY_SHAPE, address(0), none);
         ITEM = registry.register(ITEM_SHAPE, address(0), none);
         bytes32[] memory twoItems = new bytes32[](2);
         twoItems[0] = ITEM;
         twoItems[1] = ITEM;
-        PAIR = registry.register(PAIR_SHAPE, address(acceptor), twoItems);
-        require(QUOTE == Keys.typeId(QUOTE_SHAPE, none, address(acceptor).codehash) && PAIR == Keys.typeId(PAIR_SHAPE, twoItems, address(acceptor).codehash), "exact ids reconstructible");
+        PAIR = registry.register(PAIR_SHAPE, address(pairRule), twoItems);
+        require(QUOTE == Keys.typeId(QUOTE_SHAPE, none, address(quoteRule).codehash) && PAIR == Keys.typeId(PAIR_SHAPE, twoItems, address(pairRule).codehash), "exact ids reconstructible");
+        require(address(quoteRule).codehash != address(pairRule).codehash, "an immutable threshold is part of the code identity");
+        // the mutable mock is an ADDITIONAL Realm policy (row 2) on QUOTE and PAIR; its refusals are E_POLICY_REJECTED
+        require(registry.activate(QUOTE, address(acceptor)) == 2 && registry.activate(PAIR, address(acceptor)) == 2, "mock installed as policy row 2");
     }
 
     // ---- fixtures

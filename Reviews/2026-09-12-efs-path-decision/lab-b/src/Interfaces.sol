@@ -38,17 +38,27 @@ interface IIndexModule {
     function onAdmission(uint64 publication, Effect[] calldata effects) external;
 }
 
-/// @notice What the Ledger needs from the Type registry. Two layers (authority repair
-///         2026-09-13): the Type's IDENTITY (descriptor: shape, refTypes, declared rule) is
-///         immutable and the id is derived from it; the Realm's ACCEPTANCE POLICY (which
-///         acceptor enforces the Type now) is an append-only activation history per Type.
+/// @notice What the Ledger needs from the Type registry. Three layers (authority repair
+///         2026-09-13, F5): the Type's IDENTITY (descriptor: shape, refTypes, declared rule) is
+///         immutable and the id is derived from it; its MANDATORY RULE (the registration-time
+///         acceptor, pinned address + codehash == ruleId) always runs and its refusal is final;
+///         the Realm's ACCEPTANCE POLICY (an additional acceptor that must also accept; 0 = none)
+///         is an append-only activation history per Type.
 interface ITypeRegistry {
-    /// Current policy for a Type plus the identity's refCount: `acceptor`/`acceptorCodehash` are
-    /// the ACTIVE activation (may differ from the declared rule), `activation` its 1-based index.
+    /// Mandatory rule + active policy row + identity refCount. `policyAcceptor`/`policyCodehash`
+    /// are the ACTIVE activation (0/0 = no additional policy), `activation` its 1-based index.
     function typeInfo(bytes32 typeId)
         external
         view
-        returns (bool registered, address acceptor, bytes32 acceptorCodehash, uint8 refCount, uint16 activation);
+        returns (
+            bool registered,
+            address mandatoryAcceptor,
+            bytes32 ruleId,
+            address policyAcceptor,
+            bytes32 policyCodehash,
+            uint8 refCount,
+            uint16 activation
+        );
 
     /// One row of the append-only policy history of a Type (1-based; reverts when absent).
     function activation(bytes32 typeId, uint16 index)
