@@ -112,6 +112,31 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**Next heavy slot: root, 14:26–14:56 UTC, B paid slice only.** Reuse the
+independently reproduced unchanged Solidity artifacts; no compile. Source
+review of `e7b1583` approved the two-hook runner for this bounded run. A final
+report-wording correction will be committed and sealed before launch. Fresh
+genesis, only `joined/paid-slice`, normal Cancun/30M block limits, four public
+test accounts, `--prune-history 256`, run-owned cache and the runner's 25-minute
+watchdog; no late start after 14:31. Scratch is
+`/tmp/efs-paid-b-run-20260913.Kf4SOz`; artifacts remain under the previously
+recorded 28 MB compile directory. At 14:24, no competing Anvil/Forge/solc process
+was visible and 274 GiB was free. All other lanes stay light-only until this
+slot is released. This reserves execution, not a result or architecture choice.
+
+**Execution triage after independent review:** gate preparation is sufficient;
+the bottleneck is now an actual run. Target the first B gated packet by
+**16:00 UTC**, selecting only `joined/paid-slice` (the seven common setup/paid
+rows) and reusing the verified unchanged Solidity artifacts. Then give C one
+bounded readiness/repair attempt and the same slice. Freeze further checker
+expansion unless a concrete defect would invalidate those observations.
+Ordinary receipts may be collected before the separate matched rollback
+controls, but remain unqualified until those controls pass. Wider Files/SDK,
+export/import and history-after-upgrade gates stay open for the day-two
+finalist. Use **19:10 UTC** as the provisional evidence cutoff, leaving synthesis
+and challenge time before the already promised **23:10** owner checkpoint.
+Unfinished cases become explicit gates, not a forced winner or waived promise.
+
 **13:58 scoped root fallback (light work only):** Claude still has no checkpoint
 after 11:52 and native app control remains locked. Root is advancing the already
 agreed B two-hook runner integration in the existing root-owned
