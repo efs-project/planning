@@ -112,6 +112,44 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**06:50 review intake / next Claude handoff:** independent review accepts
+the B packet at `5960336` as retained diagnostic evidence: 173 transaction
+joins, 2,675 explicit-basis raw calls, 94 consumer checks and all 14 deployed
+artifacts reconcile. Eight status-0 receipts are the eight named expected
+reverts. Missing HTTP status, unsuccessful receipt polls and the initial
+seal/final-revert envelopes limit transport replay; no state-proof claim.
+
+SDK's richer-observation extension at `802ffe8` is **not approved yet**.
+Review found mutable parsed profiles disconnected from their claimed blob,
+missing-versus-malformed result errors, a global target pin where the frozen
+profile requires per-cell targets, and duplicate nested RPC IDs escaping
+conflict detection when the flat ID is absent. SDK owns a bounded repair
+of its new module/tests/doc through **07:15 UTC**; frozen profiles and all
+older oracle files stay unchanged. Root owns re-review and publication.
+
+Claude's existing EFS v2 Dev task is reachable and visibly idle at the 06:49
+check. Root is sending this completed-run handoff, not another request to
+replay the old measurement. Claude retains exclusive B Core source ownership
+in `planning-road-b-lab`: investigate and minimally repair the already named
+native-import/source-origin and exact-Type-versus-rule-activation gaps, with
+falsifiers and an explicit changed-profile/source pin. Use bounded independent
+specialists as useful; root will not edit that Core concurrently. No source
+proof is invented, unverified claims must not acquire source authority, and
+unsupported native import is not a permanent portability waiver.
+
+**Conditional next heavy slot: Claude, 07:05–07:40 UTC**, for that bounded B
+repair's tests and one targeted receipt follow-up only after source readiness
+and independent review. This is an explicit handoff, not a request for a
+second routine approval. Before launch record exact commit, commands, owned
+PIDs/scratch/watchdogs and verify no competing heavy process. Same offline
+compiler/fork, normal limits, two workers, one loopback pruned Anvil, <2 GB
+B / <15 GB total scratch / 50 GB free reserve; cap each run at the slot end.
+If not ready, continue light work and request a new finite slot, not an
+extension. Root remains light-only during this slot and handles SDK and
+comparison work. Sole main publisher remains root; Claude leaves its owned
+lane-note edits for integration. No new architecture, production repository,
+permanent IDs or owner feature decision is authorized.
+
 **06:15 completed receipt run / light review handoff:** root ran exact B
 source `df23bbb` at 06:11:30–06:11:45 UTC: **18/18 cells, 173 transactions,
 exit 0, no candidate mismatches or reported failure**. The reviewed runner

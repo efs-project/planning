@@ -151,3 +151,29 @@ returned separately at `802ffe8`; root reproduced all 160 tests. Its review
 is pending, old oracle files are unchanged, and no real-packet interpretation
 has been issued. Candidate self-checks, independent input consistency and
 authenticated chain-state proof remain three different evidential levels.
+
+## Independent packet review — September 13, 06:47 UTC intake
+
+The independent reviewer accepted `5960336`'s retained diagnostic packet:
+its hash/size, all 17 source hashes, 173 decoded transaction/receipt/header
+joins, 2,675 explicit-basis raw calls, 94 consumer checks and all 14
+deployment/artifact/initcode/runtime joins reconcile. The 37 storing checks
+each retain seven unique getters at the receipt block. All eight reverted
+transactions map to named failures with matching static selectors and
+unchanged-state probes; 165 transactions succeeded. The repeated raw hash
+for label setup occurs in two intentionally reset identical cells, with
+distinct RPC IDs and the same resulting header, not a contradictory replay.
+
+Limits remain: candidate expectations/commitments are not an independent
+semantic oracle; HTTP status and unsuccessful receipt polls are not retained;
+the initial sealed-header and final-revert envelopes are omitted. Successful
+poll joins and independent process-exit checks support this bounded run, not
+complete transport replay or authenticated state proof.
+
+The richer SDK supplement at `802ffe8` is not yet usable for a retained
+verdict. Review found four implementation defects, confirmed by root source
+inspection: parsed profiles are mutable and unbound to the claimed frozen
+blob; malformed/missing inputs do not consistently follow declared outcomes;
+the frozen per-cell target contract is implemented as one global target;
+duplicate nested RPC IDs can escape detection without flat IDs. A bounded
+repair is assigned; existing green tests did not establish these properties.
