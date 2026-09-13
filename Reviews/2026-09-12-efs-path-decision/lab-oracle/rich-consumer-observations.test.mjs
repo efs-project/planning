@@ -517,6 +517,54 @@ test('present contradictory nested RPC evidence remains OBSERVED_MISMATCH', () =
   }
 });
 
+test('missing RPC peers do not suppress malformed present carriers or fields', () => {
+  const cases = [
+    (item) => {
+      delete item.request;
+      item.response = 17;
+    },
+    (item) => {
+      delete item.request.jsonrpc;
+      item.response.jsonrpc = '1.0';
+    },
+    (item) => {
+      delete item.request.id;
+      item.response.id = {};
+    },
+    (item) => {
+      delete item.returnData;
+      delete item.response.result;
+      item.response.error = { message: 17 };
+    },
+  ];
+  for (const mutate of cases) {
+    const value = fixture();
+    mutate(rawAt(value, 'native-one/quote', 'listing', 'lastScanned'));
+    assert.equal(
+      stage(analyze(value), 'native-one/quote', 'listing').rawCollection.status,
+      'OBSERVED_MISMATCH',
+    );
+  }
+});
+
+test('duplicate request-only and response-only ids remain visible without flat ids', () => {
+  for (const carrier of ['request', 'response']) {
+    const value = fixture();
+    const [first, second] = value.packet.cells['native-one/quote'].raw;
+    delete first.rpcId;
+    delete second.rpcId;
+    const peer = carrier === 'request' ? 'response' : 'request';
+    first[carrier].id = 17;
+    second[carrier].id = 17;
+    delete first[peer].id;
+    delete second[peer].id;
+    assert.equal(
+      stage(analyze(value), 'native-one/quote', 'paid-quote-read').rawCollection.status,
+      'OBSERVED_MISMATCH',
+    );
+  }
+});
+
 test('duplicate paid transactions cannot select a convenient receipt basis', () => {
   const value = fixture();
   const cell = value.packet.cells['signed-one/quote'];

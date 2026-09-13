@@ -44,9 +44,10 @@ evidence. Caller-supplied parsed profile objects or hash strings cannot attest
 to those inputs; altered trusted bytes fail the pinned-input boundary. In
 contrast, malformed untrusted packet, cell, raw, transaction, request, or
 response containers produce qualified mismatch reports rather than throwing.
-Absent containers or fields remain `UNKNOWN`. Duplicate IDs are detected from
-correlated request/response envelopes even if the redundant flat ID is absent,
-while one request/response pair is counted only once.
+Absent carriers or fields remain `UNKNOWN`, but never suppress validation of a
+present malformed peer. Duplicate IDs are detected across every valid present
+flat, request, and response ID even when either peer is absent; identical IDs
+within one observation are counted once before cross-observation comparison.
 
 Raw collection consistency and semantic interpretation are separate. Only four
 semantic comparisons were frozen:

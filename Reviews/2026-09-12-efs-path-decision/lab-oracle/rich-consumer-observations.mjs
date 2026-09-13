@@ -396,24 +396,23 @@ function prepareRaw(value, cellId) {
     const response = raw.response;
     const hasRequest = present(raw, 'request');
     const hasResponse = present(raw, 'response');
-    if (!hasRequest || !hasResponse) {
-      issues.push(issue('UNKNOWN', 'RPC_REQUEST_OR_RESPONSE_MISSING'));
-    } else if (!isObject(request) || !isObject(response)) {
-      issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_OR_RESPONSE_MALFORMED'));
-    } else {
-      if (!present(request, 'jsonrpc') || !present(response, 'jsonrpc')) {
-        issues.push(issue('UNKNOWN', 'RPC_JSON_VERSION_MISSING'));
-      } else if (request.jsonrpc !== '2.0' || response.jsonrpc !== '2.0') {
-        issues.push(issue('OBSERVED_MISMATCH', 'RPC_JSON_VERSION_MISMATCH'));
+    const requestIsObject = hasRequest && isObject(request);
+    const responseIsObject = hasResponse && isObject(response);
+    if (!hasRequest) issues.push(issue('UNKNOWN', 'RPC_REQUEST_MISSING'));
+    else if (!requestIsObject) issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_MALFORMED'));
+    if (!hasResponse) issues.push(issue('UNKNOWN', 'RPC_RESPONSE_MISSING'));
+    else if (!responseIsObject) issues.push(issue('OBSERVED_MISMATCH', 'RPC_RESPONSE_MALFORMED'));
+
+    if (requestIsObject) {
+      if (!present(request, 'jsonrpc')) issues.push(issue('UNKNOWN', 'RPC_REQUEST_JSON_VERSION_MISSING'));
+      else if (request.jsonrpc !== '2.0') {
+        issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_JSON_VERSION_MISMATCH'));
       }
-      if (!present(request, 'id') || !present(response, 'id')) {
-        issues.push(issue('UNKNOWN', 'RPC_ID_MISSING'));
-      } else if (!validRpcId(request.id) || !validRpcId(response.id)) {
-        issues.push(issue('OBSERVED_MISMATCH', 'RPC_ID_MALFORMED'));
-      } else if (request.id !== response.id) {
-        issues.push(issue('OBSERVED_MISMATCH', 'RPC_ID_DISAGREEMENT'));
+      if (!present(request, 'id')) issues.push(issue('UNKNOWN', 'RPC_REQUEST_ID_MISSING'));
+      else if (!validRpcId(request.id)) {
+        issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_ID_MALFORMED'));
       } else if (present(raw, 'rpcId') && validRpcId(raw.rpcId) && request.id !== raw.rpcId) {
-        issues.push(issue('OBSERVED_MISMATCH', 'RPC_FLAT_ID_DISAGREEMENT'));
+        issues.push(issue('OBSERVED_MISMATCH', 'RPC_REQUEST_FLAT_ID_DISAGREEMENT'));
       }
       if (!present(request, 'method')) {
         issues.push(issue('UNKNOWN', 'RPC_REQUEST_METHOD_MISSING'));
@@ -478,6 +477,19 @@ function prepareRaw(value, cellId) {
           }
         }
       }
+    }
+
+    if (responseIsObject) {
+      if (!present(response, 'jsonrpc')) issues.push(issue('UNKNOWN', 'RPC_RESPONSE_JSON_VERSION_MISSING'));
+      else if (response.jsonrpc !== '2.0') {
+        issues.push(issue('OBSERVED_MISMATCH', 'RPC_RESPONSE_JSON_VERSION_MISMATCH'));
+      }
+      if (!present(response, 'id')) issues.push(issue('UNKNOWN', 'RPC_RESPONSE_ID_MISSING'));
+      else if (!validRpcId(response.id)) {
+        issues.push(issue('OBSERVED_MISMATCH', 'RPC_RESPONSE_ID_MALFORMED'));
+      } else if (present(raw, 'rpcId') && validRpcId(raw.rpcId) && response.id !== raw.rpcId) {
+        issues.push(issue('OBSERVED_MISMATCH', 'RPC_RESPONSE_FLAT_ID_DISAGREEMENT'));
+      }
       const hasResult = present(response, 'result');
       const hasError = present(response, 'error');
       if (!hasResult && !hasError) {
@@ -498,16 +510,29 @@ function prepareRaw(value, cellId) {
         }
       } else if (!isObject(response.error)) {
         issues.push(issue('OBSERVED_MISMATCH', 'RPC_RESPONSE_ERROR_MALFORMED'));
-      } else if (!present(response.error, 'code') || !present(response.error, 'message')) {
-        issues.push(issue('UNKNOWN', 'RPC_RESPONSE_ERROR_INCOMPLETE'));
-      } else if (!Number.isSafeInteger(response.error.code)
-        || typeof response.error.message !== 'string') {
-        issues.push(issue('OBSERVED_MISMATCH', 'RPC_RESPONSE_ERROR_MALFORMED'));
-      } else if (returnData !== null) {
-        issues.push(issue('OBSERVED_MISMATCH', 'RPC_ERROR_CONFLICTS_WITH_FLAT_RETURN'));
       } else {
-        issues.push(issue('UNKNOWN', 'RPC_RESPONSE_EXPLICIT_ERROR'));
+        if (!present(response.error, 'code')) {
+          issues.push(issue('UNKNOWN', 'RPC_RESPONSE_ERROR_CODE_MISSING'));
+        } else if (!Number.isSafeInteger(response.error.code)) {
+          issues.push(issue('OBSERVED_MISMATCH', 'RPC_RESPONSE_ERROR_CODE_MALFORMED'));
+        }
+        if (!present(response.error, 'message')) {
+          issues.push(issue('UNKNOWN', 'RPC_RESPONSE_ERROR_MESSAGE_MISSING'));
+        } else if (typeof response.error.message !== 'string') {
+          issues.push(issue('OBSERVED_MISMATCH', 'RPC_RESPONSE_ERROR_MESSAGE_MALFORMED'));
+        }
+        if (returnData !== null) {
+          issues.push(issue('OBSERVED_MISMATCH', 'RPC_ERROR_CONFLICTS_WITH_FLAT_RETURN'));
+        } else {
+          issues.push(issue('UNKNOWN', 'RPC_RESPONSE_EXPLICIT_ERROR'));
+        }
       }
+    }
+    if (requestIsObject && responseIsObject
+      && present(request, 'id') && validRpcId(request.id)
+      && present(response, 'id') && validRpcId(response.id)
+      && request.id !== response.id) {
+      issues.push(issue('OBSERVED_MISMATCH', 'RPC_ID_DISAGREEMENT'));
     }
     items.push({
       index,
@@ -542,11 +567,11 @@ function integrityOutcome(raw, transactions, boundary = []) {
       itemIds.set(JSON.stringify([typeof id, id]), id);
     };
     retainId(item.raw.rpcId);
-    if (isObject(item.raw.request) && isObject(item.raw.response)
-      && validRpcId(item.raw.request.id)
-      && validRpcId(item.raw.response.id)
-      && item.raw.request.id === item.raw.response.id) {
+    if (isObject(item.raw.request) && present(item.raw.request, 'id')) {
       retainId(item.raw.request.id);
+    }
+    if (isObject(item.raw.response) && present(item.raw.response, 'id')) {
+      retainId(item.raw.response.id);
     }
     for (const [key, id] of itemIds) {
       const retained = ids.get(key) ?? { id, indexes: [] };
