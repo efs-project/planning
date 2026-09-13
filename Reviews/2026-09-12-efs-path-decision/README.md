@@ -112,6 +112,25 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**16:32 C positive paid slice completed; heavy slot released.**
+The 16:25:20–22 run at `58dd3d7` passed both independent deployment/state gates,
+all four paid exact-answer checks and separate packet review. Anvil PID 59382
+stopped cleanly; scratch 7.5 MB; retained evidence `c6fce9d` is pushed.
+[[c-gated-paid-results-20260913]] gives the
+side-by-side costs and limits: C A1 2.40M, edit 1.11M, native B1 1.28M;
+paid point about 252k and one-entry joined list 391–406k. B is cheaper in these
+implementations, but encoding, index obligations and consumer checks differ;
+this is not a same-guarantee overhead ratio or a MUD architecture rejection.
+
+Next priorities: reconcile the remaining paid-consumer/context and mandatory
+index obligations, then the already specified matched rollback controls and
+[[portable-evidence-next-gate|evidence-retention/import challenge]]. Preserve
+the 19:10 evidence cutoff and 23:10 provisional recommendation. One possible
+C list improvement carries already-resolved placement provenance rather than
+resolving twice; it is unmeasured and cannot justify an indefinite optimization
+loop. No new heavy lease or protocol decision. Claude's original checkouts and
+pending handoff remain preserved; no fresh Claude acknowledgement is claimed.
+
 **Next heavy slot: root, 16:25–16:50 UTC, one C positive paid slice.**
 Reviewed runner source `58dd3d78e8efa8e4490b035bdde5502b75adc9e3`
 passed 83/83 Node checks and independent bounded source review. Reuse unchanged
