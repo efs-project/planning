@@ -112,6 +112,21 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**18:01 B parity source verified; compile slot released.** Reviewed and pushed
+`c5561e2` passes 7 focused / 59 full Forge tests and 42 Node tests (also repeated
+on Node 26). Two test-isolation regressions were repaired without weakening
+consumer checks. JoinedConsumer runtime is 17,781 bytes, below EIP-170; its
+140,072-byte test initcode is a Foundry-only harness, not a deployable app.
+Independent preparation now seals new runtime/input/output expectations;
+there is no fresh paid result or chain lease yet.
+
+**Claude availability correction, directly observed 17:56:** the app is
+accessible again. EFS v2 Dev explicitly reports out of Fable usage credits and
+an API 429 termination; it is not verified as still executing. Original B/C
+pins remain `7c292e0` / `9a4e766`. Do not buy credits, change models or replay its
+expired 11:55 compile launch. Root's isolated successors and current checkpoint
+are the resume handoff; no further work from Claude is assumed for the deadline.
+
 **17:54–18:14 UTC root-only B GREEN/build lease.** Seven scoped files are
 paused for independent review and focused/full Solidity tests after observed
 RED. Base remains `ac37e91`; record the dirty diff/source hashes, not a false
