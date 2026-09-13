@@ -112,6 +112,19 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**19:57 cutoff recorded; SDK advisory integrated; finalist controls continue.**
+The provisional cost snapshot closed at **19:10 UTC** with B source `c5561e2`
+/ evidence `cbadc00` and C source `2ca7349` / runner `58dd3d7` / evidence
+`c6fce9d`. Its table is [[b-parity-paid-results-20260913]]; required-index,
+portable-evidence and full-Files qualifications remain unchanged.
+[[sdk-shortlist-review-20260913]] identifies mostly adapter/runtime work plus
+genuine required-query and historical-contract-proof gaps. Both PM reviews
+are now received. B's already-reviewed late-index rollback fixture is being
+staged test-first in the root-owned successor, after the cutoff; it is not a
+new cost result. No compiler/chain lease yet. Independent shortlist challenge
+is underway before the **23:10 provisional recommendation**. Original Claude
+workspaces stay untouched; no new successful Fable execution is assumed.
+
 **19:07 Files advisory integrated; no executable Files pass claimed.**
 [[files-shortlist-review-20260913]] finds both candidates can express the four
 small discriminators with a candidate-native fixture and qualified reader.
