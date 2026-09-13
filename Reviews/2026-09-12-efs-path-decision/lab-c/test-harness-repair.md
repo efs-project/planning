@@ -41,7 +41,7 @@ Machine-readable report: `logs/final-full-size-report.tsv`, SHA-256 `8bb256d7e41
 
 ## Hashes and retained evidence
 
-- Source-hash manifest: `logs/source-sha256.txt`, SHA-256 `b346573e0c2092817907a824a8972143ce74072fcaf6268f47b8a11ddb0d3aed`. Key repaired sources: `test/Deploy.sol` `6b2aef30…cb58`; `test/Publish.t.sol` `00d9bd7e…92bc`; `test/RawWriteDenial.t.sol` `bfa1c33b…e7d0`; `test/FixtureRealm.sol` `4565be1b…a970`; `test/Vm.sol` `cff6e3ef…a970`; `foundry.toml` `9c794800…d0c7`.
+- Source-hash manifest: `logs/source-sha256.txt`, SHA-256 `b346573e0c2092817907a824a8972143ce74072fcaf6268f47b8a11ddb0d3aed`. Key repaired sources: `test/Deploy.sol` `6b2aef30…cb58`; `test/Publish.t.sol` `00d9bd7e…92bc`; `test/RawWriteDenial.t.sol` `bfa1c33b…e7d0`; `test/FixtureRealm.sol` `4565be1b…a970`; `test/Vm.sol` `cff6e3efeed41fc317d5107cc4d3d770038626703b3f4ddff7cdeee070c0724b`; `foundry.toml` `9c794800…d0c7`.
 - Artifact-hash manifest: `logs/artifact-sha256.txt`, SHA-256 `6ed6b355d640c017d26a65f4cb056e3667d4d104767f8dcf9240b34b854addc1`. Key artifacts: Ledger `c731ca5a…3844`; ImportLib `7f935762…2953`; IndexModule `b7040edf…2fba`; PublishTest `791a74ce…e727`; PublishAuthTest `e08472fc…356c`.
 - Final build log SHA-256 `62bdb68e274f7f30b32aa2098fb9e26e078dc00f3078878b959af56eba841743`; final test log SHA-256 `4ba6bdede690681be0a632d1ce93d58366dab0cd098093f0c83cdef11a18e7e6`.
 
