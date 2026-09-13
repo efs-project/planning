@@ -112,12 +112,12 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
-- Phase / T0: **B/C build/diagnostic probes and independent checker implementation / 2026-09-12 23:10 UTC**. B's first build and 24 candidate tests passed; C's first compiler failure is in repair. No matched operation-cost result yet. Provisional recommendation due September 13 at 23:10 UTC; final handoff due September 14 at 23:10 UTC.
+- Phase / T0: **B completed diagnostic / C test-harness repair / independent raw-byte checker / 2026-09-12 23:10 UTC**. B's first build and 24 candidate tests passed, and its 11-cell receipt run is retained at `322b320`. C's deployed modules now fit normal size limits, but its oversized test helper still prevents semantic tests. No feature-matched winner yet. Provisional recommendation due September 13 at 23:10 UTC; final handoff due September 14 at 23:10 UTC.
 - Participants: Codex Road A analyst, existing SDK PM and Data Explorer PM dispatched; Claude **EFS v2 Dev** kickoff sent and acknowledged by 23:41 UTC. Its [[claude-pm|acknowledgement]] records an independent in-session MUD specialist and evidence extractor; a persistent extra Claude conversation is unnecessary. Earlier MUD source, cost and portability reviews are completed inputs, not new active seats.
 - Baselines: kickoff published at planning `2552962`; native source/evidence pins in section 5 remain the named comparison pins. Fable's existing untracked brainstorm is preserved. The similarly named direct worktree is the stopped `f873890` size probe, not the fuller control.
 - Shared fixture / shortlisted roads / actual probes: [[sdk-fixture|SDK joined semantics]] and [[files-journey|Files lifecycle/selection journey]] received and reviewed as the common comparison requirements. They are test expectations, not executable evidence or permanent API bytes. Use [[run-manifest]] for exact source, encoding, payload and freshness inputs. **Provisional implementation shortlist: B (compact custom) and C (one corrected Store-only adapter).** Retain fuller control A and its packing proposal as the fallback/reference, not a third concurrent rebuild. No performance winner; the bounded run lease is below.
-- Heavy-run slot: **Claude EFS v2 Dev owns one SERIAL C-build → B-diagnostic-run queue, September 13 01:45–02:15 UTC**, releasing earlier when finished. The previous queue was released at 01:18: C compiled but exceeded normal runtime size, and oversized test deployment executed zero semantic tests; B stalled and retained partial evidence. C now starts from decomposition `731200d`; B uses receipt-polling repair `a16d7d4` over compiled contracts `dcc7b94`. One separately pinned repair cycle is allowed. Use at most two compiler workers and normal runtime/initcode/block limits: the previous test-only raised limit is NOT authorized for this queue and gave no passing evidence. No concurrent A/B/C heavy runs; B may run first if C source repair is pending and no compiler remains. Use the same run-owned scratch roots `/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b` and sibling `lab-c`, <2 GB each / <15 GB overall, 50 GB free reserve. Codex checked 265 GiB free and no matching compiler/Anvil process at 01:44 UTC. Record actual PIDs and stop by expiry; watchdogs: 480 s build, 300 s tests, 900 s B script maximum (receipt polling 30 s). B Anvil remains diagnostic: history 256, owned cache, free loopback port, 30M gas limit, no traces/dumps, raw evidence before snapshot revert, partial failures retained. No C Anvil yet. Do not overwrite retained `measure1-partial.json`.
-- Next handoff: Claude acknowledged the serial queue at 00:57:47 UTC and the experiment answers below by 01:00. C's initial Store composition fails via-IR stack depth in the import path; repair EFS-owned code without silently annotating the pinned vendor. B's measurement repair retains raw evidence before snapshot reverts. SDK PM sealed neutral expectations at `f060524` (blob `a9d6c9afb5f51d0f786e006b7b5df667ae69710e`) before candidate inspection, and is implementing in `planning-warroom-oracle`, branch `codex/efs-warroom-oracle`, owned `lab-oracle/` only. Missing declared encodings remain unsupported: Claude should publish a pinned public Action/PublicationIntent, EIP-712 domain/framing and signature-vector supplement, not point the checker at candidate helper code. Codex reviews declaration-only metadata and raw evidence. No additional broad design round is needed.
+- Heavy-run slot: **Released by Claude at September 13 02:00 UTC; Codex owns scheduling, no new heavy run is authorized.** The 01:45–02:15 serial queue finished early: C build #3 produced deployable-size modules but an oversized test helper; B completed its diagnostic at `a16d7d4` over contracts `dcc7b94` (evidence `322b320`). Source-only C helper repair and B public-profile/label design remain Claude-owned. Next build requires a pinned handback and explicit lease; do not build over the active source specialist. Retain the same run-owned scratch roots `/private/tmp/claude-501/-Users-james-Code-EFS/089e21d8-6171-40d6-9cac-1d2e941506f9/scratchpad/build/lab-b` and sibling `lab-c`, <2 GB each / <15 GB overall, 50 GB free reserve. At most two compiler workers, normal runtime/initcode/block limits, watchdogs 480 s build / 300 s tests; any later private Anvil run needs history 256, owned cache, free loopback port, 30M gas limit, 900 s outer watchdog, no traces/dumps and raw evidence before snapshot reverts. The earlier test-only raised limit is not a valid passing result or standing permission. No C Anvil yet; preserve the partial first B run too.
+- Next handoff: Claude should finish and pin its two already-running source-only tasks: C deployable test-helper split/attach-context fix, and B public profile/signature vector plus label-retention design. Hand back exact paths/status before Codex takes over a build; no duplicate specialists. SDK PM sealed neutral expectations at `f060524` (blob `a9d6c9afb5f51d0f786e006b7b5df667ae69710e`) before candidate inspection; its first strict checker is complete at `0e19d27`, and the separate `RPC_OBSERVED` extension now receives the full B diagnostic packet. It owns only `lab-oracle/` in `planning-warroom-oracle`, branch `codex/efs-warroom-oracle`. Missing declared encodings remain unsupported: provide a pinned public Action/PublicationIntent, EIP-712 domain/framing and signature-vector supplement, not candidate helper code. Claude's UI showed its five-hour quota at 100% at 02:04 UTC, reset displayed for 23:20 Chicago (04:20 UTC); Codex continues independent work and checks actual completion rather than assuming uninterrupted Claude execution.
 
 | Current owner / contact | Exclusive write scope and next result |
 |---|---|
@@ -240,6 +240,28 @@ bounded extension in the same `lab-oracle/` path to independently decode
 supplied raw RPC bytes, retaining the separate unauthenticated provenance
 qualification described in [[oracle-boundary#Execution clarification — September 13]].
 No full workflow or authenticated-chain pass is inferred from these tests.
+
+**02:00 diagnostic return (independently checked at 02:05):** B evidence
+`322b320` retains the complete 11-cell run at script `a16d7d4` / contract
+source `dcc7b94`; packet SHA-256 is
+`7bd5409a4b306d8e0705187094fa482b31efcad471260ae93f57eebd0b22fcce`.
+An independent reviewer checked 70 cell transactions, 930 raw getter returns
+and 29 Consumer checks, including 203 decoded Consumer fields with no
+discrepancies. Six expected-failure selectors match, their receipts reverted,
+and the retained aggregate pre/post probes agree. These are supplied-RPC
+consistency observations, not authenticated state proofs or exhaustive rollback
+proofs. Native/signed quote creates cost 1,216,793 / 1,261,965 gas; 41-byte
+creates 1,231,495 / 1,276,673. They remain incomplete hash-placement diagnostics,
+not matched substitutes for the fuller Files control.
+
+One measurement gap remains: baseline raw replies retain Consumer fields but
+not the Record/Ledger/Index pre-probes. Their decoded summaries cannot serve as
+independent freshness evidence. The next measurement must retain those raw
+requests/replies too. The 496,049 fresh-body / 314,527 existing-body updates
+also occur sequentially with different initialized state, so their difference
+is not an isolated deduplication premium. C's build #3 confirms Ledger 23,145 B
+and ImportLib 19,861 B runtime; the 88,623 B test Fixture still blocks execution.
+No C semantic test pass or B/C cost winner is claimed.
 
 **Cold-name gap (independent B/C review, September 13):** B `dcc7b94` and C
 `731200d` retain hashed folder/name/tag coordinates, not the original user text.
