@@ -112,6 +112,21 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**22:27–22:47 UTC root-only B mined-controls lease.**
+Reviewed/pushed source `4345992` passes47 Node tests; oracle `3dfd975` passes275.
+Preparation, runner and finite launcher reviews pass. Three fresh control
+graphs use18 deployments/36 total signed transactions and528 fixed raw-state
+comparisons; the independent offline auditor was sealed before execution.
+Input SHA256 `0b26e6d2a0037de6f89089eece41cbb1174a76eb87e8de945d9c599bf8b28622`;
+41-file run-pins SHA256 `89b038b1c0b1da72b96f515bb5663c602326bcaa7b0c9317b0a850ba9489559d`.
+Root alone may launch one fresh loopback Anvil in
+`/tmp/efs-b-controls-paid-20260913.00DzB4`: chain31337/Cancun, 30M block gas,
+prune256, run-local cache, Node26, 12-minute process-group watchdog, latest
+start22:33, absolute stop22:47. Eight named scratch roots total about121MiB;
+273GiB free and no competing heavy process observed. Preserve15GB total scratch
+and50GB free reserve. No compiler or other lane launch. Product-price cutoff
+is unchanged; this control result is unearned until raw-packet verification.
+
 **22:12 matched B control preparation active; no heavy lease.**
 The isolated B worker is implementing the three specified mined controls;
 an independent preparer derives exact runtime/input/raw-state expectations
