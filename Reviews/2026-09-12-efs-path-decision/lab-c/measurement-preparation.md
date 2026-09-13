@@ -91,4 +91,15 @@ Current SHA-256 values:
 
 ## Remaining gates
 
+First live runner preflight, root at September 13 05:07 UTC: ImportLib,
+IndexModule and Ledger deployed and passed the repaired runtime checks, but
+the setup call used `index.attach`, which resolves to ethers' local
+`BaseContract.attach` helper rather than the Solidity method. Its returned
+Contract object had no transaction hash. The raw failure packet is retained
+in run-owned temporary scratch; this was not a failed contract transaction.
+Root inspected the installed helper, then called `getFunction("attach")`
+against the same test deployment: receipt status 1, gas 69,974. The one-line
+runner fix selects that explicit ABI method. A fresh chain run must follow;
+the diagnostic attachment is not merged into the benchmark's setup totals.
+
 `node --check script/measure.mjs` exits 0 with the coordinator-pinned Node, but the runner has not been connected to a chain. Before any receipt claim: independently review the runner and expected action cells; grant a new bounded Anvil lease; execute it under normal chain limits; confirm raw RPC/receipt completeness and decoded commitments; and compare against the matched Road B evidence. Cold-readable labels, browser RPC, export/import, populated upgrade and independent reconstruction remain outside this bounded preparation task.

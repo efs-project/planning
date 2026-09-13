@@ -267,7 +267,7 @@ async function main() {
   links.set("src/ImportLib.sol:ImportLib", await importLib.getAddress());
   const index = await deploy("IndexModule", ["bytes32"], [ZERO]);
   const ledger = await deploy("Ledger", ["address"], [await index.getAddress()]);
-  await send("setup", "attach-index", async () => index.attach(await ledger.getAddress()));
+  await send("setup", "attach-index", async () => index.getFunction("attach")(await ledger.getAddress()));
   const reader = await deploy("LensReader", ["address", "address"], [await ledger.getAddress(), await index.getAddress()]);
   const pass = await deploy("PassAcceptor");
   const quoteAcceptor = await deploy("QuoteAcceptorV1");
