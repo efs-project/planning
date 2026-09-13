@@ -112,6 +112,36 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**15:59 C readiness slot released; positive paid integration in progress.**
+The isolated C repair at `2ca7349` passed the 14:59 source-archive build,
+80/80 Forge tests and 72/72 Node tests; ABI equivalence and normal code-size
+checks are retained at `e5d7568` on `codex/efs-warroom-c-run`. See
+[[c-readiness-results-20260913]]. No compiler/Anvil process is running; scratch
+42 MB, free disk 274 GiB. This closes the bounded readiness attempt, not C's
+paid comparison or finalist gates.
+
+Root is now adding only the separately pinned C two-stage runner gate in that
+isolated successor. An independent preparer has derived exact positive inputs
+and public-test-account signatures, manifest SHA256
+`16739ae05cb8a77c16b4c0edc9b5acd3a4b9b5074510a1d6d69c42aeed3f335c`;
+a separate reader checks the primary declarations. No chain results or
+candidate runner were used to derive those answers. No C chain lease yet.
+Claude native access is still locked; no fresh acknowledgement is claimed.
+On resuming, inspect this successor before duplicating C repairs/hooks.
+
+**Next heavy slot: root, 14:55–15:20 UTC, C readiness compile/tests only.**
+The isolated repair closes the previously identified resolution/cursor basis
+checks and full replay comparison; 71 non-artifact Node tests passed. Source
+review is underway. Root will pin the reviewed source before one fresh offline
+Solc 0.8.30 / Cancun / via-IR / optimizer-200 build with ordinary code-size
+limits, then Forge tests and artifact-dependent Node tests. No Anvil or paid
+measurement is authorized by this lease. Scratch:
+`/tmp/efs-c-readiness-build-20260913.NoPDle`; run-owned out/cache, two compiler
+threads, 20-minute whole-job watchdog, latest start 15:00. At 14:52 no competing
+heavy process was visible and 274 GiB was free. No other lane may take the slot
+until release. Claude native access was retried and is still blocked by the Mac
+lock; no new wakeup/acknowledgement or source checkpoint is claimed.
+
 **B's first gated paid results are now retained:** see
 [[b-gated-paid-results-20260913|the costs, exact guarantees and open gates]].
 Signed create+placement+tag is **1,614,433 gas**; fresh signed edit **658,913**;
