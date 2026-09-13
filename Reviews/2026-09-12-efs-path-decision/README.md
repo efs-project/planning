@@ -122,8 +122,9 @@ paid point about 252k and one-entry joined list 391–406k. B is cheaper in thes
 implementations, but encoding, index obligations and consumer checks differ;
 this is not a same-guarantee overhead ratio or a MUD architecture rejection.
 
-Next priorities: reconcile the remaining paid-consumer/context and mandatory
-index obligations, then the already specified matched rollback controls and
+Next priorities: [[paid-read-parity-next-gate|one B consumer-only qualification
+patch and reprice]]; needed facts already exist in its public getters. Keep
+additional index obligations disclosed, then the specified matched rollback controls and
 [[portable-evidence-next-gate|evidence-retention/import challenge]]. Preserve
 the 19:10 evidence cutoff and 23:10 provisional recommendation. One possible
 C list improvement carries already-resolved placement provenance rather than

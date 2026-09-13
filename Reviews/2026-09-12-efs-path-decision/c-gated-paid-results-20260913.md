@@ -46,6 +46,9 @@ context and per-record admission basis in its paid consumer. These costs are
 not isolated by the current receipts. Before choosing from ratios, reconcile
 which checks/discovery obligations are required in both, rather than deleting
 checks simply to make one number lower.
+[[paid-read-parity-next-gate]] identifies the bounded follow-through: B can
+tighten revision, admission-basis and coordinate/cursor provenance checks using
+existing getters, without redesigning Core or copying every C-only field.
 
 One possible C follow-on is narrow: LensReader already resolves placement
 admission/key, discards them from its page item, and the consumer resolves
