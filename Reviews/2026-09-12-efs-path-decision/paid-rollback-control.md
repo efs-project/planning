@@ -71,3 +71,55 @@ journey or retrofit completed diagnostic packets.
 Source review: B `7c292e0`, C `9a4e766`; Quote rules, Index mutation order,
 existing failure rows and the shared SDK paid appendix were inspected. The
 exact run-local control manifests and the B fault fixture remain next work.
+
+## September 13 follow-through: reviewed B seam and execution traps
+
+**Source preparation only, not a run.** With Claude quota-blocked, Codex owns
+the follow-through in its already isolated successors, not Claude's original
+worktrees. The following narrows the existing control at B source `c5561e2`
+(evidence-only HEAD `cbadc00`). It creates no chain lease or replacement cost
+result. An independent reviewer checked the actual dispatch/error paths.
+
+- Change only `IndexModule.onAdmission` visibility to `public virtual` so a
+  disposable derived fixture can call `super` internally. Preserve the Ledger
+  caller check. After normal maintenance/frontier writes, and only for nonempty
+  effects, refuse the final bind when its binding key matches an immutable
+  poison key. Zero poison disables the fault. No copied index or Ledger fault
+  hook; exercise it through the real Ledger ingress.
+- The poison key is A's TAG binding on the stable File for `market`, not the
+  Quote's content ID. Deploy and attach the module **before** Items/Pair so
+  `attachedFrom=1`. Otherwise a late-attached PARTIAL module can make the test
+  look like a successful empty directory while missing its required premise.
+- Each control deployment needs a fresh valid A intent: B commits the module's
+  address/codehash into index obligations. Re-sign for the deployment and for
+  the scale-7 body/record/HEAD target. Require the full 68-byte
+  `E_REJECTED(1, quoteType)` or 132-byte nested
+  `E_INDEX(abi.encodeWithSelector(E_LATE_INDEX.selector, poisonBindingKey))`.
+  Wrong-signature, stale-profile, outer-selector-only and OOG failures do not
+  count. Resolve inherited immutable AST declarations when preparing the
+  subclass's runtime; the present named-contract helper is insufficient.
+  Never introduce runtime masks to bypass that refusal.
+- Link the static refusal to the mined attempt using identical sender,
+  destination, calldata and adequate explicit gas. Check the **post-receipt**
+  block, not a restored snapshot. A correct static error plus an unrelated
+  failed transaction is not atomicity evidence.
+
+For B, S0 is counters `(3,3,0,1)`, A protocol nonce 0, frontier 3/publication 1,
+generation 0, no gap and five mandatory families `(COMPLETE,1,3)`. Compare all
+touched heads **and `postingWord(key,0)` even when count is zero**, evidence and
+source-evidence/publication keys, absent admissions 4–8, subject/binding rows,
+and unchanged Item/Pair bodies and occurrence counts. This detects orphan
+words hidden behind an unchanged list count.
+
+Calibration must establish counters `(8,4,3,2)`, A nonce 1, File admission 4,
+Quote admission 5, HEAD/FOLDER/TAG admissions 6/7/8 at revision 1, correct
+publication 2, frontier 8/publication 2 and families `(COMPLETE,1,8)`. Check
+scope ordinals 1/2/3, histories 6/7/8, Quote backlink 6 and File backlinks 7/8.
+A successful receipt alone is not the calibration.
+
+Implementation order remains small: targeted fixture tests and source review;
+root-only bounded compile/full suite; separate independent control bytes,
+runtime/constructor and raw-state expectations; then one owned fresh control
+per row with receipt/pre-post comparison and packet review. Preserve the normal
+paid packets and their prices. Do not expand this into an oracle framework or
+claim source proofs, portable import or the complete Files lifecycle from it.

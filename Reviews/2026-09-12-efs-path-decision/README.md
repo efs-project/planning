@@ -112,6 +112,18 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**18:59 decision-prep handoff; no new benchmark run.** The reviewed
+[[paid-rollback-control#September 13 follow-through: reviewed B seam and execution traps|B late-index control handoff]]
+now pins attachment timing, configuration-specific signatures, full error
+bytes, post-receipt observations and non-vacuous calibration. Root owns this
+fallback in its existing isolated successors; Claude's workspaces stay intact.
+[[maintenance-and-reuse-20260913]] separates MUD's genuine table/read/event
+reuse from unproved SDK/codegen/maintenance savings. SDK and Data Explorer PMs
+received bounded read-only shortlist reviews of the actual candidate APIs;
+responses due 21:00 UTC, advisory before the 23:10 provisional recommendation.
+Cost evidence remains the published B/C packets; the 19:10 cutoff and existing
+open gates are unchanged. No compiler/Anvil lease, new architecture or waiver.
+
 **18:18 B stronger-consumer paid result published; heavy slot released.**
 The 18:07:28–30 run at `c5561e2` passed both independently prepared gates,
 four exact paid-output comparisons and separate packet review. Evidence-only
