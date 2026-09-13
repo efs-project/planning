@@ -1,6 +1,6 @@
 # Road C measurement preparation — September 13
 
-**Standing:** implementation checkpoint for a disposable engineering experiment. No Anvil or network run occurred, no gas result is claimed, and no protocol/production/freeze choice is implied.
+**Standing:** historical implementation checkpoint for a disposable engineering experiment. Preparation alone established no gas result or protocol/production/freeze choice. The subsequent completed local-chain run is recorded separately in [measurement-results.md](measurement-results.md).
 
 **Scope and pins:** work began from branch `fable/2026-09-13-road-c-lab` at `7876477`; source/test semantics were pinned at `774dfcd`. The first preparation commit changed only `script/measure.mjs`, the new test-only `test/MeasurementConsumer.sol`, its test, and this report. A later pre-run correction adds only the runner's Node helper/test and updates this report. `src/Consumer.sol` remains byte-for-byte unchanged at SHA-256 `5f34e9ca9471f767d90f8f6149843ece97bdc99b036ab2005559fc3478048adb`; no Core or vendor file changed.
 
@@ -81,9 +81,9 @@ Relevant normal-limit sizes:
 
 A separate read-only scan covered 94 compiled artifacts and found zero EIP-170/EIP-3860 violations. At 04:09 UTC the retained run-owned scratch was 11 MiB, the root still had 265 GiB free, and no Forge/solc/Anvil process remained. The compiler lease is returned early; it does not become an Anvil lease.
 
-Current SHA-256 values:
+SHA-256 values (runner updated to the final `c825c61` source; other listed files unchanged):
 
-- `script/measure.mjs`: `b9764bfb5ff9ec1af451904ef7145fbe02bb3cd682c3e8bfe119d95bd11ecd36`
+- `script/measure.mjs`: `5a072ac252dfe9e87102bece786abe96db2f5f9cb638f466eb08bc7bc0b55393`
 - `script/measure-helpers.mjs`: `99ea48521d131447d053825f406b31e6e7263a1bdc72491b0f2b820a1eaa1e27`
 - `script/measure-helpers.test.mjs`: `797ba39fd16defdb6eafb4e3578c6af5869318b4e5ce03702af211bfb6b97b68`
 - `test/MeasurementConsumer.sol`: `7928a49650598b8d5da5a5de9c617eec0481d4f6bc5e71075d2003a5ab28bb4f`
@@ -102,4 +102,4 @@ against the same test deployment: receipt status 1, gas 69,974. The one-line
 runner fix selects that explicit ABI method. A fresh chain run must follow;
 the diagnostic attachment is not merged into the benchmark's setup totals.
 
-`node --check script/measure.mjs` exits 0 with the coordinator-pinned Node, but the runner has not been connected to a chain. Before any receipt claim: independently review the runner and expected action cells; grant a new bounded Anvil lease; execute it under normal chain limits; confirm raw RPC/receipt completeness and decoded commitments; and compare against the matched Road B evidence. Cold-readable labels, browser RPC, export/import, populated upgrade and independent reconstruction remain outside this bounded preparation task.
+**05:09 UTC follow-up:** after the explicit ABI-method fix, root completed the fresh local-chain run under the existing bounded lease. See [measurement-results.md](measurement-results.md) for retained receipts, source/runtime pins, process cleanup and evidence ceilings. Cold-readable labels, browser RPC, export/import, populated upgrade, independent reconstruction and a feature-matched B comparison remain outside this bounded preparation task.
