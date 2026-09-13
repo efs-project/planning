@@ -9,7 +9,7 @@ const PIN_NAMES = ['controller', 'expectations', 'armInput'];
 const TYPE_NAMES = ['QUOTE', 'BINARY', 'ITEM', 'PAIR', 'QUOTE_J', 'LABEL'];
 const FIXTURE_NAMES = ['ITEM_ETH', 'ITEM_USDC', 'PAIR_ETH_USDC', 'QUOTE_A1', 'QUOTE_A2', 'QUOTE_B1'];
 const EXPECT_NAMES = ['A_FIRST', 'B_FIRST'];
-const EXPECT_FIELDS = ['subject', 'expectedHead', 'selectedAuthor', 'selectedProofKind', 'pairId', 'itemA', 'itemB', 'mantissa', 'scale', 'observedAt', 'noteCommitment', 'basisAdmission'];
+const EXPECT_FIELDS = ['subject', 'expectedHead', 'selectedAuthor', 'selectedProofKind', 'pairId', 'itemA', 'itemB', 'mantissa', 'scale', 'observedAt', 'noteCommitment', 'basisAdmission', 'expectedRevision'];
 const ORDINAL_FIELDS = ['placementAdmission', 'placementPublication', 'placementRevision', 'aHeadAdmission', 'aHeadRevision', 'bHeadAdmission', 'bHeadRevision', 'postB1Frontier', 'registryEpoch', 'indexGeneration'];
 const CHECKPOINT_FIELDS = ['blockNumber', 'blockHash', 'timestamp', 'snapshot', 'frontier', 'indexGeneration', 'registryEpoch', 'coreCodeCommitment', 'realmId'];
 const FRONTIER_FIELDS = ['admissions', 'records', 'bindings', 'publications'];
@@ -22,6 +22,7 @@ const isBytes32 = (value) => typeof value === 'string' && /^0x[0-9a-f]{64}$/.tes
 const isAddress = (value) => typeof value === 'string' && /^0x[0-9a-f]{40}$/.test(value);
 const isBytes = (value) => typeof value === 'string' && /^0x(?:[0-9a-f]{2})*$/.test(value);
 const isDecimal = (value) => typeof value === 'string' && /^(0|[1-9][0-9]*)$/.test(value);
+const isNonzeroUint32 = (value) => isDecimal(value) && BigInt(value) > 0n && BigInt(value) <= 4_294_967_295n;
 const isIndex = (value) => Number.isSafeInteger(value) && value >= 0;
 
 export function canonical(value) {
@@ -105,6 +106,8 @@ function validateInputs(inputs) {
     for (const key of ['subject', 'expectedHead', 'pairId', 'itemA', 'itemB', 'noteCommitment']) typed(isBytes32(inputs.expect[name][key]), `${path}.${key}`);
     typed(isAddress(inputs.expect[name].selectedAuthor), `${path}.selectedAuthor`);
     for (const key of ['selectedProofKind', 'mantissa', 'scale', 'observedAt', 'basisAdmission']) typed(isDecimal(inputs.expect[name][key]), `${path}.${key}`);
+    typed(isNonzeroUint32(inputs.expect[name].expectedRevision), `${path}.expectedRevision`);
+    typed(inputs.expect[name].expectedRevision === (name === 'A_FIRST' ? '2' : '1'), `${path}.expectedRevision`);
   }
 
   exactKeys(inputs.placementExpect, ['folder', 'nameRole', 'actor', 'proofKind', 'publication', 'budget'], 'inputs.placementExpect');
@@ -255,6 +258,8 @@ export async function createControllerGate({
         compareTree(comparisons, ack.inputs.roles, context.roles, 'inputs.roles', 'CONTROLLER_INPUT_MISMATCH');
         compareValue(comparisons, ack.inputs.ordinals.postB1Frontier, ack.inputs.expect.A_FIRST.basisAdmission, 'inputs.expect.A_FIRST.basisAdmission', 'CONTROLLER_INPUT_MISMATCH');
         compareValue(comparisons, ack.inputs.ordinals.postB1Frontier, ack.inputs.expect.B_FIRST.basisAdmission, 'inputs.expect.B_FIRST.basisAdmission', 'CONTROLLER_INPUT_MISMATCH');
+        compareValue(comparisons, ack.inputs.ordinals.aHeadRevision, ack.inputs.expect.A_FIRST.expectedRevision, 'inputs.expect.A_FIRST.expectedRevision', 'CONTROLLER_INPUT_MISMATCH');
+        compareValue(comparisons, ack.inputs.ordinals.bHeadRevision, ack.inputs.expect.B_FIRST.expectedRevision, 'inputs.expect.B_FIRST.expectedRevision', 'CONTROLLER_INPUT_MISMATCH');
         state.beforeInputs = clone(ack.inputs);
         state.inputsSha256 = ack.inputsSha256;
       } else {

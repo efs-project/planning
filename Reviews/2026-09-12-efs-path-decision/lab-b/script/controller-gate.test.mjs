@@ -37,8 +37,8 @@ function fixture() {
     roles,
     lenses: { LENS_A_FIRST: [roles.AUTHOR_A.address, roles.actorB.address], LENS_B_FIRST: [roles.actorB.address, roles.AUTHOR_A.address] },
     expect: {
-      A_FIRST: { subject: h32('21'), expectedHead: h32('31'), selectedAuthor: roles.AUTHOR_A.address, selectedProofKind: '2', pairId: h32('32'), itemA: h32('33'), itemB: h32('34'), mantissa: '2502000000', scale: '6', observedAt: '1800000000', noteCommitment: h32('35'), basisAdmission: '12' },
-      B_FIRST: { subject: h32('21'), expectedHead: h32('36'), selectedAuthor: roles.actorB.address, selectedProofKind: '1', pairId: h32('32'), itemA: h32('33'), itemB: h32('34'), mantissa: '2501000000', scale: '6', observedAt: '1800000000', noteCommitment: h32('35'), basisAdmission: '12' },
+      A_FIRST: { subject: h32('21'), expectedHead: h32('31'), selectedAuthor: roles.AUTHOR_A.address, selectedProofKind: '2', pairId: h32('32'), itemA: h32('33'), itemB: h32('34'), mantissa: '2502000000', scale: '6', observedAt: '1800000000', noteCommitment: h32('35'), basisAdmission: '12', expectedRevision: '2' },
+      B_FIRST: { subject: h32('21'), expectedHead: h32('36'), selectedAuthor: roles.actorB.address, selectedProofKind: '1', pairId: h32('32'), itemA: h32('33'), itemB: h32('34'), mantissa: '2501000000', scale: '6', observedAt: '1800000000', noteCommitment: h32('35'), basisAdmission: '12', expectedRevision: '1' },
     },
     placementExpect: { folder: h32('41'), nameRole: h32('42'), actor: roles.AUTHOR_A.address, proofKind: '2', publication: '2', budget: '16' },
     ordinals: { placementAdmission: '7', placementPublication: '2', placementRevision: '1', aHeadAdmission: '10', aHeadRevision: '2', bHeadAdmission: '12', bHeadRevision: '1', postB1Frontier: '12', registryEpoch: '8', indexGeneration: '0' },
@@ -156,6 +156,31 @@ test('beforeFixture rejects missing, extra, wrongly typed and mutated input fiel
     ]) {
       const gate = await openGate(f, { beforeFixture: async (context) => { const ack = f.ackFor(context); mutate(ack); return ack; }, afterB1: async () => ({}) });
       await assert.rejects(() => gate.invoke('beforeFixture', f.beforeContext), pattern);
+    }
+  } finally { f.cleanup(); }
+});
+
+test('beforeFixture requires exact nonzero uint32 expectedRevision strings A_FIRST=2 and B_FIRST=1', async () => {
+  const f = fixture();
+  try {
+    for (const mutate of [
+      (ack) => { delete ack.inputs.expect.A_FIRST.expectedRevision; },
+      (ack) => { ack.inputs.expect.A_FIRST.expectedRevision = 2; },
+      (ack) => { ack.inputs.expect.A_FIRST.expectedRevision = '0'; },
+      (ack) => { ack.inputs.expect.A_FIRST.expectedRevision = '4294967296'; },
+      (ack) => { ack.inputs.expect.A_FIRST.expectedRevision = '1'; },
+      (ack) => { ack.inputs.expect.B_FIRST.expectedRevision = '2'; },
+    ]) {
+      const gate = await openGate(f, {
+        beforeFixture: async (context) => {
+          const ack = f.ackFor(context);
+          mutate(ack);
+          ack.inputsSha256 = sha(canonical(ack.inputs));
+          return ack;
+        },
+        afterB1: async () => ({}),
+      });
+      await assert.rejects(() => gate.invoke('beforeFixture', f.beforeContext), /CONTROLLER_ACK_MALFORMED:inputs.expect.(A_FIRST|B_FIRST).expectedRevision/);
     }
   } finally { f.cleanup(); }
 });

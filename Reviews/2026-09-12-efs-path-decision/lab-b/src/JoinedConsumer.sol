@@ -33,6 +33,9 @@ interface ILedgerReads {
             bytes32 actionsHash
         );
     function counts() external view returns (uint64 admissions, uint64 records, uint64 bindings, uint64 publications);
+    function coreCodeCommitment() external view returns (bytes32);
+    function isImported(uint64 publication) external view returns (bool);
+    function bindingPosition(uint64 ordinal) external view returns (bytes32);
     function positionCell(bytes32 position) external view returns (bytes32 purpose, bytes32 subject, bytes32 role);
     function registry() external view returns (address);
 }
@@ -317,6 +320,7 @@ contract JoinedConsumer {
         uint64 observedAt; // the selected Quote's exact observation time from the sealed fixture (an INPUT, compared on chain)
         bytes32 noteCommitment; // keccak256 of the sealed NOTE_BYTES (an INPUT, compared on chain)
         uint64 basisAdmission; // the admission frontier at the post-B1 seal
+        uint32 expectedRevision; // 2 for A-first / 1 for B-first, sealed independently and never derived from the reply
     }
 
     /// Expectations of the one placement a list row must find (list rows only).
@@ -376,6 +380,21 @@ contract JoinedConsumer {
     event PaidResult(bytes32 indexed kind, bytes32 commitment, Selection selection, Placement placement);
 
     error BasisMismatch(uint64 expected, uint64 observed);
+    error RevisionMismatch(uint32 expected, uint32 observed);
+    error RecordAdmissionBounds(bytes32 recordId, uint64 firstAdmission, uint64 basis);
+    error AdmissionBounds(uint64 admission, uint64 basis);
+    error AdmissionCoordinate(
+        uint64 admission,
+        bytes32 expectedPurpose,
+        bytes32 expectedSubject,
+        bytes32 expectedRole,
+        bytes32 observedPurpose,
+        bytes32 observedSubject,
+        bytes32 observedRole
+    );
+    error AdmissionRevision(uint64 admission, uint32 expectedRevision, uint32 observedRevision);
+    error ImportedPublication(uint64 publication);
+    error CursorContext(uint8 field, bytes32 expected, bytes32 observed);
     error SelectionMismatch(uint8 field, bytes32 expected, bytes32 observed); // field 1 = selected author, 2 = selected head id, 3 = observedAt, 4 = note commitment
     error AdmissionShape(uint64 admission, uint8 kind, bool withdrawn, bytes32 target);
     error EvidenceBounds(uint64 admission, uint64 publication, uint64 firstAdmission, uint16 leafCount);
@@ -403,7 +422,7 @@ contract JoinedConsumer {
         external
         returns (bytes32 commitment, Selection memory selection, Placement memory placement)
     {
-        placement = _placement(lensPrincipals, e.subject, p);
+        placement = _placement(lensPrincipals, e, p);
         selection = _select(lensPrincipals, e);
         if (placement.basisAdmission != selection.basisAdmission) revert BasisMismatch(selection.basisAdmission, placement.basisAdmission);
         commitment = keccak256(abi.encode(KIND_PAID_LIST, selection, placement));
@@ -419,13 +438,15 @@ contract JoinedConsumer {
         if (status != FOUND) revert NoSelection(status);
         if (author != e.selectedAuthor) revert SelectionMismatch(1, bytes32(uint256(uint160(e.selectedAuthor))), bytes32(uint256(uint160(author))));
         if (target != e.expectedHead) revert SelectionMismatch(2, e.expectedHead, target);
+        if (revision != e.expectedRevision) revert RevisionMismatch(e.expectedRevision, revision);
         s.lensId = _lensId(lensPrincipals);
         s.subject = e.subject;
         s.selectedHead = target;
         s.selectedRevision = revision;
         s.selectedAdmission = admission;
         s.selectedAuthor = author;
-        (s.selectedPublication, s.selectedProofKind) = _admittedBy(admission, target, author, e.selectedProofKind);
+        (s.selectedPublication, s.selectedProofKind) =
+            _admittedBy(admission, target, author, e.selectedProofKind, e.basisAdmission, HEAD, e.subject, bytes32(0), revision);
         _closure(s, e);
     }
 
@@ -437,20 +458,40 @@ contract JoinedConsumer {
         s.basisAdmission = admissions;
         s.indexGeneration = IIndexGeneration(lens.index()).generation();
         s.rulesEpoch = IRulesEpoch(ledger.registry()).epoch();
-        s.coreCodeCommitment = address(ledger).codehash;
+        s.coreCodeCommitment = ledger.coreCodeCommitment();
     }
 
     /// The admission that set the observed head or placement must be a live BIND of exactly that target, inside
     /// the admission range of its publication, whose retained evidence names `author` under the expected proof
     /// category: a contract-originated publication carries no signature at all (nothing fabricated), a signed one
     /// carries (v, r, s).
-    function _admittedBy(uint64 admission, bytes32 target, address author, uint8 expectedProofKind)
+    function _admittedBy(
+        uint64 admission,
+        bytes32 target,
+        address author,
+        uint8 expectedProofKind,
+        uint64 basis,
+        bytes32 expectedPurpose,
+        bytes32 expectedSubject,
+        bytes32 expectedRole,
+        uint32 observedRevision
+    )
         private
         view
         returns (uint64 publication, uint8 proofKind)
     {
-        (uint8 kind,, uint64 pub,,, bool withdrawn, bytes32 a,) = ledger.admission(admission);
+        if (admission == 0 || admission > basis) revert AdmissionBounds(admission, basis);
+        (uint8 kind,, uint64 pub, uint64 bindingOrdinal, uint32 expectedRevision, bool withdrawn, bytes32 a,) = ledger.admission(admission);
         if (kind != ACTION_BIND || withdrawn || a != target) revert AdmissionShape(admission, kind, withdrawn, a);
+        bytes32 position = ledger.bindingPosition(bindingOrdinal);
+        (bytes32 purpose, bytes32 subject, bytes32 role) = ledger.positionCell(position);
+        if (purpose != expectedPurpose || subject != expectedSubject || role != expectedRole) {
+            revert AdmissionCoordinate(admission, expectedPurpose, expectedSubject, expectedRole, purpose, subject, role);
+        }
+        if (uint64(expectedRevision) + 1 != uint64(observedRevision)) {
+            revert AdmissionRevision(admission, expectedRevision, observedRevision);
+        }
+        if (ledger.isImported(pub)) revert ImportedPublication(pub);
         (address evidenceAuthor, uint8 pk, uint8 v, uint16 leafCount, uint64 first, bytes32 r, bytes32 sg,,,,,,) = ledger.evidence(pub);
         if (admission < first || admission >= first + leafCount) revert EvidenceBounds(admission, pub, first, leafCount);
         if (evidenceAuthor != author) revert AuthorMismatch(author, evidenceAuthor, pk);
@@ -469,7 +510,7 @@ contract JoinedConsumer {
     /// (pair, ordered items, mantissa, scale, observedAt, note commitment) against the caller's expectation. Item
     /// checks are Type checks only (no Item payload semantics in this slice).
     function _closure(Selection memory s, Expect calldata e) private view {
-        Quote memory q = _quote(s.selectedHead);
+        Quote memory q = _quote(s.selectedHead, s.basisAdmission);
         if (q.pairId != e.pairId) revert ClosureMismatch(1, e.pairId, q.pairId);
         if (q.itemA != e.itemA) revert ClosureMismatch(2, e.itemA, q.itemA);
         if (q.itemB != e.itemB) revert ClosureMismatch(3, e.itemB, q.itemB);
@@ -493,13 +534,28 @@ contract JoinedConsumer {
     /// second name, a duplicate, a tombstone) is refused too. That is correct for the sealed fixture, where the
     /// folder holds exactly the single A placement. The row must be the expected (folder, name) -> subject
     /// placement held by the expected actor and admitted by the expected publication under the expected category.
-    function _placement(address[] calldata lensPrincipals, bytes32 subject, PlacementExpect calldata p)
+    function _placement(address[] calldata lensPrincipals, Expect calldata e, PlacementExpect calldata p)
         private
         view
         returns (Placement memory pl)
     {
         LensReader.Cursor memory fresh;
         LensReader.Page memory page = lens.list(lensPrincipals, FOLDER, p.folder, fresh, p.budget);
+        if (page.next.basisAdmission != e.basisAdmission) revert BasisMismatch(e.basisAdmission, page.next.basisAdmission);
+        uint64 generation = IIndexGeneration(lens.index()).generation();
+        if (page.next.indexGeneration != generation) {
+            revert CursorContext(1, bytes32(uint256(generation)), bytes32(uint256(page.next.indexGeneration)));
+        }
+        uint64 epoch = IRulesEpoch(ledger.registry()).epoch();
+        if (page.next.rulesEpoch != epoch) {
+            revert CursorContext(2, bytes32(uint256(epoch)), bytes32(uint256(page.next.rulesEpoch)));
+        }
+        bytes32 core = ledger.coreCodeCommitment();
+        if (page.next.coreCodeCommitment != core) revert CursorContext(3, core, page.next.coreCodeCommitment);
+        bytes32 scope = keccak256(abi.encode(FOLDER, p.folder));
+        if (page.next.scopeKey != scope) revert CursorContext(4, scope, page.next.scopeKey);
+        bytes32 packedLens = keccak256(abi.encodePacked(lensPrincipals));
+        if (page.next.lensHash != packedLens) revert CursorContext(5, packedLens, page.next.lensHash);
         bool ended = page.next.lensIndex == lensPrincipals.length && page.next.rawIndex == 0;
         pl.pageStatus = page.status;
         pl.rawTotal = page.rawTotal;
@@ -516,9 +572,10 @@ contract JoinedConsumer {
         (bytes32 purpose, bytes32 folder, bytes32 role) = ledger.positionCell(it.position);
         if (purpose != FOLDER || folder != p.folder) revert PlacementMismatch(1, p.folder, folder);
         if (role != p.nameRole) revert PlacementMismatch(2, p.nameRole, role);
-        if (it.target != subject) revert PlacementMismatch(3, subject, it.target);
+        if (it.target != e.subject) revert PlacementMismatch(3, e.subject, it.target);
         if (it.author != p.actor) revert PlacementMismatch(4, bytes32(uint256(uint160(p.actor))), bytes32(uint256(uint160(it.author))));
-        (uint64 publication, uint8 proofKind) = _admittedBy(it.admission, it.target, it.author, p.proofKind);
+        (uint64 publication, uint8 proofKind) =
+            _admittedBy(it.admission, it.target, it.author, p.proofKind, e.basisAdmission, FOLDER, p.folder, p.nameRole, it.revision);
         if (publication != p.publication) revert PlacementMismatch(5, bytes32(uint256(p.publication)), bytes32(uint256(publication)));
         pl.position = it.position;
         pl.actor = it.author;
@@ -529,6 +586,8 @@ contract JoinedConsumer {
     }
 
     // ------------------------------------------------------------------ verification helpers (public interfaces only)
+    /// Legacy joined reads retain their original current-frontier behavior; only the paid slice applies the
+    /// independently sealed first-admission bounds below.
     function _quote(bytes32 target) private view returns (Quote memory q) {
         (bytes32 typeId,,, bytes memory data) = ledger.record(target);
         if (typeId != quoteType || data.length != QUOTE_BODY) revert QuoteShape(target, typeId, data.length);
@@ -547,6 +606,32 @@ contract JoinedConsumer {
         if (tb != itemType) revert ItemShape(b, tb);
         q.itemA = a;
         q.itemB = b;
+    }
+
+    function _quote(bytes32 target, uint64 basis) private view returns (Quote memory q) {
+        (bytes32 typeId, bytes memory data) = _boundedRecord(target, basis);
+        if (typeId != quoteType || data.length != QUOTE_BODY) revert QuoteShape(target, typeId, data.length);
+        (q.pairId, q.mantissa, q.scale, q.observedAt, q.note) = abi.decode(data, (bytes32, uint256, uint8, uint64, bytes32));
+        (bytes32 pairTypeId, bytes memory pair) = _boundedRecord(q.pairId, basis);
+        if (pairTypeId != pairType || pair.length < 64) revert PairShape(q.pairId, pairTypeId, pair.length);
+        bytes32 a;
+        bytes32 b;
+        assembly ("memory-safe") {
+            a := mload(add(pair, 32))
+            b := mload(add(pair, 64))
+        }
+        (bytes32 ta,) = _boundedRecord(a, basis);
+        if (ta != itemType) revert ItemShape(a, ta);
+        (bytes32 tb,) = _boundedRecord(b, basis);
+        if (tb != itemType) revert ItemShape(b, tb);
+        q.itemA = a;
+        q.itemB = b;
+    }
+
+    function _boundedRecord(bytes32 id, uint64 basis) private view returns (bytes32 typeId, bytes memory data) {
+        uint64 firstAdmission;
+        (typeId, firstAdmission,, data) = ledger.record(id);
+        if (firstAdmission == 0 || firstAdmission > basis) revert RecordAdmissionBounds(id, firstAdmission, basis);
     }
 
     /// The publication that admitted `admission`, and its retained author and proof kind.

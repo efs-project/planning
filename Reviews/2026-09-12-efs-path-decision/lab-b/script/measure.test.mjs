@@ -500,15 +500,15 @@ test('buildPaidCalls consumes controller-supplied lenses, Expect and PlacementEx
   const { buildPaidCalls } = loadPaidHelpers();
   const inputs = {
     lenses: { LENS_A_FIRST: ['0xa', '0xb'], LENS_B_FIRST: ['0xb', '0xa'] },
-    expect: { A_FIRST: { expectedHead: '0xa2' }, B_FIRST: { expectedHead: '0xb1' } },
+    expect: { A_FIRST: { expectedHead: '0xa2', expectedRevision: '2' }, B_FIRST: { expectedHead: '0xb1', expectedRevision: '1' } },
     placementExpect: { folder: '0xf', publication: '2' },
   };
   const calls = buildPaidCalls(inputs);
   assert.deepEqual(JSON.parse(JSON.stringify(calls.map(({ key, lensArr, fn, fnArgs }) => ({ key, lensArr, fn, fnArgs })))), [
-    { key: 'point-a-first', lensArr: ['0xa', '0xb'], fn: 'paidPoint', fnArgs: [['0xa', '0xb'], { expectedHead: '0xa2' }] },
-    { key: 'list-a-first', lensArr: ['0xa', '0xb'], fn: 'paidList', fnArgs: [['0xa', '0xb'], { expectedHead: '0xa2' }, { folder: '0xf', publication: '2' }] },
-    { key: 'point-b-first', lensArr: ['0xb', '0xa'], fn: 'paidPoint', fnArgs: [['0xb', '0xa'], { expectedHead: '0xb1' }] },
-    { key: 'list-b-first', lensArr: ['0xb', '0xa'], fn: 'paidList', fnArgs: [['0xb', '0xa'], { expectedHead: '0xb1' }, { folder: '0xf', publication: '2' }] },
+    { key: 'point-a-first', lensArr: ['0xa', '0xb'], fn: 'paidPoint', fnArgs: [['0xa', '0xb'], { expectedHead: '0xa2', expectedRevision: '2' }] },
+    { key: 'list-a-first', lensArr: ['0xa', '0xb'], fn: 'paidList', fnArgs: [['0xa', '0xb'], { expectedHead: '0xa2', expectedRevision: '2' }, { folder: '0xf', publication: '2' }] },
+    { key: 'point-b-first', lensArr: ['0xb', '0xa'], fn: 'paidPoint', fnArgs: [['0xb', '0xa'], { expectedHead: '0xb1', expectedRevision: '1' }] },
+    { key: 'list-b-first', lensArr: ['0xb', '0xa'], fn: 'paidList', fnArgs: [['0xb', '0xa'], { expectedHead: '0xb1', expectedRevision: '1' }, { folder: '0xf', publication: '2' }] },
   ]);
   assert.notEqual(calls[0].fnArgs[1], inputs.expect.A_FIRST, 'calldata input is an isolated copy');
 });

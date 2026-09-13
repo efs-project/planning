@@ -324,10 +324,25 @@ contract JoinedConsumerTest is LabBase {
 
     function expectFor(Ids memory id, bytes32 head, address author, uint8 proofKind, uint256 mantissa, uint64 basis)
         internal
-        pure
+        view
         returns (JoinedConsumer.Expect memory e)
     {
-        e = JoinedConsumer.Expect(id.subj, head, author, proofKind, id.pairId, id.itemA, id.itemB, mantissa, SCALE, OBSERVED_AT, keccak256(NOTE_BYTES), basis);
+        uint32 expectedRevision = author == address(bob) ? 1 : 2;
+        e = JoinedConsumer.Expect(
+            id.subj,
+            head,
+            author,
+            proofKind,
+            id.pairId,
+            id.itemA,
+            id.itemB,
+            mantissa,
+            SCALE,
+            OBSERVED_AT,
+            keccak256(NOTE_BYTES),
+            basis,
+            expectedRevision
+        );
     }
 
     function placementFor() internal view returns (JoinedConsumer.PlacementExpect memory p) {
@@ -422,6 +437,9 @@ contract JoinedConsumerTest is LabBase {
         // wrong expected head id for the right author (the retained older QUOTE_A1 / the competing QUOTE_B1 are not the selection)
         expectPointFail(ab, expectFor(id, id.a1, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1), JoinedConsumer.SelectionMismatch.selector, "A-first point: expecting the older head QUOTE_A1 is refused");
         expectListFail(ab, expectFor(id, id.b1, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1), p, JoinedConsumer.SelectionMismatch.selector, "A-first list: expecting B's head under A's authorship is refused");
+        JoinedConsumer.Expect memory wrongRevision = expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1);
+        wrongRevision.expectedRevision = 1;
+        expectPointFail(ab, wrongRevision, JoinedConsumer.RevisionMismatch.selector, "A-first: the sealed expected revision is exact, not inferred from the reply");
         // wrong proof category for the right author
         expectPointFail(ab, expectFor(id, id.a2, eoaA,KIND_NATIVE, M_A2, BASIS_POST_B1), JoinedConsumer.ProofCategory.selector, "A-first: AUTHOR_A is EOA-signed, not contract-originated");
         expectPointFail(ba, expectFor(id, id.b1, address(bob),KIND_SIGNED, M_B1, BASIS_POST_B1), JoinedConsumer.ProofCategory.selector, "B-first: AUTHOR_B is contract-originated, not EOA-signed");
@@ -448,6 +466,7 @@ contract JoinedConsumerTest is LabBase {
         alice.bind(HEAD, other, NO_ROLE, rq, 0); // admission 15
         JoinedConsumer.Expect memory eo = expectFor(id, rq, address(alice), KIND_NATIVE, 3000, 15);
         eo.subject = other;
+        eo.expectedRevision = 1;
         expectPointFail(lensOf(address(alice)), eo, JoinedConsumer.QuoteShape.selector, "a non-joined head is refused, not decoded");
     }
 
@@ -477,10 +496,12 @@ contract JoinedConsumerTest is LabBase {
         // an extra (B) placement of the same name: the window holds two raw candidates -> refused under both lenses
         p = placementFor();
         bob.bind(FOLDER, SWAPS, name("eth-usdc"), id.subj, 0); // admission 13
-        expectListFail(ab, eA, p, JoinedConsumer.PlacementWindow.selector, "a second placement is refused (A-first)");
-        expectListFail(ba, eB, p, JoinedConsumer.PlacementWindow.selector, "a second placement is refused (B-first)");
+        JoinedConsumer.Expect memory eA13 = expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, 13);
+        JoinedConsumer.Expect memory eB13 = expectFor(id, id.b1, address(bob), KIND_NATIVE, M_B1, 13);
+        expectListFail(ab, eA13, p, JoinedConsumer.PlacementWindow.selector, "a second placement is refused (A-first)");
+        expectListFail(ba, eB13, p, JoinedConsumer.PlacementWindow.selector, "a second placement is refused (B-first)");
         bob.unbind(FOLDER, SWAPS, name("eth-usdc"), 1); // admission 14: B's tombstone still counts as a raw candidate
-        expectListFail(ab, eA, p, JoinedConsumer.PlacementWindow.selector, "a removed second placement is still a second raw candidate");
+        expectListFail(ab, expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, 14), p, JoinedConsumer.PlacementWindow.selector, "a removed second placement is still a second raw candidate");
         // mixed bases: the frontier moved (14) while the expectation still says 12
         expectPointFail(ab, eA, JoinedConsumer.BasisMismatch.selector, "point: a moved admission frontier is a mixed basis");
         // the point does not need the directory: it still selects at the new basis after A's placement is removed
@@ -510,12 +531,103 @@ contract JoinedConsumerTest is LabBase {
         }
     }
 
+    function expectFaultyListFail(Ids memory id, bytes4 expected, string memory label) internal {
+        try faultyJoined.paidList(
+            lensOf(eoaA, address(bob)),
+            expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1),
+            placementFor()
+        ) {
+            require(false, label);
+        } catch (bytes memory err) {
+            expectSel(err, expected, label);
+        }
+    }
+
+    function test_faulty_actual_reply_wrong_selected_revision_is_refused() public {
+        Ids memory id = runSteps1to4();
+        faulty.fault(faulty.WRONG_SELECTED_REVISION(), bytes32(0));
+        expectFaultyPointFail(id, bytes4(keccak256("RevisionMismatch(uint32,uint32)")), "the exact sealed A2 revision is required");
+    }
+
+    function test_faulty_actual_reply_zero_or_future_record_first_admission_is_refused_for_quote_pair_and_both_items() public {
+        Ids memory id = runSteps1to4();
+        bytes32[4] memory records = [id.a2, id.pairId, id.itemA, id.itemB];
+        for (uint256 i; i < records.length; ++i) {
+            faulty.fault(faulty.ZERO_RECORD_FIRST_ADMISSION(), records[i]);
+            expectFaultyPointFail(id, bytes4(keccak256("RecordAdmissionBounds(bytes32,uint64,uint64)")), "a zero record firstAdmission is refused");
+            faulty.fault(faulty.FUTURE_RECORD_FIRST_ADMISSION(), records[i]);
+            expectFaultyPointFail(id, bytes4(keccak256("RecordAdmissionBounds(bytes32,uint64,uint64)")), "a record firstAdmission after the sealed basis is refused");
+        }
+    }
+
+    function test_faulty_actual_reply_zero_or_future_selected_and_placement_admissions_are_refused() public {
+        Ids memory id = runSteps1to4();
+        faulty.fault(faulty.ZERO_SELECTED_ADMISSION(), bytes32(0));
+        expectFaultyPointFail(id, bytes4(keccak256("AdmissionBounds(uint64,uint64)")), "a zero selected admission is refused");
+        faulty.fault(faulty.FUTURE_SELECTED_ADMISSION(), bytes32(0));
+        expectFaultyPointFail(id, bytes4(keccak256("AdmissionBounds(uint64,uint64)")), "a selected admission after the sealed basis is refused");
+        faulty.fault(faulty.ZERO_PLACEMENT_ADMISSION(), bytes32(0));
+        expectFaultyListFail(id, bytes4(keccak256("AdmissionBounds(uint64,uint64)")), "a zero placement admission is refused");
+        faulty.fault(faulty.FUTURE_PLACEMENT_ADMISSION(), bytes32(0));
+        expectFaultyListFail(id, bytes4(keccak256("AdmissionBounds(uint64,uint64)")), "a placement admission after the sealed basis is refused");
+    }
+
+    function test_faulty_actual_reply_same_author_and_target_at_wrong_head_or_folder_coordinate_is_refused() public {
+        Ids memory id = runSteps1to4();
+        faulty.fault(faulty.WRONG_BINDING_POSITION(), id.swapsPos);
+        expectFaultyPointFail(id, bytes4(keccak256("AdmissionCoordinate(uint64,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)")), "selected evidence at the FOLDER coordinate cannot prove the HEAD coordinate");
+        faulty.fault(faulty.WRONG_BINDING_POSITION(), id.headPos);
+        expectFaultyListFail(id, bytes4(keccak256("AdmissionCoordinate(uint64,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)")), "placement evidence at the HEAD coordinate cannot prove the FOLDER coordinate");
+    }
+
+    function test_faulty_actual_reply_mismatched_or_wrapping_admission_revision_is_refused() public {
+        Ids memory id = runSteps1to4();
+        faulty.fault(faulty.WRONG_ADMISSION_REVISION(), bytes32(0));
+        expectFaultyPointFail(id, bytes4(keccak256("AdmissionRevision(uint64,uint32,uint32)")), "selected admission CAS revision must precede the selected revision");
+        expectFaultyListFail(id, bytes4(keccak256("AdmissionRevision(uint64,uint32,uint32)")), "placement admission CAS revision must precede the placement revision");
+        faulty.fault(faulty.MAX_ADMISSION_REVISION(), bytes32(0));
+        JoinedConsumer.Expect memory zeroRevision = expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1);
+        zeroRevision.expectedRevision = 0;
+        try faultyJoined.paidPoint(lensOf(eoaA, address(bob)), zeroRevision) {
+            require(false, "uint32 max admission expectedRevision wrapped into selected revision zero");
+        } catch (bytes memory err) {
+            expectSel(err, bytes4(keccak256("AdmissionRevision(uint64,uint32,uint32)")), "uint32 max admission expectedRevision cannot wrap into selected revision zero");
+        }
+        expectFaultyListFail(id, bytes4(keccak256("AdmissionRevision(uint64,uint32,uint32)")), "uint32 max admission expectedRevision cannot wrap into placement revision zero");
+    }
+
+    function test_faulty_actual_reply_imported_signed_and_native_publications_are_refused_as_local_fixture_evidence() public {
+        Ids memory id = runSteps1to4();
+        faulty.fault(faulty.IMPORTED_PUBLICATION(), bytes32(0));
+        expectFaultyPointFail(id, bytes4(keccak256("ImportedPublication(uint64)")), "A-first signed fixture evidence must be non-imported");
+        expectFaultyListFail(id, bytes4(keccak256("ImportedPublication(uint64)")), "the A1 signed placement effect must also be non-imported");
+        try faultyJoined.paidPoint(
+            lensOf(address(bob), eoaA), expectFor(id, id.b1, address(bob), KIND_NATIVE, M_B1, BASIS_POST_B1)
+        ) {
+            require(false, "B-first imported publication accepted");
+        } catch (bytes memory err) {
+            expectSel(err, bytes4(keccak256("ImportedPublication(uint64)")), "B-first native fixture evidence must be non-imported");
+        }
+    }
+
+    function test_faulty_actual_reply_cursor_generation_epoch_core_scope_and_packed_lens_context_are_refused() public {
+        Ids memory id = runSteps1to4();
+        uint8[5] memory modes = [
+            faulty.CURSOR_GENERATION_MISMATCH(), faulty.CURSOR_EPOCH_MISMATCH(), faulty.CURSOR_CORE_MISMATCH(),
+            faulty.CURSOR_SCOPE_MISMATCH(), faulty.CURSOR_LENS_MISMATCH()
+        ];
+        for (uint256 i; i < modes.length; ++i) {
+            faulty.fault(modes[i], bytes32(0));
+            expectFaultyListFail(id, bytes4(keccak256("CursorContext(uint8,bytes32,bytes32)")), "list cursor context mismatch is refused");
+        }
+    }
+
     function test_faulty_actual_reply_missing_pair_is_refused() public {
         Ids memory id = runSteps1to4();
         (, JoinedConsumer.Selection memory s) = faultyJoined.paidPoint(lensOf(eoaA, address(bob)), expectFor(id, id.a2, eoaA, KIND_SIGNED, M_A2, BASIS_POST_B1));
         require(s.selectedHead == id.a2 && s.pairId == id.pairId, "control: the forwarding reader is faithful with no fault armed");
         faulty.fault(faulty.MISSING_PAIR(), id.pairId);
-        expectFaultyPointFail(id, JoinedConsumer.PairShape.selector, "an absent Pair record (zero Type, empty body) is refused, not decoded");
+        expectFaultyPointFail(id, JoinedConsumer.RecordAdmissionBounds.selector, "an absent Pair record (zero Type, zero admission, empty body) is refused before decoding");
     }
 
     function test_faulty_actual_reply_wrong_type_item_is_refused() public {
