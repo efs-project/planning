@@ -211,3 +211,14 @@ retained pair. Missing data cannot establish exact-pair agreement. This is
 packet-input consistency, not chain nonce availability or runtime authority.
 No new oracle capabilities, candidate implementation inputs, network, build,
 Anvil, main edits, push or extra subagents are authorized by this repair.
+
+**Repair closed:** SDK committed the supplemental expectations at `1b341f0`
+and the main repair at `61805d4`. Root reproduced both original defects as
+fixed and 145 passing tests. Review then identified a sparse-array edge in
+the exported JavaScript analyzer (not representable in the retained JSON).
+Root added its failing regression, changed validation to visit every array
+slot, and reproduced **146/146 passing tests**. The scoped reviewer returned
+GO; final branch `258e5c2` is pushed. The positive report and profile remain
+byte-identical, including report SHA-256 `9471daec…8e25`. This closes the
+bounded signature-binding checker work, not candidate eligibility or the
+runtime/authority/provenance/effect gates.
