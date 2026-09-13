@@ -112,6 +112,14 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**17:05 B RED observed; heavy slot released.** The 17:04:20–27 root run
+compiled successfully and all seven new regressions failed at their intended
+missing-check assertions against unchanged production. Exact source/diff hashes
+and outputs are retained in the run directory below. This demonstrates the test
+gap, not a repaired consumer. Implementer may now make the specified consumer
+and runner/schema changes; no compiler or Anvil permission transfers with that
+handoff. Independent exact-input preparation is ready for reviewed new artifacts.
+
 **17:04–17:24 UTC root-only B regression-test lease.** No Anvil or other
 lane run is authorized. Source is `ac37e91` plus only the two uncommitted
 forwarding/regression test files; production is paused unchanged. Root records
