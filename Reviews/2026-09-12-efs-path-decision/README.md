@@ -112,6 +112,34 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**07:12 coordinated source repair / comparison scope:** Fable's existing
+**EFS v2 Dev** task acknowledged the 06:50 handoff in the Claude app and
+started one bounded specialist. Its B source/test changes are active;
+reviewed runner fixes are already pushed at `fdd837e`. Fable **declined the
+07:05–07:40 slot** because source and review were not ready. That reservation
+is not reusable: continue light work and request a new finite lease when
+ready. B Core remains Fable-owned; root is the sole main publisher.
+
+SDK's final scoped repair `20827a2` passed root's fresh **168/168 tests**
+and independent re-review. The frozen richer-profile blob remains
+`367c836d1952c19c16b3bdf6738675e3ea91233d`; prior oracle/report files are
+unchanged. This approves the diagnostic interpreter, **not a real-packet
+semantic verdict**. The existing packet has no identified independently
+retained pre-run concrete target/coordinate/source pin set. Missing pins
+stay `UNKNOWN`; do not derive them from the candidate packet and call them
+predeclared, or repeat the chain solely to appease this checker.
+
+The [[matched-cost-scope-review|independent B/C scope review]] is complete.
+Current gas rows are useful diagnostics, not a MUD tax or a portability
+premium. C's native update includes an extra folder placement; its listing
+consumer hydrates more data, while B's point reader checks deeper references.
+Next comparison preparation must freeze A1/A2/B1 and A-first/B-first
+point/list **observable outcomes**, use equivalent paid validation and
+independent abstract expected results, and disclose setup/storage/read work.
+Different physical encodings and native layouts are allowed. Repeat only
+those few rows plus matched failure checks after review; keep wider finalist
+gates separate. No architecture winner or feature sacrifice is adopted.
+
 **06:50 review intake / next Claude handoff:** independent review accepts
 the B packet at `5960336` as retained diagnostic evidence: 173 transaction
 joins, 2,675 explicit-basis raw calls, 94 consumer checks and all 14 deployed
