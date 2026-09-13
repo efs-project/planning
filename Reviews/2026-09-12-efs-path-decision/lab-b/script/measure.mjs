@@ -1701,7 +1701,7 @@ const paidSliceCell = {
         placementOnceOnly: { standing: 'ESTIMATE unless the paired control is pinned: the single A placement is one of five actions inside the paid/setup/A1 combined receipt (create + publish + head + FOLDER bind + tag) and is not separable from that receipt alone', pairedControl: 'cell joined/a1-without-placement (optional, non-default: identical batch minus the FOLDER bind from the same sealed pre-A1 state); when the coordinator pins it the two receipts sit side by side and any difference is the coordinator\'s computation' },
         storage: 'ESTIMATED fresh slots only (report.estimatedFreshSlots); no storage tracing was run',
         paid: 'rows paid/point-a-first, paid/list-a-first, paid/point-b-first, paid/list-b-first: receipt gas of one transaction each from the pinned unrelated caller (STATELESS consumer: no SSTORE; one PaidResult log with the concrete observations)',
-        matchedRollbackControl: 'cell failure-rows (failure/failed-acceptance = E_POLICY_REJECTED, failure/failed-mandatory-index = E_INDEX; whole-publication rollback with an unchanged probe) is the small matched acceptance/index-failure control required by matched-cost-scope-review — referenced here, not duplicated',
+        matchedRollbackControl: 'UNIMPLEMENTED / UNRUN: the matched S0/A1 mandatory-acceptance and required-index refusal controls (plus positive calibration) specified in paid-rollback-control.md require separate fresh control deployments and pins; cell failure-rows remains diagnostic and is not a matched substitute',
       },
     });
     return rows;
