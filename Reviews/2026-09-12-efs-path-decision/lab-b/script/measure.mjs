@@ -529,30 +529,17 @@ function persist(report) {
 }
 
 // ---------------------------------------------------------------- checks (candidate-side self-checks; never independent)
-// The independent checker's frozen stage call sets expect EXACTLY these Consumer selectors at the paid
-// transaction's receipt block (paid-quote-read: lastTarget/lastRevision/lastValue; listing: lastCount).
-// The remaining slots are read ONE EMPTY BLOCK LATER (evm_mine) so the receipt block carries only the
-// frozen set; other storing reads (readHead, readHistory) have no frozen set and read all seven at the receipt block.
-const CHECKER_STAGE_SLOTS = { readQuote: ['lastTarget', 'lastRevision', 'lastValue'], readList: ['lastCount'] };
+// Every stored Consumer slot is retained at the transaction's receipt block so all readback fields
+// share one observation basis. Interpretation belongs to the independent checker, not this runner.
 async function consumerCheck(ctx, row, expected) {
-  const fn = ctx.txs[row.txIndex].candidateInputs.fn;
-  const atReceipt = CHECKER_STAGE_SLOTS[fn] ?? CONSUMER_SLOTS;
-  const later = CONSUMER_SLOTS.filter((s) => !atReceipt.includes(s));
   const actual = {};
-  for (const s of atReceipt) actual[s] = str((await observe(ctx, ctx.raw, `readback:${row.label}`, 'Consumer', 'consumer', s, [], row.block))[0]);
-  let laterBlock = null;
-  if (later.length) {
-    await ctx.other('evm_mine', [], { label: `readback-later:${row.label}: one empty block (Anvil); an external RPC without evm_mine fails loudly here` });
-    laterBlock = await ctx.latestBlock();
-    assert.equal(laterBlock, row.block + 1, `${row.label}: expected exactly one empty block after the receipt block`);
-    for (const s of later) actual[s] = str((await observe(ctx, ctx.raw, `readback-later:${row.label}`, 'Consumer', 'consumer', s, [], laterBlock))[0]);
-  }
+  for (const s of CONSUMER_SLOTS) actual[s] = str((await observe(ctx, ctx.raw, `readback:${row.label}`, 'Consumer', 'consumer', s, [], row.block))[0]);
   const compared = {};
   let match = true;
   const norm = (v) => (typeof v === 'string' ? v.toLowerCase() : String(v));
   for (const [k, v] of Object.entries(expected)) { const equal = norm(v) === norm(actual[k]); compared[k] = { expected: norm(v), actual: norm(actual[k]), equal }; if (!equal) match = false; }
   if (!match) ctx.mismatches++;
-  const check = { label: `${row.label}/readback`, kind: 'stored-slots', standing: CAVEAT_EXPECTED, block: row.block, slotsAtReceiptBlock: atReceipt, slotsOneBlockLater: later, laterBlock, expected: Object.fromEntries(Object.entries(expected).map(([k, v]) => [k, norm(v)])), actual, compared, match };
+  const check = { label: `${row.label}/readback`, kind: 'stored-slots', standing: CAVEAT_EXPECTED, block: row.block, slotsAtReceiptBlock: CONSUMER_SLOTS, slotsOneBlockLater: [], laterBlock: null, expected: Object.fromEntries(Object.entries(expected).map(([k, v]) => [k, norm(v)])), actual, compared, match };
   ctx.consumerChecks.push(check);
   log(`  chk  ${check.label}: ${match ? 'match' : 'MISMATCH ' + JSON.stringify(compared)}`);
   return check;
