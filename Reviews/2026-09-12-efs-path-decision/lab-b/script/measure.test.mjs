@@ -52,6 +52,16 @@ function makeContext(fn) {
   };
 }
 
+function loadReportFinalizer() {
+  const source = readFileSync(runnerPath, 'utf8');
+  const finalizerStart = source.indexOf('report.consumerMismatches =');
+  const finalizerEnd = source.indexOf('\n  } catch (e) {', finalizerStart);
+  assert.notEqual(finalizerStart, -1, 'report finalizer exists');
+  assert.notEqual(finalizerEnd, -1, 'report finalizer boundary exists');
+  const finalizer = source.slice(finalizerStart, finalizerEnd);
+  return vm.runInNewContext(`(report) => { ${finalizer}\nreturn report; }`, { assert, Date });
+}
+
 test('consumerCheck catches a receipt-basis regression for every storing-consumer readback stage', async () => {
   for (const fn of ['readQuote', 'readList', 'readHead', 'readHistory']) {
     const { CONSUMER_SLOTS, consumerCheck, calls, values } = loadConsumerCheck();
@@ -88,4 +98,22 @@ test('consumerCheck catches a dropped expected-field comparison by counting the 
   assert.equal(check.compared.lastTarget.equal, false);
   assert.equal(check.compared.lastValue.equal, true);
   assert.equal(ctx.mismatches, 1);
+});
+
+test('report finalizer catches accepting a nonzero cell mismatch as a successful finish', () => {
+  const finalize = loadReportFinalizer();
+  const report = { cells: { quote: { mismatches: 1 }, list: { mismatches: 2 } } };
+
+  assert.throws(() => finalize(report), /consumer\/commitment self-check mismatches: 3/);
+  assert.equal(report.consumerMismatches, 3);
+  assert.equal(report.finishedAt, undefined);
+});
+
+test('report finalizer catches rejecting a zero-mismatch run before successful finish', () => {
+  const finalize = loadReportFinalizer();
+  const report = { cells: { quote: { mismatches: 0 }, list: {} } };
+
+  finalize(report);
+  assert.equal(report.consumerMismatches, 0);
+  assert.match(report.finishedAt, /^\d{4}-\d{2}-\d{2}T/);
 });
