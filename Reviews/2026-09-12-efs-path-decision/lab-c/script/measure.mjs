@@ -1,283 +1,323 @@
 #!/usr/bin/env node
-// Disposable Road C lab — receipt printer for the run-manifest rows. NOT RUN YET (no lease).
-// Requires: forge artifacts in ../out (forge build with foundry.toml), an Anvil RPC, ethers v6.
-// Usage: RPC_URL=http://127.0.0.1:8545 PRIVATE_KEY=0x... ETHERS_PATH=<path to ethers/lib.esm/index.js> node script/measure.mjs
-// Prints one JSON document: rows (per-operation receipts), reads (eth_call vs paid), rpc accounting, unknowns.
-// Every gas number printed here is a RECEIPT once run; until then everything in MANIFEST.draft.json stays ESTIMATED/UNKNOWN.
-
-import { readFileSync } from "node:fs";
+// Disposable Road C receipt runner. It requires an explicit chain lease; this file never starts Anvil.
+import { readFileSync, realpathSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-// The coordinator's path (Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers) does not exist on this machine;
-// nearest ethers v6 found: /Users/james/Code/EFS/client/node_modules/ethers (6.13.5). Override with ETHERS_PATH.
-const ETHERS = process.env.ETHERS_PATH ?? "/Users/james/Code/EFS/client/node_modules/ethers/lib.esm/index.js";
+const ETHERS = process.env.ETHERS_PATH ?? "/Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/node_modules/ethers/lib.esm/index.js";
 const ethers = await import(pathToFileURL(ETHERS).href);
-
-const RPC = process.env.RPC_URL ?? "http://127.0.0.1:8545";
-const PK = process.env.PRIVATE_KEY ?? "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // anvil #0
-const PK_A = process.env.PK_A ?? "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"; // anvil #1 = AUTHOR_A
-const OUT = process.env.OUT_DIR ?? path.resolve(here, "../out");
-
-// ---- exact supplemental cost controls (run-manifest.md) --------------------------------------
-const CONTROLS = {
-  quote3000: { bytes: ethers.zeroPadValue(ethers.toBeHex(3000n), 32), keccak: "0xe76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552" },
-  quote3100: { bytes: ethers.zeroPadValue(ethers.toBeHex(3100n), 32), keccak: "0x5a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb3" },
-  file41a: { bytes: "0x" + "61".repeat(41), keccak: "0xe27c263ce61bca70e9ff7d3182fc124c8dcfee2a4656e5c746ceb433a2558911" },
-  file41b: { bytes: "0x" + "62".repeat(41), keccak: "0x1882de08a178ebf3827d787e4086d8b2e14a81a8cf3b7b42f2e1458831646f3a" },
-};
-for (const [k, v] of Object.entries(CONTROLS)) {
-  if (ethers.keccak256(v.bytes) !== v.keccak) throw new Error(`control ${k} hash mismatch`);
-}
-
-// ---- constants mirrored from src/EfsTypes.sol -----------------------------------------------
+const RPC_URL = process.env.RPC_URL ?? "http://127.0.0.1:8545";
+const PK = process.env.PRIVATE_KEY ?? "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+const PK_A = process.env.PK_A ?? "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
+const OUT = path.resolve(process.env.OUT_DIR ?? path.resolve(here, "../out"));
+const coder = ethers.AbiCoder.defaultAbiCoder();
+const ZERO = ethers.ZeroHash;
 const id = (s) => ethers.keccak256(ethers.toUtf8Bytes(s));
-const K = { DECLARE_TYPE: 1, RECORD: 2, SUBJECT: 3, BIND: 4, IMPORT: 5 };
-const D = { BODY_HASH: 1, RECORD_ID: 2, PACKET: 3 };
-const TAG_SUBJECT = id("efs2/subject/1");
+const K = { DECLARE_TYPE: 1, RECORD: 2, SUBJECT: 3, BIND: 4 };
+const D = { BODY_HASH: 1, RECORD_ID: 2 };
 const TYPE_META = id("efs2/lab-c/type-meta/1");
 const PROFILE = id("efs2/lab-c/acceptance/1");
 const OBLIGATIONS = id("efs2/lab-c/index-obligations/1");
+const TAG_SUBJECT = id("efs2/subject/1");
 const PURPOSE = { FOLDER: id("efs2/lab-c/purpose/folder"), HEAD: id("efs2/lab-c/purpose/head"), TAG: id("efs2/lab-c/purpose/tag") };
+const FAMILY_SCOPES = id("efs2/lab-c/index/scopes");
 const TAG_ASSERT = ethers.zeroPadValue("0x01", 32);
-const ZERO = ethers.ZeroHash;
-const coder = ethers.AbiCoder.defaultAbiCoder();
-const ACTION_T = "tuple(uint8 kind,bytes32 typeId,uint8 digestKind,bytes32 digest,bytes32 purpose,bytes32 subject,bytes32 role,bytes32 target,uint32 expectedRevision,bytes32 salt)";
+const TABLE = {
+  RECORDS: "0x746265667300000000000000000000005265636f726473000000000000000000",
+  BINDINGS: "0x7462656673000000000000000000000042696e64696e67730000000000000000",
+  NONCES: "0x746265667300000000000000000000004e6f6e63657300000000000000000000",
+  OCCURRENCES: "0x746265667369647800000000000000004f6363757272656e6365730000000000",
+};
+const LAYOUT = {
+  RECORDS: "0x0028020120080000000000000000000000000000000000000000000000000000",
+  BINDINGS: "0x002c030020040800000000000000000000000000000000000000000000000000",
+  NONCES: "0x0008010008000000000000000000000000000000000000000000000000000000",
+  OCCURRENCES: "0x0004010004000000000000000000000000000000000000000000000000000000",
+};
+const C32 = { create: ethers.zeroPadValue(ethers.toBeHex(3000n), 32), edit: ethers.zeroPadValue(ethers.toBeHex(3100n), 32) };
+const C32_HASH = { create: "0xe76dc8c2cbfeda1a9b742dc422eca76098e9c5e0a82c5e4f1ad3ef5bd9efe552", edit: "0x5a25a1af59e5c9fbb1b35d4f17b3ec95ad60075c34a87c7e570d596153677cb3" };
+for (const k of Object.keys(C32)) if (ethers.keccak256(C32[k]) !== C32_HASH[k]) throw new Error(`bad ${k} control`);
 
 const action = (o) => ({ kind: 0, typeId: ZERO, digestKind: 0, digest: ZERO, purpose: ZERO, subject: ZERO, role: ZERO, target: ZERO, expectedRevision: 0, salt: ZERO, ...o });
 const recordId = (typeId, bodyHash) => ethers.keccak256(coder.encode(["bytes32", "bytes32"], [typeId, bodyHash]));
-const subjectId = (principal, salt) => ethers.keccak256(coder.encode(["bytes32", "bytes32", "bytes32"], [TAG_SUBJECT, principal, salt]));
-const eoaPrincipal = (addr) => ethers.keccak256(coder.encode(["uint8", "bytes32", "address"], [1, ZERO, addr]));
-const contractPrincipal = (origin, addr) => ethers.keccak256(coder.encode(["uint8", "bytes32", "address"], [2, origin, addr])); // origin = keccak("efs2/origin/1", chainId, ledger) as returned by ledger.realmOrigin()
-const actionsHash = (actions) => ethers.keccak256(coder.encode([`${ACTION_T}[]`], [actions]));
-const typeBody = (shape, refTypes) => coder.encode(["bytes32", "bytes32[]"], [shape, refTypes]);
 const recordBody = (refs, payload) => coder.encode(["bytes32[]", "bytes"], [refs, payload]);
-const quotePayload = (mantissa) => coder.encode(["uint256", "uint8", "uint64", "bytes32"], [mantissa, 6, 1_800_000_000n, ethers.keccak256(ethers.toUtf8Bytes("reference quote"))]);
+const typeBody = (shape, refs) => coder.encode(["bytes32", "bytes32[]"], [shape, refs]);
+const quotePayload = (n) => coder.encode(["uint256", "uint8", "uint64", "bytes32"], [n, 6, 1_800_000_000n, id("reference quote")]);
+const subjectId = (principal, salt) => ethers.keccak256(coder.encode(["bytes32", "bytes32", "bytes32"], [TAG_SUBJECT, principal, salt]));
+const bindingKey = (author, purpose, subject, role = ZERO) => ethers.keccak256(coder.encode(["bytes32", "bytes32", "bytes32", "bytes32"], [author, purpose, subject, role]));
+const eoaPrincipal = (a) => ethers.keccak256(coder.encode(["uint8", "bytes32", "address"], [1, ZERO, a]));
+const contractPrincipal = (origin, a) => ethers.keccak256(coder.encode(["uint8", "bytes32", "address"], [2, origin, a]));
+const key1 = (x) => [x];
+const be = (hex) => BigInt(hex === "0x" ? "0x0" : hex).toString();
+const decodeBinding = (packed) => ({
+  target: `0x${packed.slice(2, 66)}`,
+  revision: BigInt(`0x${packed.slice(66, 74) || "0"}`).toString(),
+  admission: BigInt(`0x${packed.slice(74, 90) || "0"}`).toString(),
+});
+const serialize = (v) => JSON.parse(JSON.stringify(v, (_, x) => typeof x === "bigint" ? x.toString() : x));
 
-// ---- rpc accounting ---------------------------------------------------------------------------
-const rpcLog = [];
-const provider = new ethers.JsonRpcProvider(RPC);
-const origSend = provider.send.bind(provider);
-provider.send = async (method, params) => {
-  const t0 = Date.now();
-  const res = await origSend(method, params);
-  rpcLog.push({ method, ms: Date.now() - t0, bytes: JSON.stringify(res ?? null).length });
-  return res;
-};
-const wallet = new ethers.Wallet(PK, provider);
-const walletA = new ethers.Wallet(PK_A, provider);
-
-const artifact = (name) => JSON.parse(readFileSync(path.join(OUT, `${name}.sol`, `${name}.json`), "utf8"));
-const rows = [];
-const unknown = [];
-
-// External-library linking: forge artifacts carry `__$<hash>$__` placeholders + bytecode.linkReferences.
-const linked = {}; // "src/ImportLib.sol:ImportLib" -> address
-function link(a) {
-  let code = a.bytecode.object;
-  for (const [file, libs] of Object.entries(a.bytecode.linkReferences ?? {})) {
-    for (const [lib, refs] of Object.entries(libs)) {
-      const addr = linked[`${file}:${lib}`];
-      if (!addr) throw new Error(`unlinked library ${file}:${lib}`);
-      for (const { start } of refs) {
-        const pos = 2 + start * 2;
-        code = code.slice(0, pos) + addr.slice(2).toLowerCase() + code.slice(pos + 40);
-      }
+const rpc = [];
+let rpcSource = "bootstrap";
+class EvidenceProvider extends ethers.JsonRpcProvider {
+  async _send(payload) {
+    const source = rpcSource;
+    const startedAt = new Date().toISOString();
+    try {
+      const reply = await super._send(payload);
+      rpc.push({ source, startedAt, finishedAt: new Date().toISOString(), request: serialize(payload), reply: serialize(reply) });
+      return reply;
+    } catch (error) {
+      rpc.push({ source, startedAt, finishedAt: new Date().toISOString(), request: serialize(payload), error: serialize({ code: error.code, message: error.message, data: error.data, info: error.info }) });
+      throw error;
     }
   }
-  return code;
+}
+const provider = new EvidenceProvider(RPC_URL);
+const wallet = new ethers.Wallet(PK, provider);
+const walletA = new ethers.Wallet(PK_A, provider);
+const evidence = { metadata: {}, artifacts: [], operations: [], observations: [], resets: [], rpc };
+const decoders = new Map();
+async function sourced(source, fn) { const prior = rpcSource; rpcSource = source; try { return await fn(); } finally { rpcSource = prior; } }
+async function raw(method, params, source) { return sourced(source, () => provider.send(method, params)); }
+async function fixedBlock(source) {
+  const number = await raw("eth_blockNumber", [], `${source}:block-number`);
+  const header = await raw("eth_getBlockByNumber", [number, false], `${source}:block-header`);
+  if (!header?.hash) throw new Error(`missing block hash for ${source}`);
+  return { number, hash: header.hash, header };
+}
+async function observe(source, fn) {
+  const block = await fixedBlock(source);
+  const rawValue = await sourced(`${source}:call`, () => fn(block.number));
+  evidence.observations.push({ source, block, rawValue: serialize(rawValue) });
+  return rawValue;
 }
 
-async function deploy(name, ...args) {
-  const a = artifact(name);
-  const f = new ethers.ContractFactory(a.abi, link(a), wallet);
-  const c = await f.deploy(...args);
-  const rc = await c.deploymentTransaction().wait();
-  const addr = await c.getAddress();
-  const code = await provider.getCode(addr);
-  rows.push({ op: `deploy:${name}`, tx: rc.hash, gasUsed: rc.gasUsed.toString(), status: rc.status, runtimeBytes: (code.length - 2) / 2, initcodeBytes: (a.bytecode.object.length - 2) / 2 });
-  return c;
-}
-
-async function send(op, promise, expectRevert = false) {
-  try {
-    const tx = await promise;
-    const rc = await tx.wait();
-    rows.push({ op, tx: rc.hash, gasUsed: rc.gasUsed.toString(), status: rc.status, expectRevert, logs: rc.logs.length });
-    return rc;
-  } catch (e) {
-    const rc = e.receipt ?? null;
-    rows.push({ op, tx: rc?.hash ?? null, gasUsed: rc?.gasUsed?.toString() ?? null, status: 0, expectRevert, revert: (e.shortMessage ?? e.message ?? "").slice(0, 200) });
-    if (!expectRevert) throw e;
-    return null;
+const artifactSpec = {
+  ImportLib: ["ImportLib.sol", "ImportLib"], IndexModule: ["IndexModule.sol", "IndexModule"], Ledger: ["Ledger.sol", "Ledger"],
+  LensReader: ["LensReader.sol", "LensReader"], PassAcceptor: ["FixtureActors.sol", "PassAcceptor"],
+  QuoteAcceptorV1: ["FixtureActors.sol", "QuoteAcceptorV1"], Producer: ["FixtureActors.sol", "Producer"],
+  MeasurementConsumer: ["MeasurementConsumer.sol", "MeasurementConsumer"],
+};
+function artifact(name) { const [source, contract] = artifactSpec[name]; return JSON.parse(readFileSync(path.join(OUT, source, `${contract}.json`), "utf8")); }
+const links = new Map();
+function linkObject(object, references, label) {
+  let code = object;
+  const entries = [];
+  for (const [source, libraries] of Object.entries(references ?? {})) for (const [library, positions] of Object.entries(libraries)) for (const position of positions) entries.push({ source, library, ...position });
+  if (label === "Ledger") {
+    if (entries.length !== 1 || entries[0].source !== "src/ImportLib.sol" || entries[0].library !== "ImportLib" || entries[0].length !== 20) throw new Error(`unexpected Ledger links: ${JSON.stringify(entries)}`);
+  } else if (entries.length !== 0) throw new Error(`unexpected links in ${label}`);
+  for (const ref of entries) {
+    const address = links.get(`${ref.source}:${ref.library}`);
+    if (!address) throw new Error(`missing link ${ref.source}:${ref.library}`);
+    const at = 2 + ref.start * 2;
+    const placeholder = code.slice(at, at + ref.length * 2);
+    if (!/^__\$[0-9a-f]{34}\$__$/.test(placeholder)) throw new Error(`unexpected placeholder ${placeholder}`);
+    code = code.slice(0, at) + address.slice(2).toLowerCase() + code.slice(at + ref.length * 2);
   }
+  if (/__\$[0-9a-f]{34}\$__/.test(code)) throw new Error(`unresolved placeholder in ${label}`);
+  return { code, entries };
+}
+async function exactTransaction(hash, source) {
+  const transaction = await raw("eth_getTransactionByHash", [hash], `${source}:transaction`);
+  const receipt = await raw("eth_getTransactionReceipt", [hash], `${source}:receipt`);
+  if (!receipt?.blockHash || !receipt?.blockNumber) throw new Error(`missing receipt basis for ${source}`);
+  const header = await raw("eth_getBlockByHash", [receipt.blockHash, false], `${source}:header`);
+  if (header?.number !== receipt.blockNumber) throw new Error(`receipt/header mismatch for ${source}`);
+  return { transaction, receipt, header };
+}
+async function deploy(name, types = [], args = []) {
+  const a = artifact(name);
+  const linkedInit = linkObject(a.bytecode.object, a.bytecode.linkReferences, name);
+  const linkedRuntime = linkObject(a.deployedBytecode.object, a.deployedBytecode.linkReferences, name);
+  const constructorArgs = coder.encode(types, args);
+  const expectedInitcode = linkedInit.code + constructorArgs.slice(2);
+  const factory = new ethers.ContractFactory(a.abi, linkedInit.code, wallet);
+  const contract = await sourced(`deploy:${name}:send`, () => factory.deploy(...args));
+  const tx = contract.deploymentTransaction();
+  if (tx.data.toLowerCase() !== expectedInitcode.toLowerCase()) throw new Error(`${name} initcode mismatch`);
+  const mined = await sourced(`deploy:${name}:wait`, () => tx.wait());
+  const address = await contract.getAddress();
+  decoders.set(address.toLowerCase(), { name, interface: contract.interface });
+  const code = await raw("eth_getCode", [address, ethers.toQuantity(mined.blockNumber)], `deploy:${name}:code`);
+  if (code.toLowerCase() !== linkedRuntime.code.toLowerCase()) throw new Error(`${name} runtime mismatch`);
+  const exact = await exactTransaction(mined.hash, `deploy:${name}`);
+  const row = { cell: "setup", operation: `deploy:${name}`, address, constructorArgs, initcode: expectedInitcode, initcodeBytes: (expectedInitcode.length - 2) / 2, initcodeHash: ethers.keccak256(expectedInitcode), runtime: code, runtimeBytes: (code.length - 2) / 2, runtimeHash: ethers.keccak256(code), links: linkedInit.entries, exact };
+  if (row.initcodeBytes > 49152 || row.runtimeBytes > 24576) throw new Error(`${name} exceeds standard size limit`);
+  evidence.artifacts.push(row);
+  return contract;
+}
+async function send(cell, operation, makeTransaction) {
+  const tx = await sourced(`${cell}:${operation}:send`, makeTransaction);
+  const receipt = await sourced(`${cell}:${operation}:wait`, () => tx.wait());
+  const exact = await exactTransaction(receipt.hash, `${cell}:${operation}`);
+  const decodedLogs = [];
+  for (const log of exact.receipt.logs ?? []) {
+    const decoder = decoders.get(log.address.toLowerCase());
+    if (!decoder) continue;
+    try {
+      const parsed = decoder.interface.parseLog({ topics: log.topics, data: log.data });
+      decodedLogs.push({ address: log.address, contract: decoder.name, name: parsed.name, args: serialize(parsed.args) });
+    } catch {}
+  }
+  evidence.operations.push({ cell, operation, status: Number(receipt.status), gasUsed: receipt.gasUsed.toString(), exact, decodedLogs });
+}
+function revertData(error) { return [error?.data, error?.info?.error?.data, error?.error?.data].find((x) => typeof x === "string" && x.startsWith("0x")) ?? null; }
+async function minedFailure(cell, operation, contract, functionName, args) {
+  const block = await fixedBlock(`${cell}:${operation}:static`);
+  const data = contract.interface.encodeFunctionData(functionName, args);
+  let staticError;
+  try {
+    await raw("eth_call", [{ from: wallet.address, to: await contract.getAddress(), data }, block.number], `${cell}:${operation}:static-call`);
+    throw new Error(`${operation} static call unexpectedly succeeded`);
+  } catch (error) {
+    const dataHex = revertData(error);
+    staticError = { block, data: dataHex, selector: dataHex?.slice(0, 10) ?? null, error: serialize({ code: error.code, message: error.message }) };
+  }
+  let hash;
+  try {
+    const to = await contract.getAddress();
+    const tx = await sourced(`${cell}:${operation}:send`, () => wallet.sendTransaction({ to, data, gasLimit: 30_000_000 }));
+    hash = tx.hash;
+    await sourced(`${cell}:${operation}:wait`, () => tx.wait());
+  } catch (error) { hash = hash ?? error?.receipt?.hash ?? error?.transactionHash; }
+  if (!hash) throw new Error(`${operation} has no mined transaction hash`);
+  const exact = await exactTransaction(hash, `${cell}:${operation}`);
+  if (Number(exact.receipt.status) !== 0) throw new Error(`${operation} did not mine status 0`);
+  evidence.operations.push({ cell, operation, status: 0, staticError, exact });
 }
 
 async function main() {
-  const net = await provider.getNetwork();
-  // ---- setup -------------------------------------------------------------------------------
-  const importLib = await deploy("ImportLib"); // external library: delegatecalled by Ledger.importPublication, no storage
-  linked["src/ImportLib.sol:ImportLib"] = await importLib.getAddress();
-  rows.push({ op: "identity:ImportLib", address: linked["src/ImportLib.sol:ImportLib"], codehash: ethers.keccak256(await provider.getCode(linked["src/ImportLib.sol:ImportLib"])) });
-  const index = await deploy("IndexModule", ZERO); // poison lever disabled for the measured deployment
-  const ledger = await deploy("Ledger", await index.getAddress());
-  await send("setup:attach", index.attach(await ledger.getAddress()));
-  const reader = await deploy("LensReader", await ledger.getAddress(), await index.getAddress());
+  const network = await provider.getNetwork();
+  evidence.metadata = { startedAt: new Date().toISOString(), chainId: network.chainId.toString(), rpcUrl: RPC_URL, artifactRootConfigured: OUT, artifactRootReal: realpathSync(OUT), ethersPath: ETHERS, framing: "supplemental c32 values are abi.encode(bytes32[],bytes), never bare bytes32" };
+  const importLib = await deploy("ImportLib");
+  links.set("src/ImportLib.sol:ImportLib", await importLib.getAddress());
+  const index = await deploy("IndexModule", ["bytes32"], [ZERO]);
+  const ledger = await deploy("Ledger", ["address"], [await index.getAddress()]);
+  await send("setup", "attach-index", async () => index.attach(await ledger.getAddress()));
+  const reader = await deploy("LensReader", ["address", "address"], [await ledger.getAddress(), await index.getAddress()]);
   const pass = await deploy("PassAcceptor");
-  const quoteAcc = await deploy("QuoteAcceptorV1");
+  const quoteAcceptor = await deploy("QuoteAcceptorV1");
   const producer = await deploy("Producer");
-  const consumer = await deploy("QuoteConsumer");
-
-  const realmOrigin = await ledger.realmOrigin();
-  const realmId = await ledger.realmId();
-  const codeCommitment = await ledger.coreCodeCommitment();
-  const SELF = contractPrincipal(realmOrigin, wallet.address); // NB: an EOA sending publishNative is treated as a contract principal of its address
-  const A = eoaPrincipal(walletA.address);
-  const B = contractPrincipal(realmOrigin, await producer.getAddress());
-
-  // types + items + pair (native from deployer EOA via publishNative is NOT allowed for EOAs? it is: principal is origin-qualified to the address)
-  const itemT = typeBody(id("Item"), []);
-  const ITEM_T = recordId(TYPE_META, ethers.keccak256(itemT));
-  const pairT = typeBody(id("Pair"), [ITEM_T, ITEM_T]);
-  const PAIR_T = recordId(TYPE_META, ethers.keccak256(pairT));
-  const quoteT = typeBody(id("Quote"), [PAIR_T]);
-  const QUOTE_T = recordId(TYPE_META, ethers.keccak256(quoteT));
-  const bytesT = typeBody(id("Bytes"), []);
-  const BYTES_T = recordId(TYPE_META, ethers.keccak256(bytesT));
-  const eth = recordBody([], ethers.toUtf8Bytes("ETH"));
-  const usdc = recordBody([], ethers.toUtf8Bytes("USDC"));
-  const ITEM_ETH = recordId(ITEM_T, ethers.keccak256(eth));
-  const ITEM_USDC = recordId(ITEM_T, ethers.keccak256(usdc));
-  const pairB = recordBody([ITEM_ETH, ITEM_USDC], "0x");
-  const PAIR = recordId(PAIR_T, ethers.keccak256(pairB));
-  const acceptorTarget = (addr) => ethers.zeroPadValue(addr, 32);
-  let nonceSelf = 0n;
-  const seed = {
-    author: SELF, nonce: ++nonceSelf, deadline: 0, acceptanceProfile: PROFILE, indexObligations: OBLIGATIONS,
-    actions: [
-      action({ kind: K.DECLARE_TYPE, typeId: TYPE_META, digestKind: D.BODY_HASH, digest: ethers.keccak256(itemT), target: acceptorTarget(await pass.getAddress()) }),
-      action({ kind: K.DECLARE_TYPE, typeId: TYPE_META, digestKind: D.BODY_HASH, digest: ethers.keccak256(pairT), target: acceptorTarget(await pass.getAddress()) }),
-      action({ kind: K.DECLARE_TYPE, typeId: TYPE_META, digestKind: D.BODY_HASH, digest: ethers.keccak256(quoteT), target: acceptorTarget(await quoteAcc.getAddress()) }),
-      action({ kind: K.DECLARE_TYPE, typeId: TYPE_META, digestKind: D.BODY_HASH, digest: ethers.keccak256(bytesT), target: acceptorTarget(await pass.getAddress()) }),
-      action({ kind: K.RECORD, typeId: ITEM_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(eth) }),
-      action({ kind: K.RECORD, typeId: ITEM_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(usdc) }),
-      action({ kind: K.RECORD, typeId: PAIR_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(pairB) }),
-    ],
+  const consumer = await deploy("MeasurementConsumer");
+  const contracts = { importLib, index, ledger, reader, pass, quoteAcceptor, producer, consumer };
+  evidence.metadata.addresses = Object.fromEntries(await Promise.all(Object.entries(contracts).map(async ([k, v]) => [k, await v.getAddress()])));
+  evidence.metadata.ledgerDomain = {
+    chainId: network.chainId.toString(), ledger: await ledger.getAddress(),
+    realmId: await observe("setup:realm-id", (b) => ledger.realmId({ blockTag: b })),
+    realmOrigin: await observe("setup:realm-origin", (b) => ledger.realmOrigin({ blockTag: b })),
+    coreCodeCommitment: await observe("setup:code-commitment", (b) => ledger.coreCodeCommitment({ blockTag: b })),
+    domainSeparator: await observe("setup:domain-separator", (b) => ledger.domainSeparator({ blockTag: b })),
+    signingMethod: "exact Ledger.intentDigest at a retained block basis; wallet signs that digest directly",
   };
-  await send("setup:types+items+pair (native, 7 actions)", ledger.publishNative(seed, [itemT, pairT, quoteT, bytesT, eth, usdc, pairB]));
+  const domain = evidence.metadata.ledgerDomain;
+  const SELF = contractPrincipal(domain.realmOrigin, wallet.address);
+  const A = eoaPrincipal(walletA.address);
+  const B = contractPrincipal(domain.realmOrigin, await producer.getAddress());
+  const itemBody = typeBody(id("Item"), []), ITEM_T = recordId(TYPE_META, ethers.keccak256(itemBody));
+  const pairTypeBody = typeBody(id("Pair"), [ITEM_T, ITEM_T]), PAIR_T = recordId(TYPE_META, ethers.keccak256(pairTypeBody));
+  const quoteTypeBody = typeBody(id("Quote"), [PAIR_T]), QUOTE_T = recordId(TYPE_META, ethers.keccak256(quoteTypeBody));
+  const bytesTypeBody = typeBody(id("Bytes"), []), BYTES_T = recordId(TYPE_META, ethers.keccak256(bytesTypeBody));
+  const ethBody = recordBody([], ethers.toUtf8Bytes("ETH")), usdcBody = recordBody([], ethers.toUtf8Bytes("USDC"));
+  const ITEM_ETH = recordId(ITEM_T, ethers.keccak256(ethBody)), ITEM_USDC = recordId(ITEM_T, ethers.keccak256(usdcBody));
+  const pairBody = recordBody([ITEM_ETH, ITEM_USDC], "0x"), PAIR = recordId(PAIR_T, ethers.keccak256(pairBody));
+  const acceptorTarget = (a) => ethers.zeroPadValue(a, 32);
 
-  // ---- signed publication helper ------------------------------------------------------------
-  const domain = { name: "EFS Lab C", version: "1" };
-  const types = { PublicationIntent: [
-    { name: "realmId", type: "bytes32" }, { name: "coreCodeCommitment", type: "bytes32" }, { name: "author", type: "bytes32" },
-    { name: "nonce", type: "uint64" }, { name: "deadline", type: "uint64" }, { name: "acceptanceProfile", type: "bytes32" },
-    { name: "indexObligations", type: "bytes32" }, { name: "actionsHash", type: "bytes32" } ] };
-  let nonceA = 0n;
-  async function signedA(actions) {
-    const intent = { author: A, nonce: ++nonceA, deadline: 0, acceptanceProfile: PROFILE, indexObligations: OBLIGATIONS, actions };
-    const sig = ethers.Signature.from(await walletA.signTypedData(domain, types, { realmId, coreCodeCommitment: codeCommitment, author: A, nonce: intent.nonce, deadline: 0, acceptanceProfile: PROFILE, indexObligations: OBLIGATIONS, actionsHash: actionsHash(actions) }));
-    return { intent, sig: { v: sig.v, r: sig.r, s: sig.s } };
+  async function nonceOf(author, label) { return BigInt(await observe(label, (b) => ledger["getStaticField(bytes32,bytes32[],uint8,bytes32)"](TABLE.NONCES, key1(author), 0, LAYOUT.NONCES, { blockTag: b }))); }
+  async function intent(author, actions, label) { return { author, nonce: await nonceOf(author, `${label}:nonce`) + 1n, deadline: 0, acceptanceProfile: PROFILE, indexObligations: OBLIGATIONS, actions }; }
+  async function signIntent(value, label) {
+    const digest = await observe(`${label}:intent-digest`, (b) => ledger.intentDigest(value, { blockTag: b }));
+    const signature = walletA.signingKey.sign(digest);
+    if (ethers.recoverAddress(digest, signature) !== walletA.address) throw new Error(`${label} signer mismatch`);
+    return { v: signature.v, r: signature.r, s: signature.s };
   }
-  const key1 = (k) => [k];
-  const RECORDS_TABLE = "0x746265667300000000000000000000005265636f726473000000000000000000";
-  const RECORDS_LAYOUT = "0x0028020120080000000000000000000000000000000000000000000000000000";
-  const recordPresent = async (rid) => (await ledger["getStaticField(bytes32,bytes32[],uint8,bytes32)"](RECORDS_TABLE, key1(rid), 1, RECORDS_LAYOUT)) !== ZERO;
+  async function publishSigned(cell, label, actions, bodies) { const value = await intent(A, actions, label); const sig = await signIntent(value, label); await send(cell, label, async () => ledger.publishSigned(value, bodies, sig)); return { value, sig }; }
+  async function publishNative(cell, label, author, actions, bodies, viaProducer = false) { const value = await intent(author, actions, label); await send(cell, label, async () => viaProducer ? producer.publish(await ledger.getAddress(), value, bodies) : ledger.publishNative(value, bodies)); return value; }
 
-  // ---- step 2: A1 fresh body (signed) --------------------------------------------------------
-  const SALT_F = id("F");
-  const FILE = subjectId(A, SALT_F);
-  const a1Body = recordBody([PAIR], quotePayload(2_500_000_000n));
-  const QUOTE_A1 = recordId(QUOTE_T, ethers.keccak256(a1Body));
-  rows.push({ op: "pre:QUOTE_A1 absent", value: !(await recordPresent(QUOTE_A1)) });
-  let { intent, sig } = await signedA([
-    action({ kind: K.SUBJECT, subject: FILE, salt: SALT_F }),
-    action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(a1Body) }),
-    action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: FILE, target: QUOTE_A1 }),
-    action({ kind: K.BIND, purpose: PURPOSE.FOLDER, subject: id("/swaps"), role: id("eth-usdc"), target: FILE }),
-    action({ kind: K.BIND, purpose: PURPOSE.TAG, subject: FILE, role: id("market"), target: TAG_ASSERT }),
-  ]);
-  const a1 = { intent, sig };
-  await send("signed-fresh-body-create (A1: subject+record+head+placement+tag)", ledger.publishSigned(intent, ["0x", a1Body, "0x", "0x", "0x"], sig));
-
-  // ---- step 3: A2 edit with CAS ---------------------------------------------------------------
-  const a2Body = recordBody([PAIR], quotePayload(2_502_000_000n));
-  const QUOTE_A2 = recordId(QUOTE_T, ethers.keccak256(a2Body));
-  ({ intent, sig } = await signedA([
-    action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(a2Body) }),
-    action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: FILE, target: QUOTE_A2, expectedRevision: 1 }),
-  ]));
-  await send("signed-edit (A2 record + head CAS)", ledger.publishSigned(intent, [a2Body, "0x"], sig));
-
-  // ---- step 4: B1 from the producer contract, fresh body -------------------------------------
-  const b1Body = recordBody([PAIR], quotePayload(2_501_000_000n));
-  const QUOTE_B1 = recordId(QUOTE_T, ethers.keccak256(b1Body));
-  rows.push({ op: "pre:QUOTE_B1 absent", value: !(await recordPresent(QUOTE_B1)) });
-  let nonceB = 0n;
-  const bIntent = (actions) => ({ author: B, nonce: ++nonceB, deadline: 0, acceptanceProfile: PROFILE, indexObligations: OBLIGATIONS, actions });
-  await send("contract-fresh-body (B1 record + own head + own placement)", producer.publish(await ledger.getAddress(), bIntent([
-    action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(b1Body) }),
-    action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: FILE, target: QUOTE_B1 }),
-    action({ kind: K.BIND, purpose: PURPOSE.FOLDER, subject: id("/swaps"), role: id("eth-usdc"), target: FILE }),
-  ]), [b1Body, "0x", "0x"]));
-  // shape-matched 1-action fresh row (record only), so fresh vs existing compare like for like
-  const b2Body = recordBody([PAIR], quotePayload(2_503_000_000n));
-  rows.push({ op: "pre:QUOTE_B2 absent", value: !(await recordPresent(recordId(QUOTE_T, ethers.keccak256(b2Body)))) });
-  await send("contract-fresh-body-1action (B2 record only)", producer.publish(await ledger.getAddress(), bIntent([
-    action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(b2Body) }),
-  ]), [b2Body]));
-  rows.push({ op: "pre:QUOTE_A1 present (for existing-body)", value: await recordPresent(QUOTE_A1) });
-  await send("contract-existing-body (B republishes A1 bytes; new occurrence, reused content)", producer.publish(await ledger.getAddress(), bIntent([
-    action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(a1Body) }),
-  ]), [a1Body]));
-  await send("contract-existing-body-by-recordId (digestKind=RECORD_ID, empty body)", producer.publish(await ledger.getAddress(), bIntent([
-    action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.RECORD_ID, digest: QUOTE_A1 }),
-  ]), ["0x"]));
-
-  // ---- failures ------------------------------------------------------------------------------
-  await send("exact-retry (A1 again) -> AlreadyAdmitted", ledger.publishSigned(a1.intent, ["0x", a1Body, "0x", "0x", "0x"], a1.sig), true);
-  ({ intent, sig } = await signedA([action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: FILE, target: QUOTE_A1, expectedRevision: 0 })]));
-  await send("stale-cas -> StaleCas", ledger.publishSigned(intent, ["0x"], sig), true);
-  nonceA--; // the rejected nonce was not consumed
-  ({ intent, sig } = await signedA([action({ kind: K.BIND, purpose: PURPOSE.TAG, subject: FILE, role: id("poison"), target: TAG_ASSERT })]));
-  // the poison lever is disabled (zero) in the measured deployment; the late-index rollback row is covered by
-  // test/Fixture.t.sol (test_reject_failedIndex_rollback) and is reported as designed-but-unmeasured
-  unknown.push({ field: "operations.failed-mandatory-index", reason: "poisonConcept=0 in the measured deployment", consequence: "rollback gas unmeasured; semantics covered by the unit test" });
-  nonceA--;
-
-  // ---- supplemental controls (32-byte quotes, 41-byte binaries) under the Bytes type -----------
-  for (const [label, c] of Object.entries(CONTROLS)) {
-    const body = recordBody([], c.bytes);
-    const rid = recordId(BYTES_T, ethers.keccak256(body));
-    rows.push({ op: `pre:${label} absent`, value: !(await recordPresent(rid)) });
-    ({ intent, sig } = await signedA([action({ kind: K.RECORD, typeId: BYTES_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(body) })]));
-    await send(`control-${label}-fresh (signed, record only; framing = abi.encode([], payload))`, ledger.publishSigned(intent, [body], sig));
+  const setupActions = [
+    action({ kind: K.DECLARE_TYPE, typeId: TYPE_META, digestKind: D.BODY_HASH, digest: ethers.keccak256(itemBody), target: acceptorTarget(await pass.getAddress()) }),
+    action({ kind: K.DECLARE_TYPE, typeId: TYPE_META, digestKind: D.BODY_HASH, digest: ethers.keccak256(pairTypeBody), target: acceptorTarget(await pass.getAddress()) }),
+    action({ kind: K.DECLARE_TYPE, typeId: TYPE_META, digestKind: D.BODY_HASH, digest: ethers.keccak256(quoteTypeBody), target: acceptorTarget(await quoteAcceptor.getAddress()) }),
+    action({ kind: K.DECLARE_TYPE, typeId: TYPE_META, digestKind: D.BODY_HASH, digest: ethers.keccak256(bytesTypeBody), target: acceptorTarget(await pass.getAddress()) }),
+    action({ kind: K.RECORD, typeId: ITEM_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(ethBody) }), action({ kind: K.RECORD, typeId: ITEM_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(usdcBody) }), action({ kind: K.RECORD, typeId: PAIR_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(pairBody) }),
+  ];
+  await publishNative("setup", "types-items-pair", SELF, setupActions, [itemBody, pairTypeBody, quoteTypeBody, bytesTypeBody, ethBody, usdcBody, pairBody]);
+  let baseline = await raw("evm_snapshot", [], "setup:snapshot");
+  async function reset(label) { const reverted = await raw("evm_revert", [baseline], `${label}:revert`); if (!reverted) throw new Error(`${label} reset failed`); baseline = await raw("evm_snapshot", [], `${label}:snapshot`); evidence.resets.push({ label, reverted, newSnapshot: baseline }); }
+  async function capture(cell, phase, { record, author, subject }) {
+    const key = bindingKey(author, PURPOSE.HEAD, subject);
+    const recordFirst = await observe(`${cell}:${phase}:record-first`, (b) => ledger["getStaticField(bytes32,bytes32[],uint8,bytes32)"](TABLE.RECORDS, key1(record), 1, LAYOUT.RECORDS, { blockTag: b }));
+    const occurrences = await observe(`${cell}:${phase}:occurrences`, (b) => index["getStaticField(bytes32,bytes32[],uint8,bytes32)"](TABLE.OCCURRENCES, key1(record), 0, LAYOUT.OCCURRENCES, { blockTag: b }));
+    const binding = await observe(`${cell}:${phase}:binding`, (b) => ledger["getRecord(bytes32,bytes32[],bytes32)"](TABLE.BINDINGS, key1(key), LAYOUT.BINDINGS, { blockTag: b }));
+    const nonce = await nonceOf(author, `${cell}:${phase}:accepted-nonce`);
+    const highWater = await observe(`${cell}:${phase}:high-water`, (b) => ledger.highWater({ blockTag: b }));
+    const generation = await observe(`${cell}:${phase}:index-generation`, (b) => index.generation({ blockTag: b }));
+    const coverage = await observe(`${cell}:${phase}:index-coverage`, (b) => index.coverage(FAMILY_SCOPES, ZERO, { blockTag: b }));
+    evidence.observations.push({ source: `${cell}:${phase}:decoded-state`, decoded: { recordFirstAdmission: be(recordFirst), occurrences: be(occurrences), binding: decodeBinding(binding[0]), nonce: nonce.toString(), highWater: highWater.toString(), indexBasis: { generation: generation.toString(), coverageStatus: coverage[0].toString(), coverageThrough: coverage[1].toString() } } });
   }
+  const expected = (author, typeId, rid, expectedRef, payload) => ({ author, typeId, recordId: rid, expectedRef, payloadLength: ethers.getBytes(payload).length, payloadHash: ethers.keccak256(payload) });
+  const lens = (author, other) => ({ principals: [author, other], mode: 0 });
 
-  // ---- reads ---------------------------------------------------------------------------------
-  const lensA = { principals: [A, B], mode: 0 };
-  const lensB = { principals: [B, A], mode: 0 };
-  const lensEq = { principals: [A, B], mode: 1 };
-  const reads = {};
-  reads.resolve_A_first = await reader.resolve(lensA, PURPOSE.HEAD, FILE, ZERO);
-  reads.resolve_B_first = await reader.resolve(lensB, PURPOSE.HEAD, FILE, ZERO);
-  reads.resolve_no_tiebreak = await reader.resolve(lensEq, PURPOSE.HEAD, FILE, ZERO);
-  const zeroCursor = { basisAdmission: 0, indexGeneration: 0, rulesEpoch: 0, coreCodeCommitment: ZERO, scopeKey: ZERO, lensHash: ZERO, position: 0 };
-  reads.list_swaps_A_first = await reader.list(lensA, PURPOSE.FOLDER, id("/swaps"), zeroCursor, 10);
-  reads.listTagged_swaps_market_A_first = await reader.listTagged(lensA, id("/swaps"), id("market"), zeroCursor, 10);
-  reads.eth_call_gas_resolve = (await reader.resolve.estimateGas(lensA, PURPOSE.HEAD, FILE, ZERO)).toString();
-  reads.eth_call_gas_list = (await reader.list.estimateGas(lensA, PURPOSE.FOLDER, id("/swaps"), zeroCursor, 10)).toString();
-  await send("paid-consumer-read A-first (unrelated contract tx)", consumer.consume(await reader.getAddress(), await ledger.getAddress(), lensA, FILE));
-  await send("paid-consumer-read B-first", consumer.consume(await reader.getAddress(), await ledger.getAddress(), lensB, FILE));
-  await send("paid-consumer-read no-tiebreak -> NotSelected(CONFLICT)", consumer.consume(await reader.getAddress(), await ledger.getAddress(), lensEq, FILE), true);
+  {
+    const cell = "typed-joined", salt = id("typed-file"), file = subjectId(A, salt), folder = id("/swaps"), name = id("eth-usdc");
+    const a1Payload = quotePayload(2_500_000_000n), a2Payload = quotePayload(2_502_000_000n), b1Payload = quotePayload(2_501_000_000n);
+    const a1Body = recordBody([PAIR], a1Payload), a2Body = recordBody([PAIR], a2Payload), b1Body = recordBody([PAIR], b1Payload);
+    const A1 = recordId(QUOTE_T, ethers.keccak256(a1Body)), A2 = recordId(QUOTE_T, ethers.keccak256(a2Body)), B1 = recordId(QUOTE_T, ethers.keccak256(b1Body));
+    const a1Actions = [action({ kind: K.SUBJECT, subject: file, salt }), action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(a1Body) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: file, target: A1 }), action({ kind: K.BIND, purpose: PURPOSE.FOLDER, subject: folder, role: name, target: file }), action({ kind: K.BIND, purpose: PURPOSE.TAG, subject: file, role: id("market"), target: TAG_ASSERT })];
+    await capture(cell, "pre-A1", { record: A1, author: A, subject: file });
+    const signedA1 = await publishSigned(cell, "A1-create", a1Actions, ["0x", a1Body, "0x", "0x", "0x"]);
+    await capture(cell, "post-A1", { record: A1, author: A, subject: file });
+    await capture(cell, "pre-A2", { record: A2, author: A, subject: file });
+    await publishSigned(cell, "A2-edit", [action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(a2Body) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: file, target: A2, expectedRevision: 1 })], [a2Body, "0x"]);
+    await capture(cell, "post-A2", { record: A2, author: A, subject: file });
+    await capture(cell, "pre-B1", { record: B1, author: B, subject: file });
+    await publishNative(cell, "B1-create", B, [action({ kind: K.RECORD, typeId: QUOTE_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(b1Body) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: file, target: B1 }), action({ kind: K.BIND, purpose: PURPOSE.FOLDER, subject: folder, role: name, target: file })], [b1Body, "0x", "0x"], true);
+    await capture(cell, "post-B1", { record: B1, author: B, subject: file });
+    await send(cell, "paid-point-A", async () => consumer.paidPoint(await reader.getAddress(), await ledger.getAddress(), lens(A, B), PURPOSE.HEAD, file, ZERO, expected(A, QUOTE_T, A2, PAIR, a2Payload)));
+    await send(cell, "paid-list-A", async () => consumer.paidList(await reader.getAddress(), await ledger.getAddress(), lens(A, B), folder, name, file, 10, expected(A, QUOTE_T, A2, PAIR, a2Payload)));
+    await minedFailure(cell, "exact-retry-A1", ledger, "publishSigned", [signedA1.value, ["0x", a1Body, "0x", "0x", "0x"], signedA1.sig]);
+  }
+  await reset("after-typed");
 
-  unknown.push({ field: "evidence.storageGrowth", reason: "no storage-slot diff is taken by this script (no debug RPC)", consequence: "persistent words per operation stay UNKNOWN until a lease-holder adds anvil_dumpState or a slot-diff pass" });
-  unknown.push({ field: "reads.browserRpc", reason: "no static Files SPA in this lab; rpcLog below covers this script's own calls only", consequence: "clean-reader RPC counts are not the browser's" });
-  const serialize = (v) => JSON.parse(JSON.stringify(v, (_, x) => (typeof x === "bigint" ? x.toString() : x)));
-  console.log(JSON.stringify({ chainId: net.chainId.toString(), addresses: { ledger: await ledger.getAddress(), index: await index.getAddress(), reader: await reader.getAddress(), producer: await producer.getAddress(), consumer: await consumer.getAddress() }, rows, reads: serialize(reads), rpc: { calls: rpcLog.length, bytes: rpcLog.reduce((a, r) => a + r.bytes, 0), byMethod: rpcLog.reduce((m, r) => ((m[r.method] = (m[r.method] ?? 0) + 1), m), {}) }, unknown }, null, 2));
+  async function c32Cell(cell, author, signed) {
+    const salt = id("c32-file"), file = subjectId(author, salt), folder = id("/c32"), name = id("quote");
+    const createBody = recordBody([], C32.create), editBody = recordBody([], C32.edit);
+    const createId = recordId(BYTES_T, ethers.keccak256(createBody)), editId = recordId(BYTES_T, ethers.keccak256(editBody));
+    const createActions = [action({ kind: K.SUBJECT, subject: file, salt }), action({ kind: K.RECORD, typeId: BYTES_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(createBody) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: file, target: createId }), action({ kind: K.BIND, purpose: PURPOSE.FOLDER, subject: folder, role: name, target: file })];
+    const editActions = [action({ kind: K.RECORD, typeId: BYTES_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(editBody) }), action({ kind: K.BIND, purpose: PURPOSE.HEAD, subject: file, target: editId, expectedRevision: 1 })];
+    await capture(cell, "pre", { record: createId, author, subject: file });
+    if (signed) await publishSigned(cell, "create", createActions, ["0x", createBody, "0x", "0x"]); else await publishNative(cell, "create", author, createActions, ["0x", createBody, "0x", "0x"]);
+    if (signed) await publishSigned(cell, "edit", editActions, [editBody, "0x"]); else await publishNative(cell, "edit", author, editActions, [editBody, "0x"]);
+    await capture(cell, "post", { record: editId, author, subject: file });
+    const l = { principals: [author], mode: 0 }, exp = expected(author, BYTES_T, editId, ZERO, C32.edit);
+    await send(cell, "paid-point", async () => consumer.paidPoint(await reader.getAddress(), await ledger.getAddress(), l, PURPOSE.HEAD, file, ZERO, exp));
+    await send(cell, "paid-list", async () => consumer.paidList(await reader.getAddress(), await ledger.getAddress(), l, folder, name, file, 10, exp));
+  }
+  await c32Cell("c32-native-framed", SELF, false);
+  await reset("after-c32-native");
+  await c32Cell("c32-signed-framed", A, true);
+  await reset("after-c32-signed");
+
+  async function freshReuseCell(cell, reuse) {
+    const dummyBody = recordBody([], C32.create), targetBody = recordBody([], C32.edit);
+    const dummyId = recordId(BYTES_T, ethers.keccak256(dummyBody)), targetId = recordId(BYTES_T, ethers.keccak256(targetBody));
+    const seedBody = reuse ? targetBody : dummyBody, seedId = reuse ? targetId : dummyId;
+    await publishNative(cell, "matched-seed", SELF, [action({ kind: K.RECORD, typeId: BYTES_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(seedBody) })], [seedBody]);
+    await capture(cell, "pre", { record: targetId, author: SELF, subject: ZERO });
+    const measured = reuse ? action({ kind: K.RECORD, typeId: BYTES_T, digestKind: D.RECORD_ID, digest: targetId }) : action({ kind: K.RECORD, typeId: BYTES_T, digestKind: D.BODY_HASH, digest: ethers.keccak256(targetBody) });
+    await publishNative(cell, "measured-record", SELF, [measured], [reuse ? "0x" : targetBody]);
+    await capture(cell, "post", { record: targetId, author: SELF, subject: ZERO });
+    evidence.observations.push({ source: `${cell}:matched-seeding`, decoded: { seedId, targetId, seedBodyBytes: ethers.getBytes(seedBody).length, measuredActionCount: 1, measuredBodyBytes: reuse ? 0 : ethers.getBytes(targetBody).length } });
+  }
+  await freshReuseCell("record-fresh-isolated", false);
+  await reset("after-record-fresh");
+  await freshReuseCell("record-reused-isolated", true);
+  evidence.metadata.finishedAt = new Date().toISOString();
+  process.stdout.write(`${JSON.stringify(serialize(evidence), null, 2)}\n`);
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
+main().catch((error) => {
+  process.stderr.write(`${JSON.stringify({ fatal: serialize({ message: error.message, stack: error.stack, code: error.code, data: error.data, info: error.info }), partialEvidence: serialize(evidence) }, null, 2)}\n`);
+  process.exitCode = 1;
 });
