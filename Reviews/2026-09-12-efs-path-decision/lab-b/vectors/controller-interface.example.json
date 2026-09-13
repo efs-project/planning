@@ -1,0 +1,588 @@
+{
+  "_standing": "EXAMPLE ONLY, candidate-authored (CONTROLLER-INTERFACE.md). Derivable values come from vectors/fixture-map-b.json; every value shaped 0xeeee…NN, 0x1111…/0x2222…/0x3333…/0x44…-0x48… sha256 strings, block numbers, timestamps, gas figures and tx hashes are PLACEHOLDERS that the controller's own build / the actual run replace. Gas figures are the retained 5960336 diagnostics, illustrative only. The example messages are internally consistent: contextSha256 / inputsSha256 are the sha256 of the canonical JSON (sorted keys, no whitespace, lowercase hex) of the objects shown.",
+  "runId": "b-49ec7027992a4211",
+  "beforeFixture": {
+    "context": {
+      "schema": "efs-lab-b/controller-context/1",
+      "runId": "b-49ec7027992a4211",
+      "stage": "beforeFixture",
+      "sentAtUtc": "2026-09-14T10:00:07.000Z",
+      "pins": {
+        "controller": {
+          "path": "/run/controller/b-controller.mjs",
+          "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        "expectations": {
+          "path": "/run/seals/expectations-b.json",
+          "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "armInput": {
+          "path": "/run/seals/arm-input-b.json",
+          "sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+        }
+      },
+      "chain": {
+        "chainId": 31337,
+        "source": "RPC_OBSERVED:anvil-local pid 4242:http://127.0.0.1:53211",
+        "anvilArgv": [
+          "--hardfork",
+          "cancun",
+          "--chain-id",
+          "31337",
+          "--gas-limit",
+          "30000000",
+          "--accounts",
+          "4",
+          "--prune-history",
+          "256",
+          "--no-cors",
+          "--quiet"
+        ]
+      },
+      "source": {
+        "commit": "2859147",
+        "dirtyDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sourceHashes": {
+          "src/Keys.sol": "ebb6b95b4eb689c01020670e1a2ae003433c7f1500d2e32510432e384fea02b6",
+          "src/Ledger.sol": "7576874b52a81ebc0f7b64640332b345096e0c09000ed4f09811bdc21dd6c3d5",
+          "src/TypeRegistry.sol": "ef2bd89de58298977058ba98a4ac2c03416a3fde991d74cc52fdc00634c09459",
+          "src/LensReader.sol": "7d0a167b684d700642fd1510bb237bc4ae59b630696603e94f08dd7c3dda0d2e",
+          "src/IndexModule.sol": "e384475c12379208dbdf31eb66972ccbf9895e951494b236e5e9ab6cab539cce",
+          "src/LabAcceptors.sol": "898021c4fe41ea02acb9cb5184097b5e6f6ca0cfc2fdf1fc86e320dc66bfe898",
+          "src/LabHarness.sol": "0f09edfd71c8bc8cd133d102f56803e1de2ef40b5c1e5bb2b22c7d590a1deeb5",
+          "src/JoinedConsumer.sol": "106775bea982634190e72f94ddfcbeafbf0a0da54f261b8d3daf96d68b64be74",
+          "script/measure.mjs": "19f066d8c6655708566a33c3f8c314bba663e873b64133b238c72718760314ac"
+        }
+      },
+      "build": {
+        "solc": "0.8.30",
+        "viaIR": true,
+        "optimizerRuns": 200,
+        "evm": "cancun",
+        "artifacts": {
+          "Ledger": {
+            "artifactSha256": "4444444444444444444444444444444444444444444444444444444444444444",
+            "initcodeHash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee09",
+            "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0a",
+            "runtimeBytes": 17280
+          },
+          "TypeRegistry": {
+            "artifactSha256": "4545454545454545454545454545454545454545454545454545454545454545",
+            "initcodeHash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0b",
+            "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0c",
+            "runtimeBytes": 3270
+          },
+          "IndexModule": {
+            "artifactSha256": "4646464646464646464646464646464646464646464646464646464646464646",
+            "initcodeHash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0d",
+            "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0e",
+            "runtimeBytes": 4127
+          },
+          "LensReader": {
+            "artifactSha256": "4747474747474747474747474747474747474747474747474747474747474747",
+            "initcodeHash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0f",
+            "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee10",
+            "runtimeBytes": 9445
+          },
+          "JoinedConsumer": {
+            "artifactSha256": "4848484848484848484848484848484848484848484848484848484848484848",
+            "initcodeHash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee11",
+            "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee12",
+            "runtimeBytes": 13852
+          }
+        }
+      },
+      "deployment": {
+        "registry": {
+          "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "nonce": 0,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee14"
+        },
+        "acceptor": {
+          "address": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+          "nonce": 1,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee15"
+        },
+        "quoteAcceptor": {
+          "address": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+          "nonce": 2,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee16"
+        },
+        "labelAcceptor": {
+          "address": "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9",
+          "nonce": 3,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee17"
+        },
+        "ledger": {
+          "address": "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
+          "nonce": 4,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee18"
+        },
+        "index": {
+          "address": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+          "nonce": 5,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee19"
+        },
+        "failingIndex": {
+          "address": "0x0165878a594ca255338adfa4d48449f69242eb8f",
+          "nonce": 6,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee1a"
+        },
+        "lens": {
+          "address": "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+          "nonce": 7,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee1b"
+        },
+        "actorA": {
+          "address": "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6",
+          "nonce": 8,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee1c"
+        },
+        "actorB": {
+          "address": "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+          "nonce": 9,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee1d"
+        },
+        "consumer": {
+          "address": "0x610178da211fef7d417bc0e6fed39f05609ad788",
+          "nonce": 10,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee1e"
+        },
+        "recon": {
+          "address": "0xb7f8bc63bbcad18155201308c8f3540b07f84f5e",
+          "nonce": 11,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee1f"
+        },
+        "strictAcceptor": {
+          "address": "0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0",
+          "nonce": 12,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee20"
+        },
+        "quoteRule": {
+          "address": "0x0dcd1bf9a1b36ce34237eeafef220932846bcd82",
+          "nonce": 13,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee21"
+        },
+        "pairRule": {
+          "address": "0x9a676e781a523b5d0c0e43731313a708cb607508",
+          "nonce": 14,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee22"
+        },
+        "statelessConsumer": {
+          "address": "0x0b306bf915c4d645ff596e518faf3f9669b97016",
+          "nonce": 15,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee23"
+        },
+        "joinedConsumer": {
+          "address": "0x4a679253410272dd5232b3ff7cf5dbb88f295319",
+          "nonce": 25,
+          "runtimeCodehash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee24"
+        }
+      },
+      "typesObserved": {
+        "QUOTE": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee01",
+        "BINARY": "0xd8ca3e1560afcaeb12756b15399dad59f78e70e49ea9c4415501fe8bcd8f3bf2",
+        "ITEM": "0x589d5624cb9167094eb8ee549683bdadc765c77ed4f894308dd376bbebc30019",
+        "PAIR": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee02",
+        "QUOTE_J": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee03",
+        "LABEL": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04"
+      },
+      "registry": {
+        "epochAfterSetup": "8"
+      },
+      "sealedInitialState": {
+        "blockNumber": "26",
+        "blockHash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee28",
+        "snapshot": "0x1"
+      },
+      "plannedCells": [
+        "failure-rows",
+        "joined/paid-slice"
+      ],
+      "firstCell": "failure-rows",
+      "mirror": {
+        "types": {
+          "QUOTE": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee01",
+          "BINARY": "0xd8ca3e1560afcaeb12756b15399dad59f78e70e49ea9c4415501fe8bcd8f3bf2",
+          "ITEM": "0x589d5624cb9167094eb8ee549683bdadc765c77ed4f894308dd376bbebc30019",
+          "PAIR": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee02",
+          "QUOTE_J": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee03",
+          "LABEL": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04"
+        },
+        "fixture": {
+          "ITEM_ETH": {
+            "typeId": "0x589d5624cb9167094eb8ee549683bdadc765c77ed4f894308dd376bbebc30019",
+            "body": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "id": "0xdcee1a18e773c4e23c675382b23918d0771ae6ff0a7f2c22d3e7298744331825"
+          },
+          "ITEM_USDC": {
+            "typeId": "0x589d5624cb9167094eb8ee549683bdadc765c77ed4f894308dd376bbebc30019",
+            "body": "0x0000000000000000000000000000000000000000000000000000000000000002",
+            "id": "0x22ad273e9b5cb707fadf826bf174c50a895a558924cc7ff0cca702bffbc6c4a2"
+          },
+          "PAIR_ETH_USDC": {
+            "typeId": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee02",
+            "body": "0xdcee1a18e773c4e23c675382b23918d0771ae6ff0a7f2c22d3e729874433182522ad273e9b5cb707fadf826bf174c50a895a558924cc7ff0cca702bffbc6c4a20000000000000000000000000000000000000000000000000000000000000001",
+            "id": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee05"
+          },
+          "QUOTE_A1": {
+            "typeId": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee03",
+            "body": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee05000000000000000000000000000000000000000000000000000000009502f9000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000006b49d200ea51e8c38c6dcf2d50a91e3db4784be38aeaf3728d1ef153b525df484e652345",
+            "id": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee06"
+          },
+          "QUOTE_A2": {
+            "typeId": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee03",
+            "body": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee050000000000000000000000000000000000000000000000000000000095217d800000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000006b49d200ea51e8c38c6dcf2d50a91e3db4784be38aeaf3728d1ef153b525df484e652345",
+            "id": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee07"
+          },
+          "QUOTE_B1": {
+            "typeId": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee03",
+            "body": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee050000000000000000000000000000000000000000000000000000000095123b400000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000006b49d200ea51e8c38c6dcf2d50a91e3db4784be38aeaf3728d1ef153b525df484e652345",
+            "id": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee08"
+          }
+        },
+        "subject": {
+          "FILE_QUOTE": "0x976c920188c61969cee3d77dc43128f58bc31006bcf4d201023eda31a20e1d1e",
+          "salt": "0xcf07b0d8ffc6bbc434847a26612314f5d16dff5e83f165d7e460c7fc0e3a008a",
+          "creatorPrincipal": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8"
+        },
+        "roles": {
+          "deployer": {
+            "address": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+            "derivationIndex": 0
+          },
+          "AUTHOR_A": {
+            "address": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+            "derivationIndex": 1
+          },
+          "actorB": {
+            "address": "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+            "deploymentNonce": 9,
+            "role": "producer / AUTHOR_B"
+          },
+          "paidCaller": {
+            "address": "0x90f79bf6eb2c4f870365e785982e1f101e93b906",
+            "derivationIndex": 3
+          }
+        },
+        "lenses": {
+          "LENS_A_FIRST": [
+            "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+            "0x8a791620dd6260079bf849dc5567adc3f2fdc318"
+          ],
+          "LENS_B_FIRST": [
+            "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+            "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
+          ]
+        },
+        "expect": {
+          "A_FIRST": {
+            "subject": "0x976c920188c61969cee3d77dc43128f58bc31006bcf4d201023eda31a20e1d1e",
+            "expectedHead": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee07",
+            "selectedAuthor": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+            "selectedProofKind": "2",
+            "pairId": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee05",
+            "itemA": "0xdcee1a18e773c4e23c675382b23918d0771ae6ff0a7f2c22d3e7298744331825",
+            "itemB": "0x22ad273e9b5cb707fadf826bf174c50a895a558924cc7ff0cca702bffbc6c4a2",
+            "mantissa": "2502000000",
+            "scale": "6",
+            "observedAt": "1800000000",
+            "noteCommitment": "0xea51e8c38c6dcf2d50a91e3db4784be38aeaf3728d1ef153b525df484e652345",
+            "basisAdmission": "12"
+          },
+          "B_FIRST": {
+            "subject": "0x976c920188c61969cee3d77dc43128f58bc31006bcf4d201023eda31a20e1d1e",
+            "expectedHead": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee08",
+            "selectedAuthor": "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+            "selectedProofKind": "1",
+            "pairId": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee05",
+            "itemA": "0xdcee1a18e773c4e23c675382b23918d0771ae6ff0a7f2c22d3e7298744331825",
+            "itemB": "0x22ad273e9b5cb707fadf826bf174c50a895a558924cc7ff0cca702bffbc6c4a2",
+            "mantissa": "2501000000",
+            "scale": "6",
+            "observedAt": "1800000000",
+            "noteCommitment": "0xea51e8c38c6dcf2d50a91e3db4784be38aeaf3728d1ef153b525df484e652345",
+            "basisAdmission": "12"
+          }
+        },
+        "placementExpect": {
+          "folder": "0x6b8f0ae148ccfbd232f2f5088f5758ca8158d5a69aaabdc7fd072cbf75be2dc9",
+          "nameRole": "0xc7c63b8bafc33aa5221fea52672881776f7b9d1aa8eebc29f8c758178230dd1a",
+          "actor": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "proofKind": "2",
+          "publication": "2",
+          "budget": "16"
+        },
+        "ordinals": {
+          "placementAdmission": "7",
+          "placementPublication": "2",
+          "aHeadAdmission": "10",
+          "aHeadRevision": "2",
+          "bHeadAdmission": "12",
+          "bHeadRevision": "1",
+          "postB1Frontier": "12",
+          "registryEpoch": "8",
+          "indexGeneration": "0"
+        }
+      },
+      "ackPath": "/run/scratch/controller/ack-beforeFixture.json"
+    },
+    "ack": {
+      "schema": "efs-lab-b/controller-ack/1",
+      "runId": "b-49ec7027992a4211",
+      "stage": "beforeFixture",
+      "decision": "ACK",
+      "reason": null,
+      "issuedAtUtc": "2026-09-14T10:00:09.000Z",
+      "pins": {
+        "controller": "1111111111111111111111111111111111111111111111111111111111111111",
+        "expectations": "2222222222222222222222222222222222222222222222222222222222222222",
+        "armInput": "3333333333333333333333333333333333333333333333333333333333333333"
+      },
+      "contextSha256": "a68c4bbd67430ed5644155092e5bee2fdda42a7d58f8137aef71a3de83437769",
+      "inputs": {
+        "types": {
+          "QUOTE": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee01",
+          "BINARY": "0xd8ca3e1560afcaeb12756b15399dad59f78e70e49ea9c4415501fe8bcd8f3bf2",
+          "ITEM": "0x589d5624cb9167094eb8ee549683bdadc765c77ed4f894308dd376bbebc30019",
+          "PAIR": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee02",
+          "QUOTE_J": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee03",
+          "LABEL": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04"
+        },
+        "fixture": {
+          "ITEM_ETH": {
+            "typeId": "0x589d5624cb9167094eb8ee549683bdadc765c77ed4f894308dd376bbebc30019",
+            "body": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "id": "0xdcee1a18e773c4e23c675382b23918d0771ae6ff0a7f2c22d3e7298744331825"
+          },
+          "ITEM_USDC": {
+            "typeId": "0x589d5624cb9167094eb8ee549683bdadc765c77ed4f894308dd376bbebc30019",
+            "body": "0x0000000000000000000000000000000000000000000000000000000000000002",
+            "id": "0x22ad273e9b5cb707fadf826bf174c50a895a558924cc7ff0cca702bffbc6c4a2"
+          },
+          "PAIR_ETH_USDC": {
+            "typeId": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee02",
+            "body": "0xdcee1a18e773c4e23c675382b23918d0771ae6ff0a7f2c22d3e729874433182522ad273e9b5cb707fadf826bf174c50a895a558924cc7ff0cca702bffbc6c4a20000000000000000000000000000000000000000000000000000000000000001",
+            "id": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee05"
+          },
+          "QUOTE_A1": {
+            "typeId": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee03",
+            "body": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee05000000000000000000000000000000000000000000000000000000009502f9000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000006b49d200ea51e8c38c6dcf2d50a91e3db4784be38aeaf3728d1ef153b525df484e652345",
+            "id": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee06"
+          },
+          "QUOTE_A2": {
+            "typeId": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee03",
+            "body": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee050000000000000000000000000000000000000000000000000000000095217d800000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000006b49d200ea51e8c38c6dcf2d50a91e3db4784be38aeaf3728d1ef153b525df484e652345",
+            "id": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee07"
+          },
+          "QUOTE_B1": {
+            "typeId": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee03",
+            "body": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee050000000000000000000000000000000000000000000000000000000095123b400000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000006b49d200ea51e8c38c6dcf2d50a91e3db4784be38aeaf3728d1ef153b525df484e652345",
+            "id": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee08"
+          }
+        },
+        "subject": {
+          "FILE_QUOTE": "0x976c920188c61969cee3d77dc43128f58bc31006bcf4d201023eda31a20e1d1e",
+          "salt": "0xcf07b0d8ffc6bbc434847a26612314f5d16dff5e83f165d7e460c7fc0e3a008a",
+          "creatorPrincipal": "0x00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c8"
+        },
+        "roles": {
+          "deployer": {
+            "address": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+            "derivationIndex": 0
+          },
+          "AUTHOR_A": {
+            "address": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+            "derivationIndex": 1
+          },
+          "actorB": {
+            "address": "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+            "deploymentNonce": 9,
+            "role": "producer / AUTHOR_B"
+          },
+          "paidCaller": {
+            "address": "0x90f79bf6eb2c4f870365e785982e1f101e93b906",
+            "derivationIndex": 3
+          }
+        },
+        "lenses": {
+          "LENS_A_FIRST": [
+            "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+            "0x8a791620dd6260079bf849dc5567adc3f2fdc318"
+          ],
+          "LENS_B_FIRST": [
+            "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+            "0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
+          ]
+        },
+        "expect": {
+          "A_FIRST": {
+            "subject": "0x976c920188c61969cee3d77dc43128f58bc31006bcf4d201023eda31a20e1d1e",
+            "expectedHead": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee07",
+            "selectedAuthor": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+            "selectedProofKind": "2",
+            "pairId": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee05",
+            "itemA": "0xdcee1a18e773c4e23c675382b23918d0771ae6ff0a7f2c22d3e7298744331825",
+            "itemB": "0x22ad273e9b5cb707fadf826bf174c50a895a558924cc7ff0cca702bffbc6c4a2",
+            "mantissa": "2502000000",
+            "scale": "6",
+            "observedAt": "1800000000",
+            "noteCommitment": "0xea51e8c38c6dcf2d50a91e3db4784be38aeaf3728d1ef153b525df484e652345",
+            "basisAdmission": "12"
+          },
+          "B_FIRST": {
+            "subject": "0x976c920188c61969cee3d77dc43128f58bc31006bcf4d201023eda31a20e1d1e",
+            "expectedHead": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee08",
+            "selectedAuthor": "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+            "selectedProofKind": "1",
+            "pairId": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee05",
+            "itemA": "0xdcee1a18e773c4e23c675382b23918d0771ae6ff0a7f2c22d3e7298744331825",
+            "itemB": "0x22ad273e9b5cb707fadf826bf174c50a895a558924cc7ff0cca702bffbc6c4a2",
+            "mantissa": "2501000000",
+            "scale": "6",
+            "observedAt": "1800000000",
+            "noteCommitment": "0xea51e8c38c6dcf2d50a91e3db4784be38aeaf3728d1ef153b525df484e652345",
+            "basisAdmission": "12"
+          }
+        },
+        "placementExpect": {
+          "folder": "0x6b8f0ae148ccfbd232f2f5088f5758ca8158d5a69aaabdc7fd072cbf75be2dc9",
+          "nameRole": "0xc7c63b8bafc33aa5221fea52672881776f7b9d1aa8eebc29f8c758178230dd1a",
+          "actor": "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
+          "proofKind": "2",
+          "publication": "2",
+          "budget": "16"
+        },
+        "ordinals": {
+          "placementAdmission": "7",
+          "placementPublication": "2",
+          "aHeadAdmission": "10",
+          "aHeadRevision": "2",
+          "bHeadAdmission": "12",
+          "bHeadRevision": "1",
+          "postB1Frontier": "12",
+          "registryEpoch": "8",
+          "indexGeneration": "0"
+        }
+      },
+      "inputsSha256": "ad85dcfa615d3f3ae96506251ff22afabc357f6fee030f2b5a2bf4fdba4f0d1d"
+    }
+  },
+  "afterB1": {
+    "context": {
+      "schema": "efs-lab-b/controller-context/1",
+      "runId": "b-49ec7027992a4211",
+      "stage": "afterB1",
+      "sentAtUtc": "2026-09-14T10:02:31.000Z",
+      "pins": {
+        "controller": {
+          "path": "/run/controller/b-controller.mjs",
+          "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        "expectations": {
+          "path": "/run/seals/expectations-b.json",
+          "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "armInput": {
+          "path": "/run/seals/arm-input-b.json",
+          "sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+        }
+      },
+      "inputsSha256": "ad85dcfa615d3f3ae96506251ff22afabc357f6fee030f2b5a2bf4fdba4f0d1d",
+      "checkpoint": {
+        "blockNumber": "30",
+        "blockHash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee29",
+        "timestamp": "1757844020",
+        "snapshot": "0x2",
+        "frontier": {
+          "admissions": "12",
+          "records": "6",
+          "bindings": "4",
+          "publications": "4"
+        },
+        "indexGeneration": "0",
+        "registryEpoch": "8",
+        "coreCodeCommitment": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0a",
+        "realmId": "0x684016e05741dc9d511ff3520a16e1da90a35be14b76f9e12ef0287b9beae39f"
+      },
+      "setupReceipts": {
+        "step1": {
+          "txHash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee32",
+          "block": "27",
+          "status": 1,
+          "gasUsed": "905829",
+          "publication": "1"
+        },
+        "A1": {
+          "txHash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee33",
+          "block": "28",
+          "status": 1,
+          "gasUsed": "1608502",
+          "publication": "2"
+        },
+        "A2": {
+          "txHash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee34",
+          "block": "29",
+          "status": 1,
+          "gasUsed": "654289",
+          "publication": "3"
+        },
+        "B1": {
+          "txHash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee35",
+          "block": "30",
+          "status": 1,
+          "gasUsed": "791814",
+          "publication": "4",
+          "actions": 2,
+          "folderBind": false
+        }
+      },
+      "observedOrdinals": {
+        "placementAdmission": "7",
+        "placementPublication": "2",
+        "placementRevision": "1",
+        "aHeadAdmission": "10",
+        "aHeadRevision": "2",
+        "bHeadAdmission": "12",
+        "bHeadRevision": "1"
+      },
+      "noBPlacement": {
+        "bHeadStateAtPlacement": "0",
+        "bSwapsScopeCount": "0",
+        "bOnlyLensStatus": "0"
+      },
+      "ackPath": "/run/scratch/controller/ack-afterB1.json"
+    },
+    "ack": {
+      "schema": "efs-lab-b/controller-ack/1",
+      "runId": "b-49ec7027992a4211",
+      "stage": "afterB1",
+      "decision": "ACK",
+      "reason": null,
+      "issuedAtUtc": "2026-09-14T10:02:33.000Z",
+      "pins": {
+        "controller": "1111111111111111111111111111111111111111111111111111111111111111",
+        "expectations": "2222222222222222222222222222222222222222222222222222222222222222",
+        "armInput": "3333333333333333333333333333333333333333333333333333333333333333"
+      },
+      "contextSha256": "83853de427cb241a41406f66e633d7a95b9a964e3631c5d6e2dc80dcdc94052d",
+      "inputsSha256": "ad85dcfa615d3f3ae96506251ff22afabc357f6fee030f2b5a2bf4fdba4f0d1d",
+      "sealedCheckpoint": {
+        "blockNumber": "30",
+        "blockHash": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee29",
+        "timestamp": "1757844020",
+        "snapshot": "0x2",
+        "frontier": {
+          "admissions": "12",
+          "records": "6",
+          "bindings": "4",
+          "publications": "4"
+        },
+        "indexGeneration": "0",
+        "registryEpoch": "8",
+        "coreCodeCommitment": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0a",
+        "realmId": "0x684016e05741dc9d511ff3520a16e1da90a35be14b76f9e12ef0287b9beae39f"
+      }
+    }
+  }
+}

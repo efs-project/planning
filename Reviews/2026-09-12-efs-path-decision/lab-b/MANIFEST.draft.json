@@ -45,27 +45,17 @@
       "consequence": "no bytecode identity"
     },
     "runtimeBytes": {
-      "Ledger": {
-        "unknown": "not built; ~870 source lines with via_ir may approach EIP-170",
-        "consequence": "deployment may fail; see TODO.md A.10"
-      },
-      "IndexModule": {
-        "unknown": "not built"
-      },
-      "LensReader": {
-        "unknown": "not built"
-      },
-      "TypeRegistry": {
-        "unknown": "not built"
-      },
-      "LabHarness/*": {
-        "unknown": "not built"
-      },
-      "LabAcceptors/QuoteAcceptor, LabelAcceptor": {
-        "unknown": "not built"
-      },
-      "JoinedConsumer/JoinedConsumer, StatelessConsumer": {
-        "unknown": "not built; JoinedConsumer decodes Page/Entry[] and 13-return evidence tuples - see TODO.md G"
+      "standing": "measured by the coordinator's build of pin 2859147 (2026-09-13 10:10 slot, solc 0.8.30 via-IR optimizer 200); all under EIP-170. The runner records report.deployment[*].runtimeBytes / runtimeCodehash at run time from eth_getCode; those, not this table, are the run's evidence",
+      "Ledger": 17280,
+      "TypeRegistry": 3270,
+      "IndexModule": 4127,
+      "LensReader": 9445,
+      "JoinedConsumer": 13852,
+      "MinBodyAcceptor": 354,
+      "FaultyReads (test-only)": 5587,
+      "LabHarness/*, LabAcceptors/QuoteAcceptor, LabelAcceptor, StatelessConsumer": {
+        "unknown": "not reported by the coordinator for this pin",
+        "consequence": "taken from report.deployment at run time"
       }
     },
     "linkedLibraries": "none (Keys is internal-only)",

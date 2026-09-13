@@ -9,7 +9,7 @@
 //   node vectors/verify-fixture-map-b.mjs --emit                author step: fill every derivable `worked` value in place
 //   node vectors/verify-fixture-map-b.mjs --codehashes <f.json> also derive the build-dependent values from the CONTROLLER's
 //                                                               runtime codehashes { quoteRule, pairRule, quoteAcceptor,
-//                                                               ledger } (each = keccak256 of the deployed runtime code);
+//                                                               labelAcceptor, ledger } (each = keccak256 of the deployed runtime code);
 //                                                               with --emit those values are filled too — never commit them
 // ethers v6 from EFS_ETHERS_PATH (fallbacks: the runner's default paths).
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -71,6 +71,9 @@ function compute(ch) {
   const ITEM = typeIdOf(DOM(I.shapes.ITEM), [], ZERO);
   c['types.ITEM.typeId'] = ITEM;
   c['types.PAIR.refsHash'] = keccak256(enc(['bytes32[]'], [[ITEM, ITEM]]));
+  for (const k of ['QUOTE', 'BINARY', 'LABEL']) c[`types.${k}.refsHash`] = keccak256(enc(['bytes32[]'], [[]])); // no checked references
+  c['types.BINARY.ruleId'] = ZERO;
+  c['types.BINARY.typeId'] = typeIdOf(DOM(I.shapes.BINARY), [], ZERO);
   const bodyEth = enc(['uint256'], [BigInt(I.items.ITEM_ETH)]);
   const bodyUsdc = enc(['uint256'], [BigInt(I.items.ITEM_USDC)]);
   const itemEth = recordId(ITEM, bodyEth);
@@ -106,8 +109,12 @@ function compute(ch) {
   c['lenses.LENS_B_FIRST.id'] = lensId([actorB, A]);
   c['constants.WORD_ONE'] = word(1);
   if (ch) {
-    const need = ['quoteRule', 'pairRule', 'quoteAcceptor', 'ledger'];
+    const need = ['quoteRule', 'pairRule', 'quoteAcceptor', 'labelAcceptor', 'ledger'];
     for (const k of need) if (!ch[k]) throw new Error(`--codehashes: missing ${k}`);
+    c['types.QUOTE.ruleId'] = ch.quoteRule;
+    c['types.QUOTE.typeId'] = typeIdOf(DOM(I.shapes.QUOTE), [], ch.quoteRule);
+    c['types.LABEL.ruleId'] = ch.labelAcceptor;
+    c['types.LABEL.typeId'] = typeIdOf(DOM(I.shapes.LABEL), [], ch.labelAcceptor);
     c['types.PAIR.ruleId'] = ch.pairRule;
     const PAIR = typeIdOf(DOM(I.shapes.PAIR), [ITEM, ITEM], ch.pairRule);
     c['types.PAIR.typeId'] = PAIR;

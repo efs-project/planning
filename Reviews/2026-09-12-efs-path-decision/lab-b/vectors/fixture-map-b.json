@@ -1,5 +1,5 @@
 {
-  "standing": "CANDIDATE-AUTHORED. B's arm-local semantic->physical fixture map for the sealed paid point/list slice (sdk-fixture.md appendix), as formulas + raw inputs + worked values. The independent run controller must re-derive every value with its own implementation (appendix pre-run pins 2 and 4) and must not copy expected answers from this file, from FIXTURE-MAP.md or from any result packet. Worked values were filled by `vectors/verify-fixture-map-b.mjs --emit` and re-checked by its default mode: a self-consistency check only. Values marked derivable=false need the controller's build of the pin (runtime codehashes) and stay null here.",
+  "standing": "CANDIDATE-AUTHORED. B's arm-local semantic->physical fixture map for the sealed paid point/list slice (sdk-fixture.md appendix), as formulas + raw inputs + worked values. The independent run controller must re-derive every value with its own implementation (appendix pre-run pins 2 and 4) and must not copy expected answers from this file, from FIXTURE-MAP.md or from any result packet. Worked values were filled by `vectors/verify-fixture-map-b.mjs --emit` and re-checked by its default mode: a self-consistency check only. Values marked derivable=false need the controller's build of the pin (runtime codehashes of MinBodyAcceptor(32), MinBodyAcceptor(96), QuoteAcceptor, LabelAcceptor and the Ledger) and stay null here.",
   "sourceCommit": "9c19164",
   "sourceHashes": {
     "src/Keys.sol": "ebb6b95b4eb689c01020670e1a2ae003433c7f1500d2e32510432e384fea02b6",
@@ -129,9 +129,12 @@
     },
     "realm": "lab/realm/1",
     "shapes": {
+      "QUOTE": "lab/type/quote/1",
+      "BINARY": "lab/type/binary/1",
       "ITEM": "lab/type/item/1",
       "PAIR": "lab/type/pair/1",
-      "QUOTE_J": "lab/type/quote-joined/1"
+      "QUOTE_J": "lab/type/quote-joined/1",
+      "LABEL": "lab/type/label/1"
     },
     "strings": {
       "FOLDER_SWAPS": "/swaps",
@@ -266,7 +269,78 @@
     }
   },
   "types": {
-    "standing": "typeId = keccak256(abi.encode(DOM_TYPE, shape, keccak256(abi.encode(bytes32[] refTypes)), ruleId)); ruleId = the mandatory acceptor's runtime codehash (0 without a rule) — src/Keys.sol:69-70, src/TypeRegistry.sol:88-99 (register), :122-126 (_codehashOf), :137-138 (typeIdOf); registration plan script/measure.mjs:142-149",
+    "standing": "ALL SIX registered Types, in registration order (script/measure.mjs:142-149 TYPE_PLAN; :1830-1843 register loop): QUOTE, BINARY, ITEM, PAIR, QUOTE_J, LABEL. typeId = keccak256(abi.encode(DOM_TYPE, shape, keccak256(abi.encode(bytes32[] refTypes)), ruleId)); ruleId = the mandatory acceptor's runtime codehash (0 without a rule) — src/Keys.sol:69-70, src/TypeRegistry.sol:88-99 (register), :122-126 (_codehashOf), :137-138 (typeIdOf). QUOTE and BINARY are the payload-control Types of the other cells; LABEL is the label-probe Type and a JoinedConsumer constructor argument (:1854); the paid slice touches ITEM, PAIR, QUOTE_J.",
+    "QUOTE": {
+      "descriptor": {
+        "shape": "lab/type/quote/1",
+        "refTypes": [],
+        "mandatoryRule": {
+          "contract": "MinBodyAcceptor",
+          "immutable": {
+            "minBody": 32
+          },
+          "deploymentNonce": 13,
+          "source": "src/LabAcceptors.sol:41-51"
+        }
+      },
+      "shape": {
+        "formula": "keccak256(utf8('lab/type/quote/1'))",
+        "source": "script/measure.mjs:136",
+        "derivable": true,
+        "worked": "0xcde0354ba21b75c3a1ab88546911ea621263d535d76ee05983d95aa655f85068"
+      },
+      "refsHash": {
+        "formula": "keccak256(abi.encode(bytes32[] []))",
+        "source": "src/Keys.sol:70",
+        "derivable": true,
+        "worked": "0x569e75fc77c1a856f6daaf9e69d8a9566ca34aa47f9133711ce065a571af0cfd"
+      },
+      "ruleId": {
+        "formula": "keccak256(runtime code of the deployed MinBodyAcceptor(32)) == address.codehash",
+        "source": "src/TypeRegistry.sol:122-126",
+        "derivable": false,
+        "worked": null,
+        "requires": "the controller's own build of the pin (runtime codehash embeds the immutable / the Ledger code)"
+      },
+      "typeId": {
+        "formula": "keccak256(abi.encode(DOM_TYPE, shape, refsHash, ruleId))",
+        "source": "src/Keys.sol:69-70",
+        "derivable": false,
+        "worked": null,
+        "requires": "the controller's own build of the pin (runtime codehash embeds the immutable / the Ledger code)"
+      }
+    },
+    "BINARY": {
+      "descriptor": {
+        "shape": "lab/type/binary/1",
+        "refTypes": [],
+        "mandatoryRule": null
+      },
+      "shape": {
+        "formula": "keccak256(utf8('lab/type/binary/1'))",
+        "source": "script/measure.mjs:136",
+        "derivable": true,
+        "worked": "0xb803b0740e42bb813308b09bdd8757b2847430b4dde7249e148c1b71ee8ff0f7"
+      },
+      "refsHash": {
+        "formula": "keccak256(abi.encode(bytes32[] []))",
+        "source": "src/Keys.sol:70",
+        "derivable": true,
+        "worked": "0x569e75fc77c1a856f6daaf9e69d8a9566ca34aa47f9133711ce065a571af0cfd"
+      },
+      "ruleId": {
+        "formula": "bytes32(0): no mandatory rule",
+        "source": "src/TypeRegistry.sol:122-126",
+        "derivable": true,
+        "worked": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "typeId": {
+        "formula": "keccak256(abi.encode(DOM_TYPE, shape, refsHash, 0x0))",
+        "source": "src/Keys.sol:69-70",
+        "derivable": true,
+        "worked": "0xd8ca3e1560afcaeb12756b15399dad59f78e70e49ea9c4415501fe8bcd8f3bf2"
+      }
+    },
     "ITEM": {
       "descriptor": {
         "shape": "lab/type/item/1",
@@ -374,6 +448,48 @@
       },
       "ruleId": {
         "formula": "keccak256(runtime code of the deployed QuoteAcceptor) == address.codehash",
+        "source": "src/TypeRegistry.sol:122-126",
+        "derivable": false,
+        "worked": null,
+        "requires": "the controller's own build of the pin (runtime codehash embeds the immutable / the Ledger code)"
+      },
+      "typeId": {
+        "formula": "keccak256(abi.encode(DOM_TYPE, shape, refsHash, ruleId))",
+        "source": "src/Keys.sol:69-70",
+        "derivable": false,
+        "worked": null,
+        "requires": "the controller's own build of the pin (runtime codehash embeds the immutable / the Ledger code)"
+      }
+    },
+    "LABEL": {
+      "descriptor": {
+        "shape": "lab/type/label/1",
+        "refTypes": [],
+        "mandatoryRule": {
+          "contract": "LabelAcceptor",
+          "immutable": null,
+          "constants": {
+            "MAX_LABEL": 255,
+            "rule": "exact well-formed UTF-8, 1..255 bytes, no refs"
+          },
+          "deploymentNonce": 3,
+          "source": "src/LabAcceptors.sol:58-118"
+        }
+      },
+      "shape": {
+        "formula": "keccak256(utf8('lab/type/label/1'))",
+        "source": "script/measure.mjs:136",
+        "derivable": true,
+        "worked": "0x9b710783b95fbe35abf4e2d31b218ba7a4e670a0ebe5be796a5dd8437b83c919"
+      },
+      "refsHash": {
+        "formula": "keccak256(abi.encode(bytes32[] []))",
+        "source": "src/Keys.sol:70",
+        "derivable": true,
+        "worked": "0x569e75fc77c1a856f6daaf9e69d8a9566ca34aa47f9133711ce065a571af0cfd"
+      },
+      "ruleId": {
+        "formula": "keccak256(runtime code of the deployed LabelAcceptor) == address.codehash",
         "source": "src/TypeRegistry.sol:122-126",
         "derivable": false,
         "worked": null,
