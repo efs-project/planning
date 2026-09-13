@@ -232,13 +232,14 @@ export function classifyCostState(input) {
     ['control.actionShape', input?.control?.actionShape],
     ['control.bodySizeBytes', input?.control?.bodySizeBytes],
     ['control.initialStateRegime', input?.control?.initialStateRegime],
+    ['control.operationCommitment', input?.control?.operationCommitment],
     ['basis.beforeBlockHash', input?.basis?.beforeBlockHash],
     ['basis.afterBlockHash', input?.basis?.afterBlockHash],
     ['provenance.kind', input?.provenance?.kind],
     ['provenance.source', input?.provenance?.source],
     ['recordPresentBefore', input?.recordPresentBefore],
     ['recordPresentAfter', input?.recordPresentAfter],
-    ['sameOperationAlreadyPresentBefore', input?.sameOperationAlreadyPresentBefore],
+    ['operationCommitmentAfter', input?.operationCommitmentAfter],
     ['occurrenceCountBefore', input?.occurrenceCountBefore],
     ['occurrenceCountAfter', input?.occurrenceCountAfter],
     ['effectCommitmentBefore', input?.effectCommitmentBefore],
@@ -250,6 +251,13 @@ export function classifyCostState(input) {
     return {
       status: 'UNKNOWN',
       reason: `MISSING_COST_EVIDENCE:${missing[0]}`,
+      evidence,
+    };
+  }
+  if (!Object.hasOwn(input, 'operationCommitmentBefore')) {
+    return {
+      status: 'UNKNOWN',
+      reason: 'MISSING_COST_EVIDENCE:operationCommitmentBefore',
       evidence,
     };
   }
@@ -267,7 +275,7 @@ export function classifyCostState(input) {
       || typeof input.provenance.source !== 'string' || input.provenance.source.length === 0) {
       throw new TypeError('provenance');
     }
-    if (![input.recordPresentBefore, input.recordPresentAfter, input.sameOperationAlreadyPresentBefore]
+    if (![input.recordPresentBefore, input.recordPresentAfter]
       .every((value) => typeof value === 'boolean')) {
       throw new TypeError('prePostBooleans');
     }
@@ -284,6 +292,19 @@ export function classifyCostState(input) {
       actionShape: input.control.actionShape,
       bodySizeBytes: bodySizeBytes.toString(),
       initialStateRegime: input.control.initialStateRegime,
+      operationCommitment: exactHex(
+        input.control.operationCommitment,
+        32,
+        'OPERATION_COMMITMENT',
+      ),
+      operationCommitmentBefore: input.operationCommitmentBefore === null
+        ? null
+        : exactHex(input.operationCommitmentBefore, 32, 'OPERATION_COMMITMENT_BEFORE'),
+      operationCommitmentAfter: exactHex(
+        input.operationCommitmentAfter,
+        32,
+        'OPERATION_COMMITMENT_AFTER',
+      ),
       beforeBlockHash: exactHex(input.basis.beforeBlockHash, 32, 'BEFORE_BLOCK_HASH'),
       afterBlockHash: exactHex(input.basis.afterBlockHash, 32, 'AFTER_BLOCK_HASH'),
       occurrenceCountBefore,
@@ -305,21 +326,23 @@ export function classifyCostState(input) {
     normalized.actionShape,
     normalized.bodySizeBytes,
     normalized.initialStateRegime,
+    normalized.operationCommitment,
   ])));
   const occurrenceDelta = normalized.occurrenceCountAfter - normalized.occurrenceCountBefore;
   const effectChanged = normalized.effectCommitmentBefore !== normalized.effectCommitmentAfter;
   const before = input.recordPresentBefore;
   const after = input.recordPresentAfter;
-  const retried = input.sameOperationAlreadyPresentBefore;
+  const sameOperationBefore = normalized.operationCommitmentBefore === normalized.operationCommitment;
+  const sameOperationAfter = normalized.operationCommitmentAfter === normalized.operationCommitment;
 
   let value = 'INCONSISTENT';
-  if (!before && after && !retried && occurrenceDelta === 1n
+  if (!before && after && !sameOperationBefore && sameOperationAfter && occurrenceDelta === 1n
     && effectChanged && normalized.stateDelta > 0n) {
     value = 'FRESH';
-  } else if (before && after && !retried && occurrenceDelta === 1n
+  } else if (before && after && !sameOperationBefore && sameOperationAfter && occurrenceDelta === 1n
     && effectChanged && normalized.stateDelta > 0n) {
     value = 'EXISTING';
-  } else if (before && after && retried && occurrenceDelta === 0n
+  } else if (before && after && sameOperationBefore && sameOperationAfter && occurrenceDelta === 0n
     && !effectChanged && normalized.stateDelta === 0n) {
     value = 'RETRY';
   }
@@ -423,6 +446,10 @@ function verifySeal(packet, profile, expectations) {
   }
   const source = verifyBasisAnchor(packet?.seal?.observationBasis?.source, 'source');
   const destination = verifyBasisAnchor(packet?.seal?.observationBasis?.destination, 'destination');
+  if (source.chainId === destination.chainId
+    && source.realmAddress === destination.realmAddress) {
+    throw new TypeError('SOURCE_DESTINATION_AUTHORITY_COLLISION');
+  }
   const observations = packet.observations ?? {};
   for (const [name, role] of [
     ['referenceValidation', 'source'],
@@ -502,8 +529,12 @@ export function checkSealedPacket(packet, profile, expectations, inputBytes) {
   const inputIntegrity = verifyFrozenInputs(profile, expectations, inputBytes);
   const observationIntegrity = verifySeal(packet, profile, expectations);
   const rawObservations = structuredClone(packet.observations ?? {});
-  const claims = structuredClone(packet.claims ?? {});
-  const commitments = reconstructCommitments(profile, packet.inputs ?? {});
+  const rawInputs = structuredClone(packet.inputs ?? {});
+  if (!packet.claims || typeof packet.claims !== 'object' || Array.isArray(packet.claims)) {
+    throw new TypeError('MALFORMED_CLAIMS');
+  }
+  const claims = structuredClone(packet.claims);
+  const commitments = reconstructCommitments(profile, rawInputs);
 
   const claimedRecord = claims.recordIdentity;
   const claimedSubject = claims.subjectIdentity;
@@ -539,6 +570,19 @@ export function checkSealedPacket(packet, profile, expectations, inputBytes) {
   evaluated.retryAllowed = evaluated.submission.status === 'UNKNOWN' ? false : null;
 
   const discrepancies = [];
+  if (!Array.isArray(expectations.axes)
+    || expectations.axes.some((axis) => typeof axis !== 'string')) {
+    throw new TypeError('MALFORMED_REQUIRED_AXES');
+  }
+  for (const axis of expectations.axes) {
+    if (!Object.hasOwn(claims, axis)) {
+      discrepancies.push({
+        axis,
+        claimed: 'MISSING_CLAIM',
+        evaluated: comparisonValue(axis, evaluated),
+      });
+    }
+  }
   for (const [axis, claimed] of Object.entries(claims)) {
     const value = comparisonValue(axis, evaluated);
     if (claimed !== value) {
@@ -551,6 +595,7 @@ export function checkSealedPacket(packet, profile, expectations, inputBytes) {
     observationIntegrity,
     profileSourceCommit: profile.candidate.sourceCommit,
     observationBasis: structuredClone(packet.seal.observationBasis),
+    rawInputs,
     rawObservations,
     claims,
     evaluated,

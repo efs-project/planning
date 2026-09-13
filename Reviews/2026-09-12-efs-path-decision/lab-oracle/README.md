@@ -63,7 +63,9 @@ Every present proof-shaped observation must name its source, claimed proof
 grade, basis role, and exact block hash. Source and destination anchors are
 separate and each must state chain, block, Realm, provenance, and the
 availability or explicit unavailability of header, runtime, account-proof, and
-storage-proof material. The checker rejects cross-basis observations. It does
+storage-proof material. The fresh-destination fixture rejects identical
+source/destination chain-and-Realm authority, and all packets reject cross-basis
+observations. It does
 not yet verify headers or Ethereum state proofs, so a structurally bound packet
 is still reported as `STRUCTURALLY_BOUND_UNAUTHENTICATED`; packet-supplied
 booleans, rows, receipts, evidence arrays, and proof-grade strings cannot yield
@@ -75,6 +77,7 @@ The implemented boundary is intentionally narrow:
   public framing and can be `MATCH` or `MISMATCH`.
 - Generic EOA recovery is a standalone cryptographic control. Candidate action
   commitment, typed digest, and signed-plan authorization remain `UNSUPPORTED`.
+  Both digest-byte and signature-byte mutation controls are exercised.
 - Reference validation, source acceptance, destination admission, submission,
   and receipt observations are retained raw but evaluate to `UNKNOWN` until an
   independent proof verifier and proof-bearing packet profile are pinned.
@@ -82,13 +85,17 @@ The implemented boundary is intentionally narrow:
   `UNSUPPORTED` because their required-effect/query/selection closure is not
   pinned. Candidate-supplied matching rows cannot complete that closure.
 - The cost helper requires matched actor, action shape, body size, state regime,
-  before/after bases, provenance, occurrence deltas, effect commitments, and
-  state delta. It can classify supplied controls as fresh, existing, retry, or
-  inconsistent, but labels them `UNAUTHENTICATED_INPUT`; the sealed report keeps
-  cost truth `UNKNOWN`.
+  exact current/before/after operation commitments, before/after bases,
+  provenance, occurrence deltas, effect commitments, and state delta. It can
+  classify supplied controls as fresh, existing, retry, or inconsistent, but
+  labels them `UNAUTHENTICATED_INPUT`; the sealed report keeps cost truth
+  `UNKNOWN`.
 
-Claims for unsupported or unknown axes are compared explicitly. An unfamiliar
-claim axis becomes `UNSUPPORTED_CLAIM_AXIS`; it is never silently skipped.
+Raw inputs, raw observations, candidate claims, and evaluated results are all
+retained separately. Every axis in the frozen neutral list must be explicitly
+claimed, including honest `UNKNOWN` and `UNSUPPORTED` outcomes. A missing claim
+is a `MISSING_CLAIM` discrepancy; an unfamiliar claim axis becomes
+`UNSUPPORTED_CLAIM_AXIS`. Neither is silently skipped.
 
 The checker uses Node built-ins and ethers 6.15.0 only for cryptographic
 primitives. It performs no RPC, network, chain, build, or package-install work.
@@ -107,9 +114,9 @@ NODE_PATH=/Users/james/Code/EFS/planning-efs21/Reviews/2026-09-04-mvp-rehearsal/
 ```
 
 The absolute `NODE_PATH` is run-local evidence for this machine, not a portable
-project dependency path. The CLI emits deterministic JSON, exits `0` when all
-claims match the independently evaluated axes (including honest
-`UNSUPPORTED`), and exits `1` for a malformed packet or discrepancy. Its packet
-shape and status vocabulary are lab-local. Exit `0` means only that the claims
-honestly match this deliberately limited oracle; it is not a candidate pass,
-deployment proof, semantic-effect proof, or production-readiness result.
+project dependency path. The CLI emits deterministic JSON, exits `0` only when
+every frozen required axis is explicitly claimed and no claim contradicts the
+limited oracle (including honest `UNKNOWN` and `UNSUPPORTED`), and exits `1`
+for a malformed packet or discrepancy. Its packet shape and status vocabulary
+are lab-local. Exit `0` is not a candidate pass, deployment proof,
+semantic-effect proof, or production-readiness result.

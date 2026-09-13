@@ -35,6 +35,7 @@ const costControl = {
   actionShape: 'PUBLISH_RECORD_WITH_ONE_OCCURRENCE',
   bodySizeBytes: '96',
   initialStateRegime: 'MATCHED_BASELINE_EXCEPT_CONTENT_PRESENCE',
+  operationCommitment: `0x${'71'.repeat(32)}`,
 };
 
 function fullCostInput(overrides = {}) {
@@ -44,7 +45,8 @@ function fullCostInput(overrides = {}) {
     provenance: { kind: 'SYNTHETIC_CONTROL', source: 'oracle.test.mjs' },
     recordPresentBefore: false,
     recordPresentAfter: true,
-    sameOperationAlreadyPresentBefore: false,
+    operationCommitmentBefore: null,
+    operationCommitmentAfter: costControl.operationCommitment,
     occurrenceCountBefore: '0',
     occurrenceCountAfter: '1',
     effectCommitmentBefore: `0x${'00'.repeat(32)}`,
@@ -164,10 +166,13 @@ function basePacket() {
     claims: {
       recordIdentity: record.recordId,
       subjectIdentity: subject.subjectId,
+      actionCommitment: 'UNSUPPORTED',
+      signedDigest: 'UNSUPPORTED',
       signatureValidity: 'UNSUPPORTED',
       referenceValidation: 'UNKNOWN',
       sourceAcceptance: 'UNKNOWN',
       destinationAdmission: 'UNKNOWN',
+      submission: 'UNKNOWN',
       receipt: 'UNKNOWN',
       canonicalEffect: 'UNSUPPORTED',
       queryCoverage: 'UNSUPPORTED',
@@ -236,6 +241,22 @@ test('the same signature over a mutated digest is invalid for the expected autho
   assert.equal(result.status, 'INVALID');
   assert.equal(result.reason, 'RECOVERED_AUTHOR_MISMATCH');
   assert.notEqual(result.recovered, vector.expectedAuthor);
+  assert.equal(result.authorizesCandidatePlan, false);
+});
+
+test('a literal signature-byte mutation is invalid for the expected author', () => {
+  const vector = vectors.signaturePrimitive;
+  const mutatedSignature = `0x0${vector.signature.slice(3)}`;
+  const result = verifyEoaSignature(
+    vector.digest,
+    mutatedSignature,
+    vector.expectedAuthor,
+  );
+
+  assert.equal(mutatedSignature.length, vector.signature.length);
+  assert.notEqual(mutatedSignature, vector.signature);
+  assert.equal(result.status, 'INVALID');
+  assert.equal(result.reason, 'RECOVERED_AUTHOR_MISMATCH');
   assert.equal(result.authorizesCandidatePlan, false);
 });
 
@@ -495,7 +516,7 @@ test('classifies fresh, existing, retry and inconsistent controls without callin
     })],
     ['RETRY', fullCostInput({
       recordPresentBefore: true,
-      sameOperationAlreadyPresentBefore: true,
+      operationCommitmentBefore: costControl.operationCommitment,
       occurrenceCountBefore: '3',
       occurrenceCountAfter: '3',
       effectCommitmentBefore: `0x${'53'.repeat(32)}`,
@@ -516,6 +537,29 @@ test('classifies fresh, existing, retry and inconsistent controls without callin
   assert.equal(results[1].controlKey, results[2].controlKey);
 });
 
+test('retry requires the exact operation commitment before and after', () => {
+  const input = fullCostInput({
+    recordPresentBefore: true,
+    operationCommitmentBefore: `0x${'72'.repeat(32)}`,
+    occurrenceCountBefore: '3',
+    occurrenceCountAfter: '3',
+    effectCommitmentBefore: `0x${'53'.repeat(32)}`,
+    effectCommitmentAfter: `0x${'53'.repeat(32)}`,
+    stateDelta: '0',
+    sameOperationAlreadyPresentBefore: true,
+  });
+
+  const result = classifyCostState(input);
+  const alternateOperation = `0x${'73'.repeat(32)}`;
+  const alternate = classifyCostState(fullCostInput({
+    control: { ...costControl, operationCommitment: alternateOperation },
+    operationCommitmentAfter: alternateOperation,
+  }));
+
+  assert.equal(result.value, 'INCONSISTENT');
+  assert.notEqual(result.controlKey, alternate.controlKey);
+});
+
 test('a provisional cost classification cannot satisfy a candidate truth claim', () => {
   const packet = basePacket();
   packet.observations.costState = fullCostInput();
@@ -530,11 +574,13 @@ test('a provisional cost classification cannot satisfy a candidate truth claim',
 
 test('raw observations and candidate claims survive comparison as separate values', () => {
   const packet = basePacket();
+  packet.inputs.unrecognizedCandidateField = { retain: true };
   packet.claims.destinationAdmission = 'SELECTED';
 
   const report = checkSealedPacket(packet, profile, expectations);
 
   assert.deepEqual(report.rawObservations, packet.observations);
+  assert.deepEqual(report.rawInputs, packet.inputs);
   assert.deepEqual(report.claims, packet.claims);
   assert.equal(report.evaluated.destinationAdmission.status, 'UNKNOWN');
   assert.deepEqual(report.discrepancies.find(({ axis }) => axis === 'destinationAdmission'), {
@@ -564,6 +610,21 @@ test('frozen and unknown claim axes never disappear from discrepancy checking', 
   );
 });
 
+test('omitting required claims is an explicit discrepancy rather than a green result', () => {
+  const packet = basePacket();
+  packet.claims = {};
+
+  const report = checkSealedPacket(packet);
+
+  assert.equal(report.discrepancies.length, expectations.axes.length);
+  assert.deepEqual(report.discrepancies[0], {
+    axis: expectations.axes[0],
+    claimed: 'MISSING_CLAIM',
+    evaluated: report.evaluated.recordIdentity.value,
+  });
+  assert.equal(report.discrepancies.every(({ claimed }) => claimed === 'MISSING_CLAIM'), true);
+});
+
 test('a moving-tag or malformed observation basis cannot enter the sealed checker', () => {
   const packet = basePacket();
   packet.seal.observationBasis.source.blockHash = 'latest';
@@ -581,6 +642,22 @@ test('each observation is bound to its declared source or destination block', ()
   assert.throws(
     () => checkSealedPacket(packet),
     /MIXED_OBSERVATION_BASIS:requiredEffects\[1\]/,
+  );
+});
+
+test('the fresh-destination fixture rejects identical source and destination authority', () => {
+  const packet = basePacket();
+  packet.seal.observationBasis.destination = structuredClone(packet.seal.observationBasis.source);
+  for (const name of ['destinationAdmission', 'submission', 'receipt']) {
+    packet.observations[name].blockHash = packet.seal.observationBasis.source.blockHash;
+  }
+  for (const effect of packet.observations.requiredEffects) {
+    effect.blockHash = packet.seal.observationBasis.source.blockHash;
+  }
+
+  assert.throws(
+    () => checkSealedPacket(packet),
+    /SOURCE_DESTINATION_AUTHORITY_COLLISION/,
   );
 });
 
@@ -665,6 +742,17 @@ test('CLI checks sealed files and exits nonzero when a claim upgrades evidence',
   });
   assert.equal(matching.status, 0, matching.stderr);
   assert.deepEqual(JSON.parse(matching.stdout).discrepancies, []);
+
+  const claimless = basePacket();
+  claimless.claims = {};
+  await writeFile(packetPath, `${JSON.stringify(claimless, null, 2)}\n`);
+  const rejectedOmission = spawnSync(
+    process.execPath,
+    [cliPath.pathname, packetPath, profilePath, expectationsPath],
+    { encoding: 'utf8', env: process.env },
+  );
+  assert.equal(rejectedOmission.status, 1, rejectedOmission.stderr);
+  assert.equal(JSON.parse(rejectedOmission.stdout).discrepancies.length, expectations.axes.length);
 
   const upgraded = basePacket();
   delete upgraded.observations.destinationAdmission;
