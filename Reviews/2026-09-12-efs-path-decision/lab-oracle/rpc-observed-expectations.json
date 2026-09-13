@@ -1,0 +1,169 @@
+{
+  "kind": "EFS_RPC_OBSERVED_MATRIX_EXPECTATIONS",
+  "version": 1,
+  "standing": "experiment-only consistency expectations; not Core, SDK, ABI, Type, workflow, deployment, or proof adoption",
+  "frozenBeforePacketAndAbiInspection": true,
+  "source": {
+    "planningCommit": "d5b4c58e74f6532d9f170d7533e177c608f9cb90",
+    "oracleBoundaryBlob": "bf4aa1b90b6f7559f66a0fadb13059c95dd2bd57",
+    "strictCheckerCommit": "0e19d2746acffd1a6686301e494542d1fffada57",
+    "strictOracleBlob": "c875a0ed7923c5175c0f5691770aa5be7eab24e0",
+    "strictCliBlob": "c45264e0a1e98ea59c789428172d629dd19d4f5b",
+    "publicRecordProfileBlob": "06106fe3bc717ed4638612f2ef8b90d502c705b8"
+  },
+  "assumption": {
+    "status": "RPC_OBSERVED",
+    "meaning": "the checker received these retained request and return bytes and may test their internal decoding and consistency",
+    "doesNotProve": [
+      "RPC provenance or honesty",
+      "block inclusion or canonicality",
+      "authenticated block hash from block number",
+      "contract runtime or storage state",
+      "source authority or authorship",
+      "exact Type semantics",
+      "complete candidate workflow",
+      "semantic COMMITTED or candidate pass"
+    ]
+  },
+  "resultStatuses": [
+    "OBSERVED_MATCH",
+    "OBSERVED_MISMATCH",
+    "UNKNOWN",
+    "UNSUPPORTED"
+  ],
+  "recordIdentity": {
+    "typeDomainText": "lab/type/quote/1",
+    "recordDomainText": "efs2/record/1",
+    "bodyHash": "keccak256(rawBody)",
+    "recordPreimage": "abi.encode(keccak256(utf8(recordDomainText)), keccak256(utf8(typeDomainText)), bodyHash)",
+    "recordId": "keccak256(recordPreimage)",
+    "bodyCodec": "UNSUPPORTED_UNTIL_PINNED_PUBLIC_ABI_DECLARATION"
+  },
+  "cells": [
+    {
+      "id": "native-one",
+      "labelStanding": "neutral matrix cell id; not a candidate verdict",
+      "stages": [
+        {
+          "id": "control",
+          "expected": {
+            "quote3000Record": "ABSENT_OBSERVED",
+            "quote3100Record": "ABSENT_OBSERVED",
+            "consumerSelectedTarget": "ZERO_BYTES32",
+            "consumerRevision": "0",
+            "consumerScalar": "0"
+          }
+        },
+        {
+          "id": "create-quote3000",
+          "expected": {
+            "scalar": "3000",
+            "record": "RECOMPUTE_FROM_RAW_BODY",
+            "sameSubjectHeadRevision": "1"
+          }
+        },
+        {
+          "id": "edit-quote3100",
+          "expected": {
+            "scalar": "3100",
+            "record": "RECOMPUTE_FROM_RAW_BODY",
+            "recordMustDifferFromQuote3000": true,
+            "sameSubjectAsQuote3000": true,
+            "sameSubjectHeadRevision": "2"
+          }
+        },
+        {
+          "id": "paid-quote-read",
+          "expected": {
+            "selectedTarget": "QUOTE_3100_RECORD",
+            "revision": "2",
+            "scalar": "3100"
+          }
+        },
+        {
+          "id": "listing",
+          "expected": {
+            "selectedNameCount": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "signed-one",
+      "labelStanding": "neutral matrix cell id; not a candidate verdict",
+      "stages": [
+        {
+          "id": "control",
+          "expected": {
+            "quote3000Record": "ABSENT_OBSERVED",
+            "quote3100Record": "ABSENT_OBSERVED",
+            "consumerSelectedTarget": "ZERO_BYTES32",
+            "consumerRevision": "0",
+            "consumerScalar": "0"
+          }
+        },
+        {
+          "id": "create-quote3000",
+          "expected": {
+            "scalar": "3000",
+            "record": "RECOMPUTE_FROM_RAW_BODY",
+            "sameSubjectHeadRevision": "1"
+          }
+        },
+        {
+          "id": "edit-quote3100",
+          "expected": {
+            "scalar": "3100",
+            "record": "RECOMPUTE_FROM_RAW_BODY",
+            "recordMustDifferFromQuote3000": true,
+            "sameSubjectAsQuote3000": true,
+            "sameSubjectHeadRevision": "2"
+          }
+        },
+        {
+          "id": "paid-quote-read",
+          "expected": {
+            "selectedTarget": "QUOTE_3100_RECORD",
+            "revision": "2",
+            "scalar": "3100"
+          }
+        },
+        {
+          "id": "listing",
+          "expected": {
+            "selectedNameCount": "1"
+          }
+        }
+      ]
+    }
+  ],
+  "requiredRawObservationFields": [
+    "cell id and stage id",
+    "JSON-RPC request id",
+    "method",
+    "to address",
+    "raw calldata",
+    "raw return or explicit omission/error",
+    "explicit block parameter",
+    "separately supplied block hash or explicit UNAVAILABLE",
+    "source/provenance label"
+  ],
+  "comparisonRules": [
+    "derive selector, argument positions, and return types only from pinned public ABI declarations",
+    "derive expected semantic values only from this expectation file and independently recomputed Record identities",
+    "never consume candidate decoded summaries, pre/post labels, consumerChecks, pass flags, or verdict labels as answers",
+    "correlate request and response by exact JSON-RPC id, never array position",
+    "require exact call target, selector, arguments, and declared basis for every supported observation",
+    "never infer blockHash from blockNumber",
+    "missing required raw bytes yields UNKNOWN; missing public ABI/schema yields UNSUPPORTED",
+    "conflicting, malformed, or transplanted bytes yield OBSERVED_MISMATCH"
+  ],
+  "requiredMutations": [
+    "raw return byte flip",
+    "selector substitution",
+    "target substitution",
+    "basis substitution",
+    "raw return omission",
+    "fake candidate decoded summary"
+  ]
+}

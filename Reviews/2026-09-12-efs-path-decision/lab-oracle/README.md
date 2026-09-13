@@ -120,3 +120,47 @@ limited oracle (including honest `UNKNOWN` and `UNSUPPORTED`), and exits `1`
 for a malformed packet or discrepancy. Its packet shape and status vocabulary
 are lab-local. Exit `0` is not a candidate pass, deployment proof,
 semantic-effect proof, or production-readiness result.
+
+## RPC_OBSERVED bounded probe
+
+This second checker is a separately named raw-byte consistency probe. Its scope
+was frozen from planning commit `d5b4c58e74f6532d9f170d7533e177c608f9cb90`,
+`oracle-boundary.md` blob `bf4aa1b90b6f7559f66a0fadb13059c95dd2bd57`,
+and `rpc-observed-expectations.json` before opening the retained candidate
+packet or its compiled ABI artifacts. The frozen RPC expectation blob is
+`1fbe87f6b2bf1d095bb0979997573439a6c2bd88`. The original expectations and strict
+proof-result implementation stay unchanged at blobs
+`a9d6c9afb5f51d0f786e006b7b5df667ae69710e`,
+`c875a0ed7923c5175c0f5691770aa5be7eab24e0`, and
+`c45264e0a1e98ea59c789428172d629dd19d4f5b`.
+
+Under an explicit `RPC_OBSERVED` assumption, the probe may decode retained raw
+calldata/return bytes with separately pinned public ABI declarations, recompute
+supported Record IDs, and compare target, selector, arguments, basis, revision,
+selected target, scalar, and listing count with the frozen matrix. Its only
+outcomes are `OBSERVED_MATCH`, `OBSERVED_MISMATCH`, `UNKNOWN`, and
+`UNSUPPORTED`. None establishes RPC honesty, block inclusion/canonicality,
+runtime or storage truth, source authority, exact Type meaning, complete
+workflow execution, semantic `COMMITTED`, or a candidate pass.
+
+The frozen two-cell matrix requires both `native-one` and `signed-one` to begin
+with the quote3000 and quote3100 control Records observed absent and a zeroed
+Consumer; create quote3000; edit the same subject HEAD to a distinct quote3100
+Record at revision 2; return that Record/revision/scalar 3100 from the paid quote
+read; and list exactly one selected name. Candidate decoded summaries,
+`pre`/`post`, `consumerChecks`, labels, and pass flags are inert retained data,
+never expected answers.
+
+Implementation plan:
+
+1. Seal and commit these expectations before inspecting packet or ABI details.
+2. Hash the retained packet; read only its raw observation data. Hash the four
+   authorized `dcc7b94` artifacts and extract only their `.abi` fields into a
+   lab-local profile.
+3. Add failing tests for exact successful decoding plus raw-byte, selector,
+   target, basis, omission, conflict, and fake-summary mutations.
+4. Implement a new `rpc-observed` module and CLI without importing, modifying,
+   or weakening `oracle.mjs` or `check.mjs`.
+5. Run the checker on the incomplete two-cell packet, store candidate-packet
+   results separately from synthetic test totals, verify strict-file hashes,
+   obtain independent review, and commit only `lab-oracle/` files.
