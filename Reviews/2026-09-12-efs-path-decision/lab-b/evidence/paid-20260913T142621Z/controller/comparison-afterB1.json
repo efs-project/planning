@@ -1,0 +1,145 @@
+{
+  "stage": "afterB1",
+  "comparisons": [
+    {
+      "path": "runId",
+      "expected": "b-paid-20260913-Kf4SOz",
+      "actual": "b-paid-20260913-Kf4SOz",
+      "equal": true
+    },
+    {
+      "path": "stage",
+      "expected": "afterB1",
+      "actual": "afterB1",
+      "equal": true
+    },
+    {
+      "path": "pins.controller",
+      "expected": "4b61055bfbe9c47c8d40bcb73690920582c5472ceed427f36f0d750eab83d7fa",
+      "actual": "4b61055bfbe9c47c8d40bcb73690920582c5472ceed427f36f0d750eab83d7fa",
+      "equal": true
+    },
+    {
+      "path": "pins.expectations",
+      "expected": "ff7c4fc735504c9871e8241c7cc461293b7ffc37f3d5e9dd50840e005cc37795",
+      "actual": "ff7c4fc735504c9871e8241c7cc461293b7ffc37f3d5e9dd50840e005cc37795",
+      "equal": true
+    },
+    {
+      "path": "pins.armInput",
+      "expected": "05cace851314a817e12c70af943fe45f86d6eaf1beec31a191a8309886b35e7b",
+      "actual": "05cace851314a817e12c70af943fe45f86d6eaf1beec31a191a8309886b35e7b",
+      "equal": true
+    },
+    {
+      "path": "contextSha256",
+      "expected": "4c9d9f3c71811f448a22ca8a8eb2075fb2641ac7b14a26226e4b4214a0a5b0de",
+      "actual": "4c9d9f3c71811f448a22ca8a8eb2075fb2641ac7b14a26226e4b4214a0a5b0de",
+      "equal": true
+    },
+    {
+      "path": "inputsSha256",
+      "expected": "39e04c16f5df77d9ebc9489ac55db3b5ad2d8a87e97e0cdc1495265307a2f97c",
+      "actual": "39e04c16f5df77d9ebc9489ac55db3b5ad2d8a87e97e0cdc1495265307a2f97c",
+      "equal": true
+    },
+    {
+      "path": "inputsSha256",
+      "expected": "39e04c16f5df77d9ebc9489ac55db3b5ad2d8a87e97e0cdc1495265307a2f97c",
+      "actual": "39e04c16f5df77d9ebc9489ac55db3b5ad2d8a87e97e0cdc1495265307a2f97c",
+      "equal": true
+    },
+    {
+      "path": "ordinals.postB1Frontier",
+      "expected": "12",
+      "actual": "12",
+      "equal": true
+    },
+    {
+      "path": "ordinals.registryEpoch",
+      "expected": "8",
+      "actual": "8",
+      "equal": true
+    },
+    {
+      "path": "ordinals.indexGeneration",
+      "expected": "0",
+      "actual": "0",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.blockNumber",
+      "expected": "30",
+      "actual": "30",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.blockHash",
+      "expected": "0x0c1ac2563650fe4b20aa0e9432465dc1c5d065f22ad9eae739e157a82f3967a0",
+      "actual": "0x0c1ac2563650fe4b20aa0e9432465dc1c5d065f22ad9eae739e157a82f3967a0",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.timestamp",
+      "expected": "1789309581",
+      "actual": "1789309581",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.snapshot",
+      "expected": "0x2",
+      "actual": "0x2",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.frontier.admissions",
+      "expected": "12",
+      "actual": "12",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.frontier.records",
+      "expected": "6",
+      "actual": "6",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.frontier.bindings",
+      "expected": "4",
+      "actual": "4",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.frontier.publications",
+      "expected": "4",
+      "actual": "4",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.indexGeneration",
+      "expected": "0",
+      "actual": "0",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.registryEpoch",
+      "expected": "8",
+      "actual": "8",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.coreCodeCommitment",
+      "expected": "0x6da961bcc79e20dd057d460b73b72555c6a42bc55bf0f55f47680e55c456b104",
+      "actual": "0x6da961bcc79e20dd057d460b73b72555c6a42bc55bf0f55f47680e55c456b104",
+      "equal": true
+    },
+    {
+      "path": "sealedCheckpoint.realmId",
+      "expected": "0x684016e05741dc9d511ff3520a16e1da90a35be14b76f9e12ef0287b9beae39f",
+      "actual": "0x684016e05741dc9d511ff3520a16e1da90a35be14b76f9e12ef0287b9beae39f",
+      "equal": true
+    }
+  ],
+  "comparisonOk": true,
+  "failureCode": null
+}

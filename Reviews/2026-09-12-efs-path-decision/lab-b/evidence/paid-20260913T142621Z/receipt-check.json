@@ -1,0 +1,47 @@
+{
+  "grade": "RPC_OBSERVED; receipt consistency only, not state proof",
+  "receiptCount": 34,
+  "setupGas": "16486632",
+  "fixtureAndPaidRows": [
+    {
+      "label": "paid/setup/step1",
+      "gas": "921085",
+      "hash": "0xa5b53450c1e6218c00f260ce4a6b980757cc79d2612c8ce2ae637187e5dcc07e"
+    },
+    {
+      "label": "paid/setup/A1",
+      "gas": "1614433",
+      "hash": "0x2c9aa822cdbfc815a4a63419bcddc8c402e4167aab9ff5139c45e626fe524649"
+    },
+    {
+      "label": "paid/setup/A2",
+      "gas": "658913",
+      "hash": "0x1f952baec14b51051ff946731b83066b594859cdc029d1ab63e7e1e8ad4e3344"
+    },
+    {
+      "label": "paid/setup/B1",
+      "gas": "796542",
+      "hash": "0xfc01a25049f3d79d9bdad7ba5f06d216d33f4aea90c40002dee4f94094d515bc"
+    },
+    {
+      "label": "paid/point-a-first",
+      "gas": "153636",
+      "hash": "0x4939de5bfc3fc5be09ff7d2604108d421e16ba58fd55fba632918d0176da5f67"
+    },
+    {
+      "label": "paid/list-a-first",
+      "gas": "246606",
+      "hash": "0x4bdb9feb2990990d8578056ac5e228b3e3b644a7e5286cb14207fc163cd3b510"
+    },
+    {
+      "label": "paid/point-b-first",
+      "gas": "153884",
+      "hash": "0x8bf5431e5c6b9f618ef9d2a600f1b4430a505336a254b52a59d9f1f4a281b83f"
+    },
+    {
+      "label": "paid/list-b-first",
+      "gas": "254283",
+      "hash": "0x39bf3c7cc877328be43bf46ffbfe17ccc91d973dd6104fff7e3039cf977d33b1"
+    }
+  ]
+}

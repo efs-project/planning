@@ -1,0 +1,70 @@
+{
+  "schema": "efs-lab-b/controller-context/1",
+  "runId": "b-paid-20260913-Kf4SOz",
+  "stage": "afterB1",
+  "sentAtUtc": "2026-09-13T14:26:22.613Z",
+  "pins": {
+    "controller": {
+      "path": "/Users/james/Code/EFS/planning-warroom-oracle/Reviews/2026-09-12-efs-path-decision/lab-oracle/paid-controller.mjs",
+      "sha256": "4b61055bfbe9c47c8d40bcb73690920582c5472ceed427f36f0d750eab83d7fa"
+    },
+    "expectations": {
+      "path": "/Users/james/Code/EFS/planning/Reviews/2026-09-12-efs-path-decision/paid-neutral-expectations.json",
+      "sha256": "ff7c4fc735504c9871e8241c7cc461293b7ffc37f3d5e9dd50840e005cc37795"
+    },
+    "armInput": {
+      "path": "/tmp/efs-paid-b-run-20260913.Kf4SOz/arm-b.json",
+      "sha256": "05cace851314a817e12c70af943fe45f86d6eaf1beec31a191a8309886b35e7b"
+    }
+  },
+  "inputsSha256": "39e04c16f5df77d9ebc9489ac55db3b5ad2d8a87e97e0cdc1495265307a2f97c",
+  "checkpoint": {
+    "blockNumber": "30",
+    "blockHash": "0x0c1ac2563650fe4b20aa0e9432465dc1c5d065f22ad9eae739e157a82f3967a0",
+    "timestamp": "1789309581",
+    "snapshot": "0x2",
+    "frontier": {
+      "admissions": "12",
+      "records": "6",
+      "bindings": "4",
+      "publications": "4"
+    },
+    "indexGeneration": "0",
+    "registryEpoch": "8",
+    "coreCodeCommitment": "0x6da961bcc79e20dd057d460b73b72555c6a42bc55bf0f55f47680e55c456b104",
+    "realmId": "0x684016e05741dc9d511ff3520a16e1da90a35be14b76f9e12ef0287b9beae39f"
+  },
+  "setupReceipts": {
+    "step1": {
+      "txHash": "0xa5b53450c1e6218c00f260ce4a6b980757cc79d2612c8ce2ae637187e5dcc07e",
+      "block": "27",
+      "status": 1,
+      "gasUsed": "921085",
+      "publication": "1"
+    },
+    "A1": {
+      "txHash": "0x2c9aa822cdbfc815a4a63419bcddc8c402e4167aab9ff5139c45e626fe524649",
+      "block": "28",
+      "status": 1,
+      "gasUsed": "1614433",
+      "publication": "2"
+    },
+    "A2": {
+      "txHash": "0x1f952baec14b51051ff946731b83066b594859cdc029d1ab63e7e1e8ad4e3344",
+      "block": "29",
+      "status": 1,
+      "gasUsed": "658913",
+      "publication": "3"
+    },
+    "B1": {
+      "txHash": "0xfc01a25049f3d79d9bdad7ba5f06d216d33f4aea90c40002dee4f94094d515bc",
+      "block": "30",
+      "status": 1,
+      "gasUsed": "796542",
+      "publication": "4",
+      "actions": 2,
+      "folderBind": false
+    }
+  },
+  "ackPath": "/tmp/efs-paid-b-run-20260913.Kf4SOz/controller/ack-afterB1.json"
+}

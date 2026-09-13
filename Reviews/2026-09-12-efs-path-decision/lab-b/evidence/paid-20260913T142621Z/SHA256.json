@@ -1,0 +1,17 @@
+{
+  "arm-b.json": "05cace851314a817e12c70af943fe45f86d6eaf1beec31a191a8309886b35e7b",
+  "assemble-arm.mjs": "5f0c8786f7619fa2488a8d5b98a7981baf4525292afbf4b0034523790873c63b",
+  "launch.log": "c647eaeb446fa42828522249602fd7749b856e79b355a929ec388477f65a9e34",
+  "measure.json": "95d17f6398068e6b2b14329bdb69c175649b9e95a90cfebdc5328bbbdc625a62",
+  "retain-packet.mjs": "53687c05c3a9bb997918f825d564a85eda53c36e9b37387b225aaa4357016e96",
+  "controller/ack-afterB1.json": "d62a90f01e4e55eb1074b72b8b87ecab5b5b14ebff4534168b9d4612b6dc9764",
+  "controller/ack-beforeFixture.json": "ebabcaafcbdac6b43e73ce0541acdaf8e973ed921b9c59ef71e3a357a53922c5",
+  "controller/comparison-afterB1.json": "d65a1edb5dc08787913d136a2567e4cde8e1e404abaae8af0ceae0bfc156b575",
+  "controller/comparison-beforeFixture.json": "73d389a9f68a19a2c92785d2fcec323511e69f0ecceb8cb4985c42b9d3c69a62",
+  "controller/context-afterB1.json": "546d6cd5ace7dd9ca2bac9f46874f76b1664ff470e4ba9ce68e95e4fe1aaf7ad",
+  "controller/context-beforeFixture.json": "e0fc06b134d533efe2531aead0d143c35500766a6274ccc382571397daa52192",
+  "controller/pins.json": "32a96617ad24fb30325bd085bb4f50e67999f821d216787676ec22d365a88269",
+  "independent-observations/b-paid-20260913-Kf4SOz-afterB1.json": "18867436ffb47680ad862adda35dbd8df3c6b381b4fefea76e46eb0a81a42f51",
+  "independent-observations/b-paid-20260913-Kf4SOz-beforeFixture.json": "4e6214fdad6bec3a9e8efc5b4d99fac219ba6ea445ea09d2cf588bb88864e130",
+  "receipt-check.json": "d544329f032ea681c4e9c653e64c4c8a6866ea996edfaf91cd736b5980e7a69f"
+}

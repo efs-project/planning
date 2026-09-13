@@ -1,0 +1,27 @@
+{
+  "runId": "b-paid-20260913-Kf4SOz",
+  "pins": {
+    "controller": {
+      "path": "/Users/james/Code/EFS/planning-warroom-oracle/Reviews/2026-09-12-efs-path-decision/lab-oracle/paid-controller.mjs",
+      "sha256": "4b61055bfbe9c47c8d40bcb73690920582c5472ceed427f36f0d750eab83d7fa"
+    },
+    "expectations": {
+      "path": "/Users/james/Code/EFS/planning/Reviews/2026-09-12-efs-path-decision/paid-neutral-expectations.json",
+      "sha256": "ff7c4fc735504c9871e8241c7cc461293b7ffc37f3d5e9dd50840e005cc37795"
+    },
+    "armInput": {
+      "path": "/tmp/efs-paid-b-run-20260913.Kf4SOz/arm-b.json",
+      "sha256": "05cace851314a817e12c70af943fe45f86d6eaf1beec31a191a8309886b35e7b"
+    }
+  },
+  "module": {
+    "path": "/Users/james/Code/EFS/planning-warroom-oracle/Reviews/2026-09-12-efs-path-decision/lab-oracle/paid-controller.mjs",
+    "sha256": "4b61055bfbe9c47c8d40bcb73690920582c5472ceed427f36f0d750eab83d7fa",
+    "loadedAtUtc": "2026-09-13T14:26:21.387Z",
+    "export": "default",
+    "hooks": [
+      "beforeFixture",
+      "afterB1"
+    ]
+  }
+}
