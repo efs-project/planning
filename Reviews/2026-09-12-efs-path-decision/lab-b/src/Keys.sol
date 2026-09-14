@@ -60,9 +60,23 @@ library Keys {
         return keccak256(abi.encode(DOM_PRINCIPAL, uint256(2), realmOrigin, account));
     }
 
-    /// The principal an account presents at native ingress on the Realm with `realmOrigin`.
+    /// EIP-7702 delegation changes execution, not the signing key's namespace.
+    /// This recognizes only the exact 23-byte marker, without executing/following
+    /// its target. Delegated native ingress remains NATIVE evidence, not an EFS
+    /// per-action signature. Arbitrary runtime transitions and constructor-time
+    /// identity require retained explicit principals before an upgradeable port.
     function principalFor(address account, bytes32 realmOrigin) internal view returns (bytes32) {
-        return account.code.length != 0 ? contractPrincipal(realmOrigin, account) : principal(account);
+        uint256 size = account.code.length;
+        if (size == 0) return principal(account);
+        if (size == 23) {
+            bytes3 prefix;
+            assembly ("memory-safe") {
+                extcodecopy(account, 0, 0, 3)
+                prefix := mload(0)
+            }
+            if (prefix == hex"ef0100") return principal(account);
+        }
+        return contractPrincipal(realmOrigin, account);
     }
 
     /// Exact Type id from its descriptor (see DOM_TYPE). A clean reader recomputes it from the
