@@ -112,6 +112,18 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**September14,08:56: B archive implementation started; query gate stays closed.**
+The [[b-portable-archive-implementation-plan-20260914|two-task implementation plan]]
+preserves the reviewed signature-only archive boundary. Independent preflight
+corrected real fixture/return-type, no-write, raw-receipt and cutoff gaps before
+dispatch. One worker now writes only the packed archive's compiling stub and
+adversarial tests; root observes a behavioral RED before implementation.
+The separate Ledger remains unchanged. No compiler/chain lease is active yet.
+Next gates are the joined recovery test and full regressions, then one small
+packed-versus-code-vector receipt comparison if ready. The morning handoff
+remains14:00UTC; an unfinished comparison stays UNMEASURED. Completed query
+work is published and must not be restarted by the recurring task.
+
 **September14,08:40: required-query challenge passed; compact B stays primary.**
 [[required-query-paid-results-20260914|Complete writes + query costs and limits]]
 are independently reviewed: all82transactions/25pages passed. B selective's
