@@ -1,0 +1,614 @@
+{
+  "kind": "DISPOSABLE_REAL_FILES_ONE_RUN_RECEIPT_ECONOMICS",
+  "date": "2026-09-14",
+  "sourceCommit": "de56345e07863d46d656b4a1a077348de7d2c25d",
+  "sourceDigest": "ac5481077ab59ad11131e861f6ed2722c27377d93b043a916aeae446a3e2360c",
+  "actualChainRuns": 1,
+  "refusedPreflights": 1,
+  "actualRun": {
+    "label": "files-paid-2",
+    "startedAt": "2026-09-14T11:48:29.022Z",
+    "finishedAt": "2026-09-14T11:48:31.566Z",
+    "exitCode": 0,
+    "ownedProcessesStopped": true,
+    "slotReleased": true
+  },
+  "sourceTests": {
+    "focusedRedFailed": 1,
+    "focusedGreenPassed": 1,
+    "focusedTestUnchanged": true,
+    "inheritedTestsDuplicatedUnlessFiltered": true,
+    "normalSizeBuildExitCode": 0
+  },
+  "audit": {
+    "status": "INDEPENDENT_FILES_RAW_AUDIT_PASS",
+    "expectedFixtureFrozenBeforeRun": true,
+    "transactions": 24,
+    "admissions": 11,
+    "records": 3,
+    "bindings": 6,
+    "publications": 6,
+    "modeledCellsPerBasis": 247,
+    "corruptionsRejected": 4,
+    "candidateCostSummaryIgnored": true
+  },
+  "pins": {
+    "files-paid-2.measurement.json.raw.json": "80f7b6ac5a81d44ce46c7d107bb4f332b341bbfde24512bcd1c368bbe7d5906a",
+    "audit-files-paid.mjs": "fd6b0212b6dc8f1d2294e5ce9b42b3a30141038b593666bdc4e2565e9cb3097e",
+    "audit-files-paid-quantities.mjs": "848aea6291c05007b503af6f21d597a6df26dd3ab61e1d601a8f7326937d2b1e",
+    "files-driver.mjs": "e4656612a4c93cf14600bced1caaaa97ee34b4235806f75eadbf896d1eb4bc68",
+    "files-paid-gate.mjs": "549cae58eda7d83dd5638f32f3d2296e6cfdbb3b1c73cf37c28882e22273a9ac",
+    "files-paid-prepared.json": "94ef68850782cdff11eaf4f9f6a11551eba3b79fa207a6a2d42db9524b743c35",
+    "files-paid-root-audit.json": "0cbd8d760e48e2e1f59a2169a9ff03c4c1988728251a23c32c452636889a395f",
+    "files-paid-audit-negatives.json": "fa3958331340014197965ec602c5cc67c7ddef01833ad0030eae129f7c0849fa"
+  },
+  "corrections": {
+    "preflight": "Pretty compiler/preparation machine JSON exceeded static 64MiB cap before Anvil; formatting-only compact JSON change; same semantics and cap; one actual run after refusal.",
+    "audit": "Original oracle retained; post-run quantity-aware oracle compares signature r/s as equal integers despite JSON-RPC padding. Exact source diff reviewed; expected fixtures/state/answers unchanged; changed signature integer still rejected."
+  },
+  "evidenceLevel": "OWNED_LOCAL_RPC_OBSERVATION_NOT_AUTHENTICATED_STATE_PROOF",
+  "persistentStorageGrowth": "UNKNOWN; 247 modeled cells are not exhaustive slot differences",
+  "economics": {
+    "setupGas": 13731683,
+    "sixWritesGas": 4346407,
+    "sixAlternativeReadsInventoryGas": 1505334,
+    "readSumIsCompulsoryBill": false,
+    "effectiveGasPriceWei": "2000000000",
+    "liveNetworkQuote": false,
+    "rows": [
+      {
+        "label": "deploy/registry",
+        "gas": 758965,
+        "calldataBytes": 3329
+      },
+      {
+        "label": "deploy/ledger",
+        "gas": 3792004,
+        "calldataBytes": 17734
+      },
+      {
+        "label": "deploy/rootRule",
+        "gas": 164153,
+        "calldataBytes": 539
+      },
+      {
+        "label": "registerRoot",
+        "gas": 148387,
+        "calldataBytes": 132
+      },
+      {
+        "label": "deploy/childRule",
+        "gas": 332251,
+        "calldataBytes": 1434
+      },
+      {
+        "label": "registerChild",
+        "gas": 153743,
+        "calldataBytes": 164
+      },
+      {
+        "label": "deploy/index",
+        "gas": 1439629,
+        "calldataBytes": 8884
+      },
+      {
+        "label": "setIndex",
+        "gas": 45139,
+        "calldataBytes": 36
+      },
+      {
+        "label": "deploy/lens",
+        "gas": 2092488,
+        "calldataBytes": 9835
+      },
+      {
+        "label": "deploy/bob",
+        "gas": 520560,
+        "calldataBytes": 2363
+      },
+      {
+        "label": "deploy/consumer",
+        "gas": 3601492,
+        "calldataBytes": 20231
+      },
+      {
+        "label": "deploy/wrapper",
+        "gas": 682872,
+        "calldataBytes": 3079
+      },
+      {
+        "label": "W1",
+        "gas": 1289277,
+        "calldataBytes": 1988
+      },
+      {
+        "label": "W2",
+        "gas": 523569,
+        "calldataBytes": 868
+      },
+      {
+        "label": "W3",
+        "gas": 523557,
+        "calldataBytes": 868
+      },
+      {
+        "label": "W4",
+        "gas": 708640,
+        "calldataBytes": 1316
+      },
+      {
+        "label": "W5",
+        "gas": 777820,
+        "calldataBytes": 932
+      },
+      {
+        "label": "W6",
+        "gas": 523544,
+        "calldataBytes": 868
+      },
+      {
+        "label": "P-A",
+        "gas": 197363,
+        "calldataBytes": 324
+      },
+      {
+        "label": "P-B",
+        "gas": 204877,
+        "calldataBytes": 324
+      },
+      {
+        "label": "F-A",
+        "gas": 269336,
+        "calldataBytes": 388
+      },
+      {
+        "label": "F-B",
+        "gas": 284384,
+        "calldataBytes": 388
+      },
+      {
+        "label": "R-A",
+        "gas": 269360,
+        "calldataBytes": 388
+      },
+      {
+        "label": "R-B",
+        "gas": 280014,
+        "calldataBytes": 388
+      }
+    ]
+  },
+  "limits": "B_ONLY_TINY_FILES; NO_MUD_PARITY; NO_FULL_LIFECYCLE_PRICE; NO_COLD_NAMES_BROWSER_SCALE_HISTORY_PAGING_OR_NATIVE_HISTORICAL_PROOF; NO_USD_AFFORDABILITY_TOTAL_LIFETIME_OVERHEAD_OR_PRODUCTION_CLAIM",
+  "custody": "Retained without source/test/chain/audit rerun. Original byte inputs are compressed unchanged; generated source escrows label their derivation. Prior reports remain historical even where later reviews supersede them.",
+  "files": {
+    "files-paid-red-pin.json.gz": {
+      "rawBytes": 5321,
+      "rawSha256": "f4084c2843072f965c36d5a3d237a211afd08f28fb68d78f5107d7c277c0348c",
+      "gzipBytes": 2513,
+      "gzipSha256": "590811027d14eabfbc76aa9d6b38f558a6c3cb6418869a55b00360278f768299",
+      "roundtripVerified": true,
+      "description": "Original gate report or complete log; empty pin logs intentionally retained."
+    },
+    "files-paid-red-pin.log.gz": {
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "roundtripVerified": true,
+      "description": "Original gate report or complete log; empty pin logs intentionally retained."
+    },
+    "files-paid-red.json.gz": {
+      "rawBytes": 6586,
+      "rawSha256": "da91f12c98d165b72573d2a74cca1ef426ed98f5115f671eba4b01f599c5d78a",
+      "gzipBytes": 2936,
+      "gzipSha256": "ebd505e14d18b3c7884d5c9ce45f0e1e15f4282aae2f9b4c497ce7064ce50dfc",
+      "roundtripVerified": true,
+      "description": "Original gate report or complete log; empty pin logs intentionally retained."
+    },
+    "files-paid-red.log.gz": {
+      "rawBytes": 3704,
+      "rawSha256": "43fdc2561e6b7e3244ad9d98ae24ba785a0a0f05ed78bc878aa39548fc2ee482",
+      "gzipBytes": 955,
+      "gzipSha256": "421eca7d7a0b672c1227a20fceca0100b92c9a75f6eec628ce6d7aeaac149990",
+      "roundtripVerified": true,
+      "description": "Original gate report or complete log; empty pin logs intentionally retained."
+    },
+    "files-paid-green-pin.json.gz": {
+      "rawBytes": 5428,
+      "rawSha256": "135aeaf4ec67daa99eec7ca8cc8ad1804c7b523ad0d6b62b06c7731663f8a778",
+      "gzipBytes": 2556,
+      "gzipSha256": "eb1386f6ed6615c1c266b3d6342db5afb34f3795e2990b78e0dab42f3f1650f9",
+      "roundtripVerified": true,
+      "description": "Original gate report or complete log; empty pin logs intentionally retained."
+    },
+    "files-paid-green-pin.log.gz": {
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+      "roundtripVerified": true,
+      "description": "Original gate report or complete log; empty pin logs intentionally retained."
+    },
+    "files-paid-green.json.gz": {
+      "rawBytes": 6700,
+      "rawSha256": "af28bfacef21192935d5608611e5e274e598e7078d43270d23d48307530e6870",
+      "gzipBytes": 2985,
+      "gzipSha256": "c601f88f612b3e99001477719afe02b6304cfbc5cf6304f69107cac9a29f73de",
+      "roundtripVerified": true,
+      "description": "Original gate report or complete log; empty pin logs intentionally retained."
+    },
+    "files-paid-green.log.gz": {
+      "rawBytes": 3332,
+      "rawSha256": "5d18af7c6e30ac0718dc62079039e5518c17fce7f06d1a4be1965dfdc995a3f6",
+      "gzipBytes": 854,
+      "gzipSha256": "84aeef783500ebfc820fed756eaf861ae307a32cfa7e60db928881e865d5b709",
+      "roundtripVerified": true,
+      "description": "Original gate report or complete log; empty pin logs intentionally retained."
+    },
+    "files-paid-size.json.gz": {
+      "rawBytes": 6550,
+      "rawSha256": "3bc722b29704c58ffe0358d2399445a9a72030c9cf71a52b28504f737e5a23a4",
+      "gzipBytes": 2917,
+      "gzipSha256": "efd240329747ed3839e04c2740986c34757cc7c13ab92130bc9610aa306f133f",
+      "roundtripVerified": true,
+      "description": "Original gate report or complete log; empty pin logs intentionally retained."
+    },
+    "files-paid-size.log.gz": {
+      "rawBytes": 54235,
+      "rawSha256": "3bf14127a64669ec28221479c846360066cdf0b9102dbcaa2cac0206afd9be24",
+      "gzipBytes": 4956,
+      "gzipSha256": "89b4aabc43e90bf8c8c3467c6f20c069ce44a8452f469f46ce575015eb900219",
+      "roundtripVerified": true,
+      "description": "Original gate report or complete log; empty pin logs intentionally retained."
+    },
+    "files-paid-1.json.gz": {
+      "rawBytes": 11529,
+      "rawSha256": "2fa9da2490410001a3daaaf408ae90675077f4706696c0e99bc86242d08974db",
+      "gzipBytes": 4571,
+      "gzipSha256": "6eef8f67442f85e3ca15c97017cccbd1108a466ec1c32961249f42ba5befa0a9",
+      "roundtripVerified": true,
+      "description": "Original gate report or complete log; empty pin logs intentionally retained."
+    },
+    "files-paid-1.log.gz": {
+      "rawBytes": 374,
+      "rawSha256": "5c1d1d498e57e592cbbb234140ddb0980d635c93d569b50e4b235c5a87e3e336",
+      "gzipBytes": 292,
+      "gzipSha256": "2e6abe4a6658df495d8ae88364a9b66e108e0854bd70def72fbe57b203bdcfd8",
+      "roundtripVerified": true,
+      "description": "Original gate report or complete log; empty pin logs intentionally retained."
+    },
+    "files-paid-2.json.gz": {
+      "rawBytes": 11529,
+      "rawSha256": "9484645c3169ecc024081f0059cabf66c5a2a2654f877a2b26c32b90421ccc9d",
+      "gzipBytes": 4573,
+      "gzipSha256": "09ef9824d916bcd580e29b3a0684f42bdb3e255ee10b70739662bcedb35e71f6",
+      "roundtripVerified": true,
+      "description": "Original gate report or complete log; empty pin logs intentionally retained."
+    },
+    "files-paid-2.log.gz": {
+      "rawBytes": 140,
+      "rawSha256": "096a66fd032e88702ff715fe7e9b2eb7b5c7cb364c16daaebdc1059633c67330",
+      "gzipBytes": 149,
+      "gzipSha256": "2caf3f2953e4ac292ddc2c25579b8340fe1425e28f85c7566b905c40eeeb9efd",
+      "roundtripVerified": true,
+      "description": "Original gate report or complete log; empty pin logs intentionally retained."
+    },
+    "files-paid-2.measurement.json.gz": {
+      "rawBytes": 390,
+      "rawSha256": "6b5ef2eb77a08f76b3841b7623e7ec433b6ef478b9823eb32c2916910cf720e2",
+      "gzipBytes": 313,
+      "gzipSha256": "45ad8f96652acd24bdccc0c738fc75c5432b9ecd668de4a0229fe071ab1f22b0",
+      "roundtripVerified": true,
+      "description": "Unmodified original evidence or explicitly named executable source; retention does not execute it."
+    },
+    "files-paid-2.measurement.json.checkpoint.json.gz": {
+      "rawBytes": 2082988,
+      "rawSha256": "ef9fb30439ec709a915dbf32f471be24f7ff8d07af5623cf560f1e0c6bc67a89",
+      "gzipBytes": 360687,
+      "gzipSha256": "47d545927960cd23b9851af784ad23e7bd95b46c9c621b069da2ef4ada303f34",
+      "roundtripVerified": true,
+      "description": "Unmodified original evidence or explicitly named executable source; retention does not execute it."
+    },
+    "files-paid-2.measurement.json.raw.json.gz": {
+      "rawBytes": 31288779,
+      "rawSha256": "80f7b6ac5a81d44ce46c7d107bb4f332b341bbfde24512bcd1c368bbe7d5906a",
+      "gzipBytes": 3944985,
+      "gzipSha256": "382c0a5f2af199b90c51a7e8dce6f8131231a5540fa9b884dd2f80fc082ad6b4",
+      "roundtripVerified": true,
+      "description": "Unmodified original evidence or explicitly named executable source; retention does not execute it."
+    },
+    "files-paid-prepared.json.gz": {
+      "rawBytes": 207697,
+      "rawSha256": "94ef68850782cdff11eaf4f9f6a11551eba3b79fa207a6a2d42db9524b743c35",
+      "gzipBytes": 39830,
+      "gzipSha256": "356ab445eecd0ee9dc12c47f8ea4c3f846a382fb5a7175f521d10d062c4c1376",
+      "roundtripVerified": true,
+      "description": "Unmodified original evidence or explicitly named executable source; retention does not execute it."
+    },
+    "files-paid-root-audit.json.gz": {
+      "rawBytes": 20721,
+      "rawSha256": "0cbd8d760e48e2e1f59a2169a9ff03c4c1988728251a23c32c452636889a395f",
+      "gzipBytes": 4045,
+      "gzipSha256": "5b7a77855fdab19f20c4cfcdc4b6922160fd24eedc2c242da89f29617d0cda6f",
+      "roundtripVerified": true,
+      "description": "Unmodified original evidence or explicitly named executable source; retention does not execute it."
+    },
+    "files-paid-audit-negatives.json.gz": {
+      "rawBytes": 1267,
+      "rawSha256": "fa3958331340014197965ec602c5cc67c7ddef01833ad0030eae129f7c0849fa",
+      "gzipBytes": 711,
+      "gzipSha256": "9c173392cf6444b2f99b83fda9bc4b13aa2a25db6bd3866f2e9d052392aad446",
+      "roundtripVerified": true,
+      "description": "Unmodified original evidence or explicitly named executable source; retention does not execute it."
+    },
+    "files-paid-audit-negatives.mjs.gz": {
+      "rawBytes": 2242,
+      "rawSha256": "4bec8d66b9fda702f0731150835d6dcf355b8503b7d42d0c56332d7c1fc96860",
+      "gzipBytes": 1053,
+      "gzipSha256": "c59fec60c6ed24630d28737d898f8d24a59421b061a2f56d7bcf302f7e8bbf93",
+      "roundtripVerified": true,
+      "description": "Unmodified original evidence or explicitly named executable source; retention does not execute it."
+    },
+    "audit-files-paid.mjs.gz": {
+      "rawBytes": 31376,
+      "rawSha256": "fd6b0212b6dc8f1d2294e5ce9b42b3a30141038b593666bdc4e2565e9cb3097e",
+      "gzipBytes": 10986,
+      "gzipSha256": "becad285abf15f41993c6a1fdbe59363bc5198f2027b25c2138adba855f8a71f",
+      "roundtripVerified": true,
+      "description": "Unmodified original evidence or explicitly named executable source; retention does not execute it."
+    },
+    "audit-files-paid-quantities.mjs.gz": {
+      "rawBytes": 31494,
+      "rawSha256": "848aea6291c05007b503af6f21d597a6df26dd3ab61e1d601a8f7326937d2b1e",
+      "gzipBytes": 11018,
+      "gzipSha256": "d1683cc623b9fc6f00fd4cfc1bb663068e29d85fed4edb1568548726100bc535",
+      "roundtripVerified": true,
+      "description": "Unmodified original evidence or explicitly named executable source; retention does not execute it."
+    },
+    "audit-files-final.mjs.gz": {
+      "rawBytes": 1445,
+      "rawSha256": "f23e4a33ae52e967151c41ff09e9ac424ca40f1ac804b9a758e68aa815eb9ce0",
+      "gzipBytes": 710,
+      "gzipSha256": "c3d7a94b8fd9a40e6bf64043f8d2993a32793af175d9fc530a628d473227ce80",
+      "roundtripVerified": true,
+      "description": "Unmodified original evidence or explicitly named executable source; retention does not execute it."
+    },
+    "files-driver.mjs.gz": {
+      "rawBytes": 8659,
+      "rawSha256": "e4656612a4c93cf14600bced1caaaa97ee34b4235806f75eadbf896d1eb4bc68",
+      "gzipBytes": 3604,
+      "gzipSha256": "1cdb359a32eb5681dbac7e11f1783714faf4e93e4f94a3fef636288664ca2fcc",
+      "roundtripVerified": true,
+      "description": "Unmodified original evidence or explicitly named executable source; retention does not execute it."
+    },
+    "files-paid-gate.mjs.gz": {
+      "rawBytes": 22445,
+      "rawSha256": "549cae58eda7d83dd5638f32f3d2296e6cfdbb3b1c73cf37c28882e22273a9ac",
+      "gzipBytes": 7719,
+      "gzipSha256": "43906072144d9e5bfa9b236402023d945aab59e18c92dbf42cda5e128c65fc42",
+      "roundtripVerified": true,
+      "description": "Unmodified original evidence or explicitly named executable source; retention does not execute it."
+    },
+    "retain-files-paid.mjs.gz": {
+      "rawBytes": 12827,
+      "rawSha256": "7778fd572d016a552442bdcb0699e41d4a22df7e6497d32fac4490c6b792d139",
+      "gzipBytes": 5149,
+      "gzipSha256": "28cb38c63604edc60d51324908076dbb3191792366b8634b17c249fde5c231ca",
+      "roundtripVerified": true,
+      "description": "Unmodified original evidence or explicitly named executable source; retention does not execute it."
+    },
+    "approved-files-paid-workflow-plan.md.gz": {
+      "rawBytes": 4731,
+      "rawSha256": "821c6bf9fc5ab9cb950e773cfe9e00a448e72faa1e9d0f279ebde32b083a0b9d",
+      "gzipBytes": 2423,
+      "gzipSha256": "b1991119077b4d3868754de99b90ec0e7aa60ac979c01880027204dc8d5c5b49",
+      "roundtripVerified": true,
+      "description": "Executed bounded plan; exhaustive storage growth explicitly optional/UNKNOWN."
+    },
+    "scope-plan-20260914.md.gz": {
+      "rawBytes": 8875,
+      "rawSha256": "a107c62a6bc7f8625a00d4593e6f5cbdd1a9cf30eca9f1d1677344d428d6a5b9",
+      "gzipBytes": 4069,
+      "gzipSha256": "a3e8dc3f1e23db34b7bc0d41ac574a3e0b3fc95e34ac4167281e3154ea99f8be",
+      "roundtripVerified": true,
+      "description": "Earlier proposal only; approved plan supersedes its mandatory exhaustive-slot-capture request."
+    },
+    "runner-report-20260914.md.gz": {
+      "rawBytes": 6198,
+      "rawSha256": "ee0621652328e4290f771a29d8b1470a2d7403a215e1dc86bb9d3c9f84a615bf",
+      "gzipBytes": 3126,
+      "gzipSha256": "d7d4a36c4c3546b4d0ad21a7677c44d42e45459daa6fb1b59f95c0e410a89fdc",
+      "roundtripVerified": true,
+      "description": "Full original preparation/review report; read dated follow-ups and final verdict."
+    },
+    "oracle-report-20260914.md.gz": {
+      "rawBytes": 7952,
+      "rawSha256": "1915c77e753aadb007d67afe1b18a9403d4f69f562f77b1d84aee3746f25cf34",
+      "gzipBytes": 3793,
+      "gzipSha256": "488c1b513f8a5d1bbdd5924f94a9d7a876b15d254202893ee5c70917facdb490",
+      "roundtripVerified": true,
+      "description": "Full original preparation/review report; read dated follow-ups and final verdict."
+    },
+    "source-review-20260914.md.gz": {
+      "rawBytes": 3333,
+      "rawSha256": "7543f6798ff3910175a94d2c9fbd154f8c4098d1e11d90f8c8bb0743adf00f53",
+      "gzipBytes": 1747,
+      "gzipSha256": "b5ad16dd919185a855d048ebc16c11dead99bbbc29eafaa135c6f264df671790",
+      "roundtripVerified": true,
+      "description": "Full original preparation/review report; read dated follow-ups and final verdict."
+    },
+    "root-preflight-review-20260914.md.gz": {
+      "rawBytes": 14160,
+      "rawSha256": "21f59bfd9ef6c27cb790fe2402d37db6ce6e7bcb58e6f4dcab94cfb0a1eab8d3",
+      "gzipBytes": 5839,
+      "gzipSha256": "9231a76b16389d49334f67f5f248c8db3f0da4762357f8d41364e9ff0d93d310",
+      "roundtripVerified": true,
+      "description": "Full original preparation/review report; read dated follow-ups and final verdict."
+    },
+    "final-review-20260914.md.gz": {
+      "rawBytes": 10398,
+      "rawSha256": "96763e848fb8f32c350203a177fb8b811821ea8623d996088e667bba04193f53",
+      "gzipBytes": 4903,
+      "gzipSha256": "cd9960b20001b9398fc976943acf77370d476d0c1c2cfd872a86eb9c5b373f1f",
+      "roundtripVerified": true,
+      "description": "Full original preparation/review report; read dated follow-ups and final verdict."
+    },
+    "red-full-compiler-info.json.gz": {
+      "rawBytes": 10536478,
+      "rawSha256": "bbea9fb26704a1cdd02ebece9f37c2d08ab52185de223d609b9b6d4a760e15da",
+      "gzipBytes": 1246117,
+      "gzipSha256": "d18d06d6a4ea8b6869642aa15c74c0302636e5f52881a1bbd8e5eb85a473d11b",
+      "roundtripVerified": true,
+      "description": "Original complete compiler input and output, including source, AST, settings, metadata, ABI, creation/deployed bytecode and immutable references."
+    },
+    "red-frozen-source-inventory.json.gz": {
+      "rawBytes": 1031875,
+      "rawSha256": "3297cdb1858ad07e2e6272388d1d08d5438ad81960515e1a75be21fb63376a3b",
+      "gzipBytes": 242398,
+      "gzipSha256": "f8b915b043f3facbaeb9ee23db391da7a6dfa2578021fec713d08eeddce47331",
+      "roundtripVerified": true,
+      "description": "Mechanical UTF-8 escrow of every gate-inventoried foundry/src/test/script source, copied from the frozen snapshot, not the changing worktree."
+    },
+    "green-full-compiler-info.json.gz": {
+      "rawBytes": 10586563,
+      "rawSha256": "49d4b44ba03e6a138cf2f3286874965e519eafa8f0b2a698c902c60034d4f402",
+      "gzipBytes": 1252266,
+      "gzipSha256": "3b59adc4dced5267b51b1e8e87905d6fab50e26fbbbe1b6536628432c3a61c70",
+      "roundtripVerified": true,
+      "description": "Original complete compiler input and output, including source, AST, settings, metadata, ABI, creation/deployed bytecode and immutable references."
+    },
+    "green-frozen-source-inventory.json.gz": {
+      "rawBytes": 1053987,
+      "rawSha256": "f963b75e9779d85323be68a14be356f7460a50e2f2247106af3bb2b020647066",
+      "gzipBytes": 247533,
+      "gzipSha256": "776fd67f98331da4ac85ea6e7090e359bb7502f118ad5bc857dc82aeb9e3b2ac",
+      "roundtripVerified": true,
+      "description": "Mechanical UTF-8 escrow of every gate-inventoried foundry/src/test/script source, copied from the frozen snapshot, not the changing worktree."
+    },
+    "size-full-compiler-info.json.gz": {
+      "rawBytes": 25476352,
+      "rawSha256": "c6391079fa1622e4283283ba1b73b31d9ef2c8bb08ca9a9efa2875ace9db921f",
+      "gzipBytes": 3184891,
+      "gzipSha256": "e36000bffc994fef83083f2eaa9b9fd0fd62d77af3cb1ac8a907c9b684b80403",
+      "roundtripVerified": true,
+      "description": "Original complete compiler input and output, including source, AST, settings, metadata, ABI, creation/deployed bytecode and immutable references."
+    },
+    "size-frozen-source-inventory.json.gz": {
+      "rawBytes": 1053987,
+      "rawSha256": "f963b75e9779d85323be68a14be356f7460a50e2f2247106af3bb2b020647066",
+      "gzipBytes": 247533,
+      "gzipSha256": "776fd67f98331da4ac85ea6e7090e359bb7502f118ad5bc857dc82aeb9e3b2ac",
+      "roundtripVerified": true,
+      "description": "Mechanical UTF-8 escrow of every gate-inventoried foundry/src/test/script source, copied from the frozen snapshot, not the changing worktree."
+    },
+    "artifact-registry.json.gz": {
+      "rawBytes": 195158,
+      "rawSha256": "4fc5a16a71a9d633d2704dee7cab5582dce2df905a29cc42b995f7dd3e072364",
+      "gzipBytes": 23026,
+      "gzipSha256": "3e212e350027493f5f2e412d90e358b9e7a5641105cab22de64cf34c0a70cd26",
+      "roundtripVerified": true,
+      "description": "Exact original deployment artifact pinned by the actual paid gate; full objects are also embedded in raw evidence."
+    },
+    "artifact-ledger.json.gz": {
+      "rawBytes": 1425011,
+      "rawSha256": "e6eaf714cb1c498d9dcefa7920df62f42ea1fb0d6287cdcfb921562aad3d2e51",
+      "gzipBytes": 137564,
+      "gzipSha256": "894c0314405401101a835cd9685ab72ad1d0c672c8f9380db44c33dd2a83cf68",
+      "roundtripVerified": true,
+      "description": "Exact original deployment artifact pinned by the actual paid gate; full objects are also embedded in raw evidence."
+    },
+    "artifact-rootRule.json.gz": {
+      "rawBytes": 191682,
+      "rawSha256": "4f40e5db21f38d6873f14484de55e614262d5b85d27fe6fac37a7ae371d1f2e8",
+      "gzipBytes": 18459,
+      "gzipSha256": "e4832d9b8f46a0edc805ed314d847c01edbc0f08e7802902867a026686764ed3",
+      "roundtripVerified": true,
+      "description": "Exact original deployment artifact pinned by the actual paid gate; full objects are also embedded in raw evidence."
+    },
+    "artifact-childRule.json.gz": {
+      "rawBytes": 198170,
+      "rawSha256": "b5f0824a0cfc20840179b4ee5d200a4e31a6dba57fa7cff04d0cc3beb90d0e7d",
+      "gzipBytes": 19578,
+      "gzipSha256": "d1dfc6f33b71d13d1b487a4e945f65b45af96a0e7922d5815e3ff8334a3c03ca",
+      "roundtripVerified": true,
+      "description": "Exact original deployment artifact pinned by the actual paid gate; full objects are also embedded in raw evidence."
+    },
+    "artifact-index.json.gz": {
+      "rawBytes": 259557,
+      "rawSha256": "6361286c5168c7cea08fe41c65581007854e37408f44933122f39c1c511bc2ba",
+      "gzipBytes": 28760,
+      "gzipSha256": "2485b3e077a600b05746ba86cb127874a3474e18847bd53862678bdf827d5f92",
+      "roundtripVerified": true,
+      "description": "Exact original deployment artifact pinned by the actual paid gate; full objects are also embedded in raw evidence."
+    },
+    "artifact-lens.json.gz": {
+      "rawBytes": 407346,
+      "rawSha256": "69614fcb0c45ae47fc6821003a446fa90bb2ccd1589dec2a276dc959dfbf181f",
+      "gzipBytes": 40939,
+      "gzipSha256": "90de08a0cd89999a970ecb513bfc3181c2ef878f155e972a525701009f95cf30",
+      "roundtripVerified": true,
+      "description": "Exact original deployment artifact pinned by the actual paid gate; full objects are also embedded in raw evidence."
+    },
+    "artifact-bob.json.gz": {
+      "rawBytes": 241200,
+      "rawSha256": "c1795b61d45cd855b0b305f29dff277737e9405c7d66cfb4c99efb2abdd9f161",
+      "gzipBytes": 25051,
+      "gzipSha256": "038048adb7e68d410ee0ce2710dfd05ddc761826b2a5a10f8b3f63eb2a198d99",
+      "roundtripVerified": true,
+      "description": "Exact original deployment artifact pinned by the actual paid gate; full objects are also embedded in raw evidence."
+    },
+    "artifact-consumer.json.gz": {
+      "rawBytes": 553589,
+      "rawSha256": "50d32208da7d2100b3c6d0821b586c65c226e4a5a4bbdef42c78a1eabf576955",
+      "gzipBytes": 59592,
+      "gzipSha256": "25180c6646edfdfe2ae0d183ff83911673c58a8534d0969305862374e52acf1c",
+      "roundtripVerified": true,
+      "description": "Exact original deployment artifact pinned by the actual paid gate; full objects are also embedded in raw evidence."
+    },
+    "artifact-wrapper.json.gz": {
+      "rawBytes": 66622,
+      "rawSha256": "1eb7e5076f84382aeee6f664d95e46473892d0d5c7ae94b581c494dd3601b9ec",
+      "gzipBytes": 9418,
+      "gzipSha256": "bb101616be3039c4b2e970c28518edb841fa705ccab2485fad7163f1810a52e5",
+      "roundtripVerified": true,
+      "description": "Exact original deployment artifact pinned by the actual paid gate; full objects are also embedded in raw evidence."
+    },
+    "red-stub-FilesPaidRead.sol.gz": {
+      "rawBytes": 939,
+      "rawSha256": "0b796b01f6571313333654b692838851a39404608c76e8cd93eec9e87fa069e2",
+      "gzipBytes": 485,
+      "gzipSha256": "6b5237b6f22b50b9d04e9d48668d0057773ff7221c80970a7b00f61e35bf6c04",
+      "roundtripVerified": true,
+      "description": "Convenience copy from exact frozen snapshot; complete source inventory is retained separately."
+    },
+    "green-FilesPaidRead.sol.gz": {
+      "rawBytes": 1530,
+      "rawSha256": "49b50c9aa7faeab7eeba1375468f68af4070a65373686758f56a01b919ceb169",
+      "gzipBytes": 574,
+      "gzipSha256": "be89ed37c2860aadbbd58c73f419e583d064dfb2a08212a0ea5513cb94bfe1ae",
+      "roundtripVerified": true,
+      "description": "Convenience copy from exact frozen snapshot; complete source inventory is retained separately."
+    },
+    "unchanged-FilesPaidRead.t.sol.gz": {
+      "rawBytes": 5835,
+      "rawSha256": "795c3647a64ad063813718d9d23003b39a3bd5fbe62f3d365394e7e4cc07d74c",
+      "gzipBytes": 1943,
+      "gzipSha256": "d217eed3a52f24cf7c8af9aa7ac5d4e1245efd4e1be9e98543f362b28f596012",
+      "roundtripVerified": true,
+      "description": "Convenience copy from exact frozen snapshot; complete source inventory is retained separately."
+    },
+    "frozen-measure-files.mjs.gz": {
+      "rawBytes": 20961,
+      "rawSha256": "247cc361ec980f2cf42aa787c594f79f8e409e6bc7d70d8633a471d5cfe012df",
+      "gzipBytes": 6214,
+      "gzipSha256": "df768f3123a6a2e89940b7e6848ff8c537847ed69134e821df62fdd488761c69",
+      "roundtripVerified": true,
+      "description": "Convenience copy from exact frozen snapshot; complete source inventory is retained separately."
+    }
+  },
+  "totals": {
+    "files": 53,
+    "rawBytes": 87190247,
+    "gzipBytes": 11239348
+  }
+}

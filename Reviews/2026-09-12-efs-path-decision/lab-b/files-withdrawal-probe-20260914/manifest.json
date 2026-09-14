@@ -1,0 +1,67 @@
+{
+  "kind": "DISPOSABLE_WITHDRAWAL_RETAINED_READ_CHARACTERIZATION",
+  "sourceCommit": "1fe8c4cd26f689f7905f66313d7a8ffc93359c6d",
+  "sourceDigest": "e2b63fd09ed5acf0f9581f58b32497f4ea7f913197c18f9b4fdf19983ba5a407",
+  "tests": {
+    "focused": 3,
+    "failures": 0
+  },
+  "behavior": "EXISTING_ZERO_OCCURRENCE_E_PROFILE_AND_UNRELATED_REUSE_VISIBILITY_CONFIRMED; NOT_DESIRED_READER_POLICY",
+  "limits": "NO_PAID_GAS; NO_CORE_CHANGE; NAMED_STATE_SUBSETS_NOT_EXHAUSTIVE_STATE_PROOFS",
+  "files": {
+    "gate.json.gz": {
+      "rawBytes": 6824,
+      "rawSha256": "e37c88e6c272197fa2f6b72c7129063cdd69dd5eefb52c4e811d4efb713fed75",
+      "gzipBytes": 3137,
+      "gzipSha256": "d306acd64d53231470ca78c16fa064e198d6ce293a1ebac736511d0cd59e07a3"
+    },
+    "test.log.gz": {
+      "rawBytes": 3520,
+      "rawSha256": "dcc8fd6b0b1116dc734cb71afd53a6d370f60da3ce8677ae45233f768e1b6921",
+      "gzipBytes": 943,
+      "gzipSha256": "b4ffd8158edc844075a5d45ab60c5b998cd37ac5dd6b404493fa909733a8f604"
+    },
+    "full-compiler-info.json.gz": {
+      "rawBytes": 10899221,
+      "rawSha256": "0d168061fa71016641f48a5fa9b7931e07950e8766fc25101cca7256f878995d",
+      "gzipBytes": 1285901,
+      "gzipSha256": "67403a9ae8cf21497905777ebfbec5f3f10fbb79ebc958235efb01c92253098a"
+    },
+    "task-report.md.gz": {
+      "rawBytes": 4893,
+      "rawSha256": "6125e09144b9c3b19ff8e746d8d9ad68652d05ad8a16ec1259937b093190aa34",
+      "gzipBytes": 2571,
+      "gzipSha256": "51277d868771270e560944f00ef0726ae534001419b71b5bfe764ab3aa38ba10"
+    },
+    "independent-review.md.gz": {
+      "rawBytes": 10479,
+      "rawSha256": "09f5b81fe5c380bcd15ff350829d99cb4147c39ae4460d18422cd99c13fd286f",
+      "gzipBytes": 4629,
+      "gzipSha256": "9b4958f964e354796c0ae6ec8c5f39aaa5802bc0c16b916993721082070c6db9"
+    },
+    "read-policy-advice.md.gz": {
+      "rawBytes": 11964,
+      "rawSha256": "13ea291795f2d8da359e1652103ac1797314a4d2da9fa95d8d8d21e64821af39",
+      "gzipBytes": 5193,
+      "gzipSha256": "50f2180a0465c2085502f0af57874507d00dc73e2fd24f3f0faa45b233e41b89"
+    },
+    "source-semantics-review.md.gz": {
+      "rawBytes": 14064,
+      "rawSha256": "1b55658cae43899b6f318031acb2accd008547895cc3f239c453c62ef5de779e",
+      "gzipBytes": 5891,
+      "gzipSha256": "2de4121a664cc04a1f6c9e8541e7210c55d45b6f634db3fc4b51a0f3a11a4295"
+    },
+    "prior-joined-final-review.md.gz": {
+      "rawBytes": 9058,
+      "rawSha256": "b4545e53832c3cdb36369afe9dbcc766022791a6b2eed01a6fce2072ea24224d",
+      "gzipBytes": 4222,
+      "gzipSha256": "622b2fd361f69bdca598a7f83a375b9cba070513dc2e05160f43558d4f82852d"
+    },
+    "plan.md.gz": {
+      "rawBytes": 4226,
+      "rawSha256": "5e1be8ccd3c49bf09192d98be5d6c6e4e92667735eca3ea633a487c5602d38f0",
+      "gzipBytes": 2116,
+      "gzipSha256": "5a0662703230c35387d152b989dfa86e6270387834222bae6035a26859b778d1"
+    }
+  }
+}
