@@ -151,14 +151,19 @@ input normal-size build passed. An initial zero-test selector attempt is
 preserved as non-evidence. No proxy/future configuration policy or new price is
 claimed. See the [[index-obligation-config-finding-20260914|finding and correction]].
 
-Current productive lane: the [[live-placement-model-plan-20260914|live-placement
-algorithm model]] compares independent lifetime replay against complete
-all-author live candidates. Actual behavioral RED is observed; implementation
-is active. This is not an onchain index or gas/scale claim. SDK and Data Explorer
+The [[live-placement-model-plan-20260914|live-placement algorithm model]] now
+passes actual13/13 GREEN after behavioral RED and independent review. It compares
+independent lifetime replay against maintained all-author live candidates;
+retention is finishing. This is not an onchain index or gas/scale claim. SDK and Data Explorer
 PMs have returned bounded advice: preserve selection provenance and separate
 maintenance from validity; the next clickable vertical must recover exact
 filename bytes in a cold guest browser, not rely on fixture names or warm cache.
-A short source-only preflight is locating that precise Files-adapter seam.
+A source-only preflight found reusable ordinary Label Records and the precise
+Files-adapter seam. The last [[files-name-retention-gate-plan-20260914|bounded
+name-retention gate]] adds only two disposable test/profile files: require exact
+name retention through the existing callback and recover bytes from position
+without a dictionary. It does not claim a cold browser or reprice the paid slice.
+Worker source cutoff13:25UTC; root RED/GREEN/review/retention must end by14:00UTC.
 
 Root owns publication and all finite execution gates. No compiler/chain process
 is active. Finish the current model, evidence and concrete build handoff by

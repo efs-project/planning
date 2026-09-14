@@ -88,6 +88,8 @@ input passed the normal-size build. Independent review is Approved. The first
 selector attempt compiled but selected zero tests and is retained as non-evidence.
 Source is `30073fcdeedfdc24a4d54004afc209ab9c8b8773`; full/size source digest
 `62e1f17ff2d3a042078063cab0ca158a40e0e97ef00e686ffcad168ddea67cf9`.
+Complete retained reports, source/compiler snapshots and independent review:
+[repair packet](https://github.com/efs-project/planning/tree/1f84a9621117eb8183d9806527bf1b5f2f9dab95/Reviews/2026-09-12-efs-path-decision/lab-b/index-config-repair-20260914).
 
 The genuine detach/write/reattach test is important: an unchanged configuration
 can still have PARTIAL coverage. Exact retained point reads continue to work;
