@@ -16,6 +16,29 @@ import {
 const A = '0x1111111111111111111111111111111111111111';
 const L = '0x2222222222222222222222222222222222222222';
 const BLOCK = `0x${'33'.repeat(32)}`;
+const OTHER_BLOCK = `0x${'66'.repeat(32)}`;
+const MINED_EXPECTED = {
+  from: A,
+  to: L,
+  nonce: 3,
+  data: '0x1234',
+  gas: 8_000_000n,
+  hash: `0x${'55'.repeat(32)}`,
+  blockNumber: 9,
+};
+const MINED_TRANSACTION = {
+  from: A,
+  to: L,
+  nonce: '0x3',
+  input: '0x1234',
+  gas: '0x7a1200',
+  hash: MINED_EXPECTED.hash,
+  blockHash: BLOCK,
+  blockNumber: '0x9',
+  transactionIndex: '0x0',
+};
+const MINED_RECEIPT = { blockHash: BLOCK, blockNumber: '0x9', transactionIndex: '0x0' };
+const MINED_HEADER = { hash: BLOCK, number: '0x9', gasLimit: '0x1c9c380' };
 
 test('strict RPC envelopes reject partial, swapped, duplicate and malformed result/error shapes', () => {
   const valid = { httpStatus: 200, request: { id: 4 }, response: { jsonrpc: '2.0', id: 4, result: '0x01' } };
@@ -51,11 +74,42 @@ test('static and mined attempts require identical sender, destination, calldata 
 });
 
 test('a mined transaction must preserve the locally signed sender, target, nonce, data, gas and hash', () => {
-  const expected = { from: A, to: L, nonce: 3, data: '0x1234', gas: 8_000_000n, hash: `0x${'55'.repeat(32)}` };
-  const mined = { from: A, to: L, nonce: '0x3', input: '0x1234', gas: '0x7a1200', hash: expected.hash };
-  assert.equal(assertMinedTransaction(expected, mined), true);
-  assert.throws(() => assertMinedTransaction(expected, { ...mined, input: '0xabcd' }), /mined calldata/);
-  assert.throws(() => assertMinedTransaction(expected, { ...mined, nonce: '0x4' }), /mined nonce/);
+  assert.equal(assertMinedTransaction(MINED_EXPECTED, MINED_TRANSACTION, MINED_RECEIPT, MINED_HEADER), true);
+  assert.throws(() => assertMinedTransaction(MINED_EXPECTED, { ...MINED_TRANSACTION, input: '0xabcd' }, MINED_RECEIPT, MINED_HEADER), /mined calldata/);
+  assert.throws(() => assertMinedTransaction(MINED_EXPECTED, { ...MINED_TRANSACTION, nonce: '0x4' }, MINED_RECEIPT, MINED_HEADER), /mined nonce/);
+});
+
+test('a mined transaction must agree directly with its receipt and header location', () => {
+  assert.throws(
+    () => assertMinedTransaction(MINED_EXPECTED, { ...MINED_TRANSACTION, blockHash: OTHER_BLOCK }, MINED_RECEIPT, MINED_HEADER),
+    /mined\/receipt block hash/,
+  );
+  assert.throws(
+    () => assertMinedTransaction(MINED_EXPECTED, { ...MINED_TRANSACTION, blockNumber: '0xa' }, MINED_RECEIPT, MINED_HEADER),
+    /mined\/receipt block number/,
+  );
+  assert.throws(
+    () => assertMinedTransaction(MINED_EXPECTED, MINED_TRANSACTION, MINED_RECEIPT, { ...MINED_HEADER, hash: OTHER_BLOCK }),
+    /mined\/header block hash/,
+  );
+});
+
+test('a mined transaction and receipt must both be first in the single-transaction block', () => {
+  assert.throws(
+    () => assertMinedTransaction(MINED_EXPECTED, { ...MINED_TRANSACTION, transactionIndex: '0x1' }, MINED_RECEIPT, MINED_HEADER),
+    /mined transaction index/,
+  );
+  assert.throws(
+    () => assertMinedTransaction(MINED_EXPECTED, MINED_TRANSACTION, { ...MINED_RECEIPT, transactionIndex: '0x1' }, MINED_HEADER),
+    /receipt transaction index/,
+  );
+});
+
+test('every observed mined header must retain the configured 30M gas limit', () => {
+  assert.throws(
+    () => assertMinedTransaction(MINED_EXPECTED, MINED_TRANSACTION, MINED_RECEIPT, { ...MINED_HEADER, gasLimit: '0x1c9c37f' }),
+    /header gas limit/,
+  );
 });
 
 test('refusal and calibration receipt classes fail closed', () => {

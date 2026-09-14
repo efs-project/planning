@@ -23,6 +23,7 @@ const DEADLINE = 2_000_000_000n;
 const DEPLOY_GAS = 15_000_000n;
 const SETUP_GAS = 8_000_000n;
 const ATTEMPT_GAS = 5_000_000n;
+const BLOCK_GAS_LIMIT = 30_000_000n;
 const RPC_TIMEOUT_MS = 30_000;
 const MAX_RAW_ENVELOPES = 4_096;
 const MAX_RAW_BYTES = 16 * 1024 * 1024;
@@ -115,14 +116,24 @@ export function assertAttemptLink(staticCall, minedTransaction) {
   return { from: staticCall.from, to: staticCall.to, data, gas: gas.toString(), transactionHash: minedTransaction.hash };
 }
 
-export function assertMinedTransaction(expected, mined) {
-  assert(mined, 'mined transaction missing');
+export function assertMinedTransaction(expected, mined, receipt, header) {
+  assert(mined && receipt && header, 'mined transaction/receipt/header missing');
   assert.equal(getAddress(mined.from), getAddress(expected.from), 'mined sender mismatch');
   assert.equal(mined.to === null ? null : getAddress(mined.to), expected.to === null ? null : getAddress(expected.to), 'mined destination mismatch');
   assert.equal(BigInt(mined.nonce), BigInt(expected.nonce), 'mined nonce mismatch');
   assert.equal(normalizeHex(mined.input, 'mined calldata'), normalizeHex(expected.data, 'expected calldata'), 'mined calldata mismatch');
   assert.equal(BigInt(mined.gas), BigInt(expected.gas), 'mined gas mismatch');
   assert.equal(normalizeHex(mined.hash, 'mined hash'), normalizeHex(expected.hash, 'expected hash'), 'mined hash mismatch');
+  const minedBlockHash = normalizeHex(mined.blockHash, 'mined block hash');
+  assert.equal(minedBlockHash, normalizeHex(receipt.blockHash, 'receipt block hash'), 'mined/receipt block hash mismatch');
+  assert.equal(minedBlockHash, normalizeHex(header.hash, 'header block hash'), 'mined/header block hash mismatch');
+  const minedBlockNumber = BigInt(mined.blockNumber);
+  assert.equal(minedBlockNumber, BigInt(receipt.blockNumber), 'mined/receipt block number mismatch');
+  assert.equal(minedBlockNumber, BigInt(header.number), 'mined/header block number mismatch');
+  assert.equal(minedBlockNumber, BigInt(expected.blockNumber), 'mined/expected block number mismatch');
+  assert.equal(BigInt(mined.transactionIndex), 0n, 'mined transaction index must be zero');
+  assert.equal(BigInt(receipt.transactionIndex), 0n, 'receipt transaction index must be zero');
+  assert.equal(BigInt(header.gasLimit), BLOCK_GAS_LIMIT, 'header gas limit must be 30000000');
   return true;
 }
 
@@ -401,7 +412,7 @@ async function sendTransaction(ctx, wallet, input, expectedNonce, expectedBlock,
   const transaction = txEnvelope.response.result;
   const header = headerEnvelope.response.result;
   assert(transaction && header, `${label}: transaction/header missing`);
-  assertMinedTransaction({ from: wallet.address, to: input.to ?? null, nonce: expectedNonce, data: input.data, gas: input.gasLimit, hash }, transaction);
+  assertMinedTransaction({ from: wallet.address, to: input.to ?? null, nonce: expectedNonce, data: input.data, gas: input.gasLimit, hash, blockNumber: expectedBlock }, transaction, receipt, header);
   assert.equal(receipt.transactionHash.toLowerCase(), hash.toLowerCase(), `${label}: receipt hash`);
   assert.equal(header.hash.toLowerCase(), receipt.blockHash.toLowerCase(), `${label}: receipt/header hash`);
   assert.equal(Number(BigInt(header.number)), expectedBlock, `${label}: header number`);
@@ -515,6 +526,7 @@ export async function runRollbackControl({ rpcUrl, artifactRoot, expectations, e
         const header = envelope.response.result;
         assert(header, `header ${blockNumber} missing`);
         assert.equal(Number(BigInt(header.number)), blockNumber, `header ${blockNumber} number`);
+        assert.equal(BigInt(header.gasLimit), BLOCK_GAS_LIMIT, `header ${blockNumber} gas limit`);
         this.headers.set(blockNumber, envelope);
       }
       return this.headers.get(blockNumber);
