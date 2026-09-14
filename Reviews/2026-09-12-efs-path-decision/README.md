@@ -112,6 +112,23 @@ Publish consolidated owner checkpoints at the first shortlist, 24-hour recommend
 
 ### Coordinator checkpoint
 
+**September14,08:40: required-query challenge passed; compact B stays primary.**
+[[required-query-paid-results-20260914|Complete writes + query costs and limits]]
+are independently reviewed: all82transactions/25pages passed. B selective's
+common writes plus both complete queries cost8,587,661gas versus C14,617,882;
+extra index maintenance and deployment are fully charged. This named challenge
+does not reverse B-first; it is not a universal MUD or full-Files benchmark.
+The successful run ended08:25:42.837UTC with all owned processes stopped;
+**the08:24–08:54 lease is released early; no heavy lease is active.** Both journals
+and exact pins are retained in the B successor; no original Claude workspace
+or frozen normal-price table changed.
+
+Next: the already reviewed [[b-portable-evidence-seam-20260914|B evidence-retention
+seam]], then the small Files/SDK journey. One bounded planner is preparing the
+archive's code/test handoff; no fourth candidate, new Core adoption or native
+historical-proof claim. Do not rerun the completed query/control/unit/input gates.
+The morning14:00UTC handoff and stop-on-stall rule remain authoritative.
+
 **September14,08:24: scalar decoding repaired; one separately sealed fresh attempt.**
 The two-line parser correction and regression tests are pushed at
 B`b94b57c405ef18b7f259cbd636d685ff96738ce7`; root12/12 audit tests and scoped

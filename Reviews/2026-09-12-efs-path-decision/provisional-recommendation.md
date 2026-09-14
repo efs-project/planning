@@ -7,10 +7,17 @@ requirement, production authorization or permanent protocol decision.
 
 ## The recommendation in plain English
 
-Use **compact EFS (B) as the primary engineering hypothesis**. Keep MUD Store
-(C) as the specific fallback until the required reverse-discovery comparison
-is priced. Keep fuller v2 (A) as a semantic/reference control, not a third
-product to finish in parallel.
+**September14 query supplement:** the [[required-query-paid-results-20260914|bounded
+reverse-discovery challenge]] is complete and independently reviewed. Compact B
+with the selective index beats the tested MUD adapter on whole common-write plus
+complete-query cost, including mandatory maintenance. B remains the primary
+implementation direction for the remaining joined gates; this is not permanent
+adoption, and the original normal-price snapshot below is unchanged.
+
+Use **compact EFS (B) as the primary engineering hypothesis**. Retain MUD Store
+(C) as the tested comparison/fallback; the required reverse-discovery comparison
+did not reverse B-first. Keep fuller v2 (A) as a semantic/reference control, not
+a third product to finish in parallel.
 
 The representation hypothesis is **preserving EFS's promises with fewer
 repeated facts**, not discarding portability, checked Types or independent
@@ -64,7 +71,11 @@ No row is silently dropped to make the recommendation pass. A content hash
 does not by itself prove authorship, real source-chain admission, availability
 or current authority. An SDK cannot manufacture evidence absent from Core.
 
-## The strongest reason B might be the wrong choice
+## The cost-reversal challenge (completed September14)
+
+The concern below motivated the experiment. Its selective-index repair now
+passes the named completion bound and is cheaper on this workload; see the
+supplement above. These findings do not settle unrelated feature/portability gaps.
 
 B's cheap writes may defer required reverse-reference discovery to later
 readers. C already maintains target-keyed Record references, although its raw
@@ -86,15 +97,16 @@ EFS SDK or lower maintenance bill: [[maintenance-and-reuse-20260913]].
 
 ## Work order before the final handoff
 
-1. Complete the already specified matched mandatory-rule/late-index rollback
-   controls; distinguish unit evidence from mined pre/post state evidence.
-2. Run the required-query reversal test above, then carry only the primary
-   candidate into the remaining joined journey.
-3. Separate retained source evidence from replay/current destination effects;
+1. **Complete:** matched mandatory-rule/late-index rollback controls, with mined
+   pre/post state evidence and separate positive calibrations for B and C.
+2. **Complete:** required-query reversal test; carry only compact B into the
+   remaining joined journey, retaining the other roads as comparison evidence.
+3. **Next:** separate retained source evidence from replay/current destination effects;
    exercise the small Files/SDK journey against that same candidate, with
    explicit proof and historical-pagination limits.
 
-The final September 14, 23:10 UTC handoff must state whether reversible testnet
+James's later morning cutoff makes the final September14,14:00UTC handoff
+earlier than the original23:10UTC sprint deadline. It must state whether reversible testnet
 implementation can begin and which exact gates remain. If the work is still
 incomplete, name that condition instead of pretending the clock proved a
 50-year foundation. No new owner question is needed just to do these tests.

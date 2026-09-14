@@ -1,6 +1,6 @@
 # Bounded incoming-Quote discovery experiment
 
-> September 14, 2026: both B/C source/unit gates and independent paid-input review completed; paid runner and execution remain outstanding. See [[required-query-paid-plan-20260914]]. No protocol adoption or owner requirement waiver. Root coordinates tests and publication in the preserved B/C successors.
+> September14,2026: source/unit/input/runner gates and the complete82transaction/25page run are finished and independently reviewed. See [[required-query-paid-results-20260914]] for costs and limits; do not repeat this experiment. No protocol adoption or owner requirement waiver. The plan below is retained execution history.
 
 **Goal:** Price the same bounded query over unique retained Quote Records first admitted at or before a named admission high-water.
 

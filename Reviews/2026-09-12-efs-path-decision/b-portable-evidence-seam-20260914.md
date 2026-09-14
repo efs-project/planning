@@ -2,6 +2,11 @@
 
 Status: **PROPOSED / UNMEASURED**; query-first, not a B selection or feature waiver. Source basis: B HEAD `acbfaf70339b73cd03e937158dd015eb37491b21`; cited files had no concurrent diff.
 
+September14: the [[required-query-paid-results-20260914|required-query gate]] is
+complete and independently reviewed; B remains the engineering priority.
+This archive is now the next bounded implementation/test step, still unimplemented
+and unmeasured. Its existing semantic/proof limits are unchanged.
+
 ## Smallest coherent seam and proof level
 
 Add a separate `SignedClaimArchive` retaining an EOA-authored B `PublicationIntent`, its **complete ordered `Action[]`**, signature, and sparse record bodies. It performs no Ledger action, acceptance, binding/CAS, mint, withdrawal, or source-admission assertion. Any account may retain/complete a claim; importer is not source author.

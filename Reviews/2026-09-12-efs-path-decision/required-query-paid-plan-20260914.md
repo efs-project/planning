@@ -1,5 +1,9 @@
 # Required-query paid comparison implementation plan
 
+**Completed September14:** both implementation tasks and the full paid run/raw
+output review are finished. See [[required-query-paid-results-20260914]]. This
+plan is execution history; do not restart its tests, builds or transactions.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Root coordinates this already-authorized experiment; no additional owner architecture decision is implied.
 
 **Goal:** Execute and independently audit the frozen B-scan/B-selective/C discovery workload, pricing all required maintenance and every paid page rather than a cheap first page.
