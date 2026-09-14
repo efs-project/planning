@@ -1,0 +1,101 @@
+{
+  "kind": "DISPOSABLE_REAL_FILES_LIFECYCLE_AND_SMALL_NAME_CHURN",
+  "sourceCommit": "c85e5ba",
+  "sourceDigest": "cf0e22d1ef77cd02446f4f1662df3d9b98d2d2a1f05a808c6e77d30cc939c8bb",
+  "tests": {
+    "full": 120,
+    "files": 17,
+    "new": 2,
+    "failures": 0,
+    "skipped": 0
+  },
+  "implementationChanges": false,
+  "compileCorrection": "RESERVED_LOCAL_partial_RENAMED_partialPage; ASSERTIONS_UNCHANGED; NOT_BEHAVIORAL_RED",
+  "limits": "HASHED_COORDINATES; FOUR_LIFETIME_NAMES_NOT_SCALE_SOLUTION; NO_PAID_GAS_BROWSER_COLD_NAMES_OR_NATIVE_HISTORICAL_PROOF",
+  "files": {
+    "files-task3-lifecycle.json.gz": {
+      "rawBytes": 6406,
+      "rawSha256": "bde0226ecf28b3fb7a770001b660d380e5add517d54d70077be53b0c761f6ef5",
+      "gzipBytes": 2960,
+      "gzipSha256": "ec616ec3c16044a4fd3d0f70ef319b8299eff8c415c4b67f6c61b40f7d65a02d"
+    },
+    "files-task3-lifecycle.log.gz": {
+      "rawBytes": 2876,
+      "rawSha256": "e61068d57955eba7218771ee8531565e913d0f2b5074fdd981c870a3cf1b403f",
+      "gzipBytes": 813,
+      "gzipSha256": "73ad3c5ed7b95413cef23510cbea2a18ecfce6fed5093a8480f024954b5ac9a6"
+    },
+    "files-task3-full.json.gz": {
+      "rawBytes": 6159,
+      "rawSha256": "95da7bb3eb8564f1b0137f0074ddcd7ca37de95ec205ea6e009ac7649a117e8f",
+      "gzipBytes": 2884,
+      "gzipSha256": "49b1fc038753248000ba9b435d80cb8cc1cacfc3146bb6143a0edad4ab74d258"
+    },
+    "files-task3-full.log.gz": {
+      "rawBytes": 347,
+      "rawSha256": "20374984f66adb605c56b03404ece9f659b66412cf5fcfe291c4408d804b6e51",
+      "gzipBytes": 257,
+      "gzipSha256": "1245a109df53cad5fd811b72e2d340ea2a8cc7e070212f87a9cb28f40f132c81"
+    },
+    "files-task3-full-fixed.json.gz": {
+      "rawBytes": 6284,
+      "rawSha256": "b1cbbf282b07973624902f7bf6b077daff0f43809ea91804cf0fa2b15dbc12ca",
+      "gzipBytes": 2912,
+      "gzipSha256": "c68037753578620752de7f71d64092f6a5d2094764e30638fd26f11a786e8ec7"
+    },
+    "files-task3-full-fixed.log.gz": {
+      "rawBytes": 19887,
+      "rawSha256": "7856eb0877b66fa881f61c55d8fafba015d2348c72826ccdf8524c2979e300e1",
+      "gzipBytes": 4995,
+      "gzipSha256": "1a600651e7868269785d97d319586f6057f086caf811122beb4c43961c640a69"
+    },
+    "files-task3-size.json.gz": {
+      "rawBytes": 6253,
+      "rawSha256": "2e5f51834311177dbf1593f3d3c9565b5f0e3f35812c73223a84c8e84256864b",
+      "gzipBytes": 2908,
+      "gzipSha256": "70934a85b44fea45c317a9d0aebc7f54832ee6a04a5babdf9691de1c787da94b"
+    },
+    "files-task3-size.log.gz": {
+      "rawBytes": 53563,
+      "rawSha256": "77d89d7d2588fe37f7562015f7844fd91171f3b186579ae794935f6249ee5414",
+      "gzipBytes": 4893,
+      "gzipSha256": "1be3f51e29b91b5ab42ce9f92e829f56a0f97a77ba4a040618b6bf483a60d00d"
+    },
+    "full-compiler-info.json.gz": {
+      "rawBytes": 24306169,
+      "rawSha256": "95df1b3ff695bb6d8d27b5769cf084296f8256084c471a8fa08124e014bd26e2",
+      "gzipBytes": 2989389,
+      "gzipSha256": "af6a3ed0d5f626061c632a5923618d6302edad58a76c752b60ca36264f6e6d1d"
+    },
+    "task-brief.md.gz": {
+      "rawBytes": 12282,
+      "rawSha256": "29266e4bbac4e2f15445a62bbb4d5e9273016c15eb7f186a304b858f58ad994b",
+      "gzipBytes": 5733,
+      "gzipSha256": "246f3fd94a3e8380831b85389d5f83760eb18a9012873410f1b5d44b3f43c6ce"
+    },
+    "task-report.md.gz": {
+      "rawBytes": 10480,
+      "rawSha256": "3a0d92ffbd19171cfcb364f078e4da59a46e8db1c78da2b621047bdd41c46526",
+      "gzipBytes": 4891,
+      "gzipSha256": "c7e2e3c9c1ce34d1eed93961ffdc2746f32a39b412a13d0654c4921569659f20"
+    },
+    "independent-review.md.gz": {
+      "rawBytes": 6742,
+      "rawSha256": "a275f581fe8c5b56c37bba446245033afc5f8d21f53e46fb50e880dcd0422b18",
+      "gzipBytes": 3414,
+      "gzipSha256": "4c8d8e4f4b69126ca0f3d2caf4e7f2a02f69deff86d90513050787dba2fd443a"
+    },
+    "review.diff.gz": {
+      "rawBytes": 29138,
+      "rawSha256": "d63ab67f408c98d8b6e6eb51dcca7e5fd81edf8d00b398436713f56b9f671ee0",
+      "gzipBytes": 6249,
+      "gzipSha256": "f8e6e6730a7fd94711b8c20f80224f3e51a49e7cbb9013156b510676c01afe9b"
+    },
+    "compile-error-test.sol.gz": {
+      "rawBytes": 60489,
+      "rawSha256": "704fd7336ac9bfa2be52fa9d2d048120cb2a096331de7a3f30de5896126c641b",
+      "gzipBytes": 11642,
+      "gzipSha256": "aba4c7fe3af63b47598c7941bccb4dbccd2c6e5d33d95909d68e43072299da79"
+    }
+  }
+}
